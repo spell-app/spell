@@ -70,4 +70,8 @@ window.Parser = class Parser {
 }
 
 
-Token.parseRuleSyntax("(constant|shared)? {variable} as one of \\({literal}(, {literal})*\\)").tokens;
+//Token.parseRuleSyntax("(constant|shared)? {variable} as one of \\({literal}(, {literal})*\\)");
+Token.parseRuleSyntax("(modifier:constant|shared)? {variable} as one of \\([enumeration:{literal},]\\)");
+
+
+//Token.parseRuleSyntax("(modifiers:constant|shared)* {variable} as one of \\((list:{literal}(, {literal})*)\\)").tokens;

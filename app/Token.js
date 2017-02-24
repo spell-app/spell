@@ -13,11 +13,16 @@ window.Token = class Token {
 		return this.constructor.name;
 	}
 
+	get _argName() {
+		if (this.argument) return ` (${this.argument})`;
+		return "";
+	}
+
 //
 // ### group: toJSON
 //
 	toJSON() {
-		return `${this._type}: '${this.name}'${this.modifiersAsJSON}`;
+		return `${this._type}${this._argName}: '${this.name}'${this.modifiersAsJSON}`;
 	}
 
 	get modifiersAsJSON() {
@@ -49,7 +54,7 @@ window.Token = class Token {
 //
 	static parseRuleSyntax(syntax) {
 		var syntaxStream = Token.tokeniseParseRuleSyntax(syntax);
-		var rule = new Rule({ syntax, syntaxStream });
+		var rule = new Rule({ syntax });
 		Token.parseRuleSyntax_tokens(syntaxStream, rule.tokens);
 
 console.group("Parsing: ", syntax);
@@ -61,7 +66,7 @@ console.groupEnd();
 	}
 
 	static tokeniseParseRuleSyntax(syntax) {
-		const SYNTAX_EXPRESSION = /(?:[\w\-]+|\\[\[\(\{\)\}\]]|\{|\(|\}|\)|\+|\?|\*|[^\s\w]|\|)/g;
+		const SYNTAX_EXPRESSION = /(?:[\w\-]+|\\[\[\(\{\)\}\]]|[^\s\w]|\|)/g;
 		var syntaxStream = syntax.match(SYNTAX_EXPRESSION);
 		if (!syntaxStream) throw new SyntaxError(`Can't tokenize parse rule syntax >>${syntax}<<`);
 		return syntaxStream;
@@ -78,24 +83,29 @@ console.groupEnd();
 		return tokens;
 	}
 
-	static parseRuleSyntax_token(syntaxStream, tokens, startIndex) {
+	static parseRuleSyntax_token(syntaxStream, tokens, startIndex = 0) {
 		var syntaxToken = syntaxStream[startIndex];
+
 		switch (syntaxToken) {
 			case "{":	return Token.Rule.parseRuleSyntax(syntaxStream, tokens, startIndex);
 			case "(":	return Token.Sequence.parseRuleSyntax(syntaxStream, tokens, startIndex);
+			case "[":	return Token.List.parseRuleSyntax(syntaxStream, tokens, startIndex);
 			case "|":	return Token.Alternates.parseRuleSyntax(syntaxStream, tokens, startIndex);
 			case "*":
 			case "+":
 			case "?":	return Token.parseRuleSyntax_repeat(syntaxStream, tokens, startIndex);
+
+			// the following should ALWAYS be consumed
+			case "}":
+			case ")":
+			case "]":
+				throw new SyntaxError(`Unexpected ${syntaxToken} found as item ${startIndex} of ${this.syntax}`);
+
 			default:
-				// shouldn't ever find a loose close braket or paren
-				if (syntaxToken === "}" || syntaxToken === ")")
-					throw new SyntaxError(`Unexpected ${syntaxToken} found as item ${startIndex} of ${this.syntax}`);
-
 				if (syntaxToken.match(/^[\w\-_]+$/))
-					return Token.Word.parseRuleSyntax(syntaxStream, tokens, startIndex);
+					return Token.Keyword.parseRuleSyntax(syntaxStream, tokens, startIndex);
 
-				return Token.Literal.parseRuleSyntax(syntaxStream, tokens, startIndex);
+				return Token.String.parseRuleSyntax(syntaxStream, tokens, startIndex);
 		}
 	}
 
@@ -126,25 +136,25 @@ console.groupEnd();
 
 }
 
-Token.Word = class Word extends Token{
+Token.Keyword = class Keyword extends Token{
 	// Match `word` in syntax tokens.
 	// Returns `[ token, endIndex ]`
 	// Throws if invalid.
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
 		var name = syntaxStream[startIndex];
-		var token = new Token.Word({ name });
+		var token = new Token.Keyword({ name });
 		return [ token, startIndex ];
 	}
 }
 
 
-Token.Literal = class Literal extends Token{
+Token.String = class String extends Token{
 	// Match `word` in syntax tokens.
 	// Returns `[ token, endIndex ]`
 	// Throws if invalid.
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
 		var name = syntaxStream[startIndex];
-		var token = new Token.Literal({ name });
+		var token = new Token.String({ name });
 		if (name.startsWith("\\")) {
 			token.name = token.name.substr(1);
 			token.toString = () => name;
@@ -182,7 +192,8 @@ Token.Nested = class Nested extends Token {
 
 	toJSON() {
 		var json = {};
-		json[this._type] = this.tokens;
+		var type = `${this._type}${this._argName}`;
+		json[type] = this.tokens;
 		if (this.optional) json.optional = true;
 		if (this.repeat) json.repeat = true;
 		return json;
@@ -224,6 +235,8 @@ Token.Alternates = class Alternates extends Token.Nested {
 	}
 
 };
+
+
 Token.Sequence = class Sequence extends Token.Nested {
 	toString() {
 		return `(${this.tokens.join(" ")})${this.modifiersAsString}`;
@@ -234,18 +247,68 @@ Token.Sequence = class Sequence extends Token.Nested {
 	// Throws if invalid.
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
 		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "(", ")", startIndex);
-		let group = new Token.Sequence();
-		Token.parseRuleSyntax_tokens(slice, group.tokens);
+		let sequence = new Token.Sequence();
+
+		if (slice.length > 2 && slice[1] === ":") {
+			sequence.argument = slice[0];
+			slice = slice.slice(2);
+		}
+
+		Token.parseRuleSyntax_tokens(slice, sequence.tokens);
 
 		// if only one item, this is an optional rule
-		if (group.tokens.length === 1) {
-			let token = group.tokens[0];
+		if (sequence.tokens.length === 1) {
+			let token = sequence.tokens[0];
+			if (sequence.argument) token.argument = sequence.argument;
 			if (!(token instanceof Token.Alternates)) {
 				token.optional = true;
 			}
 			return [ token, endIndex ];
 		}
-		return [ group, endIndex ];
+		return [ sequence, endIndex ];
+	}
+
+};
+
+
+// List match token:   `[<item><delimiter>]`
+// TODO: this is really convenient but non-standard...
+// TODO: `[argName:{literal}:]`: not clear that `:` after `argName` is not the delimiter
+
+Token.List = class List extends Token {
+	toJSON() {
+		var item = `{${JSON.stringify(this.item).replace(/"/g,"")}}`;
+		var delimiter = `{${JSON.stringify(this.delimiter).replace(/"/g,"")}}`;
+		return `${this._type}${this._argName}: { item: ${item}, delimiter: ${delimiter} } ${this.modifiersAsJSON}`;
+	}
+
+
+	toString() {
+		return `[${this.item} ${this.delimiter}]${this.modifiersAsString}`;
+	}
+
+	// Match list expression `[<item><delimiter>]` in syntax tokens.
+	// Returns `[ token, endIndex ]`
+	// Throws if invalid.
+	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
+		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "[", "]", startIndex);
+
+		let list = new Token.List();
+
+		var tokens = Token.parseRuleSyntax_tokens(slice, []);
+		if (tokens.length === 4 && tokens[1].name === ":") {
+			list.argument = tokens[0];
+			list.item = tokens[2]
+			list.delimiter = tokens[3]
+		}
+		else if (tokens.length === 2) {
+			list.item = tokens[0]
+			list.delimiter = tokens[1]
+		}
+		else {
+			throw new SyntaxError(`Unexpected stuff at end of list: [${slice.join(" ")}]`);
+		}
+		return [ list, endIndex ];
 	}
 
 };
