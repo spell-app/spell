@@ -54,7 +54,7 @@ window.Token = class Token {
 //
 	static parseRuleSyntax(syntax) {
 		var syntaxStream = Token.tokeniseParseRuleSyntax(syntax);
-		var rule = new Rule({ syntax });
+		var rule = new Rule({ syntax, tokens: [] });
 		Token.parseRuleSyntax_tokens(syntaxStream, rule.tokens);
 
 console.group("Parsing: ", syntax);
@@ -165,10 +165,14 @@ Token.String = class String extends Token{
 
 
 Token.Rule = class Rule extends Token{
+	parse(parser, stream, matches = []) {
+		var result = parser.parseRule(stream, this.name, matches);
+		if (!result && !this.optional) ;
+	}
+
 	toString() {
 		return `{${this.name}}${this.modifiersAsString}`;
 	}
-
 
 	// Match `{<ruleName>}` in syntax tokens.
 	// Returns `[ part, endIndex ]`
