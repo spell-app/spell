@@ -6,6 +6,26 @@ window.Token = class Token {
 		Object.assign(this, properties);
 	}
 
+	// Clone this token and add any `props` passed in.
+	clone(props) {
+		var clone = Object.create(this);
+		Object.assign(clone, props);
+		return clone;
+	}
+
+	// Parse this token at the beginning of `stream`.
+	// Default is that `token.name` is literal string to match.
+	// On match, returns clone of token with `value`, `stream` and `next`stream.
+	// Returns `undefined` if no match.
+	parse(parser, stream, matches) {
+		if (!stream.startsWith(this.name)) return undefined;
+		return this.clone({
+			value: this.name,
+			stream,
+			next: stream.advanceBy(this.name.length)
+		});
+	}
+
 //
 // ## group: reflection
 //
@@ -136,6 +156,7 @@ console.groupEnd();
 
 }
 
+
 Token.Keyword = class Keyword extends Token{
 	// Match `word` in syntax tokens.
 	// Returns `[ token, endIndex ]`
@@ -155,6 +176,7 @@ Token.String = class String extends Token{
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
 		var name = syntaxStream[startIndex];
 		var token = new Token.String({ name });
+		// If name starts with `\\`, remove leading slash.
 		if (name.startsWith("\\")) {
 			token.name = token.name.substr(1);
 			token.toString = () => name;
@@ -164,7 +186,25 @@ Token.String = class String extends Token{
 }
 
 
-Token.Rule = class Rule extends Token{
+
+// Regex pattern.
+Token.Pattern = class Pattern extends Token {
+	parse(parser, stream, matches = []) {
+		var match = stream.match(this.pattern);
+		if (!match) return undefined;
+
+		return this.clone({
+			value: match[0],
+			match: match,		// TODO: necessary???
+			stream,
+			next: stream.advanceBy(match[0].length)
+		});
+
+	}
+}
+
+
+Token.Rule = class Rule extends Token {
 	parse(parser, stream, matches = []) {
 		var result = parser.parseRule(stream, this.name, matches);
 		if (!result && !this.optional) ;

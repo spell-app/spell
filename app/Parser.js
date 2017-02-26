@@ -34,6 +34,8 @@ window.Tokenizer = class Tokenizer {
 }
 
 
+
+// TODO: convert to line-aware stream???
 window.TextStream = class TextStream {
 	constructor(textOrProps) {
 		if (typeof textOrProps === "string") this.text = textOrProps;
@@ -58,22 +60,16 @@ window.TextStream = class TextStream {
 		return this.clone({ startIndex: this.startIndex + length });
 	}
 
-	// Match `pattern` as string or regex at head of stream.
+	// Match `pattern` as regex at head of stream.
 	// NOTE: regexes should start with `^`!
-	// Returns `[ match, cloneAfterMatch ]` or `[]` if no match.
+	// Returns match or undefined.
 	match(pattern) {
-		var match;
-		if (typeof pattern === "string") {
-			if (this.text.startsWith(pattern, this.startIndex)) {
-				match = pattern;
-			}
-		}
-		if (pattern instanceof RegExp) {
-			var regexMatch = this.head.match(pattern);
-			if (regexMatch) match = regexMatch[0];
-		}
-		if (match) return [ match, this.advanceBy(match.length) ];
-		return [undefined, this];
+		if (!(pattern instanceof RegExp)) throw new TypeError(`TextStream.match(${pattern}): expected RegExp`);
+		return this.head.match(pattern);
+	}
+
+	startsWith(string) {
+		return this.text.startsWith(string);
 	}
 
 	// Return text of string starting at our `startIndex`
@@ -84,12 +80,6 @@ window.TextStream = class TextStream {
 	// Return a range of the string from `startIndex` to `endIndex` NON-inclusive.
 	range(startIndex = this.startIndex, endIndex = this.text.length) {
 		return this.text.substring(startIndex, endIndex);
-	}
-
-	// Eat whitespace at the beginning of the stream.
-	// Returns `[ match, cloneAfterMatch ]` or `[]` if no match.
-	eatWhitespace() {
-		return this.match(/^\s+/);
 	}
 
 	// Length of the stream.
@@ -133,18 +123,6 @@ window.Rule = class Rule {
 
 }
 
-Rule.Pattern = class Pattern extends Rule {
-	constructor(props) {
-		super(props);
-	}
-
-	parse(parser, stream, matches) {
-		return stream.match(this.pattern);
-	}
-}
-
-
-
 
 
 window.Parser = class Parser {
@@ -163,6 +141,12 @@ window.Parser = class Parser {
 		var result = rule.parse(parser, stream, matches);
 	}
 
+	eatWhitespace(stream, matches) {
+		return this.rules.whitespace.parse(this, stream, matches);
+	}
+
+	//### Rule factories
+
 	// Add a rule to our list of rules!
 	// TODO: add array of rules on overwrite?
 	addRule(name, rule) {
@@ -173,7 +157,7 @@ window.Parser = class Parser {
 
 	// Add regex as a pattern to our list of rules
 	addPattern(name, pattern, properties) {
-		var rule = new Rule.Pattern(properties);
+		var rule = new Token.Pattern(properties);
 		rule.name = name;
 		rule.pattern = pattern;
 		return this.addRule(name, rule);
@@ -194,10 +178,9 @@ parser.addPattern("literal", /^(?:-?\d+\.?\d*|"(?:[^"\\]|\\.)*"|true|false|yes|n
 
 window.stream = new TextStream("a-variable \"a literal\"");
 
+window.variable = parser.rules.variable.parse(parser, stream);
+window.whitespace = parser.eatWhitespace((variable && variable.next) || stream);
+window.literal = parser.rules.literal.parse(parser, (whitespace && whitespace.next) || stream);
 
-var testResults = {
-	variable: parser.rules.variable.parse(parser, stream)[0],
-	whitespace: stream.eatWhitespace()[0],
-	literal: parser.rules.literal.parse(parser, stream)[0]
-}
+var testResults = { variable, whitespace, literal };
 console.info(testResults)
