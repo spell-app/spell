@@ -73,13 +73,13 @@ window.TextStream = class TextStream {
 	// Returns match or undefined.
 	match(pattern) {
 		if (!(pattern instanceof RegExp)) throw new TypeError(`TextStream.match(${pattern}): expected RegExp`);
-//TODO: ensure match is not not beyond `string.endIndex`
+//TODO: use `stream.range` to ensure match is not not beyond `string.endIndex`
 		return this.head.match(pattern);
 	}
 
 	startsWith(string) {
-//TODO: ensure match is not not beyond `string.endIndex`
-		return this.text.startsWith(string);
+//TODO: use `stream.range` to ensure match is not not beyond `string.endIndex`
+		return this.head.startsWith(string);
 	}
 
 	// Return text of string starting at our `startIndex`
@@ -111,63 +111,35 @@ window.TextStream = class TextStream {
 	};
 }
 
-window.Rule = class Rule {
-	constructor(properties) {
-		Object.assign(this, properties);
-	}
-
-	parse(parser, stream, matches = []) {
-		for (let token in this.tokens) {
-			if (stream.isEmpty && !token.optional)
-				throw new SyntaxError("Stream is empty");
-
-			let startIndex = stream.startIndex;
-			let [ match, endIndex ] = token.parse(parser, stream, matches);
-
-			matches.push({ startIndex, endIndex, match });
-			stream = stream.advanceTo(endIndex + 1);
-		}
-		return [ stream, matches ];
-	}
-
-	toJSON() {
-		return this.tokens;
-	}
-
-	toString() {
-		return this.tokens.join(" ");
-	}
-
-}
-
-
-
 window.Parser = class Parser {
 	constructor(properties) {
 		Object.assign(this, properties);
-		// Clone rules, starting with a completely empty map (no standard object keys)
+		// Clone rules, starting with a completely empty map if not defined (no standard object keys)
 		this.rules = Object.create(this.rules || null);
 	}
 
 	// Parse head of stream starting at named rule.
 	// NOTE: modifies the stream!
-	parseRule(stream, name, matches = []) {
+	parseRule(stream, name) {
 		var rule = this.rules[name];
-		if (!rule) throw new SyntaxError(`Rule ${this.name} not understood`);
+		if (!rule) throw new SyntaxError(`Rule ${name} not understood`);
 
-		var result = rule.parse(parser, stream, matches);
+		var result = rule.parse(parser, stream);
 	}
 
-	eatWhitespace(stream, matches) {
-		return this.rules.whitespace.parse(this, stream, matches);
+	eatWhitespace(stream) {
+		return this.rules.whitespace.parse(this, stream);
 	}
 
 	//### Rule factories
 
+	getRule(name) {
+		return this.rules[name];
+	}
+
 	// Add regex as a pattern to our list of rules
 	addPattern(name, pattern, properties) {
-		var rule = new Token.Pattern(properties);
-		rule.name = name;
+		var rule = new Rule.Pattern(properties);
 		rule.pattern = pattern;
 		return this.addRule(name, rule);
 	}
@@ -176,6 +148,7 @@ window.Parser = class Parser {
 	// TODO: add array of rules on overwrite?
 	addRule(name, rule) {
 		if (this.rules[name]) console.warn(`Overwriting rule ${name} old: `, this.rules[name], "new: ", rule);
+		rule.name = rule;
 		this.rules[name] = rule;
 		return rule;
 	}
@@ -183,9 +156,9 @@ window.Parser = class Parser {
 	// Parse a `ruleSyntax rule and add it to our list of rules.
 	// Returns the new rule.
 // TODO: try...catch strategy?
-	parseRule(name, ruleSyntax) {
+	addSyntax(name, ruleSyntax) {
 		try {
-			this.rules[name] = Token.parseRuleSyntax(ruleSyntax);
+			this.rules[name] = Rule.parseRuleSyntax(ruleSyntax);
 		} catch (e) {
 			console.warn(`Error parsing rule ${name}:`, e, ruleSyntax);
 		}
@@ -213,6 +186,8 @@ console.groupEnd();
 
 
 // DEBUG
-parser.parseRule("declare-variable-as-one-of", "(modifier:global|constant|shared)? {variable} as one of \\([enumeration:{literal},]\\)");
+parser.addSyntax("scope-modifier", "(modifiers:global|constant|shared)*");
+parser.addSyntax("declare-variable", "{scope-modifier}?{variable} = {literal}");
+parser.addSyntax("declare-variable-as-one-of", "(modifier:global|constant|shared)? {variable} as one of \\([enumeration:{literal},]\\)");
 
 

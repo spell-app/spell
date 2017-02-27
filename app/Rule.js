@@ -1,7 +1,8 @@
-//	# Tokens
+//	# Parser Rules
+//	Rules can be as simple as a string `Keyword` or a complex sequence of (nested) rules.
 //
 //
-window.Token = class Token {
+window.Rule = class Rule {
 	constructor(properties) {
 		Object.assign(this, properties);
 	}
@@ -23,14 +24,14 @@ window.Token = class Token {
 
 
 	// Parse this token at the beginning of `stream`.
-	// Default is that `token.name` is literal string to match.
+	// Default is that `token.value` is literal string to match.
 	// On match, returns clone of token with `value`, `stream` and `endIndex`.
 	// Returns `undefined` if no match.
-	parse(parser, stream, matches) {
-		if (!stream.startsWith(this.name)) return undefined;
+	parse(parser, stream) {
+		if (typeof stream === "string") stream = new TextStream(stream);
+		if (!stream.startsWith(this.value)) return undefined;
 		return this.clone({
-			value: this.name,
-			endIndex: stream.startIndex + this.name.length,
+			endIndex: stream.startIndex + this.value.length,
 			stream
 		});
 	}
@@ -42,6 +43,9 @@ window.Token = class Token {
 		return this.constructor.name;
 	}
 
+	// `argument` is argument name in transformed calling function.
+	// Generally set by `(<arg>: <normalRule>)`
+//TODOC
 	get _argName() {
 		if (this.argument) return ` (${this.argument})`;
 		return "";
@@ -51,7 +55,7 @@ window.Token = class Token {
 // ### group: toJSON
 //
 	toJSON() {
-		return `${this._type}${this._argName}: '${this.name}'${this.modifiersAsJSON}`;
+		return `${this._type}${this._argName}: '${this.value}'${this.modifiersAsJSON}`;
 	}
 
 	get modifiersAsJSON() {
@@ -66,7 +70,7 @@ window.Token = class Token {
 // ### group: toString
 //
 	toString() {
-		return `${this.name}${this.modifiersAsString}`;
+		return `${this.value}${this.modifiersAsString}`;
 	}
 
 	get modifiersAsString() {
@@ -85,9 +89,17 @@ window.Token = class Token {
 // TODO: convert to TextStream pattern ala normal parser once that settles down
 // TODO: Naming?  `Rule` as token type???
 	static parseRuleSyntax(syntax) {
-		var syntaxStream = Token.tokeniseParseRuleSyntax(syntax);
-		var rule = new Rule({ syntax, tokens: [] });
-		Token.parseRuleSyntax_tokens(syntaxStream, rule.tokens);
+		let syntaxStream = Rule.tokeniseRuleSyntax(syntax);
+		let tokens = Rule.parseRuleSyntax_tokens(syntaxStream, []);
+
+		let rule;
+		// If we only got one thing, return that as the result
+		if (tokens.length === 1) {
+			rule = tokens[0];
+		}
+		else {
+			rule = new Rule.Sequence({ tokens });
+		}
 
 console.group("Parsing: ", syntax);
 console.log(  "toString: ", rule.toString());
@@ -97,7 +109,7 @@ console.groupEnd();
 		return rule;
 	}
 
-	static tokeniseParseRuleSyntax(syntax) {
+	static tokeniseRuleSyntax(syntax) {
 		const SYNTAX_EXPRESSION = /(?:[\w\-]+|\\[\[\(\{\)\}\]]|[^\s\w]|\|)/g;
 		var syntaxStream = syntax.match(SYNTAX_EXPRESSION);
 		if (!syntaxStream) throw new SyntaxError(`Can't tokenize parse rule syntax >>${syntax}<<`);
@@ -106,7 +118,7 @@ console.groupEnd();
 
 	static parseRuleSyntax_tokens(syntaxStream, tokens, startIndex = 0, lastIndex = syntaxStream.length) {
 		while (startIndex < lastIndex) {
-			let [ part, endIndex ] = Token.parseRuleSyntax_token(syntaxStream, tokens, startIndex);
+			let [ part, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, tokens, startIndex);
 			if (endIndex >= lastIndex)
 				throw new SyntaxError("Past lastIndex");
 			if (part) tokens.push(part);
@@ -119,15 +131,15 @@ console.groupEnd();
 		var syntaxToken = syntaxStream[startIndex];
 
 		switch (syntaxToken) {
-			case "{":	return Token.Rule.parseRuleSyntax(syntaxStream, tokens, startIndex);
-			case "(":	return Token.Sequence.parseRuleSyntax(syntaxStream, tokens, startIndex);
-			case "[":	return Token.List.parseRuleSyntax(syntaxStream, tokens, startIndex);
-			case "|":	return Token.Alternates.parseRuleSyntax(syntaxStream, tokens, startIndex);
+			case "{":	return Rule.Subrule.parseRuleSyntax(syntaxStream, tokens, startIndex);
+			case "(":	return Rule.parseRuleSyntax_parentheses(syntaxStream, tokens, startIndex);
+			case "[":	return Rule.List.parseRuleSyntax(syntaxStream, tokens, startIndex);
+			case "|":	return Rule.Alternates.parseRuleSyntax(syntaxStream, tokens, startIndex);
 			case "*":
 			case "+":
-			case "?":	return Token.parseRuleSyntax_repeat(syntaxStream, tokens, startIndex);
+			case "?":	return Rule.parseRuleSyntax_repeat(syntaxStream, tokens, startIndex);
 
-			// the following should ALWAYS be consumed
+			// the following should ALWAYS be consumed by the above
 			case "}":
 			case ")":
 			case "]":
@@ -135,12 +147,40 @@ console.groupEnd();
 
 			default:
 				if (syntaxToken.match(/^[\w\-_]+$/))
-					return Token.Keyword.parseRuleSyntax(syntaxStream, tokens, startIndex);
+					return Rule.Keyword.parseRuleSyntax(syntaxStream, tokens, startIndex);
 
-				return Token.String.parseRuleSyntax(syntaxStream, tokens, startIndex);
+				return Rule.String.parseRuleSyntax(syntaxStream, tokens, startIndex);
 		}
 	}
 
+
+	// Match grouping expression `(...)` in syntax tokens.
+	// Returns `[ token, endIndex ]`
+	// Throws if invalid.
+	static parseRuleSyntax_parentheses(syntaxStream, tokens, startIndex) {
+		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "(", ")", startIndex);
+
+		// pull out explicit argument name
+		let argument;
+		if (slice.length > 2 && slice[1] === ":") {
+			argument = slice[0];
+			slice = slice.slice(2);
+		}
+
+		let token;
+		var tokens = Rule.parseRuleSyntax_tokens(slice, []);
+		// Single token means optional expression
+		if (tokens.length === 1) {
+			token = tokens[0];
+			if (!(token instanceof Rule.Alternates)) token.optional = true;
+		}
+		else {
+			token = new Rule.Sequence({ tokens });
+		}
+		if (argument) token.argument = argument;
+
+		return [ token, endIndex ];
+	}
 
 	// Match repeat indicator `?`, `+` or `*` by attaching it to the previous rule.
 	static parseRuleSyntax_repeat(syntaxStream, tokens, startIndex) {
@@ -165,33 +205,34 @@ console.groupEnd();
 
 		return [ undefined, startIndex ]
 	}
-
 }
 
 
-Token.Keyword = class Keyword extends Token{
+Rule.Keyword = class Keyword extends Rule{
 	// Match `word` in syntax tokens.
 	// Returns `[ token, endIndex ]`
 	// Throws if invalid.
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
-		var name = syntaxStream[startIndex];
-		var token = new Token.Keyword({ name });
+		var value = syntaxStream[startIndex];
+		var token = new Rule.Keyword({ value });
 		return [ token, startIndex ];
 	}
 }
 
 
-Token.String = class String extends Token{
+Rule.String = class String extends Rule{
 	// Match `word` in syntax tokens.
 	// Returns `[ token, endIndex ]`
 	// Throws if invalid.
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
-		var name = syntaxStream[startIndex];
-		var token = new Token.String({ name });
-		// If name starts with `\\`, remove leading slash.
-		if (name.startsWith("\\")) {
-			token.name = token.name.substr(1);
-			token.toString = () => name;
+		var value = syntaxStream[startIndex];
+		var token = new Rule.String({ value });
+		// If value starts with `\\`
+		if (value.startsWith("\\")) {
+			// remove leading slash in match value...
+			token.value = token.value.substr(1);
+			// but leave it in toString
+			token.toString = () => value;
 		}
 		return [ token, startIndex ];
 	}
@@ -200,8 +241,11 @@ Token.String = class String extends Token{
 
 
 // Regex pattern.
-Token.Pattern = class Pattern extends Token {
-	parse(parser, stream, matches = []) {
+// `token.pattern` is the regular expression to match.
+// NOTE: the regex should start with `/^...` to match at the beginning of the stream.
+Rule.Pattern = class Pattern extends Rule {
+	parse(parser, stream) {
+		if (typeof stream === "string") stream = new TextStream(stream);
 		var match = stream.match(this.pattern);
 		if (!match) return undefined;
 
@@ -211,19 +255,26 @@ Token.Pattern = class Pattern extends Token {
 			match: match,		// TODO: necessary???
 			stream
 		});
-
 	}
 }
 
 
-Token.Rule = class Rule extends Token {
-	parse(parser, stream, matches = []) {
-		var result = parser.parseRule(stream, this.name, matches);
-		if (!result && !this.optional) ;
+// Subrule -- name of another rule to called.
+// `token.name` is the name of the rule (in the parser).
+Rule.Subrule = class Subrule extends Rule {
+	parse(parser, stream) {
+		if (typeof stream === "string") stream = new TextStream(stream);
+		var rule = parser.getRule(this.name);
+		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.name}'`, this);
+		return rule.parse(parser, stream);
 	}
 
 	toString() {
 		return `{${this.name}}${this.modifiersAsString}`;
+	}
+
+	toJSON() {
+		return `${this._type}${this._argName}: '${this.name}'${this.modifiersAsJSON}`;
 	}
 
 	// Match `{<ruleName>}` in syntax tokens.
@@ -232,7 +283,7 @@ Token.Rule = class Rule extends Token {
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
 		let match = Tokenizer.findNested(syntaxStream, "{", "}", startIndex);
 		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: ${rule}`);
-		let token = new Token.Rule({ name: match.slice[0] });
+		let token = new Rule.Subrule({ name: match.slice[0] });
 		return [ token, match.endIndex ];
 	}
 
@@ -240,7 +291,8 @@ Token.Rule = class Rule extends Token {
 
 
 
-Token.Nested = class Nested extends Token {
+// `Nested` token -- composed of a series of other tokens.
+Rule.Nested = class Nested extends Rule {
 	constructor(properties) {
 		super(properties);
 		if (!this.tokens) this.tokens = [];
@@ -256,7 +308,43 @@ Token.Nested = class Nested extends Token {
 	}
 }
 
-Token.Alternates = class Alternates extends Token.Nested {
+
+// Sequence of tokens to match (auto-excluding whitespace).
+Rule.Sequence = class Sequence extends Rule.Nested {
+	parse(parser, stream) {
+		if (typeof stream === "string") stream = new TextStream(stream);
+		var matches = [];
+		for (let token in this.tokens) {
+			if (stream.isEmpty && !token.optional)
+				throw new SyntaxError("Stream is empty");
+
+			let startIndex = stream.startIndex;
+			let [ match, endIndex ] = token.parse(parser, stream);
+
+			matches.push({ startIndex, endIndex, match });
+			stream = stream.advanceTo(endIndex + 1);
+		}
+		return [ stream, matches ];
+	}
+
+}
+
+
+// Alternative syntax.
+// TODO: rename
+// TODO: match all valid alternatives
+Rule.Alternates = class Alternates extends Rule.Nested {
+	parse(parser, stream) {
+		if (typeof stream === "string") stream = new TextStream(stream);
+		for (let token of this.tokens) {
+			let match = token.parse(parser, stream, []);
+			if (match) {
+				if (this.argument) match.argument = this.argument;
+				return match;
+			}
+		}
+	}
+
 	toString() {
 		return `(${this.tokens.join("|")})${this.modifiersAsString}`;
 	}
@@ -264,16 +352,16 @@ Token.Alternates = class Alternates extends Token.Nested {
 	// Match alternate `( a | b | c )`.
 	// NOTE: this should only happen inside a group...
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
-		let [ token, endIndex ] = Token.parseRuleSyntax_token(syntaxStream, tokens, startIndex + 1);
+		let [ token, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, tokens, startIndex + 1);
 
 		// create alternates rule with lastToken, or re-use existing alternates rile
 		let alternates;
 		let lastToken = tokens.pop();
-		if (lastToken instanceof Token.Alternates) {
+		if (lastToken instanceof Rule.Alternates) {
 			alternates = lastToken;
 		}
 		else {
-			alternates = new Token.Alternates();
+			alternates = new Rule.Alternates();
 
 			// if no last token, we have a rule like  `( | abc)` which means that the alternates is optional
 			if (!lastToken)
@@ -293,45 +381,11 @@ Token.Alternates = class Alternates extends Token.Nested {
 };
 
 
-Token.Sequence = class Sequence extends Token.Nested {
-	toString() {
-		return `(${this.tokens.join(" ")})${this.modifiersAsString}`;
-	}
-
-	// Match grouping expression `(...)` in syntax tokens.
-	// Returns `[ token, endIndex ]`
-	// Throws if invalid.
-	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
-		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "(", ")", startIndex);
-		let sequence = new Token.Sequence();
-
-		if (slice.length > 2 && slice[1] === ":") {
-			sequence.argument = slice[0];
-			slice = slice.slice(2);
-		}
-
-		Token.parseRuleSyntax_tokens(slice, sequence.tokens);
-
-		// if only one item, this is an optional rule
-		if (sequence.tokens.length === 1) {
-			let token = sequence.tokens[0];
-			if (sequence.argument) token.argument = sequence.argument;
-			if (!(token instanceof Token.Alternates)) {
-				token.optional = true;
-			}
-			return [ token, endIndex ];
-		}
-		return [ sequence, endIndex ];
-	}
-
-};
-
-
 // List match token:   `[<item><delimiter>]`
 // TODO: this is really convenient but non-standard...
 // TODO: `[argName:{literal}:]`: not clear that `:` after `argName` is not the delimiter
 
-Token.List = class List extends Token {
+Rule.List = class List extends Rule {
 	toJSON() {
 		var item = `{${JSON.stringify(this.item).replace(/"/g,"")}}`;
 		var delimiter = `{${JSON.stringify(this.delimiter).replace(/"/g,"")}}`;
@@ -349,10 +403,10 @@ Token.List = class List extends Token {
 	static parseRuleSyntax(syntaxStream, tokens, startIndex) {
 		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "[", "]", startIndex);
 
-		let list = new Token.List();
+		let list = new Rule.List();
 
-		var tokens = Token.parseRuleSyntax_tokens(slice, []);
-		if (tokens.length === 4 && tokens[1].name === ":") {
+		var tokens = Rule.parseRuleSyntax_tokens(slice, []);
+		if (tokens.length === 4 && tokens[1].value === ":") {
 			list.argument = tokens[0];
 			list.item = tokens[2]
 			list.delimiter = tokens[3]
