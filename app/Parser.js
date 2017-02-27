@@ -1,10 +1,13 @@
 // Spell "English" parser strawman
 
 
+// TODO:	recycle word/string/pattern rules?  do we care?
 // TODO:	make parseRuleSyntax() use a TextStream?  TokenStream?
 
-// TODO:  	return single value: token.clone({..., stream}) or undefined
-//			caller pulls stream out for next run as desired
+// TODO:  	return single value: token.clone({..., stream, next}) or undefined
+//			caller pulls `next` stream out for next run as desired
+
+// TODO:	Maybe stream owns matched tokens?
 
 
 window.Tokenizer = class Tokenizer {
@@ -60,15 +63,22 @@ window.TextStream = class TextStream {
 		return this.clone({ startIndex: this.startIndex + length });
 	}
 
+// 	// Return clone of this stream with endIndex set to start + `length`
+// 	endAfter(length) {
+// 		return this.clone({ endIndex: this.startIndex + length });
+// 	}
+
 	// Match `pattern` as regex at head of stream.
 	// NOTE: regexes should start with `^`!
 	// Returns match or undefined.
 	match(pattern) {
 		if (!(pattern instanceof RegExp)) throw new TypeError(`TextStream.match(${pattern}): expected RegExp`);
+//TODO: ensure match is not not beyond `string.endIndex`
 		return this.head.match(pattern);
 	}
 
 	startsWith(string) {
+//TODO: ensure match is not not beyond `string.endIndex`
 		return this.text.startsWith(string);
 	}
 
@@ -92,6 +102,13 @@ window.TextStream = class TextStream {
 		return this.startIndex === this.length;
 	}
 
+
+	//
+	//## Reflection
+	//
+	toString() {
+		return this.text
+	};
 }
 
 window.Rule = class Rule {
@@ -147,6 +164,14 @@ window.Parser = class Parser {
 
 	//### Rule factories
 
+	// Add regex as a pattern to our list of rules
+	addPattern(name, pattern, properties) {
+		var rule = new Token.Pattern(properties);
+		rule.name = name;
+		rule.pattern = pattern;
+		return this.addRule(name, rule);
+	}
+
 	// Add a rule to our list of rules!
 	// TODO: add array of rules on overwrite?
 	addRule(name, rule) {
@@ -155,19 +180,18 @@ window.Parser = class Parser {
 		return rule;
 	}
 
-	// Add regex as a pattern to our list of rules
-	addPattern(name, pattern, properties) {
-		var rule = new Token.Pattern(properties);
-		rule.name = name;
-		rule.pattern = pattern;
-		return this.addRule(name, rule);
+	// Parse a `ruleSyntax rule and add it to our list of rules.
+	// Returns the new rule.
+// TODO: try...catch strategy?
+	parseRule(name, ruleSyntax) {
+		try {
+			this.rules[name] = Token.parseRuleSyntax(ruleSyntax);
+		} catch (e) {
+			console.warn(`Error parsing rule ${name}:`, e, ruleSyntax);
+		}
 	}
+
 }
-
-
-// DEBUG
-Token.parseRuleSyntax("(modifier:global|constant|shared)? {variable} as one of \\([enumeration:{literal},]\\)");
-
 
 window.parser = new Parser();
 
@@ -179,8 +203,16 @@ parser.addPattern("literal", /^(?:-?\d+\.?\d*|"(?:[^"\\]|\\.)*"|true|false|yes|n
 window.stream = new TextStream("a-variable \"a literal\"");
 
 window.variable = parser.rules.variable.parse(parser, stream);
-window.whitespace = parser.eatWhitespace((variable && variable.next) || stream);
-window.literal = parser.rules.literal.parse(parser, (whitespace && whitespace.next) || stream);
+window.whitespace = parser.eatWhitespace((variable && variable.next()) || stream);
+window.literal = parser.rules.literal.parse(parser, (whitespace && whitespace.next()) || stream);
 
+console.group("Ad-hoc parsing test of "+window.stream);
 var testResults = { variable, whitespace, literal };
 console.info(testResults)
+console.groupEnd();
+
+
+// DEBUG
+parser.parseRule("declare-variable-as-one-of", "(modifier:global|constant|shared)? {variable} as one of \\([enumeration:{literal},]\\)");
+
+

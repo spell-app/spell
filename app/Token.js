@@ -13,16 +13,25 @@ window.Token = class Token {
 		return clone;
 	}
 
+	// For a token instance associated with a stream,
+	// return a new stream AFTER this token's end.
+	next() {
+		if (!this.stream || this.endIndex === undefined)
+			throw new TypeError(`token.next() called on token without a stream`, this);
+		return this.stream.advanceTo(this.endIndex);
+	}
+
+
 	// Parse this token at the beginning of `stream`.
 	// Default is that `token.name` is literal string to match.
-	// On match, returns clone of token with `value`, `stream` and `next`stream.
+	// On match, returns clone of token with `value`, `stream` and `endIndex`.
 	// Returns `undefined` if no match.
 	parse(parser, stream, matches) {
 		if (!stream.startsWith(this.name)) return undefined;
 		return this.clone({
 			value: this.name,
-			stream,
-			next: stream.advanceBy(this.name.length)
+			endIndex: stream.startIndex + this.name.length,
+			stream
 		});
 	}
 
@@ -72,6 +81,9 @@ window.Token = class Token {
 //
 // ## group: parsing syntax
 //
+
+// TODO: convert to TextStream pattern ala normal parser once that settles down
+// TODO: Naming?  `Rule` as token type???
 	static parseRuleSyntax(syntax) {
 		var syntaxStream = Token.tokeniseParseRuleSyntax(syntax);
 		var rule = new Rule({ syntax, tokens: [] });
@@ -195,9 +207,9 @@ Token.Pattern = class Pattern extends Token {
 
 		return this.clone({
 			value: match[0],
+			endIndex: stream.startIndex + match[0].length,
 			match: match,		// TODO: necessary???
-			stream,
-			next: stream.advanceBy(match[0].length)
+			stream
 		});
 
 	}
