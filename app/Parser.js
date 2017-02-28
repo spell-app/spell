@@ -1,12 +1,10 @@
 // Spell "English" parser strawman
 
-
-// TODO:	recycle word/string/pattern rules?  do we care?
-// TODO:	make parseRuleSyntax() use a TextStream?  TokenStream?
-
-// TODO:  	return single value: token.clone({..., stream, next}) or undefined
-//			caller pulls `next` stream out for next run as desired
-
+// TODO: 	Parse list
+// TODO:	What does syntax tree look like?
+// TODO:	Don't use `toJSON` for outputting rule...
+// TODO:	Pull `parseRuleSyntax` stuff out into separate module/pattern
+// TODO:	Recycle word/string/pattern rules?  do we care?
 // TODO:	Maybe stream owns matched tokens?
 
 
@@ -132,10 +130,10 @@ window.Parser = class Parser {
 		return this.parseRule(rule, stream);
 	}
 
-	// Parse a single `rule` in `stream`.
+	// Parse a single `rule` at head of `stream`.
 	// Automatically eats whitespace BEFORE the rule.
-	// If rule can repeat, keeps eating as long as repeat is valid and returns an array.
-	// Returns `[ result, nextStream ]` or `[]` if no match for an optional rule.
+	// If rule can repeat, keeps eating as long as repeat is valid and `result` will be an array.
+	// Returns `[ result, nextStream ]` or `undefined` if no match for an optional rule.
 	// Throws if we can't match a mandatory rule.
 	parseRule(rule, stream) {
 		// Eat whitespace at the beginning of the stream
@@ -150,7 +148,7 @@ console.info(rule, result);
 			// throwing if no result and rule is not optional
 			if (!rule.optional)
 				throw new SyntaxError(`Mandatory rule '${name}' not matched at '${stream.head.substr(20)}'`);
-			return []
+			return undefined;
 		}
 
 		// advance the stream beyond what was matched
@@ -227,8 +225,8 @@ parser.addPattern("literal", /^(?:-?\d+\.?\d*|"(?:[^"\\]|\\.)*"|true|false|yes|n
 // Rules auto-derived from our `rule syntax`.
 parser.addSyntax("scope-modifier", "(scope:global|constant|shared)");
 parser.addSyntax("declare-property", "{scope-modifier}? {variable} = {literal}");
-parser.addSyntax("declare-property-as-one-of", "{scope-modifier}? {variable} as one of \\([enumeration:{literal},]\\)");
-
+parser.addSyntax("declare-property-as-one-of", "{scope-modifier}? {variable} as one of \\[[enumeration:{literal},]\\]");
+parser.addSyntax("literal-enumeration", "\\[[enumeration:{literal},]\\]");
 
 window.stream = new TextStream("a-variable \"a literal\"");
 
