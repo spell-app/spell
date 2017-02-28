@@ -17,10 +17,10 @@ window.Tokenizer = class Tokenizer {
 	// Throws if unsucessful.
 	static findNested(tokens, startToken, endToken, startIndex = 0) {
 		if (tokens[startIndex] !== startToken) throw new SyntaxError(`Expected '${startToken}' at index ${startIndex} of tokens`);
-		var nesting = 0;
-		var nested = false;
-		for (var endIndex = startIndex + 1, lastIndex = tokens.length; endIndex < lastIndex; endIndex++) {
-			var token = tokens[endIndex];
+		let nesting = 0;
+		let nested = false;
+		for (let endIndex = startIndex + 1, lastIndex = tokens.length; endIndex < lastIndex; endIndex++) {
+			let token = tokens[endIndex];
 			if (token === startToken) {
 				nesting++;
 				nested = true;
@@ -48,7 +48,7 @@ window.TextStream = class TextStream {
 
 	// Return an immutable clone of the stream.
 	clone(props) {
-		var clone = new TextStream(this);
+		let clone = new TextStream(this);
 		Object.assign(clone, props);
 		return clone;
 	}
@@ -103,6 +103,8 @@ window.TextStream = class TextStream {
 	}
 
 
+
+
 	//
 	//## Reflection
 	//
@@ -118,17 +120,63 @@ window.Parser = class Parser {
 		this.rules = Object.create(this.rules || null);
 	}
 
-	// Parse head of stream starting at named rule.
-	// NOTE: modifies the stream!
-	parseRule(stream, name) {
-		var rule = this.rules[name];
-		if (!rule) throw new SyntaxError(`Rule ${name} not understood`);
+	// Parse named rule at head of stream.
+	// Handles optional and repeating rules as well as eating whitespace.
+	// Throws if a non-optional rule can't be matched.
+	// Returns array(???) of matched rules
+	parse(name, stream) {
+		if (typeof stream === "string") stream = new TextStream(stream);
 
-		var result = rule.parse(parser, stream);
+		let rule = this.rules[name];
+		if (!rule) throw new SyntaxError(`Rule ${name} not understood`);
+		return this.parseRule(rule, stream);
 	}
 
+	// Parse a single `rule` in `stream`.
+	// Automatically eats whitespace BEFORE the rule.
+	// If rule can repeat, keeps eating as long as repeat is valid and returns an array.
+	// Returns `[ result, nextStream ]` or `[]` if no match for an optional rule.
+	// Throws if we can't match a mandatory rule.
+	parseRule(rule, stream) {
+		// Eat whitespace at the beginning of the stream
+		stream = this.eatWhitespace(stream);
+
+//TODO: check empty stream???
+
+		// parse the rule
+		let result = rule.parse(parser, stream);
+console.info(rule, result);
+		if (!result) {
+			// throwing if no result and rule is not optional
+			if (!rule.optional)
+				throw new SyntaxError(`Mandatory rule '${name}' not matched at '${stream.head.substr(20)}'`);
+			return []
+		}
+
+		// advance the stream beyond what was matched
+		let nextStream = result.next();
+
+		// If the rule CAN repeat, return an array
+		if (rule.repeat) {
+			let results = [result];
+			while (true) {
+				nextStream = this.eatWhitespace(nextStream);
+				result = rule.parse(parser, nextStream);
+				if (!result) break;
+				results.push(result);
+				nextStream = result.next()
+			}
+			result = results;
+		}
+		return [ result, nextStream ];
+	}
+
+	// Eat whitespace (according to `rules.whitespace`) at the beginning of the stream.
+	// Returns new stream if we matched whitespace, otherwise the same stream.
+	// Otherwise returns this same stream.
 	eatWhitespace(stream) {
-		return this.rules.whitespace.parse(this, stream);
+		var result = this.rules.whitespace.parse(this, stream);
+		return result ? result.next() : stream;
 	}
 
 	//### Rule factories
@@ -139,13 +187,13 @@ window.Parser = class Parser {
 
 	// Add regex as a pattern to our list of rules
 	addPattern(name, pattern, properties) {
-		var rule = new Rule.Pattern(properties);
+		let rule = new Rule.Pattern(properties);
 		rule.pattern = pattern;
 		return this.addRule(name, rule);
 	}
 
 	// Add a rule to our list of rules!
-	// TODO: add array of rules on overwrite?
+	// TODO: convert to `alternatives` on overwrite?
 	addRule(name, rule) {
 		if (this.rules[name]) console.warn(`Overwriting rule ${name} old: `, this.rules[name], "new: ", rule);
 		rule.name = rule;
@@ -158,9 +206,12 @@ window.Parser = class Parser {
 // TODO: try...catch strategy?
 	addSyntax(name, ruleSyntax) {
 		try {
-			this.rules[name] = Rule.parseRuleSyntax(ruleSyntax);
+			let rule = Rule.parseRuleSyntax(ruleSyntax);
+			return this.addRule(name, rule);
 		} catch (e) {
-			console.warn(`Error parsing rule ${name}:`, e, ruleSyntax);
+			console.group(`Error parsing syntax for rule '${name}':`);
+			console.log(`syntax: ${ruleSyntax}`);
+			console.error(e);
 		}
 	}
 
@@ -173,21 +224,15 @@ parser.addPattern("whitespace", /^\s+/);
 parser.addPattern("variable", /^\w[\w\d\-_]*/);
 parser.addPattern("literal", /^(?:-?\d+\.?\d*|"(?:[^"\\]|\\.)*"|true|false|yes|no)/);
 
+// Rules auto-derived from our `rule syntax`.
+parser.addSyntax("scope-modifier", "(scope:global|constant|shared)");
+parser.addSyntax("declare-property", "{scope-modifier}? {variable} = {literal}");
+parser.addSyntax("declare-property-as-one-of", "{scope-modifier}? {variable} as one of \\([enumeration:{literal},]\\)");
+
+
 window.stream = new TextStream("a-variable \"a literal\"");
-
-window.variable = parser.rules.variable.parse(parser, stream);
-window.whitespace = parser.eatWhitespace((variable && variable.next()) || stream);
-window.literal = parser.rules.literal.parse(parser, (whitespace && whitespace.next()) || stream);
-
-console.group("Ad-hoc parsing test of "+window.stream);
-var testResults = { variable, whitespace, literal };
-console.info(testResults)
-console.groupEnd();
 
 
 // DEBUG
-parser.addSyntax("scope-modifier", "(modifiers:global|constant|shared)*");
-parser.addSyntax("declare-variable", "{scope-modifier}?{variable} = {literal}");
-parser.addSyntax("declare-variable-as-one-of", "(modifier:global|constant|shared)? {variable} as one of \\([enumeration:{literal},]\\)");
 
 
