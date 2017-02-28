@@ -2,6 +2,10 @@
 //	Rules can be as simple as a string `Keyword` or a complex sequence of (nested) rules.
 //
 //
+
+// TODO:	Pull `parseRuleSyntax` stuff out into separate module?
+// TODO:	Better name for `ruleSyntax`
+
 window.Rule = class Rule {
 	constructor(properties) {
 		Object.assign(this, properties);
@@ -33,6 +37,14 @@ window.Rule = class Rule {
 			endIndex: stream.startIndex + this.value.length,
 			stream
 		});
+	}
+
+//
+// ## output as source
+//
+	// Output value for this INSTANTIATED rule as source.
+	toSource() {
+		return this.value;
 	}
 
 //
@@ -166,6 +178,27 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		});
 	}
 
+	// Gather arguments from our parsed `value` array.
+	// Returns an object with properties from the `values` array indexed by
+	//		- `value.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
+	//		- `value.ruleName`:		name of rule when defined
+	//		- rule type:			name of the rule type
+	gatherArguments() {
+		if (!this.value) return undefined;
+		let args = {};
+		for (let match of this.value) {
+			let ruleName = match.argument || match.ruleName || match.constructor.name;
+			if (ruleName in args) {
+				if (!Array.isArray(args[ruleName])) args[ruleName] = [args[ruleName]];
+				args[ruleName].push(match);
+			}
+			else {
+				args[ruleName] = match;
+			}
+		}
+		return args;
+	}
+
 }
 
 
@@ -230,6 +263,13 @@ Rule.List = class List extends Rule {
 			stream
 		});
 	}
+
+	toSource() {
+		if (!this.value) return undefined;		// TODO: throw???
+		let values = this.value.map( value => value.toSource() ).join(", ");
+		return `[${values}]`;
+	}
+
 
 	toJSON() {
 		let item = `{${JSON.stringify(this.item).replace(/"/g,"")}}`;
@@ -405,8 +445,14 @@ console.groupEnd();
 	// Throws if invalid.
 	parseRuleSyntax_subrule(syntaxStream, rules, startIndex) {
 		let match = Tokenizer.findNested(syntaxStream, "{", "}", startIndex);
-		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: ${rule}`);
+		let argument;
+		if (match.slice.length === 3 && match.slice[1] === ":") {
+			argument = match[0];
+			match.slice = match.slice.slice(2);
+		}
+		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: {${match.slice.join("")}}`);
 		let rule = new Rule.Subrule({ name: match.slice[0] });
+		if (argument) rule.argument = argument;
 		return [ rule, match.endIndex ];
 	},
 

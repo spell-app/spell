@@ -1,11 +1,9 @@
 // Spell "English" parser strawman
 
-// TODO: 	Parse list
-// TODO:	What does syntax tree look like?
+// TODO:	What does syntax tree look like?  How do we extract meaning out of the nest?
 // TODO:	Don't use `toJSON` for outputting rule...
-// TODO:	Pull `parseRuleSyntax` stuff out into separate module/pattern
 // TODO:	Recycle word/string/pattern rules?  do we care?
-// TODO:	Maybe stream owns matched tokens?
+
 
 
 window.Tokenizer = class Tokenizer {
@@ -143,7 +141,7 @@ window.Parser = class Parser {
 
 		// parse the rule
 		let result = rule.parse(parser, stream);
-console.info(rule, result);
+console.info(rule, result, stream);
 		if (!result) {
 			// throwing if no result and rule is not optional
 			if (!rule.optional)
@@ -194,22 +192,24 @@ console.info(rule, result);
 	// TODO: convert to `alternatives` on overwrite?
 	addRule(name, rule) {
 		if (this.rules[name]) console.warn(`Overwriting rule ${name} old: `, this.rules[name], "new: ", rule);
-		rule.name = rule;
+		rule.ruleName = name;
 		this.rules[name] = rule;
 		return rule;
 	}
 
-	// Parse a `ruleSyntax rule and add it to our list of rules.
+	// Parse a `ruleSyntax` rule and add it to our list of rules.
 	// Returns the new rule.
-// TODO: try...catch strategy?
-	addSyntax(name, ruleSyntax) {
+	// Logs parsing errors but allows things to continue.
+	addSyntax(name, ruleSyntax, properties) {
 		try {
 			let rule = Rule.parseRuleSyntax(ruleSyntax);
+			Object.assign(rule, properties);
 			return this.addRule(name, rule);
 		} catch (e) {
 			console.group(`Error parsing syntax for rule '${name}':`);
 			console.log(`syntax: ${ruleSyntax}`);
 			console.error(e);
+			console.groupEnd();
 		}
 	}
 
@@ -217,20 +217,81 @@ console.info(rule, result);
 
 window.parser = new Parser();
 
-// Simple regex pattern based rules.
-parser.addPattern("whitespace", /^\s+/);
-parser.addPattern("variable", /^\w[\w\d\-_]*/);
-parser.addPattern("literal", /^(?:-?\d+\.?\d*|"(?:[^"\\]|\\.)*"|true|false|yes|no)/);
+// Regex pattern rules with custom constructors for debugging
+//parser.addPattern("whitespace", /^\s+/);
+parser.addRule("whitespace", new (class whitespace extends Rule.Pattern{})({ pattern: /^\s+/, optional: true }));
+
+//parser.addPattern("identifier", /^\w[\w\d\-_]*/);
+parser.addRule("identifier", new (class identifier extends Rule.Pattern{})({ pattern: /^\w[\w\d\-_]*/ }));
+
+//parser.addPattern("literal", /^(?:-?\d+\.?\d*|"[^"\\]*"|true|false|yes|no)/);
+parser.addRule("literal", new (class literal extends Rule.Pattern{})({
+	pattern: /^(?:-?\d+\.?\d*|"[^"]*"|true|false|yes|no)/,
+	// Return literal expressed by matched `value`.
+	toSource: function() {
+		var value = this.value;
+		if (typeof value !== "string") return undefined;
+		if (value === "true" || value === "yes") return true;
+		if (value === "false" || value === "no") return false;
+		if (value.match(/^-?\d+\.?\d*$/)) return parseFloat(value, 10);
+		// return string with quotes.  w/o quotes = `value.slice(1, -1)`
+		return value;
+	}
+}));
 
 // Rules auto-derived from our `rule syntax`.
 parser.addSyntax("scope-modifier", "(scope:global|constant|shared)");
-parser.addSyntax("declare-property", "{scope-modifier}? {variable} = {literal}");
-parser.addSyntax("declare-property-as-one-of", "{scope-modifier}? {variable} as one of \\[[enumeration:{literal},]\\]");
-parser.addSyntax("literal-enumeration", "\\[[enumeration:{literal},]\\]");
 
-window.stream = new TextStream("a-variable \"a literal\"");
+parser.addSyntax(
+	"declare-property",
+	"{scope-modifier}? {identifier} = {literal}",
+	{
+		toSource() {
+			let args = this.gatherArguments();
+			let statement = `${args.identifier.toSource()} = ${args.literal.toSource()};`;
+			switch (args.scope.toSource()) {
+				case "global":
+					return `global.${statement}`;
+
+				case "constant":
+					return `const ${statement}`;
+
+				case "shared":
+					return `static ${statement}`;
+
+				default:
+					return statement;
+			}
+		}
+	}
+);
+
+// TODO: warn on invalid set?  shared?  something other than the first value as default?
+parser.addSyntax(
+	"declare-property-as-one-of",
+	"{identifier} as one of \\[[enumeration:{literal},]\\]",
+	{
+		toSource() {
+			let args = this.gatherArguments();
+
+			let identifier = args.identifier.toSource();
+			let values = args.enumeration.toSource();
+			let firstValue = args.enumeration.value[0].toSource();
+			return `get ${identifier} { return this.__${identifier} || ${firstValue} }\n`
+				+  `set ${identifier}(value) { if (${values}.includes(value) this.__${identifier} = value }\n`;
+		}
+	}
+);
 
 
-// DEBUG
-
+parser.addSyntax(
+	"literal-enumeration",
+	"\\[[enumeration:{literal},]?\\]",
+	{
+		toSource() {
+			var args = this.gatherArguments();
+			return args.enumeration.toSource();
+		}
+	}
+);
 
