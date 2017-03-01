@@ -92,6 +92,8 @@ window.Rule = class Rule {
 	}
 }
 
+Rule.foo = [];
+
 
 // Rule for specific keywords.
 Rule.Keyword = class Keyword extends Rule{}
@@ -126,7 +128,9 @@ Rule.Subrule = class Subrule extends Rule {
 	parse(parser, stream) {
 		var rule = parser.getRule(this.name);
 		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.name}'`, this);
-		return rule.parse(parser, stream);
+		var result = rule.parse(parser, stream);
+		if (result && this.argument) result.argument = this.argument;
+		return result;
 	}
 
 	toString() {
@@ -140,7 +144,7 @@ Rule.Subrule = class Subrule extends Rule {
 
 
 
-// Abstract:  `Nested` rule -- composed of a series of other rules.
+// Abstract:  `Nested` rule -- composed of a series of other `rules`.
 Rule.Nested = class Nested extends Rule {
 	constructor(properties) {
 		super(properties);
@@ -188,12 +192,15 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		let args = {};
 		for (let match of this.value) {
 			let ruleName = match.argument || match.ruleName || match.constructor.name;
+			// For nested rules, recurse to get their arguments
+			let result = (match instanceof Rule.Nested ? match.gatherArguments() : match);
+
 			if (ruleName in args) {
 				if (!Array.isArray(args[ruleName])) args[ruleName] = [args[ruleName]];
-				args[ruleName].push(match);
+				args[ruleName].push(result);
 			}
 			else {
-				args[ruleName] = match;
+				args[ruleName] = result;
 			}
 		}
 		return args;
@@ -228,8 +235,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 // 	`rule.value` in the output is the list of values.
 //
 //
-// NOTE: we assume that a List match will NOT repeat (????)
-// NOTE: this handles optional
+// NOTE: we assume that a List rule will NOT repeat (????)
 // TODO: this is convenient but non-standard...
 Rule.List = class List extends Rule {
 	parse(parser, stream) {
@@ -252,17 +258,19 @@ Rule.List = class List extends Rule {
 			nextStream = delimiter[1];
 		}
 
-		// If we didn't get anything, barf if the list is not optional
-		if (results.length === 0 && !this.optional) {
-			throw new SyntaxError(`Mandatory list not matched at '${stream.head.substr(20)}'`);
-		}
-
 		return this.clone({
 			value: results,
 			endIndex: nextStream.startIndex,
 			stream
 		});
 	}
+
+	// Return matched item by index
+	getItem(index) {
+		if (!this.value) return undefined;
+		return this.value[index];
+	}
+
 
 	toSource() {
 		if (!this.value) return undefined;		// TODO: throw???
@@ -327,10 +335,10 @@ console.groupEnd();
 
 	parseRuleSyntax_tokens(syntaxStream, rules, startIndex = 0, lastIndex = syntaxStream.length) {
 		while (startIndex < lastIndex) {
-			let [ part, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex);
+			let [ rule, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex);
 			if (endIndex >= lastIndex)
 				throw new SyntaxError("Past lastIndex");
-			if (part) rules.push(part);
+			if (rule) rules.push(rule);
 			startIndex = endIndex + 1;
 		}
 		return rules;
@@ -441,13 +449,13 @@ console.groupEnd();
 	},
 
 	// Match `{<ruleName>}` in syntax rules.
-	// Returns `[ part, endIndex ]`
+	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
 	parseRuleSyntax_subrule(syntaxStream, rules, startIndex) {
 		let match = Tokenizer.findNested(syntaxStream, "{", "}", startIndex);
 		let argument;
 		if (match.slice.length === 3 && match.slice[1] === ":") {
-			argument = match[0];
+			argument = match.slice[0];
 			match.slice = match.slice.slice(2);
 		}
 		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: {${match.slice.join("")}}`);

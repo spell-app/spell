@@ -3,8 +3,7 @@
 // TODO:	What does syntax tree look like?  How do we extract meaning out of the nest?
 // TODO:	Don't use `toJSON` for outputting rule...
 // TODO:	Recycle word/string/pattern rules?  do we care?
-
-
+// TODO:	How to do out of scope things (global property definition, etc)
 
 window.Tokenizer = class Tokenizer {
 
@@ -145,7 +144,7 @@ console.info(rule, result, stream);
 		if (!result) {
 			// throwing if no result and rule is not optional
 			if (!rule.optional)
-				throw new SyntaxError(`Mandatory rule '${name}' not matched at '${stream.head.substr(20)}'`);
+				throw new SyntaxError(`Mandatory rule '${rule.ruleName}' not matched at '${stream.head.substr(20)}'`);
 			return undefined;
 		}
 
@@ -221,8 +220,16 @@ window.parser = new Parser();
 //parser.addPattern("whitespace", /^\s+/);
 parser.addRule("whitespace", new (class whitespace extends Rule.Pattern{})({ pattern: /^\s+/, optional: true }));
 
-//parser.addPattern("identifier", /^\w[\w\d\-_]*/);
-parser.addRule("identifier", new (class identifier extends Rule.Pattern{})({ pattern: /^\w[\w\d\-_]*/ }));
+// `identifier` = variables or property name.
+// MUST start with a lower-case letter (?)
+//parser.addPattern("identifier", /^[a-z][\w\d\-_]*/);
+parser.addRule("identifier", new (class identifier extends Rule.Pattern{})({ pattern: /^[a-z][\w\d\-_]*/ }));
+
+// `Type` = type name.
+// MUST start with an upper-case letter (?)
+//parser.addPattern("typename", /^[A-Z][\w\d\-_]*/);
+parser.addRule("Type", new (class Type extends Rule.Pattern{})({ pattern: /^[A-Z][\w\d\-_]*/ }));
+
 
 //parser.addPattern("literal", /^(?:-?\d+\.?\d*|"[^"\\]*"|true|false|yes|no)/);
 parser.addRule("literal", new (class literal extends Rule.Pattern{})({
@@ -269,25 +276,35 @@ parser.addSyntax(
 // TODO: warn on invalid set?  shared?  something other than the first value as default?
 parser.addSyntax(
 	"declare-property-as-one-of",
-	"{identifier} as one of \\[[enumeration:{literal},]\\]",
+	"{identifier} as one of {list:literal-list}",
 	{
 		toSource() {
 			let args = this.gatherArguments();
 
 			let identifier = args.identifier.toSource();
-			let values = args.enumeration.toSource();
-			let firstValue = args.enumeration.value[0].toSource();
-			return `get ${identifier} { return this.__${identifier} || ${firstValue} }\n`
-				+  `set ${identifier}(value) { if (${values}.includes(value) this.__${identifier} = value }\n`;
+			let plural = Sugar.String.pluralize(identifier);
+			let values = args.list.toSource();
+			let first = args.list.value[0];
+			let firstValue = first ? first.toSource() : "undefined";
+
+			return `static ${plural} = ${values};\n`
+				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
+				 + `set ${identifier}(value) { if (this.constructor.${plural}.includes(value)) this.__${identifier} = value }\n`;
 		}
 	}
 );
 
-
 parser.addSyntax(
-	"literal-enumeration",
-	"\\[[enumeration:{literal},]?\\]",
+	"literal-list",
+	"\\[[list:{literal},]?\\]",
 	{
+		// Modify `arguments` of this expression to just the list returned.
+		gatherArguments() {
+			var args = Rule.Sequence.prototype.gatherArguments.apply(this);
+			if (!args) return undefined;
+			return args.list;
+		},
+
 		toSource() {
 			var args = this.gatherArguments();
 			return args.enumeration.toSource();
