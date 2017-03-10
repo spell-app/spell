@@ -27,18 +27,6 @@ window.Rule = class Rule {
 	}
 
 
-	// Parse this rule at the beginning of `stream`.
-	// Default is that `rule.value` is literal string to match.
-	// On match, returns clone of rule with `value`, `stream` and `endIndex`.
-	// Returns `undefined` if no match.
-	parse(parser, stream) {
-		if (!stream.startsWith(this.value)) return undefined;
-		return this.clone({
-			endIndex: stream.startIndex + this.value.length,
-			stream
-		});
-	}
-
 //
 // ## output as source
 //
@@ -72,7 +60,6 @@ window.Rule = class Rule {
 	get modifiersAsJSON() {
 		var modifiers = [];
 		if (this.optional) modifiers.push("optional");
-		if (this.repeat) modifiers.push("repeat");
 		if (modifiers.length) return ` (${modifiers.join(" ")})`;
 		return "";
 	}
@@ -85,22 +72,28 @@ window.Rule = class Rule {
 	}
 
 	get modifiersAsString() {
-		if (this.repeat && this.optional) return "*";
+		if (this.optional) return "*";
 		if (this.repeat) return "+";
 		if (this.optional) return "?";
 		return "";
 	}
 }
 
-Rule.foo = [];
 
-
-// Rule for specific keywords.
-Rule.Keyword = class Keyword extends Rule{}
-
-
-// Rule for arbitrary string match.
-Rule.String = class String extends Rule{}
+// Rule for specific keywords, which include punctuation such as `(` etc.
+Rule.Keyword = class Keyword extends Rule {
+	// Parse this rule at the beginning of `stream`, assuming no whitespace before.
+	// Default is that `rule.value` is literal string to match.
+	// On match, returns clone of rule with `value`, `stream` and `endIndex`.
+	// Returns `undefined` if no match.
+	parse(parser, stream) {
+		if (!stream.startsWith(this.value)) return undefined;
+		return this.clone({
+			endIndex: stream.startIndex + this.value.length,
+			stream
+		});
+	}
+}
 
 
 
@@ -111,11 +104,10 @@ Rule.Pattern = class Pattern extends Rule {
 	parse(parser, stream) {
 		var match = stream.match(this.pattern);
 		if (!match) return undefined;
-
 		return this.clone({
 			value: match[0],
+			match: match,		// Include actual match in case subclass wants to pull bits out.
 			endIndex: stream.startIndex + match[0].length,
-			match: match,		// TODO: necessary???
 			stream
 		});
 	}
@@ -126,10 +118,12 @@ Rule.Pattern = class Pattern extends Rule {
 // `rule.name` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
 	parse(parser, stream) {
-		var rule = parser.getRule(this.name);
+		var rule = parser.getRule(this.rule);
 		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.name}'`, this);
 		var result = rule.parse(parser, stream);
-		if (result && this.argument) result.argument = this.argument;
+		if (!result) return undefined;
+
+		if (this.argument) result.argument = this.argument;
 		return result;
 	}
 
@@ -156,7 +150,6 @@ Rule.Nested = class Nested extends Rule {
 		var type = `${this._type}${this._argName}`;
 		json[type] = this.rules;
 		if (this.optional) json.optional = true;
-		if (this.repeat) json.repeat = true;
 		return json;
 	}
 }
@@ -166,18 +159,20 @@ Rule.Nested = class Nested extends Rule {
 Rule.Sequence = class Sequence extends Rule.Nested {
 	// Throws of mandatory rule can't be matched.
 	parse(parser, stream) {
-		let results = [], nextStream = stream;
+		let results = [], next = stream;
 		for (let rule of this.rules) {
-			let result = parser.parseRule(rule, nextStream);
+			next = parser.eatWhitespace(next);
+			let result = rule.parse(parser, next);
+			if (!result && !rule.optional) return undefined;
 			if (result) {
-				results.push(result[0]);
-				nextStream = result[1];
+				results.push(result);
+				next = result.next();
 			}
 		}
 		// if we get here, we matched all the rules!
 		return this.clone({
 			value: results,
-			endIndex: nextStream.startIndex,
+			endIndex: next.startIndex,
 			stream
 		});
 	}
@@ -210,8 +205,9 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 
 
 // Alternative syntax.
-// TODO: rename
+// NOTE: Currently takes the first valid match.
 // TODO: match all valid alternatives
+// TODO: rename
 Rule.Alternatives = class Alternatives extends Rule.Nested {
 	parse(parser, stream) {
 		for (let rule of this.rules) {
@@ -229,6 +225,43 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 };
 
 
+
+// Repeating rule.
+//	`this.rule` is the rule that repeats.
+//
+// After matching:
+//	`this.value` is array of results of matches.
+//
+//	Automatically consumes whitespace before rules.
+//	If doesn't match at least one:
+//		- if `optional`, returns `undefined`
+//		- otherwise throws
+//
+Rule.Repeat = class Repeat extends Rule {
+	parse(parser, stream) {
+		let next = stream;
+		let results = [];
+		while (true) {
+			next = parser.eatWhitespace(next);
+			let result = this.rule.parse(parser, next);
+			if (!result) break;
+
+			results.push[result];
+			next = result.next();
+		}
+
+		if (results.length === 0) return undefined;
+
+		return this.clone({
+			value: results,
+			endIndex: next.startIndex,
+			stream
+		});
+	}
+
+}
+
+
 // List match rule:   `[<item><delimiter>]`. eg" `[{literal},]` to match `a,b,c`
 //	`rule.item` is the rule for each item,
 //	`rule.delimiter` is the delimiter between each item.
@@ -236,31 +269,30 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 //
 //
 // NOTE: we assume that a List rule will NOT repeat (????)
-// TODO: this is convenient but non-standard...
 Rule.List = class List extends Rule {
 	parse(parser, stream) {
 		// ensure item and delimiter are optional so we don't barf in `parseRule`
 		this.item.optional = true;
 		this.delimiter.optional = true;
 
-		var results = [], nextStream = stream;
+		var results = [], next = stream;
 		while (true) {
 			// get next item, exiting if not found
-			let item = parser.parseRule(this.item, nextStream);
+			let item = this.item.parse(parser, next);
 			if (!item) break;
 //console.log(item);
-			results.push(item[0]);
-			nextStream = item[1];
+			results.push(item);
+			next = item.next();
 
 			// get delimiter, exiting if not found
-			let delimiter = parser.parseRule(this.delimiter, nextStream);
+			let delimiter = this.delimiter.parse(parser, next);
 			if (!delimiter) break;
-			nextStream = delimiter[1];
+			next = delimiter.next();
 		}
 
 		return this.clone({
 			value: results,
-			endIndex: nextStream.startIndex,
+			endIndex: next.startIndex,
 			stream
 		});
 	}
@@ -363,10 +395,7 @@ console.groupEnd();
 				throw new SyntaxError(`Unexpected ${syntaxToken} found as item ${startIndex} of ${this.syntax}`);
 
 			default:
-				if (syntaxToken.match(/^[\w\-_]+$/))
-					return Rule.parseRuleSyntax_keyword(syntaxStream, rules, startIndex);
-
-				return Rule.parseRuleSyntax_string(syntaxStream, rules, startIndex);
+				return Rule.parseRuleSyntax_keyword(syntaxStream, rules, startIndex);
 		}
 	},
 
@@ -402,22 +431,19 @@ console.groupEnd();
 	// Match repeat indicator `?`, `+` or `*` by attaching it to the previous rule.
 	parseRuleSyntax_repeat(syntaxStream, rules, startIndex) {
 		var symbol = syntaxStream[startIndex];
-		var last = rules[rules.length - 1];
-		if (!last) throw new SyntaxError(`Can't attach repeat symbol ${symbol} to empty rules!`);
+		var rule = rules[rules.length - 1];
+		if (!rule) throw new SyntaxError(`Can't attach repeat symbol ${symbol} to empty rule!`);
 
-		switch (symbol) {
-			case "?":
-				last.optional = true;
-				break;
+		// Transform last rule into a repeat for `*` and `+`.
+		if (symbol === "*" || symbol === "+") {
+			rule = new Rule.Repeat({ rule });
+			// push into rule stack in place of old rule
+			rules[rules.length - 1] = rule;
+		}
 
-			case "*":
-				last.optional = true;
-				last.repeat = true;
-				break;
-
-			case "+":
-				last.repeat = true;
-
+		// Rule is optional for `?` and `*`.
+		if (symbol === "?" || symbol === "*") {
+			rule.optional = true;
 		}
 
 		return [ undefined, startIndex ]
@@ -429,15 +455,6 @@ console.groupEnd();
 	parseRuleSyntax_keyword(syntaxStream, rules, startIndex) {
 		var value = syntaxStream[startIndex];
 		var rule = new Rule.Keyword({ value });
-		return [ rule, startIndex ];
-	},
-
-	// Match `word` in syntax rules.
-	// Returns `[ rule, endIndex ]`
-	// Throws if invalid.
-	parseRuleSyntax_string(syntaxStream, rules, startIndex) {
-		var value = syntaxStream[startIndex];
-		var rule = new Rule.String({ value });
 		// If value starts with `\\`
 		if (value.startsWith("\\")) {
 			// remove leading slash in match value...
@@ -459,7 +476,7 @@ console.groupEnd();
 			match.slice = match.slice.slice(2);
 		}
 		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: {${match.slice.join("")}}`);
-		let rule = new Rule.Subrule({ name: match.slice[0] });
+		let rule = new Rule.Subrule({ rule: match.slice[0] });
 		if (argument) rule.argument = argument;
 		return [ rule, match.endIndex ];
 	},
