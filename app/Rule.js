@@ -2,10 +2,6 @@
 //	Rules can be as simple as a string `Keyword` or a complex sequence of (nested) rules.
 //
 //
-
-// TODO:	Pull `parseRuleSyntax` stuff out into separate module?
-// TODO:	Better name for `ruleSyntax`
-
 window.Rule = class Rule {
 	constructor(properties) {
 		Object.assign(this, properties);
@@ -80,8 +76,8 @@ window.Rule = class Rule {
 }
 
 
-// Rule for specific keywords, which include punctuation such as `(` etc.
-Rule.Keyword = class Keyword extends Rule {
+// Rule for literal string value, which include punctuation such as `(` etc.
+Rule.String = class String extends Rule {
 	// Parse this rule at the beginning of `stream`, assuming no whitespace before.
 	// Default is that `rule.value` is literal string to match.
 	// On match, returns clone of rule with `value`, `stream` and `endIndex`.
@@ -89,6 +85,7 @@ Rule.Keyword = class Keyword extends Rule {
 	parse(parser, stream) {
 		if (!stream.startsWith(this.value)) return undefined;
 		return this.clone({
+			value: this.value,
 			endIndex: stream.startIndex + this.value.length,
 			stream
 		});
@@ -110,6 +107,19 @@ Rule.Pattern = class Pattern extends Rule {
 			endIndex: stream.startIndex + match[0].length,
 			stream
 		});
+	}
+}
+
+// Keyword pattern
+//	`rule.keyword` is the keyword string to match.
+Rule.Keyword = class Keyword extends Rule.Pattern {
+	constructor(properties) {
+		super(properties);
+		// create pattern which matches at word boundary
+		if (!this.pattern) {
+			if (!this.keyword) throw new TypeError("Expected keyword property");
+			this.pattern = new RegExp(`^${this.keyword}\\b`);
+		}
 	}
 }
 
@@ -330,6 +340,8 @@ Rule.List = class List extends Rule {
 //
 //	# Parsing `ruleSyntax` to create rules automatically.
 //
+// TODO:	Pull `parseRuleSyntax` stuff out into separate module?
+// TODO:	Better name for `ruleSyntax`
 Object.assign(Rule, {
 
 //
@@ -395,8 +407,30 @@ console.groupEnd();
 				throw new SyntaxError(`Unexpected ${syntaxToken} found as item ${startIndex} of ${this.syntax}`);
 
 			default:
-				return Rule.parseRuleSyntax_keyword(syntaxStream, rules, startIndex);
+				return Rule.parseRuleSyntax_string(syntaxStream, rules, startIndex);
 		}
+	},
+
+	// Match `keyword` in syntax rules.
+	// Returns `[ rule, endIndex ]`
+	// Throws if invalid.
+	parseRuleSyntax_string(syntaxStream, rules, startIndex) {
+		var value = syntaxStream[startIndex], rule;
+		// create as a Keyword or a String
+		if (value.match(/\w+/)) {
+			rule = new Rule.Keyword({ keyword: value });
+		}
+		else {
+			rule = new Rule.String({ value });
+			// If value starts with `\\`
+			if (value.startsWith("\\")) {
+				// remove leading slash in match value...
+				rule.value = rule.value.substr(1);
+				// but leave it in toString
+				rule.toString = () => value;
+			}
+		}
+		return [ rule, startIndex ];
 	},
 
 
@@ -449,22 +483,6 @@ console.groupEnd();
 		return [ undefined, startIndex ]
 	},
 
-	// Match `keyword` in syntax rules.
-	// Returns `[ rule, endIndex ]`
-	// Throws if invalid.
-	parseRuleSyntax_keyword(syntaxStream, rules, startIndex) {
-		var value = syntaxStream[startIndex];
-		var rule = new Rule.Keyword({ value });
-		// If value starts with `\\`
-		if (value.startsWith("\\")) {
-			// remove leading slash in match value...
-			rule.value = rule.value.substr(1);
-			// but leave it in toString
-			rule.toString = () => value;
-		}
-		return [ rule, startIndex ];
-	},
-
 	// Match `{<ruleName>}` in syntax rules.
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
@@ -479,6 +497,29 @@ console.groupEnd();
 		let rule = new Rule.Subrule({ rule: match.slice[0] });
 		if (argument) rule.argument = argument;
 		return [ rule, match.endIndex ];
+	},
+
+	// Match list expression `[<item><delimiter>]` in syntax rules.
+	// Returns `[ rule, endIndex ]`
+	// Throws if invalid.
+	parseRuleSyntax_list(syntaxStream, rules, startIndex) {
+		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "[", "]", startIndex);
+
+		let argument;
+		if (slice.length > 2 && slice[1] === ":") {
+			argument = slice[0];
+			slice = slice.slice(2);
+		}
+
+		let results = Rule.parseRuleSyntax_tokens(slice, []);
+		if (results.length !== 2) {
+			throw new SyntaxError(`Unexpected stuff at end of list: [${slice.join(" ")}]`);
+		}
+		let rule = new Rule.List();
+		rule.item = results[0]
+		rule.delimiter = results[1]
+		if (argument) rule.argument = argument;
+		return [ rule, endIndex ];
 	},
 
 	// Match alternate `( a | b | c )`.
@@ -510,28 +551,5 @@ console.groupEnd();
 		return [ undefined, endIndex ];
 	},
 
-	// Match list expression `[<item><delimiter>]` in syntax rules.
-	// Returns `[ rule, endIndex ]`
-	// Throws if invalid.
-	parseRuleSyntax_list(syntaxStream, rules, startIndex) {
-		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "[", "]", startIndex);
-
-		let list = new Rule.List();
-
-		let results = Rule.parseRuleSyntax_tokens(slice, []);
-		if (results.length === 4 && results[1].value === ":") {
-			list.argument = results[0];
-			list.item = results[2]
-			list.delimiter = results[3]
-		}
-		else if (results.length === 2) {
-			list.item = results[0]
-			list.delimiter = results[1]
-		}
-		else {
-			throw new SyntaxError(`Unexpected stuff at end of list: [${slice.join(" ")}]`);
-		}
-		return [ list, endIndex ];
-	},
 
 });

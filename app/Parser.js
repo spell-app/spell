@@ -1,6 +1,5 @@
 // Spell "English" parser strawman
 
-// TODO:	consistent `parse => rule`
 // TODO:	custom SyntaxError etc which understand streams
 // TODO:	add same named rule = make alternatives
 // TODO:	`statement` vs `expression` vs `control structure` etc -- are these just named rules?
