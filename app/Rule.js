@@ -37,42 +37,6 @@ window.Rule = class Rule {
 	get _type() {
 		return this.constructor.name;
 	}
-
-	// `argument` is argument name in transformed calling function.
-	// Generally set by `(<arg>: <normalRule>)`
-//TODOC
-	get _argName() {
-		if (this.argument) return ` (${this.argument})`;
-		return "";
-	}
-
-//
-// ### group: toJSON
-//
-	toJSON() {
-		return `${this._type}${this._argName}: '${this.value}'${this.modifiersAsJSON}`;
-	}
-
-	get modifiersAsJSON() {
-		var modifiers = [];
-		if (this.optional) modifiers.push("optional");
-		if (modifiers.length) return ` (${modifiers.join(" ")})`;
-		return "";
-	}
-
-//
-// ### group: toString
-//
-	toString() {
-		return `${this.value}${this.modifiersAsString}`;
-	}
-
-	get modifiersAsString() {
-		if (this.optional) return "*";
-		if (this.repeat) return "+";
-		if (this.optional) return "?";
-		return "";
-	}
 }
 
 
@@ -89,6 +53,10 @@ Rule.String = class String extends Rule {
 			endIndex: stream.startIndex + this.value.length,
 			stream
 		});
+	}
+
+	toString() {
+		return this.value;
 	}
 }
 
@@ -108,6 +76,10 @@ Rule.Pattern = class Pattern extends Rule {
 			stream
 		});
 	}
+
+	toString() {
+		return this.pattern;
+	}
 }
 
 // Keyword pattern
@@ -120,6 +92,10 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 			if (!this.keyword) throw new TypeError("Expected keyword property");
 			this.pattern = new RegExp(`^${this.keyword}\\b`);
 		}
+	}
+
+	toString() {
+		return this.keyword;
 	}
 }
 
@@ -138,11 +114,7 @@ Rule.Subrule = class Subrule extends Rule {
 	}
 
 	toString() {
-		return `{${this.name}}${this.modifiersAsString}`;
-	}
-
-	toJSON() {
-		return `${this._type}${this._argName}: '${this.name}'${this.modifiersAsJSON}`;
+		return `{${this.argument ? this.argument+":" : ""}${this.rule}}${this.optional ? '?' : ''}`;
 	}
 }
 
@@ -153,14 +125,6 @@ Rule.Nested = class Nested extends Rule {
 	constructor(properties) {
 		super(properties);
 		if (!this.rules) this.rules = [];
-	}
-
-	toJSON() {
-		var json = {};
-		var type = `${this._type}${this._argName}`;
-		json[type] = this.rules;
-		if (this.optional) json.optional = true;
-		return json;
 	}
 }
 
@@ -211,6 +175,10 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		return args;
 	}
 
+	toString() {
+		return `${this.rules.join(" ")}${this.optional ? '?' : ''}`;
+	}
+
 }
 
 
@@ -230,7 +198,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 	}
 
 	toString() {
-		return `(${this.rules.join("|")})${this.modifiersAsString}`;
+		return `(${this.argument ? this.argument+":" : ""}${this.rules.join("|")})${this.optional ? '?' : ''}`;
 	}
 };
 
@@ -269,6 +237,9 @@ Rule.Repeat = class Repeat extends Rule {
 		});
 	}
 
+	toString() {
+		return `${this.rule}${this.optional ? '*' : '+'}`;
+	}
 }
 
 
@@ -320,16 +291,8 @@ Rule.List = class List extends Rule {
 		return `[${values}]`;
 	}
 
-
-	toJSON() {
-		let item = `{${JSON.stringify(this.item).replace(/"/g,"")}}`;
-		let delimiter = `{${JSON.stringify(this.delimiter).replace(/"/g,"")}}`;
-		return `${this._type}${this._argName}: { item: ${item}, delimiter: ${delimiter} } ${this.modifiersAsJSON}`;
-	}
-
-
 	toString() {
-		return `[${this.item} ${this.delimiter}]${this.modifiersAsString}`;
+		return `[${this.argument ? this.argument+":" : ""}${this.item} ${this.delimiter}]`;
 	}
 };
 
@@ -362,10 +325,7 @@ Object.assign(Rule, {
 			rule = new Rule.Sequence({ rules });
 		}
 
-console.group("Parsing: ", syntax);
-console.log(  "toString: ", rule.toString());
-console.log(JSON.stringify(rule, undefined, 2));
-console.groupEnd();
+console.log("Added rule: ", syntax, "  ===>  ", rule.toString());
 
 		return rule;
 	},

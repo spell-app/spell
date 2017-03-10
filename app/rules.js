@@ -52,7 +52,7 @@ parser.addRule("boolean", new (class boolean extends Rule.Pattern{})({
 
 
 // Literal value as number, text or boolean.
-parser.addSyntax("literal", "({number}|{text}|{boolean})", { argument: "literal" });
+parser.addSyntax("literal", "(literal:{number}|{text}|{boolean})");
 
 
 // Literal list (array), eg:  `[1,2,true,false ]`
