@@ -1,6 +1,15 @@
 //	# Parser Rules
 //	Rules can be as simple as a string `Keyword` or a complex sequence of (nested) rules.
 //
+//	Parse a rule with `rule.parse(parser, stream)`, this will either:
+//		- return `undefined` if the rule doesn't match the head of the stream, or
+//		- return a CLONE of the rule with at least the following:
+//			- `stream`		Stream which was matched with `startIndex` at the start of the match
+//			- `endIndex`	Non-inclusive end index in stream where match ends.
+//
+//	The clone returned above can be manipulated with
+//		- `rule.gatherArguments()`		Return matched arguments in a format suitable to do:
+//		- `rule.toSource()`				Return javascript source to interpret the rule.
 //
 window.Rule = class Rule {
 	constructor(properties) {
@@ -28,13 +37,13 @@ window.Rule = class Rule {
 //
 	// Output value for this INSTANTIATED rule as source.
 	toSource() {
-		return this.value;
+		return this.matched;
 	}
 
 //
 // ## group: reflection
 //
-	get _type() {
+	get ruleType() {
 		return this.constructor.name;
 	}
 }
@@ -43,23 +52,22 @@ window.Rule = class Rule {
 // Rule for literal string value, which include punctuation such as `(` etc.
 Rule.String = class String extends Rule {
 	// Parse this rule at the beginning of `stream`, assuming no whitespace before.
-	// Default is that `rule.value` is literal string to match.
+	// Default is that `rule.string` is literal string to match.
 	// On match, returns clone of rule with `value`, `stream` and `endIndex`.
 	// Returns `undefined` if no match.
 	parse(parser, stream) {
-		if (!stream.startsWith(this.value)) return undefined;
+		if (!stream.startsWith(this.string)) return undefined;
 		return this.clone({
-			value: this.value,
-			endIndex: stream.startIndex + this.value.length,
+			matched: this.string,
+			endIndex: stream.startIndex + this.string.length,
 			stream
 		});
 	}
 
 	toString() {
-		return this.value;
+		return this.string;
 	}
 }
-
 
 
 // Regex pattern.
@@ -70,8 +78,7 @@ Rule.Pattern = class Pattern extends Rule {
 		var match = stream.match(this.pattern);
 		if (!match) return undefined;
 		return this.clone({
-			value: match[0],
-			match: match,		// Include actual match in case subclass wants to pull bits out.
+			matched: match[0],
 			endIndex: stream.startIndex + match[0].length,
 			stream
 		});
@@ -81,6 +88,7 @@ Rule.Pattern = class Pattern extends Rule {
 		return this.pattern;
 	}
 }
+
 
 // Keyword pattern
 //	`rule.keyword` is the keyword string to match.
@@ -145,24 +153,24 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		}
 		// if we get here, we matched all the rules!
 		return this.clone({
-			value: results,
+			results,
 			endIndex: next.startIndex,
 			stream
 		});
 	}
 
-	// Gather arguments from our parsed `value` array.
+	// Gather arguments from our parsed `results` array.
 	// Returns an object with properties from the `values` array indexed by
-	//		- `value.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
-	//		- `value.ruleName`:		name of rule when defined
-	//		- rule type:			name of the rule type
+	//		- `results.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
+	//		- `results.ruleName`:		name of rule when defined
+	//		- rule type:				name of the rule type
 	gatherArguments() {
-		if (!this.value) return undefined;
+		if (!this.results) return undefined;
 		let args = {};
-		for (let match of this.value) {
-			let ruleName = match.argument || match.ruleName || match.constructor.name;
+		for (let next of this.results) {
+			let ruleName = next.argument || next.ruleName || next.constructor.name;
 			// For nested rules, recurse to get their arguments
-			let result = (match instanceof Rule.Nested ? match.gatherArguments() : match);
+			let result = (next instanceof Rule.Nested ? next.gatherArguments() : next);
 
 			if (ruleName in args) {
 				if (!Array.isArray(args[ruleName])) args[ruleName] = [args[ruleName]];
@@ -208,13 +216,10 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 //	`this.rule` is the rule that repeats.
 //
 // After matching:
-//	`this.value` is array of results of matches.
+//	`this.results` is array of results of matches.
 //
 //	Automatically consumes whitespace before rules.
-//	If doesn't match at least one:
-//		- if `optional`, returns `undefined`
-//		- otherwise throws
-//
+//	If doesn't match at least one, returns `undefined`.
 Rule.Repeat = class Repeat extends Rule {
 	parse(parser, stream) {
 		let next = stream;
@@ -231,10 +236,14 @@ Rule.Repeat = class Repeat extends Rule {
 		if (results.length === 0) return undefined;
 
 		return this.clone({
-			value: results,
+			results,
 			endIndex: next.startIndex,
 			stream
 		});
+	}
+
+	toSource() {
+		throw "Don't understand how to source Rule.Repeat!";
 	}
 
 	toString() {
@@ -246,7 +255,7 @@ Rule.Repeat = class Repeat extends Rule {
 // List match rule:   `[<item><delimiter>]`. eg" `[{literal},]` to match `a,b,c`
 //	`rule.item` is the rule for each item,
 //	`rule.delimiter` is the delimiter between each item.
-// 	`rule.value` in the output is the list of values.
+// 	`rule.results` in the output is the list of values.
 //
 //
 // NOTE: we assume that a List rule will NOT repeat (????)
@@ -272,7 +281,7 @@ Rule.List = class List extends Rule {
 		}
 
 		return this.clone({
-			value: results,
+			results,
 			endIndex: next.startIndex,
 			stream
 		});
@@ -280,15 +289,15 @@ Rule.List = class List extends Rule {
 
 	// Return matched item by index
 	getItem(index) {
-		if (!this.value) return undefined;
-		return this.value[index];
+		if (!this.results) return undefined;
+		return this.results[index];
 	}
 
 
 	toSource() {
-		if (!this.value) return undefined;		// TODO: throw???
-		let values = this.value.map( value => value.toSource() ).join(", ");
-		return `[${values}]`;
+		if (!this.results) return undefined;		// TODO: throw???
+		let results = this.results.map( result => result.toSource() ).join(", ");
+		return `[${results}]`;
 	}
 
 	toString() {
@@ -324,8 +333,6 @@ Object.assign(Rule, {
 		else {
 			rule = new Rule.Sequence({ rules });
 		}
-
-console.log("Added rule: ", syntax, "  ===>  ", rule.toString());
 
 		return rule;
 	},
@@ -375,19 +382,20 @@ console.log("Added rule: ", syntax, "  ===>  ", rule.toString());
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
 	parseRuleSyntax_string(syntaxStream, rules, startIndex) {
-		var value = syntaxStream[startIndex], rule;
-		// create as a Keyword or a String
-		if (value.match(/\w+/)) {
-			rule = new Rule.Keyword({ keyword: value });
+		var string = syntaxStream[startIndex], rule;
+		// If letters only, match as a Keyword (so we require a word boundary after the string).
+		if (string.match(/[A-Za-z]+/)) {
+			rule = new Rule.Keyword({ keyword: string });
 		}
+		// Otherwise match as a String, which doesn't require non-word chars after the text.
 		else {
-			rule = new Rule.String({ value });
-			// If value starts with `\\`
-			if (value.startsWith("\\")) {
-				// remove leading slash in match value...
-				rule.value = rule.value.substr(1);
+			rule = new Rule.String({ string: string });
+			// If string starts with `\\`, it's an escaped literal (eg: `\[` needs to input as `\\[`).
+			if (string.startsWith("\\")) {
+				// remove leading slash in match string...
+				rule.string = rule.string.substr(1);
 				// but leave it in toString
-				rule.toString = () => value;
+				rule.toString = () => string;
 			}
 		}
 		return [ rule, startIndex ];
@@ -398,7 +406,7 @@ console.log("Added rule: ", syntax, "  ===>  ", rule.toString());
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
 	parseRuleSyntax_parentheses(syntaxStream, rules, startIndex) {
-		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "(", ")", startIndex);
+		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "(", ")", startIndex);
 
 		// pull out explicit argument name
 		let argument;
@@ -447,7 +455,7 @@ console.log("Added rule: ", syntax, "  ===>  ", rule.toString());
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
 	parseRuleSyntax_subrule(syntaxStream, rules, startIndex) {
-		let match = Tokenizer.findNested(syntaxStream, "{", "}", startIndex);
+		let match = Parser.findNestedTokens(syntaxStream, "{", "}", startIndex);
 		let argument;
 		if (match.slice.length === 3 && match.slice[1] === ":") {
 			argument = match.slice[0];
@@ -463,7 +471,7 @@ console.log("Added rule: ", syntax, "  ===>  ", rule.toString());
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
 	parseRuleSyntax_list(syntaxStream, rules, startIndex) {
-		let { endIndex, slice } = Tokenizer.findNested(syntaxStream, "[", "]", startIndex);
+		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "[", "]", startIndex);
 
 		let argument;
 		if (slice.length > 2 && slice[1] === ":") {

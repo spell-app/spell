@@ -13,20 +13,20 @@ parser.addRule("identifier", new (class identifier extends Rule.Pattern{})({ pat
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
 //parser.addPattern("typename", /^[A-Z][\w\d\-_]*/);
-parser.addRule("Type", new (class Type extends Rule.Pattern{})({ pattern: /^[A-Z][\w\d\-_]*/ }));
+parser.addRule("Type", new (class Type extends Rule.Pattern{})({ pattern: /^[A-Z][\w\-]*/ }));
 
 
 // Numeric literal (either float or integer), created with custom constructor for debugging.
 parser.addRule("number", new (class number extends Rule.Pattern{})({
 	pattern: /^-?\d+(?:\.\d+)?/,
 	toSource: function(context) {
-		return parseFloat(this.value, 10);
+		return parseFloat(this.matched, 10);
 	}
 }));
 
 
 // Literal `text` string, created with custom constructor for debugging.
-// Returned `value` has enclosing quotes.
+// Returned value has enclosing quotes.
 parser.addRule("text", new (class text extends Rule.Pattern{})({
 	pattern: /^(?:"[^"]*"|'[^']*')/
 }));
@@ -35,12 +35,13 @@ parser.addRule("text", new (class text extends Rule.Pattern{})({
 // Boolean literal, created with custom constructor for debugging.
 // TODO: better name for this???
 parser.addRule("boolean", new (class boolean extends Rule.Pattern{})({
-	pattern: /^(?:true|false|yes|no|success|failure)\b/,
+	pattern: /^(true|false|yes|no|success|failure|ok|cancel)\b/,
 	toSource: function(context) {
-		switch (this.value) {
+		switch (this.matched) {
 			case "true":
 			case "yes":
 			case "success":
+			case "ok":
 				return true;
 			default:
 				return false;
@@ -48,8 +49,10 @@ parser.addRule("boolean", new (class boolean extends Rule.Pattern{})({
 	}
 }));
 
-// Rules auto-derived from our `rule syntax`.
 
+//
+// Rules auto-derived from our `rule syntax`.
+//
 
 // Literal value as number, text or boolean.
 parser.addSyntax("literal", "(literal:{number}|{text}|{boolean})");
@@ -113,9 +116,9 @@ parser.addSyntax(
 			let args = this.gatherArguments();
 
 			let identifier = args.identifier.toSource();
-			let plural = Sugar.String.pluralize(identifier);
+			let plural = (identifier + "_VALUES").toUpperCase();
 			let values = args.list.toSource();
-			let first = args.list.value[0];
+			let first = args.list.results[0];
 			let firstValue = first ? first.toSource() : "undefined";
 
 			return `static ${plural} = ${values};\n`
