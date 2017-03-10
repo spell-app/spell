@@ -1,6 +1,6 @@
 
 // TODO: convert to line-aware stream???
-window.TextStream = class TextStream {
+export default class TextStream {
 	constructor(textOrProps) {
 		if (typeof textOrProps === "string") this.text = textOrProps;
 		else Object.assign(this, textOrProps);

@@ -11,7 +11,9 @@
 //		- `rule.gatherArguments()`		Return matched arguments in a format suitable to do:
 //		- `rule.toSource()`				Return javascript source to interpret the rule.
 //
-window.Rule = class Rule {
+import Parser from "./Parser";
+
+export default class Rule {
 	constructor(properties) {
 		Object.assign(this, properties);
 	}

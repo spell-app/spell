@@ -11,8 +11,10 @@
 // TODO:	Recycle word/string/pattern rules to more easily see commonality...
 // TODO:	Pass `context` to toSource(), add property descriptors to `class`, variables and code to `method`, `global` stuff etc
 
+import TextStream from "./TextStream.js";
+import Rule from "./Rule.js";
 
-window.Parser = class Parser {
+export default class Parser {
 	constructor(properties) {
 		Object.assign(this, properties);
 		// Clone rules, starting with a completely empty map if not defined (no standard object keys)
@@ -117,4 +119,3 @@ window.Parser = class Parser {
 
 }
 
-window.parser = new Parser();

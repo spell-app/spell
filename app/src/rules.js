@@ -1,3 +1,8 @@
+import Rule from "./Rule";
+import Parser from "./Parser";
+
+const parser = new Parser();
+export default parser;
 
 //
 // Regex pattern rules with custom constructors for debugging
