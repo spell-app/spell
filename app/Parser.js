@@ -64,9 +64,9 @@ window.Parser = class Parser {
 	// Parse a `ruleSyntax` rule and add it to our list of rules.
 	// Returns the new rule.
 	// Logs parsing errors but allows things to continue.
-	addSyntax(name, ruleSyntax, properties) {
+	addSyntax(name, ruleSyntax, properties, SequenceConstructor = Rule.Sequence) {
 		try {
-			let rule = Rule.parseRuleSyntax(ruleSyntax);
+			let rule = Rule.parseRuleSyntax(ruleSyntax, SequenceConstructor);
 
 			// Reflect the rule back out to make sure it looks (more or less) the same
 			console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
@@ -79,6 +79,14 @@ window.Parser = class Parser {
 			console.error(e);
 			console.groupEnd();
 		}
+	}
+
+	addStatement(name, ruleSyntax, properties) {
+		return this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
+	}
+
+	addExpression(name, ruleSyntax, properties) {
+		return this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
 	}
 
 

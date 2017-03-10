@@ -81,7 +81,7 @@ parser.addSyntax(
 
 parser.addSyntax("scope-modifier", "(scope:global|constant|shared)");
 
-parser.addSyntax(
+parser.addStatement(
 	"declare-property",
 	"{scope-modifier}? {identifier} = {literal}",
 	{
@@ -108,7 +108,7 @@ parser.addSyntax(
 );
 
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
-parser.addSyntax(
+parser.addStatement(
 	"declare-property-as-one-of",
 	"{identifier} as one of {list:literal-list}",
 	{

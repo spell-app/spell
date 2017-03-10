@@ -129,12 +129,7 @@ Rule.Subrule = class Subrule extends Rule {
 
 
 // Abstract:  `Nested` rule -- composed of a series of other `rules`.
-Rule.Nested = class Nested extends Rule {
-	constructor(properties) {
-		super(properties);
-		if (!this.rules) this.rules = [];
-	}
-}
+Rule.Nested = class Nested extends Rule {}
 
 
 // Sequence of rules to match (auto-excluding whitespace).
@@ -189,6 +184,10 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 
 }
 
+// Syntactic sugar for debugging
+Rule.Expression = class Expression extends Rule.Sequence {}
+Rule.Statement = class Statement extends Rule.Sequence {}
+
 
 // Alternative syntax.
 // NOTE: Currently takes the first valid match.
@@ -220,7 +219,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 //
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
-Rule.Repeat = class Repeat extends Rule {
+Rule.Repeat = class Repeat extends Rule.Nested {
 	parse(parser, stream) {
 		let next = stream;
 		let results = [];
@@ -321,7 +320,7 @@ Object.assign(Rule, {
 //
 
 // TODO: convert to TextStream pattern ala normal parser once that settles down???
-	parseRuleSyntax(syntax) {
+	parseRuleSyntax(syntax, SequenceConstructor = Rule.Sequence) {
 		let syntaxStream = Rule.tokeniseRuleSyntax(syntax);
 		let rules = Rule.parseRuleSyntax_tokens(syntaxStream, []);
 
@@ -331,7 +330,7 @@ Object.assign(Rule, {
 			rule = rules[0];
 		}
 		else {
-			rule = new Rule.Sequence({ rules });
+			rule = new SequenceConstructor({ rules });
 		}
 
 		return rule;
@@ -502,7 +501,7 @@ Object.assign(Rule, {
 			alternates = lastToken;
 		}
 		else {
-			alternates = new Rule.Alternatives();
+			alternates = new Rule.Alternatives({ rules: [] });
 
 			// if no last rule, we have a rule like  `( | abc)` which means that the alternates is optional
 			if (!lastToken)
