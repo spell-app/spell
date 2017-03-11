@@ -52,9 +52,20 @@ export default class Parser {
 	// Add a rule to our list of rules!
 	// TODO: convert to `alternatives` on overwrite?
 	addRule(name, rule) {
-		if (this.rules[name]) console.warn(`Overwriting rule ${name} old: `, this.rules[name], "new: ", rule);
-		rule.ruleName = name;
-		this.rules[name] = rule;
+		let existing = this.rules[name];
+		if (existing) {
+			console.warn(`Converting rule '${name}' to alternatives`);
+			if (!(existing instanceof Rule.Alternatives)) {
+				existing = new Rule.Alternatives({ name: existing.name, rules: [existing] });
+				this.rules[name] = existing;
+			}
+			console.warn(`Adding rule ${rule.name} to ${name}: `, rule);
+			existing.addRule(rule);
+		}
+		else {
+			rule.ruleName = name;
+			this.rules[name] = rule;
+		}
 		return rule;
 	}
 
@@ -86,11 +97,13 @@ export default class Parser {
 	}
 
 	addStatement(name, ruleSyntax, properties) {
-		return this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
+		var statement = this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
+		return this.addRule("statement", statement);
 	}
 
 	addExpression(name, ruleSyntax, properties) {
-		return this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
+		var expression = this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
+		return this.addRule("expression", expression);
 	}
 
 
