@@ -21,6 +21,12 @@ export default class Parser {
 		this.rules = Object.create(this.rules || null);
 	}
 
+	getRule(name) {
+		return this.rules[name];
+	}
+
+//### Parsing
+
 	// Parse `name`d rule at head of `stream`.
 	// Handles optional and repeating rules as well as eating whitespace.
 	// Returns result of parse.
@@ -28,7 +34,7 @@ export default class Parser {
 		if (typeof stream === "string") stream = new TextStream(stream);
 
 		let rule = this.getRule(name);
-		if (!rule) throw new SyntaxError(`Rule ${name} not understood`);
+		if (!rule) throw new SyntaxError(`Rule ${name} not understood`, name, stream);
 		stream = this.eatWhitespace(stream);
 		return rule.parse(this, stream);
 	}
@@ -41,18 +47,7 @@ export default class Parser {
 		return result ? result.next() : stream;
 	}
 
-	//### Rule factories
-
-	getRule(name) {
-		return this.rules[name];
-	}
-
-	// Add regex as a pattern to our list of rules
-	addPattern(name, pattern, properties) {
-		let rule = new Rule.Pattern(properties);
-		rule.pattern = pattern;
-		return this.addRule(name, rule);
-	}
+//### Rule factories
 
 	// Add a rule to our list of rules!
 	// TODO: convert to `alternatives` on overwrite?
@@ -61,6 +56,13 @@ export default class Parser {
 		rule.ruleName = name;
 		this.rules[name] = rule;
 		return rule;
+	}
+
+	// Add regex as a pattern to our list of rules
+	addPattern(name, pattern, properties) {
+		let rule = new Rule.Pattern(properties);
+		rule.pattern = pattern;
+		return this.addRule(name, rule);
 	}
 
 	// Parse a `ruleSyntax` rule and add it to our list of rules.

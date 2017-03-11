@@ -2,7 +2,7 @@
   "repository": "https://github.com/oakjs/parser",
   "license": "MIT",
   "scripts": {
-    "watch": "./node_modules/.bin/webpack -w",
+    "watch": "./node_modules/.bin/webpack --progress --watch",
     "test": "jest"
   },
   "devDependencies": {

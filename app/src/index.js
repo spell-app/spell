@@ -1,7 +1,7 @@
 import TextStream from "./TextStream.js";
 import Parser from "./Parser.js";
 import Rule from "./Rule.js";
-import parser from "./rules.js";
+import parser from "./rules/index.js";
 
 // Stick on window for reflection and ad-hoc testing.
 if (typeof window !== "undefined") {
@@ -14,3 +14,4 @@ if (typeof window !== "undefined") {
 export default {
 	TextStream, Parser, Rule, parser
 }
+

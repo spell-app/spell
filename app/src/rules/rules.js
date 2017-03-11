@@ -1,8 +1,5 @@
-import Rule from "./Rule";
-import Parser from "./Parser";
-
-const parser = new Parser();
-export default parser;
+import Rule from "../Rule";
+import parser from "./_parser";
 
 //
 // Regex pattern rules with custom constructors for debugging
@@ -83,7 +80,6 @@ parser.addSyntax(
 );
 
 
-
 parser.addSyntax("scope-modifier", "(scope:global|constant|shared)");
 
 parser.addStatement(
@@ -132,3 +128,4 @@ parser.addStatement(
 		}
 	}
 );
+

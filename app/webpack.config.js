@@ -1,12 +1,12 @@
 var path = require('path');
 
-export const paths = {
+var paths = {
 	root:	__dirname,
 	src:	path.join(__dirname, "src"),
 	build:	path.join(__dirname, "build")
 };
 
-export default {
+module.exports = {
 	entry: './src/index.js',
 
 	output: {
@@ -15,6 +15,7 @@ export default {
 		publicPath: "/"
 	},
 
+	devtool: "inline-source-map", //"cheap-module-eval-source-map",
 
 	module: {
 	  rules: [

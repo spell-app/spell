@@ -11,7 +11,7 @@
 //		- `rule.gatherArguments()`		Return matched arguments in a format suitable to do:
 //		- `rule.toSource()`				Return javascript source to interpret the rule.
 //
-import Parser from "./Parser";
+import Parser from "./Parser.js";
 
 export default class Rule {
 	constructor(properties) {
@@ -49,6 +49,7 @@ export default class Rule {
 		return this.constructor.name;
 	}
 }
+;
 
 
 // Rule for literal string value, which include punctuation such as `(` etc.
@@ -156,6 +157,7 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		});
 	}
 
+//TODOC
 	// Gather arguments from our parsed `results` array.
 	// Returns an object with properties from the `values` array indexed by
 	//		- `results.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
@@ -204,6 +206,10 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 				return match;
 			}
 		}
+	}
+
+	addRule(rule) {
+		this.rules.push(rule);
 	}
 
 	toString() {
