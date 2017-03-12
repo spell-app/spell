@@ -1,10 +1,9 @@
 // Spell "English" parser strawman
 
 // TODO:	custom SyntaxError etc which understand streams
-// TODO:	`statement` vs `expression` vs `control structure` etc -- are these just named rules?
 // TODO:	break `file` into lines and process each (incl. substr/match not going beyond the end)
 // TODO:	nesting -- is this just indent = "add block scope"
-// TODO:	promotion pattern for gather arguments (eg: literal-list)
+// TODO:	promotion pattern for gather arguments (eg: literal-list) ???
 // TODO:	What does syntax tree look like?  How do we extract meaning out of the nest?
 // TODO:	Don't use `toJSON` for outputting rule...
 // TODO:	Recycle word/string/pattern rules to more easily see commonality...
@@ -53,8 +52,8 @@ export default class Parser {
 	addRule(name, rule) {
 		let existing = this.rules[name];
 		if (existing) {
-			console.log(`Converting rule '${name}' to alternatives`);
 			if (!(existing instanceof Rule.Alternatives)) {
+				console.log(`Converting rule '${name}' to alternatives`);
 				existing = new Rule.Alternatives({ name: existing.name, rules: [existing] });
 				this.rules[name] = existing;
 			}

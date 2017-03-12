@@ -189,8 +189,19 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 }
 
 // Syntactic sugar for debugging
-Rule.Expression = class Expression extends Rule.Sequence {}
-Rule.Statement = class Statement extends Rule.Sequence {}
+Rule.Expression = class Expression extends Rule.Sequence {
+// 	gatherArguments() {
+// 		let args = super.gatherArguments();
+// 		return args.expression;
+// 	}
+}
+Rule.Statement = class Statement extends Rule.Sequence {
+// 	gatherArguments() {
+// 		let args = super.gatherArguments();
+// console.warn(args);
+// 		return args;
+// 	}
+}
 
 
 // Alternative syntax.
@@ -198,6 +209,11 @@ Rule.Statement = class Statement extends Rule.Sequence {}
 // TODO: match all valid alternatives
 // TODO: rename
 Rule.Alternatives = class Alternatives extends Rule.Nested {
+	constructor(props) {
+		super(props);
+		if (!this.rules) this.rules = [];
+	}
+
 	parse(parser, stream) {
 		for (let rule of this.rules) {
 			let match = rule.parse(parser, stream);

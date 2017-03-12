@@ -14,9 +14,11 @@ parser.addStatement(
 	{
 		toSource(context) {
 			let args = this.gatherArguments();
-			let statement = `${args.identifier.toSource()} = ${args.literal.toSource()};`;
+			var identifier = args.assignment.identifier.toSource();
+			var value = args.assignment.literal.toSource();
+			let statement = `${identifier} = ${value};`;
 
-			var scope = (args.scope ? args.scope.toSource() : "local");
+			var scope = args.scope ? args.scope.toSource() : "local";
 			switch (scope) {
 				case "global":
 					return `global.${statement}`;

@@ -100,3 +100,12 @@ parser.addSyntax(
 		}
 	}
 );
+
+
+
+//
+//	Initialize statements and expressions
+//
+
+parser.addRule("statement", new Rule.Alternatives());
+parser.addRule("expression", new Rule.Alternatives());

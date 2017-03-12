@@ -14,12 +14,12 @@ parser.addStatement(
 	{
 		toSource(context) {
 			let args = this.gatherArguments();
-
-			let identifier = identifier.toSource();
+			let identifier = args.identifier.toSource();
 			let statement = `${identifier} = ${args.literal.toSource()};`;
 
 			// if identifier does not already exist in context, add it and `var`
-			if (!context.variables[identifier]) {
+			// TODO: `let` is maybe better???
+			if (context && !context.variables[identifier]) {
 				statement = `var ${statement}`
 			}
 			return statement;
