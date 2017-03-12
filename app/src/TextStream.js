@@ -1,10 +1,16 @@
 
 // TODO: convert to line-aware stream???
 export default class TextStream {
+	// You can construct with a text string or a set of properties (including `text`).
 	constructor(textOrProps) {
-		if (typeof textOrProps === "string") this.text = textOrProps;
-		else Object.assign(this, textOrProps);
-		if (!this.startIndex) this.startIndex = 0;
+		if (typeof textOrProps === "string")
+			this.text = textOrProps;
+		else
+			Object.assign(this, textOrProps);
+
+		// Make sure `text` is defined.
+		if (!("text" in this)) this.text = "";
+		if (!("startIndex" in this)) this.startIndex = 0;
 	}
 
 	// Return an immutable clone of the stream.

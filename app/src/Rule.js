@@ -321,6 +321,7 @@ Rule.List = class List extends Rule {
 //
 // TODO:	Pull `parseRuleSyntax` stuff out into separate module?
 // TODO:	Better name for `ruleSyntax`
+// TODO:	Use keywords in syntax to make a quick regex-based `test` function for the entire rule
 Object.assign(Rule, {
 
 //
