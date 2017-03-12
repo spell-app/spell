@@ -1,7 +1,6 @@
 // Spell "English" parser strawman
 
 // TODO:	custom SyntaxError etc which understand streams
-// TODO:	add same named rule = make alternatives
 // TODO:	`statement` vs `expression` vs `control structure` etc -- are these just named rules?
 // TODO:	break `file` into lines and process each (incl. substr/match not going beyond the end)
 // TODO:	nesting -- is this just indent = "add block scope"
@@ -54,12 +53,12 @@ export default class Parser {
 	addRule(name, rule) {
 		let existing = this.rules[name];
 		if (existing) {
-			console.warn(`Converting rule '${name}' to alternatives`);
+			console.log(`Converting rule '${name}' to alternatives`);
 			if (!(existing instanceof Rule.Alternatives)) {
 				existing = new Rule.Alternatives({ name: existing.name, rules: [existing] });
 				this.rules[name] = existing;
 			}
-			console.warn(`Adding rule ${rule.name} to ${name}: `, rule);
+			console.log(`Adding rule '${rule.ruleName}' to '${name}': `, rule);
 			existing.addRule(rule);
 		}
 		else {
