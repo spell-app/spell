@@ -15,8 +15,13 @@ import Rule from "./Rule.js";
 export default class Parser {
 	constructor(properties) {
 		Object.assign(this, properties);
+
 		// Clone rules, starting with a completely empty map if not defined (no standard object keys)
 		this.rules = Object.create(this.rules || null);
+
+		// Set up `statement` and `expression` rules as alternates
+		this.addRule("statement", new Rule.Alternatives());
+		this.addRule("expression", new Rule.Alternatives());
 	}
 
 	getRule(name) {
