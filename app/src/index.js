@@ -1,6 +1,7 @@
 import TextStream from "./TextStream.js";
 import Parser from "./Parser.js";
 import Rule from "./Rule.js";
+import "./RuleSyntax";
 import parser from "./rules/index.js";
 
 // Stick on window for reflection and ad-hoc testing.
