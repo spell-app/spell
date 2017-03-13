@@ -37,6 +37,11 @@ export default class Rule {
 //
 // ## output as source
 //
+
+	gatherArguments() {
+		return this.matched;
+	}
+
 	// Output value for this INSTANTIATED rule as source.
 	toSource() {
 		return this.matched;
@@ -49,7 +54,7 @@ export default class Rule {
 		return this.constructor.name;
 	}
 }
-;
+
 
 
 // Rule for literal string value, which include punctuation such as `(` etc.
@@ -189,19 +194,8 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 }
 
 // Syntactic sugar for debugging
-Rule.Expression = class Expression extends Rule.Sequence {
-// 	gatherArguments() {
-// 		let args = super.gatherArguments();
-// 		return args.expression;
-// 	}
-}
-Rule.Statement = class Statement extends Rule.Sequence {
-// 	gatherArguments() {
-// 		let args = super.gatherArguments();
-// console.warn(args);
-// 		return args;
-// 	}
-}
+Rule.Expression = class expression extends Rule.Sequence {}
+Rule.Statement = class statement extends Rule.Sequence {}
 
 
 // Alternative syntax.
@@ -214,14 +208,23 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		if (!this.rules) this.rules = [];
 	}
 
+	// Find the LONGEST match
 	parse(parser, stream) {
+		let bestMatch;
 		for (let rule of this.rules) {
 			let match = rule.parse(parser, stream);
-			if (match) {
-				if (this.argument) match.argument = this.argument;
-				return match;
-			}
+			if (!match) continue;
+
+			// take the longest match
+			if (!bestMatch || match.endIndex > bestMatch.endIndex)
+				bestMatch = match;
 		}
+		if (!bestMatch) return undefined;
+		return this.clone({
+			matched: bestMatch,
+			endIndex: bestMatch.endIndex,
+			stream
+		});
 	}
 
 	addRule(rule) {
@@ -275,7 +278,7 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 }
 
 
-// List match rule:   `[<item><delimiter>]`. eg" `[{literal},]` to match `a,b,c`
+// List match rule:   `[<item><delimiter>]`. eg" `[{number},]` to match `1,2,3`
 //	`rule.item` is the rule for each item,
 //	`rule.delimiter` is the delimiter between each item.
 // 	`rule.results` in the output is the list of values.
@@ -426,9 +429,10 @@ Object.assign(Rule, {
 	},
 
 
-	// Match grouping expression `(...)` in syntax rules.
+	// Match grouping expression `(...|...)` in syntax rules.
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
+	// NOTE: nested parens may not have alternatives... :-(   `(a|(b|c))` won't work???
 	parseRuleSyntax_parentheses(syntaxStream, rules, startIndex) {
 		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "(", ")", startIndex);
 
@@ -437,6 +441,11 @@ Object.assign(Rule, {
 		if (slice.length > 2 && slice[1] === ":") {
 			argument = slice[0];
 			slice = slice.slice(2);
+		}
+
+		// split into groups, including nested parens
+		if (slice.includes("|")) {
+
 		}
 
 		let rule;

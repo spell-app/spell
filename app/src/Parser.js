@@ -1,11 +1,11 @@
 // Spell "English" parser strawman
 
+// TODO:	this doesn't worky:   `{a} (is|is not) {b}`
 // TODO:	custom SyntaxError etc which understand streams
 // TODO:	break `file` into lines and process each (incl. substr/match not going beyond the end)
 // TODO:	nesting -- is this just indent = "add block scope"
 // TODO:	promotion pattern for gather arguments (eg: literal-list) ???
 // TODO:	What does syntax tree look like?  How do we extract meaning out of the nest?
-// TODO:	Don't use `toJSON` for outputting rule...
 // TODO:	Recycle word/string/pattern rules to more easily see commonality...
 // TODO:	Pass `context` to toSource(), add property descriptors to `class`, variables and code to `method`, `global` stuff etc
 
@@ -19,9 +19,10 @@ export default class Parser {
 		// Clone rules, starting with a completely empty map if not defined (no standard object keys)
 		this.rules = Object.create(this.rules || null);
 
-		// Set up `statement` and `expression` rules as alternates
+		// Set up standard rule classes as alternates
 		this.addRule("statement", new Rule.Alternatives());
 		this.addRule("expression", new Rule.Alternatives());
+		this.addRule("operator", new Rule.Alternatives());
 	}
 
 	getRule(name) {
@@ -100,13 +101,18 @@ export default class Parser {
 	}
 
 	addStatement(name, ruleSyntax, properties) {
-		var statement = this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
-		return this.addRule("statement", statement);
+		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
+		return this.addRule("statement", rule);
 	}
 
 	addExpression(name, ruleSyntax, properties) {
-		var expression = this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
-		return this.addRule("expression", expression);
+		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
+		return this.addRule("expression", rule);
+	}
+
+	addOperator(name, ruleSyntax, properties) {
+		var rule = this.addSyntax(name, ruleSyntax, properties);
+		return this.addRule("operator", rule);
 	}
 
 

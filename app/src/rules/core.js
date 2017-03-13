@@ -13,37 +13,28 @@ export default parser;
 //parser.addPattern("whitespace", /^\s+/);
 parser.addRule("whitespace", new (class whitespace extends Rule.Pattern{})({ pattern: /^\s+/, optional: true }));
 
-// `identifier` = variables or property name.
-// MUST start with a lower-case letter (?)
-//parser.addPattern("identifier", /^[a-z][\w\d\-_]*/);
-parser.addRule("identifier", new (class identifier extends Rule.Pattern{})({
-	pattern: /^[a-z][\w\-]*/,
-	// Convert "-" to "_" in source output.
-	toSource: function(context) {
-		return this.matched.replace(/\-/g, "_");
-	}
-}));
-
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
 //parser.addPattern("typename", /^[A-Z][\w\d\-_]*/);
-parser.addRule("Type", new (class Type extends Rule.Pattern{})({
+let type = parser.addRule("Type", new (class Type extends Rule.Pattern{})({
 	pattern: /^[A-Z][\w\-]*/,
 	// Convert "-" to "_" in source output.
 	toSource: function(context) {
 		return this.matched.replace(/\-/g, "_");
 	}
 }));
+parser.addRule("expression", type);
 
 
 // `number` as either float or integer, created with custom constructor for debugging.
-parser.addRule("number", new (class number extends Rule.Pattern{})({
+let number = parser.addRule("number", new (class number extends Rule.Pattern{})({
 	pattern: /^-?([0-9]*[.])?[0-9]+/,
 	// Convert to number on source output.
 	toSource: function(context) {
 		return parseFloat(this.matched, 10);
 	}
 }));
+parser.addRule("expression", number);
 
 
 // Numeric `integer` only, created with custom constructor for debugging.
@@ -62,14 +53,15 @@ parser.addRule("integer", new (class integer extends Rule.Pattern{})({
 // You can use either single or double quotes on the outside (although double quotes are preferred).
 // Returned value has enclosing quotes.
 // TODO: escaped quotes inside string
-parser.addRule("text", new (class text extends Rule.Pattern{})({
+let text = parser.addRule("text", new (class text extends Rule.Pattern{})({
 	pattern: /^(?:"[^"]*"|'[^']*')/
 }));
+parser.addRule("expression", text);
 
 
 // Boolean literal, created with custom constructor for debugging.
 // TODO: better name for this???
-parser.addRule("boolean", new (class boolean extends Rule.Pattern{})({
+let bool = parser.addRule("boolean", new (class boolean extends Rule.Pattern{})({
 	pattern: /^(true|false|yes|no|success|failure|ok|cancel)\b/,
 	toSource: function(context) {
 		switch (this.matched) {
@@ -83,16 +75,17 @@ parser.addRule("boolean", new (class boolean extends Rule.Pattern{})({
 		}
 	}
 }));
+parser.addRule("expression", bool);
 
 
 // Literal value as number, text or boolean.
-parser.addSyntax("literal", "(literal:{number}|{text}|{boolean})");
+//parser.addExpression("literal", "(literal:{number}|{text}|{boolean})");
 
 
 // Literal list (array), eg:  `[1,2,true,false ]`
-parser.addSyntax(
+let list = parser.addExpression(
 	"literal-list",
-	"\\[[list:{literal},]?\\]",
+	"\\[[list:{expression},]?\\]",
 	{
 		// return just the list as our source
 		toSource(context) {
