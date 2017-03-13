@@ -15,10 +15,10 @@ parser.addOperator("is-not", "is not", { transformer(a,b) { return `(${a} != ${b
 parser.addOperator("type-of", "is (a|an)", { transformer(thing, type) { return `spell.typeof(${thing}, ${type})` }});
 parser.addOperator("not-type-of", "is not (a|an)", { transformer(thing, type) { return `!spell.typeof(${thing}, ${type})` }});
 
-parser.addOperator("gt", "(>|(is greater than))", { transformer(a,b) { return`(${a} > ${b})` }});
-parser.addOperator("gte", "(>=|(is greater than or equal to))", { transformer(a,b) { return`(${a} >= ${b})` }});
-parser.addOperator("lt", "(<|(is less than))", { transformer(a,b) { return`(${a} < ${b})` }});
-parser.addOperator("lte", "(<=|(is less than or equal to))", { transformer(a,b) { return`(${a} <= ${b})` }});
+parser.addOperator("gt", "(>|is greater than)", { transformer(a,b) { return`(${a} > ${b})` }});
+parser.addOperator("gte", "(>=|is greater than or equal to)", { transformer(a,b) { return`(${a} >= ${b})` }});
+parser.addOperator("lt", "(<|is less than)", { transformer(a,b) { return`(${a} < ${b})` }});
+parser.addOperator("lte", "(<=|is less than or equal to)", { transformer(a,b) { return`(${a} <= ${b})` }});
 
 parser.addSyntax(
 	"operator-expression",

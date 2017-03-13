@@ -376,7 +376,17 @@ Object.assign(Rule, {
 			let [ rule, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex);
 			if (endIndex >= lastIndex)
 				throw new SyntaxError("Past lastIndex");
-			if (rule) rules.push(rule);
+
+			if (rule) {
+				var last = rules[rules.length-1];
+				// If this is a `String` and last was a `String`, merge together
+				if (last && last instanceof Rule.String && rule instanceof Rule.String) {
+					last.string += rule.string;
+				}
+				else {
+					rules.push(rule);
+				}
+			}
 			startIndex = endIndex + 1;
 		}
 		return rules;
@@ -437,7 +447,7 @@ Object.assign(Rule, {
 		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "(", ")", startIndex);
 
 		// pull out explicit argument name
-		let argument;
+		let argument, rule;
 		if (slice.length > 2 && slice[1] === ":") {
 			argument = slice[0];
 			slice = slice.slice(2);
@@ -445,22 +455,50 @@ Object.assign(Rule, {
 
 		// split into groups, including nested parens
 		if (slice.includes("|")) {
-
-		}
-
-		let rule;
-		var results = Rule.parseRuleSyntax_tokens(slice, []);
-		// Single result means optional expression
-		if (results.length === 1) {
-			rule = results[0];
-			if (!(rule instanceof Rule.Alternatives)) rule.optional = true;
+			rule = new Rule.Alternatives();
+			let alternates = groupAlternates(slice);
+			for (let group of alternates) {
+				let results = Rule.parseRuleSyntax_tokens(group, []), groupRule;
+				if (results.length === 1) {
+					groupRule = results[0];
+				}
+				else {
+					groupRule = new Rule.Sequence({ rules: results });
+				}
+				rule.addRule(groupRule);
+			}
 		}
 		else {
-			rule = new Rule.Sequence({ rules: results });
+			var results = Rule.parseRuleSyntax_tokens(slice, []);
+			// Single result means optional expression
+			if (results.length === 1) {
+				rule = results[0];
+				if (!(rule instanceof Rule.Alternatives)) rule.optional = true;
+			}
+			else {
+				rule = new Rule.Sequence({ rules: results });
+			}
 		}
-		if (argument) rule.argument = argument;
 
+		if (argument) rule.argument = argument;
 		return [ rule, endIndex ];
+
+		function groupAlternates(tokens) {
+			var alternates = [];
+			var current = [];
+			for (let token of tokens) {
+				if (token === "|") {
+					alternates.push(current);
+					current = [];
+				}
+				else {
+					current.push(token);
+				}
+//TODO: nested parens...
+			}
+			if (current.length) alternates.push(current);
+			return alternates;
+		}
 	},
 
 	// Match repeat indicator `?`, `+` or `*` by attaching it to the previous rule.
