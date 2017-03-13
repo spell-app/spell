@@ -58,6 +58,7 @@ export default class Rule {
 
 
 // Rule for literal string value, which include punctuation such as `(` etc.
+//TODO: rename `Symbol`???
 Rule.String = class String extends Rule {
 	// Parse this rule at the beginning of `stream`, assuming no whitespace before.
 	// Default is that `rule.string` is literal string to match.
@@ -73,7 +74,7 @@ Rule.String = class String extends Rule {
 	}
 
 	toString() {
-		return this.string;
+		return `${this.string}${this.optional ? '?' : ''}`;
 	}
 }
 
@@ -111,16 +112,16 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 	}
 
 	toString() {
-		return this.keyword;
+		return `${this.keyword}${this.optional ? '?' : ''}`;
 	}
 }
 
 
 // Subrule -- name of another rule to be called.
-// `rule.name` is the name of the rule in `parser.rules`.
+// `rule.ruleName` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
 	parse(parser, stream) {
-		var rule = parser.getRule(this.rule);
+		var rule = parser.getRule(this.ruleName);
 		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.name}'`, this);
 		var result = rule.parse(parser, stream);
 		if (!result) return undefined;
@@ -130,7 +131,7 @@ Rule.Subrule = class Subrule extends Rule {
 	}
 
 	toString() {
-		return `{${this.argument ? this.argument+":" : ""}${this.rule}}${this.optional ? '?' : ''}`;
+		return `{${this.argument ? this.argument+":" : ""}${this.ruleName}}${this.optional ? '?' : ''}`;
 	}
 }
 

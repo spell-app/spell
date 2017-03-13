@@ -116,54 +116,47 @@ Object.assign(Rule, {
 		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "(", ")", startIndex);
 
 		// pull out explicit argument name
-		let argument, rule;
+		let argument;
 		if (slice.length > 2 && slice[1] === ":") {
 			argument = slice[0];
 			slice = slice.slice(2);
 		}
 
 		// split into groups, including nested parens
-		if (slice.includes("|")) {
-			rule = new Rule.Alternatives();
-			let alternates = groupAlternates(slice);
-			for (let group of alternates) {
-				let results = Rule.parseRuleSyntax_tokens(group, []), groupRule;
+		let alternates =
+			groupAlternates(slice)
+			.map(function(group) {
+				let results = Rule.parseRuleSyntax_tokens(group, []);
 				if (results.length === 1) {
-					groupRule = results[0];
+					return results[0];
 				}
 				else {
-					groupRule = new Rule.Sequence({ rules: results });
+					return new Rule.Sequence({ rules: results });
 				}
-				rule.addRule(groupRule);
-			}
-		}
-		else {
-			var results = Rule.parseRuleSyntax_tokens(slice, []);
-			// Single result means optional expression
-			if (results.length === 1) {
-				rule = results[0];
-				if (!(rule instanceof Rule.Alternatives)) rule.optional = true;
-			}
-			else {
-				rule = new Rule.Sequence({ rules: results });
-			}
-		}
+			});
 
+		let rule = alternates.length === 1 ? alternates[0] : new Rule.Alternatives({ rules: alternates });
 		if (argument) rule.argument = argument;
 		return [ rule, endIndex ];
 
 		function groupAlternates(tokens) {
 			var alternates = [];
 			var current = [];
-			for (let token of tokens) {
+			for (var i = 0, token; token = tokens[i]; i++) {
+				// handle alternate marker
 				if (token === "|") {
 					alternates.push(current);
 					current = [];
 				}
+				// handle nested parens
+				else if (token === "(") {
+					let { endIndex } = Parser.findNestedTokens(tokens, "(", ")", i);
+					current = current.concat(tokens.slice(i, endIndex + 1));
+					i = endIndex;
+				}
 				else {
 					current.push(token);
 				}
-//TODO: nested parens...
 			}
 			if (current.length) alternates.push(current);
 			return alternates;
@@ -202,7 +195,7 @@ Object.assign(Rule, {
 			match.slice = match.slice.slice(2);
 		}
 		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: {${match.slice.join("")}}`);
-		let rule = new Rule.Subrule({ rule: match.slice[0] });
+		let rule = new Rule.Subrule({ ruleName: match.slice[0] });
 		if (argument) rule.argument = argument;
 		return [ rule, match.endIndex ];
 	},
