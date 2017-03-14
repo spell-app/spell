@@ -171,7 +171,9 @@ Object.assign(Rule, {
 
 		// Transform last rule into a repeat for `*` and `+`.
 		if (symbol === "*" || symbol === "+") {
+			let argument = rule.argument;
 			rule = new Rule.Repeat({ rule });
+			if (argument) rule.argument = argument;
 			// push into rule stack in place of old rule
 			rules[rules.length - 1] = rule;
 		}

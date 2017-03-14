@@ -6,6 +6,32 @@ import parser from "./_parser";
 // re-export parser for testing.
 export default parser;
 
+
+parser.addSyntax("property-name", "the {identifier} of", {
+	gatherArguments() {
+		return this.results[1];
+	}
+});
+
+//parser.addExpression("property-of", "{property:property-name}+ {expression}", {
+parser.addExpression("property-of", "(properties:the {identifier} of)+ {expression}", {
+	gatherArguments() {
+
+	},
+
+	toSource(context) {
+		let args = this.gatherArguments();
+		let thing = args.expression.toSource();
+		let properties = args.properties
+			.map( property => property.identifier.toSource() )
+			.reverse()
+			.join(".");
+		return `spell.get(${thing}, '${properties}')`;
+	}
+});
+
+
+
 parser.addSyntax("scope-modifier", "(scope:global|constant|shared)");
 
 parser.addStatement(

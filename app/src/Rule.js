@@ -13,6 +13,9 @@
 //
 import Parser from "./Parser.js";
 
+
+//TODO: make gatherArguments() static and call on this
+
 export default class Rule {
 	constructor(properties) {
 		Object.assign(this, properties);
@@ -259,7 +262,7 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 			let result = this.rule.parse(parser, next);
 			if (!result) break;
 
-			results.push[result];
+			results.push(result);
 			next = result.next();
 		}
 
@@ -270,6 +273,11 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 			endIndex: next.startIndex,
 			stream
 		});
+	}
+
+	gatherArguments() {
+		if (!this.results) return undefined;
+		return this.results.map( result => result.gatherArguments() );
 	}
 
 	toSource() {

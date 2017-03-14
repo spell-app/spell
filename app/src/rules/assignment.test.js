@@ -41,7 +41,6 @@ test("assign boolean to identifier", () => {
 	expect(args.expression.toSource()).toBe(true);
 });
 
-
 test("assign list to identifier", () => {
 	let result = parser.parse("assignment", "a = [1,2,yes,'a']");
 	expect(result).toBeInstanceOf(Rule.Statement);
