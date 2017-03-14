@@ -195,7 +195,7 @@ Object.assign(Rule, {
 			match.slice = match.slice.slice(2);
 		}
 		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: {${match.slice.join("")}}`);
-		let rule = new Rule.Subrule({ ruleName: match.slice[0] });
+		let rule = new Rule.Subrule({ rule: match.slice[0] });
 		if (argument) rule.argument = argument;
 		return [ rule, match.endIndex ];
 	},

@@ -37,9 +37,10 @@ export default class Rule {
 //
 // ## output as source
 //
+	get _arg() { return this.argument || this.ruleName || this.constructor.name }
 
 	gatherArguments() {
-		return this.matched;
+		return this;
 	}
 
 	// Output value for this INSTANTIATED rule as source.
@@ -118,10 +119,10 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 
 
 // Subrule -- name of another rule to be called.
-// `rule.ruleName` is the name of the rule in `parser.rules`.
+// `rule.rule` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
 	parse(parser, stream) {
-		var rule = parser.getRule(this.ruleName);
+		var rule = parser.getRule(this.rule);
 		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.name}'`, this);
 		var result = rule.parse(parser, stream);
 		if (!result) return undefined;
@@ -131,7 +132,7 @@ Rule.Subrule = class Subrule extends Rule {
 	}
 
 	toString() {
-		return `{${this.argument ? this.argument+":" : ""}${this.ruleName}}${this.optional ? '?' : ''}`;
+		return `{${this.argument ? this.argument+":" : ""}${this.rule}}${this.optional ? '?' : ''}`;
 	}
 }
 
@@ -173,16 +174,17 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		if (!this.results) return undefined;
 		let args = {};
 		for (let next of this.results) {
-			let ruleName = next.argument || next.ruleName || next.constructor.name;
+			let argName = next._arg;
 			// For nested rules, recurse to get their arguments
-			let result = (next instanceof Rule.Nested ? next.gatherArguments() : next);
+			let result = next.gatherArguments();
 
-			if (ruleName in args) {
-				if (!Array.isArray(args[ruleName])) args[ruleName] = [args[ruleName]];
-				args[ruleName].push(result);
+			// If arg already exists, convert to an array
+			if (argName in args) {
+				if (!Array.isArray(args[argName])) args[argName] = [args[argName]];
+				args[argName].push(result);
 			}
 			else {
-				args[ruleName] = result;
+				args[argName] = result;
 			}
 		}
 		return args;
@@ -221,15 +223,16 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 				bestMatch = match;
 		}
 		if (!bestMatch) return undefined;
-		return this.clone({
-			matched: bestMatch,
-			endIndex: bestMatch.endIndex,
-			stream
-		});
+		bestMatch.argument = this._arg;
+		return bestMatch;
 	}
 
 	addRule(rule) {
 		this.rules.push(rule);
+	}
+
+	toSource(context) {
+		return this.matched.toSource();
 	}
 
 	toString() {
@@ -274,7 +277,8 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 	}
 
 	toString() {
-		return `${this.rule}${this.optional ? '*' : '+'}`;
+		const rule = (this.rule instanceof Rule.Sequence ? `(${this.rule})` : `${this.rule}`);
+		return `${rule}${this.optional ? '*' : '+'}`;
 	}
 }
 
@@ -320,7 +324,6 @@ Rule.List = class List extends Rule {
 		return this.results[index];
 	}
 
-
 	toSource() {
 		if (!this.results) return undefined;		// TODO: throw???
 		let results = this.results.map( result => result.toSource() ).join(", ");
@@ -328,7 +331,7 @@ Rule.List = class List extends Rule {
 	}
 
 	toString() {
-		return `[${this.argument ? this.argument+":" : ""}${this.item} ${this.delimiter}]`;
+		return `[${this.argument ? this.argument+":" : ""}${this.item} ${this.delimiter}]${this.optional ? '?' : ''}`;
 	}
 };
 

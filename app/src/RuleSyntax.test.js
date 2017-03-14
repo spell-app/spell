@@ -47,13 +47,13 @@ test("parse multiple keywords as a sequence", () => {
 test("parse subrule", () => {
 	let rule = Rule.parseRuleSyntax("{subrule}");
 	expect(rule).toBeInstanceOf(Rule.Subrule);
-	expect(rule.ruleName).toBe("subrule");
+	expect(rule.rule).toBe("subrule");
 });
 
 test("parse subrule with named argument", () => {
 	let rule = Rule.parseRuleSyntax("{arg:subrule}");
 	expect(rule).toBeInstanceOf(Rule.Subrule);
-	expect(rule.ruleName).toBe("subrule");
+	expect(rule.rule).toBe("subrule");
 	expect(rule.argument).toBe("arg");
 
 	expect(rule.toString()).toBe("{arg:subrule}");
@@ -145,10 +145,67 @@ test("parse optional keyword", () => {
 	expect(rule.toString()).toBe("yah?");
 });
 
+test("parse optional subrule", () => {
+	let rule = Rule.parseRuleSyntax("{number}?");
+	expect(rule).toBeInstanceOf(Rule.Subrule);
+	expect(rule.optional).toBe(true);
+
+	expect(rule.toString()).toBe("{number}?");
+});
+
 test("parse optional alternatives", () => {
 	let rule = Rule.parseRuleSyntax("(a|b)?");
 	expect(rule).toBeInstanceOf(Rule.Alternatives);
 	expect(rule.optional).toBe(true);
 
 	expect(rule.toString()).toBe("(a|b)?");
+});
+
+test("parse optional list", () => {
+	let rule = Rule.parseRuleSyntax("[{number},]?");
+	expect(rule).toBeInstanceOf(Rule.List);
+	expect(rule.optional).toBe(true);
+
+	expect(rule.toString()).toBe("[{number} ,]?");
+});
+
+
+//
+//	Repeats
+//
+test("parse * repeated subrule", () => {
+	let rule = Rule.parseRuleSyntax("{number}*");
+	expect(rule).toBeInstanceOf(Rule.Repeat);
+	expect(rule.optional).toBe(true);
+	expect(rule.rule).toBeInstanceOf(Rule.Subrule);
+
+
+	expect(rule.toString()).toBe("{number}*");
+});
+
+test("parse + repeated subrule", () => {
+	let rule = Rule.parseRuleSyntax("{number}+");
+	expect(rule).toBeInstanceOf(Rule.Repeat);
+	expect(rule.optional).toBeUndefined();
+	expect(rule.rule).toBeInstanceOf(Rule.Subrule);
+
+	expect(rule.toString()).toBe("{number}+");
+});
+
+test("parse + repeated sequence", () => {
+	let rule = Rule.parseRuleSyntax("(one or more)+");
+	expect(rule).toBeInstanceOf(Rule.Repeat);
+	expect(rule.optional).toBeUndefined();
+	expect(rule.rule).toBeInstanceOf(Rule.Sequence);
+
+	expect(rule.toString()).toBe("(one or more)+");
+});
+
+test("parse + repeated list", () => {
+	let rule = Rule.parseRuleSyntax("[{number},]+");
+	expect(rule).toBeInstanceOf(Rule.Repeat);
+	expect(rule.optional).toBeUndefined();
+	expect(rule.rule).toBeInstanceOf(Rule.List);
+
+	expect(rule.toString()).toBe("[{number} ,]+");
 });

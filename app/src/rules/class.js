@@ -1,7 +1,7 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
-import Rule from "../Rule";
+import Rule from "../RuleSyntax";
 import parser from "./_parser";
 // re-export parser for testing.
 export default parser;
@@ -14,23 +14,23 @@ parser.addStatement(
 	{
 		toSource(context) {
 			let args = this.gatherArguments();
-			var identifier = args.assignment.identifier.toSource();
-			var value = args.assignment.literal.toSource();
-			let statement = `${identifier} = ${value};`;
+			let identifier = args.assignment.identifier.toSource();
+			let value = args.assignment.expression.toSource();
+			let assignment = `${identifier} = ${value}`;
 
 			var scope = args.scope ? args.scope.toSource() : "local";
 			switch (scope) {
 				case "global":
-					return `global.${statement}`;
+					return `global.${assignment}`;
 
 				case "constant":
-					return `const ${statement}`;
+					return `const ${assignment}`;
 
 				case "shared":
-					return `static ${statement}`;
+					return `static ${assignment}`;
 
 				default:
-					return statement;
+					return assignment;
 			}
 		}
 	}

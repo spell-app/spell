@@ -13,6 +13,9 @@ import TextStream from "./TextStream.js";
 import Rule from "./Rule.js";
 
 export default class Parser {
+	// Set to `true` to output debug info while adding rules
+	static DEBUG = false;
+
 	constructor(properties) {
 		Object.assign(this, properties);
 
@@ -22,7 +25,8 @@ export default class Parser {
 		// Set up standard rule classes as alternates
 		this.addRule("statement", new Rule.Alternatives());
 		this.addRule("expression", new Rule.Alternatives());
-		this.addRule("operator", new Rule.Alternatives());
+		this.addRule("infix-operator", new Rule.Alternatives());
+		this.addRule("postfix-operator", new Rule.Alternatives());
 	}
 
 	getRule(name) {
@@ -36,7 +40,6 @@ export default class Parser {
 	// Returns result of parse.
 	parse(name, stream) {
 		if (typeof stream === "string") stream = new TextStream(stream);
-
 		let rule = this.getRule(name);
 		if (!rule) throw new SyntaxError(`Rule ${name} not understood`, name, stream);
 		stream = this.eatWhitespace(stream);
@@ -59,11 +62,11 @@ export default class Parser {
 		let existing = this.rules[name];
 		if (existing) {
 			if (!(existing instanceof Rule.Alternatives)) {
-				console.log(`Converting rule '${name}' to alternatives`);
+				if (Parser.debug) console.log(`Converting rule '${name}' to alternatives`);
 				existing = new Rule.Alternatives({ name: existing.name, rules: [existing] });
 				this.rules[name] = existing;
 			}
-			console.log(`Adding rule '${rule.ruleName}' to '${name}': `, rule);
+			if (Parser.debug) console.log(`Adding rule '${rule.ruleName}' to '${name}': `, rule);
 			existing.addRule(rule);
 		}
 		else {
@@ -88,31 +91,41 @@ export default class Parser {
 			let rule = Rule.parseRuleSyntax(ruleSyntax, SequenceConstructor);
 
 			// Reflect the rule back out to make sure it looks (more or less) the same
-			console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
+			if (Parser.debug) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
 
 			Object.assign(rule, properties);
 			return this.addRule(name, rule);
 		} catch (e) {
-			console.group(`Error parsing syntax for rule '${name}':`);
-			console.log(`syntax: ${ruleSyntax}`);
-			console.error(e);
-			console.groupEnd();
+			if (console.group) {
+				console.group(`Error parsing syntax for rule '${name}':`);
+				console.log(`syntax: ${ruleSyntax}`);
+				console.error(e);
+				console.groupEnd();
+			}
+			else {
+				console.warn(`Error parsing syntax for rule '${name}':`, e);
+			}
 		}
 	}
 
 	addStatement(name, ruleSyntax, properties) {
 		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
-		return this.addRule("statement", rule);
+		if (rule) return this.addRule("statement", rule);
 	}
 
 	addExpression(name, ruleSyntax, properties) {
 		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
-		return this.addRule("expression", rule);
+		if (rule) return this.addRule("expression", rule);
 	}
 
-	addOperator(name, ruleSyntax, properties) {
+	addInfixOperator(name, ruleSyntax, properties) {
 		var rule = this.addSyntax(name, ruleSyntax, properties);
-		return this.addRule("operator", rule);
+		if (rule) return this.addRule("infix-operator", rule);
+	}
+
+	addPostfixOperator(name, ruleSyntax, properties) {
+		var rule = this.addSyntax(name, ruleSyntax, properties);
+		if (rule) return this.addRule("postfix-operator", rule);
 	}
 
 
