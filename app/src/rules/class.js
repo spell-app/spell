@@ -7,25 +7,51 @@ import parser from "./_parser";
 export default parser;
 
 
-parser.addSyntax("property-name", "the {identifier} of", {
-	gatherArguments() {
-		return this.results[1];
+
+// TODO: move into 'ordinal' or some such
+parser.addSyntax("ordinal", "(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|penultimate|last|final)", {
+	toSource(context) {
+		switch (this.matched) {
+			case "first":		return 1;
+			case "second":		return 2;
+			case "third":		return 3;
+			case "fourth":		return 4;
+			case "fifth":		return 5;
+			case "sixth":		return 6;
+			case "seventh":		return 7;
+			case "eighth":		return 8;
+			case "ninth":		return 9;
+			case "tenth":		return 10;
+			case "penultimate":	return -2;
+			case "last":		return -1;
+			case "final":		return -1;
+		}
 	}
 });
 
+parser.addExpression("ordinal-expression", "the {ordinal} item of {expression}", {
+	toSource() {
+		let args = this.gatherArguments();
+		let ordinal = args.ordinal.toSource();
+		let thing = args.expression.toSource();
+		return `spell.getItem(${thing}, ordinal)`;
+	}
+});
+
+
 //parser.addExpression("property-of", "{property:property-name}+ {expression}", {
 parser.addExpression("property-of", "(properties:the {identifier} of)+ {expression}", {
-	gatherArguments() {
-
-	},
+ 	gatherArguments() {
+		let args = Rule.Expression.gatherArguments(this);
+		// transform properties and reverse order
+		args.properties = args.properties.map( sequence => sequence.identifier ).reverse();
+		return args;
+ 	},
 
 	toSource(context) {
 		let args = this.gatherArguments();
 		let thing = args.expression.toSource();
-		let properties = args.properties
-			.map( property => property.identifier.toSource() )
-			.reverse()
-			.join(".");
+		let properties = args.properties.map( identifier => identifier.toSource() ).join(".");
 		return `spell.get(${thing}, '${properties}')`;
 	}
 });

@@ -42,8 +42,14 @@ export default class Rule {
 //
 	get _arg() { return this.argument || this.ruleName || this.constructor.name }
 
+	// "gather" arguments in preparation to call `toSource()`
+	// Note that we define `gatherArguments()` statically on each subclass
+	//	and then instance method calls it on itself.
+	static gatherArguments(rule) {
+		return rule;
+	}
 	gatherArguments() {
-		return this;
+		return this.constructor.gatherArguments(this);
 	}
 
 	// Output value for this INSTANTIATED rule as source.
@@ -173,10 +179,10 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 	//		- `results.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
 	//		- `results.ruleName`:		name of rule when defined
 	//		- rule type:				name of the rule type
-	gatherArguments() {
-		if (!this.results) return undefined;
+	static gatherArguments(sequence) {
+		if (!sequence.results) return undefined;
 		let args = {};
-		for (let next of this.results) {
+		for (let next of sequence.results) {
 			let argName = next._arg;
 			// For nested rules, recurse to get their arguments
 			let result = next.gatherArguments();
@@ -275,9 +281,9 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 		});
 	}
 
-	gatherArguments() {
-		if (!this.results) return undefined;
-		return this.results.map( result => result.gatherArguments() );
+	static gatherArguments(repeat) {
+		if (!repeat.results) return undefined;
+		return repeat.results.map( result => result.gatherArguments() );
 	}
 
 	toSource() {
