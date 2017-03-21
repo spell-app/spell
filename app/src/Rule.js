@@ -153,7 +153,6 @@ Rule.Nested = class Nested extends Rule {}
 
 // Sequence of rules to match (auto-excluding whitespace).
 Rule.Sequence = class Sequence extends Rule.Nested {
-	// Throws of mandatory rule can't be matched.
 	parse(parser, stream) {
 		let results = [], next = stream;
 		for (let rule of this.rules) {
