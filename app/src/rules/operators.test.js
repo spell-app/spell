@@ -5,8 +5,6 @@ test("parser is defined", () => {
 	expect(parser).toBeDefined();
 });
 
-console.warn(parser.parse);
-
 //
 //##	Infix operators
 //

@@ -122,12 +122,22 @@ export default class Parser {
 
 	addInfixOperator(name, ruleSyntax, properties) {
 		var rule = this.addSyntax(name, ruleSyntax, properties);
-		if (rule) return this.addRule("infix-operator", rule);
+		if (rule) {
+			if (!rule.transformer) {
+				throw new TypeError(`Expected infix operator rule '${name}' to specify 'transformer' function`)
+			}
+			return this.addRule("infix-operator", rule);
+		}
 	}
 
 	addPostfixOperator(name, ruleSyntax, properties) {
 		var rule = this.addSyntax(name, ruleSyntax, properties);
-		if (rule) return this.addRule("postfix-operator", rule);
+		if (rule) {
+			if (!rule.transformer) {
+				throw new TypeError(`Expected postfix operator rule '${name}' to specify 'transformer' function`);
+			}
+			return this.addRule("postfix-operator", rule);
+		}
 	}
 
 

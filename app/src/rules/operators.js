@@ -42,9 +42,6 @@ parser.addSyntax(
 			let rhs = args.rhs.toSource(context);
 
 			let transformer = args.operator.matched.transformer;
-			if (typeof transformer !== "function") {
-				throw new TypeError("Expected infix operator 'transformer' to be a function", args);
-			}
 			return transformer(lhs, rhs);
 		}
 	}
@@ -70,9 +67,6 @@ parser.addSyntax(
 			let args = this.gatherArguments();
 			let lhs = args.lhs.toSource(context);
 			let transformer = args.operator.matched.transformer;
-			if (typeof transformer !== "function") {
-				throw new TypeError("Expected postfix operator 'transformer' to be a function", args);
-			}
 			return transformer(lhs);
 		}
 	}
