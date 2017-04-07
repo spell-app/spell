@@ -2,7 +2,6 @@
 //	# Rules for creating variables, property access, etc
 //
 
-import Rule from "../RuleSyntax";
 import parser from "./_parser";
 import "./core";
 

@@ -1,7 +1,6 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
-import Rule from "../RuleSyntax";
 import parser from "./_parser";
 // re-export parser for testing.
 export default parser;

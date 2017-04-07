@@ -1,7 +1,6 @@
 //
 //	# Rules for dealing with numbers
 //
-import Rule from "../RuleSyntax";
 import parser from "./_parser";
 // re-export parser for testing.
 export default parser;
