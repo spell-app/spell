@@ -35,6 +35,9 @@ export default class TextStream {
 // 		return this.clone({ endIndex: this.startIndex + length });
 // 	}
 
+//
+// ## Matching
+//
 	// Match `pattern` as regex at head of stream.
 	// NOTE: regexes should start with `^`!
 	// Returns match or undefined.
@@ -49,6 +52,10 @@ export default class TextStream {
 		return this.head.startsWith(string);
 	}
 
+
+//
+// ## Reflection
+//
 	// Return text of string starting at our `startIndex`
 	get head() {
 		return this.range();
@@ -69,12 +76,6 @@ export default class TextStream {
 		return this.startIndex === this.length;
 	}
 
-
-
-
-	//
-	//## Reflection
-	//
 	toString() {
 		return this.text
 	};
