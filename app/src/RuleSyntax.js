@@ -40,12 +40,10 @@ Object.assign(Rule, {
 		return syntaxStream;
 	},
 
-	parseRuleSyntax_tokens(syntaxStream, rules, startIndex = 0, lastIndex = syntaxStream.length) {
+	parseRuleSyntax_tokens(syntaxStream, rules, startIndex = 0) {
+		let lastIndex = syntaxStream.length;
 		while (startIndex < lastIndex) {
 			let [ rule, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex);
-			if (endIndex >= lastIndex)
-				throw new SyntaxError("Past lastIndex");
-
 			if (rule) {
 				var last = rules[rules.length-1];
 				// If this is a `String` and last was a `String`, merge together
@@ -68,7 +66,6 @@ Object.assign(Rule, {
 			case "{":	return Rule.parseRuleSyntax_subrule(syntaxStream, rules, startIndex);
 			case "(":	return Rule.parseRuleSyntax_parentheses(syntaxStream, rules, startIndex);
 			case "[":	return Rule.parseRuleSyntax_list(syntaxStream, rules, startIndex);
-			case "|":	return Rule.parseRuleSyntax_alternatives(syntaxStream, rules, startIndex);
 			case "*":
 			case "+":
 			case "?":	return Rule.parseRuleSyntax_repeat(syntaxStream, rules, startIndex);
@@ -77,6 +74,7 @@ Object.assign(Rule, {
 			case "}":
 			case ")":
 			case "]":
+			case "|":
 				throw new SyntaxError(`Unexpected ${syntaxToken} found as item ${startIndex} of ${this.syntax}`);
 
 			default:
@@ -224,35 +222,5 @@ Object.assign(Rule, {
 		if (argument) rule.argument = argument;
 		return [ rule, endIndex ];
 	},
-
-	// Match alternate `( a | b | c )`.
-	// NOTE: this should only happen inside a group...
-	parseRuleSyntax_alternatives(syntaxStream, rules, startIndex) {
-		let [ rule, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex + 1);
-
-		// create alternates rule with lastToken, or re-use existing alternates rile
-		let alternates;
-		let lastToken = rules.pop();
-		if (lastToken instanceof Rule.Alternatives) {
-			alternates = lastToken;
-		}
-		else {
-			alternates = new Rule.Alternatives({ rules: [] });
-
-			// if no last rule, we have a rule like  `( | abc)` which means that the alternates is optional
-			if (!lastToken)
-				alternates.optional = true;
-			else
-				alternates.rules.push(lastToken);
-		}
-		// add parsed rule to the alternatess
-		alternates.rules.push(rule);
-
-		// add back to the end of rules
-		rules.push(alternates);
-
-		return [ undefined, endIndex ];
-	},
-
 
 });
