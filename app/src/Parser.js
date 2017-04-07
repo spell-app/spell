@@ -83,6 +83,8 @@ export default class Parser {
 		return this.addRule(name, rule);
 	}
 
+//TODO: move to `ruleSyntax.js`
+
 	// Parse a `ruleSyntax` rule and add it to our list of rules.
 	// Returns the new rule.
 	// Logs parsing errors but allows things to continue.

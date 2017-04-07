@@ -210,9 +210,9 @@ Rule.Statement = class statement extends Rule.Sequence {}
 
 
 // Alternative syntax.
-// NOTE: Currently takes the first valid match.
+// NOTE: Currently takes the longest valid match.
 // TODO: match all valid alternatives
-// TODO: rename
+// TODO: rename?
 Rule.Alternatives = class Alternatives extends Rule.Nested {
 	constructor(props) {
 		super(props);
@@ -231,8 +231,12 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 				bestMatch = match;
 		}
 		if (!bestMatch) return undefined;
-		bestMatch.argument = this._arg;
-		return bestMatch;
+
+		return this.clone({
+			matched: bestMatch,
+			endIndex: bestMatch.endIndex,
+			stream
+		});
 	}
 
 	addRule(rule) {
