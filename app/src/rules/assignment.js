@@ -8,7 +8,7 @@ import "./core";
 // re-export parser for testing.
 export default parser;
 
-// TODO: {property-expression} also works...
+// TODO: {property-expression} also works... {assignable-expression} ???
 parser.addStatement("assignment", "{identifier} = {expression}", {
 	toSource(context) {
 		let args = this.gatherArguments();

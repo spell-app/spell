@@ -106,7 +106,7 @@ test("parse list with keyword delimiter", () => {
 });
 
 test("fail list with extra stuff", () => {
-	expect(() => Rule.parseRuleSyntax("[{number}and bad input]"))
+	expect(() => Rule.parseRuleSyntax("[{number}, bad input]"))
 		.toThrow(SyntaxError);
 });
 

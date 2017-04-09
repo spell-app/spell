@@ -1,6 +1,8 @@
 // Spell "English" parser strawman
 
-// TODO:	this doesn't worky:   `{a} (is|is not) {b}`
+// TODO:	consolidate subsequent literal words / strings into a single regex?
+// TODO:	`test` function for quick no-good hit on `{a} blah blah {b}`?
+// TODO:	this doesn't work:   `{expression} is {expression}`
 // TODO:	custom SyntaxError etc which understand streams
 // TODO:	break `file` into lines and process each (incl. substr/match not going beyond the end)
 // TODO:	nesting -- is this just indent = "add block scope"
@@ -11,6 +13,10 @@
 
 import TextStream from "./TextStream.js";
 import Rule from "./Rule.js";
+
+// GRRR... will SOMEONE on the node team please implement console.group ???
+if (!console.group) console.group = console.log;
+if (!console.groupEnd) console.groupEnd = console.log;
 
 export default class Parser {
 	// Set to `true` to output debug info while adding rules
@@ -98,15 +104,9 @@ export default class Parser {
 			Object.assign(rule, properties);
 			return this.addRule(name, rule);
 		} catch (e) {
-			if (console.group) {
-				console.group(`Error parsing syntax for rule '${name}':`);
-				console.log(`syntax: ${ruleSyntax}`);
-				console.error(e);
-				console.groupEnd();
-			}
-			else {
-				console.warn(`Error parsing syntax for rule '${name}':`, e);
-			}
+			console.group(`Error parsing syntax for rule '${name}':`);
+			console.log(`syntax: ${ruleSyntax}`);
+			console.error(e);
 		}
 	}
 

@@ -8,6 +8,12 @@ test("parser is defined", () => {
 //
 //##	Infix operators
 //
+test("infix operators require a transformer function", () => {
+	expect(() => {
+		parser.addInfixOperator("foo", "foo");
+	}).toThrow(TypeError);
+});
+
 test("is operator", () => {
 	let result = parser.parse("infix-operator-expression", "a is 1");
 	expect(result).toBeInstanceOf(Rule.Sequence);
@@ -137,6 +143,12 @@ test("is less than or equal to operator", () => {
 //
 //## Postfix operators
 //
+test("postfix operators require a transformer function", () => {
+	expect(() => {
+		parser.addPostfixOperator("foo", "foo");
+	}).toThrow(TypeError);
+});
+
 test("is defined operator", () => {
 	let result = parser.parse("postfix-operator-expression", "a is defined");
 	expect(result).toBeInstanceOf(Rule.Sequence);

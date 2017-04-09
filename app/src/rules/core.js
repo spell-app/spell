@@ -83,6 +83,7 @@ let bool = parser.addRule("boolean", new Rule.Boolean({
 }));
 parser.addRule("expression", bool);
 
+
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
 //parser.addPattern("identifier", /^[a-z][\w\d\-_]*/);
@@ -98,7 +99,7 @@ let identifier = parser.addRule("identifier", new Rule.Identifier({
 parser.addRule("expression", identifier);
 
 // Literal value as number, text or boolean.
-//TODO: this is an expression... ?
+//TODO: this is an expression... but installing it that way breaks parsing...?
 parser.addSyntax("literal", "(literal:{number}|{text}|{boolean})");
 
 
