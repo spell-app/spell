@@ -89,58 +89,6 @@ export default class Parser {
 		return this.addRule(name, rule);
 	}
 
-//TODO: move to `ruleSyntax.js`
-
-	// Parse a `ruleSyntax` rule and add it to our list of rules.
-	// Returns the new rule.
-	// Logs parsing errors but allows things to continue.
-	addSyntax(name, ruleSyntax, properties, SequenceConstructor = Rule.Sequence) {
-		try {
-			let rule = Rule.parseRuleSyntax(ruleSyntax, SequenceConstructor);
-
-			// Reflect the rule back out to make sure it looks (more or less) the same
-			if (Parser.debug) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
-
-			Object.assign(rule, properties);
-			return this.addRule(name, rule);
-		} catch (e) {
-			console.group(`Error parsing syntax for rule '${name}':`);
-			console.log(`syntax: ${ruleSyntax}`);
-			console.error(e);
-		}
-	}
-
-	addStatement(name, ruleSyntax, properties) {
-		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
-		if (rule) return this.addRule("statement", rule);
-	}
-
-	addExpression(name, ruleSyntax, properties) {
-		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
-		if (rule) return this.addRule("expression", rule);
-	}
-
-	addInfixOperator(name, ruleSyntax, properties) {
-		var rule = this.addSyntax(name, ruleSyntax, properties);
-		if (rule) {
-			if (!rule.transformer) {
-				throw new TypeError(`Expected infix operator rule '${name}' to specify 'transformer' function`)
-			}
-			return this.addRule("infix-operator", rule);
-		}
-	}
-
-	addPostfixOperator(name, ruleSyntax, properties) {
-		var rule = this.addSyntax(name, ruleSyntax, properties);
-		if (rule) {
-			if (!rule.transformer) {
-				throw new TypeError(`Expected postfix operator rule '${name}' to specify 'transformer' function`);
-			}
-			return this.addRule("postfix-operator", rule);
-		}
-	}
-
-
 //
 // ## Utility methods
 //
