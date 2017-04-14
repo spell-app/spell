@@ -1,5 +1,35 @@
+To get started
+----------------
+- Clone this repo
+- `cd <repo location>`
+- `npm install`
+
+
+To compile code
+----------------
+- `cd <repo location>`
+- `npm run watch`
+
+
+To test
+----------------
+- `cd <repo location>`
+- `npm test`
+
+and/or
+
+- `jest src/RuleSyntax.test.js`
+
+and/ or
+
+- `jest --coverage`
+
+
+TODO
+----
+
 - TODOC: basic structure
-- TODOC: ambiguous parsing and context to disambiguate 
+- TODOC: ambiguous parsing and context to disambiguate
 
 
 Parser operation
@@ -66,4 +96,4 @@ RuleSyntax
 
 - TODO: describe results of matching rules
 - TODO: describe using `(name:...)` to name a rule/subrule/list
- 
+
