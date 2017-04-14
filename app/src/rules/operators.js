@@ -36,12 +36,16 @@ parser.addInfixOperator("lt", "(<|is less than)", { transformer(a,b) { return`($
 parser.addInfixOperator("lte", "(<=|is less than or equal to)", { transformer(a,b) { return`(${a} <= ${b})` }});
 
 //TODO:  can't add `+` as a rule, fix this then add these
-// parser.addInfixOperator("plus", "(\\+|plus)", { transformer(a,b) { return`(${a} + ${b})` }});
-// parser.addInfixOperator("minus", "(-|minus)", { transformer(a,b) { return`(${a} - ${b})` }});
-// parser.addInfixOperator("times", "(\\*|times)", { transformer(a,b) { return`(${a} * ${b})` }});
-// parser.addInfixOperator("divided-by", "(/|divided by)", { transformer(a,b) { return`(${a} / ${b})` }});
+parser.addInfixOperator("plus", "(\\+|plus)", { transformer(a,b) { return`(${a} + ${b})` }});
+parser.addInfixOperator("minus", "(-|minus)", { transformer(a,b) { return`(${a} - ${b})` }});
+parser.addInfixOperator("times", "(\\*|times)", { transformer(a,b) { return`(${a} * ${b})` }});
+parser.addInfixOperator("divided-by", "(/|divided by)", { transformer(a,b) { return`(${a} / ${b})` }});
+
+//TODO:  `+=` etc?  other math functions?
 
 // Add infix operators to identifier blacklist
+// HMM... folks might complain about not being able to use "a" as a single variable name...
+// TODO: make this part of `addInfixOperator` ???
 // TESTME
 parser.identifier.addToBlacklist(
 	"and", "or", "is", "not", "exactly",

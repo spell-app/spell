@@ -18,7 +18,6 @@ Expressions
 
 
 Identifiers
-- Lots of things like "is", prepositions, etc are very bad identifier names
-	- assuming single word identifiers
-	- eg: all operator words???
+- Adding fairly extensive identifier blacklist
+	- `a` is unfortunate (eg: with math)
 - identifiers as nouns / adjectives only???

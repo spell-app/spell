@@ -6,8 +6,8 @@ import parser from "./_parser";
 export default parser;
 
 
-//parser.addExpression("property-of", "{property:property-name}+ {expression}", {
-parser.addExpression("property-of", "(properties:the {identifier} of)+ {expression}", {
+//parser.addExpression("property-expression", "{property:property-name}+ {expression}", {
+parser.addExpression("property-expression", "(properties:the {identifier} of)+ {expression}", {
  	gatherArguments() {
 		let args = Rule.Expression.gatherArguments(this);
 		// transform properties and reverse order

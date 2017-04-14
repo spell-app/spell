@@ -62,6 +62,12 @@ Object.assign(Rule, {
 	parseRuleSyntax_token(syntaxStream, rules, startIndex = 0) {
 		var syntaxToken = syntaxStream[startIndex];
 
+		// if we got a "\\" (which also has to go into the source string as "\\")
+		// treat the next bit as a literal string rather than as a special character.
+		if (syntaxToken === "\\") {
+			return Rule.parseRuleSyntax_string(syntaxStream, rules, startIndex + 1);
+		}
+
 		switch (syntaxToken) {
 			case "{":	return Rule.parseRuleSyntax_subrule(syntaxStream, rules, startIndex);
 			case "(":	return Rule.parseRuleSyntax_parentheses(syntaxStream, rules, startIndex);
