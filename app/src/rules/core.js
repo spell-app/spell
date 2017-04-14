@@ -14,6 +14,42 @@ export default parser;
 Rule.Whitespace = class whitespace extends Rule.Pattern {}
 parser.addRule("whitespace", new Rule.Whitespace({ pattern: /^\s+/, optional: true }));
 
+// `identifier` = variables or property name.
+// MUST start with a lower-case letter (?)
+//parser.addPattern("identifier", /^[a-z][\w\d\-_]*/);
+Rule.Identifier = class identifier extends Rule.Pattern {};
+let identifier = parser.addRule("identifier", new Rule.Identifier({
+	pattern: /^[a-z][\w\-]*/,
+	// Convert "-" to "_" in source output.
+	toSource: function(context) {
+		return this.matched.replace(/\-/g, "_");
+	}
+}));
+parser.addRule("expression", identifier);
+
+// Stick `identifier` on `parser` so we can add to its blacklist easily.
+parser.identifier = identifier;
+
+// Add English prepositions as to identifier blacklist.
+// TESTME
+parser.identifier.addToBlacklist(
+	"about", "above", "after", "as", "at",
+	"before", "behind", "below", "beneath", "beside", "between", "beyond", "by",
+	"down", "during",
+	"except",
+	"for", "from",
+	"in", "into",
+	"less", "long",
+	"minus", "more",
+	"near",
+	"of", "off", "on", "onto", "opposite", "out", "outside", "over",
+	"short", "since",
+	"than", "then", "through", "thru", "to", "toward", "towards",
+	"under", "underneath", "until", "up", "upon", "upside",
+	"versus", "vs",
+	"with", "within", "without",
+);
+
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
 //parser.addPattern("typename", /^[A-Z][\w\d\-_]*/);
@@ -82,43 +118,8 @@ let bool = parser.addRule("boolean", new Rule.Boolean({
 	}
 }));
 parser.addRule("expression", bool);
-
-
-// `identifier` = variables or property name.
-// MUST start with a lower-case letter (?)
-//parser.addPattern("identifier", /^[a-z][\w\d\-_]*/);
-//TODO: don't accept certain keywords???
-Rule.Identifier = class identifier extends Rule.Pattern {};
-let identifier = parser.addRule("identifier", new Rule.Identifier({
-	pattern: /^[a-z][\w\-]*/,
-	// Convert "-" to "_" in source output.
-	toSource: function(context) {
-		return this.matched.replace(/\-/g, "_");
-	}
-}));
-parser.addRule("expression", identifier);
-
-// Stick `identifier` on `parser` so we can add to its blacklist easily.
-parser.identifier = identifier;
-
-// Add English prepositions as to identifier blacklist.
-parser.identifier.addToBlacklist(
-	"about", "above", "after", "as", "at",
-	"before", "behind", "below", "beneath", "beside", "between", "beyond", "by",
-	"down", "during",
-	"except",
-	"for", "from",
-	"in", "into",
-	"less", "long",
-	"minus", "more",
-	"near",
-	"of", "off", "on", "onto", "opposite", "out", "outside", "over",
-	"short", "since",
-	"than", "then", "through", "thru", "to", "toward", "towards",
-	"under", "underneath", "until", "up", "upon", "upside",
-	"versus", "vs",
-	"with", "within", "without",
-);
+// Add tokens identifier blacklist.
+parser.identifier.addToBlacklist("true", "false", "yes", "no", "success", "failure", "ok", "cancel");
 
 // Literal value as number, text or boolean.
 //TODO: this is an expression... but installing it that way breaks parsing...?
