@@ -30,24 +30,39 @@ parser.addRule("expression", identifier);
 // Stick `identifier` on `parser` so we can add to its blacklist easily.
 parser.identifier = identifier;
 
-// Add English prepositions as to identifier blacklist.
+// Add English prepositions to identifier blacklist.
+//
+// Wikipedia "Preposition":
+//	"Prepositions...are a class of words that
+//	express spatial or temporal relations  (in, under, towards, before)
+//	or mark various semantic roles (of, for).
 // TESTME
 parser.identifier.addToBlacklist(
-	"about", "above", "after", "as", "at",
+	"about", "above", "after", "and", "as", "at",
 	"before", "behind", "below", "beneath", "beside", "between", "beyond", "by",
-	"down", "during",
-	"except",
+	"defined", "down", "during",
+	"empty", "exactly", "except",
 	"for", "from",
+	"greater",
 	"in", "into",
 	"less", "long",
 	"minus", "more",
-	"near",
+	"near", "not",
 	"of", "off", "on", "onto", "opposite", "out", "outside", "over",
 	"short", "since",
 	"than", "then", "through", "thru", "to", "toward", "towards",
-	"under", "underneath", "until", "up", "upon", "upside",
+	"undefined", "under", "underneath", "unique", "until", "up", "upon", "upside",
 	"versus", "vs",
 	"with", "within", "without",
+);
+
+// Add common english verbs to identifier blacklist.
+parser.identifier.addToBlacklist(
+	"are",
+	"do", "does",
+	"contains",
+	"has", "have",
+	"is",
 );
 
 // `Type` = type name.
@@ -104,12 +119,11 @@ parser.addRule("expression", text);
 // TODO: better name for this???
 Rule.Boolean = class boolean extends Rule.Pattern {};
 let bool = parser.addRule("boolean", new Rule.Boolean({
-	pattern: /^(true|false|yes|no|success|failure|ok|cancel)\b/,
+	pattern: /^(true|false|yes|no|ok|cancel)\b/,
 	toSource: function(context) {
 		switch (this.matched) {
 			case "true":
 			case "yes":
-			case "success":
 			case "ok":
 				return true;
 			default:
@@ -120,7 +134,11 @@ let bool = parser.addRule("boolean", new Rule.Boolean({
 parser.addRule("expression", bool);
 // Add tokens identifier blacklist.
 // TESTME
-parser.identifier.addToBlacklist("true", "false", "yes", "no", "success", "failure", "ok", "cancel");
+parser.identifier.addToBlacklist(
+	"true", "false",
+	"yes", "no",
+	"ok", "cancel"
+);
 
 // Literal list (array), eg:  `[1,2,true,false ]`
 let list = parser.addExpression(

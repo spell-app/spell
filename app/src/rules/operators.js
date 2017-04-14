@@ -25,11 +25,12 @@ parser.addInfixOperator("is-not-exactly", "is not exactly", { transformer(a,b) {
 parser.addInfixOperator("is-type-of", ["is a", "is an"], { transformer(thing, type) { return `spell.isOfType(${thing}, '${type}')` }});
 parser.addInfixOperator("is-not-type-of", ["is not a", "is not an"], { transformer(thing, type) { return `!spell.isOfType(${thing}, '${type}')` }});
 
-//TODO: `spell.isIn(thing, collection)`
-parser.addInfixOperator("is-in", ["is in", "is one of"], { transformer(thing, listLikeThing) { return `spell.isIn(${thing}, ${listLikeThing})` }});
-parser.addInfixOperator("is-not-in", ["is not in", "is not one of"], { transformer(thing, listLikeThing) { return `!spell.isIn(${thing}, ${listLikeThing})` }});
-parser.addInfixOperator("includes", ["includes", "contains"], { transformer(listLikeThing, thing) { return `spell.isIn(${thing}, ${listLikeThing})` }});
-parser.addInfixOperator("doesnt-include", ["does not include", "doesnt include", "does not contain", "doesnt contain"], { transformer(listLikeThing, thing) { return `!spell.isIn(${thing}, ${listLikeThing})` }});
+//TODO: `spell.contains(collection, thing)`
+parser.addInfixOperator("is-in", ["is in", "is one of"], { transformer(thing, list) { return `spell.contains(${list}, ${thing})` }});
+parser.addInfixOperator("is-not-in", ["is not in", "is not one of"], { transformer(thing, list) { return `!spell.contains(${list}, ${thing})` }});
+//TESTME
+parser.addInfixOperator("includes", ["includes", "contains"], { transformer(list, thing) { return `spell.contains(${list}, ${thing})` }});
+parser.addInfixOperator("doesnt-include", ["does not include", "doesnt include", "does not contain", "doesnt contain"], { transformer(list, thing) { return `!spell.contains(${list}, ${thing})` }});
 
 parser.addInfixOperator("gt", [">", "is greater than"], { transformer(a,b) { return`(${a} > ${b})` }});
 parser.addInfixOperator("gte", [">=", "is greater than or equal to"], { transformer(a,b) { return`(${a} >= ${b})` }});
@@ -37,22 +38,14 @@ parser.addInfixOperator("lt", ["<", "is less than"], { transformer(a,b) { return
 parser.addInfixOperator("lte", ["<=", "is less than or equal to"], { transformer(a,b) { return`(${a} <= ${b})` }});
 
 //TODO:  can't add `+` as a rule, fix this then add these
-parser.addInfixOperator("plus", ["\\+", "plus"], { transformer(a,b) { return`(${a} + ${b})` }});
-parser.addInfixOperator("minus", ["-", "minus"], { transformer(a,b) { return`(${a} - ${b})` }});
-parser.addInfixOperator("times", ["\\*", "times"], { transformer(a,b) { return`(${a} * ${b})` }});
-parser.addInfixOperator("divided-by", ["/", "divided by"], { transformer(a,b) { return`(${a} / ${b})` }});
+//TODO:  operator precedence???
+//TESTME
+parser.addInfixOperator("plus", ["\\+", "plus"], { transformer(a,b) { return`${a} + ${b}` }});
+parser.addInfixOperator("minus", ["-", "minus"], { transformer(a,b) { return`${a} - ${b}` }});
+parser.addInfixOperator("times", ["\\*", "times"], { transformer(a,b) { return`${a} * ${b}` }});
+parser.addInfixOperator("divided-by", ["/", "divided by"], { transformer(a,b) { return`${a} / ${b}` }});
 
 //TODO:  `+=` etc?  other math functions?
-
-// Add infix operators to identifier blacklist
-// HMM... folks might complain about not being able to use "a" as a single variable name...
-// TODO: make this part of `addInfixOperator` ???
-// TESTME
-parser.identifier.addToBlacklist(
-	"and", "or", "is", "not", "exactly",
-	"a", "an", "one", "greater", "less", "equal",
-	"plus", "minus", "times", "divided"
-);
 
 parser.addSyntax(
 	"infix-operator-expression",
@@ -79,12 +72,6 @@ parser.addPostfixOperator("is-undefined", "is undefined", { transformer(thing) {
 //TODO: `spell.isEmpty(thing)`
 parser.addPostfixOperator("is-empty", "is empty", { transformer(thing) { return `spell.isEmpty(${thing})` }});
 parser.addPostfixOperator("is-not-empty", "is not empty", { transformer(thing) { return `!spell.isEmpty(${thing})` }});
-
-// Add postfix operators to identifier blacklist
-// TESTME
-parser.identifier.addToBlacklist(
-	"defined", "undefined", "empty"
-);
 
 parser.addSyntax(
 	"postfix-operator-expression",
