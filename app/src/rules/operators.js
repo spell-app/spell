@@ -11,6 +11,9 @@ export default parser;
 //## Infix operators:   `{lhs} <operator> {rhs}`, eg: `a is 1`
 // NOTE: `operator.transformer` MUST return a function which transforms two arguments (`lhs` and `rhs`) into output.
 
+parser.addInfixOperator("and", "and", { transformer(a,b) { return `(${a} && ${b})` }});
+parser.addInfixOperator("or", "or", { transformer(a,b) { return `(${a} || ${b})` }});
+
 parser.addInfixOperator("is", "is", { transformer(a,b) { return `(${a} == ${b})` }});
 parser.addInfixOperator("is-not", "is not", { transformer(a,b) { return `(${a} != ${b})` }});
 
@@ -31,6 +34,20 @@ parser.addInfixOperator("gt", "(>|is greater than)", { transformer(a,b) { return
 parser.addInfixOperator("gte", "(>=|is greater than or equal to)", { transformer(a,b) { return`(${a} >= ${b})` }});
 parser.addInfixOperator("lt", "(<|is less than)", { transformer(a,b) { return`(${a} < ${b})` }});
 parser.addInfixOperator("lte", "(<=|is less than or equal to)", { transformer(a,b) { return`(${a} <= ${b})` }});
+
+//TODO:  can't add `+` as a rule, fix this then add these
+// parser.addInfixOperator("plus", "(\\+|plus)", { transformer(a,b) { return`(${a} + ${b})` }});
+// parser.addInfixOperator("minus", "(-|minus)", { transformer(a,b) { return`(${a} - ${b})` }});
+// parser.addInfixOperator("times", "(\\*|times)", { transformer(a,b) { return`(${a} * ${b})` }});
+// parser.addInfixOperator("divided-by", "(/|divided by)", { transformer(a,b) { return`(${a} / ${b})` }});
+
+// Add infix operators to identifier blacklist
+// TESTME
+parser.identifier.addToBlacklist(
+	"and", "or", "is", "not", "exactly",
+	"a", "an", "one", "greater", "less", "equal",
+	"plus", "minus", "times", "divided"
+);
 
 parser.addSyntax(
 	"infix-operator-expression",
@@ -58,6 +75,11 @@ parser.addPostfixOperator("is-undefined", "is undefined", { transformer(thing) {
 parser.addPostfixOperator("is-empty", "is empty", { transformer(thing) { return `spell.isEmpty(${thing})` }});
 parser.addPostfixOperator("is-not-empty", "is not empty", { transformer(thing) { return `!spell.isEmpty(${thing})` }});
 
+// Add postfix operators to identifier blacklist
+// TESTME
+parser.identifier.addToBlacklist(
+	"defined", "undefined", "empty"
+);
 
 parser.addSyntax(
 	"postfix-operator-expression",

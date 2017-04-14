@@ -98,6 +98,28 @@ let identifier = parser.addRule("identifier", new Rule.Identifier({
 }));
 parser.addRule("expression", identifier);
 
+// Stick `identifier` on `parser` so we can add to its blacklist easily.
+parser.identifier = identifier;
+
+// Add English prepositions as to identifier blacklist.
+parser.identifier.addToBlacklist(
+	"about", "above", "after", "as", "at",
+	"before", "behind", "below", "beneath", "beside", "between", "beyond", "by",
+	"down", "during",
+	"except",
+	"for", "from",
+	"in", "into",
+	"less", "long",
+	"minus", "more",
+	"near",
+	"of", "off", "on", "onto", "opposite", "out", "outside", "over",
+	"short", "since",
+	"than", "then", "through", "thru", "to", "toward", "towards",
+	"under", "underneath", "until", "up", "upon", "upside",
+	"versus", "vs",
+	"with", "within", "without",
+);
+
 // Literal value as number, text or boolean.
 //TODO: this is an expression... but installing it that way breaks parsing...?
 parser.addSyntax("literal", "(literal:{number}|{text}|{boolean})");
