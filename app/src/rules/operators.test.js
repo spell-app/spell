@@ -66,25 +66,25 @@ test("is not an operator", () => {
 test("is in operator", () => {
 	let result = parser.parse("infix-operator-expression", "avar is in myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.isIn(avar, myList)");
+	expect(result.toSource()).toBe("spell.contains(myList, avar)");
 });
 
 test("is one of operator", () => {
 	let result = parser.parse("infix-operator-expression", "avar is one of myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.isIn(avar, myList)");
+	expect(result.toSource()).toBe("spell.contains(myList, avar)");
 });
 
 test("is not in operator", () => {
 	let result = parser.parse("infix-operator-expression", "avar is not in myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.isIn(avar, myList)");
+	expect(result.toSource()).toBe("!spell.contains(myList, avar)");
 });
 
 test("is not one of operator", () => {
 	let result = parser.parse("infix-operator-expression", "avar is not one of myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.isIn(avar, myList)");
+	expect(result.toSource()).toBe("!spell.contains(myList, avar)");
 });
 
 test("> operator", () => {

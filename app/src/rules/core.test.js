@@ -204,9 +204,6 @@ test("correctly matches boolean type", () => {
 	result = parser.parse("boolean", "true ");
 	expect(result.toSource()).toBe(true);
 
-	result = parser.parse("boolean", "success ");
-	expect(result.toSource()).toBe(true);
-
 	result = parser.parse("boolean", "ok ");
 	expect(result.toSource()).toBe(true);
 
@@ -214,9 +211,6 @@ test("correctly matches boolean type", () => {
 	expect(result.toSource()).toBe(false);
 
 	result = parser.parse("boolean", "false ");
-	expect(result.toSource()).toBe(false);
-
-	result = parser.parse("boolean", "failure ");
 	expect(result.toSource()).toBe(false);
 
 	result = parser.parse("boolean", "cancel ");
