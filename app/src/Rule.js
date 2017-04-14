@@ -70,6 +70,7 @@ export default class Rule {
 // Rule for literal string value, which include punctuation such as `(` etc.
 //TODO: rename `Symbol`???
 Rule.String = class String extends Rule {
+//TODO: throw if `string` is not defined?
 	// Parse this rule at the beginning of `stream`, assuming no whitespace before.
 	// Default is that `rule.string` is literal string to match.
 	// On match, returns clone of rule with `value`, `stream` and `endIndex`.
@@ -86,6 +87,12 @@ Rule.String = class String extends Rule {
 	toString() {
 		return `${this.string}${this.optional ? '?' : ''}`;
 	}
+}
+
+// Merge two String rules together, adding the second to the first.
+Rule.mergeStrings = function(first, second) {
+	first.string += second.string;
+	return first;
 }
 
 
@@ -121,20 +128,27 @@ Rule.Pattern = class Pattern extends Rule {
 
 
 // Keyword pattern
-//	`rule.keyword` is the keyword string to match.
+//	`rule.string` is the keyword string to match.
 Rule.Keyword = class Keyword extends Rule.Pattern {
 	constructor(properties) {
 		super(properties);
 		// create pattern which matches at word boundary
 		if (!this.pattern) {
-			if (!this.keyword) throw new TypeError("Expected keyword property");
-			this.pattern = new RegExp(`^${this.keyword}\\b`);
+			if (!this.string) throw new TypeError("Expected keyword property");
+			this.pattern = new RegExp(`^${this.string}\\b`);
 		}
 	}
 
 	toString() {
-		return `${this.keyword}${this.optional ? '?' : ''}`;
+		return `${this.string}${this.optional ? '?' : ''}`;
 	}
+}
+
+// Merge two Keyword rules together, adding the second to the first.
+Rule.mergeKeywords = function(first, second) {
+	first.string += " " + second.string;
+	first.pattern = new RegExp("^" + first.string.split(" ").join("\\s+") + "\\b");
+	return first;
 }
 
 
@@ -305,7 +319,10 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 	}
 
 	toString() {
-		const rule = (this.rule instanceof Rule.Sequence ? `(${this.rule})` : `${this.rule}`);
+		const rule = (this.rule instanceof Rule.Sequence || this.rule instanceof Rule.Keyword && this.rule.string.includes(" ")
+				   ? `(${this.rule})`
+				   : `${this.rule}`
+				);
 		return `${rule}${this.optional ? '*' : '+'}`;
 	}
 }

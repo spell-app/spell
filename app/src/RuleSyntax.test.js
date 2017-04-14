@@ -24,17 +24,15 @@ test("parse multiple strings as one string", () => {
 test("parse single keyword", () => {
 	let rule = Rule.parseRuleSyntax("is");
 	expect(rule).toBeInstanceOf(Rule.Keyword);
-	expect(rule.keyword).toBe("is");
+	expect(rule.string).toBe("is");
 
 	expect(rule.toString()).toBe("is");
 });
 
 test("parse multiple keywords as a sequence", () => {
 	let rule = Rule.parseRuleSyntax("is not");
-	expect(rule).toBeInstanceOf(Rule.Sequence);
-	expect(rule.rules.length).toBe(2);
-	expect(rule.rules[0]).toBeInstanceOf(Rule.Keyword);
-	expect(rule.rules[1]).toBeInstanceOf(Rule.Keyword);
+	expect(rule).toBeInstanceOf(Rule.Keyword);
+	expect(rule.string).toBe("is not");
 
 	expect(rule.toString()).toBe("is not");
 });
@@ -100,7 +98,7 @@ test("parse list with keyword delimiter", () => {
 	expect(rule).toBeInstanceOf(Rule.List);
 	expect(rule.item).toBeInstanceOf(Rule.Subrule);
 	expect(rule.delimiter).toBeInstanceOf(Rule.Keyword);
-	expect(rule.delimiter.keyword).toBe("and");
+	expect(rule.delimiter.string).toBe("and");
 
 	expect(rule.toString()).toBe("[{number} and]");
 });
@@ -121,13 +119,13 @@ test("parse simple alternatives", () => {
 	expect(rule.rules.length).toBe(3);
 
 	expect(rule.rules[0]).toBeInstanceOf(Rule.Keyword);
-	expect(rule.rules[0].keyword).toBe("a");
+	expect(rule.rules[0].string).toBe("a");
 
 	expect(rule.rules[1]).toBeInstanceOf(Rule.Keyword);
-	expect(rule.rules[1].keyword).toBe("bb");
+	expect(rule.rules[1].string).toBe("bb");
 
 	expect(rule.rules[2]).toBeInstanceOf(Rule.Keyword);
-	expect(rule.rules[2].keyword).toBe("cccccc");
+	expect(rule.rules[2].string).toBe("cccccc");
 
 	expect(rule.toString()).toBe("(a|bb|cccccc)");
 });
@@ -140,10 +138,10 @@ test("parse named alternatives", () => {
 	expect(rule.rules.length).toBe(2);
 
 	expect(rule.rules[0]).toBeInstanceOf(Rule.Keyword);
-	expect(rule.rules[0].keyword).toBe("a");
+	expect(rule.rules[0].string).toBe("a");
 
 	expect(rule.rules[1]).toBeInstanceOf(Rule.Keyword);
-	expect(rule.rules[1].keyword).toBe("b");
+	expect(rule.rules[1].string).toBe("b");
 
 	expect(rule.toString()).toBe("(foo:a|b)");
 });
@@ -153,7 +151,7 @@ test("parse complex alternatives", () => {
 	expect(rule).toBeInstanceOf(Rule.Alternatives);
 
 	expect(rule.rules.length).toBe(4);
-	expect(rule.rules[0]).toBeInstanceOf(Rule.Sequence);
+	expect(rule.rules[0]).toBeInstanceOf(Rule.Keyword);
 	expect(rule.rules[1]).toBeInstanceOf(Rule.Subrule);
 	expect(rule.rules[2]).toBeInstanceOf(Rule.List);
 	expect(rule.rules[3]).toBeInstanceOf(Rule.Alternatives);
@@ -233,7 +231,7 @@ test("parse + repeated sequence", () => {
 	let rule = Rule.parseRuleSyntax("(one or more)+");
 	expect(rule).toBeInstanceOf(Rule.Repeat);
 	expect(rule.optional).toBeUndefined();
-	expect(rule.rule).toBeInstanceOf(Rule.Sequence);
+	expect(rule.rule).toBeInstanceOf(Rule.Keyword);
 
 	expect(rule.toString()).toBe("(one or more)+");
 });

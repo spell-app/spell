@@ -21,25 +21,26 @@ parser.addInfixOperator("is-exactly", "is exactly", { transformer(a,b) { return 
 parser.addInfixOperator("is-not-exactly", "is not exactly", { transformer(a,b) { return `(${a} !== ${b})` }});
 
 //TODO: `spell.isOfType(thing, type)`
-parser.addInfixOperator("is-type-of", "is (a|an)", { transformer(thing, type) { return `spell.isOfType(${thing}, '${type}')` }});
-parser.addInfixOperator("is-not-type-of", "is not (a|an)", { transformer(thing, type) { return `!spell.isOfType(${thing}, '${type}')` }});
+//TODO: `is same type as` ?
+parser.addInfixOperator("is-type-of", ["is a", "is an"], { transformer(thing, type) { return `spell.isOfType(${thing}, '${type}')` }});
+parser.addInfixOperator("is-not-type-of", ["is not a", "is not an"], { transformer(thing, type) { return `!spell.isOfType(${thing}, '${type}')` }});
 
 //TODO: `spell.isIn(thing, collection)`
-parser.addInfixOperator("is-in", "is in", { transformer(thing, listy) { return `spell.isIn(${thing}, ${listy})` }});
-parser.addInfixOperator("is-one-of", "is one of", { transformer(thing, listy) { return `spell.isIn(${thing}, ${listy})` }});
-parser.addInfixOperator("is-not-in", "is not in", { transformer(thing, listy) { return `!spell.isIn(${thing}, ${listy})` }});
-parser.addInfixOperator("is-not-one-of", "is not one of", { transformer(thing, listy) { return `!spell.isIn(${thing}, ${listy})` }});
+parser.addInfixOperator("is-in", ["is in", "is one of"], { transformer(thing, listLikeThing) { return `spell.isIn(${thing}, ${listLikeThing})` }});
+parser.addInfixOperator("is-not-in", ["is not in", "is not one of"], { transformer(thing, listLikeThing) { return `!spell.isIn(${thing}, ${listLikeThing})` }});
+parser.addInfixOperator("includes", ["includes", "contains"], { transformer(listLikeThing, thing) { return `spell.isIn(${thing}, ${listLikeThing})` }});
+parser.addInfixOperator("doesnt-include", ["does not include", "doesnt include", "does not contain", "doesnt contain"], { transformer(listLikeThing, thing) { return `!spell.isIn(${thing}, ${listLikeThing})` }});
 
-parser.addInfixOperator("gt", "(>|is greater than)", { transformer(a,b) { return`(${a} > ${b})` }});
-parser.addInfixOperator("gte", "(>=|is greater than or equal to)", { transformer(a,b) { return`(${a} >= ${b})` }});
-parser.addInfixOperator("lt", "(<|is less than)", { transformer(a,b) { return`(${a} < ${b})` }});
-parser.addInfixOperator("lte", "(<=|is less than or equal to)", { transformer(a,b) { return`(${a} <= ${b})` }});
+parser.addInfixOperator("gt", [">", "is greater than"], { transformer(a,b) { return`(${a} > ${b})` }});
+parser.addInfixOperator("gte", [">=", "is greater than or equal to"], { transformer(a,b) { return`(${a} >= ${b})` }});
+parser.addInfixOperator("lt", ["<", "is less than"], { transformer(a,b) { return`(${a} < ${b})` }});
+parser.addInfixOperator("lte", ["<=", "is less than or equal to"], { transformer(a,b) { return`(${a} <= ${b})` }});
 
 //TODO:  can't add `+` as a rule, fix this then add these
-parser.addInfixOperator("plus", "(\\+|plus)", { transformer(a,b) { return`(${a} + ${b})` }});
-parser.addInfixOperator("minus", "(-|minus)", { transformer(a,b) { return`(${a} - ${b})` }});
-parser.addInfixOperator("times", "(\\*|times)", { transformer(a,b) { return`(${a} * ${b})` }});
-parser.addInfixOperator("divided-by", "(/|divided by)", { transformer(a,b) { return`(${a} / ${b})` }});
+parser.addInfixOperator("plus", ["\\+", "plus"], { transformer(a,b) { return`(${a} + ${b})` }});
+parser.addInfixOperator("minus", ["-", "minus"], { transformer(a,b) { return`(${a} - ${b})` }});
+parser.addInfixOperator("times", ["\\*", "times"], { transformer(a,b) { return`(${a} * ${b})` }});
+parser.addInfixOperator("divided-by", ["/", "divided by"], { transformer(a,b) { return`(${a} / ${b})` }});
 
 //TODO:  `+=` etc?  other math functions?
 

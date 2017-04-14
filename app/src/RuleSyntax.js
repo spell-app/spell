@@ -48,7 +48,11 @@ Object.assign(Rule, {
 				var last = rules[rules.length-1];
 				// If this is a `String` and last was a `String`, merge together
 				if (last && last instanceof Rule.String && rule instanceof Rule.String) {
-					last.string += rule.string;
+					Rule.mergeStrings(last, rule);
+				}
+				// If this is a `Keyword` and last was also a `Keyword`, merge together
+				else if (last && last instanceof Rule.Keyword && rule instanceof Rule.Keyword) {
+					Rule.mergeKeywords(last, rule);
 				}
 				else {
 					rules.push(rule);
@@ -95,7 +99,7 @@ Object.assign(Rule, {
 		var string = syntaxStream[startIndex], rule;
 		// If letters only, match as a Keyword (so we require a word boundary after the string).
 		if (string.match(/[A-Za-z]+/)) {
-			rule = new Rule.Keyword({ keyword: string });
+			rule = new Rule.Keyword({ string });
 		}
 		// Otherwise match as a String, which doesn't require non-word chars after the text.
 		else {
@@ -234,12 +238,12 @@ Object.assign(Rule, {
 
 
 // ##  Add methods to Parser to define rules using the above syntax.
-Object.assign(Parser.prototype, {
+Object.defineProperties(Parser.prototype, {
 
 	// Parse a `ruleSyntax` rule and add it to our list of rules.
 	// Returns the new rule.
 	// Logs parsing errors but allows things to continue.
-	addSyntax(name, ruleSyntax, properties, SequenceConstructor = Rule.Sequence) {
+	addSyntax: { value: function(name, ruleSyntax, properties, SequenceConstructor = Rule.Sequence) {
 		try {
 			let rule = Rule.parseRuleSyntax(ruleSyntax, SequenceConstructor);
 
@@ -253,37 +257,88 @@ Object.assign(Parser.prototype, {
 			console.log(`syntax: ${ruleSyntax}`);
 			console.error(e);
 		}
-	},
+	}},
 
-	addStatement(name, ruleSyntax, properties) {
+	addStatement: { value: function(name, ruleSyntax, properties) {
 		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
 		if (rule) return this.addRule("statement", rule);
-	},
+	}},
 
-	addExpression(name, ruleSyntax, properties) {
+	addExpression: { value: function(name, ruleSyntax, properties) {
 		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
 		if (rule) return this.addRule("expression", rule);
-	},
+	}},
 
-	// Add infix operator, such as "a or b"
-	addInfixOperator(name, ruleSyntax, properties) {
+	// Add infix operator, such as "a or b".
+	// NOTE: if you have more than one matching operator,
+	//		 pass in an array of simple strings so all of our operators are simple strings.
+	addInfixOperator: { value: function(name, ruleSyntax, properties) {
+		if (Array.isArray(ruleSyntax)) {
+			return ruleSyntax.forEach(syntax => this.addInfixOperator(name, syntax, properties));
+		}
+
 		var rule = this.addSyntax(name, ruleSyntax, properties);
 		if (rule) {
 			if (!rule.transformer) {
 				throw new TypeError(`Expected infix operator rule '${name}' to specify 'transformer' function`)
 			}
+			// clear list of infix operators for getter below
+			delete this.__infixOperators;
 			return this.addRule("infix-operator", rule);
 		}
-	},
+	}},
+
+	// List of infix operators as strings.
+	// Re-memoized after `addInfixOperator` above.
+//TODO: make a pattern for this???
+	infixOperators: { get: function() {
+		if (!this.__infixOperators) {
+			var operators = this.rules["infix-operator"]
+						 && this.rules["infix-operator"].rules.map(rule => rule.string);
+			if (operators) {
+				Object.defineProperty(this, "__infixOperators", {
+					configurable: true,
+					value: operators
+				});
+			}
+		}
+		return this.__infixOperators;
+	}},
 
 	// Add postfix operator, such as "a is defined"
-	addPostfixOperator(name, ruleSyntax, properties) {
+	// NOTE: if you have more than one matching operator,
+	//		 pass in an array of simple strings so all of our operators are simple strings.
+	addPostfixOperator: { value: function(name, ruleSyntax, properties) {
+		if (Array.isArray(ruleSyntax)) {
+			return ruleSyntax.forEach(syntax => this.addPostfixOperator(name, syntax, properties));
+		}
+
 		var rule = this.addSyntax(name, ruleSyntax, properties);
 		if (rule) {
 			if (!rule.transformer) {
 				throw new TypeError(`Expected postfix operator rule '${name}' to specify 'transformer' function`);
 			}
+			// clear list of infix operators for getter below
+			delete this.__postfixOperators;
 			return this.addRule("postfix-operator", rule);
 		}
-	}
+	}},
+
+	// List of postfix operators as strings.
+	// Re-memoized after `addInfixOperator` above.
+//TODO: make a memoization pattern for this???
+	postfixOperators: { get: function() {
+		if (!this.__postfixOperators) {
+			var operators = this.rules["postfix-operator"]
+						 && this.rules["postfix-operator"].rules.map(rule => rule.string);
+			if (operators) {
+				Object.defineProperty(this, "__postfixOperators", {
+					configurable: true,
+					value: operators
+				});
+			}
+		}
+		return this.__postfixOperators;
+	}},
+
 });
