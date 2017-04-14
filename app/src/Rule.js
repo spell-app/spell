@@ -92,15 +92,26 @@ Rule.String = class String extends Rule {
 // Regex pattern.
 // `rule.pattern` is the regular expression to match.
 // NOTE: the regex should start with `/^...` to match at the beginning of the stream.
+// You can specify a `rule.blacklist` of matches that will specifically NOT work, eg for `identifier.
 Rule.Pattern = class Pattern extends Rule {
 	parse(parser, stream) {
 		var match = stream.match(this.pattern);
 		if (!match) return undefined;
+
+		// bail if not in blacklist
+		var matched = match[0];
+		if (this.blacklist && this.blacklist[matched]) return undefined;
+
 		return this.clone({
-			matched: match[0],
-			endIndex: stream.startIndex + match[0].length,
+			matched: matched,
+			endIndex: stream.startIndex + matched.length,
 			stream
 		});
+	}
+
+	addToBlacklist(...words) {
+		if (!this.blacklist) this.blacklist = {};
+		words.forEach(word => this.blacklist[word] = true);
 	}
 
 	toString() {
