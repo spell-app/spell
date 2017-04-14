@@ -119,12 +119,8 @@ let bool = parser.addRule("boolean", new Rule.Boolean({
 }));
 parser.addRule("expression", bool);
 // Add tokens identifier blacklist.
+// TESTME
 parser.identifier.addToBlacklist("true", "false", "yes", "no", "success", "failure", "ok", "cancel");
-
-// Literal value as number, text or boolean.
-//TODO: this is an expression... but installing it that way breaks parsing...?
-parser.addSyntax("literal", "(literal:{number}|{text}|{boolean})");
-
 
 // Literal list (array), eg:  `[1,2,true,false ]`
 let list = parser.addExpression(
@@ -141,3 +137,7 @@ let list = parser.addExpression(
 	}
 );
 
+// Literal value as number, text or boolean.
+//TODO: this is an expression... but installing it that way breaks parsing...?
+//TESTME: add literal-list to this?
+parser.addSyntax("literal", "(literal:{number}|{text}|{boolean}|{literal-list})");
