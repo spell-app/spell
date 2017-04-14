@@ -66,8 +66,7 @@ parser.addSyntax(
 // NOTE: `operator.transformer` MUST return a function which transforms argument (`lhs`) into output.
 
 parser.addPostfixOperator("is-defined", "is defined", { transformer(thing) { return `(typeof ${thing} !== 'undefined')` }});
-parser.addPostfixOperator("is-not-defined", "is not defined", { transformer(thing) { return `(typeof ${thing} === 'undefined')` }});
-parser.addPostfixOperator("is-undefined", "is undefined", { transformer(thing) { return `(typeof ${thing} === 'undefined')` }});
+parser.addPostfixOperator("is-not-defined", ["is not defined", "is undefined"], { transformer(thing) { return `(typeof ${thing} === 'undefined')` }});
 
 //TODO: `spell.isEmpty(thing)`
 parser.addPostfixOperator("is-empty", "is empty", { transformer(thing) { return `spell.isEmpty(${thing})` }});
