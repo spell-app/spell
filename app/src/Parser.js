@@ -76,13 +76,6 @@ export default class Parser {
 		return rule;
 	}
 
-	// Add regex as a pattern to our list of rules
-	addPattern(name, pattern, properties) {
-		let rule = new Rule.Pattern(properties);
-		rule.pattern = pattern;
-		return this.addRule(name, rule);
-	}
-
 
 //
 // ## Utility methods

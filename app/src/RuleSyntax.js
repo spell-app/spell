@@ -1,4 +1,4 @@
-import { memoizedGetter } from "./memoize.js";
+import { defineMemoized } from "./memoize.js";
 import Parser from "./Parser.js";
 import Rule from "./Rule.js";
 
@@ -291,7 +291,7 @@ Object.defineProperties(Parser.prototype, {
 
 	// List of infix operators as strings.
 	// Re-memoized after `addInfixOperator` above.
-	infixOperators: memoizedGetter("__infixOperator",
+	infixOperators: defineMemoized("__infixOperator",
 		function() { return this.rules["infix-operator"]
 						 && this.rules["infix-operator"].rules.map(rule => rule.string)
 	}),
@@ -317,7 +317,7 @@ Object.defineProperties(Parser.prototype, {
 
 	// List of postfix operators as strings.
 	// Re-memoized after `addInfixOperator` above.
-	postfixOperators: memoizedGetter("__posfixOperator",
+	postfixOperators: defineMemoized("__posfixOperator",
 		function(){ return this.rules["postfix-operator"]
 						&& this.rules["postfix-operator"].rules.map(rule => rule.string);
 	})

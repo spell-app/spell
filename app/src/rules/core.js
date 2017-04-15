@@ -10,13 +10,11 @@ export default parser;
 //
 // Regex pattern rules with custom constructors for debugging
 //
-//parser.addPattern("whitespace", /^\s+/);
 Rule.Whitespace = class whitespace extends Rule.Pattern {}
 parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/, optional: true }));
 
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
-//parser.addPattern("identifier", /[a-z][\w\d\-_]*/);
 Rule.Identifier = class identifier extends Rule.Pattern {};
 let identifier = parser.addRule("identifier", new Rule.Identifier({
 	pattern: /[a-z][\w\-]*/,
@@ -67,7 +65,6 @@ parser.identifier.addToBlacklist(
 
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
-//parser.addPattern("typename", /[A-Z][\w\d\-_]*/);
 Rule.Type = class Type extends Rule.Pattern {};
 let type = parser.addRule("Type", new Rule.Type({
 	pattern: /[A-Z][\w\-]*/,
