@@ -98,8 +98,12 @@ Rule.mergeStrings = function(first, second) {
 
 // Regex pattern.
 // `rule.pattern` is the regular expression to match.
-// NOTE: the regex should start with `/^...` to match at the beginning of the stream.
-// You can specify a `rule.blacklist` of matches that will specifically NOT work, eg for `identifier.
+// NOTE	To make this more generally applicable, do NOT start the regex with a `^`,
+//		we'll make sure it's matching at the appropriate point.
+//		This way we can re-use the regex to check for a match in the middle of the stream...
+//
+// You can optionally specify a `rule.blacklist`, a set of matches which will specifically NOT work,
+//	eg for `identifier.
 Rule.Pattern = class Pattern extends Rule {
 	parse(parser, stream) {
 		var match = stream.match(this.pattern);
@@ -135,7 +139,7 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 		// create pattern which matches at word boundary
 		if (!this.pattern) {
 			if (!this.string) throw new TypeError("Expected keyword property");
-			this.pattern = new RegExp(`^${this.string}\\b`);
+			this.pattern = new RegExp(`\\b${this.string}\\b`);
 		}
 	}
 
@@ -147,7 +151,7 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 // Merge two Keyword rules together, adding the second to the first.
 Rule.mergeKeywords = function(first, second) {
 	first.string += " " + second.string;
-	first.pattern = new RegExp("^" + first.string.split(" ").join("\\s+") + "\\b");
+	first.pattern = new RegExp("\\b" + first.string.split(" ").join("\\s+") + "\\b");
 	return first;
 }
 

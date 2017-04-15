@@ -39,12 +39,15 @@ export default class TextStream {
 // ## Matching
 //
 	// Match `pattern` as regex at head of stream.
-	// NOTE: regexes should start with `^`!
-	// Returns match or undefined.
+	// Returns match or `undefined`.
+	// NOTE: We assume that we do NOT have a `^` in the regex, we'll make sure it only matches at the start.
+	// TESTME: this likely breaks with a `g` on the pattern?
 	match(pattern) {
 		if (!(pattern instanceof RegExp)) throw new TypeError(`TextStream.match(${pattern}): expected RegExp`);
 //TODO: use `stream.range` to ensure match is not not beyond `string.endIndex`
-		return this.head.match(pattern);
+		var match = this.head.match(pattern);
+		// only return match at the beginning of the stream
+		if (match && match.index === 0) return match;
 	}
 
 	startsWith(string) {

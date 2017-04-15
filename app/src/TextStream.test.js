@@ -78,15 +78,15 @@ test("match throws if no regex argument", () => {
 
 test("match works with valid regex", () => {
 	let stream = new TextStream("test");
-	let match = stream.match(/^test/);
+	let match = stream.match(/test/);
 	expect(match).toBeInstanceOf(Array);
 	expect(match[0]).toBe("test");
 });
 
 test("match fails with invalid regex", () => {
 	let stream = new TextStream("test");
-	let match = stream.match(/^BLORG/);
-	expect(match).toBe(null);
+	let match = stream.match(/BLORG/);
+	expect(match).toBe(undefined);
 });
 
 test("startsWith works with valid string", () => {

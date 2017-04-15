@@ -12,14 +12,14 @@ export default parser;
 //
 //parser.addPattern("whitespace", /^\s+/);
 Rule.Whitespace = class whitespace extends Rule.Pattern {}
-parser.addRule("whitespace", new Rule.Whitespace({ pattern: /^\s+/, optional: true }));
+parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/, optional: true }));
 
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
-//parser.addPattern("identifier", /^[a-z][\w\d\-_]*/);
+//parser.addPattern("identifier", /[a-z][\w\d\-_]*/);
 Rule.Identifier = class identifier extends Rule.Pattern {};
 let identifier = parser.addRule("identifier", new Rule.Identifier({
-	pattern: /^[a-z][\w\-]*/,
+	pattern: /[a-z][\w\-]*/,
 	// Convert "-" to "_" in source output.
 	toSource: function(context) {
 		return this.matched.replace(/\-/g, "_");
@@ -67,10 +67,10 @@ parser.identifier.addToBlacklist(
 
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
-//parser.addPattern("typename", /^[A-Z][\w\d\-_]*/);
+//parser.addPattern("typename", /[A-Z][\w\d\-_]*/);
 Rule.Type = class Type extends Rule.Pattern {};
 let type = parser.addRule("Type", new Rule.Type({
-	pattern: /^[A-Z][\w\-]*/,
+	pattern: /[A-Z][\w\-]*/,
 	// Convert "-" to "_" in source output.
 	toSource: function(context) {
 		return this.matched.replace(/\-/g, "_");
@@ -82,7 +82,7 @@ parser.addRule("expression", type);
 // `number` as either float or integer, created with custom constructor for debugging.
 Rule.Number = class number extends Rule.Pattern {};
 let number = parser.addRule("number", new Rule.Number({
-	pattern: /^-?([0-9]*[.])?[0-9]+/,
+	pattern: /-?([0-9]*[.])?[0-9]+/,
 	// Convert to number on source output.
 	toSource: function(context) {
 		return parseFloat(this.matched, 10);
@@ -96,7 +96,7 @@ parser.addRule("expression", number);
 // REVIEW: is this right?  Better to not match a float?
 Rule.Integer = class integer extends Rule.Pattern {};
 parser.addRule("integer", new Rule.Integer({
-	pattern: /^-?([0-9]*[.])?[0-9]+/,
+	pattern: /-?([0-9]*[.])?[0-9]+/,
 	// Convert to integer on source output.
 	toSource: function(context) {
 		return parseInt(this.matched, 10);
@@ -110,7 +110,7 @@ parser.addRule("integer", new Rule.Integer({
 // TODO: escaped quotes inside string
 Rule.Text = class text extends Rule.Pattern {};
 let text = parser.addRule("text", new Rule.Text({
-	pattern: /^(?:"[^"]*"|'[^']*')/
+	pattern: /(?:"[^"]*"|'[^']*')/
 }));
 parser.addRule("expression", text);
 
@@ -119,7 +119,7 @@ parser.addRule("expression", text);
 // TODO: better name for this???
 Rule.Boolean = class boolean extends Rule.Pattern {};
 let bool = parser.addRule("boolean", new Rule.Boolean({
-	pattern: /^(true|false|yes|no|ok|cancel)\b/,
+	pattern: /(true|false|yes|no|ok|cancel)\b/,
 	toSource: function(context) {
 		switch (this.matched) {
 			case "true":
