@@ -57,7 +57,7 @@ export default class Parser {
 //### Rule factories
 
 	// Add a rule to our list of rules!
-	// TODO: convert to `alternatives` on overwrite?
+	// Converts to `alternatives` on re-defining the same rule.
 	addRule(name, rule) {
 		let existing = this.rules[name];
 		if (existing) {
