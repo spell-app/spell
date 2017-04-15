@@ -1,11 +1,3 @@
-- result/argument processing is too squirrely
-	-
-
-- instead of RuleSyntax doing a `Object.defineProperties`, compose a subclass???
-	- `memoizedGetter` should be a lot smarter...
-
-- normalize whitespace before parsing a line?  makes for simple regexes...
-
 - convert Rule.String to Regex?
 
 - combine regular expressions?
@@ -14,6 +6,16 @@
 
 	- re.any and re.or
 	- re.and, eg    combining keyword AND string
+
+
+- result/argument processing is too squirrely
+
+- instead of RuleSyntax doing a `Object.defineProperties`, compose a subclass???
+	- `memoizedGetter` should be a lot smarter...
+
+- normalize whitespace before parsing a line?  makes for simple regexes...
+
+
 
 - `parser.add*Operator` to:
 	- keep string list of operators

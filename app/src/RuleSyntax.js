@@ -68,7 +68,7 @@ Object.assign(Rule, {
 		var syntaxToken = syntaxStream[startIndex];
 
 		// if we got a "\\" (which also has to go into the source string as "\\")
-		// treat the next bit as a literal string rather than as a special character.
+		// treat the next token as a literal string rather than as a special character.
 		if (syntaxToken === "\\") {
 			return Rule.parseRuleSyntax_string(syntaxStream, rules, startIndex + 1);
 		}
