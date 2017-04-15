@@ -1,15 +1,17 @@
 //
 //	# Core `rules` -- simple datatypes, etc.
 //
+// NOTE: many of the below are created as custom Pattern subclasses for debugging.
+//
 import Rule from "../RuleSyntax";
 import parser from "./_parser";
 
 // re-export parser for testing.
 export default parser;
 
-//
-// Regex pattern rules with custom constructors for debugging
-//
+// `whitespace` rule.
+// NOTE `parser.parse("whitespace", "   ")` will return `undefined`
+//		 because `parser.parse()` automatically eats whitespace at the start of a rule.
 Rule.Whitespace = class whitespace extends Rule.Pattern {}
 parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/, optional: true }));
 
@@ -25,9 +27,6 @@ let identifier = parser.addRule("identifier", new Rule.Identifier({
 }));
 parser.addRule("expression", identifier);
 
-// Stick `identifier` on `parser` so we can add to its blacklist easily.
-parser.identifier = identifier;
-
 // Add English prepositions to identifier blacklist.
 //
 // Wikipedia "Preposition":
@@ -35,7 +34,7 @@ parser.identifier = identifier;
 //	express spatial or temporal relations  (in, under, towards, before)
 //	or mark various semantic roles (of, for).
 // TESTME
-parser.identifier.addToBlacklist(
+parser.rules.identifier.addToBlacklist(
 	"about", "above", "after", "and", "as", "at",
 	"before", "behind", "below", "beneath", "beside", "between", "beyond", "by",
 	"defined", "down", "during",
@@ -55,7 +54,7 @@ parser.identifier.addToBlacklist(
 );
 
 // Add common english verbs to identifier blacklist.
-parser.identifier.addToBlacklist(
+parser.rules.identifier.addToBlacklist(
 	"are",
 	"do", "does",
 	"contains",
@@ -129,9 +128,9 @@ let bool = parser.addRule("boolean", new Rule.Boolean({
 	}
 }));
 parser.addRule("expression", bool);
-// Add tokens identifier blacklist.
+// Add boolean tokens identifier blacklist.
 // TESTME
-parser.identifier.addToBlacklist(
+parser.rules.identifier.addToBlacklist(
 	"true", "false",
 	"yes", "no",
 	"ok", "cancel"
