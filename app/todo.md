@@ -1,5 +1,8 @@
-- parser.parse...  checks to make sure parse starts at the beginning of the input
-	- this makes keyword patterns, etc useful to scan inside a string...
+- result/argument processing is too squirrely
+	-
+
+- instead of RuleSyntax doing a `Object.defineProperties`, compose a subclass???
+	- `memoizedGetter` should be a lot smarter...
 
 - normalize whitespace before parsing a line?  makes for simple regexes...
 

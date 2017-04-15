@@ -1,3 +1,4 @@
+import { memoizedGetter } from "./memoize.js";
 import Parser from "./Parser.js";
 import Rule from "./Rule.js";
 
@@ -290,20 +291,10 @@ Object.defineProperties(Parser.prototype, {
 
 	// List of infix operators as strings.
 	// Re-memoized after `addInfixOperator` above.
-//TODO: make a pattern for this???
-	infixOperators: { get: function() {
-		if (!this.__infixOperators) {
-			var operators = this.rules["infix-operator"]
-						 && this.rules["infix-operator"].rules.map(rule => rule.string);
-			if (operators) {
-				Object.defineProperty(this, "__infixOperators", {
-					configurable: true,
-					value: operators
-				});
-			}
-		}
-		return this.__infixOperators;
-	}},
+	infixOperators: memoizedGetter("__infixOperator",
+		function() { return this.rules["infix-operator"]
+						 && this.rules["infix-operator"].rules.map(rule => rule.string)
+	}),
 
 	// Add postfix operator, such as "a is defined"
 	// NOTE: if you have more than one matching operator,
@@ -326,19 +317,8 @@ Object.defineProperties(Parser.prototype, {
 
 	// List of postfix operators as strings.
 	// Re-memoized after `addInfixOperator` above.
-//TODO: make a memoization pattern for this???
-	postfixOperators: { get: function() {
-		if (!this.__postfixOperators) {
-			var operators = this.rules["postfix-operator"]
-						 && this.rules["postfix-operator"].rules.map(rule => rule.string);
-			if (operators) {
-				Object.defineProperty(this, "__postfixOperators", {
-					configurable: true,
-					value: operators
-				});
-			}
-		}
-		return this.__postfixOperators;
-	}},
-
+	postfixOperators: memoizedGetter("__posfixOperator",
+		function(){ return this.rules["postfix-operator"]
+						&& this.rules["postfix-operator"].rules.map(rule => rule.string);
+	})
 });
