@@ -89,24 +89,39 @@ Rule.String = class String extends Rule {
 	}
 }
 
-// Merge two String rules together, adding the second to the first.
+// Merge two String rules together, returning a new rule that matches both.
 Rule.mergeStrings = function(first, second) {
-	first.string += second.string;
-	return first;
+	return new Rule.String({ string: first.string + second.string });
 }
 
 
 // Regex pattern.
 // `rule.pattern` is the regular expression to match.
-// NOTE	To make this more generally applicable, do NOT start the regex with a `^`,
-//		we'll make sure it's matching at the appropriate point.
+//
+// NOTE	To make this more generally applicable, do NOT start the pattern with a `^`.
+//		We'll automatically make a copy of the RegExp with the start point attached
+//		and use that as appropriate.
+//
 //		This way we can re-use the regex to check for a match in the middle of the stream...
 //
 // You can optionally specify a `rule.blacklist`, a set of matches which will specifically NOT work,
 //	eg for `identifier.
 Rule.Pattern = class Pattern extends Rule {
+	constructor(properties) {
+		// `pattern` is required
+		if (!properties.pattern) throw new TypeError("new Rule.Pattern(): You must pass a `pattern` parameter");
+
+		super(properties);
+
+		// Create a `startPattern` to match at the beginning of the strong
+		// Create non-enumerably.
+		Object.defineProperty(this, "startPattern", { value: new RegExp("^" + this.pattern.source) });
+	}
+
+	// Attempt to match this pattern at the beginning of the stream.
 	parse(parser, stream) {
-		var match = stream.match(this.pattern);
+		// Use `startPattern` defined in constructor above, much more efficient!
+		var match = stream.match(this.startPattern);
 		if (!match) return undefined;
 
 		// bail if not in blacklist
@@ -131,16 +146,23 @@ Rule.Pattern = class Pattern extends Rule {
 }
 
 
-// Keyword pattern
-//	`rule.string` is the keyword string to match.
+// Keyword pattern.
+// Properties:
+//	- `rule.string` 	(required) 	Keyword string to match.
+//	- `rule.pattern`	(optional) 	RegExp for the match.
+//									We'll create one from `string` if necessary.
+//									NOTE: do NOT start the `pattern` with `^`.
 Rule.Keyword = class Keyword extends Rule.Pattern {
 	constructor(properties) {
-		super(properties);
-		// create pattern which matches at word boundary
-		if (!this.pattern) {
-			if (!this.string) throw new TypeError("Expected keyword property");
-			this.pattern = new RegExp(`\\b${this.string}\\b`);
+		// `string` is requied.
+		if (!properties.string) throw new TypeError("new Rule.Keyword(): Expected string property");
+
+		// derive `pattern` if necessary.
+		if (!properties.pattern) {
+			var patternString = `\\b${properties.string.split(/\s+/).join("\\s+")}\\b`;
+			properties.pattern = new RegExp(patternString);
 		}
+		super(properties);
 	}
 
 	toString() {
@@ -150,9 +172,7 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 
 // Merge two Keyword rules together, adding the second to the first.
 Rule.mergeKeywords = function(first, second) {
-	first.string += " " + second.string;
-	first.pattern = new RegExp("\\b" + first.string.split(" ").join("\\s+") + "\\b");
-	return first;
+	return new Rule.Keyword({ string: first.string + " " + second.string });
 }
 
 

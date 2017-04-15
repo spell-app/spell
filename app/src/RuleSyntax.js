@@ -49,15 +49,19 @@ Object.assign(Rule, {
 				var last = rules[rules.length-1];
 				// If this is a `String` and last was a `String`, merge together
 				if (last && last instanceof Rule.String && rule instanceof Rule.String) {
-					Rule.mergeStrings(last, rule);
+					// remove the last rule
+					rules.pop();
+					// and replace with a rule that merges the keywords
+					rule = Rule.mergeStrings(last, rule);
 				}
 				// If this is a `Keyword` and last was also a `Keyword`, merge together
 				else if (last && last instanceof Rule.Keyword && rule instanceof Rule.Keyword) {
-					Rule.mergeKeywords(last, rule);
+					// remove the last rule
+					rules.pop();
+					// and replace with a rule that merges the keywords
+					rule = Rule.mergeKeywords(last, rule);
 				}
-				else {
-					rules.push(rule);
-				}
+				rules.push(rule);
 			}
 			startIndex = endIndex + 1;
 		}

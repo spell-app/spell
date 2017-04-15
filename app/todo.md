@@ -1,4 +1,11 @@
+-
+
+- stream.head continuously is expensive -- memoize?
+- start match is MUCH more efficient
+	- define without start and then auto-add when using?
+
 - convert Rule.String to Regex?
+
 
 - combine regular expressions?
 	http://stackoverflow.com/questions/9213237/combining-regular-expressions-in-javascript
@@ -14,12 +21,6 @@
 	- `memoizedGetter` should be a lot smarter...
 
 - normalize whitespace before parsing a line?  makes for simple regexes...
-
-
-
-- `parser.add*Operator` to:
-	- keep string list of operators
-	- automatically add operator words to identifier whitelist?
 
 - remember which file each rule came from
 	- global "RULE_FILE" in each file?
