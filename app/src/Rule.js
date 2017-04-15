@@ -141,7 +141,7 @@ Rule.Pattern = class Pattern extends Rule {
 	}
 
 	toString() {
-		return this.pattern;
+		return this.pattern.source;
 	}
 }
 
