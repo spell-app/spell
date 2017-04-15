@@ -27,12 +27,6 @@ export default class Parser {
 
 		// Clone rules, starting with a completely empty map if not defined (no standard object keys)
 		this.rules = Object.create(this.rules || null);
-
-		// Set up standard rule classes as alternates
-		this.addRule("statement", new Rule.Alternatives());
-		this.addRule("expression", new Rule.Alternatives());
-		this.addRule("infix-operator", new Rule.Alternatives());
-		this.addRule("postfix-operator", new Rule.Alternatives());
 	}
 
 	getRule(name) {
@@ -69,7 +63,7 @@ export default class Parser {
 		if (existing) {
 			if (!(existing instanceof Rule.Alternatives)) {
 				if (Parser.debug) console.log(`Converting rule '${name}' to alternatives`);
-				this.rules[name] = new Rule.Alternatives({ ruleName: existing.ruleName || name, rules: [existing] });
+				this.rules[name] = new Rule.Alternatives({ ruleName: name, rules: [existing] });
 				// copy argument name over (???)
 				if (existing.argument) this.rules[name].argument = existing.argument;
 			}
@@ -77,7 +71,8 @@ export default class Parser {
 			this.rules[name].addRule(rule);
 		}
 		else {
-			rule.ruleName = name;
+			// don't override ruleName
+			if (!rule.ruleName) rule.ruleName = name;
 			this.rules[name] = rule;
 		}
 		return rule;
