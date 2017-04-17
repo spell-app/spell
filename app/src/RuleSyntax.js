@@ -48,7 +48,7 @@ Object.assign(Rule, {
 			if (rule) {
 				var last = rules[rules.length-1];
 				// If this is a `String` and last was a `String`, merge together
-				if (last && last instanceof Rule.String && rule instanceof Rule.String) {
+				if (last && last instanceof Rule.Symbol && rule instanceof Rule.Symbol) {
 					// remove the last rule
 					rules.pop();
 					// and replace with a rule that merges the keywords
@@ -108,7 +108,7 @@ Object.assign(Rule, {
 		}
 		// Otherwise match as a String, which doesn't require non-word chars after the text.
 		else {
-			rule = new Rule.String({ string: string });
+			rule = new Rule.Symbol({ string: string });
 			// If string starts with `\\`, it's an escaped literal (eg: `\[` needs to input as `\\[`).
 			if (string.startsWith("\\")) {
 				// remove leading slash in match string...

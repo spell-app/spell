@@ -5,13 +5,13 @@ import Rule from "./RuleSyntax.js";
 //
 test("parse single string", () => {
 	let rule = Rule.parseRuleSyntax(">");
-	expect(rule).toBeInstanceOf(Rule.String);
+	expect(rule).toBeInstanceOf(Rule.Symbol);
 	expect(rule.string).toBe(">");
 });
 
 test("parse multiple strings as one string", () => {
 	let rule = Rule.parseRuleSyntax(">=");
-	expect(rule).toBeInstanceOf(Rule.String);
+	expect(rule).toBeInstanceOf(Rule.Symbol);
 	expect(rule.string).toBe(">=");
 
 	expect(rule.toString()).toBe(">=");
@@ -39,7 +39,7 @@ test("parse multiple keywords as a sequence", () => {
 
 test("parse non-word keyword", () => {
 	let rule = Rule.parseRuleSyntax(":");
-	expect(rule).toBeInstanceOf(Rule.String);
+	expect(rule).toBeInstanceOf(Rule.Symbol);
 	expect(rule.string).toBe(":");
 
 	expect(rule.toString()).toBe(":");
@@ -47,7 +47,7 @@ test("parse non-word keyword", () => {
 
 test("parse escaped non-word keyword", () => {
 	let rule = Rule.parseRuleSyntax("\\(");
-	expect(rule).toBeInstanceOf(Rule.String);
+	expect(rule).toBeInstanceOf(Rule.Symbol);
 	expect(rule.string).toBe("(");
 	expect(rule.toString()).toBe("\\(");
 });
@@ -79,7 +79,7 @@ test("parse list", () => {
 	let rule = Rule.parseRuleSyntax("[{number},]");
 	expect(rule).toBeInstanceOf(Rule.List);
 	expect(rule.item).toBeInstanceOf(Rule.Subrule);
-	expect(rule.delimiter).toBeInstanceOf(Rule.String);
+	expect(rule.delimiter).toBeInstanceOf(Rule.Symbol);
 
 	expect(rule.toString()).toBe("[{number} ,]");
 });
@@ -88,7 +88,7 @@ test("parse list with named argument", () => {
 	let rule = Rule.parseRuleSyntax("[my-list:{number},]");
 	expect(rule).toBeInstanceOf(Rule.List);
 	expect(rule.item).toBeInstanceOf(Rule.Subrule);
-	expect(rule.delimiter).toBeInstanceOf(Rule.String);
+	expect(rule.delimiter).toBeInstanceOf(Rule.Symbol);
 	expect(rule.argument).toBe("my-list");
 	expect(rule.toString()).toBe("[my-list:{number} ,]");
 });
@@ -165,7 +165,7 @@ test("parse complex alternatives", () => {
 //
 test("parse optional string", () => {
 	let rule = Rule.parseRuleSyntax(";?");
-	expect(rule).toBeInstanceOf(Rule.String);
+	expect(rule).toBeInstanceOf(Rule.Symbol);
 	expect(rule.string).toBe(";");
 	expect(rule.optional).toBe(true);
 

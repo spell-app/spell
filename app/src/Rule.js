@@ -122,12 +122,12 @@ Rule.Pattern = class Pattern extends Rule {
 }
 
 // Rule for literal string value, which include punctuation such as `(` etc.
-// `Strings` are different from `Keywords` in that they do not require a word boundary.
+// `Symbol`s are different from `Keywords` in that they do not require a word boundary.
 //TODO: rename `Symbol`???
-Rule.String = class String extends Rule.Pattern {
+Rule.Symbol = class Symbol extends Rule.Pattern {
 	constructor(properties) {
 		// `string` is requied.
-		if (!properties.string) throw new TypeError("new Rule.String(): Expected string property");
+		if (!properties.string) throw new TypeError("new Rule.Symbol(): Expected string property");
 
 		// convert string to pattern
 		if (!properties.pattern) {
@@ -147,7 +147,7 @@ Rule.String = class String extends Rule.Pattern {
 
 // Merge two String rules together, returning a new rule that matches both.
 Rule.mergeStrings = function(first, second) {
-	return new Rule.String({ string: first.string + second.string });
+	return new Rule.Symbol({ string: first.string + second.string });
 }
 
 // Keyword pattern.
