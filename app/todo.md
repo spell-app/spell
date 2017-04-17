@@ -1,5 +1,3 @@
--
-
 - stream.head continuously is expensive -- memoize?
 - start match is MUCH more efficient
 	- define without start and then auto-add when using?
@@ -20,7 +18,7 @@
 - instead of RuleSyntax doing a `Object.defineProperties`, compose a subclass???
 	- `memoizedGetter` should be a lot smarter...
 
-- normalize whitespace before parsing a line?  makes for simple regexes...
-
 - remember which file each rule came from
 	- global "RULE_FILE" in each file?
+
+- freeze TextStreams?  freeze Rules?

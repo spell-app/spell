@@ -18,6 +18,9 @@ import Parser from "./Parser.js";
 
 export default class Rule {
 	constructor(properties) {
+		if (this.constructor !== Rule || !this.constructor.prototype.hasOwnProperty("constructor")) {
+//console.warn("not rule", this);
+		}
 		Object.assign(this, properties);
 	}
 
@@ -66,33 +69,6 @@ export default class Rule {
 }
 
 
-
-// Rule for literal string value, which include punctuation such as `(` etc.
-//TODO: rename `Symbol`???
-Rule.String = class String extends Rule {
-//TODO: throw if `string` is not defined?
-	// Parse this rule at the beginning of `stream`, assuming no whitespace before.
-	// Default is that `rule.string` is literal string to match.
-	// On match, returns clone of rule with `value`, `stream` and `endIndex`.
-	// Returns `undefined` if no match.
-	parse(parser, stream) {
-		if (!stream.startsWith(this.string)) return undefined;
-		return this.clone({
-			matched: this.string,
-			endIndex: stream.startIndex + this.string.length,
-			stream
-		});
-	}
-
-	toString() {
-		return `${this.string}${this.optional ? '?' : ''}`;
-	}
-}
-
-// Merge two String rules together, returning a new rule that matches both.
-Rule.mergeStrings = function(first, second) {
-	return new Rule.String({ string: first.string + second.string });
-}
 
 
 // Regex pattern.
@@ -145,6 +121,34 @@ Rule.Pattern = class Pattern extends Rule {
 	}
 }
 
+// Rule for literal string value, which include punctuation such as `(` etc.
+// `Strings` are different from `Keywords` in that they do not require a word boundary.
+//TODO: rename `Symbol`???
+Rule.String = class String extends Rule.Pattern {
+	constructor(properties) {
+		// `string` is requied.
+		if (!properties.string) throw new TypeError("new Rule.String(): Expected string property");
+
+		// convert string to pattern
+		if (!properties.pattern) {
+			properties.pattern = Parser.RegExpFromString(properties.string);
+//console.info(properties.string, properties.pattern);
+		}
+
+//		console.info("creating string", properties);
+		super(properties);
+	}
+
+
+	toString() {
+		return `${this.string}${this.optional ? '?' : ''}`;
+	}
+}
+
+// Merge two String rules together, returning a new rule that matches both.
+Rule.mergeStrings = function(first, second) {
+	return new Rule.String({ string: first.string + second.string });
+}
 
 // Keyword pattern.
 // Properties:
@@ -159,6 +163,7 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 
 		// derive `pattern` if necessary.
 		if (!properties.pattern) {
+			// enforce word boundaries and allow arbitrary space between words
 			var patternString = `\\b${properties.string.split(/\s+/).join("\\s+")}\\b`;
 			properties.pattern = new RegExp(patternString);
 		}
