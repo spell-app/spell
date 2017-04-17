@@ -7,7 +7,7 @@ export default parser;
 
 
 // Numeric index in a list-like thing.
-parser.addExpression("index-expression", "item {number:integer} of {expression}", {
+parser.addExpression("index_expression", "item {number:integer} of {expression}", {
 	toSource() {
 		let args = this.gatherArguments();
 		let number = args.number.toSource();
@@ -40,7 +40,7 @@ parser.addSyntax("ordinal", "(first|second|third|fourth|fifth|sixth|seventh|eigh
 });
 
 // Alternative form for numeric index in a list-like thing.
-parser.addExpression("index-expression", "the {ordinal} item of {expression}", {
+parser.addExpression("index_expression", "the {ordinal} item of {expression}", {
 	toSource() {
 		let args = this.gatherArguments();
 		let ordinal = args.ordinal.toSource();

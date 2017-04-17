@@ -242,24 +242,24 @@ test("correctly matches literals", () => {
 //	Literal-list
 //
 test("correctly matches literal lists", () => {
-	let result = parser.parse("literal-list", " [] ");
+	let result = parser.parse("literal_list", " [] ");
 	expect(result.toSource()).toBe("[]");
 
-	result = parser.parse("literal-list", " [1] ");
+	result = parser.parse("literal_list", " [1] ");
 	expect(result.toSource()).toBe("[1]");
 
-	result = parser.parse("literal-list", " [1,] ");
+	result = parser.parse("literal_list", " [1,] ");
 	expect(result.toSource()).toBe("[1]");
 
-	result = parser.parse("literal-list", " [1,2,3] ");
+	result = parser.parse("literal_list", " [1,2,3] ");
 	expect(result.toSource()).toBe("[1, 2, 3]");
 
-	result = parser.parse("literal-list", " [1,2,3,] ");
+	result = parser.parse("literal_list", " [1,2,3,] ");
 	expect(result.toSource()).toBe("[1, 2, 3]");
 
-	result = parser.parse("literal-list", " [,1,2,3,] ");
+	result = parser.parse("literal_list", " [,1,2,3,] ");
 	expect(result).toBeUndefined();
 
-	result = parser.parse("literal-list", " [yes,no,'a',1,] ");
+	result = parser.parse("literal_list", " [yes,no,'a',1,] ");
 	expect(result.toSource()).toBe("[true, false, 'a', 1]");
 });

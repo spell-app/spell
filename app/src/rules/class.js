@@ -6,8 +6,8 @@ import parser from "./_parser";
 export default parser;
 
 
-//parser.addExpression("property-expression", "{property:property-name}+ {expression}", {
-parser.addExpression("property-expression", "(properties:the {identifier} of)+ {expression}", {
+//parser.addExpression("property_expression", "{property:property_name}+ {expression}", {
+parser.addExpression("property_expression", "(properties:the {identifier} of)+ {expression}", {
  	gatherArguments() {
 		let args = Rule.Expression.gatherArguments(this);
 		// transform properties and reverse order
@@ -25,11 +25,11 @@ parser.addExpression("property-expression", "(properties:the {identifier} of)+ {
 
 
 
-parser.addSyntax("scope-modifier", "(scope:global|constant|shared)");
+parser.addSyntax("scope_modifier", "(scope:global|constant|shared)");
 
 parser.addStatement(
-	"declare-property",
-	"{scope-modifier}? {assignment}",
+	"declare_property",
+	"{scope_modifier}? {assignment}",
 	{
 		toSource(context) {
 			let args = this.gatherArguments();
@@ -57,8 +57,8 @@ parser.addStatement(
 
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
 parser.addStatement(
-	"declare-property-as-one-of",
-	"{identifier} as one of {list:literal-list}",
+	"declare_property_as_one_of",
+	"{identifier} as one of {list:literal_list}",
 	{
 		toSource(context) {
 			let args = this.gatherArguments();

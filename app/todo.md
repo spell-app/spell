@@ -1,8 +1,16 @@
-- stream.head continuously is expensive -- memoize?
-- start match is MUCH more efficient
-	- define without start and then auto-add when using?
+- SimpleExpression and CompoundExpression
 
-- convert Rule.String to Regex?
+- Rule.String => Rule.Symbol
+- combine Symbol and Keyword matches ?
+
+- combine Alternatives w/Patterns into one
+	- implies parser.optimize step???
+	- only if no custom stuff?
+
+
+- Matched Alternatives should return matched rule instead (w/custom stuff on it somehow)
+
+- result/argument processing is too squirrely
 
 
 - combine regular expressions?
@@ -13,7 +21,6 @@
 	- re.and, eg    combining keyword AND string
 
 
-- result/argument processing is too squirrely
 
 - instead of RuleSyntax doing a `Object.defineProperties`, compose a subclass???
 	- `memoizedGetter` should be a lot smarter...
@@ -21,4 +28,5 @@
 - remember which file each rule came from
 	- global "RULE_FILE" in each file?
 
-- freeze TextStreams?  freeze Rules?
+
+- stream.head continuously is expensive -- memoize?

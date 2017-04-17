@@ -138,7 +138,7 @@ parser.rules.identifier.addToBlacklist(
 
 // Literal list (array), eg:  `[1,2,true,false ]`
 let list = parser.addExpression(
-	"literal-list",
+	"literal_list",
 	"\\[[list:{expression},]?\\]",
 	{
 		gatherArguments() {
@@ -154,4 +154,4 @@ let list = parser.addExpression(
 // Literal value as number, text or boolean.
 //TODO: this is an expression... but installing it that way breaks parsing...?
 //TESTME: add literal-list to this?
-parser.addSyntax("literal", "(literal:{number}|{text}|{boolean}|{literal-list})");
+parser.addSyntax("literal", "(literal:{number}|{text}|{boolean}|{literal_list})");

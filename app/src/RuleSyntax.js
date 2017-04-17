@@ -289,15 +289,15 @@ Object.defineProperties(Parser.prototype, {
 			}
 			// clear list of infix operators for getter below
 			delete this.__infixOperators;
-			return this.addRule("infix-operator", rule);
+			return this.addRule("infix_operator", rule);
 		}
 	}},
 
 	// List of infix operators as strings.
 	// Re-memoized after `addInfixOperator` above.
 	infixOperators: defineMemoized("__infixOperator",
-		function() { return this.rules["infix-operator"]
-						 && this.rules["infix-operator"].rules.map(rule => rule.string)
+		function() { return this.rules["infix_operator"]
+						 && this.rules["infix_operator"].rules.map(rule => rule.string)
 	}),
 
 	// Add postfix operator, such as "a is defined"
@@ -315,14 +315,14 @@ Object.defineProperties(Parser.prototype, {
 			}
 			// clear list of infix operators for getter below
 			delete this.__postfixOperators;
-			return this.addRule("postfix-operator", rule);
+			return this.addRule("postfix_operator", rule);
 		}
 	}},
 
 	// List of postfix operators as strings.
 	// Re-memoized after `addInfixOperator` above.
 	postfixOperators: defineMemoized("__posfixOperator",
-		function(){ return this.rules["postfix-operator"]
-						&& this.rules["postfix-operator"].rules.map(rule => rule.string);
+		function(){ return this.rules["postfix_operator"]
+						&& this.rules["postfix_operator"].rules.map(rule => rule.string);
 	})
 });
