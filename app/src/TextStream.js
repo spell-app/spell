@@ -55,16 +55,11 @@ export default class TextStream {
 	}
 
 	// Does this stream INCLUDE a regex within it?
+	// Returns `true` or `false`.
 	// NOTE: Pattern must NOT start with `^` for this to match in the middle of the stream.
-	includes(pattern) {
+	test(pattern) {
 		return pattern.test(this.head);
 	}
-
-	startsWith(string) {
-//TODO: use `stream.range` to ensure match is not not beyond `string.endIndex`
-		return this.head.startsWith(string);
-	}
-
 
 //
 // ## Reflection

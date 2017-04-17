@@ -39,6 +39,23 @@ export default class Rule {
 		return this.stream.advanceTo(this.endIndex);
 	}
 
+//
+//	Parsing primitives -- you MUST implement these in your subclasses!
+//
+
+	// Test to see if it's POSSIBLE that this pattern may appear in the stream,
+	//	i.e. it may present but not at the `stream.head`
+	// Returns `true` or `false` if we can actually make a test, otherwise `undefined`.
+	test(parser, stream) {
+		return undefined;
+	}
+
+	// Attempt to match this pattern at the beginning of the stream.
+	// Returns results of the parse or `undefined`.
+	parse(parser, stream) {
+		return undefined;
+	}
+
 
 //
 // ## output as source
@@ -94,6 +111,12 @@ Rule.Pattern = class Pattern extends Rule {
 		Object.defineProperty(this, "startPattern", { value: new RegExp("^" + this.pattern.source) });
 	}
 
+	// Test to see if it's POSSIBLE that this pattern may appear in the stream,
+	//	i.e. it may present but not at the `stream.head`
+	test(parser, stream) {
+		return stream.test(this.pattern);
+	}
+
 	// Attempt to match this pattern at the beginning of the stream.
 	parse(parser, stream) {
 		// Use `startPattern` defined in constructor above, much more efficient!
@@ -145,7 +168,7 @@ Rule.Symbol = class Symbol extends Rule.Pattern {
 	}
 }
 
-// Merge two String rules together, returning a new rule that matches both.
+// Merge two Symbol rules together, returning a new rule that matches both.
 Rule.mergeSymbols = function(first, second) {
 	return new Rule.Symbol({ string: first.string + second.string });
 }
@@ -174,6 +197,7 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 		return `${this.string}${this.optional ? '?' : ''}`;
 	}
 }
+
 
 // Merge two Keyword rules together, adding the second to the first.
 Rule.mergeKeywords = function(first, second) {

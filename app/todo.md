@@ -1,12 +1,12 @@
-- SimpleExpression vs CompoundExpression
 
-- Rule.String => Rule.Symbol
+
+
+- SimpleExpression vs CompoundExpression?
 - combine Symbol and Keyword matches ?
 
 - combine Alternatives w/Patterns into one
 	- implies parser.optimize step???
 	- only if no custom stuff?
-
 
 - Matched Alternatives should return matched rule instead (w/custom stuff on it somehow)
 

@@ -89,15 +89,15 @@ test("match fails with invalid regex", () => {
 	expect(match).toBe(undefined);
 });
 
-test("startsWith works with valid string", () => {
+test("test works with valid regex", () => {
 	let stream = new TextStream("test").advanceBy(2);
-	let matched = stream.startsWith("st");
+	let matched = stream.test(/t/);
 	expect(matched).toBe(true);
 });
 
-test("startsWith fails with invalid string", () => {
+test("test fails with invalid regex", () => {
 	let stream = new TextStream("test").advanceBy(2);
-	let matched = stream.startsWith("ST");
+	let matched = stream.test(/T/);
 	expect(matched).toBe(false);
 });
 
