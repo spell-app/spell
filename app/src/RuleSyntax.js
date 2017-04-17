@@ -52,7 +52,7 @@ Object.assign(Rule, {
 					// remove the last rule
 					rules.pop();
 					// and replace with a rule that merges the keywords
-					rule = Rule.mergeStrings(last, rule);
+					rule = Rule.mergeSymbols(last, rule);
 				}
 				// If this is a `Keyword` and last was also a `Keyword`, merge together
 				else if (last && last instanceof Rule.Keyword && rule instanceof Rule.Keyword) {

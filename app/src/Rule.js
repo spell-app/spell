@@ -146,7 +146,7 @@ Rule.Symbol = class Symbol extends Rule.Pattern {
 }
 
 // Merge two String rules together, returning a new rule that matches both.
-Rule.mergeStrings = function(first, second) {
+Rule.mergeSymbols = function(first, second) {
 	return new Rule.Symbol({ string: first.string + second.string });
 }
 

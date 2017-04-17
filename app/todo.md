@@ -1,4 +1,4 @@
-- SimpleExpression and CompoundExpression
+- SimpleExpression vs CompoundExpression
 
 - Rule.String => Rule.Symbol
 - combine Symbol and Keyword matches ?
