@@ -164,8 +164,8 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 		// derive `pattern` if necessary.
 		if (!properties.pattern) {
 			// enforce word boundaries and allow arbitrary space between words
-			var patternString = `\\b${properties.string.split(/\s+/).join("\\s+")}\\b`;
-			properties.pattern = new RegExp(patternString);
+			var patternString = Parser.escapeRegExpCharacters(properties.string);
+			properties.pattern = new RegExp("\\b" + patternString + "\\b");
 		}
 		super(properties);
 	}
