@@ -75,25 +75,25 @@ test("doesn't confuse identifiers and Types", () => {
 //	Type
 //
 test("correctly matches Types", () => {
-	let result = parser.parse("Type", "Abc ");
+	let result = parser.parse("type", "Abc ");
 	expect(result.toSource()).toBe("Abc");
 
-	result = parser.parse("Type", "Abc-def ");
+	result = parser.parse("type", "Abc-def ");
 	expect(result.toSource()).toBe("Abc_def");
 
-	result = parser.parse("Type", "Abc_def ");
+	result = parser.parse("type", "Abc_def ");
 	expect(result.toSource()).toBe("Abc_def");
 
-	result = parser.parse("Type", "Abc01 ");
+	result = parser.parse("type", "Abc01 ");
 	expect(result.toSource()).toBe("Abc01");
 
-	result = parser.parse("Type", "Abc-def_01 ");
+	result = parser.parse("type", "Abc-def_01 ");
 	expect(result.toSource()).toBe("Abc_def_01");
 
-	result = parser.parse("Type", "$asda ");
+	result = parser.parse("type", "$asda ");
 	expect(result).toBeUndefined();
 
-	result = parser.parse("Type", "(asda) ");
+	result = parser.parse("type", "(asda) ");
 	expect(result).toBeUndefined();
 });
 

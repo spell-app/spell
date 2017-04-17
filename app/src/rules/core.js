@@ -64,8 +64,8 @@ parser.rules.identifier.addToBlacklist(
 
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
-Rule.Type = class Type extends Rule.Pattern {};
-let type = parser.addRule("Type", new Rule.Type({
+Rule.Type = class type extends Rule.Pattern {};
+let type = parser.addRule("type", new Rule.Type({
 	pattern: /[A-Z][\w\-]*/,
 	// Convert "-" to "_" in source output.
 	toSource: function(context) {

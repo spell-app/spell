@@ -43,13 +43,6 @@ export default class Rule {
 //	Parsing primitives -- you MUST implement these in your subclasses!
 //
 
-	// Test to see if it's POSSIBLE that this pattern may appear in the stream,
-	//	i.e. it may present but not at the `stream.head`
-	// Returns `true` or `false` if we can actually make a test, otherwise `undefined`.
-	test(parser, stream) {
-		return undefined;
-	}
-
 	// Attempt to match this pattern at the beginning of the stream.
 	// Returns results of the parse or `undefined`.
 	parse(parser, stream) {
@@ -109,12 +102,6 @@ Rule.Pattern = class Pattern extends Rule {
 		// Create a `startPattern` to match at the beginning of the strong
 		// Create non-enumerably.
 		Object.defineProperty(this, "startPattern", { value: new RegExp("^" + this.pattern.source) });
-	}
-
-	// Test to see if it's POSSIBLE that this pattern may appear in the stream,
-	//	i.e. it may present but not at the `stream.head`
-	test(parser, stream) {
-		return stream.test(this.pattern);
 	}
 
 	// Attempt to match this pattern at the beginning of the stream.

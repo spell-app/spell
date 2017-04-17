@@ -295,7 +295,7 @@ Object.defineProperties(Parser.prototype, {
 
 	// List of infix operators as strings.
 	// Re-memoized after `addInfixOperator` above.
-	infixOperators: defineMemoized("__infixOperator",
+	infixOperators: defineMemoized("__infixOperators",
 		function() { return this.rules["infix_operator"]
 						 && this.rules["infix_operator"].rules.map(rule => rule.string)
 	}),
@@ -321,7 +321,7 @@ Object.defineProperties(Parser.prototype, {
 
 	// List of postfix operators as strings.
 	// Re-memoized after `addInfixOperator` above.
-	postfixOperators: defineMemoized("__posfixOperator",
+	postfixOperators: defineMemoized("__posfixOperators",
 		function(){ return this.rules["postfix_operator"]
 						&& this.rules["postfix_operator"].rules.map(rule => rule.string);
 	})

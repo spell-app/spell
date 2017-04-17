@@ -89,19 +89,6 @@ test("match fails with invalid regex", () => {
 	expect(match).toBe(undefined);
 });
 
-test("test works with valid regex", () => {
-	let stream = new TextStream("test").advanceBy(2);
-	let matched = stream.test(/t/);
-	expect(matched).toBe(true);
-});
-
-test("test fails with invalid regex", () => {
-	let stream = new TextStream("test").advanceBy(2);
-	let matched = stream.test(/T/);
-	expect(matched).toBe(false);
-});
-
-
 
 //
 //	Reflection
