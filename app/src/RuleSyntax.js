@@ -284,8 +284,8 @@ Object.defineProperties(Parser.prototype, {
 
 		var rule = this.addSyntax(name, ruleSyntax, properties);
 		if (rule) {
-			if (!rule.transformer) {
-				throw new TypeError(`Expected infix operator rule '${name}' to specify 'transformer' function`)
+			if (!rule.toJS) {
+				throw new TypeError(`Expected infix operator rule '${name}' to specify 'toJS' function`)
 			}
 			// clear list of infix operators for getter below
 			delete this.__infixOperators;
@@ -310,8 +310,8 @@ Object.defineProperties(Parser.prototype, {
 
 		var rule = this.addSyntax(name, ruleSyntax, properties);
 		if (rule) {
-			if (!rule.transformer) {
-				throw new TypeError(`Expected postfix operator rule '${name}' to specify 'transformer' function`);
+			if (!rule.toJS) {
+				throw new TypeError(`Expected postfix operator rule '${name}' to specify 'toJS' function`);
 			}
 			// clear list of infix operators for getter below
 			delete this.__postfixOperators;

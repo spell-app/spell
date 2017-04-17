@@ -128,7 +128,7 @@ let bool = parser.addRule("boolean", new Rule.Boolean({
 	}
 }));
 parser.addRule("expression", bool);
-// Add boolean tokens identifier blacklist.
+// Add boolean tokens to identifier blacklist.
 // TESTME
 parser.rules.identifier.addToBlacklist(
 	"true", "false",

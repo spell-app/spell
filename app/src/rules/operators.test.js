@@ -8,7 +8,7 @@ test("parser is defined", () => {
 //
 //##	Infix operators
 //
-test("infix operators require a transformer function", () => {
+test("infix operators require a toJS function", () => {
 	expect(() => {
 		parser.addInfixOperator("foo", "foo");
 	}).toThrow(TypeError);
@@ -143,7 +143,7 @@ test("is less than or equal to operator", () => {
 //
 //## Postfix operators
 //
-test("postfix operators require a transformer function", () => {
+test("postfix operators require a toJS function", () => {
 	expect(() => {
 		parser.addPostfixOperator("foo", "foo");
 	}).toThrow(TypeError);
