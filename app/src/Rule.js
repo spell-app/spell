@@ -303,7 +303,8 @@ Rule.Expression = class expression extends Rule.Sequence {}
 Rule.Statement = class statement extends Rule.Sequence {}
 
 
-// Alternative syntax.
+// Alternative syntax, matching one of a number of different rules.
+// The result of a parse is the longest rule that actually matched.
 // NOTE: Currently takes the longest valid match.
 // TODO: match all valid alternatives
 // TODO: rename?
@@ -326,9 +327,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		}
 		if (!bestMatch) return undefined;
 
-		// assign argName
-// console.info(this);
-// console.info(bestMatch);
+		// assign `argName` or `ruleName` for `gatherArguments()`
 		if (this.argument) bestMatch.argument = this.argument;
 		else if (this.ruleName) bestMatch.ruleName = this.ruleName;
 		return bestMatch;
