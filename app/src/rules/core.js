@@ -38,7 +38,7 @@ parser.rules.identifier.addToBlacklist(
 	"about", "above", "after", "and", "as", "at",
 	"before", "behind", "below", "beneath", "beside", "between", "beyond", "by",
 	"defined", "down", "during",
-	"empty", "exactly", "except",
+	"each", "empty", "exactly", "except",
 	"for", "from",
 	"greater",
 	"in", "into",
@@ -60,6 +60,16 @@ parser.rules.identifier.addToBlacklist(
 	"contains",
 	"has", "have",
 	"is",
+	"repeat",
+	"was", "were"
+);
+
+// Add special control keywords to identifier blacklist.
+parser.rules.identifier.addToBlacklist(
+	"else",
+	"if",
+	"otherwise",
+	"while"
 );
 
 // `Type` = type name.
