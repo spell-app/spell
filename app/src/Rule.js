@@ -328,6 +328,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 
 		return this.clone({
 			matched: bestMatch,
+			startIndex: bestMatch.stream.startIndex,
 			endIndex: bestMatch.endIndex,
 			stream: bestMatch.stream
 		});
@@ -429,6 +430,7 @@ Rule.List = class List extends Rule {
 
 		return this.clone({
 			results,
+			startIndex: results[0] ? results[0].startIndex : stream.startIndex,
 			endIndex: next.startIndex,
 			stream
 		});
