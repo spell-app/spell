@@ -40,7 +40,8 @@ parser.addSyntax("ordinal", "(first|second|third|fourth|fifth|sixth|seventh|eigh
 });
 
 // Alternative form for numeric index in a list-like thing.
-parser.addExpression("index_expression", "the {ordinal} item of {expression}", {
+// NOTE: don't add as an expression since we're auto-merged with `index_expression` above.
+parser.addSyntax("index_expression", "the {ordinal} item of {expression}", {
 	toSource() {
 		let args = this.gatherArguments();
 		let ordinal = args.ordinal.toSource();
