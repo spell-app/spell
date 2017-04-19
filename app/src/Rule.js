@@ -26,7 +26,7 @@ export default class Rule {
 
 	// Clone this rule and add any `props` passed in.
 	clone(props) {
-		var clone = Object.create(this);
+		let clone = Object.create(this);
 		Object.assign(clone, props);
 		return clone;
 	}
@@ -43,12 +43,19 @@ export default class Rule {
 //	Parsing primitives -- you MUST implement these in your subclasses!
 //
 
-	// Attempt to match this pattern at the beginning of the stream.
+	// Attempt to match this rule in the `stream`.
+	// If `atHead` is `true`, we'll only accept a match at the beginning of the stream.
 	// Returns results of the parse or `undefined`.
-	parse(parser, stream) {
+	parse(parser, stream, atHead = true) {
 		return undefined;
 	}
 
+	// Is this rule deterministic, eg: can it be quickly and unambiguously satisfied?
+	// Returning `true` can speed up sequence processing,
+	//	but if you're really not sure, return `undefined`.
+	isDeterministic(parser, stream) {
+		return undefined;
+	}
 
 //
 // ## output as source
@@ -105,20 +112,27 @@ Rule.Pattern = class Pattern extends Rule {
 	}
 
 	// Attempt to match this pattern at the beginning of the stream.
-	parse(parser, stream) {
-		// Use `startPattern` defined in constructor above, much more efficient!
-		var match = stream.match(this.startPattern);
+	parse(parser, stream, atHead = true) {
+		// If `atHead` is true, use `startPattern` defined in constructor above, much more efficient!
+		let match = stream.match(atHead ? this.startPattern : this.pattern);
 		if (!match) return undefined;
 
-		// bail if not in blacklist
-		var matched = match[0];
+		// bail if present in blacklist
+		let matched = match[0];
 		if (this.blacklist && this.blacklist[matched]) return undefined;
 
+		let matchStream = stream.advanceBy(match.index);
 		return this.clone({
 			matched: matched,
-			endIndex: stream.startIndex + matched.length,
-			stream
+			startIndex: matchStream.startIndex,
+			endIndex: matchStream.startIndex + matched.length,
+			stream: matchStream
 		});
+	}
+
+	// Patterns are ALWAYS deterministic.
+	isDeterministic(parser, stream) {
+		return true;
 	}
 
 	addToBlacklist(...words) {
@@ -174,7 +188,7 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 		// derive `pattern` if necessary.
 		if (!properties.pattern) {
 			// enforce word boundaries and allow arbitrary space between words
-			var patternString = Parser.escapeRegExpCharacters(properties.string);
+			let patternString = Parser.escapeRegExpCharacters(properties.string);
 			properties.pattern = new RegExp("\\b" + patternString + "\\b");
 		}
 		super(properties);
@@ -195,14 +209,20 @@ Rule.mergeKeywords = function(first, second) {
 // Subrule -- name of another rule to be called.
 // `rule.rule` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
-	parse(parser, stream) {
-		var rule = parser.getRule(this.rule);
+	parse(parser, stream, atHead) {
+		let rule = parser.getRule(this.rule);
 		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.name}'`, this);
-		var result = rule.parse(parser, stream);
+		let result = rule.parse(parser, stream, atHead);
 		if (!result) return undefined;
 
 		if (this.argument) result.argument = this.argument;
 		return result;
+	}
+
+	isDeterministic(parser, stream) {
+		let rule = parser.getRule(this.rule);
+		if (!rule) return false;
+		return rule.isDeterministic(parser, stream);
 	}
 
 	toString() {
@@ -213,16 +233,22 @@ Rule.Subrule = class Subrule extends Rule {
 
 
 // Abstract:  `Nested` rule -- composed of a series of other `rules`.
-Rule.Nested = class Nested extends Rule {}
+Rule.Nested = class Nested extends Rule {
+
+	// Is this deterministic, eg: are our subrules unambigously determinable?
+	isDeterministic(parser, stream) {
+		return this.rules.every(rule => rule.isDeterministic(parser, stream));
+	}
+}
 
 
 // Sequence of rules to match (auto-excluding whitespace).
 Rule.Sequence = class Sequence extends Rule.Nested {
-	parse(parser, stream) {
+	parse(parser, stream, atHead) {
 		let results = [], next = stream;
 		for (let rule of this.rules) {
 			next = parser.eatWhitespace(next);
-			let result = rule.parse(parser, next);
+			let result = rule.parse(parser, next, atHead);
 			if (!result && !rule.optional) return undefined;
 			if (result) {
 				results.push(result);
@@ -271,6 +297,9 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 
 // Syntactic sugar for debugging
 Rule.Expression = class expression extends Rule.Sequence {}
+
+
+// Statements take up the entire line.
 Rule.Statement = class statement extends Rule.Sequence {}
 
 
@@ -285,10 +314,10 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 	}
 
 	// Find the LONGEST match
-	parse(parser, stream) {
+	parse(parser, stream, atHead) {
 		let bestMatch;
 		for (let rule of this.rules) {
-			let match = rule.parse(parser, stream);
+			let match = rule.parse(parser, stream, atHead);
 			if (!match) continue;
 
 			// take the longest match
@@ -300,7 +329,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		return this.clone({
 			matched: bestMatch,
 			endIndex: bestMatch.endIndex,
-			stream
+			stream: bestMatch.stream
 		});
 	}
 
@@ -328,12 +357,12 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
 Rule.Repeat = class Repeat extends Rule.Nested {
-	parse(parser, stream) {
+	parse(parser, stream, atHead) {
 		let next = stream;
 		let results = [];
 		while (true) {
 			next = parser.eatWhitespace(next);
-			let result = this.rule.parse(parser, next);
+			let result = this.rule.parse(parser, next, atHead);
 			if (!result) break;
 
 			results.push(result);
@@ -376,22 +405,22 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 //
 // NOTE: we assume that a List rule will NOT repeat (????)
 Rule.List = class List extends Rule {
-	parse(parser, stream) {
+	parse(parser, stream, atHead) {
 		// ensure item and delimiter are optional so we don't barf in `parseRule`
 		this.item.optional = true;
 		this.delimiter.optional = true;
 
-		var results = [], next = stream;
+		let results = [], next = stream;
 		while (true) {
 			// get next item, exiting if not found
-			let item = this.item.parse(parser, next);
+			let item = this.item.parse(parser, next, atHead);
 			if (!item) break;
 //console.log(item);
 			results.push(item);
 			next = item.next();
 
 			// get delimiter, exiting if not found
-			let delimiter = this.delimiter.parse(parser, next);
+			let delimiter = this.delimiter.parse(parser, next, atHead);
 			if (!delimiter) break;
 			next = delimiter.next();
 		}

@@ -1,3 +1,19 @@
+if {expression} then {statement}?
+	- find "if" ... "(then|:)" ...
+	- parse {expression} and {statement} in interstitial bits
+
+	- sequence.parse():
+		-
+
+
+
+Rule.test()
+- for complex rules (eg: ... if ... else), we have `rule.test()` which does a quick-and-dirty test to see if it's remotely possible that the rule will work.
+- only implement a `rule.test()` if:
+	- it's super quick (a single regular expression)
+	- it's faster to do the `test()` than just evaluating the rule
+- if there's no rule.test(), you'll have to evaluate the rule to see if it works.
+- pretty much anything with a nested expression should have a `rule.test()`...
 
 
 

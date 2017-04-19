@@ -36,20 +36,20 @@ export default class Parser {
 	// Parse `name`d rule at head of `stream` (`string` or `TextStream`).
 	// Handles optional and repeating rules as well as eating whitespace.
 	// Returns result of parse.
-	parse(name, stream) {
+	parse(name, stream, atHead) {
 		if (typeof stream === "string") stream = new TextStream(stream);
 		let rule = this.getRule(name);
 		if (!rule) throw new SyntaxError(`parser.parse(${name}): Rule not found`);
 		stream = this.eatWhitespace(stream);
-		return rule.parse(this, stream);
+		return rule.parse(this, stream, atHead);
 	}
 
 	// Eat whitespace (according to `rules.whitespace`) at the beginning of the stream.
 	// Returns new stream if we matched whitespace, otherwise the same stream.
-	// Otherwise returns this same stream.
 	eatWhitespace(stream) {
 		let result = this.rules.whitespace.parse(this, stream);
-		return result ? result.next() : stream;
+		if (!result) return stream;
+		return stream.advanceBy(result.matched.length);
 	}
 
 	// Add a rule to our list of rules!
