@@ -67,7 +67,7 @@ export default class TextStream {
 	}
 
 	// Return a range of the string from `startIndex` to `endIndex` NON-inclusive.
-	range(startIndex = this.startIndex, endIndex = this.text.length) {
+	range(startIndex = this.startIndex, endIndex = this.endIndex || this.text.length) {
 		return this.text.substring(startIndex, endIndex);
 	}
 
