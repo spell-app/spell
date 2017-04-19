@@ -2,6 +2,7 @@
 //	# Rules for infix and prefix operators.
 //
 
+import Rule from "../RuleSyntax";
 import parser from "./_parser";
 import "./core";
 
@@ -74,7 +75,7 @@ parser.addPostfixOperator("is_not_empty", "is not empty", { toJS(thing) { return
 
 parser.addSyntax(
 	"postfix_operator_expression",
-	"{lhs:expression} {operator:postfix_operator}",
+	"{lhs:expression!postfix_operator_expression} {operator:postfix_operator}",
 	{
 		toSource(context) {
 			let args = this.gatherArguments();

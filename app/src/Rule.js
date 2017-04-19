@@ -44,9 +44,8 @@ export default class Rule {
 //
 
 	// Attempt to match this rule in the `stream`.
-	// If `atHead` is `true`, we'll only accept a match at the beginning of the stream.
 	// Returns results of the parse or `undefined`.
-	parse(parser, stream, atHead = true) {
+	parse(parser, stream) {
 		return undefined;
 	}
 
@@ -112,21 +111,19 @@ Rule.Pattern = class Pattern extends Rule {
 	}
 
 	// Attempt to match this pattern at the beginning of the stream.
-	parse(parser, stream, atHead = true) {
-		// If `atHead` is true, use `startPattern` defined in constructor above, much more efficient!
-		let match = stream.match(atHead ? this.startPattern : this.pattern);
+	parse(parser, stream) {
+		let match = stream.match(this.startPattern);
 		if (!match) return undefined;
 
 		// bail if present in blacklist
 		let matched = match[0];
 		if (this.blacklist && this.blacklist[matched]) return undefined;
 
-		let matchStream = stream.advanceBy(match.index);
 		return this.clone({
 			matched: matched,
-			startIndex: matchStream.startIndex,
-			endIndex: matchStream.startIndex + matched.length,
-			stream: matchStream
+			startIndex: stream.startIndex,
+			endIndex: stream.startIndex + matched.length,
+			stream
 		});
 	}
 
@@ -209,10 +206,10 @@ Rule.mergeKeywords = function(first, second) {
 // Subrule -- name of another rule to be called.
 // `rule.rule` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
-	parse(parser, stream, atHead) {
+	parse(parser, stream) {
 		let rule = parser.getRule(this.rule);
 		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.name}'`, this);
-		let result = rule.parse(parser, stream, atHead);
+		let result = rule.parse(parser, stream);
 		if (!result) return undefined;
 
 		if (this.argument) result.argument = this.argument;
@@ -244,11 +241,11 @@ Rule.Nested = class Nested extends Rule {
 
 // Sequence of rules to match (auto-excluding whitespace).
 Rule.Sequence = class Sequence extends Rule.Nested {
-	parse(parser, stream, atHead) {
+	parse(parser, stream) {
 		let results = [], next = stream;
 		for (let rule of this.rules) {
 			next = parser.eatWhitespace(next);
-			let result = rule.parse(parser, next, atHead);
+			let result = rule.parse(parser, next);
 			if (!result && !rule.optional) return undefined;
 			if (result) {
 				results.push(result);
@@ -315,10 +312,10 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 	}
 
 	// Find the LONGEST match
-	parse(parser, stream, atHead) {
+	parse(parser, stream) {
 		let bestMatch;
 		for (let rule of this.rules) {
-			let match = rule.parse(parser, stream, atHead);
+			let match = rule.parse(parser, stream);
 			if (!match) continue;
 
 			// take the longest match
@@ -330,14 +327,8 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		// assign `argName` or `ruleName` for `gatherArguments()`
 		if (this.argument) bestMatch.argument = this.argument;
 		else if (this.ruleName) bestMatch.ruleName = this.ruleName;
+//TODO: other things to copy here???
 		return bestMatch;
-
-		return this.clone({
-			matched: bestMatch,
-			startIndex: bestMatch.stream.startIndex,
-			endIndex: bestMatch.endIndex,
-			stream: bestMatch.stream
-		});
 	}
 
 	addRule(rule) {
@@ -364,12 +355,12 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
 Rule.Repeat = class Repeat extends Rule.Nested {
-	parse(parser, stream, atHead) {
+	parse(parser, stream) {
 		let next = stream;
 		let results = [];
 		while (true) {
 			next = parser.eatWhitespace(next);
-			let result = this.rule.parse(parser, next, atHead);
+			let result = this.rule.parse(parser, next);
 			if (!result) break;
 
 			results.push(result);
@@ -412,7 +403,7 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 //
 // NOTE: we assume that a List rule will NOT repeat (????)
 Rule.List = class List extends Rule {
-	parse(parser, stream, atHead) {
+	parse(parser, stream) {
 		// ensure item and delimiter are optional so we don't barf in `parseRule`
 		this.item.optional = true;
 		this.delimiter.optional = true;
@@ -421,7 +412,7 @@ Rule.List = class List extends Rule {
 		while (true) {
 			next = parser.eatWhitespace(next);
 			// get next item, exiting if not found
-			let item = this.item.parse(parser, next, atHead);
+			let item = this.item.parse(parser, next);
 			if (!item) break;
 //console.log(item);
 			results.push(item);
@@ -429,7 +420,7 @@ Rule.List = class List extends Rule {
 
 			next = parser.eatWhitespace(next);
 			// get delimiter, exiting if not found
-			let delimiter = this.delimiter.parse(parser, next, atHead);
+			let delimiter = this.delimiter.parse(parser, next);
 			if (!delimiter) break;
 			next = delimiter.next();
 		}

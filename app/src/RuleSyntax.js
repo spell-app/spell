@@ -35,7 +35,7 @@ Object.assign(Rule, {
 	},
 
 	tokeniseRuleSyntax(syntax) {
-		const SYNTAX_EXPRESSION = /(?:[\w\-]+|\\[\[\(\{\)\}\]]|[^\s\w]|\|)/g;
+		const SYNTAX_EXPRESSION = /(?:[\w\-!]+|\\[\[\(\{\)\}\]]|[^\s\w]|\|)/g;
 		var syntaxStream = syntax.match(SYNTAX_EXPRESSION);
 		if (!syntaxStream) throw new SyntaxError(`Can't tokenize parse rule syntax >>${syntax}<<`);
 		return syntaxStream;
@@ -210,7 +210,17 @@ Object.assign(Rule, {
 			match.slice = match.slice.slice(2);
 		}
 		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: {${match.slice.join("")}}`);
-		let rule = new Rule.Subrule({ rule: match.slice[0] });
+
+		var params = { rule: match.slice[0] };
+
+		// see if there's a `not` rule in there
+		let bangPosition = params.rule.indexOf("!");
+		if (bangPosition !== -1) {
+			params.not = params.rule.substr(bangPosition + 1); //[ params.rule.substr(bangPosition + 1) ];
+			params.rule = params.rule.substr(0, bangPosition);
+		}
+
+		let rule = new Rule.Subrule(params);
 		if (argument) rule.argument = argument;
 		return [ rule, match.endIndex ];
 	},
@@ -251,7 +261,6 @@ Object.defineProperties(Parser.prototype, {
 	addSyntax: { value: function(name, ruleSyntax, properties, SequenceConstructor = Rule.Sequence) {
 		try {
 			let rule = Rule.parseRuleSyntax(ruleSyntax, SequenceConstructor);
-
 			// Reflect the rule back out to make sure it looks (more or less) the same
 			if (Parser.debug) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
 
