@@ -5,5 +5,6 @@ export default parser;
 import "./core";
 import "./numbers";
 import "./operators";
+import "./statements";
 import "./assignment";
 import "./class";
