@@ -412,6 +412,7 @@ Rule.List = class List extends Rule {
 
 		let results = [], next = stream;
 		while (true) {
+			next = parser.eatWhitespace(next);
 			// get next item, exiting if not found
 			let item = this.item.parse(parser, next, atHead);
 			if (!item) break;
@@ -419,6 +420,7 @@ Rule.List = class List extends Rule {
 			results.push(item);
 			next = item.next();
 
+			next = parser.eatWhitespace(next);
 			// get delimiter, exiting if not found
 			let delimiter = this.delimiter.parse(parser, next, atHead);
 			if (!delimiter) break;
