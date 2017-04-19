@@ -136,8 +136,8 @@ Object.assign(Rule, {
 		}
 
 		// split into groups, including nested parens
-		let alternates =
-			groupAlternates(slice)
+		let alternatives =
+			groupAlternatives(slice)
 			.map(function(group) {
 				let results = Rule.parseRuleSyntax_tokens(group, []);
 				if (results.length === 1) {
@@ -148,17 +148,17 @@ Object.assign(Rule, {
 				}
 			});
 
-		let rule = alternates.length === 1 ? alternates[0] : new Rule.Alternatives({ rules: alternates });
+		let rule = alternatives.length === 1 ? alternatives[0] : new Rule.Alternatives({ rules: alternatives });
 		if (argument) rule.argument = argument;
 		return [ rule, endIndex ];
 
-		function groupAlternates(tokens) {
-			var alternates = [];
+		function groupAlternatives(tokens) {
+			var alternatives = [];
 			var current = [];
 			for (var i = 0, token; token = tokens[i]; i++) {
 				// handle alternate marker
 				if (token === "|") {
-					alternates.push(current);
+					alternatives.push(current);
 					current = [];
 				}
 				// handle nested parens
@@ -171,8 +171,8 @@ Object.assign(Rule, {
 					current.push(token);
 				}
 			}
-			if (current.length) alternates.push(current);
-			return alternates;
+			if (current.length) alternatives.push(current);
+			return alternatives;
 		}
 	},
 
