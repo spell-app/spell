@@ -17,7 +17,7 @@ test("assign number to identifier", () => {
 	expect(args.identifier).toBeInstanceOf(Rule.Pattern);
 	expect(args.identifier.toSource()).toBe("a");
 
-	expect(args.expression.matched).toBeInstanceOf(Rule.Number);
+	expect(args.expression).toBeInstanceOf(Rule.Number);
 	expect(args.expression.toSource()).toBe(1);
 });
 
@@ -27,7 +27,7 @@ test("assign string to identifier", () => {
 	expect(result.toSource()).toBe("a = 'a'");
 
 	let args = result.gatherArguments();
-	expect(args.expression.matched).toBeInstanceOf(Rule.Text);
+	expect(args.expression).toBeInstanceOf(Rule.Text);
 	expect(args.expression.toSource()).toBe("'a'");
 });
 
@@ -37,7 +37,7 @@ test("assign boolean to identifier", () => {
 	expect(result.toSource()).toBe("a = true");
 
 	let args = result.gatherArguments();
-	expect(args.expression.matched).toBeInstanceOf(Rule.Boolean);
+	expect(args.expression).toBeInstanceOf(Rule.Boolean);
 	expect(args.expression.toSource()).toBe(true);
 });
 

@@ -56,7 +56,7 @@ parser.addSyntax(
 			let lhs = args.lhs.toSource(context);
 			let rhs = args.rhs.toSource(context);
 
-			let toJS = args.operator.matched.toJS;
+			let toJS = args.operator.toJS;
 			return toJS(lhs, rhs);
 		}
 	}
@@ -79,7 +79,7 @@ parser.addSyntax(
 		toSource(context) {
 			let args = this.gatherArguments();
 			let lhs = args.lhs.toSource(context);
-			let toJS = args.operator.matched.toJS;
+			let toJS = args.operator.toJS;
 			return toJS(lhs);
 		}
 	}

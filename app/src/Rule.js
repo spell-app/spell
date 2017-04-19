@@ -326,6 +326,13 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		}
 		if (!bestMatch) return undefined;
 
+		// assign argName
+// console.info(this);
+// console.info(bestMatch);
+		if (this.argument) bestMatch.argument = this.argument;
+		else if (this.ruleName) bestMatch.ruleName = this.ruleName;
+		return bestMatch;
+
 		return this.clone({
 			matched: bestMatch,
 			startIndex: bestMatch.stream.startIndex,

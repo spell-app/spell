@@ -151,10 +151,12 @@ let list = parser.addExpression(
 	"literal_list",
 	"\\[[list:{expression},]?\\]",
 	{
+		gatherArguments() {
+			return this.results[1];
+		},
 		// return just the list as our source
 		toSource(context) {
-			let args = this.gatherArguments();
-			return args.list.toSource();
+ 			return this.gatherArguments().toSource();
 		}
 	}
 );
