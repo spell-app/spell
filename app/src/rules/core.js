@@ -151,6 +151,7 @@ let list = parser.addExpression(
 	"literal_list",
 	"\\[[list:{expression},]?\\]",
 	{
+		// When gathering arguments, return just the matched list data.
 		gatherArguments() {
 			return this.results[1];
 		},
