@@ -48,10 +48,12 @@ parser.addInfixOperator("divided_by", ["/", "divided by"], { toJS(a,b) { return`
 
 //TODO:  `+=` etc?  other math functions?
 
-parser.addSyntax(
+parser.addExpression(
 	"infix_operator_expression",
 	"{lhs:expression} {operator:infix_operator} {rhs:expression}",
-	{
+	undefined,
+	class infix_operator_expression extends Rule.Expression {
+		leftRecursive = true;
 		toSource(context) {
 			let args = this.gatherArguments();
 			let lhs = args.lhs.toSource(context);
@@ -73,10 +75,12 @@ parser.addPostfixOperator("is_not_defined", ["is not defined", "is undefined"], 
 parser.addPostfixOperator("is_empty", "is empty", { toJS(thing) { return `spell.isEmpty(${thing})` }});
 parser.addPostfixOperator("is_not_empty", "is not empty", { toJS(thing) { return `!spell.isEmpty(${thing})` }});
 
-parser.addSyntax(
+parser.addExpression(
 	"postfix_operator_expression",
-	"{lhs:expression!postfix_operator_expression} {operator:postfix_operator}",
-	{
+	"{lhs:expression} {operator:postfix_operator}",
+	undefined,
+	class postfix_operator_expresion extends Rule.Expression {
+		leftRecursive = true;
 		toSource(context) {
 			let args = this.gatherArguments();
 			let lhs = args.lhs.toSource(context);
@@ -88,4 +92,4 @@ parser.addSyntax(
 
 
 // TODO: this should really be a general "expression"...
-parser.addSyntax("operator_expression", "(expression:{postfix_operator_expression}|{infix_operator_expression})");
+//parser.addSyntax("operator_expression", "(expression:{postfix_operator_expression}|{infix_operator_expression})");

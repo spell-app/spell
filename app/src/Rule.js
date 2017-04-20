@@ -25,9 +25,9 @@ export default class Rule {
 	}
 
 	// Clone this rule and add any `props` passed in.
-	clone(props) {
+	clone(...props) {
 		let clone = Object.create(this);
-		Object.assign(clone, props);
+		Object.assign(clone, ...props);
 		return clone;
 	}
 
@@ -121,6 +121,7 @@ Rule.Pattern = class Pattern extends Rule {
 
 		return this.clone({
 			matched: matched,
+			// DEBUG
 			startIndex: stream.startIndex,
 			endIndex: stream.startIndex + matched.length,
 			stream
@@ -208,7 +209,7 @@ Rule.mergeKeywords = function(first, second) {
 Rule.Subrule = class Subrule extends Rule {
 	parse(parser, stream) {
 		let rule = parser.getRule(this.rule);
-		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.name}'`, this);
+		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.rule}'`);
 		let result = rule.parse(parser, stream);
 		if (!result) return undefined;
 
@@ -255,6 +256,10 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		// if we get here, we matched all the rules!
 		return this.clone({
 			results,
+			// DEBUG
+			matched: stream.range(stream.startIndex, next.startIndex),
+			// DEBUG
+			startIndex: stream.startIndex,
 			endIndex: next.startIndex,
 			stream
 		});
@@ -293,7 +298,23 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 }
 
 // Syntactic sugar for debugging
-Rule.Expression = class expression extends Rule.Sequence {}
+Rule.Expression = class expression extends Rule.Sequence {
+	parse(parser, stream) {
+		if (this.dontRecurse) {
+//console.warn("NOT recursing into ", this);
+			return undefined;
+		}
+		// If the expression is leftRecursive, set a flag so we don't attempt to recurse into it again.
+//TODO: this is dangerous: an exception will leave the flag set...
+		if (this.leftRecursive) {
+			this.dontRecurse = true;
+//console.warn("Setting dontRecurse for", this);
+		}
+		let result = super.parse(parser, stream);
+		if (this.leftRecursive) delete this.dontRecurse;
+		return result;
+	}
+}
 
 
 // Statements take up the entire line.
@@ -371,6 +392,10 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 
 		return this.clone({
 			results,
+			// DEBUG
+			matched: stream.range(stream.startIndex, next.startIndex),
+			// DEBUG
+			startIndex: stream.startIndex,
 			endIndex: next.startIndex,
 			stream
 		});
@@ -427,6 +452,9 @@ Rule.List = class List extends Rule {
 
 		return this.clone({
 			results,
+			// DEBUG
+			matched: stream.range(stream.startIndex, next.startIndex),
+			// DEBUG
 			startIndex: results[0] ? results[0].startIndex : stream.startIndex,
 			endIndex: next.startIndex,
 			stream
