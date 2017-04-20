@@ -8,13 +8,11 @@
 //			- `endIndex`	Non-inclusive end index in stream where match ends.
 //
 //	The clone returned above can be manipulated with
-//		- `rule.gatherArguments()`		Return matched arguments in a format suitable to do:
-//		- `rule.toSource()`				Return javascript source to interpret the rule.
+//		- `rule.args`			Return matched arguments in a format suitable to do:
+//		- `rule.toSource()`		Return javascript source to interpret the rule.
 //
 import Parser from "./Parser.js";
 
-
-//TODO: make gatherArguments() static and call on this
 
 export default class Rule {
 	constructor(properties) {
@@ -59,16 +57,12 @@ export default class Rule {
 //
 // ## output as source
 //
-	get _arg() { return this.argument || this.ruleName || this.constructor.name }
 
 	// "gather" arguments in preparation to call `toSource()`
-	// Note that we define `gatherArguments()` statically on each subclass
-	//	and then instance method calls it on itself.
-	static gatherArguments(rule) {
-		return rule;
-	}
-	gatherArguments() {
-		return this.constructor.gatherArguments(this);
+	// Only callable after parse is completed.
+	// NOTE: you may want to memoize the args.
+	get args() {
+		return this;
 	}
 
 	// Output value for this INSTANTIATED rule as source.
@@ -266,29 +260,33 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 	}
 
 //TODOC
-	// Gather arguments from our parsed `results` array.
+	// "gather" arguments in preparation to call `toSource()`
+	// Only callable after parse is completed.
 	// Returns an object with properties from the `values` array indexed by
 	//		- `results.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
 	//		- `results.ruleName`:		name of rule when defined
-	//		- rule type:				name of the rule type
-	static gatherArguments(sequence) {
-		if (!sequence.results) return undefined;
-		let args = {};
-		for (let next of sequence.results) {
-			let argName = next._arg;
-			// For nested rules, recurse to get their arguments
-			let result = next.gatherArguments();
+	//		- `rule type`:				name of the rule type
+	// NOTE: memoizes the args.
+	get args() {
+		if (!this.results) return undefined;
+		if (!this._args) {
+			let args = this._args = {};
+			for (let result of this.results) {
+				let argName = result.argument || result.ruleName || result.constructor.name;
+				// For nested rules, recurse to get their arguments
+				let resultArgs = result.args;
 
-			// If arg already exists, convert to an array
-			if (argName in args) {
-				if (!Array.isArray(args[argName])) args[argName] = [args[argName]];
-				args[argName].push(result);
-			}
-			else {
-				args[argName] = result;
+				// If arg already exists, convert to an array
+				if (argName in args) {
+					if (!Array.isArray(args[argName])) args[argName] = [args[argName]];
+					args[argName].push(resultArgs);
+				}
+				else {
+					args[argName] = resultArgs;
+				}
 			}
 		}
-		return args;
+		return this._args;
 	}
 
 	toString() {
@@ -345,7 +343,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		}
 		if (!bestMatch) return undefined;
 
-		// assign `argName` or `ruleName` for `gatherArguments()`
+		// assign `argName` or `ruleName` for `args`
 		if (this.argument) bestMatch.argument = this.argument;
 		else if (this.ruleName) bestMatch.ruleName = this.ruleName;
 //TODO: other things to copy here???
@@ -401,9 +399,14 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 		});
 	}
 
-	static gatherArguments(repeat) {
-		if (!repeat.results) return undefined;
-		return repeat.results.map( result => result.gatherArguments() );
+	// "gather" arguments in preparation to call `toSource()`
+	// Only callable after parse is completed.
+	// Returns an array with arguments of all results.
+	// NOTE: memoizes the args.
+	get args() {
+		if (!this.results) return undefined;
+		if (!this._args) this._args = this.results.map( result => result.args );
+		return this._args
 	}
 
 	toSource() {

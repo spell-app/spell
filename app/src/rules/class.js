@@ -13,7 +13,7 @@ parser.addExpression(
 	"(properties:the {identifier} of)+ {expression}",
 	undefined,
 	class property_expression extends Rule.Expression {
-		gatherArguments() {
+		get args() {
 			let args = Rule.Expression.gatherArguments(this);
 			// transform properties and reverse order
 			args.properties = args.properties.map( sequence => sequence.identifier ).reverse();
@@ -21,7 +21,7 @@ parser.addExpression(
 		}
 
 		toSource(context) {
-			let args = this.gatherArguments();
+			let args = this.args;
 			let thing = args.expression.toSource();
 			let properties = args.properties.map( identifier => identifier.toSource() ).join(".");
 			return `spell.get(${thing}, '${properties}')`;
@@ -38,7 +38,7 @@ parser.addStatement(
 	"{scope_modifier}? {assignment}",
 	{
 		toSource(context) {
-			let args = this.gatherArguments();
+			let args = this.args;
 			let identifier = args.assignment.identifier.toSource();
 			let value = args.assignment.expression.toSource();
 			let assignment = `${identifier} = ${value}`;
@@ -67,7 +67,7 @@ parser.addStatement(
 	"{identifier} as one of {list:literal_list}",
 	{
 		toSource(context) {
-			let args = this.gatherArguments();
+			let args = this.args;
 			let identifier = args.identifier.toSource();
 			let plural = (identifier + "_VALUES").toUpperCase();
 			let list = args.list.list;

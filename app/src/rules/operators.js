@@ -55,7 +55,7 @@ parser.addExpression(
 	class infix_operator_expression extends Rule.Expression {
 		leftRecursive = true;
 		toSource(context) {
-			let args = this.gatherArguments();
+			let args = this.args;
 			let lhs = args.lhs.toSource(context);
 			let rhs = args.rhs.toSource(context);
 
@@ -77,13 +77,13 @@ parser.addPostfixOperator("is_not_empty", "is not empty", { toJS(thing) { return
 
 parser.addExpression(
 	"postfix_operator_expression",
-	"{lhs:expression} {operator:postfix_operator}",
+	"{expression} {operator:postfix_operator}",
 	undefined,
 	class postfix_operator_expresion extends Rule.Expression {
 		leftRecursive = true;
 		toSource(context) {
-			let args = this.gatherArguments();
-			let lhs = args.lhs.toSource(context);
+			let args = this.args;
+			let lhs = args.expression.toSource(context);
 			let toJS = args.operator.toJS;
 			return toJS(lhs);
 		}

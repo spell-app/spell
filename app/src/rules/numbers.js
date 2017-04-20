@@ -19,7 +19,7 @@ parser.addSyntax("index_expression",
 	undefined,
 	class index_expression extends Rule.Expression {
 		toSource() {
-			let args = this.gatherArguments();
+			let args = this.args;
 			let number = args.number.toSource();
 			let expression = args.expression.toSource();
 			return `spell.getItem(${expression}, ${number})`;
@@ -60,7 +60,7 @@ parser.addSyntax(
 	undefined,
 	class index_expression extends Rule.Expression {
 		toSource() {
-			let args = this.gatherArguments();
+			let args = this.args;
 			let ordinal = args.ordinal.toSource();
 			let expression = args.expression.toSource();
 			return `spell.getItem(${expression}, ${ordinal})`;
