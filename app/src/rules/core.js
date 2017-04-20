@@ -150,11 +150,13 @@ parser.rules.identifier.addToBlacklist(
 let list = parser.addExpression(
 	"literal_list",
 	"\\[[list:{expression},]?\\]",
-	{
+	undefined,
+	class literal_list extends Rule.Expression {
 		// When gathering arguments, return just the matched list data.
 		gatherArguments() {
 			return this.results[1];
-		},
+		}
+
 		// return just the list as our source
 		toSource(context) {
  			return this.gatherArguments().toSource();

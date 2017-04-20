@@ -35,7 +35,7 @@ Object.assign(Rule, {
 	},
 
 	tokeniseRuleSyntax(syntax) {
-		const SYNTAX_EXPRESSION = /(?:[\w\-!]+|\\[\[\(\{\)\}\]]|[^\s\w]|\|)/g;
+		const SYNTAX_EXPRESSION = /(?:[\w\-]+|\\[\[\(\{\)\}\]]|[^\s\w]|\|)/g;
 		var syntaxStream = syntax.match(SYNTAX_EXPRESSION);
 		if (!syntaxStream) throw new SyntaxError(`Can't tokenize parse rule syntax >>${syntax}<<`);
 		return syntaxStream;
@@ -273,13 +273,13 @@ Object.defineProperties(Parser.prototype, {
 		}
 	}},
 
-	addStatement: { value: function(name, ruleSyntax, properties) {
-		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Statement);
+	addStatement: { value: function(name, ruleSyntax, properties, SequenceConstructor = Rule.Statement) {
+		var rule = this.addSyntax(name, ruleSyntax, properties, SequenceConstructor);
 		if (rule) return this.addRule("statement", rule);
 	}},
 
-	addExpression: { value: function(name, ruleSyntax, properties) {
-		var rule = this.addSyntax(name, ruleSyntax, properties, Rule.Expression);
+	addExpression: { value: function(name, ruleSyntax, properties, SequenceConstructor = Rule.Expression) {
+		var rule = this.addSyntax(name, ruleSyntax, properties, SequenceConstructor);
 		if (rule) return this.addRule("expression", rule);
 	}},
 

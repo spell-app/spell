@@ -1,27 +1,33 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
+import Rule from "../RuleSyntax";
 import parser from "./_parser";
 // re-export parser for testing.
 export default parser;
 
 
 //parser.addExpression("property_expression", "{property:property_name}+ {expression}", {
-parser.addExpression("property_expression", "(properties:the {identifier} of)+ {expression}", {
- 	gatherArguments() {
-		let args = Rule.Expression.gatherArguments(this);
-		// transform properties and reverse order
-		args.properties = args.properties.map( sequence => sequence.identifier ).reverse();
-		return args;
- 	},
+parser.addExpression(
+	"property_expression",
+	"(properties:the {identifier} of)+ {expression}",
+	undefined,
+	class property_expression extends Rule.Expression {
+		gatherArguments() {
+			let args = Rule.Expression.gatherArguments(this);
+			// transform properties and reverse order
+			args.properties = args.properties.map( sequence => sequence.identifier ).reverse();
+			return args;
+		}
 
-	toSource(context) {
-		let args = this.gatherArguments();
-		let thing = args.expression.toSource();
-		let properties = args.properties.map( identifier => identifier.toSource() ).join(".");
-		return `spell.get(${thing}, '${properties}')`;
+		toSource(context) {
+			let args = this.gatherArguments();
+			let thing = args.expression.toSource();
+			let properties = args.properties.map( identifier => identifier.toSource() ).join(".");
+			return `spell.get(${thing}, '${properties}')`;
+		}
 	}
-});
+);
 
 
 
