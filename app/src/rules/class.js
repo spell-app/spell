@@ -12,18 +12,18 @@ parser.addExpression(
 	"(property_names:the {identifier} of)+ {expression}",
 	undefined,
 	class property_expression extends Rule.Expression {
-		get args() {
-			if (!this._args) {
-				this._args = super.args;
+		get results() {
+			if (!this._results) {
+				this._results = super.results;
 				// transform property_names and pull out identifiers
-				this._args.property_names = this._args.property_names.args.map( sequence => sequence.identifier );
+				this._results.property_names = this._results.property_names.results.map( sequence => sequence.identifier );
 			}
-			return this._args;
+			return this._results;
 		}
 
 		toSource(context) {
-			let thing = this.args.expression.toSource(context);
-			let property_names = this.args.property_names.reverse().map( identifier => identifier.toSource(context) ).join(".");
+			let thing = this.results.expression.toSource(context);
+			let property_names = this.results.property_names.reverse().map( identifier => identifier.toSource(context) ).join(".");
 			return `spell.get(${thing}, '${property_names}')`;
 		}
 	}
@@ -37,8 +37,8 @@ parser.addStatement(
 	"{scope_modifier}? {assignment}",
 	{
 		toSource(context) {
-			let assignment = this.args.assignment.toSource(context);
-			let scope = this.args.scope && this.args.scope.toSource(context);
+			let assignment = this.results.assignment.toSource(context);
+			let scope = this.results.scope && this.results.scope.toSource(context);
 			switch (scope) {
 				case "global":
 					return `global.${assignment}`;
@@ -63,13 +63,13 @@ parser.addStatement(
 	"{scope_modifier}? {identifier} as one of {list:literal_list}",
 	{
 		toSource(context) {
-			let scope = this.args.scope.toSource(context);
-			let identifier = this.args.identifier.toSource(context);
+			let scope = this.results.scope.toSource(context);
+			let identifier = this.results.identifier.toSource(context);
 			let plural = (identifier + "_VALUES").toUpperCase();
-			let list = this.args.list;
+			let list = this.results.list;
 			let values = list.toSource(context);
 //TODO: list.getItem(0)
-			let first = list.args.matched[0];
+			let first = list.results.matched[0];
 			let firstValue = first ? first.toSource(context) : "undefined";
 			return `static ${plural} = ${values};\n`
 				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`

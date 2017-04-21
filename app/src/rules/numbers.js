@@ -19,8 +19,8 @@ parser.addSyntax("index_expression",
 	undefined,
 	class index_expression extends Rule.Expression {
 		toSource(context) {
-			let number = this.args.number.toSource(context);
-			let expression = this.args.expression.toSource(context);
+			let number = this.results.number.toSource(context);
+			let expression = this.results.expression.toSource(context);
 			return `spell.getItem(${expression}, ${number})`;
 		}
 	}
@@ -54,8 +54,8 @@ parser.addSyntax(
 	undefined,
 	class index_expression extends Rule.Expression {
 		toSource(context) {
-			let ordinal = this.args.ordinal.toSource(context);
-			let expression = this.args.expression.toSource(context);
+			let ordinal = this.results.ordinal.toSource(context);
+			let expression = this.results.expression.toSource(context);
 			return `spell.getItem(${expression}, ${ordinal})`;
 		}
 	}

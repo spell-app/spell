@@ -155,13 +155,13 @@ let list = parser.addExpression(
 
 //TODO: squirrely...
 		// When gathering arguments, return just the matched list data, ignoring the brackets.
-		get args() {
+		get results() {
 			return this.matched[1];
 		}
 
 		// return just the list as our source
 		toSource(context) {
- 			return this.args.toSource(context);
+ 			return this.results.toSource(context);
 		}
 	}
 );

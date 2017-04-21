@@ -8,7 +8,7 @@
 //			- `endIndex`	Non-inclusive end index in stream where match ends.
 //
 //	The clone returned above can be manipulated with
-//		- `rule.args`				Return matched arguments in a format suitable to do:
+//		- `rule.results`			Return matched arguments in a format suitable to do:
 //		- `rule.toSource(context)`	Return javascript source to interpret the rule.
 //
 import Parser from "./Parser.js";
@@ -60,8 +60,8 @@ export default class Rule {
 
 	// "gather" arguments in preparation to call `toSource()`
 	// Only callable after parse is completed.
-	// NOTE: you may want to memoize the args.
-	get args() {
+	// NOTE: you may want to memoize the results.
+	get results() {
 		return this;
 	}
 
@@ -266,25 +266,25 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 	//		- `match.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
 	//		- `match.ruleName`:		name of rule when defined
 	//		- `rule type`:				name of the rule type
-	// NOTE: memoizes the args.
-	get args() {
+	// NOTE: memoizes the results.
+	get results() {
 		if (!this.matched) return undefined;
-		if (!this._args) {
-			let args = this._args = {};
+		if (!this._results) {
+			let results = this._results = {};
 			for (let match of this.matched) {
 				let argName = match.argument || match.ruleName || match.constructor.name;
 
 				// If arg already exists, convert to an array
-				if (argName in args) {
-					if (!Array.isArray(args[argName])) args[argName] = [args[argName]];
-					args[argName].push(match);
+				if (argName in results) {
+					if (!Array.isArray(results[argName])) results[argName] = [results[argName]];
+					results[argName].push(match);
 				}
 				else {
-					args[argName] = match;
+					results[argName] = match;
 				}
 			}
 		}
-		return this._args;
+		return this._results;
 	}
 
 	toString() {
@@ -341,7 +341,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		}
 		if (!bestMatch) return undefined;
 
-		// assign `argName` or `ruleName` for `args`
+		// assign `argName` or `ruleName` for `results`
 		if (this.argument) bestMatch.argument = this.argument;
 		else if (this.ruleName) bestMatch.ruleName = this.ruleName;
 //TODO: other things to copy here???
@@ -400,10 +400,10 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 	// "gather" arguments in preparation to call `toSource()`
 	// Only callable after parse is completed.
 	// Returns an array with arguments of all results.
-	// NOTE: memoizes the args.
-	get args() {
+	// NOTE: memoizes the results.
+	get results() {
 		if (!this.matched) return undefined;
-		return this._args || (this._args = this.matched.map( match => match.args ));
+		return this._results || (this._results = this.matched.map( match => match.results ));
 
 	}
 
