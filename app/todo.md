@@ -1,9 +1,6 @@
-- result/argument processing is too squirrely
-	- rule.args => memoized args marshalling
-	- ALWAYS return result, we can just .args that
 
 - `rule.results` rather than `rule.args`  ?
-
+- `rule` vs `result` (vs `tree node`???)
 
 - better solution than `dontRecurse`
 	- keep current rules in a stack and leftRecurse = check to see if we're already in that queue?
@@ -20,7 +17,6 @@ Rule.test()
 
 
 
-- SimpleExpression vs CompoundExpression?
 - combine Symbol and Keyword matches ?
 
 - combine Alternatives w/Patterns into one
