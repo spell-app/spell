@@ -114,7 +114,7 @@ Rule.Pattern = class Pattern extends Rule {
 		if (this.blacklist && this.blacklist[matched]) return undefined;
 
 		return this.clone({
-			matched: matched,
+			matched,
 			// DEBUG
 			startIndex: stream.startIndex,
 			endIndex: stream.startIndex + matched.length,
@@ -204,11 +204,11 @@ Rule.Subrule = class Subrule extends Rule {
 	parse(parser, stream) {
 		let rule = parser.getRule(this.rule);
 		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.rule}'`);
-		let result = rule.parse(parser, stream);
-		if (!result) return undefined;
+		let match = rule.parse(parser, stream);
+		if (!match) return undefined;
 
-		if (this.argument) result.argument = this.argument;
-		return result;
+		if (this.argument) match.argument = this.argument;
+		return match;
 	}
 
 	isDeterministic(parser, stream) {
@@ -237,21 +237,21 @@ Rule.Nested = class Nested extends Rule {
 // Sequence of rules to match (auto-excluding whitespace).
 Rule.Sequence = class Sequence extends Rule.Nested {
 	parse(parser, stream) {
-		let results = [], next = stream;
+		let matched = [], next = stream;
 		for (let rule of this.rules) {
 			next = parser.eatWhitespace(next);
-			let result = rule.parse(parser, next);
-			if (!result && !rule.optional) return undefined;
-			if (result) {
-				results.push(result);
-				next = result.next();
+			let match = rule.parse(parser, next);
+			if (!match && !rule.optional) return undefined;
+			if (match) {
+				matched.push(match);
+				next = match.next();
 			}
 		}
 		// if we get here, we matched all the rules!
 		return this.clone({
-			results,
+			matched,
 			// DEBUG
-			matched: stream.range(stream.startIndex, next.startIndex),
+			matchedText: stream.range(stream.startIndex, next.startIndex),
 			// DEBUG
 			startIndex: stream.startIndex,
 			endIndex: next.startIndex,
@@ -262,25 +262,25 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 //TODOC
 	// "gather" arguments in preparation to call `toSource()`
 	// Only callable after parse is completed.
-	// Returns an object with properties from the `values` array indexed by
-	//		- `results.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
-	//		- `results.ruleName`:		name of rule when defined
+	// Returns an object with properties from the `matched` array indexed by
+	//		- `match.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
+	//		- `match.ruleName`:		name of rule when defined
 	//		- `rule type`:				name of the rule type
 	// NOTE: memoizes the args.
 	get args() {
-		if (!this.results) return undefined;
+		if (!this.matched) return undefined;
 		if (!this._args) {
 			let args = this._args = {};
-			for (let result of this.results) {
-				let argName = result.argument || result.ruleName || result.constructor.name;
+			for (let match of this.matched) {
+				let argName = match.argument || match.ruleName || match.constructor.name;
 
 				// If arg already exists, convert to an array
 				if (argName in args) {
 					if (!Array.isArray(args[argName])) args[argName] = [args[argName]];
-					args[argName].push(result);
+					args[argName].push(match);
 				}
 				else {
-					args[argName] = result;
+					args[argName] = match;
 				}
 			}
 		}
@@ -306,9 +306,9 @@ Rule.Expression = class expression extends Rule.Sequence {
 			this.dontRecurse = true;
 //console.warn("Setting dontRecurse for", this);
 		}
-		let result = super.parse(parser, stream);
+		let match = super.parse(parser, stream);
 		if (this.leftRecursive) delete this.dontRecurse;
-		return result;
+		return match;
 	}
 }
 
@@ -367,29 +367,29 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 //	`this.rule` is the rule that repeats.
 //
 // After matching:
-//	`this.results` is array of results of matches.
+//	`this.matched` is array of results of matches.
 //
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
 Rule.Repeat = class Repeat extends Rule.Nested {
 	parse(parser, stream) {
 		let next = stream;
-		let results = [];
+		let matched = [];
 		while (true) {
 			next = parser.eatWhitespace(next);
-			let result = this.rule.parse(parser, next);
-			if (!result) break;
+			let match = this.rule.parse(parser, next);
+			if (!match) break;
 
-			results.push(result);
-			next = result.next();
+			matched.push(match);
+			next = match.next();
 		}
 
-		if (results.length === 0) return undefined;
+		if (matched.length === 0) return undefined;
 
 		return this.clone({
-			results,
+			matched,
 			// DEBUG
-			matched: stream.range(stream.startIndex, next.startIndex),
+			matchedText: stream.range(stream.startIndex, next.startIndex),
 			// DEBUG
 			startIndex: stream.startIndex,
 			endIndex: next.startIndex,
@@ -402,8 +402,8 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 	// Returns an array with arguments of all results.
 	// NOTE: memoizes the args.
 	get args() {
-		if (!this.results) return undefined;
-		return this._args || (this._args = this.results.map( result => result.args ));
+		if (!this.matched) return undefined;
+		return this._args || (this._args = this.matched.map( match => match.args ));
 
 	}
 
@@ -424,7 +424,7 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 // List match rule:   `[<item><delimiter>]`. eg" `[{number},]` to match `1,2,3`
 //	`rule.item` is the rule for each item,
 //	`rule.delimiter` is the delimiter between each item.
-// 	`rule.results` in the output is the list of values.
+// 	`rule.matched` in the output is the list of values.
 //
 //
 // NOTE: we assume that a List rule will NOT repeat (????)
@@ -434,14 +434,14 @@ Rule.List = class List extends Rule {
 		this.item.optional = true;
 		this.delimiter.optional = true;
 
-		let results = [], next = stream;
+		let matched = [], next = stream;
 		while (true) {
 			next = parser.eatWhitespace(next);
 			// get next item, exiting if not found
 			let item = this.item.parse(parser, next);
 			if (!item) break;
 //console.log(item);
-			results.push(item);
+			matched.push(item);
 			next = item.next();
 
 			next = parser.eatWhitespace(next);
@@ -452,11 +452,11 @@ Rule.List = class List extends Rule {
 		}
 
 		return this.clone({
-			results,
+			matched,
 			// DEBUG
-			matched: stream.range(stream.startIndex, next.startIndex),
+			matchedText: stream.range(stream.startIndex, next.startIndex),
 			// DEBUG
-			startIndex: results[0] ? results[0].startIndex : stream.startIndex,
+			startIndex: matched[0] ? matched[0].startIndex : stream.startIndex,
 			endIndex: next.startIndex,
 			stream
 		});
@@ -464,14 +464,14 @@ Rule.List = class List extends Rule {
 
 	// Return matched item by index
 	getItem(index) {
-		if (!this.results) return undefined;
-		return this.results[index];
+		if (!this.matched) return undefined;
+		return this.matched[index];
 	}
 
 	toSource(context) {
-		if (!this.results) return undefined;		// TODO: throw???
-		let results = this.results.map( result => result.toSource(context) ).join(", ");
-		return `[${results}]`;
+		if (!this.matched) return undefined;		// TODO: throw???
+		let matched = this.matched.map( match => match.toSource(context) ).join(", ");
+		return `[${matched}]`;
 	}
 
 	toString() {

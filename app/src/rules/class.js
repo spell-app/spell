@@ -68,7 +68,8 @@ parser.addStatement(
 			let plural = (identifier + "_VALUES").toUpperCase();
 			let list = this.args.list;
 			let values = list.toSource(context);
-			let first = list.args.results[0];
+//TODO: list.getItem(0)
+			let first = list.args.matched[0];
 			let firstValue = first ? first.toSource(context) : "undefined";
 			return `static ${plural} = ${values};\n`
 				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
