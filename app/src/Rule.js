@@ -273,16 +273,14 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 			let args = this._args = {};
 			for (let result of this.results) {
 				let argName = result.argument || result.ruleName || result.constructor.name;
-				// For nested rules, recurse to get their arguments
-				let resultArgs = result.args;
 
 				// If arg already exists, convert to an array
 				if (argName in args) {
 					if (!Array.isArray(args[argName])) args[argName] = [args[argName]];
-					args[argName].push(resultArgs);
+					args[argName].push(result);
 				}
 				else {
-					args[argName] = resultArgs;
+					args[argName] = result;
 				}
 			}
 		}
@@ -405,8 +403,8 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 	// NOTE: memoizes the args.
 	get args() {
 		if (!this.results) return undefined;
-		if (!this._args) this._args = this.results.map( result => result.args );
-		return this._args
+		return this._args || (this._args = this.results.map( result => result.args ));
+
 	}
 
 	toSource() {

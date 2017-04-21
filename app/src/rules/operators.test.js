@@ -15,127 +15,127 @@ test("infix operators require a toJS function", () => {
 });
 
 test("is operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is 1");
+	let result = parser.parse("expression", "a is 1");
 //	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar == 1)");
+	expect(result.toSource()).toBe("(a == 1)");
 });
 
 test("is not operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is not 1");
+	let result = parser.parse("expression", "a is not 1");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar != 1)");
+	expect(result.toSource()).toBe("(a != 1)");
 });
 
 test("is exactly operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is exactly 1");
+	let result = parser.parse("expression", "a is exactly 1");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar === 1)");
+	expect(result.toSource()).toBe("(a === 1)");
 });
 
 test("is not exactly operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is not exactly 1");
+	let result = parser.parse("expression", "a is not exactly 1");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar !== 1)");
+	expect(result.toSource()).toBe("(a !== 1)");
 });
 
 test("is a operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is a string");
+	let result = parser.parse("expression", "a is a string");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.isOfType(avar, 'string')");
+	expect(result.toSource()).toBe("spell.isOfType(a, 'string')");
 });
 
 test("is an operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is an element");
+	let result = parser.parse("expression", "a is an element");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.isOfType(avar, 'element')");
+	expect(result.toSource()).toBe("spell.isOfType(a, 'element')");
 });
 
 test("is not a operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is not a string");
+	let result = parser.parse("expression", "a is not a string");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.isOfType(avar, 'string')");
+	expect(result.toSource()).toBe("!spell.isOfType(a, 'string')");
 });
 
 test("is not an operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is not an element");
+	let result = parser.parse("expression", "a is not an element");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.isOfType(avar, 'element')");
+	expect(result.toSource()).toBe("!spell.isOfType(a, 'element')");
 });
 
 
 test("is in operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is in myList");
+	let result = parser.parse("expression", "a is in myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.contains(myList, avar)");
+	expect(result.toSource()).toBe("spell.contains(myList, a)");
 });
 
 test("is one of operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is one of myList");
+	let result = parser.parse("expression", "a is one of myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.contains(myList, avar)");
+	expect(result.toSource()).toBe("spell.contains(myList, a)");
 });
 
 test("is not in operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is not in myList");
+	let result = parser.parse("expression", "a is not in myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.contains(myList, avar)");
+	expect(result.toSource()).toBe("!spell.contains(myList, a)");
 });
 
 test("is not one of operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is not one of myList");
+	let result = parser.parse("expression", "a is not one of myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.contains(myList, avar)");
+	expect(result.toSource()).toBe("!spell.contains(myList, a)");
 });
 
 test("> operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar > b");
+	let result = parser.parse("expression", "a > b");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar > b)");
+	expect(result.toSource()).toBe("(a > b)");
 });
 
 test("is greater than operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is greater than b");
+	let result = parser.parse("expression", "a is greater than b");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar > b)");
+	expect(result.toSource()).toBe("(a > b)");
 });
 
 
 test(">= operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar >= b");
+	let result = parser.parse("expression", "a >= b");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar >= b)");
+	expect(result.toSource()).toBe("(a >= b)");
 });
 
 test("is greater than or equal to operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is greater than or equal to b");
+	let result = parser.parse("expression", "a is greater than or equal to b");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar >= b)");
+	expect(result.toSource()).toBe("(a >= b)");
 });
 
 
 test("< operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar < b");
+	let result = parser.parse("expression", "a < b");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar < b)");
+	expect(result.toSource()).toBe("(a < b)");
 });
 
 test("is less than operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is less than b");
+	let result = parser.parse("expression", "a is less than b");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar < b)");
+	expect(result.toSource()).toBe("(a < b)");
 });
 
 
 test("<= operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar <= b");
+	let result = parser.parse("expression", "a <= b");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar <= b)");
+	expect(result.toSource()).toBe("(a <= b)");
 });
 
 test("is less than or equal to operator", () => {
-	let result = parser.parse("infix_operator_expression", "avar is less than or equal to b");
+	let result = parser.parse("expression", "a is less than or equal to b");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(avar <= b)");
+	expect(result.toSource()).toBe("(a <= b)");
 });
 
 
@@ -150,31 +150,31 @@ test("postfix operators require a toJS function", () => {
 });
 
 test("is defined operator", () => {
-	let result = parser.parse("postfix_operator_expression", "avar is defined");
+	let result = parser.parse("expression", "a is defined");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(typeof avar !== 'undefined')");
+	expect(result.toSource()).toBe("(typeof a !== 'undefined')");
 });
 
 test("is not defined operator", () => {
-	let result = parser.parse("postfix_operator_expression", "avar is not defined");
+	let result = parser.parse("expression", "a is not defined");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(typeof avar === 'undefined')");
+	expect(result.toSource()).toBe("(typeof a === 'undefined')");
 });
 
 test("is undefined operator", () => {
-	let result = parser.parse("postfix_operator_expression", "avar is undefined");
+	let result = parser.parse("expression", "a is undefined");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("(typeof avar === 'undefined')");
+	expect(result.toSource()).toBe("(typeof a === 'undefined')");
 });
 
 test("is empty operator", () => {
-	let result = parser.parse("postfix_operator_expression", "avar is empty");
+	let result = parser.parse("expression", "a is empty");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.isEmpty(avar)");
+	expect(result.toSource()).toBe("spell.isEmpty(a)");
 });
 
 test("is not empty operator", () => {
-	let result = parser.parse("postfix_operator_expression", "avar is not empty");
+	let result = parser.parse("expression", "a is not empty");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.isEmpty(avar)");
+	expect(result.toSource()).toBe("!spell.isEmpty(a)");
 });

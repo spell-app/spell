@@ -1,10 +1,13 @@
-if {expression} then {statement}?
-	- find "if" ... "(then|:)" ...
-	- parse {expression} and {statement} in interstitial bits
+- result/argument processing is too squirrely
+	- rule.args => memoized args marshalling
+	- ALWAYS return result, we can just .args that
 
-	- sequence.parse():
-		-
+- `rule.results` rather than `rule.args`  ?
 
+
+- better solution than `dontRecurse`
+	- keep current rules in a stack and leftRecurse = check to see if we're already in that queue?
+	- auto-detect when creating rules???
 
 
 Rule.test()
@@ -24,9 +27,6 @@ Rule.test()
 	- implies parser.optimize step???
 	- only if no custom stuff?
 
-- Matched Alternatives should return matched rule instead (w/custom stuff on it somehow)
-
-- result/argument processing is too squirrely
 
 
 - combine regular expressions?

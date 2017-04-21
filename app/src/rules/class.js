@@ -14,9 +14,9 @@ parser.addExpression(
 	undefined,
 	class property_expression extends Rule.Expression {
 		get args() {
-			let args = Rule.Expression.gatherArguments(this);
+			let args = super.args;
 			// transform properties and reverse order
-			args.properties = args.properties.map( sequence => sequence.identifier ).reverse();
+			args.properties = args.properties.args.map( sequence => sequence.identifier ).reverse();
 			return args;
 		}
 
