@@ -11,9 +11,8 @@ export default parser;
 // TODO: {property-expression} also works... {assignable-expression} ???
 parser.addStatement("assignment", "{identifier} = {expression}", {
 	toSource(context) {
-		let args = this.args;
-		let identifier = args.identifier.toSource();
-		let value = args.expression.toSource();
+		let identifier = this.args.identifier.toSource(context);
+		let value = this.args.expression.toSource(context);
 		// TODO: declare identifier if not in scope, etc
 		return `${identifier} = ${value}`;
 	}

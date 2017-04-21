@@ -8,8 +8,8 @@
 //			- `endIndex`	Non-inclusive end index in stream where match ends.
 //
 //	The clone returned above can be manipulated with
-//		- `rule.args`			Return matched arguments in a format suitable to do:
-//		- `rule.toSource()`		Return javascript source to interpret the rule.
+//		- `rule.args`				Return matched arguments in a format suitable to do:
+//		- `rule.toSource(context)`	Return javascript source to interpret the rule.
 //
 import Parser from "./Parser.js";
 
@@ -66,7 +66,7 @@ export default class Rule {
 	}
 
 	// Output value for this INSTANTIATED rule as source.
-	toSource() {
+	toSource(context) {
 		return this.matched;
 	}
 
@@ -353,7 +353,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 	}
 
 	toSource(context) {
-		return this.matched.toSource();
+		return this.matched.toSource(context);
 	}
 
 	toString() {
@@ -468,9 +468,9 @@ Rule.List = class List extends Rule {
 		return this.results[index];
 	}
 
-	toSource() {
+	toSource(context) {
 		if (!this.results) return undefined;		// TODO: throw???
-		let results = this.results.map( result => result.toSource() ).join(", ");
+		let results = this.results.map( result => result.toSource(context) ).join(", ");
 		return `[${results}]`;
 	}
 

@@ -7,43 +7,38 @@ import parser from "./_parser";
 export default parser;
 
 
-//parser.addExpression("property_expression", "{property:property_name}+ {expression}", {
 parser.addExpression(
 	"property_expression",
-	"(properties:the {identifier} of)+ {expression}",
+	"(property_names:the {identifier} of)+ {expression}",
 	undefined,
 	class property_expression extends Rule.Expression {
 		get args() {
-			let args = super.args;
-			// transform properties and reverse order
-			args.properties = args.properties.args.map( sequence => sequence.identifier ).reverse();
-			return args;
+			if (!this._args) {
+				this._args = super.args;
+				// transform property_names and pull out identifiers
+				this._args.property_names = this._args.property_names.args.map( sequence => sequence.identifier );
+			}
+			return this._args;
 		}
 
 		toSource(context) {
-			let args = this.args;
-			let thing = args.expression.toSource();
-			let properties = args.properties.map( identifier => identifier.toSource() ).join(".");
-			return `spell.get(${thing}, '${properties}')`;
+			let thing = this.args.expression.toSource(context);
+			let property_names = this.args.property_names.reverse().map( identifier => identifier.toSource(context) ).join(".");
+			return `spell.get(${thing}, '${property_names}')`;
 		}
 	}
 );
 
 
-
-parser.addSyntax("scope_modifier", "(scope:global|constant|shared)");
+parser.addSyntax("scope_modifier", "(scope:global|constant|shared|local)");
 
 parser.addStatement(
 	"declare_property",
 	"{scope_modifier}? {assignment}",
 	{
 		toSource(context) {
-			let args = this.args;
-			let identifier = args.assignment.identifier.toSource();
-			let value = args.assignment.expression.toSource();
-			let assignment = `${identifier} = ${value}`;
-
-			var scope = args.scope ? args.scope.toSource() : "local";
+			let assignment = this.args.assignment.toSource(context);
+			let scope = this.args.scope && this.args.scope.toSource(context);
 			switch (scope) {
 				case "global":
 					return `global.${assignment}`;
@@ -54,6 +49,7 @@ parser.addStatement(
 				case "shared":
 					return `static ${assignment}`;
 
+				case "local":
 				default:
 					return assignment;
 			}
@@ -64,17 +60,16 @@ parser.addStatement(
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
 parser.addStatement(
 	"declare_property_as_one_of",
-	"{identifier} as one of {list:literal_list}",
+	"{scope_modifier}? {identifier} as one of {list:literal_list}",
 	{
 		toSource(context) {
-			let args = this.args;
-			let identifier = args.identifier.toSource();
+			let scope = this.args.scope.toSource(context);
+			let identifier = this.args.identifier.toSource(context);
 			let plural = (identifier + "_VALUES").toUpperCase();
-			let list = args.list.list;
-			let values = list.toSource();
-			let first = list.results[0];
-			let firstValue = first ? first.toSource() : "undefined";
-
+			let list = this.args.list;
+			let values = list.toSource(context);
+			let first = list.args.results[0];
+			let firstValue = first ? first.toSource(context) : "undefined";
 			return `static ${plural} = ${values};\n`
 				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
 				 + `set ${identifier}(value) { if (this.constructor.${plural}.includes(value)) this.__${identifier} = value }\n`;

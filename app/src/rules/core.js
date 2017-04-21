@@ -152,14 +152,14 @@ let list = parser.addExpression(
 	"\\[[list:{expression},]?\\]",
 	undefined,
 	class literal_list extends Rule.Expression {
-		// When gathering arguments, return just the matched list data.
+		// When gathering arguments, return just the matched list data, ignoring the brackets.
 		get args() {
 			return this.results[1];
 		}
 
 		// return just the list as our source
 		toSource(context) {
- 			return this.args.toSource();
+ 			return this.args.toSource(context);
 		}
 	}
 );
