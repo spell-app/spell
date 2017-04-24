@@ -258,13 +258,18 @@ Object.defineProperties(Parser.prototype, {
 	// Parse a `ruleSyntax` rule and add it to our list of rules.
 	// Returns the new rule.
 	// Logs parsing errors but allows things to continue.
-	addSyntax: { value: function(name, ruleSyntax, properties, SequenceConstructor = Rule.Sequence) {
+	addSyntax: { value: function(name, ruleSyntax, properties, constructor = Rule.Sequence) {
+		// If we only got 3 args, and 2nd is a function, use it as constructor instead
+		if (properties instanceof Function) {
+			constructor = properties;
+			properties = undefined;
+		}
 		try {
-			let rule = Rule.parseRuleSyntax(ruleSyntax, SequenceConstructor);
+			let rule = Rule.parseRuleSyntax(ruleSyntax, constructor);
 			// Reflect the rule back out to make sure it looks (more or less) the same
 			if (Parser.debug) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
 
-			Object.assign(rule, properties);
+			if (properties) Object.assign(rule, properties);
 			return this.addRule(name, rule);
 		} catch (e) {
 			console.group(`Error parsing syntax for rule '${name}':`);
@@ -273,13 +278,13 @@ Object.defineProperties(Parser.prototype, {
 		}
 	}},
 
-	addStatement: { value: function(name, ruleSyntax, properties, SequenceConstructor = Rule.Statement) {
-		var rule = this.addSyntax(name, ruleSyntax, properties, SequenceConstructor);
+	addStatement: { value: function(name, ruleSyntax, properties, constructor = Rule.Statement) {
+		var rule = this.addSyntax(name, ruleSyntax, properties, constructor);
 		if (rule) return this.addRule("statement", rule);
 	}},
 
-	addExpression: { value: function(name, ruleSyntax, properties, SequenceConstructor = Rule.Expression) {
-		var rule = this.addSyntax(name, ruleSyntax, properties, SequenceConstructor);
+	addExpression: { value: function(name, ruleSyntax, properties, constructor = Rule.Expression) {
+		var rule = this.addSyntax(name, ruleSyntax, properties, constructor);
 		if (rule) return this.addRule("expression", rule);
 	}},
 

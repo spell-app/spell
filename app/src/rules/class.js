@@ -10,7 +10,6 @@ export default parser;
 parser.addExpression(
 	"property_expression",
 	"(properties:the {identifier} of)+ the? {expression}",
-	undefined,
 	class property_expression extends Rule.Expression {
 		toSource(context) {
 			let { expression, properties } = this.results;
