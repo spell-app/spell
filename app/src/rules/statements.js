@@ -9,7 +9,7 @@ import "./core";
 export default parser;
 
 //TESTME
-parser.addStatement("if", "if {expression} then {number}?", {
+parser.addStatement("if", "if {expression} (then|:) {statement}?", {
 
 	toSource(context) {
 	}

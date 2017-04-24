@@ -297,7 +297,7 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 Rule.Expression = class expression extends Rule.Sequence {
 	parse(parser, stream) {
 		if (this.dontRecurse) {
-//console.warn("NOT recursing into ", this);
+//console.info("NOT recursing into ", this);
 			return undefined;
 		}
 		// If the expression is leftRecursive, set a flag so we don't attempt to recurse into it again.
@@ -307,7 +307,10 @@ Rule.Expression = class expression extends Rule.Sequence {
 //console.warn("Setting dontRecurse for", this);
 		}
 		let match = super.parse(parser, stream);
-		if (this.leftRecursive) delete this.dontRecurse;
+		if (this.leftRecursive) {
+//console.info("clearing dontRecurse for ", this);
+			delete this.dontRecurse;
+		}
 		return match;
 	}
 }

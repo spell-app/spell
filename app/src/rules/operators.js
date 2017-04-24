@@ -55,11 +55,8 @@ parser.addExpression(
 	class infix_operator_expression extends Rule.Expression {
 		leftRecursive = true;
 		toSource(context) {
-			let lhs = this.results.lhs.toSource(context);
-			let rhs = this.results.rhs.toSource(context);
-
-			let toJS = this.results.operator.toJS;
-			return toJS(lhs, rhs);
+			let { lhs, rhs, operator } = this.results;
+			return operator.toJS(lhs.toSource(context), rhs.toSource(context));
 		}
 	}
 );
@@ -81,9 +78,8 @@ parser.addExpression(
 	class postfix_operator_expresion extends Rule.Expression {
 		leftRecursive = true;
 		toSource(context) {
-			let lhs = this.results.expression.toSource(context);
-			let toJS = this.results.operator.toJS;
-			return toJS(lhs);
+			let { expression, operator } = this.results;
+			return operator.toJS(expression.toSource(context));
 		}
 	}
 );
