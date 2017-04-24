@@ -53,7 +53,6 @@ parser.addExpression(
 	"{lhs:expression} {operator:infix_operator} {rhs:expression}",
 	undefined,
 	class infix_operator_expression extends Rule.Expression {
-		leftRecursive = true;
 		toSource(context) {
 			let { lhs, rhs, operator } = this.results;
 			return operator.toJS(lhs.toSource(context), rhs.toSource(context));
@@ -76,7 +75,6 @@ parser.addExpression(
 	"{expression} {operator:postfix_operator}",
 	undefined,
 	class postfix_operator_expresion extends Rule.Expression {
-		leftRecursive = true;
 		toSource(context) {
 			let { expression, operator } = this.results;
 			return operator.toJS(expression.toSource(context));

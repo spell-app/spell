@@ -56,6 +56,9 @@ export default class Parser {
 	// Add a rule to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
 	addRule(name, rule) {
+		// don't override ruleName
+		if (!rule.ruleName) rule.ruleName = name;
+
 		let existing = this.rules[name];
 		if (existing) {
 			if (!(existing instanceof Rule.Alternatives)) {
@@ -68,11 +71,30 @@ export default class Parser {
 			this.rules[name].addRule(rule);
 		}
 		else {
-			// don't override ruleName
-			if (!rule.ruleName) rule.ruleName = name;
 			this.rules[name] = rule;
 		}
+
+
+		// make a note if we're adding a left-recursive rule
+		if (this.ruleIsLeftRecursive(name, rule)) {
+//console.info("marking ", rule, " as left recursive!");
+			rule.leftRecursive = true;
+		}
+
 		return rule;
+	}
+
+	// Is the specified rule left-recursive?
+	ruleIsLeftRecursive(name, rule) {
+		if (!(rule instanceof Rule.Sequence)) return false;
+//console.log(name, rule);
+		for (let subrule of rule.rules) {
+			// ignore optional rules
+			if (subrule.optional) continue;
+			if (subrule instanceof Rule.Subrule && subrule.rule === name) return true;
+			return false;
+		}
+		return false;
 	}
 
 

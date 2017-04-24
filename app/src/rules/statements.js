@@ -23,7 +23,6 @@ parser.addStatement("if", "if {expression} (then|:) {statement}?", {
 });
 
 parser.addStatement("if", "{statement} if {expression}", {
-	leftRecursive: true,
 	toSource(context) {
 		let { expression, statement } = this.results;
 		expression = expression.toSource(context);
