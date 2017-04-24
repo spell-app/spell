@@ -34,14 +34,15 @@ export default class Parser {
 //### Parsing
 //
 	// Parse `name`d rule at head of `stream` (`string` or `TextStream`).
+	// `stack` is the stack of rules which are being parsed.
 	// Handles optional and repeating rules as well as eating whitespace.
 	// Returns result of parse.
-	parse(name, stream) {
+	parse(name, stream, stack = []) {
 		if (typeof stream === "string") stream = new TextStream(stream);
 		let rule = this.getRule(name);
 		if (!rule) throw new SyntaxError(`parser.parse(${name}): Rule not found`);
 		stream = this.eatWhitespace(stream);
-		return rule.parse(this, stream);
+		return rule.parse(this, stream, stack);
 	}
 
 	// Eat whitespace (according to `rules.whitespace`) at the beginning of the stream.

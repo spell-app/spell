@@ -43,7 +43,7 @@ export default class Rule {
 
 	// Attempt to match this rule in the `stream`.
 	// Returns results of the parse or `undefined`.
-	parse(parser, stream) {
+	parse(parser, stream, stack) {
 		return undefined;
 	}
 
@@ -52,6 +52,18 @@ export default class Rule {
 	//	but if you're really not sure, return `undefined`.
 	isDeterministic(parser, stream) {
 		return undefined;
+	}
+
+	// Does the parse `stack` already contain `rule`?
+	static stackContains(stack, rule) {
+		// go backwards
+		for (var i = stack.length - 1; i >= 0; i--) {
+			if (stack[i] === rule) {
+//console.warn("found rule ", rule, " on stack", stack);
+				return true;
+			}
+		}
+		return false;
 	}
 
 //
@@ -105,7 +117,7 @@ Rule.Pattern = class Pattern extends Rule {
 	}
 
 	// Attempt to match this pattern at the beginning of the stream.
-	parse(parser, stream) {
+	parse(parser, stream, stack) {
 		let match = stream.match(this.startPattern);
 		if (!match) return undefined;
 
@@ -201,10 +213,10 @@ Rule.mergeKeywords = function(first, second) {
 // Subrule -- name of another rule to be called.
 // `rule.rule` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
-	parse(parser, stream) {
+	parse(parser, stream, stack) {
 		let rule = parser.getRule(this.rule);
 		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.rule}'`);
-		let match = rule.parse(parser, stream);
+		let match = rule.parse(parser, stream, stack);
 		if (!match) return undefined;
 
 		if (this.argument) match.argument = this.argument;
@@ -236,11 +248,16 @@ Rule.Nested = class Nested extends Rule {
 
 // Sequence of rules to match (auto-excluding whitespace).
 Rule.Sequence = class Sequence extends Rule.Nested {
-	parse(parser, stream) {
+	parse(parser, stream, stack = []) {
+		if (this.leftRecursive) {
+			if (Rule.stackContains(stack, this)) return undefined;
+			stack = stack.concat(this);
+		}
+
 		let matched = [], next = stream;
 		for (let rule of this.rules) {
 			next = parser.eatWhitespace(next);
-			let match = rule.parse(parser, next);
+			let match = rule.parse(parser, next, stack);
 			if (!match && !rule.optional) return undefined;
 			if (match) {
 				matched.push(match);
@@ -294,26 +311,7 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 }
 
 // Syntactic sugar for debugging
-Rule.Expression = class expression extends Rule.Sequence {
-	parse(parser, stream) {
-		if (this.dontRecurse) {
-//console.info("NOT recursing into ", this);
-			return undefined;
-		}
-		// If the expression is leftRecursive, set a flag so we don't attempt to recurse into it again.
-//TODO: this is dangerous: an exception will leave the flag set...
-		if (this.leftRecursive) {
-			this.dontRecurse = true;
-//console.warn("Setting dontRecurse for", this);
-		}
-		let match = super.parse(parser, stream);
-		if (this.leftRecursive) {
-//console.info("clearing dontRecurse for ", this);
-			delete this.dontRecurse;
-		}
-		return match;
-	}
-}
+Rule.Expression = class expression extends Rule.Sequence {}
 
 
 // Statements take up the entire line.
@@ -332,10 +330,10 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 	}
 
 	// Find the LONGEST match
-	parse(parser, stream) {
+	parse(parser, stream, stack) {
 		let bestMatch;
 		for (let rule of this.rules) {
-			let match = rule.parse(parser, stream);
+			let match = rule.parse(parser, stream, stack);
 			if (!match) continue;
 
 			// take the longest match
@@ -375,12 +373,17 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
 Rule.Repeat = class Repeat extends Rule.Nested {
-	parse(parser, stream) {
+	parse(parser, stream, stack = []) {
+		if (this.leftRecursive) {
+			if (Rule.stackContains(stack, this)) return undefined;
+			stack = stack.concat(this);
+		}
+
 		let next = stream;
 		let matched = [];
 		while (true) {
 			next = parser.eatWhitespace(next);
-			let match = this.rule.parse(parser, next);
+			let match = this.rule.parse(parser, next, stack);
 			if (!match) break;
 
 			matched.push(match);
@@ -432,7 +435,12 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 //
 // NOTE: we assume that a List rule will NOT repeat (????)
 Rule.List = class List extends Rule {
-	parse(parser, stream) {
+	parse(parser, stream, stack = []) {
+		if (this.leftRecursive) {
+			if (Rule.stackContains(stack, this)) return undefined;
+			stack = stack.concat(this);
+		}
+
 		// ensure item and delimiter are optional so we don't barf in `parseRule`
 		this.item.optional = true;
 		this.delimiter.optional = true;
@@ -441,7 +449,7 @@ Rule.List = class List extends Rule {
 		while (true) {
 			next = parser.eatWhitespace(next);
 			// get next item, exiting if not found
-			let item = this.item.parse(parser, next);
+			let item = this.item.parse(parser, next, stack);
 			if (!item) break;
 //console.log(item);
 			matched.push(item);
@@ -449,7 +457,7 @@ Rule.List = class List extends Rule {
 
 			next = parser.eatWhitespace(next);
 			// get delimiter, exiting if not found
-			let delimiter = this.delimiter.parse(parser, next);
+			let delimiter = this.delimiter.parse(parser, next, stack);
 			if (!delimiter) break;
 			next = delimiter.next();
 		}
