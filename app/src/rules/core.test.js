@@ -249,3 +249,20 @@ test("correctly matches literal lists", () => {
 	result = parser.parse("literal_list", " [yes,no,'a',1,] ");
 	expect(result.toSource()).toBe("[true, false, 'a', 1]");
 });
+
+
+//
+//	Parenthesized expression
+//
+test("correctly matches parenthesized expressions", () => {
+	let result = parser.parse("expression", "(someVar)");
+	expect(result.toSource()).toBe("(someVar)");
+
+// HMMM... these won't work unless you import `operators.js`...
+// 	result = parser.parse("expression", "(1) and (true)");
+// 	expect(result.toSource()).toBe("((1) && (true))");
+//
+// 	result = parser.parse("expression", "((1) and (true))");
+// 	expect(result.toSource()).toBe("((1) && (true))");
+
+});

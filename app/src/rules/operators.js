@@ -51,7 +51,6 @@ parser.addInfixOperator("divided_by", ["/", "divided by"], { toJS(a,b) { return`
 parser.addExpression(
 	"infix_operator_expression",
 	"{lhs:expression} {operator:infix_operator} {rhs:expression}",
-	undefined,
 	class infix_operator_expression extends Rule.Expression {
 		toSource(context) {
 			let { lhs, rhs, operator } = this.results;
@@ -73,7 +72,6 @@ parser.addPostfixOperator("is_not_empty", "is not empty", { toJS(thing) { return
 parser.addExpression(
 	"postfix_operator_expression",
 	"{expression} {operator:postfix_operator}",
-	undefined,
 	class postfix_operator_expresion extends Rule.Expression {
 		toSource(context) {
 			let { expression, operator } = this.results;

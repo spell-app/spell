@@ -150,7 +150,6 @@ parser.rules.identifier.addToBlacklist(
 let list = parser.addExpression(
 	"literal_list",
 	"\\[[list:{expression},]?\\]",
-	undefined,
 	class literal_list extends Rule.Expression {
 
 //TODO: squirrely...
@@ -172,7 +171,6 @@ let list = parser.addExpression(
 parser.addExpression(
 	"parenthesized_expression",
 	"\\({expression}\\)",
-	undefined,
 	class parenthesized_expression extends Rule.Expression {
 		get results() {
 			return this.matched[1];
@@ -180,7 +178,7 @@ parser.addExpression(
 		toSource(context) {
 			let expression = this.results.toSource(context);
 			// don't double parens if not necessary
-			if (expression.startsWith("(") && expression.endsWith(")")) return expression;
+			if (typeof expression === "string" && expression.startsWith("(") && expression.endsWith(")")) return expression;
 			return `(${expression})`;
 		}
 	}
