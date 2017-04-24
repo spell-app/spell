@@ -55,12 +55,22 @@ export default class Rule {
 	}
 
 	// Does the parse `stack` already contain `rule`?
-	static stackContains(stack, rule) {
+	static stackContains(stack, rule, stream) {
+		if (stack.length === 0) return false;
+
+//console.info(stack);
 		// go backwards
 		for (var i = stack.length - 1; i >= 0; i--) {
-			if (stack[i] === rule) {
-//console.warn("found rule ", rule, " on stack", stack);
-				return true;
+			let [ nextRule, nextStream ] = stack[i];
+			if (nextRule === rule) {
+				if (nextStream.startIndex === stream.startIndex) {
+//					console.warn("found unproductive rule ", rule, " on stack", stack);
+					return true;
+				}
+				else {
+//					console.warn("found productive rule ", rule, " on stack", stack);
+					return false;
+				}
 			}
 		}
 		return false;
@@ -250,8 +260,9 @@ Rule.Nested = class Nested extends Rule {
 Rule.Sequence = class Sequence extends Rule.Nested {
 	parse(parser, stream, stack = []) {
 		if (this.leftRecursive) {
-			if (Rule.stackContains(stack, this)) return undefined;
-			stack = stack.concat(this);
+			if (Rule.stackContains(stack, this, stream)) return undefined;
+			stack = stack.concat();
+			stack.push([this, stream]);
 		}
 
 		let matched = [], next = stream;
@@ -375,8 +386,9 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 Rule.Repeat = class Repeat extends Rule.Nested {
 	parse(parser, stream, stack = []) {
 		if (this.leftRecursive) {
-			if (Rule.stackContains(stack, this)) return undefined;
-			stack = stack.concat(this);
+			if (Rule.stackContains(stack, this, stream)) return undefined;
+			stack = stack.concat();
+			stack.push([this, stream]);
 		}
 
 		let next = stream;
@@ -437,8 +449,9 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 Rule.List = class List extends Rule {
 	parse(parser, stream, stack = []) {
 		if (this.leftRecursive) {
-			if (Rule.stackContains(stack, this)) return undefined;
-			stack = stack.concat(this);
+			if (Rule.stackContains(stack, this, stream)) return undefined;
+			stack = stack.concat();
+			stack.push([this, stream]);
 		}
 
 		// ensure item and delimiter are optional so we don't barf in `parseRule`
