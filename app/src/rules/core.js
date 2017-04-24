@@ -166,7 +166,21 @@ let list = parser.addExpression(
 	}
 );
 
-// Literal value as number, text or boolean.
-//TODO: this is an expression... but installing it that way breaks parsing...?
-//TESTME: add literal-list to this?
-parser.addSyntax("literal", "(literal:{number}|{text}|{boolean}|{literal_list})");
+
+// Parenthesized expression
+parser.addExpression(
+	"parenthesized_expression",
+	"\\({expression}\\)",
+	undefined,
+	class parenthesized_expression extends Rule.Expression {
+		get results() {
+			return this.matched[1];
+		}
+		toSource(context) {
+			let expression = this.results.toSource(context);
+			// don't double parens if not necessary
+			if (expression.startsWith("(") && expression.endsWith(")")) return expression;
+			return `(${expression})`;
+		}
+	}
+)
