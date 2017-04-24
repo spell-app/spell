@@ -13,15 +13,14 @@ parser.addRule("expression", index_expression);
 //	- `item 1 of ...`
 //	- `item #2 of ...`
 // NOTE: these indices are ONE based, NOT zero based as is Javascript.
-// TODO: allow any identifier instead of `{item}` ?
+// TODO: if `identifier` is "word", output `getWord()` etc
 parser.addSyntax("index_expression",
 	"{identifier} (#)?{number:integer} of {expression}",
 	undefined,
 	class index_expression extends Rule.Expression {
 		toSource(context) {
-			let number = this.results.number.toSource(context);
-			let expression = this.results.expression.toSource(context);
-			return `spell.getItem(${expression}, ${number})`;
+			let { identifier, number, expression } = this.results;
+			return `spell.getItem(${expression.toSource(context)}, ${number.toSource(context)})`;
 		}
 	}
 );
@@ -48,15 +47,15 @@ parser.addSyntax("ordinal", "last", { toSource: () => -1 });
 
 // Alternative form for numeric index in a list-like thing.
 // NOTE: don't add as an expression since we're auto-merged with `index_expression` above.
+// TODO: if `identifier` is "word", output `getWord()` etc
 parser.addSyntax(
 	"index_expression",
 	"the {ordinal} {identifier} of {expression}",
 	undefined,
 	class index_expression extends Rule.Expression {
 		toSource(context) {
-			let ordinal = this.results.ordinal.toSource(context);
-			let expression = this.results.expression.toSource(context);
-			return `spell.getItem(${expression}, ${ordinal})`;
+			let { identifier, ordinal, expression } = this.results;
+			return `spell.getItem(${expression.toSource(context)}, ${ordinal.toSource(context)})`;
 		}
 	}
 );
