@@ -342,6 +342,9 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 
 	// Find the LONGEST match
 	parse(parser, stream, stack) {
+		//DEBUG
+		let matches = [];
+
 		let bestMatch;
 		for (let rule of this.rules) {
 			let match = rule.parse(parser, stream, stack);
@@ -350,12 +353,24 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 			// take the longest match
 			if (!bestMatch || match.endIndex > bestMatch.endIndex)
 				bestMatch = match;
+			// DEBUG
+			matches.push(match);
 		}
+
+		// DEBUG
+// 		if (matches.length > 1) {
+// 			let stackContents = stack.map(item => item[0]);
+// 			console.group(this.ruleName + " matched "+matches.length+" times:", stackContents);
+// 			matches.forEach(match => console.log("  ", match.toSource()));
+// 			console.groupEnd();
+// 		}
+
 		if (!bestMatch) return undefined;
 
 		// assign `argName` or `ruleName` for `results`
 		if (this.argument) bestMatch.argument = this.argument;
 		else if (this.ruleName) bestMatch.ruleName = this.ruleName;
+
 //TODO: other things to copy here???
 		return bestMatch;
 	}
