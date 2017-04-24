@@ -9,22 +9,17 @@ export default parser;
 
 parser.addExpression(
 	"property_expression",
-	"(property_names:the {identifier} of)+ {expression}",
+	"(properties:the {identifier} of)+ the? {expression}",
 	undefined,
 	class property_expression extends Rule.Expression {
-		get results() {
-			if (!this._results) {
-				this._results = super.results;
-				// transform property_names and pull out identifiers
-				this._results.property_names = this._results.property_names.results.map( sequence => sequence.identifier );
-			}
-			return this._results;
-		}
-
 		toSource(context) {
-			let thing = this.results.expression.toSource(context);
-			let property_names = this.results.property_names.reverse().map( identifier => identifier.toSource(context) ).join(".");
-			return `spell.get(${thing}, '${property_names}')`;
+			let { expression, properties } = this.results;
+			expression = expression.toSource(context);
+			properties = properties.results
+							.reverse()
+							.map( property => property.identifier.toSource(context) )
+							.join("', '");
+			return `spell.get(${expression}, ['${properties}'])`;
 		}
 	}
 );
@@ -37,8 +32,9 @@ parser.addStatement(
 	"{scope_modifier}? {assignment}",
 	{
 		toSource(context) {
-			let assignment = this.results.assignment.toSource(context);
-			let scope = this.results.scope && this.results.scope.toSource(context);
+			let { assignment, scope_modifier } = this.results;
+			assignment = assignment.toSource(context);
+			let scope = scope && scope.toSource(context);
 			switch (scope) {
 				case "global":
 					return `global.${assignment}`;
@@ -63,10 +59,10 @@ parser.addStatement(
 	"{scope_modifier}? {identifier} as one of {list:literal_list}",
 	{
 		toSource(context) {
-			let scope = this.results.scope.toSource(context);
-			let identifier = this.results.identifier.toSource(context);
+			let { scope_modifier, identifier, list } = this.results;
+//TODO: not handling scope_modifier
+			identifier = identifier.toSource(context);
 			let plural = (identifier + "_VALUES").toUpperCase();
-			let list = this.results.list;
 			let values = list.toSource(context);
 //TODO: list.getItem(0)
 			let first = list.results.matched[0];

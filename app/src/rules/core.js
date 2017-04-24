@@ -47,7 +47,7 @@ parser.rules.identifier.addToBlacklist(
 	"near", "not",
 	"of", "off", "on", "onto", "opposite", "out", "outside", "over",
 	"short", "since",
-	"than", "then", "through", "thru", "to", "toward", "towards",
+	"than", "the", "then", "through", "thru", "to", "toward", "towards",
 	"undefined", "under", "underneath", "unique", "until", "up", "upon", "upside",
 	"versus", "vs",
 	"with", "within", "without",
