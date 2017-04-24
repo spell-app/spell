@@ -6,9 +6,6 @@ BUGS
 > "(a == (1 && (b == 2)))"
 
 
-- addStatement() etc:
-	- 3rd arg is object (props) or function (class)
-
 - draw sentence diagram of match
 	- primary UI for parser testing
 	- run tests in-browser (just checking output)
@@ -26,18 +23,16 @@ Rule.test()
 
 
 
-- combine Symbol and Keyword matches ?
 
 - combine Alternatives w/Patterns into one
+	- combine Symbol and Keyword matches ?
 	- implies parser.optimize step???
 	- only if no custom stuff (toSource, etc)?
 
-- combine regular expressions?
 	http://stackoverflow.com/questions/9213237/combining-regular-expressions-in-javascript
 	http://stackoverflow.com/questions/869809/combine-regexp
-
-	- re.any and re.or
-	- re.and, eg    combining keyword AND string
+		- re.any and re.or
+		- re.and, eg    combining keyword AND string
 
 
 
