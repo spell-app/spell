@@ -223,20 +223,6 @@ test("doesn't match boolean as part of a word", () => {
 });
 
 
-//
-//	Literal
-//
-test("correctly matches literals", () => {
-	let result = parser.parse("literal", "true ");
-	expect(result.toSource()).toBe(true);
-
-	result = parser.parse("literal", "1");
-	expect(result.toSource()).toBe(1);
-
-	result = parser.parse("literal", "'a'");
-	expect(result.toSource()).toBe("'a'");
-});
-
 
 //
 //	Literal-list

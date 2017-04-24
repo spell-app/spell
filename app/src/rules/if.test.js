@@ -75,7 +75,7 @@ test("else works w/ statement", () => {
 //	# compound expressions
 //
 
-test("compound condition", () => {
-	let result = parser.parse("statement", "if a is 1 and b is defined: b = 2");
-	expect(result.toSource()).toBe("if ((a == 1) && (b !== undefined)) { b = 2 }");
-});
+// test("compound condition", () => {
+// 	let result = parser.parse("statement", "if a is 1 and b is defined: b = 2");
+// 	expect(result.toSource()).toBe("if ((a == 1) && (b !== undefined)) { b = 2 }");
+// });
