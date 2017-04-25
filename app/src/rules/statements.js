@@ -9,6 +9,10 @@ import "./core";
 // re-export parser for testing.
 export default parser;
 
+
+//
+//	## Assignment
+//
 class assignment extends Rule.Statement{
 	toSource(context) {
 		let { thing, value } = this.results;
@@ -22,3 +26,54 @@ class assignment extends Rule.Statement{
 
 parser.addStatement("assignment", "{thing:expression} = {value:expression}", assignment);
 parser.addStatement("assignment", "set {thing:expression} to {value:expression}", assignment);
+
+
+//
+//	## User interaction
+//
+
+// Alert a message.
+// TODO: need some fancy promise juju here?
+parser.addStatement("alert", "alert {message:expression} (buttonClause:with {text})?",
+	class alert extends Rule.Statement {
+		toSource(context) {
+			let { message, buttonClause } = this.results;
+			message = message.toSource(context);
+			let buttonName = buttonClause ? buttonClause.results.text.toSource(context) : '"OK"';
+			return `await spell.alert(${message}, ${buttonName})`;
+		}
+	}
+);
+
+// Warning message -- like alert but fancier.
+// TODO: need some fancy promise juju here?
+parser.addStatement("warn", "warn {expression:expression} (buttonClause:with {text})?",
+	class warn extends Rule.Statement {
+		toSource(context) {
+			let { message, buttonClause } = this.results;
+			message = message.toSource(context);
+			let buttonName = buttonClause ? buttonClause.results.text.toSource(context) : '"OK"';
+			return `await spell.warn(${message}, ${buttonName})`;
+		}
+	}
+);
+
+
+// Confirm message -- present a question with two answers.
+// TODO: need some fancy promise juju here?
+parser.addStatement("confirm", "confirm {message:expression} (buttonClause:with {okButton:text} (cancelClause: (and|or) {cancelButton:text})? )?",
+	class confirm extends Rule.Statement {
+		toSource(context) {
+			let { message, buttonClause } = this.results;
+			message = message.toSource(context);
+			let okButton = '"OK"', cancelButton = '"Cancel"';
+
+			if (buttonClause) {
+				okButton = buttonClause.results.okButton.results.toSource(context);
+				let cancelClause = buttonClause.results.cancelClause;
+				if (cancelClause) cancelButton = cancelClause.results.cancelButton.results.toSource(context);
+			}
+			return `await spell.confirm(${message}, ${okButton}, ${cancelButton})`;
+		}
+	}
+);
