@@ -7,6 +7,37 @@ import parser from "./_parser";
 export default parser;
 
 
+// TESTME
+parser.addStatement(
+	"define_type",
+	"define type {type} (extendsClause:extends {superType:type})?",
+	class declare_type extends Rule.Statement {
+		toSource(context) {
+			let { type, extendsClause } = this.results;
+			type = type.toSource(context);
+			let superType = extendsClause && extendsClause.results.superType.toSource(context);
+			if (superType) {
+				return `class ${type} extends ${superType}`;
+			}
+			return `class ${type}`;
+
+		}
+	}
+);
+
+
+// TESTME
+parser.addStatement(
+	"declare_method",
+	"to {identifier} (with [{identifier} and])? (: {statement})?",
+	class declare_method extends Rule.Statement {
+
+
+	}
+);
+
+
+//TESTME
 parser.addExpression(
 	"property_expression",
 	"(properties:the {identifier} of)+ the? {expression}",
@@ -28,6 +59,7 @@ parser.addExpression(
 
 parser.addSyntax("scope_modifier", "(scope:global|constant|shared|local)");
 
+//TESTME
 parser.addStatement(
 	"declare_property",
 	"{scope_modifier}? {assignment}",
@@ -55,6 +87,7 @@ parser.addStatement(
 );
 
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
+//TESTME
 parser.addStatement(
 	"declare_property_as_one_of",
 	"{scope_modifier}? {identifier} as one of {list:literal_list}",

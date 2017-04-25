@@ -24,7 +24,9 @@ class assignment extends Rule.Statement{
 	}
 }
 
+//TESTME
 parser.addStatement("assignment", "{thing:expression} = {value:expression}", assignment);
+//TESTME
 parser.addStatement("assignment", "set {thing:expression} to {value:expression}", assignment);
 
 
@@ -34,6 +36,7 @@ parser.addStatement("assignment", "set {thing:expression} to {value:expression}"
 
 // Alert a message.
 // TODO: need some fancy promise juju here?
+//TESTME
 parser.addStatement("alert", "alert {message:expression} (buttonClause:with {text})?",
 	class alert extends Rule.Statement {
 		toSource(context) {
@@ -47,6 +50,7 @@ parser.addStatement("alert", "alert {message:expression} (buttonClause:with {tex
 
 // Warning message -- like alert but fancier.
 // TODO: need some fancy promise juju here?
+//TESTME
 parser.addStatement("warn", "warn {expression:expression} (buttonClause:with {text})?",
 	class warn extends Rule.Statement {
 		toSource(context) {
@@ -61,6 +65,7 @@ parser.addStatement("warn", "warn {expression:expression} (buttonClause:with {te
 
 // Confirm message -- present a question with two answers.
 // TODO: need some fancy promise juju here?
+//TESTME
 parser.addStatement("confirm", "confirm {message:expression} (buttonClause:with {okButton:text} (cancelClause: (and|or) {cancelButton:text})? )?",
 	class confirm extends Rule.Statement {
 		toSource(context) {
