@@ -9,13 +9,16 @@ import "./core";
 // re-export parser for testing.
 export default parser;
 
-// TODO: {property-expression} also works... {assignable-expression} ???
-parser.addStatement("assignment", "{identifier} = {expression}",
-	class assignment extends Rule.Statement {
-		toSource(context) {
-			let { identifier, expression } = this.results;
+class assignment extends Rule.Statement{
+	toSource(context) {
+		let { thing, value } = this.results;
+		if (thing instanceof Rule.Identifier) {
 			// TODO: declare identifier if not in scope, etc
-			return `${identifier.toSource(context)} = ${expression.toSource(context)}`;
 		}
+
+		return `${thing.toSource(context)} = ${value.toSource(context)}`;
 	}
-);
+}
+
+parser.addStatement("assignment", "{thing:expression} = {value:expression}", assignment);
+parser.addStatement("assignment", "set {thing:expression} to {value:expression}", assignment);

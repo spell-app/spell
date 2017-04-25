@@ -17,8 +17,10 @@ parser.addExpression(
 			properties = properties.results
 							.reverse()
 							.map( property => property.identifier.toSource(context) )
-							.join("', '");
-			return `spell.get(${expression}, ['${properties}'])`;
+							.join(".");
+			return `${expression}.${properties}`;
+// NOTE: the following is safer, but ugly for demo purposes
+//			return `spell.get(${expression}, ['${properties}'])`;
 		}
 	}
 );

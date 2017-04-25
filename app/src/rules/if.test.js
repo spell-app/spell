@@ -1,6 +1,6 @@
 import Rule from "../RuleSyntax";
 import "./if.js";
-import parser from "./assignment.js";
+import parser from "./statements.js";
 
 test("parser is defined", () => {
 	expect(parser).toBeDefined();

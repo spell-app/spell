@@ -6,5 +6,5 @@ import "./core";
 import "./numbers";
 import "./operators";
 import "./if";
-import "./assignment";
+import "./statements";
 import "./class";
