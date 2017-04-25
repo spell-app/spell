@@ -6,6 +6,10 @@ BUGS
 > "(a == (1 && (b == 2)))"
 
 
+
+"confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})? )?"
+	- want result to flatten to `{ message, okButton, cancelButton }`
+
 - draw sentence diagram of match
 	- primary UI for parser testing
 	- run tests in-browser (just checking output)

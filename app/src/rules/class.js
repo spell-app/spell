@@ -29,10 +29,19 @@ parser.addStatement(
 // TESTME
 parser.addStatement(
 	"declare_method",
-	"to {identifier} (with [{identifier} and])? (: {statement})?",
+	"to {identifier} (argsClause:with [args:{identifier} and])? (\\:)? {statement}?",
 	class declare_method extends Rule.Statement {
+		toSource(context) {
+			let { identifier, argsClause, statement } = this.results;
+			identifier = identifier.toSource(context);
+			let args = argsClause && argsClause.results.args.matched.map(arg => arg.toSource(context));
+			if (statement) statement = statement.toSource(context);
+//console.info(identifier, args, statement);
 
-
+			let result = `${identifier}(${args && args.join(", ") || ""})`
+			if (statement) result += ` { ${statement} }`;
+			return result;
+		}
 	}
 );
 
