@@ -13,8 +13,17 @@ class index_expression extends Rule.Expression{
 		let { identifier, number, expression } = this.results;
 		expression = expression.toSource(context);
 		number = number.toSource(context);
+		if (typeof number === "number") {
+			if (number > 0) {
+				return `${expression}[${number - 1}]`;
+			}
+			else {
+				return `spell.getItem(${expression}, ${number})`;
+			}
+		}
 		return `${expression}[${number} - 1]`;
-// This is safer, but using the below for demo purposes
+
+// This is safer, but using the above for demo purposes
 //		return `spell.getItem(${expression}, ${number})`;
 	}
 }

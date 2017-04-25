@@ -66,25 +66,25 @@ test("is not an operator", () => {
 test("is in operator", () => {
 	let result = parser.parse("expression", "a is in myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.contains(myList, a)");
+	expect(result.toSource()).toBe("myList.includes(a)");
 });
 
 test("is one of operator", () => {
 	let result = parser.parse("expression", "a is one of myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("spell.contains(myList, a)");
+	expect(result.toSource()).toBe("myList.includes(a)");
 });
 
 test("is not in operator", () => {
 	let result = parser.parse("expression", "a is not in myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.contains(myList, a)");
+	expect(result.toSource()).toBe("!myList.includes(a)");
 });
 
 test("is not one of operator", () => {
 	let result = parser.parse("expression", "a is not one of myList");
 	expect(result).toBeInstanceOf(Rule.Sequence);
-	expect(result.toSource()).toBe("!spell.contains(myList, a)");
+	expect(result.toSource()).toBe("!myList.includes(a)");
 });
 
 test("> operator", () => {

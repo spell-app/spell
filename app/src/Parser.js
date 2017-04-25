@@ -33,9 +33,31 @@ export default class Parser {
 //
 //### Parsing
 //
+	// Parse something:
+	//	- if one string argument, does a `parseStatement()`
+	//	- if two, does a `parseRule()`
+	// Returns `parse.toString()` or throws.
+//TESTME
+	compile() {
+		if (arguments.length === 1) {
+			let string = arguments[0];
+			return this.compileStatements(string);
+		}
+		else if (arguments.length === 2) {
+			let name = arguments[0], string = arguments[1];
+			let result = this.parse(name, string);
+			if (!result) throw new SyntaxError(`parser.parse('${name}', '${string}'): can't parse this`);
+			return result.toSource();
+		}
+		else {
+			throw new SyntaxError("parser.parse(): expects one or two arguments");
+		}
+	}
+
 	// Parse `name`d rule at head of `stream` (`string` or `TextStream`).
 	// Handles optional and repeating rules as well as eating whitespace.
 	// Returns result of parse.
+//TESTME
 	parse(name, stream) {
 		if (typeof stream === "string") stream = new TextStream(stream);
 		let rule = this.getRule(name);
@@ -46,7 +68,7 @@ export default class Parser {
 
 	// Parse a set of statements line-by-line.
 //TESTME
-	parseStatements(statements) {
+	compileStatements(statements) {
 		console.time("parseStatements");
 		let results = [];
 		let currentIndent = 0;

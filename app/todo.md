@@ -6,12 +6,14 @@ BUGS
 > "(a == (1 && (b == 2)))"
 
 
-- parseStatements
+- compileStatements
 	- complain if can't match the entire line!
+	- parseStatements()
+		- return sequence(?) of results?
 
 
 TEST::::
-parser.parseStatements(`
+parser.compile(`
 define type Card
 	face as one of ["up", "down"]
 	get is_face_up: my face is "up"
@@ -20,11 +22,11 @@ define type Card
 	to turn_face_up: set my face to "up"
 	to turn_face_down: set my face to "down"
 	to turn_over
-		set my face to "down" if my face is "up" else set my face to "up"
+		set my face to "down" if this is_face_up else set my face to "up"
 
 	suit as one of ["clubs", "diamonds", "hearts", "spades"]
 	get color:
-		if ((my suit is "diamonds") or (my suit is "hearts")): return "red"
+		if my suit is one of ["diamonds", "hearts"] then return "red"
 		else return "black"
 
 	rank as Integer

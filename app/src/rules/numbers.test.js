@@ -8,7 +8,7 @@ test("parser is defined", () => {
 
 test("index expression with #", () => {
 	let result = parser.parse("expression", "item #1 of myList");
-	expect(result.toSource()).toBe("spell.getItem(myList, 1)");
+	expect(result.toSource()).toBe("myList[0]");
 });
 
 test("negative index expression with #", () => {
@@ -18,7 +18,7 @@ test("negative index expression with #", () => {
 
 test("index expression without #", () => {
 	let result = parser.parse("expression", "item 1 of myList");
-	expect(result.toSource()).toBe("spell.getItem(myList, 1)");
+	expect(result.toSource()).toBe("myList[0]");
 });
 
 test("negative index expression without #", () => {
@@ -33,11 +33,11 @@ test("index expression with custom identifier", () => {
 
 test("ordinal index expression", () => {
 	let result = parser.parse("expression", "the first item of myList");
-	expect(result.toSource()).toBe("spell.getItem(myList, 1)");
+	expect(result.toSource()).toBe("myList[0]");
 });
 
 test("ordinal index expression with custom identifier", () => {
-	let result = parser.parse("expression", "the first word of myList");
-	expect(result.toSource()).toBe("spell.getItem(myList, 1)");
+	let result = parser.parse("expression", "the second word of myList");
+	expect(result.toSource()).toBe("myList[1]");
 });
 

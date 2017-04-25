@@ -27,11 +27,11 @@ parser.addInfixOperator("is_type_of", ["is a", "is an"], { toJS(thing, type) { r
 parser.addInfixOperator("is_not_type_of", ["is not a", "is not an"], { toJS(thing, type) { return `!spell.isOfType(${thing}, '${type}')` }});
 
 //TODO: `spell.contains(collection, thing)`
-parser.addInfixOperator("is_in", ["is in", "is one of"], { toJS(thing, list) { return `spell.contains(${list}, ${thing})` }});
-parser.addInfixOperator("is_not_in", ["is not in", "is not one of"], { toJS(thing, list) { return `!spell.contains(${list}, ${thing})` }});
+parser.addInfixOperator("is_in", ["is in", "is one of"], { toJS(thing, list) { return `${list}.includes(${thing})` }});
+parser.addInfixOperator("is_not_in", ["is not in", "is not one of"], { toJS(thing, list) { return `!${list}.includes(${thing})` }});
 //TESTME
-parser.addInfixOperator("includes", ["includes", "contains"], { toJS(list, thing) { return `spell.contains(${list}, ${thing})` }});
-parser.addInfixOperator("doesnt_include", ["does not include", "doesnt include", "does not contain", "doesnt contain"], { toJS(list, thing) { return `!spell.contains(${list}, ${thing})` }});
+parser.addInfixOperator("includes", ["includes", "contains"], { toJS(list, thing) { return `${list}.includes(${thing})` }});
+parser.addInfixOperator("doesnt_include", ["does not include", "doesnt include", "does not contain", "doesnt contain"], { toJS(list, thing) { return `${list}.includes(${thing})` }});
 
 parser.addInfixOperator("gt", [">", "is greater than"], { toJS(a,b) { return`(${a} > ${b})` }});
 parser.addInfixOperator("gte", [">=", "is greater than or equal to"], { toJS(a,b) { return`(${a} >= ${b})` }});
