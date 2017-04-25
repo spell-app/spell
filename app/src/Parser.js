@@ -47,9 +47,11 @@ export default class Parser {
 	// Parse a set of statements line-by-line.
 //TESTME
 	parseStatements(statements) {
+		console.time("parseStatements");
 		let results = [];
 		let currentIndent = 0;
-		statements.split(/\n+/g).forEach(statement => {
+		const tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+		statements.split(/\n/g).forEach(statement => {
 			// skip lines that are all whitespace
 			if (statement.trim() === "") {
 				results.push("");
@@ -60,31 +62,49 @@ export default class Parser {
 			let lineStart = statement.match(/^\t*/)[0];
 			let lineIndent = lineStart.length;
 			if (lineIndent > currentIndent) {
+				// add to end of previous line if possible
 				if (results.length) results[results.length - 1] += " {";
-				else results.push(lineStart.substr(0, lineIndent-1) + "{");
+				else results.push(tabs.substr(0, lineIndent-1) + "{");
 			}
 			else if (lineIndent < currentIndent) {
-				for (var i = currentIndent; i > lineIndent; i--) {
-					results.push(lineStart.substr(0, i) + "}");
+				let closers = [];
+				for (let i = currentIndent; i > lineIndent; i--) {
+					closers.push(tabs.substr(0, i-1) + "}");
 				}
+				// put parens BEFORE any blank lines!
+				let lastBlankLine = this._getLastBlankLine(results);
+				results.splice(lastBlankLine, 0, ...closers);
 			}
 			currentIndent = lineIndent;
+
 			let result = this.parse("statement", statement);
+//TODO: complain if can't parse the entire line!
 			if (result) {
-				results.push(lineStart + result.toSource());
+				let source = result.toSource().split("\n");
+				results.push(lineStart + source.join("\n" + lineStart));
 			}
 			else {
 				console.warn("Couldn't parse statement:", statement);
 				results.push("ERROR: "+statement);
 			}
 		});
-		// add ending braces
+
 		while (currentIndent > 0) {
-			results.push("}");
+			results.push(tabs.substr(0, currentIndent-1) + "}");
 			currentIndent--;
 		}
 
+		console.timeEnd("parseStatements");
 		return results.join("\n");
+	}
+
+	// Figure out the last blank line in the results
+	_getLastBlankLine(results) {
+		for (let i = results.length - 1; i >= 0; i--) {
+			if (results[i] === "") continue;
+			return i + 1;
+		}
+		return 0;
 	}
 
 	// Eat whitespace (according to `rules.whitespace`) at the beginning of the stream.

@@ -11,6 +11,23 @@ export default parser;
 
 
 //
+//	## Returns
+//
+
+// Return a value
+//TESTME
+parser.addStatement("return_statement", "return {expression}",
+	class return_statement extends Rule.Statement {
+		toSource(context) {
+			let { expression } = this.results;
+			return `return ${expression.toSource(context)}`;
+		}
+	}
+);
+
+
+
+//
 //	## Assignment
 //
 class assignment extends Rule.Statement{

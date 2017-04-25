@@ -45,6 +45,24 @@ parser.addStatement(
 	}
 );
 
+// TESTME
+parser.addStatement(
+	"getter",
+	"get {identifier} (\\:)? {expression}?",
+	class getter extends Rule.Statement {
+		toSource(context) {
+			let { identifier, expression } = this.results;
+			identifier = identifier.toSource(context);
+			if (expression) expression = expression.toSource(context);
+//console.info(identifier, args, expression);
+
+			let result = `get ${identifier}()`
+			if (expression) result += ` { return ${expression} }`;
+			return result;
+		}
+	}
+);
+
 
 //TESTME
 parser.addExpression(
@@ -61,6 +79,19 @@ parser.addExpression(
 			return `${expression}.${properties}`;
 // NOTE: the following is safer, but ugly for demo purposes
 //			return `spell.get(${expression}, ['${properties}'])`;
+		}
+	}
+);
+
+//TESTME
+parser.addExpression(
+	"property_expression",
+	"(my|this) {identifier}",
+	class property_expression extends Rule.Expression {
+		toSource(context) {
+			let { identifier } = this.results;
+			identifier = identifier.toSource(context);
+			return `this.${identifier}`;
 		}
 	}
 );
@@ -95,6 +126,24 @@ parser.addStatement(
 	}
 );
 
+//TESTME
+parser.addStatement(
+	"declare_typedProperty",
+// TODO: scope_modifier???
+	"{identifier} as (a|an)? {type}",
+	{
+		toSource(context) {
+			let { identifier, type } = this.results;
+			identifier = identifier.toSource(context);
+			type = type.toSource(context);
+
+			return `get ${identifier} { return this.__${identifier} }\n`
+				 + `set ${identifier}(value) { if (spell.isA(value, ${type}) this.__${identifier} = value }`;
+		}
+	}
+);
+
+
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
 //TESTME
 parser.addStatement(
@@ -110,9 +159,14 @@ parser.addStatement(
 //TODO: list.getItem(0)
 			let first = list.results.matched[0];
 			let firstValue = first ? first.toSource(context) : "undefined";
-			return `static ${plural} = ${values};\n`
-				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
-				 + `set ${identifier}(value) { if (this.constructor.${plural}.includes(value)) this.__${identifier} = value }\n`;
+
+			return `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
+				 + `set ${identifier}(value) { if (${values}.includes(value)) this.__${identifier} = value }`;
+
+// MORE EFFICIENT BUT UGLIER
+// 			return `static ${plural} = ${values};\n`
+// 				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
+// 				 + `set ${identifier}(value) { if (this.constructor.${plural}.includes(value)) this.__${identifier} = value }`;
 		}
 	}
 );

@@ -13,7 +13,9 @@ class index_expression extends Rule.Expression{
 		let { identifier, number, expression } = this.results;
 		expression = expression.toSource(context);
 		number = number.toSource(context);
-		return `spell.getItem(${expression}, ${number})`;
+		return `${expression}[${number} - 1]`;
+// This is safer, but using the below for demo purposes
+//		return `spell.getItem(${expression}, ${number})`;
 	}
 }
 
@@ -21,7 +23,7 @@ class index_expression extends Rule.Expression{
 //	- `item 1 of ...`
 //	- `item #2 of ...`
 // NOTE: these indices are ONE based, NOT zero based as is Javascript.
-parser.addExpression("index_expression", "{identifier} (#)?{number:integer} of {expression}", index_expression);
+parser.addExpression("index_expression", "{identifier} (#)?{number:expression} of {expression}", index_expression);
 
 
 parser.addSyntax("ordinal", "first", { toSource: () => 1 });

@@ -6,6 +6,32 @@ BUGS
 > "(a == (1 && (b == 2)))"
 
 
+- parseStatements
+	- complain if can't match the entire line!
+
+
+TEST::::
+parser.parseStatements(`
+define type Card
+	face as one of ["up", "down"]
+	get is_face_up: my face is "up"
+	get is_face_down: my face is "down"
+
+	to turn_face_up: set my face to "up"
+	to turn_face_down: set my face to "down"
+	to turn_over
+		set my face to "down" if my face is "up" else set my face to "up"
+
+	suit as one of ["clubs", "diamonds", "hearts", "spades"]
+	get color:
+		if ((my suit is "diamonds") or (my suit is "hearts")): return "red"
+		else return "black"
+
+	rank as Integer
+	rank_names = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
+	get rank_name: item (my rank) of my rank_names
+`)
+
 
 "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})? )?"
 	- want result to flatten to `{ message, okButton, cancelButton }`
