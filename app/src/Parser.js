@@ -34,15 +34,57 @@ export default class Parser {
 //### Parsing
 //
 	// Parse `name`d rule at head of `stream` (`string` or `TextStream`).
-	// `stack` is the stack of rules which are being parsed.
 	// Handles optional and repeating rules as well as eating whitespace.
 	// Returns result of parse.
-	parse(name, stream, stack = []) {
+	parse(name, stream) {
 		if (typeof stream === "string") stream = new TextStream(stream);
 		let rule = this.getRule(name);
 		if (!rule) throw new SyntaxError(`parser.parse(${name}): Rule not found`);
 		stream = this.eatWhitespace(stream);
-		return rule.parse(this, stream, stack);
+		return rule.parse(this, stream);
+	}
+
+	// Parse a set of statements line-by-line.
+//TESTME
+	parseStatements(statements) {
+		let results = [];
+		let currentIndent = 0;
+		statements.split(/\n+/g).forEach(statement => {
+			// skip lines that are all whitespace
+			if (statement.trim() === "") {
+				results.push("");
+				return;
+			}
+
+			// figure out indent level of this line
+			let lineStart = statement.match(/^\t*/)[0];
+			let lineIndent = lineStart.length;
+			if (lineIndent > currentIndent) {
+				if (results.length) results[results.length - 1] += " {";
+				else results.push(lineStart.substr(0, lineIndent-1) + "{");
+			}
+			else if (lineIndent < currentIndent) {
+				for (var i = currentIndent; i > lineIndent; i--) {
+					results.push(lineStart.substr(0, i) + "}");
+				}
+			}
+			currentIndent = lineIndent;
+			let result = this.parse("statement", statement);
+			if (result) {
+				results.push(lineStart + result.toSource());
+			}
+			else {
+				console.warn("Couldn't parse statement:", statement);
+				results.push("ERROR: "+statement);
+			}
+		});
+		// add ending braces
+		while (currentIndent > 0) {
+			results.push("}");
+			currentIndent--;
+		}
+
+		return results.join("\n");
 	}
 
 	// Eat whitespace (according to `rules.whitespace`) at the beginning of the stream.
@@ -52,6 +94,10 @@ export default class Parser {
 		if (!result) return stream;
 		return stream.advanceBy(result.matched.length);
 	}
+
+//
+//	Rules
+//
 
 	// Add a rule to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
