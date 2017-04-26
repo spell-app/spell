@@ -7,4 +7,4 @@ import "./numbers";
 import "./operators";
 import "./if";
 import "./statements";
-import "./class";
+import "./types";

@@ -10,8 +10,8 @@ export default parser;
 // TESTME
 parser.addStatement(
 	"define_type",
-	"define type {type} (extendsClause:extends {superType:type})?",
-	class declare_type extends Rule.Statement {
+	"define type {type} (extendsClause:as (a|an) {superType:type})?",
+	class define_type extends Rule.Statement {
 		toSource(context) {
 			let { type, extendsClause } = this.results;
 			type = type.toSource(context);
@@ -25,6 +25,21 @@ parser.addStatement(
 	}
 );
 
+parser.addSyntax(
+	"argsClause",
+	"with [args:{identifier} and]",
+
+	class argsClause extends Rule.Sequence {
+		// Return just the identifiers as the results
+		get results() {
+			return super.results.args;
+		}
+
+		toSource(context) {
+			return this.results.matched.map(arg => arg.toSource(context)).join(", ");
+		}
+	}
+);
 
 // TESTME
 parser.addStatement(
