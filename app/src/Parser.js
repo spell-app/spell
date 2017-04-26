@@ -30,6 +30,12 @@ export default class Parser {
 		return this.rules[name];
 	}
 
+	getRuleOrDie(name, propertyName) {
+		let rule = this.getRule(name);
+		if (!rule) throw new SyntaxError(`${propertyName} rule '${name}' not found`);
+		return rule;
+	}
+
 //
 //### Parsing
 //
