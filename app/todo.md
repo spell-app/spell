@@ -38,12 +38,8 @@ define type Card
 "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})? )?"
 	- want result to flatten to `{ message, okButton, cancelButton }`
 
-- draw sentence diagram of match
-	- primary UI for parser testing
-	- run tests in-browser (just checking output)
-	- click on a test, see the output in sentence diagram form
-	- drag to reorder nodes in the output diagram to rearrange the source text!
-
+- sequence.parseInChunks
+	- parse deterministic bits first, then fill in other bits
 
 Rule.test()
 - for complex rules (eg: ... if ... else), we have `rule.test()` which does a quick-and-dirty test to see if it's remotely possible that the rule will work.
@@ -54,7 +50,16 @@ Rule.test()
 - pretty much anything with a nested expression should have a `rule.test()`...
 
 
+- Alternatives `getBestMatch([match, match, match])`
+	- use this to do precedence rules w/ infix operator?
 
+
+
+- draw sentence diagram of match
+	- primary UI for parser testing
+	- run tests in-browser (just checking output)
+	- click on a test, see the output in sentence diagram form
+	- drag to reorder nodes in the output diagram to rearrange the source text!
 
 - combine Alternatives w/Patterns into one
 	- combine Symbol and Keyword matches ?

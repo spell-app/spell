@@ -54,6 +54,15 @@ export default class Rule {
 		return undefined;
 	}
 
+	// Test to see if bits of our rule are found ANYWHERE in the stream.
+	// Returns:
+	//	- `undefined` if not determinstic (but all patterns are deterministic)
+	//	- regex match if found,
+	//	- `false` if not found
+	test(parser, stream) {
+		return undefined;
+	}
+
 	// Does the parse `stack` already contain `rule`?
 	static stackContains(stack, rule, stream) {
 		if (stack.length === 0) return false;
@@ -149,6 +158,20 @@ Rule.Pattern = class Pattern extends Rule {
 		return true;
 	}
 
+	// Test to see if any of our patternis found ANYWHERE in the stream.
+	// Returns:
+	//	- `undefined` if not determinstic (but all patterns are deterministic)
+	//	- regex match if found,
+	//	- `false` if not found
+	test(parser, stream) {
+		let match = stream.match(this.pattern);
+		if (match) {
+			match.endIndex = (match.index + match[0].length);
+			return match;
+		}
+		return false;
+	}
+
 	addToBlacklist(...words) {
 		if (!this.blacklist) this.blacklist = {};
 		words.forEach(word => this.blacklist[word] = true);
@@ -224,8 +247,7 @@ Rule.mergeKeywords = function(first, second) {
 // `rule.rule` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
 	parse(parser, stream, stack) {
-		let rule = parser.getRule(this.rule);
-		if (!rule) throw new SyntaxError(`Attempting to parse unknown rule '${this.rule}'`);
+		let rule = parser.getRuleOrDie(this.rule, "rule");
 		let match = rule.parse(parser, stream, stack);
 		if (!match) return undefined;
 
@@ -234,9 +256,18 @@ Rule.Subrule = class Subrule extends Rule {
 	}
 
 	isDeterministic(parser, stream) {
-		let rule = parser.getRule(this.rule);
-		if (!rule) return false;
+		let rule = parser.getRuleOrDie(this.rule, "rule");
 		return rule.isDeterministic(parser, stream);
+	}
+
+	// Test to see if any of our alternatives are found ANYWHERE in the stream.
+	// Returns:
+	//	- regex match if found,
+	//	- `false` if not found or
+	//	- `undefined` if not determinstic.
+	test(parser, stream) {
+		let rule = parser.getRuleOrDie(this.rule, "rule");
+		return rule.test(parser, stream);
 	}
 
 	toString() {
@@ -250,6 +281,7 @@ Rule.Subrule = class Subrule extends Rule {
 Rule.Nested = class Nested extends Rule {
 
 	// Is this deterministic, eg: are our subrules unambigously determinable?
+//TODO: memoize?
 	isDeterministic(parser, stream) {
 		return this.rules.every(rule => rule.isDeterministic(parser, stream));
 	}
@@ -259,11 +291,19 @@ Rule.Nested = class Nested extends Rule {
 // Sequence of rules to match (auto-excluding whitespace).
 Rule.Sequence = class Sequence extends Rule.Nested {
 	parse(parser, stream, stack = []) {
+		// If we have a `testRule` defined
+		if (this.testRule) {
+			let rule = parser.getRuleOrDie(this.testRule, "testRule");
+			if (rule.test(parser, stream) === false) return undefined;
+		}
+
 		if (this.leftRecursive) {
 			if (Rule.stackContains(stack, this, stream)) return undefined;
 			stack = stack.concat();
 			stack.push([this, stream]);
 		}
+
+		if (this.chunkit) return this.parseInChunks(parser, stream, stack);
 
 		let matched = [], next = stream;
 		for (let rule of this.rules) {
@@ -286,6 +326,10 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 			stream
 		});
 	}
+
+// 	parseInChunks(parser, stream, stack) {
+//
+// 	}
 
 //TODOC
 	// "gather" arguments in preparation to call `toSource()`
@@ -340,39 +384,54 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		if (!this.rules) this.rules = [];
 	}
 
+	// Test to see if any of our alternatives are found ANYWHERE in the stream.
+	// Returns:
+	//	- `undefined` if not determinstic.
+	//	- regex match if found,
+	//	- `false` if not found or
+	test(parser, stream) {
+		if (!this.isDeterministic(parser, stream)) return undefined;
+		let bestMatch;
+		for (let rule of this.rules) {
+			let match = rule.test(parser, stream);
+			if (match) {
+				match.endIndex = match.index + match[0].length;
+				return match;
+			}
+		}
+		return false;
+	}
+
 	// Find the LONGEST match
 	parse(parser, stream, stack) {
 		//DEBUG
 		let matches = [];
 
-		let bestMatch;
 		for (let rule of this.rules) {
 			let match = rule.parse(parser, stream, stack);
-			if (!match) continue;
-
-			// take the longest match
-			if (!bestMatch || match.endIndex > bestMatch.endIndex)
-				bestMatch = match;
-			// DEBUG
-			matches.push(match);
+			if (match) matches.push(match);
 		}
 
-		// DEBUG
-// 		if (matches.length > 1) {
-// 			let stackContents = stack.map(item => item[0]);
-// 			console.group(this.ruleName + " matched "+matches.length+" times:", stackContents);
-// 			matches.forEach(match => console.log("  ", match.toSource()));
-// 			console.groupEnd();
-// 		}
+		if (!matches.length) return undefined;
 
-		if (!bestMatch) return undefined;
+		let bestMatch = (matches.length === 1 ? matches[0] : this.getBestMatch(matches));
 
 		// assign `argName` or `ruleName` for `results`
 		if (this.argument) bestMatch.argument = this.argument;
 		else if (this.ruleName) bestMatch.ruleName = this.ruleName;
-
 //TODO: other things to copy here???
+
 		return bestMatch;
+	}
+
+	// Return the "best" match given more than one matches at the head of the stream.
+	// Default is to return the longest match.
+	// Implement something else to do, eg, precedence rules.
+	getBestMatch(matches) {
+		return matches.reduce(function (best, next) {
+			if (next.endIndex > best.endIndex) return next;
+			return best;
+		}, matches[0]);
 	}
 
 	addRule(rule) {

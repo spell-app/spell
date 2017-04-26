@@ -12,39 +12,60 @@ export default parser;
 //## Infix operators:   `{lhs} <operator> {rhs}`, eg: `a is 1`
 // NOTE: `operator.toJS` MUST return a function which transforms two arguments (`lhs` and `rhs`) into output.
 
-parser.addInfixOperator("and", "and", { toJS(a,b) { return `(${a} && ${b})` }});
-parser.addInfixOperator("or", "or", { toJS(a,b) { return `(${a} || ${b})` }});
+// NOTE: `precedence` numbers come from Javascript equivalents
+//		 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
 
-parser.addInfixOperator("is", "is", { toJS(a,b) { return `(${a} == ${b})` }});
-parser.addInfixOperator("is_not", "is not", { toJS(a,b) { return `(${a} != ${b})` }});
+class infix_operator extends Rule.Alternatives {
+	// Find best match according to operator precedence as defined below.
+// NOTE: this is not being called as we were hoping...
+	getBestMatch(matches) {
+//console.warn("GBM", matches, matches.map(match => match.precedence), matches.map(match => match.endIndex));
+		return matches.reduce(function (best, next) {
+			// take highest precedence match first
+			if (next.precedence > best.precedence) return next;
+			// take longest match if same precedence
+			if (next.precedence === best.precedence) {
+				if (next.endIndex > best.endIndex) return next;
+			}
+			return best;
+		}, matches[0]);
+	}
+}
+parser.addRule("infix_operator", new infix_operator());
 
-parser.addInfixOperator("is_exactly", "is exactly", { toJS(a,b) { return `(${a} === ${b})` }});
-parser.addInfixOperator("is_not_exactly", "is not exactly", { toJS(a,b) { return `(${a} !== ${b})` }});
+parser.addInfixOperator("and", "and", { precedence: 6, toJS(a,b) { return `(${a} && ${b})` }});
+parser.addInfixOperator("or", "or", { precedence: 5, toJS(a,b) { return `(${a} || ${b})` }});
+
+parser.addInfixOperator("is", "is", { precedence: 10, toJS(a,b) { return `(${a} == ${b})` }});
+parser.addInfixOperator("is_not", "is not", { precedence: 10, toJS(a,b) { return `(${a} != ${b})` }});
+
+parser.addInfixOperator("is_exactly", "is exactly", { precedence: 10, toJS(a,b) { return `(${a} === ${b})` }});
+parser.addInfixOperator("is_not_exactly", "is not exactly", { precedence: 10, toJS(a,b) { return `(${a} !== ${b})` }});
 
 //TODO: `spell.isOfType(thing, type)`
 //TODO: `is same type as` ?
-parser.addInfixOperator("is_type_of", ["is a", "is an"], { toJS(thing, type) { return `spell.isOfType(${thing}, '${type}')` }});
-parser.addInfixOperator("is_not_type_of", ["is not a", "is not an"], { toJS(thing, type) { return `!spell.isOfType(${thing}, '${type}')` }});
+parser.addInfixOperator("is_type_of", ["is a", "is an"], { precedence: 11, toJS(thing, type) { return `spell.isOfType(${thing}, '${type}')` }});
+parser.addInfixOperator("is_not_type_of", ["is not a", "is not an"], { precedence: 11, toJS(thing, type) { return `!spell.isOfType(${thing}, '${type}')` }});
 
 //TODO: `spell.contains(collection, thing)`
-parser.addInfixOperator("is_in", ["is in", "is one of"], { toJS(thing, list) { return `${list}.includes(${thing})` }});
-parser.addInfixOperator("is_not_in", ["is not in", "is not one of"], { toJS(thing, list) { return `!${list}.includes(${thing})` }});
+parser.addInfixOperator("is_in", ["is in", "is one of"], { precedence: 11, toJS(thing, list) { return `${list}.includes(${thing})` }});
+parser.addInfixOperator("is_not_in", ["is not in", "is not one of"], { precedence: 11, toJS(thing, list) { return `!${list}.includes(${thing})` }});
 //TESTME
-parser.addInfixOperator("includes", ["includes", "contains"], { toJS(list, thing) { return `${list}.includes(${thing})` }});
-parser.addInfixOperator("doesnt_include", ["does not include", "doesnt include", "does not contain", "doesnt contain"], { toJS(list, thing) { return `${list}.includes(${thing})` }});
+parser.addInfixOperator("includes", ["includes", "contains"], { precedence: 11, toJS(list, thing) { return `${list}.includes(${thing})` }});
+parser.addInfixOperator("doesnt_include", ["does not include", "doesnt include", "does not contain", "doesnt contain"], { precedence: 11, toJS(list, thing) { return `${list}.includes(${thing})` }});
 
-parser.addInfixOperator("gt", [">", "is greater than"], { toJS(a,b) { return`(${a} > ${b})` }});
-parser.addInfixOperator("gte", [">=", "is greater than or equal to"], { toJS(a,b) { return`(${a} >= ${b})` }});
-parser.addInfixOperator("lt", ["<", "is less than"], { toJS(a,b) { return`(${a} < ${b})` }});
-parser.addInfixOperator("lte", ["<=", "is less than or equal to"], { toJS(a,b) { return`(${a} <= ${b})` }});
+parser.addInfixOperator("gt", [">", "is greater than"], { precedence: 11, toJS(a,b) { return`(${a} > ${b})` }});
+parser.addInfixOperator("gte", [">=", "is greater than or equal to"], { precedence: 11, toJS(a,b) { return`(${a} >= ${b})` }});
+parser.addInfixOperator("lt", ["<", "is less than"], { precedence: 11, toJS(a,b) { return`(${a} < ${b})` }});
+parser.addInfixOperator("lte", ["<=", "is less than or equal to"], { precedence: 11, toJS(a,b) { return`(${a} <= ${b})` }});
 
 //TODO:  can't add `+` as a rule, fix this then add these
 //TODO:  operator precedence???
 //TESTME
-parser.addInfixOperator("plus", ["\\+", "plus"], { toJS(a,b) { return`${a} + ${b}` }});
-parser.addInfixOperator("minus", ["-", "minus"], { toJS(a,b) { return`${a} - ${b}` }});
-parser.addInfixOperator("times", ["\\*", "times"], { toJS(a,b) { return`${a} * ${b}` }});
-parser.addInfixOperator("divided_by", ["/", "divided by"], { toJS(a,b) { return`${a} / ${b}` }});
+parser.addInfixOperator("plus", ["\\+", "plus"], { precedence: 13, toJS(a,b) { return`${a} + ${b}` }});
+parser.addInfixOperator("minus", ["-", "minus"], { precedence: 13, toJS(a,b) { return`${a} - ${b}` }});
+parser.addInfixOperator("times", ["\\*", "times"], { precedence: 14, toJS(a,b) { return`${a} * ${b}` }});
+parser.addInfixOperator("divided_by", ["/", "divided by"], { precedence: 14, toJS(a,b) { return`${a} / ${b}` }});
 
 //TODO:  `+=` etc?  other math functions?
 
@@ -52,6 +73,8 @@ parser.addExpression(
 	"infix_operator_expression",
 	"{lhs:expression} {operator:infix_operator} {rhs:expression}",
 	class infix_operator_expression extends Rule.Expression {
+//		testRule = "infix_operator";
+
 		toSource(context) {
 			let { lhs, rhs, operator } = this.results;
 			return operator.toJS(lhs.toSource(context), rhs.toSource(context));
@@ -73,6 +96,7 @@ parser.addExpression(
 	"postfix_operator_expression",
 	"{expression} {operator:postfix_operator}",
 	class postfix_operator_expresion extends Rule.Expression {
+		testRule = "postfix_operator";
 		toSource(context) {
 			let { expression, operator } = this.results;
 			return operator.toJS(expression.toSource(context));
