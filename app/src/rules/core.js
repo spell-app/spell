@@ -75,14 +75,26 @@ parser.rules.identifier.addToBlacklist(
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
 Rule.Type = class type extends Rule.Pattern {};
-let type = parser.addRule("type", new Rule.Type({
-	pattern: /[A-Z][\w\-]*/,
+parser.addRule("type", new Rule.Type({
+	pattern: /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean)/,
 	// Convert "-" to "_" in source output.
 	toSource: function(context) {
-		return this.matched.replace(/\-/g, "_");
+		let value = this.matched;
+		switch(value) {
+			// special case to take the following as lowercase
+			case "text":		return "String";
+			case "character":	return "Character";
+			case "number":		return "Number";
+			case "integer":		return "Integer";
+			case "decimal":		return "Decimal";
+			case "boolean":		return "Boolean";
+			default:
+				return value.replace(/\-/g, "_");
+		}
 	}
 }));
-parser.addRule("expression", type);
+
+parser.addRule("expression", parser.rules.type);
 
 
 // `number` as either float or integer, created with custom constructor for debugging.
