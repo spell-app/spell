@@ -259,7 +259,7 @@ Object.defineProperties(Parser.prototype, {
 	// Parse a `ruleSyntax` rule and add it to our list of rules.
 	// Returns the new rule.
 	// Logs parsing errors but allows things to continue.
-	addSyntax: { value: function(name, ruleSyntax, constructor = Rule.Sequence) {
+	addSequence: { value: function(name, ruleSyntax, constructor = Rule.Sequence) {
 		let properties;
 		if (typeof constructor !== "function") {
 			properties = constructor;
@@ -281,12 +281,12 @@ Object.defineProperties(Parser.prototype, {
 	}},
 
 	addStatement: { value: function(name, ruleSyntax, constructor = Rule.Statement) {
-		var rule = this.addSyntax(name, ruleSyntax, constructor);
+		var rule = this.addSequence(name, ruleSyntax, constructor);
 		if (rule) return this.addRule("statement", rule);
 	}},
 
 	addExpression: { value: function(name, ruleSyntax, constructor = Rule.Expression) {
-		var rule = this.addSyntax(name, ruleSyntax, constructor);
+		var rule = this.addSequence(name, ruleSyntax, constructor);
 		if (rule) return this.addRule("expression", rule);
 	}},
 
@@ -303,7 +303,7 @@ Object.defineProperties(Parser.prototype, {
 			return ruleSyntax.forEach(syntax => this.addInfixOperator(name, syntax, properties));
 		}
 
-		var rule = this.addSyntax(name, ruleSyntax, properties);
+		var rule = this.addSequence(name, ruleSyntax, properties);
 		if (rule) {
 			if (!rule.toJS) {
 				throw new TypeError(`Expected infix operator rule '${name}' to specify 'toJS' function`)
@@ -329,7 +329,7 @@ Object.defineProperties(Parser.prototype, {
 			return ruleSyntax.forEach(syntax => this.addPostfixOperator(name, syntax, properties));
 		}
 
-		var rule = this.addSyntax(name, ruleSyntax, properties);
+		var rule = this.addSequence(name, ruleSyntax, properties);
 		if (rule) {
 			if (!rule.toJS) {
 				throw new TypeError(`Expected postfix operator rule '${name}' to specify 'toJS' function`);

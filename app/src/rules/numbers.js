@@ -35,19 +35,19 @@ class index_expression extends Rule.Expression{
 parser.addExpression("index_expression", "{identifier} (#)?{number:expression} of {expression}", index_expression);
 
 
-parser.addSyntax("ordinal", "first", { toSource: () => 1 });
-parser.addSyntax("ordinal", "second", { toSource: () => 2 });
-parser.addSyntax("ordinal", "third", { toSource: () => 3 });
-parser.addSyntax("ordinal", "fourth", { toSource: () => 4 });
-parser.addSyntax("ordinal", "fifth", { toSource: () => 5 });
-parser.addSyntax("ordinal", "sixth", { toSource: () => 6 });
-parser.addSyntax("ordinal", "seventh", { toSource: () => 7 });
-parser.addSyntax("ordinal", "eighth", { toSource: () => 8 });
-parser.addSyntax("ordinal", "ninth", { toSource: () => 9 });
-parser.addSyntax("ordinal", "tenth", { toSource: () => 10 });
-parser.addSyntax("ordinal", "penultimate", { toSource: () => -2 });
-parser.addSyntax("ordinal", "final", { toSource: () => -1 });
-parser.addSyntax("ordinal", "last", { toSource: () => -1 });
+parser.addSequence("ordinal", "first", { toSource: () => 1 });
+parser.addSequence("ordinal", "second", { toSource: () => 2 });
+parser.addSequence("ordinal", "third", { toSource: () => 3 });
+parser.addSequence("ordinal", "fourth", { toSource: () => 4 });
+parser.addSequence("ordinal", "fifth", { toSource: () => 5 });
+parser.addSequence("ordinal", "sixth", { toSource: () => 6 });
+parser.addSequence("ordinal", "seventh", { toSource: () => 7 });
+parser.addSequence("ordinal", "eighth", { toSource: () => 8 });
+parser.addSequence("ordinal", "ninth", { toSource: () => 9 });
+parser.addSequence("ordinal", "tenth", { toSource: () => 10 });
+parser.addSequence("ordinal", "penultimate", { toSource: () => -2 });
+parser.addSequence("ordinal", "final", { toSource: () => -1 });
+parser.addSequence("ordinal", "last", { toSource: () => -1 });
 
 // TODO: sixty-fifth, two hundred forty ninth...
 

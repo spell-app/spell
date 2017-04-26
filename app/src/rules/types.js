@@ -45,7 +45,7 @@ parser.addRule("expression", parser.rules.object_literal);
 //TODO: {identifier} = {expression}	=> requires `,` instead of `and`
 //TODO: `with foo as Type`
 //TODO:	`with foo...` for splat?
-parser.addSyntax(
+parser.addSequence(
 	"argsClause",
 	"with [args:{identifier} and]",
 	class argsClause extends Rule.Sequence {
@@ -91,7 +91,7 @@ parser.addStatement(
 //TESTME
 // `new`
 // NOTE: we assume that all types take an object of properties????
-parser.addSyntax(
+parser.addSequence(
 	"new_thing",
 	"(create|new) {type} (propsClause:with {props:object_literal})?",
 	class new_thing extends Rule.Sequence {
@@ -190,7 +190,7 @@ parser.addStatement(
 //	declare properties
 //
 
-parser.addSyntax("scope_modifier", "(scope:global|constant|shared|property)");
+parser.addSequence("scope_modifier", "(scope:global|constant|shared|property)");
 
 //TESTME
 parser.addStatement(

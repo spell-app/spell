@@ -109,4 +109,4 @@ parser.addExpression(
 
 
 // TODO: this should really be a general "expression"...
-//parser.addSyntax("operator_expression", "(expression:{postfix_operator_expression}|{infix_operator_expression})");
+//parser.addSequence("operator_expression", "(expression:{postfix_operator_expression}|{infix_operator_expression})");
