@@ -11,31 +11,36 @@ BUGS
 	- parseStatements()
 		- return sequence(?) of results?
 
+- addSyntax()
+	- pass arbitrary constructor for pattern, etc rather than only sequence
+
 
 TEST::::
 parser.compile(`
 define type Card
-	face as one of ["up", "down"]
-	get is_face_up: my face is "up"
-	get is_face_down: my face is "down"
+	property face as one of ["up", "down"]
 
 	to turn_face_up: set my face to "up"
 	to turn_face_down: set my face to "down"
 	to turn_over
-		set my face to "down" if this is_face_up else set my face to "up"
+		if my face is "up":
+			set my face to "down"
+		else
+			set my face to "up"
 
-	suit as one of ["clubs", "diamonds", "hearts", "spades"]
+	property suit as one of ["clubs", "diamonds", "hearts", "spades"]
 	get color:
 		if my suit is one of ["diamonds", "hearts"] then return "red"
 		else return "black"
 
-	rank as Integer
-	rank_names = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
+	property rank as a number
+	shared rank_names = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
 	get rank_name: item (my rank) of my rank_names
 `)
 
 
 CLASS SEMANTICS
+- constructor???
 - shared property ranks as ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
 - property rank as one of my ranks
 	- todo: ace high?
