@@ -269,6 +269,7 @@ Object.defineProperties(Parser.prototype, {
 			// Reflect the rule back out to make sure it looks (more or less) the same
 			if (Parser.debug) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
 
+//console.info(name, constructor, rule);
 			if (properties) Object.assign(rule, properties);
 			return this.addRule(name, rule);
 		} catch (e) {

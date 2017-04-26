@@ -144,11 +144,14 @@ Rule.Pattern = class Pattern extends Rule {
 		let matched = match[0];
 		if (this.blacklist && this.blacklist[matched]) return undefined;
 
+		let endIndex = stream.startIndex + matched.length;
 		return this.clone({
 			matched,
 			// DEBUG
+			matchedText: stream.range(stream.startIndex, endIndex),
+			// DEBUG
 			startIndex: stream.startIndex,
-			endIndex: stream.startIndex + matched.length,
+			endIndex,
 			stream
 		});
 	}
@@ -341,22 +344,20 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 	// NOTE: memoizes the results.
 	get results() {
 		if (!this.matched) return undefined;
-		if (!this._results) {
-			let results = this._results = {};
-			for (let match of this.matched) {
-				let argName = match.argument || match.ruleName || match.constructor.name;
+		let results = {};
+		for (let match of this.matched) {
+			let argName = match.argument || match.ruleName || match.constructor.name;
 
-				// If arg already exists, convert to an array
-				if (argName in results) {
-					if (!Array.isArray(results[argName])) results[argName] = [results[argName]];
-					results[argName].push(match);
-				}
-				else {
-					results[argName] = match;
-				}
+			// If arg already exists, convert to an array
+			if (argName in results) {
+				if (!Array.isArray(results[argName])) results[argName] = [results[argName]];
+				results[argName].push(match);
+			}
+			else {
+				results[argName] = match;
 			}
 		}
-		return this._results;
+		return results;
 	}
 
 	toString() {
@@ -402,17 +403,20 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 		return false;
 	}
 
-	// Find the LONGEST match
+	// Find all rules which match and delegate to `getBestMatch()` to pick the best one.
 	parse(parser, stream, stack) {
-		//DEBUG
 		let matches = [];
-
 		for (let rule of this.rules) {
 			let match = rule.parse(parser, stream, stack);
 			if (match) matches.push(match);
 		}
 
 		if (!matches.length) return undefined;
+
+		// uncomment the below to print alternatives
+		// if (matches.length > 1) {
+		//	console.info(this.argument || this.ruleName, matches, matches.map(match => match.matchedText));
+		// }
 
 		let bestMatch = (matches.length === 1 ? matches[0] : this.getBestMatch(matches));
 
@@ -495,8 +499,7 @@ Rule.Repeat = class Repeat extends Rule.Nested {
 	// NOTE: memoizes the results.
 	get results() {
 		if (!this.matched) return undefined;
-		return this._results || (this._results = this.matched.map( match => match.results ));
-
+		return this.matched.map( match => match.results );
 	}
 
 	toSource() {
