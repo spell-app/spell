@@ -14,7 +14,7 @@ function pluralize(word) {
 }
 
 
-console.warn("object_literal is broken -- matches "");
+console.warn("object_literal is broken -- matches ");
 //TESTME
 //MOVE TO `objects`?
 // Properties clause: creates an object with one or more property values.

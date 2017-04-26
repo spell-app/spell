@@ -552,6 +552,9 @@ Rule.List = class List extends Rule {
 			next = delimiter.next();
 		}
 
+		// If we didn't get any matches, forget it.
+		if (matched.length === 0) return undefined;
+
 		return this.clone({
 			matched,
 			// DEBUG
