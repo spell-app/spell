@@ -12,7 +12,7 @@ export default parser;
 //TESTME
 parser.addStatement(
 	"if",
-	"if {expression} (then|:) {statement}?",
+	"if {expression} (then|:)? {statement}?",
 	class if_ extends Rule.Statement {
 		toSource(context) {
 			let { expression, statement } = this.results;
