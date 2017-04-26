@@ -14,17 +14,16 @@ function pluralize(word) {
 }
 
 
-console.warn("object_literal is broken -- matches ");
 //TESTME
 //MOVE TO `objects`?
 // Properties clause: creates an object with one or more property values.
 //	`foo = 1, bar = 2`
 //TODO: would like to use `and` but that will barf on expressions...
 //TODO: how to do properties on multiple lines?
-parser.addExpression(
+parser.addList(
 	"object_literal",
 	"[({identifier} = {expression}) ,]",
-	{
+	class object_literal extends Rule.List {
 		toSource(context) {
 			let props = this.results.matched.map(function (prop) {
 					let { identifier, expression } = prop.results;
@@ -36,6 +35,7 @@ parser.addExpression(
 		}
 	}
 );
+parser.addRule("expression", parser.rules.object_literal);
 
 
 //TESTME
@@ -196,7 +196,7 @@ parser.addSyntax("scope_modifier", "(scope:global|constant|shared|property)");
 parser.addStatement(
 	"declare_property",
 	"(scope:constant|shared property|property) {identifier} (valueClause:= {expression})?",
-	{
+	class declare_property extends Rule.Statement {
 		toSource(context) {
 			let { scope, identifier, valueClause } = this.results;
 			scope = scope.toSource(context);
@@ -224,7 +224,7 @@ parser.addStatement(
 	"declare_property",
 // TODO: scope_modifier???
 	"property {identifier} as (a|an)? {type}",
-	{
+	class declare_property extends Rule.Statement {
 		toSource(context) {
 			let { identifier, type } = this.results;
 			identifier = identifier.toSource(context);
@@ -242,7 +242,7 @@ parser.addStatement(
 parser.addStatement(
 	"declare_property_as_one_of",
 	"property {identifier} as one of {list:literal_list}",
-	{
+	class declare_property_as_one_of extends Rule.Statement {
 		toSource(context) {
 			let { scope_modifier, identifier, list } = this.results;
 //TODO: not handling scope_modifier

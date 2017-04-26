@@ -76,7 +76,7 @@ parser.addExpression(
 	"infix_operator_expression",
 	"{lhs:expression} {operator:infix_operator} {rhs:expression}",
 	class infix_operator_expression extends Rule.Expression {
-//		testRule = "infix_operator";
+		testRule = "infix_operator";
 
 		toSource(context) {
 			let { lhs, rhs, operator } = this.results;
