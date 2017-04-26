@@ -35,6 +35,32 @@ define type Card
 `)
 
 
+CLASS SEMANTICS
+- shared property ranks as ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
+- property rank as one of my ranks
+	- todo: ace high?
+
+- get rank_number: item my rank of my ranks
+- get is_higher_than with other_card:
+	return my rank_number is greater than the rank_number of the other_card
+
+- get is_one_higher_than with other_card:
+
+
+FUNCTIONS
+- get x:			<= getter
+- get x with y:		<= method w/param that returns a value
+	- is the colon necessary?
+- set x:			<= setter with implicit `value` argument
+- set x with y		<= setter with explicit value argument `y`
+- if we're doing _ between keywords, can we omit `with`?
+
+`this` vs `my`
+	- my requires "is" => "am" inversion
+	- `I` ?
+	- "the object is talking out loud to itself..."
+
+
 "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})? )?"
 	- want result to flatten to `{ message, okButton, cancelButton }`
 

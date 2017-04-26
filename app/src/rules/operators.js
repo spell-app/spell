@@ -16,21 +16,24 @@ export default parser;
 //		 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
 
 class infix_operator extends Rule.Alternatives {
-	// Find best match according to operator precedence as defined below.
-// NOTE: this is not being called as we were hoping...
-	getBestMatch(matches) {
-//console.warn("GBM", matches, matches.map(match => match.precedence), matches.map(match => match.endIndex));
-		return matches.reduce(function (best, next) {
-			// take highest precedence match first
-			if (next.precedence > best.precedence) return next;
-			// take longest match if same precedence
-			if (next.precedence === best.precedence) {
-				if (next.endIndex > best.endIndex) return next;
-			}
-			return best;
-		}, matches[0]);
-	}
+
+// NOTE: For the operators themselves, we really want to just use longest match.
+// 		 We want to push the precedence up to the expression and evaluate different expressions based on that.
+// 	// Find best match according to operator precedence as defined below.
+// 	getBestMatch(matches) {
+// 		console.warn("GBM", matches, matches.map(match => match.precedence), matches.map(match => match.matchedText));
+// 		return matches.reduce(function (best, next) {
+// 			// take highest precedence match first
+// 			if (next.precedence > best.precedence) return next;
+// 			// take longest match if same precedence
+// 			if (next.precedence === best.precedence) {
+// 				if (next.endIndex > best.endIndex) return next;
+// 			}
+// 			return best;
+// 		}, matches[0]);
+// 	}
 }
+
 parser.addRule("infix_operator", new infix_operator());
 
 parser.addInfixOperator("and", "and", { precedence: 6, toJS(a,b) { return `(${a} && ${b})` }});
