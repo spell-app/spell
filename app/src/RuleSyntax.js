@@ -36,7 +36,7 @@ Object.assign(Rule, {
 
 	tokeniseRuleSyntax(syntax) {
 		const SYNTAX_EXPRESSION = /(?:[\w\-]+|\\[\[\(\{\)\}\]]|[^\s\w]|\|)/g;
-		var syntaxStream = syntax.match(SYNTAX_EXPRESSION);
+		let syntaxStream = syntax.match(SYNTAX_EXPRESSION);
 		if (!syntaxStream) throw new SyntaxError(`Can't tokenize parse rule syntax >>${syntax}<<`);
 		return syntaxStream;
 	},
@@ -46,7 +46,7 @@ Object.assign(Rule, {
 		while (startIndex < lastIndex) {
 			let [ rule, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex);
 			if (rule) {
-				var last = rules[rules.length-1];
+				let last = rules[rules.length-1];
 				// If this is a `String` and last was a `String`, merge together
 				if (last && last instanceof Rule.Symbol && rule instanceof Rule.Symbol) {
 					// remove the last rule
@@ -69,7 +69,7 @@ Object.assign(Rule, {
 	},
 
 	parseRuleSyntax_token(syntaxStream, rules = [], startIndex = 0) {
-		var syntaxToken = syntaxStream[startIndex];
+		let syntaxToken = syntaxStream[startIndex];
 
 		// if we got a "\\" (which also has to go into the source string as "\\")
 		// treat the next token as a literal string rather than as a special character.
@@ -100,15 +100,17 @@ Object.assign(Rule, {
 	// Match `keyword` in syntax rules.
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
-	parseRuleSyntax_string(syntaxStream, rules = [], startIndex = 0) {
-		var string = syntaxStream[startIndex], rule;
+	parseRuleSyntax_string(syntaxStream, rules = [], startIndex = 0, constructor) {
+		let string = syntaxStream[startIndex], rule;
 		// If letters only, match as a Keyword (so we require a word boundary after the string).
 		if (string.match(/[A-Za-z]+/)) {
-			rule = new Rule.Keyword({ string });
+			if (!constructor) constructor = Rule.Keyword;
+			rule = new constructor({ string });
 		}
 		// Otherwise match as a String, which doesn't require non-word chars after the text.
 		else {
-			rule = new Rule.Symbol({ string: string });
+			if (!constructor) constructor = Rule.Symbol;
+			rule = new constructor({ string: string });
 			// If string starts with `\\`, it's an escaped literal (eg: `\[` needs to input as `\\[`).
 			if (string.startsWith("\\")) {
 				// remove leading slash in match string...
@@ -153,9 +155,9 @@ Object.assign(Rule, {
 		return [ rule, endIndex ];
 
 		function groupAlternatives(tokens) {
-			var alternatives = [];
-			var current = [];
-			for (var i = 0, token; token = tokens[i]; i++) {
+			let alternatives = [];
+			let current = [];
+			for (let i = 0, token; token = tokens[i]; i++) {
 				// handle alternate marker
 				if (token === "|") {
 					alternatives.push(current);
@@ -178,8 +180,8 @@ Object.assign(Rule, {
 
 	// Match repeat indicator `?`, `+` or `*` by attaching it to the previous rule.
 	parseRuleSyntax_repeat(syntaxStream, rules = [], startIndex = 0) {
-		var symbol = syntaxStream[startIndex];
-		var rule = rules[rules.length - 1];
+		let symbol = syntaxStream[startIndex];
+		let rule = rules[rules.length - 1];
 		if (!rule) throw new SyntaxError(`Can't attach repeat symbol ${symbol} to empty rule!`);
 
 		// Transform last rule into a repeat for `*` and `+`.
@@ -211,7 +213,7 @@ Object.assign(Rule, {
 		}
 		if (match.slice.length > 1) throw new SyntaxError(`Can't process rules with more than one rule name: {${match.slice.join("")}}`);
 
-		var params = { rule: match.slice[0] };
+		let params = { rule: match.slice[0] };
 
 		// see if there's a `not` rule in there
 		let bangPosition = params.rule.indexOf("!");
@@ -229,7 +231,6 @@ Object.assign(Rule, {
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
 	parseRuleSyntax_list(syntaxStream, rules = [], startIndex = 0, constructor = Rule.List) {
-		if (typeof syntaxStream === "string") syntaxStream = Rule.tokeniseRuleSyntax(syntaxStream);
 		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "[", "]", startIndex);
 
 		let argument;
@@ -259,8 +260,7 @@ Object.defineProperties(Parser.prototype, {
 	// Parse a `ruleSyntax` rule and add it to our list of rules.
 	// Returns the new rule.
 	// Logs parsing errors but allows things to continue.
-	addSequence: { value: function(name, ruleSyntax, constructor = Rule.Sequence) {
-		let properties;
+	addSequence: { value: function(name, ruleSyntax, constructor = Rule.Sequence, properties) {
 		if (typeof constructor !== "function") {
 			properties = constructor;
 			constructor = Rule.Sequence;
@@ -280,19 +280,30 @@ Object.defineProperties(Parser.prototype, {
 		}
 	}},
 
-	addStatement: { value: function(name, ruleSyntax, constructor = Rule.Statement) {
-		var rule = this.addSequence(name, ruleSyntax, constructor);
+	addStatement: { value: function(name, ruleSyntax, constructor = Rule.Statement, properties) {
+		let rule = this.addSequence(name, ruleSyntax, constructor, properties);
 		if (rule) return this.addRule("statement", rule);
 	}},
 
-	addExpression: { value: function(name, ruleSyntax, constructor = Rule.Expression) {
-		var rule = this.addSequence(name, ruleSyntax, constructor);
+	addExpression: { value: function(name, ruleSyntax, constructor = Rule.Expression, properties) {
+		let rule = this.addSequence(name, ruleSyntax, constructor, properties);
 		if (rule) return this.addRule("expression", rule);
 	}},
 
-	addList: { value: function(name, ruleSyntax, constructor = Rule.List) {
-		let [ rule, endIndex ] = Rule.parseRuleSyntax_list(ruleSyntax, [], 0, constructor);
-		if (rule) return this.addRule(name, rule);
+	addList: { value: function(name, ruleSyntax, constructor = Rule.List, properties) {
+		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
+		let rule = (Rule.parseRuleSyntax_list(stream, [], 0, constructor) || [])[0];
+		if (!rule) return;
+		if (properties) Object.assign(rule, properties);
+		return this.addRule(name, rule);
+	}},
+
+	addKeyword: { value: function(name, ruleSyntax, constructor = Rule.Keyword, properties) {
+		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
+		let rule = (Rule.parseRuleSyntax_string(stream, [], 0, constructor) || [])[0];
+		if (!rule) return;
+		if (properties) Object.assign(rule, properties);
+		return this.addRule(name, rule);
 	}},
 
 	// Add infix operator, such as "a or b".
@@ -303,7 +314,7 @@ Object.defineProperties(Parser.prototype, {
 			return ruleSyntax.forEach(syntax => this.addInfixOperator(name, syntax, properties));
 		}
 
-		var rule = this.addSequence(name, ruleSyntax, properties);
+		let rule = this.addSequence(name, ruleSyntax, properties);
 		if (rule) {
 			if (!rule.toJS) {
 				throw new TypeError(`Expected infix operator rule '${name}' to specify 'toJS' function`)
@@ -329,7 +340,7 @@ Object.defineProperties(Parser.prototype, {
 			return ruleSyntax.forEach(syntax => this.addPostfixOperator(name, syntax, properties));
 		}
 
-		var rule = this.addSequence(name, ruleSyntax, properties);
+		let rule = this.addSequence(name, ruleSyntax, properties);
 		if (rule) {
 			if (!rule.toJS) {
 				throw new TypeError(`Expected postfix operator rule '${name}' to specify 'toJS' function`);

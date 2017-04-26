@@ -10,21 +10,21 @@ export default parser;
 // TODO: if `identifier` is "word", output `getWord()` etc
 class index_expression extends Rule.Expression{
 	toSource(context) {
-		let { identifier, number, expression } = this.results;
+		let { identifier, index, expression } = this.results;
 		expression = expression.toSource(context);
-		number = number.toSource(context);
-		if (typeof number === "number") {
-			if (number > 0) {
-				return `${expression}[${number - 1}]`;
+		index = index.toSource(context);
+		if (typeof index === "number") {
+			if (index > 0) {
+				return `${expression}[${index - 1}]`;
 			}
 			else {
-				return `spell.getItem(${expression}, ${number})`;
+				return `spell.getItem(${expression}, ${index})`;
 			}
 		}
-		return `${expression}[${number} - 1]`;
+		return `${expression}[${index} - 1]`;
 
 // This is safer, but using the above for demo purposes
-//		return `spell.getItem(${expression}, ${number})`;
+//		return `spell.getItem(${expression}, ${index})`;
 	}
 }
 
@@ -32,26 +32,26 @@ class index_expression extends Rule.Expression{
 //	- `item 1 of ...`
 //	- `item #2 of ...`
 // NOTE: these indices are ONE based, NOT zero based as is Javascript.
-parser.addExpression("index_expression", "{identifier} (#)?{number:expression} of {expression}", index_expression);
+parser.addExpression("index_expression", "{identifier} (#)?{index:expression} of {expression}", index_expression);
 
-
-parser.addSequence("ordinal", "first", { toSource: () => 1 });
-parser.addSequence("ordinal", "second", { toSource: () => 2 });
-parser.addSequence("ordinal", "third", { toSource: () => 3 });
-parser.addSequence("ordinal", "fourth", { toSource: () => 4 });
-parser.addSequence("ordinal", "fifth", { toSource: () => 5 });
-parser.addSequence("ordinal", "sixth", { toSource: () => 6 });
-parser.addSequence("ordinal", "seventh", { toSource: () => 7 });
-parser.addSequence("ordinal", "eighth", { toSource: () => 8 });
-parser.addSequence("ordinal", "ninth", { toSource: () => 9 });
-parser.addSequence("ordinal", "tenth", { toSource: () => 10 });
-parser.addSequence("ordinal", "penultimate", { toSource: () => -2 });
-parser.addSequence("ordinal", "final", { toSource: () => -1 });
-parser.addSequence("ordinal", "last", { toSource: () => -1 });
+class ordinal extends Rule.Keyword {}
+parser.addKeyword("ordinal", "first", ordinal, { toSource: () => 1 });
+parser.addKeyword("ordinal", "second", ordinal, { toSource: () => 2 });
+parser.addKeyword("ordinal", "third", ordinal, { toSource: () => 3 });
+parser.addKeyword("ordinal", "fourth", ordinal, { toSource: () => 4 });
+parser.addKeyword("ordinal", "fifth", ordinal, { toSource: () => 5 });
+parser.addKeyword("ordinal", "sixth", ordinal, { toSource: () => 6 });
+parser.addKeyword("ordinal", "seventh", ordinal, { toSource: () => 7 });
+parser.addKeyword("ordinal", "eighth", ordinal, { toSource: () => 8 });
+parser.addKeyword("ordinal", "ninth", ordinal, { toSource: () => 9 });
+parser.addKeyword("ordinal", "tenth", ordinal, { toSource: () => 10 });
+parser.addKeyword("ordinal", "penultimate", ordinal, { toSource: () => -2 });
+parser.addKeyword("ordinal", "final", ordinal, { toSource: () => -1 });
+parser.addKeyword("ordinal", "last", ordinal, { toSource: () => -1 });
 
 // TODO: sixty-fifth, two hundred forty ninth...
 
 // Alternative form for numeric index in a list-like thing.
 // NOTE: don't add as an expression since we're auto-merged with `index_expression` above.
-parser.addExpression("index_expression", "the {number:ordinal} {identifier} of {expression}", index_expression);
+parser.addExpression("index_expression", "the {index:ordinal} {identifier} of {expression}", index_expression);
 
