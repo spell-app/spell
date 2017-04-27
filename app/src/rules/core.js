@@ -76,7 +76,7 @@ parser.rules.identifier.addToBlacklist(
 // MUST start with an upper-case letter (?)
 Rule.Type = class type extends Rule.Pattern {};
 parser.addRule("type", new Rule.Type({
-	pattern: /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean)/,
+	pattern: /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/,
 	// Convert "-" to "_" in source output.
 	toSource: function(context) {
 		let value = this.matched;
@@ -88,6 +88,7 @@ parser.addRule("type", new Rule.Type({
 			case "integer":		return "Integer";
 			case "decimal":		return "Decimal";
 			case "boolean":		return "Boolean";
+			case "object":		return "Object";
 			default:
 				return value.replace(/\-/g, "_");
 		}
@@ -163,8 +164,17 @@ let list = parser.addExpression(
 	"literal_list",
 	"\\[[list:{expression},]?\\]",
 	class literal_list extends Rule.Expression {
+		get results() {
+			return super.results.list;
+		}
+
+		getItem(index) {
+			let list = this.results;
+			if (list) return list.matched[index];
+		}
+
 		toSource(context) {
-			let { list } = this.results;
+			let list = this.results;
 			if (!list) return "[]";
  			return list.toSource(context);
 		}

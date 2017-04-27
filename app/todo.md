@@ -11,9 +11,8 @@ BUGS
 	- parseStatements()
 		- return sequence(?) of results?
 
-- addSyntax()
-	- pass arbitrary constructor for pattern, etc rather than only sequence
-
+- "a = 1" is not matching assignment???
+	- because object_literal is taking `a = 1` as first object
 
 TEST::::
 parser.compile(`
@@ -34,7 +33,7 @@ define type Card
 		else return "black"
 
 	property rank as a number
-	shared rank_names = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
+	shared property rank_names = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
 	get rank_name: item (my rank) of my rank_names
 `)
 

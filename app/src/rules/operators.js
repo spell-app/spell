@@ -169,6 +169,7 @@ parser.addExpression(
 	"infix_operator_expression",
 	"{lhs:expression} {operator:infix_operator} {rhs:expression}",
 	class infix_operator_expression extends Rule.Expression {
+		// We CANNOT match if `infix_operator` isn't found in the expression.
 		testRule = "infix_operator";
 
 		toSource(context) {
@@ -204,7 +205,9 @@ parser.addExpression(
 	"postfix_operator_expression",
 	"{expression} {operator:postfix_operator}",
 	class postfix_operator_expresion extends Rule.Expression {
+		// We CANNOT match if `postfix_operator` isn't found in the expression.
 		testRule = "postfix_operator";
+
 		toSource(context) {
 			let { expression, operator } = this.results;
 			return operator.toJS(expression.toSource(context));

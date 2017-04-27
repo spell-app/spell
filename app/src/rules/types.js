@@ -21,9 +21,9 @@ function pluralize(word) {
 //TODO: would like to use `and` but that will barf on expressions...
 //TODO: how to do properties on multiple lines?
 parser.addList(
-	"object_literal",
+	"object_literal_properties",
 	"[({identifier} = {expression}) ,]",
-	class object_literal extends Rule.List {
+	class object_literal_properties extends Rule.List {
 		toSource(context) {
 			let props = this.results.matched.map(function (prop) {
 					let { identifier, expression } = prop.results;
@@ -35,7 +35,6 @@ parser.addList(
 		}
 	}
 );
-parser.addRule("expression", parser.rules.object_literal);
 
 
 //TESTME
@@ -47,7 +46,7 @@ parser.addRule("expression", parser.rules.object_literal);
 //TODO:	`with foo...` for splat?
 parser.addSequence(
 	"args_clause",
-	"with [args:{identifier} and]",
+	"with [args:{identifier} ,]",
 	class args_clause extends Rule.Sequence {
 		// Return just the arguments as the results
 		get results() {
@@ -93,7 +92,7 @@ parser.addStatement(
 // NOTE: we assume that all types take an object of properties????
 parser.addSequence(
 	"new_thing",
-	"(create|new) {type} (props_clause:with {props:object_literal})?",
+	"(create|new) {type} (props_clause:with {props:object_literal_properties})?",
 	class new_thing extends Rule.Sequence {
 		toSource(context) {
 			let { type, props_clause } = this.results;
@@ -130,7 +129,7 @@ parser.addStatement(
 // If you specify arguments, yields a normal function which returns a value.
 parser.addStatement(
 	"getter",
-	"get {identifier} {args_clause}? (\\:)? {X:expression}?",
+	"get {identifier} {args_clause}? (\\:)? {expression}?",
 	class getter extends Rule.Statement {
 		toSource(context) {
 			let { identifier, args_clause, expression } = this.results;
@@ -244,13 +243,13 @@ parser.addStatement(
 	"property {identifier} as one of {list:literal_list}",
 	class declare_property_as_one_of extends Rule.Statement {
 		toSource(context) {
-			let { scope_modifier, identifier, list } = this.results;
-//TODO: not handling scope_modifier
+			let { identifier, list } = this.results;
+
 			identifier = identifier.toSource(context);
 			let plural = pluralize(identifier);
+
 			let values = list.toSource(context);
-//TODO: list.getItem(0)
-			let first = list.results.matched[0];
+			let first = list.getItem(0);
 			let firstValue = first ? first.toSource(context) : "undefined";
 
 			return `@proto\n`
