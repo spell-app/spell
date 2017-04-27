@@ -90,7 +90,7 @@ parser.addKeyword("infix_operator", "is not one of",
 );
 
 
-//TESTME
+
 parser.addKeyword("infix_operator", "includes",
 	 class includes extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `${list}.includes(${thing})` } }
 );
@@ -99,10 +99,10 @@ parser.addKeyword("infix_operator", "contains",
 );
 
 parser.addKeyword("infix_operator", "does not include",
-	 class does_not_include extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `${list}.includes(${thing})` } }
+	 class does_not_include extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `!${list}.includes(${thing})` } }
 );
 parser.addKeyword("infix_operator", "does not contain",
-	 class does_not_contain extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `${list}.includes(${thing})` } }
+	 class does_not_contain extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `!${list}.includes(${thing})` } }
 );
 
 
@@ -135,7 +135,6 @@ parser.addKeyword("infix_operator", "is less than or equal to",
 );
 
 
-//TESTME
 parser.addSymbol("infix_operator", "\\+",
 	 class plus extends Rule.Symbol { precedence = 13; toJS(a,b) { return`${a} + ${b}` } }
 );

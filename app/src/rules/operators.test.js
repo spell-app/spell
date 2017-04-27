@@ -70,6 +70,32 @@ test("is not one of operator", () => {
 	expect(result.toSource()).toBe("!myList.includes(a)");
 });
 
+test("includes", () => {
+	let result = parser.parse("expression", "myList includes a");
+	expect(result.toSource()).toBe("myList.includes(a)");
+});
+
+test("contains", () => {
+	let result = parser.parse("expression", "myList contains a");
+	expect(result.toSource()).toBe("myList.includes(a)");
+});
+
+test("does not contain", () => {
+	let result = parser.parse("expression", "myList does not contain a");
+	expect(result.toSource()).toBe("!myList.includes(a)");
+});
+
+test("does not include", () => {
+	let result = parser.parse("expression", "myList does not include a");
+	expect(result.toSource()).toBe("!myList.includes(a)");
+});
+
+test("includes", () => {
+	let result = parser.parse("expression", "myList includes a");
+	expect(result.toSource()).toBe("myList.includes(a)");
+});
+
+
 test("> operator", () => {
 	let result = parser.parse("expression", "a > b");
 	expect(result.toSource()).toBe("(a > b)");
@@ -123,6 +149,40 @@ test("plus operator", () => {
 	let result = parser.parse("expression", "a plus b");
 	expect(result.toSource()).toBe("a + b");
 });
+
+
+test("- operator", () => {
+	let result = parser.parse("expression", "a - b");
+	expect(result.toSource()).toBe("a - b");
+});
+
+test("minus operator", () => {
+	let result = parser.parse("expression", "a minus b");
+	expect(result.toSource()).toBe("a - b");
+});
+
+
+test("* operator", () => {
+	let result = parser.parse("expression", "a * b");
+	expect(result.toSource()).toBe("a * b");
+});
+
+test("times operator", () => {
+	let result = parser.parse("expression", "a times b");
+	expect(result.toSource()).toBe("a * b");
+});
+
+test("/ operator", () => {
+	let result = parser.parse("expression", "a / b");
+	expect(result.toSource()).toBe("a / b");
+});
+
+test("divided_by operator", () => {
+	let result = parser.parse("expression", "a divided by b");
+	expect(result.toSource()).toBe("a / b");
+});
+
+
 
 
 
