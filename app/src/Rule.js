@@ -211,7 +211,9 @@ Rule.Symbol = class Symbol extends Rule.Pattern {
 
 // Merge two Symbol rules together, returning a new rule that matches both.
 Rule.mergeSymbols = function(first, second) {
-	return new Rule.Symbol({ string: first.string + second.string });
+	// Get custom constructor if there is one...
+	let constructor = first.constructor !== Rule.Symbol ? first.constructor : second.constructor;
+	return new constructor({ string: first.string + second.string });
 }
 
 // Keyword pattern.
@@ -242,7 +244,9 @@ Rule.Keyword = class Keyword extends Rule.Pattern {
 
 // Merge two Keyword rules together, adding the second to the first.
 Rule.mergeKeywords = function(first, second) {
-	return new Rule.Keyword({ string: first.string + " " + second.string });
+	// Get custom constructor if there is one...
+	let constructor = first.constructor !== Rule.Keyword ? first.constructor : second.constructor;
+	return new constructor({ string: first.string + " " + second.string });
 }
 
 

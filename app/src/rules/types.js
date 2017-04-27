@@ -46,9 +46,9 @@ parser.addRule("expression", parser.rules.object_literal);
 //TODO: `with foo as Type`
 //TODO:	`with foo...` for splat?
 parser.addSequence(
-	"argsClause",
+	"args_clause",
 	"with [args:{identifier} and]",
-	class argsClause extends Rule.Sequence {
+	class args_clause extends Rule.Sequence {
 		// Return just the arguments as the results
 		get results() {
 			return super.results.args;
@@ -71,12 +71,12 @@ parser.addSequence(
 // Define class.
 parser.addStatement(
 	"define_type",
-	"define type {type} (extendsClause:as (a|an) {superType:type})?",
+	"define type {type} (extends_clause:as (a|an) {superType:type})?",
 	class define_type extends Rule.Statement {
 		toSource(context) {
-			let { type, extendsClause } = this.results;
+			let { type, extends_clause } = this.results;
 			type = type.toSource(context);
-			let superType = extendsClause && extendsClause.results.superType.toSource(context);
+			let superType = extends_clause && extends_clause.results.superType.toSource(context);
 			if (superType) {
 				return `class ${type} extends ${superType}`;
 			}
@@ -93,12 +93,12 @@ parser.addStatement(
 // NOTE: we assume that all types take an object of properties????
 parser.addSequence(
 	"new_thing",
-	"(create|new) {type} (propsClause:with {props:object_literal})?",
+	"(create|new) {type} (props_clause:with {props:object_literal})?",
 	class new_thing extends Rule.Sequence {
 		toSource(context) {
-			let { type, propsClause } = this.results;
+			let { type, props_clause } = this.results;
 			type = type.toSource(context);
-			let props = propsClause && propsClause.results.props.toSource(context) || "";
+			let props = props_clause && props_clause.results.props.toSource(context) || "";
 			return `new ${type}(${props})`;
 		}
 	}
@@ -111,13 +111,13 @@ parser.addRule("statement", parser.rules.new_thing);
 // TESTME
 parser.addStatement(
 	"declare_method",
-	"(to|on) {identifier} {argsClause}? (\\:)? {statement}?",
+	"(to|on) {identifier} {args_clause}? (\\:)? {statement}?",
 	class declare_method extends Rule.Statement {
 		toSource(context) {
-			let { identifier, argsClause, statement } = this.results;
+			let { identifier, args_clause, statement } = this.results;
 
 			identifier = identifier.toSource(context);
-			let args = (argsClause && argsClause.toSource(context)) || "";
+			let args = (args_clause && args_clause.toSource(context)) || "";
 			statement = (statement ? ` { ${statement.toSource(context)} }` : "");
 
 			return `${identifier}(${args})${statement}`
@@ -130,12 +130,12 @@ parser.addStatement(
 // If you specify arguments, yields a normal function which returns a value.
 parser.addStatement(
 	"getter",
-	"get {identifier} {argsClause}? (\\:)? {X:expression}?",
+	"get {identifier} {args_clause}? (\\:)? {X:expression}?",
 	class getter extends Rule.Statement {
 		toSource(context) {
-			let { identifier, argsClause, expression } = this.results;
+			let { identifier, args_clause, expression } = this.results;
 			identifier = identifier.toSource(context);
-			let args = argsClause && argsClause.toSource(context);
+			let args = args_clause && args_clause.toSource(context);
 			expression = (expression ? ` { return (${expression.toSource(context)}) }` : "");
 
 			if (args && expression) {
@@ -165,14 +165,14 @@ parser.addStatement(
 //		 => `my color` within setter should automatically translate to `this._color` ???
 parser.addStatement(
 	"setter",
-	"set {identifier} {argsClause}? (\\:)? {statement}?",
+	"set {identifier} {args_clause}? (\\:)? {statement}?",
 	class getter extends Rule.Statement {
 		toSource(context) {
-			let { identifier, argsClause, statement } = this.results;
+			let { identifier, args_clause, statement } = this.results;
 			identifier = identifier.toSource(context);
 
 			// Assume we want the same name as the identifier if no argumens
-			let args = (argsClause && argsClause.argNames) || [identifier];
+			let args = (args_clause && args_clause.argNames) || [identifier];
 			// Complain if more than one argument
 			if (args.length > 1)
 				console.warn("parse('setter'): only one argument allowed in setter:  ", this.matchedText);
@@ -195,13 +195,13 @@ parser.addSequence("scope_modifier", "(scope:global|constant|shared|property)");
 //TESTME
 parser.addStatement(
 	"declare_property",
-	"(scope:constant|shared property|property) {identifier} (valueClause:= {expression})?",
+	"(scope:constant|shared property|property) {identifier} (value_clause:= {expression})?",
 	class declare_property extends Rule.Statement {
 		toSource(context) {
-			let { scope, identifier, valueClause } = this.results;
+			let { scope, identifier, value_clause } = this.results;
 			scope = scope.toSource(context);
 			identifier = identifier.toSource(context);
-			let value = valueClause && " = " + valueClause.results.expression.toSource(context) || "";
+			let value = value_clause && " = " + value_clause.results.expression.toSource(context) || "";
 
 			let declaration = `${identifier}${value}`;
 			switch (scope) {

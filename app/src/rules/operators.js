@@ -36,39 +36,133 @@ class infix_operator extends Rule.Alternatives {
 
 parser.addRule("infix_operator", new infix_operator());
 
-parser.addInfixOperator("and", "and", { precedence: 6, toJS(a,b) { return `(${a} && ${b})` }});
-parser.addInfixOperator("or", "or", { precedence: 5, toJS(a,b) { return `(${a} || ${b})` }});
+parser.addKeyword("infix_operator", "and",
+	class and extends Rule.Keyword { precedence = 6; toJS(a,b) { return `(${a} && ${b})` } }
+);
 
-parser.addInfixOperator("is", "is", { precedence: 10, toJS(a,b) { return `(${a} == ${b})` }});
-parser.addInfixOperator("is_not", "is not", { precedence: 10, toJS(a,b) { return `(${a} != ${b})` }});
+parser.addKeyword("infix_operator", "or",
+	class or extends Rule.Keyword { precedence = 5; toJS(a,b) { return `(${a} || ${b})` } }
+);
 
-parser.addInfixOperator("is_exactly", "is exactly", { precedence: 10, toJS(a,b) { return `(${a} === ${b})` }});
-parser.addInfixOperator("is_not_exactly", "is not exactly", { precedence: 10, toJS(a,b) { return `(${a} !== ${b})` }});
+parser.addKeyword("infix_operator", "is",
+	 class is extends Rule.Keyword { precedence = 10; toJS(a,b) { return `(${a} == ${b})` } }
+);
+parser.addKeyword("infix_operator", "is not",
+	 class is_not extends Rule.Keyword { precedence = 10; toJS(a,b) { return `(${a} != ${b})` } }
+);
+
+parser.addKeyword("infix_operator", "is exactly",
+	class is_exactly extends Rule.Keyword { precedence = 10; toJS(a,b) { return `(${a} === ${b})` } }
+);
+parser.addKeyword("infix_operator", "is not exactly",
+	 class  extends Rule.Keyword { precedence = 10; toJS(a,b) { return `(${a} !== ${b})` } }
+);
 
 //TODO: `spell.isOfType(thing, type)`
 //TODO: `is same type as` ?
-parser.addInfixOperator("is_type_of", ["is a", "is an"], { precedence: 11, toJS(thing, type) { return `spell.isOfType(${thing}, '${type}')` }});
-parser.addInfixOperator("is_not_type_of", ["is not a", "is not an"], { precedence: 11, toJS(thing, type) { return `!spell.isOfType(${thing}, '${type}')` }});
+parser.addKeyword("infix_operator", "is a",
+	 class is_a extends Rule.Keyword { precedence = 11; toJS(thing, type) { return `spell.isOfType(${thing}, '${type}')` } }
+);
+parser.addKeyword("infix_operator", "is an",
+	 class is_an extends Rule.Keyword { precedence = 11; toJS(thing, type) { return `spell.isOfType(${thing}, '${type}')` } }
+);
+
+parser.addKeyword("infix_operator", "is not a",
+	 class is_not_a extends Rule.Keyword { precedence = 11; toJS(thing, type) { return `!spell.isOfType(${thing}, '${type}')` } }
+);
+parser.addKeyword("infix_operator", "is not an",
+	 class is_not_an extends Rule.Keyword { precedence = 11; toJS(thing, type) { return `!spell.isOfType(${thing}, '${type}')` } }
+);
 
 //TODO: `spell.contains(collection, thing)`
-parser.addInfixOperator("is_in", ["is in", "is one of"], { precedence: 11, toJS(thing, list) { return `${list}.includes(${thing})` }});
-parser.addInfixOperator("is_not_in", ["is not in", "is not one of"], { precedence: 11, toJS(thing, list) { return `!${list}.includes(${thing})` }});
-//TESTME
-parser.addInfixOperator("includes", ["includes", "contains"], { precedence: 11, toJS(list, thing) { return `${list}.includes(${thing})` }});
-parser.addInfixOperator("doesnt_include", ["does not include", "doesnt include", "does not contain", "doesnt contain"], { precedence: 11, toJS(list, thing) { return `${list}.includes(${thing})` }});
+parser.addKeyword("infix_operator", "is in",
+	 class is_in extends Rule.Keyword { precedence = 11; toJS(thing, list) { return `${list}.includes(${thing})` } }
+);
+parser.addKeyword("infix_operator", "is one of",
+	 class is_one_of extends Rule.Keyword { precedence = 11; toJS(thing, list) { return `${list}.includes(${thing})` } }
+);
 
-parser.addInfixOperator("gt", [">", "is greater than"], { precedence: 11, toJS(a,b) { return`(${a} > ${b})` }});
-parser.addInfixOperator("gte", [">=", "is greater than or equal to"], { precedence: 11, toJS(a,b) { return`(${a} >= ${b})` }});
-parser.addInfixOperator("lt", ["<", "is less than"], { precedence: 11, toJS(a,b) { return`(${a} < ${b})` }});
-parser.addInfixOperator("lte", ["<=", "is less than or equal to"], { precedence: 11, toJS(a,b) { return`(${a} <= ${b})` }});
+parser.addKeyword("infix_operator", "is not in",
+	 class is_not_in extends Rule.Keyword { precedence = 11; toJS(thing, list) { return `!${list}.includes(${thing})` } }
+);
+parser.addKeyword("infix_operator", "is not one of",
+	 class is_not_one_of extends Rule.Keyword { precedence = 11; toJS(thing, list) { return `!${list}.includes(${thing})` } }
+);
 
-//TODO:  can't add `+` as a rule, fix this then add these
-//TODO:  operator precedence???
+
 //TESTME
-parser.addInfixOperator("plus", ["\\+", "plus"], { precedence: 13, toJS(a,b) { return`${a} + ${b}` }});
-parser.addInfixOperator("minus", ["-", "minus"], { precedence: 13, toJS(a,b) { return`${a} - ${b}` }});
-parser.addInfixOperator("times", ["\\*", "times"], { precedence: 14, toJS(a,b) { return`${a} * ${b}` }});
-parser.addInfixOperator("divided_by", ["/", "divided by"], { precedence: 14, toJS(a,b) { return`${a} / ${b}` }});
+parser.addKeyword("infix_operator", "includes",
+	 class includes extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `${list}.includes(${thing})` } }
+);
+parser.addKeyword("infix_operator", "contains",
+	 class contains extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `${list}.includes(${thing})` } }
+);
+
+parser.addKeyword("infix_operator", "does not include",
+	 class does_not_include extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `${list}.includes(${thing})` } }
+);
+parser.addKeyword("infix_operator", "does not contain",
+	 class does_not_contain extends Rule.Keyword { precedence = 11; toJS(list, thing) { return `${list}.includes(${thing})` } }
+);
+
+
+parser.addSymbol("infix_operator", ">",
+	 class gt extends Rule.Symbol { precedence = 11; toJS(a,b) { return`(${a} > ${b})` } }
+);
+parser.addKeyword("infix_operator", "is greater than",
+	 class is_greater_than extends Rule.Keyword { precedence = 11; toJS(a,b) { return`(${a} > ${b})` } }
+);
+
+parser.addSymbol("infix_operator", ">=",
+	 class gte extends Rule.Symbol { precedence = 11; toJS(a,b) { return`(${a} >= ${b})` } }
+);
+parser.addKeyword("infix_operator", "is greater than or equal to",
+	 class is_gte extends Rule.Keyword { precedence = 11; toJS(a,b) { return`(${a} >= ${b})` } }
+);
+
+parser.addSymbol("infix_operator", "<",
+	 class lt extends Rule.Symbol { precedence = 11; toJS(a,b) { return`(${a} < ${b})` } }
+);
+parser.addKeyword("infix_operator", "is less than",
+	 class is_less_than extends Rule.Keyword { precedence = 11; toJS(a,b) { return`(${a} < ${b})` } }
+);
+
+parser.addSymbol("infix_operator", "<=",
+	 class lte extends Rule.Symbol { precedence = 11; toJS(a,b) { return`(${a} <= ${b})` } }
+);
+parser.addKeyword("infix_operator", "is less than or equal to",
+	 class is_lte extends Rule.Keyword { precedence = 11; toJS(a,b) { return`(${a} <= ${b})` } }
+);
+
+
+//TESTME
+parser.addSymbol("infix_operator", "\\+",
+	 class plus extends Rule.Symbol { precedence = 13; toJS(a,b) { return`${a} + ${b}` } }
+);
+parser.addKeyword("infix_operator", "plus",
+	 class plus extends Rule.Keyword { precedence = 13; toJS(a,b) { return`${a} + ${b}` } }
+);
+
+parser.addSymbol("infix_operator", "-",
+	 class minus extends Rule.Symbol { precedence = 13; toJS(a,b) { return`${a} - ${b}` } }
+);
+parser.addKeyword("infix_operator", "minus",
+	 class minus extends Rule.Keyword { precedence = 13; toJS(a,b) { return`${a} - ${b}` } }
+);
+
+parser.addSymbol("infix_operator", "\\*",
+	 class times extends Rule.Symbol { precedence = 14; toJS(a,b) { return`${a} * ${b}` } }
+);
+parser.addKeyword("infix_operator", "times",
+	 class times extends Rule.Keyword { precedence = 14; toJS(a,b) { return`${a} * ${b}` } }
+);
+
+parser.addSymbol("infix_operator", "/",
+	 class divided_by extends Rule.Symbol { precedence = 14; toJS(a,b) { return`${a} / ${b}` } }
+);
+parser.addKeyword("infix_operator", "divided by",
+	 class divided_by extends Rule.Keyword { precedence = 14; toJS(a,b) { return`${a} / ${b}` } }
+);
 
 //TODO:  `+=` etc?  other math functions?
 
@@ -88,12 +182,24 @@ parser.addExpression(
 //## Postifx operators:   `{lhs} <operator>`, e.g. `a is defined`
 // NOTE: `operator.toJS` MUST return a function which transforms argument (`lhs`) into JS output.
 
-parser.addPostfixOperator("is_defined", "is defined", { toJS(thing) { return `(typeof ${thing} !== 'undefined')` }});
-parser.addPostfixOperator("is_not_defined", ["is not defined", "is undefined"], { toJS(thing) { return `(typeof ${thing} === 'undefined')` }});
+parser.addKeyword("postfix_operator", "is defined",
+	class is_defined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} !== 'undefined')` } }
+);
+parser.addKeyword("postfix_operator", "is not defined",
+	class is_not_defined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} === 'undefined')` } }
+);
+parser.addKeyword("postfix_operator", "is undefined",
+	class is_undefined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} === 'undefined')` } }
+);
+
 
 //TODO: `spell.isEmpty(thing)`
-parser.addPostfixOperator("is_empty", "is empty", { toJS(thing) { return `spell.isEmpty(${thing})` }});
-parser.addPostfixOperator("is_not_empty", "is not empty", { toJS(thing) { return `!spell.isEmpty(${thing})` }});
+parser.addKeyword("postfix_operator", "is empty",
+	class is_empty extends Rule.Keyword { toJS(thing) { return `spell.isEmpty(${thing})` } }
+);
+parser.addKeyword("postfix_operator", "is not empty",
+	class is_not_empty extends Rule.Keyword { toJS(thing) { return `!spell.isEmpty(${thing})` } }
+);
 
 parser.addExpression(
 	"postfix_operator_expression",
@@ -106,7 +212,3 @@ parser.addExpression(
 		}
 	}
 );
-
-
-// TODO: this should really be a general "expression"...
-//parser.addSequence("operator_expression", "(expression:{postfix_operator_expression}|{infix_operator_expression})");

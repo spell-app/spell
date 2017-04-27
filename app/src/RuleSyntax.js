@@ -74,7 +74,7 @@ Object.assign(Rule, {
 		// if we got a "\\" (which also has to go into the source string as "\\")
 		// treat the next token as a literal string rather than as a special character.
 		if (syntaxToken === "\\") {
-			return Rule.parseRuleSyntax_string(syntaxStream, rules, startIndex + 1);
+			return Rule.parseRuleSyntax_symbol(syntaxStream, rules, startIndex + 1);
 		}
 
 		switch (syntaxToken) {
@@ -93,31 +93,51 @@ Object.assign(Rule, {
 				throw new SyntaxError(`Unexpected ${syntaxToken} found as item ${startIndex} of ${this.syntax}`);
 
 			default:
-				return Rule.parseRuleSyntax_string(syntaxStream, rules, startIndex);
+				if (syntaxToken.match(Rule.KEYWORD_PATTERN)) {
+					return Rule.parseRuleSyntax_keyword(syntaxStream, rules, startIndex);
+				}
+				else {
+					return Rule.parseRuleSyntax_symbol(syntaxStream, rules, startIndex);
+				}
 		}
+	},
+
+	KEYWORD_PATTERN : /[A-Za-z]+/,
+
+	// Match `keyword` in syntax rules.
+	// Returns `[ rule, endIndex ]`
+	// Throws if invalid.
+	parseRuleSyntax_keyword(syntaxStream, rules = [], startIndex = 0, constructor) {
+		let words = [], endIndex;
+		for (var i = startIndex; i < syntaxStream.length; i++) {
+			let next = syntaxStream[i];
+			if (next.match(Rule.KEYWORD_PATTERN)) {
+				words.push(next);
+				endIndex = i;
+			}
+			else break;
+		}
+
+		if (!constructor) constructor = Rule.Keyword;
+		let rule = new constructor({ string: words.join(" ") });
+
+		return [ rule, endIndex ];
 	},
 
 	// Match `keyword` in syntax rules.
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
-	parseRuleSyntax_string(syntaxStream, rules = [], startIndex = 0, constructor) {
-		let string = syntaxStream[startIndex], rule;
-		// If letters only, match as a Keyword (so we require a word boundary after the string).
-		if (string.match(/[A-Za-z]+/)) {
-			if (!constructor) constructor = Rule.Keyword;
-			rule = new constructor({ string });
-		}
-		// Otherwise match as a String, which doesn't require non-word chars after the text.
-		else {
-			if (!constructor) constructor = Rule.Symbol;
-			rule = new constructor({ string: string });
-			// If string starts with `\\`, it's an escaped literal (eg: `\[` needs to input as `\\[`).
-			if (string.startsWith("\\")) {
-				// remove leading slash in match string...
-				rule.string = rule.string.substr(1);
-				// but leave it in toString
-				rule.toString = () => string;
-			}
+	parseRuleSyntax_symbol(syntaxStream, rules = [], startIndex = 0, constructor = Rule.Symbol) {
+		let string = syntaxStream[startIndex];
+		if (!constructor) constructor = Rule.Symbol;
+		let rule = new constructor({ string: string });
+
+		// If string starts with `\\`, it's an escaped literal (eg: `\[` needs to input as `\\[`).
+		if (string.startsWith("\\")) {
+			// remove leading slash in match string...
+			rule.string = rule.string.substr(1);
+			// but leave it in toString
+			rule.toString = () => string;
 		}
 		return [ rule, startIndex ];
 	},
@@ -300,37 +320,20 @@ Object.defineProperties(Parser.prototype, {
 
 	addKeyword: { value: function(name, ruleSyntax, constructor = Rule.Keyword, properties) {
 		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
-		let rule = (Rule.parseRuleSyntax_string(stream, [], 0, constructor) || [])[0];
+		let rule = (Rule.parseRuleSyntax_keyword(stream, [], 0, constructor) || [])[0];
 		if (!rule) return;
 		if (properties) Object.assign(rule, properties);
 		return this.addRule(name, rule);
 	}},
 
-	// Add infix operator, such as "a or b".
-	// NOTE: if you have more than one matching operator,
-	//		 pass in an array of simple strings so all of our operators are simple strings.
-	addInfixOperator: { value: function(name, ruleSyntax, properties) {
-		if (Array.isArray(ruleSyntax)) {
-			return ruleSyntax.forEach(syntax => this.addInfixOperator(name, syntax, properties));
-		}
-
-		let rule = this.addSequence(name, ruleSyntax, properties);
-		if (rule) {
-			if (!rule.toJS) {
-				throw new TypeError(`Expected infix operator rule '${name}' to specify 'toJS' function`)
-			}
-			// clear list of infix operators for getter below
-			delete this.__infixOperators;
-			return this.addRule("infix_operator", rule);
-		}
+	addSymbol: { value: function(name, ruleSyntax, constructor = Rule.Symbol, properties) {
+		// TODO: assume we just have one symbol of many letters...
+		let stream = [ruleSyntax];
+		let rule = (Rule.parseRuleSyntax_symbol(stream, [], 0, constructor) || [])[0];
+		if (!rule) return;
+		if (properties) Object.assign(rule, properties);
+		return this.addRule(name, rule);
 	}},
-
-	// List of infix operators as strings.
-	// Re-memoized after `addInfixOperator` above.
-	infixOperators: defineMemoized("__infixOperators",
-		function() { return this.rules["infix_operator"]
-						 && this.rules["infix_operator"].rules.map(rule => rule.string)
-	}),
 
 	// Add postfix operator, such as "a is defined"
 	// NOTE: if you have more than one matching operator,
