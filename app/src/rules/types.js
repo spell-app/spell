@@ -272,6 +272,29 @@ parser.addStatement(
 
 
 //
+//	Self-reference
+//
+parser.addKeyword("me", "me",
+	class me extends Rule.Keyword {
+		toSource(context) {
+			return "this";
+		}
+	}
+);
+
+// TODO: this really makes me want to make `I am empty` etc work...
+parser.addKeyword("I", "I",
+	class I extends Rule.Keyword {
+		toSource(context) {
+			return "this";
+		}
+	}
+);
+parser.addRule("expression", parser.rules.me);
+parser.addRule("expression", parser.rules.I);
+
+
+//
 //	Property access
 //
 

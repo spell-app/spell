@@ -41,9 +41,9 @@ parser.rules.identifier.addToBlacklist(
 	"each", "empty", "exactly", "except",
 	"for", "from",
 	"greater",
-	"in", "into",
+	"I", "in", "into",
 	"less", "long",
-	"minus", "more",
+	"me", "minus", "more",
 	"near", "not",
 	"of", "off", "on", "onto", "opposite", "out", "outside", "over",
 	"short", "since",
@@ -94,7 +94,7 @@ parser.addRule("type", new Rule.Type({
 		}
 	}
 }));
-
+parser.rules.type.addToBlacklist("I");
 parser.addRule("expression", parser.rules.type);
 
 

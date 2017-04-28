@@ -213,7 +213,19 @@ test("declare property as one of", () => {
 });
 
 
-// ## property expression
+// ## Self-reference
+test("me expression", () => {
+	let match = parser.parse("expression", "the foo of me");
+	expect(match.toSource()).toBe('this.foo');
+});
+
+test("I expression", () => {
+	let match = parser.parse("expression", "I is empty");
+	expect(match.toSource()).toBe('spell.isEmpty(this)');
+});
+
+
+// ## Property access
 test("single property expression", () => {
 	let match = parser.parse("expression", "the foo of bar");
 	expect(match.toSource()).toBe('bar.foo');
@@ -225,7 +237,7 @@ test("multiple property expression", () => {
 });
 
 
-// ## personal property expression
+// ## personal property access
 test("my property expression", () => {
 	let match = parser.parse("expression", "my foo");
 	expect(match.toSource()).toBe('this.foo');
