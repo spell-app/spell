@@ -14,7 +14,6 @@ function pluralize(word) {
 }
 
 
-//TESTME
 //MOVE TO `objects`?
 // Properties clause: creates an object with one or more property values.
 //	`foo = 1, bar = 2`
@@ -36,8 +35,57 @@ parser.addList(
 	}
 );
 
+// `new`
+// NOTE: we assume that all types take an object of properties????
+parser.addSequence(
+	"new_thing",
+	"(create|new) {type} (props_clause:with {props:object_literal_properties})?",
+	class new_thing extends Rule.Sequence {
+		toSource(context) {
+			let { type, props_clause } = this.results;
+			type = type.toSource(context);
+			let props = props_clause && props_clause.results.props.toSource(context) || "";
 
-//TESTME
+			// Special case for object, which we'll create with an object literal.
+			if (type === "Object") {
+				if (!props_clause) return "{}";
+				return `${props}`;
+			}
+
+			return `new ${type}(${props})`;
+		}
+	}
+);
+// This works as an expression OR a statement.
+parser.addRule("expression", parser.rules.new_thing);
+parser.addRule("statement", parser.rules.new_thing);
+
+
+
+
+// TESTME
+// Define class.
+parser.addStatement(
+	"define_type",
+	"define type {type} (extends_clause:as (a|an) {superType:type})?",
+	class define_type extends Rule.Statement {
+		toSource(context) {
+			let { type, extends_clause } = this.results;
+			type = type.toSource(context);
+			let superType = extends_clause && extends_clause.results.superType.toSource(context);
+			if (superType) {
+				return `class ${type} extends ${superType}`;
+			}
+			return `class ${type}`;
+
+		}
+	}
+);
+
+//TODO: constructor
+
+
+
 //MOVE TO `functions`?
 // Arguments clause for methods
 //	`with foo` or `with foo and bar and baz`
@@ -65,48 +113,6 @@ parser.addSequence(
 );
 
 
-
-// TESTME
-// Define class.
-parser.addStatement(
-	"define_type",
-	"define type {type} (extends_clause:as (a|an) {superType:type})?",
-	class define_type extends Rule.Statement {
-		toSource(context) {
-			let { type, extends_clause } = this.results;
-			type = type.toSource(context);
-			let superType = extends_clause && extends_clause.results.superType.toSource(context);
-			if (superType) {
-				return `class ${type} extends ${superType}`;
-			}
-			return `class ${type}`;
-
-		}
-	}
-);
-
-//TODO: constructor
-
-//TESTME
-// `new`
-// NOTE: we assume that all types take an object of properties????
-parser.addSequence(
-	"new_thing",
-	"(create|new) {type} (props_clause:with {props:object_literal_properties})?",
-	class new_thing extends Rule.Sequence {
-		toSource(context) {
-			let { type, props_clause } = this.results;
-			type = type.toSource(context);
-			let props = props_clause && props_clause.results.props.toSource(context) || "";
-			return `new ${type}(${props})`;
-		}
-	}
-);
-// This works as an expression OR a statement.
-parser.addRule("expression", parser.rules.new_thing);
-parser.addRule("statement", parser.rules.new_thing);
-
-
 // TESTME
 parser.addStatement(
 	"declare_method",
@@ -123,6 +129,7 @@ parser.addStatement(
 		}
 	}
 );
+
 
 // TESTME
 // Getter either with or without arguments.
@@ -146,7 +153,7 @@ parser.addStatement(
 			} else if (expression) {
 				return `get ${identifier}()${expression}`;
 			} else {
-				return `get ${identifier}`;
+				return `get ${identifier}()`;
 			}
 			return result;
 		}
@@ -189,12 +196,10 @@ parser.addStatement(
 //	declare properties
 //
 
-parser.addSequence("scope_modifier", "(scope:global|constant|shared|property)");
-
-//TESTME
+//TODO: another name for `constant` ?
 parser.addStatement(
 	"declare_property",
-	"(scope:constant|shared property|property) {identifier} (value_clause:= {expression})?",
+	"(scope:property|constant|shared property) {identifier} (value_clause:= {expression})?",
 	class declare_property extends Rule.Statement {
 		toSource(context) {
 			let { scope, identifier, value_clause } = this.results;
@@ -205,6 +210,7 @@ parser.addStatement(
 			let declaration = `${identifier}${value}`;
 			switch (scope) {
 				case "constant":
+					if (!value) console.warn("parse('declare_property'): constant properties must declare a value:  ", this.matchedText);
 					return `const ${declaration}`;
 
 				case "shared property":
@@ -218,10 +224,10 @@ parser.addStatement(
 	}
 );
 
-//TESTME
+// TODO: scope_modifier???
+// TODO: initial value
 parser.addStatement(
 	"declare_property",
-// TODO: scope_modifier???
 	"property {identifier} as (a|an)? {type}",
 	class declare_property extends Rule.Statement {
 		toSource(context) {
@@ -229,7 +235,7 @@ parser.addStatement(
 			identifier = identifier.toSource(context);
 			type = type.toSource(context);
 
-			return `get ${identifier} { return this.__${identifier} }\n`
+			return `get ${identifier}() { return this.__${identifier} }\n`
 				 + `set ${identifier}(value) { if (spell.isA(value, ${type}) this.__${identifier} = value }`;
 		}
 	}
@@ -237,9 +243,8 @@ parser.addStatement(
 
 
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
-//TESTME
 parser.addStatement(
-	"declare_property_as_one_of",
+	"declare_property",
 	"property {identifier} as one of {list:literal_list}",
 	class declare_property_as_one_of extends Rule.Statement {
 		toSource(context) {
@@ -254,7 +259,7 @@ parser.addStatement(
 
 			return `@proto\n`
 				 + `${plural} = ${values}\n`
-				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
+				 + `get ${identifier}() { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
 				 + `set ${identifier}(value) { if (this.${plural}.includes(value)) this.__${identifier} = value }`;
 
 // MORE EFFICIENT BUT UGLIER
@@ -270,7 +275,6 @@ parser.addStatement(
 //	Property access
 //
 
-//TESTME
 parser.addExpression(
 	"property_expression",
 	"(properties:the {identifier} of)+ the? {expression}",
@@ -289,7 +293,6 @@ parser.addExpression(
 	}
 );
 
-//TESTME
 parser.addExpression(
 	"property_expression",
 	"(my|this) {identifier}",
