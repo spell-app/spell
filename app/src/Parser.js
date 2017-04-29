@@ -53,7 +53,7 @@ export default class Parser {
 			let name = arguments[0], string = arguments[1];
 			let result = this.parse(name, string);
 			if (!result) throw new SyntaxError(`parser.parse('${name}', '${string}'): can't parse this`);
-			return result.toSource();
+			return result.toSource(this);
 		}
 		else {
 			throw new SyntaxError("parser.parse(): expects one or two arguments");
@@ -91,7 +91,16 @@ export default class Parser {
 			let lineIndent = lineStart.length;
 			if (lineIndent > currentIndent) {
 				// add to end of previous line if possible
-				if (results.length) results[results.length - 1] += " {";
+				if (results.length) {
+					// but only if output is not already indented to that level
+					let indentedStart = lineStart + "\t";
+					if (!results[results.length - 1].startsWith(indentedStart)) {
+						results[results.length - 1] += " {";
+					}
+					else {
+//console.info("already indented");
+					}
+				}
 				else results.push(tabs.substr(0, lineIndent-1) + "{");
 			}
 			else if (lineIndent < currentIndent) {
@@ -108,12 +117,14 @@ export default class Parser {
 			let result = this.parse("statement", statement);
 //TODO: complain if can't parse the entire line!
 			if (result) {
-				let source = result.toSource().split("\n");
-				results.push(lineStart + source.join("\n" + lineStart));
+				// split by lines and add indent
+				let source = result.toSource(this).split("\n")
+								.map( line => lineStart + line );
+				results = results.concat(source);
 			}
 			else {
 				console.warn("Couldn't parse statement:", statement);
-				results.push("ERROR: "+statement);
+				results.push("// ERROR: "+statement);
 			}
 		});
 

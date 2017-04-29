@@ -1,3 +1,9 @@
 ## Competition
 
 - https://bubble.is/apps
+
+
+
+## Thought pieces
+- "Waiting for the Next Big Thing"
+	https://blog.gft.com/blog/2017/04/27/programming-next-big-thing/

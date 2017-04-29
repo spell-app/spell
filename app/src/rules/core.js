@@ -15,6 +15,19 @@ export default parser;
 Rule.Whitespace = class whitespace extends Rule.Pattern {}
 parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/, optional: true }));
 
+
+// `word` = is a single alphanumeric word.
+// MUST start with a lower-case letter (?)
+Rule.Word = class word extends Rule.Pattern {};
+let word = parser.addRule("word", new Rule.Word({
+	pattern: /[a-z][\w\-]*/,
+	// Convert "-" to "_" in source output.
+	toSource: function(context) {
+		return this.matched.replace(/\-/g, "_");
+	}
+}));
+
+
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
 Rule.Identifier = class identifier extends Rule.Pattern {};

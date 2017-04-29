@@ -1,6 +1,7 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
+import global from "../global";
 import Rule from "../RuleSyntax";
 import parser from "./_parser";
 
@@ -63,7 +64,6 @@ parser.addRule("statement", parser.rules.new_thing);
 
 
 
-// TESTME
 // Define class.
 parser.addStatement(
 	"define_type",
@@ -113,7 +113,7 @@ parser.addSequence(
 );
 
 
-// TESTME
+// Declare instance method or normal function.
 parser.addStatement(
 	"declare_method",
 	"(to|on) {identifier} {args_clause}? (\\:)? {statement}?",
@@ -131,7 +131,76 @@ parser.addStatement(
 );
 
 
-// TESTME
+// Declare "action", which can be called globally and affects the parser.
+// TODO: `with` clause (will conflict with `word`)
+// TODO: install in parser somehow
+// TODO: create instance function?  or maybe we don't need it:
+//			`action turn Card over` for an instance is just `turn me over`
+parser.addStatement(
+	"declare_action",
+	"action (word_clause:{word}|{type})+ (\\:)? {statement}?",
+	class declare_action extends Rule.Statement {
+
+		toSource(context) {
+			let { word_clause, statement } = this.results;
+			let words = word_clause.matched.map( word => word.toSource(context) );
+			// if there's only one word, it can't be a blacklisted identifier or a type
+			if (words.length === 1) {
+				var word = words[0];
+				if (word_clause.matched instanceof Rule.Type) {
+					throw new SyntaxError(`parse('declare_action'): one-word actions may not be types: ${word}`);
+				}
+
+// HACK: `global.parser` is a hack here for convenience in testing...
+				let parser = context ? context.parser : global.parser;
+				if (parser.rules.identifier.blacklist[word]) {
+					throw new SyntaxError(`parse('declare_action'): one-word actions may not be blacklisted identifiers": ${word}`);
+				}
+			}
+
+			// figure out arguments and/or types
+			var args = [];
+			var types = [];
+			// if any of the words are types (capital letter) make that an argument of the same name.
+			word_clause.matched.map( (item, index) => {
+				if (item instanceof Rule.Type) {
+					let type = words[index];
+					let word = type.toLowerCase();
+					types.push([type, word]);
+					words[index] = word;
+					args.push(word);
+				}
+			});
+			// get static method name and arguments for output
+			let methodName = words.join("_");
+			args = args.join(", ");
+
+			// figure out if there are any conditions on the above
+			let conditions = types.map( ([type, word]) => {
+				return `\tif (!spell.isA(${word}, ${type})) return undefined`;
+			});
+
+			// get statements, adding conditions if necessary
+			statement = statement ? statement.toSource(context) : "";
+			let statements = "";
+			if (statement) {
+				statements = [];
+				if (conditions.length) statements = statements.concat(conditions);
+				if (statement) statements.push("\t" + statement);
+				statements = ` {\n${statements.join("\n")}\n }\n`;
+			}
+			else if (conditions.length) {
+				statements = ` {\n${conditions.join("\n")}`;
+			}
+//debugger;
+			// Create as a STATIC function
+	//TODO: create as an instance function we can call on ourself!
+			return `static ${methodName}(${args})${statements}`;
+		}
+	}
+);
+
+
 // Getter either with or without arguments.
 // If you specify arguments, yields a normal function which returns a value.
 parser.addStatement(
@@ -160,7 +229,6 @@ parser.addStatement(
 	}
 );
 
-// TESTME
 // Setter.
 // Complains if you specify more than one argument.
 // If you don't pass an explicit argument, we'll assume it's the same as the identifier.

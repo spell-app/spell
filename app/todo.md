@@ -5,14 +5,15 @@ BUGS
 > parser.parse("expression", "a is 1 and b is 2").toSource()
 > "(a == (1 && (b == 2)))"
 
+> parser.parse("expression", "the face of the card is 'down'").toSource()
+> "(card == 'down').face"
 
 - compileStatements
 	- complain if can't match the entire line!
 	- parseStatements()
 		- return sequence(?) of results?
 
-- "a = 1" is not matching assignment???
-	- because object_literal is taking `a = 1` as first object
+
 
 TEST::::
 parser.compile(`
@@ -36,6 +37,14 @@ define type Card
 	shared property rank_names = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
 	get rank_name: item (my rank) of my rank_names
 `)
+
+
+CLASSES AND MULTI-WORD STATEMENTS / METHODS
+- need to gather the above in the parser for this class and all antecedents BEFORE parsing method text
+- pre-flight code to pull these out and add them to parser before doing other things.
+- for this we'll need nested parsers:
+	- each class gets its own parser based on what's available to it...
+	- madness???
 
 
 CLASS SEMANTICS
