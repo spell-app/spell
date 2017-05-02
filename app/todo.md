@@ -34,8 +34,8 @@ define type Card
 		else return "black"
 
 	property rank as a number
-	shared property rank_names = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
-	get rank_name: item (my rank) of my rank_names
+	shared property ranks = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
+	get rank_name: item (my rank) of my ranks
 `)
 
 
@@ -44,7 +44,7 @@ CLASSES AND MULTI-WORD STATEMENTS / METHODS
 - pre-flight code to pull these out and add them to parser before doing other things.
 - for this we'll need nested parsers:
 	- each class gets its own parser based on what's available to it...
-	- madness???
+	- madness???"
 
 
 CLASS SEMANTICS

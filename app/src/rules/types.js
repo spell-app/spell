@@ -136,6 +136,8 @@ parser.addStatement(
 // TODO: install in parser somehow
 // TODO: create instance function?  or maybe we don't need it:
 //			`action turn Card over` for an instance is just `turn me over`
+//			`action add card to deck` => `add me to deck`
+//TESTME
 parser.addStatement(
 	"declare_action",
 	"action (word_clause:{word}|{type})+ (\\:)? {statement}?",
@@ -327,7 +329,7 @@ parser.addStatement(
 
 			return `@proto\n`
 				 + `${plural} = ${values}\n`
-				 + `get ${identifier}() { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
+				 + `get ${identifier}() { return this.__${identifier} === undefined ? ${firstValue}) : this.__${identifier}}\n`
 				 + `set ${identifier}(value) { if (this.${plural}.includes(value)) this.__${identifier} = value }`;
 
 // MORE EFFICIENT BUT UGLIER
