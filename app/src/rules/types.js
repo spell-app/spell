@@ -2,17 +2,13 @@
 //	# Rules for defining classes (known as `types`)
 //
 import global from "../utils/global";
+import pluralize from "../utils/string";
 import Rule from "../RuleSyntax";
 import parser from "./_parser";
 
 // re-export parser for testing.
 export default parser;
 
-
-// DEAD SIMPLE PLURALIZER... REALLY NOT VERY GOOD
-function pluralize(word) {
-	return word + "s";
-}
 
 
 //MOVE TO `objects`?
