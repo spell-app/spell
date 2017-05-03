@@ -10,12 +10,17 @@ BUGS
 
 > `{` lifter needs to go before comments...
 
+- getResults(context, name, name, name)
+	=> return results mapped over results.toSource(context)
+
 - line break with ¬ or \ or /
 - single line comments with -- or //
 
 - compileStatements
 	- parseStatements()
 		- return sequence(?) of results?
+
+- use specificity of results to disambiguate rules?
 
 CLASSES AND MULTI-WORD STATEMENTS / METHODS
 - need to gather the above in the parser for this class and all antecedents BEFORE parsing method text
