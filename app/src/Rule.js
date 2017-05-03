@@ -11,7 +11,7 @@
 //		- `rule.results`			Return matched arguments in a format suitable to do:
 //		- `rule.toSource(context)`	Return javascript source to interpret the rule.
 //
-import global from "./global";
+import global from "./utils/global";
 import Parser from "./Parser.js";
 
 

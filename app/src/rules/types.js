@@ -1,7 +1,7 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
-import global from "../global";
+import global from "../utils/global";
 import Rule from "../RuleSyntax";
 import parser from "./_parser";
 
