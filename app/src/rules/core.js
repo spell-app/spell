@@ -120,7 +120,7 @@ parser.addRule("expression", parser.rules.type);
 // NOTE: you can also use `one`...`ten` as strings.
 Rule.Number = class number extends Rule.Pattern {};
 parser.addRule("number", new Rule.Number({
-	pattern: /-?([0-9]*[.])?[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten/,
+	pattern: /(-?([0-9]*[.])?[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)/,
 	// Convert to number on source output.
 	toSource: function(context) {
 		var number = parseFloat(this.matched, 10);
