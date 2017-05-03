@@ -11,6 +11,7 @@
 //		- `rule.results`			Return matched arguments in a format suitable to do:
 //		- `rule.toSource(context)`	Return javascript source to interpret the rule.
 //
+import global from "./global";
 import Parser from "./Parser.js";
 
 
@@ -110,6 +111,9 @@ export default class Rule {
 }
 
 
+// DEBUG: make `Rule` global for debugging.
+global.Rule = Rule;
+
 
 
 // Regex pattern.
@@ -124,15 +128,16 @@ export default class Rule {
 // You can optionally specify a `rule.blacklist`, a set of matches which will specifically NOT work,
 //	eg for `identifier.
 Rule.Pattern = class Pattern extends Rule {
-	constructor(properties) {
-		// `pattern` is required
-		if (!properties.pattern) throw new TypeError("new Rule.Pattern(): You must pass a `pattern` parameter");
-
-		super(properties);
-
-		// Create a `startPattern` to match at the beginning of the strong
-		// Create non-enumerably.
-		Object.defineProperty(this, "startPattern", { value: new RegExp("^" + this.pattern.source) });
+	// `startPattern` is the same as our pattern except it will only match at the BEGINNING of a string.
+	get startPattern() {
+		if (!this.__startPattern) {
+			// `pattern` is required
+			if (!this.pattern) throw new TypeError(this+": You must specify a `pattern` parameter");
+			Object.defineProperty(this, "__startPattern", {
+				value: new RegExp("^" + this.pattern.source)
+			});
+		}
+		return this.__startPattern;
 	}
 
 	// Attempt to match this pattern at the beginning of the stream.
