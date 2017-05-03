@@ -68,7 +68,7 @@ parser.rules.identifier.addToBlacklist(
 	"than", "the", "then", "through", "thru", "to", "toward", "towards",
 	"undefined", "under", "underneath", "unique", "until", "up", "upon", "upside",
 	"versus", "vs",
-	"with", "within", "without",
+	"where", "with", "within", "without",
 );
 
 // Add common english verbs to identifier blacklist.
@@ -117,16 +117,36 @@ parser.addRule("expression", parser.rules.type);
 
 
 // `number` as either float or integer, created with custom constructor for debugging.
+// NOTE: you can also use `one`...`ten` as strings.
 Rule.Number = class number extends Rule.Pattern {};
 parser.addRule("number", new Rule.Number({
-	pattern: /-?([0-9]*[.])?[0-9]+/,
+	pattern: /-?([0-9]*[.])?[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten/,
 	// Convert to number on source output.
 	toSource: function(context) {
-		return parseFloat(this.matched, 10);
+		var number = parseFloat(this.matched, 10);
+		if (!isNaN(number)) return number;
+
+		switch(this.matched) {
+			case "one": return 1;
+			case "two": return 2;
+			case "three": return 3;
+			case "four": return 4;
+			case "five": return 5;
+			case "six": return 6;
+			case "seven": return 7;
+			case "eight": return 8;
+			case "nine": return 9;
+			case "ten": return 10;
+		}
 	}
 }));
 parser.addRule("expression", parser.rules.number);
 
+// Add number words to identifier blacklist.
+parser.rules.identifier.addToBlacklist(
+	"one", "two", "three", "four", "five",
+	"six", "seven", "eight", "nine", "ten"
+);
 
 // Numeric `integer` only, created with custom constructor for debugging.
 // NOTE: this WILL match a float, but the returned value will coerce to an integer.

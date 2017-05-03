@@ -1,25 +1,39 @@
 BUGS
 > parser.parse("expression","the first item of myList is the foo of the bar of the baz").toSource()
-> "spell.getItem((myList == spell.get(baz, 'bar.foo')), 1)"
+=> "spell.getItem((myList == spell.get(baz, 'bar.foo')), 1)"
 
 > parser.parse("expression", "a is 1 and b is 2").toSource()
-> "(a == (1 && (b == 2)))"
+=> "(a == (1 && (b == 2)))"
 
 > parser.parse("expression", "the face of the card is 'down'").toSource()
-> "(card == 'down').face"
+=> "(card == 'down').face"
 
-> `{` lifter needs to go before comments...
+> parser.parse("statement", "append 1 to the end of myList")
+=> "spell.append(theList.end, 1)"
 
+> parser.parse("statement", "add 1 to the front of myList")
+=> "spell.append(myList.front, 1)"	-- should be "spell.prepend(myList, 1)"
+
+
+
+
+TODO:
 - getResults(context, name, name, name)
 	=> return results mapped over results.toSource(context)
-
+- `{` lifter needs to go before comments...
+- `the? {identifier}`?  Messes up, eg, `the first item...`
 - line break with ¬ or \ or /
 - single line comments with -- or //
+- numbers `one`, `two`, etc. Should return a `Rule.Number`
+- parseStatements(): return sequence(?) of results?
+- parser.addExpression("name", /pattern/, class), same for addKeyword, etc
+- if we're doing _ between keywords, can we omit `with`?
+- class constructor?
+- add things to prototype rather than class...
+- copy of <thing>
 
-- compileStatements
-	- parseStatements()
-		- return sequence(?) of results?
 
+BIG TICKETS
 - use specificity of results to disambiguate rules?
 
 CLASSES AND MULTI-WORD STATEMENTS / METHODS
@@ -29,33 +43,6 @@ CLASSES AND MULTI-WORD STATEMENTS / METHODS
 	- each class gets its own parser based on what's available to it...
 	- madness???"
 
-
-CLASS SEMANTICS
-- constructor???
-- shared property ranks as ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
-- property rank as one of my ranks
-	- todo: ace high?
-
-- get rank_number: item my rank of my ranks
-- get is_higher_than with other_card:
-	return my rank_number is greater than the rank_number of the other_card
-
-- get is_one_higher_than with other_card:
-
-
-
-- parser.addExpression("name", /pattern/, class)
-
-- `the? {identifier}`
-	- messes up, eg, `the first item...`
-
-FUNCTIONS
-- get x:			<= getter
-- get x with y:		<= method w/param that returns a value
-	- is the colon necessary?
-- set x:			<= setter with `x` as implicit value argument
-- set x with y		<= setter with explicit value argument `y`
-- if we're doing _ between keywords, can we omit `with`?
 
 `this` vs `my`
 	- my requires "is" => "am" inversion
@@ -103,6 +90,8 @@ Rule.test()
 
 
 - instead of RuleSyntax doing a `Object.defineProperties`, compose a subclass???
+
+
 - `defineMemoized` as a property @modifier should be a lot smarter...
 
 - remember which file each rule came from
