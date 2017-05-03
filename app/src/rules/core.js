@@ -20,7 +20,7 @@ parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/, optional: tru
 // MUST start with a lower-case letter (?)
 Rule.Word = class word extends Rule.Pattern {};
 let word = parser.addRule("word", new Rule.Word({
-	pattern: /[a-z][\w\-]*/,
+	pattern: /\b[a-z][\w\-]*\b/,
 	// Convert "-" to "_" in source output.
 	toSource: function(context) {
 		return this.matched.replace(/\-/g, "_");
@@ -32,9 +32,10 @@ let word = parser.addRule("word", new Rule.Word({
 // MUST start with a lower-case letter (?)
 Rule.Identifier = class identifier extends Rule.Pattern {};
 let identifier = parser.addRule("identifier", new Rule.Identifier({
-	pattern: /[a-z][\w\-]*/,
+	pattern: /\b[a-z][\w\-]*\b/,
+
 	// Convert "-" to "_" in source output.
-	toSource: function(context) {
+	toSource(context) {
 		return this.matched.replace(/\-/g, "_");
 	}
 }));
