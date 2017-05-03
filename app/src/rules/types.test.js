@@ -207,7 +207,7 @@ test("declare property as one of", () => {
 	expect(match.toSource()).toBe(
 		'@proto\n' +
 		'foos = ["this", "that"]\n' +
-		'get foo() { return ("__foo" in this ? this.__foo : "this") }\n' +
+		'get foo() { return this.__foo === undefined ? "this" : this.__foo }\n' +
 		'set foo(value) { if (this.foos.includes(value)) this.__foo = value }'
 	);
 });

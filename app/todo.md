@@ -13,11 +13,27 @@ BUGS
 	- parseStatements()
 		- return sequence(?) of results?
 
+- `the {index:ordinal} {identifier} of the? {expression}`
+	- can't merge `of` and `the`
+	- need to merge keywords AFTER parsing the entire statement rather than during
+	- don't merge if
+		- optional
+		- named
+	- merge with more specific type
 
 
 TEST::::
 parser.compile(`
 define type Card
+	property suit as one of ["clubs", "diamonds", "hearts", "spades"]
+	get color:
+		if my suit is one of ["diamonds", "hearts"] then return "red"
+		else return "black"
+
+	property rank as a number
+	shared property ranks = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
+	get rank_name: item (my rank) of my ranks
+
 	property face as one of ["up", "down"]
 
 	to turn_face_up: set my face to "up"
@@ -28,14 +44,24 @@ define type Card
 		else
 			set my face to "up"
 
-	property suit as one of ["clubs", "diamonds", "hearts", "spades"]
-	get color:
-		if my suit is one of ["diamonds", "hearts"] then return "red"
-		else return "black"
+	action turn Card over:
+		if (the face of the card) is "up" then set the face of the card to "down"
+		else set the face of the card to "up"
 
-	property rank as a number
-	shared property ranks = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
-	get rank_name: item (my rank) of my ranks
+	action play Card on Pile:
+		put the last card of pile into top_card
+		if (top_card is empty)
+			if (the suit of the card is "king")
+				add the card to the pile
+				return success
+			else
+				return failure
+
+		if (the color of the card) is not (the color of other_card)
+			add the card to the pile
+			return success
+		else
+			return failure
 `)
 
 
@@ -60,6 +86,9 @@ CLASS SEMANTICS
 - get is_one_higher_than with other_card:
 
 
+- `the? {identifier}`
+	- messes up, eg, `the first item...`
+
 FUNCTIONS
 - get x:			<= getter
 - get x with y:		<= method w/param that returns a value
@@ -76,6 +105,7 @@ FUNCTIONS
 
 "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})? )?"
 	- want result to flatten to `{ message, okButton, cancelButton }`
+	- (^with...)	<= `^` says push results up into parent rule?
 
 - sequence.parseInChunks
 	- parse deterministic bits first, then fill in other bits

@@ -329,7 +329,7 @@ parser.addStatement(
 
 			return `@proto\n`
 				 + `${plural} = ${values}\n`
-				 + `get ${identifier}() { return this.__${identifier} === undefined ? ${firstValue}) : this.__${identifier}}\n`
+				 + `get ${identifier}() { return this.__${identifier} === undefined ? ${firstValue} : this.__${identifier} }\n`
 				 + `set ${identifier}(value) { if (this.${plural}.includes(value)) this.__${identifier} = value }`;
 
 // MORE EFFICIENT BUT UGLIER
