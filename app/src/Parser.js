@@ -40,8 +40,8 @@ export default class Parser {
 //### Parsing
 //
 	// Parse something:
-	//	- if one string argument, does a `parseStatement()`
-	//	- if two, does a `parseRule()`
+	//	- if one string argument, does a `compileStatements()`
+	//	- if two, does a `parseRule()` and outputs the results.
 	// Returns `parse.toString()` or throws.
 //TESTME
 	compile() {
@@ -79,6 +79,7 @@ export default class Parser {
 		let results = [];
 		let currentIndent = 0;
 		const tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+		//
 		statements.split(/\n/g).forEach(statement => {
 			// skip lines that are all whitespace
 			if (statement.trim() === "") {
@@ -93,6 +94,7 @@ export default class Parser {
 				// add to end of previous line if possible
 				if (results.length) {
 					// but only if output is not already indented to that level
+//TODO: backtrack for comments!!!
 					let indentedStart = lineStart + "\t";
 					if (!results[results.length - 1].startsWith(indentedStart)) {
 						results[results.length - 1] += " {";
@@ -115,16 +117,27 @@ export default class Parser {
 			currentIndent = lineIndent;
 
 			let result = this.parse("statement", statement);
-//TODO: complain if can't parse the entire line!
-			if (result) {
+			// complain if no result
+			if (!result) {
+				console.warn(`Couldn't parse statement:\n\t${statement.trim()}`);
+				results.push("// CANT PARSE: "+statement);
+			}
+			// complain can't parse the entire line!
+			else if (result.endIndex !== statement.length) {
+				let unparsed = statement.substr(result.endIndex);
+				console.warn("Couldn't parse entire statement:",
+								`\n\t"${statement.trim()}"`,
+								`\nunparsed:`,
+								`\n\t"${unparsed}"`);
+				results.push("// CANT PARSE ENTIRE STATEMENT");
+				results.push("// PARSED    : " + result.matchedText);
+				results.push("// CANT PARSE: " + unparsed);
+			}
+			else {
 				// split by lines and add indent
 				let source = result.toSource(this).split("\n")
 								.map( line => lineStart + line );
 				results = results.concat(source);
-			}
-			else {
-				console.warn("Couldn't parse statement:", statement);
-				results.push("// ERROR: "+statement);
 			}
 		});
 
