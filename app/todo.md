@@ -8,8 +8,12 @@ BUGS
 > parser.parse("expression", "the face of the card is 'down'").toSource()
 > "(card == 'down').face"
 
+> `{` lifter needs to go before comments...
+
+- line break with ¬ or \ or /
+- single line comments with -- or //
+
 - compileStatements
-	- complain if can't match the entire line!
 	- parseStatements()
 		- return sequence(?) of results?
 
@@ -93,7 +97,7 @@ FUNCTIONS
 - get x:			<= getter
 - get x with y:		<= method w/param that returns a value
 	- is the colon necessary?
-- set x:			<= setter with implicit `value` argument
+- set x:			<= setter with `x` as implicit value argument
 - set x with y		<= setter with explicit value argument `y`
 - if we're doing _ between keywords, can we omit `with`?
 

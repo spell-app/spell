@@ -351,6 +351,7 @@ parser.addKeyword("me", "me",
 		}
 	}
 );
+parser.addRule("expression", parser.rules.me);
 
 // TODO: this really makes me want to make `I am empty` etc work...
 parser.addKeyword("I", "I",
@@ -360,7 +361,6 @@ parser.addKeyword("I", "I",
 		}
 	}
 );
-parser.addRule("expression", parser.rules.me);
 parser.addRule("expression", parser.rules.I);
 
 

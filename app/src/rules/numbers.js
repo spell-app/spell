@@ -18,13 +18,14 @@ class index_expression extends Rule.Expression{
 		expression = expression.toSource(context);
 		index = index.toSource(context);
 
-		// If we got a positive number literal, compensate for JS 0-based arrays now.
+		// If we got a positive number literal, compensate for JS 0-based arrays now,
+		// for nicer output.
 		if (typeof index === "number" && index > 0) {
 			return `${expression}[${index - 1}]`;
 		}
 		return `spell.getItem(${expression}, ${index})`;
 
-// This is safer, but using the above for demo purposes
+// This is safer, but using the above sometimes for demo purposes
 //		return `spell.getItem(${expression}, ${index})`;
 	}
 }

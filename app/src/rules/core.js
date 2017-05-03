@@ -16,10 +16,14 @@ Rule.Whitespace = class whitespace extends Rule.Pattern {}
 parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/, optional: true }));
 
 
+// Comment
+Rule.Comment = class comment extends Rule.Pattern {}
+
+
 // `word` = is a single alphanumeric word.
 // MUST start with a lower-case letter (?)
 Rule.Word = class word extends Rule.Pattern {};
-let word = parser.addRule("word", new Rule.Word({
+parser.addRule("word", new Rule.Word({
 	pattern: /\b[a-z][\w\-]*\b/,
 	// Convert "-" to "_" in source output.
 	toSource: function(context) {
@@ -31,7 +35,7 @@ let word = parser.addRule("word", new Rule.Word({
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
 Rule.Identifier = class identifier extends Rule.Pattern {};
-let identifier = parser.addRule("identifier", new Rule.Identifier({
+parser.addRule("identifier", new Rule.Identifier({
 	pattern: /\b[a-z][\w\-]*\b/,
 
 	// Convert "-" to "_" in source output.
@@ -39,7 +43,7 @@ let identifier = parser.addRule("identifier", new Rule.Identifier({
 		return this.matched.replace(/\-/g, "_");
 	}
 }));
-parser.addRule("expression", identifier);
+parser.addRule("expression", parser.rules.identifier);
 
 // Add English prepositions to identifier blacklist.
 //
@@ -114,14 +118,14 @@ parser.addRule("expression", parser.rules.type);
 
 // `number` as either float or integer, created with custom constructor for debugging.
 Rule.Number = class number extends Rule.Pattern {};
-let number = parser.addRule("number", new Rule.Number({
+parser.addRule("number", new Rule.Number({
 	pattern: /-?([0-9]*[.])?[0-9]+/,
 	// Convert to number on source output.
 	toSource: function(context) {
 		return parseFloat(this.matched, 10);
 	}
 }));
-parser.addRule("expression", number);
+parser.addRule("expression", parser.rules.number);
 
 
 // Numeric `integer` only, created with custom constructor for debugging.
@@ -142,16 +146,16 @@ parser.addRule("integer", new Rule.Integer({
 // Returned value has enclosing quotes.
 // TODO: escaped quotes inside string
 Rule.Text = class text extends Rule.Pattern {};
-let text = parser.addRule("text", new Rule.Text({
+parser.addRule("text", new Rule.Text({
 	pattern: /(?:"[^"]*"|'[^']*')/
 }));
-parser.addRule("expression", text);
+parser.addRule("expression", parser.rules.text);
 
 
 // Boolean literal, created with custom constructor for debugging.
 // TODO: better name for this???
 Rule.Boolean = class boolean extends Rule.Pattern {};
-let bool = parser.addRule("boolean", new Rule.Boolean({
+parser.addRule("boolean", new Rule.Boolean({
 	pattern: /(true|false|yes|no|ok|cancel)\b/,
 	toSource: function(context) {
 		switch (this.matched) {
@@ -164,7 +168,7 @@ let bool = parser.addRule("boolean", new Rule.Boolean({
 		}
 	}
 }));
-parser.addRule("expression", bool);
+parser.addRule("expression", parser.rules.boolean);
 // Add boolean tokens to identifier blacklist.
 // TESTME
 parser.rules.identifier.addToBlacklist(
@@ -174,7 +178,7 @@ parser.rules.identifier.addToBlacklist(
 );
 
 // Literal list (array), eg:  `[1,2,true,false ]`
-let list = parser.addExpression(
+parser.addExpression(
 	"literal_list",
 	"\\[[list:{expression},]?\\]",
 	class literal_list extends Rule.Expression {
