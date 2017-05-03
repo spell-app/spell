@@ -7,21 +7,22 @@ import parser from "./_parser";
 export default parser;
 
 
+// Index expression: numeric index in some list.
+// NOTE: Our indexes are **1-based** and Javascript is **0-based**.
+//		 e.g. `item 1 of the array`  = `array[0]`
+//
 // TODO: if `identifier` is "word", output `getWord()` etc
 class index_expression extends Rule.Expression{
 	toSource(context) {
 		let { identifier, index, expression } = this.results;
 		expression = expression.toSource(context);
 		index = index.toSource(context);
-		if (typeof index === "number") {
-			if (index > 0) {
-				return `${expression}[${index - 1}]`;
-			}
-			else {
-				return `spell.getItem(${expression}, ${index})`;
-			}
+
+		// If we got a positive number literal, compensate for JS 0-based arrays now.
+		if (typeof index === "number" && index > 0) {
+			return `${expression}[${index - 1}]`;
 		}
-		return `${expression}[${index} - 1]`;
+		return `spell.getItem(${expression}, ${index})`;
 
 // This is safer, but using the above for demo purposes
 //		return `spell.getItem(${expression}, ${index})`;
@@ -52,6 +53,5 @@ parser.addKeyword("ordinal", "last", ordinal, { toSource: () => -1 });
 // TODO: sixty-fifth, two hundred forty ninth...
 
 // Alternative form for numeric index in a list-like thing.
-// NOTE: don't add as an expression since we're auto-merged with `index_expression` above.
 parser.addExpression("index_expression", "the {index:ordinal} {identifier} of {expression}", index_expression);
 
