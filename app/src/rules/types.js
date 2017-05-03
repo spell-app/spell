@@ -2,7 +2,7 @@
 //	# Rules for defining classes (known as `types`)
 //
 import global from "../utils/global";
-import pluralize from "../utils/string";
+import { pluralize } from "../utils/string";
 import Rule from "../RuleSyntax";
 import parser from "./_parser";
 

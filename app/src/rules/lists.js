@@ -26,6 +26,7 @@ export default parser;
 // TODO:	`move <thing> to end of <list>` ???
 // TODO:	`Set` for a unique list?
 // TODO:	typed list?
+// TODO:	list which won't take null/undefined
 
 
 // Return the length of the list.
