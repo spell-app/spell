@@ -54,13 +54,6 @@ Object.assign(Rule, {
 					// and replace with a rule that merges the keywords
 					rule = Rule.mergeSymbols(last, rule);
 				}
-				// If this is a `Keyword` and last was also a `Keyword`, merge together
-				else if (last && last instanceof Rule.Keyword && rule instanceof Rule.Keyword) {
-					// remove the last rule
-					rules.pop();
-					// and replace with a rule that merges the keywords
-					rule = Rule.mergeKeywords(last, rule);
-				}
 				rules.push(rule);
 			}
 			startIndex = endIndex + 1;
@@ -105,10 +98,17 @@ Object.assign(Rule, {
 	KEYWORD_PATTERN : /[A-Za-z]+/,
 
 	// Match `keyword` in syntax rules.
+	// If more than one keyword appears in a row, combines them into a single `Keyword` object.
+	// This is pretty safe, unless you have an optional keyword like
+	//		`the {identifier} of the? {expression}`
+	// in which case you can put the optional keyword in parens
+	//		`the {identifier} of (the?) {expression}`
+	//
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
 	parseRuleSyntax_keyword(syntaxStream, rules = [], startIndex = 0, constructor) {
 		let words = [], endIndex;
+ 		// eat keywords while they last
 		for (var i = startIndex; i < syntaxStream.length; i++) {
 			let next = syntaxStream[i];
 			if (next.match(Rule.KEYWORD_PATTERN)) {

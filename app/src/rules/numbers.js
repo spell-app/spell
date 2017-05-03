@@ -34,7 +34,7 @@ class index_expression extends Rule.Expression{
 //	- `item 1 of ...`
 //	- `item #2 of ...`
 // NOTE: these indices are ONE based, NOT zero based as is Javascript.
-parser.addExpression("index_expression", "{identifier} (#)?{index:expression} of {expression}", index_expression);
+parser.addExpression("index_expression", "{identifier} (#)?{index:expression} of (the?) {expression}", index_expression);
 
 class ordinal extends Rule.Keyword {}
 parser.addKeyword("ordinal", "first", ordinal, { toSource: () => 1 });
@@ -54,5 +54,5 @@ parser.addKeyword("ordinal", "last", ordinal, { toSource: () => -1 });
 // TODO: sixty-fifth, two hundred forty ninth...
 
 // Alternative form for numeric index in a list-like thing.
-parser.addExpression("index_expression", "the {index:ordinal} {identifier} of {expression}", index_expression);
+parser.addExpression("index_expression", "the {index:ordinal} {identifier} of (the)? {expression}", index_expression);
 

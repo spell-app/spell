@@ -17,14 +17,6 @@ BUGS
 	- parseStatements()
 		- return sequence(?) of results?
 
-- `the {index:ordinal} {identifier} of the? {expression}`
-	- can't merge `of` and `the`
-	- need to merge keywords AFTER parsing the entire statement rather than during
-	- don't merge if
-		- optional
-		- named
-	- merge with more specific type
-
 
 TEST::::
 parser.compile(`
@@ -89,6 +81,9 @@ CLASS SEMANTICS
 
 - get is_one_higher_than with other_card:
 
+
+
+- parser.addExpression("name", /pattern/, class)
 
 - `the? {identifier}`
 	- messes up, eg, `the first item...`
