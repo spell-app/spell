@@ -281,6 +281,10 @@ Object.defineProperties(Parser.prototype, {
 	// Returns the new rule.
 	// Logs parsing errors but allows things to continue.
 	addSequence: { value: function(name, ruleSyntax, constructor = Rule.Sequence, properties) {
+		// Add a bunch of syntaxes at once if we got an array of syntaxes
+		if (Array.isArray(ruleSyntax))
+			return ruleSyntax.forEach(syntax => this.addSequence(name, syntax, constructor, properties));
+
 		if (typeof constructor !== "function") {
 			properties = constructor;
 			constructor = Rule.Sequence;
@@ -301,16 +305,28 @@ Object.defineProperties(Parser.prototype, {
 	}},
 
 	addStatement: { value: function(name, ruleSyntax, constructor = Rule.Statement, properties) {
+		// Add a bunch of syntaxes at once if we got an array of syntaxes
+		if (Array.isArray(ruleSyntax))
+			return ruleSyntax.forEach(syntax => this.addStatement(name, syntax, constructor, properties));
+
 		let rule = this.addSequence(name, ruleSyntax, constructor, properties);
 		if (rule) return this.addRule("statement", rule);
 	}},
 
 	addExpression: { value: function(name, ruleSyntax, constructor = Rule.Expression, properties) {
+		// Add a bunch of syntaxes at once if we got an array of syntaxes
+		if (Array.isArray(ruleSyntax))
+			return ruleSyntax.forEach(syntax => this.addExpression(name, syntax, constructor, properties));
+
 		let rule = this.addSequence(name, ruleSyntax, constructor, properties);
 		if (rule) return this.addRule("expression", rule);
 	}},
 
 	addList: { value: function(name, ruleSyntax, constructor = Rule.List, properties) {
+		// Add a bunch of syntaxes at once if we got an array of syntaxes
+		if (Array.isArray(ruleSyntax))
+			return ruleSyntax.forEach(syntax => this.addList(name, syntax, constructor, properties));
+
 		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
 		let rule = (Rule.parseRuleSyntax_list(stream, [], 0, constructor) || [])[0];
 		if (!rule) return;
@@ -319,6 +335,10 @@ Object.defineProperties(Parser.prototype, {
 	}},
 
 	addKeyword: { value: function(name, ruleSyntax, constructor = Rule.Keyword, properties) {
+		// Add a bunch of syntaxes at once if we got an array of syntaxes
+		if (Array.isArray(ruleSyntax))
+			return ruleSyntax.forEach(syntax => this.addKeyword(name, syntax, constructor, properties));
+
 		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
 		let rule = (Rule.parseRuleSyntax_keyword(stream, [], 0, constructor) || [])[0];
 		if (!rule) return;
@@ -327,6 +347,10 @@ Object.defineProperties(Parser.prototype, {
 	}},
 
 	addSymbol: { value: function(name, ruleSyntax, constructor = Rule.Symbol, properties) {
+		// Add a bunch of syntaxes at once if we got an array of syntaxes
+		if (Array.isArray(ruleSyntax))
+			return ruleSyntax.forEach(syntax => this.addSymbol(name, syntax, constructor, properties));
+
 		// TODO: assume we just have one symbol of many letters...
 		let stream = [ruleSyntax];
 		let rule = (Rule.parseRuleSyntax_symbol(stream, [], 0, constructor) || [])[0];
