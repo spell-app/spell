@@ -3,7 +3,7 @@ export default parser;
 
 // load standard rules files here
 import "./core";
-import "./numbers";
+import "./lists";
 import "./operators";
 import "./if";
 import "./statements";

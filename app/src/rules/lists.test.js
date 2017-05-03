@@ -1,6 +1,6 @@
 import Rule from "../RuleSyntax";
 import "./core.js";
-import parser from "./numbers.js";
+import parser from "./lists.js";
 
 test("parser is defined", () => {
 	expect(parser).toBeDefined();
