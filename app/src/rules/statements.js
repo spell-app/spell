@@ -45,6 +45,8 @@ class assignment extends Rule.Statement{
 parser.addStatement("assignment", "{thing:expression} = {value:expression}", assignment);
 //TESTME
 parser.addStatement("assignment", "set {thing:expression} to {value:expression}", assignment);
+//TESTME
+parser.addStatement("assignment", "put {value:expression} into {thing:expression}", assignment);
 
 
 //
