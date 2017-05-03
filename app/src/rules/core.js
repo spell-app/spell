@@ -13,7 +13,7 @@ export default parser;
 // NOTE `parser.parseRule("whitespace", "   ")` will return `undefined`
 //		 because `parser.parseRule()` automatically eats whitespace at the start of a rule.
 Rule.Whitespace = class whitespace extends Rule.Pattern {}
-parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/, optional: true }));
+parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/ }));
 
 
 // Comment
