@@ -1,9 +1,19 @@
 ## Competition
-
 - https://bubble.is/apps
 
+
+## Collaborators?
+- Jacqueline Landman Gay (HC Forum): http://www.hyperactivesw.com/who_we_are.html
+- Danny Goodman: http://www.dannyg.com/
+
+
+## App Ideas
+- HyperCard Stories: http://www.hyperactivesw.com/hypercard/hypercard_stories.html
 
 
 ## Thought pieces
 - "Waiting for the Next Big Thing"
 	https://blog.gft.com/blog/2017/04/27/programming-next-big-thing/
+
+
+-

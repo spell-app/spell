@@ -69,6 +69,9 @@ Rule.test()
 - Alternatives `getBestMatch([match, match, match])`
 	- use this to do precedence rules w/ infix operator?
 
+- `preference X (as Y) with default Z`
+	- persistent preference, must cross over to cloud
+	- `local preference` for this machine only?
 
 
 - draw sentence diagram of match
