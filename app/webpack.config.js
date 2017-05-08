@@ -7,7 +7,10 @@ var paths = {
 };
 
 module.exports = {
-	entry: './src/index.js',
+	entry: {
+		"parser": "./src/index.js",
+		"app": "./src/app/index.jsx"
+	},
 
 	output: {
 		path: paths.build,
