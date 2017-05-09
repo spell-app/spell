@@ -11,11 +11,6 @@ export default class ExampleStore {
 	// Compiled output.
 	@observable output = "";
 
-	constructor() {
-//DEBUG
-window.examples = this;
-	}
-
 	// Return just the titles of the examples.
 	@computed get titles() {
 		return Object.keys(this.examples);

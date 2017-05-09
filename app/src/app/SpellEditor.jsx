@@ -16,9 +16,11 @@ export default class SpellEditor extends React.Component {
 
 	constructor(props) {
 		super(props);
-//DEBUG
-window.spellEditor = this;
 		this.props.examples.load();
+
+		//DEBUG
+		window.spellEditor = this;
+		window.examples = this.props.examples;
 	}
 
 	@keydown("ctrl+s")
@@ -36,11 +38,11 @@ window.spellEditor = this;
 	@keydown("ctrl+d")
 	delete() { this.props.examples.delete(undefined, "CONFIRM"); }
 
-	// @keydown("")
 	rename() { this.props.examples.rename(); }
-
-	// @keydown("")
 	duplicate() { this.props.examples.duplicate(); }
+	load() { this.props.examples.load(); }
+	reset() { this.props.examples.reset(); }
+
 
 	render() {
 		let { examples } = this.props;
@@ -56,23 +58,23 @@ window.spellEditor = this;
 				onClick: () => examples.select(title)
 			}));
 
-		function dirtyButtons() {
+		let dirtyButtons = () => {
 			if (!dirty) return;
 			return (
 				<Menu secondary style={{ position: "absolute", right: "1rem", top: "3px", margin: 0 }}>
-					<Button negative onClick={() => this.revert()}>Revert</Button>
-					<Button positive onClick={() => this.save()}>Save</Button>
+					<Button negative onClick={() => this.revert()}><u>R</u>evert</Button>
+					<Button positive onClick={() => this.save()}><u>S</u>ave</Button>
 				</Menu>
 			);
-		}
+		};
 
-		function compileButton() {
+		let compileButton = () => {
 			if (output) return;
 			return <Button
 					style={{ position: "absolute",  width: "4em", left: "calc(50% - 2em)", top: "50%" }}
 					onClick={() => this.compile()}
 					icon="right chevron"/>;
-		}
+		};
 
 		return (
 		<Grid stretched padded className="fullHeight">
@@ -81,21 +83,23 @@ window.spellEditor = this;
 					<Menu inverted attached fluid>
 						<Menu.Item>Example:</Menu.Item>
 						<Dropdown item selection options={options} value={selected} style={{ width: "20em" }}/>
+						<Menu.Item onClick={() => this.delete()}><u>D</u>elete</Menu.Item>
 						<Menu.Item onClick={() => this.rename()}>Rename</Menu.Item>
-						<Menu.Item onClick={() => this.delete()}>Delete</Menu.Item>
+						<Menu.Item onClick={() => this.duplicate()}>Duplicate</Menu.Item>
 					</Menu>
 				</Grid.Column>
 				<Grid.Column width={2}>
 					<Menu inverted attached fluid>
-						<Menu.Item onClick={() => this.create()}>New</Menu.Item>
-						<Menu.Item onClick={() => this.duplicate()}>Duplicate</Menu.Item>
+						<Spacer fluid/>
+						<Menu.Item onClick={() => this.create()}><u>N</u>ew</Menu.Item>
+						<Spacer fluid/>
 					</Menu>
 				</Grid.Column>
 				<Grid.Column width={7}>
 					<Menu inverted attached fluid>
 						<Spacer fluid/>
-						<Menu.Item onClick={() => examples.load()}>Reload</Menu.Item>
-						<Menu.Item onClick={() => examples.reset()}>Reset</Menu.Item>
+						<Menu.Item onClick={() => this.load()}>Reload</Menu.Item>
+						<Menu.Item onClick={() => this.reset()}>Reset</Menu.Item>
 					</Menu>
 				</Grid.Column>
 			</Grid.Row>
