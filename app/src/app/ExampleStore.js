@@ -5,6 +5,7 @@ export default class ExampleStore {
 	@observable examples = {};
 	@observable selected = "";
 	@observable output = "";
+	@observable dirty = false;
 
 	constructor() {
 //DEBUG
@@ -21,8 +22,6 @@ window.examples = this;
 		return this.examples[this.selected];
 	}
 
-	//
-
 	// Reset all examples from localStorage.
 	reset() {
 		delete localStorage.spellEditorExamples;
@@ -36,28 +35,34 @@ window.examples = this;
 		this.examples = JSON.parse(localStorage.spellEditorExamples
 			|| '{"Foo":"define type Foo", "Bar":"define type Bar"}');
 
+		// Save a copy of examples for revert
+		this._savedExamples = {...this.examples};
+
 		// Load selected example name
 		this.select(localStorage.spellEditorExample);
+		this.dirty = false;
 	}
 
 	// Save current examples & selection.
 	save() {
 		localStorage.spellEditorExamples = JSON.stringify(this.examples);
+		this.dirty = false;
+
+		// Save a copy of examples for revert
+		this._savedExamples = {...this.examples};
+	}
+
+	// Revert the current example
+	revert(example = this.selected) {
+		this.update(example, this._savedExamples[example]);
 	}
 
 	// Select a different example.
 	select(example) {
 		if (!example || this.examples[example] == null) example = Object.keys(this.examples)[0] || "";
 		this.selected = localStorage.spellEditorExample = example;
+		this._selectedWas = this.code;
 		this.output = "";
-	}
-
-	// Compile the current example, placing it in our `output`.
-	compile() {
-		this.output = "...compiling...";
-		setTimeout(() => {
-			this.output = parser.compile(this.code);
-		}, 100);
 	}
 
 	// Create a new example.
@@ -67,6 +72,7 @@ window.examples = this;
 		this.select(name);
 		this.output = "";
 		if (!skipSave) this.save();
+		else this.dirty = true;
 	}
 
 	// Delete an example.
@@ -75,6 +81,7 @@ window.examples = this;
 		let examples = Object.assign({}, this.examples);
 		delete examples[name];
 		this.examples = examples;
+		this.save();
 		this.select();
 	}
 
@@ -113,4 +120,14 @@ window.examples = this;
 
 		this.update(newName, this.code);
 	}
+
+	// Compile the current example, placing it in our `output`.
+//TODO: some way to do this automatically w/ "output" ?
+	compile() {
+		this.output = "...compiling...";
+		setTimeout(() => {
+			this.output = parser.compile(this.code);
+		}, 100);
+	}
+
 }

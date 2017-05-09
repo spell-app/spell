@@ -25,6 +25,7 @@ TODO:
 	> get the top card of the pile
 		=> it = pile.top_card
 
+- expression: property {x} of list
 
 - getResults(context, name, name, name)
 	=> return results mapped over results.toSource(context)

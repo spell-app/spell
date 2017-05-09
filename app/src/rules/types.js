@@ -280,7 +280,7 @@ parser.addStatement(
 					return `const ${declaration}`;
 
 				case "shared property":
-					return `@proto\n${declaration}`;
+					return `@proto ${declaration}`;
 
 				case "property":
 				default:
@@ -323,8 +323,7 @@ parser.addStatement(
 			let first = list.getItem(0);
 			let firstValue = first ? first.toSource(context) : "undefined";
 
-			return `@proto\n`
-				 + `${plural} = ${values}\n`
+			return `@proto ${plural} = ${values}\n`
 				 + `get ${identifier}() { return this.__${identifier} === undefined ? ${firstValue} : this.__${identifier} }\n`
 				 + `set ${identifier}(value) { if (this.${plural}.includes(value)) this.__${identifier} = value }`;
 

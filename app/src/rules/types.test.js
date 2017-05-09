@@ -165,7 +165,7 @@ test("declare property w/no value", () => {
 
 test("declare shared property w/no value", () => {
 	let match = parser.parse("statement", "shared property foo");
-	expect(match.toSource()).toBe('@proto\nfoo');
+	expect(match.toSource()).toBe('@proto foo');
 });
 
 test("declare constant property w/no value", () => {
@@ -183,7 +183,7 @@ test("declare property w/value", () => {
 
 test("declare shared property w/value", () => {
 	let match = parser.parse("statement", "shared property foo = my bar");
-	expect(match.toSource()).toBe('@proto\nfoo = this.bar');
+	expect(match.toSource()).toBe('@proto foo = this.bar');
 });
 
 test("declare constant property w/value", () => {
@@ -205,8 +205,7 @@ test("declare property as type", () => {
 test("declare property as one of", () => {
 	let match = parser.parse("statement", 'property foo as one of ["this", "that"]');
 	expect(match.toSource()).toBe(
-		'@proto\n' +
-		'foos = ["this", "that"]\n' +
+		'@proto foos = ["this", "that"]\n' +
 		'get foo() { return this.__foo === undefined ? "this" : this.__foo }\n' +
 		'set foo(value) { if (this.foos.includes(value)) this.__foo = value }'
 	);
