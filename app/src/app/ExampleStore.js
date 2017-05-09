@@ -2,10 +2,14 @@
 import mobx, { observable, computed } from "mobx";
 
 export default class ExampleStore {
+	// CURRENT examples
 	@observable examples = {};
+	// Examples as of last save (for rever)
+	@observable _savedExamples = {};
+	// Selected example key.
 	@observable selected = "";
+	// Compiled output.
 	@observable output = "";
-	@observable dirty = false;
 
 	constructor() {
 //DEBUG
@@ -22,6 +26,11 @@ window.examples = this;
 		return this.examples[this.selected];
 	}
 
+	// Is ANYTHIND dirty?
+	@computed get dirty() {
+		return JSON.stringify(this._savedExamples) !== JSON.stringify(this.examples);
+	}
+
 	// Reset all examples from localStorage.
 	reset() {
 		delete localStorage.spellEditorExamples;
@@ -36,20 +45,18 @@ window.examples = this;
 			|| '{"Foo":"define type Foo", "Bar":"define type Bar"}');
 
 		// Save a copy of examples for revert
-		this._savedExamples = {...this.examples};
+		this._savedExamples = this.examples;
 
 		// Load selected example name
 		this.select(localStorage.spellEditorExample);
-		this.dirty = false;
 	}
 
-	// Save current examples & selection.
+	// Save current examples.
 	save() {
 		localStorage.spellEditorExamples = JSON.stringify(this.examples);
-		this.dirty = false;
 
 		// Save a copy of examples for revert
-		this._savedExamples = {...this.examples};
+		this._savedExamples = this.examples;
 	}
 
 	// Revert the current example
@@ -61,7 +68,6 @@ window.examples = this;
 	select(example) {
 		if (!example || this.examples[example] == null) example = Object.keys(this.examples)[0] || "";
 		this.selected = localStorage.spellEditorExample = example;
-		this._selectedWas = this.code;
 		this.output = "";
 	}
 
@@ -72,12 +78,12 @@ window.examples = this;
 		this.select(name);
 		this.output = "";
 		if (!skipSave) this.save();
-		else this.dirty = true;
 	}
 
 	// Delete an example.
 	// Saves and selects another example automatically.
-	delete(name = this.selected) {
+	delete(name = this.selected, showConfirm) {
+		if (showConfirm && !confirm(`Really delete example ${name}?`)) return;
 		let examples = Object.assign({}, this.examples);
 		delete examples[name];
 		this.examples = examples;

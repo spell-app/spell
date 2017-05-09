@@ -28,7 +28,7 @@
       "react"
     ],
     "plugins": [
-    	"transform-decorators-legacy"
+      "transform-decorators-legacy"
     ]
   },
   "dependencies": {
@@ -37,6 +37,7 @@
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
+    "react-keydown": "^1.7.2",
     "semantic-ui-react": "^0.68.3"
   }
 }
