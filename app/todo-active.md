@@ -18,6 +18,14 @@ BUGS
 
 
 TODO:
+- property names can be multi-word!!!!
+	> get top card: return the last card of me
+		=> get top_card()
+
+	> get the top card of the pile
+		=> it = pile.top_card
+
+
 - getResults(context, name, name, name)
 	=> return results mapped over results.toSource(context)
 - `{` lifter needs to go before comments... ?
