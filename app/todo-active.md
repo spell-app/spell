@@ -20,7 +20,7 @@ BUGS
 TODO:
 - getResults(context, name, name, name)
 	=> return results mapped over results.toSource(context)
-- `{` lifter needs to go before comments...
+- `{` lifter needs to go before comments... ?
 - `the? {identifier}`?  Messes up, eg, `the first item...`
 - line break with ¬ or \ or /
 - single line comments with -- or //

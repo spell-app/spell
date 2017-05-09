@@ -2,6 +2,11 @@
 - https://bubble.is/apps
 
 
+## Inspiration
+- d3.express:	https://medium.com/@mbostock/a-better-way-to-code-2b1d2876a3a0
+- vega-Lite:	https://vega.github.io/vega-lite/
+
+
 ## Collaborators?
 - Jacqueline Landman Gay (HC Forum): http://www.hyperactivesw.com/who_we_are.html
 - Danny Goodman: http://www.dannyg.com/
