@@ -1,126 +1,152 @@
 import React from "react";
+import mobx, { observable, computed } from "mobx";
+import { observer } from "mobx-react";
 import { Button, Dropdown, Grid, Menu, Segment, TextArea } from 'semantic-ui-react'
-import Spacer from "./Spacer.jsx";
 
+import Spacer from "./Spacer.jsx";
 import "./styles.less";
 
 
+class ExampleStore {
+	@observable examples = {};
+	@observable selected = "";
+	@observable output = "";
 
-
-
-
-export default class SpellEditor extends React.Component {
 	constructor() {
-		super();
+//DEBUG
+window.examples = this;
+	}
+
+	// Return just the titles of the examples.
+	@computed get titles() {
+		return Object.keys(this.examples);
+	}
+
+	// Return the code for the current example
+	@computed get code() {
+		return this.examples[this.selected];
+	}
+
+	//
+
+	// Reset all examples from localStorage.
+	reset() {
+		delete localStorage.spellEditorExamples;
+		delete localStorage.spellEditorExample;
+		window.location.reload();
+	}
+
+	// Load examples
+	load() {
+		// Load examples from localStorage
+		this.examples = JSON.parse(localStorage.spellEditorExamples
+			|| '{"Foo":"define type Foo", "Bar":"define type Bar"}');
+
+		// Load selected example name
+		this.select(localStorage.spellEditorExample);
+	}
+
+	// Save current examples & selection.
+	save() {
+		localStorage.spellEditorExamples = JSON.stringify(this.examples);
+	}
+
+	// Select a different example.
+	select(example) {
+		if (!example || this.examples[example] == null) example = Object.keys(this.examples)[0] || "";
+		this.selected = localStorage.spellEditorExample = example;
+		this.output = "";
+	}
+
+	// Compile the current example, placing it in our `output`.
+	compile() {
+		this.output = "...compiling...";
+		setTimeout(() => {
+			this.output = parser.compile(this.code);
+		}, 100);
+	}
+
+	// Create a new example.
+	// Saves and selects the example automatically.
+	update(name, code, skipSave) {
+		this.examples = Object.assign({}, this.examples, { [ name ]: code });
+		this.select(name);
+		this.output = "";
+		if (!skipSave) this.save();
+	}
+
+	// Delete an example.
+	// Saves and selects another example automatically.
+	delete(name = this.selected) {
+		let examples = Object.assign({}, this.examples);
+		delete examples[name];
+		this.examples = examples;
+		this.select();
+	}
+
+	// Create a new example.
+	create(name, code = "") {
+		// If no name, prompt.
+		if (!name) name = prompt("Name for this example?");
+		// Forget it if no name.
+		if (!name) return;
+
+		this.update(name, code);
+	}
+
+	// Rename an example.
+	// Selects and saves automatically.
+	rename(oldName = this.selected, newName) {
+		// If no new name, prompt.
+		if (!newName) newName = prompt("New name for this example?", oldName);
+
+		// Forget it if no name supplied or name is the same
+		if (!newName || newName === oldName) return;
+		if (this.examples[newName]) return console.warn(`examples.rename("${newName}"): name already in use`);
+
+		let code = this.examples[oldName];
+		this.delete(oldName);
+		this.update(newName, code);
+	}
+
+	// Duplicate an example.
+	duplicate(oldName = this.selected, newName) {
+		// If no new name, prompt.
+		if (!newName) newName = prompt("New name for duplicate example?", oldName);
+		// Forget it if no name supplied or name is the same
+		if (!newName || newName === oldName) return;
+		if (this.examples[newName]) return console.warn(`examples.rename("${newName}"): name already in use`);
+
+		this.update(newName, this.code);
+	}
+}
+
+
+@observer
+export default class SpellEditor extends React.Component {
+	static defaultProps = {
+		examples: new ExampleStore()
+	};
+
+	constructor(props) {
+		super(props);
 //DEBUG
 window.spellEditor = this;
-		this.state = this.loadExamples();
-		this.compileExampleSoon();
+		this.props.examples.load();
 	}
-
-	// Get examples from localStorage.
-	loadExamples = () => {
-		let examples = JSON.parse(localStorage.spellEditorExamples || '{"Foo":"define type foo", "Bar":"define type bar"}');
-		let example = (this.state && this.state.example) || localStorage.spellEditorExample;
-		if (!example || !examples[example]) example = Object.keys(examples)[0];
-		// make local copy of code so we can modify w/o explicitly saving.
-		let code = examples[example];
-		return { examples, example, code, output: "...compiling..." };
-	}
-
-	// Rename the current example.
-	// Saves automatically.
-	renameExample = () => {
-		let example = this.state.example;
-		let newName = prompt("New name for this example?", example);
-		if (!newName || newName === example) return;
-
-		let { examples } = this.state;
-		examples[newName] = examples[example];
-		delete examples[example];
-
-		this.saveExamples(examples, newName);
-		this.setState({ examples, example: newName });
-	}
-
-	// Duplicate the current example with a new name.
-	duplicateExample = () => {
-		let { examples, example } = this.state;
-		let newName = prompt("Name for duplicate example?", example);
-		if (newName === example) return;
-		examples[newName] = examples[example];
-		this.saveExamples(examples, example);
-		this.setState({ examples, example: newName });
-	}
-
-	onDeleteExample = () => this.deleteExample();
-	deleteExample = (example = this.state.example) => {
-		let { examples } = this.state;
-		delete examples[example];
-		example = Object.keys(examples)[0];
-		this.saveExamples(examples, example);
-		this.setState({ examples, example, code: examples[example], output: undefined });
-	}
-
-
-	// Save examples to localStorage.
-	onSaveExamples = () => this.saveExamples();
-	saveExamples = (examples = this.state.examples, example = this.state.example) => {
-		localStorage.spellEditorExamples = JSON.stringify(examples);
-		localStorage.spellEditorExample = example;
-	}
-
-	// Reload examples from localStorage.
-	reloadExamples = () => {
-		this.setState(this.loadExamples());
-	}
-
-	// Select an example to show.
-	selectExample = (example) => {
-		localStorage.spellEditorExample = example;
-		let { examples } = this.state;
-		this.setState({ example, output: "...compiling..." });
-		this.compileExampleSoon();
-	}
-
-	// Compile the current example into the output.
-	compileExample = () => {
-		let { example, examples } = this.state;
-		let output = parser.compile(examples[example]);
-		this.setState({ output });
-	}
-
-	compileExampleSoon = () => {
-		setTimeout(this.compileExample, 100);
-	}
-
-
-	// Input textarea changed.
-	// Update `state.examples`.
-	onInputChanged = (event) => {
-		let examples = Object.assign({}, this.state.examples);
-		// update the in-memory value of `Examples`
-		let example = this.state.example;
-		let value = event.target.value;
-		examples[example] = value;
-
-		this.setState({ examples });
-	}
-
 
 	render() {
-		let props = this.props;
-		let { examples, example, output } = this.state;
-		let code = examples[example];
+		let { examples } = this.props;
+		let { titles, selected, code, output } = examples;
 
 		// Create menuitems from the examples
-		let options = Object.keys(examples).map( title =>
+		let options = titles.map( title =>
 			({
 				value: title,
 				title: title,
 				text: title,
 				content: title,
-				onClick: ()=>this.selectExample(title)
+				onClick: () => examples.select(title)
 			}));
 
 		return (
@@ -129,24 +155,27 @@ window.spellEditor = this;
 				<Menu inverted attached fluid>
 					<Spacer medium/>
 					<Menu.Item>Example:</Menu.Item>
-					<Dropdown item selection options={options} value={example}/>
-					<Menu.Item onClick={this.renameExample}>Rename</Menu.Item>
-					<Menu.Item onClick={this.onDeleteExample}>Delete</Menu.Item>
+					<Dropdown item selection options={options} value={selected}/>
+					<Menu.Item onClick={() => examples.rename()}>Rename</Menu.Item>
+					<Menu.Item onClick={() => examples.delete()}>Delete</Menu.Item>
 					<Spacer fluid/>
-					<Menu.Item onClick={this.onSaveExamples}>Save</Menu.Item>
-					<Menu.Item onClick={this.reloadExamples}>Reload</Menu.Item>
+					<Menu.Item onClick={() => examples.create()}>New</Menu.Item>
+					<Menu.Item onClick={() => examples.duplicate()}>Duplicate</Menu.Item>
+					<Menu.Item onClick={() => examples.save()}>Save</Menu.Item>
 					<Spacer fluid/>
-					<Menu.Item onClick={this.duplicateExample}>Duplicate</Menu.Item>
-					<Menu.Item>New</Menu.Item>
+					<Menu.Item onClick={() => examples.load()}>Reload</Menu.Item>
+					<Menu.Item onClick={() => examples.reset()}>Reset</Menu.Item>
 					<Spacer medium/>
 				</Menu>
 			</Grid.Row>
 			<Grid.Row style={{ height: "calc(100% - 3rem)" }}>
 				<Grid.Column width={7}>
-					<TextArea className="ui segment" value={code} onChange={this.onInputChanged}/>
+					<TextArea className="ui segment" value={code}
+						onChange={(event) => examples.update(selected, event.target.value, "SKIP_SAVE")}
+					/>
 				</Grid.Column>
 				<Grid.Column width={1} verticalAlign="middle">
-				<Button icon="chevron right" onClick={this.compileExample}/>
+				<Button icon="chevron right" onClick={() => examples.compile()}/>
 				</Grid.Column>
 				<Grid.Column width={8}>
 					<TextArea className="ui segment" value={output}/>

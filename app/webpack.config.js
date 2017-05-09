@@ -9,7 +9,6 @@ var paths = {
 
 module.exports = {
 	entry: {
-		"parser": "./src/index.js",
 		"app": "./src/app/index.jsx",
 		"vendor": ["react", "react-dom", "semantic-ui-react", ]
 	},
