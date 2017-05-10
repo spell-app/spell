@@ -451,16 +451,53 @@ parser.addStatement(
 	}
 );
 
-// Randomize list in-place.
+// Shuffle list in-place.
 //TESTME
 parser.addStatement(
-	"list_randomize",
-	"randomize {list:expression}",
-	class list_randomize extends Rule.Expression {
+	"list_shuffle",
+	"(randomize|shuffle) {list:expression}",
+	class list_shuffle extends Rule.Expression {
 		toSource(context) {
 			let { list } = this.results;
 			list = list.toSource(context);
-			return `spell.randomize(${list})`;
+			return `spell.shuffle(${list})`;
+		}
+	}
+);
+
+
+// Iteration
+//TESTME
+parser.addStatement(
+	"list_iteration",
+	"for (each)? {itemVar:identifier}(positionClause:(and|,) {positionVar:identifier})? in {list:expression}:?",
+	class list_iteration extends Rule.Statement {
+		toSource(context) {
+			let { itemVar, positionClause, list } = this.results;
+			itemVar = itemVar.toSource(context);
+			list = list.toSource(context);
+			let positionVar = positionClause && positionClause.results.positionVar.toSource(context);
+
+			if (positionVar) {
+				return `for (let ${positionVar} = 1; ${positionVar} <= ${list}.length; ${positionVar}++) {\n`
+					+  `	let ${itemVar} = ${list}[${positionVar}-1]`;
+			}
+			return `for (let ${itemVar} in ${list})`;
+		}
+	}
+);
+
+
+// Range
+parser.addExpression(
+	"range_expression",
+	"range {start:expression} to {end:expression}",
+	class range_expression extends Rule.Expression {
+		toSource(context) {
+			let { start, end } = this.results;
+			start = start.toSource(context);
+			end = end.toSource(context);
+			return `spell.getRange(${start}, ${end})`;
 		}
 	}
 );
