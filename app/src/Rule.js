@@ -315,8 +315,6 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 			stack.push([this, stream]);
 		}
 
-		if (this.chunkit) return this.parseInChunks(parser, stream, stack);
-
 		let matched = [], next = stream;
 		for (let rule of this.rules) {
 			next = parser.eatWhitespace(next);
@@ -338,10 +336,6 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 			stream
 		});
 	}
-
-// 	parseInChunks(parser, stream, stack) {
-//
-// 	}
 
 //TODOC
 	// "gather" arguments in preparation to call `toSource()`

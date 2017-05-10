@@ -15,10 +15,23 @@ BUGS
 => "spell.append(myList.front, 1)"	-- should be "spell.prepend(myList, 1)"
 
 
+SPEEDUP
+- tokenize & match words/symbols using === rather than regex
+- alternatives/etc to one regex?
+- parse structure first (statements only?)
+- break statement parsing up into interruptable chunks w/ promise
+
+
 
 
 TODO:
+- parse result.tree	=> nested tree of results for visualization, transform
+- single line comments with -- or //
+- `if can play card on pile`	=> want to translate to `pile.can_play_card(card)`
+- `(?:...)` to move nested results up in a sequence
 - `Rule.Statements`, including nesting
+- `(a,b)` to create array rather than []
+- `is one of "diamonds", "hearts" or "spades"`
 - property X as list of Cards
 - property names can be multi-word!!!!
 	> get top card: return the last card of me
@@ -27,14 +40,13 @@ TODO:
 	> get the top card of the pile
 		=> it = pile.top_card
 
-- expression: property {x} of list
+- expression: `the {property} for each in {list}`
 
 - getResults(context, name, name, name)
 	=> return results mapped over results.toSource(context)
 - `{` lifter needs to go before comments... ?
 - `the? {identifier}`?  Messes up, eg, `the first item...`
 - line break with ¬ or \ or /
-- single line comments with -- or //
 - numbers `one`, `two`, etc. Should return a `Rule.Number`
 - parseStatements(): return sequence(?) of results?
 - parser.addExpression("name", /pattern/, class), same for addKeyword, etc
