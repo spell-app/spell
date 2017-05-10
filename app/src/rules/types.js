@@ -16,16 +16,18 @@ export default parser;
 //	`foo = 1, bar = 2`
 //TODO: would like to use `and` but that will barf on expressions...
 //TODO: how to do properties on multiple lines?
+//TESTME w/o `= expression`
 parser.addList(
 	"object_literal_properties",
-	"[({identifier} = {expression}) ,]",
+	"[({identifier}(equals:= {expression})?) ,]",
 	class object_literal_properties extends Rule.List {
 		toSource(context) {
 			let props = this.results.matched.map(function (prop) {
-					let { identifier, expression } = prop.results;
+					let { identifier, equals } = prop.results;
 					let key = identifier.toSource(context);
-					let value = expression.toSource(context);
-					return `"${key}": ${value}`
+					let value = equals && equals.results.expression.toSource(context);
+					if (value) return `"${key}": ${value}`
+					return key;
 				});
 			return `{ ${props.join(", ")} }`;
 		}
