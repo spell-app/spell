@@ -79,13 +79,21 @@ export default class Parser {
 		let results = [];
 		let currentIndent = 0;
 		const tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-		//
+
+
+		// Remove whitespace at the end of all of the statements
+		// This avoids blank lines before closing brackets in the output.
+		statements = statements.replace(/\s+$/, "");
+
 		statements.split(/\n/g).forEach(statement => {
 			// skip lines that are all whitespace
 			if (statement.trim() === "") {
 				results.push("");
 				return;
 			}
+
+			// trim whitespace off the end
+			statement = statement.replace(/\s+$/, "");
 
 			// figure out indent level of this line
 			let lineStart = statement.match(/^\t*/)[0];
