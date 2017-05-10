@@ -30,7 +30,7 @@ parser.addStatement("return_statement", "return {expression}",
 //
 //	## Assignment
 //
-class assignment extends Rule.Statement{
+class assignment extends Rule.Statement {
 	toSource(context) {
 		let { thing, value } = this.results;
 		if (thing instanceof Rule.Identifier) {
@@ -47,6 +47,20 @@ parser.addStatement("assignment", "{thing:expression} = {value:expression}", ass
 parser.addStatement("assignment", "set {thing:expression} to {value:expression}", assignment);
 //TESTME
 parser.addStatement("assignment", "put {value:expression} into {thing:expression}", assignment);
+
+//TESTME
+parser.addStatement(
+	"get_expression",
+	"get {value:expression}",
+	class get_expression extends Rule.Statement {
+		toSource(context) {
+			let { value } = this.results;
+			value = value.toSource(context);
+			return `it = ${value}`
+		}
+	}
+);
+
 
 
 //
