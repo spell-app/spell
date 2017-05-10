@@ -18,6 +18,8 @@ BUGS
 
 
 TODO:
+- `Rule.Statements`, including nesting
+- property X as list of Cards
 - property names can be multi-word!!!!
 	> get top card: return the last card of me
 		=> get top_card()
