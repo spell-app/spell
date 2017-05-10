@@ -176,12 +176,13 @@ parser.addRule("expression", parser.rules.text);
 // TODO: better name for this???
 Rule.Boolean = class boolean extends Rule.Pattern {};
 parser.addRule("boolean", new Rule.Boolean({
-	pattern: /(true|false|yes|no|ok|cancel)\b/,
+	pattern: /(true|false|yes|no|ok|cancel|success|failure)\b/,
 	toSource: function(context) {
 		switch (this.matched) {
 			case "true":
 			case "yes":
 			case "ok":
+			case "success":
 				return true;
 			default:
 				return false;
@@ -194,7 +195,8 @@ parser.addRule("expression", parser.rules.boolean);
 parser.rules.identifier.addToBlacklist(
 	"true", "false",
 	"yes", "no",
-	"ok", "cancel"
+	"ok", "cancel",
+	"success", "failure"
 );
 
 // Literal list (array), eg:  `[1,2,true,false ]`
