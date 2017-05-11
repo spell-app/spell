@@ -335,13 +335,17 @@ parser.addExpression(
 	"property_expression",
 	"(properties:the {identifier} of)+ the? {expression}",
 	class property_expression extends Rule.Expression {
-		toSource(context) {
+		getMatchedSource(context) {
 			let { expression, properties } = this.results;
-			expression = expression.toSource(context);
-			properties = properties.results
-							.reverse()
-							.map( property => property.identifier.toSource(context) )
-							.join(".");
+			return {
+				expression: expression.toSource(context),
+				properties: properties.matched.map( property => property.results.identifier.toSource(context) )
+			};
+		}
+
+		toSource(context) {
+			let { expression, properties } = this.getMatchedSource(context);
+			properties = properties.reverse().join(".");
 			return `${expression}.${properties}`;
 // NOTE: the following is safer, but ugly for demo purposes
 //			return `spell.get(${expression}, ['${properties}'])`;
@@ -354,8 +358,7 @@ parser.addExpression(
 	"(my|this) {identifier}",
 	class property_expression extends Rule.Expression {
 		toSource(context) {
-			let { identifier } = this.results;
-			identifier = identifier.toSource(context);
+			let { identifier } = this.getMatchedSource(context);
 			return `this.${identifier}`;
 		}
 	}
