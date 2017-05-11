@@ -372,6 +372,21 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		return results;
 	}
 
+	// Return results.toSource(context)
+	getMatchedSource(context, ...keys) {
+		let results = this.results;
+		let output = {};
+		if (!keys.length) keys = Object.keys(results);
+		keys.forEach(key => {
+			let value = results[key];
+			if (value == null) return;
+			if (value.toSource) output[key] = value.toSource(context);
+			else output[key] = value;
+		});
+		return output;
+	}
+
+	// Echo this rule back out.
 	toString() {
 		return `${this.rules.join(" ")}${this.optional ? '?' : ''}`;
 	}
@@ -578,16 +593,10 @@ Rule.List = class List extends Rule {
 		});
 	}
 
-	// Return matched item by index
-	getItem(index) {
-		if (!this.matched) return undefined;
-		return this.matched[index];
-	}
-
+	// Returns list of values as source.
 	toSource(context) {
-		if (!this.matched) return undefined;		// TODO: throw???
-		let matched = this.matched.map( match => match.toSource(context) ).join(", ");
-		return `[${matched}]`;
+		if (!this.matched) return [];
+		return this.matched.map( match => match.toSource(context) );
 	}
 
 	toString() {

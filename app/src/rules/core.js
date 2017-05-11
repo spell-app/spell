@@ -204,19 +204,14 @@ parser.addExpression(
 	"literal_list",
 	"\\[[list:{expression},]?\\]",
 	class literal_list extends Rule.Expression {
-		get results() {
-			return super.results.list;
-		}
-
-		getItem(index) {
-			let list = this.results;
-			if (list) return list.matched[index];
+		getMatchedSource(context) {
+			let list = this.results.list;
+			return { list: list && list.toSource(context) || [] };
 		}
 
 		toSource(context) {
-			let list = this.results;
-			if (!list) return "[]";
- 			return list.toSource(context);
+			let { list } = this.getMatchedSource(context);
+			return `[${list.join(", ")}]`;
 		}
 	}
 );

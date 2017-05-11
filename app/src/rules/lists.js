@@ -470,13 +470,13 @@ parser.addStatement(
 //TESTME
 parser.addStatement(
 	"list_iteration",
-	"for (each)? {itemVar:identifier}(positionClause:(and|,) {positionVar:identifier})? in {list:expression}:?",
+	"for (each)? {itemVar:identifier}(?:(and|,) {positionVar:identifier})? in {list:expression}:?",
 	class list_iteration extends Rule.Statement {
 		toSource(context) {
-			let { itemVar, positionClause, list } = this.results;
+			let { itemVar, positionVar, list } = this.results;
 			itemVar = itemVar.toSource(context);
 			list = list.toSource(context);
-			let positionVar = positionClause && positionClause.results.positionVar.toSource(context);
+			positionVar = positionVar && positionVar.toSource(context);
 
 			if (positionVar) {
 				return `for (let ${positionVar} = 1; ${positionVar} <= ${list}.length; ${positionVar}++) {\n`

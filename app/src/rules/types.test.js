@@ -54,18 +54,18 @@ test("create thing w/properties", () => {
 
 // ## Args clause
 test("args clause with 0 arguments is undefined", () => {
-	let match = parser.parse("args_clause", "with");
+	let match = parser.parse("args", "with");
 	expect(match).toBe(undefined);
 });
 
 test("args clause with 1 argument", () => {
-	let match = parser.parse("args_clause", "with a");
-	expect(match.toSource()).toBe('a');
+	let match = parser.parse("args", "with a");
+	expect(match.toSource()).toEqual(["a"]);
 });
 
 test("args clause with 3 arguments", () => {
-	let match = parser.parse("args_clause", "with a, b, c");
-	expect(match.toSource()).toBe('a, b, c');
+	let match = parser.parse("args", "with a, b, c");
+	expect(match.toSource()).toEqual(["a", "b", "c"]);
 });
 
 
@@ -206,7 +206,7 @@ test("declare property as one of", () => {
 	let match = parser.parse("statement", 'property foo as one of ["this", "that"]');
 	expect(match.toSource()).toBe(
 		'@proto foos = ["this", "that"]\n' +
-		'get foo() { return this.__foo === undefined ? "this" : this.__foo }\n' +
+		'get foo() { return this.__foo === undefined ? this.foos[0] : this.__foo }\n' +
 		'set foo(value) { if (this.foos.includes(value)) this.__foo = value }'
 	);
 });
