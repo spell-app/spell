@@ -14,6 +14,8 @@ BUGS
 > parser.parse("statement", "add 1 to the front of myList")
 => "spell.append(myList.front, 1)"	-- should be "spell.prepend(myList, 1)"
 
+> parser.parse("backwards_if", "get a if true else get b")
+=> "if (true) { get a() } else { it = b }"
 
 SPEEDUP
 - tokenize & match words/symbols using === rather than regex

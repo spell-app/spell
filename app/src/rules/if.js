@@ -12,46 +12,37 @@ export default parser;
 //TESTME
 parser.addStatement(
 	"if",
-	"if {expression} (then|:)? {statement}?",
+	"if {condition:expression} (then|:)? {statement}?",
 	class if_ extends Rule.Statement {
 		toSource(context) {
-			let { expression, statement } = this.results;
-			expression = expression.toSource(context);
-			statement = statement ? statement.toSource(context) : undefined;
-
-			if (statement) return `if (${expression}) { ${statement} }`;
-			return `if (${expression})`
+			let { condition, statement } = this.getMatchedSource(context);
+			if (statement) return `if (${condition}) { ${statement} }`;
+			return `if (${condition})`
 		}
 	}
 );
 
 parser.addStatement(
 	"backwards_if",
-	"{statement} if {expression} (elsePhrase:(else|otherwise) {statement})?",
+	"{statement} if {condition:expression} (?:(else|otherwise) {elseStatement:statement})?",
 	class backwards_if extends Rule.Statement {
+		leftRecursive = true;
 		toSource(context) {
-			let { expression, statement, elsePhrase } = this.results;
-			expression = expression.toSource(context);
-			statement = statement ? statement.toSource(context) : undefined;
-			let elseStatement = elsePhrase && elsePhrase.results.statement.toSource();
-
-			if (elseStatement) return `if (${expression}) { ${statement} } else { ${elseStatement} }`
-			return `if (${expression}) { ${statement} }`;
+			let { condition, statement, elseStatement } = this.getMatchedSource(context);
+			if (elseStatement) return `if (${condition}) { ${statement} } else { ${elseStatement} }`
+			return `if (${condition}) { ${statement} }`;
 		}
 	}
 );
 
 parser.addStatement(
 	"else_if",
-	"(else|otherwise) if {expression} (then|:) {statement}?",
+	"(else|otherwise) if {condition:expression} (then|:) {statement}?",
 	class else_if extends Rule.Statement {
 		toSource(context) {
-			let { expression, statement } = this.results;
-			expression = expression.toSource(context);
-			statement = statement ? statement.toSource(context) : undefined;
-
-			if (statement) return `else if (${expression}) { ${statement} }`;
-			return `else if (${expression})`
+			let { condition, statement } = this.getMatchedSource(context);;
+			if (statement) return `else if (${condition}) { ${statement} }`;
+			return `else if (${condition})`
 		}
 	}
 );
@@ -61,9 +52,7 @@ parser.addStatement(
 	"(else|otherwise) {statement}?",
 	class else_ extends Rule.Statement {
 		toSource(context) {
-			let { statement } = this.results;
-			statement = statement ? statement.toSource(context) : undefined;
-
+			let { statement } = this.getMatchedSource(context);
 			if (statement) return `else { ${statement} }`;
 			return `else`
 		}
