@@ -36,9 +36,8 @@ parser.addExpression(
 	"the? number of {identifier} in {list:expression}",
 	class list_length extends Rule.Sequence {
 		toSource(context) {
-			let { list, identifier } = this.results;
-			list = list.toSource(context);
-			identifier = identifier.toSource(context);
+			let { list, identifier } = this.getMatchedSource(context);
+// TODO: special case 'words', 'lines', etc
 			return `${list}.length`;
 		}
 	}
@@ -48,14 +47,13 @@ parser.addExpression(
 // If item is not found, returns `undefined`.
 // NOTE: this position returned is **1-based**.
 //TESTME
+// TODO: `positions`, `last position`, `after...`
 parser.addExpression(
 	"list_position",
 	"the? position of {thing:expression} in {list:expression}",
 	class list_position extends Rule.Sequence {
 		toSource(context) {
-			let { thing, list } = this.results;
-			thing = thing.toSource(context);
-			list = list.toSource(context);
+			let { thing, list } = this.getMatchedSource(context);
 			return `spell.positionOf(${thing}, ${list})`
 		}
 	}
@@ -108,9 +106,8 @@ parser.addExpression(
 	],
 	class position_expression extends Rule.Expression{
 		toSource(context) {
-			let { identifier, position, expression } = this.results;
-			expression = expression.toSource(context);
-			position = position.toSource(context);
+			let { identifier, position, expression } = this.getMatchedSource(context);
+// TODO: special case 'words', 'lines', etc
 
 			// If we got a positive number literal, compensate for JS 0-based arrays now,
 			// for nicer output.
@@ -133,8 +130,7 @@ parser.addExpression(
 	"a random {identifier} (of|from|in) (the)? {list:expression}",
 	class random_position_expression extends Rule.Expression {
 		toSource(context) {
-			let { list } = this.results;
-			list = list.toSource(context);
+			let { list } = this.getMatchedSource(context);
 			return `spell.getRandomItemOf(${list})`;
 		}
 	}
@@ -150,9 +146,7 @@ parser.addExpression(
 	"{number} random {identifier} (of|from|in) (the)? {list:expression}",
 	class random_positions_expression extends Rule.Expression {
 		toSource(context) {
-			let { number, list } = this.results;
-			number = number.toSource(context);
-			list = list.toSource(context);
+			let { number, list } = this.getMatchedSource(context);
 			return `spell.getRandomItemsOf(${list}, ${number})`;
 		}
 	}
@@ -171,10 +165,7 @@ parser.addExpression(
 	"{identifier} {start:expression} to {end:expression} of {list:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
-			let { start, end, list } = this.results;
-			start = start.toSource(context);
-			end = end.toSource(context);
-			list = list.toSource(context);
+			let { start, end, list } = this.getMatchedSource(context);
 			return `spell.getRange(${list}, ${start}, ${end})`;
 		}
 	}
@@ -189,9 +180,7 @@ parser.addExpression(
 	"first {number:expression} {identifier} (in|of) {list:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
-			let { number, list } = this.results;
-			number = number.toSource(context);
-			list = list.toSource(context);
+			let { number, list } = this.getMatchedSource(context);
 			return `spell.getRange(${list}, 1, ${number})`;
 		}
 	}
@@ -206,9 +195,7 @@ parser.addExpression(
 	"last {number:expression} {identifier} (in|of) {list:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
-			let { number, list } = this.results;
-			number = number.toSource(context);
-			list = list.toSource(context);
+			let { number, list } = this.getMatchedSource(context);
 			return `spell.getEndRange(${list}, 1, ${number})`;
 		}
 	}
@@ -224,9 +211,7 @@ parser.addExpression(
 	"{identifier} (in|of) {list:expression} starting with {thing:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
-			let { thing, list } = this.results;
-			thing = thing.toSource(context);
-			list = list.toSource(context);
+			let { thing, list } = this.getMatchedSource(context);
 			return `spell.getRange(${list}, spell.positionOf(${thing}, ${list}))`;
 		}
 	}
@@ -241,9 +226,7 @@ parser.addExpression(
 	"{identifier} (in|of) {list:expression} where {condition:expression}",
 	class list_filter extends Rule.Expression {
 		toSource(context) {
-			let { identifier, condition, list } = this.results;
-			condition = condition.toSource(context);
-			list = list.toSource(context);
+			let { identifier, condition, list } = this.getMatchedSource(context);
 			// use singular of identifier for method argument
 			let argument = singularize(identifier.toSource(context));
 			return `spell.filter(${list}, ${argument} => ${condition})`;
@@ -260,13 +243,11 @@ parser.addExpression(
 	"{list:expression} (operator:has|has no|doesnt have|does not have) {identifier} where {filter:expression}",
 	class list_membership_test extends Rule.Expression {
 		toSource(context) {
-			let { identifier, operator, filter, list } = this.results;
-			filter = filter.toSource(context);
-			list = list.toSource(context);
-			operator = operator.toSource(context) === "has" ? "" : "!";
+			let { identifier, operator, filter, list } = this.getMatchedSource(context);
+			let bang = operator === "has" ? "" : "!";
 			// use singular of identifier for method argument
 			let argument = singularize(identifier.toSource(context));
-			return `${operator}spell.any(${list}, ${argument} => ${filter})`;
+			return `${bang}spell.any(${list}, ${argument} => ${filter})`;
 		}
 	}
 );
@@ -285,9 +266,7 @@ parser.addStatement(
 	],
 	class list_append extends Rule.Statement {
 		toSource(context) {
-			let { thing, list } = this.results;
-			thing = thing.toSource(context);
-			list = list.toSource(context);
+			let { thing, list } = this.getMatchedSource(context);
 			return `spell.append(${list}, ${thing})`;
 		}
 	}
@@ -304,9 +283,7 @@ parser.addStatement(
 	],
 	class list_prepend extends Rule.Statement {
 		toSource(context) {
-			let { thing, list } = this.results;
-			thing = thing.toSource(context);
-			list = list.toSource(context);
+			let { thing, list } = this.getMatchedSource(context);
 			return `spell.prepend(${list}, ${thing})`;
 		}
 	}
@@ -319,10 +296,7 @@ parser.addStatement(
 	"add {thing:expression} to {list:expression} at position {position:expression}",
 	class list_splice extends Rule.Statement {
 		toSource(context) {
-			let { thing, position, list } = this.results;
-			thing = thing.toSource(context);
-			position = position.toSource(context);
-			list = list.toSource(context);
+			let { thing, position, list } = this.getMatchedSource(context);
 			return `spell.splice(${list}, ${position}, ${thing})`;
 		}
 	}
@@ -335,10 +309,7 @@ parser.addStatement(
 	"add {thing:expression} to {list:expression} after {item:expression}",
 	class list_splice extends Rule.Statement {
 		toSource(context) {
-			let { thing, item, list } = this.results;
-			thing = thing.toSource(context);
-			item = item.toSource(context);
-			list = list.toSource(context);
+			let { thing, item, list } = this.getMatchedSource(context);
 			return `spell.splice(${list}, spell.positionOf(${list}, ${item}), ${thing})`;
 		}
 	}
@@ -358,8 +329,7 @@ parser.addStatement(
 	"(empty|clear) {list:expression}",
 	class list_empty extends Rule.Expression {
 		toSource(context) {
-			let { list } = this.results;
-			list = list.toSource(context);
+			let { list } = this.getMatchedSource(context);
 			return `spell.clear(${list})`;
 		}
 	}
@@ -372,9 +342,7 @@ parser.addStatement(
 	"remove {identifier} {number:expression} of {list:expression}",
 	class list_remove_position extends Rule.Expression {
 		toSource(context) {
-			let { number, list } = this.results;
-			number = number.toSource(context);
-			list = list.toSource(context);
+			let { number, list } = this.getMatchedSource(context);
 			return `spell.removeItem(${list}, ${number})`;
 		}
 	}
@@ -389,10 +357,7 @@ parser.addStatement(
 	"remove {identifier} {start:expression} to {end:expression} of {list:expression}",
 	class list_remove_position extends Rule.Expression {
 		toSource(context) {
-			let { start, end, list } = this.results;
-			start = start.toSource(context);
-			end = end.toSource(context);
-			list = list.toSource(context);
+			let { start, end, list } = this.getMatchedSource(context);
 			return `spell.removeRange(${list}, ${start}, ${end})`;
 		}
 	}
@@ -406,9 +371,7 @@ parser.addStatement(
 	"remove {thing:expression} from {list:expression}",
 	class list_remove extends Rule.Expression {
 		toSource(context) {
-			let { thing, list } = this.results;
-			thing = thing.toSource(context);
-			list = list.toSource(context);
+			let { thing, list } = this.getMatchedSource(context);
 			return `spell.remove(${list}, ${thing})`;
 		}
 	}
@@ -422,9 +385,7 @@ parser.addStatement(
 	"remove {identifier} (in|of|from) {list:expression} where {condition:expression}",
 	class list_remove_where extends Rule.Expression {
 		toSource(context) {
-			let { identifier, condition, list } = this.results;
-			condition = condition.toSource(context);
-			list = list.toSource(context);
+			let { identifier, condition, list } = this.getMatchedSource(context);
 			// use singular of identifier for method argument
 			let argument = singularize(identifier.toSource(context));
 			return `spell.removeWhere(${list}, ${argument} => ${condition})`;
@@ -444,8 +405,7 @@ parser.addStatement(
 	"reverse {list:expression}",
 	class list_reverse extends Rule.Expression {
 		toSource(context) {
-			let { list } = this.results;
-			list = list.toSource(context);
+			let { list } = this.getMatchedSource(context);
 			return `spell.reverse(${list})`;
 		}
 	}
@@ -458,8 +418,7 @@ parser.addStatement(
 	"(randomize|shuffle) {list:expression}",
 	class list_shuffle extends Rule.Expression {
 		toSource(context) {
-			let { list } = this.results;
-			list = list.toSource(context);
+			let { list } = this.getMatchedSource(context);
 			return `spell.shuffle(${list})`;
 		}
 	}
@@ -473,11 +432,7 @@ parser.addStatement(
 	"for (each)? {itemVar:identifier}(?:(and|,) {positionVar:identifier})? in {list:expression}:?",
 	class list_iteration extends Rule.Statement {
 		toSource(context) {
-			let { itemVar, positionVar, list } = this.results;
-			itemVar = itemVar.toSource(context);
-			list = list.toSource(context);
-			positionVar = positionVar && positionVar.toSource(context);
-
+			let { itemVar, positionVar, list } = this.getMatchedSource(context);
 			if (positionVar) {
 				return `for (let ${positionVar} = 1; ${positionVar} <= ${list}.length; ${positionVar}++) {\n`
 					+  `	let ${itemVar} = ${list}[${positionVar}-1]`;
@@ -489,14 +444,13 @@ parser.addStatement(
 
 
 // Range
+//TESTME
 parser.addExpression(
 	"range_expression",
 	"range {start:expression} to {end:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
-			let { start, end } = this.results;
-			start = start.toSource(context);
-			end = end.toSource(context);
+			let { start, end } = this.getMatchedSource(context);
 			return `spell.getRange(${start}, ${end})`;
 		}
 	}
