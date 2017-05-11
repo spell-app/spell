@@ -372,7 +372,8 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		return results;
 	}
 
-	// Return results.toSource(context)
+	// Return `toSource()` for our `results` as a map.
+	// If you pass `keys`, we'll restrict to just those keys.
 	getMatchedSource(context, ...keys) {
 		let results = this.results;
 		let output = {};

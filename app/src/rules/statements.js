@@ -19,8 +19,8 @@ export default parser;
 parser.addStatement("return_statement", "return {expression}",
 	class return_statement extends Rule.Statement {
 		toSource(context) {
-			let { expression } = this.results;
-			return `return ${expression.toSource(context)}`;
+			let { expression } = this.getMatchedSource(context);
+			return `return ${expression}`;
 		}
 	}
 );
@@ -32,12 +32,9 @@ parser.addStatement("return_statement", "return {expression}",
 //
 class assignment extends Rule.Statement {
 	toSource(context) {
-		let { thing, value } = this.results;
-		if (thing instanceof Rule.Identifier) {
-			// TODO: declare identifier if not in scope, etc
-		}
-
-		return `${thing.toSource(context)} = ${value.toSource(context)}`;
+		let { thing, value } = this.getMatchedSource(context);
+		// TODO: declare identifier if not in scope, etc
+		return `${thing} = ${value}`;
 	}
 }
 
@@ -54,8 +51,7 @@ parser.addStatement(
 	"get {value:expression}",
 	class get_expression extends Rule.Statement {
 		toSource(context) {
-			let { value } = this.results;
-			value = value.toSource(context);
+			let { value } = this.getMatchedSource(context);;
 			return `it = ${value}`
 		}
 	}
@@ -70,13 +66,11 @@ parser.addStatement(
 // Alert a message.
 // TODO: need some fancy promise juju here?
 //TESTME
-parser.addStatement("alert", "alert {message:expression} (buttonClause:with {text})?",
+parser.addStatement("alert", "alert {message:expression} (?:with {okButton:text})?",
 	class alert extends Rule.Statement {
 		toSource(context) {
-			let { message, buttonClause } = this.results;
-			message = message.toSource(context);
-			let buttonName = buttonClause ? buttonClause.results.text.toSource(context) : '"OK"';
-			return `await spell.alert(${message}, ${buttonName})`;
+			let { message, okButton = `"OK"` } = this.getMatchedSource(context);
+			return `await spell.alert(${message}, ${okButton})`;
 		}
 	}
 );
@@ -84,13 +78,11 @@ parser.addStatement("alert", "alert {message:expression} (buttonClause:with {tex
 // Warning message -- like alert but fancier.
 // TODO: need some fancy promise juju here?
 //TESTME
-parser.addStatement("warn", "warn {expression:expression} (buttonClause:with {text})?",
+parser.addStatement("warn", "warn {expression:expression} (?:with {okButton:text})?",
 	class warn extends Rule.Statement {
 		toSource(context) {
-			let { message, buttonClause } = this.results;
-			message = message.toSource(context);
-			let buttonName = buttonClause ? buttonClause.results.text.toSource(context) : '"OK"';
-			return `await spell.warn(${message}, ${buttonName})`;
+			let { message, okButton = `"OK"` } = this.getMatchedSource(context);
+			return `await spell.warn(${message}, ${okButton})`;
 		}
 	}
 );
@@ -99,18 +91,10 @@ parser.addStatement("warn", "warn {expression:expression} (buttonClause:with {te
 // Confirm message -- present a question with two answers.
 // TODO: need some fancy promise juju here?
 //TESTME
-parser.addStatement("confirm", "confirm {message:expression} (buttonClause:with {okButton:text} (cancelClause: (and|or) {cancelButton:text})? )?",
+parser.addStatement("confirm", "confirm {message:expression} (?:with {okButton:text} (?: (and|or) {cancelButton:text})? )?",
 	class confirm extends Rule.Statement {
 		toSource(context) {
-			let { message, buttonClause } = this.results;
-			message = message.toSource(context);
-			let okButton = '"OK"', cancelButton = '"Cancel"';
-
-			if (buttonClause) {
-				okButton = buttonClause.results.okButton.results.toSource(context);
-				let cancelClause = buttonClause.results.cancelClause;
-				if (cancelClause) cancelButton = cancelClause.results.cancelButton.results.toSource(context);
-			}
+			let { message, okButton = `"OK"`, cancelButton = `"Cancel"` } = this.getMatchedSource(context);
 			return `await spell.confirm(${message}, ${okButton}, ${cancelButton})`;
 		}
 	}
