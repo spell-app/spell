@@ -145,10 +145,16 @@ Object.assign(Rule, {
 
 	// Match grouping expression `(...|...)` in syntax rules.
 	// Returns `[ rule, endIndex ]`
-	// Throws if invalid.
+	// You can specify an explicit `rule.argument` with:  `(somearg:...)`
+	// You can specify that the results should be `promoted` to enclosing context with: `(?:...)`
+	//
 	// NOTE: nested parens may not have alternatives... :-(   `(a|(b|c))` won't work???
 	parseRuleSyntax_parentheses(syntaxStream, rules = [], startIndex = 0) {
 		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "(", ")", startIndex);
+
+		// pull out explicit "promote" flag: `?:`
+		let promote = (slice[0] === "?" && slice[1] === ":");
+		if (promote) slice = slice.slice(2);
 
 		// pull out explicit argument name
 		let argument;
@@ -172,6 +178,7 @@ Object.assign(Rule, {
 
 		let rule = alternatives.length === 1 ? alternatives[0] : new Rule.Alternatives({ rules: alternatives });
 		if (argument) rule.argument = argument;
+		if (promote) rule.promote = true;
 		return [ rule, endIndex ];
 
 		function groupAlternatives(tokens) {

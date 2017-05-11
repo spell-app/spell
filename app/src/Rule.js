@@ -337,6 +337,8 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 		});
 	}
 
+// 	parseInChunks(parser, stream, stack) {}
+
 //TODOC
 	// "gather" arguments in preparation to call `toSource()`
 	// Only callable after parse is completed.
@@ -347,17 +349,24 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 	// NOTE: memoizes the results.
 	get results() {
 		if (!this.matched) return undefined;
-		let results = {};
-		for (let match of this.matched) {
-			let argName = match.argument || match.ruleName || match.constructor.name;
+		return this.addResults({}, this.matched);
+	}
 
-			// If arg already exists, convert to an array
-			if (argName in results) {
-				if (!Array.isArray(results[argName])) results[argName] = [results[argName]];
-				results[argName].push(match);
+	addResults(results, matched) {
+		for (let match of matched) {
+			if (match.promote) {
+				return this.addResults(results, match.matched);
 			}
 			else {
-				results[argName] = match;
+				let argName = match.argument || match.ruleName || match.constructor.name;
+				// If arg already exists, convert to an array
+				if (argName in results) {
+					if (!Array.isArray(results[argName])) results[argName] = [results[argName]];
+					results[argName].push(match);
+				}
+				else {
+					results[argName] = match;
+				}
 			}
 		}
 		return results;

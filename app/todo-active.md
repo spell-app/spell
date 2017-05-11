@@ -22,13 +22,17 @@ SPEEDUP
 - break statement parsing up into interruptable chunks w/ promise
 
 
+SPREAD INTO RULES
+- `(?:...)` to move nested results up in a sequence
+
 
 
 TODO:
-- parse result.tree	=> nested tree of results for visualization, transform
+- parse result.tree
+	=> nested tree of results for visualization, transform
+	=> or is the tree just the matched array???
 - single line comments with -- or //
 - `if can play card on pile`	=> want to translate to `pile.can_play_card(card)`
-- `(?:...)` to move nested results up in a sequence
 - `Rule.Statements`, including nesting
 - `(a,b)` to create array rather than []
 - `is one of "diamonds", "hearts" or "spades"`
@@ -50,8 +54,8 @@ TODO:
 - numbers `one`, `two`, etc. Should return a `Rule.Number`
 - parseStatements(): return sequence(?) of results?
 - parser.addExpression("name", /pattern/, class), same for addKeyword, etc
-- if we're doing _ between keywords, can we omit `with`?
 - class constructor?
+	- when creating
 - add things to prototype rather than class...
 - copy of <thing>
 

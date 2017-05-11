@@ -19,13 +19,13 @@ export default parser;
 //TESTME w/o `= expression`
 parser.addList(
 	"object_literal_properties",
-	"[({identifier}(equals:= {expression})?) ,]",
+	"[({key:identifier}(?:= {value:expression})?) ,]",
 	class object_literal_properties extends Rule.List {
 		toSource(context) {
 			let props = this.results.matched.map(function (prop) {
-					let { identifier, equals } = prop.results;
-					let key = identifier.toSource(context);
-					let value = equals && equals.results.expression.toSource(context);
+					let { key, value } = prop.results;
+					key = key.toSource(context);
+					value = value && value.toSource(context);
 					if (value) return `"${key}": ${value}`
 					return key;
 				});
@@ -38,16 +38,20 @@ parser.addList(
 // NOTE: we assume that all types take an object of properties????
 parser.addSequence(
 	"new_thing",
-	"(create|new) {type} (props_clause:with {props:object_literal_properties})?",
+	"(create|new) {type} (?:with {props:object_literal_properties})?",
 	class new_thing extends Rule.Sequence {
+		getResults(context) {
+			let { type, props } = this.results;
+			return {
+				type: type.toSource(context),
+				props: props && props.toSource(context) || ""
+			};
+		}
 		toSource(context) {
-			let { type, props_clause } = this.results;
-			type = type.toSource(context);
-			let props = props_clause && props_clause.results.props.toSource(context) || "";
-
+			let { type, props } = this.getResults(context);
 			// Special case for object, which we'll create with an object literal.
 			if (type === "Object") {
-				if (!props_clause) return "{}";
+				if (!props) return "{}";
 				return `${props}`;
 			}
 
