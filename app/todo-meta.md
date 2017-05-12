@@ -1,5 +1,9 @@
 # Spell Environment ToDo
 
+## Questions
+- OK to modify JS globals?
+	- eg: `array.size`
+
 ## Goals
 - Driving toward an interactive "editor" for Spell/Oak
 
@@ -18,12 +22,18 @@
 
 ## Short Term Tasks
 - Add code examples app to spell parser
-	- Save examples in localstorage initially
+	√ Save examples in localstorage initially
 	- Save to disk soon
 		- express module we can plug in to OakJS server environment
 	- Use as test runner
+		- code => expected result
+		- 'bless' button
 	- Evolve w/ [Atom | Ace | CodeMirror | etc] into full editor / debugger
 
+- visualize parse match
+	- peer of `compiled JS` tab
+	- shows english => match
+	- this will expose needles complexities in parsing results nesting
 
 - What does a Spell program look like?
 	- MD-based similar to eve?
@@ -33,6 +43,7 @@
 - Component Definition
 	- Parse XML => spell.createComponent()
 	- Props vs State?
+	- "preferences" = state
 
 - Parser Enhancements / Bugs
 	- Multi-part expressions (a = b and c = d)
@@ -50,6 +61,13 @@
 	- Datasource
 	- Record (types, fields, field mapping, load, save)
 
+
+- Animation model
+	- `animatable` components are postion-absolute to some container
+	- container dynamically applies location to children
+	- e.g.
+		- cards are position absolute for `game`
+		- piles supply x/y coordiante for each of their card
 
 ## Data Model
 #### Requirements

@@ -19,13 +19,10 @@ BUGS
 
 SPEEDUP
 - tokenize & match words/symbols using === rather than regex
+	- make a `word trie`?
 - alternatives/etc to one regex?
 - parse structure first (statements only?)
 - break statement parsing up into interruptable chunks w/ promise
-
-
-SPREAD INTO RULES
-- `(?:...)` to move nested results up in a sequence
 
 
 
@@ -33,6 +30,7 @@ TODO:
 - parse result.tree
 	=> nested tree of results for visualization, transform
 	=> or is the tree just the matched array???
+-
 - single line comments with -- or //
 - `if can play card on pile`	=> want to translate to `pile.can_play_card(card)`
 - `Rule.Statements`, including nesting
@@ -47,6 +45,10 @@ TODO:
 		=> it = pile.top_card
 
 - expression: `the {property} for each in {list}`
+
+- `each {identifer} of {expression}` => iterate for each item in a list
+	- move Card to Pile
+	- move each card of some pile to another pile
 
 - getResults(context, name, name, name)
 	=> return results mapped over results.toSource(context)
@@ -64,6 +66,8 @@ TODO:
 
 BIG TICKETS
 - use specificity of results to disambiguate rules?
+	- CSS-like specificity heuristic for rules
+	-
 
 CLASSES AND MULTI-WORD STATEMENTS / METHODS
 - need to gather the above in the parser for this class and all antecedents BEFORE parsing method text
@@ -72,6 +76,10 @@ CLASSES AND MULTI-WORD STATEMENTS / METHODS
 	- each class gets its own parser based on what's available to it...
 	- madness???"
 
+
+- define Pile:
+	- can play a card on me
+		=> "if can play (the) card on (the) pile"
 
 `this` vs `my`
 	- my requires "is" => "am" inversion
