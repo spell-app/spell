@@ -9,14 +9,6 @@ import parser from "./_parser";
 // re-export parser for testing.
 export default parser;
 
-
-
-// Add default rule types
-// TODO: move this somewhere else???
-parser.addRule("expression", Rule.Alternatives);
-
-
-
 // `whitespace` rule.
 // NOTE `parser.parseRule("whitespace", "   ")` will return `undefined`
 //		 because `parser.parseRule()` automatically eats whitespace at the start of a rule.
@@ -71,33 +63,27 @@ parser.addSequence(
 
 // `word` = is a single alphanumeric word.
 // MUST start with a lower-case letter (?)
-parser.addRule(
-	"word",
-	class word extends Rule.Pattern {
-		pattern = /\b[a-z][\w\-]*\b/;
-		// Convert "-" to "_" in source output.
-		toSource(context) {
-			return this.matched.replace(/\-/g, "_");
-		}
+Rule.Word = class word extends Rule.Pattern {
+	pattern = /\b[a-z][\w\-]*\b/;
+	// Convert "-" to "_" in source output.
+	toSource(context) {
+		return this.matched.replace(/\-/g, "_");
 	}
-);
-
-
+};
+parser.addRule("word", Rule.Word);
 
 
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
-parser.addRule(
-	"identifier",
-	class identifier extends Rule.Pattern {
-		pattern = /\b[a-z][\w\-]*\b/;
+Rule.Identifier = class identifier extends Rule.Pattern {
+	pattern = /\b[a-z][\w\-]*\b/;
 
-		// Convert "-" to "_" in source output.
-		toSource(context) {
-			return this.matched.replace(/\-/g, "_");
-		}
+	// Convert "-" to "_" in source output.
+	toSource(context) {
+		return this.matched.replace(/\-/g, "_");
 	}
-);
+};
+parser.addRule("identifier", Rule.Identifier);
 parser.addRule("expression", parser.rules.identifier);
 
 // Add English prepositions to identifier blacklist.

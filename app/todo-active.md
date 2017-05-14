@@ -1,5 +1,7 @@
 
 TODO:
+- parser.addRule([a,b,c]...)
+
 - getMatchedSource()
 	=> getMatched(context)
 
