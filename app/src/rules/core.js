@@ -83,8 +83,7 @@ Rule.Identifier = class identifier extends Rule.Pattern {
 		return this.matched.replace(/\-/g, "_");
 	}
 };
-parser.addRule("identifier", Rule.Identifier);
-parser.addRule("expression", parser.rules.identifier);
+parser.addRule(["identifier", "expression"], Rule.Identifier);
 
 // Add English prepositions to identifier blacklist.
 //

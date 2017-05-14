@@ -188,6 +188,11 @@ export default class Parser {
 			rule = new rule();
 		}
 
+		if (Array.isArray(name)) {
+			name.forEach(name => this.addRule(name, rule) );
+			return rule;
+		}
+
 		// don't override ruleName
 		if (!rule.ruleName) rule.ruleName = name;
 
