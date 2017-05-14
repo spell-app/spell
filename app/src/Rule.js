@@ -352,7 +352,9 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 	// NOTE: memoizes the results.
 	get results() {
 		if (!this.matched) return undefined;
-		return this.addResults({}, this.matched);
+		let results = this.addResults({}, this.matched);
+		if (this.comment) results.comment = this.comment;
+		return results;
 	}
 
 	addResults(results, matched) {

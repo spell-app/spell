@@ -75,7 +75,7 @@ export default class Parser {
 	// Parse a set of statements line-by-line.
 //TESTME
 	compileStatements(statements) {
-		console.time("parseStatements");
+		console.time("compileStatements");
 		let results = [];
 		let currentIndent = 0;
 		const tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
@@ -154,7 +154,7 @@ export default class Parser {
 			currentIndent--;
 		}
 
-		console.timeEnd("parseStatements");
+		console.timeEnd("compileStatements");
 		return results.join("\n");
 	}
 

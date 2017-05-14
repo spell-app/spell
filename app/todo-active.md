@@ -3,16 +3,21 @@ TODO:
 - getMatchedSource()
 	=> getMatched(context)
 
+- comments
+	- add to all statements
+	- add to results
+	- others?
+	- auto-output as part of `statements`?
+		- eg: comments not important unless part of statement block
+	- TODO: preserve whitespace in between comment symbol and text
+	- TODO: preserve whitespace BEFORE comment?  very unlikely this will line up...
+	- TODO: automagic comment indent preserver
+
 - Rule.Boolean etc:  add pattern/etc to class: we're only creating one anyway.
 
 - parse result.tree
 	=> nested tree of results for visualization, transform
 	=> or is the tree just the matched array???
-
-- Rule.Comment
-	- single line comments with -- or //
-	- any Rule.Statement can end with a rule.Comment
-		- any structure at all?  eg:  result = { matched, matchedText, comment }
 
 - Rule.Statements
 	- move multiline parsing logic into statements.parse
