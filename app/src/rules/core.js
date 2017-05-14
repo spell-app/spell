@@ -132,9 +132,8 @@ parser.rules.identifier.addToBlacklist(
 
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
-Rule.Type = class type extends Rule.Pattern {};
-parser.addRule("type", new Rule.Type({
-	pattern: /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/,
+Rule.Type = class type extends Rule.Pattern {
+	pattern = /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/;
 	// Convert "-" to "_" in source output.
 	toSource(context) {
 		let value = this.matched;
@@ -151,9 +150,9 @@ parser.addRule("type", new Rule.Type({
 				return value.replace(/\-/g, "_");
 		}
 	}
-}));
+};
+parser.addRule(["type", "expression"], Rule.Type);
 parser.rules.type.addToBlacklist("I");
-parser.addRule("expression", parser.rules.type);
 
 
 // `number` as either float or integer, created with custom constructor for debugging.
