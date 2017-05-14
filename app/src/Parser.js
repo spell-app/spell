@@ -182,6 +182,12 @@ export default class Parser {
 	// Add a rule to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
 	addRule(name, rule) {
+		// If passed a function, create an instance for the actual rule.
+		// This is commonly done so JS will give us meaningful class names in debug output.
+		if (typeof rule === "function") {
+			rule = new rule();
+		}
+
 		// don't override ruleName
 		if (!rule.ruleName) rule.ruleName = name;
 

@@ -9,26 +9,49 @@ import parser from "./_parser";
 // re-export parser for testing.
 export default parser;
 
+
+
+// Add default rule types
+// TODO: move this somewhere else???
+parser.addRule("expression", Rule.Alternatives);
+
+
+
 // `whitespace` rule.
 // NOTE `parser.parseRule("whitespace", "   ")` will return `undefined`
 //		 because `parser.parseRule()` automatically eats whitespace at the start of a rule.
-Rule.Whitespace = class whitespace extends Rule.Pattern {}
-parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/ }));
+parser.addRule(
+	"whitespace",
+	class whitespace extends Rule.Pattern {
+		pattern = /\s+/;
+	}
+);
+
+
+
+
 
 
 // Generic rule to eat everything from start to end of the current line
 // NOTE: due to our whitespace rules, whitespace BEFORE this will not be included.
 // TODO: do not return EOL in results?
 // TESTME
-parser.addRule("eat_to_end_of_line", new (class eat_to_end_of_line extends Rule.Pattern {
-	pattern = /.*\n?/;
-}));
+parser.addRule(
+	"eat_to_end_of_line",
+	class eat_to_end_of_line extends Rule.Pattern {
+		pattern = /.*\n?/;
+	}
+);
 
 // Single-line comment symbol (with NO comment text).
+//TODO: do as an alternatives???
 // TESTME
-parser.addRule("comment_symbol", new (class comment_symbol extends Rule.Pattern {
-	pattern = /\s*(\/\/|--|#+)\s*/;
-}));
+parser.addRule(
+	"comment_symbol",
+	class comment_symbol extends Rule.Pattern {
+		pattern = /\s*(\/\/|--|#+)\s*/;
+	}
+);
 
 
 // Comment 'expression"
@@ -48,27 +71,33 @@ parser.addSequence(
 
 // `word` = is a single alphanumeric word.
 // MUST start with a lower-case letter (?)
-Rule.Word = class word extends Rule.Pattern {};
-parser.addRule("word", new Rule.Word({
-	pattern: /\b[a-z][\w\-]*\b/,
-	// Convert "-" to "_" in source output.
-	toSource(context) {
-		return this.matched.replace(/\-/g, "_");
+parser.addRule(
+	"word",
+	class word extends Rule.Pattern {
+		pattern = /\b[a-z][\w\-]*\b/;
+		// Convert "-" to "_" in source output.
+		toSource(context) {
+			return this.matched.replace(/\-/g, "_");
+		}
 	}
-}));
+);
+
+
 
 
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
-Rule.Identifier = class identifier extends Rule.Pattern {};
-parser.addRule("identifier", new Rule.Identifier({
-	pattern: /\b[a-z][\w\-]*\b/,
+parser.addRule(
+	"identifier",
+	class identifier extends Rule.Pattern {
+		pattern = /\b[a-z][\w\-]*\b/;
 
-	// Convert "-" to "_" in source output.
-	toSource(context) {
-		return this.matched.replace(/\-/g, "_");
+		// Convert "-" to "_" in source output.
+		toSource(context) {
+			return this.matched.replace(/\-/g, "_");
+		}
 	}
-}));
+);
 parser.addRule("expression", parser.rules.identifier);
 
 // Add English prepositions to identifier blacklist.
