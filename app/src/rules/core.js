@@ -157,9 +157,9 @@ parser.rules.type.addToBlacklist("I");
 
 // `number` as either float or integer, created with custom constructor for debugging.
 // NOTE: you can also use `one`...`ten` as strings.
-Rule.Number = class number extends Rule.Pattern {};
-parser.addRule("number", new Rule.Number({
-	pattern: /(-?([0-9]*[.])?[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)/,
+Rule.Number = class number extends Rule.Pattern {
+	pattern = /(-?([0-9]*[.])?[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)/;
+
 	// Convert to number on source output.
 	toSource(context) {
 		var number = parseFloat(this.matched, 10);
@@ -178,10 +178,12 @@ parser.addRule("number", new Rule.Number({
 			case "ten": return 10;
 		}
 	}
-}));
-parser.addRule("expression", parser.rules.number);
+};
+
+parser.addRule(["number", "expression"], Rule.Number);
 
 // Add number words to identifier blacklist.
+// TESTME
 parser.rules.identifier.addToBlacklist(
 	"one", "two", "three", "four", "five",
 	"six", "seven", "eight", "nine", "ten"
@@ -190,32 +192,32 @@ parser.rules.identifier.addToBlacklist(
 // Numeric `integer` only, created with custom constructor for debugging.
 // NOTE: this WILL match a float, but the returned value will coerce to an integer.
 // REVIEW: is this right?  Better to not match a float?
-Rule.Integer = class integer extends Rule.Pattern {};
-parser.addRule("integer", new Rule.Integer({
-	pattern: /-?([0-9]*[.])?[0-9]+/,
+Rule.Integer = class integer extends Rule.Pattern {
+	pattern = /-?([0-9]*[.])?[0-9]+/;
 	// Convert to integer on source output.
 	toSource(context) {
 		return parseInt(this.matched, 10);
 	}
-}));
+};
+//TODO: add as expression????
+parser.addRule("integer", Rule.Integer);
 
 
 // Literal `text` string, created with custom constructor for debugging.
 // You can use either single or double quotes on the outside (although double quotes are preferred).
 // Returned value has enclosing quotes.
 // TODO: escaped quotes inside string
-Rule.Text = class text extends Rule.Pattern {};
-parser.addRule("text", new Rule.Text({
-	pattern: /(?:"[^"]*"|'[^']*')/
-}));
-parser.addRule("expression", parser.rules.text);
+Rule.Text = class text extends Rule.Pattern {
+	pattern = /(?:"[^"]*"|'[^']*')/;
+};
+parser.addRule(["text", "expression"], Rule.Text);
 
 
 // Boolean literal, created with custom constructor for debugging.
 // TODO: better name for this???
-Rule.Boolean = class boolean extends Rule.Pattern {};
-parser.addRule("boolean", new Rule.Boolean({
-	pattern: /(true|false|yes|no|ok|cancel|success|failure)\b/,
+Rule.Boolean = class boolean extends Rule.Pattern {
+	pattern = /(true|false|yes|no|ok|cancel|success|failure)\b/;
+
 	toSource(context) {
 		switch (this.matched) {
 			case "true":
@@ -227,8 +229,8 @@ parser.addRule("boolean", new Rule.Boolean({
 				return false;
 		}
 	}
-}));
-parser.addRule("expression", parser.rules.boolean);
+};
+parser.addRule(["boolean", "expression"], Rule.Boolean);
 // Add boolean tokens to identifier blacklist.
 // TESTME
 parser.rules.identifier.addToBlacklist(
