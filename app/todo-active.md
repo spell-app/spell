@@ -1,39 +1,56 @@
-BUGS
-> parser.parse("expression","the first item of myList is the foo of the bar of the baz").toSource()
-=> "spell.getItem((myList == spell.get(baz, 'bar.foo')), 1)"
-
-> parser.parse("expression", "a is 1 and b is 2").toSource()
-=> "(a == (1 && (b == 2)))"
-
-> parser.parse("expression", "the face of the card is 'down'").toSource()
-=> "(card == 'down').face"
-
-> parser.parse("statement", "append 1 to the end of myList")
-=> "spell.append(theList.end, 1)"
-
-> parser.parse("statement", "add 1 to the front of myList")
-=> "spell.append(myList.front, 1)"	-- should be "spell.prepend(myList, 1)"
-
-> parser.parse("backwards_if", "get a if true else get b")
-=> "if (true) { get a() } else { it = b }"
-
-SPEEDUP
-- tokenize & match words/symbols using === rather than regex
-	- make a `word trie`?
-- alternatives/etc to one regex?
-- parse structure first (statements only?)
-- break statement parsing up into interruptable chunks w/ promise
-
-
 
 TODO:
+- getMatchedSource()
+	=> getMatched(context)
+
+- Rule.Boolean etc:  add pattern/etc to class: we're only creating one anyway.
+
 - parse result.tree
 	=> nested tree of results for visualization, transform
 	=> or is the tree just the matched array???
--
-- single line comments with -- or //
+
+- Rule.Comment
+	- single line comments with -- or //
+	- any Rule.Statement can end with a rule.Comment
+		- any structure at all?  eg:  result = { matched, matchedText, comment }
+
+- Rule.Statements
+	- move multiline parsing logic into statements.parse
+	- returns an instance which can be toSource()'d
+
+- Structure parsing
+	- have separate structure rules, eg:
+		- if.pattern	= "if {expression} (then|:) {statement}?"
+		- if.structure	= "if {anything} (then|:) {statement}?"
+
+	- scan statements for structure
+		- leading whitespace (changes)
+		- if, loops, etc
+		- and/or inside expressions?
+		- define type
+		- to/action/get/set
+		- what else??
+
+	- for structure to really work, there will be some mandatory blacklists for mutli-identifiers
+		if, else, then, ":",
+
+	- break up parsing into small sub-tasks
+		- intuit structure
+		- add structure to context.scope
+		- parse bits
+
+	- parse() takes `context` including:
+		- parser
+		- scope
+			- app / type / method / block
+			- any loose code (eg: in type def) gets added to constructor
+
+- Rule.Repeat
+	- some default toSource()?
+	- at least default toMatchedSource()?
+
+
 - `if can play card on pile`	=> want to translate to `pile.can_play_card(card)`
-- `Rule.Statements`, including nesting
 - `(a,b)` to create array rather than []
 - `is one of "diamonds", "hearts" or "spades"`
 - property X as list of Cards
@@ -44,11 +61,11 @@ TODO:
 	> get the top card of the pile
 		=> it = pile.top_card
 
-- expression: `the {property} for each in {list}`
 
 - `each {identifer} of {expression}` => iterate for each item in a list
 	- move Card to Pile
 	- move each card of some pile to another pile
+	- the color of each card in the pile
 
 - getResults(context, name, name, name)
 	=> return results mapped over results.toSource(context)
@@ -62,6 +79,17 @@ TODO:
 	- when creating
 - add things to prototype rather than class...
 - copy of <thing>
+
+
+
+
+SPEEDUP
+- tokenize & match words/symbols using === rather than regex
+	- make a `word trie`?
+- alternatives/etc to one regex?
+- parse structure first (statements only?)
+- break statement parsing up into interruptable chunks w/ promise
+
 
 
 BIG TICKETS

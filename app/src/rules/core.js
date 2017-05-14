@@ -16,8 +16,33 @@ Rule.Whitespace = class whitespace extends Rule.Pattern {}
 parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/ }));
 
 
-// Comment
-Rule.Comment = class comment extends Rule.Pattern {}
+// Generic rule to eat everything from start to end of the current line
+// NOTE: due to our whitespace rules, whitespace BEFORE this will not be included.
+// TESTME
+parser.addRule("eat_to_end_of_line", new (class eat_to_end_of_line extends Rule.Pattern {
+	pattern = /.*\n?/;
+}));
+
+// Single-line comment symbol (with NO comment text).
+// TESTME
+parser.addRule("comment_symbol", new (class comment_symbol extends Rule.Pattern {
+	pattern = /(\/\/|--|#+)/;
+}));
+
+
+// Comment 'expression"
+// TODO: this does not preserve whitespace in the comment itself, which is probably wrong...
+// TESTME
+parser.addSequence(
+	"comment",
+	"{comment_symbol}{comment:eat_to_end_of_line}",
+	class comment extends Rule.Sequence {
+		toSource(context) {
+			let { comment_symbol, comment } = this.getMatchedSource(context);
+			return `// ${comment}`;
+		}
+	}
+);
 
 
 // `word` = is a single alphanumeric word.
@@ -26,7 +51,7 @@ Rule.Word = class word extends Rule.Pattern {};
 parser.addRule("word", new Rule.Word({
 	pattern: /\b[a-z][\w\-]*\b/,
 	// Convert "-" to "_" in source output.
-	toSource: function(context) {
+	toSource(context) {
 		return this.matched.replace(/\-/g, "_");
 	}
 }));
@@ -96,7 +121,7 @@ Rule.Type = class type extends Rule.Pattern {};
 parser.addRule("type", new Rule.Type({
 	pattern: /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/,
 	// Convert "-" to "_" in source output.
-	toSource: function(context) {
+	toSource(context) {
 		let value = this.matched;
 		switch(value) {
 			// special case to take the following as lowercase
@@ -122,7 +147,7 @@ Rule.Number = class number extends Rule.Pattern {};
 parser.addRule("number", new Rule.Number({
 	pattern: /(-?([0-9]*[.])?[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)/,
 	// Convert to number on source output.
-	toSource: function(context) {
+	toSource(context) {
 		var number = parseFloat(this.matched, 10);
 		if (!isNaN(number)) return number;
 
@@ -155,7 +180,7 @@ Rule.Integer = class integer extends Rule.Pattern {};
 parser.addRule("integer", new Rule.Integer({
 	pattern: /-?([0-9]*[.])?[0-9]+/,
 	// Convert to integer on source output.
-	toSource: function(context) {
+	toSource(context) {
 		return parseInt(this.matched, 10);
 	}
 }));
@@ -177,7 +202,7 @@ parser.addRule("expression", parser.rules.text);
 Rule.Boolean = class boolean extends Rule.Pattern {};
 parser.addRule("boolean", new Rule.Boolean({
 	pattern: /(true|false|yes|no|ok|cancel|success|failure)\b/,
-	toSource: function(context) {
+	toSource(context) {
 		switch (this.matched) {
 			case "true":
 			case "yes":
@@ -229,4 +254,3 @@ parser.addExpression(
 		}
 	}
 )
-

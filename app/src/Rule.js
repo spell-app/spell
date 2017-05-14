@@ -149,6 +149,9 @@ Rule.Pattern = class Pattern extends Rule {
 		let matched = match[0];
 		if (this.blacklist && this.blacklist[matched]) return undefined;
 
+//TESTME: is this assertion correct?
+		// NOTE: is is possible for match[0] !== stream.range(...) below
+		//		 because we may have eaten whitespace at the beginning of the rule.
 		let endIndex = stream.startIndex + matched.length;
 		return this.clone({
 			matched,
@@ -398,8 +401,11 @@ Rule.Sequence = class Sequence extends Rule.Nested {
 Rule.Expression = class expression extends Rule.Sequence {}
 
 
-// Statements take up the entire line.
-Rule.Statement = class statement extends Rule.Sequence {}
+// A statement takes up the entire line.
+// Statements can optionally have a comment at the end of the line.
+Rule.Statement = class statement extends Rule.Sequence {
+
+}
 
 
 // Alternative syntax, matching one of a number of different rules.
