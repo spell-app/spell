@@ -18,6 +18,7 @@ parser.addRule("whitespace", new Rule.Whitespace({ pattern: /\s+/ }));
 
 // Generic rule to eat everything from start to end of the current line
 // NOTE: due to our whitespace rules, whitespace BEFORE this will not be included.
+// TODO: do not return EOL in results?
 // TESTME
 parser.addRule("eat_to_end_of_line", new (class eat_to_end_of_line extends Rule.Pattern {
 	pattern = /.*\n?/;
@@ -26,7 +27,7 @@ parser.addRule("eat_to_end_of_line", new (class eat_to_end_of_line extends Rule.
 // Single-line comment symbol (with NO comment text).
 // TESTME
 parser.addRule("comment_symbol", new (class comment_symbol extends Rule.Pattern {
-	pattern = /(\/\/|--|#+)/;
+	pattern = /\s*(\/\/|--|#+)\s*/;
 }));
 
 

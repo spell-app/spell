@@ -404,7 +404,18 @@ Rule.Expression = class expression extends Rule.Sequence {}
 // A statement takes up the entire line.
 // Statements can optionally have a comment at the end of the line.
 Rule.Statement = class statement extends Rule.Sequence {
+	parse(parser, stream, stack = []) {
+		let result = super.parse(parser, stream, stack);
+		if (!result) return undefined;
 
+		// Check for a comment, and add it as `comment` to the matched output
+		let comment = parser.rules.comment.parse(parser, result.next(), stack);
+		if (comment) {
+			result.comment = comment;
+			result.endIndex = comment.next().startIndex;
+		}
+		return result;
+	}
 }
 
 
