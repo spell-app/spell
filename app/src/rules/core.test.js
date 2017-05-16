@@ -138,39 +138,6 @@ test("correctly matches numbers", () => {
 
 
 //
-//	Integer
-//
-test("correctly matches integers", () => {
-	let result = parser.parse("integer", "1");
-	expect(result.toSource()).toBe(1);
-
-	result = parser.parse("integer", "1000");
-	expect(result.toSource()).toBe(1000);
-
-	result = parser.parse("integer", " -1");
-	expect(result.toSource()).toBe(-1);
-
-	result = parser.parse("integer", " -1000");
-	expect(result.toSource()).toBe(-1000);
-
-	result = parser.parse("integer", "- 1");
-	expect(result).toBeUndefined();
-
-	result = parser.parse("integer", "1.1");
-	expect(result.toSource()).toBe(1);
-
-	result = parser.parse("integer", "-111.111");
-	expect(result.toSource()).toBe(-111);
-
-	result = parser.parse("integer", "a1");
-	expect(result).toBeUndefined();
-
-	result = parser.parse("integer", "(1");
-	expect(result).toBeUndefined();
-});
-
-
-//
 //	Text
 //
 test("correctly matches text type", () => {

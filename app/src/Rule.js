@@ -48,13 +48,6 @@ export default class Rule {
 		return undefined;
 	}
 
-	// Is this rule deterministic, eg: can it be quickly and unambiguously satisfied?
-	// Returning `true` can speed up sequence processing,
-	//	but if you're really not sure, return `undefined`.
-	isDeterministic(parser, stream) {
-		return undefined;
-	}
-
 	// Test to see if bits of our rule are found ANYWHERE in the stream.
 	// Returns:
 	//	- `undefined` if not determinstic (but all patterns are deterministic)
@@ -164,11 +157,6 @@ Rule.Pattern = class Pattern extends Rule {
 		});
 	}
 
-	// Patterns are ALWAYS deterministic.
-	isDeterministic(parser, stream) {
-		return true;
-	}
-
 	// Test to see if any of our patternis found ANYWHERE in the stream.
 	// Returns:
 	//	- `undefined` if not determinstic (but all patterns are deterministic)
@@ -269,11 +257,6 @@ Rule.Subrule = class Subrule extends Rule {
 		return match;
 	}
 
-	isDeterministic(parser, stream) {
-		let rule = parser.getRuleOrDie(this.rule, "rule");
-		return rule.isDeterministic(parser, stream);
-	}
-
 	// Test to see if any of our alternatives are found ANYWHERE in the stream.
 	// Returns:
 	//	- regex match if found,
@@ -293,12 +276,6 @@ Rule.Subrule = class Subrule extends Rule {
 
 // Abstract:  `Nested` rule -- composed of a series of other `rules`.
 Rule.Nested = class Nested extends Rule {
-
-	// Is this deterministic, eg: are our subrules unambigously determinable?
-//TODO: memoize?
-	isDeterministic(parser, stream) {
-		return this.rules.every(rule => rule.isDeterministic(parser, stream));
-	}
 }
 
 
@@ -558,24 +535,6 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 	constructor(props) {
 		super(props);
 		if (!this.rules) this.rules = [];
-	}
-
-	// Test to see if any of our alternatives are found ANYWHERE in the stream.
-	// Returns:
-	//	- `undefined` if not determinstic.
-	//	- regex match if found,
-	//	- `false` if not found or
-	test(parser, stream) {
-		if (!this.isDeterministic(parser, stream)) return undefined;
-		let bestMatch;
-		for (let rule of this.rules) {
-			let match = rule.test(parser, stream);
-			if (match) {
-				match.endIndex = match.index + match[0].length;
-				return match;
-			}
-		}
-		return false;
 	}
 
 	// Find all rules which match and delegate to `getBestMatch()` to pick the best one.
