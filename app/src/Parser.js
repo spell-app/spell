@@ -223,7 +223,7 @@ export default class Parser {
 
 	// Is the specified rule left-recursive?
 	ruleIsLeftRecursive(name, rule) {
-		if (!(rule instanceof Rule.Sequence)) return false;
+		if (!(rule instanceof Rule.Sequence) || !rule.rules) return false;
 //console.log(name, rule);
 		for (let subrule of rule.rules) {
 			// ignore optional rules

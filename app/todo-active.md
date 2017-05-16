@@ -1,9 +1,30 @@
-
 TODO:
-- parser.addRule([a,b,c]...)
+
+- refactor thoughts
+	- forget stream, just take text string?
+		- need: matched, matchedText, startIndex, endIndex
+	- results can be string?
+
+
+- MobX
+	- cleverly use mobX to cache lines, structures, etc?
+
+- forget the `stream` thing in parsing?  use only in Statements?
+
+-> push context:  { parser, stack, supers, method } into parsing
+	- output doesn't require context...
+	- "local class" winds
+		- each class gets its own parser (or just rules?)
+		- match {expression} in each super parser
+		- level of parser in stack = specificity if 2 matches?
+		- how does length of result jibe with this?
+
+- subrule needs to take params
+	- eg: "non-greedy"
 
 - getMatchedSource()
 	=> getMatched(context)
+
 
 - comments
 	- add to all statements
@@ -16,6 +37,20 @@ TODO:
 	- TODO: automagic comment indent preserver
 
 - Rule.Boolean etc:  add pattern/etc to class: we're only creating one anyway.
+- addSyntax(["name","expression", ...)
+
+
+
+- parsing feedback
+	- give an optional HTML element
+	- break parsing up into steps
+		- structure analysis
+		- line by line
+	- as process moves along, provide feedback into html element as react classes
+		- "unknown" (grey) => <if> <keyword> etc (blue, etc)
+
+	- parser.parse() needs to return a promise?
+		-> global `parse()` to print to console for convenience
 
 - parse result.tree
 	=> nested tree of results for visualization, transform
@@ -29,6 +64,9 @@ TODO:
 	- have separate structure rules, eg:
 		- if.pattern	= "if {expression} (then|:) {statement}?"
 		- if.structure	= "if {anything} (then|:) {statement}?"
+
+	- parse strings, then comments at this level too!!!
+	- paren nesting?
 
 	- scan statements for structure
 		- leading whitespace (changes)
@@ -57,6 +95,7 @@ TODO:
 	- at least default toMatchedSource()?
 
 
+- rule.number vs rule.integer => length rule should disambiguate...
 - `if can play card on pile`	=> want to translate to `pile.can_play_card(card)`
 - `(a,b)` to create array rather than []
 - `is one of "diamonds", "hearts" or "spades"`

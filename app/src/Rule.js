@@ -195,7 +195,6 @@ Rule.Pattern = class Pattern extends Rule {
 
 // Rule for literal string value, which include punctuation such as `(` etc.
 // `Symbol`s are different from `Keywords` in that they do not require a word boundary.
-//TODO: rename `Symbol`???
 Rule.Symbol = class Symbol extends Rule.Pattern {
 	constructor(properties) {
 		// `string` is requied.
@@ -404,19 +403,132 @@ Rule.Expression = class expression extends Rule.Sequence {}
 
 
 // A statement takes up the entire line.
-// Statements can optionally have a comment at the end of the line.
 Rule.Statement = class statement extends Rule.Sequence {
-	parse(parser, stream, stack = []) {
-		let result = super.parse(parser, stream, stack);
-		if (!result) return undefined;
+// Statements can optionally have a comment at the end of the line.
+// 	parse(parser, stream, stack = []) {
+// 		let result = super.parse(parser, stream, stack);
+// 		if (!result) return undefined;
+//
+// 		// Check for a comment, and add it as `comment` to the matched output
+// 		let comment = parser.rules.comment.parse(parser, result.next(), stack);
+// 		if (comment) {
+// 			result.comment = comment;
+// 			result.endIndex = comment.next().startIndex;
+// 		}
+// 		return result;
+// 	}
+}
 
-		// Check for a comment, and add it as `comment` to the matched output
-		let comment = parser.rules.comment.parse(parser, result.next(), stack);
-		if (comment) {
-			result.comment = comment;
-			result.endIndex = comment.next().startIndex;
+// `Statements` are a block of `Statements` that understand nesting.
+// TODO: is this a `Block`?
+Rule.Statements = class statements extends Rule.Sequence {
+
+	// Return a certain `number` of tab characters.
+	static TABS = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+	getTabs(number) {
+		return Rule.Statements.TABS.substr(0, number);
+	}
+
+	parse(parser, stream, stack = []) {
+		console.time("Rule.Statements.parse()");
+
+		let results = [];
+		let lastIndent = 0;
+
+		// parse the entire stream from this point
+		let statements = stream.head;
+		statements.split("\n").forEach(statement => {
+console.info("statement");
+			// remove whitespace from the end of the line
+			statement = statement.replace(/\s+$/, "");
+
+			// skip lines that are all whitespace
+			if (statement.trim() === "") {
+				return results.push(parser.rules.blank_line);
+			}
+
+			// figure out indent level of this line
+			let lineStart = statement.match(/^\t*/)[0];
+			let lineIndent = lineStart.length;
+
+			// If indent INCREASES, add open curly braces
+			if (lineIndent > lastIndent) {
+				results.push(parser.rules.open_block.clone({ indent: this.getTabs(lineIndent-1) }));
+			}
+			// if line indent DECREASES, add one or more closing curly braces
+			else if (lineIndent < lastIndent) {
+				for (let indent = lastIndent; indent > lineIndent; indent--) {
+					results.push(parser.rules.close_block.clone({ indent: this.getTabs(indent-1) }));
+				}
+			}
+			lastIndent = lineIndent;
+
+			let stream = new TextStream(statement);
+			let result = parser.rules.statement.parse(parser, stream);
+			if (result) {
+				result.indent = lineStart;
+				stream = result.next();
+			}
+
+			// attempt to parse a comment
+			let comment = parser.rules.comment.parse(parser, stream);
+			if (comment) {
+				if (!result) comment.indent = lineStart;
+				stream = comment.next();
+			}
+
+			// complain if no result and no comment
+			if (!result && !comment) {
+				console.warn(`Couldn't parse statement:\n\t${statement.trim()}`);
+				results.push(parser.rules.parse_error({
+					error: "Can't parse statement",
+					message: `CAN'T PARSE: ${statement}`
+				}));
+				return;
+			}
+
+			// complain can't parse the entire line!
+			if (stream.startIndex !== statement.length) {
+				let unparsed = statement.substr(stream.startIndex);
+				console.warn("Couldn't parse entire statement:",
+								`\n\t"${statement.trim()}"`,
+								`\nunparsed:`,
+								`\n\t"${unparsed}"`);
+				results.push(parser.rules.parse_error({
+					error: "Cant' parse entire statement",
+					message: `CANT PARSE ENTIRE STATEMENT`
+						   + `PARSED    : ${result.matchedText}`
+						   + `CANT PARSE: ${unparsed}`
+
+				}));
+				return;
+			}
+
+			if (result) results.push(result);
+			if (comment) results.push(comment);
+		});
+
+		// Add closing curly braces as necessary
+//TODO: move ABOVE any blank lines
+		while (lastIndent > 0) {
+			results.push(parser.rules.close_block.clone({ indent: this.getTabs(--lastIndent) }));
 		}
-		return result;
+		console.timeEnd("Rule.Statements.parse()");
+
+		return this.clone({
+			matched: results,
+			matchedText: stream.head,
+			startIndex: stream.startIndex,
+			endIndex: stream.startIndex + stream.head.length
+		});
+	}
+
+	toSource(context) {
+		return this.matched.map(match => {
+			let source = match.toSource(context) || "";
+			let indent = match.indent || "";
+			return indent + source.split("\n").join("\n"+indent)
+		}).join("\n");
 	}
 }
 

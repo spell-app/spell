@@ -386,7 +386,7 @@ Object.defineProperties(Parser.prototype, {
 	}},
 
 	// List of postfix operators as strings.
-	// Re-memoized after `addInfixOperator` above.
+	// Re-memoized after `addPostfixOperator` above.
 	postfixOperators: defineMemoized("__posfixOperators",
 		function(){ return this.rules["postfix_operator"]
 						&& this.rules["postfix_operator"].rules.map(rule => rule.string);

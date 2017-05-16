@@ -9,6 +9,9 @@ import parser from "./_parser";
 // re-export parser for testing.
 export default parser;
 
+
+
+
 // `whitespace` rule.
 // NOTE `parser.parseRule("whitespace", "   ")` will return `undefined`
 //		 because `parser.parseRule()` automatically eats whitespace at the start of a rule.
@@ -20,46 +23,70 @@ parser.addRule(
 );
 
 
-
-
-
-
-// Generic rule to eat everything from start to end of the current line
-// NOTE: due to our whitespace rules, whitespace BEFORE this will not be included.
-// TODO: do not return EOL in results?
-// TESTME
 parser.addRule(
-	"eat_to_end_of_line",
-	class eat_to_end_of_line extends Rule.Pattern {
-		pattern = /.*\n?/;
-	}
-);
-
-// Single-line comment symbol (with NO comment text).
-//TODO: do as an alternatives???
-// TESTME
-parser.addRule(
-	"comment_symbol",
-	class comment_symbol extends Rule.Pattern {
-		pattern = /\s*(\/\/|--|#+)\s*/;
-	}
-);
-
-
-// Comment 'expression"
-// TODO: this does not preserve whitespace in the comment itself, which is probably wrong...
-// TESTME
-parser.addSequence(
 	"comment",
-	"{comment_symbol}{comment:eat_to_end_of_line}",
-	class comment extends Rule.Sequence {
+	class comment extends Rule {
+		// TODO: don't match comments INSIDE strings, etc
+		pattern = /\s*(\/\/|--|#+)\s*(.*)\s*$/;
+		parse(parser, stream, stack) {
+			let match = stream.match(this.pattern);
+			if (!match) return undefined;
+			let endIndex = stream.startIndex + match[0].length;
+			return this.clone({
+				matched : {
+					symbol: match[1],
+					comment: match[2]
+				},
+				matchedText: match[0],
+				startIndex: stream.startIndex,
+				endIndex,
+				stream
+			});
+		}
+
 		toSource(context) {
-			let { comment_symbol, comment } = this.getMatchedSource(context);
-			return `// ${comment}`;
+			return `// ${this.matched.comment}`;
 		}
 	}
 );
 
+//
+// // Generic rule to eat everything from start to end of the current line
+// // NOTE: due to our whitespace rules, whitespace BEFORE this will not be included.
+// // TODO: do not return EOL in results?
+// // TESTME
+// parser.addRule(
+// 	"eat_to_end_of_line",
+// 	class eat_to_end_of_line extends Rule.Pattern {
+// 		pattern = /.*\n?/;
+// 	}
+// );
+//
+// // Single-line comment symbol (with NO comment text).
+// //TODO: do as an alternatives???
+// // TESTME
+// parser.addRule(
+// 	"comment_symbol",
+// 	class comment_symbol extends Rule.Pattern {
+// 		pattern = /\s*(\/\/|--|#+)\s*/;
+// 	}
+// );
+//
+//
+// // Comment 'expression"
+// // TODO: this does not preserve whitespace in the comment itself, which is probably wrong...
+// // TESTME
+// parser.addSequence(
+// 	"comment",
+// 	"{comment_symbol}{comment:eat_to_end_of_line}",
+// 	class comment extends Rule.Sequence {
+// 		toSource(context) {
+// 			let { comment_symbol, comment } = this.getMatchedSource(context);
+// 			return `// ${comment}`;
+// 		}
+// 	}
+// );
+//
 
 // `word` = is a single alphanumeric word.
 // MUST start with a lower-case letter (?)
@@ -240,6 +267,7 @@ parser.rules.identifier.addToBlacklist(
 	"success", "failure"
 );
 
+
 // Literal list (array), eg:  `[1,2,true,false ]`
 parser.addExpression(
 	"literal_list",
@@ -270,3 +298,50 @@ parser.addExpression(
 		}
 	}
 )
+
+
+
+//
+//	"Special" rules for `Statements`/block processing.
+// TODO: figure out some way to make this more in line with the rest of our rules
+//
+
+parser.addRule("statements", Rule.Statements);
+
+// Blank line rule -- used to insert a blank line in `statements.results`
+parser.addRule(
+	"blank_line",
+	class blank_line extends Rule {
+		toSource(context) {
+			return "\n";
+		}
+	}
+);
+
+// Rule to insert an open curly brace in output in `statement.results`.
+parser.addRule(
+	"open_block",
+	class open_block extends Rule {
+		toSource(context) {
+			return (this.indent || "") + "{";
+		}
+	}
+);
+
+parser.addRule(
+	"close_block",
+	class close_block extends Rule {
+		toSource(context) {
+			return (this.indent || "") + "}";
+		}
+	}
+);
+
+parser.addRule(
+	"parse_error",
+	class parse_error extends Rule {
+		toSource(context) {
+			return `// ERROR: ${this.message}`;
+		}
+	}
+);
