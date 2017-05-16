@@ -41,23 +41,17 @@ export default class Parser {
 //
 	// Parse something:
 	//	- if one string argument, does a `compileStatements()`
-	//	- if two, does a `parseRule()` and outputs the results.
-	// Returns `parse.toString()` or throws.
+	// Returns the `toString()` or throws.
 //TESTME
-	compile() {
+	compile(name, stream) {
+		// If only one argument, assume that's the stream and parse `statements`
 		if (arguments.length === 1) {
-			let string = arguments[0];
-			return this.compileStatements(string);
+			stream = name;
+			name = "statements";
 		}
-		else if (arguments.length === 2) {
-			let name = arguments[0], string = arguments[1];
-			let result = this.parse(name, string);
-			if (!result) throw new SyntaxError(`parser.parse('${name}', '${string}'): can't parse this`);
-			return result.toSource(this);
-		}
-		else {
-			throw new SyntaxError("parser.parse(): expects one or two arguments");
-		}
+		let result = this.parse(name, stream);
+		if (!result) throw new SyntaxError(`parser.parse('${name}', '${string}'): can't parse this`);
+		return result.toSource(this);
 	}
 
 	// Parse `name`d rule at head of `stream` (`string` or `TextStream`).
@@ -65,106 +59,20 @@ export default class Parser {
 	// Returns result of parse.
 //TESTME
 	parse(name, stream) {
+		// If only one argument, assume that's the stream and parse `statements`
+		if (arguments.length === 1) {
+			stream = name;
+			name = "statements";
+		}
+		// Convert to a TextStream if necessary.
 		if (typeof stream === "string") stream = new TextStream(stream);
-		let rule = this.getRule(name);
-		if (!rule) throw new SyntaxError(`parser.parse(${name}): Rule not found`);
-		stream = this.eatWhitespace(stream);
+
+		// Get rule to parse.
+		let rule = this.getRuleOrDie(name, "parser.parse()");
+
+		// parse and return the results
+		if (rule !== "statements") stream = this.eatWhitespace(stream);
 		return rule.parse(this, stream);
-	}
-
-	// Parse a set of statements line-by-line.
-//TESTME
-	compileStatements(statements) {
-		console.time("compileStatements");
-		let results = [];
-		let currentIndent = 0;
-		const tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-
-
-		// Remove whitespace at the end of all of the statements
-		// This avoids blank lines before closing brackets in the output.
-		statements = statements.replace(/\s+$/, "");
-
-		statements.split(/\n/g).forEach(statement => {
-			// skip lines that are all whitespace
-			if (statement.trim() === "") {
-				results.push("");
-				return;
-			}
-
-			// trim whitespace off the end
-			statement = statement.replace(/\s+$/, "");
-
-			// figure out indent level of this line
-			let lineStart = statement.match(/^\t*/)[0];
-			let lineIndent = lineStart.length;
-			if (lineIndent > currentIndent) {
-				// add to end of previous line if possible
-				if (results.length) {
-					// but only if output is not already indented to that level
-//TODO: backtrack for comments!!!
-					let indentedStart = lineStart + "\t";
-					if (!results[results.length - 1].startsWith(indentedStart)) {
-						results[results.length - 1] += " {";
-					}
-					else {
-//console.info("already indented");
-					}
-				}
-				else results.push(tabs.substr(0, lineIndent-1) + "{");
-			}
-			else if (lineIndent < currentIndent) {
-				let closers = [];
-				for (let i = currentIndent; i > lineIndent; i--) {
-					closers.push(tabs.substr(0, i-1) + "}");
-				}
-				// put parens BEFORE any blank lines!
-				let lastBlankLine = this._getLastBlankLine(results);
-				results.splice(lastBlankLine, 0, ...closers);
-			}
-			currentIndent = lineIndent;
-
-			let result = this.parse("statement", statement);
-			// complain if no result
-			if (!result) {
-				console.warn(`Couldn't parse statement:\n\t${statement.trim()}`);
-				results.push("// CANT PARSE: "+statement);
-			}
-			// complain can't parse the entire line!
-			else if (result.endIndex !== statement.length) {
-				let unparsed = statement.substr(result.endIndex);
-				console.warn("Couldn't parse entire statement:",
-								`\n\t"${statement.trim()}"`,
-								`\nunparsed:`,
-								`\n\t"${unparsed}"`);
-				results.push("// CANT PARSE ENTIRE STATEMENT");
-				results.push("// PARSED    : " + result.matchedText);
-				results.push("// CANT PARSE: " + unparsed);
-			}
-			else {
-				// split by lines and add indent
-				let source = result.toSource(this).split("\n")
-								.map( line => lineStart + line );
-				results = results.concat(source);
-			}
-		});
-
-		while (currentIndent > 0) {
-			results.push(tabs.substr(0, currentIndent-1) + "}");
-			currentIndent--;
-		}
-
-		console.timeEnd("compileStatements");
-		return results.join("\n");
-	}
-
-	// Figure out the last blank line in the results
-	_getLastBlankLine(results) {
-		for (let i = results.length - 1; i >= 0; i--) {
-			if (results[i] === "") continue;
-			return i + 1;
-		}
-		return 0;
 	}
 
 	// Eat whitespace (according to `rules.whitespace`) at the beginning of the stream.

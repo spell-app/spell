@@ -1,18 +1,15 @@
-import TextStream from "./TextStream.js";
-import Parser from "./Parser.js";
-import Rule from "./Rule.js";
+export TextStream from "./TextStream.js";
+export Parser from "./Parser.js";
+export Rule from "./Rule.js";
 import "./RuleSyntax";
 import parser from "./rules/index.js";
 
 // Stick on window for reflection and ad-hoc testing.
 if (typeof window !== "undefined") {
-	window.TextStream = TextStream;
-	window.Parser = Parser;
-	window.Rule = Rule;
-	window.parser = parser;
+	window.TextStream = exports.TextStream;
+	window.Parser = exports.Parser;
+	window.Rule = exports.Rule;
+	window.parser = exports.parser;
 }
 
-export default {
-	TextStream, Parser, Rule, parser
-}
-
+export default parser;
