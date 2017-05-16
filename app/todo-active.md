@@ -3,13 +3,14 @@ TODO:
 - refactor thoughts
 	- forget stream, just take text string?
 		- need: matched, matchedText, startIndex, endIndex
-	- results can be string?
+	- tokenize:
+		- whitespace
+		- string literals
+	- symbol/keyword use (array of) string matching
 
 
 - MobX
 	- cleverly use mobX to cache lines, structures, etc?
-
-- forget the `stream` thing in parsing?  use only in Statements?
 
 -> push context:  { parser, stack, supers, method } into parsing
 	- output doesn't require context...
@@ -46,9 +47,6 @@ TODO:
 	=> nested tree of results for visualization, transform
 	=> or is the tree just the matched array???
 
-- Rule.Statements
-	- move multiline parsing logic into statements.parse
-	- returns an instance which can be toSource()'d
 
 - Structure parsing
 	- have separate structure rules, eg:

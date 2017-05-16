@@ -101,11 +101,6 @@ export default class Rule {
 }
 
 
-// DEBUG: make `Rule` global for debugging.
-global.Rule = Rule;
-
-
-
 // Regex pattern.
 // `rule.pattern` is the regular expression to match.
 //
@@ -160,12 +155,7 @@ Rule.Pattern = class Pattern extends Rule {
 	//	- regex match if found,
 	//	- `false` if not found
 	test(parser, stream) {
-		let match = stream.match(this.pattern);
-		if (match) {
-			match.endIndex = (match.index + match[0].length);
-			return match;
-		}
-		return false;
+		return stream.match(this.pattern) || false;
 	}
 
 	addToBlacklist(...words) {
@@ -260,7 +250,7 @@ Rule.Subrule = class Subrule extends Rule {
 	//	- `false` if not found or
 	//	- `undefined` if not determinstic.
 	test(parser, stream) {
-		let rule = parser.getRuleOrDie(this.rule, "rule");
+		let rule = parser.getRuleOrDie(this.rule, "subrule.test()");
 		return rule.test(parser, stream);
 	}
 
@@ -433,7 +423,7 @@ Rule.Statements = class statements extends Rule {
 			// complain if no result and no comment
 			if (!result && !comment) {
 				console.warn(`Couldn't parse statement:\n\t${statement.trim()}`);
-				results.push(parser.rules.parse_error({
+				results.push(parser.rules.parse_error.clone({
 					error: "Can't parse statement",
 					message: `CAN'T PARSE: ${statement}`
 				}));
@@ -447,7 +437,7 @@ Rule.Statements = class statements extends Rule {
 								`\n\t"${statement.trim()}"`,
 								`\nunparsed:`,
 								`\n\t"${unparsed}"`);
-				results.push(parser.rules.parse_error({
+				results.push(parser.rules.parse_error.clone({
 					error: "Can't parse entire statement",
 					message: `CANT PARSE ENTIRE STATEMENT`
 						   + `PARSED    : ${result.matchedText}`
@@ -524,10 +514,7 @@ Rule.Alternatives = class Alternatives extends Rule {
 		let bestMatch;
 		for (let rule of this.rules) {
 			let match = rule.test(parser, stream);
-			if (match) {
-				match.endIndex = match.index + match[0].length;
-				return match;
-			}
+			if (match) return match;
 		}
 		return false;
 	}
