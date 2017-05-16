@@ -144,7 +144,7 @@ parser.rules.type.addToBlacklist("I");
 
 
 // `number` as either float or integer, created with custom constructor for debugging.
-// NOTE: you can also use `one`...`ten` as strings.
+// NOTE: you can also use `one`...`ten` as strings.'
 Rule.Number = class number extends Rule.Pattern {
 	pattern = /(-?([0-9]*[.])?[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)/;
 
