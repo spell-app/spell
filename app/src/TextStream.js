@@ -15,6 +15,7 @@ export default class TextStream {
 		// Make sure `text` and `startIndex` are defined.
 		if (!("text" in this)) this.text = "";
 		if (!("startIndex" in this)) this.startIndex = 0;
+		this.head = this.text.substr(this.startIndex);
 	}
 
 	// Return an immutable clone of the stream.
@@ -62,9 +63,9 @@ export default class TextStream {
 // ## Reflection
 //
 	// Return text of string starting at our `startIndex`
-	get head() {
-		return this.range();
-	}
+// 	get head() {
+// 		return this.range();
+// 	}
 
 	// Return a range of the string from `startIndex` to `endIndex` NON-inclusive.
 	range(startIndex = this.startIndex, endIndex = this.endIndex || this.text.length) {
