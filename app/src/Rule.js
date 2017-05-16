@@ -17,16 +17,13 @@ import Parser from "./Parser.js";
 
 export default class Rule {
 	constructor(properties) {
-		if (this.constructor !== Rule || !this.constructor.prototype.hasOwnProperty("constructor")) {
-//console.warn("not rule", this);
-		}
 		Object.assign(this, properties);
 	}
 
 	// Clone this rule and add any `props` passed in.
-	clone(...props) {
+	clone = function ruleClone(props) {
 		let clone = Object.create(this);
-		Object.assign(clone, ...props);
+		if (props) Object.assign(clone, props);
 		return clone;
 	}
 
