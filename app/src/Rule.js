@@ -273,14 +273,8 @@ Rule.Subrule = class Subrule extends Rule {
 }
 
 
-
-// Abstract:  `Nested` rule -- composed of a series of other `rules`.
-Rule.Nested = class Nested extends Rule {
-}
-
-
 // Sequence of rules to match (auto-excluding whitespace).
-Rule.Sequence = class Sequence extends Rule.Nested {
+Rule.Sequence = class Sequence extends Rule {
 	parse(parser, stream, stack = []) {
 		// If we have a `testRule` defined
 		if (this.testRule) {
@@ -380,26 +374,12 @@ Rule.Expression = class expression extends Rule.Sequence {}
 
 
 // A statement takes up the entire line.
-Rule.Statement = class statement extends Rule.Sequence {
-// Statements can optionally have a comment at the end of the line.
-// 	parse(parser, stream, stack = []) {
-// 		let result = super.parse(parser, stream, stack);
-// 		if (!result) return undefined;
-//
-// 		// Check for a comment, and add it as `comment` to the matched output
-// 		let comment = parser.rules.comment.parse(parser, result.next(), stack);
-// 		if (comment) {
-// 			result.comment = comment;
-// 			result.endIndex = comment.next().startIndex;
-// 		}
-// 		return result;
-// 	}
-}
+Rule.Statement = class statement extends Rule.Sequence {}
 
-// `Statements` are a block of `Statements` that understand nesting.
+
+// `Statements` are a block of `Statements` that understand nesting and comments.
 // TODO: is this a `Block`?
-Rule.Statements = class statements extends Rule.Sequence {
-
+Rule.Statements = class statements extends Rule {
 	// Return a certain `number` of tab characters.
 	static TABS = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 	getTabs(number) {
@@ -471,7 +451,7 @@ Rule.Statements = class statements extends Rule.Sequence {
 								`\nunparsed:`,
 								`\n\t"${unparsed}"`);
 				results.push(parser.rules.parse_error({
-					error: "Cant' parse entire statement",
+					error: "Can't parse entire statement",
 					message: `CANT PARSE ENTIRE STATEMENT`
 						   + `PARSED    : ${result.matchedText}`
 						   + `CANT PARSE: ${unparsed}`
@@ -531,10 +511,28 @@ Rule.Statements = class statements extends Rule.Sequence {
 // NOTE: Currently takes the longest valid match.
 // TODO: match all valid alternatives
 // TODO: rename?
-Rule.Alternatives = class Alternatives extends Rule.Nested {
+Rule.Alternatives = class Alternatives extends Rule {
 	constructor(props) {
 		super(props);
 		if (!this.rules) this.rules = [];
+	}
+
+	// Test to see if any of our alternatives are found ANYWHERE in the stream.
+	// NOTE: this should only be called if we're specified as a `testRule`
+	//		 and then only if all of our rules are deterministic.
+	// Returns:
+	//	- regex match if found,
+	//	- `false` if not found or
+	test(parser, stream) {
+		let bestMatch;
+		for (let rule of this.rules) {
+			let match = rule.test(parser, stream);
+			if (match) {
+				match.endIndex = match.index + match[0].length;
+				return match;
+			}
+		}
+		return false;
 	}
 
 	// Find all rules which match and delegate to `getBestMatch()` to pick the best one.
@@ -595,7 +593,7 @@ Rule.Alternatives = class Alternatives extends Rule.Nested {
 //
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
-Rule.Repeat = class Repeat extends Rule.Nested {
+Rule.Repeat = class Repeat extends Rule {
 	parse(parser, stream, stack = []) {
 		if (this.leftRecursive) {
 			if (Rule.stackContains(stack, this, stream)) return undefined;
