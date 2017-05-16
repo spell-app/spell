@@ -26,16 +26,6 @@ TODO:
 	=> getMatched(context)
 
 
-- comments
-	- add to all statements
-	- add to results
-	- others?
-	- auto-output as part of `statements`?
-		- eg: comments not important unless part of statement block
-	- TODO: preserve whitespace in between comment symbol and text
-	- TODO: preserve whitespace BEFORE comment?  very unlikely this will line up...
-	- TODO: automagic comment indent preserver
-
 - Rule.Boolean etc:  add pattern/etc to class: we're only creating one anyway.
 - addSyntax(["name","expression", ...)
 

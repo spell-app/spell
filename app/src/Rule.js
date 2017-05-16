@@ -530,8 +530,8 @@ Rule.Statements = class statements extends Rule.Sequence {
 			let match = this.matched[i];
 
 			// special case open block to put on the same line
-			//	if previous token does not have `.opensBlock` set.
-			if (match instanceof Rule.open_block) {
+			//	if previous statement does not have `.opensBlock` set.
+			if (match instanceof Rule.OpenBlock) {
 				let previous = this.matched[i-1];
 				if (previous) {
 					if (!previous.opensBlock) {

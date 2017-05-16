@@ -6,10 +6,14 @@ import parser from "./rules/index.js";
 
 // Stick on window for reflection and ad-hoc testing.
 if (typeof window !== "undefined") {
-	window.TextStream = exports.TextStream;
-	window.Parser = exports.Parser;
-	window.Rule = exports.Rule;
-	window.parser = exports.parser;
+	Object.assign(window, {
+		TextStream: exports.TextStream,
+		Parser: exports.Parser,
+		Rule: exports.Rule,
+		parser: parser,
+		parse: parser.parse.bind(parser),
+		compile: parser.compile.bind(parser),
+	});
 }
 
 export default parser;

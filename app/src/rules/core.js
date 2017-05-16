@@ -23,70 +23,31 @@ parser.addRule(
 );
 
 
-parser.addRule(
-	"comment",
-	class comment extends Rule {
-		// TODO: don't match comments INSIDE strings, etc
-		pattern = /\s*(\/\/|--|#+)\s*(.*)\s*$/;
-		parse(parser, stream, stack) {
-			let match = stream.match(this.pattern);
-			if (!match) return undefined;
-			let endIndex = stream.startIndex + match[0].length;
-			return this.clone({
-				matched : {
-					symbol: match[1],
-					comment: match[2]
-				},
-				matchedText: match[0],
-				startIndex: stream.startIndex,
-				endIndex,
-				stream
-			});
-		}
-
-		toSource(context) {
-			return `// ${this.matched.comment}`;
-		}
+Rule.Comment = class comment extends Rule {
+	// TODO: don't match comments INSIDE strings, etc
+	pattern = /\s*(\/\/|--|#+)\s*(.*)\s*$/;
+	parse(parser, stream, stack) {
+		let match = stream.match(this.pattern);
+		if (!match) return undefined;
+		let endIndex = stream.startIndex + match[0].length;
+		return this.clone({
+			matched : {
+				symbol: match[1],
+				comment: match[2]
+			},
+			matchedText: match[0],
+			startIndex: stream.startIndex,
+			endIndex,
+			stream
+		});
 	}
-);
 
-//
-// // Generic rule to eat everything from start to end of the current line
-// // NOTE: due to our whitespace rules, whitespace BEFORE this will not be included.
-// // TODO: do not return EOL in results?
-// // TESTME
-// parser.addRule(
-// 	"eat_to_end_of_line",
-// 	class eat_to_end_of_line extends Rule.Pattern {
-// 		pattern = /.*\n?/;
-// 	}
-// );
-//
-// // Single-line comment symbol (with NO comment text).
-// //TODO: do as an alternatives???
-// // TESTME
-// parser.addRule(
-// 	"comment_symbol",
-// 	class comment_symbol extends Rule.Pattern {
-// 		pattern = /\s*(\/\/|--|#+)\s*/;
-// 	}
-// );
-//
-//
-// // Comment 'expression"
-// // TODO: this does not preserve whitespace in the comment itself, which is probably wrong...
-// // TESTME
-// parser.addSequence(
-// 	"comment",
-// 	"{comment_symbol}{comment:eat_to_end_of_line}",
-// 	class comment extends Rule.Sequence {
-// 		toSource(context) {
-// 			let { comment_symbol, comment } = this.getMatchedSource(context);
-// 			return `// ${comment}`;
-// 		}
-// 	}
-// );
-//
+	toSource(context) {
+		return `// ${this.matched.comment}`;
+	}
+}
+parser.addRule("comment", Rule.Comment);
+
 
 // `word` = is a single alphanumeric word.
 // MUST start with a lower-case letter (?)
@@ -216,19 +177,6 @@ parser.rules.identifier.addToBlacklist(
 	"six", "seven", "eight", "nine", "ten"
 );
 
-// Numeric `integer` only, created with custom constructor for debugging.
-// NOTE: this WILL match a float, but the returned value will coerce to an integer.
-// REVIEW: is this right?  Better to not match a float?
-Rule.Integer = class integer extends Rule.Pattern {
-	pattern = /-?([0-9]*[.])?[0-9]+/;
-	// Convert to integer on source output.
-	toSource(context) {
-		return parseInt(this.matched, 10);
-	}
-};
-//TODO: add as expression????
-parser.addRule("integer", Rule.Integer);
-
 
 // Literal `text` string, created with custom constructor for debugging.
 // You can use either single or double quotes on the outside (although double quotes are preferred).
@@ -309,45 +257,35 @@ parser.addExpression(
 parser.addRule("statements", Rule.Statements);
 
 // Blank line representation in statements output
-Rule.blank_line = class blank_line extends Rule {
+Rule.BlankLine = class blank_line extends Rule {
 	toSource(context) {
 		return "\n";
 	}
 }
-parser.addRule( "blank_line", Rule.blank_line);
-
-// Blank line rule -- used to insert a blank line in `statements.results`
-parser.addRule(
-	"blank_line",
-	class blank_line extends Rule {
-		toSource(context) {
-			return "\n";
-		}
-	}
-);
+parser.addRule( "blank_line", Rule.BlankLine);
 
 // Open block representation in statements output
-Rule.open_block = class open_block extends Rule {
+Rule.OpenBlock = class open_block extends Rule {
 	toSource(context) {
 		return "{";
 	}
 }
-parser.addRule( "open_block", Rule.open_block);
+parser.addRule( "open_block", Rule.OpenBlock);
 
 
 // Close block representation in statements output
-Rule.close_block = class close_block extends Rule {
+Rule.CloseBlock = class close_block extends Rule {
 	toSource(context) {
 		return "}";
 	}
 }
-parser.addRule( "close_block", Rule.close_block);
+parser.addRule( "close_block", Rule.CloseBlock);
 
 
 // Parser error representation statements output
-Rule.parse_error = class parse_error extends Rule {
+Rule.ParseError = class parse_error extends Rule {
 	toSource(context) {
 		return `// ERROR: ${this.message}`;
 	}
 }
-parser.addRule( "parse_error", Rule.parse_error);
+parser.addRule( "parse_error", Rule.ParseError);
