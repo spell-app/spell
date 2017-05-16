@@ -438,7 +438,6 @@ Rule.Statements = class statements extends Rule.Sequence {
 		// parse the entire stream from this point
 		let statements = stream.head;
 		statements.split("\n").forEach(statement => {
-console.info("statement");
 			// remove whitespace from the end of the line
 			statement = statement.replace(/\s+$/, "");
 
@@ -473,7 +472,7 @@ console.info("statement");
 			// attempt to parse a comment
 			let comment = parser.rules.comment.parse(parser, stream);
 			if (comment) {
-				if (!result) comment.indent = lineStart;
+				comment.indent = lineStart;
 				stream = comment.next();
 			}
 
@@ -504,14 +503,16 @@ console.info("statement");
 				return;
 			}
 
-			if (result) results.push(result);
+			// put comment BEFORE result for output
 			if (comment) results.push(comment);
+			if (result) results.push(result);
 		});
 
 		// Add closing curly braces as necessary
 //TODO: move ABOVE any blank lines
 		while (lastIndent > 0) {
-			results.push(parser.rules.close_block.clone({ indent: this.getTabs(--lastIndent) }));
+			results.push(parser.rules.close_block.clone({ indent: this.getTabs(lastIndent - 1) }));
+			--lastIndent;
 		}
 		console.timeEnd("Rule.Statements.parse()");
 
@@ -524,11 +525,26 @@ console.info("statement");
 	}
 
 	toSource(context) {
-		return this.matched.map(match => {
+		let results = [];
+		for (var i = 0; i < this.matched.length; i++) {
+			let match = this.matched[i];
+
+			// special case open block to put on the same line
+			//	if previous token does not have `.opensBlock` set.
+			if (match instanceof Rule.open_block) {
+				let previous = this.matched[i-1];
+				if (previous) {
+					if (!previous.opensBlock) {
+						results[results.length - 1] += " {";
+					}
+					continue;
+				}
+			}
 			let source = match.toSource(context) || "";
 			let indent = match.indent || "";
-			return indent + source.split("\n").join("\n"+indent)
-		}).join("\n");
+			results.push(indent + source.split("\n").join("\n"+indent));
+		}
+		return results.join("\n");
 	}
 }
 

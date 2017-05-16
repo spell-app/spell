@@ -105,8 +105,14 @@ parser.addStatement(
 		toSource(context) {
 			let { identifier, args, statement } = this.getMatchedSource(context);
 			args = (Array.isArray(args) ? args.join(", ") : "");
-			if (!statement) return `${identifier}(${args})`;
-			return `${identifier}(${args}) { ${statement} }`;
+			if (!statement) {
+				return `${identifier}(${args})`;
+			}
+			else {
+				this.opensBlock = true;
+				this.closesBlock = true;
+				return `${identifier}(${args}) { ${statement} }`;
+			}
 		}
 	}
 );
@@ -123,7 +129,6 @@ parser.addStatement(
 	"declare_action",
 	"action (keywords:{word}|{type})+ (\\:)? {statement}?",
 	class declare_action extends Rule.Statement {
-
 		toSource(context) {
 			let { keywords, statement } = this.results;
 			let words = keywords.matched.map( word => word.toSource(context) );
@@ -171,9 +176,12 @@ parser.addStatement(
 				if (conditions.length) statements = statements.concat(conditions);
 				if (statement) statements.push("\t" + statement);
 				statements = ` {\n${statements.join("\n")}\n }\n`;
+				this.opensBlock = true;
+				this.closesBlock = true;
 			}
 			else if (conditions.length) {
 				statements = ` {\n${conditions.join("\n")}`;
+				this.opensBlock = true;
 			}
 //debugger;
 			// Create as a STATIC function
@@ -195,12 +203,16 @@ parser.addStatement(
 			args = (Array.isArray(args) ? args.join(", ") : "");
 
 			if (args && expression) {
+				this.opensBlock = true;
+				this.closesBlock = true;
 				return `${identifier}(${args}) { return (${expression}) }`;
 			}
 			else if (args) {
 				return `${identifier}(${args})`;
 			}
 			else if (expression) {
+				this.opensBlock = true;
+				this.closesBlock = true;
 				return `get ${identifier}() { return (${expression}) }`;
 			}
 			else {
@@ -231,8 +243,14 @@ parser.addStatement(
 				args = [ args[0] ];
 			}
 
-			if (!statement) return `set ${identifier}(${args})`;
-			return `set ${identifier}(${args}) { ${statement} }`;
+			if (!statement) {
+				return `set ${identifier}(${args})`;
+			}
+			else {
+				this.opensBlock = true;
+				this.closesBlock = true;
+				return `set ${identifier}(${args}) { ${statement} }`;
+			}
 		}
 	}
 );

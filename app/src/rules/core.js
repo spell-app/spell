@@ -308,6 +308,14 @@ parser.addExpression(
 
 parser.addRule("statements", Rule.Statements);
 
+// Blank line representation in statements output
+Rule.blank_line = class blank_line extends Rule {
+	toSource(context) {
+		return "\n";
+	}
+}
+parser.addRule( "blank_line", Rule.blank_line);
+
 // Blank line rule -- used to insert a blank line in `statements.results`
 parser.addRule(
 	"blank_line",
@@ -318,30 +326,28 @@ parser.addRule(
 	}
 );
 
-// Rule to insert an open curly brace in output in `statement.results`.
-parser.addRule(
-	"open_block",
-	class open_block extends Rule {
-		toSource(context) {
-			return (this.indent || "") + "{";
-		}
+// Open block representation in statements output
+Rule.open_block = class open_block extends Rule {
+	toSource(context) {
+		return "{";
 	}
-);
+}
+parser.addRule( "open_block", Rule.open_block);
 
-parser.addRule(
-	"close_block",
-	class close_block extends Rule {
-		toSource(context) {
-			return (this.indent || "") + "}";
-		}
-	}
-);
 
-parser.addRule(
-	"parse_error",
-	class parse_error extends Rule {
-		toSource(context) {
-			return `// ERROR: ${this.message}`;
-		}
+// Close block representation in statements output
+Rule.close_block = class close_block extends Rule {
+	toSource(context) {
+		return "}";
 	}
-);
+}
+parser.addRule( "close_block", Rule.close_block);
+
+
+// Parser error representation statements output
+Rule.parse_error = class parse_error extends Rule {
+	toSource(context) {
+		return `// ERROR: ${this.message}`;
+	}
+}
+parser.addRule( "parse_error", Rule.parse_error);
