@@ -183,6 +183,10 @@ Rule.Text = class text extends Rule.Pattern {
 			nextStart: startIndex + 1
 		});
 	}
+
+	toSource(context) {
+		return '"' + this.matched.replace(/"/g, '\"') + '"';
+	}
 };
 parser.addRule(["text", "expression"], Rule.Text);
 
@@ -285,7 +289,8 @@ parser.addRule("close_block", Rule.CloseBlock);
 // Parser error representation statements output
 Rule.ParseError = class parse_error extends Rule {
 	toSource(context) {
-		return `// ERROR: ${this.message}`;
+		let message = this.message.split("\n").join("\n// ");
+		return `// ERROR: ${message}`;
 	}
 }
 parser.addRule("parse_error", Rule.ParseError);

@@ -195,22 +195,36 @@ export default class TextStream {
 }
 
 
-// String class
+// `Text` class for string literals.
 TextStream.text = function text(text) {
 	this.text = text;
 }
-TextStream.text.prototype.type = "text";
+TextStream.text.prototype = {
+	type: "text",
+	toString() {
+		return `"${this.text}"`;
+	}
+};
 
 
 // String indent class
 TextStream.indent = function indent(level) {
 	this.level = level;
 }
-TextStream.indent.prototype.type = "indent";
+TextStream.indent.prototype = {
+	type: "indent",
+	toString() {
+		return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t".slice(0, this.indent);
+	}
+};
 
 // Comment class
 TextStream.comment = function comment(comment) {
 	this.comment = comment;
 }
-TextStream.comment.prototype.type = "comment";
-
+TextStream.comment.prototype = {
+	type: "comment",
+	toString() {
+		return `/*${this.comment}*/`;
+	}
+};

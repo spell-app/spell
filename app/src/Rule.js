@@ -472,7 +472,7 @@ Rule.List = class List extends Rule {
 			if (!item) break;
 //console.log(item);
 			matched.push(item);
-			nextStart = matched.nextStart;
+			nextStart = item.nextStart;
 
 			// get delimiter, exiting if not found
 			let delimiter = this.delimiter.parse(parser, tokens, nextStart, stack);
@@ -587,8 +587,8 @@ console.info(statements);
 								`\n\t"${unparsed}"`);
 				results.push(parser.rules.parse_error.clone({
 					error: "Can't parse entire statement",
-					message: `CANT PARSE ENTIRE STATEMENT`
-						   + `PARSED    : ${result.matched}`
+					message: `CANT PARSE ENTIRE STATEMENT\n`
+						   + `PARSED    : ${result.matched}\n`
 						   + `CANT PARSE: ${unparsed}`
 
 				}));
