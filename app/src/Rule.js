@@ -4,8 +4,8 @@
 //	Parse a rule with `rule.parse(parser, tokens, startIndex)`, this will either:
 //		- return `undefined` if the rule doesn't match the head of the tokens, or
 //		- return a CLONE of the rule with at least the following:
-//			- `tokens`		Stream which was matched with `startIndex` at the start of the match
-//			- `endIndex`	Non-inclusive end index in tokens where match ends.
+//			- `matched`		Results of your parse.
+//			- `nextStart`	Place where next match should start (eg: one beyond what you matched).
 //
 //	The clone returned above can be manipulated with
 //		- `rule.results`			Return matched arguments in a format suitable to do:
@@ -113,7 +113,7 @@ Rule.Match = class match extends Rule {
 
 		return this.clone({
 			matched: this.match.join(this.matchDelimiter),
-			endIndex: startIndex + this.match.length
+			nextStart: startIndex + this.match.length
 		});
 	}
 
@@ -168,7 +168,7 @@ Rule.Pattern = class Pattern extends Rule {
 
 		return this.clone({
 			matched,
-			endIndex: startIndex + 1
+			nextStart: startIndex + 1
 		});
 	}
 
@@ -231,19 +231,19 @@ Rule.Sequence = class Sequence extends Rule {
 		}
 
 		let matched = [];
-		let current = startIndex;
+		let nextStart = startIndex;
 		for (let rule of this.rules) {
-			let match = rule.parse(parser, tokens, current, stack);
+			let match = rule.parse(parser, tokens, nextStart, stack);
 			if (!match && !rule.optional) return undefined;
 			if (match) {
 				matched.push(match);
-				current = match.endIndex;
+				nextStart = match.nextStart;
 			}
 		}
 		// if we get here, we matched all the rules!
 		return this.clone({
 			matched,
-			endIndex: current
+			nextStart
 		});
 	}
 
@@ -368,7 +368,7 @@ Rule.Alternatives = class Alternatives extends Rule {
 	// Implement something else to do, eg, precedence rules.
 	getBestMatch(matches) {
 		return matches.reduce(function (best, current) {
-			if (current.endIndex > best.endIndex) return current;
+			if (current.nextStart > best.nextStart) return current;
 			return best;
 		}, matches[0]);
 	}
@@ -405,20 +405,20 @@ Rule.Repeat = class Repeat extends Rule {
 		}
 
 		let matched = [];
-		let current = startIndex;
+		let nextStart = startIndex;
 		while (true) {
-			let match = this.rule.parse(parser, tokens, current, stack);
+			let match = this.rule.parse(parser, tokens, nextStart, stack);
 			if (!match) break;
 
 			matched.push(match);
-			current = match.endIndex;
+			nextStart = match.nextStart;
 		}
 
 		if (matched.length === 0) return undefined;
 
 		return this.clone({
 			matched,
-			endIndex: current
+			nextStart
 		});
 	}
 
@@ -465,19 +465,19 @@ Rule.List = class List extends Rule {
 		this.delimiter.optional = true;
 
 		let matched = [];
-		let current = startIndex;
+		let nextStart = startIndex;
 		while (true) {
 			// get next item, exiting if not found
-			let item = this.item.parse(parser, tokens, current, stack);
+			let item = this.item.parse(parser, tokens, nextStart, stack);
 			if (!item) break;
 //console.log(item);
 			matched.push(item);
-			current = matched.endIndex;
+			nextStart = matched.nextStart;
 
 			// get delimiter, exiting if not found
-			let delimiter = this.delimiter.parse(parser, tokens, current, stack);
+			let delimiter = this.delimiter.parse(parser, tokens, nextStart, stack);
 			if (!delimiter) break;
-			current = delimiter.endIndex;
+			nextStart = delimiter.nextStart;
 		}
 
 		// If we didn't get any matches, forget it.
@@ -485,7 +485,7 @@ Rule.List = class List extends Rule {
 
 		return this.clone({
 			matched,
-			endIndex: current
+			nextStart
 		});
 	}
 
@@ -530,9 +530,6 @@ console.info(statements);
 			if (tokens.length === 0) {
 				return results.push(new Rule.BlankLine());
 			}
-
-			// current position in the tokens
-			let current = 0;
 
 			// figure out indent level of this line
 			let indent = 0;
@@ -581,9 +578,9 @@ console.info(statements);
 			}
 
 			// complain can't parse the entire line!
-			if (result && result.endIndex !== tokens.length) {
+			if (result && result.nextStart !== tokens.length) {
 				let statement = tokens.join(" ");
-				let unparsed = tokens.slice(result.endIndex).join(" ");
+				let unparsed = tokens.slice(result.nextStart).join(" ");
 				console.warn("Couldn't parse entire statement:",
 								`\n\t"${statement}"`,
 								`\nunparsed:`,
@@ -614,7 +611,7 @@ console.info(statements);
 
 		return this.clone({
 			matched: results,
-			endIndex: statements.length
+			nextStart: statements.length
 		});
 	}
 

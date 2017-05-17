@@ -17,7 +17,7 @@ Rule.Comment = class comment extends Rule {
 		if (token.type !== "comment") return undefined;
 		return this.clone({
 			matched: token.comment,
-			endIndex: startIndex + 1
+			nextStart: startIndex + 1
 		});
 	}
 
@@ -149,7 +149,7 @@ Rule.Number = class number extends Rule.Pattern {
 		if (typeof token !== "number") return undefined;
 		return this.clone({
 			matched: token,
-			endIndex: startIndex + 1
+			nextStart: startIndex + 1
 		});
 	}
 
@@ -180,7 +180,7 @@ Rule.Text = class text extends Rule.Pattern {
 		if (!token || token.type !== "text") return undefined;
 		return this.clone({
 			matched: token.text,
-			endIndex: startIndex + 1
+			nextStart: startIndex + 1
 		});
 	}
 };
