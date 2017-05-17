@@ -149,7 +149,7 @@ Rule.Pattern = class Pattern extends Rule {
 		});
 	}
 
-	// Test to see if any of our patternis found ANYWHERE in the stream.
+	// Test to see if any of our pattern is found ANYWHERE in the stream.
 	// Returns:
 	//	- `undefined` if not determinstic (but all patterns are deterministic)
 	//	- regex match if found,

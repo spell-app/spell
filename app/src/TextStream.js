@@ -85,4 +85,130 @@ export default class TextStream {
 	toString() {
 		return this.text
 	};
+
+	// Tokenize text into a series of:
+	//	- an array for each line, within each line,
+	//		- `{ indent: number }` for indent at start of line
+	//		- strings for keywords/symbols or
+	//		- objects for things which match the TOKENIZE_RULES below.
+	//			- NOTE: indent, string literals and comments will be removed
+	//				BEFORE calling `parseStructure`
+	static tokenize(text) {
+		const TABS = /^\t+/;
+		const WORD_CHAR = /^[A-Za-z_-]/;
+		const WHITE_SPACE = /^\s/;
+		const NUMBER_CHAR = /^[0-9]/;
+		const NUMBER = /^([0-9]+\.)?[0-9]+/;
+		const HEADER = /^#+/;
+
+		let lines = text.split("\n").map(line => {
+			let tokens = [];
+			// pop indent off
+			let tabs = line.match(TABS);
+			if (tabs) {
+				tokens.push(new TextStream.indent(tabs.length));
+				line = line.substr(tabs.length);
+			}
+
+			let current = 0;
+			let last = line.length;
+			while (current < last) {
+				// eat whitespace
+				while (WHITE_SPACE.test(line[current])) {
+					current++;
+				}
+
+				let char = line[current];
+				// if a word character, make the `word` as long as we can
+				if (WORD_CHAR.test(char)) {
+					let start = current;
+					current++;
+					while (current < last && WORD_CHAR.test(line[current])) {
+						current++;
+					}
+					tokens.push(line.slice(start, current));
+					continue;
+				}
+
+				// if char is a quote symbol, eat until we get a matching quote.
+				if (char === '"' || char === "'") {
+					let end = this.getEndQuotePosition(line, current, char);
+					let string = new TextStream.string(line.slice(current + 1, end));
+					if (end === last) string.unbalanced = true;
+					tokens.push(string);
+					current = end + 1;
+					continue;
+				}
+
+				// if a number, stick in as a number
+				if (NUMBER_CHAR.test(char)) {
+					let numberMatch = line.substr(current).match(NUMBER)[0];
+					tokens.push(parseFloat(numberMatch, 10));
+					current += numberMatch.length;
+					continue;
+				}
+
+				// if we got a comment header symbol, eat until the end of the line
+				if (char === "#") {
+					let text = line.slice(current);
+					let level = line.match(HEADER)[0].length;
+					text = text.substr(level).trim();
+					let comment = new TextStream.comment(text);
+					comment.header = true;
+					comment.level = level;
+					// break out of the loop since we ate to the end
+					break;
+				}
+
+				let next = line[current + 1];
+				if ((char === "-" && next === "-") || (char === "/" && next === "/")) {
+					// get the comment and strip off the comment start
+					let text = line.slice(current + 2).trim();
+					let comment = new TextStream.comment(text);
+					tokens.push(comment);
+
+					// break out of the loop since we ate to the end
+					break;
+				}
+
+				// otherwise stick non-word characters in by themselves
+				tokens.push(char);
+				current += 1;
+			}
+			return tokens;
+		});
+		return lines;
+	}
+
+	// Return position of matching `quoteSymbol` for `line` at `start`.
+	// TODO: handle `\"`
+	static getEndQuotePosition(line, start, quoteSymbol) {
+		let end = start + 1;
+		let last = line.length;
+		while (end < last && line[end] !== quoteSymbol) {
+			end++;
+		}
+		return end;
+	}
 }
+
+
+// String class
+TextStream.string = function string(string) {
+	this.string = string;
+}
+TextStream.string.prototype.type = "string";
+
+
+// String indent class
+TextStream.indent = function indent(level) {
+	this.level = level;
+}
+TextStream.indent.prototype.type = "indent";
+
+// Comment class
+TextStream.comment = function comment(comment) {
+	this.comment = comment;
+}
+TextStream.comment.prototype.type = "comment";
+
