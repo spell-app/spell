@@ -95,7 +95,8 @@ export default class TextStream {
 	//				BEFORE calling `parseStructure`
 	static tokenize(text) {
 		const TABS = /^\t+/;
-		const WORD_CHAR = /^[A-Za-z_-]/;
+		const WORD_START = /^[A-Za-z]/;
+		const WORD_CHAR = /^[\w_-]/;
 		const WHITE_SPACE = /^\s/;
 		const NUMBER_CHAR = /^[0-9]/;
 		const NUMBER = /^([0-9]+\.)?[0-9]+/;
@@ -120,7 +121,7 @@ export default class TextStream {
 
 				let char = line[current];
 				// if a word character, make the `word` as long as we can
-				if (WORD_CHAR.test(char)) {
+				if (WORD_START.test(char)) {
 					let start = current;
 					current++;
 					while (current < last && WORD_CHAR.test(line[current])) {

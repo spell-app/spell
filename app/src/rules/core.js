@@ -185,7 +185,7 @@ Rule.Text = class text extends Rule.Pattern {
 	}
 
 	toSource(context) {
-		return '"' + this.matched.replace(/"/g, '\"') + '"';
+		return "'" + this.matched + "'";
 	}
 };
 parser.addRule(["text", "expression"], Rule.Text);
