@@ -71,16 +71,7 @@ export default class Parser {
 		let rule = this.getRuleOrDie(name, "parser.parse()");
 
 		// parse and return the results
-		if (rule !== "statements") stream = this.eatWhitespace(stream);
 		return rule.parse(this, stream);
-	}
-
-	// Eat whitespace (according to `rules.whitespace`) at the beginning of the stream.
-	// Returns new stream if we matched whitespace, otherwise the same stream.
-	eatWhitespace(stream) {
-		let result = this.rules.whitespace.parse(this, stream);
-		if (!result) return stream;
-		return stream.advanceBy(result.matched.length);
 	}
 
 //

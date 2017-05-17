@@ -277,7 +277,6 @@ Rule.Sequence = class Sequence extends Rule {
 
 		let matched = [], next = stream;
 		for (let rule of this.rules) {
-			next = parser.eatWhitespace(next);
 			let match = rule.parse(parser, next, stack);
 			if (!match && !rule.optional) return undefined;
 			if (match) {
@@ -588,7 +587,6 @@ Rule.Repeat = class Repeat extends Rule {
 		let next = stream;
 		let matched = [];
 		while (true) {
-			next = parser.eatWhitespace(next);
 			let match = this.rule.parse(parser, next, stack);
 			if (!match) break;
 
@@ -653,7 +651,6 @@ Rule.List = class List extends Rule {
 
 		let matched = [], next = stream;
 		while (true) {
-			next = parser.eatWhitespace(next);
 			// get next item, exiting if not found
 			let item = this.item.parse(parser, next, stack);
 			if (!item) break;
@@ -661,7 +658,6 @@ Rule.List = class List extends Rule {
 			matched.push(item);
 			next = item.next();
 
-			next = parser.eatWhitespace(next);
 			// get delimiter, exiting if not found
 			let delimiter = this.delimiter.parse(parser, next, stack);
 			if (!delimiter) break;

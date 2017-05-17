@@ -7,38 +7,6 @@ test("parser is defined", () => {
 
 
 //
-//	Whitespace
-//	TODO: move `eatWhitespace` tests to the parser?
-//
-test("correctly matches whitespace at the beginning of a stream", () => {
-	// NOTE: special case for `whitespace` since we automatially eat it at start of `parser.parse()
-	let rule = parser.getRule("whitespace");
-	let result = rule.parse(parser, new TextStream(" a"));
-	expect(result).toBeDefined();
-	expect(result.toSource()).toBe(" ");
-});
-
-test("does not match whitespace if it does not exist", () => {
-	// NOTE: special case for `whitespace` since we automatially eat it at start of `parser.parse()
-	let rule = parser.getRule("whitespace");
-	let result = rule.parse(parser, new TextStream("a "));
-	expect(result).toBeUndefined();
-});
-
-test("eatWhitespace works correctly when whitespace is present", () => {
-	let newStream = parser.eatWhitespace(new TextStream(" \t\n "));
-	expect(newStream).toBeDefined();
-	expect(newStream.startIndex).toBe(4);
-});
-
-test("eatWhitespace works correctly when whitespace is present", () => {
-	let newStream = parser.eatWhitespace(new TextStream("aaa"));
-	expect(newStream).toBeDefined();
-	expect(newStream.startIndex).toBe(0);
-});
-
-
-//
 //	Identifiers
 //
 test("correctly matches identifiers", () => {
