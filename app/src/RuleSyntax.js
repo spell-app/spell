@@ -48,12 +48,12 @@ Object.assign(Rule, {
 			if (rule) {
 				let last = rules[rules.length-1];
 				// If this is a `String` and last was a `String`, merge together
-				if (last && last instanceof Rule.Symbol && rule instanceof Rule.Symbol) {
-					// remove the last rule
-					rules.pop();
-					// and replace with a rule that merges the keywords
-					rule = Rule.mergeSymbols(last, rule);
-				}
+// 				if (last && last instanceof Rule.Symbol && rule instanceof Rule.Symbol) {
+// 					// remove the last rule
+// 					rules.pop();
+// 					// and replace with a rule that merges the keywords
+// 					rule = Rule.mergeSymbols(last, rule);
+// 				}
 				rules.push(rule);
 			}
 			startIndex = endIndex + 1;
@@ -95,7 +95,7 @@ Object.assign(Rule, {
 		}
 	},
 
-	KEYWORD_PATTERN : /[A-Za-z]+/,
+	KEYWORD_PATTERN : /[A-Za-z][\w_-]*/,
 
 	// Match `keyword` in syntax rules.
 	// If more than one keyword appears in a row, combines them into a single `Keyword` object.
@@ -107,19 +107,19 @@ Object.assign(Rule, {
 	// Returns `[ rule, endIndex ]`
 	// Throws if invalid.
 	parseRuleSyntax_keyword(syntaxStream, rules = [], startIndex = 0, constructor) {
-		let words = [], endIndex;
+		let match = [], endIndex;
  		// eat keywords while they last
 		for (var i = startIndex; i < syntaxStream.length; i++) {
 			let next = syntaxStream[i];
 			if (next.match(Rule.KEYWORD_PATTERN)) {
-				words.push(next);
+				match.push(next);
 				endIndex = i;
 			}
 			else break;
 		}
 
 		if (!constructor) constructor = Rule.Keyword;
-		let rule = new constructor({ string: words.join(" ") });
+		let rule = new constructor({ match });
 
 		return [ rule, endIndex ];
 	},
@@ -129,16 +129,14 @@ Object.assign(Rule, {
 	// Throws if invalid.
 	parseRuleSyntax_symbol(syntaxStream, rules = [], startIndex = 0, constructor = Rule.Symbol) {
 		let string = syntaxStream[startIndex];
+
 		if (!constructor) constructor = Rule.Symbol;
-		let rule = new constructor({ string: string });
 
 		// If string starts with `\\`, it's an escaped literal (eg: `\[` needs to input as `\\[`).
-		if (string.startsWith("\\")) {
-			// remove leading slash in match string...
-			rule.string = rule.string.substr(1);
-			// but leave it in toString
-			rule.toString = () => string;
-		}
+		let isEscaped = string.startsWith("\\");
+		let match = isEscaped ? string.substr(1) : string;
+
+		let rule = new constructor({ match });
 		return [ rule, startIndex ];
 	},
 

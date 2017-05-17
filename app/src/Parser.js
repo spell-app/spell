@@ -64,14 +64,22 @@ export default class Parser {
 			stream = name;
 			name = "statements";
 		}
+
 		// Convert to a TextStream if necessary.
-		if (typeof stream === "string") stream = new TextStream(stream);
+		if (typeof stream === "string") stream = TextStream.tokenize(stream);
+
+		// If we're not parsing `statements`, use only the first line and pop off indentation.
+		if (name !== "statements") {
+			stream = stream[0];
+			// remove indentation from the
+			if (stream[0].length && stream[0].type === "indent") stream = stream.slice(1);
+		}
 
 		// Get rule to parse.
 		let rule = this.getRuleOrDie(name, "parser.parse()");
 
 		// parse and return the results
-		return rule.parse(this, stream);
+		return rule.parse(this, stream, 0);
 	}
 
 //

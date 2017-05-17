@@ -10,35 +10,14 @@ import parser from "./_parser";
 export default parser;
 
 
-
-
-// `whitespace` rule.
-// NOTE `parser.parseRule("whitespace", "   ")` will return `undefined`
-//		 because `parser.parseRule()` automatically eats whitespace at the start of a rule.
-parser.addRule(
-	"whitespace",
-	class whitespace extends Rule.Pattern {
-		pattern = /\s+/;
-	}
-);
-
-
 Rule.Comment = class comment extends Rule {
-	// TODO: don't match comments INSIDE strings, etc
-	pattern = /\s*(\/\/|--|#+)\s*(.*)\s*$/;
-	parse(parser, stream, stack) {
-		let match = stream.match(this.pattern);
-		if (!match) return undefined;
-		let endIndex = stream.startIndex + match[0].length;
+	// Comments are specially processed in our token stream.
+	parse(parser, tokens, startIndex = 0, stack) {
+		let token = tokens[startIndex];
+		if (token.type !== "comment") return undefined;
 		return this.clone({
-			matched : {
-				symbol: match[1],
-				comment: match[2]
-			},
-			matchedText: match[0],
-			startIndex: stream.startIndex,
-			endIndex,
-			stream
+			matched: token.comment,
+			endIndex: startIndex + 1
 		});
 	}
 
@@ -52,25 +31,24 @@ parser.addRule("comment", Rule.Comment);
 // `word` = is a single alphanumeric word.
 // MUST start with a lower-case letter (?)
 Rule.Word = class word extends Rule.Pattern {
-	pattern = /\b[a-z][\w\-]*\b/;
 	// Convert "-" to "_" in source output.
 	toSource(context) {
 		return this.matched.replace(/\-/g, "_");
 	}
 };
+Rule.Word.prototype.pattern = /^[a-z][\w\-]*$/;
 parser.addRule("word", Rule.Word);
 
 
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
 Rule.Identifier = class identifier extends Rule.Pattern {
-	pattern = /\b[a-z][\w\-]*\b/;
-
 	// Convert "-" to "_" in source output.
 	toSource(context) {
 		return this.matched.replace(/\-/g, "_");
 	}
 };
+Rule.Identifier.prototype.pattern = /^[a-z][\w\-]*$/;
 parser.addRule(["identifier", "expression"], Rule.Identifier);
 
 // Add English prepositions to identifier blacklist.
@@ -121,11 +99,10 @@ parser.rules.identifier.addToBlacklist(
 // `Type` = type name.
 // MUST start with an upper-case letter (?)
 Rule.Type = class type extends Rule.Pattern {
-	pattern = /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/;
 	// Convert "-" to "_" in source output.
 	toSource(context) {
-		let value = this.matched;
-		switch(value) {
+		let type = this.matched;
+		switch(type) {
 			// special case to take the following as lowercase
 			case "text":		return "String";
 			case "character":	return "Character";
@@ -135,36 +112,50 @@ Rule.Type = class type extends Rule.Pattern {
 			case "boolean":		return "Boolean";
 			case "object":		return "Object";
 			default:
-				return value.replace(/\-/g, "_");
+				return type.replace(/\-/g, "_");
 		}
 	}
 };
+Rule.Type.prototype.pattern = /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/;
 parser.addRule(["type", "expression"], Rule.Type);
 parser.rules.type.addToBlacklist("I");
 
 
+
 // `number` as either float or integer, created with custom constructor for debugging.
 // NOTE: you can also use `one`...`ten` as strings.'
+// TODO:  `integer` and `decimal`?  too techy?
 Rule.Number = class number extends Rule.Pattern {
-	pattern = /(-?([0-9]*[.])?[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)/;
+	// Special words you can use as numbers...
+	static NUMBER_NAMES = {
+		zero: 0,
+		one: 1,
+		two: 2,
+		three: 3,
+		four: 4,
+		five: 5,
+		six: 6,
+		seven: 7,
+		eight: 8,
+		nine: 9,
+		ten: 10
+	}
+
+	// Numbers get encoded as numbers in the token stream.
+	parse(parser, tokens, startIndex = 0) {
+		let token = tokens[startIndex];
+		// if a string, attempt to run through our NUMBER_NAMES
+		if (typeof token === "string") token = Rule.Number.NUMBER_NAMES[token];
+		if (typeof token !== "number") return undefined;
+		return this.clone({
+			matched: token,
+			endIndex: startIndex + 1
+		});
+	}
 
 	// Convert to number on source output.
 	toSource(context) {
-		var number = parseFloat(this.matched, 10);
-		if (!isNaN(number)) return number;
-
-		switch(this.matched) {
-			case "one": return 1;
-			case "two": return 2;
-			case "three": return 3;
-			case "four": return 4;
-			case "five": return 5;
-			case "six": return 6;
-			case "seven": return 7;
-			case "eight": return 8;
-			case "nine": return 9;
-			case "ten": return 10;
-		}
+		return this.matched;
 	}
 };
 
@@ -183,7 +174,15 @@ parser.rules.identifier.addToBlacklist(
 // Returned value has enclosing quotes.
 // TODO: escaped quotes inside string
 Rule.Text = class text extends Rule.Pattern {
-	pattern = /(?:"[^"]*"|'[^']*')/;
+	// Text strings get encoded as `text` objects in the token stream.
+	parse(parser, tokens, startIndex = 0) {
+		let token = tokens[startIndex];
+		if (!token || token.type !== "text") return undefined;
+		return this.clone({
+			matched: token.text,
+			endIndex: startIndex + 1
+		});
+	}
 };
 parser.addRule(["text", "expression"], Rule.Text);
 
@@ -191,8 +190,6 @@ parser.addRule(["text", "expression"], Rule.Text);
 // Boolean literal, created with custom constructor for debugging.
 // TODO: better name for this???
 Rule.Boolean = class boolean extends Rule.Pattern {
-	pattern = /(true|false|yes|no|ok|cancel|success|failure)\b/;
-
 	toSource(context) {
 		switch (this.matched) {
 			case "true":
@@ -200,12 +197,15 @@ Rule.Boolean = class boolean extends Rule.Pattern {
 			case "ok":
 			case "success":
 				return true;
+
 			default:
 				return false;
 		}
 	}
 };
+Rule.Boolean.prototype.pattern = /^(true|false|yes|no|ok|cancel|success|failure)$/;
 parser.addRule(["boolean", "expression"], Rule.Boolean);
+
 // Add boolean tokens to identifier blacklist.
 // TESTME
 parser.rules.identifier.addToBlacklist(
@@ -262,7 +262,7 @@ Rule.BlankLine = class blank_line extends Rule {
 		return "\n";
 	}
 }
-parser.addRule( "blank_line", Rule.BlankLine);
+parser.addRule("blank_line", Rule.BlankLine);
 
 // Open block representation in statements output
 Rule.OpenBlock = class open_block extends Rule {
@@ -270,7 +270,7 @@ Rule.OpenBlock = class open_block extends Rule {
 		return "{";
 	}
 }
-parser.addRule( "open_block", Rule.OpenBlock);
+parser.addRule("open_block", Rule.OpenBlock);
 
 
 // Close block representation in statements output
@@ -279,7 +279,7 @@ Rule.CloseBlock = class close_block extends Rule {
 		return "}";
 	}
 }
-parser.addRule( "close_block", Rule.CloseBlock);
+parser.addRule("close_block", Rule.CloseBlock);
 
 
 // Parser error representation statements output
@@ -288,4 +288,4 @@ Rule.ParseError = class parse_error extends Rule {
 		return `// ERROR: ${this.message}`;
 	}
 }
-parser.addRule( "parse_error", Rule.ParseError);
+parser.addRule("parse_error", Rule.ParseError);

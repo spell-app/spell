@@ -133,9 +133,9 @@ export default class TextStream {
 				// if char is a quote symbol, eat until we get a matching quote.
 				if (char === '"' || char === "'") {
 					let end = this.getEndQuotePosition(line, current, char);
-					let string = new TextStream.string(line.slice(current + 1, end));
-					if (end === last) string.unbalanced = true;
-					tokens.push(string);
+					let text = new TextStream.text(line.slice(current + 1, end));
+					if (end === last) text.unbalanced = true;
+					tokens.push(text);
 					current = end + 1;
 					continue;
 				}
@@ -156,10 +156,12 @@ export default class TextStream {
 					let comment = new TextStream.comment(text);
 					comment.header = true;
 					comment.level = level;
+					tokens.push(comment);
 					// break out of the loop since we ate to the end
 					break;
 				}
 
+				// if we got a regular comment symbol, eat until the end of the line
 				let next = line[current + 1];
 				if ((char === "-" && next === "-") || (char === "/" && next === "/")) {
 					// get the comment and strip off the comment start
@@ -194,10 +196,10 @@ export default class TextStream {
 
 
 // String class
-TextStream.string = function string(string) {
-	this.string = string;
+TextStream.text = function text(text) {
+	this.text = text;
 }
-TextStream.string.prototype.type = "string";
+TextStream.text.prototype.type = "text";
 
 
 // String indent class
