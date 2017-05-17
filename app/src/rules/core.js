@@ -179,13 +179,13 @@ Rule.Text = class text extends Rule.Pattern {
 		let token = tokens[startIndex];
 		if (!token || token.type !== "text") return undefined;
 		return this.clone({
-			matched: token.text,
+			matched: token,
 			nextStart: startIndex + 1
 		});
 	}
 
 	toSource(context) {
-		return "'" + this.matched + "'";
+		return this.matched.literal;
 	}
 };
 parser.addRule(["text", "expression"], Rule.Text);

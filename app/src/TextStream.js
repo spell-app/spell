@@ -98,8 +98,8 @@ export default class TextStream {
 		const WORD_START = /^[A-Za-z]/;
 		const WORD_CHAR = /^[\w_-]/;
 		const WHITE_SPACE = /^\s/;
-		const NUMBER_CHAR = /^[0-9]/;
-		const NUMBER = /^([0-9]+\.)?[0-9]+/;
+		const NUMBER_START = /^[0-9-.]/;
+		const NUMBER = /^-?([0-9]*\.)?[0-9]+/;
 		const HEADER = /^#+/;
 
 		let lines = text.split("\n").map(line => {
@@ -134,7 +134,7 @@ export default class TextStream {
 				// if char is a quote symbol, eat until we get a matching quote.
 				if (char === '"' || char === "'") {
 					let end = this.getEndQuotePosition(line, current, char);
-					let text = new TextStream.text(line.slice(current + 1, end));
+					let text = new TextStream.text(line.slice(current, end + 1));
 					if (end === last) text.unbalanced = true;
 					tokens.push(text);
 					current = end + 1;
@@ -142,11 +142,14 @@ export default class TextStream {
 				}
 
 				// if a number, stick in as a number
-				if (NUMBER_CHAR.test(char)) {
-					let numberMatch = line.substr(current).match(NUMBER)[0];
-					tokens.push(parseFloat(numberMatch, 10));
-					current += numberMatch.length;
-					continue;
+				if (NUMBER_START.test(char)) {
+					let numberMatch = line.substr(current).match(NUMBER);
+					if (numberMatch) {
+						let numberStr = numberMatch[0];
+						tokens.push(parseFloat(numberStr, 10));
+						current += numberStr.length;
+						continue;
+					}
 				}
 
 				// if we got a comment header symbol, eat until the end of the line
@@ -197,13 +200,20 @@ export default class TextStream {
 
 
 // `Text` class for string literals.
-TextStream.text = function text(text) {
-	this.text = text;
+// Pass the literal value, use `.text` to get just the bit inside the quotes.
+TextStream.text = function text(literal) {
+	this.literal = literal;
+
+	let start = 0;
+	let end = literal.length;
+	if (literal[start] === '"' || literal[start] === "'") start = 1;
+	if (literal[end-1] === '"' || literal[end-1] === "'") end = -1;
+	this.text = literal.slice(start, end);
 }
 TextStream.text.prototype = {
 	type: "text",
 	toString() {
-		return `"${this.text}"`;
+		return this.literal;
 	}
 };
 
