@@ -101,7 +101,7 @@ parser.addKeyword("ordinal", "bottom", ordinal, { toSource: () => -1 });
 parser.addExpression(
 	"position_expression",
 	[
-		"{identifier} (#)?{position:expression} of (the?) {expression}",
+		"{identifier} {position:expression} of (the?) {expression}",
 		"the {position:ordinal} {identifier} of (the?) {expression}"
 	],
 	class position_expression extends Rule.Expression{

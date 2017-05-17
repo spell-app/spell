@@ -6,22 +6,12 @@ test("parser is defined", () => {
 	expect(parser).toBeDefined();
 });
 
-test("index expression with #", () => {
-	let result = parser.parse("expression", "item #1 of myList");
-	expect(result.toSource()).toBe("myList[0]");
-});
-
-test("negative index expression with #", () => {
-	let result = parser.parse("expression", "item #-1 of myList");
-	expect(result.toSource()).toBe("spell.getItem(myList, -1)");
-});
-
-test("index expression without #", () => {
+test("index expression", () => {
 	let result = parser.parse("expression", "item 1 of myList");
 	expect(result.toSource()).toBe("myList[0]");
 });
 
-test("negative index expression without #", () => {
+test("negative index expression", () => {
 	let result = parser.parse("expression", "item -11 of myList");
 	expect(result.toSource()).toBe("spell.getItem(myList, -11)");
 });

@@ -71,8 +71,8 @@ export default class Parser {
 		// If we're not parsing `statements`, use only the first line and pop off indentation.
 		if (name !== "statements") {
 			stream = stream[0];
-			// remove indentation from the
-			if (stream[0].length && stream[0].type === "indent") stream = stream.slice(1);
+			// remove indentation from the line
+			if (stream[0] && stream[0].type === "indent") stream = stream.slice(1);
 		}
 
 		// Get rule to parse.
