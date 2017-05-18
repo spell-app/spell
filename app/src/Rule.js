@@ -301,10 +301,7 @@ Rule.Sequence = class Sequence extends Rule {
 
 	// Echo this rule back out.
 	toString() {
-		let ruleStrings = this.rules.map(rule => {
-			return rule.toString() + (rule.matchDelimiter ? rule.matchDelimiter : "");
-		}).join("");
-		return `${ruleStrings}${this.optional ? '?' : ''}`;
+		return `${this.rules.join(" ")}${this.optional ? '?' : ''}`;
 	}
 
 }

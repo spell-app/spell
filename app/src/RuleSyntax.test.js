@@ -9,12 +9,10 @@ test("parse single symbols", () => {
 	expect(rule.match).toEqual([">"]);
 });
 
-test("parse multiple symbols as a sequence", () => {
+test("parse multiple symbols as a single Symbol", () => {
 	let rule = Rule.parseRuleSyntax(">=");
-	expect(rule).toBeInstanceOf(Rule.Sequence);
-	expect(rule.rules[0].match).toEqual([">"]);
-	expect(rule.rules[1].match).toEqual(["="]);
-
+	expect(rule).toBeInstanceOf(Rule.Symbol);
+	expect(rule.match).toEqual([">", "="]);
 	expect(rule.toString()).toBe(">=");
 });
 

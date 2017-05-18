@@ -189,12 +189,6 @@ test("divided_by operator", () => {
 //
 //## Postfix operators
 //
-test("postfix operators require a toJS function", () => {
-	expect(() => {
-		parser.addPostfixOperator("foo", "foo");
-	}).toThrow(TypeError);
-});
-
 test("is defined operator", () => {
 	let result = parser.parse("expression", "a is defined");
 	expect(result.toSource()).toBe("(typeof a !== 'undefined')");

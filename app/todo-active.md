@@ -1,13 +1,69 @@
 TODO:
 
 - refactor
-	- symbol/keyword `toString()` doesn't understand when whitespace is necessary
-		- eg:  `Rule.parseRuleSyntax(">=").toString()` == `> =`
 	- gut `TextStream`
+	- tokenize tests
 	- merge TextStream.text & Rule.Text ?
-	-
 
-- tokenize jsx
+	- tokenize jsx
+	- addSyntax(["someName","expression"], ...)
+
+
+- Structure
+
+
+# Scope/etc
+- global "actions"
+	- to turn a card over	<= global action with param `card` (ref as `the card` inside fn)
+	- to start a game		<= global action with param `game`
+	? to deal cards?		<= internal action, only available w/in `Game` class?
+
+- Non-controller objects as simple as possible
+	- eg: card knows it has a suit, but not what all "suits" are
+	- eg: `the color of a card` is deck mechanics
+
+- Default "game logic" to controller rather than spreading into subclasses
+	- eg: game: `can play a card on a pile` as switch rather than method for each pile
+	- easier for layperson to follow logic in one place
+	- if necessary, give "pile" properties like "alternating" and "ascending" etc
+
+- where actions are defined will help place scope
+	- type Game
+		property deck = new Card Deck
+		- to start game
+			- shuffle the deck	=> `the deck` is magic "look up in local scope" indicator
+
+- event handlers
+	- type Card Deck
+		- to shuffle a deck					<= global typed action
+			gather the cards into a pile	<= `the cards` = magic scope `the cards of the deck`
+											<= `a pile` = create new pile, which will show at center of screen?
+			randomize the cards				<= shuffle command
+			turn the cards face down		<= implies `turn a card` takes an array of cards as
+			play sound "shuffle deck"		<= autofind sound, returns a promise
+			wait until the sound is done	<= `the sound` here is local variable from `play sound`
+
+
+- component definition
+	to draw
+		<card rank suit direction>		<= properties of cards, === `rank={my.rank}`, etc
+			<image name="front" url={card image of my deck with my rank and my suit}/>
+			<image name="back" url={card back image of my deck}/>
+		</card>
+
+	styles
+		// Make card "front" and "back" images overlap
+		<card> <image>
+			overlap				<- (eg: position absolute)
+
+		// Flip "front" face of card over from back face
+		<card> <image name="front">
+			3D-angle = 180°		<- somehow express "flip in 3D"
+
+		// Change card orientation when direction is up.  Automatically animates.
+		<card direction="up">
+			3D-angle = 180°		<- somehow express "flip in 3D"
+
 
 
 - MobX
@@ -28,8 +84,6 @@ TODO:
 	=> getMatched(context)
 
 
-- Rule.Boolean etc:  add pattern/etc to class: we're only creating one anyway.
-- addSyntax(["name","expression", ...)
 
 
 

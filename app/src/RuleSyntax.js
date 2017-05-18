@@ -45,7 +45,17 @@ Object.assign(Rule, {
 		let lastIndex = syntaxStream.length;
 		while (startIndex < lastIndex) {
 			let [ rule, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex);
-			if (rule) rules.push(rule);
+			if (rule) {
+				let last = rules[rules.length-1];
+				// If this is a `Symbol` and last was a `Symbol`, merge together
+ 				if (last && last instanceof Rule.Symbol && rule instanceof Rule.Symbol) {
+ 					// remove the last rule
+ 					rules.pop();
+ 					// and replace with a rule that merges the keywords
+ 					rule.match = last.match.concat(rule.match);
+ 				}
+				rules.push(rule);
+			}
 			startIndex = endIndex + 1;
 		}
 		return rules;
@@ -331,7 +341,7 @@ Object.defineProperties(Parser.prototype, {
 
 		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
 		let rule = (Rule.parseRuleSyntax_list(stream, [], 0, constructor) || [])[0];
-		if (!rule) return;
+		if (!rule) throw new SyntaxError(`Rule.addList(${name}, ${ruleSyntax}): no rule produced`);
 		if (properties) Object.assign(rule, properties);
 		return this.addRule(name, rule);
 	}},
@@ -343,7 +353,7 @@ Object.defineProperties(Parser.prototype, {
 
 		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
 		let rule = (Rule.parseRuleSyntax_keyword(stream, [], 0, constructor) || [])[0];
-		if (!rule) return;
+		if (!rule) throw new SyntaxError(`Rule.addKeyword(${name}, ${ruleSyntax}): no rule produced`);
 		if (properties) Object.assign(rule, properties);
 		return this.addRule(name, rule);
 	}},
@@ -353,37 +363,24 @@ Object.defineProperties(Parser.prototype, {
 		if (Array.isArray(ruleSyntax))
 			return ruleSyntax.forEach(syntax => this.addSymbol(name, syntax, constructor, properties));
 
-		// TODO: assume we just have one symbol of many letters...
-		let stream = [ruleSyntax];
-		let rule = (Rule.parseRuleSyntax_symbol(stream, [], 0, constructor) || [])[0];
-		if (!rule) return;
+		// Parse as `tokens`, which will merge Symbols for us.
+		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
+		let rules = (Rule.parseRuleSyntax_tokens(stream, [], 0, constructor) || []);
+
+		if (rules.length === 0) {
+			throw new SyntaxError(`Rule.addSymbol(${name}, ${ruleSyntax}): no rule produced`);
+		}
+
+		if (rules.length > 1 || !(rules[0] instanceof Rule.Symbol)) {
+			throw new SyntaxError(`Rule.addSymbol(${name}, ${ruleSyntax}): generated something `+
+				` other than a single Symbol.  Use Rule.addSyntax() instead.`);
+		}
+
+		let rule = rules[0];
+		// Convert to proper type if necessary
+		if (constructor !== Rule.Symbol) rule = new constructor(rule);
 		if (properties) Object.assign(rule, properties);
 		return this.addRule(name, rule);
 	}},
 
-	// Add postfix operator, such as "a is defined"
-	// NOTE: if you have more than one matching operator,
-	//		 pass in an array of simple strings so all of our operators are simple strings.
-	addPostfixOperator: { value: function(name, ruleSyntax, properties) {
-		if (Array.isArray(ruleSyntax)) {
-			return ruleSyntax.forEach(syntax => this.addPostfixOperator(name, syntax, properties));
-		}
-
-		let rule = this.addSequence(name, ruleSyntax, properties);
-		if (rule) {
-			if (!rule.toJS) {
-				throw new TypeError(`Expected postfix operator rule '${name}' to specify 'toJS' function`);
-			}
-			// clear list of infix operators for getter below
-			delete this.__postfixOperators;
-			return this.addRule("postfix_operator", rule);
-		}
-	}},
-
-	// List of postfix operators as strings.
-	// Re-memoized after `addPostfixOperator` above.
-	postfixOperators: defineMemoized("__posfixOperators",
-		function(){ return this.rules["postfix_operator"]
-						&& this.rules["postfix_operator"].rules.map(rule => rule.string);
-	})
 });
