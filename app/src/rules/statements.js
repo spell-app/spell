@@ -30,20 +30,22 @@ parser.addStatement("return_statement", "return {expression}",
 //
 //	## Assignment
 //
-class assignment extends Rule.Statement {
-	toSource(context) {
-		let { thing, value } = this.getMatchedSource(context);
-		// TODO: declare identifier if not in scope, etc
-		return `${thing} = ${value}`;
-	}
-}
 
 //TESTME
-parser.addStatement("assignment", "{thing:expression} = {value:expression}", assignment);
-//TESTME
-parser.addStatement("assignment", "set {thing:expression} to {value:expression}", assignment);
-//TESTME
-parser.addStatement("assignment", "put {value:expression} into {thing:expression}", assignment);
+parser.addStatement("assignment",
+	[
+		"{thing:expression} = {value:expression}",
+		"set {thing:expression} to {value:expression}",
+		"put {value:expression} into {thing:expression}"
+	],
+	class assignment extends Rule.Statement {
+		toSource(context) {
+			let { thing, value } = this.getMatchedSource(context);
+			// TODO: declare identifier if not in scope, etc
+			return `${thing} = ${value}`;
+		}
+	}
+);
 
 //TESTME
 parser.addStatement(
@@ -61,6 +63,7 @@ parser.addStatement(
 
 //
 //	## User interaction
+// TODO: move into another file
 //
 
 // Alert a message.

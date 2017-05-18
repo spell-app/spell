@@ -1,10 +1,9 @@
 TODO:
 
 - refactor
-	- gut `TextStream`
-	- tokenize tests
-	- merge TextStream.text & Rule.Text ?
-
+	- gut `TextStream` & refactor somehow
+	- remove `ruleName` if same as constructor name???
+	- test tokenize tests
 	- tokenize jsx
 	- addSyntax(["someName","expression"], ...)
 

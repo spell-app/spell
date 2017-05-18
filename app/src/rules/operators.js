@@ -15,10 +15,9 @@ export default parser;
 // NOTE: `precedence` numbers come from Javascript equivalents
 //		 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
 
-class infix_operator extends Rule.Alternatives {
+parser.addRule("infix_operator", class infix_operator extends Rule.Alternatives{});
 
-// NOTE: For the operators themselves, we really want to just use longest match.
-// 		 We want to push the precedence up to the expression and evaluate different expressions based on that.
+// TODO:
 // 	// Find best match according to operator precedence as defined below.
 // 	getBestMatch(matches) {
 // 		console.warn("GBM", matches, matches.map(match => match.precedence), matches.map(match => match.matchedText));
@@ -32,9 +31,22 @@ class infix_operator extends Rule.Alternatives {
 // 			return best;
 // 		}, matches[0]);
 // 	}
-}
 
-parser.addRule("infix_operator", new infix_operator());
+
+parser.addExpression(
+	"infix_operator_expression",
+	"{lhs:expression} {operator:infix_operator} {rhs:expression}",
+	class infix_operator_expression extends Rule.Expression {
+		// We CANNOT match if `infix_operator` isn't found in the expression.
+		testRule = "infix_operator";
+
+		toSource(context) {
+			let { lhs, rhs, operator } = this.results;
+			return operator.toJS(lhs.toSource(context), rhs.toSource(context));
+		}
+	}
+);
+
 
 parser.addKeyword("infix_operator", "and",
 	class and extends Rule.Keyword { precedence = 6; toJS(a,b) { return `(${a} && ${b})` } }
@@ -165,41 +177,13 @@ parser.addKeyword("infix_operator", "divided by",
 
 //TODO:  `+=` etc?  other math functions?
 
-parser.addExpression(
-	"infix_operator_expression",
-	"{lhs:expression} {operator:infix_operator} {rhs:expression}",
-	class infix_operator_expression extends Rule.Expression {
-		// We CANNOT match if `infix_operator` isn't found in the expression.
-		testRule = "infix_operator";
 
-		toSource(context) {
-			let { lhs, rhs, operator } = this.results;
-			return operator.toJS(lhs.toSource(context), rhs.toSource(context));
-		}
-	}
-);
-
+//
+//
 //## Postifx operators:   `{lhs} <operator>`, e.g. `a is defined`
 // NOTE: `operator.toJS` MUST return a function which transforms argument (`lhs`) into JS output.
 
-parser.addKeyword("postfix_operator", "is defined",
-	class is_defined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} !== 'undefined')` } }
-);
-parser.addKeyword("postfix_operator", "is not defined",
-	class is_not_defined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} === 'undefined')` } }
-);
-parser.addKeyword("postfix_operator", "is undefined",
-	class is_undefined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} === 'undefined')` } }
-);
-
-
-//TODO: `spell.isEmpty(thing)`
-parser.addKeyword("postfix_operator", "is empty",
-	class is_empty extends Rule.Keyword { toJS(thing) { return `spell.isEmpty(${thing})` } }
-);
-parser.addKeyword("postfix_operator", "is not empty",
-	class is_not_empty extends Rule.Keyword { toJS(thing) { return `!spell.isEmpty(${thing})` } }
-);
+parser.addRule("postfix_operator", class postfix_operator extends Rule.Alternatives{});
 
 parser.addExpression(
 	"postfix_operator_expression",
@@ -214,3 +198,22 @@ parser.addExpression(
 		}
 	}
 );
+
+parser.addKeyword("postfix_operator", "is defined",
+	class is_defined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} !== 'undefined')` } }
+);
+parser.addKeyword("postfix_operator", "is not defined",
+	class is_not_defined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} === 'undefined')` } }
+);
+parser.addKeyword("postfix_operator", "is undefined",
+	class is_undefined extends Rule.Keyword { toJS(thing) { return `(typeof ${thing} === 'undefined')` } }
+);
+
+//TODO: `spell.isEmpty(thing)`
+parser.addKeyword("postfix_operator", "is empty",
+	class is_empty extends Rule.Keyword { toJS(thing) { return `spell.isEmpty(${thing})` } }
+);
+parser.addKeyword("postfix_operator", "is not empty",
+	class is_not_empty extends Rule.Keyword { toJS(thing) { return `!spell.isEmpty(${thing})` } }
+);
+

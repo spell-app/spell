@@ -64,6 +64,7 @@ parser.addExpression(
 //	Ordinal numbers (first, second, last, etc).
 // TODO: sixty-fifth, two hundred forty ninth...
 //
+parser.addRule("ordinal", class ordinal extends Rule.Alternatives{});
 class ordinal extends Rule.Keyword {}
 parser.addKeyword("ordinal", "first", ordinal, { toSource: () => 1 });
 parser.addKeyword("ordinal", "second", ordinal, { toSource: () => 2 });
@@ -278,7 +279,7 @@ parser.addStatement(
 	"list_prepend",
 	[
 		"prepend {thing:expression} to {list:expression}",
-		"add {thing:expression} before {list:expression}",
+//"top" as stack === bottom?
 		"add {thing:expression} to the (start|front|top) of {list:expression}"
 	],
 	class list_prepend extends Rule.Statement {
@@ -301,6 +302,9 @@ parser.addStatement(
 		}
 	}
 );
+
+
+// TODO:  	"add {thing:expression} to {list:expression} before {item:expression}",
 
 // Add to middle of list, pushing existing items out of the way.
 //TESTME

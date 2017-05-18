@@ -34,10 +34,11 @@ parser.addList(
 	}
 );
 
-// `new`
+// `new` or `create`
+// This works as an expression OR a statement.
 // NOTE: we assume that all types take an object of properties????
 parser.addSequence(
-	"new_thing",
+	["expression", "statement"],
 	"(create|new) {type} (?:with {props:object_literal_properties})?",
 	class new_thing extends Rule.Sequence {
 		toSource(context) {
@@ -52,11 +53,6 @@ parser.addSequence(
 		}
 	}
 );
-// This works as an expression OR a statement.
-parser.addRule("expression", parser.rules.new_thing);
-parser.addRule("statement", parser.rules.new_thing);
-
-
 
 
 // Define class.
@@ -325,24 +321,26 @@ parser.addStatement(
 //
 //	Self-reference
 //
-parser.addKeyword("me", "me",
+parser.addKeyword(
+	["me", "expression"],
+	"me",
 	class me extends Rule.Keyword {
 		toSource(context) {
 			return "this";
 		}
 	}
 );
-parser.addRule("expression", parser.rules.me);
 
 // TODO: this really makes me want to make `I am empty` etc work...
-parser.addKeyword("I", "I",
+parser.addKeyword(
+	["I", "expression"],
+	"I",
 	class I extends Rule.Keyword {
 		toSource(context) {
 			return "this";
 		}
 	}
 );
-parser.addRule("expression", parser.rules.I);
 
 
 //
