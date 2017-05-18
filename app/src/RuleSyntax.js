@@ -45,17 +45,7 @@ Object.assign(Rule, {
 		let lastIndex = syntaxStream.length;
 		while (startIndex < lastIndex) {
 			let [ rule, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex);
-			if (rule) {
-				let last = rules[rules.length-1];
-				// If this is a `String` and last was a `String`, merge together
-// 				if (last && last instanceof Rule.Symbol && rule instanceof Rule.Symbol) {
-// 					// remove the last rule
-// 					rules.pop();
-// 					// and replace with a rule that merges the keywords
-// 					rule = Rule.mergeSymbols(last, rule);
-// 				}
-				rules.push(rule);
-			}
+			if (rule) rules.push(rule);
 			startIndex = endIndex + 1;
 		}
 		return rules;
@@ -111,7 +101,7 @@ Object.assign(Rule, {
  		// eat keywords while they last
 		for (var i = startIndex; i < syntaxStream.length; i++) {
 			let next = syntaxStream[i];
-			if (next.match(Rule.KEYWORD_PATTERN)) {
+			if (typeof next === "string" && next.match(Rule.KEYWORD_PATTERN)) {
 				match.push(next);
 				endIndex = i;
 			}
@@ -137,6 +127,13 @@ Object.assign(Rule, {
 		let match = isEscaped ? string.substr(1) : string;
 
 		let rule = new constructor({ match });
+
+		if (isEscaped) {
+			rule.toString = function() {
+				return `\\${match}${this.optional ? '?' : ''}`;
+			}
+		}
+
 		return [ rule, startIndex ];
 	},
 

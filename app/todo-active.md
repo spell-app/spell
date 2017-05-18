@@ -1,12 +1,13 @@
 TODO:
 
-- refactor thoughts
-	- forget stream, just take text string?
-		- need: matched, matchedText, startIndex, endIndex
-	- tokenize:
-		- whitespace
-		- string literals
-	- symbol/keyword use (array of) string matching
+- refactor
+	- symbol/keyword `toString()` doesn't understand when whitespace is necessary
+		- eg:  `Rule.parseRuleSyntax(">=").toString()` == `> =`
+	- gut `TextStream`
+	- merge TextStream.text & Rule.Text ?
+	-
+
+- tokenize jsx
 
 
 - MobX

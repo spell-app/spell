@@ -301,7 +301,10 @@ Rule.Sequence = class Sequence extends Rule {
 
 	// Echo this rule back out.
 	toString() {
-		return `${this.rules.join(" ")}${this.optional ? '?' : ''}`;
+		let ruleStrings = this.rules.map(rule => {
+			return rule.toString() + (rule.matchDelimiter ? rule.matchDelimiter : "");
+		}).join("");
+		return `${ruleStrings}${this.optional ? '?' : ''}`;
 	}
 
 }
@@ -436,10 +439,9 @@ Rule.Repeat = class Repeat extends Rule {
 	}
 
 	toString() {
-		const rule = (this.rule instanceof Rule.Sequence || this.rule instanceof Rule.Keyword && this.rule.string.includes(" ")
-				   ? `(${this.rule})`
-				   : `${this.rule}`
-				);
+		let isCompoundRule = (this.rule instanceof Rule.Sequence)
+						  || (this.rule instanceof Rule.Keyword && this.rule.match.length > 1);
+		const rule = isCompoundRule ? `(${this.rule})` : `${this.rule}`;
 		return `${rule}${this.optional ? '*' : '+'}`;
 	}
 }
