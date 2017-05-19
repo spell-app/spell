@@ -8,9 +8,10 @@ const Tokenizer = {
 	WHITE_SPACE : /^\s/,
 	NUMBER_START : /^[0-9-.]/,
 	NUMBER : /^-?([0-9]*\.)?[0-9]+/,
-	HEADER : /^#+/,
+	COMMENT_START : /^(?:#|-|\/)/,
+	COMMENT : /^(##+|--+|\/\/+)(\s*)(.*)/,
 
-	// JSX
+	// JSX parsing
 	TAG_START : /^</,
 	START_TAG : /^<([\w-]+\b)/,
 	BINARY_TAG_END : />/,
@@ -21,20 +22,21 @@ const Tokenizer = {
 		return new RegExp(`${startLine ? "^" : ""}<\/(${tagName})>`);
 	},
 
-	// Tokenize text into a series of:
+	// Tokenize text into an array of:
 	//	- an array for each line, within each line,
 	//		- `{ indent: number }` for indent at start of line
 	//		- strings for keywords/symbols or
-	//		- objects for things which match the TOKENIZE_RULES below.
-	//			- NOTE: indent, string literals and comments will be removed
-	//				BEFORE calling `parseStructure`
+	//		- numbers for number literals
+	//		- { type: "text", literal: "'abc'", text: "abc" },
+	//		- { type: "indent", level: 7 },
+	//		- { type: "comment", ?header: true, comment: "string" }
 	tokenize(text) {
 		let lines = text.split("\n").map(line => {
 			let tokens = [];
 			// pop indent off
 			let tabs = line.match(this.TABS);
 			if (tabs) {
-				tokens.push(new this.indent(tabs.length));
+				tokens.push(new Tokenizer.Indent(tabs.length));
 				line = line.substr(tabs.length);
 			}
 
@@ -61,7 +63,7 @@ const Tokenizer = {
 				// if char is a quote symbol, eat until we get a matching quote.
 				if (char === '"' || char === "'") {
 					let end = this.getEndQuotePosition(line, current, char);
-					let text = new this.text(line.slice(current, end + 1));
+					let text = new Tokenizer.Text(line.slice(current, end + 1));
 					if (end === last) text.unbalanced = true;
 					tokens.push(text);
 					current = end + 1;
@@ -79,29 +81,16 @@ const Tokenizer = {
 					}
 				}
 
-				// if we got a comment header symbol, eat until the end of the line
-				if (char === "#") {
-					let text = line.slice(current);
-					let level = line.match(this.HEADER)[0].length;
-					text = text.substr(level).trim();
-					let comment = new this.comment(text);
-					comment.header = true;
-					comment.level = level;
-					tokens.push(comment);
-					// break out of the loop since we ate to the end
-					break;
-				}
-
-				// if we got a regular comment symbol, eat until the end of the line
-				let next = line[current + 1];
-				if ((char === "-" && next === "-") || (char === "/" && next === "/")) {
-					// get the comment and strip off the comment start
-					let text = line.slice(current + 2).trim();
-					let comment = new this.comment(text);
-					tokens.push(comment);
-
-					// break out of the loop since we ate to the end
-					break;
+				// if we got a comment start symbol, attempt to match a comment
+				if (this.COMMENT_START.test(char)) {
+					let commentMatch = line.substr(current).match(this.COMMENT)
+					if (commentMatch) {
+						let [match, commentSymbol, whitespace, comment] = commentMatch;
+						let token = new Tokenizer.Comment({ commentSymbol, whitespace, comment });
+						tokens.push(token);
+						// break out of the loop since we ate to the end of the line
+						break;
+					}
 				}
 
 				// otherwise stick non-word characters in by themselves
@@ -126,9 +115,14 @@ const Tokenizer = {
 };
 
 
+Tokenizer.Token = function token(props) {
+	Object.assign(this, props);
+}
+
+
 // `Text` class for string literals.
 // Pass the literal value, use `.text` to get just the bit inside the quotes.
-Tokenizer.text = function text(literal) {
+Tokenizer.Text = function text(literal) {
 	this.literal = literal;
 
 	let start = 0;
@@ -137,34 +131,34 @@ Tokenizer.text = function text(literal) {
 	if (literal[end-1] === '"' || literal[end-1] === "'") end = -1;
 	this.text = literal.slice(start, end);
 }
-Tokenizer.text.prototype = {
+Tokenizer.Text.prototype = new Tokenizer.Token({
 	type: "text",
 	toString() {
 		return this.literal;
 	}
-};
+});
 
 
 // String indent class
-Tokenizer.indent = function indent(level) {
+Tokenizer.Indent = function indent(level) {
 	this.level = level;
 }
-Tokenizer.indent.prototype = {
+Tokenizer.Indent.prototype = new Tokenizer.Token({
 	type: "indent",
 	toString() {
 		return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t".slice(0, this.indent);
 	}
-};
+});
 
 // Comment class
-Tokenizer.comment = function comment(comment) {
+Tokenizer.Comment = function comment(comment) {
 	this.comment = comment;
 }
-Tokenizer.comment.prototype = {
+Tokenizer.Comment.prototype = new Tokenizer.Token({
 	type: "comment",
 	toString() {
 		return `/*${this.comment}*/`;
 	}
-};
+});
 
 export default Tokenizer;

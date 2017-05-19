@@ -8,8 +8,11 @@ import parser from "./rules/index.js";
 if (typeof window !== "undefined") {
 	Object.assign(window, {
 		Tokenizer: exports.Tokenizer,
-		Parser: exports.Parser,
+		tokenize: exports.Tokenizer.tokenize.bind(exports.Tokenizer),
+
 		Rule: exports.Rule,
+
+		Parser: exports.Parser,
 		parser: parser,
 		parse: parser.parse.bind(parser),
 		compile: parser.compile.bind(parser),
