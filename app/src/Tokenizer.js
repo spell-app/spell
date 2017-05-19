@@ -10,6 +10,17 @@ const Tokenizer = {
 	NUMBER : /^-?([0-9]*\.)?[0-9]+/,
 	HEADER : /^#+/,
 
+	// JSX
+	TAG_START : /^</,
+	START_TAG : /^<([\w-]+\b)/,
+	BINARY_TAG_END : />/,
+	UNARY_TAG_END : "/\/>",
+	TAG_END : /^<\/([\w-])>/,
+
+	getTagEnd : function(tagName, startLine = true) {
+		return new RegExp(`${startLine ? "^" : ""}<\/(${tagName})>`);
+	},
+
 	// Tokenize text into a series of:
 	//	- an array for each line, within each line,
 	//		- `{ indent: number }` for indent at start of line

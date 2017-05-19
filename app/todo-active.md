@@ -1,13 +1,16 @@
 TODO:
 
 - refactor
-	- gut `TextStream` & refactor somehow
-	- remove `ruleName` if same as constructor name???
-	- test tokenize tests
+	- test tokenizer
+	- tokenizer & bad input
 	- tokenize jsx
 
+- jsx parser
+	- JSX breaks line-by-line paradigm
+		- "\n" as char kicks into "linestart" mode
 
-- Structure
+	- match "<"
+		- match START_TAG => JSX mode
 
 
 # Scope/etc
