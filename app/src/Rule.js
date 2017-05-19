@@ -501,8 +501,7 @@ Rule.List = class List extends Rule {
 
 
 
-// `Statements` are a block of `Statements` that understand nesting and comments.
-// TODO: is this a `Block`?
+// `Statements` are a block of `Statement` that understand nesting and comments.
 Rule.Statements = class statements extends Rule {
 	// Return a certain `number` of tab characters.
 	static TABS = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
@@ -514,7 +513,6 @@ Rule.Statements = class statements extends Rule {
 	// `statements` is an array of arrays of tokens.
 //TODO: non-standard, other `parse()` routines will take a single line???
 	parse(parser, statements, lineNumber = 0, stack = []) {
-console.info(statements);
 		console.time("Rule.Statements.parse()");
 
 		// Cut off the beginning if not on the first line...

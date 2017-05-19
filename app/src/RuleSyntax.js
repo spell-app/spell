@@ -17,7 +17,6 @@ Object.assign(Rule, {
 // ## group: parsing syntax
 //
 
-// TODO: convert to TextStream pattern ala normal parser once that settles down???
 	parseRuleSyntax(syntax, SequenceConstructor = Rule.Sequence) {
 		let syntaxStream = Rule.tokeniseRuleSyntax(syntax);
 		let rules = Rule.parseRuleSyntax_tokens(syntaxStream, []);

@@ -1,4 +1,4 @@
-import TextStream from "../TextStream";
+import Tokenizer from "../Tokenizer";
 import parser from "./core.js";
 
 test("parser is defined", () => {

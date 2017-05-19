@@ -8,7 +8,7 @@
 // TODO:	What does syntax tree look like?  How do we extract meaning out of the nest?
 // TODO:	Pass `context` to toSource(), add property descriptors to `class`, variables and code to `method`, `global` stuff etc
 
-import TextStream from "./TextStream.js";
+import Tokenizer from "./Tokenizer.js";
 import Rule from "./Rule.js";
 
 // GRRR... will SOMEONE on the node team please implement console.group ???
@@ -54,7 +54,7 @@ export default class Parser {
 		return result.toSource(this);
 	}
 
-	// Parse `name`d rule at head of `stream` (`string` or `TextStream`).
+	// Parse `name`d rule at head of `stream` (`string` or array of `tokens`).
 	// Handles optional and repeating rules as well as eating whitespace.
 	// Returns result of parse.
 //TESTME
@@ -65,8 +65,8 @@ export default class Parser {
 			name = "statements";
 		}
 
-		// Convert to a TextStream if necessary.
-		if (typeof stream === "string") stream = TextStream.tokenize(stream);
+		// Tokenize if necessary.
+		if (typeof stream === "string") stream = Tokenizer.tokenize(stream);
 
 		// If we're not parsing `statements`, use only the first line and pop off indentation.
 		if (name !== "statements") {

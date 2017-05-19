@@ -5,7 +5,6 @@ TODO:
 	- remove `ruleName` if same as constructor name???
 	- test tokenize tests
 	- tokenize jsx
-	- addSyntax(["someName","expression"], ...)
 
 
 - Structure
