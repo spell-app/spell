@@ -11,3 +11,13 @@ PARSE_JSX
 	-
 
 
+
+DELEGATING CHAR SCAN TOKENIZER
+- this.testChar(text, index, <rule>)
+	<rule> = RegExp or array of possible chars
+
+- tokenizer.rules = [ [ "name", <rule>, matcher() ], ... ]
+	- <rule> = RegExp or array of possible start chars
+	- matcher returns [ [<tokens>], nextChar ]
+
+

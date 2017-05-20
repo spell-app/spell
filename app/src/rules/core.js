@@ -185,7 +185,7 @@ Rule.Text = class text extends Rule.Pattern {
 	}
 
 	toSource(context) {
-		return this.matched.literal;
+		return this.matched.quotedString;
 	}
 };
 parser.addRule(["text", "expression"], Rule.Text);
