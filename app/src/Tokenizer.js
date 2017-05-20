@@ -23,13 +23,9 @@ Object.defineProperty(String.prototype, "getLine", {
 // TODO: convert to line-aware stream???
 const Tokenizer = {
 
-	TABS : /^\t+/,
-	WORD_START : /^[A-Za-z]/,
+	// Regular expressions for rule functions.
 	WORD_CHAR : /^[\w_-]/,
-	WHITE_SPACE : /^\s/,
-	NUMBER_START : /^[0-9-.]/,
 	NUMBER : /^-?([0-9]*\.)?[0-9]+/,
-	COMMENT_START : /^(?:#|-|\/)/,
 	COMMENT : /^(##+|--+|\/\/+)(\s*)(.*)/,
 
 	// JSX parsing
@@ -52,6 +48,43 @@ const Tokenizer = {
 		{ method: "eatComment",			pattern: /^(#|-|\/)/	},
 		{ method: "eatNewline",		 	pattern: /^\n/			},
 	],
+
+
+	// Tokenize text into an array of:
+	//	- an array for each line, within each line,
+	//		- `{ indent: number }` for indent at start of line
+	//		- strings for keywords/symbols or
+	//		- numbers for number literals
+	//		- { type: "text", literal: "'abc'", text: "abc" },
+	//		- { type: "indent", level: 7 },
+	//		- { type: "comment", comment: "string", commentSymbol, whitespace }
+	tokenize(text) {
+		let results = [[]];
+		if (!text) return results;
+
+		let current = 0;
+		let last = text.length;
+		while (current < last) {
+			current = this.applyRulesToHead(text, current, results);
+		}
+		return results;
+	},
+
+	// TODOC
+	applyRulesToHead(text, start, results) {
+		let char = text[start];
+		let ruleNumber = -1;
+		let rule;
+		while (rule = this.rules[++ruleNumber]) {
+			if (rule.pattern.test(char)) {
+				let endChar = this[rule.method](text, start, results);
+				if (endChar !== undefined) return endChar;
+			}
+		}
+		// if NO rules applied, eat a single symbol character.
+		return this.eatSymbol(text, start, results);
+	},
+
 
 	// Processors
 	// Each are called because their `rule` was matched in the stream.
@@ -153,42 +186,6 @@ const Tokenizer = {
 	eatSymbol(text, start, results) {
 		results.last.push(text[start]);
 		return start + 1;
-	},
-
-
-	// Tokenize text into an array of:
-	//	- an array for each line, within each line,
-	//		- `{ indent: number }` for indent at start of line
-	//		- strings for keywords/symbols or
-	//		- numbers for number literals
-	//		- { type: "text", literal: "'abc'", text: "abc" },
-	//		- { type: "indent", level: 7 },
-	//		- { type: "comment", comment: "string", commentSymbol, whitespace }
-	tokenize(text) {
-		let results = [[]];
-		if (!text) return results;
-
-		let current = 0;
-		let last = text.length;
-		while (current < last) {
-			current = this.applyNextRule(text, current, results);
-		}
-		return results;
-	},
-
-	// TODOC
-	applyNextRule(text, start, results) {
-		let char = text[start];
-		let ruleNumber = -1;
-		let rule;
-		while (rule = this.rules[++ruleNumber]) {
-			if (rule.pattern.test(char)) {
-				let endChar = this[rule.method](text, start, results);
-				if (endChar !== undefined) return endChar;
-			}
-		}
-		// if NO rules applied, eat a single symbol character.
-		return this.eatSymbol(text, start, results);
 	},
 };
 
