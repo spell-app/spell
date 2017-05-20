@@ -38,12 +38,13 @@ const Tokenizer = {
 	//
 	// It is MUCH MUCH faster to use strings!
 	rules : [
-		{ method: "eatWhitespace", 		pattern: [" ", "\t"]		},
-		{ method: "eatWord",			pattern: /[A-Za-z]/			},
-		{ method: "eatNumber",			pattern: /[0-9-.]/			},
-		{ method: "eatNewline",		 	pattern: ["\n"]				},
-		{ method: "eatText",			pattern: ["'", '"']			},
-		{ method: "eatComment",			pattern: ["#", "-", "\/"]	},
+		{ method: "matchWhitespace", 	pattern: [" ", "\t"]		},
+		{ method: "matchWord",			pattern: /[A-Za-z]/			},
+		{ method: "matchNumber",		pattern: /[0-9-.]/			},
+		{ method: "matchJSX",			pattern: ["<"]				},
+		{ method: "matchNewline",		pattern: ["\n"]				},
+		{ method: "matchText",			pattern: ["'", '"']			},
+		{ method: "matchComment",		pattern: ["#", "-", "\/"]	},
 	],
 
 
@@ -61,20 +62,24 @@ const Tokenizer = {
 
 		// quick return if only whitespace
 		if (!text.trim()) return results;
-
+//console.time("tokenize");
 		if (typeof start !== "number") start = 0;
 		if (typeof end !== "number") end = text.length;
 
 		// check for a leading indent if at the beginning of text
 		if (start === 0) {
-			let newStart = this.eatIndent(text, start, end, results);
+			let newStart = this.matchIndent(text, start, end, results);
 			if (newStart) start = newStart;
 		}
 
 		// process rules repeatedly until we get to the end
 		while (start < end) {
-			start = this.applyRulesToHead(text, start, end, results);
+			let newStart = this.applyRulesToHead(text, start, end, results);
+			// Throw if we didn't get a productive rule!
+			if (start === newStart) throw new SyntaxError(`tokenize(${text.substr(start, 20)}): rules didn't match anything!`);
+			start = newStart;
 		}
+//console.timeEnd("tokenize");
 		return results;
 	},
 
@@ -86,12 +91,17 @@ const Tokenizer = {
 		while (rule = this.rules[++ruleNumber]) {
 			if (this.testRule(rule, char)) {
 				// if we matched a rule, exit so we start over from the top.
-				let newStart = this[rule.method](text, start, end, results);
-				if (newStart !== undefined) return newStart;
+				let result = this[rule.method](text, start, end, results);
+				if (result !== undefined) {
+					let [token, newStart] = result;
+					if (token) results[results.length - 1] = results[results.length - 1].concat(token);
+					return newStart;
+				}
 			}
 		}
 		// if NO rules applied, eat a single symbol character.
-		return this.eatSymbol(text, start, end, results);
+		results.last.push(text[start]);
+		return start + 1;
 	},
 
 	// Return `true` if the `rule.pattern` matches the `char` passed in.
@@ -117,31 +127,50 @@ const Tokenizer = {
 	//	just return `undefined` so we'll try the next rule.
 	//
 
+	//
+	//	### Whitespace
+	//
+
 	// Eat one or more whitespace characters.
 	// NOTE: does NOT add whitespace to the `results`.
-	eatWhitespace(text, start, end, results) {
-		while (text[start] === " " || text[start] === "\t") {
-			start++;
+	matchWhitespace(text, start, end, results) {
+		let whiteSpaceEnd = start;
+		while (whiteSpaceEnd < end && (text[whiteSpaceEnd] === " " || text[whiteSpaceEnd] === "\t")) {
+			whiteSpaceEnd++;
 		}
-		return start;
+		if (whiteSpaceEnd === start) return undefined;
+		return [undefined, whiteSpaceEnd];
 	},
 
-	// Eat a single `word`.
-	// Adds to results as a String.
-	eatWord(text, start, end, results) {
-		let wordEnd = start + 1;
+	//
+	//	### Word
+	//
+
+	// Match a single `word` in `text` at character `start`.
+	// Returns `[word, wordEnd]`.
+	// Returns an empty array if couldn't match a word.
+	matchWord(text, start, end, results) {
+		let wordEnd = start;
 		while (wordEnd < end && this.WORD_CHAR.test(text[wordEnd])) {
 			wordEnd++;
 		}
+		if (wordEnd === start) return undefined;
+
 		let word = text.slice(start, wordEnd);
-		results.last.push(word);
-		return wordEnd;
+		return [word, wordEnd];
 	},
 
+
+	//
+	//	### Text literal
+	//
+
 	// Eat a text literal (starts/ends with `'` or `"`).
-	// Adds to `results` as `Tokenizer.Text`.
-	eatText(text, start, end, results) {
+	// Returns a `Tokenizer.Text` if matched.
+	matchText(text, start, end, results) {
 		let quoteSymbol = text[start];
+		if (quoteSymbol !== '"' && quoteSymbol !== "'") return undefined;
+
 		let textEnd = start + 1;
 		while (textEnd < end) {
 			let char = text[textEnd];
@@ -155,54 +184,94 @@ const Tokenizer = {
 
 		let quotedString = text.slice(start, textEnd);
 		let token = new Tokenizer.Text(quotedString);
-		results.last.push(token);
-
-		return textEnd;
+		return [token, textEnd];
 	},
 
+	// `Text` class for string literals.
+	// Pass the literal value, use `.text` to get just the bit inside the quotes.
+	Text : class text {
+		constructor(quotedString) {
+			this.quotedString = quotedString;
+
+			// calculate `text` as the bits between the quotes.
+			let start = 0;
+			let end = quotedString.length;
+			if (quotedString[start] === '"' || quotedString[start] === "'") start = 1;
+			if (quotedString[end-1] === '"' || quotedString[end-1] === "'") end = -1;
+			this.text = quotedString.slice(start, end);
+		}
+		toString() {
+			return this.quotedString;
+		}
+	},
+
+	//
+	//	### Numbers
+	//
+
 	// Eat a single number.
-	// Adds to `results` as a Number.
-	eatNumber(text, start, end, results) {
+	// Returns a `Number` if matched.
+	matchNumber(text, start, end, results) {
 		let line = this.getLine(text, start, end);
 		let numberMatch = line.match(this.NUMBER);
 		if (!numberMatch) return undefined;
 
 		let numberStr = numberMatch[0];
-		results.last.push(parseFloat(numberStr, 10));
-
-		return start + numberStr.length;
+		let number = parseFloat(numberStr, 10);
+		return [number, start + numberStr.length];
 	},
 
+	//
+	//	### Comments
+	//
 
 	// Eat a comment (until the end of the line).
-	// Adds to `results` as `Tokenizer.Comment`.
-	eatComment(text, start, end, results) {
+	// Returns a `Tokenizer.Comment` if matched.
+	matchComment(text, start, end, results) {
+		// comment eats until the end of the line
 		let line = this.getLine(text, start, end);
 		let commentMatch = line.match(this.COMMENT)
 		if (!commentMatch) return undefined;
 
 		let [match, commentSymbol, whitespace, comment] = commentMatch;
 		let token = new Tokenizer.Comment({ commentSymbol, whitespace, comment });
-		results.last.push(token);
-		return start + line.length;
+		return [token, start + line.length];
 	},
+
+	// Comment class
+	Comment : class comment {
+		constructor (comment) {
+			this.comment = comment;
+		}
+		toString() {
+			return `/*${this.comment}*/`;
+		}
+	},
+
+
+	//
+	//	### Newline
+	//
 
 	// Eat a newline, which starts a new line in the `results`.
 	// If one or more tabs occur after the newline, inserts a `Tokenizer.Indent` in the new line.
-	eatNewline(text, start, end, results) {
+	matchNewline(text, start, end, results) {
 		// start a new line in the results
 		results.push([]);
+		let nextLineStart = start + 1;
 
 		// attempt to match tabs at the beginning of the line
-		let newStart = this.eatIndent(text, start + 1, end, results);
-		if (newStart) return newStart;
-
-		// if no tabs, just advance past the newline
-		return start + 1;
+		let indentResult = this.matchIndent(text, nextLineStart, end, results);
+		return indentResult || [undefined, nextLineStart];
 	},
 
+
+	//
+	//	### Indent
+	//
+
 	// Convert a run of tabs (e.g. at the beginning of a line) into a `Tokenizer.Indent`.
-	eatIndent(text, start, end, results) {
+	matchIndent(text, start, end, results) {
 		// figure out # of tabs at the beginning of the new line
 		let tabCount = 0;
 		while (text[start + tabCount] === "\t") {
@@ -210,15 +279,47 @@ const Tokenizer = {
 		}
 		if (tabCount === 0) return undefined;
 
-		results.last.push(new Tokenizer.Indent(tabCount - 1));
-		return start + tabCount;
+		let indent = new Tokenizer.Indent(tabCount - 1);
+		return [indent, start + tabCount];
 	},
 
-	// Eat a single symbol character.
-	// Adds to `results` as a String.
-	eatSymbol(text, start, end, results) {
-		results.last.push(text[start]);
-		return start + 1;
+	// Indent class
+	Indent : class indent {
+		constructor(level) {
+			this.level = level;
+		}
+		toString() {
+			return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t".slice(0, this.indent);
+		}
+	},
+
+	//
+	//	### JSX
+	//
+
+	// Eat a (nested) JSX expression.
+	matchJSX(text, start, end, results) {
+		// Make sure we start with `<`.
+		if (text[start] !== "<") return undefined;
+
+		// text after the leading `<` MUST be a `word` as defined above, with no whitespace.
+		let [tagName, tagNameEnd ] = this.matchWord(text, start + 1, end, results) || [];
+		if (!tagName) return undefined;
+
+		let token = new Tokenizer.JSX(tagName);
+		return [token, tagNameEnd];
+	},
+
+	// JSX class
+	JSX : class jsx {
+		constructor(tagName, attributes, children) {
+			this.tagName = tagName;
+			this.attributes = attributes || {};
+			this.children = children;
+		}
+		toString() {
+			return `<${this.tagName}...>`;
+		}
 	},
 
 
@@ -237,52 +338,5 @@ const Tokenizer = {
 
 };
 
-
-Tokenizer.Token = function token(props) {
-	Object.assign(this, props);
-}
-
-
-// `Text` class for string literals.
-// Pass the literal value, use `.text` to get just the bit inside the quotes.
-Tokenizer.Text = function text(quotedString) {
-	this.quotedString = quotedString;
-
-	// calculate `text` as the bits between the quotes.
-	let start = 0;
-	let end = quotedString.length;
-	if (quotedString[start] === '"' || quotedString[start] === "'") start = 1;
-	if (quotedString[end-1] === '"' || quotedString[end-1] === "'") end = -1;
-	this.text = quotedString.slice(start, end);
-}
-Tokenizer.Text.prototype = new Tokenizer.Token({
-	type: "text",
-	toString() {
-		return this.quotedString;
-	}
-});
-
-
-// String indent class
-Tokenizer.Indent = function indent(level) {
-	this.level = level;
-}
-Tokenizer.Indent.prototype = new Tokenizer.Token({
-	type: "indent",
-	toString() {
-		return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t".slice(0, this.indent);
-	}
-});
-
-// Comment class
-Tokenizer.Comment = function comment(comment) {
-	this.comment = comment;
-}
-Tokenizer.Comment.prototype = new Tokenizer.Token({
-	type: "comment",
-	toString() {
-		return `/*${this.comment}*/`;
-	}
-});
 
 export default Tokenizer;

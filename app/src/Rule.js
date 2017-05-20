@@ -531,7 +531,7 @@ Rule.Statements = class statements extends Rule {
 			// figure out indent level of this line
 			let indent = 0;
 			// If we start with an indent
-			if (tokens[0].type === "indent") {
+			if (tokens[0] instanceof Tokenizer.Indent) {
 				indent = tokens[0].level;
 				// take the indent out of the statement start
 				tokens = tokens.slice(1);
@@ -552,7 +552,7 @@ Rule.Statements = class statements extends Rule {
 			// Attempt to parse a comment as the last item in the statement
 			let last = tokens[tokens.length - 1];
 			let comment;
-			if (last && last.type === "comment") {
+			if (last instanceof Tokenizer.Comment) {
 				comment = new Rule.Comment({ matched: last.comment, indent });
 
 				// Add comment BEFORE corresponding statement

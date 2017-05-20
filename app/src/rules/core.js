@@ -4,6 +4,7 @@
 // NOTE: many of the below are created as custom Pattern subclasses for debugging.
 //
 import Rule from "../RuleSyntax";
+import Tokenizer from "../Tokenizer";
 import parser from "./_parser";
 
 // re-export parser for testing.
@@ -177,7 +178,7 @@ Rule.Text = class text extends Rule.Pattern {
 	// Text strings get encoded as `text` objects in the token stream.
 	parse(parser, tokens, startIndex = 0) {
 		let token = tokens[startIndex];
-		if (!token || token.type !== "text") return undefined;
+		if (!(token instanceof Tokenizer.Text)) return undefined;
 		return this.clone({
 			matched: token,
 			nextStart: startIndex + 1
