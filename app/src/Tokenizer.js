@@ -16,7 +16,9 @@ Object.defineProperty(Array.prototype, "last", {
 const Tokenizer = {
 
 	// Regular expressions for rule functions.
+	WORD_START: /[A-Za-z]/,
 	WORD_CHAR : /^[\w_-]/,
+	NUMBER_START: /[0-9-.]/,
 	NUMBER : /^-?([0-9]*\.)?[0-9]+/,
 	COMMENT : /^(##+|--+|\/\/+)(\s*)(.*)/,
 
@@ -38,13 +40,13 @@ const Tokenizer = {
 	//
 	// It is MUCH MUCH faster to use strings!
 	rules : [
-		{ method: "matchWhitespace", 	pattern: [" ", "\t"]		},
-		{ method: "matchWord",			pattern: /[A-Za-z]/			},
-		{ method: "matchNumber",		pattern: /[0-9-.]/			},
-		{ method: "matchJSX",			pattern: ["<"]				},
-		{ method: "matchNewline",		pattern: ["\n"]				},
-		{ method: "matchText",			pattern: ["'", '"']			},
-		{ method: "matchComment",		pattern: ["#", "-", "\/"]	},
+		"matchWhitespace",
+		"matchWord",
+		"matchNumber",
+		"matchJSX",
+		"matchNewline",
+		"matchText",
+		"matchComment",
 	],
 
 
@@ -68,8 +70,11 @@ const Tokenizer = {
 
 		// check for a leading indent if at the beginning of text
 		if (start === 0) {
-			let newStart = this.matchIndent(text, start, end, results);
-			if (newStart) start = newStart;
+			let [indent, newStart] = this.matchIndent(text, start, end, results) || [];
+			if (indent) {
+				results.last.push(indent);
+				start = newStart;
+			}
 		}
 
 		// process rules repeatedly until we get to the end
@@ -85,37 +90,19 @@ const Tokenizer = {
 
 	// Apply our `rules` to the head of the text.
 	applyRulesToHead(text, start, end, results) {
-		let char = text[start];
 		let ruleNumber = -1;
-		let rule;
-		while (rule = this.rules[++ruleNumber]) {
-			if (this.testRule(rule, char)) {
-				// if we matched a rule, exit so we start over from the top.
-				let result = this[rule.method](text, start, end, results);
-				if (result !== undefined) {
-					let [token, newStart] = result;
-					if (token) results[results.length - 1] = results[results.length - 1].concat(token);
-					return newStart;
-				}
+		let ruleName;
+		while (ruleName = this.rules[++ruleNumber]) {
+			let result = this[ruleName](text, start, end, results);
+			if (result !== undefined) {
+				let [token, newStart] = result;
+				if (token) results[results.length - 1] = results[results.length - 1].concat(token);
+				return newStart;
 			}
 		}
 		// if NO rules applied, eat a single symbol character.
 		results.last.push(text[start]);
 		return start + 1;
-	},
-
-	// Return `true` if the `rule.pattern` matches the `char` passed in.
-	testRule(rule, char) {
-		let pattern = rule.pattern;
-		if (pattern instanceof RegExp) return pattern.test(char);
-
-		// return true if ANY chars work
-		let index = 0;
-		let testChar;
-		while (testChar = pattern[index++]) {
-			if (char === testChar) return true;
-		}
-		return false;
 	},
 
 	//
@@ -135,7 +122,7 @@ const Tokenizer = {
 	// NOTE: does NOT add whitespace to the `results`.
 	matchWhitespace(text, start, end, results) {
 		let whiteSpaceEnd = start;
-		while (whiteSpaceEnd < end && (text[whiteSpaceEnd] === " " || text[whiteSpaceEnd] === "\t")) {
+		while (text[whiteSpaceEnd] === " " || text[whiteSpaceEnd] === "\t") {
 			whiteSpaceEnd++;
 		}
 		if (whiteSpaceEnd === start) return undefined;
@@ -150,7 +137,9 @@ const Tokenizer = {
 	// Returns `[word, wordEnd]`.
 	// Returns an empty array if couldn't match a word.
 	matchWord(text, start, end, results) {
-		let wordEnd = start;
+		if (!this.WORD_START.test(text[start])) return undefined;
+
+		let wordEnd = start + 1;
 		while (wordEnd < end && this.WORD_CHAR.test(text[wordEnd])) {
 			wordEnd++;
 		}
@@ -212,6 +201,8 @@ const Tokenizer = {
 	// Eat a single number.
 	// Returns a `Number` if matched.
 	matchNumber(text, start, end, results) {
+		if (!this.NUMBER_START.test(text[start])) return undefined;
+
 		let line = this.getLine(text, start, end);
 		let numberMatch = line.match(this.NUMBER);
 		if (!numberMatch) return undefined;
@@ -228,6 +219,9 @@ const Tokenizer = {
 	// Eat a comment (until the end of the line).
 	// Returns a `Tokenizer.Comment` if matched.
 	matchComment(text, start, end, results) {
+		let commentStart = text.slice(start, start + 2);
+		if (commentStart !== "--" && commentStart !== "\/\/" && commentStart !== "##") return undefined;
+
 		// comment eats until the end of the line
 		let line = this.getLine(text, start, end);
 		let commentMatch = line.match(this.COMMENT)
@@ -256,6 +250,8 @@ const Tokenizer = {
 	// Eat a newline, which starts a new line in the `results`.
 	// If one or more tabs occur after the newline, inserts a `Tokenizer.Indent` in the new line.
 	matchNewline(text, start, end, results) {
+		if (text[start] !== "\n") return undefined;
+
 		// start a new line in the results
 		results.push([]);
 		let nextLineStart = start + 1;
@@ -279,7 +275,7 @@ const Tokenizer = {
 		}
 		if (tabCount === 0) return undefined;
 
-		let indent = new Tokenizer.Indent(tabCount - 1);
+		let indent = new Tokenizer.Indent(tabCount);
 		return [indent, start + tabCount];
 	},
 
@@ -302,7 +298,7 @@ const Tokenizer = {
 		// Make sure we start with `<`.
 		if (text[start] !== "<") return undefined;
 
-		// text after the leading `<` MUST be a `word` as defined above, with no whitespace.
+		// text after the leading `<` MUST be a `word` as defined above, with no whitespace before it.
 		let [tagName, tagNameEnd ] = this.matchWord(text, start + 1, end, results) || [];
 		if (!tagName) return undefined;
 
@@ -315,7 +311,7 @@ const Tokenizer = {
 		constructor(tagName, attributes, children) {
 			this.tagName = tagName;
 			this.attributes = attributes || {};
-			this.children = children;
+			if (children) this.children = children;
 		}
 		toString() {
 			return `<${this.tagName}...>`;
