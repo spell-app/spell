@@ -1,18 +1,7 @@
 //
-// Yes, I'm doing it.
+//	# Tokenizer
+//		- `tokenize()` Breaks up long string into tokens, including JSX expressions, etc.
 //
-
-// Getter for the `last` element in an array.
-// Returns `undefined` if the array is empty.
-Object.defineProperty(Array.prototype, "last", {
-	get() {
-		return this[this.length - 1];
-	}
-});
-
-
-
-// TODO: convert to line-aware stream???
 const Tokenizer = {
 
 	// Tokenize a stream and then divide it into lines.
@@ -21,7 +10,7 @@ const Tokenizer = {
 		let lines = [[]];
 		tokens.forEach(token => {
 			if (token === Tokenizer.NEWLINE) lines.push([]);
-			else lines.last.push(token);
+			else lines[lines.length - 1].push(token);
 		});
 		return lines;
 	},
@@ -78,8 +67,8 @@ const Tokenizer = {
 		return	this.matchWhitespace(text, start, end)
 			 || this.matchWord(text, start, end)
 			 || this.matchNumber(text, start, end)
+			 || this.matchNewlineAndIndent(text, start, end)
 			 || this.matchJSXElement(text, start, end)
-			 || this.matchNewline(text, start, end)
 			 || this.matchText(text, start, end)
 			 || this.matchComment(text, start, end)
 			 || this.matchSymbol(text, start, end)
@@ -92,7 +81,8 @@ const Tokenizer = {
 	//
 
 	// Match the single "symbol" character at `text[start]`.
-	// NOTE: this does not do any checking, it just blindly uses the character in question.
+	// NOTE: This does not do any checking, it just blindly uses the character in question.
+	//		 You should make sure all other rules have been exhausted first.
 	matchSymbol(text, start, end) {
 		if (start >= end) return undefined;
 		return [text[start], start + 1]
@@ -129,7 +119,7 @@ const Tokenizer = {
 
 	// Eat a newline, which starts a new line in the `results`.
 	// If one or more tabs occur after the newline, inserts a `Tokenizer.Indent` in the new line.
-	matchNewline(text, start, end) {
+	matchNewlineAndIndent(text, start, end) {
 		if (text[start] !== "\n") return undefined;
 
 		let nextLineStart = start + 1;
@@ -224,13 +214,15 @@ const Tokenizer = {
 	Text : class text {
 		constructor(quotedString) {
 			this.quotedString = quotedString;
-
+		}
+		get text() {
+			let string = this.quotedString;
 			// calculate `text` as the bits between the quotes.
 			let start = 0;
-			let end = quotedString.length;
-			if (quotedString[start] === '"' || quotedString[start] === "'") start = 1;
-			if (quotedString[end-1] === '"' || quotedString[end-1] === "'") end = -1;
-			this.text = quotedString.slice(start, end);
+			let end = string.length;
+			if (string[start] === '"' || string[start] === "'") start = 1;
+			if (string[end-1] === '"' || string[end-1] === "'") end = -1;
+			return string.slice(start, end);
 		}
 		toString() {
 			return this.quotedString;
@@ -358,6 +350,7 @@ const Tokenizer = {
 			if (attributes) this.attributes = attributes;
 			if (children) this.children = children;
 		}
+
 		// Return attributes as a map.
 		get attrs() {
 			let attrs = {};
@@ -432,15 +425,15 @@ const Tokenizer = {
 	},
 
 	// Match a single JSX child:
-	//	- end child to the current tag
+	//	- current endTag
 	//	- `{ jsx expression }`
 	//	- nested JSX element
-	// TODO: text...
+	//	- (anything else) as jsxText expression.
 	matchJSXChild(text, start, end, endTag) {
 		return this.matchJSXEndTag(text, start, end, endTag)
 			|| this.matchJSXExpression(text, start, end)
 			|| this.matchJSXElement(text, start, end)
-			|| this.matchJSXText(text, start, end);;
+			|| this.matchJSXText(text, start, end);
 	},
 
 	// Attempt to match a specific end tag.
