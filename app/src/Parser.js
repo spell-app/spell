@@ -66,7 +66,7 @@ export default class Parser {
 		}
 
 		// Tokenize if necessary.
-		if (typeof stream === "string") stream = Tokenizer.tokenize(stream);
+		if (typeof stream === "string") stream = Tokenizer.tokenizeToLines(stream);
 
 		// If we're not parsing `statements`, use only the first line and pop off indentation.
 		if (name !== "statements") {
