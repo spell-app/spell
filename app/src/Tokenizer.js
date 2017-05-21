@@ -23,21 +23,6 @@ const Tokenizer = {
 	COMMENT : /^(##+|--+|\/\/+)(\s*)(.*)/,
 
 
-	// NOTE: `patterns` match a single character and are either:
-	//	- a RegExp.
-	//	- an array of strings (in which case any of the strings will work).
-	//
-	// It is MUCH MUCH faster to use strings!
-	rules : [
-		"matchWhitespace",
-		"matchWord",
-		"matchNumber",
-		"matchJSXElement",
-		"matchNewline",
-		"matchText",
-		"matchComment",
-	],
-
 	// Tokenize a stream and then divide it into lines.
 	tokenizeToLines(text, start, end, rules) {
 		let tokens = this.tokenize(text, start, end, rules);
@@ -58,7 +43,7 @@ const Tokenizer = {
 	//	- `{ type: "text", literal: "'abc'", text: "abc" }
 	//	- `{ type: "indent", level: 7 }`
 	//	- `{ type: "comment", comment: "string", commentSymbol, whitespace }`
-	tokenize(text, start = 0, end = text.length, rules = this.rules) {
+	tokenize(text, start = 0, end = text.length) {
 		let results = [];
 		// quick return if only whitespace
 		if (!text.trim()) return results;
@@ -74,34 +59,42 @@ const Tokenizer = {
 
 		// process rules repeatedly until we get to the end
 		while (start < end) {
-			let [newResults, newStart] = this.applyRulesToHead(text, start, end, results, rules);
+			let result = this.matchNextToken(text, start, end);
+			let [newResults, newStart] = result;
 			// Throw if we didn't get a productive rule!
 			if (start === newStart) throw new SyntaxError(`tokenize(${text.substr(start, 20)}): rules didn't match anything!`);
-			results = newResults;
+			if (newResults !== undefined) results = results.concat(newResults);
 			start = newStart;
 		}
 //console.timeEnd("tokenize");
 		return results;
 	},
 
-	// Apply `rules` to the head of the text.
-	applyRulesToHead(text, start, end, results, rules) {
-		let ruleNumber = -1;
-		let ruleName;
-		while (ruleName = rules[++ruleNumber]) {
-			let result = this[ruleName](text, start, end);
-			if (result !== undefined) {
-				let [token, newStart] = result;
-				if (token) {
-					results = results.concat(token);
-				}
-				return [results, newStart];
-			}
-		}
-		// if NO rules applied, eat a single symbol character.
-		results.push(text[start]);
-		return [results, start + 1];
+	// Match next top-level token at `text[start]`.
+	matchNextToken(text, start, end) {
+		return	this.matchWhitespace(text, start, end)
+			 || this.matchWord(text, start, end)
+			 || this.matchNumber(text, start, end)
+			 || this.matchJSXElement(text, start, end)
+			 || this.matchNewline(text, start, end)
+			 || this.matchText(text, start, end)
+			 || this.matchComment(text, start, end)
+			 || this.matchSymbol(text, start, end)
+		;
 	},
+
+
+	//
+	//	### Symbol character
+	//
+
+	// Match the single "symbol" character at `text[start]`.
+	// NOTE: this does not do any checking, it just blindly uses the character in question.
+	matchSymbol(text, start, end) {
+		if (start >= end) return undefined;
+		return [text[start], start + 1]
+	},
+
 
 	//
 	//	### Whitespace
@@ -390,10 +383,6 @@ const Tokenizer = {
 	},
 
 	// Match a single JSX element attribute as `<attr>={<value>}`
-// TODO: doesn't handle anything nested!
-// TODO: attr='a'
-// TODO: attr="a"
-// TODO: attr=<nested jsx>
 // TODO: {...xxx}
 	JSX_ATTRIBUTE_START : /^\s*([\w-]+\b)\s*(=?)\s*/,
 	matchJSXAttribute(text, start, end) {
@@ -427,18 +416,14 @@ const Tokenizer = {
 	//	`"..."`			// Text (literal string).
 	//	`{...}`			// Expression.  Results will be tokenized array.
 	//	`<....>`		// JSX element.
-	//	`1`				// Number.  Note: this is an extension to JSX>
+	//	`1`				// Number.  Note: this is an extension to JSX.
 	//
 	// NOTE: we will be called immediately after the `=` (and subsequent whitespace).
-//TODO: `<word>`
+//TODO: `<word>` ?
 	matchJSXAttributeValue(text, start, end) {
-			// attempt to match a literal string
 		return this.matchText(text, start, end)
-			// attempt to match expression as `{...}`
 			|| this.matchJSXExpression(text, start, end)
-			// attempt to match JSX elements
 			|| this.matchJSXElement(text, start, end)
-			// attempt to match a number (extension to JSX)
 			|| this.matchNumber(text, start, end)
 		;
 	},
