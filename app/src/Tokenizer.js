@@ -422,34 +422,38 @@ const Tokenizer = {
 		return [attribute, nextStart];
 	},
 
-	// Match a value expression for a JSX element:
-	//	`1`				// Number.  Note: this is an extension to JSX>
+	// Match a value expression for a JSX element attribute:
 	//	`'...'`			// Text (literal string).
 	//	`"..."`			// Text (literal string).
 	//	`{...}`			// Expression.  Results will be tokenized array.
 	//	`<....>`		// JSX element.
+	//	`1`				// Number.  Note: this is an extension to JSX>
 	//
 	// NOTE: we will be called immediately after the `=` (and subsequent whitespace).
+//TODO: `<word>`
 	matchJSXAttributeValue(text, start, end) {
 			// attempt to match a literal string
 		return this.matchText(text, start, end)
 			// attempt to match expression as `{...}`
 			|| this.matchJSXExpression(text, start, end)
 			// attempt to match JSX elements
-			|| this.matchJSXElement(text, start, end);
+			|| this.matchJSXElement(text, start, end)
+			// attempt to match a number (extension to JSX)
+			|| this.matchNumber(text, start, end)
+		;
 	},
 
 	// Match a JSX expression enclosed in curly braces.
 //TODO: newlines/indents???
 	matchJSXExpression(text, start, end) {
-		if (text[start] !== "{") return undefined;
+		let endIndex = this.findMatchingDelmiter("{", "}", text, start, end);
+		if (endIndex === undefined) return undefined;
 
-// TODO: this needs to count nested {, strings, etc
-		let endCurlyIndex = text.indexOf("}", start);
-		let contents = text.slice(start + 1, endCurlyIndex).trim();
-
+		// tokenize the contents!!!
+		let contents = text.slice(start + 1, endIndex).trim();
 		let tokens = this.tokenize(contents);
-		return [tokens, endCurlyIndex + 1];
+
+		return [tokens, endIndex + 1];
 	},
 
 	// JSX attribute class
@@ -476,7 +480,53 @@ const Tokenizer = {
 		let newLine = text.indexOf("\n", start);
 		if (newLine === -1 || newLine > end) newLine = end;
 		return text.slice(start, newLine);
-	}
+	},
+
+	// Find index of the matching SINGLE CHARACTER `endDelimiter` to match `startDelimiter`.
+	// Matches nested delimiters and handles escaped delimiters.
+	// Assumes `text[start]` is the startDelimiter!
+	// Returns numeric index or `undefined` if no match or if first char is not `startDelimiter`.
+	//
+	//	Also handles nested quotes -- if we encounter a single or double quote,
+	//		we'll skip scanning until we find a matching quote.
+	//
+	//	eg:  `findMatchingDelmiter("{", "}", "{aa{a}aa}")` => 8
+	findMatchingDelmiter(startDelimiter, endDelimiter, text, start = 0, end = text.length) {
+		if (text[start] !== startDelimiter) return undefined;
+
+		let nesting = 0;
+		let current = start;
+		while (current < end) {
+			let char = text[current];
+			// if startDelimiter, increase nesting
+			if (char === startDelimiter) {
+				nesting++;
+			}
+			// if endDelimiter, decrease nesting and return if nesting back to 0
+			else if (char === endDelimiter) {
+				nesting--;
+				if (nesting === 0) return current;
+			}
+			// if a single or double quote, skip until the matching quote
+			else if (char === "'" || char === '"') {
+				let [token, afterQuote] = this.matchText(text, current, end) || [];
+				current = afterQuote;
+				continue;	// continue so we don't add 1 to curent below
+			}
+			// If backslash, skip an extra char if it's either delimiter or a quote
+			else if (char === "\\") {
+				char = text[current + 1];
+				if (char === startDelimiter
+				 || char === endDelimiter
+				 || char === "'"
+				 || char === '"'
+				) {
+					current++;;
+				}
+			}
+			current++;
+		}
+	},
 
 };
 
