@@ -32,7 +32,7 @@ const Tokenizer = {
 		"matchWhitespace",
 		"matchWord",
 		"matchNumber",
-		"matchJSX",
+		"matchJSXElement",
 		"matchNewline",
 		"matchText",
 		"matchComment",
@@ -310,8 +310,8 @@ const Tokenizer = {
 
 
 	// Eat a (nested) JSX expression.
-	JSX_TAG_NAME : /^<([A-Za-z][\w-\.]*)(\s*\/>|\s*>|\s+|)/,
-	matchJSX(text, start, end) {
+	JSX_TAG_NAME : /^<([A-Za-z][\w-\.]*)(\s*\/>|\s*>|\s+)/,
+	matchJSXElement(text, start, end) {
 		// Make sure we start with `<`.
 		if (text[start] !== "<") return undefined;
 
@@ -332,21 +332,23 @@ const Tokenizer = {
 
 		// If we didn't immediately get an end marker, attempt to match attributes
 		if (endBit !== ">") {
-			let attrResult = this.matchJSXAttributes(text, nextStart, end, jsxElement);
-			nextStart = attrResult[1];
+			let [ attrs, attrEnd ] = this.matchJSXAttributes(text, nextStart, end, jsxElement);
+			jsxElement.attributes = attrs;
+			nextStart = attrEnd;
 		}
 
 		// at this point we should get an `/>` or `>` (with no whitespace).
 
-		// Return for unary tag
-		if (text.slice(nextStart, nextStart + 2) === "/>") {
+		// Return immediately for unary tag
+		if (text[nextStart] === "/" && text[nextStart + 1] === ">") {
 			jsxElement.isUnaryTag = true;
 			return [jsxElement, nextStart + 2];
 		}
 
 		// Complain if we can't match a `>`
 		if (text[start] !== ">") {
-			jsxElement.error = "No end tag???";
+			console.warn("Missing expected end `>` for jsxElement", jsxElement, "'"+text.slice(start, nextStart)+"'");
+			jsxElement.error = "No end >";
 			return [jsxElement, nextStart];
 		}
 
@@ -363,10 +365,6 @@ const Tokenizer = {
 			if (attributes) this.attributes = attributes;
 			if (children) this.children = children;
 		}
-		addAttribute(jsxAttribute) {
-			if (!this.attributes) this.attributes = [];
-			this.attributes.push(jsxAttribute);
-		}
 		toString() {
 			let attrs = (this.attributes && " " + this.attributes.join(" ")) ||"";
 			if (this.isUnaryTag) return `<${this.tagName}${attrs}/>`;
@@ -375,56 +373,90 @@ const Tokenizer = {
 	},
 
 
-	// Match any JSX attributes inside and add to `jsx` element.
+	// Match any JSX attributes a `text[start]` and add to `jsxElement`.
 	// Handles whitespace, including whitespace at the end.
 //TODO: "\n" ???
-	matchJSXAttributes(text, start, end, jsxElement) {
+	matchJSXAttributes(text, start, end) {
+		let attrs = [];
 		let attrStart = start;
 		while (true) {
-			attrStart = this.eatWhitespace(text, attrStart, end);
-			let [ attr, nextStart ] = this.matchJSXAttribute(text, attrStart, end, jsxElement) || [];
+			let [ attr, nextStart ] = this.matchJSXAttribute(text, attrStart, end) || [];
 			if (!attr) break
-			jsxElement.addAttribute(attr);
+
+			attrs.push(attr);
 			attrStart = nextStart;
 		}
-		// go ahead and eat whitespace at the end, too...
-		let afterWhitespace = this.eatWhitespace(text, attrStart, end);
-		return [jsxElement, afterWhitespace];
+		return [attrs, attrStart];
 	},
 
 	// Match a single JSX element attribute as `<attr>={<value>}`
 // TODO: doesn't handle anything nested!
-// TODO: ...xxx etc
-	JSX_ATTRIBUTE : /^\s*([\w-]+)\s*=\s*{(.*?)}\s*/,
-	JSX_ATTRIBUTE_NAME : /^\s*([\w-]+)\s*/,
-	matchJSXAttribute(text, start, end, jsxElement) {
+// TODO: attr='a'
+// TODO: attr="a"
+// TODO: attr=<nested jsx>
+// TODO: {...xxx}
+	JSX_ATTRIBUTE_START : /^\s*([\w-]+\b)\s*(=?)\s*/,
+	matchJSXAttribute(text, start, end) {
 		// attributes must start with a word character
 		if (!this.WORD_START.test(text[start])) return undefined;
 
-		// attempt to match a full attribute as `a={...}`
+		// attempt to match a full attribute as `name=` or `name name name`
 		let line = this.getLine(text, start, end);
-		let result = line.match(this.JSX_ATTRIBUTE);
-		if (result) {
-			let [ attrExpression, name, value ] = result;
-			let attribute = new Tokenizer.JSXAttribute(name, value);
-//TODO: parse `value` with normal tokenizer!
-			return [attribute, start + attrExpression.length];
-		}
+		let result = line.match(this.JSX_ATTRIBUTE_START);
+		if (!result) return undefined;
 
-		// attempt to match just attribute name
-		result = line.match(this.JSX_ATTRIBUTE_NAME);
-		if (result) {
-			let [ match, name ] = result;
-			let attribute = new Tokenizer.JSXAttribute(name);
-			return [attribute, start + match.length];
+		let [ match, name, equals ] = result;
+		let nextStart = start + match.length;
+		let attribute = new Tokenizer.JSXAttribute(name);
+
+		// if there was an equals char, parse the value
+		if (equals) {
+			let [value, valueEnd] = this.matchJSXAttributeValue(text, nextStart, end) || [];
+			if (value) {
+				attribute.value = value;
+				nextStart = valueEnd;
+			}
 		}
+		// eat whitespace before the next attribute
+		nextStart = this.eatWhitespace(text, nextStart, end);
+		return [attribute, nextStart];
+	},
+
+	// Match a value expression for a JSX element:
+	//	`1`				// Number.  Note: this is an extension to JSX>
+	//	`'...'`			// Text (literal string).
+	//	`"..."`			// Text (literal string).
+	//	`{...}`			// Expression.  Results will be tokenized array.
+	//	`<....>`		// JSX element.
+	//
+	// NOTE: we will be called immediately after the `=` (and subsequent whitespace).
+	matchJSXAttributeValue(text, start, end) {
+			// attempt to match a literal string
+		return this.matchText(text, start, end)
+			// attempt to match expression as `{...}`
+			|| this.matchJSXExpression(text, start, end)
+			// attempt to match JSX elements
+			|| this.matchJSXElement(text, start, end);
+	},
+
+	// Match a JSX expression enclosed in curly braces.
+//TODO: newlines/indents???
+	matchJSXExpression(text, start, end) {
+		if (text[start] !== "{") return undefined;
+
+// TODO: this needs to count nested {, strings, etc
+		let endCurlyIndex = text.indexOf("}", start);
+		let contents = text.slice(start + 1, endCurlyIndex).trim();
+
+		let tokens = this.tokenize(contents);
+		return [tokens, endCurlyIndex + 1];
 	},
 
 	// JSX attribute class
 	JSXAttribute : class jsxAttribute {
 		constructor(name, value) {
 			this.name = name;
-			this.value = value;
+			if (value !== undefined) this.value = value;
 		}
 		toString() {
 			if (this.value === undefined) return this.name;
