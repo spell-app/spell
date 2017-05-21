@@ -365,10 +365,32 @@ const Tokenizer = {
 			return attrs;
 		}
 
+		// Return our attributes as a string
+		get attrsAsString() {
+			if (!this.attributes) return "";
+			return " " + this.attributes.map( ({ name, value }) => {
+				if (value === undefined) return name;
+				// convert value array (tokens) to string
+				// TODO: this will want to be smarter...
+				if (Array.isArray(value)) value = `{${value.join(" ")}}`;
+				return `name=${value}`;
+			}).join(" ");
+		}
+
+		// Return our children as a string.
+		get childrenAsString() {
+			if (!this.children) return "";
+			return this.children.map(child => {
+				if (Array.isArray(child)) return `{${child.join(" ")}}`;
+				return "" + child;
+			}).join("");
+		}
+
 		toString() {
-			let attrs = (this.attributes && " " + this.attributes.join(" ")) ||"";
+			let attrs = this.attrsAsString;
+			let children = this.childrenAsString;
 			if (this.isUnaryTag) return `<${this.tagName}${attrs}/>`;
-			return `<${this.tagName}${attrs}></${this.tagName}>`;
+			return `<${this.tagName}${attrs}>${children}</${this.tagName}>`;
 		}
 	},
 
