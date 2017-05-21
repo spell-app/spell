@@ -380,7 +380,6 @@ const Tokenizer = {
 	// Match JSX element children of `<tagName>` at `text[start]`.
 	// Matches nested children and end tag.
 	// Returns `[children, nextStart]`.
-//TODO: currently ignores whitespace ???
 	matchJSXChildren(text, start, end, tagName) {
 		let children = [];
 		let nesting = 1;
@@ -403,7 +402,10 @@ const Tokenizer = {
 				if (child) children.push(child);
 			}
 		}
-
+// TODO: how to surface this error???
+		if (nesting !== 0) {
+			console.warn(`matchJSXChildren(${text.slice(start, nextStart + 10)}: didn't match end child!`);
+		}
 		return [children, nextStart];
 	},
 
