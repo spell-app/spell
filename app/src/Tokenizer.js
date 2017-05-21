@@ -268,7 +268,7 @@ const Tokenizer = {
 		if (commentStart !== "--" && commentStart !== "\/\/" && commentStart !== "##") return undefined;
 
 		// comment eats until the end of the line
-		let line = this.getLine(text, start, end);
+		let line = this.getLineAtHead(text, start, end);
 		let commentMatch = line.match(this.COMMENT)
 		if (!commentMatch) return undefined;
 
@@ -293,17 +293,19 @@ const Tokenizer = {
 	//
 
 	// Eat a (nested) JSX expression.
+	// Ignores leading whitespace.
 	JSX_TAG_NAME : /^<([A-Za-z][\w-\.]*)(\s*\/>|\s*>|\s+)/,
 	matchJSXElement(text, start, end) {
+		let nextStart = this.eatWhitespace(text, start, end);
 		// Make sure we start with `<`.
-		if (text[start] !== "<") return undefined;
+		if (text[nextStart] !== "<") return undefined;
 
-		let tagMatch = this.matchExpressionAtHead(this.JSX_TAG_NAME, text, start, end);
+		let tagMatch = this.matchExpressionAtHead(this.JSX_TAG_NAME, text, nextStart, end);
 		if (!tagMatch) return undefined;
 
 		let [ matchText, tagName, endBit ] = tagMatch;
 		let jsxElement = new Tokenizer.JSXElement(tagName);
-		let nextStart = start + matchText.length;
+		nextStart = nextStart + matchText.length;
 
 		// If unary tag, mark as such and return.
 		endBit = endBit.trim();
@@ -386,7 +388,6 @@ const Tokenizer = {
 
 		let nextStart = start;
 		while(true) {
-			nextStart = this.eatWhitespace(text, nextStart, end);
 			let result = this.matchJSXChild(text, nextStart, end, endTag);
 			if (!result) break;
 
@@ -412,16 +413,56 @@ const Tokenizer = {
 	//	- nested JSX element
 	// TODO: text...
 	matchJSXChild(text, start, end, endTag) {
-		let nextStart = this.eatWhitespace(text, start, end);
-		return this.matchJSXEndTag(text, nextStart, end, endTag)
-			|| this.matchJSXExpression(text, nextStart, end)
-			|| this.matchJSXElement(text, nextStart, end);
+		return this.matchJSXEndTag(text, start, end, endTag)
+			|| this.matchJSXExpression(text, start, end)
+			|| this.matchJSXElement(text, start, end)
+			|| this.matchJSXText(text, start, end);;
 	},
 
 	// Attempt to match a specific end tag.
+	// Ignores leading whitespace.
 	matchJSXEndTag(text, start, end, endTag) {
-		if (!this.matchStringAtHead(endTag, text, start, end)) return undefined;
-		return [endTag, start + endTag.length];
+		let nextStart = this.eatWhitespace(text, start, end);
+		if (!this.matchStringAtHead(endTag, text, nextStart, end)) return undefined;
+		return [endTag, nextStart + endTag.length];
+	},
+
+	// Match a JSX expression enclosed in curly braces, eg:  `{ ... }`.
+	//  Handles nested curlies, quotes, etc.
+	// Returns array of tokens of internal match.
+	// Ignores leading whitespace.
+//TODO: newlines/indents???
+	matchJSXExpression(text, start, end) {
+		let nextStart = this.eatWhitespace(text, start, end);
+		let endIndex = this.findMatchingAtHead("{", "}", text, nextStart, end);
+		if (endIndex === undefined) return undefined;
+
+		// tokenize the contents!!!
+		let contents = text.slice(nextStart + 1, endIndex).trim();
+		let tokens = this.tokenize(contents);
+
+		return [tokens, endIndex + 1];
+	},
+
+	// Match JSXText until the one of `{`, `<`, `>` or `}`.
+	// NOTE: INCLUDES leading / trailing whitespace.
+	JSX_TEXT_END_CHARS : ["{", "<", ">", "}"],
+	matchJSXText(text, start, end) {
+		// temporarily advance past whitespace (we'll include it in the output).
+		let nextStart = this.eatWhitespace(text, start, end);
+		let endIndex = this.findFirstAtHead(this.JSX_TEXT_END_CHARS, text, nextStart, end);
+		// If the first non-whitespace char is in our END_CHARS, forget it.
+		if (endIndex === nextStart) return undefined;
+
+		// if no match, we've got some sort of error
+		if (endIndex === undefined) {
+			console.warn("matchJSXText("+text.slice(start, start + 50)+"): JSX seems to be unbalanced.");
+			return undefined;
+		}
+
+		// include leading whitespace in the output.
+		let jsxText = text.slice(start, endIndex);
+		return [jsxText, endIndex];
 	},
 
 
@@ -474,21 +515,6 @@ const Tokenizer = {
 		;
 	},
 
-	// Match a JSX expression enclosed in curly braces, eg:  `{ ... }`.
-	//  Handles nested curlies, quotes, etc.
-	// Returns array of tokens of internal match.
-//TODO: newlines/indents???
-	matchJSXExpression(text, start, end) {
-		let endIndex = this.findMatchingDelmiter("{", "}", text, start, end);
-		if (endIndex === undefined) return undefined;
-
-		// tokenize the contents!!!
-		let contents = text.slice(start + 1, endIndex).trim();
-		let tokens = this.tokenize(contents);
-
-		return [tokens, endIndex + 1];
-	},
-
 	// JSX attribute class
 	JSXAttribute : class jsxAttribute {
 		constructor(name, value) {
@@ -509,7 +535,7 @@ const Tokenizer = {
 	// Return characters up to, but not including, the next newline char after `start`.
 	// If `start` is a newline char, returns empty string.
 	// If at the end of the string (eg: no more newlines), returns from start to end.
-	getLine(text, start = 0, end = text.length) {
+	getLineAtHead(text, start = 0, end = text.length) {
 		let newLine = text.indexOf("\n", start);
 		if (newLine === -1 || newLine > end) newLine = end;
 		return text.slice(start, newLine);
@@ -540,8 +566,8 @@ const Tokenizer = {
 	//	Also handles nested quotes -- if we encounter a single or double quote,
 	//		we'll skip scanning until we find a matching quote.
 	//
-	//	eg:  `findMatchingDelmiter("{", "}", "{aa{a}aa}")` => 8
-	findMatchingDelmiter(startDelimiter, endDelimiter, text, start = 0, end = text.length) {
+	//	eg:  `findMatchingAtHead("{", "}", "{aa{a}aa}")` => 8
+	findMatchingAtHead(startDelimiter, endDelimiter, text, start = 0, end = text.length) {
 		if (text[start] !== startDelimiter) return undefined;
 
 		let nesting = 0;
@@ -577,6 +603,20 @@ const Tokenizer = {
 			current++;
 		}
 	},
+
+	// Return the index of the first NON-ESCAPED character in `chars` after `text[start]`.
+	// Returns `undefined` if we didn't find a match.
+	findFirstAtHead(chars, text, start, end) {
+		while (start < end) {
+			let char = text[start];
+			if (chars.includes(char)) return start;
+			// if we got an escape char, ignore the next char if it's in `chars`
+			if (char === "\\" && chars.includes(text[start+1])) start++;
+			start++;
+		}
+		if (start >= end) return undefined;
+		return start;
+	}
 
 };
 
