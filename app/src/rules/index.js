@@ -8,3 +8,4 @@ import "./operators";
 import "./if";
 import "./statements";
 import "./types";
+import "./JSX";

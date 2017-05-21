@@ -15,7 +15,7 @@ Rule.Comment = class comment extends Rule {
 	// Comments are specially processed in our token stream.
 	parse(parser, tokens, startIndex = 0, stack) {
 		let token = tokens[startIndex];
-		if (token.type !== "comment") return undefined;
+		if (!(token instanceof Tokenizer.Comment)) return undefined;
 		return this.clone({
 			matched: token.comment,
 			nextStart: startIndex + 1
@@ -173,7 +173,6 @@ parser.rules.identifier.addToBlacklist(
 // Literal `text` string, created with custom constructor for debugging.
 // You can use either single or double quotes on the outside (although double quotes are preferred).
 // Returned value has enclosing quotes.
-// TODO: escaped quotes inside string
 Rule.Text = class text extends Rule.Pattern {
 	// Text strings get encoded as `text` objects in the token stream.
 	parse(parser, tokens, startIndex = 0) {
