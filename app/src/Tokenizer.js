@@ -15,13 +15,6 @@ Object.defineProperty(Array.prototype, "last", {
 // TODO: convert to line-aware stream???
 const Tokenizer = {
 
-	// Regular expressions for rule functions.
-	WORD_START: /[A-Za-z]/,
-	WORD_CHAR : /^[\w_-]/,
-	NUMBER_START: /[0-9-.]/,
-	NUMBER : /^-?([0-9]*\.)?[0-9]+/,
-
-
 	// Tokenize a stream and then divide it into lines.
 	tokenizeToLines(text, start, end, rules) {
 		let tokens = this.tokenize(text, start, end, rules);
@@ -184,6 +177,8 @@ const Tokenizer = {
 	// Match a single `word` in `text` at character `start`.
 	// Returns `[word, wordEnd]`.
 	// Returns an empty array if couldn't match a word.
+	WORD_START: /[A-Za-z]/,
+	WORD_CHAR : /^[\w_-]/,
 	matchWord(text, start, end) {
 		if (!this.WORD_START.test(text[start])) return undefined;
 
@@ -248,6 +243,8 @@ const Tokenizer = {
 
 	// Eat a single number.
 	// Returns a `Number` if matched.
+	NUMBER_START: /[0-9-.]/,
+	NUMBER : /^-?([0-9]*\.)?[0-9]+/,
 	matchNumber(text, start, end) {
 		if (!this.NUMBER_START.test(text[start])) return undefined;
 
@@ -295,16 +292,6 @@ const Tokenizer = {
 	//	### JSX
 	//
 
-	// JSX parsing
-	BINARY_TAG_END : />/,
-	UNARY_TAG_END : "/\/>",
-	TAG_END : /^<\/([\w-])>/,
-
-	getTagEnd : function(tagName, startLine = true) {
-		return new RegExp(`${startLine ? "^" : ""}<\/(${tagName})>`);
-	},
-
-
 	// Eat a (nested) JSX expression.
 	JSX_TAG_NAME : /^<([A-Za-z][\w-\.]*)(\s*\/>|\s*>|\s+)/,
 	matchJSXElement(text, start, end) {
@@ -337,8 +324,9 @@ const Tokenizer = {
 			endBit = "/>";
 			nextStart += 2;
 		}
-		else {
+		else if (text[nextStart] === ">") {
 			endBit = text[nextStart];
+			nextStart += 1;
 		}
 
 		// Return immediately for unary tag
@@ -348,20 +336,15 @@ const Tokenizer = {
 		}
 
 		// advance past `>`
-		if (endBit === ">") {
-			nextStart++;
-		}
-		// Complain if we can't match `>` here
-		else {
+		if (endBit !== ">") {
 			console.warn("Missing expected end `>` for jsxElement", jsxElement, "`"+text.slice(start, nextStart)+"`");
 			jsxElement.error = "No end >";
 			return [jsxElement, nextStart];
 		}
 
-		let endTag = `</${tagName}>`;
-
-// TODO: look for children!
-// TODO: look for end tag!
+		let [children, childEnd] = this.matchJSXChildren(text, nextStart, end, tagName);
+		if (children.length) jsxElement.children = children;
+		nextStart = childEnd;
 
 		return [jsxElement, nextStart];
 	},
@@ -373,6 +356,13 @@ const Tokenizer = {
 			if (attributes) this.attributes = attributes;
 			if (children) this.children = children;
 		}
+		// Return attributes as a map.
+		get attrs() {
+			let attrs = {};
+			if (this.attributes) this.attributes.forEach(attr => attrs[attr.name] = attr.value);
+			return attrs;
+		}
+
 		toString() {
 			let attrs = (this.attributes && " " + this.attributes.join(" ")) ||"";
 			if (this.isUnaryTag) return `<${this.tagName}${attrs}/>`;
@@ -382,23 +372,58 @@ const Tokenizer = {
 
 
 	//
-	//	### JSX element children
+	//	### JSX children
 	//
 
 	// Match JSX element children of `<tagName>` at `text[start]`.
-	// Matches nested children and all.
+	// Matches nested children and end tag.
 	// Returns `[children, nextStart]`.
-//TODO: currently eats whitespace ???
+//TODO: currently ignores whitespace ???
 	matchJSXChildren(text, start, end, tagName) {
-		let nextStart = this.eatWhitespace(text, start, end);
-
 		let children = [];
-		let nesting = 0;
-		let char = text[nextStart];
+		let nesting = 1;
+		let endTag = `</${tagName}>`;
 
+		let nextStart = start;
+		while(true) {
+			nextStart = this.eatWhitespace(text, nextStart, end);
+			let result = this.matchJSXChild(text, nextStart, end, endTag);
+			if (!result) break;
+
+			let [child, childEnd] = result;
+			nextStart = childEnd;
+			// If we got the endTag, update nesting and break out of loop if nesting !== 0
+			if (child === endTag) {
+				nesting --;
+				if (nesting === 0) break;
+				continue;
+			}
+			else {
+				if (child) children.push(child);
+			}
+		}
 
 		return [children, nextStart];
 	},
+
+	// Match a single JSX child:
+	//	- end child to the current tag
+	//	- `{ jsx expression }`
+	//	- nested JSX element
+	// TODO: text...
+	matchJSXChild(text, start, end, endTag) {
+		let nextStart = this.eatWhitespace(text, start, end);
+		return this.matchJSXEndTag(text, nextStart, end, endTag)
+			|| this.matchJSXExpression(text, nextStart, end)
+			|| this.matchJSXElement(text, nextStart, end);
+	},
+
+	// Attempt to match a specific end tag.
+	matchJSXEndTag(text, start, end, endTag) {
+		if (!this.matchStringAtHead(endTag, text, start, end)) return undefined;
+		return [endTag, start + endTag.length];
+	},
+
 
 	//
 	//	### JSX attributes
@@ -412,7 +437,7 @@ const Tokenizer = {
 		if (!this.WORD_START.test(text[start])) return undefined;
 
 		// attempt to match an attribute name, including `=` if present.
-		let result = line.matchExpressionAtHead(this.JSX_ATTRIBUTE_START, text, start, end);
+		let result = this.matchExpressionAtHead(this.JSX_ATTRIBUTE_START, text, start, end);
 		if (!result) return undefined;
 
 		let [ match, name, equals ] = result;
@@ -449,7 +474,9 @@ const Tokenizer = {
 		;
 	},
 
-	// Match a JSX expression enclosed in curly braces.
+	// Match a JSX expression enclosed in curly braces, eg:  `{ ... }`.
+	//  Handles nested curlies, quotes, etc.
+	// Returns array of tokens of internal match.
 //TODO: newlines/indents???
 	matchJSXExpression(text, start, end) {
 		let endIndex = this.findMatchingDelmiter("{", "}", text, start, end);
@@ -488,11 +515,19 @@ const Tokenizer = {
 		return text.slice(start, newLine);
 	},
 
+	// Match a multi-char string starting at `text[start]`.
+	matchStringAtHead(string, text, start = 0, end = text.length) {
+		let stringEnd = start + string.length;
+		if (stringEnd > end) return undefined;
+		return string === text.slice(start, stringEnd);
+	},
+
+
 	// Match a regular expression starting at `text[start]`, returning the match.
 	// Returns `null` if no match.
 	//
 	// NOTE: The expression MUST start with `/^.../`
-	matchExpressionAtHead(expression, text, start, end) {
+	matchExpressionAtHead(expression, text, start = 0, end = text.length) {
 		let head = text.slice(start, end);
 		return head.match(expression);
 	},
