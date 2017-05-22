@@ -325,6 +325,7 @@ const Tokenizer = {
 			return [jsxElement, nextStart];
 		}
 
+// TODO: clean this stuff up, maybe with findFirstAtHead?
 		// If we didn't immediately get an end marker, attempt to match attributes
 		if (endBit !== ">" && endBit !== "/>") {
 			let [ attrs, attrEnd ] = this.eatTokens(this.matchJSXAttribute, text, nextStart, end);
@@ -458,6 +459,7 @@ const Tokenizer = {
 		return this.matchJSXEndTag(text, start, end, endTag)
 			|| this.matchJSXExpression(text, start, end)
 			|| this.matchJSXElement(text, start, end)
+// TODO: newline and indent?
 			|| this.matchJSXText(text, start, end);
 	},
 
@@ -468,46 +470,6 @@ const Tokenizer = {
 		let nextStart = this.eatWhitespace(text, start, end);
 		if (!this.matchStringAtHead(endTag, text, nextStart, end)) return undefined;
 		return [endTag, nextStart + endTag.length];
-	},
-
-	// Match a JSX expression enclosed in curly braces, eg:  `{ ... }`.
-	//  Handles nested curlies, quotes, etc.
-	// Returns array of tokens of internal match.
-	// Ignores leading whitespace.
-//TODO: newlines/indents???
-//TESTME
-	matchJSXExpression(text, start, end) {
-		let nextStart = this.eatWhitespace(text, start, end);
-		let endIndex = this.findMatchingAtHead("{", "}", text, nextStart, end);
-		if (endIndex === undefined) return undefined;
-
-		// tokenize the contents!!!
-		let contents = text.slice(nextStart + 1, endIndex).trim();
-		let tokens = this.tokenize(contents);
-
-		return [tokens, endIndex + 1];
-	},
-
-	// Match JSXText until the one of `{`, `<`, `>` or `}`.
-	// NOTE: INCLUDES leading / trailing whitespace.
-	JSX_TEXT_END_CHARS : ["{", "<", ">", "}"],
-//TESTME
-	matchJSXText(text, start, end) {
-		// temporarily advance past whitespace (we'll include it in the output).
-		let nextStart = this.eatWhitespace(text, start, end);
-		let endIndex = this.findFirstAtHead(this.JSX_TEXT_END_CHARS, text, nextStart, end);
-		// If the first non-whitespace char is in our END_CHARS, forget it.
-		if (endIndex === nextStart) return undefined;
-
-		// if no match, we've got some sort of error
-		if (endIndex === undefined) {
-			console.warn("matchJSXText("+text.slice(start, start + 50)+"): JSX seems to be unbalanced.");
-			return undefined;
-		}
-
-		// include leading whitespace in the output.
-		let jsxText = text.slice(start, endIndex);
-		return [jsxText, endIndex];
 	},
 
 
@@ -545,12 +507,6 @@ const Tokenizer = {
 	},
 
 	// Match a value expression for a JSX element attribute:
-	//	`'...'`			// Text (literal string).
-	//	`"..."`			// Text (literal string).
-	//	`{...}`			// Expression.  Results will be tokenized array.
-	//	`<....>`		// JSX element.
-	//	`1`				// Number.  Note: this is an extension to JSX.
-	//
 	// NOTE: we will be called immediately after the `=` (and subsequent whitespace).
 //TODO: `<word>` ?
 //TESTME
@@ -563,6 +519,14 @@ const Tokenizer = {
 	},
 
 	// JSX attribute class
+	// `name` is the name of the attribute.
+	// `value` is one of:
+	//		- `'...'`			// Text (literal string).
+	//		- `"..."`			// Text (literal string).
+	//		- `{...}`			// Expression.  Results will be tokenized array.
+	//		- `<....>`			// JSX element.
+	//		- `1`				// Number.  Note: this is an extension to JSX.
+
 //TESTME
 	JSXAttribute : class jsxAttribute {
 		constructor(name, value) {
@@ -574,6 +538,61 @@ const Tokenizer = {
 			return `${this.name}={${this.value}}`;
 		}
 	},
+
+
+	// Match a JSX expression enclosed in curly braces, eg:  `{ ... }`.
+	//  Handles nested curlies, quotes, etc.
+	// Returns array of tokens of internal match.
+	// Ignores leading whitespace.
+//TODO: newlines/indents???
+//TESTME
+	matchJSXExpression(text, start, end) {
+		let nextStart = this.eatWhitespace(text, start, end);
+		let endIndex = this.findMatchingAtHead("{", "}", text, nextStart, end);
+		if (endIndex === undefined) return undefined;
+
+		// Get contents, including leading and trailing whitespace.
+		let contents = text.slice(start + 1, endIndex);
+
+		// return a new JSXExpression, advancing beyond the ending `}`.
+		let expression = new Tokenizer.JSXExpression(contents);
+		return [expression, endIndex + 1];
+	},
+
+	// JSX expression, composed of inline tokens which should yield an `expression`.
+	JSXExpression : class jsxExpression {
+		constructor(contents) {
+			this.contents = contents || "";
+		}
+		// Divide contents into `tokens`.
+		get tokens() {
+			return Tokenizer.tokenize(this.contents.trim());
+		}
+	},
+
+	// Match JSXText until the one of `{`, `<`, `>` or `}`.
+	// NOTE: INCLUDES leading / trailing whitespace.
+	JSX_TEXT_END_CHARS : ["{", "<", ">", "}"],
+//TESTME
+	matchJSXText(text, start, end) {
+		// temporarily advance past whitespace (we'll include it in the output).
+		let nextStart = this.eatWhitespace(text, start, end);
+		let endIndex = this.findFirstAtHead(this.JSX_TEXT_END_CHARS, text, nextStart, end);
+		// If the first non-whitespace char is in our END_CHARS, forget it.
+		if (endIndex === nextStart) return undefined;
+
+		// if no match, we've got some sort of error
+		if (endIndex === undefined) {
+			console.warn("matchJSXText("+text.slice(start, start + 50)+"): JSX seems to be unbalanced.");
+			return undefined;
+		}
+
+		// include leading whitespace in the output.
+		let jsxText = text.slice(start, endIndex);
+		return [jsxText, endIndex];
+	},
+
+
 
 
 	//
@@ -655,6 +674,12 @@ const Tokenizer = {
 			current++;
 		}
 	},
+
+
+//TODO:  `findAtHead(thing)` where thing is
+//			- (single or multi-char) string
+//			- array of alternative strings
+//			- regular expression
 
 	// Return the index of the first NON-ESCAPED character in `chars` after `text[start]`.
 	// Returns `undefined` if we didn't find a match.
