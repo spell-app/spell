@@ -369,7 +369,7 @@ test("matchNewlineAndIndent():  Make sure it doesn't go beyond the specified end
 	expect(result[1]).toEqual(4);
 });
 
-test("matchIndent():  Doesn't match if start > end", () => {
+test("matchNewlineAndIndent():  Doesn't match if start > end", () => {
 	let result = Tokenizer.matchNewlineAndIndent("\n\t\t", 2, 1);
 	expect(result).toEqual(undefined);
 });

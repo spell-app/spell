@@ -16,28 +16,38 @@ const Tokenizer = {
 	//	- `{ type: "indent", level: 7 }`
 	//	- `{ type: "comment", comment: "string", commentSymbol, whitespace }`
 //TESTME
-	tokenize(text, start = 0, end = text.length) {
-		let results = [];
-		// quick return if only whitespace
-		if (!text.trim()) return results;
+	tokenize(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+		// quick return out of range or only whitespace
+		if (start >= end || !text.trim()) return undefined;
 
-		let nextStart = start;
+		let tokens = [];
 		// check for a leading indent if at the beginning of text
-		if (nextStart === 0) {
-			[results, nextStart] = this.eatTokens(this.matchIndent, text, start, end);
+		if (start === 0) {
+			let [results, nextStart] = this.matchIndent(text, start, end) || [];
+			if (results) {
+				tokens = tokens.concat(results);
+				start = nextStart;
+			}
 		}
 
 		// Process our top-level rules.
-		[results, nextStart] = this.eatTokens(this.matchTopTokens, text, start, end, results);
+		let [results, nextStart] = this.eatTokens(this.matchTopTokens, text, start, end);
+		if (results) {
+			tokens = tokens.concat(results);
+			start = nextStart;
+		}
 
-		if (nextStart !== end) console.warn("tokenize(): didn't consume: `", tokens.slice(nextStart, end) + "`");
+		if (start !== end) console.warn("tokenize(): didn't consume: `", text.slice(start, end) + "`");
 		return results;
 	},
 
 	// Tokenize a stream and then divide it into lines.
 //TESTME
-	tokenizeToLines(text, start, end, rules) {
-		let tokens = this.tokenize(text, start, end, rules);
+	tokenizeToLines(text, start, end) {
+		let tokens = this.tokenize(text, start, end);
+		if (!tokens || tokens.length === 0) return [];
+
 		let lines = [[]];
 		tokens.forEach(token => {
 			if (token === Tokenizer.NEWLINE) lines.push([]);
@@ -50,7 +60,10 @@ const Tokenizer = {
 	// Places matched results together in `results` array and returns `[results, nextStart]` for the entire set.
 	// Stops if `method` doesn't return anything, or if calling `method` is unproductive.
 //TESTME
-	eatTokens(method, text, start, end, results = []) {
+	eatTokens(method, text, start = 0, end, results = []) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+		if (start >= end) return undefined;
+
 		// process rules repeatedly until we get to the end
 		while (start < end) {
 			let result = method.call(this, text, start, end);
