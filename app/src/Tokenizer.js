@@ -192,14 +192,17 @@ const Tokenizer = {
 			tabEnd++;
 		}
 
-		let indent = new Tokenizer.Indent(tabEnd - start);
+		let indent = new Tokenizer.Indent(text.slice(start, tabEnd));
 		return [indent, tabEnd];
 	},
 
 	// Indent class
 	Indent : class indent {
-		constructor(level) {
-			this.level = level;
+		constructor(indent) {
+			this.indent = indent;
+		}
+		get level() {
+			return this.indent.length;
 		}
 		toString() {
 			return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t".slice(0, this.indent);
@@ -216,7 +219,6 @@ const Tokenizer = {
 	// Returns an empty array if couldn't match a word.
 	WORD_START: /[A-Za-z]/,
 	WORD_CHAR : /^[\w_-]/,
-//TESTME
 	matchWord(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;
@@ -240,7 +242,7 @@ const Tokenizer = {
 
 	// Eat a text literal (starts/ends with `'` or `"`).
 	// Returns a `Tokenizer.Text` if matched.
-//TESTME
+//TESTME:  not sure the escaping logic is really right...
 	matchText(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;
@@ -256,6 +258,8 @@ const Tokenizer = {
 			if (char === "\\" && text[textEnd + 1] === quoteSymbol) textEnd++;
 			textEnd++;
 		}
+		// Forget it if we didn't end with the quote symbol
+		if (text[textEnd] !== quoteSymbol) return undefined;
 		// advance past end quote
 		textEnd++;
 

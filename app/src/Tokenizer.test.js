@@ -34,7 +34,7 @@ test("matchSymbol():  Doesn't match if start is > end", () => {
 	expect(result).toEqual(undefined);
 });
 
-test("matchSymbol():  Doesn't barf if end is out of range", () => {
+test("matchSymbol():  Matches if end is out of range", () => {
 	let result = Tokenizer.matchSymbol(":", 0, 100);
 	expect(result).toEqual([":", 1]);
 });
@@ -83,7 +83,7 @@ test("eatWhitespace():  Make sure it works in the middle of the string", () => {
 	expect(result).toEqual(4);
 });
 
-test("eatWhitespace():  Make sure it doesn't go beyond specified end", () => {
+test("eatWhitespace():  Doesn't go beyond specified end", () => {
 	let result = Tokenizer.eatWhitespace("       ", 3, 4);
 	expect(result).toEqual(4);
 });
@@ -142,7 +142,7 @@ test("matchWhitespace():  Make sure it works in the middle of the string", () =>
 	expect(result).toEqual([undefined, 4]);
 });
 
-test("matchWhitespace():  Make sure it doesn't go beyond the end", () => {
+test("matchWhitespace():  Doesn't go beyond the end", () => {
 	let result = Tokenizer.matchWhitespace("       ", 3, 4);
 	expect(result).toEqual([undefined, 4]);
 });
@@ -183,27 +183,27 @@ test("matchNewline():  Matches at beginning of string", () => {
 	expect(result).toEqual([Tokenizer.NEWLINE, 1]);
 });
 
-test("matchNewline():  Should NOT match spaces", () => {
+test("matchNewline():  Does not match spaces", () => {
 	let result = Tokenizer.matchNewline(" ");
 	expect(result).toEqual(undefined);
 });
 
-test("matchNewline():  Should NOT match tabs", () => {
+test("matchNewline():  Does not match tabs", () => {
 	let result = Tokenizer.matchNewline("\t");
 	expect(result).toEqual(undefined);
 });
 
-test("matchNewline():  Make sure it matches in the middle of the string", () => {
+test("matchNewline():  Matches in the middle of the string", () => {
 	let result = Tokenizer.matchNewline("  \n x", 2);
 	expect(result).toEqual([Tokenizer.NEWLINE, 3]);
 });
 
-test("matchNewline():  Make sure it doesn't match incorrectly in the middle of the string", () => {
+test("matchNewline():  Doesn't match incorrectly in the middle of the string", () => {
 	let result = Tokenizer.matchNewline("  \n x", 3);
 	expect(result).toEqual(undefined);
 });
 
-test("matchNewline():  Make sure it doesn't go beyond the end", () => {
+test("matchNewline():  Doesn't go beyond the end", () => {
 	let result = Tokenizer.matchNewline("  \n x", 3, 4);
 	expect(result).toEqual(undefined);
 });
@@ -268,18 +268,17 @@ test("matchIndent():  Make sure it matches correctly in the middle of the string
 	expect(result[1]).toBe(5);
 });
 
-test("matchIndent():  Make sure it doesn't match incorrectly in the middle of the string", () => {
+test("matchIndent():  Doesn't match incorrectly in the middle of the string", () => {
 	let result = Tokenizer.matchIndent("xx\txx", 3);
 	expect(result).toEqual(undefined);
 });
 
-test("matchIndent():  Make sure it doesn't go beyond the specified end", () => {
+test("matchIndent():  Doesn't go beyond the specified end", () => {
 	let result = Tokenizer.matchIndent("xx\t\t\txx", 2, 3);
 	expect(result[0]).toBeInstanceOf(Tokenizer.Indent);
 	expect(result[0].level).toBe(1);
 	expect(result[1]).toEqual(3);
 });
-
 
 test("matchIndent():  Doesn't match if start > end", () => {
 	let result = Tokenizer.matchIndent("\t\t\t", 2, 1);
@@ -339,12 +338,12 @@ test("matchNewlineAndIndent():  Matches newline and multiple tab at beginning of
 	expect(result[1]).toEqual(4);
 });
 
-test("matchNewlineAndIndent():  Should NOT tab w/o preceding newline", () => {
+test("matchNewlineAndIndent():  Does not match tab w/o preceding newline", () => {
 	let result = Tokenizer.matchNewlineAndIndent("\t");
 	expect(result).toEqual(undefined);
 });
 
-test("matchNewlineAndIndent():  Make sure it matches correctly in the middle of the string", () => {
+test("matchNewlineAndIndent():  Matches correctly in the middle of the string", () => {
 	let result = Tokenizer.matchNewlineAndIndent("xx\n\t\txx", 2);
 	expect(result[0][0]).toEqual(Tokenizer.NEWLINE);
 	expect(result[0][1]).toBeInstanceOf(Tokenizer.Indent);
@@ -352,12 +351,12 @@ test("matchNewlineAndIndent():  Make sure it matches correctly in the middle of 
 	expect(result[1]).toEqual(5);
 });
 
-test("matchNewlineAndIndent():  Make sure it doesn't match incorrectly in the middle of the string", () => {
+test("matchNewlineAndIndent():  Doesn't match incorrectly in the middle of the string", () => {
 	let result = Tokenizer.matchNewlineAndIndent("xx\n\t\txx", 3);
 	expect(result).toEqual(undefined);
 });
 
-test("matchNewlineAndIndent():  Make sure it doesn't go beyond the specified end", () => {
+test("matchNewlineAndIndent():  Doesn't go beyond the specified end", () => {
 	let result = Tokenizer.matchNewlineAndIndent("xx\n\t\txx", 2, 3);
 	expect(result[0]).toEqual(Tokenizer.NEWLINE);
 	expect(result[1]).toEqual(3);
@@ -387,7 +386,168 @@ test("matchNewlineAndIndent():  Matches if end is out of range", () => {
 	expect(result[1]).toEqual(2);
 });
 
-test("matchNewlineAndIndent():  Doesn't barf if start and end are both out of range", () => {
+test("matchNewlineAndIndent():  Returns undefined if start and end are both out of range", () => {
 	let result = Tokenizer.matchNewlineAndIndent("\n\t", 99, 100);
 	expect(result).toEqual(undefined);
 });
+
+
+
+
+//
+// matchWord()
+//
+test("matchWord():  Returns undefined for empty string", () => {
+	let result = Tokenizer.matchWord("");
+	expect(result).toEqual(undefined);
+});
+
+test("matchWord():  If no match, returns undefined", () => {
+	let result = Tokenizer.matchWord(":");
+	expect(result).toEqual(undefined);
+});
+
+test("matchWord():  Matches single letter at beginning of string", () => {
+	let result = Tokenizer.matchWord("x ");
+	expect(result).toEqual(["x", 1]);
+});
+
+test("matchWord():  Matches multiple letters at beginning of string", () => {
+	let result = Tokenizer.matchWord("xxxx ");
+	expect(result).toEqual(["xxxx", 4]);
+});
+
+test("matchWord():  Matches multiple letters, numbers, underscores at beginning of string", () => {
+	let result = Tokenizer.matchWord("xxxx-XXX_y ");
+	expect(result).toEqual(["xxxx-XXX_y", 10]);
+});
+
+test("matchWord():  Does not match leading number", () => {
+	let result = Tokenizer.matchWord("9a ");
+	expect(result).toEqual(undefined);
+});
+
+test("matchWord():  Does not match leading underscore", () => {
+	let result = Tokenizer.matchWord("_a ");
+	expect(result).toEqual(undefined);
+});
+
+test("matchWord():  Does not match leading dash", () => {
+	let result = Tokenizer.matchWord("-a ");
+	expect(result).toEqual(undefined);
+});
+
+test("matchWord():  Matches in the middle of the string", () => {
+	let result = Tokenizer.matchWord("  xxx  ", 2);
+	expect(result).toEqual(["xxx", 5]);
+});
+
+test("matchWord():  Doesn't match incorrectly in the middle of the string", () => {
+	let result = Tokenizer.matchWord("  xxx  ", 5);
+	expect(result).toEqual(undefined);
+});
+
+test("matchWord():  Doesn't go beyond the end", () => {
+	let result = Tokenizer.matchWord("   xxx", 3, 4);
+	expect(result).toEqual(["x", 4]);
+});
+
+test("matchWord():  Doesn't match if start > end", () => {
+	let result = Tokenizer.matchWord("xxx", 2, 1);
+	expect(result).toEqual(undefined);
+});
+
+test("matchWord():  Doesn't match if start is out of range", () => {
+	let result = Tokenizer.matchWord("xxx", 100);
+	expect(result).toEqual(undefined);
+});
+
+test("matchWord():  Matches if end is out of range", () => {
+	let result = Tokenizer.matchWord("xxx", 0, 100);
+	expect(result).toEqual(["xxx", 3]);
+});
+
+
+
+//
+// matchText()
+//
+test("matchText():  Returns undefined for empty string", () => {
+	let result = Tokenizer.matchText("");
+	expect(result).toEqual(undefined);
+});
+
+test("matchText():  If no match, returns undefined", () => {
+	let result = Tokenizer.matchText("a");
+	expect(result).toEqual(undefined);
+});
+
+test("matchText():  Matches single quotes at beginning of string", () => {
+	let result = Tokenizer.matchText("'a'");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
+	expect(result[0].quotedString).toBe("'a'");
+	expect(result[0].text).toBe("a");
+	expect(result[1]).toBe(3);
+});
+
+test("matchText():  Matches double quotes at beginning of string", () => {
+	let result = Tokenizer.matchText('"aaaa"');
+	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
+	expect(result[0].quotedString).toBe('"aaaa"');
+	expect(result[0].text).toBe("aaaa");
+	expect(result[1]).toBe(6);
+});
+
+test("matchText():  Matches single quotes with escape at beginning of string", () => {
+	let result = Tokenizer.matchText("'a\\'a'");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
+	expect(result[0].quotedString).toBe("'a\\'a'");
+	expect(result[0].text).toBe("a\\'a");
+	expect(result[1]).toBe(6);
+});
+
+test("matchText():  Matches double quotes with escape at beginning of string", () => {
+	let result = Tokenizer.matchText('"a\\"a"');
+	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
+	expect(result[0].quotedString).toBe('"a\\"a"');
+	expect(result[0].text).toBe('a\\"a');
+	expect(result[1]).toBe(6);
+});
+
+test("matchText():  Matches in the middle of the string", () => {
+	let result = Tokenizer.matchText("  'aaa'  ", 2);
+	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
+	expect(result[0].quotedString).toBe("'aaa'");
+	expect(result[0].text).toBe("aaa");
+	expect(result[1]).toBe(7);
+});
+
+test("matchText():  Doesn't match if unbalanced", () => {
+	let result = Tokenizer.matchText("'aaa");
+	expect(result).toEqual(undefined);
+});
+
+test("matchText():  Doesn't go beyond the end", () => {
+	let result = Tokenizer.matchText("  'aaa'  ", 2, 4);
+	expect(result).toEqual(undefined);
+});
+
+test("matchText():  Doesn't match if start > end", () => {
+	let result = Tokenizer.matchText("'aaa'", 2, 1);
+	expect(result).toEqual(undefined);
+});
+
+test("matchText():  Doesn't match if start is out of range", () => {
+	let result = Tokenizer.matchText("'aaa'", 100);
+	expect(result).toEqual(undefined);
+});
+
+test("matchText():  Matches if end is out of range", () => {
+	let result = Tokenizer.matchText("'aaa'", 0, 100);
+	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
+	expect(result[0].quotedString).toBe("'aaa'");
+	expect(result[0].text).toBe("aaa");
+	expect(result[1]).toBe(5);
+});
+
+
