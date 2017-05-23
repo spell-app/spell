@@ -88,9 +88,9 @@ const Tokenizer = {
 
 	// Match the single "symbol" character at `text[start]`.
 	// NOTE: This does not do any checking, it just blindly uses the character in question.
-	//		 You should make sure all other rules have been exhausted first.
-//TESTME
-	matchSymbol(text, start, end) {
+	//		 You should make sure all other possible rules have been exhausted first.
+	matchSymbol(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;
 		return [text[start], start + 1]
 	},
@@ -102,18 +102,24 @@ const Tokenizer = {
 
 	// Return the first char position after `start` which is NOT a whitespace char.
 	// May return `start` if that's not whitespace...
-//TESTME
-	eatWhitespace(text, start, end) {
+	eatWhitespace(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+		if (start >= end) return end;
+
 		let whiteSpaceEnd = start;
-		while (text[whiteSpaceEnd] === " " || text[whiteSpaceEnd] === "\t") {
+		while (whiteSpaceEnd < end && (text[whiteSpaceEnd] === " " || text[whiteSpaceEnd] === "\t")) {
 			whiteSpaceEnd++;
 		}
 		return whiteSpaceEnd;
 	},
 
-	// Eat one or more whitespace characters.
-//TESTME
-	matchWhitespace(text, start, end) {
+	// Match one or more whitespace characters between `text[start]` and `text[end]`.
+	// Returns `[undefined, nextStart]` if we matched whitespace.
+	// Otherwise returns `undefined`.
+	matchWhitespace(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+		if (start >= end) return undefined;
+
 		let whiteSpaceEnd = this.eatWhitespace(text, start, end);
 		if (whiteSpaceEnd === start) return undefined;
 		return [undefined, whiteSpaceEnd];
@@ -126,19 +132,33 @@ const Tokenizer = {
 	// Newline marker (singleton).
 	NEWLINE : new (class newline {})(),
 
-	// Eat a newline, which starts a new line in the `results`.
-	// If one or more tabs occur after the newline, inserts a `Tokenizer.Indent` in the new line.
-//TESTME
-	matchNewlineAndIndent(text, start, end) {
-		if (text[start] !== "\n") return undefined;
 
-		let nextLineStart = start + 1;
+	// Match a single newline character at `text[start]`.
+	// Returns `[Tokenizer.NEWLINE, nextStart]` on match.
+	// Otherwise returns `undefined`.
+	matchNewline(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+		if (start >= end || text[start] !== "\n") return undefined;
+		return [Tokenizer.NEWLINE, start + 1];
+	},
+
+	// Match a single newline character at `text[start]` and tab run at start of new line.
+	// Returns`[Tokenizer.NEWLINE, nextStart]` if no tabs.
+	// Returns `[[Tokenizer.NEWLINE, <indent>, nextStart]` if tabs present.
+	// Returns `undefiined` if no match.
+	matchNewlineAndIndent(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+
+		let [newline, nextStart] = this.matchNewline(text, start, end) || [];
+		if (!newline) return undefined;
 
 		// attempt to match tabs at the beginning of the line
-		let [ indent, indentEnd ] = this.matchIndent(text, nextLineStart, end) || [];
-		if (indent) return [ [ Tokenizer.NEWLINE, indent ], indentEnd ];
+		let [ indent, indentEnd ] = this.matchIndent(text, nextStart, end) || [];
+		// return both tokens
+		if (indent) return [ [ newline, indent ], indentEnd ];
 
-		return [ Tokenizer.NEWLINE, nextLineStart ];
+		// otherwise just return newline
+		return [ newline, nextStart ];
 	},
 
 
@@ -147,21 +167,21 @@ const Tokenizer = {
 	//
 
 	// Convert a run of tabs (e.g. at the beginning of a line) into a `Tokenizer.Indent`.
-//TESTME
-	matchIndent(text, start, end) {
-		// figure out # of tabs at the beginning of the new line
-		let tabCount = 0;
-		while (text[start + tabCount] === "\t") {
-			tabCount++;
-		}
-		if (tabCount === 0) return undefined;
+	matchIndent(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+		if (start >= end || text[start] !== "\t") return undefined;
 
-		let indent = new Tokenizer.Indent(tabCount);
-		return [indent, start + tabCount];
+		// figure out # of tabs at the beginning of the new line
+		let tabEnd = start + 1;
+		while (tabEnd < end && text[tabEnd] === "\t") {
+			tabEnd++;
+		}
+
+		let indent = new Tokenizer.Indent(tabEnd - start);
+		return [indent, tabEnd];
 	},
 
 	// Indent class
-//TESTME
 	Indent : class indent {
 		constructor(level) {
 			this.level = level;
@@ -604,9 +624,9 @@ const Tokenizer = {
 	// If at the end of the string (eg: no more newlines), returns from start to end.
 //TESTME
 	getLineAtHead(text, start = 0, end = text.length) {
-		let newLine = text.indexOf("\n", start);
-		if (newLine === -1 || newLine > end) newLine = end;
-		return text.slice(start, newLine);
+		let newline = text.indexOf("\n", start);
+		if (newline === -1 || newline > end) newline = end;
+		return text.slice(start, newline);
 	},
 
 	// Match a multi-char string starting at `text[start]`.

@@ -3,17 +3,9 @@ TODO:
 - refactor
 	- test tokenizer
 	- tokenizer & bad input
-	- tokenize jsx
 
 - jsx parser
-	- JSX breaks line-by-line paradigm
-		- "\n" as char kicks into "linestart" mode
-
-	- match "<"
-		- match START_TAG => JSX mode
-
-	<aaa a  b=
-
+	- indentation???
 
 
 # Scope/etc
