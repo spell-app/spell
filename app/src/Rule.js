@@ -554,7 +554,7 @@ Rule.Statements = class statements extends Rule {
 			let last = tokens[lastItem];
 			let comment;
 			if (last instanceof Tokenizer.Comment) {
-				comment = parser.parseRule("comment", tokens, lastItem);
+				comment = parser.rules.comment.parse(tokens, lastItem);
 				if (comment) {
 					// Add comment BEFORE corresponding statement
 					results.push(comment);
