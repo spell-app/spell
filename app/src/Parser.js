@@ -26,6 +26,89 @@ export default class Parser {
 		this.rules = Object.create(this.rules || null);
 	}
 
+//
+//### Tokenizing
+//
+
+	// Given an arbitarary `text` string, tokenize it and return as an array of arrays of lines.
+	// Returns `undefined` if result didn't produce any tokens.
+//TODO: __tokenize__ returns tokensEnd, complain if `tokensEnd !== end`.
+//TESTME
+	tokenize(text, start, end) {
+		let tokens = Tokenizer.tokenize(text, start, end);
+		if (!tokens || tokens.length === 0) return undefined;
+
+		// Convert to lines.
+		let lines = [[]];
+		tokens.forEach(token => {
+			// Skip whitespace which is not an indent.
+			if (token instanceof Tokenizer.Whitespace && !token.isIndent) return;
+
+			// add new array for each newline
+			if (token === Tokenizer.NEWLINE) return lines.push([]);
+
+			// otherwise just add to the last line
+			lines[lines.length - 1].push(token);
+		});
+		return lines;
+	}
+
+
+//
+//### Parsing
+//
+	// Parse `name`d rule at head of `text`.
+	// If you pass only one argument, we'll assume that's `text` and you want to match `statements`.
+	// Handles optional and repeating rules as well as eating whitespace.
+	// Returns result of parse.
+//TESTME
+	parse(name, text) {
+		// If only one argument, assume that's the text and parse `statements`
+		if (arguments.length === 1) {
+			text = name;
+			name = "statements";
+		}
+
+		// Convert to tokens.
+		let tokens = this.tokenize(text);
+		// Bail if we didn't get any tokens back.
+//TODO: WARN?  ERROR?
+		if (tokens === undefined) return undefined;
+
+		// If we're not parsing `statements`, use only the first line and pop off indentation.
+		if (name !== "statements") {
+			tokens = tokens[0];
+			// remove whitespace from the start of the line
+			if (tokens[0] instanceof Tokenizer.Whitespace) tokens = tokens.slice(1);
+		}
+
+		// Get rule to parse.
+		let rule = this.getRuleOrDie(name, "parser.parse()");
+
+		// parse and return the results
+		return rule.parse(this, tokens, 0);
+	}
+
+	// Parse something:
+	//	- if one string argument, does a `compileStatements()`
+	// Returns the `toString()` or throws.
+//TESTME
+	compile(name, text) {
+		// If only one argument, assume that's the text and parse `statements`
+		if (arguments.length === 1) {
+			text = name;
+			name = "statements";
+		}
+		let result = this.parse(name, text);
+		if (!result) throw new SyntaxError(`parser.parse('${name}', '${string}'): can't parse this`);
+		return result.toSource(this);
+	}
+
+
+//
+//	Rules
+//
+
 	getRule(name) {
 		return this.rules[name];
 	}
@@ -36,55 +119,13 @@ export default class Parser {
 		return rule;
 	}
 
-//
-//### Parsing
-//
-	// Parse something:
-	//	- if one string argument, does a `compileStatements()`
-	// Returns the `toString()` or throws.
-//TESTME
-	compile(name, stream) {
-		// If only one argument, assume that's the stream and parse `statements`
-		if (arguments.length === 1) {
-			stream = name;
-			name = "statements";
-		}
-		let result = this.parse(name, stream);
-		if (!result) throw new SyntaxError(`parser.parse('${name}', '${string}'): can't parse this`);
-		return result.toSource(this);
+	// Parse a particular `name`d rule starting at `tokens[start]`.
+	// Throws if rule can't be found.
+	parseRule(name, tokens, start, stack) {
+		let rule = this.getRuleOrDie(name, "parseRule");
+		return rule.parse(this, tokens, start, stack);
 	}
 
-	// Parse `name`d rule at head of `stream` (`string` or array of `tokens`).
-	// Handles optional and repeating rules as well as eating whitespace.
-	// Returns result of parse.
-//TESTME
-	parse(name, stream) {
-		// If only one argument, assume that's the stream and parse `statements`
-		if (arguments.length === 1) {
-			stream = name;
-			name = "statements";
-		}
-
-		// Tokenize if necessary.
-		if (typeof stream === "string") stream = Tokenizer.tokenizeToLines(stream);
-
-		// If we're not parsing `statements`, use only the first line and pop off indentation.
-		if (name !== "statements") {
-			stream = stream[0];
-			// remove indentation from the line
-			if (stream[0] instanceof Tokenizer.Whitespace) stream = stream.slice(1);
-		}
-
-		// Get rule to parse.
-		let rule = this.getRuleOrDie(name, "parser.parse()");
-
-		// parse and return the results
-		return rule.parse(this, stream, 0);
-	}
-
-//
-//	Rules
-//
 
 	// Add a rule to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.

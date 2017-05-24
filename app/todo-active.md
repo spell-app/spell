@@ -1,18 +1,18 @@
 TODO:
 
 - refactor
+	- include whitespace in JSX parsing
+		- change eg matchAttributes etc to use `matchWhitespace`
+		- include whitespace in `attributes`, have getter which ignores this...
+
 	- test tokenizer
-	- include whitespace in normal stream (similar to Indent)
-		- tokens => lines in parser?
-
-	- change eg matchAttributes etc to use `matchWhitespace`
-
-	- matchJSXStartTag, used in matchJSXElement
 
 	- tokenizer & bad input
 
-- jsx parser
-	- indentation???
+	- conver parser to `[tokens, start, end]` pattern ala tokenizer
+	- tokenizer to similar `rule` pattern as parser?
+
+	- how to go back to source for annotation w/stream/skip whitespace
 
 
 # Scope/etc

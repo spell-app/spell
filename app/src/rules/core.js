@@ -12,18 +12,18 @@ export default parser;
 
 
 Rule.Comment = class comment extends Rule {
-	// Comments are specially processed in our token stream.
+	// Comments are specially nodes in our token stream.
 	parse(parser, tokens, startIndex = 0, stack) {
 		let token = tokens[startIndex];
 		if (!(token instanceof Tokenizer.Comment)) return undefined;
 		return this.clone({
-			matched: token.comment,
+			matched: token,
 			nextStart: startIndex + 1
 		});
 	}
 
 	toSource(context) {
-		return `// ${this.matched.comment}`;
+		return `//${this.matched.whitespace}${this.matched.comment}`;
 	}
 }
 parser.addRule("comment", Rule.Comment);

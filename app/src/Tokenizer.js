@@ -33,27 +33,6 @@ const Tokenizer = {
 		return results;
 	},
 
-	// Tokenize a stream and then divide it into lines.
-	// Also removes whitespace which are not "indents".
-//TESTME
-	tokenizeToLines(text, start, end) {
-		let tokens = this.tokenize(text, start, end);
-		if (!tokens || tokens.length === 0) return [];
-
-		let lines = [[]];
-		tokens.forEach(token => {
-			// skip whitespace which is not an indent
-			if (token instanceof Tokenizer.Whitespace && !token.isIndent) return;
-
-			// add new array for each newline
-			if (token === Tokenizer.NEWLINE) return lines.push([]);
-
-			// otherwise just add to the last line
-			lines[lines.length - 1].push(token);
-		});
-		return lines;
-	},
-
 	// Repeatedly execute a `method` (bound to `this) which returns a `[result, nextStart]` or `undefined`.
 	// Places matched results together in `results` array and returns `[results, nextStart]` for the entire set.
 	// Stops if `method` doesn't return anything, or if calling `method` is unproductive.
@@ -336,7 +315,7 @@ const Tokenizer = {
 			Object.assign(this, props);
 		}
 		toString() {
-			return `/*${this.comment}*/`;
+			return `${this.commentSymbol}${this.whitespace}${this.comment}`;
 		}
 	},
 
@@ -346,10 +325,32 @@ const Tokenizer = {
 	//
 
 	// Eat a (nested) JSX expression.
-	// Ignores leading whitespace.
-	JSX_TAG_NAME : /^<([A-Za-z][\w-\.]*)(\s*\/>|\s*>|\s+)/,
 //TESTME
 	matchJSXElement(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+		if (start >= end) return undefined;
+
+		let [jsxElement, nextStart] = this.matchJSXStartTag(text, start, end) || [];
+		if (!jsxElement) return undefined;
+
+		if (!jsxElement.isUnaryTag) {
+			let [children, childEnd] = this.matchJSXChildren(jsxElement.tagName, text, nextStart, end);
+			if (children.length) {
+				jsxElement.children = children;
+				nextStart = childEnd;
+			}
+		}
+
+		return [jsxElement, nextStart];
+	},
+
+	// Match JSX start tag and internal elements (but NOT children).
+	// Returns `[jsxElement, nextStart]` or `undefined`.
+	// Use `matchJSXElement()` to match children, end tag, etc.
+	// Ignores leading whitespace.
+//TESTME
+	JSX_TAG_NAME : /^<([A-Za-z][\w-\.]*)(\s*\/>|\s*>|\s+)/,
+	matchJSXStartTag(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;
 
@@ -364,6 +365,8 @@ const Tokenizer = {
 		let jsxElement = new Tokenizer.JSXElement(tagName);
 		nextStart = nextStart + matchText.length;
 
+// TODO: clean this stuff up, maybe with findFirstAtHead?
+
 		// If unary tag, mark as such and return.
 		endBit = endBit.trim();
 		if (endBit === "/>") {
@@ -371,7 +374,6 @@ const Tokenizer = {
 			return [jsxElement, nextStart];
 		}
 
-// TODO: clean this stuff up, maybe with findFirstAtHead?
 		// If we didn't immediately get an end marker, attempt to match attributes
 		if (endBit !== ">" && endBit !== "/>") {
 			let [ attrs, attrEnd ] = this.eatTokens(this.matchJSXAttribute, text, nextStart, end);
@@ -402,12 +404,9 @@ const Tokenizer = {
 			return [jsxElement, nextStart];
 		}
 
-		let [children, childEnd] = this.matchJSXChildren(tagName, text, nextStart, end);
-		if (children.length) jsxElement.children = children;
-		nextStart = childEnd;
-
 		return [jsxElement, nextStart];
 	},
+
 
 	// JSX element class
 //TESTME
@@ -422,7 +421,10 @@ const Tokenizer = {
 //TESTME
 		get attrs() {
 			let attrs = {};
-			if (this.attributes) this.attributes.forEach(attr => attrs[attr.name] = attr.value);
+			if (this.attributes) this.attributes.forEach(attr => {
+				// ignore unnamed attributes
+				if (attr.name) attrs[attr.name] = attr.value
+			});
 			return attrs;
 		}
 
@@ -463,7 +465,7 @@ const Tokenizer = {
 	//
 
 	// Match JSX element children of `<tagName>` at `text[start]`.
-	// Matches nested children and end tag.
+	// Matches nested children and stops after matching end tag: `</tagName>`.
 	// Returns `[children, nextStart]`.
 //TESTME
 	matchJSXChildren(tagName, text, start, end) {

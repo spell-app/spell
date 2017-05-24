@@ -550,16 +550,18 @@ Rule.Statements = class statements extends Rule {
 			lastIndent = indent;
 
 			// Attempt to parse a comment as the last item in the statement
-			let last = tokens[tokens.length - 1];
+			let lastItem = tokens.length - 1;
+			let last = tokens[lastItem];
 			let comment;
 			if (last instanceof Tokenizer.Comment) {
-				comment = new Rule.Comment({ matched: last.comment, indent });
+				comment = parser.parseRule("comment", tokens, lastItem);
+				if (comment) {
+					// Add comment BEFORE corresponding statement
+					results.push(comment);
 
-				// Add comment BEFORE corresponding statement
-				results.push(comment);
-
-				// pop the comment off before matching statements.
-				tokens = tokens.slice(0, -1);
+					// pop the comment off before matching the rest of the statement.
+					tokens = tokens.slice(0, -1);
+				}
 			}
 
 			let result = parser.rules.statement.parse(parser, tokens, 0);
