@@ -72,7 +72,7 @@ export default class Parser {
 		if (name !== "statements") {
 			stream = stream[0];
 			// remove indentation from the line
-			if (stream[0] instanceof Tokenizer.Indent) stream = stream.slice(1);
+			if (stream[0] instanceof Tokenizer.Whitespace) stream = stream.slice(1);
 		}
 
 		// Get rule to parse.

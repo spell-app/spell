@@ -531,8 +531,8 @@ Rule.Statements = class statements extends Rule {
 			// figure out indent level of this line
 			let indent = 0;
 			// If we start with an indent
-			if (tokens[0] instanceof Tokenizer.Indent) {
-				indent = tokens[0].level;
+			if (tokens[0] instanceof Tokenizer.Whitespace && tokens[0].isIndent) {
+				indent = tokens[0].length;
 				// take the indent out of the statement start
 				tokens = tokens.slice(1);
 			}

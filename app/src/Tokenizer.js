@@ -22,27 +22,19 @@ const Tokenizer = {
 		if (start >= end || !text.trim()) return undefined;
 
 		let tokens = [];
-		// check for a leading indent if at the beginning of text
-		if (start === 0) {
-			let [results, nextStart] = this.matchIndent(text, start, end) || [];
-			if (results) {
-				tokens = tokens.concat(results);
-				start = nextStart;
-			}
-		}
-
 		// Process our top-level rules.
 		let [results, nextStart] = this.eatTokens(this.matchTopTokens, text, start, end);
 		if (results) {
 			tokens = tokens.concat(results);
 			start = nextStart;
 		}
-
 		if (start !== end) console.warn("tokenize(): didn't consume: `", text.slice(start, end) + "`");
+
 		return results;
 	},
 
 	// Tokenize a stream and then divide it into lines.
+	// Also removes whitespace which are not "indents".
 //TESTME
 	tokenizeToLines(text, start, end) {
 		let tokens = this.tokenize(text, start, end);
@@ -50,8 +42,14 @@ const Tokenizer = {
 
 		let lines = [[]];
 		tokens.forEach(token => {
-			if (token === Tokenizer.NEWLINE) lines.push([]);
-			else lines[lines.length - 1].push(token);
+			// skip whitespace which is not an indent
+			if (token instanceof Tokenizer.Whitespace && !token.isIndent) return;
+
+			// add new array for each newline
+			if (token === Tokenizer.NEWLINE) return lines.push([]);
+
+			// otherwise just add to the last line
+			lines[lines.length - 1].push(token);
 		});
 		return lines;
 	},
@@ -86,7 +84,7 @@ const Tokenizer = {
 		return	this.matchWhitespace(text, start, end)
 			 || this.matchWord(text, start, end)
 			 || this.matchNumber(text, start, end)
-			 || this.matchNewlineAndIndent(text, start, end)
+			 || this.matchNewline(text, start, end)
 			 || this.matchJSXElement(text, start, end)
 			 || this.matchText(text, start, end)
 			 || this.matchComment(text, start, end)
@@ -114,8 +112,9 @@ const Tokenizer = {
 	//	### Whitespace
 	//
 
-	// Return the first char position after `start` which is NOT a whitespace char.
-	// May return `start` if that's not whitespace...
+	// Return the first char position after `start` which is NOT a whitespace char (space or tab only).
+	// If `text[start]` is not whitespace, returns `start`,
+	//	so you can call this at any time to skip whitespace in the output.
 	eatWhitespace(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return end;
@@ -127,17 +126,64 @@ const Tokenizer = {
 		return whiteSpaceEnd;
 	},
 
-	// Match one or more whitespace characters between `text[start]` and `text[end]`.
-	// Returns `[undefined, nextStart]` if we matched whitespace.
-	// Otherwise returns `undefined`.
+
+	//
+	//	### Whitespace
+	//	NOTE: Whitespace at the beginning of `text` or the beginning of a line
+	//		  is considered an "indent" and will have `.isIndent === true`.
+	//
+
+	// Convert a run of spaces and/or tabs into a `Tokenizer.Whitespace`.
 	matchWhitespace(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;
 
-		let whiteSpaceEnd = this.eatWhitespace(text, start, end);
-		if (whiteSpaceEnd === start) return undefined;
-		return [undefined, whiteSpaceEnd];
+		let whitespaceEnd = this.eatWhitespace(text, start, end);
+		// forget it if no forward motion
+		if (whitespaceEnd === start) return undefined;
+
+		let token = new Tokenizer.Whitespace(text.slice(start, whitespaceEnd));
+
+		// if the char BEFORE start is a newline, consider this an "indent"
+		if (start === 0 || text[start-1] === "\n") token.isIndent = true;
+
+		return [token, whitespaceEnd];
 	},
+
+	// Whitespace class
+	Whitespace : class whitespace {
+		constructor(whitespace) {
+			this.whitespace = whitespace;
+		}
+
+		// Return the "length" of this whitespace, eg for an indent.
+		get length() {
+			return this.whitespace.length;
+		}
+
+		// Return true if this indent is all tabs
+		get isTabs() {
+			return this.whitespace.split("").every(space => space === "\t");
+		}
+
+		// Return true if this indent is all spaces
+		get isTabs() {
+			return this.whitespace.split("").every(space => space === "\t");
+		}
+
+		// Return true if this indent is mixed tabs and spaces
+		get isMixed() {
+			let firstChar = this.whitespace[0];
+			return this.whitespace.split("").some(space => space !== firstChar);
+		}
+
+
+		toString() {
+			return this.whitespace;
+		}
+	},
+
+
 
 	//
 	//	### Newline
@@ -155,58 +201,6 @@ const Tokenizer = {
 		if (start >= end || text[start] !== "\n") return undefined;
 
 		return [Tokenizer.NEWLINE, start + 1];
-	},
-
-	// Match a single newline character at `text[start]` and tab run at start of new line.
-	// Returns`[Tokenizer.NEWLINE, nextStart]` if no tabs.
-	// Returns `[[Tokenizer.NEWLINE, <indent>, nextStart]` if tabs present.
-	// Returns `undefiined` if no match.
-	matchNewlineAndIndent(text, start = 0, end) {
-		if (typeof end !== "number" || end > text.length) end = text.length;
-
-		let [newline, newlineEnd] = this.matchNewline(text, start, end) || [];
-		if (!newline) return undefined;
-
-		// attempt to match tabs at the beginning of the line
-		let [ indent, indentEnd ] = this.matchIndent(text, newlineEnd, end) || [];
-		// return both tokens
-		if (indent) return [ [ newline, indent ], indentEnd ];
-
-		// otherwise just return newline
-		return [ newline, newlineEnd ];
-	},
-
-
-	//
-	//	### Indent
-	//
-
-	// Convert a run of tabs (e.g. at the beginning of a line) into a `Tokenizer.Indent`.
-	matchIndent(text, start = 0, end) {
-		if (typeof end !== "number" || end > text.length) end = text.length;
-		if (start >= end || text[start] !== "\t") return undefined;
-
-		// figure out # of tabs at the beginning of the new line
-		let tabEnd = start + 1;
-		while (tabEnd < end && text[tabEnd] === "\t") {
-			tabEnd++;
-		}
-
-		let indent = new Tokenizer.Indent(text.slice(start, tabEnd));
-		return [indent, tabEnd];
-	},
-
-	// Indent class
-	Indent : class indent {
-		constructor(indent) {
-			this.indent = indent;
-		}
-		get level() {
-			return this.indent.length;
-		}
-		toString() {
-			return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t".slice(0, this.indent);
-		}
 	},
 
 
@@ -318,7 +312,6 @@ const Tokenizer = {
 	// Eat a comment (until the end of the line).
 	// Returns a `Tokenizer.Comment` if matched.
 	COMMENT : /^(##+|--+|\/\/+)(\s*)(.*)/,
-//TESTME
 	matchComment(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;

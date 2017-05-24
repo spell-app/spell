@@ -2,6 +2,13 @@ TODO:
 
 - refactor
 	- test tokenizer
+	- include whitespace in normal stream (similar to Indent)
+		- tokens => lines in parser?
+
+	- change eg matchAttributes etc to use `matchWhitespace`
+
+	- matchJSXStartTag, used in matchJSXElement
+
 	- tokenizer & bad input
 
 - jsx parser
