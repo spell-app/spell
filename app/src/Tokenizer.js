@@ -237,6 +237,29 @@ const Tokenizer = {
 
 
 	//
+	//	### Numbers
+	//
+
+	// Eat a single number.
+	// Returns a `Number` if matched.
+	NUMBER_START: /[0-9-.]/,
+	NUMBER : /^-?([0-9]*\.)?[0-9]+/,
+	matchNumber(text, start = 0, end) {
+		if (typeof end !== "number" || end > text.length) end = text.length;
+		if (start >= end) return undefined;
+
+		if (!this.NUMBER_START.test(text[start])) return undefined;
+
+		let numberMatch = this.matchExpressionAtHead(this.NUMBER, text, start, end);
+		if (!numberMatch) return undefined;
+
+		let numberStr = numberMatch[0];
+		let number = parseFloat(numberStr, 10);
+		return [number, start + numberStr.length];
+	},
+
+
+	//
 	//	### Text literal
 	//
 
@@ -270,7 +293,6 @@ const Tokenizer = {
 
 	// `Text` class for string literals.
 	// Pass the literal value, use `.text` to get just the bit inside the quotes.
-//TESTME
 	Text : class text {
 		constructor(quotedString) {
 			this.quotedString = quotedString;
@@ -287,29 +309,6 @@ const Tokenizer = {
 		toString() {
 			return this.quotedString;
 		}
-	},
-
-	//
-	//	### Numbers
-	//
-
-	// Eat a single number.
-	// Returns a `Number` if matched.
-	NUMBER_START: /[0-9-.]/,
-	NUMBER : /^-?([0-9]*\.)?[0-9]+/,
-//TESTME
-	matchNumber(text, start = 0, end) {
-		if (typeof end !== "number" || end > text.length) end = text.length;
-		if (start >= end) return undefined;
-
-		if (!this.NUMBER_START.test(text[start])) return undefined;
-
-		let numberMatch = this.matchExpressionAtHead(this.NUMBER, text, start, end);
-		if (!numberMatch) return undefined;
-
-		let numberStr = numberMatch[0];
-		let number = parseFloat(numberStr, 10);
-		return [number, start + numberStr.length];
 	},
 
 	//
@@ -340,8 +339,8 @@ const Tokenizer = {
 	// Comment class
 //TESTME
 	Comment : class comment {
-		constructor (comment) {
-			this.comment = comment;
+		constructor (props) {
+			Object.assign(this, props);
 		}
 		toString() {
 			return `/*${this.comment}*/`;

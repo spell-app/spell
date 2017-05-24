@@ -470,6 +470,96 @@ test("matchWord():  Matches if end is out of range", () => {
 
 
 //
+// matchNumber()
+//
+test("matchNumber():  Returns undefined for empty string", () => {
+	let result = Tokenizer.matchNumber("");
+	expect(result).toEqual(undefined);
+});
+
+test("matchNumber():  If no match, returns undefined", () => {
+	let result = Tokenizer.matchNumber("a");
+	expect(result).toEqual(undefined);
+});
+
+test("matchNumber():  Matches integer at beginning of string", () => {
+	let result = Tokenizer.matchNumber("999 ");
+	expect(result).toEqual([999, 3]);
+});
+
+test("matchNumber():  Matches proper decimal at beginning of string", () => {
+	let result = Tokenizer.matchNumber("1.888 ");
+	expect(result).toEqual([1.888, 5]);
+});
+
+test("matchNumber():  Matches no-leading-zero decimal at beginning of string", () => {
+	let result = Tokenizer.matchNumber(".888 ");
+	expect(result).toEqual([0.888, 4]);
+});
+
+test("matchNumber():  Ignores leading zeros at beginning of string", () => {
+	let result = Tokenizer.matchNumber("00888 ");
+	expect(result).toEqual([888, 5]);
+});
+
+test("matchNumber():  Matches negative integer at beginning of string", () => {
+	let result = Tokenizer.matchNumber("-999 ");
+	expect(result).toEqual([-999, 4]);
+});
+
+test("matchNumber():  Matches negative proper decimal at beginning of string", () => {
+	let result = Tokenizer.matchNumber("-1.888 ");
+	expect(result).toEqual([-1.888, 6]);
+});
+
+test("matchNumber():  Matches no-leading-zero decimal at beginning of string", () => {
+	let result = Tokenizer.matchNumber("-.888 ");
+	expect(result).toEqual([-0.888, 5]);
+});
+
+test("matchNumber():  Ignores negative with leading zeros at beginning of string", () => {
+	let result = Tokenizer.matchNumber("-00888 ");
+	expect(result).toEqual([-888, 6]);
+});
+
+test("matchNumber():  Ignores `{negative}{space}{number} at beginning of string", () => {
+	let result = Tokenizer.matchNumber("- 00888 ");
+	expect(result).toEqual(undefined);
+});
+
+test("matchNumber():  Matches in the middle of the string", () => {
+	let result = Tokenizer.matchNumber("  999  ", 2);
+	expect(result).toEqual([999, 5]);
+});
+
+test("matchNumber():  Doesn't match incorrectly in the middle of the string", () => {
+	let result = Tokenizer.matchNumber("  999  999", 5);
+	expect(result).toEqual(undefined);
+});
+
+test("matchNumber():  Doesn't go beyond the end", () => {
+	let result = Tokenizer.matchNumber("   999", 3, 4);
+	expect(result).toEqual([9, 4]);
+});
+
+test("matchNumber():  Doesn't match if start > end", () => {
+	let result = Tokenizer.matchNumber("999", 2, 1);
+	expect(result).toEqual(undefined);
+});
+
+test("matchNumber():  Doesn't match if start is out of range", () => {
+	let result = Tokenizer.matchNumber("999", 100);
+	expect(result).toEqual(undefined);
+});
+
+test("matchNumber():  Matches if end is out of range", () => {
+	let result = Tokenizer.matchNumber("999", 1, 100);
+	expect(result).toEqual([99, 3]);
+});
+
+
+
+//
 // matchText()
 //
 test("matchText():  Returns undefined for empty string", () => {
@@ -548,6 +638,127 @@ test("matchText():  Matches if end is out of range", () => {
 	expect(result[0].quotedString).toBe("'aaa'");
 	expect(result[0].text).toBe("aaa");
 	expect(result[1]).toBe(5);
+});
+
+
+
+
+//
+// matchComment()
+//
+test("matchComment():  Returns undefined for empty string", () => {
+	let result = Tokenizer.matchComment("");
+	expect(result).toEqual(undefined);
+});
+
+test("matchComment():  If no match, returns undefined", () => {
+	let result = Tokenizer.matchComment("a");
+	expect(result).toEqual(undefined);
+});
+
+test("matchComment():  Matches `//` comment at beginning of string", () => {
+	let result = Tokenizer.matchComment("//comment here");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("comment here");
+	expect(result[0].whitespace).toBe("");
+	expect(result[0].commentSymbol).toBe("//");
+	expect(result[1]).toBe(14);
+});
+
+test("matchComment():  Matches `--` comment at beginning of string", () => {
+	let result = Tokenizer.matchComment("-- comment here");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("comment here");
+	expect(result[0].whitespace).toBe(" ");
+	expect(result[0].commentSymbol).toBe("--");
+	expect(result[1]).toBe(15);
+});
+
+test("matchComment():  Matches `##` comment at beginning of string", () => {
+	let result = Tokenizer.matchComment("##\tcomment here");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("comment here");
+	expect(result[0].whitespace).toBe("\t");
+	expect(result[0].commentSymbol).toBe("##");
+	expect(result[1]).toBe(15);
+});
+
+test("matchComment():  Matches empty `//` comment", () => {
+	let result = Tokenizer.matchComment("//");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("");
+	expect(result[0].whitespace).toBe("");
+	expect(result[0].commentSymbol).toBe("//");
+	expect(result[1]).toBe(2);
+});
+
+test("matchComment():  Matches empty `--` comment", () => {
+	let result = Tokenizer.matchComment("--");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("");
+	expect(result[0].whitespace).toBe("");
+	expect(result[0].commentSymbol).toBe("--");
+	expect(result[1]).toBe(2);
+});
+
+test("matchComment():  Matches empty `##` comment", () => {
+	let result = Tokenizer.matchComment("##");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("");
+	expect(result[0].whitespace).toBe("");
+	expect(result[0].commentSymbol).toBe("##");
+	expect(result[1]).toBe(2);
+});
+
+test("matchComment():  Matches in the middle of the string", () => {
+	let result = Tokenizer.matchComment("xxx//comment", 3);
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("comment");
+	expect(result[0].whitespace).toBe("");
+	expect(result[0].commentSymbol).toBe("//");
+	expect(result[1]).toBe(12);
+});
+
+test("matchComment():  Doesn't incorrectly match in the middle of the string", () => {
+	let result = Tokenizer.matchComment("xxx//comment\n", 4);
+	expect(result).toEqual(undefined);
+});
+
+test("matchComment():  Stops at newline", () => {
+	let result = Tokenizer.matchComment("//\tcomment here\n");
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("comment here");
+	expect(result[0].whitespace).toBe("\t");
+	expect(result[0].commentSymbol).toBe("//");
+	expect(result[1]).toBe(15);
+});
+
+test("matchComment():  Doesn't go beyond the end", () => {
+	let result = Tokenizer.matchComment("//\tcomment here\n", 0, 10);
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("comment");
+	expect(result[0].whitespace).toBe("\t");
+	expect(result[0].commentSymbol).toBe("//");
+	expect(result[1]).toBe(10);
+});
+
+test("matchComment():  Doesn't match if start > end", () => {
+	let result = Tokenizer.matchComment("//\tcomment here\n", 2, 1);
+	expect(result).toEqual(undefined);
+});
+
+test("matchComment():  Doesn't match if start is out of range", () => {
+	let result = Tokenizer.matchComment("//\tcomment here\n", 100);
+	expect(result).toEqual(undefined);
+});
+
+test("matchComment():  Matches if end is out of range", () => {
+	let result = Tokenizer.matchComment("//\tcomment here\n", 0, 100);
+	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
+	expect(result[0].comment).toBe("comment here");
+	expect(result[0].whitespace).toBe("\t");
+	expect(result[0].commentSymbol).toBe("//");
+	expect(result[1]).toBe(15);
 });
 
 
