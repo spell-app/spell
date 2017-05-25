@@ -79,27 +79,27 @@ test("matchWhitespace():  If no match, returns undefined", () => {
 });
 
 test("matchWhitespace():  Spaces are fine", () => {
-	let result = Tokenizer.matchWhitespace("   x");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe("   ");
-	expect(result[0].length).toBe(3);
-	expect(result[1]).toBe(3);
+	let [token, nextStart] = Tokenizer.matchWhitespace("   x");
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe("   ");
+	expect(token.length).toBe(3);
+	expect(nextStart).toBe(3);
 });
 
 test("matchWhitespace():  Tabs are fine", () => {
-	let result = Tokenizer.matchWhitespace("\t\t\tx");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe("\t\t\t");
-	expect(result[0].length).toBe(3);
-	expect(result[1]).toBe(3);
+	let [token, nextStart] = Tokenizer.matchWhitespace("\t\t\tx");
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe("\t\t\t");
+	expect(token.length).toBe(3);
+	expect(nextStart).toBe(3);
 });
 
 test("matchWhitespace():  Mixed spaces and tabs are fine", () => {
-	let result = Tokenizer.matchWhitespace("\t \tx");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe("\t \t");
-	expect(result[0].length).toBe(3);
-	expect(result[1]).toBe(3);
+	let [token, nextStart] = Tokenizer.matchWhitespace("\t \tx");
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe("\t \t");
+	expect(token.length).toBe(3);
+	expect(nextStart).toBe(3);
 });
 
 test("matchWhitespace():  Should NOT match newline", () => {
@@ -108,17 +108,17 @@ test("matchWhitespace():  Should NOT match newline", () => {
 });
 
 test("matchWhitespace():  Matches in the middle of the string", () => {
-	let result = Tokenizer.matchWhitespace("  \n x", 3);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe(" ");
-	expect(result[1]).toBe(4);
+	let [token, nextStart] = Tokenizer.matchWhitespace("  \n x", 3);
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe(" ");
+	expect(nextStart).toBe(4);
 });
 
 test("matchWhitespace():  Doesn't go beyond the end", () => {
-	let result = Tokenizer.matchWhitespace("       ", 3, 4);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe(" ");
-	expect(result[1]).toBe(4);
+	let [token, nextStart] = Tokenizer.matchWhitespace("       ", 3, 4);
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe(" ");
+	expect(nextStart).toBe(4);
 });
 
 test("matchWhitespace():  Doesn't match if start > end", () => {
@@ -132,34 +132,34 @@ test("matchWhitespace():  Doesn't match if start is out of range", () => {
 });
 
 test("matchWhitespace():  Matches if end is out of range", () => {
-	let result = Tokenizer.matchWhitespace("   ", 0, 100);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe("   ");
-	expect(result[1]).toBe(3);
+	let [token, nextStart] = Tokenizer.matchWhitespace("   ", 0, 100);
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe("   ");
+	expect(nextStart).toBe(3);
 });
 
 test("matchWhitespace():  Whitespace at start `isIndent`", () => {
-	let result = Tokenizer.matchWhitespace(" ");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe(" ");
-	expect(result[0].isIndent).toBe(true);
-	expect(result[1]).toBe(1);
+	let [token, nextStart] = Tokenizer.matchWhitespace(" ");
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe(" ");
+	expect(token.isIndent).toBe(true);
+	expect(nextStart).toBe(1);
 });
 
 test("matchWhitespace():  Whitespace after newline `isIndent`", () => {
-	let result = Tokenizer.matchWhitespace(" \n\t", 2);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe("\t");
-	expect(result[0].isIndent).toBe(true);
-	expect(result[1]).toBe(3);
+	let [token, nextStart] = Tokenizer.matchWhitespace(" \n\t", 2);
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe("\t");
+	expect(token.isIndent).toBe(true);
+	expect(nextStart).toBe(3);
 });
 
 test("matchWhitespace():  Whitespace in middle of other stuff is not indent", () => {
-	let result = Tokenizer.matchWhitespace("x x", 1);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Whitespace);
-	expect(result[0].whitespace).toBe(" ");
-	expect(result[0].isIndent).toBe(undefined);
-	expect(result[1]).toBe(2);
+	let [token, nextStart] = Tokenizer.matchWhitespace("x x", 1);
+	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token.whitespace).toBe(" ");
+	expect(token.isIndent).toBe(undefined);
+	expect(nextStart).toBe(2);
 });
 
 
@@ -444,43 +444,43 @@ test("matchText():  If no match, returns undefined", () => {
 });
 
 test("matchText():  Matches single quotes at beginning of string", () => {
-	let result = Tokenizer.matchText("'a'");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
-	expect(result[0].quotedString).toBe("'a'");
-	expect(result[0].text).toBe("a");
-	expect(result[1]).toBe(3);
+	let [token, nextStart] = Tokenizer.matchText("'a'");
+	expect(token).toBeInstanceOf(Tokenizer.Text);
+	expect(token.quotedString).toBe("'a'");
+	expect(token.text).toBe("a");
+	expect(nextStart).toBe(3);
 });
 
 test("matchText():  Matches double quotes at beginning of string", () => {
-	let result = Tokenizer.matchText('"aaaa"');
-	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
-	expect(result[0].quotedString).toBe('"aaaa"');
-	expect(result[0].text).toBe("aaaa");
-	expect(result[1]).toBe(6);
+	let [token, nextStart] = Tokenizer.matchText('"aaaa"');
+	expect(token).toBeInstanceOf(Tokenizer.Text);
+	expect(token.quotedString).toBe('"aaaa"');
+	expect(token.text).toBe("aaaa");
+	expect(nextStart).toBe(6);
 });
 
 test("matchText():  Matches single quotes with escape at beginning of string", () => {
-	let result = Tokenizer.matchText("'a\\'a'");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
-	expect(result[0].quotedString).toBe("'a\\'a'");
-	expect(result[0].text).toBe("a\\'a");
-	expect(result[1]).toBe(6);
+	let [token, nextStart] = Tokenizer.matchText("'a\\'a'");
+	expect(token).toBeInstanceOf(Tokenizer.Text);
+	expect(token.quotedString).toBe("'a\\'a'");
+	expect(token.text).toBe("a\\'a");
+	expect(nextStart).toBe(6);
 });
 
 test("matchText():  Matches double quotes with escape at beginning of string", () => {
-	let result = Tokenizer.matchText('"a\\"a"');
-	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
-	expect(result[0].quotedString).toBe('"a\\"a"');
-	expect(result[0].text).toBe('a\\"a');
-	expect(result[1]).toBe(6);
+	let [token, nextStart] = Tokenizer.matchText('"a\\"a"');
+	expect(token).toBeInstanceOf(Tokenizer.Text);
+	expect(token.quotedString).toBe('"a\\"a"');
+	expect(token.text).toBe('a\\"a');
+	expect(nextStart).toBe(6);
 });
 
 test("matchText():  Matches in the middle of the string", () => {
-	let result = Tokenizer.matchText("  'aaa'  ", 2);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
-	expect(result[0].quotedString).toBe("'aaa'");
-	expect(result[0].text).toBe("aaa");
-	expect(result[1]).toBe(7);
+	let [token, nextStart] = Tokenizer.matchText("  'aaa'  ", 2);
+	expect(token).toBeInstanceOf(Tokenizer.Text);
+	expect(token.quotedString).toBe("'aaa'");
+	expect(token.text).toBe("aaa");
+	expect(nextStart).toBe(7);
 });
 
 test("matchText():  Doesn't match if unbalanced", () => {
@@ -504,11 +504,11 @@ test("matchText():  Doesn't match if start is out of range", () => {
 });
 
 test("matchText():  Matches if end is out of range", () => {
-	let result = Tokenizer.matchText("'aaa'", 0, 100);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Text);
-	expect(result[0].quotedString).toBe("'aaa'");
-	expect(result[0].text).toBe("aaa");
-	expect(result[1]).toBe(5);
+	let [token, nextStart] = Tokenizer.matchText("'aaa'", 0, 100);
+	expect(token).toBeInstanceOf(Tokenizer.Text);
+	expect(token.quotedString).toBe("'aaa'");
+	expect(token.text).toBe("aaa");
+	expect(nextStart).toBe(5);
 });
 
 
@@ -528,66 +528,66 @@ test("matchComment():  If no match, returns undefined", () => {
 });
 
 test("matchComment():  Matches `//` comment at beginning of string", () => {
-	let result = Tokenizer.matchComment("//comment here");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("comment here");
-	expect(result[0].whitespace).toBe("");
-	expect(result[0].commentSymbol).toBe("//");
-	expect(result[1]).toBe(14);
+	let [token, nextStart] = Tokenizer.matchComment("//comment here");
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("comment here");
+	expect(token.whitespace).toBe("");
+	expect(token.commentSymbol).toBe("//");
+	expect(nextStart).toBe(14);
 });
 
 test("matchComment():  Matches `--` comment at beginning of string", () => {
-	let result = Tokenizer.matchComment("-- comment here");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("comment here");
-	expect(result[0].whitespace).toBe(" ");
-	expect(result[0].commentSymbol).toBe("--");
-	expect(result[1]).toBe(15);
+	let [token, nextStart] = Tokenizer.matchComment("-- comment here");
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("comment here");
+	expect(token.whitespace).toBe(" ");
+	expect(token.commentSymbol).toBe("--");
+	expect(nextStart).toBe(15);
 });
 
 test("matchComment():  Matches `##` comment at beginning of string", () => {
-	let result = Tokenizer.matchComment("##\tcomment here");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("comment here");
-	expect(result[0].whitespace).toBe("\t");
-	expect(result[0].commentSymbol).toBe("##");
-	expect(result[1]).toBe(15);
+	let [token, nextStart] = Tokenizer.matchComment("##\tcomment here");
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("comment here");
+	expect(token.whitespace).toBe("\t");
+	expect(token.commentSymbol).toBe("##");
+	expect(nextStart).toBe(15);
 });
 
 test("matchComment():  Matches empty `//` comment", () => {
-	let result = Tokenizer.matchComment("//");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("");
-	expect(result[0].whitespace).toBe("");
-	expect(result[0].commentSymbol).toBe("//");
-	expect(result[1]).toBe(2);
+	let [token, nextStart] = Tokenizer.matchComment("//");
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("");
+	expect(token.whitespace).toBe("");
+	expect(token.commentSymbol).toBe("//");
+	expect(nextStart).toBe(2);
 });
 
 test("matchComment():  Matches empty `--` comment", () => {
-	let result = Tokenizer.matchComment("--");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("");
-	expect(result[0].whitespace).toBe("");
-	expect(result[0].commentSymbol).toBe("--");
-	expect(result[1]).toBe(2);
+	let [token, nextStart] = Tokenizer.matchComment("--");
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("");
+	expect(token.whitespace).toBe("");
+	expect(token.commentSymbol).toBe("--");
+	expect(nextStart).toBe(2);
 });
 
 test("matchComment():  Matches empty `##` comment", () => {
-	let result = Tokenizer.matchComment("##");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("");
-	expect(result[0].whitespace).toBe("");
-	expect(result[0].commentSymbol).toBe("##");
-	expect(result[1]).toBe(2);
+	let [token, nextStart] = Tokenizer.matchComment("##");
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("");
+	expect(token.whitespace).toBe("");
+	expect(token.commentSymbol).toBe("##");
+	expect(nextStart).toBe(2);
 });
 
 test("matchComment():  Matches in the middle of the string", () => {
-	let result = Tokenizer.matchComment("xxx//comment", 3);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("comment");
-	expect(result[0].whitespace).toBe("");
-	expect(result[0].commentSymbol).toBe("//");
-	expect(result[1]).toBe(12);
+	let [token, nextStart] = Tokenizer.matchComment("xxx//comment", 3);
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("comment");
+	expect(token.whitespace).toBe("");
+	expect(token.commentSymbol).toBe("//");
+	expect(nextStart).toBe(12);
 });
 
 test("matchComment():  Doesn't incorrectly match in the middle of the string", () => {
@@ -596,21 +596,21 @@ test("matchComment():  Doesn't incorrectly match in the middle of the string", (
 });
 
 test("matchComment():  Stops at newline", () => {
-	let result = Tokenizer.matchComment("//\tcomment here\n");
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("comment here");
-	expect(result[0].whitespace).toBe("\t");
-	expect(result[0].commentSymbol).toBe("//");
-	expect(result[1]).toBe(15);
+	let [token, nextStart] = Tokenizer.matchComment("//\tcomment here\n");
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("comment here");
+	expect(token.whitespace).toBe("\t");
+	expect(token.commentSymbol).toBe("//");
+	expect(nextStart).toBe(15);
 });
 
 test("matchComment():  Doesn't go beyond the end", () => {
-	let result = Tokenizer.matchComment("//\tcomment here\n", 0, 10);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("comment");
-	expect(result[0].whitespace).toBe("\t");
-	expect(result[0].commentSymbol).toBe("//");
-	expect(result[1]).toBe(10);
+	let [token, nextStart] = Tokenizer.matchComment("//\tcomment here\n", 0, 10);
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("comment");
+	expect(token.whitespace).toBe("\t");
+	expect(token.commentSymbol).toBe("//");
+	expect(nextStart).toBe(10);
 });
 
 test("matchComment():  Doesn't match if start > end", () => {
@@ -624,12 +624,165 @@ test("matchComment():  Doesn't match if start is out of range", () => {
 });
 
 test("matchComment():  Matches if end is out of range", () => {
-	let result = Tokenizer.matchComment("//\tcomment here\n", 0, 100);
-	expect(result[0]).toBeInstanceOf(Tokenizer.Comment);
-	expect(result[0].comment).toBe("comment here");
-	expect(result[0].whitespace).toBe("\t");
-	expect(result[0].commentSymbol).toBe("//");
-	expect(result[1]).toBe(15);
+	let [token, nextStart] = Tokenizer.matchComment("//\tcomment here\n", 0, 100);
+	expect(token).toBeInstanceOf(Tokenizer.Comment);
+	expect(token.comment).toBe("comment here");
+	expect(token.whitespace).toBe("\t");
+	expect(token.commentSymbol).toBe("//");
+	expect(nextStart).toBe(15);
 });
 
 
+
+
+
+//
+// matchJSXStartTag()
+//
+test("matchJSXStartTag():  Returns undefined for empty string", () => {
+	let result = Tokenizer.matchJSXStartTag("");
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXStartTag():  If no match, returns undefined", () => {
+	let result = Tokenizer.matchJSXStartTag("a");
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXStartTag():  Matches no-attribute start tag at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXStartTag("<test>");
+	expect(token).toBeInstanceOf(Tokenizer.JSXElement);
+	expect(token.tagName).toBe("test");
+	expect(token.isUnaryTag).toBe(undefined);
+	expect(token.children).toBe(undefined);
+	expect(token.attributes).toBe(undefined);
+	expect(nextStart).toBe(6);
+});
+
+test("matchJSXStartTag():  Matches no attribute unary tag at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXStartTag("<test/>");
+	expect(token).toBeInstanceOf(Tokenizer.JSXElement);
+	expect(token.tagName).toBe("test");
+	expect(token.isUnaryTag).toBe(true);
+	expect(token.children).toBe(undefined);
+	expect(token.attributes).toBe(undefined);
+	expect(nextStart).toBe(7);
+});
+
+test("matchJSXStartTag():  Does NOT match end tag at beginning of string", () => {
+	let result = Tokenizer.matchJSXStartTag("</test>");
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXStartTag():  Matches start tag with attributes at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXStartTag("<test a='a\\'a' bbb=1 c-0-a={tokens} d>");
+	expect(token).toBeInstanceOf(Tokenizer.JSXElement);
+	expect(token.tagName).toBe("test");
+	expect(token.isUnaryTag).toBe(undefined);
+	expect(token.children).toBe(undefined);
+	expect(nextStart).toBe(38);
+
+	let attributes = token.attributes;
+	expect(attributes).toBeInstanceOf(Array);
+	expect(attributes.length).toEqual(4);
+
+	expect(attributes[0].name).toEqual("a");
+	expect(attributes[0].value).toBeInstanceOf(Tokenizer.Text);
+	expect(attributes[0].value.text).toEqual("a\\'a");
+
+	expect(attributes[1].name).toEqual("bbb");
+	expect(attributes[1].value).toBe(1)
+
+	expect(attributes[2].name).toEqual("c-0-a");
+	expect(attributes[2].value).toBeInstanceOf(Tokenizer.JSXExpression);
+
+	expect(attributes[3].name).toEqual("d");
+	expect(attributes[3].value).toBe(undefined);
+});
+
+test("matchJSXStartTag():  Matches unary tag with attributes at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXStartTag("<test a='a\\'a' bbb=1 c-0-a={tokens} d/>");
+	expect(token).toBeInstanceOf(Tokenizer.JSXElement);
+	expect(token.tagName).toBe("test");
+	expect(token.isUnaryTag).toBe(true);
+	expect(token.children).toBe(undefined);
+	expect(nextStart).toBe(39);
+
+	let attributes = token.attributes;
+	expect(attributes).toBeInstanceOf(Array);
+	expect(attributes.length).toEqual(4);
+
+	expect(attributes[0].name).toEqual("a");
+	expect(attributes[0].value).toBeInstanceOf(Tokenizer.Text);
+	expect(attributes[0].value.text).toEqual("a\\'a");
+
+	expect(attributes[1].name).toEqual("bbb");
+	expect(attributes[1].value).toBe(1)
+
+	expect(attributes[2].name).toEqual("c-0-a");
+	expect(attributes[2].value).toBeInstanceOf(Tokenizer.JSXExpression);
+
+	expect(attributes[3].name).toEqual("d");
+	expect(attributes[3].value).toBe(undefined);
+});
+
+test("matchJSXStartTag():  Matches in the middle of the string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXStartTag("xxx<test aprop/>xxx", 3);
+	expect(token).toBeInstanceOf(Tokenizer.JSXElement);
+	expect(token.tagName).toBe("test");
+	expect(token.isUnaryTag).toBe(true);
+	expect(token.children).toBe(undefined);
+	expect(token.attributes).toBeInstanceOf(Array);
+	expect(token.attributes.length).toEqual(1);
+	expect(nextStart).toBe(16);
+});
+
+test("matchJSXStartTag():  Doesn't incorrectly match in the middle of the string", () => {
+	let result = Tokenizer.matchJSXStartTag("xxx<test aprop/>xxx", 4);
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXStartTag():  Doesn't stop at newline", () => {
+	let [token, nextStart] = Tokenizer.matchJSXStartTag("xxx<test aprop\n bprop/>xxx", 3)
+	expect(token).toBeInstanceOf(Tokenizer.JSXElement);
+	expect(token.tagName).toBe("test");
+	expect(token.isUnaryTag).toBe(true);
+	expect(token.children).toBe(undefined);
+	expect(token.attributes).toBeInstanceOf(Array);
+	expect(token.attributes.length).toEqual(2);
+	expect(nextStart).toBe(23);
+});
+
+test("matchJSXStartTag():  Matches but doesn't go beyond the end", () => {
+	let [token, nextStart] = Tokenizer.matchJSXStartTag("<test aprop\n bprop/>", 0, 10)
+	expect(token).toBeInstanceOf(Tokenizer.JSXElement);
+	expect(token.tagName).toBe("test");
+	expect(token.isUnaryTag).toBe(undefined);
+	expect(token.error).toBe("No end >");
+	expect(token.children).toBe(undefined);
+	expect(token.attributes).toBeInstanceOf(Array);
+	expect(token.attributes.length).toEqual(1);
+	expect(token.attributes[0].name).toEqual("apro");
+	expect(nextStart).toBe(10);
+});
+
+test("matchJSXStartTag():  Doesn't match if start > end", () => {
+	let result = Tokenizer.matchJSXStartTag("xxx<test aprop\n bprop/>", 3, 2)
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXStartTag():  Doesn't match if start is out of range", () => {
+	let result = Tokenizer.matchJSXStartTag("xxx<test aprop\n bprop/>", 100)
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXStartTag():  Matches if end is out of range", () => {
+	let [token, nextStart] = Tokenizer.matchJSXStartTag("xxx<test aprop\n bprop/>xxx", 3, 100)
+	expect(token).toBeInstanceOf(Tokenizer.JSXElement);
+	expect(token.tagName).toBe("test");
+	expect(token.isUnaryTag).toBe(true);
+	expect(token.children).toBe(undefined);
+	expect(token.attributes).toBeInstanceOf(Array);
+	expect(token.attributes.length).toEqual(2);
+	expect(nextStart).toBe(23);
+});
