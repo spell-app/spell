@@ -1,3 +1,15 @@
+// GRRR... node doesn't include this???
+// CHECK DIFFERENT NODE VERSIONS...
+if (!(Array.prototype.includes)) {
+	Object.defineProperty(Array.prototype, "includes", {
+		value: function(value, start) {
+			let index = this.indexOf(value, start);
+			return (index !== -1);
+		}
+	});
+}
+
+
 //
 //	# Tokenizer
 //	- `.tokenize()` 		Breaks up long string into tokens, including newlines, JSX expressions, etc.
@@ -530,7 +542,6 @@ const Tokenizer = {
 	// Match a single JSX element attribute as `<attr>={<value>}`
 // TODO: {...xxx}
 	JSX_ATTRIBUTE_START : /^\s*([\w-]+\b)\s*(=?)\s*/,
-//TESTME
 	matchJSXAttribute(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;
@@ -562,7 +573,6 @@ const Tokenizer = {
 	// Match a value expression for a JSX element attribute:
 	// NOTE: we will be called immediately after the `=` (and subsequent whitespace).
 //TODO: `<word>` ?
-//TESTME
 	matchJSXAttributeValue(text, start, end) {
 		return this.matchText(text, start, end)
 			|| this.matchJSXExpression(text, start, end)
@@ -580,7 +590,6 @@ const Tokenizer = {
 	//		- `<....>`			// JSX element.
 	//		- `1`				// Number.  Note: this is an extension to JSX.
 
-//TESTME
 	JSXAttribute : class jsxAttribute {
 		constructor(name, value) {
 			this.name = name;
@@ -771,6 +780,5 @@ const Tokenizer = {
 	}
 
 };
-
 
 export default Tokenizer;

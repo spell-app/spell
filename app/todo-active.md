@@ -1,6 +1,7 @@
 TODO:
 
 - refactor
+	- `Text` => `QuotedText`?
 	- include whitespace in JSX parsing
 		- change eg matchAttributes etc to use `matchWhitespace`
 		- include whitespace in `attributes`, have getter which ignores this...
