@@ -9,10 +9,13 @@ TODO:
 
 	- tokenizer & bad input
 
-	- conver parser to `[tokens, start, end]` pattern ala tokenizer
+	- conver parser to `[tokens, start, end]` pattern ala tokenizer/
 	- tokenizer to similar `rule` pattern as parser?
 
 	- how to go back to source for annotation w/stream/skip whitespace
+		- assume whitespace in the token stream
+		- rule.start, rule.nextStart allow you to map back into token stream
+		- add characters...
 
 
 # Scope/etc

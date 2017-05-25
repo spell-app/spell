@@ -119,14 +119,6 @@ export default class Parser {
 		return rule;
 	}
 
-	// Parse a particular `name`d rule starting at `tokens[start]`.
-	// Throws if rule can't be found.
-	parseRule(name, tokens, start, stack) {
-		let rule = this.getRuleOrDie(name, "parseRule");
-		return rule.parse(this, tokens, start, stack);
-	}
-
-
 	// Add a rule to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
 	addRule(name, rule) {
