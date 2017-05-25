@@ -70,7 +70,7 @@ parser.rules.identifier.addToBlacklist(
 	"less", "long",
 	"me", "minus", "more",
 	"near", "not",
-	"of", "off", "on", "onto", "opposite", "out", "outside", "over",
+	"of", "off", "on", "onto", "opposite", "or", "out", "outside", "over",
 	"short", "since",
 	"than", "the", "then", "through", "thru", "to", "toward", "towards",
 	"undefined", "under", "underneath", "unique", "until", "up", "upon", "upside",

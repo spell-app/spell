@@ -348,8 +348,8 @@ const Tokenizer = {
 	// Returns `[jsxElement, nextStart]` or `undefined`.
 	// Use `matchJSXElement()` to match children, end tag, etc.
 	// Ignores leading whitespace.
-//TESTME
-	JSX_TAG_NAME : /^<([A-Za-z][\w-\.]*)(\s*\/>|\s*>|\s+)/,
+	JSX_TAG_START : /^<([A-Za-z][\w-\.]*)(\s*\/>|\s*>|\s+)/,
+// TODO: clean this stuff up, maybe with findFirstAtHead?
 	matchJSXStartTag(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;
@@ -358,14 +358,12 @@ const Tokenizer = {
 		// Make sure we start with `<`.
 		if (text[nextStart] !== "<") return undefined;
 
-		let tagMatch = this.matchExpressionAtHead(this.JSX_TAG_NAME, text, nextStart, end);
+		let tagMatch = this.matchExpressionAtHead(this.JSX_TAG_START, text, nextStart, end);
 		if (!tagMatch) return undefined;
 
 		let [ matchText, tagName, endBit ] = tagMatch;
 		let jsxElement = new Tokenizer.JSXElement(tagName);
 		nextStart = nextStart + matchText.length;
-
-// TODO: clean this stuff up, maybe with findFirstAtHead?
 
 		// If unary tag, mark as such and return.
 		endBit = endBit.trim();
@@ -409,7 +407,6 @@ const Tokenizer = {
 
 
 	// JSX element class
-//TESTME
 	JSXElement : class jsxElement {
 		constructor(tagName, attributes, children) {
 			this.tagName = tagName;
@@ -516,7 +513,6 @@ const Tokenizer = {
 
 	// Attempt to match a specific end tag.
 	// Ignores leading whitespace.
-//TESTME
 	matchJSXEndTag(endTag, text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		if (start >= end) return undefined;

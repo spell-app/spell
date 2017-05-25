@@ -839,3 +839,118 @@ test("matchJSXEndTag():  Matches if end is out of range", () => {
 	expect(token).toBe("</test>")
 	expect(nextStart).toBe(10);
 });
+
+
+
+
+//
+// matchJSXAttribute()
+//
+test("matchJSXAttribute():  Returns undefined for empty string", () => {
+	let result = Tokenizer.matchJSXAttribute("");
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXAttribute():  If no match, returns undefined", () => {
+	let result = Tokenizer.matchJSXAttribute(":");
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXAttribute():  Matches no-value attribute at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("xyz ");
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toEqual(undefined);
+	expect(nextStart).toEqual(4);
+});
+
+test("matchJSXAttribute():  Matches string attribute at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("xyz='abc' ");
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toBeInstanceOf(Tokenizer.Text);
+	expect(token.value.quotedString).toEqual("'abc'")
+	expect(nextStart).toEqual(10);
+});
+
+test("matchJSXAttribute():  Matches number attribute at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("xyz=0.33 ");
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toEqual(0.33);
+	expect(nextStart).toEqual(9);
+});
+
+test("matchJSXAttribute():  Matches JSX Expression attribute at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("xyz={foo bar baz} ");
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toBeInstanceOf(Tokenizer.JSXExpression);
+	expect(token.value.contents).toEqual("foo bar baz");
+	expect(nextStart).toEqual(18);
+});
+
+
+
+test("matchJSXAttribute():  Matches no-value attribute in the middle of the string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("...xyz ", 3);
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toEqual(undefined);
+	expect(nextStart).toEqual(7);
+});
+
+test("matchJSXAttribute():  Matches string attribute in the middle of the string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("...xyz='abc' ", 3);
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toBeInstanceOf(Tokenizer.Text);
+	expect(token.value.quotedString).toEqual("'abc'")
+	expect(nextStart).toEqual(13);
+});
+
+test("matchJSXAttribute():  Matches number attribute in the middle of the string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("...xyz=0.33 ", 3);
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toEqual(0.33);
+	expect(nextStart).toEqual(12);
+});
+
+test("matchJSXAttribute():  Matches JSX Expression attribute in the middle of the string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("...xyz={foo bar baz} ",3);
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toBeInstanceOf(Tokenizer.JSXExpression);
+	expect(token.value.contents).toEqual("foo bar baz");
+	expect(nextStart).toEqual(21);
+});
+
+test("matchJSXAttribute():  Doesn't go beyond the end", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("...xyz ", 3, 4);
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("x");
+	expect(token.value).toEqual(undefined);
+	expect(nextStart).toEqual(4);
+});
+
+test("matchJSXAttribute():  Doesn't match if start > end", () => {
+	let result = Tokenizer.matchJSXAttribute("xxx", 2, 1);
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXAttribute():  Doesn't match if start is out of range", () => {
+	let result = Tokenizer.matchJSXAttribute("xxx", 100);
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXAttribute():  Matches if end is out of range", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("xyz={foo bar baz} ");
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toBeInstanceOf(Tokenizer.JSXExpression);
+	expect(token.value.contents).toEqual("foo bar baz");
+	expect(nextStart).toEqual(18);
+});
+
+
