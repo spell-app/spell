@@ -786,3 +786,56 @@ test("matchJSXStartTag():  Matches if end is out of range", () => {
 	expect(token.attributes.length).toEqual(2);
 	expect(nextStart).toBe(23);
 });
+
+
+
+//
+// matchJSXEndTag()
+//
+test("matchJSXEndTag():  Returns undefined for empty string", () => {
+	let result = Tokenizer.matchJSXEndTag("</test>", "");
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXEndTag():  If no match, returns undefined", () => {
+	let result = Tokenizer.matchJSXEndTag("</test>", "a");
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXEndTag():  Matches specified end tag at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXEndTag("</test>","</test>");
+	expect(token).toBe("</test>")
+	expect(nextStart).toBe(7);
+});
+
+test("matchJSXEndTag():  Does not match different end tag at beginning of string", () => {
+	let result = Tokenizer.matchJSXEndTag("</bad>","</test>");
+	expect(result).toBe(undefined);
+});
+
+test("matchJSXEndTag():  Matches specified end tag in the middle of the string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXEndTag("</test>","xxx</test>", 3);
+	expect(token).toBe("</test>")
+	expect(nextStart).toBe(10);
+});
+
+test("matchJSXEndTag():  Does not incorrectly match in the middle of the string", () => {
+	let result = Tokenizer.matchJSXEndTag("</test>","xxx</test>", 2);
+	expect(result).toBe(undefined);
+});
+
+test("matchJSXEndTag():  Doesn't match if start > end", () => {
+	let result = Tokenizer.matchJSXEndTag("</test>","xxx</test>", 3, 2);
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXEndTag():  Doesn't match if start is out of range", () => {
+	let result = Tokenizer.matchJSXEndTag("</test>","xxx</test>", 100);
+	expect(result).toEqual(undefined);
+});
+
+test("matchJSXEndTag():  Matches if end is out of range", () => {
+	let [token, nextStart] = Tokenizer.matchJSXEndTag("</test>","xxx</test>", 3, 100);
+	expect(token).toBe("</test>")
+	expect(nextStart).toBe(10);
+});
