@@ -890,6 +890,16 @@ test("matchJSXAttribute():  Matches JSX Expression attribute at beginning of str
 	expect(nextStart).toEqual(18);
 });
 
+test("matchJSXAttribute():  Matches identifier attribute at beginning of string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("xyz=foo ");
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toBeInstanceOf(Tokenizer.JSXExpression);
+	expect(token.value.contents).toEqual("foo");
+	expect(nextStart).toEqual(8);
+});
+
+
 test("matchJSXAttribute():  Matches no-value attribute in the middle of the string", () => {
 	let [token, nextStart] = Tokenizer.matchJSXAttribute("...xyz ", 3);
 	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
@@ -922,6 +932,15 @@ test("matchJSXAttribute():  Matches JSX Expression attribute in the middle of th
 	expect(token.value).toBeInstanceOf(Tokenizer.JSXExpression);
 	expect(token.value.contents).toEqual("foo bar baz");
 	expect(nextStart).toEqual(21);
+});
+
+test("matchJSXAttribute():  Matches identifier attribute in the middle of the string", () => {
+	let [token, nextStart] = Tokenizer.matchJSXAttribute("...xyz=foo ", 3);
+	expect(token).toBeInstanceOf(Tokenizer.JSXAttribute);
+	expect(token.name).toEqual("xyz");
+	expect(token.value).toBeInstanceOf(Tokenizer.JSXExpression);
+	expect(token.value.contents).toEqual("foo");
+	expect(nextStart).toEqual(11);
 });
 
 test("matchJSXAttribute():  Doesn't go beyond the end", () => {

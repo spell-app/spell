@@ -514,7 +514,6 @@ const Tokenizer = {
 	//	- `{ jsx expression }`
 	//	- nested JSX element
 	//	- (anything else) as jsxText expression.
-//TESTME
 	matchJSXChild(endTag, text, start = 0, end) {
 		return this.matchJSXEndTag(endTag, text, start, end)
 			|| this.matchJSXExpression(text, start, end)
@@ -572,13 +571,24 @@ const Tokenizer = {
 
 	// Match a value expression for a JSX element attribute:
 	// NOTE: we will be called immediately after the `=` (and subsequent whitespace).
-//TODO: `<word>` ?
 	matchJSXAttributeValue(text, start, end) {
 		return this.matchText(text, start, end)
 			|| this.matchJSXExpression(text, start, end)
 			|| this.matchJSXElement(text, start, end)
+			|| this.matchJSXAttributeValueIdentifier(text, start, end)
 			|| this.matchNumber(text, start, end)
 		;
+	},
+
+	// Match a single identifer as a JSX attribute value.
+	// Returns as a `JSXExpression`.
+	matchJSXAttributeValueIdentifier(text, start, end) {
+		let result = this.matchWord(text, start, end);
+		if (!result) return;
+
+		let [ word, nextStart ] = result;
+		let token = new Tokenizer.JSXExpression(word);
+		return [token, nextStart];
 	},
 
 	// JSX attribute class
@@ -607,6 +617,7 @@ const Tokenizer = {
 	// Returns array of tokens of internal match.
 	// Ignores leading whitespace.
 //TODO: newlines/indents???
+//TODO: {...xxx}
 //TESTME
 	matchJSXExpression(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
