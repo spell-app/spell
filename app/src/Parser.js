@@ -235,19 +235,19 @@ export default class Parser {
 //
 	static REGISTRY = {};
 
-	// Get a parser for a given named "context".
-	// Will re-use existing context, or create a new one if parser context is not defined.
-	static forContext(context) {
-		if (!Parser.REGISTRY[context]) {
-			Parser.REGISTRY[context] = new Parser({ context });
+	// Get a parser for a given `contextName`.
+	// Will re-use existing parser, or create a new one if not already defined.
+	static forContext(contextName) {
+		if (!Parser.REGISTRY[contextName]) {
+			Parser.REGISTRY[contextName] = new Parser({ contextName });
 		}
-		return Parser.REGISTRY[context];
+		return Parser.REGISTRY[contextName];
 	}
 
-	// Return a parser for a named "context" or throw an exception if not found.
-	static getContextOrDie(context) {
-		if (Parser.REGISTRY[context]) return Parser.REGISTRY[context];
-		throw new TypeError(`Parser.getContextOrDie(): context '${context}' not found.`);
+	// Return a parser for `contextName` or throw an exception if not found.
+	static getContextOrDie(contextName) {
+		if (Parser.REGISTRY[contextName]) return Parser.REGISTRY[contextName];
+		throw new TypeError(`Parser.getContextOrDie(): contextName '${contextName}' not found.`);
 	}
 
 
@@ -257,6 +257,7 @@ export default class Parser {
 //
 
 	// Is the specified rule left-recursive?
+	// True for sequences where the first non-optional rule recursively calls `ruleName`.
 	static ruleIsLeftRecursive(ruleName, rule) {
 		if (!(rule instanceof Rule.Sequence) || !rule.rules) return false;
 //console.log(ruleName, rule);

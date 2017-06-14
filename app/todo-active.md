@@ -1,3 +1,29 @@
+Structure parsing
+- parser.addScope("define_type", "define type...")
+	- if we parse initial line, recurses to balanced indent / EOF
+	- can have custom rules (with higher precedence than default) for matching internal lines
+	- added as normal `statement` as well
+
+	// Add structural rule
+	const define_type = addNestedStructure(
+		"define_type",
+		"define type {type} (?:as (a|an) {superType:type})?",
+		class define_type extends Rule.Statement {...}
+	);
+
+	// Add rules which will only apply when parsing this structure
+	// TODO: statements only???
+	define_type.addStatement(...)
+
+- maybe just do the above with
+	{expressionOrNestedBlock} ???
+
+- to add methods / globals / etc to the parse stream:
+	- need to parse types, methods, globals, etc up front
+		BEFORE parsing method contents, variable declaration values, etc
+	-
+
+
 - Structures
 	- "type" structure
 		- name
@@ -13,14 +39,6 @@
 		- globals: map
 		- locals: map
 		- rules - local rules for this scope ???
-
-	- structures are immutable
-		- all maps are proto clones of parent maps
-		- how to "proto clone" arrays?
-
-		- parser.addRule("statement", ...)
-			=> new parser.rules map
-			=> new parser.rules.statement array ?
 
 - Structure parsing
 	- "structure" rules:

@@ -1,6 +1,9 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
+
+// TODO: mixins / traits
+
 import Parser from "../Parser";
 import Rule from "../RuleSyntax";
 
@@ -15,8 +18,22 @@ export default parser;
 import "./core";
 parser.import("core");
 
+// Define "type" (a.k.a. "class").
+parser.addStatement(
+	"define_type",
+	"define type {type} (?:as (a|an) {superType:type})?",
+	class define_type extends Rule.Statement {
+		toSource(context) {
+			let { type, superType } = this.getMatchedSource(context);
+			if (superType) {
+				return `class ${type} extends ${superType}`;
+			}
+			return `class ${type}`;
+		}
+	}
+);
 
-//MOVE TO `objects`?
+
 // Properties clause: creates an object with one or more property values.
 //	`foo = 1, bar = 2`
 //TODO: would like to use `and` but that will barf on expressions...
@@ -59,22 +76,6 @@ parser.addSequence(
 	}
 );
 
-
-// Define class.
-parser.addStatement(
-	"define_type",
-	"define type {type} (?:as (a|an) {superType:type})?",
-	class define_type extends Rule.Statement {
-		toSource(context) {
-			let { type, superType } = this.getMatchedSource(context);
-			if (superType) {
-				return `class ${type} extends ${superType}`;
-			}
-			return `class ${type}`;
-
-		}
-	}
-);
 
 //TODO: constructor
 
