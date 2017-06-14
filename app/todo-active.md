@@ -1,3 +1,30 @@
+- Each file defines a new "parser"
+	- let parser = Parser.withContext("name");
+
+	-
+
+
+- Each parse file defines a "context"
+	- name
+	- priority (derived from load order)
+	- types
+	- rules
+	- vars (global and scope-local)
+	- imports (contexts we depend on)
+
+	- getRule(name)
+		=> looks at our own + parents for a big "alternative"
+		=> higher priority rules will generally win
+
+- Loading the above
+	- let parser = Parser.withContext("name");
+		- can re-define a context later (to add to base classes, etc)
+
+	- parser.import("context", "context2")
+	- parser.addRule() etc
+	- parser.addType() etc
+
+
 - Structures
 	- "type" structure
 		- name
