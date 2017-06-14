@@ -16,10 +16,78 @@ export default class Parser {
 	// Constructor.
 	constructor(properties) {
 		Object.assign(this, properties);
-
-		// Clone rules, starting with a completely empty map if not defined (no standard object keys)
-		this.rules = Object.create(this.rules || null);
 	}
+
+
+//
+//### Parsing
+//
+	// Parse `ruleName` rule at head of `text`.
+	// If you pass only one argument, we'll assume that's `text` and you want to match `statements`.
+	// Handles optional and repeating rules as well as eating whitespace.
+	// Returns result of parse.
+//TESTME
+	parse(ruleName, text) {
+		// If only one argument, assume that's the text and parse `statements`
+		if (arguments.length === 1) {
+			text = ruleName;
+			ruleName = "statements";
+		}
+
+		// Convert to tokens.
+		let tokens = this.tokenize(text);
+		// Bail if we didn't get any tokens back.
+//TODO: WARN?  ERROR?
+		if (tokens === undefined) return undefined;
+
+		// If we're not parsing `statements`, use only the first line and pop off indentation.
+		if (ruleName !== "statements") {
+			tokens = tokens[0];
+			// remove whitespace from the start of the line
+			if (tokens[0] instanceof Tokenizer.Whitespace) tokens = tokens.slice(1);
+		}
+
+		// Parse the rule or throw an exception if rule not found.
+		return this.parseRuleOrDie(ruleName, tokens, 0, undefined, "parser.parse()");
+	}
+
+
+
+	// Parse something:
+	//	- if one string argument, does a `compileStatements()`
+	// Returns the `toString()` or throws.
+//TESTME
+	compile(ruleName, text) {
+		// If only one argument, assume that's the text and parse `statements`
+		if (arguments.length === 1) {
+			text = ruleName;
+			ruleName = "statements";
+		}
+		let result = this.parse(ruleName, text);
+		if (!result) throw new SyntaxError(`parser.parse('${ruleName}', '${string}'): can't parse this`);
+		return result.toSource(this);
+	}
+
+
+	// Parse a named rule (defined in this parser or in any of our `imports`), returning the "best" match.
+	// Throws if NOBODY implements `ruleName`.
+	//
+	// NOTE: currently "best" is defined as the first rule in our imports which matches...
+	parseRuleOrDie(ruleName, tokens, startIndex, stack, callingContext = "parseRuleOrDie") {
+		let rule = this.getRuleOrDie(ruleName, callingContext);
+		return rule.parse(this, tokens, startIndex, stack);
+	}
+
+	// Test whether a named rule MIGHT be found in head of stream.
+	// Returns:
+	//	- `true` if the rule MIGHT be matched.
+	//	- `false` if there is no way the rule can be matched.
+	//	- `undefined` if not determinstic (eg: no way to tell quickly).
+	testRule(ruleName, tokens, startIndex, callingContext= "testRule") {
+		let rule = this.getRuleOrDie(ruleName, callingContext);
+		return rule.test(this, tokens, startIndex);
+	}
+
 
 //
 //### Tokenizing
@@ -50,80 +118,40 @@ export default class Parser {
 
 
 //
-//### Parsing
+// ### 	Imports
+//		Parsers depend on other parsers for their `rules`.
+//		Imports are lazy-bound (and we assume the build file will include all necessary imports).
 //
-	// Parse `name`d rule at head of `text`.
-	// If you pass only one argument, we'll assume that's `text` and you want to match `statements`.
-	// Handles optional and repeating rules as well as eating whitespace.
-	// Returns result of parse.
-//TESTME
-	parse(name, text) {
-		// If only one argument, assume that's the text and parse `statements`
-		if (arguments.length === 1) {
-			text = name;
-			name = "statements";
-		}
 
-		// Convert to tokens.
-		let tokens = this.tokenize(text);
-		// Bail if we didn't get any tokens back.
-//TODO: WARN?  ERROR?
-		if (tokens === undefined) return undefined;
+	// Add one or more named imports to this parser.
+	// Imports increase in priority the later they are in the list.
+	import(...imports) {
+		// REVERSE the list of imports, so the most general one is LAST
+		// Thus more specific imports will be EARLIER in the `imports` list.
 
-		// If we're not parsing `statements`, use only the first line and pop off indentation.
-		if (name !== "statements") {
-			tokens = tokens[0];
-			// remove whitespace from the start of the line
-			if (tokens[0] instanceof Tokenizer.Whitespace) tokens = tokens.slice(1);
-		}
-
-		// Get rule to parse.
-		let rule = this.getRuleOrDie(name, "parser.parse()");
-
-		// parse and return the results
-		return rule.parse(this, tokens, 0);
+		// Create new array of imports and add import names passed in.
+		this._imports = (this._imports || []).concat(imports.reverse());
+		// clear memoize variable for `imports`.
+		delete this.__imports;
 	}
 
-	// Parse something:
-	//	- if one string argument, does a `compileStatements()`
-	// Returns the `toString()` or throws.
-//TESTME
-	compile(name, text) {
-		// If only one argument, assume that's the text and parse `statements`
-		if (arguments.length === 1) {
-			text = name;
-			name = "statements";
+	// Getter to return list of our `imports` as `Parser` objects, INCLUDING `this` parser itself!
+	// Most specific import (eg: ourself) is first in the list.
+	// Throws if an import can't be found.
+	get imports() {
+		if (!this.__imports) {
+			var imports = (this._imports ? this._imports.map(Parser.getContextOrDie) : []);
+			this.__imports = [this].concat(imports);
 		}
-		let result = this.parse(name, text);
-		if (!result) throw new SyntaxError(`parser.parse('${name}', '${string}'): can't parse this`);
-		return result.toSource(this);
-	}
-
-
-
-	// Parse a named rule (defined in this parser or in any of our `imports`), returning the "best" match.
-	// Throws if NOBODY implements `ruleName`.
-	//
-	// NOTE: currently "best" is defined as the first rule in our imports which matches...
-	parseRuleOrDie(ruleName, tokens, startIndex, stack, callingContext = "parseRuleOrDie") {
-		let rule = this.getRuleOrDie(ruleName, callingContext);
-		return rule.parse(this, tokens, startIndex, stack);
-	}
-
-	// Test whether a named rule MIGHT be found in head of stream.
-	// Returns:
-	//	- `true` if the rule MIGHT be matched.
-	//	- `false` if there is no way the rule can be matched.
-	//	- `undefined` if not determinstic (eg: no way to tell quickly).
-	testRule(ruleName, tokens, startIndex, callingContext= "testRule") {
-		let rule = this.getRuleOrDie(ruleName, callingContext);
-		return rule.test(this, tokens, startIndex);
+		return this.__imports;
 	}
 
 
 //
-//	Rules
+// ### Rules
 //
+	// Start with an empty map of rules.
+	rules = {};
 
 	getRule(name) {
 		return this.rules[name];
@@ -135,41 +163,47 @@ export default class Parser {
 		return rule;
 	}
 
-	// Add a rule to our list of rules!
+	// Add a `rule` to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
-	addRule(name, rule) {
+	addRule(ruleName, rule) {
 		// If passed a function, create an instance for the actual rule.
 		// This is commonly done so JS will give us meaningful class names in debug output.
 		if (typeof rule === "function") {
 			rule = new rule();
 		}
 
-		if (Array.isArray(name)) {
-			name.forEach(name => this.addRule(name, rule) );
+		// If we got an array of `ruleNames`, recursively add under each name with the same `rule`.
+		if (Array.isArray(ruleName)) {
+			ruleName.forEach(ruleName => this.addRule(ruleName, rule) );
 			return rule;
 		}
 
-		// don't override ruleName
-		if (!rule.ruleName) rule.ruleName = name;
+		// Set `ruleName` if it hasn't been explicitly set.
+		if (!rule.ruleName) rule.ruleName = ruleName;
 
-		let existing = this.rules[name];
+		// If a rule of this name already exists
+		const existing = this.rules[ruleName];
 		if (existing) {
+			// Convert to an `Alternatives` if not one already.
 			if (!(existing instanceof Rule.Alternatives)) {
-				if (Parser.debug) console.log(`Converting rule '${name}' to alternatives`);
-				this.rules[name] = new Rule.Alternatives({ ruleName: name, rules: [existing] });
+				if (Parser.debug) console.log(`Converting rule '${ruleName}' to alternatives`);
+				this.rules[ruleName] = new Rule.Alternatives({ ruleName, rules: [existing] });
 				// copy argument name over (???)
-				if (existing.argument) this.rules[name].argument = existing.argument;
+				if (existing.argument) this.rules[ruleName].argument = existing.argument;
 			}
-			if (Parser.debug) console.log(`Adding rule '${rule.ruleName}' to '${name}': `, rule);
-			this.rules[name].addRule(rule);
+			if (Parser.debug) console.log(`Adding rule '${rule.ruleName}' to '${ruleName}': `, rule);
+			// Add rule to the alternatives.
+			this.rules[ruleName].addRule(rule);
 		}
+		// Otherwise just remember the rule.
 		else {
-			this.rules[name] = rule;
+			this.rules[ruleName] = rule;
 		}
 
 
 		// make a note if we're adding a left-recursive rule
-		if (this.ruleIsLeftRecursive(name, rule)) {
+//TODO: this doesn't fly if adding under multiple names...  :-(
+		if (Parser.ruleIsLeftRecursive(ruleName, rule)) {
 //console.info("marking ", rule, " as left recursive!");
 			rule.leftRecursive = true;
 		}
@@ -177,23 +211,46 @@ export default class Parser {
 		return rule;
 	}
 
-	// Is the specified rule left-recursive?
-	ruleIsLeftRecursive(name, rule) {
-		if (!(rule instanceof Rule.Sequence) || !rule.rules) return false;
-//console.log(name, rule);
-		for (let subrule of rule.rules) {
-			// ignore optional rules
-			if (subrule.optional) continue;
-			if (subrule instanceof Rule.Subrule && subrule.rule === name) return true;
-			return false;
+
+//
+// ### Parser registry.
+//
+	static REGISTRY = {};
+
+	// Get a parser for a given named "context".
+	// Will re-use existing context, or create a new one if parser context is not defined.
+	static forContext(context) {
+		if (!Parser.REGISTRY[context]) {
+			Parser.REGISTRY[context] = new Parser({ context });
 		}
-		return false;
+		return Parser.REGISTRY[context];
 	}
+
+	// Return a parser for a named "context" or throw an exception if not found.
+	static getContextOrDie(context) {
+		if (Parser.REGISTRY[context]) return Parser.REGISTRY[context];
+		throw new TypeError(`Parser.getContextOrDie(): context '${context}' not found.`);
+	}
+
 
 
 //
 // ## Utility methods
 //
+
+	// Is the specified rule left-recursive?
+	static ruleIsLeftRecursive(ruleName, rule) {
+		if (!(rule instanceof Rule.Sequence) || !rule.rules) return false;
+//console.log(ruleName, rule);
+		let index = 0, subrule = undefined;
+		while (subrule = rule.rules[index++]) {
+			// ignore optional rules
+			if (subrule.optional) continue;
+			if (subrule instanceof Rule.Subrule && subrule.rule === ruleName) return true;
+			return false;
+		}
+		return false;
+	}
 
 	// Find the matching instance of possibly nested `endToken` to balance `startToken`
 	//	in array of `tokens` (strings).
