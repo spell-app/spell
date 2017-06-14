@@ -2,7 +2,7 @@
 //	# Rules for defining classes (known as `types`)
 //
 
-// TODO: mixins / traits
+// TODO: mixins / traits / composed classes / annotations
 
 import Parser from "../Parser";
 import Rule from "../RuleSyntax";
@@ -38,7 +38,6 @@ parser.addStatement(
 //	`foo = 1, bar = 2`
 //TODO: would like to use `and` but that will barf on expressions...
 //TODO: how to do properties on multiple lines?
-//TESTME w/o `= expression`
 parser.addList(
 	"object_literal_properties",
 	"[({key:identifier}(?:= {value:expression})?) ,]",

@@ -79,7 +79,7 @@ export default class Parser {
 		let imports = this.imports, index = 0, parser;
 		let results = [];
 		while (parser = imports[index++]) {
-			let rule = parser.rules[ruleName];
+			let rule = parser._rules[ruleName];
 			if (!rule) continue;
 			const result = rule.parse(this, tokens, startIndex, stack);
 			if (result) results.push(result);
@@ -109,7 +109,7 @@ export default class Parser {
 	testRule(ruleName, tokens, startIndex) {
 		let imports = this.imports, index = 0, parser;
 		while (parser = imports[index++]) {
-			let rule = parser.rules[ruleName];
+			let rule = parser._rules[ruleName];
 			if (!rule) continue;
 			let result = rule.test(this, tokens, startIndex);
 			if (result !== undefined) return result;
@@ -179,7 +179,7 @@ export default class Parser {
 // ### Rules
 //
 	// Start with an empty map of rules.
-	rules = {};
+	_rules = {};
 
 	// Add a `rule` to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
@@ -200,22 +200,22 @@ export default class Parser {
 		if (!rule.ruleName) rule.ruleName = ruleName;
 
 		// If a rule of this name already exists
-		const existing = this.rules[ruleName];
+		const existing = this._rules[ruleName];
 		if (existing) {
 			// Convert to an `Alternatives` if not one already.
 			if (!(existing instanceof Rule.Alternatives)) {
 				if (Parser.DEBUG) console.log(`Converting rule '${ruleName}' to alternatives`);
-				this.rules[ruleName] = new Rule.Alternatives({ ruleName, rules: [existing] });
+				this._rules[ruleName] = new Rule.Alternatives({ ruleName, rules: [existing] });
 				// copy argument name over (???)
-				if (existing.argument) this.rules[ruleName].argument = existing.argument;
+				if (existing.argument) this._rules[ruleName].argument = existing.argument;
 			}
 			if (Parser.DEBUG) console.log(`Adding rule '${rule.ruleName}' to '${ruleName}': `, rule);
 			// Add rule to the alternatives.
-			this.rules[ruleName].addRule(rule);
+			this._rules[ruleName].addRule(rule);
 		}
 		// Otherwise just remember the rule.
 		else {
-			this.rules[ruleName] = rule;
+			this._rules[ruleName] = rule;
 		}
 
 

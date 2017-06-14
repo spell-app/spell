@@ -1,11 +1,11 @@
-Structure parsing
+Scope parsing
 - parser.addScope("define_type", "define type...")
-	- if we parse initial line, recurses to balanced indent / EOF
+	- if we parse initial line, matches to balanced indent / EOF
 	- can have custom rules (with higher precedence than default) for matching internal lines
 	- added as normal `statement` as well
 
 	// Add structural rule
-	const define_type = addNestedStructure(
+	let define_type = addNestedStructure(
 		"define_type",
 		"define type {type} (?:as (a|an) {superType:type})?",
 		class define_type extends Rule.Statement {...}
@@ -15,13 +15,16 @@ Structure parsing
 	// TODO: statements only???
 	define_type.addStatement(...)
 
-- maybe just do the above with
-	{expressionOrNestedBlock} ???
-
 - to add methods / globals / etc to the parse stream:
-	- need to parse types, methods, globals, etc up front
+	- need to parse types, methods, locals, globals, etc up front
 		BEFORE parsing method contents, variable declaration values, etc
-	-
+
+	- BUT: how do we know that this rule is the one we're matching???
+
+	- onParsed() method to update scope???
+
+- CHEAT: just do the above with
+	{expressionOrNestedBlock} ???
 
 
 - Structures
