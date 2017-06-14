@@ -503,7 +503,7 @@ Rule.Statements = class statements extends Rule {
 
 	// `statements` is an array of arrays of tokens.
 //TODO: non-standard, other `parse()` routines will take a single line???
-	parse(parser, statements, lineNumber = 0, stack = []) {
+	parse(parser, statements, lineNumber = 0, stack) {
 		console.time("Rule.Statements.parse()");
 
 		// Cut off the beginning if not on the first line...
@@ -577,13 +577,14 @@ Rule.Statements = class statements extends Rule {
 								`\n\t"${statement}"`,
 								`\nunparsed:`,
 								`\n\t"${unparsed}"`);
-				results.push(parser.rules.parse_error.clone({
+				let error = new Rule.ParseError({
 					error: "Can't parse entire statement",
 					message: `CANT PARSE ENTIRE STATEMENT\n`
 						   + `PARSED    : ${result.matched}\n`
 						   + `CANT PARSE: ${unparsed}`
 
-				}));
+				});
+				results.push(error);
 				return;
 			}
 
@@ -596,7 +597,8 @@ Rule.Statements = class statements extends Rule {
 		// Add closing curly braces as necessary
 //TODO: move ABOVE any blank lines
 		while (lastIndent > 0) {
-			results.push(parser.rules.close_block.clone({ indent: this.getTabs(lastIndent - 1) }));
+			let closeBlock = new Rule.CloseBlock({ indent: this.getTabs(lastIndent - 1) });
+			results.push(closeBlock);
 			--lastIndent;
 		}
 		console.timeEnd("Rule.Statements.parse()");
