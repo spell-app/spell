@@ -37,9 +37,9 @@ export default class Rule {
 
 	// Test to see if bits of our rule are found ANYWHERE in the tokens.
 	// Returns:
-	//	- `undefined` if not determinstic (but all patterns are deterministic)
-	//	- regex match if found,
-	//	- `false` if not found
+	//	- `true` if the rule MIGHT be matched.
+	//	- `false` if there is no way the rule can be matched.
+	//	- `undefined` if not determinstic (eg: no way to tell quickly).
 	test(parser, tokens, startIndex = 0) {
 		return undefined;
 	}
@@ -173,10 +173,6 @@ Rule.Pattern = class Pattern extends Rule {
 	}
 
 	// Test to see if any of our pattern is found ANYWHERE in the tokens.
-	// Returns:
-	//	- `undefined` if not determinstic (but all patterns are deterministic)
-	//	- regex match if found,
-	//	- `false` if not found
 	test(parser, tokens, startIndex = 0) {
 		return tokens.slice(startIndex).some(token => typeof token === "string" && token.match(this.pattern));
 	}
@@ -200,10 +196,6 @@ Rule.Subrule = class Subrule extends Rule {
 	}
 
 	// Test to see if any of our alternatives are found ANYWHERE in the tokens.
-	// Returns:
-	//	- regex match if found,
-	//	- `false` if not found or
-	//	- `undefined` if not determinstic.
 	test(parser, tokens, startIndex = 0) {
 		let rule = parser.getRuleOrDie(this.rule, "subrule.test()");
 		return rule.test(parser, tokens, startIndex);
@@ -232,7 +224,8 @@ Rule.Sequence = class Sequence extends Rule {
 
 		let matched = [];
 		let nextStart = startIndex;
-		for (let rule of this.rules) {
+		let index = 0, rule = undefined;
+		while (rule = this.rules[index++]) {
 			let match = rule.parse(parser, tokens, nextStart, stack);
 			if (!match && !rule.optional) return undefined;
 			if (match) {
@@ -265,7 +258,8 @@ Rule.Sequence = class Sequence extends Rule {
 	}
 
 	addResults(results, matched) {
-		for (let match of matched) {
+		let index = 0, match = undefined;
+		while (match = matched[index++]) {
 			if (match.promote) {
 				return this.addResults(results, match.matched);
 			}
@@ -328,11 +322,9 @@ Rule.Alternatives = class Alternatives extends Rule {
 	// Test to see if any of our alternatives are found ANYWHERE in the tokens.
 	// NOTE: this should only be called if we're specified as a `testRule`
 	//		 and then only if all of our rules are deterministic.
-	// Returns:
-	//	- regex match if found,
-	//	- `false` if not found or
 	test(parser, tokens, startIndex = 0) {
-		for (let rule of this.rules) {
+		let index = 0, rule = undefined;
+		while (rule = this.rules[index++]) {
 			if (rule.test(parser, tokens, startIndex)) return true;
 		}
 		return false;
@@ -341,7 +333,8 @@ Rule.Alternatives = class Alternatives extends Rule {
 	// Find all rules which match and delegate to `getBestMatch()` to pick the best one.
 	parse(parser, tokens, startIndex = 0,  stack = []) {
 		let matches = [];
-		for (let rule of this.rules) {
+		let index = 0, rule = undefined;
+		while (rule = this.rules[index++]) {
 			let match = rule.parse(parser, tokens, startIndex,  stack);
 			if (match) matches.push(match);
 		}

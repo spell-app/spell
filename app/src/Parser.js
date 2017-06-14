@@ -1,13 +1,7 @@
-// Spell "English" parser strawman
+// Spell "parser" class.
+//
 
-// TODO:	`test` function for quick no-good hit on `{a} blah blah {b}`?
-// TODO:	this doesn't work:   `{expression} is {expression}`
-// TODO:	break `file` into lines and process each (incl. substr/match not going beyond the end)
-// TODO:	nesting -- is this just indent = "add block scope"
-// TODO:	promotion pattern for gather arguments (eg: literal-list) ???
-// TODO:	What does syntax tree look like?  How do we extract meaning out of the nest?
-// TODO:	Pass `context` to toSource(), add property descriptors to `class`, variables and code to `method`, `global` stuff etc
-
+// TODO: dependency-inject tokenizer?
 import Tokenizer from "./Tokenizer.js";
 import Rule from "./Rule.js";
 
@@ -19,6 +13,7 @@ export default class Parser {
 	// Set to `true` to output debug info while adding rules
 	static DEBUG = false;
 
+	// Constructor.
 	constructor(properties) {
 		Object.assign(this, properties);
 
