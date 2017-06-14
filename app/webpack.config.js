@@ -10,7 +10,7 @@ var paths = {
 module.exports = {
 	entry: {
 		"app": "./src/app/index.jsx",
-		"vendor": ["react", "react-dom", "semantic-ui-react", ]
+		"vendor": ["react", "react-dom", "semantic-ui-react", "mobx", "mobx-react"]
 	},
 
 	output: {
