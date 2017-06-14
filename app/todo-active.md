@@ -1,26 +1,3 @@
-
-
-- Each parse file defines a "context"
-	- name
-	- priority (derived from load order)
-	- types
-	- rules
-	- vars (global and scope-local)
-	- imports (contexts we depend on)
-
-	- getRule(name)
-		=> looks at our own + parents for a big "alternative"
-		=> higher priority rules will generally win
-
-- Loading the above
-	- let parser = Parser.withContext("name");
-		- can re-define a context later (to add to base classes, etc)
-
-	- parser.import("context", "context2")
-	- parser.addRule() etc
-	- parser.addType() etc
-
-
 - Structures
 	- "type" structure
 		- name
@@ -182,7 +159,7 @@
 
 -> push context:  { parser, stack, supers, method } into parsing
 	- output doesn't require context...
-	- "local class" winds
+	- "local class" wins
 		- each class gets its own parser (or just rules?)
 		- match {expression} in each super parser
 		- level of parser in stack = specificity if 2 matches?
@@ -190,12 +167,6 @@
 
 - subrule needs to take params
 	- eg: "non-greedy"
-
-- getMatchedSource()
-	=> getMatched(context)
-
-
-
 
 
 - parsing feedback

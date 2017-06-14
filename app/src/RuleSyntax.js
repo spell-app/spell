@@ -303,7 +303,7 @@ Object.defineProperties(Parser.prototype, {
 		try {
 			let rule = Rule.parseRuleSyntax(ruleSyntax, constructor);
 			// Reflect the rule back out to make sure it looks (more or less) the same
-			if (Parser.debug) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
+			if (Parser.DEBUG) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
 
 //console.info(name, constructor, rule);
 			if (properties) Object.assign(rule, properties);

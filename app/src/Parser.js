@@ -99,7 +99,6 @@ export default class Parser {
 			if (next.nextStart > largest.nextStart) return next;
 			return largest;
 		}, results[0]);
-
 	}
 
 	// Test whether a named rule MIGHT be found in head of stream.
@@ -205,12 +204,12 @@ export default class Parser {
 		if (existing) {
 			// Convert to an `Alternatives` if not one already.
 			if (!(existing instanceof Rule.Alternatives)) {
-				if (Parser.debug) console.log(`Converting rule '${ruleName}' to alternatives`);
+				if (Parser.DEBUG) console.log(`Converting rule '${ruleName}' to alternatives`);
 				this.rules[ruleName] = new Rule.Alternatives({ ruleName, rules: [existing] });
 				// copy argument name over (???)
 				if (existing.argument) this.rules[ruleName].argument = existing.argument;
 			}
-			if (Parser.debug) console.log(`Adding rule '${rule.ruleName}' to '${ruleName}': `, rule);
+			if (Parser.DEBUG) console.log(`Adding rule '${rule.ruleName}' to '${ruleName}': `, rule);
 			// Add rule to the alternatives.
 			this.rules[ruleName].addRule(rule);
 		}
