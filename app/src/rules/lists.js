@@ -449,7 +449,7 @@ parser.addStatement(
 				return `for (let ${positionVar} = 1; ${positionVar} <= ${list}.length; ${positionVar}++) {\n`
 					+  `	let ${itemVar} = ${list}[${positionVar}-1]`;
 			}
-			return `for (let ${itemVar} in ${list})`;
+			return `for (let ${itemVar} of ${list})`;
 		}
 	}
 );
