@@ -187,18 +187,16 @@ Rule.Pattern = class Pattern extends Rule {
 // `rule.rule` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
 	parse(parser, tokens, startIndex = 0,  stack = []) {
-		let rule = parser.getRuleOrDie(this.rule, "rule");
-		let match = rule.parse(parser, tokens, startIndex,  stack);
-		if (!match) return undefined;
+		let result = parser.parseRuleOrDie(this.rule, tokens, startIndex, stack, `parse subrule '${this.rule}'`);
+		if (!result) return undefined;
 
-		if (this.argument) match.argument = this.argument;
-		return match;
+		if (this.argument) result.argument = this.argument;
+		return result;
 	}
 
 	// Test to see if any of our alternatives are found ANYWHERE in the tokens.
 	test(parser, tokens, startIndex = 0) {
-		let rule = parser.getRuleOrDie(this.rule, "subrule.test()");
-		return rule.test(parser, tokens, startIndex);
+		return parser.testRule(this.rule, tokens, startIndex);
 	}
 
 	toString() {
@@ -212,8 +210,8 @@ Rule.Sequence = class Sequence extends Rule {
 	parse(parser, tokens, startIndex = 0,  stack = []) {
 		// If we have a `testRule` defined
 		if (this.testRule) {
-			let rule = parser.getRuleOrDie(this.testRule, "testRule");
-			if (rule.test(parser, tokens, startIndex) === false) return undefined;
+			// Forget it if there is NO WAY the rule could be matched.
+			if (parser.testRule(this.testRule, tokens, startIndex) === false) return undefined;
 		}
 
 		if (this.leftRecursive) {
@@ -547,7 +545,8 @@ Rule.Statements = class statements extends Rule {
 			let last = tokens[lastItem];
 			let comment;
 			if (last instanceof Tokenizer.Comment) {
-				comment = parser.rules.comment.parse(parser, tokens, lastItem);
+//TODO...
+				comment = parser.parseRuleOrDie("comment", tokens, lastItem);
 				if (comment) {
 					// Add comment BEFORE corresponding statement
 					results.push(comment);
@@ -557,7 +556,8 @@ Rule.Statements = class statements extends Rule {
 				}
 			}
 
-			let result = parser.rules.statement.parse(parser, tokens, 0);
+//TODO...
+			let result = parser.parseRuleOrDie("statement", tokens, 0);
 			// complain if no result and no comment
 			if (!result && !comment) {
 				let statement = tokens.join(" ");

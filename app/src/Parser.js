@@ -100,6 +100,27 @@ export default class Parser {
 	}
 
 
+
+	// Parse a named rule (defined in this parser or in any of our `imports`), returning the "best" match.
+	// Throws if NOBODY implements `ruleName`.
+	//
+	// NOTE: currently "best" is defined as the first rule in our imports which matches...
+	parseRuleOrDie(ruleName, tokens, startIndex, stack, callingContext = "parseRuleOrDie") {
+		let rule = this.getRuleOrDie(ruleName, callingContext);
+		return rule.parse(this, tokens, startIndex, stack);
+	}
+
+	// Test whether a named rule MIGHT be found in head of stream.
+	// Returns:
+	//	- `true` if the rule MIGHT be matched.
+	//	- `false` if there is no way the rule can be matched.
+	//	- `undefined` if not determinstic (eg: no way to tell quickly).
+	testRule(ruleName, tokens, startIndex, callingContext= "testRule") {
+		let rule = this.getRuleOrDie(ruleName, callingContext);
+		return rule.test(this, tokens, startIndex);
+	}
+
+
 //
 //	Rules
 //
