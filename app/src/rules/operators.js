@@ -2,12 +2,16 @@
 //	# Rules for infix and prefix operators.
 //
 
+import Parser from "../Parser";
 import Rule from "../RuleSyntax";
-import parser from "./_parser";
-import "./core";
 
-// re-export parser for testing.
+// Create "operators" parser context.
+const parser = Parser.forContext("operators");
 export default parser;
+
+// Import core rules.
+import "./core";
+parser.import("core");
 
 //## Infix operators:   `{lhs} <operator> {rhs}`, eg: `a is 1`
 // NOTE: `operator.toJS` MUST return a function which transforms two arguments (`lhs` and `rhs`) into output.

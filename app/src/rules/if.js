@@ -1,13 +1,17 @@
 //
-//	# Rules for creating variables, property access, etc
+//	# Rules for if statements.
 //
 
+import Parser from "../Parser";
 import Rule from "../Rule";
-import parser from "./_parser";
-import "./core";
 
-// re-export parser for testing.
+// Create "if" parser context.
+const parser = Parser.forContext("if");
 export default parser;
+
+// Import core rules.
+import "./core";
+parser.import("core");
 
 //TESTME
 parser.addStatement(

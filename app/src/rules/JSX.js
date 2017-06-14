@@ -1,13 +1,13 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
+import Parser from "../Parser";
 import Tokenizer from "../Tokenizer";
 import Rule from "../RuleSyntax";
-import parser from "./_parser";
 
-// re-export parser for testing.
+// Create "JSX" parser context.
+const parser = Parser.forContext("JSX");
 export default parser;
-
 
 // JSX expression.
 Rule.JSX = class jsxElement extends Rule.Pattern {
@@ -104,9 +104,6 @@ console.info(jsxExpression, tokens);
 		return this.jsxElementToSource(context, this.matched);
 	}
 };
+
+// Define jsx block as an `expression` OR a `statement`.
 parser.addRule(["jsx", "expression", "statement"], Rule.JSX);
-
-
-
-// TODO
-//parser.addRule("jsx_expression", "expression", "statement", Rule.JSXExpression);

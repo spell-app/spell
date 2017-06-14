@@ -1,7 +1,3 @@
-- Each file defines a new "parser"
-	- let parser = Parser.withContext("name");
-
-	-
 
 
 - Each parse file defines a "context"

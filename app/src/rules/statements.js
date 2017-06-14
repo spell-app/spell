@@ -2,12 +2,16 @@
 //	# Rules for creating variables, property access, etc
 //
 
+import Parser from "../Parser";
 import Rule from "../RuleSyntax";
-import parser from "./_parser";
-import "./core";
 
-// re-export parser for testing.
+// Create "statements" parser context.
+const parser = Parser.forContext("statements");
 export default parser;
+
+// Import core rules.
+import "./core";
+parser.import("core");
 
 
 //

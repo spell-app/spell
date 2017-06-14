@@ -3,14 +3,59 @@
 //
 // NOTE: many of the below are created as custom Pattern subclasses for debugging.
 //
+import Parser from "../Parser";
 import Rule from "../RuleSyntax";
 import Tokenizer from "../Tokenizer";
-import parser from "./_parser";
 
-// re-export parser for testing.
+// Create `core` parser context.
+const parser = Parser.forContext("core");
 export default parser;
 
 
+//
+// ### Install standard rules
+//
+
+// Block of `statements` with indentation for nesting.
+parser.addRule("statements", Rule.Statements);
+
+
+
+
+
+// Blank line representation in parser output.
+Rule.BlankLine = class blank_line extends Rule {
+	toSource(context) {
+		return "\n";
+	}
+}
+
+// Open block representation in parser output.
+Rule.OpenBlock = class open_block extends Rule {
+	toSource(context) {
+		return "{";
+	}
+}
+
+
+// Close block representation in parser output.
+Rule.CloseBlock = class close_block extends Rule {
+	toSource(context) {
+		return "}";
+	}
+}
+
+
+// Parser error representation in parser output.
+Rule.ParseError = class parse_error extends Rule {
+	toSource(context) {
+		let message = this.message.split("\n").join("\n// ");
+		return `// ERROR: ${message}`;
+	}
+}
+
+
+// Comment rule -- matches tokens of type `Tokenizer.Comment`.
 Rule.Comment = class comment extends Rule {
 	// Comments are specially nodes in our token stream.
 	parse(parser, tokens, startIndex = 0, stack) {
@@ -43,6 +88,7 @@ parser.addRule("word", Rule.Word);
 
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
+// NOTE: We blacklist a lot of words as identifiers.
 Rule.Identifier = class identifier extends Rule.Pattern {
 	// Convert "-" to "_" in source output.
 	toSource(context) {
@@ -50,7 +96,7 @@ Rule.Identifier = class identifier extends Rule.Pattern {
 	}
 };
 Rule.Identifier.prototype.pattern = /^[a-z][\w\-]*$/;
-parser.addRule(["identifier", "expression"], Rule.Identifier);
+let identifier = parser.addRule(["identifier", "expression"], Rule.Identifier);
 
 // Add English prepositions to identifier blacklist.
 //
@@ -59,7 +105,7 @@ parser.addRule(["identifier", "expression"], Rule.Identifier);
 //	express spatial or temporal relations  (in, under, towards, before)
 //	or mark various semantic roles (of, for).
 // TESTME
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"about", "above", "after", "and", "as", "at",
 	"before", "behind", "below", "beneath", "beside", "between", "beyond", "by",
 	"defined", "down", "during",
@@ -79,7 +125,7 @@ parser.rules.identifier.addToBlacklist(
 );
 
 // Add common english verbs to identifier blacklist.
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"are",
 	"do", "does",
 	"contains",
@@ -90,7 +136,7 @@ parser.rules.identifier.addToBlacklist(
 );
 
 // Add special control keywords to identifier blacklist.
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"else",
 	"if",
 	"otherwise",
@@ -118,8 +164,8 @@ Rule.Type = class type extends Rule.Pattern {
 	}
 };
 Rule.Type.prototype.pattern = /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/;
-parser.addRule(["type", "expression"], Rule.Type);
-parser.rules.type.addToBlacklist("I");
+let type = parser.addRule(["type", "expression"], Rule.Type);
+type.addToBlacklist("I");
 
 
 
@@ -164,7 +210,7 @@ parser.addRule(["number", "expression"], Rule.Number);
 
 // Add number words to identifier blacklist.
 // TESTME
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"one", "two", "three", "four", "five",
 	"six", "seven", "eight", "nine", "ten"
 );
@@ -212,7 +258,7 @@ parser.addRule(["boolean", "expression"], Rule.Boolean);
 
 // Add boolean tokens to identifier blacklist.
 // TESTME
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"true", "false",
 	"yes", "no",
 	"ok", "cancel",
@@ -250,47 +296,3 @@ parser.addExpression(
 		}
 	}
 )
-
-
-
-//
-//	"Special" rules for `Statements`/block processing.
-// TODO: figure out some way to make this more in line with the rest of our rules
-//
-
-parser.addRule("statements", Rule.Statements);
-
-// Blank line representation in statements output
-Rule.BlankLine = class blank_line extends Rule {
-	toSource(context) {
-		return "\n";
-	}
-}
-parser.addRule("blank_line", Rule.BlankLine);
-
-// Open block representation in statements output
-Rule.OpenBlock = class open_block extends Rule {
-	toSource(context) {
-		return "{";
-	}
-}
-parser.addRule("open_block", Rule.OpenBlock);
-
-
-// Close block representation in statements output
-Rule.CloseBlock = class close_block extends Rule {
-	toSource(context) {
-		return "}";
-	}
-}
-parser.addRule("close_block", Rule.CloseBlock);
-
-
-// Parser error representation statements output
-Rule.ParseError = class parse_error extends Rule {
-	toSource(context) {
-		let message = this.message.split("\n").join("\n// ");
-		return `// ERROR: ${message}`;
-	}
-}
-parser.addRule("parse_error", Rule.ParseError);

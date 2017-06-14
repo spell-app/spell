@@ -2,7 +2,7 @@ export Tokenizer from "./Tokenizer.js";
 export Parser from "./Parser.js";
 export Rule from "./Rule.js";
 import "./RuleSyntax";
-import parser from "./rules/index.js";
+import parser from "./rules/all.js";
 
 // Stick on window for reflection and ad-hoc testing.
 if (typeof window !== "undefined") {

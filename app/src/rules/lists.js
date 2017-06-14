@@ -5,11 +5,19 @@
 // TODO: confirm identifiers are plural in some of the below?
 // TODO: `list.clone()` to return new list of same type.
 
-import { isPlural, singularize } from "../utils/string";
+import Parser from "../Parser";
 import Rule from "../Rule";
-import parser from "./_parser";
-// re-export parser for testing.
+
+import { isPlural, singularize } from "../utils/string";
+
+// Create "lists" parser context.
+const parser = Parser.forContext("lists");
 export default parser;
+
+// Import core rules.
+import "./core";
+parser.import("core");
+
 
 // WORKING FROM OTHER RULES (testme)
 //	`the length of <list>`

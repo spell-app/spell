@@ -1,6 +1,12 @@
-import Rule from "../RuleSyntax";
-import "./if.js";
-import parser from "./statements.js";
+import Parser from "../Parser";
+
+import "./core";
+import "./if";
+import "./statements";
+
+let parser = new Parser();
+parser.import("core", "if", "statements");
+
 
 test("parser is defined", () => {
 	expect(parser).toBeDefined();

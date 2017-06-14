@@ -18,7 +18,6 @@ export default class Parser {
 		Object.assign(this, properties);
 	}
 
-
 //
 //### Parsing
 //
@@ -70,6 +69,7 @@ export default class Parser {
 
 
 	// Parse a named rule (defined in this parser or in any of our `imports`), returning the "best" match.
+	// Returns `undefined` if no match.
 	// Throws if NOBODY implements `ruleName`.
 	//
 	// NOTE: currently "best" is defined as the first rule in our `imports` which matches...
@@ -77,15 +77,29 @@ export default class Parser {
 		// Keep track of whether rule was EVER found or not.
 		let ruleFound = false;
 		let imports = this.imports, index = 0, parser;
+		let results = [];
 		while (parser = imports[index++]) {
 			let rule = parser.rules[ruleName];
 			if (!rule) continue;
 			const result = rule.parse(this, tokens, startIndex, stack);
-			if (result) return result;
+			if (result) results.push(result);
 			ruleFound = true;
 		}
 		// If never found, throw.
 		if (!ruleFound) throw new SyntaxError(`${callingContext}: rule '${ruleName}' not found`);
+
+		// If no match, return undefined.
+		if (results.length === 0) return undefined;
+
+		// If exactly one match, return that.
+		if (results.length === 1) return results[0];
+
+		// Otherwise return the longest match.
+		return results.reduce(function (largest, next) {
+			if (next.nextStart > largest.nextStart) return next;
+			return largest;
+		}, results[0]);
+
 	}
 
 	// Test whether a named rule MIGHT be found in head of stream.
@@ -110,7 +124,7 @@ export default class Parser {
 
 	// Given an arbitarary `text` string, tokenize it and return as an array of arrays of lines.
 	// Returns `undefined` if result didn't produce any tokens.
-//TODO: __tokenize__ returns tokensEnd, complain if `tokensEnd !== end`.
+//TODO: `tokenize` returns tokensEnd, complain if `tokensEnd !== end`.
 //TESTME
 	tokenize(text, start, end) {
 		let tokens = Tokenizer.tokenize(text, start, end);

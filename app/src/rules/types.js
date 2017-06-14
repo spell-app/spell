@@ -1,14 +1,19 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
+import Parser from "../Parser";
+import Rule from "../RuleSyntax";
+
 import global from "../utils/global";
 import { pluralize } from "../utils/string";
-import Rule from "../RuleSyntax";
-import parser from "./_parser";
 
-// re-export parser for testing.
+// Create "types" parser context.
+const parser = Parser.forContext("types");
 export default parser;
 
+// Import core rules.
+import "./core";
+parser.import("core");
 
 
 //MOVE TO `objects`?
@@ -135,6 +140,7 @@ parser.addStatement(
 					throw new SyntaxError(`parse('declare_action'): one-word actions may not be types: ${word}`);
 				}
 
+console.warn("FIXME: parser.rules.identifier");
 // HACK: `global.parser` is a hack here for convenience in testing...
 				let parser = context ? context.parser : global.parser;
 				if (parser.rules.identifier.blacklist[word]) {
