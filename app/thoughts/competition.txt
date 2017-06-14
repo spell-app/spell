@@ -22,4 +22,7 @@
 	https://blog.gft.com/blog/2017/04/27/programming-next-big-thing/
 
 
--
+## EAV/Rule Databases
+- http://witheve.com
+- https://github.com/CoNarrative/precept
+- http://www.clara-rules.org/

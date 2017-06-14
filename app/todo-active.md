@@ -1,4 +1,85 @@
-TODO:
+- Structures
+	- "type" structure
+		- name
+		- collection name (plural)
+		- properties:
+			- { key : value | function }
+		- methods:
+			- { name:  signature, contents }
+
+	- "scope" structure
+		- types:
+			- { name: type }
+		- globals: map
+		- locals: map
+		- rules - local rules for this scope ???
+
+	- structures are immutable
+		- all maps are proto clones of parent maps
+		- how to "proto clone" arrays?
+
+		- parser.addRule("statement", ...)
+			=> new parser.rules map
+			=> new parser.rules.statement array ?
+
+- Structure parsing
+	- "structure" rules:
+		- global
+		- (define) type X
+		- to / on / action / get / set
+		- property definition
+		- assume all must start a line (ignoring indent)
+
+	- when parsing a file:
+		- parse structure rules
+		- add structure to file-specific "rules"
+			- "define type" adds new type
+			- "global" defines new global variable
+			- "to x" adds new "statement" to local rules
+		- then parse structure interiors
+
+	- a file can augment an existing type
+		- add properties
+		- add methods / actions
+
+
+	- Rule / parser changes:
+		- "context" (parser?) has several sets of rules, one for each file
+			- note: can use where rule is defined for precedence
+		-
+
+	- within a class/function
+		- pick up assignments and other variable definitions for use when parsing the function
+
+	- have separate structure rules, eg:
+		- if.pattern	= "if {expression} (then|:) {statement}?"
+		- if.structure	= "if {anything} (then|:) {statement}?"
+
+	- paren nesting?
+
+	- scan statements for structure
+		- leading whitespace (changes)
+		- if, loops, etc
+		- and/or inside expressions?
+		- define type
+		- to/action/get/set
+		- what else??
+
+	- for structure to really work, there will be some mandatory blacklists for mutli-identifiers
+		if, else, then, ":",
+
+	- break up parsing into small sub-tasks
+		- intuit structure
+		- add structure to context.scope
+		- parse bits
+
+	- parse() takes `context` including:
+		- parser
+		- scope
+			- app / type / method / block
+			- any loose code (eg: in type def) gets added to constructor
+
+
 
 - refactor
 	- `Text` => `QuotedText`?
@@ -10,7 +91,7 @@ TODO:
 
 	- tokenizer & bad input
 
-	- conver parser to `[tokens, start, end]` pattern ala tokenizer/
+	- conver parser to `[tokens, start, end]` pattern ala tokenizer?
 	- tokenizer to similar `rule` pattern as parser?
 
 	- how to go back to source for annotation w/stream/skip whitespace
@@ -110,35 +191,6 @@ TODO:
 	=> or is the tree just the matched array???
 
 
-- Structure parsing
-	- have separate structure rules, eg:
-		- if.pattern	= "if {expression} (then|:) {statement}?"
-		- if.structure	= "if {anything} (then|:) {statement}?"
-
-	- parse strings, then comments at this level too!!!
-	- paren nesting?
-
-	- scan statements for structure
-		- leading whitespace (changes)
-		- if, loops, etc
-		- and/or inside expressions?
-		- define type
-		- to/action/get/set
-		- what else??
-
-	- for structure to really work, there will be some mandatory blacklists for mutli-identifiers
-		if, else, then, ":",
-
-	- break up parsing into small sub-tasks
-		- intuit structure
-		- add structure to context.scope
-		- parse bits
-
-	- parse() takes `context` including:
-		- parser
-		- scope
-			- app / type / method / block
-			- any loose code (eg: in type def) gets added to constructor
 
 - Rule.Repeat
 	- some default toSource()?
@@ -146,7 +198,10 @@ TODO:
 
 
 - rule.number vs rule.integer => length rule should disambiguate...
-- `if can play card on pile`	=> want to translate to `pile.can_play_card(card)`
+- `if can play card on pile`	=> want to translate to:
+		- `pile.can_play_card(card)`
+		or
+		- `can_play_card_on_pile(card, pile)
 - `(a,b)` to create array rather than []
 - `is one of "diamonds", "hearts" or "spades"`
 - property X as list of Cards
@@ -180,8 +235,6 @@ TODO:
 
 
 SPEEDUP
-- tokenize & match words/symbols using === rather than regex
-	- make a `word trie`?
 - alternatives/etc to one regex?
 - parse structure first (statements only?)
 - break statement parsing up into interruptable chunks w/ promise

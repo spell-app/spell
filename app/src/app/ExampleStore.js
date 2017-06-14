@@ -21,7 +21,7 @@ export default class ExampleStore {
 		return this.examples[this.selected];
 	}
 
-	// Is ANYTHIND dirty?
+	// Is ANYTHING dirty?
 	@computed get dirty() {
 		return JSON.stringify(this._savedExamples) !== JSON.stringify(this.examples);
 	}

@@ -3,6 +3,8 @@
 ## Questions
 - OK to modify JS globals?
 	- eg: `array.size`
+	- Eric says "yes"
+	- as long as it's not inherently part of the parser...
 
 ## Goals
 - Driving toward an interactive "editor" for Spell/Oak
@@ -33,7 +35,7 @@
 - visualize parse match
 	- peer of `compiled JS` tab
 	- shows english => match
-	- this will expose needles complexities in parsing results nesting
+	- this will expose needless complexities in parse result nesting
 
 - What does a Spell program look like?
 	- MD-based similar to eve?
@@ -67,7 +69,7 @@
 	- container dynamically applies location to children
 	- e.g.
 		- cards are position absolute for `game`
-		- piles supply x/y coordiante for each of their card
+		- piles supply x/y coordiante for each of their cards
 
 ## Data Model
 #### Requirements
