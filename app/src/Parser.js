@@ -72,10 +72,20 @@ export default class Parser {
 	// Parse a named rule (defined in this parser or in any of our `imports`), returning the "best" match.
 	// Throws if NOBODY implements `ruleName`.
 	//
-	// NOTE: currently "best" is defined as the first rule in our imports which matches...
+	// NOTE: currently "best" is defined as the first rule in our `imports` which matches...
 	parseRuleOrDie(ruleName, tokens, startIndex, stack, callingContext = "parseRuleOrDie") {
-		let rule = this.getRuleOrDie(ruleName, callingContext);
-		return rule.parse(this, tokens, startIndex, stack);
+		// Keep track of whether rule was EVER found or not.
+		let ruleFound = false;
+		let imports = this.imports, index = 0, parser;
+		while (parser = imports[index++]) {
+			let rule = parser.rules[ruleName];
+			if (!rule) continue;
+			const result = rule.parse(this, tokens, startIndex, stack);
+			if (result) return result;
+			ruleFound = true;
+		}
+		// If never found, throw.
+		if (!ruleFound) throw new SyntaxError(`${callingContext}: rule '${ruleName}' not found`);
 	}
 
 	// Test whether a named rule MIGHT be found in head of stream.
@@ -83,9 +93,14 @@ export default class Parser {
 	//	- `true` if the rule MIGHT be matched.
 	//	- `false` if there is no way the rule can be matched.
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
-	testRule(ruleName, tokens, startIndex, callingContext= "testRule") {
-		let rule = this.getRuleOrDie(ruleName, callingContext);
-		return rule.test(this, tokens, startIndex);
+	testRule(ruleName, tokens, startIndex) {
+		let imports = this.imports, index = 0, parser;
+		while (parser = imports[index++]) {
+			let rule = parser.rules[ruleName];
+			if (!rule) continue;
+			let result = rule.test(this, tokens, startIndex);
+			if (result !== undefined) return result;
+		}
 	}
 
 
@@ -152,16 +167,6 @@ export default class Parser {
 //
 	// Start with an empty map of rules.
 	rules = {};
-
-	getRule(name) {
-		return this.rules[name];
-	}
-
-	getRuleOrDie(name, propertyName) {
-		let rule = this.getRule(name);
-		if (!rule) throw new SyntaxError(`${propertyName} rule '${name}' not found`);
-		return rule;
-	}
 
 	// Add a `rule` to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
