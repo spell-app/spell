@@ -532,7 +532,7 @@ Rule.Statements = class statements extends Rule {
 			if (indent > lastIndent) {
 				results.push(new Rule.OpenBlock({ indent: indent-1 }));
 			}
-			// if line indent DECREASES, add one or more closing curly braces
+			// if line indent DECREASES, add one or more `CloseBlock`s
 			else if (indent < lastIndent) {
 				for (let indent = lastIndent; indent > indent; indent--) {
 					results.push(new Rule.CloseBlock({ indent: indent-1 }));
@@ -545,7 +545,6 @@ Rule.Statements = class statements extends Rule {
 			let last = tokens[lastItem];
 			let comment;
 			if (last instanceof Tokenizer.Comment) {
-//TODO...
 				comment = parser.parseRuleOrDie("comment", tokens, lastItem);
 				if (comment) {
 					// Add comment BEFORE corresponding statement
@@ -556,10 +555,10 @@ Rule.Statements = class statements extends Rule {
 				}
 			}
 
-//TODO...
-			let result = parser.parseRuleOrDie("statement", tokens, 0);
-			// complain if no result and no comment
-			if (!result && !comment) {
+			// Parse
+			let statement = parser.parseRuleOrDie("statement", tokens, 0);
+			// complain if no statement and no comment
+			if (!statement && !comment) {
 				let statement = tokens.join(" ");
 				console.warn(`Couldn't parse statement:\n\t${statement}`);
 				results.push(new Rule.ParseError({
@@ -570,9 +569,9 @@ Rule.Statements = class statements extends Rule {
 			}
 
 			// complain can't parse the entire line!
-			if (result && result.nextStart !== tokens.length) {
+			if (statement && statement.nextStart !== tokens.length) {
 				let statement = tokens.join(" ");
-				let unparsed = tokens.slice(result.nextStart).join(" ");
+				let unparsed = tokens.slice(statement.nextStart).join(" ");
 				console.warn("Couldn't parse entire statement:",
 								`\n\t"${statement}"`,
 								`\nunparsed:`,
@@ -580,7 +579,7 @@ Rule.Statements = class statements extends Rule {
 				let error = new Rule.ParseError({
 					error: "Can't parse entire statement",
 					message: `CANT PARSE ENTIRE STATEMENT\n`
-						   + `PARSED    : ${result.matched}\n`
+						   + `PARSED    : ${statement.matched}\n`
 						   + `CANT PARSE: ${unparsed}`
 
 				});
@@ -588,9 +587,9 @@ Rule.Statements = class statements extends Rule {
 				return;
 			}
 
-			if (result) {
-				result.indent = indent;
-				results.push(result);
+			if (statement) {
+				statement.indent = indent;
+				results.push(statement);
 			}
 		});
 

@@ -181,6 +181,21 @@ export default class Parser {
 	// Start with an empty map of rules.
 	_rules = {};
 
+	// DANGEROUS: return map of array of named rules for us and our imports
+	// NOTE: We memoize this but there's nothing that resets this when our imports change!
+	get rules() {
+		if (!this.__rules) {
+			let rules = this.__rules = {};
+			this.imports.forEach(parser => {
+				for (var ruleName in parser._rules) {
+					if (!rules[ruleName]) rules[ruleName] = [];
+					rules[ruleName].push(parser._rules[ruleName]);
+				}
+			});
+		}
+		return this.__rules;
+	}
+
 	// Add a `rule` to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
 	addRule(ruleName, rule) {
