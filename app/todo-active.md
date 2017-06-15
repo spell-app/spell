@@ -1,6 +1,7 @@
 Scope parsing
 - need to be able to define multiple scopes
 - add `endIndex` to `parse()`
+	-
 
 - parser.addScope("define_type", "define type...")
 	- if we parse initial line, matches to balanced indent / EOF

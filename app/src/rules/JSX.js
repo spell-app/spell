@@ -12,12 +12,12 @@ export default parser;
 // JSX expression.
 Rule.JSX = class jsxElement extends Rule.Pattern {
 	// Text strings get encoded as `text` objects in the token stream.
-	parse(parser, tokens, startIndex = 0) {
-		let token = tokens[startIndex];
+	parse(parser, tokens, start = 0) {
+		let token = tokens[start];
 		if (!(token instanceof Tokenizer.JSXElement)) return undefined;
 		return this.clone({
 			matched: token,
-			nextStart: startIndex + 1
+			nextStart: start + 1
 		});
 	}
 

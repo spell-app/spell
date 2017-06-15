@@ -41,7 +41,7 @@ Rule.OpenBlock = class open_block extends Rule {
 // Close block representation in parser output.
 Rule.CloseBlock = class close_block extends Rule {
 	toSource(context) {
-		return "}";
+		return (this.indent || "") + "}";
 	}
 }
 
@@ -58,12 +58,12 @@ Rule.ParseError = class parse_error extends Rule {
 // Comment rule -- matches tokens of type `Tokenizer.Comment`.
 Rule.Comment = class comment extends Rule {
 	// Comments are specially nodes in our token stream.
-	parse(parser, tokens, startIndex = 0, stack) {
-		let token = tokens[startIndex];
+	parse(parser, tokens, start = 0, stack) {
+		let token = tokens[start];
 		if (!(token instanceof Tokenizer.Comment)) return undefined;
 		return this.clone({
 			matched: token,
-			nextStart: startIndex + 1
+			nextStart: start + 1
 		});
 	}
 
@@ -189,14 +189,14 @@ Rule.Number = class number extends Rule.Pattern {
 	}
 
 	// Numbers get encoded as numbers in the token stream.
-	parse(parser, tokens, startIndex = 0) {
-		let token = tokens[startIndex];
+	parse(parser, tokens, start = 0) {
+		let token = tokens[start];
 		// if a string, attempt to run through our NUMBER_NAMES
 		if (typeof token === "string") token = Rule.Number.NUMBER_NAMES[token];
 		if (typeof token !== "number") return undefined;
 		return this.clone({
 			matched: token,
-			nextStart: startIndex + 1
+			nextStart: start + 1
 		});
 	}
 
@@ -221,12 +221,12 @@ identifier.addToBlacklist(
 // Returned value has enclosing quotes.
 Rule.Text = class text extends Rule.Pattern {
 	// Text strings get encoded as `text` objects in the token stream.
-	parse(parser, tokens, startIndex = 0) {
-		let token = tokens[startIndex];
+	parse(parser, tokens, start = 0) {
+		let token = tokens[start];
 		if (!(token instanceof Tokenizer.Text)) return undefined;
 		return this.clone({
 			matched: token,
-			nextStart: startIndex + 1
+			nextStart: start + 1
 		});
 	}
 

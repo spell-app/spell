@@ -73,7 +73,7 @@ export default class Parser {
 	// Throws if NOBODY implements `ruleName`.
 	//
 	// NOTE: currently "best" is defined as the first rule in our `imports` which matches...
-	parseRuleOrDie(ruleName, tokens, startIndex, stack, callingContext = "parseRuleOrDie") {
+	parseRuleOrDie(ruleName, tokens, start, stack, callingContext = "parseRuleOrDie") {
 		// Keep track of whether rule was EVER found or not.
 		let ruleFound = false;
 		let imports = this.imports, index = 0, parser;
@@ -81,7 +81,7 @@ export default class Parser {
 		while (parser = imports[index++]) {
 			let rule = parser._rules[ruleName];
 			if (!rule) continue;
-			const result = rule.parse(this, tokens, startIndex, stack);
+			const result = rule.parse(this, tokens, start, stack);
 			if (result) results.push(result);
 			ruleFound = true;
 		}
@@ -106,12 +106,12 @@ export default class Parser {
 	//	- `true` if the rule MIGHT be matched.
 	//	- `false` if there is no way the rule can be matched.
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
-	testRule(ruleName, tokens, startIndex) {
+	testRule(ruleName, tokens, start) {
 		let imports = this.imports, index = 0, parser;
 		while (parser = imports[index++]) {
 			let rule = parser._rules[ruleName];
 			if (!rule) continue;
-			let result = rule.test(this, tokens, startIndex);
+			let result = rule.test(this, tokens, start);
 			if (result !== undefined) return result;
 		}
 	}
@@ -306,25 +306,25 @@ export default class Parser {
 
 	// Find the matching instance of possibly nested `endToken` to balance `startToken`
 	//	in array of `tokens` (strings).
-	// If successful, returns `{ startIndex, endIndex, slice }`
+	// If successful, returns `{ start, end, slice }`
 	// Throws if unsucessful.
-	static findNestedTokens(tokens, startToken, endToken, startIndex = 0) {
-		if (tokens[startIndex] !== startToken) throw new SyntaxError(`Expected '${startToken}' at index ${startIndex} of tokens`);
+	static findNestedTokens(tokens, startToken, endToken, start = 0) {
+		if (tokens[start] !== startToken) throw new SyntaxError(`Expected '${startToken}' at index ${start} of tokens`);
 		let nesting = 0;
 		let nested = false;
-		for (let endIndex = startIndex + 1, lastIndex = tokens.length; endIndex < lastIndex; endIndex++) {
-			let token = tokens[endIndex];
+		for (let end = start + 1, lastIndex = tokens.length; end < lastIndex; end++) {
+			let token = tokens[end];
 			if (token === startToken) {
 				nesting++;
 				nested = true;
 			}
 			if (token === endToken) {
 				if (nesting === 0)
-					return { startIndex, endIndex, slice: tokens.slice(startIndex+1, endIndex), nested };
+					return { start, end, slice: tokens.slice(start+1, end), nested };
 				nesting--;
 			}
 		}
-		throw new SyntaxError(`Couldn't find matching '${endToken}'s starting at item ${startIndex}`);
+		throw new SyntaxError(`Couldn't find matching '${endToken}'s starting at item ${start}`);
 	}
 
 
