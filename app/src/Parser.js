@@ -13,6 +13,9 @@ export default class Parser {
 	// Set to `true` to output debug info while adding rules
 	static DEBUG = false;
 
+	// Should we warn about anomalous conditions?
+	static WARN = false;
+
 	// Set to `true` to output timing info.
 	static TIME = false;
 
@@ -53,7 +56,7 @@ export default class Parser {
 		if (Parser.TIME) console.time("parse");
 		// If we're not parsing `statements`, eat whitespace at the beginning of the line.
 		if (ruleName !== "statements") {
-			tokens = Tokenizer.eatWhitespaceTokens(tokens);
+			tokens = Tokenizer.removeLeadingWhitespace(tokens);
 		}
 
 		// Parse the rule or throw an exception if rule not found.

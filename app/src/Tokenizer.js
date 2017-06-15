@@ -56,7 +56,6 @@ const Tokenizer = {
 	// NEWLINE singleton.
 	NEWLINE: new newline("\n"),
 
-
 	// Tokenize text between `start` and `end` into an array of `results`, an array of:
 	//	- `Tokenizer.NEWLINE` for a newline symbol
 	//	- strings for keywords/symbols
@@ -793,51 +792,52 @@ const Tokenizer = {
 //
 
 	// Given a set of tokens, slice whitespace (indent, NEWLINE or normal whitespace) from the front.
-	eatWhitespaceTokens(tokens) {
-		let start = 0;
+	removeLeadingWhitespace(tokens, start = 0) {
 		while (tokens[start] instanceof Tokenizer.Whitespace) start++;
 		if (start === 0) return tokens;
 		return tokens.slice(start);
 	},
 
+	// Given a set of tokens, remove ALL "normal" whitespace tokens (NOT indent or NEWLINE).
+	removeNormalWhitespace(tokens) {
+		return tokens.filter(token => !Tokenizer.isNormalWhitespace(token));
+	},
+
+
+	// Return `true` if `token` is "normal" whitespce (not a newline or indent)
 	isNormalWhitespace(token) {
 		return token instanceof Tokenizer.Whitespace
 			&& !(token instanceof Tokenizer.Indent)
 			&& (token !== Tokenizer.NEWLINE);
 	},
 
-	// Break tokens into an array of arrays by `NEWLINEs`.
+	// Break tokens into an array of arrays by `NEWLINE`s.
+	// Returns an array of lines WITHOUT the `NEWLINE`s.
 	breakIntoLines(tokens) {
 		// Convert to lines.
-		let lines = [[]];
+		let currentLine = [];
+		let lines = [currentLine];
 		tokens.forEach(token => {
 			// add new array for each newline
-			if (token === Tokenizer.NEWLINE) return lines.push([]);
+			if (token === Tokenizer.NEWLINE) {
+				// create a new line and push it in
+				currentLine = [];
+				return lines.push(currentLine);
+			}
 
-			// otherwise just add to the last line
-			lines[lines.length - 1].push(token);
+			// otherwise just add to the current line
+			currentLine.push(token);
 		});
-
-		// add indents to each line
-		lines.forEach(line => line.indent = Tokenizer.getLineIndent(line));
-
 		return lines;
 	},
 
-	// Given an array of lines, return the index of the last line at `indent` or greater.
-	// Returns line number BEFORE any blank lines.
-	// NOTE: assumes normal whitespace has been skipped... ???
-	getOutdentedLine(lines, indent) {
-		var lastValidLine = 0;
-		for (var index = 0, last = lines.length; index < last; index++) {
-			let line = lines[index];
-			// skip empty lines
-			if (line.length === 0) continue;
-			let lineIndent = Tokenizer.getLineIndent(line[0]);
-			if (lineIndent < indent) return lastValidLine;
-			lastValidLine = index + 1;
+
+	// Return index of first `NEWLINE` in `tokens` at or after `start` but before `end`.
+	// Returns `undefined` if we get to the end without a newline.
+	findNextNewline(tokens, start = 0, end = tokens.length) {
+		for (; start < end; index++) {
+			if (tokens[start] === Tokenizer.NEWLINE) return start;
 		}
-		return lastValidLine;
 	},
 
 	// Return the indent of a line of tokens.
@@ -847,7 +847,17 @@ const Tokenizer = {
 		if (!line || line.length === 0) return undefined;
 		if (line[0] instanceof Tokenizer.Indent) return line[0].length;
 		return 0;
+	},
+
+	// Beginning at line `start` of `lines`, return the indent of the first non-empty line.
+	// Returns `undefined` if we get to the end and there's no indent.
+	getNextNonEmptyLineIndent(lines, start = 0, end = lines.length) {
+		while (start < end) {
+			if (lines[start].length === 0) continue;
+			return
+		}
 	}
+
 
 };
 
