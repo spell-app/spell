@@ -236,7 +236,7 @@ parser.addStatement(
 parser.addStatement(
 	"setter",
 	"set {identifier} {args}? (\\:)? {statement}?",
-	class getter extends Rule.Statement {
+	class setter extends Rule.Statement {
 		toSource(context) {
 			let { identifier, args = [identifier], statement = "" } = this.getMatchedSource(context);
 			// Complain if more than one argument
@@ -291,9 +291,9 @@ parser.addStatement(
 // TODO: scope_modifier???
 // TODO: initial value
 parser.addStatement(
-	"declare_property",
+	"declare_property_of_type",
 	"property {identifier} as (a|an)? {type}",
-	class declare_property extends Rule.Statement {
+	class declare_property_of_type extends Rule.Statement {
 		toSource(context) {
 			let { identifier, type } = this.getMatchedSource(context);
 			return `get ${identifier}() { return this.__${identifier} }\n`
@@ -305,7 +305,7 @@ parser.addStatement(
 
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
 parser.addStatement(
-	"declare_property",
+	"declare_property_as_one_of",
 	"property {identifier} as one of {list:literal_list}",
 	class declare_property_as_one_of extends Rule.Statement {
 		toSource(context) {
@@ -376,9 +376,9 @@ parser.addExpression(
 );
 
 parser.addExpression(
-	"property_expression",
+	"my_property_expression",
 	"(my|this) {identifier}",
-	class property_expression extends Rule.Expression {
+	class my_property_expression extends Rule.Expression {
 		toSource(context) {
 			let { identifier } = this.getMatchedSource(context);
 			return `this.${identifier}`;

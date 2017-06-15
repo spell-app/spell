@@ -185,7 +185,7 @@ parser.addExpression(
 // e.g.	`first 4 items of list`
 //TESTME
 parser.addExpression(
-	"range_expression",
+	"first_in_range",
 	"first {number:expression} {identifier} (in|of) {list:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
@@ -200,7 +200,7 @@ parser.addExpression(
 // e.g.	`last 4 items of list`
 //TESTME
 parser.addExpression(
-	"range_expression",
+	"last_in_range",
 	"last {number:expression} {identifier} (in|of) {list:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
@@ -301,7 +301,7 @@ parser.addStatement(
 // Add to middle of list, pushing existing items out of the way.
 //TESTME
 parser.addStatement(
-	"list_splice",
+	"list_add_at",
 	"add {thing:expression} to {list:expression} at position {position:expression}",
 	class list_splice extends Rule.Statement {
 		toSource(context) {
@@ -319,7 +319,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_add_after",
 	"add {thing:expression} to {list:expression} after {item:expression}",
-	class list_splice extends Rule.Statement {
+	class list_add_after extends Rule.Statement {
 		toSource(context) {
 			let { thing, item, list } = this.getMatchedSource(context);
 			return `spell.splice(${list}, spell.positionOf(${list}, ${item}), ${thing})`;
