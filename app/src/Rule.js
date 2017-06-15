@@ -532,137 +532,12 @@ Rule.Comment = class comment extends Rule {
 	}
 }
 
-
-// Simple block class for `breakIntoBlocks`.
-Rule.Block = class block {
-	constructor(props){
-		Object.assign(this, props);
-		if (!this.contents) this.contents = [];
-	}
-
-	toString() {
-		return JSON.stringify(this, null, "\t");
-	}
-}
-
-
-
-
-// Break `tokens` between `start` and `end` into a `Rule.Block` with nested `contents`.
-// Skips "normal" whitespace and indents in the results.
-Rule.breakIntoBlocks = function(tokens, start = 0, end = tokens.length) {
-	// restrict to tokens of interest and skip "normal" whitespace
-	tokens = Tokenizer.removeNormalWhitespace(tokens.slice(start, end));
-
-	// break into lines & return early if no lines
-	let lines = Rule.breakIntoLines(tokens);
-	if (lines.length === 0) return [];
-
-	// figure out indents
-	let indents = Rule.getLineIndents(lines);
-
-	// First block is at the MINIMUM indent of all lines!
-	let maxIndent = Math.min.apply(Math, indents);
-	let block = new Rule.Block({ indent: maxIndent });
-
-	// stack of blocks
-	let stack = [block];
-
-	lines.forEach( (line, index) => {
-		// Remove leading whitespace (eg: indents)
-		line = Tokenizer.removeLeadingWhitespace(line);
-
-		let lineIndent = indents[index];
-		let top = stack[stack.length - 1];
-		// If indenting, push new block(s)
-		if (lineIndent > top.indent) {
-			while (lineIndent > top.indent) {
-				var newBlock = new Rule.Block({ indent: top.indent + 1 });
-				top.contents.push(newBlock);
-				stack.push(newBlock);
-
-				top = newBlock;
-			}
-		}
-		// If outdenting: pop block(s)
-		else if (lineIndent < top.indent) {
-			while (lineIndent < top.indent) {
-				stack.pop();
-				top = stack[stack.length - 1];
-			}
-		}
-		// add to top block
-		top.contents.push(line);
-	});
-
-	return block;
-}
-
-// Break tokens into an array of arrays by `NEWLINE`s.
-// Returns an array of lines WITHOUT the `NEWLINE`s.
-// Lines which are composed solely of whitespace are converted to `NEWLINE`s
-Rule.breakIntoLines = function(tokens) {
-	// Convert to lines.
-	let currentLine = [];
-	let lines = [currentLine];
-	tokens.forEach(token => {
-		// add new array for each newline
-		if (token === Tokenizer.NEWLINE) {
-			// create a new line and push it in
-			currentLine = [];
-			return lines.push(currentLine);
-		}
-
-		// otherwise just add to the current line
-		currentLine.push(token);
-	});
-
-	// Clear any lines that are only whitespace
-	lines.forEach((line, index) => {
-		if (line.length === 1 && line[0] instanceof Tokenizer.Whitespace) lines[index] = [];
-	});
-
-	return lines;
-}
-
-
-// Return indents of the specified blocks.
-// Indents empty lines (NEWLINEs) into the block AFTER they appear.
-Rule.getLineIndents = function(lines, defaultIndent = 0) {
-	if (lines.length === 0) return [];
-
-	const indents = lines.map(Tokenizer.getLineIndent);
-	const end = indents.length;
-
-	// figure out the indent of the first non-empty line
-	let startIndent = getNextIndent(0);
-	if (startIndent === undefined) startIndent = defaultIndent;
-
-	// indent blank lines to the indent AFTER them
-	for (var index = 0; index < end; index++) {
-		if (indents[index] === undefined) {
-			indents[index] = getNextIndent(index + 1);
-		}
-	}
-	return indents;
-
-	// Return the value of the NEXT non-undefined indent.
-	function getNextIndent(index) {
-		while (index < end) {
-			if (indents[index] !== undefined) return indents[index];
-			index++;
-		}
-		return startIndent;
-	}
-}
-
-
 // `Statements` are a block of `Statement` that understand nesting and comments.
 Rule.Statements = class statements extends Rule {
 
 	// Split statements up into blocks and parse 'em.
 	parse(parser, tokens, start = 0, end = tokens.length, stack) {
-		var block = Rule.breakIntoBlocks(tokens, start, end);
+		var block = Tokenizer.breakIntoBlocks(tokens, start, end);
 		let matched = this.parseBlock(parser, block);
 
 		if (matched) {
@@ -682,10 +557,12 @@ Rule.Statements = class statements extends Rule {
 			if (item.length === 0) {
 				results.push(new Rule.BlankLine());
 			}
-			else if (item instanceof Rule.Block) {
+			else if (item instanceof Tokenizer.Block) {
 				results.push(new Rule.OpenBlock({ indent: item.indent }));
+
 				let blockResults = this.parseBlock(parser, item);
 				results = results.concat(blockResults);
+
 				results.push(new Rule.CloseBlock({ indent: item.indent - 1 }));
 			}
 			else {
@@ -721,16 +598,20 @@ Rule.Statements = class statements extends Rule {
 
 		// complain if no statement and no comment
 		if (!statement && !comment) {
-			let unparsed = tokens.slice(start, end).join(" ");
-			let error = new Rule.StatementParseError({ unparsed, indent });
+			let error = new Rule.StatementParseError({
+				indent,
+				unparsed: tokens.slice(start, end).join(" ")
+			});
 			results.push(error);
 		}
 
 		// complain can't parse the entire line!
 		else if (statement && statement.nextStart !== end) {
-			let parsed = tokens.slice(start, statement.nextStart).join(" ");
-			let unparsed = tokens.slice(statement.nextStart, end).join(" ");
-			let error = new Rule.StatementParseError({ parsed, unparsed, indent });
+			let error = new Rule.StatementParseError({
+				indent,
+				parsed : tokens.slice(start, statement.nextStart).join(" "),
+				unparsed : tokens.slice(statement.nextStart, end).join(" ")
+			});
 			results.push(error);
 		}
 		// Otherwise add the statement

@@ -811,8 +811,26 @@ const Tokenizer = {
 			&& (token !== Tokenizer.NEWLINE);
 	},
 
+
+//
+// ### Block / indent processing
+//
+
+	// Simple block class for `breakIntoBlocks`.
+	Block: class block {
+		constructor(props){
+			Object.assign(this, props);
+			if (!this.contents) this.contents = [];
+		}
+
+		toString() {
+			return JSON.stringify(this, null, "\t");
+		}
+	},
+
 	// Break tokens into an array of arrays by `NEWLINE`s.
 	// Returns an array of lines WITHOUT the `NEWLINE`s.
+	// Lines which are composed solely of whitespace are treated as blank.
 	breakIntoLines(tokens) {
 		// Convert to lines.
 		let currentLine = [];
@@ -828,17 +846,45 @@ const Tokenizer = {
 			// otherwise just add to the current line
 			currentLine.push(token);
 		});
+
+		// Clear any lines that are only whitespace
+		lines.forEach((line, index) => {
+			if (line.length === 1 && line[0] instanceof Tokenizer.Whitespace) lines[index] = [];
+		});
+
 		return lines;
 	},
 
+	// Return indents of the specified lines.
+	// Indents empty lines (NEWLINEs) into the block AFTER they appear.
+	getLineIndents(lines, defaultIndent = 0) {
+		if (lines.length === 0) return [];
 
-	// Return index of first `NEWLINE` in `tokens` at or after `start` but before `end`.
-	// Returns `undefined` if we get to the end without a newline.
-	findNextNewline(tokens, start = 0, end = tokens.length) {
-		for (; start < end; index++) {
-			if (tokens[start] === Tokenizer.NEWLINE) return start;
+		const indents = lines.map(Tokenizer.getLineIndent);
+		const end = indents.length;
+
+		// figure out the indent of the first non-empty line
+		let startIndent = getNextIndent(0);
+		if (startIndent === undefined) startIndent = defaultIndent;
+
+		// indent blank lines to the indent AFTER them
+		for (var index = 0; index < end; index++) {
+			if (indents[index] === undefined) {
+				indents[index] = getNextIndent(index + 1);
+			}
+		}
+		return indents;
+
+		// Return the value of the NEXT non-undefined indent.
+		function getNextIndent(index) {
+			while (index < end) {
+				if (indents[index] !== undefined) return indents[index];
+				index++;
+			}
+			return startIndent;
 		}
 	},
+
 
 	// Return the indent of a line of tokens.
 	// Returns `0` if not indented.
@@ -849,14 +895,57 @@ const Tokenizer = {
 		return 0;
 	},
 
-	// Beginning at line `start` of `lines`, return the indent of the first non-empty line.
-	// Returns `undefined` if we get to the end and there's no indent.
-	getNextNonEmptyLineIndent(lines, start = 0, end = lines.length) {
-		while (start < end) {
-			if (lines[start].length === 0) continue;
-			return
-		}
-	}
+	// Break `tokens` between `start` and `end` into a `Tokenizer.Block` with nested `contents`.
+	// Skips "normal" whitespace and indents in the results.
+	breakIntoBlocks: function(tokens, start = 0, end = tokens.length) {
+		// restrict to tokens of interest and skip "normal" whitespace
+		tokens = Tokenizer.removeNormalWhitespace(tokens.slice(start, end));
+
+		// break into lines & return early if no lines
+		let lines = Tokenizer.breakIntoLines(tokens);
+		if (lines.length === 0) return [];
+
+		// figure out indents
+		let indents = Tokenizer.getLineIndents(lines);
+
+		// First block is at the MINIMUM indent of all lines!
+		let maxIndent = Math.min.apply(Math, indents);
+		let block = new Tokenizer.Block({ indent: maxIndent });
+
+		// stack of blocks
+		let stack = [block];
+
+		lines.forEach( (line, index) => {
+			// Remove leading whitespace (eg: indents)
+			line = Tokenizer.removeLeadingWhitespace(line);
+
+			let lineIndent = indents[index];
+			let top = stack[stack.length - 1];
+			// If indenting, push new block(s)
+			if (lineIndent > top.indent) {
+				while (lineIndent > top.indent) {
+					var newBlock = new Tokenizer.Block({ indent: top.indent + 1 });
+					top.contents.push(newBlock);
+					stack.push(newBlock);
+
+					top = newBlock;
+				}
+			}
+			// If outdenting: pop block(s)
+			else if (lineIndent < top.indent) {
+				while (lineIndent < top.indent) {
+					stack.pop();
+					top = stack[stack.length - 1];
+				}
+			}
+			// add to top block
+			top.contents.push(line);
+		});
+
+		return block;
+	},
+
+
 
 
 };
