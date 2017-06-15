@@ -28,6 +28,14 @@ export function isSingular(word) {
 }
 
 
+// Return a certain `number` of tab characters.
+const TABS = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+export function getTabs(number) {
+	if (typeof number !== "number") return "";
+	return TABS.substr(0, number);
+}
+
+
 // Export all as a lump
 let allExports = {...exports};
 export default allExports;

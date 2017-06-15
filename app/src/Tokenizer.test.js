@@ -140,17 +140,15 @@ test("matchWhitespace():  Matches if end is out of range", () => {
 
 test("matchWhitespace():  Whitespace at start `isIndent`", () => {
 	let [token, nextStart] = Tokenizer.matchWhitespace(" ");
-	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token).toBeInstanceOf(Tokenizer.Indent);
 	expect(token.whitespace).toBe(" ");
-	expect(token.isIndent).toBe(true);
 	expect(nextStart).toBe(1);
 });
 
 test("matchWhitespace():  Whitespace after newline `isIndent`", () => {
 	let [token, nextStart] = Tokenizer.matchWhitespace(" \n\t", 2);
-	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
+	expect(token).toBeInstanceOf(Tokenizer.Indent);
 	expect(token.whitespace).toBe("\t");
-	expect(token.isIndent).toBe(true);
 	expect(nextStart).toBe(3);
 });
 
@@ -158,7 +156,6 @@ test("matchWhitespace():  Whitespace in middle of other stuff is not indent", ()
 	let [token, nextStart] = Tokenizer.matchWhitespace("x x", 1);
 	expect(token).toBeInstanceOf(Tokenizer.Whitespace);
 	expect(token.whitespace).toBe(" ");
-	expect(token.isIndent).toBe(undefined);
 	expect(nextStart).toBe(2);
 });
 

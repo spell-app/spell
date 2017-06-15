@@ -11,9 +11,10 @@
 //		- `rule.results`			Return matched arguments in a format suitable to do:
 //		- `rule.toSource(context)`	Return javascript source to interpret the rule.
 //
-import global from "./utils/global";
 import Parser from "./Parser.js";
 
+import global from "./utils/global";
+import { getTabs } from "./utils/string";
 
 export default class Rule {
 	constructor(...props) {
@@ -472,118 +473,134 @@ Rule.List = class List extends Rule {
 Rule.NestedScope = class scope extends Rule {
 
 
-}
-
-
-// `Statements` are a block of `Statement` that understand nesting and comments.
-Rule.Statements = class statements extends Rule {
-	// Return a certain `number` of tab characters.
-	static TABS = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-	getTabs(number) {
-		if (typeof number !== "number") return "";
-		return Rule.Statements.TABS.substr(0, number);
-	}
-
 	// `statements` is an array of arrays of tokens.
-//TODO: non-standard, other `parse()` routines will take a single line???
-	parse(parser, statements, lineNumber = 0, end, stack) {
-		console.time("Rule.Statements.parse()");
+	parse(parser, tokens, start = 0, end = tokens.length, stack) {
+		if (start >= end) return undefined;
 
-		// Cut off the beginning if not on the first line...
-		if (lineNumber !== 0) statements = statements.slice(lineNumber);
+		// break tokens of interest into lines.
+		var lines = Tokenizer.breakIntoLines(tokens.slice(start, end));
 
 		let results = [];
 		let lastIndent = 0;
 
 		// Parse each line individually
-		statements.forEach(tokens => {
-			// add placeholders for empty lines
-			if (tokens.length === 0) {
-				return results.push(new Rule.BlankLine());
-			}
-
-			// figure out indent level of this line
-			let indent = 0;
-			// If we start with an indent
-			if (tokens[0] instanceof Tokenizer.Whitespace && tokens[0].isIndent) {
-				indent = tokens[0].length;
-				// take the indent out of the statement start
-				tokens = tokens.slice(1);
-			}
-
-			// If indent INCREASES, add `OpenBlock`
-			if (indent > lastIndent) {
-				results.push(new Rule.OpenBlock({ indent: indent-1 }));
-			}
-			// if line indent DECREASES, add one or more `CloseBlock`s
-			else if (indent < lastIndent) {
-				for (let indent = lastIndent; indent > indent; indent--) {
-					results.push(new Rule.CloseBlock({ indent: indent-1 }));
+		lines.forEach(tokens => {
+//console.info("TOKENS", tokens);
+			let lineResult = this.parseLine(parser, lastIndent, tokens);
+			if (lineResult) {
+				results = results.concat(lineResult);
+				let lastResult = results[results.length - 1];
+				if (typeof lastResult.indent === "number") {
+					lastIndent = lastResult.indent;
+//console.warn("setting lastIndent to", lastIndent);
 				}
-			}
-			lastIndent = indent;
-
-			// Attempt to parse a comment as the last item in the statement
-			let comment = parser.parseRuleOrDie("comment", tokens, tokens.length - 1);
-			if (comment) {
-				// Add comment BEFORE corresponding statement
-				results.push(comment);
-				// pop the comment off before matching the rest of the statement.
-				tokens = tokens.slice(0, -1);
-			}
-
-			// Parse
-			let statement = parser.parseRuleOrDie("statement", tokens, 0);
-			// complain if no statement and no comment
-			if (!statement && !comment) {
-				let statement = tokens.join(" ");
-				console.warn(`Couldn't parse statement:\n\t${statement}`);
-				results.push(new Rule.ParseError({
-					error: "Can't parse statement",
-					message: `CAN'T PARSE: ${statement}`
-				}));
-				return;
-			}
-
-			// complain can't parse the entire line!
-			if (statement && statement.nextStart !== tokens.length) {
-				let statement = tokens.join(" ");
-				let unparsed = tokens.slice(statement.nextStart).join(" ");
-				console.warn("Couldn't parse entire statement:",
-								`\n\t"${statement}"`,
-								`\nunparsed:`,
-								`\n\t"${unparsed}"`);
-				let error = new Rule.ParseError({
-					error: "Can't parse entire statement",
-					message: `CANT PARSE ENTIRE STATEMENT\n`
-						   + `PARSED    : ${statement.matched}\n`
-						   + `CANT PARSE: ${unparsed}`
-
-				});
-				results.push(error);
-				return;
-			}
-
-			if (statement) {
-				statement.indent = indent;
-				results.push(statement);
 			}
 		});
 
 		// Add closing curly braces as necessary
 //TODO: move ABOVE any blank lines
 		while (lastIndent > 0) {
-			let closeBlock = new Rule.CloseBlock({ indent: this.getTabs(lastIndent - 1) });
+			let closeBlock = new Rule.CloseBlock({ indent: getTabs(lastIndent - 1) });
 			results.push(closeBlock);
 			--lastIndent;
 		}
-		console.timeEnd("Rule.Statements.parse()");
 
 		return this.clone({
 			matched: results,
-			nextStart: statements.length
+			nextStart: end
 		});
 	}
+
+	// Parse tokens corresponding to a single line of input.
+	// Returns `[lastIndent, [matched rules]]`
+	parseLine(parser, lastIndent, tokens) {
+		let results = [];
+
+		// add `BlankLine`s for empty lines
+		if (tokens.length === 0) {
+			results.push(new Rule.BlankLine());
+			return results;
+		}
+
+		// figure out indent level of this line
+		let indent = 0;
+		// If we start with an indent
+		if (tokens[0] instanceof Tokenizer.Indent) {
+			indent = tokens[0].length;
+			// take the indent out of the statement start
+			tokens = tokens.slice(1);
+		}
+
+		// If indent INCREASES, add `OpenBlock`
+		if (indent > lastIndent) {
+			results.push(new Rule.OpenBlock({ indent: indent-1 }));
+		}
+		// if line indent DECREASES, add one or more `CloseBlock`s
+		else if (indent < lastIndent) {
+			for (let indent = lastIndent; indent > indent; indent--) {
+				results.push(new Rule.CloseBlock({ indent: indent-1 }));
+			}
+		}
+
+		// Attempt to parse a comment as the last item in the statement
+		let comment = parser.parseRuleOrDie("comment", tokens, tokens.length - 1);
+		if (comment) {
+			// remember indent
+			comment.indent = indent;
+			// Add comment BEFORE corresponding statement
+			results.push(comment);
+			// pop the comment off before matching the rest of the statement.
+			tokens = tokens.slice(0, -1);
+		}
+
+		// Parse statement
+		let statement = parser.parseRuleOrDie("statement", tokens, 0);
+		// complain if no statement and no comment
+		if (!statement && !comment) {
+			let statement = tokens.join(" ");
+			console.warn(`Couldn't parse statement:\n\t${statement}`);
+			results.push(new Rule.ParseError({
+				indent,
+				error: "Can't parse statement",
+				message: `CAN'T PARSE: ${statement}`
+			}));
+		}
+
+		// complain can't parse the entire line!
+		else if (statement && statement.nextStart !== tokens.length) {
+			let statement = tokens.join(" ");
+			let unparsed = tokens.slice(statement.nextStart).join(" ");
+			console.warn("Couldn't parse entire statement:",
+							`\n\t"${statement}"`,
+							`\nunparsed:`,
+							`\n\t"${unparsed}"`);
+			let error = new Rule.ParseError({
+				indent,
+				error: "Can't parse entire statement",
+				message: `CANT PARSE ENTIRE STATEMENT\n`
+					   + `PARSED    : ${statement.matched}\n`
+					   + `CANT PARSE: ${unparsed}`
+
+			});
+			results.push(error);
+			return;
+		}
+
+		// Otherwise add statement to results
+		else if (statement) {
+			statement.indent = indent;
+			results.push(statement);
+		}
+
+		return results;
+	}
+
+}
+
+
+
+// `Statements` are a block of `Statement` that understand nesting and comments.
+Rule.Statements = class statements extends Rule.NestedScope {
 
 	toSource(context) {
 		let results = [];
@@ -602,7 +619,7 @@ Rule.Statements = class statements extends Rule {
 				}
 			}
 			let source = match.toSource(context) || "";
-			let indent = this.getTabs(match.indent);
+			let indent = getTabs(match.indent);
 			results.push(indent + source.split("\n").join("\n"+indent));
 		}
 		return results.join("\n");

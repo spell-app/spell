@@ -1,3 +1,5 @@
+import { getTabs } from "./utils/string";
+
 // GRRR... node doesn't include this???
 // CHECK DIFFERENT NODE VERSIONS...
 if (!(Array.prototype.includes)) {
@@ -10,6 +12,32 @@ if (!(Array.prototype.includes)) {
 }
 
 
+
+// `whitespace` class for normal (non-indent, non-newline) whitespace.
+class whitespace {
+	constructor(whitespace) {
+		this.whitespace = whitespace;
+	}
+
+	// Return the "length" of this whitespace, eg for an indent.
+	get length() {
+		return this.whitespace.length;
+	}
+
+	toString() {
+		return this.whitespace;
+	}
+}
+
+
+// `indent` class.
+class indent extends whitespace {}
+
+
+// Newline singleton.
+class newline extends whitespace {}
+
+
 //
 //	# Tokenizer
 //	- `.tokenize()` 		Breaks up long string into tokens, including newlines, JSX expressions, etc.
@@ -18,6 +46,16 @@ if (!(Array.prototype.includes)) {
 // TODO: error checking / reporting, especially in JSX expressions.
 // TODO: have normal `tokenize` stick whitespace elements in the stream, then `tokenizeLines()` takes them out?
 const Tokenizer = {
+
+	// Whitespace constructor.
+	Whitespace: whitespace,
+
+	// Indent constructor
+	Indent: indent,
+
+	// NEWLINE singleton.
+	NEWLINE: new newline("\n"),
+
 
 	// Tokenize text between `start` and `end` into an array of `results`, an array of:
 	//	- `Tokenizer.NEWLINE` for a newline symbol
@@ -31,7 +69,7 @@ const Tokenizer = {
 	tokenize(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		// quick return out of range or only whitespace
-		if (start >= end || !text.trim()) return undefined;
+		if (start >= end || !text.trim()) return [];
 
 		let tokens = [];
 		// Process our top-level rules.
@@ -133,56 +171,20 @@ const Tokenizer = {
 		// forget it if no forward motion
 		if (whitespaceEnd === start) return undefined;
 
-		let token = new Tokenizer.Whitespace(text.slice(start, whitespaceEnd));
-
-		// if the char BEFORE start is a newline, consider this an "indent"
-		if (start === 0 || text[start-1] === "\n") token.isIndent = true;
+		let whitespace = text.slice(start, whitespaceEnd);
+		let token;
+		if (start === 0 || text[start-1] === "\n")
+			token = new Tokenizer.Indent(whitespace);
+		else
+			token = new Tokenizer.Whitespace(whitespace);
 
 		return [token, whitespaceEnd];
 	},
-
-	// Whitespace class
-	Whitespace : class whitespace {
-		constructor(whitespace) {
-			this.whitespace = whitespace;
-		}
-
-		// Return the "length" of this whitespace, eg for an indent.
-		get length() {
-			return this.whitespace.length;
-		}
-
-		// Return true if this indent is all tabs
-		get isTabs() {
-			return this.whitespace.split("").every(space => space === "\t");
-		}
-
-		// Return true if this indent is all spaces
-		get isTabs() {
-			return this.whitespace.split("").every(space => space === "\t");
-		}
-
-		// Return true if this indent is mixed tabs and spaces
-		get isMixed() {
-			let firstChar = this.whitespace[0];
-			return this.whitespace.split("").some(space => space !== firstChar);
-		}
-
-
-		toString() {
-			return this.whitespace;
-		}
-	},
-
 
 
 	//
 	//	### Newline
 	//
-
-	// Newline marker (singleton).
-	NEWLINE : new (class newline {})(),
-
 
 	// Match a single newline character at `text[start]`.
 	// Returns `[Tokenizer.NEWLINE, nextStart]` on match.
@@ -788,7 +790,41 @@ const Tokenizer = {
 		}
 		if (start >= end) return undefined;
 		return start;
-	}
+	},
+
+
+//
+// ### Utility
+//
+
+	isNormalWhitespace(token) {
+		return token instanceof Tokenizer.Whitespace
+			&& !(token instanceof Tokenizer.Indent)
+			&& (token !== Tokenizer.NEWLINE);
+	},
+
+	// Break tokens into an array of arrays by `NEWLINEs`.
+	breakIntoLines(tokens) {
+		// Convert to lines.
+		let lines = [[]];
+		tokens.forEach(token => {
+			// add new array for each newline
+			if (token === Tokenizer.NEWLINE) return lines.push([]);
+
+			// otherwise just add to the last line
+			lines[lines.length - 1].push(token);
+		});
+		return lines;
+	},
+
+	// Given a set of tokens, slice whitespace (indent, NEWLINE or normal whitespace) from the front.
+	eatWhitespaceTokens(tokens) {
+		let start = 0;
+		while (tokens[start] instanceof Tokenizer.Whitespace) start++;
+		if (start === 0) return tokens;
+		return tokens.slice(start);
+	},
+
 
 };
 

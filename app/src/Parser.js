@@ -13,6 +13,12 @@ export default class Parser {
 	// Set to `true` to output debug info while adding rules
 	static DEBUG = false;
 
+	// Set to `true` to output timing info.
+	static TIME = false;
+
+	// Pointer to our tokenizer.
+	Tokenzier = Tokenizer;
+
 	// Constructor.
 	constructor(properties) {
 		Object.assign(this, properties);
@@ -34,20 +40,26 @@ export default class Parser {
 		}
 
 		// Convert to tokens.
-		let tokens = this.tokenize(text);
+		if (Parser.TIME) console.time("tokenize");
+		let tokens = Tokenizer.tokenize(text);
+		// eat non-indent whitespace (since we ignore it)
+		tokens = tokens.filter(token => !Tokenizer.isNormalWhitespace(token));
+		if (Parser.TIME) console.timeEnd("tokenize");
+
 		// Bail if we didn't get any tokens back.
 //TODO: WARN?  ERROR?
-		if (tokens === undefined) return undefined;
+		if (!tokens || tokens.length === 0) return undefined;
 
-		// If we're not parsing `statements`, use only the first line and pop off indentation.
+		if (Parser.TIME) console.time("parse");
+		// If we're not parsing `statements`, eat whitespace at the beginning of the line.
 		if (ruleName !== "statements") {
-			tokens = tokens[0];
-			// remove whitespace from the start of the line
-			if (tokens[0] instanceof Tokenizer.Whitespace) tokens = tokens.slice(1);
+			tokens = Tokenizer.eatWhitespaceTokens(tokens);
 		}
 
 		// Parse the rule or throw an exception if rule not found.
-		return this.parseRuleOrDie(ruleName, tokens, 0, tokens.length, undefined, "parser.parse()");
+		let result = this.parseRuleOrDie(ruleName, tokens, 0, tokens.length, undefined, "parser.parse()");
+		if (Parser.TIME) console.timeEnd("parse");
+		return result;
 	}
 
 
@@ -63,7 +75,7 @@ export default class Parser {
 			ruleName = "statements";
 		}
 		let result = this.parse(ruleName, text);
-		if (!result) throw new SyntaxError(`parser.parse('${ruleName}', '${string}'): can't parse this`);
+		if (!result) throw new SyntaxError(`parser.parse('${ruleName}', '${text}'): can't parse this`);
 		return result.toSource(this);
 	}
 
@@ -119,34 +131,6 @@ export default class Parser {
 			let result = nextRule.test(this, tokens, start, end);
 			if (result !== undefined) return result;
 		}
-	}
-
-
-//
-//### Tokenizing
-//
-
-	// Given an arbitarary `text` string, tokenize it and return as an array of arrays of lines.
-	// Returns `undefined` if result didn't produce any tokens.
-//TODO: `tokenize` returns tokensEnd, complain if `tokensEnd !== end`.
-//TESTME
-	tokenize(text) {
-		let tokens = Tokenizer.tokenize(text);
-		if (!tokens || tokens.length === 0) return undefined;
-
-		// Convert to lines.
-		let lines = [[]];
-		tokens.forEach(token => {
-			// Skip whitespace which is not an indent.
-			if (token instanceof Tokenizer.Whitespace && !token.isIndent) return;
-
-			// add new array for each newline
-			if (token === Tokenizer.NEWLINE) return lines.push([]);
-
-			// otherwise just add to the last line
-			lines[lines.length - 1].push(token);
-		});
-		return lines;
 	}
 
 
