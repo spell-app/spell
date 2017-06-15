@@ -244,13 +244,14 @@ parser.addExpression(
 );
 
 
-// Set membership.
+// Set membership (left recursive).
 // NOTE: we will singularize `identifier` and use that as the argument to `expression`.
 //TESTME
 parser.addExpression(
 	"list_membership_test",
 	"{list:expression} (operator:has|has no|doesnt have|does not have) {identifier} where {filter:expression}",
 	class list_membership_test extends Rule.Expression {
+		// Add test rule for quicker processing
 		testRule = new Rule.Match({ match: ["where"] });
 
 		toSource(context) {

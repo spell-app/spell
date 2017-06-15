@@ -10,7 +10,7 @@ const parser = Parser.forContext("JSX");
 export default parser;
 
 // JSX expression.
-Rule.JSX = class jsxElement extends Rule.Pattern {
+Rule.JSX = class jsxElement extends Rule {
 	// Text strings get encoded as `text` objects in the token stream.
 	parse(parser, tokens, start = 0) {
 		let token = tokens[start];

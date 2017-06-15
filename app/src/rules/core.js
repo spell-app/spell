@@ -168,11 +168,39 @@ let type = parser.addRule(["type", "expression"], Rule.Type);
 type.addToBlacklist("I");
 
 
+// Boolean literal, created with custom constructor for debugging.
+// TODO: better name for this???
+Rule.Boolean = class boolean extends Rule.Pattern {
+	toSource(context) {
+		switch (this.matched) {
+			case "true":
+			case "yes":
+			case "ok":
+			case "success":
+				return true;
+
+			default:
+				return false;
+		}
+	}
+};
+Rule.Boolean.prototype.pattern = /^(true|false|yes|no|ok|cancel|success|failure)$/;
+parser.addRule(["boolean", "expression"], Rule.Boolean);
+
+// Add boolean tokens to identifier blacklist.
+// TESTME
+identifier.addToBlacklist(
+	"true", "false",
+	"yes", "no",
+	"ok", "cancel",
+	"success", "failure"
+);
+
 
 // `number` as either float or integer, created with custom constructor for debugging.
 // NOTE: you can also use `one`...`ten` as strings.'
 // TODO:  `integer` and `decimal`?  too techy?
-Rule.Number = class number extends Rule.Pattern {
+Rule.Number = class number extends Rule {
 	// Special words you can use as numbers...
 	static NUMBER_NAMES = {
 		zero: 0,
@@ -219,7 +247,7 @@ identifier.addToBlacklist(
 // Literal `text` string, created with custom constructor for debugging.
 // You can use either single or double quotes on the outside (although double quotes are preferred).
 // Returned value has enclosing quotes.
-Rule.Text = class text extends Rule.Pattern {
+Rule.Text = class text extends Rule {
 	// Text strings get encoded as `text` objects in the token stream.
 	parse(parser, tokens, start = 0) {
 		let token = tokens[start];
@@ -236,34 +264,6 @@ Rule.Text = class text extends Rule.Pattern {
 };
 parser.addRule(["text", "expression"], Rule.Text);
 
-
-// Boolean literal, created with custom constructor for debugging.
-// TODO: better name for this???
-Rule.Boolean = class boolean extends Rule.Pattern {
-	toSource(context) {
-		switch (this.matched) {
-			case "true":
-			case "yes":
-			case "ok":
-			case "success":
-				return true;
-
-			default:
-				return false;
-		}
-	}
-};
-Rule.Boolean.prototype.pattern = /^(true|false|yes|no|ok|cancel|success|failure)$/;
-parser.addRule(["boolean", "expression"], Rule.Boolean);
-
-// Add boolean tokens to identifier blacklist.
-// TESTME
-identifier.addToBlacklist(
-	"true", "false",
-	"yes", "no",
-	"ok", "cancel",
-	"success", "failure"
-);
 
 
 // Literal list (array), eg:  `[1,2,true,false ]`

@@ -86,7 +86,7 @@ Rule.Match = class match extends Rule {
 	// Attempt to match this rule in the `tokens`.
 	// Returns results of the parse or `undefined`.
 	parse(parser, tokens, start = 0, end, stack) {
-		if (!this.headStartsWith(this.match, tokens, start)) return undefined;
+		if (!this.headStartsWith(this.match, tokens, start, end)) return undefined;
 		// if only one and we have a blacklist, make sure it's not in the blacklist!
 		if (this.match.length === 1 && this.blacklist && this.blacklist[this.match[0]]) return undefined;
 
@@ -99,11 +99,14 @@ Rule.Match = class match extends Rule {
 	// Does this match appear anywhere in the tokens?
 	test(parser, tokens, start = 0, end) {
 		let matchStart = tokens.indexOf(this.match[0], start);
-		return matchStart !== -1 && this.headStartsWith(this.match, tokens, matchStart);
+		return matchStart !== -1 && this.headStartsWith(this.match, tokens, matchStart, end);
 	}
 
 	// Does the head of the tokens start with an array of matches?
-	headStartsWith(matches, tokens, start = 0) {
+	headStartsWith(matches, tokens, start = 0, end = tokens.length) {
+		// bail if match would go beyond the end
+		if (start + matches.length > end) return false;
+
 		// Special case for one match, maybe premature optimization but...
 		if (matches.length === 1) return (matches[0] === tokens[start]);
 
@@ -128,7 +131,7 @@ Rule.Keyword.prototype.matchDelimiter = " ";
 
 
 
-// Regex pattern.
+// Regex pattern to match a SINGLE token.
 // `rule.pattern` is the regular expression to match.
 // Note that you MUST start your pattern with `^` and end with `$` to make sure it matches the entire token.
 // Note that this can only match a single token!
@@ -153,7 +156,7 @@ Rule.Pattern = class Pattern extends Rule {
 
 	// Test to see if any of our pattern is found ANYWHERE in the tokens.
 	test(parser, tokens, start = 0, end) {
-		return tokens.slice(start).some(token => typeof token === "string" && token.match(this.pattern));
+		return tokens.slice(start, end).some(token => typeof token === "string" && token.match(this.pattern));
 	}
 
 	toString() {
@@ -508,7 +511,7 @@ Rule.Statements = class statements extends Rule {
 				tokens = tokens.slice(1);
 			}
 
-			// If indent INCREASES, add open curly braces
+			// If indent INCREASES, add `OpenBlock`
 			if (indent > lastIndent) {
 				results.push(new Rule.OpenBlock({ indent: indent-1 }));
 			}
@@ -521,18 +524,12 @@ Rule.Statements = class statements extends Rule {
 			lastIndent = indent;
 
 			// Attempt to parse a comment as the last item in the statement
-			let lastItem = tokens.length - 1;
-			let last = tokens[lastItem];
-			let comment;
-			if (last instanceof Tokenizer.Comment) {
-				comment = parser.parseRuleOrDie("comment", tokens, lastItem);
-				if (comment) {
-					// Add comment BEFORE corresponding statement
-					results.push(comment);
-
-					// pop the comment off before matching the rest of the statement.
-					tokens = tokens.slice(0, -1);
-				}
+			let comment = parser.parseRuleOrDie("comment", tokens, tokens.length - 1);
+			if (comment) {
+				// Add comment BEFORE corresponding statement
+				results.push(comment);
+				// pop the comment off before matching the rest of the statement.
+				tokens = tokens.slice(0, -1);
 			}
 
 			// Parse
