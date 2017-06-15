@@ -185,13 +185,18 @@ export default class Parser {
 	// NOTE: We memoize this but there's nothing that resets this when our imports change!
 	get rules() {
 		if (!this.__rules) {
-			let rules = this.__rules = {};
+			let output = this.__rules = {};
+			// For each parser
 			this.imports.forEach(parser => {
+				// Merge rules into an Alternatives in output rules.
 				for (var ruleName in parser._rules) {
 					let rule = parser._rules[ruleName];
-					let alternatives = rules[ruleName] || (rules[ruleName] = new Rule.Alternatives({ ruleName }));
+					let alternatives = output[ruleName] || (output[ruleName] = new Rule.Alternatives({ ruleName }));
 
-					if (rule instanceof Rule.Alternatives && rule.ruleName === ruleName) {
+					if (rule instanceof Rule.Alternatives
+					 && rule.ruleName === ruleName
+					 && !rule.argument
+					) {
 						rule.rules.forEach( alternative => alternatives.addRule(alternative) );
 					}
 					else {
