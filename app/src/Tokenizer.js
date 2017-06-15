@@ -769,11 +769,6 @@ const Tokenizer = {
 	},
 
 
-//TODO:  `findAtHead(thing)` where thing is
-//			- (single or multi-char) string
-//			- array of alternative strings
-//			- regular expression
-
 	// Return the index of the first NON-ESCAPED character in `chars` after `text[start]`.
 	// Returns `undefined` if we didn't find a match.
 //TESTME
@@ -797,6 +792,14 @@ const Tokenizer = {
 // ### Utility
 //
 
+	// Given a set of tokens, slice whitespace (indent, NEWLINE or normal whitespace) from the front.
+	eatWhitespaceTokens(tokens) {
+		let start = 0;
+		while (tokens[start] instanceof Tokenizer.Whitespace) start++;
+		if (start === 0) return tokens;
+		return tokens.slice(start);
+	},
+
 	isNormalWhitespace(token) {
 		return token instanceof Tokenizer.Whitespace
 			&& !(token instanceof Tokenizer.Indent)
@@ -814,17 +817,37 @@ const Tokenizer = {
 			// otherwise just add to the last line
 			lines[lines.length - 1].push(token);
 		});
+
+		// add indents to each line
+		lines.forEach(line => line.indent = Tokenizer.getLineIndent(line));
+
 		return lines;
 	},
 
-	// Given a set of tokens, slice whitespace (indent, NEWLINE or normal whitespace) from the front.
-	eatWhitespaceTokens(tokens) {
-		let start = 0;
-		while (tokens[start] instanceof Tokenizer.Whitespace) start++;
-		if (start === 0) return tokens;
-		return tokens.slice(start);
+	// Given an array of lines, return the index of the last line at `indent` or greater.
+	// Returns line number BEFORE any blank lines.
+	// NOTE: assumes normal whitespace has been skipped... ???
+	getOutdentedLine(lines, indent) {
+		var lastValidLine = 0;
+		for (var index = 0, last = lines.length; index < last; index++) {
+			let line = lines[index];
+			// skip empty lines
+			if (line.length === 0) continue;
+			let lineIndent = Tokenizer.getLineIndent(line[0]);
+			if (lineIndent < indent) return lastValidLine;
+			lastValidLine = index + 1;
+		}
+		return lastValidLine;
 	},
 
+	// Return the indent of a line of tokens.
+	// Returns `0` if not indented.
+	// Returns `undefined` if a blank line.
+	getLineIndent(line) {
+		if (!line || line.length === 0) return undefined;
+		if (line[0] instanceof Tokenizer.Indent) return line[0].length;
+		return 0;
+	}
 
 };
 

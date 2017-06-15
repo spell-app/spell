@@ -12,7 +12,7 @@ export default parser;
 // JSX expression.
 Rule.JSX = class jsxElement extends Rule {
 	// Text strings get encoded as `text` objects in the token stream.
-	parse(parser, tokens, start = 0) {
+	parse(parser, tokens, start = 0, end = tokens.length) {
 		let token = tokens[start];
 		if (!(token instanceof Tokenizer.JSXElement)) return undefined;
 		return this.clone({

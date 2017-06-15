@@ -16,62 +16,10 @@ export default parser;
 // ### Install standard rules
 //
 
-// Block of `statements` with indentation for nesting.
 parser.addRule("statements", Rule.Statements);
-
-
-
-
-
-// Blank line representation in parser output.
-Rule.BlankLine = class blank_line extends Rule {
-	toSource(context) {
-		return "\n";
-	}
-}
-
-// Open block representation in parser output.
-Rule.OpenBlock = class open_block extends Rule {
-	toSource(context) {
-		return "{";
-	}
-}
-
-
-// Close block representation in parser output.
-Rule.CloseBlock = class close_block extends Rule {
-	toSource(context) {
-		return (this.indent || "") + "}";
-	}
-}
-
-
-// Parser error representation in parser output.
-Rule.ParseError = class parse_error extends Rule {
-	toSource(context) {
-		let message = this.message.split("\n").join("\n// ");
-		return `// ERROR: ${message}`;
-	}
-}
-
-
-// Comment rule -- matches tokens of type `Tokenizer.Comment`.
-Rule.Comment = class comment extends Rule {
-	// Comments are specially nodes in our token stream.
-	parse(parser, tokens, start = 0, end, stack) {
-		let token = tokens[start];
-		if (!(token instanceof Tokenizer.Comment)) return undefined;
-		return this.clone({
-			matched: token,
-			nextStart: start + 1
-		});
-	}
-
-	toSource(context) {
-		return `//${this.matched.whitespace}${this.matched.comment}`;
-	}
-}
 parser.addRule("comment", Rule.Comment);
+
+
 
 
 // `word` = is a single alphanumeric word.
