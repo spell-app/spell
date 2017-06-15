@@ -188,8 +188,15 @@ export default class Parser {
 			let rules = this.__rules = {};
 			this.imports.forEach(parser => {
 				for (var ruleName in parser._rules) {
-					if (!rules[ruleName]) rules[ruleName] = [];
-					rules[ruleName].push(parser._rules[ruleName]);
+					let rule = parser._rules[ruleName];
+					let alternatives = rules[ruleName] || (rules[ruleName] = new Rule.Alternatives({ ruleName }));
+
+					if (rule instanceof Rule.Alternatives && rule.ruleName === ruleName) {
+						rule.rules.forEach( alternative => alternatives.addRule(alternative) );
+					}
+					else {
+						alternatives.addRule(rule);
+					}
 				}
 			});
 		}
