@@ -1,7 +1,7 @@
 //	# Parser Rules
 //	Rules can be as simple as a string `Keyword` or a complex sequence of (nested) rules.
 //
-//	Parse a rule with `rule.parse(parser, tokens, startIndex)`, this will either:
+//	Parse a rule with `rule.parse(parser, tokens, startIndex, endIndex)`, this will either:
 //		- return `undefined` if the rule doesn't match the head of the tokens, or
 //		- return a CLONE of the rule with at least the following:
 //			- `matched`		Results of your parse.
@@ -29,9 +29,9 @@ export default class Rule {
 //	Parsing primitives -- you MUST implement these in your subclasses!
 //
 
-	// Attempt to match this rule in the `tokens`.
+	// Attempt to match this rule between `startIndex` and `endIndex` of `tokens`.
 	// Returns results of the parse or `undefined`.
-	parse(parser, tokens, startIndex = 0,  stack = []) {
+	parse(parser, tokens, startIndex = 0,  stack) {
 		return undefined;
 	}
 
@@ -42,28 +42,6 @@ export default class Rule {
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
 	test(parser, tokens, startIndex = 0) {
 		return undefined;
-	}
-
-	// Does the parse `stack` already contain `rule`?
-	static stackContains(stack, rule, tokens) {
-		if (stack.length === 0) return false;
-
-//console.info(stack);
-		// go backwards
-		for (var i = stack.length - 1; i >= 0; i--) {
-			let [ nextRule, nextStream ] = stack[i];
-			if (nextRule === rule) {
-				if (tokens.startIndex === tokens.startIndex) {
-//					console.warn("found unproductive rule ", rule, " on stack", stack);
-					return true;
-				}
-				else {
-//					console.warn("found productive rule ", rule, " on stack", stack);
-					return false;
-				}
-			}
-		}
-		return false;
 	}
 
 	addToBlacklist(...words) {
@@ -106,7 +84,7 @@ Rule.Match = class match extends Rule {
 
 	// Attempt to match this rule in the `tokens`.
 	// Returns results of the parse or `undefined`.
-	parse(parser, tokens, startIndex = 0,  stack = []) {
+	parse(parser, tokens, startIndex = 0,  stack) {
 		if (!this.headStartsWith(this.match, tokens, startIndex)) return undefined;
 		// if only one and we have a blacklist, make sure it's not in the blacklist!
 		if (this.match.length === 1 && this.blacklist && this.blacklist[this.match[0]]) return undefined;
@@ -155,7 +133,7 @@ Rule.Keyword.prototype.matchDelimiter = " ";
 // Note that this can only match a single token!
 Rule.Pattern = class Pattern extends Rule {
 	// Attempt to match this pattern at the beginning of the tokens.
-	parse(parser, tokens, startIndex = 0,  stack = []) {
+	parse(parser, tokens, startIndex = 0, stack) {
 		let token = tokens[startIndex];
 		if (typeof token !== "string") return undefined;
 
@@ -186,7 +164,7 @@ Rule.Pattern = class Pattern extends Rule {
 // Subrule -- name of another rule to be called.
 // `rule.rule` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
-	parse(parser, tokens, startIndex = 0,  stack = []) {
+	parse(parser, tokens, startIndex = 0,  stack) {
 		let result = parser.parseRuleOrDie(this.rule, tokens, startIndex, stack, `parse subrule '${this.rule}'`);
 		if (!result) return undefined;
 
@@ -207,17 +185,25 @@ Rule.Subrule = class Subrule extends Rule {
 
 // Sequence of rules to match.
 Rule.Sequence = class Sequence extends Rule {
-	parse(parser, tokens, startIndex = 0,  stack = []) {
+	parse(parser, tokens, startIndex = 0,  stack) {
 		// If we have a `testRule` defined
 		if (this.testRule) {
 			// Forget it if there is NO WAY the rule could be matched.
 			if (parser.testRule(this.testRule, tokens, startIndex) === false) return undefined;
 		}
 
+		// If we're a leftRecursive sequence...
 		if (this.leftRecursive) {
-			if (Rule.stackContains(stack, this, tokens)) return undefined;
-			stack = stack.concat();
-			stack.push([this, tokens]);
+			// If the stack already contains this rule, forget it.
+			if (stack && stack.includes(this)) return undefined;
+
+			// Clone stack and add this rule for recursion...
+			stack = stack ? stack.concat() : [];
+			stack.push(this);
+
+			// TODO: We could distinguish between productive and unproductive rules
+			//		 by checking only rules which occur at the same `startIndex`...
+			//		 This would probably allow more interesting things, but it's much much slower.
 		}
 
 		let matched = [];
@@ -329,7 +315,7 @@ Rule.Alternatives = class Alternatives extends Rule {
 	}
 
 	// Find all rules which match and delegate to `getBestMatch()` to pick the best one.
-	parse(parser, tokens, startIndex = 0,  stack = []) {
+	parse(parser, tokens, startIndex = 0,  stack) {
 		let matches = [];
 		let index = 0, rule = undefined;
 		while (rule = this.rules[index++]) {
@@ -388,13 +374,7 @@ Rule.Alternatives = class Alternatives extends Rule {
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
 Rule.Repeat = class Repeat extends Rule {
-	parse(parser, tokens, startIndex = 0,  stack = []) {
-		if (this.leftRecursive) {
-			if (Rule.stackContains(stack, this, tokens)) return undefined;
-			stack = stack.concat();
-			stack.push([this, tokens]);
-		}
-
+	parse(parser, tokens, startIndex = 0,  stack) {
 		let matched = [];
 		let nextStart = startIndex;
 		while (true) {
@@ -443,13 +423,7 @@ Rule.Repeat = class Repeat extends Rule {
 //
 // NOTE: we assume that a List rule will NOT repeat (????)
 Rule.List = class List extends Rule {
-	parse(parser, tokens, startIndex = 0,  stack = []) {
-		if (this.leftRecursive) {
-			if (Rule.stackContains(stack, this, tokens)) return undefined;
-			stack = stack.concat();
-			stack.push([this, tokens]);
-		}
-
+	parse(parser, tokens, startIndex = 0,  stack) {
 		// ensure item and delimiter are optional so we don't barf in `parseRule`
 		this.item.optional = true;
 		this.delimiter.optional = true;
@@ -490,6 +464,12 @@ Rule.List = class List extends Rule {
 	}
 };
 
+
+// A `Scope` parses a nested scope, eg a type declaration or a method definition.
+Rule.Scope = class scope extends Rule {
+
+
+}
 
 
 // `Statements` are a block of `Statement` that understand nesting and comments.

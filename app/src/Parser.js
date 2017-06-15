@@ -125,8 +125,8 @@ export default class Parser {
 	// Returns `undefined` if result didn't produce any tokens.
 //TODO: `tokenize` returns tokensEnd, complain if `tokensEnd !== end`.
 //TESTME
-	tokenize(text, start, end) {
-		let tokens = Tokenizer.tokenize(text, start, end);
+	tokenize(text) {
+		let tokens = Tokenizer.tokenize(text);
 		if (!tokens || tokens.length === 0) return undefined;
 
 		// Convert to lines.
@@ -252,7 +252,10 @@ export default class Parser {
 		// make a note if we're adding a left-recursive rule
 //TODO: this doesn't fly if adding under multiple names...  :-(
 		if (Parser.ruleIsLeftRecursive(ruleName, rule)) {
-//console.info("marking ", rule, " as left recursive!");
+			if (!rule instanceof Rule.Sequence) {
+				throw new TypeError(`Error defining rule ${ruleName}: Only Sequence rules can be leftRecusive`);
+			}
+			if (Parser.DEBUG) console.info("marking ", rule, " as left recursive!");
 			rule.leftRecursive = true;
 		}
 
