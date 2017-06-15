@@ -251,6 +251,8 @@ parser.addExpression(
 	"list_membership_test",
 	"{list:expression} (operator:has|has no|doesnt have|does not have) {identifier} where {filter:expression}",
 	class list_membership_test extends Rule.Expression {
+		testRule = new Rule.Match({ match: ["where"] });
+
 		toSource(context) {
 			let { identifier, operator, filter, list } = this.getMatchedSource(context);
 			let bang = operator === "has" ? "" : "!";

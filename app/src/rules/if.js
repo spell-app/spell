@@ -30,7 +30,7 @@ parser.addStatement(
 	"backwards_if",
 	"{statement} if {condition:expression} (?:(else|otherwise) {elseStatement:statement})?",
 	class backwards_if extends Rule.Statement {
-		leftRecursive = true;
+		testRule = new Rule.Match({ match: ["if"] });
 		toSource(context) {
 			let { condition, statement, elseStatement } = this.getMatchedSource(context);
 			if (elseStatement) return `if (${condition}) { ${statement} } else { ${elseStatement} }`

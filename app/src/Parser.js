@@ -101,17 +101,22 @@ export default class Parser {
 		}, results[0]);
 	}
 
-	// Test whether a named rule MIGHT be found in head of stream.
+	// Test whether a rule (which may be specified by name) MIGHT be found in head of stream.
 	// Returns:
 	//	- `true` if the rule MIGHT be matched.
 	//	- `false` if there is no way the rule can be matched.
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
-	testRule(ruleName, tokens, start, end) {
+	testRule(rule, tokens, start, end) {
+		// Handle rule instance
+		if (rule instanceof Rule) {
+			return rule.test(this, tokens, start, end);
+		}
+		// Handle named rule by looking in our imports
 		let imports = this.imports, index = 0, parser;
 		while (parser = imports[index++]) {
-			let rule = parser._rules[ruleName];
-			if (!rule) continue;
-			let result = rule.test(this, tokens, start, end);
+			let nextRule = parser._rules[rule];
+			if (!nextRule) continue;
+			let result = nextRule.test(this, tokens, start, end);
 			if (result !== undefined) return result;
 		}
 	}
@@ -253,9 +258,15 @@ export default class Parser {
 //TODO: this doesn't fly if adding under multiple names...  :-(
 		if (Parser.ruleIsLeftRecursive(ruleName, rule)) {
 			if (!rule instanceof Rule.Sequence) {
-				throw new TypeError(`Error defining rule ${ruleName}: Only Sequence rules can be leftRecusive`);
+				throw new TypeError(`Error defining rule '${ruleName}': Only Sequence rules can be leftRecusive`);
+			}
+			// You must define a `testRule` for left recursive sequences.
+			// e.g. `testRule = new Rule.Match({ match: ["something"] })`
+			if (!rule.testRule) {
+				throw new TypeError(`Error defining rule '${rule.ruleName}': You must define a 'testRule' for leftRecusive rules.`);
 			}
 			if (Parser.DEBUG) console.info("marking ", rule, " as left recursive!");
+
 			rule.leftRecursive = true;
 		}
 

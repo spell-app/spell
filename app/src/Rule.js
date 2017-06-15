@@ -35,7 +35,8 @@ export default class Rule {
 		return undefined;
 	}
 
-	// Test to see if bits of our rule are found ANYWHERE in the tokens.
+	// Test to see if bits of our rule are found ANYWHERE between `start` and `end` in the `tokens`.
+	// This is used by complicated (eg: left recursive) rules to exit quickly if there's no chance.
 	// Returns:
 	//	- `true` if the rule MIGHT be matched.
 	//	- `false` if there is no way the rule can be matched.
