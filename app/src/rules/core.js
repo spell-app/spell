@@ -58,7 +58,7 @@ Rule.ParseError = class parse_error extends Rule {
 // Comment rule -- matches tokens of type `Tokenizer.Comment`.
 Rule.Comment = class comment extends Rule {
 	// Comments are specially nodes in our token stream.
-	parse(parser, tokens, start = 0, stack) {
+	parse(parser, tokens, start = 0, end, stack) {
 		let token = tokens[start];
 		if (!(token instanceof Tokenizer.Comment)) return undefined;
 		return this.clone({

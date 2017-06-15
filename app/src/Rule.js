@@ -31,7 +31,7 @@ export default class Rule {
 
 	// Attempt to match this rule between `start` and `end` of `tokens`.
 	// Returns results of the parse or `undefined`.
-	parse(parser, tokens, start = 0, stack) {
+	parse(parser, tokens, start = 0, end, stack) {
 		return undefined;
 	}
 
@@ -40,7 +40,7 @@ export default class Rule {
 	//	- `true` if the rule MIGHT be matched.
 	//	- `false` if there is no way the rule can be matched.
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
-	test(parser, tokens, start = 0) {
+	test(parser, tokens, start = 0, end) {
 		return undefined;
 	}
 
@@ -84,7 +84,7 @@ Rule.Match = class match extends Rule {
 
 	// Attempt to match this rule in the `tokens`.
 	// Returns results of the parse or `undefined`.
-	parse(parser, tokens, start = 0, stack) {
+	parse(parser, tokens, start = 0, end, stack) {
 		if (!this.headStartsWith(this.match, tokens, start)) return undefined;
 		// if only one and we have a blacklist, make sure it's not in the blacklist!
 		if (this.match.length === 1 && this.blacklist && this.blacklist[this.match[0]]) return undefined;
@@ -96,7 +96,7 @@ Rule.Match = class match extends Rule {
 	}
 
 	// Does this match appear anywhere in the tokens?
-	test(parser, tokens, start = 0) {
+	test(parser, tokens, start = 0, end) {
 		let matchStart = tokens.indexOf(this.match[0], start);
 		return matchStart !== -1 && this.headStartsWith(this.match, tokens, matchStart);
 	}
@@ -133,7 +133,7 @@ Rule.Keyword.prototype.matchDelimiter = " ";
 // Note that this can only match a single token!
 Rule.Pattern = class Pattern extends Rule {
 	// Attempt to match this pattern at the beginning of the tokens.
-	parse(parser, tokens, start = 0, stack) {
+	parse(parser, tokens, start = 0, end, stack) {
 		let token = tokens[start];
 		if (typeof token !== "string") return undefined;
 
@@ -151,7 +151,7 @@ Rule.Pattern = class Pattern extends Rule {
 	}
 
 	// Test to see if any of our pattern is found ANYWHERE in the tokens.
-	test(parser, tokens, start = 0) {
+	test(parser, tokens, start = 0, end) {
 		return tokens.slice(start).some(token => typeof token === "string" && token.match(this.pattern));
 	}
 
@@ -164,8 +164,8 @@ Rule.Pattern = class Pattern extends Rule {
 // Subrule -- name of another rule to be called.
 // `rule.rule` is the name of the rule in `parser.rules`.
 Rule.Subrule = class Subrule extends Rule {
-	parse(parser, tokens, start = 0, stack) {
-		let result = parser.parseRuleOrDie(this.rule, tokens, start, stack, `parse subrule '${this.rule}'`);
+	parse(parser, tokens, start = 0, end, stack) {
+		let result = parser.parseRuleOrDie(this.rule, tokens, start, end, stack, `parse subrule '${this.rule}'`);
 		if (!result) return undefined;
 
 		if (this.argument) result.argument = this.argument;
@@ -173,7 +173,7 @@ Rule.Subrule = class Subrule extends Rule {
 	}
 
 	// Test to see if any of our alternatives are found ANYWHERE in the tokens.
-	test(parser, tokens, start = 0) {
+	test(parser, tokens, start = 0, end) {
 		return parser.testRule(this.rule, tokens, start);
 	}
 
@@ -185,7 +185,7 @@ Rule.Subrule = class Subrule extends Rule {
 
 // Sequence of rules to match.
 Rule.Sequence = class Sequence extends Rule {
-	parse(parser, tokens, start = 0, stack) {
+	parse(parser, tokens, start = 0, end, stack) {
 		// If we have a `testRule` defined
 		if (this.testRule) {
 			// Forget it if there is NO WAY the rule could be matched.
@@ -210,7 +210,7 @@ Rule.Sequence = class Sequence extends Rule {
 		let nextStart = start;
 		let index = 0, rule = undefined;
 		while (rule = this.rules[index++]) {
-			let match = rule.parse(parser, tokens, nextStart, stack);
+			let match = rule.parse(parser, tokens, nextStart, end, stack);
 			if (!match && !rule.optional) return undefined;
 			if (match) {
 				matched.push(match);
@@ -224,7 +224,6 @@ Rule.Sequence = class Sequence extends Rule {
 		});
 	}
 
-// 	parseInChunks(parser, tokens, stack) {}
 
 //TODOC
 	// "gather" arguments in preparation to call `toSource()`
@@ -306,20 +305,20 @@ Rule.Alternatives = class Alternatives extends Rule {
 	// Test to see if any of our alternatives are found ANYWHERE in the tokens.
 	// NOTE: this should only be called if we're specified as a `testRule`
 	//		 and then only if all of our rules are deterministic.
-	test(parser, tokens, start = 0) {
+	test(parser, tokens, start = 0, end) {
 		let index = 0, rule = undefined;
 		while (rule = this.rules[index++]) {
-			if (rule.test(parser, tokens, start)) return true;
+			if (rule.test(parser, tokens, start, end)) return true;
 		}
 		return false;
 	}
 
 	// Find all rules which match and delegate to `getBestMatch()` to pick the best one.
-	parse(parser, tokens, start = 0, stack) {
+	parse(parser, tokens, start = 0, end, stack) {
 		let matches = [];
 		let index = 0, rule = undefined;
 		while (rule = this.rules[index++]) {
-			let match = rule.parse(parser, tokens, start, stack);
+			let match = rule.parse(parser, tokens, start, end, stack);
 			if (match) matches.push(match);
 		}
 
@@ -374,11 +373,11 @@ Rule.Alternatives = class Alternatives extends Rule {
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
 Rule.Repeat = class Repeat extends Rule {
-	parse(parser, tokens, start = 0, stack) {
+	parse(parser, tokens, start = 0, end, stack) {
 		let matched = [];
 		let nextStart = start;
 		while (true) {
-			let match = this.rule.parse(parser, tokens, nextStart, stack);
+			let match = this.rule.parse(parser, tokens, nextStart, end, stack);
 			if (!match) break;
 
 			matched.push(match);
@@ -423,7 +422,7 @@ Rule.Repeat = class Repeat extends Rule {
 //
 // NOTE: we assume that a List rule will NOT repeat (????)
 Rule.List = class List extends Rule {
-	parse(parser, tokens, start = 0, stack) {
+	parse(parser, tokens, start = 0, end, stack) {
 		// ensure item and delimiter are optional so we don't barf in `parseRule`
 		this.item.optional = true;
 		this.delimiter.optional = true;
@@ -432,14 +431,14 @@ Rule.List = class List extends Rule {
 		let nextStart = start;
 		while (true) {
 			// get next item, exiting if not found
-			let item = this.item.parse(parser, tokens, nextStart, stack);
+			let item = this.item.parse(parser, tokens, nextStart, end, stack);
 			if (!item) break;
 //console.log(item);
 			matched.push(item);
 			nextStart = item.nextStart;
 
 			// get delimiter, exiting if not found
-			let delimiter = this.delimiter.parse(parser, tokens, nextStart, stack);
+			let delimiter = this.delimiter.parse(parser, tokens, nextStart, end, stack);
 			if (!delimiter) break;
 			nextStart = delimiter.nextStart;
 		}
@@ -483,7 +482,7 @@ Rule.Statements = class statements extends Rule {
 
 	// `statements` is an array of arrays of tokens.
 //TODO: non-standard, other `parse()` routines will take a single line???
-	parse(parser, statements, lineNumber = 0, stack) {
+	parse(parser, statements, lineNumber = 0, end, stack) {
 		console.time("Rule.Statements.parse()");
 
 		// Cut off the beginning if not on the first line...

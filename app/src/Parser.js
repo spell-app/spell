@@ -47,7 +47,7 @@ export default class Parser {
 		}
 
 		// Parse the rule or throw an exception if rule not found.
-		return this.parseRuleOrDie(ruleName, tokens, 0, undefined, "parser.parse()");
+		return this.parseRuleOrDie(ruleName, tokens, 0, tokens.length, undefined, "parser.parse()");
 	}
 
 
@@ -73,7 +73,7 @@ export default class Parser {
 	// Throws if NOBODY implements `ruleName`.
 	//
 	// NOTE: currently "best" is defined as the first rule in our `imports` which matches...
-	parseRuleOrDie(ruleName, tokens, start, stack, callingContext = "parseRuleOrDie") {
+	parseRuleOrDie(ruleName, tokens, start, end, stack, callingContext = "parseRuleOrDie") {
 		// Keep track of whether rule was EVER found or not.
 		let ruleFound = false;
 		let imports = this.imports, index = 0, parser;
@@ -81,7 +81,7 @@ export default class Parser {
 		while (parser = imports[index++]) {
 			let rule = parser._rules[ruleName];
 			if (!rule) continue;
-			const result = rule.parse(this, tokens, start, stack);
+			const result = rule.parse(this, tokens, start, end, stack);
 			if (result) results.push(result);
 			ruleFound = true;
 		}
@@ -106,12 +106,12 @@ export default class Parser {
 	//	- `true` if the rule MIGHT be matched.
 	//	- `false` if there is no way the rule can be matched.
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
-	testRule(ruleName, tokens, start) {
+	testRule(ruleName, tokens, start, end) {
 		let imports = this.imports, index = 0, parser;
 		while (parser = imports[index++]) {
 			let rule = parser._rules[ruleName];
 			if (!rule) continue;
-			let result = rule.test(this, tokens, start);
+			let result = rule.test(this, tokens, start, end);
 			if (result !== undefined) return result;
 		}
 	}
