@@ -546,14 +546,12 @@ Rule.Block = class block extends Rule {
 			}
 			else if (item instanceof Tokenizer.Block) {
 				itemResult = this.parseBlock(parser, item);
+				itemResult.indent = block.indent + 1;
 			}
 			else {
 				itemResult = this.parseStatement(parser, item);
 			}
 
-			// convert to array and indent results
-			if (!Array.isArray(itemResult)) itemResult = [itemResult];
-			itemResult.forEach(result => result.indent = block.indent + 1);
 			// add to output results
 			matched = matched.concat(itemResult);
 		});
