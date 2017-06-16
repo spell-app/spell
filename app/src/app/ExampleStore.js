@@ -4,6 +4,8 @@ import mobx, { observable, computed } from "mobx";
 // Make Parser and Tokenizer WARN as we run
 import Parser from "../Parser";
 Parser.WARN = true;
+Parser.DEBUG = true;
+Parser.TIME = true;
 
 import Tokenizer from "../Tokenizer";
 Tokenizer.WARN = true;
