@@ -1,6 +1,14 @@
 /* Store of example spell code fragments. */
 import mobx, { observable, computed } from "mobx";
 
+// Make Parser and Tokenizer WARN as we run
+import Parser from "../Parser";
+Parser.WARN = true;
+
+import Tokenizer from "../Tokenizer";
+Tokenizer.WARN = true;
+
+
 export default class ExampleStore {
 	// CURRENT examples
 	@observable examples = {};

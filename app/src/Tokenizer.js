@@ -47,6 +47,9 @@ class newline extends whitespace {}
 // TODO: have normal `tokenize` stick whitespace elements in the stream, then `tokenizeLines()` takes them out?
 const Tokenizer = {
 
+	// Should we warn about anomalous conditions?
+	WARN : false,
+
 	// Whitespace constructor.
 	Whitespace: whitespace,
 
@@ -77,7 +80,9 @@ const Tokenizer = {
 			tokens = tokens.concat(results);
 			start = nextStart;
 		}
-		if (start !== end) console.warn("tokenize(): didn't consume: `", text.slice(start, end) + "`");
+		if (start !== end) {
+			if (Tokenizer.WARN) console.warn("tokenize(): didn't consume: `", text.slice(start, end) + "`");
+		}
 
 		return results;
 	},
@@ -410,7 +415,9 @@ const Tokenizer = {
 
 		// advance past `>`
 		if (endBit !== ">") {
-			console.warn("Missing expected end `>` for jsxElement", jsxElement, "`"+text.slice(start, nextStart)+"`");
+			if (Tokenizer.WARN) {
+				console.warn("Missing expected end `>` for jsxElement", jsxElement, "`"+text.slice(start, nextStart)+"`");
+			}
 			jsxElement.error = "No end >";
 			return [jsxElement, nextStart];
 		}
@@ -505,7 +512,9 @@ const Tokenizer = {
 		}
 // TODO: how to surface this error???
 		if (nesting !== 0) {
-			console.warn(`matchJSXChildren(${text.slice(start, nextStart + 10)}: didn't match end child!`);
+			if (Tokenizer.WARN) {
+				console.warn(`matchJSXChildren(${text.slice(start, nextStart + 10)}: didn't match end child!`);
+			}
 		}
 		return [children, nextStart];
 	},
@@ -663,7 +672,9 @@ const Tokenizer = {
 
 		// if no match, we've got some sort of error
 		if (endIndex === undefined) {
-			console.warn("matchJSXText("+text.slice(start, start + 50)+"): JSX seems to be unbalanced.");
+			if (Tokenizer.WARN) {
+				console.warn("matchJSXText("+text.slice(start, start + 50)+"): JSX seems to be unbalanced.");
+			}
 			return undefined;
 		}
 
