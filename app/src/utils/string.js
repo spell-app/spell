@@ -1,5 +1,11 @@
 import global from "./global";
 
+// Return true if text is all whitespace, including empty string.
+let ALL_WHITESPACE = /^\s*$/;
+export function isWhitespace(text) {
+	return ALL_WHITESPACE.test(text)
+}
+
 // Return the plural of `word`.
 // NOTE: this is not very good at all!!!
 // TODO: exceptions, etc.
