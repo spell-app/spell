@@ -672,7 +672,7 @@ Rule.BlockStatement = class block_statement extends Rule.Block {
 		let output = super.getMatchedSource(context, ...keys);
 		// add `block` to output if defined.
 		if (this.block) {
-			output.block = this.block.blockToSource(context);
+			output.block = this.block.toSource(context);
 		}
 		return output;
 	}

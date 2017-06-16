@@ -13,6 +13,10 @@ export default parser;
 import "./core";
 parser.import("core");
 
+
+// TODO: custom `getMatcher`:
+//			- `condtion` wraps in parens if NOT wrapped
+
 //TESTME
 parser.addStatement(
 	"if",
@@ -22,9 +26,8 @@ parser.addStatement(
 			let { condition, statement, block } = this.getMatchedSource(context);
 			if (statement && block) throw new SyntaxError("if may only have inline statement OR block");
 
-			if (statement) return `if (${condition}) { ${statement} }`;
-			if (block) return `if (${condition}) { \n${block}\n }`;
-			return `if (${condition})`
+			let contents = (statement ? ` { ${statement} }` : block || "");
+			return `if (${condition})${contents}`;
 		}
 	}
 );
@@ -50,9 +53,8 @@ parser.addStatement(
 			let { condition, statement, block } = this.getMatchedSource(context);
 			if (statement && block) throw new SyntaxError("else if may only have inline statement OR block");
 
-			if (statement) return `else if (${condition}) { ${statement} }`;
-			if (block) return `else if (${condition}) { \n${block}\n }`;
-			return `else if (${condition})`
+			let contents = (statement ? ` { ${statement} }` : block || "");
+			return `else if (${condition})${contents}`
 		}
 	}
 );
@@ -65,9 +67,8 @@ parser.addStatement(
 			let { statement, block } = this.getMatchedSource(context);
 			if (statement && block) throw new SyntaxError("else if may only have inline statement OR block");
 
-			if (statement) return `else { ${statement} }`;
-			if (block) return `else { \n${block}\n }`;
-			return `else`
+			let contents = (statement ? ` { ${statement} }` : block || "");
+			return `else${contents}`
 		}
 	}
 );
