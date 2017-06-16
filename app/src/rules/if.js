@@ -24,10 +24,9 @@ parser.addStatement(
 	class if_ extends Rule.BlockStatement {
 		toSource(context) {
 			let { condition, statement, block } = this.getMatchedSource(context);
-			if (statement && block) throw new SyntaxError("if may only have inline statement OR block");
-
-			let contents = (statement ? ` { ${statement} }` : block || "");
-			return `if (${condition})${contents}`;
+//			if (statement && block) throw new SyntaxError("if may only have inline statement OR block");
+			let statements = Rule.Block.encloseStatements(statement, block);
+			return `if (${condition}) ${statements}`;
 		}
 	}
 );
@@ -39,8 +38,9 @@ parser.addStatement(
 		testRule = new Rule.Match({ match: ["if"] });
 		toSource(context) {
 			let { condition, statement, elseStatement } = this.getMatchedSource(context);
-			if (elseStatement) return `if (${condition}) { ${statement} } else { ${elseStatement} }`
-			return `if (${condition}) { ${statement} }`;
+			let output = `if (${condition}) { ${statement} }`;
+			if (elseStatement) output += `\nelse { ${elseStatement} }`
+			return output;
 		}
 	}
 );
@@ -51,10 +51,9 @@ parser.addStatement(
 	class else_if extends Rule.BlockStatement {
 		toSource(context) {
 			let { condition, statement, block } = this.getMatchedSource(context);
-			if (statement && block) throw new SyntaxError("else if may only have inline statement OR block");
-
-			let contents = (statement ? ` { ${statement} }` : block || "");
-			return `else if (${condition})${contents}`
+//			if (statement && block) throw new SyntaxError("else if may only have inline statement OR block");
+			let statements = Rule.Block.encloseStatements(statement, block);
+			return `else if (${condition}) ${statements}`
 		}
 	}
 );
@@ -65,10 +64,9 @@ parser.addStatement(
 	class else_ extends Rule.BlockStatement {
 		toSource(context) {
 			let { statement, block } = this.getMatchedSource(context);
-			if (statement && block) throw new SyntaxError("else if may only have inline statement OR block");
-
-			let contents = (statement ? ` { ${statement} }` : block || "");
-			return `else${contents}`
+//			if (statement && block) throw new SyntaxError("else if may only have inline statement OR block");
+			let statements = Rule.Block.encloseStatements(statement, block);
+			return `else ${statements}`
 		}
 	}
 );

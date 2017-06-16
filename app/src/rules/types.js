@@ -129,22 +129,23 @@ parser.addStatement(
 parser.addStatement(
 	"declare_action",
 	"action (keywords:{word}|{type})+ (\\:)? {statement}?",
-	class declare_action extends Rule.Statement {
+	class declare_action extends Rule.BlockStatement {
 		toSource(context) {
-			let { keywords, statement } = this.results;
-			let words = keywords.matched.map( word => word.toSource(context) );
-			// if there's only one word, it can't be a blacklisted identifier or a type
-			if (words.length === 1) {
-				var word = words[0];
-				if (keywords.matched instanceof Rule.Type) {
-					throw new SyntaxError(`parse('declare_action'): one-word actions may not be types: ${word}`);
+			let { keywords, statement, block } = this.getMatchedSource(context);
+
+			// if there's only one keyword, it can't be a blacklisted identifier or a type
+			let keywordResults = this.results.keywords;
+			if (keywords.length === 1) {
+				let keyword = keywords[0];
+				if (keywordResults[0].matched instanceof Rule.Type) {
+					throw new SyntaxError(`parse('declare_action'): one-word actions may not be types: ${keyword}`);
 				}
 
 console.warn("FIXME: parser.rules.identifier");
 // HACK: `global.parser` is a hack here for convenience in testing...
 				let parser = context ? context.parser : global.parser;
-				if (parser.rules.identifier.blacklist[word]) {
-					throw new SyntaxError(`parse('declare_action'): one-word actions may not be blacklisted identifiers": ${word}`);
+				if (parser.rules.identifier.blacklist[keyword]) {
+					throw new SyntaxError(`parse('declare_action'): one-word actions may not be blacklisted identifiers": ${keyword}`);
 				}
 			}
 
@@ -152,43 +153,29 @@ console.warn("FIXME: parser.rules.identifier");
 			var args = [];
 			var types = [];
 			// if any of the words are types (capital letter) make that an argument of the same name.
-			keywords.matched.map( (item, index) => {
+			keywordResults.matched.map( (item, index) => {
 				if (item instanceof Rule.Type) {
-					let type = words[index];
-					let word = type.toLowerCase();
-					types.push([type, word]);
-					words[index] = word;
-					args.push(word);
+					let Type = keywords[index];
+					let type = Type.toLowerCase();
+					types.push([Type, type]);
+					keywords[index] = type;
+					args.push(type);
 				}
 			});
 			// get static method name and arguments for output
-			let methodName = words.join("_");
+			let methodName = keywords.join("_");
 			args = args.join(", ");
 
 			// figure out if there are any conditions on the above
-			let conditions = types.map( ([type, word]) => {
-				return `\tif (!spell.isA(${word}, ${type})) return undefined`;
+			let conditions = types.map( ([Type, type]) => {
+				return `\tif (!spell.isA(${type}, ${Type})) return undefined`;
 			});
 
-			// get statements, adding conditions if necessary
-			statement = statement ? statement.toSource(context) : "";
-			let statements = "";
-			if (statement) {
-				statements = [];
-				if (conditions.length) statements = statements.concat(conditions);
-				if (statement) statements.push("\t" + statement);
-				statements = ` {\n${statements.join("\n")}\n }\n`;
-				this.opensBlock = true;
-				this.closesBlock = true;
-			}
-			else if (conditions.length) {
-				statements = ` {\n${conditions.join("\n")}`;
-				this.opensBlock = true;
-			}
-//debugger;
+			let statements = Rule.Block.encloseStatements(conditions, statement, block);
+
 			// Create as a STATIC function
 	//TODO: create as an instance function we can call on ourself!
-			return `static ${methodName}(${args})${statements}`;
+			return `static ${methodName}(${args}) ${statements}`;
 		}
 	}
 );

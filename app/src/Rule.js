@@ -406,8 +406,9 @@ Rule.Repeat = class Repeat extends Rule {
 		return this.matched.map( match => match.results );
 	}
 
-	toSource() {
-		throw "Don't understand how to source Rule.Repeat!";
+	toSource(context) {
+		if (!this.matched) return undefined;
+		return this.matched.map(match => match.toSource(context));
 	}
 
 	toString() {
@@ -623,6 +624,31 @@ Rule.Block = class block extends Rule.Statement {
 		return " {\n" + this.blockToSource(context) + "\n" + "}";
 	}
 
+	// Format array of `statements` as a JS output block:
+	//	- if `statements` is empty, returns `{}`
+	//	- if `statements is a single line, returns `{ statement }`
+	//	- else returns multiple lines
+	static encloseStatements(...args) {
+		var statements = [];
+		for (var i = 0; i < args.length; i++) {
+			let arg = args[i];
+			if (Array.isArray(arg)) {
+				statements = statements.concat(arg);
+			}
+			else if (typeof arg === "string") {
+				statements.push(arg);
+			}
+		}
+		statements = statements.join("\n");
+
+		if (!statements) return "{}";
+		if (!statements.includes("\n") && statements.length < 40) {
+			return `{ ${statements.trim()} }`;
+		}
+		if (statements[0] !== "\t") statements = `\t${statements}`;
+		return `{\n${statements}\n}`;
+	}
+
 }
 
 
@@ -672,7 +698,7 @@ Rule.BlockStatement = class block_statement extends Rule.Block {
 		let output = super.getMatchedSource(context, ...keys);
 		// add `block` to output if defined.
 		if (this.block) {
-			output.block = this.block.toSource(context);
+			output.block = this.block.blockToSource(context);
 		}
 		return output;
 	}
