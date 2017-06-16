@@ -240,16 +240,16 @@ Rule.Sequence = class Sequence extends Rule {
 	// NOTE: memoizes the results.
 	get results() {
 		if (!this.matched) return undefined;
-		let results = this.addResults({}, this.matched);
+		let results = this._addResults({}, this.matched);
 		if (this.comment) results.comment = this.comment;
 		return results;
 	}
 
-	addResults(results, matched) {
+	_addResults(results, matched) {
 		let index = 0, match = undefined;
 		while (match = matched[index++]) {
 			if (match.promote) {
-				return this.addResults(results, match.matched);
+				return this._addResults(results, match.matched);
 			}
 			else {
 				let argName = match.argument || match.ruleName || match.constructor.name;
@@ -477,22 +477,6 @@ Rule.BlankLine = class blank_line extends Rule {
 	}
 }
 
-// Open block representation in parser output.
-Rule.OpenBlock = class open_block extends Rule {
-	toSource(context) {
-		return "{";
-	}
-}
-
-
-// Close block representation in parser output.
-Rule.CloseBlock = class close_block extends Rule {
-	toSource(context) {
-		return "}";
-	}
-}
-
-
 // Parser error representation in parser output.
 Rule.StatementParseError = class parse_error extends Rule {
 	constructor(...props) {
@@ -533,31 +517,35 @@ Rule.Comment = class comment extends Rule {
 }
 
 
-Rule.Block = class block extends Rule {
+// A block is used to parse a nested block of statements.
+Rule.Block = class block extends Rule.Statement {
 
 	// Parse the entire `block`, returning results.
-	parseBlock(parser, block) {
+	parseBlock(parser, block, indent = 0) {
 		let matched = [];
 //console.warn("block:", block);
 		block.contents.forEach((item, index) => {
-			let itemResult;
+			let result;
 			if (item.length === 0) {
-				itemResult = new Rule.BlankLine();
+				matched.push(new Rule.BlankLine());
 			}
 			else if (item instanceof Tokenizer.Block) {
-				itemResult = this.parseBlock(parser, item);
-				itemResult.indent = block.indent + 1;
+				let last = matched[matched.length - 1];
+				if (last.parseBlock) {
+					last.parseBlock(parser, item, indent + 1);
+				}
+				else {
+					let block = this.parseBlock(parser, item, indent + 1);
+					matched.push(block);
+				}
 			}
 			else {
-				itemResult = this.parseStatement(parser, item);
+				matched = matched.concat(this.parseStatement(parser, item));
 			}
-
-			// add to output results
-			matched = matched.concat(itemResult);
 		});
 
 		return new Rule.Block({
-			indent: block.indent,
+			indent,
 			matched
 		});
 	}
@@ -638,7 +626,9 @@ Rule.Block = class block extends Rule {
 }
 
 
-// `Statements` are a block of `Statement` rules that understand nesting and comments.
+// `Statements` are a special case for a block of `Statement` rules
+//	that understand nesting and comments.
+//
 // This is a top-level construct, e.g. used to parse an entire file.
 Rule.Statements = class statements extends Rule.Block {
 
@@ -647,11 +637,12 @@ Rule.Statements = class statements extends Rule.Block {
 		var block = Tokenizer.breakIntoBlocks(tokens, start, end);
 
 		let matched = this.parseBlock(parser, block);
-		let result = this.clone({
+		if (!matched) return undefined;
+
+		return this.clone({
 			matched,
 			nextStart: end
 		});
-		return result;
 	}
 
 	// Output statements WITHOUT curly braces around them.
@@ -660,4 +651,30 @@ Rule.Statements = class statements extends Rule.Block {
 	}
 }
 
+
+// A `BlockStatement` (e.g. an `if` or `repeat`):
+//	- has an initial `statement`
+//	- MAY have an inline `statement` (on the same line, generally after a `:`)
+//	- MAY have contents as an embedded `block`
+//
+//	In your `getMatchedSource()`, `block` will be the resulting block output, if there is one.
+//	It's up to your rule to do something with it...
+Rule.BlockStatement = class block_statement extends Rule.Block {
+
+	// Parse a block and add it to `this.block`
+	parseBlock(parser, block, indent = 0) {
+		this.block = super.parseBlock(...arguments);
+	}
+
+	// Return `toSource()` for our `results` as a map.
+	// If you pass `keys`, we'll restrict to just those keys.
+	getMatchedSource(context, ...keys) {
+		let output = super.getMatchedSource(context, ...keys);
+		// add `block` to output if defined.
+		if (this.block) {
+			output.block = this.block.blockToSource(context);
+		}
+		return output;
+	}
+}
 
