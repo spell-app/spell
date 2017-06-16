@@ -898,8 +898,11 @@ const Tokenizer = {
 	// Break `tokens` between `start` and `end` into a `Tokenizer.Block` with nested `contents`.
 	// Skips "normal" whitespace and indents in the results.
 	breakIntoBlocks: function(tokens, start = 0, end = tokens.length) {
-		// restrict to tokens of interest and skip "normal" whitespace
-		tokens = Tokenizer.removeNormalWhitespace(tokens.slice(start, end));
+		// restrict to tokens of interest
+		tokens = tokens.slice(start, end);
+		// remove "normal" whitespace
+//TODO: better to leave this to consumers???
+		tokens = Tokenizer.removeNormalWhitespace(tokens);
 
 		// break into lines & return early if no lines
 		let lines = Tokenizer.breakIntoLines(tokens);
