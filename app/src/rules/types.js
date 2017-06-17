@@ -22,13 +22,13 @@ parser.import("core");
 parser.addStatement(
 	"define_type",
 	"define type {type} (?:as (a|an) {superType:type})?",
-	class define_type extends Rule.Statement {
+	class define_type extends Rule.BlockStatement {
 		toSource(context) {
-			let { type, superType } = this.getMatchedSource(context);
-			if (superType) {
-				return `class ${type} extends ${superType}`;
-			}
-			return `class ${type}`;
+			let { type, superType, block } = this.getMatchedSource(context);
+			let output = `class ${type}`;
+			if (superType) output += ` extends ${superType}`;
+			output += " " + Rule.Block.encloseStatements(block);
+			return output;
 		}
 	}
 );
@@ -102,18 +102,14 @@ parser.addSequence(
 parser.addStatement(
 	"declare_method",
 	"(to|on) {identifier} {args}? (\\:)? {statement}?",
-	class declare_method extends Rule.Statement {
+	class declare_method extends Rule.BlockStatement {
 		toSource(context) {
-			let { identifier, args, statement } = this.getMatchedSource(context);
+			let { identifier, args, statement, block } = this.getMatchedSource(context);
 			args = (Array.isArray(args) ? args.join(", ") : "");
-			if (!statement) {
-				return `${identifier}(${args})`;
-			}
-			else {
-				this.opensBlock = true;
-				this.closesBlock = true;
-				return `${identifier}(${args}) { ${statement} }`;
-			}
+
+			let output = `${identifier}(${args}) `;
+			output += Rule.Block.encloseStatements(statement, block);
+			return output;
 		}
 	}
 );
@@ -134,17 +130,17 @@ parser.addStatement(
 			let { keywords, statement, block } = this.getMatchedSource(context);
 
 			// if there's only one keyword, it can't be a blacklisted identifier or a type
-			let keywordResults = this.results.keywords;
+			let keywordMatches = this.results.keywords.matched;
 			if (keywords.length === 1) {
 				let keyword = keywords[0];
-				if (keywordResults[0].matched instanceof Rule.Type) {
+				if (keywordMatches[0] instanceof Rule.Type) {
 					throw new SyntaxError(`parse('declare_action'): one-word actions may not be types: ${keyword}`);
 				}
 
-console.warn("FIXME: parser.rules.identifier");
 // HACK: `global.parser` is a hack here for convenience in testing...
-				let parser = context ? context.parser : global.parser;
-				if (parser.rules.identifier.blacklist[keyword]) {
+				let parser = (context && context.parser) || global.parser;
+				let blacklist = parser.getBlacklist("identifier");
+				if (blacklist[keyword]) {
 					throw new SyntaxError(`parse('declare_action'): one-word actions may not be blacklisted identifiers": ${keyword}`);
 				}
 			}
@@ -153,7 +149,7 @@ console.warn("FIXME: parser.rules.identifier");
 			var args = [];
 			var types = [];
 			// if any of the words are types (capital letter) make that an argument of the same name.
-			keywordResults.matched.map( (item, index) => {
+			keywordMatches.map( (item, index) => {
 				if (item instanceof Rule.Type) {
 					let Type = keywords[index];
 					let type = Type.toLowerCase();
@@ -185,29 +181,15 @@ console.warn("FIXME: parser.rules.identifier");
 // If you specify arguments, yields a normal function which returns a value.
 parser.addStatement(
 	"getter",
-	"get {identifier} {args}? (\\:)? {expression}?",
-	class getter extends Rule.Statement {
+	"get {identifier} (\\:)? {expression}?",
+	class getter extends Rule.BlockStatement {
 		toSource(context) {
-			let { identifier, args, expression } = this.getMatchedSource(context);
-			args = (Array.isArray(args) ? args.join(", ") : "");
-
-			if (args && expression) {
-				this.opensBlock = true;
-				this.closesBlock = true;
-				return `${identifier}(${args}) { return (${expression}) }`;
-			}
-			else if (args) {
-				return `${identifier}(${args})`;
-			}
-			else if (expression) {
-				this.opensBlock = true;
-				this.closesBlock = true;
-				return `get ${identifier}() { return (${expression}) }`;
-			}
-			else {
-				return `get ${identifier}()`;
-			}
-			return result;
+			let { identifier, expression, block } = this.getMatchedSource(context);
+			// If they specified an inline-expression, prepend return
+			if (expression && !expression.startsWith("return ")) expression = `return (${expression})`;
+			let output = `get ${identifier}() `;
+			output += Rule.Block.encloseStatements(expression, block);
+			return output;
 		}
 	}
 );
@@ -223,23 +205,18 @@ parser.addStatement(
 parser.addStatement(
 	"setter",
 	"set {identifier} {args}? (\\:)? {statement}?",
-	class setter extends Rule.Statement {
+	class setter extends Rule.BlockStatement {
 		toSource(context) {
-			let { identifier, args = [identifier], statement = "" } = this.getMatchedSource(context);
+			// default args to the identifier
+			let { identifier, args = [identifier], statement, block } = this.getMatchedSource(context);
 			// Complain if more than one argument
 			if (args && args.length > 1) {
 				console.warn("parse('setter'): only one argument allowed in setter:  ", this.matchedText);
 				args = [ args[0] ];
 			}
-
-			if (!statement) {
-				return `set ${identifier}(${args})`;
-			}
-			else {
-				this.opensBlock = true;
-				this.closesBlock = true;
-				return `set ${identifier}(${args}) { ${statement} }`;
-			}
+			let output = `set ${identifier}(${args}) `;
+			output += Rule.Block.encloseStatements(statement, block);
+			return output;
 		}
 	}
 );

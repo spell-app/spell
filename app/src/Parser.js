@@ -200,6 +200,24 @@ export default class Parser {
 		return this.__rules;
 	}
 
+	// Return ALL instances of named rule, for us and our imports.
+	getRule(ruleName) {
+		let rules = [];
+		let imports = this.imports, index = 0, parser;
+		while (parser = imports[index++]) {
+			if (parser._rules[ruleName]) rules.push(parser._rules[ruleName]);
+		}
+		return rules;
+	}
+
+	// Return the concatenated blacklist for a given rule.
+	getBlacklist(ruleName) {
+		let rules = this.getRule(ruleName);
+		return rules.reduce(function (blacklist, rule) {
+			return Object.assign(blacklist, rule.blacklist);
+		}, {});
+	}
+
 	// Add a `rule` to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
 	addRule(ruleName, rule) {

@@ -600,18 +600,22 @@ Rule.Block = class block extends Rule.Statement {
 	}
 
 	// Return source for this block as an array of indented lines WITHOUT `{` OR `}`.
-	blockToSource(context) {
-		let results = [];
+	blockToSource(context, block = this.matched) {
+		let results = [], statement;
 
-		for (var i = 0; i < this.matched.length; i++) {
-			let match = this.matched[i];
-			let source = match.toSource(context) || "";
-			if (isWhitespace(source)) {
+		for (var i = 0; i < block.length; i++) {
+			let match = block[i];
+try {
+			statement = match.toSource(context) || "";
+} catch (e) {
+	console.warn("Error converting block: ", block, "statement:", match);
+}
+			if (isWhitespace(statement)) {
 				results.push("");
 			}
 			else {
-				source = source.split("\n");
-				results = results.concat(source);
+				statement = statement.split("\n");
+				results = results.concat(statement);
 			}
 		}
 		if (this.indent !== 0) {
