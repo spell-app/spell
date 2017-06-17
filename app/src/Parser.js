@@ -20,6 +20,7 @@ export default class Parser {
 	static TIME = false;
 
 	// Pointer to our tokenizer.
+	// TODO: dependency inject this?
 	Tokenzier = Tokenizer;
 
 	// Constructor.

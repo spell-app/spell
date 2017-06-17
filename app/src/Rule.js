@@ -57,7 +57,6 @@ export default class Rule {
 
 	// "gather" arguments in preparation to call `toSource()`
 	// Only callable after parse is completed.
-	// NOTE: you may want to memoize the results.
 	get results() {
 		return this;
 	}
@@ -408,9 +407,8 @@ Rule.Repeat = class Repeat extends Rule {
 	// "gather" arguments in preparation to call `toSource()`
 	// Only callable after parse is completed.
 	// Returns an array with arguments of all results.
-	// NOTE: memoizes the results.
 	get results() {
-		if (!this.matched) return undefined;
+		if (!this.matched) return [];
 		return this.matched.map( match => match.results );
 	}
 
@@ -527,6 +525,7 @@ Rule.Comment = class comment extends Rule {
 
 
 // A block is used to parse a nested block of statements.
+// Abstract class.
 Rule.Block = class block extends Rule.Statement {
 
 	// Parse the entire `block`, returning results.

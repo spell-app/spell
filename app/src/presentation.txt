@@ -1,0 +1,169 @@
+Presentation
+
+- vision
+	- "non-programmer programming environment"
+	- end goal:
+		- layperson can write an app
+		- customize / mashup existing apps for personal use
+
+	- 3 parts to this
+		- dnd app/component assembly
+		- "english" for app logic
+			- dynamic "human language" to "computer language" translator
+			- other human languages eventually
+			- "compiles" to JS for now
+		- "marketplace" for apps / components / language extensions
+
+	- example apps
+		=> TODO
+
+
+- Inspiration
+	- HyperCard / SuperCard
+	- Inform
+	- React (JSX)
+
+- language particulars
+	- Why "english"?
+		- layperson can READ programs, even if they can't write one initially
+			- everything in the language MUST be grammatical english
+			- OK to use "algebra" concepts (eg: `a = b`)
+		- "it's just english" leads to experimentation
+		- code is self-documenting
+		- "literate programming"
+		- talking interfaces are coming -- semicolons and parenthesis won't cut it
+
+	- Computer industry moving farther from layperson accessibility
+		- functional programming
+			- too mathy
+			- especially resurgence of lisp-like dialetcs
+
+	- Every lay person I've talked to has said
+		"Why doesn't it do that already???"
+
+	- examples
+		=> TODO
+
+- language is dynamic
+	- import new concepts (e.g. "bank account") to extend the language in your project
+	- two methods
+		- programmers can extend the language in Javascript (using "rule syntax")
+		- laypersons can automatically extend the language in the language itself
+			- creating a new "type"
+			- defining "actions" and "expressions"
+	- curated "marketplace" of standard concepts you can pull into your app
+
+- parser
+	- written in Javascript
+		- Dynamic nature of language means not suitable for YACC, Antlr, Chevrotain etc
+	- Parser implementation is not important, language syntax/features are!
+
+	- multi-pass algorithm:
+		- tokenize "human text"
+			- split raw text into tokens: "words", numbers, JSX expression, comments, etc
+
+		=> TODO: pre-process text
+
+		- parse tokens
+			- apply "rules" to tokens to generate syntax tree
+			- yields "syntax tree" of rule instances
+
+		- "compile"
+			- translate syntax tree into computer language
+
+	- rules
+		- named or ad-hoc parsing concept
+			- e.g. 	`identifier`
+			- e.g.	`declare_type`
+		- rules can be optional or required
+		- rules can repeat
+		- "terminals" vs "alternatives" vs "sequences"
+
+	- rule types
+		- terminals
+			- keyword			literal alphanumeric "word", e.g. `the`, `for each`
+			- symbol			literal symbol, e.g. `(`, `=` etc
+			- pattern			regular expression
+		- subrule				named rule to parse at this point
+		- alternatives			match one of a set of alternatives
+		- sequence				match a series of (possibly optional) rules
+								logical types:  "expression" and "statement"
+		- repeat				apply same rule over and over
+		- block					tab-nested series of statements
+			- statements		top-level series of statements, e.g. a file
+			- blockStatement	statement with possible nested block.
+								e.g. method or type definition
+
+	- rule syntax
+		- this is how we create actual rules in our language
+		- think: regular expression with sub-rules
+		- core rules all written in rule syntax
+
+Rule syntax example
+	- `define type {type} (?:as (a|an) {superType:type})?`
+			- `define` and `type` and `as` are literal keywords
+			- `{type}` is a subrule
+			- `{superType:type}` is a named subrule
+			- `(a|an)` is an alternatives -- either literal keyword will work
+				- `(…)` groups a set of rules together
+			- `(?:as (a|an) {superType:type})?`
+				- `(…)?` marks a group as "optional"
+					- also `(…)*` for "optional and possibly repeating"
+					- and `(…)*` for "required and possibly repeating"
+				- `(?:…)` is a "non-capturing" group -- results get pushed up to parent
+
+	- `define type {type} (?:as (a|an) {superType:type})?`
+			- matches text:
+				- `define type Card`, or
+				- `define type Employee as a Person`
+
+			- latter yields logical structure
+				- define_type
+					- type:			"Card"
+					- superType:	"Object"
+
+	- actual definition of the above:
+		parser.addStatement(
+			"define_type",
+			"define type {name:type} (?:as (a|an) {superType:type})?",
+			class define_type extends Rule.BlockStatement {
+				compile(context) {
+					let { name, superType, block } = this.getMatchedSource(context);
+					let output = `class ${name}`;
+					if (superType) output += ` extends ${superType}`;
+					output += " " + Rule.Block.encloseStatements(block);
+					return output;
+				}
+			}
+		)
+
+		- "name" of rule is "define_type"
+		- added to parser "rules" as "define_type" and "statement"
+			- adding 2 rules under same name (e.g. "statement") converts to an "alternatives"
+		- rule syntax expresses the rule
+		- implementation defined as a class for graceful debugging in JS console
+		- `compile()` routine translates parsed rule to Javascript
+
+Parsers
+	- layered parsers
+		- core
+		- libraries from marketplace
+		- user types = new parsers
+
+=>
+
+=> ambiguity
+=>
+
+
+Problems
+	- "left recursive" rules
+		- autodetects left recursive rules
+
+	- precedence
+		- currently "longest wins" and "most specific parser wins"
+		- "the field is empty or the value of the field is 'nothing'"
+			=> yields ((the field) is ((empty) or ((the value of the field) is ('nothing'))
+			=> want	  (((the field) is (empty)) or ((the value of the field) is ('nothing')))
+
+	- extending language can result in ambiguity
