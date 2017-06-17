@@ -31,6 +31,7 @@ parser.addStatement(
 	}
 );
 
+// NOTE: this is NOT a block statement... ???
 parser.addStatement(
 	"backwards_if",
 	"{statement} if {condition:expression} (?:(else|otherwise) {elseStatement:statement})?",
