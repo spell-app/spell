@@ -67,6 +67,14 @@ export default class Rule {
 		return this.matched;
 	}
 
+
+//
+// ## output as structure:
+//
+	toStructure(context) {
+		return undefined;
+	}
+
 //
 // ## group: reflection
 //
@@ -537,7 +545,7 @@ Rule.Block = class block extends Rule.Statement {
 				}
 				else {
 					let block = this.parseBlock(parser, item, indent + 1);
-					matched.push(block);
+					if (block !== undefined) matched.push(block);
 				}
 			}
 			else {
@@ -573,7 +581,6 @@ Rule.Block = class block extends Rule.Statement {
 
 		// parse the rest as a "statement"
 		statement = parser.parseRuleOrDie("statement", tokens, start, end, undefined, "parseStatement");
-
 		// complain if no statement and no comment
 		if (!statement && !comment) {
 			let error = new Rule.StatementParseError({
@@ -605,17 +612,26 @@ Rule.Block = class block extends Rule.Statement {
 
 		for (var i = 0; i < block.length; i++) {
 			let match = block[i];
+//console.info(i, match);
 try {
 			statement = match.toSource(context) || "";
 } catch (e) {
+	console.error(e);
 	console.warn("Error converting block: ", block, "statement:", match);
 }
+//console.info(i, statement);
 			if (isWhitespace(statement)) {
 				results.push("");
 			}
-			else {
+			else if (Array.isArray(statement)) {
+				results = results.concat(statement);
+			}
+			else if (typeof statement === "string") {
 				statement = statement.split("\n");
 				results = results.concat(statement);
+			}
+			else {
+				console.warn("blockToSource(): DON'T KNOW HOW TO WORK WITH\n\t", statement, "\n\tfrom match", match);
 			}
 		}
 		if (this.indent !== 0) {
