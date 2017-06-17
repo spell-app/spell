@@ -21,43 +21,68 @@ parser.import("core");
 // Define "type" (a.k.a. "class").
 parser.addStatement(
 	["define_type", "MUTATOR"],
-	"define type {type} (?:as (a|an) {superType:type})?",
+	"define type {name:type} (?:as (a|an) {superType:type})?",
 	class define_type extends Rule.BlockStatement {
 
 		// Return a logical representation of the data structure
 		toStructure(context) {
-			let { type, superType } = this.getMatchedSource(context);
+			let { name, superType } = this.getMatchedSource(context);
 			let block = (this.block && this.block.matched) || [];
 
+			let slots = {};
 			let properties = [];
 			let methods = [];
 			let other = [];
 			block.map(statement => statement.toStructure(context))
 				 .filter(Boolean)
-				 .forEach(structure => {
-					if (structure.type === "property") 		properties.push(structure);
-					else if (structure.type === "method") 	methods.push(structure);
-				 	else									other.push(structure);
-				 });
+				 .forEach(addStructure);
 
 			return {
 				type: "class",
-				name: type,
+				name,
 				superType,
+				slots,
 				properties,
 				methods,
 				other
+			}
+
+			function addStructure(structure) {
+				// add arrays as individual items
+				if (Array.isArray(structure)) return structure.forEach(addStructure);
+
+				// add under `slots` for quick hit of all significant bits...
+				if (structure.name) slots[structure.name] = structure;
+
+				switch (structure.type) {
+					case "property":
+					case "shared property":
+					case "constant":
+					case "getter":
+					case "setter":
+						properties.push(structure);
+						break;
+
+					case "method":
+					case "event":
+					case "action":
+						methods.push(structure);
+						break;
+
+					default:
+						other.push(structure);
+				}
 			}
 		}
 
 
 		toSource(context) {
-			let { type, superType, block } = this.getMatchedSource(context);
+			let { name, superType, block } = this.getMatchedSource(context);
 
 // DEBUG
 console.info("TYPE STRUCTURE:", this.toStructure(context));
 
-			let output = `class ${type}`;
+			let output = `class ${name}`;
 			if (superType) output += ` extends ${superType}`;
 			output += " " + Rule.Block.encloseStatements(block);
 			return output;
@@ -94,23 +119,18 @@ parser.addSequence(
 // Declare instance method or normal function.
 parser.addStatement(
 	["declare_method", "MUTATOR"],
-	"(to|on) {name:identifier} {args}? (\\:)? {statement}?",
+	"(operator:to|on) {name:identifier} {args}? (\\:)? {statement}?",
 	class declare_method extends Rule.BlockStatement {
 		// Return a logical representation of the data structure
 		toStructure(context) {
-			let { name, args } = this.getMatchedSource(context);
-			return {
-				type: "method",
-				name,
-				args
-			}
+			let { operator, name, args = []} = this.getMatchedSource(context);
+			let type = (operator === "to" ? "method" : "event");
+			return { type, name, args };
 		}
 
 		toSource(context) {
-			let { name, args, statement, block } = this.getMatchedSource(context);
-			args = (Array.isArray(args) ? args.join(", ") : "");
-
-			let output = `${name}(${args}) `;
+			let { name, args = [], statement, block } = this.getMatchedSource(context);
+			let output = `${name}(${args.join(", ")}) `;
 			output += Rule.Block.encloseStatements(statement, block);
 			return output;
 		}
@@ -174,7 +194,7 @@ parser.addStatement(
 		}
 
 		toSource(context) {
-			let { name, args, types, statement, block } = this.getMatchedSource(context);
+			let { name, args = [], types, statement, block } = this.getMatchedSource(context);
 
 			// figure out if there are any conditions due to known argument types
 			let conditions = [];
@@ -182,22 +202,16 @@ parser.addStatement(
 				conditions.push(`\tif (!spell.isA(${arg}, ${types[arg]})) return undefined`);
 			}
 
-			args = args.join(", ");
 			let statements = Rule.Block.encloseStatements(conditions, statement, block);
 
 			// Create as a STATIC function
 	//TODO: create as an instance function we can call on ourself!
-			return `static ${name}(${args}) ${statements}`;
+			return `static ${name}(${args.join(", ")}) ${statements}`;
 		}
 
 		toStructure(context) {
 			let { name, args, types } = this.getMatchedSource(context);
-			return {
-				type: "method",
-				name,
-				args,
-				types
-			}
+			return { type: "action", name, args, types }
 		}
 	}
 );
@@ -207,15 +221,21 @@ parser.addStatement(
 // If you specify arguments, yields a normal function which returns a value.
 parser.addStatement(
 	["getter", "MUTATOR"],
-	"get {identifier} (\\:)? {expression}?",
+	"get {name:identifier} (\\:)? {expression}?",
 	class getter extends Rule.BlockStatement {
 		toSource(context) {
-			let { identifier, expression, block } = this.getMatchedSource(context);
+			let { name, expression, block } = this.getMatchedSource(context);
 			// If they specified an inline-expression, prepend return
 			if (expression && !expression.startsWith("return ")) expression = `return (${expression})`;
-			let output = `get ${identifier}() `;
+			let output = `get ${name}() `;
 			output += Rule.Block.encloseStatements(expression, block);
 			return output;
+		}
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { name } = this.getMatchedSource(context);
+			return { type: "getter", name }
 		}
 	}
 );
@@ -230,19 +250,25 @@ parser.addStatement(
 //		 => `my color` within setter should automatically translate to `this._color` ???
 parser.addStatement(
 	["setter", "MUTATOR"],
-	"set {identifier} {args}? (\\:)? {statement}?",
+	"set {name:identifier} {args}? (\\:)? {statement}?",
 	class setter extends Rule.BlockStatement {
 		toSource(context) {
-			// default args to the identifier
-			let { identifier, args = [identifier], statement, block } = this.getMatchedSource(context);
+			// default args to the setter name
+			let { name, args = [name], statement, block } = this.getMatchedSource(context);
 			// Complain if more than one argument
 			if (args && args.length > 1) {
 				console.warn("parse('setter'): only one argument allowed in setter:  ", this.matchedText);
 				args = [ args[0] ];
 			}
-			let output = `set ${identifier}(${args}) `;
+			let output = `set ${name}(${args}) `;
 			output += Rule.Block.encloseStatements(statement, block);
 			return output;
+		}
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { name } = this.getMatchedSource(context);
+			return { type: "setter", name }
 		}
 	}
 );
@@ -255,13 +281,13 @@ parser.addStatement(
 //TODO: another name for `constant` ?
 parser.addStatement(
 	["declare_property", "MUTATOR"],
-	"(scope:property|constant|shared property) {identifier} (?:= {value:expression})?",
+	"(scope:property|constant|shared property) {name:identifier} (?:= {value:expression})?",
 	class declare_property extends Rule.Statement {
 		toSource(context) {
-			let { scope, identifier, value = "" } = this.getMatchedSource(context);
+			let { scope, name, value = "" } = this.getMatchedSource(context);
 			if (value) value = ` = ${value}`;
 
-			let declaration = `${identifier}${value}`;
+			let declaration = `${name}${value}`;
 			switch (scope) {
 				case "constant":
 					if (!value) console.warn("parse('declare_property'): constant properties must declare a value:  ", this.matchedText);
@@ -275,6 +301,12 @@ parser.addStatement(
 					return declaration;
 			}
 		}
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { scope, name } = this.getMatchedSource(context);
+			return { type: "property", name, scope };
+		}
 	}
 );
 
@@ -282,12 +314,18 @@ parser.addStatement(
 // TODO: initial value
 parser.addStatement(
 	["declare_property_of_type", "MUTATOR"],
-	"property {identifier} as (a|an)? {type}",
+	"property {name:identifier} as (a|an)? {type}",
 	class declare_property_of_type extends Rule.Statement {
 		toSource(context) {
-			let { identifier, type } = this.getMatchedSource(context);
-			return `get ${identifier}() { return this.__${identifier} }\n`
-				 + `set ${identifier}(value) { if (spell.isA(value, ${type}) this.__${identifier} = value }`;
+			let { name, type } = this.getMatchedSource(context);
+			return `get ${name}() { return this.__${name} }\n`
+				 + `set ${name}(value) { if (spell.isA(value, ${type}) this.__${name} = value }`;
+		}
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { name, type } = this.getMatchedSource(context);
+			return { type: "setter", name, dataType: type };
 		}
 	}
 );
@@ -296,19 +334,33 @@ parser.addStatement(
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
 parser.addStatement(
 	["declare_property_as_one_of", "MUTATOR"],
-	"property {identifier} as one of {list:literal_list}",
+	"property {name:identifier} as one of {list:literal_list}",
 	class declare_property_as_one_of extends Rule.Statement {
+		getMatchedSource(context) {
+			let output = super.getMatchedSource(context);
+			output.plural = pluralize(output.name);
+			return output;
+		}
+
 		toSource(context) {
-			let { identifier, list } = this.getMatchedSource(context);
-			let plural = pluralize(identifier);
+			let { name, plural, list } = this.getMatchedSource(context);
 			return `@proto ${plural} = ${list}\n`
-				 + `get ${identifier}() { return this.__${identifier} === undefined ? this.${plural}[0] : this.__${identifier} }\n`
-				 + `set ${identifier}(value) { if (this.${plural}.includes(value)) this.__${identifier} = value }`;
+				 + `get ${name}() { return this.__${name} === undefined ? this.${plural}[0] : this.__${name} }\n`
+				 + `set ${name}(value) { if (this.${plural}.includes(value)) this.__${name} = value }`;
 
 // MORE EFFICIENT BUT UGLIER
 // 			return `static ${plural} = ${list};\n`
-// 				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
-// 				 + `set ${identifier}(value) { if (this.constructor.${plural}.includes(value)) this.__${identifier} = value }`;
+// 				 + `get ${name} { return ("__${name}" in this ? this.__${name} : ${firstValue}) }\n`
+// 				 + `set ${name}(value) { if (this.constructor.${plural}.includes(value)) this.__${name} = value }`;
+		}
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { name, plural } = this.getMatchedSource(context);
+			return [
+				{ type: "property", name },
+				{ type: "shared property", name: plural }
+			];
 		}
 	}
 );
