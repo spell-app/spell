@@ -5,11 +5,19 @@
 // TODO: confirm identifiers are plural in some of the below?
 // TODO: `list.clone()` to return new list of same type.
 
-import { isPlural, singularize } from "../utils/string";
+import Parser from "../Parser";
 import Rule from "../Rule";
-import parser from "./_parser";
-// re-export parser for testing.
+
+import { isPlural, singularize } from "../utils/string";
+
+// Create "lists" parser context.
+const parser = Parser.forContext("lists");
 export default parser;
+
+// Import core rules.
+import "./core";
+parser.import("core");
+
 
 // WORKING FROM OTHER RULES (testme)
 //	`the length of <list>`
@@ -177,7 +185,7 @@ parser.addExpression(
 // e.g.	`first 4 items of list`
 //TESTME
 parser.addExpression(
-	"range_expression",
+	"first_in_range",
 	"first {number:expression} {identifier} (in|of) {list:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
@@ -192,7 +200,7 @@ parser.addExpression(
 // e.g.	`last 4 items of list`
 //TESTME
 parser.addExpression(
-	"range_expression",
+	"last_in_range",
 	"last {number:expression} {identifier} (in|of) {list:expression}",
 	class range_expression extends Rule.Expression {
 		toSource(context) {
@@ -236,13 +244,16 @@ parser.addExpression(
 );
 
 
-// Set membership.
+// Set membership (left recursive).
 // NOTE: we will singularize `identifier` and use that as the argument to `expression`.
 //TESTME
 parser.addExpression(
 	"list_membership_test",
 	"{list:expression} (operator:has|has no|doesnt have|does not have) {identifier} where {filter:expression}",
 	class list_membership_test extends Rule.Expression {
+		// Add test rule for quicker processing
+		testRule = new Rule.Match({ match: ["where"] });
+
 		toSource(context) {
 			let { identifier, operator, filter, list } = this.getMatchedSource(context);
 			let bang = operator === "has" ? "" : "!";
@@ -293,7 +304,7 @@ parser.addStatement(
 // Add to middle of list, pushing existing items out of the way.
 //TESTME
 parser.addStatement(
-	"list_splice",
+	"list_add_at",
 	"add {thing:expression} to {list:expression} at position {position:expression}",
 	class list_splice extends Rule.Statement {
 		toSource(context) {
@@ -311,7 +322,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_add_after",
 	"add {thing:expression} to {list:expression} after {item:expression}",
-	class list_splice extends Rule.Statement {
+	class list_add_after extends Rule.Statement {
 		toSource(context) {
 			let { thing, item, list } = this.getMatchedSource(context);
 			return `spell.splice(${list}, spell.positionOf(${list}, ${item}), ${thing})`;
@@ -331,7 +342,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_empty",
 	"(empty|clear) {list:expression}",
-	class list_empty extends Rule.Expression {
+	class list_empty extends Rule.Statement {
 		toSource(context) {
 			let { list } = this.getMatchedSource(context);
 			return `spell.clear(${list})`;
@@ -344,7 +355,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_remove_position",
 	"remove {identifier} {number:expression} of {list:expression}",
-	class list_remove_position extends Rule.Expression {
+	class list_remove_position extends Rule.Statement {
 		toSource(context) {
 			let { number, list } = this.getMatchedSource(context);
 			return `spell.removeItem(${list}, ${number})`;
@@ -359,7 +370,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_remove_range",
 	"remove {identifier} {start:expression} to {end:expression} of {list:expression}",
-	class list_remove_position extends Rule.Expression {
+	class list_remove_position extends Rule.Statement {
 		toSource(context) {
 			let { start, end, list } = this.getMatchedSource(context);
 			return `spell.removeRange(${list}, ${start}, ${end})`;
@@ -373,7 +384,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_remove",
 	"remove {thing:expression} from {list:expression}",
-	class list_remove extends Rule.Expression {
+	class list_remove extends Rule.Statement {
 		toSource(context) {
 			let { thing, list } = this.getMatchedSource(context);
 			return `spell.remove(${list}, ${thing})`;
@@ -387,7 +398,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_remove_where",
 	"remove {identifier} (in|of|from) {list:expression} where {condition:expression}",
-	class list_remove_where extends Rule.Expression {
+	class list_remove_where extends Rule.Statement {
 		toSource(context) {
 			let { identifier, condition, list } = this.getMatchedSource(context);
 			// use singular of identifier for method argument
@@ -407,7 +418,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_reverse",
 	"reverse {list:expression}",
-	class list_reverse extends Rule.Expression {
+	class list_reverse extends Rule.Statement {
 		toSource(context) {
 			let { list } = this.getMatchedSource(context);
 			return `spell.reverse(${list})`;
@@ -420,7 +431,7 @@ parser.addStatement(
 parser.addStatement(
 	"list_shuffle",
 	"(randomize|shuffle) {list:expression}",
-	class list_shuffle extends Rule.Expression {
+	class list_shuffle extends Rule.Statement {
 		toSource(context) {
 			let { list } = this.getMatchedSource(context);
 			return `spell.shuffle(${list})`;
@@ -433,15 +444,23 @@ parser.addStatement(
 //TESTME
 parser.addStatement(
 	"list_iteration",
-	"for (each)? {itemVar:identifier}(?:(and|,) {positionVar:identifier})? in {list:expression}:?",
-	class list_iteration extends Rule.Statement {
+	[
+		"for (each)? {itemVar:identifier} in {list:expression}:? {statement}?",
+		"for (each)? {itemVar:identifier} (and|,) {positionVar:identifier} in {list:expression}:? {statement}?",
+	],
+	class list_iteration extends Rule.BlockStatement {
 		toSource(context) {
-			let { itemVar, positionVar, list } = this.getMatchedSource(context);
+			let { itemVar, positionVar, list, statement, block } = this.getMatchedSource(context);
+			let output;
 			if (positionVar) {
-				return `for (let ${positionVar} = 1; ${positionVar} <= ${list}.length; ${positionVar}++) {\n`
-					+  `	let ${itemVar} = ${list}[${positionVar}-1]`;
+				output = `for (let ${positionVar} = 1, bar; ${itemVar} = ${list}[${positionVar}-1], ${positionVar} <= ${list}.length; ${positionVar}++) `
 			}
-			return `for (let ${itemVar} in ${list})`;
+			else {
+				// NOTE: this is relatively slow...  probably doesn't matter...
+				output = `for (let ${itemVar} of ${list}) `;
+			}
+			output += Rule.Block.encloseStatements(statement, block);
+			return output;
 		}
 	}
 );

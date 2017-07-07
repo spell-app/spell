@@ -1,11 +1,13 @@
 ## Competition
 - https://bubble.is/apps
+- https://framer.com/
 
 
 ## Inspiration
-- d3.express:	https://medium.com/@mbostock/a-better-way-to-code-2b1d2876a3a0
-- vega-Lite:	https://vega.github.io/vega-lite/
-
+- d3.express:		https://medium.com/@mbostock/a-better-way-to-code-2b1d2876a3a0
+- vega-Lite:		https://vega.github.io/vega-lite/
+- sketch-n-sketch:	https://ravichugh.github.io/sketch-n-sketch/
+- https://www.visualcinnamon.com/
 
 ## Collaborators?
 - Jacqueline Landman Gay (HC Forum): http://www.hyperactivesw.com/who_we_are.html

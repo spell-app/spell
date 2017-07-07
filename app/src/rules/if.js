@@ -1,36 +1,47 @@
 //
-//	# Rules for creating variables, property access, etc
+//	# Rules for if statements.
 //
 
+import Parser from "../Parser";
 import Rule from "../Rule";
-import parser from "./_parser";
-import "./core";
 
-// re-export parser for testing.
+// Create "if" parser context.
+const parser = Parser.forContext("if");
 export default parser;
+
+// Import core rules.
+import "./core";
+parser.import("core");
+
+
+// TODO: custom `getMatcher`:
+//			- `condtion` wraps in parens if NOT wrapped
 
 //TESTME
 parser.addStatement(
 	"if",
 	"if {condition:expression} (then|:)? {statement}?",
-	class if_ extends Rule.Statement {
+	class if_ extends Rule.BlockStatement {
 		toSource(context) {
-			let { condition, statement } = this.getMatchedSource(context);
-			if (statement) return `if (${condition}) { ${statement} }`;
-			return `if (${condition})`
+			let { condition, statement, block } = this.getMatchedSource(context);
+//			if (statement && block) throw new SyntaxError("if may only have inline statement OR block");
+			let statements = Rule.Block.encloseStatements(statement, block);
+			return `if (${condition}) ${statements}`;
 		}
 	}
 );
 
+// NOTE: this is NOT a block statement... ???
 parser.addStatement(
 	"backwards_if",
 	"{statement} if {condition:expression} (?:(else|otherwise) {elseStatement:statement})?",
 	class backwards_if extends Rule.Statement {
-		leftRecursive = true;
+		testRule = new Rule.Match({ match: ["if"] });
 		toSource(context) {
 			let { condition, statement, elseStatement } = this.getMatchedSource(context);
-			if (elseStatement) return `if (${condition}) { ${statement} } else { ${elseStatement} }`
-			return `if (${condition}) { ${statement} }`;
+			let output = `if (${condition}) { ${statement} }`;
+			if (elseStatement) output += `\nelse { ${elseStatement} }`
+			return output;
 		}
 	}
 );
@@ -38,23 +49,25 @@ parser.addStatement(
 parser.addStatement(
 	"else_if",
 	"(else|otherwise) if {condition:expression} (then|:) {statement}?",
-	class else_if extends Rule.Statement {
+	class else_if extends Rule.BlockStatement {
 		toSource(context) {
-			let { condition, statement } = this.getMatchedSource(context);;
-			if (statement) return `else if (${condition}) { ${statement} }`;
-			return `else if (${condition})`
+			let { condition, statement, block } = this.getMatchedSource(context);
+//			if (statement && block) throw new SyntaxError("else if may only have inline statement OR block");
+			let statements = Rule.Block.encloseStatements(statement, block);
+			return `else if (${condition}) ${statements}`
 		}
 	}
 );
 
 parser.addStatement(
 	"else",
-	"(else|otherwise) {statement}?",
-	class else_ extends Rule.Statement {
+	"(else|otherwise) (:)? {statement}?",
+	class else_ extends Rule.BlockStatement {
 		toSource(context) {
-			let { statement } = this.getMatchedSource(context);
-			if (statement) return `else { ${statement} }`;
-			return `else`
+			let { statement, block } = this.getMatchedSource(context);
+//			if (statement && block) throw new SyntaxError("else if may only have inline statement OR block");
+			let statements = Rule.Block.encloseStatements(statement, block);
+			return `else ${statements}`
 		}
 	}
 );

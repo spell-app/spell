@@ -1,6 +1,12 @@
-import Rule from "../RuleSyntax";
-import "./if.js";
-import parser from "./statements.js";
+import Parser from "../Parser";
+
+import "./core";
+import "./if";
+import "./statements";
+
+let parser = new Parser();
+parser.import("core", "if", "statements");
+
 
 test("parser is defined", () => {
 	expect(parser).toBeDefined();
@@ -8,7 +14,7 @@ test("parser is defined", () => {
 
 test("simple if...then works w/o statement", () => {
 	let result = parser.parse("statement", "if a then");
-	expect(result.toSource()).toBe("if (a)");
+	expect(result.toSource()).toBe("if (a) {}");
 });
 
 test("simple if...then works", () => {
@@ -33,17 +39,17 @@ test("simple inverted if works", () => {
 
 test("simple inverted if...else works", () => {
 	let result = parser.parse("statement", "b = 1 if a else b = 2");
-	expect(result.toSource()).toBe("if (a) { b = 1 } else { b = 2 }");
+	expect(result.toSource()).toBe("if (a) { b = 1 }\nelse { b = 2 }");
 });
 
 test("simple inverted if...otherwise works", () => {
 	let result = parser.parse("statement", "b = 1 if a otherwise b = 2");
-	expect(result.toSource()).toBe("if (a) { b = 1 } else { b = 2 }");
+	expect(result.toSource()).toBe("if (a) { b = 1 }\nelse { b = 2 }");
 });
 
 test("simple else if...then works w/o statement", () => {
 	let result = parser.parse("statement", "else if a then");
-	expect(result.toSource()).toBe("else if (a)");
+	expect(result.toSource()).toBe("else if (a) {}");
 });
 
 test("simple else if...then works", () => {
@@ -58,12 +64,12 @@ test("simple else if...: works", () => {
 
 test("else works w/o statement", () => {
 	let result = parser.parse("statement", "else");
-	expect(result.toSource()).toBe("else");
+	expect(result.toSource()).toBe("else {}");
 });
 
 test("otherwise works w/o statement", () => {
 	let result = parser.parse("statement", "otherwise");
-	expect(result.toSource()).toBe("else");
+	expect(result.toSource()).toBe("else {}");
 });
 
 test("else works w/ statement", () => {

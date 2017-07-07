@@ -1,5 +1,11 @@
 import global from "./global";
 
+// Return true if text is all whitespace, including empty string.
+let ALL_WHITESPACE = /^\s*$/;
+export function isWhitespace(text) {
+	return ALL_WHITESPACE.test(text)
+}
+
 // Return the plural of `word`.
 // NOTE: this is not very good at all!!!
 // TODO: exceptions, etc.
@@ -25,6 +31,14 @@ export function singularize(word) {
 // NOTE: for words which are BOTH singular and plural, this will return true.
 export function isSingular(word) {
 	return word === singularize(word);
+}
+
+
+// Return a certain `number` of tab characters.
+const TABS = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+export function getTabs(number) {
+	if (typeof number !== "number") return "";
+	return TABS.substr(0, number);
 }
 
 

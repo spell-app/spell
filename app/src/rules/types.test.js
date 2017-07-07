@@ -1,5 +1,13 @@
-import Rule from "../RuleSyntax";
-import parser from "./index.js";
+import Parser from "../Parser";
+
+import "./core";
+import "./operators";
+import "./statements";
+import "./types";
+
+let parser = new Parser();
+parser.import("core", "types", "operators", "statements");
+
 
 test("parser is defined", () => {
 	expect(parser).toBeDefined();
@@ -72,12 +80,12 @@ test("args clause with 3 arguments", () => {
 // ## Define type
 test("define type", () => {
 	let match = parser.parse("statement", "define type Foo");
-	expect(match.toSource()).toBe('class Foo');
+	expect(match.toSource()).toBe('class Foo {}');
 });
 
 test("define type w/super", () => {
 	let match = parser.parse("statement", "define type Foo as a Bar");
-	expect(match.toSource()).toBe('class Foo extends Bar');
+	expect(match.toSource()).toBe('class Foo extends Bar {}');
 });
 
 
@@ -85,12 +93,12 @@ test("define type w/super", () => {
 // ## Declare method
 test("declare method w/no args & no statement", () => {
 	let match = parser.parse("statement", "to doit");
-	expect(match.toSource()).toBe('doit()');
+	expect(match.toSource()).toBe('doit() {}');
 });
 
 test("declare method w/args & no statement", () => {
 	let match = parser.parse("statement", "on doit with a, b");
-	expect(match.toSource()).toBe('doit(a, b)');
+	expect(match.toSource()).toBe('doit(a, b) {}');
 });
 
 test("declare method w/no args & statement", () => {
@@ -105,37 +113,26 @@ test("declare method w/args & statement", () => {
 
 
 // ## Getter
-test("getter w/no args & no expression", () => {
+test("getter w/no expression", () => {
 	let match = parser.parse("statement", "get foo:");
-	expect(match.toSource()).toBe('get foo()');
+	expect(match.toSource()).toBe('get foo() {}');
 });
 
-test("getter w/no args & expression", () => {
+test("getter w/expression", () => {
 	let match = parser.parse("statement", "get foo: avar is 1");
 	expect(match.toSource()).toBe('get foo() { return ((avar == 1)) }');
 });
-
-test("getter w/args & no expression", () => {
-	let match = parser.parse("statement", "get foo with avar:");
-	expect(match.toSource()).toBe('foo(avar)');
-});
-
-test("getter w/args & expression", () => {
-	let match = parser.parse("statement", "get foo with avar: avar is 1");
-	expect(match.toSource()).toBe('foo(avar) { return ((avar == 1)) }');
-});
-
 
 
 // ## Setter
 test("setter w/no arg & no statement", () => {
 	let match = parser.parse("statement", "set foo");
-	expect(match.toSource()).toBe('set foo(foo)');
+	expect(match.toSource()).toBe('set foo(foo) {}');
 });
 
 test("setter w/single arg & no statement", () => {
 	let match = parser.parse("statement", "set foo with bar");
-	expect(match.toSource()).toBe('set foo(bar)');
+	expect(match.toSource()).toBe('set foo(bar) {}');
 });
 
 test("setter w/no arg & statement", () => {
@@ -148,7 +145,7 @@ test("setter w/multiple just takes the first one", () => {
 //	global.console = { warn: jest.fn() }
 	let match = parser.parse("statement", "set foo with bar and baz");
 //	expect(console.warn).toBeCalled()
-	expect(match.toSource()).toBe('set foo(bar)');
+	expect(match.toSource()).toBe('set foo(bar) {}');
 });
 
 test("setter w/single arg & statement", () => {

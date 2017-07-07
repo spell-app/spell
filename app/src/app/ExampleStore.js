@@ -1,6 +1,16 @@
 /* Store of example spell code fragments. */
 import mobx, { observable, computed } from "mobx";
 
+// Make Parser and Tokenizer WARN as we run
+import Parser from "../Parser";
+Parser.WARN = true;
+Parser.DEBUG = true;
+Parser.TIME = true;
+
+import Tokenizer from "../Tokenizer";
+Tokenizer.WARN = true;
+
+
 export default class ExampleStore {
 	// CURRENT examples
 	@observable examples = {};
@@ -127,7 +137,15 @@ export default class ExampleStore {
 	compile() {
 		this.output = "...compiling...";
 		setTimeout(() => {
-			this.output = parser.compile(this.code);
+			let result = parser.parse("statements", this.code);
+			if (!result) {
+				console.warn("Can't parse!");
+				this.output = "Can't parse statements";
+			}
+			else {
+				console.info("Result", result);
+				this.output = result.toSource(parser);
+			}
 		}, 100);
 	}
 

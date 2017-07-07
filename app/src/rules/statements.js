@@ -2,12 +2,16 @@
 //	# Rules for creating variables, property access, etc
 //
 
+import Parser from "../Parser";
 import Rule from "../RuleSyntax";
-import parser from "./_parser";
-import "./core";
 
-// re-export parser for testing.
+// Create "statements" parser context.
+const parser = Parser.forContext("statements");
 export default parser;
+
+// Import core rules.
+import "./core";
+parser.import("core");
 
 
 //
@@ -16,7 +20,9 @@ export default parser;
 
 // Return a value
 //TESTME
-parser.addStatement("return_statement", "return {expression}",
+parser.addStatement(
+	"return_statement",
+	"return {expression}",
 	class return_statement extends Rule.Statement {
 		toSource(context) {
 			let { expression } = this.getMatchedSource(context);
@@ -32,7 +38,8 @@ parser.addStatement("return_statement", "return {expression}",
 //
 
 //TESTME
-parser.addStatement("assignment",
+parser.addStatement(
+	["assignment", "MUTATOR"],
 	[
 		"{thing:expression} = {value:expression}",
 		"set {thing:expression} to {value:expression}",
@@ -49,7 +56,7 @@ parser.addStatement("assignment",
 
 //TESTME
 parser.addStatement(
-	"get_expression",
+	["get_expression", "MUTATOR"],
 	"get {value:expression}",
 	class get_expression extends Rule.Statement {
 		toSource(context) {

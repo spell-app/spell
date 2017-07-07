@@ -3,12 +3,15 @@ To get started
 - Clone this repo
 - `cd <repo location>`
 - `npm install`
+- Open file `<repo location>/index.html` in your web browser.
 
 
-To compile code
+To auto-compile code
 ----------------
 - `cd <repo location>`
 - `npm run watch`
+
+- NOTE: initial compile time can take quite a while due to the inclusion of the "React-SemanticUI" library in the demo app -- the parser itself is quite small.
 
 
 To test
@@ -31,30 +34,31 @@ Parser operation
 
 To parse English text
 
-- parser.parse("a = 1")
+- `parser.parse("a = 1")`
 	- returns the syntax tree, easiest for now to inspect it in the console
 
 or
 
-- parser.parse("expression", "a = 1")
+- `parser.parse("expression", "a = 1")`
 	- parse "text" as a specific rule type
 
 
 To "compile" text into javascript:
 
-- parser.compile("a = 1")
-- parser.parse("expression", "a = 1")
+- `parser.compile("a = 1")`
+- `parser.parse("expression", "a = 1")`
 
 
 Rule
 ----
-- `Rule`s match specific characters/logical structures in a `textStream`.
+- `Rule`s match specific characters/logical structures the provided text.
 - Simple rules are composed into larger rules, for example:
-	- `identifier` is a simple rule satisified with a regular expression,
-	- `{literal-value}` is a rule satisfied with one alternative of a set of regular expressions, while
-	- `{identifier} = {literal-value}` is a `statement` rule which uses the above as subrules.
+	- `the` is a simple rule satisified with simple text match
+	- `{expression}` matches the "expression" sub-rule
+	- `{identifier} = {expression}` is a `statement` rule which uses the above as subrules.
 - Rules come in various flavors:
-	- `Keyword`s match a literal string.
+	- `Keyword`s match a literal word-like string.
+	- `Keyword`s match non-word-like single characters.
 	- `Pattern`s match a regular expression.
 	- `Subrule`s match another rule, specified by rule name.
 	- `Sequence`s match a sequence of named rules and/or keywords.

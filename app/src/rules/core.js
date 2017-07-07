@@ -3,30 +3,23 @@
 //
 // NOTE: many of the below are created as custom Pattern subclasses for debugging.
 //
+import Parser from "../Parser";
 import Rule from "../RuleSyntax";
 import Tokenizer from "../Tokenizer";
-import parser from "./_parser";
 
-// re-export parser for testing.
+// Create `core` parser context.
+const parser = Parser.forContext("core");
 export default parser;
 
 
-Rule.Comment = class comment extends Rule {
-	// Comments are specially nodes in our token stream.
-	parse(parser, tokens, startIndex = 0, stack) {
-		let token = tokens[startIndex];
-		if (!(token instanceof Tokenizer.Comment)) return undefined;
-		return this.clone({
-			matched: token,
-			nextStart: startIndex + 1
-		});
-	}
+//
+// ### Install standard rules
+//
 
-	toSource(context) {
-		return `//${this.matched.whitespace}${this.matched.comment}`;
-	}
-}
+parser.addRule("statements", Rule.Statements);
 parser.addRule("comment", Rule.Comment);
+
+
 
 
 // `word` = is a single alphanumeric word.
@@ -43,6 +36,7 @@ parser.addRule("word", Rule.Word);
 
 // `identifier` = variables or property name.
 // MUST start with a lower-case letter (?)
+// NOTE: We blacklist a lot of words as identifiers.
 Rule.Identifier = class identifier extends Rule.Pattern {
 	// Convert "-" to "_" in source output.
 	toSource(context) {
@@ -50,7 +44,7 @@ Rule.Identifier = class identifier extends Rule.Pattern {
 	}
 };
 Rule.Identifier.prototype.pattern = /^[a-z][\w\-]*$/;
-parser.addRule(["identifier", "expression"], Rule.Identifier);
+let identifier = parser.addRule(["identifier", "expression"], Rule.Identifier);
 
 // Add English prepositions to identifier blacklist.
 //
@@ -59,7 +53,7 @@ parser.addRule(["identifier", "expression"], Rule.Identifier);
 //	express spatial or temporal relations  (in, under, towards, before)
 //	or mark various semantic roles (of, for).
 // TESTME
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"about", "above", "after", "and", "as", "at",
 	"before", "behind", "below", "beneath", "beside", "between", "beyond", "by",
 	"defined", "down", "during",
@@ -79,7 +73,7 @@ parser.rules.identifier.addToBlacklist(
 );
 
 // Add common english verbs to identifier blacklist.
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"are",
 	"do", "does",
 	"contains",
@@ -90,7 +84,7 @@ parser.rules.identifier.addToBlacklist(
 );
 
 // Add special control keywords to identifier blacklist.
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"else",
 	"if",
 	"otherwise",
@@ -104,7 +98,11 @@ Rule.Type = class type extends Rule.Pattern {
 	toSource(context) {
 		let type = this.matched;
 		switch(type) {
+			// Alias `List` to `Array`
+			case "List":		return "Array";
+
 			// special case to take the following as lowercase
+			case "list":		return "Array";
 			case "text":		return "String";
 			case "character":	return "Character";
 			case "number":		return "Number";
@@ -117,78 +115,9 @@ Rule.Type = class type extends Rule.Pattern {
 		}
 	}
 };
-Rule.Type.prototype.pattern = /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/;
-parser.addRule(["type", "expression"], Rule.Type);
-parser.rules.type.addToBlacklist("I");
-
-
-
-// `number` as either float or integer, created with custom constructor for debugging.
-// NOTE: you can also use `one`...`ten` as strings.'
-// TODO:  `integer` and `decimal`?  too techy?
-Rule.Number = class number extends Rule.Pattern {
-	// Special words you can use as numbers...
-	static NUMBER_NAMES = {
-		zero: 0,
-		one: 1,
-		two: 2,
-		three: 3,
-		four: 4,
-		five: 5,
-		six: 6,
-		seven: 7,
-		eight: 8,
-		nine: 9,
-		ten: 10
-	}
-
-	// Numbers get encoded as numbers in the token stream.
-	parse(parser, tokens, startIndex = 0) {
-		let token = tokens[startIndex];
-		// if a string, attempt to run through our NUMBER_NAMES
-		if (typeof token === "string") token = Rule.Number.NUMBER_NAMES[token];
-		if (typeof token !== "number") return undefined;
-		return this.clone({
-			matched: token,
-			nextStart: startIndex + 1
-		});
-	}
-
-	// Convert to number on source output.
-	toSource(context) {
-		return this.matched;
-	}
-};
-
-parser.addRule(["number", "expression"], Rule.Number);
-
-// Add number words to identifier blacklist.
-// TESTME
-parser.rules.identifier.addToBlacklist(
-	"one", "two", "three", "four", "five",
-	"six", "seven", "eight", "nine", "ten"
-);
-
-
-// Literal `text` string, created with custom constructor for debugging.
-// You can use either single or double quotes on the outside (although double quotes are preferred).
-// Returned value has enclosing quotes.
-Rule.Text = class text extends Rule.Pattern {
-	// Text strings get encoded as `text` objects in the token stream.
-	parse(parser, tokens, startIndex = 0) {
-		let token = tokens[startIndex];
-		if (!(token instanceof Tokenizer.Text)) return undefined;
-		return this.clone({
-			matched: token,
-			nextStart: startIndex + 1
-		});
-	}
-
-	toSource(context) {
-		return this.matched.quotedString;
-	}
-};
-parser.addRule(["text", "expression"], Rule.Text);
+Rule.Type.prototype.pattern = /([A-Z][\w\-]*|list|text|number|integer|decimal|character|boolean|object)/;
+let type = parser.addRule(["type", "expression"], Rule.Type);
+type.addToBlacklist("I");
 
 
 // Boolean literal, created with custom constructor for debugging.
@@ -212,12 +141,81 @@ parser.addRule(["boolean", "expression"], Rule.Boolean);
 
 // Add boolean tokens to identifier blacklist.
 // TESTME
-parser.rules.identifier.addToBlacklist(
+identifier.addToBlacklist(
 	"true", "false",
 	"yes", "no",
 	"ok", "cancel",
 	"success", "failure"
 );
+
+
+// `number` as either float or integer, created with custom constructor for debugging.
+// NOTE: you can also use `one`...`ten` as strings.'
+// TODO:  `integer` and `decimal`?  too techy?
+Rule.Number = class number extends Rule {
+	// Special words you can use as numbers...
+	static NUMBER_NAMES = {
+		zero: 0,
+		one: 1,
+		two: 2,
+		three: 3,
+		four: 4,
+		five: 5,
+		six: 6,
+		seven: 7,
+		eight: 8,
+		nine: 9,
+		ten: 10
+	}
+
+	// Numbers get encoded as numbers in the token stream.
+	parse(parser, tokens, start = 0) {
+		let token = tokens[start];
+		// if a string, attempt to run through our NUMBER_NAMES
+		if (typeof token === "string") token = Rule.Number.NUMBER_NAMES[token];
+		if (typeof token !== "number") return undefined;
+		return this.clone({
+			matched: token,
+			nextStart: start + 1
+		});
+	}
+
+	// Convert to number on source output.
+	toSource(context) {
+		return this.matched;
+	}
+};
+
+parser.addRule(["number", "expression"], Rule.Number);
+
+// Add number words to identifier blacklist.
+// TESTME
+identifier.addToBlacklist(
+	"one", "two", "three", "four", "five",
+	"six", "seven", "eight", "nine", "ten"
+);
+
+
+// Literal `text` string, created with custom constructor for debugging.
+// You can use either single or double quotes on the outside (although double quotes are preferred).
+// Returned value has enclosing quotes.
+Rule.Text = class text extends Rule {
+	// Text strings get encoded as `text` objects in the token stream.
+	parse(parser, tokens, start = 0) {
+		let token = tokens[start];
+		if (!(token instanceof Tokenizer.Text)) return undefined;
+		return this.clone({
+			matched: token,
+			nextStart: start + 1
+		});
+	}
+
+	toSource(context) {
+		return this.matched.quotedString;
+	}
+};
+parser.addRule(["text", "expression"], Rule.Text);
+
 
 
 // Literal list (array), eg:  `[1,2,true,false ]`
@@ -250,47 +248,3 @@ parser.addExpression(
 		}
 	}
 )
-
-
-
-//
-//	"Special" rules for `Statements`/block processing.
-// TODO: figure out some way to make this more in line with the rest of our rules
-//
-
-parser.addRule("statements", Rule.Statements);
-
-// Blank line representation in statements output
-Rule.BlankLine = class blank_line extends Rule {
-	toSource(context) {
-		return "\n";
-	}
-}
-parser.addRule("blank_line", Rule.BlankLine);
-
-// Open block representation in statements output
-Rule.OpenBlock = class open_block extends Rule {
-	toSource(context) {
-		return "{";
-	}
-}
-parser.addRule("open_block", Rule.OpenBlock);
-
-
-// Close block representation in statements output
-Rule.CloseBlock = class close_block extends Rule {
-	toSource(context) {
-		return "}";
-	}
-}
-parser.addRule("close_block", Rule.CloseBlock);
-
-
-// Parser error representation statements output
-Rule.ParseError = class parse_error extends Rule {
-	toSource(context) {
-		let message = this.message.split("\n").join("\n// ");
-		return `// ERROR: ${message}`;
-	}
-}
-parser.addRule("parse_error", Rule.ParseError);

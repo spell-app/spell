@@ -40,10 +40,10 @@ Object.assign(Rule, {
 		return syntaxStream;
 	},
 
-	parseRuleSyntax_tokens(syntaxStream, rules = [], startIndex = 0) {
+	parseRuleSyntax_tokens(syntaxStream, rules = [], start = 0) {
 		let lastIndex = syntaxStream.length;
-		while (startIndex < lastIndex) {
-			let [ rule, endIndex ] = Rule.parseRuleSyntax_token(syntaxStream, rules, startIndex);
+		while (start < lastIndex) {
+			let [ rule, end ] = Rule.parseRuleSyntax_token(syntaxStream, rules, start);
 			if (rule) {
 				let last = rules[rules.length-1];
 				// If this is a `Symbol` and last was a `Symbol`, merge together
@@ -55,41 +55,41 @@ Object.assign(Rule, {
  				}
 				rules.push(rule);
 			}
-			startIndex = endIndex + 1;
+			start = end + 1;
 		}
 		return rules;
 	},
 
-	parseRuleSyntax_token(syntaxStream, rules = [], startIndex = 0) {
-		let syntaxToken = syntaxStream[startIndex];
+	parseRuleSyntax_token(syntaxStream, rules = [], start = 0) {
+		let syntaxToken = syntaxStream[start];
 
 		// if we got a "\\" (which also has to go into the source string as "\\")
 		// treat the next token as a literal string rather than as a special character.
 		if (syntaxToken === "\\") {
-			return Rule.parseRuleSyntax_symbol(syntaxStream, rules, startIndex + 1);
+			return Rule.parseRuleSyntax_symbol(syntaxStream, rules, start + 1);
 		}
 
 		switch (syntaxToken) {
-			case "{":	return Rule.parseRuleSyntax_subrule(syntaxStream, rules, startIndex);
-			case "(":	return Rule.parseRuleSyntax_parentheses(syntaxStream, rules, startIndex);
-			case "[":	return Rule.parseRuleSyntax_list(syntaxStream, rules, startIndex);
+			case "{":	return Rule.parseRuleSyntax_subrule(syntaxStream, rules, start);
+			case "(":	return Rule.parseRuleSyntax_parentheses(syntaxStream, rules, start);
+			case "[":	return Rule.parseRuleSyntax_list(syntaxStream, rules, start);
 			case "*":
 			case "+":
-			case "?":	return Rule.parseRuleSyntax_repeat(syntaxStream, rules, startIndex);
+			case "?":	return Rule.parseRuleSyntax_repeat(syntaxStream, rules, start);
 
 			// the following should ALWAYS be consumed by the above
 			case "}":
 			case ")":
 			case "]":
 			case "|":
-				throw new SyntaxError(`Unexpected ${syntaxToken} found as item ${startIndex} of ${this.syntax}`);
+				throw new SyntaxError(`Unexpected ${syntaxToken} found as item ${start} of ${this.syntax}`);
 
 			default:
 				if (syntaxToken.match(Rule.KEYWORD_PATTERN)) {
-					return Rule.parseRuleSyntax_keyword(syntaxStream, rules, startIndex);
+					return Rule.parseRuleSyntax_keyword(syntaxStream, rules, start);
 				}
 				else {
-					return Rule.parseRuleSyntax_symbol(syntaxStream, rules, startIndex);
+					return Rule.parseRuleSyntax_symbol(syntaxStream, rules, start);
 				}
 		}
 	},
@@ -103,16 +103,16 @@ Object.assign(Rule, {
 	// in which case you can put the optional keyword in parens
 	//		`the {identifier} of (the?) {expression}`
 	//
-	// Returns `[ rule, endIndex ]`
+	// Returns `[ rule, end ]`
 	// Throws if invalid.
-	parseRuleSyntax_keyword(syntaxStream, rules = [], startIndex = 0, constructor) {
-		let match = [], endIndex;
+	parseRuleSyntax_keyword(syntaxStream, rules = [], start = 0, constructor) {
+		let match = [], end;
  		// eat keywords while they last
-		for (var i = startIndex; i < syntaxStream.length; i++) {
+		for (var i = start; i < syntaxStream.length; i++) {
 			let next = syntaxStream[i];
 			if (typeof next === "string" && next.match(Rule.KEYWORD_PATTERN)) {
 				match.push(next);
-				endIndex = i;
+				end = i;
 			}
 			else break;
 		}
@@ -120,14 +120,14 @@ Object.assign(Rule, {
 		if (!constructor) constructor = Rule.Keyword;
 		let rule = new constructor({ match });
 
-		return [ rule, endIndex ];
+		return [ rule, end ];
 	},
 
 	// Match `keyword` in syntax rules.
-	// Returns `[ rule, endIndex ]`
+	// Returns `[ rule, end ]`
 	// Throws if invalid.
-	parseRuleSyntax_symbol(syntaxStream, rules = [], startIndex = 0, constructor = Rule.Symbol) {
-		let string = syntaxStream[startIndex];
+	parseRuleSyntax_symbol(syntaxStream, rules = [], start = 0, constructor = Rule.Symbol) {
+		let string = syntaxStream[start];
 
 		if (!constructor) constructor = Rule.Symbol;
 
@@ -143,18 +143,18 @@ Object.assign(Rule, {
 			}
 		}
 
-		return [ rule, startIndex ];
+		return [ rule, start ];
 	},
 
 
 	// Match grouping expression `(...|...)` in syntax rules.
-	// Returns `[ rule, endIndex ]`
+	// Returns `[ rule, end ]`
 	// You can specify an explicit `rule.argument` with:  `(somearg:...)`
 	// You can specify that the results should be `promoted` to enclosing context with: `(?:...)`
 	//
 	// NOTE: nested parens may not have alternatives... :-(   `(a|(b|c))` won't work???
-	parseRuleSyntax_parentheses(syntaxStream, rules = [], startIndex = 0) {
-		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "(", ")", startIndex);
+	parseRuleSyntax_parentheses(syntaxStream, rules = [], start = 0) {
+		let { end, slice } = Parser.findNestedTokens(syntaxStream, "(", ")", start);
 
 		// pull out explicit "promote" flag: `?:`
 		let promote = (slice[0] === "?" && slice[1] === ":");
@@ -183,7 +183,7 @@ Object.assign(Rule, {
 		let rule = alternatives.length === 1 ? alternatives[0] : new Rule.Alternatives({ rules: alternatives });
 		if (argument) rule.argument = argument;
 		if (promote) rule.promote = true;
-		return [ rule, endIndex ];
+		return [ rule, end ];
 
 		function groupAlternatives(tokens) {
 			let alternatives = [];
@@ -196,9 +196,9 @@ Object.assign(Rule, {
 				}
 				// handle nested parens
 				else if (token === "(") {
-					let { endIndex } = Parser.findNestedTokens(tokens, "(", ")", i);
-					current = current.concat(tokens.slice(i, endIndex + 1));
-					i = endIndex;
+					let { end } = Parser.findNestedTokens(tokens, "(", ")", i);
+					current = current.concat(tokens.slice(i, end + 1));
+					i = end;
 				}
 				else {
 					current.push(token);
@@ -210,8 +210,8 @@ Object.assign(Rule, {
 	},
 
 	// Match repeat indicator `?`, `+` or `*` by attaching it to the previous rule.
-	parseRuleSyntax_repeat(syntaxStream, rules = [], startIndex = 0) {
-		let symbol = syntaxStream[startIndex];
+	parseRuleSyntax_repeat(syntaxStream, rules = [], start = 0) {
+		let symbol = syntaxStream[start];
 		let rule = rules[rules.length - 1];
 		if (!rule) throw new SyntaxError(`Can't attach repeat symbol ${symbol} to empty rule!`);
 
@@ -229,14 +229,14 @@ Object.assign(Rule, {
 			rule.optional = true;
 		}
 
-		return [ undefined, startIndex ]
+		return [ undefined, start ]
 	},
 
 	// Match `{<ruleName>}` in syntax rules.
-	// Returns `[ rule, endIndex ]`
+	// Returns `[ rule, end ]`
 	// Throws if invalid.
-	parseRuleSyntax_subrule(syntaxStream, rules = [], startIndex = 0) {
-		let match = Parser.findNestedTokens(syntaxStream, "{", "}", startIndex);
+	parseRuleSyntax_subrule(syntaxStream, rules = [], start = 0) {
+		let match = Parser.findNestedTokens(syntaxStream, "{", "}", start);
 		let argument;
 		if (match.slice.length === 3 && match.slice[1] === ":") {
 			argument = match.slice[0];
@@ -255,14 +255,14 @@ Object.assign(Rule, {
 
 		let rule = new Rule.Subrule(params);
 		if (argument) rule.argument = argument;
-		return [ rule, match.endIndex ];
+		return [ rule, match.end ];
 	},
 
 	// Match list expression `[<item><delimiter>]` in syntax rules.
-	// Returns `[ rule, endIndex ]`
+	// Returns `[ rule, end ]`
 	// Throws if invalid.
-	parseRuleSyntax_list(syntaxStream, rules = [], startIndex = 0, constructor = Rule.List) {
-		let { endIndex, slice } = Parser.findNestedTokens(syntaxStream, "[", "]", startIndex);
+	parseRuleSyntax_list(syntaxStream, rules = [], start = 0, constructor = Rule.List) {
+		let { end, slice } = Parser.findNestedTokens(syntaxStream, "[", "]", start);
 
 		let argument;
 		if (slice.length > 2 && slice[1] === ":") {
@@ -278,7 +278,7 @@ Object.assign(Rule, {
 
 		let rule = new constructor({ item, delimiter });
 		if (argument) rule.argument = argument;
-		return [ rule, endIndex ];
+		return [ rule, end ];
 	},
 
 });
@@ -294,7 +294,7 @@ Object.defineProperties(Parser.prototype, {
 	addSequence: { value: function(name, ruleSyntax, constructor = Rule.Sequence, properties) {
 		// Add a bunch of syntaxes at once if we got an array of syntaxes
 		if (Array.isArray(ruleSyntax))
-			return ruleSyntax.forEach(syntax => this.addSequence(name, syntax, constructor, properties));
+			return ruleSyntax.map(syntax => this.addSequence(name, syntax, constructor, properties))[0];
 
 		if (typeof constructor !== "function") {
 			properties = constructor;
@@ -303,7 +303,7 @@ Object.defineProperties(Parser.prototype, {
 		try {
 			let rule = Rule.parseRuleSyntax(ruleSyntax, constructor);
 			// Reflect the rule back out to make sure it looks (more or less) the same
-			if (Parser.debug) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
+			if (Parser.DEBUG) console.log(`Added rule '${name}':\n  INPUT: ${ruleSyntax} \n OUTPUT: ${rule}`);
 
 //console.info(name, constructor, rule);
 			if (properties) Object.assign(rule, properties);
@@ -318,7 +318,7 @@ Object.defineProperties(Parser.prototype, {
 	addStatement: { value: function(name, ruleSyntax, constructor = Rule.Statement, properties) {
 		// Add a bunch of syntaxes at once if we got an array of syntaxes
 		if (Array.isArray(ruleSyntax))
-			return ruleSyntax.forEach(syntax => this.addStatement(name, syntax, constructor, properties));
+			return ruleSyntax.map(syntax => this.addStatement(name, syntax, constructor, properties))[0];
 
 		let rule = this.addSequence(name, ruleSyntax, constructor, properties);
 		if (rule) return this.addRule("statement", rule);
@@ -327,7 +327,7 @@ Object.defineProperties(Parser.prototype, {
 	addExpression: { value: function(name, ruleSyntax, constructor = Rule.Expression, properties) {
 		// Add a bunch of syntaxes at once if we got an array of syntaxes
 		if (Array.isArray(ruleSyntax))
-			return ruleSyntax.forEach(syntax => this.addExpression(name, syntax, constructor, properties));
+			return ruleSyntax.map(syntax => this.addExpression(name, syntax, constructor, properties))[0];
 
 		let rule = this.addSequence(name, ruleSyntax, constructor, properties);
 		if (rule) return this.addRule("expression", rule);
@@ -336,7 +336,7 @@ Object.defineProperties(Parser.prototype, {
 	addList: { value: function(name, ruleSyntax, constructor = Rule.List, properties) {
 		// Add a bunch of syntaxes at once if we got an array of syntaxes
 		if (Array.isArray(ruleSyntax))
-			return ruleSyntax.forEach(syntax => this.addList(name, syntax, constructor, properties));
+			return ruleSyntax.map(syntax => this.addList(name, syntax, constructor, properties))[0];
 
 		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
 		let rule = (Rule.parseRuleSyntax_list(stream, [], 0, constructor) || [])[0];
@@ -348,7 +348,7 @@ Object.defineProperties(Parser.prototype, {
 	addKeyword: { value: function(name, ruleSyntax, constructor = Rule.Keyword, properties) {
 		// Add a bunch of syntaxes at once if we got an array of syntaxes
 		if (Array.isArray(ruleSyntax))
-			return ruleSyntax.forEach(syntax => this.addKeyword(name, syntax, constructor, properties));
+			return ruleSyntax.map(syntax => this.addKeyword(name, syntax, constructor, properties))[0];
 
 		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);
 		let rule = (Rule.parseRuleSyntax_keyword(stream, [], 0, constructor) || [])[0];
@@ -360,7 +360,7 @@ Object.defineProperties(Parser.prototype, {
 	addSymbol: { value: function(name, ruleSyntax, constructor = Rule.Symbol, properties) {
 		// Add a bunch of syntaxes at once if we got an array of syntaxes
 		if (Array.isArray(ruleSyntax))
-			return ruleSyntax.forEach(syntax => this.addSymbol(name, syntax, constructor, properties));
+			return ruleSyntax.map(syntax => this.addSymbol(name, syntax, constructor, properties))[0];
 
 		// Parse as `tokens`, which will merge Symbols for us.
 		let stream = Rule.tokeniseRuleSyntax(ruleSyntax);

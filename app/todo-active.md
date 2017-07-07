@@ -1,28 +1,34 @@
-- Each file defines a new "parser"
-	- let parser = Parser.withContext("name");
-
+Scope parsing
+- need to be able to define multiple scopes
+- add `endIndex` to `parse()`
 	-
 
+- parser.addScope("define_type", "define type...")
+	- if we parse initial line, matches to balanced indent / EOF
+	- can have custom rules (with higher precedence than default) for matching internal lines
+	- added as normal `statement` as well
 
-- Each parse file defines a "context"
-	- name
-	- priority (derived from load order)
-	- types
-	- rules
-	- vars (global and scope-local)
-	- imports (contexts we depend on)
+	// Add structural rule
+	let define_type = addNestedStructure(
+		"define_type",
+		"define type {type} (?:as (a|an) {superType:type})?",
+		class define_type extends Rule.Statement {...}
+	);
 
-	- getRule(name)
-		=> looks at our own + parents for a big "alternative"
-		=> higher priority rules will generally win
+	// Add rules which will only apply when parsing this structure
+	// TODO: statements only???
+	define_type.addStatement(...)
 
-- Loading the above
-	- let parser = Parser.withContext("name");
-		- can re-define a context later (to add to base classes, etc)
+- to add methods / globals / etc to the parse stream:
+	- need to parse types, methods, locals, globals, etc up front
+		BEFORE parsing method contents, variable declaration values, etc
 
-	- parser.import("context", "context2")
-	- parser.addRule() etc
-	- parser.addType() etc
+	- BUT: how do we know that this rule is the one we're matching???
+
+	- onParsed() method to update scope???
+
+- CHEAT: just do the above with
+	{expressionOrNestedBlock} ???
 
 
 - Structures
@@ -40,14 +46,6 @@
 		- globals: map
 		- locals: map
 		- rules - local rules for this scope ???
-
-	- structures are immutable
-		- all maps are proto clones of parent maps
-		- how to "proto clone" arrays?
-
-		- parser.addRule("statement", ...)
-			=> new parser.rules map
-			=> new parser.rules.statement array ?
 
 - Structure parsing
 	- "structure" rules:
@@ -186,7 +184,7 @@
 
 -> push context:  { parser, stack, supers, method } into parsing
 	- output doesn't require context...
-	- "local class" winds
+	- "local class" wins
 		- each class gets its own parser (or just rules?)
 		- match {expression} in each super parser
 		- level of parser in stack = specificity if 2 matches?
@@ -194,12 +192,6 @@
 
 - subrule needs to take params
 	- eg: "non-greedy"
-
-- getMatchedSource()
-	=> getMatched(context)
-
-
-
 
 
 - parsing feedback
@@ -216,12 +208,6 @@
 - parse result.tree
 	=> nested tree of results for visualization, transform
 	=> or is the tree just the matched array???
-
-
-
-- Rule.Repeat
-	- some default toSource()?
-	- at least default toMatchedSource()?
 
 
 - rule.number vs rule.integer => length rule should disambiguate...
@@ -261,25 +247,11 @@
 
 
 
-SPEEDUP
-- alternatives/etc to one regex?
-- parse structure first (statements only?)
-- break statement parsing up into interruptable chunks w/ promise
-
-
 
 BIG TICKETS
 - use specificity of results to disambiguate rules?
 	- CSS-like specificity heuristic for rules
 	-
-
-CLASSES AND MULTI-WORD STATEMENTS / METHODS
-- need to gather the above in the parser for this class and all antecedents BEFORE parsing method text
-- pre-flight code to pull these out and add them to parser before doing other things.
-- for this we'll need nested parsers:
-	- each class gets its own parser based on what's available to it...
-	- madness???"
-
 
 - define Pile:
 	- can play a card on me
@@ -332,13 +304,7 @@ Rule.test()
 		- re.and, eg    combining keyword AND string
 
 
-
-- instead of RuleSyntax doing a `Object.defineProperties`, compose a subclass???
-
-
 - `defineMemoized` as a property @modifier should be a lot smarter...
 
 - remember which file each rule came from
 	- global "RULE_FILE" in each file?
-
-- stream.head continuously is expensive -- memoize?

@@ -1,38 +1,50 @@
 //
 //	# Rules for defining classes (known as `types`)
 //
+
+// TODO: mixins / traits / composed classes / annotations
+
+import Parser from "../Parser";
+import Rule from "../RuleSyntax";
+
 import global from "../utils/global";
 import { pluralize } from "../utils/string";
-import Rule from "../RuleSyntax";
-import parser from "./_parser";
 
-// re-export parser for testing.
+// Create "types" parser context.
+const parser = Parser.forContext("types");
 export default parser;
 
+// Import core rules.
+import "./core";
+parser.import("core");
+
+// Define "type" (a.k.a. "class").
+parser.addStatement(
+	["define_type", "MUTATOR"],
+	"define type {name:type} (?:as (a|an) {superType:type})?",
+	class define_type extends Rule.BlockStatement {
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let structure = super.toStructure(context);
+			structure.type = "class";
+			return structure;
+		}
 
 
-//MOVE TO `objects`?
-// Properties clause: creates an object with one or more property values.
-//	`foo = 1, bar = 2`
-//TODO: would like to use `and` but that will barf on expressions...
-//TODO: how to do properties on multiple lines?
-//TESTME w/o `= expression`
-parser.addList(
-	"object_literal_properties",
-	"[({key:identifier}(?:= {value:expression})?) ,]",
-	class object_literal_properties extends Rule.List {
 		toSource(context) {
-			let props = this.results.matched.map(function (prop) {
-					let { key, value } = prop.results;
-					key = key.toSource(context);
-					value = value && value.toSource(context);
-					if (value) return `"${key}": ${value}`
-					return key;
-				});
-			return `{ ${props.join(", ")} }`;
+			let { name, superType, block } = this.getMatchedSource(context);
+			let output = `class ${name}`;
+			if (superType) output += ` extends ${superType}`;
+			output += " " + Rule.Block.encloseStatements(block);
+
+// DEBUG
+console.info("TYPE STRUCTURE:", this.toStructure(context));
+			return output;
 		}
 	}
 );
+
 
 // `new` or `create`
 // This works as an expression OR a statement.
@@ -55,60 +67,27 @@ parser.addSequence(
 );
 
 
-// Define class.
-parser.addStatement(
-	"define_type",
-	"define type {type} (?:as (a|an) {superType:type})?",
-	class define_type extends Rule.Statement {
-		toSource(context) {
-			let { type, superType } = this.getMatchedSource(context);
-			if (superType) {
-				return `class ${type} extends ${superType}`;
-			}
-			return `class ${type}`;
-
-		}
-	}
-);
-
 //TODO: constructor
 
 
 
-//MOVE TO `functions`?
-// Arguments clause for methods
-//	`with foo` or `with foo and bar and baz`
-//TODO: {identifier} = {expression}	=> requires `,` instead of `and`
-//TODO: `with foo as Type`
-//TODO:	`with foo...` for splat?
-parser.addSequence(
-	"args",
-	"with [args:{identifier} ,]",
-	class args extends Rule.Sequence {
-		// Returns an array of argument values
-		toSource(context) {
-			return this.results.args.matched.map(arg => arg.matched);
-		}
-	}
-);
-
-
 // Declare instance method or normal function.
 parser.addStatement(
-	"declare_method",
-	"(to|on) {identifier} {args}? (\\:)? {statement}?",
-	class declare_method extends Rule.Statement {
+	["declare_method", "MUTATOR"],
+	"(operator:to|on) {name:identifier} {args}? (\\:)? {statement}?",
+	class declare_method extends Rule.BlockStatement {
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { operator, name, args = []} = this.getMatchedSource(context);
+			let subType = (operator === "to" ? "method" : "event");
+			return { type: "function", subType, name, args };
+		}
+
 		toSource(context) {
-			let { identifier, args, statement } = this.getMatchedSource(context);
-			args = (Array.isArray(args) ? args.join(", ") : "");
-			if (!statement) {
-				return `${identifier}(${args})`;
-			}
-			else {
-				this.opensBlock = true;
-				this.closesBlock = true;
-				return `${identifier}(${args}) { ${statement} }`;
-			}
+			let { name, args = [], statement, block } = this.getMatchedSource(context);
+			let output = `${name}(${args.join(", ")}) `;
+			output += Rule.Block.encloseStatements(statement, block);
+			return output;
 		}
 	}
 );
@@ -122,67 +101,72 @@ parser.addStatement(
 //			`action add card to deck` => `add me to deck`
 //TESTME
 parser.addStatement(
-	"declare_action",
+	["declare_action", "MUTATOR"],
 	"action (keywords:{word}|{type})+ (\\:)? {statement}?",
-	class declare_action extends Rule.Statement {
-		toSource(context) {
-			let { keywords, statement } = this.results;
-			let words = keywords.matched.map( word => word.toSource(context) );
-			// if there's only one word, it can't be a blacklisted identifier or a type
-			if (words.length === 1) {
-				var word = words[0];
-				if (keywords.matched instanceof Rule.Type) {
-					throw new SyntaxError(`parse('declare_action'): one-word actions may not be types: ${word}`);
+	class declare_action extends Rule.BlockStatement {
+
+		// Add `name`, `args` and `types` to matched source
+		getMatchedSource(context) {
+			let output = super.getMatchedSource(context);
+
+			// if there's only one keyword, it can't be a blacklisted identifier or a type
+			let { keywords } = output;
+			let keywordMatches = this.results.keywords.matched;
+			if (keywords.length === 1) {
+				let keyword = keywords[0];
+				if (keywordMatches[0] instanceof Rule.Type) {
+					console.error(`parse('declare_action'): one-word actions may not be types: ${keyword}`);
 				}
 
 // HACK: `global.parser` is a hack here for convenience in testing...
-				let parser = context ? context.parser : global.parser;
-				if (parser.rules.identifier.blacklist[word]) {
-					throw new SyntaxError(`parse('declare_action'): one-word actions may not be blacklisted identifiers": ${word}`);
+				let parser = (context && context.parser) || global.parser;
+				let blacklist = parser.getBlacklist("identifier");
+				if (blacklist[keyword]) {
+					console.error(`parse('declare_action'): one-word actions may not be blacklisted identifiers": ${keyword}`);
 				}
 			}
 
 			// figure out arguments and/or types
-			var args = [];
-			var types = [];
+			output.args = [];
+			output.types = {};
+
 			// if any of the words are types (capital letter) make that an argument of the same name.
-			keywords.matched.map( (item, index) => {
+			keywordMatches.map( (item, index) => {
 				if (item instanceof Rule.Type) {
-					let type = words[index];
-					let word = type.toLowerCase();
-					types.push([type, word]);
-					words[index] = word;
-					args.push(word);
+					let Type = keywords[index];
+					let type = Type.toLowerCase();
+
+					output.types[type] = Type;
+					output.args.push(type);
+
+					// replace with lowercase in method name
+					keywords[index] = type;
 				}
 			});
 			// get static method name and arguments for output
-			let methodName = words.join("_");
-			args = args.join(", ");
+			output.name = keywords.join("_");
+			return output;
+		}
 
-			// figure out if there are any conditions on the above
-			let conditions = types.map( ([type, word]) => {
-				return `\tif (!spell.isA(${word}, ${type})) return undefined`;
-			});
+		toSource(context) {
+			let { name, args = [], types, statement, block } = this.getMatchedSource(context);
 
-			// get statements, adding conditions if necessary
-			statement = statement ? statement.toSource(context) : "";
-			let statements = "";
-			if (statement) {
-				statements = [];
-				if (conditions.length) statements = statements.concat(conditions);
-				if (statement) statements.push("\t" + statement);
-				statements = ` {\n${statements.join("\n")}\n }\n`;
-				this.opensBlock = true;
-				this.closesBlock = true;
+			// figure out if there are any conditions due to known argument types
+			let conditions = [];
+			for (let arg in types) {
+				conditions.push(`\tif (!spell.isA(${arg}, ${types[arg]})) return undefined`);
 			}
-			else if (conditions.length) {
-				statements = ` {\n${conditions.join("\n")}`;
-				this.opensBlock = true;
-			}
-//debugger;
+
+			let statements = Rule.Block.encloseStatements(conditions, statement, block);
+
 			// Create as a STATIC function
 	//TODO: create as an instance function we can call on ourself!
-			return `static ${methodName}(${args})${statements}`;
+			return `static ${name}(${args.join(", ")}) ${statements}`;
+		}
+
+		toStructure(context) {
+			let { name, args, types } = this.getMatchedSource(context);
+			return { type: "function", subType: "action", name, args, types }
 		}
 	}
 );
@@ -190,31 +174,24 @@ parser.addStatement(
 
 // Getter either with or without arguments.
 // If you specify arguments, yields a normal function which returns a value.
+// TODO: `to get...` ?
 parser.addStatement(
-	"getter",
-	"get {identifier} {args}? (\\:)? {expression}?",
-	class getter extends Rule.Statement {
+	["getter", "MUTATOR"],
+	"get {name:identifier} (\\:)? {expression}?",
+	class getter extends Rule.BlockStatement {
 		toSource(context) {
-			let { identifier, args, expression } = this.getMatchedSource(context);
-			args = (Array.isArray(args) ? args.join(", ") : "");
+			let { name, expression, block } = this.getMatchedSource(context);
+			// If they specified an inline-expression, prepend return
+			if (expression && !expression.startsWith("return ")) expression = `return (${expression})`;
+			let output = `get ${name}() `;
+			output += Rule.Block.encloseStatements(expression, block);
+			return output;
+		}
 
-			if (args && expression) {
-				this.opensBlock = true;
-				this.closesBlock = true;
-				return `${identifier}(${args}) { return (${expression}) }`;
-			}
-			else if (args) {
-				return `${identifier}(${args})`;
-			}
-			else if (expression) {
-				this.opensBlock = true;
-				this.closesBlock = true;
-				return `get ${identifier}() { return (${expression}) }`;
-			}
-			else {
-				return `get ${identifier}()`;
-			}
-			return result;
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { name } = this.getMatchedSource(context);
+			return { type: "property", subType: "getter", name }
 		}
 	}
 );
@@ -227,26 +204,28 @@ parser.addStatement(
 // TODO: internal getter/setter semantics ala objective C
 //			`set color: if color is in ["red", "blue"] then set my color to color`
 //		 => `my color` within setter should automatically translate to `this._color` ???
+// TODO: `to set...` ?
 parser.addStatement(
-	"setter",
-	"set {identifier} {args}? (\\:)? {statement}?",
-	class getter extends Rule.Statement {
+	["setter", "MUTATOR"],
+	"set {name:identifier} {args}? (\\:)? {statement}?",
+	class setter extends Rule.BlockStatement {
 		toSource(context) {
-			let { identifier, args = [identifier], statement = "" } = this.getMatchedSource(context);
+			// default args to the setter name
+			let { name, args = [name], statement, block } = this.getMatchedSource(context);
 			// Complain if more than one argument
 			if (args && args.length > 1) {
 				console.warn("parse('setter'): only one argument allowed in setter:  ", this.matchedText);
 				args = [ args[0] ];
 			}
+			let output = `set ${name}(${args}) `;
+			output += Rule.Block.encloseStatements(statement, block);
+			return output;
+		}
 
-			if (!statement) {
-				return `set ${identifier}(${args})`;
-			}
-			else {
-				this.opensBlock = true;
-				this.closesBlock = true;
-				return `set ${identifier}(${args}) { ${statement} }`;
-			}
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { name } = this.getMatchedSource(context);
+			return { type: "property", subType: "setter", name }
 		}
 	}
 );
@@ -258,14 +237,14 @@ parser.addStatement(
 
 //TODO: another name for `constant` ?
 parser.addStatement(
-	"declare_property",
-	"(scope:property|constant|shared property) {identifier} (?:= {value:expression})?",
+	["declare_property", "MUTATOR"],
+	"(scope:property|constant|shared property) {name:identifier} (?:= {value:expression})?",
 	class declare_property extends Rule.Statement {
 		toSource(context) {
-			let { scope, identifier, value = "" } = this.getMatchedSource(context);
+			let { scope, name, value = "" } = this.getMatchedSource(context);
 			if (value) value = ` = ${value}`;
 
-			let declaration = `${identifier}${value}`;
+			let declaration = `${name}${value}`;
 			switch (scope) {
 				case "constant":
 					if (!value) console.warn("parse('declare_property'): constant properties must declare a value:  ", this.matchedText);
@@ -279,19 +258,31 @@ parser.addStatement(
 					return declaration;
 			}
 		}
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { scope, name } = this.getMatchedSource(context);
+			return { type: "property", name, scope };
+		}
 	}
 );
 
 // TODO: scope_modifier???
 // TODO: initial value
 parser.addStatement(
-	"declare_property",
-	"property {identifier} as (a|an)? {type}",
-	class declare_property extends Rule.Statement {
+	["declare_property_of_type", "MUTATOR"],
+	"property {name:identifier} as (a|an)? {type}",
+	class declare_property_of_type extends Rule.Statement {
 		toSource(context) {
-			let { identifier, type } = this.getMatchedSource(context);
-			return `get ${identifier}() { return this.__${identifier} }\n`
-				 + `set ${identifier}(value) { if (spell.isA(value, ${type}) this.__${identifier} = value }`;
+			let { name, type } = this.getMatchedSource(context);
+			return `get ${name}() { return this.__${name} }\n`
+				 + `set ${name}(value) { if (spell.isA(value, ${type}) this.__${name} = value }`;
+		}
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { name, type } = this.getMatchedSource(context);
+			return { type: "property", subType: "setter", name, dataType: type };
 		}
 	}
 );
@@ -299,20 +290,34 @@ parser.addStatement(
 
 // TODO: warn on invalid set?  shared?  undefined? something other than the first value as default?
 parser.addStatement(
-	"declare_property",
-	"property {identifier} as one of {list:literal_list}",
+	["declare_property_as_one_of", "MUTATOR"],
+	"property {name:identifier} as one of {list:literal_list}",
 	class declare_property_as_one_of extends Rule.Statement {
+		getMatchedSource(context) {
+			let output = super.getMatchedSource(context);
+			output.plural = pluralize(output.name);
+			return output;
+		}
+
 		toSource(context) {
-			let { identifier, list } = this.getMatchedSource(context);
-			let plural = pluralize(identifier);
+			let { name, plural, list } = this.getMatchedSource(context);
 			return `@proto ${plural} = ${list}\n`
-				 + `get ${identifier}() { return this.__${identifier} === undefined ? this.${plural}[0] : this.__${identifier} }\n`
-				 + `set ${identifier}(value) { if (this.${plural}.includes(value)) this.__${identifier} = value }`;
+				 + `get ${name}() { return this.__${name} === undefined ? this.${plural}[0] : this.__${name} }\n`
+				 + `set ${name}(value) { if (this.${plural}.includes(value)) this.__${name} = value }`;
 
 // MORE EFFICIENT BUT UGLIER
 // 			return `static ${plural} = ${list};\n`
-// 				 + `get ${identifier} { return ("__${identifier}" in this ? this.__${identifier} : ${firstValue}) }\n`
-// 				 + `set ${identifier}(value) { if (this.constructor.${plural}.includes(value)) this.__${identifier} = value }`;
+// 				 + `get ${name} { return ("__${name}" in this ? this.__${name} : ${firstValue}) }\n`
+// 				 + `set ${name}(value) { if (this.constructor.${plural}.includes(value)) this.__${name} = value }`;
+		}
+
+		// Return a logical representation of the data structure
+		toStructure(context) {
+			let { name, plural } = this.getMatchedSource(context);
+			return [
+				{ type: "property", name },
+				{ type: "property", subType: "shared", name: plural }
+			];
 		}
 	}
 );
@@ -370,12 +375,57 @@ parser.addExpression(
 );
 
 parser.addExpression(
-	"property_expression",
+	"my_property_expression",
 	"(my|this) {identifier}",
-	class property_expression extends Rule.Expression {
+	class my_property_expression extends Rule.Expression {
 		toSource(context) {
 			let { identifier } = this.getMatchedSource(context);
 			return `this.${identifier}`;
+		}
+	}
+);
+
+
+//
+//	Utility
+//
+
+
+// Properties clause: creates an object with one or more property values.
+//	`foo = 1, bar = 2`
+//TODO: would like to use `and` but that will barf on expressions...
+//TODO: how to do properties on multiple lines?
+parser.addList(
+	"object_literal_properties",
+	"[({key:identifier}(?:= {value:expression})?) ,]",
+	class object_literal_properties extends Rule.List {
+		toSource(context) {
+			let props = this.results.matched.map(function (prop) {
+					let { key, value } = prop.results;
+					key = key.toSource(context);
+					value = value && value.toSource(context);
+					if (value) return `"${key}": ${value}`
+					return key;
+				});
+			return `{ ${props.join(", ")} }`;
+		}
+	}
+);
+
+
+//MOVE TO `functions`?
+// Arguments clause for methods
+//	`with foo` or `with foo and bar and baz`
+//TODO: {identifier} = {expression}	=> requires `,` instead of `and`
+//TODO: `with foo as Type`
+//TODO:	`with foo...` for splat?
+parser.addSequence(
+	"args",
+	"with [args:{identifier} ,]",
+	class args extends Rule.Sequence {
+		// Returns an array of argument values
+		toSource(context) {
+			return this.results.args.matched.map(arg => arg.matched);
 		}
 	}
 );

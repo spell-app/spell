@@ -1,3 +1,5 @@
+import { getTabs } from "./utils/string";
+
 // GRRR... node doesn't include this???
 // CHECK DIFFERENT NODE VERSIONS...
 if (!(Array.prototype.includes)) {
@@ -10,6 +12,32 @@ if (!(Array.prototype.includes)) {
 }
 
 
+
+// `whitespace` class for normal (non-indent, non-newline) whitespace.
+class whitespace {
+	constructor(whitespace) {
+		this.whitespace = whitespace;
+	}
+
+	// Return the "length" of this whitespace, eg for an indent.
+	get length() {
+		return this.whitespace.length;
+	}
+
+	toString() {
+		return this.whitespace;
+	}
+}
+
+
+// `indent` class.
+class indent extends whitespace {}
+
+
+// Newline singleton.
+class newline extends whitespace {}
+
+
 //
 //	# Tokenizer
 //	- `.tokenize()` 		Breaks up long string into tokens, including newlines, JSX expressions, etc.
@@ -18,6 +46,18 @@ if (!(Array.prototype.includes)) {
 // TODO: error checking / reporting, especially in JSX expressions.
 // TODO: have normal `tokenize` stick whitespace elements in the stream, then `tokenizeLines()` takes them out?
 const Tokenizer = {
+
+	// Should we warn about anomalous conditions?
+	WARN : false,
+
+	// Whitespace constructor.
+	Whitespace: whitespace,
+
+	// Indent constructor
+	Indent: indent,
+
+	// NEWLINE singleton.
+	NEWLINE: new newline("\n"),
 
 	// Tokenize text between `start` and `end` into an array of `results`, an array of:
 	//	- `Tokenizer.NEWLINE` for a newline symbol
@@ -31,7 +71,7 @@ const Tokenizer = {
 	tokenize(text, start = 0, end) {
 		if (typeof end !== "number" || end > text.length) end = text.length;
 		// quick return out of range or only whitespace
-		if (start >= end || !text.trim()) return undefined;
+		if (start >= end || !text.trim()) return [];
 
 		let tokens = [];
 		// Process our top-level rules.
@@ -40,7 +80,9 @@ const Tokenizer = {
 			tokens = tokens.concat(results);
 			start = nextStart;
 		}
-		if (start !== end) console.warn("tokenize(): didn't consume: `", text.slice(start, end) + "`");
+		if (start !== end) {
+			if (Tokenizer.WARN) console.warn("tokenize(): didn't consume: `", text.slice(start, end) + "`");
+		}
 
 		return results;
 	},
@@ -133,56 +175,20 @@ const Tokenizer = {
 		// forget it if no forward motion
 		if (whitespaceEnd === start) return undefined;
 
-		let token = new Tokenizer.Whitespace(text.slice(start, whitespaceEnd));
-
-		// if the char BEFORE start is a newline, consider this an "indent"
-		if (start === 0 || text[start-1] === "\n") token.isIndent = true;
+		let whitespace = text.slice(start, whitespaceEnd);
+		let token;
+		if (start === 0 || text[start-1] === "\n")
+			token = new Tokenizer.Indent(whitespace);
+		else
+			token = new Tokenizer.Whitespace(whitespace);
 
 		return [token, whitespaceEnd];
 	},
-
-	// Whitespace class
-	Whitespace : class whitespace {
-		constructor(whitespace) {
-			this.whitespace = whitespace;
-		}
-
-		// Return the "length" of this whitespace, eg for an indent.
-		get length() {
-			return this.whitespace.length;
-		}
-
-		// Return true if this indent is all tabs
-		get isTabs() {
-			return this.whitespace.split("").every(space => space === "\t");
-		}
-
-		// Return true if this indent is all spaces
-		get isTabs() {
-			return this.whitespace.split("").every(space => space === "\t");
-		}
-
-		// Return true if this indent is mixed tabs and spaces
-		get isMixed() {
-			let firstChar = this.whitespace[0];
-			return this.whitespace.split("").some(space => space !== firstChar);
-		}
-
-
-		toString() {
-			return this.whitespace;
-		}
-	},
-
 
 
 	//
 	//	### Newline
 	//
-
-	// Newline marker (singleton).
-	NEWLINE : new (class newline {})(),
-
 
 	// Match a single newline character at `text[start]`.
 	// Returns `[Tokenizer.NEWLINE, nextStart]` on match.
@@ -409,7 +415,9 @@ const Tokenizer = {
 
 		// advance past `>`
 		if (endBit !== ">") {
-			console.warn("Missing expected end `>` for jsxElement", jsxElement, "`"+text.slice(start, nextStart)+"`");
+			if (Tokenizer.WARN) {
+				console.warn("Missing expected end `>` for jsxElement", jsxElement, "`"+text.slice(start, nextStart)+"`");
+			}
 			jsxElement.error = "No end >";
 			return [jsxElement, nextStart];
 		}
@@ -504,7 +512,9 @@ const Tokenizer = {
 		}
 // TODO: how to surface this error???
 		if (nesting !== 0) {
-			console.warn(`matchJSXChildren(${text.slice(start, nextStart + 10)}: didn't match end child!`);
+			if (Tokenizer.WARN) {
+				console.warn(`matchJSXChildren(${text.slice(start, nextStart + 10)}: didn't match end child!`);
+			}
 		}
 		return [children, nextStart];
 	},
@@ -662,7 +672,9 @@ const Tokenizer = {
 
 		// if no match, we've got some sort of error
 		if (endIndex === undefined) {
-			console.warn("matchJSXText("+text.slice(start, start + 50)+"): JSX seems to be unbalanced.");
+			if (Tokenizer.WARN) {
+				console.warn("matchJSXText("+text.slice(start, start + 50)+"): JSX seems to be unbalanced.");
+			}
 			return undefined;
 		}
 
@@ -767,11 +779,6 @@ const Tokenizer = {
 	},
 
 
-//TODO:  `findAtHead(thing)` where thing is
-//			- (single or multi-char) string
-//			- array of alternative strings
-//			- regular expression
-
 	// Return the index of the first NON-ESCAPED character in `chars` after `text[start]`.
 	// Returns `undefined` if we didn't find a match.
 //TESTME
@@ -788,7 +795,172 @@ const Tokenizer = {
 		}
 		if (start >= end) return undefined;
 		return start;
-	}
+	},
+
+
+//
+// ### Utility
+//
+
+	// Given a set of tokens, slice whitespace (indent, NEWLINE or normal whitespace) from the front.
+	removeLeadingWhitespace(tokens, start = 0) {
+		while (tokens[start] instanceof Tokenizer.Whitespace) start++;
+		if (start === 0) return tokens;
+		return tokens.slice(start);
+	},
+
+	// Given a set of tokens, remove ALL "normal" whitespace tokens (NOT indent or NEWLINE).
+	removeNormalWhitespace(tokens) {
+		return tokens.filter(token => !Tokenizer.isNormalWhitespace(token));
+	},
+
+
+	// Return `true` if `token` is "normal" whitespce (not a newline or indent)
+	isNormalWhitespace(token) {
+		return token instanceof Tokenizer.Whitespace
+			&& !(token instanceof Tokenizer.Indent)
+			&& (token !== Tokenizer.NEWLINE);
+	},
+
+
+//
+// ### Block / indent processing
+//
+
+	// Simple block class for `breakIntoBlocks`.
+	Block: class block {
+		constructor(props){
+			Object.assign(this, props);
+			if (!this.contents) this.contents = [];
+		}
+
+		toString() {
+			return JSON.stringify(this, null, "\t");
+		}
+	},
+
+	// Break tokens into an array of arrays by `NEWLINE`s.
+	// Returns an array of lines WITHOUT the `NEWLINE`s.
+	// Lines which are composed solely of whitespace are treated as blank.
+	breakIntoLines(tokens) {
+		// Convert to lines.
+		let currentLine = [];
+		let lines = [currentLine];
+		tokens.forEach(token => {
+			// add new array for each newline
+			if (token === Tokenizer.NEWLINE) {
+				// create a new line and push it in
+				currentLine = [];
+				return lines.push(currentLine);
+			}
+
+			// otherwise just add to the current line
+			currentLine.push(token);
+		});
+
+		// Clear any lines that are only whitespace
+		lines.forEach((line, index) => {
+			if (line.length === 1 && line[0] instanceof Tokenizer.Whitespace) lines[index] = [];
+		});
+
+		return lines;
+	},
+
+	// Return indents of the specified lines.
+	// Indents empty lines (NEWLINEs) into the block AFTER they appear.
+	getLineIndents(lines, defaultIndent = 0) {
+		if (lines.length === 0) return [];
+
+		const indents = lines.map(Tokenizer.getLineIndent);
+		const end = indents.length;
+
+		// figure out the indent of the first non-empty line
+		let startIndent = getNextIndent(0);
+		if (startIndent === undefined) startIndent = defaultIndent;
+
+		// indent blank lines to the indent AFTER them
+		for (var index = 0; index < end; index++) {
+			if (indents[index] === undefined) {
+				indents[index] = getNextIndent(index + 1);
+			}
+		}
+		return indents;
+
+		// Return the value of the NEXT non-undefined indent.
+		function getNextIndent(index) {
+			while (index < end) {
+				if (indents[index] !== undefined) return indents[index];
+				index++;
+			}
+			return startIndent;
+		}
+	},
+
+
+	// Return the indent of a line of tokens.
+	// Returns `0` if not indented.
+	// Returns `undefined` if a blank line.
+	getLineIndent(line) {
+		if (!line || line.length === 0) return undefined;
+		if (line[0] instanceof Tokenizer.Indent) return line[0].length;
+		return 0;
+	},
+
+	// Break `tokens` between `start` and `end` into a `Tokenizer.Block` with nested `contents`.
+	// Skips "normal" whitespace and indents in the results.
+	breakIntoBlocks: function(tokens, start = 0, end = tokens.length) {
+		// restrict to tokens of interest
+		tokens = tokens.slice(start, end);
+		// remove "normal" whitespace
+//TODO: better to leave this to consumers???
+		tokens = Tokenizer.removeNormalWhitespace(tokens);
+
+		// break into lines & return early if no lines
+		let lines = Tokenizer.breakIntoLines(tokens);
+		if (lines.length === 0) return [];
+
+		// figure out indents
+		let indents = Tokenizer.getLineIndents(lines);
+
+		// First block is at the MINIMUM indent of all lines!
+		let maxIndent = Math.min.apply(Math, indents);
+		let block = new Tokenizer.Block({ indent: maxIndent });
+
+		// stack of blocks
+		let stack = [block];
+
+		lines.forEach( (line, index) => {
+			// Remove leading whitespace (eg: indents)
+			line = Tokenizer.removeLeadingWhitespace(line);
+
+			let lineIndent = indents[index];
+			let top = stack[stack.length - 1];
+			// If indenting, push new block(s)
+			if (lineIndent > top.indent) {
+				while (lineIndent > top.indent) {
+					var newBlock = new Tokenizer.Block({ indent: top.indent + 1 });
+					top.contents.push(newBlock);
+					stack.push(newBlock);
+
+					top = newBlock;
+				}
+			}
+			// If outdenting: pop block(s)
+			else if (lineIndent < top.indent) {
+				while (lineIndent < top.indent) {
+					stack.pop();
+					top = stack[stack.length - 1];
+				}
+			}
+			// add to top block
+			top.contents.push(line);
+		});
+
+		return block;
+	},
+
+
+
 
 };
 
