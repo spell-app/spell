@@ -98,7 +98,11 @@ Rule.Type = class type extends Rule.Pattern {
 	toSource(context) {
 		let type = this.matched;
 		switch(type) {
+			// Alias `List` to `Array`
+			case "List":		return "Array";
+
 			// special case to take the following as lowercase
+			case "list":		return "Array";
 			case "text":		return "String";
 			case "character":	return "Character";
 			case "number":		return "Number";
@@ -111,7 +115,7 @@ Rule.Type = class type extends Rule.Pattern {
 		}
 	}
 };
-Rule.Type.prototype.pattern = /([A-Z][\w\-]*|text|number|integer|decimal|character|boolean|object)/;
+Rule.Type.prototype.pattern = /([A-Z][\w\-]*|list|text|number|integer|decimal|character|boolean|object)/;
 let type = parser.addRule(["type", "expression"], Rule.Type);
 type.addToBlacklist("I");
 

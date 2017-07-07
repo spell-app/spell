@@ -643,6 +643,44 @@ try {
 		return " {\n" + this.blockToSource(context) + "\n" + "}";
 	}
 
+	// Convert to logical representation of structure by converting individual statements and grouping
+	// NOTE: you should override this and include "type"
+	toStructure(context) {
+		let { name, superType } = this.getMatchedSource(context);
+		let block = (this.block && this.block.matched) || [];
+
+		let named = {};
+		let properties = [];
+		let methods = [];
+		let other = [];
+		block.map(statement => statement.toStructure(context))
+			 .filter(Boolean)
+			 .forEach(addStructure);
+
+		return {
+			type: "unknown",
+			name,
+			superType,
+			named,
+			properties,
+			methods,
+			other
+		}
+
+		function addStructure(structure) {
+			// add arrays as individual items
+			if (Array.isArray(structure)) return structure.forEach(addStructure);
+
+			// add under `named` for quick hit of all significant bits...
+			if (structure.name) named[structure.name] = structure;
+
+			// add under 'methods', 'properties' or 'other'
+			if (structure.type === "function") methods.push(structure);
+			else if (structure.type === "property") properties.push(structure);
+			else other.push(structure);
+		}
+	}
+
 	// Format array of `statements` as a JS output block:
 	//	- if `statements` is empty, returns `{}`
 	//	- if `statements is a single line, returns `{ statement }`

@@ -19,43 +19,50 @@ Presentation
 
 
 - Inspiration
-	- HyperCard / SuperCard
+	- HyperCard / SuperCard / etc
 	- Inform
 	- React (JSX)
 
 - language particulars
 	- Why "english"?
 		- layperson can READ programs, even if they can't write one initially
-			- everything in the language MUST be grammatical english
-			- OK to use "algebra" concepts (eg: `a = b`)
 		- "it's just english" leads to experimentation
 		- code is self-documenting
 		- "literate programming"
-		- talking interfaces are coming -- semicolons and parenthesis won't cut it
+		- talking interfaces are coming -- semicolons and parenthesis won't cut it!
 
 	- Computer industry moving farther from layperson accessibility
 		- functional programming
 			- too mathy
 			- especially resurgence of lisp-like dialetcs
 
-	- Every lay person I've talked to has said
+	- Every lay person I've talked about "english as a programming language" to has said
 		"Why doesn't it do that already???"
 
 	- examples
 		=> TODO
 
-- language is dynamic
-	- import new concepts (e.g. "bank account") to extend the language in your project
-	- two methods
-		- programmers can extend the language in Javascript (using "rule syntax")
-		- laypersons can automatically extend the language in the language itself
-			- creating a new "type"
-			- defining "actions" and "expressions"
-	- curated "marketplace" of standard concepts you can pull into your app
+	- language is dynamic
+		- import new concepts (e.g. "bank account") to extend the language in your project
+		- two methods to extend
+			- programmers can extend the language in Javascript (using "rule syntax")
+			- laypersons can automatically extend the language in the language itself
+				- creating a new "type"
+				- defining "actions" and "expressions"
+		- curated "marketplace" of standard concepts you can pull into your app
 
-- parser
+	- language principles
+		- everything in the language MUST be grammatical english
+		- OK to use "basic math" concepts/symbols (eg: `a = b`)
+		- multiple ways to say the same thing
+		- embrace ambiguity
+		- declarative as much as possible
+
+
+- Parser
 	- written in Javascript
-		- Dynamic nature of language means not suitable for YACC, Antlr, Chevrotain etc
+		- Dynamic nature of language means not suitable for existing parsers (YACC, Antlr, Chevrotain etc)
+
 	- Parser implementation is not important, language syntax/features are!
 
 	- multi-pass algorithm:
@@ -68,16 +75,19 @@ Presentation
 			- apply "rules" to tokens to generate syntax tree
 			- yields "syntax tree" of rule instances
 
-		- "compile"
+		- "translate"
 			- translate syntax tree into computer language
 
-	- rules
-		- named or ad-hoc parsing concept
-			- e.g. 	`identifier`
-			- e.g.	`declare_type`
-		- rules can be optional or required
-		- rules can repeat
-		- "terminals" vs "alternatives" vs "sequences"
+		- "compile"
+			- compile computer language into executable code
+
+Rules
+	- named or ad-hoc parsing concept
+		- e.g. 	`identifier`
+		- e.g.	`declare_type`
+	- rules can be optional or required
+	- rules can repeat
+	- "terminals" vs "alternatives" vs "sequences"
 
 	- rule types
 		- terminals
@@ -89,7 +99,7 @@ Presentation
 		- sequence				match a series of (possibly optional) rules
 								logical types:  "expression" and "statement"
 		- repeat				apply same rule over and over
-		- block					tab-nested series of statements
+		- block					series of statements, uses tab-nesting (ala Python)
 			- statements		top-level series of statements, e.g. a file
 			- blockStatement	statement with possible nested block.
 								e.g. method or type definition
@@ -109,7 +119,7 @@ Rule syntax example
 			- `(?:as (a|an) {superType:type})?`
 				- `(…)?` marks a group as "optional"
 					- also `(…)*` for "optional and possibly repeating"
-					- and `(…)*` for "required and possibly repeating"
+					- and `(…)+` for "required and possibly repeating"
 				- `(?:…)` is a "non-capturing" group -- results get pushed up to parent
 
 	- `define type {type} (?:as (a|an) {superType:type})?`
@@ -119,15 +129,15 @@ Rule syntax example
 
 			- latter yields logical structure
 				- define_type
-					- type:			"Card"
-					- superType:	"Object"
+					- type:			"Employee"
+					- superType:	"Person"
 
 	- actual definition of the above:
-		parser.addStatement(
+		parser.addBlockStatement(
 			"define_type",
 			"define type {name:type} (?:as (a|an) {superType:type})?",
 			class define_type extends Rule.BlockStatement {
-				compile(context) {
+				toJS(context) {
 					let { name, superType, block } = this.getMatchedSource(context);
 					let output = `class ${name}`;
 					if (superType) output += ` extends ${superType}`;
@@ -142,15 +152,18 @@ Rule syntax example
 			- adding 2 rules under same name (e.g. "statement") converts to an "alternatives"
 		- rule syntax expresses the rule
 		- implementation defined as a class for graceful debugging in JS console
-		- `compile()` routine translates parsed rule to Javascript
+		- `toJS()` routine translates parsed rule to Javascript
 
 Parsers
 	- layered parsers
 		- core
-		- libraries from marketplace
+		- concept libraries (e.g. from marketplace)
 		- user types = new parsers
 
-=>
+
+
+
+
 
 => ambiguity
 =>
@@ -158,12 +171,30 @@ Parsers
 
 Problems
 	- "left recursive" rules
+		- eg:  "infix_operator_expression":
+			"{lhs:expression} {infix_operator} {rhs:expression}"
+		- most parsers require extensions gyrations in syntax to avoid this
 		- autodetects left recursive rules
+		- bails on non-productine left recursive rules
 
-	- precedence
-		- currently "longest wins" and "most specific parser wins"
-		- "the field is empty or the value of the field is 'nothing'"
+	- precedence / disambiguation
+		- Currently "longest wins" and "most specific parser wins"
+		- e.g. "the field is empty or the value of the field is 'nothing'"
 			=> yields ((the field) is ((empty) or ((the value of the field) is ('nothing'))
 			=> want	  (((the field) is (empty)) or ((the value of the field) is ('nothing')))
+		- Currently can correct with explicit parenthesis.
+		- How to build disambiguation / precendence into the rules?
+		- TODO: UI for allowing end user to see options and provide disambiguation hints..
 
 	- extending language can result in ambiguity
+
+
+Future Direction
+	- pre-process spell files to extend language automatically
+		- e.g. "bank account"
+	-
+	- languages other than english
+	- languages other than Javascript
+
+	- looking for a project to partner with
+

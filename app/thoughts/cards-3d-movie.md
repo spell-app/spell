@@ -1,6 +1,6 @@
 # MOVIE SCENARIO:  make a game
 
-- "make a new game..."
+- "make a new board game..."
 	- creates a green blank field in slightly isometric perspective
 - "... called 'Solitaire'"
 	- "called" brings up a data entry field with "Untitled Game"
@@ -16,24 +16,24 @@
 	- reach in an adjust rounding on corners
 - "ok"
 
-- "a deck is..."
-	- new type 'Deck' dialog
-- "...a set of cards..."
-	- show a hazy pile of cards
-- "...with suits 'clubs', 'diamonds', 'hearts', 'spades'..."
-	- add 'suits' slot to deck info dialog
-	- when first suit is announced
-		- add a breakout table of suits
-	- as each suit is announced:
-		- add <suit> to breakout table
-		- add a new hazy pile of cards with link back to suit in breakout table
-- "...and ranks 'ace', '2', ...., 'jack', 'queen', 'king'"
-	- add 'ranks' slot & breakout table
-	- as each '<rank>' is announced
-		- add entry to breakout table
-		- add new cards in a grid (going down)
-		- link from breakout table entry to row (underneath all cards in the row)
-- "ok"
+	- "a deck is..."
+		- new type 'Deck' dialog
+	- "...a set of cards..."
+		- show a hazy pile of cards
+	- "...with suits 'clubs', 'diamonds', 'hearts', 'spades'..."
+		- add 'suits' slot to deck info dialog
+		- when first suit is announced
+			- add a breakout table of suits
+		- as each suit is announced:
+			- add <suit> to breakout table
+			- add a new hazy pile of cards with link back to suit in breakout table
+	- "...and ranks 'ace', '2', ...., 'jack', 'queen', 'king'"
+		- add 'ranks' slot & breakout table
+		- as each '<rank>' is announced
+			- add entry to breakout table
+			- add new cards in a grid (going down)
+			- link from breakout table entry to row (underneath all cards in the row)
+	- "ok"
 
 
 - "the label of a card..."

@@ -26,65 +26,20 @@ parser.addStatement(
 
 		// Return a logical representation of the data structure
 		toStructure(context) {
-			let { name, superType } = this.getMatchedSource(context);
-			let block = (this.block && this.block.matched) || [];
-
-			let slots = {};
-			let properties = [];
-			let methods = [];
-			let other = [];
-			block.map(statement => statement.toStructure(context))
-				 .filter(Boolean)
-				 .forEach(addStructure);
-
-			return {
-				type: "class",
-				name,
-				superType,
-				slots,
-				properties,
-				methods,
-				other
-			}
-
-			function addStructure(structure) {
-				// add arrays as individual items
-				if (Array.isArray(structure)) return structure.forEach(addStructure);
-
-				// add under `slots` for quick hit of all significant bits...
-				if (structure.name) slots[structure.name] = structure;
-
-				switch (structure.type) {
-					case "property":
-					case "shared property":
-					case "constant":
-					case "getter":
-					case "setter":
-						properties.push(structure);
-						break;
-
-					case "method":
-					case "event":
-					case "action":
-						methods.push(structure);
-						break;
-
-					default:
-						other.push(structure);
-				}
-			}
+			let structure = super.toStructure(context);
+			structure.type = "class";
+			return structure;
 		}
 
 
 		toSource(context) {
 			let { name, superType, block } = this.getMatchedSource(context);
-
-// DEBUG
-console.info("TYPE STRUCTURE:", this.toStructure(context));
-
 			let output = `class ${name}`;
 			if (superType) output += ` extends ${superType}`;
 			output += " " + Rule.Block.encloseStatements(block);
+
+// DEBUG
+console.info("TYPE STRUCTURE:", this.toStructure(context));
 			return output;
 		}
 	}
@@ -124,8 +79,8 @@ parser.addStatement(
 		// Return a logical representation of the data structure
 		toStructure(context) {
 			let { operator, name, args = []} = this.getMatchedSource(context);
-			let type = (operator === "to" ? "method" : "event");
-			return { type, name, args };
+			let subType = (operator === "to" ? "method" : "event");
+			return { type: "function", subType, name, args };
 		}
 
 		toSource(context) {
@@ -211,7 +166,7 @@ parser.addStatement(
 
 		toStructure(context) {
 			let { name, args, types } = this.getMatchedSource(context);
-			return { type: "action", name, args, types }
+			return { type: "function", subType: "action", name, args, types }
 		}
 	}
 );
@@ -219,6 +174,7 @@ parser.addStatement(
 
 // Getter either with or without arguments.
 // If you specify arguments, yields a normal function which returns a value.
+// TODO: `to get...` ?
 parser.addStatement(
 	["getter", "MUTATOR"],
 	"get {name:identifier} (\\:)? {expression}?",
@@ -235,7 +191,7 @@ parser.addStatement(
 		// Return a logical representation of the data structure
 		toStructure(context) {
 			let { name } = this.getMatchedSource(context);
-			return { type: "getter", name }
+			return { type: "property", subType: "getter", name }
 		}
 	}
 );
@@ -248,6 +204,7 @@ parser.addStatement(
 // TODO: internal getter/setter semantics ala objective C
 //			`set color: if color is in ["red", "blue"] then set my color to color`
 //		 => `my color` within setter should automatically translate to `this._color` ???
+// TODO: `to set...` ?
 parser.addStatement(
 	["setter", "MUTATOR"],
 	"set {name:identifier} {args}? (\\:)? {statement}?",
@@ -268,7 +225,7 @@ parser.addStatement(
 		// Return a logical representation of the data structure
 		toStructure(context) {
 			let { name } = this.getMatchedSource(context);
-			return { type: "setter", name }
+			return { type: "property", subType: "setter", name }
 		}
 	}
 );
@@ -325,7 +282,7 @@ parser.addStatement(
 		// Return a logical representation of the data structure
 		toStructure(context) {
 			let { name, type } = this.getMatchedSource(context);
-			return { type: "setter", name, dataType: type };
+			return { type: "property", subType: "setter", name, dataType: type };
 		}
 	}
 );
@@ -359,7 +316,7 @@ parser.addStatement(
 			let { name, plural } = this.getMatchedSource(context);
 			return [
 				{ type: "property", name },
-				{ type: "shared property", name: plural }
+				{ type: "property", subType: "shared", name: plural }
 			];
 		}
 	}

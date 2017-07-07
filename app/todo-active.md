@@ -210,12 +210,6 @@ Scope parsing
 	=> or is the tree just the matched array???
 
 
-
-- Rule.Repeat
-	- some default toSource()?
-	- at least default toMatchedSource()?
-
-
 - rule.number vs rule.integer => length rule should disambiguate...
 - `if can play card on pile`	=> want to translate to:
 		- `pile.can_play_card(card)`
@@ -253,25 +247,11 @@ Scope parsing
 
 
 
-SPEEDUP
-- alternatives/etc to one regex?
-- parse structure first (statements only?)
-- break statement parsing up into interruptable chunks w/ promise
-
-
 
 BIG TICKETS
 - use specificity of results to disambiguate rules?
 	- CSS-like specificity heuristic for rules
 	-
-
-CLASSES AND MULTI-WORD STATEMENTS / METHODS
-- need to gather the above in the parser for this class and all antecedents BEFORE parsing method text
-- pre-flight code to pull these out and add them to parser before doing other things.
-- for this we'll need nested parsers:
-	- each class gets its own parser based on what's available to it...
-	- madness???"
-
 
 - define Pile:
 	- can play a card on me
@@ -324,13 +304,7 @@ Rule.test()
 		- re.and, eg    combining keyword AND string
 
 
-
-- instead of RuleSyntax doing a `Object.defineProperties`, compose a subclass???
-
-
 - `defineMemoized` as a property @modifier should be a lot smarter...
 
 - remember which file each rule came from
 	- global "RULE_FILE" in each file?
-
-- stream.head continuously is expensive -- memoize?
