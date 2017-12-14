@@ -80,15 +80,20 @@ RuleSyntax
 | Syntax		| Description |
 |---------------|-------------|
 | {...}		| Curly braces indicate that we should match a named subrule here. |
+| {rule:localName}		| A `:` inside a rule specifier allows you to specify a local name for that rule in the parse tree. |
 | (...)		| Parenthesis indicate a parenthesized expression, often a set of `Alternatives` or used to make a rule optional (see below). |
 | [...]		| Indicates a `List` expresion. |
 | (...&#124;...)	| A vertical pipe, generally found inside parenthesis, indicates a set of `Alternatives`, any one of which will work.
-| ...?		| A question mark indicates that the preceding rule is optional. |
 | ...*		| An asterisk indicates that the preceding rule is optional, and may repeat one or more times. |
 | ...+		| A plus indicates that the preceding rule is required, and MAY be repeated. |
 | whitespace	| Whitespace is used for nesting blocks and separating pattern/keyword rules, and is automatically consumed. **NOTE: Use `tab` characters for nesting.** |
 | anything else	| Pretty much anything else indicates a keyword, which may be punctuation, e.g. `=`, or english words `is`, `not`, `play`, etc. |
 
+Examples:
+---------
+- `if {condition:expression} (then|:)? {statement}?`
+- `{statement} if {condition:expression} (?:(else|otherwise) {elseStatement:statement})?`
+- `a random {identifier} (of|from|in) (the)? {list:expression}`
 
 License
 -------
