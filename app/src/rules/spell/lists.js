@@ -5,10 +5,10 @@
 // TODO: confirm identifiers are plural in some of the below?
 // TODO: `list.clone()` to return new list of same type.
 
-import Parser from "../Parser";
-import Rule from "../Rule";
+import Parser from "../../Parser";
+import Rule from "../../Rule";
 
-import { isPlural, singularize } from "../utils/string";
+import { isPlural, singularize } from "../../utils/string";
 
 // Create "lists" parser context.
 const parser = Parser.forContext("lists");
@@ -252,7 +252,8 @@ parser.addExpression(
 	"{list:expression} (operator:has|has no|doesnt have|does not have) {identifier} where {filter:expression}",
 	class list_membership_test extends Rule.Expression {
 		// Add test rule for quicker processing
-		testRule = new Rule.Match({ match: ["where"] });
+		static testRule = new Rule.Keyword({ match: ["where"] });
+		get testRule() { return this.constructor.testRule }
 
 		toSource(context) {
 			let { identifier, operator, filter, list } = this.getMatchedSource(context);

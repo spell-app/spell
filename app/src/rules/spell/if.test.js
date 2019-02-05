@@ -1,12 +1,4 @@
-import Parser from "../Parser";
-
-import "./core";
-import "./if";
-import "./statements";
-
-let parser = new Parser();
-parser.import("core", "if", "statements");
-
+import parser from "./index.js";
 
 test("parser is defined", () => {
 	expect(parser).toBeDefined();

@@ -2,8 +2,8 @@
 //	# Rules for creating variables, property access, etc
 //
 
-import Parser from "../Parser";
-import Rule from "../RuleSyntax";
+import Parser from "../../Parser";
+import Rule from "../../RuleSyntax";
 
 // Create "statements" parser context.
 const parser = Parser.forContext("statements");

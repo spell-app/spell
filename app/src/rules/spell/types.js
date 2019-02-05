@@ -4,11 +4,11 @@
 
 // TODO: mixins / traits / composed classes / annotations
 
-import Parser from "../Parser";
-import Rule from "../RuleSyntax";
+import Parser from "../../Parser";
+import Rule from "../../RuleSyntax";
 
-import global from "../utils/global";
-import { pluralize } from "../utils/string";
+import global from "../../utils/global";
+import { pluralize } from "../../utils/string";
 
 // Create "types" parser context.
 const parser = Parser.forContext("types");

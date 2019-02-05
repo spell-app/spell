@@ -61,7 +61,7 @@ export default class Parser {
 		}
 
 		// Parse the rule or throw an exception if rule not found.
-		let result = this.parseRuleOrDie(ruleName, tokens, 0, tokens.length, undefined, "parser.parse()");
+		let result = this.parseNamedRule(ruleName, tokens, 0, tokens.length, undefined, "parser.parse()");
 		if (Parser.TIME) console.timeEnd("parse");
 		return result;
 	}
@@ -86,35 +86,11 @@ export default class Parser {
 
 	// Parse a named rule (defined in this parser or in any of our `imports`), returning the "best" match.
 	// Returns `undefined` if no match.
-	// Throws if NOBODY implements `ruleName`.
-	//
-	// NOTE: currently "best" is defined as the first rule in our `imports` which matches...
-	parseRuleOrDie(ruleName, tokens, start, end, stack, callingContext = "parseRuleOrDie") {
-		// Keep track of whether rule was EVER found or not.
-		let ruleFound = false;
-		let imports = this.imports, index = 0, parser;
-		let results = [];
-		while (parser = imports[index++]) {
-			let rule = parser._rules[ruleName];
-			if (!rule) continue;
-			const result = rule.parse(this, tokens, start, end, stack);
-			if (result) results.push(result);
-			ruleFound = true;
-		}
-		// If never found, throw.
-		if (!ruleFound) throw new SyntaxError(`${callingContext}: rule '${ruleName}' not found`);
-
-		// If no match, return undefined.
-		if (results.length === 0) return undefined;
-
-		// If exactly one match, return that.
-		if (results.length === 1) return results[0];
-
-		// Otherwise return the longest match.
-		return results.reduce(function (largest, next) {
-			if (next.nextStart > largest.nextStart) return next;
-			return largest;
-		}, results[0]);
+	// Throws if rule is not implemented.
+	parseNamedRule(ruleName, tokens, start, end, stack, callingContext = "parseNamedRule") {
+    const rule = this.rules[ruleName];
+		if (!rule) throw new SyntaxError(`${callingContext}: rule '${ruleName}' not found`);
+    return rule.parse(this, tokens, start, end, stack);
 	}
 
 	// Test whether a rule (which may be specified by name) MIGHT be found in head of stream.
@@ -123,53 +99,39 @@ export default class Parser {
 	//	- `false` if there is no way the rule can be matched.
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
 	testRule(rule, tokens, start, end) {
-		// Handle rule instance
-		if (rule instanceof Rule) {
-			return rule.test(this, tokens, start, end);
-		}
-		// Handle named rule by looking in our imports
-		let imports = this.imports, index = 0, parser;
-		while (parser = imports[index++]) {
-			let nextRule = parser._rules[rule];
-			if (!nextRule) continue;
-			let result = nextRule.test(this, tokens, start, end);
-			if (result !== undefined) return result;
-		}
+	  if (typeof rule === "string") {
+	    rule = this.rules[rule];
+	    if (!rule) return undefined;    // TODO: throw?
+	  }
+	  return rule.test(this, tokens, start, end);
 	}
 
 
 //
 // ### 	Imports
-//		Parsers depend on other parsers for their `rules`.
-//		Imports are lazy-bound (and we assume the build file will include all necessary imports).
+//		Parsers can depend on other parsers for additional `rules`.
+//		Imports are lazy-bound into `parser.rules` as necessary.
+//    We assume the top-level parser for a language will include all necessary imports automatically.
 //
 
 	// Add one or more named imports to this parser.
 	// Imports increase in priority the later they are in the list.
+  imports = [];
 	import(...imports) {
 		// REVERSE the list of imports, so the most general one is LAST
 		// Thus more specific imports will be EARLIER in the `imports` list.
 
 		// Create new array of imports and add import names passed in.
-		this._imports = (this._imports || []).concat(imports.reverse());
-		// clear memoize variable for `imports`.
-		delete this.__imports;
-	}
+		this.imports = imports.reverse().concat(this.imports);
 
-	// Getter to return list of our `imports` as `Parser` objects, INCLUDING `this` parser itself!
-	// Most specific import (eg: ourself) is first in the list.
-	// Throws if an import can't be found.
-	get imports() {
-		if (!this.__imports) {
-			var imports = (this._imports ? this._imports.map(Parser.getContextOrDie) : []);
-			this.__imports = [this].concat(imports);
-		}
-		return this.__imports;
+		// clear concatenated list of rules so we'll recaculate in `parser.rules`
+		delete this.__rules;
 	}
-
 
 //
 // ### Rules
+//    List of all known rules for this parser.
+//    You can access named rules as `parser.rules["ruleName"]`
 //
 	// Start with an empty map of rules.
 	_rules = {};
@@ -179,10 +141,13 @@ export default class Parser {
 	get rules() {
 		if (!this.__rules) {
 			let output = this.__rules = {};
+			// Get all imported parsers, with us last
+			const imports = [this].concat(this.imports.map(Parser.getContextOrDie));
+
 			// For each parser
-			this.imports.forEach(parser => {
+			imports.forEach(parser => {
 				// Merge rules into an Alternatives in output rules.
-				for (var ruleName in parser._rules) {
+				for (let ruleName in parser._rules) {
 					let rule = parser._rules[ruleName];
 					let alternatives = output[ruleName] || (output[ruleName] = new Rule.Alternatives({ ruleName }));
 
@@ -201,28 +166,10 @@ export default class Parser {
 		return this.__rules;
 	}
 
-	// Return ALL instances of named rule, for us and our imports.
-	getRule(ruleName) {
-		let rules = [];
-		let imports = this.imports, index = 0, parser;
-		while (parser = imports[index++]) {
-			if (parser._rules[ruleName]) rules.push(parser._rules[ruleName]);
-		}
-		return rules;
-	}
-
-	// Return the concatenated blacklist for a given rule.
-	getBlacklist(ruleName) {
-		let rules = this.getRule(ruleName);
-		return rules.reduce(function (blacklist, rule) {
-			return Object.assign(blacklist, rule.blacklist);
-		}, {});
-	}
-
 	// Add a `rule` to our list of rules!
 	// Converts to `alternatives` on re-defining the same rule.
 	addRule(ruleName, rule) {
-		// Clear memoized `__rules`
+		// Clear memoized `__rules` so we'll recalculate `parser.rules`
 		delete this.__rules;
 
 		// If passed a function, create an instance for the actual rule.
@@ -267,18 +214,29 @@ export default class Parser {
 				throw new TypeError(`Error defining rule '${ruleName}': Only Sequence rules can be leftRecusive`);
 			}
 			// You must define a `testRule` for left recursive sequences.
-			// e.g. `testRule = new Rule.Match({ match: ["something"] })`
-			if (!rule.testRule) {
+			// e.g. `testRule = new Rule.Keyword({ match: ["something"] })`
+			if (!rule.testRule || !rule.constructor.testRule) {
 				throw new TypeError(`Error defining rule '${rule.ruleName}': You must define a 'testRule' for leftRecusive rules.`);
 			}
 			if (Parser.DEBUG) console.info("marking ", rule, " as left recursive!");
 
+//TODO: rule.prototype.leftRecursive ???
 			rule.leftRecursive = true;
 		}
 
 		return rule;
 	}
 
+	// Return the concatenated blacklist for a given named rule.
+	getBlacklist(ruleName) {
+	  const rule = this.rules[ruleName];
+	  const rules = rule instanceof Rule.Alternatives
+          ? rule.rules
+          : [ rule ];
+		return rules.reduce(function (blacklist, rule) {
+			return Object.assign(blacklist, rule.blacklist);
+		}, {});
+	}
 
 //
 // ### Parser registry.
@@ -343,36 +301,5 @@ export default class Parser {
 		}
 		throw new SyntaxError(`Couldn't find matching '${endToken}'s starting at item ${start}`);
 	}
-
-
-	// List of special characters in regular expressions.
-	// Used to escape those chars when creating regular expressions from strings.
-	static REGEXP_SPECIAL_CHARACTERS = (function() {
-		const chars = {};
-		"\\/^$*+?.()|{},[]".split("").forEach(char => chars[char] = true);
-		return chars;
-	})()
-
-	// Given a "normal" `string`, escape any regular expression special characters
-	//	so we can create a `new RegExp()`.
-	// Also converts a single space to arbitrary set of spaces with "\s+"
-	static escapeRegExpCharacters(string) {
-		return string.split("").map(function (char, index, list) {
-			// Special case for backslash
-			if (char === "\\") return "\\";
-			// Special case for space
-			if (char === " ") return "\\s+";
-			// If a special char and previous character was not an escape, escape the result.
-			if (Parser.REGEXP_SPECIAL_CHARACTERS[char] && list[index-1] !== "\\") return "\\"+char;
-			// This char should be fine by itself.
-			return char;
-		}).join("");
-	}
-
-	// Create a new regular expression from a "normal" string, escaping special characters as necessary.
-	static RegExpFromString(string, flags) {
-		return new RegExp(Parser.escapeRegExpCharacters(string), flags);
-	}
-
 }
 

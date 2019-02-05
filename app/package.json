@@ -3,7 +3,7 @@
   "license": "MIT",
   "scripts": {
     "watch": "./node_modules/.bin/webpack --progress --watch",
-    "test": "jest"
+    "test": "jest --watch"
   },
   "devDependencies": {
     "babel-core": "^6.23.1",
@@ -38,6 +38,7 @@
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-keydown": "^1.7.2",
-    "semantic-ui-react": "^0.68.3"
+    "semantic-ui-react": "^0.68.3",
+    "wordset-dictionary": "https://github.com/wordset/wordset-dictionary.git"
   }
 }

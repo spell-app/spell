@@ -26,9 +26,9 @@ to pad a number with numeric length and character with default "0"
 to convert integer to fancy text
 	get "{integer}"
 	reverse it
-	group into chunks of 3
+	group it into chunks of 3
 	join it with ","
-	return reverse it
+	reverse it
 ```
 
 

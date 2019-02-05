@@ -1,5 +1,4 @@
-import Tokenizer from "../Tokenizer";
-import parser from "./core.js";
+import parser from "./index.js";
 
 test("parser is defined", () => {
 	expect(parser).toBeDefined();

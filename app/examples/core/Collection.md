@@ -13,7 +13,7 @@
 - Singular vs plural agreement:
 	- with
 		`action move Card to Pile`
-  	- automatically set up
+  	- automatically sets up
   		`action move Cards to Pile:  for each card in cards: move card to pile`
 
 

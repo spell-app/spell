@@ -3,7 +3,7 @@
 //
 //	Parse a rule with `rule.parse(parser, tokens, start, end)`, this will either:
 //		- return `undefined` if the rule doesn't match the head of the tokens, or
-//		- return a CLONE of the rule with at least the following:
+//		- return a CLONE of the matched rule with at least the following:
 //			- `matched`		Results of your parse.
 //			- `nextStart`	Place where next match should start (eg: one beyond what you matched).
 //
@@ -46,9 +46,11 @@ export default class Rule {
 		return undefined;
 	}
 
-	addToBlacklist(...words) {
+  // Add a set of strings to a blacklist for this rule.
+  // This is used in some subclasses to disallow certain tokens.
+	addToBlacklist(...tokens) {
 		if (!this.blacklist) this.blacklist = {};
-		words.forEach(word => this.blacklist[word] = true);
+		tokens.forEach(token => this.blacklist[token] = true);
 	}
 
 //
@@ -112,6 +114,7 @@ Rule.Match = class match extends Rule {
 
 	// Does the head of the tokens start with an array of matches?
 	headStartsWith(matches, tokens, start = 0, end = tokens.length) {
+//TODO: this is probably just 1 line in lodash
 		// bail if match would go beyond the end
 		if (start + matches.length > end) return false;
 
@@ -143,7 +146,7 @@ Rule.Keyword.prototype.matchDelimiter = " ";
 // `rule.pattern` is the regular expression to match.
 // Note that you MUST start your pattern with `^` and end with `$` to make sure it matches the entire token.
 // Note that this can only match a single token!
-Rule.Pattern = class Pattern extends Rule {
+Rule.Pattern = class pattern extends Rule {
 	// Attempt to match this pattern at the beginning of the tokens.
 	parse(parser, tokens, start = 0, end, stack) {
 		let token = tokens[start];
@@ -175,18 +178,18 @@ Rule.Pattern = class Pattern extends Rule {
 
 // Subrule -- name of another rule to be called.
 // `rule.rule` is the name of the rule in `parser.rules`.
-Rule.Subrule = class Subrule extends Rule {
+Rule.Subrule = class subrule extends Rule {
 	parse(parser, tokens, start = 0, end, stack) {
-		let result = parser.parseRuleOrDie(this.rule, tokens, start, end, stack, `parse subrule '${this.rule}'`);
+		let result = parser.parseNamedRule(this.rule, tokens, start, end, stack, `parse subrule '${this.rule}'`);
 		if (!result) return undefined;
 
 		if (this.argument) result.argument = this.argument;
 		return result;
 	}
 
-	// Test to see if any of our alternatives are found ANYWHERE in the tokens.
+	// Ask the subrule to figure out if a match is possible.
 	test(parser, tokens, start = 0, end) {
-		return parser.testRule(this.rule, tokens, start);
+		return parser.testRule(this.rule, tokens, start, end);
 	}
 
 	toString() {
@@ -196,7 +199,7 @@ Rule.Subrule = class Subrule extends Rule {
 
 
 // Sequence of rules to match.
-Rule.Sequence = class Sequence extends Rule {
+Rule.Sequence = class sequence extends Rule {
 	parse(parser, tokens, start = 0, end, stack) {
 		// If we have a `testRule` defined
 		if (this.testRule) {
@@ -243,7 +246,7 @@ Rule.Sequence = class Sequence extends Rule {
 	// Returns an object with properties from the `matched` array indexed by
 	//		- `match.argument`:		argument set when rule was declared, eg: `{value:literal}` => `value`
 	//		- `match.ruleName`:		name of rule when defined
-	//		- `rule type`:				name of the rule type
+	//		- `rule type`:			name of the rule type
 	// NOTE: memoizes the results.
 	get results() {
 		if (!this.matched) return undefined;
@@ -256,6 +259,7 @@ Rule.Sequence = class Sequence extends Rule {
 		let index = 0, match = undefined;
 		while (match = matched[index++]) {
 			if (match.promote) {
+			//TODO: unclear that promote should return, that will ignore subsequent stuff, right?
 				return this._addResults(results, match.matched);
 			}
 			else {
@@ -308,7 +312,7 @@ Rule.Statement = class statement extends Rule.Sequence {}
 // NOTE: Currently takes the longest valid match.
 // TODO: match all valid alternatives
 // TODO: rename?
-Rule.Alternatives = class Alternatives extends Rule {
+Rule.Alternatives = class alternatives extends Rule {
 	constructor(...props) {
 		super(...props);
 		if (!this.rules) this.rules = [];
@@ -384,7 +388,7 @@ Rule.Alternatives = class Alternatives extends Rule {
 //
 //	Automatically consumes whitespace before rules.
 //	If doesn't match at least one, returns `undefined`.
-Rule.Repeat = class Repeat extends Rule {
+Rule.Repeat = class repeat extends Rule {
 	parse(parser, tokens, start = 0, end, stack) {
 		let matched = [];
 		let nextStart = start;
@@ -431,9 +435,8 @@ Rule.Repeat = class Repeat extends Rule {
 //	`rule.delimiter` is the delimiter between each item.
 // 	`rule.matched` in the output is the list of values.
 //
-//
-// NOTE: we assume that a List rule will NOT repeat (????)
-Rule.List = class List extends Rule {
+// NOTE: we assume that a List rule itself will NOT repeat (????)
+Rule.List = class list extends Rule {
 	parse(parser, tokens, start = 0, end, stack) {
 		// ensure item and delimiter are optional so we don't barf in `parseRule`
 		this.item.optional = true;
@@ -508,7 +511,7 @@ Rule.StatementParseError = class parse_error extends Rule {
 
 // Comment rule -- matches tokens of type `Tokenizer.Comment`.
 Rule.Comment = class comment extends Rule {
-	// Comments are specially nodes in our token stream.
+	// Comments are special nodes in our token stream.
 	parse(parser, tokens, start = 0, end, stack) {
 		let token = tokens[start];
 		if (!(token instanceof Tokenizer.Comment)) return undefined;
@@ -572,14 +575,14 @@ Rule.Block = class block extends Rule.Statement {
 
 		// check for a comment at the end of the tokens
 		if (tokens[end-1] instanceof Tokenizer.Comment) {
-			comment = parser.parseRuleOrDie("comment", tokens, end-1, end, undefined, "parseStatement");
+			comment = parser.parseNamedRule("comment", tokens, end-1, end, undefined, "parseStatement");
 			// add comment FIRST if found
 			results.push(comment);
 			end--;
 		}
 
 		// parse the rest as a "statement"
-		statement = parser.parseRuleOrDie("statement", tokens, start, end, undefined, "parseStatement");
+		statement = parser.parseNamedRule("statement", tokens, start, end, undefined, "parseStatement");
 		// complain if no statement and no comment
 		if (!statement && !comment) {
 			let error = new Rule.StatementParseError({

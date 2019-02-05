@@ -3,9 +3,9 @@
 //
 // NOTE: many of the below are created as custom Pattern subclasses for debugging.
 //
-import Parser from "../Parser";
-import Rule from "../RuleSyntax";
-import Tokenizer from "../Tokenizer";
+import Parser from "../../Parser";
+import Rule from "../../RuleSyntax";
+import Tokenizer from "../../Tokenizer";
 
 // Create `core` parser context.
 const parser = Parser.forContext("core");
@@ -218,7 +218,7 @@ parser.addRule(["text", "expression"], Rule.Text);
 
 
 
-// Literal list (array), eg:  `[1,2,true,false ]`
+// Literal list (array), eg:  `[1,2 , true,false ]`
 parser.addExpression(
 	"literal_list",
 	"\\[[list:{expression},]?\\]",

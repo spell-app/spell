@@ -2,8 +2,8 @@
 //	# Rules for if statements.
 //
 
-import Parser from "../Parser";
-import Rule from "../Rule";
+import Parser from "../../Parser";
+import Rule from "../../Rule";
 
 // Create "if" parser context.
 const parser = Parser.forContext("if");
@@ -36,7 +36,9 @@ parser.addStatement(
 	"backwards_if",
 	"{statement} if {condition:expression} (?:(else|otherwise) {elseStatement:statement})?",
 	class backwards_if extends Rule.Statement {
-		testRule = new Rule.Match({ match: ["if"] });
+		static testRule = new Rule.Keyword({ match: ["if"] });
+		get testRule() { return this.constructor.testRule }
+
 		toSource(context) {
 			let { condition, statement, elseStatement } = this.getMatchedSource(context);
 			let output = `if (${condition}) { ${statement} }`;

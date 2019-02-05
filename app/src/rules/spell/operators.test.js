@@ -1,5 +1,4 @@
-import Rule from "../RuleSyntax";
-import parser from "./operators.js";
+import parser from "./index.js";
 
 test("parser is defined", () => {
 	expect(parser).toBeDefined();
