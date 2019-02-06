@@ -11,12 +11,8 @@ import Rule from "../../Rule";
 import { isPlural, singularize } from "../../utils/string";
 
 // Create "lists" parser context.
-const parser = Parser.forContext("lists");
+const parser = Parser.forName("lists");
 export default parser;
-
-// Import core rules.
-import "./core";
-parser.import("core");
 
 
 // WORKING FROM OTHER RULES (testme)
@@ -72,27 +68,25 @@ parser.addExpression(
 //	Ordinal numbers (first, second, last, etc).
 // TODO: sixty-fifth, two hundred forty ninth...
 //
-parser.addRule("ordinal", class ordinal extends Rule.Alternatives{});
-class ordinal extends Rule.Keyword {}
-parser.addKeyword("ordinal", "first", ordinal, { toSource: () => 1 });
-parser.addKeyword("ordinal", "second", ordinal, { toSource: () => 2 });
-parser.addKeyword("ordinal", "third", ordinal, { toSource: () => 3 });
-parser.addKeyword("ordinal", "fourth", ordinal, { toSource: () => 4 });
-parser.addKeyword("ordinal", "fifth", ordinal, { toSource: () => 5 });
-parser.addKeyword("ordinal", "sixth", ordinal, { toSource: () => 6 });
-parser.addKeyword("ordinal", "seventh", ordinal, { toSource: () => 7 });
-parser.addKeyword("ordinal", "eighth", ordinal, { toSource: () => 8 });
-parser.addKeyword("ordinal", "ninth", ordinal, { toSource: () => 9 });
-parser.addKeyword("ordinal", "tenth", ordinal, { toSource: () => 10 });
-parser.addKeyword("ordinal", "penultimate", ordinal, { toSource: () => -2 });
-parser.addKeyword("ordinal", "final", ordinal, { toSource: () => -1 });
-parser.addKeyword("ordinal", "last", ordinal, { toSource: () => -1 });
+parser.addKeyword("ordinal", "first", class ordinal extends Rule.Keyword{ toSource() { return 1 }});
+parser.addKeyword("ordinal", "second", class ordinal extends Rule.Keyword{ toSource() { return 2 }});
+parser.addKeyword("ordinal", "third", class ordinal extends Rule.Keyword{ toSource() { return 3 }});
+parser.addKeyword("ordinal", "fourth", class ordinal extends Rule.Keyword{ toSource() { return 4 }});
+parser.addKeyword("ordinal", "fifth", class ordinal extends Rule.Keyword{ toSource() { return 5 }});
+parser.addKeyword("ordinal", "sixth", class ordinal extends Rule.Keyword{ toSource() { return 6 }});
+parser.addKeyword("ordinal", "seventh", class ordinal extends Rule.Keyword{ toSource() { return 7 }});
+parser.addKeyword("ordinal", "eighth", class ordinal extends Rule.Keyword{ toSource() { return 8 }});
+parser.addKeyword("ordinal", "ninth", class ordinal extends Rule.Keyword{ toSource() { return 9 }});
+parser.addKeyword("ordinal", "tenth", class ordinal extends Rule.Keyword{ toSource() { return 10 }});
+parser.addKeyword("ordinal", "penultimate", class ordinal extends Rule.Keyword{ toSource() { return -2 }});
+parser.addKeyword("ordinal", "final", class ordinal extends Rule.Keyword{ toSource() { return -1 }});
+parser.addKeyword("ordinal", "last", class ordinal extends Rule.Keyword{ toSource() { return -1 }});
 
 
 // treat list as a stack or queue
 //TESTME
-parser.addKeyword("ordinal", "top", ordinal, { toSource: () => 1 });
-parser.addKeyword("ordinal", "bottom", ordinal, { toSource: () => -1 });
+parser.addKeyword("ordinal", "top", class ordinal extends Rule.Keyword{ toSource() { return 1 }});
+parser.addKeyword("ordinal", "bottom", class ordinal extends Rule.Keyword{ toSource() { return -1 }});
 
 
 // Index expression: numeric position in some list.
@@ -116,7 +110,7 @@ parser.addExpression(
 	class position_expression extends Rule.Expression{
 		toSource(context) {
 			let { identifier, position, expression } = this.getMatchedSource(context);
-// TODO: special case 'words', 'lines', etc
+// TODO: special case 'words', 'lines', etc ?
 
 			// If we got a positive number literal, compensate for JS 0-based arrays now,
 			// for nicer output.

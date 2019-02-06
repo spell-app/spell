@@ -6,12 +6,8 @@ import Parser from "../../Parser";
 import Rule from "../../RuleSyntax";
 
 // Create "operators" parser context.
-const parser = Parser.forContext("operators");
+const parser = Parser.forName("operators");
 export default parser;
-
-// Import core rules.
-import "./core";
-parser.import("core");
 
 //## Infix operators:   `{lhs} <operator> {rhs}`, eg: `a is 1`
 // NOTE: `operator.apply` MUST return a function which transforms two arguments (`lhs` and `rhs`) into output.

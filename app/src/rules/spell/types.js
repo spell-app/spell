@@ -11,12 +11,8 @@ import global from "../../utils/global";
 import { pluralize } from "../../utils/string";
 
 // Create "types" parser context.
-const parser = Parser.forContext("types");
+const parser = Parser.forName("types");
 export default parser;
-
-// Import core rules.
-import "./core";
-parser.import("core");
 
 // Define "type" (a.k.a. "class").
 parser.addStatement(
@@ -39,7 +35,7 @@ parser.addStatement(
 			output += " " + Rule.Block.encloseStatements(block);
 
 // DEBUG
-console.info("TYPE STRUCTURE:", this.toStructure(context));
+//console.info("TYPE STRUCTURE:", this.toStructure(context));
 			return output;
 		}
 	}

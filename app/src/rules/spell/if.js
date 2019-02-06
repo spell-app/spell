@@ -6,13 +6,8 @@ import Parser from "../../Parser";
 import Rule from "../../Rule";
 
 // Create "if" parser context.
-const parser = Parser.forContext("if");
+const parser = Parser.forName("if");
 export default parser;
-
-// Import core rules.
-import "./core";
-parser.import("core");
-
 
 // TODO: custom `getMatcher`:
 //			- `condtion` wraps in parens if NOT wrapped

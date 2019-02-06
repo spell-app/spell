@@ -40,7 +40,7 @@ export default class Rule {
 	// This is used by complicated (eg: left recursive) rules to exit quickly if there's no chance.
 	// Returns:
 	//	- `true` if the rule MIGHT be matched.
-	//	- `false` if there is no way the rule can be matched.
+	//	- `false` if there is NO WAY the rule can be matched.
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
 	test(parser, tokens, start = 0, end) {
 		return undefined;
@@ -85,13 +85,18 @@ export default class Rule {
 }
 
 
-// Rule for one or more sequential literal values to match, which include punctuation such as `(` etc.
+// Abstract rule for one or more sequential literal values to match, which include punctuation such as `(` etc.
+// `rule.match` is the literal string or array of literal strings to match.
 Rule.Match = class match extends Rule {
 	constructor(...props) {
 		super(...props);
 		// coerce to an array (a bit slower but cleaner).
 		if (!Array.isArray(this.match)) this.match = [this.match];
 	}
+
+  get matchDelimiter() {
+    return "";
+  }
 
 	// Attempt to match this rule in the `tokens`.
 	// Returns results of the parse or `undefined`.
@@ -131,14 +136,19 @@ Rule.Match = class match extends Rule {
 		return `${this.match.join(this.matchDelimiter)}${this.optional ? '?' : ''}`;
 	}
 }
-Rule.Match.prototype.matchDelimiter = "";
+
+Rule.Symbol = class symbol extends Rule.Match {
+  get matchDelimiter() {
+    return "";
+  }
+}
 
 
-// Syntactic sugar to separate `symbols` (which don't require spaces) from `keywords` (which do).
-Rule.Symbol = class symbol extends Rule.Match {}
-
-Rule.Keyword = class keyword extends Rule.Match {}
-Rule.Keyword.prototype.matchDelimiter = " ";
+Rule.Keyword = class keyword extends Rule.Match {
+  get matchDelimiter() {
+    return " ";
+  }
+}
 
 
 
@@ -591,7 +601,7 @@ Rule.Block = class block extends Rule.Statement {
 			results.push(error);
 		}
 
-		// complain can't parse the entire line!
+		// complain if we can't parse the entire line!
 		else if (statement && statement.nextStart !== end) {
 			let error = new Rule.StatementParseError({
 				parsed : tokens.slice(start, statement.nextStart).join(" "),
@@ -614,14 +624,14 @@ Rule.Block = class block extends Rule.Statement {
 
 		for (var i = 0; i < block.length; i++) {
 			let match = block[i];
-//console.info(i, match);
-try {
-			statement = match.toSource(context) || "";
-} catch (e) {
-	console.error(e);
-	console.warn("Error converting block: ", block, "statement:", match);
-}
-//console.info(i, statement);
+      //console.info(i, match);
+      try {
+            statement = match.toSource(context) || "";
+      } catch (e) {
+        console.error(e);
+        console.warn("Error converting block: ", block, "statement:", match);
+      }
+      //console.info(i, statement);
 			if (isWhitespace(statement)) {
 				results.push("");
 			}
@@ -739,8 +749,8 @@ Rule.Statements = class statements extends Rule.Block {
 
 
 // A `BlockStatement` (e.g. an `if` or `repeat`):
-//	- has an initial `statement`
-//	- MAY have an inline `statement` (on the same line, generally after a `:`)
+//	- is assumed to have an initial partial `statement`
+//	- MAY have an inline `statement` (on the same line, possibly after a `:`)
 //	- MAY have contents as an embedded `block`
 //
 //	In your `getMatchedSource()`, `block` will be the resulting block output, if there is one.

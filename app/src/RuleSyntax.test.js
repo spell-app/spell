@@ -9,7 +9,7 @@ test("parse single symbols", () => {
 	expect(rule.match).toEqual([">"]);
 });
 
-test("parse multiple symbols as a single Symbol", () => {
+test("parse multiple symbols", () => {
 	let rule = Rule.parseRuleSyntax(">=");
 	expect(rule).toBeInstanceOf(Rule.Symbol);
 	expect(rule.match).toEqual([">", "="]);
@@ -95,7 +95,7 @@ test("parse list with keyword delimiter", () => {
 });
 
 test("fail list with extra stuff", () => {
-	expect(() => Rule.parseRuleSyntax("[{number}, bad input]"))
+	expect(() => Rule.parseRuleSyntax("[{good},bad input]"))
 		.toThrow(SyntaxError);
 });
 

@@ -51,7 +51,6 @@ export default class Parser {
 		if (Parser.TIME) console.timeEnd("tokenize");
 
 		// Bail if we didn't get any tokens back.
-//TODO: WARN?  ERROR?
 		if (!tokens || tokens.length === 0) return undefined;
 
 		if (Parser.TIME) console.time("parse");
@@ -68,9 +67,9 @@ export default class Parser {
 
 
 
-	// Parse something:
-	//	- if one string argument, does a `compileStatements()`
-	// Returns the `toString()` or throws.
+	// Parse `text` and return the resulting source code.
+	//	- if one string argument, compiles as "statements"
+	// Throws if not parseable.
 //TESTME
 	compile(ruleName, text) {
 		// If only one argument, assume that's the text and parse `statements`
@@ -96,7 +95,7 @@ export default class Parser {
 	// Test whether a rule (which may be specified by name) MIGHT be found in head of stream.
 	// Returns:
 	//	- `true` if the rule MIGHT be matched.
-	//	- `false` if there is no way the rule can be matched.
+	//	- `false` if there is NO WAY the rule can be matched.
 	//	- `undefined` if not determinstic (eg: no way to tell quickly).
 	testRule(rule, tokens, start, end) {
 	  if (typeof rule === "string") {
@@ -136,13 +135,13 @@ export default class Parser {
 	// Start with an empty map of rules.
 	_rules = {};
 
-	// DANGEROUS: return map of array of named rules for us and our imports
-	// NOTE: We memoize this but there's nothing that resets this when our imports change!
+	// Return map of all known rules by rule name, including rules defined in our imports.
+	// NOTE: We memoize this, so make sure to clear `__rules` if you're manipulating rules or imports!
 	get rules() {
 		if (!this.__rules) {
 			let output = this.__rules = {};
 			// Get all imported parsers, with us last
-			const imports = [this].concat(this.imports.map(Parser.getContextOrDie));
+			const imports = [this].concat(this.imports.map(Parser.forName));
 
 			// For each parser
 			imports.forEach(parser => {
@@ -238,6 +237,54 @@ export default class Parser {
 		}, {});
 	}
 
+  // Define one or more rules according to a `ruleSetup` as an object with:
+  //  `name` (identifier, required)  Base name of the rule.
+  //  `syntax` (string, required) RuleSyntax string for this rule.
+  //  `constructor` (class, required) Class which will be used to instantiate the rule.
+  //    Note that you cannot re-use constructors!
+  //  `alias` (string or [string], optinal) Other names to define rule under.
+  //  `mutatesScope` (boolean, optional) Set to `true` if the rule mutates the scope it is defined in.
+  //  `precedence` (number, optional) Precedence number for the rule (currently doesn't do anything)
+  defineRules(...ruleSetups) {
+    for (const ruleSetup of arguments) {
+      const { name, alias = [], mutatesScope, precedence, syntax, constructor } = ruleSetup;
+      const names = [name].concat(alias);
+
+      // throw if we're re-using a constructor
+      if (constructor.prototype.ruleName) {
+        throw new TypeError(`parser.define(): Attempting to re-use constructor for rule '${ruleName}'`);
+      }
+
+      // Set properties on prototype.constructor
+      Object.defineProperty(constructor.prototype, "ruleName", { value: name });
+      Object.defineProperty(constructor.prototype, "names", { value: names });
+      if (mutatesScope) Object.defineProperty(constructor.prototype, "mutatesScope", { value: true });
+      if (precedence) Object.defineProperty(constructor.prototype, "precedence", { value: precedence });
+
+      let syntaxStream = Rule.tokeniseRuleSyntax(syntax);
+      let rules = Rule.parseRuleSyntax_tokens(syntaxStream, []);
+      if (rules.length === 0) {
+        throw new SyntaxError(`parser.defineRule(${names[0]}, ${syntax}): no rule produced`);
+      }
+
+      // Make an instance of the rule and add relevant properties to its prototype non-enumerably
+      let rule = new constructor();
+      if (rule instanceof Rule.Keyword || rule instanceof Rule.Symbol) {
+        Object.defineProperty(constructor.prototype, "match", { value: rules[0].match });
+      }
+      else if (rule instanceof Rule.List) {
+        Object.defineProperty(constructor.prototype, "item", { value: rules[0].item });
+        Object.defineProperty(constructor.prototype, "delimiter", { value: rules[0].delimiter });
+      }
+      else {
+        Object.defineProperty(constructor.prototype, "rules", { value: rules });
+      }
+
+      names.forEach(name => this.addRule(name, rule));
+    }
+  }
+
+
 //
 // ### Parser registry.
 //
@@ -245,19 +292,12 @@ export default class Parser {
 
 	// Get a parser for a given `contextName`.
 	// Will re-use existing parser, or create a new one if not already defined.
-	static forContext(contextName) {
-		if (!Parser.REGISTRY[contextName]) {
-			Parser.REGISTRY[contextName] = new Parser({ contextName });
+	static forName(name) {
+		if (!Parser.REGISTRY[name]) {
+			Parser.REGISTRY[name] = new Parser({ name });
 		}
-		return Parser.REGISTRY[contextName];
+		return Parser.REGISTRY[name];
 	}
-
-	// Return a parser for `contextName` or throw an exception if not found.
-	static getContextOrDie(contextName) {
-		if (Parser.REGISTRY[contextName]) return Parser.REGISTRY[contextName];
-		throw new TypeError(`Parser.getContextOrDie(): contextName '${contextName}' not found.`);
-	}
-
 
 
 //

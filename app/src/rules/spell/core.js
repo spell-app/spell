@@ -8,7 +8,7 @@ import Rule from "../../RuleSyntax";
 import Tokenizer from "../../Tokenizer";
 
 // Create `core` parser context.
-const parser = Parser.forContext("core");
+const parser = Parser.forName("core");
 export default parser;
 
 

@@ -6,13 +6,8 @@ import Parser from "../../Parser";
 import Rule from "../../RuleSyntax";
 
 // Create "statements" parser context.
-const parser = Parser.forContext("statements");
+const parser = Parser.forName("statements");
 export default parser;
-
-// Import core rules.
-import "./core";
-parser.import("core");
-
 
 //
 //	## Returns
@@ -38,6 +33,7 @@ parser.addStatement(
 //
 
 //TESTME
+//TODO: distinguish between `new_identifier` and `scoped_identifier`
 parser.addStatement(
 	["assignment", "MUTATOR"],
 	[
