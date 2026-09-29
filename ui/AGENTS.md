@@ -28,7 +28,10 @@ when working with code in this repository.
   - `src/styles/` -- `layers.css`, tokens, colours, sizes, reset, typography, animations, utilities, `native.css`,
     `themes/`
   - `src/index.ts` -- registers every component (side-effect entry) and re-exports them
-  - `spike/` -- Milestone 0 base-library spike (`spike/lit/`, `spike/solid/`), deleted once decided
+  - `spike/` -- base-library spike, DECIDED:  Solid 2.  `spike/solid/` (components), `spike/solid-element/`
+    (`@spell/solid-element`, our fork of `@solidjs/element`), `spike/shared/` (measure / smoke / report tooling),
+    `spike/icons/` (icon loading experiment).  The Lit spike is archived at git tag `archive/lit-spike`
+    (`git checkout archive/lit-spike -- spike/lit`)
   - `site/` -- Astro docs site, modelled on Fomantic's docs
   - `test/` -- shared test utils:  `Fixture.render(html)` (`fixture.ts`), `A11y.check(el)` / `expectAccessible(el)`
     (`a11y.ts`).  Every test runs in a REAL browser (Vitest browser mode + Playwright, chromium by default)
@@ -144,7 +147,6 @@ when working with code in this repository.
   vite 8's own transformer (oxc) doesn't do it yet.
 - A decorator MUST be the first thing on its line (`@proto static parts = [...]` is fine,
   and preferred) or that plugin won't notice the file.
-- Lit properties (if Lit wins the spike) are `@property() accessor value = ""` -- standard decorators need `accessor`.
 
 ## Types / Exports
 

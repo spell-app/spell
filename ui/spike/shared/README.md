@@ -22,7 +22,7 @@ Setup:  `cd spike/shared && yarn install && yarn build`.  Checks:  `yarn ts`, `y
 
 ## Plugging a spike in
 
-Reference:  `spike/lit/` (`spike.config.ts`, `spike.ts`, `peers.ts`, `demo/smoke/`).  Node-side scripts import the
+Reference:  `spike/solid/` (`spike.config.ts`, `spike.ts`, `peers.ts`, `demo/smoke/`).  Node-side scripts import the
 barrel, `spike/shared/index.ts`;  browser code imports `$shared/PerfRun.ts`.
 
 1. **Build.**  In the spike's `vite.config.ts`:
@@ -143,7 +143,7 @@ barrel, `spike/shared/index.ts`;  browser code imports `$shared/PerfRun.ts`.
    element base:  one `console.error` naming the tag with the cause, a cancelable composed `ui-error`
    (`{ error }`), `:state(errored)`, and -- unless cancelled -- `<Name>Fallback.render(host, root, error, internals)`.
 9. **Report.**  Rewrite `REPORT.md` to `REPORT.template.md`'s headings, keep the `generated` markers empty, run
-   `yarn report`.  `diff <(grep '^## ' spike/lit/REPORT.md) <(grep '^## ' spike/<x>/REPORT.md)` must be empty.
+   `yarn report`.  `diff <(grep '^## ' spike/shared/REPORT.template.md) <(grep '^## ' spike/<x>/REPORT.md)` must be empty.
 
 ## The Solid 2 host app and the identity hook (for a Solid-based spike)
 
