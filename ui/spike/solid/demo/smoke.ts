@@ -116,7 +116,9 @@ async function examples() {
   await page.locator(".pair").first().waitFor()
   await page.waitForTimeout(1500)
   const pairs = await page.locator(".pair").count()
-  const elements = await page.locator("ui-button, ui-dropdown").count()
+  const elements = await page
+    .locator("[class='pair'] > div:last-child *")
+    .evaluateAll((nodes) => nodes.filter((node) => node.localName.startsWith("ui-")).length)
   await page.close()
   return { pairs, elements, errors }
 }

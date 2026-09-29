@@ -1,0 +1,34 @@
+<!-- `src/components/parts/examples/title.html` as element markup. -->
+<!-- Owners are `stub-*` stand-ins (`StubOwner`) until card, feed, modal ... land;  each owns the parts Fomantic styles in it. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-title>A title with no owner is an unstyled block.</ui-title>
+  </section>
+
+  <section>
+    <h4>In owners</h4>
+    <div class="ui steps">
+      <stub-step>
+        <ui-content><ui-title>Shipping</ui-title></ui-content>
+      </stub-step>
+    </div>
+    <div class="ui steps">
+      <stub-step style="--ui-step-state: active">
+        <ui-content><ui-title>Active step</ui-title></ui-content>
+      </stub-step>
+    </div>
+    <stub-accordion><ui-title>What is a dog?</ui-title></stub-accordion>
+    <stub-accordion style="--ui-accordion-style: styled">
+      <ui-title>Styled title</ui-title>
+      <ui-title>Second title</ui-title>
+    </stub-accordion>
+    <stub-search>
+      <div class="results">
+        <div class="result">
+          <ui-content><ui-title>Search result</ui-title></ui-content>
+        </div>
+      </div>
+    </stub-search>
+  </section>
+</div>

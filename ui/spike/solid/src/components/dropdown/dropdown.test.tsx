@@ -79,6 +79,21 @@ describe("<ui-dropdown> markup", () => {
     expect(menu.getAttribute("popover")).toBe("manual")
   })
 
+  it("renders the `icon` slot inside `.dropdown.icon` only while it is occupied (the caret is `:empty`)", async () => {
+    const { host, root } = await dropdown(GENDER)
+    const icon = root.querySelector(".dropdown.icon")!
+    expect(icon.matches(":empty")).toBe(true)
+    expect(getComputedStyle(icon, "::before").content).not.toBe("none")
+    const custom = document.createElement("span")
+    custom.slot = "icon"
+    custom.textContent = "v"
+    host.append(custom)
+    await expect.poll(() => icon.querySelector("slot")).not.toBeNull()
+    expect(icon.matches(":empty")).toBe(false)
+    custom.remove()
+    await expect.poll(() => icon.matches(":empty")).toBe(true)
+  })
+
   it("anchors the menu to the root", async () => {
     const { root, menu, combobox } = await dropdown(GENDER)
     const anchor = root.style.getPropertyValue("--ui-dropdown-anchor")

@@ -9,7 +9,11 @@
     "build": "vite build",
     "test": "vitest run --project ssr && vitest run --project browser",
     "tsc": "tsc",
-    "smoke": "node --experimental-strip-types --no-warnings demo/smoke.ts"
+    "smoke": "node --experimental-strip-types --no-warnings demo/smoke.ts",
+    "screenshots": "node --experimental-strip-types --no-warnings demo/screenshots.ts",
+    "measure": "node --experimental-strip-types --no-warnings demo/measure.ts",
+    "oxlint": "../../node_modules/.bin/oxlint -c .oxlintrc.json --report-unused-disable-directives --max-warnings 0 src demo *.ts",
+    "oxfmt": "../../node_modules/.bin/oxfmt -c ../../.oxfmtrc.json"
   },
   "dependencies": {
     "@solidjs/element": "2.0.0-rc.11",
