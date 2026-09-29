@@ -3,7 +3,7 @@
  * Schema:  `ComponentVocabulary` (`$/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-icon name="heart" size="large" color="red" circular>` => `ui large red circular icon`.  `icon.css` keys
- *   on those words;  `name` / `style` / `label` are property-only and pick the SVG (`Icons.resolve()`).
+ *   on those words;  `name` / `variant` / `label` are property-only and pick the SVG (`Icons.resolve()`).
  * - `iconsVocabulary.ownsParts` lists `icon`:  a `<ui-icon>` directly inside a `<ui-icons>` finds it through
  *   `OwnerContext` and sets `:state(in-icons)`, which `icon.css` stacks and positions it by.
  */
@@ -37,10 +37,16 @@ export const iconVocabulary = {
         "Spaces ~== dashes.  See `docs/icons.md`."
     },
     {
-      name: "style",
+      name: "variant",
       kind: "enum",
       values: ["solid", "regular", "brands"],
+      default: "solid",
       description: "Font Awesome set;  default inferred from `name` (a trailing `outline` word picks `regular`)."
+    },
+    {
+      name: "outline",
+      kind: "boolean",
+      description: "Alias for `variant=\"regular\"`, Fomantic's `mail outline icon` spelling.  No class of its own."
     },
     {
       name: "label",

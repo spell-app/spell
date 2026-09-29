@@ -137,3 +137,53 @@ export const PART_OWNER_TOKENS = {
  * - Same text as `OwnerContext.stateName(ownerNoun)`.
  */
 export const PART_STATIC_CLASS_PREFIX = "in-"
+
+////////////////
+// ## Grid
+////////////////
+
+/**
+ * Size container a top-level `<ui-grid>` HOST establishes (`container: ui-grid / inline-size`), see `grid.css`.
+ * - `stackable`, `doubling`, `reversed` and per-device widths answer to it, not to the viewport.
+ * - Page CSS may query it too, e.g. `@container ui-grid (width < 768px) { ... }` inside a column.
+ */
+export const GRID_CONTAINER_NAME = "ui-grid"
+
+////////////////
+// ## Message
+////////////////
+
+/** `detail` of the cancelable `ui-dismiss`, from a `dismissible` `<ui-message>`'s close button. */
+export type MessageDismissDetail = {
+  /** click / key event on the close button */
+  originalEvent?: Event
+}
+
+////////////////
+// ## Breadcrumb
+////////////////
+
+/**
+ * Inherited tokens a `<ui-breadcrumb>` sets INLINE on its root, which every `<ui-breadcrumb-section>` draws as
+ * its leading divider.  See "Dividers" in `breadcrumb.css`.
+ * - `text` -- a CSS STRING (`"›"`), from `divider`;  quote and escape it as CSS (`\"`, `\\`, `\A `), not JSON
+ * - `icon` -- an `<image>`, `url("data:image/svg+xml,...")` of the `divider-icon` SVG;  painted as a mask in
+ *   `currentColor`
+ * - `layout` -- `icon` while `divider-icon` is set;  removed otherwise
+ */
+export const BREADCRUMB_DIVIDER_TOKENS = {
+  text: "--ui-breadcrumb-divider",
+  icon: "--ui-breadcrumb-divider-icon",
+  layout: "--ui-breadcrumb-divider-layout"
+} as const
+
+////////////////
+// ## Placeholder
+////////////////
+
+/**
+ * Custom state every `<ui-placeholder>` host MUST carry, always:  `placeholder.css` spaces consecutive
+ * placeholders with `:host(:nth-child(n + 2 of :state(placeholder)))`, since a shadow root can't see its host's
+ * previous sibling.
+ */
+export const PLACEHOLDER_HOST_STATE = "placeholder"

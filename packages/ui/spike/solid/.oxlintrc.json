@@ -7,9 +7,8 @@
   // AND the `oxlint-tsgolint` package is installed.
   "categories": { "correctness": "error" },
 
-  // Type-aware rules, driven from the config so the CLI and the editor agree without
-  // anyone having to remember a flag.  Requires the `oxlint-tsgolint` package.
-  "options": { "typeAware": true },
+  // NOTE: `options.typeAware` is only allowed in the ROOT config (a nested copy breaks the root `oxlint .`);
+  // type-aware rules come from the root run.
 
   // The root config ignores `spike/`;  this copy lints the spike against its own files (`yarn oxlint`).
   "ignorePatterns": ["dist", ".cache", ".yarn", "node_modules"],

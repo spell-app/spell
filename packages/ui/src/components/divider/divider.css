@@ -30,8 +30,13 @@
   :host {
     display: contents;
   }
+  /*
+   * `hidden` is Fomantic's OWN divider word ("hidden divider" keeps its spacing, only the line goes) -- it isn't
+   * a visibility toggle here, so this overrides the UA default `[hidden] { display: none }` which would drop
+   * the host, and its margin, out of layout entirely.
+   */
   :host([hidden]) {
-    display: none;
+    display: contents;
   }
 
   /* Tokens:  one per `divider.variables` entry that still matters, from the global tokens. */
