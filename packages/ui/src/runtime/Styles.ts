@@ -182,10 +182,24 @@ export class Styles {
   /** Put the page sheets onto `document.adoptedStyleSheets`, keeping anything else already there. */
   private refreshPage() {
     if (typeof document === "undefined") return
-    const ours = this.lookup([...this.pageNames])
     const foreign = document.adoptedStyleSheets.filter((sheet) => !this.owned.has(sheet))
+    // a page that links `ui.css` already has every page sheet -- adopting them again just doubles the CSS
+    const ours = this.pageIsLinked ? [] : this.lookup([...this.pageNames])
     document.adoptedStyleSheets = [...foreign, ...ours]
+    if (!this.pageIsLinked && !this.watchingLoad && document.readyState !== "complete") {
+      // a `<link>` still loading may bring the marker;  re-check once the page has settled
+      this.watchingLoad = true
+      window.addEventListener("load", () => this.refreshPage(), { once: true })
+    }
   }
+
+  /** Has the page linked `ui.css` (which sets `--ui-page-sheet: linked` on `:root`)? */
+  private get pageIsLinked(): boolean {
+    return getComputedStyle(document.documentElement).getPropertyValue("--ui-page-sheet").trim() === "linked"
+  }
+
+  /** `load` listener armed, so page sheets get re-evaluated once late `<link>`s are in. */
+  private watchingLoad = false
 
   /** Registered sheets for `names`, skipping unregistered ones. */
   private lookup(names: Iterable<string>): CSSStyleSheet[] {

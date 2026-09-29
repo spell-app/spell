@@ -42,14 +42,4 @@ One `##` heading per item, `---` between items, then:
 
 ---
 
-## Foundation CSS lands twice on pages that link `ui.css` AND load the runtime
-
-- **Cost** -- every foundation rule exists twice in the document (the linked `ui.css` plus
-  `document.adoptedStyleSheets` from `UI.styles.register(..., { page: true })`).  Harmless for the cascade
-  (same layers, same rules), but doubles the page-level CSS and confuses devtools.
-- **Cause** -- `UIRuntime.registerFoundation()` adopts the foundation into the document unconditionally,
-  because a page that only uses components must still get the tokens;  it cannot tell `ui.css` is linked.
-- **Fix** -- a marker the linked sheet sets (`:root { --ui-sheet-foundation: loaded }`, the convention
-  `tokens.css` already uses for its `:host` fallback), read by `Styles.register()` to skip the document push
-  while still adopting into shadow roots.
-- **Pinned at** -- `src/runtime/UIRuntime.ts` `registerFoundation()`;  noticed by the docs-site layout.
+_No entries yet._
