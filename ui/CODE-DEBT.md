@@ -42,4 +42,16 @@ One `##` heading per item, `---` between items, then:
 
 ---
 
-_No entries yet._
+## Hue backgrounds fail WCAG 4.5:1 with white text
+
+- **Cost** -- axe `color-contrast` fails on coloured buttons and labels (the Lit spike had to disable that rule
+  in its element tests):  red 4.38:1, orange 2.85, green / positive 2.87, teal 2.7, blue / primary 4.28,
+  pink 3.93, basic green 4.18, inverted secondary 2.17 (measured on the class-grammar fragments, so it is the
+  palette, not the elements).  Fomantic's own palette fails the same way, so this is inherited, not new.
+- **Cause** -- `src/styles/styles.vocabulary.en.ts` picks OKLCH lightness for hue recognisability (~.6-.84),
+  and every hue assumes white foreground text (`--ui-<hue>-inverted` etc.).
+- **Fix** -- per hue, an `--ui-<hue>-on` foreground token (white or near-black) chosen at generation time by
+  contrast against the hue, consumed by button / label / segment text rules;  optionally lower L on the
+  saturated hues (blue, red, pink) so white still works there.  `contrast-color()` is Chromium-only, so it
+  must be data.  Re-enable `color-contrast` in the element a11y tests afterwards.
+- **Pinned at** -- `spike/lit/src/**/*.test.ts` disable axe `color-contrast`;  `spike/lit/REPORT.md` (j) 2.
