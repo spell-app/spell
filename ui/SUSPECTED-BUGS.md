@@ -8,10 +8,8 @@ Entry format:  `` - `path/to/file.ts` `symbol()`: what looks wrong, why, and how
 
 ## 1. Behavior bugs
 
-- `src/icons/Icons.ts` `resolve()`: the Fomantic alias map is applied even when a `style` is given, so
-  `Icons.get("apple", "brands")` resolves to `apple-whole` (solid) and returns nothing;  `"zoom"` also returns
-  nothing.  Found by the docs-site icons page.  Prove:  `await new Icons().get("apple", "brands")` is `undefined`.
-  Fix shape:  look the name up in the requested style first, apply Fomantic aliases only when that misses.
+- `src/icons/Icons.ts` `get("zoom")`: returns nothing (reported by the docs-site icons page);  the Fomantic
+  `zoom` alias may point at an FA6 name that no longer exists.  Prove:  `await Icons.get("zoom")` is `undefined`.
 
 ## 2. Accessibility
 
