@@ -26,10 +26,11 @@ export const labelVocabulary = {
     { name: "color", kind: "color", description: "Hue;  fills the label (its ring and text when `basic`)." },
     {
       name: "image",
-      kind: "keyOnly",
+      kind: "string",
       description:
-        "Image label:  a photo flush with the start edge.  A URL renders the `<img>`;  bare `image` styles a " +
-        "slotted `<img>`."
+        'Image label:  a photo flush with the start edge (class `image`).  Presence (`""`, bare `image`) means ' +
+        "an image label styled around a slotted `<img>`;  a non-empty value is the `src` of the label's own " +
+        "`img.image` child."
     },
     { name: "tag", kind: "keyOnly", description: "Shaped like a price tag." },
     {
