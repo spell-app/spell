@@ -1,0 +1,27 @@
+<!-- `src/components/parts/examples/actions.html` as element markup. -->
+<!-- Owners are `stub-*` stand-ins (`StubOwner`) until card, feed, modal ... land;  each owns the parts Fomantic styles in it. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-actions><button type="button">OK</button></ui-actions>
+  </section>
+
+  <section>
+    <h4>In owners</h4>
+    <div class="ui comments">
+      <stub-comment>
+        <ui-content>
+          <ui-actions><a href="#reply">Reply</a><a href="#save">Save</a></ui-actions>
+        </ui-content>
+      </stub-comment>
+    </div>
+    <stub-modal>
+      <ui-header>Delete your account</ui-header>
+      <ui-actions><button type="button">No</button><button type="button">Yes</button></ui-actions>
+    </stub-modal>
+    <stub-toast style="padding: 1em">
+      <ui-content>Saved</ui-content>
+      <ui-actions><button type="button">Undo</button></ui-actions>
+    </stub-toast>
+  </section>
+</div>

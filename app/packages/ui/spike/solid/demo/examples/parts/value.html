@@ -1,0 +1,42 @@
+<!-- `src/components/parts/examples/value.html` as element markup. -->
+<!-- Owners are `stub-*` stand-ins (`StubOwner`) until card, feed, modal ... land;  each owns the parts Fomantic styles in it. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-value>5,550</ui-value>
+  </section>
+
+  <section>
+    <h4>In a statistic</h4>
+    <stub-statistic>
+      <ui-value>5,550</ui-value>
+      <ui-label>Downloads</ui-label>
+    </stub-statistic>
+    <stub-statistic>
+      <ui-value text>Three<br />Thousand</ui-value>
+      <ui-label>Signups</ui-label>
+    </stub-statistic>
+    <stub-statistic style="--ui-statistic-layout: horizontal" horizontal>
+      <ui-value>2,204</ui-value>
+      <ui-label>Views</ui-label>
+    </stub-statistic>
+    <stub-statistic color="red">
+      <ui-value>27</ui-value>
+      <ui-label>Red</ui-label>
+    </stub-statistic>
+  </section>
+
+  <section>
+    <h4>In a search result</h4>
+    <stub-search>
+      <div class="results">
+        <div class="result">
+          <ui-content>
+            <ui-value>$10.99</ui-value>
+            <ui-title>Result</ui-title>
+          </ui-content>
+        </div>
+      </div>
+    </stub-search>
+  </section>
+</div>

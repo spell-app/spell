@@ -20,7 +20,13 @@ export default defineConfig({
     lib: {
       entry: {
         button: `${SPIKE}/components/button/index.ts`,
-        dropdown: `${SPIKE}/components/dropdown/index.ts`
+        dropdown: `${SPIKE}/components/dropdown/index.ts`,
+        icon: `${SPIKE}/components/icon/index.ts`,
+        label: `${SPIKE}/components/label/index.ts`,
+        parts: `${SPIKE}/components/parts/index.ts`,
+        divider: `${SPIKE}/components/divider/index.ts`,
+        segment: `${SPIKE}/components/segment/index.ts`,
+        container: `${SPIKE}/components/container/index.ts`
       },
       formats: ["es"]
     },
