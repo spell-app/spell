@@ -1,0 +1,31 @@
+{
+  "name": "@spell/ui-spike-solid",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Milestone 0 spike:  ui-button + ui-dropdown on @solidjs/element (Solid 2.0 RC)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run --project ssr && vitest run --project browser",
+    "tsc": "tsc",
+    "smoke": "node --experimental-strip-types --no-warnings demo/smoke.ts"
+  },
+  "dependencies": {
+    "@solidjs/element": "2.0.0-rc.11",
+    "@solidjs/web": "2.0.0-rc.11",
+    "solid-js": "2.0.0-rc.11"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.46",
+    "@vitest/browser-playwright": "5.0.2",
+    "axe-core": "4.13.0",
+    "esbuild": "0.28.2",
+    "lightningcss": "1.33.0",
+    "playwright": "1.63.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.1",
+    "vitest": "5.0.2"
+  },
+  "packageManager": "yarn@4.18.0"
+}
