@@ -154,6 +154,24 @@ describe("label.css in shadow roots", () => {
     expect(getComputedStyle(Sheets.inner(host)).backgroundColor).toBe(getComputedStyle(teal).backgroundColor)
   })
 
+  it("styles a `<ui-detail href>`'s own link, and one slotted inside it, from their own shadow root", () => {
+    Sheets.adopt(foundationCSS)
+    // Stands in for `<ui-detail href>`:  its OWN shadow renders `<a class="detail">`, with no `.ui.label`
+    // ancestor in that tree -- the label sheet's link rule must key on `.detail` standalone to reach it.
+    const link = Sheets.host(`<a class="detail" part="detail" href="#view">View Mail</a>`, [...foundationCSS, labelCSS])
+    expect(getComputedStyle(Sheets.inner(link)).cursor).toBe("pointer")
+
+    // Stands in for `<ui-detail>` with a plain `<a>` projected into its own default slot.
+    const projected = Sheets.host(`<span class="detail" part="detail"><slot></slot></span>`, [
+      ...foundationCSS,
+      labelCSS
+    ])
+    const anchor = document.createElement("a")
+    anchor.textContent = "View Mail"
+    projected.append(anchor)
+    expect(getComputedStyle(anchor).cursor).toBe("pointer")
+  })
+
   it("hands a group's basic and tag looks to slotted labels", () => {
     Sheets.adopt(foundationCSS)
     const group = Sheets.host(`<div class="ui basic tag labels" part="group"><slot></slot></div>`, [
