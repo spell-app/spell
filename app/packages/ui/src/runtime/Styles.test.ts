@@ -27,6 +27,24 @@ describe("Styles", () => {
     removeAppSheet()
   })
 
+  it("page sheets are NOT adopted into the document when ui.css is linked (--ui-page-sheet: linked)", () => {
+    const marker = document.createElement("style")
+    marker.textContent = ":root { --ui-page-sheet: linked }"
+    document.head.append(marker)
+    try {
+      const sheet = styles.register("native", "p { color: red }", { page: true })
+      expect(document.adoptedStyleSheets).not.toContain(sheet)
+      // shadow roots still get it
+      const host = Fixture.render("<div></div>")
+      const root = host.attachShadow({ mode: "open" })
+      styles.setFoundation(["native"])
+      styles.adoptInto(root, [])
+      expect(root.adoptedStyleSheets).toContain(sheet)
+    } finally {
+      marker.remove()
+    }
+  })
+
   it("register() is idempotent and updates sheets in place", () => {
     const sheet = styles.register("button", ".probe { color: red }")
     expect(styles.register("button", ".probe { color: red }")).toBe(sheet)
