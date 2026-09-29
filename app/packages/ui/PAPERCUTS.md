@@ -107,3 +107,16 @@ Log of things that slowed down development. Date · symptom · fix · project.
   it imports statically. · Harmless;  a narrower glob in `Icons.#loadChunk` would silence it. · spell/ui
 - 2026-09-29 · `yarn dev` in Astro 7 starts the dev server DETACHED and returns;  stop it with
   `yarn astro dev stop` (or `status` / `logs`). · Noted in `site/README.md`. · spell/ui site
+- 2026-09-29 · `page.screenshot({ path })` (from `vitest/browser`) to a path outside the repo fails with
+  `Access denied to "..." See Vite config documentation for "server.fs"` -- the path goes through Vite's
+  dev server, which only serves the project. · Write under the repo (e.g. `.cache/shots/`, which `yarn clean`
+  removes) and move the files afterwards. · spell/ui
+- 2026-09-29 · Porting a `.less` into the `types, content, variations, states` sublayers:  Fomantic's
+  "Content" rules (`.ui.dropdown > .dropdown.icon`, `> .text`, `> .menu`) are BASE rules that its types
+  override (`.ui.selection.dropdown > .dropdown.icon { position: absolute }`).  Put in the `content` layer
+  they beat every type rule regardless of specificity -- the selection caret stopped being absolute and
+  `.label ~ .text { display: none }` stopped working, with no error. · Keep a component's base element
+  rules in `types`, ahead of the type rules;  `content` is for parts no type touches. · spell/ui
+- 2026-09-29 · A relative selector inside `:is()` (`.ui.dropdown :is(> .text, .menu > .item) > .icon`) is
+  invalid -- only `:has()` takes relative selectors -- and the browser silently drops the whole rule
+  (lightningcss passes it through). · Spell the alternatives out as separate selectors in the list. · spell/ui

@@ -161,7 +161,13 @@ class IconGenerator {
 
     const fomanticText = readFileSync(this.fomanticVariablesPath, "utf8")
     const fomanticResult = this.buildFomanticAliases(fomanticText, metadata, freeNames)
-    const fomanticReport = this.writeJson("fomantic-aliases.json", fomanticResult.aliases)
+    const { aliases: fomanticAliases, clashes: fomanticClashes } = this.splitFomanticClashes(
+      fomanticResult.aliases,
+      freeNames,
+      faAliases
+    )
+    const fomanticReport = this.writeJson("fomantic-aliases.json", fomanticAliases)
+    const clashesReport = this.writeJson("fomantic-clashes.json", fomanticClashes)
 
     const search = this.buildSearchIndex(metadata)
     const searchReport = search ? this.writeJson("search.json", search.terms) : undefined
@@ -173,6 +179,8 @@ class IconGenerator {
       brandsReport,
       faAliasesReport,
       fomanticReport,
+      clashesReport,
+      fomanticClashes,
       searchReport,
       searchSkippedBytes: search ? undefined : this.searchIndexBytes(metadata),
       fomanticResult
@@ -363,6 +371,30 @@ class IconGenerator {
     }
   }
 
+  /**
+   * Splits Fomantic's aliases into the ones that are safe by default and the CLASHES:  Fomantic phrases
+   * whose dashed form is ALREADY a Font Awesome name or alias for a DIFFERENT icon (`x`, `warning`,
+   * `sign in`, `desktop` ...).
+   * - Font Awesome wins a clash by default, so clashes go to their own file, which `Icons` consults only
+   *   when the page opts in with `<html ui-icon-names="fomantic">` -- see `docs/icons.md`.
+   * - Dashed form, because `Icons` treats spaces and dashes alike:  `sign in` ~== `sign-in`.
+   */
+  private splitFomanticClashes(
+    fomantic: Record<string, string>,
+    freeNames: Set<string>,
+    faAliases: Record<string, string>
+  ) {
+    const aliases: Record<string, string> = {}
+    const clashes: Record<string, string> = {}
+    for (const [phrase, target] of Object.entries(fomantic)) {
+      const dashed = phrase.replace(/ /g, "-")
+      const faMeaning = faAliases[dashed] ?? (freeNames.has(dashed) ? dashed : undefined)
+      if (faMeaning && faMeaning !== target) clashes[phrase] = target
+      else aliases[phrase] = target
+    }
+    return { aliases, clashes }
+  }
+
   /** Parses one `@<mapName>: { key: "\\hex"; ... };` LESS map into `[underscored key, lowercase hex]` pairs. */
   private static parseLessMap(text: string, mapName: string): [string, string][] {
     const body = new RegExp(`@${mapName}:\\s*\\{([^}]*)\\}`, "s").exec(text)?.[1]
@@ -420,6 +452,8 @@ class IconGenerator {
     brandsReport: { file: string; bytes: number }
     faAliasesReport: { file: string; bytes: number }
     fomanticReport: { file: string; bytes: number }
+    clashesReport: { file: string; bytes: number }
+    fomanticClashes: Record<string, string>
     searchReport: { file: string; bytes: number } | undefined
     searchSkippedBytes: number | undefined
     fomanticResult: ReturnType<IconGenerator["buildFomanticAliases"]>
@@ -432,6 +466,7 @@ class IconGenerator {
     console.log(`  ${args.brandsReport.file}: ${kb(args.brandsReport.bytes)}`)
     console.log(`  ${args.faAliasesReport.file}: ${kb(args.faAliasesReport.bytes)}`)
     console.log(`  ${args.fomanticReport.file}: ${kb(args.fomanticReport.bytes)}`)
+    console.log(`  ${args.clashesReport.file}: ${kb(args.clashesReport.bytes)}`)
     if (args.searchReport) console.log(`  ${args.searchReport.file}: ${kb(args.searchReport.bytes)}`)
     else console.log(`  search.json: SKIPPED (uncapped would be ${kb(args.searchSkippedBytes ?? 0)}, over 100 KB)`)
 
@@ -449,6 +484,9 @@ class IconGenerator {
     console.log(`            ${r.overrideCount} via MANUAL_OVERRIDES, ${r.nameFallbackCount} via name fallback)`)
     console.log(`  unresolved: ${r.unresolved.length}`)
     for (const u of r.unresolved) console.log(`    - "${u.phrase}" (\\${u.hex})`)
+    const clashes = Object.keys(args.fomanticClashes)
+    console.log(`  clashing with a Font Awesome name (opt-in only): ${clashes.length}`)
+    console.log(`    ${clashes.join(", ")}`)
   }
 }
 
