@@ -331,14 +331,14 @@ export const avatarVocabulary = {
 
 /****************
  * ### `<ui-detail>`
- * A detail:  `<span class="detail">`.
+ * A detail:  `<span class="detail">` (`<a>` with `href`).
  ****************/
 export const detailVocabulary = {
   tag: "ui-detail",
   noun: "detail",
   ui: false,
   description: "A label's dimmer second value, e.g. a count.",
-  attributes: [],
+  attributes: [{ name: "href", kind: "string", description: 'Renders a link (`<a class="detail" href>`).' }],
   events: [],
   slots: [{ name: "", description: "Text, an icon." }],
   parts: [{ name: "detail", description: "The detail box." }],

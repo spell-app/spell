@@ -10,9 +10,10 @@
  *   - `<ui-header>` STANDALONE:  `<div class="ui [size] [color] [keyOnly ...] header">`, or `<h1>` ... `<h6>`
  *     with `level` (a page header);  OWNED (inside a card, modal, another header ...):  `<div class="header">`,
  *     never `ui` -- Fomantic's `.ui.card > .content > .header` is a plain `.header`
- *   - `href` renders `<a>` (header, author, title);  `<ui-date datetime>` renders `<time>`;  `<ui-avatar src>`
- *     renders `<span class="avatar"><img alt=""></span>`;  `<ui-detail>` / `<ui-date>` / `<ui-author>` are
- *     `<span>`s
+ *   - `href` renders `<a>` (header, author, title, detail);  `<ui-date datetime>` renders `<time>`;  `<ui-avatar
+ *     src>` renders `<span class="avatar"><img alt=""></span>`;  `<ui-detail>` / `<ui-date>` / `<ui-author>` are
+ *     `<span>`s, or `<a class="detail" href>` / `<a class="author" href>` for `<ui-detail href>` / `<ui-author
+ *     href>`
  *   - a `<ui-label>` inside a `<ui-statistic>` is that statistic's `.label` part:  it adopts this sheet after
  *     `label.css` and renders `<div class="label" part="label">`, no `ui`
  * - Hosts are `display: contents`:  the root IS the part, so Fomantic's flex / table / float layouts of the

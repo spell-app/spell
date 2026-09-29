@@ -14,6 +14,9 @@
  *     (Fomantic makes the PARENT one with `:has()`, which can't reach across a shadow boundary)
  *   - `:state(inverted)` / `:state(loading)` / `:state(disabled)` -- for PAGE styling only
  * - OWNER side (what content slotted into a segment inherits):
+ *   - EVERY segment root declares `--ui-inverted` (`0` by default, `1` when `inverted`) and `color-scheme` /
+ *     `--ui-scheme` to match:  a plain segment nested in an inverted one resets to the light scheme instead of
+ *     inheriting the dark one, matching Fomantic (which paints a nested plain segment white again)
  *   - `inverted` (and a coloured inverted segment) sets `--ui-inverted: 1`, `color-scheme: dark` and
  *     `--ui-scheme: dark` on the root:  every `light-dark()` token below resolves dark, so headers, labels,
  *     dividers and parts follow with no inverted rules of their own;  `parts.css` style-queries `--ui-inverted`
@@ -26,13 +29,16 @@
  * - Group looks are TOKEN driven:  `.ui.segments` sets `--ui-segments-*` on each child (light DOM `> *`, shadow
  *   `::slotted(*)`) -- margin, border, radius, divider line, shadow, flex -- which the segment root reads first.
  *   Each segment root resets them for its OWN children, so nested segments don't inherit a group's layout.
- *   NEVER set `--_segment-*` or `--ui-segments-*` from outside;  theme with `--ui-segment-*`.
+ *   NEVER set `--_segment-*`, `--_segments-*` or `--ui-segments-*` from outside;  theme with `--ui-segment-*`.
+ * - Nested GROUPS lose their own box the same way:  `.ui.segments > .segments` (static) / `.ui.segments >
+ *   ::slotted(ui-segments)` (a nested `<ui-segments>` is a `display: contents` host, so its box can't be
+ *   styled directly) set `--_segments-*` (private), which the nested group's OWN root reads -- Fomantic's
+ *   `.ui.segments > .ui.segments` has no border / shadow / radius of its own, just a divider line if not first.
  * - NOTE: left out, on purpose:
  *   - coupling rules for other components' markup:  grid / table / tab segments, the placeholder segment's
  *     inner `.button` / `.field` / `.inline` layout, and attached-label content padding (`+ :not(.attached)`)
  *   - `primary` / `secondary` never colour a segment's top edge (Fomantic's rule):  `secondary` is an emphasis;
  *     `color="red" secondary` loses the red, since `colors.css` maps `secondary` after the hues
- *   - a plain segment nested in an inverted one stays in the dark scheme (Fomantic paints it white again)
  *   - STATIC markup only:  a coloured (or `secondary`) segment recolours static segments nested in it -- the
  *     colour reset lives on the root's `<slot>`, which static markup doesn't have
  *   - `.ui.attached + .ui.attached.segment` (no top border after an attached neighbour) is approximated as
@@ -73,6 +79,19 @@
   :has(> .ui.piled.segment) {
     position: relative;
     z-index: 0;
+  }
+
+  /*
+   * Owner tokens, ALWAYS declared (never left to inherit):  a plain segment root resets `--ui-inverted` to `0`
+   * and `color-scheme` / `--ui-scheme` to `light` even nested in an inverted one -- Fomantic resets a nested
+   * plain segment to the light scheme, it doesn't inherit the dark one.  `.ui.inverted:is(.segment, .segments)`
+   * below overrides both, in a LATER layer, so it always wins over this default regardless of nesting depth.
+   */
+  .ui.segment,
+  .ui.segments {
+    --ui-inverted: 0;
+    --ui-scheme: light;
+    color-scheme: light;
   }
 
   /* Tokens:  one per `segment.variables` entry that still matters, from the global tokens. */
@@ -324,11 +343,20 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    margin: var(--ui-segment-margin) 0;
-    border: var(--ui-segment-border-width) solid var(--ui-segment-border-color);
-    border-radius: var(--ui-segment-radius);
+    /*
+     * `--_segments-*` (private):  the NESTED-group selectors below set these on a nested group's own root, so
+     * it loses its box the same way an individual segment loses its via `--ui-segments-*`.  Unset (top-level
+     * group), each falls through to the normal group look.
+     */
+    margin: var(--_segments-margin, var(--ui-segment-margin) 0);
+    border: var(--_segments-border, var(--ui-segment-border-width) solid var(--ui-segment-border-color));
+    border-top: var(
+      --_segments-border-top,
+      var(--_segments-border, var(--ui-segment-border-width) solid var(--ui-segment-border-color))
+    );
+    border-radius: var(--_segments-radius, var(--ui-segment-radius));
     background: var(--ui-segment-background);
-    box-shadow: var(--_segment-shadow, var(--ui-segment-shadow));
+    box-shadow: var(--_segments-shadow, var(--_segment-shadow, var(--ui-segment-shadow)));
     color: var(--ui-segment-color);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
   }
@@ -363,15 +391,22 @@
   .ui.segments > ::slotted(:only-child) {
     --ui-segments-radius: var(--ui-segment-radius);
   }
-  /* Nested group:  a divider line above it, no box of its own. */
-  .ui.segments > .segments:not(:first-child) {
-    border-top: var(--ui-segment-border-width) solid var(--ui-segment-border-color);
+  /*
+   * Nested group:  a divider line above it, no box of its own.
+   * - Shadow DOM:  a nested `<ui-segments>` is a `display: contents` host, so its box can't be styled directly
+   *   from here (`::slotted()` only reaches the top-level slotted node) -- this sets the `--_segments-*`
+   *   tokens above instead, which inherit into the nested host's OWN shadow root and its `.ui.segments` reads.
+   */
+  .ui.segments > .segments,
+  .ui.segments > ::slotted(ui-segments) {
+    --_segments-margin: 0;
+    --_segments-border: none;
+    --_segments-radius: 0;
+    --_segments-shadow: 0 0 #0000;
   }
-  .ui.segments > .segments {
-    margin: 0;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
+  .ui.segments > .segments:not(:first-child),
+  .ui.segments > ::slotted(ui-segments:not(:first-child)) {
+    --_segments-border-top: var(--ui-segment-border-width) solid var(--ui-segment-border-color);
   }
 }
 

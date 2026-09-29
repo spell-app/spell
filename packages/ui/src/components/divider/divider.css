@@ -13,6 +13,9 @@
  *   values:  one rule set, no inverted colour table.
  * - Colours:  a `color` recolours the rule (`--ui-color`) and the text (`--ui-color-text`).
  * - Host states:  none;  this sheet keys on the root's classes.
+ * - NOTE: `hidden` reflects the element's `dividerHidden` property (vocabulary `property` rename, so it doesn't
+ *   shadow `HTMLElement.hidden`) but keeps ITS OWN attribute name -- `[hidden]` overrides the UA default
+ *   `display: none` with `display: contents`, so a hidden divider keeps contributing its spacing.
  * - NOTE: left out, on purpose:
  *   - the stackable-grid swap of a vertical divider to a horizontal one on mobile, and the grid column
  *     coupling (`.ui.grid > .column + .divider`):  `grid.css` owns those when it lands

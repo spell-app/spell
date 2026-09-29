@@ -8,7 +8,9 @@
  *     - `<span class="icon" part="icon"><slot name="icon">svg</slot></span>` when there's an icon
  *     - the default slot (text)
  *     - `<span class="detail" part="detail">` for the `detail` shorthand (a slotted `<ui-detail>` is a content
- *       part and styles itself from `parts.css`, context `in-label`)
+ *       part and styles itself from `parts.css`, context `in-label`;  `<ui-detail href>` renders `<a
+ *       class="detail">` in ITS OWN shadow root -- this sheet's link rule keys on `.detail` / `.detail
+ *       ::slotted(a)` standalone, since it can't reach past that separate root with `.ui.label` ancestry)
  *     - `removable`:  `<button type="button" class="delete icon" part="delete" aria-label="...">svg</button>`
  *   - `icon` class (as `ClassBuilder` `extra`) when there's an icon and no text:  the icon centres
  *   - `<ui-labels>`:  `<div class="ui ... labels" part="group"><slot></slot></div>`
@@ -428,16 +430,26 @@
 *******************************/
 
 @layer ui.components.label.content {
-  /* Links inside a label (slotted `<a>`s). */
+  /*
+   * Links inside a label (slotted `<a>`s), plus one inside a `.detail` -- a `<ui-detail href>` renders its own
+   * `<a class="detail">` in ITS OWN shadow root, where there's no `.ui.label` ancestor to key on, so `.detail`
+   * covers that root standalone;  `.detail ::slotted(a)` covers a plain link projected into a `<ui-detail>`
+   * (`<ui-detail><a>...</a></ui-detail>`), reachable ONLY from `<ui-detail>`'s own shadow, never label's --
+   * a label's sheet can't reach past a `<ui-detail>` it merely slots.
+   */
   .ui.label > a,
-  .ui.label ::slotted(a) {
+  .ui.label ::slotted(a),
+  a.detail,
+  .detail ::slotted(a) {
     color: inherit;
     cursor: pointer;
     opacity: var(--ui-label-link-opacity);
     transition: opacity var(--ui-label-duration) var(--ui-ease);
   }
   .ui.label > a:hover,
-  .ui.label ::slotted(a:hover) {
+  .ui.label ::slotted(a:hover),
+  a.detail:hover,
+  .detail ::slotted(a:hover) {
     opacity: 1;
   }
 

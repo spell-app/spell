@@ -46,7 +46,7 @@ export const iconVocabulary = {
     {
       name: "outline",
       kind: "boolean",
-      description: "Alias for `variant=\"regular\"`, Fomantic's `mail outline icon` spelling.  No class of its own."
+      description: 'Alias for `variant="regular"`, Fomantic\'s `mail outline icon` spelling.  No class of its own.'
     },
     {
       name: "label",

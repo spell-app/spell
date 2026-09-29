@@ -101,6 +101,36 @@ describe("segment.css examples", () => {
     expect(luminance(getComputedStyle(inverted.querySelector("p:last-child")!).color)).toBeGreaterThan(0.5)
   })
 
+  it("resets a plain segment nested in an inverted one to the light scheme, Fomantic-style", () => {
+    Sheets.adopt([...foundationCSS, segmentCSS])
+    const root = Fixture.render(
+      `<div class="ui inverted segment"><div class="ui segment"><p>Plain again</p></div></div>`
+    )
+    const outer = getComputedStyle(root)
+    expect(outer.colorScheme).toBe("dark")
+    expect(outer.getPropertyValue("--ui-inverted").trim()).toBe("1")
+    const inner = getComputedStyle(root.querySelector(".ui.segment")!)
+    expect(inner.colorScheme).toBe("light")
+    expect(inner.getPropertyValue("--ui-inverted").trim()).toBe("0")
+  })
+
+  it("collapses a group nested directly in another group to a divider line, no box of its own", () => {
+    Sheets.adopt([...foundationCSS, segmentCSS])
+    const root = Fixture.render(`<div class="ui segments">
+      <div class="ui segment"><p>Top</p></div>
+      <div class="ui segments">
+        <div class="ui segment"><p>Nested top</p></div>
+        <div class="ui segment"><p>Nested bottom</p></div>
+      </div>
+    </div>`)
+    const nested = getComputedStyle(root.querySelector(".ui.segments > .ui.segments")!)
+    expect(nested.marginTop).toBe("0px")
+    expect(nested.boxShadow).toBe("rgba(0, 0, 0, 0) 0px 0px 0px 0px")
+    expect(nested.borderBottomStyle).toBe("none")
+    expect(nested.borderTopStyle).toBe("solid")
+    expect(nested.borderTopLeftRadius).toBe("0px")
+  })
+
   it("joins attached segments edge to edge", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
     const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
@@ -205,6 +235,32 @@ describe("segment.css in shadow roots", () => {
     expect(getComputedStyle(a!).marginTop).toBe("0px")
     expect(getComputedStyle(b!).marginTop).not.toBe("0px")
     expect(getComputedStyle(a!).marginBottom).not.toBe("0px")
+  })
+
+  it("collapses a group nested directly in another group's shadow root the same way", () => {
+    Sheets.adopt(foundationCSS)
+    // Outer `<ui-segments>`:  its shadow root's `.ui.segments` holds a `<slot>`.
+    const outer = Sheets.host(`<div class="ui segments" part="group"><slot></slot></div>`, sheets())
+    const first = document.createElement("span")
+    Sheets.attach(first, `<div class="ui segment" part="segment"><slot></slot></div>`, sheets())
+    outer.append(first)
+    // A nested `<ui-segments>`, second child of the outer group:  a `display: contents` host with its OWN
+    // shadow root, standing in for the custom element (`::slotted(ui-segments)` matches it by TAG).
+    const nestedHost = document.createElement("ui-segments")
+    outer.append(nestedHost)
+    Sheets.attach(nestedHost, `<div class="ui segments" part="group"><slot></slot></div>`, sheets())
+    const nestedFirst = document.createElement("span")
+    Sheets.attach(nestedFirst, `<div class="ui segment" part="segment"><slot></slot></div>`, sheets())
+    Sheets.inner(nestedHost).append(nestedFirst)
+
+    const nestedInner = Sheets.inner(nestedHost)
+    const style = getComputedStyle(nestedInner)
+    expect(style.marginTop).toBe("0px")
+    expect(style.boxShadow).toBe("rgba(0, 0, 0, 0) 0px 0px 0px 0px")
+    expect(style.borderBottomStyle).toBe("none")
+    // Second child of the outer group (not the first):  keeps its divider line on top.
+    expect(style.borderTopStyle).toBe("solid")
+    expect(style.borderTopLeftRadius).toBe("0px")
   })
 
   it("hands inverted to its content, but not its colour, scale or group layout", () => {
