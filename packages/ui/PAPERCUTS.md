@@ -147,3 +147,30 @@ Log of things that slowed down development. Date · symptom · fix · project.
   labeled-icon glyph fills its whole block (same for `.text > img` inside the dropdown's `trigger` slot). ·
   Render the svg as a SIBLING of the slot.  Caught only by comparing screenshots with the class-grammar
   fragments. · spell/ui spike/lit
+- 2026-09-29 · Solid 2 RC:  ONE uncaught error in any `@solidjs/element` component (a memo reading an
+  undefined field) logs `[REACTIVITY_HALTED]` and freezes EVERY Solid element on the page -- later tests
+  hung on `ready` until timeout (a 45-test file took 240 s). · Find the FIRST error above the halt;  give the
+  browser project a `testTimeout` so a halt fails fast. · spell/ui spike/solid
+- 2026-09-29 · Solid 2 memos compute EAGERLY:  a `createMemo` in a base-class constructor that calls an
+  overridable method reads subclass fields that don't exist yet (`this.hasIcon is not a function`);  likewise a
+  memo field initializer reading a signal assigned in the constructor BODY. · `{ lazy: true }` on base-class
+  memos;  declare every signal as a field (`Cell`) above the memos that read it. · spell/ui spike/solid
+- 2026-09-29 · `@solidjs/vite-plugin` picks its client / server posture from the `test.environment` of the config
+  it was CREATED in, so a vitest project with `environment: "node"` under `extends: true` still gets the browser
+  build (`renderToString is not supported in the browser`). · Give that project its own `solid()` instance
+  (`spike/solid/vitest.config.ts`). · spell/ui spike/solid
+- 2026-09-29 · Vitest stubs CSS imports in node tests, so `?inline` sheets are `""` there (a DSD string came out
+  with an empty `<style>`). · `test.css: { include: [/.+/] }` on that project. · spell/ui spike/solid
+- 2026-09-29 · A package in a sub-folder (`spike/solid/`) with its own `node_modules`:  `test/fixture.ts` and
+  `test/a11y.ts` resolve `vitest` / `axe-core` from the REPO's `node_modules`, a second vitest instance
+  (`onTestFinished` has no test).  Also Vite's `server.fs` refuses `../../src` and the first run reloads mid-test
+  (`optimized dependencies changed`). · `resolve.dedupe: ["vitest", "axe-core", ...]`, `server.fs.allow: [repo]`,
+  `optimizeDeps.include` (`spike/solid/vite.shared.ts`). · spell/ui spike/solid
+- 2026-09-29 · `commands.writeFile()` (vitest browser) resolves paths from the PROJECT root, not the test file;
+  `../../../x` escaped the repo and hit `server.fs` ("Access denied"). · Write to `.cache/...`. · spell/ui spike/solid
+- 2026-09-29 · Root `tsconfig.json` `include`s `spike`, so root `yarn tsc` type-checks `spike/solid/**/*.tsx` without
+  its `jsx` / `jsxImportSource` / `$spike` settings:  411 errors. · Spike-local `yarn tsc` is clean;  the root
+  should exclude `spike/*` (each spike has its own tsconfig) -- NOT changed, outside the spike's remit. ·
+  spell/ui spike/solid
+- 2026-09-29 · rolldown (Vite 8.3) warns `advancedChunks option is deprecated, please use codeSplitting instead`;
+  same `groups` shape. · `output.codeSplitting: { groups }`. · spell/ui spike/solid
