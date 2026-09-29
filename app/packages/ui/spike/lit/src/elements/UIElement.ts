@@ -6,6 +6,7 @@ import { loadUI, RUNTIME_KEY, type RuntimeGlobal, type UIRuntime } from "$/runti
 import { type ComponentVocabulary, type Dictionary, type LocalizedVocabulary, Vocabulary } from "$/vocabulary"
 
 import type { DeclaredProps, EmitOptions, EventName, PartName, SheetEntry, SlotName, TextKey } from "./elements.types"
+import { PartOwners } from "./PartOwners"
 import { VocabularyProperties, type VocabularyDeclaration } from "./VocabularyProperties"
 
 /**
@@ -25,6 +26,9 @@ import { VocabularyProperties, type VocabularyDeclaration } from "./VocabularyPr
  *   or the host wrote the property from inside its handler, which wins (React-style revert).
  * - Upgrade backstop:  Lit's own `__saveInstanceProperties()` already deletes and replays properties a
  *   framework set before the element was defined, for every declared property.  Nothing to add.
+ * - Registration (`define()`) also records the tag with `PartOwners` (owner context) and queues the
+ *   vocabulary's `texts` for `UI.i18n`, registered once the runtime is in.
+ * - Every `slotchange` in the shadow root is reported to `PartOwners`, so re-slotted parts find their owner.
  */
 export class UIElement extends LitElement {
   /** canonical vocabulary;  installed on the prototype by `for()` */
@@ -37,10 +41,16 @@ export class UIElement extends LitElement {
   declare delegatesFocus: boolean
   /** sheets to register and adopt, in cascade order after the foundation */
   declare sheets: readonly SheetEntry[]
+  /** a generic content part (`ContentPart`):  transparent to other parts' owner lookup */
+  declare contentPart: boolean
+  /** forward the host's `aria-label` into the shadow root (see `ariaLabelled`), e.g. icon-only buttons */
+  declare forwardsAriaLabel: boolean
 
   @proto static localized: LocalizedVocabulary | undefined = undefined
   @proto static delegatesFocus = false
   @proto static sheets: readonly SheetEntry[] = []
+  @proto static contentPart = false
+  @proto static forwardsAriaLabel = false
 
   /** `ElementInternals`:  states, ARIA, forms */
   readonly internals: ElementInternals
@@ -107,6 +117,8 @@ export class UIElement extends LitElement {
     const name = tag ?? vocabulary.tag
     const existing = customElements.get(name)
     if (existing) return existing
+    PartOwners.register(name, vocabulary, this.prototype.contentPart)
+    UIElement.queueTexts(vocabulary)
     if (!dictionary && name === vocabulary.tag) {
       customElements.define(name, this)
       return this
@@ -130,16 +142,32 @@ export class UIElement extends LitElement {
   // ## Lifecycle
   ////////////////
 
-  /** Open shadow root, delegating focus per `delegatesFocus`;  reuses a declarative (SSR) one. */
+  /**
+   * Open shadow root, delegating focus per `delegatesFocus`;  reuses a declarative (SSR) one.
+   * - SIDE EFFECT:  reports every `slotchange` inside to `PartOwners` (it bubbles, but isn't composed).
+   */
   protected override createRenderRoot() {
-    return this.shadowRoot ?? this.attachShadow({ mode: "open", delegatesFocus: this.delegatesFocus })
+    const root = this.shadowRoot ?? this.attachShadow({ mode: "open", delegatesFocus: this.delegatesFocus })
+    root.addEventListener("slotchange", UIElement.onSlotChange)
+    return root
+  }
+
+  /** Also watch the host's `aria-label` when it's forwarded. */
+  static override get observedAttributes() {
+    const names = super.observedAttributes
+    return this.prototype.forwardsAriaLabel ? [...names, ARIA_LABEL] : names
+  }
+
+  override attributeChangedCallback(name: string, old: string | null, value: string | null) {
+    if (name === ARIA_LABEL && this.forwardsAriaLabel) this.requestUpdate()
+    else super.attributeChangedCallback(name, old, value)
   }
 
   /** Adopt sheets once the runtime is in (at once if it already is). */
   override connectedCallback() {
     super.connectedCallback()
     if (UIElement.runtime) this.adoptSheets()
-    else void UIElement.loadRuntime().then(() => this.isConnected && this.adoptSheets())
+    else void UIElement.loadRuntime().then(() => this.adoptSheets())
   }
 
   /** Hold the FIRST render until the runtime has loaded, so it paints styled and can use `UI`. */
@@ -148,18 +176,28 @@ export class UIElement extends LitElement {
     return UIElement.loadRuntime().then(() => super.scheduleUpdate())
   }
 
-  /** Register this class's sheets (once) and adopt them into the shadow root. */
-  private adoptSheets() {
-    const ui = UIElement.runtime!
+  /**
+   * Register this class's sheets (once) and adopt `sheetNames()` into the shadow root.
+   * - Call again when `sheetNames()` changes;  a no-op before the runtime is in (connect adopts then).
+   */
+  protected adoptSheets() {
+    const ui = UIElement.runtime
+    if (!ui || !this.isConnected) return
     const constructor = this.constructor as typeof UIElement
     if (!UIElement.registered.has(constructor)) {
       for (const [name, css] of this.sheets) ui.styles.register(name, css)
       UIElement.registered.add(constructor)
     }
-    ui.styles.adoptInto(
-      this.renderRoot as ShadowRoot,
-      this.sheets.map(([name]) => name)
-    )
+    ui.styles.adoptInto(this.renderRoot as ShadowRoot, this.sheetNames())
+  }
+
+  /**
+   * Registered sheet names to adopt, in cascade order:  `sheets` by default.
+   * - Override to add another component's sheet by NAME, e.g. a statistic's label adopts `parts`;  a name
+   *   nobody registered is skipped by `UI.styles`, and picked up once it is.
+   */
+  protected sheetNames(): string[] {
+    return this.sheets.map(([name]) => name)
   }
 
   ////////////////
@@ -175,9 +213,39 @@ export class UIElement extends LitElement {
   /** Classes whose sheets are registered. */
   private static readonly registered = new WeakSet<typeof UIElement>()
 
+  /** Vocabularies whose `texts` wait for the runtime. */
+  private static readonly pendingTexts: ComponentVocabulary[] = []
+
   /** `UI.load()`, remembering the instance so later callers stay synchronous. */
   static loadRuntime(): Promise<UIRuntime> {
-    return (UIElement.loading ??= loadUI().then((ui) => (UIElement.runtime = ui)))
+    return (UIElement.loading ??= loadUI().then((ui) => {
+      UIElement.runtime = ui
+      UIElement.flushTexts(ui)
+      return ui
+    }))
+  }
+
+  /**
+   * Register `vocabulary`'s English `texts` with `UI.i18n`:  now if the runtime is in, else once it loads.
+   * - Doesn't load the runtime itself, so `define()` stays side-effect-light (and SSR-safe).
+   */
+  private static queueTexts(vocabulary: ComponentVocabulary) {
+    if (!vocabulary.texts.length) return
+    UIElement.pendingTexts.push(vocabulary)
+    if (UIElement.runtime) UIElement.flushTexts(UIElement.runtime)
+  }
+
+  /**
+   * Add every pending vocabulary's texts to the `en` pack, so `UI.i18n.t("or")` resolves through the pack
+   * and a translation (`register("es", { or: "o" })`) wins over it.
+   * - A key the pack already has keeps its text:  shared keys (`loading`) stay the runtime's.
+   */
+  private static flushTexts(ui: UIRuntime) {
+    const pack: Record<string, string> = {}
+    for (const vocabulary of UIElement.pendingTexts.splice(0)) {
+      for (const { key, text } of vocabulary.texts) if (!ui.i18n.has(key) && !(key in pack)) pack[key] = text
+    }
+    if (Object.keys(pack).length) ui.i18n.register("en", pack)
   }
 
   ////////////////
@@ -225,6 +293,14 @@ export class UIElement extends LitElement {
     if (i18n?.has(key)) return i18n.t(key, params)
     const text = this.vocabulary.texts.find((spec) => spec.key === key)?.text ?? key
     return params ? text.replace(/\{(\w+)\}/g, (match, name: string) => String(params[name] ?? match)) : text
+  }
+
+  /**
+   * The host's `aria-label`, for elements that forward it (`forwardsAriaLabel`) onto their semantic root:
+   * an icon-only button or label has no text to be named by.
+   */
+  protected ariaLabelled(): string | undefined {
+    return this.getAttribute(ARIA_LABEL) ?? undefined
   }
 
   /** Light-DOM children assigned to canonical slot `name` (`""` ~== default slot). */
@@ -302,4 +378,13 @@ export class UIElement extends LitElement {
 
   /** Cache for `builder()`. */
   private static readonly builders = new WeakMap<ComponentVocabulary, ClassBuilder>()
+
+  /** Report a slot's new assignment to `PartOwners`;  shared by every shadow root. */
+  private static onSlotChange(event: Event) {
+    const slot = event.target
+    if (slot instanceof HTMLSlotElement) PartOwners.reslotted(slot.assignedElements({ flatten: true }))
+  }
 }
+
+/** Platform attribute forwarded by `forwardsAriaLabel` elements. */
+const ARIA_LABEL = "aria-label"

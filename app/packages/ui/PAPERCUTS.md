@@ -174,3 +174,16 @@ Log of things that slowed down development. Date · symptom · fix · project.
   spell/ui spike/solid
 - 2026-09-29 · rolldown (Vite 8.3) warns `advancedChunks option is deprecated, please use codeSplitting instead`;
   same `groups` shape. · `output.codeSplitting: { groups }`. · spell/ui spike/solid
+- 2026-09-29 · After the root `tsconfig.json` started excluding `spike`, `spike/lit`'s `yarn ts` failed with
+  `TS18003: No inputs were found`:  `exclude` is INHERITED through `extends` and its `../../spike` matches the
+  spike's own files. · Override `"exclude": ["node_modules", "dist"]` in `spike/lit/tsconfig.json`. · spell/ui spike/lit
+- 2026-09-29 · The root `.oxlintrc.json` ignores `spike/**`, and oxlint resolves `ignorePatterns` against the config
+  that declares them, so running the root binary from a spike lints nothing. · `spike/lit/.oxlintrc.json`
+  `extends` the root config with its own `ignorePatterns`;  `yarn lint` / `yarn format:check` in `spike/lit`. ·
+  spell/ui spike/lit
+- 2026-09-29 · Vitest's `cdp()` is typed as an empty `CDPSession` interface (`.send` is a TS error) unless the
+  provider's types are loaded. · `/// <reference types="@vitest/browser-playwright" />` in the file that calls it
+  (`spike/lit/src/testing/AXTree.ts`). · spell/ui spike/lit
+- 2026-09-29 · `lit/static-html.js` discovered mid-run made Vite re-optimize and reload the test page
+  ("Vite unexpectedly reloaded a test"). · List every `lit/*` subpath in `optimizeDeps.include`
+  (`spike/lit/vite.config.ts`). · spell/ui spike/lit

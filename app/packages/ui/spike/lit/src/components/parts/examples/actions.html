@@ -1,0 +1,24 @@
+<!-- Element markup for `src/components/parts/examples/actions.html`. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-actions><button type="button">OK</button></ui-actions>
+  </section>
+
+  <section>
+    <h4>In owners</h4>
+    <x-comment>
+      <ui-content>
+        <ui-actions><a href="#reply">Reply</a><a href="#save">Save</a></ui-actions>
+      </ui-content>
+    </x-comment>
+    <x-modal>
+      <ui-header>Delete your account</ui-header>
+      <ui-actions><button type="button">No</button><button type="button">Yes</button></ui-actions>
+    </x-modal>
+    <x-toast style="padding: 1em">
+      <ui-content>Saved</ui-content>
+      <ui-actions><button type="button">Undo</button></ui-actions>
+    </x-toast>
+  </section>
+</div>

@@ -1,0 +1,37 @@
+<!-- Element markup for `src/components/parts/examples/value.html`. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-value>5,550</ui-value>
+  </section>
+
+  <section>
+    <h4>In a statistic</h4>
+    <x-statistic>
+      <ui-value>5,550</ui-value>
+      <ui-label>Downloads</ui-label>
+    </x-statistic>
+    <x-statistic>
+      <ui-value text>Three<br />Thousand</ui-value>
+      <ui-label>Signups</ui-label>
+    </x-statistic>
+    <x-statistic style="--ui-statistic-layout: horizontal">
+      <ui-value>2,204</ui-value>
+      <ui-label>Views</ui-label>
+    </x-statistic>
+    <x-statistic>
+      <ui-value>27</ui-value>
+      <ui-label>Red</ui-label>
+    </x-statistic>
+  </section>
+
+  <section>
+    <h4>In a search result</h4>
+    <x-search>
+      <ui-content>
+        <ui-value>$10.99</ui-value>
+        <ui-title>Result</ui-title>
+      </ui-content>
+    </x-search>
+  </section>
+</div>

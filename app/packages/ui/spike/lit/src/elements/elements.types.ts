@@ -3,7 +3,7 @@
  * - Type-level mirror of `VocabularyProperties`:  a component's vocabulary (`as const`) becomes its typed
  *   property bag, so `UIButton` gets `primary: boolean`, `size: string | undefined` ... with no hand-written
  *   field list.
- * - Runtime-light:  types only.
+ * - Runtime-light:  types, plus the `RESERVED_PROPERTIES` list they mirror.
  */
 
 import type { AttributeSpec, ComponentVocabulary } from "$/vocabulary"
@@ -17,10 +17,25 @@ export type CamelCase<T extends string> = T extends `${infer Head}-${infer Tail}
   ? `${Head}${Capitalize<CamelCase<Tail>>}`
   : T
 
-/** JS property name of an attribute:  its `property`, else `camelCase(name)`. */
-export type PropertyName<S extends AttributeSpec> = S extends { property: infer P extends string }
-  ? P
-  : CamelCase<S["name"]>
+/**
+ * `HTMLElement` members a vocabulary attribute may be named after, which an element MUST NOT shadow:
+ * `VocabularyProperties.propertyName()` prefixes them with the noun (`style` => `iconStyle`).
+ * - Short and literal (not `name in HTMLElement.prototype`), so `PropertyName` can mirror it in types.
+ */
+export const RESERVED_PROPERTIES = ["style", "hidden", "title", "lang", "dir", "slot", "id", "inert"] as const
+
+/** A name in `RESERVED_PROPERTIES`. */
+export type ReservedProperty = (typeof RESERVED_PROPERTIES)[number]
+
+/** Name an attribute's property would have, before the reserved-name rename. */
+type BaseName<S extends AttributeSpec> = S extends { property: infer P extends string } ? P : CamelCase<S["name"]>
+
+/**
+ * JS property name of an attribute of a component with noun `Noun`:  its `property`, else `camelCase(name)`;
+ * a reserved name gets the noun in front (`iconStyle`).  Mirrors `VocabularyProperties.propertyName()`.
+ */
+export type PropertyName<S extends AttributeSpec, Noun extends string = string> =
+  BaseName<S> extends ReservedProperty ? `${CamelCase<Noun>}${Capitalize<BaseName<S>>}` : BaseName<S>
 
 /** Canonical attribute names of `V`. */
 export type AttributeName<V extends ComponentVocabulary> = V["attributes"][number]["name"]
@@ -64,7 +79,7 @@ export type AttributeValue<S extends AttributeSpec> = S["kind"] extends "keyOnly
 
 /** Every attribute of `V` as a typed property. */
 export type VocabularyProps<V extends ComponentVocabulary> = {
-  -readonly [S in V["attributes"][number] as PropertyName<S>]: AttributeValue<S>
+  -readonly [S in V["attributes"][number] as PropertyName<S, V["noun"]>]: AttributeValue<S>
 }
 
 /**
@@ -87,6 +102,13 @@ export type DeclaredProps<V extends ComponentVocabulary, Overrides extends objec
 /** A sheet a component adopts:  registry name + CSS text (`?inline` import), e.g. `["button", buttonCSS]`. */
 export type SheetEntry = readonly [name: string, css: string]
 
+/**
+ * `UI.styles` name of `parts.css`, registered by the part elements (`PartElement`).
+ * - Adopted BY NAME by other components that act as a part in some owner (a statistic's `<ui-label>`), so they
+ *   don't import the sheet:  whoever owns them loads the parts.
+ */
+export const PARTS_SHEET = "parts"
+
 ////////////////
 // ## Events
 ////////////////
@@ -96,3 +118,29 @@ export type EmitOptions = {
   /** `preventDefault()` vetoes the transition, e.g. `ui-close` */
   cancelable?: boolean
 }
+
+////////////////
+// ## Owner context
+////////////////
+
+/** What `PartOwners` tracks:  one element that resolves its owner (see `OwnerController`). */
+export type OwnerTracker = {
+  /** the part (or icon, label) looking for its owner */
+  readonly element: Element
+  /** look the owner up again and apply it */
+  resolveOwner(): void
+}
+
+/** Options for `OwnerController`. */
+export type OwnerControllerOptions = {
+  /**
+   * Only an owner that is the element's direct flat-tree parent counts:  its light-DOM parent, or the host
+   * of the shadow root it was rendered into.  `<ui-icon>` in `<ui-icons>`.
+   */
+  direct?: boolean
+  /** called after the owner changed, e.g. to re-adopt sheets */
+  onChange?: () => void
+}
+
+/** Element a `ContentPart` root renders:  `div` by default, `h1` ... `h6` for page headers. */
+export type PartBox = "div" | "span" | "time" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
