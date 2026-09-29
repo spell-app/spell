@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { Fixture } from "../../test/fixture"
+import { Fixture } from "$test/fixture"
 import { RovingTabindex } from "./RovingTabindex"
 
 /** Dispatch a `keydown` from `target`. */

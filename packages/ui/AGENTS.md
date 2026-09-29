@@ -181,6 +181,7 @@ when working with code in this repository.
 ## Imports
 
 - ALWAYS import starting from `$`, NEVER start import from `../`.
+  - Test helpers come from `$test/...` (`$test/fixture`, `$test/a11y`), the only other alias.
 - OK to import from direct peers: `import { UIElement } from "./UIElement"`, but not subdirectories -- use `$/...` instead.
 - Prefer ONE namespace import per sub-system and qualify at use site:
   `import { E } from "$/elements"` => `E.UIElement`, `new E.ClassBuilder(...)`.

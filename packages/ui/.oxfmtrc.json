@@ -15,6 +15,7 @@
     ".claude/**",
     "coverage/**",
     "reference/**",
+    "src/icons/data/**",
     "site/dist/**",
     "spike/*/dist/**"
   ]

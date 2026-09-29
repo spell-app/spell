@@ -53,3 +53,25 @@ Log of things that slowed down development. Date · symptom · fix · project.
 - 2026-09-28 · oxlint's type-aware `no-base-to-string` fires on `${value}` / `String(value)` when `value: unknown`
   (e.g. `ClassBuilder` reading a `Record<string, unknown>` bag), even though `restrict-template-expressions`
   is off. · Narrow first (`typeof value === "string" | "number"`), see `ClassBuilder.text()`. · spell/ui
+- 2026-09-28 · Vite's default Lightning CSS targets (`baseline-widely-available`) LOWER `light-dark()` in every
+  `?inline` / imported sheet into `var(--lightningcss-light, a) var(--lightningcss-dark, b)` plus a
+  `@media (prefers-color-scheme)` switch, and add hex + `@supports (color: lab())` fallbacks for OKLCH literals.
+  In a custom property the `var()`s substitute where the token is DECLARED (`:root`), so every `.ui-dark` /
+  inverted subtree silently keeps the page's scheme. · Needs `css.lightningcss.targets` set to modern browsers
+  in `vite.config.ts` AND `vitest.config.ts`, e.g. `{ chrome: 125 << 16, safari: 26 << 16, firefox: 147 << 16 }`
+  (verified:  `styles.test.ts` passes 20/20 with it, and its barrel `light-dark()` test is skipped until then). ·
+  spell/ui
+- 2026-09-28 · `@property` rules inside a shadow root's (adopted) stylesheet are IGNORED in Chromium -- only the
+  document registers custom properties. · Register in page-level sheets only;  never rely on a registration
+  (or its `initial-value`) inside a component's own CSS. · spell/ui
+- 2026-09-28 · A registered `<color>` custom property resolves `light-dark()` where it is DECLARED, so
+  `@property --ui-red { syntax: "<color>" }` + `:root { --ui-red: light-dark(a, b) }` freezes `:root`'s scheme
+  into `.ui-dark` subtrees (unregistered, the token stream resolves where it is USED). · Register only the
+  concrete per-scheme bases (`--ui-red-on-light` / `-on-dark`);  keep `light-dark()` tokens unregistered. · spell/ui
+- 2026-09-28 · oxfmt formats `.css` too (prettier style), including generated sheets. · `yarn gen:styles` runs
+  oxfmt over its output, and `styles.test.ts` compares generated vs committed CSS with whitespace stripped. · spell/ui
+- 2026-09-28 · `scripts/*.ts` sit in no tsconfig, so `yarn ts` never type-checks them. · Added
+  `scripts/tsconfig.json` (extends `tsconfig.node.json`, `$` paths, DOM lib);  `yarn gen:styles` runs
+  `tsc -p scripts` first.  Consider adding it to `yarn ts`. · spell/ui
+- 2026-09-28 · `console.log` inside a Vitest browser-mode test doesn't reach the terminal in this setup, which
+  makes quick browser probes awkward. · Throw an `Error` with the values instead, or assert. · spell/ui

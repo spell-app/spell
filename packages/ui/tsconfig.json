@@ -16,7 +16,8 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["vite/client"],
     "paths": {
-      "$/*": ["./src/*"]
+      "$/*": ["./src/*"],
+      "$test/*": ["./test/*"]
     }
   },
   "include": ["src", "test", "spike"]

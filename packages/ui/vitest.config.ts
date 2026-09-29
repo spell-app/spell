@@ -3,9 +3,12 @@ import { playwright } from "@vitest/browser-playwright"
 import { fileURLToPath } from "node:url"
 
 import { standardDecorators } from "./vite.decorators.ts"
+import { CSS_TARGETS } from "./vite.config.ts"
 
 /** Absolute path of `src/`, target of the `$` import alias. */
 const SRC = fileURLToPath(new URL("./src", import.meta.url))
+/** Absolute path of `test/`, target of the `$test` import alias. */
+const TEST = fileURLToPath(new URL("./test", import.meta.url))
 
 /**
  * Every test runs in a REAL browser (Vitest browser mode + Playwright):  custom elements, shadow DOM,
@@ -19,12 +22,14 @@ export default defineConfig({
   plugins: [standardDecorators()],
   resolve: {
     alias: {
+      $test: TEST,
       $: SRC
     }
   },
   css: {
     transformer: "lightningcss",
     lightningcss: {
+      targets: CSS_TARGETS,
       drafts: { customMedia: true }
     }
   },
