@@ -5,6 +5,12 @@
  * - Shadow markup contract (class grammar on semantic elements):
  *   - `<ui-button>`:  `<button class="ui ... button" part="button">` (`<a>` when `href`), holding
  *     `<span class="icon" part="icon"><slot name="icon">svg</slot></span>` and the default slot.
+ *     - NOTE:  `<slot>` breaks a CHILD (`>`) selector -- fallback content sits one level DEEPER, as a
+ *       descendant of `.icon`, not a direct child.  So the icon's sizing rule reads `.icon svg` (descendant,
+ *       reaches the fallback `<svg>` through the `<slot>`) plus `.icon ::slotted(svg)` /
+ *       `.icon ::slotted(ui-icon)` for a real slotted replacement -- NEVER `.icon > svg`.  `.icon` itself
+ *       carries the token-driven box size (`1.18em` by default, `1em` for `circular`, the labeled-icon
+ *       block width ...);  the inner rule just fills that box (`width/height: 100%`).
  *     - `animated`:  default slot in `<span class="visible content">`, icon slot in `<span class="hidden content">`
  *     - `label`:  a `<div class="ui labeled button">` ROOT wrapping the `<button class="ui button">` and a
  *       `<span class="ui basic label" part="label">`;  CSS orders the label first for `labeled="left"`
@@ -450,8 +456,9 @@
   .ui.button:not(.icon) > .right.icon {
     margin-inline: var(--ui-button-icon-spacing) calc(var(--ui-button-icon-spacing) / -2);
   }
-  .ui.button .icon > svg,
-  .ui.button .icon > ::slotted(svg) {
+  .ui.button .icon svg,
+  .ui.button .icon ::slotted(svg),
+  .ui.button .icon ::slotted(ui-icon) {
     display: block;
     width: 100%;
     height: 100%;

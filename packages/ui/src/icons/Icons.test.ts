@@ -247,6 +247,19 @@ describe("Icons.preload()", () => {
     expect(Icons.peek("circle-check")).toBeDefined()
     expect(Icons.peek("circle-xmark")).toBeDefined()
   })
+
+  /**
+   * The alias maps are lazy now (`Icons.ts`'s `#loadAliases()`), so an EMPTY `preload()` used to be a no-op
+   * for them.  It still warms `peek()`'s alias resolution on its own -- this only needs the target CHUNK
+   * warmed separately (here via `get()`) to prove the alias half came from `preload([])`, not from `get()`.
+   */
+  it("warms the alias maps even with no names, so peek() can resolve a Fomantic alias once its chunk is cached", async () => {
+    await Icons.preload([])
+    await Icons.get("envelope", "regular")
+    // "mail outline" -> Fomantic alias "mail" -> "envelope", regular style from the "outline" word --
+    // needs the (now-warmed) Fomantic alias map to find "envelope" synchronously at all.
+    expect(Icons.peek("mail outline")).toEqual(Icons.peek("envelope", "regular"))
+  })
 })
 
 describe("Icons.get() -- explicit style beats aliasing", () => {

@@ -194,7 +194,12 @@ export const dropdownVocabulary = {
   texts: [
     { key: "noResults", text: "No results found.", description: "Message when nothing matches the search." },
     { key: "addItem", text: "Add {value}", description: "The add item of `allow-additions`." },
-    { key: "clear", text: "Clear", description: "Accessible name of the clear button." }
+    { key: "clear", text: "Clear", description: "Accessible name of the clear button." },
+    {
+      key: "removeValue",
+      text: "Remove {value}",
+      description: "Accessible name of a `multiple` label's delete button."
+    }
   ]
 } as const satisfies ComponentVocabulary
 

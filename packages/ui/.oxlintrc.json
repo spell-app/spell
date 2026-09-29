@@ -12,7 +12,17 @@
   "options": { "typeAware": true },
 
   // Mirrors `.oxfmtrc.json` -- vendored, generated and scratch trees.
-  "ignorePatterns": ["build", "dist", ".cache", ".yarn", "reference", "site/dist", "spike/*/dist", "coverage"],
+  "ignorePatterns": [
+    "spike/**",
+    "build",
+    "dist",
+    ".cache",
+    ".yarn",
+    "reference",
+    "site/dist",
+    "spike/*/dist",
+    "coverage"
+  ],
 
   // NOTE: only rules that DIFFER from the `correctness` defaults belong here.  Anything listed
   // as plain `"error"` is redundant -- `categories` already enables it.

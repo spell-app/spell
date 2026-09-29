@@ -69,3 +69,71 @@ export type ItemType = "item" | "header" | "divider"
  * - Falls back to `--ui-dropdown`, which is enough inside one shadow root.
  */
 export const DROPDOWN_ANCHOR_PROPERTY = "--ui-dropdown-anchor"
+
+////////////////
+// ## Icon
+////////////////
+
+/**
+ * Custom property an owner sets on itself to steer a slotted `<ui-icon>` (a `display: contents` host takes no box
+ * styles from `::slotted()`), e.g. `--ui-icon-owner-margin: 0 0.75em 0 0` on a label root.  See `icon.css`.
+ */
+export type IconOwnerToken =
+  | "--ui-icon-owner-display"
+  | "--ui-icon-owner-size"
+  | "--ui-icon-owner-margin"
+  | "--ui-icon-owner-opacity"
+  | "--ui-icon-owner-align"
+
+////////////////
+// ## Label
+////////////////
+
+/** `detail` of the cancelable `ui-remove`, from a `removable` `<ui-label>`'s delete icon. */
+export type LabelRemoveDetail = {
+  /** click / key event on the delete icon */
+  originalEvent?: Event
+}
+
+////////////////
+// ## Parts
+////////////////
+
+/** `<ui-header level>`:  renders `<h1>` ... `<h6>`, a page header. */
+export type HeaderLevel = 1 | 2 | 3 | 4 | 5 | 6
+
+/**
+ * Inherited tokens OWNERS set on their root for the generic content parts, which style-query them
+ * (`@container style(...)`).  See the "Owner tokens" table in `parts.css`.
+ * - MUST be declared on EVERY root of the owner, default value included, so a nested owner never inherits an
+ *   outer owner's layout.
+ * - `inverted` owners also set `color-scheme: dark`;  the token is only for looks the dark scheme doesn't give.
+ */
+export const PART_OWNER_TOKENS = {
+  inverted: "--ui-inverted",
+  cardLayout: "--ui-card-layout",
+  itemLayout: "--ui-item-layout",
+  itemState: "--ui-item-state",
+  commentsMinimal: "--ui-comments-minimal",
+  modalBasic: "--ui-modal-basic",
+  modalHeaderSize: "--ui-modal-header-size",
+  messageLayout: "--ui-message-layout",
+  listLayout: "--ui-list-layout",
+  statisticLayout: "--ui-statistic-layout",
+  statisticValueSize: "--ui-statistic-value-size",
+  stepState: "--ui-step-state",
+  stepLayout: "--ui-step-layout",
+  accordionStyle: "--ui-accordion-style",
+  accordionOpen: "--ui-accordion-open",
+  searchResult: "--ui-search-result",
+  headerLayout: "--ui-header-layout",
+  labelLayout: "--ui-label-layout",
+  part: "--ui-part"
+} as const
+
+/**
+ * Class a STATIC part carries in place of the `:state(in-<owner>)` its element sets, e.g. `in-card`.
+ * - Elements NEVER set it:  it exists for static markup (examples, SSR without scripts);  see `parts.css`.
+ * - Same text as `OwnerContext.stateName(ownerNoun)`.
+ */
+export const PART_STATIC_CLASS_PREFIX = "in-"

@@ -300,6 +300,7 @@ export const EN_STRINGS = {
   loading: "Loading…",
   today: "Today",
   clear: "Clear",
+  removeValue: "Remove {value}",
   selectAll: "Select all",
   more: "More",
   less: "Less",

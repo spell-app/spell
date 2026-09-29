@@ -10,9 +10,9 @@
  *       <input class="search" part="search" role="combobox">          (search:  the combobox)
  *       <span class="sizer" aria-hidden="true">query</span>           (multiple search:  measures the input)
  *       <button class="trigger" part="trigger" role="combobox">       (otherwise:  the combobox, covering the root)
- *       <span class="[default] [filtered] text" part="text">...</span>
+ *       <span class="[default] [filtered] text" part="text"><slot name="trigger">...</slot></span>
  *       <button class="remove icon" part="clear" aria-label="...">    (clearable, when there's a value)
- *       <span class="dropdown icon" part="icon"></span>             (an empty icon draws a caret;  or slot an svg)
+ *       <span class="dropdown icon" part="icon"><slot name="icon"></slot></span>  (empty:  a caret;  or slot an svg)
  *       <div class="[left] menu" role="listbox" popover part="menu">
  *         <div class="header">, <hr class="divider">, <div class="message">,
  *         <div class="[active] [selected] [disabled] [addition] item" role="option" part="item">
@@ -21,6 +21,12 @@
  *       </div>
  *     </div>
  *
+ * - NOTE:  `<slot>` breaks a CHILD (`>`) selector -- fallback content sits one level DEEPER, as a descendant
+ *   of its wrapper, not a direct child.  So `.dropdown.icon` (wraps `<slot name="icon">`) and `.text` (wraps
+ *   `<slot name="trigger">`, the "custom trigger content" slot) size an inner icon with a DESCENDANT
+ *   selector (`.icon svg`, `.text .icon`) to reach fallback content through the `<slot>`, plus
+ *   `::slotted(svg)` / `::slotted(ui-icon)` for a real top-level slotted replacement -- NEVER `.icon > svg`
+ *   or `.text > .icon`.
  * - Item classes are Fomantic's:  `active` === the CHOSEN value (also `[aria-selected="true"]`), `selected` ===
  *   the keyboard-highlighted option (the `aria-activedescendant` target).  NOTE: the vocabulary's `selected`
  *   (chosen) maps to `active` here.
@@ -247,8 +253,9 @@
       10% 20%
     );
   }
-  .ui.dropdown .icon > svg,
-  .ui.dropdown .icon > ::slotted(svg) {
+  .ui.dropdown .icon svg,
+  .ui.dropdown .icon ::slotted(svg),
+  .ui.dropdown .icon ::slotted(ui-icon) {
     display: block;
     width: 100%;
     height: 100%;
@@ -547,13 +554,16 @@
   }
 
   /* Item sub-elements:  icon, image, flag, label, before the text. */
-  .ui.dropdown > .text > :is(.icon, .icons, .label, .flag, .image, img),
+  .ui.dropdown > .text :is(.icon, .icons, .label, .flag, .image, img),
+  .ui.dropdown > .text ::slotted(:is(.icon, .icons, .label, .flag, .image, img, ui-icon)),
   .ui.dropdown .menu > :is(.item, .header) > :is(.icon, .icons, .label, .flag, .image, img) {
     float: none;
     margin-block: 0;
     margin-inline: 0 var(--ui-dropdown-item-element-spacing);
   }
-  .ui.dropdown > .text > .icon,
+  .ui.dropdown > .text .icon,
+  .ui.dropdown > .text ::slotted(svg),
+  .ui.dropdown > .text ::slotted(ui-icon),
   .ui.dropdown .menu > :is(.item, .header) > .icon {
     box-sizing: border-box;
     display: inline-block;
@@ -562,7 +572,8 @@
     fill: currentColor;
     vertical-align: -0.125em;
   }
-  .ui.dropdown > .text > :is(img, .image:not(.icon)),
+  .ui.dropdown > .text :is(img, .image:not(.icon)),
+  .ui.dropdown > .text ::slotted(:is(img, .image:not(.icon))),
   .ui.dropdown .menu > :is(.item, .header) > :is(img, .image:not(.icon)) {
     display: inline-block;
     width: auto;
@@ -570,17 +581,20 @@
     margin-block: -0.5em;
     vertical-align: top;
   }
-  .ui.dropdown > .text > .flag,
+  .ui.dropdown > .text .flag,
+  .ui.dropdown > .text ::slotted(.flag),
   .ui.dropdown .menu > :is(.item, .header) > .flag {
     display: inline-block;
     line-height: 1;
   }
-  .ui.dropdown > .text > [class*="right floated"],
+  .ui.dropdown > .text [class*="right floated"],
+  .ui.dropdown > .text ::slotted([class*="right floated"]),
   .ui.dropdown .menu > :is(.item, .header) > [class*="right floated"] {
     float: inline-end;
     margin-inline: 1em 0;
   }
-  .ui.dropdown > .text > [class*="left floated"],
+  .ui.dropdown > .text [class*="left floated"],
+  .ui.dropdown > .text ::slotted([class*="left floated"]),
   .ui.dropdown .menu > :is(.item, .header) > [class*="left floated"] {
     float: inline-start;
     margin-inline: 0 1em;

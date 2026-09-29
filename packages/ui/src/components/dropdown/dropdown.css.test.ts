@@ -195,6 +195,51 @@ describe("dropdown.css in a shadow root", () => {
     expect(menu.getBoundingClientRect().top).toBeGreaterThanOrEqual(dropdown.getBoundingClientRect().bottom)
     expect(Math.abs(menu.getBoundingClientRect().left - dropdown.getBoundingClientRect().left)).toBeLessThan(1)
   })
+
+  it('sizes a fallback icon inside the caret\'s <slot name="icon"> to the icon box, not the caret block', () => {
+    // Regression for the slot-fallback-vs-child-selector bug (REPORT.md "(j)" item 1):  the svg is FALLBACK
+    // content of `<slot name="icon">`, one level deeper than `.dropdown.icon`'s own children, so a `>`
+    // selector (the old rule) would leave it unstyled and it'd render at the browser's default SVG size.
+    adoptIntoPage(foundationCSS)
+    const host = Fixture.render(`<span></span>`)
+    const shadow = host.attachShadow({ mode: "open" })
+    shadow.adoptedStyleSheets = toSheets(SHEETS)
+    shadow.innerHTML = `
+      <div class="ui selection dropdown">
+        <button class="trigger" role="combobox" aria-label="Pick"></button>
+        <span class="text">Pick</span>
+        <span class="dropdown icon" part="icon"><slot name="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 22h20z" /></svg>
+        </slot></span>
+      </div>`
+    const iconBox = shadow.querySelector<HTMLElement>(".dropdown.icon")!
+    const svg = shadow.querySelector<SVGSVGElement>(".dropdown.icon svg")!
+    const boxWidth = iconBox.getBoundingClientRect().width
+    expect(boxWidth).toBeGreaterThan(0)
+    expect(boxWidth).toBeLessThan(30)
+    expect(svg.getBoundingClientRect().width).toBeCloseTo(boxWidth, 1)
+  })
+
+  it('sizes an icon slotted as custom "trigger" content, not the whole selection box', () => {
+    // Regression for the same bug at `.text > .icon` (dropdown.css:550-ish):  `.text` wraps
+    // `<slot name="trigger">` (the "custom trigger content" slot), so a real replacement is TOP-LEVEL
+    // slotted content, reached only through `::slotted()` -- the old rule had none, so the icon would fall
+    // back to the browser's default SVG size instead of the ~1.18em icon token.
+    adoptIntoPage(foundationCSS)
+    const host = Fixture.render(`<span></span>`)
+    const shadow = host.attachShadow({ mode: "open" })
+    shadow.adoptedStyleSheets = toSheets(SHEETS)
+    shadow.innerHTML = `
+      <div class="ui selection dropdown">
+        <button class="trigger" role="combobox" aria-label="Pick"></button>
+        <span class="text" part="text"><slot name="trigger">Pick</slot></span>
+        <span class="dropdown icon"></span>
+      </div>`
+    host.innerHTML = `<svg slot="trigger" viewBox="0 0 32 32" aria-hidden="true"><path d="M0 0h32v32H0z" /></svg>`
+    const reference = Fixture.render(`<span style="display: inline-block; width: 1.18em"></span>`)
+    const slotted = host.querySelector<SVGSVGElement>("svg")!
+    expect(slotted.getBoundingClientRect().width).toBeCloseTo(reference.getBoundingClientRect().width, 1)
+  })
 })
 
 /**
