@@ -1,13 +1,16 @@
 import faAliases from "./data/aliases.json"
 import fomanticAliases from "./data/fomantic-aliases.json"
-import type {
-  IconAliasMap,
-  IconChunk,
-  IconChunkIndex,
-  IconData,
-  IconLoader,
-  IconResolved,
-  IconStyle
+import fomanticClashes from "./data/fomantic-clashes.json"
+import {
+  ICON_NAMES_ATTRIBUTE,
+  type IconAliasMap,
+  type IconChunk,
+  type IconChunkIndex,
+  type IconData,
+  type IconLoader,
+  type IconNames,
+  type IconResolved,
+  type IconStyle
 } from "./icons.types"
 
 /** Namespace for SVG element creation -- `document.createElementNS()` needs it, `createElement()` doesn't apply. */
@@ -19,12 +22,10 @@ const SVG_NS = "http://www.w3.org/2000/svg"
  *   place that touches the DOM.
  * - Static-only class (no instances) -- there's exactly one icon dataset per page, same shape as `UI`'s
  *   singleton services, but simple enough not to need `new`.
- * - Data loading is lazy and cached PER CHUNK:  `aliases.json` + `fomantic-aliases.json` are small enough
- *   (~38 KB together) to import statically above, but `solid.json` (the chunk index, ~36 KB) and every
- *   `solid-*` / `regular` / `brands` data file are dynamically imported on first use and cached forever
- *   after -- see `docs/icons.md` for the full size table and why the split lands here rather than at the
- *   40 KB line the brief suggested (`regular.json` and `brands.json` turned out to be 111 KB / 478 KB,
- *   not "small").
+ * - Data loading is lazy and cached PER CHUNK:  the three alias maps are small enough (~40 KB together)
+ *   to import statically above, but `solid.json` (the chunk index, ~37 KB) and every `solid-*` / `regular` /
+ *   `brands` data file are dynamically imported on first use and cached forever after -- see
+ *   `docs/icons.md` for the full size table and why the split lands here.
  * - `resolve()` is `async` (not sync, despite reading as one in casual use like `await Icons.resolve(...)`):
  *   disambiguating a bare, style-less name between `solid` and `brands` needs the chunk index, which is
  *   itself lazy.  `peek()` stays fully synchronous by only ever answering from what's ALREADY cached.
@@ -43,13 +44,16 @@ export class Icons {
 
   /**
    * Resolves a possibly-aliased, possibly-multi-word icon name to its canonical Font Awesome 7 name + style.
+   * - Spaces ~== dashes:  `"tablet button"` ~== `"tablet-button"`,  `"sign-in"` ~== `"sign in"`.
    * - Order:  strip a trailing `outline` word (-> `style: "regular"`), then Fomantic's OWN alias vocabulary
-   *   (`"sign in"` -> `"right-to-bracket"`, `"mail"` -> `"envelope"`), then Font Awesome's alias vocabulary
+   *   (`"mail"` -> `"envelope"`, `"setting"` -> `"gear"`), then Font Awesome's alias vocabulary
    *   (`"cog"` -> `"gear"`), then -- if `style` is still unknown -- checks the (lazily-loaded) solid index:
    *   present there => `solid`, otherwise => `brands`.  A name Font Awesome doesn't know at all resolves as
    *   `solid` anyway;  `get()` then correctly finds nothing and returns `undefined`.
    * - `style`, whether passed in or inferred from `outline`, always wins over the solid/brands guess --
    *   a caller who says `{ style: "brands" }` is trusted, even for a name that also happens to exist elsewhere.
+   * - A word that means different icons in the two vocabularies (`"x"`, `"warning"`, `"sign in"` ...)
+   *   gets Font Awesome's meaning, unless the page opts into Fomantic's -- see `preferredNames`.
    */
   static async resolve(name: string, style?: IconStyle): Promise<IconResolved> {
     const partial = Icons.#resolveAliases(name, style)
@@ -64,17 +68,32 @@ export class Icons {
    *   (which instead leaves `style` unset when it can't answer without loading something).
    */
   static #resolveAliases(name: string, style: IconStyle | undefined): { name: string; style?: IconStyle } {
-    const words = name.trim().toLowerCase().split(/\s+/).filter(Boolean)
+    const words = name
+      .trim()
+      .toLowerCase()
+      .split(/[\s-]+/)
+      .filter(Boolean)
     let resolvedStyle = style
     if (!resolvedStyle && words.at(-1) === "outline") {
       resolvedStyle = "regular"
       words.pop()
     }
     const phrase = words.join(" ")
-    const kebab = phrase.replace(/ /g, "-")
-    const afterFomantic = (fomanticAliases as IconAliasMap)[phrase] ?? kebab
+    const kebab = words.join("-")
+    const clash = Icons.preferredNames === "fomantic" ? (fomanticClashes as IconAliasMap)[phrase] : undefined
+    const afterFomantic = clash ?? (fomanticAliases as IconAliasMap)[phrase] ?? kebab
     const canonical = (faAliases as IconAliasMap)[afterFomantic] ?? afterFomantic
     return { name: canonical, style: resolvedStyle }
+  }
+
+  /**
+   * Which vocabulary wins a clash, read from `<html ui-icon-names>` on EVERY lookup.
+   * - `"fontawesome"` unless the attribute says `"fomantic"`;  also outside a browser (no `document`).
+   * - NOTE: flipping the attribute affects later lookups only -- icons already drawn keep their old meaning.
+   */
+  static get preferredNames(): IconNames {
+    if (typeof document === "undefined") return "fontawesome"
+    return document.documentElement.getAttribute(ICON_NAMES_ATTRIBUTE) === "fomantic" ? "fomantic" : "fontawesome"
   }
 
   ////////////////

@@ -34,11 +34,12 @@ Sizes below are what ships:  `.oxfmtrc.json` ignores `src/icons/data/`, so the c
 | `regular.json` | 103,625 | lazy |
 | `brands.json` | 560,557 | lazy |
 | `aliases.json` (FA7's own aliases) | 18,383 | **static** import |
-| `fomantic-aliases.json` | 21,379 | **static** import |
+| `fomantic-aliases.json` | 20,747 | **static** import |
+| `fomantic-clashes.json` (opt-in, see "Clashes") | 633 | **static** import |
 | `search.json` (docs site only) | 96,204 | lazy, docs site only |
 
 Total `src/icons/data/`: ~1.6 MB, none of it in the initial JS bundle except the two small alias maps
-(~39.8 KB combined -- see "The 40 KB line" below).
+(the three alias maps, ~39.8 KB combined -- see "The 40 KB line" below).
 
 ### A papercut: oxfmt reformats generated JSON
 
@@ -83,7 +84,7 @@ static imports if their combined size is under 40 KB. In practice:
 - `regular.json` and `brands.json` are NOT "small" the way the brief assumed -- 104 KB and 561 KB. They're
   lazy like every solid chunk, same as the brief's own "dynamic `import()`, Vite code-splits JSON" mechanism
   already implies for any per-style file.
-- `aliases.json` + `fomantic-aliases.json` alone are ~39.8 KB -- just under the 40 KB line (they were
+- `aliases.json` + `fomantic-aliases.json` + `fomantic-clashes.json` are ~39.8 KB -- just under the 40 KB line (they were
   ~44.6 KB, over it, while oxfmt still reformatted them).  `Icons.ts` imports them statically either way:
   they're the only two files it
   ever bundles, `Icons.resolve()` needs them for the common case (alias lookup, `outline` word) to stay
@@ -126,8 +127,8 @@ and the generator reports it. `Icons.ts` never imports this file: it exists for 
    - **1,058 already matched their FA7 name exactly** (`"caret down"` -> `caret-down`) -- no alias entry
      needed; `Icons.resolve()`'s kebab-case fallback already gets these right.
    - **729 needed an alias entry** (`setting` -> `gear`, `settings` -> `gears`, `mail` -> `envelope`,
-     `remove`/`delete`/`close` -> `xmark`, `checkmark` -> `check`, `dropdown` -> `caret-down`,
-     `sign in` -> `right-to-bracket`, `sign out` -> `right-from-bracket`, ...).
+     `remove`/`delete`/`close` -> `xmark`, `checkmark` -> `check`, `dropdown` -> `caret-down`, ...).
+     27 of these CLASH with a Font Awesome name and live in `fomantic-clashes.json` instead -- see "Clashes".
    - **21 resolved via `MANUAL_OVERRIDES`** in `gen-icons.ts`.  20 because FA6 reassigned their codepoint entirely,
      most often onto the plain ASCII character for a "keyboard symbol" icon (`plus` is now literally `"+"`,
      `question` is `"?"`), so the old FA5 codepoint doesn't appear anywhere in FA6+ metadata. Each entry
@@ -148,9 +149,41 @@ and the generator reports it. `Icons.ts` never imports this file: it exists for 
      `icons.json` carries either codepoint or a plausibly-renamed name). No entry was invented for these;
      a caller using either Fomantic name gets `undefined` back from `get()`, same as any unknown name.
 
-`Icons.resolve()`'s order: strip a trailing `outline` word (Fomantic's regular-style modifier, no separate
-alias needed) -> `fomantic-aliases.json` -> `aliases.json` -> else treat the kebab-cased name as already
-correct. A name found nowhere still resolves (best-effort `style: "solid"` or `"brands"`), so `get()`
+### Clashes:  Font Awesome wins, Fomantic is opt-in
+
+DECISION (2026-09-29):  Font Awesome names are canonical and win a clash.  A CLASH is a Fomantic name
+whose dashed form is ALREADY a Font Awesome name or alias for a DIFFERENT icon -- 27 of them at FA 7.3.1:
+
+| Typed | Font Awesome (default) | Fomantic (opt-in) |
+| --- | --- | --- |
+| `x` | `x` (the letter) | `xmark` (close) |
+| `warning` | `triangle-exclamation` | `exclamation` |
+| `sign in` / `sign out` | `arrow-right-to-bracket` / `arrow-right-from-bracket` | `right-to-bracket` / `right-from-bracket` |
+| `desktop`, `computer` | `desktop`, `computer` | `display` |
+| `apple`, `zoom` | the brand logos | `apple-whole`, `magnifying-glass-plus` |
+| ... | | |
+
+(full list:  the generator prints it;  the data is `fomantic-clashes.json`)
+
+- `gen-icons.ts` writes the clashes to `fomantic-clashes.json` and leaves them OUT of `fomantic-aliases.json`.
+- A page opts into Fomantic's meaning with `<html ui-icon-names="fomantic">` (`ICON_NAMES_ATTRIBUTE`,
+  read as `Icons.preferredNames`).  Any other value, or none, means Font Awesome.
+  - An attribute rather than a JS setting:  it's there before any script runs, and survives SSR.
+  - Read on EVERY lookup, so flipping it affects later lookups only -- icons already drawn keep their meaning.
+  - One choice per page;  anyone needing a particular icon can always use an unambiguous name (`xmark`).
+- Why Font Awesome by default:  it's the vocabulary people search for, and ~26% of FA7 icons (570 of
+  2,163) have NO Fomantic name at all, so FA names have to work regardless.
+- `Icons.test.ts` checks EVERY FA7 name and alias resolves to Font Awesome's own target by default.
+
+### Spaces ~== dashes
+
+`Icons.resolve()` splits on spaces AND dashes, so `tablet button` ~== `tablet-button`, and `sign-in`
+~== `sign in` (the same clash rule applies to both spellings).  No Fomantic name contains a dash and no
+FA7 name ends in `-outline`, so neither spelling can be misread.
+
+`Icons.resolve()`'s order: split on spaces / dashes -> strip a trailing `outline` word (Fomantic's
+regular-style modifier, no separate alias needed) -> `fomantic-clashes.json` (only when the page opts in)
+-> `fomantic-aliases.json` -> `aliases.json` -> else treat the dashed name as already correct. A name found nowhere still resolves (best-effort `style: "solid"` or `"brands"`), so `get()`
 simply returns `undefined` rather than `resolve()` throwing.
 
 ## License attribution

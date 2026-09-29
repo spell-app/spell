@@ -25,7 +25,8 @@
 | Content parts | Generic part elements (`<ui-content>`, `<ui-header>`, `<ui-meta>`, `<ui-description>`, `<ui-extra>`, `<ui-actions>`…) style themselves by **context**, so `<ui-header>` works inside a card, an item, a modal, a message. No `ui-card-header`. |
 | Chosen state | `selected` is the canonical word for "chosen" (checkbox, radio, toggle, items, tabs, options); `checked` is accepted as an alias on checkbox/radio for native muscle memory. |
 | Platform | Assume anchor positioning (no JS fallback), style container queries (widely supported features only), Temporal via polyfill, customizable `<select>` with clean fallback (it only reached Safari in 27.0). |
-| Libraries | `lodash-es` is fine (tree-shakes). Font Awesome names for icons; Fomantic aliases only where they stay obvious. |
+| Libraries | `lodash-es` is fine (tree-shakes). |
+| Icons | **Font Awesome 7 Free**. FA names are canonical and **win a clash**: the 27 words that mean a different icon in Fomantic (`x`, `warning`, `sign in`, `desktop`…) get FA's meaning. A page ported from Fomantic opts into Fomantic's meaning with `<html ui-icon-names="fomantic">`. Every other Fomantic name works regardless. Spaces ~== dashes (`tablet button` ~== `tablet-button`). See `docs/icons.md`. |
 | Vocabulary | Per component, own file: `<name>.vocabulary.en.ts` (translations become `<name>.vocabulary.<lang>.ts`). Attribute **values** (colours, sizes, positions) are translatable too. |
 | Docs | Base every component page on Fomantic's docs for presentation, style and content. |
 | Conventions | Carry over `spell/parser`'s agentic files and coding conventions, with `$` as the import alias (see "Conventions"). |
