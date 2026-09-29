@@ -1,0 +1,11 @@
+node_modules
+dist
+build
+.cache
+coverage
+test-results
+reference/
+site/dist
+.DS_Store
+*.log
+.yarn/install-state.gz
