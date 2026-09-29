@@ -105,11 +105,32 @@ export class Icons {
    * `[width, height, path]` tuple -- `undefined` for a name Font Awesome doesn't have in that style.
    */
   static async get(name: string, style?: IconStyle): Promise<IconData | undefined> {
+    // An explicit style is trusted BEFORE aliasing:  `("apple", "brands")` means the Apple logo, not the
+    // Fomantic alias `apple` -> `apple-whole` (solid), which has no brands entry at all.
+    if (style) {
+      const plain = await Icons.#lookup(Icons.#kebab(name), style)
+      if (plain) return plain
+    }
     const request = await Icons.resolve(name, style)
-    const chunk = request.style === "solid" ? (await Icons.#loadSolidIndex())[request.name] : request.style
+    return Icons.#lookup(request.name, request.style)
+  }
+
+  /** The chunk lookup behind `get()`:  loads the chunk holding `name` in `style`, returns its tuple. */
+  static async #lookup(name: string, style: IconStyle): Promise<IconData | undefined> {
+    const chunk = style === "solid" ? (await Icons.#loadSolidIndex())[name] : style
     if (!chunk) return undefined
     const data = await Icons.#loadChunk(chunk)
-    return data[request.name]
+    return data[name]
+  }
+
+  /** `name` normalized the way the data files spell it:  lowercase words joined with `-`. */
+  static #kebab(name: string): string {
+    return name
+      .trim()
+      .toLowerCase()
+      .split(/[\s-]+/)
+      .filter(Boolean)
+      .join("-")
   }
 
   /**
@@ -120,6 +141,12 @@ export class Icons {
    *   rather than guessing -- there's nothing in cache to answer from either way.
    */
   static peek(name: string, style?: IconStyle): IconData | undefined {
+    if (style) {
+      // same explicit-style-first rule as `get()`
+      const chunk = style === "solid" ? Icons.#solidIndex?.[Icons.#kebab(name)] : style
+      const plain = chunk ? Icons.#chunks.get(chunk)?.data?.[Icons.#kebab(name)] : undefined
+      if (plain) return plain
+    }
     const partial = Icons.#resolveAliases(name, style)
     let resolvedStyle = partial.style
     if (!resolvedStyle) {
