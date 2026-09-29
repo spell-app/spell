@@ -52,6 +52,9 @@ export class ElementDefinition {
   /** Resolved attribute by property key (`allowAdditions`, or a localized key). */
   private readonly byKey = new Map<string, ResolvedAttribute>()
 
+  /** Resolved attribute by the (localized) attribute name authors write. */
+  private readonly byAttribute = new Map<string, ResolvedAttribute>()
+
   /** Private registry, so `canonicalize()` can map multi-word values for THIS tag without the runtime. */
   private readonly names = new Vocabulary()
 
@@ -67,11 +70,12 @@ export class ElementDefinition {
     this.attributes = vocabulary.attributes.map((spec) => {
       const attribute = localized.names.attributes.get(spec.name) ?? spec.name
       const canonicalKey = spec.property ?? camelCase(spec.name)
-      const key = attribute === spec.name ? canonicalKey : camelCase(attribute)
+      const key = this.safeKey(attribute === spec.name ? canonicalKey : camelCase(attribute))
       const reflect = spec.kind !== "json" && spec.reflect !== false
       const resolved: ResolvedAttribute = { spec, attribute, key, canonicalKey, reflect }
       this.byName.set(spec.name, resolved)
       this.byKey.set(key, resolved)
+      this.byAttribute.set(attribute, resolved)
       return resolved
     })
   }
@@ -85,6 +89,25 @@ export class ElementDefinition {
     const attribute = this.byName.get(name)
     if (!attribute) throw new Error(`<${this.tag}>: no attribute ${JSON.stringify(name)} in the vocabulary`)
     return attribute
+  }
+
+  /**
+   * Property key for `key`, renamed when it would shadow a NATIVE `HTMLElement` member:  `style` => `iconStyle`,
+   * `hidden` => `dividerHidden`.
+   * - Why:  `component-register` defines an accessor per prop on the element class, so a vocabulary attribute
+   *   named `style` would replace `element.style` (a `CSSStyleDeclaration`) for every framework and author.
+   * - The ATTRIBUTE keeps its name;  the vocabulary should set `property` for these (see REPORT.md).
+   * - SIDE EFFECT (dev only):  warns once per rename.
+   */
+  private safeKey(key: string): string {
+    if (typeof HTMLElement === "undefined" || !(key in HTMLElement.prototype)) return key
+    const renamed = `${camelCase(this.vocabulary.noun)}${key.charAt(0).toUpperCase()}${key.slice(1)}`
+    if (import.meta.env?.DEV) {
+      console.warn(
+        `<${this.vocabulary.tag}>: attribute property ${JSON.stringify(key)} shadows HTMLElement.${key}; using ${renamed}`
+      )
+    }
+    return renamed
   }
 
   /** Attribute resolved from property `key`, if any. */
@@ -231,6 +254,7 @@ export class ElementDefinition {
       customElements: capture as unknown as CustomElementRegistry
     })(withSolid(render as never))
     const Registered = capture.captured as unknown as RegisteredHost
+    const byAttribute = this.byAttribute
     const name = ElementDefinition.className(this.tag)
     const Defined = {
       [name]: class extends Registered {
@@ -243,7 +267,12 @@ export class ElementDefinition {
           if (this.reflecting) return
           this.fromAttribute = true
           try {
-            super.attributeChangedCallback(name, oldValue, newValue)
+            // HACK: `component-register` ignores a removal when the property is falsy -- and a bare boolean
+            // attribute's raw value is `""`, so `removeAttribute("disabled")` would never reach the element
+            const key = byAttribute.get(name)?.key
+            const self = this as unknown as Record<string, unknown>
+            if (newValue === null && key && self[key] === "") self[key] = null
+            else super.attributeChangedCallback(name, oldValue, newValue)
           } finally {
             this.fromAttribute = false
           }

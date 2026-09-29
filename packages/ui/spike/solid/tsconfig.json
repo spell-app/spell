@@ -10,5 +10,7 @@
       "$spike/*": ["./src/*"]
     }
   },
-  "include": ["src", "demo", "*.ts", "../../src/**/*.d.ts"]
+  "include": ["src", "demo", "*.ts", "../../src/**/*.d.ts"],
+  // the root config excludes `spike/`, which would exclude everything here
+  "exclude": ["node_modules", "dist"]
 }

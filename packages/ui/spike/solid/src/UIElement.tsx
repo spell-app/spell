@@ -1,4 +1,4 @@
-import { Show, createEffect, createMemo, createSignal, untrack, type Accessor } from "solid-js"
+import { Show, createEffect, createErrorBoundary, createMemo, createSignal, untrack, type Accessor } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { proto } from "$/util"
@@ -19,6 +19,7 @@ import type {
 } from "./spike.types"
 import { Controlled } from "./Controlled"
 import { ElementDefinition } from "./ElementDefinition"
+import { PartContext } from "./PartContext"
 import { UIHost } from "./UIHost"
 
 /**
@@ -40,12 +41,22 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
   declare vocabulary: V
   declare styles: Readonly<Record<string, string>>
   declare Host: typeof UIHost
+  declare isPart: boolean
 
   /** Sheets to adopt after the foundation, by registry name => CSS text, in order. */
   @proto static styles: Readonly<Record<string, string>> = {}
 
   /** Host base class;  `FormElement` swaps in `FormHost`. */
   @proto static Host = UIHost
+
+  /** A generic content part:  transparent to other parts' owner lookups (`PartContext`).  `ContentPart` sets it. */
+  @proto static isPart = false
+
+  /**
+   * Wrap every element's render in its own error boundary, so one element's error disables THAT element
+   * instead of halting reactivity for the page.  A switch only so `REPORT.md` can measure the cost.
+   */
+  static isolateErrors = true
 
   /** The element. */
   readonly host: UIHost
@@ -89,8 +100,10 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
       if (!host.fromAttribute) definition.reflect(host, key, value)
     })
     if (isServer) return
-    if (loaded) this.adoptStyles()
-    else void UI.load().then(() => this.onLoaded())
+    const onSlotChange = (event: Event) => PartContext.slotChanged(event.target as HTMLSlotElement)
+    host.shadowRoot!.addEventListener("slotchange", onSlotChange)
+    host.addReleaseCallback(() => host.shadowRoot!.removeEventListener("slotchange", onSlotChange))
+    if (!loaded) void UI.load().then(() => this.onLoaded())
   }
 
   ////////////////
@@ -105,6 +118,9 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
    * - Host states follow `hostStates()`;  `ready` resolves once content has rendered with styles.
    */
   mount(): JSX.Element {
+    // adopted HERE when the runtime was already loaded:  `sheetNames()` is overridable and may read subclass
+    // fields, which don't exist yet while the base constructor runs
+    if (!isServer && untrack(this.loaded)) this.adoptStyles()
     createEffect(
       () => this.hostStates(),
       (states) => {
@@ -117,7 +133,23 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
         if (loaded) queueMicrotask(() => this.host.markReady())
       }
     )
+    createEffect(
+      () => this.sheetNames().join(" "),
+      () => {
+        if (untrack(this.loaded)) UI.styles.adoptInto(this.host.shadowRoot!, this.sheetNames())
+      },
+      { defer: true }
+    )
     return <Show when={this.loaded()}>{this.render()}</Show>
+  }
+
+  /**
+   * Registry names of the sheets to adopt now, in order;  default every `styles` entry.
+   * - Tracked:  an element whose sheets depend on context (a label owned by a statistic adds `parts.css`)
+   *   overrides it, and the root re-adopts when it changes.
+   */
+  protected sheetNames(): string[] {
+    return Object.keys(this.styles)
   }
 
   /** Extra classes after the noun, e.g. `icon` for an icon-only button. */
@@ -228,21 +260,16 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
     this.setLoaded(true)
   }
 
-  /**
-   * Register this class's sheets and texts once, then adopt foundation + sheets into the shadow root.
-   * - SIDE EFFECT:  registers the vocabulary with `UI.vocabulary` and its English texts with `UI.i18n`.
-   */
+  /** Register this class's sheets once, then adopt foundation + sheets into the shadow root. */
   private adoptStyles() {
-    const registered = REGISTERED
-    if (!registered.has(this.vocabulary)) {
-      registered.add(this.vocabulary)
+    if (!SHEETS.has(this.styles)) {
+      SHEETS.add(this.styles)
       for (const [name, css] of Object.entries(this.styles)) if (!UI.styles.has(name)) UI.styles.register(name, css)
-      UI.vocabulary.register(this.vocabulary)
-      const texts: Record<string, string> = {}
-      for (const { key, text } of this.vocabulary.texts) if (!UI.i18n.has(key)) texts[key] = text
-      UI.i18n.register("en", texts)
     }
-    UI.styles.adoptInto(this.host.shadowRoot!, Object.keys(this.styles))
+    UI.styles.adoptInto(
+      this.host.shadowRoot!,
+      untrack(() => this.sheetNames())
+    )
   }
 
   ////////////////
@@ -256,11 +283,56 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
    * - Idempotent per tag;  returns the element class.
    */
   static define(this: UIElementClass, tag?: string, dictionary?: Dictionary): CustomElementConstructor {
-    const definition = new ElementDefinition(this.prototype.vocabulary, { tag, dictionary })
+    const { vocabulary, Host, isPart } = this.prototype
+    const definition = new ElementDefinition(vocabulary, { tag, dictionary })
+    PartContext.define(vocabulary, definition.tag, isPart)
+    UIElement.registerTexts(vocabulary)
     return definition.register(
-      (props, { element }) => untrack(() => new this(element, definition, props).mount()),
-      this.prototype.Host
+      (props, { element }) =>
+        untrack(() => UIElement.isolate(element, () => new this(element, definition, props).mount())),
+      Host
     )
+  }
+
+  /**
+   * `render()` inside an error boundary (`createErrorBoundary`):  an error thrown while constructing, rendering
+   * or updating this element empties ITS shadow root, sets `:state(errored)` and logs, and every other element
+   * keeps working.
+   * - Without it, one uncaught error halts Solid's scheduler for the whole page (`[REACTIVITY_HALTED]`).
+   * - SIDE EFFECT:  resolves `host.ready`, so waiting code doesn't hang on a failed element.
+   */
+  private static isolate(host: UIHost, render: () => JSX.Element): JSX.Element {
+    if (!UIElement.isolateErrors) return render()
+    return createErrorBoundary(render, (error: Accessor<unknown>) => {
+      const cause = error()
+      if (!FAILED.has(host)) {
+        FAILED.add(host)
+        console.error(`<${host.localName}> failed and is disabled:`, cause)
+      }
+      host.setState(ERRORED, true)
+      host.markReady()
+      return undefined
+    }) as unknown as JSX.Element
+  }
+
+  /**
+   * Register `vocabulary` with `UI.vocabulary` and its English texts with `UI.i18n` when the class is DEFINED,
+   * not on first connect, so `UI.i18n.t()` and translations see them before any instance exists.
+   * - Loads the runtime if it isn't yet;  idempotent per vocabulary.
+   */
+  private static registerTexts(vocabulary: ComponentVocabulary) {
+    if (isServer || TEXTS.has(vocabulary)) return
+    TEXTS.add(vocabulary)
+    if ((globalThis as RuntimeGlobal)[RUNTIME_KEY]) register()
+    else void UI.load().then(register)
+
+    /** Hand the vocabulary and its texts to the runtime;  keeps texts a translation registered earlier. */
+    function register() {
+      UI.vocabulary.register(vocabulary)
+      const texts: Record<string, string> = {}
+      for (const { key, text } of vocabulary.texts) if (!UI.i18n.has(key)) texts[key] = text
+      UI.i18n.register("en", texts)
+    }
   }
 }
 
@@ -270,5 +342,14 @@ export type UIElementClass = {
   prototype: UIElement<any>
 }
 
-/** Vocabularies whose sheets / texts are registered with the runtime. */
-const REGISTERED = new WeakSet<ComponentVocabulary>()
+/** `styles` maps whose sheets are registered with the runtime. */
+const SHEETS = new WeakSet<object>()
+
+/** Vocabularies whose texts are registered (or queued) with the runtime. */
+const TEXTS = new WeakSet<ComponentVocabulary>()
+
+/** Hosts whose failure was logged already. */
+const FAILED = new WeakSet<UIHost>()
+
+/** State an element enters when its render failed (see `isolate()`). */
+const ERRORED = "errored"

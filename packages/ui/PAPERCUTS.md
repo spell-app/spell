@@ -187,3 +187,20 @@ Log of things that slowed down development. Date · symptom · fix · project.
 - 2026-09-29 · `lit/static-html.js` discovered mid-run made Vite re-optimize and reload the test page
   ("Vite unexpectedly reloaded a test"). · List every `lit/*` subpath in `optimizeDeps.include`
   (`spike/lit/vite.config.ts`). · spell/ui spike/lit
+- 2026-09-29 · Same inherited-`exclude` `TS18003` in `spike/solid` (`yarn tsc --noEmit`). · Override `exclude` in
+  `spike/solid/tsconfig.json`. · spell/ui spike/solid
+- 2026-09-29 · No lint / format commands in `spike/solid` once the root configs ignore `spike/`;  also oxlint 1.86
+  prints NOTHING on a clean run, which looks like "linted nothing". · `spike/solid/.oxlintrc.json` (a copy of the
+  root's without the spike ignore) + `yarn oxlint` / `yarn oxfmt --check .` scripts;  checked with a planted
+  `debugger`. · spell/ui spike/solid
+- 2026-09-29 · `UIElement.define()` with no tag registered a test vocabulary `tag: "stub-card"` as `ui-card`:
+  `Vocabulary.define()` derives the tag from prefix + noun, ignoring `vocabulary.tag`. · Pass the tag:
+  `define(vocabulary.tag)` (`StubOwner`). · spell/ui spike/solid
+- 2026-09-29 · Solid's JSX types have no custom-element tags (`<ui-segment>` in a test's JSX is TS2339). ·
+  `<Dynamic component="ui-segment">`. · spell/ui spike/solid
+- 2026-09-29 · A test that deliberately lets an error escape Solid (to show the halt) got "Vitest caught 1 unhandled
+  error":  the throw resurfaces from Solid's queued microtask flush, outside the test's `try`. · Call `flush()`
+  synchronously inside the `try` right after the write (`src/errors/isolation.test.tsx`);  run it LAST in the file,
+  since a halt poisons the scheduler for later tests even after `resetErrorHalt()`. · spell/ui spike/solid
+- 2026-09-29 · Two spike agents share one scratchpad directory:  screenshot names collided (`label-types.png`). ·
+  Solid writes to `spike/solid/.cache/screenshots/` (`yarn screenshots`). · spell/ui spike/solid

@@ -1,0 +1,24 @@
+import { proto } from "$/util"
+import { dateVocabulary } from "$/components/parts/parts.vocabulary.en"
+
+import { ContentPart } from "$spike/ContentPart"
+
+/****************
+ * ### `<ui-date>`
+ * A date:  `<time class="date" datetime>`, so the machine-readable value travels with the text.
+ * - Inside a feed summary it goes inline and small:  `parts.css` style-queries the summary's `--ui-part`.
+ ****************/
+export class UIDate extends ContentPart<typeof dateVocabulary> {
+  @proto static vocabulary = dateVocabulary
+
+  protected tag(): string {
+    return TIME
+  }
+
+  protected datetime(): string | undefined {
+    return this.attrs.datetime
+  }
+}
+
+/** Root element. */
+const TIME = "time"
