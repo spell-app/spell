@@ -17,8 +17,11 @@ const TEST = `${REPO}test`
  */
 const SPIKE = fileURLToPath(new URL("./src", import.meta.url))
 
+/** Component families, one lib entry each (`src/components/<name>/index.ts`), so each can be sized alone. */
+export const COMPONENTS = ["button", "dropdown", "icon", "label", "parts", "divider", "segment", "container"] as const
+
 /**
- * Lit spike:  dev server for `demo/`, library build of the two components.
+ * Lit spike:  dev server for `demo/`, library build of every component family.
  * - Same decorator pre-pass and Lightning CSS targets as the root, imported rather than copied.
  * - `server.fs.allow` includes the repo root:  the spike has its own lockfile, so Vite would otherwise treat
  *   `spike/lit` as the workspace root and refuse to serve `../../src`.
@@ -36,14 +39,22 @@ export default defineConfig({
     lightningcss: { targets: CSS_TARGETS, drafts: { customMedia: true } }
   },
   server: { fs: { allow: [REPO] } },
+  // pre-bundled up front:  discovered mid-run, Vite reloads the test page
+  optimizeDeps: {
+    include: [
+      "lit",
+      "lit/decorators.js",
+      "lit/static-html.js",
+      "lit/directives/if-defined.js",
+      "lit/directives/live.js",
+      "lit/directives/repeat.js"
+    ]
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,
     lib: {
-      entry: {
-        button: `${SPIKE}/components/button/index.ts`,
-        dropdown: `${SPIKE}/components/dropdown/index.ts`
-      },
+      entry: Object.fromEntries(COMPONENTS.map((name) => [name, `${SPIKE}/components/${name}/index.ts`])),
       formats: ["es"]
     },
     rolldownOptions: { output: { keepNames: true } }

@@ -386,4 +386,30 @@ describe("<ui-dropdown> markup contract", () => {
     const order = [...element.shadowRoot!.firstElementChild!.children].map((child) => child.className)
     expect(order).toEqual(["ui label", "search", "sizer", "default text", "remove icon", "dropdown icon", "menu"])
   })
+
+  it("renders the icon slot inside .dropdown.icon only while it's occupied", async () => {
+    const element = await colors()
+    const caret = () => $(element, ".dropdown.icon")!
+    expect(caret().querySelector("slot")).toBeNull()
+    const icon = document.createElement("span")
+    icon.slot = "icon"
+    icon.textContent = "v"
+    element.append(icon)
+    await new Promise((resolve) => setTimeout(resolve))
+    await element.updateComplete
+    expect(caret().querySelector("slot[name=icon]")).not.toBeNull()
+    expect(caret().matches(":empty")).toBe(false)
+    icon.remove()
+    await new Promise((resolve) => setTimeout(resolve))
+    await element.updateComplete
+    expect(caret().matches(":empty")).toBe(true)
+  })
+
+  it("forwards the host's aria-label to the combobox, and follows changes", async () => {
+    const element = await colors(`aria-label="Favourite colour"`)
+    expect($(element, "[role=combobox]")!.getAttribute("aria-label")).toBe("Favourite colour")
+    element.setAttribute("aria-label", "Colour")
+    await element.updateComplete
+    expect($(element, "[role=combobox]")!.getAttribute("aria-label")).toBe("Colour")
+  })
 })

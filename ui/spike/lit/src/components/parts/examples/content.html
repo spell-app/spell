@@ -1,0 +1,80 @@
+<!-- Element markup for `src/components/parts/examples/content.html`. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-content>A content block with no owner is an unstyled block.</ui-content>
+  </section>
+
+  <section>
+    <h4>Card</h4>
+    <x-card style="display: flex; flex-direction: column; width: 290px">
+      <ui-content><ui-header>Elliot Fu</ui-header></ui-content>
+      <ui-content><ui-description>Elliot is a film-maker from New York.</ui-description></ui-content>
+    </x-card>
+  </section>
+
+  <section>
+    <h4>Horizontal card</h4>
+    <!-- `--ui-card-layout` is the owner token a horizontal card sets. -->
+    <x-card style="display: flex; flex-flow: row wrap; --ui-card-layout: horizontal">
+      <ui-content><ui-header>Left</ui-header></ui-content>
+      <ui-content><ui-header>Right</ui-header></ui-content>
+    </x-card>
+  </section>
+
+  <section>
+    <h4>Item</h4>
+    <x-item style="display: flex">
+      <img
+        src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
+        alt=""
+        width="80"
+        height="80"
+      />
+      <ui-content><ui-header href="#item">Header</ui-header></ui-content>
+    </x-item>
+  </section>
+
+  <section>
+    <h4>Feed, comment, modal, message, list, step, accordion, popup, toast</h4>
+    <x-feed>
+      <div class="event" style="display: flex">
+        <ui-content><ui-summary>You added Elliot Fu to the group</ui-summary></ui-content>
+      </div>
+    </x-feed>
+    <x-comment>
+      <ui-content><ui-author href="#matt">Matt</ui-author></ui-content>
+    </x-comment>
+    <x-modal>
+      <ui-content><p>A modal's content.</p></ui-content>
+    </x-modal>
+    <x-modal>
+      <ui-content scrolling style="--ui-modal-scrolling-height: 4em">
+        <p>Scrolling.</p>
+        <p>Content.</p>
+        <p>Here.</p>
+      </ui-content>
+    </x-modal>
+    <x-message style="display: flex; --ui-message-layout: icon">
+      <span>!</span>
+      <ui-content><ui-header>Just one second</ui-header></ui-content>
+    </x-message>
+    <x-list>
+      <div class="item">
+        <span>*</span>
+        <ui-content><ui-header>Rachel</ui-header></ui-content>
+      </div>
+    </x-list>
+    <x-step>
+      <ui-content><ui-title>Shipping</ui-title></ui-content>
+    </x-step>
+    <x-accordion>
+      <ui-title>What is a dog?</ui-title>
+      <ui-content>A domesticated carnivore.</ui-content>
+    </x-accordion>
+    <x-popup>
+      <ui-header>User rating</ui-header>
+      <ui-content>Four stars.</ui-content>
+    </x-popup>
+  </section>
+</div>

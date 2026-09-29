@@ -9,6 +9,8 @@ import {
   ValueSets
 } from "$/vocabulary"
 
+import { RESERVED_PROPERTIES } from "./elements.types"
+
 /**
  * Turns a `ComponentVocabulary` into Lit property declarations, so a component NEVER spells an attribute name.
  * - One declaration per attribute:  `attribute` is the vocabulary name (or its localized name), the converter
@@ -35,7 +37,7 @@ export class VocabularyProperties {
       const json = spec.kind === "json"
       const initial = VocabularyProperties.initialValue(spec)
       const canonical = VocabularyProperties.converter(spec, attribute)
-      declarations.set(VocabularyProperties.propertyName(spec), {
+      declarations.set(VocabularyProperties.propertyName(spec, vocabulary.noun), {
         spec,
         initial,
         attribute: json ? false : attribute,
@@ -47,9 +49,18 @@ export class VocabularyProperties {
     return declarations
   }
 
-  /** JS property name of `spec`:  its `property`, else `camelCase(name)`. */
-  static propertyName(spec: AttributeSpec): string {
-    return spec.property ?? camelCase(spec.name)
+  /**
+   * JS property name of `spec`:  its `property`, else `camelCase(name)`.
+   * - A name `HTMLElement` already has (`style`, `hidden`, `title` ...) gets the component's `noun` in front
+   *   (`iconStyle`, `dividerHidden`):  a Lit accessor named `style` would replace the host's
+   *   `CSSStyleDeclaration` for every framework and devtool.  The ATTRIBUTE keeps its vocabulary name.
+   * - Mirrored at the type level by `PropertyName` (`elements.types.ts`).
+   */
+  static propertyName(spec: AttributeSpec, noun: string): string {
+    const name = spec.property ?? camelCase(spec.name)
+    return (RESERVED_PROPERTIES as readonly string[]).includes(name)
+      ? `${camelCase(noun)}${name[0]!.toUpperCase()}${name.slice(1)}`
+      : name
   }
 
   /**

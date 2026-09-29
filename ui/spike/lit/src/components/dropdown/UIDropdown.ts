@@ -47,6 +47,7 @@ export class UIDropdown extends FormElement.for<
   { value: DropdownValue | undefined; options: DropdownOptions | undefined }
 >(dropdownVocabulary) {
   @proto static delegatesFocus = true
+  @proto static forwardsAriaLabel = true
   @proto static sheets = [
     [buttonVocabulary.noun, buttonCSS],
     [dropdownVocabulary.noun, dropdownCSS]
@@ -103,16 +104,6 @@ export class UIDropdown extends FormElement.for<
   constructor() {
     super()
     this.addEventListener("focusout", this.onFocusOut)
-  }
-
-  /** Also watch the host's `aria-label`, used as the combobox's name. */
-  static override get observedAttributes() {
-    return [...super.observedAttributes, ARIA_LABEL]
-  }
-
-  override attributeChangedCallback(name: string, old: string | null, value: string | null) {
-    if (name === ARIA_LABEL) this.requestUpdate()
-    else super.attributeChangedCallback(name, old, value)
   }
 
   override connectedCallback() {
@@ -693,7 +684,7 @@ export class UIDropdown extends FormElement.for<
 
   /** Combobox name:  host `aria-label`, else `<label for>` text, else the placeholder. */
   private accessibleName(): string | undefined {
-    const own = this.getAttribute(ARIA_LABEL)
+    const own = this.ariaLabelled()
     if (own) return own
     // SSR:  the shim's `ElementInternals` has no `labels`
     const labels = [...(this.internals.labels ?? [])].map((label) => label.textContent?.trim()).filter(Boolean)
@@ -721,9 +712,6 @@ type Row = {
   index?: number
   entry?: MenuEntry
 }
-
-/** Platform attribute used as the combobox's name. */
-const ARIA_LABEL = "aria-label"
 /** `data-*` attribute carrying an option's index, read by the delegated click handler. */
 const INDEX_ATTRIBUTE = "data-index"
 /** `UI.ids` prefixes. */
