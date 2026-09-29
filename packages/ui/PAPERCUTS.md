@@ -35,6 +35,18 @@ Log of things that slowed down development. Date · symptom · fix · project.
   API from a scratch `.mts` with `node --experimental-strip-types` (node 22.17), importing
   `node_modules/vite/dist/node/index.js` and `vite.decorators.ts` by absolute path.  Left as `it.todo` in
   `UIRuntime.test.ts`. · spell/ui
+- 2026-09-28 · `oxfmt --check` on a JSON file doesn't just report -- it (like plain `oxfmt`) rewrites the
+  file to pretty-printed (2-space) JSON in place;  `.oxfmtrc.json`'s `ignorePatterns` doesn't exclude
+  generated data (`src/icons/data/*.json`), so every `yarn review` inflates it by ~4-15% (a long
+  `[width, height, path]` tuple explodes across 5 lines past the 120-col print width). · Tuned
+  `gen-icons.ts`'s `MAX_CHUNK_BYTES` / `SEARCH_TERMS_CAP` against the POST-format size instead of the
+  compact size it first writes -- see `docs/icons.md`'s "A papercut: oxfmt reformats generated JSON". ·
+  spell/ui
+- 2026-09-28 · `tsc` (whole-project `yarn ts`) fails on an unrelated in-progress file
+  (`src/styles/styles.types.ts` -> missing `./styles.vocabulary.en`) from parallel work elsewhere in the
+  repo, blocking `yarn review` for everyone until that lands. · Verified `src/icons/` and
+  `scripts/gen-icons.ts` independently with a scoped `tsc -p <temp config>` (`types: []`/explicit
+  `typeRoots`, `include` limited to this pipeline's files) instead of waiting. · spell/ui
 - 2026-09-28 · Tests under `src/` can't reach the shared test utils (`test/fixture.ts`, `test/a11y.ts`) by the
   `$/...` rule:  `$` maps to `src/`, and `AGENTS.md` bans `../` imports. · `OwnerContext.test.ts` renders into
   its own container instead.  Fix:  add a `$test` (or `$/../test`) alias in `tsconfig.json` + `vitest.config.ts`. · spell/ui
