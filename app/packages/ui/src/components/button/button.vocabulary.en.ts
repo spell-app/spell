@@ -70,6 +70,11 @@ export const buttonVocabulary = {
         "`icon` class (square padding);  with `labeled` it becomes a `labeled icon` button."
     },
     {
+      name: "content",
+      kind: "string",
+      description: "Shorthand for the button's text, instead of the default slot;  slotted children win."
+    },
+    {
       name: "label",
       kind: "string",
       description: "Shorthand for a joined label, e.g. a count;  renders `ui labeled button` around the button."
@@ -94,7 +99,7 @@ export const buttonVocabulary = {
     }
   ],
   slots: [
-    { name: "", description: "Content, usually text." },
+    { name: "", description: "Content, usually text;  instead of the `content` attribute." },
     { name: "icon", description: "Icon, instead of the `icon` attribute;  the hidden content of `animated`." },
     { name: "label", description: "Label content, instead of the `label` attribute." }
   ],
