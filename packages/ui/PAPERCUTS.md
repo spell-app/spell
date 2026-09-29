@@ -24,3 +24,20 @@ Log of things that slowed down development. Date · symptom · fix · project.
   package -- `import { playwright } from "@vitest/browser-playwright"`, `provider: playwright()` -- not the
   string `"playwright"`, and browsers are `instances: [{ browser: "chromium" }]`, not `name:`.  Test helpers
   import from `vitest/browser`, not `@vitest/browser/context`. · See `vitest.config.ts`. · spell/ui
+- 2026-09-28 · Tests under `src/` can't import `test/fixture.ts` without `../../test/fixture`:  the `$` alias
+  only covers `src/`, and `AGENTS.md` says NEVER start an import with `../`. · `src/runtime/*.test.ts` use the
+  relative path for now;  a `$test/*` alias (tsconfig `paths` + both vite configs) would fix it. · spell/ui
+- 2026-09-28 · TypeScript 7's DOM lib has no `CloseWatcher`, and after a failed `instanceof HTMLStyleElement`
+  it narrows `HTMLLinkElement | HTMLStyleElement` to `never` (the two are structurally close). · Minimal
+  `CloseWatcherLike` type in `runtime.types.ts`;  test `instanceof HTMLLinkElement` first. · spell/ui
+- 2026-09-28 · Checking that `load()` code-splits needs a build:  browser-mode tests can't read `dist/`, and a
+  scratch `vite.config.ts` outside the repo can't resolve `vite` (`MODULE_NOT_FOUND`). · Drive the Vite JS
+  API from a scratch `.mts` with `node --experimental-strip-types` (node 22.17), importing
+  `node_modules/vite/dist/node/index.js` and `vite.decorators.ts` by absolute path.  Left as `it.todo` in
+  `UIRuntime.test.ts`. · spell/ui
+- 2026-09-28 · Tests under `src/` can't reach the shared test utils (`test/fixture.ts`, `test/a11y.ts`) by the
+  `$/...` rule:  `$` maps to `src/`, and `AGENTS.md` bans `../` imports. · `OwnerContext.test.ts` renders into
+  its own container instead.  Fix:  add a `$test` (or `$/../test`) alias in `tsconfig.json` + `vitest.config.ts`. · spell/ui
+- 2026-09-28 · oxlint's type-aware `no-base-to-string` fires on `${value}` / `String(value)` when `value: unknown`
+  (e.g. `ClassBuilder` reading a `Record<string, unknown>` bag), even though `restrict-template-expressions`
+  is off. · Narrow first (`typeof value === "string" | "number"`), see `ClassBuilder.text()`. · spell/ui
