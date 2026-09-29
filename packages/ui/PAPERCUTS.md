@@ -120,3 +120,30 @@ Log of things that slowed down development. Date · symptom · fix · project.
 - 2026-09-29 · A relative selector inside `:is()` (`.ui.dropdown :is(> .text, .menu > .item) > .icon`) is
   invalid -- only `:has()` takes relative selectors -- and the browser silently drops the whole rule
   (lightningcss passes it through). · Spell the alternatives out as separate selectors in the list. · spell/ui
+- 2026-09-29 · Root `tsconfig.json` includes `spike/` but has no alias for a spike's own `src/`, so a `$spike/*`
+  alias (tsconfig `paths` + Vite) made root `yarn tsc` fail on every spike file -- and two spikes can't share
+  one alias name anyway. · `spike/lit` imports its own files relatively (`../../elements`), a deliberate
+  exception to the `$`-only import rule;  scripts that need node types start with `/// <reference types="node" />`. · spell/ui spike/lit
+- 2026-09-29 · A spike package (own lockfile, own `vitest`) importing `$test/fixture` gets the ROOT copy of
+  `vitest` (resolved from `test/`), i.e. a second runner:  `onTestFinished` / `afterEach` register nowhere. ·
+  `resolve.dedupe: ["vitest", "axe-core"]` in the spike's Vite config;  also `server.fs.allow: [repo root]`, since
+  the spike's lockfile makes Vite treat `spike/lit` as the workspace root. · spell/ui spike/lit
+- 2026-09-29 · Lit base-class helper names collide with `HTMLElement` members:  a `part()` method breaks
+  `HTMLElement.part` (and then EVERY standard `@property` / `@state` decorator on subclasses fails to type with
+  "Unable to resolve signature of property decorator" -- the real error is far away);  `remove()` and a
+  `get inert()` shadow DOM API. · Named them `partName()`, `removeValue()`, `locked`.  Check `name in
+  HTMLElement.prototype` before naming an element method. · spell/ui spike/lit
+- 2026-09-29 · Lit 3.3 `useDefault: true` on a property whose initial value is `undefined` records the FIRST
+  real change as the default and swallows it (no update, no reflection). · Only use `useDefault` when the
+  constructor sets a non-`undefined` start value (`VocabularyProperties.initialValue()`). · spell/ui spike/lit
+- 2026-09-29 · Standard decorators make classes side-effectful, so a barrel re-exporting a decorated class
+  (`FormElement`) drags it (and `Validator`) into every chunk that imports the barrel -- even unused. ·
+  `"sideEffects"` in the package's `package.json` (as the root has);  button-only cost fell 4.1 KB gzip. · spell/ui spike/lit
+- 2026-09-29 · Chromium's `CloseWatcher` GROUPS watchers created without an intervening user activation, so
+  a test that opens a second overlay programmatically and presses Escape closes BOTH. · Press a real key
+  (`userEvent.keyboard("{ArrowDown}")`) before opening the second overlay. · spell/ui spike/lit
+- 2026-09-29 · Contract says "icon svg as FALLBACK content of `<slot name=icon>`", but `button.css` /
+  `dropdown.css` size `.icon > svg` and `.icon > ::slotted(svg)`:  fallback content matches neither, so a
+  labeled-icon glyph fills its whole block (same for `.text > img` inside the dropdown's `trigger` slot). ·
+  Render the svg as a SIBLING of the slot.  Caught only by comparing screenshots with the class-grammar
+  fragments. · spell/ui spike/lit

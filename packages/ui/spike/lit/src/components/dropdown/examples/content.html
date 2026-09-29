@@ -1,0 +1,54 @@
+<!-- Element markup for `src/components/dropdown/examples/content.html`.  `data-query` is typed by the demo. -->
+<div class="ui-stack">
+  <section style="min-height: 22em">
+    <h4>Header, divider, icon, description</h4>
+    <ui-dropdown open text="Filter">
+      <ui-item type="header">Filter by tag</ui-item>
+      <ui-item type="divider"></ui-item>
+      <ui-item icon="tag" description="2 new">Important</ui-item>
+      <ui-item icon="bullhorn">Announcement</ui-item>
+      <ui-item icon="comments" disabled>Discussion</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section style="min-height: 14em">
+    <h4>Image and flag</h4>
+    <ui-dropdown selection open aria-label="Friend" value="Jenny Hess">
+      <ui-item
+        image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
+        >Jenny Hess</ui-item
+      >
+      <ui-item flag="fr">France</ui-item>
+      <ui-item flag="de">Germany</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section style="min-height: 10em">
+    <h4>Message (no results)</h4>
+    <ui-dropdown search selection open placeholder="Select Country" data-query="xyz">
+      <ui-item>Afghanistan</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section style="min-height: 12em">
+    <h4>Addition</h4>
+    <ui-dropdown search selection allow-additions open placeholder="Tags" data-query="Svelte">
+      <ui-item>SvelteKit</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section style="min-height: 22em">
+    <h4>Search in menu, scrolling menu</h4>
+    <ui-dropdown floating labeled button icon="filter" placeholder="Filter Posts">
+      <div slot="header" class="ui-p-s">
+        <input type="text" placeholder="Search tags..." aria-label="Search tags" />
+      </div>
+      <ui-item type="header">Tag label</ui-item>
+      <ui-item>Important</ui-item>
+      <ui-item>Announcement</ui-item>
+      <ui-item>Cannot fix</ui-item>
+      <ui-item>News</ui-item>
+      <ui-item>Enhancement</ui-item>
+    </ui-dropdown>
+  </section>
+</div>
