@@ -1,8 +1,7 @@
 import { html, type PropertyValues } from "lit"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "../../core"
 import { buttonsVocabulary, buttonVocabulary } from "$/components/button/button.vocabulary.en"
-import { UIElement } from "../../elements"
 
 import buttonCSS from "$/components/button/button.css?inline"
 

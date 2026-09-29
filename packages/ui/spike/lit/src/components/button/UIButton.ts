@@ -2,11 +2,9 @@ import { html, nothing, type PropertyValues, type TemplateResult } from "lit"
 import { property } from "lit/decorators.js"
 import { ifDefined } from "lit/directives/if-defined.js"
 
-import { proto } from "$/util"
-import { Shorthand } from "$/elements"
+import { proto, Shorthand, type ButtonToggleDetail, IconRenderer, UIElement } from "../../core"
 import { buttonVocabulary } from "$/components/button/button.vocabulary.en"
-import type { ButtonToggleDetail } from "$/components/components.types"
-import { IconRenderer, UIElement } from "../../elements"
+import { ButtonFallback } from "$/components/button/button.fallback"
 
 import buttonCSS from "$/components/button/button.css?inline"
 
@@ -27,6 +25,7 @@ import buttonCSS from "$/components/button/button.css?inline"
 export class UIButton extends UIElement.for(buttonVocabulary) {
   static formAssociated = true
   @proto static delegatesFocus = true
+  @proto static Fallback = ButtonFallback
   @proto static forwardsAriaLabel = true
   @proto static sheets = [[buttonVocabulary.noun, buttonCSS]] as const
 

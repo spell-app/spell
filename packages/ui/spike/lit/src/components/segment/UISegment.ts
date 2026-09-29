@@ -1,10 +1,9 @@
 import { html, nothing, type PropertyValues } from "lit"
 import { ifDefined } from "lit/directives/if-defined.js"
 
-import { proto } from "$/util"
-import { PART_OWNER_TOKENS } from "$/components/components.types"
+import { proto, PART_OWNER_TOKENS, UIElement } from "../../core"
 import { segmentVocabulary } from "$/components/segment/segment.vocabulary.en"
-import { UIElement } from "../../elements"
+import { SegmentFallback } from "$/components/segment/segment.fallback"
 
 import segmentCSS from "$/components/segment/segment.css?inline"
 
@@ -22,6 +21,7 @@ import segmentCSS from "$/components/segment/segment.css?inline"
  ****************/
 export class UISegment extends UIElement.for(segmentVocabulary) {
   @proto static sheets = [[segmentVocabulary.noun, segmentCSS]] as const
+  @proto static Fallback = SegmentFallback
 
   protected override willUpdate(changed: PropertyValues) {
     super.willUpdate(changed)

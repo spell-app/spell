@@ -1,9 +1,11 @@
 import { state } from "lit/decorators.js"
 import type { PropertyValues } from "lit"
 
-import { type FieldValue, type ValidationRule, Validator } from "$/elements"
+import { Validator } from "$/elements/Validator"
 
-import { UIElement } from "./UIElement"
+// Through the `core` ENTRY, never its leaves:  otherwise Rolldown hoists what `core` and `forms` share into a
+// third, hashed chunk
+import { type FieldValue, type ValidationRule, UIElement } from "../core"
 
 /**
  * Form-associated base:  `static formAssociated = true` plus the `ElementInternals` plumbing every form control

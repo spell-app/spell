@@ -356,3 +356,31 @@ export type ShorthandOptions = {
   /** Highest priority props, or a function of the merged defaults + value props. */
   overrides?: ShorthandProps | ((props: ShorthandProps) => ShorthandProps)
 }
+
+////////////////
+// ## Native fallback
+////////////////
+
+/** Where `NativeFallback.render()` builds:  a component's shadow root, or (light-DOM hosts) the element itself. */
+export type NativeFallbackRoot = ShadowRoot | HTMLElement
+
+/**
+ * What `NativeFallback.render()` returns.
+ * - `dispose()` removes listeners only;  the DOM stays, so a later re-render can replace it.
+ */
+export type NativeFallbackHandle = {
+  /** Removes the fallback's listeners and observers. */
+  dispose(): void
+  /** Features of the real component this fallback does NOT keep, for the console error and docs. */
+  readonly degraded: readonly string[]
+}
+
+/**
+ * Attributes for `NativeFallback.create()`.
+ * - `true` => bare attribute (`""`)
+ * - `false` / `null` / `undefined` => omitted
+ */
+export type NativeFallbackAttributes = Readonly<Record<string, string | boolean | null | undefined>>
+
+/** Canonical attribute names of vocabulary `V`, so a fallback can't misspell one. */
+export type AttributeNameOf<V extends { attributes: readonly { name: string }[] }> = V["attributes"][number]["name"]

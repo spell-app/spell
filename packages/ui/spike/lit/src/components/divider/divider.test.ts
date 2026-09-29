@@ -60,8 +60,8 @@ describe("<ui-divider>", () => {
     expect(element.dividerHidden).toBe(true)
     expect(root(element).className).toBe("ui hidden divider")
     expect(root(element).getAttribute("role")).toBe("none")
-    // NOTE: the attribute also hides the whole HOST -- `divider.css`'s `:host([hidden])`, a contract bug
-    expect(getComputedStyle(element).display).toBe("none")
+    // `divider.css`'s `:host([hidden])` overrides the UA's `display: none`:  a hidden divider keeps its spacing
+    expect(getComputedStyle(element).display).toBe("contents")
   })
 
   it.each(Object.keys(EXAMPLES))("passes axe on %s", async (path) => {

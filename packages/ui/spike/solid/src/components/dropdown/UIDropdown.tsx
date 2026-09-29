@@ -1,18 +1,27 @@
 import { For, Show, createEffect, createMemo, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
-import { UI, type OverlayEntry } from "$/runtime"
-import { MenuOptions, type FieldValue, type MenuAddition, type MenuOption, type ValidationRule } from "$/elements"
-import { Icons } from "$/icons"
-import { Converters } from "$/vocabulary"
-import { DROPDOWN_ANCHOR_PROPERTY, type DropdownOptions } from "$/components/components.types"
+import {
+  Cell,
+  Converters,
+  DROPDOWN_ANCHOR_PROPERTY,
+  Icons,
+  proto,
+  SlotContent,
+  UI,
+  type AttributeName,
+  type DropdownOptions,
+  type FieldValue,
+  type MenuAddition,
+  type MenuEntry,
+  type MenuOption,
+  type MenuSeparator,
+  type OverlayEntry,
+  type ValidationRule
+} from "$spike/core"
+import { FormElement, MenuOptions } from "$spike/forms"
 import { dropdownVocabulary } from "$/components/dropdown/dropdown.vocabulary.en"
-
-import { Cell } from "$spike/Cell"
-import { FormElement } from "$spike/FormElement"
-import { SlotContent } from "$spike/SlotContent"
-import type { AttributeName, MenuEntry, MenuSeparator } from "$spike/spike.types"
+import { DropdownFallback } from "$/components/dropdown/dropdown.fallback"
 
 import { SlottedItems } from "./SlottedItems"
 
@@ -36,6 +45,7 @@ type Vocabulary = typeof dropdownVocabulary
 export class UIDropdown extends FormElement<Vocabulary> {
   @proto static vocabulary = dropdownVocabulary
   @proto static styles = { button: buttonCSS, dropdown: dropdownCSS }
+  @proto static Fallback = DropdownFallback
 
   /** Rows PageUp / PageDown move. */
   static pageSize = 10
@@ -69,7 +79,7 @@ export class UIDropdown extends FormElement<Vocabulary> {
   readonly valueState = this.controlled("value", this.selectedItemValues() as never)
 
   /** Host value to restore on form reset (`undefined`:  back to the `selected` items). */
-  private readonly initialValue = untrack(() => this.props[this.definition.attribute("value").key])
+  private readonly initialValue = untrack(() => this.attrs.value)
 
   /** Search-key cache shared by every `MenuOptions` this element derives. */
   private readonly keys = new WeakMap() as NonNullable<ConstructorParameters<typeof MenuOptions>[2]>
@@ -506,10 +516,14 @@ export class UIDropdown extends FormElement<Vocabulary> {
   // ## Effects
   ////////////////
 
-  /** Popover + overlay registration while open;  highlighted row kept in view. */
+  /**
+   * Popover + overlay registration while open AND connected;  highlighted row kept in view.
+   * - `connected`:  `keepAlive` keeps an open dropdown's state when it's removed, but the page must not keep its
+   *   overlay entry (Escape / outside clicks) for an element that isn't there;  reconnecting re-registers.
+   */
   private effects() {
     createEffect(
-      () => this.isOpen(),
+      () => this.isOpen() && this.connected.get(),
       (open) => {
         const { menu } = this
         if (!open || !menu || !menu.popover) return
@@ -524,7 +538,7 @@ export class UIDropdown extends FormElement<Vocabulary> {
     createEffect(
       () => (this.isOpen() ? this.highlighted() : undefined),
       (option) => {
-        if (option) this.host.shadowRoot!.getElementById(this.optionId(option))?.scrollIntoView({ block: "nearest" })
+        if (option) this.host.renderRoot.getElementById(this.optionId(option))?.scrollIntoView({ block: "nearest" })
       }
     )
   }
@@ -644,7 +658,7 @@ export class UIDropdown extends FormElement<Vocabulary> {
   /** Leaving the combobox closes the menu, unless focus stays inside. */
   private readonly onBlur = (event: FocusEvent) => {
     const next = event.relatedTarget as Node | null
-    if (next && (this.host.contains(next) || this.host.shadowRoot!.contains(next))) return
+    if (next && (this.host.contains(next) || this.host.renderRoot.contains(next))) return
     this.setOpen(false, event)
   }
 

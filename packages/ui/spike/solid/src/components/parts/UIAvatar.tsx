@@ -1,10 +1,10 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { avatarVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-avatar>`
@@ -12,7 +12,7 @@ import { ContentPart } from "$spike/ContentPart"
  * default slot (a slotted `<img>`).
  * - `alt` defaults to `""`:  the person's name is almost always right next to it.
  ****************/
-export class UIAvatar extends ContentPart<typeof avatarVocabulary> {
+export class UIAvatar extends PartElement<typeof avatarVocabulary> {
   @proto static vocabulary = avatarVocabulary
 
   protected tag(): string {

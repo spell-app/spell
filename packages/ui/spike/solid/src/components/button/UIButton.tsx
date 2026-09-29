@@ -1,39 +1,33 @@
 import { Show, createEffect, createMemo, untrack } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
-import { Icons, type IconData } from "$/icons"
+import { Cell, Icons, proto, SlotContent, UIElement, type AttributeName, type IconData } from "$spike/core"
 import { buttonVocabulary } from "$/components/button/button.vocabulary.en"
 
-import { Cell } from "$spike/Cell"
-import { FormHost } from "$spike/FormHost"
-import { SlotContent } from "$spike/SlotContent"
-import { UIElement } from "$spike/UIElement"
-import type { AttributeName } from "$spike/spike.types"
+import { ButtonFallback } from "$/components/button/button.fallback"
 
 import buttonCSS from "$/components/button/button.css?inline"
 
 /****************
  * ### `<ui-button>`
  * A button:  a semantic `<button>` (or `<a>` with `href`) in the shadow root, in Fomantic's class grammar.
- * - Form-associated (`FormHost`) only so `type=submit|reset` can reach `internals.form`;  it submits no value
- *   of its own except while it is the submitter (see `submit()`).
+ * - Form-associated (the fork's `formAssociated`) only so `type=submit|reset` can reach `internals.form`;  it
+ *   submits no value of its own except while it is the submitter (see `submit()`).  No `FormHost`:  a page with
+ *   buttons only never loads the `forms` entry.
  * - `active` is auto-controlled:  `toggle` flips it on click and dispatches `ui-toggle` first.
  * - Icons come from `Icons` asynchronously;  the `.icon` box is sized by CSS, so the SVG arriving shifts nothing.
  ****************/
 export class UIButton extends UIElement<typeof buttonVocabulary> {
   @proto static vocabulary = buttonVocabulary
   @proto static styles = { button: buttonCSS }
-  @proto static Host = FormHost
+  @proto static formAssociated = true
+  @proto static Fallback = ButtonFallback
 
   /** `active`:  host-controlled, or toggled internally. */
   readonly active = this.controlled("active", false)
 
   /** Light-DOM slot occupancy. */
   readonly slots = new SlotContent(this.host)
-
-  /** Disabled by a `<fieldset disabled>`. */
-  readonly formDisabled = new Cell((this.host as FormHost).formDisabled)
 
   /** Loaded icon data for the `icon` attribute;  starts from the cache, so a known icon draws at once. */
   private readonly iconData = new Cell<IconData | undefined>(
@@ -235,11 +229,6 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
     this.iconName = name
     const data = name ? await Icons.get(name) : undefined
     if (this.iconName === name) this.iconData.set(data)
-  }
-
-  /** Host callback:  fieldset disabled changed. */
-  onFormDisabled(disabled: boolean) {
-    this.formDisabled.set(disabled)
   }
 
   /** Focus the inner control. */

@@ -32,4 +32,31 @@ export class SpikeFixture {
     await Promise.resolve()
     flush()
   }
+
+  /**
+   * Make `host`'s render throw NOW, as a bug in an update would, and wait for the native fallback.
+   * - How:  its controller's `extraClasses()` starts throwing, then one `keyOnly` attribute is flipped and
+   *   flipped back -- the classes memo reads every class-emitting attribute, so it recomputes inside the render
+   *   effect and the fork's error boundary catches the throw.  The host's attributes end as they were.
+   * - The fallback is built a microtask after the error (`UIElement.renderFallback()`), hence two ticks.
+   */
+  static async breakRender(host: UIHost) {
+    const controller = host.controller
+    if (!controller) throw new Error(`<${host.localName}> has not rendered`)
+    Object.defineProperty(controller, "extraClasses", {
+      value: () => {
+        throw new Error(`forced render failure in <${host.localName}>`)
+      }
+    })
+    const { attributes } = controller.definition
+    // a `keyOnly` attribute emits a class, so the classes memo surely tracks it
+    const flag = attributes.find(({ spec }) => spec.kind === "keyOnly") ?? attributes[0]!
+    const self = host as unknown as Record<string, unknown>
+    const before = self[flag.property]
+    self[flag.property] = !before
+    self[flag.property] = before
+    flush()
+    await SpikeFixture.tick()
+    await SpikeFixture.tick()
+  }
 }

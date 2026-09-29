@@ -56,9 +56,21 @@ beforeAll(() => {
   ;(Bomb as unknown as UIElementClass & typeof UIElement).define("x-bomb")
 })
 
+/**
+ * Define `tag` for `Element` with the fork's error boundary OFF:  `isolateErrors` is read at `define()`.
+ * - Restores the switch afterwards.
+ */
+function defineBare(Element: UIElementClass & typeof UIElement, tag: string) {
+  UIElement.isolateErrors = false
+  try {
+    Element.define(tag)
+  } finally {
+    UIElement.isolateErrors = true
+  }
+}
+
 afterEach(() => {
   resetErrorHalt()
-  UIElement.isolateErrors = true
 })
 
 /** A `<ui-label>` sibling:  does it still update after the bomb went off? */
@@ -74,12 +86,20 @@ describe("per-element error boundary", () => {
     const root = await SpikeFixture.render(`<div><x-bomb></x-bomb><ui-label>Sibling</ui-label></div>`)
     const bomb = root.querySelector<UIHost>("x-bomb")!
     const sibling = root.querySelector<UIHost>("ui-label")!
+    const events: CustomEvent[] = []
+    root.addEventListener("ui-error", (event) => events.push(event as CustomEvent))
     expect(bomb.shadowRoot!.textContent).toBe("ok")
     bomb.setAttribute("boom", "")
     await SpikeFixture.tick()
     expect(bomb.matches(":state(errored)")).toBe(true)
     expect(bomb.shadowRoot!.querySelector("[part=bomb]")).toBeNull()
-    expect(error).toHaveBeenCalledWith("<x-bomb> failed and is disabled:", expect.any(Error))
+    // no native fallback for a test element:  a bare `<slot>`, so its children would still show
+    expect(bomb.shadowRoot!.firstElementChild?.localName).toBe("slot")
+    expect(error).toHaveBeenCalledTimes(1)
+    expect(error).toHaveBeenCalledWith("<x-bomb> failed:", expect.any(Error))
+    expect(events).toHaveLength(1)
+    expect(events[0]!.cancelable && events[0]!.composed && events[0]!.bubbles).toBe(true)
+    expect((events[0]!.detail as { error: Error }).error.message).toBe("boom in render")
     expect(await siblingStillUpdates(sibling)).toBe("ui red label")
     // and new elements still render
     const later = await SpikeFixture.render<UIHost>(`<ui-label color="blue">Later</ui-label>`)
@@ -110,13 +130,14 @@ describe("per-element error boundary", () => {
 
 describe("error boundary cost", () => {
   it("measures render time of 300 labels with and without boundaries", { timeout: 60_000 }, async () => {
-    const html = `<div>${"<ui-label color='red' icon='check'>x</ui-label>".repeat(300)}</div>`
+    const { UILabel } = await import("$spike/components/label")
+    defineBare(UILabel as unknown as UIElementClass & typeof UIElement, "bare-label")
+    const html = (tag: string) => `<div>${`<${tag} color='red' icon='check'>x</${tag}>`.repeat(300)}</div>`
     const times: Record<string, number[]> = { isolated: [], bare: [] }
     for (let run = 0; run < 6; run++) {
       for (const mode of ["isolated", "bare"] as const) {
-        UIElement.isolateErrors = mode === "isolated"
         const start = performance.now()
-        const root = await SpikeFixture.render(html)
+        const root = await SpikeFixture.render(html(mode === "isolated" ? "ui-label" : "bare-label"))
         times[mode]!.push(performance.now() - start)
         root.remove()
       }
@@ -131,12 +152,12 @@ describe("error boundary cost", () => {
 // LAST:  a halt poisons Solid's scheduler for the rest of the file (`resetErrorHalt()` only re-arms it)
 describe("without the boundary", () => {
   it("the same throw halts EVERY element (the failure mode it prevents)", async () => {
-    UIElement.isolateErrors = false
+    // a fresh tag defined with the fork's `errorBoundary: false`
+    defineBare(Bomb as unknown as UIElementClass & typeof UIElement, "x-bare-bomb")
     const error = vi.spyOn(console, "error").mockImplementation(() => {})
     const report = vi.spyOn(globalThis, "reportError").mockImplementation(() => {})
-    // defined under `isolateErrors = false`:  a fresh tag, so its render function has no boundary
-    const root = await SpikeFixture.render(`<div><x-bomb></x-bomb><ui-label>Sibling</ui-label></div>`)
-    const bomb = root.querySelector<UIHost>("x-bomb")!
+    const root = await SpikeFixture.render(`<div><x-bare-bomb></x-bare-bomb><ui-label>Sibling</ui-label></div>`)
+    const bomb = root.querySelector<UIHost>("x-bare-bomb")!
     bomb.setAttribute("boom", "")
     // drain the queue HERE, so the escaping error lands in this `try` instead of an unhandled microtask
     try {

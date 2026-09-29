@@ -1,11 +1,9 @@
 import { Show, createEffect } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
-import { PART_OWNER_TOKENS } from "$/components/components.types"
+import { PART_OWNER_TOKENS, proto, UIElement } from "$spike/core"
 import { segmentVocabulary } from "$/components/segment/segment.vocabulary.en"
-
-import { UIElement } from "$spike/UIElement"
+import { SegmentFallback } from "$/components/segment/segment.fallback"
 
 import segmentCSS from "$/components/segment/segment.css?inline"
 
@@ -23,6 +21,7 @@ import segmentCSS from "$/components/segment/segment.css?inline"
 export class UISegment extends UIElement<typeof segmentVocabulary> {
   @proto static vocabulary = segmentVocabulary
   @proto static styles = { segment: segmentCSS }
+  @proto static Fallback = SegmentFallback
 
   constructor(...args: ConstructorParameters<typeof UIElement>) {
     super(...args)

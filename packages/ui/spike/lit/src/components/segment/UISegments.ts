@@ -1,8 +1,7 @@
 import { html, type PropertyValues } from "lit"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "../../core"
 import { segmentsVocabulary, segmentVocabulary } from "$/components/segment/segment.vocabulary.en"
-import { UIElement } from "../../elements"
 
 import segmentCSS from "$/components/segment/segment.css?inline"
 

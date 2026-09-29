@@ -1,10 +1,8 @@
 import { createEffect } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "$spike/core"
 import { iconsVocabulary } from "$/components/icon/icon.vocabulary.en"
-
-import { UIElement } from "$spike/UIElement"
 
 import iconCSS from "$/components/icon/icon.css?inline"
 

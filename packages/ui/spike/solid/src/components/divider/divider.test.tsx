@@ -54,14 +54,14 @@ describe("<ui-divider>", () => {
     await expect.poll(() => box.querySelector("svg")).not.toBeNull()
   })
 
-  it("`hidden` is the GLOBAL attribute too:  the host is hidden, the property renamed", async () => {
+  it("keeps the host's hidden property:  the hidden attribute is property dividerHidden", async () => {
     const { host, root } = await divider(`<ui-divider hidden></ui-divider>`)
     expect(root.getAttribute("role")).toBe("none")
     expect(root.className).toBe("ui hidden divider")
-    // the UA's `[hidden]` rule and `divider.css`'s `:host([hidden])` hide the spacing it exists for
-    expect(getComputedStyle(host).display).toBe("none")
+    // `divider.css`'s `:host([hidden])` overrides the UA's `display: none`:  a hidden divider keeps its spacing
+    expect(getComputedStyle(host).display).toBe("contents")
     expect(typeof host.hidden).toBe("boolean")
-    expect((host as unknown as { dividerHidden: unknown }).dividerHidden).toBe("")
+    expect((host as unknown as { dividerHidden: unknown }).dividerHidden).toBe(true)
   })
 })
 

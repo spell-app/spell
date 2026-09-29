@@ -70,22 +70,26 @@ describe("<ui-icon> classes", () => {
     expect(root(no).className).toBe("ui icon")
   })
 
-  it("renders the svg for name and style, with the part", async () => {
+  it("renders the svg for name and variant, with the part", async () => {
     const solid = await render(`<ui-icon name="heart"></ui-icon>`)
-    const regular = await render(`<ui-icon name="heart" style="regular"></ui-icon>`)
+    const regular = await render(`<ui-icon name="heart" variant="regular"></ui-icon>`)
     await until(() => !!solid.shadowRoot!.querySelector("svg path") && !!regular.shadowRoot!.querySelector("svg path"))
     expect(root(solid).getAttribute("part")).toBe("icon")
     const path = (element: UIIcon) => element.shadowRoot!.querySelector("path")!.getAttribute("d")
     expect(path(solid)).not.toBe(path(regular))
-    expect(regular.iconStyle).toBe("regular")
+    expect(regular.variant).toBe("regular")
   })
 
-  it("keeps the host's style object:  the style attribute is property iconStyle", async () => {
-    const element = await render(`<ui-icon name="heart" style="brands"></ui-icon>`)
-    expect(element.style).toBeInstanceOf(CSSStyleDeclaration)
-    element.iconStyle = "regular"
-    await element.updateComplete
-    expect(element.getAttribute("style")).toBe("regular")
+  it("draws outline ~== variant=regular, and keeps the host's style object", async () => {
+    const outline = await render(`<ui-icon name="heart" outline style="color: red"></ui-icon>`)
+    const regular = await render(`<ui-icon name="heart" variant="regular"></ui-icon>`)
+    await until(
+      () => !!outline.shadowRoot!.querySelector("svg path") && !!regular.shadowRoot!.querySelector("svg path")
+    )
+    const path = (element: UIIcon) => element.shadowRoot!.querySelector("path")!.getAttribute("d")
+    expect(path(outline)).toBe(path(regular))
+    expect(outline.style).toBeInstanceOf(CSSStyleDeclaration)
+    expect(outline.style.color).toBe("red")
   })
 
   it("keeps its box for unknown names", async () => {

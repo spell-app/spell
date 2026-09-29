@@ -1,10 +1,9 @@
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
-import type { HeaderLevel } from "$/components/components.types"
+import { proto, type HeaderLevel } from "$spike/core"
 import { headerVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-header>`
@@ -17,7 +16,7 @@ import { ContentPart } from "$spike/ContentPart"
  *   carries the class grammar.
  * - It is an OWNER too (`ownsParts:  header, content`):  a nested `<ui-header>` / `<ui-content>` resolves to it.
  ****************/
-export class UIHeader extends ContentPart<typeof headerVocabulary> {
+export class UIHeader extends PartElement<typeof headerVocabulary> {
   @proto static vocabulary = headerVocabulary
 
   render(): JSX.Element {

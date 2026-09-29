@@ -1,14 +1,14 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { titleVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-title>`
  * A title:  `<div class="title">`, or `<a class="title">` with `href`.
  * - A step's, an accordion panel's or a search result's title.
  ****************/
-export class UITitle extends ContentPart<typeof titleVocabulary> {
+export class UITitle extends PartElement<typeof titleVocabulary> {
   @proto static vocabulary = titleVocabulary
 
   protected tag(): string {

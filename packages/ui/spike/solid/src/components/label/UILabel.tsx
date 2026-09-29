@@ -1,14 +1,9 @@
 import { Show, createMemo } from "solid-js"
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { HostAttribute, IconGlyph, PartContext, proto, SlotContent, UIElement } from "$spike/core"
 import { labelVocabulary } from "$/components/label/label.vocabulary.en"
-
-import { HostAttribute } from "$spike/HostAttribute"
-import { IconGlyph } from "$spike/IconGlyph"
-import { PartContext } from "$spike/PartContext"
-import { SlotContent } from "$spike/SlotContent"
-import { UIElement } from "$spike/UIElement"
+import { LabelFallback } from "$/components/label/label.fallback"
 
 import labelCSS from "$/components/label/label.css?inline"
 import partsCSS from "$/components/parts/parts.css?inline"
@@ -18,7 +13,9 @@ import partsCSS from "$/components/parts/parts.css?inline"
  * A label:  `<span class="ui … label" part="label">` (`<a>` with `href`) holding, in order, the `image` `<img>`,
  * the icon box, the default slot, the `detail` shorthand and the `removable` delete button.
  * - `icon` class (after the noun) when there's an icon and no text:  the icon centres.
- * - `image`:  a URL renders `<img class="image" part="image" alt="">`;  bare `image` styles a slotted `<img>`.
+ * - `image`:  a string attribute.  Present (bare / `""`) => class `image` around a slotted `<img>`;  a non-empty
+ *   value is the `src` of the label's own `<img class="image" part="image" alt="">`.  `ClassBuilder` emits
+ *   nothing for a string kind, so the `image` class goes in as an extra.
  * - `removable`:  a real `<button class="delete icon">` named by the `remove` text;  a click dispatches the
  *   cancelable `ui-remove` -- the label never removes itself, the page does.
  * - Inside a statistic (an owner of `label`, `PartContext`) it is that statistic's `.label` PART:  it renders
@@ -28,6 +25,7 @@ import partsCSS from "$/components/parts/parts.css?inline"
 export class UILabel extends UIElement<typeof labelVocabulary> {
   @proto static vocabulary = labelVocabulary
   @proto static styles = { label: labelCSS, parts: partsCSS }
+  @proto static Fallback = LabelFallback
 
   /** Owner, when it's a statistic's label. */
   readonly context = new PartContext(this.host, this.vocabulary.noun)
@@ -54,18 +52,16 @@ export class UILabel extends UIElement<typeof labelVocabulary> {
   /** Has text (default slot or `detail`)? */
   readonly hasText = createMemo(() => this.slots.has("") || !!this.attrs.detail)
 
-  /** `image` attribute as a URL, or `undefined` when bare / boolean. */
-  readonly imageSrc = createMemo(() => {
-    const raw = this.props[this.definition.attribute("image").key]
-    return typeof raw === "string" && !BOOLEAN_WORDS.has(raw.toLowerCase()) ? raw : undefined
-  })
+  /** `image` attribute as a URL, or `undefined` when bare (a slotted `<img>`) or absent. */
+  readonly imageSrc = createMemo(() => this.attrs.image?.trim() || undefined)
 
   isDisabled(): boolean {
     return this.attrs.disabled
   }
 
   protected extraClasses(): string | undefined {
-    return this.hasIcon() && !this.hasText() ? ICON : undefined
+    const extra = [this.attrs.image === undefined ? "" : IMAGE, this.hasIcon() && !this.hasText() ? ICON : ""]
+    return extra.filter(Boolean).join(" ") || undefined
   }
 
   protected hostStates() {
@@ -149,7 +145,7 @@ export class UILabel extends UIElement<typeof labelVocabulary> {
 /** Grammar words the element adds itself:  the icon box / icon-only class. */
 const ICON = "icon"
 
-/** Class of the `image` `<img>`. */
+/** Class of the `image` `<img>`, and the label's extra class for an image label. */
 const IMAGE = "image"
 
 /** Class of the `detail` shorthand box. */
@@ -166,6 +162,3 @@ const ARIA_LABEL = "aria-label"
 
 /** Role of a named, non-link label (an icon-only label is a picture of its name). */
 const IMG = "img"
-
-/** `image` values that mean "bare", not a URL. */
-const BOOLEAN_WORDS = new Set(["", "true", "yes", "false", "no", "image"])

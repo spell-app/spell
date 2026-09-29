@@ -1,7 +1,7 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { extraVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-extra>`
@@ -9,6 +9,6 @@ import { ContentPart } from "$spike/ContentPart"
  * - Set apart from the main content, e.g. a card's footer;  `text` in a feed.
  * - Everything else (owner context, markup, sheet) comes from `ContentPart`.
  ****************/
-export class UIExtra extends ContentPart<typeof extraVocabulary> {
+export class UIExtra extends PartElement<typeof extraVocabulary> {
   @proto static vocabulary = extraVocabulary
 }

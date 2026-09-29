@@ -1,25 +1,30 @@
 import { expect, it } from "vitest"
 import { commands } from "vitest/browser"
+import { flush } from "solid-js"
+
+import { PerfRun } from "$shared/PerfRun.ts"
 
 import { SpikeFixture } from "$spike/SpikeFixture"
-import { PerfRun } from "$spike/perf/PerfRun"
 
 import "$spike/components/dropdown"
 
+/** Solid's `PerfAdapter`:  writes land on a microtask;  `flush()` applies them now. */
+const SOLID_SETTLE = { settle: () => flush() }
+
 /**
- * Filtering 1000 options per keystroke must stay under a frame (16 ms), measured event => DOM updated.
- * - SIDE EFFECT:  writes the numbers to `.cache/perf-dropdown.json` (browser-mode `console.log` doesn't reach
- *   the terminal), for `REPORT.md`.
+ * The shared dropdown benchmark (`spike/shared/PerfRun.ts`):  1000 options, `"united sta"` typed one character
+ * per keystroke;  each keystroke must stay under a frame (16 ms), event => DOM updated.
+ * - SIDE EFFECT:  writes `perf-results.json` in the spike root (browser-mode `console.log` doesn't reach the
+ *   terminal), for `yarn report`.
  */
-it("filters 1000 options in under 16 ms per keystroke", async () => {
-  const host = await SpikeFixture.render(`<ui-dropdown search selection placeholder="Country"></ui-dropdown>`)
-  // warm-up run (JIT, icon-free rows), then the measured one on a fresh element
-  await PerfRun.run(host)
-  host.remove()
-  const fresh = await SpikeFixture.render(`<ui-dropdown search selection placeholder="Country"></ui-dropdown>`)
-  const result = await PerfRun.run(fresh)
-  await commands.writeFile(".cache/perf-dropdown.json", JSON.stringify(result, null, 2))
-  expect(result.open.rows).toBe(1000)
-  expect(result.keystrokes.at(-1)!.rows).toBeGreaterThan(0)
-  expect(result.script.avg).toBeLessThan(16)
+it("filters 1000 options in under a frame per keystroke (shared PerfRun)", async () => {
+  const host = await SpikeFixture.render(`<ui-dropdown search selection placeholder="Search"></ui-dropdown>`)
+  const result = await PerfRun.run(host as Parameters<typeof PerfRun.run>[0], SOLID_SETTLE)
+  await PerfRun.save(
+    { spike: "Solid", where: "vitest browser mode", build: "dev (Vite dev server)", result },
+    commands.writeFile
+  )
+  expect(result.open.rows).toBe(PerfRun.count)
+  expect(result.keystrokes.at(-1)!.rows).toBeLessThan(PerfRun.count)
+  expect(result.update.avg).toBeLessThan(16)
 })

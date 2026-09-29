@@ -1,4 +1,5 @@
 import { createEffect, onSettled, untrack } from "solid-js"
+import { onConnect } from "@spell/solid-element"
 
 import { OwnerContext, type OwnerMatch } from "$/elements"
 import type { ComponentVocabulary } from "$/vocabulary"
@@ -16,7 +17,9 @@ import type { UIHost } from "./UIHost"
  * - SIDE EFFECT:  keeps `:state(in-<owner>)` on the host in step with `owner`, via an effect;  NEVER the static
  *   `in-<owner>` class.
  * - Re-resolves on:
- *   - connect (a new controller, so reparenting is covered by `component-register`'s reconnect)
+ *   - every connect after the first (`keepAlive` keeps the controller across moves, so a part re-parented into
+ *     another owner hears it through the fork's `onConnect`), a microtask late:  the hook may run inside a
+ *     Solid render, where the signal write would throw
  *   - `slotchange` in any spike element's shadow root, for the elements entering AND leaving that slot
  *     (`UIElement` calls `PartContext.slotChanged()`), cascading to part descendants
  *   - once after the first settle, for owners whose shadow rendered after this part connected
@@ -57,6 +60,11 @@ export class PartContext {
       return () => {
         if (CONTEXTS.get(host) === this) CONTEXTS.delete(host)
       }
+    })
+    let first = true
+    onConnect(() => {
+      if (first) first = false
+      else queueMicrotask(() => this.refresh())
     })
   }
 

@@ -1,71 +1,65 @@
-# Milestone 0: Lit vs Solid, side by side
+# Lit vs Solid: the two spikes side by side
 
-Both spikes built the same `ui-button` (+ `ui-buttons`, `ui-or`) and `ui-dropdown` (+ `ui-item`) on the same foundation (`src/`), the same CSS, the same vocabularies, the same tests and demo pages. Full reports: `spike/lit/REPORT.md`, `spike/solid/REPORT.md`. Measured 2026-09-29.
+Both spikes build the same eight families (`button`, `dropdown`, `icon`, `label`, 13 content `parts`, `divider`, `segment`, `container`) on the same foundation (`src/`), CSS, vocabularies and native fallbacks, and are measured, smoke-tested and reported by the same tools (`spike/shared/`).  Full reports, with identical sections and generated tables:  `spike/lit/REPORT.md`, `spike/solid/REPORT.md`.  Numbers as of 2026-09-30.
 
-## Numbers
+- Lit spike:  Lit 3.3.3, standard decorators.
+- Solid spike:  Solid 2.0.0-rc.11 on `@spell/solid-element` (`spike/solid-element/`), our fork of `@solidjs/element` + `component-register` that fixes 22 reproduced bugs and could go upstream (`spike/solid-element/UPSTREAM.md`).
+- Both are packaged as a SHARED RUNTIME:  the base library is a peer dependency (external), our code splits into a `core` entry (every family), a `forms` entry (form controls only) and one small entry per family.
 
-| Criterion | Lit 3.3.3 | `@solidjs/element` 2.0.0-rc.11 |
+## Size (min + gzip level 9, kB)
+
+| | Lit | Solid |
+|---|--:|--:|
+| library, as used by the components | 7.51 | 26.65 |
+| core | 14.12 | 14.63 |
+| forms (dropdown only, so far) | 6.37 | 6.36 |
+| own, all 8 families | 69.95 | 71.11 |
+| **plain page with one button** (library + core + button) | **33.15** | 53.07 |
+| **plain page with all families** | **93.97** | 118.75 |
+| app already ships the component library's base library | 86.45 | 92.09 |
+| **spell app on Solid 2** (Lit components still need Lit;  Solid components use the app's Solid) | **93.97** | **92.09** |
+
+- Per family, our own code costs the same on both (button 11.5 vs 11.8, dropdown 15.7 vs 17.1, parts 11.7 vs 14.3);  the base library is the whole difference on a plain page.
+- **In the spell app the two are a wash** (94.0 vs 92.1):  the app pays for Solid anyway, so Solid components add nothing for it, while Lit components add Lit.
+- Standalone builds (library bundled into each family) for reference:  one button 27.4 (Lit) / 41.4 (Solid), all families 90.8 / 114.3.  Sharing costs a plain one-button page a little and saves on pages with several families or an app that ships the library.
+- The import-map pages vendor only the used Lit bindings;  the Solid pages still vendor all of Solid (59.6 kB), because the Solid 2 host page's identity probe imports everything (fixable, see the Solid report's Risks).
+
+## Everything else
+
+| | Lit | Solid |
 |---|---|---|
-| `ui-button` alone, gzip, excl. runtime + icon data | **27.3 KB** | 47.7 KB |
-| `ui-button` + `ui-dropdown`, gzip | **47.9 KB** | 70.1 KB |
-| Library runtime inside that | 6–7 KB | 24.2 KB |
-| Per keystroke, 1000 options (avg / max) | **0.78 / 4.8 ms** | 1.6 / 4.3 ms (1.3 / 3.9 prod) |
-| First open, 1000 rows | **12.6 ms** | 16–17 ms |
-| Tests | 57 pass | 79 pass |
-| Element core LOC (base classes) | ~740 | ~1180 |
-| Dropdown LOC | 746 | 811 + 126 |
-| Frameworks (vanilla, React 19, Vue 3, Solid 1.9) | all pass | all pass |
-| Forms (`formAssociated`, `setValidity`, reset, fieldset) | no friction | works, but only by bypassing `customElement()` (~40 LOC re-implementing its registration) |
-| `delegatesFocus`, ElementInternals | native options | hand-rolled in a host base class |
-| SSR / Declarative Shadow DOM | real: `@lit-labs/ssr` renders DSD; 3 one-line guards | DIY: `renderToString` against a stub host; re-renders on upgrade, no hydration |
-| Translation hook (`ie-boton`, `rojo`→`red`, `ie-cambio`) | works (5-line subclass) | works (second definition) |
-| Duplicate runtime on one page | works; dev-only warning | Solid 1.9 host works; Solid 2 host untested |
-| Error isolation | per element | **one uncaught error halts every Solid element on the page** |
-| Dev-server perf | as prod | ~5× slower than prod (diagnostics + performance tracks) |
-| Attribute parsing quirks | none (`useDefault` caveat with `undefined` starts) | `component-register` parses bare booleans as false, reflects `"true"`, drops pre-upgrade properties — all worked around |
-| Dependency status | stable; SSR is a Labs package | 12 RCs in 7 weeks; README is the 1.x one; `component-register` single-maintainer, last release 2025-09 |
-
-Both spikes needed the same platform workarounds (submit-button form value trick, disabled `role=option` for "no results", host `aria-label` forwarding), so those are not library differences.
+| Per keystroke, 1000 options, production (avg / max ms) | 1.3 / 5.1 | 1.3 / 4.0 |
+| First open, 1000 rows, production (ms) | 14.2 | 19.4 |
+| Hosts (vanilla, React 19, Vue 3, Solid 2 app) | all pass | all pass |
+| Solid 2 app shares one runtime with the components, app context reaches a component | n/a | **yes** (identity + context checks pass) |
+| Compatibility checks | a second Lit copy loaded by URL works | a Solid 1.9 host alongside our Solid 2 works (no context, as expected) |
+| Forms (`formAssociated`, validity, reset, fieldset) | native | native, via the fork's options and hooks |
+| SSR / Declarative Shadow DOM | real (`@lit-labs/ssr`) | DIY string render;  the fork adopts a declarative root, no hydration |
+| Error isolation + native fallback | per element;  all 7 shared fallback cases pass | per element (fork boundary);  all 7 pass |
+| Translation hook | works | works |
+| Element core LOC (lines / code) | 1301 / 700 | 1592 / 845 (was 1599 / 868 before the fork;  the fork itself is 693 code lines) |
+| Tests | 163 | 283 (+108 in the fork) |
+| Dependency risk | stable;  SSR is a Labs package | Solid 2 is an RC;  we now own the element layer (the fork) |
 
 ## Reading
 
-- **Size.** Solid's reactive core + web runtime + element layer is 24 KB gzip against Lit's 6 KB. That difference alone is larger than the whole `ui-button` on Lit. Solid's fine-grained model did not buy a smaller output, because our components are class-driven (`ClassBuilder` over the whole vocabulary) rather than deep signal graphs.
-- **Speed.** Both are far under 16 ms per keystroke; Lit was faster on this workload. Fine-grained reactivity is not the bottleneck; keyed row diffing is, and both do it.
-- **Fit with the conventions.** Lit is class-based; `UIElement.for(vocabulary)` derives typed properties from the vocabulary in one line and standard decorators plus `@proto` just work. Solid's unit is a render function, so the spike wrapped it in a controller class and then hit two Solid 2 rules (eager memos, no writes in owned scopes) that fight class inheritance and constructor initialisation.
-- **Platform integration.** Everything we lean on (formAssociated, ElementInternals, `delegatesFocus`, upgrade backstop, SSR) is native to Lit and had to be re-implemented around `component-register` for Solid.
-- **Failure mode.** A library that ships ~50 components cannot accept "one bug in any element freezes all of them on the page". This is the single strongest reason.
-- **Maintenance.** Lit is stable and widely used for exactly this. `@solidjs/element` is an RC on an RC with stale docs and a thin, single-maintainer custom-element layer.
+- **Size no longer decides it for the spell app.**  On a plain page Lit is 20–25 kB lighter, all of it Solid's runtime.  Inside a Solid 2 app, where these components will mostly live, the totals are equal.
+- **What Solid buys in the spell app:**  one reactive system end to end.  The Solid 2 host page proves the app and the components share one `solid-js`, app context reaches components, and app signals drive component props with no glue.  Component authors and app authors follow the same rules.
+- **What Lit buys:**  fewer rules for component authors (no eager-memo / owned-scope traps), native SSR, and no element layer of our own to maintain.
+- **The fork changed the Solid picture.**  The 22 bugs and workarounds are gone from the spike, the page-wide halt is gone (per-element boundary + native fallback), and the remaining cost is ownership:  ~700 lines we maintain until (if) upstream takes the patches.
+- **Performance is a tie** at this scale;  Lit opens a 1000-row menu about 5 ms faster.
 
 ## Recommendation
 
-**Lit 3.3.3, standard decorators.** Keep the Solid spike in git history as a reference for the fine-grained pattern, delete `spike/solid/` from the tree, and promote `spike/lit/src/elements/*` to `src/elements/` (as `UIElement`, `VocabularyProperties`, `FormElement`, `IconRenderer`) and its two components to `src/components/{button,dropdown}/`.
+If spell's own app is Solid 2 (it is), **Solid** is now the better system for spell:  same size inside the app, one runtime and one mental model, context and signals flowing into components.  **Lit** remains the better choice only if `@spell/ui` must serve non-Solid pages first, or if we don't want to own the element layer.
 
-Carry over from the spike reports, regardless of library:
-- The slot-fallback vs child-selector CSS contract (fixed in `src/components/*/*.css`).
-- `Icons.ts` alias maps must load lazily and `search.json` must not be bundled (fixed).
-- Palette contrast is a token problem, logged in `CODE-DEBT.md`.
-- Component `texts` should be registered with `UI.i18n` when a class is defined.
-- `.dropdown.icon` must stay `:empty` unless the `icon` slot is occupied.
-- The `left labeled` example needs an accessible name.
-- Runtime chunk is 27 KB gzip against a 20 KB budget: `colors.css` dominates; revisit after the palette work.
+Either way, before building more families:
+- decide whether to send the fork's patches upstream (`spike/solid-element/UPSTREAM.md`), which lowers the ownership risk
+- adopt one-module-per-icon loading (`docs/icons.md`, "Loading strategies")
+- fix the palette contrast debt (`CODE-DEBT.md`)
 
-## Batch 1 (2026-09-29): icon, label, 13 content parts, divider, segment, container on both
+## Appendix: history
 
-Owen chose to keep both candidates after Milestone 0; both spikes then built the same six families on the same CSS/vocabulary. Full sections: `spike/lit/REPORT.md` and `spike/solid/REPORT.md`, "Batch 1".
-
-| Criterion | Lit | Solid 2 rc.11 |
-|---|---|---|
-| Whole family built alone, gzip, excl. runtime + icon data | icon 22.1, label 24.6, parts 26.5, divider 19.8, segment 21.6, container 17.5 | icon 48.2, label 56.5, parts 54.1, divider 46.2, segment 47.8, container 43.4 |
-| Shared floor (library + element core) | ~15 KB (Lit 7.5) | ~43 KB (Solid 28.3 + core 11.7) |
-| All eight families together | **84.6 KB** | 118.4 KB |
-| Tests after batch 1 | 156 | 274 |
-| Element LOC for the batch | ~480 code lines | (more; see report LOC table) |
-| Owner-context cost | +1.1 KB (+0.5 KB `lit/static-html`) | `PartContext` inside the 11.7 KB core |
-| Page-wide halt | n/a (per element) | **fixed**: `createErrorBoundary` per element, +1.4 KB, no measurable render cost; a throw disables only that element (`:state(errored)`) |
-| New library quirks | none | `component-register` ignores `removeAttribute()` on a bare boolean (worked around) |
-| Visual parity with the class-grammar fragments | 30/30 pairs match except the shared foundation bugs | near-identical, same exceptions |
-| Foundation bugs found | 6 (same set) | 11 findings (superset of the same 6) |
-
-Both spikes independently renamed the clashing properties (`iconStyle`, `dividerHidden`), hit the same missing `--ui-inverted` default, and the same "no event when an element's assigned slot changes" platform limit (both report `slotchange` from their own shadow roots to a registry).
-
-**Reading after batch 1.** The Solid spike closed its biggest gap (error isolation) at negligible cost, and its owner-context design is equivalent to Lit's. What did not change: Solid's runtime is now 28 KB gzip against Lit's 7.5, so every family costs roughly 25 KB more, and the full set is 40% larger; Solid still needs the `component-register` workarounds and has no SSR. The recommendation stands: **Lit**.
+- **Milestone 0** (button + dropdown, library bundled into every widget):  Lit 27.3 / 47.9 kB vs Solid 47.7 / 70.1 kB;  Solid's `component-register` needed ~40 lines of workarounds for forms and three attribute quirks, and one uncaught error halted every Solid element on the page.  Those "alone" numbers were later found to be wrong:  Vite merged every entry into each "alone" build.
+- **Batch 1** (six more families):  Solid added a per-element error boundary (+1.4 kB);  both spikes hit the same six foundation bugs, since fixed.
+- **Shared runtime** (this round):  peers externalized, `core` + `forms` entries, one measuring tool and report template for both, the Solid fork, native fallbacks.

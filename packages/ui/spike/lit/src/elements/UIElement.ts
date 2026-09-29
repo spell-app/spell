@@ -5,7 +5,18 @@ import { ClassBuilder } from "$/elements"
 import { loadUI, RUNTIME_KEY, type RuntimeGlobal, type UIRuntime } from "$/runtime"
 import { type ComponentVocabulary, type Dictionary, type LocalizedVocabulary, Vocabulary } from "$/vocabulary"
 
-import type { DeclaredProps, EmitOptions, EventName, PartName, SheetEntry, SlotName, TextKey } from "./elements.types"
+import {
+  ERROR_EVENT,
+  ERRORED_STATE,
+  type DeclaredProps,
+  type EmitOptions,
+  type EventName,
+  type FallbackClass,
+  type PartName,
+  type SheetEntry,
+  type SlotName,
+  type TextKey
+} from "./elements.types"
 import { PartOwners } from "./PartOwners"
 import { VocabularyProperties, type VocabularyDeclaration } from "./VocabularyProperties"
 
@@ -29,6 +40,9 @@ import { VocabularyProperties, type VocabularyDeclaration } from "./VocabularyPr
  * - Registration (`define()`) also records the tag with `PartOwners` (owner context) and queues the
  *   vocabulary's `texts` for `UI.i18n`, registered once the runtime is in.
  * - Every `slotchange` in the shadow root is reported to `PartOwners`, so re-slotted parts find their owner.
+ * - Failure:  a throw anywhere in an update (`willUpdate()`, `render()`, `updated()` ...) is caught;  the element
+ *   logs it once, dispatches a cancelable `ui-error`, gets `:state(errored)`, shows its family's native fallback
+ *   (`@proto static Fallback`) and never renders again -- see `failed()`.
  */
 export class UIElement extends LitElement {
   /** canonical vocabulary;  installed on the prototype by `for()` */
@@ -45,18 +59,28 @@ export class UIElement extends LitElement {
   declare contentPart: boolean
   /** forward the host's `aria-label` into the shadow root (see `ariaLabelled`), e.g. icon-only buttons */
   declare forwardsAriaLabel: boolean
+  /**
+   * Native fallback shown when an update throws (`$/components/<name>/<name>.fallback.ts`);  none => a bare
+   * `<slot>`, so a group's children stay visible.
+   * - NOTE: capitalized (a class), so it can never clash with a vocabulary attribute's property.
+   */
+  declare Fallback: FallbackClass | undefined
 
   @proto static localized: LocalizedVocabulary | undefined = undefined
   @proto static delegatesFocus = false
   @proto static sheets: readonly SheetEntry[] = []
   @proto static contentPart = false
   @proto static forwardsAriaLabel = false
+  @proto static Fallback: FallbackClass | undefined = undefined
 
   /** `ElementInternals`:  states, ARIA, forms */
   readonly internals: ElementInternals
 
   /** properties being transitioned right now => did the host write them during the event? */
   private readonly hostWrites = new Map<PropertyKey, boolean>()
+
+  /** Set by the first failed update (`failed()`):  the element never renders again. */
+  private failure: { error: unknown } | undefined
 
   constructor() {
     super()
@@ -170,10 +194,31 @@ export class UIElement extends LitElement {
     else void UIElement.loadRuntime().then(() => this.adoptSheets())
   }
 
-  /** Hold the FIRST render until the runtime has loaded, so it paints styled and can use `UI`. */
+  /**
+   * Hold the FIRST render until the runtime has loaded, so it paints styled and can use `UI`.
+   * - Every update runs through `guardedUpdate()`, so a throw becomes `failed()`, not an unhandled rejection.
+   */
   protected override scheduleUpdate(): void | Promise<unknown> {
-    if (UIElement.runtime) return super.scheduleUpdate()
-    return UIElement.loadRuntime().then(() => super.scheduleUpdate())
+    if (UIElement.runtime) return this.guardedUpdate()
+    return UIElement.loadRuntime().then(() => this.guardedUpdate())
+  }
+
+  /**
+   * `super.scheduleUpdate()` (Lit's `performUpdate()`), with any throw handed to `failed()`.
+   * - Catches the whole cycle:  `performUpdate()` rethrows from `willUpdate()` / `update()` / `render()` after
+   *   marking the update done, and `firstUpdated()` / `updated()` throw straight through.
+   */
+  private guardedUpdate(): void | Promise<unknown> {
+    try {
+      return super.scheduleUpdate()
+    } catch (error) {
+      this.failed(error)
+    }
+  }
+
+  /** Never again after a failure:  Lit would re-render over the fallback, and `updated()` hooks would fight it. */
+  protected override shouldUpdate(changed: PropertyValues): boolean {
+    return !this.failure && super.shouldUpdate(changed)
   }
 
   /**
@@ -198,6 +243,34 @@ export class UIElement extends LitElement {
    */
   protected sheetNames(): string[] {
     return this.sheets.map(([name]) => name)
+  }
+
+  ////////////////
+  // ## Failure
+  ////////////////
+
+  /**
+   * The first update that threw:  degrade to the family's native fallback.
+   * - SIDE EFFECT:
+   *   - one `console.error` naming the tag, with the cause
+   *   - `:state(errored)`
+   *   - a cancelable, bubbling, composed `ui-error` (`{ error }`);  an app cancelling it keeps the fallback out
+   *     and gets an EMPTY shadow root to take over
+   *   - unless cancelled, `Fallback.render(host, shadowRoot, error, internals)` replaces the shadow content
+   *     (plain DOM, the same markup the Solid spike renders);  adopted sheets stay, so it's styled
+   * - Later updates are skipped (`shouldUpdate()`), so this runs once per instance.
+   */
+  private failed(error: unknown) {
+    if (this.failure) return
+    this.failure = { error }
+    console.error(`<${this.localName}> failed:`, error)
+    this.setState(ERRORED_STATE, true)
+    const event = new CustomEvent(ERROR_EVENT, { bubbles: true, composed: true, cancelable: true, detail: { error } })
+    const root = this.renderRoot as ShadowRoot
+    // cancelled:  the last good render is stale (it never updates again), so it goes too, as in the Solid spike
+    if (!this.dispatchEvent(event)) root.replaceChildren()
+    else if (this.Fallback) this.Fallback.render(this, root, error, this.internals)
+    else root.replaceChildren(this.ownerDocument.createElement("slot"))
   }
 
   ////////////////

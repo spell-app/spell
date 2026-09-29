@@ -1,8 +1,10 @@
 /**
  * Shared types for the Solid spike's element core (`$spike`) -- how a `ComponentVocabulary` becomes typed,
  * converted property values, and what the pieces of the core hand each other.
- * - Runtime-light:  types only.
+ * - Runtime-light:  types, plus two name constants (`ERROR_EVENT`, `ERRORED_STATE`).
  */
+
+import type { PropDefinition } from "@spell/solid-element"
 
 import type { AttributeSpec, ComponentVocabulary } from "$/vocabulary"
 
@@ -63,46 +65,47 @@ export type InlineValues<S extends AttributeSpec> = S["values"] extends readonly
 /**
  * Every attribute of `V` as a converted, read-only property, keyed by camelCase canonical name:
  * `attrs.allowAdditions`, `attrs.size`.
- * - Reading one inside JSX, a memo or an effect TRACKS it (each is a memo over the raw prop).
+ * - These ARE the fork's props:  one signal each, converted on the way in (attribute AND property writes), so
+ *   reading one inside JSX, a memo or an effect TRACKS it with no memo layer of our own.
  */
 export type AttributeValues<V extends ComponentVocabulary> = {
   readonly [S in V["attributes"][number] as CamelCase<S["name"]>]: SpecValue<S>
 }
 
 ////////////////
-// ## component-register bridge
+// ## Element definition
 ////////////////
 
-/**
- * One entry of the props definition `component-register` takes (its `PropDefinition`, restated so callers
- * needn't import the library's types).
- * - `parse: false` always:  its JSON parse turns `""` into `undefined`, which would make a bare boolean
- *   attribute false.  `Converters` do all parsing instead.
- * - `reflect: false` always:  its reflection writes `"true"` for `true`;  `ElementDefinition` reflects instead.
- */
-export type RegisterPropDefinition = {
-  value: unknown
-  attribute: string
-  notify: boolean
-  reflect: boolean
-  parse: boolean
-}
-
-/** Raw, unconverted props as `withSolid` hands them over:  one reactive getter per property key. */
-export type RawProps = Record<string, unknown>
-
-/** One attribute as the definition resolved it:  canonical spec, localized attribute name, property key. */
+/** One attribute as the definition resolved it:  canonical spec, localized attribute name, property names. */
 export type ResolvedAttribute = {
   spec: AttributeSpec
   /** attribute name authors write, e.g. `primario` */
   attribute: string
-  /** JS property key, e.g. `allowAdditions` / `permitirAdiciones` */
+  /** camelCase CANONICAL name:  the key in `AttributeValues` and in the fork's props (`props.allowAdditions`) */
   key: string
-  /** camelCase canonical name, the key in `AttributeValues` */
-  canonicalKey: string
+  /** element property, e.g. `allowAdditions`, `permitirAdiciones`, or a vocabulary rename (`dividerHidden`) */
+  property: string
   /** reflect property changes to the attribute */
   reflect: boolean
 }
+
+/** The fork's prop definitions for one tag, by `ResolvedAttribute.key`. */
+export type PropDefinitions = Record<string, PropDefinition>
+
+////////////////
+// ## Errors
+////////////////
+
+/**
+ * Event an element dispatches when its render fails, before showing its native fallback.
+ * - Cancelable, `bubbles`, `composed`, `detail: { error }`;  `preventDefault()` keeps the fallback out (the
+ *   page takes over).
+ * - NOTE: no vocabulary names it yet (every element has it);  the Lit spike uses the same name.
+ */
+export const ERROR_EVENT = "ui-error"
+
+/** Custom state of a failed element (`:state(errored)`), set by the fork's boundary and by the fallback. */
+export const ERRORED_STATE = "errored"
 
 ////////////////
 // ## Dropdown

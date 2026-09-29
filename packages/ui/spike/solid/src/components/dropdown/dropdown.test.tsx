@@ -163,16 +163,44 @@ describe("<ui-dropdown> open / close", () => {
     expect(menu.matches(":popover-open")).toBe(false)
   })
 
-  it("releases its overlay when removed while open (disposal)", async () => {
+  it("releases its overlay when removed while open, and takes it back when re-attached (keepAlive)", async () => {
     const { host, combobox } = await dropdown(GENDER)
     combobox.click()
     await SpikeFixture.tick()
     expect(UI.overlays.entries).toHaveLength(1)
+    const parent = host.parentElement!
     host.remove()
-    // component-register waits a microtask before releasing, in case the element is only being moved
+    // `connected` follows a microtask late (the fork's hooks may run inside a Solid render)
     await SpikeFixture.tick()
     await SpikeFixture.tick()
     expect(UI.overlays.entries).toHaveLength(0)
+    // `keepAlive`:  the SAME controller, still open, comes back with the element
+    parent.append(host)
+    await SpikeFixture.tick()
+    await SpikeFixture.tick()
+    expect(host.matches(":state(open)")).toBe(true)
+    expect(UI.overlays.entries).toHaveLength(1)
+    host.remove()
+    await SpikeFixture.tick()
+    await SpikeFixture.tick()
+  })
+
+  it("keeps its state when moved to another container (keepAlive:  no re-render)", async () => {
+    const page = await SpikeFixture.render(`<main><div>${GENDER}</div><section></section></main>`)
+    const host = page.querySelector<Dropdown>("ui-dropdown")!
+    const controller = host.controller
+    parts(host).combobox.click()
+    await SpikeFixture.tick()
+    const { rows } = parts(host)
+    rows()[1]!.click()
+    await SpikeFixture.tick()
+    expect(host.value).toBe("female")
+    const button = host.shadowRoot!.querySelector("[role=combobox]")
+    page.querySelector("section")!.append(host)
+    await SpikeFixture.tick()
+    expect(host.controller).toBe(controller)
+    expect(host.shadowRoot!.querySelector("[role=combobox]")).toBe(button)
+    expect(parts(host).text.textContent).toBe("Female")
   })
 
   it("Escape closes only the top overlay", async () => {

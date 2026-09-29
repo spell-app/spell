@@ -1,14 +1,14 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { authorVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-author>`
  * An author:  `<span class="author">`, or `<a class="author">` with `href` (a profile link).
  * - Fomantic's comment `.author` and feed `.user`.
  ****************/
-export class UIAuthor extends ContentPart<typeof authorVocabulary> {
+export class UIAuthor extends PartElement<typeof authorVocabulary> {
   @proto static vocabulary = authorVocabulary
 
   protected tag(): string {

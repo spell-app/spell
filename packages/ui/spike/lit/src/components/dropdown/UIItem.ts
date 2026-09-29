@@ -1,10 +1,7 @@
 import { nothing } from "lit"
 
-import { Converters } from "$/vocabulary"
-import type { MenuOption } from "$/elements"
+import { Converters, type MenuOption, type ItemType, UIElement } from "../../core"
 import { itemVocabulary } from "$/components/dropdown/dropdown.vocabulary.en"
-import type { ItemType } from "$/components/components.types"
-import { UIElement } from "../../elements"
 
 /****************
  * ### `<ui-item>`

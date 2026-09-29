@@ -1,7 +1,7 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { valueVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-value>`
@@ -9,6 +9,6 @@ import { ContentPart } from "$spike/ContentPart"
  * - A statistic's value;  a search result's price.
  * - Everything else (owner context, markup, sheet) comes from `ContentPart`.
  ****************/
-export class UIValue extends ContentPart<typeof valueVocabulary> {
+export class UIValue extends PartElement<typeof valueVocabulary> {
   @proto static vocabulary = valueVocabulary
 }

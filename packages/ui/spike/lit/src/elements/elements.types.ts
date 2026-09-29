@@ -3,9 +3,11 @@
  * - Type-level mirror of `VocabularyProperties`:  a component's vocabulary (`as const`) becomes its typed
  *   property bag, so `UIButton` gets `primary: boolean`, `size: string | undefined` ... with no hand-written
  *   field list.
- * - Runtime-light:  types, plus the `RESERVED_PROPERTIES` list they mirror.
+ * - Runtime-light:  types, plus the `RESERVED_PROPERTIES` list they mirror and two failure names
+ *   (`ERROR_EVENT`, `ERRORED_STATE`).
  */
 
+import type { NativeFallbackHandle, NativeFallbackRoot } from "$/elements"
 import type { AttributeSpec, ComponentVocabulary } from "$/vocabulary"
 
 ////////////////
@@ -144,3 +146,28 @@ export type OwnerControllerOptions = {
 
 /** Element a `ContentPart` root renders:  `div` by default, `h1` ... `h6` for page headers. */
 export type PartBox = "div" | "span" | "time" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
+
+////////////////
+// ## Failure
+////////////////
+
+/**
+ * Event an element dispatches when its update fails, before showing its native fallback.
+ * - Cancelable, `bubbles`, `composed`, `detail: { error }`;  `preventDefault()` keeps the fallback out (the page
+ *   takes over).
+ * - NOTE: no vocabulary names it yet, so it's never localized;  same name as the Solid spike's.
+ */
+export const ERROR_EVENT = "ui-error"
+
+/** Custom state of a failed element (`:state(errored)`). */
+export const ERRORED_STATE = "errored"
+
+/** A per-family native fallback class (`ButtonFallback` ...), as `NativeFallback.render()` is called. */
+export type FallbackClass = {
+  render(
+    host: HTMLElement,
+    root: NativeFallbackRoot,
+    error?: unknown,
+    internals?: ElementInternals
+  ): NativeFallbackHandle
+}

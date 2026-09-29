@@ -97,7 +97,7 @@ describe("<ui-label> content", () => {
 
   it("renders no <img> for a bare image label (it styles a slotted one)", async () => {
     const element = await render(`<ui-label image><img src="${PIXEL}" alt="" />Joe</ui-label>`)
-    expect(root(element).className).toBe("ui image label")
+    expect(root(element).classList.contains("image")).toBe(true)
     expect(root(element).querySelector("img")).toBeNull()
   })
 

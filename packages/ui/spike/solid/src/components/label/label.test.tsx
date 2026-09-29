@@ -57,7 +57,8 @@ describe("<ui-label> classes", () => {
     ["fluid centered", "ui centered fluid label"],
     ["prompt", "ui prompt label"],
     ["active disabled inverted", "ui active disabled inverted label"],
-    ["image", "ui image label"]
+    // `image` is a string kind:  no grammar slot, so the element adds the class as an extra, after the noun
+    ["image", "ui label image"]
   ])("<ui-label %s>", async (attributes, classes) => {
     const { root } = await label(`<ui-label ${attributes}>Text</ui-label>`)
     expect(root.className).toBe(classes)
@@ -124,7 +125,7 @@ describe("<ui-label> content", () => {
 
   it("styles a bare `image` label's slotted <img>, without rendering one", async () => {
     const { root } = await label(`<ui-label image><img src="${IMAGE}" alt="">Joe</ui-label>`)
-    expect(root.className).toBe("ui image label")
+    expect(root.classList.contains("image")).toBe(true)
     expect(root.querySelector("img")).toBeNull()
   })
 })

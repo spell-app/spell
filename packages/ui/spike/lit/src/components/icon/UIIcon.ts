@@ -1,16 +1,17 @@
 import { html, type PropertyValues } from "lit"
 
-import { proto } from "$/util"
+import { proto, type IconStyle, IconRenderer, OwnerController, UIElement } from "../../core"
 import { iconVocabulary } from "$/components/icon/icon.vocabulary.en"
-import { IconRenderer, OwnerController, UIElement } from "../../elements"
+import { IconFallback } from "$/components/icon/icon.fallback"
 
 import iconCSS from "$/components/icon/icon.css?inline"
 
 /****************
  * ### `<ui-icon>`
  * A Font Awesome glyph:  `<span class="ui ... icon" part="icon"><svg>` (`IconRenderer`), host `display: contents`.
- * - `style` picks the set (`regular`, `brands`);  its property is `iconStyle`, since `style` is the host's
- *   `CSSStyleDeclaration` (see `VocabularyProperties.propertyName()`).
+ * - `variant` picks the set (`regular`, `brands`);  `outline` ~== `variant="regular"` (Fomantic's spelling).
+ *   Without an explicit `variant` attribute the set is inferred from the name (`Icons.resolve()`), so the
+ *   vocabulary's `solid` default never overrides a brand name or a trailing `outline` word.
  * - Accessible name on the HOST, through internals:  `label` => `role=img` + `aria-label`;  none =>
  *   `aria-hidden`, a decorative glyph.
  * - `:state(in-icons)` while its flat-tree parent is a `<ui-icons>` (an `OwnerController` for the `icon` part,
@@ -19,6 +20,7 @@ import iconCSS from "$/components/icon/icon.css?inline"
  ****************/
 export class UIIcon extends UIElement.for(iconVocabulary) {
   @proto static sheets = [[iconVocabulary.noun, iconCSS]] as const
+  @proto static Fallback = IconFallback
 
   /** svg templates */
   private readonly icons = new IconRenderer(this)
@@ -35,8 +37,15 @@ export class UIIcon extends UIElement.for(iconVocabulary) {
 
   protected override render() {
     return html`<span class=${this.classes()} part=${this.partName("icon")}
-      >${this.icons.template(this.name, this.iconStyle)}</span
+      >${this.icons.template(this.name, this.iconSet())}</span
     >`
+  }
+
+  /** Font Awesome set to force, or `undefined` to infer it from the name. */
+  private iconSet(): IconStyle | undefined {
+    if (this.outline) return "regular"
+    const attribute = this.localized?.names.attributes.get("variant") ?? "variant"
+    return this.hasAttribute(attribute) ? this.variant : undefined
   }
 
   /**

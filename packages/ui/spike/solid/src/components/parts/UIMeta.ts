@@ -1,7 +1,7 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { metaVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-meta>`
@@ -9,6 +9,6 @@ import { ContentPart } from "$spike/ContentPart"
  * - A date or a category;  Fomantic's comment `metadata`.
  * - Everything else (owner context, markup, sheet) comes from `ContentPart`.
  ****************/
-export class UIMeta extends ContentPart<typeof metaVocabulary> {
+export class UIMeta extends PartElement<typeof metaVocabulary> {
   @proto static vocabulary = metaVocabulary
 }
