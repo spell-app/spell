@@ -1,11 +1,9 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { IconGlyph, proto, UIElement } from "$spike/core"
 import { dividerVocabulary } from "$/components/divider/divider.vocabulary.en"
-
-import { IconGlyph } from "$spike/IconGlyph"
-import { UIElement } from "$spike/UIElement"
+import { DividerFallback } from "$/components/divider/divider.fallback"
 
 import dividerCSS from "$/components/divider/divider.css?inline"
 
@@ -15,13 +13,14 @@ import dividerCSS from "$/components/divider/divider.css?inline"
  * then the default slot for text.
  * - `role="separator"`, not `<hr>`:  a horizontal / vertical divider carries text, which `<hr>` can't hold;
  *   `aria-orientation="vertical"` for `vertical`;  a `hidden` divider is `role="none"` (spacing only).
- * - NOTE: the vocabulary's `hidden` attribute IS the global `hidden` attribute:  the UA and `divider.css`
- *   (`:host([hidden])`) hide the whole host, so a "hidden divider" renders nothing (see REPORT.md).  Its
- *   property is `dividerHidden` (`ElementDefinition.safeKey()`).
+ * - `hidden` is property `dividerHidden` (the vocabulary's `property`):  `hidden` is the host's own boolean.  The
+ *   ATTRIBUTE keeps its name;  `divider.css`'s `:host([hidden]) { display: contents }` overrides the UA's
+ *   `display: none`, so a hidden divider keeps its spacing.
  ****************/
 export class UIDivider extends UIElement<typeof dividerVocabulary> {
   @proto static vocabulary = dividerVocabulary
   @proto static styles = { divider: dividerCSS }
+  @proto static Fallback = DividerFallback
 
   /** Glyph of the `icon` shorthand. */
   readonly glyph = new IconGlyph(() => this.attrs.icon)

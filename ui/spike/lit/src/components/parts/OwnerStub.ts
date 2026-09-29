@@ -1,7 +1,5 @@
-import { PART_STATIC_CLASS_PREFIX } from "$/components/components.types"
+import { PART_STATIC_CLASS_PREFIX, type ComponentVocabulary, PartOwners } from "../../core"
 import { PART_VOCABULARIES } from "$/components/parts/parts.vocabulary.en"
-import type { ComponentVocabulary } from "$/vocabulary"
-import { PartOwners } from "../../elements"
 
 /**
  * Stand-in OWNERS for the demo and tests:  `<x-card>`, `<x-feed>`, `<x-statistic>` ... until the real card,

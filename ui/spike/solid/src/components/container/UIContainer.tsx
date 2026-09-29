@@ -1,9 +1,8 @@
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "$spike/core"
 import { containerVocabulary } from "$/components/container/container.vocabulary.en"
-
-import { UIElement } from "$spike/UIElement"
+import { ContainerFallback } from "$/components/container/container.fallback"
 
 import containerCSS from "$/components/container/container.css?inline"
 
@@ -15,6 +14,7 @@ import containerCSS from "$/components/container/container.css?inline"
 export class UIContainer extends UIElement<typeof containerVocabulary> {
   @proto static vocabulary = containerVocabulary
   @proto static styles = { container: containerCSS }
+  @proto static Fallback = ContainerFallback
 
   render(): JSX.Element {
     return (

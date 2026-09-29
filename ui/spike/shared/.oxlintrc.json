@@ -1,0 +1,6 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  // The root config ignores `spike/**`;  this one lints the shared tooling with the root's rules.
+  "extends": ["../../.oxlintrc.json"],
+  "ignorePatterns": ["vendor", "frameworks/solid/dist", ".yarn", "node_modules"]
+}

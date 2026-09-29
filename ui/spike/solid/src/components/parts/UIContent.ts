@@ -1,7 +1,7 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { contentVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-content>`
@@ -10,7 +10,7 @@ import { ContentPart } from "$spike/ContentPart"
  * - `scrolling`:  the root is a keyboard stop (`tabindex=0`), as every scrollable region must be.
  * - Everything else (owner context, markup, sheet) comes from `ContentPart`.
  ****************/
-export class UIContent extends ContentPart<typeof contentVocabulary> {
+export class UIContent extends PartElement<typeof contentVocabulary> {
   @proto static vocabulary = contentVocabulary
 
   protected tabIndex(): number | undefined {

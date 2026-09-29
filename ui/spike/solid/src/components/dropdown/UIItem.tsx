@@ -1,15 +1,7 @@
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "$spike/core"
 import { itemVocabulary } from "$/components/dropdown/dropdown.vocabulary.en"
-
-import { UIElement } from "$spike/UIElement"
-import { UIHost } from "$spike/UIHost"
-
-/** `<ui-item>`'s host:  nothing focusable inside, so no `delegatesFocus`. */
-class ItemHost extends UIHost {
-  static delegatesFocus = false
-}
 
 /****************
  * ### `<ui-item>`
@@ -20,7 +12,8 @@ class ItemHost extends UIHost {
  ****************/
 export class UIItem extends UIElement<typeof itemVocabulary> {
   @proto static vocabulary = itemVocabulary
-  @proto static Host = ItemHost
+  /** Nothing focusable inside. */
+  @proto static delegatesFocus = false
 
   render(): JSX.Element {
     return <slot />

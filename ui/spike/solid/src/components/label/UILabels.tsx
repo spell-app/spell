@@ -1,9 +1,7 @@
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "$spike/core"
 import { labelsVocabulary } from "$/components/label/label.vocabulary.en"
-
-import { UIElement } from "$spike/UIElement"
 
 import labelCSS from "$/components/label/label.css?inline"
 

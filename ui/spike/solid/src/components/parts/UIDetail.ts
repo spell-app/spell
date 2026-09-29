@@ -1,17 +1,22 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { detailVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-detail>`
  * A label's dimmer second value:  `<span class="detail">`, owned by `<ui-label>` (`:state(in-label)`).
  * - A tab on an image label:  `label.css` sets `--ui-label-layout: image`, which `parts.css` style-queries.
+ * - `href` renders `<a class="detail" href>` (a link detail, `label.css` styles `a.detail`).
  ****************/
-export class UIDetail extends ContentPart<typeof detailVocabulary> {
+export class UIDetail extends PartElement<typeof detailVocabulary> {
   @proto static vocabulary = detailVocabulary
 
   protected tag(): string {
-    return "span"
+    return this.attrs.href ? "a" : "span"
+  }
+
+  protected href(): string | undefined {
+    return this.attrs.href
   }
 }

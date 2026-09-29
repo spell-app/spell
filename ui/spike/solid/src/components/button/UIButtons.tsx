@@ -1,9 +1,7 @@
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "$spike/core"
 import { buttonsVocabulary } from "$/components/button/button.vocabulary.en"
-
-import { UIElement } from "$spike/UIElement"
 
 import buttonCSS from "$/components/button/button.css?inline"
 

@@ -1,9 +1,9 @@
 import { html } from "lit"
 import { ifDefined } from "lit/directives/if-defined.js"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "../../core"
 import { containerVocabulary } from "$/components/container/container.vocabulary.en"
-import { UIElement } from "../../elements"
+import { ContainerFallback } from "$/components/container/container.fallback"
 
 import containerCSS from "$/components/container/container.css?inline"
 
@@ -14,6 +14,7 @@ import containerCSS from "$/components/container/container.css?inline"
  ****************/
 export class UIContainer extends UIElement.for(containerVocabulary) {
   @proto static sheets = [[containerVocabulary.noun, containerCSS]] as const
+  @proto static Fallback = ContainerFallback
 
   protected override render() {
     return html`<div

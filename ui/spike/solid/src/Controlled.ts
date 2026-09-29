@@ -12,7 +12,10 @@ import type { UIHost } from "./UIHost"
  *   - otherwise the new value is written to the host PROPERTY (and reflects), so `el.value` is always current,
  *     like a native `<input>`
  * - Why watch the property instead of comparing values:  a host re-setting the SAME value it already had is
- *   still a decision.
+ *   still a decision.  The fork calls change callbacks on every write, equal or not.
+ * - "Set" ~== the converted value isn't `undefined`:  a boolean (`open`, `active`) is always the host's (its
+ *   default is the same `false` the internal value would be);  `el.value = undefined` hands a dropdown back to
+ *   its `selected` items.
  */
 export class Controlled<T> {
   /** Current value:  host's when set, else internal. */
@@ -21,21 +24,24 @@ export class Controlled<T> {
   /** The host. */
   private readonly host: UIHost
 
-  /** Property key on the host. */
-  private readonly key: string
+  /** Property on the host, e.g. `value` (`valor` on a translated tag). */
+  private readonly property: string
 
-  /** Raw host value (undefined => uncontrolled). */
-  private readonly raw: Accessor<unknown>
+  /** Converted host value (`undefined` => uncontrolled). */
+  private readonly value: Accessor<T | undefined>
 
   /** Host writes to `key` so far;  compared around `announce()`. */
   private writes = 0
 
-  constructor({ host, key, raw, value, initial }: ControlledProps<T>) {
+  constructor({ host, key, property, value, initial }: ControlledProps<T>) {
     this.host = host
-    this.key = key
-    this.raw = raw
+    this.property = property
+    this.value = value
     const [internal] = createSignal<T>(initial as Exclude<T, Function>)
-    this.get = () => (raw() === undefined ? internal() : value())
+    this.get = () => {
+      const current = value()
+      return current === undefined ? internal() : current
+    }
     host.addPropertyChangedCallback((changed: string) => {
       if (changed === key) this.writes++
     })
@@ -43,7 +49,7 @@ export class Controlled<T> {
 
   /** Is the host controlling it right now? */
   get isControlled(): boolean {
-    return untrack(this.raw) !== undefined
+    return untrack(this.value) !== undefined
   }
 
   /**
@@ -62,19 +68,19 @@ export class Controlled<T> {
    * - `undefined` removes the host's value, so the internal starting value shows again.
    */
   set(next: T | undefined) {
-    ;(this.host as unknown as Record<string, unknown>)[this.key] = next
+    ;(this.host as unknown as Record<string, unknown>)[this.property] = next
   }
 }
 
 /** Constructor props for `Controlled`. */
 export type ControlledProps<T> = {
   host: UIHost
-  /** Property key on the host. */
+  /** Definition key the fork's change callbacks name (camelCase canonical). */
   key: string
-  /** Raw host value, `undefined` when not set. */
-  raw: Accessor<unknown>
-  /** Converted host value. */
-  value: Accessor<T>
+  /** Property on the host. */
+  property: string
+  /** Converted host value, `undefined` when not set. */
+  value: Accessor<T | undefined>
   /** Internal starting value. */
   initial: T
 }

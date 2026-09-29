@@ -1,24 +1,16 @@
 /**
- * Entry for the whole spike:  every component, registered (side effect), plus the element core.
- * - NOTE: the core's classes are exported by name (`UIElement`, `ElementDefinition` ...), no namespace:
- *   the spike is deleted once Milestone 0 decides.
+ * Entry for the whole spike (`index` lib entry):  every component, registered (side effect), plus both shared
+ * entries.
+ * - NOTE: the core's classes are exported by name (`UIElement`, `ElementDefinition` ...), no namespace:  the spike
+ *   is deleted once Milestone 0 decides.
  * - NOTE: `StubOwner` / `SpikeFixture` are left out:  test and demo scaffolding.
+ * - SIDE EFFECT:  `./identity` sets the Solid 2 host page's identity hook.
  */
 
-export * from "./spike.types"
+import "./identity"
 
-export * from "./Cell"
-export * from "./ElementDefinition"
-export * from "./UIHost"
-export * from "./FormHost"
-export * from "./PartContext"
-export * from "./UIElement"
-export * from "./FormElement"
-export * from "./ContentPart"
-export * from "./Controlled"
-export * from "./SlotContent"
-export * from "./HostAttribute"
-export * from "./IconGlyph"
+export * from "./core"
+export * from "./forms"
 
 export * from "$spike/components/button"
 export * from "$spike/components/dropdown"

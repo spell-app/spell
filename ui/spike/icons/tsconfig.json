@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "vite/client"],
+    "paths": {
+      "$/*": ["../../src/*"]
+    }
+  },
+  "include": ["src", "*.ts"],
+  // the root config excludes `spike/`;  an inherited `exclude` would drop every file here
+  "exclude": ["node_modules", "dist", ".tmp"]
+}

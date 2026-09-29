@@ -1,0 +1,26 @@
+{
+  "size": {
+    "fork": {
+      "name": "fork",
+      "min": 9132,
+      "gzip": 3671
+    },
+    "original": {
+      "name": "original",
+      "min": 5142,
+      "gzip": 2128
+    }
+  },
+  "loc": {
+    "fork": {
+      "files": 15,
+      "all": 1319,
+      "code": 693
+    },
+    "original": {
+      "files": 2,
+      "all": 371,
+      "code": 349
+    }
+  }
+}

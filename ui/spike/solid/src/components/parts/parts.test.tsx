@@ -131,6 +131,9 @@ describe("parts standalone", () => {
     expect(root(date).getAttribute("datetime")).toBe("2026-09-29")
     const detail = await SpikeFixture.render(`<ui-detail>2</ui-detail>`)
     expect(root(detail).localName).toBe("span")
+    const linkDetail = await SpikeFixture.render(`<ui-detail href="#all">214</ui-detail>`)
+    expect(root(linkDetail).localName).toBe("a")
+    expect(root(linkDetail).getAttribute("href")).toBe("#all")
     const avatar = await SpikeFixture.render(`<ui-avatar src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></ui-avatar>`)
     const image = root(avatar).querySelector("img")!
     expect(root(avatar).localName).toBe("span")
@@ -256,6 +259,20 @@ describe("owner context", () => {
     await SpikeFixture.settle(holder)
     expect(ownerStates(header)).toEqual([])
     expect(root(header).className).toBe("ui header")
+  })
+
+  it("re-resolves after a real detach:  keepAlive keeps the controller, `onConnect` refreshes its owner", async () => {
+    const holder = await SpikeFixture.render(`<div><ui-header>H</ui-header><stub-card></stub-card></div>`)
+    const header = holder.querySelector<UIHost>("ui-header")!
+    const controller = header.controller
+    expect(ownerStates(header)).toEqual([])
+    header.remove()
+    await SpikeFixture.tick()
+    holder.querySelector("stub-card")!.append(header)
+    await SpikeFixture.settle(holder)
+    expect(header.controller).toBe(controller)
+    expect(ownerStates(header)).toEqual(["in-card"])
+    expect(root(header).className).toBe("header")
   })
 
   it("makes a <ui-label> in a statistic its `.label` part, with `parts.css`", async () => {

@@ -1,8 +1,7 @@
 import { html } from "lit"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "../../core"
 import { buttonVocabulary, orVocabulary } from "$/components/button/button.vocabulary.en"
-import { UIElement } from "../../elements"
 
 import buttonCSS from "$/components/button/button.css?inline"
 

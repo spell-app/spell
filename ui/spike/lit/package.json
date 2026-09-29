@@ -2,28 +2,51 @@
   "name": "@spell/ui-spike-lit",
   "version": "0.0.0",
   "private": true,
-  "description": "Milestone 0 spike:  ui-button + ui-dropdown on Lit 3.3 (standard decorators)",
+  "description": "Spike:  @spell/ui elements on Lit 3.3 (standard decorators), lit as a shared peer dependency",
   "type": "module",
   "sideEffects": [
     "./src/index.ts",
     "./src/components/*/index.ts",
+    "./dist/index.js",
+    "./dist/button.js",
+    "./dist/dropdown.js",
+    "./dist/icon.js",
+    "./dist/label.js",
+    "./dist/parts.js",
+    "./dist/divider.js",
+    "./dist/segment.js",
+    "./dist/container.js",
     "./demo/**",
     "**/*.css"
   ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./index": "./dist/index.js",
+    "./core": "./dist/core.js",
+    "./forms": "./dist/forms.js",
+    "./button": "./dist/button.js",
+    "./dropdown": "./dist/dropdown.js",
+    "./icon": "./dist/icon.js",
+    "./label": "./dist/label.js",
+    "./parts": "./dist/parts.js",
+    "./divider": "./dist/divider.js",
+    "./segment": "./dist/segment.js",
+    "./container": "./dist/container.js"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run",
     "ts": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
     "ssr": "tsx ssr.ts",
-    "smoke": "tsx smoke.ts",
-    "measure": "tsx measure.ts",
+    "vendor": "tsx spike.ts vendor",
+    "measure": "tsx spike.ts measure",
+    "smoke": "vite build --logLevel warn && tsx spike.ts smoke",
+    "serve": "tsx spike.ts serve",
+    "report": "tsx spike.ts report",
     "lint": "../../node_modules/.bin/oxlint --report-unused-disable-directives --max-warnings 0",
     "format": "../../node_modules/.bin/oxfmt .",
     "format:check": "../../node_modules/.bin/oxfmt --check ."
-  },
-  "dependencies": {
-    "lit": "3.3.3"
   },
   "devDependencies": {
     "@lit-labs/ssr": "4.1.0",
@@ -31,11 +54,15 @@
     "@vitest/browser-playwright": "5.0.2",
     "axe-core": "4.13.0",
     "esbuild": "0.28.2",
+    "lit": "3.3.3",
     "playwright": "1.63.0",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.1",
     "vitest": "5.0.2"
+  },
+  "peerDependencies": {
+    "lit": "^3.3.3"
   },
   "packageManager": "yarn@4.18.0"
 }
