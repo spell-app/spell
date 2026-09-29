@@ -1,4 +1,16 @@
 import { proto } from "$/util"
+import { Vocabulary } from "$/vocabulary"
+import {
+  animationsCSS,
+  colorsCSS,
+  layersCSS,
+  nativeCSS,
+  resetCSS,
+  sizesCSS,
+  tokensCSS,
+  typographyCSS,
+  utilitiesCSS
+} from "$/styles"
 
 import { RUNTIME_KEY, RUNTIME_VERSION, type RuntimeGlobal, type ToastHandle, type ToastOptions } from "./runtime.types"
 import { Api } from "./Api"
@@ -59,12 +71,39 @@ export class UIRuntime {
   readonly modals = new Modals()
   /** `fetch` with URL templates and throttling */
   readonly api = new Api()
+  /** canonical + localized component names (the translation hook) */
+  readonly vocabulary = new Vocabulary()
 
   /** Resolves once every service is constructed and the runtime is published on `globalThis`. */
   readonly ready: Promise<void>
 
   constructor() {
+    this.registerFoundation()
     this.ready = Promise.resolve()
+  }
+
+  /**
+   * Register the CSS foundation with `styles`, so every shadow root adopts it and the page gets the light-side sheets.
+   * - Foundation sheets (every tree scope, in cascade order):  layers, reset, tokens, colors, sizes, animations, utilities.
+   * - Page-only sheets:  typography and native (they style light-DOM markup;  shadow roots don't need them).
+   * - Here rather than in `$/styles`:  the runtime chunk is loaded exactly once per page, which is also how often
+   *   the foundation must be registered;  `$/styles` stays plain data.
+   */
+  private registerFoundation() {
+    const foundation: Array<[string, string]> = [
+      ["layers", layersCSS],
+      ["reset", resetCSS],
+      ["tokens", tokensCSS],
+      ["colors", colorsCSS],
+      ["sizes", sizesCSS],
+      ["animations", animationsCSS],
+      ["utilities", utilitiesCSS]
+    ]
+    for (const [name, css] of foundation) this.styles.register(name, css, { page: true })
+    this.styles.register("typography", typographyCSS, { page: true })
+    this.styles.register("native", nativeCSS, { page: true })
+    this.styles.setFoundation(foundation.map(([name]) => name).filter((name) => name !== "utilities"))
+    this.styles.setUtilities(["utilities"])
   }
 
   /**
