@@ -27,6 +27,8 @@ export function setProp(element: SolidElement, prop: NormalizedProp, value: unkn
   const old = state.values[prop.key]
   if (source === "property") value = prop.fromProperty(value)
   state.values[prop.key] = value
+  // dev only:  a hot redefinition re-converts attribute values, keeps property writes (`hot.ts`)
+  if (import.meta.hot) (state.sources ??= {})[prop.key] = source
   if (source === "property" && prop.reflect) reflect(element, prop, value)
   for (const callback of state.propertyChangedCallbacks.slice()) callback(prop.key, value, old, source)
 }

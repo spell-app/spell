@@ -77,7 +77,7 @@ comparison and the recommendation are in `docs/spike-lit-vs-solid.md`.  Every ta
 From `spike/solid/`:
 - `yarn test` -- the `ssr` project (node), then `browser` (chromium);  the dropdown perf test writes
   `perf-results.json`
-- `yarn tsc --noEmit` -- `src`, `demo` and the node-side `*.ts`
+- `yarn tsc --noEmit` -- `src`, `demo`, `test` and the node-side `*.ts`
 - `yarn build` -- `dist/`:  `core.js`, `forms.js`, one entry per family, `index.js`, lazy runtime + icon chunks
 - `yarn vendor` -- `vendor/`:  one ES module per peer specifier + `vendor/importmap.json` (`PeerVendor`)
 - `yarn measure` -- `measure-results.json` (`SpikeMeasure`)
@@ -85,7 +85,9 @@ From `spike/solid/`:
   (`SmokeRunner`).  Needs network for esm.sh (React, Solid 1.9) and unpkg (Vue) only.
 - `yarn serve` -- the same pages for a person (prints URLs), including `demo/fallback.html`
 - `yarn report` -- `loc-results.json` (`LocCount`), then regenerates this file's tables (`ReportTables`)
-- `yarn lint`, `yarn format`, `yarn format:check`;  `yarn dev` serves `demo/` (examples, perf, translate);
+- `yarn test:hmr` -- hot module replacement end to end:  dev server + headless chromium + real file edits
+  (Ergonomics)
+- `yarn lint`, `yarn format`, `yarn format:check`;  `yarn dev` serves `demo/` (examples, perf, translate, hmr);
   `yarn screenshots` writes one PNG per example pair
 
 All of `spike.ts`'s commands delegate to `spike/shared/` (see its `README.md`);  `spike.config.ts` is the Solid
@@ -148,9 +150,9 @@ All of `spike.ts`'s commands delegate to `spike/shared/` (see its `README.md`); 
 <!-- generated:bundle-tiers -->
 | Tier | min kB | min+gz kB | Loaded |
 | --- | --: | --: | --- |
-| library (as used:  the bindings `dist/` imports) | 73.73 | 26.65 | eager |
-| library (full vendored:  every export of the peer set) | 170.84 | 59.61 | comparison |
-| core (element core + foundation JS) | 46.60 | 14.63 | eager |
+| library (as used:  the bindings `dist/` imports) | 73.73 | 26.66 | eager |
+| library (full vendored:  every export of the peer set) | 171.57 | 59.87 | comparison |
+| core (element core + foundation JS) | 46.68 | 14.63 | eager |
 | forms (form base, validation, menu options;  imported by `dropdown`) | 17.73 | 6.36 | eager |
 | own, all 8 families | 290.65 | 71.11 | eager |
 | runtime (`UIRuntime` + foundation CSS) | 160.83 | 27.02 | lazy |
@@ -162,14 +164,14 @@ All of `spike.ts`'s commands delegate to `spike/shared/` (see its `README.md`); 
 <!-- generated:bundle-families -->
 | Family | own min+gz kB | classes | css | vocabulary | fallback | imports | page with only it | standalone (library bundled) |
 | --- | --: | --: | --: | --: | --: | --- | --: | --: |
-| `button` | **11.79** | 3.92 | 3.99 | 2.14 | 1.93 | core | 53.07 | 41.36 |
-| `dropdown` | **17.08** | 7.57 | 4.69 | 2.66 | 2.49 | core + forms | 64.72 | 59.68 |
-| `icon` | **5.72** | 2.20 | 1.83 | 1.25 | 1.58 | core | 47.00 | 36.07 |
-| `label` | **8.06** | 2.87 | 3.14 | 1.57 | 1.56 | core | 49.34 | 49.24 |
-| `parts` | **14.31** | 5.46 | 4.97 | 2.14 | 1.64 | core | 55.59 | 49.46 |
-| `divider` | **3.77** | 1.67 | 0.91 | 0.72 | 1.48 | core | 45.05 | 34.13 |
-| `segment` | **7.19** | 2.27 | 3.15 | 1.41 | 1.45 | core | 48.47 | 36.19 |
-| `container` | **3.20** | 1.45 | 0.77 | 0.56 | 1.40 | core | 44.48 | 31.96 |
+| `button` | **11.79** | 3.92 | 3.99 | 2.14 | 1.93 | core | 53.08 | 41.38 |
+| `dropdown` | **17.08** | 7.57 | 4.69 | 2.66 | 2.49 | core + forms | 64.73 | 59.70 |
+| `icon` | **5.72** | 2.20 | 1.83 | 1.25 | 1.58 | core | 47.01 | 36.08 |
+| `label` | **8.06** | 2.87 | 3.14 | 1.57 | 1.56 | core | 49.35 | 49.26 |
+| `parts` | **14.31** | 5.46 | 4.97 | 2.14 | 1.64 | core | 55.60 | 49.48 |
+| `divider` | **3.77** | 1.67 | 0.91 | 0.72 | 1.48 | core | 45.06 | 34.15 |
+| `segment` | **7.19** | 2.27 | 3.15 | 1.41 | 1.45 | core | 48.48 | 36.21 |
+| `container` | **3.20** | 1.45 | 0.77 | 0.56 | 1.40 | core | 44.49 | 31.97 |
 <!-- /generated:bundle-families -->
 
 ### Scenarios
@@ -177,9 +179,9 @@ All of `spike.ts`'s commands delegate to `spike/shared/` (see its `README.md`); 
 <!-- generated:bundle-scenarios -->
 | Scenario | Adds up | shared runtime min+gz kB | standalone builds |
 | --- | --- | --: | --: |
-| page with one button | library + core + own:button | **53.07** | 41.36 |
-| all families | library + core + forms + own (8 families) | **118.75** | 114.26 |
-| app already ships the library | core + forms + own (8 families) | **92.09** | -- |
+| page with one button | library + core + own:button | **53.08** | 41.38 |
+| all families | library + core + forms + own (8 families) | **118.76** | 114.27 |
+| app already ships the library | core + forms + own (8 families) | **92.10** | -- |
 <!-- /generated:bundle-scenarios -->
 
 ### Checks
@@ -221,10 +223,10 @@ All of `spike.ts`'s commands delegate to `spike/shared/` (see its `README.md`); 
 <!-- generated:loc -->
 | Group | Files | Lines | Code lines |
 | --- | --: | --: | --: |
-| element core | 16 | 1592 | 845 |
+| element core | 17 | 1725 | 920 |
 | components | 36 | 2185 | 1435 |
 | tests | 16 | 2100 | 1765 |
-| demo & tooling | 58 | 3260 | 2847 |
+| demo & tooling | 60 | 3358 | 2921 |
 <!-- /generated:loc -->
 
 ### Per file
@@ -239,10 +241,11 @@ All of `spike.ts`'s commands delegate to `spike/shared/` (see its `README.md`); 
 | `FormElement.ts` | 119 | 62 |
 | `FormHost.ts` | 46 | 24 |
 | `HostAttribute.ts` | 25 | 15 |
+| `HotDefinitions.ts` | 125 | 74 |
 | `IconGlyph.ts` | 49 | 28 |
 | `PartContext.ts` | 174 | 95 |
 | `SlotContent.ts` | 46 | 29 |
-| `UIElement.tsx` | 453 | 259 |
+| `UIElement.tsx` | 461 | 260 |
 | `UIHost.ts` | 74 | 30 |
 | `core.ts` | 43 | 21 |
 | `forms.ts` | 15 | 4 |
@@ -398,6 +401,63 @@ file (`spike/solid-element/UPSTREAM.md`).
   files import `./core` instead of their peers -- both to steer Rolldown's chunk assignment (Bundle).
 - `display: contents` hosts drop author box styles;  the examples size through `::part()` instead.
 
+### Hot module replacement
+
+Edit a component in `yarn dev` and every live instance updates in place:  same host objects, host attributes
+and properties kept (the dropdown's `options` and controlled `value` included), no page reload.  Open
+`demo/hmr.html` and edit `UIButton.tsx`, `button.css` or `button.vocabulary.en.ts`.
+
+- **How:**
+  - `@spell/solid-element/vite` (the fork's plugin, `solidElementHot()` in `vite.config.ts`, `apply: "serve"`)
+    appends `import.meta.hot.accept(() => hotUpdate(import.meta.hot))` to each component barrel
+    (`src/components/<name>/index.ts`, the modules that call `define()`).  An edit to a component class, its
+    vocabulary or fallback climbs to its barrel, which Vite re-runs with the fresh modules.
+  - `define()` is idempotent per tag, so the barrel's `UIButton.define()` would return the OLD class.
+    `HotDefinitions` (dev only, the plugin's `setup` import) wraps it:  a DIFFERENT class of the SAME name
+    defining a known tag is a new version, and takes over every tag the old one had -- `<ie-boton>` from the
+    translation hook included -- through `UIElement.defineTag()`, which calls the fork's `customElement()`
+    unconditionally.
+  - The fork swaps each class's component, props (accessors, converters) and options in place, migrates each
+    instance's values (property writes kept, attribute values re-converted, new props defaulted), then
+    `hotUpdate()` disposes and re-renders every live instance (a per-class `WeakRef` registry, dev only).
+  - CSS:  `?inline` component sheets self-accept;  `HotDefinitions.updateStyle()` re-registers the sheet by
+    name (`button.css` => `button`) and `Styles.register()` replaces its rules in every adopted shadow root.
+    Nothing re-renders.
+  - A changed vocabulary also refreshes its English texts in `UI.i18n` (where no translation replaced them)
+    and swaps the registration in `UI.vocabulary`.
+- **Limits:**
+  - Component-internal state resets:  a search query, the highlighted row, an open menu, an uncontrolled
+    toggle's `active`.  Host state doesn't.
+  - Anything the platform reads once can't change:  observed attributes (a new or removed vocabulary attribute),
+    `formAssociated`, the host base class (`FormHost`), shadow root options (`delegatesFocus`).  The page reloads
+    with `<ui-button>: observed attributes changed (+size), full reload`.
+  - Shared code (`core`, `forms`, `UIElement`, the runtime, `HotDefinitions`) reaches several barrels:  the plugin
+    reloads the page instead of letting Vite re-run every barrel against a fresh `UIElement` their live instances
+    don't extend.  A module reaching ONE barrel (a vocabulary, a fallback, `SlottedItems`) stays hot.
+  - A class renamed in the edit, or a vocabulary whose tag changed, defines as NEW;  old instances keep the old.
+  - `UI.vocabulary.localized` (runtime-translated names) keeps the old vocabulary until a reload;  the elements
+    don't read it.
+  - `@solidjs/vite-plugin`'s refresh transform finds no components in class-based modules (checked:  no
+    `import.meta.hot` in any transformed `src/**/*.tsx`), so it neither conflicts nor helps;  it stays on.
+- **Test:**  `yarn test:hmr` (`test/hmr.e2e.ts`) starts the dev server, opens `demo/hmr.html` in headless chromium
+  and edits the real files (restored after each scenario, then checked against their original text and
+  `git diff --quiet`).  8 / 8 pass, ~4 s:
+  1. `UIButton.tsx`:  every `<ui-button>` and `<ie-boton>` re-renders with the new markup;  same hosts,
+     `primary` / `color` / `size` (set as a PROPERTY) kept;  segment and dropdown shadow nodes untouched
+  2. `UIDropdown.tsx`:  re-rendered, `options` (property) and `value` (`fr`, shows "France") kept
+  3. `button.css`:  the new rule applies in every shadow root;  same inner `<button>` node, same controller
+  4. `button.vocabulary.en.ts`, the `or` text:  hot, `<ui-or>` shows the new text
+  5. `render()` throws:  the native fallback and `:state(errored)`, the error logged, the segment still reacts;
+     restoring the file recovers the same hosts
+  6. a syntax error:  Vite's overlay, old code keeps running;  the fix re-renders
+  7. a new vocabulary attribute:  the message above, then a full reload
+  8. `UIElement.tsx`:  full reload
+- **Cost:**  dev only.  The plugin appends ~180-250 bytes to each barrel and style module, plus `HotDefinitions`
+  (5.8 kB of commented source) and the fork's registry (one `WeakRef` per element);  the fork's HMR paths sit behind `import.meta.hot`, which a build replaces with `undefined`.  `dist/`:
+  byte-identical except `core.js`, where `define()` split into `define()` + `defineTag()` (+76 B min, +6 B gzip:
+  the one production change, so HMR can re-define without duplicating `define()`'s body).  Library tier:  same
+  min size, +4 B gzip (module order in the fork's `dist/`).
+
 ## Performance
 
 ### Method
@@ -415,7 +475,7 @@ smoke perf page (`dist/` + vendored production Solid, `demo/smoke/perf-adapter.j
 <!-- generated:perf -->
 | Where | Build | Open: update / + layout / + frame ms | Keystroke update min / avg / max ms | + layout | + frame |
 | --- | --- | --: | --: | --: | --: |
-| vitest browser mode | dev (Vite dev server) | 17.7 / 17.7 / 19.0 | 0.3 / **1.7** / 4.7 | 0.8 / **3.6** / 9.2 | 13.5 / **15.8** / 16.7 |
+| vitest browser mode | dev (Vite dev server) | 17.6 / 17.6 / 19.1 | 0.4 / **1.8** / 4.5 | 1.0 / **3.6** / 9.9 | 13.8 / **15.8** / 16.6 |
 | smoke perf page | production (`dist/` + vendored peers) | 19.4 / 19.4 / 21.0 | 0.1 / **1.3** / 4.0 | 0.5 / **3.0** / 10.4 | 11.7 / **15.5** / 17.3 |
 <!-- /generated:perf -->
 

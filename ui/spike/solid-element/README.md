@@ -8,7 +8,9 @@ definition.  Each fix lives in its own module with its own test file, so each ca
 see [`UPSTREAM.md`](./UPSTREAM.md).
 
 - Peer dependencies:  `solid-js` and `@solidjs/web`, `2.0.0-rc.11` (pinned:  the RCs still churn).
-- Size:  3.67 kB min + gzip 9, vs 2.13 kB for `@solidjs/element` + `component-register` (`yarn measure`).
+- Size:  4.00 kB min + gzip 9 with every export, vs 2.13 kB for `@solidjs/element` + `component-register`
+  (`yarn measure`).  The HMR helpers are ~0.3 kB of that, and only when imported;  the dev-only code behind
+  `import.meta.hot` is 0 bytes in a build.
 
 ```tsx
 import { customElement, onFormReset } from "@spell/solid-element"
@@ -32,7 +34,7 @@ customElement(
 
 | Export | What |
 |---|---|
-| `customElement(tag, props?, Component, options?)` | Define `tag` rendering the Solid `Component`;  returns the class.  Re-defining a tag this package owns swaps the component (hot reload). |
+| `customElement(tag, props?, Component, options?)` | Define `tag` rendering the Solid `Component`;  returns the class.  Re-defining a tag this package owns swaps the component (hot reload;  in Vite dev also props and options, see [HMR](#hot-module-replacement)). |
 | `register(tag, props?, options?)(Component)` | `component-register`'s HOC:  defines the element;  `Component` gets `(values, { element })` on first connect. |
 | `withSolid(Component)` | The mixin that renders Solid into `element.renderRoot`.  Also runs on `component-register`'s elements. |
 | `compose(...mixins)` | Right-to-left composition:  `compose(register(tag, props), withSolid)(Component)`. |
@@ -40,7 +42,9 @@ customElement(
 | `getCurrentElement()` | The element being set up;  also works later, anywhere under its component (it's provided as context). |
 | `onConnect(fn)` / `onDisconnect(fn)` | Every connect (the first included, right after setup) / every disconnect, synchronously. |
 | `onFormAssociated(fn)` / `onFormDisabled(fn)` / `onFormReset(fn)` / `onFormStateRestore(fn)` | The platform's form callbacks.  `formAssociated` / `formDisabled` replay the last reported state to late registrations. |
-| `hot(module, tag)` / `reloadElement(el)` | `component-register`'s HMR (webpack / Parcel style);  with Vite, call `reloadElement` from `import.meta.hot`. |
+| `hotUpdate(import.meta.hot)` | Vite HMR:  re-render the live instances of every class re-defined since the last call, or invalidate (full reload) when a re-definition was refused.  `@spell/solid-element/vite` calls it for you. |
+| `reloadElement(el)` / `reloadElements(ClassOrTag)` / `liveElements(ClassOrTag)` | Re-render one / every live instance with the class's current component, keeping host attributes and properties;  list them. |
+| `hot(module, tag)` | `component-register`'s HMR (webpack / Parcel style). |
 | `toAttribute(name)` | `someProp` => `some-prop`, `a_b_c` => `a-b-c`. |
 | `createProps(values)` | The reactive props object `withSolid` builds (one signal per key). |
 
@@ -178,10 +182,43 @@ What it can't (Solid 2 itself), with the patterns that work:
 - **Hooks writing signals** (`onConnect` / `onDisconnect`) run inside `connectedCallback`, which may itself run
   inside a Solid render (an app inserting the element);  defer writes with `queueMicrotask` if that matters.
 
+## Hot module replacement
+
+Edit a component in Vite dev and every live instance re-renders with the new code, in place:  same element
+objects, same attributes and property values (rich data included), no page reload.
+
+```ts
+// vite.config.ts
+import solid from "@solidjs/vite-plugin"
+import { solidElementHot } from "@spell/solid-element/vite"
+
+export default { plugins: [solid(), solidElementHot()] }
+```
+
+- The plugin (`apply: "serve"`, builds untouched) appends `import.meta.hot.accept(() => hotUpdate(import.meta.hot))`
+  to every module that calls `customElement(` (`detect`).  Vite re-runs the module;  `customElement()` for a tag
+  this package defined swaps the class's component, props (accessors, converters) and options IN PLACE;
+  `hotUpdate()` then re-renders each live instance (`reloadElement()`).
+- What survives:  the element, its attributes, its property values (a value last written as a property is kept;
+  one written by its attribute is converted again with the new converter;  a new prop gets its default), its
+  shadow root and adopted sheets.  What doesn't:  state inside the component (signals, a search query).
+- Refused, with a full reload (`<tag>: observed attributes changed (+size), full reload`):  anything the platform
+  reads once -- observed attributes, `formAssociated`, the base class, `internals`, shadow root options.
+- A render that throws shows the `fallback` and `:state(errored)`;  the next good edit clears both.
+- Shared code (a changed module reaching more than one element module) reloads the page:  re-running every
+  element module against a fresh copy of a base class their live instances don't extend can't work.
+- `styles: { include, handler, call }`:  style modules (e.g. `?inline` CSS) self-accept and hand their new text to
+  your handler instead of re-rendering anything.  `setup`:  a module every element module imports first, for a
+  framework whose own `define()` needs an HMR hook (`spike/solid`'s `HotDefinitions`).
+- Live instances are tracked (`WeakRef`s per class) only while `import.meta.hot` exists;  without it (a build,
+  a prebundled copy) `liveElements()` walks `document` and open shadow roots.
+- `@solidjs/vite-plugin`'s refresh transform only wraps exported function components;  both can coexist.
+
 ## Development
 
-`yarn tsc`, `yarn test` (Vitest browser mode, chromium), `yarn build` (`dist/index.js`, peers external),
-`yarn lint`, `yarn format:check`, `yarn measure` (writes `measure-results.json`).
+`yarn tsc`, `yarn test` (Vitest browser mode, chromium), `yarn build` (`dist/index.js`, peers external;  then
+`dist/vite.js`, the plugin, from `vite.node.config.ts`), `yarn lint`, `yarn format:check`, `yarn measure` (writes
+`measure-results.json`).
 
 Each fix's test file reproduces the original bug against `@solidjs/element` rc.11 + `component-register` 0.8.8
 (dev dependencies, pinned) with `reproduce()`:  one observation, the original must produce the exact BUGGY
@@ -195,4 +232,7 @@ against both.
 - The consumer MUST `resolve.dedupe: ["solid-js", "@solidjs/web"]`:  the linked package resolves its own
   `node_modules` otherwise, and two Solid copies can't share owners.
 - For a library build, mark `@spell/solid-element` external alongside `solid-js` / `@solidjs/*`, or bundle it
-  (it's 3.7 kB).
+  (it's 4 kB).
+- `@spell/solid-element/vite` resolves to `dist/vite.js`:  run `yarn build` here once before `yarn dev` there.
+  Vite loads a `vite.config.ts` with every bare import external, so Node imports the plugin itself (and Node
+  22.17 can't load `.ts`).
