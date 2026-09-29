@@ -1,0 +1,51 @@
+import { describe, expect, it } from "vitest"
+import { renderToString } from "@solidjs/web"
+import { writeFile, mkdir } from "node:fs/promises"
+
+import { foundationCSS } from "$/styles"
+import { buttonVocabulary } from "$/components/button/button.vocabulary.en"
+
+import { ElementDefinition } from "$spike/ElementDefinition"
+import type { UIHost } from "$spike/UIHost"
+import { UIButton } from "$spike/components/button/UIButton"
+
+import buttonCSS from "$/components/button/button.css?inline"
+
+/**
+ * SSR probe:  can `<ui-button primary>Save</ui-button>` be rendered to a Declarative Shadow DOM string?
+ * - `@solidjs/element` / `component-register` have NO server story (they need a live `HTMLElement`), so this
+ *   drives the CONTROLLER directly under `@solidjs/web`'s server `renderToString`, with a stub host standing in
+ *   for the element (no internals, no observers), then wraps the result in `<template shadowrootmode>`.
+ * - SIDE EFFECT:  writes the string to `.cache/ssr-button.html` for `REPORT.md` and the browser check.
+ */
+describe("SSR / Declarative Shadow DOM", () => {
+  it("renders <ui-button primary>Save</ui-button> to a DSD string", async () => {
+    const definition = new ElementDefinition(buttonVocabulary)
+    const props: Record<string, unknown> = { primary: "" }
+    const host = stubHost()
+    const html = renderToString(() => new UIButton(host, definition, props).mount())
+    const css = [...foundationCSS, buttonCSS].join("\n")
+    const dsd =
+      `<ui-button primary><template shadowrootmode="open" shadowrootdelegatesfocus>` +
+      `<style>${css}</style>${html}</template>Save</ui-button>`
+    await mkdir(".cache", { recursive: true })
+    await writeFile(".cache/ssr-button.html", dsd)
+    expect(html).toContain('class="ui primary button"')
+    expect(html).toContain('part="button"')
+    expect(html).toContain("<slot")
+  })
+})
+
+/** The least of `UIHost` the controller touches while rendering on the server. */
+function stubHost(): UIHost {
+  return {
+    childNodes: [],
+    shadowRoot: null,
+    getAttribute: () => null,
+    addPropertyChangedCallback() {},
+    addReleaseCallback() {},
+    setState() {},
+    markReady() {},
+    internals: {}
+  } as unknown as UIHost
+}
