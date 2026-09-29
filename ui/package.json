@@ -40,6 +40,9 @@
     "test:all": "UI_TEST_ALL=1 vitest run",
     "test:visual": "vitest run visual.test --passWithNoTests",
     "test:browsers": "playwright install chromium firefox webkit",
+    "/////// GENERATED": "",
+    "gen:styles": "tsc -p scripts && tsx scripts/gen-styles.ts",
+    "gen:icons": "tsc -p scripts && tsx scripts/gen-icons.ts",
     "/////// MANIFEST": "",
     "manifest": "custom-elements-manifest analyze --globs 'src/**/*.ts' --exclude 'src/**/*.test.ts'"
   },
@@ -60,6 +63,7 @@
     "oxlint": "^1.86.0",
     "oxlint-tsgolint": "^7.0.2003",
     "playwright": "^1.63.0",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vite-plugin-dts": "^5.1.1",

@@ -6,6 +6,17 @@ import { standardDecorators } from "./vite.decorators.ts"
 
 /** Absolute path of `src/`, target of the `$` import alias. */
 const SRC = fileURLToPath(new URL("./src", import.meta.url))
+/** Absolute path of `test/`, target of the `$test` import alias (test helpers only). */
+const TEST = fileURLToPath(new URL("./test", import.meta.url))
+
+/**
+ * Browsers the CSS is compiled FOR:  the platform floor the plan commits to (anchor positioning everywhere).
+ * - MUST stay modern:  with Vite's default (`baseline-widely-available`) Lightning CSS lowers `light-dark()`
+ *   into `--lightningcss-light` variables resolved where a token is DECLARED, which freezes `:root`'s colour
+ *   scheme into `.ui-dark` subtrees, and adds hex fallbacks for every `oklch()`.  `styles.test.ts` checks.
+ * - Lightning CSS encodes versions as `major << 16 | minor << 8`.
+ */
+export const CSS_TARGETS = { chrome: 125 << 16, safari: 26 << 16, firefox: 147 << 16 }
 
 /**
  * Library build of `@spell/ui`.
@@ -18,12 +29,14 @@ export default defineConfig({
   plugins: [standardDecorators(), dts({ include: ["src"], exclude: ["src/**/*.test.ts"] })],
   resolve: {
     alias: {
+      $test: TEST,
       $: SRC
     }
   },
   css: {
     transformer: "lightningcss",
     lightningcss: {
+      targets: CSS_TARGETS,
       drafts: { customMedia: true }
     }
   },
