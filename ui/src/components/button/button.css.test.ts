@@ -192,6 +192,44 @@ describe("button.css in shadow roots", () => {
       Math.abs(children[0]!.getBoundingClientRect().width - children[1]!.getBoundingClientRect().width)
     ).toBeLessThan(1)
   })
+
+  it('sizes a fallback icon inside <slot name="icon"> to the icon box, not the button block', () => {
+    // Regression for the slot-fallback-vs-child-selector bug (REPORT.md "(j)" item 1):  the svg here is
+    // FALLBACK content of `<slot name="icon">`, one level deeper than `.icon`'s own children, so a `>`
+    // selector (the old rule) would leave it unstyled and it'd render at the browser's default SVG size.
+    // NOTE:  the outer `<button>` deliberately does NOT also carry class `icon` here (unlike a real
+    // icon-only `<ui-button>`), so `.icon` unambiguously selects the inner `<span>`, not the button.
+    adoptIntoPage(foundationCSS)
+    const host = shadowHost(
+      `<button class="ui button" part="button">` +
+        `<span class="icon" part="icon"><slot name="icon">` +
+        `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 22h20z" /></svg>` +
+        `</slot></span>` +
+        `</button>`
+    )
+    const iconBox = host.shadowRoot!.querySelector<HTMLElement>(".icon")!
+    const svg = host.shadowRoot!.querySelector<SVGSVGElement>(".icon svg")!
+    const boxWidth = iconBox.getBoundingClientRect().width
+    expect(boxWidth).toBeGreaterThan(0)
+    expect(boxWidth).toBeLessThan(30)
+    expect(svg.getBoundingClientRect().width).toBeCloseTo(boxWidth, 1)
+    expect(svg.getBoundingClientRect().height).toBeCloseTo(iconBox.getBoundingClientRect().height, 1)
+  })
+
+  it('sizes a real <svg slot="icon"> replacement the same way as the fallback', () => {
+    adoptIntoPage(foundationCSS)
+    const host = shadowHost(
+      `<button class="ui button" part="button">` +
+        `<span class="icon" part="icon"><slot name="icon">` +
+        `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 22h20z" /></svg>` +
+        `</slot></span>` +
+        `</button>`
+    )
+    host.innerHTML = `<svg slot="icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M0 0h32v32H0z" /></svg>`
+    const iconBox = host.shadowRoot!.querySelector<HTMLElement>(".icon")!
+    const slotted = host.querySelector<SVGSVGElement>("svg")!
+    expect(slotted.getBoundingClientRect().width).toBeCloseTo(iconBox.getBoundingClientRect().width, 1)
+  })
 })
 
 /**
