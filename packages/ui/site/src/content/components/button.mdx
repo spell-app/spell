@@ -1,0 +1,42 @@
+---
+title: Button
+tag: ui-button
+status: in-progress
+summary: A button indicates a possible user action.
+---
+
+import Example from "../../components/Example.astro"
+import Section from "../../components/Section.astro"
+import Variation from "../../components/Variation.astro"
+// PLACEHOLDER until `ui-button` lands in `src/components/button/`;  the component agent replaces this page
+// (recipe:  `site/README.md`).  Examples use the TARGET markup, so they render as plain text until then.
+
+<Section title="Types">
+  <Example title="Button" description="A standard button.">
+    <ui-button>Follow</ui-button>
+  </Example>
+  <Example
+    title="Emphasis"
+    description="A button can be formatted to show different levels of emphasis."
+    class="ui-cluster"
+  >
+    <ui-button color="primary">Save</ui-button>
+    <ui-button color="secondary">Okay</ui-button>
+    <ui-button>Cancel</ui-button>
+  </Example>
+</Section>
+
+<Section title="States">
+  <Example title="Disabled" description="A button can show it is currently unable to be interacted with.">
+    <ui-button disabled>Disabled</ui-button>
+  </Example>
+</Section>
+
+<Section title="Variations">
+  <Variation title="Size" description="A button can have different sizes." class="ui-cluster">
+    <ui-button size="mini">Mini</ui-button>
+    <ui-button size="small">Small</ui-button>
+    <ui-button>Medium</ui-button>
+    <ui-button size="large">Large</ui-button>
+  </Variation>
+</Section>

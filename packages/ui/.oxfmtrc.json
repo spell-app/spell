@@ -17,6 +17,8 @@
     "reference/**",
     "src/icons/data/**",
     "site/dist/**",
+    "site/**/*.mdx",
+    "site/.astro/**",
     "spike/*/dist/**"
   ]
 }

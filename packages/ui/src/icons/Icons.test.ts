@@ -5,11 +5,11 @@ import { Icons } from "$/icons"
 /**
  * Runs against the REAL generated data (`src/icons/data/*.json`), not a fixture -- these tests are the
  * regression check that `scripts/gen-icons.ts`'s output and `Icons`' resolution logic agree with each
- * other, so a name below has to keep meaning the same FA6 icon across a regeneration.
+ * other, so a name below has to keep meaning the same FA7 icon across a regeneration.
  */
 
 describe("Icons.resolve()", () => {
-  it("maps a Fomantic alias to its FA6 canonical name", async () => {
+  it("maps a Fomantic alias to its FA7 canonical name", async () => {
     expect(await Icons.resolve("sign in")).toEqual({ name: "right-to-bracket", style: "solid" })
   })
 
@@ -21,7 +21,7 @@ describe("Icons.resolve()", () => {
     expect(await Icons.resolve("github")).toEqual({ name: "github", style: "brands" })
   })
 
-  it("passes an already-correct FA6 name through unchanged", async () => {
+  it("passes an already-correct FA7 name through unchanged", async () => {
     expect(await Icons.resolve("user")).toEqual({ name: "user", style: "solid" })
   })
 
@@ -29,7 +29,7 @@ describe("Icons.resolve()", () => {
     expect(await Icons.resolve("user", "regular")).toEqual({ name: "user", style: "regular" })
   })
 
-  /** ~10 well-known Fomantic names, each round-tripped to the FA6 name `gen-icons.ts` reported for it. */
+  /** ~12 well-known Fomantic names, each round-tripped to the FA7 name `gen-icons.ts` reported for it. */
   const fomanticRoundTrips: [string, string][] = [
     ["setting", "gear"],
     ["settings", "gears"],
@@ -40,15 +40,19 @@ describe("Icons.resolve()", () => {
     ["dropdown", "caret-down"],
     ["caret down", "caret-down"],
     ["mail", "envelope"],
-    ["sign out", "right-from-bracket"]
+    ["sign out", "right-from-bracket"],
+    // FA7 merged `user-large` into `user` -- matched via `aliases.unicodes.primary`
+    ["user alternate", "user"],
+    // FA7 Free dropped `vector-square` -- `MANUAL_OVERRIDES` stand-in
+    ["vector square", "object-group"]
   ]
-  it.each(fomanticRoundTrips)("resolves Fomantic name %j to %j", async (fomanticName, fa6Name) => {
-    expect((await Icons.resolve(fomanticName)).name).toBe(fa6Name)
+  it.each(fomanticRoundTrips)("resolves Fomantic name %j to %j", async (fomanticName, fa7Name) => {
+    expect((await Icons.resolve(fomanticName)).name).toBe(fa7Name)
   })
 })
 
 describe("Icons.get()", () => {
-  it("returns a tuple with a non-empty path for a plain FA6 name", async () => {
+  it("returns a tuple with a non-empty path for a plain FA7 name", async () => {
     const data = await Icons.get("user")
     expect(data).toBeDefined()
     const [width, height, path] = data!

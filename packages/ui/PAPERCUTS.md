@@ -75,3 +75,35 @@ Log of things that slowed down development. Date · symptom · fix · project.
   `tsc -p scripts` first.  Consider adding it to `yarn ts`. · spell/ui
 - 2026-09-28 · `console.log` inside a Vitest browser-mode test doesn't reach the terminal in this setup, which
   makes quick browser probes awkward. · Throw an `Error` with the values instead, or assert. · spell/ui
+- 2026-09-28 · `yarn -s tsx ...` fails with `Unknown Syntax Error: Unsupported option name ("-s")` -- yarn 1's
+  silent flag doesn't exist in yarn 4. · Drop `-s`;  redirect output instead. · spell/ui
+- 2026-09-29 · Astro 7's MDX ignores `mdx({ remarkPlugins })` (and `markdown.remarkPlugins`):  the default
+  Markdown processor is now Sätteri (Rust), which only runs its own `mdastPlugins` / `hastPlugins`;  the
+  "ignored" warning is easy to miss in build output. · Wrote the plugin for Sätteri (`defineMdastPlugin` from
+  `satteri`) and passed `mdx({ processor: satteri({ mdastPlugins }) })` (`site/astro.config.mjs`). · spell/ui site
+- 2026-09-29 · MDX renders text on its own line inside an HTML element (`<p>⏎text⏎</p>`, which oxfmt produces
+  on its own for long JSX) as a nested `<p>`:  invalid HTML, and wrong source in `Example`'s "Show code". ·
+  `site/src/lib/unwrapHtmlParagraphs.ts` unwraps paragraphs inside lower-case JSX elements. · spell/ui site
+- 2026-09-29 · Root `oxfmt .` formats `site/**/*.mdx` as markdown and rewrites a MULTI-line `{/* ... */}` JSX
+  comment to `{/_ ... _/}`, which breaks the MDX build (`Unterminated regular expression`).  It also collapses
+  double spaces after periods in prose. · Only single-line `{/* */}` or `//` comments attached to the import
+  block in MDX (documented in `site/README.md`);  or add `site/**/*.mdx` to `.oxfmtrc.json` `ignorePatterns`. ·
+  spell/ui site
+- 2026-09-29 · MDX has no bundled `<script>`:  it's JSX, emitted as-is, so `import`s in it fail at build
+  (`ReferenceError`).  Component pages can't import `$/components/...` themselves. · `site/src/scripts/
+  components.ts` (run by the layout) `import.meta.glob`s `$/components/*/*.ts` and loads the module for each
+  undefined `ui-*` tag on the page;  anything more goes in an `.astro` component with a `<script>`. · spell/ui site
+- 2026-09-29 · `astro check` (Astro 7.3) refuses TypeScript 7 ("does not currently support TypeScript 7.0"),
+  and `@astrojs/check` 0.9 then fails to import with `Cannot find package '@emnapi/runtime'` (a missing peer of
+  `@napi-rs/wasm-runtime`), which Astro reports as "not installed" and offers to `yarn add` it again. · `site/`
+  pins `typescript@^6` and adds `@emnapi/runtime` + `@emnapi/core` as dev deps. · spell/ui site
+- 2026-09-29 · Astro emits the page's own `<link id="ui-app-stylesheet">` BEFORE the bundled foundation
+  (`import "$/styles/ui.css"`), so the site sheet's `@layer ui.app` was the first layer named -- the LOWEST. ·
+  `site.css` `@import`s `$/styles/layers.css` first (resolved through the `$` alias by Lightning CSS). · spell/ui site
+- 2026-09-29 · Astro + rolldown warn `MODULE_LEVEL_DIRECTIVE ... "use astro:head-inject" ... may not be
+  preserved` for every content-collection `.mdx`.  Harmless (pages render, styles propagate). · Ignore. · spell/ui site
+- 2026-09-29 · Site build warns `INEFFECTIVE_DYNAMIC_IMPORT` for `src/icons/data/aliases.json` /
+  `fomantic-aliases.json`:  `Icons.ts`'s template `import(\`./data/${chunk}.json\`)` also matches the two maps
+  it imports statically. · Harmless;  a narrower glob in `Icons.#loadChunk` would silence it. · spell/ui
+- 2026-09-29 · `yarn dev` in Astro 7 starts the dev server DETACHED and returns;  stop it with
+  `yarn astro dev stop` (or `status` / `logs`). · Noted in `site/README.md`. · spell/ui site

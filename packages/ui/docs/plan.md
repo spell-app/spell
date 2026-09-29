@@ -124,7 +124,7 @@
   - `elements.types.ts`, `index.ts` (`export * as E`)
 - `src/styles/`: `layers.css`, `tokens.css`, `colors.css`, `sizes.css`, `reset.css`, `typography.css`, `animations.css`, `utilities.css`, `native.css`, `themes/classic.css`, `themes/dark.css`.
 - `src/components/<name>/`: `<name>.ts`, `<name>.css`, `<name>.vocabulary.en.ts`, `<name>.test.ts`, `<name>.visual.test.ts`, `<name>.a11y.test.ts`, `examples/*.html`.
-- `src/icons/`: FA6 Free path data as JSON chunks (+ a short Fomantic alias list).
+- `src/icons/`: FA7 Free path data as JSON chunks (+ a short Fomantic alias list).
 - `site/`: Astro docs. `docs/`: `spike-lit-vs-solid.md`, `grammar.md`, `theming.md`, `translation.md`. `test/`: shared test utils.
 
 ### CSS system
@@ -226,7 +226,7 @@
 All under `src/components/`, no Elements/Collections/Views/Modules split. Each row is one unit of work (CSS port + element(s) + a11y + tests + docs page).
 
 - **Phase A – foundation**:
-  - `icon` (SVG, FA6 names, sizes, flipped/rotated, circular/bordered, `ui-icons` group with corner)
+  - `icon` (SVG, FA7 names, sizes, flipped/rotated, circular/bordered, `ui-icons` group with corner)
   - `button` (+ `ui-buttons`, `ui-or`)
   - `label` (+ `ui-labels`; image/tag/corner/ribbon/pointing/floating/attached/circular/basic/detail/remove)
   - content parts (`ui-content`, `ui-header`, `ui-description`, `ui-meta`, `ui-extra`, `ui-actions`, `ui-title`, …)

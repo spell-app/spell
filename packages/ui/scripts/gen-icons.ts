@@ -1,5 +1,5 @@
 /**
- * Generates `src/icons/data/*.json` from Font Awesome 6 Free's metadata plus Fomantic-UI's icon vocabulary.
+ * Generates `src/icons/data/*.json` from Font Awesome 7 Free's metadata plus Fomantic-UI's icon vocabulary.
  * - Run with `yarn tsx scripts/gen-icons.ts` (or `node --experimental-strip-types` / `yarn vite-node` if `tsx`
  *   is unavailable -- see `PAPERCUTS.md`).
  * - Downloads (and caches under the OS temp dir, NOT the repo) Font Awesome's `icons.json`, since it's ~6 MB
@@ -33,7 +33,11 @@ type FaSvgStyle = {
 type FaIconEntry = {
   unicode: string
   free?: string[]
-  aliases?: { names?: string[] }
+  aliases?: {
+    names?: string[]
+    /** `primary` holds codepoints of icons FA merged INTO this one, e.g. `user` lists `user-large`'s `f406`. */
+    unicodes?: { primary?: string[] }
+  }
   search?: { terms?: string[] }
   svg: Partial<Record<IconStyle, FaSvgStyle>>
 }
@@ -52,14 +56,14 @@ type IconTuple = readonly [width: number, height: number, path: string]
 ////////////////
 
 /**
- * Builds every file under `src/icons/data/` from Font Awesome 6 Free + Fomantic-UI's icon vocabulary.
+ * Builds every file under `src/icons/data/` from Font Awesome 7 Free + Fomantic-UI's icon vocabulary.
  * - One method per output file (plus the shared parsing steps), so `run()` reads as a table of contents.
  * - Stateless between runs:  every method takes what it needs and returns what it built, nothing is cached
  *   on `this` except the resolved filesystem paths.
  */
 class IconGenerator {
   /** Font Awesome's own metadata source -- see file docstring for why it's cached outside the repo. */
-  static readonly METADATA_URL = "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/metadata/icons.json"
+  static readonly METADATA_URL = "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/7.x/metadata/icons.json"
 
   /**
    * Byte budget per solid chunk, of the COMPACT JSON this script writes.
@@ -69,14 +73,17 @@ class IconGenerator {
    *   `[width, height, path]` tuple is long enough to force oxfmt to explode it across 5 lines, adding
    *   ~22 bytes/icon;  52 KB compact lands at ~57 KB once formatted, leaving margin under 60 KB either way
    *   (decimal or binary).
+   * - NOTE: `.oxfmtrc.json` has since ignored `src/icons/data/`, so that margin is no longer needed --
+   *   kept anyway so chunk file names don't churn.
    */
   static readonly MAX_CHUNK_BYTES = 52_000
 
   /**
-   * Fomantic-UI class names that are genuine FA5 -> FA6 renames Font Awesome's OWN `unicode` field can't
+   * Fomantic-UI class names that are genuine FA5 -> FA6+ renames Font Awesome's OWN `unicode` field can't
    * recover, because FA6 reassigned the codepoint (often to the plain ASCII character, e.g. `plus` -> `"+"`)
    * rather than keeping the legacy private-use codepoint Fomantic's LESS still references.  Each was verified
    * by hand against `icons.json` -- see `docs/icons.md`.  Keyed by the RAW (underscored) Fomantic class name.
+   * - also holds a hand-picked stand-in for an icon FA dropped from Free (`vector_square`).
    */
   static readonly MANUAL_OVERRIDES: Record<string, string> = {
     cloud_download_alternate: "cloud-arrow-down",
@@ -98,7 +105,9 @@ class IconGenerator {
     usd: "dollar-sign",
     help: "question",
     warning: "exclamation",
-    percentage: "percent"
+    percentage: "percent",
+    // NOTE: FA7 Free dropped `vector-square` outright -- chosen stand-in, not a rename.
+    vector_square: "object-group"
   }
 
   /** Fomantic LESS maps to merge, in priority order (first definition of a name wins on conflict). */
@@ -126,7 +135,7 @@ class IconGenerator {
     )
     // NOTE: cached OUTSIDE the repo (OS temp dir) -- 6 MB of upstream metadata we don't vendor or commit.
     // Override with `FA_METADATA_PATH` to point at an already-downloaded copy (e.g. in a scratchpad).
-    this.metadataCachePath = process.env.FA_METADATA_PATH ?? path.join(tmpdir(), "spell-ui-fa6-icons.json")
+    this.metadataCachePath = process.env.FA_METADATA_PATH ?? path.join(tmpdir(), "spell-ui-fa7-icons.json")
   }
 
   /** Runs the full pipeline and prints the size / alias report the task asks for. */
@@ -269,7 +278,7 @@ class IconGenerator {
   // ## Alias maps
   ////////////////
 
-  /** Font Awesome's OWN alias names (`aliases.names`, e.g. `cog` -> `gear`) -> canonical FA6 name. */
+  /** Font Awesome's OWN alias names (`aliases.names`, e.g. `cog` -> `gear`) -> canonical FA7 name. */
   private buildFaAliases(metadata: FaMetadata): Record<string, string> {
     const aliases: Record<string, string> = {}
     const names = Object.keys(metadata).sort((a, b) => a.localeCompare(b))
@@ -282,11 +291,14 @@ class IconGenerator {
   }
 
   /**
-   * Fomantic's class-name vocabulary -> canonical FA6 name, for every Fomantic name that doesn't already
-   * equal its FA6 name.
+   * Fomantic's class-name vocabulary -> canonical FA7 name, for every Fomantic name that doesn't already
+   * equal its FA7 name.
    * - Matches by UNICODE CODEPOINT:  Fomantic's LESS maps are Font Awesome 5 class names pointing at FA5's
-   *   private-use codepoints, which usually still identify the same icon in FA6's `unicode` field.
-   * - Falls back to `MANUAL_OVERRIDES`, then to treating the kebab-cased Fomantic name as already-correct
+   *   private-use codepoints, which usually still identify the same icon in FA7's `unicode` field --
+   *   or in `aliases.unicodes.primary`, where FA7 keeps the codepoints of icons it merged into another
+   *   (`user-large` -> `user`).  Top-level `unicode` wins when both claim a codepoint.
+   * - `MANUAL_OVERRIDES` win over the codepoint match;  failing both, falls back to treating
+   *   the kebab-cased Fomantic name as already-correct
    *   (covers FA6 remapping a handful of "keyboard symbol" icons, like `asterisk`, onto their literal ASCII
    *   character -- codepoint matching can't follow that, but the NAME didn't change).
    * - Whatever's left after both is reported as unresolved rather than guessed at.
@@ -304,6 +316,12 @@ class IconGenerator {
     for (const [name, entry] of Object.entries(metadata)) {
       const code = entry.unicode?.toLowerCase()
       if (code && !codeToName.has(code)) codeToName.set(code, name)
+    }
+    // NOTE: second pass, so a merged-in codepoint never shadows an icon that still OWNS it.
+    for (const [name, entry] of Object.entries(metadata)) {
+      for (const code of entry.aliases?.unicodes?.primary ?? []) {
+        if (!codeToName.has(code.toLowerCase())) codeToName.set(code.toLowerCase(), name)
+      }
     }
 
     const aliases: Record<string, string> = {}
