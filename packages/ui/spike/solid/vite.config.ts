@@ -1,5 +1,6 @@
 import { defineConfig } from "vite"
 import { fileURLToPath } from "node:url"
+import { solidElementHot } from "@spell/solid-element/vite"
 
 import { shared } from "./vite.shared.ts"
 
@@ -44,6 +45,7 @@ export const ENTRIES: Record<string, string> = {
  */
 export default defineConfig({
   ...shared,
+  plugins: [...shared.plugins, hotElements()],
   build: {
     outDir: "dist",
     emptyOutDir: true,
@@ -57,3 +59,25 @@ export default defineConfig({
     }
   }
 })
+
+/**
+ * Hot module replacement for the components in `yarn dev` (`@spell/solid-element/vite`;  `apply: "serve"`, so
+ * builds are untouched, and NOT in `vitest.config.ts`).
+ * - Boundaries:  the component barrels (`src/components/<name>/index.ts`), the modules that call `define()`.
+ *   An edit to a component class, vocabulary or fallback re-runs its barrel;  `HotDefinitions` turns the barrel's
+ *   `define()` of a new version of a class into a re-definition of every tag it had.
+ * - `?inline` component CSS (`src/components/<name>/<name>.css`) re-registers its sheet:  no re-render.
+ * - Shared code (`core`, `forms`, the runtime) reaches several barrels:  full reload.
+ */
+function hotElements() {
+  return solidElementHot({
+    include: /\/spike\/solid\/src\/components\/[\w-]+\/index\.ts$/,
+    detect: /\.define\(/,
+    setup: "$spike/HotDefinitions",
+    styles: {
+      include: /\/src\/components\/[\w-]+\/[\w-]+\.css\?inline$/,
+      handler: "$spike/HotDefinitions",
+      call: "HotDefinitions.updateStyle"
+    }
+  })
+}

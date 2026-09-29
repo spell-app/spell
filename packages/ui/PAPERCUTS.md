@@ -278,3 +278,21 @@ Log of things that slowed down development. Date · symptom · fix · project.
   but Rolldown 1.2.11's `OutputChunk` has no `importedBindings` (Rollup's does), only `imports` (specifiers). ·
   `SpikeMeasure.importedBindings()` parses the emitted `import { a as b } from "x"` statements (Rolldown prints
   them plainly);  `PeerVendor` reuses it on `dist/`. · spell/ui spikes
+- 2026-09-29 · `yarn dev` in `spike/solid` dies loading `vite.config.ts`:  `ERR_UNKNOWN_FILE_EXTENSION ".ts" for
+  .../spike/solid-element/src/vite.ts`.  Vite 8 bundles a config with EVERY bare import external -- linked
+  packages too -- so Node 22.17 imports `@spell/solid-element/vite` itself, and can't load `.ts` (tsx-run scripts
+  like `yarn test:hmr` hide it). · The fork builds the plugin to `dist/vite.js` (`vite.node.config.ts`, second
+  step of its `yarn build`);  `exports["./vite"].default` points there.  Build the fork once before `yarn dev`. ·
+  spike/solid-element
+- 2026-09-29 · A `?inline` CSS module's own `import.meta.hot.accept()` never takes:  Vite's `vite:css-analysis`
+  resets `isSelfAccepting = false` for `?inline` on every transform, and import analysis skips CSS requests, so
+  the module graph never records the accept;  the update climbs to the importers and re-renders them. · The HMR
+  plugin sets `mod.isSelfAccepting = true` for its style modules in its `hotUpdate` hook. · spike/solid-element
+- 2026-09-29 · Playwright `page.evaluate(fn)` from a tsx-run script throws `ReferenceError: __name is not
+  defined`:  tsx compiles with esbuild `keepNames`, which wraps named inner functions (and `const f = () => ...`)
+  in `__name(...)`, and that call is serialized into the page. · `page.addInitScript("globalThis.__name = (fn) =>
+  fn")` (`test/hmr.e2e.ts`). · spike/solid
+- 2026-09-29 · HMR of a component whose vocabulary module re-ran:  `Vocabulary.register(): <ui-button> is already
+  registered` -- it accepts the SAME vocabulary object twice ("HMR, double imports" in its docs) but a re-run
+  module makes a NEW object. · `HotDefinitions` drops the old entry from `UI.vocabulary.vocabularies` before
+  re-defining;  a `Vocabulary.replace()` in `src/` would be cleaner. · spike/solid

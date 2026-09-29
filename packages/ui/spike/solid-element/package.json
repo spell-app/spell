@@ -15,10 +15,14 @@
       "types": "./src/index.ts",
       "development": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./vite": {
+      "types": "./src/vite.ts",
+      "default": "./dist/vite.js"
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vite build -c vite.node.config.ts",
     "test": "vitest run",
     "tsc": "tsc",
     "measure": "node --experimental-strip-types --no-warnings scripts/measure.ts",

@@ -10,6 +10,8 @@
  *   `component-register`'s `register` / `compose` too, so its README patterns keep working.
  * - Additions:  the `options` 4th argument, prop definitions (`type`, `converter`, `property` ...), lifecycle and
  *   form hooks, `element.dispose()`.  See `README.md`;  each fix is its own module (`UPSTREAM.md`).
+ * - Hot module replacement:  `hot` (webpack), `hotUpdate` / `reloadElement(s)` / `liveElements` (Vite);  the Vite
+ *   plugin is a separate entry, `@spell/solid-element/vite` (node-side, never in this barrel).
  * - NOTE: `component-register`'s context helpers (`createContext` / `provide` / `consume`) are left out:  Solid's
  *   own context crosses elements (owner lookup, fix 8).
  */
@@ -21,4 +23,4 @@ export { getCurrentElement, noShadowDOM } from "./current"
 export { onConnect, onDisconnect } from "./lifecycle"
 export { onFormAssociated, onFormDisabled, onFormReset, onFormStateRestore } from "./internals"
 export { toAttribute } from "./props"
-export { hot, reloadElement } from "./hot"
+export { hot, hotUpdate, liveElements, reloadElement, reloadElements } from "./hot"

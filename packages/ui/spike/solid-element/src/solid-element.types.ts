@@ -251,6 +251,11 @@ export type ElementState = {
   hooks: Partial<Record<HookName, Set<(...args: any[]) => void>>>
   /** Last arguments of the state-like hooks (`formAssociated`, `formDisabled`), replayed to late registrations. */
   last: Partial<Record<HookName, unknown[]>>
+  /**
+   * Where each key's value last came from;  dev only (`import.meta.hot`), read by a hot redefinition
+   * (`hot.ts`) to re-convert attribute values with a new converter while keeping property writes.
+   */
+  sources?: Record<string, ChangeSource>
 }
 
 /**
@@ -276,14 +281,48 @@ export type SolidElement = HTMLElement & {
 
 /** Static side of every element class this package defines. */
 export type SolidElementClass = CustomElementConstructor & {
-  /** Resolved props. */
+  /**
+   * Resolved props.
+   * - NOTE: a hot redefinition (`hot.ts`) updates this object IN PLACE, so closures holding it see the new props.
+   */
   readonly props: NormalizedProps
-  /** Options it was defined with. */
+  /**
+   * Options it was defined with.
+   * - NOTE: a hot redefinition updates this object in place too.
+   */
   readonly options: ElementOptions
   /** Current component;  swapped on hot reload. */
   Component: FunctionComponent<any>
   /** Tag it was defined as. */
   readonly tag: string
+  /** Attributes the platform observes;  it reads them ONCE, at `customElements.define()`. */
+  readonly observedAttributes: string[]
+}
+
+////////////////
+// ## Hot module replacement
+////////////////
+
+/** A redefinition the platform can't apply to a defined class (see `hot.ts`). */
+export type HotIncompatibility = {
+  /** Tag whose redefinition was refused. */
+  tag: string
+  /** What changed, e.g. `observed attributes changed (+size)`. */
+  reason: string
+}
+
+/** What one `hotUpdate()` did. */
+export type HotUpdateResult = {
+  /** Tags whose live instances were re-rendered. */
+  reloaded: string[]
+  /** Refused redefinitions;  non-empty => the module was invalidated (full reload) instead. */
+  incompatible: HotIncompatibility[]
+}
+
+/** The slice of Vite's `import.meta.hot` that `hotUpdate()` uses. */
+export type HotContext = {
+  /** Give up on this update:  Vite propagates it to the importers (a full reload when none accepts). */
+  invalidate(message?: string): void
 }
 
 /** Key of `ElementState` on every element. */

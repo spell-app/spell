@@ -6,7 +6,7 @@
 /**
  * `yarn measure`:  size and LOC of this package vs `@solidjs/element` + `component-register`.
  * - Size:  each entry bundled with esbuild, minified, `solid-js` / `@solidjs/*` external, then gzip level 9
- *   (kB = 1000 bytes), as the spike reports measure.
+ *   (kB = 1000 bytes), as the spike reports measure.  `import.meta.hot` => `undefined`, as in a production build.
  * - LOC:  `wc -l` of the sources (tests and `testing.ts` excluded), plus "code" lines (not blank, not comment).
  * - Writes `measure-results.json`.
  */
@@ -53,6 +53,8 @@ async function measure(name: string, entry: string) {
     write: false,
     legalComments: "none",
     external: ["solid-js", "solid-js/*", "@solidjs/*"],
+    // as every production build does (Vite replaces it):  the HMR code behind it is dev only
+    define: { "import.meta.hot": "undefined" },
     logLevel: "silent"
   })
   const code = result.outputFiles[0]!.contents

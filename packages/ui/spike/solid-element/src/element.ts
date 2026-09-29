@@ -17,6 +17,8 @@ import { attachInternals } from "./internals"
 import { initialValue } from "./props"
 import { resolveRenderRoot } from "./shadowRoot"
 import { captureUpgradeProperties, defineAccessors } from "./upgrade"
+// dev only:  a build drops the call (`import.meta.hot`), and with it this module's code
+import { trackElement } from "./hot"
 import {
   STATE,
   type ElementOptions,
@@ -53,7 +55,7 @@ export function createElementClass(
       /** Tag it was defined as. */
       static readonly tag = tag
 
-      /** Current component;  `register()` swaps it on hot reload. */
+      /** Current component;  `register()` swaps it on hot reload (with `props` / `options`, in place:  `hot.ts`). */
       static Component = Component
 
       /** Every attribute a prop observes. */
@@ -76,6 +78,8 @@ export function createElementClass(
         }
         attachInternals(self, wantsInternals)
         captureUpgradeProperties(self, props)
+        // dev only (a build replaces `import.meta.hot` with `undefined`):  hot reload finds its instances
+        if (import.meta.hot) trackElement(self)
       }
 
       connectedCallback() {
