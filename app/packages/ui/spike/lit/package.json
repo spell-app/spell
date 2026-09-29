@@ -1,0 +1,38 @@
+{
+  "name": "@spell/ui-spike-lit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Milestone 0 spike:  ui-button + ui-dropdown on Lit 3.3 (standard decorators)",
+  "type": "module",
+  "sideEffects": [
+    "./src/index.ts",
+    "./src/components/*/index.ts",
+    "./demo/**",
+    "**/*.css"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "ts": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
+    "ssr": "tsx ssr.ts",
+    "smoke": "tsx smoke.ts",
+    "measure": "tsx measure.ts"
+  },
+  "dependencies": {
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@lit-labs/ssr": "4.1.0",
+    "@types/node": "22.20.4",
+    "@vitest/browser-playwright": "5.0.2",
+    "axe-core": "4.13.0",
+    "esbuild": "0.28.2",
+    "playwright": "1.63.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.1",
+    "vitest": "5.0.2"
+  },
+  "packageManager": "yarn@4.18.0"
+}

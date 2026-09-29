@@ -1,0 +1,117 @@
+<!-- Element markup for `src/components/dropdown/examples/types.html`. -->
+<div class="ui-stack" style="padding-bottom: 12em">
+  <section>
+    <h4>Dropdown</h4>
+    <ui-dropdown text="File" aria-label="File">
+      <ui-item>New</ui-item>
+      <ui-item description="ctrl + o">Open...</ui-item>
+      <ui-item description="ctrl + s">Save as...</ui-item>
+      <ui-item type="divider"></ui-item>
+      <ui-item>Edit</ui-item>
+      <ui-item>Share</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Selection</h4>
+    <ui-dropdown selection placeholder="Gender">
+      <ui-item>Male</ui-item>
+      <ui-item>Female</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Search selection</h4>
+    <ui-dropdown search selection placeholder="Select Country">
+      <ui-item flag="af">Afghanistan</ui-item>
+      <ui-item flag="ax">Aland Islands</ui-item>
+      <ui-item flag="al">Albania</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Clearable selection</h4>
+    <ui-dropdown clearable selection placeholder="Gender" value="Female">
+      <ui-item>Male</ui-item>
+      <ui-item>Female</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Multiple selection</h4>
+    <ui-dropdown fluid multiple selection placeholder="Skills" value="Angular,CSS">
+      <ui-item>Angular</ui-item>
+      <ui-item>CSS</ui-item>
+      <ui-item>Graphic Design</ui-item>
+      <ui-item>HTML</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Multiple search selection</h4>
+    <ui-dropdown fluid multiple search selection placeholder="Skills" value="Ember">
+      <ui-item>Angular</ui-item>
+      <ui-item>Ember</ui-item>
+      <ui-item>Meteor</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Search dropdown</h4>
+    <ui-dropdown search placeholder="Select Language">
+      <ui-item>Arabic</ui-item>
+      <ui-item>Chinese</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Inline</h4>
+    <p>
+      Show me posts by
+      <ui-dropdown inline aria-label="Author" value="Jenny Hess">
+        <ui-item
+          image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
+          >Jenny Hess</ui-item
+        >
+        <ui-item
+          image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 2 2%22%3E%3Ccircle cx=%221%22 cy=%221%22 r=%221%22 fill=%22%2396a%22/%3E%3C/svg%3E"
+          >Elliot Fu</ui-item
+        >
+      </ui-dropdown>
+    </p>
+  </section>
+
+  <section>
+    <h4>Floating labeled icon button</h4>
+    <ui-dropdown floating labeled button icon="filter" text="Filter Posts">
+      <ui-item type="header">Filter by tag</ui-item>
+      <ui-item>Important</ui-item>
+      <ui-item>Announcement</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Button</h4>
+    <ui-dropdown color="primary" button text="Actions">
+      <ui-item>Edit</ui-item>
+      <ui-item>Delete</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Simple (no script)</h4>
+    <ui-dropdown simple text="Hover me">
+      <ui-item>One</ui-item>
+      <ui-item>Two</ui-item>
+    </ui-dropdown>
+  </section>
+
+  <section>
+    <h4>Open selection</h4>
+    <ui-dropdown selection open value="Female" aria-label="Gender">
+      <ui-item>Male</ui-item>
+      <ui-item>Other</ui-item>
+      <ui-item>Female</ui-item>
+    </ui-dropdown>
+  </section>
+</div>

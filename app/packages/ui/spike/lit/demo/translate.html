@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Translation -- Lit spike</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        padding: 1em 2em;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Translated tags</h1>
+    <p>
+      <code>UIButton.define("ie-boton", spanish)</code> etc.: a subclass per tag, attributes redeclared with localized
+      names and value maps.
+    </p>
+    <p>
+      <ie-boton primario tamano="grande">Guardar</ie-boton>
+      <ie-boton color="rojo" basico>Borrar</ie-boton>
+      <ie-boton color="azul" tamano="pequeno" desactivado="si">Desactivado</ie-boton>
+    </p>
+    <p>
+      <ie-desplegable seleccion busqueda borrable marcador="Elige un color" id="colores">
+        <ie-elemento valor="r">Rojo</ie-elemento>
+        <ie-elemento valor="v">Verde</ie-elemento>
+        <ie-elemento valor="a">Azul</ie-elemento>
+      </ie-desplegable>
+    </p>
+    <p>Último <code>ie-cambio</code>: <output id="value">(ninguno)</output></p>
+    <pre id="result">checking...</pre>
+    <script type="module" src="./translate.ts"></script>
+  </body>
+</html>
