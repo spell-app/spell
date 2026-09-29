@@ -20,5 +20,6 @@
       "$test/*": ["./test/*"]
     }
   },
-  "include": ["src", "test", "spike"]
+  "include": ["src", "test"],
+  "exclude": ["spike", "site", "node_modules", "dist"]
 }
