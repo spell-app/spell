@@ -15,3 +15,14 @@
 @import "./utilities.css";
 @import "./typography.css";
 @import "./native.css";
+
+/*
+ * Marks the page as already carrying the foundation, so a runtime that loads later does NOT push the same
+ * sheets onto `document.adoptedStyleSheets` a second time -- see `Styles.refreshPage()`.
+ * Lives HERE (the linked entry), not in the sub-sheets, so a runtime-only page never sees it.
+ */
+@layer ui.tokens {
+  :root {
+    --ui-page-sheet: linked;
+  }
+}
