@@ -48,3 +48,24 @@ Carry over from the spike reports, regardless of library:
 - `.dropdown.icon` must stay `:empty` unless the `icon` slot is occupied.
 - The `left labeled` example needs an accessible name.
 - Runtime chunk is 27 KB gzip against a 20 KB budget: `colors.css` dominates; revisit after the palette work.
+
+## Batch 1 (2026-09-29): icon, label, 13 content parts, divider, segment, container on both
+
+Owen chose to keep both candidates after Milestone 0; both spikes then built the same six families on the same CSS/vocabulary. Full sections: `spike/lit/REPORT.md` and `spike/solid/REPORT.md`, "Batch 1".
+
+| Criterion | Lit | Solid 2 rc.11 |
+|---|---|---|
+| Whole family built alone, gzip, excl. runtime + icon data | icon 22.1, label 24.6, parts 26.5, divider 19.8, segment 21.6, container 17.5 | icon 48.2, label 56.5, parts 54.1, divider 46.2, segment 47.8, container 43.4 |
+| Shared floor (library + element core) | ~15 KB (Lit 7.5) | ~43 KB (Solid 28.3 + core 11.7) |
+| All eight families together | **84.6 KB** | 118.4 KB |
+| Tests after batch 1 | 156 | 274 |
+| Element LOC for the batch | ~480 code lines | (more; see report LOC table) |
+| Owner-context cost | +1.1 KB (+0.5 KB `lit/static-html`) | `PartContext` inside the 11.7 KB core |
+| Page-wide halt | n/a (per element) | **fixed**: `createErrorBoundary` per element, +1.4 KB, no measurable render cost; a throw disables only that element (`:state(errored)`) |
+| New library quirks | none | `component-register` ignores `removeAttribute()` on a bare boolean (worked around) |
+| Visual parity with the class-grammar fragments | 30/30 pairs match except the shared foundation bugs | near-identical, same exceptions |
+| Foundation bugs found | 6 (same set) | 11 findings (superset of the same 6) |
+
+Both spikes independently renamed the clashing properties (`iconStyle`, `dividerHidden`), hit the same missing `--ui-inverted` default, and the same "no event when an element's assigned slot changes" platform limit (both report `slotchange` from their own shadow roots to a registry).
+
+**Reading after batch 1.** The Solid spike closed its biggest gap (error isolation) at negligible cost, and its owner-context design is equivalent to Lit's. What did not change: Solid's runtime is now 28 KB gzip against Lit's 7.5, so every family costs roughly 25 KB more, and the full set is 40% larger; Solid still needs the `component-register` workarounds and has no SSR. The recommendation stands: **Lit**.
