@@ -19,6 +19,8 @@
     "site/dist/**",
     "site/**/*.mdx",
     "site/.astro/**",
-    "spike/*/dist/**"
+    "spike/*/dist/**",
+    "spike/*/vendor/**",
+    "spike/*/*results.json"
   ]
 }

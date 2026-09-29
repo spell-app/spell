@@ -3,10 +3,12 @@ import { commands, userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
 import type { OverlayEntry } from "$/runtime"
-import type { MenuOption } from "$/elements"
 import { expectAccessible } from "$test/a11y"
 import { Fixture } from "$test/fixture"
 import type { UIDropdown } from "./index"
+
+import { PerfRun } from "$shared/PerfRun.ts"
+import type { PerfAdapter } from "$shared/shared.types.ts"
 
 import "./index"
 
@@ -325,34 +327,16 @@ describe("<ui-dropdown> accessibility", () => {
 })
 
 describe("<ui-dropdown> performance", () => {
-  it("filters 1000 options in under a frame per keystroke", async () => {
+  it("filters 1000 options in under a frame per keystroke (shared PerfRun)", async () => {
     const element = await render(`<ui-dropdown search selection placeholder="Search"></ui-dropdown>`)
-    element.options = OPTIONS
-    await element.updateComplete
-    let start = performance.now()
-    element.open = true
-    await element.updateComplete
-    const openMs = performance.now() - start
-    const input = $(element, "input.search") as HTMLInputElement
-    const times: number[] = []
-    for (const character of QUERY) {
-      input.value += character
-      start = performance.now()
-      input.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true, data: character }))
-      await element.updateComplete
-      times.push(performance.now() - start)
-    }
-    const average = times.reduce((sum, time) => sum + time, 0) / times.length
-    const result = {
-      options: OPTIONS.length,
-      openMs: round(openMs),
-      keystrokes: times.map(round),
-      minMs: round(Math.min(...times)),
-      averageMs: round(average),
-      maxMs: round(Math.max(...times))
-    }
-    await commands.writeFile("perf-results.json", JSON.stringify(result, null, 2))
-    expect(average).toBeLessThan(16)
+    const result = await PerfRun.run(element, LIT_SETTLE)
+    await PerfRun.save(
+      { spike: "Lit", where: "vitest browser mode", build: "dev (Vite dev server)", result },
+      commands.writeFile
+    )
+    expect(result.open.rows).toBe(PerfRun.count)
+    expect(result.keystrokes.at(-1)!.rows).toBeLessThan(PerfRun.count)
+    expect(result.update.avg).toBeLessThan(16)
   })
 })
 
@@ -361,22 +345,8 @@ describe("<ui-dropdown> performance", () => {
  */
 const AXE_OPTIONS = { rules: { "color-contrast": { enabled: false } } }
 
-/** Vocabulary for the generated option texts. */
-const WORDS = ["apple", "banana", "cherry", "lemon", "mango", "olive", "peach", "plum", "grape", "melon", "kiwi"]
-
-/** 1000 options with varied text, so each keystroke filters differently. */
-const OPTIONS: MenuOption[] = Array.from({ length: 1000 }, (_, index) => ({
-  value: `v${index}`,
-  text: `${WORDS[index % WORDS.length]} ${WORDS[(index * 7) % WORDS.length]} ${index}`
-}))
-
-/** Typed one character at a time:  broad first, narrowing to a few matches. */
-const QUERY = "a lemon 12"
-
-/** Two decimals. */
-function round(value: number) {
-  return Math.round(value * 100) / 100
-}
+/** Lit's `PerfAdapter`:  the DOM is up to date once `updateComplete` resolves. */
+const LIT_SETTLE: PerfAdapter = { settle: (element) => (element as UIDropdown).updateComplete }
 
 describe("<ui-dropdown> markup contract", () => {
   it("keeps the caret :empty and orders the root's children", async () => {

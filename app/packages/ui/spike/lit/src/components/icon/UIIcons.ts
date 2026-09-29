@@ -1,8 +1,7 @@
 import { html, type PropertyValues } from "lit"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "../../core"
 import { iconsVocabulary, iconVocabulary } from "$/components/icon/icon.vocabulary.en"
-import { UIElement } from "../../elements"
 import { UIIcon } from "./UIIcon"
 
 import iconCSS from "$/components/icon/icon.css?inline"

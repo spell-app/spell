@@ -1,9 +1,7 @@
 import type { JSX } from "@solidjs/web"
 
-import { proto } from "$/util"
+import { proto, UIElement } from "$spike/core"
 import { segmentsVocabulary } from "$/components/segment/segment.vocabulary.en"
-
-import { UIElement } from "$spike/UIElement"
 
 import segmentCSS from "$/components/segment/segment.css?inline"
 

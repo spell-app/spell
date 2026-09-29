@@ -53,12 +53,17 @@ describe("<ui-icon> classes", () => {
     expect(root.querySelector("svg")!.getAttribute("aria-hidden")).toBe("true")
   })
 
-  it("keeps `element.style` native:  the `style` attribute's property is `iconStyle`", async () => {
-    const { host } = await icon(`<ui-icon name="star"></ui-icon>`)
-    expect(host.style).toBeInstanceOf(CSSStyleDeclaration)
-    ;(host as unknown as { iconStyle: string }).iconStyle = "regular"
-    await SpikeFixture.tick()
-    expect(host.getAttribute("style")).toBe("regular")
+  it("draws the set `variant` names;  `outline` ~== variant=regular, and `element.style` stays native", async () => {
+    const { host: solid } = await icon(`<ui-icon name="heart"></ui-icon>`)
+    const { host: regular } = await icon(`<ui-icon name="heart" variant="regular"></ui-icon>`)
+    const { host: outline } = await icon(`<ui-icon name="heart" outline style="color: red"></ui-icon>`)
+    const path = (host: UIHost) => host.shadowRoot!.querySelector("svg path")?.getAttribute("d")
+    await expect.poll(() => [solid, regular, outline].every((host) => !!path(host))).toBe(true)
+    expect(path(solid)).not.toBe(path(regular))
+    expect(path(outline)).toBe(path(regular))
+    expect((regular as unknown as { variant: string }).variant).toBe("regular")
+    expect(outline.style).toBeInstanceOf(CSSStyleDeclaration)
+    expect(outline.style.color).toBe("red")
   })
 
   it("sets `:state(disabled)` / `:state(loading)`", async () => {

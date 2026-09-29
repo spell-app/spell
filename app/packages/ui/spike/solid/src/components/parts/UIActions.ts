@@ -1,7 +1,7 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { actionsVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-actions>`
@@ -9,6 +9,6 @@ import { ContentPart } from "$spike/ContentPart"
  * - A modal's or toast's buttons, a comment's reply links.
  * - Everything else (owner context, markup, sheet) comes from `ContentPart`.
  ****************/
-export class UIActions extends ContentPart<typeof actionsVocabulary> {
+export class UIActions extends PartElement<typeof actionsVocabulary> {
   @proto static vocabulary = actionsVocabulary
 }

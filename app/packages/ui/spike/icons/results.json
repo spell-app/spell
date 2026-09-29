@@ -1,0 +1,3128 @@
+{
+  "generated": "2026-09-29T20:19:02.764Z",
+  "runsPerCell": 5,
+  "node": "v22.17.0",
+  "playwright": "1.63.0",
+  "fontAwesome": "7.3.1",
+  "iconList": [
+    "solid/house",
+    "brands/github",
+    "solid/user",
+    "regular/heart",
+    "solid/gear",
+    "brands/apple",
+    "regular/bell",
+    "solid/magnifying-glass",
+    "solid/envelope",
+    "solid/star",
+    "solid/check",
+    "solid/xmark",
+    "solid/plus",
+    "solid/minus",
+    "solid/trash",
+    "solid/pen",
+    "solid/download",
+    "solid/upload",
+    "solid/lock",
+    "solid/unlock",
+    "solid/calendar",
+    "solid/clock",
+    "solid/camera",
+    "solid/image",
+    "solid/file",
+    "solid/folder",
+    "solid/cloud",
+    "solid/sun",
+    "solid/moon",
+    "solid/bolt",
+    "solid/fire",
+    "solid/leaf",
+    "solid/key",
+    "solid/link",
+    "solid/globe",
+    "solid/cart-shopping",
+    "solid/credit-card",
+    "solid/chart-line",
+    "solid/code",
+    "solid/bug",
+    "solid/wrench",
+    "solid/flag",
+    "solid/tag",
+    "solid/bookmark",
+    "solid/phone",
+    "solid/music",
+    "solid/play",
+    "solid/pause",
+    "solid/rocket",
+    "solid/shield"
+  ],
+  "notes": {
+    "cold": "fresh context, CDP cache disabled, server `cache-control: no-store`",
+    "warm": "same context loads the page once unmeasured, then again with immutable caching",
+    "bytes": "`wireBytes` = sum of CDP encodedDataLength (headers + gzip body);  `bodyBytes` = gzip bodies as served",
+    "time": "ms from navigation start;  `firstPaint`/`allPainted` = two frames after the first/last icon was ready",
+    "net": "local = loopback;  net = 40 ms RTT, 20 Mbit/s down, 10 Mbit/s up (CDP emulation)"
+  },
+  "matrix": {
+    "h2-net": {
+      "today": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 3707,
+            "bodyBytes": 3499,
+            "loadEvent": 158.3,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 450,
+            "bodyBytes": 388,
+            "loadEvent": 62.3,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 5,
+            "served": 5,
+            "wireBytes": 26998,
+            "bodyBytes": 26711,
+            "firstPaint": 294,
+            "allPainted": 294,
+            "loadEvent": 159.3,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 5,
+            "served": 1,
+            "wireBytes": 475,
+            "bodyBytes": 413,
+            "firstPaint": 92.1,
+            "allPainted": 92.1,
+            "loadEvent": 57.6,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 12,
+            "served": 12,
+            "wireBytes": 366429,
+            "bodyBytes": 365690,
+            "firstPaint": 263,
+            "allPainted": 381.6,
+            "loadEvent": 157.3,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/brands-D639R7KL.js",
+              "/a/chunks/regular-COw9lU6W.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js",
+              "/a/chunks/solid-u-w-D5tsx8b2.js",
+              "/a/chunks/solid-g-h-ZfbZL0e0.js",
+              "/a/chunks/solid-k-m-DWyTcvZu.js",
+              "/a/chunks/solid-d-f-Bd9ep3h5.js",
+              "/a/chunks/solid-s-t-DVbfdpws.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 12,
+            "served": 1,
+            "wireBytes": 551,
+            "bodyBytes": 489,
+            "firstPaint": 87.8,
+            "allPainted": 87.8,
+            "loadEvent": 60.1,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 21,
+            "served": 21,
+            "wireBytes": 496818,
+            "bodyBytes": 495702,
+            "firstPaint": 257.3,
+            "allPainted": 440.6,
+            "loadEvent": 159.4,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/brands-D639R7KL.js",
+              "/a/chunks/regular-COw9lU6W.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js",
+              "/a/chunks/solid-u-w-D5tsx8b2.js",
+              "/a/chunks/solid-g-h-ZfbZL0e0.js",
+              "/a/chunks/solid-k-m-DWyTcvZu.js",
+              "/a/chunks/solid-d-f-Bd9ep3h5.js",
+              "/a/chunks/solid-s-t-DVbfdpws.js",
+              "/a/chunks/solid-b-c-DTK0djdr.js",
+              "/a/chunks/solid-w-z-gXU0Jryf.js",
+              "/a/chunks/solid-pe-pu-BfOAmMvI.js",
+              "/a/chunks/solid-t-u-G0m6-TRZ.js",
+              "/a/chunks/solid-m-p-BUd0TqgD.js",
+              "/a/chunks/solid-c-d-B-yq6Z0O.js",
+              "/a/chunks/solid-f-g-DKrRgUsG.js",
+              "/a/chunks/solid-ba-bu-BWpVxWOB.js",
+              "/a/chunks/solid-q-s-DjCf0qWq.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 21,
+            "served": 1,
+            "wireBytes": 741,
+            "bodyBytes": 679,
+            "firstPaint": 90.8,
+            "allPainted": 90.8,
+            "loadEvent": 56.8,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "module": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 1942,
+            "bodyBytes": 1734,
+            "loadEvent": 157.5,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 448,
+            "bodyBytes": 386,
+            "loadEvent": 55.8,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 2213,
+            "bodyBytes": 1968,
+            "firstPaint": 228.2,
+            "allPainted": 228.2,
+            "loadEvent": 155.2,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 472,
+            "bodyBytes": 411,
+            "firstPaint": 87.6,
+            "allPainted": 87.6,
+            "loadEvent": 58.4,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 5115,
+            "bodyBytes": 4521,
+            "firstPaint": 233.6,
+            "allPainted": 236.1,
+            "loadEvent": 158.2,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js",
+              "/icons/brands/github.js",
+              "/icons/solid/user.js",
+              "/icons/regular/heart.js",
+              "/icons/solid/gear.js",
+              "/icons/brands/apple.js",
+              "/icons/regular/bell.js",
+              "/icons/solid/magnifying-glass.js",
+              "/icons/solid/envelope.js",
+              "/icons/solid/star.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 549,
+            "bodyBytes": 487,
+            "firstPaint": 90.6,
+            "allPainted": 90.6,
+            "loadEvent": 57.5,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 15755,
+            "bodyBytes": 13621,
+            "firstPaint": 236.6,
+            "allPainted": 262.7,
+            "loadEvent": 160.8,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js",
+              "/icons/brands/github.js",
+              "/icons/solid/user.js",
+              "/icons/regular/heart.js",
+              "/icons/solid/gear.js",
+              "/icons/brands/apple.js",
+              "/icons/regular/bell.js",
+              "/icons/solid/magnifying-glass.js",
+              "/icons/solid/envelope.js",
+              "/icons/solid/star.js",
+              "/icons/solid/check.js",
+              "/icons/solid/xmark.js",
+              "/icons/solid/plus.js",
+              "/icons/solid/minus.js",
+              "/icons/solid/trash.js",
+              "/icons/solid/pen.js",
+              "/icons/solid/download.js",
+              "/icons/solid/upload.js",
+              "/icons/solid/lock.js",
+              "/icons/solid/unlock.js",
+              "/icons/solid/calendar.js",
+              "/icons/solid/clock.js",
+              "/icons/solid/camera.js",
+              "/icons/solid/image.js",
+              "/icons/solid/file.js",
+              "/icons/solid/folder.js",
+              "/icons/solid/cloud.js",
+              "/icons/solid/sun.js",
+              "/icons/solid/moon.js",
+              "/icons/solid/bolt.js",
+              "/icons/solid/fire.js",
+              "/icons/solid/leaf.js",
+              "/icons/solid/key.js",
+              "/icons/solid/link.js",
+              "/icons/solid/globe.js",
+              "/icons/solid/cart-shopping.js",
+              "/icons/solid/credit-card.js",
+              "/icons/solid/chart-line.js",
+              "/icons/solid/code.js",
+              "/icons/solid/bug.js",
+              "/icons/solid/wrench.js",
+              "/icons/solid/flag.js",
+              "/icons/solid/tag.js",
+              "/icons/solid/bookmark.js",
+              "/icons/solid/phone.js",
+              "/icons/solid/music.js",
+              "/icons/solid/play.js",
+              "/icons/solid/pause.js",
+              "/icons/solid/rocket.js",
+              "/icons/solid/shield.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 742,
+            "bodyBytes": 680,
+            "firstPaint": 88.1,
+            "allPainted": 92.5,
+            "loadEvent": 64.5,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "mask": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2222,
+            "bodyBytes": 2014,
+            "loadEvent": 140.4,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 449,
+            "bodyBytes": 387,
+            "loadEvent": 55.9,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 2696,
+            "bodyBytes": 2439,
+            "firstPaint": 205,
+            "allPainted": 205,
+            "loadEvent": 199.9,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 473,
+            "bodyBytes": 412,
+            "firstPaint": 88.6,
+            "allPainted": 88.6,
+            "loadEvent": 55.3,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 7343,
+            "bodyBytes": 6735,
+            "firstPaint": 221,
+            "allPainted": 221.1,
+            "loadEvent": 207.4,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/brands/apple.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 550,
+            "bodyBytes": 488,
+            "firstPaint": 88.3,
+            "allPainted": 88.3,
+            "loadEvent": 55.4,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 25507,
+            "bodyBytes": 23342,
+            "firstPaint": 212.6,
+            "allPainted": 254,
+            "loadEvent": 229.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/check.svg",
+              "/svg/solid/xmark.svg",
+              "/svg/solid/plus.svg",
+              "/svg/solid/minus.svg",
+              "/svg/solid/trash.svg",
+              "/svg/solid/pen.svg",
+              "/svg/solid/download.svg",
+              "/svg/solid/upload.svg",
+              "/svg/solid/lock.svg",
+              "/svg/solid/unlock.svg",
+              "/svg/solid/calendar.svg",
+              "/svg/solid/clock.svg",
+              "/svg/solid/camera.svg",
+              "/svg/solid/image.svg",
+              "/svg/solid/file.svg",
+              "/svg/solid/folder.svg",
+              "/svg/solid/globe.svg",
+              "/svg/solid/leaf.svg",
+              "/svg/solid/music.svg",
+              "/svg/solid/rocket.svg",
+              "/svg/solid/pause.svg",
+              "/svg/solid/flag.svg",
+              "/svg/solid/link.svg",
+              "/svg/solid/shield.svg",
+              "/svg/solid/tag.svg",
+              "/svg/solid/credit-card.svg",
+              "/svg/solid/bookmark.svg",
+              "/svg/solid/sun.svg",
+              "/svg/solid/cloud.svg",
+              "/svg/solid/phone.svg",
+              "/svg/solid/moon.svg",
+              "/svg/solid/bolt.svg",
+              "/svg/solid/key.svg",
+              "/svg/solid/cart-shopping.svg",
+              "/svg/solid/chart-line.svg",
+              "/svg/solid/code.svg",
+              "/svg/solid/play.svg",
+              "/svg/solid/fire.svg",
+              "/svg/solid/wrench.svg",
+              "/svg/solid/bug.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 738,
+            "bodyBytes": 676,
+            "firstPaint": 95.2,
+            "allPainted": 95.2,
+            "loadEvent": 64.3,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "fetch": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2063,
+            "bodyBytes": 1855,
+            "loadEvent": 145.7,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 451,
+            "bodyBytes": 389,
+            "loadEvent": 58.8,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 2538,
+            "bodyBytes": 2280,
+            "firstPaint": 219.8,
+            "allPainted": 219.8,
+            "loadEvent": 152.5,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 476,
+            "bodyBytes": 414,
+            "firstPaint": 86.9,
+            "allPainted": 86.9,
+            "loadEvent": 54.7,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 7183,
+            "bodyBytes": 6575,
+            "firstPaint": 238.6,
+            "allPainted": 238.6,
+            "loadEvent": 155.8,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 551,
+            "bodyBytes": 489,
+            "firstPaint": 90.7,
+            "allPainted": 90.7,
+            "loadEvent": 58.3,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 25349,
+            "bodyBytes": 23184,
+            "firstPaint": 219.8,
+            "allPainted": 254,
+            "loadEvent": 154.4,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/check.svg",
+              "/svg/solid/xmark.svg",
+              "/svg/solid/plus.svg",
+              "/svg/solid/minus.svg",
+              "/svg/solid/trash.svg",
+              "/svg/solid/pen.svg",
+              "/svg/solid/download.svg",
+              "/svg/solid/upload.svg",
+              "/svg/solid/lock.svg",
+              "/svg/solid/unlock.svg",
+              "/svg/solid/calendar.svg",
+              "/svg/solid/clock.svg",
+              "/svg/solid/camera.svg",
+              "/svg/solid/image.svg",
+              "/svg/solid/file.svg",
+              "/svg/solid/folder.svg",
+              "/svg/solid/cloud.svg",
+              "/svg/solid/sun.svg",
+              "/svg/solid/moon.svg",
+              "/svg/solid/bolt.svg",
+              "/svg/solid/fire.svg",
+              "/svg/solid/leaf.svg",
+              "/svg/solid/key.svg",
+              "/svg/solid/link.svg",
+              "/svg/solid/globe.svg",
+              "/svg/solid/cart-shopping.svg",
+              "/svg/solid/credit-card.svg",
+              "/svg/solid/chart-line.svg",
+              "/svg/solid/code.svg",
+              "/svg/solid/bug.svg",
+              "/svg/solid/wrench.svg",
+              "/svg/solid/flag.svg",
+              "/svg/solid/tag.svg",
+              "/svg/solid/bookmark.svg",
+              "/svg/solid/phone.svg",
+              "/svg/solid/music.svg",
+              "/svg/solid/play.svg",
+              "/svg/solid/pause.svg",
+              "/svg/solid/rocket.svg",
+              "/svg/solid/shield.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 741,
+            "bodyBytes": 679,
+            "firstPaint": 91.1,
+            "allPainted": 91.1,
+            "loadEvent": 61.1,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      }
+    },
+    "h1-local": {
+      "today": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 4221,
+            "bodyBytes": 3499,
+            "loadEvent": 5.2,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 624,
+            "bodyBytes": 388,
+            "loadEvent": 8.3,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 5,
+            "served": 5,
+            "wireBytes": 27920,
+            "bodyBytes": 26711,
+            "firstPaint": 37.7,
+            "allPainted": 37.7,
+            "loadEvent": 5.8,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 5,
+            "served": 1,
+            "wireBytes": 649,
+            "bodyBytes": 413,
+            "firstPaint": 42.9,
+            "allPainted": 42.9,
+            "loadEvent": 9.3,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 12,
+            "served": 12,
+            "wireBytes": 368608,
+            "bodyBytes": 365690,
+            "firstPaint": 38.3,
+            "allPainted": 38.4,
+            "loadEvent": 6.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/brands-D639R7KL.js",
+              "/a/chunks/regular-COw9lU6W.js",
+              "/a/chunks/solid-d-f-Bd9ep3h5.js",
+              "/a/chunks/solid-s-t-DVbfdpws.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js",
+              "/a/chunks/solid-u-w-D5tsx8b2.js",
+              "/a/chunks/solid-g-h-ZfbZL0e0.js",
+              "/a/chunks/solid-k-m-DWyTcvZu.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 12,
+            "served": 1,
+            "wireBytes": 725,
+            "bodyBytes": 489,
+            "firstPaint": 42.6,
+            "allPainted": 42.6,
+            "loadEvent": 9.5,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 21,
+            "served": 21,
+            "wireBytes": 500815,
+            "bodyBytes": 495702,
+            "firstPaint": 38.4,
+            "allPainted": 38.5,
+            "loadEvent": 6.3,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/brands-D639R7KL.js",
+              "/a/chunks/regular-COw9lU6W.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js",
+              "/a/chunks/solid-s-t-DVbfdpws.js",
+              "/a/chunks/solid-g-h-ZfbZL0e0.js",
+              "/a/chunks/solid-b-c-DTK0djdr.js",
+              "/a/chunks/solid-u-w-D5tsx8b2.js",
+              "/a/chunks/solid-w-z-gXU0Jryf.js",
+              "/a/chunks/solid-pe-pu-BfOAmMvI.js",
+              "/a/chunks/solid-t-u-G0m6-TRZ.js",
+              "/a/chunks/solid-m-p-BUd0TqgD.js",
+              "/a/chunks/solid-k-m-DWyTcvZu.js",
+              "/a/chunks/solid-c-d-B-yq6Z0O.js",
+              "/a/chunks/solid-f-g-DKrRgUsG.js",
+              "/a/chunks/solid-ba-bu-BWpVxWOB.js",
+              "/a/chunks/solid-q-s-DjCf0qWq.js",
+              "/a/chunks/solid-d-f-Bd9ep3h5.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 21,
+            "served": 1,
+            "wireBytes": 915,
+            "bodyBytes": 679,
+            "firstPaint": 42.9,
+            "allPainted": 43,
+            "loadEvent": 10.7,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "module": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2455,
+            "bodyBytes": 1734,
+            "loadEvent": 4.9,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 622,
+            "bodyBytes": 386,
+            "loadEvent": 8.2,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 2931,
+            "bodyBytes": 1968,
+            "firstPaint": 38.1,
+            "allPainted": 38.1,
+            "loadEvent": 5.6,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 647,
+            "bodyBytes": 411,
+            "firstPaint": 41.7,
+            "allPainted": 41.7,
+            "loadEvent": 8.4,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 7662,
+            "bodyBytes": 4521,
+            "firstPaint": 38.4,
+            "allPainted": 38.4,
+            "loadEvent": 6.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js",
+              "/icons/brands/github.js",
+              "/icons/solid/user.js",
+              "/icons/regular/heart.js",
+              "/icons/solid/gear.js",
+              "/icons/brands/apple.js",
+              "/icons/regular/bell.js",
+              "/icons/solid/magnifying-glass.js",
+              "/icons/solid/envelope.js",
+              "/icons/solid/star.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 723,
+            "bodyBytes": 487,
+            "firstPaint": 42.1,
+            "allPainted": 42.1,
+            "loadEvent": 10.4,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 26442,
+            "bodyBytes": 13621,
+            "firstPaint": 38.5,
+            "allPainted": 38.5,
+            "loadEvent": 8,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js",
+              "/icons/brands/github.js",
+              "/icons/solid/user.js",
+              "/icons/regular/heart.js",
+              "/icons/solid/gear.js",
+              "/icons/brands/apple.js",
+              "/icons/regular/bell.js",
+              "/icons/solid/magnifying-glass.js",
+              "/icons/solid/envelope.js",
+              "/icons/solid/star.js",
+              "/icons/solid/check.js",
+              "/icons/solid/xmark.js",
+              "/icons/solid/plus.js",
+              "/icons/solid/minus.js",
+              "/icons/solid/trash.js",
+              "/icons/solid/pen.js",
+              "/icons/solid/download.js",
+              "/icons/solid/upload.js",
+              "/icons/solid/lock.js",
+              "/icons/solid/unlock.js",
+              "/icons/solid/calendar.js",
+              "/icons/solid/clock.js",
+              "/icons/solid/camera.js",
+              "/icons/solid/image.js",
+              "/icons/solid/file.js",
+              "/icons/solid/folder.js",
+              "/icons/solid/cloud.js",
+              "/icons/solid/sun.js",
+              "/icons/solid/moon.js",
+              "/icons/solid/bolt.js",
+              "/icons/solid/fire.js",
+              "/icons/solid/leaf.js",
+              "/icons/solid/key.js",
+              "/icons/solid/link.js",
+              "/icons/solid/globe.js",
+              "/icons/solid/cart-shopping.js",
+              "/icons/solid/credit-card.js",
+              "/icons/solid/chart-line.js",
+              "/icons/solid/code.js",
+              "/icons/solid/bug.js",
+              "/icons/solid/wrench.js",
+              "/icons/solid/flag.js",
+              "/icons/solid/tag.js",
+              "/icons/solid/bookmark.js",
+              "/icons/solid/phone.js",
+              "/icons/solid/music.js",
+              "/icons/solid/play.js",
+              "/icons/solid/pause.js",
+              "/icons/solid/rocket.js",
+              "/icons/solid/shield.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 916,
+            "bodyBytes": 680,
+            "firstPaint": 42.7,
+            "allPainted": 42.8,
+            "loadEvent": 15,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "mask": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2735,
+            "bodyBytes": 2014,
+            "loadEvent": 4.9,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 623,
+            "bodyBytes": 387,
+            "loadEvent": 8.2,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 3385,
+            "bodyBytes": 2439,
+            "firstPaint": 38.4,
+            "allPainted": 38.4,
+            "loadEvent": 6.2,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 648,
+            "bodyBytes": 412,
+            "firstPaint": 42.7,
+            "allPainted": 42.7,
+            "loadEvent": 9.5,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 9706,
+            "bodyBytes": 6735,
+            "firstPaint": 38,
+            "allPainted": 38,
+            "loadEvent": 8.7,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 724,
+            "bodyBytes": 488,
+            "firstPaint": 42.6,
+            "allPainted": 42.6,
+            "loadEvent": 11.5,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 35313,
+            "bodyBytes": 23342,
+            "firstPaint": 38.5,
+            "allPainted": 38.6,
+            "loadEvent": 16.7,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/xmark.svg",
+              "/svg/solid/plus.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/check.svg",
+              "/svg/solid/trash.svg",
+              "/svg/solid/pen.svg",
+              "/svg/solid/download.svg",
+              "/svg/solid/upload.svg",
+              "/svg/solid/lock.svg",
+              "/svg/solid/minus.svg",
+              "/svg/solid/unlock.svg",
+              "/svg/solid/calendar.svg",
+              "/svg/solid/clock.svg",
+              "/svg/solid/camera.svg",
+              "/svg/solid/image.svg",
+              "/svg/solid/file.svg",
+              "/svg/solid/folder.svg",
+              "/svg/solid/cloud.svg",
+              "/svg/solid/sun.svg",
+              "/svg/solid/moon.svg",
+              "/svg/solid/bolt.svg",
+              "/svg/solid/fire.svg",
+              "/svg/solid/leaf.svg",
+              "/svg/solid/key.svg",
+              "/svg/solid/link.svg",
+              "/svg/solid/globe.svg",
+              "/svg/solid/cart-shopping.svg",
+              "/svg/solid/credit-card.svg",
+              "/svg/solid/chart-line.svg",
+              "/svg/solid/code.svg",
+              "/svg/solid/bug.svg",
+              "/svg/solid/wrench.svg",
+              "/svg/solid/flag.svg",
+              "/svg/solid/tag.svg",
+              "/svg/solid/bookmark.svg",
+              "/svg/solid/phone.svg",
+              "/svg/solid/rocket.svg",
+              "/svg/solid/music.svg",
+              "/svg/solid/play.svg",
+              "/svg/solid/pause.svg",
+              "/svg/solid/shield.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 912,
+            "bodyBytes": 676,
+            "firstPaint": 45.9,
+            "allPainted": 45.9,
+            "loadEvent": 16.1,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "fetch": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2576,
+            "bodyBytes": 1855,
+            "loadEvent": 4.7,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 625,
+            "bodyBytes": 389,
+            "loadEvent": 8.4,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 3226,
+            "bodyBytes": 2280,
+            "firstPaint": 37.8,
+            "allPainted": 37.8,
+            "loadEvent": 5.5,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 650,
+            "bodyBytes": 414,
+            "firstPaint": 40.6,
+            "allPainted": 40.6,
+            "loadEvent": 8.6,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 9546,
+            "bodyBytes": 6575,
+            "firstPaint": 38.4,
+            "allPainted": 38.4,
+            "loadEvent": 5.8,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/user.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 725,
+            "bodyBytes": 489,
+            "firstPaint": 41.6,
+            "allPainted": 41.6,
+            "loadEvent": 10.1,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 35155,
+            "bodyBytes": 23184,
+            "firstPaint": 37,
+            "allPainted": 37,
+            "loadEvent": 7.8,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/check.svg",
+              "/svg/solid/xmark.svg",
+              "/svg/solid/minus.svg",
+              "/svg/solid/trash.svg",
+              "/svg/solid/pen.svg",
+              "/svg/solid/download.svg",
+              "/svg/solid/upload.svg",
+              "/svg/solid/plus.svg",
+              "/svg/solid/lock.svg",
+              "/svg/solid/unlock.svg",
+              "/svg/solid/calendar.svg",
+              "/svg/solid/clock.svg",
+              "/svg/solid/camera.svg",
+              "/svg/solid/image.svg",
+              "/svg/solid/file.svg",
+              "/svg/solid/folder.svg",
+              "/svg/solid/cloud.svg",
+              "/svg/solid/sun.svg",
+              "/svg/solid/moon.svg",
+              "/svg/solid/bolt.svg",
+              "/svg/solid/fire.svg",
+              "/svg/solid/leaf.svg",
+              "/svg/solid/key.svg",
+              "/svg/solid/link.svg",
+              "/svg/solid/globe.svg",
+              "/svg/solid/cart-shopping.svg",
+              "/svg/solid/credit-card.svg",
+              "/svg/solid/chart-line.svg",
+              "/svg/solid/code.svg",
+              "/svg/solid/bug.svg",
+              "/svg/solid/wrench.svg",
+              "/svg/solid/flag.svg",
+              "/svg/solid/tag.svg",
+              "/svg/solid/bookmark.svg",
+              "/svg/solid/phone.svg",
+              "/svg/solid/music.svg",
+              "/svg/solid/play.svg",
+              "/svg/solid/pause.svg",
+              "/svg/solid/rocket.svg",
+              "/svg/solid/shield.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 915,
+            "bodyBytes": 679,
+            "firstPaint": 42.4,
+            "allPainted": 42.4,
+            "loadEvent": 13.6,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      }
+    },
+    "h2-local": {
+      "today": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 3707,
+            "bodyBytes": 3499,
+            "loadEvent": 6.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 450,
+            "bodyBytes": 388,
+            "loadEvent": 9.1,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 5,
+            "served": 5,
+            "wireBytes": 26998,
+            "bodyBytes": 26711,
+            "firstPaint": 38.7,
+            "allPainted": 38.7,
+            "loadEvent": 6.8,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 5,
+            "served": 1,
+            "wireBytes": 475,
+            "bodyBytes": 413,
+            "firstPaint": 42.5,
+            "allPainted": 42.5,
+            "loadEvent": 9.6,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 12,
+            "served": 12,
+            "wireBytes": 366429,
+            "bodyBytes": 365690,
+            "firstPaint": 38.7,
+            "allPainted": 38.7,
+            "loadEvent": 7,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/brands-D639R7KL.js",
+              "/a/chunks/regular-COw9lU6W.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js",
+              "/a/chunks/solid-u-w-D5tsx8b2.js",
+              "/a/chunks/solid-g-h-ZfbZL0e0.js",
+              "/a/chunks/solid-k-m-DWyTcvZu.js",
+              "/a/chunks/solid-d-f-Bd9ep3h5.js",
+              "/a/chunks/solid-s-t-DVbfdpws.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 12,
+            "served": 1,
+            "wireBytes": 551,
+            "bodyBytes": 489,
+            "firstPaint": 41.8,
+            "allPainted": 41.8,
+            "loadEvent": 9.7,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 21,
+            "served": 21,
+            "wireBytes": 496818,
+            "bodyBytes": 495702,
+            "firstPaint": 39.4,
+            "allPainted": 39.4,
+            "loadEvent": 7.5,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/brands-D639R7KL.js",
+              "/a/chunks/regular-COw9lU6W.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js",
+              "/a/chunks/solid-u-w-D5tsx8b2.js",
+              "/a/chunks/solid-g-h-ZfbZL0e0.js",
+              "/a/chunks/solid-k-m-DWyTcvZu.js",
+              "/a/chunks/solid-d-f-Bd9ep3h5.js",
+              "/a/chunks/solid-s-t-DVbfdpws.js",
+              "/a/chunks/solid-b-c-DTK0djdr.js",
+              "/a/chunks/solid-w-z-gXU0Jryf.js",
+              "/a/chunks/solid-pe-pu-BfOAmMvI.js",
+              "/a/chunks/solid-t-u-G0m6-TRZ.js",
+              "/a/chunks/solid-m-p-BUd0TqgD.js",
+              "/a/chunks/solid-c-d-B-yq6Z0O.js",
+              "/a/chunks/solid-f-g-DKrRgUsG.js",
+              "/a/chunks/solid-ba-bu-BWpVxWOB.js",
+              "/a/chunks/solid-q-s-DjCf0qWq.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 21,
+            "served": 1,
+            "wireBytes": 741,
+            "bodyBytes": 679,
+            "firstPaint": 43.4,
+            "allPainted": 43.5,
+            "loadEvent": 10.7,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "module": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 1942,
+            "bodyBytes": 1734,
+            "loadEvent": 6.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 448,
+            "bodyBytes": 386,
+            "loadEvent": 8.4,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 2213,
+            "bodyBytes": 1968,
+            "firstPaint": 39.3,
+            "allPainted": 39.3,
+            "loadEvent": 6.5,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 472,
+            "bodyBytes": 411,
+            "firstPaint": 41.1,
+            "allPainted": 41.1,
+            "loadEvent": 8.8,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 5115,
+            "bodyBytes": 4521,
+            "firstPaint": 39.2,
+            "allPainted": 39.2,
+            "loadEvent": 7.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js",
+              "/icons/brands/github.js",
+              "/icons/solid/user.js",
+              "/icons/regular/heart.js",
+              "/icons/solid/gear.js",
+              "/icons/brands/apple.js",
+              "/icons/regular/bell.js",
+              "/icons/solid/magnifying-glass.js",
+              "/icons/solid/envelope.js",
+              "/icons/solid/star.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 549,
+            "bodyBytes": 487,
+            "firstPaint": 41.7,
+            "allPainted": 41.7,
+            "loadEvent": 10.2,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 15755,
+            "bodyBytes": 13621,
+            "firstPaint": 39.5,
+            "allPainted": 39.5,
+            "loadEvent": 9.3,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js",
+              "/icons/brands/github.js",
+              "/icons/solid/user.js",
+              "/icons/regular/heart.js",
+              "/icons/solid/gear.js",
+              "/icons/brands/apple.js",
+              "/icons/regular/bell.js",
+              "/icons/solid/magnifying-glass.js",
+              "/icons/solid/envelope.js",
+              "/icons/solid/star.js",
+              "/icons/solid/check.js",
+              "/icons/solid/xmark.js",
+              "/icons/solid/plus.js",
+              "/icons/solid/minus.js",
+              "/icons/solid/trash.js",
+              "/icons/solid/pen.js",
+              "/icons/solid/download.js",
+              "/icons/solid/upload.js",
+              "/icons/solid/lock.js",
+              "/icons/solid/unlock.js",
+              "/icons/solid/calendar.js",
+              "/icons/solid/clock.js",
+              "/icons/solid/camera.js",
+              "/icons/solid/image.js",
+              "/icons/solid/file.js",
+              "/icons/solid/folder.js",
+              "/icons/solid/cloud.js",
+              "/icons/solid/sun.js",
+              "/icons/solid/moon.js",
+              "/icons/solid/bolt.js",
+              "/icons/solid/fire.js",
+              "/icons/solid/leaf.js",
+              "/icons/solid/key.js",
+              "/icons/solid/link.js",
+              "/icons/solid/globe.js",
+              "/icons/solid/cart-shopping.js",
+              "/icons/solid/credit-card.js",
+              "/icons/solid/chart-line.js",
+              "/icons/solid/code.js",
+              "/icons/solid/bug.js",
+              "/icons/solid/wrench.js",
+              "/icons/solid/flag.js",
+              "/icons/solid/tag.js",
+              "/icons/solid/bookmark.js",
+              "/icons/solid/phone.js",
+              "/icons/solid/music.js",
+              "/icons/solid/play.js",
+              "/icons/solid/pause.js",
+              "/icons/solid/rocket.js",
+              "/icons/solid/shield.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 742,
+            "bodyBytes": 680,
+            "firstPaint": 43.7,
+            "allPainted": 43.8,
+            "loadEvent": 14.9,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "mask": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2222,
+            "bodyBytes": 2014,
+            "loadEvent": 6.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 449,
+            "bodyBytes": 387,
+            "loadEvent": 8.4,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 2696,
+            "bodyBytes": 2439,
+            "firstPaint": 39.4,
+            "allPainted": 39.4,
+            "loadEvent": 7.7,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 473,
+            "bodyBytes": 412,
+            "firstPaint": 42.1,
+            "allPainted": 42.1,
+            "loadEvent": 8.7,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 7343,
+            "bodyBytes": 6735,
+            "firstPaint": 39.4,
+            "allPainted": 39.4,
+            "loadEvent": 10.3,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 550,
+            "bodyBytes": 488,
+            "firstPaint": 42,
+            "allPainted": 42,
+            "loadEvent": 10.2,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 25507,
+            "bodyBytes": 23342,
+            "firstPaint": 39.4,
+            "allPainted": 39.4,
+            "loadEvent": 19.3,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/check.svg",
+              "/svg/solid/xmark.svg",
+              "/svg/solid/plus.svg",
+              "/svg/solid/minus.svg",
+              "/svg/solid/trash.svg",
+              "/svg/solid/pen.svg",
+              "/svg/solid/download.svg",
+              "/svg/solid/upload.svg",
+              "/svg/solid/lock.svg",
+              "/svg/solid/unlock.svg",
+              "/svg/solid/calendar.svg",
+              "/svg/solid/clock.svg",
+              "/svg/solid/camera.svg",
+              "/svg/solid/image.svg",
+              "/svg/solid/file.svg",
+              "/svg/solid/folder.svg",
+              "/svg/solid/cloud.svg",
+              "/svg/solid/sun.svg",
+              "/svg/solid/moon.svg",
+              "/svg/solid/bolt.svg",
+              "/svg/solid/fire.svg",
+              "/svg/solid/leaf.svg",
+              "/svg/solid/key.svg",
+              "/svg/solid/link.svg",
+              "/svg/solid/globe.svg",
+              "/svg/solid/cart-shopping.svg",
+              "/svg/solid/credit-card.svg",
+              "/svg/solid/chart-line.svg",
+              "/svg/solid/code.svg",
+              "/svg/solid/bug.svg",
+              "/svg/solid/wrench.svg",
+              "/svg/solid/flag.svg",
+              "/svg/solid/tag.svg",
+              "/svg/solid/bookmark.svg",
+              "/svg/solid/phone.svg",
+              "/svg/solid/music.svg",
+              "/svg/solid/play.svg",
+              "/svg/solid/pause.svg",
+              "/svg/solid/rocket.svg",
+              "/svg/solid/shield.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 738,
+            "bodyBytes": 676,
+            "firstPaint": 46.2,
+            "allPainted": 46.2,
+            "loadEvent": 16.1,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "fetch": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2063,
+            "bodyBytes": 1855,
+            "loadEvent": 6,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 451,
+            "bodyBytes": 389,
+            "loadEvent": 8.9,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 2538,
+            "bodyBytes": 2280,
+            "firstPaint": 39.4,
+            "allPainted": 39.4,
+            "loadEvent": 6.4,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 476,
+            "bodyBytes": 414,
+            "firstPaint": 42.4,
+            "allPainted": 42.4,
+            "loadEvent": 9.2,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 7183,
+            "bodyBytes": 6575,
+            "firstPaint": 38,
+            "allPainted": 38,
+            "loadEvent": 7.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 551,
+            "bodyBytes": 489,
+            "firstPaint": 42.7,
+            "allPainted": 42.7,
+            "loadEvent": 10.6,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 25349,
+            "bodyBytes": 23184,
+            "firstPaint": 39.5,
+            "allPainted": 39.6,
+            "loadEvent": 8.8,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/check.svg",
+              "/svg/solid/xmark.svg",
+              "/svg/solid/plus.svg",
+              "/svg/solid/minus.svg",
+              "/svg/solid/trash.svg",
+              "/svg/solid/pen.svg",
+              "/svg/solid/download.svg",
+              "/svg/solid/upload.svg",
+              "/svg/solid/lock.svg",
+              "/svg/solid/unlock.svg",
+              "/svg/solid/calendar.svg",
+              "/svg/solid/clock.svg",
+              "/svg/solid/camera.svg",
+              "/svg/solid/image.svg",
+              "/svg/solid/file.svg",
+              "/svg/solid/folder.svg",
+              "/svg/solid/cloud.svg",
+              "/svg/solid/sun.svg",
+              "/svg/solid/moon.svg",
+              "/svg/solid/bolt.svg",
+              "/svg/solid/fire.svg",
+              "/svg/solid/leaf.svg",
+              "/svg/solid/key.svg",
+              "/svg/solid/link.svg",
+              "/svg/solid/globe.svg",
+              "/svg/solid/cart-shopping.svg",
+              "/svg/solid/credit-card.svg",
+              "/svg/solid/chart-line.svg",
+              "/svg/solid/code.svg",
+              "/svg/solid/bug.svg",
+              "/svg/solid/wrench.svg",
+              "/svg/solid/flag.svg",
+              "/svg/solid/tag.svg",
+              "/svg/solid/bookmark.svg",
+              "/svg/solid/phone.svg",
+              "/svg/solid/music.svg",
+              "/svg/solid/play.svg",
+              "/svg/solid/pause.svg",
+              "/svg/solid/rocket.svg",
+              "/svg/solid/shield.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 741,
+            "bodyBytes": 679,
+            "firstPaint": 43.1,
+            "allPainted": 43.2,
+            "loadEvent": 13.5,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      }
+    },
+    "h1-net": {
+      "today": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 4221,
+            "bodyBytes": 3499,
+            "loadEvent": 148,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 624,
+            "bodyBytes": 388,
+            "loadEvent": 57.4,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 5,
+            "served": 5,
+            "wireBytes": 27920,
+            "bodyBytes": 26711,
+            "firstPaint": 285.7,
+            "allPainted": 285.7,
+            "loadEvent": 151.7,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 5,
+            "served": 1,
+            "wireBytes": 649,
+            "bodyBytes": 413,
+            "firstPaint": 89.8,
+            "allPainted": 89.8,
+            "loadEvent": 56.3,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 12,
+            "served": 12,
+            "wireBytes": 368608,
+            "bodyBytes": 365690,
+            "firstPaint": 235.3,
+            "allPainted": 370.5,
+            "loadEvent": 145.7,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/brands-D639R7KL.js",
+              "/a/chunks/regular-COw9lU6W.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js",
+              "/a/chunks/solid-u-w-D5tsx8b2.js",
+              "/a/chunks/solid-g-h-ZfbZL0e0.js",
+              "/a/chunks/solid-k-m-DWyTcvZu.js",
+              "/a/chunks/solid-d-f-Bd9ep3h5.js",
+              "/a/chunks/solid-s-t-DVbfdpws.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 12,
+            "served": 1,
+            "wireBytes": 725,
+            "bodyBytes": 489,
+            "firstPaint": 87.2,
+            "allPainted": 87.2,
+            "loadEvent": 55.2,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 21,
+            "served": 21,
+            "wireBytes": 500815,
+            "bodyBytes": 495702,
+            "firstPaint": 249.7,
+            "allPainted": 446.7,
+            "loadEvent": 151.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/today.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/a/chunks/solid-X4q4xi-w.js",
+              "/a/chunks/brands-D639R7KL.js",
+              "/a/chunks/regular-COw9lU6W.js",
+              "/a/chunks/solid-h-j-DOZEtgol.js",
+              "/a/chunks/solid-u-w-D5tsx8b2.js",
+              "/a/chunks/solid-g-h-ZfbZL0e0.js",
+              "/a/chunks/solid-k-m-DWyTcvZu.js",
+              "/a/chunks/solid-d-f-Bd9ep3h5.js",
+              "/a/chunks/solid-s-t-DVbfdpws.js",
+              "/a/chunks/solid-b-c-DTK0djdr.js",
+              "/a/chunks/solid-w-z-gXU0Jryf.js",
+              "/a/chunks/solid-pe-pu-BfOAmMvI.js",
+              "/a/chunks/solid-t-u-G0m6-TRZ.js",
+              "/a/chunks/solid-m-p-BUd0TqgD.js",
+              "/a/chunks/solid-c-d-B-yq6Z0O.js",
+              "/a/chunks/solid-f-g-DKrRgUsG.js",
+              "/a/chunks/solid-ba-bu-BWpVxWOB.js",
+              "/a/chunks/solid-q-s-DjCf0qWq.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 21,
+            "served": 1,
+            "wireBytes": 915,
+            "bodyBytes": 679,
+            "firstPaint": 93.9,
+            "allPainted": 94,
+            "loadEvent": 61.5,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "module": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2455,
+            "bodyBytes": 1734,
+            "loadEvent": 142.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 622,
+            "bodyBytes": 386,
+            "loadEvent": 56.8,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 2931,
+            "bodyBytes": 1968,
+            "firstPaint": 217.9,
+            "allPainted": 217.9,
+            "loadEvent": 143.5,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 647,
+            "bodyBytes": 411,
+            "firstPaint": 84,
+            "allPainted": 84,
+            "loadEvent": 50.8,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 7662,
+            "bodyBytes": 4521,
+            "firstPaint": 217.7,
+            "allPainted": 266.5,
+            "loadEvent": 145.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js",
+              "/icons/brands/github.js",
+              "/icons/solid/user.js",
+              "/icons/regular/heart.js",
+              "/icons/solid/gear.js",
+              "/icons/brands/apple.js",
+              "/icons/regular/bell.js",
+              "/icons/solid/magnifying-glass.js",
+              "/icons/solid/envelope.js",
+              "/icons/solid/star.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 723,
+            "bodyBytes": 487,
+            "firstPaint": 86.7,
+            "allPainted": 86.7,
+            "loadEvent": 53.1,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 26442,
+            "bodyBytes": 13621,
+            "firstPaint": 219.2,
+            "allPainted": 603.1,
+            "loadEvent": 149.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/module.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/icons/solid/house.js",
+              "/icons/brands/github.js",
+              "/icons/solid/user.js",
+              "/icons/regular/heart.js",
+              "/icons/solid/gear.js",
+              "/icons/brands/apple.js",
+              "/icons/regular/bell.js",
+              "/icons/solid/magnifying-glass.js",
+              "/icons/solid/envelope.js",
+              "/icons/solid/star.js",
+              "/icons/solid/check.js",
+              "/icons/solid/xmark.js",
+              "/icons/solid/plus.js",
+              "/icons/solid/minus.js",
+              "/icons/solid/trash.js",
+              "/icons/solid/pen.js",
+              "/icons/solid/download.js",
+              "/icons/solid/upload.js",
+              "/icons/solid/lock.js",
+              "/icons/solid/unlock.js",
+              "/icons/solid/calendar.js",
+              "/icons/solid/clock.js",
+              "/icons/solid/camera.js",
+              "/icons/solid/image.js",
+              "/icons/solid/file.js",
+              "/icons/solid/folder.js",
+              "/icons/solid/cloud.js",
+              "/icons/solid/sun.js",
+              "/icons/solid/moon.js",
+              "/icons/solid/bolt.js",
+              "/icons/solid/fire.js",
+              "/icons/solid/leaf.js",
+              "/icons/solid/key.js",
+              "/icons/solid/link.js",
+              "/icons/solid/globe.js",
+              "/icons/solid/cart-shopping.js",
+              "/icons/solid/credit-card.js",
+              "/icons/solid/chart-line.js",
+              "/icons/solid/code.js",
+              "/icons/solid/bug.js",
+              "/icons/solid/wrench.js",
+              "/icons/solid/flag.js",
+              "/icons/solid/tag.js",
+              "/icons/solid/bookmark.js",
+              "/icons/solid/phone.js",
+              "/icons/solid/music.js",
+              "/icons/solid/play.js",
+              "/icons/solid/pause.js",
+              "/icons/solid/rocket.js",
+              "/icons/solid/shield.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 916,
+            "bodyBytes": 680,
+            "firstPaint": 90.7,
+            "allPainted": 90.8,
+            "loadEvent": 60.2,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "mask": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2735,
+            "bodyBytes": 2014,
+            "loadEvent": 142.9,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 623,
+            "bodyBytes": 387,
+            "loadEvent": 55.1,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 3385,
+            "bodyBytes": 2439,
+            "firstPaint": 215.4,
+            "allPainted": 215.4,
+            "loadEvent": 195.9,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 648,
+            "bodyBytes": 412,
+            "firstPaint": 90.3,
+            "allPainted": 90.3,
+            "loadEvent": 56.8,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 9706,
+            "bodyBytes": 6735,
+            "firstPaint": 215.3,
+            "allPainted": 256.5,
+            "loadEvent": 242.9,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/regular/bell.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 724,
+            "bodyBytes": 488,
+            "firstPaint": 92.8,
+            "allPainted": 92.8,
+            "loadEvent": 60.8,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 35313,
+            "bodyBytes": 23342,
+            "firstPaint": 220.1,
+            "allPainted": 620.9,
+            "loadEvent": 594,
+            "servedPaths": [
+              "/page.html",
+              "/a/mask.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/solid/music.svg",
+              "/svg/solid/leaf.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/upload.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/folder.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/rocket.svg",
+              "/svg/solid/check.svg",
+              "/svg/solid/pause.svg",
+              "/svg/solid/camera.svg",
+              "/svg/solid/plus.svg",
+              "/svg/solid/download.svg",
+              "/svg/solid/flag.svg",
+              "/svg/solid/trash.svg",
+              "/svg/solid/file.svg",
+              "/svg/solid/link.svg",
+              "/svg/solid/shield.svg",
+              "/svg/solid/calendar.svg",
+              "/svg/solid/tag.svg",
+              "/svg/solid/credit-card.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/minus.svg",
+              "/svg/solid/bookmark.svg",
+              "/svg/solid/sun.svg",
+              "/svg/solid/cloud.svg",
+              "/svg/solid/phone.svg",
+              "/svg/solid/moon.svg",
+              "/svg/solid/unlock.svg",
+              "/svg/solid/bolt.svg",
+              "/svg/solid/key.svg",
+              "/svg/solid/lock.svg",
+              "/svg/solid/cart-shopping.svg",
+              "/svg/solid/xmark.svg",
+              "/svg/solid/chart-line.svg",
+              "/svg/solid/pen.svg",
+              "/svg/solid/code.svg",
+              "/svg/solid/play.svg",
+              "/svg/solid/image.svg",
+              "/svg/solid/fire.svg",
+              "/svg/solid/wrench.svg",
+              "/svg/solid/clock.svg",
+              "/svg/solid/bug.svg",
+              "/svg/solid/globe.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 912,
+            "bodyBytes": 676,
+            "firstPaint": 94.1,
+            "allPainted": 94.1,
+            "loadEvent": 63.6,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      },
+      "fetch": {
+        "0": {
+          "cold": {
+            "requests": 3,
+            "served": 3,
+            "wireBytes": 2576,
+            "bodyBytes": 1855,
+            "loadEvent": 149.4,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 3,
+            "served": 1,
+            "wireBytes": 625,
+            "bodyBytes": 389,
+            "loadEvent": 54.5,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "1": {
+          "cold": {
+            "requests": 4,
+            "served": 4,
+            "wireBytes": 3226,
+            "bodyBytes": 2280,
+            "firstPaint": 221,
+            "allPainted": 221,
+            "loadEvent": 149.5,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 4,
+            "served": 1,
+            "wireBytes": 650,
+            "bodyBytes": 414,
+            "firstPaint": 89.9,
+            "allPainted": 89.9,
+            "loadEvent": 57.6,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "10": {
+          "cold": {
+            "requests": 13,
+            "served": 13,
+            "wireBytes": 9546,
+            "bodyBytes": 6575,
+            "firstPaint": 219.4,
+            "allPainted": 268.6,
+            "loadEvent": 146.2,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 13,
+            "served": 1,
+            "wireBytes": 725,
+            "bodyBytes": 489,
+            "firstPaint": 87.5,
+            "allPainted": 87.5,
+            "loadEvent": 55,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        },
+        "50": {
+          "cold": {
+            "requests": 53,
+            "served": 53,
+            "wireBytes": 35155,
+            "bodyBytes": 23184,
+            "firstPaint": 222,
+            "allPainted": 621.9,
+            "loadEvent": 155.1,
+            "servedPaths": [
+              "/page.html",
+              "/a/fetch.js",
+              "/a/chunks/base-BTvj8YNZ.js",
+              "/svg/solid/house.svg",
+              "/svg/brands/github.svg",
+              "/svg/solid/user.svg",
+              "/svg/regular/heart.svg",
+              "/svg/solid/gear.svg",
+              "/svg/brands/apple.svg",
+              "/svg/regular/bell.svg",
+              "/svg/solid/magnifying-glass.svg",
+              "/svg/solid/envelope.svg",
+              "/svg/solid/star.svg",
+              "/svg/solid/check.svg",
+              "/svg/solid/xmark.svg",
+              "/svg/solid/plus.svg",
+              "/svg/solid/minus.svg",
+              "/svg/solid/trash.svg",
+              "/svg/solid/pen.svg",
+              "/svg/solid/download.svg",
+              "/svg/solid/upload.svg",
+              "/svg/solid/lock.svg",
+              "/svg/solid/unlock.svg",
+              "/svg/solid/calendar.svg",
+              "/svg/solid/clock.svg",
+              "/svg/solid/camera.svg",
+              "/svg/solid/image.svg",
+              "/svg/solid/file.svg",
+              "/svg/solid/folder.svg",
+              "/svg/solid/cloud.svg",
+              "/svg/solid/sun.svg",
+              "/svg/solid/moon.svg",
+              "/svg/solid/bolt.svg",
+              "/svg/solid/fire.svg",
+              "/svg/solid/leaf.svg",
+              "/svg/solid/key.svg",
+              "/svg/solid/link.svg",
+              "/svg/solid/globe.svg",
+              "/svg/solid/cart-shopping.svg",
+              "/svg/solid/credit-card.svg",
+              "/svg/solid/chart-line.svg",
+              "/svg/solid/code.svg",
+              "/svg/solid/bug.svg",
+              "/svg/solid/wrench.svg",
+              "/svg/solid/flag.svg",
+              "/svg/solid/tag.svg",
+              "/svg/solid/bookmark.svg",
+              "/svg/solid/phone.svg",
+              "/svg/solid/music.svg",
+              "/svg/solid/play.svg",
+              "/svg/solid/pause.svg",
+              "/svg/solid/rocket.svg",
+              "/svg/solid/shield.svg"
+            ],
+            "errors": [],
+            "runs": 5
+          },
+          "warm": {
+            "requests": 53,
+            "served": 1,
+            "wireBytes": 915,
+            "bodyBytes": 679,
+            "firstPaint": 89.5,
+            "allPainted": 89.5,
+            "loadEvent": 58.6,
+            "servedPaths": [
+              "/page.html"
+            ],
+            "errors": [],
+            "runs": 5
+          }
+        }
+      }
+    }
+  },
+  "twoBundles": {
+    "today": {
+      "oneBundleCold": {
+        "served": 12,
+        "wireBytes": 366429
+      },
+      "twoBundlesCold": {
+        "served": 23,
+        "wireBytes": 732297,
+        "duplicatePaths": 0
+      },
+      "twoBundlesWarm": {
+        "served": 1,
+        "wireBytes": 584
+      },
+      "wireBytesRatio": 2,
+      "errors": []
+    },
+    "module": {
+      "oneBundleCold": {
+        "served": 13,
+        "wireBytes": 5115
+      },
+      "twoBundlesCold": {
+        "served": 15,
+        "wireBytes": 6599,
+        "duplicatePaths": 0
+      },
+      "twoBundlesWarm": {
+        "served": 1,
+        "wireBytes": 605
+      },
+      "wireBytesRatio": 1.3,
+      "errors": []
+    },
+    "mask": {
+      "oneBundleCold": {
+        "served": 13,
+        "wireBytes": 7343
+      },
+      "twoBundlesCold": {
+        "served": 15,
+        "wireBytes": 9107,
+        "duplicatePaths": 0
+      },
+      "twoBundlesWarm": {
+        "served": 1,
+        "wireBytes": 607
+      },
+      "wireBytesRatio": 1.2,
+      "errors": []
+    },
+    "fetch": {
+      "oneBundleCold": {
+        "served": 13,
+        "wireBytes": 7183
+      },
+      "twoBundlesCold": {
+        "served": 25,
+        "wireBytes": 13793,
+        "duplicatePaths": 10
+      },
+      "twoBundlesWarm": {
+        "served": 1,
+        "wireBytes": 607
+      },
+      "wireBytesRatio": 1.9,
+      "errors": []
+    }
+  },
+  "disk": {
+    "today": {
+      "data": {
+        "files": 23,
+        "raw": 1593869,
+        "gzip": 524885,
+        "allocated": 1658880
+      },
+      "loaderEntry": {
+        "files": 1,
+        "raw": 5383,
+        "gzip": 2048,
+        "allocated": 8192
+      }
+    },
+    "module": {
+      "data": {
+        "files": 2163,
+        "raw": 1452281,
+        "gzip": 730342,
+        "allocated": 8921088
+      },
+      "loaderEntry": {
+        "files": 1,
+        "raw": 357,
+        "gzip": 285,
+        "allocated": 4096
+      }
+    },
+    "svgAsShipped": {
+      "data": {
+        "files": 2883,
+        "raw": 2653595,
+        "gzip": 1486802,
+        "allocated": 11878400
+      },
+      "loaderEntry": {
+        "files": 1,
+        "raw": 854,
+        "gzip": 564,
+        "allocated": 4096
+      },
+      "note": "includes FA alias copies (e.g. ad.svg, add.svg)"
+    },
+    "svgCanonicalOnly": {
+      "data": {
+        "files": 2163,
+        "raw": 2064410,
+        "gzip": 1148348,
+        "allocated": 8929280
+      },
+      "loaderEntry": {
+        "files": 1,
+        "raw": 535,
+        "gzip": 403,
+        "allocated": 4096
+      }
+    },
+    "sharedChunk": {
+      "files": 1,
+      "raw": 2053,
+      "gzip": 1063,
+      "allocated": 4096
+    }
+  },
+  "bundling": {
+    "today": {
+      "emitted": {
+        "files": 24,
+        "raw": 1552993,
+        "gzip": 520726,
+        "allocated": 1593344
+      },
+      "note": "every data chunk is emitted (CHUNK_LOADERS lists them all):  cannot include just the icons named",
+      "containsUnnamedGear": true
+    },
+    "module": {
+      "emitted": {
+        "files": 2,
+        "raw": 1863,
+        "gzip": 1085,
+        "allocated": 8192
+      },
+      "containsNamed": 3,
+      "containsUnnamedGear": false,
+      "containsUnnamedStar": false,
+      "note": "static imports tree-shake to exactly the named paths, inlined into the app bundle"
+    },
+    "svgUrlDefault": {
+      "emitted": {
+        "files": 2,
+        "raw": 3397,
+        "gzip": 1381,
+        "allocated": 8192
+      },
+      "note": "files under 4 KB become data: URIs by Vite's default `assetsInlineLimit`"
+    },
+    "svgUrlNoInline": {
+      "emitted": {
+        "files": 5,
+        "raw": 2844,
+        "gzip": 1834,
+        "allocated": 20480
+      },
+      "note": "one hashed file per named icon, nothing else"
+    },
+    "computedNames": "a URL built from a runtime name (all of candidates 2, 3a, 3b as `ui-icon name=...` would use them) is invisible to a bundler:  the app must copy the whole set, or import the named icons statically and register them"
+  },
+  "licence": {
+    "svgFiles": 2883,
+    "withComment": 2883,
+    "sampleComment": "<!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc. -->",
+    "commentBytesTotal": 608313,
+    "gzipBytesWithComment": 1486802,
+    "gzipBytesWithoutComment": 1109227,
+    "packageAttributionText": "Attribution is required by MIT, SIL OFL, and CC BY licenses. Downloaded Font Awesome Free files already contain embedded comments with sufficient attribution, so you shouldn't need to do anything additional when using these files normally. We've kept attribution comments terse, so we ask that you do not actively work to remove them from files, especially code. They're a great way for folks to learn about Font Awesome."
+  },
+  "chromium": "153.0.8010.12"
+}

@@ -204,3 +204,77 @@ Log of things that slowed down development. Date · symptom · fix · project.
   since a halt poisons the scheduler for later tests even after `resetErrorHalt()`. · spell/ui spike/solid
 - 2026-09-29 · Two spike agents share one scratchpad directory:  screenshot names collided (`label-types.png`). ·
   Solid writes to `spike/solid/.cache/screenshots/` (`yarn screenshots`). · spell/ui spike/solid
+- 2026-09-29 · Solid 2 rc.11 `useContext(ctx)` THROWS ("Context must either be created with a default value or a
+  value must be provided") when the context was created with `undefined` as its default and no provider is
+  above. · Create optional contexts with `null` as the default (`createContext<T | null>(null)`). ·
+  spike/solid-element
+- 2026-09-29 · A Solid scheduler halt (`[REACTIVITY_HALTED]`) is reported ASYNCHRONOUSLY, so a test reproducing
+  it fails the Vitest browser run with an "unhandled error" even inside `try` / `catch` around `flush()`. ·
+  Vitest's `error-catcher` only logs when a USER `error` listener exists:  add a `window` `error` listener
+  (`preventDefault()`) and keep it up for one task (`setTimeout(0)`);  `resetErrorHalt()` in `afterEach`.  See
+  `spike/solid-element/src/errors.test.tsx`. · spike/solid-element
+- 2026-09-29 · Solid 2 rc.11 `<For each={strings}>{(item) => …}</For>`:  `item` is the VALUE, not an accessor
+  (`item()` throws `item is not a function`). · Use it directly. · spike/solid-element
+- 2026-09-29 · Solid 2's `createContext` provider evaluates `children` in a LAZY memo:  a component called from
+  a provider's `children` getter runs tracked (re-running whenever a prop read in its body changes) and not at
+  all until read. · `untrack()` inside the getter, and read the returned accessor once to run it now.  See
+  `spike/solid-element/src/withSolid.ts`. · spike/solid-element
+- 2026-09-29 · `vite.build({ configFile, build: { lib: { entry: { button } } } })` does NOT build `button` alone:
+  Vite `mergeConfig()`s inline options into the file config and UNIONS `build.lib.entry` objects, so every
+  "alone" build in the old `spike/lit/measure.ts` really had all eight entries (inflating batch 1's "alone"
+  numbers by up to 4 kB). · Load the file once with `vite.loadConfigFromFile()`, replace `lib.entry` (and
+  `external`) yourself, pass `configFile: false` -- `spike/shared/SpikeMeasure.ts`. · spike/shared
+- 2026-09-29 · Vite lib mode with entries that import each other (`button.js` => `core.js`) emits every entry as a
+  0.1 kB facade re-exporting a hashed chunk (`core.js` => `core-<hash>.js`):  lib mode defaults
+  `preserveEntrySignatures` to `strict`. · `rolldownOptions.preserveEntrySignatures: "allow-extension"`. ·
+  spike/lit
+- 2026-09-29 · A virtual lib entry (`lib.entry: { lit: "virtual:lit" }`) fails `[UNRESOLVED_ENTRY]`:  lib mode
+  resolves entries against `root` first, so the plugin's `resolveId` sees `/abs/root/virtual:lit`. · Match the
+  marker anywhere in the id (`id.indexOf(VIRTUAL)`) -- `spike/shared/PeerVendor.ts`. · spike/shared
+- 2026-09-29 · Tooling in `spike/shared` typed `vite: typeof import("vite")` won't accept a spike's `vite`
+  module:  two installs, and vitest augments the spike's `ResolvedConfig` (`Property 'test' is missing`). ·
+  Structural `ViteLike` with `build: (config: any) => …`;  call sites write the config `satisfies InlineConfig`. ·
+  spike/shared
+- 2026-09-29 · Adding a custom tag to Solid 2's JSX:  `declare module "@solidjs/web" { namespace JSX … }` fails
+  (`Invalid module name in augmentation`), because `@solidjs/web` only RE-EXPORTS `JSX`. · Augment the defining
+  module, `declare module "@solidjs/web/types/jsx.js"` (the package exports `./types/*`) --
+  `spike/shared/frameworks/solid/app.tsx`. · spike/shared
+- 2026-09-29 · Foundation commit `33b89e5` (icon `style` => `variant`, label `image` string, divider `hidden`
+  spacing) broke 4 Lit spike tests + `yarn ts`, unnoticed:  the root `yarn review` doesn't run the spikes. ·
+  Adapted the spike;  run a spike's `yarn ts && yarn test` after vocabulary changes while spikes exist. · spike/lit
+- 2026-09-29 · `yarn review` stops in `lint:fix` although `src/` is clean:  root `oxlint` walks into
+  `spike/*/` and fails on their own configs (`options.typeAware is only supported in the root config, but it
+  was found in spike/icons/.oxlintrc.json`;  earlier `no-base-to-string` in `spike/solid-element/src/props.ts`),
+  because a nested `.oxlintrc.json` is still parsed despite root `ignorePatterns: ["spike/**"]`. · Lint just
+  the package with `yarn oxlint src test`, then run `yarn tsc`, `yarn oxfmt --check src`, `yarn vitest run` by
+  hand;  spikes should drop `typeAware` from their own oxlint configs. · spell/ui
+- 2026-09-29 · Cache-warm measurements over HTTP/2 with a throwaway certificate:  `fetch()` re-downloaded every
+  file on the second visit while `<script type=module>` / CSS `mask` did not (looked like `fetch` "not caching"). ·
+  Chromium never writes responses with certificate errors to its HTTP cache (`--ignore-certificate-errors` /
+  `ignoreHTTPSErrors` keep the error);  the Blink memory cache still served the other resource types. Launch with
+  `--ignore-certificate-errors-spki-list=<sha256 of the public key>` instead -- `spike/icons/TestServer.ts`. ·
+  spike/icons
+- 2026-09-29 · Playwright `ariaSnapshot()` showed an empty tree for `<x-icon label="...">` whose role / name come from
+  `ElementInternals` (and for `display: contents` hosts):  it reads DOM attributes, not Chromium's accessibility
+  tree. · Read the real tree over CDP (`Accessibility.getFullAXTree`) -- `spike/icons/test.ts`. · spike/icons
+- 2026-09-29 · `page.evaluate(fn)` from a `tsx` script threw `__name is not defined`:  tsx compiles with esbuild
+  `keepNames`, which wraps named inner functions in a `__name()` helper the page doesn't have. · `addInitScript("window.__name = (t) => t")`
+  -- `spike/icons/test.ts`. · spike/icons
+- 2026-09-29 · A LINKED peer (`"@spell/solid-element": "link:../solid-element"`) silently brought a second Solid:
+  Vite resolves the symlink to its real path, so the fork's `import "solid-js"` resolved from
+  `spike/solid-element/node_modules` -- the vendored `@spell/solid-element.js` carried its own signals runtime
+  (65 kB instead of 11), which breaks owner / context sharing with the app. · `resolve.dedupe` on every peer package
+  in every build that bundles peers:  the spike's `vite.shared.ts`, `PeerVendor` and `SpikeMeasure`'s `library`
+  build (both now dedupe `packageOf()` of each specifier). · spike/solid
+- 2026-09-29 · Splitting a lib build into two shared entries (`core`, `forms`):  `dist/core.js` became a facade and
+  a hashed `UIElement-<hash>.js` held the element core, because `forms` imported core LEAF files, so Rolldown saw
+  modules reached by two independent entries. · Import the shared code through the `core` ENTRY (`./core`) from
+  `forms`;  `SpikeMeasure`'s `coreOutsideCore` check now flags it. · spike/solid
+- 2026-09-29 · Standalone ("library bundled") sizes doubled (button 41 => 81 kB) after adding the Solid identity
+  hook to `core.ts`:  `import * as SolidJs from "solid-js"` stored in a global keeps every export alive, so nothing
+  tree-shakes. · Moved the hook to `src/identity.ts`, loaded by the `index` entry only (what the host page
+  imports). · spike/solid
+- 2026-09-29 · Measuring the peer library "as used" needs the names each chunk imports from `lit` / `solid-js`,
+  but Rolldown 1.2.11's `OutputChunk` has no `importedBindings` (Rollup's does), only `imports` (specifiers). ·
+  `SpikeMeasure.importedBindings()` parses the emitted `import { a as b } from "x"` statements (Rolldown prints
+  them plainly);  `PeerVendor` reuses it on `dist/`. · spell/ui spikes

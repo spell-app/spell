@@ -1,6 +1,6 @@
 import { html, nothing } from "lit"
 
-import { proto } from "$/util"
+import { proto } from "../../core"
 import { avatarVocabulary } from "$/components/parts/parts.vocabulary.en"
 import { PartElement } from "./PartElement"
 

@@ -1,4 +1,4 @@
-import { proto } from "$/util"
+import { proto } from "../../core"
 import { dateVocabulary } from "$/components/parts/parts.vocabulary.en"
 import { PartElement } from "./PartElement"
 

@@ -1,0 +1,25 @@
+{
+  "name": "@spell/ui-spike-icons",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Spike:  four ways to load Font Awesome 7 Free icons, measured side by side (docs/plan-shared-runtime.md section 5)",
+  "type": "module",
+  "scripts": {
+    "build": "tsx build.ts",
+    "measure": "tsx measure.ts",
+    "test": "tsx test.ts",
+    "ts": "tsc --noEmit",
+    "lint": "../../node_modules/.bin/oxlint --report-unused-disable-directives --max-warnings 0",
+    "format": "../../node_modules/.bin/oxfmt .",
+    "format:check": "../../node_modules/.bin/oxfmt --check ."
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^7",
+    "@types/node": "22.20.4",
+    "playwright": "1.63.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.1"
+  },
+  "packageManager": "yarn@4.18.0"
+}

@@ -1,12 +1,17 @@
 import { onSettled, type Accessor } from "solid-js"
 
-import type { MenuOption } from "$/elements"
 import { itemVocabulary } from "$/components/dropdown/dropdown.vocabulary.en"
 
-import { Cell } from "$spike/Cell"
-import type { ElementDefinition } from "$spike/ElementDefinition"
-import type { AttributeName, MenuEntry, MenuSeparator } from "$spike/spike.types"
-import type { UIHost } from "$spike/UIHost"
+import {
+  Cell,
+  UIElement,
+  type AttributeName,
+  type ElementDefinition,
+  type MenuEntry,
+  type MenuOption,
+  type MenuSeparator,
+  type UIHost
+} from "$spike/core"
 
 /**
  * The options a dropdown's light-DOM `<ui-item>` children describe, as a signal of `MenuEntry`s.
@@ -51,13 +56,13 @@ export class SlottedItems {
     })
   }
 
-  /** Every item child, read now. */
+  /** Every item child (`<ui-item>`, or a translated alias of it), read now. */
   private read(): MenuEntry[] {
     const entries: MenuEntry[] = []
-    const definition = SlottedItems.definition()
     for (const element of this.host.children) {
-      if (element.localName !== itemVocabulary.tag && !(definition && element instanceof definition.Host)) continue
-      entries.push(this.entry(element, definition?.definition))
+      const definition = UIElement.definitions.get(element.localName)
+      if (element.localName !== itemVocabulary.tag && definition?.vocabulary !== itemVocabulary) continue
+      entries.push(this.entry(element, definition))
     }
     return entries
   }
@@ -94,25 +99,21 @@ export class SlottedItems {
     return entry
   }
 
-  /** Converted value of item attribute `name`:  the property once upgraded, else the attribute. */
+  /**
+   * Converted value of item attribute `name`:  the (already converted) property once the item has upgraded,
+   * else its attribute, converted here.
+   */
   private static value(element: Element, definition: ElementDefinition | undefined, name: string): unknown {
-    const spec = itemVocabulary.attributes.find((attribute) => attribute.name === name)!
     if (!definition) {
+      const spec = itemVocabulary.attributes.find((attribute) => attribute.name === name)!
       const raw = element.getAttribute(spec.name)
       return spec.kind === "keyOnly" ? raw !== null && raw !== "false" && raw !== "no" : (raw ?? undefined)
     }
     const attribute = definition.attribute(name)
-    const raw =
-      (element as unknown as Record<string, unknown>)[attribute.key] ?? element.getAttribute(attribute.attribute)
-    return definition.convert(attribute, raw)
-  }
-
-  /** The registered `<ui-item>` class and its definition, if defined yet. */
-  private static definition() {
-    const Host = customElements.get(itemVocabulary.tag) as
-      | (CustomElementConstructor & { definition: ElementDefinition })
-      | undefined
-    return Host ? { Host, definition: Host.definition } : undefined
+    if (element.matches(":defined")) {
+      return (element as unknown as Record<string, unknown>)[attribute.property]
+    }
+    return definition.convert(attribute, element.getAttribute(attribute.attribute))
   }
 
   /** Shallow equality of two entries. */

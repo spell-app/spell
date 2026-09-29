@@ -1,10 +1,9 @@
 import { html, nothing, type PropertyValues, type TemplateResult } from "lit"
 import { ifDefined } from "lit/directives/if-defined.js"
 
-import { proto } from "$/util"
+import { proto, type LabelRemoveDetail, IconRenderer, OwnerController, PARTS_SHEET, UIElement } from "../../core"
 import { labelVocabulary } from "$/components/label/label.vocabulary.en"
-import type { LabelRemoveDetail } from "$/components/components.types"
-import { IconRenderer, OwnerController, PARTS_SHEET, UIElement } from "../../elements"
+import { LabelFallback } from "$/components/label/label.fallback"
 
 import labelCSS from "$/components/label/label.css?inline"
 
@@ -12,8 +11,9 @@ import labelCSS from "$/components/label/label.css?inline"
  * ### `<ui-label>`
  * A label:  `<span class="ui ... label" part="label">` (`<a>` with `href`), host `display: contents`, holding in
  * order `img.image`, `span.icon`, the default slot, `span.detail`, and a `removable` label's delete button.
- * - `image`:  a keyOnly attribute that may carry a URL.  The property is a boolean (class `image`);  the URL is
- *   read from the ATTRIBUTE, since the boolean converter keeps no value.
+ * - `image`:  a string attribute.  Present (bare / `""`) => class `image` around a slotted `<img>`;  a non-empty
+ *   value is the `src` of the label's own `img.image`.  `ClassBuilder` emits nothing for a string kind, so the
+ *   `image` class goes in as `extra`.
  * - `icon` class (ClassBuilder `extra`) when there's an icon and no text:  the icon centres.
  * - `removable`:  `button.delete.icon` dispatches the cancelable `ui-remove` (`LabelRemoveDetail`);  the
  *   element never removes itself -- the host decides.
@@ -24,6 +24,7 @@ import labelCSS from "$/components/label/label.css?inline"
  ****************/
 export class UILabel extends UIElement.for(labelVocabulary) {
   @proto static sheets = [[labelVocabulary.noun, labelCSS]] as const
+  @proto static Fallback = LabelFallback
   @proto static forwardsAriaLabel = true
 
   /** icon templates */
@@ -51,7 +52,8 @@ export class UILabel extends UIElement.for(labelVocabulary) {
       return html`<div class=${labelVocabulary.noun} part=${this.partName("label")}><slot></slot></div>`
     }
     const icon = this.hasIcon()
-    const classes = this.classes(icon && !this.hasText() ? ICON_CLASS : undefined)
+    const extra = [this.image === undefined ? "" : IMAGE_CLASS, icon && !this.hasText() ? ICON_CLASS : ""]
+    const classes = this.classes(extra.filter(Boolean).join(" ") || undefined)
     const content = this.renderContent(icon)
     const ariaLabel = this.ariaLabelled()
     if (this.href) {
@@ -109,14 +111,11 @@ export class UILabel extends UIElement.for(labelVocabulary) {
   ////////////////
 
   /**
-   * `image="<url>"`:  the URL, read from the attribute (localized name on a translated element).
-   * - A boolean spelling (bare, `yes`, `true` ...) is a plain image label:  it styles a slotted `<img>`.
+   * `image="<url>"`:  the URL, or `undefined` for a plain image label (bare `image`), which styles a slotted
+   * `<img>` instead.
    */
   private imageUrl(): string | undefined {
-    if (!this.image) return undefined
-    const name = this.localized?.names.attributes.get("image") ?? "image"
-    const value = this.getAttribute(name)?.trim() ?? ""
-    return BARE_TRUE.has(value.toLowerCase()) || value === name ? undefined : value
+    return this.image?.trim() || undefined
   }
 
   private hasIcon(): boolean {
@@ -153,5 +152,9 @@ const ICON_CLASS = "icon"
 /** Glyph of the delete button. */
 const DELETE_ICON = "xmark"
 
-/** Attribute values meaning a bare boolean, not a URL. */
-const BARE_TRUE: ReadonlySet<string> = new Set(["", "true", "yes"])
+/**
+ * `ClassBuilder` extra for an image label.
+ * - The vocabulary's `image` is a string attribute (it may carry a URL), and `ClassBuilder` emits no class for
+ *   the string kind, so the word is added here.
+ */
+const IMAGE_CLASS = "image"

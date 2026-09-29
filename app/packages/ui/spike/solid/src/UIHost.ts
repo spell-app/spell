@@ -1,4 +1,5 @@
-import type { ElementDefinition } from "./ElementDefinition"
+import type { SolidElement } from "@spell/solid-element"
+
 import type { UIElement } from "./UIElement"
 
 /**
@@ -8,63 +9,41 @@ import type { UIElement } from "./UIElement"
 const BaseElement = (globalThis.HTMLElement ?? class {}) as typeof HTMLElement
 
 /**
- * Base class of every element's HOST -- the `BaseElement` `component-register` extends.
- * - Owns what lives as long as the element, not one connection:  the shadow root (with `delegatesFocus`,
- *   attached HERE, before the library's `renderRoot` getter would attach a plain one), `ElementInternals`
- *   (custom states, ARIA, forms), the `ready` promise and the upgrade-property stash.
- * - The per-connection logic is a `UIElement` controller, created by the render function on every connect
- *   (`component-register` tears everything down on disconnect and re-renders on reconnect).
- * - NOTE: `connectedCallback` / `attributeChangedCallback` belong to the library's subclass;  anything that
- *   needs them goes in `ElementDefinition.register()`'s final subclass.
+ * Base class of every element's HOST -- the `BaseElement` option `@spell/solid-element` extends.
+ * - The fork owns the platform plumbing:  shadow root (`shadowRootInit`, `delegatesFocus`), `ElementInternals`
+ *   (`internals: true`), prop accessors, the upgrade step, lifecycle.  This class keeps what is OURS:  the
+ *   `ready` promise, custom states, the controller link and the disabled-click guard.
+ * - The per-element logic is a `UIElement` controller, created once by the render function;  with `keepAlive`
+ *   it lives until `dispose()`, across moves.
+ * - NOTE: prototype members here are checked by the fork against prop names;  never add one that a
+ *   vocabulary attribute could be called.
  */
 export class UIHost extends BaseElement {
-  /** Set on each defined subclass by `ElementDefinition.register()`. */
-  declare static definition: ElementDefinition
+  /** Platform internals:  states, ARIA defaults, forms (attached by the fork). */
+  declare readonly internals: ElementInternals
 
-  /** Shadow root option;  a component without a focusable part turns it off. */
-  static delegatesFocus = true
+  /** Where the component renders:  the shadow root (the fork's `renderRoot`). */
+  declare readonly renderRoot: ShadowRoot
 
-  /** Platform internals:  states, ARIA defaults, forms. */
-  readonly internals: ElementInternals
+  /** The fork's instance API. */
+  declare addPropertyChangedCallback: SolidElement["addPropertyChangedCallback"]
+  declare addReleaseCallback: SolidElement["addReleaseCallback"]
+  declare dispose: SolidElement["dispose"]
 
-  /** Controller of the current connection, if connected. */
+  /** Controller, once rendered. */
   controller?: UIElement<any>
 
-  // `component-register`'s instance API, which its subclass adds
-  /** Run `fn(key, value)` whenever a prop is set;  cleared on disconnect. */
-  declare addPropertyChangedCallback: (fn: (key: string, value: unknown) => void) => void
-  /** Run `fn` on disconnect. */
-  declare addReleaseCallback: (fn: () => void) => void
-
-  /** True while `attributeChangedCallback` runs, so the change isn't reflected back. */
-  fromAttribute = false
-
-  /** True while reflecting a property, so the attribute change isn't read back (arrays would become strings). */
-  reflecting = false
-
-  /** Resolves once the first connection has rendered with its styles adopted. */
+  /** Resolves once the first render is done with its styles adopted (or failed). */
   readonly ready: Promise<void>
 
   /** Resolves `ready`. */
   private resolveReady!: () => void
 
-  /** Properties set on the element BEFORE it upgraded, see `restoreUpgradedProperties()`. */
-  private upgraded?: Map<string, unknown>
-
   constructor() {
     super()
-    const Host = this.constructor as typeof UIHost
-    this.attachShadow({ mode: "open", delegatesFocus: Host.delegatesFocus })
-    this.internals = this.attachInternals()
     this.ready = new Promise((resolve) => (this.resolveReady = resolve))
-    this.stashUpgradedProperties()
     // capture on the host itself, so a disabled element swallows clicks before page listeners on it run
     this.addEventListener("click", this.onClickCapture, { capture: true })
-  }
-
-  /** This element's definition (names, converters). */
-  get definition(): ElementDefinition {
-    return (this.constructor as typeof UIHost).definition
   }
 
   ////////////////
@@ -77,40 +56,9 @@ export class UIHost extends BaseElement {
     else this.internals.states.delete(name)
   }
 
-  /** Resolve `ready`;  called by the controller once it has rendered with styles. */
+  /** Resolve `ready`;  called by the controller once it has rendered with styles, or by the error path. */
   markReady() {
     this.resolveReady()
-  }
-
-  ////////////////
-  // ## Upgrade backstop
-  ////////////////
-
-  /**
-   * Stash own properties that shadow our accessors -- set before `customElements.define()` ran, e.g. a
-   * framework assigning `options` to a not-yet-upgraded element.
-   * - Why:  `component-register`'s constructor assigns `undefined` to every prop key right after this,
-   *   which would silently drop such values.
-   */
-  private stashUpgradedProperties() {
-    for (const { key } of this.definition.attributes) {
-      if (!Object.hasOwn(this, key)) continue
-      const value = (this as unknown as Record<string, unknown>)[key]
-      if (value === undefined) continue
-      ;(this.upgraded ??= new Map()).set(key, value)
-      delete (this as unknown as Record<string, unknown>)[key]
-    }
-  }
-
-  /**
-   * Re-set stashed pre-upgrade properties through the real setters (so they render and reflect).
-   * - Called once, right after the first `connectedCallback`.
-   */
-  restoreUpgradedProperties() {
-    if (!this.upgraded) return
-    const values = this.upgraded
-    this.upgraded = undefined
-    for (const [key, value] of values) (this as unknown as Record<string, unknown>)[key] = value
   }
 
   ////////////////

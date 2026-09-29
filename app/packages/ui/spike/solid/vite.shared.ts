@@ -11,6 +11,8 @@ const SRC = fileURLToPath(new URL("../../src", import.meta.url))
 const TEST = fileURLToPath(new URL("../../test", import.meta.url))
 /** Absolute path of this spike's `src/`, target of the `$spike` import alias. */
 const SPIKE = fileURLToPath(new URL("./src", import.meta.url))
+/** Absolute path of `spike/shared/`, target of the `$shared` import alias (`PerfRun`, the shared types). */
+const SHARED = fileURLToPath(new URL("../shared", import.meta.url))
 /** Repo root:  the dev server must serve `src/` and `test/` from above this package. */
 const ROOT = fileURLToPath(new URL("../..", import.meta.url))
 
@@ -30,13 +32,19 @@ export const shared = {
     alias: {
       $test: TEST,
       $spike: SPIKE,
+      $shared: SHARED,
       $: SRC
     },
+    // `solid-js` / `@solidjs/web`:  the linked fork resolves its OWN `node_modules` otherwise -- two Solid copies
+    // can't share owners
     dedupe: ["vitest", "axe-core", "solid-js", "@solidjs/web"]
   },
-  // pre-bundled up front, so the first test run doesn't reload mid-run ("optimized dependencies changed")
+  // pre-bundled up front, so the first test run doesn't reload mid-run ("optimized dependencies changed");
+  // NOT `@spell/solid-element`:  it's linked TypeScript source (its `development` export), compiled by the Solid
+  // plugin like our own files
   optimizeDeps: {
-    include: ["component-register", "axe-core", "@solidjs/element"]
+    include: ["axe-core"],
+    exclude: ["@spell/solid-element"]
   },
   server: {
     fs: { allow: [ROOT] }

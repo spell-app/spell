@@ -1,6 +1,5 @@
 import { headerVocabulary } from "$/components/parts/parts.vocabulary.en"
-import type { HeaderLevel } from "$/components/components.types"
-import type { PartBox } from "../../elements"
+import type { HeaderLevel, PartBox } from "../../core"
 import { PartElement } from "./PartElement"
 
 /****************

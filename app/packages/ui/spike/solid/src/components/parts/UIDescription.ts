@@ -1,7 +1,7 @@
-import { proto } from "$/util"
+import { proto } from "$spike/core"
 import { descriptionVocabulary } from "$/components/parts/parts.vocabulary.en"
 
-import { ContentPart } from "$spike/ContentPart"
+import { PartElement } from "./PartElement"
 
 /****************
  * ### `<ui-description>`
@@ -9,6 +9,6 @@ import { ContentPart } from "$spike/ContentPart"
  * - Card / item / modal / list / step / search text, a comment's text.
  * - Everything else (owner context, markup, sheet) comes from `ContentPart`.
  ****************/
-export class UIDescription extends ContentPart<typeof descriptionVocabulary> {
+export class UIDescription extends PartElement<typeof descriptionVocabulary> {
   @proto static vocabulary = descriptionVocabulary
 }

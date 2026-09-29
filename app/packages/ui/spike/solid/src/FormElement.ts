@@ -1,29 +1,37 @@
 import { createEffect, createMemo, type Accessor } from "solid-js"
+import { onFormReset } from "@spell/solid-element"
 
-import { proto } from "$/util"
-import { Validator, type FieldValue, type ValidationResult, type ValidationRule } from "$/elements"
-import type { ComponentVocabulary } from "$/vocabulary"
+import { Validator } from "$/elements/Validator"
 
-import { Cell } from "./Cell"
+// through the `core` ENTRY, never its leaves:  otherwise the bundler splits what `core` and `forms` share into a
+// third chunk instead of leaving it in `core.js`
+import {
+  proto,
+  UIElement,
+  type ComponentVocabulary,
+  type FieldValue,
+  type ValidationResult,
+  type ValidationRule
+} from "./core"
 import { FormHost } from "./FormHost"
-import { UIElement } from "./UIElement"
 
 /**
  * Controller base of form-associated components:  form value, validity, reset, fieldset-disabled.
- * - The host is a `FormHost` (`static formAssociated = true`);  this class pushes `formValue()` into
- *   `ElementInternals.setFormValue()` -- a `string[]` becomes a `FormData` with one entry per value, so
- *   `new FormData(form).getAll(name)` returns them all -- and `rules()` through `Validator` into `setValidity()`.
+ * - The fork's `formAssociated` option makes the host a form control;  its host class is a `FormHost` (the
+ *   form-control API).  Form callbacks arrive as the fork's hooks:  `onFormReset` => `formReset()`,
+ *   `onFormDisabled` => `formDisabled` (in `UIElement`).
+ * - Pushes `formValue()` into `ElementInternals.setFormValue()` -- a `string[]` becomes a `FormData` with one
+ *   entry per value, so `new FormData(form).getAll(name)` returns them all -- and `rules()` through `Validator`
+ *   into `setValidity()`.
  * - `:state(invalid)` mirrors validity;  the anchor for the browser's bubble is `validationAnchor()`.
  */
 export abstract class FormElement<V extends ComponentVocabulary = ComponentVocabulary> extends UIElement<V> {
-  /** Form-associated host. */
+  /** Host with the form-control API. */
   @proto static Host = FormHost
+  @proto static formAssociated = true
 
   /** Fomantic rules;  shared, it's stateless. */
   static validator = new Validator()
-
-  /** Disabled by a fieldset / own `disabled`, per `formDisabledCallback`. */
-  readonly formDisabled = new Cell((this.host as FormHost).formDisabled)
 
   /**
    * Result of `rules()` against `formValue()`.
@@ -71,8 +79,9 @@ export abstract class FormElement<V extends ComponentVocabulary = ComponentVocab
   // ## Wiring
   ////////////////
 
-  /** Adds the form value / validity effects to `UIElement.mount()`. */
+  /** Adds the form value / validity effects and the reset hook to `UIElement.mount()`. */
   mount() {
+    onFormReset(() => this.formReset())
     createEffect(
       () => ({ value: this.formValue(), name: this.formName() }),
       ({ value, name }) => this.formHost.internals.setFormValue(FormElement.submission(value, name))
@@ -87,11 +96,6 @@ export abstract class FormElement<V extends ComponentVocabulary = ComponentVocab
       }
     )
     return super.mount()
-  }
-
-  /** Host callback:  fieldset disabled changed. */
-  onFormDisabled(disabled: boolean) {
-    this.formDisabled.set(disabled)
   }
 
   /**

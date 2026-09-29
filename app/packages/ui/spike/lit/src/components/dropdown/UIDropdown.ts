@@ -4,22 +4,28 @@ import { ifDefined } from "lit/directives/if-defined.js"
 import { live } from "lit/directives/live.js"
 import { repeat } from "lit/directives/repeat.js"
 
-import { proto } from "$/util"
-import { Converters } from "$/vocabulary"
-import { type FieldValue, type MenuAddition, type MenuOption, MenuOptions, Shorthand } from "$/elements"
-import type { OverlayEntry } from "$/runtime"
-import { buttonVocabulary } from "$/components/button/button.vocabulary.en"
-import { dropdownVocabulary } from "$/components/dropdown/dropdown.vocabulary.en"
 import {
+  proto,
+  Converters,
+  type FieldValue,
+  type MenuAddition,
+  type MenuOption,
+  Shorthand,
+  type OverlayEntry,
   DROPDOWN_ANCHOR_PROPERTY,
   type DropdownChangeDetail,
   type DropdownItemDetail,
   type DropdownOpenDetail,
   type DropdownOptions,
   type DropdownSearchDetail,
-  type DropdownValue
-} from "$/components/components.types"
-import { FormElement, IconRenderer, UIElement } from "../../elements"
+  type DropdownValue,
+  IconRenderer,
+  UIElement
+} from "../../core"
+import { FormElement, MenuOptions } from "../../forms"
+import { buttonVocabulary } from "$/components/button/button.vocabulary.en"
+import { dropdownVocabulary } from "$/components/dropdown/dropdown.vocabulary.en"
+import { DropdownFallback } from "$/components/dropdown/dropdown.fallback"
 
 import { type MenuEntry, UIItem } from "./UIItem"
 
@@ -47,6 +53,7 @@ export class UIDropdown extends FormElement.for<
   { value: DropdownValue | undefined; options: DropdownOptions | undefined }
 >(dropdownVocabulary) {
   @proto static delegatesFocus = true
+  @proto static Fallback = DropdownFallback
   @proto static forwardsAriaLabel = true
   @proto static sheets = [
     [buttonVocabulary.noun, buttonCSS],

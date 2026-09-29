@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>COMPATIBILITY check: two copies of Lit -- Lit spike</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // Capture Lit's dev-mode warnings before either copy loads.
+      window.litWarnings = []
+      const warn = console.warn
+      console.warn = (...args) => {
+        window.litWarnings.push(args.join(" "))
+        warn(...args)
+      }
+    </script>
+  </head>
+  <body>
+    <h1>COMPATIBILITY check: a second copy of Lit</h1>
+    <p>
+      The host app ships its OWN Lit, loaded by full URL (esm.sh, 3.2.1 dev build); the components use the page's shared
+      copy from the import map (vendored <code>lit</code>, production build). Not the recommended setup -- it checks
+      that nothing breaks when an app does it anyway.
+    </p>
+    <x-host-widget></x-host-widget>
+    <ui-button primary>Spike button</ui-button>
+    <pre id="result">checking...</pre>
+    <script type="module">
+      import { LitElement, html } from "https://esm.sh/lit@3.2.1?dev"
+      import "@spell/ui/button"
+
+      /** The host app's own Lit element, on a different Lit copy. */
+      class HostWidget extends LitElement {
+        static properties = { count: { type: Number } }
+        constructor() {
+          super()
+          this.count = 1
+        }
+        render() {
+          return html`<span>host widget ${this.count}</span>`
+        }
+      }
+      customElements.define("x-host-widget", HostWidget)
+
+      const widget = document.querySelector("x-host-widget")
+      const button = document.querySelector("ui-button")
+      await Promise.all([widget.updateComplete, button.updateComplete])
+      widget.count = 2
+      button.size = "large"
+      await Promise.all([widget.updateComplete, button.updateComplete])
+      const checks = {
+        hostWidgetUpdates: widget.shadowRoot.textContent.includes("host widget 2"),
+        spikeButtonUpdates: button.shadowRoot.querySelector("button").className === "ui large primary button",
+        litElementVersions: JSON.stringify(globalThis.litElementVersions),
+        multipleVersionsWarning: window.litWarnings.some((warning) => /multiple versions/i.test(warning))
+          ? "logged"
+          : "not logged"
+      }
+      const ok = checks.hostWidgetUpdates && checks.spikeButtonUpdates
+      window.smokeResult = { ok, label: "lit 3.2.1 dev (esm.sh) + vendored lit", checks }
+      document.querySelector("#result").textContent = `${ok ? "PASS" : "FAIL"} ${JSON.stringify(checks)}`
+    </script>
+  </body>
+</html>
