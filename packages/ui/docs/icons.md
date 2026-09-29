@@ -181,10 +181,31 @@ whose dashed form is ALREADY a Font Awesome name or alias for a DIFFERENT icon -
 ~== `sign in` (the same clash rule applies to both spellings).  No Fomantic name contains a dash and no
 FA7 name ends in `-outline`, so neither spelling can be misread.
 
+### Word order, as a last resort
+
+DECISION (2026-09-29):  a name found nowhere is tried with its words in ANY order, when those words name
+exactly one icon -- `button tablet` -> `tablet-button`.  Why:  Fomantic reads thing-first (`check circle`,
+`arrow circle down`) where FA6+ reads modifier-first (`circle-check`, `circle-arrow-down`), so this lets
+Fomantic-style phrasing reach the 570 FA7 icons Fomantic never named.
+
+- LAST resort:  an exact name, Fomantic alias or FA alias always wins over a reordering.
+- Ambiguous word sets stay as typed and find nothing, rather than silently picking one -- 8 at FA 7.3.1:
+  `arrow-{up,down}-{a-z,z-a,1-9,9-1,wide-short,short-wide}`, `left-right` / `right-left`, and
+  `martini-glass` / `glass-martini` (an FA alias for `martini-glass-empty`).
+- Index built on first use from the solid index (already loaded to infer style) + `aliases.json`.  No new
+  data file.
+  - covers solid + regular:  every regular icon also exists in solid
+  - covers brands only through FA's aliases (`github square` -> `square-github`);  the full brand list is
+    the 560 KB `brands.json`, too big to load just for this
+  - `Icons.test.ts` checks no real brand name is ever redirected
+- `peek()` reorders only once the solid index is loaded -- before that it has nothing to reorder against.
+
 `Icons.resolve()`'s order: split on spaces / dashes -> strip a trailing `outline` word (Fomantic's
 regular-style modifier, no separate alias needed) -> `fomantic-clashes.json` (only when the page opts in)
--> `fomantic-aliases.json` -> `aliases.json` -> else treat the dashed name as already correct. A name found nowhere still resolves (best-effort `style: "solid"` or `"brands"`), so `get()`
-simply returns `undefined` rather than `resolve()` throwing.
+-> `fomantic-aliases.json` -> `aliases.json` -> the dashed name, if the solid index knows it -> the one
+icon its words name in any order -> else the dashed name as typed.  A name found nowhere still resolves
+(best-effort `style: "solid"` or `"brands"`), so `get()` simply returns `undefined` rather than
+`resolve()` throwing.
 
 ## License attribution
 

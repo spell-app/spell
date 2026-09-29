@@ -38,6 +38,13 @@ export class Icons {
   static #solidIndexLoader: Promise<IconChunkIndex> | undefined
   static #solidIndex: IconChunkIndex | undefined
 
+  /**
+   * Sorted words -> the ONE icon they name in any order, or `null` if 2+ icons share them
+   * (`arrow-up-a-z` / `arrow-up-z-a`).
+   * - Built on first use from the solid index + Font Awesome's aliases -- see `#reorder()`.
+   */
+  static #wordSets: Map<string, string | null> | undefined
+
   ////////////////
   // ## Name resolution
   ////////////////
@@ -50,6 +57,8 @@ export class Icons {
    *   (`"cog"` -> `"gear"`), then -- if `style` is still unknown -- checks the (lazily-loaded) solid index:
    *   present there => `solid`, otherwise => `brands`.  A name Font Awesome doesn't know at all resolves as
    *   `solid` anyway;  `get()` then correctly finds nothing and returns `undefined`.
+   * - Last resort, word order:  a name found nowhere is tried in ANY order, if those words name exactly one
+   *   icon -- `"button tablet"` -> `"tablet-button"` -- see `#reorder()`.
    * - `style`, whether passed in or inferred from `outline`, always wins over the solid/brands guess --
    *   a caller who says `{ style: "brands" }` is trusted, even for a name that also happens to exist elsewhere.
    * - A word that means different icons in the two vocabularies (`"x"`, `"warning"`, `"sign in"` ...)
@@ -57,9 +66,43 @@ export class Icons {
    */
   static async resolve(name: string, style?: IconStyle): Promise<IconResolved> {
     const partial = Icons.#resolveAliases(name, style)
-    if (partial.style) return { name: partial.name, style: partial.style }
+    if (partial.style === "brands") return { name: partial.name, style: "brands" }
     const index = await Icons.#loadSolidIndex()
-    return { name: partial.name, style: partial.name in index ? "solid" : "brands" }
+    const found = Icons.#reorder(partial.name, index)
+    return { name: found, style: partial.style ?? (found in index ? "solid" : "brands") }
+  }
+
+  /**
+   * `name`, or the one icon its words name in another order -- `"button-tablet"` -> `"tablet-button"`.
+   * - Only for a name the solid index doesn't know:  an exact name, Fomantic alias or FA alias always wins.
+   * - Ambiguous word sets (`a-z` vs `z-a`, `left-right` vs `right-left`) stay as typed, so they fail loudly
+   *   rather than silently picking one.
+   * - NOTE: covers solid + regular (every regular icon is also solid) and brands only through FA's aliases
+   *   (`github-square` -> `square-github`) -- the full brand list lives in the 560 KB `brands.json`.
+   *   `Icons.test.ts` checks no real brand name is ever redirected.
+   */
+  static #reorder(name: string, index: IconChunkIndex): string {
+    if (name in index || !name.includes("-")) return name
+    Icons.#wordSets ??= Icons.#buildWordSets(index)
+    return Icons.#wordSets.get(Icons.#wordSet(name)) ?? name
+  }
+
+  /** `#wordSets` from every multi-word solid name and Font Awesome alias. */
+  static #buildWordSets(index: IconChunkIndex): Map<string, string | null> {
+    const sets = new Map<string, string | null>()
+    const entries = [...Object.keys(index).map((key) => [key, key]), ...Object.entries(faAliases as IconAliasMap)]
+    for (const [key, target] of entries) {
+      if (!key.includes("-")) continue
+      const words = Icons.#wordSet(key)
+      const current = sets.get(words)
+      sets.set(words, current === undefined || current === target ? target : null)
+    }
+    return sets
+  }
+
+  /** Order-free key for a dashed name:  its words, sorted -- `"tablet-button"` -> `"button tablet"`. */
+  static #wordSet(name: string): string {
+    return name.split("-").sort().join(" ")
   }
 
   /**
@@ -148,14 +191,16 @@ export class Icons {
       if (plain) return plain
     }
     const partial = Icons.#resolveAliases(name, style)
+    const index = Icons.#solidIndex
+    const found = index && partial.style !== "brands" ? Icons.#reorder(partial.name, index) : partial.name
     let resolvedStyle = partial.style
     if (!resolvedStyle) {
-      if (!Icons.#solidIndex) return undefined
-      resolvedStyle = partial.name in Icons.#solidIndex ? "solid" : "brands"
+      if (!index) return undefined
+      resolvedStyle = found in index ? "solid" : "brands"
     }
-    const chunk = resolvedStyle === "solid" ? Icons.#solidIndex?.[partial.name] : resolvedStyle
+    const chunk = resolvedStyle === "solid" ? index?.[found] : resolvedStyle
     if (!chunk) return undefined
-    return Icons.#chunks.get(chunk)?.data?.[partial.name]
+    return Icons.#chunks.get(chunk)?.data?.[found]
   }
 
   /** Warms the cache for `names` (each resolved with its default style) -- fire-and-forget from a component. */

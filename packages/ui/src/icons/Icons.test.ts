@@ -71,6 +71,42 @@ describe("Icons.resolve() -- spaces and dashes", () => {
   })
 })
 
+describe("Icons.resolve() -- word order", () => {
+  it.each([
+    ["button tablet", "tablet-button"],
+    ["bracket arrow right to", "arrow-right-to-bracket"],
+    ["square github", "square-github"]
+  ])("resolves %j to %j", async (typed, expected) => {
+    expect((await Icons.resolve(typed)).name).toBe(expected)
+  })
+
+  it("prefers an exact name or alias over a reordering", async () => {
+    // `check circle` is Fomantic's own name for `circle-check` -- same answer, but via the alias
+    expect((await Icons.resolve("check circle")).name).toBe("circle-check")
+    expect((await Icons.resolve("arrow up z a")).name).toBe("arrow-up-z-a")
+  })
+
+  it("leaves an ambiguous word set as typed, so it finds nothing", async () => {
+    expect((await Icons.resolve("a z up arrow")).name).toBe("a-z-up-arrow")
+    expect(await Icons.get("a z up arrow")).toBeUndefined()
+  })
+
+  it("never redirects a real brand name", async () => {
+    const wrong: string[] = []
+    for (const name of await Icons.names("brands")) {
+      const resolved = await Icons.resolve(name)
+      if (resolved.name !== name) wrong.push(`${name} -> ${resolved.name}`)
+    }
+    expect(wrong).toEqual([])
+  })
+
+  it("works in peek() once the solid index is loaded", async () => {
+    const loaded = await Icons.get("button tablet")
+    expect(loaded).toBeDefined()
+    expect(Icons.peek("button tablet")).toEqual(loaded)
+  })
+})
+
 /**
  * Font Awesome's meaning wins a clash unless `<html ui-icon-names="fomantic">` -- see `docs/icons.md`.
  * - Checked over EVERY FA7 name and alias, so a regeneration can't quietly let Fomantic shadow one.
