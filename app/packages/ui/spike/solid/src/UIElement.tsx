@@ -344,10 +344,18 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
    * - Idempotent per tag;  returns the element class.
    */
   static define(this: UIElementClass, tag?: string, dictionary?: Dictionary): CustomElementConstructor {
+    const definition = new ElementDefinition(this.prototype.vocabulary, { tag, dictionary })
+    return customElements.get(definition.tag) ?? UIElement.defineTag.call(this, definition)
+  }
+
+  /**
+   * `define()` minus the idempotence check:  record `definition`, then hand the fork its tag, props, component
+   * and options.
+   * - For a tag already defined, the fork swaps the component in place (Vite dev only:  hot module replacement
+   *   re-defines a new version of a class through here, see `HotDefinitions`).
+   */
+  static defineTag(this: UIElementClass, definition: ElementDefinition): CustomElementConstructor {
     const { vocabulary, Host, isPart, delegatesFocus, formAssociated, Fallback } = this.prototype
-    const definition = new ElementDefinition(vocabulary, { tag, dictionary })
-    const existing = customElements.get(definition.tag)
-    if (existing) return existing
     UIElement.definitions.set(definition.tag, definition)
     PartContext.define(vocabulary, definition.tag, isPart)
     UIElement.registerTexts(vocabulary)

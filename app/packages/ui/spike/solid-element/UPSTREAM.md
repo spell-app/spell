@@ -191,6 +191,39 @@ How each fix in `@spell/solid-element` could land in `solidjs/solid`, branch `ne
 - **Test:**  `shadowRoot.test.tsx` (browser-only:  `setHTMLUnsafe` + declarative shadow DOM) -- replaced not
   appended;  closed root via internals;  same root node kept.
 
+## HMR -- redefinition in place, live-instance registry, Vite plugin (`hot.ts`, `vite.ts`)
+
+- **Problem:**
+  - `register()` on an existing tag swaps `Component` only (`component-register.js:276`):  new props (a new
+    property-only prop, a changed converter or default) and options are silently ignored, and a change the
+    platform CAN'T take (a new observed attribute) gives no signal at all
+  - `hot(module, tag)` is webpack-shaped (`module.hot`);  with Vite each app writes its own
+    `import.meta.hot.accept()` and walk
+  - `reloadElement()` calls `connectedCallback()` (`:90-96`), which re-renders a DETACHED element too;  `hot()`
+    walks only `document.body` (`:238-256`), missing detached and `keepAlive` instances;  the fork's
+    `:state(errored)` would stick after a recovery
+  - `@solidjs/element` has no Vite story:  `@solidjs/vite-plugin`'s refresh wraps exported function components,
+    not `customElement()` calls, so an element module edit falls through to a full reload
+- **Answers:**  no upstream issue yet.
+- **Patch outline:**
+  - `register()` on an existing tag, while `import.meta.hot` exists:  `redefine()` -- refuse (record the reason)
+    when observed attributes, `formAssociated`, base class, internals or shadow root options changed;  else swap
+    `Component`, `props` and `options` IN PLACE (the class's closures hold those objects), redefine accessors,
+    and migrate each live instance's values (property writes kept, attribute values re-converted, new keys
+    defaulted -- needs a dev-only "last write source" per key in `setProp()`)
+  - dev-only `WeakRef` registry of instances per class (constructor);  `liveElements()` walks the document and
+    open shadow roots when untracked
+  - `hotUpdate(hot)`:  re-render every swapped class's instances, or `hot.invalidate(reason)`;
+    `reloadElement()`:  dispose, clear `errored`, render only if connected
+  - `@solidjs/element/vite` (or an option of `@solidjs/vite-plugin`):  append the accept to modules calling
+    `customElement(`;  force a full reload when a changed module reaches several element modules (shared base
+    code);  optional style-module hand-off
+  - every dev path sits behind `import.meta.hot`, so builds drop it (0 bytes)
+- **Breaking:**  no.  In dev a refused redefinition warns and reloads instead of half-applying.
+- **Test:**  `hot.test.tsx` (registry, in-place swap with values kept, converter / default migration, each refusal
+  reason, shadowing prop throws, error recovery, detached `keepAlive`, `hot()` still works);
+  `spike/solid`'s `yarn test:hmr` is the end-to-end proof (a real Vite server, real file edits).
+
 ## Smaller changes riding along
 
 - **Element as context** (`current.ts`):  `withSolid` provides the element through a Solid context, so
@@ -198,4 +231,5 @@ How each fix in `@spell/solid-element` could land in `solidjs/solid`, branch `ne
   provider's `children` getter, or the component re-runs on every prop read in its body.
 - **`ownedWrite` on prop signals** (`withSolid.ts`):  `el.value = x` is a DOM API, legal anywhere;  without it,
   setting a property from a Solid component body throws in dev (`solid2.test.tsx` reproduces it against rc.11).
-- **HMR:**  re-registering a tag defined by another library throws instead of returning that class.
+- **HMR:**  re-registering a tag defined by another library throws instead of returning that class (see the HMR
+  section for the rest).
