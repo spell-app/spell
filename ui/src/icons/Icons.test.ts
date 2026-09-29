@@ -1,6 +1,8 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 
-import { Icons } from "$/icons"
+import { ICON_NAMES_ATTRIBUTE, Icons } from "$/icons"
+import faAliases from "$/icons/data/aliases.json"
+import fomanticClashes from "$/icons/data/fomantic-clashes.json"
 
 /**
  * Runs against the REAL generated data (`src/icons/data/*.json`), not a fixture -- these tests are the
@@ -10,7 +12,7 @@ import { Icons } from "$/icons"
 
 describe("Icons.resolve()", () => {
   it("maps a Fomantic alias to its FA7 canonical name", async () => {
-    expect(await Icons.resolve("sign in")).toEqual({ name: "right-to-bracket", style: "solid" })
+    expect(await Icons.resolve("add user")).toEqual({ name: "user-plus", style: "solid" })
   })
 
   it("maps the `outline` word to the regular style", async () => {
@@ -40,7 +42,6 @@ describe("Icons.resolve()", () => {
     ["dropdown", "caret-down"],
     ["caret down", "caret-down"],
     ["mail", "envelope"],
-    ["sign out", "right-from-bracket"],
     // FA7 merged `user-large` into `user` -- matched via `aliases.unicodes.primary`
     ["user alternate", "user"],
     // FA7 Free dropped `vector-square` -- `MANUAL_OVERRIDES` stand-in
@@ -48,6 +49,87 @@ describe("Icons.resolve()", () => {
   ]
   it.each(fomanticRoundTrips)("resolves Fomantic name %j to %j", async (fomanticName, fa7Name) => {
     expect((await Icons.resolve(fomanticName)).name).toBe(fa7Name)
+  })
+})
+
+describe("Icons.resolve() -- spaces and dashes", () => {
+  it.each([
+    ["tablet button", "tablet-button"],
+    ["circle check", "circle-check"],
+    ["arrow right to bracket", "arrow-right-to-bracket"],
+    ["Circle  Check", "circle-check"]
+  ])("resolves %j to %j", async (typed, expected) => {
+    expect((await Icons.resolve(typed)).name).toBe(expected)
+  })
+
+  it("treats a dashed Fomantic name like the spaced one", async () => {
+    expect(await Icons.resolve("add-user")).toEqual(await Icons.resolve("add user"))
+  })
+
+  it("treats a dashed `outline` like the spaced one", async () => {
+    expect(await Icons.resolve("mail-outline")).toEqual({ name: "envelope", style: "regular" })
+  })
+})
+
+/**
+ * Font Awesome's meaning wins a clash unless `<html ui-icon-names="fomantic">` -- see `docs/icons.md`.
+ * - Checked over EVERY FA7 name and alias, so a regeneration can't quietly let Fomantic shadow one.
+ */
+describe("Icons.resolve() -- Font Awesome vs Fomantic names", () => {
+  afterEach(() => document.documentElement.removeAttribute(ICON_NAMES_ATTRIBUTE))
+
+  it("resolves every FA7 name to itself by default", async () => {
+    const wrong: string[] = []
+    for (const style of ["solid", "regular", "brands"] as const) {
+      for (const name of await Icons.names(style)) {
+        const resolved = await Icons.resolve(name, style)
+        if (resolved.name !== name) wrong.push(`${style} ${name} -> ${resolved.name}`)
+      }
+    }
+    expect(wrong).toEqual([])
+  })
+
+  it("resolves every FA7 alias to Font Awesome's target by default", async () => {
+    const wrong: string[] = []
+    for (const [alias, target] of Object.entries(faAliases as Record<string, string>)) {
+      const resolved = await Icons.resolve(alias)
+      if (resolved.name !== target) wrong.push(`${alias} -> ${resolved.name}, not ${target}`)
+    }
+    expect(wrong).toEqual([])
+  })
+
+  it.each([
+    ["x", "x"],
+    ["warning", "triangle-exclamation"],
+    ["sign in", "arrow-right-to-bracket"],
+    ["sign-in", "arrow-right-to-bracket"],
+    ["desktop", "desktop"]
+  ])("gives Font Awesome's meaning for %j by default", async (typed, expected) => {
+    expect((await Icons.resolve(typed)).name).toBe(expected)
+  })
+
+  it.each([
+    ["x", "xmark"],
+    ["warning", "exclamation"],
+    ["sign in", "right-to-bracket"],
+    ["sign-in", "right-to-bracket"],
+    ["desktop", "display"]
+  ])("gives Fomantic's meaning for %j when the page opts in", async (typed, expected) => {
+    document.documentElement.setAttribute(ICON_NAMES_ATTRIBUTE, "fomantic")
+    expect(Icons.preferredNames).toBe("fomantic")
+    expect((await Icons.resolve(typed)).name).toBe(expected)
+  })
+
+  it("only changes the clashing words when the page opts in", async () => {
+    const before = await Icons.resolve("setting")
+    document.documentElement.setAttribute(ICON_NAMES_ATTRIBUTE, "fomantic")
+    expect(await Icons.resolve("setting")).toEqual(before)
+    expect(Object.keys(fomanticClashes).length).toBeGreaterThan(0)
+  })
+
+  it("treats any other attribute value as Font Awesome", () => {
+    document.documentElement.setAttribute(ICON_NAMES_ATTRIBUTE, "semantic")
+    expect(Icons.preferredNames).toBe("fontawesome")
   })
 })
 

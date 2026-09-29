@@ -5,6 +5,21 @@
  */
 
 ////////////////
+// ## Page setting
+////////////////
+
+/**
+ * Attribute on `<html>` choosing which vocabulary wins when a word means DIFFERENT icons in each
+ * (`x`, `warning`, `sign in` ...) -- see `docs/icons.md`.
+ * - absent / `"fontawesome"` ~== Font Awesome's meaning (default)
+ * - `"fomantic"` ~== Fomantic's meaning, for pages ported from Fomantic markup
+ */
+export const ICON_NAMES_ATTRIBUTE = "ui-icon-names"
+
+/** Allowed values of `ICON_NAMES_ATTRIBUTE`. */
+export type IconNames = "fontawesome" | "fomantic"
+
+////////////////
 // ## Requests
 ////////////////
 
@@ -26,7 +41,10 @@ export type IconData = readonly [width: number, height: number, path: string]
 
 /** What `Icons.resolve()` takes:  a possibly-aliased, possibly-multi-word name, and an optional forced style. */
 export type IconRequest = {
-  /** Icon name as typed by a caller -- Fomantic vocabulary (`"sign in"`), FA7 name (`"gear"`), or an alias. */
+  /**
+   * Icon name as typed by a caller -- Fomantic vocabulary (`"sign in"`), FA7 name (`"gear"`), or an alias.
+   * - spaces ~== dashes:  `"circle check"` ~== `"circle-check"`
+   */
   name: string
   /** Forces the style rather than letting `resolve()` infer it from `name` / the `outline` word. */
   style?: IconStyle
@@ -48,7 +66,7 @@ export type IconChunk = Readonly<Record<string, IconData>>
 /** Shape of `solid.json`:  icon name -> the chunk file (without extension) that holds its data. */
 export type IconChunkIndex = Readonly<Record<string, string>>
 
-/** Shape of `aliases.json` and `fomantic-aliases.json`:  alias name -> canonical FA7 name. */
+/** Shape of `aliases.json`, `fomantic-aliases.json` and `fomantic-clashes.json`:  alias -> canonical FA7 name. */
 export type IconAliasMap = Readonly<Record<string, string>>
 
 ////////////////
