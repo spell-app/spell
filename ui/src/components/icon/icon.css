@@ -2,7 +2,7 @@
  * `<ui-icon>` and `<ui-icons>`:  port of Fomantic's `icon.less` + `icon.variables`, for SVG icons.
  * - ONE sheet for both elements;  each adopts it after the foundation.
  * - Glyphs are Font Awesome 7 SVGs (`Icons.svg()`), never a font:  the 900-entry glyph maps, `@font-face`s,
- *   `outline` / `thin` / `brand` font families and the duotone rules are gone.  `style` picks the SVG set.
+ *   `outline` / `thin` / `brand` font families and the duotone rules are gone.  `variant` picks the SVG set.
  * - Shadow markup contract (class grammar on semantic elements):
  *   - `<ui-icon>`:  `<span class="ui [size] [color] [keyOnly ...] [corner] [flipped] [rotated] icon"
  *     part="icon"><svg viewBox="..." aria-hidden="true"><path fill="currentColor" d="..."/></svg></span>`

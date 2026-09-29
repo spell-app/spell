@@ -24,7 +24,15 @@ export const dividerVocabulary = {
       kind: "keyOnly",
       description: "A vertical rule with optional text, centred in a `position: relative` owner (segment, grid)."
     },
-    { name: "hidden", kind: "keyOnly", description: "The spacing without the line." },
+    {
+      name: "hidden",
+      kind: "keyOnly",
+      property: "dividerHidden",
+      description:
+        "The spacing without the line.  Fomantic's own vocabulary word;  the JS property is `dividerHidden` so " +
+        "it doesn't shadow `HTMLElement.hidden` -- `divider.css` overrides the UA `[hidden] { display: none }` " +
+        "so the host keeps contributing its margin."
+    },
     { name: "fitted", kind: "keyOnly", description: "No space above or below." },
     { name: "clearing", kind: "keyOnly", description: "Clears floated content above it." },
     { name: "section", kind: "keyOnly", description: "More space, to divide sections of content." },
