@@ -1,7 +1,7 @@
 # Icon data attribution
 
 The icon DATA under `src/icons/data/` (icon shapes/paths, names, search terms) is derived from
-[Font Awesome 6 Free](https://fontawesome.com), by Fonticons, Inc.
+[Font Awesome 7 Free](https://fontawesome.com), by Fonticons, Inc.
 
 - Icons: [CC BY 4.0 License](https://creativecommons.org/licenses/by/4.0/)
 - Fonts: [SIL OFL 1.1 License](https://scripts.sil.org/OFL) -- not applicable here: `@spell/ui` ships SVG
@@ -23,7 +23,7 @@ Font Awesome's upstream attribution (required by CC BY 4.0):
 
 > Copyright (c) Fomantic-UI (https://github.com/fomantic/Fomantic-UI)
 
-Only the ALIAS MAPPING (Fomantic class name -> Font Awesome 6 canonical name) is derived from that file --
+Only the ALIAS MAPPING (Fomantic class name -> Font Awesome 7 canonical name) is derived from that file --
 no Fomantic code, CSS or font is copied into this package. See `docs/icons.md` for how the mapping is built.
 
 ## Full attribution requirement

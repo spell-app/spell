@@ -9,7 +9,7 @@
 ////////////////
 
 /**
- * The three Font Awesome 6 Free styles this package ships.
+ * The three Font Awesome 7 Free styles this package ships.
  * - Fomantic's `outline` class word maps to `regular` (see `Icons.resolve()`) -- there's no separate
  *   "outline" style here, unlike Fomantic's own font-per-style setup.
  * - `thin` and `duotone` exist in Font Awesome but aren't part of the free tier -- `gen-icons.ts` never
@@ -26,13 +26,13 @@ export type IconData = readonly [width: number, height: number, path: string]
 
 /** What `Icons.resolve()` takes:  a possibly-aliased, possibly-multi-word name, and an optional forced style. */
 export type IconRequest = {
-  /** Icon name as typed by a caller -- Fomantic vocabulary (`"sign in"`), FA6 name (`"gear"`), or an alias. */
+  /** Icon name as typed by a caller -- Fomantic vocabulary (`"sign in"`), FA7 name (`"gear"`), or an alias. */
   name: string
   /** Forces the style rather than letting `resolve()` infer it from `name` / the `outline` word. */
   style?: IconStyle
 }
 
-/** What `Icons.resolve()` returns:  the canonical FA6 name plus the style it (or the caller) settled on. */
+/** What `Icons.resolve()` returns:  the canonical FA7 name plus the style it (or the caller) settled on. */
 export type IconResolved = {
   name: string
   style: IconStyle
@@ -48,7 +48,7 @@ export type IconChunk = Readonly<Record<string, IconData>>
 /** Shape of `solid.json`:  icon name -> the chunk file (without extension) that holds its data. */
 export type IconChunkIndex = Readonly<Record<string, string>>
 
-/** Shape of `aliases.json` and `fomantic-aliases.json`:  alias name -> canonical FA6 name. */
+/** Shape of `aliases.json` and `fomantic-aliases.json`:  alias name -> canonical FA7 name. */
 export type IconAliasMap = Readonly<Record<string, string>>
 
 ////////////////
