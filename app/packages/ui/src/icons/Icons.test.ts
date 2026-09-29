@@ -212,3 +212,18 @@ describe("Icons.preload()", () => {
     expect(Icons.peek("circle-xmark")).toBeDefined()
   })
 })
+
+describe("Icons.get() -- explicit style beats aliasing", () => {
+  it("returns the Apple brand logo for (apple, brands), not the solid apple-whole alias", async () => {
+    const brand = await Icons.get("apple", "brands")
+    expect(brand).toBeDefined()
+    expect(brand?.[2].length).toBeGreaterThan(0)
+    // bare `apple` keeps Font Awesome's meaning (the brand) unless the page opts into Fomantic names
+    expect(await Icons.resolve("apple")).toEqual({ name: "apple", style: "brands" })
+  })
+
+  it("peek() follows the same rule once the brands chunk is cached", async () => {
+    await Icons.get("apple", "brands")
+    expect(Icons.peek("apple", "brands")).toBeDefined()
+  })
+})
