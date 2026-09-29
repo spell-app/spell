@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Examples -- Lit spike</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        margin: 0;
+        padding: 1em 2em;
+        font-family: system-ui, sans-serif;
+      }
+      .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2em;
+        padding-block: 1em;
+        border-top: 1px solid #ccc;
+      }
+      .pair > h3 {
+        grid-column: 1 / -1;
+        margin: 0;
+      }
+      .pair > div > h4 {
+        margin: 0 0 0.5em;
+        color: #777;
+        font-weight: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Class grammar (left) vs element markup (right)</h1>
+    <p>
+      Left: the CSS agent's fragment, in a shadow root that adopts the same sheets. Right: the same example as
+      <code>&lt;ui-*&gt;</code> elements on the Lit spike.
+    </p>
+    <main id="examples"></main>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html>

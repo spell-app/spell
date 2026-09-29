@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vanilla -- Lit spike</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        padding: 1em 2em 16em;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Vanilla</h1>
+    <div id="root"></div>
+    <pre id="result">checking...</pre>
+    <script type="module">
+      import "/src/index.ts"
+      import { OPTIONS, roundTrip } from "./check.js"
+
+      const root = document.querySelector("#root")
+      root.innerHTML = `<ui-dropdown selection placeholder="Fruit" value="b" open></ui-dropdown>
+        <p>Page state: <output id="value">b</output></p>`
+      const dropdown = root.querySelector("ui-dropdown")
+      dropdown.options = OPTIONS
+      dropdown.addEventListener("ui-change", (event) => (root.querySelector("#value").textContent = event.detail.value))
+      roundTrip("vanilla")
+    </script>
+  </body>
+</html>

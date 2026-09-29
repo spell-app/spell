@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Two copies of Lit -- Lit spike</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // Capture Lit's dev-mode warnings before either copy loads.
+      window.litWarnings = []
+      const warn = console.warn
+      console.warn = (...args) => {
+        window.litWarnings.push(args.join(" "))
+        warn(...args)
+      }
+    </script>
+  </head>
+  <body>
+    <h1>The host app ships its own Lit (esm.sh, dev build)</h1>
+    <x-host-widget></x-host-widget>
+    <ui-button primary>Spike button</ui-button>
+    <pre id="result">checking...</pre>
+    <script type="module">
+      import { LitElement, html } from "https://esm.sh/lit@3.2.1?dev"
+      import "/src/index.ts"
+
+      /** The host app's own Lit element, on a different Lit version. */
+      class HostWidget extends LitElement {
+        static properties = { count: { type: Number } }
+        constructor() {
+          super()
+          this.count = 1
+        }
+        render() {
+          return html`<span>host widget ${this.count}</span>`
+        }
+      }
+      customElements.define("x-host-widget", HostWidget)
+
+      const widget = document.querySelector("x-host-widget")
+      const button = document.querySelector("ui-button")
+      await Promise.all([widget.updateComplete, button.updateComplete])
+      widget.count = 2
+      button.size = "large"
+      await Promise.all([widget.updateComplete, button.updateComplete])
+      const ok =
+        widget.shadowRoot.textContent.includes("host widget 2") &&
+        button.shadowRoot.querySelector("button").className === "ui large primary button"
+      document.querySelector("#result").textContent = `${ok ? "PASS" : "FAIL"} ${JSON.stringify({
+        litElementVersions: globalThis.litElementVersions,
+        litHtmlVersions: globalThis.litHtmlVersions,
+        warnings: window.litWarnings.filter((warning) => /lit/i.test(warning))
+      })}`
+    </script>
+  </body>
+</html>
