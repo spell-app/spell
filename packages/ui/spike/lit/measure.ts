@@ -4,9 +4,10 @@
  * Bundle breakdown for `REPORT.md`:  builds the library in memory (same config as `yarn build`) and reports
  * - every chunk, raw / gzip, as emitted (Vite's lib-mode ES output keeps whitespace)
  * - the same chunks fully minified (esbuild `minify`), since that's what an app bundler would ship
- * - "ui-button alone" and "ui-button + ui-dropdown":  the entry chunks plus their STATIC imports, minus the
- *   lazily-loaded `UIRuntime` chunk and icon data
- * - a per-module breakdown of that static closure (lit, spike elements, foundation, CSS, icon alias maps)
+ * - each component family ALONE (a build with just its entry):  the entry chunk plus its STATIC imports,
+ *   minus the lazily-loaded `UIRuntime` chunk and icon data, and its own modules (classes, sheet, vocabulary)
+ * - "ui-button + ui-dropdown" and "all components":  the same closure over several entries of one build
+ * - a per-module breakdown of those closures (lit, spike elements, foundation, CSS, icon alias maps)
  * `yarn measure`;  writes `measure-results.json`.
  */
 
@@ -16,20 +17,30 @@ import { gzipSync } from "node:zlib"
 import { transform } from "esbuild"
 import { build, type Rolldown } from "vite"
 
+import { COMPONENTS } from "./vite.config.ts"
+
 /** Group name of the icon alias JSON `Icons.ts` imports statically (icon data, excluded from component cost). */
 const ALIAS_MAPS = "icon alias maps (static JSON)"
 
 /** Absolute path of the spike's `src/`. */
 const SPIKE = fileURLToPath(new URL("./src", import.meta.url))
 
-const both = await measure()
-const buttonOnly = await measure({ button: `${SPIKE}/components/button/index.ts` })
+const all = await measure()
+const entries = COMPONENTS.map((name) => `${name}.js`)
+const alone: Record<string, unknown> = {}
+for (const name of COMPONENTS) {
+  const single = await measure({ [name]: `${SPIKE}/components/${name}/index.ts` })
+  const closure = await single.closure([`${name}.js`])
+  const modules = await single.modules([`${name}.js`])
+  alone[name] = { ...closure, files: undefined, own: own(name, modules) }
+}
 const report: Record<string, unknown> = {
-  chunks: both.chunks,
-  "ui-button alone (button-only build)": buttonOnly.closure(["button.js"]),
-  "ui-button + ui-dropdown": both.closure(["button.js", "dropdown.js"]),
-  "modules, ui-button alone": buttonOnly.modules(["button.js"]),
-  "modules, ui-button + ui-dropdown": both.modules(["button.js", "dropdown.js"])
+  chunks: all.chunks,
+  "each component alone (single-entry build)": alone,
+  "ui-button + ui-dropdown": all.closure(["button.js", "dropdown.js"]),
+  "all components": all.closure(entries),
+  "modules, ui-button alone": (await measure({ button: `${SPIKE}/components/button/index.ts` })).modules(["button.js"]),
+  "modules, all components": all.modules(entries)
 }
 for (const [key, value] of Object.entries(report)) report[key] = await value
 console.log(JSON.stringify(report, null, 2))
@@ -107,16 +118,28 @@ async function breakdown(byName: Map<string, Rolldown.OutputChunk>, entries: str
   return rows
 }
 
+/**
+ * A component's OWN cost:  min+gz of its spike classes, its sheet and its vocabulary, each gzipped alone
+ * (so the sum overstates a little).
+ */
+function own(name: string, modules: Record<string, { min: number; minGzip: number }>) {
+  const mine = [`spike ${name}`, `css: ${name}.css`, `vocabulary: ${name}`]
+  const rows = Object.fromEntries(Object.entries(modules).filter(([group]) => mine.includes(group)))
+  return { ...rows, total: Object.values(rows).reduce((sum, row) => sum + row.minGzip, 0) }
+}
+
 /** Which bucket a module id belongs to. */
 function groupOf(id: string): string {
   if (/node_modules\/(lit|lit-html|lit-element|@lit)\//.test(id)) return "lit"
-  if (id.includes("/spike/lit/src/elements/")) return "spike elements (UIElement, FormElement ...)"
-  if (id.includes("/spike/lit/src/components/button/")) return "spike button (UIButton, UIButtons, UIOr)"
-  if (id.includes("/spike/lit/src/components/dropdown/")) return "spike dropdown (UIDropdown, UIItem)"
+  if (id.includes("/spike/lit/src/elements/")) return "spike elements (UIElement, ContentPart ...)"
+  const component = /\/spike\/lit\/src\/components\/(\w+)\//.exec(id)?.[1]
+  if (component) return `spike ${component}`
   if (/\.css/.test(id)) return `css: ${id.split("/").pop()!.split("?")[0]}`
   if (id.includes("/src/icons/data/")) return ALIAS_MAPS
   if (id.includes("/src/icons/")) return "foundation: $/icons (Icons.ts)"
-  if (id.includes("/src/components/")) return "foundation: vocabularies"
+  const vocabulary = /\/src\/components\/(\w+)\/\w+\.vocabulary/.exec(id)?.[1]
+  if (vocabulary) return `vocabulary: ${vocabulary}`
+  if (id.includes("/src/components/")) return "foundation: components.types"
   const folder = /\/src\/(\w+)\//.exec(id)?.[1]
   return folder ? `foundation: $/${folder}` : id
 }

@@ -1,0 +1,25 @@
+<!-- Element markup for `src/components/parts/examples/extra.html`. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-extra>Extra content with no owner is an unstyled block.</ui-extra>
+  </section>
+
+  <section>
+    <h4>In owners</h4>
+    <x-card style="display: flex; flex-direction: column; width: 290px">
+      <ui-content><ui-header>Elliot</ui-header></ui-content>
+      <ui-extra><a href="#friends">22 Friends</a></ui-extra>
+    </x-card>
+    <x-item>
+      <ui-content>
+        <ui-extra><span>Additional details</span></ui-extra>
+      </ui-content>
+    </x-item>
+    <x-feed>
+      <div class="event">
+        <ui-content><ui-extra text>Ours is a life of constant reruns.</ui-extra></ui-content>
+      </div>
+    </x-feed>
+  </section>
+</div>

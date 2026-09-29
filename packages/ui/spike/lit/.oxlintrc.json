@@ -1,0 +1,6 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  // The root config ignores `spike/**`;  this one lints the spike's own files with the root's rules.
+  "extends": ["../../.oxlintrc.json"],
+  "ignorePatterns": ["dist", ".yarn", ".vitest", "node_modules"]
+}

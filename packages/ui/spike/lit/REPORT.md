@@ -207,3 +207,182 @@ Each page mounts `<ui-dropdown>` with an `options` array property, `value="b"` a
 6. **No "remove value" text** in `dropdown.vocabulary.en.ts` for a label's delete button. The spike uses `clear` plus the value ("Clear Angular").
 
 Files: element core `src/elements/`; components `src/components/{button,dropdown}/` incl. `examples/*.html`; `src/dictionary.es.ts`, `src/translate.test.ts`; pages `demo/` (`index`, `perf`, `translate`, `frameworks/*`); scripts `ssr.ts`, `smoke.ts`, `measure.ts`.
+
+## Batch 1
+
+Adds `ui-icon` / `ui-icons`, `ui-label` / `ui-labels`, the 13 content parts, `ui-divider`, `ui-segment` / `ui-segments` and `ui-container`, all on the Lit element core. Also fixes three things from both batch-0 reports:
+- **Texts:** each component's vocabulary `texts` are registered with `UI.i18n`.
+- **Caret:** the dropdown renders its caret slot only while it's occupied. Lit already did this; it's now tested.
+- **`aria-label`:** host `aria-label` forwarding is now shared.
+
+Measured 2026-09-29 on the same toolchain as batch 0.
+
+**Results:**
+- `yarn test`: 156 tests pass in 1.8 s.
+- `yarn build`, `yarn ts` and `yarn ssr` pass.
+- `yarn lint` and `yarn format:check` are clean. Both are spike-local; see `PAPERCUTS.md`.
+
+### Bundle
+
+Setup:
+- One lib entry per family (`vite.config.ts` `COMPONENTS`).
+- "Alone" means a build with just that entry: the entry plus its static imports, minus the lazy `UIRuntime` chunk and the icon data.
+- "Own" means the family's spike classes, its sheet and its vocabulary, each gzipped separately.
+- Sizes are min+gz, in kB (1000 bytes).
+
+| Family | Alone | Own | Own: classes / css / vocabulary |
+|---|--:|--:|---|
+| `button` (`ui-button`, `ui-buttons`, `ui-or`) | 27.7 | 9.8 | 3.6 / 4.0 / 2.1 |
+| `dropdown` (`ui-dropdown`, `ui-item`) | 45.0 | 13.5 | 6.1 / 4.7 / 2.7 |
+| `icon` (`ui-icon`, `ui-icons`) | 22.1 | 5.0 | 1.9 / 1.8 / 1.2 |
+| `label` (`ui-label`, `ui-labels`) | 24.6 | 7.3 | 2.7 / 3.1 / 1.5 |
+| `parts` (13 parts + `PartElement`) | 26.5 | 10.0 | 2.9 / 5.0 / 2.1 |
+| `divider` | 19.8 | 2.9 | 1.4 / 0.9 / 0.6 |
+| `segment` (`ui-segment`, `ui-segments`) | 21.6 | 6.5 | 2.0 / 3.1 / 1.4 |
+| `container` | 17.5 | 2.6 | 1.3 / 0.8 / 0.6 |
+| **`ui-button` + `ui-dropdown`** | **48.7** | | |
+| **all eight families** | **84.6** | | |
+
+- **Shared floor:** about 15 kB. That is `container` alone minus its own cost: Lit 7.5, the spike core 5.9 (all of it), and `ClassBuilder` / `OwnerContext` from `$/elements`, `$/vocabulary`, `Icons`, the runtime loader and `$/util`.
+- **Cost of the content-part machinery:** `ContentPart`, `PartOwners` and `OwnerController` add about 1.1 kB gzip to the core. `lit/static-html.js` (used to vary a part's tag) adds about 0.5 kB.
+- **Icon alias maps:** `Icons.ts` now loads them lazily (0.25 kB left in the eager closure), so batch 0's "minus 14.1 kB alias maps" correction no longer applies. `button` alone is 27.7 kB without that correction (27.3 kB with it in batch 0).
+- **`label` doesn't import `parts.css`:** a statistic's label adopts it by registry name (`PARTS_SHEET`), and whoever loads the owner loads the parts.
+
+### LOC (lines / code lines)
+
+| File | Lines | Code |
+|---|--:|--:|
+| `elements/UIElement.ts` (+85: registration, texts, slotchange, aria-label, `sheetNames()`) | 390 | 211 |
+| `elements/VocabularyProperties.ts` | 176 | 125 |
+| `elements/ContentPart.ts` | 95 | 60 |
+| `elements/OwnerController.ts` | 71 | 43 |
+| `elements/PartOwners.ts` | 87 | 39 |
+| `elements/IconRenderer.ts` | 50 | 30 |
+| `elements/elements.types.ts` | 146 | 53 |
+| `icon/UIIcon.ts`, `UIIcons.ts` | 51, 28 | 26, 16 |
+| `label/UILabel.ts`, `UILabels.ts` | 157, 20 | 103, 11 |
+| `parts/UIHeader.ts` | 32 | 18 |
+| `parts/UIAvatar.ts`, `UIDate.ts`, `UIContent.ts` | 21, 15, 13 | 13, 9, 7 |
+| `parts/` 8 plain parts (`UIMeta` ...) + `PartElement.ts` | 8–14 each | 3–6 each |
+| `parts/OwnerStub.ts` (demo / test owners) | 56 | 38 |
+| `divider/UIDivider.ts` | 38 | 23 |
+| `segment/UISegment.ts`, `UISegments.ts` | 49, 28 | 32, 18 |
+| `container/UIContainer.ts` | 27 | 18 |
+| `testing/AXTree.ts` | 64 | 44 |
+| tests: icon / label / parts / divider / segment / container | 166 / 224 / 301 / 75 / 137 / 65 | 137 / 191 / 252 / 58 / 112 / 51 |
+
+The whole batch is about 480 code lines of elements. Most parts are one line:
+```ts
+class UIMeta extends PartElement.for(metaVocabulary) {}
+```
+
+### Ergonomics, per component
+
+**Icon.**
+- Trivial: 26 code lines.
+- Host ARIA through internals (`role=img`, `ariaLabel`, `ariaHidden`) is three assignments.
+- `IconRenderer` gained a `style` argument.
+- The one fight was the vocabulary's `style` attribute. A Lit property named `style` replaces the host's `CSSStyleDeclaration`. `VocabularyProperties.propertyName()` now renames names in `RESERVED_PROPERTIES` to `<noun><Name>` (`iconStyle`, `dividerHidden`), and the `PropertyName` type mirrors that rename. The attribute keeps its name.
+
+**Label.**
+- The most logic in the batch:
+  - `<a>` vs `<span>` roots
+  - icon-only detection
+  - an image URL on a keyOnly attribute
+  - the statistic-label mode
+- `image` is keyOnly (boolean converter), yet may carry a URL. The element reads the raw attribute, since the converter discards the value.
+- The contract's `<slot name="icon">svg</slot>` fallback works here (unlike button's), because `label.css` uses a descendant `.icon svg` selector.
+- An icon-only `<span>` root with a forwarded `aria-label` becomes `role=img`, since `aria-label` is prohibited on a generic element.
+
+**Parts.**
+- The easiest part to write, once `ContentPart` existed.
+- A tag that varies (`div` / `span` / `time` / `a` / `h1`–`h6`) needs `lit/static-html.js` `literal`s. One template covers every part root.
+- The owned-header decision is a single `if (this.owner)`, because `OwnerController` re-renders the host when the owner changes.
+
+**Divider, segment, container.**
+- Mechanical: 18–32 code lines each.
+- The segment declares `--ui-inverted: 0|1` inline on its root.
+- `disabled` makes the root `inert`, which reaches slotted content through the flat tree (tested).
+- `loading` sets host `aria-busy` and renders a visually hidden `role=status`.
+- A scrolling segment, container or modal `ui-content` gets `tabindex=0`, because axe's `scrollable-region-focusable` fails without it.
+
+**What fought the conventions.**
+- A `display: contents` host swallows inline box styles: an example's `style="width: 2em"` on `<ui-avatar>` did nothing. The avatar example sizes through `::part(avatar)` instead.
+- Adding an owner-only style needs a `<style>` in the page, which is correct but surprising to authors.
+
+### Owner context and `ContentPart` design
+
+- **`PartOwners`** is a static, page-wide registry filled by `UIElement.define()`:
+  - part noun → (owner tag → owner noun), from each vocabulary's `ownsParts`, canonical and translated tags alike
+  - tag → "is a content part"
+  - the connected `OwnerController`s
+- **`find()`** wraps `OwnerContext.find()`. Its `barrier` is any registered component that is not a part; owners match before the barrier. So a header inside a segment inside a card stays standalone, while an app's own unregistered wrappers don't block. Lookup is by tag, so upgrade order never matters.
+- **`OwnerController`** is a Lit `ReactiveController` used by `ContentPart`, `UIIcon` (`direct: true`, parent must be `<ui-icons>`) and `UILabel` (a statistic's `label`):
+  - it resolves on `hostConnected`, which also covers reparenting
+  - it swaps `:state(in-<owner>)` and never sets the `in-<owner>` class
+  - it calls `requestUpdate()` and an optional `onChange`; the label uses `onChange` to re-adopt sheets with `parts`
+- **Re-resolution.** Every `UIElement` shadow root reports `slotchange` (with `flatten`) to `PartOwners.reslotted()`, which re-resolves tracked elements in or under the newly assigned nodes. A late owner registration re-resolves every connected tracker.
+- **What the tests cover:**
+  - slot boundary (an owner with a shadow root slotting a part)
+  - shadow boundary (a `<ui-header>` rendered in the owner's own shadow root)
+  - a segment barrier
+  - nested owners (card > content > item > content > header resolves to `item`)
+  - header in header (`depth` 1 through `ui-content`)
+  - reparenting
+  - re-slotting through `slot=` into a slot behind a barrier, with no reconnect
+  - a late owner registration
+  - no static class ever set
+- **Owner tokens.** A header in a plain segment inside an inverted one reads `--ui-inverted: 0`; reversed, it reads 1 with `color-scheme: dark`.
+- **`--ui-part`** is declared on every part root by `parts.css` (tested through computed style), so the element adds nothing.
+- **`OwnerStub`** (`x-card`, `x-feed`, `x-statistic` ...) stands in for owners that don't exist yet. These are light-DOM elements registered as real owners, so the demo and axe exercise the production lookup path.
+
+**Platform limits hit.**
+- **Nobody tells an element it was re-slotted.** Only the slot gets `slotchange`, so owners have to report it. A part slotted into a non-`UIElement` owner that re-slots it isn't re-resolved; it is again on reconnect.
+- **`slotchange` timing.** It fires after the owner's first render assigns its slots, so a part resolves twice: once on connect (through the light parent, which gives the same answer) and once on `slotchange`. The tests wait two `updateComplete` rounds.
+- **`:state()` on a `display: contents` host** matches fine in `:host(:state(x)) > .root`. Structural pseudo-classes read the host's position, as the CSS expects.
+- **`display: contents` and accessibility.** Chrome keeps a `display: contents` host with an internals `role=img` + `ariaLabel` in the accessibility tree as `image "Home"`, and drops it when `ariaHidden`. This was verified against Chrome's real tree through CDP (`testing/AXTree.ts`, `Accessibility.getPartialAXTree`), not only axe.
+
+### Visual comparison
+
+The side-by-side demo is at `demo/index.html` (`?only=<family>`), with all 30 new pairs, compared through full-section screenshots.
+- **Harness fix:** the element side now opts into `ui-typography`. Light-DOM `<p>` margins had made every segment look taller, a harness difference and not a contract one.
+- **Matches:** icons, labels (ribbons, corners, attached, floating, tags, image + detail), headers (page, content, icon, sub, dividing, block, attached, inverted, owned), statistic values and labels, dividers, segments and containers.
+- **Remaining differences:**
+  - `ui-segments` nested in `ui-segments` keeps its own box: foundation bug 5 below.
+  - A link inside `<ui-detail>` is unstyled: bug 6 below.
+  - Stub owners carry no colour: a red message header and a red statistic render uncoloured.
+
+### Tests
+
+156 tests in total: button 29, dropdown 28, icon 17, label 22, parts 30, divider 7, segment 14, container 5, translation 4.
+
+What the new tests cover:
+- class output per vocabulary attribute (every keyOnly, keyOrValue bare and valued, yes/no, `medium` as a no-op)
+- `:state()`s and events (`ui-remove`, cancelable, reported as prevented; the label is never removed)
+- slots and parts
+- owner resolution (see above)
+- header levels, roles and `aria-level` when owned
+- icon ARIA, including the CDP accessibility-tree checks
+- i18n: `has("or")` / `has("remove")`, and a registered translation pack winning
+- the dropdown caret slot
+- `aria-label` forwarding
+- axe on all 30 element-markup examples with `color-contrast` off. `heading-order` is also off for the segment and parts examples: the fragments nest `<h1>`–`<h6>` demos under `<h4>` section titles, in the originals too. The label examples' bare `<input>`s got `aria-label`s, since the originals fail axe's `label` rule.
+
+### Foundation bugs in `src/`
+
+1. **`style` attribute.** `icon/icon.vocabulary.en.ts:40` names an attribute `style`, which shadows `HTMLElement.style`. It needs `property: "iconStyle"`, or a rename (`set`?). The spike renames it generically.
+2. **`hidden` attribute.** `divider/divider.vocabulary.en.ts:27` names an attribute `hidden`, which is the global attribute. With `divider.css:33` (`:host([hidden]) { display: none }`) and the UA sheet, `<ui-divider hidden>` hides the whole host instead of leaving spacing (tested). It needs another name, e.g. `spacer`.
+3. **Default `--ui-inverted` missing.** `segment/segment.css:477` and `parts/parts.css:1082` set `--ui-inverted: 1` but never declare the default `0` on every root, as `PART_OWNER_TOKENS` requires. The spike's segment declares it inline. Separately, `segment.css` keeps a plain segment inside an inverted one in the dark scheme, so `--ui-inverted: 0` there sits beside `color-scheme: dark`. That needs a decision.
+4. **`image` carries two values.** In `label/label.vocabulary.en.ts:28`, `image` is `keyOnly` but documented as also taking a URL. No attribute kind carries both, so the element reads the raw attribute. It should be a keyOrValue-like kind, or a separate `src`.
+5. **Nested groups.** `segment/segment.css:367-375` (`.ui.segments > .segments`: a divider line and no box of its own) has no shadow or token twin. A nested `<ui-segments>` keeps its own border and shadow.
+6. **Links in a detail.** `parts/parts.vocabulary.en.ts:336`: `ui-detail` has no `href`, though Fomantic has `a.detail`. `label.css:433` (`.ui.label ::slotted(a)`) can't reach a link slotted into a `<ui-detail>`, so it renders in the UA link colour.
+7. **Segment owns no parts.** `segment.vocabulary.en.ts:6` has no `ownsParts`, and no `in-segment` rule exists. Segment is an owner of TOKENS only, and a barrier for part lookup. Used as-is.
+8. **Batch-0 bugs 1 and 2 still stand:** the slot-fallback vs child selectors in `button.css` / `dropdown.css`, and palette contrast.
+
+**Files:**
+- element core: `src/elements/{ContentPart,OwnerController,PartOwners}.ts`
+- components: `src/components/{icon,label,parts,divider,segment,container}/`, including `examples/*.html`
+- `src/testing/AXTree.ts`
+- `demo/index.ts`
+- `measure.ts`
+- `.oxlintrc.json`

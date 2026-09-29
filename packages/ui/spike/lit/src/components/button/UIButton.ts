@@ -27,6 +27,7 @@ import buttonCSS from "$/components/button/button.css?inline"
 export class UIButton extends UIElement.for(buttonVocabulary) {
   static formAssociated = true
   @proto static delegatesFocus = true
+  @proto static forwardsAriaLabel = true
   @proto static sheets = [[buttonVocabulary.noun, buttonCSS]] as const
 
   /** Text shorthand;  the default slot wins.  Property only:  the vocabulary has no `content` attribute. */
@@ -41,16 +42,6 @@ export class UIButton extends UIElement.for(buttonVocabulary) {
   constructor() {
     super()
     this.addEventListener("click", this.onHostClick, { capture: true })
-  }
-
-  /** Also watch the host's `aria-label`, forwarded to the inner button (an icon-only button's name). */
-  static override get observedAttributes() {
-    return [...super.observedAttributes, ARIA_LABEL]
-  }
-
-  override attributeChangedCallback(name: string, old: string | null, value: string | null) {
-    if (name === ARIA_LABEL) this.requestUpdate()
-    else super.attributeChangedCallback(name, old, value)
   }
 
   ////////////////
@@ -85,7 +76,7 @@ export class UIButton extends UIElement.for(buttonVocabulary) {
   private renderButton(classes: string) {
     const disabled = this.isDisabled
     const content = this.renderContent()
-    const ariaLabel = this.getAttribute(ARIA_LABEL) ?? undefined
+    const ariaLabel = this.ariaLabelled()
     if (this.href) {
       return html`<a
         class=${classes}
@@ -249,6 +240,3 @@ const WRAPPER_KINDS: ReadonlySet<string> = new Set(["size", "color"])
 
 /** `ClassBuilder` extra for icon-only / labeled icon buttons -- grammar, not vocabulary. */
 const ICON_CLASS = "icon"
-
-/** Platform attribute forwarded to the inner button. */
-const ARIA_LABEL = "aria-label"

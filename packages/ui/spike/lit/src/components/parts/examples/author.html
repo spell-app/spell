@@ -1,0 +1,21 @@
+<!-- Element markup for `src/components/parts/examples/author.html`. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-author>Matt</ui-author>
+  </section>
+
+  <section>
+    <h4>In owners</h4>
+    <x-comment>
+      <ui-content><ui-author href="#matt">Matt</ui-author></ui-content>
+    </x-comment>
+    <x-feed>
+      <div class="event">
+        <ui-content>
+          <ui-summary><ui-author href="#elliot">Elliot Fu</ui-author> posted on his page</ui-summary>
+        </ui-content>
+      </div>
+    </x-feed>
+  </section>
+</div>

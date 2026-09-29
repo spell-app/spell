@@ -1,11 +1,12 @@
 import { describe, expect, it, vi } from "vitest"
 import { userEvent } from "vitest/browser"
 
+import { loadUI } from "$/runtime"
 import type { AttributeSpec } from "$/vocabulary"
 import { buttonsVocabulary, buttonVocabulary } from "$/components/button/button.vocabulary.en"
 import { expectAccessible } from "$test/a11y"
 import { Fixture } from "$test/fixture"
-import { UIButton, type UIButtons } from "./index"
+import { UIButton, type UIButtons, type UIOr } from "./index"
 
 import "./index"
 
@@ -132,6 +133,16 @@ describe("<ui-button> content", () => {
     expect(root.querySelector("[part=label]")!.textContent!.trim()).toBe("1,048")
   })
 
+  it("forwards the host's aria-label to the inner button, and follows changes", async () => {
+    const element = await render(`<ui-button icon="cloud" aria-label="Cloud"></ui-button>`)
+    element.setAttribute("aria-label", "Upload")
+    await element.updateComplete
+    expect(inner(element).getAttribute("aria-label")).toBe("Upload")
+    element.removeAttribute("aria-label")
+    await element.updateComplete
+    expect(inner(element).hasAttribute("aria-label")).toBe(false)
+  })
+
   it("renders a link with href", async () => {
     const element = await render(`<ui-button href="#x">Go</ui-button>`)
     expect(inner(element).localName).toBe("a")
@@ -233,6 +244,23 @@ describe("<ui-button> behaviour", () => {
     UIButton.define("x-late-button")
     await element.updateComplete
     expect(inner(element).className).toBe("ui primary button")
+  })
+})
+
+describe("<ui-or> texts", () => {
+  it("registers its text with UI.i18n, so `or` resolves through the pack and a translation wins", async () => {
+    const ui = await loadUI()
+    expect(ui.i18n.has("or")).toBe(true)
+    const locale = ui.i18n.locale
+    ui.i18n.register("xx", { or: "o" })
+    ui.i18n.locale = "xx"
+    try {
+      const or = Fixture.render<UIOr>(`<ui-or></ui-or>`)
+      await or.updateComplete
+      expect(or.shadowRoot!.querySelector(".or")!.getAttribute("data-text")).toBe("o")
+    } finally {
+      ui.i18n.locale = locale
+    }
   })
 })
 

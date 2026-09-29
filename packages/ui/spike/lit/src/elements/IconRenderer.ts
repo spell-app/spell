@@ -1,6 +1,6 @@
 import { html, nothing, type ReactiveControllerHost, type TemplateResult } from "lit"
 
-import { Icons } from "$/icons"
+import { Icons, type IconStyle } from "$/icons"
 
 /**
  * Icons in Lit templates:  `renderer.template("cloud")` => `<svg viewBox aria-hidden><path fill=currentColor d>`.
@@ -13,34 +13,38 @@ import { Icons } from "$/icons"
 export class IconRenderer {
   /** element to re-render when data arrives */
   private readonly host: ReactiveControllerHost
-  /** names this host is already waiting for */
+  /** names (`name/style`) this host is already waiting for */
   private readonly waiting = new Set<string>()
 
   constructor(host: ReactiveControllerHost) {
     this.host = host
   }
 
-  /** `<svg>` template for icon `name`, or `nothing` while loading / for unknown names. */
-  template(name: string | undefined): TemplateResult | typeof nothing {
+  /**
+   * `<svg>` template for icon `name`, or `nothing` while loading / for unknown names.
+   * - `style` forces a set (`regular`, `brands`);  default inferred from the name (`Icons.resolve()`).
+   */
+  template(name: string | undefined, style?: IconStyle): TemplateResult | typeof nothing {
     if (!name) return nothing
-    const data = Icons.peek(name)
+    const data = Icons.peek(name, style)
     if (data) {
       const [width, height, path] = data
       return html`<svg viewBox="0 0 ${width} ${height}" aria-hidden="true">
         <path fill="currentColor" d=${path}></path>
       </svg>`
     }
-    if (!IconRenderer.missing.has(name) && !this.waiting.has(name)) {
-      this.waiting.add(name)
-      void Icons.get(name).then((found) => {
-        this.waiting.delete(name)
+    const key = style ? `${name}/${style}` : name
+    if (!IconRenderer.missing.has(key) && !this.waiting.has(key)) {
+      this.waiting.add(key)
+      void Icons.get(name, style).then((found) => {
+        this.waiting.delete(key)
         if (found) this.host.requestUpdate()
-        else IconRenderer.missing.add(name)
+        else IconRenderer.missing.add(key)
       })
     }
     return nothing
   }
 
-  /** Names `Icons.get()` couldn't find. */
+  /** Names (`name/style`) `Icons.get()` couldn't find. */
   private static readonly missing = new Set<string>()
 }

@@ -1,0 +1,25 @@
+<!-- Element markup for `src/components/parts/examples/title.html`. -->
+<div class="ui-stack">
+  <section>
+    <h4>Standalone</h4>
+    <ui-title>A title with no owner is an unstyled block.</ui-title>
+  </section>
+
+  <section>
+    <h4>In owners</h4>
+    <x-step>
+      <ui-content><ui-title>Shipping</ui-title></ui-content>
+    </x-step>
+    <x-step style="--ui-step-state: active">
+      <ui-content><ui-title>Active step</ui-title></ui-content>
+    </x-step>
+    <x-accordion><ui-title>What is a dog?</ui-title></x-accordion>
+    <x-accordion style="--ui-accordion-style: styled">
+      <ui-title>Styled title</ui-title>
+      <ui-title>Second title</ui-title>
+    </x-accordion>
+    <x-search>
+      <ui-content><ui-title>Search result</ui-title></ui-content>
+    </x-search>
+  </section>
+</div>
