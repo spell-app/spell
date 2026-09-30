@@ -19,7 +19,7 @@ yarn gen:icons
    Fomantic clone's LESS source for its `@icon-map` family, to derive Fomantic's alias vocabulary.
 3. Writes, after deleting `src/icons/glyphs/` (so a dropped icon doesn't linger):
    - `src/icons/glyphs/<style>/<name>.js`:  one ES module per free icon, `export default [width, height, "path"]`
-   - `src/icons/data/{aliases,fomantic-aliases,fomantic-clashes,names,search}.json`:  compact JSON, no header
+   - `src/icons/data/{aliases,fomantic-aliases,fomantic-clashes,fomantic-names,names,search}.json`:  compact JSON, no header
      (comments aren't valid JSON;  this file is the regeneration record)
 
 Re-run it whenever Font Awesome ships new icons, or the Fomantic reference clone updates its icon variables.
@@ -43,6 +43,7 @@ Measured at Font Awesome 7.3.1.
 | `data/fomantic-aliases.json` | 1 | 20.3 KB | 6.2 KB | lazy, same |
 | `data/fomantic-clashes.json` (opt-in, see "Clashes") | 1 | 0.6 KB | 0.4 KB | lazy, same |
 | `data/search.json` (docs site only) | 1 | 93.9 KB | - | lazy, docs site only |
+| `data/fomantic-names.json` (docs site only) | 1 | 62.2 KB | 14.6 KB | lazy, the icon browser's "Fomantic" names view |
 
 None of it is in the initial JS bundle.  Gzip sizes above are `gzip -c <file> | wc -c` (2026-09-29).
 What a page pays (gzip, HTTP/2, exact Font Awesome names):
@@ -86,6 +87,11 @@ Requests per style-less `get()` on a cold page (glyphs + data files;  a 404 is a
   the 100 KB budget.  Font Awesome's full terms are ~200 KB.  NOTE:  FA7 roughly doubled terms per icon, so new
   icons can push this over -- `buildSearchIndex()` then SKIPS the file and the generator says so (the docs
   site would fall back to name-only search).  `Icons.ts` never imports it.
+- `fomantic-names.json`:  Fomantic's WHOLE vocabulary as Fomantic spells it (1,938 names, `outline` and brand
+  names included) -> `"<style>/<FA7 name>"`, so the icon browser can label tiles with Fomantic's names.
+  `fomantic-aliases.json` can't serve:  it drops every name equal to its FA7 name and the `outline` word.
+  `Icons.ts` never imports it.  Two Fomantic names are left out:  `acquisitions incorporated` and `penny arcade`
+  (no FA7 Free icon).
 - Removed with the chunked layout:  `solid.json`, `solid-*.json`, `regular.json`, `brands.json` and the generated
   `data/index.ts` (`CHUNK_LOADERS`, a literal-specifier map that existed only to stop Vite globbing `data/`).
 
