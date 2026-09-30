@@ -1,78 +1,86 @@
 /**
- * Generates `src/icons/glyphs/<style>/<name>.js` (one ES module per icon) and `src/icons/data/*.json` (alias
- * maps, names index, search terms) from Font Awesome 7 Free's metadata plus Fomantic-UI's icon vocabulary.
- * - Run with `yarn tsx scripts/gen-icons.ts` (or `node --experimental-strip-types` / `yarn vite-node` if `tsx`
- *   is unavailable -- see `PAPERCUTS.md`).
- * - Downloads (and caches under the OS temp dir, NOT the repo) Font Awesome's `icons.json`, since it's ~6 MB
- *   and CC-BY-4.0/MIT rather than something we vendor -- see `src/icons/LICENSE.md`.
- * - Reads (never writes) `reference/Fomantic-UI/src/themes/default/elements/icon.variables`, the LESS source
- *   of Fomantic's `@icon-map` family, to derive Fomantic's OWN alias vocabulary (`setting` -> `gear`, etc).
- * - Glyph modules are `export default [width, height, "path"]`;  the JSON has no header (comments aren't valid
- *   JSON), so the regeneration story lives in `docs/icons.md`.  Both are COMMITTED, so installs and CI need no
- *   network.
- * - Types here are a deliberately minimal, LOCAL re-statement of Font Awesome's metadata shape:  this script
- *   runs standalone via `tsx`, outside the `$/*` alias graph `tsconfig.json` sets up for `src/`, so it can't
- *   import `$/icons` types without its own module resolution setup.
+ * Generates the built-in icon packs under `src/icons/icon-packs/` (`docs/icons.md`, "Built-in packs") from Font Awesome
+ * Free's own npm package, plus Fomantic-UI's icon vocabulary:
+ * - `fa7-free/`:  FA's `solid/` and `regular/` SVGs, plus the brand extras (`scripts/icon-extras.ts`);  the default
+ * - `fa7-brands/`:  FA's `brands/` SVGs
+ * - `fomantic/`:  no SVGs;  an index whose entries point at the two folders above, named by Fomantic
+ * - also `src/icons/data/search.json`, solid search terms for the docs icon browser
+ * - Run with `yarn gen:icons`.  MUST run in a worktree while tests run elsewhere:  it deletes and rewrites every
+ *   pack folder.
+ * - The SVGs are FA's files BYTE FOR BYTE, licence comment included (FA's IP:  the attribution stays), in FA's own
+ *   layout (`<style>/<name>.svg`), so a pack's `base` can point at jsDelivr's copy of the same package.
+ * - Downloads (and caches under the OS temp dir, NOT the repo) the pinned package tarball, `FA_VERSION`.
+ * - Reads (never writes) `reference/Fomantic-UI/src/themes/default/elements/icon.variables`, the LESS source of
+ *   Fomantic's `@icon-map` family, for Fomantic's names.
+ * - Each pack's `pack.js` is written by `IconPackBuilder` (`tools/`), which also verifies every SVG.
+ * - Types here are a deliberately minimal, LOCAL re-statement of Font Awesome's metadata shape.
  */
 
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { execFileSync } from "node:child_process"
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+
+import { IconName } from "../src/icons/IconName.ts"
+import { IconPackBuilder } from "../tools/IconPackBuilder.ts"
+import type { IconPackReport } from "../tools/tools.types.ts"
+import { ICON_EXTRAS } from "./icon-extras.ts"
 
 ////////////////
 // ## Font Awesome metadata shape
 ////////////////
 
-/** One `svg.<style>` entry in Font Awesome's `icons.json` -- `path` is an array only for duotone (not free). */
-type FaSvgStyle = {
-  width: number
-  height: number
-  path: string | string[]
-}
-
-/** One icon's entry in Font Awesome's `icons.json`, trimmed to the fields this script reads. */
-type FaIconEntry = {
+/** One icon's entry in `metadata/icon-families.json`, trimmed to the fields this script reads. */
+type FaFamiliesEntry = {
   unicode: string
-  free?: string[]
   aliases?: {
     names?: string[]
     /** `primary` holds codepoints of icons FA merged INTO this one, e.g. `user` lists `user-large`'s `f406`. */
     unicodes?: { primary?: string[] }
   }
   search?: { terms?: string[] }
-  svg: Partial<Record<IconStyle, FaSvgStyle>>
+  familyStylesByLicense?: { free?: { family: string; style: string }[] }
 }
 
-/** Font Awesome's `icons.json`, keyed by canonical (kebab-case) icon name. */
+/** One icon as this script uses it:  its codepoints, aliases, search terms and FREE classic styles. */
+type FaIconEntry = {
+  unicode: string
+  free: IconStyle[]
+  aliases?: FaFamiliesEntry["aliases"]
+  search?: FaFamiliesEntry["search"]
+}
+
+/** Font Awesome metadata, keyed by canonical (kebab-case) icon name. */
 type FaMetadata = Record<string, FaIconEntry>
 
-/** Mirrors `$/icons`' `IconStyle` -- kept in sync by hand since this script can't import it (see file docstring). */
+/** The Font Awesome Free styles, and the folders their SVGs live in. */
 type IconStyle = "solid" | "regular" | "brands"
-
-/** Mirrors `$/icons`' `IconData` tuple. */
-type IconTuple = readonly [width: number, height: number, path: string]
 
 ////////////////
 // ## Generator
 ////////////////
 
 /**
- * Builds every file under `src/icons/glyphs/` and `src/icons/data/` from Font Awesome 7 Free + Fomantic-UI's
- * icon vocabulary.
- * - One method per output file (plus the shared parsing steps), so `run()` reads as a table of contents.
- * - Stateless between runs:  every method takes what it needs and returns what it built, nothing is cached
- *   on `this` except the resolved filesystem paths.
+ * Builds every pack under `src/icons/icon-packs/` and the docs-site search data.
+ * - One method per output, so `run()` reads as a table of contents.
+ * - Stateless between runs:  every method takes what it needs and returns what it built.
  */
 class IconGenerator {
-  /** Font Awesome's own metadata source -- see file docstring for why it's cached outside the repo. */
-  static readonly METADATA_URL = "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/7.x/metadata/icons.json"
+  /** Font Awesome Free release the packs are built from (and `docs/icons.md`'s jsDelivr URLs name). */
+  static readonly FA_VERSION = "7.3.1"
+
+  /** Its npm tarball. */
+  static readonly FA_TARBALL = `https://registry.npmjs.org/@fortawesome/fontawesome-free/-/fontawesome-free-${IconGenerator.FA_VERSION}.tgz`
+
+  /** Licence line in the FA packs' indexes. */
+  static readonly FA_LICENSE = `Font Awesome Free ${IconGenerator.FA_VERSION} by @fontawesome - https://fontawesome.com (Icons: CC BY 4.0)`
 
   /**
    * Fomantic-UI class names that are genuine FA5 -> FA6+ renames Font Awesome's OWN `unicode` field can't
    * recover, because FA6 reassigned the codepoint (often to the plain ASCII character, e.g. `plus` -> `"+"`)
    * rather than keeping the legacy private-use codepoint Fomantic's LESS still references.  Each was verified
-   * by hand against `icons.json` -- see `docs/icons.md`.  Keyed by the RAW (underscored) Fomantic class name.
+   * by hand against the metadata -- see `docs/icons.md`.  Keyed by the RAW (underscored) Fomantic class name.
    * - also holds a hand-picked stand-in for an icon FA dropped from Free (`vector_square`).
    */
   static readonly MANUAL_OVERRIDES: Record<string, string> = {
@@ -111,164 +119,260 @@ class IconGenerator {
     { name: "icon-brand-aliases-map", stripOutlineSuffix: false }
   ]
 
+  /** Solid search terms kept per icon, to fit `search.json`'s 100 KB budget -- see `docs/icons.md`. */
+  static readonly SEARCH_TERMS_CAP = 5
+
   private readonly repoRoot: string
+  private readonly packsDir: string
   private readonly dataDir: string
-  private readonly glyphsDir: string
   private readonly fomanticVariablesPath: string
-  private readonly metadataCachePath: string
+  /** extracted FA package (`<dir>/package/...`), cached OUTSIDE the repo;  override with `FA_PACKAGE_DIR` */
+  private readonly packageDir: string
 
   constructor() {
     this.repoRoot = fileURLToPath(new URL("..", import.meta.url))
+    this.packsDir = path.join(this.repoRoot, "src/icons/icon-packs")
     this.dataDir = path.join(this.repoRoot, "src/icons/data")
-    this.glyphsDir = path.join(this.repoRoot, "src/icons/glyphs")
     this.fomanticVariablesPath = path.join(
       this.repoRoot,
       "reference/Fomantic-UI/src/themes/default/elements/icon.variables"
     )
-    // NOTE: cached OUTSIDE the repo (OS temp dir) -- 6 MB of upstream metadata we don't vendor or commit.
-    // Override with `FA_METADATA_PATH` to point at an already-downloaded copy (e.g. in a scratchpad).
-    this.metadataCachePath = process.env.FA_METADATA_PATH ?? path.join(tmpdir(), "spell-ui-fa7-icons.json")
+    this.packageDir =
+      process.env.FA_PACKAGE_DIR ?? path.join(tmpdir(), `spell-ui-fontawesome-free-${IconGenerator.FA_VERSION}`)
   }
 
-  /** Runs the full pipeline and prints the size / alias report the task asks for. */
+  /** Runs the full pipeline and prints what it built. */
   async run() {
-    mkdirSync(this.dataDir, { recursive: true })
-    // NOTE: wiped first so an icon Font Awesome drops doesn't linger as a stale module.
-    rmSync(this.glyphsDir, { recursive: true, force: true })
-
     const metadata = await this.loadMetadata()
-    const freeNames = new Set(Object.keys(metadata).filter((name) => (metadata[name].free?.length ?? 0) > 0))
+    const byStyle = IconGenerator.byStyle(metadata)
+    // NOTE: wiped first so an icon Font Awesome drops doesn't linger
+    rmSync(this.packsDir, { recursive: true, force: true })
 
-    const STYLES = ["solid", "regular", "brands"] as const
-    const solid = this.buildStyleData(metadata, "solid")
-    const regular = this.buildStyleData(metadata, "regular")
-    const brands = this.buildStyleData(metadata, "brands")
-
-    const glyphReports = [solid, regular, brands].map((data, i) => this.writeGlyphs(STYLES[i], data))
-    const namesReport = this.writeJson("names.json", {
-      solid: Object.keys(solid),
-      regular: Object.keys(regular),
-      brands: Object.keys(brands)
-    })
-
-    const faAliases = this.buildFaAliases(metadata)
-    const faAliasesReport = this.writeJson("aliases.json", faAliases)
-
+    const faAliases = IconGenerator.faAliases(metadata)
     const fomanticText = readFileSync(this.fomanticVariablesPath, "utf8")
-    const fomanticResult = this.buildFomanticAliases(fomanticText, metadata, freeNames)
-    const { aliases: fomanticAliases, clashes: fomanticClashes } = this.splitFomanticClashes(
-      fomanticResult.aliases,
-      freeNames,
-      faAliases
-    )
-    const fomanticReport = this.writeJson("fomantic-aliases.json", fomanticAliases)
-    const clashesReport = this.writeJson("fomantic-clashes.json", fomanticClashes)
+    const fomantic = IconGenerator.fomanticNames(fomanticText, metadata, byStyle)
 
-    const search = this.buildSearchIndex(metadata)
-    const searchReport = search ? this.writeJson("search.json", search.terms) : undefined
+    const free = await this.freePack(byStyle, faAliases, fomantic.names)
+    const brands = await this.brandsPack(byStyle, faAliases)
+    const fomanticPack = await this.fomanticPack(fomantic.names, byStyle)
 
-    this.report({
-      glyphReports,
-      namesReport,
-      faAliasesReport,
-      fomanticReport,
-      clashesReport,
-      fomanticClashes,
-      searchReport,
-      searchSkippedBytes: search ? undefined : this.searchIndexBytes(metadata),
-      fomanticResult
-    })
+    const search = IconGenerator.searchIndex(metadata)
+    mkdirSync(this.dataDir, { recursive: true })
+    writeFileSync(path.join(this.dataDir, "search.json"), JSON.stringify(search))
+
+    for (const report of [free, brands, fomanticPack]) IconGenerator.print(report)
+    console.log(`\n  fomantic:  ${Object.keys(fomantic.names).length} names;  dropped ${fomantic.dropped.length}:`)
+    console.log(`    ${fomantic.dropped.join(", ")}`)
   }
+
+  ////////////////
+  // ## Font Awesome package
+  ////////////////
 
   /**
-   * Reads Font Awesome's `icons.json`, downloading it to `metadataCachePath` first if it's not there yet.
-   * - A plain `fetch()` + `writeFileSync()` -- no retry/backoff, this is a one-off dev-time script.
+   * FA's metadata from the pinned package (downloading and extracting its tarball first if not cached), as one
+   * entry per icon with its FREE classic styles.
+   * - `metadata/icon-families.json`, not the GitHub branch's `icons.json`:  names, aliases and SVGs all come from
+   *   the SAME release.
    */
   private async loadMetadata(): Promise<FaMetadata> {
-    if (!existsSync(this.metadataCachePath)) {
-      console.log(`Downloading Font Awesome metadata to ${this.metadataCachePath} ...`)
-      const response = await fetch(IconGenerator.METADATA_URL)
-      if (!response.ok) throw new Error(`Failed to download ${IconGenerator.METADATA_URL}: ${response.status}`)
-      writeFileSync(this.metadataCachePath, await response.text())
+    const families = path.join(this.packageDir, "package/metadata/icon-families.json")
+    if (!existsSync(families)) {
+      console.log(`Downloading Font Awesome Free ${IconGenerator.FA_VERSION} to ${this.packageDir} ...`)
+      const response = await fetch(IconGenerator.FA_TARBALL)
+      if (!response.ok) throw new Error(`Failed to download ${IconGenerator.FA_TARBALL}: ${response.status}`)
+      mkdirSync(this.packageDir, { recursive: true })
+      const tarball = path.join(this.packageDir, "package.tgz")
+      writeFileSync(tarball, Buffer.from(await response.arrayBuffer()))
+      execFileSync("tar", ["-xzf", tarball, "-C", this.packageDir])
     }
-    return JSON.parse(readFileSync(this.metadataCachePath, "utf8")) as FaMetadata
+    const raw = JSON.parse(readFileSync(families, "utf8")) as Record<string, FaFamiliesEntry>
+    const metadata: FaMetadata = {}
+    for (const name of Object.keys(raw).sort((a, b) => a.localeCompare(b))) {
+      const entry = raw[name]
+      const free = (entry.familyStylesByLicense?.free ?? [])
+        .filter((familyStyle) => familyStyle.family === "classic")
+        .map((familyStyle) => familyStyle.style as IconStyle)
+      if (free.length) metadata[name] = { unicode: entry.unicode, free, aliases: entry.aliases, search: entry.search }
+    }
+    return metadata
+  }
+
+  /** Free icon names per style, sorted. */
+  private static byStyle(metadata: FaMetadata): Record<IconStyle, Set<string>> {
+    const byStyle: Record<IconStyle, Set<string>> = { solid: new Set(), regular: new Set(), brands: new Set() }
+    for (const [name, entry] of Object.entries(metadata)) for (const style of entry.free) byStyle[style].add(name)
+    return byStyle
+  }
+
+  /** Copies FA's `svgs/<style>/<name>.svg` into `folder/<style>/`, unchanged. */
+  private copySvgs(folder: string, style: IconStyle, names: Iterable<string>) {
+    const target = path.join(folder, style)
+    mkdirSync(target, { recursive: true })
+    for (const name of names) {
+      copyFileSync(path.join(this.packageDir, "package/svgs", style, `${name}.svg`), path.join(target, `${name}.svg`))
+    }
   }
 
   ////////////////
-  // ## Per-style icon data
+  // ## Packs
   ////////////////
 
-  /** `{ name: [width, height, path] }` for every icon free in `style`, sorted by name for deterministic output. */
-  private buildStyleData(metadata: FaMetadata, style: IconStyle): Record<string, IconTuple> {
-    const data: Record<string, IconTuple> = {}
-    const names = Object.keys(metadata).sort((a, b) => a.localeCompare(b))
-    for (const name of names) {
-      const entry = metadata[name]
-      if (!entry.free?.includes(style)) continue
-      const svg = entry.svg[style]
-      if (!svg) continue
-      const path = Array.isArray(svg.path) ? svg.path.join(" ") : svg.path
-      data[name] = [svg.width, svg.height, path]
+  /**
+   * `fa7-free`:  solid, regular (named `… outline`), and the brand extras.
+   * - Solid first, so a name solid and regular share (`bell`) is the solid icon's.
+   * - Aliases:  FA's own (`cog` -> `gear`), with ` outline` on regular icons, plus the Fomantic extras.
+   */
+  private async freePack(
+    byStyle: Record<IconStyle, Set<string>>,
+    faAliases: Map<string, string[]>,
+    fomanticNames: Record<string, string>
+  ): Promise<IconPackReport> {
+    const folder = path.join(this.packsDir, "fa7-free")
+    const extras = ICON_EXTRAS.brands.filter((name) => byStyle.brands.has(name))
+    this.copySvgs(folder, "solid", byStyle.solid)
+    this.copySvgs(folder, "regular", byStyle.regular)
+    this.copySvgs(folder, "brands", extras)
+
+    const aliases = new Map<string, string[]>()
+    for (const name of byStyle.solid) aliases.set(`solid/${name}`, faAliases.get(name) ?? [])
+    for (const name of byStyle.regular) {
+      const words = [name, ...(faAliases.get(name) ?? [])].map((word) => `${IconName.normalize(word)} outline`)
+      aliases.set(`regular/${name}`, words)
     }
-    return data
+    for (const name of extras) aliases.set(`brands/${name}`, faAliases.get(name) ?? [])
+    for (const phrase of ICON_EXTRAS.fomantic) {
+      const key = fomanticNames[phrase]
+      if (!key || !aliases.has(key)) throw new Error(`icon-extras:  Fomantic "${phrase}" isn't an fa7-free icon`)
+      aliases.get(key)!.push(phrase)
+    }
+    return new IconPackBuilder({
+      folder,
+      id: "fa7-free",
+      label: "Font Awesome 7 Free",
+      license: IconGenerator.FA_LICENSE,
+      folders: ["solid", "regular", "brands"],
+      aliases: IconGenerator.compact(aliases)
+    }).build()
+  }
+
+  /** `fa7-brands`:  every free brand icon, with FA's own aliases. */
+  private async brandsPack(
+    byStyle: Record<IconStyle, Set<string>>,
+    faAliases: Map<string, string[]>
+  ): Promise<IconPackReport> {
+    const folder = path.join(this.packsDir, "fa7-brands")
+    this.copySvgs(folder, "brands", byStyle.brands)
+    const aliases = new Map([...byStyle.brands].map((name) => [`brands/${name}`, faAliases.get(name) ?? []]))
+    return new IconPackBuilder({
+      folder,
+      id: "fa7-brands",
+      label: "Font Awesome 7 Free brands",
+      license: IconGenerator.FA_LICENSE,
+      aliases: IconGenerator.compact(aliases)
+    }).build()
   }
 
   /**
-   * Writes one `<style>/<name>.js` module per icon:  `export default [width, height, "path"]`.
-   * - Compact and header-free (a licence comment per file would add ~200 B x 2000);  attribution lives in
-   *   `src/icons/LICENSE.md`.
-   * - Names are Font Awesome's kebab-case slugs, so they're safe as file names and as URL segments.
+   * `fomantic`:  one entry per FA icon a Fomantic name means, keyed into the sibling FA folders
+   * (`../fa7-free/solid/gear`), every Fomantic name for it as an `alias`.
+   * - No SVGs of its own, so a page using it with `fa7-free` fetches each file once;  it needs the FA folders
+   *   deployed beside it, not their packs added.
+   * - Entries solid, then regular, then brands, so derived names favour solid;  an alias beats a derived name
+   *   anyway (`IconName.claim()`), which is how Fomantic's meaning of `shield` or `x` wins inside this pack.
    */
-  private writeGlyphs(style: IconStyle, data: Record<string, IconTuple>) {
-    const directory = path.join(this.glyphsDir, style)
-    mkdirSync(directory, { recursive: true })
-    let bytes = 0
-    for (const [name, tuple] of Object.entries(data)) {
-      const text = `export default ${JSON.stringify(tuple)}\n`
-      writeFileSync(path.join(directory, `${name}.js`), text)
-      bytes += Buffer.byteLength(text)
+  private async fomanticPack(
+    names: Record<string, string>,
+    byStyle: Record<IconStyle, Set<string>>
+  ): Promise<IconPackReport> {
+    const folder = path.join(this.packsDir, "fomantic")
+    mkdirSync(folder, { recursive: true })
+    const aliases = new Map<string, string[]>()
+    for (const [phrase, target] of Object.entries(names)) {
+      const [style] = target.split("/") as [IconStyle]
+      const key = `../${style === "brands" ? "fa7-brands" : "fa7-free"}/${target}`
+      aliases.set(key, [...(aliases.get(key) ?? []), phrase])
     }
-    return { style, count: Object.keys(data).length, bytes }
+    const order: IconStyle[] = ["solid", "regular", "brands"]
+    const keys = [...aliases.keys()].sort((a, b) => {
+      const byFolder = order.indexOf(a.split("/")[2] as IconStyle) - order.indexOf(b.split("/")[2] as IconStyle)
+      return byFolder || a.localeCompare(b)
+    })
+    for (const key of keys) {
+      const [, , style, name] = key.split("/")
+      if (!byStyle[style as IconStyle].has(name)) throw new Error(`fomantic:  ${key} isn't a free FA icon`)
+    }
+    return new IconPackBuilder({
+      folder,
+      id: "fomantic",
+      label: "Fomantic-UI names",
+      license: `${IconGenerator.FA_LICENSE};  names from Fomantic-UI (MIT)`,
+      keys,
+      aliases: IconGenerator.compact(aliases)
+    }).build()
+  }
+
+  /** `alias` values for the builder:  none dropped, one as a string, several as a list. */
+  private static compact(aliases: Map<string, string[]>): Record<string, string | string[]> {
+    const compact: Record<string, string | string[]> = {}
+    for (const [key, words] of aliases) {
+      const unique = [...new Set(words.map(IconName.normalize))]
+      if (unique.length) compact[key] = unique.length === 1 ? unique[0] : unique
+    }
+    return compact
   }
 
   ////////////////
-  // ## Alias maps
+  // ## Names
   ////////////////
 
-  /** Font Awesome's OWN alias names (`aliases.names`, e.g. `cog` -> `gear`) -> canonical FA7 name. */
-  private buildFaAliases(metadata: FaMetadata): Record<string, string> {
-    const aliases: Record<string, string> = {}
-    const names = Object.keys(metadata).sort((a, b) => a.localeCompare(b))
-    for (const name of names) {
-      const entry = metadata[name]
-      if (!entry.free?.length) continue
-      for (const alias of entry.aliases?.names ?? []) aliases[alias] = name
+  /** Font Awesome's OWN alias names per icon (`gear` -> `["cog"]`), for free icons. */
+  private static faAliases(metadata: FaMetadata): Map<string, string[]> {
+    const aliases = new Map<string, string[]>()
+    for (const [name, entry] of Object.entries(metadata)) {
+      const names = entry.aliases?.names ?? []
+      if (names.length) aliases.set(name, names.map(IconName.normalize))
     }
     return aliases
   }
 
   /**
-   * Fomantic's class-name vocabulary -> canonical FA7 name, for every Fomantic name that doesn't already
-   * equal its FA7 name.
-   * - Matches by UNICODE CODEPOINT:  Fomantic's LESS maps are Font Awesome 5 class names pointing at FA5's
-   *   private-use codepoints, which usually still identify the same icon in FA7's `unicode` field --
-   *   or in `aliases.unicodes.primary`, where FA7 keeps the codepoints of icons it merged into another
-   *   (`user-large` -> `user`).  Top-level `unicode` wins when both claim a codepoint.
-   * - `MANUAL_OVERRIDES` win over the codepoint match;  failing both, falls back to treating
-   *   the kebab-cased Fomantic name as already-correct
-   *   (covers FA6 remapping a handful of "keyboard symbol" icons, like `asterisk`, onto their literal ASCII
-   *   character -- codepoint matching can't follow that, but the NAME didn't change).
-   * - Whatever's left after both is reported as unresolved rather than guessed at.
+   * Fomantic's WHOLE icon vocabulary, as Fomantic spells it -> `"<style>/<FA7 name>"`:  `bell` -> `solid/bell`,
+   * `bell outline` -> `regular/bell`, `github` -> `brands/github`.
+   * - Style from the LESS map the name came from:  outline maps -> `regular` only;  brand maps -> `brands`,
+   *   else `solid`;  other maps -> `solid`, else `brands`.  First map to define a name wins.
+   * - NOTE:  not just the map's own style -- Fomantic's deprecated map holds brand icons too (`linkedin in`).
+   * - Dropped (and reported):  a name that doesn't resolve, or whose FA7 icon isn't free in any of its styles.
    */
-  private buildFomanticAliases(text: string, metadata: FaMetadata, freeNames: Set<string>) {
-    const merged = new Map<string, string>()
-    for (const { name, stripOutlineSuffix } of IconGenerator.FOMANTIC_MAPS) {
-      for (const [key, hex] of IconGenerator.parseLessMap(text, name)) {
-        const finalKey = stripOutlineSuffix ? key.replace(/_outline$/, "") : key
-        if (!merged.has(finalKey)) merged.set(finalKey, hex)
+  private static fomanticNames(text: string, metadata: FaMetadata, byStyle: Record<IconStyle, Set<string>>) {
+    const freeNames = new Set(Object.keys(metadata))
+    const codeToName = IconGenerator.codeIndex(metadata)
+    const names: Record<string, string> = {}
+    const dropped: string[] = []
+    for (const { name: mapName, stripOutlineSuffix } of IconGenerator.FOMANTIC_MAPS) {
+      const styles: IconStyle[] = stripOutlineSuffix
+        ? ["regular"]
+        : mapName.startsWith("icon-brand")
+          ? ["brands", "solid"]
+          : ["solid", "brands"]
+      for (const [key, hex] of IconGenerator.parseLessMap(text, mapName)) {
+        const phrase = key.replace(/_/g, " ")
+        if (phrase in names) continue
+        const baseKey = stripOutlineSuffix ? key.replace(/_outline$/, "") : key
+        const canonical = IconGenerator.resolveFomantic(baseKey, hex, codeToName, freeNames)
+        const style = canonical ? styles.find((candidate) => byStyle[candidate].has(canonical)) : undefined
+        if (style) names[phrase] = `${style}/${canonical}`
+        else dropped.push(phrase)
       }
     }
+    return { names, dropped }
+  }
 
+  /**
+   * Font Awesome codepoint -> FA7 name, for matching Fomantic's FA5 codepoints.
+   * - Top-level `unicode` first, then `aliases.unicodes.primary` (codepoints of icons FA merged in).
+   */
+  private static codeIndex(metadata: FaMetadata): Map<string, string> {
     const codeToName = new Map<string, string>()
     for (const [name, entry] of Object.entries(metadata)) {
       const code = entry.unicode?.toLowerCase()
@@ -280,68 +384,24 @@ class IconGenerator {
         if (!codeToName.has(code.toLowerCase())) codeToName.set(code.toLowerCase(), name)
       }
     }
-
-    const aliases: Record<string, string> = {}
-    const unresolved: { phrase: string; hex: string }[] = []
-    let identicalCount = 0
-    let overrideCount = 0
-    let nameFallbackCount = 0
-    for (const [key, hex] of merged) {
-      const phrase = key.replace(/_/g, " ")
-      const kebab = phrase.replace(/ /g, "-")
-      let canonical: string | undefined
-      if (key in IconGenerator.MANUAL_OVERRIDES) {
-        canonical = IconGenerator.MANUAL_OVERRIDES[key]
-        overrideCount++
-      } else {
-        const byCode = codeToName.get(hex)
-        if (byCode && freeNames.has(byCode)) canonical = byCode
-        else if (freeNames.has(kebab)) {
-          canonical = kebab
-          nameFallbackCount++
-        }
-      }
-      if (!canonical) {
-        unresolved.push({ phrase, hex })
-        continue
-      }
-      if (kebab === canonical) identicalCount++
-      else aliases[phrase] = canonical
-    }
-
-    return {
-      aliases,
-      mergedCount: merged.size,
-      resolvedCount: merged.size - unresolved.length,
-      identicalCount,
-      overrideCount,
-      nameFallbackCount,
-      unresolved
-    }
+    return codeToName
   }
 
   /**
-   * Splits Fomantic's aliases into the ones that are safe by default and the CLASHES:  Fomantic phrases
-   * whose dashed form is ALREADY a Font Awesome name or alias for a DIFFERENT icon (`x`, `warning`,
-   * `sign in`, `desktop` ...).
-   * - Font Awesome wins a clash by default, so clashes go to their own file, which `Icons` consults only
-   *   when the page opts in with `<html ui-icon-names="fomantic">` -- see `docs/icons.md`.
-   * - Dashed form, because `Icons` treats spaces and dashes alike:  `sign in` ~== `sign-in`.
+   * The FA7 name for one Fomantic class name (`key`, underscored) and its FA5 codepoint, or `undefined`.
+   * - `MANUAL_OVERRIDES`, then the codepoint, then the kebab-cased name itself.
    */
-  private splitFomanticClashes(
-    fomantic: Record<string, string>,
-    freeNames: Set<string>,
-    faAliases: Record<string, string>
-  ) {
-    const aliases: Record<string, string> = {}
-    const clashes: Record<string, string> = {}
-    for (const [phrase, target] of Object.entries(fomantic)) {
-      const dashed = phrase.replace(/ /g, "-")
-      const faMeaning = faAliases[dashed] ?? (freeNames.has(dashed) ? dashed : undefined)
-      if (faMeaning && faMeaning !== target) clashes[phrase] = target
-      else aliases[phrase] = target
-    }
-    return { aliases, clashes }
+  private static resolveFomantic(
+    key: string,
+    hex: string,
+    codeToName: Map<string, string>,
+    freeNames: Set<string>
+  ): string | undefined {
+    if (key in IconGenerator.MANUAL_OVERRIDES) return IconGenerator.MANUAL_OVERRIDES[key]
+    const byCode = codeToName.get(hex)
+    if (byCode && freeNames.has(byCode)) return byCode
+    const kebab = key.replace(/_/g, "-")
+    return freeNames.has(kebab) ? kebab : undefined
   }
 
   /** Parses one `@<mapName>: { key: "\\hex"; ... };` LESS map into `[underscored key, lowercase hex]` pairs. */
@@ -352,79 +412,29 @@ class IconGenerator {
   }
 
   ////////////////
-  // ## Search index (optional)
+  // ## Docs-site data
   ////////////////
 
-  /** Solid-only `name -> search terms`, capped at 5 terms/icon to fit the 100 KB budget -- see `docs/icons.md`. */
-  private static readonly SEARCH_TERMS_CAP = 5
-
-  private buildSearchIndex(metadata: FaMetadata) {
+  /**
+   * Solid-only `name -> search terms`, capped at `SEARCH_TERMS_CAP` per icon.
+   * - Throws past the 100 KB budget, rather than silently shipping a heavier docs page.
+   */
+  private static searchIndex(metadata: FaMetadata): Record<string, string[]> {
     const terms: Record<string, string[]> = {}
     for (const [name, entry] of Object.entries(metadata)) {
-      if (!entry.free?.includes("solid")) continue
+      if (!entry.free.includes("solid")) continue
       const list = entry.search?.terms?.slice(0, IconGenerator.SEARCH_TERMS_CAP)
       if (list?.length) terms[name] = list
     }
     const bytes = Buffer.byteLength(JSON.stringify(terms))
-    if (bytes > 100_000) return undefined
-    return { terms, bytes }
+    if (bytes > 100_000) throw new Error(`search.json would be ${bytes} bytes, over the 100 KB budget`)
+    return terms
   }
 
-  /** Uncapped search-index size, for the report when `buildSearchIndex()` skips (or would have needed to). */
-  private searchIndexBytes(metadata: FaMetadata) {
-    const terms: Record<string, string[]> = {}
-    for (const [name, entry] of Object.entries(metadata)) {
-      if (entry.free?.includes("solid") && entry.search?.terms?.length) terms[name] = entry.search.terms
-    }
-    return Buffer.byteLength(JSON.stringify(terms))
-  }
-
-  ////////////////
-  // ## Output + report
-  ////////////////
-
-  /** Writes `data` as compact JSON (no whitespace -- these are runtime data, not source) and returns its size. */
-  private writeJson(file: string, data: unknown) {
-    const text = JSON.stringify(data)
-    writeFileSync(path.join(this.dataDir, file), text)
-    return { file, bytes: Buffer.byteLength(text) }
-  }
-
-  /** Prints the file-size table + alias-resolution counts. */
-  private report(args: {
-    glyphReports: { style: string; count: number; bytes: number }[]
-    namesReport: { file: string; bytes: number }
-    faAliasesReport: { file: string; bytes: number }
-    fomanticReport: { file: string; bytes: number }
-    clashesReport: { file: string; bytes: number }
-    fomanticClashes: Record<string, string>
-    searchReport: { file: string; bytes: number } | undefined
-    searchSkippedBytes: number | undefined
-    fomanticResult: ReturnType<IconGenerator["buildFomanticAliases"]>
-  }) {
-    const kb = (bytes: number) => `${(bytes / 1024).toFixed(1)} KB`
-    console.log("\n== Icon data written ==")
-    for (const glyph of args.glyphReports) {
-      console.log(`  glyphs/${glyph.style}/: ${glyph.count} modules, ${kb(glyph.bytes)}`)
-    }
-    for (const report of [args.namesReport, args.faAliasesReport, args.fomanticReport, args.clashesReport]) {
-      console.log(`  ${report.file}: ${kb(report.bytes)}`)
-    }
-    if (args.searchReport) console.log(`  ${args.searchReport.file}: ${kb(args.searchReport.bytes)}`)
-    else console.log(`  search.json: SKIPPED (uncapped would be ${kb(args.searchSkippedBytes ?? 0)}, over 100 KB)`)
-
-    const r = args.fomanticResult
-    console.log("\n== Fomantic alias resolution ==")
-    console.log(`  merged Fomantic class names: ${r.mergedCount}`)
-    console.log(
-      `  resolved: ${r.resolvedCount} (${r.identicalCount} identical, ${Object.keys(r.aliases).length} aliased,`
-    )
-    console.log(`            ${r.overrideCount} via MANUAL_OVERRIDES, ${r.nameFallbackCount} via name fallback)`)
-    console.log(`  unresolved: ${r.unresolved.length}`)
-    for (const u of r.unresolved) console.log(`    - "${u.phrase}" (\\${u.hex})`)
-    const clashes = Object.keys(args.fomanticClashes)
-    console.log(`  clashing with a Font Awesome name (opt-in only): ${clashes.length}`)
-    console.log(`    ${clashes.join(", ")}`)
+  /** One pack's summary line, and any icon left without a name. */
+  private static print(report: IconPackReport) {
+    console.log(`  ${path.relative(process.cwd(), report.index)}:  ${report.count} icons`)
+    if (report.unreachable.length) console.log(`    no name of their own:  ${report.unreachable.join(", ")}`)
   }
 }
 

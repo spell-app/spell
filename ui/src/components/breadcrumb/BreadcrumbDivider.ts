@@ -1,5 +1,3 @@
-import type { IconData } from "$/core"
-
 /****************
  * ### `BreadcrumbDivider`
  * Values of the divider tokens a breadcrumb publishes (`BREADCRUMB_DIVIDER_TOKENS`), as CSS text -- shared by
@@ -11,15 +9,22 @@ export class BreadcrumbDivider {
     return `"${text.replaceAll("\\", "\\\\").replaceAll('"', '\\"').replace(LINE_BREAK, "\\A ")}"`
   }
 
-  /** An icon's data as a CSS `url()` of a standalone SVG, for the divider's mask. */
-  static svgUrl([width, height, path]: IconData): string {
-    const svg = `<svg xmlns="${SVG_NS}" viewBox="0 0 ${width} ${height}"><path d="${path}"/></svg>`
-    return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
+  /**
+   * An icon's `<svg>` as a CSS `url()` of a standalone SVG, for the divider's mask.
+   * - Serialized from the page's template, so no second request;  only its shape matters to a mask.
+   */
+  static svgUrl(svg: SVGSVGElement): string {
+    const copy = svg.cloneNode(true) as SVGSVGElement
+    copy.setAttribute(XMLNS, SVG_NS)
+    return `url("data:image/svg+xml,${encodeURIComponent(new XMLSerializer().serializeToString(copy))}")`
   }
 }
 
-/** SVG namespace, for the data URL's root. */
+/** SVG namespace, for the data URL's root:  a standalone SVG image needs it. */
 const SVG_NS = "http://www.w3.org/2000/svg"
+
+/** Attribute declaring it. */
+const XMLNS = "xmlns"
 
 /** Line breaks, escaped in a CSS string. */
 const LINE_BREAK = /\r\n|\r|\n/g

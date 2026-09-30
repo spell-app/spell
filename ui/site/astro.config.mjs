@@ -6,7 +6,7 @@ import solid from "@solidjs/vite-plugin"
 import { fileURLToPath } from "node:url"
 
 import { standardDecorators } from "../vite.decorators.ts"
-import { CSS_TARGETS, SOLID_DEDUPE, emitGlyphs } from "../vite.config.ts"
+import { CSS_TARGETS, SOLID_DEDUPE, emitIconPacks } from "../vite.config.ts"
 // from SOURCE, as in the root `vite.config.ts`:  a fresh checkout has no `packages/solid-element/dist/`
 import { solidElementHot } from "../packages/solid-element/src/vite.ts"
 import { unwrapHtmlParagraphs } from "./src/lib/unwrapHtmlParagraphs.ts"
@@ -55,8 +55,8 @@ export default defineConfig({
           call: "HotDefinitions.updateStyle"
         }
       }),
-      // icon glyph modules beside the client chunks, where `Icons` fetches them (`import.meta.url`)
-      emitGlyphs("_astro/glyphs")
+      // built-in icon packs beside the client chunks, where `BuiltInPacks` finds them (`import.meta.url`)
+      emitIconPacks("_astro/icon-packs")
     ],
     resolve: {
       // Array form so `$test` is matched before `$`;  string keys match `$` exactly or `$/...` only.

@@ -21,7 +21,7 @@
  * - NOTE: left out, on purpose:
  *   - the sprite / Twemoji SVG background images and the 264 per-country `background-image` rules:  the glyph is
  *     text now, so there's no network fetch and no per-country CSS.  An SVG flag set (consistent everywhere,
- *     Windows included) could come back later as an opt-in `Icons`-style registry
+ *     Windows included) could come back later as an opt-in pack, like icons (`UI.icons`)
  *   - `speak: none`:  the root is `role="img"` with an `aria-label`, which is what assistive tech reads
  */
 

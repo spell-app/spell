@@ -155,7 +155,7 @@ export class ReportTables {
       ]),
       ["runtime (`UIRuntime` + foundation CSS)", kB(results.lazy.runtime.min), kB(results.lazy.runtime.gzip), "lazy"],
       [
-        "icons (name index + alias maps;  glyphs are separate files)",
+        "icons (none bundled:  pack indexes and SVGs are separate files, `docs/icons.md`)",
         kB(results.lazy.icons.min),
         kB(results.lazy.icons.gzip),
         "lazy"
