@@ -8,7 +8,8 @@
  *   - `$/util`, `$/vocabulary`, `$/components/components.types` -- foundation JS
  *   - from `$/elements`:  `ClassBuilder`, `Shorthand`, `OwnerContext`, `NativeFallback` (the fallbacks' base)
  *   - `$/runtime` -- ONLY the eager loader (`UI`, `loadUI`);  `UIRuntime` stays a lazy chunk
- *   - `$/icons` -- `Icons`;  glyph modules stay separate files (`dist/glyphs/`), alias maps lazy chunks
+ *   - `$/icons` -- the icon pack format (`IconName`, `BuiltInPacks`);  the packs are separate files
+ *     (`dist/icon-packs/`), loaded by the runtime (`UI.icons`)
  * - NOT here:  the `forms` entry (`forms.ts`:  `FormElement`, `FormHost`, `Validator`, `MenuOptions`), loaded only
  *   by families that import it.
  * - NOTE: `$/elements` LEAVES are re-exported, against `AGENTS.md`:  its barrel also exports the `forms` files, and
