@@ -1,0 +1,35 @@
+/* Fill the webview:  VS Code gives `body` padding of its own. */
+html,
+body,
+#runner-root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.VSCodeRunner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  & > .VSCodeRunnerToolbar {
+    flex: 0 0 auto;
+    border-radius: 0 !important;
+  }
+
+  & > .VSCodeRunnerToolbar .error {
+    color: #9f3a38;
+  }
+}
+
+/* The app, filling its pane -- hidden when the program has none, but kept, so its mount point never changes. */
+.VSCodeRunnerApp {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  &.hidden {
+    display: none;
+  }
+}

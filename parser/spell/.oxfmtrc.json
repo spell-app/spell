@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "trailingComma": "none",
+  "semi": false,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "printWidth": 120,
+  "sortPackageJson": true,
+  "ignorePatterns": [
+    "**/.output.js",
+    "**/*.md",
+    "**/*.scopes.js",
+    "build/**",
+    "dist/**",
+    ".cache/**",
+    ".venv/**",
+    ".yarn/**",
+    ".claude/**",
+    "graphify-out/**",
+    "thoughts/**",
+    "static/**",
+    "projects/**",
+    "src/test/fixtures/**",
+    "src/graphify-out/**",
+    "vscode-extension/out/**"
+  ]
+}

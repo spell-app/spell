@@ -1,0 +1,12 @@
+.InputRoot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.InputEditor {
+  position: relative;
+  background: white;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
