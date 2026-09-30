@@ -7,6 +7,8 @@
  *   and CC-BY-4.0/MIT rather than something we vendor -- see `src/icons/LICENSE.md`.
  * - Reads (never writes) `reference/Fomantic-UI/src/themes/default/elements/icon.variables`, the LESS source
  *   of Fomantic's `@icon-map` family, to derive Fomantic's OWN alias vocabulary (`setting` -> `gear`, etc).
+ * - Also writes `fomantic-names.json`, Fomantic's WHOLE icon vocabulary for the docs icon browser (docs-site
+ *   only, like `search.json`;  `Icons` never imports it).
  * - Glyph modules are `export default [width, height, "path"]`;  the JSON has no header (comments aren't valid
  *   JSON), so the regeneration story lives in `docs/icons.md`.  Both are COMMITTED, so installs and CI need no
  *   network.
@@ -164,6 +166,14 @@ class IconGenerator {
     const fomanticReport = this.writeJson("fomantic-aliases.json", fomanticAliases)
     const clashesReport = this.writeJson("fomantic-clashes.json", fomanticClashes)
 
+    const styleNames = {
+      solid: new Set(Object.keys(solid)),
+      regular: new Set(Object.keys(regular)),
+      brands: new Set(Object.keys(brands))
+    }
+    const fomanticNames = this.buildFomanticNames(fomanticText, metadata, freeNames, styleNames)
+    const fomanticNamesReport = this.writeJson("fomantic-names.json", fomanticNames.names)
+
     const search = this.buildSearchIndex(metadata)
     const searchReport = search ? this.writeJson("search.json", search.terms) : undefined
 
@@ -173,6 +183,8 @@ class IconGenerator {
       faAliasesReport,
       fomanticReport,
       clashesReport,
+      fomanticNamesReport,
+      fomanticNames,
       fomanticClashes,
       searchReport,
       searchSkippedBytes: search ? undefined : this.searchIndexBytes(metadata),
@@ -269,17 +281,7 @@ class IconGenerator {
       }
     }
 
-    const codeToName = new Map<string, string>()
-    for (const [name, entry] of Object.entries(metadata)) {
-      const code = entry.unicode?.toLowerCase()
-      if (code && !codeToName.has(code)) codeToName.set(code, name)
-    }
-    // NOTE: second pass, so a merged-in codepoint never shadows an icon that still OWNS it.
-    for (const [name, entry] of Object.entries(metadata)) {
-      for (const code of entry.aliases?.unicodes?.primary ?? []) {
-        if (!codeToName.has(code.toLowerCase())) codeToName.set(code.toLowerCase(), name)
-      }
-    }
+    const codeToName = IconGenerator.codeIndex(metadata)
 
     const aliases: Record<string, string> = {}
     const unresolved: { phrase: string; hex: string }[] = []
@@ -289,18 +291,9 @@ class IconGenerator {
     for (const [key, hex] of merged) {
       const phrase = key.replace(/_/g, " ")
       const kebab = phrase.replace(/ /g, "-")
-      let canonical: string | undefined
-      if (key in IconGenerator.MANUAL_OVERRIDES) {
-        canonical = IconGenerator.MANUAL_OVERRIDES[key]
-        overrideCount++
-      } else {
-        const byCode = codeToName.get(hex)
-        if (byCode && freeNames.has(byCode)) canonical = byCode
-        else if (freeNames.has(kebab)) {
-          canonical = kebab
-          nameFallbackCount++
-        }
-      }
+      const { canonical, via } = IconGenerator.resolveFomantic(key, hex, codeToName, freeNames)
+      if (via === "override") overrideCount++
+      if (via === "name") nameFallbackCount++
       if (!canonical) {
         unresolved.push({ phrase, hex })
         continue
@@ -318,6 +311,84 @@ class IconGenerator {
       nameFallbackCount,
       unresolved
     }
+  }
+
+  /**
+   * Fomantic's WHOLE icon vocabulary, as Fomantic spells it -> `"<style>/<FA7 name>"`, for the docs icon browser's
+   * "Fomantic names" view:  `bell` -> `solid/bell`, `bell outline` -> `regular/bell`, `github` -> `brands/github`.
+   * - Unlike `fomantic-aliases.json`, keeps names that equal their FA7 name, and keeps the `outline` word.
+   * - Style from the LESS map the name came from:  outline maps -> `regular` only;  brand maps -> `brands`,
+   *   else `solid`;  other maps -> `solid`, else `brands`.  First map to define a name wins, as in
+   *   `buildFomanticAliases()`.
+   * - NOTE:  not just the map's own style -- Fomantic's deprecated map holds brand icons too (`linkedin in`).
+   * - Dropped (and counted in the report):  a name that doesn't resolve, or whose FA7 icon isn't free in any
+   *   of its styles (an outline Fomantic had that FA7 Free has no regular version of).
+   */
+  private buildFomanticNames(
+    text: string,
+    metadata: FaMetadata,
+    freeNames: Set<string>,
+    styleNames: Record<IconStyle, Set<string>>
+  ) {
+    const codeToName = IconGenerator.codeIndex(metadata)
+    const names: Record<string, string> = {}
+    const dropped: string[] = []
+    for (const { name: mapName, stripOutlineSuffix } of IconGenerator.FOMANTIC_MAPS) {
+      const styles: IconStyle[] = stripOutlineSuffix
+        ? ["regular"]
+        : mapName.startsWith("icon-brand")
+          ? ["brands", "solid"]
+          : ["solid", "brands"]
+      for (const [key, hex] of IconGenerator.parseLessMap(text, mapName)) {
+        const phrase = key.replace(/_/g, " ")
+        if (phrase in names) continue
+        const baseKey = stripOutlineSuffix ? key.replace(/_outline$/, "") : key
+        const { canonical } = IconGenerator.resolveFomantic(baseKey, hex, codeToName, freeNames)
+        const style = canonical ? styles.find((candidate) => styleNames[candidate].has(canonical)) : undefined
+        if (style) names[phrase] = `${style}/${canonical}`
+        else dropped.push(phrase)
+      }
+    }
+    const sorted = Object.fromEntries(Object.entries(names).sort(([a], [b]) => a.localeCompare(b)))
+    return { names: sorted, dropped }
+  }
+
+  /**
+   * Font Awesome codepoint -> FA7 name, for matching Fomantic's FA5 codepoints.
+   * - Top-level `unicode` first, then `aliases.unicodes.primary` (codepoints of icons FA merged in).
+   */
+  private static codeIndex(metadata: FaMetadata): Map<string, string> {
+    const codeToName = new Map<string, string>()
+    for (const [name, entry] of Object.entries(metadata)) {
+      const code = entry.unicode?.toLowerCase()
+      if (code && !codeToName.has(code)) codeToName.set(code, name)
+    }
+    // NOTE: second pass, so a merged-in codepoint never shadows an icon that still OWNS it.
+    for (const [name, entry] of Object.entries(metadata)) {
+      for (const code of entry.aliases?.unicodes?.primary ?? []) {
+        if (!codeToName.has(code.toLowerCase())) codeToName.set(code.toLowerCase(), name)
+      }
+    }
+    return codeToName
+  }
+
+  /**
+   * The FA7 name for one Fomantic class name (`key`, underscored) and its FA5 codepoint, and which rule found it.
+   * - `MANUAL_OVERRIDES`, then the codepoint, then the kebab-cased name itself;  `canonical` undefined if none.
+   */
+  private static resolveFomantic(
+    key: string,
+    hex: string,
+    codeToName: Map<string, string>,
+    freeNames: Set<string>
+  ): { canonical?: string; via?: "override" | "code" | "name" } {
+    if (key in IconGenerator.MANUAL_OVERRIDES)
+      return { canonical: IconGenerator.MANUAL_OVERRIDES[key], via: "override" }
+    const byCode = codeToName.get(hex)
+    if (byCode && freeNames.has(byCode)) return { canonical: byCode, via: "code" }
+    const kebab = key.replace(/_/g, "-")
+    if (freeNames.has(kebab)) return { canonical: kebab, via: "name" }
+    return {}
   }
 
   /**
@@ -397,6 +468,8 @@ class IconGenerator {
     faAliasesReport: { file: string; bytes: number }
     fomanticReport: { file: string; bytes: number }
     clashesReport: { file: string; bytes: number }
+    fomanticNamesReport: { file: string; bytes: number }
+    fomanticNames: { names: Record<string, string>; dropped: string[] }
     fomanticClashes: Record<string, string>
     searchReport: { file: string; bytes: number } | undefined
     searchSkippedBytes: number | undefined
@@ -407,7 +480,14 @@ class IconGenerator {
     for (const glyph of args.glyphReports) {
       console.log(`  glyphs/${glyph.style}/: ${glyph.count} modules, ${kb(glyph.bytes)}`)
     }
-    for (const report of [args.namesReport, args.faAliasesReport, args.fomanticReport, args.clashesReport]) {
+    const dataReports = [
+      args.namesReport,
+      args.faAliasesReport,
+      args.fomanticReport,
+      args.clashesReport,
+      args.fomanticNamesReport
+    ]
+    for (const report of dataReports) {
       console.log(`  ${report.file}: ${kb(report.bytes)}`)
     }
     if (args.searchReport) console.log(`  ${args.searchReport.file}: ${kb(args.searchReport.bytes)}`)
@@ -425,6 +505,10 @@ class IconGenerator {
     const clashes = Object.keys(args.fomanticClashes)
     console.log(`  clashing with a Font Awesome name (opt-in only): ${clashes.length}`)
     console.log(`    ${clashes.join(", ")}`)
+    const names = args.fomanticNames
+    console.log(`  fomantic-names.json: ${Object.keys(names.names).length} names`)
+    console.log(`  dropped (unresolved, or not free in that style): ${names.dropped.length}`)
+    console.log(`    ${names.dropped.join(", ")}`)
   }
 }
 
