@@ -4,6 +4,8 @@
  *   and the service classes stay in the lazily-loaded chunk.
  */
 
+import type { Temporal } from "temporal-polyfill"
+
 import type { UIRuntime } from "./UIRuntime"
 
 ////////////////
@@ -115,7 +117,7 @@ export const PAGE_SCOPE = "page"
 ////////////////
 
 /** What kind of top-layer thing an overlay entry is;  sets defaults for the entry's other options. */
-export type OverlayKind = "modal" | "flyout" | "popover" | "toast" | "dimmer"
+export type OverlayKind = "modal" | "flyout" | "popover" | "toast" | "dimmer" | "sidebar"
 
 /**
  * Why `Overlays` asked an entry to dismiss itself.
@@ -245,6 +247,7 @@ export const ANIMATION_NAMES = [
   "drop",
   "browse",
   "browse-right",
+  "fly",
   "fly-up",
   "fly-down",
   "fly-left",
@@ -323,24 +326,78 @@ export type StringPack = Partial<Record<I18nKey, string>>
 /** Values for `{name}` placeholders in `I18n.t()`. */
 export type I18nParams = Record<string, string | number>
 
+/**
+ * The `Temporal` namespace, as `UI.i18n.temporal` hands it out:  the browser's own, or `temporal-polyfill`'s.
+ * - Typed by the polyfill (`temporal-spec`):  TypeScript's DOM lib has no Temporal yet.
+ */
+export type TemporalAPI = typeof Temporal
+
+/** Package `I18n.loadTemporal()` falls back to;  named in `TemporalPolyfill`'s load error. */
+export const TEMPORAL_POLYFILL = "temporal-polyfill"
+
 ////////////////
 // ## Toasts / Modals
 ////////////////
 
-/** Options for `UI.toasts.show()`;  the toast component defines the rendering. */
+/**
+ * Options for `UI.toasts.show()`, Fomantic's `$.toast({...})` settings;  the toast component defines the rendering.
+ * - Text is always set as TEXT, never parsed as HTML (Fomantic's `preserveHTML: false`).
+ */
 export type ToastOptions = {
   /** body text */
-  message: string
+  message?: string
   /** bold first line */
   title?: string
-  /** colour / state word, e.g. `"success"`, `"error"`, `"warning"`, `"info"` */
+  /** consequence word:  `"info"`, `"success"`, `"warning"`, `"error"`, `"neutral"` (default) */
   type?: string
-  /** ms before auto-dismiss;  `0` keeps it until dismissed */
-  displayTime?: number
-  /** e.g. `"top right"` */
+  /**
+   * Fomantic's `class`:  class words for the toast, e.g. `"success"`, `"inverted blue"`;  a consequence word
+   * becomes `type`, a hue `color`, `inverted` stays a word
+   */
+  class?: string
+  /** ms before auto-dismiss (default `3000`);  `0` keeps it until dismissed;  `"auto"` ~== reading time */
+  displayTime?: number | "auto"
+  /** e.g. `"top right"` (default), `"bottom center"`, `"centered"` */
   position?: string
   /** explicit id, e.g. to replace an existing toast */
   id?: string
+  /** icon:  `true` for the type's own, or an icon name */
+  showIcon?: boolean | string
+  /** a progress bar counting the display time down, at the `"top"` or `"bottom"` */
+  showProgress?: "top" | "bottom" | false
+  /** the progress bar fills up instead of emptying */
+  progressUp?: boolean
+  /** pause the countdown while the pointer is over it;  default `true` (focus inside always pauses) */
+  pauseOnHover?: boolean
+  /** a close icon */
+  closeIcon?: boolean
+  /** a click anywhere on it closes it;  default `true`, off with a close icon or actions */
+  closeOnClick?: boolean
+  /** fixed width (Fomantic's 350px);  default `true` */
+  compact?: boolean
+  /** buttons below (or beside) the message */
+  actions?: readonly ToastAction[]
+  /** layout words of the actions:  `basic`, `left`, `attached`, `vertical`, `top`, `bottom` */
+  classActions?: string
+  /** new toasts go on top of the stack instead of below */
+  newestOnTop?: boolean
+  /** toasts at this position line up side by side */
+  horizontal?: boolean
+}
+
+/** One button of `ToastOptions.actions`. */
+export type ToastAction = {
+  /** button text */
+  text?: string
+  /** icon name */
+  icon?: string
+  /**
+   * class words, e.g. `"green"`, `"positive"`:  `.positive` / `.approve` / `.ok` approve, `.negative` / `.deny` /
+   * `.cancel` deny
+   */
+  class?: string
+  /** clicked;  return `false` to keep the toast open */
+  click?: (event: MouseEvent) => void | boolean
 }
 
 /** What `UI.toasts.show()` returns. */
@@ -349,6 +406,8 @@ export type ToastHandle = {
   id: string
   /** resolves when the toast is gone */
   closed: Promise<void>
+  /** the `<ui-toast>` element, when the provider renders one */
+  element?: HTMLElement
 }
 
 /** What the toast component registers as `Toasts.provider`. */
@@ -443,4 +502,85 @@ export class ApiError extends Error {
     this.status = response.status
     this.response = response
   }
+}
+
+////////////////
+// ## Visibility
+////////////////
+
+/**
+ * Where an element is against the screen (the viewport, or `context`), as Fomantic's visibility `calculations`.
+ * - "Screen top" is the viewport top plus `offset`.
+ */
+export type VisibilityCalculations = {
+  /** its top is above the screen top */
+  topPassed: boolean
+  /** its bottom is above the screen top:  scrolled past */
+  bottomPassed: boolean
+  /** its top is on screen (below the screen top, above the screen bottom) */
+  topVisible: boolean
+  /** its bottom is on screen */
+  bottomVisible: boolean
+  /** it spans the screen top:  top passed, bottom not */
+  passing: boolean
+  /** some of it is on screen */
+  onScreen: boolean
+  /** none of it is on screen */
+  offScreen: boolean
+  /** px of it above the screen top while `passing`, else `0` */
+  pixelsPassed: number
+  /** share (0 ... 1) of it above the screen top while `passing`, else `0` */
+  percentagePassed: number
+  /** which way the page moved since the last check */
+  direction: "up" | "down" | "static"
+}
+
+/** A visibility callback;  gets the calculations of the check that fired it. */
+export type VisibilityCallback = (calculations: VisibilityCalculations) => void
+
+/**
+ * Callbacks for `UI.observeVisibility()`, Fomantic's names.
+ * - Forward ones fire when their condition turns true;  `...Reverse` ones when it turns false again.
+ */
+export type VisibilityCallbacks = {
+  onOnScreen?: VisibilityCallback
+  onOffScreen?: VisibilityCallback
+  onTopVisible?: VisibilityCallback
+  onBottomVisible?: VisibilityCallback
+  onTopPassed?: VisibilityCallback
+  onBottomPassed?: VisibilityCallback
+  onPassing?: VisibilityCallback
+  onTopVisibleReverse?: VisibilityCallback
+  onBottomVisibleReverse?: VisibilityCallback
+  onTopPassedReverse?: VisibilityCallback
+  onBottomPassedReverse?: VisibilityCallback
+  onPassingReverse?: VisibilityCallback
+  /** every check */
+  onUpdate?: VisibilityCallback
+}
+
+/** Callbacks plus options for `UI.observeVisibility()`. */
+export type VisibilityOptions = VisibilityCallbacks & {
+  /** each callback fires at most once, ever;  default `true` (Fomantic's) */
+  once?: boolean
+  /** a callback fires on EVERY check while its condition holds, not only when it turns true;  default `false` */
+  continuous?: boolean
+  /** px below the viewport top that count as the screen top (a fixed header);  default `0` */
+  offset?: number
+  /** scroll container to measure against;  default the viewport */
+  context?: Element | null
+}
+
+/** Options for `UI.visibility.lazyImage()`, Fomantic's `type: 'image'`. */
+export type LazyImageOptions = {
+  /** animation once loaded;  default `fade`;  `false` for none */
+  transition?: AnimationName | false
+  /** its ms;  default `1000` */
+  duration?: number
+  /** px below the viewport top that count as the screen top */
+  offset?: number
+  /** scroll container;  default the viewport */
+  context?: Element | null
+  /** the image has its `src` */
+  onLoad?: (image: HTMLImageElement) => void
 }

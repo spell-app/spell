@@ -99,15 +99,15 @@ export class HotDefinitions {
     else void UI.load().then(fn)
   }
 
-  /** English texts `Next` changed, where the page still shows `Previous`'s (i.e. no translation replaced them). */
+  /**
+   * English texts `Next` changed, as its new defaults.
+   * - Defaults sit below every registered string (`I18n.registerDefaults()`), so a translation still wins.
+   */
   private static updateTexts(Previous: ComponentVocabulary, Next: ComponentVocabulary) {
     const before = new Map(Previous.texts.map(({ key, text }) => [key, text]))
     const changed: Record<string, string> = {}
-    for (const { key, text } of Next.texts) {
-      const old = before.get(key)
-      if (old !== text && (!UI.i18n.has(key) || UI.i18n.t(key) === old)) changed[key] = text
-    }
-    if (Object.keys(changed).length) UI.i18n.register("en", changed)
+    for (const { key, text } of Next.texts) if (before.get(key) !== text) changed[key] = text
+    if (Object.keys(changed).length) UI.i18n.registerDefaults(changed, Next.tag)
   }
 }
 

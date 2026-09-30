@@ -77,14 +77,21 @@ export type ItemContext = {
   interactive: boolean
   /** `aria-current` of a SELECTED item that is a link:  `page` in a navigation menu. */
   current: "page" | "true"
+  /**
+   * The item OWNS its content parts (`:state(in-item)`):  the Items view.  Default false:  a list's or menu's parts
+   * see through the item to the list / menu (`:state(in-list)`).  See `ConditionalOwner`.
+   */
+  ownsParts?: boolean
+  /** Classes of the `image` shorthand's `<img>`;  default `ui avatar image` (a list's avatar). */
+  imageClass?: string
 }
 
 /** Roles an owner may give an item's root. */
 export type ItemRole = "menuitem" | "menuitemradio" | "menuitemcheckbox" | "option" | "treeitem"
 
 /**
- * What an owner of `<ui-item>`s (`<ui-list>`, `<ui-menu>`) implements on its CONTROLLER;  the item calls it as
- * `(owner as UIHost).controller.itemContext(item)`, tracked.
+ * What an owner of `<ui-item>`s (`<ui-list>`, `<ui-menu>`, `<ui-items>`) implements on its CONTROLLER;  the item
+ * calls it as `(owner as UIHost).controller.itemContext(item)`, tracked.
  * - The item also adopts the owner's `styles`:  the owner's sheet holds its item rules
  *   (`:host(:state(in-list)) > .item`), next to the static class-grammar ones (`.ui.list > .item`).
  */
@@ -146,6 +153,7 @@ export type HeaderLevel = 1 | 2 | 3 | 4 | 5 | 6
 export const PART_OWNER_TOKENS = {
   inverted: "--ui-inverted",
   cardLayout: "--ui-card-layout",
+  cardLeading: "--ui-card-leading",
   itemLayout: "--ui-item-layout",
   itemState: "--ui-item-state",
   commentsMinimal: "--ui-comments-minimal",
@@ -154,6 +162,7 @@ export const PART_OWNER_TOKENS = {
   messageLayout: "--ui-message-layout",
   listLayout: "--ui-list-layout",
   itemMedia: "--ui-item-media",
+  eventLabel: "--ui-event-label",
   statisticLayout: "--ui-statistic-layout",
   statisticValueSize: "--ui-statistic-value-size",
   stepState: "--ui-step-state",
@@ -382,6 +391,16 @@ export type ListSelectDetail = {
 }
 
 ////////////////
+// ## Card
+////////////////
+
+/**
+ * Variations of a `<ui-cards>` group that every card in it takes as its OWN class when it doesn't set the
+ * attribute itself (Fomantic's `.ui.raised.cards > .card`), read through `UICards.shared()`.
+ */
+export type CardSharedVariation = "size" | "color" | "horizontal" | "raised" | "link" | "basic" | "inverted"
+
+////////////////
 // ## Popup
 ////////////////
 
@@ -448,3 +467,422 @@ export const MODAL_ACTION_SELECTORS = {
  * - `--close` -- close, reason `close` (the cancelable `ui-close` first)
  */
 export const MODAL_COMMANDS = { show: "--show", close: "--close" } as const
+
+////////////////
+// ## Select
+////////////////
+
+/** A select's value:  one string, or one per chosen option with `multiple`. */
+export type SelectValue = string | string[]
+
+/** `options` property of `<ui-select>`:  the `MenuOptions` model's option shape, as the dropdown's. */
+export type SelectOptions = readonly MenuOption[]
+
+/** `detail` of `ui-change`, from `<ui-select>`. */
+export type SelectChangeDetail = {
+  /** value after the change */
+  value: SelectValue
+  originalEvent?: Event
+}
+
+////////////////
+// ## Search
+////////////////
+
+/**
+ * One result of a `<ui-search>`, Fomantic's result fields;  other fields may ride along (`search-fields` can name
+ * them).
+ */
+export type SearchResult = {
+  /** shown, and what choosing the result puts in the input */
+  title: string
+  description?: string
+  /** image URL, shown at the result's end */
+  image?: string
+  /** `alt` of the image;  default `""` (decorative) */
+  alt?: string
+  /** shown at the end, in green */
+  price?: string
+  /** the `category` variation groups a LOCAL source by it */
+  category?: string
+  /** choosing the result follows it;  the result is a link */
+  url?: string
+  id?: string
+  [field: string]: unknown
+}
+
+/** A named group of results, Fomantic's category shape (`{ name, results }`). */
+export type SearchCategory = {
+  name: string
+  results: readonly SearchResult[]
+}
+
+/**
+ * What a remote `url` may answer, as Fomantic's API search:
+ * - `{ results: SearchResult[] }` -- standard
+ * - `{ results: { [key]: SearchCategory } }` or `{ results: SearchCategory[] }` -- category
+ * - a bare `SearchResult[]`
+ */
+export type SearchResponse =
+  | readonly SearchResult[]
+  | { results?: readonly SearchResult[] | readonly SearchCategory[] | Readonly<Record<string, SearchCategory>> }
+
+/**
+ * How a local search matches, Fomantic's `fullTextSearch`:  a query at the START of a word always matches (and
+ * sorts first);  then
+ * - `exact` -- anywhere in the field (default)
+ * - `fuzzy` -- its characters in order, gaps allowed (Fomantic's `true`)
+ * - `prefix` -- nothing more (Fomantic's `false`)
+ * - `some` -- any of its words, anywhere
+ * - `all` -- all of its words, anywhere in the fields together
+ */
+export type SearchMatch = "exact" | "fuzzy" | "prefix" | "some" | "all"
+
+/** `detail` of the cancelable `ui-select`, from `<ui-search>`. */
+export type SearchSelectDetail = {
+  result: SearchResult
+  originalEvent?: Event
+}
+
+/** `detail` of `ui-search`:  the query about to run. */
+export type SearchQueryDetail = {
+  query: string
+  originalEvent?: Event
+}
+
+/** `detail` of `ui-results`:  what a query found (before `max-results` for a remote one). */
+export type SearchResultsDetail = {
+  query: string
+  results: readonly SearchResult[]
+}
+
+/** `detail` of `ui-change`, from `<ui-search>`:  its text was committed. */
+export type SearchChangeDetail = {
+  value: string
+  originalEvent?: Event
+}
+
+/**
+ * Custom property `search.css` reads for the anchor name, e.g. `--ui-search-anchor: --ui-search-3`;  the element
+ * sets it inline on its root, as the dropdown does (`DROPDOWN_ANCHOR_PROPERTY`).
+ */
+export const SEARCH_ANCHOR_PROPERTY = "--ui-search-anchor"
+
+////////////////
+// ## Toast
+////////////////
+
+/**
+ * Why a `<ui-toast>` is closing, in `ui-close` / `ui-hide`'s `detail.reason`.
+ * - `timeout` -- its display time ran out
+ * - `close` -- the close icon
+ * - `click` -- a click on it (`close-on-click`)
+ * - `escape` -- Escape with focus inside it
+ * - `approve` / `deny` / `action` -- an action button (after its own `ui-approve` / `ui-deny`)
+ * - `dismiss` -- script:  `host.close()`, `UI.toasts.dismiss(id)`
+ * - `close-all` -- `UI.overlays.closeAll("toast")`
+ */
+export type ToastCloseReason =
+  | "timeout"
+  | "close"
+  | "click"
+  | "escape"
+  | "approve"
+  | "deny"
+  | "action"
+  | "dismiss"
+  | "close-all"
+
+/** `detail` of the cancelable `ui-close`, and of `ui-hide` (without the event). */
+export type ToastCloseDetail = {
+  reason: ToastCloseReason
+  originalEvent?: Event
+}
+
+/** `detail` of `ui-show`. */
+export type ToastShowDetail = {
+  /** ms it stays before closing itself;  `0` for "until closed" */
+  displayTime: number
+}
+
+/** `detail` of the cancelable `ui-approve` / `ui-deny`, from a `<ui-toast>`. */
+export type ToastActionDetail = {
+  /** the button (or other element) that was activated, in the light DOM */
+  action: Element
+  originalEvent?: Event
+}
+
+////////////////
+// ## Nag
+////////////////
+
+/** Where a `<ui-nag>` remembers its dismissal (`storage`). */
+export type NagStorage = "local" | "session" | "cookie"
+
+/**
+ * Why a `<ui-nag>` is closing, in `ui-close` / `ui-hide`'s `detail.reason`.
+ * - `close` -- its close icon (the dismissal is stored)
+ * - `timeout` -- its display time ran out (nothing stored)
+ * - `dismiss` -- script:  `host.close()` (stored)
+ */
+export type NagCloseReason = "close" | "timeout" | "dismiss"
+
+/** `detail` of the cancelable `ui-close`, and of `ui-hide` (without the event). */
+export type NagCloseDetail = {
+  reason: NagCloseReason
+  originalEvent?: Event
+}
+
+////////////////
+// ## Sticky
+////////////////
+
+/** Which viewport edge a `<ui-sticky>` is stuck to. */
+export type StickyEdge = "top" | "bottom"
+
+/** `detail` of `ui-stick` / `ui-unstick`. */
+export type StickyDetail = {
+  /** the edge it stuck to (`ui-stick`) or left (`ui-unstick`) */
+  edge: StickyEdge
+}
+
+////////////////
+// ## Embed
+////////////////
+
+/** Known video hosts of `<ui-embed source>`. */
+export type EmbedSource = "youtube" | "vimeo"
+
+/** `detail` of the cancelable `ui-activate`, from a `<ui-embed>` about to load its frame. */
+export type EmbedActivateDetail = {
+  /** the frame's `src`, parameters included */
+  url: string
+  originalEvent?: Event
+}
+
+////////////////
+// ## Transition
+////////////////
+
+/** `detail` of `ui-show` / `ui-hide` / `ui-complete`, from a `<ui-transition>` once an animation has run. */
+export type TransitionDetail = {
+  /** shown now */
+  visible: boolean
+  /** the animation that ran, Fomantic's name (`fade up`) */
+  animation: string
+}
+
+/**
+ * Invoker commands a `<ui-transition>` answers, `<button commandfor="id" command="--toggle">`:
+ * - `--show` / `--close` / `--toggle` -- animate in / out / whichever it isn't
+ * - `--transition` -- run its `animation` (an attention one in place)
+ */
+export const TRANSITION_COMMANDS = {
+  show: "--show",
+  close: "--close",
+  toggle: "--toggle",
+  transition: "--transition"
+} as const
+
+////////////////
+// ## Dimmer
+////////////////
+
+/**
+ * Why a `<ui-dimmer>` is hiding, in `ui-close`'s `detail.reason`.
+ * - `escape` / `close-all` -- as `UI.overlays` asks (a page dimmer)
+ * - `click` -- a click on the dimmer itself, outside its content (`closedby="any"`)
+ * - `hover` -- the pointer and focus left an `on="hover"` dimmer's target
+ */
+export type DimmerCloseReason = "escape" | "close-all" | "click" | "hover"
+
+/** `detail` of the cancelable `ui-open`, and of `ui-show` / `ui-hide` (after the transition). */
+export type DimmerOpenDetail = {
+  /** state it's entering / entered */
+  active: boolean
+  originalEvent?: Event
+}
+
+/** `detail` of the cancelable `ui-close`. */
+export type DimmerCloseDetail = {
+  active: false
+  reason: DimmerCloseReason
+  originalEvent?: Event
+}
+
+////////////////
+// ## Sidebar
+////////////////
+
+/**
+ * Why a `<ui-sidebar>` is closing, in `ui-close`'s `detail.reason`.
+ * - `escape` / `outside` / `close-all` -- as `UI.overlays` asks;  `outside` is a click on the pusher (or anywhere
+ *   else outside the sidebar)
+ * - `close` -- the `--close` / `--toggle` invoker command
+ */
+export type SidebarCloseReason = "escape" | "outside" | "close-all" | "close"
+
+/** `detail` of the cancelable `ui-open`, and of `ui-show` / `ui-hide` (after the transition). */
+export type SidebarOpenDetail = {
+  /** state it's entering / entered */
+  visible: boolean
+  originalEvent?: Event
+}
+
+/** `detail` of the cancelable `ui-close`. */
+export type SidebarCloseDetail = {
+  visible: false
+  reason: SidebarCloseReason
+  originalEvent?: Event
+}
+
+/**
+ * Invoker commands a `<ui-sidebar>` (and a `<ui-dimmer>`) answers, `<button commandfor="id" command="--toggle">`:
+ * the modal's two (`MODAL_COMMANDS`) plus `--toggle`, as user actions (the cancelable `ui-open` / `ui-close` first).
+ */
+export const TOGGLE_COMMANDS = { show: "--show", close: "--close", toggle: "--toggle" } as const
+
+/** Custom state every `<ui-pusher>` host carries:  `<ui-pushable>` finds and moves it by this, whatever its tag. */
+export const PUSHER_HOST_STATE = "pusher"
+
+/** Custom state every `<ui-sidebar>` host carries:  `<ui-pushable>` finds its sidebars by this. */
+export const SIDEBAR_HOST_STATE = "sidebar"
+
+/** Custom state every `<ui-pushable>` host carries:  a `<ui-sidebar>` finds its pushable by this. */
+export const PUSHABLE_HOST_STATE = "pushable"
+
+/**
+ * Inherited tokens a `<ui-pushable>` sets INLINE on its root for its `<ui-pusher>`s (`sidebar.css`), from the
+ * visible sidebar:
+ * - `transform` -- where the pusher moves (`translate3d(260px, 0, 0)`, `scale(0.75)`), `none` when nothing is open
+ * - `origin` -- its `transform-origin` (scale down)
+ * - `dimmed` -- `1` while a modal sidebar is open:  the pusher's dimmer shows
+ * - `blurring` -- `1` while that sidebar is `blurring`:  the dimmer blurs the pusher
+ */
+export const PUSHER_TOKENS = {
+  transform: "--ui-pusher-transform",
+  origin: "--ui-pusher-origin",
+  dimmed: "--ui-pusher-dimmed",
+  blurring: "--ui-pusher-blurring"
+} as const
+
+/** What a visible `<ui-sidebar>` asks of its `<ui-pushable>` (`UIPushable.report()`). */
+export type SidebarLayout = {
+  /** where the pushers move, e.g. `translate3d(260px, 0, 0)`;  `none` for `overlay` */
+  transform: string
+  /** the pushers' `transform-origin` (`scale down`) */
+  origin: string
+  /** modal:  the pushers are dimmed and `inert` */
+  modal: boolean
+  /** the dimmer blurs */
+  blurring: boolean
+}
+
+////////////////
+// ## Shape
+////////////////
+
+/** Which way a `<ui-shape>` flips to its next side (Fomantic's `flip up` ... `flip back`). */
+export type ShapeFlip = "up" | "down" | "left" | "right" | "over" | "back"
+
+/** `detail` of `ui-change`, from a `<ui-shape>` once it shows another side. */
+export type ShapeChangeDetail = {
+  /** index of the side now shown */
+  activeIndex: number
+  /** that side */
+  side: Element
+  /** how it got there */
+  flip: ShapeFlip
+}
+
+/** Custom state every `<ui-side>` host carries:  `<ui-shape>` finds its sides by this, whatever their tag. */
+export const SIDE_HOST_STATE = "side"
+
+////////////////
+// ## Accordion
+////////////////
+
+/**
+ * One panel of a `<ui-accordion>`:  a title child and the child after it, wrapped in one `<details>` in the shadow
+ * root.  `AccordionPanels.read()` keeps the same object while the pair is unchanged, so the panel isn't re-rendered.
+ */
+export type AccordionPanel = {
+  /** the `<ui-title>` child */
+  title: Element
+  /** the element after it, usually a `<ui-content>`;  none when the title is last or another title follows */
+  content?: Element
+}
+
+/** `detail` of the cancelable `ui-open` / `ui-close`, from a `<ui-accordion>`. */
+export type AccordionToggleDetail = {
+  /** panel index (0-based) */
+  index: number
+  /** state the panel is ABOUT to enter */
+  open: boolean
+  /** the panel's title element */
+  title: Element
+  /** its content element, if any */
+  content?: Element
+  /** the click / key event on the title;  none for a browser-made change (find-in-page) */
+  originalEvent?: Event
+}
+
+////////////////
+// ## Tab
+////////////////
+
+/** `<ui-tabs activation>`:  the WAI-ARIA APG's two ways a focused tab gets selected. */
+export type TabActivation = "automatic" | "manual"
+
+/** `detail` of the cancelable `ui-change`, from a `<ui-tabs>`. */
+export type TabChangeDetail = {
+  /** value of the tab about to be selected */
+  value: string
+  /** that `<ui-tab>` pane */
+  tab: Element
+  /** click / key event, or the `hashchange` / `popstate` of `history` */
+  originalEvent?: Event
+}
+
+/** `detail` of `ui-show`, from a `<ui-tab>` each time it becomes the shown pane. */
+export type TabShowDetail = {
+  /** the pane's value */
+  value: string
+  /** the first time it's shown:  fill a lazy pane now */
+  first: boolean
+}
+
+////////////////
+// ## Calendar
+////////////////
+
+/** `<ui-calendar type>`:  what it picks, and so the ISO shape of its value. */
+export type CalendarType = "date" | "time" | "datetime" | "month" | "year"
+
+/** A view of the picker, coarse to fine;  also the unit a cell stands for. */
+export type CalendarMode = "year" | "month" | "day" | "hour" | "minute"
+
+/** `detail` of the cancelable `ui-change`, from a `<ui-calendar>`. */
+export type CalendarChangeDetail = {
+  /**
+   * the new value, ISO by `type`:  `2026-09-30`, `14:30`, `2026-09-30T14:30`, `2026-09`, `2026`;  `""` when
+   * cleared
+   */
+  value: string
+  /** the click / key / `change` event */
+  originalEvent?: Event
+}
+
+/** `detail` of the cancelable `ui-open` / `ui-close`, from a popup `<ui-calendar>`. */
+export type CalendarOpenDetail = {
+  /** the state it's about to take */
+  open: boolean
+  /** the click / key event;  none for a dismissal from `UI.overlays` */
+  originalEvent?: Event
+}
+
+/**
+ * Invoker commands a `<ui-shape>` answers, `<button commandfor="id" command="--next">`:  turn to the next / previous
+ * side, the `direction` attribute's way.
+ */
+export const SHAPE_COMMANDS = { next: "--next", previous: "--previous" } as const

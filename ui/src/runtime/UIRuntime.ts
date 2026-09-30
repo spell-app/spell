@@ -12,7 +12,15 @@ import {
   utilitiesCSS
 } from "$/styles"
 
-import { RUNTIME_KEY, RUNTIME_VERSION, type RuntimeGlobal, type ToastHandle, type ToastOptions } from "./runtime.types"
+import {
+  RUNTIME_KEY,
+  RUNTIME_VERSION,
+  type Disposer,
+  type RuntimeGlobal,
+  type ToastHandle,
+  type ToastOptions,
+  type VisibilityOptions
+} from "./runtime.types"
 import { Api } from "./Api"
 import { Browser } from "./Browser"
 import { Focus } from "./Focus"
@@ -24,6 +32,7 @@ import { Overlays } from "./Overlays"
 import { Styles } from "./Styles"
 import { Toasts } from "./Toasts"
 import { Transitions } from "./Transitions"
+import { Visibility } from "./Visibility"
 import { load } from "./load"
 
 /**
@@ -63,8 +72,10 @@ export class UIRuntime {
   })
   /** keyframe catalogue runner */
   readonly transitions = new Transitions({ browser: this.browser })
+  /** scroll position callbacks and lazy images, on `IntersectionObserver` */
+  readonly visibility = new Visibility({ transitions: this.transitions })
   /** strings and `Intl` formatting */
-  readonly i18n = new I18n()
+  readonly i18n = new I18n({ browser: this.browser })
   /** programmatic toasts (provider registered by `ui-toast`) */
   readonly toasts = new Toasts()
   /** promise dialogs (provider registered by `ui-modal`) */
@@ -140,5 +151,10 @@ export class UIRuntime {
   /** Shortcut for `toasts.show()`, the Fomantic `$.toast({...})` spelling. */
   toast(options: ToastOptions): ToastHandle {
     return this.toasts.show(options)
+  }
+
+  /** Shortcut for `visibility.observe()`, Fomantic's `$(el).visibility({...})`;  returns the undo. */
+  observeVisibility(element: Element, options: VisibilityOptions): Disposer {
+    return this.visibility.observe(element, options)
   }
 }

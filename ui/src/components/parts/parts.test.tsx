@@ -13,6 +13,15 @@ import { StubOwner } from "$test/StubOwner"
 import "$/components/parts"
 import "$/components/label"
 import "$/components/segment"
+import "$/components/card"
+import "$/components/items"
+import "$/components/feed"
+import "$/components/comment"
+import "$/components/statistic"
+import "$/components/step"
+import "$/components/message"
+import "$/components/list"
+import "$/components/icon"
 
 /** Examples whose original fragment fails axe `heading-order` too (see `docs/report.md`). */
 const HEADING_DEMOS = ["parts/examples/elements/header.html", "segment/examples/elements/variations.html"]
@@ -87,7 +96,7 @@ beforeAll(() => {
   }
   Object.defineProperty(Split.prototype, "vocabulary", { value: vocabulary })
   if (!customElements.get("x-split")) (Split as unknown as UIElementClass & typeof UIElement).define("x-split")
-  defineShell("x-shell", "<stub-card><slot></slot></stub-card>")
+  defineShell("x-shell", "<ui-card><slot></slot></ui-card>")
   defineShell("x-panel", "<ui-header>Inside a shadow root</ui-header>")
 })
 
@@ -212,7 +221,7 @@ describe("<ui-header> standalone", () => {
 describe("owner context", () => {
   it("resolves an owner through another part:  card > content > header", async () => {
     const card = await ElementFixture.render(
-      `<stub-card><ui-content><ui-header>Elliot</ui-header></ui-content></stub-card>`
+      `<ui-card><ui-content><ui-header>Elliot</ui-header></ui-content></ui-card>`
     )
     const content = card.querySelector("ui-content")!
     const header = card.querySelector("ui-header")!
@@ -226,7 +235,7 @@ describe("owner context", () => {
 
   it("resolves the NEAREST of nested owners", async () => {
     const modal = await ElementFixture.render(
-      `<stub-modal><ui-header>M</ui-header><stub-card><ui-content><ui-header>C</ui-header></ui-content></stub-card></stub-modal>`
+      `<stub-modal><ui-header>M</ui-header><ui-card><ui-content><ui-header>C</ui-header></ui-content></ui-card></stub-modal>`
     )
     const [modalHeader, cardHeader] = modal.querySelectorAll("ui-header")
     expect(ownerStates(modalHeader!)).toEqual(["in-modal"])
@@ -246,7 +255,7 @@ describe("owner context", () => {
   })
 
   it("stops at a non-part component:  card > segment > header stays standalone", async () => {
-    const card = await ElementFixture.render(`<stub-card><ui-segment><ui-header>H</ui-header></ui-segment></stub-card>`)
+    const card = await ElementFixture.render(`<ui-card><ui-segment><ui-header>H</ui-header></ui-segment></ui-card>`)
     const header = card.querySelector("ui-header")!
     expect(ownerStates(header)).toEqual([])
     expect(root(header).className).toBe("ui header")
@@ -255,7 +264,7 @@ describe("owner context", () => {
   it("resolves across a slot into another shadow root, and out of a shadow root", async () => {
     const shell = await ElementFixture.render(`<x-shell><ui-meta>Slotted through a shell</ui-meta></x-shell>`)
     expect(ownerStates(shell.querySelector("ui-meta")!)).toEqual(["in-card"])
-    const card = await ElementFixture.render(`<stub-card><x-panel></x-panel></stub-card>`)
+    const card = await ElementFixture.render(`<ui-card><x-panel></x-panel></ui-card>`)
     const inner = card.querySelector("x-panel")!.shadowRoot!.querySelector("ui-header")!
     await ElementFixture.settle(inner)
     expect(ownerStates(inner)).toEqual(["in-card"])
@@ -274,7 +283,7 @@ describe("owner context", () => {
   })
 
   it("re-resolves on reparenting", async () => {
-    const holder = await ElementFixture.render(`<div><stub-card><ui-header>H</ui-header></stub-card><p></p></div>`)
+    const holder = await ElementFixture.render(`<div><ui-card><ui-header>H</ui-header></ui-card><p></p></div>`)
     const header = holder.querySelector("ui-header")!
     expect(ownerStates(header)).toEqual(["in-card"])
     holder.querySelector("p")!.append(header)
@@ -284,13 +293,13 @@ describe("owner context", () => {
   })
 
   it("re-resolves after a real detach:  keepAlive keeps the controller, `onConnect` refreshes its owner", async () => {
-    const holder = await ElementFixture.render(`<div><ui-header>H</ui-header><stub-card></stub-card></div>`)
+    const holder = await ElementFixture.render(`<div><ui-header>H</ui-header><ui-card></ui-card></div>`)
     const header = holder.querySelector<UIHost>("ui-header")!
     const controller = header.controller
     expect(ownerStates(header)).toEqual([])
     header.remove()
     await ElementFixture.tick()
-    holder.querySelector("stub-card")!.append(header)
+    holder.querySelector("ui-card")!.append(header)
     await ElementFixture.settle(holder)
     expect(header.controller).toBe(controller)
     expect(ownerStates(header)).toEqual(["in-card"])
@@ -299,7 +308,7 @@ describe("owner context", () => {
 
   it("makes a <ui-label> in a statistic its `.label` part, with `parts.css`", async () => {
     const statistic = await ElementFixture.render(
-      `<stub-statistic><ui-value>5,550</ui-value><ui-label>Downloads</ui-label></stub-statistic>`
+      `<ui-statistic><ui-value>5,550</ui-value><ui-label>Downloads</ui-label></ui-statistic>`
     )
     const label = statistic.querySelector("ui-label")!
     expect(ownerStates(statistic.querySelector("ui-value")!)).toEqual(["in-statistic"])
@@ -326,7 +335,7 @@ describe("owner context", () => {
 
   it("puts a date in a feed summary inline, by the summary's `--ui-part`", async () => {
     const feed = await ElementFixture.render(
-      `<stub-feed><ui-content><ui-date>3 days ago</ui-date><ui-summary>Added <ui-date>4 hours ago</ui-date></ui-summary></ui-content></stub-feed>`
+      `<ui-feed><ui-event><ui-content><ui-date>3 days ago</ui-date><ui-summary>Added <ui-date>4 hours ago</ui-date></ui-summary></ui-content></ui-event></ui-feed>`
     )
     const [alone, inline] = feed.querySelectorAll("ui-date")
     // NOTE: `parts.css` gives an in-feed `<time>` outside a summary no `display` (see `docs/report.md`)

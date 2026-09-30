@@ -18,9 +18,14 @@ import { modalVocabulary } from "./modal.vocabulary.en"
  * - Follows the host's `open` attribute (a `MutationObserver`), with the `active` class;  any close (Escape, the
  *   close button, an approve / deny click) removes it again.
  * - Approve / deny elements still fire the cancelable `ui-approve` / `ui-deny` before closing.
+ * - `FlyoutFallback` extends it with its own vocabulary and `rootPart`:  the same dialog, a flyout's classes.
  ****************/
 export class ModalFallback extends NativeFallback<typeof modalVocabulary> {
+  /** Part name of the `<dialog>`, e.g. `modal`. */
+  declare rootPart: string
+
   @proto static vocabulary = modalVocabulary
+  @proto static rootPart = "modal"
   @proto static degraded = [
     "`ui-open` / `ui-close` (no veto), `ui-show`, invoker commands;  `ui-hide` fires at once, without a transition",
     "`closedby` (the browser's own Escape handling;  no dimmer clicks), page scroll lock, the overlay stack",
@@ -38,7 +43,7 @@ export class ModalFallback extends NativeFallback<typeof modalVocabulary> {
     const content = this.attr("content")
     const dialog = this.create("dialog", { class: this.classes() })
     if (header) {
-      const id = `${this.host.id || "ui-modal"}-fallback-header`
+      const id = `${this.host.id || `ui-${this.vocabulary.noun}`}-fallback-header`
       dialog.append(this.create("div", { id, class: "header", part: "header" }, header))
       dialog.setAttribute("aria-labelledby", id)
     }
@@ -47,7 +52,7 @@ export class ModalFallback extends NativeFallback<typeof modalVocabulary> {
     if (this.flag("closable")) dialog.append(this.closeButton())
     this.listen<MouseEvent>(dialog, "click", (event) => this.onClick(event))
     this.listen(dialog, "close", () => this.onClosed())
-    this.dialog = this.decorate(dialog, "modal")
+    this.dialog = this.decorate(dialog, this.rootPart)
     return [this.dialog]
   }
 
@@ -68,14 +73,14 @@ export class ModalFallback extends NativeFallback<typeof modalVocabulary> {
     const dialog = this.dialog
     if (!dialog?.isConnected) return
     const open = Converters.boolean(this.host.getAttribute(OPEN), OPEN)
-    dialog.classList.toggle(ACTIVE, open)
+    dialog.classList.toggle(this.openClass(), open)
     if (open && !dialog.open) dialog.showModal()
     else if (!open && dialog.open) dialog.close()
   }
 
   /** The dialog closed (Escape, a button):  drop `open`, tell the page. */
   private onClosed() {
-    this.dialog?.classList.remove(ACTIVE)
+    this.dialog?.classList.remove(this.openClass())
     if (this.host.hasAttribute(OPEN)) this.host.removeAttribute(OPEN)
     const detail: ModalOpenDetail = { open: false }
     this.host.dispatchEvent(new CustomEvent(HIDE, { bubbles: true, composed: true, detail }))
@@ -100,6 +105,12 @@ export class ModalFallback extends NativeFallback<typeof modalVocabulary> {
     }
   }
 
+  /** Class word of `open` (`active` on a modal, `visible` on a flyout):  the vocabulary's `key`. */
+  private openClass(): string {
+    const spec = this.vocabulary.attributes.find(({ name }) => name === OPEN) as { key?: string } | undefined
+    return spec?.key ?? OPEN
+  }
+
   /** The close button. */
   private closeButton(): HTMLButtonElement {
     const label = this.vocabulary.texts.find(({ key }) => key === "close")!.text
@@ -113,9 +124,8 @@ export class ModalFallback extends NativeFallback<typeof modalVocabulary> {
   }
 }
 
-/** The host attribute it follows, and the class word it emits (`open`'s `key`). */
+/** The host attribute it follows. */
 const OPEN = "open"
-const ACTIVE = "active"
 
 /** Events it still fires, checked against the vocabulary. */
 const APPROVE: EventName<typeof modalVocabulary> = "ui-approve"

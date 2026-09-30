@@ -1,4 +1,4 @@
-import { NativeFallback, OwnerContext, proto, type NativeFallbackRoot, type OwnerLookup } from "$/core"
+import { NativeFallback, PartContext, proto, type NativeFallbackRoot } from "$/core"
 
 import { PART_VOCABULARIES, headerVocabulary } from "./parts.vocabulary.en"
 
@@ -9,13 +9,10 @@ import { PART_VOCABULARIES, headerVocabulary } from "./parts.vocabulary.en"
  * - Standalone `<ui-header>` is Fomantic's `<div class="ui ... header">`:  `<h1>` ... `<h6>` by `level`, `<a>`
  *   with `href`.  An OWNED header (in a card, another header ...) is the bare `header` class, with
  *   `role="heading"` + `aria-level` for a `level`.
- * - NOTE: `owners` knows only what parts own today (a header owns headers and contents);  add card / modal
- *   owners as they land.
+ * - Owned or not:  the page-wide owner registry (`PartContext.ownerOf()`), so every DEFINED owner counts -- card,
+ *   Items view item, message, list, menu, modal, popup, another header ... -- with the element's barriers.
  ****************/
 export class ContentPartFallback extends NativeFallback {
-  /** Which tags own a header. */
-  static owners: OwnerLookup = OwnerContext.ownersOf(headerVocabulary.noun, PART_VOCABULARIES)
-
   @proto static degraded = ["owner-context states (`:state(in-card)`) that style owned parts"]
 
   constructor(host: HTMLElement, root: NativeFallbackRoot, error?: unknown, internals?: ElementInternals) {
@@ -29,7 +26,7 @@ export class ContentPartFallback extends NativeFallback {
     const level = this.host.getAttribute("level")
     if (noun !== headerVocabulary.noun)
       return [this.decorate(this.create("div", { class: this.classes() }, this.slot()), noun)]
-    const owned = OwnerContext.find(this.host, ContentPartFallback.owners)
+    const owned = PartContext.ownerOf(this.host, noun)
     if (owned) {
       const header = this.create(
         "div",

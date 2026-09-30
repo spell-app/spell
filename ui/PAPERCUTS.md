@@ -401,3 +401,112 @@ Log of things that slowed down development. Date · symptom · fix · project.
 - 2026-09-29 · `<button commandfor command="show-modal">` aimed at a custom element dispatches NO `command` event;
   only custom commands (`--show`) reach a non-dialog / non-popover target. · `MODAL_COMMANDS` are `--show` /
   `--close`. · spell/ui modal
+- 2026-09-30 · A test expecting Fomantic's `display: inline-block` on a horizontal statistic's label read `block`:
+  the label is a FLEX item (the statistic root is `inline-flex`), and flex items are blockified. · Assert what the
+  rule really does (the label's start margin). · spell/ui statistic
+- 2026-09-30 · Example markup lost its layout silently:  `<ui-segment style="margin-inline: 20em">` does nothing,
+  the host is `display: contents` (no box). · Put layout styles on a wrapper `<div>` around the element. · spell/ui rail
+- 2026-09-30 · `timeout 600 yarn vitest ...` failed with `command not found: timeout`:  macOS has no GNU `timeout`. ·
+  Rely on the tool's own timeout. · spell/ui
+- 2026-09-30 · A lazily `import()`ed data file in a family SUB-folder (`src/components/emoji/data/s.json`) matched no
+  bucket in `tools/package.config.ts` (the family rule only matches files directly in the family folder), so
+  `yarn measure` would have counted it as `core` and failed `coreOutsideCore`. · A `data` bucket (lazy, checked by
+  `lazyInEager`, its own row in the report's tier table). · spell/ui emoji
+- 2026-09-30 · `sed -i '' 's/"\\u26A1"/.../'` on macOS rewrote the JS `\u` escapes of OTHER strings in the same test
+  file into literal characters. · Edit escape sequences with the Edit tool or python, never sed. · spell/ui emoji
+- 2026-09-30 · A component's `prefers-reduced-motion` rule setting `transition-duration: 0s` computes as `1e-05s`:
+  `reset.css`'s own reduced-motion block wins with `0.01ms !important`. · Assert "under 1 ms", not `0s`. ·
+  spell/ui reveal
+- 2026-09-30 · `yarn site:build` failed on `popup.mdx` (`Unexpected character after '<', expected a valid JSX tag`) at
+  a `<ui-button` whose attributes wrapped onto the next lines and whose text followed a lone `>` line -- though the
+  page compiled fine with plain `@mdx-js/mdx`, so a helper's syntax check passed. · Keep an element's opening tag
+  on ONE line in site MDX;  check pages with the real `yarn site:build`, not a bare MDX compile. · spell/ui site
+- 2026-09-30 · Docs theming snippets that set `--ui-<family>-*` on the host tag did nothing:  each family declares
+  its tokens on the shadow box, which beats the inherited value. · Set them through `::part(<root part>)`
+  (checked per family in a Playwright probe);  logged in `SUSPECTED-BUGS.md`. · spell/ui site
+- 2026-09-30 · A feed example with a `disabled` event failed axe `color-contrast` (faded text), though the card and
+  item ones passed:  `$test/a11y` only exempts text under `.ui.disabled`, and a part-less box (`disabled event`) has
+  no `ui`. · Render `aria-disabled="true"` on the disabled root (as `<ui-item>` already did):  axe skips text under
+  an `aria-disabled` ancestor in the flat tree (`is_disabled`), and assistive tech gets the state too. · spell/ui feed
+- 2026-09-30 · `class UIEvent` for `<ui-event>` would shadow the DOM's global `UIEvent` interface for anyone importing
+  `* from "@spell/ui"`. · Named the class `UIFeedEvent`;  check a new `UI<Name>` against DOM globals
+  (`name in globalThis`). · spell/ui feed
+- 2026-09-30 · `yarn oxfmt test/fallback.cases.ts` (a shared wiring file) also rewrapped OTHER agents' new entries
+  there. · Harmless (formatting only), but format shared files last, or leave them to the combined `yarn format`. ·
+  spell/ui
+- 2026-09-30 · Container queries:  in a card group, doubling's `.ui.doubling:is(.four ...).cards` (specificity 0,4,0)
+  silently beat stackable's `.ui.stackable.cards` in the same mobile range -- Fomantic hides this with
+  `!important`. · `.ui.ui.stackable.cards`;  caught by a static-example CSS test. · spell/ui card
+- 2026-09-30 · `<ui-search>`'s no-results message read "No results found." (the DROPDOWN's text), not its own:
+  `UI.i18n` keys are global and first-registered wins, and both vocabularies said `noResults`. · Prefix component
+  text keys that aren't truly shared (`searchNoResults`);  logged in `SUSPECTED-BUGS.md`. · spell/ui search
+- 2026-09-30 · A customizable-select `<option label="...">` rendered EMPTY in the picker (its child spans got no box):
+  with `appearance: base-select` the `label` attribute replaces the option's content. · Never set `label` on rich
+  options;  the text lives in a `<span class="text">`. · spell/ui select
+- 2026-09-30 · A slider drag test dispatched `pointerup`, `pointerdown`, `pointermove` in ONE task and the move went
+  to the OLD thumb:  the handler read the `dragging` Cell, whose writes land on a microtask.  (Also:  thumb index `0`
+  read through `!!` looked like "not dragging".) · Handlers keep their own state in a plain field (`dragThumb`);
+  the Cell only drives rendering and `:state(dragging)`. · spell/ui slider
+- 2026-09-30 · A `ResizeObserver`-measured layout (slider label spacing) never showed up after
+  `ElementFixture.settle()`:  observers report at the next rendering step, not on a microtask. · `expect.poll()` for
+  anything measured by an observer. · spell/ui slider
+- 2026-09-30 · A rating test asserting each icon's `<svg>` passed alone and failed in a combined run:  the first
+  `Icons.get()` of a glyph is an async module import, so a cold cache renders no `<svg>` yet. · Poll for glyphs
+  (`expect.poll`) in element tests. · spell/ui rating
+- 2026-09-30 · Stopping an agent (`TaskStop`) did NOT stop the sub-agents it had spawned:  two docs sub-agents kept
+  running, putting the session over Owen's agent cap. · Check `ListAgents` after every stop and stop orphans;  briefs
+  now say "no subagents". · spell/ui orchestration
+- 2026-09-30 · A marker set in a `keydown` capture listener and cleared with `queueMicrotask()` was already gone when
+  the next listener (the roving tabindex's) ran:  for a BROWSER-dispatched event, a microtask checkpoint runs after
+  every listener returns (only a script's `dispatchEvent()` keeps the stack non-empty). · Never clear it;  check
+  `event.eventPhase !== Event.NONE` (still being dispatched) where it's read (`UITabs.onRovingChange()`). · spell/ui tab
+- 2026-09-30 · A `tabindex="0"` host with `display: contents` is skipped by Tab:  an element without a box can't take
+  focus, so the tabpanel host was unreachable. · The owned pane's host is `display: block` (`tab.css`). · spell/ui tab
+- 2026-09-30 · `userEvent.click()` on a `<button aria-disabled="true">` times out ("waiting for element to be ...
+  enabled"):  Playwright's actionability check treats `aria-disabled` as disabled. · `element.click()` for that one
+  click. · spell/ui tab
+- 2026-09-30 · `yarn vitest run src/components/tab` also ran `src/components/table/` (a path filter is a PREFIX match). ·
+  End the filter with a slash:  `src/components/tab/`. · spell/ui
+- 2026-09-30 · A CSS test of `toast.css`'s 350px compact width failed with 414px:  the Vitest browser viewport is 414px
+  wide, so every `@media (max-width: 420px)` phone rule applies in browser tests. · Make width assertions viewport
+  aware (`matchMedia(...)`), or test in a fixed-width container. · spell/ui
+- 2026-09-30 · `test/fallback.test.tsx` "every family renders its fallback root" failed for `<ui-visibility>` with
+  "did the render really fail?":  `ElementFixture.breakRender()` breaks a render through the classes memo, and an
+  element with NO class-emitting attribute (and an `extraClasses()` that reads nothing) never recomputes it. · Have
+  `extraClasses()` read an attribute (visibility emits `image` for `type="image"`). · spell/ui
+- 2026-09-30 · `this.attrs.sameSite` didn't exist for an attribute `samesite` with `property: "sameSite"`:  `attrs`
+  keys are the camelCased attribute NAME, `property` only renames the host property. · Use `attrs.samesite`. · spell/ui
+- 2026-09-30 · `FILES="a.ts b.ts"; yarn oxlint $FILES` said "No files found to lint", and `oxfmt` silently skipped the
+  same list:  the shell is zsh, which does NOT word-split an unquoted `$FILES` (one argument with spaces). · Pass
+  paths literally (or `${=FILES}` in zsh). · spell/ui
+- 2026-09-30 · `<ui-transition>`'s box (`class="ui transition"`) never animated:  `UI.transitions` resolved at once.
+  `animations.css`'s protocol reset `.ui.transition, [data-ui-animation] { --ui-animation-keyframes: none }` is
+  (0,2,0) on the class, beating `[data-ui-animation="fade out"]` (0,1,0), so an element that is BOTH got no
+  keyframes (and `expectedDuration` 0). · Wrapped the reset in `:where()` (zero specificity). · spell/ui
+- 2026-09-30 · A Vitest browser `userEvent.click()` that can't click just times out ("locator.click: Timeout"), with
+  the reason hidden. · Wrap it in `try { await userEvent.click(el, { timeout: 2000 }) } catch (e) { ... }` and assert
+  on `String(e)`:  the Playwright call log says who intercepts the pointer (here a close icon over a button). · spell/ui
+- 2026-09-30 · Focus moved into a just-shown sidebar went nowhere:  the panel's `visibility` TRANSITION (hidden =>
+  visible) keeps it `hidden` at progress 0, so nothing inside is focusable in the same task. · Transition
+  `visibility` only on the way OUT:  the showing rule sets `visibility 0s`. · spell/ui
+- 2026-09-30 · Defining `<ui-shape>` threw `prop "flip" would shadow the element's own "flip"`:  the fork refuses an
+  attribute whose property name is a method of the host class (`ShapeHost.flip()`). · Renamed the attribute
+  (`direction`). · spell/ui
+- 2026-09-30 · `getComputedStyle(el).transform` is `none` for a `display: none` element (percentages need a box),
+  so a hidden static flyout's off-screen `translate3d(-100%, ...)` read as untransformed. · Lay it out
+  (`display: flex` inline) in the test. · spell/ui
+- 2026-09-30 · A modal `<dialog>` (`showModal()`) doesn't cycle Tab:  past its last element focus goes to the
+  browser's own UI (the page stays `inert`), so "Tab wraps to the first" tests fail. · Assert the page behind is never
+  reached instead;  only `UI.focus.trap()` (non-dialog sidebars) cycles. · spell/ui
+- 2026-09-30 · New `.mdx` pages returned HTTP 500 (an empty "Error" page) from a `yarn site:dev` server that had been
+  running for hours, while `yarn site:build` built them fine and older pages still served. · Restart it
+  (`yarn --cwd site astro dev stop`, then `yarn site:dev`);  suspect a stale content-collection index. · spell/ui site
+- 2026-09-30 · Forcing the Temporal POLYFILL in a Chromium test:  `import { Temporal } from "temporal-polyfill"`
+  returns the NATIVE `Temporal` whenever `globalThis.Temporal` exists (its `root.js` reads the global at module
+  evaluation), so stubbing `UI.browser.supports.temporal` alone still tested native code;  the "forced" entry
+  (`temporal-polyfill/implementation`) also imports the full-calendars chunk. · Delete `globalThis.Temporal` inside
+  `vi.hoisted()` at the top of a dedicated test file (runs before every import;  each browser test file gets its own
+  page), so the flag, `I18n` and the polyfill all see a Temporal-less browser (`calendar.polyfill.test.tsx`). ·
+  spell/ui calendar
+- 2026-09-30 · TypeScript 7's lib has no `Temporal` types. · Type it from the polyfill's `temporal-spec`
+  (`import type { Temporal } from "temporal-polyfill"`, `TemporalAPI` in `runtime.types.ts`). · spell/ui calendar

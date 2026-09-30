@@ -385,6 +385,10 @@
     width: 175px;
     height: 175px;
   }
+  /* Rails are 300px wide by default, too wide for the example column:  narrow them in rail examples only. */
+  .site-narrow-rails ui-rail::part(rail) {
+    --ui-rail-width: 9em;
+  }
   /* Room for a menu that the example shows open. */
   .site-example-demo.site-tall {
     min-height: 18em;

@@ -300,12 +300,26 @@ export type HighlightRange = readonly [start: number, end: number]
  * Which elements own generic content parts.
  * - `Set` of tags -- noun is the tag after its prefix (`ui-card` => `card`)
  * - `Map` of tag => noun -- for translated tags (`ie-tarjeta` => `card`)
- * - function of the tag -- return the noun, `true` (derive it from the tag) or a falsy value (not an owner)
+ * - function of the tag (and the element) -- return the noun, `true` (derive it from the tag) or a falsy value (not
+ *   an owner);  the element lets an owner decide per instance (`ConditionalOwner`)
  */
 export type OwnerLookup =
   | ReadonlySet<string>
   | ReadonlyMap<string, string>
-  | ((tag: string) => string | boolean | undefined | null)
+  | ((tag: string, element: Element) => string | boolean | undefined | null)
+
+/**
+ * A PART that owns parts only in some contexts, implemented on its CONTROLLER:  `<ui-item>` owns its content parts
+ * in the Items view (`:state(in-item)`), but in a list or menu they see through it to the list / menu.
+ * - `PartContext` registers such a class (it has `ownsPart()`) as a conditional owner of its vocabulary's
+ *   `ownsParts`, and asks it during every climb;  while it says no, it's transparent like any part.
+ * - MUST read the DOM now, not signals:  it runs inside other parts' re-resolution, right after moves, before
+ *   Solid's writes land.
+ * - An element with no controller yet (not upgraded) owns nothing;  its own settle re-resolves its parts.
+ */
+export type ConditionalOwner = {
+  ownsPart(noun: string): boolean
+}
 
 /** Options for `OwnerContext.find()`. */
 export type OwnerFindOptions = {
