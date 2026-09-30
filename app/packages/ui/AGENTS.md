@@ -45,10 +45,11 @@ when working with code in this repository.
       values, events, slots, parts, states, text strings.  Translations become `<name>.vocabulary.<lang>.ts`
     - `<name>.fallback.ts` -- the native fallback (plain DOM, no Solid) shown when the element's render throws
     - `<name>.test.tsx` (elements), `<name>.css.test.ts` (the sheet on class-grammar markup),
-      `<name>.fallback.test.ts`, `<name>.a11y.test.ts`, `<name>.visual.test.ts`, `<name>.perf.test.tsx`
+      `<name>.fallback.test.ts`, `<name>.a11y.test.ts`, `<name>.perf.test.tsx`
     - `examples/*.html` -- Fomantic's examples in CLASS GRAMMAR (static markup, the CSS tests and the site);
       `examples/elements/*.html` -- the same examples as `ui-*` ELEMENT markup (axe in `<name>.test.tsx`,
-      `yarn dev`)
+      `yarn dev`, `yarn test:visual`);  `examples/elements/<name>.visual.ts` -- optional OPEN states for the
+      visual tests (`docs/visual-testing.md`)
   - `src/core.ts`, `src/forms.ts` -- the two SHARED lib entries (`@spell/ui/core`, `@spell/ui/forms`):  `core` is
     the element core + the foundation JS every family needs;  `forms` what only form controls with a VALUE need
     (`FormElement`, `FormHost`, `Validator`, `MenuOptions`).  Component files import shared code ONLY through
@@ -60,12 +61,14 @@ when working with code in this repository.
   - `test/` -- shared test utils and cross-family tests:  `Fixture.render(html)` (`fixture.ts`),
     `A11y.check(el)` / `expectAccessible(el)` (`a11y.ts`), `ElementFixture` (render + wait for `ready` +
     `flush()`, `breakRender()`), `StubOwner` (stand-in owners:  card, feed ...), `PerfRun` (the dropdown
-    benchmark), `fallback.cases.ts`, `dictionary.es.ts`;  `fallback` / `isolation` / `translate` / SSR / DSD
+    benchmark), `fallback.cases.ts`, `dictionary.es.ts`, `VisualOpen` + `test.types.ts` (visual-test hooks),
+    `visual/baselines/` (screenshots, `yarn test:visual`);  `fallback` / `isolation` / `translate` / SSR / DSD
     tests.  Every test runs in a REAL browser (Vitest browser mode + Playwright, chromium by default), except
     `*.ssr.test.tsx` (node)
   - `tools/` -- package tooling (node scripts run by `tsx`, see `tools/README.md`):  bundle measurement, peer
     vendoring, import-map smoke pages (framework hosts), LOC, report tables, the HMR end-to-end test;
-    `tools/demo/` is the `yarn dev` site;  results go to `tools/results/` (git-ignored)
+    `tools/demo/` is the `yarn dev` site;  `tools/visual/` the visual tests;  results go to `tools/results/`
+    (git-ignored)
   - `site/` -- Astro docs site, modelled on Fomantic's docs, on the live components
   - `docs/` -- design docs (`plan.md`, `grammar.md`, `theming.md`, `translation.md`, `icons.md`, `fallback.md`,
     `runtime.md`) and the generated `report.md`
@@ -79,6 +82,14 @@ when working with code in this repository.
   - `yarn test` -- `ssr` project first (it writes `.cache/ssr-button.html`, which `test/dsd.test.ts` reads), then
     `browser`, then `yarn test:fork`
   - `yarn test:all` -- chromium + firefox + webkit (`yarn test:browsers` once first)
+  - `yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] [--update] [--grep <family>]
+    [--parity]` -- screenshot tests of every element example, light + dark, against the baselines in
+    `test/visual/baselines/` (Playwright `toHaveScreenshot`;  `linux`, the default, renders in Playwright's
+    Docker image).  `yarn test:visual:update` ~== `--update`.  See `docs/visual-testing.md`
+    - NOT part of `yarn review` (slow, needs Docker), but MUST run before a change that alters rendering (CSS,
+      markup, tokens, an example) is handed back
+    - a change that alters rendering MUST update its baselines in the SAME change (`--update`), after reviewing
+      every diff in the HTML report;  never update to silence a diff you haven't looked at
   - `yarn dev` -- `tools/demo/`:  every example as class grammar beside elements;  edits hot-reload
   - `yarn icons:pack <folder> --id <id> [--sanitize] [--skip-unsafe | --allow-unsafe]` -- verify a folder of SVGs
     and write its `pack.js` (keeps hand edits);  `--sanitize` strips unsafe attributes first;  files that still fail

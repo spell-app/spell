@@ -1044,6 +1044,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@playwright/test@npm:1.63.0":
+  version: 1.63.0
+  resolution: "@playwright/test@npm:1.63.0"
+  dependencies:
+    playwright: "npm:1.63.0"
+  bin:
+    playwright: cli.js
+  checksum: 10c0/795cd06c2eb6cb6142e72792f4df8f97665aa8c551c16278a7f2b3f31664e0cff07ed3c066490da55daf2fe51bc18e9c1ec6cba05b2c37387a0c49ad63017db8
+  languageName: node
+  linkType: hard
+
 "@polka/url@npm:^1.0.0-next.24":
   version: 1.0.0-next.29
   resolution: "@polka/url@npm:1.0.0-next.29"
@@ -1327,6 +1338,7 @@ __metadata:
   resolution: "@spell/ui@workspace:."
   dependencies:
     "@custom-elements-manifest/analyzer": "npm:^0.11.0"
+    "@playwright/test": "npm:1.63.0"
     "@solidjs/vite-plugin": "npm:3.0.0-next.46"
     "@solidjs/web": "npm:2.0.0-rc.11"
     "@spell/solid-element": "link:./packages/solid-element"
@@ -1342,7 +1354,7 @@ __metadata:
     oxfmt: "npm:^0.71.0"
     oxlint: "npm:^1.86.0"
     oxlint-tsgolint: "npm:^7.0.2003"
-    playwright: "npm:^1.63.0"
+    playwright: "npm:1.63.0"
     solid-js: "npm:2.0.0-rc.11"
     temporal-polyfill: "npm:^1.0.5"
     tsx: "npm:^4.23.15"
@@ -3064,7 +3076,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright@npm:^1.63.0":
+"playwright@npm:1.63.0":
   version: 1.63.0
   resolution: "playwright@npm:1.63.0"
   dependencies:
