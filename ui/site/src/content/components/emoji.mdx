@@ -75,14 +75,19 @@ await EmojiData.get("tada") // loads the "t" names;  resolves to "🎉"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-emoji-*` tokens on the emoji's box, through `::part(emoji)`.
-  `--ui-emoji-font-family` picks the emoji font;  the `--ui-emoji-size-*` tokens are the size ratios.
-  `--ui-emoji-size-medium` (Fomantic's 3em medium emoji) only affects class-grammar markup:  the element treats
-  `medium` as the default size.
+  Theme with the public `--ui-emoji-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or on
+  the emoji's box through `::part(emoji)`.  They inherit into the shadow root, where the sheet reads each through a
+  private alias, so nothing inside blocks them.  `--ui-emoji-font-family` picks the emoji font;  the
+  `--ui-emoji-size-*` tokens are the size ratios.  `--ui-emoji-size-medium` (Fomantic's 3em medium emoji) only
+  affects class-grammar markup:  the element treats `medium` as the default size.
 
 ```css
-ui-emoji::part(emoji) {
+/* every emoji on the page */
+:root {
   --ui-emoji-font-family: "Noto Color Emoji", sans-serif;
+}
+/* one region */
+.reactions {
   --ui-emoji-size-large: 4;
 }
 ```

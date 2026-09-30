@@ -140,7 +140,7 @@
   - global: font stack, spacing, radii, borders, shadows, durations, breakpoints, z-index scale
   - colours in OKLCH: `--ui-red: oklch(60% 0.2 25)` …; each hue derives `-hover / -focus / -down / -active / -text / -background / -border` via relative color syntax; registered with `@property` so they animate; the hue list is data (`colors.vocabulary.en.ts`) so adding a hue means one token block + one vocabulary entry
   - dark mode via `light-dark()` under `color-scheme: light dark`; `ui-dark` / `ui-light` / `ui-invert` classes force it
-  - per-component tokens (`--ui-button-padding`, …) defined on the component root from global tokens, one-to-one with the `.variables` files
+  - per-component tokens (`--ui-button-padding`, …) from global tokens, one-to-one with the `.variables` files;  public and settable from outside (page, ancestor, host, `::part`):  the component root declares only a private alias (`--_ui-button-padding: var(--ui-button-padding, <default>)`) and reads that (decided 2026-09-30, `docs/theming.md` "Component tokens")
 - Colour/size remap instead of loops:
   - `.ui.red.button { --ui-color: var(--ui-red); … }` once per hue, then one generic rule set consuming `--ui-color`; same for sizes via `--ui-scale`
 - Class grammar kept inside shadow roots on semantic elements:

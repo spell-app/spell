@@ -315,11 +315,12 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-items-*` tokens on the group's box, through `::part(items)` (the box declares its own
-  defaults, so a value set on the host tag doesn't reach it);  the items inside inherit them.
+  Theme with the public `--ui-items-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or on the
+  group's box through `::part(items)`.  The items inside read them from the group, so set them there or above, not on
+  one item.
 
 ```css
-ui-items::part(items) {
+ui-items {
   --ui-items-image-width: 8em;
   --ui-items-divided-border: 2px solid var(--ui-border-color);
 }

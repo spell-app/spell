@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import type {
@@ -203,6 +203,65 @@ describe("<ui-form> layout", () => {
     expect(getComputedStyle(success!).display).toBe("contents")
     expect(getComputedStyle(error!).display).toBe("none")
     expect(getComputedStyle(plain!).display).toBe("contents")
+  })
+})
+
+describe("<ui-form> tokens from outside", () => {
+  /** A row of two fields (in a form) whose row margin `--ui-form-gutter` drives. */
+  const ROW = `<ui-fields><ui-field>A</ui-field><ui-field>B</ui-field></ui-fields>`
+
+  /** The first row's start margin:  minus half the gutter. */
+  function rowMargin(host: Element): string {
+    return getComputedStyle(host.querySelector("ui-fields")!.shadowRoot!.querySelector("[part~=fields]")!).marginLeft
+  }
+
+  it("takes a token set on the HOST, and hands it to its rows (an owner token)", async () => {
+    const { host } = await form(`<ui-form style="--ui-form-gutter: 40px"><form>${ROW}</form></ui-form>`)
+    expect(rowMargin(host)).toBe("-20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const { host } = await form(
+      `<section style="--ui-form-gutter: 40px"><ui-form><form>${ROW}</form></ui-form></section>`
+    )
+    expect(rowMargin(host)).toBe("-20px")
+  })
+
+  it("takes a token set through `::part(form)`", async () => {
+    const { host } = await form(
+      `<div><style>.themed::part(form) { --ui-form-gutter: 40px }</style><ui-form class="themed"><form>${ROW}</form></ui-form></div>`
+    )
+    expect(rowMargin(host)).toBe("-20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-form-gutter", "40px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-form-gutter")
+    })
+    const { host } = await form(`<ui-form><form>${ROW}</form></ui-form>`)
+    expect(rowMargin(host)).toBe("-20px")
+  })
+
+  it("keeps its defaults when nothing is set;  a row outside a form reads the public token", async () => {
+    const { host } = await form(`<ui-form><form>${ROW}</form></ui-form>`)
+    expect(rowMargin(host)).toBe("-8px")
+    const alone = await ElementFixture.render(`<div style="--ui-form-gutter: 40px">${ROW}</div>`)
+    expect(rowMargin(alone)).toBe("-20px")
+  })
+
+  it("variations:  `inverted` swaps the label colour for its own token", async () => {
+    const red = "rgb(255, 0, 0)"
+    const label = (host: Element) => getComputedStyle(host.querySelector("label")!).color
+    const field = `<form><ui-field><label for="t-a">A</label><ui-input id="t-a"></ui-input></ui-field></form>`
+    const { host: plain } = await form(`<ui-form style="--ui-form-label-color: ${red}">${field}</ui-form>`)
+    expect(label(plain)).toBe(red)
+    const { host: inverted } = await form(`<ui-form inverted style="--ui-form-label-color: ${red}">${field}</ui-form>`)
+    expect(label(inverted)).not.toBe(red)
+    const { host: themed } = await form(
+      `<ui-form inverted style="--ui-form-inverted-label-color: ${red}">${field}</ui-form>`
+    )
+    expect(label(themed)).toBe(red)
   })
 })
 

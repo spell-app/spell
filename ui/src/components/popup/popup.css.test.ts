@@ -102,8 +102,10 @@ describe("popup.css source", () => {
   it("declares the owner tokens the header / content parts read, on every root", () => {
     expect(popupVocabulary.ownsParts).toEqual(["header", "content"])
     const text = Sheets.withoutComments(popupRaw)
-    expect(text).toMatch(/\.ui\.popup \{[^}]*--ui-popup-header-font-size: 1\.14285em;/)
-    expect(text).toMatch(/\.ui\.popup \{[^}]*--ui-popup-header-distance: 0\.5em;/)
+    expect(text).toMatch(
+      /\.ui\.popup \{[^}]*--_ui-popup-header-font-size: var\(--ui-popup-header-font-size, 1\.14285em\);/
+    )
+    expect(text).toMatch(/\.ui\.popup \{[^}]*--_ui-popup-header-distance: var\(--ui-popup-header-distance, 0\.5em\);/)
   })
 })
 
@@ -252,3 +254,11 @@ async function resize(width: number) {
   await page.viewport(width, 800)
   onTestFinished(() => page.viewport(previousWidth, previousHeight))
 }
+
+describe("popup.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, popupCSS])
+    const root = Fixture.render(`<div style="--ui-popup-radius: 20px"><div class="ui visible popup">x</div></div>`)
+    expect(getComputedStyle(root.querySelector(".ui.popup")!).borderTopLeftRadius).toBe("20px")
+  })
+})

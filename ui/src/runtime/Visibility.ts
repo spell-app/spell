@@ -15,6 +15,9 @@ import type { Transitions } from "./Transitions"
  * - Checks happen when something CROSSES:  the element entering / leaving the screen, and its top or bottom edge
  *   crossing the screen top or bottom (two 1px "line" observers).  So `continuous` fires at each crossing, not on
  *   every scrolled pixel, and `onUpdate` likewise.
+ * - Measures the element's first BOX:  a `display: contents` element (`<ui-segment>`, `<ui-sticky>` ... hosts) has
+ *   none, so it measures the first rendered descendant with one -- its shadow root's root element, else its first
+ *   boxed child.  NOTE:  only that one box, not the union of every child's.  Nothing to measure warns once in dev.
  * - `once` (default, as Fomantic's):  each callback fires at most once;  `once: false`:  again each time its condition
  *   turns true.  `...Reverse` callbacks fire when their condition turns false after being true.
  * - `lazyImage(img)`:  Fomantic's `type: 'image'` -- an `<img data-src>` (and `data-srcset`) gets its source once on
@@ -89,10 +92,17 @@ export type VisibilityProps = {
  * - Checks are coalesced to one per task:  the three observers report the same crossing together.
  * - The line observers' margins are px (a root margin can't say "all but 1px"), so they're rebuilt when the
  *   screen resizes.
+ * - Observes `target`, the element's first box (see `Visibility`), re-found when it's gone or boxless at a check:
+ *   a host observed before it renders gets its box after its `ready` promise.
  ****************/
 class VisibilityWatch {
   /** watched element */
   private readonly element: Element
+  /** what's measured:  `element`, or its first boxed descendant when it has no box */
+  private target: Element
+  /** already waited for `element`'s `ready`, or warned there's nothing to measure */
+  private waited = false
+  private warned = false
   /** callbacks and options */
   private readonly options: VisibilityOptions
   /** live observers */
@@ -111,6 +121,7 @@ class VisibilityWatch {
   constructor(element: Element, options: VisibilityOptions) {
     this.element = element
     this.options = options
+    this.target = VisibilityWatch.boxOf(element) ?? element
     this.build()
     const context = options.context
     if (context) {
@@ -135,10 +146,10 @@ class VisibilityWatch {
   // ## Observers
   ////////////////
 
-  /** (Re)create the three observers for the current screen height. */
+  /** (Re)create the three observers on `target` for the current screen height. */
   private build() {
     for (const observer of this.observers.splice(0)) observer.disconnect()
-    const { element } = this
+    const { element, target } = this
     const context = this.options.context ?? null
     const offset = this.options.offset ?? 0
     const height = context ? context.clientHeight : element.ownerDocument.documentElement.clientHeight
@@ -151,7 +162,7 @@ class VisibilityWatch {
       [`${-lineAboveBottom}px 0px 0px 0px`, [0]]
     ] as const) {
       const observer = new IntersectionObserver(() => this.schedule(), { root, rootMargin, threshold: [...threshold] })
-      observer.observe(element)
+      observer.observe(target)
       this.observers.push(observer)
     }
   }
@@ -172,7 +183,8 @@ class VisibilityWatch {
 
   /** Measure, then call what the calculations call for (reverse callbacks first, as Fomantic). */
   private check() {
-    const rect = this.element.getBoundingClientRect()
+    if (!this.retarget()) return
+    const rect = this.target.getBoundingClientRect()
     if (!rect.width && !rect.height) return
     const calculations = this.calculate(rect)
     const previous = this.previous
@@ -182,6 +194,55 @@ class VisibilityWatch {
     }
     for (const name of CONDITIONS) this.forward(FORWARD_KEYS[name], calculations[name], calculations)
     this.options.onUpdate?.(calculations)
+  }
+
+  /**
+   * Make sure `target` is still the box to measure;  true to measure it now.
+   * - A new box:  observe it instead (its observers queue the next check).
+   * - No box yet:  wait once for the element's `ready` (a `UIHost` that hasn't rendered), else warn once in dev.
+   */
+  private retarget(): boolean {
+    const target = this.target
+    if (target.isConnected && target !== this.element) return true
+    const box = VisibilityWatch.boxOf(this.element)
+    if (box && box !== target) {
+      this.target = box
+      this.build()
+      return false
+    }
+    if (box || !this.element.isConnected || getComputedStyle(this.element).display !== CONTENTS) return true
+    const ready = (this.element as { ready?: unknown }).ready
+    if (!this.waited && ready instanceof Promise) {
+      this.waited = true
+      void ready.then(() => this.observers.length && this.schedule())
+    } else if (import.meta.env.DEV && !this.warned) {
+      this.warned = true
+      console.warn(
+        `UI.observeVisibility():  <${this.element.localName}> is \`display: contents\` with no rendered box inside;` +
+          `  nothing will fire.  Observe an element with a box.`
+      )
+    }
+    return false
+  }
+
+  /**
+   * First element with a box at or inside `element`, in rendered order;  `undefined` for none.
+   * - `display: contents`:  a shadow host's shadow root children, a `<slot>`'s assigned (else fallback) elements,
+   *   else its children.  `display: none` has no box and none inside.
+   */
+  private static boxOf(element: Element): Element | undefined {
+    const display = getComputedStyle(element).display
+    if (display === NONE) return undefined
+    if (display !== CONTENTS) return element
+    const children =
+      element instanceof HTMLSlotElement
+        ? element.assignedElements({ flatten: true })
+        : [...(element.shadowRoot ?? element).children]
+    for (const child of children) {
+      const box = VisibilityWatch.boxOf(child)
+      if (box) return box
+    }
+    return undefined
   }
 
   /** Fomantic's calculations for `rect`. */
@@ -272,6 +333,10 @@ const REVERSE_KEYS: Record<(typeof EDGES)[number], keyof VisibilityCallbacks> = 
 const UP = "up"
 const DOWN = "down"
 const STATIC = "static"
+
+/** `display` values without a box of their own. */
+const CONTENTS = "contents"
+const NONE = "none"
 
 /** Screen resize event. */
 const RESIZE = "resize"

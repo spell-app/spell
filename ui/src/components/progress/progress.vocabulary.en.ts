@@ -4,7 +4,7 @@
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-progress size="small" color="teal" active indicating attached="top">` =>
  *   `ui small teal active indicating top attached progress`.
- * - `state` and `speed` are `kind: "color"`:  each emits its value alone, as Fomantic writes `success` / `slow`.
+ * - `state` and `speed` are `kind: "valueOnly"`:  each emits its value alone, as Fomantic writes `success` / `slow`.
  * - `value` / `percent` are STRINGS:  one number, or a comma list for several bars (`value="10,20,30"`).
  */
 
@@ -24,14 +24,14 @@ export const progressVocabulary = {
     { name: "color", kind: "color", description: "Hue of the bar." },
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: ["success", "warning", "error"],
       description:
         "Outcome, tinting bar and label;  stops the animations.  Without it a single bar turns `success` at 100%."
     },
     {
       name: "speed",
-      kind: "color",
+      kind: "valueOnly",
       values: ["slow", "fast"],
       description: "With `indeterminate`:  a `slow` or `fast` animation;  absent is normal."
     },

@@ -4,9 +4,9 @@
  * - Shadow markup contracts:
  *   - `<ui-pushable>`:  `<div class="pushable" part="pushable"><slot>` -- positioned, clipping;  carries the
  *     pusher tokens (`PUSHER_TOKENS`) INLINE, set by the element from its visible sidebar
- *   - `<ui-pusher>`:  `<div class="pusher" part="pusher"><slot>` -- moved by `--ui-pusher-transform` /
- *     `--ui-pusher-origin`;  its `::after` is the dimmer, shown by `--ui-pusher-dimmed: 1` (a style query) and
- *     blurred by `--ui-pusher-blurring: 1`
+ *   - `<ui-pusher>`:  `<div class="pusher" part="pusher"><slot>` -- moved by `--_ui-pusher-transform` /
+ *     `--_ui-pusher-origin`;  its `::after` is the dimmer, shown by `--_ui-pusher-dimmed: 1` (a style query) and
+ *     blurred by `--_ui-pusher-blurring: 1` (the private `PUSHER_TOKENS` the pushable sets)
  *   - `<ui-sidebar>`:  `<dialog class="ui [position] [width] [transition] [keyOnly ...] sidebar" part="sidebar">`
  *     (modal, opened with `show()` so it stays IN the pushable) or `<aside ...>` (`persistent`), around the slot
  * - Hidden sidebars are laid out but `visibility: hidden` (out of the tab order and the accessibility tree) and
@@ -19,6 +19,10 @@
  * - Tokens:  `--ui-sidebar-duration`, `--ui-sidebar-width`, `--ui-sidebar-background`,
  *   `--ui-sidebar-dimmer-background` (Fomantic's lighter 0.4 dimmer), `--ui-pusher-background`;  `blurring` uses the
  *   shared `--ui-dimmer-blurred-background` / `--ui-dimmer-blur` (`dimmer.css`).
+ * - Public tokens are NEVER declared here:  the ones a variation swaps (the width words, `inverted`) are read
+ *   through a private alias on the sidebar box (`--_ui-sidebar-width: var(--ui-sidebar-width, 260px)`), the rest
+ *   where they paint (read on several boxes, varied by nothing).  So a value set on `:root`, an ancestor, the host
+ *   or `::part(sidebar)` reaches the box (`docs/theming.md` "Component tokens").
  * - NOTE: left out, on purpose:  `body.pushable` (a whole-page pushable is a `<ui-pushable>` of viewport height),
  *   `.fixed` children moving with the pusher, iOS scrolling fixes, `.ui.sidebar.menu .item` corners (the menu is its
  *   own element inside the sidebar).
@@ -41,10 +45,14 @@
 
   /* ## Pushable:  positioned and clipping, so sidebars slide inside it. */
   .pushable {
-    --ui-pusher-transform: none;
-    --ui-pusher-origin: 50% 50%;
-    --ui-pusher-dimmed: 0;
-    --ui-pusher-blurring: 0;
+    /*
+     * The pusher switches' defaults (`PUSHER_TOKENS`):  the element's inline values beat them, and they reset a
+     * nested pushable.  Private:  switches, not theming.
+     */
+    --_ui-pusher-transform: none;
+    --_ui-pusher-origin: 50% 50%;
+    --_ui-pusher-dimmed: 0;
+    --_ui-pusher-blurring: 0;
     position: relative;
     box-sizing: border-box;
     height: 100%;
@@ -68,10 +76,12 @@
     box-sizing: border-box;
     min-height: 100%;
     overflow: hidden;
+    /* The pusher's own background. */
     background: var(--ui-pusher-background, var(--ui-surface));
-    transform: var(--ui-pusher-transform, none);
-    transform-origin: var(--ui-pusher-origin, 50% 50%);
+    transform: var(--_ui-pusher-transform, none);
+    transform-origin: var(--_ui-pusher-origin, 50% 50%);
     backface-visibility: hidden;
+    /* The slide, and the pusher moving with it. */
     transition: transform var(--ui-sidebar-duration, var(--ui-duration-slower)) var(--ui-ease);
   }
   .pushable > .pusher.overflowing {
@@ -88,6 +98,7 @@
     width: 0;
     height: 0;
     overflow: hidden;
+    /* The dimmer over the pusher while a modal sidebar is open. */
     background: var(--ui-sidebar-dimmer-background, oklch(0 0 0 / 0.4));
     opacity: 0;
     will-change: opacity;
@@ -99,6 +110,11 @@
 
   /* ## Sidebar:  the panel, off its edge until visible. */
   .ui.sidebar {
+    /* ## Tokens:  private aliases;  the width words and `inverted` swap them. */
+    /* Width of a left or right sidebar;  the width words set it. */
+    --_ui-sidebar-width: var(--ui-sidebar-width, 260px);
+    /* The panel;  `inverted` sets a dark one. */
+    --_ui-sidebar-background: var(--ui-sidebar-background, transparent);
     --_sidebar-hidden: translate3d(-100%, 0, 0);
     --ui-inverted: 0;
     position: fixed;
@@ -107,7 +123,7 @@
     z-index: 102;
     box-sizing: border-box;
     display: block;
-    width: var(--ui-sidebar-width, 260px);
+    width: var(--_ui-sidebar-width);
     height: 100%;
     max-width: none;
     max-height: 100%;
@@ -118,7 +134,7 @@
     border: none;
     border-radius: 0;
     outline: none;
-    background: var(--ui-sidebar-background, transparent);
+    background: var(--_ui-sidebar-background);
     color: inherit;
     visibility: hidden;
     transform: var(--_sidebar-hidden);
@@ -186,23 +202,23 @@
 
   /* ## Width (left / right) */
   .ui[class*="very thin"]:is(.left, .right).sidebar {
-    --ui-sidebar-width: 60px;
+    --_ui-sidebar-width: 60px;
   }
   .ui.thin:is(.left, .right).sidebar:not([class*="very thin"]) {
-    --ui-sidebar-width: 150px;
+    --_ui-sidebar-width: 150px;
   }
   .ui.wide:is(.left, .right).sidebar:not([class*="very wide"]) {
-    --ui-sidebar-width: 350px;
+    --_ui-sidebar-width: 350px;
   }
   .ui[class*="very wide"]:is(.left, .right).sidebar {
-    --ui-sidebar-width: 475px;
+    --_ui-sidebar-width: 475px;
   }
 
   /* ## Inverted:  a dark panel. */
   .ui.inverted.sidebar {
     --ui-inverted: 1;
     --ui-scheme: dark;
-    --ui-sidebar-background: oklch(0.22 0.005 260);
+    --_ui-sidebar-background: oklch(0.22 0.005 260);
     color-scheme: dark;
   }
 
@@ -246,7 +262,7 @@
   }
 
   /* ## Dimmed pusher (the element's tokens);  blurring on top. */
-  @container style(--ui-pusher-dimmed: 1) {
+  @container style(--_ui-pusher-dimmed: 1) {
     .pusher::after {
       width: 100%;
       height: 100%;
@@ -254,7 +270,7 @@
       transition: opacity var(--ui-sidebar-duration, var(--ui-duration-slower));
     }
   }
-  @container style(--ui-pusher-dimmed: 1) and style(--ui-pusher-blurring: 1) {
+  @container style(--_ui-pusher-dimmed: 1) and style(--_ui-pusher-blurring: 1) {
     .pusher::after {
       background: var(--ui-dimmer-blurred-background, oklch(0 0 0 / 0.6));
       backdrop-filter: var(--ui-dimmer-blur, blur(5px) grayscale(0.7));

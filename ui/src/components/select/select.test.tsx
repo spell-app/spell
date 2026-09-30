@@ -293,6 +293,52 @@ describe("<ui-select> forms", () => {
   })
 })
 
+describe("<ui-select> tokens from outside", () => {
+  /** The native select's top-left radius, which `--ui-select-radius` drives. */
+  function radius(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("select")!).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await select(`<ui-select style="--ui-select-radius: 12px" placeholder="A"></ui-select>`)
+    expect(radius(host)).toBe("12px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-select-radius: 12px"><div><ui-select placeholder="A"></ui-select></div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-select")!)).toBe("12px")
+  })
+
+  it("takes a token set through `::part(select)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(select) { --ui-select-radius: 12px }</style><ui-select class="themed" placeholder="A"></ui-select></div>`
+    )
+    expect(radius(wrapper.querySelector("ui-select")!)).toBe("12px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-select-radius", "12px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-select-radius")
+    })
+    const { host } = await select(`<ui-select placeholder="A"></ui-select>`)
+    expect(radius(host)).toBe("12px")
+  })
+
+  it("variations:  a form state swaps the border colour", async () => {
+    const red = "rgb(255, 0, 0)"
+    const border = (host: Element) => getComputedStyle(host.shadowRoot!.querySelector("select")!).borderTopColor
+    const { host: plain } = await select(`<ui-select style="--ui-select-border-color: ${red}"></ui-select>`)
+    expect(border(plain)).toBe(red)
+    const { host: error } = await select(
+      `<ui-select state="error" style="--ui-select-border-color: ${red}"></ui-select>`
+    )
+    expect(border(error)).not.toBe(red)
+  })
+})
+
 describe("<ui-select> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)

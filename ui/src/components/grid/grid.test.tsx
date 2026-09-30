@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { GRID_CONTAINER_NAME } from "$/components/components.types"
 import { expectAccessible } from "$test/a11y"
@@ -223,6 +223,64 @@ describe("<ui-grid> layout across shadow roots", () => {
     const [red, plain] = [...box.querySelectorAll("ui-column")].map((column) => getComputedStyle(rootOf(column)))
     expect(red!.backgroundColor).not.toBe(plain!.backgroundColor)
     expect(plain!.backgroundColor).toBe("rgba(0, 0, 0, 0)")
+  })
+})
+
+describe("<ui-grid> tokens from outside", () => {
+  /** The inner box's margin left. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=grid]")!).marginLeft
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-grid><ui-column>A</ui-column></ui-grid>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(MARKUP.replace("<ui-grid", `<ui-grid style="--ui-grid-gutter: 40px"`))
+    expect(measure(host)).toBe("-20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-grid-gutter: 40px"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-grid")!)).toBe("-20px")
+  })
+
+  it("takes a token set through `::part(grid)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(grid) { --ui-grid-gutter: 40px }</style>${MARKUP.replace("<ui-grid", '<ui-grid class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-grid")!)).toBe("-20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-grid-gutter", "40px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-grid-gutter")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("-20px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("-16px")
+  })
+
+  it("reaches the columns, set on the grid", async () => {
+    const host = await ElementFixture.render(MARKUP.replace("<ui-grid", `<ui-grid style="--ui-grid-gutter: 40px"`))
+    const column = host.querySelector("ui-column")!.shadowRoot!.querySelector("[part~=column]")!
+    expect(getComputedStyle(column).paddingLeft).toBe("20px")
+  })
+
+  it("variations:  `relaxed` swaps in its own token, whatever the base", async () => {
+    const host = await ElementFixture.render(
+      `<ui-grid relaxed style="--ui-grid-gutter: 40px"><ui-column>A</ui-column></ui-grid>`
+    )
+    expect(measure(host)).toBe("-24px")
+    host.style.setProperty("--ui-grid-relaxed-gutter", "60px")
+    expect(measure(host)).toBe("-30px")
   })
 })
 

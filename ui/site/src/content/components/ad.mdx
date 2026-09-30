@@ -61,11 +61,12 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-ad-*` tokens on the ad's box, through `::part(ad)` (the box declares its own defaults,
-  so a value set on the host tag doesn't reach it).  The unit sizes are fixed by the IAB, so they aren't tokens.
+  Theme with the public `--ui-ad-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or on the
+  ad's box through `::part(ad)`.  They inherit into the shadow root, where the sheet reads each through a private
+  alias, so nothing inside blocks them.  The unit sizes are fixed by the IAB, so they aren't tokens.
 
 ```css
-ui-ad::part(ad) {
+:root {
   --ui-ad-margin: 2em 0;
   --ui-ad-test-background: var(--ui-surface-muted);
   --ui-ad-test-color: var(--ui-text-muted);

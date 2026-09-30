@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, onTestFinished } from "vitest"
 
 import { UI } from "$/runtime"
 import type { StickyDetail } from "$/components/components.types"
@@ -143,6 +143,55 @@ describe("<ui-sticky> stuck state", () => {
     await ElementFixture.settle(host)
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(host.matches(":state(stuck)")).toBe(false)
+  })
+})
+
+describe("<ui-sticky> tokens from outside", () => {
+  /** The inner box's z index. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=sticky]")!).zIndex
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-sticky>S</ui-sticky>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(MARKUP.replace("<ui-sticky", `<ui-sticky style="--ui-sticky-z-index: 7"`))
+    expect(measure(host)).toBe("7")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-sticky-z-index: 7"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-sticky")!)).toBe("7")
+  })
+
+  it("takes a token set through `::part(sticky)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(sticky) { --ui-sticky-z-index: 7 }</style>${MARKUP.replace("<ui-sticky", '<ui-sticky class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-sticky")!)).toBe("7")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-sticky-z-index", "7")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-sticky-z-index")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("7")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    const probe = await ElementFixture.render(`<div style="position: relative; z-index: var(--ui-z-sticky)"></div>`)
+    expect(measure(host)).toBe(getComputedStyle(probe).zIndex)
+  })
+
+  it("takes its offset from the attribute, whatever the page sets", async () => {
+    const host = await ElementFixture.render(`<ui-sticky offset="12" style="--ui-sticky-offset: 40px">S</ui-sticky>`)
+    expect(getComputedStyle(host.shadowRoot!.querySelector("[part~=sticky]")!).top).toBe("12px")
   })
 })
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -125,6 +125,57 @@ describe("<ui-emoji>", () => {
     )
     const root = holder.querySelector<UIHost>("ui-emoji")!.shadowRoot!.firstElementChild!
     expect(parseFloat(getComputedStyle(root).fontSize)).toBe(16)
+  })
+})
+
+describe("<ui-emoji> tokens from outside", () => {
+  /** The inner box's opacity. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=emoji]")!).opacity
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-emoji name="smile"></ui-emoji>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(MARKUP.replace("<ui-emoji", `<ui-emoji style="--ui-emoji-opacity: 0.5"`))
+    expect(measure(host)).toBe("0.5")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-emoji-opacity: 0.5"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-emoji")!)).toBe("0.5")
+  })
+
+  it("takes a token set through `::part(emoji)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(emoji) { --ui-emoji-opacity: 0.5 }</style>${MARKUP.replace("<ui-emoji", '<ui-emoji class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-emoji")!)).toBe("0.5")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-emoji-opacity", "0.5")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-emoji-opacity")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("0.5")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("1")
+  })
+
+  it("variations:  a size reads its ratio token", async () => {
+    const host = await ElementFixture.render(
+      `<div style="font-size: 16px"><ui-emoji name="smile" size="large" style="--ui-emoji-size-large: 4"></ui-emoji></div>`
+    )
+    const root = host.querySelector("ui-emoji")!.shadowRoot!.querySelector("[part~=emoji]")!
+    expect(getComputedStyle(root).fontSize).toBe("64px")
   })
 })
 

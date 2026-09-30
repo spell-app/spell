@@ -9,6 +9,14 @@
  *   - the fixed widths are Fomantic's (breakpoint minus gutters and a scrollbar), as `--ui-container-width-*`
  *   - `wide` multiplies them by `--ui-container-wide-ratio`;  a `grid` container adds the grid's negative
  *     gutters back (`relaxed` / `very relaxed` wider ones)
+ *   - `--_ui-container-width` is the private switch holding the current breakpoint's width;  theme the widths
+ *     with `--ui-container-width-tablet` / `-computer` / `-large-monitor`
+ *   - `scrolling` heights step up per breakpoint:  `--ui-container-scrolling-height` is the MOBILE height, the
+ *     wider breakpoints swap in their own (18em / 24em / 30em), whatever the page sets
+ * - Public tokens (`--ui-container-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-container-text-width: var(--ui-container-text-width, 700px)`, and every rule
+ *   reads the alias.  So a value set on `:root`, an ancestor, the host, `::part(container)` or in the app
+ *   stylesheet reaches the box (`docs/theming.md` "Component tokens").
  * - Host states:  none;  this sheet keys on the root's classes.
  * - NOTE: left out, on purpose:
  *   - nothing structural;  Fomantic's widths assume a 14px root, these keep its px values at the 16px default
@@ -32,20 +40,20 @@
     display: none;
   }
 
-  /* Tokens:  one per `container.variables` entry that still matters. */
+  /* Tokens:  one per `container.variables` entry that still matters, each the private alias of its public token. */
   .ui.container {
-    --ui-container-mobile-gutter: 1em;
-    --ui-container-width-tablet: 723px;
-    --ui-container-width-computer: 933px;
-    --ui-container-width-large-monitor: 1127px;
-    --ui-container-wide-ratio: 1.2;
-    --ui-container-grid-gutter: 2em;
-    --ui-container-relaxed-grid-gutter: 3em;
-    --ui-container-very-relaxed-grid-gutter: 5em;
-    --ui-container-text-width: 700px;
-    --ui-container-text-font-ratio: var(--ui-size-large);
-    --ui-container-text-line-height: 1.5;
-    --ui-container-scrolling-height: 15em;
+    --_ui-container-mobile-gutter: var(--ui-container-mobile-gutter, 1em);
+    --_ui-container-width-tablet: var(--ui-container-width-tablet, 723px);
+    --_ui-container-width-computer: var(--ui-container-width-computer, 933px);
+    --_ui-container-width-large-monitor: var(--ui-container-width-large-monitor, 1127px);
+    --_ui-container-wide-ratio: var(--ui-container-wide-ratio, 1.2);
+    --_ui-container-grid-gutter: var(--ui-container-grid-gutter, 2em);
+    --_ui-container-relaxed-grid-gutter: var(--ui-container-relaxed-grid-gutter, 3em);
+    --_ui-container-very-relaxed-grid-gutter: var(--ui-container-very-relaxed-grid-gutter, 5em);
+    --_ui-container-text-width: var(--ui-container-text-width, 700px);
+    --_ui-container-text-font-ratio: var(--ui-container-text-font-ratio, var(--ui-size-large));
+    --_ui-container-text-line-height: var(--ui-container-text-line-height, 1.5);
+    --_ui-container-scrolling-height: var(--ui-container-scrolling-height, 15em);
   }
 
   /* Container:  mobile first -- the page width, less a gutter. */
@@ -56,41 +64,41 @@
   }
   .ui.container:not(.fluid) {
     width: auto;
-    margin-inline: var(--ui-container-mobile-gutter);
+    margin-inline: var(--_ui-container-mobile-gutter);
   }
 
   /* Tablet and up:  a fixed width, centred. */
   @media (--ui-tablet), (--ui-computer) {
     .ui.container {
-      --ui-container-width: var(--ui-container-width-tablet);
+      --_ui-container-width: var(--_ui-container-width-tablet);
     }
     .ui.container:not(.fluid) {
-      width: calc(var(--ui-container-width) * var(--_container-wide, 1) + var(--_container-grid-gutter, 0px));
+      width: calc(var(--_ui-container-width) * var(--_container-wide, 1) + var(--_container-grid-gutter, 0px));
       margin-inline: auto;
     }
   }
   @media (--ui-computer) {
     .ui.container {
-      --ui-container-width: var(--ui-container-width-computer);
+      --_ui-container-width: var(--_ui-container-width-computer);
     }
   }
   @media (--ui-large-monitor) {
     .ui.container {
-      --ui-container-width: var(--ui-container-width-large-monitor);
+      --_ui-container-width: var(--_ui-container-width-large-monitor);
     }
   }
 
   /* Text:  a narrower reading column with larger type. */
   .ui.text.container {
-    max-width: var(--ui-container-text-width);
+    max-width: var(--_ui-container-text-width);
     font-family: var(--ui-font-family);
-    font-size: calc(var(--ui-font-size) * var(--ui-container-text-font-ratio));
-    line-height: var(--ui-container-text-line-height);
+    font-size: calc(var(--ui-font-size) * var(--_ui-container-text-font-ratio));
+    line-height: var(--_ui-container-text-line-height);
   }
 
   /* Wide:  a fifth wider than the default. */
   .ui.wide.container {
-    --_container-wide: var(--ui-container-wide-ratio);
+    --_container-wide: var(--_ui-container-wide-ratio);
   }
 
   /* Fluid:  always the full width. */
@@ -100,13 +108,13 @@
 
   /* Grid:  make room for a grid's negative gutters. */
   .ui.grid.container {
-    --_container-grid-gutter: var(--ui-container-grid-gutter);
+    --_container-grid-gutter: var(--_ui-container-grid-gutter);
   }
   .ui.relaxed.grid.container {
-    --_container-grid-gutter: var(--ui-container-relaxed-grid-gutter);
+    --_container-grid-gutter: var(--_ui-container-relaxed-grid-gutter);
   }
   .ui.very.relaxed.grid.container {
-    --_container-grid-gutter: var(--ui-container-very-relaxed-grid-gutter);
+    --_container-grid-gutter: var(--_ui-container-very-relaxed-grid-gutter);
   }
 }
 
@@ -132,7 +140,7 @@
 
   /* Scrolling:  a capped height (per breakpoint, `short` ... `very long`) that scrolls. */
   .ui.scrolling.container {
-    --_container-scroll: calc(var(--ui-container-scrolling-height) * var(--_container-scroll-ratio, 1));
+    --_container-scroll: calc(var(--_ui-container-scrolling-height) * var(--_container-scroll-ratio, 1));
     max-height: var(--_container-scroll);
     overflow: auto;
     overscroll-behavior: none;
@@ -151,17 +159,17 @@
   }
   @media (--ui-tablet), (--ui-computer) {
     .ui.scrolling.container {
-      --ui-container-scrolling-height: 18em;
+      --_ui-container-scrolling-height: 18em;
     }
   }
   @media (--ui-computer) {
     .ui.scrolling.container {
-      --ui-container-scrolling-height: 24em;
+      --_ui-container-scrolling-height: 24em;
     }
   }
   @media (--ui-widescreen) {
     .ui.scrolling.container {
-      --ui-container-scrolling-height: 30em;
+      --_ui-container-scrolling-height: 30em;
     }
   }
   /* Resizable:  starts at the capped height, the user drags it taller or shorter. */

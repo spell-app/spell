@@ -81,3 +81,15 @@ describe("rail.css examples", () => {
     expect(parseFloat(measure(root, ".ui.large.rail").style.fontSize)).toBeCloseTo(18, 0)
   })
 })
+
+describe("rail.css tokens", () => {
+  it("takes a public token from a wrapper or the rail itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, railCSS])
+    const root = Fixture.render(
+      `<div style="--ui-rail-width: 200px"><div class="ui left rail">A</div></div>` +
+        `<div class="ui left close rail" style="--ui-rail-close-distance: 40px">B</div>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).width).toBe("200px")
+    expect(getComputedStyle(root.nextElementSibling!).width).toBe("320px")
+  })
+})

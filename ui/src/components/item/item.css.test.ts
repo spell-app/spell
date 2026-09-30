@@ -46,6 +46,6 @@ describe("item.css in a shadow root", () => {
     expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)")
     expect(style.borderTopWidth).toBe("0px")
     expect(style.cursor).toBe("pointer")
-    expect(style.getPropertyValue("--ui-item-media").trim()).toBe("1")
+    expect(style.getPropertyValue("--_ui-item-media").trim()).toBe("1")
   })
 })

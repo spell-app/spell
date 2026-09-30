@@ -61,3 +61,15 @@ describe("emoji.css examples", () => {
     expect(parseFloat(getComputedStyle(medium.querySelector(".ui.emoji")!).fontSize)).toBe(48)
   })
 })
+
+describe("emoji.css tokens", () => {
+  it("takes a public token from a wrapper or the emoji itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, emojiCSS])
+    const root = Fixture.render(
+      `<div style="--ui-emoji-opacity: 0.5"><span class="ui emoji">😄</span></div>` +
+        `<span style="--ui-emoji-line-height: 3px" class="ui emoji">😄</span>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).opacity).toBe("0.5")
+    expect(getComputedStyle(root.nextElementSibling!).lineHeight).toBe("3px")
+  })
+})

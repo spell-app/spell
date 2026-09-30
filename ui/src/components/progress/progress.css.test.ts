@@ -98,7 +98,7 @@ describe("progress.css examples", () => {
     expect(bar(hue)).toBe(probe("--ui-teal"))
     const low = render(`<div class="ui indicating progress" data-percent="15"><div class="bar"></div></div>`)
     const high = render(`<div class="ui indicating progress" data-percent="95"><div class="bar"></div></div>`)
-    expect(bar(low)).toBe(probe("--ui-progress-indicating-1", low))
+    expect(bar(low)).toBe(probe("--_ui-progress-indicating-1", low))
     expect(bar(high)).not.toBe(bar(low))
     const success = render(`<div class="ui red indicating success progress" data-percent="100">
       <div class="bar"></div></div>`)
@@ -127,5 +127,15 @@ describe("progress.css examples", () => {
     const piece = getComputedStyle(bar, "::before")
     expect(piece.content).toBe('""')
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) expect(piece.animationName).toBe("progress-sliding")
+  })
+})
+
+describe("progress.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, progressCSS])
+    const root = Fixture.render(
+      `<div style="--ui-progress-bar-height: 20px"><div class="ui progress" data-percent="40"><div class="bar" style="width: 40%"></div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.progress .bar")!).height).toBe("20px")
   })
 })

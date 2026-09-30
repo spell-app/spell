@@ -50,7 +50,7 @@ describe("flag.css source", () => {
     for (const phrase of Sheets.classPhrases(flagVocabulary))
       expect(Sheets.covers(css, phrase), `${flagVocabulary.tag}: ${phrase}`).toBe(true)
     const [size] = flagVocabulary.attributes
-    for (const value of size.values) expect(flagRaw).toContain(`--ui-flag-size-${value}:`)
+    for (const value of size.values) expect(flagRaw).toContain(`--_ui-flag-size-${value}:`)
   })
 })
 
@@ -145,5 +145,17 @@ describe("flag vocabulary data", () => {
       expect(keys.has(code.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase())), code).toBe(true)
       expect(types, code).toContain(emoji)
     }
+  })
+})
+
+describe("flag.css tokens", () => {
+  it("takes a public token from a wrapper or the flag itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, flagCSS])
+    const root = Fixture.render(
+      `<div style="--ui-flag-distance: 10px"><span class="ui flag">🇫🇷</span></div>` +
+        `<span style="--ui-flag-line-height: 3px" class="ui flag">🇫🇷</span>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).marginRight).toBe("10px")
+    expect(getComputedStyle(root.nextElementSibling!).lineHeight).toBe("3px")
   })
 })

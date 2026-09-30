@@ -250,9 +250,23 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-segment-*` tokens.  `--ui-segments-*` tokens are set by the group.
+  Theme with the public `--ui-segment-*` tokens:  set one on the element, on any ancestor (a `<ui-segments>` group,
+  `:root`), or on the box through `::part(segment)`.  They inherit into the shadow root, where the sheet reads each
+  through a private alias, so nothing inside blocks them.  Variations build on them:  `padded` swaps in
+  `--ui-segment-padded`, and `--ui-segment-scrolling-height` replaces the viewport-based height of `scrolling`
+  segments at every width.  The group's own `--_ui-segments-*` tokens are private.
 
-  <CssTokens family="segment" prefixes={["--ui-segment-"]} />
+```css
+ui-segments.cards {
+  --ui-segment-radius: 0;
+}
+```
+
+  <CssTokens
+    family="segment"
+    prefixes={["--ui-segment-"]}
+    defaults={{ "--ui-segment-scrolling-height": "15em;  18em / 24em / 30em on tablet / computer / widescreen" }}
+  />
 </Section>
 
 <Section title="Accessibility">

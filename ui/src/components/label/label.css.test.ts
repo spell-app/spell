@@ -132,6 +132,12 @@ describe("label.css examples", () => {
     expect(Math.abs(attached.getBoundingClientRect().top - edge.top)).toBeLessThan(1)
   })
 
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt([...foundationCSS, labelCSS])
+    const root = Fixture.render(`<div style="--ui-label-radius: 12px"><div class="ui label">A</div></div>`)
+    expect(getComputedStyle(root.querySelector(".ui.label")!).borderTopLeftRadius).toBe("12px")
+  })
+
   it("hands a group's look to its labels", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
     const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)

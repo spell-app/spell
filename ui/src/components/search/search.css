@@ -5,7 +5,7 @@
  * - Shadow markup contract (class grammar on semantic elements), in this order inside the root:
  *
  *     <div class="ui [size] [category horizontal fluid scrolling resizable short ...] [left|right aligned]
- *                 [loading disabled] search" style="--ui-search-anchor: --ui-search-4">
+ *                 [loading disabled] search" style="--_ui-search-anchor: --ui-search-4">
  *       <div class="ui icon [loading fluid disabled] input" part="input">
  *         <input class="prompt" part="prompt" role="combobox">
  *         <span class="search icon" part="icon"><slot name="icon"><svg></slot></span>
@@ -25,16 +25,23 @@
  *
  * - `active` on a result === the keyboard-HIGHLIGHTED one (Fomantic's meaning), also `[aria-selected="true"]`.
  * - Positioning:  POPOVER + ANCHOR, no JS (as the dropdown's menu).
- *   - root:  `anchor-name: var(--ui-search-anchor, --ui-search)`, `anchor-scope: all`
+ *   - root:  `anchor-name: var(--_ui-search-anchor, --ui-search)`, `anchor-scope: all`
  *   - `.results[popover]`:  below, flipping (`flip-block, flip-inline`);  `right aligned` extends to the start
  *   - a `.results` WITHOUT `popover` is Fomantic's `top: 100%` box, shown with `visible` (static examples)
  * - Host states the ELEMENT sets:  `:state(fluid)` (block-level host), plus `open` / `disabled` / `loading` /
  *   `invalid` for PAGE styling only -- this sheet keys on the root's classes.
+ * - Public tokens (`--ui-search-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-search-results-radius: var(--ui-search-results-radius, var(--ui-radius))`, and
+ *   every rule reads the alias.  So a value set on `:root`, an ancestor, the host, `::part(input)` /
+ *   `::part(results)` or in the app stylesheet reaches the box (`docs/theming.md` "Component
+ *   tokens").  Cross-family, on purpose:  the prompt sets the nested input's PUBLIC `--ui-input-radius` (from
+ *   `--ui-search-prompt-radius`), as a page would.
  * - NOTE: left out, on purpose:
  *   - the "view all results" `.action` link of a remote answer:  a link inside a listbox;  put one near the search
  *   - the `clearable` variation (`.remove.icon`, the webkit cancel button):  Escape clears
- * - Scrolling heights stay Fomantic's per-breakpoint result counts (4 / 6 / 8 / 12), by viewport `@media`, as one
- *   token `--ui-search-results-max-height`.
+ * - Scrolling heights stay Fomantic's per-breakpoint result counts (4 / 6 / 8 / 12), by viewport `@media`
+ *   (`--_search-results-rows`), as the DEFAULT of one token `--ui-search-results-max-height`:  a value set from
+ *   outside wins at every width.
  */
 
 @layer ui.components.search.types, ui.components.search.content, ui.components.search.variations, ui.components.search.states;
@@ -67,46 +74,66 @@
     outline: none;
   }
 
-  /* Tokens:  one per `search.variables` entry that still matters, from the global tokens. */
-  .ui.search {
-    --ui-search-prompt-radius: var(--ui-radius-pill);
-    --ui-search-duration: var(--ui-duration-fast);
-    --ui-search-results-width: 18em;
-    --ui-search-results-background: var(--ui-surface);
-    --ui-search-results-color: var(--ui-text-color);
-    --ui-search-results-border-color: var(--ui-border-color);
-    --ui-search-results-radius: var(--ui-radius);
-    --ui-search-results-shadow: var(--ui-shadow-floating);
-    --ui-search-results-offset: 0.5em;
-    --ui-search-result-padding: 0.85714em 1.14285em;
-    --ui-search-result-line-height: 1.33;
-    --ui-search-result-divider-color: var(--ui-border-color-internal);
-    --ui-search-result-background-hover: var(--ui-surface-muted);
-    --ui-search-result-background-active: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-search-result-image-width: 5em;
-    --ui-search-result-image-height: 3em;
-    --ui-search-result-image-radius: 0.25em;
-    --ui-search-result-image-margin: 6em;
-    --ui-search-title-color: var(--ui-text-dark);
-    --ui-search-description-color: var(--ui-text-light);
-    --ui-search-description-font-size: 0.92857em;
-    --ui-search-price-color: var(--ui-green-text, var(--ui-green));
-    --ui-search-message-padding: 1em;
-    --ui-search-category-background: var(--ui-surface-muted);
-    --ui-search-category-results-width: 28em;
-    --ui-search-category-name-width: 100px;
-    --ui-search-category-name-color: var(--ui-text-light);
-    --ui-search-category-name-padding: 0.4em 1em;
-    --ui-search-category-divider-color: var(--ui-border-color-internal);
-    --ui-search-category-result-border-color: var(--ui-border-color);
-    --ui-search-results-max-height: calc(4 * (2 * 0.85714em + 1.33em));
-    --ui-search-disabled-opacity: var(--ui-disabled-opacity);
+  /*
+   * Tokens:  one per `search.variables` entry that still matters, from the global tokens -- each the private alias
+   * of its public token (never declare the public one:  it would block inherited values).
+   * - Declared on the root AND on its two parts (the root has no part name), so a value set through
+   *   `::part(input)` / `::part(results)` reaches the part's own rules.
+   */
+  .ui.search,
+  .ui.search > .ui.input,
+  .ui.search > .results {
+    --_ui-search-prompt-radius: var(--ui-search-prompt-radius, var(--ui-radius-pill));
+    --_ui-search-duration: var(--ui-search-duration, var(--ui-duration-fast));
+    --_ui-search-results-width: var(--ui-search-results-width, 18em);
+    --_ui-search-results-background: var(--ui-search-results-background, var(--ui-surface));
+    --_ui-search-results-color: var(--ui-search-results-color, var(--ui-text-color));
+    --_ui-search-results-border-color: var(--ui-search-results-border-color, var(--ui-border-color));
+    --_ui-search-results-radius: var(--ui-search-results-radius, var(--ui-radius));
+    --_ui-search-results-shadow: var(--ui-search-results-shadow, var(--ui-shadow-floating));
+    --_ui-search-results-offset: var(--ui-search-results-offset, 0.5em);
+    --_ui-search-result-padding: var(--ui-search-result-padding, 0.85714em 1.14285em);
+    --_ui-search-result-line-height: var(--ui-search-result-line-height, 1.33);
+    --_ui-search-result-divider-color: var(--ui-search-result-divider-color, var(--ui-border-color-internal));
+    --_ui-search-result-background-hover: var(--ui-search-result-background-hover, var(--ui-surface-muted));
+    --_ui-search-result-background-active: var(
+      --ui-search-result-background-active,
+      oklch(from var(--ui-ink) l c h / 0.05)
+    );
+    --_ui-search-result-image-width: var(--ui-search-result-image-width, 5em);
+    --_ui-search-result-image-height: var(--ui-search-result-image-height, 3em);
+    --_ui-search-result-image-radius: var(--ui-search-result-image-radius, 0.25em);
+    --_ui-search-result-image-margin: var(--ui-search-result-image-margin, 6em);
+    --_ui-search-title-color: var(--ui-search-title-color, var(--ui-text-dark));
+    --_ui-search-description-color: var(--ui-search-description-color, var(--ui-text-light));
+    --_ui-search-description-font-size: var(--ui-search-description-font-size, 0.92857em);
+    --_ui-search-price-color: var(--ui-search-price-color, var(--ui-green-text, var(--ui-green)));
+    --_ui-search-message-padding: var(--ui-search-message-padding, 1em);
+    --_ui-search-category-background: var(--ui-search-category-background, var(--ui-surface-muted));
+    --_ui-search-category-results-width: var(--ui-search-category-results-width, 28em);
+    --_ui-search-category-name-width: var(--ui-search-category-name-width, 100px);
+    --_ui-search-category-name-color: var(--ui-search-category-name-color, var(--ui-text-light));
+    --_ui-search-category-name-padding: var(--ui-search-category-name-padding, 0.4em 1em);
+    --_ui-search-category-divider-color: var(--ui-search-category-divider-color, var(--ui-border-color-internal));
+    --_ui-search-category-result-border-color: var(--ui-search-category-result-border-color, var(--ui-border-color));
+    /* Height of the results list;  its default grows with the viewport (the result rows below), a value set from
+       outside wins at every width. */
+    --_ui-search-results-max-height: var(
+      --ui-search-results-max-height,
+      calc(var(--_search-results-rows) * (2 * 0.85714em + 1.33em))
+    );
+    --_ui-search-disabled-opacity: var(--ui-search-disabled-opacity, var(--ui-disabled-opacity));
+  }
 
+  /* Root */
+  .ui.search {
+    /* Fomantic's scrolling result count, 4 / 6 / 8 / 12 by viewport (`@media` below);  the root only, so it inherits */
+    --_search-results-rows: 4;
     position: relative;
     box-sizing: border-box;
     display: inline-block;
     max-width: 100%;
-    anchor-name: var(--ui-search-anchor, --ui-search);
+    anchor-name: var(--_ui-search-anchor, --ui-search);
     anchor-scope: all;
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
@@ -115,7 +142,7 @@
 
   /* Prompt:  Fomantic's round input. */
   .ui.search > .ui.input {
-    --ui-input-radius: var(--ui-search-prompt-radius);
+    --ui-input-radius: var(--_ui-search-prompt-radius);
     display: flex;
   }
   .ui.search > .ui.input > .prompt {
@@ -136,16 +163,16 @@
     z-index: var(--ui-z-dropdown);
     box-sizing: border-box;
     display: none;
-    width: var(--ui-search-results-width);
-    margin: var(--ui-search-results-offset) 0 0;
+    width: var(--_ui-search-results-width);
+    margin: var(--_ui-search-results-offset) 0 0;
     padding: 0;
     overflow: visible;
-    border: var(--ui-border-width) solid var(--ui-search-results-border-color);
-    border-radius: var(--ui-search-results-radius);
+    border: var(--ui-border-width) solid var(--_ui-search-results-border-color);
+    border-radius: var(--_ui-search-results-radius);
     outline: none;
-    background: var(--ui-search-results-background);
-    box-shadow: var(--ui-search-results-shadow);
-    color: var(--ui-search-results-color);
+    background: var(--_ui-search-results-background);
+    box-shadow: var(--_ui-search-results-shadow);
+    color: var(--_ui-search-results-color);
     font-size: 1em;
     line-height: normal;
     text-align: start;
@@ -153,24 +180,24 @@
     white-space: normal;
   }
   .ui.search > .results[popover] {
-    position-anchor: var(--ui-search-anchor, --ui-search);
+    position-anchor: var(--_ui-search-anchor, --ui-search);
     position-area: block-end span-inline-end;
     position-try-fallbacks: flip-block, flip-inline;
     inset: auto;
-    margin: var(--ui-search-results-offset) 0;
+    margin: var(--_ui-search-results-offset) 0;
     opacity: 0;
     transition-property: opacity, display, overlay;
-    transition-duration: var(--ui-search-duration);
+    transition-duration: var(--_ui-search-duration);
     transition-timing-function: var(--ui-ease);
     transition-behavior: allow-discrete;
   }
   .ui.search > .results > :first-child {
-    border-start-start-radius: var(--ui-search-results-radius);
-    border-start-end-radius: var(--ui-search-results-radius);
+    border-start-start-radius: var(--_ui-search-results-radius);
+    border-start-end-radius: var(--_ui-search-results-radius);
   }
   .ui.search > .results > :last-child {
-    border-end-start-radius: var(--ui-search-results-radius);
-    border-end-end-radius: var(--ui-search-results-radius);
+    border-end-start-radius: var(--_ui-search-results-radius);
+    border-end-end-radius: var(--_ui-search-results-radius);
   }
 
   /* The live region:  heard, not seen. */
@@ -194,11 +221,11 @@
     box-sizing: border-box;
     display: block;
     overflow: hidden;
-    padding: var(--ui-search-result-padding);
-    border-bottom: var(--ui-border-width) solid var(--ui-search-result-divider-color);
-    color: var(--ui-search-results-color);
+    padding: var(--_ui-search-result-padding);
+    border-bottom: var(--ui-border-width) solid var(--_ui-search-result-divider-color);
+    color: var(--_ui-search-results-color);
     font-size: 1em;
-    line-height: var(--ui-search-result-line-height);
+    line-height: var(--_ui-search-result-line-height);
     text-decoration: none;
     cursor: pointer;
   }
@@ -209,10 +236,10 @@
   /* Image:  at the result's end. */
   .ui.search > .results .result .image {
     float: inline-end;
-    width: var(--ui-search-result-image-width);
-    height: var(--ui-search-result-image-height);
+    width: var(--_ui-search-result-image-width);
+    height: var(--_ui-search-result-image-height);
     overflow: hidden;
-    border-radius: var(--ui-search-result-image-radius);
+    border-radius: var(--_ui-search-result-image-radius);
     background: none;
   }
   .ui.search > .results .result .image img {
@@ -221,25 +248,25 @@
     height: 100%;
   }
   .ui.search > .results .result .image + .content {
-    margin-inline-end: var(--ui-search-result-image-margin);
+    margin-inline-end: var(--_ui-search-result-image-margin);
   }
 
   /* Title, description, price */
   .ui.search > .results .result .title {
     margin: 0;
-    color: var(--ui-search-title-color);
+    color: var(--_ui-search-title-color);
     font-family: var(--ui-font-family-heading, var(--ui-font-family));
     font-size: 1em;
     font-weight: var(--ui-font-weight-bold);
   }
   .ui.search > .results .result .description {
     margin-top: 0;
-    color: var(--ui-search-description-color);
-    font-size: var(--ui-search-description-font-size);
+    color: var(--_ui-search-description-color);
+    font-size: var(--_ui-search-description-font-size);
   }
   .ui.search > .results .result .price {
     float: inline-end;
-    color: var(--ui-search-price-color);
+    color: var(--_ui-search-price-color);
   }
   .ui.search > .results mark {
     background: var(--ui-highlight);
@@ -248,17 +275,17 @@
 
   /* Message:  no results, or an error. */
   .ui.search > .results > .message {
-    padding: var(--ui-search-message-padding);
+    padding: var(--_ui-search-message-padding);
   }
   .ui.search > .results > .message .header {
-    color: var(--ui-search-results-color);
+    color: var(--_ui-search-results-color);
     font-family: var(--ui-font-family-heading, var(--ui-font-family));
     font-size: 1em;
     font-weight: var(--ui-font-weight-bold);
   }
   .ui.search > .results > .message .description {
     margin-top: 0.25em;
-    color: var(--ui-search-results-color);
+    color: var(--_ui-search-results-color);
     font-size: 1em;
   }
   .ui.search > .results > .error.message .description {
@@ -273,27 +300,27 @@
 @layer ui.components.search.variations {
   /* Category:  a table of groups, the name in a cell beside its results. */
   .ui.category.search > .results {
-    width: var(--ui-search-category-results-width);
+    width: var(--_ui-search-category-results-width);
   }
   .ui.category.search > .results .category {
     display: table-row;
-    background: var(--ui-search-category-background);
+    background: var(--_ui-search-category-background);
     box-shadow: none;
     transition:
-      background var(--ui-search-duration) var(--ui-ease),
-      border-color var(--ui-search-duration) var(--ui-ease);
+      background var(--_ui-search-duration) var(--ui-ease),
+      border-color var(--_ui-search-duration) var(--ui-ease);
   }
   .ui.category.search > .results .category:last-child {
     border-bottom: none;
   }
   .ui.category.search > .results .category > .name {
     display: table-cell;
-    width: var(--ui-search-category-name-width);
-    padding: var(--ui-search-category-name-padding);
+    width: var(--_ui-search-category-name-width);
+    padding: var(--_ui-search-category-name-padding);
     overflow: hidden;
-    border-bottom: var(--ui-border-width) solid var(--ui-search-category-divider-color);
+    border-bottom: var(--ui-border-width) solid var(--_ui-search-category-divider-color);
     background: transparent;
-    color: var(--ui-search-category-name-color);
+    color: var(--_ui-search-category-name-color);
     font-family: var(--ui-font-family);
     font-size: 1em;
     font-weight: var(--ui-font-weight-bold);
@@ -302,28 +329,28 @@
   }
   .ui.category.search > .results .category > .results {
     display: table-cell;
-    border-bottom: var(--ui-border-width) solid var(--ui-search-category-divider-color);
-    border-inline-start: var(--ui-border-width) solid var(--ui-search-category-result-border-color);
-    background: var(--ui-search-results-background);
+    border-bottom: var(--ui-border-width) solid var(--_ui-search-category-divider-color);
+    border-inline-start: var(--ui-border-width) solid var(--_ui-search-category-result-border-color);
+    background: var(--_ui-search-results-background);
   }
   .ui.category.search > .results .category:last-child > :is(.name, .results) {
     border-bottom: none;
   }
   .ui.category.search > .results .category .result {
-    padding: var(--ui-search-result-padding);
-    border-bottom: var(--ui-border-width) solid var(--ui-search-result-divider-color);
+    padding: var(--_ui-search-result-padding);
+    border-bottom: var(--ui-border-width) solid var(--_ui-search-result-divider-color);
     transition:
-      background var(--ui-search-duration) var(--ui-ease),
-      border-color var(--ui-search-duration) var(--ui-ease);
+      background var(--_ui-search-duration) var(--ui-ease),
+      border-color var(--_ui-search-duration) var(--ui-ease);
   }
   .ui.category.search > .results .category .result:last-child {
     border-bottom: none;
   }
   .ui.category.search > .results .category:first-child .name + .results > .result:first-child {
-    border-start-end-radius: var(--ui-search-results-radius);
+    border-start-end-radius: var(--_ui-search-results-radius);
   }
   .ui.category.search > .results .category:last-child .result:last-child {
-    border-end-end-radius: var(--ui-search-results-radius);
+    border-end-end-radius: var(--_ui-search-results-radius);
   }
 
   /* Horizontal category:  each name above its results. */
@@ -344,35 +371,35 @@
   }
   .ui.scrolling.search > .results,
   .ui.short.search > .results {
-    max-height: var(--ui-search-results-max-height);
+    max-height: var(--_ui-search-results-max-height);
   }
   .ui[class*="very short"].search > .results {
-    max-height: calc(var(--ui-search-results-max-height) * 0.75);
+    max-height: calc(var(--_ui-search-results-max-height) * 0.75);
   }
   .ui.long.search > .results {
-    max-height: calc(var(--ui-search-results-max-height) * 2);
+    max-height: calc(var(--_ui-search-results-max-height) * 2);
   }
   .ui[class*="very long"].search > .results {
-    max-height: calc(var(--ui-search-results-max-height) * 3);
+    max-height: calc(var(--_ui-search-results-max-height) * 3);
   }
   .ui.scrolling.resizable.search > .results {
-    height: var(--ui-search-results-max-height);
+    height: var(--_ui-search-results-max-height);
     max-height: none;
     resize: vertical;
   }
   @media (width >= 768px) {
     .ui.search {
-      --ui-search-results-max-height: calc(6 * (2 * 0.85714em + 1.33em));
+      --_search-results-rows: 6;
     }
   }
   @media (width >= 992px) {
     .ui.search {
-      --ui-search-results-max-height: calc(8 * (2 * 0.85714em + 1.33em));
+      --_search-results-rows: 8;
     }
   }
   @media (width >= 1920px) {
     .ui.search {
-      --ui-search-results-max-height: calc(12 * (2 * 0.85714em + 1.33em));
+      --_search-results-rows: 12;
     }
   }
 
@@ -434,22 +461,22 @@
   /* Hover and the keyboard highlight (`active`). */
   .ui.search > .results .result:hover,
   .ui.category.search > .results .category .result:hover {
-    background: var(--ui-search-result-background-hover);
+    background: var(--_ui-search-result-background-hover);
   }
   .ui.category.search > .results .category.active {
-    background: var(--ui-search-result-background-active);
+    background: var(--_ui-search-result-background-active);
   }
   .ui.category.search > .results .category.active > .name {
-    color: var(--ui-search-results-color);
+    color: var(--_ui-search-results-color);
   }
   .ui.search > .results .result.active,
   .ui.category.search > .results .category .result.active {
     position: relative;
-    background: var(--ui-search-result-background-active);
+    background: var(--_ui-search-result-background-active);
     box-shadow: none;
   }
   .ui.search > .results .result.active :is(.title, .description) {
-    color: var(--ui-search-title-color);
+    color: var(--_ui-search-title-color);
   }
 
   /* Loading:  the icon box becomes a spinner (the element also marks its input `loading`, `input.css`). */
@@ -480,7 +507,7 @@
   /* Disabled:  dimmed and inert. */
   .ui.disabled.search {
     cursor: default;
-    opacity: var(--ui-search-disabled-opacity);
+    opacity: var(--_ui-search-disabled-opacity);
     pointer-events: none;
   }
   .ui.disabled.search > .disabled.input {

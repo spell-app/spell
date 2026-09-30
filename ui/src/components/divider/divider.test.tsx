@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -62,6 +62,56 @@ describe("<ui-divider>", () => {
     expect(getComputedStyle(host).display).toBe("contents")
     expect(typeof host.hidden).toBe("boolean")
     expect((host as unknown as { dividerHidden: unknown }).dividerHidden).toBe(true)
+  })
+})
+
+describe("<ui-divider> tokens from outside", () => {
+  /** The inner box's margin top. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=divider]")!).marginTop
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-divider></ui-divider>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(
+      MARKUP.replace("<ui-divider", `<ui-divider style="--ui-divider-margin: 20px"`)
+    )
+    expect(measure(host)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-divider-margin: 20px"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-divider")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(divider)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(divider) { --ui-divider-margin: 20px }</style>${MARKUP.replace("<ui-divider", '<ui-divider class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-divider")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-divider-margin", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-divider-margin")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("20px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("16px")
+  })
+
+  it("variations:  `section` swaps in its own token, whatever the base", async () => {
+    const { root } = await divider(`<ui-divider section style="--ui-divider-margin: 20px"></ui-divider>`)
+    expect(getComputedStyle(root).marginTop).toBe("32px")
   })
 })
 

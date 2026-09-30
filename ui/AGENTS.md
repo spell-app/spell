@@ -124,6 +124,10 @@ when working with code in this repository.
     so states beat variations without `!important`
   - NEVER `!important` unless documented with a comment saying why
   - colours / sizes by token REMAP (`--ui-color`, `--ui-scale`) and one generic rule set, not per-hue rules
+  - NEVER declare a public component token (`--ui-<tag>-*`) in a component sheet:  declare its private alias
+    (`--_ui-button-radius: var(--ui-button-radius, var(--ui-radius))`) and read the alias, so values set on the
+    page, an ancestor, the host or `::part()` reach the box.  Owner switches are private (`--_ui-card-layout`).
+    See `docs/theming.md` "Component tokens";  `test/component-tokens.test.ts` enforces it
 - Libraries:  `lodash-es` only (tree-shakes).  Ask before adding any other runtime dependency.
 - Platform:  ASSUME anchor positioning (no JS fallback), style container queries, popover, `<dialog>`.
   Safari gaps (`closedby`, `popover=hint`, `CloseWatcher`, customizable `<select>`) are feature-flagged through

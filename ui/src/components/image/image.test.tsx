@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -131,6 +131,66 @@ describe("<ui-images>", () => {
   it("sizes a plain <img> slotted into it", async () => {
     const group = await ElementFixture.render<UIHost>(`<ui-images size="tiny"><img src="${SRC}" alt="a"></ui-images>`)
     expect(group.querySelector("img")!.getBoundingClientRect().width).toBeCloseTo(80, 0)
+  })
+})
+
+describe("<ui-image> tokens from outside", () => {
+  /** The inner image's top-left radius. */
+  function radius(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=image]")!).borderTopLeftRadius
+  }
+
+  /** A rounded image. */
+  const ROUNDED = `<ui-image rounded src="${SRC}" alt=""></ui-image>`
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await image(
+      `<ui-image rounded src="${SRC}" alt="" style="--ui-image-rounded-radius: 20px"></ui-image>`
+    )
+    expect(radius(host)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-image-rounded-radius: 20px"><div>${ROUNDED}</div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-image")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(image)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(image) { --ui-image-rounded-radius: 20px }</style>${ROUNDED.replace("<ui-image", '<ui-image class="themed"')}</div>`
+    )
+    expect(radius(wrapper.querySelector("ui-image")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-image-rounded-radius", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-image-rounded-radius")
+    })
+    const { host } = await image(ROUNDED)
+    expect(radius(host)).toBe("20px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const { host } = await image(ROUNDED)
+    const probe = await ElementFixture.render(`<span style="border-top-left-radius: var(--ui-radius)"></span>`)
+    expect(radius(host)).toBe(getComputedStyle(probe).borderTopLeftRadius)
+  })
+
+  it("variations:  a size reads its own width token", async () => {
+    const { root } = await image(
+      `<ui-image size="small" src="${SRC}" alt="" style="--ui-image-width-small: 100px"></ui-image>`
+    )
+    expect(root.getBoundingClientRect().width).toBe(100)
+  })
+
+  it("reaches the members of a group, set on the group", async () => {
+    const group = await ElementFixture.render<UIHost>(
+      `<ui-images rounded style="--ui-image-rounded-radius: 20px"><ui-image src="${SRC}" alt="a"></ui-image><ui-image src="${SRC}" alt="b"></ui-image></ui-images>`
+    )
+    for (const member of group.querySelectorAll("ui-image")) expect(radius(member)).toBe("20px")
   })
 })
 

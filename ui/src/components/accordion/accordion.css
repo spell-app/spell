@@ -24,9 +24,13 @@
  *   it turns down while its panel is open.
  *
  * ## Tokens
- * The ROOT resolves every variation into `--ui-accordion-*`;  the rules only read them.  A nested accordion's root
- * (`.accordion` without `ui`:  the element's, or Fomantic's static `.ui.accordion .accordion`) declares NONE, so
- * it inherits its parent's look through the flat tree -- Fomantic's `.ui.styled.accordion .accordion` rules.
+ * Public tokens (`--ui-accordion-*`, the theming surface) are NEVER declared here:  the ROOT reads each through a
+ * private alias (`--_ui-accordion-radius: var(--ui-accordion-radius, 0)`), its variations write the aliases, and
+ * the rules only read those.  So a value set on `:root`, an ancestor, the host, `::part(accordion)` or in the app
+ * stylesheet reaches the box (`docs/theming.md` "Component tokens");  a variation still wins over it.  A nested
+ * accordion's root (`.accordion` without `ui`:  the element's, or Fomantic's static `.ui.accordion .accordion`)
+ * declares NONE, so it inherits its parent's resolved look through the flat tree -- Fomantic's
+ * `.ui.styled.accordion .accordion` rules.  So theme a nested accordion through its outermost one.
  *
  * | Token                                          | What                                     | Changed by              |
  * | ---------------------------------------------- | ---------------------------------------- | ----------------------- |
@@ -63,26 +67,26 @@
     display: none;
   }
 
-  /* Tokens:  the root resolves every variation into these (see the header). */
+  /* Tokens:  private aliases;  the root resolves every variation into these (see the header). */
   .ui.accordion {
-    --ui-accordion-width: auto;
-    --ui-accordion-background: none;
-    --ui-accordion-shadow: none;
-    --ui-accordion-radius: 0;
-    --ui-accordion-nested-margin: 1em 0 0;
-    --ui-accordion-title-padding: 0.5em 0;
-    --ui-accordion-title-weight: inherit;
-    --ui-accordion-title-color: var(--ui-text-color);
-    --ui-accordion-title-border: none;
-    --ui-accordion-title-transition: none;
-    --ui-accordion-title-hover-color: var(--ui-accordion-title-color);
-    --ui-accordion-title-hover-background: transparent;
-    --ui-accordion-title-active-color: var(--ui-accordion-title-color);
-    --ui-accordion-title-active-background: transparent;
-    --ui-accordion-content-padding: 0.5em 0 1em;
-    --ui-accordion-content-last-padding: 0.5em 0 0;
-    --ui-accordion-content-indent: 0;
-    --ui-accordion-duration: var(--ui-duration-slow);
+    --_ui-accordion-width: var(--ui-accordion-width, auto);
+    --_ui-accordion-background: var(--ui-accordion-background, none);
+    --_ui-accordion-shadow: var(--ui-accordion-shadow, none);
+    --_ui-accordion-radius: var(--ui-accordion-radius, 0);
+    --_ui-accordion-nested-margin: var(--ui-accordion-nested-margin, 1em 0 0);
+    --_ui-accordion-title-padding: var(--ui-accordion-title-padding, 0.5em 0);
+    --_ui-accordion-title-weight: var(--ui-accordion-title-weight, inherit);
+    --_ui-accordion-title-color: var(--ui-accordion-title-color, var(--ui-text-color));
+    --_ui-accordion-title-border: var(--ui-accordion-title-border, none);
+    --_ui-accordion-title-transition: var(--ui-accordion-title-transition, none);
+    --_ui-accordion-title-hover-color: var(--ui-accordion-title-hover-color, var(--_ui-accordion-title-color));
+    --_ui-accordion-title-hover-background: var(--ui-accordion-title-hover-background, transparent);
+    --_ui-accordion-title-active-color: var(--ui-accordion-title-active-color, var(--_ui-accordion-title-color));
+    --_ui-accordion-title-active-background: var(--ui-accordion-title-active-background, transparent);
+    --_ui-accordion-content-padding: var(--ui-accordion-content-padding, 0.5em 0 1em);
+    --_ui-accordion-content-last-padding: var(--ui-accordion-content-last-padding, 0.5em 0 0);
+    --_ui-accordion-content-indent: var(--ui-accordion-content-indent, 0);
+    --_ui-accordion-duration: var(--ui-accordion-duration, var(--ui-duration-slow));
   }
 
   /* The box:  the root, and a nested accordion (which inherits its parent's box tokens). */
@@ -90,16 +94,16 @@
   .accordion {
     box-sizing: border-box;
     max-width: 100%;
-    background: var(--ui-accordion-background);
-    border-radius: var(--ui-accordion-radius);
-    box-shadow: var(--ui-accordion-shadow);
+    background: var(--_ui-accordion-background);
+    border-radius: var(--_ui-accordion-radius);
+    box-shadow: var(--_ui-accordion-shadow);
   }
   .ui.accordion {
-    width: var(--ui-accordion-width);
+    width: var(--_ui-accordion-width);
     color: var(--ui-text-color);
   }
   .accordion:not(.ui) {
-    margin: var(--ui-accordion-nested-margin);
+    margin: var(--_ui-accordion-nested-margin);
     padding: 0;
   }
 
@@ -116,16 +120,16 @@
     display: flex;
     align-items: center;
     margin: 0;
-    padding: var(--ui-accordion-title-padding);
-    border-top: var(--ui-accordion-title-border);
+    padding: var(--_ui-accordion-title-padding);
+    border-top: var(--_ui-accordion-title-border);
     font-family: var(--ui-font-family-heading);
     font-size: 1em;
-    font-weight: var(--ui-accordion-title-weight);
+    font-weight: var(--_ui-accordion-title-weight);
     line-height: 1;
-    color: var(--ui-accordion-title-color);
+    color: var(--_ui-accordion-title-color);
     list-style: none;
     cursor: pointer;
-    transition: var(--ui-accordion-title-transition);
+    transition: var(--_ui-accordion-title-transition);
     -webkit-tap-highlight-color: transparent;
   }
   /* Safari's own disclosure triangle:  the arrow is ours. */
@@ -156,8 +160,8 @@
     font-size: 1em;
     vertical-align: baseline;
     transition:
-      transform var(--ui-accordion-duration) var(--ui-ease),
-      opacity var(--ui-accordion-duration) var(--ui-ease);
+      transform var(--_ui-accordion-duration) var(--ui-ease),
+      opacity var(--_ui-accordion-duration) var(--ui-ease);
   }
   .accordion > .title > .dropdown.icon::before,
   .accordion > details > .title > .dropdown.icon::before {
@@ -178,13 +182,13 @@
   .accordion > .content,
   .accordion > details > .content {
     margin: 0;
-    margin-inline-start: var(--ui-accordion-content-indent);
-    padding: var(--ui-accordion-content-padding);
+    margin-inline-start: var(--_ui-accordion-content-indent);
+    padding: var(--_ui-accordion-content-padding);
   }
   /* The last panel's content has no gap below (unless styled). */
   .accordion > .content:last-child,
   .accordion > details:last-child > .content {
-    padding: var(--ui-accordion-content-last-padding);
+    padding: var(--_ui-accordion-content-last-padding);
   }
   /* Slotted content fills the box. */
   .content > ::slotted(*) {
@@ -199,47 +203,47 @@
 @layer ui.components.accordion.variations {
   /* ## Styled:  a box, rules between bold titles, padded content. */
   .ui.styled.accordion {
-    --ui-accordion-width: 37.5em;
-    --ui-accordion-background: var(--ui-surface);
-    --ui-accordion-shadow: var(--ui-shadow-subtle), 0 0 0 var(--ui-border-width) var(--ui-border-color);
-    --ui-accordion-radius: var(--ui-radius);
-    --ui-accordion-title-padding: 0.75em 1em;
-    --ui-accordion-title-weight: var(--ui-font-weight-bold);
-    --ui-accordion-title-color: var(--ui-text-unselected);
-    --ui-accordion-title-border: var(--ui-border-width) solid var(--ui-border-color);
-    --ui-accordion-title-transition:
+    --_ui-accordion-width: 37.5em;
+    --_ui-accordion-background: var(--ui-surface);
+    --_ui-accordion-shadow: var(--ui-shadow-subtle), 0 0 0 var(--ui-border-width) var(--ui-border-color);
+    --_ui-accordion-radius: var(--ui-radius);
+    --_ui-accordion-title-padding: 0.75em 1em;
+    --_ui-accordion-title-weight: var(--ui-font-weight-bold);
+    --_ui-accordion-title-color: var(--ui-text-unselected);
+    --_ui-accordion-title-border: var(--ui-border-width) solid var(--ui-border-color);
+    --_ui-accordion-title-transition:
       background var(--ui-duration-fast) var(--ui-ease), color var(--ui-duration-fast) var(--ui-ease);
-    --ui-accordion-title-hover-color: var(--ui-text-color);
-    --ui-accordion-title-active-color: var(--ui-text-selected);
-    --ui-accordion-content-padding: 0.5em 1em 1.5em;
-    --ui-accordion-content-last-padding: 0.5em 1em 1.5em;
+    --_ui-accordion-title-hover-color: var(--ui-text-color);
+    --_ui-accordion-title-active-color: var(--ui-text-selected);
+    --_ui-accordion-content-padding: 0.5em 1em 1.5em;
+    --_ui-accordion-content-last-padding: 0.5em 1em 1.5em;
   }
 
   /* ## Compact / very compact */
   .ui.compact.accordion:not(.styled) {
-    --ui-accordion-title-padding: 0.25em 0;
-    --ui-accordion-content-padding: 0.25em 0 0.5em;
-    --ui-accordion-content-last-padding: 0.25em 0 0;
+    --_ui-accordion-title-padding: 0.25em 0;
+    --_ui-accordion-content-padding: 0.25em 0 0.5em;
+    --_ui-accordion-content-last-padding: 0.25em 0 0;
   }
   .ui[class*="very compact"].accordion:not(.styled) {
-    --ui-accordion-title-padding: 0.125em 0;
-    --ui-accordion-content-padding: 0.125em 0 0.25em;
-    --ui-accordion-content-last-padding: 0.125em 0 0;
+    --_ui-accordion-title-padding: 0.125em 0;
+    --_ui-accordion-content-padding: 0.125em 0 0.25em;
+    --_ui-accordion-content-last-padding: 0.125em 0 0;
   }
   .ui.compact.styled.accordion {
-    --ui-accordion-title-padding: 0.375em 0.5em;
-    --ui-accordion-content-padding: 0.25em 0.5em 0.75em;
-    --ui-accordion-content-last-padding: 0.25em 0.5em 0.75em;
+    --_ui-accordion-title-padding: 0.375em 0.5em;
+    --_ui-accordion-content-padding: 0.25em 0.5em 0.75em;
+    --_ui-accordion-content-last-padding: 0.25em 0.5em 0.75em;
   }
   .ui[class*="very compact"].styled.accordion {
-    --ui-accordion-title-padding: 0.1875em 0.25em;
-    --ui-accordion-content-padding: 0.125em 0.25em 0.375em;
-    --ui-accordion-content-last-padding: 0.125em 0.25em 0.375em;
+    --_ui-accordion-title-padding: 0.1875em 0.25em;
+    --_ui-accordion-content-padding: 0.125em 0.25em 0.375em;
+    --_ui-accordion-content-last-padding: 0.125em 0.25em 0.375em;
   }
 
   /* ## Fluid */
   .ui.fluid.accordion {
-    --ui-accordion-width: 100%;
+    --_ui-accordion-width: 100%;
   }
 
   /* ## Inverted:  the dark scheme;  every `light-dark()` token (text, surface, border) follows. */
@@ -251,22 +255,22 @@
 
   /* ## Basic styled:  the styled spacing and colours, without the box or the rules. */
   .ui.basic.styled.accordion {
-    --ui-accordion-background: transparent;
-    --ui-accordion-shadow: none;
-    --ui-accordion-title-border: none;
-    --ui-accordion-title-color: var(--ui-text-muted);
-    --ui-accordion-title-hover-color: var(--ui-text-color);
-    --ui-accordion-title-active-color: var(--ui-text-selected);
+    --_ui-accordion-background: transparent;
+    --_ui-accordion-shadow: none;
+    --_ui-accordion-title-border: none;
+    --_ui-accordion-title-color: var(--ui-text-muted);
+    --_ui-accordion-title-hover-color: var(--ui-text-color);
+    --_ui-accordion-title-active-color: var(--ui-text-selected);
   }
 
   /* ## Tree:  content indented under its title, nested accordions flush. */
   .ui.tree.accordion {
-    --ui-accordion-content-indent: 1.7em;
-    --ui-accordion-nested-margin: 0;
+    --_ui-accordion-content-indent: 1.7em;
+    --_ui-accordion-nested-margin: 0;
   }
   .ui.tree.accordion:not(.styled) {
-    --ui-accordion-content-padding: 0;
-    --ui-accordion-content-last-padding: 0;
+    --_ui-accordion-content-padding: 0;
+    --_ui-accordion-content-last-padding: 0;
   }
 }
 
@@ -283,14 +287,14 @@
   /* Hovered and open titles. */
   .accordion > .title:hover,
   .accordion > details > .title:hover {
-    color: var(--ui-accordion-title-hover-color);
-    background: var(--ui-accordion-title-hover-background);
+    color: var(--_ui-accordion-title-hover-color);
+    background: var(--_ui-accordion-title-hover-background);
   }
   .accordion > .active.title,
   .accordion > details[open] > .title,
   details.accordion[open] > .title {
-    color: var(--ui-accordion-title-active-color);
-    background: var(--ui-accordion-title-active-background);
+    color: var(--_ui-accordion-title-active-color);
+    background: var(--_ui-accordion-title-active-background);
   }
   .accordion > .active.title > .dropdown.icon,
   .accordion > details[open] > .title > .dropdown.icon,
@@ -312,8 +316,8 @@
       block-size: 0;
       overflow-y: clip;
       transition:
-        block-size var(--ui-accordion-duration) var(--ui-ease-out),
-        content-visibility var(--ui-accordion-duration) allow-discrete;
+        block-size var(--_ui-accordion-duration) var(--ui-ease-out),
+        content-visibility var(--_ui-accordion-duration) allow-discrete;
     }
     :host(:state(animated)) .accordion > details[open]::details-content {
       block-size: auto;

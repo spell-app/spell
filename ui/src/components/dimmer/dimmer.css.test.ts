@@ -117,7 +117,7 @@ describe("dimmer tokens", () => {
         `<div class="ui active dimmer"></div></div><div class="ui modal"></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".dimmer")!).backgroundColor).toBe("rgba(10, 20, 30, 0.5)")
-    expect(getComputedStyle(root.querySelector(".modal")!).getPropertyValue("--ui-modal-dimmer-background")).toBe(
+    expect(getComputedStyle(root.querySelector(".modal")!).getPropertyValue("--_ui-modal-dimmer-background")).toBe(
       "rgb(10 20 30 / 0.5)"
     )
   })

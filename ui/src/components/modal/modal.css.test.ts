@@ -74,8 +74,12 @@ describe("modal.css source", () => {
   it("declares the owner tokens the parts read, on every root", () => {
     expect(modalVocabulary.ownsParts).toEqual(["header", "content", "description", "actions"])
     const text = Sheets.withoutComments(modalRaw)
-    for (const token of ["--ui-modal-basic: 0;", "--ui-modal-header-size: 1.42857em;", "--ui-inverted: 0;"]) {
-      expect(text).toMatch(new RegExp(`\\.ui\\.modal \\{[^}]*${token.replace(/\./g, "\\.")}`))
+    for (const token of [
+      "--_ui-modal-basic: 0;",
+      "--_ui-modal-header-size: var(--ui-modal-header-size, 1.42857em);",
+      "--ui-inverted: 0;"
+    ]) {
+      expect(text).toMatch(new RegExp(`\\.ui\\.modal \\{[^}]*${token.replace(/[.()]/g, "\\$&")}`))
     }
   })
 })
@@ -154,7 +158,7 @@ describe("modal.css examples", () => {
     const style = getComputedStyle(basic)
     expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)")
     expect(style.boxShadow).toBe("none")
-    expect(style.getPropertyValue("--ui-modal-basic").trim()).toBe("1")
+    expect(style.getPropertyValue("--_ui-modal-basic").trim()).toBe("1")
     expect(getComputedStyle(basic.querySelector(".header")!).borderBottomStyle).toBe("none")
     const inverted = modalNamed(await example("variations"), "Inverted")
     expect(getComputedStyle(inverted).colorScheme).toBe("dark")
@@ -239,3 +243,13 @@ async function resize(width: number) {
   await page.viewport(width, 800)
   onTestFinished(() => page.viewport(previousWidth, previousHeight))
 }
+
+describe("modal.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, modalCSS])
+    const root = Fixture.render(
+      `<div style="--ui-modal-radius: 20px"><div class="ui active modal"><div class="content">x</div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.modal")!).borderTopLeftRadius).toBe("20px")
+  })
+})

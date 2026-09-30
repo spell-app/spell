@@ -4,10 +4,10 @@
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-message state="negative" attached="bottom" size="small">` => `ui small negative bottom attached message`.
  *   The element adds `icon` (`extra`) when it shows an icon.
- * - `color` and `state` are both remaps (`colors.css`);  `state` is `kind: "color"` because it emits its value
+ * - `color` and `state` are both remaps (`colors.css`);  `state` is `kind: "valueOnly"` because it emits its value
  *   alone (`ui negative message`), as dropdown's `state` does.
  * - A message OWNS the `header` and `content` parts:  slotted `<ui-header>` / `<ui-content>` get
- *   `:state(in-message)` and style themselves from `parts.css`, reading `--ui-message-layout` (`message.css`).
+ *   `:state(in-message)` and style themselves from `parts.css`, reading `--_ui-message-layout` (`message.css`).
  */
 
 import type { ComponentVocabulary } from "$/vocabulary"
@@ -26,9 +26,9 @@ export const messageVocabulary = {
     { name: "color", kind: "color", description: "Hue:  a tinted surface, border and text." },
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: ["positive", "negative", "error", "info", "success", "warning"],
-      description: 'Consequence, tinting it like a colour.  NOTE: `kind: "color"` because it emits its value alone.'
+      description: "Consequence, tinting it like a colour."
     },
     { name: "floating", kind: "keyOnly", description: "Lifted off the page with a shadow." },
     { name: "compact", kind: "keyOnly", description: "Only as wide as its content." },
@@ -48,7 +48,7 @@ export const messageVocabulary = {
     },
     {
       name: "icon",
-      kind: "string",
+      kind: "icon",
       description: "Icon name, shown large beside the content;  the root gets the `icon` class."
     },
     {

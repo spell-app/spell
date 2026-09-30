@@ -130,12 +130,18 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-image-*` tokens on the `image` part (or the `group` part of `<ui-images>`).  The
-  group's own `--ui-images-*` tokens are private.
+  Theme with the public `--ui-image-*` tokens:  set one on the element, on any ancestor (a `<ui-images>` group, a
+  region, `:root`), or on the inner box through `::part(image)` (`::part(group)` for `<ui-images>`).  They inherit
+  into the shadow root, where the sheet reads each through a private alias, so nothing inside blocks them.  The
+  group's own `--_ui-images-*` tokens are private.
 
 ```css
-ui-image::part(image) {
+/* every image on the page */
+:root {
   --ui-image-rounded-radius: 1em;
+}
+/* one gallery */
+.gallery {
   --ui-image-border: 2px solid var(--ui-border-color-strong);
 }
 ```

@@ -126,6 +126,22 @@ describe("ClassBuilder.build() order", () => {
   it("sorts keyOnly by canonical name, not vocabulary order", () => {
     expect(widgets.build({ fluid: true, basic: true })).toBe("ui basic fluid widget")
   })
+
+  it("puts valueOnly with color, in vocabulary order:  each emits its value alone", () => {
+    const panel = new ClassBuilder({
+      ...widget,
+      attributes: [
+        { name: "basic", kind: "keyOnly", description: "" },
+        { name: "position", kind: "valueOnly", values: ["left", "right"], description: "" },
+        { name: "color", kind: "color", description: "" },
+        { name: "speed", kind: "valueOnly", values: ["slow", "fast"], description: "" },
+        { name: "size", kind: "size", description: "" }
+      ]
+    })
+    expect(panel.build({ basic: true, position: "left", color: "red", speed: "slow", size: "small" })).toBe(
+      "ui small left red slow basic widget"
+    )
+  })
 })
 
 describe("ClassBuilder width options", () => {

@@ -757,18 +757,18 @@ table.addEventListener("ui-sort", async (event) => {
 </Section>
 
 <Section title="Theming">
-  The table is in your page, so theme it like any page element:  the public `--ui-table-*` tokens are declared on
-  the table itself, so set them there, in the app layer.  The shadow root's only piece is the `scroller` part.
+  Theme with the public `--ui-table-*` tokens:  set one on the element, on any ancestor (`:root` included), on the
+  table itself (it's in your page) or through `::part(scroller)`.  The sheet reads each through a private alias, so
+  nothing blocks them.  `inverted` swaps in its own `--ui-table-inverted-*` colours.  The shadow root's only piece
+  is the `scroller` part.
 
 ```css
-@layer ui.app {
-  ui-table > table {
-    --ui-table-header-background: var(--ui-surface);
-    --ui-table-striped-background: oklch(from var(--ui-primary) l c h / 0.06);
-  }
-  ui-table::part(scroller) {
-    scrollbar-gutter: stable;
-  }
+ui-table {
+  --ui-table-header-background: var(--ui-surface);
+  --ui-table-striped-background: oklch(from var(--ui-primary) l c h / 0.06);
+}
+ui-table::part(scroller) {
+  scrollbar-gutter: stable;
 }
 ```
 
