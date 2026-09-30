@@ -14,11 +14,14 @@
     "@astrojs/markdown-remark": "^7.3.1",
     "@astrojs/markdown-satteri": "0.4.2",
     "@astrojs/mdx": "^8.0.2",
+    "@solidjs/vite-plugin": "3.0.0-next.46",
+    "@solidjs/web": "2.0.0-rc.11",
     "astro": "^7.3.5",
     "esbuild": "^0.28.2",
     "lightningcss": "^1.33.0",
     "lodash-es": "^4.18.1",
-    "satteri": "0.10.5"
+    "satteri": "0.10.5",
+    "solid-js": "2.0.0-rc.11"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

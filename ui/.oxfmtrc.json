@@ -16,11 +16,15 @@
     "coverage/**",
     "reference/**",
     "src/icons/data/**",
+    "src/icons/glyphs/**",
     "site/dist/**",
     "site/**/*.mdx",
     "site/.astro/**",
-    "spike/*/dist/**",
-    "spike/*/vendor/**",
-    "spike/*/*results.json"
+    "vendor/**",
+    "packages/*/dist/**",
+    "packages/*/.vitest/**",
+    "packages/*/*results.json",
+    "tools/frameworks/solid/dist/**",
+    "tools/results/**"
   ]
 }

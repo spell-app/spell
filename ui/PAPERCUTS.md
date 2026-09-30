@@ -296,3 +296,40 @@ Log of things that slowed down development. Date · symptom · fix · project.
   registered` -- it accepts the SAME vocabulary object twice ("HMR, double imports" in its docs) but a re-run
   module makes a NEW object. · `HotDefinitions` drops the old entry from `UI.vocabulary.vocabularies` before
   re-defining;  a `Vocabulary.replace()` in `src/` would be cleaner. · spike/solid
+- 2026-09-29 · Icons: a bundler-visible pattern (`import(`./data/${x}.json`)`, `new URL(`./glyphs/${x}.js`, import.meta.url)`)
+  globs and emits EVERY matching file (search.json, or all 2,163 glyphs) . · `Icons.#loadGlyph()` builds the URL from
+  `Icons.glyphBase || import.meta.url` in a getter plus `/* @vite-ignore */`, so no pattern is visible;  verified by a
+  scratch `vite build` of `src/icons/index.ts` (no per-icon output).  Supersedes the two earlier icon entries above
+  (oxfmt reformatting and `INEFFECTIVE_DYNAMIC_IMPORT`):  `data/` is oxfmt-ignored, glyph loading is not a glob. · spell/ui
+- 2026-09-29 · Promoting the Solid spike:  `import { defineConfig } from "vite"` in `vite.config.ts` failed under
+  `tsx` (`does not provide an export named 'defineConfig'`) after adding a `tsconfig` `paths` pin
+  `"vite": ["./node_modules/vite/dist/node/index.d.ts"]` -- `tsx` honours `paths` at RUNTIME, so `vite` resolved to
+  a `.d.ts`.  The pin was there because the fork's HMR plugin, imported from source, types against the fork's OWN
+  `vite` install, whose `Plugin` TypeScript won't unify with the root's. · No `paths` pin;  `hotElements()` casts
+  the fork's plugin through `unknown` (HACK comment in `vite.config.ts`). · spell/ui
+- 2026-09-29 · `src/index.ts` re-exporting `$/styles` (a pure re-export, no entry of its own) made Rolldown put the
+  foundation sheets INTO `index.js`, and the lazy `UIRuntime` chunk then imported `./index.js` -- i.e. loading the
+  runtime on a button-only page would load every family.  Only visible in the real `dist/` (the measured build has
+  no `index` entry). · `styles` is its own lib entry (`dist/styles.js`, `@spell/ui/styles`);  check
+  `grep '^import' dist/UIRuntime-*.js` after touching `index.ts`. · spell/ui
+- 2026-09-29 · `export * as E from "$/elements"` in `src/index.ts` moves Rolldown's runtime helpers (`__name`,
+  `__exportAll`) out of `core.js` into a shared `rolldown-runtime-<hash>.js` that EVERY chunk imports (0.29 kB, one
+  more request per page). · Tolerated (the task keeps the `E` / `V` namespaces);  `CODE-DEBT.md`. · spell/ui
+- 2026-09-29 · Import-map smoke pages failed with `The requested module 'solid-js' does not provide an export
+  named 'flush'` once `yarn vendor` tree-shook Solid:  page modules (`perf-adapter.js`, inline `<script>`s) import
+  bindings `dist/` never does. · `PeerVendor`'s `usedBy` reads `.html` pages and `.js` modules too;  `cli.ts` lists
+  `tools/frameworks`, `tools/smoke`, `tools/demo/fallback.html`. · spell/ui
+- 2026-09-29 · Axe `heading-order` exemptions silently stopped matching when the element examples moved from
+  `demo/examples/<name>/x.html` to `src/components/<name>/examples/elements/x.html` (`path.endsWith("parts/header.html")`).
+  · Match the full tail (`parts/examples/elements/header.html`). · spell/ui
+- 2026-09-29 · The docs site's production build drew no icons:  `Icons` fetches `glyphs/<style>/<name>.js` relative
+  to its own chunk (`import.meta.url`), and Astro's client chunks live in `_astro/`, where nothing copied the
+  glyphs. · `emitGlyphs("_astro/glyphs")` (exported from `vite.config.ts`) in `site/astro.config.mjs`;  client
+  builds only. · spell/ui
+- 2026-09-29 · Yarn 4 runs no `pre<script>` hooks, so "build the fork before dev / test" can't be a `predev`. ·
+  Nothing in dev / test / site / build needs the fork's `dist/` any more (source via the `development` condition,
+  an alias in the site, the HMR plugin imported relatively);  `yarn vendor` / `yarn measure` call
+  `ForkBuild.ensure()` (install + build when stale). · spell/ui
+- 2026-09-29 · A preview server from an earlier session held the Astro preview port:  `yarn site:preview --port
+  4399` printed `Preview server already running at http://localhost:4391` and exited. · `astro preview status` /
+  use the running one (it serves `site/dist/` from disk, so a rebuild is picked up). · spell/ui

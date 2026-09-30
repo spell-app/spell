@@ -8,8 +8,8 @@ summary: A button indicates a possible user action.
 import Example from "../../components/Example.astro"
 import Section from "../../components/Section.astro"
 import Variation from "../../components/Variation.astro"
-// PLACEHOLDER until `ui-button` lands in `src/components/button/`;  the component agent replaces this page
-// (recipe:  `site/README.md`).  Examples use the TARGET markup, so they render as plain text until then.
+// First pass:  a few live `ui-button` examples (loaded by `src/scripts/components.ts`);  the full page follows
+// the recipe in `site/README.md`.
 
 <Section title="Types">
   <Example title="Button" description="A standard button.">
@@ -20,8 +20,8 @@ import Variation from "../../components/Variation.astro"
     description="A button can be formatted to show different levels of emphasis."
     class="ui-cluster"
   >
-    <ui-button color="primary">Save</ui-button>
-    <ui-button color="secondary">Okay</ui-button>
+    <ui-button primary>Save</ui-button>
+    <ui-button secondary>Okay</ui-button>
     <ui-button>Cancel</ui-button>
   </Example>
 </Section>

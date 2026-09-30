@@ -7,40 +7,82 @@ when working with code in this repository.
 
 - `@spell/ui` is Fomantic UI reborn as `ui-*` custom elements on a modern CSS foundation:  Fomantic's
   vocabulary (`ui small primary basic icon button`), shadow DOM, `@layer`s, OKLCH tokens, accessibility built in.
-  Usable from any framework or plain HTML.
+  Usable from any framework or plain HTML.  Built on **Solid 2** (`solid-js` / `@solidjs/web` `2.0.0-rc.11`,
+  pinned exactly) through our fork of its custom-element layer, `@spell/solid-element`.
 - The approved design is `docs/plan.md`.  Read "Decisions" and "Architecture" there BEFORE adding a component
-  or runtime service.
+  or runtime service.  `docs/report.md` is the generated status report (bundle, perf, hosts, HMR, fallbacks).
 - Layout:
+  - `packages/solid-element/` -- `@spell/solid-element`, the fork of `@solidjs/element` + `component-register`
+    (upgrade, forms, lifecycle, error boundary, HMR fixes;  `UPSTREAM.md` maps each to a PR).  Its OWN yarn
+    project (own `yarn.lock`, `node_modules`, tests), linked into the root with `link:`;  run its scripts with
+    `yarn fork <script>`.  NEVER import its files from `src/`:  use the package name.
   - `src/util/` -- general utilities with no dependency on the rest of the package:  `@proto` (`decorators.ts`),
     `class.ts`, `string.ts` (case, `numberToWord`, `suggest`), `dom.ts` (`closestAcrossShadow` ...), `util.types.ts`
+  - `src/vocabulary/` (`V`) -- the naming layer:  vocabulary schema, value sets, `Vocabulary` (registry, translated
+    names, `replace()` for hot reload), `Converters`
   - `src/runtime/` (`UI`) -- the shared `UI` runtime, ONE instance per page (`globalThis.UI ??= new UIRuntime()`).
     Components call `UI.load()` on connect, which dynamic-imports this chunk once.  Services are classes:
     `Browser` (sniffing + `UI.browser.supports` flags), `Keyboard`, `Overlays`, `Focus`, `Styles`, `Vocabulary`,
     `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`, `Api`
-  - `src/elements/` (`E`) -- base classes:  `UIElement`, `ClassBuilder`, `ContentPart`, `FormControl`,
-    `OverlayElement`
-  - `src/components/<name>/` -- one folder per component:
-    - `<name>.ts` -- element class(es)
+  - `src/icons/` -- `Icons` (`get`, `peek`, `svg`, `resolve`, `preload`, `names` ...), one ES module per glyph
+    (`glyphs/<style>/<name>.js`), lazy name / alias maps;  see `docs/icons.md`
+  - `src/elements/` (`E`) -- the element core:
+    - library-neutral:  `ClassBuilder`, `Validator`, `MenuOptions`, `OwnerContext`, `Shorthand`, `NativeFallback`
+    - the Solid layer:  `UIHost` / `FormHost` (host base classes), `UIElement` (the CONTROLLER base:  one instance
+      per element, `render()` returns JSX), `ElementDefinition` (vocabulary => the fork's props), `FormElement`,
+      `Controlled`, `Cell`, `SlotContent`, `HostAttribute`, `PartContext` + `ContentPart` (owner context),
+      `IconGlyph`, and the dev-only `HotDefinitions` (NOT in the barrel)
+  - `src/components/<name>/` -- one folder per component FAMILY:
+    - `UI<Name>.tsx` (or `.ts` without JSX) -- one element class per file:  `UIButton.tsx`, `UIButtons.tsx`,
+      `UIOr.tsx`;  family helpers beside them (`SlottedItems.ts`, `PartElement.ts`)
+    - `index.ts` -- the family barrel:  calls `define()` for every tag (SIDE EFFECT), re-exports the classes.
+      Also the family's lib entry (`@spell/ui/button`) and its hot-reload boundary
     - `<name>.css` -- port of Fomantic's `.less` + `.variables`
     - `<name>.vocabulary.en.ts` -- EVERY name the component uses:  tag, attributes (kind + allowed values),
       values, events, slots, parts, states, text strings.  Translations become `<name>.vocabulary.<lang>.ts`
-    - `<name>.test.ts`, `<name>.a11y.test.ts`, `<name>.visual.test.ts`, `examples/*.html`
+    - `<name>.fallback.ts` -- the native fallback (plain DOM, no Solid) shown when the element's render throws
+    - `<name>.test.tsx` (elements), `<name>.css.test.ts` (the sheet on class-grammar markup),
+      `<name>.fallback.test.ts`, `<name>.a11y.test.ts`, `<name>.visual.test.ts`, `<name>.perf.test.tsx`
+    - `examples/*.html` -- Fomantic's examples in CLASS GRAMMAR (static markup, the CSS tests and the site);
+      `examples/elements/*.html` -- the same examples as `ui-*` ELEMENT markup (axe in `<name>.test.tsx`,
+      `yarn dev`)
+  - `src/core.ts`, `src/forms.ts` -- the two SHARED lib entries (`@spell/ui/core`, `@spell/ui/forms`):  `core` is
+    the element core + the foundation JS every family needs;  `forms` what only form controls with a VALUE need
+    (`FormElement`, `FormHost`, `Validator`, `MenuOptions`).  Component files import shared code ONLY through
+    these (see "Solid authoring")
   - `src/styles/` -- `layers.css`, tokens, colours, sizes, reset, typography, animations, utilities, `native.css`,
-    `themes/`
-  - `src/index.ts` -- registers every component (side-effect entry) and re-exports them
-  - `spike/` -- base-library spike, DECIDED:  Solid 2.  `spike/solid/` (components), `spike/solid-element/`
-    (`@spell/solid-element`, our fork of `@solidjs/element`), `spike/shared/` (measure / smoke / report tooling),
-    `spike/icons/` (icon loading experiment).  The Lit spike is archived at git tag `archive/lit-spike`
-    (`git checkout archive/lit-spike -- spike/lit`)
-  - `site/` -- Astro docs site, modelled on Fomantic's docs
-  - `test/` -- shared test utils:  `Fixture.render(html)` (`fixture.ts`), `A11y.check(el)` / `expectAccessible(el)`
-    (`a11y.ts`).  Every test runs in a REAL browser (Vitest browser mode + Playwright, chromium by default)
-  - `docs/` -- design docs (`plan.md`, later `grammar.md`, `theming.md`, `translation.md`)
+    `themes/`;  its own lib entry (`@spell/ui/styles`)
+  - `src/index.ts` -- `@spell/ui`:  registers every family (side effect) and re-exports them, plus `E`, `V`, the
+    runtime, styles and icons
+  - `test/` -- shared test utils and cross-family tests:  `Fixture.render(html)` (`fixture.ts`),
+    `A11y.check(el)` / `expectAccessible(el)` (`a11y.ts`), `ElementFixture` (render + wait for `ready` +
+    `flush()`, `breakRender()`), `StubOwner` (stand-in owners:  card, feed ...), `PerfRun` (the dropdown
+    benchmark), `fallback.cases.ts`, `dictionary.es.ts`;  `fallback` / `isolation` / `translate` / SSR / DSD
+    tests.  Every test runs in a REAL browser (Vitest browser mode + Playwright, chromium by default), except
+    `*.ssr.test.tsx` (node)
+  - `tools/` -- package tooling (node scripts run by `tsx`, see `tools/README.md`):  bundle measurement, peer
+    vendoring, import-map smoke pages (framework hosts), LOC, report tables, the HMR end-to-end test;
+    `tools/demo/` is the `yarn dev` site;  results go to `tools/results/` (git-ignored)
+  - `site/` -- Astro docs site, modelled on Fomantic's docs, on the live components
+  - `docs/` -- design docs (`plan.md`, `grammar.md`, `theming.md`, `translation.md`, `icons.md`, `fallback.md`,
+    `runtime.md`) and the generated `report.md`
+  - `scripts/` -- generators (`gen-styles.ts`, `gen-icons.ts`)
   - `reference/Fomantic-UI/` -- READ-ONLY, git-ignored clone of Fomantic for porting.  NEVER edit or import it.
 - Commands:
-  - `yarn review` -- tsc + oxlint `--fix` + oxfmt + tests;  MUST pass before you hand work back
-  - `yarn build` -- tsc + vite library build into `dist/`
+  - `yarn review` -- tsc (root, node configs, the fork) + oxlint `--fix` + oxfmt + every test (`ssr`, `browser`,
+    the fork's);  MUST pass before you hand work back
+  - `yarn build` -- tsc + vite library build into `dist/` (entries `core`, `forms`, one per family, `styles`,
+    `index`;  `dist/glyphs/`;  `.d.ts`)
+  - `yarn test` -- `ssr` project first (it writes `.cache/ssr-button.html`, which `test/dsd.test.ts` reads), then
+    `browser`, then `yarn test:fork`
   - `yarn test:all` -- chromium + firefox + webkit (`yarn test:browsers` once first)
+  - `yarn dev` -- `tools/demo/`:  every example as class grammar beside elements;  edits hot-reload
+  - `yarn vendor`, `yarn measure`, `yarn smoke`, `yarn report`, `yarn test:hmr` -- see `tools/README.md`;
+    `yarn report` rewrites `docs/report.md`'s tables (run it twice:  no diff)
+  - `yarn fork <script>`, `yarn fork:install`, `yarn fork:build` -- the fork's own scripts.  Its `dist/` is only
+    needed by `yarn vendor` / `yarn measure`, which build it when stale (`tools/ForkBuild.ts`);  dev, tests,
+    the site and the library build use its source
+  - `yarn site:dev`, `yarn site:build`
   - NEVER `npx tsc`:  `node_modules/.bin/tsc` is TypeScript 6 (see `PAPERCUTS.md`).  Use `yarn tsc`.
 
 ## UI rules
@@ -80,6 +122,49 @@ when working with code in this repository.
 - Platform:  ASSUME anchor positioning (no JS fallback), style container queries, popover, `<dialog>`.
   Safari gaps (`closedby`, `popover=hint`, `CloseWatcher`, customizable `<select>`) are feature-flagged through
   `UI.browser.supports`, NEVER user-agent checks at the call site.
+
+## Solid authoring
+
+- An element is a CONTROLLER class `UI<Name> extends UIElement<typeof nameVocabulary>` (or `FormElement`,
+  `ContentPart`):  `@proto static vocabulary` / `styles` / `Fallback` (/ `formAssociated`, `delegatesFocus`),
+  signals and memos as FIELDS, `render()` returning JSX.  The fork creates one per element on first connect and
+  keeps it (`keepAlive`) until `host.dispose()`.  `UI<Name>.define()` in the family's `index.ts` registers it.
+- Imports in component files (element classes AND `<name>.fallback.ts`):  shared code ONLY from `$/core` (and
+  `$/forms` for form controls), never `$/util`, `$/vocabulary`, `$/elements` ... directly;  the family's own
+  vocabulary, fallback, helpers and sheet as peers (`./button.vocabulary.en`, `./button.css?inline`).  Why:  the
+  lib build puts everything `$/core` re-exports into `dist/core.js`;  a leaf imported by a family AND by `core`
+  splits into a hashed third chunk.  For the same reason `core.ts` / `forms.ts` re-export `$/elements` LEAVES, and
+  `FormHost` / `FormElement` import the core through `$/core` (`yarn measure`'s checks catch a violation).
+- **Memos compute EAGERLY** on creation.  Base-class memos that call overridable methods take `{ lazy: true }`;
+  effects that call overridables are created in `mount()`, after every subclass field exists.
+- **`Cell` field order:**  class fields initialize in declaration order, before the subclass constructor body.
+  Declare every signal as a `Cell` field ABOVE the memos that read it;  compute a starting value into the initial
+  value (`new Cell(untrack(() => ...))`), never by writing during setup.
+- **No signal writes in an owned scope** (component body, `render()`, memo, effect COMPUTE):  dev throws
+  `REACTIVE_WRITE_IN_OWNED_SCOPE`, and `untrack` does not exempt it.  Write from event handlers, `onSettled`,
+  promise callbacks, the effect's APPLY function, or the fork's hooks;  hooks that can run inside a Solid render
+  (`onConnect`, the `onFormDisabled` replay) defer with `queueMicrotask`.  Element PROPERTY writes are always legal.
+- **Writes land on a microtask:**  a read right after a write sees the old value;  keep the new value in a local.
+  Tests `await ElementFixture.settle()` / `tick()` (which `flush()`), never sleep.
+- **Effects take two functions:**  `createEffect(compute, apply)`.
+- **Events:**  dispatch through `this.emit("ui-change", detail)` (vocabulary-checked, localized on translated
+  tags).  Solid 2 has no `on:` namespace:  inside a component, `onClick={...}` for native events;  a Solid APP
+  listening for `ui-*` events uses a `ref` callback + `addEventListener` (see `tools/frameworks/solid/app.tsx`),
+  and binds rich data with `prop:options`.
+- **`keepAlive`:**  a removed element keeps its reactive root (until `dispose()` or garbage collection), so
+  anything page-wide (overlay entries, document listeners) follows `connected()`, never disposal.
+- **Native fallback:**  every family sets `@proto static Fallback = <Name>Fallback` (plain DOM on
+  `NativeFallback`, same class grammar, no Solid).  When a render throws, the element logs once, dispatches a
+  cancelable `ui-error`, gets `:state(errored)` and shows the fallback;  siblings keep working
+  (`docs/fallback.md`).
+- **Hot reload** (`yarn dev`, `yarn site:dev`):  edits to a family's classes, vocabulary, fallback or sheet
+  update live instances in place;  internal state (a query, an open menu) resets.  Changes the platform reads
+  once (observed attributes, `formAssociated`, the host base class, shadow options) and edits to shared code
+  (`core`, `forms`, `src/elements/`, the runtime) reload the page.  `yarn test:hmr` MUST pass after touching
+  `HotDefinitions`, `UIElement.define()` or the fork's HMR.
+- **One Solid per page:**  every Vite config dedupes `solid-js` / `@solidjs/web` (`SOLID_DEDUPE`);  NEVER
+  `import * as` a Solid package in shipped code (it pins every export into bundles and vendored copies).
+- SSR:  anything that reads the DOM in a constructor needs an `isServer` guard (`test/ssr.ssr.test.tsx`).
 
 ## Long-term debt
 
@@ -143,10 +228,12 @@ when working with code in this repository.
 ## Decorators
 
 - Use STANDARD (TC39 2023-11) decorators, NEVER `experimentalDecorators`.  General-purpose ones live in `$/util/decorators.ts`.
-- Lowered by esbuild via `vite.decorators.ts`, used by `vite.config.ts`, `vitest.config.ts` and the Astro config --
-  vite 8's own transformer (oxc) doesn't do it yet.
+- Lowered by esbuild via `vite.decorators.ts`, used by `vite.config.ts` (`baseConfig()`, shared with
+  `vitest.config.ts`) and the Astro config -- vite 8's own transformer (oxc) doesn't do it yet.
 - A decorator MUST be the first thing on its line (`@proto static parts = [...]` is fine,
   and preferred) or that plugin won't notice the file.
+- The decorator pre-pass MUST run BEFORE the Solid plugin (both are `enforce: "pre"`;  `baseConfig()` orders them):
+  the Solid compiler must see decorator-free code.
 
 ## Types / Exports
 
@@ -183,7 +270,10 @@ when working with code in this repository.
 ## Imports
 
 - ALWAYS import starting from `$`, NEVER start import from `../`.
-  - Test helpers come from `$test/...` (`$test/fixture`, `$test/a11y`), the only other alias.
+  - Test helpers come from `$test/...` (`$test/fixture`, `$test/a11y`, `$test/ElementFixture`), the only other
+    alias.
+  - Exceptions:  component files import shared code from `$/core` / `$/forms` ("Solid authoring");  `tools/` are
+    node scripts:  relative imports with `.ts` extensions, no aliases.
 - OK to import from direct peers: `import { UIElement } from "./UIElement"`, but not subdirectories -- use `$/...` instead.
 - Prefer ONE namespace import per sub-system and qualify at use site:
   `import { E } from "$/elements"` => `E.UIElement`, `new E.ClassBuilder(...)`.

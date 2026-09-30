@@ -1,8 +1,9 @@
 ---
 /**
- * Icon browser:  every Font Awesome 6 Free icon `$/icons` ships, searchable, click to copy the name.
+ * Icon browser:  every Font Awesome Free icon `$/icons` ships, searchable, click to copy the name.
  * - Exercises the icon data pipeline for real:  names come from `Icons.names()`, glyphs from `Icons.get()`,
- *   so browsing loads the per-letter solid chunks (and `regular` / `brands`) lazily, as `ui-icon` will.
+ *   so browsing loads one glyph module per icon shown (`src/icons/glyphs/<style>/<name>.js`) lazily, as
+ *   `ui-icon` does.
  * - Solid search also matches Font Awesome's search terms (`search.json`, docs-site-only data).
  * - Renders the first 300 matches, then "Show more" in steps of 300:  cheap enough without a virtual list.
  */

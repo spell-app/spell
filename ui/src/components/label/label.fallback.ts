@@ -1,5 +1,4 @@
-import { proto } from "$/util"
-import { NativeFallback } from "$/elements"
+import { NativeFallback, proto } from "$/core"
 
 import { labelVocabulary } from "./label.vocabulary.en"
 

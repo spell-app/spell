@@ -10,7 +10,7 @@ import type { ShorthandMapper, ShorthandOptions, ShorthandProps, ShorthandValue 
  * - plain object => props as given
  * - Merge order `defaults < value props < overrides`;  `class` is merged and de-duplicated,
  *   object `style`s merge key by key.
- * - Returns plain props;  the renderer (Lit or Solid) turns them into an element.  NO DOM.
+ * - Returns plain props;  the renderer (a Solid component) turns them into an element.  NO DOM.
  * - NOTE: dropped from SUI:  React elements, render functions, `key` / `childKey`.  Children (slotted content)
  *   win over shorthand -- that's the renderer's job.
  */

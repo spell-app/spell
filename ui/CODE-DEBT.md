@@ -54,4 +54,20 @@ One `##` heading per item, `---` between items, then:
   contrast against the hue, consumed by button / label / segment text rules;  optionally lower L on the
   saturated hues (blue, red, pink) so white still works there.  `contrast-color()` is Chromium-only, so it
   must be data.  Re-enable `color-contrast` in the element a11y tests afterwards.
-- **Pinned at** -- `spike/lit/src/**/*.test.ts` disable axe `color-contrast`;  `spike/lit/REPORT.md` (j) 2.
+- **Pinned at** -- `src/components/*/*.test.tsx` disable axe `color-contrast` (and did in `spike/lit/`, tag
+  `archive/lit-spike`;  its `REPORT.md` (j) 2).
+
+---
+
+## `@spell/ui`'s `E` / `V` namespaces cost every page a Rolldown runtime chunk
+
+- **Cost** -- `dist/rolldown-runtime-<hash>.js` (0.29 kB gzip):  one extra request on EVERY page, a button-only
+  one included, since `core.js` and each family import it.
+- **Cause** -- `src/index.ts`'s `export * as E from "$/elements"` / `export * as V from "$/vocabulary"` need
+  Rolldown's `__exportAll`;  with a second user of its runtime module besides `__name` (keepNames), Rolldown
+  emits that module as its own shared chunk instead of leaving it in `core.js`.  Without the two namespaces it
+  stays in `core.js` (checked).
+- **Fix** -- drop the namespaces from the `index` entry (flat named exports, or a separate `@spell/ui/api` entry
+  that only apps import), or find a Rolldown option that pins its runtime into `core`.
+- **Pinned at** -- not measured:  `yarn measure` builds without the `index` entry;  `docs/report.md` Bundle /
+  Method notes it.

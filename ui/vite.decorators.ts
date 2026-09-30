@@ -10,7 +10,7 @@ import type { Plugin } from "vite"
  *   the same way, so `@proto` behaves identically in both repos.
  * - `keepNames` MUST stay on:  custom element classes keep their class names (`UIButton`), which the
  *   custom-elements manifest and dev-time warnings read -- the build keeps them too (`vite.config.ts`).
- * - JSX is preserved (loader `tsx`) for whatever framework plugin a spike or the site adds.
+ * - JSX is preserved (loader `tsx`) for the Solid plugin, which runs next.
  * - MUST be used by `vite.config.ts`, `vitest.config.ts` and the Astro config in `site/`.
  * - TODO: delete this file when oxc lowers standard decorators.
  */

@@ -1,6 +1,6 @@
 /**
  * Shared types for `$/components` -- event details and the CSS contracts every implementation of a component
- * (Lit or Solid, Milestone 0) must honour.
+ * (the element and its native fallback) must honour.
  * - Runtime-light:  `import type` only, plus a few constants.
  */
 
