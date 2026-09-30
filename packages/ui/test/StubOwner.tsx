@@ -9,10 +9,11 @@ import { UIElement, type UIElementClass } from "$/elements"
 const STUB_CSS = ":host { display: block }"
 
 /**
- * A stand-in OWNER component for tests and the demo:  card, feed, modal, statistic ... don't exist yet, but the
- * content parts they own do.  Renders `<div class="ui <noun>" style="display: contents"><slot>`, so the class
- * grammar's colour / size remaps reach the parts while the HOST takes the layout (`display: block` default,
- * overridable with an inline `style`).
+ * A stand-in OWNER component for tests and the demo, for owners of the content parts that aren't real (or aren't
+ * visible) yet:  modal and popup (overlays, hidden until opened), accordion, toast and search.
+ * - Renders `<div class="ui <noun>" style="display: contents"><slot>`, so the class grammar's colour / size
+ *   remaps reach the parts while the HOST takes the layout (`display: block` default, overridable with an inline
+ *   `style`).
  * - `StubOwner.defineFor(vocabulary)` defines one tag;  its vocabulary's `ownsParts` registers it as an owner.
  * - NOTE: test / demo scaffolding, not a component.
  */
@@ -38,12 +39,10 @@ export class StubOwner extends UIElement {
 
   /**
    * Define `stub-<owner>` for every owner Fomantic styles parts in -- read from the parts' `in-<owner>` states --
-   * except those that exist as real elements (`header`, `label`).
-   * - `stub-item`, not `ui-item`:  that tag is the generic item of dropdowns, lists and menus (`docs/grammar.md`).
-   * - A statistic also owns `label` (a `<ui-label>` there is its `.label` part).
+   * except those that exist as real elements (`REAL_OWNERS`).
    */
   static defineFomanticOwners() {
-    const owned = new Map<string, Set<string>>([["statistic", new Set(["label"])]])
+    const owned = new Map<string, Set<string>>()
     for (const vocabulary of PART_VOCABULARIES) {
       for (const { name } of vocabulary.states) {
         const owner = name.slice(IN.length)
@@ -74,8 +73,22 @@ export class StubOwner extends UIElement {
 /** Prefix of an owner state, `in-card`. */
 const IN = "in-"
 
-/** Owners that are real elements already. */
-const REAL_OWNERS = new Set(["header", "label"])
+/**
+ * Owners that are real elements already, owning their parts:  examples and tests use those.
+ * - `item`:  `<ui-item>` in `<ui-items>`.
+ */
+const REAL_OWNERS = new Set([
+  "header",
+  "label",
+  "card",
+  "item",
+  "feed",
+  "comment",
+  "message",
+  "list",
+  "step",
+  "statistic"
+])
 
 /** Attributes every stub understands. */
 const STUB_ATTRIBUTES = [

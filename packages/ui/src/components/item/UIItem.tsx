@@ -1,4 +1,4 @@
-import { Show, createEffect, createMemo } from "solid-js"
+import { Show, createEffect, createMemo, untrack } from "solid-js"
 import { Dynamic, type JSX } from "@solidjs/web"
 
 import {
@@ -12,6 +12,7 @@ import {
   UI,
   UIElement,
   type AttributeName,
+  type ConditionalOwner,
   type ItemContext,
   type ItemOwner,
   type RuntimeGlobal,
@@ -45,8 +46,11 @@ import itemCSS from "./item.css?inline"
  * - `active` is an ALIAS of `selected` (Fomantic's word), read from the host attribute.
  * - A part (`isPart`):  transparent to other parts' climbs, so a `<ui-header>` inside an item in a list is the
  *   LIST's header (`.ui.list > .item > .content > .header`).
+ * - Except in the Items view (`<ui-items>`):  there the owner's `ItemContext.ownsParts` makes the item OWN its
+ *   content parts (`ConditionalOwner`, `ownsPart()`), so they get `:state(in-item)` -- Fomantic's
+ *   `.ui.items > .item > .content > .header`.  Its `image` shorthand takes the owner's `imageClass`.
  ****************/
-export class UIItem extends UIElement<typeof itemVocabulary> {
+export class UIItem extends UIElement<typeof itemVocabulary> implements ConditionalOwner {
   @proto static vocabulary = itemVocabulary
   @proto static styles = { item: itemCSS }
   @proto static Fallback = ItemFallback
@@ -126,6 +130,18 @@ export class UIItem extends UIElement<typeof itemVocabulary> {
     return this.attrs.disabled
   }
 
+  /**
+   * `ConditionalOwner`:  does this item own its content parts now?  Only when its owner's `ItemContext` says so
+   * (the Items view).
+   * - Reads the DOM (`PartContext.resolve()`), untracked:  other parts ask during their climbs, right after moves,
+   *   before this item's own `owner` signal has landed.
+   */
+  ownsPart(): boolean {
+    const controller = (this.context.resolve()?.owner as UIHost | undefined)?.controller
+    if (!controller || !("itemContext" in controller)) return false
+    return !!untrack(() => (controller as UIElement & ItemOwner).itemContext(this.host)).ownsParts
+  }
+
   protected classValue(name: AttributeName<typeof itemVocabulary>): unknown {
     return name === SELECTED ? this.isSelected() : super.classValue(name)
   }
@@ -194,7 +210,12 @@ export class UIItem extends UIElement<typeof itemVocabulary> {
         data-value={this.attrs.value}
       >
         <Show when={this.imageSrc()}>
-          <img class={IMAGE_CLASS} part={this.part("image")} src={this.imageSrc()} alt="" />
+          <img
+            class={this.itemContext()?.imageClass ?? IMAGE_CLASS}
+            part={this.part("image")}
+            src={this.imageSrc()}
+            alt=""
+          />
         </Show>
         <Show when={this.hasIcon()}>
           <span class={ICON} part={this.part("icon")}>
@@ -244,7 +265,7 @@ const SEPARATOR = "separator"
 /** Class and part of the icon box. */
 const ICON = "icon"
 
-/** Classes of the `image` shorthand:  an avatar, as in Fomantic's list examples. */
+/** Classes of the `image` shorthand, unless the owner says otherwise:  an avatar, as in Fomantic's list examples. */
 const IMAGE_CLASS = "ui avatar image"
 
 /** `aria-current` values. */

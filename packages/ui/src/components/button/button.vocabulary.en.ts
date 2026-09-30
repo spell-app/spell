@@ -36,6 +36,18 @@ export const buttonVocabulary = {
       description: "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-toggle`."
     },
     { name: "active", kind: "keyOnly", description: "Pressed / on;  with `toggle`, in the positive colour." },
+    {
+      name: "active-text",
+      kind: "string",
+      description:
+        "Fomantic's `state` behaviour:  the text while `active` (`Following`), instead of the content.  With " +
+        "either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG)."
+    },
+    {
+      name: "inactive-text",
+      kind: "string",
+      description: "Fomantic's `state` behaviour:  the text while NOT `active` (`Follow`), instead of the content."
+    },
     { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed and inert." },
     { name: "loading", kind: "keyOnly", description: "Shows a spinner in place of the content;  `aria-busy`." },
     { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },

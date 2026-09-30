@@ -1,5 +1,5 @@
 <!-- `src/components/parts/examples/summary.html` as element markup. -->
-<!-- Owners are `stub-*` stand-ins (`StubOwner`) until card, feed, modal ... land;  each owns the parts Fomantic styles in it. -->
+<!-- Owners are the real elements. -->
 <div class="ui-stack">
   <section>
     <h4>Standalone</h4>
@@ -8,15 +8,15 @@
 
   <section>
     <h4>In a feed</h4>
-    <stub-feed>
-      <div class="event">
+    <ui-feed>
+      <ui-event>
         <ui-content>
           <ui-summary>
             <ui-author href="#elliot">Elliot Fu</ui-author> added you as a friend
             <ui-date datetime="PT1H">1 hour ago</ui-date>
           </ui-summary>
         </ui-content>
-      </div>
-    </stub-feed>
+      </ui-event>
+    </ui-feed>
   </section>
 </div>

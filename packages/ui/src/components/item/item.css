@@ -1,7 +1,7 @@
 /*
  * `<ui-item>`:  the generic item's OWN sheet -- host rules and resets every owner builds on.  The item LOOK is the
- * owner's:  a list / menu item adopts its owner's sheet after this one (`list.css`, `menu.css`), whose item rules
- * key on `:host(:state(in-<owner>)) > .item` beside the static `.ui.<owner> > .item`.
+ * owner's:  a list / menu / Items view item adopts its owner's sheet after this one (`list.css`, `menu.css`,
+ * `items.css`), whose item rules key on `:host(:state(in-<owner>)) > .item` beside the static `.ui.<owner> > .item`.
  * - Shadow markup contract:
  *   - unowned (a dropdown option, or loose):  `<slot></slot>` only
  *   - owned:  `<a | button | div class="[color] [position] [keyOnly ...] item [header]" part="item">` holding the

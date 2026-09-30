@@ -1,5 +1,5 @@
 <!-- `src/components/parts/examples/header.html` as element markup. -->
-<!-- Owners are `stub-*` stand-ins (`StubOwner`) until card, feed, modal ... land;  each owns the parts Fomantic styles in it. -->
+<!-- Owners are the real elements, except `stub-*` stand-ins (`StubOwner`) for modal and popup (overlays, hidden until opened) and toast (owns no parts yet). -->
 <div class="ui-stack">
   <section>
     <h4>Page headers</h4>
@@ -91,22 +91,22 @@
 
   <section>
     <h4>Owned headers</h4>
-    <stub-card>
+    <ui-card>
       <ui-content><ui-header>Card header</ui-header></ui-content>
-    </stub-card>
-    <div class="ui items">
-      <stub-item>
+    </ui-card>
+    <ui-items>
+      <ui-item>
         <ui-content><ui-header>Item header</ui-header></ui-content>
-      </stub-item>
-    </div>
+      </ui-item>
+    </ui-items>
     <stub-modal><ui-header>Modal header</ui-header></stub-modal>
-    <stub-message><ui-header>Message header</ui-header></stub-message>
-    <stub-message color="red"><ui-header>Coloured message header</ui-header></stub-message>
-    <stub-list>
-      <div class="item">
+    <ui-message><ui-header>Message header</ui-header></ui-message>
+    <ui-message color="red"><ui-header>Coloured message header</ui-header></ui-message>
+    <ui-list>
+      <ui-item>
         <ui-content><ui-header href="#list">List header</ui-header></ui-content>
-      </div>
-    </stub-list>
+      </ui-item>
+    </ui-list>
     <stub-popup><ui-header>Popup header</ui-header></stub-popup>
     <stub-toast>
       <ui-content><ui-header>Toast header</ui-header></ui-content>

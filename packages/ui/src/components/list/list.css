@@ -102,8 +102,8 @@
  *   - Fomantic's plain `ul.ui.list > li` / `ol.ui.list > li` markup (a `ul` meaning bulleted):  the element's
  *     root is ALWAYS a `<ul>` / `<ol>` of `<ui-item>`s, so it says `bulleted` / `ordered` with classes
  *   - `.ui.menu .ui.list` coupling:  `menu.css` owns it
- *   - floated / aligned CONTENT (`right floated content`, `middle aligned content`):  `<ui-content>` has no such
- *     attributes;  the static class-grammar rules stay
+ *   - floated / aligned CONTENT (`right floated content`, `middle aligned content`):  `<ui-content floated>` /
+ *     `vertical-align` style themselves (`parts.css`);  the static class-grammar rules stay here
  *   - a slotted `<img>` / `<ui-image>` FOLLOWED by a `<ui-content>`:  the content is a table cell (`parts.css`,
  *     `:not(:first-child)`) beside an inline-block image, so it wraps below;  use the item's `image` shorthand
  *   - links nested INSIDE a slotted part (`<ui-description>Watch <a>…</a>`):  out of this sheet's reach;  they

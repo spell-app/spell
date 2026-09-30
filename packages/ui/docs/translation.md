@@ -74,6 +74,12 @@ How the runtime will use it (not built yet):
 - Tokens (`--ui-*`) and utility classes (`ui-stack`).
 - Part names: the canonical part is always present;  translation only adds.
 - Text strings are NOT in the dictionary: `UI.i18n` owns them (`TextSpec` keys), with `Intl` formatting.
+  - Keys are SCOPED per component:  a vocabulary's texts are that component's English defaults, under its
+    canonical tag, so two families may share a key (`label` is "Table" for `<ui-table>`, "Breadcrumb" for
+    `<ui-breadcrumb>`).  No prefixing needed.
+  - A translation registers a key SHARED (`UI.i18n.register("es", { label: "Etiqueta" })`, every component
+    using it) or for one component (`UI.i18n.register("es", { label: "Migas" }, "ui-breadcrumb")`, which wins).
+  - Any registered string beats the English defaults, `en` included (an app rewording a default).
 
 ## Open questions
 

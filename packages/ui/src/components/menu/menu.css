@@ -56,9 +56,11 @@
  * - Colour:  the menu HOST resets the generic colour tokens (`--ui-color*`), so only its OWN `color` (the
  *   `.ui.red` remap on its root) or an item's (`ui-red`, the class the item adds for its `color`) paints the
  *   active item:  its text in `--ui-color-text` (the hue's AA text variant;  Fomantic's raw hue fails contrast on
- *   the active fill), its border in `--ui-color`.  `inverted` sets `color-scheme: dark` (+ `--ui-inverted: 1`) and every `light-dark()` token
- *   follows;  an inverted COLOURED menu fills with `--ui-color`, its active item with `--ui-color-active`, and its
- *   text is the hue's contrast-picked `--ui-color-on` (Fomantic's white fails AA on the lighter hues).
+ *   the active fill), its border in `--ui-color`.
+ * - Scheme:  a plain menu follows the page's `color-scheme` (light again only nested in something inverted).
+ *   `inverted` sets `color-scheme: dark` (+ `--ui-inverted: 1`) and every `light-dark()` token follows;  an
+ *   inverted COLOURED menu fills with `--ui-color`, its active item with `--ui-color-active`, and its text is the
+ *   hue's contrast-picked `--ui-color-on` (Fomantic's white fails AA on the lighter hues).
  * - Sizes:  Fomantic's menu ladder is flatter than the generic one (large 15px, massive 18px on 14px);  it is
  *   the square root of `--ui-scale` here (within 2%, massive 1.41 for 1.29).  The root's `<slot>` resets
  *   `--ui-scale`, so items' components aren't scaled twice.  A vertical menu's width scales the same way.
@@ -112,7 +114,6 @@
   /* Tokens:  the root resolves every variation into these;  items read them (see the header). */
   .ui.menu {
     --ui-inverted: 0;
-    --ui-scheme: light;
     --ui-menu-layout: horizontal;
     --ui-menu-stackable: 0;
     --ui-menu-radius: var(--ui-radius);
@@ -171,7 +172,6 @@
     --ui-menu-icon-size: 1em;
     --ui-menu-icon-display: inline-flex;
     --ui-menu-icon-float: none;
-    color-scheme: light;
 
     box-sizing: border-box;
     display: flex;
@@ -187,6 +187,17 @@
     border: var(--ui-menu-border);
     border-radius: var(--ui-menu-radius);
     box-shadow: var(--ui-shadow-subtle);
+  }
+  /*
+   * Scheme:  a plain menu follows the page's (`color-scheme` / `--ui-scheme` inherit), so it turns dark under
+   * `themes/dark.css` or an OS preference;  nested in something inverted, it resets to the light scheme, as a
+   * plain segment does (Fomantic paints it white).  `.ui.inverted.menu` below wins by specificity.
+   */
+  @container style(--ui-inverted: 1) {
+    .ui.menu {
+      --ui-scheme: light;
+      color-scheme: light;
+    }
   }
   .ui.menu::after {
     content: "";

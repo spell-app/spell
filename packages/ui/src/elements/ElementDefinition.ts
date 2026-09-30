@@ -54,8 +54,9 @@ export class ElementDefinition {
     this.names.register(vocabulary)
     const localized = this.names.define(prefix, dictionary).get(vocabulary.tag)!
     this.localized = localized
-    // a tag the dictionary doesn't name (an English alias, `ui-later`) is fine:  names still resolve by prefix
-    this.tag = tag ?? localized.tag
+    // a tag the dictionary doesn't name (an English alias, `ui-later`) is fine:  names still resolve by prefix;
+    // no tag and no dictionary is the vocabulary's OWN tag, whatever its prefix (`x-item-owner` in tests)
+    this.tag = tag ?? (dictionary ? localized.tag : vocabulary.tag)
     this.builder = new ClassBuilder(vocabulary)
     this.attributes = vocabulary.attributes.map((spec) => {
       const attribute = localized.names.attributes.get(spec.name) ?? spec.name

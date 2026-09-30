@@ -61,6 +61,7 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
   declare Host: typeof UIHost
   declare isPart: boolean
   declare delegatesFocus: boolean
+  declare slotAssignment: SlotAssignmentMode
   declare formAssociated: boolean
   declare Fallback: FallbackClass | undefined
 
@@ -75,6 +76,13 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
 
   /** Shadow root `delegatesFocus`;  an element with nothing focusable inside (`<ui-item>`) turns it off. */
   @proto static delegatesFocus = true
+
+  /**
+   * Shadow root `slotAssignment`:  `manual` lets an element hand CHOSEN children to chosen `<slot>`s
+   * (`slot.assign()`), e.g. `<ui-accordion>` wrapping each title + content pair in its own `<details>`.
+   * - NOTE: a `manual` root assigns nothing by itself:  every `<slot>` it renders stays empty until assigned.
+   */
+  @proto static slotAssignment: SlotAssignmentMode = "named"
 
   /** Form-associated (the fork's `formAssociated` option):  `FormElement`, and `UIButton` for submit / reset. */
   @proto static formAssociated = false
@@ -196,10 +204,11 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
         if (loaded) queueMicrotask(() => this.host.markReady())
       }
     )
+    // the APPLY uses the computed names:  calling `sheetNames()` there again would read its signals untracked
     createEffect(
-      () => this.sheetNames().join(" "),
-      () => {
-        if (untrack(this.loaded)) UI.styles.adoptInto(this.host.renderRoot, this.sheetNames())
+      () => this.sheetNames().join(SHEET_SEPARATOR),
+      (names) => {
+        if (untrack(this.loaded)) UI.styles.adoptInto(this.host.renderRoot, names ? names.split(SHEET_SEPARATOR) : [])
       },
       { defer: true }
     )
@@ -288,9 +297,12 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
     return this.definition.slot(name)
   }
 
-  /** Text for `key` in the current locale, via `UI.i18n`. */
+  /**
+   * Text for `key` in the current locale, via `UI.i18n`, scoped to this component's canonical tag.
+   * - Another family's text under the same key never leaks in (see `registerTexts()`).
+   */
   text(key: TextKey<V>, params?: Record<string, string | number>): string {
-    return UI.i18n.t(key, params)
+    return UI.i18n.t(key, params, this.vocabulary.tag)
   }
 
   ////////////////
@@ -358,9 +370,9 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
    *   re-defines a new version of a class through here, see `HotDefinitions`).
    */
   static defineTag(this: UIElementClass, definition: ElementDefinition): CustomElementConstructor {
-    const { vocabulary, Host, isPart, delegatesFocus, formAssociated, Fallback } = this.prototype
+    const { vocabulary, Host, isPart, delegatesFocus, slotAssignment, formAssociated, Fallback } = this.prototype
     UIElement.definitions.set(definition.tag, definition)
-    PartContext.define(vocabulary, definition.tag, isPart)
+    PartContext.define(vocabulary, definition.tag, isPart, "ownsPart" in this.prototype)
     UIElement.registerTexts(vocabulary)
     return customElement(
       definition.tag,
@@ -368,7 +380,7 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
       (attrs, { element }) => new this(element as unknown as UIHost, definition, attrs).mount(),
       {
         BaseElement: Host,
-        shadowRootInit: { mode: "open", delegatesFocus },
+        shadowRootInit: { mode: "open", delegatesFocus, slotAssignment },
         internals: true,
         formAssociated,
         keepAlive: true,
@@ -419,6 +431,9 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
   /**
    * Register `vocabulary` with `UI.vocabulary` and its English texts with `UI.i18n` when the class is DEFINED,
    * not on first connect, so `UI.i18n.t()` and translations see them before any instance exists.
+   * - Texts are English DEFAULTS scoped to the canonical tag (`I18n.registerDefaults()`):  any registered string
+   *   (an app's English, a translation) beats them, and two families may share a key (`label`) with different
+   *   text.  Code outside the element (`UI.i18n.t("notifications")`, unscoped) gets the FIRST family's.
    * - Loads the runtime if it isn't yet;  idempotent per vocabulary.
    */
   private static registerTexts(vocabulary: ComponentVocabulary) {
@@ -427,12 +442,12 @@ export abstract class UIElement<V extends ComponentVocabulary = ComponentVocabul
     if ((globalThis as RuntimeGlobal)[RUNTIME_KEY]) register()
     else void UI.load().then(register)
 
-    /** Hand the vocabulary and its texts to the runtime;  keeps texts a translation registered earlier. */
+    /** Hand the vocabulary and its English texts to the runtime. */
     function register() {
       UI.vocabulary.register(vocabulary)
       const texts: Record<string, string> = {}
-      for (const { key, text } of vocabulary.texts) if (!UI.i18n.has(key)) texts[key] = text
-      UI.i18n.register("en", texts)
+      for (const { key, text } of vocabulary.texts) texts[key] = text
+      UI.i18n.registerDefaults(texts, vocabulary.tag)
     }
   }
 }
@@ -452,6 +467,9 @@ export type FallbackClass = {
     internals?: ElementInternals
   ): NativeFallbackHandle
 }
+
+/** Joins sheet registry names into one comparable value (names never contain it). */
+const SHEET_SEPARATOR = " "
 
 /** `styles` maps whose sheets are registered with the runtime. */
 const SHEETS = new WeakSet<object>()

@@ -1,5 +1,5 @@
 <!-- `src/components/parts/examples/avatar.html` as element markup. -->
-<!-- Owners are `stub-*` stand-ins (`StubOwner`) until card, feed, modal ... land;  each owns the parts Fomantic styles in it. -->
+<!-- Owners are the real elements. -->
 <div class="ui-stack">
   <section>
     <h4>Standalone</h4>
@@ -22,8 +22,8 @@
 
   <section>
     <h4>In owners</h4>
-    <div class="ui comments">
-      <stub-comment>
+    <ui-comments>
+      <ui-comment>
         <ui-avatar
           src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
         ></ui-avatar>
@@ -31,18 +31,18 @@
           <ui-author href="#matt">Matt</ui-author>
           <ui-description>How artistic!</ui-description>
         </ui-content>
-      </stub-comment>
-    </div>
-    <stub-card>
+      </ui-comment>
+    </ui-comments>
+    <ui-card>
       <ui-content>
         <ui-avatar
           src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
         ></ui-avatar>
         Elliot
       </ui-content>
-    </stub-card>
-    <div class="ui items">
-      <stub-item>
+    </ui-card>
+    <ui-items>
+      <ui-item>
         <ui-content>
           <ui-avatar
             id="item-avatar"
@@ -50,7 +50,7 @@
           ></ui-avatar>
           Stevie
         </ui-content>
-      </stub-item>
-    </div>
+      </ui-item>
+    </ui-items>
   </section>
 </div>

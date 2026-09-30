@@ -19,6 +19,7 @@ export class ButtonFallback extends NativeFallback<typeof buttonVocabulary> {
     "joined `label`",
     "`animated`",
     "`loading` spinner",
+    "`active-text` / `inactive-text` (the content shows;  a toggle keeps `aria-pressed`)",
     "a host `click` handler's preventDefault() cannot veto submit / reset"
   ]
 

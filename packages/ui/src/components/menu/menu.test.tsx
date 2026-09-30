@@ -236,6 +236,19 @@ describe("<ui-menu> owner tokens reach the items", () => {
     expect(styleOf(items[0]!).colorScheme).toBe("dark")
   })
 
+  it("follows a dark page;  resets to light only inside something inverted", async () => {
+    const page = await ElementFixture.render<HTMLElement>(
+      `<div class="ui-dark"><ui-menu aria-label="A" secondary>${LINKS}</ui-menu>` +
+        `<ui-segment inverted><ui-menu aria-label="B">${LINKS}</ui-menu></ui-segment></div>`
+    )
+    const [plain, nested] = [...page.querySelectorAll<UIHost>("ui-menu")].map((host) =>
+      host.shadowRoot!.querySelector<HTMLElement>("[part~=menu]")!
+    )
+    expect(getComputedStyle(plain!).colorScheme).toBe("dark")
+    expect(styleOf(page.querySelector("ui-item")!).colorScheme).toBe("dark")
+    expect(getComputedStyle(nested!).colorScheme).toBe("light")
+  })
+
   it("divides the width evenly with `items`", async () => {
     const { root, items } = await menu('items="3"')
     const width = root.getBoundingClientRect().width

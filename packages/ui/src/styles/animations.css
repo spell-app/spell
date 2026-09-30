@@ -21,8 +21,11 @@
             Protocol
   *******************************/
 
-  .ui.transition,
-  [data-ui-animation] {
+  /*
+   * `:where()`, so zero specificity:  an element that is BOTH `.ui.transition` (class grammar, e.g. `<ui-transition>`'s
+   * box) and runs the protocol must still take `[data-ui-animation="..."]`'s keyframes and defaults below.
+   */
+  :where(.ui.transition, [data-ui-animation]) {
     --ui-animation-keyframes: none;
     --ui-animation-default-duration: var(--ui-duration-slow);
     --ui-animation-default-easing: var(--ui-ease);

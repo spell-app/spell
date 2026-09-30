@@ -26,7 +26,7 @@ export class OwnerContext {
     let depth = 0
     for (let current = OwnerContext.parentOf(element); current; current = OwnerContext.parentOf(current)) {
       const tag = current.localName
-      const noun = OwnerContext.nounOf(tag, owners)
+      const noun = OwnerContext.nounOf(current, owners)
       if (noun) return { owner: current, ownerNoun: noun, depth }
       if (options.barrier?.(current)) return undefined
       if (tag.includes("-")) depth++
@@ -68,11 +68,12 @@ export class OwnerContext {
     return root instanceof ShadowRoot ? root.host : null
   }
 
-  /** Owner noun of `tag` per `owners`, or `undefined` if it isn't an owner. */
-  private static nounOf(tag: string, owners: OwnerLookup): string | undefined {
+  /** Owner noun of `element` (by its tag) per `owners`, or `undefined` if it isn't an owner. */
+  private static nounOf(element: Element, owners: OwnerLookup): string | undefined {
+    const tag = element.localName
     if (owners instanceof Map) return owners.get(tag)
     if (owners instanceof Set) return owners.has(tag) ? OwnerContext.stem(tag) : undefined
-    const result = (owners as (tag: string) => unknown)(tag)
+    const result = (owners as (tag: string, element: Element) => unknown)(tag, element)
     if (typeof result === "string") return result || undefined
     return result ? OwnerContext.stem(tag) : undefined
   }

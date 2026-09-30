@@ -3,7 +3,7 @@ import { onConnect } from "@spell/solid-element"
 
 import type { ComponentVocabulary } from "$/vocabulary"
 
-import type { OwnerMatch } from "./elements.types"
+import type { ConditionalOwner, OwnerMatch } from "./elements.types"
 import { OwnerContext } from "./OwnerContext"
 import { Cell } from "./Cell"
 import type { UIHost } from "./UIHost"
@@ -15,6 +15,8 @@ import type { UIHost } from "./UIHost"
  *   component:  a header inside a segment inside a card stays standalone, as Fomantic's child combinators have it.
  * - `direct` mode (icons):  only the flat-tree parent component counts, skipping its own shadow internals
  *   (`.ui.icons > .icon`).
+ * - CONDITIONAL owners (`ConditionalOwner`, a part whose controller has `ownsPart()`):  asked during the climb,
+ *   transparent while they say no -- `<ui-item>` owns its content parts in the Items view only.
  * - SIDE EFFECT:  keeps `:state(in-<owner>)` on the host in step with `owner`, via an effect;  NEVER the static
  *   `in-<owner>` class.
  * - Re-resolves on:
@@ -89,15 +91,23 @@ export class PartContext {
     this.owner.set(this.find())
   }
 
+  /**
+   * Nearest owner, read from the DOM now (untracked), without updating `owner`.
+   * - For a `ConditionalOwner` deciding whether it owns:  its own `owner` signal may not have landed yet.
+   */
+  resolve(): OwnerMatch | undefined {
+    return this.find()
+  }
+
   /** Nearest owner, read from the DOM now. */
   private find(): OwnerMatch | undefined {
-    const owners = PartContext.ownersOf(this.noun)
-    if (!owners.size) return undefined
+    if (!this.direct) return PartContext.ownerOf(this.host, this.noun)
     const root = this.host.getRootNode()
-    const barrier = this.direct
-      ? (element: Element) => !(element instanceof HTMLSlotElement) && element.getRootNode() === root
-      : PartContext.isBarrier
-    return untrack(() => OwnerContext.find(this.host, owners, { barrier }))
+    return PartContext.ownerOf(
+      this.host,
+      this.noun,
+      (element) => !(element instanceof HTMLSlotElement) && element.getRootNode() === root
+    )
   }
 
   ////////////////
@@ -107,11 +117,13 @@ export class PartContext {
   /**
    * Record a defined element:  its owner nouns (from `ownsParts`, under the tag it was defined as) and whether
    * it is a part, which makes it transparent to other parts' climbs.
+   * - `conditional`:  its controller decides per instance (`ConditionalOwner`).
    * - Called by `UIElement.define()` for every tag, translated aliases included.
    */
-  static define(vocabulary: ComponentVocabulary, tag: string, isPart: boolean) {
+  static define(vocabulary: ComponentVocabulary, tag: string, isPart: boolean, conditional = false) {
     TAGS.add(tag)
     if (isPart) PART_TAGS.add(tag)
+    if (conditional) CONDITIONAL.add(tag)
     for (const noun of vocabulary.ownsParts ?? []) {
       let owners = OWNERS.get(noun)
       if (!owners) OWNERS.set(noun, (owners = new Map()))
@@ -122,6 +134,25 @@ export class PartContext {
   /** Tag => owner noun of every element owning `noun`. */
   static ownersOf(noun: string): ReadonlyMap<string, string> {
     return OWNERS.get(noun) ?? EMPTY
+  }
+
+  /**
+   * Nearest owner of `element` as part `noun`, from the page-wide registry, read from the DOM now (untracked).
+   * - The climb every `PartContext` makes (barriers, conditional owners), for code without one:  a native
+   *   fallback (`ContentPartFallback`) knows every defined owner, translated tags included.
+   * - `barrier`:  default `isBarrier()`.
+   */
+  static ownerOf(
+    element: Element,
+    noun: string,
+    barrier: (element: Element) => boolean = PartContext.isBarrier
+  ): OwnerMatch | undefined {
+    const owners = PartContext.ownersOf(noun)
+    if (!owners.size) return undefined
+    const lookup = CONDITIONAL.size
+      ? (tag: string, owner: Element) => PartContext.ownerNoun(owners, tag, owner, noun)
+      : owners
+    return untrack(() => OwnerContext.find(element, lookup, { barrier }))
   }
 
   /** Does the climb stop at `element`?  Yes for a registered component that isn't a part. */
@@ -144,6 +175,19 @@ export class PartContext {
     }
   }
 
+  /** Owner noun of `element` (tag `tag`) per `owners`;  a conditional owner is asked whether it owns `noun` now. */
+  private static ownerNoun(
+    owners: ReadonlyMap<string, string>,
+    tag: string,
+    element: Element,
+    noun: string
+  ): string | undefined {
+    const ownerNoun = owners.get(tag)
+    if (!ownerNoun || !CONDITIONAL.has(tag)) return ownerNoun
+    const controller = (element as UIHost).controller as Partial<ConditionalOwner> | undefined
+    return controller?.ownsPart?.(noun) ? ownerNoun : undefined
+  }
+
   /** Same owner element and noun:  no state change. */
   private static sameOwner(a: OwnerMatch | undefined, b: OwnerMatch | undefined) {
     return a?.owner === b?.owner && a?.ownerNoun === b?.ownerNoun && a?.depth === b?.depth
@@ -164,6 +208,9 @@ const TAGS = new Set<string>()
 
 /** Tags of elements that resolve an owner as a generic part (transparent to other parts). */
 const PART_TAGS = new Set<string>()
+
+/** Tags of conditional owners (`ConditionalOwner`):  owners only while their controller says so. */
+const CONDITIONAL = new Set<string>()
 
 /** Live context per host, for `slotChanged()` / cascades. */
 const CONTEXTS = new WeakMap<Element, PartContext>()

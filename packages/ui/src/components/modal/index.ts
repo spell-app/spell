@@ -6,12 +6,16 @@
  *     `content`, `description` and `actions` parts
  *   - registers `ModalDialogs` as `UI.modals`' provider once the runtime has loaded, so `UI.modals.confirm()` /
  *     `alert()` / `prompt()` work
+ * - Also exports what `<ui-flyout>` (`$/components/flyout`) builds on:  `DialogElement`, the shared controller base,
+ *   and `ModalFallback`, which `FlyoutFallback` extends.
  */
 
 import { isBrowser, UI } from "$/core"
 
+import { DialogElement } from "./DialogElement"
 import { UIModal } from "./UIModal"
 import { ModalDialogs } from "./ModalDialogs"
+import { ModalFallback } from "./modal.fallback"
 
 import "$/components/parts"
 import "$/components/button"
@@ -19,4 +23,5 @@ import "$/components/button"
 UIModal.define()
 if (isBrowser()) void UI.load().then(() => UI.modals.register(new ModalDialogs()))
 
-export { UIModal, ModalDialogs }
+export { DialogElement, UIModal, ModalDialogs, ModalFallback }
+export type { DialogAttributes } from "./DialogElement"

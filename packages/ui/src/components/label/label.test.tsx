@@ -1,15 +1,15 @@
-import { beforeAll, describe, expect, it } from "vitest"
+import { describe, expect, it } from "vitest"
 
 import { UI } from "$/runtime"
 import { expectAccessible } from "$test/a11y"
 
 import { ElementFixture } from "$test/ElementFixture"
-import { StubOwner } from "$test/StubOwner"
 import type { UIHost } from "$/elements"
 
 import "$/components/label"
 import "$/components/icon"
 import "$/components/parts"
+import "$/components/statistic"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/label/examples/elements/*.html", {
@@ -190,14 +190,12 @@ describe("<ui-labels>", () => {
 })
 
 describe("<ui-label> statistic / standalone swap", () => {
-  beforeAll(() => StubOwner.defineFomanticOwners())
-
   it("keeps elements slotted into it live when its root switches branch", async () => {
     // loaded first:  the label renders its slot synchronously, BEFORE the detail connects (the old owner bug's
     // trigger, `@spell/solid-element` fix 11)
     await UI.load()
     const holder = await ElementFixture.render(
-      `<div><stub-statistic><ui-label>Dogs<ui-detail>214</ui-detail></ui-label></stub-statistic><p></p></div>`
+      `<div><ui-statistic><ui-label>Dogs<ui-detail>214</ui-detail></ui-label></ui-statistic><p></p></div>`
     )
     const label = holder.querySelector<UIHost>("ui-label")!
     const detail = holder.querySelector<UIHost>("ui-detail")!

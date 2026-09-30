@@ -159,7 +159,18 @@ export class ReportTables {
         kB(results.lazy.icons.min),
         kB(results.lazy.icons.gzip),
         "lazy"
-      ]
+      ],
+      // older results files have no `data` tier
+      ...(results.lazy.data
+        ? [
+            [
+              "family data (emoji name chunks, each loaded on its own)",
+              kB(results.lazy.data.min),
+              kB(results.lazy.data.gzip),
+              "lazy"
+            ]
+          ]
+        : [])
     ]
     return ReportTables.table(["Tier", "min kB", "min+gz kB", "Loaded"], rows, ["l", "r", "r", "l"])
   }

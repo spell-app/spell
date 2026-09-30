@@ -51,7 +51,35 @@ export const COMPONENTS = [
   "menu",
   "table",
   "popup",
-  "modal"
+  "modal",
+  "transition",
+  "dimmer",
+  "flyout",
+  "sidebar",
+  "shape",
+  "card",
+  "items",
+  "feed",
+  "comment",
+  "statistic",
+  "step",
+  "rail",
+  "reveal",
+  "ad",
+  "emoji",
+  "select",
+  "search",
+  "progress",
+  "rating",
+  "slider",
+  "accordion",
+  "tab",
+  "toast",
+  "nag",
+  "sticky",
+  "visibility",
+  "embed",
+  "calendar"
 ] as const
 
 /**
@@ -95,7 +123,8 @@ export const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
  *   compiler must see decorator-free code.
  * - `UI_SOLID_PROD=1`:  Solid's PRODUCTION runtime under `vite dev` (no dev diagnostics, no performance tracks),
  *   for timing `tools/demo/perf.html`.
- * - `optimizeDeps`:  `axe-core` pre-bundled up front, so the first test run doesn't reload mid-run;  NOT
+ * - `optimizeDeps`:  `axe-core` and `temporal-polyfill` (only a Temporal-less page imports it) pre-bundled up
+ *   front, so the first test run doesn't reload mid-run;  NOT
  *   `@spell/solid-element`:  it's linked TypeScript source (its `development` export), compiled by the Solid
  *   plugin like our own files.
  */
@@ -111,7 +140,7 @@ export function baseConfig() {
       dedupe: SOLID_DEDUPE
     },
     optimizeDeps: {
-      include: ["axe-core"],
+      include: ["axe-core", "temporal-polyfill"],
       exclude: ["@spell/solid-element"]
     },
     css: {

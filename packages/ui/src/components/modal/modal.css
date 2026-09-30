@@ -24,8 +24,9 @@
  *   - the root's `<slot>` resets the colour remap and `--ui-scale`, so a large modal doesn't enlarge its buttons
  * - NOTE: left out, on purpose:
  *   - `legacy` (margin positioning), `.ui.loading.modal`, `.dimmer` children:  script states `<dialog>` replaces
- *   - `.ui.inverted.dimmer > .modal` couplings:  there's no dimmer element;  theme `::backdrop` with
- *     `--ui-modal-dimmer-background`
+ *   - `.ui.inverted.dimmer > .modal` couplings:  the dimmer is the `::backdrop`;  theme it with the shared
+ *     `--ui-dimmer-background` (every dimmer) or `--ui-modal-dimmer-background` / `--ui-modal-dimmer-filter`
+ *     (modals only, e.g. `var(--ui-dimmer-blur)` for Fomantic's blurring dimmer)
  *   - `resizable scrolling content`:  a table variation's coupling, not a modal one
  */
 
@@ -50,7 +51,8 @@
     --ui-modal-color: var(--ui-text-color);
     --ui-modal-radius: var(--ui-radius);
     --ui-modal-shadow: 1px 3px 3px 0 oklch(0 0 0 / 0.2), 1px 3px 15px 2px oklch(0 0 0 / 0.2);
-    --ui-modal-dimmer-background: oklch(0 0 0 / 0.85);
+    /* The shared dimmer token (`dimmer.css`), so a theme styles this `::backdrop` and `<ui-dimmer>` at once. */
+    --ui-modal-dimmer-background: var(--ui-dimmer-background, oklch(0 0 0 / 0.85));
     --ui-modal-duration: var(--ui-duration-slow);
     --ui-modal-close-size: 1.25em;
     --ui-modal-close-hitbox: 2.25em;
@@ -120,6 +122,7 @@
   /* The dimmer. */
   dialog.ui.modal::backdrop {
     background: var(--ui-modal-dimmer-background);
+    backdrop-filter: var(--ui-modal-dimmer-filter, none);
     opacity: 1;
     transition:
       opacity var(--ui-modal-duration) var(--ui-ease),

@@ -1,6 +1,4 @@
 import { UI, type ModalOptions, type ModalProvider } from "$/core"
-import { buttonVocabulary } from "$/components/button/button.vocabulary.en"
-import { actionsVocabulary, contentVocabulary } from "$/components/parts/parts.vocabulary.en"
 
 import { modalVocabulary } from "./modal.vocabulary.en"
 
@@ -15,6 +13,10 @@ import { modalVocabulary } from "./modal.vocabulary.en"
  *   settles once the modal is HIDDEN (`ui-hide`), so a caller can open the next dialog straight away.
  * - Button texts:  `okText` / `cancelText`, else the translated `ok` / `cancel` texts (`UI.i18n`).
  * - Everything is light DOM built with `createElement` / `textContent`:  never `innerHTML` with caller text.
+ * - Other families' tags (`<ui-content>`, `<ui-actions>`, `<ui-button>`) are looked up at CALL time in the
+ *   vocabulary registry (`UI.vocabulary`), by class noun:  importing their vocabulary files would reach into
+ *   other families' leaves, which `AGENTS.md` keeps behind `$/core`.  The family barrel imports `parts` and
+ *   `button` for their side effect, so both are registered before any dialog opens.
  ****************/
 export class ModalDialogs implements ModalProvider {
   confirm(options: ModalOptions): Promise<boolean> {
@@ -43,10 +45,10 @@ export class ModalDialogs implements ModalProvider {
     modal.setAttribute(CLOSEDBY, CLOSEREQUEST)
     if (options.title) modal.setAttribute(HEADER, options.title)
     else modal.setAttribute(ARIA_LABEL, options.message)
-    const content = document.createElement(contentVocabulary.tag)
+    const content = document.createElement(ModalDialogs.tag(CONTENT))
     const field = input === undefined ? undefined : ModalDialogs.input(input)
     content.append(field ? ModalDialogs.label(options.message, field) : ModalDialogs.paragraph(options.message))
-    const actions = document.createElement(actionsVocabulary.tag)
+    const actions = document.createElement(ModalDialogs.tag(ACTIONS))
     if (deny) actions.append(ModalDialogs.button(options.cancelText ?? UI.i18n.t(CANCEL), CANCEL))
     const approve = ModalDialogs.button(options.okText ?? UI.i18n.t(OK), APPROVE)
     approve.setAttribute(PRIMARY, "")
@@ -69,6 +71,15 @@ export class ModalDialogs implements ModalProvider {
         { once: true }
       )
     })
+  }
+
+  /**
+   * Canonical tag of the registered component whose class noun is `noun` (`button` => `ui-button`).
+   * - Throws when none is registered:  a dialog built from undefined elements would look right and not work.
+   */
+  private static tag(noun: string): string {
+    for (const vocabulary of UI.vocabulary.vocabularies.values()) if (vocabulary.noun === noun) return vocabulary.tag
+    throw new Error(`UI.modals:  no component with the class noun "${noun}" is registered`)
   }
 
   /** The message as a paragraph. */
@@ -98,7 +109,7 @@ export class ModalDialogs implements ModalProvider {
 
   /** A `<ui-button>` with Fomantic's action class (`approve` / `cancel`). */
   private static button(text: string, action: string): HTMLElement {
-    const button = document.createElement(buttonVocabulary.tag)
+    const button = document.createElement(ModalDialogs.tag(BUTTON))
     button.className = action
     button.textContent = text
     return button
@@ -112,6 +123,11 @@ const CLOSEDBY = "closedby"
 const CLOSEREQUEST = "closerequest"
 const HEADER = "header"
 const ARIA_LABEL = "aria-label"
+
+/** Class nouns of the elements a dialog is built from (`UI.vocabulary` lookups, see `tag()`). */
+const CONTENT = "content"
+const ACTIONS = "actions"
+const BUTTON = "button"
 
 /** `<ui-button>` attribute of the approve button. */
 const PRIMARY = "primary"

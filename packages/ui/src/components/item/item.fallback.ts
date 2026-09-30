@@ -5,14 +5,16 @@ import { itemVocabulary } from "./item.vocabulary.en"
 /****************
  * ### `ItemFallback`
  * The item's markup without owner context:  keyed on its light-DOM PARENT's canonical tag instead.
- * - Inside a `<ui-list>` / `<ui-menu>`:  `<a class="... item" part="item" href>` (with `href`) or
- *   `<div class="... item" part="item">` around the slot;  `role=listitem` on the host (internals) in a list.
+ * - Inside a `<ui-list>` / `<ui-menu>` / `<ui-items>`:  `<a class="... item" part="item" href>` (with `href`) or
+ *   `<div class="... item" part="item">` around the slot;  `role=listitem` on the host (internals) in a list or
+ *   the Items view.
  * - Elsewhere (a dropdown option, loose):  `<slot>`, as the real element renders unowned.
  ****************/
 export class ItemFallback extends NativeFallback<typeof itemVocabulary> {
   @proto static vocabulary = itemVocabulary
   @proto static degraded = [
-    "owner context through translated or slotted owners (only a direct `<ui-list>` / `<ui-menu>` parent counts)",
+    "owner context through translated or slotted owners (only a direct `<ui-list>` / `<ui-menu>` / `<ui-items>` " +
+      "parent counts);  owning its content parts in the Items view",
     "`icon` / `image` shorthands",
     "`link` / interactive items (a `<div>` unless `href`), `menuitem` roles, `aria-current`"
   ]
@@ -27,7 +29,7 @@ export class ItemFallback extends NativeFallback<typeof itemVocabulary> {
 
   protected override build() {
     if (!this.owner) return [this.slot()]
-    if (this.internals && this.owner === LIST) this.internals.role = LISTITEM
+    if (this.internals && LIST_OWNERS.has(this.owner)) this.internals.role = LISTITEM
     // `active` is the alias of `selected`, which `classes()` can't see:  it isn't a vocabulary attribute
     const alias = !this.flag("selected") && Converters.boolean(this.host.getAttribute(ACTIVE), ACTIVE)
     const selected = this.flag("selected") || alias
@@ -53,11 +55,12 @@ export class ItemFallback extends NativeFallback<typeof itemVocabulary> {
 /** Owner tags the fallback recognizes (canonical only), => owner noun. */
 const OWNERS: ReadonlyMap<string, string> = new Map([
   ["ui-list", "list"],
-  ["ui-menu", "menu"]
+  ["ui-menu", "menu"],
+  ["ui-items", "items"]
 ])
 
-/** Owner noun whose items are list items. */
-const LIST = "list"
+/** Owner nouns whose items are list items. */
+const LIST_OWNERS: ReadonlySet<string> = new Set(["list", "items"])
 
 /** Host role in a list. */
 const LISTITEM = "listitem"

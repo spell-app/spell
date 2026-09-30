@@ -73,6 +73,7 @@ export type OwnKind = "classes" | "css" | "vocabulary" | "fallback"
  * - `core` -- element core + foundation JS, the `core.js` chunk;  ~== `shared:core`
  * - `shared:<name>` -- a module of shared entry `<name>` (`shared:forms` => `forms.js`)
  * - `runtime` / `icons` -- the lazy `UIRuntime` chunk and the icon name / alias maps
+ * - `data` -- a family's lazily imported data files (`components/<family>/data/`, e.g. the emoji chunks)
  * - `own:<family>:<kind>` -- one family's classes, sheet, vocabulary or fallback
  * - `extra:<name>` -- a module only `PackageConfig.extra` entry `<name>` holds (`extra:api` => `api.js`)
  * - `other` -- unattributed;  reported by a check so nothing is silently dropped
@@ -83,6 +84,7 @@ export type Bucket =
   | `shared:${string}`
   | "runtime"
   | "icons"
+  | "data"
   | "other"
   | `own:${string}:${OwnKind}`
   | `extra:${string}`
@@ -155,7 +157,8 @@ export type MeasureResults = {
    * `all families` in one such build:  what an app that bundles everything itself would ship, for comparison.
    */
   standalone: Record<string, Size>
-  lazy: { runtime: Size; icons: Size }
+  /** lazy tiers;  `data` is missing from results files older than the `data` bucket */
+  lazy: { runtime: Size; icons: Size; data?: Size }
   /** each `PackageConfig.extra` entry's own code (`extra:<name>` buckets), e.g. `api` */
   extra: Record<string, Size>
   chunks: ChunkSize[]
@@ -178,7 +181,7 @@ export type MeasureChecks = {
   coreOutsideCore: string[]
   /** `library`-bucket module ids found anywhere in the build (should be external) */
   libraryBundled: string[]
-  /** `runtime` / `icons` module ids found in an eager chunk */
+  /** `runtime` / `icons` / `data` module ids found in an eager chunk */
   lazyInEager: string[]
   /** `other`-bucket module ids */
   unattributed: string[]

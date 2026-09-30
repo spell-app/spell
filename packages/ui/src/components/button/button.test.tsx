@@ -113,6 +113,34 @@ describe("<ui-button> behaviour", () => {
     expect(control.getAttribute("aria-pressed")).toBe("true")
   })
 
+  it("state texts (Fomantic's `state`):  the text follows `active`;  the label carries it, so no aria-pressed", async () => {
+    const { host, control } = await button(
+      `<ui-button toggle inactive-text="Follow" active-text="Following">Ignored</ui-button>`
+    )
+    const events: boolean[] = []
+    host.addEventListener("ui-toggle", (event) => events.push((event as CustomEvent).detail.active))
+    expect(control.textContent).toBe("Follow")
+    expect(control.querySelector("slot")).toBeNull()
+    expect(control.hasAttribute("aria-pressed")).toBe(false)
+    control.click()
+    await ElementFixture.tick()
+    expect(events).toEqual([true])
+    expect(control.textContent).toBe("Following")
+    expect(host.matches(":state(active)")).toBe(true)
+    control.click()
+    await ElementFixture.tick()
+    expect(control.textContent).toBe("Follow")
+    await expectAccessible(host)
+  })
+
+  it("a single state text:  the content shows in the other state;  a host-set `active` switches it", async () => {
+    const { host, control } = await button(`<ui-button active-text="Voted">Vote</ui-button>`)
+    expect(control.querySelector("slot")).not.toBeNull()
+    ;(host as unknown as { active: boolean }).active = true
+    await ElementFixture.tick()
+    expect(control.textContent).toBe("Voted")
+  })
+
   it("blocks clicks while disabled", async () => {
     const { host, control } = await button(`<ui-button disabled>Nope</ui-button>`)
     const clicked = vi.fn()

@@ -75,6 +75,22 @@ describe("<ui-segment> states and owner tokens", () => {
     expect(getComputedStyle(root).getPropertyValue("--ui-inverted").trim()).toBe("0")
   })
 
+  it("follows a dark page;  resets to light only inside an inverted one", async () => {
+    const page = await ElementFixture.render<HTMLElement>(
+      `<div class="ui-dark"><ui-segment>Plain</ui-segment><ui-segment inverted><ui-segment>Nested</ui-segment></ui-segment></div>`
+    )
+    const [plain, inverted, nested] = [...page.querySelectorAll<UIHost>("ui-segment")].map(
+      (host) => host.shadowRoot!.firstElementChild!
+    )
+    expect(getComputedStyle(plain!).colorScheme).toBe("dark")
+    expect(getComputedStyle(plain!).getPropertyValue("--ui-inverted").trim()).toBe("0")
+    expect(getComputedStyle(inverted!).colorScheme).toBe("dark")
+    expect(getComputedStyle(nested!).colorScheme).toBe("light")
+    expect(getComputedStyle(nested!).getPropertyValue("--ui-scheme").trim()).toBe("light")
+    const { root: light } = await render(`<ui-segment>x</ui-segment>`)
+    expect(getComputedStyle(light).getPropertyValue("--ui-scheme").trim()).not.toBe("dark")
+  })
+
   it("is busy while loading, with an announcement;  aria-disabled while disabled", async () => {
     const { host, root } = await render(`<ui-segment loading disabled>x</ui-segment>`)
     expect(host.internals.ariaBusy).toBe("true")

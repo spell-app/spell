@@ -110,6 +110,15 @@ describe("OwnerContext.find()", () => {
     expect(OwnerContext.find(header, (tag) => (tag === "owner-card" ? "custom" : undefined))?.ownerNoun).toBe("custom")
     expect(OwnerContext.find(header, () => false)).toBeUndefined()
   })
+
+  it("hands a function lookup the element, so an owner can decide per instance", () => {
+    const header = render(
+      `<owner-card id="outer"><owner-card id="inner" data-owns="no"><owner-header id="h"></owner-header></owner-card></owner-card>`,
+      "h"
+    )
+    const lookup = (tag: string, element: Element) => tag === "owner-card" && element.getAttribute("data-owns") !== "no"
+    expect(OwnerContext.find(header, lookup)).toMatchObject({ owner: container.querySelector("#outer"), depth: 1 })
+  })
 })
 
 describe("OwnerContext helpers", () => {

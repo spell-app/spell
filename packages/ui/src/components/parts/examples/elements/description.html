@@ -1,5 +1,5 @@
 <!-- `src/components/parts/examples/description.html` as element markup. -->
-<!-- Owners are `stub-*` stand-ins (`StubOwner`) until card, feed, modal ... land;  each owns the parts Fomantic styles in it. -->
+<!-- Owners are the real elements, except `stub-*` stand-ins (`StubOwner`) for modal (an overlay, hidden until opened) and search (owns no parts yet). -->
 <div class="ui-stack">
   <section>
     <h4>Standalone</h4>
@@ -8,22 +8,22 @@
 
   <section>
     <h4>In owners</h4>
-    <stub-card>
+    <ui-card>
       <ui-content>
         <ui-header>Elliot</ui-header>
         <ui-description>Card description after a header.</ui-description>
       </ui-content>
-    </stub-card>
-    <div class="ui items">
-      <stub-item>
+    </ui-card>
+    <ui-items>
+      <ui-item>
         <ui-content><ui-description>Item description.</ui-description></ui-content>
-      </stub-item>
-    </div>
-    <div class="ui comments">
-      <stub-comment>
+      </ui-item>
+    </ui-items>
+    <ui-comments>
+      <ui-comment>
         <ui-content><ui-description>How artistic!</ui-description></ui-content>
-      </stub-comment>
-    </div>
+      </ui-comment>
+    </ui-comments>
     <stub-modal>
       <ui-content image>
         <img
@@ -34,19 +34,19 @@
         <ui-description>Modal description beside an image.</ui-description>
       </ui-content>
     </stub-modal>
-    <stub-list>
-      <div class="item">
+    <ui-list>
+      <ui-item>
         <ui-content><ui-description>List description.</ui-description></ui-content>
-      </div>
-    </stub-list>
-    <div class="ui steps">
-      <stub-step>
+      </ui-item>
+    </ui-list>
+    <ui-steps>
+      <ui-step>
         <ui-content>
           <ui-title>Billing</ui-title>
           <ui-description>Enter billing information</ui-description>
         </ui-content>
-      </stub-step>
-    </div>
+      </ui-step>
+    </ui-steps>
     <stub-search>
       <div class="results">
         <div class="result">
