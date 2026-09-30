@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 import { Fixture } from "$test/fixture"
@@ -111,7 +111,7 @@ describe("<ui-statistic> content", () => {
 describe("<ui-statistic> owner tokens and layout", () => {
   it("declares its layout, value sizes and --ui-inverted on the root, defaults included", async () => {
     const { root } = await render(`<ui-statistic value="1"></ui-statistic>`)
-    expect(token(root, "--ui-statistic-layout")).toBe("vertical")
+    expect(token(root, "--_ui-statistic-layout")).toBe("vertical")
     expect(token(root, "--ui-inverted")).toBe("0")
     expect(getComputedStyle(root).display).toBe("inline-flex")
     expect(getComputedStyle(root).flexDirection).toBe("column")
@@ -119,7 +119,7 @@ describe("<ui-statistic> owner tokens and layout", () => {
 
   it("lays a horizontal statistic out in a row, on the horizontal ladder", async () => {
     const { root } = await render(`<ui-statistic horizontal value="2,204" label="Views"></ui-statistic>`)
-    expect(token(root, "--ui-statistic-layout")).toBe("horizontal")
+    expect(token(root, "--_ui-statistic-layout")).toBe("horizontal")
     expect(getComputedStyle(root).flexDirection).toBe("row")
     const value = root.querySelector<HTMLElement>("[part=value]")!
     const label = root.querySelector<HTMLElement>("[part=label]")!
@@ -171,6 +171,69 @@ describe("<ui-statistic> owner tokens and layout", () => {
   })
 })
 
+describe("<ui-statistic> tokens from outside", () => {
+  /** Two statistics;  the second one's start margin is the horizontal spacing. */
+  const PAIR = `<ui-statistic value="1"></ui-statistic><ui-statistic value="2"></ui-statistic>`
+
+  /** The second statistic's start margin under `wrapper`. */
+  function spacing(wrapper: Element): string {
+    return getComputedStyle(wrapper.querySelectorAll("ui-statistic")[1]!.shadowRoot!.firstElementChild!).marginLeft
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><ui-statistic value="1"></ui-statistic><ui-statistic value="2" style="--ui-statistic-horizontal-spacing: 20px"></ui-statistic></div>`
+    )
+    expect(spacing(wrapper)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-statistic-horizontal-spacing: 20px">${PAIR}</section>`
+    )
+    expect(spacing(wrapper)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(statistic)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(statistic) { --ui-statistic-horizontal-spacing: 20px }</style>` +
+        `<ui-statistic value="1"></ui-statistic><ui-statistic class="themed" value="2"></ui-statistic></div>`
+    )
+    expect(spacing(wrapper)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-statistic-horizontal-spacing", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-statistic-horizontal-spacing")
+    })
+    const wrapper = await ElementFixture.render(`<div>${PAIR}</div>`)
+    expect(spacing(wrapper)).toBe("20px")
+  })
+
+  it("reaches the members of a group, set on the group", async () => {
+    const group = await render(
+      `<ui-statistics style="--ui-statistic-row-spacing: 20px"><ui-statistic value="1"></ui-statistic></ui-statistics>`
+    )
+    const member = group.host.querySelector("ui-statistic")!.shadowRoot!.firstElementChild!
+    expect(getComputedStyle(member).marginBottom).toBe("20px")
+  })
+
+  it("owner tokens:  a value size set on the statistic or above it reaches the value;  `horizontal` swaps it", async () => {
+    const { root } = await render(`<ui-statistic value="1" style="--ui-statistic-value-size: 30px"></ui-statistic>`)
+    expect(getComputedStyle(root.querySelector("[part=value]")!).fontSize).toBe("30px")
+    const above = await ElementFixture.render(
+      `<section style="--ui-statistic-value-size: 30px"><ui-statistic><ui-value>1</ui-value></ui-statistic></section>`
+    )
+    const value = above.querySelector("ui-value")!.shadowRoot!.firstElementChild!
+    expect(getComputedStyle(value).fontSize).toBe("30px")
+    const { root: horizontal } = await render(
+      `<ui-statistic horizontal value="1" style="--ui-statistic-value-size: 30px"></ui-statistic>`
+    )
+    expect(getComputedStyle(horizontal.querySelector("[part=value]")!).fontSize).not.toBe("30px")
+  })
+})
+
 describe("<ui-statistics>", () => {
   it.each([
     ["", "ui statistics"],
@@ -214,7 +277,7 @@ describe("<ui-statistics>", () => {
     const [first, second] = [...host.querySelectorAll<UIHost>("ui-statistic")].map(
       (statistic) => statistic.shadowRoot!.firstElementChild as HTMLElement
     )
-    expect(token(first!, "--ui-statistic-layout")).toBe("horizontal")
+    expect(token(first!, "--_ui-statistic-layout")).toBe("horizontal")
     expect(getComputedStyle(first!).flexDirection).toBe("row")
     expect(getComputedStyle(second!).marginLeft).toBe("0px")
     expect(second!.getBoundingClientRect().top).toBeGreaterThan(first!.getBoundingClientRect().bottom - 1)

@@ -14,7 +14,7 @@ import messageCSS from "./message.css?inline"
  * `<div class="content" part="content">` (the `header` shorthand, then the default slot) and the `dismissible`
  * close button.
  * - `icon` class (after the noun) while there's an icon, the `icon` shorthand or a slotted `slot="icon"`:
- *   `message.css` switches to the icon layout (`--ui-message-layout: icon`) by it.
+ *   `message.css` switches to the icon layout (`--_ui-message-layout: icon`) by it.
  * - OWNER of the `header` and `content` parts (`ownsParts`):  a slotted `<ui-header>` / `<ui-content>` finds it
  *   through `PartContext`, sets `:state(in-message)` and styles itself from `parts.css`, reading the owner tokens
  *   `message.css` declares on the root.  Registered by `define()`;  nothing to do here.

@@ -123,6 +123,7 @@ export class ElementDefinition {
         return Converters.keyOrValue(value as string | boolean | null | undefined, ValueSets.of(spec), where)
       case "size":
       case "color":
+      case "valueOnly":
       case "enum":
       case "valueAndKey":
       case "textAlign":
@@ -135,6 +136,8 @@ export class ElementDefinition {
         return Converters.number(value as string | number | null | undefined)
       case "json":
         return Converters.json(value)
+      case "icon":
+        return Converters.icon(value, spec.default)
       case "width":
       case "multiple":
         return value == null || value === "" ? undefined : (value as string | number)
@@ -160,6 +163,8 @@ export class ElementDefinition {
     if (spec.kind === "keyOnly" || spec.kind === "boolean") {
       return Converters.booleanToAttribute(Converters.boolean(value as string | boolean | null | undefined))
     }
+    // an `icon` turned off over its default reflects as `"false"`:  removing it would bring the default back
+    if (spec.kind === "icon" && value == null && typeof spec.default === "string") return FALSE
     if (value == null || value === false) return null
     if (value === true) return ""
     if (Array.isArray(value)) return value.join(",")
@@ -207,3 +212,6 @@ export type ElementDefinitionProps = {
   /** Translation;  default English identity. */
   dictionary?: Dictionary
 }
+
+/** Attribute text of an `icon` turned off. */
+const FALSE = "false"

@@ -128,12 +128,13 @@ export abstract class NativeFallback<V extends ComponentVocabulary = ComponentVo
 
   /**
    * Fomantic class string the real element would render, e.g. `ui small primary button`.
-   * - Every class-emitting vocabulary attribute is read from the host.
+   * - Every class-emitting vocabulary attribute is read from the host;  an absent one takes its vocabulary
+   *   `default`, as the element's props do (`<ui-sidebar>` => `ui left sidebar`).
    */
   protected classes(extra?: string): string {
     const input: Record<string, unknown> = {}
     for (const spec of this.vocabulary.attributes) {
-      const value = this.host.getAttribute(spec.name)
+      const value = this.host.getAttribute(spec.name) ?? NativeFallback.defaultText(spec.default)
       if (value == null) continue
       if (spec.kind === "keyOnly") input[spec.name] = Converters.boolean(value, spec.name)
       else if (spec.kind === "keyOrValueAndKey") input[spec.name] = Converters.keyOrValue(value, undefined)
@@ -141,6 +142,12 @@ export abstract class NativeFallback<V extends ComponentVocabulary = ComponentVo
     }
     this.builder ??= new ClassBuilder(this.vocabulary)
     return this.builder.build(input, { extra })
+  }
+
+  /** A vocabulary `default` as attribute text:  `true` => bare (`""`), `false` / `null` / absent => `null`. */
+  private static defaultText(value: string | number | boolean | null | undefined): string | null {
+    if (value == null || value === false) return null
+    return value === true ? "" : String(value)
   }
 
   /** The host's form (`internals.form`, else an ancestor `<form>`), or `null`. */

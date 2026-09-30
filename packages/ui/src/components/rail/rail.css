@@ -11,6 +11,10 @@
  * - A rail is a `<div>`, not an `<aside>`:  its content carries the meaning (a menu, an ad, related links), and
  *   two unnamed `<aside>` landmarks on one page break axe's `landmark-unique`.  Wrap the content in a named
  *   `<aside aria-label>` where it IS complementary.
+ * - Public tokens (`--ui-rail-*`, the theming surface) are NEVER declared here:  the token block reads each through a
+ *   private alias, `--_ui-rail-width: var(--ui-rail-width, 300px)`, and every rule reads the alias.  So a value set on
+ *   `:root`, an ancestor, the host, `::part(rail)` or in the app stylesheet reaches the box (`docs/theming.md`
+ *   "Component tokens").
  */
 
 @layer ui.components.rail.types, ui.components.rail.content, ui.components.rail.variations, ui.components.rail.states;
@@ -28,23 +32,23 @@
     display: none;
   }
 
-  /* Tokens:  one per `rail.variables` entry that still matters. */
+  /* Tokens:  one per `rail.variables` entry that still matters, each the private alias of its public token. */
   .ui.rail {
-    --ui-rail-width: 300px;
-    --ui-rail-distance: calc(var(--ui-font-size) * 4);
-    --ui-rail-close-distance: 2em;
-    --ui-rail-very-close-distance: 1em;
-    --ui-rail-dividing-distance: calc(var(--ui-font-size) * 5);
-    --ui-rail-dividing-border: var(--ui-border-width) solid var(--ui-border-color);
+    --_ui-rail-width: var(--ui-rail-width, 300px);
+    --_ui-rail-distance: var(--ui-rail-distance, calc(var(--ui-font-size) * 4));
+    --_ui-rail-close-distance: var(--ui-rail-close-distance, 2em);
+    --_ui-rail-very-close-distance: var(--ui-rail-very-close-distance, 1em);
+    --_ui-rail-dividing-distance: var(--ui-rail-dividing-distance, calc(var(--ui-font-size) * 5));
+    --_ui-rail-dividing-border: var(--ui-rail-dividing-border, var(--ui-border-width) solid var(--ui-border-color));
     /* Half the distance each side:  the rail's padding and margin. */
-    --_rail-split: calc(var(--ui-rail-distance) / 2);
+    --_rail-split: calc(var(--_ui-rail-distance) / 2);
   }
 
   .ui.rail {
     position: absolute;
     top: 0;
     box-sizing: border-box;
-    width: var(--ui-rail-width);
+    width: var(--_ui-rail-width);
     height: 100%;
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
   }
@@ -88,23 +92,23 @@
 
   /* Dividing:  a rule between the rail and its container, further away. */
   .ui.dividing.rail {
-    --_rail-split: calc(var(--ui-rail-dividing-distance) / 2);
-    width: calc(var(--ui-rail-width) + var(--_rail-split));
+    --_rail-split: calc(var(--_ui-rail-dividing-distance) / 2);
+    width: calc(var(--_ui-rail-width) + var(--_rail-split));
   }
   .ui.left.dividing.rail {
-    border-right: var(--ui-rail-dividing-border);
+    border-right: var(--_ui-rail-dividing-border);
   }
   .ui.right.dividing.rail {
-    border-left: var(--ui-rail-dividing-border);
+    border-left: var(--_ui-rail-dividing-border);
   }
 
   /* Close and very close:  nearer, and wider by the half distance saved. */
   .ui.close.rail {
-    --_rail-split: calc(var(--ui-rail-close-distance) / 2);
-    width: calc(var(--ui-rail-width) + var(--_rail-split));
+    --_rail-split: calc(var(--_ui-rail-close-distance) / 2);
+    width: calc(var(--_ui-rail-width) + var(--_rail-split));
   }
   .ui[class*="very close"].rail {
-    --_rail-split: calc(var(--ui-rail-very-close-distance) / 2);
+    --_rail-split: calc(var(--_ui-rail-very-close-distance) / 2);
   }
 
   /* Attached:  flush against the container. */

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -210,6 +210,62 @@ describe("<ui-table> shadow markup", () => {
     wrapper.style.width = "900px"
     await new Promise((resolve) => requestAnimationFrame(resolve))
     expect(getComputedStyle(stacking!.querySelector("td")!).display).toBe("table-cell")
+  })
+})
+
+describe("<ui-table> tokens from outside", () => {
+  /** The table's top-left radius, which `--ui-table-radius` drives. */
+  function radius(element: Element): string {
+    return getComputedStyle(element).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST, or on the table itself", async () => {
+    const { table: onHost } = await table(`style="--ui-table-radius: 12px"`)
+    expect(radius(onHost)).toBe("12px")
+    const { table: onTable } = await table("", HEAD + BODY, `style="--ui-table-radius: 12px"`)
+    expect(radius(onTable)).toBe("12px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-table-radius: 12px"><div><ui-table><table>${HEAD}${BODY}</table></ui-table></div></section>`
+    )
+    await settle()
+    expect(radius(wrapper.querySelector("table")!)).toBe("12px")
+  })
+
+  it("takes a token set through `::part(scroller)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(scroller) { --ui-table-radius: 12px }</style><ui-table class="themed"><table>${HEAD}${BODY}</table></ui-table></div>`
+    )
+    await settle()
+    expect(radius(wrapper.querySelector("table")!)).toBe("12px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-table-radius", "12px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-table-radius")
+    })
+    const { table: element } = await table()
+    expect(radius(element)).toBe("12px")
+  })
+
+  it("sizes the scroller by `--ui-table-row-height`", async () => {
+    const rows = Array.from({ length: 30 }, (_, index) => `<tr><td>${index}</td><td>x</td><td>y</td></tr>`).join("")
+    const { host } = await table(`scrolling style="--ui-table-row-height: 10px"`, `${HEAD}<tbody>${rows}</tbody>`)
+    expect(getComputedStyle(scroller(host)).maxBlockSize).toBe("40px")
+  })
+
+  it("variations:  `inverted` swaps the header background for its own token", async () => {
+    const red = "rgb(255, 0, 0)"
+    const head = (element: HTMLTableElement) => getComputedStyle(element.querySelector("th")!).backgroundColor
+    const { table: plain } = await table(`style="--ui-table-header-background: ${red}"`)
+    expect(head(plain)).toBe(red)
+    const { table: inverted } = await table(`inverted style="--ui-table-header-background: ${red}"`)
+    expect(head(inverted)).not.toBe(red)
+    const { table: themed } = await table(`inverted style="--ui-table-inverted-header-background: ${red}"`)
+    expect(head(themed)).toBe(red)
   })
 })
 

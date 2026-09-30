@@ -3,7 +3,7 @@
  * Schema:  `ComponentVocabulary` (`$/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:  `<ui-rail position="left" close="very">`
  *   => `ui left very close rail`.  `rail.css` keys on those words.
- * - `position` is the SIDE, emitted as a bare word (`left rail`), hence `kind: "color"` (a value-only kind, as the
+ * - `position` is the SIDE, emitted as a bare word (`left rail`), hence `kind: "valueOnly"` (as the
  *   menu's `position`).  Fomantic has no side-less rail:  without one the rail sits over its container's start.
  */
 
@@ -22,9 +22,9 @@ export const railVocabulary = {
     { name: "size", kind: "size", description: "Size of the rail's text, `mini` ... `massive`." },
     {
       name: "position",
-      kind: "color",
+      kind: "valueOnly",
       values: ["left", "right"],
-      description: 'Side:  `left` or `right` of its container.  NOTE: `kind: "color"` because it emits its value alone.'
+      description: "Side:  `left` or `right` of its container."
     },
     { name: "internal", kind: "keyOnly", description: "Inside its container's edge instead of outside it." },
     { name: "dividing", kind: "keyOnly", description: "A vertical rule between the rail and its container." },

@@ -1,5 +1,5 @@
 import { userEvent } from "vitest/browser"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -155,6 +155,50 @@ describe("<ui-accordion> panels", () => {
     expect(title.matches(":state(in-accordion)")).toBe(false)
     expect(getComputedStyle(titles[0]!).paddingLeft).toBe("16px")
     expect(getComputedStyle(title.shadowRoot!.querySelector(".title")!).paddingLeft).toBe("0px")
+  })
+})
+
+describe("<ui-accordion> tokens from outside", () => {
+  /** The first title's top padding. */
+  function padding(host: Element): string {
+    return getComputedStyle(parts(host).titles[0]!).paddingTop
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await accordion(`style="--ui-accordion-title-padding: 20px 0"`)
+    expect(padding(host)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-accordion-title-padding: 20px 0"><ui-accordion>${PANELS}</ui-accordion></section>`
+    )
+    expect(padding(wrapper.querySelector("ui-accordion")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(accordion)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(accordion) { --ui-accordion-title-padding: 20px 0 }</style>` +
+        `<ui-accordion class="themed">${PANELS}</ui-accordion></div>`
+    )
+    expect(padding(wrapper.querySelector("ui-accordion")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-accordion-title-padding", "20px 0")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-accordion-title-padding")
+    })
+    const { host } = await accordion()
+    expect(padding(host)).toBe("20px")
+  })
+
+  it("variations:  `styled` swaps the padding;  the open title's colour follows the title colour", async () => {
+    const { host } = await accordion(`styled style="--ui-accordion-title-padding: 20px 0"`)
+    expect(padding(host)).not.toBe("20px")
+    const red = "rgb(255, 0, 0)"
+    const { titles } = await accordion(`open="0" style="--ui-accordion-title-color: ${red}"`)
+    expect(getComputedStyle(titles[0]!).color).toBe(red)
   })
 })
 

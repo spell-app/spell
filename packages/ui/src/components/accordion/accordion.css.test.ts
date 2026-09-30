@@ -148,3 +148,13 @@ describe("accordion.css examples", () => {
     expect(style(tree, ".accordion").marginTop).toBe("0px")
   })
 })
+
+describe("accordion.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, accordionCSS])
+    const root = Fixture.render(
+      `<div style="--ui-accordion-title-padding: 20px 0"><div class="ui accordion"><div class="title">T</div><div class="content">C</div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.accordion > .title")!).paddingTop).toBe("20px")
+  })
+})

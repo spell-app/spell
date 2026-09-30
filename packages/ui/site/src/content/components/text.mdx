@@ -12,7 +12,7 @@ import Section from "../../components/Section.astro"
 import Variation from "../../components/Variation.astro"
 import VocabularyTable from "../../components/VocabularyTable.astro"
 // One tag, `ui-text`.  Its tokens share the `--ui-text-` prefix with the GLOBAL text colours (`--ui-text-color`,
-// `--ui-text-muted` ...), which `text.css` never declares, so `CssTokens` lists only the component's own.
+// `--ui-text-muted` ...);  `CssTokens` leaves out the foundation's names, so it lists only the component's own.
 
 <Section title="Types">
   <Example title="Text" description="A text can be formatted with different colors.">
@@ -48,13 +48,19 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-text-*` tokens on the `text` part.  The hues themselves are global colour tokens
-  (`--ui-red` and friends), so change those to recolour every component at once.
+  Theme with the public `--ui-text-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or on the
+  inner box through `::part(text)`.  They inherit into the shadow root, where the sheet reads each through a private
+  alias, so nothing inside blocks them.  The hues themselves are global colour tokens (`--ui-red` and friends), so
+  change those to recolour every component at once.
 
 ```css
-ui-text::part(text) {
-  --ui-text-line-height: 1.2;
+/* every text on the page */
+:root {
   --ui-text-disabled-opacity: 0.6;
+}
+/* one region */
+.headline {
+  --ui-text-line-height: 1.2;
 }
 ```
 

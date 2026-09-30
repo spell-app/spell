@@ -95,7 +95,7 @@ describe("dropdown.css examples", () => {
     adoptIntoPage(SHEETS)
     const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
     const dropdown = root.querySelector<HTMLElement>(".ui.selection.dropdown")!
-    dropdown.style.setProperty("--ui-dropdown-anchor", "--test-anchor")
+    dropdown.style.setProperty("--_ui-dropdown-anchor", "--test-anchor")
     const menu = open(dropdown)
     const style = getComputedStyle(menu)
     expect(style.positionArea).not.toBe("")
@@ -136,6 +136,14 @@ describe("dropdown.css examples", () => {
     expect(Math.abs(menu.getBoundingClientRect().top - dropdown.getBoundingClientRect().bottom)).toBeLessThanOrEqual(1)
     expect(getComputedStyle(menu.querySelector(".active.item")!).fontWeight).toBe("700")
     expect(getComputedStyle(menu.querySelector(".filtered.item")!).display).toBe("none")
+  })
+
+  it("takes a public token from a wrapper (static markup)", () => {
+    adoptIntoPage(SHEETS)
+    const root = Fixture.render(
+      `<div style="--ui-dropdown-radius: 12px"><div class="ui selection dropdown"><span class="text">A</span></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.dropdown")!).borderTopLeftRadius).toBe("12px")
   })
 
   it("scales by size;  medium is the default", () => {

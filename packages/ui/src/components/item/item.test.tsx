@@ -147,7 +147,7 @@ describe("<ui-item> owned", () => {
     expect(image.getAttribute("alt")).toBe("")
     await (await UI.load()).icons.get("house")
     await expect.poll(() => box.querySelector("[part~=icon] svg")).not.toBeNull()
-    expect(getComputedStyle(box).getPropertyValue("--ui-item-media").trim()).toBe("1")
+    expect(getComputedStyle(box).getPropertyValue("--_ui-item-media").trim()).toBe("1")
   })
 
   it("adopts its owner's sheet", async () => {

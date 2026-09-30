@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import type { UIHost } from "$/elements"
 import { expectAccessible } from "$test/a11y"
@@ -123,6 +123,49 @@ describe("<ui-progress> numbers", () => {
     expect(bars[0]!.style.width).toBe("")
     expect(root.hasAttribute("data-percent")).toBe(false)
     expect(host.matches(":state(indeterminate)")).toBe(true)
+  })
+})
+
+describe("<ui-progress> tokens from outside", () => {
+  /** The first bar's height. */
+  function height(host: Element): string {
+    return getComputedStyle(parts(host).bars[0]!).height
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await progress(`<ui-progress value="40" style="--ui-progress-bar-height: 20px"></ui-progress>`)
+    expect(height(host)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-progress-bar-height: 20px"><ui-progress value="40"></ui-progress></section>`
+    )
+    expect(height(wrapper.querySelector("ui-progress")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(progress)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(progress) { --ui-progress-bar-height: 20px }</style>` +
+        `<ui-progress class="themed" value="40"></ui-progress></div>`
+    )
+    expect(height(wrapper.querySelector("ui-progress")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-progress-bar-height", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-progress-bar-height")
+    })
+    const { host } = await progress(`<ui-progress value="40"></ui-progress>`)
+    expect(height(host)).toBe("20px")
+  })
+
+  it("a size swaps the bar height", async () => {
+    const { host } = await progress(
+      `<ui-progress size="large" value="40" style="--ui-progress-bar-height: 20px"></ui-progress>`
+    )
+    expect(height(host)).not.toBe("20px")
   })
 })
 

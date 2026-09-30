@@ -4,7 +4,7 @@
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-toast type="success" inverted>` => `ui success inverted toast`.  The element adds the layout words after
  *   the noun (`vertical`, `actions`, `attached top`, `compact`), as Fomantic's JS did.
- * - `type` and `color` are both remaps (`colors.css`);  `type` is `kind: "color"` because it emits its value alone
+ * - `type` and `color` are both remaps (`colors.css`);  `type` is `kind: "valueOnly"` because it emits its value alone
  *   (`ui success toast`), as message's `state` does.  `neutral` (the default look) has no remap:  `toast.css` owns it.
  * - `UI.toast({...})` (`ToastStack`) builds one of these per call, in a container per position;  a `<ui-toast>`
  *   written in the page shows where it is.
@@ -24,10 +24,9 @@ export const toastVocabulary = {
   attributes: [
     {
       name: "type",
-      kind: "color",
+      kind: "valueOnly",
       values: ["info", "success", "warning", "error", "neutral"],
-      description:
-        'Consequence (Fomantic\'s `class`), tinting it like a colour;  `error` also announces it as an alert.  NOTE: `kind: "color"` because it emits its value alone.'
+      description: "Consequence (Fomantic's `class`), tinting it like a colour;  `error` also announces it as an alert."
     },
     { name: "color", kind: "color", description: "Hue:  a filled toast in that colour." },
     { name: "inverted", kind: "keyOnly", description: "The dark scheme;  a coloured one takes its light variant." },
@@ -35,8 +34,10 @@ export const toastVocabulary = {
     { name: "message", kind: "string", description: "Body text;  slotted content follows it." },
     {
       name: "icon",
-      kind: "string",
-      description: "Icon name beside the content;  bare `icon` uses the type's own (info, check, warning, cross)."
+      kind: "icon",
+      description:
+        'Icon name beside the content;  bare `icon` (or `"true"`, as frameworks write it) uses the type\'s own ' +
+        "(info, check, warning, cross)."
     },
     { name: "closable", kind: "boolean", description: "Shows a close icon (Fomantic's `closeIcon`)." },
     {

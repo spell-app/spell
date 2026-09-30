@@ -2,8 +2,10 @@ import { onSettled, type Accessor } from "solid-js"
 
 import {
   Cell,
+  Converters,
   UIElement,
   type AttributeName,
+  type AttributeSpec,
   type ElementDefinition,
   type MenuEntry,
   type MenuOption,
@@ -18,7 +20,7 @@ import { itemVocabulary } from "$/components/item"
  * - Read on connect and on every mutation of the host's subtree (`MutationObserver`:  children, attributes,
  *   text) -- that also covers what `slotchange` would, and attribute / text edits it wouldn't.
  * - Plain items become `MenuOption`s:  `value` (default `text`), `text` (default the text content), `description`,
- *   `icon`, `image`, `flag`, `disabled`, `selected`.  The dropdown renders them in ITS shadow root, because
+ *   `icon`, `image`, `flag`, `disabled`, `selected` (or its alias `active`, as `UIItem` reads it).  The dropdown renders them in ITS shadow root, because
  *   the listbox must share a tree with the combobox for `aria-activedescendant`.
  * - RICH items (element children) keep their markup:  the item gets a generated `slot` name and the dropdown
  *   projects it into its menu row, so the content stays live (listeners, framework-rendered children).
@@ -81,11 +83,12 @@ export class SlottedItems {
         value: (read("value") as string | undefined) ?? text,
         text,
         description: read("description") as string | undefined,
-        icon: read("icon"),
+        // `""` is a bare `icon`:  an item has no icon of its own to default to
+        icon: (read("icon") as string | undefined) || undefined,
         image: read("image"),
         flag: read("flag"),
         disabled: read("disabled") as boolean,
-        selected: read("selected") as boolean
+        selected: (read("selected") as boolean) || Converters.boolean(element.getAttribute(ACTIVE), ACTIVE)
       }
     }
     const cached = this.cache.get(element)
@@ -105,9 +108,11 @@ export class SlottedItems {
    */
   private static value(element: Element, definition: ElementDefinition | undefined, name: string): unknown {
     if (!definition) {
-      const spec = itemVocabulary.attributes.find((attribute) => attribute.name === name)!
+      const spec: AttributeSpec = itemVocabulary.attributes.find((attribute) => attribute.name === name)!
       const raw = element.getAttribute(spec.name)
-      return spec.kind === "keyOnly" ? raw !== null && raw !== "false" && raw !== "no" : (raw ?? undefined)
+      if (spec.kind === "keyOnly") return Converters.boolean(raw, spec.name)
+      if (spec.kind === "icon") return Converters.icon(raw, spec.default)
+      return raw ?? undefined
     }
     const attribute = definition.attribute(name)
     if (element.matches(":defined")) {
@@ -122,6 +127,9 @@ export class SlottedItems {
     return keys.length === Object.keys(a).length && keys.every((key) => a[key] === b[key])
   }
 }
+
+/** The item's alias of `selected` (not a vocabulary attribute:  `UIItem` reads it itself). */
+const ACTIVE = "active"
 
 /** Prefix of generated slot names for rich items. */
 const SLOT_PREFIX = "ui-item-"

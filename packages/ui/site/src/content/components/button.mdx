@@ -319,6 +319,33 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
   </Variation>
 </Section>
 
+<Section title="State">
+  Fomantic's `state` behaviour (`$('.button').state({ text: { inactive, active } })`) is two attributes on the
+  button, not an element of its own:  a `toggle` button already switches `active`, so only the texts were missing.
+  `inactive-text` replaces the content while the button is not `active`, `active-text` while it is.  With only one of
+  them, the button's own content shows in the other state.
+
+  <Example title="State texts" description="The label says the state:  click to follow, click again to unfollow." class="ui-cluster">
+    <ui-button toggle inactive-text="Follow" active-text="Following"></ui-button>
+    <ui-button toggle primary active inactive-text="Subscribe" active-text="Subscribed"></ui-button>
+  </Example>
+  <Example title="One text" description="With only `active-text`, the content is the inactive label." class="ui-cluster">
+    <ui-button toggle icon="bell" active-text="Watching">Watch</ui-button>
+  </Example>
+
+  Because the label SAYS the state, a `toggle` button with a state text leaves `aria-pressed` off:  a toggle button
+  whose name changes would announce the state twice (WAI-ARIA APG).  Listen for `ui-toggle` as usual.
+
+```js
+document.querySelector("ui-button[active-text]").addEventListener("ui-toggle", (event) => {
+  event.detail.active ? follow() : unfollow()
+})
+```
+
+  Not ported:  Fomantic's hover texts (`activate` / `deactivate`, which change the name under the pointer), `flash`,
+  `sync` across buttons, and the API-request and `automatic` states.
+</Section>
+
 <Section title="Behaviour">
   Attributes are the vocabulary of the element:  most of them turn into Fomantic's class words in the shadow root
   (`<ui-button size="small" primary basic>` renders `ui small basic primary button`).  A boolean attribute is true when
@@ -335,15 +362,30 @@ toggle.addEventListener("ui-toggle", (event) => console.log(event.detail.active)
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-button-*` tokens on the element or any ancestor;  they inherit into the shadow root.
-  The group's `--ui-buttons-*` tokens are private:  set the button tokens on the group instead.
+  Theme with the public `--ui-button-*` tokens:  set one on the element, on any ancestor (a group, a toolbar,
+  `:root`), or on the inner box through `::part(button)`.  They inherit into the shadow root, where the sheet reads
+  each through a private alias, so nothing inside blocks them.  Set on a `<ui-buttons>`, they reach every button in
+  the group.
 
 ```css
-ui-button {
+/* every button on the page */
+:root {
   --ui-button-radius: 999px;
+}
+/* one region */
+.toolbar {
   --ui-button-padding-inline: 1.5em;
 }
+/* one kind, on its box */
+ui-button.cta::part(button) {
+  --ui-button-background: var(--ui-yellow);
+}
 ```
+
+  Variations build on the base tokens:  `compact` scales your `--ui-button-padding-block`, while `circular`
+  replaces the radius whatever you set.  To restyle a variation itself, target it with plain properties:
+  `ui-button[circular]::part(button) { border-radius: 0.5em }`.  Never set the `--_ui-*` / `--_button-*` names:  they're the
+  sheet's private plumbing.
 
   <CssTokens family="button" />
 </Section>

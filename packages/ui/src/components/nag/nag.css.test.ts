@@ -117,3 +117,11 @@ function luminance(color: string): number {
   const [r, g, b] = context.getImageData(0, 0, 1, 1).data
   return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
 }
+
+describe("nag.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, nagCSS])
+    const root = Fixture.render(`<div style="--ui-nag-radius: 20px"><div class="ui nag">x</div></div>`)
+    expect(getComputedStyle(root.querySelector(".ui.nag")!).borderBottomLeftRadius).toBe("20px")
+  })
+})

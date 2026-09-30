@@ -205,8 +205,20 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-icon-*` tokens.  Size tokens (`--ui-icon-size-huge` ...) rescale a whole step;  the
-  glyph itself takes `currentColor`, so `color` on the icon or its parent works too.
+  Theme with the public `--ui-icon-*` tokens:  set one on the element, on any ancestor (a `<ui-icons>` group,
+  `:root`), or on the box through `::part(icon)`.  They inherit into the shadow root, where the sheet reads each
+  through a private alias, so nothing inside blocks them.  Size tokens (`--ui-icon-size-huge` ...) rescale a whole
+  step;  `circular` and `bordered` replace the width and height.  The glyph itself takes `currentColor`, so `color`
+  on the icon or its parent works too.
+
+```css
+:root {
+  --ui-icon-distance: 0.5em;
+}
+.toolbar {
+  --ui-icon-size-large: 1.25;
+}
+```
 
   <CssTokens family="icon" />
 </Section>

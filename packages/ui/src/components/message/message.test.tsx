@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { PART_OWNER_TOKENS, type MessageDismissDetail } from "$/components/components.types"
 import { UI } from "$/runtime"
@@ -104,6 +104,64 @@ describe("<ui-message> content", () => {
     expect(getComputedStyle(plain).getPropertyValue(PART_OWNER_TOKENS.messageLayout).trim()).toBe("block")
     const { root: icon } = await message(`<ui-message icon="envelope">x</ui-message>`)
     expect(getComputedStyle(icon).getPropertyValue(PART_OWNER_TOKENS.messageLayout).trim()).toBe("icon")
+  })
+})
+
+describe("<ui-message> tokens from outside", () => {
+  /** The box's top-left radius. */
+  function radius(root: Element): string {
+    return getComputedStyle(root).borderTopLeftRadius
+  }
+
+  /** The root of the first `<ui-message>` in `wrapper`. */
+  function rootIn(wrapper: Element): Element {
+    return wrapper.querySelector("ui-message")!.shadowRoot!.querySelector("[part~=message]")!
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { root } = await message(`<ui-message style="--ui-message-radius: 20px">Hi</ui-message>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-message-radius: 20px"><ui-message>Hi</ui-message></section>`
+    )
+    expect(radius(rootIn(wrapper))).toBe("20px")
+  })
+
+  it("takes a token set through `::part(message)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(message) { --ui-message-radius: 20px }</style><ui-message class="themed">Hi</ui-message></div>`
+    )
+    expect(radius(rootIn(wrapper))).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-message-radius", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-message-radius")
+    })
+    const { root } = await message(`<ui-message>Hi</ui-message>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("`attached` squares its bottom corners, keeping the token's top ones", async () => {
+    const { root } = await message(`<ui-message attached style="--ui-message-radius: 20px">Hi</ui-message>`)
+    expect(radius(root)).toBe("20px")
+    expect(getComputedStyle(root).borderBottomLeftRadius).toBe("0px")
+  })
+
+  it("owner tokens:  a header size set on the message or above it reaches a slotted header", async () => {
+    const html = `<ui-message style="--ui-message-header-font-size: 30px"><ui-header>H</ui-header></ui-message>`
+    const { host } = await message(html)
+    const header = host.querySelector("ui-header")!.shadowRoot!.querySelector("[part~=header]")!
+    expect(getComputedStyle(header).fontSize).toBe("30px")
+    const above = await ElementFixture.render(
+      `<section style="--ui-message-header-font-size: 30px"><ui-message><ui-header>H</ui-header></ui-message></section>`
+    )
+    const inner = above.querySelector("ui-header")!.shadowRoot!.querySelector("[part~=header]")!
+    expect(getComputedStyle(inner).fontSize).toBe("30px")
   })
 })
 

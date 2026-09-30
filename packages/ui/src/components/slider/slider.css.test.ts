@@ -165,6 +165,13 @@ describe("slider.css examples", () => {
     expect(getComputedStyle(root.querySelector(".thumb")!).backgroundColor).toBe(red)
   })
 
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt([...foundationCSS, colorsCSS, sliderCSS, NO_TRANSITIONS])
+    const box = Fixture.render(`<div style="--ui-slider-track-height: 10px"><div class="ui slider">
+      <div class="inner"><div class="track"></div></div></div></div>`)
+    expect(getComputedStyle(box.querySelector(".track")!).height).toBe("10px")
+  })
+
   it("scales with `size`", () => {
     const thumb = (classes: string) =>
       render(classes, "", `<div class="thumb"></div>`).querySelector(".thumb")!.getBoundingClientRect().width

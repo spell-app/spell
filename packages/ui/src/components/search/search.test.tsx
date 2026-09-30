@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -157,7 +157,7 @@ describe("<ui-search> markup", () => {
     expect(results.getAttribute("popover")).toBe("manual")
     expect(results.hasAttribute("role")).toBe(false)
     expect(status.textContent).toBe("")
-    expect(root.style.getPropertyValue("--ui-search-anchor")).toMatch(/^--ui-search-\d+$/)
+    expect(root.style.getPropertyValue("--_ui-search-anchor")).toMatch(/^--ui-search-\d+$/)
     await expect.poll(() => root.querySelector(".search.icon svg")).not.toBeNull()
   })
 
@@ -491,6 +491,46 @@ describe("<ui-search> forms", () => {
     await userEvent.click(page.querySelector("button")!)
     await ElementFixture.tick()
     expect(changes).toEqual([expect.objectContaining({ value: "hello" })])
+  })
+})
+
+describe("<ui-search> tokens from outside", () => {
+  /** The prompt's top-left radius, which `--ui-search-prompt-radius` drives (through the input's own token). */
+  function radius(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("input.prompt")!).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await search(`<ui-search style="--ui-search-prompt-radius: 3px"></ui-search>`)
+    expect(radius(host)).toBe("3px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-search-prompt-radius: 3px"><div><ui-search></ui-search></div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-search")!)).toBe("3px")
+  })
+
+  it("takes a token set through `::part(input)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(input) { --ui-search-prompt-radius: 3px }</style><ui-search class="themed"></ui-search></div>`
+    )
+    expect(radius(wrapper.querySelector("ui-search")!)).toBe("3px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-search-prompt-radius", "3px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-search-prompt-radius")
+    })
+    const { host } = await search(`<ui-search></ui-search>`)
+    expect(radius(host)).toBe("3px")
+  })
+
+  it("keeps Fomantic's round prompt when nothing is set", async () => {
+    const { host } = await search(`<ui-search></ui-search>`)
+    expect(parseFloat(radius(host))).toBeGreaterThan(100)
   })
 })
 

@@ -26,8 +26,14 @@
  *   rules).  `inverted` swaps in the opposite scheme's ink, and a coloured inverted popup the hue's `-inverted`
  *   variant (Fomantic's "light" hue).  The host resets the remap and `--ui-scale`, so a popup opened from inside
  *   a red message or a large button isn't red or large.
+ * - Public tokens (`--ui-popup-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-popup-radius: var(--ui-popup-radius, var(--ui-radius))` (the duration on the
+ *   host, which transitions too), and every rule reads the alias, `popup.anchored.css` included.  So a value set
+ *   on `:root`, an ancestor, the host, `::part(popup)` or in the app stylesheet reaches the box (`docs/theming.md`
+ *   "Component tokens").  `wide` / `very wide` swap the max width for `--ui-popup-wide-width` /
+ *   `--ui-popup-very-wide-width`, back to the base on phones.
  * - OWNER side:  slotted `<ui-header>` / `<ui-content>` style themselves from `parts.css` (context `in-popup`),
- *   reading `--ui-popup-header-font-size` / `--ui-popup-header-distance` from the root.
+ *   reading the aliases `--_ui-popup-header-font-size` / `--_ui-popup-header-distance`, declared on every root.
  * - NOTE: left out, on purpose:
  *   - `.ui.invisible.popup` / `.ui.animating.popup`:  script states the popover replaces
  *   - the nested-grid coupling's `rem` margins:  `.ui.popup > .ui.grid` gets the same inset in `em`
@@ -55,7 +61,7 @@
     --ui-color-on: initial;
     --ui-color-inverted-on: initial;
     --ui-scale: initial;
-    --ui-popup-duration: var(--ui-duration-normal);
+    --_ui-popup-duration: var(--ui-popup-duration, var(--ui-duration-normal));
     position: absolute;
     inset: auto;
     z-index: var(--ui-z-popup);
@@ -72,7 +78,7 @@
     position-try-fallbacks: flip-block, flip-inline;
     container-type: anchored;
     transition-property: display, overlay;
-    transition-duration: var(--ui-popup-duration);
+    transition-duration: var(--_ui-popup-duration);
     transition-behavior: allow-discrete;
   }
   :host(:not(:popover-open)) {
@@ -82,31 +88,31 @@
     width: anchor-size(width);
   }
 
-  /* Tokens:  one per `popup.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one private alias per `popup.variables` entry that still matters, from the global tokens. */
   .ui.popup {
-    --ui-popup-background: var(--ui-surface);
-    --ui-popup-color: var(--ui-text-color);
-    --ui-popup-border-color: var(--ui-border-color-strong);
-    --ui-popup-shadow: var(--ui-shadow-floating);
-    --ui-popup-radius: var(--ui-radius);
-    --ui-popup-padding: 0.833em 1em;
-    --ui-popup-max-width: 250px;
-    --ui-popup-wide-width: 350px;
-    --ui-popup-very-wide-width: 550px;
-    --ui-popup-arrow-size: 0.71428em;
-    --ui-popup-arrow-edge-distance: 1em;
-    --ui-popup-arrow-offset: calc(var(--ui-popup-arrow-size) / -2 + 0.05em);
-    --ui-popup-arrow-edge: var(--ui-border-color-strong);
-    --ui-popup-distance: var(--ui-popup-arrow-size);
-    --ui-popup-inverted-background: var(--ui-ink);
-    --ui-popup-inverted-color: var(--ui-surface);
-    --ui-popup-loading-opacity: 0.3;
-    /* Owner tokens (`parts.css`):  declared on every root. */
-    --ui-popup-header-font-size: 1.14285em;
-    --ui-popup-header-distance: 0.5em;
+    --_ui-popup-background: var(--ui-popup-background, var(--ui-surface));
+    --_ui-popup-color: var(--ui-popup-color, var(--ui-text-color));
+    --_ui-popup-border-color: var(--ui-popup-border-color, var(--ui-border-color-strong));
+    --_ui-popup-shadow: var(--ui-popup-shadow, var(--ui-shadow-floating));
+    --_ui-popup-radius: var(--ui-popup-radius, var(--ui-radius));
+    --_ui-popup-padding: var(--ui-popup-padding, 0.833em 1em);
+    --_ui-popup-max-width: var(--ui-popup-max-width, 250px);
+    --_ui-popup-wide-width: var(--ui-popup-wide-width, 350px);
+    --_ui-popup-very-wide-width: var(--ui-popup-very-wide-width, 550px);
+    --_ui-popup-arrow-size: var(--ui-popup-arrow-size, 0.71428em);
+    --_ui-popup-arrow-edge-distance: var(--ui-popup-arrow-edge-distance, 1em);
+    --_ui-popup-arrow-offset: var(--ui-popup-arrow-offset, calc(var(--_ui-popup-arrow-size) / -2 + 0.05em));
+    --_ui-popup-arrow-edge: var(--ui-popup-arrow-edge, var(--ui-border-color-strong));
+    --_ui-popup-distance: var(--ui-popup-distance, var(--_ui-popup-arrow-size));
+    --_ui-popup-inverted-background: var(--ui-popup-inverted-background, var(--ui-ink));
+    --_ui-popup-inverted-color: var(--ui-popup-inverted-color, var(--ui-surface));
+    --_ui-popup-loading-opacity: var(--ui-popup-loading-opacity, 0.3);
+    /* ## Owner tokens (`parts.css`):  declared on every root. */
+    --_ui-popup-header-font-size: var(--ui-popup-header-font-size, 1.14285em);
+    --_ui-popup-header-distance: var(--ui-popup-header-distance, 0.5em);
     /* Arrow placement, set per position below. */
     --_popup-arrow-shadow: 1px 1px 0 0 var(--_popup-arrow-edge);
-    --_popup-arrow-edge: var(--ui-color, var(--ui-popup-arrow-edge));
+    --_popup-arrow-edge: var(--ui-color, var(--_ui-popup-arrow-edge));
     position: absolute;
     top: 0;
     right: 0;
@@ -114,14 +120,14 @@
     box-sizing: border-box;
     display: none;
     min-width: min-content;
-    max-width: var(--ui-popup-max-width);
+    max-width: var(--_ui-popup-max-width);
     margin: 0;
-    padding: var(--ui-popup-padding);
-    border: var(--ui-border-width) solid var(--ui-color, var(--ui-popup-border-color));
-    border-radius: var(--ui-popup-radius);
-    background: var(--ui-color, var(--ui-popup-background));
-    box-shadow: var(--ui-popup-shadow);
-    color: var(--ui-color-on, var(--ui-popup-color));
+    padding: var(--_ui-popup-padding);
+    border: var(--ui-border-width) solid var(--ui-color, var(--_ui-popup-border-color));
+    border-radius: var(--_ui-popup-radius);
+    background: var(--ui-color, var(--_ui-popup-background));
+    box-shadow: var(--_ui-popup-shadow);
+    color: var(--ui-color-on, var(--_ui-popup-color));
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     font-style: normal;
@@ -139,8 +145,8 @@
     opacity: 1;
     transform: none;
     transition:
-      opacity var(--ui-popup-duration) var(--ui-ease),
-      transform var(--ui-popup-duration) var(--ui-ease);
+      opacity var(--_ui-popup-duration) var(--ui-ease),
+      transform var(--_ui-popup-duration) var(--ui-ease);
   }
   :host(:not(:popover-open)) > .ui.popup {
     opacity: 0;
@@ -158,8 +164,8 @@
     content: "";
     position: absolute;
     z-index: 1;
-    width: var(--ui-popup-arrow-size);
-    height: var(--ui-popup-arrow-size);
+    width: var(--_ui-popup-arrow-size);
+    height: var(--_ui-popup-arrow-size);
     background: inherit;
     box-shadow: var(--_popup-arrow-shadow);
     transform: rotate(45deg);
@@ -175,12 +181,12 @@
   .ui.popup > .header {
     padding: 0;
     font-family: var(--ui-font-family-heading);
-    font-size: var(--ui-popup-header-font-size);
+    font-size: var(--_ui-popup-header-font-size);
     font-weight: var(--ui-font-weight-bold);
     line-height: 1.2;
   }
   .ui.popup > .header + .content {
-    padding-top: var(--ui-popup-header-distance);
+    padding-top: var(--_ui-popup-header-distance);
   }
 
   /* Coupling:  a grid right inside a popup sits flush with its padding. */
@@ -198,19 +204,19 @@
 @layer ui.components.popup.variations {
   /* ## Position:  the gap on the side facing the target, and the arrow on that edge. */
   .ui.top.popup {
-    margin: 0 0 var(--ui-popup-distance);
+    margin: 0 0 var(--_ui-popup-distance);
   }
   .ui.bottom.popup {
-    margin: var(--ui-popup-distance) 0 0;
+    margin: var(--_ui-popup-distance) 0 0;
     --_popup-arrow-shadow: -1px -1px 0 0 var(--_popup-arrow-edge);
   }
   .ui.left.center.popup {
-    margin: 0 var(--ui-popup-distance) 0 0;
+    margin: 0 var(--_ui-popup-distance) 0 0;
     transform-origin: right 50%;
     --_popup-arrow-shadow: 1px -1px 0 0 var(--_popup-arrow-edge);
   }
   .ui.right.center.popup {
-    margin: 0 0 0 var(--ui-popup-distance);
+    margin: 0 0 0 var(--_ui-popup-distance);
     transform-origin: left 50%;
     --_popup-arrow-shadow: -1px 1px 0 0 var(--_popup-arrow-edge);
   }
@@ -235,36 +241,36 @@
 
   /* Below */
   .ui.bottom.center.popup::before {
-    inset: var(--ui-popup-arrow-offset) auto auto 50%;
-    margin-left: var(--ui-popup-arrow-offset);
+    inset: var(--_ui-popup-arrow-offset) auto auto 50%;
+    margin-left: var(--_ui-popup-arrow-offset);
   }
   .ui.bottom.left.popup::before {
-    inset: var(--ui-popup-arrow-offset) auto auto var(--ui-popup-arrow-edge-distance);
+    inset: var(--_ui-popup-arrow-offset) auto auto var(--_ui-popup-arrow-edge-distance);
   }
   .ui.bottom.right.popup::before {
-    inset: var(--ui-popup-arrow-offset) var(--ui-popup-arrow-edge-distance) auto auto;
+    inset: var(--_ui-popup-arrow-offset) var(--_ui-popup-arrow-edge-distance) auto auto;
   }
 
   /* Above */
   .ui.top.center.popup::before {
-    inset: auto auto var(--ui-popup-arrow-offset) 50%;
-    margin-left: var(--ui-popup-arrow-offset);
+    inset: auto auto var(--_ui-popup-arrow-offset) 50%;
+    margin-left: var(--_ui-popup-arrow-offset);
   }
   .ui.top.left.popup::before {
-    inset: auto auto var(--ui-popup-arrow-offset) var(--ui-popup-arrow-edge-distance);
+    inset: auto auto var(--_ui-popup-arrow-offset) var(--_ui-popup-arrow-edge-distance);
   }
   .ui.top.right.popup::before {
-    inset: auto var(--ui-popup-arrow-edge-distance) var(--ui-popup-arrow-offset) auto;
+    inset: auto var(--_ui-popup-arrow-edge-distance) var(--_ui-popup-arrow-offset) auto;
   }
 
   /* Beside */
   .ui.left.center.popup::before {
-    inset: 50% var(--ui-popup-arrow-offset) auto auto;
-    margin-top: var(--ui-popup-arrow-offset);
+    inset: 50% var(--_ui-popup-arrow-offset) auto auto;
+    margin-top: var(--_ui-popup-arrow-offset);
   }
   .ui.right.center.popup::before {
-    inset: 50% auto auto var(--ui-popup-arrow-offset);
-    margin-top: var(--ui-popup-arrow-offset);
+    inset: 50% auto auto var(--_ui-popup-arrow-offset);
+    margin-top: var(--_ui-popup-arrow-offset);
   }
 
   /*
@@ -275,12 +281,12 @@
    */
   .ui[class*="left top"].left.popup,
   .ui[class*="left bottom"].left.popup {
-    margin: 0 var(--ui-popup-distance) 0 0;
+    margin: 0 var(--_ui-popup-distance) 0 0;
     --_popup-arrow-shadow: 1px -1px 0 0 var(--_popup-arrow-edge);
   }
   .ui[class*="right top"].right.popup,
   .ui[class*="right bottom"].right.popup {
-    margin: 0 0 0 var(--ui-popup-distance);
+    margin: 0 0 0 var(--_ui-popup-distance);
     --_popup-arrow-shadow: -1px 1px 0 0 var(--_popup-arrow-edge);
   }
   .ui[class*="left top"].left.popup {
@@ -296,16 +302,16 @@
     transform-origin: left bottom;
   }
   .ui[class*="left top"].left.popup::before {
-    inset: var(--ui-popup-arrow-edge-distance) var(--ui-popup-arrow-offset) auto auto;
+    inset: var(--_ui-popup-arrow-edge-distance) var(--_ui-popup-arrow-offset) auto auto;
   }
   .ui[class*="left bottom"].left.popup::before {
-    inset: auto var(--ui-popup-arrow-offset) var(--ui-popup-arrow-edge-distance) auto;
+    inset: auto var(--_ui-popup-arrow-offset) var(--_ui-popup-arrow-edge-distance) auto;
   }
   .ui[class*="right top"].right.popup::before {
-    inset: var(--ui-popup-arrow-edge-distance) auto auto var(--ui-popup-arrow-offset);
+    inset: var(--_ui-popup-arrow-edge-distance) auto auto var(--_ui-popup-arrow-offset);
   }
   .ui[class*="right bottom"].right.popup::before {
-    inset: auto auto var(--ui-popup-arrow-edge-distance) var(--ui-popup-arrow-offset);
+    inset: auto auto var(--_ui-popup-arrow-edge-distance) var(--_ui-popup-arrow-offset);
   }
 
   /* Flipped by `position-try-fallbacks`:  see `popup.anchored.css`. */
@@ -317,18 +323,18 @@
 
   /* ## Widths */
   .ui.fixed.popup {
-    width: var(--ui-popup-max-width);
+    width: var(--_ui-popup-max-width);
   }
   .ui.wide.popup {
-    --ui-popup-max-width: var(--ui-popup-wide-width);
+    --_ui-popup-max-width: var(--_ui-popup-wide-width);
   }
   .ui[class*="very wide"].popup {
-    --ui-popup-max-width: var(--ui-popup-very-wide-width);
+    --_ui-popup-max-width: var(--_ui-popup-very-wide-width);
   }
   @media (--ui-mobile) {
     .ui.wide.popup,
     .ui[class*="very wide"].popup {
-      --ui-popup-max-width: 250px;
+      --_ui-popup-max-width: var(--ui-popup-max-width, 250px);
     }
   }
   .ui.fluid.popup {
@@ -344,9 +350,9 @@
     --ui-inverted: 1;
     --_popup-arrow-shadow: none;
     border-color: transparent;
-    background: var(--ui-color-inverted, var(--ui-popup-inverted-background));
+    background: var(--ui-color-inverted, var(--_ui-popup-inverted-background));
     box-shadow: none;
-    color: var(--ui-color-inverted-on, var(--ui-popup-inverted-color));
+    color: var(--ui-color-inverted-on, var(--_ui-popup-inverted-color));
   }
   .ui.inverted.popup > .header {
     background: none;
@@ -372,7 +378,7 @@
   }
   .ui.loading.popup > *,
   .ui.loading.popup > ::slotted(*) {
-    opacity: var(--ui-popup-loading-opacity);
+    opacity: var(--_ui-popup-loading-opacity);
   }
   .ui.loading.popup::after {
     content: "";

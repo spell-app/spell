@@ -12,7 +12,7 @@ import Section from "../../components/Section.astro"
 import Variation from "../../components/Variation.astro"
 import VocabularyTable from "../../components/VocabularyTable.astro"
 // `ui-list` holds the GENERIC `ui-item` (the `item` family, its own page), which loads by itself too.
-// The list's `--ui-list-*` tokens live on its root box and its items read them, so theming goes through `::part(list)`.
+// The list's `--ui-list-*` tokens reach its root box from the element, any ancestor or `::part(list)`;  its items read them.
 
 <Section title="Types">
   <Example title="List" description="A list groups related content.  Its items are `<ui-item>`s.">
@@ -696,11 +696,13 @@ list.addEventListener("ui-select", (event) => {
 </Section>
 
 <Section title="Theming">
-  Each variation sets `--ui-list-*` tokens on the list's box, and its items inherit them, so set your own there too,
-  through `::part(list)`.  Style an item's box with `ui-item::part(item)`.
+  Theme with the public `--ui-list-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or on the
+  list's box through `::part(list)`.  The items (and a nested list's items, through the `--ui-list-child-*` tokens)
+  read them from the list, so set them there or above, not on an item.  A variation (`relaxed`, `celled` ...) swaps
+  its own values in over yours.  Style an item's box with `ui-item::part(item)`.
 
 ```css
-ui-list::part(list) {
+ui-list {
   --ui-list-item-border-color: var(--ui-primary);
   --ui-list-item-padding-block: 0.5em;
 }

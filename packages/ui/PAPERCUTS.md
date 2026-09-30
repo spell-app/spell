@@ -510,6 +510,46 @@ Log of things that slowed down development. Date · symptom · fix · project.
   spell/ui calendar
 - 2026-09-30 · TypeScript 7's lib has no `Temporal` types. · Type it from the polyfill's `temporal-spec`
   (`import type { Temporal } from "temporal-polyfill"`, `TemporalAPI` in `runtime.types.ts`). · spell/ui calendar
+- 2026-09-30 · A browser test's `commands.writeFile("../.cache/x.txt")` (from `vitest/browser`) fails with `Access
+  denied to "/Users/owen/www/spell/.cache/x.txt"` -- the path resolves from the PROJECT ROOT, not the test file. ·
+  `commands.writeFile("./.cache/x.txt", ...)`. · spell/ui
+- 2026-09-30 · `import.meta.glob("/src/components/*/*.css", { query: "?inline" })` fails the whole test file
+  ("Failed to fetch dynamically imported module"):  Lightning CSS rejects `popup.anchored.css`
+  (`@container anchored(...)`, see `CODE-DEBT.md`). · Exclude it:  `["/src/components/*/*.css",
+  "!**/popup.anchored.css"]`, or glob `?raw`. · spell/ui
+- 2026-09-30 · `FILES=$(grep -l ...); perl -pi -e ... $FILES` edits nothing and says `File name too long`:  zsh
+  doesn't word-split an unquoted `$FILES`. · Pipe to `xargs`, or `${=FILES}`. · spell/ui
+- 2026-09-30 · A docs page's `<ui-toast type="info" icon>` requested `glyphs/solid/true.js` (404):  MDX / Astro render
+  a bare JSX attribute on a custom element as `icon="true"`, and `icon` is a STRING attribute (bare = "the type's
+  icon"). · Write `icon=""` in site MDX for bare string attributes;  logged in `SUSPECTED-BUGS.md`. · spell/ui site
+- 2026-09-30 · A `UI.observeVisibility()` demo on a `<ui-segment>` never logged anything, with no error:  the host is
+  `display: contents`, so its rect is all zeros and every check returns early. · Observe an element with a box (a
+  plain `<div>`);  logged in `SUSPECTED-BUGS.md`. · spell/ui site
+- 2026-09-30 · The `yarn site:dev` server returned HTTP 500 again for a newly added `.mdx` (see the earlier "HTTP 500" entry);
+  `astro dev` now daemonizes (`astro dev stop` / `status` / `logs`), so `kill <pid>` then `yarn site:dev` restarts it
+  and returns at once. · Restart the server after adding pages. · spell/ui site
+- 2026-09-30 · A browser test's `commands.writeFile()` of a ~60MB JSON (computed styles of every example) crashed the
+  vitest run with `WS_ERR_UNSUPPORTED_MESSAGE_LENGTH`:  the browser -> node websocket caps one message. · Write one
+  file per example (a few MB each), skip pseudo-elements whose `content` is `none`. · spell/ui token conversion
+- 2026-09-30 · A browser test that globbed EVERY component sheet (`import.meta.glob("/src/components/*/*.css",
+  { query: "?inline" })`) failed to import:  lightningcss can't parse `popup.anchored.css`'s
+  `@container anchored(fallback: flip-block)`. · Glob only the families you need (brace list), or `?raw`. · spell/ui
+  token conversion
+- 2026-09-30 · `yarn oxfmt $PATHS` / `yarn oxlint $PATHS` said "Expected at least one target file" / "No files found
+  to lint":  the shell is zsh, which does NOT word-split an unquoted `$PATHS`, so the tools got one bogus path. ·
+  Spell the paths out (brace expansion `src/components/{a,b}` works) or use a zsh array. · spell/ui token conversion
+- 2026-09-30 · `yarn -s tsx script.ts` printed yarn's whole command list ("Unsupported option name ("-s")"), and
+  `timeout 590 yarn ...` said "command not found":  yarn 4 has no `-s` (silent) flag, and macOS ships no `timeout`. ·
+  `yarn tsx ...` without `-s`;  bound long runs with the Bash tool's own timeout. · spell/ui token cleanup
+- 2026-09-30 · Escape did nothing on a modal `<ui-sidebar>` opened by a CLICK, yet its tests passed:  they switch
+  `UI.overlays.useCloseWatcher` off, and a property-opened one worked anyway.  Chromium gives a `show()`n
+  (non-modal) `<dialog>` its own close watcher, DISABLED (`closedby` computes to `none`);  created during user
+  activation it starts a new close-watcher group, and Escape only reaches the NEWEST group, so an earlier
+  `CloseWatcher` never hears it. · Open the dialog / popover BEFORE `UI.overlays.open()`;  test Escape with the
+  watcher ON and the overlay opened by `userEvent.click()` (`sidebar.test.tsx`, `flyout` / `dimmer` too). · spell/ui
+- 2026-09-30 · Vitest browser `page.screenshot({ path })` to a scratch dir outside the repo fails:  `Access denied
+  ... server.fs strict`. · Write it under the repo (a throwaway folder next to the probe test) and delete it after. ·
+  spell/ui
 - 2026-09-30 · `vitest` dies loading `vitest.config.ts` with `[PARSE_ERROR] Unexpected token` inside a comment:  the
   doc comment held a glob, `tools/**/*.test.ts`, whose `*/` ends the comment early. · Describe the glob in words
   in `/** */` comments (or use `//`). · spell/ui icon packs

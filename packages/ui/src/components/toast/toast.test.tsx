@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { userEvent } from "vitest/browser"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest"
+import { page, userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
 import type { ToastActionDetail, ToastCloseDetail, ToastShowDetail } from "$/components/components.types"
@@ -55,7 +55,7 @@ function partsOf(root: Element) {
 
 beforeEach(async () => {
   await UI.load()
-  // entry / exit animations in 1ms:  a page `::part` rule beats the shadow's own token
+  // entry / exit animations in 1ms:  the box's alias reads the page's `::part` value
   Fixture.render(`<style>ui-toast::part(box) { --ui-toast-duration: 1ms }</style>`)
 })
 
@@ -107,6 +107,48 @@ describe("<ui-toast> classes", () => {
   })
 })
 
+describe("<ui-toast> tokens from outside", () => {
+  /** The toast's top-left radius. */
+  function radius(root: Element): string {
+    return getComputedStyle(root).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { root } = await toast(`<ui-toast style="--ui-toast-radius: 20px" message="Hi"></ui-toast>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-toast-radius: 20px"><ui-toast message="Hi"></ui-toast></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-toast")!.shadowRoot!.querySelector("[part~=toast]")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(box)`", async () => {
+    Fixture.render(`<style>.themed::part(box) { --ui-toast-radius: 20px }</style>`)
+    const { root } = await toast(`<ui-toast class="themed" message="Hi"></ui-toast>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-toast-radius", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-toast-radius")
+    })
+    const { root } = await toast(`<ui-toast message="Hi"></ui-toast>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("`compact` (the default) follows the width token (off phones)", async () => {
+    const [previousWidth, previousHeight] = [window.innerWidth, window.innerHeight]
+    await page.viewport(1000, 800)
+    onTestFinished(() => page.viewport(previousWidth, previousHeight))
+    const { root } = await toast(`<ui-toast style="--ui-toast-width: 200px" message="Hi"></ui-toast>`)
+    expect(getComputedStyle(root).width).toBe("200px")
+  })
+})
+
 describe("<ui-toast> content", () => {
   it("renders in contract order:  icon, content (header, message, slot), close", async () => {
     const { root, box } = await toast(
@@ -137,6 +179,23 @@ describe("<ui-toast> content", () => {
     await expect.poll(() => root.querySelector("[part~=icon] svg")).not.toBeNull()
     const { root: plain } = await toast(`<ui-toast type="success" message="Done"></ui-toast>`)
     expect(plain.querySelector("[part~=icon]")).toBeNull()
+  })
+
+  it('takes `icon="true"` / `"yes"` (what frameworks render for a bare `icon`) as the type\'s icon;  `"false"` as none', async () => {
+    const asked: string[] = []
+    const { icons } = await UI.load()
+    const get = icons.get.bind(icons)
+    icons.get = (name) => (asked.push(name), get(name))
+    onTestFinished(() => void (icons.get = get))
+    const { host, root } = await toast(`<ui-toast type="success" icon="true" message="Done"></ui-toast>`)
+    await expect.poll(() => root.querySelector("[part~=icon] svg")).not.toBeNull()
+    expect((host as UIHost & { icon?: string }).icon).toBe("")
+    const { root: yes } = await toast(`<ui-toast type="info" icon="yes" message="Info"></ui-toast>`)
+    await expect.poll(() => yes.querySelector("[part~=icon] svg")).not.toBeNull()
+    const { root: off } = await toast(`<ui-toast type="info" icon="false" message="Info"></ui-toast>`)
+    expect(off.querySelector("[part~=icon]")).toBeNull()
+    expect(asked).not.toContain("true")
+    expect(asked).not.toContain("yes")
   })
 
   it("fills the toast from its type:  the colour and its contrast-picked text", async () => {
@@ -187,6 +246,39 @@ describe("<ui-toast> content", () => {
     )
     expect(partsOf(bottom)).toEqual(["div.toast", "div.progress"])
     await expect.poll(() => bottom.querySelector("[part~=bar]")!.className).toBe("bar up progressing")
+  })
+})
+
+describe("<ui-toast> actions bar", () => {
+  /** Render a toast with actions inside a `scheme` wrapper;  returns the toast root and its action bar. */
+  async function withActions(scheme: "ui-light" | "ui-dark") {
+    const wrapper = await ElementFixture.render(
+      `<div class="${scheme}"><ui-toast header="Delete?" message="Really?">` +
+        `<button slot="actions">Yes</button><button slot="actions">No</button></ui-toast></div>`
+    )
+    const root = wrapper.querySelector("ui-toast")!.shadowRoot!.querySelector<HTMLElement>("[part~=toast]")!
+    return { root, bar: root.querySelector<HTMLElement>("[part~=actions]")! }
+  }
+
+  /** OKLCH lightness of a computed `oklch(...)` colour. */
+  function lightness(color: string): number {
+    return Number(/oklch\(([\d.]+)/.exec(color)?.[1])
+  }
+
+  it.each(["ui-light", "ui-dark"] as const)(
+    "%s:  the bar ends at the toast's edges, not past its corners",
+    async (scheme) => {
+      const { root, bar } = await withActions(scheme)
+      const outer = root.getBoundingClientRect()
+      const inner = bar.getBoundingClientRect()
+      expect(inner.bottom).toBeLessThanOrEqual(outer.bottom + 0.5)
+      expect(inner.right).toBeLessThanOrEqual(outer.right + 0.5)
+    }
+  )
+
+  it("dark:  the bar shades the toast instead of washing it grey", async () => {
+    const { bar } = await withActions("ui-dark")
+    expect(lightness(getComputedStyle(bar).backgroundColor)).toBeLessThan(0.5)
   })
 })
 

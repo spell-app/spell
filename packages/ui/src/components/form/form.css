@@ -17,24 +17,30 @@
  *   re-decided by the HOST's position (`:host(:last-child)`);  static markup keeps Fomantic's selectors.
  * - Selectors are bare `.field` / `.fields`:  inside a shadow root nothing else carries them, and static
  *   (class-grammar) markup is Fomantic's own.
- * - Tokens handed DOWN (inherited, never set from outside;  theme with `--ui-form-*`):
+ * - Public tokens (`--ui-form-*`, the theming surface) are NEVER declared here:  the form's token block reads each
+ *   through a private alias, `--_ui-form-gutter: var(--ui-form-gutter, 1em)`, and every rule reads the alias.  So
+ *   a value set on `:root`, an ancestor, the host, `::part(form)` or in the app stylesheet reaches the box
+ *   (`docs/theming.md` "Component tokens").
+ *   - a field's / fields' root is OUTSIDE the form's box (its own shadow root), so it reads a form token as
+ *     `var(--_ui-form-x, var(--ui-form-x, <default>))`:  the form's alias inside a form, else the public one
+ * - Tokens handed DOWN (private, inherited;  never set them from outside, theme with `--ui-form-*`):
  *
  *   | Token                          | Set by            | Read by                                          |
  *   | ------------------------------ | ----------------- | ------------------------------------------------ |
- *   | `--ui-fields-child-width`      | fields (`widths`) | field:  its width, unless its own `N wide`         |
- *   | `--ui-fields-child-flex`       | equal width       | field:  its `flex`                                 |
- *   | `--ui-fields-pad-start` / `-end` | fields          | field:  the gutter                                 |
- *   | `--ui-fields-field-margin`     | fields, grouped   | field:  its margin (`0 0 1em` alone)               |
- *   | `--ui-fields-inline`           | inline fields     | field:  inline label (style query)                 |
- *   | `--ui-fields-required`         | required fields   | field:  asterisk on its label (style query)        |
- *   | `--ui-fields-stacked`          | narrow form       | field:  full width (style query)                   |
- *   | `--ui-form-label-color`        | form (`inverted`) | field / fields:  label colour                      |
- *   | `--ui-form-equal-width` / `--ui-form-unstackable` | form | fields (style query)                          |
- *   | `--ui-input-owner-width`       | field             | `input.css`:  the control fills the field          |
- *   | `--ui-field-state-color` / `-background` / `-border` | field / fields state | `input.css`, `checkbox.css`, `native.css` |
+ *   | `--_ui-fields-child-width`     | fields (`widths`) | field:  its width, unless its own `N wide`         |
+ *   | `--_ui-fields-child-flex`      | equal width       | field:  its `flex`                                 |
+ *   | `--_ui-fields-pad-start` / `-end` | fields         | field:  the gutter                                 |
+ *   | `--_ui-fields-field-margin`    | fields, grouped   | field:  its margin (`0 0 1em` alone)               |
+ *   | `--_ui-fields-inline`          | inline fields     | field:  inline label (style query)                 |
+ *   | `--_ui-fields-required`        | required fields   | field:  asterisk on its label (style query)        |
+ *   | `--_ui-fields-stacked`         | narrow form       | field:  full width (style query)                   |
+ *   | `--_ui-form-label-color`       | form (`inverted`) | field / fields:  label colour (the alias of `--ui-form-label-color`) |
+ *   | `--_ui-form-equal-width` / `--_ui-form-unstackable` | form | fields (style query)                      |
+ *   | `--_ui-input-owner-width`       | field             | `input.css`:  the control fills the field          |
+ *   | `--_ui-field-state-color` / `-background` / `-border` | field / fields state | `input.css`, `checkbox.css`, `native.css` |
  *
  *   - a field's / fields' `<slot>` resets the colour remap (`--ui-color*`) and the fields tokens, so a field state
- *     reaches controls ONLY as the resolved `--ui-field-state-*` tokens and rows don't leak into nested rows
+ *     reaches controls ONLY as the resolved `--_ui-field-state-*` tokens and rows don't leak into nested rows
  * - Responsive:  the form ROOT is the `ui-form` size container;  rows stack below 768px of FORM width
  *   (`unstackable` form / fields opt out).
  * - Messages:  a form / field / fields shows the `<ui-message state="…">`s of its state and hides the others --
@@ -71,27 +77,30 @@
     display: none;
   }
 
-  /* Tokens:  one per `form.variables` entry that still matters, from the global tokens. */
+  /*
+   * Tokens:  one per `form.variables` entry that still matters, from the global tokens -- each the private alias
+   * of its public token (never declare the public one:  it would block inherited values).
+   */
   .ui.form {
-    --ui-form-gutter: 1em;
-    --ui-form-row-distance: 1em;
-    --ui-form-label-distance: 0.28571em;
-    --ui-form-label-font-size: 0.92857em;
-    --ui-form-label-font-weight: var(--ui-font-weight-bold);
-    --ui-form-required-color: var(--ui-negative-text);
-    --ui-form-disabled-opacity: var(--ui-disabled-opacity);
-    --ui-form-loader-size: 3em;
-    --ui-form-loader-width: 0.2em;
-    --ui-form-loader-fill: oklch(from var(--ui-ink) l c h / 0.1);
-    --ui-form-loader-line: var(--ui-text-muted);
-    --ui-form-loader-speed: 0.6s;
-    --ui-form-loader-dimmer: color-mix(in oklab, var(--ui-surface) 80%, transparent);
-    --ui-form-inverted-label-color: var(--ui-text-inverted-color);
-    --ui-form-prompt-inline-margin: -0.25em 0 -0.5em 0.5em;
-    /* Owner tokens:  declared on every root, so a nested form never inherits an outer one's. */
-    --ui-form-label-color: var(--ui-text-color);
-    --ui-form-equal-width: 0;
-    --ui-form-unstackable: 0;
+    --_ui-form-gutter: var(--ui-form-gutter, 1em);
+    --_ui-form-row-distance: var(--ui-form-row-distance, 1em);
+    --_ui-form-label-distance: var(--ui-form-label-distance, 0.28571em);
+    --_ui-form-label-font-size: var(--ui-form-label-font-size, 0.92857em);
+    --_ui-form-label-font-weight: var(--ui-form-label-font-weight, var(--ui-font-weight-bold));
+    --_ui-form-required-color: var(--ui-form-required-color, var(--ui-negative-text));
+    --_ui-form-disabled-opacity: var(--ui-form-disabled-opacity, var(--ui-disabled-opacity));
+    --_ui-form-loader-size: var(--ui-form-loader-size, 3em);
+    --_ui-form-loader-width: var(--ui-form-loader-width, 0.2em);
+    --_ui-form-loader-fill: var(--ui-form-loader-fill, oklch(from var(--ui-ink) l c h / 0.1));
+    --_ui-form-loader-line: var(--ui-form-loader-line, var(--ui-text-muted));
+    --_ui-form-loader-speed: var(--ui-form-loader-speed, 0.6s);
+    --_ui-form-loader-dimmer: var(--ui-form-loader-dimmer, color-mix(in oklab, var(--ui-surface) 80%, transparent));
+    --_ui-form-inverted-label-color: var(--ui-form-inverted-label-color, var(--ui-text-inverted-color));
+    --_ui-form-prompt-inline-margin: var(--ui-form-prompt-inline-margin, -0.25em 0 -0.5em 0.5em);
+    /* ## Owner tokens:  declared on every root, so a nested form never inherits an outer one's. */
+    --_ui-form-label-color: var(--ui-form-label-color, var(--ui-text-color));
+    --_ui-form-equal-width: 0;
+    --_ui-form-unstackable: 0;
 
     position: relative;
     box-sizing: border-box;
@@ -109,14 +118,14 @@
 
   /* Field */
   .field {
-    --ui-input-owner-width: 100%;
+    --_ui-input-owner-width: 100%;
     box-sizing: border-box;
-    width: var(--_field-width, var(--ui-fields-child-width, auto));
-    flex: var(--ui-fields-child-flex, 0 1 auto);
+    width: var(--_field-width, var(--_ui-fields-child-width, auto));
+    flex: var(--_ui-fields-child-flex, 0 1 auto);
     min-width: 0;
     clear: both;
-    margin: var(--ui-fields-field-margin, 0 0 var(--ui-form-row-distance, 1em));
-    padding-inline: var(--ui-fields-pad-start, 0) var(--ui-fields-pad-end, 0);
+    margin: var(--_ui-fields-field-margin, 0 0 var(--_ui-form-row-distance, var(--ui-form-row-distance, 1em)));
+    padding-inline: var(--_ui-fields-pad-start, 0) var(--_ui-fields-pad-end, 0);
   }
   :host(:last-child) > .field,
   .ui.form .field:last-child {
@@ -124,14 +133,14 @@
   }
   .field > slot {
     /* A row inside a field starts clean. */
-    --ui-fields-child-width: initial;
-    --ui-fields-child-flex: initial;
-    --ui-fields-pad-start: initial;
-    --ui-fields-pad-end: initial;
-    --ui-fields-field-margin: initial;
-    --ui-fields-inline: initial;
-    --ui-fields-required: initial;
-    --ui-fields-stacked: initial;
+    --_ui-fields-child-width: initial;
+    --_ui-fields-child-flex: initial;
+    --_ui-fields-pad-start: initial;
+    --_ui-fields-pad-end: initial;
+    --_ui-fields-field-margin: initial;
+    --_ui-fields-inline: initial;
+    --_ui-fields-required: initial;
+    --_ui-fields-stacked: initial;
   }
   .field > slot,
   .fields > slot {
@@ -152,18 +161,19 @@
 
   /* Fields:  a row;  its children share it. */
   .fields {
-    --ui-fields-child-width: auto;
-    --ui-fields-child-flex: 0 1 auto;
-    --ui-fields-pad-start: calc(var(--ui-form-gutter, 1em) / 2);
-    --ui-fields-pad-end: calc(var(--ui-form-gutter, 1em) / 2);
-    --ui-fields-field-margin: 0;
-    --ui-fields-inline: 0;
-    --ui-fields-required: 0;
-    --ui-fields-stacked: 0;
+    --_ui-fields-child-width: auto;
+    --_ui-fields-child-flex: 0 1 auto;
+    --_ui-fields-pad-start: calc(var(--_ui-form-gutter, var(--ui-form-gutter, 1em)) / 2);
+    --_ui-fields-pad-end: calc(var(--_ui-form-gutter, var(--ui-form-gutter, 1em)) / 2);
+    --_ui-fields-field-margin: 0;
+    --_ui-fields-inline: 0;
+    --_ui-fields-required: 0;
+    --_ui-fields-stacked: 0;
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
-    margin: 0 calc(var(--ui-form-gutter, 1em) / -2) var(--ui-form-row-distance, 1em);
+    margin: 0 calc(var(--_ui-form-gutter, var(--ui-form-gutter, 1em)) / -2)
+      var(--_ui-form-row-distance, var(--ui-form-row-distance, 1em));
   }
   :host(:last-child) > .fields,
   .ui.form .fields:last-child {
@@ -181,13 +191,13 @@
   .fields ::slotted(label),
   .ui.form :is(.field, .fields) > label {
     display: block;
-    margin: 0 0 var(--ui-form-label-distance, 0.28571em);
-    color: var(--_field-label-color, var(--ui-form-label-color, var(--ui-text-color)));
-    font-size: var(--ui-form-label-font-size, 0.92857em);
-    font-weight: var(--ui-form-label-font-weight, var(--ui-font-weight-bold));
+    margin: 0 0 var(--_ui-form-label-distance, var(--ui-form-label-distance, 0.28571em));
+    color: var(--_field-label-color, var(--_ui-form-label-color, var(--ui-form-label-color, var(--ui-text-color))));
+    font-size: var(--_ui-form-label-font-size, var(--ui-form-label-font-size, 0.92857em));
+    font-weight: var(--_ui-form-label-font-weight, var(--ui-form-label-font-weight, var(--ui-font-weight-bold)));
     text-transform: none;
   }
-  /* Static markup:  a `.ui.input` fills its field (elements get `--ui-input-owner-width`). */
+  /* Static markup:  a `.ui.input` fills its field (elements get `--_ui-input-owner-width`). */
   .ui.form .field .ui.input {
     width: 100%;
   }
@@ -283,63 +293,63 @@
 
   /* Rows of N equal fields. */
   .two.fields {
-    --ui-fields-child-width: 50%;
+    --_ui-fields-child-width: 50%;
   }
   .three.fields {
-    --ui-fields-child-width: 33.33333%;
+    --_ui-fields-child-width: 33.33333%;
   }
   .four.fields {
-    --ui-fields-child-width: 25%;
+    --_ui-fields-child-width: 25%;
   }
   .five.fields {
-    --ui-fields-child-width: 20%;
+    --_ui-fields-child-width: 20%;
   }
   .six.fields {
-    --ui-fields-child-width: 16.66666%;
+    --_ui-fields-child-width: 16.66666%;
   }
   .seven.fields {
-    --ui-fields-child-width: 14.28571%;
+    --_ui-fields-child-width: 14.28571%;
   }
   .eight.fields {
-    --ui-fields-child-width: 12.5%;
+    --_ui-fields-child-width: 12.5%;
   }
   .nine.fields {
-    --ui-fields-child-width: 11.11111%;
+    --_ui-fields-child-width: 11.11111%;
   }
   .ten.fields {
-    --ui-fields-child-width: 10%;
+    --_ui-fields-child-width: 10%;
   }
   .fields[class*="equal width"] {
-    --ui-fields-child-width: 100%;
-    --ui-fields-child-flex: 1 1 auto;
+    --_ui-fields-child-width: 100%;
+    --_ui-fields-child-flex: 1 1 auto;
   }
   .ui[class*="equal width"].form {
-    --ui-form-equal-width: 1;
+    --_ui-form-equal-width: 1;
   }
-  @container style(--ui-form-equal-width: 1) {
+  @container style(--_ui-form-equal-width: 1) {
     .fields {
-      --ui-fields-child-width: 100%;
-      --ui-fields-child-flex: 1 1 auto;
+      --_ui-fields-child-width: 100%;
+      --_ui-fields-child-flex: 1 1 auto;
     }
   }
 
   /* Grouped:  stacked fields under one label. */
   .grouped.fields {
-    --ui-fields-pad-start: 0;
-    --ui-fields-pad-end: 0;
-    --ui-fields-field-margin: 0.5em 0;
+    --_ui-fields-pad-start: 0;
+    --_ui-fields-pad-end: 0;
+    --_ui-fields-field-margin: 0.5em 0;
     display: block;
-    margin: 0 0 var(--ui-form-row-distance, 1em);
+    margin: 0 0 var(--_ui-form-row-distance, var(--ui-form-row-distance, 1em));
   }
 
   /* Inline:  labels beside controls. */
   .inline.fields {
-    --ui-fields-pad-start: 0;
-    --ui-fields-pad-end: 1em;
-    --ui-fields-inline: 1;
-    --ui-input-owner-width: auto;
+    --_ui-fields-pad-start: 0;
+    --_ui-fields-pad-end: 1em;
+    --_ui-fields-inline: 1;
+    --_ui-input-owner-width: auto;
     align-items: center;
-    margin: 0 0 var(--ui-form-row-distance, 1em);
+    margin: 0 0 var(--_ui-form-row-distance, var(--ui-form-row-distance, 1em));
   }
   .inline.fields ::slotted(label),
   .ui.form .inline.fields > label {
@@ -347,7 +357,7 @@
     margin: 0.03571em 1em 0 0;
   }
   .inline.field {
-    --ui-input-owner-width: auto;
+    --_ui-input-owner-width: auto;
   }
   .inline.field ::slotted(label),
   .ui.form .inline:is(.field, .fields) .field > label,
@@ -357,9 +367,9 @@
     margin: 0 0.85714em 0 0;
     vertical-align: baseline;
   }
-  @container style(--ui-fields-inline: 1) {
+  @container style(--_ui-fields-inline: 1) {
     .field {
-      --ui-input-owner-width: auto;
+      --_ui-input-owner-width: auto;
     }
     .field ::slotted(label) {
       display: inline-block;
@@ -369,7 +379,7 @@
   }
   .inline.field > .prompt.label {
     display: inline-block;
-    margin: var(--ui-form-prompt-inline-margin);
+    margin: var(--_ui-form-prompt-inline-margin, var(--ui-form-prompt-inline-margin, -0.25em 0 -0.5em 0.5em));
     vertical-align: top;
   }
 
@@ -382,46 +392,46 @@
     content: "*";
     display: inline-block;
     margin: -0.2em 0 0 0.2em;
-    color: var(--ui-form-required-color, var(--ui-negative-text));
+    color: var(--_ui-form-required-color, var(--ui-form-required-color, var(--ui-negative-text)));
     vertical-align: top;
   }
   .required.fields:not(.grouped, .inline) {
-    --ui-fields-required: 1;
+    --_ui-fields-required: 1;
   }
-  @container style(--ui-fields-required: 1) {
+  @container style(--_ui-fields-required: 1) {
     .field ::slotted(label)::after {
       content: "*";
       display: inline-block;
       margin: -0.2em 0 0 0.2em;
-      color: var(--ui-form-required-color, var(--ui-negative-text));
+      color: var(--_ui-form-required-color, var(--ui-form-required-color, var(--ui-negative-text)));
       vertical-align: top;
     }
   }
 
   /* Inverted:  light labels. */
   .ui.inverted.form {
-    --ui-form-label-color: var(--ui-form-inverted-label-color);
-    color: var(--ui-form-inverted-label-color);
+    --_ui-form-label-color: var(--_ui-form-inverted-label-color);
+    color: var(--_ui-form-inverted-label-color);
   }
 
   /* Unstackable */
   .ui.unstackable.form {
-    --ui-form-unstackable: 1;
+    --_ui-form-unstackable: 1;
   }
 
   /* Narrow forms stack their rows. */
   @container ui-form (width < 768px) {
-    @container style(not (--ui-form-unstackable: 1)) {
+    @container style(not (--_ui-form-unstackable: 1)) {
       .fields:not(.unstackable) {
-        --ui-fields-child-width: 100%;
-        --ui-fields-stacked: 1;
-        --ui-fields-field-margin: 0 0 var(--ui-form-row-distance, 1em);
+        --_ui-fields-child-width: 100%;
+        --_ui-fields-stacked: 1;
+        --_ui-fields-field-margin: 0 0 var(--_ui-form-row-distance, var(--ui-form-row-distance, 1em));
         flex-wrap: wrap;
         margin-block-end: 0;
       }
     }
   }
-  @container style(--ui-fields-stacked: 1) {
+  @container style(--_ui-fields-stacked: 1) {
     .field {
       width: 100%;
     }
@@ -438,33 +448,33 @@
    * have no `ui` class, so `colors.css`'s `.ui.error` remap never runs on them (as Fomantic's `.field.error`).
    */
   :is(.field, .fields).error {
-    --ui-field-state-color: var(--ui-error-text);
-    --ui-field-state-background: var(--ui-error-background);
-    --ui-field-state-border: var(--ui-error-border);
+    --_ui-field-state-color: var(--ui-error-text);
+    --_ui-field-state-background: var(--ui-error-background);
+    --_ui-field-state-border: var(--ui-error-border);
   }
   :is(.field, .fields).info {
-    --ui-field-state-color: var(--ui-info-text);
-    --ui-field-state-background: var(--ui-info-background);
-    --ui-field-state-border: var(--ui-info-border);
+    --_ui-field-state-color: var(--ui-info-text);
+    --_ui-field-state-background: var(--ui-info-background);
+    --_ui-field-state-border: var(--ui-info-border);
   }
   :is(.field, .fields).success {
-    --ui-field-state-color: var(--ui-success-text);
-    --ui-field-state-background: var(--ui-success-background);
-    --ui-field-state-border: var(--ui-success-border);
+    --_ui-field-state-color: var(--ui-success-text);
+    --_ui-field-state-background: var(--ui-success-background);
+    --_ui-field-state-border: var(--ui-success-border);
   }
   :is(.field, .fields).warning {
-    --ui-field-state-color: var(--ui-warning-text);
-    --ui-field-state-background: var(--ui-warning-background);
-    --ui-field-state-border: var(--ui-warning-border);
+    --_ui-field-state-color: var(--ui-warning-text);
+    --_ui-field-state-background: var(--ui-warning-background);
+    --_ui-field-state-border: var(--ui-warning-border);
   }
   :is(.field, .fields):is(.error, .info, .success, .warning) {
-    --_field-label-color: var(--ui-field-state-color);
+    --_field-label-color: var(--_ui-field-state-color);
   }
 
   /* Disabled:  dimmed, inert (the element sets `inert`). */
   :is(.field, .fields).disabled,
   .ui.disabled.form {
-    opacity: var(--ui-form-disabled-opacity);
+    opacity: var(--_ui-form-disabled-opacity, var(--ui-form-disabled-opacity, var(--ui-disabled-opacity)));
     pointer-events: none;
   }
 
@@ -478,7 +488,7 @@
     position: absolute;
     inset: 0;
     z-index: 100;
-    background: var(--ui-form-loader-dimmer);
+    background: var(--_ui-form-loader-dimmer);
   }
   .ui.loading.form::after {
     content: "";
@@ -487,18 +497,18 @@
     left: 50%;
     z-index: 101;
     box-sizing: border-box;
-    width: var(--ui-form-loader-size);
-    height: var(--ui-form-loader-size);
-    margin: calc(var(--ui-form-loader-size) / -2) 0 0 calc(var(--ui-form-loader-size) / -2);
-    border: var(--ui-form-loader-width) solid var(--ui-form-loader-fill);
-    border-top-color: var(--ui-form-loader-line);
+    width: var(--_ui-form-loader-size);
+    height: var(--_ui-form-loader-size);
+    margin: calc(var(--_ui-form-loader-size) / -2) 0 0 calc(var(--_ui-form-loader-size) / -2);
+    border: var(--_ui-form-loader-width) solid var(--_ui-form-loader-fill);
+    border-top-color: var(--_ui-form-loader-line);
     border-radius: var(--ui-radius-circle);
-    animation: ui-form-spin var(--ui-form-loader-speed) linear infinite;
+    animation: ui-form-spin var(--_ui-form-loader-speed) linear infinite;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .ui.loading.form::after {
-      animation-duration: calc(var(--ui-form-loader-speed) * 4);
+      animation-duration: calc(var(--_ui-form-loader-speed) * 4);
     }
   }
 }

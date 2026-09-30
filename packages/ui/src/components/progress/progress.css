@@ -21,6 +21,11 @@
  * - Bar text is the bar colour's contrast-picked foreground (`--ui-color-on`;  dark on `indicating` hues), where
  *   Fomantic wrote 70% white on anything -- which fails WCAG contrast on most hues;  the default bar is a darker
  *   grey for the same reason.
+ * - Public tokens (`--ui-progress-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-progress-radius: var(--ui-progress-radius, var(--ui-radius-s))`, and every
+ *   rule reads the alias.  So a value set on `:root`, an ancestor, the host, `::part(progress)` or in the app
+ *   stylesheet reaches the box (`docs/theming.md` "Component tokens").  Sizes swap the bar height, `inverted` the
+ *   label colour.
  * - States beat colours and `indicating` by LAYER (`states`), where Fomantic stacked `.ui.ui.` specificity.
  * - Sizes:  `--ui-scale` scales the text;  each size sets the bar height token (Fomantic's per-size bar heights).
  * - Reduced motion:  the `active` pulse stops;  indeterminate bars stand still, half filled (no motion needed to
@@ -46,46 +51,46 @@
     display: none;
   }
 
-  /* Tokens:  one per `progress.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one private alias per `progress.variables` entry that still matters, from the global tokens. */
   .ui.progress {
-    --ui-progress-margin: 1em;
-    --ui-progress-label-height: 1.5em;
-    --ui-progress-background: oklch(from var(--ui-ink) l c h / 0.1);
-    --ui-progress-radius: var(--ui-radius-s);
-    --ui-progress-bar-height: 1.75em;
-    --ui-progress-bar-background: oklch(0.5 0 0);
-    --ui-progress-bar-min-width: 2.5em;
-    --ui-progress-duration: var(--ui-duration-normal);
-    --ui-progress-text-size: 0.92857em;
-    --ui-progress-text-color: oklch(1 0 0);
-    --ui-progress-indicating-text-color: oklch(0.2 0 0);
-    --ui-progress-label-color: var(--ui-text-color);
-    --ui-progress-pulse-color: oklch(1 0 0);
-    --ui-progress-pulse-opacity: 0.3;
-    --ui-progress-pulse-duration: 2s;
-    --ui-progress-indeterminate-slow: 4s;
-    --ui-progress-indeterminate-fast: 1s;
-    --ui-progress-attached-height: 0.2em;
-    --ui-progress-inverted-background: oklch(1 0 0 / 0.08);
-    --ui-progress-inverted-label-color: oklch(1 0 0);
-    --ui-progress-disabled-opacity: 0.35;
-    --ui-progress-indicating-1: oklch(0.63 0.15 22);
-    --ui-progress-indicating-2: oklch(0.83 0.11 75);
-    --ui-progress-indicating-3: oklch(0.81 0.13 87);
-    --ui-progress-indicating-4: oklch(0.83 0.16 102);
-    --ui-progress-indicating-5: oklch(0.84 0.15 125);
-    --ui-progress-indicating-6: oklch(0.8 0.16 150);
+    --_ui-progress-margin: var(--ui-progress-margin, 1em);
+    --_ui-progress-label-height: var(--ui-progress-label-height, 1.5em);
+    --_ui-progress-background: var(--ui-progress-background, oklch(from var(--ui-ink) l c h / 0.1));
+    --_ui-progress-radius: var(--ui-progress-radius, var(--ui-radius-s));
+    --_ui-progress-bar-height: var(--ui-progress-bar-height, 1.75em);
+    --_ui-progress-bar-background: var(--ui-progress-bar-background, oklch(0.5 0 0));
+    --_ui-progress-bar-min-width: var(--ui-progress-bar-min-width, 2.5em);
+    --_ui-progress-duration: var(--ui-progress-duration, var(--ui-duration-normal));
+    --_ui-progress-text-size: var(--ui-progress-text-size, 0.92857em);
+    --_ui-progress-text-color: var(--ui-progress-text-color, oklch(1 0 0));
+    --_ui-progress-indicating-text-color: var(--ui-progress-indicating-text-color, oklch(0.2 0 0));
+    --_ui-progress-label-color: var(--ui-progress-label-color, var(--ui-text-color));
+    --_ui-progress-pulse-color: var(--ui-progress-pulse-color, oklch(1 0 0));
+    --_ui-progress-pulse-opacity: var(--ui-progress-pulse-opacity, 0.3);
+    --_ui-progress-pulse-duration: var(--ui-progress-pulse-duration, 2s);
+    --_ui-progress-indeterminate-slow: var(--ui-progress-indeterminate-slow, 4s);
+    --_ui-progress-indeterminate-fast: var(--ui-progress-indeterminate-fast, 1s);
+    --_ui-progress-attached-height: var(--ui-progress-attached-height, 0.2em);
+    --_ui-progress-inverted-background: var(--ui-progress-inverted-background, oklch(1 0 0 / 0.08));
+    --_ui-progress-inverted-label-color: var(--ui-progress-inverted-label-color, oklch(1 0 0));
+    --_ui-progress-disabled-opacity: var(--ui-progress-disabled-opacity, 0.35);
+    --_ui-progress-indicating-1: var(--ui-progress-indicating-1, oklch(0.63 0.15 22));
+    --_ui-progress-indicating-2: var(--ui-progress-indicating-2, oklch(0.83 0.11 75));
+    --_ui-progress-indicating-3: var(--ui-progress-indicating-3, oklch(0.81 0.13 87));
+    --_ui-progress-indicating-4: var(--ui-progress-indicating-4, oklch(0.83 0.16 102));
+    --_ui-progress-indicating-5: var(--ui-progress-indicating-5, oklch(0.84 0.15 125));
+    --_ui-progress-indicating-6: var(--ui-progress-indicating-6, oklch(0.8 0.16 150));
 
     position: relative;
     box-sizing: border-box;
     display: flex;
     max-width: 100%;
-    margin: var(--_progress-margin-top, var(--ui-progress-margin)) 0
-      var(--_progress-margin-bottom, calc(var(--ui-progress-label-height) + var(--ui-progress-margin)));
+    margin: var(--_progress-margin-top, var(--_ui-progress-margin)) 0
+      var(--_progress-margin-bottom, calc(var(--_ui-progress-label-height) + var(--_ui-progress-margin)));
     padding: 0;
     border: none;
-    border-radius: var(--ui-progress-radius);
-    background: var(--ui-progress-background);
+    border-radius: var(--_ui-progress-radius);
+    background: var(--_ui-progress-background);
     box-shadow: none;
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
@@ -94,7 +99,7 @@
     --_progress-margin-top: 0;
   }
   .ui.progress:last-child {
-    --_progress-margin-bottom: var(--ui-progress-label-height);
+    --_progress-margin-bottom: var(--_ui-progress-label-height);
   }
   /* Shadow DOM:  the root is always an only child, so the HOST's position decides. */
   :host(:not(:first-child)) > .ui.progress {
@@ -107,9 +112,9 @@
   /* Native fallback:  a `<progress>` in the track. */
   .ui.progress > progress {
     flex: 1 1 auto;
-    height: var(--ui-progress-bar-height);
+    height: var(--_ui-progress-bar-height);
     margin: 0;
-    accent-color: var(--ui-color, var(--ui-progress-bar-background));
+    accent-color: var(--ui-color, var(--_ui-progress-bar-background));
   }
 }
 
@@ -124,18 +129,18 @@
     display: block;
     box-sizing: border-box;
     width: 0;
-    height: var(--ui-progress-bar-height);
+    height: var(--_ui-progress-bar-height);
     overflow: hidden;
-    border-radius: var(--ui-progress-radius);
-    background: var(--_progress-bar-color, var(--ui-color, var(--ui-progress-bar-background)));
-    color: var(--_progress-bar-on, var(--ui-color-on, var(--ui-progress-text-color)));
+    border-radius: var(--_ui-progress-radius);
+    background: var(--_progress-bar-color, var(--ui-color, var(--_ui-progress-bar-background)));
+    color: var(--_progress-bar-on, var(--ui-color-on, var(--_ui-progress-text-color)));
     line-height: 1;
     transition:
-      width var(--ui-progress-duration) var(--ui-ease),
-      background-color var(--ui-progress-duration) var(--ui-ease);
+      width var(--_ui-progress-duration) var(--ui-ease),
+      background-color var(--_ui-progress-duration) var(--ui-ease);
   }
   .ui.progress .bar:not(:empty) {
-    min-width: var(--ui-progress-bar-min-width);
+    min-width: var(--_ui-progress-bar-min-width);
   }
 
   /* Percent complete, inside the bar. */
@@ -145,7 +150,7 @@
     width: auto;
     margin-top: -0.5em;
     color: inherit;
-    font-size: var(--ui-progress-text-size);
+    font-size: var(--_ui-progress-text-size);
     font-weight: var(--ui-font-weight-bold);
     text-align: left;
     text-shadow: none;
@@ -157,8 +162,8 @@
     position: absolute;
     inset: 100% auto auto 0;
     width: 100%;
-    margin-top: calc(var(--ui-progress-label-height) - 1.3em);
-    color: var(--_progress-label-color, var(--ui-progress-label-color));
+    margin-top: calc(var(--_ui-progress-label-height) - 1.3em);
+    color: var(--_progress-label-color, var(--_ui-progress-label-color));
     font-size: 1em;
     font-weight: var(--ui-font-weight-bold);
     text-align: center;
@@ -174,25 +179,25 @@
 @layer ui.components.progress.types {
   /* Indicating:  the bar's colour follows the percentage, as Fomantic's `data-percent` prefixes. */
   .ui.indicating.progress[data-percent] {
-    --_progress-bar-on: var(--ui-progress-indicating-text-color);
+    --_progress-bar-on: var(--_ui-progress-indicating-text-color);
   }
   .ui.indicating.progress:is([data-percent^="1"], [data-percent^="2"]) {
-    --_progress-bar-color: var(--ui-progress-indicating-1);
+    --_progress-bar-color: var(--_ui-progress-indicating-1);
   }
   .ui.indicating.progress[data-percent^="3"] {
-    --_progress-bar-color: var(--ui-progress-indicating-2);
+    --_progress-bar-color: var(--_ui-progress-indicating-2);
   }
   .ui.indicating.progress:is([data-percent^="4"], [data-percent^="5"]) {
-    --_progress-bar-color: var(--ui-progress-indicating-3);
+    --_progress-bar-color: var(--_ui-progress-indicating-3);
   }
   .ui.indicating.progress[data-percent^="6"] {
-    --_progress-bar-color: var(--ui-progress-indicating-4);
+    --_progress-bar-color: var(--_ui-progress-indicating-4);
   }
   .ui.indicating.progress:is([data-percent^="7"], [data-percent^="8"]) {
-    --_progress-bar-color: var(--ui-progress-indicating-5);
+    --_progress-bar-color: var(--_ui-progress-indicating-5);
   }
   .ui.indicating.progress:is([data-percent^="9"], [data-percent="100"]) {
-    --_progress-bar-color: var(--ui-progress-indicating-6);
+    --_progress-bar-color: var(--_ui-progress-indicating-6);
   }
   /* Single digits:  red too (they start with 1 ... 9 as well). */
   .ui.indicating.progress:is(
@@ -206,7 +211,7 @@
       [data-percent="8"],
       [data-percent="9"]
     ) {
-    --_progress-bar-color: var(--ui-progress-indicating-1);
+    --_progress-bar-color: var(--_ui-progress-indicating-1);
   }
 }
 
@@ -233,17 +238,17 @@
 
   /* Inverted:  for dark backgrounds;  every `light-dark()` token below resolves dark. */
   .ui.inverted.progress {
-    --ui-progress-label-color: var(--ui-progress-inverted-label-color);
+    --_ui-progress-label-color: var(--_ui-progress-inverted-label-color);
     color-scheme: dark;
     --ui-scheme: dark;
   }
   .ui.inverted.progress:not(.basic) {
     border: none;
-    background: var(--ui-progress-inverted-background);
+    background: var(--_ui-progress-inverted-background);
   }
   .ui.inverted.progress .bar {
-    background: var(--_progress-bar-color, var(--ui-color-inverted, var(--ui-progress-bar-background)));
-    color: var(--_progress-bar-on, var(--ui-color-inverted-on, var(--ui-progress-text-color)));
+    background: var(--_progress-bar-color, var(--ui-color-inverted, var(--_ui-progress-bar-background)));
+    color: var(--_progress-bar-on, var(--ui-color-inverted-on, var(--_ui-progress-text-color)));
   }
 
   /* Attached:  a thin line on the edge of the content above (bare / `bottom`) or below (`top`). */
@@ -256,10 +261,10 @@
   }
   .ui.attached.progress,
   .ui.attached.progress .bar {
-    height: var(--ui-progress-attached-height);
+    height: var(--_ui-progress-attached-height);
     padding: 0;
     overflow: hidden;
-    border-radius: 0 0 var(--ui-progress-radius) var(--ui-progress-radius);
+    border-radius: 0 0 var(--_ui-progress-radius) var(--_ui-progress-radius);
   }
   .ui.attached.progress .bar {
     border-radius: 0;
@@ -267,7 +272,7 @@
   .ui.top.attached.progress,
   .ui.top.attached.progress .bar {
     top: 0;
-    border-radius: var(--ui-progress-radius) var(--ui-progress-radius) 0 0;
+    border-radius: var(--_ui-progress-radius) var(--_ui-progress-radius) 0 0;
   }
   .ui.top.attached.progress .bar {
     border-radius: 0;
@@ -275,25 +280,25 @@
 
   /* Sizes:  `--ui-scale` (from `sizes.css`) scales the text;  the bar height is per size. */
   .ui.mini.progress {
-    --ui-progress-bar-height: 0.3em;
+    --_ui-progress-bar-height: 0.3em;
   }
   .ui.tiny.progress {
-    --ui-progress-bar-height: 0.5em;
+    --_ui-progress-bar-height: 0.5em;
   }
   .ui.small.progress {
-    --ui-progress-bar-height: 1em;
+    --_ui-progress-bar-height: 1em;
   }
   .ui.large.progress {
-    --ui-progress-bar-height: 2.5em;
+    --_ui-progress-bar-height: 2.5em;
   }
   .ui.big.progress {
-    --ui-progress-bar-height: 3.5em;
+    --_ui-progress-bar-height: 3.5em;
   }
   .ui.huge.progress {
-    --ui-progress-bar-height: 4em;
+    --_ui-progress-bar-height: 4em;
   }
   .ui.massive.progress {
-    --ui-progress-bar-height: 5em;
+    --_ui-progress-bar-height: 5em;
   }
 
   /* Indeterminate:  a full bar with a pulse, or a moving piece on the track. */
@@ -311,16 +316,16 @@
     top: 0;
     bottom: 0;
     width: 100%;
-    border-radius: var(--ui-progress-radius);
-    background: var(--ui-progress-pulse-color);
-    animation: progress-pulsating var(--ui-progress-pulse-duration) var(--ui-ease) infinite;
+    border-radius: var(--_ui-progress-radius);
+    background: var(--_ui-progress-pulse-color);
+    animation: progress-pulsating var(--_ui-progress-pulse-duration) var(--ui-ease) infinite;
     transform-origin: center;
   }
   .ui.slow.indeterminate.progress .bar::before {
-    animation-duration: var(--ui-progress-indeterminate-slow);
+    animation-duration: var(--_ui-progress-indeterminate-slow);
   }
   .ui.fast.indeterminate.progress .bar::before {
-    animation-duration: var(--ui-progress-indeterminate-fast);
+    animation-duration: var(--_ui-progress-indeterminate-fast);
   }
   .ui.swinging.indeterminate.progress .bar::before {
     transform-origin: left;
@@ -335,19 +340,19 @@
   }
   /* The moving piece is the bar's colour;  the bar itself becomes the track. */
   .ui:is(.sliding, .swinging, .filling).indeterminate.progress .bar {
-    background: var(--ui-progress-background);
+    background: var(--_ui-progress-background);
   }
   .ui:is(.sliding, .swinging, .filling).indeterminate.progress .bar::before {
-    background: var(--_progress-bar-color, var(--ui-color, var(--ui-progress-bar-background)));
+    background: var(--_progress-bar-color, var(--ui-color, var(--_ui-progress-bar-background)));
   }
   .ui:is(.sliding, .swinging).indeterminate.progress .bar .progress {
     color: var(--ui-text-color);
   }
   .ui.inverted:is(.sliding, .swinging, .filling).indeterminate.progress .bar {
-    background: var(--ui-progress-inverted-background);
+    background: var(--_ui-progress-inverted-background);
   }
   .ui.inverted:is(.sliding, .swinging, .filling).indeterminate.progress .bar::before {
-    background: var(--_progress-bar-color, var(--ui-color-inverted, var(--ui-progress-bar-background)));
+    background: var(--_progress-bar-color, var(--ui-color-inverted, var(--_ui-progress-bar-background)));
   }
   .ui.inverted:is(.sliding, .swinging).indeterminate.progress .bar .progress {
     color: var(--ui-text-inverted-color);
@@ -415,16 +420,16 @@
     position: relative;
   }
   .ui.active.progress .bar:not(:empty) {
-    min-width: var(--ui-progress-bar-min-width);
+    min-width: var(--_ui-progress-bar-min-width);
   }
   .ui.active.progress .bar::after {
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: var(--ui-progress-radius);
-    background: var(--ui-progress-pulse-color);
+    border-radius: var(--_ui-progress-radius);
+    background: var(--_ui-progress-pulse-color);
     opacity: 0;
-    animation: progress-active var(--ui-progress-pulse-duration) var(--ui-ease) infinite;
+    animation: progress-active var(--_ui-progress-pulse-duration) var(--ui-ease) infinite;
     transform-origin: left;
   }
   .ui.active.right.aligned.progress .bar::after {
@@ -432,7 +437,7 @@
   }
   @keyframes progress-active {
     0% {
-      opacity: var(--ui-progress-pulse-opacity);
+      opacity: var(--_ui-progress-pulse-opacity);
       transform: scale(0, 1);
     }
     100% {
@@ -485,7 +490,7 @@
 
   /* Disabled:  dimmed, still. */
   .ui.disabled.progress {
-    opacity: var(--ui-progress-disabled-opacity);
+    opacity: var(--_ui-progress-disabled-opacity);
   }
   .ui.disabled.progress .bar,
   .ui.disabled.progress .bar::before,

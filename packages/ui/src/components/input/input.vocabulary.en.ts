@@ -5,7 +5,7 @@
  *   `<ui-input icon="search" icon-position="left" labeled="right" size="small">` =>
  *   `ui small left icon right labeled input`.  The element adds `icon` (no position), `labeled` / `action` (a
  *   slotted label or action without the attribute) and `file` (`type="file"`) itself.
- * - `state` is `kind: "color"`:  it emits its value alone (`ui error input`), a remap in `colors.css`.
+ * - `state` is `kind: "valueOnly"`:  it emits its value alone (`ui error input`), a remap in `colors.css`.
  * - `value` does NOT reflect:  like a native `<input>`, the ATTRIBUTE is the starting (and reset) value and the
  *   PROPERTY the live one -- a password never lands in the DOM.
  * - Constraint attributes (`required`, `pattern`, `min` ...) go to the inner native control, whose validity
@@ -53,10 +53,9 @@ export const inputVocabulary = {
     },
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: FORM_STATES,
-      description:
-        'Form state, tinting the box, text and placeholder.  NOTE: `kind: "color"`:  it emits its value alone.'
+      description: "Form state, tinting the box, text and placeholder."
     },
     { name: "transparent", kind: "keyOnly", description: "No box:  text only, e.g. inside a menu or header." },
     { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
@@ -90,7 +89,7 @@ export const inputVocabulary = {
       description:
         "Joined buttons (slot `action`):  bare => after the field, `left` => before it.  Implied by the slot."
     },
-    { name: "icon", kind: "string", description: "Icon name, drawn inside the field;  the root gets `icon`." },
+    { name: "icon", kind: "icon", description: "Icon name, drawn inside the field;  the root gets `icon`." },
     {
       name: "label",
       kind: "string",
@@ -180,10 +179,9 @@ export const textareaVocabulary = {
     { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: FORM_STATES,
-      description:
-        'Form state, tinting the box, text and placeholder.  NOTE: `kind: "color"`:  it emits its value alone.'
+      description: "Form state, tinting the box, text and placeholder."
     },
     { name: "transparent", kind: "keyOnly", description: "No box:  text only." },
     { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },

@@ -52,10 +52,12 @@ describe("text.css source", () => {
     for (const value of state.values) expect(colorsCSS).toContain(`.ui.${value},`)
   })
 
-  it("never declares a global --ui-text-* colour token", () => {
-    const declared = [...Sheets.withoutComments(textRaw).matchAll(/(--ui-text-[\w-]+)\s*:/g)].map((match) => match[1]!)
-    expect(declared.length).toBeGreaterThan(0)
-    for (const name of declared) expect(tokensCSS + colorsCSS, name).not.toMatch(new RegExp(`${name}\\s*:`))
+  it("never aliases a global --ui-text-* colour token", () => {
+    const aliased = [...Sheets.withoutComments(textRaw).matchAll(/--_(ui-text-[\w-]+)\s*:/g)].map(
+      (match) => `--${match[1]!}`
+    )
+    expect(aliased.length).toBeGreaterThan(0)
+    for (const name of aliased) expect(tokensCSS + colorsCSS, name).not.toMatch(new RegExp(`${name}\\s*:`))
   })
 })
 
@@ -141,3 +143,15 @@ describe("text.css in shadow roots", () => {
 function sheets(): string[] {
   return [...foundationCSS, textCSS]
 }
+
+describe("text.css tokens", () => {
+  it("takes a public token from a wrapper or the text itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, textCSS])
+    const root = Fixture.render(
+      `<div style="--ui-text-disabled-opacity: 0.25"><span class="ui disabled text">A</span></div>` +
+        `<span class="ui large text" style="--ui-text-size-large: 3">B</span>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).opacity).toBe("0.25")
+    expect(getComputedStyle(root.nextElementSibling!).fontSize).toBe("48px")
+  })
+})

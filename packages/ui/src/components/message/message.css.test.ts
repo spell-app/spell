@@ -55,8 +55,8 @@ describe("message.css source", () => {
 
   it("declares the owner token the header / content parts read, on every root", () => {
     expect(messageVocabulary.ownsParts).toEqual(["header", "content"])
-    expect(Sheets.withoutComments(messageRaw)).toMatch(/\.ui\.message \{[^}]*--ui-message-layout: block;/)
-    expect(Sheets.withoutComments(messageRaw)).toMatch(/\.ui\.icon\.message \{[^}]*--ui-message-layout: icon;/)
+    expect(Sheets.withoutComments(messageRaw)).toMatch(/\.ui\.message \{[^}]*--_ui-message-layout: block;/)
+    expect(Sheets.withoutComments(messageRaw)).toMatch(/\.ui\.icon\.message \{[^}]*--_ui-message-layout: icon;/)
   })
 })
 
@@ -101,7 +101,7 @@ describe("message.css examples", () => {
     const message = root.querySelector<HTMLElement>(".ui.icon.message")!
     const style = getComputedStyle(message)
     expect(style.display).toBe("flex")
-    expect(style.getPropertyValue("--ui-message-layout").trim()).toBe("icon")
+    expect(style.getPropertyValue("--_ui-message-layout").trim()).toBe("icon")
     const icon = message.querySelector<HTMLElement>(":scope > .icon")!
     expect(parseFloat(getComputedStyle(icon).fontSize)).toBeCloseTo(3 * parseFloat(style.fontSize), 0)
     expect(getComputedStyle(icon).opacity).toBe("0.8")
@@ -249,7 +249,7 @@ describe("message.css in shadow roots", () => {
     expect(getComputedStyle(Sheets.inner(content)).flexGrow).toBe("1")
     expect(inner.getPropertyValue("--ui-color").trim()).toBe("")
     expect(inner.getPropertyValue("--ui-scale").trim()).toBe("")
-    expect(inner.getPropertyValue("--ui-message-layout").trim()).toBe("icon")
+    expect(inner.getPropertyValue("--_ui-message-layout").trim()).toBe("icon")
   })
 })
 
@@ -266,3 +266,11 @@ function luminance(color: string): number {
   const [r, g, b] = context.getImageData(0, 0, 1, 1).data
   return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
 }
+
+describe("message.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, messageCSS])
+    const root = Fixture.render(`<div style="--ui-message-radius: 20px"><div class="ui message">x</div></div>`)
+    expect(getComputedStyle(root.querySelector(".ui.message")!).borderTopLeftRadius).toBe("20px")
+  })
+})

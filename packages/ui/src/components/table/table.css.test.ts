@@ -97,6 +97,14 @@ describe("table.css on class-grammar examples", () => {
     expect(getComputedStyle(plain).borderLeftStyle).toBe("none")
   })
 
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt([...foundationCSS, tableCSS])
+    const root = Fixture.render(
+      `<div style="--ui-table-radius: 12px"><table class="ui table"><tbody><tr><td>A</td></tr></tbody></table></div>`
+    )
+    expect(getComputedStyle(root.querySelector("table")!).borderTopLeftRadius).toBe("12px")
+  })
+
   it("stripes even body rows", () => {
     Sheets.adopt([...foundationCSS, tableCSS])
     const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)

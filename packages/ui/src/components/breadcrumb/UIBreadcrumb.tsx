@@ -18,7 +18,7 @@ import breadcrumbCSS from "./breadcrumb.css?inline"
  *   - `divider="›"` => `--ui-breadcrumb-divider: "›"`, serialized as a CSS string;  only when the attribute is
  *     set, so a page theming the token on a wrapper isn't overridden (the sheet's own fallback is `/`)
  *   - `divider-icon="chevron right"` => `--ui-breadcrumb-divider-icon: url("data:image/svg+xml,…")` of the glyph
- *     (painted as a mask in `currentColor`) + `--ui-breadcrumb-divider-layout: icon`, once the glyph has loaded;
+ *     (painted as a mask in `currentColor`) + `--_ui-breadcrumb-divider-layout: icon`, once the glyph has loaded;
  *     it wins over `divider`
  * - `aria-label`:  the host's, forwarded (two trails on one page need distinct landmark names), else the
  *   translated `label` text ("Breadcrumb").
@@ -65,5 +65,5 @@ export class UIBreadcrumb extends UIElement<typeof breadcrumbVocabulary> {
 /** Host attribute forwarded to the `<nav>`. */
 const ARIA_LABEL = "aria-label"
 
-/** `--ui-breadcrumb-divider-layout` while an icon divider is set. */
+/** `--_ui-breadcrumb-divider-layout` while an icon divider is set. */
 const ICON_LAYOUT = "icon"

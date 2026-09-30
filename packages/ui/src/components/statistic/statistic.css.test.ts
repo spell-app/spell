@@ -71,7 +71,7 @@ describe("statistic.css examples", () => {
     const style = getComputedStyle(statistic)
     expect(style.display).toBe("inline-flex")
     expect(style.flexDirection).toBe("column")
-    expect(style.getPropertyValue("--ui-statistic-layout").trim()).toBe("vertical")
+    expect(style.getPropertyValue("--_ui-statistic-layout").trim()).toBe("vertical")
     expect(valueSize(statistic)).toBeCloseTo(4 * BASE, 0)
     expect(getComputedStyle(statistic.querySelector(".label")!).textTransform).toBe("uppercase")
   })
@@ -93,13 +93,13 @@ describe("statistic.css examples", () => {
     const root = example("variations")
     const statistic = root.querySelector<HTMLElement>(".ui.horizontal.statistic")!
     expect(getComputedStyle(statistic).flexDirection).toBe("row")
-    expect(getComputedStyle(statistic).getPropertyValue("--ui-statistic-layout").trim()).toBe("horizontal")
+    expect(getComputedStyle(statistic).getPropertyValue("--_ui-statistic-layout").trim()).toBe("horizontal")
     expect(valueSize(statistic)).toBeCloseTo(3 * BASE, 0)
     const group = root.querySelector<HTMLElement>(".ui.horizontal.statistics")!
     expect(getComputedStyle(group).flexDirection).toBe("column")
     const member = group.querySelector<HTMLElement>(".statistic")!
     expect(getComputedStyle(member).flexDirection).toBe("row")
-    expect(getComputedStyle(member).getPropertyValue("--ui-statistic-layout").trim()).toBe("horizontal")
+    expect(getComputedStyle(member).getPropertyValue("--_ui-statistic-layout").trim()).toBe("horizontal")
     expect(valueSize(member)).toBeCloseTo(3 * BASE, 0)
   })
 
@@ -146,5 +146,15 @@ describe("statistic.css examples", () => {
     const wide = Fixture.render(markup(900))
     const [c, d] = wide.querySelectorAll<HTMLElement>(".statistic")
     expect(d!.getBoundingClientRect().top).toBe(c!.getBoundingClientRect().top)
+  })
+})
+
+describe("statistic.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, statisticCSS])
+    const root = Fixture.render(
+      `<div style="--ui-statistic-horizontal-spacing: 20px"><div class="ui statistics"><div class="statistic">x</div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.statistics")!).marginLeft).toBe("-20px")
   })
 })

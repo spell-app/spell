@@ -3,7 +3,7 @@
  * Schema:  `ComponentVocabulary` (`$/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-loader size="large" color="red" speed="slow" active inline>` => `ui large red slow active inline loader`.
- * - `speed` is `kind: "color"` because it emits its value alone (`slow` / `fast`), like dropdown's `state`.
+ * - `speed` is `kind: "valueOnly"` because it emits its value alone (`slow` / `fast`), like dropdown's `state`.
  * - Accessibility:  the host is `role="status"` + `aria-live="polite"` (internals);  with no slotted text its
  *   accessible name is the `loading` text.  The spinner is decorative.  See `loader.css`.
  */
@@ -27,9 +27,9 @@ export const loaderVocabulary = {
     { name: "color", kind: "color", description: "Hue of the turning arc." },
     {
       name: "speed",
-      kind: "color",
+      kind: "valueOnly",
       values: ["slow", "fast"],
-      description: 'Spin `slow` or `fast`;  absent is normal.  NOTE: `kind: "color"` because it emits its value alone.'
+      description: "Spin `slow` or `fast`;  absent is normal."
     },
     {
       name: "active",

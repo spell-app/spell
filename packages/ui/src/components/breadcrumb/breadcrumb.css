@@ -18,7 +18,7 @@
  * - `--ui-breadcrumb-divider` -- a CSS string, the text divider (default `"/"`);  `divider="›"` makes the element
  *   set it inline on the root, serialized as a CSS string
  * - `--ui-breadcrumb-divider-icon` -- an `<image>` (a `url("data:image/svg+xml,...")` of the icon's SVG), plus
- *   `--ui-breadcrumb-divider-layout: icon`;  `divider-icon="chevron right"` makes the element set both.  The
+ *   `--_ui-breadcrumb-divider-layout: icon`;  `divider-icon="chevron right"` makes the element set both.  The
  *   divider paints `currentColor` through the icon as a MASK, so it follows the text colour
  * - the section's divider is empty and draws the token as generated content (`:empty::before`);  the first
  *   section hides its divider by HOST position (`:host(:first-child)`)
@@ -28,6 +28,13 @@
  *   (`--ui-breadcrumb-divider: "›"` on a wrapper) and a text divider needs no element help at all.
  * - static markup keeps Fomantic's explicit `.divider` elements (text, or an icon `.icon.divider`)
  *
+ * - Public tokens (`--ui-breadcrumb-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-breadcrumb-color: var(--ui-breadcrumb-color, var(--ui-text-color))`, and
+ *   every rule reads the alias.  So a value set on `:root`, an ancestor, the host, `::part(breadcrumb)` or in the
+ *   app stylesheet reaches the box (`docs/theming.md` "Component tokens").  Sections inherit the aliases from the
+ *   breadcrumb's root, so set them on the breadcrumb (or above), not on a section;  `inverted` writes the aliases.
+ *   - NOTE:  the divider tokens (`--ui-breadcrumb-divider*`) are never declared here either;  the element sets
+ *     them INLINE on its root only while `divider` / `divider-icon` is set, so the attribute beats the page
  * - Colours:  sections take the text colour, links `--ui-link`;  dividers are lighter and dimmer.  `inverted`
  *   sets `color-scheme: dark` (plus `--ui-inverted: 1`), so text, link and divider tokens resolve on-dark.
  * - NOTE: left out, on purpose:
@@ -50,29 +57,29 @@
     display: none;
   }
 
-  /* Tokens:  one per `breadcrumb.variables` entry that still matters;  sections inherit them. */
+  /* Tokens:  a private alias per `breadcrumb.variables` entry that still matters;  sections inherit them. */
   .ui.breadcrumb {
-    --ui-breadcrumb-margin: 0;
-    --ui-breadcrumb-line-height: var(--ui-line-height);
-    --ui-breadcrumb-color: var(--ui-text-color);
-    --ui-breadcrumb-link-color: var(--ui-link);
-    --ui-breadcrumb-link-hover-color: var(--ui-link-hover);
-    --ui-breadcrumb-active-font-weight: var(--ui-font-weight-bold);
-    --ui-breadcrumb-active-color: initial;
-    --ui-breadcrumb-divider-spacing: 0.25em;
-    --ui-breadcrumb-divider-opacity: 0.7;
-    --ui-breadcrumb-divider-color: var(--ui-text-light);
-    --ui-breadcrumb-divider-size: 0.92857em;
-    --ui-breadcrumb-icon-divider-size: 0.78571em;
-    --ui-breadcrumb-section-padding: 0;
-    --ui-breadcrumb-focus-radius: var(--ui-radius-s);
+    --_ui-breadcrumb-margin: var(--ui-breadcrumb-margin, 0);
+    --_ui-breadcrumb-line-height: var(--ui-breadcrumb-line-height, var(--ui-line-height));
+    --_ui-breadcrumb-color: var(--ui-breadcrumb-color, var(--ui-text-color));
+    --_ui-breadcrumb-link-color: var(--ui-breadcrumb-link-color, var(--ui-link));
+    --_ui-breadcrumb-link-hover-color: var(--ui-breadcrumb-link-hover-color, var(--ui-link-hover));
+    --_ui-breadcrumb-active-font-weight: var(--ui-breadcrumb-active-font-weight, var(--ui-font-weight-bold));
+    --_ui-breadcrumb-active-color: var(--ui-breadcrumb-active-color, initial);
+    --_ui-breadcrumb-divider-spacing: var(--ui-breadcrumb-divider-spacing, 0.25em);
+    --_ui-breadcrumb-divider-opacity: var(--ui-breadcrumb-divider-opacity, 0.7);
+    --_ui-breadcrumb-divider-color: var(--ui-breadcrumb-divider-color, var(--ui-text-light));
+    --_ui-breadcrumb-divider-size: var(--ui-breadcrumb-divider-size, 0.92857em);
+    --_ui-breadcrumb-icon-divider-size: var(--ui-breadcrumb-icon-divider-size, 0.78571em);
+    --_ui-breadcrumb-section-padding: var(--ui-breadcrumb-section-padding, 0);
+    --_ui-breadcrumb-focus-radius: var(--ui-breadcrumb-focus-radius, var(--ui-radius-s));
     box-sizing: border-box;
     display: inline-block;
-    margin: var(--_breadcrumb-margin-top, var(--ui-breadcrumb-margin)) 0
-      var(--_breadcrumb-margin-bottom, var(--ui-breadcrumb-margin));
-    color: var(--ui-breadcrumb-color);
+    margin: var(--_breadcrumb-margin-top, var(--_ui-breadcrumb-margin)) 0
+      var(--_breadcrumb-margin-bottom, var(--_ui-breadcrumb-margin));
+    color: var(--_ui-breadcrumb-color);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
-    line-height: var(--ui-breadcrumb-line-height);
+    line-height: var(--_ui-breadcrumb-line-height);
     vertical-align: middle;
   }
   .ui.breadcrumb:first-child {
@@ -105,18 +112,18 @@
   :host > .section {
     display: inline-block;
     margin: 0;
-    padding: var(--ui-breadcrumb-section-padding);
+    padding: var(--_ui-breadcrumb-section-padding);
   }
   .ui.breadcrumb a,
   :host > a.section {
-    border-radius: var(--ui-breadcrumb-focus-radius);
-    color: var(--ui-breadcrumb-link-color);
+    border-radius: var(--_ui-breadcrumb-focus-radius);
+    color: var(--_ui-breadcrumb-link-color);
     cursor: pointer;
     text-decoration: none;
   }
   .ui.breadcrumb a:hover,
   :host > a.section:hover {
-    color: var(--ui-breadcrumb-link-hover-color);
+    color: var(--_ui-breadcrumb-link-hover-color);
     text-decoration: underline;
   }
   .ui.breadcrumb a:focus-visible,
@@ -129,11 +136,11 @@
   .ui.breadcrumb .divider,
   :host > .divider {
     display: inline-block;
-    margin: 0 var(--ui-breadcrumb-divider-spacing);
-    color: var(--ui-breadcrumb-divider-color);
-    font-size: var(--ui-breadcrumb-divider-size);
+    margin: 0 var(--_ui-breadcrumb-divider-spacing);
+    color: var(--_ui-breadcrumb-divider-color);
+    font-size: var(--_ui-breadcrumb-divider-size);
     vertical-align: baseline;
-    opacity: var(--ui-breadcrumb-divider-opacity);
+    opacity: var(--_ui-breadcrumb-divider-opacity);
   }
   /* A section's own divider draws the breadcrumb's token;  the first section has none. */
   :host > .divider:empty::before,
@@ -146,7 +153,7 @@
   }
   /* Icon divider:  static markup's icon element, or the breadcrumb's icon as a mask in the text colour. */
   .ui.breadcrumb .icon.divider {
-    font-size: var(--ui-breadcrumb-icon-divider-size);
+    font-size: var(--_ui-breadcrumb-icon-divider-size);
     vertical-align: baseline;
   }
   .ui.breadcrumb .icon.divider > svg {
@@ -154,10 +161,10 @@
     height: 1em;
     fill: currentColor;
   }
-  @container style(--ui-breadcrumb-divider-layout: icon) {
+  @container style(--_ui-breadcrumb-divider-layout: icon) {
     :host > .divider:empty,
     .ui.breadcrumb .divider:empty {
-      font-size: var(--ui-breadcrumb-icon-divider-size);
+      font-size: var(--_ui-breadcrumb-icon-divider-size);
     }
     :host > .divider:empty::before,
     .ui.breadcrumb .divider:empty::before {
@@ -181,9 +188,9 @@
   .ui.inverted.breadcrumb {
     --ui-inverted: 1;
     --ui-scheme: dark;
-    --ui-breadcrumb-color: var(--ui-text-inverted-muted);
-    --ui-breadcrumb-divider-color: var(--ui-text-inverted-light);
-    --ui-breadcrumb-active-color: var(--ui-text-inverted-color);
+    --_ui-breadcrumb-color: var(--ui-text-inverted-muted);
+    --_ui-breadcrumb-divider-color: var(--ui-text-inverted-light);
+    --_ui-breadcrumb-active-color: var(--ui-text-inverted-color);
     color-scheme: dark;
   }
 }
@@ -196,7 +203,7 @@
   /* Active:  the current page, bold (and brighter when inverted;  otherwise the text colour). */
   .ui.breadcrumb .active.section,
   :host > .active.section {
-    color: var(--ui-breadcrumb-active-color);
-    font-weight: var(--ui-breadcrumb-active-font-weight);
+    color: var(--_ui-breadcrumb-active-color);
+    font-weight: var(--_ui-breadcrumb-active-font-weight);
   }
 }

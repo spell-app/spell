@@ -18,14 +18,22 @@
  *
  * ## Owner tokens
  * An item can't see its menu's classes, so the menu ROOT resolves every variation (and combination:  `secondary
- * pointing`, `vertical tabular`, `inverted secondary` ...) into INHERITED `--ui-menu-*` tokens, and the item rules
+ * pointing`, `vertical tabular`, `inverted secondary` ...) into INHERITED `--_ui-menu-*` tokens, and the item rules
  * only read them.  The top-level root declares all of them (defaults included), so a nested top-level menu never
- * inherits an outer one's look;  a sub-menu root redeclares only its edges and inherits the rest.
+ * inherits an outer one's look;  a sub-menu root writes only its edges (and, in a vertical menu, its smaller look)
+ * and inherits the rest.
+ * - Public tokens (`--ui-menu-*`, the theming surface) are NEVER declared here:  the root reads each through a
+ *   private alias, `--_ui-menu-item-padding: var(--ui-menu-item-padding, 0.92857em 1.14286em)`, which variations
+ *   write, and every rule reads the alias.  So a value set on `:root`, an ancestor, the host, `::part(menu)` or in
+ *   the app stylesheet reaches the menu and its items (`docs/theming.md` "Component tokens");  set it on the menu or
+ *   above, not on an item.  A variation that swaps a value wins over the page's.
+ * - The rows marked (switch) are private:  the menu's classes decide them, so the page never sets them.  The first
+ *   / last / only item corners derive from `--ui-menu-radius`.
  *
  * | Token                               | What                                  | Changed by                           |
  * | ----------------------------------- | ------------------------------------- | ------------------------------------ |
- * | `--ui-menu-layout`                  | `horizontal` / `vertical` (queried)   | `vertical`                           |
- * | `--ui-menu-stackable`               | `0` / `1` (queried, on mobile)        | `stackable`                          |
+ * | `--_ui-menu-layout` (switch)        | `horizontal` / `vertical` (queried)   | `vertical`                           |
+ * | `--_ui-menu-stackable` (switch)     | `0` / `1` (queried, on mobile)        | `stackable`                          |
  * | `--ui-menu-item-display`            | item box display                      | vertical (`block`)                   |
  * | `--ui-menu-item-padding`            | item padding                          | secondary, pointing, tabular, text,  |
  * |                                     |                                       | fitted, equal width, sub-menus       |
@@ -37,11 +45,11 @@
  * | `--ui-menu-item-align`              | item `align-self`                     | secondary, pointing, text            |
  * | `--ui-menu-item-flex` / `-width` / `-min-width` / `-justify` / `-text-align` / `-direction` | item sizing | centered, equal width, N item, pagination, labeled icon, stackable |
  * | `--ui-menu-item-font-size`          | sub-menu item size                    | sub-menus of a vertical menu         |
- * | `--ui-menu-first-radius` / `-last-radius` | corners of the first / last item | vertical, pagination, compact,       |
+ * | `--_ui-menu-first-radius` / `-last-` / `-only-` (switch) | corners of the first / last / only item | vertical, pagination, compact, |
  * |                                     |                                       | attached, fixed, sub-menus           |
  * | `--ui-menu-divider`                 | divider colour (`transparent` hides)  | borderless, inverted, coloured       |
  * | `--ui-menu-divider-display` / `-first-display` / `-last-display` | which dividers show | secondary, text, tabular, pagination, compact, floated, equal width, wrapping |
- * | `--ui-menu-divider-side`            | `right` / `left` edge of the divider  | right sub-menus, wrapping            |
+ * | `--_ui-menu-divider-side` (switch)  | `right` / `left` edge of the divider  | right sub-menus, wrapping            |
  * | `--ui-menu-hover-background` / `-color`   | link / button item hover        | secondary, pointing, tabular, text, inverted |
  * | `--ui-menu-pressed-background` / `-color` | pressed item                    | same                                 |
  * | `--ui-menu-active-background` / `-color` / `-weight` / `-border-color` / `-border-width` / `-margin` / `-radius` | active item | every type |
@@ -111,67 +119,71 @@
     --ui-color-inverted-on: initial;
   }
 
-  /* Tokens:  the root resolves every variation into these;  items read them (see the header). */
+  /* Tokens:  the switches and the private aliases, which the root resolves every variation into;  items read them
+     (see the header). */
   .ui.menu {
     --ui-inverted: 0;
-    --ui-menu-layout: horizontal;
-    --ui-menu-stackable: 0;
-    --ui-menu-radius: var(--ui-radius);
-    --ui-menu-background: var(--ui-surface);
-    --ui-menu-border: var(--ui-border-width) solid var(--ui-border-color);
-    --ui-menu-item-display: flex;
-    --ui-menu-item-padding: 0.92857em 1.14286em;
-    --ui-menu-item-margin: 0;
-    --ui-menu-item-color: var(--ui-text-color);
-    --ui-menu-item-weight: var(--ui-font-weight-normal);
-    --ui-menu-item-background: none;
-    --ui-menu-item-radius: 0;
-    --ui-menu-item-border-width: 0;
-    --ui-menu-item-border-color: transparent;
-    --ui-menu-item-align: auto;
-    --ui-menu-item-flex: 0 0 auto;
-    --ui-menu-item-width: auto;
-    --ui-menu-item-min-width: 0;
-    --ui-menu-item-justify: normal;
-    --ui-menu-item-text-align: inherit;
-    --ui-menu-item-direction: row;
-    --ui-menu-item-font-size: 1em;
-    --ui-menu-item-transition:
-      background var(--ui-duration-fast) var(--ui-ease), box-shadow var(--ui-duration-fast) var(--ui-ease),
-      color var(--ui-duration-fast) var(--ui-ease);
-    --ui-menu-first-radius: var(--ui-menu-radius) 0 0 var(--ui-menu-radius);
-    --ui-menu-last-radius: 0;
-    --ui-menu-divider: var(--ui-border-color-internal);
-    --ui-menu-divider-display: block;
-    --ui-menu-divider-first-display: var(--ui-menu-divider-display);
-    --ui-menu-divider-last-display: var(--ui-menu-divider-display);
-    --ui-menu-divider-side: right;
-    --ui-menu-hover-background: oklch(from var(--ui-ink) l c h / 0.03);
-    --ui-menu-hover-color: var(--ui-text-selected);
-    --ui-menu-pressed-background: oklch(from var(--ui-ink) l c h / 0.03);
-    --ui-menu-pressed-color: var(--ui-text-selected);
-    --ui-menu-active-background: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-menu-active-color: var(--ui-text-selected);
-    --ui-menu-active-weight: var(--ui-font-weight-normal);
-    --ui-menu-active-border-color: var(--ui-menu-item-border-color);
-    --ui-menu-active-border-width: var(--ui-menu-item-border-width);
-    --ui-menu-active-margin: var(--ui-menu-item-margin);
-    --ui-menu-active-radius: var(--ui-menu-item-radius);
-    --ui-menu-active-hover-background: var(--ui-menu-active-background);
-    --ui-menu-active-hover-color: var(--ui-menu-active-color);
-    --ui-menu-active-accent: initial;
-    --ui-menu-arrow: none;
-    --ui-menu-arrow-color: color-mix(in oklab, var(--ui-ink) 5%, var(--ui-surface));
-    --ui-menu-header-color: inherit;
-    --ui-menu-header-size: 1em;
-    --ui-menu-header-transform: none;
-    --ui-menu-header-margin: 0;
-    --ui-menu-disabled-color: var(--ui-text-disabled);
-    --ui-menu-icon-margin: 0 0.35714em 0 0;
-    --ui-menu-icon-opacity: 0.9;
-    --ui-menu-icon-size: 1em;
-    --ui-menu-icon-display: inline-flex;
-    --ui-menu-icon-float: none;
+    --_ui-menu-layout: horizontal;
+    --_ui-menu-stackable: 0;
+    --_ui-menu-radius: var(--ui-menu-radius, var(--ui-radius));
+    --_ui-menu-background: var(--ui-menu-background, var(--ui-surface));
+    --_ui-menu-border: var(--ui-menu-border, var(--ui-border-width) solid var(--ui-border-color));
+    --_ui-menu-item-display: var(--ui-menu-item-display, flex);
+    --_ui-menu-item-padding: var(--ui-menu-item-padding, 0.92857em 1.14286em);
+    --_ui-menu-item-margin: var(--ui-menu-item-margin, 0);
+    --_ui-menu-item-color: var(--ui-menu-item-color, var(--ui-text-color));
+    --_ui-menu-item-weight: var(--ui-menu-item-weight, var(--ui-font-weight-normal));
+    --_ui-menu-item-background: var(--ui-menu-item-background, none);
+    --_ui-menu-item-radius: var(--ui-menu-item-radius, 0);
+    --_ui-menu-item-border-width: var(--ui-menu-item-border-width, 0);
+    --_ui-menu-item-border-color: var(--ui-menu-item-border-color, transparent);
+    --_ui-menu-item-align: var(--ui-menu-item-align, auto);
+    --_ui-menu-item-flex: var(--ui-menu-item-flex, 0 0 auto);
+    --_ui-menu-item-width: var(--ui-menu-item-width, auto);
+    --_ui-menu-item-min-width: var(--ui-menu-item-min-width, 0);
+    --_ui-menu-item-justify: var(--ui-menu-item-justify, normal);
+    --_ui-menu-item-text-align: var(--ui-menu-item-text-align, inherit);
+    --_ui-menu-item-direction: var(--ui-menu-item-direction, row);
+    --_ui-menu-item-font-size: var(--ui-menu-item-font-size, 1em);
+    --_ui-menu-item-transition: var(
+      --ui-menu-item-transition,
+      background var(--ui-duration-fast) var(--ui-ease),
+      box-shadow var(--ui-duration-fast) var(--ui-ease),
+      color var(--ui-duration-fast) var(--ui-ease)
+    );
+    --_ui-menu-first-radius: var(--_ui-menu-radius) 0 0 var(--_ui-menu-radius);
+    --_ui-menu-last-radius: 0;
+    --_ui-menu-divider: var(--ui-menu-divider, var(--ui-border-color-internal));
+    --_ui-menu-divider-display: var(--ui-menu-divider-display, block);
+    --_ui-menu-divider-first-display: var(--ui-menu-divider-first-display, var(--_ui-menu-divider-display));
+    --_ui-menu-divider-last-display: var(--ui-menu-divider-last-display, var(--_ui-menu-divider-display));
+    --_ui-menu-divider-side: right;
+    --_ui-menu-hover-background: var(--ui-menu-hover-background, oklch(from var(--ui-ink) l c h / 0.03));
+    --_ui-menu-hover-color: var(--ui-menu-hover-color, var(--ui-text-selected));
+    --_ui-menu-pressed-background: var(--ui-menu-pressed-background, oklch(from var(--ui-ink) l c h / 0.03));
+    --_ui-menu-pressed-color: var(--ui-menu-pressed-color, var(--ui-text-selected));
+    --_ui-menu-active-background: var(--ui-menu-active-background, oklch(from var(--ui-ink) l c h / 0.05));
+    --_ui-menu-active-color: var(--ui-menu-active-color, var(--ui-text-selected));
+    --_ui-menu-active-weight: var(--ui-menu-active-weight, var(--ui-font-weight-normal));
+    --_ui-menu-active-border-color: var(--ui-menu-active-border-color, var(--_ui-menu-item-border-color));
+    --_ui-menu-active-border-width: var(--ui-menu-active-border-width, var(--_ui-menu-item-border-width));
+    --_ui-menu-active-margin: var(--ui-menu-active-margin, var(--_ui-menu-item-margin));
+    --_ui-menu-active-radius: var(--ui-menu-active-radius, var(--_ui-menu-item-radius));
+    --_ui-menu-active-hover-background: var(--ui-menu-active-hover-background, var(--_ui-menu-active-background));
+    --_ui-menu-active-hover-color: var(--ui-menu-active-hover-color, var(--_ui-menu-active-color));
+    --_ui-menu-active-accent: var(--ui-menu-active-accent, initial);
+    --_ui-menu-arrow: var(--ui-menu-arrow, none);
+    --_ui-menu-arrow-color: var(--ui-menu-arrow-color, color-mix(in oklab, var(--ui-ink) 5%, var(--ui-surface)));
+    --_ui-menu-header-color: var(--ui-menu-header-color, inherit);
+    --_ui-menu-header-size: var(--ui-menu-header-size, 1em);
+    --_ui-menu-header-transform: var(--ui-menu-header-transform, none);
+    --_ui-menu-header-margin: var(--ui-menu-header-margin, 0);
+    --_ui-menu-disabled-color: var(--ui-menu-disabled-color, var(--ui-text-disabled));
+    --_ui-menu-icon-margin: var(--ui-menu-icon-margin, 0 0.35714em 0 0);
+    --_ui-menu-icon-opacity: var(--ui-menu-icon-opacity, 0.9);
+    --_ui-menu-icon-size: var(--ui-menu-icon-size, 1em);
+    --_ui-menu-icon-display: var(--ui-menu-icon-display, inline-flex);
+    --_ui-menu-icon-float: var(--ui-menu-icon-float, none);
 
     box-sizing: border-box;
     display: flex;
@@ -183,9 +195,9 @@
     font-weight: var(--ui-font-weight-normal);
     line-height: normal;
     list-style: none;
-    background: var(--ui-menu-background);
-    border: var(--ui-menu-border);
-    border-radius: var(--ui-menu-radius);
+    background: var(--_ui-menu-background);
+    border: var(--_ui-menu-border);
+    border-radius: var(--_ui-menu-radius);
     box-shadow: var(--ui-shadow-subtle);
   }
   /*
@@ -220,8 +232,8 @@
   /* ## Sub-menu:  a `.menu` inside a menu (`.right.menu`, a vertical menu's `.item > .menu`). */
   :host(:state(in-menu)) > .menu,
   .ui.menu .menu {
-    --ui-menu-first-radius: 0;
-    --ui-menu-last-radius: 0;
+    --_ui-menu-first-radius: 0;
+    --_ui-menu-last-radius: 0;
     display: flex;
     margin: 0;
   }
@@ -230,38 +242,38 @@
   :host(:state(in-menu)) > .item,
   .ui.menu .item {
     position: relative;
-    display: var(--ui-menu-item-display);
-    flex: var(--ui-menu-item-flex);
-    flex-direction: var(--ui-menu-item-direction);
-    align-self: var(--ui-menu-item-align);
+    display: var(--_ui-menu-item-display);
+    flex: var(--_ui-menu-item-flex);
+    flex-direction: var(--_ui-menu-item-direction);
+    align-self: var(--_ui-menu-item-align);
     align-items: center;
-    justify-content: var(--ui-menu-item-justify);
+    justify-content: var(--_ui-menu-item-justify);
     box-sizing: border-box;
-    width: var(--ui-menu-item-width);
-    min-width: var(--ui-menu-item-min-width);
-    margin: var(--ui-menu-item-margin);
-    padding: var(--ui-menu-item-padding);
-    font-size: var(--ui-menu-item-font-size);
-    font-weight: var(--ui-menu-item-weight);
+    width: var(--_ui-menu-item-width);
+    min-width: var(--_ui-menu-item-min-width);
+    margin: var(--_ui-menu-item-margin);
+    padding: var(--_ui-menu-item-padding);
+    font-size: var(--_ui-menu-item-font-size);
+    font-weight: var(--_ui-menu-item-weight);
     line-height: 1;
-    color: var(--ui-menu-item-color);
-    text-align: var(--ui-menu-item-text-align);
+    color: var(--_ui-menu-item-color);
+    text-align: var(--_ui-menu-item-text-align);
     text-decoration: none;
     text-transform: none;
     vertical-align: middle;
-    background: var(--ui-menu-item-background);
+    background: var(--_ui-menu-item-background);
     border-style: solid;
-    border-width: var(--ui-menu-item-border-width);
-    border-color: var(--ui-menu-item-border-color);
-    border-radius: var(--ui-menu-item-radius);
+    border-width: var(--_ui-menu-item-border-width);
+    border-color: var(--_ui-menu-item-border-color);
+    border-radius: var(--_ui-menu-item-radius);
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    transition: var(--ui-menu-item-transition);
+    transition: var(--_ui-menu-item-transition);
     /* what a slotted `<ui-icon>` takes:  Fomantic's `.ui.menu .item > i.icon` */
-    --ui-icon-owner-margin: var(--ui-menu-icon-margin);
-    --ui-icon-owner-opacity: var(--ui-menu-icon-opacity);
-    --ui-icon-owner-size: var(--ui-menu-icon-size);
-    --ui-icon-owner-display: var(--ui-menu-icon-display);
+    --_ui-icon-owner-margin: var(--_ui-menu-icon-margin);
+    --_ui-icon-owner-opacity: var(--_ui-menu-icon-opacity);
+    --_ui-icon-owner-size: var(--_ui-menu-icon-size);
+    --_ui-icon-owner-display: var(--_ui-menu-icon-display);
   }
   :host(:state(in-menu)) > .item:focus-visible,
   .ui.menu .item:focus-visible {
@@ -272,15 +284,15 @@
   /* Corners:  the first / last item of the menu (sub-menus zero them). */
   :host(:state(in-menu):first-child) > .item,
   .ui.menu .item:first-child {
-    border-radius: var(--ui-menu-first-radius);
+    border-radius: var(--_ui-menu-first-radius);
   }
   :host(:state(in-menu):last-child) > .item,
   .ui.menu .item:last-child {
-    border-radius: var(--ui-menu-last-radius);
+    border-radius: var(--_ui-menu-last-radius);
   }
   :host(:state(in-menu):only-child) > .item,
   .ui.menu .item:only-child {
-    border-radius: var(--ui-menu-only-radius, var(--ui-menu-first-radius));
+    border-radius: var(--_ui-menu-only-radius, var(--_ui-menu-first-radius));
   }
 
   /* Divider:  a hairline on the item's end edge (the top edge when vertical). */
@@ -290,18 +302,18 @@
     position: absolute;
     top: 0;
     right: 0;
-    display: var(--ui-menu-divider-display);
+    display: var(--_ui-menu-divider-display);
     width: 1px;
     height: 100%;
-    background: var(--ui-menu-divider);
+    background: var(--_ui-menu-divider);
   }
   :host(:state(in-menu):first-child) > .item::before,
   .ui.menu .item:first-child::before {
-    display: var(--ui-menu-divider-first-display);
+    display: var(--_ui-menu-divider-first-display);
   }
   :host(:state(in-menu):last-child) > .item::before,
   .ui.menu .item:last-child::before {
-    display: var(--ui-menu-divider-last-display);
+    display: var(--_ui-menu-divider-last-display);
   }
   /* Right items / a right sub-menu's items:  the divider moves to the start edge. */
   :host(:state(in-menu)) > .right.item::before,
@@ -309,7 +321,7 @@
     right: auto;
     left: 0;
   }
-  @container style(--ui-menu-divider-side: left) {
+  @container style(--_ui-menu-divider-side: left) {
     :host(:state(in-menu)) > .item::before,
     .ui.menu .item::before {
       right: auto;
@@ -346,22 +358,22 @@
   /* Header item:  bold, never a link. */
   :host(:state(in-menu)) > .header.item,
   .ui.menu .header.item {
-    margin: var(--ui-menu-header-margin);
-    font-size: var(--ui-menu-header-size);
+    margin: var(--_ui-menu-header-margin);
+    font-size: var(--_ui-menu-header-size);
     font-weight: var(--ui-font-weight-bold);
-    color: var(--ui-menu-header-color);
-    text-transform: var(--ui-menu-header-transform);
+    color: var(--_ui-menu-header-color);
+    text-transform: var(--_ui-menu-header-transform);
     background: none;
   }
 
   /* Icon box of the item's `icon` shorthand (a slotted `<ui-icon>` takes the same through its owner tokens). */
   :host(:state(in-menu)) > .item > .icon,
   .ui.menu .item > .icon {
-    display: var(--ui-menu-icon-display);
-    float: var(--ui-menu-icon-float);
-    margin: var(--ui-menu-icon-margin);
-    font-size: var(--ui-menu-icon-size);
-    opacity: var(--ui-menu-icon-opacity);
+    display: var(--_ui-menu-icon-display);
+    float: var(--_ui-menu-icon-float);
+    margin: var(--_ui-menu-icon-margin);
+    font-size: var(--_ui-menu-icon-size);
+    opacity: var(--_ui-menu-icon-opacity);
   }
   :host(:state(in-menu)) > .active.item > .icon,
   .ui.menu .active.item > .icon {
@@ -411,28 +423,28 @@
   /* A right sub-menu's items put their divider on the start edge;  a centred one drops its last. */
   :host(:state(in-menu)) > .right.menu,
   .ui.menu .right.menu {
-    --ui-menu-divider-side: left;
+    --_ui-menu-divider-side: left;
   }
   :host(:state(in-menu)) > .center.menu,
   .ui.menu .center.menu {
-    --ui-menu-divider-last-display: none;
+    --_ui-menu-divider-last-display: none;
   }
 
   /* ## Vertical */
   .ui.vertical.menu {
-    --ui-menu-layout: vertical;
-    --ui-menu-item-display: block;
-    --ui-menu-first-radius: var(--ui-menu-radius) var(--ui-menu-radius) 0 0;
-    --ui-menu-last-radius: 0 0 var(--ui-menu-radius) var(--ui-menu-radius);
-    --ui-menu-only-radius: var(--ui-menu-radius);
-    --ui-menu-divider-first-display: none;
-    --ui-menu-active-radius: 0;
-    --ui-menu-icon-float: right;
-    --ui-menu-icon-margin: 0 0 0 0.5em;
+    --_ui-menu-layout: vertical;
+    --_ui-menu-item-display: block;
+    --_ui-menu-first-radius: var(--_ui-menu-radius) var(--_ui-menu-radius) 0 0;
+    --_ui-menu-last-radius: 0 0 var(--_ui-menu-radius) var(--_ui-menu-radius);
+    --_ui-menu-only-radius: var(--_ui-menu-radius);
+    --_ui-menu-divider-first-display: none;
+    --_ui-menu-active-radius: 0;
+    --_ui-menu-icon-float: right;
+    --_ui-menu-icon-margin: 0 0 0 0.5em;
     display: block;
     width: calc(15em * sqrt(var(--ui-scale, 1)));
   }
-  @container style(--ui-menu-layout: vertical) {
+  @container style(--_ui-menu-layout: vertical) {
     :host(:state(in-menu)) > .item::before,
     .ui.menu .item::before {
       top: 0;
@@ -444,21 +456,21 @@
     /* A sub-menu inside an item:  indented under it, smaller, lighter. */
     :host(:state(in-menu)) > .menu,
     .ui.menu .item > .menu {
-      --ui-menu-item-padding: 0.5em 1.33333em;
-      --ui-menu-item-font-size: 0.85714em;
+      --_ui-menu-item-padding: 0.5em 1.33333em;
+      --_ui-menu-item-font-size: 0.85714em;
       /* Fomantic's 50% ink fails AA contrast at this size:  the muted text colour */
-      --ui-menu-item-color: var(--ui-text-muted);
-      --ui-menu-item-background: none;
-      --ui-menu-divider-display: none;
-      --ui-menu-divider-first-display: none;
-      --ui-menu-divider-last-display: none;
-      --ui-menu-active-background: transparent;
-      --ui-menu-active-hover-background: transparent;
-      --ui-menu-active-color: var(--ui-text-selected);
-      --ui-menu-active-weight: var(--ui-font-weight-bold);
-      --ui-menu-arrow-color: var(--ui-surface);
-      --ui-menu-hover-color: var(--ui-text-dark);
-      --ui-menu-hover-background: none;
+      --_ui-menu-item-color: var(--ui-text-muted);
+      --_ui-menu-item-background: none;
+      --_ui-menu-divider-display: none;
+      --_ui-menu-divider-first-display: none;
+      --_ui-menu-divider-last-display: none;
+      --_ui-menu-active-background: transparent;
+      --_ui-menu-active-hover-background: transparent;
+      --_ui-menu-active-color: var(--ui-text-selected);
+      --_ui-menu-active-weight: var(--ui-font-weight-bold);
+      --_ui-menu-arrow-color: var(--ui-surface);
+      --_ui-menu-hover-color: var(--ui-text-dark);
+      --_ui-menu-hover-background: none;
       display: block;
       margin: 0.5em -1.14286em 0;
     }
@@ -466,37 +478,37 @@
 
   /* ## Secondary:  no box;  rounded, spaced items. */
   .ui.secondary.menu {
-    --ui-menu-background: none;
-    --ui-menu-border: none;
-    --ui-menu-item-padding: 0.78571em 0.92857em;
-    --ui-menu-item-margin: 0 0.35714em;
-    --ui-menu-item-radius: var(--ui-radius);
-    --ui-menu-item-align: center;
-    --ui-menu-item-color: var(--ui-text-unselected);
-    --ui-menu-item-transition: color var(--ui-duration-fast) var(--ui-ease);
-    --ui-menu-first-radius: var(--ui-radius);
-    --ui-menu-last-radius: var(--ui-radius);
-    --ui-menu-divider-display: none;
-    --ui-menu-divider-first-display: none;
-    --ui-menu-divider-last-display: none;
-    --ui-menu-hover-background: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-menu-active-background: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-menu-active-radius: var(--ui-radius);
+    --_ui-menu-background: none;
+    --_ui-menu-border: none;
+    --_ui-menu-item-padding: 0.78571em 0.92857em;
+    --_ui-menu-item-margin: 0 0.35714em;
+    --_ui-menu-item-radius: var(--ui-radius);
+    --_ui-menu-item-align: center;
+    --_ui-menu-item-color: var(--ui-text-unselected);
+    --_ui-menu-item-transition: color var(--ui-duration-fast) var(--ui-ease);
+    --_ui-menu-first-radius: var(--ui-radius);
+    --_ui-menu-last-radius: var(--ui-radius);
+    --_ui-menu-divider-display: none;
+    --_ui-menu-divider-first-display: none;
+    --_ui-menu-divider-last-display: none;
+    --_ui-menu-hover-background: oklch(from var(--ui-ink) l c h / 0.05);
+    --_ui-menu-active-background: oklch(from var(--ui-ink) l c h / 0.05);
+    --_ui-menu-active-radius: var(--ui-radius);
     margin-right: -0.35714em;
     margin-left: -0.35714em;
     border-radius: 0;
     box-shadow: none;
   }
   .ui.secondary.vertical.menu {
-    --ui-menu-item-margin: 0 0 0.35714em;
-    --ui-menu-active-radius: var(--ui-radius);
+    --_ui-menu-item-margin: 0 0 0.35714em;
+    --_ui-menu-active-radius: var(--ui-radius);
   }
 
   /* ## Pointing:  an arrow under the active item (beside it when vertical). */
   .ui.pointing.menu {
-    --ui-menu-arrow: block;
+    --_ui-menu-arrow: block;
   }
-  @container style(--ui-menu-layout: vertical) {
+  @container style(--_ui-menu-layout: vertical) {
     :host(:state(in-menu)) > .item::after,
     .ui.menu .item::after {
       inset: 50% 0 auto auto;
@@ -510,54 +522,54 @@
 
   /* ## Secondary pointing:  an underline, no arrow. */
   .ui.secondary.pointing.menu {
-    --ui-menu-arrow: none;
-    --ui-menu-item-padding: 0.85714em 1.14286em;
-    --ui-menu-item-margin: 0 0 -2px;
-    --ui-menu-item-radius: 0;
-    --ui-menu-item-align: flex-end;
-    --ui-menu-item-border-width: 0 0 2px;
-    --ui-menu-first-radius: 0;
-    --ui-menu-last-radius: 0;
-    --ui-menu-hover-background: transparent;
-    --ui-menu-hover-color: var(--ui-text-color);
-    --ui-menu-pressed-background: transparent;
-    --ui-menu-active-background: transparent;
-    --ui-menu-active-border-color: currentColor;
-    --ui-menu-active-weight: var(--ui-font-weight-bold);
-    --ui-menu-active-radius: 0;
-    --ui-menu-header-color: var(--ui-text-dark);
+    --_ui-menu-arrow: none;
+    --_ui-menu-item-padding: 0.85714em 1.14286em;
+    --_ui-menu-item-margin: 0 0 -2px;
+    --_ui-menu-item-radius: 0;
+    --_ui-menu-item-align: flex-end;
+    --_ui-menu-item-border-width: 0 0 2px;
+    --_ui-menu-first-radius: 0;
+    --_ui-menu-last-radius: 0;
+    --_ui-menu-hover-background: transparent;
+    --_ui-menu-hover-color: var(--ui-text-color);
+    --_ui-menu-pressed-background: transparent;
+    --_ui-menu-active-background: transparent;
+    --_ui-menu-active-border-color: currentColor;
+    --_ui-menu-active-weight: var(--ui-font-weight-bold);
+    --_ui-menu-active-radius: 0;
+    --_ui-menu-header-color: var(--ui-text-dark);
     margin-right: 0;
     margin-left: 0;
     border-bottom: 2px solid var(--ui-border-color);
   }
   .ui.secondary.vertical.pointing.menu {
-    --ui-menu-item-margin: 0 -2px 0 0;
-    --ui-menu-item-border-width: 0 2px 0 0;
+    --_ui-menu-item-margin: 0 -2px 0 0;
+    --_ui-menu-item-border-width: 0 2px 0 0;
     border-right: 2px solid var(--ui-border-color);
     border-bottom-width: 0;
   }
 
   /* ## Tabular:  tabs sitting on a rule. */
   .ui.tabular.menu {
-    --ui-menu-background: none transparent;
-    --ui-menu-border: none;
-    --ui-menu-item-background: transparent;
-    --ui-menu-item-padding: 0.92857em 1.42857em;
-    --ui-menu-item-border-width: 2px 1px 0;
-    --ui-menu-first-radius: 0;
-    --ui-menu-last-radius: 0;
-    --ui-menu-divider-display: none;
-    --ui-menu-divider-first-display: none;
-    --ui-menu-divider-last-display: none;
-    --ui-menu-hover-background: transparent;
-    --ui-menu-hover-color: var(--ui-text-hovered);
-    --ui-menu-active-background: var(--ui-surface);
-    --ui-menu-active-hover-background: var(--ui-surface);
-    --ui-menu-active-border-color: var(--ui-border-color-strong);
-    --ui-menu-active-border-width: 1px 1px 0;
-    --ui-menu-active-weight: var(--ui-font-weight-bold);
-    --ui-menu-active-margin: 0 0 -1px;
-    --ui-menu-active-radius: var(--ui-radius) var(--ui-radius) 0 0;
+    --_ui-menu-background: none transparent;
+    --_ui-menu-border: none;
+    --_ui-menu-item-background: transparent;
+    --_ui-menu-item-padding: 0.92857em 1.42857em;
+    --_ui-menu-item-border-width: 2px 1px 0;
+    --_ui-menu-first-radius: 0;
+    --_ui-menu-last-radius: 0;
+    --_ui-menu-divider-display: none;
+    --_ui-menu-divider-first-display: none;
+    --_ui-menu-divider-last-display: none;
+    --_ui-menu-hover-background: transparent;
+    --_ui-menu-hover-color: var(--ui-text-hovered);
+    --_ui-menu-active-background: var(--ui-surface);
+    --_ui-menu-active-hover-background: var(--ui-surface);
+    --_ui-menu-active-border-color: var(--ui-border-color-strong);
+    --_ui-menu-active-border-width: 1px 1px 0;
+    --_ui-menu-active-weight: var(--ui-font-weight-bold);
+    --_ui-menu-active-margin: 0 0 -1px;
+    --_ui-menu-active-radius: var(--ui-radius) var(--ui-radius) 0 0;
     border-bottom: 1px solid var(--ui-border-color-strong);
     border-radius: 0;
     box-shadow: none;
@@ -566,64 +578,64 @@
     width: calc(100% + 2px);
   }
   .ui.bottom.attached.tabular.menu {
-    --ui-menu-item-border-width: 0 1px 1px;
-    --ui-menu-active-border-width: 0 1px 1px;
-    --ui-menu-active-margin: -1px 0 0;
-    --ui-menu-active-radius: 0 0 var(--ui-radius) var(--ui-radius);
+    --_ui-menu-item-border-width: 0 1px 1px;
+    --_ui-menu-active-border-width: 0 1px 1px;
+    --_ui-menu-active-margin: -1px 0 0;
+    --_ui-menu-active-radius: 0 0 var(--ui-radius) var(--ui-radius);
     border-top: 1px solid var(--ui-border-color-strong);
     border-bottom: none;
   }
   .ui.vertical.tabular.menu {
-    --ui-menu-item-border-width: 1px 0 1px 1px;
-    --ui-menu-active-border-width: 1px 0 1px 1px;
-    --ui-menu-active-margin: 0 -1px 0 0;
-    --ui-menu-active-radius: var(--ui-radius) 0 0 var(--ui-radius);
+    --_ui-menu-item-border-width: 1px 0 1px 1px;
+    --_ui-menu-active-border-width: 1px 0 1px 1px;
+    --_ui-menu-active-margin: 0 -1px 0 0;
+    --_ui-menu-active-radius: var(--ui-radius) 0 0 var(--ui-radius);
     border-right: 1px solid var(--ui-border-color-strong);
     border-bottom: none;
   }
   .ui.vertical.right.tabular.menu {
-    --ui-menu-item-border-width: 1px 1px 1px 0;
-    --ui-menu-active-border-width: 1px 1px 1px 0;
-    --ui-menu-active-margin: 0 0 0 -1px;
-    --ui-menu-active-radius: 0 var(--ui-radius) var(--ui-radius) 0;
+    --_ui-menu-item-border-width: 1px 1px 1px 0;
+    --_ui-menu-active-border-width: 1px 1px 1px 0;
+    --_ui-menu-active-margin: 0 0 0 -1px;
+    --_ui-menu-active-radius: 0 var(--ui-radius) var(--ui-radius) 0;
     border-right: none;
     border-left: 1px solid var(--ui-border-color-strong);
   }
 
   /* ## Text:  plain words, no box. */
   .ui.text.menu {
-    --ui-menu-background: none transparent;
-    --ui-menu-border: none;
-    --ui-menu-item-padding: 0.35714em 0.5em;
-    --ui-menu-item-radius: 0;
-    --ui-menu-item-align: center;
-    --ui-menu-item-color: var(--ui-text-muted);
-    --ui-menu-item-transition: opacity var(--ui-duration-fast) var(--ui-ease);
-    --ui-menu-first-radius: 0;
-    --ui-menu-last-radius: 0;
-    --ui-menu-divider-display: none;
-    --ui-menu-divider-first-display: none;
-    --ui-menu-divider-last-display: none;
-    --ui-menu-arrow: none;
-    --ui-menu-hover-background: transparent;
-    --ui-menu-hover-color: var(--ui-menu-item-color);
-    --ui-menu-pressed-background: transparent;
-    --ui-menu-active-background: transparent;
-    --ui-menu-active-hover-background: transparent;
-    --ui-menu-active-weight: var(--ui-font-weight-normal);
-    --ui-menu-header-color: var(--ui-text-dark);
-    --ui-menu-header-size: 0.92857em;
-    --ui-menu-header-transform: uppercase;
+    --_ui-menu-background: none transparent;
+    --_ui-menu-border: none;
+    --_ui-menu-item-padding: 0.35714em 0.5em;
+    --_ui-menu-item-radius: 0;
+    --_ui-menu-item-align: center;
+    --_ui-menu-item-color: var(--ui-text-muted);
+    --_ui-menu-item-transition: opacity var(--ui-duration-fast) var(--ui-ease);
+    --_ui-menu-first-radius: 0;
+    --_ui-menu-last-radius: 0;
+    --_ui-menu-divider-display: none;
+    --_ui-menu-divider-first-display: none;
+    --_ui-menu-divider-last-display: none;
+    --_ui-menu-arrow: none;
+    --_ui-menu-hover-background: transparent;
+    --_ui-menu-hover-color: var(--_ui-menu-item-color);
+    --_ui-menu-pressed-background: transparent;
+    --_ui-menu-active-background: transparent;
+    --_ui-menu-active-hover-background: transparent;
+    --_ui-menu-active-weight: var(--ui-font-weight-normal);
+    --_ui-menu-header-color: var(--ui-text-dark);
+    --_ui-menu-header-size: 0.92857em;
+    --_ui-menu-header-transform: uppercase;
     margin: 1em -0.5em;
     border-radius: 0;
     box-shadow: none;
   }
   .ui.vertical.text.menu {
-    --ui-menu-item-margin: 0.57143em 0;
-    --ui-menu-item-padding: 0.35714em 0;
-    --ui-menu-icon-float: none;
-    --ui-menu-icon-margin: 0 0.35714em 0 0;
-    --ui-menu-header-margin: 0.57143em 0 0.71429em;
+    --_ui-menu-item-margin: 0.57143em 0;
+    --_ui-menu-item-padding: 0.35714em 0;
+    --_ui-menu-icon-float: none;
+    --_ui-menu-icon-margin: 0 0.35714em 0 0;
+    --_ui-menu-header-margin: 0.57143em 0 0.71429em;
     margin: 1em 0;
   }
   .ui.fluid.text.menu {
@@ -633,30 +645,30 @@
 
   /* ## Pagination */
   .ui.pagination.menu {
-    --ui-menu-item-min-width: 3em;
-    --ui-menu-item-justify: center;
-    --ui-menu-item-text-align: center;
-    --ui-menu-last-radius: 0 var(--ui-menu-radius) var(--ui-menu-radius) 0;
-    --ui-menu-divider-last-display: none;
+    --_ui-menu-item-min-width: 3em;
+    --_ui-menu-item-justify: center;
+    --_ui-menu-item-text-align: center;
+    --_ui-menu-last-radius: 0 var(--_ui-menu-radius) var(--_ui-menu-radius) 0;
+    --_ui-menu-divider-last-display: none;
     display: inline-flex;
     margin: 0;
     vertical-align: middle;
   }
   .ui.pagination.wrapping.menu {
-    --ui-menu-divider-last-display: var(--ui-menu-divider-display);
+    --_ui-menu-divider-last-display: var(--_ui-menu-divider-display);
   }
 
   /* ## Icon:  icon-only items. */
   .ui.icon.menu {
-    --ui-menu-item-color: var(--ui-ink);
-    --ui-menu-item-text-align: center;
-    --ui-menu-icon-margin: 0;
-    --ui-menu-icon-opacity: 1;
+    --_ui-menu-item-color: var(--ui-ink);
+    --_ui-menu-item-text-align: center;
+    --_ui-menu-icon-margin: 0;
+    --_ui-menu-icon-opacity: 1;
   }
   .ui.vertical.icon.menu {
-    --ui-menu-icon-display: block;
-    --ui-menu-icon-float: none;
-    --ui-menu-icon-margin: 0 auto;
+    --_ui-menu-icon-display: block;
+    --_ui-menu-icon-float: none;
+    --_ui-menu-icon-margin: 0 auto;
     display: inline-block;
     width: auto;
   }
@@ -669,15 +681,15 @@
 
   /* ## Labeled icon:  a large icon above the text. */
   .ui.labeled.icon.menu {
-    --ui-menu-item-min-width: 6em;
-    --ui-menu-item-direction: column;
-    --ui-menu-icon-display: block;
-    --ui-menu-icon-size: 1.71429em;
-    --ui-menu-icon-margin: 0 auto 0.5em;
+    --_ui-menu-item-min-width: 6em;
+    --_ui-menu-item-direction: column;
+    --_ui-menu-icon-display: block;
+    --_ui-menu-icon-size: 1.71429em;
+    --_ui-menu-icon-margin: 0 auto 0.5em;
     text-align: center;
   }
   .ui.fluid.labeled.icon.menu {
-    --ui-menu-item-min-width: 0;
+    --_ui-menu-item-min-width: 0;
   }
 
   /* ## Fluid, compact, floated, centered */
@@ -685,22 +697,22 @@
     width: 100%;
   }
   .ui.compact.menu {
-    --ui-menu-divider-last-display: none;
+    --_ui-menu-divider-last-display: none;
     display: inline-flex;
     margin: 0;
     vertical-align: middle;
   }
   .ui.compact.menu:not(.secondary) {
-    --ui-menu-last-radius: 0 var(--ui-menu-radius) var(--ui-menu-radius) 0;
+    --_ui-menu-last-radius: 0 var(--_ui-menu-radius) var(--_ui-menu-radius) 0;
   }
   .ui.compact.vertical.menu {
-    --ui-menu-divider-last-display: var(--ui-menu-divider-display);
-    --ui-menu-last-radius: 0 0 var(--ui-menu-radius) var(--ui-menu-radius);
+    --_ui-menu-divider-last-display: var(--_ui-menu-divider-display);
+    --_ui-menu-last-radius: 0 0 var(--_ui-menu-radius) var(--_ui-menu-radius);
     display: inline-block;
     width: auto;
   }
   .ui.floated.menu {
-    --ui-menu-divider-last-display: none;
+    --_ui-menu-divider-last-display: none;
     float: left;
     margin: 0 0.5em 0 0;
   }
@@ -714,22 +726,22 @@
     transform: translateX(-50%);
   }
   .ui.centered.menu {
-    --ui-menu-item-flex: 1 0 auto;
-    --ui-menu-item-justify: center;
+    --_ui-menu-item-flex: 1 0 auto;
+    --_ui-menu-item-justify: center;
   }
 
   /* ## Evenly divided:  `equal width`, or `N item`. */
   .ui[class*="equal width"].menu,
   .ui.item.menu {
-    --ui-menu-item-width: 100%;
-    --ui-menu-item-padding: 0.92857em 0;
-    --ui-menu-item-margin: 0;
-    --ui-menu-item-justify: center;
-    --ui-menu-item-text-align: center;
-    --ui-menu-divider-last-display: none;
+    --_ui-menu-item-width: 100%;
+    --_ui-menu-item-padding: 0.92857em 0;
+    --_ui-menu-item-margin: 0;
+    --_ui-menu-item-justify: center;
+    --_ui-menu-item-text-align: center;
+    --_ui-menu-divider-last-display: none;
   }
   .ui[class*="equal width"].menu {
-    --ui-menu-item-flex: 1;
+    --_ui-menu-item-flex: 1;
   }
   .ui.secondary.item.menu,
   .ui.text.item.menu {
@@ -737,60 +749,60 @@
     margin-left: 0;
   }
   .ui.two.item.menu {
-    --ui-menu-item-width: 50%;
+    --_ui-menu-item-width: 50%;
   }
   .ui.three.item.menu {
-    --ui-menu-item-width: 33.333%;
+    --_ui-menu-item-width: 33.333%;
   }
   .ui.four.item.menu {
-    --ui-menu-item-width: 25%;
+    --_ui-menu-item-width: 25%;
   }
   .ui.five.item.menu {
-    --ui-menu-item-width: 20%;
+    --_ui-menu-item-width: 20%;
   }
   .ui.six.item.menu {
-    --ui-menu-item-width: 16.666%;
+    --_ui-menu-item-width: 16.666%;
   }
   .ui.seven.item.menu {
-    --ui-menu-item-width: 14.285%;
+    --_ui-menu-item-width: 14.285%;
   }
   .ui.eight.item.menu {
-    --ui-menu-item-width: 12.5%;
+    --_ui-menu-item-width: 12.5%;
   }
   .ui.nine.item.menu {
-    --ui-menu-item-width: 11.11%;
+    --_ui-menu-item-width: 11.11%;
   }
   .ui.ten.item.menu {
-    --ui-menu-item-width: 10%;
+    --_ui-menu-item-width: 10%;
   }
   .ui.eleven.item.menu {
-    --ui-menu-item-width: 9.09%;
+    --_ui-menu-item-width: 9.09%;
   }
   .ui.twelve.item.menu {
-    --ui-menu-item-width: 8.333%;
+    --_ui-menu-item-width: 8.333%;
   }
   .ui.thirteen.item.menu {
-    --ui-menu-item-width: 7.692%;
+    --_ui-menu-item-width: 7.692%;
   }
   .ui.fourteen.item.menu {
-    --ui-menu-item-width: 7.142%;
+    --_ui-menu-item-width: 7.142%;
   }
   .ui.fifteen.item.menu {
-    --ui-menu-item-width: 6.666%;
+    --_ui-menu-item-width: 6.666%;
   }
   .ui.sixteen.item.menu {
-    --ui-menu-item-width: 6.25%;
+    --_ui-menu-item-width: 6.25%;
   }
 
   /* ## Fitted:  no item padding (on the menu, or one item). */
   .ui.fitted.menu {
-    --ui-menu-item-padding: 0;
+    --_ui-menu-item-padding: 0;
   }
   .ui.horizontally.fitted.menu {
-    --ui-menu-item-padding: 0.92857em 0;
+    --_ui-menu-item-padding: 0.92857em 0;
   }
   .ui.vertically.fitted.menu {
-    --ui-menu-item-padding: 0 1.14286em;
+    --_ui-menu-item-padding: 0 1.14286em;
   }
   :host(:state(in-menu)) > .fitted.item,
   .ui.menu .fitted.item {
@@ -807,24 +819,24 @@
 
   /* ## Borderless */
   .ui.borderless.menu {
-    --ui-menu-divider: transparent;
+    --_ui-menu-divider: transparent;
   }
 
   /* ## Wrapping:  items wrap;  dividers on the start edge so every line starts clean. */
   .ui.wrapping.menu {
-    --ui-menu-divider-side: left;
-    --ui-menu-divider-first-display: none;
+    --_ui-menu-divider-side: left;
+    --_ui-menu-divider-first-display: none;
     flex-wrap: wrap;
   }
   .ui.wrapped.wrapping.menu:not(.secondary, .text, .tabular, .borderless) {
-    --ui-menu-first-radius: var(--ui-menu-radius) 0 0 0;
-    --ui-menu-last-radius: 0 0 var(--ui-menu-radius) 0;
+    --_ui-menu-first-radius: var(--_ui-menu-radius) 0 0 0;
+    --_ui-menu-last-radius: 0 0 var(--_ui-menu-radius) 0;
   }
 
   /* ## Attached:  joined to a segment above / below. */
   .ui.attached.menu {
-    --ui-menu-first-radius: 0;
-    --ui-menu-last-radius: 0;
+    --_ui-menu-first-radius: 0;
+    --_ui-menu-last-radius: 0;
     top: 0;
     bottom: 0;
     width: calc(100% + 2px);
@@ -842,23 +854,23 @@
     margin-left: 0;
   }
   .ui[class*="top attached"].menu {
-    --ui-menu-first-radius: var(--ui-menu-radius) 0 0 0;
+    --_ui-menu-first-radius: var(--_ui-menu-radius) 0 0 0;
     margin-top: var(--_menu-margin-top, 1em);
     margin-bottom: 0;
-    border-radius: var(--ui-menu-radius) var(--ui-menu-radius) 0 0;
+    border-radius: var(--_ui-menu-radius) var(--_ui-menu-radius) 0 0;
   }
   .ui[class*="top attached"].tabular.menu {
-    --ui-menu-first-radius: 0;
+    --_ui-menu-first-radius: 0;
     border-radius: 0;
   }
   .ui[class*="bottom attached"].menu {
-    --ui-menu-first-radius: 0 0 0 var(--ui-menu-radius);
+    --_ui-menu-first-radius: 0 0 0 var(--_ui-menu-radius);
     margin-top: 0;
     margin-bottom: var(--_menu-margin-bottom, 1em);
-    border-radius: 0 0 var(--ui-menu-radius) var(--ui-menu-radius);
+    border-radius: 0 0 var(--_ui-menu-radius) var(--_ui-menu-radius);
   }
   .ui[class*="bottom attached"].tabular.menu {
-    --ui-menu-first-radius: 0;
+    --_ui-menu-first-radius: 0;
     border-radius: 0;
   }
   .ui[class*="equal width"].attached.menu:not(.tabular),
@@ -868,9 +880,9 @@
 
   /* ## Fixed:  pinned to a viewport edge. */
   .ui.fixed.menu {
-    --ui-menu-first-radius: 0;
-    --ui-menu-last-radius: 0;
-    --ui-menu-only-radius: 0;
+    --_ui-menu-first-radius: 0;
+    --_ui-menu-last-radius: 0;
+    --_ui-menu-only-radius: 0;
     position: fixed;
     inset: 0 auto auto 0;
     z-index: var(--ui-z-sticky, 101);
@@ -908,19 +920,19 @@
 
   /* ## Stackable:  a column on mobile. */
   .ui.stackable.menu {
-    --ui-menu-stackable: 1;
+    --_ui-menu-stackable: 1;
   }
   @media (--ui-mobile) {
     .ui.stackable.menu {
-      --ui-menu-item-width: 100%;
-      --ui-menu-divider-first-display: var(--ui-menu-divider-display);
-      --ui-menu-arrow: none;
+      --_ui-menu-item-width: 100%;
+      --_ui-menu-divider-first-display: var(--_ui-menu-divider-display);
+      --_ui-menu-arrow: none;
       flex-direction: column;
     }
     .ui.stackable.menu :is(.left, .right, .center).menu {
       flex-direction: column;
     }
-    @container style(--ui-menu-stackable: 1) {
+    @container style(--_ui-menu-stackable: 1) {
       :host(:state(in-menu)) > .item::before,
       .ui.menu .item::before {
         top: auto;
@@ -945,61 +957,61 @@
   .ui.inverted.menu {
     --ui-inverted: 1;
     --ui-scheme: dark;
-    --ui-menu-background: var(--ui-color, var(--ui-surface));
-    --ui-menu-border: 0 solid transparent;
-    --ui-menu-item-background: transparent;
-    --ui-menu-item-color: var(--ui-color-on, var(--ui-text-inverted-color));
-    --ui-menu-divider: oklch(from var(--ui-ink-on-dark) l c h / 0.08);
-    --ui-menu-hover-background: oklch(from var(--ui-ink-on-dark) l c h / 0.08);
-    --ui-menu-hover-color: var(--ui-color-on, var(--ui-text-inverted-selected));
-    --ui-menu-pressed-background: oklch(from var(--ui-ink-on-dark) l c h / 0.08);
-    --ui-menu-pressed-color: var(--ui-color-on, var(--ui-text-inverted-selected));
-    --ui-menu-active-background: var(
+    --_ui-menu-background: var(--ui-color, var(--ui-surface));
+    --_ui-menu-border: 0 solid transparent;
+    --_ui-menu-item-background: transparent;
+    --_ui-menu-item-color: var(--ui-color-on, var(--ui-text-inverted-color));
+    --_ui-menu-divider: oklch(from var(--ui-ink-on-dark) l c h / 0.08);
+    --_ui-menu-hover-background: oklch(from var(--ui-ink-on-dark) l c h / 0.08);
+    --_ui-menu-hover-color: var(--ui-color-on, var(--ui-text-inverted-selected));
+    --_ui-menu-pressed-background: oklch(from var(--ui-ink-on-dark) l c h / 0.08);
+    --_ui-menu-pressed-color: var(--ui-color-on, var(--ui-text-inverted-selected));
+    --_ui-menu-active-background: var(
       --ui-color-active,
       color-mix(in oklab, var(--ui-ink-on-dark) 15%, var(--ui-surface))
     );
-    --ui-menu-active-color: var(--ui-color-on, var(--ui-text-inverted-selected));
-    --ui-menu-active-hover-background: var(--ui-menu-active-background);
-    --ui-menu-active-hover-color: var(--ui-color-on, var(--ui-ink-on-dark));
-    --ui-menu-active-accent: var(--ui-menu-active-color);
-    --ui-menu-arrow-color: var(--ui-menu-active-background);
-    --ui-menu-disabled-color: var(--ui-text-inverted-disabled);
+    --_ui-menu-active-color: var(--ui-color-on, var(--ui-text-inverted-selected));
+    --_ui-menu-active-hover-background: var(--_ui-menu-active-background);
+    --_ui-menu-active-hover-color: var(--ui-color-on, var(--ui-ink-on-dark));
+    --_ui-menu-active-accent: var(--_ui-menu-active-color);
+    --_ui-menu-arrow-color: var(--_ui-menu-active-background);
+    --_ui-menu-disabled-color: var(--ui-text-inverted-disabled);
     color-scheme: dark;
     box-shadow: none;
   }
   /* Coloured inverted:  a darker divider on the fill. */
   .ui.inverted.menu:not(.secondary, .text, .tabular) {
-    --ui-menu-divider: var(--ui-color-active, oklch(from var(--ui-ink-on-dark) l c h / 0.08));
+    --_ui-menu-divider: var(--ui-color-active, oklch(from var(--ui-ink-on-dark) l c h / 0.08));
   }
   .ui.secondary.inverted.menu {
-    --ui-menu-background: transparent;
-    --ui-menu-item-color: var(--ui-text-inverted-light);
-    --ui-menu-hover-background: oklch(from var(--ui-ink-on-dark) l c h / 0.08);
-    --ui-menu-active-background: oklch(from var(--ui-ink-on-dark) l c h / 0.15);
+    --_ui-menu-background: transparent;
+    --_ui-menu-item-color: var(--ui-text-inverted-light);
+    --_ui-menu-hover-background: oklch(from var(--ui-ink-on-dark) l c h / 0.08);
+    --_ui-menu-active-background: oklch(from var(--ui-ink-on-dark) l c h / 0.15);
   }
   .ui.secondary.inverted.pointing.menu {
-    --ui-menu-item-color: var(--ui-text-inverted-color);
-    --ui-menu-hover-background: transparent;
-    --ui-menu-active-background: transparent;
-    --ui-menu-active-border-color: var(--ui-ink-on-dark);
-    --ui-menu-header-color: var(--ui-ink-on-dark);
+    --_ui-menu-item-color: var(--ui-text-inverted-color);
+    --_ui-menu-hover-background: transparent;
+    --_ui-menu-active-background: transparent;
+    --_ui-menu-active-border-color: var(--ui-ink-on-dark);
+    --_ui-menu-header-color: var(--ui-ink-on-dark);
     border-color: oklch(from var(--ui-ink-on-dark) l c h / 0.1);
   }
   .ui.inverted.tabular.menu {
-    --ui-menu-active-background: var(--ui-surface);
-    --ui-menu-active-hover-background: var(--ui-surface);
-    --ui-menu-active-border-color: oklch(from var(--ui-ink-on-dark) l c h / 0.2);
+    --_ui-menu-active-background: var(--ui-surface);
+    --_ui-menu-active-hover-background: var(--ui-surface);
+    --_ui-menu-active-border-color: oklch(from var(--ui-ink-on-dark) l c h / 0.2);
     border-color: oklch(from var(--ui-ink-on-dark) l c h / 0.2);
   }
   .ui.inverted.text.menu {
-    --ui-menu-background: transparent;
-    --ui-menu-active-background: transparent;
+    --_ui-menu-background: transparent;
+    --_ui-menu-active-background: transparent;
   }
   .ui.attached.inverted.menu {
     border: none;
   }
   .ui.inverted.pointing.menu {
-    --ui-menu-arrow-color: var(--ui-menu-active-background);
+    --_ui-menu-arrow-color: var(--_ui-menu-active-background);
   }
 }
 
@@ -1012,41 +1024,41 @@
   :host(:state(in-menu)) > :is(a, button).item:hover,
   .ui.menu :is(a.item, .link.item):hover,
   .ui.link.menu .item:hover {
-    color: var(--ui-menu-hover-color);
-    background: var(--ui-menu-hover-background);
+    color: var(--_ui-menu-hover-color);
+    background: var(--_ui-menu-hover-background);
     cursor: pointer;
   }
   :host(:state(in-menu)) > :is(a, button).item:active,
   .ui.menu :is(a.item, .link.item):active,
   .ui.link.menu .item:active {
-    color: var(--ui-menu-pressed-color);
-    background: var(--ui-menu-pressed-background);
+    color: var(--_ui-menu-pressed-color);
+    background: var(--_ui-menu-pressed-background);
   }
 
   /* Active:  the current item;  a coloured menu (or item) paints it in `--ui-color`. */
   :host(:state(in-menu)) > .active.item,
   .ui.menu .active.item {
-    margin: var(--ui-menu-active-margin);
-    font-weight: var(--ui-menu-active-weight);
-    color: var(--ui-menu-active-accent, var(--ui-color-text, var(--ui-menu-active-color)));
-    background: var(--ui-menu-active-background);
-    border-width: var(--ui-menu-active-border-width);
-    border-color: var(--ui-color, var(--ui-menu-active-border-color));
-    border-radius: var(--ui-menu-active-radius);
+    margin: var(--_ui-menu-active-margin);
+    font-weight: var(--_ui-menu-active-weight);
+    color: var(--_ui-menu-active-accent, var(--ui-color-text, var(--_ui-menu-active-color)));
+    background: var(--_ui-menu-active-background);
+    border-width: var(--_ui-menu-active-border-width);
+    border-color: var(--ui-color, var(--_ui-menu-active-border-color));
+    border-radius: var(--_ui-menu-active-radius);
     box-shadow: none;
   }
   :host(:state(in-menu):first-child) > .active.item,
   .ui.menu .active.item:first-child {
-    border-radius: var(--ui-menu-active-first-radius, var(--ui-menu-first-radius));
+    border-radius: var(--ui-menu-active-first-radius, var(--_ui-menu-first-radius));
   }
   :host(:state(in-menu):last-child) > .active.item,
   .ui.menu .active.item:last-child {
-    border-radius: var(--ui-menu-active-last-radius, var(--ui-menu-last-radius));
+    border-radius: var(--ui-menu-active-last-radius, var(--_ui-menu-last-radius));
   }
   :host(:state(in-menu)) > .active.item:hover,
   .ui.menu .active.item:hover {
-    color: var(--ui-menu-active-accent, var(--ui-color-text, var(--ui-menu-active-hover-color)));
-    background: var(--ui-menu-active-hover-background);
+    color: var(--_ui-menu-active-accent, var(--ui-color-text, var(--_ui-menu-active-hover-color)));
+    background: var(--_ui-menu-active-hover-background);
   }
   .ui.tabular.menu .active.item:hover,
   :host(:state(in-menu)) > .active.item:is(.header):hover {
@@ -1055,14 +1067,14 @@
   /* An active item shows the pointing arrow, filled like the item. */
   :host(:state(in-menu)) > .active.item::after,
   .ui.menu .active.item::after {
-    display: var(--ui-menu-arrow);
-    background-color: var(--ui-menu-arrow-color);
+    display: var(--_ui-menu-arrow);
+    background-color: var(--_ui-menu-arrow-color);
   }
 
   /* Disabled:  dimmed and inert. */
   :host(:state(in-menu)) > .disabled.item,
   .ui.menu .disabled.item {
-    color: var(--ui-menu-disabled-color);
+    color: var(--_ui-menu-disabled-color);
     background-color: transparent;
     cursor: default;
     pointer-events: none;

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { UI } from "$/runtime"
 import { expectAccessible } from "$test/a11y"
@@ -100,6 +100,58 @@ describe("<ui-flag> glyph and name", () => {
     const { host, root } = await flag(`<ui-flag country="fr" size="large"></ui-flag>`)
     const surrounding = Number.parseFloat(getComputedStyle(host.parentElement!).fontSize)
     expect(Number.parseFloat(getComputedStyle(root).fontSize)).toBeCloseTo(surrounding * 6, 0)
+  })
+})
+
+describe("<ui-flag> tokens from outside", () => {
+  /** The inner box's margin right. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=flag]")!).marginRight
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-flag country="fr"></ui-flag>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(MARKUP.replace("<ui-flag", `<ui-flag style="--ui-flag-distance: 10px"`))
+    expect(measure(host)).toBe("10px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-flag-distance: 10px"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-flag")!)).toBe("10px")
+  })
+
+  it("takes a token set through `::part(flag)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(flag) { --ui-flag-distance: 10px }</style>${MARKUP.replace("<ui-flag", '<ui-flag class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-flag")!)).toBe("10px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-flag-distance", "10px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-flag-distance")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("10px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    const probe = await ElementFixture.render(`<span style="margin-right: var(--ui-space-2xs)"></span>`)
+    expect(measure(host)).toBe(getComputedStyle(probe).marginRight)
+  })
+
+  it("variations:  a size reads its ratio token", async () => {
+    const host = await ElementFixture.render(
+      `<div style="font-size: 16px"><ui-flag country="fr" size="large" style="--ui-flag-size-large: 4"></ui-flag></div>`
+    )
+    const root = host.querySelector("ui-flag")!.shadowRoot!.querySelector("[part~=flag]")!
+    expect(getComputedStyle(root).fontSize).toBe("64px")
   })
 })
 

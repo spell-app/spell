@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -96,7 +96,7 @@ describe("<ui-dropdown> markup", () => {
 
   it("anchors the menu to the root", async () => {
     const { root, menu, combobox } = await dropdown(GENDER)
-    const anchor = root.style.getPropertyValue("--ui-dropdown-anchor")
+    const anchor = root.style.getPropertyValue("--_ui-dropdown-anchor")
     expect(anchor).toMatch(/^--ui-dropdown-\d+$/)
     combobox.click()
     await ElementFixture.tick()
@@ -377,6 +377,22 @@ describe("<ui-dropdown> multiple", () => {
 })
 
 describe("<ui-dropdown> value", () => {
+  it("takes a slotted item's `selected`, or its alias `active`, as the value", async () => {
+    const { host, text } = await dropdown(GENDER.replace('value="female"', 'value="female" active'))
+    await ElementFixture.settle(host)
+    expect(text.textContent).toBe("Female")
+  })
+
+  it('reads a slotted item\'s bare `icon="true"` as no glyph name, before and after the item upgrades', async () => {
+    const { host } = await dropdown(
+      `<ui-dropdown selection placeholder="Pick"><ui-item value="a" icon="true">A</ui-item></ui-dropdown>`
+    )
+    const controller = host.controller as unknown as { items: { entries(): readonly { icon?: unknown }[] } }
+    expect(controller.items.entries()[0]!.icon).toBeUndefined()
+    await ElementFixture.settle(host)
+    expect(controller.items.entries()[0]!.icon).toBeUndefined()
+  })
+
   it("clears with the clear button", async () => {
     const { host, root, text } = await dropdown(GENDER.replace("selection", 'clearable selection value="male"'))
     expect(text.textContent).toBe("Male")
@@ -459,6 +475,50 @@ describe("<ui-dropdown> forms", () => {
     const host = form.querySelector<Dropdown>("ui-dropdown")!
     expect(new FormData(form).has("size")).toBe(false)
     expect(parts(host).root.classList.contains("disabled")).toBe(true)
+  })
+})
+
+describe("<ui-dropdown> tokens from outside", () => {
+  /** A selection box's top-left radius, which `--ui-dropdown-radius` drives. */
+  function radius(host: Element): string {
+    return getComputedStyle(parts(host as Dropdown).root).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await dropdown(GENDER.replace("<ui-dropdown", `<ui-dropdown style="--ui-dropdown-radius: 12px"`))
+    expect(radius(host)).toBe("12px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-dropdown-radius: 12px"><div>${GENDER}</div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-dropdown")!)).toBe("12px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-dropdown-radius", "12px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-dropdown-radius")
+    })
+    const { host } = await dropdown(GENDER)
+    expect(radius(host)).toBe("12px")
+  })
+
+  it("variations:  `floating` swaps the menu shadow for its own token", async () => {
+    const shadow = (host: Dropdown) => getComputedStyle(parts(host).menu).boxShadow
+    const { host: plain } = await dropdown(
+      GENDER.replace("<ui-dropdown", `<ui-dropdown style="--ui-dropdown-menu-shadow: none"`)
+    )
+    expect(shadow(plain)).toBe("none")
+    const { host: floating } = await dropdown(
+      GENDER.replace("<ui-dropdown", `<ui-dropdown floating style="--ui-dropdown-menu-shadow: none"`)
+    )
+    expect(shadow(floating)).not.toBe("none")
+    const { host: themed } = await dropdown(
+      GENDER.replace("<ui-dropdown", `<ui-dropdown floating style="--ui-dropdown-floating-shadow: none"`)
+    )
+    expect(shadow(themed)).toBe("none")
   })
 })
 

@@ -20,6 +20,11 @@
  *   surface.  `inverted`:  a plain toast turns dark, a coloured one takes the hue's inverted variant.
  * - Slotted actions:  `<ui-button>`s (or a `<ui-buttons>` group for `attached` layouts, whose own sheet joins
  *   them);  this sheet only places them.
+ * - Public tokens (`--ui-toast-*`, the theming surface) are NEVER declared here:  the box's token block reads each
+ *   through a private alias, `--_ui-toast-radius: var(--ui-toast-radius, var(--ui-radius))`, and every rule reads
+ *   the alias.  So a value set on `:root`, an ancestor, the host, `::part(box)` or in the app stylesheet reaches
+ *   the toast (`docs/theming.md` "Component tokens").  The container's `--ui-toast-container-distance` likewise
+ *   (`toast.container.css`).
  * - Countdown:  the progress bar's `progressing` animation runs while `:state(paused)` is off;  it is
  *   `data-ui-motion="essential"` (it IS the remaining time), so reduced motion keeps it (`reset.css`).  The entry /
  *   exit animations are `UI.transitions`' `scale`, timed by `--ui-toast-duration`.
@@ -45,41 +50,48 @@
     display: none;
   }
 
-  /* Tokens:  one per `toast.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one private alias per `toast.variables` entry that still matters, from the global tokens. */
   .toast-box {
-    --ui-toast-width: 350px;
-    --ui-toast-mobile-width: 280px;
-    --ui-toast-radius: var(--ui-radius);
-    --ui-toast-padding: 0.78571429em 1em;
-    --ui-toast-box-margin: 0.5em;
-    --ui-toast-background: var(--ui-surface);
-    --ui-toast-color: var(--ui-text-color);
-    --ui-toast-inverted-background: var(--ui-surface);
-    --ui-toast-border: 1px solid var(--ui-border-color);
-    --ui-toast-inverted-border: 1px solid oklch(from var(--ui-ink-on-dark) l c h / 0.5);
-    --ui-toast-shadow: var(--ui-shadow-floating);
-    --ui-toast-duration: var(--ui-duration-slower);
-    --ui-toast-icon-size: 1.5em;
-    --ui-toast-icon-padding: 3em;
-    --ui-toast-close-distance: 0.3em;
-    --ui-toast-close-opacity: 0.7;
-    --ui-toast-action-background: oklch(1 0 0 / 0.25);
-    --ui-toast-action-border: 1px solid oklch(0 0 0 / 0.2);
-    --ui-toast-action-margin: -1em;
-    --ui-toast-action-margin-top: 0.5em;
-    --ui-toast-action-margin-left: 1em;
-    --ui-toast-action-gap: 0.3em;
-    --ui-toast-action-padding: 0.5em;
-    --ui-toast-action-padding-bottom: 0.75em;
-    --ui-toast-progress-height: 0.2em;
-    --ui-animation-duration: var(--ui-toast-duration);
+    --_ui-toast-width: var(--ui-toast-width, 350px);
+    --_ui-toast-mobile-width: var(--ui-toast-mobile-width, 280px);
+    --_ui-toast-radius: var(--ui-toast-radius, var(--ui-radius));
+    --_ui-toast-padding: var(--ui-toast-padding, 0.78571429em 1em);
+    --_ui-toast-box-margin: var(--ui-toast-box-margin, 0.5em);
+    --_ui-toast-background: var(--ui-toast-background, var(--ui-surface));
+    --_ui-toast-color: var(--ui-toast-color, var(--ui-text-color));
+    --_ui-toast-inverted-background: var(--ui-toast-inverted-background, var(--ui-surface));
+    --_ui-toast-border: var(--ui-toast-border, 1px solid var(--ui-border-color));
+    --_ui-toast-inverted-border: var(
+      --ui-toast-inverted-border,
+      1px solid oklch(from var(--ui-ink-on-dark) l c h / 0.5)
+    );
+    --_ui-toast-shadow: var(--ui-toast-shadow, var(--ui-shadow-floating));
+    --_ui-toast-duration: var(--ui-toast-duration, var(--ui-duration-slower));
+    --_ui-toast-icon-size: var(--ui-toast-icon-size, 1.5em);
+    --_ui-toast-icon-padding: var(--ui-toast-icon-padding, 3em);
+    --_ui-toast-close-distance: var(--ui-toast-close-distance, 0.3em);
+    --_ui-toast-close-opacity: var(--ui-toast-close-opacity, 0.7);
+    /* Fomantic's white wash lifts a light toast;  on a dark one it's a grey band, so the dark scheme shades instead */
+    --_ui-toast-action-background: var(
+      --ui-toast-action-background,
+      light-dark(oklch(1 0 0 / 0.25), oklch(0 0 0 / 0.2))
+    );
+    --_ui-toast-action-border: var(--ui-toast-action-border, 1px solid oklch(0 0 0 / 0.2));
+    --_ui-toast-action-margin: var(--ui-toast-action-margin, -1em);
+    --_ui-toast-action-margin-top: var(--ui-toast-action-margin-top, 0.5em);
+    --_ui-toast-action-margin-left: var(--ui-toast-action-margin-left, 1em);
+    --_ui-toast-action-gap: var(--ui-toast-action-gap, 0.3em);
+    --_ui-toast-action-padding: var(--ui-toast-action-padding, 0.5em);
+    --_ui-toast-action-padding-bottom: var(--ui-toast-action-padding-bottom, 0.75em);
+    --_ui-toast-progress-height: var(--ui-toast-progress-height, 0.2em);
+    --ui-animation-duration: var(--_ui-toast-duration);
     position: relative;
     box-sizing: border-box;
     display: block;
     width: fit-content;
     max-width: 100%;
-    margin: 0 0 var(--ui-toast-box-margin);
-    border-radius: var(--ui-toast-radius);
+    margin: 0 0 var(--_ui-toast-box-margin);
+    border-radius: var(--_ui-toast-radius);
     font-size: var(--ui-font-size);
     line-height: var(--ui-line-height);
     cursor: default;
@@ -101,10 +113,10 @@
     box-sizing: border-box;
     display: block;
     margin: 0;
-    padding: var(--ui-toast-padding);
-    border-radius: var(--ui-toast-radius);
-    background: var(--ui-color, var(--ui-toast-background));
-    color: var(--ui-color-on, var(--ui-toast-color));
+    padding: var(--_ui-toast-padding);
+    border-radius: var(--_ui-toast-radius);
+    background: var(--ui-color, var(--_ui-toast-background));
+    color: var(--ui-color-on, var(--_ui-toast-color));
   }
   .ui.toast > .content > .header {
     margin: 0;
@@ -130,7 +142,7 @@
     justify-content: center;
     width: 1em;
     height: 1em;
-    font-size: var(--ui-toast-icon-size);
+    font-size: var(--_ui-toast-icon-size);
     transform: translateY(-50%);
   }
   .ui.toast > .icon:not(.close) > svg {
@@ -139,7 +151,7 @@
   }
   .ui.toast > .icon:not(.close) + .content {
     min-height: 1.5em;
-    padding-inline-start: var(--ui-toast-icon-padding);
+    padding-inline-start: var(--_ui-toast-icon-padding);
   }
   .ui.vertical.toast > .icon:not(.close) {
     position: static;
@@ -157,8 +169,8 @@
   /* Close icon:  a bare button, top right. */
   .ui.toast > .close.icon {
     position: absolute;
-    top: var(--ui-toast-close-distance);
-    right: var(--ui-toast-close-distance);
+    top: var(--_ui-toast-close-distance);
+    right: var(--_ui-toast-close-distance);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -171,7 +183,7 @@
     background: none;
     color: inherit;
     font: inherit;
-    opacity: var(--ui-toast-close-opacity);
+    opacity: var(--_ui-toast-close-opacity);
     cursor: pointer;
     transition: opacity var(--ui-duration-normal) var(--ui-ease);
   }
@@ -190,26 +202,36 @@
     position: static;
     align-self: flex-start;
     order: 1;
-    margin: calc(var(--ui-toast-close-distance) * -1) calc(var(--ui-toast-close-distance) * -1) 0 0;
+    margin: calc(var(--_ui-toast-close-distance) * -1) calc(var(--_ui-toast-close-distance) * -1) 0 0;
   }
 
   /* Actions:  a bar across the bottom, buttons at the end. */
   .ui.toast .actions {
-    margin: var(--ui-toast-action-margin-top) var(--ui-toast-action-margin) var(--ui-toast-action-margin);
-    padding: var(--ui-toast-action-padding) var(--ui-toast-action-padding) var(--ui-toast-action-padding-bottom);
+    margin: var(--_ui-toast-action-margin-top) var(--_ui-toast-action-margin) var(--_ui-toast-action-margin);
+    padding: var(--_ui-toast-action-padding) var(--_ui-toast-action-padding) var(--_ui-toast-action-padding-bottom);
     text-align: right;
   }
   .ui.toast .actions:not(.basic, .attached) {
-    border-top: var(--ui-toast-action-border);
-    border-end-start-radius: var(--ui-toast-radius);
-    border-end-end-radius: var(--ui-toast-radius);
-    background: var(--ui-toast-action-background);
+    border-top: var(--_ui-toast-action-border);
+    border-end-start-radius: var(--_ui-toast-radius);
+    border-end-end-radius: var(--_ui-toast-radius);
+    background: var(--_ui-toast-action-background);
+  }
+  /*
+   * A bar that ends the toast takes the place of its bottom padding:  the bar's `-1em` is more than that padding
+   * (Fomantic's too), so it hung past the toast's bottom edge and rounded corners.
+   */
+  .ui.toast:has(> .actions:not(.basic, .attached, .vertical):last-child) {
+    padding-bottom: 0;
+  }
+  .ui.toast > .actions:not(.basic, .attached, .vertical):last-child {
+    margin-bottom: 0;
   }
   .ui.toast .left.actions {
     text-align: left;
   }
   .actions > ::slotted(*) {
-    margin-inline-start: var(--ui-toast-action-gap);
+    margin-inline-start: var(--_ui-toast-action-gap);
   }
 }
 
@@ -221,16 +243,16 @@
   /* Compact:  a fixed width. */
   .toast-box.compact,
   .toast-box > .compact {
-    width: var(--ui-toast-width);
+    width: var(--_ui-toast-width);
   }
 
   /* Floating:  lifted with a shadow and hairline border. */
   .toast-box.floating {
-    border: var(--ui-toast-border);
-    box-shadow: var(--ui-toast-shadow);
+    border: var(--_ui-toast-border);
+    box-shadow: var(--_ui-toast-shadow);
   }
   .toast-box.floating:has(> .inverted.toast) {
-    border: var(--ui-toast-inverted-border);
+    border: var(--_ui-toast-inverted-border);
   }
 
   /* Neutral:  the page surface, like no type at all. */
@@ -243,8 +265,8 @@
   .ui.inverted.toast {
     --ui-scheme: dark;
     color-scheme: dark;
-    background: var(--ui-color-inverted, var(--ui-toast-inverted-background));
-    color: var(--ui-color-inverted-on, var(--ui-toast-color));
+    background: var(--ui-color-inverted, var(--_ui-toast-inverted-background));
+    color: var(--ui-color-inverted-on, var(--_ui-toast-color));
   }
 
   /* Vertical actions:  a column beside the content. */
@@ -258,14 +280,14 @@
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    margin: calc(var(--ui-toast-action-padding-bottom) * -1) -1em calc(var(--ui-toast-action-padding-bottom) * -1)
-      var(--ui-toast-action-margin-left);
-    padding: var(--ui-toast-action-padding);
+    margin: calc(var(--_ui-toast-action-padding-bottom) * -1) -1em calc(var(--_ui-toast-action-padding-bottom) * -1)
+      var(--_ui-toast-action-margin-left);
+    padding: var(--_ui-toast-action-padding);
     border-top: 0;
-    border-radius: 0 var(--ui-toast-radius) var(--ui-toast-radius) 0;
+    border-radius: 0 var(--_ui-toast-radius) var(--_ui-toast-radius) 0;
   }
   .ui.toast .vertical.actions:not(.basic) {
-    border-inline-start: var(--ui-toast-action-border);
+    border-inline-start: var(--_ui-toast-action-border);
   }
   .ui.toast .vertical.top.actions {
     justify-content: flex-start;
@@ -277,7 +299,7 @@
     margin-inline-start: 0;
   }
   .vertical.actions > ::slotted(:not(:last-child)) {
-    margin-block-end: var(--ui-toast-action-gap);
+    margin-block-end: var(--_ui-toast-action-gap);
   }
 
   /* Attached actions:  joined to the toast's edge, outside it. */
@@ -304,10 +326,10 @@
   }
   .vertical.attached > .ui.toast {
     flex: 1;
-    border-radius: var(--ui-toast-radius) 0 0 var(--ui-toast-radius);
+    border-radius: var(--_ui-toast-radius) 0 0 var(--_ui-toast-radius);
   }
   .vertical.attached > .ui.left.toast {
-    border-radius: 0 var(--ui-toast-radius) var(--ui-toast-radius) 0;
+    border-radius: 0 var(--_ui-toast-radius) var(--_ui-toast-radius) 0;
   }
   .vertical.attached > .attached.actions {
     flex-direction: column;
@@ -317,19 +339,19 @@
   .toast-box > .ui.attached.progress {
     position: relative;
     z-index: 1;
-    height: var(--ui-toast-progress-height);
+    height: var(--_ui-toast-progress-height);
     overflow: hidden;
     background: transparent;
   }
   .toast-box > .ui.attached.progress.top {
-    margin-bottom: calc(var(--ui-toast-progress-height) * -1);
-    border-start-start-radius: var(--ui-toast-radius);
-    border-start-end-radius: var(--ui-toast-radius);
+    margin-bottom: calc(var(--_ui-toast-progress-height) * -1);
+    border-start-start-radius: var(--_ui-toast-radius);
+    border-start-end-radius: var(--_ui-toast-radius);
   }
   .toast-box > .ui.attached.progress.bottom {
-    margin-top: calc(var(--ui-toast-progress-height) * -1);
-    border-end-start-radius: var(--ui-toast-radius);
-    border-end-end-radius: var(--ui-toast-radius);
+    margin-top: calc(var(--_ui-toast-progress-height) * -1);
+    border-end-start-radius: var(--_ui-toast-radius);
+    border-end-end-radius: var(--_ui-toast-radius);
   }
   .toast-box > .ui.progress > .bar {
     width: 100%;
@@ -361,7 +383,7 @@
     .toast-box.compact,
     .toast-box > .compact {
       width: fit-content;
-      min-width: var(--ui-toast-mobile-width);
+      min-width: var(--_ui-toast-mobile-width);
       max-width: 100%;
     }
   }

@@ -437,17 +437,21 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme a card with the public `--ui-card-*` tokens on its box, through `::part(card)` (the box declares its own
-  defaults, so a value set on the host tag doesn't reach it).  A group's spacing tokens, `--ui-cards-*`, go on the
-  group's box, `::part(group)`;  to theme the cards of one group, target them:  `ui-cards ui-card::part(card)`.  The
-  shorthand blocks are parts too:  `image`, `content`, `header`, `meta`, `description` and `extra`.
+  Theme a card with the public `--ui-card-*` tokens:  set one on the element, on any ancestor (a `<ui-cards>`
+  group, a region, `:root`), or on the card's box through `::part(card)`.  A group's spacing tokens,
+  `--ui-cards-*`, go on the group or above it.  The shorthand blocks are parts too:  `image`, `content`, `header`,
+  `meta`, `description` and `extra`.
+
+  The look of the parts inside (`--ui-card-header-color`, `--ui-card-content-padding`, `--ui-card-meta-color`
+  ...) is themed the same way, on the card or above it (see the content parts page).
 
 ```css
-ui-card::part(card) {
+ui-card {
   --ui-card-radius: 0;
   --ui-card-width: 20em;
+  --ui-card-header-color: var(--ui-violet-text);
 }
-ui-cards::part(group) {
+ui-cards {
   --ui-cards-spacing: 2em;
 }
 ```

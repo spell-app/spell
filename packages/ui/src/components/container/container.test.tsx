@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -39,6 +39,52 @@ describe("<ui-container>", () => {
     const root = host.shadowRoot!.querySelector<HTMLElement>("[part~=container]")!
     const style = getComputedStyle(root)
     expect(style.marginLeft).toBe(style.marginRight)
+  })
+})
+
+describe("<ui-container> tokens from outside", () => {
+  /** The inner box's max width. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=container]")!).maxWidth
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-container text>Text</ui-container>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(
+      MARKUP.replace("<ui-container", `<ui-container style="--ui-container-text-width: 500px"`)
+    )
+    expect(measure(host)).toBe("500px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-container-text-width: 500px"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-container")!)).toBe("500px")
+  })
+
+  it("takes a token set through `::part(container)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(container) { --ui-container-text-width: 500px }</style>${MARKUP.replace("<ui-container", '<ui-container class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-container")!)).toBe("500px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-container-text-width", "500px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-container-text-width")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("500px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    const probe = await ElementFixture.render(`<span style="max-width: 700px"></span>`)
+    expect(measure(host)).toBe(getComputedStyle(probe).maxWidth)
   })
 })
 

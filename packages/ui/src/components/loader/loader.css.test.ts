@@ -55,7 +55,7 @@ describe("loader.css source", () => {
     const css = loaderRaw + colorsCSS
     for (const phrase of Sheets.classPhrases(loaderVocabulary))
       expect(Sheets.covers(css, phrase), `${loaderVocabulary.tag}: ${phrase}`).toBe(true)
-    // `speed` is `kind: "color"` (value alone), which `classPhrases` skips.
+    // `speed` is `kind: "valueOnly"` (value alone), which `classPhrases` skips.
     for (const speed of ["slow", "fast"]) expect(Sheets.covers(loaderRaw, speed), speed).toBe(true)
   })
 })
@@ -171,6 +171,18 @@ describe("loader.css examples", () => {
     expect(getComputedStyle(dark!).colorScheme).toBe("dark")
     expect(getComputedStyle(light!).display).toBe("block")
     expect(getComputedStyle(light!).colorScheme).toBe("light")
+  })
+})
+
+describe("loader.css tokens", () => {
+  it("takes a public token from a wrapper or the loader itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, loaderCSS])
+    const root = Fixture.render(
+      `<div style="--ui-loader-size: 40px"><div class="ui active inline loader"></div></div>` +
+        `<div class="ui active inline loader" style="--ui-loader-line-width: 5px"></div>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).width).toBe("40px")
+    expect(getComputedStyle(root.nextElementSibling!, "::before").borderTopWidth).toBe("5px")
   })
 })
 

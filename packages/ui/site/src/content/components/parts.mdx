@@ -186,10 +186,15 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Header tokens are public (`--ui-header-*`).  Owners set the layout tokens their parts read (for example
-  `--ui-card-layout: horizontal`), so a part never needs to know its owner's markup.
+  A standalone header's tokens are public (`--ui-header-*`):  set one on the element, on any ancestor or `:root`,
+  or through `::part(header)`.
 
-  <CssTokens family="parts" prefixes={["--ui-header-", "--ui-comment-"]} />
+  Inside an owner, a part's look comes from the OWNER's tokens (`--ui-card-header-color`,
+  `--ui-modal-header-size` ...):  set them on the owner or above it, and every part inside follows.  Owners also
+  hand their parts private layout switches (`--_ui-card-layout: horizontal`), so a part never needs to know its
+  owner's markup;  never set those.
+
+  <CssTokens family="parts" prefixes={["--ui-header-"]} />
 </Section>
 
 <Section title="Accessibility">

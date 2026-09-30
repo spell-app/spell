@@ -1,4 +1,4 @@
-import { NativeFallback, proto } from "$/core"
+import { Converters, NativeFallback, proto } from "$/core"
 
 import { buttonVocabulary } from "./button.vocabulary.en"
 
@@ -29,7 +29,8 @@ export class ButtonFallback extends NativeFallback<typeof buttonVocabulary> {
     const disabled = this.flag("disabled")
     const toggle = this.flag("toggle")
     const link = href !== null
-    const icon = this.attr("icon")
+    // a bare `icon` (`"true"`) names no glyph, so it can't name the button either
+    const icon = Converters.icon(this.attr("icon"))
     const iconOnly = icon && !this.attr("content") && !host.textContent?.trim()
     const control = link
       ? this.create("a", {

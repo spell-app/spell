@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import type { FormHost } from "$/elements"
@@ -312,6 +312,46 @@ describe("<ui-rating> forms", () => {
     const host = container.querySelector<Rating>("ui-rating")!
     await expect.poll(() => parts(host).group.getAttribute("aria-label")).toBe("Stars")
     await expectAccessible(container)
+  })
+})
+
+describe("<ui-rating> tokens from outside", () => {
+  /** The first icon's width, which `--ui-rating-icon-width` drives. */
+  function iconWidth(host: Element): string {
+    return getComputedStyle(parts(host).icons[0]!).width
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await rating(`<ui-rating max="3" style="--ui-rating-icon-width: 40px"></ui-rating>`)
+    expect(iconWidth(host)).toBe("40px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-rating-icon-width: 40px"><div><ui-rating max="3"></ui-rating></div></section>`
+    )
+    expect(iconWidth(wrapper.querySelector("ui-rating")!)).toBe("40px")
+  })
+
+  it("takes a token set through `::part(rating)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(rating) { --ui-rating-icon-width: 40px }</style><ui-rating class="themed" max="3"></ui-rating></div>`
+    )
+    expect(iconWidth(wrapper.querySelector("ui-rating")!)).toBe("40px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-rating-icon-width", "40px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-rating-icon-width")
+    })
+    const { host } = await rating(`<ui-rating max="3"></ui-rating>`)
+    expect(iconWidth(host)).toBe("40px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const { host } = await rating(`<ui-rating max="3"></ui-rating>`)
+    expect(iconWidth(host)).toBe("20px")
   })
 })
 

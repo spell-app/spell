@@ -123,3 +123,13 @@ describe("comment.css examples", () => {
     expect(style(reply).marginTop).toBe("16px")
   })
 })
+
+describe("comment.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, commentCSS])
+    const root = Fixture.render(
+      `<div style="--ui-comments-max-width: 300px"><div class="ui comments"><div class="comment">x</div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.comments")!).maxWidth).toBe("300px")
+  })
+})

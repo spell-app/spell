@@ -68,6 +68,20 @@ describe("grid.css source", () => {
   })
 })
 
+describe("grid.css tokens", () => {
+  it("takes a public token from a wrapper or the grid itself;  columns follow (static markup)", () => {
+    Sheets.adopt([...foundationCSS, gridCSS])
+    const root = Fixture.render(
+      `<div style="--ui-grid-gutter: 40px"><div class="ui grid"><div class="ui column">A</div></div></div>` +
+        `<div><div class="ui celled grid" style="--ui-grid-celled-padding: 7px"><div class="ui column">B</div></div></div>`
+    )
+    const grid = root.querySelector<HTMLElement>(".ui.grid")!
+    expect(getComputedStyle(grid).marginLeft).toBe("-20px")
+    expect(getComputedStyle(grid.firstElementChild!).paddingLeft).toBe("20px")
+    expect(getComputedStyle(root.nextElementSibling!.querySelector(".column")!).paddingTop).toBe("7px")
+  })
+})
+
 describe("grid.css examples", () => {
   it.each(Object.keys(EXAMPLES))("lays out every column in %s", (path) => {
     Sheets.adopt([...foundationCSS, gridCSS])

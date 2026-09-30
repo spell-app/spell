@@ -16,13 +16,18 @@
  *   Host position replaces Fomantic's `:first-child` / `:last-child`:  `:host(:state(in-items):first-child)`.
  * - The item OWNS its content parts here (`ItemContext.ownsParts`):  `<ui-content>`, `<ui-header>`, `<ui-meta>`,
  *   `<ui-description>`, `<ui-extra>` inside get `:state(in-item)`, and `parts.css` styles them.  The item root
- *   declares the owner tokens they read:  `--ui-item-layout` (`row`, `stacked` in a narrow group),
- *   `--ui-item-state` (`normal`, `hover` on a link item) and `--ui-item-content-distance`;  `item.css` adds
- *   `--ui-item-media` (the content beside the `image` shorthand).
+ *   declares the owner tokens they read:  `--_ui-item-layout` (`row`, `stacked` in a narrow group),
+ *   `--_ui-item-state` (`normal`, `hover` on a link item) and `--_ui-item-content-distance` (from
+ *   `--ui-items-content-distance`, narrower in a tablet-wide group);  `item.css` adds `--_ui-item-media` (the content
+ *   beside the `image` shorthand).  All private:  the group decides them;  theme with `--ui-items-*`.
  * - Images:  the `image` shorthand, a slotted `<img>` (both Fomantic's `.image:not(.ui)`, 175px wide), or a
  *   `<ui-image size="tiny">` (a `ui image`, sized by itself).
- * - Group variations reach the items as INHERITED private tokens (`--_items-*`, set on the group root);  NEVER set
- *   them from outside, theme with `--ui-items-*`.
+ * - Public tokens (`--ui-items-*`, the theming surface) are NEVER declared here:  the group root reads each through
+ *   a private alias, `--_ui-items-margin: var(--ui-items-margin, 1.5em)`, and every rule reads the alias.  So a value
+ *   set on `:root`, an ancestor, the host, `::part(items)` or in the app stylesheet reaches the group and its items
+ *   (`docs/theming.md` "Component tokens");  set it on the group or above, not on one item.
+ * - Group variations reach the items as INHERITED private tokens (`--_items-*`, set on the group root, read from the
+ *   aliases);  NEVER set them from outside, theme with `--ui-items-*`.
  * - Responsive:  the group HOST is a block and the size container `ui-items`;  items stack (image above content)
  *   in a group narrower than 768px unless `unstackable`, and narrow the image in a 768..991px one -- the GROUP's
  *   width, not the viewport.  Static markup makes the group's parent the container (`:has(> .ui.items)`).
@@ -54,29 +59,29 @@
     container: ui-items / inline-size;
   }
 
-  /* Tokens:  one per `item.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  a private alias per `item.variables` entry that still matters, from the global tokens. */
   .ui.items {
-    --ui-items-margin: 1.5em;
-    --ui-items-item-spacing: 1em;
-    --ui-items-image-width: calc(var(--ui-font-size) * 10.9375);
-    --ui-items-tablet-image-width: calc(var(--ui-font-size) * 9.375);
-    --ui-items-unstackable-image-width: calc(var(--ui-font-size) * 7.8125);
-    --ui-items-mobile-image-height: calc(var(--ui-font-size) * 15.625);
-    --ui-items-image-radius: calc(var(--ui-font-size) * 0.125);
-    --ui-items-content-distance: 1.5em;
-    --ui-items-tablet-content-distance: 1em;
-    --ui-items-mobile-item-spacing: 2em;
-    --ui-items-relaxed-spacing: 1.5em;
-    --ui-items-very-relaxed-spacing: 2em;
-    --ui-items-divided-padding: 1em;
-    --ui-items-divided-border: var(--ui-border-width) solid var(--ui-border-color);
-    --ui-items-disabled-opacity: var(--ui-disabled-opacity);
+    --_ui-items-margin: var(--ui-items-margin, 1.5em);
+    --_ui-items-item-spacing: var(--ui-items-item-spacing, 1em);
+    --_ui-items-image-width: var(--ui-items-image-width, calc(var(--ui-font-size) * 10.9375));
+    --_ui-items-tablet-image-width: var(--ui-items-tablet-image-width, calc(var(--ui-font-size) * 9.375));
+    --_ui-items-unstackable-image-width: var(--ui-items-unstackable-image-width, calc(var(--ui-font-size) * 7.8125));
+    --_ui-items-mobile-image-height: var(--ui-items-mobile-image-height, calc(var(--ui-font-size) * 15.625));
+    --_ui-items-image-radius: var(--ui-items-image-radius, calc(var(--ui-font-size) * 0.125));
+    --_ui-items-content-distance: var(--ui-items-content-distance, 1.5em);
+    --_ui-items-tablet-content-distance: var(--ui-items-tablet-content-distance, 1em);
+    --_ui-items-mobile-item-spacing: var(--ui-items-mobile-item-spacing, 2em);
+    --_ui-items-relaxed-spacing: var(--ui-items-relaxed-spacing, 1.5em);
+    --_ui-items-very-relaxed-spacing: var(--ui-items-very-relaxed-spacing, 2em);
+    --_ui-items-divided-padding: var(--ui-items-divided-padding, 1em);
+    --_ui-items-divided-border: var(--ui-items-divided-border, var(--ui-border-width) solid var(--ui-border-color));
+    --_ui-items-disabled-opacity: var(--ui-items-disabled-opacity, var(--ui-disabled-opacity));
     /* The group's layout, read by its items. */
-    --_items-item-margin: var(--ui-items-item-spacing) 0;
+    --_items-item-margin: var(--_ui-items-item-spacing) 0;
     --_items-item-padding: 0;
     --_items-item-border: none;
-    --_items-image-width: var(--ui-items-image-width);
-    --_items-content-distance: var(--ui-items-content-distance);
+    --_items-image-width: var(--_ui-items-image-width);
+    --_items-content-distance: var(--_ui-items-content-distance);
     --_items-stackable: 1;
     --_items-link: 0;
     /* Owner token, ALWAYS declared:  a plain group nested in an inverted one resets it. */
@@ -87,7 +92,7 @@
   .ui.items {
     box-sizing: border-box;
     display: block;
-    margin: var(--_items-margin-top, var(--ui-items-margin)) 0 var(--_items-margin-bottom, var(--ui-items-margin));
+    margin: var(--_items-margin-top, var(--_ui-items-margin)) 0 var(--_items-margin-bottom, var(--_ui-items-margin));
     padding: 0;
     color: var(--ui-text-color);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
@@ -117,9 +122,9 @@
   /* Item:  a flex row of an image and content;  declares the owner tokens its parts read. */
   :host(:state(in-items)) > .item,
   .ui.items > .item {
-    --ui-item-layout: row;
-    --ui-item-state: normal;
-    --ui-item-content-distance: var(--_items-content-distance);
+    --_ui-item-layout: row;
+    --_ui-item-state: normal;
+    --_ui-item-content-distance: var(--_items-content-distance);
     display: flex;
     width: 100%;
     min-height: 0;
@@ -183,14 +188,14 @@
   :host(:state(in-items)) > .item > img.image,
   :host(:state(in-items)) > .item > ::slotted(img) {
     height: auto;
-    border-radius: var(--ui-items-image-radius);
+    border-radius: var(--_ui-items-image-radius);
   }
   .ui.items > .item > .image > img {
     display: block;
     width: 100%;
     height: auto;
     border: none;
-    border-radius: var(--ui-items-image-radius);
+    border-radius: var(--_ui-items-image-radius);
   }
   .ui.items > .item > .image:only-child > img {
     border-radius: 0;
@@ -234,39 +239,39 @@
 @layer ui.components.items.variations {
   /* Relaxed:  more space between items. */
   .ui.relaxed.items {
-    --_items-item-margin: var(--ui-items-relaxed-spacing) 0;
+    --_items-item-margin: var(--_ui-items-relaxed-spacing) 0;
   }
   .ui[class*="very relaxed"].items {
-    --_items-item-margin: var(--ui-items-very-relaxed-spacing) 0;
+    --_items-item-margin: var(--_ui-items-very-relaxed-spacing) 0;
   }
 
   /* Divided:  a rule between items, the spacing inside them. */
   .ui.divided.items {
     --_items-item-margin: 0;
-    --_items-item-padding: var(--ui-items-divided-padding) 0;
-    --_items-item-border: var(--ui-items-divided-border);
+    --_items-item-padding: var(--_ui-items-divided-padding) 0;
+    --_items-item-border: var(--_ui-items-divided-border);
   }
   .ui.relaxed.divided.items {
-    --_items-item-padding: var(--ui-items-relaxed-spacing) 0;
+    --_items-item-padding: var(--_ui-items-relaxed-spacing) 0;
   }
   .ui[class*="very relaxed"].divided.items {
-    --_items-item-padding: var(--ui-items-very-relaxed-spacing) 0;
+    --_items-item-padding: var(--_ui-items-very-relaxed-spacing) 0;
   }
 
-  /* Link:  a pointer, and the header in the link colour while its item is hovered (`--ui-item-state`). */
+  /* Link:  a pointer, and the header in the link colour while its item is hovered (`--_ui-item-state`). */
   .ui.link.items {
     --_items-link: 1;
   }
   @container style(--_items-link: 1) {
     :host(:state(in-items)) > .item:hover,
     .ui.items > .item:hover {
-      --ui-item-state: hover;
+      --_ui-item-state: hover;
       cursor: pointer;
     }
   }
   :host(:state(in-items)) > a.item:hover,
   .ui.items > a.item:hover {
-    --ui-item-state: hover;
+    --_ui-item-state: hover;
     cursor: pointer;
   }
 
@@ -289,21 +294,21 @@
    */
   @container ui-items (768px <= width < 992px) {
     .ui.items {
-      --_items-image-width: var(--ui-items-tablet-image-width);
-      --_items-content-distance: var(--ui-items-tablet-content-distance);
+      --_items-image-width: var(--_ui-items-tablet-image-width);
+      --_items-content-distance: var(--_ui-items-tablet-content-distance);
     }
   }
   @container ui-items (width < 768px) {
     .ui.items:not(.relaxed, .divided, .unstackable) {
-      --_items-item-margin: var(--ui-items-mobile-item-spacing) 0;
+      --_items-item-margin: var(--_ui-items-mobile-item-spacing) 0;
     }
     .ui.unstackable.items {
-      --_items-image-width: var(--ui-items-unstackable-image-width);
+      --_items-image-width: var(--_ui-items-unstackable-image-width);
     }
     @container style(--_items-stackable: 1) {
       :host(:state(in-items)) > .item,
       .ui.items > .item {
-        --ui-item-layout: stacked;
+        --_ui-item-layout: stacked;
         flex-direction: column;
       }
       :host(:state(in-items)) > .item > img.image,
@@ -313,7 +318,7 @@
         display: block;
         width: auto;
         max-width: 100%;
-        max-height: var(--ui-items-mobile-image-height);
+        max-height: var(--_ui-items-mobile-image-height);
         margin-inline: auto;
       }
     }
@@ -329,7 +334,7 @@
   .ui.disabled.items,
   :host(:state(in-items)) > .disabled.item,
   .ui.items > .disabled.item {
-    opacity: var(--ui-items-disabled-opacity);
+    opacity: var(--_ui-items-disabled-opacity);
     pointer-events: none;
   }
 }

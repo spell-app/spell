@@ -42,47 +42,55 @@
  * ## Owner tokens
  * Where Fomantic's part rule depends on an owner VARIATION or STATE, the owner sets an inherited token on its
  * root and the part style-queries it (`@container style(...)`).  Owners MUST declare their tokens on EVERY
- * root, default value included, so a nested owner never inherits an outer owner's layout.
+ * root, default value included, so a nested owner never inherits an outer owner's layout.  Three kinds
+ * (`docs/theming.md` "Owner tokens"):
+ * - SWITCHES (the `--_ui-*` rows but the two `-size` aliases):  private, the owner's attributes decide them;
+ *   never a theming surface.
+ * - LOOK tokens the owner VARIES (`--ui-modal-header-size` ...):  public, the owner declares the private alias
+ *   (`--_ui-modal-header-size: var(--ui-modal-header-size, 1.42857em)`) on every root, and its variations
+ *   write it.  Parts read the alias ONLY, `var(--_ui-x, <default>)`:  the default covers a part outside its
+ *   owner.  So the page sets these on the owner, above it, or `::part()` of the owner's box, NOT on the part.
+ * - LOOK tokens nobody varies (`--ui-card-header-font-size` ...):  public, declared NOWHERE, read here as
+ *   `var(--ui-x, <default>)`, so they're set on the owner, above it, or on the part itself.
  *
- * | Token                    | Values                          | Set by                             | Parts it changes                                  |
- * | ------------------------ | ------------------------------- | ---------------------------------- | ------------------------------------------------- |
- * | `--ui-inverted`          | `0` / `1`                       | any owner with `inverted`, PLUS    | card / item / list links, statistic value, basic  |
- * |                          |                                 | `color-scheme: dark`               | modal header -- everything else re-resolves its   |
- * |                          |                                 |                                    | `light-dark()` tokens from `color-scheme` alone   |
- * | `--ui-card-layout`       | `vertical` / `horizontal`       | card(s) `horizontal`               | content (no top rule, `flex-basis`), extra        |
- * | `--ui-card-leading`      | `0` / `1`                       | card rendering a shorthand image / | first slotted content (keeps its top rule)        |
- * |                          |                                 | content block before its slot      |                                                   |
- * | `--ui-item-layout`       | `row` / `stacked`               | items:  `stacked` below tablet     | content after an image                            |
- * |                          |                                 | unless `unstackable`               |                                                   |
- * | `--ui-item-state`        | `normal` / `hover`              | `link` items, on item hover        | header colour                                     |
- * | `--ui-comments-minimal`  | `0` / `1`                       | comments `minimal`                 | actions (hidden until the content is hovered or   |
- * |                          |                                 |                                    | holds focus)                                      |
- * | `--ui-modal-basic`       | `0` / `1`                       | modal `basic`                      | header, content, actions (transparent, no rules)  |
- * | `--ui-modal-header-size` | a length                        | modal sizes                        | header font size                                  |
- * | `--ui-message-layout`    | `block` / `icon`                | message `icon`                     | content (flex item beside the icon)               |
- * | `--ui-event-label`       | `0` / `1`                       | feed event showing a label (a      | content (the margin beside the label)             |
- * |                          |                                 | slotted one, or a shorthand)       |                                                   |
- * | `--ui-list-layout`       | `vertical` / `horizontal`       | list `horizontal`                  | content after an icon / image                     |
- * | `--ui-item-media`        | `0` / `1` / `image`             | a list / menu / Items view item    | content:  a table cell beside it in a list        |
- * |                          |                                 | with an icon or image box          | (`image`:  an inline block beside the `<img>`),   |
- * |                          |                                 | (`item.css`;  `image`:  `list.css`)| padded beside it in the Items view                |
- * | `--ui-list-align`        | `top` / `middle` / `bottom`     | list `vertical-align`, horizontal  | content's vertical alignment                      |
- * | `--ui-statistic-layout`  | `vertical` / `horizontal`       | statistic(s) `horizontal`          | value, label                                      |
- * | `--ui-statistic-value-size` | a length                     | statistic sizes                    | value font size (text values:  `-text-value-size`) |
- * | `--ui-step-state`        | `normal` / `active` / `disabled` | step states                       | title, description colours                        |
- * | `--ui-step-layout`       | `row` / `stacked`               | steps, when stacked                | content alignment                                 |
- * | `--ui-accordion-style`   | `plain` / `styled`              | accordion `styled`                 | title, content                                    |
- * | `--ui-accordion-open`    | `0` / `1`                       | an open panel                      | title colour (styled)                             |
- * | `--ui-search-result`     | `normal` / `active`             | the highlighted result             | title, description colours                        |
- * | `--ui-header-layout`     | `text` / `icon`                 | header (this sheet)                | content, sub header inside a header               |
- * | `--ui-label-layout`      | `text` / `image`                | label (`label.css`)                | detail (a tab on an image label)                  |
- * | `--ui-part`              | the part noun                   | every part root (this sheet)       | a part inside another part, e.g. a date in a      |
- * |                          |                                 |                                    | feed summary                                      |
+ * | Token                        | Values                           | Set by                             | Parts it changes                                  |
+ * | ---------------------------- | -------------------------------- | ---------------------------------- | ------------------------------------------------- |
+ * | `--ui-inverted`              | `0` / `1`                        | any owner with `inverted`, PLUS    | card / item / list links, statistic value, basic  |
+ * |                              |                                  | `color-scheme: dark`               | modal header -- everything else re-resolves its   |
+ * |                              |                                  |                                    | `light-dark()` tokens from `color-scheme` alone   |
+ * | `--_ui-card-layout`          | `vertical` / `horizontal`        | card(s) `horizontal`               | content (no top rule, `flex-basis`), extra        |
+ * | `--_ui-card-leading`         | `0` / `1`                        | card rendering a shorthand image / | first slotted content (keeps its top rule)        |
+ * |                              |                                  | content block before its slot      |                                                   |
+ * | `--_ui-item-layout`          | `row` / `stacked`                | items:  `stacked` below tablet     | content after an image                            |
+ * |                              |                                  | unless `unstackable`               |                                                   |
+ * | `--_ui-item-state`           | `normal` / `hover`               | `link` items, on item hover        | header colour                                     |
+ * | `--_ui-comments-minimal`     | `0` / `1`                        | comments `minimal`                 | actions (hidden until the content is hovered or   |
+ * |                              |                                  |                                    | holds focus)                                      |
+ * | `--_ui-modal-basic`          | `0` / `1`                        | modal `basic`                      | header, content, actions (transparent, no rules)  |
+ * | `--_ui-modal-header-size`    | a length                         | modal sizes                        | header font size                                  |
+ * | `--_ui-message-layout`       | `block` / `icon`                 | message `icon`                     | content (flex item beside the icon)               |
+ * | `--_ui-event-label`          | `0` / `1`                        | feed event showing a label (a      | content (the margin beside the label)             |
+ * |                              |                                  | slotted one, or a shorthand)       |                                                   |
+ * | `--_ui-list-layout`          | `vertical` / `horizontal`        | list `horizontal`                  | content after an icon / image                     |
+ * | `--_ui-item-media`           | `0` / `1` / `image`              | a list / menu / Items view item    | content:  a table cell beside it in a list        |
+ * |                              |                                  | with an icon or image box          | (`image`:  an inline block beside the `<img>`),   |
+ * |                              |                                  | (`item.css`;  `image`:  `list.css`) | padded beside it in the Items view                |
+ * | `--_ui-list-align`           | `top` / `middle` / `bottom`      | list `vertical-align`, horizontal  | content's vertical alignment                      |
+ * | `--_ui-statistic-layout`     | `vertical` / `horizontal`        | statistic(s) `horizontal`          | value, label                                      |
+ * | `--_ui-statistic-value-size` | a length                         | statistic sizes                    | value font size (text values:  `-text-value-size`) |
+ * | `--_ui-step-state`           | `normal` / `active` / `disabled` | step states                        | title, description colours                        |
+ * | `--_ui-step-layout`          | `row` / `stacked`                | steps, when stacked                | content alignment                                 |
+ * | `--_ui-accordion-style`      | `plain` / `styled`               | accordion `styled`                 | title, content                                    |
+ * | `--_ui-accordion-open`       | `0` / `1`                        | an open panel                      | title colour (styled)                             |
+ * | `--_ui-search-result`        | `normal` / `active`              | the highlighted result             | title, description colours                        |
+ * | `--_ui-header-layout`        | `text` / `icon`                  | header (this sheet)                | content, sub header inside a header               |
+ * | `--_ui-label-layout`         | `text` / `image`                 | label (`label.css`)                | detail (a tab on an image label)                  |
+ * | `--_ui-part`                 | the part noun                    | every part root (this sheet)       | a part inside another part, e.g. a date in a      |
+ * |                              |                                  |                                    | feed summary                                      |
  *
- * - Part look tokens (`--ui-card-header-font-size`, `--ui-modal-actions-background` ...) are READ with
- *   Fomantic's defaults as fallbacks and never declared here, so an owner or the page themes its parts by
- *   setting them on itself:  they inherit into the parts.
- * - The standalone header's own tokens (`--ui-header-*`) are declared on its root, as in every component sheet.
+ * - The standalone header's own tokens (`--ui-header-*`) are public and NEVER declared:  its root declares the
+ *   private aliases (`--_ui-header-color: var(--ui-header-color, var(--ui-text-dark))`) and rules read those, as
+ *   in every component sheet;  its sub header (`in-header`) reads the owner's `--_ui-header-sub-*` aliases.
  * - NOTE: left out, on purpose:
  *   - rules for other components' markup inside parts (card star / like icons, `.ui.card .dimmer`, modal
  *     `.image` columns, feed / summary images, list sub-lists, statistic images):  those owners port them
@@ -114,43 +122,43 @@
 
   /* Every part root names itself, for parts nested in parts (a date in a summary). */
   .content {
-    --ui-part: content;
+    --_ui-part: content;
   }
   .header {
-    --ui-part: header;
+    --_ui-part: header;
   }
   .description {
-    --ui-part: description;
+    --_ui-part: description;
   }
   .meta {
-    --ui-part: meta;
+    --_ui-part: meta;
   }
   .extra {
-    --ui-part: extra;
+    --_ui-part: extra;
   }
   .actions {
-    --ui-part: actions;
+    --_ui-part: actions;
   }
   .title {
-    --ui-part: title;
+    --_ui-part: title;
   }
   .summary {
-    --ui-part: summary;
+    --_ui-part: summary;
   }
   .date {
-    --ui-part: date;
+    --_ui-part: date;
   }
   .author {
-    --ui-part: author;
+    --_ui-part: author;
   }
   .avatar {
-    --ui-part: avatar;
+    --_ui-part: avatar;
   }
   .detail {
-    --ui-part: detail;
+    --_ui-part: detail;
   }
   .value {
-    --ui-part: value;
+    --_ui-part: value;
   }
 
   /* A part's avatar image, whether rendered from `src` or slotted. */
@@ -166,77 +174,83 @@
              Header
   *******************************/
 
-  /* Tokens:  one per `header.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one per `header.variables` entry that still matters, each the private alias of its public token. */
   .ui.header {
-    --ui-header-color: var(--ui-text-dark);
-    --ui-header-font-weight: var(--ui-font-weight-bold);
-    --ui-header-line-height: var(--ui-line-height-heading);
-    --ui-header-offset: calc((var(--ui-line-height-heading) - 1) * 0.5em);
-    --ui-header-margin-top: calc(var(--ui-font-size) * 2);
-    --ui-header-margin-bottom: var(--ui-font-size);
-    --ui-header-icon-size: 1.5em;
-    --ui-header-icon-margin: calc(var(--ui-font-size) * 0.75);
-    --ui-header-image-width: 2.5em;
-    --ui-header-sub-color: var(--ui-text-muted);
-    --ui-header-sub-font-size: clamp(calc(var(--ui-font-size) * 0.92857), 0.78em, calc(var(--ui-font-size) * 1.42857));
-    --ui-header-sub-heading-ratio: 0.85714;
-    --ui-header-sub-heading-color: inherit;
-    --ui-header-icon-header-size: 3em;
-    --ui-header-icon-header-margin: calc(var(--ui-font-size) * 0.5);
-    --ui-header-dividing-padding: 0.21428em;
-    --ui-header-dividing-border: var(--ui-border-width) solid var(--ui-border-color);
-    --ui-header-colored-border-width: 2px;
-    --ui-header-block-background: var(--ui-surface-strong);
-    --ui-header-block-border: var(--ui-border-width) solid var(--ui-border-color-strong);
-    --ui-header-block-padding: 0.78571em 1em;
-    --ui-header-attached-background: var(--ui-surface);
-    --ui-header-floated-margin: 0.5em;
-    --ui-header-disabled-opacity: var(--ui-disabled-opacity);
+    --_ui-header-color: var(--ui-header-color, var(--ui-text-dark));
+    --_ui-header-font-weight: var(--ui-header-font-weight, var(--ui-font-weight-bold));
+    --_ui-header-line-height: var(--ui-header-line-height, var(--ui-line-height-heading));
+    --_ui-header-offset: var(--ui-header-offset, calc((var(--ui-line-height-heading) - 1) * 0.5em));
+    --_ui-header-margin-top: var(--ui-header-margin-top, calc(var(--ui-font-size) * 2));
+    --_ui-header-margin-bottom: var(--ui-header-margin-bottom, var(--ui-font-size));
+    --_ui-header-icon-size: var(--ui-header-icon-size, 1.5em);
+    --_ui-header-icon-margin: var(--ui-header-icon-margin, calc(var(--ui-font-size) * 0.75));
+    --_ui-header-image-width: var(--ui-header-image-width, 2.5em);
+    --_ui-header-sub-color: var(--ui-header-sub-color, var(--ui-text-muted));
+    --_ui-header-sub-font-size: var(
+      --ui-header-sub-font-size,
+      clamp(calc(var(--ui-font-size) * 0.92857), 0.78em, calc(var(--ui-font-size) * 1.42857))
+    );
+    --_ui-header-sub-heading-ratio: var(--ui-header-sub-heading-ratio, 0.85714);
+    --_ui-header-sub-heading-color: var(--ui-header-sub-heading-color, inherit);
+    --_ui-header-icon-header-size: var(--ui-header-icon-header-size, 3em);
+    --_ui-header-icon-header-margin: var(--ui-header-icon-header-margin, calc(var(--ui-font-size) * 0.5));
+    --_ui-header-dividing-padding: var(--ui-header-dividing-padding, 0.21428em);
+    --_ui-header-dividing-border: var(--ui-header-dividing-border, var(--ui-border-width) solid var(--ui-border-color));
+    --_ui-header-colored-border-width: var(--ui-header-colored-border-width, 2px);
+    --_ui-header-block-background: var(--ui-header-block-background, var(--ui-surface-strong));
+    --_ui-header-block-border: var(
+      --ui-header-block-border,
+      var(--ui-border-width) solid var(--ui-border-color-strong)
+    );
+    --_ui-header-block-padding: var(--ui-header-block-padding, 0.78571em 1em);
+    --_ui-header-attached-background: var(--ui-header-attached-background, var(--ui-surface));
+    --_ui-header-floated-margin: var(--ui-header-floated-margin, 0.5em);
+    --_ui-header-disabled-opacity: var(--ui-header-disabled-opacity, var(--ui-disabled-opacity));
     /* Content header ladder (em of the surrounding text), Fomantic's h6 ... h1-ish. */
-    --ui-header-size-mini: 0.85714;
-    --ui-header-size-tiny: 1;
-    --ui-header-size-small: 1.07142;
-    --ui-header-size-medium: 1.28571;
-    --ui-header-size-large: 1.71428;
-    --ui-header-size-big: 1.85714;
-    --ui-header-size-huge: 2;
-    --ui-header-size-massive: 2.28571;
+    --_ui-header-size-mini: var(--ui-header-size-mini, 0.85714);
+    --_ui-header-size-tiny: var(--ui-header-size-tiny, 1);
+    --_ui-header-size-small: var(--ui-header-size-small, 1.07142);
+    --_ui-header-size-medium: var(--ui-header-size-medium, 1.28571);
+    --_ui-header-size-large: var(--ui-header-size-large, 1.71428);
+    --_ui-header-size-big: var(--ui-header-size-big, 1.85714);
+    --_ui-header-size-huge: var(--ui-header-size-huge, 2);
+    --_ui-header-size-massive: var(--ui-header-size-massive, 2.28571);
     /* Page header ladder (`level`), relative to `--ui-font-size`:  absolute, like Fomantic's rem. */
-    --ui-header-h1: 2;
-    --ui-header-h2: 1.71428;
-    --ui-header-h3: 1.28571;
-    --ui-header-h4: 1.07142;
-    --ui-header-h5: 1;
-    --ui-header-h6: 0.85714;
+    --_ui-header-h1: var(--ui-header-h1, 2);
+    --_ui-header-h2: var(--ui-header-h2, 1.71428);
+    --_ui-header-h3: var(--ui-header-h3, 1.28571);
+    --_ui-header-h4: var(--ui-header-h4, 1.07142);
+    --_ui-header-h5: var(--ui-header-h5, 1);
+    --_ui-header-h6: var(--ui-header-h6, 0.85714);
     /* The generic size remap resolves `--ui-size-<size>` HERE:  the header ladder, relative to `medium`. */
-    --ui-size-mini: calc(var(--ui-header-size-mini) / var(--ui-header-size-medium));
-    --ui-size-tiny: calc(var(--ui-header-size-tiny) / var(--ui-header-size-medium));
-    --ui-size-small: calc(var(--ui-header-size-small) / var(--ui-header-size-medium));
-    --ui-size-large: calc(var(--ui-header-size-large) / var(--ui-header-size-medium));
-    --ui-size-big: calc(var(--ui-header-size-big) / var(--ui-header-size-medium));
-    --ui-size-huge: calc(var(--ui-header-size-huge) / var(--ui-header-size-medium));
-    --ui-size-massive: calc(var(--ui-header-size-massive) / var(--ui-header-size-medium));
+    --ui-size-mini: calc(var(--_ui-header-size-mini) / var(--_ui-header-size-medium));
+    --ui-size-tiny: calc(var(--_ui-header-size-tiny) / var(--_ui-header-size-medium));
+    --ui-size-small: calc(var(--_ui-header-size-small) / var(--_ui-header-size-medium));
+    --ui-size-large: calc(var(--_ui-header-size-large) / var(--_ui-header-size-medium));
+    --ui-size-big: calc(var(--_ui-header-size-big) / var(--_ui-header-size-medium));
+    --ui-size-huge: calc(var(--_ui-header-size-huge) / var(--_ui-header-size-medium));
+    --ui-size-massive: calc(var(--_ui-header-size-massive) / var(--_ui-header-size-medium));
     /* Owner side:  icons and content parts inside. */
-    --ui-header-layout: text;
-    --ui-icon-owner-size: var(--ui-header-icon-size);
-    --ui-icon-owner-margin: 0 var(--ui-header-icon-margin) 0 0;
-    --ui-icon-owner-align: middle;
-    --ui-icon-owner-display: inline-flex;
+    --_ui-header-layout: text;
+    --_ui-icon-owner-size: var(--_ui-header-icon-size);
+    --_ui-icon-owner-margin: 0 var(--_ui-header-icon-margin) 0 0;
+    --_ui-icon-owner-align: middle;
+    --_ui-icon-owner-display: inline-flex;
   }
 
   /* Header:  a content header, `1.28em` of the surrounding text;  a page header (`<h1>` ...) is absolute. */
   .ui.header {
     box-sizing: border-box;
     display: block;
-    margin: var(--_header-margin-top, calc(var(--ui-header-margin-top) - var(--ui-header-offset))) 0
-      var(--_header-margin-bottom, var(--ui-header-margin-bottom));
+    margin: var(--_header-margin-top, calc(var(--_ui-header-margin-top) - var(--_ui-header-offset))) 0
+      var(--_header-margin-bottom, var(--_ui-header-margin-bottom));
     padding: 0;
     border: none;
-    color: var(--ui-color-header, var(--ui-header-color));
+    color: var(--ui-color-header, var(--_ui-header-color));
     font-family: var(--ui-font-family-heading);
-    font-size: calc(var(--_header-base, 1em * var(--ui-header-size-medium)) * var(--ui-scale, 1));
-    font-weight: var(--ui-header-font-weight);
-    line-height: var(--ui-header-line-height);
+    font-size: calc(var(--_header-base, 1em * var(--_ui-header-size-medium)) * var(--ui-scale, 1));
+    font-weight: var(--_ui-header-font-weight);
+    line-height: var(--_ui-header-line-height);
     text-transform: none;
   }
   /* Its scale comes from its own size class only, never a parent's;  nor does it hand its own on. */
@@ -247,7 +261,7 @@
     --ui-scale: initial;
   }
   .ui.header:first-child {
-    --_header-margin-top: calc(var(--ui-header-offset) * -1);
+    --_header-margin-top: calc(var(--_ui-header-offset) * -1);
   }
   .ui.header:last-child {
     --_header-margin-bottom: 0;
@@ -265,60 +279,60 @@
 
   /* Page headers:  sized by level unless a size is given. */
   h1.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive) {
-    --_header-base: calc(var(--ui-font-size) * var(--ui-header-h1));
+    --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h1));
   }
   h2.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive) {
-    --_header-base: calc(var(--ui-font-size) * var(--ui-header-h2));
+    --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h2));
   }
   h3.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive) {
-    --_header-base: calc(var(--ui-font-size) * var(--ui-header-h3));
+    --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h3));
   }
   h4.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive) {
-    --_header-base: calc(var(--ui-font-size) * var(--ui-header-h4));
+    --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h4));
   }
   h5.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive) {
-    --_header-base: calc(var(--ui-font-size) * var(--ui-header-h5));
+    --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h5));
   }
   h6.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive) {
-    --_header-base: calc(var(--ui-font-size) * var(--ui-header-h6));
+    --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h6));
   }
 
   /* Images slotted straight into a header:  a small picture before the text. */
   .ui.header > img,
   .ui.header ::slotted(img) {
     display: inline-block;
-    width: var(--ui-header-image-width);
+    width: var(--_ui-header-image-width);
     height: auto;
-    margin-top: calc(var(--ui-header-offset) * -1);
-    margin-inline-end: var(--ui-header-icon-margin);
+    margin-top: calc(var(--_ui-header-offset) * -1);
+    margin-inline-end: var(--_ui-header-icon-margin);
     vertical-align: middle;
   }
 
   /* Sub heading:  a small uppercase label-like header. */
   .ui.sub.header {
-    --_header-base: calc(1em * var(--ui-header-sub-heading-ratio));
+    --_header-base: calc(1em * var(--_ui-header-sub-heading-ratio));
     --_header-margin-bottom: 0.14285em;
     padding: 0;
-    color: var(--ui-color-header, var(--ui-header-sub-heading-color));
+    color: var(--ui-color-header, var(--_ui-header-sub-heading-color));
     text-transform: uppercase;
   }
 
   /* Icon header:  a large icon centred above the text. */
   .ui.icon.header {
-    --ui-header-layout: icon;
-    --ui-icon-owner-size: var(--ui-header-icon-header-size);
-    --ui-icon-owner-display: flex;
-    --ui-icon-owner-margin: 0 auto var(--ui-header-icon-header-margin);
-    --ui-icon-owner-align: baseline;
+    --_ui-header-layout: icon;
+    --_ui-icon-owner-size: var(--_ui-header-icon-header-size);
+    --_ui-icon-owner-display: flex;
+    --_ui-icon-owner-margin: 0 auto var(--_ui-header-icon-header-margin);
+    --_ui-icon-owner-align: baseline;
     display: inline-block;
-    margin-top: var(--ui-header-margin-top);
+    margin-top: var(--_ui-header-margin-top);
     text-align: center;
   }
   .ui.icon.header:first-child {
     margin-top: 0;
   }
   :host(:not(:first-child)) > .ui.icon.header {
-    margin-top: var(--ui-header-margin-top);
+    margin-top: var(--_ui-header-margin-top);
   }
   .ui.icon.header::after {
     content: "";
@@ -349,8 +363,8 @@
     display: block;
     margin: 0;
     padding: 0;
-    color: var(--ui-header-sub-color, var(--ui-text-muted));
-    font-size: var(--ui-header-sub-font-size, 1em);
+    color: var(--_ui-header-sub-color, var(--ui-text-muted));
+    font-size: var(--_ui-header-sub-font-size, 1em);
     font-weight: var(--ui-font-weight-normal);
     line-height: 1.2em;
   }
@@ -373,7 +387,7 @@
     border-top: none;
   }
   /* ... unless the card rendered a shorthand block before its slot:  then the first slotted content isn't first. */
-  @container style(--ui-card-leading: 1) {
+  @container style(--_ui-card-leading: 1) {
     :host(:state(in-card):first-child) > .content {
       border-top: var(--ui-border-width) solid var(--ui-card-divider-color, var(--ui-border-color-internal));
     }
@@ -493,7 +507,7 @@
     align-self: start;
     width: auto;
     min-width: 0;
-    padding-inline-start: var(--ui-item-content-distance, 1.5em);
+    padding-inline-start: var(--_ui-item-content-distance, 1.5em);
   }
   :host(:state(in-item)) > .header,
   .in-item.header {
@@ -685,7 +699,7 @@
   /* Hovered, or holding keyboard focus:  a minimal comment's actions show (never invisible while focused). */
   :host(:state(in-comment)) > .content:is(:hover, :focus-within),
   .in-comment.content:is(:hover, :focus-within) {
-    --ui-comment-hover: 1;
+    --_ui-comment-hover: 1;
   }
   :host(:state(in-comment)) > .author,
   .in-comment.author {
@@ -752,11 +766,11 @@
     margin: 0;
     padding: 0.875em 1.05em;
     border-bottom: var(--ui-border-width) solid var(--ui-border-color);
-    background: var(--ui-modal-header-background, var(--ui-surface));
+    background: var(--_ui-modal-header-background, var(--ui-surface));
     box-shadow: none;
-    color: var(--ui-modal-header-color, var(--ui-text-dark));
+    color: var(--_ui-modal-header-color, var(--ui-text-dark));
     font-family: var(--ui-font-family-heading);
-    font-size: var(--ui-modal-header-size, 1.42857em);
+    font-size: var(--_ui-modal-header-size, 1.42857em);
     font-weight: var(--ui-font-weight-bold);
     line-height: var(--ui-line-height-heading);
   }
@@ -765,7 +779,7 @@
     display: block;
     width: 100%;
     padding: var(--ui-modal-content-padding, 1.5em);
-    background: var(--ui-modal-content-background, var(--ui-surface));
+    background: var(--_ui-modal-content-background, var(--ui-surface));
     font-size: 1em;
     line-height: 1.4;
   }
@@ -799,7 +813,7 @@
   .in-modal.actions {
     padding: var(--ui-modal-actions-padding, 1em);
     border-top: var(--ui-border-width) solid var(--ui-border-color);
-    background: var(--ui-modal-actions-background, var(--ui-surface-muted));
+    background: var(--_ui-modal-actions-background, var(--ui-surface-muted));
     text-align: right;
   }
   :host(:state(in-modal)) > .actions > ::slotted(*),
@@ -809,13 +823,13 @@
   /* The modal's outer corners. */
   :host(:state(in-modal):first-child) > :is(.header, .content, .actions),
   .in-modal:is(.header, .content, .actions):first-child {
-    border-start-start-radius: var(--ui-modal-radius, var(--ui-radius));
-    border-start-end-radius: var(--ui-modal-radius, var(--ui-radius));
+    border-start-start-radius: var(--_ui-modal-radius, var(--ui-radius));
+    border-start-end-radius: var(--_ui-modal-radius, var(--ui-radius));
   }
   :host(:state(in-modal):last-child) > :is(.header, .content, .actions),
   .in-modal:is(.header, .content, .actions):last-child {
-    border-end-start-radius: var(--ui-modal-radius, var(--ui-radius));
-    border-end-end-radius: var(--ui-modal-radius, var(--ui-radius));
+    border-end-start-radius: var(--_ui-modal-radius, var(--ui-radius));
+    border-end-end-radius: var(--_ui-modal-radius, var(--ui-radius));
   }
   @media (--ui-mobile) {
     :host(:state(in-modal)) > .header,
@@ -860,8 +874,8 @@
     margin: 0;
     padding: 1.25em 1.5em;
     border-bottom: var(--ui-border-width) solid var(--ui-border-color);
-    background: var(--ui-flyout-header-background, var(--ui-flyout-background, var(--ui-surface)));
-    color: var(--ui-flyout-header-color, var(--ui-text-dark));
+    background: var(--ui-flyout-header-background, var(--_ui-flyout-background, var(--ui-surface)));
+    color: var(--_ui-flyout-header-color, var(--ui-text-dark));
     font-family: var(--ui-font-family-heading);
     font-size: var(--ui-flyout-header-size, 1.28571em);
     font-weight: var(--ui-font-weight-bold);
@@ -874,7 +888,7 @@
     flex: 1 0 auto;
     width: 100%;
     padding: var(--ui-flyout-content-padding, 1.5em);
-    background: var(--ui-flyout-content-background, var(--ui-flyout-background, var(--ui-surface)));
+    background: var(--ui-flyout-content-background, var(--_ui-flyout-background, var(--ui-surface)));
     font-size: 1em;
     line-height: 1.4;
   }
@@ -883,7 +897,7 @@
     flex: none;
     padding: var(--ui-flyout-actions-padding, 1em);
     border-top: var(--ui-border-width) solid var(--ui-border-color);
-    background: var(--ui-flyout-actions-background, var(--ui-surface-muted));
+    background: var(--_ui-flyout-actions-background, var(--ui-surface-muted));
     text-align: right;
   }
   :host(:state(in-flyout)) > .actions > ::slotted(*),
@@ -898,14 +912,14 @@
     margin: calc((1 - var(--ui-line-height-heading)) * 0.5em) 0 0;
     color: var(--ui-color-header, inherit);
     font-family: var(--ui-font-family-heading);
-    font-size: var(--ui-message-header-font-size, 1.14285em);
+    font-size: var(--_ui-message-header-font-size, 1.14285em);
     font-weight: var(--ui-font-weight-bold);
   }
 
   /* ## in-list:  `.ui.list > .item > .content > .header / .description`. */
   :host(:state(in-list)) > .content,
   .in-list.content {
-    color: var(--ui-list-content-color, var(--ui-text-color));
+    color: var(--_ui-list-content-color, var(--ui-text-color));
     line-height: 1.14285em;
   }
   /* After the item's icon or image. */
@@ -913,8 +927,8 @@
   .in-list.content:not(:first-child) {
     display: table-cell;
     width: 100%;
-    padding: 0 0 0 var(--ui-list-content-distance, 0.5em);
-    vertical-align: var(--ui-list-align, top);
+    padding: 0 0 0 var(--_ui-list-content-distance, 0.5em);
+    vertical-align: var(--_ui-list-align, top);
   }
   /* Static markup:  beside an `<img>` (Fomantic's `img.image + .content`), an inline block. */
   img.image + .in-list.content {
@@ -925,7 +939,7 @@
   .in-list.header {
     display: block;
     margin: 0;
-    color: var(--ui-list-header-color, var(--ui-text-color));
+    color: var(--_ui-list-header-color, var(--ui-text-color));
     font-family: var(--ui-font-family-heading);
     font-weight: var(--ui-font-weight-bold);
   }
@@ -941,7 +955,7 @@
   :host(:state(in-list)) > .description,
   .in-list.description {
     display: block;
-    color: var(--ui-list-description-color, oklch(from var(--ui-ink) l c h / 0.7));
+    color: var(--_ui-list-description-color, oklch(from var(--ui-ink) l c h / 0.7));
   }
 
   /* ## in-menu:  an item's sub header, `.ui.vertical.menu .item > .header:not(.ui)` (menu header ITEMS are
@@ -959,7 +973,7 @@
   .in-statistic.value {
     color: var(--ui-color, var(--ui-statistic-value-color, var(--ui-ink)));
     font-family: var(--ui-font-family);
-    font-size: var(--ui-statistic-value-size, calc(var(--ui-font-size) * 4));
+    font-size: var(--_ui-statistic-value-size, calc(var(--ui-font-size) * 4));
     font-weight: var(--ui-font-weight-normal);
     line-height: 1em;
     text-align: center;
@@ -968,7 +982,7 @@
   :host(:state(in-statistic)) > .value.text,
   .in-statistic.value.text {
     min-height: 2em;
-    font-size: var(--ui-statistic-text-value-size, calc(var(--ui-font-size) * 2));
+    font-size: var(--_ui-statistic-text-value-size, calc(var(--ui-font-size) * 2));
     font-weight: var(--ui-font-weight-bold);
     line-height: 1em;
   }
@@ -993,8 +1007,8 @@
   }
   :host(:state(in-statistic)) > .value,
   .in-statistic.value {
-    --ui-icon-owner-margin: 0;
-    --ui-icon-owner-opacity: 1;
+    --_ui-icon-owner-margin: 0;
+    --_ui-icon-owner-opacity: 1;
   }
 
   /* ## in-step:  `.ui.steps .step > .content`, `.step .title / .description`. */
@@ -1004,8 +1018,8 @@
     flex: 0 1 auto;
     align-self: center;
     /* Circular steps move the content off their ring (`step.css`). */
-    margin: var(--ui-step-content-margin, 0);
-    padding: var(--ui-step-content-padding, 0);
+    margin: var(--_ui-step-content-margin, 0);
+    padding: var(--_ui-step-content-padding, 0);
   }
   :host(:state(in-step)) > .title,
   .in-step.title {
@@ -1026,14 +1040,14 @@
   /* After the title. */
   :host(:state(in-step):not(:first-child)) > .description,
   .in-step.description:not(:first-child) {
-    margin-top: var(--ui-step-description-distance, 0.25em);
+    margin-top: var(--_ui-step-description-distance, 0.25em);
   }
 
   /* ## in-accordion:  `.ui.accordion > .title`, `.ui.accordion .title ~ .content`. */
   :host(:state(in-accordion)) > .title,
   .in-accordion.title {
-    padding: var(--ui-accordion-title-padding, 0.5em 0);
-    color: var(--ui-accordion-title-color, var(--ui-text-color));
+    padding: var(--_ui-accordion-title-padding, 0.5em 0);
+    color: var(--_ui-accordion-title-color, var(--ui-text-color));
     font-family: var(--ui-font-family-heading);
     font-size: 1em;
     line-height: 1;
@@ -1042,7 +1056,7 @@
   }
   :host(:state(in-accordion)) > .content,
   .in-accordion.content {
-    padding: var(--ui-accordion-content-padding, 0.5em 0 1em);
+    padding: var(--_ui-accordion-content-padding, 0.5em 0 1em);
   }
   :host(:state(in-accordion):last-child) > .content,
   .in-accordion.content:last-child {
@@ -1054,13 +1068,13 @@
   .in-popup.header {
     padding: 0;
     font-family: var(--ui-font-family-heading);
-    font-size: var(--ui-popup-header-font-size, 1.14285em);
+    font-size: var(--_ui-popup-header-font-size, 1.14285em);
     font-weight: var(--ui-font-weight-bold);
     line-height: 1.2;
   }
   :host(:state(in-popup):not(:first-child)) > .content,
   .in-popup.content:not(:first-child) {
-    padding-top: var(--ui-popup-header-distance, 0.5em);
+    padding-top: var(--_ui-popup-header-distance, 0.5em);
   }
 
   /* ## in-toast:  `.ui.toast > .content > .header`, `.ui.toast .actions`. */
@@ -1084,7 +1098,7 @@
   :host(:state(in-search)) > .title,
   .in-search.title {
     margin: calc((1 - var(--ui-line-height-heading)) * 0.5em) 0 0;
-    color: var(--ui-search-title-color, var(--ui-text-dark));
+    color: var(--_ui-search-title-color, var(--ui-text-dark));
     font-family: var(--ui-font-family-heading);
     font-size: 1em;
     font-weight: var(--ui-font-weight-bold);
@@ -1092,23 +1106,23 @@
   :host(:state(in-search)) > .description,
   .in-search.description {
     margin-top: 0;
-    color: var(--ui-search-description-color, var(--ui-text-light));
+    color: var(--_ui-search-description-color, var(--ui-text-light));
     font-size: 0.92857em;
   }
   :host(:state(in-search)) > .value,
   .in-search.value {
     float: right;
-    color: var(--ui-search-price-color, var(--ui-green-text));
+    color: var(--_ui-search-price-color, var(--ui-green-text));
   }
 
   /* ## in-label:  `.ui.label > .detail`. */
   :host(:state(in-label)) > .detail,
   .in-label.detail {
-    --ui-icon-owner-margin: 0 0.25em 0 0;
+    --_ui-icon-owner-margin: 0 0.25em 0 0;
     display: inline-block;
-    margin-inline-start: var(--ui-label-detail-distance, 1em);
-    font-weight: var(--ui-label-detail-weight, var(--ui-font-weight-bold));
-    opacity: var(--ui-label-detail-opacity, 1);
+    margin-inline-start: var(--_ui-label-detail-distance, 1em);
+    font-weight: var(--_ui-label-detail-weight, var(--ui-font-weight-bold));
+    opacity: var(--_ui-label-detail-opacity, 1);
     vertical-align: top;
   }
 }
@@ -1122,19 +1136,19 @@
 
   /* Dividing:  a rule below;  a coloured one thickens, the extra line drawn inside. */
   .ui.dividing.header {
-    padding-bottom: var(--ui-header-dividing-padding);
-    border-bottom: var(--ui-header-dividing-border);
+    padding-bottom: var(--_ui-header-dividing-padding);
+    border-bottom: var(--_ui-header-dividing-border);
     border-bottom-color: var(--ui-color, var(--ui-border-color));
-    box-shadow: inset 0 calc(var(--ui-border-width) - var(--ui-header-colored-border-width)) 0 0
+    box-shadow: inset 0 calc(var(--ui-border-width) - var(--_ui-header-colored-border-width)) 0 0
       var(--ui-color, transparent);
   }
 
   /* Block:  a tinted box, absolutely sized like Fomantic's rem. */
   .ui.block.header {
-    padding: var(--ui-header-block-padding);
-    border: var(--ui-header-block-border);
+    padding: var(--_ui-header-block-padding);
+    border: var(--_ui-header-block-border);
     border-radius: var(--ui-radius);
-    background: var(--ui-header-block-background);
+    background: var(--_ui-header-block-background);
     box-shadow: none;
   }
   .ui.block.header:not(h1, h2, h3, h4, h5, h6) {
@@ -1144,14 +1158,14 @@
   /* Attached:  joined to the segment below (or above). */
   .ui.attached.header {
     margin: 0 calc(var(--ui-border-width) * -1);
-    padding: var(--ui-header-block-padding);
-    border: var(--ui-header-block-border);
+    padding: var(--_ui-header-block-padding);
+    border: var(--_ui-header-block-border);
     border-radius: 0;
-    background: var(--ui-header-attached-background);
+    background: var(--_ui-header-attached-background);
     box-shadow: none;
   }
   .ui.attached.block.header {
-    background: var(--ui-header-block-background);
+    background: var(--_ui-header-block-background);
   }
   .ui.attached:not(.top).header {
     border-top: none;
@@ -1203,12 +1217,12 @@
   .ui:is(.floated, [class*="left floated"]).header {
     float: left;
     margin-top: 0;
-    margin-inline-end: var(--ui-header-floated-margin);
+    margin-inline-end: var(--_ui-header-floated-margin);
   }
   .ui[class*="right floated"].header {
     float: right;
     margin-top: 0;
-    margin-inline-start: var(--ui-header-floated-margin);
+    margin-inline-start: var(--_ui-header-floated-margin);
   }
 
   /* Fitted */
@@ -1219,7 +1233,7 @@
   /* ## Parts under an owner's variation. */
 
   /* A sub header / content inside an icon header. */
-  @container style(--ui-header-layout: icon) {
+  @container style(--_ui-header-layout: icon) {
     :host(:state(in-header)) > .content,
     .in-header.content {
       display: block;
@@ -1228,7 +1242,7 @@
   }
 
   /* Horizontal card:  contents side by side with the image, extra content below. */
-  @container style(--ui-card-layout: horizontal) {
+  @container style(--_ui-card-layout: horizontal) {
     :host(:state(in-card)) > .content,
     .in-card.content {
       flex-basis: 1px;
@@ -1241,24 +1255,24 @@
   }
 
   /* An item showing its own image (`<ui-item image>`, `item.css`):  the content beside it, as after a slotted one. */
-  @container style(--ui-item-media: 1) {
+  @container style(--_ui-item-media: 1) {
     :host(:state(in-item)) > .content {
       align-self: start;
       width: auto;
       min-width: 0;
-      padding-inline-start: var(--ui-item-content-distance, 1.5em);
+      padding-inline-start: var(--_ui-item-content-distance, 1.5em);
     }
   }
 
   /* Stacked items (mobile, not `unstackable`):  content below the image. */
-  @container style(--ui-item-layout: stacked) {
+  @container style(--_ui-item-layout: stacked) {
     :host(:state(in-item):not(:first-child)) > .content,
     .in-item.content:not(:first-child) {
       display: block;
       padding: var(--ui-item-content-distance-mobile, 1.5em) 0 0;
     }
   }
-  @container style(--ui-item-layout: stacked) and style(--ui-item-media: 1) {
+  @container style(--_ui-item-layout: stacked) and style(--_ui-item-media: 1) {
     :host(:state(in-item)) > .content {
       display: block;
       padding: var(--ui-item-content-distance-mobile, 1.5em) 0 0;
@@ -1266,7 +1280,7 @@
   }
 
   /* Link items:  the header takes the link hover colour while its item is hovered. */
-  @container style(--ui-item-state: hover) {
+  @container style(--_ui-item-state: hover) {
     :host(:state(in-item)) > .header,
     .in-item.header {
       color: var(--ui-link-hover);
@@ -1292,7 +1306,7 @@
   }
 
   /* Minimal comments:  actions hidden until the comment's content is hovered. */
-  @container style(--ui-comments-minimal: 1) {
+  @container style(--_ui-comments-minimal: 1) {
     :host(:state(in-comment)) > .actions,
     .in-comment.actions {
       position: absolute;
@@ -1303,7 +1317,7 @@
       transition: opacity var(--ui-duration-normal) var(--ui-ease) 0.1s;
     }
   }
-  @container style(--ui-comments-minimal: 1) and style(--ui-comment-hover: 1) {
+  @container style(--_ui-comments-minimal: 1) and style(--_ui-comment-hover: 1) {
     :host(:state(in-comment)) > .actions,
     .in-comment.actions {
       opacity: 1;
@@ -1311,7 +1325,7 @@
   }
 
   /* Basic modal:  parts float on the dimmer, no boxes, a white header. */
-  @container style(--ui-modal-basic: 1) {
+  @container style(--_ui-modal-basic: 1) {
     :host(:state(in-modal)) > :is(.header, .content, .actions),
     .in-modal:is(.header, .content, .actions) {
       border: none;
@@ -1324,7 +1338,7 @@
   }
 
   /* Icon message:  the content is the flex item beside the icon. */
-  @container style(--ui-message-layout: icon) {
+  @container style(--_ui-message-layout: icon) {
     :host(:state(in-message)) > .content,
     .in-message.content {
       display: block;
@@ -1336,7 +1350,7 @@
 
   /* A feed event showing a label (slotted, or `<ui-event icon / image / label>`):  the content beside it, as after a
      slotted label. */
-  @container style(--ui-event-label: 1) {
+  @container style(--_ui-event-label: 1) {
     :host(:state(in-feed)) > .content {
       margin: 0.5em 0 0.35714em 1.14285em;
     }
@@ -1390,43 +1404,43 @@
 
   /* List item showing an icon / image box of its own (`<ui-item icon>`, `item.css`):  the content is the table
      cell beside it, as after a slotted icon. */
-  @container style(--ui-item-media: 1) {
+  @container style(--_ui-item-media: 1) {
     :host(:state(in-list)) > .content {
       display: table-cell;
       width: 100%;
-      padding: 0 0 0 var(--ui-list-content-distance, 0.5em);
-      vertical-align: var(--ui-list-align, top);
+      padding: 0 0 0 var(--_ui-list-content-distance, 0.5em);
+      vertical-align: var(--_ui-list-align, top);
     }
   }
   /* ... beside the `image` shorthand's `<img>` (`list.css` sets `image`):  an inline block, Fomantic's
      `img.image + .content`. */
-  @container style(--ui-item-media: image) {
+  @container style(--_ui-item-media: image) {
     :host(:state(in-list)) > .content {
       display: inline-block;
       width: auto;
-      padding: 0 0 0 var(--ui-list-content-distance, 0.5em);
-      vertical-align: var(--ui-list-align, top);
+      padding: 0 0 0 var(--_ui-list-content-distance, 0.5em);
+      vertical-align: var(--_ui-list-align, top);
     }
   }
 
   /* Horizontal list:  content inline, centred on the icon. */
-  @container style(--ui-list-layout: horizontal) {
+  @container style(--_ui-list-layout: horizontal) {
     :host(:state(in-list)) > .content,
     .in-list.content,
     :host(:state(in-list):not(:first-child)) > .content,
     .in-list.content:not(:first-child) {
       display: inline-block;
       width: auto;
-      vertical-align: var(--ui-list-align, middle);
+      vertical-align: var(--_ui-list-align, middle);
     }
   }
 
   /* Horizontal statistic:  value and label on one line. */
-  @container style(--ui-statistic-layout: horizontal) {
+  @container style(--_ui-statistic-layout: horizontal) {
     :host(:state(in-statistic)) > .value,
     .in-statistic.value {
       display: inline-block;
-      font-size: var(--ui-statistic-value-size, calc(var(--ui-font-size) * 3));
+      font-size: var(--_ui-statistic-value-size, calc(var(--ui-font-size) * 3));
       vertical-align: middle;
     }
     :host(:state(in-statistic)) > .value.text,
@@ -1442,7 +1456,7 @@
   }
 
   /* Stacked steps:  centred content. */
-  @container style(--ui-step-layout: stacked) {
+  @container style(--_ui-step-layout: stacked) {
     :host(:state(in-step)) > .content,
     .in-step.content {
       text-align: center;
@@ -1450,7 +1464,7 @@
   }
 
   /* Styled accordion:  bordered titles, padded content. */
-  @container style(--ui-accordion-style: styled) {
+  @container style(--_ui-accordion-style: styled) {
     :host(:state(in-accordion)) > .title,
     .in-accordion.title {
       margin: 0;
@@ -1474,19 +1488,22 @@
   }
 
   /* An image label's detail:  a darker tab to the end edge. */
-  @container style(--ui-label-layout: image) {
+  @container style(--_ui-label-layout: image) {
     :host(:state(in-label)) > .detail,
     .in-label.detail {
       margin: -0.5833em -0.833em -0.5833em 0.5em;
       padding: 0.5833em 0.833em;
       border-radius: 0 var(--ui-radius) var(--ui-radius) 0;
-      background: var(--ui-label-detail-background, oklch(from var(--ui-shadow-ink) l c h / 0.1));
+      background: var(
+        --_ui-label-detail-background,
+        var(--ui-label-detail-background, oklch(from var(--ui-shadow-ink) l c h / 0.1))
+      );
       opacity: 1;
     }
   }
 
   /* A date inside a feed summary:  inline and small. */
-  @container style(--ui-part: summary) {
+  @container style(--_ui-part: summary) {
     :host(:state(in-feed)) > .date,
     .in-feed.date {
       display: inline-block;
@@ -1507,17 +1524,17 @@
 @layer ui.components.parts.states {
   /* Disabled header */
   .ui.disabled.header {
-    opacity: var(--ui-header-disabled-opacity);
+    opacity: var(--_ui-header-disabled-opacity);
   }
 
   /* Step states:  the active step's title in the link colour, a disabled step's text dimmed. */
-  @container style(--ui-step-state: active) {
+  @container style(--_ui-step-state: active) {
     :host(:state(in-step)) > .title,
     .in-step.title {
-      color: var(--ui-step-active-title-color, var(--ui-link));
+      color: var(--_ui-step-active-title-color, var(--ui-link));
     }
   }
-  @container style(--ui-step-state: disabled) {
+  @container style(--_ui-step-state: disabled) {
     :host(:state(in-step)) > :is(.title, .description),
     .in-step:is(.title, .description) {
       color: var(--ui-text-disabled);
@@ -1525,13 +1542,13 @@
   }
 
   /* Styled accordion:  hovered and open titles darken. */
-  @container style(--ui-accordion-style: styled) {
+  @container style(--_ui-accordion-style: styled) {
     :host(:state(in-accordion)) > .title:hover,
     .in-accordion.title:hover {
       color: var(--ui-text-color);
     }
   }
-  @container style(--ui-accordion-style: styled) and style(--ui-accordion-open: 1) {
+  @container style(--_ui-accordion-style: styled) and style(--_ui-accordion-open: 1) {
     :host(:state(in-accordion)) > .title,
     .in-accordion.title {
       color: var(--ui-text-selected);
@@ -1539,7 +1556,7 @@
   }
 
   /* The highlighted search result. */
-  @container style(--ui-search-result: active) {
+  @container style(--_ui-search-result: active) {
     :host(:state(in-search)) > :is(.title, .description),
     .in-search:is(.title, .description) {
       color: var(--ui-text-dark);

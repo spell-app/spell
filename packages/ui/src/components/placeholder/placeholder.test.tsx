@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { PLACEHOLDER_HOST_STATE } from "$/components/components.types"
 import { expectAccessible } from "$test/a11y"
@@ -109,6 +109,62 @@ describe("<ui-placeholder> shapes by position", () => {
     const box = rootOf(placeholder.querySelector("ui-placeholder-image")!).getBoundingClientRect()
     expect(box.width).toBeGreaterThan(0)
     expect(box.height).toBeCloseTo(box.width, 0)
+  })
+})
+
+describe("<ui-placeholder> tokens from outside", () => {
+  /** The inner box's max width. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=placeholder]")!).maxWidth
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-placeholder><ui-placeholder-line></ui-placeholder-line></ui-placeholder>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(
+      MARKUP.replace("<ui-placeholder", `<ui-placeholder style="--ui-placeholder-max-width: 200px"`)
+    )
+    expect(measure(host)).toBe("200px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-placeholder-max-width: 200px"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-placeholder")!)).toBe("200px")
+  })
+
+  it("takes a token set through `::part(placeholder)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(placeholder) { --ui-placeholder-max-width: 200px }</style>${MARKUP.replace("<ui-placeholder", '<ui-placeholder class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-placeholder")!)).toBe("200px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-placeholder-max-width", "200px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-placeholder-max-width")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("200px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("480px")
+  })
+
+  it("reaches every shape, set on the placeholder;  a shape takes one on its own part", async () => {
+    const host = await ElementFixture.render(
+      `<ui-placeholder style="--ui-placeholder-radius: 7px"><ui-placeholder-line></ui-placeholder-line>` +
+        `<ui-placeholder-line class="own"></ui-placeholder-line></ui-placeholder>` +
+        `<style>.own::part(line) { --ui-placeholder-radius: 3px }</style>`
+    )
+    const [plain, own] = [...host.querySelectorAll("ui-placeholder-line")].map((line) => rootOf(line))
+    expect(getComputedStyle(plain!).borderTopLeftRadius).toBe("7px")
+    expect(getComputedStyle(own!).borderTopLeftRadius).toBe("3px")
   })
 })
 

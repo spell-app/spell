@@ -140,6 +140,14 @@ describe("calendar.css examples", () => {
     expect(getComputedStyle(inRange).backgroundColor).toBe(color("var(--ui-teal-background)"))
   })
 
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt([...foundationCSS, inputCSS, segmentCSS, calendarCSS])
+    const root = Fixture.render(
+      `<div style="--ui-calendar-cell-padding: 20px">${EXAMPLES["./examples/types.html"]!}</div>`
+    )
+    expect(styleIn(root, "t-day", "tbody td").paddingTop).toBe("20px")
+  })
+
   it("inverted:  the picker in the dark scheme;  compact:  tighter cells;  sizes by the remap", () => {
     const root = example("variations")
     const dark = calendarOf(root, "v-inverted").querySelector<HTMLElement>(".calendar")!

@@ -1,5 +1,5 @@
 import { userEvent } from "vitest/browser"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -262,6 +262,51 @@ describe("<ui-menu> owner tokens reach the items", () => {
     await expect.poll(() => boxOf(items[0]!).localName).toBe("button")
     host.removeAttribute("link")
     await expect.poll(() => boxOf(items[0]!).localName).toBe("div")
+  })
+})
+
+describe("<ui-menu> tokens from outside", () => {
+  /** An item's top padding. */
+  function padding(item: Element): string {
+    return styleOf(item).paddingTop
+  }
+
+  it("takes a token set on the HOST, reaching its items", async () => {
+    const { items } = await menu(`style="--ui-menu-item-padding: 20px"`)
+    expect(padding(items[1]!)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-menu-item-padding: 20px"><ui-menu aria-label="Test">${LINKS}</ui-menu></section>`
+    )
+    expect(padding(wrapper.querySelector("ui-item")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(menu)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(menu) { --ui-menu-item-padding: 20px }</style>` +
+        `<ui-menu class="themed" aria-label="Test">${LINKS}</ui-menu></div>`
+    )
+    expect(padding(wrapper.querySelector("ui-item")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-menu-item-padding", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-menu-item-padding")
+    })
+    const { items } = await menu()
+    expect(padding(items[1]!)).toBe("20px")
+  })
+
+  it("variations:  `secondary` swaps the padding, winning over the base token;  corners derive from the radius", async () => {
+    const secondary = await menu(`secondary style="--ui-menu-item-padding: 20px"`)
+    expect(padding(secondary.items[1]!)).not.toBe("20px")
+    const { root, items } = await menu(`style="--ui-menu-radius: 10px"`)
+    expect(getComputedStyle(root).borderTopLeftRadius).toBe("10px")
+    expect(styleOf(items[0]!).borderTopLeftRadius).toBe("10px")
+    expect(styleOf(items[0]!).borderTopRightRadius).toBe("0px")
   })
 })
 

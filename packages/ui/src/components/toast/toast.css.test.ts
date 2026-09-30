@@ -212,3 +212,13 @@ function luminance(color: string): number {
   const [r, g, b] = context.getImageData(0, 0, 1, 1).data
   return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
 }
+
+describe("toast.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, toastCSS])
+    const root = Fixture.render(
+      `<div style="--ui-toast-radius: 20px"><div class="floating toast-box"><div class="ui toast"><div class="content">x</div></div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.toast")!).borderTopLeftRadius).toBe("20px")
+  })
+})

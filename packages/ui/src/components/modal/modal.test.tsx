@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { userEvent } from "vitest/browser"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest"
+import { page, userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
 import { PART_OWNER_TOKENS, type ModalCloseDetail } from "$/components/components.types"
-import { expectAccessible } from "$test/a11y"
+import { A11y, expectAccessible } from "$test/a11y"
 import { Fixture } from "$test/fixture"
 
 import { ElementFixture } from "$test/ElementFixture"
@@ -57,7 +57,10 @@ async function settle() {
   await ElementFixture.tick()
 }
 
-/** Speeds the transitions up (a page `::part` rule beats the shadow's own), for this test. */
+/** This test's `fast()` rule, which a test may remove to see the real transition. */
+let speedUp: HTMLElement
+
+/** Speeds the transitions up (the dialog's alias reads the page's `::part` value), for this test. */
 function fast() {
   const style = Fixture.render(`<style>ui-modal::part(modal) { --ui-modal-duration: 1ms }</style>`)
   return style
@@ -67,7 +70,7 @@ beforeEach(async () => {
   await UI.load()
   // Escape through a keyboard binding rather than `CloseWatcher`, so every test can press it
   UI.overlays.useCloseWatcher = false
-  fast()
+  speedUp = fast()
 })
 
 afterEach(() => {
@@ -131,6 +134,70 @@ describe("<ui-modal> content", () => {
   })
 })
 
+describe("<ui-modal> tokens from outside", () => {
+  /** The dialog's top-left radius. */
+  function radius(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("dialog")!).borderTopLeftRadius
+  }
+
+  /** The inner box of the first `<ui-header>` in `root`. */
+  function header(root: Element): Element {
+    return root.querySelector("ui-header")!.shadowRoot!.firstElementChild!
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await modal(`<ui-modal style="--ui-modal-radius: 20px">x</ui-modal>`)
+    expect(radius(host)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const { host } = await modal(`<section style="--ui-modal-radius: 20px"><ui-modal>x</ui-modal></section>`)
+    expect(radius(host)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(modal)`", async () => {
+    const { host } = await modal(
+      `<style>.themed::part(modal) { --ui-modal-radius: 20px }</style><ui-modal class="themed">x</ui-modal>`
+    )
+    expect(radius(host)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-modal-radius", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-modal-radius")
+    })
+    const { host } = await modal(`<ui-modal>x</ui-modal>`)
+    expect(radius(host)).toBe("20px")
+  })
+
+  it("a page width holds on every screen;  `fullscreen` swaps it", async () => {
+    const [previousWidth, previousHeight] = [window.innerWidth, window.innerHeight]
+    await page.viewport(1300, 800)
+    onTestFinished(() => page.viewport(previousWidth, previousHeight))
+    const { host } = await modal(`<ui-modal style="--ui-modal-width: 300px">x</ui-modal>`)
+    expect(getComputedStyle(host.shadowRoot!.querySelector("dialog")!).width).toBe("300px")
+    const { host: full } = await modal(`<ui-modal fullscreen style="--ui-modal-width: 300px">x</ui-modal>`)
+    expect(getComputedStyle(full.shadowRoot!.querySelector("dialog")!).width).not.toBe("300px")
+  })
+
+  it("owner tokens:  a part look token set on the modal or above it reaches a slotted header;  `basic` swaps it", async () => {
+    const red = "rgb(255, 0, 0)"
+    const { wrapper: onModal } = await modal(
+      `<ui-modal style="--ui-modal-header-color: ${red}"><ui-header>H</ui-header></ui-modal>`
+    )
+    expect(getComputedStyle(header(onModal)).color).toBe(red)
+    const { wrapper: above } = await modal(
+      `<section style="--ui-modal-header-color: ${red}"><ui-modal><ui-header>H</ui-header></ui-modal></section>`
+    )
+    expect(getComputedStyle(header(above)).color).toBe(red)
+    const { wrapper: basic } = await modal(
+      `<ui-modal basic style="--ui-modal-header-color: ${red}"><ui-header>H</ui-header></ui-modal>`
+    )
+    expect(getComputedStyle(header(basic)).color).not.toBe(red)
+  })
+})
+
 describe("<ui-modal> open / close", () => {
   it("`open` shows it with showModal():  top layer, inert page, scroll lock;  ui-show, then ui-hide", async () => {
     const { host, dialog } = await modal(`<ui-modal header="Hi">x</ui-modal>`)
@@ -151,7 +218,7 @@ describe("<ui-modal> open / close", () => {
   })
 
   it("waits for the transition before ui-show / ui-hide", async () => {
-    document.querySelector("style")?.remove()
+    speedUp.remove()
     const { host, dialog } = await modal(`<ui-modal>x</ui-modal>`)
     const shows = record(host, "ui-show")
     host.open = true
@@ -385,7 +452,17 @@ describe("<ui-modal> accessibility", () => {
     await expectAccessible(root)
     for (const host of root.querySelectorAll<Modal>("ui-modal")) {
       await open(host)
-      await expectAccessible(host)
+      if (host.hasAttribute("basic")) {
+        // A basic modal has no box:  its light text sits on the dimmer, the dialog's `::backdrop`, which axe
+        // ignores (it measures against the white page).  Check that pairing by hand instead.
+        await expectAccessible(host, { rules: { "color-contrast": { enabled: false } } })
+        const dialog = host.shadowRoot!.querySelector("dialog")!
+        const backdrop = getComputedStyle(dialog, "::backdrop").backgroundColor
+        const page = getComputedStyle(document.body).backgroundColor
+        expect(A11y.contrast(getComputedStyle(dialog).color, [page, backdrop])).toBeGreaterThanOrEqual(4.5)
+      } else {
+        await expectAccessible(host)
+      }
       host.open = false
       await settle()
     }

@@ -58,6 +58,34 @@ export class Converters {
   }
 
   ////////////////
+  // ## Icons
+  ////////////////
+
+  /**
+   * `icon` attribute value => icon name, `""` for "the element's own icon", or `undefined` for none.
+   * - Why:  frameworks (JSX, Astro) render a bare `icon` as `icon="true"`, which MUST NOT be looked up as a glyph.
+   * - bare / `"true"` / `"yes"` / `true` => `fallback` (the vocabulary default), else `""`
+   * - `"false"` / `"no"` / `false` => `undefined`, even over a default.  NOT `"0"`:  Font Awesome has a `0` glyph.
+   * - a string / number => the trimmed name;  absent (`null` / `undefined`) or any other value => `undefined`
+   */
+  static icon(value: unknown, fallback?: unknown): string | undefined {
+    if (value == null || value === false) return undefined
+    const text =
+      typeof value === "string"
+        ? value.trim()
+        : value === true
+          ? ""
+          : typeof value === "number"
+            ? `${value}`
+            : undefined
+    if (text === undefined) return undefined
+    const word = text.toLowerCase()
+    if (word === "false" || word === "no") return undefined
+    if (word === "" || word === "true" || word === "yes") return typeof fallback === "string" ? fallback : ""
+    return text
+  }
+
+  ////////////////
   // ## Enums
   ////////////////
 

@@ -352,12 +352,14 @@ form.clear() // every control emptied, and prompts cleared
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-form-*` tokens on the form's box, through `::part(form)` (the box declares its own
-  defaults, so a value set on the host tag doesn't reach it);  fields and the controls inside read them.
-  The `--ui-fields-*` tokens are private (a row hands them to its fields):  use `width` and `widths` instead.
+  Theme with the public `--ui-form-*` tokens:  set one on the element, on any ancestor (`:root` included), or on the
+  form's box through `::part(form)`.  They inherit into the shadow root, where the sheet reads each through a private
+  alias, so nothing inside blocks them;  the form hands them to its fields and rows, so set them on the form (a field
+  outside a form reads them from its own ancestors).  `inverted` swaps in `--ui-form-inverted-label-color`.  The
+  `--_ui-fields-*` tokens are private (a row hands them to its fields):  use `width` and `widths` instead.
 
 ```css
-ui-form::part(form) {
+ui-form {
   --ui-form-gutter: 2em;
   --ui-form-label-font-weight: normal;
   --ui-form-required-color: var(--ui-primary);

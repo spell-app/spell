@@ -16,8 +16,8 @@ import partsCSS from "$/components/parts/parts.css?inline"
  *   tree with a barrier at every non-part component, and keeps `:state(in-<owner>)` on the host.
  * - Markup:  `<div class="<noun> [keyOnly ...]" part="<noun>"><slot></slot></div>`;  subclasses change the tag
  *   (`tag()`:  `<a>` for `href`, `<time>`, `<span>`), the link / time attributes and the content.
- * - `--ui-part`:  `parts.css` declares it on the ROOT from the noun class, never on the host -- a host
- *   declaring it would be what its own root's `@container style(--ui-part: summary)` queries, so a date could
+ * - `--_ui-part`:  `parts.css` declares it on the ROOT from the noun class, never on the host -- a host
+ *   declaring it would be what its own root's `@container style(--_ui-part: summary)` queries, so a date could
  *   never see the summary it sits in.
  * - Every part adopts `parts.css`;  `@proto static isPart` makes parts transparent to other parts' climbs.
  */

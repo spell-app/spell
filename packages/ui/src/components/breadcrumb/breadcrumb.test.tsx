@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { BREADCRUMB_DIVIDER_TOKENS } from "$/components/components.types"
 import { UI } from "$/runtime"
@@ -174,6 +174,58 @@ describe("<ui-breadcrumb> dividers", () => {
     host.removeAttribute("divider-icon")
     await expect.poll(() => nav.style.getPropertyValue(BREADCRUMB_DIVIDER_TOKENS.layout)).toBe("")
     expect(nav.style.getPropertyValue(BREADCRUMB_DIVIDER_TOKENS.icon)).toBe("")
+  })
+})
+
+describe("<ui-breadcrumb> tokens from outside", () => {
+  const RED = "rgb(255, 0, 0)"
+
+  /** The `<nav>`'s computed text colour. */
+  function color(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=breadcrumb]")!).color
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await breadcrumb(`style="--ui-breadcrumb-color: ${RED}"`)
+    expect(color(host)).toBe(RED)
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-breadcrumb-color: ${RED}"><div><ui-breadcrumb>${TRAIL}</ui-breadcrumb></div></section>`
+    )
+    expect(color(wrapper.querySelector("ui-breadcrumb")!)).toBe(RED)
+  })
+
+  it("takes a token set through `::part(breadcrumb)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(breadcrumb) { --ui-breadcrumb-color: ${RED} }</style>` +
+        `<ui-breadcrumb class="themed">${TRAIL}</ui-breadcrumb></div>`
+    )
+    expect(color(wrapper.querySelector("ui-breadcrumb")!)).toBe(RED)
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-breadcrumb-color", RED)
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-breadcrumb-color")
+    })
+    const { host } = await breadcrumb()
+    expect(color(host)).toBe(RED)
+  })
+
+  it("owner tokens:  one set on the breadcrumb or above it reaches its sections", async () => {
+    const { sections } = await breadcrumb(`style="--ui-breadcrumb-divider-color: ${RED}"`)
+    expect(getComputedStyle(dividerOf(sections[1]!)).color).toBe(RED)
+    const wrapper = await ElementFixture.render(
+      `<div style="--ui-breadcrumb-link-color: ${RED}"><ui-breadcrumb>${TRAIL}</ui-breadcrumb></div>`
+    )
+    expect(getComputedStyle(sectionOf(wrapper.querySelector("ui-breadcrumb-section")!)).color).toBe(RED)
+  })
+
+  it("variations:  `inverted` swaps the colour, winning over the base token", async () => {
+    const { host } = await breadcrumb(`inverted style="--ui-breadcrumb-color: ${RED}"`)
+    expect(color(host)).not.toBe(RED)
   })
 })
 

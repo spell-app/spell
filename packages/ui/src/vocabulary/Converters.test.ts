@@ -62,6 +62,28 @@ describe("Converters.keyOrValue()", () => {
   })
 })
 
+describe("Converters.icon()", () => {
+  it.each([
+    // [value, fallback, expected]
+    ["star", undefined, "star"],
+    [" star ", undefined, "star"],
+    ["", undefined, ""],
+    ["true", undefined, ""],
+    ["Yes", undefined, ""],
+    [true, undefined, ""],
+    ["", "circle-play", "circle-play"],
+    ["true", "circle-play", "circle-play"],
+    ["false", "circle-play", undefined],
+    ["no", undefined, undefined],
+    [false, "circle-play", undefined],
+    [null, undefined, undefined],
+    // a Font Awesome glyph, not a false word
+    ["0", undefined, "0"]
+  ] as const)("%j (default %j) => %j", (value, fallback, expected) => {
+    expect(Converters.icon(value, fallback)).toBe(expected)
+  })
+})
+
 describe("Converters.enumValue()", () => {
   it("returns canonical values, normalized", () => {
     expect(Converters.enumValue("red", "hues")).toBe("red")

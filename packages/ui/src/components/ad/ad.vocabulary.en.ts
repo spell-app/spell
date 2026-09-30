@@ -3,7 +3,7 @@
  * Schema:  `ComponentVocabulary` (`$/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:  `<ui-ad unit="medium rectangle" centered>`
  *   => `ui medium rectangle centered ad`.  `ad.css` keys on those phrases (`[class*="medium rectangle"]`).
- * - `unit` is the IAB unit, emitted as its bare words, hence `kind: "color"` (a value-only kind, as the menu's
+ * - `unit` is the IAB unit, emitted as its bare words, hence `kind: "valueOnly"` (as the menu's
  *   `position`).  NOT `size`:  that's the generic `mini` ... `massive`, and `medium rectangle` would read as one.
  * - `test` is a string:  present => Fomantic's `test` class (a grey placeholder saying "Ad");  a value is the text
  *   to show instead (Fomantic's `data-text`).
@@ -22,7 +22,7 @@ export const adVocabulary = {
   attributes: [
     {
       name: "unit",
-      kind: "color",
+      kind: "valueOnly",
       values: [
         "medium rectangle",
         "large rectangle",
@@ -50,7 +50,7 @@ export const adVocabulary = {
       ],
       description:
         "IAB unit, e.g. `medium rectangle` (300 x 250), `leaderboard` (728 x 90).  Mobile units (`mobile leaderboard`, " +
-        '`large mobile banner`) show only on phone-sized viewports.  NOTE: `kind: "color"` because it emits its value alone.'
+        "`large mobile banner`) show only on phone-sized viewports."
     },
     { name: "centered", kind: "keyOnly", description: "Centred in its container." },
     {

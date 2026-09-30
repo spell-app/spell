@@ -178,17 +178,31 @@ modal.open = true // open from code:  no ui-open
 </Section>
 
 <Section title="Theming">
-  Theme the box through its `modal` part:  the public `--ui-modal-*` tokens are declared on it, and a rule from your
-  page beats the modal's own.  `--ui-modal-dimmer-background` colours the backdrop.
+  Theme with the public `--ui-modal-*` tokens:  set one on the element, on any ancestor (`:root` for every modal),
+  or on the box through `::part(modal)`.  They inherit into the shadow root, where the sheet reads each through a
+  private alias, so nothing inside blocks them.  `--ui-modal-dimmer-background` colours the backdrop (by default the
+  shared `--ui-dimmer-background`, which also themes `<ui-dimmer>`).  A `--ui-modal-width` holds on every screen;
+  `fullscreen` replaces it.  The header, content and actions parts read `--ui-modal-header-*`,
+  `--ui-modal-content-background` and `--ui-modal-actions-background` from the modal, so set those on the modal or
+  above it;  `basic` replaces them.
 
 ```css
-ui-modal::part(modal) {
+:root {
   --ui-modal-radius: 0.75em;
+}
+ui-modal.confirm {
+  --ui-modal-width: 480px;
   --ui-modal-dimmer-background: oklch(0 0 0 / 0.6);
 }
 ```
 
-  <CssTokens family="modal" />
+  <CssTokens
+    family="modal"
+    defaults={{
+      "--ui-modal-width": "95%;  tablets 88%;  then 850px / 900px / 950px by screen (scaled by size)",
+      "--ui-modal-aligned-margin": "5vh;  phones 1em"
+    }}
+  />
 </Section>
 
 <Section title="Accessibility">

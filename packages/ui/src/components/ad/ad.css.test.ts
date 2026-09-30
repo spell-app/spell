@@ -61,3 +61,15 @@ describe("ad.css examples", () => {
     expect(getComputedStyle(bare, "::after").content).toBe(`"Ad"`)
   })
 })
+
+describe("ad.css tokens", () => {
+  it("takes a public token from a wrapper or the ad itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, adCSS])
+    const root = Fixture.render(
+      `<div style="--ui-ad-test-background: rgb(255, 0, 0)"><div class="ui test button ad"></div></div>` +
+        `<div><p>A</p><div class="ui button ad" style="--ui-ad-margin: 7px 0">B</div><p>C</p></div>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).backgroundColor).toBe("rgb(255, 0, 0)")
+    expect(getComputedStyle(root.nextElementSibling!.querySelector(".ad")!).marginTop).toBe("7px")
+  })
+})

@@ -120,6 +120,18 @@ describe("divider.css examples", () => {
   })
 })
 
+describe("divider.css tokens", () => {
+  it("takes a public token from a wrapper or the divider itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, dividerCSS])
+    const root = Fixture.render(
+      `<div style="--ui-divider-margin: 20px"><div class="ui divider"></div></div>` +
+        `<div class="ui divider" style="--ui-divider-line-width: 3px"></div>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).marginTop).toBe("20px")
+    expect(getComputedStyle(root.nextElementSibling!).borderTopWidth).toBe("3px")
+  })
+})
+
 describe("divider.css in shadow roots", () => {
   it("keeps the host out of layout and draws the root", () => {
     Sheets.adopt(foundationCSS)

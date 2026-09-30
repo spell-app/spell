@@ -18,6 +18,10 @@
  *   - NOTE `medium`:  the grammar makes `size="medium"` a no-op (the unsized 1em flag), whereas Fomantic's
  *     `.ui.medium.flag` is 3em.  The `.medium` rule is ported for STATIC markup;  the element never emits it.
  *     Fomantic has no `mini` / `tiny` flag, so the vocabulary doesn't offer them.
+ * - Public tokens (`--ui-flag-*`, the theming surface) are NEVER declared here:  the token block reads each through a
+ *   private alias, `--_ui-flag-distance: var(--ui-flag-distance, var(--ui-space-2xs))`, and every rule reads the
+ *   alias.  So a value set on `:root`, an ancestor, the host, `::part(flag)` or in the app stylesheet reaches the box
+ *   (`docs/theming.md` "Component tokens").
  * - NOTE: left out, on purpose:
  *   - the sprite / Twemoji SVG background images and the 264 per-country `background-image` rules:  the glyph is
  *     text now, so there's no network fetch and no per-country CSS.  An SVG flag set (consistent everywhere,
@@ -42,38 +46,44 @@
     display: none;
   }
 
-  /* Tokens:  one per `flag.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one per `flag.variables` entry that still matters, each the private alias of its public token. */
   .ui.flag {
-    --ui-flag-font-family:
-      "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "Segoe UI Symbol",
-      var(--ui-font-family);
-    --ui-flag-line-height: 1;
-    --ui-flag-distance: var(--ui-space-2xs);
+    --_ui-flag-font-family: var(
+      --ui-flag-font-family,
+      "Apple Color Emoji",
+      "Segoe UI Emoji",
+      "Noto Color Emoji",
+      "Twemoji Mozilla",
+      "Segoe UI Symbol",
+      var(--ui-font-family)
+    );
+    --_ui-flag-line-height: var(--ui-flag-line-height, 1);
+    --_ui-flag-distance: var(--ui-flag-distance, var(--ui-space-2xs));
     /* Fomantic's flag ladder (`1.5em * n`), relative to the surrounding text. */
-    --ui-flag-size-small: 1.5;
-    --ui-flag-size-medium: 3;
-    --ui-flag-size-large: 6;
-    --ui-flag-size-big: 7.5;
-    --ui-flag-size-huge: 9;
-    --ui-flag-size-massive: 12;
+    --_ui-flag-size-small: var(--ui-flag-size-small, 1.5);
+    --_ui-flag-size-medium: var(--ui-flag-size-medium, 3);
+    --_ui-flag-size-large: var(--ui-flag-size-large, 6);
+    --_ui-flag-size-big: var(--ui-flag-size-big, 7.5);
+    --_ui-flag-size-huge: var(--ui-flag-size-huge, 9);
+    --_ui-flag-size-massive: var(--ui-flag-size-massive, 12);
     /* The generic size remap (`sizes.css`) resolves `--ui-size-<size>` HERE, so it picks the flag ladder. */
-    --ui-size-small: var(--ui-flag-size-small);
-    --ui-size-large: var(--ui-flag-size-large);
-    --ui-size-big: var(--ui-flag-size-big);
-    --ui-size-huge: var(--ui-flag-size-huge);
-    --ui-size-massive: var(--ui-flag-size-massive);
+    --ui-size-small: var(--_ui-flag-size-small);
+    --ui-size-large: var(--_ui-flag-size-large);
+    --ui-size-big: var(--_ui-flag-size-big);
+    --ui-size-huge: var(--_ui-flag-size-huge);
+    --ui-size-massive: var(--_ui-flag-size-massive);
   }
 
   /* Flag:  one emoji glyph, one line tall, sitting on the text's baseline. */
   .ui.flag {
     display: inline-block;
-    margin: 0 var(--ui-flag-distance) 0 0;
-    font-family: var(--ui-flag-font-family);
+    margin: 0 var(--_ui-flag-distance) 0 0;
+    font-family: var(--_ui-flag-font-family);
     font-size: calc(1em * var(--ui-scale, 1));
     font-style: normal;
     font-weight: var(--ui-font-weight-normal);
     font-variant-emoji: emoji;
-    line-height: var(--ui-flag-line-height);
+    line-height: var(--_ui-flag-line-height);
     text-decoration: none;
     white-space: nowrap;
     vertical-align: baseline;
@@ -92,6 +102,6 @@
   }
   /* Static markup only:  `sizes.css` makes `.medium` a no-op;  Fomantic's medium flag is 3em. */
   .ui.medium.flag {
-    --ui-scale: var(--ui-flag-size-medium);
+    --ui-scale: var(--_ui-flag-size-medium);
   }
 }

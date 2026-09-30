@@ -48,6 +48,8 @@ name with `-` replaced by a space (`very-basic` => `very basic`);  a vocabulary 
 | `size` | value only | `size="small"` | `small` |
 | | | `size="medium"` | _(nothing -- default size)_ |
 | `color` | value only | `color="red"` | `red` |
+| `valueOnly` | value only (where colours go) | `type="warning"` | `warning` |
+| `icon` | -- | `icon="user"` / bare, `true`, `yes` (the default icon) / `false`, `no` (none) | _(no class;  a glyph name)_ |
 | `keyOnly` | `useKeyOnly` -- `val && key` | `basic` | `basic` |
 | | | `very-basic` | `very basic` |
 | `valueAndKey` | `useValueAndKey` -- `val && val !== true && "val key"` | `floated="left"` | `left floated` |
@@ -187,9 +189,10 @@ parts -- never `ui-list-item` / `ui-menu-item`:
 - The box:  `<a href>` with `href`;  a `<button>` for `link` or when the owner says items are interactive
   (selection list, `link` / `pagination` menu, menubar);  else a `<div>` (an item can hold inputs, buttons,
   dropdowns).  `type="header"` => `<div class="item header">`.
-- Owner VARIATIONS reach the item's shadow root as inherited `--ui-<owner>-*` tokens the owner root declares
-  (`menu.css`, `list.css` headers list them):  the owner root resolves every class combination (`secondary
-  pointing`, `vertical tabular`), the item rules only read tokens.
+- Owner VARIATIONS reach the item's shadow root as inherited tokens the owner root declares (`menu.css`,
+  `list.css` headers list them):  the owner root resolves every class combination (`secondary pointing`,
+  `vertical tabular`), the item rules only read tokens.  Public ones go through private aliases
+  (`--_ui-menu-item-padding: var(--ui-menu-item-padding, ...)`, `docs/theming.md` "Owner tokens").
 - Chosen state:  `selected` (canonical, class word `active`);  `active` is accepted as an alias on `<ui-item>`,
   Fomantic's word.  Selected => `aria-current` (`page` on a link, `true` otherwise).
 - Colour:  an item has no `ui`, so a coloured one adds `ui-<color>` (the utility remap class) for `colors.css`.
@@ -426,8 +429,8 @@ first paint never needs the property.  No virtualization yet:  every row renders
 
 - Fomantic's three classes as three elements:  `<ui-pushable>` (the clipping box), `<ui-sidebar>` (the panel),
   `<ui-pusher>` (the page beside it).  A visible sidebar reports what it needs to its pushable, which sets inherited
-  tokens (`PUSHER_TOKENS`) the pusher reads:  where it moves (measured, as Fomantic's script did), its origin, dimmed,
-  blurred.  Fomantic's sibling rules (`.visible.left.sidebar ~ .pusher`) stay for static markup.
+  PRIVATE tokens (`PUSHER_TOKENS`, `--_ui-pusher-*`) the pusher reads:  where it moves (measured, as Fomantic's
+  script did), its origin, dimmed, blurred.  Fomantic's sibling rules (`.visible.left.sidebar ~ .pusher`) stay for static markup.
 - `position` (`left` default, `right`, `top`, `bottom`), `width` (`very thin`, `thin`, `wide`, `very wide`),
   `transition` (`overlay`, `push`, `scale down`, `uncover`, `slide along`, `slide out`;  default Fomantic's:
   `uncover` on the sides, `overlay` at the top / bottom), `inverted` (a dark panel), `blurring`.
@@ -467,7 +470,7 @@ first paint never needs the property.  No virtualization yet:  every row renders
   `--next`, `--previous` (`SHAPE_COMMANDS`).
 - The flip is Fomantic's geometry (`shape.js`), a CSS transition on the sides box;  flips queue;  `ui-change`
   (`{ activeIndex, side, flip }`) once turned.  Reduced motion:  an instant swap.
-- The shape's type reaches its sides as a token (`--ui-shape-type`, style-queried):  a side's shadow can't see the
+- The shape's type reaches its sides as a token (the private `--_ui-shape-type`, style-queried):  a side's shadow can't see the
   shape's classes.  The sides box is a polite live region, so the new side is read out.
 
 ## Cards:  `<ui-card>` in `<ui-cards>`
@@ -495,7 +498,7 @@ first paint never needs the property.  No virtualization yet:  every row renders
   static markup in the card's shadow root (`<div class="header in-card">`), styled by the `parts.css` the card
   adopts.  Order:  image, one content block, the slot, extra.  A slotted part of a shorthand's noun anywhere inside
   (or a slotted `<img>`) wins, and that shorthand isn't rendered.
-  A slotted `<ui-content>` after the shorthand block keeps its rule above (`--ui-card-leading`).
+  A slotted `<ui-content>` after the shorthand block keeps its rule above (`--_ui-card-leading`).
 - A group owns its cards (`ownsParts:  card`):  a card in `<ui-cards>` is a `role=listitem` host (the group is a
   `role=list`) with `:state(in-cards)`, and takes the group's `size`, `color`, `horizontal`, `raised`, `link`,
   `basic`, `inverted` as its OWN classes when it doesn't set them (`CardSharedVariation`) -- so `card.css` needs one
@@ -561,7 +564,7 @@ first paint never needs the property.  No virtualization yet:  every row renders
 - The label (Fomantic's `.event > .label`, not a `ui label`):  the `image` shorthand (round, `alt=""`), the `icon`
   shorthand, a `label` text in a circle (Fomantic's `data-text`), or anything in the `label` slot.  The box renders
   only when there is one (or the feed is `ordered`:  the number goes there);  the event root then declares
-  `--ui-event-label: 1` and `parts.css` puts the content beside it, as it does after a slotted label.
+  `--_ui-event-label: 1` and `parts.css` puts the content beside it, as it does after a slotted label.
 - Variations reach the events as inherited private tokens, which the event rules style-query (`--_feed-connected`,
   `--_feed-ordered` ...);  numbering is CSS counters across the shadow boundaries.  `color` colours the number
   circles and the connecting line, on the feed or per event (an event adds `ui-<color>`, having no `ui`).
@@ -615,8 +618,8 @@ first paint never needs the property.  No virtualization yet:  every row renders
   in-statistic`):  the `value` BEFORE the slot, the `label` AFTER it, so either pairs with a slotted part and still
   reads value over label.  `text` makes the value shorthand a word value.
 - The value / label look (sizes, horizontal, inverted, colour) is `parts.css`'s, driven by the owner tokens every
-  statistic root declares (`--ui-statistic-layout`, `--ui-statistic-value-size`, `-text-value-size`,
-  `--ui-inverted`);  colour is the generic `--ui-color` remap on the statistic or its group -- never an
+  statistic root declares (`--_ui-statistic-layout`, the aliases `--_ui-statistic-value-size` and
+  `-text-value-size` of the public size tokens, `--ui-inverted`);  colour is the generic `--ui-color` remap on the statistic or its group -- never an
   ancestor's (the host drops inherited colour tokens, a member takes back its group's).
 - A group hands its members PRIVATE inherited tokens (`--_statistics-*`:  in-a-group, size ratios, layout,
   inversion, `widths`, stacked), since a member can't see its group's classes.
@@ -641,10 +644,11 @@ first paint never needs the property.  No virtualization yet:  every row renders
 - The step root:  `<a>` with `href`, a `<button>` with `link`, else a `<div>`.
 - Content:  `header` (NOT `title`, the global tooltip attribute -- the popup's `header` precedent) and `description`
   shorthands, or the generic parts (the step `ownsParts` `content`, `title`, `description`).
-- A step can't see its group's classes:  the `<ol>` root resolves every variation into inherited `--ui-steps-*`
-  tokens and one switch per layout (`--ui-steps-layout: horizontal | vertical | stacked`, `--ui-steps-circular`,
-  `--ui-steps-ordered` ...), which the step rules style-query (`step.css` header).  The same rules serve static
-  markup, whose `.ui.steps` root declares the same tokens.
+- A step can't see its group's classes:  the `<ol>` root resolves every variation into inherited PRIVATE
+  `--_ui-steps-*` tokens (the aliases of the public `--ui-steps-radius` / `-border` / `-accent-on`, plus one switch
+  per layout:  `--_ui-steps-layout: horizontal | vertical | stacked`, `--_ui-steps-circular`, `--_ui-steps-ordered`
+  ...), which the step rules read and style-query (`step.css` header).  The same rules serve static markup, whose
+  `.ui.steps` root declares the same tokens.
 - Stacking:  Fomantic stacks steps on phones unless `unstackable`;  here below 768px of the GROUP's width (`ui-steps`
   container on the host), 992px with `stackable="tablet"`.
 - `vertical="right"` for Fomantic's `right vertical` (arrow on the start side);  `attached="top | bottom"`;
@@ -856,7 +860,8 @@ first paint never needs the property.  No virtualization yet:  every row renders
 - The summary and content box ARE the boxes:  the accordion doesn't own the `title` / `content` parts, so the
   slotted `<ui-title>` / `<ui-content>` stay plain.  (`parts.css`'s `in-accordion` rules are unused by the element.)
 - A nested `<ui-accordion>` (`:state(in-accordion)`) renders `accordion` without `ui` and takes its parent's look
-  through the inherited `--ui-accordion-*` tokens, as Fomantic's `.ui.styled.accordion .accordion` did.
+  through the inherited `--_ui-accordion-*` aliases (its root declares none), as Fomantic's
+  `.ui.styled.accordion .accordion` did.
 - Animated where the browser can transition to `auto` (`UI.browser.supports.interpolateSize` => `:state(animated)`,
   `::details-content`);  `prefers-reduced-motion` drops it.
 - Static markup:  the same `<details>` grammar works without JS (`.ui.accordion > details > summary.title`), and so

@@ -6,7 +6,7 @@ import { PartElement } from "./PartElement"
 /****************
  * ### `<ui-detail>`
  * A label's dimmer second value:  `<span class="detail">`, owned by `<ui-label>` (`:state(in-label)`).
- * - A tab on an image label:  `label.css` sets `--ui-label-layout: image`, which `parts.css` style-queries.
+ * - A tab on an image label:  `label.css` sets `--_ui-label-layout: image`, which `parts.css` style-queries.
  * - `href` renders `<a class="detail" href>` (a link detail, `label.css` styles `a.detail`).
  ****************/
 export class UIDetail extends PartElement<typeof detailVocabulary> {

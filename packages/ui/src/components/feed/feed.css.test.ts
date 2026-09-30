@@ -142,3 +142,15 @@ describe("feed.css examples", () => {
     expect(Number(style(disabled!).opacity)).toBeLessThan(1)
   })
 })
+
+describe("feed.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, feedCSS])
+    const root = Fixture.render(
+      `<div style="--ui-feed-event-padding: 10px"><div class="ui feed"><div class="event"><div class="content">x</div></div>` +
+        `<div class="event"><div class="content">y</div></div></div></div>`
+    )
+    // the second event:  a feed pads its events, not its outer edges
+    expect(getComputedStyle(root.querySelectorAll(".ui.feed > .event")[1]!).paddingTop).toBe("10px")
+  })
+})

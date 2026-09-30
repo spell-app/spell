@@ -31,7 +31,7 @@ export const breadcrumbVocabulary = {
       kind: "string",
       description:
         "Icon name drawn between sections instead of `divider`, e.g. `chevron right`;  published as " +
-        "`--ui-breadcrumb-divider-icon` (+ `--ui-breadcrumb-divider-layout: icon`)."
+        "`--ui-breadcrumb-divider-icon`."
     }
   ],
   events: [],

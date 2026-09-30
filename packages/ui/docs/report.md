@@ -105,10 +105,11 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
     `forms` entry so the `forms` leaves stay in `forms.js`.  `core.js` keeps the helpers and exports `__exportAll`
     to `api.js` (+0.06 kB min+gz).  A button-only page:  3 of our files instead of 4.  The check
     `no Rolldown runtime chunk` guards it.
-  - Icons are separate files (`dist/icon-packs/<id>/`:  SVGs + `pack.js`, copied by `emitIconPacks()`), found relative
-    to the chunk holding `BuiltInPacks` (`core.js`) and loaded by the runtime (`UI.icons`);  see `docs/icons.md`.
+  - Icons are separate files (`dist/icon-packs/<id>/`:  SVGs + `pack.js`, copied by `emitIconPacks()`), found
+    relative to the chunk holding `BuiltInPacks` (`core.js`) and loaded by the runtime (`UI.icons`);  see
+    `docs/icons.md`.
 - **Measuring** (`BundleMeasure`):  the repo's Vite config, built in memory with entries `core` + `forms` + one per
-  family + `api` (it changes how `core.js` comes out;  `vite:dts` and the glyph copy dropped;  no `index` or
+  family + `api` (it changes how `core.js` comes out;  `vite:dts` and the icon-pack copy dropped;  no `index` or
   `styles`);  every module is attributed to a bucket by id (`tools/package.config.ts`):  `library`, `core`,
   `shared:forms`, `own:<family>:classes|css|vocabulary|fallback`, `extra:api`, lazy `runtime` / `icons`.  Each tier
   is minified (esbuild) and gzipped (level 9) ON ITS OWN;  a scenario sums, per family, only the shared entries its
@@ -124,11 +125,11 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | --- | --: | --: | --- |
 | library (as used:  the bindings `dist/` imports) | 78.30 | 28.08 | eager |
 | library (full:  every export of the peer set) | 173.47 | 60.49 | comparison |
-| core (element core + foundation JS) | 45.62 | 14.33 | eager |
+| core (element core + foundation JS) | 46.21 | 14.48 | eager |
 | forms (form base, validation, menu options;  imported by `dropdown`, `input`, `checkbox`, `form`, `select`, `search`, `rating`, `slider`, `calendar`) | 20.27 | 7.32 | eager |
-| own, all 53 families | 1328.78 | 379.78 | eager |
+| own, all 53 families | 1369.63 | 384.78 | eager |
 | api (`E` / `V` namespaces, `@spell/ui/api`) | 0.70 | 0.31 | app only |
-| runtime (`UIRuntime` + foundation CSS) | 179.23 | 30.78 | lazy |
+| runtime (`UIRuntime` + foundation CSS) | 179.99 | 31.03 | lazy |
 | icons (none bundled:  pack indexes and SVGs are separate files, `docs/icons.md`) | 0.00 | 0.00 | lazy |
 | family data (emoji name chunks, each loaded on its own) | 250.05 | 60.72 | lazy |
 <!-- /generated:bundle-tiers -->
@@ -138,59 +139,59 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 <!-- generated:bundle-families -->
 | Family | own min+gz kB | classes | css | vocabulary | fallback | imports | page with only it | standalone (library bundled) |
 | --- | --: | --: | --: | --: | --: | --- | --: | --: |
-| `button` | **11.85** | 3.87 | 3.98 | 2.24 | 1.96 | core | 54.26 | 41.18 |
-| `dropdown` | **16.27** | 7.00 | 4.69 | 2.40 | 2.49 | core + forms | 66.00 | 64.42 |
-| `icon` | **6.24** | 2.53 | 1.84 | 1.44 | 1.58 | core | 48.65 | 36.21 |
-| `label` | **8.06** | 2.87 | 3.14 | 1.57 | 1.56 | core | 50.47 | 49.24 |
-| `parts` | **14.88** | 5.46 | 5.42 | 2.27 | 1.62 | core | 57.29 | 50.92 |
-| `divider` | **3.77** | 1.67 | 0.91 | 0.72 | 1.48 | core | 46.18 | 33.76 |
-| `segment` | **7.20** | 2.27 | 3.17 | 1.41 | 1.45 | core | 49.61 | 37.36 |
-| `container` | **3.20** | 1.45 | 0.77 | 0.56 | 1.40 | core | 45.61 | 33.06 |
-| `grid` | **7.78** | 2.44 | 3.26 | 1.51 | 1.44 | core | 50.20 | 38.69 |
-| `image` | **5.48** | 2.32 | 1.51 | 1.15 | 1.60 | core | 47.89 | 35.23 |
-| `text` | **2.70** | 1.47 | 0.38 | 0.43 | 1.40 | core | 45.12 | 32.57 |
-| `flag` | **6.05** | 1.87 | 0.54 | 2.92 | 1.64 | core | 48.46 | 37.10 |
-| `loader` | **4.21** | 1.65 | 1.23 | 0.75 | 1.54 | core | 46.62 | 34.24 |
-| `placeholder` | **5.82** | 3.31 | 1.27 | 0.83 | 1.57 | core | 48.23 | 35.71 |
-| `message` | **5.60** | 2.02 | 1.76 | 1.02 | 1.81 | core | 48.01 | 35.80 |
-| `breadcrumb` | **4.98** | 2.77 | 0.93 | 0.72 | 1.80 | core | 47.39 | 35.13 |
-| `input` | **10.11** | 4.61 | 2.63 | 1.88 | 2.22 | core + forms | 59.84 | 50.80 |
-| `checkbox` | **9.11** | 4.58 | 2.52 | 1.08 | 2.11 | core + forms | 58.84 | 45.02 |
-| `form` | **10.52** | 6.22 | 2.07 | 1.83 | 1.59 | core + forms | 60.25 | 47.87 |
-| `item` | **4.91** | 2.71 | 0.37 | 1.00 | 1.91 | core | 47.32 | 39.65 |
-| `list` | **6.75** | 2.03 | 3.05 | 0.92 | 1.65 | core | 49.16 | 44.87 |
-| `menu` | **9.79** | 2.82 | 4.11 | 1.39 | 1.62 | core | 52.20 | 47.52 |
-| `table` | **13.36** | 4.58 | 5.18 | 1.85 | 1.92 | core | 55.77 | 47.22 |
-| `popup` | **8.33** | 3.85 | 2.48 | 1.30 | 1.82 | core | 50.74 | 38.00 |
-| `modal` | **8.63** | 4.05 | 2.04 | 1.32 | 2.43 | core | 51.04 | 68.57 |
-| `transition` | **4.90** | 2.81 | 0.28 | 1.01 | 1.90 | core | 47.31 | 34.64 |
-| `dimmer` | **6.26** | 3.00 | 1.09 | 1.24 | 2.10 | core | 48.67 | 36.12 |
-| `flyout` | **5.15** | 1.48 | 1.79 | 1.25 | 1.64 | core | 47.56 | 72.26 |
-| `sidebar` | **7.81** | 4.52 | 1.46 | 1.28 | 1.82 | core | 50.22 | 37.72 |
-| `shape` | **6.00** | 4.04 | 0.79 | 0.81 | 1.57 | core | 48.41 | 35.75 |
-| `card` | **8.06** | 3.30 | 2.59 | 1.44 | 1.92 | core | 50.47 | 56.09 |
-| `items` | **4.00** | 1.55 | 1.38 | 0.56 | 1.51 | core | 46.41 | 55.97 |
-| `feed` | **5.67** | 2.70 | 1.42 | 0.86 | 1.88 | core | 48.08 | 54.21 |
-| `comment` | **4.39** | 2.40 | 0.82 | 0.67 | 1.70 | core | 46.80 | 52.86 |
-| `statistic` | **4.77** | 2.25 | 1.20 | 0.93 | 1.54 | core | 47.18 | 40.94 |
-| `step` | **8.60** | 2.97 | 3.45 | 1.47 | 1.89 | core | 51.01 | 49.78 |
-| `rail` | **2.88** | 1.45 | 0.50 | 0.52 | 1.40 | core | 45.29 | 32.75 |
-| `reveal` | **4.05** | 2.02 | 0.88 | 0.58 | 1.58 | core | 46.46 | 33.92 |
-| `ad` | **3.44** | 1.52 | 0.82 | 0.59 | 1.50 | core | 45.85 | 33.30 |
-| `emoji` | **4.01** | 2.32 | 0.58 | 0.57 | 1.55 | core | 46.42 | 33.94 |
-| `select` | **7.97** | 3.41 | 2.08 | 1.04 | 2.63 | core + forms | 57.70 | 52.60 |
-| `search` | **12.68** | 6.63 | 2.30 | 2.02 | 2.15 | core + forms | 62.41 | 51.72 |
-| `progress` | **7.29** | 3.33 | 1.99 | 1.25 | 1.75 | core | 49.70 | 37.54 |
-| `rating` | **6.20** | 3.43 | 0.90 | 0.89 | 2.11 | core + forms | 55.93 | 41.25 |
-| `slider` | **9.00** | 4.87 | 1.76 | 1.23 | 2.24 | core + forms | 58.73 | 43.90 |
-| `accordion` | **6.97** | 3.36 | 1.60 | 1.20 | 1.89 | core | 49.38 | 56.76 |
-| `tab` | **8.51** | 5.08 | 0.89 | 1.70 | 2.15 | core | 50.92 | 46.70 |
-| `toast` | **10.89** | 6.22 | 2.10 | 1.73 | 2.09 | core | 53.30 | 51.81 |
-| `nag` | **5.95** | 3.17 | 0.90 | 1.17 | 1.77 | core | 48.36 | 35.93 |
-| `sticky` | **3.64** | 2.36 | 0.28 | 0.51 | 1.50 | core | 46.05 | 33.64 |
-| `visibility` | **3.58** | 2.12 | 0.14 | 0.78 | 1.60 | core | 45.99 | 33.49 |
-| `embed` | **6.25** | 3.57 | 0.83 | 1.13 | 2.06 | core | 48.66 | 36.25 |
-| `calendar` | **15.28** | 9.50 | 1.91 | 2.12 | 2.18 | core + forms | 65.00 | 54.02 |
+| `button` | **12.07** | 3.87 | 4.13 | 2.24 | 1.97 | core | 54.63 | 41.50 |
+| `dropdown` | **16.50** | 7.02 | 4.90 | 2.37 | 2.49 | core + forms | 66.38 | 64.95 |
+| `icon` | **6.33** | 2.53 | 1.92 | 1.44 | 1.58 | core | 48.90 | 36.44 |
+| `label` | **8.45** | 2.87 | 3.38 | 1.58 | 1.56 | core | 51.02 | 49.81 |
+| `parts` | **15.05** | 5.46 | 5.58 | 2.27 | 1.62 | core | 57.62 | 51.27 |
+| `divider` | **3.82** | 1.67 | 0.96 | 0.72 | 1.48 | core | 46.39 | 33.94 |
+| `segment` | **7.37** | 2.27 | 3.32 | 1.41 | 1.45 | core | 49.93 | 37.66 |
+| `container` | **3.24** | 1.45 | 0.81 | 0.56 | 1.40 | core | 45.81 | 33.26 |
+| `grid` | **7.84** | 2.44 | 3.32 | 1.51 | 1.44 | core | 50.41 | 38.91 |
+| `image` | **5.57** | 2.32 | 1.59 | 1.15 | 1.60 | core | 48.14 | 35.45 |
+| `text` | **2.70** | 1.47 | 0.40 | 0.40 | 1.40 | core | 45.27 | 32.71 |
+| `flag` | **6.08** | 1.87 | 0.56 | 2.92 | 1.64 | core | 48.65 | 37.28 |
+| `loader` | **4.26** | 1.65 | 1.30 | 0.72 | 1.54 | core | 46.82 | 34.43 |
+| `placeholder` | **5.90** | 3.31 | 1.38 | 0.80 | 1.57 | core | 48.46 | 35.93 |
+| `message` | **5.68** | 2.02 | 1.86 | 0.99 | 1.81 | core | 48.24 | 36.02 |
+| `breadcrumb` | **5.04** | 2.77 | 0.99 | 0.70 | 1.80 | core | 47.60 | 35.32 |
+| `input` | **10.38** | 4.61 | 2.76 | 1.85 | 2.22 | core + forms | 60.26 | 51.34 |
+| `checkbox` | **9.29** | 4.58 | 2.69 | 1.09 | 2.11 | core + forms | 59.17 | 45.35 |
+| `form` | **10.59** | 6.22 | 2.16 | 1.81 | 1.59 | core + forms | 60.47 | 48.36 |
+| `item` | **4.88** | 2.71 | 0.37 | 0.97 | 1.91 | core | 47.45 | 39.75 |
+| `list` | **7.05** | 2.03 | 3.33 | 0.92 | 1.65 | core | 49.62 | 45.34 |
+| `menu` | **10.06** | 2.82 | 4.36 | 1.36 | 1.62 | core | 52.63 | 47.86 |
+| `table` | **13.59** | 4.58 | 5.39 | 1.85 | 1.92 | core | 56.15 | 47.59 |
+| `popup` | **8.41** | 3.85 | 2.56 | 1.30 | 1.82 | core | 50.98 | 38.23 |
+| `modal` | **8.74** | 4.05 | 2.14 | 1.32 | 2.43 | core | 51.31 | 69.20 |
+| `transition` | **4.90** | 2.81 | 0.28 | 1.01 | 1.90 | core | 47.47 | 34.77 |
+| `dimmer` | **6.22** | 3.00 | 1.09 | 1.21 | 2.10 | core | 48.79 | 36.20 |
+| `flyout` | **5.12** | 1.48 | 1.84 | 1.22 | 1.59 | core | 47.68 | 72.88 |
+| `sidebar` | **7.83** | 4.51 | 1.48 | 1.28 | 1.82 | core | 50.40 | 37.86 |
+| `shape` | **6.07** | 4.10 | 0.80 | 0.81 | 1.57 | core | 48.63 | 35.95 |
+| `card` | **8.19** | 3.30 | 2.71 | 1.44 | 1.92 | core | 50.75 | 56.61 |
+| `items` | **4.06** | 1.55 | 1.43 | 0.56 | 1.51 | core | 46.63 | 56.34 |
+| `feed` | **5.73** | 2.70 | 1.48 | 0.87 | 1.88 | core | 48.30 | 54.54 |
+| `comment` | **4.44** | 2.40 | 0.86 | 0.67 | 1.70 | core | 47.01 | 53.23 |
+| `statistic` | **4.80** | 2.25 | 1.24 | 0.93 | 1.54 | core | 47.37 | 41.29 |
+| `step` | **8.78** | 2.97 | 3.62 | 1.48 | 1.89 | core | 51.34 | 50.27 |
+| `rail` | **2.87** | 1.45 | 0.53 | 0.48 | 1.40 | core | 45.44 | 32.88 |
+| `reveal` | **4.07** | 2.02 | 0.91 | 0.58 | 1.58 | core | 46.63 | 34.08 |
+| `ad` | **3.42** | 1.52 | 0.84 | 0.56 | 1.50 | core | 45.99 | 33.43 |
+| `emoji` | **4.05** | 2.32 | 0.61 | 0.57 | 1.55 | core | 46.61 | 34.10 |
+| `select` | **8.10** | 3.41 | 2.23 | 1.01 | 2.63 | core + forms | 57.98 | 52.87 |
+| `search` | **12.85** | 6.63 | 2.44 | 2.02 | 2.15 | core + forms | 62.73 | 52.99 |
+| `progress` | **7.41** | 3.33 | 2.09 | 1.26 | 1.75 | core | 49.98 | 37.80 |
+| `rating` | **6.24** | 3.43 | 0.94 | 0.89 | 2.11 | core + forms | 56.12 | 41.46 |
+| `slider` | **9.10** | 4.87 | 1.85 | 1.23 | 2.24 | core + forms | 58.98 | 44.15 |
+| `accordion` | **7.05** | 3.36 | 1.68 | 1.20 | 1.89 | core | 49.62 | 57.17 |
+| `tab` | **8.56** | 5.08 | 0.94 | 1.70 | 2.15 | core | 51.13 | 47.39 |
+| `toast` | **11.03** | 6.22 | 2.23 | 1.73 | 2.09 | core | 53.59 | 52.30 |
+| `nag` | **6.01** | 3.17 | 0.95 | 1.17 | 1.77 | core | 48.57 | 36.14 |
+| `sticky` | **3.67** | 2.36 | 0.31 | 0.51 | 1.50 | core | 46.23 | 33.78 |
+| `visibility` | **3.58** | 2.12 | 0.14 | 0.78 | 1.60 | core | 46.14 | 33.62 |
+| `embed` | **6.31** | 3.57 | 0.87 | 1.16 | 2.06 | core | 48.88 | 36.44 |
+| `calendar` | **15.44** | 9.50 | 2.04 | 2.13 | 2.18 | core + forms | 65.32 | 54.50 |
 <!-- /generated:bundle-families -->
 
 ### Scenarios
@@ -198,9 +199,9 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 <!-- generated:bundle-scenarios -->
 | Scenario | Adds up | shared runtime min+gz kB | standalone build |
 | --- | --- | --: | --: |
-| page with one button | library + core + own:button | **54.26** | 41.18 |
-| all families | library + core + forms + own (53 families) | **429.51** | 427.86 |
-| app already ships the library | core + forms + own (53 families) | **401.43** | -- |
+| page with one button | library + core + own:button | **54.63** | 41.50 |
+| all families | library + core + forms + own (53 families) | **434.67** | 433.53 |
+| app already ships the library | core + forms + own (53 families) | **406.59** | -- |
 <!-- /generated:bundle-scenarios -->
 
 ### Checks
@@ -234,20 +235,20 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 - **Fallback bytes are mostly decorator helpers:**  each `<name>.fallback.ts` is minified and gzipped on its own
   here, and about 1.2 kB of that is esbuild's lowered-decorator helpers, repeated in every file with a decorator.
   Net of them the fallbacks are 0.15-1.25 kB each (`docs/fallback.md`).
-- **Lazy:**  `UIRuntime` (27.0 kB) and the icon name / alias maps (20.5 kB);  glyphs are fetched one small module
-  per icon.  `label` imports `parts.css` itself (a statistic's label adopts it), counted once, under `parts`.
+- **Lazy:**  `UIRuntime` (31.0 kB, with `UI.icons` since 2026-09-30);  icons load from the page's packs:  the
+  default pack's index (14.2 kB gzip) on the first icon, then one SVG file per icon drawn.  `label` imports `parts.css` itself (a statistic's label adopts it), counted once, under `parts`.
 
 ## LOC
 
 <!-- generated:loc -->
 | Group | Files | Lines | Code lines |
 | --- | --: | --: | --: |
-| element core | 24 | 3792 | 2161 |
-| components | 151 | 14536 | 9100 |
-| vocabularies & fallbacks | 106 | 9940 | 7840 |
-| foundation | 46 | 7815 | 4190 |
-| tests | 207 | 31682 | 26644 |
-| tooling | 40 | 4507 | 3243 |
+| element core | 24 | 3808 | 2171 |
+| components | 151 | 14569 | 9117 |
+| vocabularies & fallbacks | 106 | 9920 | 7825 |
+| foundation | 47 | 8191 | 4419 |
+| tests | 209 | 35181 | 29580 |
+| tooling | 40 | 4717 | 3402 |
 <!-- /generated:loc -->
 
 ### Per file
@@ -257,18 +258,18 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | --- | --: | --: |
 | `core.ts` | 43 | 20 |
 | `elements/Cell.ts` | 23 | 10 |
-| `elements/ClassBuilder.ts` | 184 | 121 |
+| `elements/ClassBuilder.ts` | 185 | 122 |
 | `elements/ContentPart.tsx` | 85 | 48 |
 | `elements/ControlLabels.ts` | 223 | 144 |
 | `elements/Controlled.ts` | 86 | 41 |
-| `elements/ElementDefinition.ts` | 209 | 128 |
+| `elements/ElementDefinition.ts` | 217 | 133 |
 | `elements/FormElement.ts` | 137 | 68 |
 | `elements/FormHost.ts` | 46 | 24 |
 | `elements/HostAttribute.ts` | 25 | 15 |
 | `elements/HotDefinitions.ts` | 124 | 71 |
 | `elements/IconGlyph.ts` | 64 | 34 |
 | `elements/MenuOptions.ts` | 303 | 191 |
-| `elements/NativeFallback.ts` | 205 | 114 |
+| `elements/NativeFallback.ts` | 212 | 118 |
 | `elements/OwnerContext.ts` | 85 | 47 |
 | `elements/PartContext.ts` | 222 | 124 |
 | `elements/Shorthand.ts` | 96 | 54 |
@@ -307,7 +308,7 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | `components/dimmer/index.ts` | 13 | 3 |
 | `components/divider/UIDivider.tsx` | 58 | 33 |
 | `components/divider/index.ts` | 10 | 3 |
-| `components/dropdown/SlottedItems.ts` | 127 | 87 |
+| `components/dropdown/SlottedItems.ts` | 135 | 92 |
 | `components/dropdown/UIDropdown.tsx` | 826 | 607 |
 | `components/dropdown/index.ts` | 14 | 4 |
 | `components/embed/UIEmbed.tsx` | 190 | 116 |
@@ -399,12 +400,12 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | `components/segment/index.ts` | 13 | 5 |
 | `components/select/UISelect.tsx` | 358 | 236 |
 | `components/select/index.ts` | 13 | 4 |
-| `components/shape/UIShape.tsx` | 349 | 228 |
+| `components/shape/UIShape.tsx` | 368 | 240 |
 | `components/shape/UISide.tsx` | 37 | 22 |
 | `components/shape/index.ts` | 13 | 6 |
 | `components/sidebar/UIPushable.tsx` | 122 | 78 |
 | `components/sidebar/UIPusher.tsx` | 36 | 22 |
-| `components/sidebar/UISidebar.tsx` | 343 | 216 |
+| `components/sidebar/UISidebar.tsx` | 347 | 216 |
 | `components/sidebar/index.ts` | 15 | 7 |
 | `components/slider/UISlider.tsx` | 496 | 337 |
 | `components/slider/index.ts` | 13 | 4 |
@@ -414,7 +415,7 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | `components/step/UIStep.tsx` | 178 | 97 |
 | `components/step/UISteps.tsx` | 40 | 22 |
 | `components/step/index.ts` | 14 | 5 |
-| `components/sticky/UISticky.tsx` | 209 | 131 |
+| `components/sticky/UISticky.tsx` | 211 | 131 |
 | `components/sticky/index.ts` | 10 | 3 |
 | `components/tab/UITab.tsx` | 208 | 127 |
 | `components/tab/UITabs.tsx` | 510 | 296 |
@@ -542,8 +543,8 @@ Solid, Vite dev server) and the smoke perf page (`dist/` + vendored production S
 <!-- generated:perf -->
 | Where | Build | Open: update / + layout / + frame ms | Keystroke update min / avg / max ms | + layout | + frame |
 | --- | --- | --: | --: | --: | --: |
-| vitest browser mode | dev (Vite dev server) | 16.4 / 16.4 / 18.4 | 0.3 / **2.2** / 6.2 | 1.1 / **4.2** / 12.5 | 14.8 / **16.0** / 16.4 |
-| smoke perf page | production (`dist/` + vendored peers) | 17.6 / 17.6 / 19.0 | 0.4 / **1.3** / 3.5 | 0.9 / **3.0** / 9.2 | 13.6 / **15.8** / 16.3 |
+| vitest browser mode | dev (Vite dev server) | 18.3 / 18.3 / 19.8 | 0.4 / **1.8** / 5.0 | 1.1 / **3.7** / 9.2 | 13.4 / **15.9** / 16.4 |
+| smoke perf page | production (`dist/` + vendored peers) | 17.9 / 17.9 / 19.6 | 0.3 / **1.3** / 3.4 | 0.9 / **3.1** / 9.3 | 13.0 / **15.4** / 16.4 |
 <!-- /generated:perf -->
 
 - The test asserts an average update under 16 ms;  it passes with large headroom.  No windowing needed.

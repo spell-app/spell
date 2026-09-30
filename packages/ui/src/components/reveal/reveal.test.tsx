@@ -151,6 +151,41 @@ describe("<ui-reveal> revealing", () => {
   })
 })
 
+describe("<ui-reveal> tokens from outside", () => {
+  /** The visible content's transition duration. */
+  async function duration(html: string, select = (element: Element) => element) {
+    const element = await ElementFixture.render(html)
+    const host = select(element)
+    return getComputedStyle(host.shadowRoot!.querySelector("[part=visible]")!).transitionDuration
+  }
+
+  it("takes a token set on the HOST", async () => {
+    expect(await duration(markup(`fade style="--ui-reveal-duration: 1s"`))).toBe("1s")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const html = `<section style="--ui-reveal-duration: 1s">${markup("fade")}</section>`
+    expect(await duration(html, (section) => section.querySelector("ui-reveal")!)).toBe("1s")
+  })
+
+  it("takes a token set through `::part(reveal)`", async () => {
+    const html = `<div><style>.themed::part(reveal) { --ui-reveal-duration: 1s }</style>${markup('fade class="themed"')}</div>`
+    expect(await duration(html, (wrapper) => wrapper.querySelector("ui-reveal")!)).toBe("1s")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-reveal-duration", "1s")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-reveal-duration")
+    })
+    expect(await duration(markup("fade"))).toBe("1s")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    expect(await duration(markup("fade"))).toBe("0.5s")
+  })
+})
+
 describe("<ui-reveal> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)

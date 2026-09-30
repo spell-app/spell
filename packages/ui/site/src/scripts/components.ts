@@ -28,7 +28,10 @@ const EXTRA_TAGS: Record<string, string> = {
   "ui-radio": "checkbox",
   "ui-field": "form",
   "ui-fields": "form",
-  "ui-event": "feed"
+  "ui-event": "feed",
+  "ui-pushable": "sidebar",
+  "ui-pusher": "sidebar",
+  "ui-side": "shape"
 }
 
 /**
