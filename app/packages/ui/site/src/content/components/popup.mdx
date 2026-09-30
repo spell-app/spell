@@ -184,14 +184,18 @@ popup.open = true // show it from code:  no event
 </Section>
 
 <Section title="Theming">
-  Theme the box through its `popup` part:  the public `--ui-popup-*` tokens are declared on it, and a rule from
-  your page beats the popup's own.  The CSS-only tooltip reads `--ui-tooltip-*` tokens on the element that carries
-  it.
+  Theme with the public `--ui-popup-*` tokens:  set one on the element, on any ancestor (`:root` for every popup),
+  or on the box through `::part(popup)`.  They inherit into the shadow root, where the sheet reads each through a
+  private alias, so nothing inside blocks them.  `wide` and `very wide` swap the max width for
+  `--ui-popup-wide-width` / `--ui-popup-very-wide-width`;  a slotted header reads `--ui-popup-header-font-size`
+  from the popup.  The CSS-only tooltip reads `--ui-tooltip-*` tokens on the element that carries it.
 
 ```css
-ui-popup::part(popup) {
-  --ui-popup-max-width: 320px;
+:root {
   --ui-popup-radius: 0.5em;
+}
+ui-popup.help {
+  --ui-popup-max-width: 320px;
 }
 [data-tooltip] {
   --ui-tooltip-distance: 0.75em;

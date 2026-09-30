@@ -47,6 +47,12 @@ export class UIShape extends UIElement<Vocabulary> {
   /** A flip is running. */
   readonly animating = new Cell(false)
 
+  /**
+   * Has had sides;  until then `current` is only a guess.
+   * - NOTE:  the barrel defines `<ui-shape>` BEFORE `<ui-side>`, so a parsed shape upgrades with no sides yet.
+   */
+  private hadSides = untrack(() => this.sides.get().length > 0)
+
   /** Index of the side shown now;  follows the queue, not the attribute. */
   private current = untrack(() => this.normalize(this.activeState.get() ?? 0, this.sides.get().length))
 
@@ -88,7 +94,10 @@ export class UIShape extends UIElement<Vocabulary> {
   render(): JSX.Element {
     createEffect(
       () => this.sides.get(),
-      (sides) => this.mark(sides)
+      (sides) => {
+        this.firstSides(sides)
+        this.mark(sides)
+      }
     )
     createEffect(
       () => this.activeState.get() ?? 0,
@@ -206,6 +215,16 @@ export class UIShape extends UIElement<Vocabulary> {
       const timer = setTimeout(done, wait + FAIL_SAFE)
       box.addEventListener("transitionend", onEnd)
     })
+  }
+
+  /** The first sides found after none (upgrade order, or content added later):  start at `activeIndex`, not 0. */
+  private firstSides(sides: readonly UIHost[]) {
+    if (this.hadSides || !sides.length) return
+    this.hadSides = true
+    this.current = this.target = this.normalize(
+      untrack(() => this.activeState.get() ?? 0),
+      sides.length
+    )
   }
 
   /** Show the current side;  hide the rest. */

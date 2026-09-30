@@ -26,9 +26,9 @@ export const textVocabulary = {
     { name: "color", kind: "color", description: "Hue of the text." },
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: ["error", "info", "success", "warning"],
-      description: 'Semantic colour of a status message.  NOTE: `kind: "color"` because it emits its value alone.'
+      description: "Semantic colour of a status message."
     },
     { name: "inverted", kind: "keyOnly", description: "The hue as it reads on a dark surface." },
     { name: "disabled", kind: "keyOnly", description: "Faded:  shown as unavailable." }

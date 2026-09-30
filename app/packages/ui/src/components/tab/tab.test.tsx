@@ -1,5 +1,5 @@
 import { userEvent } from "vitest/browser"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -413,6 +413,63 @@ describe("<ui-tabs> look", () => {
     expect(active.marginBottom).toBe("-1px")
     expect(active.fontFamily).toBe(getComputedStyle(menu).fontFamily)
     expect(getComputedStyle(buttons[1]!).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+  })
+
+  it("vertical tabular:  every tab fills the column, and the active one covers the menu's rule to reach its pane", async () => {
+    const { menu, buttons, panes } = await tabs("vertical tabular")
+    const edge = menu.getBoundingClientRect().right
+    const [active, other] = buttons.map((button) => button.getBoundingClientRect())
+    expect(Math.round(active!.right)).toBe(Math.round(edge))
+    expect(Math.round(other!.right)).toBe(Math.round(edge - 1))
+    expect(Math.round(boxOf(panes[0]!).getBoundingClientRect().left)).toBe(Math.round(edge))
+  })
+})
+
+describe("<ui-tabs> tokens from outside", () => {
+  /** The first pane's top margin. */
+  function margin(host: Element): string {
+    return getComputedStyle(boxOf(parts(host).panes[0]!)).marginTop
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await tabs(`style="--ui-tabs-pane-margin: 2em 0 0"`)
+    expect(margin(host)).toBe("32px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-tabs-pane-margin: 2em 0 0"><ui-tabs aria-label="Test">${PANES}</ui-tabs></section>`
+    )
+    await ElementFixture.tick()
+    expect(margin(wrapper.querySelector("ui-tabs")!)).toBe("32px")
+  })
+
+  it("takes a token set through `::part(tabs)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(tabs) { --ui-tabs-pane-margin: 2em 0 0 }</style>` +
+        `<ui-tabs class="themed" aria-label="Test">${PANES}</ui-tabs></div>`
+    )
+    await ElementFixture.tick()
+    expect(margin(wrapper.querySelector("ui-tabs")!)).toBe("32px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-tabs-pane-margin", "2em 0 0")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-tabs-pane-margin")
+    })
+    const { host } = await tabs()
+    expect(margin(host)).toBe("32px")
+  })
+
+  it("passes the tab list's `--ui-menu-*` tokens, set on the tab set, to its tabs", async () => {
+    const { buttons } = await tabs(`style="--ui-menu-item-padding: 20px"`)
+    expect(getComputedStyle(buttons[1]!).paddingTop).toBe("20px")
+  })
+
+  it("variations:  `attached` swaps the margin, winning over the base token", async () => {
+    const { host } = await tabs(`tabular attached style="--ui-tabs-pane-margin: 2em 0 0"`)
+    expect(margin(host)).toBe("0px")
   })
 })
 

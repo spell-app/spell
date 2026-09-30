@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { Fixture } from "$test/fixture"
 import { Visibility } from "./Visibility"
@@ -113,6 +113,47 @@ describe("Visibility.observe()", () => {
     stop()
     await scrollTo(context, 150)
     expect(calls).toEqual(["onOffScreen"])
+  })
+})
+
+describe("Visibility.observe() on an element with no box", () => {
+  it("measures a `display: contents` element's first boxed child", async () => {
+    const { context, target } = frame()
+    target.style.display = "contents"
+    target.innerHTML = `<span hidden></span><div style="height: 100px"></div>`
+    const calls: string[] = []
+    const stop = visibility.observe(target, { context, ...recorder(calls) })
+    await expect.poll(() => calls).toEqual(["onOffScreen"])
+    await scrollTo(context, 150)
+    expect(calls).toEqual(["onOffScreen", "onOnScreen", "onTopVisible"])
+    stop()
+  })
+
+  it("measures a `display: contents` shadow host's rendered box, not its light children", async () => {
+    const { context, target } = frame()
+    target.style.display = "contents"
+    target.innerHTML = `<p style="height: 5px; margin: 0"></p>`
+    const shadow = target.attachShadow({ mode: "open" })
+    shadow.innerHTML = `<style></style><div style="height: 100px"><slot></slot></div>`
+    const updates: VisibilityCalculations[] = []
+    const stop = visibility.observe(target, { context, onUpdate: (calculations) => updates.push(calculations) })
+    await scrollTo(context, 350)
+    await expect.poll(() => updates.at(-1)?.pixelsPassed).toBe(50)
+    stop()
+  })
+
+  it("warns once in dev when there's no box to measure", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined)
+    const { context, target } = frame()
+    target.style.display = "contents"
+    const calls: string[] = []
+    const stop = visibility.observe(target, { context, ...recorder(calls) })
+    await expect.poll(() => warn.mock.calls.length).toBe(1)
+    await scrollTo(context, 150)
+    expect(calls).toEqual([])
+    expect(warn).toHaveBeenCalledTimes(1)
+    stop()
+    warn.mockRestore()
   })
 })
 

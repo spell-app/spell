@@ -42,7 +42,7 @@ export class ClassBuilder {
     this.vocabulary = vocabulary
     this.specs = [
       ...byKind("size"),
-      ...byKind("color"),
+      ...vocabulary.attributes.filter((spec) => spec.kind === "color" || spec.kind === "valueOnly"),
       ...byKind("keyOnly").sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)),
       ...vocabulary.attributes.filter((spec) => spec.kind === "valueAndKey" || spec.kind === "keyOrValueAndKey"),
       ...byKind("multiple"),
@@ -83,6 +83,7 @@ export class ClassBuilder {
           if (text && text !== grammar.medium) classes.push(text)
           break
         case "color":
+        case "valueOnly":
           if (text) classes.push(text)
           break
         case "keyOnly":

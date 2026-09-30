@@ -74,7 +74,7 @@ describe("placeholder.css source", () => {
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
       expect(Sheets.covers(placeholderRaw, vocabulary.noun), vocabulary.noun).toBe(true)
     }
-    // `length` is `kind: "color"` (value alone), which `classPhrases` skips.
+    // `length` is `kind: "valueOnly"` (value alone), which `classPhrases` skips.
     for (const length of placeholderLineVocabulary.attributes[0].values)
       expect(Sheets.covers(placeholderRaw, length), length).toBe(true)
   })
@@ -183,6 +183,21 @@ describe("placeholder.css examples", () => {
     expect(getComputedStyle(inverted!).getPropertyValue("--ui-inverted").trim()).toBe("1")
     const image = (placeholder: HTMLElement) => getComputedStyle(placeholder.querySelector(".line")!).backgroundImage
     expect(image(inverted!)).not.toBe(image(plain!))
+  })
+})
+
+describe("placeholder.css tokens", () => {
+  it("takes a public token from a wrapper, the placeholder or a shape (static markup)", () => {
+    Sheets.adopt([...foundationCSS, placeholderCSS])
+    const root = Fixture.render(
+      `<div style="--ui-placeholder-max-width: 200px"><div class="ui placeholder"><div class="line"></div></div></div>` +
+        `<div class="ui placeholder" style="--ui-placeholder-radius: 7px"><div class="line"></div>` +
+        `<div class="line" style="--ui-placeholder-radius: 3px"></div></div>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).maxWidth).toBe("200px")
+    const [plain, own] = root.nextElementSibling!.children
+    expect(getComputedStyle(plain!).borderTopLeftRadius).toBe("7px")
+    expect(getComputedStyle(own!).borderTopLeftRadius).toBe("3px")
   })
 })
 

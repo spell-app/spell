@@ -18,9 +18,14 @@
  *
  * | Token                      | What                                    | Changed by           |
  * | -------------------------- | --------------------------------------- | -------------------- |
- * | `--ui-tabs-pane-margin`    | the shown pane's margin                 | attached, vertical   |
- * | `--ui-tabs-pane-flex`      | the shown pane host's `flex` (vertical) | vertical             |
+ * | `--ui-tabs-pane-margin`    | the shown pane's margin (public)        | attached, vertical   |
+ * | `--_ui-tabs-pane-flex`     | the shown pane host's `flex` (switch)   | vertical             |
  *
+ * - Public tokens (`--ui-tabs-*`, the theming surface) are NEVER declared here:  the `.ui.tabs` root reads each
+ *   through a private alias, `--_ui-tabs-pane-margin: var(--ui-tabs-pane-margin, 1em 0 0)`, which variations
+ *   write and panes inherit.  So a value set on `:root`, an ancestor, the host, `::part(tabs)` or in the app
+ *   stylesheet reaches the panes (`docs/theming.md` "Component tokens");  set it on the tab set, not on a pane.
+ * - `--_ui-tabs-pane-flex` is a private SWITCH:  the layout (`vertical`) decides it, so the page never sets it.
  * - NOTE: left out, on purpose:
  *   - `.ui.tab.open` is kept for static markup only;  the elements use `active`
  *   - Fomantic's `!important`s on a loading tab's content:  a loading pane hides its slotted content instead
@@ -64,8 +69,8 @@
     display: none;
   }
   .ui.tabs {
-    --ui-tabs-pane-margin: 1em 0 0;
-    --ui-tabs-pane-flex: 0 1 auto;
+    --_ui-tabs-pane-margin: var(--ui-tabs-pane-margin, 1em 0 0);
+    --_ui-tabs-pane-flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     max-width: 100%;
@@ -111,17 +116,17 @@
 
   /* A pane of a tab set:  its share of a vertical row (the host is the flex item), and the set's spacing. */
   :host(:state(in-tabs)) {
-    flex: var(--ui-tabs-pane-flex);
+    flex: var(--_ui-tabs-pane-flex);
     min-width: 0;
   }
   :host(:state(in-tabs)) > .ui.tab {
-    margin: var(--ui-tabs-pane-margin);
+    margin: var(--_ui-tabs-pane-margin);
   }
   /* Static markup:  a pane straight inside a `.ui.tabs` root is the flex item itself. */
   .ui.tabs > .ui.tab {
-    flex: var(--ui-tabs-pane-flex);
+    flex: var(--_ui-tabs-pane-flex);
     min-width: 0;
-    margin: var(--ui-tabs-pane-margin);
+    margin: var(--_ui-tabs-pane-margin);
   }
 }
 
@@ -133,18 +138,31 @@
   /* Attached:  the panes join the tab list edge to edge. */
   .ui[class*="top attached"].tabs,
   .ui[class*="bottom attached"].tabs {
-    --ui-tabs-pane-margin: 0;
+    --_ui-tabs-pane-margin: 0;
   }
 
   /* Vertical:  the tab list in a column beside the panes, which share the rest of the row. */
   .ui.vertical.tabs {
-    --ui-tabs-pane-margin: 0;
-    --ui-tabs-pane-flex: 1 1 0%;
+    --_ui-tabs-pane-margin: 0;
+    --_ui-tabs-pane-flex: 1 1 0%;
     flex-direction: row;
     align-items: stretch;
   }
   .ui.vertical.tabs > .ui.menu {
     margin: 0;
+  }
+  /*
+   * A tab is a `<button>`, which shrinks to its text where Fomantic's block `.item` fills the column:  `stretch`
+   * fills it AND keeps the tabular active tab's `-1px` end margin, so that tab covers the menu's rule.  Set on the
+   * item, so it beats the menu root's `--_ui-menu-item-width` whatever the layer order.
+   */
+  .ui.vertical.tabs > .ui.menu > .item {
+    --_ui-menu-item-width: -webkit-fill-available;
+  }
+  @supports (width: stretch) {
+    .ui.vertical.tabs > .ui.menu > .item {
+      --_ui-menu-item-width: stretch;
+    }
   }
 
   /* Inverted:  the dark scheme for the panes' slot too. */

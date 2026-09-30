@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { UI } from "$/runtime"
 import { expectAccessible } from "$test/a11y"
@@ -95,6 +95,52 @@ describe("<ui-ad> units and test", () => {
     const box = root.getBoundingClientRect()
     const parent = holder.getBoundingClientRect()
     expect(box.left - parent.left).toBeCloseTo(parent.right - box.right, 0)
+  })
+})
+
+describe("<ui-ad> tokens from outside", () => {
+  /** The inner box's background color. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=ad]")!).backgroundColor
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-ad test unit="button"></ui-ad>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(
+      MARKUP.replace("<ui-ad", `<ui-ad style="--ui-ad-test-background: rgb(255, 0, 0)"`)
+    )
+    expect(measure(host)).toBe("rgb(255, 0, 0)")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-ad-test-background: rgb(255, 0, 0)"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-ad")!)).toBe("rgb(255, 0, 0)")
+  })
+
+  it("takes a token set through `::part(ad)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(ad) { --ui-ad-test-background: rgb(255, 0, 0) }</style>${MARKUP.replace("<ui-ad", '<ui-ad class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-ad")!)).toBe("rgb(255, 0, 0)")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-ad-test-background", "rgb(255, 0, 0)")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-ad-test-background")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("rgb(255, 0, 0)")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    const probe = await ElementFixture.render(`<span style="background-color: oklch(0.4 0 0)"></span>`)
+    expect(measure(host)).toBe(getComputedStyle(probe).backgroundColor)
   })
 })
 

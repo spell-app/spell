@@ -97,6 +97,18 @@ describe("container.css examples", () => {
   })
 })
 
+describe("container.css tokens", () => {
+  it("takes a public token from a wrapper or the container itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, containerCSS])
+    const root = Fixture.render(
+      `<div style="--ui-container-text-width: 500px"><div class="ui text container">A</div></div>` +
+        `<div class="ui text container" style="--ui-container-text-font-ratio: 2">B</div>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).maxWidth).toBe("500px")
+    expect(getComputedStyle(root.nextElementSibling!).fontSize).toBe("32px")
+  })
+})
+
 describe("container.css in shadow roots", () => {
   it("keeps the host out of layout and centres the root", async () => {
     await resize(1000)

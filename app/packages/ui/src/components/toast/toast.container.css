@@ -8,13 +8,15 @@
  * - A `manual` popover, so it sits in the TOP LAYER above dialogs shown before it, with no light dismiss;
  *   `ToastStack` re-shows it for each new toast to lift it above anything shown since.  The UA popover box (inset,
  *   margin, border, padding, background) is undone here.
+ * - `--ui-toast-container-distance` (the gap to the viewport's edge) is read through a private alias, never
+ *   declared, so a value set on `:root` reaches the containers (`docs/theming.md` "Component tokens").
  * - Toasts stack in a column (a row when `horizontal`), aligned to the container's side.
  * - NOTE: left out:  `absolute` containers (Fomantic's `context` setting) and `attached` full-width containers.
  */
 
 @layer ui.components {
   .ui.toast-container {
-    --ui-toast-container-distance: 12px;
+    --_ui-toast-container-distance: var(--ui-toast-container-distance, 12px);
     position: fixed;
     inset: auto;
     z-index: var(--ui-z-toast);
@@ -23,8 +25,8 @@
     flex-direction: column;
     align-items: flex-start;
     width: max-content;
-    max-width: calc(100vw - 2 * var(--ui-toast-container-distance));
-    max-height: calc(100vh - 2 * var(--ui-toast-container-distance));
+    max-width: calc(100vw - 2 * var(--_ui-toast-container-distance));
+    max-height: calc(100vh - 2 * var(--_ui-toast-container-distance));
     margin: 0;
     padding: 0;
     overflow: visible;
@@ -42,17 +44,17 @@
 
   /* Positions. */
   .ui.top.toast-container {
-    top: var(--ui-toast-container-distance);
+    top: var(--_ui-toast-container-distance);
   }
   .ui.bottom.toast-container {
-    bottom: var(--ui-toast-container-distance);
+    bottom: var(--_ui-toast-container-distance);
   }
   .ui.right.toast-container {
-    right: var(--ui-toast-container-distance);
+    right: var(--_ui-toast-container-distance);
     align-items: flex-end;
   }
   .ui.left.toast-container {
-    left: var(--ui-toast-container-distance);
+    left: var(--_ui-toast-container-distance);
   }
   .ui.center.toast-container {
     left: 50%;

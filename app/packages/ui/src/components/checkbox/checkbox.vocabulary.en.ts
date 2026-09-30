@@ -4,7 +4,7 @@
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-checkbox type="toggle" size="large" fitted>` => `ui large toggle fitted checkbox`;  a `<ui-radio>` is
  *   `ui radio checkbox` (the element adds `radio` unless its `type` is `slider` / `toggle`).
- * - `type` is `kind: "color"`:  it emits its value alone, right after the colour, as Fomantic writes it.
+ * - `type` is `kind: "valueOnly"`:  it emits its value alone, right after the colour, as Fomantic writes it.
  * - Chosen state:  `selected` is canonical (`AGENTS.md`);  `checked` is accepted as an alias -- the host's `checked`
  *   PROPERTY reads and writes `selected`, and a `checked` ATTRIBUTE in markup selects it (the host class,
  *   `CheckHost`, owns that alias:  it is not a vocabulary attribute).
@@ -87,7 +87,7 @@ export const checkboxVocabulary = {
     ...LEADING_ATTRIBUTES,
     {
       name: "type",
-      kind: "color",
+      kind: "valueOnly",
       values: ["slider", "toggle"],
       description: "Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`."
     },
@@ -123,7 +123,7 @@ export const radioVocabulary = {
     ...LEADING_ATTRIBUTES,
     {
       name: "type",
-      kind: "color",
+      kind: "valueOnly",
       values: ["slider", "toggle"],
       description: "Look:  a `toggle` or `slider` radio;  default the round radio box."
     },

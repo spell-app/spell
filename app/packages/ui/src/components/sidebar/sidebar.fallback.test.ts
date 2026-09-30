@@ -26,6 +26,11 @@ describe("SidebarFallback", () => {
     await expectAccessible(panel, AXE)
   })
 
+  it("adds the vocabulary's default `position` (`left`) when the host has none, as the element does", () => {
+    const host = Fixture.render<StubHost>(`<ui-sidebar>x</ui-sidebar>`)
+    expect(FallbackStub.shadow(host).querySelector("[part~=sidebar]")!.className).toBe("ui left sidebar")
+  })
+
   it("stops following `visible` once disposed", async () => {
     const host = Fixture.render<StubHost>(`<ui-sidebar visible aria-label="Site">x</ui-sidebar>`)
     const panel = FallbackStub.shadow(host).querySelector<HTMLElement>("[part~=sidebar]")!

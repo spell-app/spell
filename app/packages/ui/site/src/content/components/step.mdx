@@ -205,12 +205,14 @@ steps.addEventListener("click", (event) => {
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-step-*` tokens on the group's box, through `::part(steps)`:  the group declares them
-  and every step in it reads them, so a value set on the host tag doesn't reach them.  Style one step's box with
-  `ui-step::part(step)`, and its `icon`, `content`, `title` and `description` parts likewise.
+  Theme with the public `--ui-step-*` and `--ui-steps-*` tokens:  set one on the element, on any ancestor (a region,
+  `:root`), or on the group's box through `::part(steps)`.  Every step in the group reads them from the group, so set
+  them there or above, not on one step.  The content's look tokens (`--ui-step-content-padding`,
+  `--ui-step-description-distance` ...) also work on one step.  Style one step's box with `ui-step::part(step)`, and
+  its `icon`, `content`, `title` and `description` parts likewise.
 
 ```css
-ui-steps::part(steps) {
+ui-steps {
   --ui-step-completed-color: var(--ui-primary);
   --ui-step-active-background: var(--ui-surface-muted);
   --ui-step-padding: 1em 1.5em;
@@ -220,7 +222,7 @@ ui-step::part(title) {
 }
 ```
 
-  <CssTokens family="step" />
+  <CssTokens family="step" prefixes={["--ui-step-", "--ui-steps-"]} />
 </Section>
 
 <Section title="Accessibility">

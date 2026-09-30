@@ -79,7 +79,7 @@ describe("list.css source", () => {
       expect(selectors.length).toBeGreaterThan(40)
       expect(selectors.some((selector) => selector.includes(":host(:state(in-list):first-child) > .item"))).toBe(true)
       expect(selectors.some((selector) => selector.includes("::slotted(:state(in-list))"))).toBe(true)
-      expect(css).toMatch(/@container style\(--ui-list-marker: ?number\)/)
+      expect(css).toMatch(/@container style\(--_ui-list-marker: ?number\)/)
     }
   })
 
@@ -96,11 +96,11 @@ describe("list.css source", () => {
       expect(Sheets.covers(css, phrase), `${listVocabulary.tag}: ${phrase}`).toBe(true)
   })
 
-  it("declares every token it remaps on the root, default included", () => {
+  it("declares every alias and switch it remaps on the root, default included", () => {
     const text = Sheets.withoutComments(listRaw)
     const root = text.slice(text.indexOf(".ui.list {"), text.indexOf("}", text.indexOf(".ui.list {")))
-    const declared = new Set(root.match(/--ui-list-[\w-]+(?=:)/g))
-    const remapped = new Set(text.match(/--ui-list-[\w-]+(?=:)/g))
+    const declared = new Set(root.match(/--_ui-list-[\w-]+(?=:)/g))
+    const remapped = new Set(text.match(/--_ui-list-[\w-]+(?=:)/g))
     for (const token of remapped) expect(declared.has(token), token).toBe(true)
   })
 })
@@ -237,6 +237,18 @@ describe("list.css examples", () => {
     expect(style(active!).color).not.toBe(style(other!).color)
   })
 
+  it("takes a public token from a wrapper or the list itself (static markup)", () => {
+    adopt()
+    const root = Fixture.render(
+      `<div style="--ui-list-item-padding-block: 10px"><div class="ui list">` +
+        `<div class="item">A</div><div class="item">B</div><div class="item">C</div></div></div>` +
+        `<div class="ui celled list" style="--ui-list-item-border-color: rgb(255, 0, 0)">` +
+        `<div class="item">A</div></div>`
+    )
+    expect(style(root.querySelectorAll(".item")[1]!).paddingTop).toBe("10px")
+    expect(style(root.nextElementSibling!.querySelector(".item")!).borderTopColor).toBe("rgb(255, 0, 0)")
+  })
+
   it("inverts to the dark scheme", () => {
     const list = listIn(example("variations"), "Inverted")
     expect(style(list).colorScheme).toBe("dark")
@@ -330,9 +342,9 @@ describe("list.css in shadow roots", () => {
     const item = list.querySelector("test-list-item")!
     const probe = item.querySelector(".probe")!
     const part = item.querySelector(".part")!
-    expect(style(probe).getPropertyValue("--ui-icon-owner-display").trim()).toBe("table-cell")
+    expect(style(probe).getPropertyValue("--_ui-icon-owner-display").trim()).toBe("table-cell")
     // a slotted part (`:state(in-list)`) resets the owner tokens for what's inside it
-    expect(style(part).getPropertyValue("--ui-icon-owner-display").trim()).toBe("")
+    expect(style(part).getPropertyValue("--_ui-icon-owner-display").trim()).toBe("")
   })
 })
 

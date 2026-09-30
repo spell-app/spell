@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -108,8 +108,23 @@ describe("<ui-embed> placeholder", () => {
     expect(await label(`source="vimeo" video-id="1" alt="A cat"`)).toBe("Play A cat")
   })
 
-  it('has no icon with icon=""', async () => {
-    const { root } = await embed(`<ui-embed icon=""></ui-embed>`)
+  it('has no icon with icon="false" / "no";  a bare icon (or "true") keeps the default', async () => {
+    const { root } = await embed(`<ui-embed icon="false"></ui-embed>`)
+    expect(root.querySelector("[part~=icon]")).toBeNull()
+    const { root: no } = await embed(`<ui-embed icon="no"></ui-embed>`)
+    expect(no.querySelector("[part~=icon]")).toBeNull()
+    for (const bare of [`icon`, `icon="true"`]) {
+      const { host, root: shown } = await embed(`<ui-embed ${bare}></ui-embed>`)
+      expect(shown.querySelector("[part~=icon]"), bare).not.toBeNull()
+      expect((host as UIHost & { icon?: string }).icon).toBe("circle-play")
+    }
+  })
+
+  it('a property write of `false` turns the icon off and reflects as icon="false" (removal would bring the default back)', async () => {
+    const { host, root } = await embed(`<ui-embed></ui-embed>`)
+    ;(host as UIHost & { icon?: unknown }).icon = false
+    await ElementFixture.settle(host)
+    expect(host.getAttribute("icon")).toBe("false")
     expect(root.querySelector("[part~=icon]")).toBeNull()
   })
 })
@@ -242,6 +257,54 @@ describe("EmbedSources", () => {
     expect(EmbedSources.resolve({ url: "javascript:alert(1)", autoplay: true, brandedUI: false })).toBeUndefined()
     expect(EmbedSources.resolve({ url: "data:text/html,x", autoplay: true, brandedUI: false })).toBeUndefined()
     expect(EmbedSources.resolve({ source: "youtube", autoplay: true, brandedUI: false })).toBeUndefined()
+  })
+})
+
+describe("<ui-embed> tokens from outside", () => {
+  /** The inner box's aspect ratio. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=embed]")!).aspectRatio
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-embed label="Clip"></ui-embed>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(MARKUP.replace("<ui-embed", `<ui-embed style="--ui-embed-ratio: 2 / 1"`))
+    expect(measure(host)).toBe("2 / 1")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-embed-ratio: 2 / 1"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-embed")!)).toBe("2 / 1")
+  })
+
+  it("takes a token set through `::part(embed)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(embed) { --ui-embed-ratio: 2 / 1 }</style>${MARKUP.replace("<ui-embed", '<ui-embed class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-embed")!)).toBe("2 / 1")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-embed-ratio", "2 / 1")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-embed-ratio")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("2 / 1")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("16 / 9")
+  })
+
+  it("variations:  an aspect ratio swaps in its own value, whatever the base", async () => {
+    const { root } = await embed(`<ui-embed aspect-ratio="4:3" style="--ui-embed-ratio: 2 / 1"></ui-embed>`)
+    expect(getComputedStyle(root).aspectRatio).toBe("4 / 3")
   })
 })
 
