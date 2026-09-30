@@ -34,7 +34,7 @@ links open in an editor tab;  `.md` links do too because `.vscode/settings.json`
 
 | Component | Phase | Tags | Status | Tests | Size | Keys | Docs | Visual | Notes |
 |---|:-:|---|:-:|--:|--:|:-:|:-:|:-:|---|
-| icon | A | `ui-icon`, `ui-icons` | ✅ | 47 | 5.72 | — | [✅](../site/src/content/components/icon.mdx) | 💤 | one ES module per glyph (FA7);  [`docs/icons.md`](icons.md) |
+| icon | A | `ui-icon`, `ui-icons`, `ui-icon-set` | ✅ | 51 | 5.72 | — | [✅](../site/src/content/components/icon.mdx) | 💤 | SVG icon packs (FA7 Free default;  brands, Fomantic opt-in);  [`docs/icons.md`](icons.md) |
 | button | A | `ui-button`, `ui-buttons`, `ui-or` | ✅ | 81 | 11.95 | native | [✅](../site/src/content/components/button.mdx) | 💤 | |
 | label | A | `ui-label`, `ui-labels` | ✅ | 59 | 8.06 | — | [✅](../site/src/content/components/label.mdx) | 💤 | |
 | content parts | A | `ui-content`, `ui-header`, `ui-description`, `ui-meta`, `ui-extra`, `ui-actions`, `ui-title`, `ui-summary`, `ui-date`, `ui-author`, `ui-avatar`, `ui-detail`, `ui-value` | ✅ | 100 | 14.88 | — | [✅](../site/src/content/components/parts.mdx) | 💤 | styled by owner context |
@@ -98,7 +98,7 @@ links open in an editor tab;  `.md` links do too because `.vscode/settings.json`
 | upstream PRs for the fork | 💤 | outlined in [`packages/solid-element/UPSTREAM.md`](../packages/solid-element/UPSTREAM.md);  nothing filed without Owen's go-ahead |
 | element core (`core`, `forms` entries) | ✅ | 15.4 kB + 7.3 kB |
 | `UI` runtime (lazy) | ✅ | 29.3 kB, budget < 50 kB;  [`docs/runtime.md`](runtime.md) |
-| icons | ✅ | 20.5 kB lazy alias / name data;  [`docs/icons.md`](icons.md) |
+| icons | ✅ | SVG packs + `UI.icons` (2026-09-30):  default pack index 14.2 kB, loaded on first icon;  `yarn icons:pack`;  [`docs/icons.md`](icons.md) |
 | styles, tokens, utilities, themes | ✅ | OKLCH, `light-dark()`, contrast-picked foregrounds |
 | native fallbacks | ✅ | every family;  [`docs/fallback.md`](fallback.md) |
 | hot reload | ✅ | `yarn test:hmr` |

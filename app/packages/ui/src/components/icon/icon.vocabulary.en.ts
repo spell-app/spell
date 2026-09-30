@@ -3,7 +3,7 @@
  * Schema:  `ComponentVocabulary` (`$/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-icon name="heart" size="large" color="red" circular>` => `ui large red circular icon`.  `icon.css` keys
- *   on those words;  `name` / `variant` / `label` are property-only and pick the SVG (`Icons.resolve()`).
+ *   on those words;  `name` / `outline` / `label` are property-only and pick the SVG (`UI.icons`).
  * - `iconsVocabulary.ownsParts` lists `icon`:  a `<ui-icon>` directly inside a `<ui-icons>` finds it through
  *   `OwnerContext` and sets `:state(in-icons)`, which `icon.css` stacks and positions it by.
  */
@@ -12,7 +12,8 @@ import type { ComponentVocabulary } from "$/vocabulary"
 
 /****************
  * ### `<ui-icon>`
- * An SVG glyph from Font Awesome 7 Free:  `<span class="ui ... icon" part="icon"><svg>` in the shadow root.
+ * An SVG glyph from the page's icon packs (Font Awesome 7 Free by default):  `<span class="ui ... icon" part="icon">
+ * <svg>` in the shadow root.
  ****************/
 export const iconVocabulary = {
   tag: "ui-icon",
@@ -33,20 +34,13 @@ export const iconVocabulary = {
       name: "name",
       kind: "string",
       description:
-        "Icon name:  Font Awesome 7 (`circle-check`), or Fomantic's words (`check circle`, `mail outline`).  " +
-        "Spaces ~== dashes.  See `docs/icons.md`."
-    },
-    {
-      name: "variant",
-      kind: "enum",
-      values: ["solid", "regular", "brands"],
-      default: "solid",
-      description: "Font Awesome set;  default inferred from `name` (a trailing `outline` word picks `regular`)."
+        "Icon name in the page's packs:  `circle check`, `bell outline`, `lucide:bell` (one pack).  " +
+        "Dashes ~== spaces, so Font Awesome's `circle-check` works too.  See `docs/icons.md`."
     },
     {
       name: "outline",
       kind: "boolean",
-      description: 'Alias for `variant="regular"`, Fomantic\'s `mail outline icon` spelling.  No class of its own.'
+      description: "Appends ` outline` to `name`:  Fomantic's `bell outline icon` spelling.  No class of its own."
     },
     {
       name: "label",
@@ -120,4 +114,45 @@ export const iconsVocabulary = {
   states: [],
   texts: [],
   ownsParts: ["icon"]
+} as const satisfies ComponentVocabulary
+
+/****************
+ * ### `<ui-icon-set>`
+ * Adds an icon pack to the page, from HTML.  Renders nothing.
+ * - The runtime (`UI.icons`) reads these itself, so they work on pages that never define the element.
+ ****************/
+export const iconSetVocabulary = {
+  tag: "ui-icon-set",
+  noun: "icon set",
+  description: "An icon set adds a pack of icons to the page:  a folder of SVGs and its `pack.js` index.",
+  attributes: [
+    {
+      name: "src",
+      kind: "string",
+      description:
+        "URL of the pack's `pack.js`, or a built-in pack:  `fa7-free` (the default), `fa7-brands`, `fomantic`."
+    },
+    {
+      name: "prefix",
+      // NOTE:  `Element.prototype.prefix` (the namespace prefix) is taken
+      property: "packPrefix",
+      kind: "string",
+      description: "Extra prefix for `prefix:name`;  the pack's own id works too."
+    },
+    {
+      name: "base",
+      kind: "string",
+      description: "Folder the pack's SVGs load from instead of its own, e.g. a CDN copy.  Relative to the page."
+    },
+    {
+      name: "only",
+      kind: "boolean",
+      description: "Drop every pack added before this one, including the default `fa7-free`."
+    }
+  ],
+  events: [],
+  slots: [],
+  parts: [],
+  states: [],
+  texts: []
 } as const satisfies ComponentVocabulary

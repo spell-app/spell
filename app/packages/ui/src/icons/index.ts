@@ -1,12 +1,12 @@
 /**
- * Barrel for `$/icons` -- the Font Awesome 7 Free icon data pipeline and its runtime loader.
- * - NOTE: no self-namespace (unlike `UI` / `E`):  `Icons` is the only exported class, so
- *   `import { Icons } from "$/icons"` already reads as a namespace.
- * - NOTE: the generated data files under `./data/*.json` are NOT re-exported here -- they're loaded
- *   internally by `Icons` (statically for the small alias maps, dynamically for everything else).
- *   A consumer never imports them directly.
+ * Barrel for `$/icons` -- the icon PACK format and the names around it.
+ * - Loading and caching live in the runtime (`UI.icons`, `src/runtime/IconPacks.ts`);  this is the part that is
+ *   shared with node tooling (`tools/IconPackBuilder.ts`) and the built-in pack locations.
+ * - NOTE: no self-namespace:  `IconName` / `BuiltInPacks` already read as namespaces.
+ * - NOTE: the packs themselves (`./icon-packs/<id>/`) and the docs-site data (`./data/*.json`) are files, not exports.
  */
 
 export * from "./icons.types"
 
-export * from "./Icons"
+export * from "./IconName"
+export * from "./BuiltInPacks"

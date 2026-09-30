@@ -1,49 +1,64 @@
 import { createEffect, createMemo, untrack, type Accessor } from "solid-js"
 
-import { Icons, type IconData, type IconStyle } from "$/icons"
+import { RUNTIME_KEY, UI, type RuntimeGlobal } from "$/runtime"
 
 import { Cell } from "./Cell"
 
 /**
- * An icon NAME (attribute, shorthand) turned into an `<svg>`, loaded through `Icons` -- shared by `<ui-icon>`,
- * the `icon` shorthand of `<ui-label>` / `<ui-divider>` and the label's delete icon.
- * - Starts from `Icons.peek()`, so an icon whose chunk is already cached draws in the first frame.
+ * An icon NAME (attribute, shorthand) turned into an `<svg>`, loaded through the page's icon packs (`UI.icons`) --
+ * shared by `<ui-icon>` and every component's `icon` shorthand, close / delete icons and the like.
+ * - Starts from `UI.icons.peek()` when the runtime is already loaded, so a cached icon draws in the first frame.
  * - A later name wins over an earlier, slower load.
- * - `svg()` is a fresh `aria-hidden` `<svg>` per data change;  the box around it is the caller's.
+ * - `svg()` is a fresh `aria-hidden` clone per change;  the box around it is the caller's.
  * - MUST be created under the element's owner:  it creates a signal, a memo and an effect.
  */
 export class IconGlyph {
-  /** Loaded data, `undefined` until loaded (or for an unknown name);  tracked. */
-  readonly data: Cell<IconData | undefined>
+  /**
+   * The page's cached `<svg>` for the name, `undefined` until loaded (or for an unknown name);  tracked.
+   * - A shared TEMPLATE:  NEVER insert it -- `svg()` / `IconGlyph.draw()` clone it.
+   */
+  readonly data: Cell<SVGSVGElement | undefined>
 
-  /** The `<svg>`, or `undefined`;  tracked. */
+  /** A fresh `<svg>` to insert, or `undefined`;  tracked. */
   readonly svg: Accessor<SVGSVGElement | undefined>
 
-  /** `name` + `style` last asked for, so a slower earlier load can't win. */
+  /** Name last asked for, so a slower earlier load can't win. */
   private request?: string
 
-  constructor(name: Accessor<string | undefined>, style: Accessor<IconStyle | undefined> = () => undefined) {
-    this.data = new Cell(untrack(() => IconGlyph.peek(name(), style())))
+  constructor(name: Accessor<string | undefined>) {
+    this.data = new Cell(untrack(() => IconGlyph.peek(name())))
     this.svg = createMemo(() => {
-      const data = this.data.get()
-      return data ? Icons.svg(data) : undefined
+      const template = this.data.get()
+      return template ? IconGlyph.draw(template) : undefined
     })
     createEffect(
-      () => [name(), style()] as const,
-      ([nameNow, styleNow]) => void this.load(nameNow, styleNow)
+      () => name(),
+      (nameNow) => void this.load(nameNow)
     )
   }
 
-  /** Load `name`'s data;  writes only if it is still the latest request. */
-  private async load(name: string | undefined, style: IconStyle | undefined) {
-    const request = `${name}|${style}`
-    this.request = request
-    const data = name ? await Icons.get(name, style) : undefined
-    if (this.request === request) this.data.set(data)
+  /** Load `name`'s SVG;  writes only if it is still the latest request. */
+  private async load(name: string | undefined) {
+    this.request = name
+    const template = name ? await (await UI.load()).icons.get(name) : undefined
+    if (this.request === name) this.data.set(template)
   }
 
-  /** Cached data for `name`, or `undefined`. */
-  private static peek(name: string | undefined, style: IconStyle | undefined) {
-    return name ? Icons.peek(name, style) : undefined
+  /** An insertable, decorative copy of `template` (`aria-hidden`:  the accessible name is the caller's). */
+  static draw(template: SVGSVGElement): SVGSVGElement {
+    const svg = template.cloneNode(true) as SVGSVGElement
+    svg.setAttribute(ARIA_HIDDEN, TRUE)
+    return svg
+  }
+
+  /** Cached template for `name`, or `undefined` -- also when the runtime isn't loaded yet (or on a server). */
+  private static peek(name: string | undefined): SVGSVGElement | undefined {
+    return name ? (globalThis as RuntimeGlobal)[RUNTIME_KEY]?.icons.peek(name) : undefined
   }
 }
+
+/** Hides a decorative icon from assistive technology. */
+const ARIA_HIDDEN = "aria-hidden"
+
+/** ARIA boolean. */
+const TRUE = "true"

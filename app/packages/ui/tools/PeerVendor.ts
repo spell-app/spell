@@ -96,7 +96,7 @@ export class PeerVendor {
    * Bindings the `usedBy` files import, per specifier;  `undefined` when there's nothing to read (then every
    * specifier is vendored whole).
    * - Reads `.js` modules and `.html` pages (their inline module scripts), under folders recursively.
-   * - Glyph modules (`dist/glyphs/`) are skipped:  2,000 files of data, no imports.
+   * - Icon packs (`dist/icon-packs/`) are skipped:  2,000 files of data, no imports.
    */
   private used(): Record<string, string[]> | undefined {
     const code: string[] = []
@@ -106,7 +106,7 @@ export class PeerVendor {
         continue
       }
       for (const file of readdirSync(path, { recursive: true, encoding: "utf8" })) {
-        if (PeerVendor.SCANNED.test(file) && !file.startsWith("glyphs/"))
+        if (PeerVendor.SCANNED.test(file) && !file.startsWith("icon-packs/"))
           code.push(readFileSync(join(path, file), "utf8"))
       }
     }

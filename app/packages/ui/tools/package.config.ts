@@ -73,7 +73,7 @@ function bucket(id: string): Bucket {
     if (file.endsWith(".fallback.ts")) return `own:${family}:fallback`
     return `own:${family}:classes`
   }
-  if (src.startsWith("icons/data/") || src.startsWith("icons/glyphs/")) return "icons"
+  if (src.startsWith("icons/data/") || src.startsWith("icons/icon-packs/")) return "icons"
   if (src.startsWith("runtime/") && !/^runtime\/(load|runtime\.types)\.ts$/.test(src)) return "runtime"
   if (src.startsWith("styles/")) return "runtime"
   return "core"

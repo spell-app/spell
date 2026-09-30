@@ -111,7 +111,7 @@
       const failedButton = document.querySelector(`tr[data-family="button"] .failed ui-button`)
       failedButton.shadowRoot.querySelector("button").click()
       checks.fallbackSubmits = output.textContent === '[["action","save"]]'
-      // the working icon draws its glyph, fetched from `dist/glyphs/` beside the chunk that holds `Icons`
+      // the working icon draws its SVG:  the default pack from `dist/icon-packs/fa7-free/`, beside `core.js` (`BuiltInPacks`)
       const icon = document.querySelector(`tr[data-family="icon"] .working ui-icon`)
       checks.iconGlyph = await eventually(() => !!icon.shadowRoot.querySelector("svg path[d]"))
       const ok = Object.values(checks).every(Boolean)

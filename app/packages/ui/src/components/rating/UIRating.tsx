@@ -6,7 +6,6 @@ import {
   Cell,
   Converters,
   IconGlyph,
-  Icons,
   proto,
   UI,
   type AttributeName,
@@ -237,9 +236,9 @@ export class UIRating extends FormElement<typeof ratingVocabulary> {
 
   /** A fresh glyph `<svg>` (with class `extra`), or nothing until the icon has loaded;  tracked. */
   private svg(extra?: string): SVGSVGElement | undefined {
-    const data = this.glyph.data.get()
-    if (!data) return undefined
-    const svg = Icons.svg(data)
+    const template = this.glyph.data.get()
+    if (!template) return undefined
+    const svg = IconGlyph.draw(template)
     if (extra) svg.classList.add(extra)
     return svg
   }

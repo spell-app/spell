@@ -584,3 +584,42 @@ export type LazyImageOptions = {
   /** the image has its `src` */
   onLoad?: (image: HTMLImageElement) => void
 }
+
+////////////////
+// ## Icons
+////////////////
+
+/** How `UI.icons.use()` adds a pack (and what `<ui-icon-set>`'s attributes set). */
+export type IconPackOptions = {
+  /** extra prefix for `prefix:name`;  the pack's `id` always works too */
+  prefix?: string
+  /**
+   * Folder the pack's SVG paths resolve against, e.g. a CDN;  default:  the folder `pack.js` loaded from.
+   * - Relative to the page.
+   */
+  base?: string
+  /** drop every pack added before this one, including the default */
+  only?: boolean
+}
+
+/** Where an icon name leads:  `UI.icons.resolve()`. */
+export type ResolvedIcon = {
+  /** id of the pack that answered */
+  pack: string
+  /** the name as asked, normalized, without a prefix */
+  name: string
+  /** index key, e.g. `solid/address-book` */
+  key: string
+  /** absolute URL of the SVG */
+  url: string
+  /** viewBox width */
+  width: number
+  /** viewBox height */
+  height: number
+}
+
+/** One icon of a pack, as `IconPack.icons()` lists it (the docs icon browser). */
+export type IconPackIcon = Omit<ResolvedIcon, "name"> & {
+  /** every name that reaches this icon;  empty if all were taken */
+  names: string[]
+}

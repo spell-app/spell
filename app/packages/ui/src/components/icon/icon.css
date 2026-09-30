@@ -1,11 +1,12 @@
 /*
  * `<ui-icon>` and `<ui-icons>`:  port of Fomantic's `icon.less` + `icon.variables`, for SVG icons.
  * - ONE sheet for both elements;  each adopts it after the foundation.
- * - Glyphs are Font Awesome 7 SVGs (`Icons.svg()`), never a font:  the 900-entry glyph maps, `@font-face`s,
- *   `outline` / `thin` / `brand` font families and the duotone rules are gone.  `variant` picks the SVG set.
+ * - Glyphs are SVG files from the page's icon packs (`UI.icons`;  Font Awesome 7 Free by default), never a font:
+ *   the 900-entry glyph maps, `@font-face`s, `outline` / `thin` / `brand` font families and the duotone rules are
+ *   gone.  `outline` is part of the icon's name.
  * - Shadow markup contract (class grammar on semantic elements):
  *   - `<ui-icon>`:  `<span class="ui [size] [color] [keyOnly ...] [corner] [flipped] [rotated] icon"
- *     part="icon"><svg viewBox="..." aria-hidden="true"><path fill="currentColor" d="..."/></svg></span>`
+ *     part="icon"><svg viewBox="..." fill="currentColor" aria-hidden="true">…the pack's file…</svg></span>`
  *     - accessible name on the HOST (internals):  `label` => `role=img` + `aria-label`;  none => `aria-hidden`
  *     - an empty root (no `name`, or an unknown one) keeps its box, so layout doesn't jump while data loads
  *   - `<ui-icons>`:  `<span class="ui [size] [loading] icons" part="icons"><slot></slot></span>`
@@ -34,7 +35,7 @@
  * - The box rules key on `span.ui.icon:not(.label)`:  `ui icon header` / `message` / `button` / `label` are other
  *   components' roots.  They never share a shadow root with an icon, but static pages adopting several sheets do.
  * - NOTE: left out, on purpose:
- *   - the glyph maps, aliases and deprecated names:  `Icons` (`src/icons/`) resolves names
+ *   - the glyph maps, aliases and deprecated names:  icon packs (`UI.icons`) resolve names
  *   - `emphasized` (opacity 1 -- already the default) and `colored` (a ring in `currentColor`):  a coloured
  *     circular / bordered icon's ring follows its colour anyway
  *   - `right` / `left` rotated (Fomantic 1.x spellings of `clockwise` / `counterclockwise`)

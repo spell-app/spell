@@ -10,13 +10,14 @@ import Example from "../../components/Example.astro"
 import Section from "../../components/Section.astro"
 import Variation from "../../components/Variation.astro"
 import VocabularyTable from "../../components/VocabularyTable.astro"
-// `ui-icon` and `ui-icons` are one family.  Glyphs load lazily, one small module per icon, so a page only pays for
-// the icons it shows.
+// `ui-icon`, `ui-icons` and `ui-icon-set` are one family.  Icons are SVG files in packs, loaded lazily one file per
+// icon, so a page only pays for the icons it shows.
 
 <Section title="Types">
-  Every Font Awesome Free icon is available by name, and so are Fomantic's names (`mail outline`, `check circle`),
-  which resolve to the same glyphs.  Browse and copy names in the [icon browser](../../icons/), which replaces
-  Fomantic's long list of icon sets.
+  Every Font Awesome 7 Free solid and regular icon is available by name, in words:  `circle check`, `bell outline`
+  (Font Awesome's dashed `circle-check` works too).  Brands and Fomantic's own names come in packs a page adds with
+  `<ui-icon-set>`.  Browse and copy names in the [icon browser](../../icons/), which replaces Fomantic's long list of
+  icon sets.
 
   <Example title="Icon" description="An icon is a glyph used to represent something else.  Solid is the default set." class="ui-cluster">
     <ui-icon name="house"></ui-icon>
@@ -25,13 +26,13 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
     <ui-icon name="puzzle-piece"></ui-icon>
     <ui-icon name="heart"></ui-icon>
   </Example>
-  <Example title="Outline" description="An `outline` word (or `variant=&quot;regular&quot;`) picks the regular set." class="ui-cluster">
+  <Example title="Outline" description="An `outline` word (or the `outline` attribute) names the regular icon." class="ui-cluster">
     <ui-icon name="heart outline"></ui-icon>
     <ui-icon name="bell outline"></ui-icon>
     <ui-icon name="envelope outline"></ui-icon>
     <ui-icon name="circle outline"></ui-icon>
   </Example>
-  <Example title="Brands" description="Icons can represent logos of common brands." class="ui-cluster">
+  <Example title="Brands" description="A few common brand logos are in the default pack;  the `fa7-brands` pack has all 572." class="ui-cluster">
     <ui-icon name="github"></ui-icon>
     <ui-icon name="discord"></ui-icon>
     <ui-icon name="medium"></ui-icon>
@@ -181,11 +182,24 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Behaviour">
-  `name` is the only thing an icon needs.  It accepts Font Awesome names, and Fomantic's spellings as aliases:  a
-  trailing `outline` word means the regular set, and `variant` picks a set (`regular`, `brands`) explicitly.
+  `name` is the only thing an icon needs:  one name per icon, words separated by spaces (dashes work too).  A trailing
+  `outline` names the regular icon;  `lucide:bell` asks one pack.
 
   Icons also work as the `icon` attribute of other components (`<ui-button icon="download">`), where they share this
   name resolution.  Icons have no events.
+
+  **Icon packs.**  A pack is a folder of SVG files plus a `pack.js` index;  the page's packs are shared by every
+  component.  Font Awesome 7 Free is the default.  Add more with `<ui-icon-set>`, which renders nothing;  the pack
+  added last wins a name:
+
+  ```html
+  <ui-icon-set src="fa7-brands"></ui-icon-set>                              <!-- every brand logo -->
+  <ui-icon-set src="fomantic"></ui-icon-set>                                <!-- Fomantic's names -->
+  <ui-icon-set src="/icons/lucide/pack.js" prefix="lucide"></ui-icon-set>   <!-- your own pack -->
+  <ui-icon-set src="/icons/fa-pro/pack.js" only></ui-icon-set>              <!-- replace the default -->
+  ```
+
+  Turn any folder of SVGs into a pack with `yarn icons:pack <folder> --id <id>`;  see `docs/icons.md`.
 
   <VocabularyTable family="icon" />
 </Section>

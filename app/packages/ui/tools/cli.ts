@@ -12,17 +12,26 @@
  * - `serve` -- the same pages and import map for a person:  prints the URLs, runs until killed
  * - `loc` / `report` -- `LocCount` (`loc-results.json`), then `ReportTables` rewrites `docs/report.md`'s generated
  *   tables
+ * - `icons:pack <folder> --id <id> [--label <text>] [--license <text>] [--sanitize]
+ *   [--skip-unsafe | --allow-unsafe] [--force]` -- `IconPackBuilder`:  verify a folder of SVGs and write its
+ *   `pack.js` (keeps hand edits of an existing one)
+ *   - `--sanitize`:  first strip unsafe attributes from the SVGs, rewriting those files
+ *   - `--skip-unsafe`:  leave files that still fail out of the index, instead of refusing the pack
+ *   - `--allow-unsafe`:  index unsafe files anyway (a broken one still refuses the pack)
  * - `smoke` expects a fresh `vite build` and `yarn vendor`;  `measure` builds in memory.  Both `vendor` and
  *   `measure` bundle the fork's BUILT output:  `ForkBuild.ensure()` builds it first when stale.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { join } from "node:path"
+import { join, resolve } from "node:path"
+import { parseArgs } from "node:util"
 
 import {
   BundleMeasure,
   ForkBuild,
   HostApp,
+  IconPackBuilder,
+  IconPackError,
   LocCount,
   PeerVendor,
   ReportTables,
@@ -61,8 +70,11 @@ switch (command) {
     loc()
     new ReportTables(PACKAGE.root).write()
     break
+  case "icons:pack":
+    await iconPack()
+    break
   default:
-    console.error("usage:  tsx tools/cli.ts vendor | measure | smoke | serve | loc | report")
+    console.error("usage:  tsx tools/cli.ts vendor | measure | smoke | serve | loc | report | icons:pack")
     process.exit(1)
 }
 
@@ -109,4 +121,51 @@ function loc() {
   const folder = join(PACKAGE.root, PACKAGE.results)
   mkdirSync(folder, { recursive: true })
   writeFileSync(join(folder, "loc-results.json"), `${JSON.stringify(results, null, 2)}\n`)
+}
+
+/** `icons:pack`:  verify a folder of SVGs and write its `pack.js`;  prints what changed, or every problem. */
+async function iconPack() {
+  const { positionals, values } = parseArgs({
+    args: process.argv.slice(3),
+    allowPositionals: true,
+    options: {
+      id: { type: "string" },
+      label: { type: "string" },
+      license: { type: "string" },
+      sanitize: { type: "boolean" },
+      "skip-unsafe": { type: "boolean" },
+      "allow-unsafe": { type: "boolean" },
+      force: { type: "boolean" }
+    }
+  })
+  const [folder] = positionals
+  if (!folder || !values.id || (values["skip-unsafe"] && values["allow-unsafe"])) {
+    console.error(
+      "usage:  tsx tools/cli.ts icons:pack <folder> --id <id> [--label <text>] [--license <text>] [--sanitize] " +
+        "[--skip-unsafe | --allow-unsafe] [--force]"
+    )
+    process.exit(1)
+  }
+  try {
+    const report = await new IconPackBuilder({
+      folder: resolve(folder),
+      id: values.id,
+      label: values.label,
+      license: values.license,
+      sanitize: values.sanitize,
+      unsafe: values["skip-unsafe"] ? "skip" : values["allow-unsafe"] ? "allow" : "refuse",
+      force: values.force
+    }).build()
+    console.log(`${report.index}:  ${report.count} icons`)
+    if (report.added.length) console.log(`  added:  ${report.added.join(", ")}`)
+    if (report.dropped.length) console.log(`  dropped:  ${report.dropped.join(", ")}`)
+    if (report.unreachable.length) console.log(`  no name of their own:  ${report.unreachable.join(", ")}`)
+    for (const { file, reason } of report.sanitized) console.log(`  sanitized ${file}:  ${reason}`)
+    for (const { file, reason } of report.skipped) console.log(`  skipped ${file}:  ${reason}`)
+    for (const { file, reason } of report.allowed) console.log(`  UNSAFE, indexed anyway:  ${file}:  ${reason}`)
+  } catch (error) {
+    if (!(error instanceof IconPackError)) throw error
+    console.error(error.message)
+    process.exitCode = 1
+  }
 }

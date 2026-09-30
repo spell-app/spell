@@ -1,339 +1,277 @@
-# Icon data pipeline
+# Icons:  packs of SVG files
 
-`src/icons/` is the DATA layer for icons:  Font Awesome 7 Free's icon paths, plus enough alias vocabulary
-that Fomantic's names (`setting`, `sign in`, `mail outline`, ...) keep working.  It has no UI of its own --
-`ui-icon` (`src/components/icon/`, not built yet per `docs/plan.md`) will be the component that calls it.
+Icons are plain `.svg` files in **packs**.  A pack is a folder of SVGs plus a generated index, `pack.js`, listing
+each icon's file, size and extra names.  The page's packs live in the shared runtime, `UI.icons`
+(`src/runtime/IconPacks.ts`);  `<ui-icon>` and every component's `icon` shorthand ask it for a name, and it
+decides which file to load.
 
-## Regenerating
+- `src/icons/` -- the pack FORMAT and the names around it:  `icons.types.ts` (`IconPackIndex` ...), `IconName`
+  (normalizing and claiming names), `BuiltInPacks` (where the shipped packs live), and the packs themselves in
+  `icon-packs/`
+- `src/runtime/IconPack.ts` / `IconPacks.ts` -- loading, resolving and caching (`UI.icons`)
+- `tools/IconPackBuilder.ts` -- turns a folder of SVGs into a pack (`yarn icons:pack`)
+- `scripts/gen-icons.ts` -- builds the three built-in packs from Font Awesome's npm package
 
-```sh
-yarn gen:icons
+DECISIONS (Owen, 2026-09-30), replacing the one-ES-module-per-glyph layout of 2026-09-29 ("Loading strategies"
+below):
+
+- Icons ship as SVG files so another set (Lucide, Font Awesome Pro) is a pack away.
+- Font Awesome 7 Free ships in `dist`;  loading it from jsDelivr is opt-in (`base`).
+- FA's files keep their licence comment:  FA's IP, the attribution stays.
+- Default pack:  FA7 solid + regular, plus a hand-picked list of extras.  Brands and Fomantic's names are opt-in
+  packs.
+- Opt-in from HTML (`<ui-icon-set>`) and JS (`UI.icons.use()`).
+- The pack added LAST wins a name;  `prefix:name` picks a pack.
+- ONE name per icon, words separated by spaces:  `address book`, `address book outline`, `github`.  No style /
+  variant axis, no word-order guessing.
+- Aliases live in the pack index, per icon, so a pack can be hand-edited to add or change names.
+
+## Names
+
+An icon's name comes from its file name, dashes -> spaces:  `solid/address-book.svg` is `address book`.  Its
+`alias`es are more names.  The folder is never part of a name.
+
+- Input is normalized the same way (`IconName.normalize()`):  lowercase, runs of dashes / underscores / spaces ->
+  one space.  So `Address-Book`, `address_book` and `address book` are one name, and names pasted from Font
+  Awesome's site work.
+- `lucide:bell` asks one pack:  its `id`, or the `prefix` it was added with.  Only the first `:` splits.
+- `<ui-icon name="bell" outline>` ~== `name="bell outline"`:  Fomantic's `bell outline icon` spelling.
+- **Within one pack** (`IconName.claim()`):
+  - an explicit `alias` beats a name derived from a file name
+  - otherwise the FIRST entry to claim a name keeps it
+  - Why aliases win:  a hand-edit (or the Fomantic pack) must be able to take a word from a file name, e.g. alias
+    `shield` on `solid/shield-halved` over the file `solid/shield`.
+  - So in `fa7-free`, `bell` is `solid/bell` (solid is listed first) and `regular/bell` is reached by its alias
+    `bell outline`.
+- **Across packs:**  the last pack added that has the name wins.
+
+## Packs
+
+```
+fa7-free/
+  pack.js
+  solid/address-book.svg      Font Awesome's own files and layout (svgs/<style>/<name>.svg)
+  regular/address-book.svg
 ```
 
-`IconGenerator` (`scripts/gen-icons.ts`) does three things:
-
-1. Downloads Font Awesome 7 Free's `metadata/icons.json` (~5 MB, from the `7.x` branch) to a cache OUTSIDE
-   the repo (`$TMPDIR/spell-ui-fa7-icons.json` by default, override with `FA_METADATA_PATH`) -- it's large,
-   third-party, and not ours to commit.
-2. Reads (never writes) `reference/Fomantic-UI/src/themes/default/elements/icon.variables`, the read-only
-   Fomantic clone's LESS source for its `@icon-map` family, to derive Fomantic's alias vocabulary.
-3. Writes, after deleting `src/icons/glyphs/` (so a dropped icon doesn't linger):
-   - `src/icons/glyphs/<style>/<name>.js`:  one ES module per free icon, `export default [width, height, "path"]`
-   - `src/icons/data/{aliases,fomantic-aliases,fomantic-clashes,names,search}.json`:  compact JSON, no header
-     (comments aren't valid JSON;  this file is the regeneration record)
-
-Re-run it whenever Font Awesome ships new icons, or the Fomantic reference clone updates its icon variables.
-
-**Generated files are COMMITTED**, like the JSON before them:  installs and CI need no network, and a diff shows
-exactly which icons a Font Awesome upgrade added or redrew.  `.oxfmtrc.json` ignores `src/icons/data/**` and
-`src/icons/glyphs/**`, so `yarn review` never reformats them.
-
-## Output files and sizes
-
-Measured at Font Awesome 7.3.1.
-
-| Files | Count | Raw | Gzip | Loaded |
-| --- | ---: | ---: | ---: | --- |
-| `glyphs/solid/*.js` | 1,422 | 768 KB | - | lazy, one `import()` per icon drawn |
-| `glyphs/regular/*.js` | 169 | 101 KB | - | same |
-| `glyphs/brands/*.js` | 572 | 549 KB | - | same |
-| **all glyphs** | **2,163** | **1,418 KB** (8.7 MB allocated on disk) | 478 KB as one stream, 770 KB per-file | |
-| `data/names.json` (`{ solid, regular, brands }` name lists) | 1 | 28.6 KB | 9.3 KB | lazy, only `Icons.names()` / `resolve()` / the word-order fallback |
-| `data/aliases.json` (FA7's own aliases) | 1 | 18.0 KB | 5.3 KB | lazy, first name not found as typed |
-| `data/fomantic-aliases.json` | 1 | 20.3 KB | 6.2 KB | lazy, same |
-| `data/fomantic-clashes.json` (opt-in, see "Clashes") | 1 | 0.6 KB | 0.4 KB | lazy, same |
-| `data/search.json` (docs site only) | 1 | 93.9 KB | - | lazy, docs site only |
-
-None of it is in the initial JS bundle.  Gzip sizes above are `gzip -c <file> | wc -c` (2026-09-29).
-What a page pays (gzip, HTTP/2, exact Font Awesome names):
-
-- `Icons` code ~1.8 KB, and ~0.2-0.6 KB per glyph:  **~2 KB for one icon, ~6 KB for ten**.  No index.
-  (With `names.json` up front it was ~11 KB / ~15 KB;  before one module per icon, 26 KB / 358 KB:
-  see "Loading strategies".)
-- A name that needs an alias (`setting`, `mail outline`, `cog`) also loads the three alias maps:  +~12 KB, once.
-  `Icons.get()` skips them for an exact Font Awesome name (`user`, `github`), except under
-  `<html ui-icon-names="fomantic">`, which can remap exact names.
-
-Requests per style-less `get()` on a cold page (glyphs + data files;  a 404 is a few hundred bytes of headers):
-
-| Asked for | Before (`names.json` first) | Now (glyph first) |
-| --- | --- | --- |
-| solid icon (`user`) | 2:  `names.json`, glyph | **1**:  glyph |
-| brand icon (`github`) | 2:  `names.json`, glyph | 2:  `solid` 404, glyph |
-| regular via `outline` (`mail outline`) | 5:  alias maps (3), `names.json`, glyph | 4:  alias maps (3), glyph |
-| alias (`setting`), maps not yet cached | 5:  alias maps (3), `names.json`, glyph | 6:  `solid` + `brands` 404s, alias maps (3), glyph |
-| alias, maps cached | 1:  glyph | 1:  glyph |
-| unknown, one word (`nosuchicon`) | 4:  `names.json`, alias maps (3) | 5:  2 404s, alias maps (3) |
-| unknown, dashed (`no-such-icon`) | 4:  `names.json`, alias maps (3) | 6:  2 404s, alias maps (3), `names.json` |
-| the same miss again | 0 | 0 |
-| explicit style (`("user", "regular")`) | 2:  `names.json`, glyph | **1**:  glyph |
-
-- The trade-off:  exact names -- the common case -- got cheaper, while a name that isn't one pays 404s before its
-  real answer.  Fomantic vocabulary pays them only until the first alias name has loaded the maps;  after that,
-  the cached maps route an alias straight to its target.
-- Every miss is cached, so no URL is requested twice.  And once `names.json` HAS loaded (the docs icon browser,
-  a word-order name), `get()` checks it before any request again:  unknown names go back to costing nothing.
-
-### Why these data files
-
-- `names.json`:  `Icons.names(style)` feeds the docs icon browser, the word-order fallback needs every name, and
-  `Icons.resolve()` uses it to tell a bare `github` (brands) from `user` (solid) without drawing either.
-  NOT on `get()`'s direct path any more (2026-09-29):  there the glyph request itself is the existence check.
-  It replaces the old 37 KB `solid.json` chunk index and the whole-style `regular.json` / `brands.json` loads.
-- Alias maps are lazy for the same reason as before (`spike/lit/REPORT.md` "(j)" item 4):  a static import would
-  land ~14 KB gzip of vocabulary in the eager chunk of every component that can render an icon.
-- `search.json`:  solid-only `name -> search terms`, first 5 terms per icon (`SEARCH_TERMS_CAP`), 93.9 KB, just under
-  the 100 KB budget.  Font Awesome's full terms are ~200 KB.  NOTE:  FA7 roughly doubled terms per icon, so new
-  icons can push this over -- `buildSearchIndex()` then SKIPS the file and the generator says so (the docs
-  site would fall back to name-only search).  `Icons.ts` never imports it.
-- Removed with the chunked layout:  `solid.json`, `solid-*.json`, `regular.json`, `brands.json` and the generated
-  `data/index.ts` (`CHUNK_LOADERS`, a literal-specifier map that existed only to stop Vite globbing `data/`).
-
-## Loading
-
-`Icons.get(name, style?)`:
-
-Each step runs only if the one before found nothing:
-
-1. Explicit `style`:  the name as typed, in that style (`("apple", "brands")` is the Apple logo).  One request;
-   an explicit style never probes another style.
-2. No style, alias maps not yet loaded, not Fomantic mode, no trailing `outline`:  the name as an exact Font
-   Awesome name -- anything cached, then `solid`, then `brands`.  Never `regular`:  every regular icon also
-   exists in solid, so that request could only 404 (a `register()`ed regular icon is still found in cache).
-3. Fomantic and Font Awesome aliases, and `outline` (-> `regular`), then the result in its style, or solid, then
-   brands.  Loads the alias maps.
-4. Word order (`button tablet` -> `tablet-button`):  loads `names.json`, the only step on this path that does.
-
-Each attempt `import()`s `new URL("glyphs/<style>/<name>.js", import.meta.url)`, but only for a name shaped like
-a Font Awesome slug (`/^[a-z0-9]+(-[a-z0-9]+)*$/`, so `../x` is never requested), and -- once `names.json` has
-loaded for another reason -- only one it lists.
-
-The URL is computed from the name, with `/* @vite-ignore */`:  there is NO name -> loader map.  A bundler
-therefore neither inlines the glyphs nor emits 2,000 entries (verified with a `vite build` of `src/icons/index.ts`
-alone:  the output is `index.js` 4.3 KB plus the four data chunks, no per-icon anything).  The module system is the
-cache:  a URL evaluates once per page, even across two bundles that share the same `glyphs/`.
-
-A failed import is recorded as a MISS and never requested again (`get()` resolves `undefined`, never rejects).
-`import()` rejects the same way for a 404 and a dropped connection -- there's no status to tell them apart --
-so the one cheap signal is used:  a failure while `navigator.onLine === false` is forgotten instead, and retried
-by a later `get()`.  Glyphs not deployed at all (wrong `glyphBase`) => every icon a miss until reload.
-
-`Icons.register(name, data, style = "solid")` adds a glyph to the same cache without any request.
-
-`Icons.glyphBase` (default `""`) overrides the directory, e.g. a CDN:  `Icons.glyphBase = "https://cdn.example.com/ui/glyphs/"`.
-
-## Shipping icons
-
-The glyph files must be served NEXT TO THE BUILT MODULE that contains `Icons`:  `glyphs/` beside the emitted chunk.
-
-- **Library build (`@spell/ui`)**:  a tiny inline plugin in `vite.config.ts` emits `src/icons/glyphs/**` to
-  `dist/glyphs/**` (see "Build change" below).  `Icons` ends up in `dist/index.js` or a chunk beside it, so
-  `import.meta.url` resolves `dist/glyphs/`.  MUST NOT set `chunkFileNames` to a subdirectory without also
-  setting `Icons.glyphBase`.
-- **Consumer that bundles `@spell/ui`**:  the bundler moves `Icons` into the app's output, away from
-  `node_modules/@spell/ui/dist/glyphs/`.  Copy that directory next to the app's chunks (a
-  `vite-plugin-static-copy` rule, Rolldown `emitFile`, or a build step), or serve it anywhere and set
-  `Icons.glyphBase`.  Every icon in `glyphs/` may be requested (runtime names), so ship the whole directory
-  (1.4 MB raw, ~480 KB compressed), or...
-- **Tree-shakable path for apps that use a few known icons**:  no `glyphs/` deployment at all.
-
-  ```ts
-  import { Icons } from "@spell/ui/icons"
-  import user from "@spell/ui/icons/glyphs/solid/user.js"
-  import github from "@spell/ui/icons/glyphs/brands/github.js"
-
-  Icons.register("user", user)
-  Icons.register("github", github, "brands")
-  ```
-
-  The bundler includes just those files (three icons ~1.2 KB of JS), and `peek()` / `get()` answer them
-  synchronously / without a request.  TypeScript needs a declaration for the `.js` glyph modules:
-
-  ```ts
-  declare module "@spell/ui/icons/glyphs/*.js" {
-    const data: readonly [width: number, height: number, path: string]
-    export default data
-  }
-  ```
-
-  (In this repo it is `src/icons/glyphs.d.ts`, for `$/icons/glyphs/*.js`.)
-- **Dev / tests**:  Vite serves `src/icons/glyphs/` directly, so nothing is copied.
-- **Cross-origin hosting** needs CORS (module scripts).
-- Package exports (`package.json`) should map `"./icons/glyphs/*": "./dist/glyphs/*"` so the static-import path
-  works.
-
-### Build change (`vite.config.ts`)
-
-```ts
-import { readdirSync, readFileSync } from "node:fs"
-import path from "node:path"
-
-/** Copies `src/icons/glyphs/**` to `dist/glyphs/**`, next to the chunks, where `Icons` looks via `import.meta.url`. */
-function emitGlyphs(): Plugin {
-  const root = fileURLToPath(new URL("./src/icons/glyphs", import.meta.url))
-  return {
-    name: "spell-emit-glyphs",
-    apply: "build",
-    generateBundle() {
-      for (const entry of readdirSync(root, { recursive: true, withFileTypes: true })) {
-        if (!entry.isFile() || !entry.name.endsWith(".js")) continue
-        const file = path.join(entry.parentPath, entry.name)
-        this.emitFile({ type: "asset", fileName: `glyphs/${path.relative(root, file)}`, source: readFileSync(file) })
-      }
-    }
+```js
+export default {
+  "id": "fa7-free",
+  "label": "Font Awesome 7 Free",
+  "license": "Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com (Icons: CC BY 4.0)",
+  "defaults": {"width":512,"height":512},
+  "icons": {
+    "solid/address-book": {"width":448},
+    "solid/gear": {"alias":["cog","setting"]},
+    "regular/address-book": {"width":448,"alias":"address book outline"}
   }
 }
-// plugins: [standardDecorators(), emitGlyphs(), dts(...)]
 ```
 
-Verified in a scratch lib build of `src/icons/index.ts`:  2,163 files in `dist/glyphs/`, `Icons` reads
-`new URL(`glyphs/${r}.js`, e.glyphBase || e.#_)` with no per-icon map.
+- `icons` keys are SVG paths relative to the pack's **base**, without `.svg`.  The base defaults to the folder
+  `pack.js` was loaded from;  `use(…, { base })` / `<ui-icon-set base>` re-points it (relative to the page).
+- `defaults` apply to every entry that doesn't set its own (`width`, `height`).
+- `alias`:  a string or a list.
+- One icon per line, so a hand-edit is a one-line diff;  re-running the builder keeps it (see "Building a pack").
+- The index is what makes lookups cheap:  the runtime knows synchronously whether a name exists, which file it
+  is and its size, so an unknown name costs no request.
 
-## Alias strategy
+### Built-in packs
 
-**Font Awesome 7 names are canonical.** Everything else is an alias resolved down to one:
+In `src/icons/icon-packs/`, copied to `dist/icon-packs/` by `emitIconPacks()` (`vite.config.ts`):
 
-1. `aliases.json` -- Font Awesome's OWN alternate names for an icon it renamed or merged
-   (`cog` -> `gear`, `times` -> `xmark`, `contact-book` -> `address-book`, ...). Straight from
-   `icons.json`'s `aliases.names` field, free icons only.
-2. `fomantic-aliases.json` -- Fomantic-UI's class-name vocabulary, where it differs from the FA7 name.
-   Derived from `reference/Fomantic-UI/src/themes/default/elements/icon.variables`'s `@icon-map`,
-   `@icon-aliases-map`, `@icon-deprecated-map`, `@icon-outline-map` (+ its aliases), `@icon-brand-map`
-   (+ its aliases) -- 1,789 Fomantic class names total (`_` -> space, e.g. `address_book` -> `"address book"`).
-   Matched to a canonical name by UNICODE CODEPOINT: Fomantic's LESS still points at Font Awesome 5's
-   private-use codepoints, which usually still identify the same icon in FA7's `unicode` metadata field,
-   or in `aliases.unicodes.primary` -- where FA7 keeps the codepoints of icons it MERGED into another
-   (`user alternate` -> `user`, since FA7 folded `user-large` into `user`;  same for `user alternate slash`,
-   `headphones alternate`, `handshake alternate slash`).
-   - **1,058 already matched their FA7 name exactly** (`"caret down"` -> `caret-down`) -- no alias entry
-     needed; `Icons.resolve()`'s kebab-case fallback already gets these right.
-   - **729 needed an alias entry** (`setting` -> `gear`, `settings` -> `gears`, `mail` -> `envelope`,
-     `remove`/`delete`/`close` -> `xmark`, `checkmark` -> `check`, `dropdown` -> `caret-down`, ...).
-     27 of these CLASH with a Font Awesome name and live in `fomantic-clashes.json` instead -- see "Clashes".
-   - **21 resolved via `MANUAL_OVERRIDES`** in `gen-icons.ts`.  20 because FA6 reassigned their codepoint entirely,
-     most often onto the plain ASCII character for a "keyboard symbol" icon (`plus` is now literally `"+"`,
-     `question` is `"?"`), so the old FA5 codepoint doesn't appear anywhere in FA6+ metadata. Each entry
-     was checked by hand against `icons.json` (`add` -> `plus`, `dollar`/`usd` -> `dollar-sign`,
-     `help` -> `question`, `warning` -> `exclamation`, `desktop`/`computer` -> `display`,
-     `dashboard`/`tachometer_alternate` -> `gauge`, `cloud_download(_alternate)` -> `cloud-arrow-down`,
-     `cloud_upload(_alternate)` -> `cloud-arrow-up`, `hospital_alternate` -> `hospital`,
-     `medium_m` -> `medium`, `slack_hash` -> `slack`, `snapchat_ghost` -> `snapchat`,
-     `telegram_plane` -> `telegram`, `font_awesome_flag` -> `font-awesome`, `percentage` -> `percent`).
-     The 21st is a STAND-IN, not a rename:  FA7 Free dropped `vector-square` entirely, so
-     `vector_square` -> `object-group` (chosen by hand;  `draw-square` would be closer but is Pro-only).
-   - **0 need the kebab-case name fallback** any more.  Under FA6 11 did:  the "keyboard symbol" icons
-     (`asterisk`, `at`, `equals`, `greater-than`, `hashtag`, `less-than`, ...) whose glyph FA6 moved onto
-     the literal ASCII character.  FA7 lists their old codepoints in `aliases.unicodes.primary`, so they
-     now match by codepoint -- to the same names, and still with no alias entry written.
-   - **2 stayed unresolved**: `"acquisitions incorporated"` (`\f6af`) and `"penny arcade"` (`\f704`) --
-     both brand icons Font Awesome Free (6 and 7) no longer ships at all (checked directly: no free icon in
-     `icons.json` carries either codepoint or a plausibly-renamed name). No entry was invented for these;
-     a caller using either Fomantic name gets `undefined` back from `get()`, same as any unknown name.
+| Pack | Icons | Index gzip | What |
+| --- | ---: | ---: | --- |
+| `fa7-free` | 1,595 | 14.2 KB | solid + regular (`… outline`) + the extras;  **the default** |
+| `fa7-brands` | 572 | 4.1 KB | every Font Awesome 7 Free brand icon |
+| `fomantic` | 1,593 entries, 1,938 names | 18.2 KB | Fomantic-UI's names, pointing into the two FA folders |
 
-### Clashes:  Font Awesome wins, Fomantic is opt-in
+- The extras (`scripts/icon-extras.ts`, hand-picked, edit freely):  the brands our own examples use (`discord`,
+  `github`, `medium`, `twitter`) and the Fomantic names they use (`help`, `mail`, `setting`, `linkify`, as
+  aliases).  Everything else:  `<ui-icon-set src="fa7-brands">` / `<ui-icon-set src="fomantic">`.
+- FA's own aliases (`cog` -> `gear`, `contact book` -> `address book`) are aliases in both FA packs;  on a regular
+  icon with ` outline` added (`contact book outline`).
+- `fomantic` ships no SVGs:  its keys point at the FA folders beside it (`"../fa7-free/solid/gear"`), so a page
+  using it with `fa7-free` fetches each file once (same URL).  It needs those folders DEPLOYED beside it, not their
+  packs added.
 
-DECISION (2026-09-29):  Font Awesome names are canonical and win a clash.  A CLASH is a Fomantic name
-whose dashed form is ALREADY a Font Awesome name or alias for a DIFFERENT icon -- 27 of them at FA 7.3.1:
+### Clashes:  whichever pack comes last
 
-| Typed | Font Awesome (default) | Fomantic (opt-in) |
+27 Fomantic names mean a DIFFERENT icon in Font Awesome (at FA 7.3.1):
+
+| Typed | `fa7-free` (default) | `fomantic` |
 | --- | --- | --- |
 | `x` | `x` (the letter) | `xmark` (close) |
 | `warning` | `triangle-exclamation` | `exclamation` |
 | `sign in` / `sign out` | `arrow-right-to-bracket` / `arrow-right-from-bracket` | `right-to-bracket` / `right-from-bracket` |
 | `desktop`, `computer` | `desktop`, `computer` | `display` |
-| `apple`, `zoom` | the brand logos | `apple-whole`, `magnifying-glass-plus` |
 | ... | | |
 
-(full list:  the generator prints it;  the data is `fomantic-clashes.json`)
+- The default pack gives Font Awesome's meaning.  Adding `fomantic` (after the default, as `<ui-icon-set>` does)
+  gives Fomantic's, because the last pack wins.  This replaces the old `<html ui-icon-names="fomantic">` switch
+  and `fomantic-clashes.json`.
+- `fa7-free:x` or an unambiguous name (`xmark`) always means one icon.
 
-- `gen-icons.ts` writes the clashes to `fomantic-clashes.json` and leaves them OUT of `fomantic-aliases.json`.
-- A page opts into Fomantic's meaning with `<html ui-icon-names="fomantic">` (`ICON_NAMES_ATTRIBUTE`,
-  read as `Icons.preferredNames`).  Any other value, or none, means Font Awesome.
-  - An attribute rather than a JS setting:  it's there before any script runs, and survives SSR.
-  - Read on EVERY lookup, so flipping it affects later lookups only -- icons already drawn keep their meaning.
-  - One choice per page;  anyone needing a particular icon can always use an unambiguous name (`xmark`).
-- Why Font Awesome by default:  it's the vocabulary people search for, and ~26% of FA7 icons (570 of
-  2,163) have NO Fomantic name at all, so FA names have to work regardless.
-- `Icons.test.ts` checks EVERY FA7 name and alias resolves to Font Awesome's own target by default.
+### How Fomantic's names were matched (`scripts/gen-icons.ts`)
 
-### Spaces ~== dashes
+From `reference/Fomantic-UI/src/themes/default/elements/icon.variables`:  `@icon-map`, `@icon-aliases-map`,
+`@icon-deprecated-map`, `@icon-outline-map` (+ aliases), `@icon-brand-map` (+ aliases);  first map to define a
+name wins, `_` -> space.
 
-`Icons.resolve()` splits on spaces AND dashes, so `tablet button` ~== `tablet-button`, and `sign-in`
-~== `sign in` (the same clash rule applies to both spellings).  No Fomantic name contains a dash and no
-FA7 name ends in `-outline`, so neither spelling can be misread.
+- Matched to a Font Awesome icon by UNICODE CODEPOINT:  Fomantic's LESS still points at Font Awesome 5's
+  private-use codepoints, which usually still identify the same icon in FA7's `unicode` field, or in
+  `aliases.unicodes.primary`, where FA7 keeps the codepoints of icons it merged into another (`user alternate` ->
+  `user`).
+- 21 by hand (`MANUAL_OVERRIDES`):  20 renames FA6 moved onto the plain ASCII character (`add` -> `plus`,
+  `help` -> `question`, `warning` -> `exclamation` ...), each checked against FA's metadata, and one stand-in
+  (`vector square` -> `object-group`:  FA7 Free dropped `vector-square`).
+- Style from the map the name came from:  outline maps -> regular only;  brand maps -> brands, else solid;  other
+  maps -> solid, else brands (Fomantic's deprecated map holds brand icons too, e.g. `linkedin in`).
+- 2 left out:  `acquisitions incorporated` and `penny arcade`, which Font Awesome Free no longer ships.
 
-### Word order, as a last resort
+## Using packs on a page
 
-DECISION (2026-09-29):  a name found nowhere is tried with its words in ANY order, when those words name
-exactly one icon -- `button tablet` -> `tablet-button`.  Why:  Fomantic reads thing-first (`check circle`,
-`arrow circle down`) where FA6+ reads modifier-first (`circle-check`, `circle-arrow-down`), so this lets
-Fomantic-style phrasing reach the 570 FA7 icons Fomantic never named.
+```html
+<ui-icon-set src="fa7-brands"></ui-icon-set>                                <!-- a built-in pack -->
+<ui-icon-set src="/icons/lucide/pack.js" prefix="lucide"></ui-icon-set>     <!-- your own -->
+<ui-icon-set src="/icons/fa-pro/pack.js" only></ui-icon-set>                <!-- replace everything before it -->
+<ui-icon-set src="fa7-free"
+  base="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/svgs/" only></ui-icon-set>
+```
 
-- LAST resort:  an exact name, Fomantic alias or FA alias always wins over a reordering.
-- Ambiguous word sets stay as typed and find nothing, rather than silently picking one -- 8 at FA 7.3.1:
-  `arrow-{up,down}-{a-z,z-a,1-9,9-1,wide-short,short-wide}`, `left-right` / `right-left`, and
-  `martini-glass` / `glass-martini` (an FA alias for `martini-glass-empty`).
-- Index built on first use from `names.json` + `aliases.json`.  No new data file, but `names.json` is loaded
-  just for this, and only after the direct glyph attempts missed -- so the common case never pays for it.
-  - covers solid + regular:  every regular icon also exists in solid
-  - covers brands only through FA's aliases (`github square` -> `square-github`);  the full brand list is
-    the 560 KB `brands.json`, too big to load just for this
-  - `Icons.test.ts` checks no real brand name is ever redirected
-- `peek()` reorders only once `names.json` and the alias maps are loaded -- before that it has nothing to
-  reorder against.
+- `src`:  a pack URL (relative to the page) or a built-in id (`fa7-free`, `fa7-brands`, `fomantic`).
+- `prefix`:  an extra name for `prefix:name` (the pack's id always works).
+- `base`:  where its SVGs load from instead of its own folder.  Our FA folders mirror FA's npm layout, so pointing
+  `fa7-free` at jsDelivr's copy of `@fortawesome/fontawesome-free@7.3.1/svgs/` works (checked 2026-09-30:  CORS,
+  immutable caching, byte-identical files).
+- `only`:  drop every pack added before it, including the default.  `only="false"` ~== absent.
+- JS:  `await UI.load();  UI.icons.use("fa7-brands", { prefix, base, only })`, `UI.icons.remove("fa7-free")`.
+- `UI.icons.reset()` drops every pack (the default, the document's sets, `use()`d ones, and any still loading) and
+  returns `UI.icons`, so `UI.icons.reset().use("/icons/lucide/pack.js")`.  `use(…, { only: true })` ~== that.
+  - Before first use, the default and the document's sets are never loaded.
+  - Keeps `register()`ed icons and fetched SVGs;  `<ui-icon-set>`s added AFTER a reset still count.
 
-`Icons.resolve()`'s order: split on spaces / dashes -> strip a trailing `outline` word (Fomantic's
-regular-style modifier, no separate alias needed) -> `fomantic-clashes.json` (only when the page opts in)
--> `fomantic-aliases.json` -> `aliases.json` -> the dashed name, if the solid index knows it -> the one
-icon its words name in any order -> else the dashed name as typed.  A name found nowhere still resolves
-(best-effort `style: "brands"`) rather than throwing.
+Order and timing (`IconPacks`):
 
-`Icons.resolve()` is an introspection helper (tests, docs):  `get()` doesn't call it, and it always loads
-`names.json` + the alias maps, since naming the style without drawing the icon needs the full name lists.
-`get()` runs the same steps, but lets the glyph requests answer solid-vs-brands.
+- Starts on first use (a lookup or `use()`), not on construction, so a page with no icons loads no index.  Then:
+  the default pack (unless an `only` replaces it:  it's never fetched), every `<ui-icon-set>` in the document in
+  document order, then `use()` calls in call order.
+- Watches the document for `<ui-icon-set>`s added, removed or re-pointed later:  removing the element removes its
+  pack.
+- The runtime reads the tag itself, so a page that never imports the icon family (`<ui-button icon>` only) can
+  still add packs.  The icon family defines `<ui-icon-set>` for its vocabulary, docs and `display: none`.
+- NOTE:  a pack added or removed later affects later lookups only:  icons already drawn keep their SVG.
+- NOTE:  only sets in the DOCUMENT count, not ones inside a shadow root.
+
+Other API (`UI.icons`):
+
+- `resolve(name)`:  where a name leads, synchronously (`{ pack, name, key, url, width, height }`).
+- `get(name)`:  the `<svg>` template, fetched once per URL per page;  `peek(name)` if already loaded.  A shared
+  template:  clone it (`IconGlyph.draw()`), never insert it.
+- `register(name, svg)`:  one icon from SVG text, ahead of every pack -- how an app bundles a few known icons
+  instead of deploying a pack.
+
+### Drawing
+
+- Each SVG is fetched once per page (the runtime is page-wide, so two bundles share it) and parsed into a
+  page-owned template.  A failed load is remembered as a miss;  offline (`navigator.onLine === false`) it is
+  forgotten, so a later lookup retries.
+- One normalization, on the in-memory copy:  a root with no `fill` (Font Awesome) gets `fill="currentColor"`;  a
+  root WITH one (Lucide's `fill="none"`) gets it copied into its inline style.  Why:  component sheets set
+  `fill: currentColor` on icon `<svg>`s (slotted SVGs rely on it), and CSS beats a presentation attribute but not
+  an inline style.  So stroke sets draw stroked.
+- No sanitizing at runtime:  the builder verified the files, and adding a pack runs its `pack.js`, so the page
+  trusts it like any script it adds.  The template keeps the file's licence comment.
+
+## Building a pack
+
+```sh
+yarn icons:pack path/to/folder --id my-icons [--label "My icons"] [--license "…"] [--sanitize]
+  [--skip-unsafe | --allow-unsafe] [--force]
+```
+
+`IconPackBuilder` (`tools/`;  a class, so the upcoming CLI can drive it) does TWO things only, and by default NEVER
+modifies an SVG:
+
+1. **Index:**  every `**/*.svg` (files at the top first, then each sub-folder, alphabetically), sized from its
+   `viewBox`;  the most common width / height become `defaults`.  Reports names nobody can reach (a file name
+   another entry took, and no alias).
+2. **Verify:**  refuses the whole pack, listing file + reason, and writes no index, if any SVG has:
+   - `<script>`, `<foreignObject>`, `<iframe>`, `<embed>`, `<object>`, or an `<!ENTITY>`
+   - an `on*` attribute
+   - an `href` / `xlink:href` that isn't a same-file `#fragment`
+   - CSS (`<style>`, `style=""`) with `@import` or a non-fragment `url()`
+   - no `<svg>` root, or no usable `viewBox`
+
+`--sanitize` (opt-in) first STRIPS the unsafe attributes -- `on*`, a non-fragment `href` / `xlink:href`, a `style=""`
+that loads something -- and rewrites those files;  everything else in them stays byte for byte, licence comments
+included, and each removal is reported.  Unsafe ELEMENTS stay:  removing a `<script>` or `<foreignObject>` could
+change what the icon draws, so that stays a person's call.  A refused pack rewrites nothing.
+
+A file that still fails verification (after `--sanitize`, if given):
+
+| Option | Unsafe file | Broken file (no `<svg>` root / `viewBox`) |
+| --- | --- | --- |
+| (default) | refuses the whole pack | refuses the whole pack |
+| `--skip-unsafe` | left out of the index, reported | left out of the index, reported |
+| `--allow-unsafe` | indexed anyway, reported as UNSAFE | refuses the whole pack:  it can't be sized |
+
+- The two are exclusive.  A skipped file is never rewritten by `--sanitize`.
+- `--allow-unsafe` means the page trusts those files as they are:  the runtime doesn't sanitize (see "Drawing").
+
+Re-running on a folder whose `pack.js` has the same `id` keeps the hand edits:  entries are matched by key and keep
+their order, `alias` and any other field;  only sizes are refreshed.  New files are appended, gone ones dropped
+(both reported).  A different `id` is refused unless `--force`.
+
+## Regenerating the built-in packs
+
+```sh
+yarn gen:icons
+```
+
+- Downloads the pinned Font Awesome Free package (`FA_VERSION`, 7.3.1) from npm into the OS temp dir (override:
+  `FA_PACKAGE_DIR`), and reads names, aliases, codepoints and search terms from its `metadata/icon-families.json`,
+  so names and files come from the SAME release.
+- Copies FA's `svgs/<style>/<name>.svg` byte for byte (licence comment included), for canonical names only (the
+  package's alias copies are skipped:  aliases are in the index).
+- Runs the builder on each pack, and writes `src/icons/data/search.json` (solid search terms, first 5 per icon,
+  under a 100 KB budget) for the docs icon browser.
+- **MUST run in a worktree** while tests run elsewhere:  it deletes and rewrites `src/icons/icon-packs/`.
+- Generated files are COMMITTED:  installs and CI need no network, and a diff shows what an FA upgrade changed.
+  `.oxfmtrc.json` / `.oxlintrc.json` ignore `src/icons/icon-packs/**`.
+
+## Shipping icons
+
+The built-in packs must be served NEXT TO THE MODULE that contains `BuiltInPacks` (`import.meta.url`):
+
+- **Library build:**  `BuiltInPacks` is in `dist/core.js`, so `dist/icon-packs/<id>/`.  Package export:
+  `@spell/ui/icons/*` -> `dist/icon-packs/*`.
+- **Docs site:**  `emitIconPacks("_astro/icon-packs")` beside Astro's chunks.
+- **An app that bundles `@spell/ui`:**  the bundler moves `BuiltInPacks` away from `node_modules`.  Copy
+  `dist/icon-packs/` next to the app's chunks, OR add the packs by URL from wherever they're served
+  (`<ui-icon-set src="/assets/packs/fa7-free/pack.js" only>`), OR set `BuiltInPacks.base`.
+- **A few known icons:**  `UI.icons.register(name, svgText)` for each (e.g. imported with `?raw`).  Registered
+  names are answered before any pack is asked, so they draw with no pack deployed.  NOTE:  the default pack's
+  index is still requested on first use (and warns once if it isn't there).
+- Cross-origin packs need CORS (`pack.js` is imported as a module;  SVGs are fetched).
 
 ## License attribution
 
-See `src/icons/LICENSE.md` for the full text. Summary: 
-- Icon DATA is [Font Awesome 7 Free](https://fontawesome.com)
-  - CC BY 4.0 icons, MIT code 
-  - no font files are redistributed, only path data.
-- The alias-name MAPPING in `fomantic-aliases.json` is derived from [Fomantic-UI](https://github.com/fomantic/Fomantic-UI) 
-  - MIT
-  - original file which is never itself copied or redistributed.
-
-## How `ui-icon` will consume this
-
-Sketch (component doesn't exist yet -- `docs/plan.md`'s milestone list has it under `elements/icon`):
-
-```ts
-// src/components/icon/icon.ts (future)
-import { Icons } from "$/icons"
-
-class UIIcon extends E.UIElement {
-  async connectedCallback() {
-    super.connectedCallback()
-    const data = await Icons.get(this.name, this.style) // vocabulary-driven `name` / `style` attributes
-    if (data) this.shadowRoot!.replaceChildren(Icons.svg(data, { label: this.label }))
-  }
-}
-```
-
-Key points for that component:
-
-- First paint shouldn't need to await anything (per `AGENTS.md`'s "first paint MUST NOT need a rich
-  property" rule) -- `ui-icon` should render nothing or a sized placeholder synchronously, then swap in the
-  real `<svg>` once `Icons.get()` resolves. `Icons.peek()` lets it skip the placeholder entirely when the
-  icon is already loaded or `register()`ed (e.g. after `Icons.preload()` from a parent list).
-- `name` is Fomantic-or-FA7 vocabulary either way -- the component never needs to know which;  `Icons.get()`
-  resolves it (and `Icons.resolve()` says what it resolved to, at the cost of `names.json`).
-- `Icons.svgString()` is there for a component that builds its shadow root from one big template literal
-  instead of DOM APIs -- not needed if `ui-icon` uses `svg()` directly, as sketched above.
+See `src/icons/LICENSE.md`.  In short:  the SVGs are [Font Awesome 7 Free](https://fontawesome.com) (CC BY 4.0),
+shipped as FA publishes them, each with its licence comment;  the Fomantic pack's NAMES are derived from
+[Fomantic-UI](https://github.com/fomantic/Fomantic-UI) (MIT).
 
 ## Loading strategies
 
-Historical record of WHY the layout above was chosen.  "Today" / candidate 1 below is the PREVIOUS chunked-JSON
-layout (removed);  candidate 2 is what `src/icons/` now does.
+**SUPERSEDED (2026-09-30):**  icons are now SVG files in packs (above).  This section is the record of the
+2026-09-29 decision to ship one ES module per glyph (candidate 2), kept for its measurements.  What changed:
+swapping in another icon set (Lucide, FA Pro) became a goal, and the `[width, height, path]` format can only hold
+single-path filled icons.  Candidate 3b (SVG fetch + inline) is close to what shipped;  its two drawbacks here are
+handled differently:  the SVG cache is page-wide (the runtime), so two bundles fetch a file once, and apps that
+want a few bundled icons use `UI.icons.register()`.
+
+Historical record of WHY the 2026-09-29 layout was chosen.  "Today" / candidate 1 below is the chunked-JSON layout
+before it;  candidate 2 is the one-module-per-glyph layout that replaced it.
 
 Experiment behind this section:  `spike/icons/`, removed from the tree;  restore it with
 `git checkout archive/spikes -- spike/icons` (`yarn build`, `yarn measure`, `yarn test` there;  raw numbers in
@@ -463,8 +401,8 @@ Two separately built apps (`/a/`, `/b/`), each drawing the same 10 icons, cold, 
 
 ### Recommendation
 
-**Status (2026-09-29):  adopted and implemented** -- see "Loading" and "Shipping icons" above.  The delivery form chosen was
-the computed URL (last bullet below), not a template `import()`.  Below is the recommendation as written.
+**Status:  adopted 2026-09-29, superseded 2026-09-30 by icon packs** (see the top of this section).  Below is the
+recommendation as written.
 
 **Adopt candidate 2, one ES module per icon**, behind the existing `Icons` API (`get`, `peek`, `resolve`, `svg`,
 `svgString` unchanged;  the lazy alias maps stay).

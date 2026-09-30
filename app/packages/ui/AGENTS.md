@@ -25,9 +25,10 @@ when working with code in this repository.
   - `src/runtime/` (`UI`) -- the shared `UI` runtime, ONE instance per page (`globalThis.UI ??= new UIRuntime()`).
     Components call `UI.load()` on connect, which dynamic-imports this chunk once.  Services are classes:
     `Browser` (sniffing + `UI.browser.supports` flags), `Keyboard`, `Overlays`, `Focus`, `Styles`, `Vocabulary`,
-    `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`, `Api`
-  - `src/icons/` -- `Icons` (`get`, `peek`, `svg`, `resolve`, `preload`, `names` ...), one ES module per glyph
-    (`glyphs/<style>/<name>.js`), lazy name / alias maps;  see `docs/icons.md`
+    `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`, `Api`, `IconPacks` (`UI.icons`)
+  - `src/icons/` -- the icon PACK format (`IconPackIndex`, `IconName`, `BuiltInPacks`) and the built-in packs
+    (`icon-packs/<id>/`:  SVG files + `pack.js`);  loading and caching are the runtime's (`UI.icons`);  packs are built by
+    `tools/IconPackBuilder.ts` (`yarn icons:pack`);  see `docs/icons.md`
   - `src/elements/` (`E`) -- the element core:
     - library-neutral:  `ClassBuilder`, `Validator`, `MenuOptions`, `OwnerContext`, `Shorthand`, `NativeFallback`
     - the Solid layer:  `UIHost` / `FormHost` (host base classes), `UIElement` (the CONTROLLER base:  one instance
@@ -74,11 +75,14 @@ when working with code in this repository.
   - `yarn review` -- tsc (root, node configs, the fork) + oxlint `--fix` + oxfmt + every test (`ssr`, `browser`,
     the fork's);  MUST pass before you hand work back
   - `yarn build` -- tsc + vite library build into `dist/` (entries `core`, `forms`, one per family, `styles`,
-    `index`;  `dist/glyphs/`;  `.d.ts`)
+    `index`;  `dist/icon-packs/`;  `.d.ts`)
   - `yarn test` -- `ssr` project first (it writes `.cache/ssr-button.html`, which `test/dsd.test.ts` reads), then
     `browser`, then `yarn test:fork`
   - `yarn test:all` -- chromium + firefox + webkit (`yarn test:browsers` once first)
   - `yarn dev` -- `tools/demo/`:  every example as class grammar beside elements;  edits hot-reload
+  - `yarn icons:pack <folder> --id <id> [--sanitize] [--skip-unsafe | --allow-unsafe]` -- verify a folder of SVGs
+    and write its `pack.js` (keeps hand edits);  `--sanitize` strips unsafe attributes first;  files that still fail
+    refuse the pack, unless skipped or allowed
   - `yarn vendor`, `yarn measure`, `yarn smoke`, `yarn report`, `yarn test:hmr` -- see `tools/README.md`;
     `yarn report` rewrites `docs/report.md`'s tables (run it twice:  no diff)
   - `yarn fork <script>`, `yarn fork:install`, `yarn fork:build` -- the fork's own scripts.  Its `dist/` is only
