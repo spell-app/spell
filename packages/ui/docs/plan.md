@@ -12,7 +12,7 @@
 
 | Decision | Choice |
 |---|---|
-| Base library | **Code spike first**: `ui-button` + `ui-dropdown` in both Lit 3.3 and `@solidjs/element` (Solid 2 RC), measure, then decide (Milestone 0). |
+| Base library | **Solid 2** (decided 2026-09-30 after the Milestone 0 spike, `docs/spike-lit-vs-solid.md`):  `solid-js` / `@solidjs/web` 2.0 RC pinned exactly, through our fork `@spell/solid-element` (`packages/solid-element/`);  Solid, `@solidjs/web` and the fork are peer dependencies.  Promoted into `src/` 2026-09-29 (`docs/plan-promote-solid.md`, `docs/report.md`). |
 | DOM strategy | **Shadow DOM everywhere** (Web Awesome style) with **semantic shadow markup** (`<button>`, `<dialog>`, `<input>`, `<nav>`, `<table>`…, never a `<div>` where an element exists). |
 | Global runtime | A **shared `UI` runtime**, loaded dynamically by the first component that connects, coordinates keyboard shortcuts, overlays/modals, browser sniffing and feature flags, styles, i18n, vocabulary, and utilities. |
 | Overrides | A **utility class layer** (`ui-bold`, `ui-stack`, …, modelled on Web Awesome) plus components **adopt the page's app stylesheet**: one sheet, `id="ui-app-stylesheet"`, convention over configuration, it `@import`s anything else. |
@@ -89,7 +89,7 @@
   - `CLAUDE.md` (`@AGENTS.md` include, `PAPERCUTS.md`, `SUSPECTED-BUGS.md`, narration rule), `.claude/settings.json`, `.claudeignore`, `.oxlintrc.json` (drop React rules), `.oxfmtrc.json`, `tsconfig.json` shape (`$/*` paths, `useDefineForClassFields: true`, strict), `vite.decorators.ts`, `src/util/decorators.ts` (`@proto`), `src/util/class.ts`.
   - Stubs: `PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`.
 - Rules that shape this codebase:
-  - Standard TC39 decorators only, lowered by `vite.decorators.ts` (esbuild) in Vite, Vitest and Astro configs; Lit properties are `@property() accessor value = ""`; never `experimentalDecorators`.
+  - Standard TC39 decorators only, lowered by `vite.decorators.ts` (esbuild) in Vite, Vitest and Astro configs, before the Solid compiler; never `experimentalDecorators`.
   - `@proto static` installs class defaults on the prototype (non-enumerable, inherited, `protoDefined` hook) → used for vocabulary, default settings, part names, so instances carry no per-instance copies.
   - Prefer classes for coordination over loose functions: runtime services are classes (`Keyboard`, `Overlays`, `Styles`…), builders are classes (`ClassBuilder`), not bags of functions. No loose helper methods at the bottom of files; a helper that earns a name becomes a private method or a small class.
   - `type` not `interface`; one exported class per file; `<folder>.types.ts` per folder where it makes sense (`runtime.types.ts`, `elements.types.ts`, `components.types.ts`), runtime-light.

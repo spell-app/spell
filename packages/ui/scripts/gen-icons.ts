@@ -1,19 +1,21 @@
 /**
- * Generates `src/icons/data/*.json` from Font Awesome 7 Free's metadata plus Fomantic-UI's icon vocabulary.
+ * Generates `src/icons/glyphs/<style>/<name>.js` (one ES module per icon) and `src/icons/data/*.json` (alias
+ * maps, names index, search terms) from Font Awesome 7 Free's metadata plus Fomantic-UI's icon vocabulary.
  * - Run with `yarn tsx scripts/gen-icons.ts` (or `node --experimental-strip-types` / `yarn vite-node` if `tsx`
  *   is unavailable -- see `PAPERCUTS.md`).
  * - Downloads (and caches under the OS temp dir, NOT the repo) Font Awesome's `icons.json`, since it's ~6 MB
  *   and CC-BY-4.0/MIT rather than something we vendor -- see `src/icons/LICENSE.md`.
  * - Reads (never writes) `reference/Fomantic-UI/src/themes/default/elements/icon.variables`, the LESS source
  *   of Fomantic's `@icon-map` family, to derive Fomantic's OWN alias vocabulary (`setting` -> `gear`, etc).
- * - Outputs are plain JSON with no header -- comments aren't valid JSON, so the regeneration story lives in
- *   `docs/icons.md` instead.
+ * - Glyph modules are `export default [width, height, "path"]`;  the JSON has no header (comments aren't valid
+ *   JSON), so the regeneration story lives in `docs/icons.md`.  Both are COMMITTED, so installs and CI need no
+ *   network.
  * - Types here are a deliberately minimal, LOCAL re-statement of Font Awesome's metadata shape:  this script
  *   runs standalone via `tsx`, outside the `$/*` alias graph `tsconfig.json` sets up for `src/`, so it can't
  *   import `$/icons` types without its own module resolution setup.
  */
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -56,7 +58,8 @@ type IconTuple = readonly [width: number, height: number, path: string]
 ////////////////
 
 /**
- * Builds every file under `src/icons/data/` from Font Awesome 7 Free + Fomantic-UI's icon vocabulary.
+ * Builds every file under `src/icons/glyphs/` and `src/icons/data/` from Font Awesome 7 Free + Fomantic-UI's
+ * icon vocabulary.
  * - One method per output file (plus the shared parsing steps), so `run()` reads as a table of contents.
  * - Stateless between runs:  every method takes what it needs and returns what it built, nothing is cached
  *   on `this` except the resolved filesystem paths.
@@ -64,19 +67,6 @@ type IconTuple = readonly [width: number, height: number, path: string]
 class IconGenerator {
   /** Font Awesome's own metadata source -- see file docstring for why it's cached outside the repo. */
   static readonly METADATA_URL = "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/7.x/metadata/icons.json"
-
-  /**
-   * Byte budget per solid chunk, of the COMPACT JSON this script writes.
-   * - Set well under the ~60 KB target because `yarn review`'s `oxfmt .` step reformats every generated
-   *   JSON file it isn't told to skip -- and this repo's `.oxfmtrc.json` isn't ours to add an
-   *   `ignorePatterns` entry to (outside this pipeline's file scope) -- see `PAPERCUTS.md`.  Each
-   *   `[width, height, path]` tuple is long enough to force oxfmt to explode it across 5 lines, adding
-   *   ~22 bytes/icon;  52 KB compact lands at ~57 KB once formatted, leaving margin under 60 KB either way
-   *   (decimal or binary).
-   * - NOTE: `.oxfmtrc.json` has since ignored `src/icons/data/`, so that margin is no longer needed --
-   *   kept anyway so chunk file names don't churn.
-   */
-  static readonly MAX_CHUNK_BYTES = 52_000
 
   /**
    * Fomantic-UI class names that are genuine FA5 -> FA6+ renames Font Awesome's OWN `unicode` field can't
@@ -123,12 +113,14 @@ class IconGenerator {
 
   private readonly repoRoot: string
   private readonly dataDir: string
+  private readonly glyphsDir: string
   private readonly fomanticVariablesPath: string
   private readonly metadataCachePath: string
 
   constructor() {
     this.repoRoot = fileURLToPath(new URL("..", import.meta.url))
     this.dataDir = path.join(this.repoRoot, "src/icons/data")
+    this.glyphsDir = path.join(this.repoRoot, "src/icons/glyphs")
     this.fomanticVariablesPath = path.join(
       this.repoRoot,
       "reference/Fomantic-UI/src/themes/default/elements/icon.variables"
@@ -141,21 +133,23 @@ class IconGenerator {
   /** Runs the full pipeline and prints the size / alias report the task asks for. */
   async run() {
     mkdirSync(this.dataDir, { recursive: true })
+    // NOTE: wiped first so an icon Font Awesome drops doesn't linger as a stale module.
+    rmSync(this.glyphsDir, { recursive: true, force: true })
 
     const metadata = await this.loadMetadata()
     const freeNames = new Set(Object.keys(metadata).filter((name) => (metadata[name].free?.length ?? 0) > 0))
 
+    const STYLES = ["solid", "regular", "brands"] as const
     const solid = this.buildStyleData(metadata, "solid")
     const regular = this.buildStyleData(metadata, "regular")
     const brands = this.buildStyleData(metadata, "brands")
 
-    const { index: solidIndex, chunks: solidChunks } = this.chunkSolid(solid)
-    this.removeStaleChunks(Object.keys(solidChunks))
-    const solidReport = this.writeJson("solid.json", solidIndex)
-    const chunkReports = Object.entries(solidChunks).map(([file, data]) => this.writeJson(`${file}.json`, data))
-    const regularReport = this.writeJson("regular.json", regular)
-    const brandsReport = this.writeJson("brands.json", brands)
-    const chunkIndexReport = this.writeChunkIndex(Object.keys(solidChunks))
+    const glyphReports = [solid, regular, brands].map((data, i) => this.writeGlyphs(STYLES[i], data))
+    const namesReport = this.writeJson("names.json", {
+      solid: Object.keys(solid),
+      regular: Object.keys(regular),
+      brands: Object.keys(brands)
+    })
 
     const faAliases = this.buildFaAliases(metadata)
     const faAliasesReport = this.writeJson("aliases.json", faAliases)
@@ -174,17 +168,14 @@ class IconGenerator {
     const searchReport = search ? this.writeJson("search.json", search.terms) : undefined
 
     this.report({
-      chunkReports,
-      solidReport,
-      regularReport,
-      brandsReport,
+      glyphReports,
+      namesReport,
       faAliasesReport,
       fomanticReport,
       clashesReport,
       fomanticClashes,
       searchReport,
       searchSkippedBytes: search ? undefined : this.searchIndexBytes(metadata),
-      chunkIndexReport,
       fomanticResult
     })
   }
@@ -223,91 +214,21 @@ class IconGenerator {
   }
 
   /**
-   * Splits `solid` (the ~1400-icon style) into ~60 KB chunks, grouped by name so a chunk covers a contiguous
-   * alphabetic range (`solid-a-c`, `solid-co-cu`, ...) -- `Icons.get()` only ever fetches the one chunk a
-   * lookup needs.
-   * - Packs greedily in sorted order rather than by whole first-letter groups:  several single letters
-   *   (`b`, `c`, `f`, `h`, `p`, `s`) hold enough icons on their own to blow the 60 KB budget, so a chunk
-   *   boundary sometimes falls mid-letter -- the label then uses a 2-character prefix instead of 1.
-   * - Returns both the chunk contents (to write) and the `{ name: chunkFile }` index (`solid.json`).
+   * Writes one `<style>/<name>.js` module per icon:  `export default [width, height, "path"]`.
+   * - Compact and header-free (a licence comment per file would add ~200 B x 2000);  attribution lives in
+   *   `src/icons/LICENSE.md`.
+   * - Names are Font Awesome's kebab-case slugs, so they're safe as file names and as URL segments.
    */
-  private chunkSolid(data: Record<string, IconTuple>) {
-    const names = Object.keys(data)
-    const groups: string[][] = []
-    let current: string[] = []
-    let currentBytes = 2 // "{}"
-    for (const name of names) {
-      const entryBytes = JSON.stringify(name).length + 1 + JSON.stringify(data[name]).length + 1
-      if (current.length > 0 && currentBytes + entryBytes > IconGenerator.MAX_CHUNK_BYTES) {
-        groups.push(current)
-        current = []
-        currentBytes = 2
-      }
-      current.push(name)
-      currentBytes += entryBytes
+  private writeGlyphs(style: IconStyle, data: Record<string, IconTuple>) {
+    const directory = path.join(this.glyphsDir, style)
+    mkdirSync(directory, { recursive: true })
+    let bytes = 0
+    for (const [name, tuple] of Object.entries(data)) {
+      const text = `export default ${JSON.stringify(tuple)}\n`
+      writeFileSync(path.join(directory, `${name}.js`), text)
+      bytes += Buffer.byteLength(text)
     }
-    if (current.length > 0) groups.push(current)
-
-    const chunks: Record<string, Record<string, IconTuple>> = {}
-    const index: Record<string, string> = {}
-    const usedLabels = new Set<string>()
-    for (const group of groups) {
-      let label = `solid-${IconGenerator.chunkLabel(group)}`
-      let suffix = 2
-      while (usedLabels.has(label)) label = `solid-${IconGenerator.chunkLabel(group)}-${suffix++}`
-      usedLabels.add(label)
-      chunks[label] = Object.fromEntries(group.map((name) => [name, data[name]]))
-      for (const name of group) index[name] = label
-    }
-    return { index, chunks }
-  }
-
-  /**
-   * Deletes any existing `solid-*.json` chunk file NOT in `currentChunkFiles` -- chunk boundaries (and so
-   * file names) shift between runs as Font Awesome adds/removes icons, and a stale chunk left on disk would
-   * otherwise sit there unreferenced by `solid.json` forever, never cleaned up on its own.
-   */
-  private removeStaleChunks(currentChunkFiles: string[]) {
-    const keep = new Set(currentChunkFiles.map((file) => `${file}.json`))
-    for (const entry of readdirSync(this.dataDir)) {
-      if (/^solid-.*\.json$/.test(entry) && !keep.has(entry)) unlinkSync(path.join(this.dataDir, entry))
-    }
-  }
-
-  /**
-   * Writes `src/icons/data/index.ts`:  chunk name -> `() => import("./<chunk>.json")`, ONE arrow per data
-   * chunk `Icons.#loadChunk()` can request (every solid chunk, plus `regular` and `brands` -- NOT `solid.json`,
-   * loaded separately by `#loadSolidIndex()`, and NOT the alias maps or `search.json`, which `Icons` never
-   * chunk-loads).
-   * - Why:  a template-string dynamic import (`import(`./data/${chunk}.json`)`) makes a bundler treat EVERY
-   *   file matching `./data/*.json` as a possible target, so it built a lazy chunk for `search.json` too even
-   *   though nothing ever imports it.  Each arrow below has a LITERAL specifier, so the bundler can see
-   *   exactly which files are reachable and size the rest out of the build.
-   * - Generated, so it's covered by `.oxfmtrc.json`'s `ignorePatterns` for `src/icons/data/` same as the
-   *   JSON files -- kept minimal (one line per chunk) so a diff stays readable anyway.
-   */
-  private writeChunkIndex(solidChunkFiles: string[]) {
-    const chunks = [...solidChunkFiles, "regular", "brands"].sort((a, b) => a.localeCompare(b))
-    const entries = chunks.map((name) => `  "${name}": () => import("./${name}.json")`).join(",\n")
-    const text =
-      "// GENERATED by `scripts/gen-icons.ts` -- do not hand edit.  See `docs/icons.md`.\n" +
-      "// One arrow per data chunk, so a bundler sees each file as its own lazy import target instead of\n" +
-      "// gluing every `data/*.json` file (including `search.json`, which nothing loads) into one glob.\n" +
-      "export const CHUNK_LOADERS: Readonly<Record<string, () => Promise<unknown>>> = {\n" +
-      `${entries}\n` +
-      "}\n"
-    writeFileSync(path.join(this.dataDir, "index.ts"), text)
-    return { file: "index.ts", bytes: Buffer.byteLength(text) }
-  }
-
-  /** First/last name of a sorted chunk group -> a short alphabetic range label, e.g. `a-c`, `co`, `co-cu`. */
-  private static chunkLabel(names: string[]) {
-    const first = names[0]
-    const last = names[names.length - 1]
-    if (first[0] !== last[0]) return `${first[0]}-${last[0]}`
-    const firstTwo = first.slice(0, 2)
-    const lastTwo = last.slice(0, 2)
-    return firstTwo === lastTwo ? firstTwo : `${firstTwo}-${lastTwo}`
+    return { style, count: Object.keys(data).length, bytes }
   }
 
   ////////////////
@@ -434,10 +355,7 @@ class IconGenerator {
   // ## Search index (optional)
   ////////////////
 
-  /**
-   * Solid-only `name -> search terms`, capped at 5 terms/icon to fit the 100 KB budget once `oxfmt` reformats
-   * it (same inflation issue as `MAX_CHUNK_BYTES` -- see its docstring) -- see `docs/icons.md`.
-   */
+  /** Solid-only `name -> search terms`, capped at 5 terms/icon to fit the 100 KB budget -- see `docs/icons.md`. */
   private static readonly SEARCH_TERMS_CAP = 5
 
   private buildSearchIndex(metadata: FaMetadata) {
@@ -472,38 +390,28 @@ class IconGenerator {
     return { file, bytes: Buffer.byteLength(text) }
   }
 
-  /** Prints the file-size table + alias-resolution counts the task asks the generator to report. */
+  /** Prints the file-size table + alias-resolution counts. */
   private report(args: {
-    chunkReports: { file: string; bytes: number }[]
-    solidReport: { file: string; bytes: number }
-    regularReport: { file: string; bytes: number }
-    brandsReport: { file: string; bytes: number }
+    glyphReports: { style: string; count: number; bytes: number }[]
+    namesReport: { file: string; bytes: number }
     faAliasesReport: { file: string; bytes: number }
     fomanticReport: { file: string; bytes: number }
     clashesReport: { file: string; bytes: number }
     fomanticClashes: Record<string, string>
     searchReport: { file: string; bytes: number } | undefined
     searchSkippedBytes: number | undefined
-    chunkIndexReport: { file: string; bytes: number }
     fomanticResult: ReturnType<IconGenerator["buildFomanticAliases"]>
   }) {
     const kb = (bytes: number) => `${(bytes / 1024).toFixed(1)} KB`
     console.log("\n== Icon data written ==")
-    for (const chunk of args.chunkReports) console.log(`  ${chunk.file}: ${kb(chunk.bytes)}`)
-    console.log(`  ${args.solidReport.file} (index): ${kb(args.solidReport.bytes)}`)
-    console.log(`  ${args.regularReport.file}: ${kb(args.regularReport.bytes)}`)
-    console.log(`  ${args.brandsReport.file}: ${kb(args.brandsReport.bytes)}`)
-    console.log(`  ${args.faAliasesReport.file}: ${kb(args.faAliasesReport.bytes)}`)
-    console.log(`  ${args.fomanticReport.file}: ${kb(args.fomanticReport.bytes)}`)
-    console.log(`  ${args.clashesReport.file}: ${kb(args.clashesReport.bytes)}`)
-    console.log(`  ${args.chunkIndexReport.file} (chunk loader map): ${kb(args.chunkIndexReport.bytes)}`)
+    for (const glyph of args.glyphReports) {
+      console.log(`  glyphs/${glyph.style}/: ${glyph.count} modules, ${kb(glyph.bytes)}`)
+    }
+    for (const report of [args.namesReport, args.faAliasesReport, args.fomanticReport, args.clashesReport]) {
+      console.log(`  ${report.file}: ${kb(report.bytes)}`)
+    }
     if (args.searchReport) console.log(`  ${args.searchReport.file}: ${kb(args.searchReport.bytes)}`)
     else console.log(`  search.json: SKIPPED (uncapped would be ${kb(args.searchSkippedBytes ?? 0)}, over 100 KB)`)
-
-    const oversizeChunks = args.chunkReports.filter((chunk) => chunk.bytes > 61_440)
-    if (oversizeChunks.length > 0) {
-      console.warn(`  WARNING: ${oversizeChunks.length} chunk(s) still exceed ~60 KB:`, oversizeChunks)
-    }
 
     const r = args.fomanticResult
     console.log("\n== Fomantic alias resolution ==")

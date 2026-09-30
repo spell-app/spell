@@ -1,10 +1,15 @@
 /**
- * Barrel for `$/elements` -- the library-neutral element core every `UIElement` builds on:
- * class building, validation, option model, owner context, shorthand.
- * - No base library:  the Milestone 0 spike builds `UIElement` on top of these for Lit and for Solid.
- * - NOTE: `export * as E from "."` (the sub-system namespace) is added once `UIElement` lands here.
- * - `NativeFallback` is the base of the per-component `*.fallback.ts` classes (plain DOM when a render throws).
- * - NOTE: only `OwnerContext.find()` touches the DOM, and only when called.
+ * Barrel for `$/elements` (`E`) -- the element core every component builds on.
+ * - Library-neutral:  `ClassBuilder`, `Validator`, `MenuOptions`, `OwnerContext`, `Shorthand`, `NativeFallback`
+ *   (the base of the per-component `*.fallback.ts`, plain DOM when a render throws).
+ * - The Solid layer, on `@spell/solid-element`:  `UIHost` / `FormHost` (host bases), `UIElement` (the controller
+ *   base), `ElementDefinition` (vocabulary => the fork's props), `FormElement`, `Controlled`, `Cell`,
+ *   `SlotContent`, `HostAttribute`, `PartContext` + `ContentPart` (owner context), `IconGlyph`.
+ * - NOTE: components never import this barrel:  they import the `$/core` / `$/forms` ENTRIES (`src/core.ts`,
+ *   `src/forms.ts`), which split the same files into the two shared chunks of the build.
+ * - NOTE: `HotDefinitions` is left out:  dev-only, and a SIDE EFFECT on import (it wraps `UIElement.define`);
+ *   the HMR plugin loads it into each component barrel (`vite.config.ts`).
+ * - NOTE: only `OwnerContext.find()` and the Solid layer touch the DOM, and only when called.
  */
 
 export * from "./elements.types"
@@ -15,3 +20,17 @@ export * from "./MenuOptions"
 export * from "./OwnerContext"
 export * from "./Shorthand"
 export * from "./NativeFallback"
+export * from "./Cell"
+export * from "./ElementDefinition"
+export * from "./UIHost"
+export * from "./PartContext"
+export * from "./Controlled"
+export * from "./UIElement"
+export * from "./ContentPart"
+export * from "./SlotContent"
+export * from "./HostAttribute"
+export * from "./IconGlyph"
+export * from "./FormHost"
+export * from "./FormElement"
+
+export * as E from "."

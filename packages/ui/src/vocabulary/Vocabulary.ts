@@ -37,6 +37,9 @@ export class Vocabulary {
   /** Every localized vocabulary `define()` produced, by LOCALIZED tag. */
   readonly localized = new Map<string, LocalizedVocabulary>()
 
+  /** Dictionary each entry of `localized` was resolved with, so `replace()` can resolve it again. */
+  private readonly dictionaries = new Map<string, Dictionary>()
+
   ////////////////
   // ## Registry
   ////////////////
@@ -52,6 +55,26 @@ export class Vocabulary {
       throw new Error(`Vocabulary.register(): <${vocabulary.tag}> is already registered`)
     }
     this.vocabularies.set(vocabulary.tag, vocabulary)
+    return vocabulary
+  }
+
+  /**
+   * Swap in a NEW version of a registered component's vocabulary (hot module replacement:  its module re-ran and
+   * made a new object);  returns it.
+   * - Keyed by `vocabulary.tag`;  an unknown tag is simply registered.
+   * - Every localized vocabulary resolved from the old version is resolved again from the new one, under the same
+   *   prefix and dictionary, so `canonicalize()` / `localize()` see the new names at once.
+   * - NOTE: a vocabulary whose tag changed is a NEW component:  the old tag stays registered.
+   */
+  replace<V extends ComponentVocabulary>(vocabulary: V): V {
+    const previous = this.vocabularies.get(vocabulary.tag)
+    this.vocabularies.set(vocabulary.tag, vocabulary)
+    if (!previous || previous === vocabulary) return vocabulary
+    for (const [tag, localized] of this.localized) {
+      if (localized.vocabulary !== previous) continue
+      const dictionary = this.dictionaries.get(tag) ?? this.dictionary
+      this.localized.set(tag, this.resolve(vocabulary, localized.prefix, dictionary))
+    }
     return vocabulary
   }
 
@@ -81,6 +104,7 @@ export class Vocabulary {
         )
       }
       this.localized.set(localized.tag, localized)
+      this.dictionaries.set(localized.tag, dictionary)
       result.set(vocabulary.tag, localized)
     }
     return result

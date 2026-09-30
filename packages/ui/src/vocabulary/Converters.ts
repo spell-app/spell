@@ -2,10 +2,10 @@ import type { EnumOptions, ValueSetName } from "./vocabulary.types"
 import { ValueSets } from "./ValueSets"
 
 /**
- * Pure attribute => property converters, shared by every base-library candidate's `UIElement`.
- * - Why here, library-neutral:  Lit and Solid both need the SAME booleans / enums / widths semantics,
- *   and frameworks send attributes in odd shapes -- Vue sends `open="false"` when it can't find a property,
- *   so `"false"` MUST mean false (plan, "Framework consumption contract").
+ * Pure attribute => property converters, shared by `ElementDefinition` (the fork's props) and the native fallbacks.
+ * - Why here, library-neutral:  the elements and their native fallbacks need the SAME booleans / enums / widths
+ *   semantics, and frameworks send attributes in odd shapes -- Vue sends `open="false"` when it can't find a
+ *   property, so `"false"` MUST mean false (plan, "Framework consumption contract").
  * - Static and stateless:  converters run on every `attributeChangedCallback`.
  * - Attribute values arrive as `string | null` (`null` ~== absent);  properties may arrive as anything.
  */

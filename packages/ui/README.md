@@ -4,11 +4,14 @@ Fomantic UI's vocabulary reborn as `ui-*` web components on a modern CSS foundat
 OKLCH tokens, anchor positioning, `<dialog>` / popover, and accessibility built in.  Usable from any framework
 or plain HTML.
 
-**Status:**  scaffold.  Tooling, conventions, `src/util` and the test harness exist;  no components yet.
+**Status:**  eight component families (button, dropdown, icon, label, content parts, divider, segment,
+container) on Solid 2, through our fork of its custom-element layer (`packages/solid-element/`).  Measurements,
+framework hosts, HMR and fallbacks:  [`docs/report.md`](docs/report.md).
 
 ```sh
-yarn            # install
-yarn review     # tsc + oxlint + oxfmt + tests (Vitest browser mode, chromium)
+yarn            # install (the fork, packages/solid-element, is its own yarn project:  yarn fork:install)
+yarn dev        # tools/demo/:  every example, class grammar beside elements, hot-reloading
+yarn review     # tsc + oxlint + oxfmt + tests (Vitest browser mode + node SSR, and the fork's)
 yarn build      # library build into dist/
 ```
 

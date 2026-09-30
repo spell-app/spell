@@ -1,7 +1,4 @@
-import { proto } from "$/util"
-import { NativeFallback, type MenuOption } from "$/elements"
-import { Converters } from "$/vocabulary"
-import type { DropdownValue } from "$/components/components.types"
+import { Converters, NativeFallback, proto, type DropdownValue, type MenuOption } from "$/core"
 
 import { dropdownVocabulary, itemVocabulary } from "./dropdown.vocabulary.en"
 

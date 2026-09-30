@@ -1,14 +1,23 @@
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, beforeAll, describe, expect, it } from "vitest"
 
 import { ICON_NAMES_ATTRIBUTE, Icons } from "$/icons"
 import faAliases from "$/icons/data/aliases.json"
 import fomanticClashes from "$/icons/data/fomantic-clashes.json"
+import dragon from "$/icons/glyphs/solid/dragon.js"
 
 /**
- * Runs against the REAL generated data (`src/icons/data/*.json`), not a fixture -- these tests are the
+ * Runs against the REAL generated data (`src/icons/data/*.json`, `src/icons/glyphs/`), not a fixture -- these tests are the
  * regression check that `scripts/gen-icons.ts`'s output and `Icons`' resolution logic agree with each
  * other, so a name below has to keep meaning the same FA7 icon across a regeneration.
  */
+
+/** Requests for `glyphs/<style>/<name>.js` so far (Resource Timing), for asserting "one request per icon". */
+function glyphRequests(style: string, name: string): number {
+  return performance.getEntriesByType("resource").filter((entry) => entry.name.includes(`/glyphs/${style}/${name}.js`))
+    .length
+}
+
+beforeAll(() => performance.setResourceTimingBufferSize(10_000))
 
 describe("Icons.resolve()", () => {
   it("maps a Fomantic alias to its FA7 canonical name", async () => {
@@ -100,7 +109,7 @@ describe("Icons.resolve() -- word order", () => {
     expect(wrong).toEqual([])
   })
 
-  it("works in peek() once the solid index is loaded", async () => {
+  it("works in peek() once the names index is loaded", async () => {
     const loaded = await Icons.get("button tablet")
     expect(loaded).toBeDefined()
     expect(Icons.peek("button tablet")).toEqual(loaded)
@@ -198,8 +207,8 @@ describe("Icons.peek()", () => {
     expect(Icons.peek("wrench")).toEqual(loaded)
   })
 
-  it("resolves aliases synchronously once the target chunk is cached", async () => {
-    await Icons.get("gear") // warms the "solid" chunk containing "gear"
+  it("resolves aliases synchronously once the target glyph is cached", async () => {
+    await Icons.get("gear") // loads the solid `gear` glyph
     expect(Icons.peek("setting")).toEqual(Icons.peek("gear"))
   })
 })
@@ -250,7 +259,7 @@ describe("Icons.preload()", () => {
 
   /**
    * The alias maps are lazy now (`Icons.ts`'s `#loadAliases()`), so an EMPTY `preload()` used to be a no-op
-   * for them.  It still warms `peek()`'s alias resolution on its own -- this only needs the target CHUNK
+   * for them.  It still warms `peek()`'s alias resolution on its own -- this only needs the target GLYPH
    * warmed separately (here via `get()`) to prove the alias half came from `preload([])`, not from `get()`.
    */
   it("warms the alias maps even with no names, so peek() can resolve a Fomantic alias once its chunk is cached", async () => {
@@ -271,8 +280,105 @@ describe("Icons.get() -- explicit style beats aliasing", () => {
     expect(await Icons.resolve("apple")).toEqual({ name: "apple", style: "brands" })
   })
 
-  it("peek() follows the same rule once the brands chunk is cached", async () => {
+  it("peek() follows the same rule once the brands glyph is cached", async () => {
     await Icons.get("apple", "brands")
     expect(Icons.peek("apple", "brands")).toBeDefined()
+  })
+})
+
+describe("Icons -- one module per icon", () => {
+  it("makes one request per icon, however many callers ask", async () => {
+    const before = glyphRequests("solid", "cat")
+    const results = await Promise.all([Icons.get("cat"), Icons.get("cat"), Icons.get("cat", "solid")])
+    await Icons.get("cat")
+    expect(results[0]).toBeDefined()
+    expect(results[1]).toBe(results[0])
+    expect(glyphRequests("solid", "cat") - before).toBe(1)
+  })
+
+  it("loads only the icons asked for", async () => {
+    const before = glyphRequests("solid", "horse")
+    await Icons.get("cat")
+    expect(glyphRequests("solid", "horse")).toBe(before)
+  })
+
+  it("resolves an alias to the canonical glyph and requests only that one", async () => {
+    const before = glyphRequests("solid", "gear")
+    const aliased = await Icons.get("cog")
+    expect(aliased).toEqual(await Icons.get("gear"))
+    expect(glyphRequests("solid", "gear") - before).toBeLessThanOrEqual(1)
+    expect(glyphRequests("solid", "cog")).toBe(0)
+  })
+
+  it("loads brands, regular and solid glyphs", async () => {
+    for (const [name, style] of [
+      ["github", "brands"],
+      ["envelope", "regular"],
+      ["envelope", "solid"]
+    ] as const) {
+      const data = await Icons.get(name, style)
+      expect(data?.[2].length, `${style}/${name}`).toBeGreaterThan(0)
+      expect(Icons.peek(name, style)).toEqual(data)
+    }
+    // regular and solid are different drawings
+    expect(await Icons.get("envelope", "regular")).not.toEqual(await Icons.get("envelope", "solid"))
+  })
+
+  it("infers brands for a brand-only name", async () => {
+    expect(await Icons.get("github")).toEqual(await Icons.get("github", "brands"))
+  })
+
+  it("resolves unknown names to undefined without any request", async () => {
+    expect(await Icons.get("no-such-icon-anywhere")).toBeUndefined()
+    expect(await Icons.get("no-such-icon-anywhere", "brands")).toBeUndefined()
+    expect(await Icons.get("../../data/aliases", "solid")).toBeUndefined()
+    expect(glyphRequests("solid", "no-such-icon-anywhere")).toBe(0)
+    expect(glyphRequests("brands", "no-such-icon-anywhere")).toBe(0)
+  })
+
+  it("has a glyph for every name in names()", async () => {
+    // spot check the ends of each list rather than requesting ~2000 modules
+    for (const style of ["solid", "regular", "brands"] as const) {
+      const names = await Icons.names(style)
+      expect(names.length).toBeGreaterThan(100)
+      for (const name of [names[0], names.at(-1)!])
+        expect(await Icons.get(name, style), `${style}/${name}`).toBeDefined()
+    }
+  })
+
+  it("gives names() a copy, so callers can't corrupt the index", async () => {
+    const names = await Icons.names("regular")
+    names.length = 0
+    expect((await Icons.names("regular")).length).toBeGreaterThan(0)
+  })
+})
+
+describe("Icons.register()", () => {
+  it("short-circuits loading for a statically imported glyph", async () => {
+    Icons.register("dragon", dragon)
+    const before = glyphRequests("solid", "dragon")
+    expect(Icons.peek("dragon", "solid")).toBe(dragon)
+    expect(await Icons.get("dragon")).toBe(dragon)
+    expect(await Icons.get("dragon", "solid")).toBe(dragon)
+    expect(glyphRequests("solid", "dragon")).toBe(before)
+  })
+
+  it("answers peek() synchronously before anything else has loaded", () => {
+    Icons.register("Peek Only", [10, 10, "M0 0h10v10z"])
+    expect(Icons.peek("peek-only")).toEqual([10, 10, "M0 0h10v10z"])
+    expect(Icons.peek("peek only", "solid")).toEqual([10, 10, "M0 0h10v10z"])
+  })
+
+  it("supports a custom icon that Font Awesome doesn't have, in any style", async () => {
+    Icons.register("acme-logo", [20, 20, "M1 1h18v18z"], "brands")
+    expect(await Icons.get("acme-logo")).toEqual([20, 20, "M1 1h18v18z"])
+    expect(await Icons.get("acme-logo", "brands")).toEqual([20, 20, "M1 1h18v18z"])
+    expect(await Icons.resolve("acme-logo")).toEqual({ name: "acme-logo", style: "brands" })
+  })
+
+  it("replaces an earlier entry for the same name and style", async () => {
+    Icons.register("swap-me", [1, 1, "M0 0"])
+    Icons.register("swap-me", [2, 2, "M1 1"])
+    expect(await Icons.get("swap-me")).toEqual([2, 2, "M1 1"])
   })
 })

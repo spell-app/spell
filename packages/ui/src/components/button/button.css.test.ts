@@ -194,9 +194,10 @@ describe("button.css in shadow roots", () => {
   })
 
   it('sizes a fallback icon inside <slot name="icon"> to the icon box, not the button block', () => {
-    // Regression for the slot-fallback-vs-child-selector bug (REPORT.md "(j)" item 1):  the svg here is
-    // FALLBACK content of `<slot name="icon">`, one level deeper than `.icon`'s own children, so a `>`
-    // selector (the old rule) would leave it unstyled and it'd render at the browser's default SVG size.
+    // Regression for the slot-fallback-vs-child-selector bug (the Lit spike report's "(j)" item 1, tag
+    // `archive/lit-spike`):  the svg here is FALLBACK content of `<slot name="icon">`, one level deeper than
+    // `.icon`'s own children, so a `>` selector (the old rule) would leave it unstyled and it'd render at the
+    // browser's default SVG size.
     // NOTE:  the outer `<button>` deliberately does NOT also carry class `icon` here (unlike a real
     // icon-only `<ui-button>`), so `.icon` unambiguously selects the inner `<span>`, not the button.
     adoptIntoPage(foundationCSS)

@@ -1,7 +1,7 @@
 # Native fallbacks
 
 What a host shows when its real render throws (plan-shared-runtime.md, 3a).  Library-neutral:  plain DOM,
-no Lit / Solid, so both spikes render the same thing.
+no Solid, so it renders whatever broke the Solid render (the Lit spike rendered the same thing).
 
 ## API
 
