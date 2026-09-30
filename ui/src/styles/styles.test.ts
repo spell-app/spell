@@ -33,8 +33,11 @@ import mediaRaw from "./media.css?raw"
 /** Every `.css` file under `src/styles/`, as written. */
 const RAW_SHEETS = import.meta.glob<string>("./**/*.css", { query: "?raw", import: "default", eager: true })
 
-/** 12 KB:  the gzip budget for `foundationCSS`. */
-const FOUNDATION_GZIP_BUDGET = 12 * 1024
+/**
+ * 13 KB:  the gzip budget for `foundationCSS`.
+ * - Was 12 KB;  the per-colour `-on` / `-inverted-on` contrast tokens and their remaps added ~0.65 KB.
+ */
+const FOUNDATION_GZIP_BUDGET = 13 * 1024
 
 /** `true` when Vite's Lightning CSS lowered `light-dark()` in the barrel's sheets (default targets). */
 const LIGHT_DARK_LOWERED = colorsCSS.includes("--lightningcss-light")

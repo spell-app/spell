@@ -314,7 +314,10 @@ Log of things that slowed down development. Date · symptom · fix · project.
   `grep '^import' dist/UIRuntime-*.js` after touching `index.ts`. · spell/ui
 - 2026-09-29 · `export * as E from "$/elements"` in `src/index.ts` moves Rolldown's runtime helpers (`__name`,
   `__exportAll`) out of `core.js` into a shared `rolldown-runtime-<hash>.js` that EVERY chunk imports (0.29 kB, one
-  more request per page). · Tolerated (the task keeps the `E` / `V` namespaces);  `CODE-DEBT.md`. · spell/ui
+  more request per page). · Fixed:  the namespaces moved to an `api` entry (`src/api.ts`);  namespacing a barrel
+  `core` also reaches (`$/vocabulary`) still split the runtime, so `V` namespaces an api-only re-export
+  (`vocabulary.api.ts`), and `api.ts` imports `$/forms` or the `forms` leaves split out of `forms.js` too.
+  `yarn measure`'s `runtimeChunks` check guards it. · spell/ui
 - 2026-09-29 · Import-map smoke pages failed with `The requested module 'solid-js' does not provide an export
   named 'flush'` once `yarn vendor` tree-shook Solid:  page modules (`perf-adapter.js`, inline `<script>`s) import
   bindings `dist/` never does. · `PeerVendor`'s `usedBy` reads `.html` pages and `.js` modules too;  `cli.ts` lists
@@ -333,3 +336,45 @@ Log of things that slowed down development. Date · symptom · fix · project.
 - 2026-09-29 · A preview server from an earlier session held the Astro preview port:  `yarn site:preview --port
   4399` printed `Preview server already running at http://localhost:4391` and exited. · `astro preview status` /
   use the running one (it serves `site/dist/` from disk, so a rebuild is picked up). · spell/ui
+- 2026-09-29 · `yarn site:build` / `yarn site:check` inside `site/` say `Couldn't find a script named
+  "site:build"` -- those scripts only exist in the ROOT `package.json` (`site/` has plain `build` / `check`). ·
+  Run `yarn site:*` from the repo root, or `yarn build` / `yarn check` from `site/`. · spell/ui
+- 2026-09-29 · Astro `<script>` in a `.astro` component: `demo.querySelector<UIDropdown>(...)` fails
+  `astro check` (`Type 'UIDropdown' does not satisfy the constraint 'Element'`) and `.options` is typed `{}` --
+  the element classes aren't `HTMLElement`s to the site's tsconfig. · Type the query as
+  `HTMLElement & { options: unknown[] }` (see `site/src/components/DropdownDemo.astro`). · spell/ui
+- 2026-09-29 · MDX attribute `<ui-label image>` (bare boolean) reaches the element as `image="true"` and the browser
+  requests `/components/parts/true` (404):  MDX makes bare attributes `="true"`, which is wrong for STRING
+  attributes. · Give string attributes a real value in site examples. · spell/ui
+- 2026-09-29 · A form layout test failed with every field full width:  Vitest's browser iframe is 414px wide
+  by default, so `<ui-form>`'s container query (`@container ui-form (width < 768px)`) stacked the rows, even
+  with `style="width: 800px"` on the slotted `<form>` (the CONTAINER is the form's shadow root box, sized by
+  the `<ui-form>`'s parent). · Put the width on a WRAPPER around `<ui-form>` in tests. · spell/ui
+- 2026-09-29 · `yarn smoke` failed every page with `The requested module '@spell/solid-element' does not provide
+  an export named 'onFormAssociated'` after a component started using a fork export no family had used before:
+  `vendor/` is tree-shaken to the bindings `dist/` imported LAST time. · `yarn vendor` again before
+  `yarn smoke`. · spell/ui
+- 2026-09-29 · A test spying `console.warn` never saw the `EFFECT_RELAY_TEAR` that `yarn screenshots` printed:
+  Solid 2's relay / tear detectors live in the ATTRIBUTION engine (`@solidjs/signals/attribution`), which only
+  runs after `attribution.enable()`, and "info"-severity findings never reach the console. · In the test:
+  `attribution.enable()` (from `solid-js/attribution`), `OBSERVE!.diagnostics.capture()` (from `solid-js`), assert
+  on `events.stop()` codes, `attribution.disable()` after (`checkbox.test.tsx`). · spell/ui
+- 2026-09-29 · A `<ui-menu>`'s items silently stopped updating after `interactive` was toggled -- only when an
+  EARLIER test had loaded the runtime.  Chased as a stale memo for an hour. · The fork parents a slotted child's
+  reactive root under the owner stamped on its `<slot>`;  a slot re-created by `<Switch>` disposes them.  Create the
+  slot once per render and move it (`SUSPECTED-BUGS.md`).  Reproduce ordering bugs with a trivial first test that
+  just renders something. · spell/ui
+- 2026-09-29 · `UIElement.define()` without a tag registered a test owner (`x-item-owner`) as `ui-item-owner`;
+  `customElements.get("x-item-owner")` was `undefined` and every test just saw un-owned items. · Pass the tag:
+  `.define(vocabulary.tag)`. · spell/ui
+- 2026-09-29 · Rules placed DIRECTLY in `@layer ui.components` (the old `native.css` table block) beat every rule
+  in its sublayers (`ui.components.table.*`), silently overriding `table.css`. · Never put rules directly in a
+  parent layer that has sublayers;  a rule dump (`Sheets.rules`) found it. · spell/ui
+- 2026-09-29 · The Vitest browser viewport is narrower than 768px by default, so static tables / menus render in
+  their MOBILE (stacked) layout in CSS tests. · `page.viewport(1000, 800)` in the test (restore on finish), see
+  `menu.css.test.ts` `resize()`. · spell/ui
+- 2026-09-29 · `getComputedStyle(el, "::before").content` returns the `counters(...)` expression, not the rendered
+  number, so list numbering can only be checked by screenshot. · spell/ui
+- 2026-09-29 · axe's `aria-required-children` fails a `role=menubar` whose children are focusable custom-element
+  hosts:  it can't see `ElementInternals` roles (`role=none`), so a `tabindex` on the host reads as an unknown
+  focusable child. · Rove focus over the items' inner boxes (`UIItem.focusTarget`), never the hosts. · spell/ui

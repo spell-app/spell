@@ -1,5 +1,5 @@
 /**
- * Every name `<ui-dropdown>` and `<ui-item>` use:  tags, attributes (kind + allowed values), events, slots,
+ * Every name `<ui-dropdown>` uses:  tag, attributes (kind + allowed values), events, slots,
  * parts, states, texts.  Schema:  `ComponentVocabulary` (`$/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-dropdown search selection pointing="top left">` => `ui search selection top left pointing dropdown`.
@@ -201,48 +201,4 @@ export const dropdownVocabulary = {
       description: "Accessible name of a `multiple` label's delete button."
     }
   ]
-} as const satisfies ComponentVocabulary
-
-/****************
- * ### `<ui-item>`
- * One option (or header / divider) of a dropdown -- data, not rendering.
- * - Generic on purpose:  menus and lists reuse it later, so it names only what an option needs.
- * - The dropdown renders its own `.item[role=option]` from each `<ui-item>` (the listbox must live in the
- *   combobox's tree for `aria-activedescendant`);  `<ui-item>` itself shows nothing.
- ****************/
-export const itemVocabulary = {
-  tag: "ui-item",
-  noun: "item",
-  ui: false,
-  description: "An option of a dropdown (and later a menu or list).",
-  attributes: [
-    { name: "value", kind: "string", description: "Value;  defaults to `text`." },
-    { name: "text", kind: "string", description: "Text;  defaults to the text content." },
-    { name: "description", kind: "string", description: "Secondary text, shown at the end." },
-    { name: "icon", kind: "string", description: "Icon name, shown before the text." },
-    { name: "image", kind: "string", description: "Image URL, shown before the text." },
-    { name: "flag", kind: "string", description: "Country code, shown as a flag before the text." },
-    { name: "disabled", kind: "keyOnly", description: "Can't be chosen." },
-    {
-      name: "selected",
-      kind: "keyOnly",
-      key: "active",
-      description: "Chosen.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted."
-    },
-    {
-      name: "type",
-      kind: "enum",
-      values: ["item", "header", "divider"],
-      default: "item",
-      description: "An option, a group `header`, or a `divider` line."
-    }
-  ],
-  events: [],
-  slots: [{ name: "", description: "Text (when there's no `text` attribute)." }],
-  parts: [],
-  states: [
-    { name: "selected", description: "Chosen." },
-    { name: "disabled", description: "Can't be chosen." }
-  ],
-  texts: []
 } as const satisfies ComponentVocabulary

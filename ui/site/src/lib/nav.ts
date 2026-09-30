@@ -39,6 +39,9 @@ export const HEADER_LINKS: NavLink[] = [
   { label: "Icons", path: "/icons/" }
 ]
 
+/** Component categories in sidebar / index order, as Fomantic groups them. */
+export const CATEGORIES = ["Elements", "Modules"] as const
+
 /** Sidebar sections, components listed alphabetically from the content collection. */
 export async function sidebar(): Promise<NavSection[]> {
   const components = (await getCollection("components")).sort((a, b) => a.data.title.localeCompare(b.data.title))
@@ -51,14 +54,16 @@ export async function sidebar(): Promise<NavSection[]> {
         { label: "Grammar", path: "/grammar/" }
       ]
     },
-    {
-      title: "Components",
-      links: components.map((entry) => ({
-        label: entry.data.title,
-        path: `/components/${entry.id}/`,
-        badge: STATUS_BADGES[entry.data.status]
-      }))
-    },
+    ...CATEGORIES.map((category) => ({
+      title: category,
+      links: components
+        .filter((entry) => entry.data.category === category)
+        .map((entry) => ({
+          label: entry.data.title,
+          path: `/components/${entry.id}/`,
+          badge: STATUS_BADGES[entry.data.status]
+        }))
+    })).filter((section) => section.links.length),
     {
       title: "Foundation",
       links: [

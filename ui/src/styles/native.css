@@ -1,8 +1,12 @@
 /*
  * Light-DOM rules for NATIVE markup, injected into the page by the runtime, `@layer ui.components`.
- * - Why a page sheet:  content slotted into a component (`<ui-table><table>`) stays in the light DOM, where the
- *   component's shadow CSS can only reach the top level (`::slotted(table)`), never `td`.  These rules give
- *   that markup its base look;  components add their variations (`celled`, `striped` ...) the same way.
+ * - Why a page sheet:  content slotted into a component (the native `<form>` / controls in `<ui-form>`) stays in
+ *   the light DOM, where the component's shadow CSS can only reach the top level (`::slotted(form)`), never the
+ *   controls inside.  These rules give that markup its base look.
+ * - NOT here:
+ *   - slotted tables:  `table.css` styles `<ui-table>`'s light-DOM `<table>` itself (the element registers it as
+ *     a page sheet too), base look included
+ *   - lists:  a `<ui-list>`'s items are `<ui-item>`s, styled from `list.css` in their own shadow roots
  * - Also:  Fomantic's CSS-only tooltip (`[data-tooltip]`, from `popup.less`), and `.ui-native` -- opt-in
  *   token styling for plain HTML elements (Web Awesome's "native styles").
  * - Selectors are wrapped in `:where()` where they could otherwise out-rank an app's own element rules.
@@ -13,44 +17,6 @@
 
 @layer ui.components {
   /*******************************
-         Slotted tables
-  *******************************/
-
-  :where(ui-table) > table {
-    inline-size: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: inherit;
-    line-height: var(--ui-line-height);
-    color: var(--ui-text-color);
-    text-align: start;
-  }
-  :where(ui-table) > table > :where(caption) {
-    padding-block: var(--ui-space-xs);
-    color: var(--ui-text-muted);
-    text-align: start;
-  }
-  :where(ui-table) > table :where(th, td) {
-    padding: 0.785em;
-    text-align: inherit;
-    vertical-align: middle;
-  }
-  :where(ui-table) > table > :where(thead) :where(th) {
-    font-weight: var(--ui-font-weight-bold);
-    color: var(--ui-text-dark);
-    background-color: var(--ui-surface-muted);
-    border-block-end: var(--ui-border);
-  }
-  :where(ui-table) > table > :where(tbody, tfoot) > :where(tr + tr) > :where(td, th) {
-    border-block-start: var(--ui-border-width) solid var(--ui-border-color-internal);
-  }
-  :where(ui-table) > table > :where(tfoot) :where(th, td) {
-    font-weight: var(--ui-font-weight-normal);
-    background-color: var(--ui-surface-muted);
-    border-block-start: var(--ui-border);
-  }
-
-  /*******************************
        Native form controls
   *******************************/
 
@@ -60,9 +26,10 @@
     padding: 0.679em 1em;
     font: inherit;
     line-height: 1.215em;
-    color: var(--ui-text-color);
-    background-color: var(--ui-surface);
+    color: var(--ui-field-state-color, var(--ui-text-color));
+    background-color: var(--ui-field-state-background, var(--ui-surface));
     border: var(--ui-border);
+    border-color: var(--ui-field-state-border, var(--ui-border-color));
     border-radius: var(--ui-radius);
     outline: none;
     transition:
@@ -109,16 +76,20 @@
   }
 
   /*******************************
-          Slotted lists
+      Form and field messages
   *******************************/
 
-  :where(ui-list) > :where(ul, ol) {
-    margin: 0;
-    padding-inline-start: 1.25em;
-    line-height: var(--ui-line-height);
-  }
-  :where(ui-list) > :where(ul, ol) > :where(li + li) {
-    margin-block-start: var(--ui-space-2xs);
+  /*
+   * A `<ui-message state="…">` inside a `<ui-form>` shows only while its form, fields or field has that state
+   * (Fomantic's `.ui.form .error.message`).  Here, not in `message.css`:  the message's box is in its own shadow
+   * root, and the states are on the ancestors' hosts (`:state(error)` ...).
+   * - NOTE: canonical names only (`ui-message`, `state`);  a translated message tag isn't hidden.
+   */
+  :where(ui-form) :where(ui-message[state="error"]):not(:where(:state(error)) *),
+  :where(ui-form) :where(ui-message[state="info"]):not(:where(:state(info)) *),
+  :where(ui-form) :where(ui-message[state="success"]):not(:where(:state(success)) *),
+  :where(ui-form) :where(ui-message[state="warning"]):not(:where(:state(warning)) *) {
+    display: none;
   }
 
   /*******************************
@@ -131,12 +102,17 @@
    * - Hue / size variations come from the generated `[data-variation~="red"]` remaps (`colors.css`,
    *   `sizes.css`) as `--ui-variation-color` / `--ui-variation-scale`, so they never recolour or resize the
    *   element the tooltip hangs off.
-   * - Text is black or white by the bubble's lightness (same step function as `--ui-color-contrast`).
+   * - Text on a coloured bubble is the colour's `-on` foreground (`--ui-variation-color-on`, picked by contrast);
+   *   on a plain one, black or white by the bubble's lightness.
    * - For anything interactive or long, use `<ui-popup>`:  pseudo-element text is not reliably announced.
    */
   [data-tooltip] {
     --ui-tooltip-background: var(--ui-variation-color, var(--ui-surface));
     --ui-tooltip-edge: var(--ui-variation-color, var(--ui-border-color-strong));
+    --ui-tooltip-color: var(
+      --ui-variation-color-on,
+      oklch(from var(--ui-tooltip-background) clamp(0, (0.6 - l) * 1000, 1) 0 0)
+    );
     --ui-tooltip-arrow-size: 0.714em;
     --ui-tooltip-distance: 0.5em;
     position: relative;
@@ -168,7 +144,7 @@
     font-style: normal;
     line-height: var(--ui-line-height);
     /* black or white, whichever reads on the bubble -- plain, inverted and coloured alike */
-    color: oklch(from var(--ui-tooltip-background) clamp(0, (0.72 - l) * 1000, 1) 0 0);
+    color: var(--ui-tooltip-color);
     text-align: start;
     text-transform: none;
     text-shadow: none;
@@ -266,6 +242,10 @@
    */
   [data-tooltip][data-inverted] {
     --ui-tooltip-background: var(--ui-variation-color-inverted, var(--ui-ink));
+    --ui-tooltip-color: var(
+      --ui-variation-color-inverted-on,
+      oklch(from var(--ui-tooltip-background) clamp(0, (0.6 - l) * 1000, 1) 0 0)
+    );
     --ui-tooltip-edge: transparent;
   }
   [data-tooltip][data-inverted]::after {

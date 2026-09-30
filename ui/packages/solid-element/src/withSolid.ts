@@ -12,13 +12,16 @@
  *   - the component runs untracked, inside an error boundary (`errors.ts`)
  *   - an adopted declarative shadow root is emptied first (`shadowRoot.ts`)
  *   - the element is provided as context, so hooks work from nested components (`current.ts`)
+ *   - delegated events don't leak `target` / `currentTarget` out of the shadow root, and reach enclosing
+ *     Solid handlers (`events.ts`)
  */
 
 import { createRoot, createSignal, runWithOwner, untrack, type Signal } from "solid-js"
-import { insert, registerDelegatedRoot, unregisterDelegatedRoot, type JSX } from "@solidjs/web"
+import { insert, type JSX } from "@solidjs/web"
 
 import { ElementContext } from "./current"
 import { renderWithBoundary } from "./errors"
+import { registerRoot, unregisterRoot } from "./events"
 import { lookupOwner } from "./owner"
 import { clearAdoptedRoot } from "./shadowRoot"
 import type { ComponentOptions, ComponentType, FunctionComponent, SolidElement } from "./solid-element.types"
@@ -56,7 +59,7 @@ export function withSolid<T extends object>(Component: ComponentType<T>): Functi
           ;(props as Record<string, unknown>)[key] = value
         })
         element.addReleaseCallback(() => {
-          unregisterDelegatedRoot(element.renderRoot)
+          unregisterRoot(element.renderRoot)
           element.renderRoot.textContent = ""
           dispose()
         })
@@ -75,7 +78,8 @@ export function withSolid<T extends object>(Component: ComponentType<T>): Functi
         })
         // the component (and `noShadowDOM()`) ran above, so the render root can be resolved now
         clearAdoptedRoot(element)
-        registerDelegatedRoot(element.renderRoot)
+        // delegation root, bridged so handlers' state doesn't leak out of the shadow root (`events.ts`)
+        registerRoot(element.renderRoot)
         return insert(element.renderRoot, view)
       })
     }

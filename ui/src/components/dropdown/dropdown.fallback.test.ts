@@ -13,9 +13,6 @@ FallbackStub.define(
   true
 )
 
-/** Axe without contrast:  the stub has no stylesheet. */
-const AXE = { rules: { "color-contrast": { enabled: false } } }
-
 /** The stub's `value` / `options` properties, as `<ui-dropdown>` has. */
 type DropdownStub = StubHost & { value?: string | string[]; options?: { value: string; text: string }[] }
 
@@ -42,7 +39,7 @@ describe("DropdownFallback", () => {
     expect(select().getAttribute("aria-label")).toBe("Pick one")
     expect(select().multiple).toBe(false)
     expect(host.matches(":state(errored)")).toBe(true)
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 
   it("keeps an explicit aria-label", () => {

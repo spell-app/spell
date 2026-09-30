@@ -26,7 +26,7 @@ export type FallbackAdapter = {
   breakRender(element: HTMLElement): Promise<void>
   /** Resolve once pending updates (attribute / property writes) are in the DOM. */
   settle(): Promise<void>
-  /** Run axe on `root`;  reject (throw) on violations.  `color-contrast` off. */
+  /** Run axe on `root`;  reject (throw) on violations. */
   axe(root: Element): Promise<void>
 }
 
@@ -55,7 +55,43 @@ export const FAMILY_FALLBACKS: readonly { family: string; html: string; root: st
   { family: "segment", html: `<ui-segment raised>Box</ui-segment>`, root: "[part~=segment]" },
   { family: "container", html: `<ui-container text>Text</ui-container>`, root: "[part~=container]" },
   { family: "divider", html: `<ui-divider horizontal>Or</ui-divider>`, root: "[role=separator][part~=divider]" },
-  { family: "parts", html: `<ui-header size="large">Title</ui-header>`, root: "[part~=header]" }
+  { family: "parts", html: `<ui-header size="large">Title</ui-header>`, root: "[part~=header]" },
+  { family: "grid", html: `<ui-grid columns="2"><ui-column>A</ui-column></ui-grid>`, root: "[part~=grid]" },
+  { family: "image", html: `<ui-image size="small" src="data:," alt="Photo"></ui-image>`, root: "img[part~=image]" },
+  { family: "text", html: `<ui-text color="red">Red</ui-text>`, root: "span[part~=text]" },
+  { family: "flag", html: `<ui-flag country="fr"></ui-flag>`, root: "[role=img][part~=flag]" },
+  { family: "loader", html: `<ui-loader active inline></ui-loader>`, root: "[role=status][part~=loader]" },
+  {
+    family: "placeholder",
+    html: `<ui-placeholder><ui-placeholder-line></ui-placeholder-line></ui-placeholder>`,
+    root: "[part~=placeholder]"
+  },
+  { family: "message", html: `<ui-message header="Saved" dismissible>Done</ui-message>`, root: "[part~=message]" },
+  {
+    family: "breadcrumb",
+    html: `<ui-breadcrumb><ui-breadcrumb-section active>Home</ui-breadcrumb-section></ui-breadcrumb>`,
+    root: "nav[part~=breadcrumb]"
+  },
+  { family: "input", html: `<ui-input placeholder="Search" aria-label="Search"></ui-input>`, root: "[part~=input]" },
+  { family: "checkbox", html: `<ui-checkbox>Agree</ui-checkbox>`, root: "[part~=checkbox]" },
+  { family: "form", html: `<ui-form><form></form></ui-form>`, root: "[part~=form]" },
+  {
+    family: "list",
+    html: `<ui-list divided ordered><ui-item>One</ui-item><ui-item>Two</ui-item></ui-list>`,
+    root: "ol.ui.divided.ordered.list[part=list][role=list]"
+  },
+  {
+    family: "menu",
+    html: `<ui-menu secondary aria-label="Fallback menu"><ui-item href="#a" selected>A</ui-item></ui-menu>`,
+    root: "nav[part~=menu]"
+  },
+  {
+    family: "table",
+    html:
+      `<ui-table celled scrolling><table><caption>People</caption><thead><tr><th>Name</th></tr></thead>` +
+      `<tbody><tr><td>Jill</td></tr></tbody></table></ui-table>`,
+    root: "[role=region][part~=scroller]"
+  }
 ]
 
 export const FALLBACK_CASES: readonly FallbackCase[] = [

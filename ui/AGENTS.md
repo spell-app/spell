@@ -151,6 +151,10 @@ when working with code in this repository.
   tags).  Solid 2 has no `on:` namespace:  inside a component, `onClick={...}` for native events;  a Solid APP
   listening for `ui-*` events uses a `ref` callback + `addEventListener` (see `tools/frameworks/solid/app.tsx`),
   and binds rich data with `prop:options`.
+  - Listeners OUTSIDE a component see `event.target === host` (`composedPath()[0]` is the inner element), and an
+    app's delegated `onClick` on a `ui-*` tag runs once.  The fork's `events.ts` guarantees it by undoing what
+    Solid's shadow-root delegation leaves on the event (`target`, `currentTarget`, its handled marker);  NEVER
+    work around a wrong `target` in a component -- fix it there (`packages/solid-element/UPSTREAM.md`, PR 10).
 - **`keepAlive`:**  a removed element keeps its reactive root (until `dispose()` or garbage collection), so
   anything page-wide (overlay entries, document listeners) follows `connected()`, never disposal.
 - **Native fallback:**  every family sets `@proto static Fallback = <Name>Fallback` (plain DOM on

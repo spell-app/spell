@@ -24,8 +24,7 @@ export const breadcrumbVocabulary = {
     {
       name: "divider",
       kind: "string",
-      default: "/",
-      description: "Text drawn between sections, e.g. `›`;  published as `--ui-breadcrumb-divider`."
+      description: "Text drawn between sections, e.g. `›` (`/` when unset);  published as `--ui-breadcrumb-divider`."
     },
     {
       name: "divider-icon",

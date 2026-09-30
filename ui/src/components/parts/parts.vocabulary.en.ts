@@ -129,7 +129,8 @@ export const headerVocabulary = {
     { name: "in-list", description: "Owned by a list." },
     { name: "in-popup", description: "Owned by a popup." },
     { name: "in-toast", description: "Owned by a toast." },
-    { name: "in-header", description: "Owned by a header." }
+    { name: "in-header", description: "Owned by a header." },
+    { name: "in-menu", description: "Owned by a menu:  an item's sub header (a vertical menu's `.item > .header`)." }
   ],
   texts: [],
   ownsParts: ["header", "content"]

@@ -116,6 +116,20 @@ How each fix in `@spell/solid-element` could land in `solidjs/solid`, branch `ne
 - **Test:**  `attributes.test.tsx` -- bare removal, callback sources, same-tick `setAttribute()`, no echo,
   array reflection round trip.
 
+## PR 4b -- don't reflect default values (`lifecycle.ts`)
+
+- **Problem:**  `component-register`'s `initializeProps` (run on first connect) calls `prop.reflect &&
+  reflect(...)` for EVERY prop, defaults included (`component-register.js:40`).  A bare `<x-icon>` with a
+  reflecting `variant` default of `"solid"` becomes `<x-icon variant="solid">`, so the component can no longer
+  tell a default from an author's explicit choice, and `outerHTML` / serialized markup changes under the author.
+  Native elements and Lit (`useDefault`) never do this.  Confirmed in the original: yes, it reflects defaults.
+- **Patch outline:**  drop the reflect-on-connect loop.  Reflection only happens on a property write (writing
+  the default back included);  removing the attribute restores the default without reflecting.  A pre-upgrade
+  property is re-applied through the setter, so it still reflects.
+- **Breaking:**  yes for consumers relying on default attributes (e.g. CSS `[variant]` selectors on defaults).
+- **Test:**  `attributes.test.tsx` -- bare element has no attribute, default write reflects, removal restores
+  the default with no attribute;  `upgrade.test.tsx` -- pre-upgrade property reflects.
+
 ## PR 5 -- `ElementInternals` and form hooks (`internals.ts`)
 
 - **Problem:**  no way to get `ElementInternals` (it can only be attached by the element's own class) or to hear
@@ -190,6 +204,59 @@ How each fix in `@spell/solid-element` could land in `solidjs/solid`, branch `ne
 - **Breaking:**  no.
 - **Test:**  `shadowRoot.test.tsx` (browser-only:  `setHTMLUnsafe` + declarative shadow DOM) -- replaced not
   appended;  closed root via internals;  same root node kept.
+
+## PR 10 -- delegated events leak out of shadow roots (`events.ts`)
+
+- **Problem:**  every element's shadow root is a delegation root (`registerDelegatedRoot`, element `:48`), and
+  dom-expressions' `eventHandler` (`@solidjs/web` `web.js:1572-1641`) leaves its walk state ON THE EVENT OBJECT:
+  - `retarget(oriTarget)` at the end redefines `target` as an own property holding the value read on entry at the
+    shadow root:  the INNER node.  Own beats the prototype's retargeting getter, so every later listener outside
+    the shadow root sees `<button>` / `<input>`, not the host.
+  - `currentTarget` stays an own getter returning wherever the walk stopped (the inner node), for every later
+    listener -- also for a plain Solid app with no shadow DOM (a `document` / `window` listener added after the
+    app's gets the app's last walked node).
+  - the `_$SOLID_EVENT_OWNER` marker stays the shadow root;  every OUTER container bails on
+    `!container.contains(prev)` (not shadow-including), so a Solid app's `<my-el onClick>` and any `onClick` above
+    a nested element never run for events from inside that element's shadow root.
+- **Is it Solid 2 generally?**  Yes:  every `@solidjs/element` element, and any `render()` into a shadow root
+  (`@spell/solid-element` inherits it unchanged).  Candidate issue for `solidjs/solid` (`next`;  the code is
+  dom-expressions' `client.js` `eventHandler`), not filed.  Minimal repro (no library):
+
+  ```tsx
+  import { render } from "@solidjs/web"
+  customElements.define("x-el", class extends HTMLElement {
+    connectedCallback() {
+      render(() => <button onClick={() => {}}>b</button>, this.attachShadow({ mode: "open" }))
+    }
+  })
+  const app = document.body.appendChild(document.createElement("div"))
+  render(() => <div onClick={() => console.log("never runs")}><x-el /></div>, app)
+  const el = app.querySelector("x-el")!
+  el.addEventListener("click", (e) => console.log(e.target === el, e.currentTarget === el)) // false false
+  el.shadowRoot!.querySelector("button")!.click()
+  ```
+- **Answers:**  no upstream issue yet.
+- **Patch outline (upstream, in `eventHandler`, ~10 lines):**
+  - end with `delete e.target;  delete e.currentTarget` (both were defined `configurable`), not
+    `retarget(oriTarget)`:  the platform's getters return
+  - a `ShadowRoot` container hands off at its host:  run the host's own handler when the enclosing container would
+    resume past it, and leave the host as the marker (or make the `contains(prev)` check shadow-including:
+    `prev.getRootNode().host` up to the container)
+- **This fork (from outside, no `@solidjs/web` change):**  `registerRoot()` wraps Solid's per-type listener on the
+  render root (own `addEventListener` on the root instance;  Solid's listener told apart by the container state
+  `registerDelegatedContainer()` returns).  After it:  own props deleted, host handler run when a plain Solid
+  container walks next, marker moved to the host.  Before it:  when an inner root walked part of the path, a
+  one-shot `composedPath()` slice makes Solid resume after that part (slots included).  Reads internals
+  (`_$SOLID_EVENT_OWNER`, `_$$<type>`, the state's `handlers` / `roots`):  pinned rc.11.
+- **Cost:**  +0.75 kB min + gzip;  ~+0.5-1 us per delegated event per root on its path (chromium, 50k clicks:
+  1.9-2.3 us => 2.7-3.0 us single root);  no extra listeners.
+- **Breaking:**  handlers above a nested element (and a Solid app's handlers on an element) now RUN where they
+  were silently skipped;  page listeners see the retargeted `target`.
+- **Test:**  `events.test.tsx` -- page listener `target` / `currentTarget` (original leaks the inner node);  app
+  handlers on and above the element;  nested elements;  slotted light content and a nested element slotted into
+  another, each handler once;  `stopPropagation()`;  a component's own root listener untouched;  `noShadowDOM()`.
+  `@spell/ui`'s `test/events.test.tsx`:  `input` / `click` / `keydown` / `focusin` on `<ui-input>`, `<ui-button>`,
+  `<ui-dropdown>` with and without a Solid app, and a rich dropdown item's nested element.
 
 ## HMR -- redefinition in place, live-instance registry, Vite plugin (`hot.ts`, `vite.ts`)
 

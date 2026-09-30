@@ -117,7 +117,17 @@ describe("Converters.number() / json() / list()", () => {
   it("warns on invalid JSON", () => {
     const warn = spyWarn()
     expect(Converters.json("[oops")).toBeUndefined()
-    expect(warn).toHaveBeenCalledOnce()
+    expect(Converters.json("{oops}")).toBeUndefined()
+    expect(warn).toHaveBeenCalledTimes(2)
+  })
+
+  it("keeps text that isn't JSON-shaped as a string (`rules` shorthand), without warning", () => {
+    const warn = spyWarn()
+    expect(Converters.json("email")).toBe("email")
+    expect(Converters.json("minLength[6]")).toBe("minLength[6]")
+    expect(Converters.json('"email"')).toBe("email")
+    expect(Converters.json("  ")).toBeUndefined()
+    expect(warn).not.toHaveBeenCalled()
   })
 
   it("splits lists on spaces and commas", () => {

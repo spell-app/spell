@@ -12,9 +12,6 @@ FallbackStub.define(
   true
 )
 
-/** Axe without contrast:  the stub has no stylesheet. */
-const AXE = { rules: { "color-contrast": { enabled: false } } }
-
 /** `<form>` around `html`;  records the `FormData` of the next submit and cancels it. */
 function form(html: string) {
   const element = Fixture.render<HTMLFormElement>(`<form><input name="a" value="1" />${html}</form>`)
@@ -40,7 +37,7 @@ describe("ButtonFallback", () => {
     expect(button.getAttribute("aria-label")).toBe("Save it")
     expect(button.querySelector("slot")).not.toBeNull()
     expect(host.matches(":state(errored)")).toBe(true)
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 
   it("uses `content` only as the slot's fallback", () => {
@@ -64,7 +61,7 @@ describe("ButtonFallback", () => {
     expect(link.rel).toBe("noopener")
     expect(link.className).toBe("ui button")
     expect(FallbackStub.shadow(host).querySelector("button")).toBeNull()
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 
   it("submits its form with name=value", () => {
