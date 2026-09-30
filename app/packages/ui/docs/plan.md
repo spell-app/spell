@@ -236,7 +236,7 @@ All under `src/components/`, no Elements/Collections/Views/Modules split. Each r
   - `image` (+ `ui-images`), `text`, `flag`, `loader`, `placeholder`
   - `input` (icon/labeled/action/file/transparent/states), `checkbox` (standard/radio/slider/toggle; indeterminate; read-only; `selected`)
   - `form` (+ `ui-field`, `ui-fields`; validation engine), `message`
-  - `list` (+ `ui-item`), `table`, `menu` (+ `ui-item`, `ui-menu-menu`), `breadcrumb`
+  - `list` (+ `ui-item`), `table`, `menu` (+ `ui-item`;  a nested `ui-menu` is the sub-menu), `breadcrumb`
 - **Phase B – views & remaining static components**:
   - `card` (+ `ui-cards`), `item` (+ `ui-items`), `feed`, `comment` (+ `ui-comments`), `statistic` (+ `ui-statistics`), `step` (+ `ui-steps`), `rail`, `reveal`, `ad`, `emoji`
 - **Phase C – behaviour components**:

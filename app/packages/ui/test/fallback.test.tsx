@@ -15,7 +15,7 @@ const SOLID: FallbackAdapter = {
   mount: (html) => ElementFixture.render(`<div>${html}</div>`),
   breakRender: (element) => ElementFixture.breakRender(element as UIHost),
   settle: () => ElementFixture.tick(),
-  axe: async (root) => void (await expectAccessible(root, { rules: { "color-contrast": { enabled: false } } }))
+  axe: async (root) => void (await expectAccessible(root))
 }
 
 describe("native fallback", () => {

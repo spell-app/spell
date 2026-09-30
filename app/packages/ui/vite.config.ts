@@ -26,7 +26,31 @@ const TEST = fileURLToPath(new URL("./test", import.meta.url))
 export const CSS_TARGETS = { chrome: 125 << 16, safari: 26 << 16, firefox: 147 << 16 }
 
 /** Component families, one lib entry each (`src/components/<name>/index.ts`), so each can be loaded and sized alone. */
-export const COMPONENTS = ["button", "dropdown", "icon", "label", "parts", "divider", "segment", "container"] as const
+export const COMPONENTS = [
+  "button",
+  "dropdown",
+  "icon",
+  "label",
+  "parts",
+  "divider",
+  "segment",
+  "container",
+  "grid",
+  "image",
+  "text",
+  "flag",
+  "loader",
+  "placeholder",
+  "message",
+  "breadcrumb",
+  "input",
+  "checkbox",
+  "form",
+  "item",
+  "list",
+  "menu",
+  "table"
+] as const
 
 /**
  * Shared entries, in load order:  every family imports `core`;  only families with a form VALUE import `forms`.
@@ -39,12 +63,14 @@ export const SHARED_ENTRIES = { core: `${SRC}/core.ts`, forms: `${SRC}/forms.ts`
  * - `core`, `forms` -- the shared entries (`SHARED_ENTRIES`);  no family inlines them
  * - one per family
  * - `index` -- every family, for pages that want them all
+ * - `api` -- the `E` / `V` namespaces, for apps only (`src/api.ts`)
  */
 export const ENTRIES: Record<string, string> = {
   ...SHARED_ENTRIES,
   ...Object.fromEntries(COMPONENTS.map((name) => [name, `${SRC}/components/${name}/index.ts`])),
   styles: `${SRC}/styles/index.ts`,
-  index: `${SRC}/index.ts`
+  index: `${SRC}/index.ts`,
+  api: `${SRC}/api.ts`
 }
 
 /**

@@ -74,9 +74,10 @@
     --ui-message-duration: var(--ui-duration-fast);
     --ui-message-header-font-size: 1.14285em;
     --ui-message-header-paragraph-distance: 0.25em;
-    --ui-message-text-opacity: 0.85;
+    /* Fomantic's 0.85 faded tinted text below 4.5:1 (brown text on its background:  4.06), so text stays opaque. */
+    --ui-message-text-opacity: 1;
     --ui-message-paragraph-margin: 0.75em;
-    --ui-message-list-opacity: 0.85;
+    --ui-message-list-opacity: 1;
     --ui-message-list-margin: 0.5em;
     --ui-message-list-indent: 1em;
     --ui-message-list-item-margin: 0.3em;
@@ -138,7 +139,8 @@
     --ui-color-focus: initial;
     --ui-color-down: initial;
     --ui-color-active: initial;
-    --ui-color-contrast: initial;
+    --ui-color-on: initial;
+    --ui-color-inverted-on: initial;
     --ui-scale: initial;
   }
 }

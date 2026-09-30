@@ -74,6 +74,18 @@ export type ColorRecipe = {
   chroma: number
 }
 
+/**
+ * A foreground candidate for text on a solid colour (`onColors`).
+ * - `color` is what `ColorContrast` measures, `css` what `--ui-<name>-on` emits -- the same colour, but `css`
+ *   may be a token (`var(--ui-ink-on-light)`) so a theme's re-ink reaches it.
+ */
+export type OnColor = {
+  /** value measured at generation time */
+  color: Oklch
+  /** CSS emitted for it */
+  css: string
+}
+
 /** A `ColorRecipe` per colour scheme. */
 export type SchemeRecipe = {
   /** recipe used in the light scheme */
@@ -95,11 +107,15 @@ export type HueStates = Record<HueStateName, ColorShift>
 /**
  * One palette hue.
  * - `states` overrides the default darken / saturate recipe, e.g. `black` LIGHTENS on hover (as in Fomantic).
+ * - `inverted` overrides `--ui-<hue>-inverted` (default `onDark`), for a hue whose dark-scheme fill is too dark
+ *   to read as TEXT on a dark surface -- `black`, as Fomantic's inverted black is near-white.
  */
 export type HueDefinition = Prettify<
   SchemeColor & {
     /** per-hue override of `hueStates` */
     states?: HueStates
+    /** per-hue override of the `inverted` colour */
+    inverted?: Oklch
   }
 >
 

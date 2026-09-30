@@ -39,7 +39,7 @@ export class StubOwner extends UIElement {
   /**
    * Define `stub-<owner>` for every owner Fomantic styles parts in -- read from the parts' `in-<owner>` states --
    * except those that exist as real elements (`header`, `label`).
-   * - `stub-item`, not `ui-item`:  that tag is the dropdown's option (see `docs/report.md`).
+   * - `stub-item`, not `ui-item`:  that tag is the generic item of dropdowns, lists and menus (`docs/grammar.md`).
    * - A statistic also owns `label` (a `<ui-label>` there is its `.label` part).
    */
   static defineFomanticOwners() {

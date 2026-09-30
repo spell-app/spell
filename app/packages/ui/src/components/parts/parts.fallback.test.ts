@@ -12,9 +12,6 @@ for (const tag of ["ui-meta", "ui-header", "ui-content", "ui-description"]) {
   )
 }
 
-/** Axe without contrast:  the stub has no stylesheet. */
-const AXE = { rules: { "color-contrast": { enabled: false } } }
-
 describe("ContentPartFallback", () => {
   it("renders a bare noun div, keyed by the host's tag", async () => {
     const host = Fixture.render<StubHost>(`<ui-meta>Yesterday</ui-meta>`)
@@ -23,7 +20,7 @@ describe("ContentPartFallback", () => {
     expect(meta.className).toBe("meta")
     expect(meta.getAttribute("part")).toBe("meta")
     expect(meta.querySelector("slot")).not.toBeNull()
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 
   it("renders a standalone header as an `ui header` heading by level", async () => {
@@ -32,7 +29,7 @@ describe("ContentPartFallback", () => {
     expect(header.tagName).toBe("H2")
     expect(header.className).toBe("ui large dividing header")
     expect(header.getAttribute("part")).toBe("header")
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 
   it("renders a header without a level as a div, and with href as a link", () => {

@@ -10,9 +10,6 @@ FallbackStub.define("x-fb-container", (host, root, internals) =>
   ContainerFallback.render(host, root, new Error("boom"), internals)
 )
 
-/** Axe without contrast:  the stub has no stylesheet. */
-const AXE = { rules: { "color-contrast": { enabled: false } } }
-
 describe("ContainerFallback", () => {
   it("renders a div with the class grammar, part and slot", async () => {
     const host = Fixture.render<StubHost>(`<x-fb-container text fluid="no">Hi</x-fb-container>`)
@@ -20,6 +17,6 @@ describe("ContainerFallback", () => {
     expect(container.className).toBe("ui text container")
     expect(container.getAttribute("part")).toBe("container")
     expect(container.querySelector("slot")).not.toBeNull()
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 })

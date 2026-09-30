@@ -116,6 +116,7 @@
     --ui-button-spaced-margin: var(--ui-space-m);
     --ui-button-toggle-background: var(--ui-positive);
     --ui-button-toggle-background-hover: var(--ui-positive-hover);
+    --ui-button-toggle-color: var(--ui-positive-on);
     --ui-button-disabled-opacity: var(--ui-disabled-opacity);
     --ui-button-animation-duration: var(--ui-duration-slow);
     --ui-button-loader-size: 1.25em;
@@ -153,7 +154,7 @@
     border-end-end-radius: calc(var(--_button-radius, var(--ui-button-radius)) * var(--ui-buttons-ee, 1));
     background-color: var(--_button-bg, var(--ui-color, var(--ui-button-background)));
     background-image: none;
-    color: var(--_button-fg, var(--ui-color-contrast, var(--ui-button-color)));
+    color: var(--_button-fg, var(--ui-color-on, var(--ui-button-color)));
     box-shadow: var(--_button-edge, 0 0 #0000), var(--ui-buttons-divider, 0 0 #0000);
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
@@ -224,7 +225,7 @@
     --_button-bg-down: oklch(from var(--_button-inverted) calc(l - 0.08) c h);
     --_button-bg-active: oklch(from var(--_button-inverted) calc(l - 0.04) c h);
     --_button-fg: var(--ui-color-inverted, var(--ui-text-inverted-color));
-    --_button-fg-hover: oklch(from var(--_button-inverted) clamp(0, (0.72 - l) * 1000, 1) 0 0);
+    --_button-fg-hover: var(--ui-color-inverted-on, var(--ui-ink-on-light));
     --_button-edge: inset 0 0 0 var(--ui-button-inverted-border-width) var(--_button-inverted);
   }
   .ui.basic.inverted:is(.button, .buttons) {
@@ -490,7 +491,7 @@
   .ui.labeled.button > .label:not(.basic) {
     border-color: transparent;
     background-color: var(--ui-color, var(--ui-button-background));
-    color: var(--ui-color-contrast, var(--ui-button-color));
+    color: var(--ui-color-on, var(--ui-button-color));
   }
   .ui[class*="left labeled"].button > .label {
     order: -1;
@@ -520,7 +521,7 @@
   .ui.toggle:is(.button, .buttons) {
     --_button-bg-active: var(--ui-button-toggle-background);
     --_button-bg-active-hover: var(--ui-button-toggle-background-hover);
-    --_button-fg-active: oklch(from var(--ui-button-toggle-background) clamp(0, (0.72 - l) * 1000, 1) 0 0);
+    --_button-fg-active: var(--ui-button-toggle-color);
     --_button-edge-active: 0 0 #0000;
   }
 
@@ -762,7 +763,7 @@
   /* Hover */
   .ui.button:hover {
     background-color: var(--_button-bg-hover, var(--ui-color-hover, var(--ui-button-background-hover)));
-    color: var(--_button-fg-hover, var(--ui-color-contrast, var(--ui-button-color-hover)));
+    color: var(--_button-fg-hover, var(--ui-color-on, var(--ui-button-color-hover)));
     box-shadow: var(--_button-edge-hover, var(--_button-edge, 0 0 #0000)), var(--ui-buttons-divider, 0 0 #0000);
   }
   .ui.button:is(:hover, :focus-visible) > .icon:not(.button) {
@@ -775,7 +776,7 @@
       --_button-bg-focus,
       var(--_button-bg-hover, var(--ui-color-focus, var(--ui-button-background-hover)))
     );
-    color: var(--_button-fg-hover, var(--ui-color-contrast, var(--ui-button-color-hover)));
+    color: var(--_button-fg-hover, var(--ui-color-on, var(--ui-button-color-hover)));
     box-shadow:
       var(--_button-edge-focus, var(--_button-edge-hover, var(--_button-edge, 0 0 #0000))),
       var(--ui-buttons-divider, 0 0 #0000);
@@ -784,7 +785,7 @@
   /* Down (pressed) */
   .ui.button:active {
     background-color: var(--_button-bg-down, var(--ui-color-down, var(--ui-button-background-down)));
-    color: var(--_button-fg-down, var(--_button-fg-hover, var(--ui-color-contrast, var(--ui-button-color-down))));
+    color: var(--_button-fg-down, var(--_button-fg-hover, var(--ui-color-on, var(--ui-button-color-down))));
     box-shadow:
       var(--_button-edge-down, var(--_button-edge-hover, var(--_button-edge, 0 0 #0000))),
       var(--ui-buttons-divider, 0 0 #0000);
@@ -793,7 +794,7 @@
   /* Active (on) */
   .ui.active.button {
     background-color: var(--_button-bg-active, var(--ui-color-active, var(--ui-button-background-active)));
-    color: var(--_button-fg-active, var(--_button-fg-hover, var(--ui-color-contrast, var(--ui-button-color-active))));
+    color: var(--_button-fg-active, var(--_button-fg-hover, var(--ui-color-on, var(--ui-button-color-active))));
     box-shadow: var(--_button-edge-active, var(--_button-edge, 0 0 #0000)), var(--ui-buttons-divider, 0 0 #0000);
   }
   .ui.active.button:hover {
@@ -864,14 +865,10 @@
     border-radius: var(--ui-radius-circle);
   }
   .ui.loading.button::before {
-    border-color: color-mix(
-      in oklab,
-      var(--_button-fg, var(--ui-color-contrast, var(--ui-button-color))) 20%,
-      transparent
-    );
+    border-color: color-mix(in oklab, var(--_button-fg, var(--ui-color-on, var(--ui-button-color))) 20%, transparent);
   }
   .ui.loading.button::after {
-    border-top-color: var(--_button-fg, var(--ui-color-contrast, var(--ui-button-color)));
+    border-top-color: var(--_button-fg, var(--ui-color-on, var(--ui-button-color)));
     animation: ui-button-spin var(--ui-button-loader-speed) linear infinite;
   }
   .ui.loading.button > :is(.icon, .label) {

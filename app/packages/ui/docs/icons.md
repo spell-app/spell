@@ -38,24 +38,47 @@ Measured at Font Awesome 7.3.1.
 | `glyphs/regular/*.js` | 169 | 101 KB | - | same |
 | `glyphs/brands/*.js` | 572 | 549 KB | - | same |
 | **all glyphs** | **2,163** | **1,418 KB** (8.7 MB allocated on disk) | 478 KB as one stream, 770 KB per-file | |
-| `data/names.json` (`{ solid, regular, brands }` name lists) | 1 | 28.6 KB | 9.2 KB | lazy, `Icons.#loadNames()` |
-| `data/aliases.json` (FA7's own aliases) | 1 | 18.0 KB | 7.6 KB | lazy, `Icons.#loadAliases()` |
-| `data/fomantic-aliases.json` | 1 | 20.3 KB | 9.5 KB | lazy, same |
-| `data/fomantic-clashes.json` (opt-in, see "Clashes") | 1 | 0.6 KB | 0.6 KB | lazy, same |
+| `data/names.json` (`{ solid, regular, brands }` name lists) | 1 | 28.6 KB | 9.3 KB | lazy, only `Icons.names()` / `resolve()` / the word-order fallback |
+| `data/aliases.json` (FA7's own aliases) | 1 | 18.0 KB | 5.3 KB | lazy, first name not found as typed |
+| `data/fomantic-aliases.json` | 1 | 20.3 KB | 6.2 KB | lazy, same |
+| `data/fomantic-clashes.json` (opt-in, see "Clashes") | 1 | 0.6 KB | 0.4 KB | lazy, same |
 | `data/search.json` (docs site only) | 1 | 93.9 KB | - | lazy, docs site only |
 
-None of it is in the initial JS bundle.  What a page pays (gzip, HTTP/2, no aliases involved):
+None of it is in the initial JS bundle.  Gzip sizes above are `gzip -c <file> | wc -c` (2026-09-29).
+What a page pays (gzip, HTTP/2, exact Font Awesome names):
 
-- `Icons` code 1.7 KB, `names.json` 9.2 KB, and ~0.2-0.6 KB per glyph:  **~11 KB for one icon, ~15 KB for ten**.
-  (Before, one icon cost 26 KB and ten cost 358 KB:  see "Loading strategies".)
-- A name that needs an alias (`setting`, `mail outline`, `cog`) also loads the three alias maps:  +~27 KB, once.
+- `Icons` code ~1.8 KB, and ~0.2-0.6 KB per glyph:  **~2 KB for one icon, ~6 KB for ten**.  No index.
+  (With `names.json` up front it was ~11 KB / ~15 KB;  before one module per icon, 26 KB / 358 KB:
+  see "Loading strategies".)
+- A name that needs an alias (`setting`, `mail outline`, `cog`) also loads the three alias maps:  +~12 KB, once.
   `Icons.get()` skips them for an exact Font Awesome name (`user`, `github`), except under
   `<html ui-icon-names="fomantic">`, which can remap exact names.
 
+Requests per style-less `get()` on a cold page (glyphs + data files;  a 404 is a few hundred bytes of headers):
+
+| Asked for | Before (`names.json` first) | Now (glyph first) |
+| --- | --- | --- |
+| solid icon (`user`) | 2:  `names.json`, glyph | **1**:  glyph |
+| brand icon (`github`) | 2:  `names.json`, glyph | 2:  `solid` 404, glyph |
+| regular via `outline` (`mail outline`) | 5:  alias maps (3), `names.json`, glyph | 4:  alias maps (3), glyph |
+| alias (`setting`), maps not yet cached | 5:  alias maps (3), `names.json`, glyph | 6:  `solid` + `brands` 404s, alias maps (3), glyph |
+| alias, maps cached | 1:  glyph | 1:  glyph |
+| unknown, one word (`nosuchicon`) | 4:  `names.json`, alias maps (3) | 5:  2 404s, alias maps (3) |
+| unknown, dashed (`no-such-icon`) | 4:  `names.json`, alias maps (3) | 6:  2 404s, alias maps (3), `names.json` |
+| the same miss again | 0 | 0 |
+| explicit style (`("user", "regular")`) | 2:  `names.json`, glyph | **1**:  glyph |
+
+- The trade-off:  exact names -- the common case -- got cheaper, while a name that isn't one pays 404s before its
+  real answer.  Fomantic vocabulary pays them only until the first alias name has loaded the maps;  after that,
+  the cached maps route an alias straight to its target.
+- Every miss is cached, so no URL is requested twice.  And once `names.json` HAS loaded (the docs icon browser,
+  a word-order name), `get()` checks it before any request again:  unknown names go back to costing nothing.
+
 ### Why these data files
 
-- `names.json`:  telling a bare `github` (brands) from `user` (solid) needs the name lists, `Icons.names(style)`
-  feeds the docs icon browser, and it lets `get()` answer `undefined` for an unknown name WITHOUT a 404 request.
+- `names.json`:  `Icons.names(style)` feeds the docs icon browser, the word-order fallback needs every name, and
+  `Icons.resolve()` uses it to tell a bare `github` (brands) from `user` (solid) without drawing either.
+  NOT on `get()`'s direct path any more (2026-09-29):  there the glyph request itself is the existence check.
   It replaces the old 37 KB `solid.json` chunk index and the whole-style `regular.json` / `brands.json` loads.
 - Alias maps are lazy for the same reason as before (`spike/lit/REPORT.md` "(j)" item 4):  a static import would
   land ~14 KB gzip of vocabulary in the eager chunk of every component that can render an icon.
@@ -70,17 +93,30 @@ None of it is in the initial JS bundle.  What a page pays (gzip, HTTP/2, no alia
 
 `Icons.get(name, style?)`:
 
-1. Explicit `style` is trusted before aliasing (`("apple", "brands")` is the Apple logo).
-2. Otherwise an exact Font Awesome name is looked up directly (solid, then brands).
-3. Otherwise `resolve()` applies Fomantic and Font Awesome aliases, `outline`, and word reordering.
-4. The result is checked against `names.json`, then `import()`s
-   `new URL("glyphs/<style>/<name>.js", import.meta.url)`.
+Each step runs only if the one before found nothing:
+
+1. Explicit `style`:  the name as typed, in that style (`("apple", "brands")` is the Apple logo).  One request;
+   an explicit style never probes another style.
+2. No style, alias maps not yet loaded, not Fomantic mode, no trailing `outline`:  the name as an exact Font
+   Awesome name -- anything cached, then `solid`, then `brands`.  Never `regular`:  every regular icon also
+   exists in solid, so that request could only 404 (a `register()`ed regular icon is still found in cache).
+3. Fomantic and Font Awesome aliases, and `outline` (-> `regular`), then the result in its style, or solid, then
+   brands.  Loads the alias maps.
+4. Word order (`button tablet` -> `tablet-button`):  loads `names.json`, the only step on this path that does.
+
+Each attempt `import()`s `new URL("glyphs/<style>/<name>.js", import.meta.url)`, but only for a name shaped like
+a Font Awesome slug (`/^[a-z0-9]+(-[a-z0-9]+)*$/`, so `../x` is never requested), and -- once `names.json` has
+loaded for another reason -- only one it lists.
 
 The URL is computed from the name, with `/* @vite-ignore */`:  there is NO name -> loader map.  A bundler
 therefore neither inlines the glyphs nor emits 2,000 entries (verified with a `vite build` of `src/icons/index.ts`
 alone:  the output is `index.js` 4.3 KB plus the four data chunks, no per-icon anything).  The module system is the
-cache:  a URL evaluates once per page, even across two bundles that share the same `glyphs/`.  A failed import is
-forgotten, so a later `get()` retries.
+cache:  a URL evaluates once per page, even across two bundles that share the same `glyphs/`.
+
+A failed import is recorded as a MISS and never requested again (`get()` resolves `undefined`, never rejects).
+`import()` rejects the same way for a 404 and a dropped connection -- there's no status to tell them apart --
+so the one cheap signal is used:  a failure while `navigator.onLine === false` is forgotten instead, and retried
+by a later `get()`.  Glyphs not deployed at all (wrong `glyphBase`) => every icon a miss until reload.
 
 `Icons.register(name, data, style = "solid")` adds a glyph to the same cache without any request.
 
@@ -237,20 +273,24 @@ Fomantic-style phrasing reach the 570 FA7 icons Fomantic never named.
 - Ambiguous word sets stay as typed and find nothing, rather than silently picking one -- 8 at FA 7.3.1:
   `arrow-{up,down}-{a-z,z-a,1-9,9-1,wide-short,short-wide}`, `left-right` / `right-left`, and
   `martini-glass` / `glass-martini` (an FA alias for `martini-glass-empty`).
-- Index built on first use from the solid index (already loaded to infer style) + `aliases.json`.  No new
-  data file.
+- Index built on first use from `names.json` + `aliases.json`.  No new data file, but `names.json` is loaded
+  just for this, and only after the direct glyph attempts missed -- so the common case never pays for it.
   - covers solid + regular:  every regular icon also exists in solid
   - covers brands only through FA's aliases (`github square` -> `square-github`);  the full brand list is
     the 560 KB `brands.json`, too big to load just for this
   - `Icons.test.ts` checks no real brand name is ever redirected
-- `peek()` reorders only once the solid index is loaded -- before that it has nothing to reorder against.
+- `peek()` reorders only once `names.json` and the alias maps are loaded -- before that it has nothing to
+  reorder against.
 
 `Icons.resolve()`'s order: split on spaces / dashes -> strip a trailing `outline` word (Fomantic's
 regular-style modifier, no separate alias needed) -> `fomantic-clashes.json` (only when the page opts in)
 -> `fomantic-aliases.json` -> `aliases.json` -> the dashed name, if the solid index knows it -> the one
 icon its words name in any order -> else the dashed name as typed.  A name found nowhere still resolves
-(best-effort `style: "solid"` or `"brands"`), so `get()` simply returns `undefined` rather than
-`resolve()` throwing.
+(best-effort `style: "brands"`) rather than throwing.
+
+`Icons.resolve()` is an introspection helper (tests, docs):  `get()` doesn't call it, and it always loads
+`names.json` + the alias maps, since naming the style without drawing the icon needs the full name lists.
+`get()` runs the same steps, but lets the glyph requests answer solid-vs-brands.
 
 ## License attribution
 
@@ -285,8 +325,8 @@ Key points for that component:
   property" rule) -- `ui-icon` should render nothing or a sized placeholder synchronously, then swap in the
   real `<svg>` once `Icons.get()` resolves. `Icons.peek()` lets it skip the placeholder entirely when the
   icon is already loaded or `register()`ed (e.g. after `Icons.preload()` from a parent list).
-- `name` is Fomantic-or-FA7 vocabulary either way -- the component never needs to know which; that's
-  exactly what `Icons.resolve()` is for.
+- `name` is Fomantic-or-FA7 vocabulary either way -- the component never needs to know which;  `Icons.get()`
+  resolves it (and `Icons.resolve()` says what it resolved to, at the cost of `names.json`).
 - `Icons.svgString()` is there for a component that builds its shadow root from one big template literal
   instead of DOM APIs -- not needed if `ui-icon` uses `svg()` directly, as sketched above.
 

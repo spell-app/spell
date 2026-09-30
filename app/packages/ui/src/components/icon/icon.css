@@ -63,7 +63,8 @@
     --ui-scale: initial;
     --ui-color: initial;
     --ui-color-inverted: initial;
-    --ui-color-contrast: initial;
+    --ui-color-on: initial;
+    --ui-color-inverted-on: initial;
   }
   :host([hidden]) {
     display: none;
@@ -275,7 +276,7 @@
   span.ui.inverted:is(.circular, .bordered).icon:not(.label) {
     --_icon-ring: none;
     --_icon-background: var(--ui-color, var(--ui-icon-inverted-background));
-    --_icon-color: var(--ui-color-contrast, var(--ui-icon-inverted-color));
+    --_icon-color: var(--ui-color-on, var(--ui-icon-inverted-color));
   }
   .ui.icons > .inverted.corner.icon,
   :host(:state(in-icons)) > .ui.inverted.corner.icon {

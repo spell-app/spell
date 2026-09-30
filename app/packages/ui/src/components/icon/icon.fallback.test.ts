@@ -10,9 +10,6 @@ FallbackStub.define("x-fb-icon", (host, root, internals) =>
   IconFallback.render(host, root, new Error("boom"), internals)
 )
 
-/** Axe without contrast:  the stub has no stylesheet. */
-const AXE = { rules: { "color-contrast": { enabled: false } } }
-
 describe("IconFallback", () => {
   it("is an image with a hidden text when it has a label", async () => {
     const host = Fixture.render<StubHost>(
@@ -25,7 +22,7 @@ describe("IconFallback", () => {
     expect(box.getAttribute("aria-label")).toBe("Profile")
     expect(box.hasAttribute("aria-hidden")).toBe(false)
     expect(box.textContent).toBe("Profile")
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 
   it("is an empty aria-hidden box without a label", async () => {
@@ -35,6 +32,6 @@ describe("IconFallback", () => {
     expect(box.getAttribute("aria-hidden")).toBe("true")
     expect(box.hasAttribute("role")).toBe(false)
     expect(box.childNodes.length).toBe(0)
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 })

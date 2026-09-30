@@ -172,6 +172,15 @@ describe("Icons.resolve() -- Font Awesome vs Fomantic names", () => {
     expect(Object.keys(fomanticClashes).length).toBeGreaterThan(0)
   })
 
+  it("loads `zoom`:  the brand logo by default, the magnifier when the page opts in", async () => {
+    // a clash, not a missing icon:  Font Awesome's `zoom` brand wins by default
+    expect(await Icons.resolve("zoom")).toEqual({ name: "zoom", style: "brands" })
+    expect(await Icons.get("zoom")).toBeDefined()
+    document.documentElement.setAttribute(ICON_NAMES_ATTRIBUTE, "fomantic")
+    expect(await Icons.resolve("zoom")).toEqual({ name: "magnifying-glass-plus", style: "solid" })
+    expect(await Icons.get("zoom")).toBe(await Icons.get("magnifying-glass-plus"))
+  })
+
   it("treats any other attribute value as Font Awesome", () => {
     document.documentElement.setAttribute(ICON_NAMES_ATTRIBUTE, "semantic")
     expect(Icons.preferredNames).toBe("fontawesome")
@@ -328,7 +337,9 @@ describe("Icons -- one module per icon", () => {
     expect(await Icons.get("github")).toEqual(await Icons.get("github", "brands"))
   })
 
-  it("resolves unknown names to undefined without any request", async () => {
+  // NOTE: `resolve()` above loaded the names index, which then vouches for every name -- the cold
+  // request counts (glyph first, misses cached) are in `Icons.exact.test.ts`
+  it("resolves unknown names to undefined without any request once the names index is loaded", async () => {
     expect(await Icons.get("no-such-icon-anywhere")).toBeUndefined()
     expect(await Icons.get("no-such-icon-anywhere", "brands")).toBeUndefined()
     expect(await Icons.get("../../data/aliases", "solid")).toBeUndefined()

@@ -4,7 +4,7 @@
  * - Runtime-light:  `import type` only, plus a few constants.
  */
 
-import type { MenuOption } from "$/elements"
+import type { FieldValue, MenuOption, ValidationRule } from "$/elements"
 
 ////////////////
 // ## Button
@@ -55,8 +55,42 @@ export type DropdownItemDetail = {
   originalEvent?: Event
 }
 
+////////////////
+// ## Item
+////////////////
+
 /** `<ui-item type>`:  an option, a group header, or a divider. */
 export type ItemType = "item" | "header" | "divider"
+
+/**
+ * How an OWNER wants its generic `<ui-item>`s rendered, from `ItemOwner.itemContext()`.
+ * - The item finds its owner through `PartContext` (the owner's vocabulary `ownsParts` has `item`) and reads
+ *   this in a memo, so an owner attribute change (`<ui-list selection>`, `<ui-menu interactive>`) re-renders
+ *   every item.
+ */
+export type ItemContext = {
+  /** Role of the item HOST (internals), e.g. `listitem`;  `null` for none. */
+  hostRole: string | null
+  /** Role of the item's ROOT, e.g. `menuitem` in a menubar;  `undefined` keeps the native element's. */
+  role?: ItemRole
+  /** An item without `href` renders a `<button>` (selection list, menubar);  else a `<div>` (unless `link`). */
+  interactive: boolean
+  /** `aria-current` of a SELECTED item that is a link:  `page` in a navigation menu. */
+  current: "page" | "true"
+}
+
+/** Roles an owner may give an item's root. */
+export type ItemRole = "menuitem" | "menuitemradio" | "menuitemcheckbox" | "option" | "treeitem"
+
+/**
+ * What an owner of `<ui-item>`s (`<ui-list>`, `<ui-menu>`) implements on its CONTROLLER;  the item calls it as
+ * `(owner as UIHost).controller.itemContext(item)`, tracked.
+ * - The item also adopts the owner's `styles`:  the owner's sheet holds its item rules
+ *   (`:host(:state(in-list)) > .item`), next to the static class-grammar ones (`.ui.list > .item`).
+ */
+export type ItemOwner = {
+  itemContext(item: Element): ItemContext
+}
 
 ////////////////
 // ## CSS contracts
@@ -119,6 +153,7 @@ export const PART_OWNER_TOKENS = {
   modalHeaderSize: "--ui-modal-header-size",
   messageLayout: "--ui-message-layout",
   listLayout: "--ui-list-layout",
+  itemMedia: "--ui-item-media",
   statisticLayout: "--ui-statistic-layout",
   statisticValueSize: "--ui-statistic-value-size",
   stepState: "--ui-step-state",
@@ -187,3 +222,161 @@ export const BREADCRUMB_DIVIDER_TOKENS = {
  * previous sibling.
  */
 export const PLACEHOLDER_HOST_STATE = "placeholder"
+
+////////////////
+// ## Input
+////////////////
+
+/** `detail` of `ui-input` (every keystroke) and `ui-change` (commit), from `<ui-input>` / `<ui-textarea>`. */
+export type InputChangeDetail = {
+  /** value after the change */
+  value: string
+  originalEvent?: Event
+}
+
+/**
+ * Inherited tokens an OWNER sets for the text controls inside it (`input.css`), e.g. `<ui-field>` on its root.
+ * - `width` -- the host's inline size (`100%` in a field, `auto` in an inline one)
+ * - `color` / `background` / `border` -- a field's state, RESOLVED colours (declared where the state's remap
+ *   runs), so a control's own `state` still wins
+ */
+export const INPUT_OWNER_TOKENS = {
+  width: "--ui-input-owner-width",
+  color: "--ui-field-state-color",
+  background: "--ui-field-state-background",
+  border: "--ui-field-state-border"
+} as const
+
+////////////////
+// ## Checkbox
+////////////////
+
+/** `detail` of `ui-change`, from `<ui-checkbox>` / `<ui-radio>`. */
+export type CheckboxChangeDetail = {
+  /** chosen after the change */
+  selected: boolean
+  /** the element's `value` (default `on`) */
+  value: string
+  originalEvent?: Event
+}
+
+////////////////
+// ## Form
+////////////////
+
+/** One field's value as `<ui-form>` reads it (`values`):  the `Validator`'s `FieldValue`. */
+export type FormFieldValue = FieldValue
+
+/** `<ui-form>`'s `values`:  by field name (or id). */
+export type FormValues = Record<string, FieldValue>
+
+/**
+ * One field's rules in `<ui-form rules>`, Fomantic's `fields` shape:
+ * - a shorthand string (`"notEmpty"`, `"minLength[6]"`) or a list of them / rule objects
+ * - or `{ rules, optional?, depends?, identifier? }`:  `optional` skips a blank field, `depends` skips the field
+ *   while another is blank, `identifier` names the control when the key doesn't
+ * - NOTE: Fomantic's deprecated `empty` means `notEmpty`
+ */
+export type FormFieldRules =
+  | ValidationRule
+  | readonly ValidationRule[]
+  | {
+      rules: readonly ValidationRule[]
+      optional?: boolean
+      depends?: string
+      identifier?: string
+    }
+
+/** `<ui-form>`'s `rules` property. */
+export type FormRules = Record<string, FormFieldRules>
+
+/** `detail` of `ui-valid`. */
+export type FormValidDetail = {
+  /** field name (or id) */
+  field: string
+  value: FieldValue
+  values: FormValues
+}
+
+/** `detail` of `ui-invalid`. */
+export type FormInvalidDetail = FormValidDetail & {
+  /** the field's prompts */
+  errors: string[]
+}
+
+/** `detail` of the cancelable `ui-success`. */
+export type FormSuccessDetail = {
+  values: FormValues
+  originalEvent?: Event
+}
+
+/** `detail` of `ui-failure`. */
+export type FormFailureDetail = FormSuccessDetail & {
+  /** prompts by field */
+  errors: Record<string, string[]>
+}
+
+/**
+ * Custom state every `<ui-field>` host carries, always:  `<ui-form>` finds a control's field with
+ * `control.closest(":state(field)")`, whatever the field's tag is called in a translation.
+ */
+export const FIELD_HOST_STATE = "field"
+
+////////////////
+// ## Table
+////////////////
+
+/** Direction of a sorted `<ui-table>` column (`sort-direction`, `aria-sort`). */
+export type TableSortDirection = "ascending" | "descending"
+
+/** `detail` of the cancelable `ui-sort`, from a `sortable` `<ui-table>`'s header. */
+export type TableSortDetail = {
+  /** column index (0-based, counting `colspan`s) */
+  column: number
+  /** data mode:  the column's `key`;  slotted:  the header's `data-key`, if any */
+  key?: string
+  /** direction it's ABOUT to sort in:  flipped for the sorted column, else `ascending` */
+  direction: TableSortDirection
+  /** click / key event on the header */
+  originalEvent?: Event
+}
+
+/** One column of `<ui-table>`'s data mode (`columnDefs`). */
+export type TableColumn = {
+  /** property of each row shown in this column */
+  key: string
+  /** header text;  default `key` */
+  header?: string
+  /** cell alignment (`left aligned` ...) */
+  textAlign?: "left" | "center" | "right"
+  /** `false` opts the column out of sorting;  default sortable when the table is */
+  sortable?: boolean
+  /** Fomantic width, `1` ... `16` (or `1/4`, `25%`):  `four wide` */
+  width?: number | string
+}
+
+/** One row of `<ui-table>`'s data mode (`rows`):  values by column key, shown as text. */
+export type TableRow = Record<string, unknown>
+
+/**
+ * Header attribute that opts one `th` out of a `sortable` table:  `data-sortable="false"`.
+ * - Fomantic's `class="disabled"` on a `th` opts out too (and greys it on hover).
+ */
+export const TABLE_SORT_OPT_OUT = { attribute: "data-sortable", value: "false" } as const
+
+/** Header attribute naming a slotted column for `ui-sort`'s `key`, e.g. `<th data-key="name">`. */
+export const TABLE_SORT_KEY = "data-key"
+
+////////////////
+// ## List
+////////////////
+
+/** `detail` of `ui-select`, from a `<ui-list>` when one of its interactive items is activated. */
+export type ListSelectDetail = {
+  /** the item's `value`, else its `text`, else its trimmed text content */
+  value: string
+  /** the `<ui-item>` host */
+  item: Element
+  /** click (or the click Enter / Space made) on the item's link / button */
+  originalEvent?: Event
+}

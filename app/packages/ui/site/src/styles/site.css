@@ -380,6 +380,15 @@
     border: var(--ui-border);
     border-radius: var(--ui-radius) var(--ui-radius) 0 0;
   }
+  /* Segment's host is `display: contents`:  the circle is sized on its `segment` part. */
+  .site-circular::part(segment) {
+    width: 175px;
+    height: 175px;
+  }
+  /* Room for a menu that the example shows open. */
+  .site-example-demo.site-tall {
+    min-height: 18em;
+  }
   .site-example-demo > :first-child {
     margin-block-start: 0;
   }

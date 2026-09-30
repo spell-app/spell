@@ -12,6 +12,7 @@ import type {
   HueDefinition,
   HueName,
   HueStates,
+  OnColor,
   SchemeAlpha,
   SchemeColor,
   SchemeRecipe,
@@ -29,25 +30,33 @@ import type {
  *   out and chroma nudged so no hue is much louder than its neighbours.
  * - `onDark` is lighter and a touch less saturated -- Fomantic's `light<Hue>` role, used by the dark scheme
  *   and `inverted` variations.
- * - `black` lightens instead of darkening for its states, as Fomantic's `@blackHover` does.
+ * - `black` lightens instead of darkening for its states, as Fomantic's `@blackHover` does.  Its `inverted`
+ *   (text / outline on dark surfaces) is near-white, as Fomantic's inverted black button is:  `onDark` (L 0.42)
+ *   read 2.2:1 as text on the inverted surface.
+ * - `onLight` of red / green / blue / pink is darker than the "even" lightness, so WHITE text passes WCAG AA
+ *   (4.5:1) on the solid colour and its states -- was L 0.6 / 0.66 / 0.58 / 0.63, white 4.4 / 2.9 / 4.3 / 3.9:1.
+ *   Yellow / olive / orange / teal stay light and take dark text instead (`onColors`, `--ui-<hue>-on`).
+ * - `onDark` values are light enough that every hue but `black` takes DARK text in the dark scheme.
+ * - `colors.contrast.test.ts` checks every pair, in both schemes.
  * - Order is display order (docs, colour pickers).
  */
 export const hues = {
-  red: { onLight: [0.6, 0.21, 27], onDark: [0.7, 0.19, 25] },
+  red: { onLight: [0.57, 0.21, 27], onDark: [0.7, 0.19, 25] },
   orange: { onLight: [0.7, 0.18, 48], onDark: [0.77, 0.16, 52] },
   yellow: { onLight: [0.84, 0.17, 86], onDark: [0.88, 0.16, 92] },
   olive: { onLight: [0.79, 0.18, 122], onDark: [0.86, 0.16, 118] },
-  green: { onLight: [0.66, 0.19, 148], onDark: [0.75, 0.18, 148] },
+  green: { onLight: [0.53, 0.17, 148], onDark: [0.75, 0.18, 148] },
   teal: { onLight: [0.68, 0.12, 188], onDark: [0.8, 0.12, 190] },
-  blue: { onLight: [0.58, 0.16, 250], onDark: [0.72, 0.14, 240] },
+  blue: { onLight: [0.55, 0.16, 250], onDark: [0.72, 0.14, 240] },
   violet: { onLight: [0.52, 0.22, 290], onDark: [0.7, 0.16, 290] },
   purple: { onLight: [0.56, 0.23, 316], onDark: [0.72, 0.19, 316] },
-  pink: { onLight: [0.63, 0.22, 355], onDark: [0.76, 0.16, 350] },
+  pink: { onLight: [0.58, 0.22, 355], onDark: [0.76, 0.16, 350] },
   brown: { onLight: [0.56, 0.1, 55], onDark: [0.7, 0.12, 60] },
   grey: { onLight: [0.55, 0.01, 260], onDark: [0.72, 0.01, 260] },
   black: {
     onLight: [0.24, 0.01, 260],
     onDark: [0.42, 0.01, 260],
+    inverted: [0.87, 0.005, 260],
     states: {
       hover: { lightness: 0.05, chroma: 1 },
       focus: { lightness: 0.08, chroma: 1 },
@@ -82,18 +91,19 @@ export const hueStates = {
 /**
  * Role colours derived from each hue, per scheme.
  * - `text` caps lightness so light hues stay legible (Fomantic hand-picked `@yellowTextColor: #b58105`);
- *   the dark scheme floors it instead.
+ *   the dark scheme floors it instead.  The cap (0.5, was 0.56) is what gets green / teal /
+ *   olive to 4.5:1 on white AND on the pale `background` tint.
  * - `header` ~== text darkened 5 (Fomantic's `@redHeaderColor`).
  * - `border` ~== text (Fomantic's `@redBorderColor`).
  * - `background` ~== a pale tint (Fomantic's `@redBackground: #ffe8e6`), a deep one in the dark scheme.
  */
 export const hueRoles = {
   text: {
-    light: { lightness: 0.56, mode: "atMost", chroma: 1 },
+    light: { lightness: 0.5, mode: "atMost", chroma: 1 },
     dark: { lightness: 0.78, mode: "atLeast", chroma: 1 }
   },
   header: {
-    light: { lightness: 0.5, mode: "atMost", chroma: 1 },
+    light: { lightness: 0.45, mode: "atMost", chroma: 1 },
     dark: { lightness: 0.85, mode: "atLeast", chroma: 1 }
   },
   border: {
@@ -105,12 +115,6 @@ export const hueRoles = {
     dark: { lightness: 0.28, mode: "exact", chroma: 0.35 }
   }
 } as const satisfies Record<string, SchemeRecipe>
-
-/**
- * OKLCH lightness above which text on a solid colour turns black instead of white (`--ui-color-contrast`).
- * - Fomantic used white on every hue;  black on yellow / olive reads far better.
- */
-export const contrastThreshold = 0.72
 
 ////////////////
 // ## Semantic colours
@@ -178,16 +182,30 @@ export const neutrals = {
 } as const satisfies Record<string, SchemeColor>
 
 /**
+ * Foreground candidates for text ON a solid colour, in preference order:  `--ui-<name>-on`.
+ * - `StyleGenerator` picks, per colour and per scheme, the FIRST candidate that reaches `ColorContrast.text`
+ *   (4.5:1) on the colour AND every interaction state of it;  failing that, the best one.
+ * - White first:  Fomantic put white on every hue, so keep it wherever it passes.
+ * - `dark` is the light scheme's ink, emitted as `var(--ui-ink-on-light)` so a re-inked theme follows.
+ */
+export const onColors = {
+  light: { color: [1, 0, 0], css: "oklch(1 0 0)" },
+  dark: { color: neutrals.ink.onLight, css: "var(--ui-ink-on-light)" }
+} as const satisfies Record<string, OnColor>
+
+/**
  * Text alpha roles:  Fomantic's "Neutral Text" (`@mutedTextColor: rgb(0 0 0 / 0.6)`) and their
  * `inverted` counterparts (`@invertedMutedTextColor: rgb(255 255 255 / 0.8)`), as alphas of `ink`.
  * - `default` ~== `--ui-text-color` (Fomantic's `@textColor`).
+ * - `light` / `unselected` are 0.58 on light surfaces, not Fomantic's 0.4 (2.7:1 on white):  the lowest alpha of
+ *   `ink` that still reaches WCAG AA 4.5:1 on white.  `disabled` stays faint (inactive controls are exempt).
  */
 export const textAlphas = {
   default: { onLight: 0.87, onDark: 0.9 },
   dark: { onLight: 0.85, onDark: 0.95 },
   muted: { onLight: 0.6, onDark: 0.8 },
-  light: { onLight: 0.4, onDark: 0.7 },
-  unselected: { onLight: 0.4, onDark: 0.5 },
+  light: { onLight: 0.58, onDark: 0.7 },
+  unselected: { onLight: 0.58, onDark: 0.5 },
   hovered: { onLight: 0.8, onDark: 1 },
   pressed: { onLight: 0.9, onDark: 1 },
   selected: { onLight: 0.95, onDark: 1 },

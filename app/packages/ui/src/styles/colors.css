@@ -4,7 +4,7 @@
 @property --ui-red-on-light {
   syntax: "<color>";
   inherits: true;
-  initial-value: oklch(0.6 0.21 27);
+  initial-value: oklch(0.57 0.21 27);
 }
 @property --ui-red-on-dark {
   syntax: "<color>";
@@ -44,7 +44,7 @@
 @property --ui-green-on-light {
   syntax: "<color>";
   inherits: true;
-  initial-value: oklch(0.66 0.19 148);
+  initial-value: oklch(0.53 0.17 148);
 }
 @property --ui-green-on-dark {
   syntax: "<color>";
@@ -64,7 +64,7 @@
 @property --ui-blue-on-light {
   syntax: "<color>";
   inherits: true;
-  initial-value: oklch(0.58 0.16 250);
+  initial-value: oklch(0.55 0.16 250);
 }
 @property --ui-blue-on-dark {
   syntax: "<color>";
@@ -94,7 +94,7 @@
 @property --ui-pink-on-light {
   syntax: "<color>";
   inherits: true;
-  initial-value: oklch(0.63 0.22 355);
+  initial-value: oklch(0.58 0.22 355);
 }
 @property --ui-pink-on-dark {
   syntax: "<color>";
@@ -162,21 +162,23 @@
     --ui-surface-muted: light-dark(oklch(0.985 0.002 248), oklch(0.26 0.006 260));
     --ui-surface-strong: light-dark(oklch(0.967 0.002 248), oklch(0.3 0.006 260));
     --ui-highlight: light-dark(oklch(0.906 0.046 255), oklch(0.42 0.09 255));
-    --ui-red-on-light: oklch(0.6 0.21 27);
+    --ui-red-on-light: oklch(0.57 0.21 27);
     --ui-red-on-dark: oklch(0.7 0.19 25);
     --ui-red: light-dark(var(--ui-red-on-light), var(--ui-red-on-dark));
     --ui-red-hover: oklch(from var(--ui-red) calc(l - 0.05) calc(c * 1.1) h);
     --ui-red-focus: oklch(from var(--ui-red) calc(l - 0.08) calc(c * 1.2) h);
     --ui-red-down: oklch(from var(--ui-red) calc(l - 0.1) c h);
     --ui-red-active: oklch(from var(--ui-red) calc(l - 0.05) calc(c * 1.15) h);
-    --ui-red-text: light-dark(oklch(from var(--ui-red) min(l, 0.56) c h), oklch(from var(--ui-red) max(l, 0.78) c h));
-    --ui-red-header: light-dark(oklch(from var(--ui-red) min(l, 0.5) c h), oklch(from var(--ui-red) max(l, 0.85) c h));
+    --ui-red-text: light-dark(oklch(from var(--ui-red) min(l, 0.5) c h), oklch(from var(--ui-red) max(l, 0.78) c h));
+    --ui-red-header: light-dark(oklch(from var(--ui-red) min(l, 0.45) c h), oklch(from var(--ui-red) max(l, 0.85) c h));
     --ui-red-border: light-dark(oklch(from var(--ui-red) min(l, 0.6) c h), oklch(from var(--ui-red) max(l, 0.7) c h));
     --ui-red-background: light-dark(
       oklch(from var(--ui-red) 0.96 calc(c * 0.25) h),
       oklch(from var(--ui-red) 0.28 calc(c * 0.35) h)
     );
     --ui-red-inverted: var(--ui-red-on-dark);
+    --ui-red-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-red-inverted-on: var(--ui-ink-on-light);
     --ui-orange-on-light: oklch(0.7 0.18 48);
     --ui-orange-on-dark: oklch(0.77 0.16 52);
     --ui-orange: light-dark(var(--ui-orange-on-light), var(--ui-orange-on-dark));
@@ -185,11 +187,11 @@
     --ui-orange-down: oklch(from var(--ui-orange) calc(l - 0.1) c h);
     --ui-orange-active: oklch(from var(--ui-orange) calc(l - 0.05) calc(c * 1.15) h);
     --ui-orange-text: light-dark(
-      oklch(from var(--ui-orange) min(l, 0.56) c h),
+      oklch(from var(--ui-orange) min(l, 0.5) c h),
       oklch(from var(--ui-orange) max(l, 0.78) c h)
     );
     --ui-orange-header: light-dark(
-      oklch(from var(--ui-orange) min(l, 0.5) c h),
+      oklch(from var(--ui-orange) min(l, 0.45) c h),
       oklch(from var(--ui-orange) max(l, 0.85) c h)
     );
     --ui-orange-border: light-dark(
@@ -201,6 +203,8 @@
       oklch(from var(--ui-orange) 0.28 calc(c * 0.35) h)
     );
     --ui-orange-inverted: var(--ui-orange-on-dark);
+    --ui-orange-on: var(--ui-ink-on-light);
+    --ui-orange-inverted-on: var(--ui-ink-on-light);
     --ui-yellow-on-light: oklch(0.84 0.17 86);
     --ui-yellow-on-dark: oklch(0.88 0.16 92);
     --ui-yellow: light-dark(var(--ui-yellow-on-light), var(--ui-yellow-on-dark));
@@ -209,11 +213,11 @@
     --ui-yellow-down: oklch(from var(--ui-yellow) calc(l - 0.1) c h);
     --ui-yellow-active: oklch(from var(--ui-yellow) calc(l - 0.05) calc(c * 1.15) h);
     --ui-yellow-text: light-dark(
-      oklch(from var(--ui-yellow) min(l, 0.56) c h),
+      oklch(from var(--ui-yellow) min(l, 0.5) c h),
       oklch(from var(--ui-yellow) max(l, 0.78) c h)
     );
     --ui-yellow-header: light-dark(
-      oklch(from var(--ui-yellow) min(l, 0.5) c h),
+      oklch(from var(--ui-yellow) min(l, 0.45) c h),
       oklch(from var(--ui-yellow) max(l, 0.85) c h)
     );
     --ui-yellow-border: light-dark(
@@ -225,6 +229,8 @@
       oklch(from var(--ui-yellow) 0.28 calc(c * 0.35) h)
     );
     --ui-yellow-inverted: var(--ui-yellow-on-dark);
+    --ui-yellow-on: var(--ui-ink-on-light);
+    --ui-yellow-inverted-on: var(--ui-ink-on-light);
     --ui-olive-on-light: oklch(0.79 0.18 122);
     --ui-olive-on-dark: oklch(0.86 0.16 118);
     --ui-olive: light-dark(var(--ui-olive-on-light), var(--ui-olive-on-dark));
@@ -233,11 +239,11 @@
     --ui-olive-down: oklch(from var(--ui-olive) calc(l - 0.1) c h);
     --ui-olive-active: oklch(from var(--ui-olive) calc(l - 0.05) calc(c * 1.15) h);
     --ui-olive-text: light-dark(
-      oklch(from var(--ui-olive) min(l, 0.56) c h),
+      oklch(from var(--ui-olive) min(l, 0.5) c h),
       oklch(from var(--ui-olive) max(l, 0.78) c h)
     );
     --ui-olive-header: light-dark(
-      oklch(from var(--ui-olive) min(l, 0.5) c h),
+      oklch(from var(--ui-olive) min(l, 0.45) c h),
       oklch(from var(--ui-olive) max(l, 0.85) c h)
     );
     --ui-olive-border: light-dark(
@@ -249,7 +255,9 @@
       oklch(from var(--ui-olive) 0.28 calc(c * 0.35) h)
     );
     --ui-olive-inverted: var(--ui-olive-on-dark);
-    --ui-green-on-light: oklch(0.66 0.19 148);
+    --ui-olive-on: var(--ui-ink-on-light);
+    --ui-olive-inverted-on: var(--ui-ink-on-light);
+    --ui-green-on-light: oklch(0.53 0.17 148);
     --ui-green-on-dark: oklch(0.75 0.18 148);
     --ui-green: light-dark(var(--ui-green-on-light), var(--ui-green-on-dark));
     --ui-green-hover: oklch(from var(--ui-green) calc(l - 0.05) calc(c * 1.1) h);
@@ -257,11 +265,11 @@
     --ui-green-down: oklch(from var(--ui-green) calc(l - 0.1) c h);
     --ui-green-active: oklch(from var(--ui-green) calc(l - 0.05) calc(c * 1.15) h);
     --ui-green-text: light-dark(
-      oklch(from var(--ui-green) min(l, 0.56) c h),
+      oklch(from var(--ui-green) min(l, 0.5) c h),
       oklch(from var(--ui-green) max(l, 0.78) c h)
     );
     --ui-green-header: light-dark(
-      oklch(from var(--ui-green) min(l, 0.5) c h),
+      oklch(from var(--ui-green) min(l, 0.45) c h),
       oklch(from var(--ui-green) max(l, 0.85) c h)
     );
     --ui-green-border: light-dark(
@@ -273,6 +281,8 @@
       oklch(from var(--ui-green) 0.28 calc(c * 0.35) h)
     );
     --ui-green-inverted: var(--ui-green-on-dark);
+    --ui-green-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-green-inverted-on: var(--ui-ink-on-light);
     --ui-teal-on-light: oklch(0.68 0.12 188);
     --ui-teal-on-dark: oklch(0.8 0.12 190);
     --ui-teal: light-dark(var(--ui-teal-on-light), var(--ui-teal-on-dark));
@@ -280,12 +290,9 @@
     --ui-teal-focus: oklch(from var(--ui-teal) calc(l - 0.08) calc(c * 1.2) h);
     --ui-teal-down: oklch(from var(--ui-teal) calc(l - 0.1) c h);
     --ui-teal-active: oklch(from var(--ui-teal) calc(l - 0.05) calc(c * 1.15) h);
-    --ui-teal-text: light-dark(
-      oklch(from var(--ui-teal) min(l, 0.56) c h),
-      oklch(from var(--ui-teal) max(l, 0.78) c h)
-    );
+    --ui-teal-text: light-dark(oklch(from var(--ui-teal) min(l, 0.5) c h), oklch(from var(--ui-teal) max(l, 0.78) c h));
     --ui-teal-header: light-dark(
-      oklch(from var(--ui-teal) min(l, 0.5) c h),
+      oklch(from var(--ui-teal) min(l, 0.45) c h),
       oklch(from var(--ui-teal) max(l, 0.85) c h)
     );
     --ui-teal-border: light-dark(
@@ -297,19 +304,18 @@
       oklch(from var(--ui-teal) 0.28 calc(c * 0.35) h)
     );
     --ui-teal-inverted: var(--ui-teal-on-dark);
-    --ui-blue-on-light: oklch(0.58 0.16 250);
+    --ui-teal-on: var(--ui-ink-on-light);
+    --ui-teal-inverted-on: var(--ui-ink-on-light);
+    --ui-blue-on-light: oklch(0.55 0.16 250);
     --ui-blue-on-dark: oklch(0.72 0.14 240);
     --ui-blue: light-dark(var(--ui-blue-on-light), var(--ui-blue-on-dark));
     --ui-blue-hover: oklch(from var(--ui-blue) calc(l - 0.05) calc(c * 1.1) h);
     --ui-blue-focus: oklch(from var(--ui-blue) calc(l - 0.08) calc(c * 1.2) h);
     --ui-blue-down: oklch(from var(--ui-blue) calc(l - 0.1) c h);
     --ui-blue-active: oklch(from var(--ui-blue) calc(l - 0.05) calc(c * 1.15) h);
-    --ui-blue-text: light-dark(
-      oklch(from var(--ui-blue) min(l, 0.56) c h),
-      oklch(from var(--ui-blue) max(l, 0.78) c h)
-    );
+    --ui-blue-text: light-dark(oklch(from var(--ui-blue) min(l, 0.5) c h), oklch(from var(--ui-blue) max(l, 0.78) c h));
     --ui-blue-header: light-dark(
-      oklch(from var(--ui-blue) min(l, 0.5) c h),
+      oklch(from var(--ui-blue) min(l, 0.45) c h),
       oklch(from var(--ui-blue) max(l, 0.85) c h)
     );
     --ui-blue-border: light-dark(
@@ -321,6 +327,8 @@
       oklch(from var(--ui-blue) 0.28 calc(c * 0.35) h)
     );
     --ui-blue-inverted: var(--ui-blue-on-dark);
+    --ui-blue-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-blue-inverted-on: var(--ui-ink-on-light);
     --ui-violet-on-light: oklch(0.52 0.22 290);
     --ui-violet-on-dark: oklch(0.7 0.16 290);
     --ui-violet: light-dark(var(--ui-violet-on-light), var(--ui-violet-on-dark));
@@ -329,11 +337,11 @@
     --ui-violet-down: oklch(from var(--ui-violet) calc(l - 0.1) c h);
     --ui-violet-active: oklch(from var(--ui-violet) calc(l - 0.05) calc(c * 1.15) h);
     --ui-violet-text: light-dark(
-      oklch(from var(--ui-violet) min(l, 0.56) c h),
+      oklch(from var(--ui-violet) min(l, 0.5) c h),
       oklch(from var(--ui-violet) max(l, 0.78) c h)
     );
     --ui-violet-header: light-dark(
-      oklch(from var(--ui-violet) min(l, 0.5) c h),
+      oklch(from var(--ui-violet) min(l, 0.45) c h),
       oklch(from var(--ui-violet) max(l, 0.85) c h)
     );
     --ui-violet-border: light-dark(
@@ -345,6 +353,8 @@
       oklch(from var(--ui-violet) 0.28 calc(c * 0.35) h)
     );
     --ui-violet-inverted: var(--ui-violet-on-dark);
+    --ui-violet-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-violet-inverted-on: var(--ui-ink-on-light);
     --ui-purple-on-light: oklch(0.56 0.23 316);
     --ui-purple-on-dark: oklch(0.72 0.19 316);
     --ui-purple: light-dark(var(--ui-purple-on-light), var(--ui-purple-on-dark));
@@ -353,11 +363,11 @@
     --ui-purple-down: oklch(from var(--ui-purple) calc(l - 0.1) c h);
     --ui-purple-active: oklch(from var(--ui-purple) calc(l - 0.05) calc(c * 1.15) h);
     --ui-purple-text: light-dark(
-      oklch(from var(--ui-purple) min(l, 0.56) c h),
+      oklch(from var(--ui-purple) min(l, 0.5) c h),
       oklch(from var(--ui-purple) max(l, 0.78) c h)
     );
     --ui-purple-header: light-dark(
-      oklch(from var(--ui-purple) min(l, 0.5) c h),
+      oklch(from var(--ui-purple) min(l, 0.45) c h),
       oklch(from var(--ui-purple) max(l, 0.85) c h)
     );
     --ui-purple-border: light-dark(
@@ -369,19 +379,18 @@
       oklch(from var(--ui-purple) 0.28 calc(c * 0.35) h)
     );
     --ui-purple-inverted: var(--ui-purple-on-dark);
-    --ui-pink-on-light: oklch(0.63 0.22 355);
+    --ui-purple-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-purple-inverted-on: var(--ui-ink-on-light);
+    --ui-pink-on-light: oklch(0.58 0.22 355);
     --ui-pink-on-dark: oklch(0.76 0.16 350);
     --ui-pink: light-dark(var(--ui-pink-on-light), var(--ui-pink-on-dark));
     --ui-pink-hover: oklch(from var(--ui-pink) calc(l - 0.05) calc(c * 1.1) h);
     --ui-pink-focus: oklch(from var(--ui-pink) calc(l - 0.08) calc(c * 1.2) h);
     --ui-pink-down: oklch(from var(--ui-pink) calc(l - 0.1) c h);
     --ui-pink-active: oklch(from var(--ui-pink) calc(l - 0.05) calc(c * 1.15) h);
-    --ui-pink-text: light-dark(
-      oklch(from var(--ui-pink) min(l, 0.56) c h),
-      oklch(from var(--ui-pink) max(l, 0.78) c h)
-    );
+    --ui-pink-text: light-dark(oklch(from var(--ui-pink) min(l, 0.5) c h), oklch(from var(--ui-pink) max(l, 0.78) c h));
     --ui-pink-header: light-dark(
-      oklch(from var(--ui-pink) min(l, 0.5) c h),
+      oklch(from var(--ui-pink) min(l, 0.45) c h),
       oklch(from var(--ui-pink) max(l, 0.85) c h)
     );
     --ui-pink-border: light-dark(
@@ -393,6 +402,8 @@
       oklch(from var(--ui-pink) 0.28 calc(c * 0.35) h)
     );
     --ui-pink-inverted: var(--ui-pink-on-dark);
+    --ui-pink-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-pink-inverted-on: var(--ui-ink-on-light);
     --ui-brown-on-light: oklch(0.56 0.1 55);
     --ui-brown-on-dark: oklch(0.7 0.12 60);
     --ui-brown: light-dark(var(--ui-brown-on-light), var(--ui-brown-on-dark));
@@ -401,11 +412,11 @@
     --ui-brown-down: oklch(from var(--ui-brown) calc(l - 0.1) c h);
     --ui-brown-active: oklch(from var(--ui-brown) calc(l - 0.05) calc(c * 1.15) h);
     --ui-brown-text: light-dark(
-      oklch(from var(--ui-brown) min(l, 0.56) c h),
+      oklch(from var(--ui-brown) min(l, 0.5) c h),
       oklch(from var(--ui-brown) max(l, 0.78) c h)
     );
     --ui-brown-header: light-dark(
-      oklch(from var(--ui-brown) min(l, 0.5) c h),
+      oklch(from var(--ui-brown) min(l, 0.45) c h),
       oklch(from var(--ui-brown) max(l, 0.85) c h)
     );
     --ui-brown-border: light-dark(
@@ -417,6 +428,8 @@
       oklch(from var(--ui-brown) 0.28 calc(c * 0.35) h)
     );
     --ui-brown-inverted: var(--ui-brown-on-dark);
+    --ui-brown-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-brown-inverted-on: var(--ui-ink-on-light);
     --ui-grey-on-light: oklch(0.55 0.01 260);
     --ui-grey-on-dark: oklch(0.72 0.01 260);
     --ui-grey: light-dark(var(--ui-grey-on-light), var(--ui-grey-on-dark));
@@ -424,12 +437,9 @@
     --ui-grey-focus: oklch(from var(--ui-grey) calc(l - 0.08) calc(c * 1.2) h);
     --ui-grey-down: oklch(from var(--ui-grey) calc(l - 0.1) c h);
     --ui-grey-active: oklch(from var(--ui-grey) calc(l - 0.05) calc(c * 1.15) h);
-    --ui-grey-text: light-dark(
-      oklch(from var(--ui-grey) min(l, 0.56) c h),
-      oklch(from var(--ui-grey) max(l, 0.78) c h)
-    );
+    --ui-grey-text: light-dark(oklch(from var(--ui-grey) min(l, 0.5) c h), oklch(from var(--ui-grey) max(l, 0.78) c h));
     --ui-grey-header: light-dark(
-      oklch(from var(--ui-grey) min(l, 0.5) c h),
+      oklch(from var(--ui-grey) min(l, 0.45) c h),
       oklch(from var(--ui-grey) max(l, 0.85) c h)
     );
     --ui-grey-border: light-dark(
@@ -441,6 +451,8 @@
       oklch(from var(--ui-grey) 0.28 calc(c * 0.35) h)
     );
     --ui-grey-inverted: var(--ui-grey-on-dark);
+    --ui-grey-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-grey-inverted-on: var(--ui-ink-on-light);
     --ui-black-on-light: oklch(0.24 0.01 260);
     --ui-black-on-dark: oklch(0.42 0.01 260);
     --ui-black: light-dark(var(--ui-black-on-light), var(--ui-black-on-dark));
@@ -449,11 +461,11 @@
     --ui-black-down: oklch(from var(--ui-black) calc(l + 0.1) c h);
     --ui-black-active: oklch(from var(--ui-black) calc(l - 0.05) c h);
     --ui-black-text: light-dark(
-      oklch(from var(--ui-black) min(l, 0.56) c h),
+      oklch(from var(--ui-black) min(l, 0.5) c h),
       oklch(from var(--ui-black) max(l, 0.78) c h)
     );
     --ui-black-header: light-dark(
-      oklch(from var(--ui-black) min(l, 0.5) c h),
+      oklch(from var(--ui-black) min(l, 0.45) c h),
       oklch(from var(--ui-black) max(l, 0.85) c h)
     );
     --ui-black-border: light-dark(
@@ -464,18 +476,20 @@
       oklch(from var(--ui-black) 0.96 calc(c * 0.25) h),
       oklch(from var(--ui-black) 0.28 calc(c * 0.35) h)
     );
-    --ui-black-inverted: var(--ui-black-on-dark);
+    --ui-black-inverted: oklch(0.87 0.005 260);
+    --ui-black-on: oklch(1 0 0);
+    --ui-black-inverted-on: var(--ui-ink-on-light);
     --ui-primary: var(--ui-blue);
     --ui-primary-hover: oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.1) h);
     --ui-primary-focus: oklch(from var(--ui-primary) calc(l - 0.08) calc(c * 1.2) h);
     --ui-primary-down: oklch(from var(--ui-primary) calc(l - 0.1) c h);
     --ui-primary-active: oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.15) h);
     --ui-primary-text: light-dark(
-      oklch(from var(--ui-primary) min(l, 0.56) c h),
+      oklch(from var(--ui-primary) min(l, 0.5) c h),
       oklch(from var(--ui-primary) max(l, 0.78) c h)
     );
     --ui-primary-header: light-dark(
-      oklch(from var(--ui-primary) min(l, 0.5) c h),
+      oklch(from var(--ui-primary) min(l, 0.45) c h),
       oklch(from var(--ui-primary) max(l, 0.85) c h)
     );
     --ui-primary-border: light-dark(
@@ -487,17 +501,19 @@
       oklch(from var(--ui-primary) 0.28 calc(c * 0.35) h)
     );
     --ui-primary-inverted: var(--ui-blue-inverted);
+    --ui-primary-on: var(--ui-blue-on);
+    --ui-primary-inverted-on: var(--ui-blue-inverted-on);
     --ui-secondary: var(--ui-black);
     --ui-secondary-hover: oklch(from var(--ui-secondary) calc(l + 0.05) c h);
     --ui-secondary-focus: oklch(from var(--ui-secondary) calc(l + 0.08) c h);
     --ui-secondary-down: oklch(from var(--ui-secondary) calc(l + 0.1) c h);
     --ui-secondary-active: oklch(from var(--ui-secondary) calc(l - 0.05) c h);
     --ui-secondary-text: light-dark(
-      oklch(from var(--ui-secondary) min(l, 0.56) c h),
+      oklch(from var(--ui-secondary) min(l, 0.5) c h),
       oklch(from var(--ui-secondary) max(l, 0.78) c h)
     );
     --ui-secondary-header: light-dark(
-      oklch(from var(--ui-secondary) min(l, 0.5) c h),
+      oklch(from var(--ui-secondary) min(l, 0.45) c h),
       oklch(from var(--ui-secondary) max(l, 0.85) c h)
     );
     --ui-secondary-border: light-dark(
@@ -509,8 +525,12 @@
       oklch(from var(--ui-secondary) 0.28 calc(c * 0.35) h)
     );
     --ui-secondary-inverted: var(--ui-black-inverted);
+    --ui-secondary-on: var(--ui-black-on);
+    --ui-secondary-inverted-on: var(--ui-black-inverted-on);
     --ui-positive: var(--ui-green);
     --ui-positive-inverted: var(--ui-green-inverted);
+    --ui-positive-on: var(--ui-green-on);
+    --ui-positive-inverted-on: var(--ui-green-inverted-on);
     --ui-positive-hover: oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.1) h);
     --ui-positive-focus: oklch(from var(--ui-positive) calc(l - 0.08) calc(c * 1.2) h);
     --ui-positive-down: oklch(from var(--ui-positive) calc(l - 0.1) c h);
@@ -533,6 +553,8 @@
     );
     --ui-negative: var(--ui-red);
     --ui-negative-inverted: var(--ui-red-inverted);
+    --ui-negative-on: var(--ui-red-on);
+    --ui-negative-inverted-on: var(--ui-red-inverted-on);
     --ui-negative-hover: oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.1) h);
     --ui-negative-focus: oklch(from var(--ui-negative) calc(l - 0.08) calc(c * 1.2) h);
     --ui-negative-down: oklch(from var(--ui-negative) calc(l - 0.1) c h);
@@ -557,6 +579,8 @@
     --ui-info-on-dark: oklch(0.8 0.12 215);
     --ui-info: light-dark(var(--ui-info-on-light), var(--ui-info-on-dark));
     --ui-info-inverted: var(--ui-info-on-dark);
+    --ui-info-on: var(--ui-ink-on-light);
+    --ui-info-inverted-on: var(--ui-ink-on-light);
     --ui-info-hover: oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.1) h);
     --ui-info-focus: oklch(from var(--ui-info) calc(l - 0.08) calc(c * 1.2) h);
     --ui-info-down: oklch(from var(--ui-info) calc(l - 0.1) c h);
@@ -581,6 +605,8 @@
     --ui-warning-on-dark: oklch(0.86 0.15 85);
     --ui-warning: light-dark(var(--ui-warning-on-light), var(--ui-warning-on-dark));
     --ui-warning-inverted: var(--ui-warning-on-dark);
+    --ui-warning-on: var(--ui-ink-on-light);
+    --ui-warning-inverted-on: var(--ui-ink-on-light);
     --ui-warning-hover: oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.1) h);
     --ui-warning-focus: oklch(from var(--ui-warning) calc(l - 0.08) calc(c * 1.2) h);
     --ui-warning-down: oklch(from var(--ui-warning) calc(l - 0.1) c h);
@@ -603,6 +629,8 @@
     );
     --ui-success: var(--ui-positive);
     --ui-success-inverted: var(--ui-positive-inverted);
+    --ui-success-on: var(--ui-positive-on);
+    --ui-success-inverted-on: var(--ui-positive-inverted-on);
     --ui-success-hover: var(--ui-positive-hover);
     --ui-success-focus: var(--ui-positive-focus);
     --ui-success-down: var(--ui-positive-down);
@@ -613,6 +641,8 @@
     --ui-success-background: var(--ui-positive-background);
     --ui-error: var(--ui-negative);
     --ui-error-inverted: var(--ui-negative-inverted);
+    --ui-error-on: var(--ui-negative-on);
+    --ui-error-inverted-on: var(--ui-negative-inverted-on);
     --ui-error-hover: var(--ui-negative-hover);
     --ui-error-focus: var(--ui-negative-focus);
     --ui-error-down: var(--ui-negative-down);
@@ -649,16 +679,16 @@
       --ui-surface-muted: light-dark(oklch(0.985 0.002 248), oklch(0.26 0.006 260));
       --ui-surface-strong: light-dark(oklch(0.967 0.002 248), oklch(0.3 0.006 260));
       --ui-highlight: light-dark(oklch(0.906 0.046 255), oklch(0.42 0.09 255));
-      --ui-red-on-light: oklch(0.6 0.21 27);
+      --ui-red-on-light: oklch(0.57 0.21 27);
       --ui-red-on-dark: oklch(0.7 0.19 25);
       --ui-red: light-dark(var(--ui-red-on-light), var(--ui-red-on-dark));
       --ui-red-hover: oklch(from var(--ui-red) calc(l - 0.05) calc(c * 1.1) h);
       --ui-red-focus: oklch(from var(--ui-red) calc(l - 0.08) calc(c * 1.2) h);
       --ui-red-down: oklch(from var(--ui-red) calc(l - 0.1) c h);
       --ui-red-active: oklch(from var(--ui-red) calc(l - 0.05) calc(c * 1.15) h);
-      --ui-red-text: light-dark(oklch(from var(--ui-red) min(l, 0.56) c h), oklch(from var(--ui-red) max(l, 0.78) c h));
+      --ui-red-text: light-dark(oklch(from var(--ui-red) min(l, 0.5) c h), oklch(from var(--ui-red) max(l, 0.78) c h));
       --ui-red-header: light-dark(
-        oklch(from var(--ui-red) min(l, 0.5) c h),
+        oklch(from var(--ui-red) min(l, 0.45) c h),
         oklch(from var(--ui-red) max(l, 0.85) c h)
       );
       --ui-red-border: light-dark(oklch(from var(--ui-red) min(l, 0.6) c h), oklch(from var(--ui-red) max(l, 0.7) c h));
@@ -667,6 +697,8 @@
         oklch(from var(--ui-red) 0.28 calc(c * 0.35) h)
       );
       --ui-red-inverted: var(--ui-red-on-dark);
+      --ui-red-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+      --ui-red-inverted-on: var(--ui-ink-on-light);
       --ui-orange-on-light: oklch(0.7 0.18 48);
       --ui-orange-on-dark: oklch(0.77 0.16 52);
       --ui-orange: light-dark(var(--ui-orange-on-light), var(--ui-orange-on-dark));
@@ -675,11 +707,11 @@
       --ui-orange-down: oklch(from var(--ui-orange) calc(l - 0.1) c h);
       --ui-orange-active: oklch(from var(--ui-orange) calc(l - 0.05) calc(c * 1.15) h);
       --ui-orange-text: light-dark(
-        oklch(from var(--ui-orange) min(l, 0.56) c h),
+        oklch(from var(--ui-orange) min(l, 0.5) c h),
         oklch(from var(--ui-orange) max(l, 0.78) c h)
       );
       --ui-orange-header: light-dark(
-        oklch(from var(--ui-orange) min(l, 0.5) c h),
+        oklch(from var(--ui-orange) min(l, 0.45) c h),
         oklch(from var(--ui-orange) max(l, 0.85) c h)
       );
       --ui-orange-border: light-dark(
@@ -691,6 +723,8 @@
         oklch(from var(--ui-orange) 0.28 calc(c * 0.35) h)
       );
       --ui-orange-inverted: var(--ui-orange-on-dark);
+      --ui-orange-on: var(--ui-ink-on-light);
+      --ui-orange-inverted-on: var(--ui-ink-on-light);
       --ui-yellow-on-light: oklch(0.84 0.17 86);
       --ui-yellow-on-dark: oklch(0.88 0.16 92);
       --ui-yellow: light-dark(var(--ui-yellow-on-light), var(--ui-yellow-on-dark));
@@ -699,11 +733,11 @@
       --ui-yellow-down: oklch(from var(--ui-yellow) calc(l - 0.1) c h);
       --ui-yellow-active: oklch(from var(--ui-yellow) calc(l - 0.05) calc(c * 1.15) h);
       --ui-yellow-text: light-dark(
-        oklch(from var(--ui-yellow) min(l, 0.56) c h),
+        oklch(from var(--ui-yellow) min(l, 0.5) c h),
         oklch(from var(--ui-yellow) max(l, 0.78) c h)
       );
       --ui-yellow-header: light-dark(
-        oklch(from var(--ui-yellow) min(l, 0.5) c h),
+        oklch(from var(--ui-yellow) min(l, 0.45) c h),
         oklch(from var(--ui-yellow) max(l, 0.85) c h)
       );
       --ui-yellow-border: light-dark(
@@ -715,6 +749,8 @@
         oklch(from var(--ui-yellow) 0.28 calc(c * 0.35) h)
       );
       --ui-yellow-inverted: var(--ui-yellow-on-dark);
+      --ui-yellow-on: var(--ui-ink-on-light);
+      --ui-yellow-inverted-on: var(--ui-ink-on-light);
       --ui-olive-on-light: oklch(0.79 0.18 122);
       --ui-olive-on-dark: oklch(0.86 0.16 118);
       --ui-olive: light-dark(var(--ui-olive-on-light), var(--ui-olive-on-dark));
@@ -723,11 +759,11 @@
       --ui-olive-down: oklch(from var(--ui-olive) calc(l - 0.1) c h);
       --ui-olive-active: oklch(from var(--ui-olive) calc(l - 0.05) calc(c * 1.15) h);
       --ui-olive-text: light-dark(
-        oklch(from var(--ui-olive) min(l, 0.56) c h),
+        oklch(from var(--ui-olive) min(l, 0.5) c h),
         oklch(from var(--ui-olive) max(l, 0.78) c h)
       );
       --ui-olive-header: light-dark(
-        oklch(from var(--ui-olive) min(l, 0.5) c h),
+        oklch(from var(--ui-olive) min(l, 0.45) c h),
         oklch(from var(--ui-olive) max(l, 0.85) c h)
       );
       --ui-olive-border: light-dark(
@@ -739,7 +775,9 @@
         oklch(from var(--ui-olive) 0.28 calc(c * 0.35) h)
       );
       --ui-olive-inverted: var(--ui-olive-on-dark);
-      --ui-green-on-light: oklch(0.66 0.19 148);
+      --ui-olive-on: var(--ui-ink-on-light);
+      --ui-olive-inverted-on: var(--ui-ink-on-light);
+      --ui-green-on-light: oklch(0.53 0.17 148);
       --ui-green-on-dark: oklch(0.75 0.18 148);
       --ui-green: light-dark(var(--ui-green-on-light), var(--ui-green-on-dark));
       --ui-green-hover: oklch(from var(--ui-green) calc(l - 0.05) calc(c * 1.1) h);
@@ -747,11 +785,11 @@
       --ui-green-down: oklch(from var(--ui-green) calc(l - 0.1) c h);
       --ui-green-active: oklch(from var(--ui-green) calc(l - 0.05) calc(c * 1.15) h);
       --ui-green-text: light-dark(
-        oklch(from var(--ui-green) min(l, 0.56) c h),
+        oklch(from var(--ui-green) min(l, 0.5) c h),
         oklch(from var(--ui-green) max(l, 0.78) c h)
       );
       --ui-green-header: light-dark(
-        oklch(from var(--ui-green) min(l, 0.5) c h),
+        oklch(from var(--ui-green) min(l, 0.45) c h),
         oklch(from var(--ui-green) max(l, 0.85) c h)
       );
       --ui-green-border: light-dark(
@@ -763,6 +801,8 @@
         oklch(from var(--ui-green) 0.28 calc(c * 0.35) h)
       );
       --ui-green-inverted: var(--ui-green-on-dark);
+      --ui-green-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+      --ui-green-inverted-on: var(--ui-ink-on-light);
       --ui-teal-on-light: oklch(0.68 0.12 188);
       --ui-teal-on-dark: oklch(0.8 0.12 190);
       --ui-teal: light-dark(var(--ui-teal-on-light), var(--ui-teal-on-dark));
@@ -771,11 +811,11 @@
       --ui-teal-down: oklch(from var(--ui-teal) calc(l - 0.1) c h);
       --ui-teal-active: oklch(from var(--ui-teal) calc(l - 0.05) calc(c * 1.15) h);
       --ui-teal-text: light-dark(
-        oklch(from var(--ui-teal) min(l, 0.56) c h),
+        oklch(from var(--ui-teal) min(l, 0.5) c h),
         oklch(from var(--ui-teal) max(l, 0.78) c h)
       );
       --ui-teal-header: light-dark(
-        oklch(from var(--ui-teal) min(l, 0.5) c h),
+        oklch(from var(--ui-teal) min(l, 0.45) c h),
         oklch(from var(--ui-teal) max(l, 0.85) c h)
       );
       --ui-teal-border: light-dark(
@@ -787,7 +827,9 @@
         oklch(from var(--ui-teal) 0.28 calc(c * 0.35) h)
       );
       --ui-teal-inverted: var(--ui-teal-on-dark);
-      --ui-blue-on-light: oklch(0.58 0.16 250);
+      --ui-teal-on: var(--ui-ink-on-light);
+      --ui-teal-inverted-on: var(--ui-ink-on-light);
+      --ui-blue-on-light: oklch(0.55 0.16 250);
       --ui-blue-on-dark: oklch(0.72 0.14 240);
       --ui-blue: light-dark(var(--ui-blue-on-light), var(--ui-blue-on-dark));
       --ui-blue-hover: oklch(from var(--ui-blue) calc(l - 0.05) calc(c * 1.1) h);
@@ -795,11 +837,11 @@
       --ui-blue-down: oklch(from var(--ui-blue) calc(l - 0.1) c h);
       --ui-blue-active: oklch(from var(--ui-blue) calc(l - 0.05) calc(c * 1.15) h);
       --ui-blue-text: light-dark(
-        oklch(from var(--ui-blue) min(l, 0.56) c h),
+        oklch(from var(--ui-blue) min(l, 0.5) c h),
         oklch(from var(--ui-blue) max(l, 0.78) c h)
       );
       --ui-blue-header: light-dark(
-        oklch(from var(--ui-blue) min(l, 0.5) c h),
+        oklch(from var(--ui-blue) min(l, 0.45) c h),
         oklch(from var(--ui-blue) max(l, 0.85) c h)
       );
       --ui-blue-border: light-dark(
@@ -811,6 +853,8 @@
         oklch(from var(--ui-blue) 0.28 calc(c * 0.35) h)
       );
       --ui-blue-inverted: var(--ui-blue-on-dark);
+      --ui-blue-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+      --ui-blue-inverted-on: var(--ui-ink-on-light);
       --ui-violet-on-light: oklch(0.52 0.22 290);
       --ui-violet-on-dark: oklch(0.7 0.16 290);
       --ui-violet: light-dark(var(--ui-violet-on-light), var(--ui-violet-on-dark));
@@ -819,11 +863,11 @@
       --ui-violet-down: oklch(from var(--ui-violet) calc(l - 0.1) c h);
       --ui-violet-active: oklch(from var(--ui-violet) calc(l - 0.05) calc(c * 1.15) h);
       --ui-violet-text: light-dark(
-        oklch(from var(--ui-violet) min(l, 0.56) c h),
+        oklch(from var(--ui-violet) min(l, 0.5) c h),
         oklch(from var(--ui-violet) max(l, 0.78) c h)
       );
       --ui-violet-header: light-dark(
-        oklch(from var(--ui-violet) min(l, 0.5) c h),
+        oklch(from var(--ui-violet) min(l, 0.45) c h),
         oklch(from var(--ui-violet) max(l, 0.85) c h)
       );
       --ui-violet-border: light-dark(
@@ -835,6 +879,8 @@
         oklch(from var(--ui-violet) 0.28 calc(c * 0.35) h)
       );
       --ui-violet-inverted: var(--ui-violet-on-dark);
+      --ui-violet-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+      --ui-violet-inverted-on: var(--ui-ink-on-light);
       --ui-purple-on-light: oklch(0.56 0.23 316);
       --ui-purple-on-dark: oklch(0.72 0.19 316);
       --ui-purple: light-dark(var(--ui-purple-on-light), var(--ui-purple-on-dark));
@@ -843,11 +889,11 @@
       --ui-purple-down: oklch(from var(--ui-purple) calc(l - 0.1) c h);
       --ui-purple-active: oklch(from var(--ui-purple) calc(l - 0.05) calc(c * 1.15) h);
       --ui-purple-text: light-dark(
-        oklch(from var(--ui-purple) min(l, 0.56) c h),
+        oklch(from var(--ui-purple) min(l, 0.5) c h),
         oklch(from var(--ui-purple) max(l, 0.78) c h)
       );
       --ui-purple-header: light-dark(
-        oklch(from var(--ui-purple) min(l, 0.5) c h),
+        oklch(from var(--ui-purple) min(l, 0.45) c h),
         oklch(from var(--ui-purple) max(l, 0.85) c h)
       );
       --ui-purple-border: light-dark(
@@ -859,7 +905,9 @@
         oklch(from var(--ui-purple) 0.28 calc(c * 0.35) h)
       );
       --ui-purple-inverted: var(--ui-purple-on-dark);
-      --ui-pink-on-light: oklch(0.63 0.22 355);
+      --ui-purple-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+      --ui-purple-inverted-on: var(--ui-ink-on-light);
+      --ui-pink-on-light: oklch(0.58 0.22 355);
       --ui-pink-on-dark: oklch(0.76 0.16 350);
       --ui-pink: light-dark(var(--ui-pink-on-light), var(--ui-pink-on-dark));
       --ui-pink-hover: oklch(from var(--ui-pink) calc(l - 0.05) calc(c * 1.1) h);
@@ -867,11 +915,11 @@
       --ui-pink-down: oklch(from var(--ui-pink) calc(l - 0.1) c h);
       --ui-pink-active: oklch(from var(--ui-pink) calc(l - 0.05) calc(c * 1.15) h);
       --ui-pink-text: light-dark(
-        oklch(from var(--ui-pink) min(l, 0.56) c h),
+        oklch(from var(--ui-pink) min(l, 0.5) c h),
         oklch(from var(--ui-pink) max(l, 0.78) c h)
       );
       --ui-pink-header: light-dark(
-        oklch(from var(--ui-pink) min(l, 0.5) c h),
+        oklch(from var(--ui-pink) min(l, 0.45) c h),
         oklch(from var(--ui-pink) max(l, 0.85) c h)
       );
       --ui-pink-border: light-dark(
@@ -883,6 +931,8 @@
         oklch(from var(--ui-pink) 0.28 calc(c * 0.35) h)
       );
       --ui-pink-inverted: var(--ui-pink-on-dark);
+      --ui-pink-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+      --ui-pink-inverted-on: var(--ui-ink-on-light);
       --ui-brown-on-light: oklch(0.56 0.1 55);
       --ui-brown-on-dark: oklch(0.7 0.12 60);
       --ui-brown: light-dark(var(--ui-brown-on-light), var(--ui-brown-on-dark));
@@ -891,11 +941,11 @@
       --ui-brown-down: oklch(from var(--ui-brown) calc(l - 0.1) c h);
       --ui-brown-active: oklch(from var(--ui-brown) calc(l - 0.05) calc(c * 1.15) h);
       --ui-brown-text: light-dark(
-        oklch(from var(--ui-brown) min(l, 0.56) c h),
+        oklch(from var(--ui-brown) min(l, 0.5) c h),
         oklch(from var(--ui-brown) max(l, 0.78) c h)
       );
       --ui-brown-header: light-dark(
-        oklch(from var(--ui-brown) min(l, 0.5) c h),
+        oklch(from var(--ui-brown) min(l, 0.45) c h),
         oklch(from var(--ui-brown) max(l, 0.85) c h)
       );
       --ui-brown-border: light-dark(
@@ -907,6 +957,8 @@
         oklch(from var(--ui-brown) 0.28 calc(c * 0.35) h)
       );
       --ui-brown-inverted: var(--ui-brown-on-dark);
+      --ui-brown-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+      --ui-brown-inverted-on: var(--ui-ink-on-light);
       --ui-grey-on-light: oklch(0.55 0.01 260);
       --ui-grey-on-dark: oklch(0.72 0.01 260);
       --ui-grey: light-dark(var(--ui-grey-on-light), var(--ui-grey-on-dark));
@@ -915,11 +967,11 @@
       --ui-grey-down: oklch(from var(--ui-grey) calc(l - 0.1) c h);
       --ui-grey-active: oklch(from var(--ui-grey) calc(l - 0.05) calc(c * 1.15) h);
       --ui-grey-text: light-dark(
-        oklch(from var(--ui-grey) min(l, 0.56) c h),
+        oklch(from var(--ui-grey) min(l, 0.5) c h),
         oklch(from var(--ui-grey) max(l, 0.78) c h)
       );
       --ui-grey-header: light-dark(
-        oklch(from var(--ui-grey) min(l, 0.5) c h),
+        oklch(from var(--ui-grey) min(l, 0.45) c h),
         oklch(from var(--ui-grey) max(l, 0.85) c h)
       );
       --ui-grey-border: light-dark(
@@ -931,6 +983,8 @@
         oklch(from var(--ui-grey) 0.28 calc(c * 0.35) h)
       );
       --ui-grey-inverted: var(--ui-grey-on-dark);
+      --ui-grey-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+      --ui-grey-inverted-on: var(--ui-ink-on-light);
       --ui-black-on-light: oklch(0.24 0.01 260);
       --ui-black-on-dark: oklch(0.42 0.01 260);
       --ui-black: light-dark(var(--ui-black-on-light), var(--ui-black-on-dark));
@@ -939,11 +993,11 @@
       --ui-black-down: oklch(from var(--ui-black) calc(l + 0.1) c h);
       --ui-black-active: oklch(from var(--ui-black) calc(l - 0.05) c h);
       --ui-black-text: light-dark(
-        oklch(from var(--ui-black) min(l, 0.56) c h),
+        oklch(from var(--ui-black) min(l, 0.5) c h),
         oklch(from var(--ui-black) max(l, 0.78) c h)
       );
       --ui-black-header: light-dark(
-        oklch(from var(--ui-black) min(l, 0.5) c h),
+        oklch(from var(--ui-black) min(l, 0.45) c h),
         oklch(from var(--ui-black) max(l, 0.85) c h)
       );
       --ui-black-border: light-dark(
@@ -954,18 +1008,20 @@
         oklch(from var(--ui-black) 0.96 calc(c * 0.25) h),
         oklch(from var(--ui-black) 0.28 calc(c * 0.35) h)
       );
-      --ui-black-inverted: var(--ui-black-on-dark);
+      --ui-black-inverted: oklch(0.87 0.005 260);
+      --ui-black-on: oklch(1 0 0);
+      --ui-black-inverted-on: var(--ui-ink-on-light);
       --ui-primary: var(--ui-blue);
       --ui-primary-hover: oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.1) h);
       --ui-primary-focus: oklch(from var(--ui-primary) calc(l - 0.08) calc(c * 1.2) h);
       --ui-primary-down: oklch(from var(--ui-primary) calc(l - 0.1) c h);
       --ui-primary-active: oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.15) h);
       --ui-primary-text: light-dark(
-        oklch(from var(--ui-primary) min(l, 0.56) c h),
+        oklch(from var(--ui-primary) min(l, 0.5) c h),
         oklch(from var(--ui-primary) max(l, 0.78) c h)
       );
       --ui-primary-header: light-dark(
-        oklch(from var(--ui-primary) min(l, 0.5) c h),
+        oklch(from var(--ui-primary) min(l, 0.45) c h),
         oklch(from var(--ui-primary) max(l, 0.85) c h)
       );
       --ui-primary-border: light-dark(
@@ -977,17 +1033,19 @@
         oklch(from var(--ui-primary) 0.28 calc(c * 0.35) h)
       );
       --ui-primary-inverted: var(--ui-blue-inverted);
+      --ui-primary-on: var(--ui-blue-on);
+      --ui-primary-inverted-on: var(--ui-blue-inverted-on);
       --ui-secondary: var(--ui-black);
       --ui-secondary-hover: oklch(from var(--ui-secondary) calc(l + 0.05) c h);
       --ui-secondary-focus: oklch(from var(--ui-secondary) calc(l + 0.08) c h);
       --ui-secondary-down: oklch(from var(--ui-secondary) calc(l + 0.1) c h);
       --ui-secondary-active: oklch(from var(--ui-secondary) calc(l - 0.05) c h);
       --ui-secondary-text: light-dark(
-        oklch(from var(--ui-secondary) min(l, 0.56) c h),
+        oklch(from var(--ui-secondary) min(l, 0.5) c h),
         oklch(from var(--ui-secondary) max(l, 0.78) c h)
       );
       --ui-secondary-header: light-dark(
-        oklch(from var(--ui-secondary) min(l, 0.5) c h),
+        oklch(from var(--ui-secondary) min(l, 0.45) c h),
         oklch(from var(--ui-secondary) max(l, 0.85) c h)
       );
       --ui-secondary-border: light-dark(
@@ -999,8 +1057,12 @@
         oklch(from var(--ui-secondary) 0.28 calc(c * 0.35) h)
       );
       --ui-secondary-inverted: var(--ui-black-inverted);
+      --ui-secondary-on: var(--ui-black-on);
+      --ui-secondary-inverted-on: var(--ui-black-inverted-on);
       --ui-positive: var(--ui-green);
       --ui-positive-inverted: var(--ui-green-inverted);
+      --ui-positive-on: var(--ui-green-on);
+      --ui-positive-inverted-on: var(--ui-green-inverted-on);
       --ui-positive-hover: oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.1) h);
       --ui-positive-focus: oklch(from var(--ui-positive) calc(l - 0.08) calc(c * 1.2) h);
       --ui-positive-down: oklch(from var(--ui-positive) calc(l - 0.1) c h);
@@ -1023,6 +1085,8 @@
       );
       --ui-negative: var(--ui-red);
       --ui-negative-inverted: var(--ui-red-inverted);
+      --ui-negative-on: var(--ui-red-on);
+      --ui-negative-inverted-on: var(--ui-red-inverted-on);
       --ui-negative-hover: oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.1) h);
       --ui-negative-focus: oklch(from var(--ui-negative) calc(l - 0.08) calc(c * 1.2) h);
       --ui-negative-down: oklch(from var(--ui-negative) calc(l - 0.1) c h);
@@ -1047,6 +1111,8 @@
       --ui-info-on-dark: oklch(0.8 0.12 215);
       --ui-info: light-dark(var(--ui-info-on-light), var(--ui-info-on-dark));
       --ui-info-inverted: var(--ui-info-on-dark);
+      --ui-info-on: var(--ui-ink-on-light);
+      --ui-info-inverted-on: var(--ui-ink-on-light);
       --ui-info-hover: oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.1) h);
       --ui-info-focus: oklch(from var(--ui-info) calc(l - 0.08) calc(c * 1.2) h);
       --ui-info-down: oklch(from var(--ui-info) calc(l - 0.1) c h);
@@ -1071,6 +1137,8 @@
       --ui-warning-on-dark: oklch(0.86 0.15 85);
       --ui-warning: light-dark(var(--ui-warning-on-light), var(--ui-warning-on-dark));
       --ui-warning-inverted: var(--ui-warning-on-dark);
+      --ui-warning-on: var(--ui-ink-on-light);
+      --ui-warning-inverted-on: var(--ui-ink-on-light);
       --ui-warning-hover: oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.1) h);
       --ui-warning-focus: oklch(from var(--ui-warning) calc(l - 0.08) calc(c * 1.2) h);
       --ui-warning-down: oklch(from var(--ui-warning) calc(l - 0.1) c h);
@@ -1093,6 +1161,8 @@
       );
       --ui-success: var(--ui-positive);
       --ui-success-inverted: var(--ui-positive-inverted);
+      --ui-success-on: var(--ui-positive-on);
+      --ui-success-inverted-on: var(--ui-positive-inverted-on);
       --ui-success-hover: var(--ui-positive-hover);
       --ui-success-focus: var(--ui-positive-focus);
       --ui-success-down: var(--ui-positive-down);
@@ -1103,6 +1173,8 @@
       --ui-success-background: var(--ui-positive-background);
       --ui-error: var(--ui-negative);
       --ui-error-inverted: var(--ui-negative-inverted);
+      --ui-error-on: var(--ui-negative-on);
+      --ui-error-inverted-on: var(--ui-negative-inverted-on);
       --ui-error-hover: var(--ui-negative-hover);
       --ui-error-focus: var(--ui-negative-focus);
       --ui-error-down: var(--ui-negative-down);
@@ -1138,6 +1210,8 @@
     --ui-color-border: var(--ui-red-border);
     --ui-color-background: var(--ui-red-background);
     --ui-color-inverted: var(--ui-red-inverted);
+    --ui-color-on: var(--ui-red-on);
+    --ui-color-inverted-on: var(--ui-red-inverted-on);
   }
   .ui.orange,
   .ui-orange {
@@ -1147,6 +1221,8 @@
     --ui-color-border: var(--ui-orange-border);
     --ui-color-background: var(--ui-orange-background);
     --ui-color-inverted: var(--ui-orange-inverted);
+    --ui-color-on: var(--ui-orange-on);
+    --ui-color-inverted-on: var(--ui-orange-inverted-on);
   }
   .ui.yellow,
   .ui-yellow {
@@ -1156,6 +1232,8 @@
     --ui-color-border: var(--ui-yellow-border);
     --ui-color-background: var(--ui-yellow-background);
     --ui-color-inverted: var(--ui-yellow-inverted);
+    --ui-color-on: var(--ui-yellow-on);
+    --ui-color-inverted-on: var(--ui-yellow-inverted-on);
   }
   .ui.olive,
   .ui-olive {
@@ -1165,6 +1243,8 @@
     --ui-color-border: var(--ui-olive-border);
     --ui-color-background: var(--ui-olive-background);
     --ui-color-inverted: var(--ui-olive-inverted);
+    --ui-color-on: var(--ui-olive-on);
+    --ui-color-inverted-on: var(--ui-olive-inverted-on);
   }
   .ui.green,
   .ui-green {
@@ -1174,6 +1254,8 @@
     --ui-color-border: var(--ui-green-border);
     --ui-color-background: var(--ui-green-background);
     --ui-color-inverted: var(--ui-green-inverted);
+    --ui-color-on: var(--ui-green-on);
+    --ui-color-inverted-on: var(--ui-green-inverted-on);
   }
   .ui.teal,
   .ui-teal {
@@ -1183,6 +1265,8 @@
     --ui-color-border: var(--ui-teal-border);
     --ui-color-background: var(--ui-teal-background);
     --ui-color-inverted: var(--ui-teal-inverted);
+    --ui-color-on: var(--ui-teal-on);
+    --ui-color-inverted-on: var(--ui-teal-inverted-on);
   }
   .ui.blue,
   .ui-blue {
@@ -1192,6 +1276,8 @@
     --ui-color-border: var(--ui-blue-border);
     --ui-color-background: var(--ui-blue-background);
     --ui-color-inverted: var(--ui-blue-inverted);
+    --ui-color-on: var(--ui-blue-on);
+    --ui-color-inverted-on: var(--ui-blue-inverted-on);
   }
   .ui.violet,
   .ui-violet {
@@ -1201,6 +1287,8 @@
     --ui-color-border: var(--ui-violet-border);
     --ui-color-background: var(--ui-violet-background);
     --ui-color-inverted: var(--ui-violet-inverted);
+    --ui-color-on: var(--ui-violet-on);
+    --ui-color-inverted-on: var(--ui-violet-inverted-on);
   }
   .ui.purple,
   .ui-purple {
@@ -1210,6 +1298,8 @@
     --ui-color-border: var(--ui-purple-border);
     --ui-color-background: var(--ui-purple-background);
     --ui-color-inverted: var(--ui-purple-inverted);
+    --ui-color-on: var(--ui-purple-on);
+    --ui-color-inverted-on: var(--ui-purple-inverted-on);
   }
   .ui.pink,
   .ui-pink {
@@ -1219,6 +1309,8 @@
     --ui-color-border: var(--ui-pink-border);
     --ui-color-background: var(--ui-pink-background);
     --ui-color-inverted: var(--ui-pink-inverted);
+    --ui-color-on: var(--ui-pink-on);
+    --ui-color-inverted-on: var(--ui-pink-inverted-on);
   }
   .ui.brown,
   .ui-brown {
@@ -1228,6 +1320,8 @@
     --ui-color-border: var(--ui-brown-border);
     --ui-color-background: var(--ui-brown-background);
     --ui-color-inverted: var(--ui-brown-inverted);
+    --ui-color-on: var(--ui-brown-on);
+    --ui-color-inverted-on: var(--ui-brown-inverted-on);
   }
   .ui.grey,
   .ui-grey {
@@ -1237,6 +1331,8 @@
     --ui-color-border: var(--ui-grey-border);
     --ui-color-background: var(--ui-grey-background);
     --ui-color-inverted: var(--ui-grey-inverted);
+    --ui-color-on: var(--ui-grey-on);
+    --ui-color-inverted-on: var(--ui-grey-inverted-on);
   }
   .ui.black,
   .ui-black {
@@ -1246,6 +1342,8 @@
     --ui-color-border: var(--ui-black-border);
     --ui-color-background: var(--ui-black-background);
     --ui-color-inverted: var(--ui-black-inverted);
+    --ui-color-on: var(--ui-black-on);
+    --ui-color-inverted-on: var(--ui-black-inverted-on);
   }
   .ui.primary,
   .ui-primary {
@@ -1255,6 +1353,8 @@
     --ui-color-border: var(--ui-primary-border);
     --ui-color-background: var(--ui-primary-background);
     --ui-color-inverted: var(--ui-primary-inverted);
+    --ui-color-on: var(--ui-primary-on);
+    --ui-color-inverted-on: var(--ui-primary-inverted-on);
   }
   .ui.secondary,
   .ui-secondary {
@@ -1264,6 +1364,8 @@
     --ui-color-border: var(--ui-secondary-border);
     --ui-color-background: var(--ui-secondary-background);
     --ui-color-inverted: var(--ui-secondary-inverted);
+    --ui-color-on: var(--ui-secondary-on);
+    --ui-color-inverted-on: var(--ui-secondary-inverted-on);
   }
   .ui.positive,
   .ui-positive {
@@ -1273,6 +1375,8 @@
     --ui-color-border: var(--ui-positive-border);
     --ui-color-background: var(--ui-positive-background);
     --ui-color-inverted: var(--ui-positive-inverted);
+    --ui-color-on: var(--ui-positive-on);
+    --ui-color-inverted-on: var(--ui-positive-inverted-on);
   }
   .ui.negative,
   .ui-negative {
@@ -1282,6 +1386,8 @@
     --ui-color-border: var(--ui-negative-border);
     --ui-color-background: var(--ui-negative-background);
     --ui-color-inverted: var(--ui-negative-inverted);
+    --ui-color-on: var(--ui-negative-on);
+    --ui-color-inverted-on: var(--ui-negative-inverted-on);
   }
   .ui.info,
   .ui-info {
@@ -1291,6 +1397,8 @@
     --ui-color-border: var(--ui-info-border);
     --ui-color-background: var(--ui-info-background);
     --ui-color-inverted: var(--ui-info-inverted);
+    --ui-color-on: var(--ui-info-on);
+    --ui-color-inverted-on: var(--ui-info-inverted-on);
   }
   .ui.warning,
   .ui-warning {
@@ -1300,6 +1408,8 @@
     --ui-color-border: var(--ui-warning-border);
     --ui-color-background: var(--ui-warning-background);
     --ui-color-inverted: var(--ui-warning-inverted);
+    --ui-color-on: var(--ui-warning-on);
+    --ui-color-inverted-on: var(--ui-warning-inverted-on);
   }
   .ui.success,
   .ui-success {
@@ -1309,6 +1419,8 @@
     --ui-color-border: var(--ui-success-border);
     --ui-color-background: var(--ui-success-background);
     --ui-color-inverted: var(--ui-success-inverted);
+    --ui-color-on: var(--ui-success-on);
+    --ui-color-inverted-on: var(--ui-success-inverted-on);
   }
   .ui.error,
   .ui-error {
@@ -1318,6 +1430,8 @@
     --ui-color-border: var(--ui-error-border);
     --ui-color-background: var(--ui-error-background);
     --ui-color-inverted: var(--ui-error-inverted);
+    --ui-color-on: var(--ui-error-on);
+    --ui-color-inverted-on: var(--ui-error-inverted-on);
   }
   .ui.red,
   .ui-red,
@@ -1365,7 +1479,6 @@
     --ui-color-focus: oklch(from var(--ui-color) calc(l - 0.08) calc(c * 1.2) h);
     --ui-color-down: oklch(from var(--ui-color) calc(l - 0.1) c h);
     --ui-color-active: oklch(from var(--ui-color) calc(l - 0.05) calc(c * 1.15) h);
-    --ui-color-contrast: oklch(from var(--ui-color) clamp(0, (0.72 - l) * 1000, 1) 0 0);
   }
   .ui.black,
   .ui-black,
@@ -1379,62 +1492,92 @@
   [data-variation~="red"] {
     --ui-variation-color: var(--ui-red);
     --ui-variation-color-inverted: var(--ui-red-inverted);
+    --ui-variation-color-on: var(--ui-red-on);
+    --ui-variation-color-inverted-on: var(--ui-red-inverted-on);
   }
   [data-variation~="orange"] {
     --ui-variation-color: var(--ui-orange);
     --ui-variation-color-inverted: var(--ui-orange-inverted);
+    --ui-variation-color-on: var(--ui-orange-on);
+    --ui-variation-color-inverted-on: var(--ui-orange-inverted-on);
   }
   [data-variation~="yellow"] {
     --ui-variation-color: var(--ui-yellow);
     --ui-variation-color-inverted: var(--ui-yellow-inverted);
+    --ui-variation-color-on: var(--ui-yellow-on);
+    --ui-variation-color-inverted-on: var(--ui-yellow-inverted-on);
   }
   [data-variation~="olive"] {
     --ui-variation-color: var(--ui-olive);
     --ui-variation-color-inverted: var(--ui-olive-inverted);
+    --ui-variation-color-on: var(--ui-olive-on);
+    --ui-variation-color-inverted-on: var(--ui-olive-inverted-on);
   }
   [data-variation~="green"] {
     --ui-variation-color: var(--ui-green);
     --ui-variation-color-inverted: var(--ui-green-inverted);
+    --ui-variation-color-on: var(--ui-green-on);
+    --ui-variation-color-inverted-on: var(--ui-green-inverted-on);
   }
   [data-variation~="teal"] {
     --ui-variation-color: var(--ui-teal);
     --ui-variation-color-inverted: var(--ui-teal-inverted);
+    --ui-variation-color-on: var(--ui-teal-on);
+    --ui-variation-color-inverted-on: var(--ui-teal-inverted-on);
   }
   [data-variation~="blue"] {
     --ui-variation-color: var(--ui-blue);
     --ui-variation-color-inverted: var(--ui-blue-inverted);
+    --ui-variation-color-on: var(--ui-blue-on);
+    --ui-variation-color-inverted-on: var(--ui-blue-inverted-on);
   }
   [data-variation~="violet"] {
     --ui-variation-color: var(--ui-violet);
     --ui-variation-color-inverted: var(--ui-violet-inverted);
+    --ui-variation-color-on: var(--ui-violet-on);
+    --ui-variation-color-inverted-on: var(--ui-violet-inverted-on);
   }
   [data-variation~="purple"] {
     --ui-variation-color: var(--ui-purple);
     --ui-variation-color-inverted: var(--ui-purple-inverted);
+    --ui-variation-color-on: var(--ui-purple-on);
+    --ui-variation-color-inverted-on: var(--ui-purple-inverted-on);
   }
   [data-variation~="pink"] {
     --ui-variation-color: var(--ui-pink);
     --ui-variation-color-inverted: var(--ui-pink-inverted);
+    --ui-variation-color-on: var(--ui-pink-on);
+    --ui-variation-color-inverted-on: var(--ui-pink-inverted-on);
   }
   [data-variation~="brown"] {
     --ui-variation-color: var(--ui-brown);
     --ui-variation-color-inverted: var(--ui-brown-inverted);
+    --ui-variation-color-on: var(--ui-brown-on);
+    --ui-variation-color-inverted-on: var(--ui-brown-inverted-on);
   }
   [data-variation~="grey"] {
     --ui-variation-color: var(--ui-grey);
     --ui-variation-color-inverted: var(--ui-grey-inverted);
+    --ui-variation-color-on: var(--ui-grey-on);
+    --ui-variation-color-inverted-on: var(--ui-grey-inverted-on);
   }
   [data-variation~="black"] {
     --ui-variation-color: var(--ui-black);
     --ui-variation-color-inverted: var(--ui-black-inverted);
+    --ui-variation-color-on: var(--ui-black-on);
+    --ui-variation-color-inverted-on: var(--ui-black-inverted-on);
   }
   [data-variation~="primary"] {
     --ui-variation-color: var(--ui-primary);
     --ui-variation-color-inverted: var(--ui-primary-inverted);
+    --ui-variation-color-on: var(--ui-primary-on);
+    --ui-variation-color-inverted-on: var(--ui-primary-inverted-on);
   }
   [data-variation~="secondary"] {
     --ui-variation-color: var(--ui-secondary);
     --ui-variation-color-inverted: var(--ui-secondary-inverted);
+    --ui-variation-color-on: var(--ui-secondary-on);
+    --ui-variation-color-inverted-on: var(--ui-secondary-inverted-on);
   }
 }
 

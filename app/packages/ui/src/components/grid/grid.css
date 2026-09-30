@@ -180,7 +180,8 @@
     --ui-color-focus: initial;
     --ui-color-down: initial;
     --ui-color-active: initial;
-    --ui-color-contrast: initial;
+    --ui-color-on: initial;
+    --ui-color-inverted-on: initial;
   }
 
   /* Row:  a full-width flex line of its own. */
@@ -199,7 +200,7 @@
     padding: var(--_grid-row-padding, calc(var(--_grid-row-spacing) / 2)) 0;
     background-color: var(--ui-color, transparent);
     box-shadow: var(--_grid-row-divider, none);
-    color: var(--ui-color-contrast);
+    color: var(--ui-color-on);
   }
   .ui.grid > .ui.row:first-child,
   :host(:first-child) > .ui.row {
@@ -224,7 +225,7 @@
     );
     background-color: var(--ui-color, transparent);
     box-shadow: var(--_grid-column-divider, none);
-    color: var(--ui-color-contrast);
+    color: var(--ui-color-on);
     text-align: var(--_grid-text-align);
     vertical-align: top;
   }
@@ -333,53 +334,185 @@
     --_grid-columns-mobile: 4;
   }
 
-  /* Widths:  `N wide` columns take N of 16 (Fomantic's `!important` precedence, by expression order). */
-  .ui[class*="one wide"].column {
+  /*
+   * Widths:  `N wide` columns take N of 16 (Fomantic's `!important` precedence, by expression order).
+   * - The bare rules exclude (in `:where()`, so the device rules still out-rank them) `N wide <device>` classes (the substring matches those too), so
+   *   `width="4" width-mobile="16"` is 4 wide outside the mobile range.
+   */
+  .ui[class*="one wide"]:where(
+      :not(
+        [class*="one wide mobile"],
+        [class*="one wide tablet"],
+        [class*="one wide computer"],
+        [class*="one wide large screen"],
+        [class*="one wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 1;
   }
-  .ui[class*="two wide"].column {
+  .ui[class*="two wide"]:where(
+      :not(
+        [class*="two wide mobile"],
+        [class*="two wide tablet"],
+        [class*="two wide computer"],
+        [class*="two wide large screen"],
+        [class*="two wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 2;
   }
-  .ui[class*="three wide"].column {
+  .ui[class*="three wide"]:where(
+      :not(
+        [class*="three wide mobile"],
+        [class*="three wide tablet"],
+        [class*="three wide computer"],
+        [class*="three wide large screen"],
+        [class*="three wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 3;
   }
-  .ui[class*="four wide"].column {
+  .ui[class*="four wide"]:where(
+      :not(
+        [class*="four wide mobile"],
+        [class*="four wide tablet"],
+        [class*="four wide computer"],
+        [class*="four wide large screen"],
+        [class*="four wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 4;
   }
-  .ui[class*="five wide"].column {
+  .ui[class*="five wide"]:where(
+      :not(
+        [class*="five wide mobile"],
+        [class*="five wide tablet"],
+        [class*="five wide computer"],
+        [class*="five wide large screen"],
+        [class*="five wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 5;
   }
-  .ui[class*="six wide"].column {
+  .ui[class*="six wide"]:where(
+      :not(
+        [class*="six wide mobile"],
+        [class*="six wide tablet"],
+        [class*="six wide computer"],
+        [class*="six wide large screen"],
+        [class*="six wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 6;
   }
-  .ui[class*="seven wide"].column {
+  .ui[class*="seven wide"]:where(
+      :not(
+        [class*="seven wide mobile"],
+        [class*="seven wide tablet"],
+        [class*="seven wide computer"],
+        [class*="seven wide large screen"],
+        [class*="seven wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 7;
   }
-  .ui[class*="eight wide"].column {
+  .ui[class*="eight wide"]:where(
+      :not(
+        [class*="eight wide mobile"],
+        [class*="eight wide tablet"],
+        [class*="eight wide computer"],
+        [class*="eight wide large screen"],
+        [class*="eight wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 8;
   }
-  .ui[class*="nine wide"].column {
+  .ui[class*="nine wide"]:where(
+      :not(
+        [class*="nine wide mobile"],
+        [class*="nine wide tablet"],
+        [class*="nine wide computer"],
+        [class*="nine wide large screen"],
+        [class*="nine wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 9;
   }
-  .ui[class*="ten wide"].column {
+  .ui[class*="ten wide"]:where(
+      :not(
+        [class*="ten wide mobile"],
+        [class*="ten wide tablet"],
+        [class*="ten wide computer"],
+        [class*="ten wide large screen"],
+        [class*="ten wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 10;
   }
-  .ui[class*="eleven wide"].column {
+  .ui[class*="eleven wide"]:where(
+      :not(
+        [class*="eleven wide mobile"],
+        [class*="eleven wide tablet"],
+        [class*="eleven wide computer"],
+        [class*="eleven wide large screen"],
+        [class*="eleven wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 11;
   }
-  .ui[class*="twelve wide"].column {
+  .ui[class*="twelve wide"]:where(
+      :not(
+        [class*="twelve wide mobile"],
+        [class*="twelve wide tablet"],
+        [class*="twelve wide computer"],
+        [class*="twelve wide large screen"],
+        [class*="twelve wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 12;
   }
-  .ui[class*="thirteen wide"].column {
+  .ui[class*="thirteen wide"]:where(
+      :not(
+        [class*="thirteen wide mobile"],
+        [class*="thirteen wide tablet"],
+        [class*="thirteen wide computer"],
+        [class*="thirteen wide large screen"],
+        [class*="thirteen wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 13;
   }
-  .ui[class*="fourteen wide"].column {
+  .ui[class*="fourteen wide"]:where(
+      :not(
+        [class*="fourteen wide mobile"],
+        [class*="fourteen wide tablet"],
+        [class*="fourteen wide computer"],
+        [class*="fourteen wide large screen"],
+        [class*="fourteen wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 14;
   }
-  .ui[class*="fifteen wide"].column {
+  .ui[class*="fifteen wide"]:where(
+      :not(
+        [class*="fifteen wide mobile"],
+        [class*="fifteen wide tablet"],
+        [class*="fifteen wide computer"],
+        [class*="fifteen wide large screen"],
+        [class*="fifteen wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 15;
   }
-  .ui[class*="sixteen wide"].column {
+  .ui[class*="sixteen wide"]:where(
+      :not(
+        [class*="sixteen wide mobile"],
+        [class*="sixteen wide tablet"],
+        [class*="sixteen wide computer"],
+        [class*="sixteen wide large screen"],
+        [class*="sixteen wide widescreen"]
+      )
+    ).column {
     --_grid-wide: 16;
   }
   /* Equal width:  columns share the line;  sized ones keep their width. */

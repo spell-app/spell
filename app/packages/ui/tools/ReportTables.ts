@@ -22,7 +22,8 @@ export class ReportTables {
    */
   static readonly TABLES = {
     versions: "installed peer packages and toolchain",
-    "bundle-tiers": "library (as used, full) / shared entries (core, forms ...) / own / lazy, min and min+gz",
+    "bundle-tiers":
+      "library (as used, full) / shared entries (core, forms ...) / own / extra (api) / lazy, min and min+gz",
     "bundle-families": "own cost per family, split classes / css / vocabulary / fallback, and what it imports",
     "bundle-scenarios": "the three page scenarios",
     "bundle-checks": "structural checks of dist/",
@@ -34,6 +35,9 @@ export class ReportTables {
 
   /** Packages the versions table lists:  Solid, the fork and the Solid plugin (the pins that matter). */
   static readonly VERSIONED = /^solid-js$|^@solidjs\/|^@spell\/solid-element$/
+
+  /** What each extra entry (`MeasureResults.extra`) holds, for the tier table. */
+  static readonly EXTRA: Record<string, string> = { api: "`E` / `V` namespaces, `@spell/ui/api`" }
 
   /** LOC groups listed file by file (`loc-files`). */
   static readonly LOC_FILE_GROUPS = ["element core", "components"]
@@ -143,6 +147,12 @@ export class ReportTables {
       ...library,
       ...shared,
       [`own, all ${Object.keys(results.own).length} families`, kB(ownMin), kB(ownGzip), "eager"],
+      ...Object.entries(results.extra ?? {}).map(([name, size]) => [
+        `${name} (${ReportTables.EXTRA[name] ?? "extra entry"})`,
+        kB(size.min),
+        kB(size.gzip),
+        "app only"
+      ]),
       ["runtime (`UIRuntime` + foundation CSS)", kB(results.lazy.runtime.min), kB(results.lazy.runtime.gzip), "lazy"],
       [
         "icons (name index + alias maps;  glyphs are separate files)",
@@ -215,6 +225,7 @@ export class ReportTables {
   private checks(results: MeasureResults): string {
     const labels: Record<keyof MeasureResults["checks"], string> = {
       entriesMissingCore: "every family entry imports `core.js`",
+      runtimeChunks: "no Rolldown runtime chunk (`rolldown-runtime-<hash>.js`):  its helpers stay in `core.js`",
       coreOutsideCore: "no shared-entry module outside its own chunk (`core.js`, `forms.js` ...)",
       libraryBundled: "no Solid / fork module in `dist/`",
       lazyInEager: "runtime + icon data only in lazy chunks",

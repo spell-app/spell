@@ -4,7 +4,7 @@
  *   (the base of the per-component `*.fallback.ts`, plain DOM when a render throws).
  * - The Solid layer, on `@spell/solid-element`:  `UIHost` / `FormHost` (host bases), `UIElement` (the controller
  *   base), `ElementDefinition` (vocabulary => the fork's props), `FormElement`, `Controlled`, `Cell`,
- *   `SlotContent`, `HostAttribute`, `PartContext` + `ContentPart` (owner context), `IconGlyph`.
+ *   `SlotContent`, `HostAttribute`, `PartContext` + `ContentPart` (owner context), `IconGlyph`, `ControlLabels`.
  * - NOTE: components never import this barrel:  they import the `$/core` / `$/forms` ENTRIES (`src/core.ts`,
  *   `src/forms.ts`), which split the same files into the two shared chunks of the build.
  * - NOTE: `HotDefinitions` is left out:  dev-only, and a SIDE EFFECT on import (it wraps `UIElement.define`);
@@ -32,5 +32,6 @@ export * from "./HostAttribute"
 export * from "./IconGlyph"
 export * from "./FormHost"
 export * from "./FormElement"
+export * from "./ControlLabels"
 
 export * as E from "."
