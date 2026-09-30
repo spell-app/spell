@@ -551,6 +551,9 @@
     inline-size: 2.25em;
     block-size: 2.25em;
   }
+  .site-icon-aliases {
+    color: var(--ui-text-muted);
+  }
 
   /*******************************
           Token playground

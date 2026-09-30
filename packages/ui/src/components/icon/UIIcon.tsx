@@ -1,7 +1,7 @@
 import { createEffect } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { IconGlyph, PartContext, proto, UIElement, type IconStyle } from "$/core"
+import { IconGlyph, PartContext, proto, UIElement } from "$/core"
 
 import { iconVocabulary } from "./icon.vocabulary.en"
 import { IconFallback } from "./icon.fallback"
@@ -10,16 +10,15 @@ import iconCSS from "./icon.css?inline"
 
 /****************
  * ### `<ui-icon>`
- * An SVG glyph:  `<span class="ui … icon" part="icon"><svg aria-hidden></span>`, the data from `Icons`.
+ * An SVG glyph:  `<span class="ui … icon" part="icon"><svg aria-hidden></span>`, from the page's icon packs
+ * (`UI.icons`).
  * - Host is `display: contents`:  the span IS the inline box, where Fomantic's `<i class="icon">` sat.
  * - Accessible name on the HOST, through internals:  `label` => `role=img` + `aria-label`;  none =>
  *   `aria-hidden`, a decorative glyph.
  * - `:state(in-icons)` when its flat-tree parent is a `<ui-icons>` (`PartContext`, direct mode):  `icon.css`
  *   stacks and positions it by that, since the group can't reach into its children's shadow roots.
- * - `variant` picks the set (`regular`, `brands`);  `outline` ~== `variant="regular"` (Fomantic's spelling).
- *   Without an explicit `variant` attribute `Icons.get()` infers the set:  a trailing `outline` word means
- *   `regular`, otherwise it tries the solid glyph first and falls back to `brands`, then `regular`.  So the
- *   vocabulary's `solid` default never overrides a brand name or a trailing `outline` word.
+ * - `name` is the whole name:  `bell`, `bell outline`, `lucide:bell`.  `outline` appends ` outline`
+ *   (Fomantic's `bell outline icon` spelling), so `<ui-icon name="bell" outline>` ~== `name="bell outline"`.
  ****************/
 export class UIIcon extends UIElement<typeof iconVocabulary> {
   @proto static vocabulary = iconVocabulary
@@ -29,11 +28,8 @@ export class UIIcon extends UIElement<typeof iconVocabulary> {
   /** `<ui-icons>` parent, if any. */
   readonly context = new PartContext(this.host, this.vocabulary.noun, { direct: true })
 
-  /** The glyph for `name` / `variant`. */
-  readonly glyph = new IconGlyph(
-    () => this.attrs.name,
-    () => this.iconSet()
-  )
+  /** The glyph for `name` (+ `outline`). */
+  readonly glyph = new IconGlyph(() => this.iconName())
 
   constructor(...args: ConstructorParameters<typeof UIElement>) {
     super(...args)
@@ -52,15 +48,10 @@ export class UIIcon extends UIElement<typeof iconVocabulary> {
     return { disabled: this.attrs.disabled, loading: this.attrs.loading }
   }
 
-  /**
-   * Font Awesome set to force, or `undefined` to infer it from the name;  tracked.
-   * - `attrs.variant` is read first so a change re-runs this;  the attribute check tells an explicit
-   *   `variant` from the vocabulary default.
-   */
-  private iconSet(): IconStyle | undefined {
-    const variant = this.attrs.variant
-    if (this.attrs.outline) return REGULAR
-    return this.host.hasAttribute(this.definition.attribute("variant").attribute) ? variant : undefined
+  /** The name to look up:  `name`, plus ` outline` for the `outline` attribute;  tracked. */
+  private iconName(): string | undefined {
+    const name = this.attrs.name
+    return name && this.attrs.outline ? `${name}${OUTLINE}` : name
   }
 
   render(): JSX.Element {
@@ -78,5 +69,5 @@ const IMG = "img"
 /** ARIA boolean. */
 const TRUE = "true"
 
-/** Set `outline` picks. */
-const REGULAR = "regular"
+/** Word `outline` appends to the name. */
+const OUTLINE = " outline"

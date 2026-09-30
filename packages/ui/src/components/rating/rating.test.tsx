@@ -73,7 +73,7 @@ describe("<ui-rating> markup", () => {
       "5 of 5"
     ])
     expect(new Set(radios.map((radio) => radio.name)).size).toBe(1)
-    // the glyph loads asynchronously the first time (`Icons`)
+    // the glyph loads asynchronously the first time (`UI.icons`)
     await expect.poll(() => icons.every((icon) => icon.querySelector("svg"))).toBe(true)
   })
 

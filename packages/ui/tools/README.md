@@ -17,6 +17,7 @@ turns them into the tables of `docs/report.md`.
 | `LocCount.ts` | lines / code lines per file, by group |
 | `ReportTables.ts` | rewrites the `generated:<name>` tables of `docs/report.md` |
 | `peers.ts` | the peer specifiers `dist/` imports |
+| `IconPackBuilder.ts` | `yarn icons:pack <folder> --id <id>`:  verifies a folder of SVGs (no script, no external resources) and writes its `pack.js` index, keeping hand edits;  `--sanitize` strips unsafe attributes first, `--skip-unsafe` / `--allow-unsafe` leave out / keep files that still fail;  also run by `scripts/gen-icons.ts` |
 | `hmr.e2e.ts` | `yarn test:hmr`:  dev server + headless chromium + real file edits, 8 scenarios |
 | `screenshots.ts` | `yarn screenshots`:  one PNG per example pair of `demo/index.html` |
 | `frameworks/` | host pages `vanilla` / `react` (esm.sh) / `vue` (unpkg) / `solid` (Solid 2 app + `identity.js` probe), the shared round trip `check.js`, `perf.html` |

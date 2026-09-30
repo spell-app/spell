@@ -43,15 +43,15 @@ import type {
  * - Also checks `dist/`'s structure (`MeasureChecks`):  every family imports core, no Rolldown runtime chunk, no
  *   shared-entry / library code elsewhere, nothing unattributed.
  * - `yarn measure`:  `await new BundleMeasure(PACKAGE).write()`, into `tools/results/measure-results.json`.
- * - Plugins that only matter for a real build (`vite:dts`, `spell-emit-glyphs`) are dropped from the measured
- *   builds:  they'd write declaration files or copy 2,000 glyphs per build.
+ * - Plugins that only matter for a real build (`vite:dts`, `spell-emit-icon-packs`) are dropped from the measured
+ *   builds:  they'd write declaration files or copy 2,000 icon files per build.
  */
 export class BundleMeasure {
   /** what the report says the numbers mean */
   static readonly UNITS = "bytes;  min = esbuild minify, gzip = gzip level 9 of min;  kB = 1000 bytes"
 
   /** plugins left out of the measured builds, by name */
-  static readonly SKIPPED_PLUGINS = new Set(["vite:dts", "spell-emit-glyphs"])
+  static readonly SKIPPED_PLUGINS = new Set(["vite:dts", "spell-emit-icon-packs"])
 
   /** id of Rolldown's runtime module (`__name`, `__exportAll` ...);  `RUNTIME_MODULE_ID` in its types */
   static readonly RUNTIME_MODULE = "\0rolldown/runtime.js"

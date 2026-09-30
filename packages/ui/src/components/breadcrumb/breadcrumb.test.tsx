@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { BREADCRUMB_DIVIDER_TOKENS } from "$/components/components.types"
-import { Icons } from "$/icons"
+import { UI } from "$/runtime"
 import { expectAccessible } from "$test/a11y"
 
 import { ElementFixture } from "$test/ElementFixture"
@@ -166,7 +166,7 @@ describe("<ui-breadcrumb> dividers", () => {
   it("publishes `divider-icon` as a mask image + the icon layout, once the glyph loads", async () => {
     const { host, nav, sections } = await breadcrumb('divider-icon="chevron right"')
     await expect.poll(() => nav.style.getPropertyValue(BREADCRUMB_DIVIDER_TOKENS.layout)).toBe("icon")
-    const data = (await Icons.get("chevron right"))!
+    const data = (await (await UI.load()).icons.get("chevron right"))!
     expect(nav.style.getPropertyValue(BREADCRUMB_DIVIDER_TOKENS.icon)).toBe(BreadcrumbDivider.svgUrl(data))
     const before = getComputedStyle(dividerOf(sections[1]!), "::before")
     expect(before.content).toBe('""')

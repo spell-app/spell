@@ -5,7 +5,8 @@ fixed, or disproven, delete it (note a disproof in a line at the top if the reas
 `[V]` = checked against the code by hand.  Everything else is unverified.
 
 Disproven:  `Icons.get("zoom")` isn't missing -- it is Font Awesome's `zoom` BRAND logo (a documented clash;  Fomantic's magnifier
-is `<html ui-icon-names="fomantic">` or `magnifying-glass-plus`), pinned in `Icons.test.ts`.
+is `<html ui-icon-names="fomantic">` or `magnifying-glass-plus`), pinned in `Icons.test.ts`.  (2026-09-30:  `Icons` is gone;
+with icon packs `zoom` is in `fa7-brands`, and the `fomantic` pack gives the magnifier.)
 
 Disproven:  `--ui-comments-minimal` (`comment.css`) isn't a misnamed private switch -- it is a documented OWNER token
 (`PART_OWNER_TOKENS.commentsMinimal`, `parts.css` "Owner tokens"), public like `--ui-card-layout`, since `parts.css` reads it.

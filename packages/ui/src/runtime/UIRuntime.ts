@@ -25,6 +25,7 @@ import { Api } from "./Api"
 import { Browser } from "./Browser"
 import { Focus } from "./Focus"
 import { I18n } from "./I18n"
+import { IconPacks } from "./IconPacks"
 import { Ids } from "./Ids"
 import { Keyboard } from "./Keyboard"
 import { Modals } from "./Modals"
@@ -82,6 +83,8 @@ export class UIRuntime {
   readonly modals = new Modals()
   /** `fetch` with URL templates and throttling */
   readonly api = new Api()
+  /** icon packs (`<ui-icon-set>`) and the page's SVG cache */
+  readonly icons = new IconPacks()
   /** canonical + localized component names (the translation hook) */
   readonly vocabulary = new Vocabulary()
 

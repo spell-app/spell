@@ -272,3 +272,35 @@ export type LocResults = {
   files: LocFile[]
   groups: Record<string, { files: number; lines: number; code: number }>
 }
+
+////////////////
+// ## Icon packs (`IconPackBuilder`)
+////////////////
+
+/** One reason a pack failed verification:  which SVG, and why. */
+export type IconPackProblem = {
+  /** SVG path relative to the pack folder */
+  file: string
+  /** e.g. `<script> element`, `external href "https://…"` */
+  reason: string
+}
+
+/** What one `IconPackBuilder.build()` did. */
+export type IconPackReport = {
+  /** absolute path of the written `pack.js` */
+  index: string
+  /** icons in the index */
+  count: number
+  /** keys new since the previous `pack.js` (every key on a first run) */
+  added: string[]
+  /** keys the previous `pack.js` had whose SVG is gone */
+  dropped: string[]
+  /** keys with no name of their own:  file name taken by another entry, and no `alias` */
+  unreachable: string[]
+  /** attributes `sanitize` removed, per file (`reason` says which);  empty without `sanitize` */
+  sanitized: IconPackProblem[]
+  /** files left out of the index (`unsafe: "skip"`), with why */
+  skipped: IconPackProblem[]
+  /** unsafe files indexed anyway (`unsafe: "allow"`), with why */
+  allowed: IconPackProblem[]
+}

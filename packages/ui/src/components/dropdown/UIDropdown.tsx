@@ -5,7 +5,7 @@ import {
   Cell,
   Converters,
   DROPDOWN_ANCHOR_PROPERTY,
-  Icons,
+  IconGlyph,
   proto,
   SlotContent,
   UI,
@@ -753,15 +753,16 @@ export class UIDropdown extends FormElement<Vocabulary> {
 ////////////////
 
 /**
- * Draws an `Icons` SVG into an element once its data has loaded.
+ * Draws an icon from the page's packs (`UI.icons`) into an element once it has loaded.
  * - Plain DOM, no signal:  rows are many and their icons never change.
  */
 class SVGIcon {
   /** Replace `element`'s content with icon `name`, when loaded. */
   static async fill(element: HTMLElement, name: string | undefined) {
     if (!name) return
-    const data = Icons.peek(name) ?? (await Icons.get(name))
-    if (data) element.replaceChildren(Icons.svg(data))
+    const { icons } = await UI.load()
+    const template = icons.peek(name) ?? (await icons.get(name))
+    if (template) element.replaceChildren(IconGlyph.draw(template))
   }
 }
 

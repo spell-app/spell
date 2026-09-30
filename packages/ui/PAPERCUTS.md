@@ -510,3 +510,10 @@ Log of things that slowed down development. Date · symptom · fix · project.
   spell/ui calendar
 - 2026-09-30 · TypeScript 7's lib has no `Temporal` types. · Type it from the polyfill's `temporal-spec`
   (`import type { Temporal } from "temporal-polyfill"`, `TemporalAPI` in `runtime.types.ts`). · spell/ui calendar
+- 2026-09-30 · `vitest` dies loading `vitest.config.ts` with `[PARSE_ERROR] Unexpected token` inside a comment:  the
+  doc comment held a glob, `tools/**/*.test.ts`, whose `*/` ends the comment early. · Describe the glob in words
+  in `/** */` comments (or use `//`). · spell/ui icon packs
+- 2026-09-30 · `node --experimental-strip-types` can't load a tool (`tools/index.ts`):  `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX
+  ... parameter property is not supported in strip-only mode`.  `tsx` and Vite accept it, so nothing else catches
+  it. · In `tools/`, declare fields and assign them in the constructor, never `constructor(private readonly x)`.
+  · spell/ui icon packs

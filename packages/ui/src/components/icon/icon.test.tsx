@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest"
 
+import { ICON_SET_ATTRIBUTES, ICON_SET_TAG } from "$/icons"
 import { expectAccessible } from "$test/a11y"
 
 import { ElementFixture } from "$test/ElementFixture"
 import type { UIHost } from "$/elements"
+
+import { iconSetVocabulary } from "./icon.vocabulary.en"
 
 import "$/components/icon"
 
@@ -53,28 +56,21 @@ describe("<ui-icon> classes", () => {
     expect(root.querySelector("svg")!.getAttribute("aria-hidden")).toBe("true")
   })
 
-  it("draws the set `variant` names;  `outline` ~== variant=regular, and `element.style` stays native", async () => {
+  it("draws `… outline` as the regular icon;  `outline` ~== that name, and `element.style` stays native", async () => {
     const { host: solid } = await icon(`<ui-icon name="heart"></ui-icon>`)
-    const { host: regular } = await icon(`<ui-icon name="heart" variant="regular"></ui-icon>`)
+    const { host: named } = await icon(`<ui-icon name="heart outline"></ui-icon>`)
     const { host: outline } = await icon(`<ui-icon name="heart" outline style="color: red"></ui-icon>`)
-    const path = (host: UIHost) => host.shadowRoot!.querySelector("svg path")?.getAttribute("d")
-    await expect.poll(() => [solid, regular, outline].every((host) => !!path(host))).toBe(true)
-    expect(path(solid)).not.toBe(path(regular))
-    expect(path(outline)).toBe(path(regular))
-    expect((regular as unknown as { variant: string }).variant).toBe("regular")
+    await expect.poll(() => [solid, named, outline].every((host) => !!path(host))).toBe(true)
+    expect(path(solid)).not.toBe(path(named))
+    expect(path(outline)).toBe(path(named))
     expect(outline.style).toBeInstanceOf(CSSStyleDeclaration)
     expect(outline.style.color).toBe("red")
   })
 
-  it.each(["github", "heart outline"])(
-    "a bare `<ui-icon name=%j>` draws, and its defaults are not reflected as attributes",
-    async (name) => {
-      const { host } = await icon(`<ui-icon name="${name}"></ui-icon>`)
-      await expect.poll(() => host.shadowRoot!.querySelector("svg path")).not.toBeNull()
-      expect(host.hasAttribute("variant")).toBe(false)
-      expect(host.outerHTML).not.toContain("variant=")
-    }
-  )
+  it.each(["github", "circle-check", "Address Book"])("draws `name=%j` from the default pack", async (name) => {
+    const { host } = await icon(`<ui-icon name="${name}"></ui-icon>`)
+    await expect.poll(() => path(host)).toBeTruthy()
+  })
 
   it("sets `:state(disabled)` / `:state(loading)`", async () => {
     const { host } = await icon(`<ui-icon name="spinner" loading disabled></ui-icon>`)
@@ -137,3 +133,38 @@ describe("<ui-icons>", () => {
     expect(child.matches(":state(in-icons)")).toBe(false)
   })
 })
+
+describe("<ui-icon-set>", () => {
+  it("names the tag and attributes the runtime reads", () => {
+    expect(iconSetVocabulary.tag).toBe(ICON_SET_TAG)
+    expect(iconSetVocabulary.attributes.map((attribute) => attribute.name)).toEqual(Object.values(ICON_SET_ATTRIBUTES))
+  })
+
+  it("is hidden, and adds a pack:  `slack` only draws once `fa7-brands` is added", async () => {
+    const { host: before, root } = await icon(`<ui-icon name="slack"></ui-icon>`)
+    await ElementFixture.settle()
+    expect(root.querySelector("svg")).toBeNull()
+    const set = await ElementFixture.render<UIHost>(`<ui-icon-set src="fa7-brands"></ui-icon-set>`)
+    expect(getComputedStyle(set).display).toBe("none")
+    const { host: after } = await icon(`<ui-icon name="slack"></ui-icon>`)
+    await expect.poll(() => path(after)).toBeTruthy()
+    expect(path(before)).toBeUndefined()
+    set.remove()
+  })
+
+  it("draws a stroke-style pack's icon stroked, not filled", async () => {
+    const pack = new URL("/test/fixtures/stroke-pack/pack.js", location.href).href
+    const set = await ElementFixture.render<UIHost>(`<ui-icon-set src="${pack}" prefix="lucide"></ui-icon-set>`)
+    const { root } = await icon(`<ui-icon name="lucide:bell"></ui-icon>`)
+    await expect.poll(() => root.querySelector("svg")).not.toBeNull()
+    const svg = root.querySelector("svg")!
+    expect(getComputedStyle(svg).fill).toBe("none")
+    expect(getComputedStyle(svg).stroke).not.toBe("none")
+    set.remove()
+  })
+})
+
+/** `d` of the first path an icon drew, or `undefined`. */
+function path(host: UIHost): string | undefined {
+  return host.shadowRoot!.querySelector("svg path")?.getAttribute("d") ?? undefined
+}

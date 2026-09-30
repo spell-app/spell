@@ -12,11 +12,15 @@ const BROWSERS = process.env.UI_TEST_ALL ? (["chromium", "firefox", "webkit"] as
 /** Server-render tests:  `*.ssr.test.ts(x)`, anywhere. */
 const SSR_TESTS = ["src/**/*.ssr.test.{ts,tsx}", "test/**/*.ssr.test.{ts,tsx}"]
 
+/** Node tooling tests (the pack builder) under `tools/`, run with the `ssr` project, in node. */
+const TOOL_TESTS = ["tools/**/*.test.ts"]
+
 /**
  * Two projects:
  * - `browser` -- every test but SSR, in a REAL browser (Vitest browser mode + Playwright):  custom elements, shadow
  *   DOM, `adoptedStyleSheets`, anchor positioning and axe all need one, and jsdom fakes too much of it.
- * - `ssr` -- `*.ssr.test.tsx` in node, under `@solidjs/web`'s server build (`renderToString`).
+ * - `ssr` -- `*.ssr.test.tsx` in node, under `@solidjs/web`'s server build (`renderToString`);  also the node
+ *   tooling's own tests (`TOOL_TESTS`).
  * - Each project gets its OWN Solid plugin instance (`baseConfig()`):  the plugin picks its posture (client, or
  *   the server build of `@solidjs/web`) from `test.environment` of the config it's created in, and never sees a
  *   project's `environment` through `extends: true`.
@@ -50,7 +54,7 @@ export default defineConfig({
           environment: "node",
           // vitest stubs CSS imports by default;  the DSD string needs the real `?inline` sheets
           css: { include: [/.+/] },
-          include: SSR_TESTS
+          include: [...SSR_TESTS, ...TOOL_TESTS]
         }
       }
     ]

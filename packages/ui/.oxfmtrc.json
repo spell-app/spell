@@ -16,7 +16,7 @@
     "coverage/**",
     "reference/**",
     "src/icons/data/**",
-    "src/icons/glyphs/**",
+    "src/icons/icon-packs/**",
     "src/components/emoji/data/**",
     "site/dist/**",
     "site/**/*.mdx",

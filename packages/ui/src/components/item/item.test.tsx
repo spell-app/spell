@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import type { ItemContext, ItemOwner } from "$/components/components.types"
 import { UIElement, type UIElementClass, type UIHost } from "$/elements"
 import type { ComponentVocabulary } from "$/vocabulary"
-import { Icons } from "$/icons"
+import { UI } from "$/runtime"
 import { expectAccessible } from "$test/a11y"
 
 import { ElementFixture } from "$test/ElementFixture"
@@ -145,7 +145,7 @@ describe("<ui-item> owned", () => {
     const image = box.querySelector<HTMLImageElement>("[part~=image]")!
     expect(image.className).toBe("ui avatar image")
     expect(image.getAttribute("alt")).toBe("")
-    await Icons.get("house")
+    await (await UI.load()).icons.get("house")
     await expect.poll(() => box.querySelector("[part~=icon] svg")).not.toBeNull()
     expect(getComputedStyle(box).getPropertyValue("--ui-item-media").trim()).toBe("1")
   })

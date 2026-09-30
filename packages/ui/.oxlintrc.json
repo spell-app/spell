@@ -20,6 +20,7 @@
     ".yarn",
     ".vitest",
     "reference",
+    "src/icons/icon-packs",
     "site/dist",
     "packages/*/dist",
     "tools/frameworks/solid/dist",

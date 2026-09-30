@@ -157,7 +157,7 @@ export function baseConfig() {
  * Library build of `@spell/ui`, and the dev server (`yarn dev`:  `tools/demo/`).
  * - ESM only:  every consumer we target (bundlers, `<script type="module">`, frameworks) speaks it.
  * - `solid-js`, `@solidjs/web` and `@spell/solid-element` are external (`SOLID_EXTERNAL`);  the `UIRuntime` and
- *   icon alias maps stay lazy chunks, icon glyphs separate files (`emitGlyphs()`).
+ *   icon packs are separate files (`emitIconPacks()`).
  * - `preserveEntrySignatures: "allow-extension"`:  lets `core.js` / `button.js` ... hold their own code and export
  *   what siblings need, instead of Vite's lib-mode default (`strict`), which turns every entry into a facade over
  *   a hashed chunk.
@@ -172,7 +172,7 @@ export default defineConfig(() => {
     plugins: [
       ...base.plugins,
       hotElements(),
-      emitGlyphs(),
+      emitIconPacks(),
       dts({ include: ["src"], exclude: ["src/**/*.test.ts", "src/**/*.test.tsx"] })
     ],
     build: {
@@ -220,24 +220,28 @@ function hotElements(): Plugin {
 }
 
 /**
- * Copies `src/icons/glyphs/**` to `<dir>/**` in the build output, next to the chunks, where `Icons` looks via
- * `import.meta.url` (`docs/icons.md`, "Build change").
- * - Library build:  `Icons` lives in `dist/core.js` (the `core` entry re-exports `$/icons`), so `dist/glyphs/`.
- * - Docs site:  Astro puts client chunks in `_astro/`, so `emitGlyphs("_astro/glyphs")` (`site/astro.config.mjs`).
- * - Client builds only:  a server / prerender build (Astro's) needs no glyph files.
+ * Copies the built-in icon packs, `src/icons/icon-packs/**` (SVGs + each `pack.js`), to `<dir>/**` in the build output,
+ * next to the chunks, where `BuiltInPacks` looks via `import.meta.url` (`docs/icons.md`, "Shipping icons").
+ * - Library build:  `BuiltInPacks` lives in `dist/core.js` (the `core` entry re-exports `$/icons`), so `dist/icon-packs/`.
+ * - Docs site:  Astro puts client chunks in `_astro/`, so `emitIconPacks("_astro/icon-packs")` (`site/astro.config.mjs`).
+ * - Copied as ASSETS, never bundled:  the runtime imports each `pack.js` by URL, on demand.
+ * - Client builds only:  a server / prerender build (Astro's) needs no icon files.
  */
-export function emitGlyphs(dir = "glyphs"): Plugin {
-  const root = fileURLToPath(new URL("./src/icons/glyphs", import.meta.url))
+export function emitIconPacks(dir = "icon-packs"): Plugin {
+  const root = fileURLToPath(new URL("./src/icons/icon-packs", import.meta.url))
   return {
-    name: "spell-emit-glyphs",
+    name: "spell-emit-icon-packs",
     apply: "build",
     generateBundle() {
       if (this.environment.name !== "client") return
       for (const entry of readdirSync(root, { recursive: true, withFileTypes: true })) {
-        if (!entry.isFile() || !entry.name.endsWith(".js")) continue
+        if (!entry.isFile() || !ICON_PACK_FILE.test(entry.name)) continue
         const file = path.join(entry.parentPath, entry.name)
         this.emitFile({ type: "asset", fileName: `${dir}/${path.relative(root, file)}`, source: readFileSync(file) })
       }
     }
   }
 }
+
+/** Files of an icon pack:  its SVGs and its `pack.js` index. */
+const ICON_PACK_FILE = /\.(svg|js)$/

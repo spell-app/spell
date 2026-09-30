@@ -1,7 +1,7 @@
-import { Show, createEffect, createMemo, untrack } from "solid-js"
+import { Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { Cell, Icons, proto, SlotContent, UIElement, type AttributeName, type IconData } from "$/core"
+import { Cell, IconGlyph, proto, SlotContent, UIElement, type AttributeName } from "$/core"
 
 import { buttonVocabulary } from "./button.vocabulary.en"
 import { ButtonFallback } from "./button.fallback"
@@ -18,7 +18,7 @@ import buttonCSS from "./button.css?inline"
  * - Fomantic's `state` behaviour is two attributes, not an element:  `active-text` / `inactive-text` replace the
  *   content while `active` is on / off (`Follow` => `Following`).  A label that SAYS the state must not also be
  *   `aria-pressed` (WAI-ARIA APG, toggle button), so a toggle with a state text leaves it off.
- * - Icons come from `Icons` asynchronously;  the `.icon` box is sized by CSS, so the SVG arriving shifts nothing.
+ * - Icons come from the page's icon packs (`IconGlyph`) asynchronously;  the `.icon` box is sized by CSS, so the SVG arriving shifts nothing.
  ****************/
 export class UIButton extends UIElement<typeof buttonVocabulary> {
   @proto static vocabulary = buttonVocabulary
@@ -32,10 +32,8 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
   /** Light-DOM slot occupancy. */
   readonly slots = new SlotContent(this.host)
 
-  /** Loaded icon data for the `icon` attribute;  starts from the cache, so a known icon draws at once. */
-  private readonly iconData = new Cell<IconData | undefined>(
-    untrack(() => (this.attrs.icon ? Icons.peek(this.attrs.icon) : undefined))
-  )
+  /** Glyph of the `icon` attribute;  starts from the cache, so a known icon draws at once. */
+  readonly glyph = new IconGlyph(() => this.attrs.icon)
 
   /** Host `aria-label`, forwarded to the inner control (an icon-only button's name). */
   private readonly ariaLabel = new Cell(this.host.getAttribute(ARIA_LABEL))
@@ -43,15 +41,8 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
   /** The inner `<button>` / `<a>`. */
   private control?: HTMLElement
 
-  /** Icon name last asked for. */
-  private iconName?: string
-
   constructor(...args: ConstructorParameters<typeof UIElement>) {
     super(...args)
-    createEffect(
-      () => this.attrs.icon,
-      (name) => void this.loadIcon(name)
-    )
     if (isServer) return
     const observer = new MutationObserver(() => this.ariaLabel.set(this.host.getAttribute(ARIA_LABEL)))
     observer.observe(this.host, { attributeFilter: [ARIA_LABEL] })
@@ -76,12 +67,6 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
 
   /** Has a joined label (attribute or `label` slot)? */
   readonly hasLabel = createMemo(() => !!this.attrs.label || this.slots.has(this.slot("label")))
-
-  /** SVG for the `icon` attribute. */
-  readonly iconSvg = createMemo(() => {
-    const data = this.iconData.get()
-    return data ? Icons.svg(data) : undefined
-  })
 
   isDisabled(): boolean {
     return this.attrs.disabled || this.formDisabled.get()
@@ -198,7 +183,7 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
   private icon(): JSX.Element {
     return (
       <span class={ICON_CLASS} part={this.part("icon")}>
-        <slot name={this.slot("icon")}>{this.iconSvg()}</slot>
+        <slot name={this.slot("icon")}>{this.glyph.svg()}</slot>
       </span>
     )
   }
@@ -237,13 +222,6 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
     } finally {
       if (name) internals.setFormValue(null)
     }
-  }
-
-  /** Load the icon's data;  a later name wins over an earlier, slower one. */
-  private async loadIcon(name: string | undefined) {
-    this.iconName = name
-    const data = name ? await Icons.get(name) : undefined
-    if (this.iconName === name) this.iconData.set(data)
   }
 
   /** Focus the inner control. */

@@ -304,7 +304,7 @@
       "types": "./dist/styles/index.d.ts",
       "import": "./dist/styles.js"
     },
-    "./icons/glyphs/*": "./dist/glyphs/*"
+    "./icons/*": "./dist/icon-packs/*"
   },
   "scripts": {
     "dev": "vite --open /tools/demo/index.html",
@@ -337,6 +337,7 @@
     "smoke": "vite build --logLevel warn && tsx tools/cli.ts smoke",
     "serve": "tsx tools/cli.ts serve",
     "report": "tsx tools/cli.ts report",
+    "icons:pack": "tsx tools/cli.ts icons:pack",
     "screenshots": "tsx tools/screenshots.ts",
     "/////// DOCS SITE": "",
     "site:dev": "yarn --cwd site dev",
