@@ -25,6 +25,10 @@
  *   with it.
  * - Speeds are RATIOS of `--ui-loader-speed` (`--ui-loader-slow` / `--ui-loader-fast`), so one switch
  *   (`--_loader-pace`) scales the plain spin, `indeterminate` and `elastic` alike.
+ * - Public tokens (`--ui-loader-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-loader-size: var(--ui-loader-size, 2em)`, and every rule reads the alias.
+ *   So a value set on `:root`, an ancestor, the host, `::part(loader)` or in the app stylesheet reaches the box
+ *   (`docs/theming.md` "Component tokens").
  * - Keyframes are this sheet's OWN (`ui-loader-spin`, `ui-loader-elastic`), not the transition catalogue.
  * - Reduced motion:  in static markup the spin slows to a third (`--_loader-motion`) rather than stopping, since
  *   the motion IS the message.  NOTE: inside shadow roots `reset.css`'s blanket reduced-motion block wins (it's
@@ -93,47 +97,53 @@
     display: none;
   }
 
-  /* Tokens:  one per `loader.variables` / `site.variables` loader entry that still matters. */
+  /*
+   * Tokens:  one per `loader.variables` / `site.variables` loader entry that still matters, each the private
+   * alias of its public token.
+   */
   .ui.loader {
-    --ui-loader-size: 2em;
-    --ui-loader-line-width: 0.2em;
-    --ui-loader-speed: 0.6s;
-    --ui-loader-slow: 1.5;
-    --ui-loader-fast: 0.5;
-    --ui-loader-indeterminate-ratio: 2;
-    --ui-loader-elastic-speed: 1s;
-    --ui-loader-elastic-easing: cubic-bezier(0.27, 1.05, 0.92, 0.61);
-    --ui-loader-fill-color: oklch(from var(--ui-ink) l c h / 0.1);
-    --ui-loader-line-color: var(--ui-text-muted);
-    --ui-loader-text-color: var(--ui-text-color);
-    --ui-loader-inverted-fill-color: oklch(from var(--ui-ink-on-dark) l c h / 0.15);
-    --ui-loader-inverted-line-color: var(--ui-ink-on-dark);
-    --ui-loader-inverted-text-color: var(--ui-text-inverted-color);
-    --ui-loader-text-distance: var(--ui-space-s);
-    --ui-loader-offset: 50%;
-    --ui-loader-z-index: var(--ui-z-dimmer);
-    --ui-loader-inline-margin: 0;
-    --ui-loader-inline-vertical-align: middle;
+    --_ui-loader-size: var(--ui-loader-size, 2em);
+    --_ui-loader-line-width: var(--ui-loader-line-width, 0.2em);
+    --_ui-loader-speed: var(--ui-loader-speed, 0.6s);
+    --_ui-loader-slow: var(--ui-loader-slow, 1.5);
+    --_ui-loader-fast: var(--ui-loader-fast, 0.5);
+    --_ui-loader-indeterminate-ratio: var(--ui-loader-indeterminate-ratio, 2);
+    --_ui-loader-elastic-speed: var(--ui-loader-elastic-speed, 1s);
+    --_ui-loader-elastic-easing: var(--ui-loader-elastic-easing, cubic-bezier(0.27, 1.05, 0.92, 0.61));
+    --_ui-loader-fill-color: var(--ui-loader-fill-color, oklch(from var(--ui-ink) l c h / 0.1));
+    --_ui-loader-line-color: var(--ui-loader-line-color, var(--ui-text-muted));
+    --_ui-loader-text-color: var(--ui-loader-text-color, var(--ui-text-color));
+    --_ui-loader-inverted-fill-color: var(
+      --ui-loader-inverted-fill-color,
+      oklch(from var(--ui-ink-on-dark) l c h / 0.15)
+    );
+    --_ui-loader-inverted-line-color: var(--ui-loader-inverted-line-color, var(--ui-ink-on-dark));
+    --_ui-loader-inverted-text-color: var(--ui-loader-inverted-text-color, var(--ui-text-inverted-color));
+    --_ui-loader-text-distance: var(--ui-loader-text-distance, var(--ui-space-s));
+    --_ui-loader-offset: var(--ui-loader-offset, 50%);
+    --_ui-loader-z-index: var(--ui-loader-z-index, var(--ui-z-dimmer));
+    --_ui-loader-inline-margin: var(--ui-loader-inline-margin, 0);
+    --_ui-loader-inline-vertical-align: var(--ui-loader-inline-vertical-align, middle);
 
     /* Private switches:  colours (inverted, dimmer), shown display (inline), pace (speeds), reduced motion. */
-    --_loader-fill: var(--ui-loader-fill-color);
-    --_loader-line: var(--ui-color, var(--ui-loader-line-color));
-    --_loader-duration: calc(var(--ui-loader-speed) * var(--_loader-pace, 1) * var(--_loader-motion, 1));
+    --_loader-fill: var(--_ui-loader-fill-color);
+    --_loader-line: var(--ui-color, var(--_ui-loader-line-color));
+    --_loader-duration: calc(var(--_ui-loader-speed) * var(--_loader-pace, 1) * var(--_loader-motion, 1));
     --_loader-elastic-duration: calc(
-      var(--ui-loader-elastic-speed) * var(--_loader-pace, 1) * var(--_loader-motion, 1)
+      var(--_ui-loader-elastic-speed) * var(--_loader-pace, 1) * var(--_loader-motion, 1)
     );
 
     position: absolute;
-    top: var(--ui-loader-offset);
-    left: var(--ui-loader-offset);
-    z-index: var(--ui-loader-z-index);
+    top: var(--_ui-loader-offset);
+    left: var(--_ui-loader-offset);
+    z-index: var(--_ui-loader-z-index);
     box-sizing: border-box;
     display: none;
-    width: var(--ui-loader-size);
-    height: var(--ui-loader-size);
+    width: var(--_ui-loader-size);
+    height: var(--_ui-loader-size);
     margin: 0;
     translate: -50% -50%;
-    color: var(--ui-loader-text-color);
+    color: var(--_ui-loader-text-color);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     font-style: normal;
     text-align: center;
@@ -147,10 +157,10 @@
     top: 0;
     left: 50%;
     box-sizing: border-box;
-    width: var(--ui-loader-size);
-    height: var(--ui-loader-size);
-    margin: 0 0 0 calc(var(--ui-loader-size) / -2);
-    border: var(--ui-loader-line-width) solid var(--_loader-fill);
+    width: var(--_ui-loader-size);
+    height: var(--_ui-loader-size);
+    margin: 0 0 0 calc(var(--_ui-loader-size) / -2);
+    border: var(--_ui-loader-line-width) solid var(--_loader-fill);
     border-radius: var(--ui-radius-circle);
   }
   .ui.loader::after {
@@ -173,9 +183,9 @@
   /* Text:  the slotted text below the spinner. */
   .ui.text.loader {
     width: auto;
-    min-width: var(--ui-loader-size);
+    min-width: var(--_ui-loader-size);
     height: auto;
-    padding-top: calc(var(--ui-loader-size) + var(--ui-loader-text-distance));
+    padding-top: calc(var(--_ui-loader-size) + var(--_ui-loader-text-distance));
   }
 }
 
@@ -190,9 +200,9 @@
     position: relative;
     top: 0;
     left: 0;
-    margin: var(--ui-loader-inline-margin);
+    margin: var(--_ui-loader-inline-margin);
     translate: none;
-    vertical-align: var(--ui-loader-inline-vertical-align);
+    vertical-align: var(--_ui-loader-inline-vertical-align);
   }
   /* Centered inline:  a block of its own, centred. */
   .ui.centered.inline.loader {
@@ -202,15 +212,15 @@
 
   /* Speeds */
   .ui.slow.loader {
-    --_loader-pace: var(--ui-loader-slow);
+    --_loader-pace: var(--_ui-loader-slow);
   }
   .ui.fast.loader {
-    --_loader-pace: var(--ui-loader-fast);
+    --_loader-pace: var(--_ui-loader-fast);
   }
 
   /* Indeterminate:  unsure how long -- turns backwards, at half speed. */
   .ui.indeterminate.loader::after {
-    animation-duration: calc(var(--_loader-duration) * var(--ui-loader-indeterminate-ratio));
+    animation-duration: calc(var(--_loader-duration) * var(--_ui-loader-indeterminate-ratio));
     animation-direction: reverse;
   }
 
@@ -224,16 +234,16 @@
     border-color: var(--_loader-line);
     border-right-color: transparent;
     color: var(--_loader-line);
-    animation: ui-loader-elastic var(--_loader-elastic-duration) var(--ui-loader-elastic-easing) infinite;
+    animation: ui-loader-elastic var(--_loader-elastic-duration) var(--_ui-loader-elastic-easing) infinite;
   }
   .ui.elastic.loader::after {
-    animation: ui-loader-spin var(--_loader-elastic-duration) var(--ui-loader-elastic-easing) infinite;
+    animation: ui-loader-spin var(--_loader-elastic-duration) var(--_ui-loader-elastic-easing) infinite;
     animation-delay: calc(var(--_loader-elastic-duration) * 0.3);
   }
   /* An elastic inline loader with no text turns as a whole, slowly. */
   .ui.elastic.inline.loader:empty,
   :host(:empty) > .ui.elastic.inline.loader {
-    animation: ui-loader-spin calc(var(--ui-loader-elastic-speed) * 8 * var(--_loader-motion, 1)) linear infinite;
+    animation: ui-loader-spin calc(var(--_ui-loader-elastic-speed) * 8 * var(--_loader-motion, 1)) linear infinite;
   }
 
   /* Inverted (and in a dimmer):  the dark scheme, a white arc (or the hue's inverted role) on a faint track. */
@@ -241,19 +251,19 @@
   .ui.dimmer > .ui.loader {
     --ui-inverted: 1;
     --ui-scheme: dark;
-    --_loader-fill: var(--ui-loader-inverted-fill-color);
-    --_loader-line: var(--ui-color-inverted, var(--ui-loader-inverted-line-color));
+    --_loader-fill: var(--_ui-loader-inverted-fill-color);
+    --_loader-line: var(--ui-color-inverted, var(--_ui-loader-inverted-line-color));
     color-scheme: dark;
-    color: var(--ui-loader-inverted-text-color);
+    color: var(--_ui-loader-inverted-text-color);
   }
   /* An inverted (white) dimmer keeps its loader light. */
   .ui.inverted.dimmer > .ui.loader:not(.inverted) {
     --ui-inverted: 0;
     --ui-scheme: light;
-    --_loader-fill: var(--ui-loader-fill-color);
-    --_loader-line: var(--ui-color, var(--ui-loader-line-color));
+    --_loader-fill: var(--_ui-loader-fill-color);
+    --_loader-line: var(--ui-color, var(--_ui-loader-line-color));
     color-scheme: light;
-    color: var(--ui-loader-text-color);
+    color: var(--_ui-loader-text-color);
   }
 
   /* Reduced motion:  slower, not stopped -- see the header for shadow roots. */

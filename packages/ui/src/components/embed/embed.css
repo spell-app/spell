@@ -11,6 +11,11 @@
  * - The icon:  Fomantic's `::before` glyph is the `<svg>`, its `::after` the darkening overlay (a radial gradient,
  *   stronger on hover / focus).
  * - The play button fills the box;  its focus ring is drawn INSIDE (the box clips its overflow).
+ * - Public tokens (`--ui-embed-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-embed-icon-size: var(--ui-embed-icon-size, 6em)`, and every rule reads the
+ *   alias.  So a value set on `:root`, an ancestor, the host, `::part(embed)` or in the app stylesheet reaches the
+ *   box (`docs/theming.md` "Component tokens").  A ratio class (`4:3`, `square` ...) swaps the ratio, whatever
+ *   the page sets.
  * - NOTE: left out:  `embed` / `object` children (legacy plugins) beyond the `iframe` rule.
  */
 
@@ -28,24 +33,24 @@
     display: none;
   }
 
-  /* Tokens:  one per `embed.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one per `embed.variables` entry that still matters, each the private alias of its public token. */
   .ui.embed {
-    --ui-embed-background: var(--ui-surface-strong);
-    --ui-embed-ratio: 16 / 9;
-    --ui-embed-duration: 0.5s;
-    --ui-embed-overlay: radial-gradient(transparent 45%, oklch(0 0 0 / 0.3));
-    --ui-embed-overlay-opacity: 0.5;
-    --ui-embed-overlay-hover-opacity: 1;
-    --ui-embed-icon-size: 6em;
-    --ui-embed-icon-color: oklch(1 0 0);
-    --ui-embed-icon-shadow: drop-shadow(0 2px 10px oklch(0.23 0.01 250 / 0.2));
+    --_ui-embed-background: var(--ui-embed-background, var(--ui-surface-strong));
+    --_ui-embed-ratio: var(--ui-embed-ratio, 16 / 9);
+    --_ui-embed-duration: var(--ui-embed-duration, 0.5s);
+    --_ui-embed-overlay: var(--ui-embed-overlay, radial-gradient(transparent 45%, oklch(0 0 0 / 0.3)));
+    --_ui-embed-overlay-opacity: var(--ui-embed-overlay-opacity, 0.5);
+    --_ui-embed-overlay-hover-opacity: var(--ui-embed-overlay-hover-opacity, 1);
+    --_ui-embed-icon-size: var(--ui-embed-icon-size, 6em);
+    --_ui-embed-icon-color: var(--ui-embed-icon-color, oklch(1 0 0));
+    --_ui-embed-icon-shadow: var(--ui-embed-icon-shadow, drop-shadow(0 2px 10px oklch(0.23 0.01 250 / 0.2)));
     position: relative;
     box-sizing: border-box;
     display: block;
     max-width: 100%;
-    aspect-ratio: var(--ui-embed-ratio);
+    aspect-ratio: var(--_ui-embed-ratio);
     overflow: hidden;
-    background: var(--ui-embed-background);
+    background: var(--_ui-embed-background);
     font-size: var(--ui-font-size);
   }
 }
@@ -102,7 +107,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    background: var(--ui-embed-overlay);
+    background: var(--_ui-embed-overlay);
   }
 
   /* Icon:  a darkening overlay, and the glyph centred on it. */
@@ -123,9 +128,9 @@
     width: 100%;
     height: 100%;
     content: "";
-    background: var(--ui-embed-overlay);
-    opacity: var(--ui-embed-overlay-opacity);
-    transition: opacity var(--ui-embed-duration) var(--ui-ease);
+    background: var(--_ui-embed-overlay);
+    opacity: var(--_ui-embed-overlay-opacity);
+    transition: opacity var(--_ui-embed-duration) var(--ui-ease);
   }
   .ui.embed .icon > svg {
     position: absolute;
@@ -134,13 +139,13 @@
     z-index: 10;
     width: 1em;
     height: 1em;
-    color: var(--ui-embed-icon-color);
-    font-size: var(--ui-embed-icon-size);
-    filter: var(--ui-embed-icon-shadow);
+    color: var(--_ui-embed-icon-color);
+    font-size: var(--_ui-embed-icon-size);
+    filter: var(--_ui-embed-icon-shadow);
     transform: translate(-50%, -50%);
     transition:
-      opacity var(--ui-embed-duration) var(--ui-ease),
-      color var(--ui-embed-duration) var(--ui-ease);
+      opacity var(--_ui-embed-duration) var(--ui-ease),
+      color var(--_ui-embed-duration) var(--ui-ease);
   }
 }
 
@@ -150,16 +155,16 @@
 
 @layer ui.components.embed.variations {
   .ui.square.embed {
-    --ui-embed-ratio: 1 / 1;
+    --_ui-embed-ratio: 1 / 1;
   }
   .ui[class*="4:3"].embed {
-    --ui-embed-ratio: 4 / 3;
+    --_ui-embed-ratio: 4 / 3;
   }
   .ui[class*="16:9"].embed {
-    --ui-embed-ratio: 16 / 9;
+    --_ui-embed-ratio: 16 / 9;
   }
   .ui[class*="21:9"].embed {
-    --ui-embed-ratio: 21 / 9;
+    --_ui-embed-ratio: 21 / 9;
   }
 }
 
@@ -171,7 +176,7 @@
   /* Hover / focus:  the overlay darkens. */
   .ui.embed > .play:is(:hover, :focus-visible) .icon::after,
   .ui.embed .icon:hover::after {
-    opacity: var(--ui-embed-overlay-hover-opacity);
+    opacity: var(--_ui-embed-overlay-hover-opacity);
   }
 
   /* Active:  the frame shows, the placeholder goes. */

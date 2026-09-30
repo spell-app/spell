@@ -26,10 +26,10 @@
     padding: 0.679em 1em;
     font: inherit;
     line-height: 1.215em;
-    color: var(--ui-field-state-color, var(--ui-text-color));
-    background-color: var(--ui-field-state-background, var(--ui-surface));
+    color: var(--_ui-field-state-color, var(--ui-text-color));
+    background-color: var(--_ui-field-state-background, var(--ui-surface));
     border: var(--ui-border);
-    border-color: var(--ui-field-state-border, var(--ui-border-color));
+    border-color: var(--_ui-field-state-border, var(--ui-border-color));
     border-radius: var(--ui-radius);
     outline: none;
     transition:

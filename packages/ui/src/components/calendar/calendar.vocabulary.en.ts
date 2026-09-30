@@ -109,8 +109,8 @@ export const calendarVocabulary = {
     },
     {
       name: "icon",
-      kind: "string",
-      description: "Icon of the popup button;  default `calendar` (`clock` for `time`)."
+      kind: "icon",
+      description: "Icon of the popup button;  default (or bare `icon`) `calendar`, `clock` for `time`."
     },
     {
       name: "disabled-dates",

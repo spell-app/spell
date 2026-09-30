@@ -357,17 +357,25 @@ menu.addEventListener("ui-select", (event) => {
 </Section>
 
 <Section title="Theming">
-  The menu resolves every variation into `--ui-menu-*` tokens on its box, and its items read them, so set your own
-  there too, through `::part(menu)`.  Style an item's box with `ui-item::part(item)`.
+  Theme with the public `--ui-menu-*` tokens:  set one on the element, on any ancestor (a header, `:root`), or on the
+  menu's box through `::part(menu)`.  The items read them from the menu, so set them there or above, not on an item.
+  A variation (`secondary`, `tabular` ...) swaps its own values in over yours.  Style an item's box with
+  `ui-item::part(item)`.
 
 ```css
-ui-menu::part(menu) {
+ui-menu {
   --ui-menu-radius: 0;
   --ui-menu-item-padding: 0.75em 1.5em;
 }
 ```
 
-  <CssTokens family="menu" />
+  <CssTokens
+    family="menu"
+    defaults={{
+      "--ui-menu-active-first-radius": "the menu's own corners on that side (by layout)",
+      "--ui-menu-active-last-radius": "the menu's own corners on that side (by layout)"
+    }}
+  />
 </Section>
 
 <Section title="Accessibility">

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest"
-import { userEvent } from "vitest/browser"
+import { beforeEach, describe, expect, it, onTestFinished } from "vitest"
+import { page, userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
 import type { PopupOpenDetail } from "$/components/components.types"
@@ -107,6 +107,60 @@ describe("<ui-popup> content", () => {
     )
     expect(host.querySelector("ui-header")!.matches(":state(in-popup)")).toBe(true)
     expect(host.querySelector("ui-content")!.matches(":state(in-popup)")).toBe(true)
+  })
+})
+
+describe("<ui-popup> tokens from outside", () => {
+  /** The box's top-left radius. */
+  function radius(root: Element): string {
+    return getComputedStyle(root).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { root } = await popup(`<button>t</button><ui-popup style="--ui-popup-radius: 20px">x</ui-popup>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const { root } = await popup(
+      `<section style="--ui-popup-radius: 20px"><button>t</button><ui-popup>x</ui-popup></section>`
+    )
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(popup)`", async () => {
+    const { root } = await popup(
+      `<style>.themed::part(popup) { --ui-popup-radius: 20px }</style><button>t</button><ui-popup class="themed">x</ui-popup>`
+    )
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-popup-radius", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-popup-radius")
+    })
+    const { root } = await popup(`<button>t</button><ui-popup>x</ui-popup>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("variations:  `wide` swaps the max width (off phones);  the gap derives from the arrow size", async () => {
+    const [previousWidth, previousHeight] = [window.innerWidth, window.innerHeight]
+    await page.viewport(1000, 800)
+    onTestFinished(() => page.viewport(previousWidth, previousHeight))
+    const { root } = await popup(`<button>t</button><ui-popup wide style="--ui-popup-max-width: 100px">x</ui-popup>`)
+    expect(getComputedStyle(root).maxWidth).toBe("350px")
+    const { root: plain } = await popup(`<button>t</button><ui-popup>x</ui-popup>`)
+    const { root: bigger } = await popup(`<button>t</button><ui-popup style="--ui-popup-arrow-size: 3em">x</ui-popup>`)
+    expect(parseFloat(getComputedStyle(bigger).marginBottom)).toBeGreaterThan(
+      parseFloat(getComputedStyle(plain).marginBottom)
+    )
+  })
+
+  it("owner tokens:  a header size set on the popup or above it reaches a slotted header", async () => {
+    const html = `<button>t</button><ui-popup style="--ui-popup-header-font-size: 30px"><ui-header>H</ui-header></ui-popup>`
+    const { host } = await popup(html)
+    expect(getComputedStyle(host.querySelector("ui-header")!.shadowRoot!.firstElementChild!).fontSize).toBe("30px")
   })
 })
 

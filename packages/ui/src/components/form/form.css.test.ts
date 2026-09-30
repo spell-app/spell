@@ -50,7 +50,7 @@ describe("form.css source", () => {
       expect(selectors.some((selector) => selector.includes(".field ::slotted(label)"))).toBe(true)
       expect(selectors.some((selector) => selector.includes("::slotted(label)::after"))).toBe(true)
       expect(css).toMatch(/container: ui-form \/ inline-size/)
-      expect(css).toMatch(/@container style\(--ui-fields-required: ?1\)/)
+      expect(css).toMatch(/@container style\(--_ui-fields-required: ?1\)/)
     }
   })
 
@@ -107,6 +107,14 @@ describe("form.css examples", () => {
     expect(getComputedStyle(loading, "::before").position).toBe("absolute")
     expect(getComputedStyle(loading, "::after").animationName).toBe("ui-form-spin")
     expect(getComputedStyle(loading).pointerEvents).toBe("none")
+  })
+
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt(SHEETS)
+    const root = Fixture.render(
+      `<div style="--ui-form-gutter: 40px; width: 800px"><div class="ui form"><div class="two fields"><div class="field">A</div><div class="field">B</div></div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".fields")!).marginLeft).toBe("-20px")
   })
 
   it("stacks a row on a narrow form", () => {

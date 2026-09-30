@@ -47,7 +47,7 @@ describe("input.css source", () => {
       const selectors = Sheets.selectors(css)
       expect(selectors.length).toBeGreaterThan(60)
       expect(selectors.some((selector) => selector.includes(".ui.action.input > ::slotted(*)"))).toBe(true)
-      expect(css).toMatch(/inline-size: var\(--ui-input-owner-width, auto\)/)
+      expect(css).toMatch(/inline-size: var\(--_ui-input-owner-width, auto\)/)
     }
   })
 
@@ -124,11 +124,19 @@ describe("input.css examples", () => {
 
   it("takes an owner field's resolved state tokens, which its own state beats", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="--ui-field-state-background: rgb(1, 2, 3)">
+    const root = Fixture.render(`<div style="--_ui-field-state-background: rgb(1, 2, 3)">
       <div class="ui input"><input aria-label="a"></div><div class="ui info input"><input aria-label="b"></div></div>`)
     const [plain, own] = root.querySelectorAll("input")
     expect(getComputedStyle(plain!).backgroundColor).toBe("rgb(1, 2, 3)")
     expect(getComputedStyle(own!).backgroundColor).not.toBe("rgb(1, 2, 3)")
+  })
+
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt(SHEETS)
+    const root = Fixture.render(
+      `<div style="--ui-input-radius: 12px"><div class="ui input"><input aria-label="x"></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector("input")!).borderTopLeftRadius).toBe("12px")
   })
 
   it("scales with `size` and dims when disabled", () => {

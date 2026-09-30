@@ -67,3 +67,15 @@ describe("sticky.css examples", () => {
     expect(root.querySelector("p")!.getBoundingClientRect().top).toBe(sentinel.getBoundingClientRect().top)
   })
 })
+
+describe("sticky.css tokens", () => {
+  it("takes a public token from a wrapper or the box itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, stickyCSS])
+    const root = Fixture.render(
+      `<div style="--ui-sticky-offset: 8px"><div class="ui sticky">A</div></div>` +
+        `<div class="ui sticky" style="--ui-sticky-z-index: 7">B</div>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).top).toBe("8px")
+    expect(getComputedStyle(root.nextElementSibling!).zIndex).toBe("7")
+  })
+})

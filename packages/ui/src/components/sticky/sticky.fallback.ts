@@ -14,7 +14,7 @@ export class StickyFallback extends NativeFallback<typeof stickyVocabulary> {
   protected override build() {
     const offset = Number(this.attr("offset")) || 0
     const bottomOffset = Number(this.attr("bottom-offset")) || 0
-    const style = `--ui-sticky-offset: ${offset}px; --ui-sticky-bottom-offset: ${bottomOffset}px`
+    const style = `--_ui-sticky-offset: ${offset}px; --_ui-sticky-bottom-offset: ${bottomOffset}px`
     return [this.decorate(this.create("div", { class: this.classes(), style }, this.slot()), "sticky")]
   }
 }

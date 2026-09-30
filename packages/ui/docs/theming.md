@@ -96,8 +96,8 @@ Component CSS never names a hue.  A colour class re-points the GENERIC tokens, a
 }
 
 /* component CSS (e.g. button.css) */
-.ui.button { background: var(--ui-color, var(--ui-button-background)); color: var(--ui-color-on, inherit); }
-.ui.button:hover { background: var(--ui-color-hover, var(--ui-button-hover-background)); }
+.ui.button { background: var(--ui-color, var(--_ui-button-background)); color: var(--ui-color-on, inherit); }
+.ui.button:hover { background: var(--ui-color-hover, var(--_ui-button-background-hover)); }
 ```
 
 - Contract for components:  READ `--ui-color*` with a fallback for the uncoloured look;  NEVER declare them
@@ -124,6 +124,129 @@ does).  `contrast-color()` would do it in CSS, but is Chromium-only.
   contrast fails a test, naming the colour.
 - A theme that changes a base (`--ui-red-on-light`) should re-check its `-on`:  it's data, not derived.  The
   classic theme keeps Fomantic's palette, and with it Fomantic's contrast failures.
+
+## Component tokens
+
+Every family exposes PUBLIC per-component tokens, `--ui-<tag>-*`, one per Fomantic `.variables` entry that still
+matters:  `--ui-button-radius`, `--ui-card-width`, `--ui-header-color`.  Each docs page lists them with their
+defaults (`CssTokens.astro` reads them from the sheet).  Decided 2026-09-30 (Owen).
+
+### Where you can set them
+
+Anywhere above or on the box;  all of these work, for elements and static class-grammar markup alike:
+
+| Where | Reaches | Example |
+|---|---|---|
+| `:root` or a theme sheet | every instance on the page | `:root { --ui-button-radius: 0 }` |
+| any ancestor | a region | `<section style="--ui-button-radius: 0">` |
+| the host | one kind, or one instance | `ui-button.cta { ... }`, `<ui-button style="...">` |
+| `::part(<root part>)` | the inner box itself | `ui-button::part(button) { --ui-button-radius: 0 }` |
+| the app stylesheet | the inner box, by class grammar | `@layer ui.app { .ui.primary.button { --ui-button-radius: 0 } }` |
+
+A variation that SWAPS a value (`circular` buttons) wins over the base token, whatever you set:  restyle the
+variation itself with plain properties, through the app stylesheet or `::part()` plus the host attribute
+(`ui-button[circular]::part(button) { border-radius: 0.5em }`).
+
+### The pattern (component authors)
+
+A component sheet NEVER declares a public component token.  Custom properties inherit, but a declaration on the
+inner box beats any inherited value:  a sheet that said `.ui.button { --ui-button-radius: var(--ui-radius) }`
+blocked every value set on the host, an ancestor or `:root` (only `::part()` got through).  Instead the sheet reads
+each public token through a PRIVATE ALIAS declared where the public one used to be, and every rule reads the alias:
+
+```css
+.ui.button, .ui.buttons, .or {
+  --_ui-button-radius: var(--ui-button-radius, var(--ui-radius));
+  --_ui-button-labeled-icon-width: var(--ui-button-labeled-icon-width, calc(1em + 2 * var(--_ui-button-padding-block)));
+}
+.ui.button { border-radius: var(--_ui-button-radius); }
+```
+
+- Naming:  `--_ui-<tag>-<rest>`, the public name with `_`, mechanical and grep-able.  The older ad-hoc privates
+  (`--_button-*`, `--_card-*`) are variation plumbing and keep their names.
+- Declare the alias on EVERY box that reads it (the token block's selector list, as before), so a nested instance
+  resolves its own value, never an outer one's.
+- Rules read the alias, never the public name:  a bare `var(--ui-button-radius)` would skip what a variation writes.
+- A default derived from another token reads that token's ALIAS (`labeled-icon-width` above), so the user's base
+  value flows into it.  Both aliases sit on the same box:  `var()` in a custom property resolves where it's declared.
+- NOT component tokens, mechanism unchanged:  the remaps (`--ui-color*`, `--ui-scale`, `--ui-inverted`,
+  `--ui-scheme`, `--ui-variation-*`, a local `--ui-size-*` ladder) and the global tokens.  A sheet may declare those.
+- `test/component-tokens.test.ts` enforces it:  no sheet declares a `--ui-<tag>-*` name (any family's), every alias
+  is named after the token it reads, and no sheet reads an aliased token bare.  `EXCEPTIONS` lists deliberate
+  cross-family theming, each with why.
+- A token nothing varies needs no alias:  the rule reads it where it paints, `var(--ui-modal-content-padding, 1.5em)`.
+  `CssTokens.astro` lists both kinds.
+
+### Variations
+
+- A variation that SWAPS to another value writes the alias, on the box that declares it (a later sublayer, so it
+  wins):  `.ui.wide.foo { --_ui-foo-gap: 2em }`.  If Fomantic has a variable for the swapped value, that's a
+  public token of its own, read through its alias:  `--_button-pad-block: var(--_ui-button-tertiary-padding)`.
+- A variation that is a FUNCTION of a base token derives from the base's alias, so the user's base value flows
+  through:  `compact` sets `--_button-density: var(--_ui-button-compact-ratio)` and the padding rule computes
+  `calc(var(--_ui-button-padding-block) * var(--_button-density, 1))`.
+- GROUPS:  a variation on a group box (`.ui.basic.buttons`) that its members must follow can't write the alias --
+  each member box re-declares `--_ui-button-*` from the public token and drops it.  Use a separate private
+  variation token read IN FRONT of the alias, as the button does:  `var(--_button-radius, var(--_ui-button-radius))`.
+
+### Owner tokens
+
+An owner hands the components inside it (content parts, items, icons, labels) inherited tokens.  Four kinds:
+
+| Kind | Example | Owner (declares on EVERY root) | Reader |
+|---|---|---|---|
+| switch | `--_ui-card-layout`, `--_ui-icon-owner-margin`, `--_ui-part` | the private name, default included;  variations write it | `@container style(--_ui-card-layout: horizontal)`, `var(--_ui-icon-owner-margin, 0)` |
+| look token the owner VARIES | `--ui-modal-header-size`, `--ui-header-sub-color` | the alias:  `--_ui-modal-header-size: var(--ui-modal-header-size, 1.42857em)`;  variations write it | the alias only:  `var(--_ui-modal-header-size, 1.42857em)` (the default covers a part outside its owner) |
+| look token nobody varies | `--ui-card-header-color` | nothing | `var(--ui-card-header-color, var(--ui-text-dark))` |
+| owner-provided, user-settable too | `--ui-label-owner-edge` | an owner COMPONENT writes the private name | `var(--_ui-label-owner-edge, var(--ui-label-owner-edge, 0px))`, permanently:  a plain `<div>` owner sets the public one |
+
+- Switches are private because the owner's attributes decide them:  a page setting a layout switch would lie about
+  the layout.  They were public `--ui-*` names until 2026-09-30, renamed in every family (a pure rename, no look
+  change):
+  - owners and parts:  `--_ui-card-layout`, `--_ui-card-leading`, `--_ui-part` and every switch of `parts.css`'s
+    "Owner tokens" table (`PART_OWNER_TOKENS`), whose two look entries now name the aliases
+    `--_ui-modal-header-size` and `--_ui-statistic-value-size`
+  - icons, inputs, labels:  `--_ui-icon-owner-*`, `--_ui-icons-*` (corner icons), `--_ui-input-owner-width`,
+    `--_ui-label-owner-*` (read dual, see the table), `--_ui-labels-margin`, `--_ui-label-layout`
+  - groups:  `--_ui-buttons-*` (positions), `--_ui-segments-*`, `--_ui-images-*`, `--_ui-steps-*` (layout,
+    `circular`, `ordered`, corners ...;  the aliases of `--ui-steps-radius` / `-border` / `-accent-on` share the
+    prefix)
+  - forms:  `--_ui-field-state-*`, `--_ui-fields-*` (inline, stacked, child widths, paddings), `--_ui-form-equal-width`,
+    `--_ui-form-unstackable`
+  - menus, lists, tabs:  `--_ui-menu-layout`, `--_ui-menu-stackable`, `--_ui-menu-divider-side`,
+    `--_ui-menu-first-radius` / `-last-radius` / `-only-radius`, `--_ui-list-layout`, `--_ui-list-align`,
+    `--_ui-list-marker`, `--_ui-list-animated`, `--_ui-item-*`, `--_ui-tabs-pane-flex`
+  - steps:  `--_ui-step-state`, `--_ui-step-layout`
+  - one-offs:  `--_ui-container-width`, `--_ui-shape-type`, `--_ui-breadcrumb-divider-layout`
+  - set inline by an element:  `--_ui-dropdown-anchor`, `--_ui-search-anchor`, `--_ui-calendar-anchor` (anchor
+    names), `--_ui-pusher-*` (`PUSHER_TOKENS`)
+- Declared on EVERY owner root, default included (the alias re-declares from the public token), so a nested owner
+  never inherits an outer owner's value.
+- Where a page sets an owner look token:  on the owner, above it, or `::part()` of the owner's box -- the part
+  reads the owner's alias, so NOT on the part (a look token nobody varies works on the part too).
+- Parts read an owner-varied token through the alias ONLY.  A dual read, `var(--_ui-x, var(--ui-x, <default>))`,
+  is for a reader that may sit OUTSIDE every declaring box, where only the public name can reach it:
+  `label.css`'s `--ui-label-owner-*` (a plain `<div>` owner sets the public one), `form.css`'s field rules (a field
+  outside a form) and `label.css`'s `<ui-detail>` link rule.
+- Cross-family theming:  an owner that deliberately themes a NESTED component of another family sets that
+  family's PUBLIC token, as the page would (`search.css`:  `--ui-input-radius` on its input) -- an `EXCEPTIONS`
+  entry in the test, with why.
+
+### Worked example
+
+```html
+<style>
+  :root { --ui-button-radius: 0; }                                  /* every button square */
+  .toolbar { --ui-button-padding-inline: 0.75em; }                   /* a region */
+  ui-button.cta::part(button) { --ui-button-background: gold; }      /* one kind, on its box */
+  ui-card { --ui-card-header-color: var(--ui-violet-text); }         /* every card's headers (an owner token) */
+</style>
+<div class="toolbar">
+  <ui-button>Tight</ui-button>
+  <ui-button compact>Tighter</ui-button>     <!-- 0.75 x 0.75em:  compact derives from the base token -->
+  <ui-button circular>Round</ui-button>      <!-- still round:  circular swaps the radius -->
+</div>
+```
 
 ## The app stylesheet (`#ui-app-stylesheet`)
 
@@ -231,3 +354,78 @@ Dark mode by default follows the OS (`color-scheme: light dark` on `:root`, in `
 - `css.lightningcss.targets` MUST be modern browsers (the platform the plan assumes).  With Vite's default
   targets Lightning CSS lowers `light-dark()` into `--lightningcss-light` variables substituted at `:root`,
   which breaks `.ui-dark` subtrees, and adds hex / `lab()` fallbacks for every OKLCH literal.
+
+## Converting a family (recipe)
+
+Every family is converted (2026-09-30);  the recipe stays for a NEW family ported from Fomantic's `.variables`, or a
+sheet the test catches declaring a public token.  References:  `button` (a plain family with a group), `card` (an
+owner), `parts` (the header's own tokens, and the part side of owner tokens).
+
+1. Dry run:  `yarn tokens:alias <family>` prints, per sheet, the notes to review and every OTHER file still naming
+   one of the family's public tokens.  `--write` applies it (and runs oxfmt over the sheets).
+   - Without the codemod:  `grep -nE -- '^\s*--ui-<tag>-[a-z0-9-]+\s*:' src/components/<family>/*.css` finds the
+     declarations (one grep per tag:  `button`, `buttons`, `or`);  `grep -rnE -- '--ui-<tag>-' src test site/src
+     docs` finds the rest.
+2. What the codemod does, per sheet:  the FIRST declaration of each public token becomes the alias
+   (`--_ui-x: var(--ui-x, <value>)`), every later declaration (a variation) writes `--_ui-x`, and every
+   `var(--ui-x` / `style(--ui-x` read in the family's sheets becomes `--_ui-x`.  Comments keep the public names.
+3. Review every note it prints:
+   - `variation writes --_ui-x`:  fine when the variation's class sits on the box that declares the alias.  On a
+     GROUP box whose members must follow, see "Variations" (a separate `--_<family>-*` token in front of the alias).
+   - `FIRST declaration ... is nested`:  the token has no base value (only `@media` / `@container` variants).  Add a
+     base alias to the token block with the default its readers fall back to, so nested owners reset it.
+   - `declares another family's token`:  an alias (a look token), a private switch, or an `EXCEPTIONS` entry.
+   - Is it really a public token?  Internal plumbing named `--ui-<tag>-*` (like the button group's corner
+     factors) becomes a private SWITCH instead:  rename it `--_ui-...` in every file that names it, no alias.
+4. Reads OUTSIDE the declaring box:  the codemod rewrites every read in the family's sheets.  A rule whose box is
+   neither a box of the token block's selector list nor inside one reads an unset alias -- give it
+   `var(--_ui-x, var(--ui-x, <default>))`.  Watch sheets ADOPTED BY A PART (`<ui-item>` adopts `menu.css` /
+   `list.css`):  the alias block must not match the part's own box, or the part re-declares the alias from the
+   public token and drops the owner's variation.
+5. The other files it lists:
+   - `parts.css`:  a look token your owner varies is read as the alias only, `var(--_ui-x, <default>)`;  add the
+     owner's rule there, as `modal` does.
+   - Another family's sheet reading your token:  the alias if it sits inside your box, else the dual read
+     `var(--_ui-x, var(--ui-x, <default>))` (step 4).
+   - Tests reading a value off the inner box (`getPropertyValue("--ui-x")`):  read `--_ui-x`, or better, assert
+     the computed property it drives.
+   - TS setting a public token INLINE on its own root (`style={{ "--ui-x": ... }}`) blocks the page exactly like a
+     sheet:  set the private name.  Check `grep -rn -- '--ui-<tag>-' src/components/<family>/*.ts*`.
+   - `PART_OWNER_TOKENS` (`components.types.ts`):  a look token (`modalHeaderSize`, `statisticValueSize`) names
+     the alias;  so does every switch an element sets inline (`PUSHER_TOKENS`, the anchor names).
+   - Examples and docs:  public names stay (they're the API);  fix text that says "only through `::part()`" or
+     "declared on the box".
+6. The sheet's header comment:  add the "Public tokens ... are NEVER declared here" bullet (copy `button.css`'s)
+   and say "private alias" in the token block's comment.
+7. Add `EXCEPTIONS` entries if any, each with why.
+8. Tests, in `<family>.test.tsx` (templates:  `button.test.tsx` "tokens from outside", `card.test.tsx`):
+   - a public token set on the HOST, on an ANCESTOR, through `::part(<root part>)` and on `:root`
+     (`document.documentElement.style`, removed with `onTestFinished`), each changing a COMPUTED property of the
+     inner box
+   - a group family:  one set on the group reaches its members
+   - an owner:  one owner look token set on the owner reaches a part
+   - variations:  one that swaps (wins over the base token) or derives (follows it)
+   - static markup (`<family>.css.test.ts`):  one set on a wrapper of class-grammar markup
+9. Docs page (`site/src/content/components/<family>.mdx`, Theming):  "set it on the element, any ancestor, or
+   `::part()`", as `button.mdx`.  The `CssTokens` table reads the aliases on its own.
+10. Look unchanged:  compare computed styles of every example before and after (the reference conversions did, for
+    every property that paints);  run `yarn vitest run --project browser src/components/<family> test/`.
+
+Pitfalls met on the way:
+
+- The group variation vs member re-declaration (step 3), and reads outside the declaring box (step 4).
+- `var()` in a custom property resolves where it's DECLARED:  an alias whose default reads another alias must sit
+  on the same box.  The token block is the natural place.
+- A style query on an own token (`@container style(--ui-x: v)`) becomes `style(--_ui-x: v)`:  the queried element
+  must be inside the declaring box.
+- `!important` inside a value can't be wrapped in `var()`:  the codemod notes it, fix by hand.
+- oxfmt reflows long aliases over three lines;  expected.
+- A family whose ROOT has no part name (`dropdown`:  its root `<div>` carries no `part`) can't be themed through
+  `::part(<root>)`:  its docs page says "on the element or any ancestor" only, and its tests skip the `::part()`
+  case.  A `::part()` of an inner piece (`::part(menu)`) sits inside the alias box, so the aliases already resolved
+  there:  it takes plain properties, not tokens.
+- A screen-size breakpoint changes a private DEFAULT, never the alias:  `modal.css` declares
+  `--_ui-modal-width: var(--ui-modal-width, var(--_modal-width))` once and its `@media` rules set `--_modal-width`
+  (the same for `search`'s result rows and `segment`'s scrolling height).  Writing the alias in a `@media` rule
+  would beat a page's `--ui-modal-width` on that screen.  The docs table shows such a default through
+  `CssTokens`' `defaults` prop.

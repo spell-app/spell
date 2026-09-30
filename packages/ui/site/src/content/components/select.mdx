@@ -131,12 +131,13 @@ select.addEventListener("ui-change", (event) => console.log(event.detail.value))
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-select-*` tokens on the select, through `::part(select)` (the box declares its own
-  defaults, so a value set on the host tag doesn't reach it).  Style the rest with `::part()`:  `button`, `option`,
-  `placeholder` and `group`.
+  Theme with the public `--ui-select-*` tokens:  set one on the element, on any ancestor (a form, `:root`), or on the
+  select's box through `::part(select)`.  They inherit into the shadow root, where the sheet reads each through a
+  private alias, so nothing inside blocks them.  Style the rest with `::part()`:  `button`, `option`, `placeholder`
+  and `group`.
 
 ```css
-ui-select::part(select) {
+ui-select {
   --ui-select-radius: 0;
 }
 ui-select::part(option) {

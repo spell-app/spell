@@ -133,13 +133,13 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-breadcrumb-*` tokens on the breadcrumb's box, through `::part(breadcrumb)` (the box
-  declares its own defaults, so a value set on the host tag doesn't reach it).  The text divider is the
-  `--ui-breadcrumb-divider` token (a CSS string), so a whole site can change it once instead of setting `divider` on
-  every breadcrumb.
+  Theme with the public `--ui-breadcrumb-*` tokens:  set one on the element, on any ancestor (a header, `:root`), or
+  on the breadcrumb's box through `::part(breadcrumb)`.  The sections inherit them from the breadcrumb, so set them
+  there or above, not on a section.  The text divider is the `--ui-breadcrumb-divider` token (a CSS string), so a
+  whole site can change it once instead of setting `divider` on every breadcrumb;  a `divider` attribute still wins.
 
 ```css
-header ui-breadcrumb::part(breadcrumb) {
+header ui-breadcrumb {
   --ui-breadcrumb-divider: "»";
   --ui-breadcrumb-divider-color: var(--ui-primary);
   --ui-breadcrumb-active-font-weight: normal;

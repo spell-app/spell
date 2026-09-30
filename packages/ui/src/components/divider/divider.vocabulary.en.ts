@@ -43,7 +43,7 @@ export const dividerVocabulary = {
       values: ["left", "center", "right"],
       description: "With `horizontal`:  where the text sits;  `left` / `right` drop the rule on that side."
     },
-    { name: "icon", kind: "string", description: "Icon name, shown before the text." }
+    { name: "icon", kind: "icon", description: "Icon name, shown before the text." }
   ],
   events: [],
   slots: [{ name: "", description: "Text between the rules of a `horizontal` or `vertical` divider." }],

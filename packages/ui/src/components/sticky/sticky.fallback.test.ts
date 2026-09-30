@@ -15,8 +15,8 @@ describe("StickyFallback", () => {
     const box = FallbackStub.shadow(host).firstElementChild as HTMLElement
     expect(box.getAttribute("part")).toBe("sticky")
     expect(box.className).toBe("ui pushing sticky")
-    expect(box.style.getPropertyValue("--ui-sticky-offset")).toBe("12px")
-    expect(box.style.getPropertyValue("--ui-sticky-bottom-offset")).toBe("4px")
+    expect(box.style.getPropertyValue("--_ui-sticky-offset")).toBe("12px")
+    expect(box.style.getPropertyValue("--_ui-sticky-bottom-offset")).toBe("4px")
     expect(box.querySelector("slot")).not.toBeNull()
   })
 
@@ -24,6 +24,6 @@ describe("StickyFallback", () => {
     const host = Fixture.render<StubHost>(`<x-fb-sticky>S</x-fb-sticky>`)
     const box = FallbackStub.shadow(host).firstElementChild as HTMLElement
     expect(box.className).toBe("ui sticky")
-    expect(box.style.getPropertyValue("--ui-sticky-offset")).toBe("0px")
+    expect(box.style.getPropertyValue("--_ui-sticky-offset")).toBe("0px")
   })
 })

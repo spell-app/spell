@@ -5,7 +5,7 @@
  *   `<ui-sidebar position="right" width="thin" transition="scale down" visible>` =>
  *   `ui right thin scale down visible sidebar`.  Without `transition`, the element adds Fomantic's default for
  *   its side (`uncover` left / right, `overlay` top / bottom).
- * - `position`, `width` and `transition` are `kind: "color"`:  each emits its value alone.
+ * - `position`, `width` and `transition` are `kind: "valueOnly"`:  each emits its value alone.
  * - `width` takes Fomantic's sidebar words (`very thin` ... `very wide`), never columns.
  * - `pushable` / `pusher` have no `ui` (Fomantic's `.pushable`, `.pusher`).
  */
@@ -24,14 +24,14 @@ export const sidebarVocabulary = {
   attributes: [
     {
       name: "position",
-      kind: "color",
+      kind: "valueOnly",
       values: ["left", "right", "top", "bottom"],
       default: "left",
       description: "Edge it sits on:  `left` (default), `right`, `top`, `bottom`."
     },
     {
       name: "width",
-      kind: "color",
+      kind: "valueOnly",
       values: ["very thin", "thin", "wide", "very wide"],
       description:
         "Width of a `left` / `right` sidebar:  `very thin` (60px), `thin` (150px), 260px by default, `wide` " +
@@ -39,7 +39,7 @@ export const sidebarVocabulary = {
     },
     {
       name: "transition",
-      kind: "color",
+      kind: "valueOnly",
       values: ["overlay", "push", "scale down", "uncover", "slide along", "slide out"],
       description:
         "How it appears (Fomantic's animations):  over the page, pushing it, shrinking it, from under it ...  " +

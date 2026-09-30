@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -7,6 +7,7 @@ import type { UIHost } from "$/elements"
 
 import "$/components/segment"
 import "$/components/parts"
+import "$/components/label"
 
 /** Examples whose original fragment fails axe `heading-order` too (see `docs/report.md`). */
 const HEADING_DEMOS = ["parts/examples/elements/header.html", "segment/examples/elements/variations.html"]
@@ -122,6 +123,67 @@ describe("<ui-segments>", () => {
   it("sets :state(piled)", async () => {
     const { host } = await render(`<ui-segments piled><ui-segment>a</ui-segment></ui-segments>`)
     expect(host.matches(":state(piled)")).toBe(true)
+  })
+})
+
+describe("<ui-segment> tokens from outside", () => {
+  /** The segment box's top-left radius, which `--ui-segment-radius` drives. */
+  function radius(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.firstElementChild!).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { root } = await render(`<ui-segment style="--ui-segment-radius: 12px">x</ui-segment>`)
+    expect(getComputedStyle(root).borderTopLeftRadius).toBe("12px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-segment-radius: 12px"><div><ui-segment>x</ui-segment></div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-segment")!)).toBe("12px")
+  })
+
+  it("takes a token set through `::part(segment)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(segment) { --ui-segment-radius: 12px }</style><ui-segment class="themed">x</ui-segment></div>`
+    )
+    expect(radius(wrapper.querySelector("ui-segment")!)).toBe("12px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-segment-radius", "12px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-segment-radius")
+    })
+    const { root } = await render(`<ui-segment>x</ui-segment>`)
+    expect(getComputedStyle(root).borderTopLeftRadius).toBe("12px")
+  })
+
+  it("reaches the members of a group, set on the group:  its outer corners round, the seams stay square", async () => {
+    const group = await ElementFixture.render(
+      `<ui-segments style="--ui-segment-radius: 12px"><ui-segment>A</ui-segment><ui-segment>B</ui-segment></ui-segments>`
+    )
+    const [first, last] = [...group.querySelectorAll("ui-segment")].map((host) => host.shadowRoot!.firstElementChild!)
+    expect(getComputedStyle(first!).borderTopLeftRadius).toBe("12px")
+    expect(getComputedStyle(first!).borderBottomLeftRadius).toBe("0px")
+    expect(getComputedStyle(last!).borderBottomLeftRadius).toBe("12px")
+  })
+
+  it("owner tokens:  an attached label covers the border width the page set", async () => {
+    const { host } = await render(
+      `<ui-segment style="--ui-segment-border-width: 3px"><ui-label attached="top">A</ui-label>x</ui-segment>`
+    )
+    await ElementFixture.settle(host)
+    const label = host.querySelector("ui-label")!.shadowRoot!.querySelector("[part~=label]")!
+    expect(getComputedStyle(label).top).toBe("-3px")
+  })
+
+  it("variations:  `padded` swaps the padding for its own token", async () => {
+    const { root: padded } = await render(`<ui-segment padded style="--ui-segment-padding: 5px">x</ui-segment>`)
+    expect(getComputedStyle(padded).paddingTop).not.toBe("5px")
+    const { root: themed } = await render(`<ui-segment padded style="--ui-segment-padded: 5px">x</ui-segment>`)
+    expect(getComputedStyle(themed).paddingTop).toBe("5px")
   })
 })
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { expectAccessible } from "$test/a11y"
@@ -123,7 +123,7 @@ describe("<ui-step>", () => {
     expect(title.matches(":state(in-step)")).toBe(true)
     expect(holder.querySelector<UIHost>("ui-content")!.matches(":state(in-step)")).toBe(true)
     const [root] = stepRoots(holder)
-    expect(token(root!, "--ui-step-state")).toBe("active")
+    expect(token(root!, "--_ui-step-state")).toBe("active")
     const link = Fixture.render(`<span style="color: var(--ui-link)"></span>`)
     expect(getComputedStyle(title.shadowRoot!.firstElementChild!).color).toBe(getComputedStyle(link).color)
   })
@@ -155,7 +155,7 @@ describe("<ui-step>", () => {
     expect(link!.hasAttribute("href")).toBe(false)
     expect(link!.getAttribute("aria-disabled")).toBe("true")
     expect((button as HTMLButtonElement).disabled).toBe(true)
-    expect(token(link!, "--ui-step-state")).toBe("disabled")
+    expect(token(link!, "--_ui-step-state")).toBe("disabled")
   })
 })
 
@@ -170,14 +170,14 @@ describe("<ui-steps> layouts", () => {
     expect(getComputedStyle(roots[0]!).borderTopRightRadius).toBe("0px")
     expect(getComputedStyle(roots[0]!).borderRightStyle).toBe("solid")
     expect(getComputedStyle(roots[2]!).borderRightStyle).toBe("none")
-    expect(token(roots[0]!, "--ui-step-layout")).toBe("row")
+    expect(token(roots[0]!, "--_ui-step-layout")).toBe("row")
   })
 
   it("stacks below 768px of the GROUP's width, not with unstackable", async () => {
     const stacked = await ElementFixture.render(three("", 500))
     const roots = stepRoots(stacked)
     expect(roots[1]!.getBoundingClientRect().top).toBeGreaterThan(roots[0]!.getBoundingClientRect().top)
-    expect(token(roots[0]!, "--ui-step-layout")).toBe("stacked")
+    expect(token(roots[0]!, "--_ui-step-layout")).toBe("stacked")
     expect(getComputedStyle(roots[0]!, "::after").transform).not.toBe("none")
     const kept = await ElementFixture.render(three("unstackable", 500))
     const row = stepRoots(kept)
@@ -238,6 +238,89 @@ describe("<ui-steps> layouts", () => {
     expect(ring.borderTopLeftRadius).toBe("50%")
     const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
     expect(ring.borderTopColor).toBe(getComputedStyle(red).color)
+  })
+})
+
+describe("<ui-steps> tokens from outside", () => {
+  const RED = "rgb(255, 0, 0)"
+  /** Three steps, content as a slotted part in the first. */
+  const STEPS =
+    `<ui-step><ui-content><ui-title>One</ui-title></ui-content></ui-step>` +
+    `<ui-step selected header="Two"></ui-step><ui-step disabled header="Three"></ui-step>`
+
+  /** Background of the first step's root under `holder`. */
+  function background(holder: Element): string {
+    return getComputedStyle(stepRoots(holder)[0]!).backgroundColor
+  }
+
+  /** The first step's slotted `<ui-content>` box. */
+  function content(holder: Element): HTMLElement {
+    return holder.querySelector("ui-content")!.shadowRoot!.firstElementChild as HTMLElement
+  }
+
+  it("takes a token set on the HOST, reaching every step", async () => {
+    const holder = await ElementFixture.render(
+      `<div style="width: 900px"><ui-steps unstackable style="--ui-step-background: ${RED}">${STEPS}</ui-steps></div>`
+    )
+    expect(background(holder)).toBe(RED)
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const holder = await ElementFixture.render(
+      `<div style="width: 900px; --ui-step-background: ${RED}"><section><ui-steps unstackable>${STEPS}</ui-steps></section></div>`
+    )
+    expect(background(holder)).toBe(RED)
+  })
+
+  it("takes a token set through `::part(steps)`", async () => {
+    const holder = await ElementFixture.render(
+      `<div style="width: 900px"><style>.themed::part(steps) { --ui-step-background: ${RED} }</style>` +
+        `<ui-steps class="themed" unstackable>${STEPS}</ui-steps></div>`
+    )
+    expect(background(holder)).toBe(RED)
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-steps-radius", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-steps-radius")
+    })
+    const holder = await ElementFixture.render(
+      `<div style="width: 900px"><ui-steps unstackable>${STEPS}</ui-steps></div>`
+    )
+    const group = holder.querySelector("ui-steps")!.shadowRoot!.firstElementChild!
+    expect(getComputedStyle(group).borderTopLeftRadius).toBe("20px")
+    expect(getComputedStyle(stepRoots(holder)[0]!).borderTopLeftRadius).toBe("20px")
+  })
+
+  it("variations:  `inverted` swaps the background, a disabled step's background derives from it", async () => {
+    const inverted = await ElementFixture.render(
+      `<div style="width: 900px"><ui-steps inverted unstackable style="--ui-step-background: ${RED}">${STEPS}</ui-steps></div>`
+    )
+    expect(background(inverted)).not.toBe(RED)
+    const plain = await ElementFixture.render(
+      `<div style="width: 900px"><ui-steps unstackable style="--ui-step-background: ${RED}">${STEPS}</ui-steps></div>`
+    )
+    expect(getComputedStyle(stepRoots(plain)[2]!).backgroundColor).toBe(RED)
+  })
+
+  it("owner tokens:  a part look token set on the group or one step reaches its content;  circular swaps it", async () => {
+    const onGroup = await ElementFixture.render(
+      `<div style="width: 900px"><ui-steps unstackable style="--ui-step-content-padding: 20px">${STEPS}</ui-steps></div>`
+    )
+    expect(getComputedStyle(content(onGroup)).paddingTop).toBe("20px")
+    const onStep = await ElementFixture.render(
+      `<div style="width: 900px"><ui-steps unstackable>${STEPS.replace("<ui-step>", `<ui-step style="--ui-step-content-padding: 20px">`)}</ui-steps></div>`
+    )
+    expect(getComputedStyle(content(onStep)).paddingTop).toBe("20px")
+    const plain = await ElementFixture.render(
+      `<div style="width: 900px"><ui-steps unstackable>${STEPS}</ui-steps></div>`
+    )
+    expect(getComputedStyle(content(plain)).paddingTop).toBe("0px")
+    const circular = await ElementFixture.render(
+      `<div style="width: 900px"><ui-steps circular style="--ui-step-content-padding: 20px">${STEPS}</ui-steps></div>`
+    )
+    expect(getComputedStyle(content(circular)).paddingLeft).toBe("8px")
   })
 })
 

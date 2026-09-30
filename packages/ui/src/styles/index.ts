@@ -11,6 +11,8 @@
  *   substituted where a token is DECLARED, which freezes `:root`'s scheme into `.ui-dark` subtrees.
  *   `styles.test.ts` checks for it.
  * - NOTE: `StyleGenerator` is left out -- build-time only (`yarn gen:styles`).  Import its leaf file.
+ * - NOTE: `ComponentTokens` is left out too -- test / build time only (`test/component-tokens.test.ts`,
+ *   `yarn tokens:alias`, the docs site's `CssTokens`).  Import its leaf file.
  * - NOTE: no namespace:  sheet names carry a `CSS` suffix and the vocabulary exports are data.
  */
 

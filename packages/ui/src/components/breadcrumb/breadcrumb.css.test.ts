@@ -45,7 +45,7 @@ describe("breadcrumb.css source", () => {
       const selectors = Sheets.selectors(css)
       expect(selectors.length).toBeGreaterThan(15)
       expect(selectors.some((selector) => selector.includes(":host(:first-child) > .divider"))).toBe(true)
-      expect(css).toMatch(/@container style\(--ui-breadcrumb-divider-layout: ?icon\)/)
+      expect(css).toMatch(/@container style\(--_ui-breadcrumb-divider-layout: ?icon\)/)
     }
   })
 
@@ -113,6 +113,18 @@ describe("breadcrumb.css examples", () => {
     expect(size(".ui.medium.breadcrumb")).toBe(16)
   })
 
+  it("takes a public token from a wrapper or the breadcrumb itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, breadcrumbCSS])
+    const root = Fixture.render(
+      `<div style="--ui-breadcrumb-divider-opacity: 0.5"><nav class="ui breadcrumb">` +
+        `<a class="section">A</a><span class="divider">/</span><span class="active section">B</span></nav></div>` +
+        `<nav class="ui breadcrumb" style="--ui-breadcrumb-active-font-weight: 400">` +
+        `<span class="active section">C</span></nav>`
+    )
+    expect(getComputedStyle(root.querySelector(".divider")!).opacity).toBe("0.5")
+    expect(getComputedStyle(root.nextElementSibling!.querySelector(".active")!).fontWeight).toBe("400")
+  })
+
   it("inverts to the dark scheme, the active section brightest", () => {
     Sheets.adopt([...foundationCSS, breadcrumbCSS])
     const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
@@ -155,7 +167,7 @@ describe("breadcrumb.css in shadow roots", () => {
     const nav = Sheets.inner(breadcrumb)
     nav.style.setProperty("--ui-breadcrumb-divider", `"›"`)
     expect(getComputedStyle(divider(2), "::before").content).toBe('"›"')
-    nav.style.setProperty("--ui-breadcrumb-divider-layout", "icon")
+    nav.style.setProperty("--_ui-breadcrumb-divider-layout", "icon")
     nav.style.setProperty("--ui-breadcrumb-divider-icon", CHEVRON)
     const icon = getComputedStyle(divider(2), "::before")
     expect(icon.content).toBe('""')

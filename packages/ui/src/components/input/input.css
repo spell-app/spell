@@ -22,14 +22,20 @@
  *   - NOTE: `<slot>` breaks a CHILD (`>`) selector, so the icon box sizes its glyph with a DESCENDANT selector
  *     (`.icon svg`) plus `::slotted(svg)` / `::slotted(ui-icon)`
  * - Host:  `inline-flex`, `:state(fluid)` block-level.  An owner (`<ui-field>`) sizes it with the inherited
- *   `--ui-input-owner-width` (default `auto`);  the root and the native control grow to fill.
+ *   `--_ui-input-owner-width` (default `auto`);  the root and the native control grow to fill.
  * - Action buttons (`<ui-button slot="action">`) are FLEX ITEMS of the root (a slot is `display: contents`).
- *   The input squares their joined corners through button.css's group corner tokens (`--ui-buttons-ss` ...):  a
+ *   The input squares their joined corners through button.css's group corner tokens (`--_ui-buttons-ss` ...):  a
  *   joined action is a one-sided button group.  `:first-child` / `:last-child` are the HOST's light children.
  * - States:  `state="error|info|success|warning"` is a colour remap (`colors.css`);  one rule set reads
  *   `--ui-color-background` / `-border` / `-text`.  An owner field hands its state down as INHERITED, already
- *   resolved tokens (`--ui-field-state-background` / `-border` / `-color`), which the input's own `state` beats.
+ *   resolved tokens (`--_ui-field-state-background` / `-border` / `-color`), which the input's own `state` beats.
  * - Focus:  the native control draws Fomantic's focus border;  `delegatesFocus` keeps the host ring off.
+ * - Public tokens (`--ui-input-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-input-radius: var(--ui-input-radius, var(--ui-radius))`, and every rule reads
+ *   the alias.  So a value set on `:root`, an ancestor, the host, `::part(input)` or in the app stylesheet reaches
+ *   the box (`docs/theming.md` "Component tokens").  Owners that theme a nested input set its PUBLIC token, as a
+ *   page would (`search.css`:  `--ui-input-radius`).  The joined label takes the input's font size (the corner one
+ *   `--ui-input-corner-ratio` of it), never `--ui-label-font-ratio`.
  * - NOTE: left out, on purpose:
  *   - the `.ui.input.down` / `.ui.input.focus` classes (static screenshots):  `:active` / `:focus` do it
  *   - Fomantic's `invalid` variation (`:invalid:not(:placeholder-shown)`):  the element sets `:state(invalid)` on
@@ -58,7 +64,7 @@
   /* Host:  layout only;  the look lives on the root inside. */
   :host {
     display: inline-flex;
-    inline-size: var(--ui-input-owner-width, auto);
+    inline-size: var(--_ui-input-owner-width, auto);
     max-inline-size: 100%;
     vertical-align: middle;
   }
@@ -73,58 +79,70 @@
     outline: none;
   }
 
-  /* Tokens:  one per `input.variables` entry that still matters, from the global tokens. */
+  /*
+   * Tokens:  one per `input.variables` entry that still matters, from the global tokens -- each the private alias
+   * of its public token (never declare the public one:  it would block inherited values).
+   */
   .ui.input {
-    --ui-input-padding-block: 0.67857em;
-    --ui-input-padding-inline: 1em;
-    --ui-input-line-height: 1.21428em;
-    --ui-input-background: var(--ui-surface);
-    --ui-input-color: var(--ui-text-color);
-    --ui-input-border-width: var(--ui-border-width);
-    --ui-input-border-color: var(--ui-border-color);
-    --ui-input-border-color-hover: var(--ui-border-color-selected);
-    --ui-input-border-color-focus: var(--ui-focus-border);
-    --ui-input-border-color-down: var(--ui-border-color-selected-strong);
-    --ui-input-background-down: var(--ui-surface-muted);
-    --ui-input-color-focus: var(--ui-text-hovered);
-    --ui-input-radius: var(--ui-radius);
-    --ui-input-duration: var(--ui-duration-fast);
-    --ui-input-placeholder-color: var(--ui-text-light);
-    --ui-input-placeholder-focus-color: var(--ui-text-muted);
-    --ui-input-disabled-opacity: var(--ui-disabled-opacity);
-    --ui-input-icon-width: 2.67142em;
-    --ui-input-icon-size: 1em;
-    --ui-input-icon-opacity: 0.5;
-    --ui-input-icon-focus-opacity: 1;
-    --ui-input-transparent-icon-width: 1.18em;
-    --ui-input-transparent-icon-margin: 2em;
-    --ui-input-labeled-margin: 2.5em;
-    --ui-input-labeled-icon-input-margin: 3.25em;
-    --ui-input-labeled-and-icon-margin: 4em;
-    --ui-input-labeled-icon-margin: 1.25em;
-    --ui-input-corner-ratio: 0.64285;
-    --ui-input-loader-size: 1.28571em;
-    --ui-input-loader-width: 0.2em;
-    --ui-input-loader-fill: oklch(from var(--ui-ink) l c h / 0.1);
-    --ui-input-loader-line: var(--ui-text-muted);
-    --ui-input-loader-speed: 0.6s;
-    --ui-input-file-button-background: color-mix(in oklab, var(--ui-ink) 12%, var(--ui-surface));
-    --ui-input-file-button-background-hover: color-mix(in oklab, var(--ui-ink) 20%, var(--ui-surface));
-    --ui-input-file-button-color: var(--ui-text-dark);
-    --ui-input-file-button-margin: 1em;
-    --ui-input-textarea-height: 12em;
-    --ui-input-textarea-min-height: 8em;
-    --ui-input-textarea-max-height: 24em;
-    --ui-input-textarea-line-height: 1.2857;
-    --ui-input-inverted-color: var(--ui-text-inverted-color);
-    --ui-input-inverted-placeholder-color: var(--ui-text-inverted-unselected);
+    --_ui-input-padding-block: var(--ui-input-padding-block, 0.67857em);
+    --_ui-input-padding-inline: var(--ui-input-padding-inline, 1em);
+    --_ui-input-line-height: var(--ui-input-line-height, 1.21428em);
+    --_ui-input-background: var(--ui-input-background, var(--ui-surface));
+    --_ui-input-color: var(--ui-input-color, var(--ui-text-color));
+    --_ui-input-border-width: var(--ui-input-border-width, var(--ui-border-width));
+    --_ui-input-border-color: var(--ui-input-border-color, var(--ui-border-color));
+    --_ui-input-border-color-hover: var(--ui-input-border-color-hover, var(--ui-border-color-selected));
+    --_ui-input-border-color-focus: var(--ui-input-border-color-focus, var(--ui-focus-border));
+    --_ui-input-border-color-down: var(--ui-input-border-color-down, var(--ui-border-color-selected-strong));
+    --_ui-input-background-down: var(--ui-input-background-down, var(--ui-surface-muted));
+    --_ui-input-color-focus: var(--ui-input-color-focus, var(--ui-text-hovered));
+    --_ui-input-radius: var(--ui-input-radius, var(--ui-radius));
+    --_ui-input-duration: var(--ui-input-duration, var(--ui-duration-fast));
+    --_ui-input-placeholder-color: var(--ui-input-placeholder-color, var(--ui-text-light));
+    --_ui-input-placeholder-focus-color: var(--ui-input-placeholder-focus-color, var(--ui-text-muted));
+    --_ui-input-disabled-opacity: var(--ui-input-disabled-opacity, var(--ui-disabled-opacity));
+    --_ui-input-icon-width: var(--ui-input-icon-width, 2.67142em);
+    --_ui-input-icon-size: var(--ui-input-icon-size, 1em);
+    --_ui-input-icon-opacity: var(--ui-input-icon-opacity, 0.5);
+    --_ui-input-icon-focus-opacity: var(--ui-input-icon-focus-opacity, 1);
+    --_ui-input-transparent-icon-width: var(--ui-input-transparent-icon-width, 1.18em);
+    --_ui-input-transparent-icon-margin: var(--ui-input-transparent-icon-margin, 2em);
+    --_ui-input-labeled-margin: var(--ui-input-labeled-margin, 2.5em);
+    --_ui-input-labeled-icon-input-margin: var(--ui-input-labeled-icon-input-margin, 3.25em);
+    --_ui-input-labeled-and-icon-margin: var(--ui-input-labeled-and-icon-margin, 4em);
+    --_ui-input-labeled-icon-margin: var(--ui-input-labeled-icon-margin, 1.25em);
+    --_ui-input-corner-ratio: var(--ui-input-corner-ratio, 0.64285);
+    --_ui-input-loader-size: var(--ui-input-loader-size, 1.28571em);
+    --_ui-input-loader-width: var(--ui-input-loader-width, 0.2em);
+    --_ui-input-loader-fill: var(--ui-input-loader-fill, oklch(from var(--ui-ink) l c h / 0.1));
+    --_ui-input-loader-line: var(--ui-input-loader-line, var(--ui-text-muted));
+    --_ui-input-loader-speed: var(--ui-input-loader-speed, 0.6s);
+    --_ui-input-file-button-background: var(
+      --ui-input-file-button-background,
+      color-mix(in oklab, var(--ui-ink) 12%, var(--ui-surface))
+    );
+    --_ui-input-file-button-background-hover: var(
+      --ui-input-file-button-background-hover,
+      color-mix(in oklab, var(--ui-ink) 20%, var(--ui-surface))
+    );
+    --_ui-input-file-button-color: var(--ui-input-file-button-color, var(--ui-text-dark));
+    --_ui-input-file-button-margin: var(--ui-input-file-button-margin, 1em);
+    --_ui-input-textarea-height: var(--ui-input-textarea-height, 12em);
+    --_ui-input-textarea-min-height: var(--ui-input-textarea-min-height, 8em);
+    --_ui-input-textarea-max-height: var(--ui-input-textarea-max-height, 24em);
+    --_ui-input-textarea-line-height: var(--ui-input-textarea-line-height, 1.2857);
+    --_ui-input-inverted-color: var(--ui-input-inverted-color, var(--ui-text-inverted-color));
+    --_ui-input-inverted-placeholder-color: var(
+      --ui-input-inverted-placeholder-color,
+      var(--ui-text-inverted-unselected)
+    );
 
     position: relative;
     box-sizing: border-box;
     display: inline-flex;
     flex: 1 1 auto;
     min-inline-size: 0;
-    color: var(--ui-input-color);
+    color: var(--_ui-input-color);
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     font-style: normal;
@@ -138,49 +156,49 @@
     min-inline-size: 0;
     max-inline-size: 100%;
     margin: 0;
-    padding: var(--_input-pad-block, var(--ui-input-padding-block))
-      var(--_input-pad-end, var(--ui-input-padding-inline)) var(--_input-pad-block, var(--ui-input-padding-block))
-      var(--_input-pad-start, var(--ui-input-padding-inline));
-    border: var(--ui-input-border-width) solid
-      var(--_input-border, var(--ui-field-state-border, var(--ui-input-border-color)));
-    border-radius: var(--ui-input-radius);
+    padding: var(--_input-pad-block, var(--_ui-input-padding-block))
+      var(--_input-pad-end, var(--_ui-input-padding-inline)) var(--_input-pad-block, var(--_ui-input-padding-block))
+      var(--_input-pad-start, var(--_ui-input-padding-inline));
+    border: var(--_ui-input-border-width) solid
+      var(--_input-border, var(--_ui-field-state-border, var(--_ui-input-border-color)));
+    border-radius: var(--_ui-input-radius);
     outline: none;
-    background: var(--_input-background, var(--ui-field-state-background, var(--ui-input-background)));
+    background: var(--_input-background, var(--_ui-field-state-background, var(--_ui-input-background)));
     box-shadow: none;
-    color: var(--_input-color, var(--ui-field-state-color, var(--ui-input-color)));
+    color: var(--_input-color, var(--_ui-field-state-color, var(--_ui-input-color)));
     font: inherit;
-    line-height: var(--ui-input-line-height);
+    line-height: var(--_ui-input-line-height);
     text-align: start;
     appearance: none;
     -webkit-tap-highlight-color: transparent;
     transition:
-      box-shadow var(--ui-input-duration) var(--ui-ease),
-      border-color var(--ui-input-duration) var(--ui-ease);
+      box-shadow var(--_ui-input-duration) var(--ui-ease),
+      border-color var(--_ui-input-duration) var(--ui-ease);
   }
   .ui.input > input[type="color"] {
     padding: 0;
     block-size: calc(
-      var(--ui-input-line-height) + 2 * var(--ui-input-padding-block) + 2 * var(--ui-input-border-width)
+      var(--_ui-input-line-height) + 2 * var(--_ui-input-padding-block) + 2 * var(--_ui-input-border-width)
     );
   }
   .ui.input > input::-webkit-calendar-picker-indicator {
     padding: 0;
-    opacity: var(--ui-input-icon-opacity);
+    opacity: var(--_ui-input-icon-opacity);
     cursor: pointer;
-    transition: opacity var(--ui-input-duration) var(--ui-ease);
+    transition: opacity var(--_ui-input-duration) var(--ui-ease);
   }
 
   /* Textarea:  Fomantic's form textarea, since a `<ui-textarea>` is nearly always a form field. */
   .ui.input > textarea {
-    min-block-size: calc(2 * var(--ui-input-padding-block) + var(--ui-input-line-height));
-    padding-block: calc(var(--ui-input-padding-block) + (var(--ui-input-line-height) - 1em) / 2);
-    line-height: var(--ui-input-textarea-line-height);
+    min-block-size: calc(2 * var(--_ui-input-padding-block) + var(--_ui-input-line-height));
+    padding-block: calc(var(--_ui-input-padding-block) + (var(--_ui-input-line-height) - 1em) / 2);
+    line-height: var(--_ui-input-textarea-line-height);
     resize: vertical;
   }
   .ui.input > textarea:not([rows]) {
-    block-size: var(--ui-input-textarea-height);
-    min-block-size: var(--ui-input-textarea-min-height);
-    max-block-size: var(--ui-input-textarea-max-height);
+    block-size: var(--_ui-input-textarea-height);
+    min-block-size: var(--_ui-input-textarea-min-height);
+    max-block-size: var(--_ui-input-textarea-max-height);
   }
 }
 
@@ -191,11 +209,11 @@
 @layer ui.components.input.content {
   /* Placeholder */
   .ui.input > :is(input, textarea)::placeholder {
-    color: var(--_input-placeholder, var(--ui-input-placeholder-color));
+    color: var(--_input-placeholder, var(--_ui-input-placeholder-color));
     opacity: 1;
   }
   .ui.input > :is(input, textarea):focus::placeholder {
-    color: var(--_input-placeholder-focus, var(--ui-input-placeholder-focus-color));
+    color: var(--_input-placeholder-focus, var(--_ui-input-placeholder-focus-color));
   }
 
   /* Icon box:  over the field's end, the glyph centred. */
@@ -208,31 +226,31 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    inline-size: var(--_input-icon-width, var(--ui-input-icon-width));
+    inline-size: var(--_input-icon-width, var(--_ui-input-icon-width));
     block-size: 100%;
     margin: 0;
     color: inherit;
     line-height: 1;
-    opacity: var(--ui-input-icon-opacity);
+    opacity: var(--_ui-input-icon-opacity);
     pointer-events: none;
     cursor: default;
-    transition: opacity var(--ui-input-duration) var(--ui-ease);
-    --ui-icon-owner-margin: 0;
-    --ui-icon-owner-size: var(--ui-input-icon-size);
-    --ui-icon-owner-opacity: 1;
-    --ui-icon-owner-align: middle;
+    transition: opacity var(--_ui-input-duration) var(--ui-ease);
+    --_ui-icon-owner-margin: 0;
+    --_ui-icon-owner-size: var(--_ui-input-icon-size);
+    --_ui-icon-owner-opacity: 1;
+    --_ui-icon-owner-align: middle;
   }
   .ui.input > .icon svg,
   .ui.input > .icon ::slotted(svg) {
-    inline-size: var(--ui-input-icon-size);
-    block-size: var(--ui-input-icon-size);
+    inline-size: var(--_ui-input-icon-size);
+    block-size: var(--_ui-input-icon-size);
     fill: currentColor;
   }
   .ui.input > :is(input, textarea):focus ~ .icon {
-    opacity: var(--ui-input-icon-focus-opacity);
+    opacity: var(--_ui-input-icon-focus-opacity);
   }
   .ui.input > input:focus::-webkit-calendar-picker-indicator {
-    opacity: var(--ui-input-icon-focus-opacity);
+    opacity: var(--_ui-input-icon-focus-opacity);
   }
   .ui.input > textarea ~ .icon {
     block-size: 3em;
@@ -247,18 +265,18 @@
   }
   .ui.file.input > input[type="file"]::file-selector-button {
     margin-block: 0;
-    margin-inline: 0 var(--ui-input-file-button-margin);
-    padding: var(--ui-input-padding-block) var(--ui-input-padding-inline);
+    margin-inline: 0 var(--_ui-input-file-button-margin);
+    padding: var(--_ui-input-padding-block) var(--_ui-input-padding-inline);
     border: 0;
-    background: var(--ui-color, var(--ui-input-file-button-background));
-    color: var(--ui-color-on, var(--ui-input-file-button-color));
+    background: var(--ui-color, var(--_ui-input-file-button-background));
+    color: var(--ui-color-on, var(--_ui-input-file-button-color));
     font: inherit;
     font-weight: var(--ui-font-weight-bold);
-    line-height: var(--ui-input-line-height);
+    line-height: var(--_ui-input-line-height);
     cursor: pointer;
   }
   .ui.file.input > input[type="file"]:is(:hover, :focus-visible)::file-selector-button {
-    background: var(--ui-color-hover, var(--ui-input-file-button-background-hover));
+    background: var(--ui-color-hover, var(--_ui-input-file-button-background-hover));
   }
   .ui.action.file.input > input[type="file"]::file-selector-button {
     display: none;
@@ -272,16 +290,16 @@
 @layer ui.components.input.variations {
   /* Icon:  room for the icon box at the end;  `left icon` at the start. */
   .ui.icon.input:not(.corner) {
-    --_input-pad-end: var(--ui-input-icon-width);
+    --_input-pad-end: var(--_ui-input-icon-width);
   }
   .ui[class*="left icon"].input > .icon {
     inset-inline: 0 auto;
   }
   .ui[class*="left icon"].input:not([class*="left corner"]) {
-    --_input-pad-start: var(--ui-input-icon-width);
+    --_input-pad-start: var(--_ui-input-icon-width);
   }
   .ui[class*="left icon"].input:not(.corner) {
-    --_input-pad-end: var(--ui-input-padding-inline);
+    --_input-pad-end: var(--_ui-input-padding-inline);
   }
 
   /* Loading:  the icon box becomes a spinner (a track and a turning arc). */
@@ -298,15 +316,15 @@
     inset-block-start: 50%;
     inset-inline-start: 50%;
     box-sizing: border-box;
-    inline-size: var(--ui-input-loader-size);
-    block-size: var(--ui-input-loader-size);
-    margin: calc(var(--ui-input-loader-size) / -2) 0 0 calc(var(--ui-input-loader-size) / -2);
-    border: var(--ui-input-loader-width) solid var(--ui-input-loader-fill);
+    inline-size: var(--_ui-input-loader-size);
+    block-size: var(--_ui-input-loader-size);
+    margin: calc(var(--_ui-input-loader-size) / -2) 0 0 calc(var(--_ui-input-loader-size) / -2);
+    border: var(--_ui-input-loader-width) solid var(--_ui-input-loader-fill);
     border-radius: var(--ui-radius-circle);
   }
   .ui.loading.input > .icon::after {
-    border-color: var(--ui-input-loader-line) transparent transparent;
-    animation: ui-input-spin var(--ui-input-loader-speed) linear infinite;
+    border-color: var(--_ui-input-loader-line) transparent transparent;
+    animation: ui-input-spin var(--_ui-input-loader-speed) linear infinite;
   }
 
   /* Transparent:  text only. */
@@ -320,24 +338,24 @@
     box-shadow: none;
   }
   .ui.transparent.icon.input {
-    --_input-icon-width: var(--ui-input-transparent-icon-width);
+    --_input-icon-width: var(--_ui-input-transparent-icon-width);
   }
   .ui.transparent.icon.input > :is(input, textarea) {
-    --_input-pad-end: var(--ui-input-transparent-icon-margin);
+    --_input-pad-end: var(--_ui-input-transparent-icon-margin);
   }
   .ui.transparent[class*="left icon"].input > :is(input, textarea) {
-    --_input-pad-start: var(--ui-input-transparent-icon-margin);
+    --_input-pad-start: var(--_ui-input-transparent-icon-margin);
     --_input-pad-end: 0;
   }
   .ui.transparent.input > textarea ~ .icon {
     block-size: 1.3em;
   }
   .ui.transparent.inverted.input {
-    color: var(--ui-input-inverted-color);
+    color: var(--_ui-input-inverted-color);
   }
   .ui.transparent.inverted.input > :is(input, textarea) {
     --_input-color: inherit;
-    --_input-placeholder: var(--ui-input-inverted-placeholder-color);
+    --_input-placeholder: var(--_ui-input-inverted-placeholder-color);
   }
 
   /* Inverted:  no border, as Fomantic (the surface already contrasts with a dark page). */
@@ -345,9 +363,8 @@
     border-color: transparent;
   }
 
-  /* Labeled:  the label box joins the field at a square seam. */
+  /* Labeled:  the label box joins the field at a square seam, at the input's font size (not the label's ratio). */
   .ui.labeled.input > .ui.label {
-    --ui-label-font-ratio: 1;
     flex: 0 0 auto;
     display: flex;
     align-items: center;
@@ -367,7 +384,7 @@
     border-inline-start-color: transparent;
   }
   .ui.labeled.input:not([class*="corner labeled"]) > .ui.label:first-child ~ :is(input, textarea):focus {
-    border-inline-start-color: var(--ui-input-border-color-focus);
+    border-inline-start-color: var(--_ui-input-border-color-focus);
   }
   .ui[class*="right labeled"].input > :is(input, textarea) {
     border-start-end-radius: 0;
@@ -375,7 +392,7 @@
     border-inline-end-color: transparent;
   }
   .ui[class*="right labeled"].input > :is(input, textarea):focus {
-    border-inline-end-color: var(--ui-input-border-color-focus);
+    border-inline-end-color: var(--_ui-input-border-color-focus);
   }
   .ui[class*="right labeled"].input > .ui.label:last-child {
     border-start-start-radius: 0;
@@ -384,42 +401,41 @@
 
   /* Corner label:  folded over the field's corner, inside its border, at Fomantic's 9px-of-14 size. */
   .ui.labeled.input > .ui.corner.label {
-    --ui-label-font-ratio: var(--ui-input-corner-ratio);
-    --ui-label-owner-radius: var(--ui-input-radius);
+    --_ui-label-owner-radius: var(--_ui-input-radius);
     display: block;
-    top: var(--ui-input-border-width);
-    right: var(--ui-input-border-width);
-    font-size: calc(var(--ui-font-size) * var(--ui-label-font-ratio) * var(--ui-scale, 1));
-    border-start-end-radius: var(--ui-input-radius);
+    top: var(--_ui-input-border-width);
+    right: var(--_ui-input-border-width);
+    font-size: calc(var(--ui-font-size) * var(--_ui-input-corner-ratio) * var(--ui-scale, 1));
+    border-start-end-radius: var(--_ui-input-radius);
   }
   .ui.labeled.input > .ui.left.corner.label {
     right: auto;
-    left: var(--ui-input-border-width);
+    left: var(--_ui-input-border-width);
   }
   .ui.labeled.input > .ui.corner.label > .icon {
-    --ui-icon-owner-margin: 0;
-    --ui-icon-owner-align: top;
+    --_ui-icon-owner-margin: 0;
+    --_ui-icon-owner-align: top;
   }
   .ui[class*="corner labeled"]:not([class*="left corner labeled"]).input {
-    --_input-pad-end: var(--ui-input-labeled-margin);
+    --_input-pad-end: var(--_ui-input-labeled-margin);
   }
   .ui[class*="corner labeled"]:not([class*="left corner labeled"]).icon.input {
-    --_input-pad-end: var(--ui-input-labeled-icon-input-margin);
+    --_input-pad-end: var(--_ui-input-labeled-icon-input-margin);
   }
   .ui[class*="corner labeled"]:not([class*="left corner labeled"]).icon.input > .icon {
-    margin-inline-end: var(--ui-input-labeled-icon-margin);
+    margin-inline-end: var(--_ui-input-labeled-icon-margin);
   }
   .ui[class*="left corner labeled"].input {
-    --_input-pad-start: var(--ui-input-labeled-margin);
+    --_input-pad-start: var(--_ui-input-labeled-margin);
   }
   .ui[class*="left corner labeled"][class*="left icon"].input {
-    --_input-pad-start: var(--ui-input-labeled-and-icon-margin);
+    --_input-pad-start: var(--_ui-input-labeled-and-icon-margin);
   }
   .ui[class*="left corner labeled"].icon.input > .icon {
-    margin-inline-start: var(--ui-input-labeled-icon-margin);
+    margin-inline-start: var(--_ui-input-labeled-icon-margin);
   }
   .ui[class*="left corner labeled"].icon:not([class*="left icon"]).input {
-    --_input-pad-end: var(--ui-input-labeled-margin);
+    --_input-pad-end: var(--_ui-input-labeled-margin);
   }
 
   /* Action:  joined buttons, square at the seam (slotted elements;  `.button` children in static markup). */
@@ -434,19 +450,19 @@
     border-inline-end-color: transparent;
   }
   .ui.action.input:not([class*="left action"]) > :is(input, textarea):focus {
-    border-inline-end-color: var(--ui-input-border-color-focus);
+    border-inline-end-color: var(--_ui-input-border-color-focus);
   }
   .ui.action.input:not([class*="left action"]) > ::slotted(*),
   .ui.action.input:not([class*="left action"]) > .ui.button {
-    --ui-buttons-ss: 0;
-    --ui-buttons-es: 0;
-    --ui-buttons-se: 0;
-    --ui-buttons-ee: 0;
+    --_ui-buttons-ss: 0;
+    --_ui-buttons-es: 0;
+    --_ui-buttons-se: 0;
+    --_ui-buttons-ee: 0;
   }
   .ui.action.input:not([class*="left action"]) > ::slotted(:last-child),
   .ui.action.input:not([class*="left action"]) > .ui.button:last-child {
-    --ui-buttons-se: 1;
-    --ui-buttons-ee: 1;
+    --_ui-buttons-se: 1;
+    --_ui-buttons-ee: 1;
   }
   .ui[class*="left action"].input > :is(input, textarea) {
     border-start-start-radius: 0;
@@ -454,19 +470,19 @@
     border-inline-start-color: transparent;
   }
   .ui[class*="left action"].input > :is(input, textarea):focus {
-    border-inline-start-color: var(--ui-input-border-color-focus);
+    border-inline-start-color: var(--_ui-input-border-color-focus);
   }
   .ui[class*="left action"].input > ::slotted(*),
   .ui[class*="left action"].input > .ui.button {
-    --ui-buttons-ss: 0;
-    --ui-buttons-es: 0;
-    --ui-buttons-se: 0;
-    --ui-buttons-ee: 0;
+    --_ui-buttons-ss: 0;
+    --_ui-buttons-es: 0;
+    --_ui-buttons-se: 0;
+    --_ui-buttons-ee: 0;
   }
   .ui[class*="left action"].input > ::slotted(:first-child),
   .ui[class*="left action"].input > .ui.button:first-child {
-    --ui-buttons-ss: 1;
-    --ui-buttons-es: 1;
+    --_ui-buttons-ss: 1;
+    --_ui-buttons-es: 1;
   }
 
   /* Fluid:  the whole row. */
@@ -486,16 +502,19 @@
 @layer ui.components.input.states {
   /* Hover, down, focus */
   .ui.input > :is(input, textarea):hover:not(:focus) {
-    --_input-border: var(--ui-color-border, var(--ui-field-state-border, var(--ui-input-border-color-hover)));
+    --_input-border: var(--ui-color-border, var(--_ui-field-state-border, var(--_ui-input-border-color-hover)));
   }
   .ui.input > :is(input, textarea):active {
-    --_input-border: var(--ui-color-border, var(--ui-field-state-border, var(--ui-input-border-color-down)));
-    --_input-background: var(--ui-color-background, var(--ui-field-state-background, var(--ui-input-background-down)));
+    --_input-border: var(--ui-color-border, var(--_ui-field-state-border, var(--_ui-input-border-color-down)));
+    --_input-background: var(
+      --ui-color-background,
+      var(--_ui-field-state-background, var(--_ui-input-background-down))
+    );
   }
   .ui.input > :is(input, textarea):focus {
-    --_input-border: var(--ui-color-border, var(--ui-field-state-border, var(--ui-input-border-color-focus)));
-    --_input-background: var(--ui-color-background, var(--ui-field-state-background, var(--ui-input-background)));
-    --_input-color: var(--ui-color-text, var(--ui-field-state-color, var(--ui-input-color-focus)));
+    --_input-border: var(--ui-color-border, var(--_ui-field-state-border, var(--_ui-input-border-color-focus)));
+    --_input-background: var(--ui-color-background, var(--_ui-field-state-background, var(--_ui-input-background)));
+    --_input-color: var(--ui-color-text, var(--_ui-field-state-color, var(--_ui-input-color-focus)));
   }
   .ui.transparent.input > :is(input, textarea):is(:hover, :active, :focus) {
     --_input-border: transparent;
@@ -514,19 +533,19 @@
     color: var(--ui-color-text);
   }
   .ui.labeled.input:is(.error, .info, .success, .warning):not([class*="corner labeled"]) > .ui.label {
-    border-block: var(--ui-input-border-width) solid var(--ui-color-border);
+    border-block: var(--_ui-input-border-width) solid var(--ui-color-border);
   }
   .ui.labeled.input:is(.error, .info, .success, .warning):not(.right, [class*="corner labeled"]) > .ui.label {
-    border-inline-start: var(--ui-input-border-width) solid var(--ui-color-border);
+    border-inline-start: var(--_ui-input-border-width) solid var(--ui-color-border);
   }
   .ui.right.labeled.input:is(.error, .info, .success, .warning):not([class*="corner labeled"]) > .ui.label {
-    border-inline-end: var(--ui-input-border-width) solid var(--ui-color-border);
+    border-inline-end: var(--_ui-input-border-width) solid var(--ui-color-border);
   }
 
   /* Disabled:  dimmed, inert. */
   .ui.disabled.input,
   .ui.input > :is(input, textarea):disabled {
-    opacity: var(--ui-input-disabled-opacity);
+    opacity: var(--_ui-input-disabled-opacity);
   }
   .ui.disabled.input > :is(input, textarea),
   .ui.disabled.input > .ui.label {
@@ -538,7 +557,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .ui.loading.input > .icon::after {
-      animation-duration: calc(var(--ui-input-loader-speed) * 4);
+      animation-duration: calc(var(--_ui-input-loader-speed) * 4);
     }
   }
 }

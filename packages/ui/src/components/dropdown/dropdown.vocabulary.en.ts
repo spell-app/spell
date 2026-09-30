@@ -27,10 +27,9 @@ export const dropdownVocabulary = {
     },
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: ["error", "info", "success", "warning"],
-      description:
-        'Form state, tinting the box, text and menu.  NOTE: `kind: "color"` because it emits its value alone.'
+      description: "Form state, tinting the box, text and menu."
     },
     { name: "selection", kind: "keyOnly", description: "Looks like a form `<select>`." },
     { name: "search", kind: "keyOnly", description: "Filters the options by typing;  the trigger is an `<input>`." },
@@ -93,7 +92,7 @@ export const dropdownVocabulary = {
       default: "right",
       description: "Which way the menu extends from the dropdown's edge;  `left` right-aligns it (`.left.menu`)."
     },
-    { name: "icon", kind: "string", description: "Icon name for a `labeled` dropdown's icon block." },
+    { name: "icon", kind: "icon", description: "Icon name for a `labeled` dropdown's icon block." },
     { name: "placeholder", kind: "string", description: "Text shown while nothing is chosen." },
     {
       name: "value",

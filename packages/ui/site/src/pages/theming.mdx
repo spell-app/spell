@@ -150,13 +150,30 @@ and one rule set consumes them. Sizes work the same way through `--ui-scale`.
 
 /* component CSS */
 .ui.button {
-  background: var(--ui-color, var(--ui-button-background));
+  background: var(--ui-color, var(--_ui-button-background));
   color: var(--ui-color-on, inherit);
 }
 ```
 
 - Components READ `--ui-color*` with a fallback for the uncoloured look; they NEVER declare them.
 - The generic tokens INHERIT: `<div class="ui-red">` recolours every component inside it.
+
+## Component tokens
+
+Every component has public tokens of its own, `--ui-<component>-*` (`--ui-button-radius`, `--ui-card-width`), listed
+with their defaults on its page. Set them anywhere above or on the component:
+
+```css
+:root { --ui-button-radius: 0; }                               /* every button */
+.toolbar { --ui-button-padding-inline: 0.75em; }                /* a region */
+ui-button.cta::part(button) { --ui-button-background: gold; }   /* one kind, on its inner box */
+ui-card { --ui-card-header-color: var(--ui-violet-text); }      /* the headers inside every card */
+```
+
+- They inherit into the shadow root, where the component reads each one through a private alias
+  (`--_ui-button-radius: var(--ui-button-radius, var(--ui-radius))`), so nothing inside blocks them.
+- A variation that swaps a value (`circular`) wins over the token; one derived from it (`compact` padding) follows it.
+- Never set the `--_ui-*` names: they are the components' private plumbing.
 
 ## The app stylesheet
 

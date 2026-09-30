@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -90,6 +90,54 @@ describe("<ui-loader> states and visibility", () => {
     const inner = root.getBoundingClientRect()
     expect(inner.left + inner.width / 2).toBeCloseTo(outer.left + outer.width / 2, 0)
     expect(inner.top + inner.height / 2).toBeCloseTo(outer.top + outer.height / 2, 0)
+  })
+})
+
+describe("<ui-loader> tokens from outside", () => {
+  /** The inner box's width. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=loader]")!).width
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-loader active></ui-loader>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(MARKUP.replace("<ui-loader", `<ui-loader style="--ui-loader-size: 40px"`))
+    expect(measure(host)).toBe("40px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-loader-size: 40px"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-loader")!)).toBe("40px")
+  })
+
+  it("takes a token set through `::part(loader)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(loader) { --ui-loader-size: 40px }</style>${MARKUP.replace("<ui-loader", '<ui-loader class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-loader")!)).toBe("40px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-loader-size", "40px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-loader-size")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("40px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("32px")
+  })
+
+  it("variations:  a speed derives from the base token", async () => {
+    const { root } = await loader(`<ui-loader active speed="slow" style="--ui-loader-speed: 1s"></ui-loader>`)
+    expect(getComputedStyle(root, "::after").animationDuration).toBe("1.5s")
   })
 })
 

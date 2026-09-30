@@ -76,7 +76,7 @@ export const buttonVocabulary = {
     { name: "floated", kind: "valueAndKey", values: "floats", description: "Floats `left` or `right`." },
     {
       name: "icon",
-      kind: "string",
+      kind: "icon",
       description:
         "Icon name (Font Awesome, Fomantic aliases allowed).  With no text content the button gets the " +
         "`icon` class (square padding);  with `labeled` it becomes a `labeled icon` button."

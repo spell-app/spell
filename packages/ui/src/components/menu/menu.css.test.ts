@@ -46,8 +46,8 @@ describe("menu.css source", () => {
       expect(selectors.length).toBeGreaterThan(100)
       expect(selectors.some((selector) => selector.includes(":host(:state(in-menu)) > .item"))).toBe(true)
       expect(selectors.some((selector) => selector.includes(".ui.menu .item"))).toBe(true)
-      expect(css).toMatch(/@container style\(--ui-menu-layout: ?vertical\)/)
-      expect(css).toMatch(/@container style\(--ui-menu-divider-side: ?left\)/)
+      expect(css).toMatch(/@container style\(--_ui-menu-layout: ?vertical\)/)
+      expect(css).toMatch(/@container style\(--_ui-menu-divider-side: ?left\)/)
     }
   })
 
@@ -152,6 +152,16 @@ describe("menu.css examples", () => {
     const item = menu.querySelector<HTMLElement>(".item")!
     expect(item.getBoundingClientRect().width).toBeCloseTo(menu.clientWidth, 0)
     expect(getComputedStyle(item, "::before").height).toBe("1px")
+  })
+
+  it("takes a public token from a wrapper or the menu itself (static markup)", () => {
+    Sheets.adopt(sheets())
+    const root = Fixture.render(
+      `<div style="--ui-menu-item-padding: 20px"><div class="ui menu"><a class="item">A</a><a class="item">B</a>` +
+        `</div></div><div class="ui menu" style="--ui-menu-radius: 10px"><a class="item">C</a><a class="item">D</a></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".item")!).paddingTop).toBe("20px")
+    expect(getComputedStyle(root.nextElementSibling!.querySelector(".item")!).borderTopLeftRadius).toBe("10px")
   })
 })
 

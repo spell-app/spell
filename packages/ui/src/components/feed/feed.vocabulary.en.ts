@@ -61,7 +61,7 @@ export const eventVocabulary = {
       kind: "color",
       description: "Hue of its number circle and of the line to the next event (`connected`)."
     },
-    { name: "icon", kind: "string", description: "Icon name, shown as the label." },
+    { name: "icon", kind: "icon", description: "Icon name, shown as the label." },
     { name: "image", kind: "string", description: 'Image URL, shown round as the label (decorative, `alt=""`).' },
     {
       name: "label",

@@ -121,7 +121,7 @@ export const tabVocabulary = {
       description: "What the tabs' `value` (and the URL hash, with `history`) calls this pane;  default its index."
     },
     { name: "label", kind: "string", description: "Text of its tab;  default its `value`.  Also names the pane." },
-    { name: "icon", kind: "string", description: "Icon on its tab (a Font Awesome name)." },
+    { name: "icon", kind: "icon", description: "Icon on its tab (a Font Awesome name)." },
     {
       name: "selected",
       kind: "keyOnly",

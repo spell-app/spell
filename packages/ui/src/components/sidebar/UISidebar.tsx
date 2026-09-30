@@ -198,8 +198,12 @@ export class UISidebar extends UIElement<Vocabulary> {
       const closedBy = untrack(() => this.attrs.closedby) ?? ANY
       this.overlay.closeOnEscape = closedBy !== NONE
       this.overlay.closeOnOutsideClick = closedBy === ANY
-      UI.overlays.open(this.overlay)
+      // MUST `show()` BEFORE `UI.overlays.open()`:  `show()` gives the dialog its own close watcher, disabled
+      // (`closedby` computes to `none`).  Opened by a click, it's the newest close-watcher group, and Chromium
+      // processes only that group, so a watcher made before it never hears Escape.  Focus still returns:
+      // `close()` refocuses what had focus before `show()`.
       if (!box.open) box.show()
+      UI.overlays.open(this.overlay)
       this.untrap = UI.focus.trap(this.host)
     }
     this.after(() => {

@@ -132,7 +132,7 @@ export type DismissReason = "escape" | "outside" | "close-all"
  * - The component owns the entry object and passes the SAME object to `close()`.
  * - Defaults by `kind`:
  *   - `closeOnEscape`:  `true` except `toast`
- *   - `closeOnOutsideClick`:  `true` for `popover` / `flyout` / `dimmer`, `false` for `modal` / `toast`
+ *   - `closeOnOutsideClick`:  `true` except `toast` (`<ui-modal>` sets its own, see `docs/runtime.md`)
  *   - `modal` (scroll lock + keyboard scope):  `true` for `modal` / `flyout` / `dimmer`
  */
 export type OverlayEntry = {

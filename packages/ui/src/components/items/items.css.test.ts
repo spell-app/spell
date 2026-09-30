@@ -115,6 +115,21 @@ describe("items.css examples", () => {
     expect(style(header).fontWeight).toBe("700")
   })
 
+  it("takes a public token from a wrapper or the group itself (static markup)", () => {
+    adopt()
+    const root = Fixture.render(
+      `<div style="width: 1000px; --ui-items-item-spacing: 2em"><div class="ui items">` +
+        `<div class="item"><div class="content">A</div></div><div class="item"><div class="content">B</div></div>` +
+        `</div></div>`
+    )
+    expect(style(root.querySelectorAll(".item")[1]!).marginTop).toBe("32px")
+    const group = Fixture.render(
+      `<div style="width: 1000px"><div class="ui items" style="--ui-items-content-distance: 40px"><div class="item">` +
+        `<div class="image"><img src="" alt=""></div><div class="content in-item">A</div></div></div></div>`
+    )
+    expect(style(group.querySelector(".content")!).paddingLeft).toBe("40px")
+  })
+
   it("stacks items in a narrow group, not when unstackable", () => {
     const [item] = itemsIn(example("types", 500), "Items")
     expect(style(item!).flexDirection).toBe("column")

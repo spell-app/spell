@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import type { FormHost } from "$/elements"
@@ -397,6 +397,48 @@ describe("<ui-textarea>", () => {
     expect(textarea.rows).toBe(3)
     expect(textarea.required).toBe(true)
     expect(host.validity.valueMissing).toBe(true)
+  })
+})
+
+describe("<ui-input> tokens from outside", () => {
+  /** The native control's top-left radius, which `--ui-input-radius` drives. */
+  function radius(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=control]")!).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await input(`<ui-input style="--ui-input-radius: 12px" aria-label="A"></ui-input>`)
+    expect(radius(host)).toBe("12px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-input-radius: 12px"><div><ui-input aria-label="A"></ui-input></div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-input")!)).toBe("12px")
+  })
+
+  it("takes a token set through `::part(input)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(input) { --ui-input-radius: 12px }</style><ui-input class="themed" aria-label="A"></ui-input></div>`
+    )
+    expect(radius(wrapper.querySelector("ui-input")!)).toBe("12px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-input-radius", "12px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-input-radius")
+    })
+    const { host } = await input(`<ui-input aria-label="A"></ui-input>`)
+    expect(radius(host)).toBe("12px")
+  })
+
+  it("reaches a textarea too", async () => {
+    const host = await ElementFixture.render(
+      `<ui-textarea style="--ui-input-radius: 12px" aria-label="A"></ui-textarea>`
+    )
+    expect(radius(host)).toBe("12px")
   })
 })
 

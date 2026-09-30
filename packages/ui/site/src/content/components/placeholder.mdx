@@ -210,13 +210,20 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-placeholder-*` tokens on the `placeholder` part;  every shape inside follows.  The
-  colours are tints of the ink colour, so they suit any surface in either scheme.
+  Theme with the public `--ui-placeholder-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or
+  on the inner box through `::part(placeholder)`;  every shape inside follows.  They inherit into the shadow roots,
+  where the sheet reads each through a private alias, so nothing inside blocks them.  A single shape takes them too,
+  on its own element or `::part()`.  The colours are tints of the ink colour, so they suit any surface in either
+  scheme.
 
 ```css
-ui-placeholder::part(placeholder) {
-  --ui-placeholder-max-width: 40em;
+/* every placeholder on the page */
+:root {
   --ui-placeholder-duration: 3s;
+}
+/* one region */
+.sidebar {
+  --ui-placeholder-max-width: 40em;
   --ui-placeholder-radius: 0;
 }
 ```

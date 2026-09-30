@@ -119,3 +119,13 @@ describe("flyout.css examples", () => {
     expect(new DOMMatrix(getComputedStyle(right!).transform).m41).toBe(400)
   })
 })
+
+describe("flyout.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, flyoutCSS])
+    const root = Fixture.render(
+      `<div style="--ui-flyout-width: 321px"><div class="ui visible flyout"><div class="content">x</div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.flyout")!).width).toBe("321px")
+  })
+})

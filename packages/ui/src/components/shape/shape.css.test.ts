@@ -47,7 +47,7 @@ describe("shape.css source", () => {
       expect(selectors).toContain(":host(:state(inactive))")
       expect(selectors).toContain(":host(:state(animating))")
     }
-    expect(shapeCSS).toContain("@container style(--ui-shape-type: cube)")
+    expect(shapeCSS).toContain("@container style(--_ui-shape-type: cube)")
   })
 
   it("covers every class word the vocabulary can emit", () => {
@@ -88,5 +88,16 @@ describe("shape.css examples", () => {
     expect(getComputedStyle(staged).position).toBe("absolute")
     expect(getComputedStyle(staged).display).toBe("block")
     expect(getComputedStyle(root.querySelector(".hidden.side")!).opacity).toBe("0.6")
+  })
+})
+
+describe("shape.css tokens", () => {
+  it("takes a public token from a wrapper or the shape itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, shapeCSS])
+    const root = Fixture.render(
+      `<div style="--ui-shape-cube-size: 100px"><div class="ui cube shape"><div class="sides">` +
+        `<div class="active side">A</div></div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".side")!).height).toBe("100px")
   })
 })

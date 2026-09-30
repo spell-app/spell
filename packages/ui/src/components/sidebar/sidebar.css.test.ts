@@ -55,7 +55,7 @@ describe("sidebar.css source", () => {
       expect(selectors).toContain(".pusher::after")
       expect(selectors).toContain(":host(:state(pushable))")
     }
-    expect(sidebarCSS).toContain("@container style(--ui-pusher-dimmed: 1)")
+    expect(sidebarCSS).toContain("@container style(--_ui-pusher-dimmed: 1)")
   })
 
   it("covers every class word the vocabulary can emit", () => {
@@ -63,7 +63,7 @@ describe("sidebar.css source", () => {
     for (const phrase of Sheets.classPhrases(sidebarVocabulary))
       expect(Sheets.covers(css, phrase), `${sidebarVocabulary.tag}: ${phrase}`).toBe(true)
     for (const spec of sidebarVocabulary.attributes) {
-      if (spec.kind !== "color") continue
+      if (spec.kind !== "valueOnly") continue
       for (const value of spec.values) expect(Sheets.covers(css, value), `${spec.name}: ${value}`).toBe(true)
     }
   })
@@ -121,12 +121,22 @@ describe("pusher tokens", () => {
   it("move, shrink and dim the pusher", () => {
     Sheets.adopt([...foundationCSS, sidebarCSS])
     const root = Fixture.render(
-      `<div class="pushable" style="--ui-pusher-transform: scale(0.75); --ui-pusher-origin: 75% 50%; ` +
-        `--ui-pusher-dimmed: 1; --ui-sidebar-duration: 0s"><div class="pusher" style="height: 50px"></div></div>`
+      `<div class="pushable" style="--_ui-pusher-transform: scale(0.75); --_ui-pusher-origin: 75% 50%; ` +
+        `--_ui-pusher-dimmed: 1; --ui-sidebar-duration: 0s"><div class="pusher" style="height: 50px"></div></div>`
     )
     const pusher = root.querySelector<HTMLElement>(".pusher")!
     expect(getComputedStyle(pusher).transform).toBe("matrix(0.75, 0, 0, 0.75, 0, 0)")
     expect(getComputedStyle(pusher).transformOrigin.startsWith(`${pusher.offsetWidth * 0.75}px`)).toBe(true)
     expect(getComputedStyle(pusher, "::after").opacity).toBe("1")
+  })
+})
+
+describe("sidebar.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, sidebarCSS])
+    const root = Fixture.render(
+      `<div style="--ui-sidebar-width: 222px"><div class="pushable"><div class="ui left sidebar">x</div><div class="pusher">y</div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.sidebar")!).width).toBe("222px")
   })
 })

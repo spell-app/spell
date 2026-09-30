@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -68,6 +68,60 @@ describe("<ui-text> states and looks", () => {
     const { root: plain } = await text(`<ui-text>x</ui-text>`)
     const { root: red } = await text(`<ui-text color="red">x</ui-text>`)
     expect(getComputedStyle(red).color).not.toBe(getComputedStyle(plain).color)
+  })
+})
+
+describe("<ui-text> tokens from outside", () => {
+  /** The inner box's opacity. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=text]")!).opacity
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-text disabled>Off</ui-text>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(
+      MARKUP.replace("<ui-text", `<ui-text style="--ui-text-disabled-opacity: 0.25"`)
+    )
+    expect(measure(host)).toBe("0.25")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-text-disabled-opacity: 0.25"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-text")!)).toBe("0.25")
+  })
+
+  it("takes a token set through `::part(text)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(text) { --ui-text-disabled-opacity: 0.25 }</style>${MARKUP.replace("<ui-text", '<ui-text class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-text")!)).toBe("0.25")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-text-disabled-opacity", "0.25")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-text-disabled-opacity")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("0.25")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    const probe = await ElementFixture.render(`<span style="opacity: var(--ui-disabled-opacity)"></span>`)
+    expect(measure(host)).toBe(getComputedStyle(probe).opacity)
+  })
+
+  it("variations:  a size reads its ratio token", async () => {
+    const host = await ElementFixture.render(
+      `<div style="font-size: 16px"><ui-text size="large" style="--ui-text-size-large: 3">Big</ui-text></div>`
+    )
+    const root = host.querySelector("ui-text")!.shadowRoot!.querySelector("[part~=text]")!
+    expect(getComputedStyle(root).fontSize).toBe("48px")
   })
 })
 

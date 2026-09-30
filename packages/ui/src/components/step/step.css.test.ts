@@ -74,11 +74,11 @@ describe("step.css examples", () => {
     expect(getComputedStyle(first!, "::after").display).toBe("block")
     expect(getComputedStyle(last!, "::after").display).toBe("none")
     expect(getComputedStyle(active!).backgroundColor).not.toBe(getComputedStyle(first!).backgroundColor)
-    expect(getComputedStyle(active!).getPropertyValue("--ui-step-state").trim()).toBe("active")
+    expect(getComputedStyle(active!).getPropertyValue("--_ui-step-state").trim()).toBe("active")
     const title = getComputedStyle(active!.querySelector(".title")!)
     const link = Fixture.render(`<span style="color: var(--ui-link)"></span>`)
     expect(title.color).toBe(getComputedStyle(link).color)
-    expect(getComputedStyle(last!).getPropertyValue("--ui-step-state").trim()).toBe("disabled")
+    expect(getComputedStyle(last!).getPropertyValue("--_ui-step-state").trim()).toBe("disabled")
     expect(getComputedStyle(last!).pointerEvents).toBe("none")
   })
 
@@ -97,7 +97,7 @@ describe("step.css examples", () => {
     const narrow = example("variations", 500)
     const stacked = steps(narrow, ".ui.tablet.stackable.steps")
     expect(stacked[1]!.getBoundingClientRect().top).toBeGreaterThan(stacked[0]!.getBoundingClientRect().top)
-    expect(getComputedStyle(stacked[0]!).getPropertyValue("--ui-step-layout").trim()).toBe("stacked")
+    expect(getComputedStyle(stacked[0]!).getPropertyValue("--_ui-step-layout").trim()).toBe("stacked")
     const kept = steps(narrow, ".ui.unstackable.steps")
     expect(kept[1]!.getBoundingClientRect().top).toBe(kept[0]!.getBoundingClientRect().top)
     const tablet = example("variations", 900)
@@ -136,6 +136,16 @@ describe("step.css examples", () => {
     expect(parseFloat(getComputedStyle(large!).fontSize)).toBeCloseTo(18, 0)
     const [inverted] = steps(root, ".ui.inverted.steps")
     expect(getComputedStyle(inverted!).colorScheme).toBe("dark")
+  })
+
+  it("takes a public token from a wrapper of the group (static markup)", () => {
+    Sheets.adopt([...foundationCSS, partsCSS, stepCSS])
+    const root = Fixture.render(
+      `<div style="width: 1000px; --ui-step-padding: 20px"><ol class="ui unstackable steps">` +
+        `<li class="step"><div class="content"><div class="title">A</div></div></li>` +
+        `<li class="step">B</li></ol></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".step")!).paddingTop).toBe("20px")
   })
 
   it("draws circular steps as a line with rings;  a completed ring filled with the accent", () => {

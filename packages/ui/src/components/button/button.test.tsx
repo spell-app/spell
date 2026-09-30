@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it, onTestFinished, vi } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -231,6 +231,71 @@ describe("<ui-buttons> / <ui-or>", () => {
   it("renders `equal width`", async () => {
     const group = await ElementFixture.render<UIHost>(`<ui-buttons width="equal"><ui-button>A</ui-button></ui-buttons>`)
     expect(group.shadowRoot!.firstElementChild!.className).toBe("ui equal width buttons")
+  })
+})
+
+/**
+ * Public `--ui-button-*` tokens set from OUTSIDE the shadow root reach the box:  the sheet declares only private
+ * aliases (`--_ui-button-radius: var(--ui-button-radius, ...)`), never the public names (`docs/theming.md`
+ * "Component tokens").
+ */
+describe("<ui-button> tokens from outside", () => {
+  /** The inner control's top-left radius. */
+  function radius(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=button]")!).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await button(`<ui-button style="--ui-button-radius: 20px">Go</ui-button>`)
+    expect(radius(host)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-button-radius: 20px"><div><ui-button>Go</ui-button></div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-button")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(button)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(button) { --ui-button-radius: 20px }</style><ui-button class="themed">Go</ui-button></div>`
+    )
+    expect(radius(wrapper.querySelector("ui-button")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-button-radius", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-button-radius")
+    })
+    const { host } = await button(`<ui-button>Go</ui-button>`)
+    expect(radius(host)).toBe("20px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const { host } = await button(`<ui-button>Go</ui-button>`)
+    const probe = await ElementFixture.render(`<span style="border-top-left-radius: var(--ui-radius)"></span>`)
+    expect(radius(host)).toBe(getComputedStyle(probe).borderTopLeftRadius)
+  })
+
+  it("variations:  a swap wins over the base token, a derived value follows it", async () => {
+    const { control: circular } = await button(`<ui-button circular style="--ui-button-radius: 20px">Go</ui-button>`)
+    expect(getComputedStyle(circular).borderTopLeftRadius).not.toBe("20px")
+    const { control: compact } = await button(
+      `<ui-button compact style="--ui-button-padding-block: 20px">Go</ui-button>`
+    )
+    expect(getComputedStyle(compact).paddingTop).toBe("15px")
+  })
+
+  it("reaches the members of a group, set on the group", async () => {
+    const group = await ElementFixture.render<UIHost>(
+      `<ui-buttons style="--ui-button-radius: 20px"><ui-button>A</ui-button><ui-button>B</ui-button></ui-buttons>`
+    )
+    const [first, last] = [...group.querySelectorAll("ui-button")]
+    expect(radius(first!)).toBe("20px")
+    expect(getComputedStyle(last!.shadowRoot!.querySelector("[part~=button]")!).borderTopRightRadius).toBe("20px")
+    expect(getComputedStyle(first!.shadowRoot!.querySelector("[part~=button]")!).borderTopRightRadius).toBe("0px")
   })
 })
 

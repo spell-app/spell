@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it, onTestFinished, vi } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { expectAccessible } from "$test/a11y"
@@ -167,7 +167,7 @@ describe("<ui-items> images", () => {
     expect(content.getBoundingClientRect().top).toBe(image.getBoundingClientRect().top)
   })
 
-  it("renders the `image` shorthand as a plain `.image`, the content beside it (`--ui-item-media`)", async () => {
+  it("renders the `image` shorthand as a plain `.image`, the content beside it (`--_ui-item-media`)", async () => {
     const { items } = await view("", `<ui-item image="${PHOTO}"><ui-content>Beside</ui-content></ui-item>`)
     const image = boxOf(items[0]!).querySelector<HTMLImageElement>("img[part~=image]")!
     expect(image.className).toBe("image")
@@ -281,6 +281,56 @@ describe("<ui-items> responsive (container queries)", () => {
     const { items } = await view("", ITEM, 800)
     expect(items[0]!.querySelector("img")!.getBoundingClientRect().width).toBe(150)
     expect(style(partRoot(items[0]!.querySelector("ui-content")!)).paddingLeft).toBe("16px")
+  })
+})
+
+describe("<ui-items> tokens from outside", () => {
+  /** The second item's top margin. */
+  function spacing(host: Element): string {
+    return style(boxOf(itemsOf(host)[1]!)).marginTop
+  }
+
+  it("takes a token set on the HOST, reaching its items", async () => {
+    const { host } = await view(`style="--ui-items-item-spacing: 2em"`, ITEM + ITEM + ITEM)
+    expect(spacing(host)).toBe("32px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-items-item-spacing: 2em"><div style="width: 1000px"><ui-items>${ITEM + ITEM}</ui-items></div></section>`
+    )
+    await ElementFixture.settle(wrapper)
+    expect(spacing(wrapper.querySelector("ui-items")!)).toBe("32px")
+  })
+
+  it("takes a token set through `::part(items)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div style="width: 1000px"><style>.themed::part(items) { --ui-items-item-spacing: 2em }</style>` +
+        `<ui-items class="themed">${ITEM + ITEM}</ui-items></div>`
+    )
+    await ElementFixture.settle(wrapper)
+    expect(spacing(wrapper.querySelector("ui-items")!)).toBe("32px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-items-image-width", "100px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-items-image-width")
+    })
+    const { items } = await view("", ITEM)
+    expect(items[0]!.querySelector("img")!.getBoundingClientRect().width).toBe(100)
+  })
+
+  it("variations:  `relaxed` swaps the spacing, winning over the base token", async () => {
+    const { host } = await view(`relaxed style="--ui-items-item-spacing: 2em"`, ITEM + ITEM + ITEM)
+    expect(spacing(host)).toBe("24px")
+  })
+
+  it("owner tokens:  the content distance set on the group reaches its content parts;  a tablet-wide group swaps it", async () => {
+    const { items } = await view(`style="--ui-items-content-distance: 40px"`, ITEM)
+    expect(style(partRoot(items[0]!.querySelector("ui-content")!)).paddingLeft).toBe("40px")
+    const tablet = await view(`style="--ui-items-content-distance: 40px"`, ITEM, 800)
+    expect(style(partRoot(tablet.items[0]!.querySelector("ui-content")!)).paddingLeft).toBe("16px")
   })
 })
 

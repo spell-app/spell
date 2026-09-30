@@ -96,7 +96,7 @@ export class UICalendar extends FormElement<Vocabulary> {
   readonly labels = new ControlLabels(this.formHost)
 
   /** The popup button's glyph:  `icon`, else `calendar` (`clock` for `time`). */
-  readonly glyph = new IconGlyph(() => this.attrs.icon ?? (this.attrs.type === "time" ? CLOCK_ICON : CALENDAR_ICON))
+  readonly glyph = new IconGlyph(() => this.attrs.icon || (this.attrs.type === "time" ? CLOCK_ICON : CALENDAR_ICON))
 
   /** Previous / next page glyphs. */
   readonly previousGlyph = new IconGlyph(() => PREVIOUS_ICON)
@@ -785,7 +785,7 @@ const DEFAULT_POSITION = "bottom left"
 const ID_PREFIX = "ui-calendar"
 
 /** Inline custom property naming the field's anchor (`calendar.css`). */
-const ANCHOR_PROPERTY = "--ui-calendar-anchor"
+const ANCHOR_PROPERTY = "--_ui-calendar-anchor"
 
 /** `required` => Fomantic's `notEmpty`. */
 const REQUIRED_RULE: ValidationRule = "notEmpty"

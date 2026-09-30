@@ -118,6 +118,11 @@ describe("ButtonFallback", () => {
     expect(FallbackStub.shadow(host).querySelector("button")!.getAttribute("aria-label")).toBe("save")
   })
 
+  it('never names a button "true" after a bare icon (`icon="true"`, as frameworks write it)', () => {
+    const host = Fixture.render<StubHost>(`<x-fb-button icon="true"></x-fb-button>`)
+    expect(FallbackStub.shadow(host).querySelector("button")!.hasAttribute("aria-label")).toBe(false)
+  })
+
   it("stops reacting after dispose()", () => {
     const { host, control, result } = form(`<x-fb-button type="submit">Go</x-fb-button>`)
     host.handle!.dispose()

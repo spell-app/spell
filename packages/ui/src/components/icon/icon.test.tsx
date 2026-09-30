@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -80,6 +80,60 @@ describe("<ui-icon> classes", () => {
     const { host } = await icon(`<ui-icon name="spinner" loading disabled></ui-icon>`)
     expect(host.matches(":state(loading)")).toBe(true)
     expect(host.matches(":state(disabled)")).toBe(true)
+  })
+})
+
+describe("<ui-icon> tokens from outside", () => {
+  /** The root span's width. */
+  function width(root: Element): string {
+    return getComputedStyle(root).width
+  }
+
+  /** The root span of the first `<ui-icon>` in `wrapper`. */
+  function rootIn(wrapper: Element): Element {
+    return wrapper.querySelector("ui-icon")!.shadowRoot!.querySelector("[part~=icon]")!
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { root } = await icon(`<ui-icon name="house" style="--ui-icon-width: 30px"></ui-icon>`)
+    expect(width(root)).toBe("30px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-icon-width: 30px"><ui-icon name="house"></ui-icon></section>`
+    )
+    expect(width(rootIn(wrapper))).toBe("30px")
+  })
+
+  it("takes a token set through `::part(icon)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(icon) { --ui-icon-width: 30px }</style><ui-icon class="themed" name="house"></ui-icon></div>`
+    )
+    expect(width(rootIn(wrapper))).toBe("30px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-icon-width", "30px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-icon-width")
+    })
+    const { root } = await icon(`<ui-icon name="house"></ui-icon>`)
+    expect(width(root)).toBe("30px")
+  })
+
+  it("variations:  `circular` swaps the width;  a size follows its ladder token", async () => {
+    const { root } = await icon(`<ui-icon name="house" circular style="--ui-icon-width: 30px"></ui-icon>`)
+    expect(width(root)).not.toBe("30px")
+    const { root: huge } = await icon(`<ui-icon name="house" size="huge" style="--ui-icon-size-huge: 2"></ui-icon>`)
+    expect(getComputedStyle(huge).fontSize).toBe("32px")
+  })
+
+  it("reaches the members of a group, set on the group", async () => {
+    const group = await ElementFixture.render(
+      `<ui-icons style="--ui-icon-width: 30px"><ui-icon name="house"></ui-icon></ui-icons>`
+    )
+    expect(width(rootIn(group))).toBe("30px")
   })
 })
 

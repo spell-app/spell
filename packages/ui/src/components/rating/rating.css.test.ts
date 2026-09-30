@@ -98,6 +98,14 @@ describe("rating.css examples", () => {
     expect(width(".ui.massive.rating") / width(".ui.mini.rating")).toBeGreaterThan(3)
   })
 
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt([...foundationCSS, colorsCSS, ratingCSS])
+    const root = Fixture.render(
+      `<div style="--ui-rating-icon-width: 40px"><div class="ui rating"><i class="active icon"></i></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".icon")!).width).toBe("40px")
+  })
+
   it("takes no pointer while disabled", () => {
     Sheets.adopt([...foundationCSS, colorsCSS, ratingCSS])
     const root = Fixture.render(EXAMPLES["./examples/states.html"]!)

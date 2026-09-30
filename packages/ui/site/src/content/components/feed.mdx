@@ -315,14 +315,15 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-feed-*` tokens on the feed's box, through `::part(feed)`:  its events inherit them.
+  Theme with the public `--ui-feed-*` tokens:  set one on the feed, on any ancestor (`:root` for every feed), or on
+  its box through `::part(feed)`;  its events inherit them.
   Style an event's pieces with `::part()`:  `event`, `label`, `image` and `icon`.  The feed's content parts also read
   a few tokens that are unset by default, so they are not in the table:  `--ui-feed-summary-color`,
   `--ui-feed-date-color`, `--ui-feed-meta-color`, `--ui-feed-meta-action-color`, `--ui-feed-extra-color` and
   `--ui-feed-extra-text-width` (default `500px`).
 
 ```css
-ui-feed::part(feed) {
+ui-feed {
   --ui-feed-label-width: 3em;
   --ui-feed-connected-color: var(--ui-primary);
   --ui-feed-date-color: var(--ui-text-muted);

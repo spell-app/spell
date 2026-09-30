@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -74,6 +74,47 @@ describe("<ui-nag> classes", () => {
     const { root } = await nag(`<ui-nag ${attributes}>Text</ui-nag>`)
     expect(root.localName).toBe("div")
     expect(root.className).toBe(classes)
+  })
+})
+
+describe("<ui-nag> tokens from outside", () => {
+  /** The bar's bottom-left radius. */
+  function radius(root: Element): string {
+    return getComputedStyle(root).borderBottomLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { root } = await nag(`<ui-nag style="--ui-nag-radius: 20px">Hi</ui-nag>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(`<section style="--ui-nag-radius: 20px"><ui-nag>Hi</ui-nag></section>`)
+    expect(radius(wrapper.querySelector("ui-nag")!.shadowRoot!.querySelector("[part~=nag]")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(nag)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(nag) { --ui-nag-radius: 20px }</style><ui-nag class="themed">Hi</ui-nag></div>`
+    )
+    expect(radius(wrapper.querySelector("ui-nag")!.shadowRoot!.querySelector("[part~=nag]")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-nag-radius", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-nag-radius")
+    })
+    const { root } = await nag(`<ui-nag>Hi</ui-nag>`)
+    expect(radius(root)).toBe("20px")
+  })
+
+  it("`inverted` reads its own background, not the base one", async () => {
+    const red = "rgb(255, 0, 0)"
+    const { root } = await nag(`<ui-nag style="--ui-nag-background: ${red}">Hi</ui-nag>`)
+    expect(getComputedStyle(root).backgroundColor).toBe(red)
+    const { root: inverted } = await nag(`<ui-nag inverted style="--ui-nag-background: ${red}">Hi</ui-nag>`)
+    expect(getComputedStyle(inverted).backgroundColor).not.toBe(red)
   })
 })
 

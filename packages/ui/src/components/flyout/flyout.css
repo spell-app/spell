@@ -14,9 +14,17 @@
  *   `overlay` transition (`allow-discrete`) keep it in the top layer;  the `::backdrop` fades with it.
  * - Dimmer:  Fomantic's lighter page dimmer (0.4), `--ui-flyout-dimmer-background`;  `blurring` uses the shared
  *   `--ui-dimmer-blurred-background` / `--ui-dimmer-blur` (`dimmer.css`).
+ * - Public tokens (`--ui-flyout-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-flyout-width: var(--ui-flyout-width, 400px)`, and every rule reads the alias.
+ *   So a value set on `:root`, an ancestor, the host, `::part(flyout)` or in the app stylesheet reaches the box
+ *   (`docs/theming.md` "Component tokens").  The width words and columns SWAP the width (they write the alias).
  * - OWNER side:  a flyout owns `header`, `content`, `description` and `actions` (`ownsParts`);  slotted parts style
- *   themselves from `parts.css` (context `in-flyout`), reading `--ui-flyout-*` look tokens and `--ui-inverted`
- *   (declared on EVERY root, with `color-scheme`).
+ *   themselves from `parts.css` (context `in-flyout`), reading, all declared on EVERY root:
+ *   - `--ui-inverted`, with `color-scheme`
+ *   - the aliases of the look tokens `inverted` VARIES:  `--_ui-flyout-background`, `--_ui-flyout-header-color`,
+ *     `--_ui-flyout-actions-background`;  so a page sets those on the flyout or above it, not on the part
+ *   - the look tokens nobody varies (`--ui-flyout-header-size`, `--ui-flyout-content-padding` ...) are declared
+ *     nowhere:  set them on the flyout, above it or on the part
  * - NOTE: left out, on purpose:
  *   - `.pushable` / `.pusher` / `.fixed` couplings (a flyout never pushes:  that's `<ui-sidebar>`), `.ui.flyout.menu`
  *   - `scrolling content` capped heights:  the dialog itself scrolls
@@ -37,27 +45,29 @@
     display: contents;
   }
 
-  /* Tokens:  one per `flyout.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one private alias per `flyout.variables` entry that still matters, from the global tokens. */
   .ui.flyout {
-    --ui-flyout-background: var(--ui-surface);
-    --ui-flyout-color: var(--ui-text-color);
-    --ui-flyout-width: 400px;
-    --ui-flyout-shadow: 0 0 20px var(--ui-border-color);
-    --ui-flyout-dimmer-background: oklch(0 0 0 / 0.4);
-    --ui-flyout-duration: var(--ui-duration-slower);
-    --ui-flyout-close-size: 1.25em;
-    --ui-flyout-close-hitbox: 2.25em;
-    --ui-flyout-close-opacity: 0.8;
+    --_ui-flyout-background: var(--ui-flyout-background, var(--ui-surface));
+    --_ui-flyout-color: var(--ui-flyout-color, var(--ui-text-color));
+    --_ui-flyout-width: var(--ui-flyout-width, 400px);
+    --_ui-flyout-shadow: var(--ui-flyout-shadow, 0 0 20px var(--ui-border-color));
+    --_ui-flyout-dimmer-background: var(--ui-flyout-dimmer-background, oklch(0 0 0 / 0.4));
+    --_ui-flyout-duration: var(--ui-flyout-duration, var(--ui-duration-slower));
+    --_ui-flyout-close-size: var(--ui-flyout-close-size, 1.25em);
+    --_ui-flyout-close-hitbox: var(--ui-flyout-close-hitbox, 2.25em);
+    --_ui-flyout-close-opacity: var(--ui-flyout-close-opacity, 0.8);
     --_flyout-hidden: translate3d(-100%, 0, 0);
-    /* Owner tokens (`parts.css`):  declared on every root. */
+    /* Owner tokens (`parts.css`):  declared on every root;  `inverted` writes the look ones. */
     --ui-inverted: 0;
+    --_ui-flyout-header-color: var(--ui-flyout-header-color, var(--ui-text-dark));
+    --_ui-flyout-actions-background: var(--ui-flyout-actions-background, var(--ui-surface-muted));
     position: fixed;
     inset: 0 auto auto 0;
     z-index: var(--ui-z-modal);
     box-sizing: border-box;
     display: none;
     flex-direction: column;
-    width: var(--ui-flyout-width);
+    width: var(--_ui-flyout-width);
     height: 100%;
     max-width: 100%;
     max-height: 100%;
@@ -69,8 +79,8 @@
     border: none;
     border-radius: 0;
     outline: none;
-    background: var(--ui-flyout-background);
-    color: var(--ui-flyout-color);
+    background: var(--_ui-flyout-background);
+    color: var(--_ui-flyout-color);
     font-family: var(--ui-font-family);
     font-size: var(--ui-font-size);
     line-height: var(--ui-line-height);
@@ -84,10 +94,10 @@
   /* The element's `<dialog>`:  shown while `[open]`, sliding with `display` / `overlay` kept for the exit. */
   dialog.ui.flyout {
     transition:
-      transform var(--ui-flyout-duration) var(--ui-ease),
-      visibility var(--ui-flyout-duration) allow-discrete,
-      display var(--ui-flyout-duration) allow-discrete,
-      overlay var(--ui-flyout-duration) allow-discrete;
+      transform var(--_ui-flyout-duration) var(--ui-ease),
+      visibility var(--_ui-flyout-duration) allow-discrete,
+      display var(--_ui-flyout-duration) allow-discrete,
+      overlay var(--_ui-flyout-duration) allow-discrete;
   }
   dialog.ui.flyout[open] {
     display: flex;
@@ -95,12 +105,12 @@
 
   /* The dimmer. */
   dialog.ui.flyout::backdrop {
-    background: var(--ui-flyout-dimmer-background);
+    background: var(--_ui-flyout-dimmer-background);
     opacity: 1;
     transition:
-      opacity var(--ui-flyout-duration) var(--ui-ease),
-      display var(--ui-flyout-duration) allow-discrete,
-      overlay var(--ui-flyout-duration) allow-discrete;
+      opacity var(--_ui-flyout-duration) var(--ui-ease),
+      display var(--_ui-flyout-duration) allow-discrete,
+      overlay var(--_ui-flyout-duration) allow-discrete;
   }
   dialog.ui.flyout:not([open])::backdrop {
     opacity: 0;
@@ -146,16 +156,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--ui-flyout-close-hitbox);
-    height: var(--ui-flyout-close-hitbox);
+    width: var(--_ui-flyout-close-hitbox);
+    height: var(--_ui-flyout-close-hitbox);
     margin: 0 0 0 0.25em;
     padding: 0;
     border: none;
     border-radius: var(--ui-radius);
     background: none;
     color: var(--ui-text-dark);
-    font-size: var(--ui-flyout-close-size);
-    opacity: var(--ui-flyout-close-opacity);
+    font-size: var(--_ui-flyout-close-size);
+    opacity: var(--_ui-flyout-close-opacity);
     cursor: pointer;
   }
   /* Static markup's close is an icon glyph in a hitbox:  pin its top right. */
@@ -176,7 +186,7 @@
   }
   /* The header shorthand makes room for it. */
   .ui.flyout:has(> .close) > .header {
-    padding-inline-end: calc(var(--ui-flyout-close-hitbox) * 1.5);
+    padding-inline-end: calc(var(--_ui-flyout-close-hitbox) * 1.5);
   }
 
   /* Header */
@@ -186,9 +196,9 @@
     margin: 0;
     padding: 1.25em 1.5em;
     border-bottom: var(--ui-border-width) solid var(--ui-border-color);
-    background: var(--ui-flyout-header-background, var(--ui-flyout-background));
+    background: var(--ui-flyout-header-background, var(--_ui-flyout-background));
     box-shadow: none;
-    color: var(--ui-flyout-header-color, var(--ui-text-dark));
+    color: var(--_ui-flyout-header-color);
     font-family: var(--ui-font-family-heading);
   }
   .ui.flyout > .header:not(.ui) {
@@ -204,7 +214,7 @@
     flex: 1 0 auto;
     width: 100%;
     padding: var(--ui-flyout-content-padding, 1.5em);
-    background: var(--ui-flyout-content-background, var(--ui-flyout-background));
+    background: var(--ui-flyout-content-background, var(--_ui-flyout-background));
     font-size: 1em;
     line-height: 1.4;
   }
@@ -218,7 +228,7 @@
     flex: none;
     padding: var(--ui-flyout-actions-padding, 1em);
     border-top: var(--ui-border-width) solid var(--ui-border-color);
-    background: var(--ui-flyout-actions-background, var(--ui-surface-muted));
+    background: var(--_ui-flyout-actions-background);
     text-align: right;
   }
   .ui.flyout .actions > .button:not(.fluid) {
@@ -276,11 +286,11 @@
   }
   .ui.left.visible.flyout,
   .ui.right.visible.flyout {
-    box-shadow: var(--ui-flyout-shadow);
+    box-shadow: var(--_ui-flyout-shadow);
   }
   .ui.top.visible.flyout,
   .ui.bottom.visible.flyout {
-    box-shadow: var(--ui-flyout-shadow);
+    box-shadow: var(--_ui-flyout-shadow);
   }
 
   /*
@@ -288,75 +298,75 @@
    * class `wide`, so its rules come LATER at the same specificity (Fomantic's `:not(.fullscreen)`) and win.
    */
   .ui[class*="very thin"].flyout {
-    --ui-flyout-width: 120px;
+    --_ui-flyout-width: 120px;
   }
   .ui.thin.flyout:not([class*="very thin"]) {
-    --ui-flyout-width: 200px;
+    --_ui-flyout-width: 200px;
   }
   .ui.wide.flyout:not([class*="very wide"]) {
-    --ui-flyout-width: 600px;
+    --_ui-flyout-width: 600px;
   }
   .ui[class*="very wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: 800px;
+    --_ui-flyout-width: 800px;
   }
   .ui[class*="one wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(100% / 16);
+    --_ui-flyout-width: calc(100% / 16);
   }
   .ui[class*="two wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(200% / 16);
+    --_ui-flyout-width: calc(200% / 16);
   }
   .ui[class*="three wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(300% / 16);
+    --_ui-flyout-width: calc(300% / 16);
   }
   .ui[class*="four wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(400% / 16);
+    --_ui-flyout-width: calc(400% / 16);
   }
   .ui[class*="five wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(500% / 16);
+    --_ui-flyout-width: calc(500% / 16);
   }
   .ui[class*="six wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(600% / 16);
+    --_ui-flyout-width: calc(600% / 16);
   }
   .ui[class*="seven wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(700% / 16);
+    --_ui-flyout-width: calc(700% / 16);
   }
   .ui[class*="eight wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(800% / 16);
+    --_ui-flyout-width: calc(800% / 16);
   }
   .ui[class*="nine wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(900% / 16);
+    --_ui-flyout-width: calc(900% / 16);
   }
   .ui[class*="ten wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(1000% / 16);
+    --_ui-flyout-width: calc(1000% / 16);
   }
   .ui[class*="eleven wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(1100% / 16);
+    --_ui-flyout-width: calc(1100% / 16);
   }
   .ui[class*="twelve wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(1200% / 16);
+    --_ui-flyout-width: calc(1200% / 16);
   }
   .ui[class*="thirteen wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(1300% / 16);
+    --_ui-flyout-width: calc(1300% / 16);
   }
   .ui[class*="fourteen wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(1400% / 16);
+    --_ui-flyout-width: calc(1400% / 16);
   }
   .ui[class*="fifteen wide"].flyout:not(.fullscreen) {
-    --ui-flyout-width: calc(1500% / 16);
+    --_ui-flyout-width: calc(1500% / 16);
   }
   .ui[class*="sixteen wide"].flyout,
   .ui.fullscreen.flyout {
-    --ui-flyout-width: 100%;
+    --_ui-flyout-width: 100%;
   }
 
   /* ## Inverted:  the dark scheme;  parts re-resolve their tokens from it. */
   .ui.inverted.flyout {
     --ui-inverted: 1;
     --ui-scheme: dark;
-    --ui-flyout-background: oklch(0 0 0);
-    --ui-flyout-color: oklch(1 0 0);
-    --ui-flyout-header-color: oklch(1 0 0);
-    --ui-flyout-actions-background: oklch(0.2 0 0);
+    --_ui-flyout-background: oklch(0 0 0);
+    --_ui-flyout-color: oklch(1 0 0);
+    --_ui-flyout-header-color: oklch(1 0 0);
+    --_ui-flyout-actions-background: oklch(0.2 0 0);
     color-scheme: dark;
   }
   .ui.inverted.flyout > .close {

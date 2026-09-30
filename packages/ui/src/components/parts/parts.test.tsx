@@ -111,7 +111,7 @@ describe("parts standalone", () => {
     expect(ownerStates(host)).toEqual([])
     expect(host.classList.length).toBe(0)
     // `parts.css` names every part root, for parts nested in parts
-    expect(getComputedStyle(part).getPropertyValue("--ui-part").trim()).toBe(noun)
+    expect(getComputedStyle(part).getPropertyValue("--_ui-part").trim()).toBe(noun)
   })
 
   it.each([
@@ -328,12 +328,12 @@ describe("owner context", () => {
     )
     const content = header.querySelector("ui-content")!
     expect(ownerStates(content)).toEqual(["in-header"])
-    // an icon header's content is a block (`@container style(--ui-header-layout: icon)`)
+    // an icon header's content is a block (`@container style(--_ui-header-layout: icon)`)
     expect(getComputedStyle(root(content)).display).toBe("block")
     expect(ownerStates(header.querySelector("ui-header")!)).toEqual(["in-header"])
   })
 
-  it("puts a date in a feed summary inline, by the summary's `--ui-part`", async () => {
+  it("puts a date in a feed summary inline, by the summary's `--_ui-part`", async () => {
     const feed = await ElementFixture.render(
       `<ui-feed><ui-event><ui-content><ui-date>3 days ago</ui-date><ui-summary>Added <ui-date>4 hours ago</ui-date></ui-summary></ui-content></ui-event></ui-feed>`
     )
@@ -358,6 +358,32 @@ describe("owner tokens", () => {
     const invertedHeader = innerInverted.querySelector("ui-header")!
     expect(getComputedStyle(root(invertedHeader)).getPropertyValue("--ui-inverted").trim()).toBe("1")
     expect(getComputedStyle(root(invertedHeader)).colorScheme).toBe("dark")
+  })
+
+  it("a standalone header takes its public tokens from the host or an ancestor", async () => {
+    const red = "rgb(255, 0, 0)"
+    const onHost = await ElementFixture.render(`<ui-header style="--ui-header-color: ${red}">H</ui-header>`)
+    expect(getComputedStyle(root(onHost)).color).toBe(red)
+    const wrapper = await ElementFixture.render(
+      `<div style="--ui-header-font-weight: 300"><ui-header>H</ui-header></div>`
+    )
+    expect(getComputedStyle(root(wrapper.querySelector("ui-header")!)).fontWeight).toBe("300")
+  })
+
+  it("a sub header reads its owner header's alias, so the owner's public token reaches it", async () => {
+    const red = "rgb(255, 0, 0)"
+    const owner = await ElementFixture.render(
+      `<ui-header style="--ui-header-sub-color: ${red}"><ui-content>Account<ui-header>Manage</ui-header></ui-content></ui-header>`
+    )
+    const sub = owner.querySelector("ui-content ui-header")!
+    expect(getComputedStyle(root(sub)).color).toBe(red)
+  })
+
+  it("an owner look token reaches the part through the owner's alias", async () => {
+    // `parts.css` reads `var(--_ui-statistic-value-size, ...)`;  a `large` statistic's size (80px) only arrives
+    // through the owner's alias, which its size variation writes
+    const owner = await ElementFixture.render(`<ui-statistic size="large"><ui-value>5</ui-value></ui-statistic>`)
+    expect(getComputedStyle(root(owner.querySelector("ui-value")!)).fontSize).toBe("80px")
   })
 })
 

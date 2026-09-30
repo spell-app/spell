@@ -25,9 +25,9 @@ export const selectVocabulary = {
     { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: ["error", "info", "success", "warning"],
-      description: 'Form state, tinting the box and text.  NOTE: `kind: "color"` because it emits its value alone.'
+      description: "Form state, tinting the box and text."
     },
     { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
     { name: "compact", kind: "keyOnly", description: "No minimum width:  as wide as its longest option." },

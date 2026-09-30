@@ -101,7 +101,7 @@ describe("search.css examples", () => {
     adoptIntoPage(SHEETS)
     const root = Fixture.render(`<div style="padding-left: 20em">${EXAMPLES["./examples/types.html"]!}</div>`)
     const search = root.querySelector<HTMLElement>(".ui.search")!
-    search.style.setProperty("--ui-search-anchor", "--test-search")
+    search.style.setProperty("--_ui-search-anchor", "--test-search")
     const results = open(search)
     expect(getComputedStyle(results).positionAnchor).toBe("--test-search")
     const box = search.getBoundingClientRect()
@@ -146,6 +146,14 @@ describe("search.css examples", () => {
     expect(size(".ui.mini.search .prompt")).toBeLessThan(size(".ui.massive.search .prompt"))
     const fluid = root.querySelector<HTMLElement>(".ui.fluid.search")!
     expect(Math.round(fluid.querySelector(".prompt")!.getBoundingClientRect().width)).toBe(600)
+  })
+
+  it("takes a public token from a wrapper (static markup), over the viewport's default", () => {
+    adoptIntoPage(SHEETS)
+    const root = Fixture.render(
+      `<div style="--ui-search-results-max-height: 100px">${EXAMPLES["./examples/variations.html"]!}</div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.scrolling.search > .results")!).maxHeight).toBe("100px")
   })
 
   it("scrolls results after a height with `scrolling`", () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { expectAccessible } from "$test/a11y"
@@ -92,6 +92,50 @@ describe("<ui-comments> classes and markup", () => {
     expect(style(rootOf(comments[0]!)).marginTop).toBe("0px")
     expect(style(rootOf(comments[1]!)).marginTop).toBe("8px")
     expect(style(rootOf(comments[1]!)).paddingTop).toBe("8px")
+  })
+})
+
+describe("<ui-comments> tokens from outside", () => {
+  /** The second comment's top margin, in `host`. */
+  function distance(host: Element): string {
+    return getComputedStyle(rootOf(host.querySelectorAll(":scope > ui-comment")[1]!)).marginTop
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await list(`style="--ui-comment-distance: 20px"`)
+    expect(distance(host)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-comment-distance: 20px"><ui-comments><ui-comment>${PARTS}</ui-comment>` +
+        `<ui-comment>${PARTS}</ui-comment></ui-comments></section>`
+    )
+    expect(distance(wrapper.querySelector("ui-comments")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(comments)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(comments) { --ui-comment-distance: 20px }</style><ui-comments class="themed">` +
+        `<ui-comment>${PARTS}</ui-comment><ui-comment>${PARTS}</ui-comment></ui-comments></div>`
+    )
+    expect(distance(wrapper.querySelector("ui-comments")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-comment-distance", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-comment-distance")
+    })
+    const { host } = await list()
+    expect(distance(host)).toBe("20px")
+  })
+
+  it("owner tokens:  a part look token set on the list reaches an author", async () => {
+    const red = "rgb(255, 0, 0)"
+    const { comments } = await list(`style="--ui-comment-author-color: ${red}"`)
+    const author = comments[0]!.querySelector("ui-author")!.shadowRoot!.firstElementChild!
+    expect(getComputedStyle(author).color).toBe(red)
   })
 })
 

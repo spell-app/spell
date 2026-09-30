@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import type { FormHost } from "$/elements"
@@ -386,6 +386,52 @@ describe("<ui-slider> forms", () => {
     container.querySelector("label")!.click()
     expect(host.shadowRoot!.activeElement).toBe(parts(host).thumbs[0])
     await expectAccessible(container)
+  })
+})
+
+describe("<ui-slider> tokens from outside", () => {
+  /** The track's height, which `--ui-slider-track-height` drives. */
+  function trackHeight(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=track]")!).height
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await slider(`style="--ui-slider-track-height: 10px"`)
+    expect(trackHeight(host)).toBe("10px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-slider-track-height: 10px"><div><ui-slider></ui-slider></div></section>`
+    )
+    expect(trackHeight(wrapper.querySelector("ui-slider")!)).toBe("10px")
+  })
+
+  it("takes a token set through `::part(slider)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(slider) { --ui-slider-track-height: 10px }</style><ui-slider class="themed"></ui-slider></div>`
+    )
+    expect(trackHeight(wrapper.querySelector("ui-slider")!)).toBe("10px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-slider-track-height", "10px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-slider-track-height")
+    })
+    const { host } = await slider("")
+    expect(trackHeight(host)).toBe("10px")
+  })
+
+  it("variations:  `inverted` swaps the track colour for its own token", async () => {
+    const red = "rgb(255, 0, 0)"
+    const { host: plain } = await slider(`style="--ui-slider-track-color: ${red}"`)
+    const track = (host: Element) => getComputedStyle(host.shadowRoot!.querySelector("[part~=track]")!)
+    expect(track(plain).backgroundColor).toBe(red)
+    const { host: inverted } = await slider(`inverted style="--ui-slider-track-color: ${red}"`)
+    expect(track(inverted).backgroundColor).not.toBe(red)
+    const { host: themed } = await slider(`inverted style="--ui-slider-inverted-track-color: ${red}"`)
+    expect(track(themed).backgroundColor).toBe(red)
   })
 })
 

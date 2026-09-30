@@ -52,7 +52,7 @@ describe("parts.css source", () => {
           owner
         ).toBe(true)
       }
-      expect(css).toMatch(/@container style\(--ui-card-layout: ?horizontal\)/)
+      expect(css).toMatch(/@container style\(--_ui-card-layout: ?horizontal\)/)
     }
   })
 
@@ -75,7 +75,7 @@ describe("parts.css examples", () => {
     for (const part of owned) {
       const noun = [...part.classList].find((word) => (PART_NOUNS as readonly string[]).includes(word))
       if (!noun) continue
-      expect(getComputedStyle(part).getPropertyValue("--ui-part").trim(), part.outerHTML.slice(0, 60)).toBe(noun)
+      expect(getComputedStyle(part).getPropertyValue("--_ui-part").trim(), part.outerHTML.slice(0, 60)).toBe(noun)
     }
   })
 
@@ -169,7 +169,7 @@ describe("parts.css examples", () => {
     expect(parseFloat(after.marginTop)).toBeCloseTo(0.5 * parseFloat(after.fontSize), 1)
   })
 
-  it("inlines a date inside a feed summary through the --ui-part token", () => {
+  it("inlines a date inside a feed summary through the --_ui-part token", () => {
     Sheets.adopt([...foundationCSS, partsCSS])
     const root = Fixture.render(EXAMPLES["./examples/date.html"]!)
     const [alone, inline] = root.querySelectorAll<HTMLElement>(".in-feed.date")
@@ -230,13 +230,13 @@ describe("parts.css in shadow roots", () => {
   it("styles a part by its host's in-<owner> state, and reads the owner's tokens", () => {
     Sheets.adopt(foundationCSS)
     definePart()
-    const card = Fixture.render(`<div class="ui card" style="--ui-card-layout: vertical"></div>`)
+    const card = Fixture.render(`<div class="ui card" style="--_ui-card-layout: vertical"></div>`)
     card.innerHTML = `<test-part noun="content" owner="card"></test-part><test-part noun="content" owner="card"></test-part>`
     const [first, second] = [...card.querySelectorAll("test-part")].map((host) => Sheets.inner(host))
     expect(getComputedStyle(card.querySelector("test-part")!).display).toBe("contents")
     expect(getComputedStyle(first!).borderTopStyle).toBe("none")
     expect(getComputedStyle(second!).borderTopStyle).toBe("solid")
-    card.style.setProperty("--ui-card-layout", "horizontal")
+    card.style.setProperty("--_ui-card-layout", "horizontal")
     expect(getComputedStyle(second!).borderTopStyle).toBe("none")
   })
 

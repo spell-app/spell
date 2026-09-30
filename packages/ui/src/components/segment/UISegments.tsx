@@ -9,7 +9,7 @@ import segmentCSS from "./segment.css?inline"
 /****************
  * ### `<ui-segments>`
  * A group of segments in one box:  `<div class="ui … segments" part="group"><slot></slot></div>`.
- * - `segment.css` hands the group look to slotted segments through `--ui-segments-*` tokens.
+ * - `segment.css` hands the group look to slotted segments through `--_ui-segments-*` tokens.
  ****************/
 export class UISegments extends UIElement<typeof segmentsVocabulary> {
   @proto static vocabulary = segmentsVocabulary

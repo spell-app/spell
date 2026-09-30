@@ -314,14 +314,14 @@ toggle.addEventListener("click", () => {
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-comments-*` and `--ui-comment-*` tokens on the list's box, through `::part(comments)`:
-  its comments and threads inherit them.  `--ui-comments-minimal` is the switch `minimal` sets;  use the attribute.
+  Theme with the public `--ui-comments-*` and `--ui-comment-*` tokens:  set one on the list, on any ancestor (`:root`
+  for every list), or on its box through `::part(comments)`;  its comments and threads inherit them.  `--_ui-comments-minimal` is the switch `minimal` sets;  use the attribute.
   The parts inside a comment also read a few tokens that are unset by default, so they are not in the table:
   `--ui-comment-avatar-width` (`2.5em`), `--ui-comment-content-margin` (`3.5em`, the space beside the avatar),
   `--ui-comment-author-color`, `--ui-comment-meta-color`, `--ui-comment-text-color` and `--ui-comment-action-color`.
 
 ```css
-ui-comments::part(comments) {
+ui-comments {
   --ui-comments-max-width: 50em;
   --ui-comment-distance: 1em;
   --ui-comment-avatar-width: 3em;

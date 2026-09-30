@@ -89,12 +89,14 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-flag-*` tokens on the `flag` part.  Windows' emoji font has no flags and shows the two
-  letters instead;  to get real flags there, load a flag font (for example the "Twemoji Country Flags" polyfill) and
-  name it first in `--ui-flag-font-family`.
+  Theme with the public `--ui-flag-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or on the
+  flag's box through `::part(flag)`.  They inherit into the shadow root, where the sheet reads each through a private
+  alias, so nothing inside blocks them.  Windows' emoji font has no flags and shows the two letters instead;  to get
+  real flags there, load a flag font (for example the "Twemoji Country Flags" polyfill) and name it first in
+  `--ui-flag-font-family`, once for the page.
 
 ```css
-ui-flag::part(flag) {
+:root {
   --ui-flag-font-family: "Twemoji Country Flags", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 }
 ```

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { UI } from "$/runtime"
 import { expectAccessible } from "$test/a11y"
@@ -186,6 +186,59 @@ describe("<ui-labels>", () => {
     const plain = await ElementFixture.render<UIHost>(`<ui-label>1</ui-label>`)
     const plainRoot = plain.shadowRoot!.querySelector<HTMLElement>("[part~=label]")!
     expect(getComputedStyle(child).borderRadius).not.toBe(getComputedStyle(plainRoot).borderRadius)
+  })
+})
+
+describe("<ui-label> tokens from outside", () => {
+  /** The label box's top-left radius, which `--ui-label-radius` drives. */
+  function radius(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=label]")!).borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { root } = await label(`<ui-label style="--ui-label-radius: 12px">A</ui-label>`)
+    expect(getComputedStyle(root).borderTopLeftRadius).toBe("12px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-label-radius: 12px"><div><ui-label>A</ui-label></div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-label")!)).toBe("12px")
+  })
+
+  it("takes a token set through `::part(label)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(label) { --ui-label-radius: 12px }</style><ui-label class="themed">A</ui-label></div>`
+    )
+    expect(radius(wrapper.querySelector("ui-label")!)).toBe("12px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-label-radius", "12px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-label-radius")
+    })
+    const { root } = await label(`<ui-label>A</ui-label>`)
+    expect(getComputedStyle(root).borderTopLeftRadius).toBe("12px")
+  })
+
+  it("reaches the members of a group, set on the group;  `circular` swaps it", async () => {
+    const group = await ElementFixture.render(
+      `<ui-labels style="--ui-label-radius: 12px"><ui-label>A</ui-label><ui-label circular>1</ui-label></ui-labels>`
+    )
+    const [plain, circular] = [...group.querySelectorAll("ui-label")]
+    expect(radius(plain!)).toBe("12px")
+    expect(radius(circular!)).not.toBe("12px")
+  })
+
+  it("owner tokens:  a plain owner sets the public `--ui-label-owner-edge`", async () => {
+    const owner = await ElementFixture.render(
+      `<div style="position: relative; --ui-label-owner-edge: 5px"><ui-label attached="top">A</ui-label></div>`
+    )
+    const box = getComputedStyle(owner.querySelector("ui-label")!.shadowRoot!.querySelector("[part~=label]")!)
+    expect(box.top).toBe("-5px")
+    expect(box.left).toBe("-5px")
   })
 })
 
