@@ -1,11 +1,11 @@
-/*! SPELL: SCOPES @system:examples:Solitaire */
+/*! SPELL: SCOPES @test:fixtures:Solitaire */
 ;(globalThis.SPELL_SCOPES ??= {})[document.currentScript.src] = {
-  id: "@system:examples:Solitaire",
+  id: "@test:fixtures:Solitaire",
   entries: [
     { path: "project:Solitaire" },
     {
       path: "project:Solitaire/file:Card.spell",
-      uri: "spell:/@system:examples:Solitaire/Card.spell"
+      uri: "spell:/@test:fixtures:Solitaire/Card.spell"
     },
     {
       path: "project:Solitaire/file:Card.spell/type:Card", line: 2,
@@ -251,7 +251,7 @@
     {
       path: "project:Solitaire/file:Card.spell/type:Card/method:move (a card) to (a pile)", line: [15, 19],
       section: "Pile of playing cards",
-      uri: "spell:/@system:examples:Solitaire/Pile.spell",
+      uri: "spell:/@test:fixtures:Solitaire/Pile.spell",
       description: "\"move\" a card\nNOTE: use this rather than `add` to make sure card is only in one pile at a time\nif you `wait for: move the card to the pile` the move will be animated",
       rules: [
         { name: "move_to_$pile", syntax: "move {thisArg:expression} to {callArgs:expression}" }
@@ -260,7 +260,7 @@
     {
       path: "project:Solitaire/file:Card.spell/type:Card/method:play (a card)", line: [111, 138],
       section: "actions",
-      uri: "spell:/@system:examples:Solitaire/Solitaire.spell",
+      uri: "spell:/@test:fixtures:Solitaire/Solitaire.spell",
       rules: [
         { name: "play", syntax: "play {thisArg:expression}" }
       ]
@@ -275,7 +275,7 @@
     },
     {
       path: "project:Solitaire/file:Deck.spell",
-      uri: "spell:/@system:examples:Solitaire/Deck.spell"
+      uri: "spell:/@test:fixtures:Solitaire/Deck.spell"
     },
     {
       path: "project:Solitaire/file:Deck.spell/type:Deck", line: 3,
@@ -305,7 +305,7 @@
     },
     {
       path: "project:Solitaire/file:Pile.spell",
-      uri: "spell:/@system:examples:Solitaire/Pile.spell"
+      uri: "spell:/@test:fixtures:Solitaire/Pile.spell"
     },
     {
       path: "project:Solitaire/file:Pile.spell/type:Pile", line: 2,
@@ -327,7 +327,7 @@
     },
     {
       path: "project:Solitaire/file:Solitaire.spell",
-      uri: "spell:/@system:examples:Solitaire/Solitaire.spell"
+      uri: "spell:/@test:fixtures:Solitaire/Solitaire.spell"
     },
     {
       path: "project:Solitaire/file:Solitaire.spell/type:Game", line: 5,
