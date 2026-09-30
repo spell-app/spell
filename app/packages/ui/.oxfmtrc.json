@@ -17,6 +17,7 @@
     "reference/**",
     "src/icons/data/**",
     "src/icons/glyphs/**",
+    "src/components/emoji/data/**",
     "site/dist/**",
     "site/**/*.mdx",
     "site/.astro/**",

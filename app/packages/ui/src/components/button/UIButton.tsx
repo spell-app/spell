@@ -15,6 +15,9 @@ import buttonCSS from "./button.css?inline"
  *   submits no value of its own except while it is the submitter (see `submit()`).  No `FormHost`:  a page with
  *   buttons only never loads the `forms` entry.
  * - `active` is auto-controlled:  `toggle` flips it on click and dispatches `ui-toggle` first.
+ * - Fomantic's `state` behaviour is two attributes, not an element:  `active-text` / `inactive-text` replace the
+ *   content while `active` is on / off (`Follow` => `Following`).  A label that SAYS the state must not also be
+ *   `aria-pressed` (WAI-ARIA APG, toggle button), so a toggle with a state text leaves it off.
  * - Icons come from `Icons` asynchronously;  the `.icon` box is sized by CSS, so the SVG arriving shifts nothing.
  ****************/
 export class UIButton extends UIElement<typeof buttonVocabulary> {
@@ -59,8 +62,14 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
   // ## Derived state
   ////////////////
 
-  /** Has text content (slotted, or the `content` shorthand)? */
-  readonly hasText = createMemo(() => this.slots.has("") || !!this.attrs.content)
+  /** Text for the current `active`, from `active-text` / `inactive-text`;  `undefined` shows the content. */
+  readonly stateText = createMemo(() => (this.active.get() ? this.attrs.activeText : this.attrs.inactiveText))
+
+  /** Uses state texts at all (either one set)? */
+  readonly hasStateText = createMemo(() => this.attrs.activeText != null || this.attrs.inactiveText != null)
+
+  /** Has text content (slotted, the `content` shorthand, or a state text)? */
+  readonly hasText = createMemo(() => this.slots.has("") || !!this.attrs.content || !!this.stateText())
 
   /** Has an icon (attribute or `icon` slot)? */
   readonly hasIcon = createMemo(() => !!this.attrs.icon || this.slots.has(this.slot("icon")))
@@ -141,7 +150,9 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
             class={this.classes()}
             part={this.part("button")}
             disabled={this.isDisabled()}
-            aria-pressed={this.attrs.toggle ? (this.active.get() ? "true" : "false") : undefined}
+            aria-pressed={
+              this.attrs.toggle && !this.hasStateText() ? (this.active.get() ? "true" : "false") : undefined
+            }
             aria-busy={this.attrs.loading ? "true" : undefined}
             aria-label={this.ariaLabel.get() ?? undefined}
             onClick={this.onClick}
@@ -168,9 +179,13 @@ export class UIButton extends UIElement<typeof buttonVocabulary> {
     )
   }
 
-  /** Icon + text, or the two `.content` boxes of an `animated` button. */
+  /** Icon + text (the state text, else the slot), or the two `.content` boxes of an `animated` button. */
   private content(): JSX.Element {
-    const text = <slot>{this.attrs.content}</slot>
+    const text = (
+      <Show when={this.stateText()} fallback={<slot>{this.attrs.content}</slot>}>
+        {this.stateText()}
+      </Show>
+    )
     return (
       <Show when={this.attrs.animated} fallback={[<Show when={this.hasIcon()}>{this.icon()}</Show>, text]}>
         <span class="visible content">{text}</span>

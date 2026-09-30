@@ -33,11 +33,27 @@ class UIThing extends HTMLElement {
 | `UI.focus` | `Focus` + `RovingTabindex` | `activeElementDeep()`, `focusables(root)` (flat tree: shadow roots and slots; skips `inert`, `hidden`, unrendered, `:disabled` and `tabindex=-1`), `first` / `last`, `containsDeep`, `trap(root)` (only for non-`<dialog>` cases), and `roving(container, items, { orientation, wrap })`. |
 | `UI.styles` | `Styles` + `AppStylesheet` | Named constructable sheets: `register(name, css, { page, linked })`, `sheet(name)`, `setFoundation(names)`, `setUtilities(names)`, `adoptInto(shadowRoot, names)`, `appSheetReady`. `page` also puts a sheet on the document; `linked` marks one `ui.css` already carries (the foundation, typography, native), left off a page that links `ui.css`. Component page sheets (`table`, `scroll-lock`) always go on. |
 | `UI.transitions` | `Transitions` | `animate(el, name, "in" \| "out" \| "static", { duration, easing })` resolves `true` when the animation ends and `false` when interrupted. `whenTransitionEnds(el)`. |
-| `UI.i18n` | `I18n` | `locale`, `register(locale, pack)`, `t(key, params)` (lookup order: `pt-BR`, then `pt`, then `en`, then the key itself), `formatDate`, `formatNumber`, `weekdays()`, `months()`, `firstDayOfWeek()`, `displayName()`. |
+| `UI.i18n` | `I18n` | `locale`, `register(locale, pack, scope?)`, `registerDefaults(pack, scope)` (a component's English source texts), `t(key, params, scope?)` (lookup order: `pt-BR`, then `pt`, then `en` -- each the `scope`'s string, then the shared one -- then the scope's English default, the shared default, the key itself;  `scope` is a component's canonical tag, so two families may share a key), `formatDate`, `formatNumber`, `weekdays()`, `months()`, `firstDayOfWeek()` (the date helpers take an optional `locale`, e.g. an element's own), `displayName()`.  Temporal:  `temporal` (the namespace if it's here now) and `loadTemporal()` -- see "Temporal" below. |
 | `UI.ids` | `Ids` | `next(prefix)` and `ensure(el, prefix)` for ARIA id wiring. |
-| `UI.toasts` / `UI.toast()` | `Toasts` | Delegates to `Toasts.provider`, which `ui-toast` registers. Throws until then. |
+| `UI.toasts` / `UI.toast()` | `Toasts` | `show(options)` / `dismiss(id)` delegate to the provider `ui-toast`'s barrel registers with `register(provider)` (`ToastStack`:  a `<ui-toast>` per call, in a popover container per position). `ToastOptions` are Fomantic's settings (`title`, `message`, `class` / `type`, `displayTime`, `showIcon`, `showProgress`, `actions`, `classActions`, `position` ...);  the handle carries `id`, `closed` and the `element`. Throws until registered. |
 | `UI.modals` | `Modals` | `confirm` / `alert` / `prompt` delegate to the provider `ui-modal`'s barrel registers with `register(provider)` (`ModalDialogs`:  a `<ui-modal>` per call). Throws until then. |
+| `UI.visibility` / `UI.observeVisibility()` | `Visibility` | Fomantic's visibility callbacks on `IntersectionObserver`:  `observe(el, { onOnScreen, onTopVisible, onBottomPassed ..., once, continuous, offset, context })` returns the undo;  checks run at crossings (in / out, an edge crossing the screen top or bottom), not per scrolled pixel. `lazyImage(img, { transition, duration, onLoad })` sets `data-src` / `data-srcset` once on screen, then fades in. |
 | `UI.api` | `Api` | `url(template, data)` and `request({ url, urlData, method, data, throttle, key, signal, timeout, headers, responseType })`. |
+
+## Temporal
+
+```ts
+const Temporal = await UI.i18n.loadTemporal() // the browser's own, or temporal-polyfill's
+Temporal.PlainDate.from("2026-09-30").add({ months: 1 })
+UI.i18n.temporal // the same namespace, synchronously, once loaded (undefined before)
+```
+
+- `UI.browser.supports.temporal` says whether the browser has `Temporal`;  when it does, `temporal` is
+  `globalThis.Temporal` at once and nothing loads.
+- Otherwise the first `loadTemporal()` does a dynamic `import("temporal-polyfill")` (the ponyfill entry:  ISO and
+  Gregorian calendars) -- a LAZY chunk, so neither `core` nor the runtime chunk carries it.  Every caller shares
+  the one import;  the polyfill is kept in `I18n`, never installed on `globalThis`.
+- `<ui-calendar>` is the user:  it renders its picker once `Temporal` is here.
 
 ## Overlay entries
 
@@ -59,19 +75,21 @@ Defaults depend on `kind`:
 | `pool` | `"toast"` for toasts, `"default"` for everything else |
 | `closeOnEscape` | `true` for every kind except `toast` |
 | `closeOnOutsideClick` | `true` for every kind except `toast` |
-| `modal` (scroll lock) | `true` for `modal`, `flyout` and `dimmer` |
+| `modal` (scroll lock) | `true` for `modal`, `flyout` and `dimmer`;  `false` for `sidebar` (Fomantic's `scrollLock: false`) |
 
 - Every entry that handles Escape or is modal pushes a keyboard scope, so page shortcuts go quiet while it's open.
 - A click on a modal `<dialog>`'s `::backdrop` counts as outside. The pointer position is compared with the dialog's box, because a backdrop click targets the dialog element itself.
 - `<ui-modal>` sets `closeOnOutsideClick: false` when the browser does light dismiss itself (`<dialog closedby>`, `UI.browser.supports.dialogClosedBy`) and routes the dialog's `cancel` through its own `ui-close`;  Escape always goes through `Overlays`.
 - `<ui-popup>` and the dropdown menu are `popover` entries with their target as `anchor`, so a click on the target never dismisses-then-reopens.
+- `<ui-flyout>` shares `<ui-modal>`'s controller (`DialogElement`) with kind `flyout`;  a page `<ui-dimmer>` is kind `dimmer` (outside clicks are its own:  the dimmer covers the viewport);  a modal `<ui-sidebar>` is kind `sidebar` -- a non-modal `<dialog>` in its pushable, so it adds `UI.focus.trap()` itself and its pushable makes the pusher `inert`.
 - Scroll lock adds `ui-scroll-locked` to `<html>` and sets `--ui-scrollbar-width`. `Overlays` registers the matching rule as the page sheet `scroll-lock`, in `@layer ui.base`.
 
 ## Animation protocol
 
 - JS sets `data-ui-animation="<name> <direction>"`, e.g. `"fade-up in"`. `animations.css` owns the keyframes and matches the attribute.
 - The `duration` and `easing` options become `--ui-animation-duration` / `--ui-animation-easing` on the element, so the CSS should read them: `animation-duration: var(--ui-animation-duration, …)`.
-- `ANIMATION_NAMES` in `runtime.types.ts` is the catalogue. Fomantic's multi-word names are kebab-cased (`"horizontal flip"` becomes `flip-horizontal`).
+- `ANIMATION_NAMES` in `runtime.types.ts` is the catalogue. Fomantic's multi-word names are kebab-cased (`"horizontal flip"` becomes `flip-horizontal`);  plain `fly` is in it too.  `<ui-transition>` maps Fomantic's spelling onto it (plain `slide` / `swing` run `slide-down` / `swing-down`).
+- The protocol's reset rule is `:where(.ui.transition, [data-ui-animation])` -- zero specificity, so an element that is BOTH (`<ui-transition>`'s box) still takes the `[data-ui-animation="..."]` keyframes.
 - `in` removes `hidden` first. `out` sets `hidden` when it finishes, plus an inline `display: none` if the element's CSS overrides `[hidden]`. `static` leaves visibility alone.
 - Reduced motion, or no matching keyframes, resolves at once. A fail-safe timeout (computed duration + `failSafeDelay`) catches a missing `animationend`.
 

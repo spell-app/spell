@@ -1,5 +1,5 @@
 <!-- `src/components/parts/examples/content.html` as element markup. -->
-<!-- Owners are `stub-*` stand-ins (`StubOwner`) until card, feed, modal ... land;  each owns the parts Fomantic styles in it. -->
+<!-- Owners are the real elements, except `stub-*` stand-ins (`StubOwner`) for modal and popup (overlays, hidden until opened), accordion and toast (they own no parts yet). -->
 <div class="ui-stack">
   <section>
     <h4>Standalone</h4>
@@ -8,48 +8,43 @@
 
   <section>
     <h4>Card</h4>
-    <stub-card style="display: flex; flex-direction: column; width: 290px">
+    <ui-card>
       <ui-content><ui-header>Elliot Fu</ui-header></ui-content>
       <ui-content><ui-description>Elliot is a film-maker from New York.</ui-description></ui-content>
-    </stub-card>
+    </ui-card>
   </section>
 
   <section>
     <h4>Horizontal card</h4>
-    <!-- `--ui-card-layout` is the owner token a horizontal card sets. -->
-    <stub-card style="display: flex; flex-flow: row wrap; --ui-card-layout: horizontal" horizontal>
+    <ui-card horizontal>
       <ui-content><ui-header>Left</ui-header></ui-content>
       <ui-content><ui-header>Right</ui-header></ui-content>
-    </stub-card>
+    </ui-card>
   </section>
 
   <section>
     <h4>Item</h4>
-    <div class="ui items">
-      <stub-item style="display: flex">
-        <img
-          src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
-          alt=""
-          width="80"
-          height="80"
-        />
+    <ui-items>
+      <ui-item
+        image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"
+      >
         <ui-content><ui-header href="#item">Header</ui-header></ui-content>
-      </stub-item>
-    </div>
+      </ui-item>
+    </ui-items>
   </section>
 
   <section>
     <h4>Feed, comment, modal, message, list, step, accordion, popup, toast</h4>
-    <stub-feed>
-      <div class="event" style="display: flex">
+    <ui-feed>
+      <ui-event>
         <ui-content><ui-summary>You added Elliot Fu to the group</ui-summary></ui-content>
-      </div>
-    </stub-feed>
-    <div class="ui comments">
-      <stub-comment>
+      </ui-event>
+    </ui-feed>
+    <ui-comments>
+      <ui-comment>
         <ui-content><ui-author href="#matt">Matt</ui-author></ui-content>
-      </stub-comment>
-    </div>
+      </ui-comment>
+    </ui-comments>
     <stub-modal>
       <ui-content><p>A modal's content.</p></ui-content>
     </stub-modal>
@@ -60,21 +55,19 @@
         <p>Here.</p>
       </ui-content>
     </stub-modal>
-    <stub-message style="display: flex; --ui-message-layout: icon">
-      <span>!</span>
+    <ui-message icon="circle-exclamation">
       <ui-content><ui-header>Just one second</ui-header></ui-content>
-    </stub-message>
-    <stub-list>
-      <div class="item">
-        <span>*</span>
+    </ui-message>
+    <ui-list>
+      <ui-item icon="user">
         <ui-content><ui-header>Rachel</ui-header></ui-content>
-      </div>
-    </stub-list>
-    <div class="ui steps">
-      <stub-step>
+      </ui-item>
+    </ui-list>
+    <ui-steps>
+      <ui-step>
         <ui-content><ui-title>Shipping</ui-title></ui-content>
-      </stub-step>
-    </div>
+      </ui-step>
+    </ui-steps>
     <stub-accordion>
       <ui-title>What is a dog?</ui-title>
       <ui-content>A domesticated carnivore.</ui-content>

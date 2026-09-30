@@ -82,6 +82,9 @@ export type AttributeSpec = {
   /**
    * Other canonical attribute names accepted for this one, e.g. `checked` for `selected` on checkbox / radio.
    * - NOTE: aliases are English muscle memory;  translations don't rename them.
+   * - NOTE: DECLARATIVE only:  `Vocabulary` keeps them reachable by name (translation, docs), but
+   *   `ElementDefinition` makes no observed attribute or property for an alias -- the family reads it itself
+   *   (`<ui-item active>`, checkbox `checked`, `<ui-tab active>` through a `HostAttribute`).
    */
   aliases?: readonly string[]
   /** What it does, for docs and the custom-elements manifest. */

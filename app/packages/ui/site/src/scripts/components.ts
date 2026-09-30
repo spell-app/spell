@@ -7,7 +7,7 @@ import { PART_NOUNS } from "$/components/parts/parts.vocabulary.en"
  *   `$/components/button/index.ts` loads (it defines `ui-button`, `ui-buttons`, `ui-or`), on the pages that use it
  *   only.
  * - Tag => family:  `ui-<family>` or its plural (`ui-buttons`), a content part (`ui-header` => `parts`, from
- *   `PART_NOUNS`), or `EXTRA_TAGS`.
+ *   `PART_NOUNS`), a family-prefixed sub-tag (`ui-breadcrumb-section`, `ui-placeholder-line`), or `EXTRA_TAGS`.
  * - Imports source through the `$` alias, so the site always shows the working tree, not a build.
  */
 const MODULES = import.meta.glob("$/components/*/index.ts")
@@ -19,8 +19,17 @@ for (const [path, load] of Object.entries(MODULES)) {
   if (family) FAMILIES.set(family, load)
 }
 
-/** Tags a family defines besides `ui-<family>` / `ui-<family>s` / the parts. */
-const EXTRA_TAGS: Record<string, string> = { "ui-or": "button", "ui-item": "dropdown" }
+/** Tags a family defines besides `ui-<family>` / `ui-<family>s` / `ui-<family>-*` / the parts. */
+const EXTRA_TAGS: Record<string, string> = {
+  "ui-or": "button",
+  "ui-row": "grid",
+  "ui-column": "grid",
+  "ui-textarea": "input",
+  "ui-radio": "checkbox",
+  "ui-field": "form",
+  "ui-fields": "form",
+  "ui-event": "feed"
+}
 
 /**
  * Import the family of each distinct undefined `ui-*` tag under `root`.
@@ -40,11 +49,18 @@ export async function loadComponents(root: ParentNode = document): Promise<void>
   }
 }
 
-/** Family that defines `tag`, e.g. `ui-buttons` => `button`, `ui-header` => `parts`;  `""` if none. */
+/**
+ * Family that defines `tag`;  `""` if none.
+ * - `ui-buttons` => `button`
+ * - `ui-header` => `parts`
+ * - `ui-placeholder-line` => `placeholder`
+ */
 function familyOf(tag: string): string {
   const name = tag.slice("ui-".length)
   if (FAMILIES.has(name)) return name
   if (name.endsWith("s") && FAMILIES.has(name.slice(0, -1))) return name.slice(0, -1)
   if ((PART_NOUNS as readonly string[]).includes(name)) return "parts"
-  return EXTRA_TAGS[tag] ?? ""
+  if (EXTRA_TAGS[tag]) return EXTRA_TAGS[tag]
+  const prefix = name.split("-")[0]
+  return FAMILIES.has(prefix) ? prefix : ""
 }

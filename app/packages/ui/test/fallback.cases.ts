@@ -93,7 +93,75 @@ export const FAMILY_FALLBACKS: readonly { family: string; html: string; root: st
     root: "[role=region][part~=scroller]"
   },
   { family: "popup", html: `<ui-popup content="Tip" on="manual"></ui-popup>`, root: "[part~=popup]" },
-  { family: "modal", html: `<ui-modal header="Saved" closable>Done</ui-modal>`, root: "dialog[part~=modal]" }
+  { family: "modal", html: `<ui-modal header="Saved" closable>Done</ui-modal>`, root: "dialog[part~=modal]" },
+  { family: "transition", html: `<ui-transition visible>Shown</ui-transition>`, root: "[part~=transition]" },
+  { family: "dimmer", html: `<ui-dimmer active>Dimmed</ui-dimmer>`, root: "div[part~=dimmer]" },
+  { family: "flyout", html: `<ui-flyout header="Saved" closable>Done</ui-flyout>`, root: "dialog[part~=flyout]" },
+  { family: "sidebar", html: `<ui-sidebar aria-label="Site">Links</ui-sidebar>`, root: "aside[part~=sidebar]" },
+  { family: "shape", html: `<ui-shape><ui-side>One</ui-side></ui-shape>`, root: "[part~=shape]" },
+  { family: "card", html: `<ui-card header="Kristy" raised>Card</ui-card>`, root: "article[part~=card]" },
+  { family: "items", html: `<ui-items divided><ui-item>One</ui-item></ui-items>`, root: "[role=list][part~=items]" },
+  { family: "feed", html: `<ui-feed ordered><ui-event label="A">Joined</ui-event></ui-feed>`, root: "ol[part~=feed]" },
+  {
+    family: "comment",
+    html: `<ui-comments threaded><ui-comment>Hi</ui-comment></ui-comments>`,
+    root: "[part~=comments]"
+  },
+  { family: "statistic", html: `<ui-statistic value="5" label="Flights"></ui-statistic>`, root: "[part~=statistic]" },
+  {
+    family: "step",
+    html: `<ui-steps><ui-step selected header="Billing"></ui-step></ui-steps>`,
+    root: "ol[part~=steps]"
+  },
+  { family: "rail", html: `<ui-rail position="left">Rail</ui-rail>`, root: "[part~=rail]" },
+  {
+    family: "reveal",
+    html: `<ui-reveal fade><span slot="visible">Front</span><span slot="hidden">Back</span></ui-reveal>`,
+    root: "[part~=reveal]"
+  },
+  { family: "ad", html: `<ui-ad unit="small rectangle" test></ui-ad>`, root: "[part~=ad]" },
+  { family: "emoji", html: `<ui-emoji name="smile" label="Happy"></ui-emoji>`, root: "[part~=emoji]" },
+  {
+    family: "select",
+    html: `<ui-select placeholder="Fruit"><ui-item value="a">Apple</ui-item></ui-select>`,
+    root: "select[part~=select]"
+  },
+  { family: "search", html: `<ui-search placeholder="Fruit"></ui-search>`, root: "input[part~=prompt]" },
+  { family: "progress", html: `<ui-progress value="40" label="Upload"></ui-progress>`, root: "progress[part~=bar]" },
+  {
+    family: "rating",
+    html: `<ui-rating value="2" aria-label="Fallback rating"></ui-rating>`,
+    root: "fieldset[role=radiogroup][part~=rating] label[part~=icon]:not(.icon)"
+  },
+  {
+    family: "slider",
+    html: `<ui-slider value="4" aria-label="Fallback slider"></ui-slider>`,
+    root: "input[type=range][part~=thumb]"
+  },
+  {
+    family: "accordion",
+    html: `<ui-accordion styled open="0"><ui-title>Dogs</ui-title><ui-content>Loyal</ui-content></ui-accordion>`,
+    root: "[part~=accordion] > details[open]"
+  },
+  {
+    family: "tab",
+    html: `<ui-tabs tabular aria-label="Fallback tabs"><ui-tab label="One">A</ui-tab></ui-tabs>`,
+    root: "[part~=tabs] > [role=tablist]"
+  },
+  { family: "toast", html: `<ui-toast header="Saved" message="Done" closable></ui-toast>`, root: "[part~=box]" },
+  { family: "nag", html: `<ui-nag color="teal">Updated</ui-nag>`, root: "[part~=nag]" },
+  { family: "sticky", html: `<ui-sticky offset="8">Stuck</ui-sticky>`, root: "[part~=sticky]" },
+  { family: "visibility", html: `<ui-visibility><p>Seen</p></ui-visibility>`, root: "[part~=visibility]" },
+  {
+    family: "embed",
+    html: `<ui-embed source="youtube" video-id="x" label="Intro"></ui-embed>`,
+    root: "button[part~=play]"
+  },
+  {
+    family: "calendar",
+    html: `<ui-calendar type="date" value="2026-09-30" placeholder="Fallback date"></ui-calendar>`,
+    root: "[part~=calendar] input[type=date][part~=control]"
+  }
 ]
 
 export const FALLBACK_CASES: readonly FallbackCase[] = [

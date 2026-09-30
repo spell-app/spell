@@ -124,7 +124,7 @@ export class BundleMeasure {
         const shared = bucket.startsWith("shared:") ? sharedChunks.get(bucket.slice("shared:".length)) : undefined
         if (bucket.startsWith("shared:") && chunk !== shared) checks.coreOutsideCore.push(id)
         if (bucket === "library") checks.libraryBundled.push(id)
-        if ((bucket === "runtime" || bucket === "icons") && !lazy) checks.lazyInEager.push(id)
+        if ((bucket === "runtime" || bucket === "icons" || bucket === "data") && !lazy) checks.lazyInEager.push(id)
         if (bucket === "other") checks.unattributed.push(id)
       }
     }
@@ -174,7 +174,7 @@ export class BundleMeasure {
       families: needs,
       scenarios: this.scenarios(library, shared, own, needs),
       standalone: await this.standalone(),
-      lazy: { runtime: await size("runtime"), icons: await size("icons") },
+      lazy: { runtime: await size("runtime"), icons: await size("icons"), data: await size("data") },
       extra: Object.fromEntries(
         await Promise.all(Object.keys(config.extra ?? {}).map(async (name) => [name, await size(`extra:${name}`)]))
       ),

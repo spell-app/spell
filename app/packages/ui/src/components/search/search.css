@@ -1,0 +1,489 @@
+/*
+ * `<ui-search>`:  port of Fomantic's `search.less` + `search.variables`.
+ * - Adopted after the foundation and AFTER `input.css`:  the prompt sits in a real `ui icon input`, and this sheet
+ *   re-shapes it (Fomantic's round prompt), since `ui.components.search` layers come later.
+ * - Shadow markup contract (class grammar on semantic elements), in this order inside the root:
+ *
+ *     <div class="ui [size] [category horizontal fluid scrolling resizable short ...] [left|right aligned]
+ *                 [loading disabled] search" style="--ui-search-anchor: --ui-search-4">
+ *       <div class="ui icon [loading fluid disabled] input" part="input">
+ *         <input class="prompt" part="prompt" role="combobox">
+ *         <span class="search icon" part="icon"><slot name="icon"><svg></slot></span>
+ *       </div>
+ *       <div class="results" popover part="results" role="listbox">       (role only while there are results)
+ *         <a|div class="[active] result" role="option" part="result">
+ *           <div class="image"><img></div>
+ *           <div class="content"><div class="price"> <div class="title"> <div class="description"></div>
+ *         </a|div>
+ *         <div class="[active] category" role="group" part="category">     (category:  in place of results)
+ *           <div class="name" part="name">  <div class="results" role="none"> result ... </div>
+ *         </div>
+ *         <div class="empty|error message" part="message"><div class="header"> <div class="description"></div>
+ *       </div>
+ *       <span class="status" role="status">3 results available.</span>    (visually hidden)
+ *     </div>
+ *
+ * - `active` on a result === the keyboard-HIGHLIGHTED one (Fomantic's meaning), also `[aria-selected="true"]`.
+ * - Positioning:  POPOVER + ANCHOR, no JS (as the dropdown's menu).
+ *   - root:  `anchor-name: var(--ui-search-anchor, --ui-search)`, `anchor-scope: all`
+ *   - `.results[popover]`:  below, flipping (`flip-block, flip-inline`);  `right aligned` extends to the start
+ *   - a `.results` WITHOUT `popover` is Fomantic's `top: 100%` box, shown with `visible` (static examples)
+ * - Host states the ELEMENT sets:  `:state(fluid)` (block-level host), plus `open` / `disabled` / `loading` /
+ *   `invalid` for PAGE styling only -- this sheet keys on the root's classes.
+ * - NOTE: left out, on purpose:
+ *   - the "view all results" `.action` link of a remote answer:  a link inside a listbox;  put one near the search
+ *   - the `clearable` variation (`.remove.icon`, the webkit cancel button):  Escape clears
+ * - Scrolling heights stay Fomantic's per-breakpoint result counts (4 / 6 / 8 / 12), by viewport `@media`, as one
+ *   token `--ui-search-results-max-height`.
+ */
+
+@layer ui.components.search.types, ui.components.search.content, ui.components.search.variations, ui.components.search.states;
+
+/* Loader spin, for a `loading` search whose input isn't marked `loading` itself (static markup). */
+@keyframes ui-search-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+/*******************************
+             Search
+*******************************/
+
+@layer ui.components.search.types {
+  /* Host:  layout only;  the look lives on the root inside. */
+  :host {
+    display: inline-block;
+    vertical-align: baseline;
+  }
+  :host(:state(fluid)) {
+    display: block;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+  /* `delegatesFocus`:  the prompt draws the focus, never the host. */
+  :host(:focus-visible) {
+    outline: none;
+  }
+
+  /* Tokens:  one per `search.variables` entry that still matters, from the global tokens. */
+  .ui.search {
+    --ui-search-prompt-radius: var(--ui-radius-pill);
+    --ui-search-duration: var(--ui-duration-fast);
+    --ui-search-results-width: 18em;
+    --ui-search-results-background: var(--ui-surface);
+    --ui-search-results-color: var(--ui-text-color);
+    --ui-search-results-border-color: var(--ui-border-color);
+    --ui-search-results-radius: var(--ui-radius);
+    --ui-search-results-shadow: var(--ui-shadow-floating);
+    --ui-search-results-offset: 0.5em;
+    --ui-search-result-padding: 0.85714em 1.14285em;
+    --ui-search-result-line-height: 1.33;
+    --ui-search-result-divider-color: var(--ui-border-color-internal);
+    --ui-search-result-background-hover: var(--ui-surface-muted);
+    --ui-search-result-background-active: oklch(from var(--ui-ink) l c h / 0.05);
+    --ui-search-result-image-width: 5em;
+    --ui-search-result-image-height: 3em;
+    --ui-search-result-image-radius: 0.25em;
+    --ui-search-result-image-margin: 6em;
+    --ui-search-title-color: var(--ui-text-dark);
+    --ui-search-description-color: var(--ui-text-light);
+    --ui-search-description-font-size: 0.92857em;
+    --ui-search-price-color: var(--ui-green-text, var(--ui-green));
+    --ui-search-message-padding: 1em;
+    --ui-search-category-background: var(--ui-surface-muted);
+    --ui-search-category-results-width: 28em;
+    --ui-search-category-name-width: 100px;
+    --ui-search-category-name-color: var(--ui-text-light);
+    --ui-search-category-name-padding: 0.4em 1em;
+    --ui-search-category-divider-color: var(--ui-border-color-internal);
+    --ui-search-category-result-border-color: var(--ui-border-color);
+    --ui-search-results-max-height: calc(4 * (2 * 0.85714em + 1.33em));
+    --ui-search-disabled-opacity: var(--ui-disabled-opacity);
+
+    position: relative;
+    box-sizing: border-box;
+    display: inline-block;
+    max-width: 100%;
+    anchor-name: var(--ui-search-anchor, --ui-search);
+    anchor-scope: all;
+    font-family: var(--ui-font-family);
+    font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+    text-align: start;
+  }
+
+  /* Prompt:  Fomantic's round input. */
+  .ui.search > .ui.input {
+    --ui-input-radius: var(--ui-search-prompt-radius);
+    display: flex;
+  }
+  .ui.search > .ui.input > .prompt {
+    margin: 0;
+    font-style: normal;
+    text-shadow: none;
+    transition-property: background-color, color, box-shadow, border-color;
+  }
+  .ui.search .prompt ~ .search.icon {
+    cursor: pointer;
+  }
+
+  /* Results:  hidden until open;  a popover in the top layer, anchored to the root. */
+  .ui.search > .results {
+    position: absolute;
+    top: 100%;
+    inset-inline-start: 0;
+    z-index: var(--ui-z-dropdown);
+    box-sizing: border-box;
+    display: none;
+    width: var(--ui-search-results-width);
+    margin: var(--ui-search-results-offset) 0 0;
+    padding: 0;
+    overflow: visible;
+    border: var(--ui-border-width) solid var(--ui-search-results-border-color);
+    border-radius: var(--ui-search-results-radius);
+    outline: none;
+    background: var(--ui-search-results-background);
+    box-shadow: var(--ui-search-results-shadow);
+    color: var(--ui-search-results-color);
+    font-size: 1em;
+    line-height: normal;
+    text-align: start;
+    text-transform: none;
+    white-space: normal;
+  }
+  .ui.search > .results[popover] {
+    position-anchor: var(--ui-search-anchor, --ui-search);
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: flip-block, flip-inline;
+    inset: auto;
+    margin: var(--ui-search-results-offset) 0;
+    opacity: 0;
+    transition-property: opacity, display, overlay;
+    transition-duration: var(--ui-search-duration);
+    transition-timing-function: var(--ui-ease);
+    transition-behavior: allow-discrete;
+  }
+  .ui.search > .results > :first-child {
+    border-start-start-radius: var(--ui-search-results-radius);
+    border-start-end-radius: var(--ui-search-results-radius);
+  }
+  .ui.search > .results > :last-child {
+    border-end-start-radius: var(--ui-search-results-radius);
+    border-end-end-radius: var(--ui-search-results-radius);
+  }
+
+  /* The live region:  heard, not seen. */
+  .ui.search > .status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/*******************************
+             Content
+*******************************/
+
+@layer ui.components.search.content {
+  /* Result */
+  .ui.search > .results .result {
+    box-sizing: border-box;
+    display: block;
+    overflow: hidden;
+    padding: var(--ui-search-result-padding);
+    border-bottom: var(--ui-border-width) solid var(--ui-search-result-divider-color);
+    color: var(--ui-search-results-color);
+    font-size: 1em;
+    line-height: var(--ui-search-result-line-height);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .ui.search > .results .result:last-child {
+    border-bottom: none;
+  }
+
+  /* Image:  at the result's end. */
+  .ui.search > .results .result .image {
+    float: inline-end;
+    width: var(--ui-search-result-image-width);
+    height: var(--ui-search-result-image-height);
+    overflow: hidden;
+    border-radius: var(--ui-search-result-image-radius);
+    background: none;
+  }
+  .ui.search > .results .result .image img {
+    display: block;
+    width: auto;
+    height: 100%;
+  }
+  .ui.search > .results .result .image + .content {
+    margin-inline-end: var(--ui-search-result-image-margin);
+  }
+
+  /* Title, description, price */
+  .ui.search > .results .result .title {
+    margin: 0;
+    color: var(--ui-search-title-color);
+    font-family: var(--ui-font-family-heading, var(--ui-font-family));
+    font-size: 1em;
+    font-weight: var(--ui-font-weight-bold);
+  }
+  .ui.search > .results .result .description {
+    margin-top: 0;
+    color: var(--ui-search-description-color);
+    font-size: var(--ui-search-description-font-size);
+  }
+  .ui.search > .results .result .price {
+    float: inline-end;
+    color: var(--ui-search-price-color);
+  }
+  .ui.search > .results mark {
+    background: var(--ui-highlight);
+    color: inherit;
+  }
+
+  /* Message:  no results, or an error. */
+  .ui.search > .results > .message {
+    padding: var(--ui-search-message-padding);
+  }
+  .ui.search > .results > .message .header {
+    color: var(--ui-search-results-color);
+    font-family: var(--ui-font-family-heading, var(--ui-font-family));
+    font-size: 1em;
+    font-weight: var(--ui-font-weight-bold);
+  }
+  .ui.search > .results > .message .description {
+    margin-top: 0.25em;
+    color: var(--ui-search-results-color);
+    font-size: 1em;
+  }
+  .ui.search > .results > .error.message .description {
+    color: var(--ui-red-text, var(--ui-red));
+  }
+}
+
+/*******************************
+           Variations
+*******************************/
+
+@layer ui.components.search.variations {
+  /* Category:  a table of groups, the name in a cell beside its results. */
+  .ui.category.search > .results {
+    width: var(--ui-search-category-results-width);
+  }
+  .ui.category.search > .results .category {
+    display: table-row;
+    background: var(--ui-search-category-background);
+    box-shadow: none;
+    transition:
+      background var(--ui-search-duration) var(--ui-ease),
+      border-color var(--ui-search-duration) var(--ui-ease);
+  }
+  .ui.category.search > .results .category:last-child {
+    border-bottom: none;
+  }
+  .ui.category.search > .results .category > .name {
+    display: table-cell;
+    width: var(--ui-search-category-name-width);
+    padding: var(--ui-search-category-name-padding);
+    overflow: hidden;
+    border-bottom: var(--ui-border-width) solid var(--ui-search-category-divider-color);
+    background: transparent;
+    color: var(--ui-search-category-name-color);
+    font-family: var(--ui-font-family);
+    font-size: 1em;
+    font-weight: var(--ui-font-weight-bold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ui.category.search > .results .category > .results {
+    display: table-cell;
+    border-bottom: var(--ui-border-width) solid var(--ui-search-category-divider-color);
+    border-inline-start: var(--ui-border-width) solid var(--ui-search-category-result-border-color);
+    background: var(--ui-search-results-background);
+  }
+  .ui.category.search > .results .category:last-child > :is(.name, .results) {
+    border-bottom: none;
+  }
+  .ui.category.search > .results .category .result {
+    padding: var(--ui-search-result-padding);
+    border-bottom: var(--ui-border-width) solid var(--ui-search-result-divider-color);
+    transition:
+      background var(--ui-search-duration) var(--ui-ease),
+      border-color var(--ui-search-duration) var(--ui-ease);
+  }
+  .ui.category.search > .results .category .result:last-child {
+    border-bottom: none;
+  }
+  .ui.category.search > .results .category:first-child .name + .results > .result:first-child {
+    border-start-end-radius: var(--ui-search-results-radius);
+  }
+  .ui.category.search > .results .category:last-child .result:last-child {
+    border-end-end-radius: var(--ui-search-results-radius);
+  }
+
+  /* Horizontal category:  each name above its results. */
+  .ui.horizontal.category.search > .results .category,
+  .ui.horizontal.category.search > .results .category > .name,
+  .ui.horizontal.category.search > .results .category > .results {
+    display: block;
+  }
+  .ui.horizontal.category.search > .results .category > .results {
+    width: 100%;
+    border-inline-start: 0;
+  }
+
+  /* Scrolling / short / long:  the results scroll after a height (4 results on phones, more on larger screens). */
+  .ui:is(.scrolling, .short, .long).search > .results {
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+  }
+  .ui.scrolling.search > .results,
+  .ui.short.search > .results {
+    max-height: var(--ui-search-results-max-height);
+  }
+  .ui[class*="very short"].search > .results {
+    max-height: calc(var(--ui-search-results-max-height) * 0.75);
+  }
+  .ui.long.search > .results {
+    max-height: calc(var(--ui-search-results-max-height) * 2);
+  }
+  .ui[class*="very long"].search > .results {
+    max-height: calc(var(--ui-search-results-max-height) * 3);
+  }
+  .ui.scrolling.resizable.search > .results {
+    height: var(--ui-search-results-max-height);
+    max-height: none;
+    resize: vertical;
+  }
+  @media (width >= 768px) {
+    .ui.search {
+      --ui-search-results-max-height: calc(6 * (2 * 0.85714em + 1.33em));
+    }
+  }
+  @media (width >= 992px) {
+    .ui.search {
+      --ui-search-results-max-height: calc(8 * (2 * 0.85714em + 1.33em));
+    }
+  }
+  @media (width >= 1920px) {
+    .ui.search {
+      --ui-search-results-max-height: calc(12 * (2 * 0.85714em + 1.33em));
+    }
+  }
+
+  /* Aligned:  which edge the results line up with. */
+  .ui[class*="left aligned"].search > .results:not([popover]) {
+    inset-inline: 0 auto;
+  }
+  .ui[class*="right aligned"].search > .results:not([popover]) {
+    inset-inline: auto 0;
+  }
+  .ui[class*="left aligned"].search > .results[popover] {
+    position-area: block-end span-inline-end;
+  }
+  .ui[class*="right aligned"].search > .results[popover] {
+    position-area: block-end span-inline-start;
+  }
+
+  /* Fluid:  the prompt and the results take the full width. */
+  .ui.fluid.search {
+    display: block;
+    width: 100%;
+  }
+  .ui.fluid.search > .results {
+    width: 100%;
+  }
+  .ui.fluid.search > .results[popover] {
+    width: anchor-size(width);
+  }
+
+  /* Phones:  never wider than the screen. */
+  @media (width < 768px) {
+    .ui.search > .results {
+      max-width: calc(100vw - 2em);
+    }
+  }
+}
+
+/*******************************
+             States
+*******************************/
+
+@layer ui.components.search.states {
+  /* Open:  a popover while `:popover-open`;  a plain one with `visible`. */
+  .ui.search > .results[popover]:popover-open,
+  .ui.search > .visible.results:not([popover]) {
+    display: block;
+    opacity: 1;
+  }
+  .ui.category.search > .results[popover]:popover-open,
+  .ui.category.search > .visible.results:not([popover]) {
+    display: table;
+  }
+  @starting-style {
+    .ui.search > .results[popover]:popover-open {
+      opacity: 0;
+    }
+  }
+
+  /* Hover and the keyboard highlight (`active`). */
+  .ui.search > .results .result:hover,
+  .ui.category.search > .results .category .result:hover {
+    background: var(--ui-search-result-background-hover);
+  }
+  .ui.category.search > .results .category.active {
+    background: var(--ui-search-result-background-active);
+  }
+  .ui.category.search > .results .category.active > .name {
+    color: var(--ui-search-results-color);
+  }
+  .ui.search > .results .result.active,
+  .ui.category.search > .results .category .result.active {
+    position: relative;
+    background: var(--ui-search-result-background-active);
+    box-shadow: none;
+  }
+  .ui.search > .results .result.active :is(.title, .description) {
+    color: var(--ui-search-title-color);
+  }
+
+  /* Loading:  the icon box becomes a spinner (the element also marks its input `loading`, `input.css`). */
+  .ui.loading.search > .ui.input > .icon {
+    opacity: 1;
+  }
+  .ui.loading.search > .ui.input > .icon > * {
+    visibility: hidden;
+  }
+  .ui.loading.search > .ui.input > .icon::before,
+  .ui.loading.search > .ui.input > .icon::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    box-sizing: border-box;
+    inline-size: 1.28571em;
+    block-size: 1.28571em;
+    margin: -0.642855em 0 0 -0.642855em;
+    border: 0.2em solid oklch(from var(--ui-ink) l c h / 0.1);
+    border-radius: var(--ui-radius-circle);
+  }
+  .ui.loading.search > .ui.input > .icon::after {
+    border-color: var(--ui-text-muted) transparent transparent;
+    animation: ui-search-spin 0.6s linear infinite;
+  }
+
+  /* Disabled:  dimmed and inert. */
+  .ui.disabled.search {
+    cursor: default;
+    opacity: var(--ui-search-disabled-opacity);
+    pointer-events: none;
+  }
+  .ui.disabled.search > .disabled.input {
+    opacity: 1;
+  }
+}

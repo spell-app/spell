@@ -40,7 +40,20 @@ export const contentVocabulary = {
   description: "The main content block of a card, item, event, comment, modal, message, list item, step ...",
   attributes: [
     { name: "image", kind: "keyOnly", description: "In a modal:  an image beside the description (a flex row)." },
-    { name: "scrolling", kind: "keyOnly", description: "In a modal:  a capped height that scrolls." }
+    { name: "scrolling", kind: "keyOnly", description: "In a modal:  a capped height that scrolls." },
+    { name: "floated", kind: "valueAndKey", values: "floats", description: "Floats `left` or `right`." },
+    {
+      name: "text-align",
+      kind: "textAlign",
+      values: "alignments",
+      description: "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`)."
+    },
+    {
+      name: "vertical-align",
+      kind: "verticalAlign",
+      values: "verticalAlignments",
+      description: "In an item or a list:  `top`, `middle` or `bottom` against the image or icon beside it."
+    }
   ],
   events: [],
   slots: [{ name: "", description: "Content, usually other parts." }],
@@ -51,6 +64,7 @@ export const contentVocabulary = {
     { name: "in-feed", description: "Owned by a feed." },
     { name: "in-comment", description: "Owned by a comment." },
     { name: "in-modal", description: "Owned by a modal." },
+    { name: "in-flyout", description: "Owned by a flyout." },
     { name: "in-message", description: "Owned by a message." },
     { name: "in-list", description: "Owned by a list." },
     { name: "in-step", description: "Owned by a step." },
@@ -125,6 +139,7 @@ export const headerVocabulary = {
     { name: "in-card", description: "Owned by a card." },
     { name: "in-item", description: "Owned by a item." },
     { name: "in-modal", description: "Owned by a modal." },
+    { name: "in-flyout", description: "Owned by a flyout." },
     { name: "in-message", description: "Owned by a message." },
     { name: "in-list", description: "Owned by a list." },
     { name: "in-popup", description: "Owned by a popup." },
@@ -154,6 +169,7 @@ export const descriptionVocabulary = {
     { name: "in-item", description: "Owned by a item." },
     { name: "in-comment", description: "Owned by a comment." },
     { name: "in-modal", description: "Owned by a modal." },
+    { name: "in-flyout", description: "Owned by a flyout." },
     { name: "in-list", description: "Owned by a list." },
     { name: "in-step", description: "Owned by a step." },
     { name: "in-search", description: "Owned by a search." }
@@ -220,6 +236,7 @@ export const actionsVocabulary = {
   states: [
     { name: "in-comment", description: "Owned by a comment." },
     { name: "in-modal", description: "Owned by a modal." },
+    { name: "in-flyout", description: "Owned by a flyout." },
     { name: "in-toast", description: "Owned by a toast." }
   ],
   texts: []

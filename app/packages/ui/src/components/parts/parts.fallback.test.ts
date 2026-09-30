@@ -3,14 +3,22 @@ import { describe, expect, it } from "vitest"
 import { Fixture } from "$test/fixture"
 import { expectAccessible } from "$test/a11y"
 import { FallbackStub, type StubHost } from "$/components/fallback.stub"
+import { cardVocabulary } from "$/components/card/card.vocabulary.en"
+import { segmentVocabulary } from "$/components/segment/segment.vocabulary.en"
+import { PartContext } from "$/elements"
 
 import { ContentPartFallback } from "./parts.fallback"
+import { PART_VOCABULARIES } from "./parts.vocabulary.en"
 
 for (const tag of ["ui-meta", "ui-header", "ui-content", "ui-description"]) {
   FallbackStub.define(tag, (host, root, internals) =>
     ContentPartFallback.render(host, root, new Error("boom"), internals)
   )
 }
+// the owner registry, as `UIElement.define()` fills it:  the parts, a card (an owner) and a segment (a barrier)
+for (const vocabulary of PART_VOCABULARIES) PartContext.define(vocabulary, vocabulary.tag, true)
+PartContext.define(cardVocabulary, cardVocabulary.tag, false)
+PartContext.define(segmentVocabulary, segmentVocabulary.tag, false)
 
 describe("ContentPartFallback", () => {
   it("renders a bare noun div, keyed by the host's tag", async () => {
@@ -37,6 +45,19 @@ describe("ContentPartFallback", () => {
     expect(FallbackStub.shadow(plain).firstElementChild!.tagName).toBe("DIV")
     const link = Fixture.render<StubHost>(`<ui-header href="/x">Title</ui-header>`)
     expect(FallbackStub.shadow(link).firstElementChild!.tagName).toBe("A")
+  })
+
+  it("renders a header owned by any registered owner (a card) as a bare `header`, not past a barrier", () => {
+    const card = Fixture.render<HTMLElement>(
+      `<ui-card><ui-content><ui-header>Elliot</ui-header></ui-content></ui-card>`
+    )
+    const header = FallbackStub.shadow(card.querySelector<StubHost>("ui-header")!).firstElementChild!
+    expect(header.className).toBe("header")
+    const segment = Fixture.render<HTMLElement>(
+      `<ui-card><ui-segment><ui-header>Alone</ui-header></ui-segment></ui-card>`
+    )
+    const alone = FallbackStub.shadow(segment.querySelector<StubHost>("ui-header")!).firstElementChild!
+    expect(alone.className).toBe("ui header")
   })
 
   it("renders a header owned by another header as a bare `header`", () => {

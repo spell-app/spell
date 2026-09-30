@@ -38,6 +38,34 @@
     "./dist/table.js",
     "./dist/popup.js",
     "./dist/modal.js",
+    "./dist/transition.js",
+    "./dist/dimmer.js",
+    "./dist/flyout.js",
+    "./dist/sidebar.js",
+    "./dist/shape.js",
+    "./dist/card.js",
+    "./dist/items.js",
+    "./dist/feed.js",
+    "./dist/comment.js",
+    "./dist/statistic.js",
+    "./dist/step.js",
+    "./dist/rail.js",
+    "./dist/reveal.js",
+    "./dist/ad.js",
+    "./dist/emoji.js",
+    "./dist/select.js",
+    "./dist/search.js",
+    "./dist/progress.js",
+    "./dist/rating.js",
+    "./dist/slider.js",
+    "./dist/accordion.js",
+    "./dist/tab.js",
+    "./dist/toast.js",
+    "./dist/nag.js",
+    "./dist/sticky.js",
+    "./dist/visibility.js",
+    "./dist/embed.js",
+    "./dist/calendar.js",
     "./tools/demo/**"
   ],
   "main": "./dist/index.js",
@@ -160,6 +188,118 @@
       "types": "./dist/components/modal/index.d.ts",
       "import": "./dist/modal.js"
     },
+    "./transition": {
+      "types": "./dist/components/transition/index.d.ts",
+      "import": "./dist/transition.js"
+    },
+    "./dimmer": {
+      "types": "./dist/components/dimmer/index.d.ts",
+      "import": "./dist/dimmer.js"
+    },
+    "./flyout": {
+      "types": "./dist/components/flyout/index.d.ts",
+      "import": "./dist/flyout.js"
+    },
+    "./sidebar": {
+      "types": "./dist/components/sidebar/index.d.ts",
+      "import": "./dist/sidebar.js"
+    },
+    "./shape": {
+      "types": "./dist/components/shape/index.d.ts",
+      "import": "./dist/shape.js"
+    },
+    "./card": {
+      "types": "./dist/components/card/index.d.ts",
+      "import": "./dist/card.js"
+    },
+    "./items": {
+      "types": "./dist/components/items/index.d.ts",
+      "import": "./dist/items.js"
+    },
+    "./feed": {
+      "types": "./dist/components/feed/index.d.ts",
+      "import": "./dist/feed.js"
+    },
+    "./comment": {
+      "types": "./dist/components/comment/index.d.ts",
+      "import": "./dist/comment.js"
+    },
+    "./statistic": {
+      "types": "./dist/components/statistic/index.d.ts",
+      "import": "./dist/statistic.js"
+    },
+    "./step": {
+      "types": "./dist/components/step/index.d.ts",
+      "import": "./dist/step.js"
+    },
+    "./rail": {
+      "types": "./dist/components/rail/index.d.ts",
+      "import": "./dist/rail.js"
+    },
+    "./reveal": {
+      "types": "./dist/components/reveal/index.d.ts",
+      "import": "./dist/reveal.js"
+    },
+    "./ad": {
+      "types": "./dist/components/ad/index.d.ts",
+      "import": "./dist/ad.js"
+    },
+    "./emoji": {
+      "types": "./dist/components/emoji/index.d.ts",
+      "import": "./dist/emoji.js"
+    },
+    "./select": {
+      "types": "./dist/components/select/index.d.ts",
+      "import": "./dist/select.js"
+    },
+    "./search": {
+      "types": "./dist/components/search/index.d.ts",
+      "import": "./dist/search.js"
+    },
+    "./progress": {
+      "types": "./dist/components/progress/index.d.ts",
+      "import": "./dist/progress.js"
+    },
+    "./rating": {
+      "types": "./dist/components/rating/index.d.ts",
+      "import": "./dist/rating.js"
+    },
+    "./slider": {
+      "types": "./dist/components/slider/index.d.ts",
+      "import": "./dist/slider.js"
+    },
+    "./accordion": {
+      "types": "./dist/components/accordion/index.d.ts",
+      "import": "./dist/accordion.js"
+    },
+    "./tab": {
+      "types": "./dist/components/tab/index.d.ts",
+      "import": "./dist/tab.js"
+    },
+    "./toast": {
+      "types": "./dist/components/toast/index.d.ts",
+      "import": "./dist/toast.js"
+    },
+    "./nag": {
+      "types": "./dist/components/nag/index.d.ts",
+      "import": "./dist/nag.js"
+    },
+    "./sticky": {
+      "types": "./dist/components/sticky/index.d.ts",
+      "import": "./dist/sticky.js"
+    },
+    "./visibility": {
+      "types": "./dist/components/visibility/index.d.ts",
+      "import": "./dist/visibility.js"
+    },
+    "./embed": {
+      "types": "./dist/components/embed/index.d.ts",
+      "import": "./dist/embed.js"
+    },
+    "./calendar": {
+      "types": "./dist/components/calendar/index.d.ts",
+      "import": "./dist/calendar.js"
+    },
     "./styles": {
       "types": "./dist/styles/index.d.ts",
       "import": "./dist/styles.js"
@@ -206,12 +346,14 @@
     "/////// GENERATED": "",
     "gen:styles": "tsc -p scripts && tsx scripts/gen-styles.ts",
     "gen:icons": "tsc -p scripts && tsx scripts/gen-icons.ts",
+    "gen:emoji": "tsc -p scripts && tsx scripts/gen-emoji.ts",
     "/////// MANIFEST": "",
     "manifest": "custom-elements-manifest analyze --globs 'src/**/*.ts' 'src/**/*.tsx' --exclude 'src/**/*.test.ts' --exclude 'src/**/*.test.tsx'"
   },
   "dependencies": {
     "@spell/solid-element": "link:./packages/solid-element",
-    "lodash-es": "^4.18.1"
+    "lodash-es": "^4.18.1",
+    "temporal-polyfill": "^1.0.5"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",

@@ -6,19 +6,21 @@
  * - Class words come out through `ClassBuilder`, no `ui`:  `<ui-item color="red" selected link>` =>
  *   `red active link item` -- the owner's sheet (`list.css`, `menu.css`) styles them by context.
  * - Attributes name what ANY owner needs;  each description says who reads it.
+ * - `ownsParts`:  CONDITIONAL (`ConditionalOwner`) -- the item owns them only in the Items view (`<ui-items>`);  in a
+ *   list or menu they see through it to their owner.
  */
 
 import type { ComponentVocabulary } from "$/vocabulary"
 
 /****************
  * ### `<ui-item>`
- * One item of a dropdown (data), list or menu (a rendered `.item`).
+ * One item of a dropdown (data), list, menu or Items view (a rendered `.item`).
  ****************/
 export const itemVocabulary = {
   tag: "ui-item",
   noun: "item",
   ui: false,
-  description: "An item of a dropdown, list or menu.",
+  description: "An item of a dropdown, list, menu or Items view.",
   attributes: [
     {
       name: "color",
@@ -37,7 +39,11 @@ export const itemVocabulary = {
     { name: "text", kind: "string", description: "Dropdown:  text;  defaults to the text content." },
     { name: "description", kind: "string", description: "Dropdown:  secondary text, shown at the end." },
     { name: "icon", kind: "string", description: "Icon name, shown before the text." },
-    { name: "image", kind: "string", description: "Image URL, shown before the text (an avatar in a list)." },
+    {
+      name: "image",
+      kind: "string",
+      description: "Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view."
+    },
     { name: "flag", kind: "string", description: "Dropdown:  country code, shown as a flag before the text." },
     { name: "href", kind: "string", description: "List / menu:  renders a link (`<a>`)." },
     { name: "target", kind: "string", description: "Link target, with `href`." },
@@ -86,5 +92,6 @@ export const itemVocabulary = {
     { name: "selected", description: "Chosen (`selected` or `active`)." },
     { name: "disabled", description: "Can't be chosen." }
   ],
-  texts: []
+  texts: [],
+  ownsParts: ["content", "header", "meta", "description", "extra", "avatar"]
 } as const satisfies ComponentVocabulary

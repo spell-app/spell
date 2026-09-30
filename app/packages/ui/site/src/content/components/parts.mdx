@@ -13,8 +13,8 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 // One page for thirteen tags:  `ui-content`, `ui-header`, `ui-description`, `ui-meta`, `ui-extra`, `ui-actions`,
 // `ui-title`, `ui-summary`, `ui-date`, `ui-author`, `ui-avatar`, `ui-detail`, `ui-value`.  They all live in the
 // `parts` family (`src/scripts/components.ts` maps each tag there).  Only the standalone `ui-header` is a
-// component in its own right;  the rest are styled by their OWNER (card, item, modal ...), and no owner has
-// shipped yet, so those are shown as code, not live.
+// component in its own right;  the rest are styled by their OWNER (card, item, modal ...):  the "Owned parts"
+// examples use the real owners, as `src/components/parts/examples/elements/` does.
 
 <Section title="Types">
   <Example title="Page headers" description="Headers may be oriented to give the hierarchy of a section in the context of the page.  `level` picks `h1` ... `h6`.">
@@ -131,21 +131,51 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
   nearest owner and sets `:state(in-card)`, `:state(in-modal)` ... on itself, and `parts.css` keys on that state.  So
   the same markup reads differently in each owner:
 
-```html
-<!-- inside a card (when ui-card lands): the header is a card header -->
-<ui-card>
-  <ui-content>
-    <ui-header>Elliot Fu</ui-header>
-    <ui-meta><span>Friend</span></ui-meta>
-    <ui-description>Elliot is a film-maker from New York.</ui-description>
-  </ui-content>
-  <ui-extra>22 Friends</ui-extra>
-</ui-card>
-```
+  <Example title="A header in a card" description="Inside a `<ui-card>`, the parts are the card's header, meta, description and extra.">
+    <ui-card>
+      <ui-content>
+        <ui-header>Elliot Fu</ui-header>
+        <ui-meta><span>Friend</span></ui-meta>
+        <ui-description>Elliot is a film-maker from New York.</ui-description>
+      </ui-content>
+      <ui-extra>22 Friends</ui-extra>
+    </ui-card>
+  </Example>
+  <Example title="One meta, four owners" description="The same `<ui-meta>` in a card, an item, a feed event and a comment:  each owner styles it its own way.">
+    <ui-card>
+      <ui-content>
+        <ui-meta><span>Joined in 2013</span><a href="#friends">Friends</a></ui-meta>
+      </ui-content>
+    </ui-card>
+    <ui-items>
+      <ui-item>
+        <ui-content>
+          <ui-meta><span>Description</span><span>Stevie</span></ui-meta>
+        </ui-content>
+      </ui-item>
+    </ui-items>
+    <ui-feed>
+      <ui-event>
+        <ui-content>
+          <ui-meta><a href="#like">4 Likes</a><a href="#reply">Reply</a></ui-meta>
+        </ui-content>
+      </ui-event>
+    </ui-feed>
+    <ui-comments>
+      <ui-comment>
+        <ui-content>
+          <ui-author href="#matt">Matt</ui-author>
+          <ui-meta><span>Today at 5:42PM</span></ui-meta>
+        </ui-content>
+      </ui-comment>
+    </ui-comments>
+  </Example>
 
   Outside any owner, `ui-content`, `ui-description` and the rest are unstyled blocks, and a standalone `ui-header` is
-  Fomantic's `ui header`.  Owners will arrive with their components (card, item, feed, comment, modal, message, list,
-  step, accordion, popup, toast, search, statistic);  each part's `:state(in-*)` table below lists the owners it knows.
+  Fomantic's `ui header`.  The owners are [card](../card/), [items](../items/), [feed](../feed/),
+  [comment](../comment/), [statistic](../statistic/), [step](../step/), [message](../message/), [modal](../modal/),
+  [popup](../popup/) and [list](../list/), with more as families land;  each part's `:state(in-*)`
+  table below lists the owners it knows.
 </Section>
 
 <Section title="Behaviour">

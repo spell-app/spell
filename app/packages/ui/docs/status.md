@@ -5,11 +5,15 @@ as work lands ([AGENTS.md](../AGENTS.md)).  Last updated 2026-09-29.
 
 ## Working on now
 
-- Nothing in progress.  **popup** and **modal** landed 2026-09-29 (working tree, not committed yet).
+- Nothing running.  Phases B and C are combined and checked (2026-09-30):  3,053 browser + 145 fork tests,
+  build, measure (all checks clean), smoke (8 / 8), report, hot-reload test, site build (47 pages).  Staged,
+  waiting for Owen's go-ahead to commit.
+- Next (proposed):  make the per-component `--ui-<family>-*` tokens themeable from outside (see "To review").
+- Last committed:  **popup** (+ 4 extra positions) and **modal**, commit `4f4f304`.
 
 ## Legend
 
-✅ done · 🚧 in progress · ⬜ not started · 💤 deferred on purpose (see "Deferred") · — not applicable
+✅ done · 🚧 started, not finished (in a cell:  files for that part exist;  assigned-but-unstarted stays ⬜) · ⬜ not started · 💤 deferred on purpose (see "Deferred") · — not applicable
 
 - **Phase** = the plan's build order:  **A** foundation components, **B** views and remaining static
   components, **C** behaviour components.  Phase D (site, hardening, release) is its own table below.
@@ -31,60 +35,60 @@ links open in an editor tab;  `.md` links do too because `.vscode/settings.json`
 | Component | Phase | Tags | Status | Tests | Size | Keys | Docs | Visual | Notes |
 |---|:-:|---|:-:|--:|--:|:-:|:-:|:-:|---|
 | icon | A | `ui-icon`, `ui-icons` | ✅ | 47 | 5.72 | — | [✅](../site/src/content/components/icon.mdx) | 💤 | one ES module per glyph (FA7);  [`docs/icons.md`](icons.md) |
-| button | A | `ui-button`, `ui-buttons`, `ui-or` | ✅ | 79 | 11.77 | native | [✅](../site/src/content/components/button.mdx) | 💤 | |
+| button | A | `ui-button`, `ui-buttons`, `ui-or` | ✅ | 81 | 11.95 | native | [✅](../site/src/content/components/button.mdx) | 💤 | |
 | label | A | `ui-label`, `ui-labels` | ✅ | 59 | 8.06 | — | [✅](../site/src/content/components/label.mdx) | 💤 | |
-| content parts | A | `ui-content`, `ui-header`, `ui-description`, `ui-meta`, `ui-extra`, `ui-actions`, `ui-title`, `ui-summary`, `ui-date`, `ui-author`, `ui-avatar`, `ui-detail`, `ui-value` | ✅ | 99 | 14.41 | — | [✅](../site/src/content/components/parts.mdx) | 💤 | styled by owner context |
+| content parts | A | `ui-content`, `ui-header`, `ui-description`, `ui-meta`, `ui-extra`, `ui-actions`, `ui-title`, `ui-summary`, `ui-date`, `ui-author`, `ui-avatar`, `ui-detail`, `ui-value` | ✅ | 100 | 14.88 | — | [✅](../site/src/content/components/parts.mdx) | 💤 | styled by owner context |
 | divider | A | `ui-divider` | ✅ | 30 | 3.77 | — | [✅](../site/src/content/components/divider.mdx) | 💤 | |
-| segment | A | `ui-segment`, `ui-segments` | ✅ | 56 | 7.19 | — | [✅](../site/src/content/components/segment.mdx) | 💤 | |
+| segment | A | `ui-segment`, `ui-segments` | ✅ | 57 | 7.20 | — | [✅](../site/src/content/components/segment.mdx) | 💤 | |
 | container | A | `ui-container` | ✅ | 26 | 3.20 | — | [✅](../site/src/content/components/container.mdx) | 💤 | |
-| grid | A | `ui-grid`, `ui-row`, `ui-column` | ✅ | 69 | 7.78 | — | ⬜ | 💤 | stackable / doubling by container query |
-| image | A | `ui-image`, `ui-images` | ✅ | 49 | 5.48 | — | ⬜ | 💤 | |
-| text | A | `ui-text` | ✅ | 32 | 2.70 | — | ⬜ | 💤 | |
-| flag | A | `ui-flag` | ✅ | 38 | 6.05 | — | ⬜ | 💤 | |
-| loader | A | `ui-loader` | ✅ | 37 | 4.21 | — | ⬜ | 💤 | |
-| placeholder | A | `ui-placeholder` (+ `-header`, `-paragraph`, `-line`, `-image`) | ✅ | 40 | 5.82 | — | ⬜ | 💤 | |
-| input | A | `ui-input`, `ui-textarea` | ✅ | 62 | 10.11 | ✅ | ⬜ | 💤 | form-associated |
-| checkbox | A | `ui-checkbox`, `ui-radio` | ✅ | 54 | 9.11 | ✅ | ⬜ | 💤 | standard / radio / slider / toggle;  `checked` aliases `selected` |
-| form | A | `ui-form`, `ui-field`, `ui-fields` | ✅ | 52 | 10.52 | ✅ | ⬜ | 💤 | Fomantic's validation rules |
-| message | A | `ui-message` | ✅ | 50 | 5.60 | — | ⬜ | 💤 | |
-| item | A | `ui-item` | ✅ | 31 | 4.77 | — | ⬜ | 💤 | ONE generic item for dropdown / list / menu (and the Items view);  `active` aliases `selected` |
-| list | A | `ui-list` | ✅ | 75 | 6.75 | ✅ | ⬜ | 💤 | |
-| table | A | `ui-table` | ✅ | 76 | 13.36 | ✅ | ⬜ | 💤 | native `<table>` in light DOM;  data mode (`rows`, `columnDefs`), sorting |
-| menu | A | `ui-menu` | ✅ | 71 | 9.78 | ✅ | ⬜ | 💤 | `<nav>` by default, `interactive` menubar;  nested `ui-menu` = sub-menu |
-| breadcrumb | A | `ui-breadcrumb`, `ui-breadcrumb-section` | ✅ | 36 | 4.99 | native | ⬜ | 💤 | |
-| card | B | `ui-card`, `ui-cards` | ⬜ | | | | | | |
-| items (view) | B | `ui-items` + the generic `ui-item` | ⬜ | | | | | | no second item tag (decided 2026-09-29) |
-| feed | B | `ui-feed` | ⬜ | | | | | | |
-| comment | B | `ui-comment`, `ui-comments` | ⬜ | | | | | | |
-| statistic | B | `ui-statistic`, `ui-statistics` | ⬜ | | | | | | |
-| step | B | `ui-step`, `ui-steps` | ⬜ | | | | | | |
-| rail | B | `ui-rail` | ⬜ | | | | | | |
-| reveal | B | `ui-reveal` | ⬜ | | | | | | |
-| ad | B | `ui-ad` | ⬜ | | | | | | |
-| emoji | B | `ui-emoji` | ⬜ | | | | | | |
-| dropdown | C | `ui-dropdown` (+ `ui-item`) | ✅ | 60 | 16.27 | ✅ | [✅](../site/src/content/components/dropdown.mdx) | 💤 | built early, as the benchmark component |
-| popup | C | `ui-popup`, `[data-tooltip]` | ✅ | 71 | 7.99 | ✅ | ⬜ | 💤 | popover host, CSS anchor positioning only (Fomantic's 8 positions + 4 of ours, flips);  `on` hover / focus / click / manual;  tooltip or non-modal dialog ARIA;  CSS-only tooltip in `native.css` |
-| modal | C | `ui-modal`, `UI.modals.*` | ✅ | 61 | 8.41 | ✅ | ⬜ | 💤 | native `<dialog>` + `showModal()`, `::backdrop` dimmer;  `closedby`, approve / deny, `--show` invoker command;  `UI.modals.confirm/alert/prompt` |
-| transition | C | `ui-transition` | ⬜ | | | | | | `UI.transitions` service exists |
-| dimmer | C | `ui-dimmer` | ⬜ | | | | | | modal uses `<dialog>::backdrop` instead |
-| select | C | `ui-select` | ⬜ | | | | | | customizable `<select>` + fallback |
-| search | C | `ui-search` | ⬜ | | | | | | |
-| flyout | C | `ui-flyout` | ⬜ | | | | | | |
-| sidebar | C | `ui-sidebar`, `ui-pushable`, `ui-pusher` | ⬜ | | | | | | |
-| accordion | C | `ui-accordion` | ⬜ | | | | | | |
-| tab | C | `ui-tabs`, `ui-tab`, `ui-tab-pane` | ⬜ | | | | | | |
-| progress | C | `ui-progress` | ⬜ | | | | | | |
-| rating | C | `ui-rating` | ⬜ | | | | | | |
-| slider | C | `ui-slider` | ⬜ | | | | | | |
-| calendar | C | `ui-calendar` | ⬜ | | | | | | Temporal polyfill |
-| toast | C | `ui-toast`, `UI.toast()` | ⬜ | | | | | | `UI.toasts` service stub exists |
-| sticky | C | `ui-sticky` | ⬜ | | | | | | |
-| embed | C | `ui-embed` | ⬜ | | | | | | |
-| shape | C | `ui-shape` | ⬜ | | | | | | |
-| nag | C | `ui-nag` | ⬜ | | | | | | |
-| visibility | C | `ui-visibility`, `UI.observeVisibility()` | ⬜ | | | | | | |
+| grid | A | `ui-grid`, `ui-row`, `ui-column` | ✅ | 69 | 7.78 | — | [✅](../site/src/content/components/grid.mdx) | 💤 | stackable / doubling by container query |
+| image | A | `ui-image`, `ui-images` | ✅ | 49 | 5.48 | — | [✅](../site/src/content/components/image.mdx) | 💤 | |
+| text | A | `ui-text` | ✅ | 32 | 2.70 | — | [✅](../site/src/content/components/text.mdx) | 💤 | |
+| flag | A | `ui-flag` | ✅ | 38 | 6.05 | — | [✅](../site/src/content/components/flag.mdx) | 💤 | |
+| loader | A | `ui-loader` | ✅ | 37 | 4.21 | — | [✅](../site/src/content/components/loader.mdx) | 💤 | |
+| placeholder | A | `ui-placeholder` (+ `-header`, `-paragraph`, `-line`, `-image`) | ✅ | 40 | 5.82 | — | [✅](../site/src/content/components/placeholder.mdx) | 💤 | |
+| input | A | `ui-input`, `ui-textarea` | ✅ | 62 | 10.11 | ✅ | [✅](../site/src/content/components/input.mdx) | 💤 | form-associated |
+| checkbox | A | `ui-checkbox`, `ui-radio` | ✅ | 54 | 9.11 | ✅ | [✅](../site/src/content/components/checkbox.mdx) | 💤 | standard / radio / slider / toggle;  `checked` aliases `selected` |
+| form | A | `ui-form`, `ui-field`, `ui-fields` | ✅ | 52 | 10.52 | ✅ | [✅](../site/src/content/components/form.mdx) | 💤 | Fomantic's validation rules |
+| message | A | `ui-message` | ✅ | 50 | 5.60 | — | [✅](../site/src/content/components/message.mdx) | 💤 | |
+| item | A | `ui-item` | ✅ | 31 | 4.91 | — | [✅](../site/src/content/components/item.mdx) | 💤 | ONE generic item for dropdown / list / menu (and the Items view);  `active` aliases `selected` |
+| list | A | `ui-list` | ✅ | 75 | 6.75 | ✅ | [✅](../site/src/content/components/list.mdx) | 💤 | |
+| table | A | `ui-table` | ✅ | 76 | 13.36 | ✅ | [✅](../site/src/content/components/table.mdx) | 💤 | native `<table>` in light DOM;  data mode (`rows`, `columnDefs`), sorting |
+| menu | A | `ui-menu` | ✅ | 72 | 9.79 | ✅ | [✅](../site/src/content/components/menu.mdx) | 💤 | `<nav>` by default, `interactive` menubar;  nested `ui-menu` = sub-menu |
+| breadcrumb | A | `ui-breadcrumb`, `ui-breadcrumb-section` | ✅ | 36 | 4.99 | native | [✅](../site/src/content/components/breadcrumb.mdx) | 💤 | |
+| card | B | `ui-card`, `ui-cards` | ✅ | 60 | 8.06 | native | [✅](../site/src/content/components/card.mdx) | 💤 | `<article>`, a link card is one `<a>`;  shorthands render static parts;  a group hands its cards its variations;  `columns`, doubling / stackable by container query |
+| items (view) | B | `ui-items` + the generic `ui-item` | ✅ | 45 | 4.00 | native | [✅](../site/src/content/components/items.mdx) | 💤 | no second item tag (decided 2026-09-29);  the item owns its parts here only (`ConditionalOwner`);  stacks by container query |
+| feed | B | `ui-feed`, `ui-event` | ✅ | 43 | 5.67 | — | [✅](../site/src/content/components/feed.mdx) | 💤 | a list of `listitem` events;  the feed owns the parts (an event is transparent);  image / icon / text labels, ordered by CSS counters, connected |
+| comment | B | `ui-comment`, `ui-comments` | ✅ | 41 | 4.39 | — | [✅](../site/src/content/components/comment.mdx) | 💤 | `<article>` comments owning their parts;  a list inside a comment is its thread;  threaded, minimal (actions show on hover or focus), collapsed, `reply` slot |
+| statistic | B | `ui-statistic`, `ui-statistics` | ✅ | 47 | 4.77 | — | [✅](../site/src/content/components/statistic.mdx) | 💤 | value / label are the generic parts (`<ui-value>`, `<ui-label>`) or shorthands;  group `stackable` by container query |
+| step | B | `ui-step`, `ui-steps` | ✅ | 52 | 8.60 | native | [✅](../site/src/content/components/step.mdx) | 💤 | `<ol>` + `listitem` steps, `aria-current="step"`;  stacks below 768px of the GROUP (container query);  circular steps too;  `active` aliases `selected` |
+| rail | B | `ui-rail` | ✅ | 21 | 2.88 | — | [✅](../site/src/content/components/rail.mdx) | 💤 | `position="left\|right"` for the side |
+| reveal | B | `ui-reveal` | ✅ | 27 | 4.05 | ✅ | [✅](../site/src/content/components/reveal.mdx) | 💤 | `visible` / `hidden` slots;  reveals on hover, `active` AND focus (a tab stop unless the content is focusable);  instant under reduced motion |
+| ad | B | `ui-ad` | ✅ | 39 | 3.44 | — | [✅](../site/src/content/components/ad.mdx) | 💤 | IAB units as `unit="medium rectangle"` |
+| emoji | B | `ui-emoji` | ✅ | 25 | 4.01 | — | [✅](../site/src/content/components/emoji.mdx) | 💤 | NATIVE Unicode emoji from Fomantic's 3,808 names, lazy data chunks (`scripts/gen-emoji.ts`), no sprites / CDN |
+| dropdown | C | `ui-dropdown` (+ `ui-item`) | ✅ | 60 | 16.26 | ✅ | [✅](../site/src/content/components/dropdown.mdx) | 💤 | built early, as the benchmark component |
+| popup | C | `ui-popup`, `[data-tooltip]` | ✅ | 71 | 8.33 | ✅ | [✅](../site/src/content/components/popup.mdx) | 💤 | popover host, CSS anchor positioning only (Fomantic's 8 positions + 4 of ours, flips);  `on` hover / focus / click / manual;  tooltip or non-modal dialog ARIA;  CSS-only tooltip in `native.css` |
+| modal | C | `ui-modal`, `UI.modals.*` | ✅ | 61 | 8.63 | ✅ | [✅](../site/src/content/components/modal.mdx) | 💤 | native `<dialog>` + `showModal()`, `::backdrop` dimmer;  `closedby`, approve / deny, `--show` invoker command;  `UI.modals.confirm/alert/prompt` |
+| transition | C | `ui-transition` | ✅ | 32 | 4.90 | ✅ | ⬜ | 💤 | the `animations.css` catalogue through `UI.transitions`;  `visible`, host `show()` / `hide()` / `toggle()` / `transition(name)`, invoker commands;  Fomantic's queue;  reduced motion |
+| dimmer | C | `ui-dimmer` | ✅ | 36 | 6.26 | ✅ | ⬜ | 💤 | element dimmer over its parent;  `page` = a MODAL `<dialog>`;  `on` hover / click (hover reachable by Tab);  `blurring` by `backdrop-filter`;  `--ui-dimmer-*` tokens shared with the modal's `::backdrop` |
+| select | C | `ui-select` | ✅ | 42 | 7.97 | native | [✅](../site/src/content/components/select.mdx) | 💤 | a native `<select>`:  the customizable select (`appearance: base-select`) where supported, else the plain picker in the same closed look;  groups, `multiple`, form-associated;  [`docs/grammar.md`](grammar.md) "Selects" (vs `ui-dropdown`) |
+| search | C | `ui-search` | ✅ | 48 | 12.68 | ✅ | [✅](../site/src/content/components/search.mdx) | 💤 | APG combobox + listbox popover (CSS anchored);  local `source` (`SearchMatcher`, Fomantic's matching) or remote `url` through `UI.api` (debounce, abort, cache);  `category`;  form-associated (the input's text) |
+| flyout | C | `ui-flyout` | ✅ | 34 | 5.15 | ✅ | ⬜ | 💤 | side modal on `<dialog>` + `showModal()`;  shares `<ui-modal>`'s controller (`DialogElement`, modal family);  four sides, word and column widths |
+| sidebar | C | `ui-sidebar`, `ui-pushable`, `ui-pusher` | ✅ | 36 | 7.81 | ✅ | ⬜ | 💤 | Fomantic's six transitions, four sides, widths;  modal drawer (`<dialog>` + `show()`, trap, `inert` dimmed pusher) or `persistent` `<aside>`;  pusher moved by tokens |
+| accordion | C | `ui-accordion` (+ `ui-title` / `ui-content` pairs) | ✅ | 52 | 6.97 | ✅ | ⬜ | 💤 | native `<details name>` per pair (manual slot assignment);  `open` = panel indexes;  cancelable `ui-open` / `ui-close`;  nested takes its parent's look;  `interpolate-size` animation |
+| tab | C | `ui-tabs`, `ui-tab` (the pane) | ✅ | 56 | 8.51 | ✅ | ⬜ | 💤 | APG tablist drawn from the panes' labels, styled by `menu.css`;  `activation`, `history` (URL hash), `lazy`, View Transitions;  no `ui-tab-pane`:  Fomantic's `.ui.tab` IS the pane |
+| progress | C | `ui-progress` | ✅ | 44 | 7.29 | — | [✅](../site/src/content/components/progress.mdx) | 💤 | the host is the `progressbar` (internals);  several bars, `indicating`, indeterminate filling / sliding / swinging, auto `success` at 100% |
+| rating | C | `ui-rating` | ✅ | 42 | 6.20 | ✅ | [✅](../site/src/content/components/rating.mdx) | 💤 | form-associated;  native radios in a `<fieldset role=radiogroup>`;  any icon name;  partial (display) values;  `clearable` |
+| slider | C | `ui-slider` | ✅ | 48 | 9.00 | ✅ | [✅](../site/src/content/components/slider.mdx) | 💤 | form-associated;  APG slider thumbs, `range` (two form entries), labeled / ticked, vertical, reversed;  positions by CSS ratio |
+| calendar | C | `ui-calendar` | ✅ | 58 | 15.28 | ✅ | ⬜ | 💤 | form-associated;  field + popover dialog (CSS anchored) or `inline`;  APG date-picker grid over Fomantic's year / month / day / hour / minute views;  `Temporal` (native, else `temporal-polyfill` from a lazy chunk) + `Intl` names, formats, 12 / 24 h;  typed text in the locale's order;  `min` / `max`, disabled dates / weekdays, ranges;  [`docs/grammar.md`](grammar.md) "Calendars" |
+| toast | C | `ui-toast`, `UI.toast()` | ✅ | 70 | 10.89 | ✅ | ⬜ | 💤 | in-place box, or `UI.toast()` in a popover container per position;  types / colours / inverted, icon, close icon, progress bar, countdown paused on hover / focus, actions (inline, basic, vertical, attached), `role=status` / `alert`, never takes focus |
+| sticky | C | `ui-sticky` | ✅ | 18 | 3.64 | — | ⬜ | 💤 | CSS `position: sticky`;  `:state(stuck)` / `:state(bound)`, `ui-stick` / `ui-unstick` from an `IntersectionObserver` on sentinels;  `offset`, `bottom-offset`, `pushing` |
+| embed | C | `ui-embed` | ✅ | 31 | 6.25 | ✅ | ⬜ | 💤 | play `<button>` placeholder, frame only on activation (no third-party request before);  YouTube (nocookie) / Vimeo / any http(s) `url`;  ratios, `autoplay`, focus into the frame |
+| shape | C | `ui-shape`, `ui-side` | ✅ | 28 | 6.00 | — | ⬜ | 💤 | Fomantic's flip geometry;  `active-index`, `direction`, host `flip()` / `next()` / `previous()`, invoker commands;  reduced motion swaps |
+| nag | C | `ui-nag` | ✅ | 35 | 5.95 | ✅ | ⬜ | 💤 | top / bottom, fixed / overlay;  opt-in `key` remembers the dismissal in local / session storage or a cookie, with expiry;  blocked storage tolerated |
+| visibility | C | `ui-visibility`, `UI.observeVisibility()` | ✅ | 18 (+8 runtime) | 3.58 | — | ⬜ | 💤 | runtime service `UI.visibility` on `IntersectionObserver`:  Fomantic's callbacks, `once` / `continuous`, `offset`;  lazy images (`type="image"`, `lazyImage()`) |
 | api | C | `UI.api` | ✅ | | | | ⬜ | — | runtime service;  no element |
-| state | C | (behaviour util) | ⬜ | | | | | | |
+| state | C | `ui-button` `active-text` / `inactive-text` | ✅ | 2 (in button) | — | native | ⬜ | 💤 | Fomantic's `state` behaviour as two button attributes, not an element;  a toggle with a state text drops `aria-pressed` (APG);  [`docs/grammar.md`](grammar.md) "State" |
 
 ## Foundation
 
@@ -92,8 +96,8 @@ links open in an editor tab;  `.md` links do too because `.vscode/settings.json`
 |---|:-:|---|
 | `@spell/solid-element` fork | ✅ | 145 tests;  upgrade, forms, lifecycle, error boundary, HMR, event-target and slot-owner fixes |
 | upstream PRs for the fork | 💤 | outlined in [`packages/solid-element/UPSTREAM.md`](../packages/solid-element/UPSTREAM.md);  nothing filed without Owen's go-ahead |
-| element core (`core`, `forms` entries) | ✅ | 14.9 kB + 7.3 kB |
-| `UI` runtime (lazy) | ✅ | 27.7 kB, budget < 50 kB;  [`docs/runtime.md`](runtime.md) |
+| element core (`core`, `forms` entries) | ✅ | 15.4 kB + 7.3 kB |
+| `UI` runtime (lazy) | ✅ | 29.3 kB, budget < 50 kB;  [`docs/runtime.md`](runtime.md) |
 | icons | ✅ | 20.5 kB lazy alias / name data;  [`docs/icons.md`](icons.md) |
 | styles, tokens, utilities, themes | ✅ | OKLCH, `light-dark()`, contrast-picked foregrounds |
 | native fallbacks | ✅ | every family;  [`docs/fallback.md`](fallback.md) |
@@ -105,7 +109,7 @@ links open in an editor tab;  `.md` links do too because `.vscode/settings.json`
 
 | Item | Status | Notes |
 |---|:-:|---|
-| docs pages | 🚧 | 8 of 24 families:  [button](../site/src/content/components/button.mdx), [container](../site/src/content/components/container.mdx), [divider](../site/src/content/components/divider.mdx), [dropdown](../site/src/content/components/dropdown.mdx), [icon](../site/src/content/components/icon.mdx), [label](../site/src/content/components/label.mdx), [parts](../site/src/content/components/parts.mdx), [segment](../site/src/content/components/segment.mdx) |
+| docs pages | 🚧 | 40 pages:  every built family of Phases A and B, plus dropdown, popup, modal, select, search, progress, rating and slider;  still to do:  accordion, tab, transition, dimmer, flyout, sidebar, shape, calendar, toast, nag, sticky, visibility, embed.  Pages:  [ad](../site/src/content/components/ad.mdx), [breadcrumb](../site/src/content/components/breadcrumb.mdx), [button](../site/src/content/components/button.mdx), [card](../site/src/content/components/card.mdx), [checkbox](../site/src/content/components/checkbox.mdx), [comment](../site/src/content/components/comment.mdx), [container](../site/src/content/components/container.mdx), [divider](../site/src/content/components/divider.mdx), [dropdown](../site/src/content/components/dropdown.mdx), [emoji](../site/src/content/components/emoji.mdx), [feed](../site/src/content/components/feed.mdx), [flag](../site/src/content/components/flag.mdx), [form](../site/src/content/components/form.mdx), [grid](../site/src/content/components/grid.mdx), [icon](../site/src/content/components/icon.mdx), [image](../site/src/content/components/image.mdx), [input](../site/src/content/components/input.mdx), [item](../site/src/content/components/item.mdx), [items](../site/src/content/components/items.mdx), [label](../site/src/content/components/label.mdx), [list](../site/src/content/components/list.mdx), [loader](../site/src/content/components/loader.mdx), [menu](../site/src/content/components/menu.mdx), [message](../site/src/content/components/message.mdx), [modal](../site/src/content/components/modal.mdx), [parts](../site/src/content/components/parts.mdx), [placeholder](../site/src/content/components/placeholder.mdx), [popup](../site/src/content/components/popup.mdx), [progress](../site/src/content/components/progress.mdx), [rail](../site/src/content/components/rail.mdx), [rating](../site/src/content/components/rating.mdx), [reveal](../site/src/content/components/reveal.mdx), [search](../site/src/content/components/search.mdx), [segment](../site/src/content/components/segment.mdx), [select](../site/src/content/components/select.mdx), [slider](../site/src/content/components/slider.mdx), [statistic](../site/src/content/components/statistic.mdx), [step](../site/src/content/components/step.mdx), [table](../site/src/content/components/table.mdx), [text](../site/src/content/components/text.mdx) |
 | theming guide | ✅ | [`site/src/pages/theming.mdx`](../site/src/pages/theming.mdx), [`docs/theming.md`](theming.md) |
 | translation contract | ✅ | [`docs/translation.md`](translation.md) (design only) |
 | kitchen sink | ⬜ | |
@@ -130,7 +134,19 @@ Decided or knowingly left for later;  each should be picked up where noted.
 - **Hydration** of server-rendered elements -- SSR renders; the client re-renders.
 - **List / menu:**  other components inside items (labels, buttons, inputs), Fomantic's fixed-menu examples.
 - **Table:**  virtualization of large data tables, `rowspan` when counting columns.
-- **Dimmer as its own element** -- modal uses `<dialog>::backdrop` for now.
+- **Dimmer:**  built (`<ui-dimmer>`), but the modal keeps its `<dialog>::backdrop` (themed by the same
+  `--ui-dimmer-*` tokens), so stacked modals each dim again -- the one shared page dimmer of Fomantic's
+  (`Overlays`' "dimmer coordination" TODO) isn't built;  partial dimmers (`top / center / bottom dimmer`), Fomantic's
+  `displayLoader` / `loaderText` (slot a `<ui-loader>`), `legacy`, custom scrollbars.
+- **Transition:**  group animations (`interval`, `reverse` over several children), `displayType`, `onBeforeShow` /
+  `onBeforeHide` hooks, start events (`onStart` / `onShow` / `onHide`:  only the end events fire).
+- **Flyout:**  Fomantic's JS-built flyouts (`$.flyout({ title, content, actions })`, like `UI.modals.*`),
+  `autoShow`, `keyboardShortcuts`, `.pusher` / `.fixed` pushing (a flyout always overlays;  that's `<ui-sidebar>`).
+- **Sidebar:**  `exclusive` (other sidebars hiding), `returnScroll`, `scrollLock`, `.fixed` children moving with the
+  pusher, `body.pushable` (a whole-page pushable is a `<ui-pushable>` of viewport height), the sidebar filling its
+  height with a menu (a `<ui-menu>`'s own box can't be stretched from outside:  use `inverted` on the sidebar).
+- **Shape:**  Fomantic's stage `width` / `height` settings (`next`, `auto`, px:  always `initial`), `jitter`,
+  `set next side` by selector (by index only), `allowRepeats`.
 - **Popup:**  Fomantic settings with no element equivalent yet -- `exclusive`, `hideOnScroll`, `offset` /
   `distanceAway`, `lastResort`, `boundary`;  `hoverable: false` (hover popups are always hoverable, WCAG 1.4.13);
   touch-specific triggers;  show / hide METHODS on the host (`open` is the API);  an arrow that follows a flip in
@@ -138,6 +154,73 @@ Decided or knowingly left for later;  each should be picked up where noted.
 - **Modal:**  `allowMultiple: false` (modals always stack), `detachable`, `observeChanges`, `blurring` / inverted
   dimmers, `legacy`;  the close icon OUTSIDE the box (the dialog clips it);  `UI.modals.*` with custom buttons
   beyond ok / cancel;  a slotted `<ui-header>` pushing past the close icon (parts don't know about it).
+- **Card:**  star / like icon looks and a `.dimmer` inside cards;  a slotted `<ui-button>` / `<ui-image>` spanning
+  the card's edge (no host box to widen:  use a plain `<img>` or the `image` shorthand);  spacing of paragraphs
+  straight inside a `<ui-content>` (a `<ui-description>`'s are spaced);  naming the `<article>` by its header.
+- **Items view:**  favorite / like icon looks;  a slotted `<img>` as a Fomantic `.image` wrapper with its own
+  `<img>` inside (a wrapper can't be sized from the item:  slot the `<img>` itself).
+- **Feed:**  like icons and their colours;  images inside a summary, a user or an `extra images` block (use
+  `<ui-images>`);  a `<ui-label>` inside the label box;  `multiline` text labels.
+- **Comment:**  the reply form's textarea height (Fomantic's 12em:  a `<ui-textarea>` sizes itself by `rows`).
+- **Statistic:**  a value's `<ui-image>` sized like Fomantic's `3rem` image (only a slotted plain `<img>` gets the
+  cap);  "a statistic right after another" is approximated as "not the first statistic among its siblings".
+- **Step:**  circular steps' `center aligned` / `bottom aligned` content (the parts have no alignment attributes);
+  RTL arrows;  an event of its own for `link` steps (the page listens for `click`).
+- **Reveal:**  `ui reveal image` / `circular` couplings (put `<ui-image circular>` in each slot);  a ribbon label
+  over the reveal;  detecting focusable CUSTOM elements (`<ui-button>`) in the content, which keeps the reveal's own
+  tab stop.
+- **Ad:**  a landmark of its own (`<aside>`):  several would share one name (axe `landmark-unique`).
+- **Emoji:**  Fomantic's Twemoji SVG sprites (and an opt-in SVG set for platforms without a colour emoji font);
+  `em[data-emoji]` markup;  names beyond Fomantic's 3,808 (apps use `EmojiData.register()`).
+- **Select:**  the customizable picker for `multiple` (a native list box everywhere);  the dropdown's other types
+  on a select (`search`, `inline`, `button`, `labeled`, `pointing`) and menu heights (`short`, `long`);
+  `ui-open` / `ui-close` (a native picker has no events for them);  a rows count for `multiple`;  rich slotted
+  option content (options are drawn from item DATA:  a select owns its `<option>`s).
+- **Search:**  Fomantic's "view all results" `action` link, `clearable` (Escape clears), custom result templates
+  (`templates`, `fields` mapping, `preserveHTML`), `onResponse` transforms, `hideDelay`, `cache: false`, the
+  `searchButton`;  following a result's `url` in a new tab from the keyboard;  local searches honour no
+  `search-delay` (they run per keystroke).
+- **Progress:**  the `.ui.segment > .ui.attached.progress` / card coupling (an attached progress sits in the flow);
+  opting out of the automatic `success` at 100% (Fomantic's `autoSuccess: false`);  Fomantic's state label texts
+  (`text.active` / `success` ...) and `{bar}` names;  `increment()` / `decrement()` methods (set `value`).
+- **Rating:**  Fomantic's text-shadow outline on coloured icons (an icon-font trick);  a preview of the focused point
+  (the `selected` preview follows the pointer only).
+- **Slider:**  `highlightRange` (active labels), thumb tooltips (`showThumbTooltip`), `restrictedLabels`, Fomantic's
+  `ui label` labels, `minRange` / `maxRange`, a `label-distance` attribute (fixed at Fomantic's 100px), `ticked`
+  without `labeled`;  keyboard control of a hovered but unfocused slider (Fomantic's `activateFocus`).
+- **Accordion:**  the accordion menu coupling (`.ui.accordion.menu`), Fomantic's `right` dropdown icon,
+  `closeNested`, `animateChildren` (content fading in), `on: "hover"` titles;  `open` / `close` / `toggle` as host
+  METHODS (the controller has `toggle()`;  the page sets `open`);  titles given as Fomantic class grammar
+  (`<div class="title">`) inside the element.
+- **Tab:**  rich tab labels (only `label` text + `icon`:  a label lives on the pane, the tab is drawn elsewhere);
+  Fomantic's remote panes (`path`, `apiSettings`, `cache`, `evaluateScripts`:  use `ui-show`'s `first`);  nested
+  `history` paths (`#outer/inner`) -- two `history` tab sets on a page share one hash;  `vertical right` tabs;  a
+  named View Transition for the pane area (the default crossfade runs);  switching panes in the native fallback.
+
+- **Toast:**  Fomantic's `.ui.message` / `.ui.card` toasts, image toasts (`showImage`), the left close icon,
+  `absolute` containers in an element (`context`) and full-width `attached` containers, `opacity`, showing a page's
+  `<ui-toast>` in a container (Fomantic's clone), re-showing a closed toast.  KNOWN LIMIT:  while a modal `<dialog>`
+  is open, everything outside it -- toast containers too -- is inert (checked in Chromium):  a toast counts down
+  but can't be clicked, focused or announced;  fix by moving the container into the top modal while it's open.
+- **Nag:**  the `.ui.nags` group;  `a.ui.nag` links;  Fomantic's `detachable` and `context` (the nag stays where it
+  is written);  the fade animation option (always `slide-down`).
+- **Sticky:**  Fomantic's `context` (stick within ANY element:  CSS sticks within the parent), `scrollContext`
+  (auto-detected), a direction-aware `pushing` for content taller than the screen (CSS `top` + `bottom` instead),
+  `observeChanges`, `onTop` / `onBottom` / `onReposition` / `onScroll`.
+- **Visibility:**  `onPassed` percentages, `type: 'fixed'` (use `<ui-sticky>`), `includeMargin`, `refreshOnLoad`,
+  `throttle`;  `continuous` / `onUpdate` fire at crossings, not every scrolled pixel;  the element measures against the
+  viewport only (the service takes a `context`).
+- **Calendar:**  multi-month (`multiMonth`, `monthOffset`), week numbers (`showWeekNumbers`), event dates
+  (`eventDates`) and disabled-date messages as tooltips, `enabledDates`, `disabledHours`, the `isDisabled()` callback,
+  `startMode`, `constantHeight: false`, `closable: false`, `on: 'focus'` (a click or ArrowDown opens:  opening on
+  focus fights Tab), `centuryBreak` / `currentCentury` settings (fixed at 60 / 2000), `monthFirst` (the locale's
+  order instead), custom `formatter` / `parser` functions, `touchReadonly`;  RTL arrow keys;  a range partner in
+  ANOTHER tree scope;  the native fallback's `inline`, locale and range behaviour.
+- **State:**  Fomantic's hover texts (`activate` / `deactivate` / `hover`:  the accessible name would change
+  under the pointer), `flash`, `sync`, the API-request states and the `automatic` input / progress defaults;
+  the button's native fallback shows the content instead of a state text.
+- **Embed:**  `embed` / `object` children, the player API (`onPause` / `onPlay` / `onStop` were unimplemented in
+  Fomantic too), `color` / `hd` player parameters, `onEmbed` rewriting parameters (use `parameters`).
 
 ## To review (Owen)
 
@@ -154,10 +237,24 @@ Built, but flagged for Owen's review before it's treated as settled.
   hoverable, dismissible with Escape, persistent);  Fomantic's default `hoverable: false` closed it when the
   pointer left the target, and there is no attribute to get that back.  Keep it always-on, or add an opt-out?
   ([`docs/grammar.md`](grammar.md) "Popups").  Flagged 2026-09-30.
+- **Emoji names** -- `<ui-emoji name>` uses Fomantic's 3,808 chat-style shortcodes (`thumbsup`, `flag_us`), from
+  its MIT `emoji.variables`, no new dependency.  Alternative:  official Unicode (CLDR) names or a fuller dataset
+  (`emojibase`) as a dev-only generator dependency.  Also:  `scripts/gen-emoji.ts`'s ~44 "show as emoji" code-point
+  ranges were written from memory, unverified (a miss only falls back to text style).  Flagged 2026-09-30.
+- **Label colour inheritance** -- a plain `<ui-label>` inside a coloured wrapper (`ui-red`) paints red:  label
+  passes `--ui-color` down to its children on purpose (coloured icons / details), so stopping the leak changes
+  that.  Statistic and menu now reset it.  Reset on label too, or keep it?  Flagged 2026-09-30.
+- **Component tokens can't be themed from outside** -- every family declares its `--ui-<family>-*` tokens on the
+  box INSIDE its shadow root, so `ui-button { --ui-button-radius: 20px }` (or on an ancestor) does nothing;  only
+  `::part()` and the global tokens work.  The plan promised per-component tokens as the theming surface, and the
+  older docs pages say "set it on the element".  Proposed fix (after the current work is combined):  each sheet
+  reads `var(--ui-button-radius, <default>)` through a private `--_` alias, so a value set on the page, an
+  ancestor, the host or a part all work, for elements and static markup alike.  Flagged 2026-09-30.
 
 ## Budgets
 
-- **Average component ≤ 4 kB gzip (plan) -- currently over:**  the families above average 7.7 kB own code.
+- **Average component ≤ 4 kB gzip (plan) -- currently over:**  the 53 families above average 7.2 kB own code.
   Gzipped separately, an average family is classes 3.1 kB, CSS 2.4 kB (a full port of Fomantic's variations),
   native fallback 1.7 kB, vocabulary 1.4 kB.  Not yet decided whether to raise the budget or trim.
-- Lazy runtime chunk < 50 kB gzip -- 27.7 kB.
+- Lazy runtime chunk < 50 kB gzip -- 29.3 kB.  Lazy data (emoji names, the Temporal polyfill) 60.7 kB, loaded
+  only when used.

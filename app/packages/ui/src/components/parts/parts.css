@@ -50,17 +50,22 @@
  * |                          |                                 | `color-scheme: dark`               | modal header -- everything else re-resolves its   |
  * |                          |                                 |                                    | `light-dark()` tokens from `color-scheme` alone   |
  * | `--ui-card-layout`       | `vertical` / `horizontal`       | card(s) `horizontal`               | content (no top rule, `flex-basis`), extra        |
+ * | `--ui-card-leading`      | `0` / `1`                       | card rendering a shorthand image / | first slotted content (keeps its top rule)        |
+ * |                          |                                 | content block before its slot      |                                                   |
  * | `--ui-item-layout`       | `row` / `stacked`               | items:  `stacked` below tablet     | content after an image                            |
  * |                          |                                 | unless `unstackable`               |                                                   |
  * | `--ui-item-state`        | `normal` / `hover`              | `link` items, on item hover        | header colour                                     |
- * | `--ui-comments-minimal`  | `0` / `1`                       | comments `minimal`                 | actions (hidden until the content is hovered)     |
+ * | `--ui-comments-minimal`  | `0` / `1`                       | comments `minimal`                 | actions (hidden until the content is hovered or   |
+ * |                          |                                 |                                    | holds focus)                                      |
  * | `--ui-modal-basic`       | `0` / `1`                       | modal `basic`                      | header, content, actions (transparent, no rules)  |
  * | `--ui-modal-header-size` | a length                        | modal sizes                        | header font size                                  |
  * | `--ui-message-layout`    | `block` / `icon`                | message `icon`                     | content (flex item beside the icon)               |
+ * | `--ui-event-label`       | `0` / `1`                       | feed event showing a label (a      | content (the margin beside the label)             |
+ * |                          |                                 | slotted one, or a shorthand)       |                                                   |
  * | `--ui-list-layout`       | `vertical` / `horizontal`       | list `horizontal`                  | content after an icon / image                     |
- * | `--ui-item-media`        | `0` / `1` / `image`             | a list / menu item with an icon or | content:  a table cell beside it (`image`:  an    |
- * |                          |                                 | image box (`item.css`;  `image`:   | inline block beside the `<img>`)                  |
- * |                          |                                 | `list.css`)                        |                                                   |
+ * | `--ui-item-media`        | `0` / `1` / `image`             | a list / menu / Items view item    | content:  a table cell beside it in a list        |
+ * |                          |                                 | with an icon or image box          | (`image`:  an inline block beside the `<img>`),   |
+ * |                          |                                 | (`item.css`;  `image`:  `list.css`)| padded beside it in the Items view                |
  * | `--ui-list-align`        | `top` / `middle` / `bottom`     | list `vertical-align`, horizontal  | content's vertical alignment                      |
  * | `--ui-statistic-layout`  | `vertical` / `horizontal`       | statistic(s) `horizontal`          | value, label                                      |
  * | `--ui-statistic-value-size` | a length                     | statistic sizes                    | value font size (text values:  `-text-value-size`) |
@@ -367,6 +372,12 @@
   .in-card.content:first-child {
     border-top: none;
   }
+  /* ... unless the card rendered a shorthand block before its slot:  then the first slotted content isn't first. */
+  @container style(--ui-card-leading: 1) {
+    :host(:state(in-card):first-child) > .content {
+      border-top: var(--ui-border-width) solid var(--ui-card-divider-color, var(--ui-border-color-internal));
+    }
+  }
   :host(:state(in-card)) > .content::after,
   .in-card.content::after {
     content: " ";
@@ -476,19 +487,13 @@
     clear: both;
     visibility: hidden;
   }
-  /* After the item's image. */
+  /* After the item's image;  the Items view narrows the distance in a tablet-wide group (`items.css`). */
   :host(:state(in-item):not(:first-child)) > .content,
   .in-item.content:not(:first-child) {
     align-self: start;
     width: auto;
     min-width: 0;
     padding-inline-start: var(--ui-item-content-distance, 1.5em);
-  }
-  @media (--ui-tablet) {
-    :host(:state(in-item):not(:first-child)) > .content,
-    .in-item.content:not(:first-child) {
-      padding-inline-start: var(--ui-item-content-distance-tablet, 1em);
-    }
   }
   :host(:state(in-item)) > .header,
   .in-item.header {
@@ -557,6 +562,15 @@
     display: inline-block;
     overflow: hidden;
     border-radius: var(--ui-radius-circle);
+  }
+  /* Paragraphs of a card's or an item's description:  Fomantic's `.content p`. */
+  :host(:is(:state(in-card), :state(in-item))) > .description > ::slotted(p),
+  :is(.in-card, .in-item).description > p {
+    margin: 0 0 0.5em;
+  }
+  :host(:is(:state(in-card), :state(in-item))) > .description > ::slotted(p:last-child),
+  :is(.in-card, .in-item).description > p:last-child {
+    margin-bottom: 0;
   }
 
   /* ## in-feed:  `.ui.feed > .event > .content > .summary / .date / .meta / .extra`, `.user` => author. */
@@ -668,8 +682,9 @@
   .in-comment.content:not(:first-child) {
     margin-inline-start: var(--ui-comment-content-margin, 3.5em);
   }
-  :host(:state(in-comment)) > .content:hover,
-  .in-comment.content:hover {
+  /* Hovered, or holding keyboard focus:  a minimal comment's actions show (never invisible while focused). */
+  :host(:state(in-comment)) > .content:is(:hover, :focus-within),
+  .in-comment.content:is(:hover, :focus-within) {
     --ui-comment-hover: 1;
   }
   :host(:state(in-comment)) > .author,
@@ -835,6 +850,47 @@
     }
   }
 
+  /*
+   * ## in-flyout:  `.ui.flyout > .header / .content / .actions`.  The flyout is a column:  its content grows, so
+   * the actions sit at the bottom;  look tokens (`--ui-flyout-*`) and `--ui-inverted` come from `flyout.css`.
+   */
+  :host(:state(in-flyout)) > .header,
+  .in-flyout.header {
+    display: block;
+    margin: 0;
+    padding: 1.25em 1.5em;
+    border-bottom: var(--ui-border-width) solid var(--ui-border-color);
+    background: var(--ui-flyout-header-background, var(--ui-flyout-background, var(--ui-surface)));
+    color: var(--ui-flyout-header-color, var(--ui-text-dark));
+    font-family: var(--ui-font-family-heading);
+    font-size: var(--ui-flyout-header-size, 1.28571em);
+    font-weight: var(--ui-font-weight-bold);
+    line-height: var(--ui-line-height-heading);
+  }
+  :host(:state(in-flyout)) > .content,
+  .in-flyout.content {
+    box-sizing: border-box;
+    display: block;
+    flex: 1 0 auto;
+    width: 100%;
+    padding: var(--ui-flyout-content-padding, 1.5em);
+    background: var(--ui-flyout-content-background, var(--ui-flyout-background, var(--ui-surface)));
+    font-size: 1em;
+    line-height: 1.4;
+  }
+  :host(:state(in-flyout)) > .actions,
+  .in-flyout.actions {
+    flex: none;
+    padding: var(--ui-flyout-actions-padding, 1em);
+    border-top: var(--ui-border-width) solid var(--ui-border-color);
+    background: var(--ui-flyout-actions-background, var(--ui-surface-muted));
+    text-align: right;
+  }
+  :host(:state(in-flyout)) > .actions > ::slotted(*),
+  .in-flyout.actions > * {
+    margin-inline-start: var(--ui-flyout-button-distance, 0.75em);
+  }
+
   /* ## in-message:  `.ui.message .header`, `.ui.icon.message > .content`. */
   :host(:state(in-message)) > .header,
   .in-message.header {
@@ -928,6 +984,18 @@
     text-align: center;
     text-transform: uppercase;
   }
+  /* Image and icon values (`statistic.less` "Types"):  an image no taller than 3 lines of text;  an icon at
+     full opacity with no margin of its own (`<ui-icon>` reads the owner tokens). */
+  :host(:state(in-statistic)) > .value ::slotted(img),
+  .in-statistic.value img {
+    max-height: calc(var(--ui-font-size) * 3);
+    vertical-align: baseline;
+  }
+  :host(:state(in-statistic)) > .value,
+  .in-statistic.value {
+    --ui-icon-owner-margin: 0;
+    --ui-icon-owner-opacity: 1;
+  }
 
   /* ## in-step:  `.ui.steps .step > .content`, `.step .title / .description`. */
   :host(:state(in-step)) > .content,
@@ -935,6 +1003,9 @@
     display: block;
     flex: 0 1 auto;
     align-self: center;
+    /* Circular steps move the content off their ring (`step.css`). */
+    margin: var(--ui-step-content-margin, 0);
+    padding: var(--ui-step-content-padding, 0);
   }
   :host(:state(in-step)) > .title,
   .in-step.title {
@@ -1169,10 +1240,26 @@
     }
   }
 
+  /* An item showing its own image (`<ui-item image>`, `item.css`):  the content beside it, as after a slotted one. */
+  @container style(--ui-item-media: 1) {
+    :host(:state(in-item)) > .content {
+      align-self: start;
+      width: auto;
+      min-width: 0;
+      padding-inline-start: var(--ui-item-content-distance, 1.5em);
+    }
+  }
+
   /* Stacked items (mobile, not `unstackable`):  content below the image. */
   @container style(--ui-item-layout: stacked) {
     :host(:state(in-item):not(:first-child)) > .content,
     .in-item.content:not(:first-child) {
+      display: block;
+      padding: var(--ui-item-content-distance-mobile, 1.5em) 0 0;
+    }
+  }
+  @container style(--ui-item-layout: stacked) and style(--ui-item-media: 1) {
+    :host(:state(in-item)) > .content {
       display: block;
       padding: var(--ui-item-content-distance-mobile, 1.5em) 0 0;
     }
@@ -1245,6 +1332,60 @@
       padding-inline-start: 0;
       vertical-align: middle;
     }
+  }
+
+  /* A feed event showing a label (slotted, or `<ui-event icon / image / label>`):  the content beside it, as after a
+     slotted label. */
+  @container style(--ui-event-label: 1) {
+    :host(:state(in-feed)) > .content {
+      margin: 0.5em 0 0.35714em 1.14285em;
+    }
+  }
+
+  /* Floated and aligned content (`right floated content`, `center aligned content`):  Fomantic's
+     `.ui.card [class*="right floated"]`, `.ui.list .item > [class*="middle aligned"].content`, and the Items view's
+     `.image + [class*="middle aligned"].content`. */
+  .content[class*="left floated"] {
+    float: left;
+  }
+  .content[class*="right floated"] {
+    float: right;
+  }
+  .content[class*="left aligned"] {
+    text-align: left;
+  }
+  .content[class*="center aligned"] {
+    text-align: center;
+  }
+  .content[class*="right aligned"] {
+    text-align: right;
+  }
+  .content.justified {
+    text-align: justify;
+  }
+  :host(:state(in-item)) > .content[class*="top aligned"],
+  .in-item.content[class*="top aligned"] {
+    align-self: flex-start;
+  }
+  :host(:state(in-item)) > .content[class*="middle aligned"],
+  .in-item.content[class*="middle aligned"] {
+    align-self: center;
+  }
+  :host(:state(in-item)) > .content[class*="bottom aligned"],
+  .in-item.content[class*="bottom aligned"] {
+    align-self: flex-end;
+  }
+  :host(:state(in-list)) > .content[class*="top aligned"],
+  .in-list.content[class*="top aligned"] {
+    vertical-align: top;
+  }
+  :host(:state(in-list)) > .content[class*="middle aligned"],
+  .in-list.content[class*="middle aligned"] {
+    vertical-align: middle;
+  }
+  :host(:state(in-list)) > .content[class*="bottom aligned"],
+  .in-list.content[class*="bottom aligned"] {
+    vertical-align: bottom;
   }
 
   /* List item showing an icon / image box of its own (`<ui-item icon>`, `item.css`):  the content is the table
@@ -1373,7 +1514,7 @@
   @container style(--ui-step-state: active) {
     :host(:state(in-step)) > .title,
     .in-step.title {
-      color: var(--ui-link);
+      color: var(--ui-step-active-title-color, var(--ui-link));
     }
   }
   @container style(--ui-step-state: disabled) {
