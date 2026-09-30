@@ -85,6 +85,12 @@ describe("segment.css examples", () => {
     expect(getComputedStyle(vertical[1]!).borderTopStyle).toBe("solid")
   })
 
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt([...foundationCSS, segmentCSS])
+    const root = Fixture.render(`<div style="--ui-segment-radius: 12px"><div class="ui segment">x</div></div>`)
+    expect(getComputedStyle(root.querySelector(".ui.segment")!).borderTopLeftRadius).toBe("12px")
+  })
+
   it("colours the top edge, and fills inverted ones in the dark scheme", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
     const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)

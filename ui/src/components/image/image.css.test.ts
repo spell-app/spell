@@ -174,6 +174,18 @@ describe("image.css groups", () => {
   })
 })
 
+describe("image.css tokens", () => {
+  it("takes a public token from a wrapper or the image itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, imageCSS])
+    const root = Fixture.render(
+      `<div style="--ui-image-rounded-radius: 20px"><img class="ui rounded image" src="${SQUARE}" alt=""></div>` +
+        `<img class="ui bordered image" src="${SQUARE}" alt="" style="--ui-image-border: 3px solid red">`
+    )
+    expect(getComputedStyle(root.firstElementChild!).borderTopLeftRadius).toBe("20px")
+    expect(getComputedStyle(root.nextElementSibling!).borderTopWidth).toBe("3px")
+  })
+})
+
 describe("image.css in shadow roots", () => {
   it("renders the host as contents and the root as the image box", () => {
     Sheets.adopt(foundationCSS)

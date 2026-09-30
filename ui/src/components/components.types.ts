@@ -104,12 +104,13 @@ export type ItemOwner = {
 ////////////////
 
 /**
- * Custom property `dropdown.css` reads for the anchor name, e.g. `--ui-dropdown-anchor: --ui-dropdown-7`.
+ * Custom property `dropdown.css` reads for the anchor name, e.g. `--_ui-dropdown-anchor: --ui-dropdown-7`.
  * - The element sets it INLINE on its root, to a per-instance dashed ident (`UI.ids`);  the root's
  *   `anchor-name` and the menu's `position-anchor` both read it.
+ * - PRIVATE (`--_ui-`):  a switch the element decides, never a theming surface.
  * - Falls back to `--ui-dropdown`, which is enough inside one shadow root.
  */
-export const DROPDOWN_ANCHOR_PROPERTY = "--ui-dropdown-anchor"
+export const DROPDOWN_ANCHOR_PROPERTY = "--_ui-dropdown-anchor"
 
 ////////////////
 // ## Icon
@@ -117,14 +118,16 @@ export const DROPDOWN_ANCHOR_PROPERTY = "--ui-dropdown-anchor"
 
 /**
  * Custom property an owner sets on itself to steer a slotted `<ui-icon>` (a `display: contents` host takes no box
- * styles from `::slotted()`), e.g. `--ui-icon-owner-margin: 0 0.75em 0 0` on a label root.  See `icon.css`.
+ * styles from `::slotted()`), e.g. `--_ui-icon-owner-margin: 0 0.75em 0 0` on a label root.  See `icon.css`.
+ * - PRIVATE (`--_ui-`):  an internal switch between components, never a theming surface
+ *   (`docs/theming.md` "Owner tokens").
  */
 export type IconOwnerToken =
-  | "--ui-icon-owner-display"
-  | "--ui-icon-owner-size"
-  | "--ui-icon-owner-margin"
-  | "--ui-icon-owner-opacity"
-  | "--ui-icon-owner-align"
+  | "--_ui-icon-owner-display"
+  | "--_ui-icon-owner-size"
+  | "--_ui-icon-owner-margin"
+  | "--_ui-icon-owner-opacity"
+  | "--_ui-icon-owner-align"
 
 ////////////////
 // ## Label
@@ -146,33 +149,38 @@ export type HeaderLevel = 1 | 2 | 3 | 4 | 5 | 6
 /**
  * Inherited tokens OWNERS set on their root for the generic content parts, which style-query them
  * (`@container style(...)`).  See the "Owner tokens" table in `parts.css`.
+ * - Switches are PRIVATE (`--_ui-`):  what the owner's attributes decide, never a theming surface.
+ * - `--ui-inverted` is the shared remap.
+ * - The look tokens (`modalHeaderSize`, `statisticValueSize`) name the owner's private ALIAS of a public token
+ *   (`--_ui-modal-header-size: var(--ui-modal-header-size, 1.42857em)`):  the page sets the public one, the
+ *   owner's variations write the alias, and parts read only the alias (`docs/theming.md` "Owner tokens").
  * - MUST be declared on EVERY root of the owner, default value included, so a nested owner never inherits an
  *   outer owner's layout.
  * - `inverted` owners also set `color-scheme: dark`;  the token is only for looks the dark scheme doesn't give.
  */
 export const PART_OWNER_TOKENS = {
   inverted: "--ui-inverted",
-  cardLayout: "--ui-card-layout",
-  cardLeading: "--ui-card-leading",
-  itemLayout: "--ui-item-layout",
-  itemState: "--ui-item-state",
-  commentsMinimal: "--ui-comments-minimal",
-  modalBasic: "--ui-modal-basic",
-  modalHeaderSize: "--ui-modal-header-size",
-  messageLayout: "--ui-message-layout",
-  listLayout: "--ui-list-layout",
-  itemMedia: "--ui-item-media",
-  eventLabel: "--ui-event-label",
-  statisticLayout: "--ui-statistic-layout",
-  statisticValueSize: "--ui-statistic-value-size",
-  stepState: "--ui-step-state",
-  stepLayout: "--ui-step-layout",
-  accordionStyle: "--ui-accordion-style",
-  accordionOpen: "--ui-accordion-open",
-  searchResult: "--ui-search-result",
-  headerLayout: "--ui-header-layout",
-  labelLayout: "--ui-label-layout",
-  part: "--ui-part"
+  cardLayout: "--_ui-card-layout",
+  cardLeading: "--_ui-card-leading",
+  itemLayout: "--_ui-item-layout",
+  itemState: "--_ui-item-state",
+  commentsMinimal: "--_ui-comments-minimal",
+  modalBasic: "--_ui-modal-basic",
+  modalHeaderSize: "--_ui-modal-header-size",
+  messageLayout: "--_ui-message-layout",
+  listLayout: "--_ui-list-layout",
+  itemMedia: "--_ui-item-media",
+  eventLabel: "--_ui-event-label",
+  statisticLayout: "--_ui-statistic-layout",
+  statisticValueSize: "--_ui-statistic-value-size",
+  stepState: "--_ui-step-state",
+  stepLayout: "--_ui-step-layout",
+  accordionStyle: "--_ui-accordion-style",
+  accordionOpen: "--_ui-accordion-open",
+  searchResult: "--_ui-search-result",
+  headerLayout: "--_ui-header-layout",
+  labelLayout: "--_ui-label-layout",
+  part: "--_ui-part"
 } as const
 
 /**
@@ -213,12 +221,13 @@ export type MessageDismissDetail = {
  * - `text` -- a CSS STRING (`"›"`), from `divider`;  quote and escape it as CSS (`\"`, `\\`, `\A `), not JSON
  * - `icon` -- an `<image>`, `url("data:image/svg+xml,...")` of the `divider-icon` SVG;  painted as a mask in
  *   `currentColor`
- * - `layout` -- `icon` while `divider-icon` is set;  removed otherwise
+ * - `layout` -- `icon` while `divider-icon` is set;  removed otherwise.  PRIVATE (`--_ui-`):  a switch the
+ *   element decides;  static markup sets it by hand
  */
 export const BREADCRUMB_DIVIDER_TOKENS = {
   text: "--ui-breadcrumb-divider",
   icon: "--ui-breadcrumb-divider-icon",
-  layout: "--ui-breadcrumb-divider-layout"
+  layout: "--_ui-breadcrumb-divider-layout"
 } as const
 
 ////////////////
@@ -250,10 +259,10 @@ export type InputChangeDetail = {
  *   runs), so a control's own `state` still wins
  */
 export const INPUT_OWNER_TOKENS = {
-  width: "--ui-input-owner-width",
-  color: "--ui-field-state-color",
-  background: "--ui-field-state-background",
-  border: "--ui-field-state-border"
+  width: "--_ui-input-owner-width",
+  color: "--_ui-field-state-color",
+  background: "--_ui-field-state-background",
+  border: "--_ui-field-state-border"
 } as const
 
 ////////////////
@@ -563,10 +572,11 @@ export type SearchChangeDetail = {
 }
 
 /**
- * Custom property `search.css` reads for the anchor name, e.g. `--ui-search-anchor: --ui-search-3`;  the element
- * sets it inline on its root, as the dropdown does (`DROPDOWN_ANCHOR_PROPERTY`).
+ * Custom property `search.css` reads for the anchor name, e.g. `--_ui-search-anchor: --ui-search-3`.
+ * - The element sets it inline on its root, as the dropdown does (`DROPDOWN_ANCHOR_PROPERTY`).
+ * - PRIVATE (`--_ui-`):  a switch the element decides, never a theming surface.
  */
-export const SEARCH_ANCHOR_PROPERTY = "--ui-search-anchor"
+export const SEARCH_ANCHOR_PROPERTY = "--_ui-search-anchor"
 
 ////////////////
 // ## Toast
@@ -758,12 +768,14 @@ export const PUSHABLE_HOST_STATE = "pushable"
  * - `origin` -- its `transform-origin` (scale down)
  * - `dimmed` -- `1` while a modal sidebar is open:  the pusher's dimmer shows
  * - `blurring` -- `1` while that sidebar is `blurring`:  the dimmer blurs the pusher
+ * - PRIVATE (`--_ui-`):  switches the pushable decides, never a theming surface;  `sidebar.css` declares their
+ *   defaults on the pushable box, which the inline values beat
  */
 export const PUSHER_TOKENS = {
-  transform: "--ui-pusher-transform",
-  origin: "--ui-pusher-origin",
-  dimmed: "--ui-pusher-dimmed",
-  blurring: "--ui-pusher-blurring"
+  transform: "--_ui-pusher-transform",
+  origin: "--_ui-pusher-origin",
+  dimmed: "--_ui-pusher-dimmed",
+  blurring: "--_ui-pusher-blurring"
 } as const
 
 /** What a visible `<ui-sidebar>` asks of its `<ui-pushable>` (`UIPushable.report()`). */

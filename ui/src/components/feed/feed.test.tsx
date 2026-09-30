@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -149,6 +149,50 @@ describe("<ui-event> labels", () => {
     expect(events[0]!.querySelector("img")!.getBoundingClientRect().width).toBe(40)
     const content = partRoot(events[0]!.querySelector("ui-content")!)
     expect(parseFloat(style(content).marginLeft)).toBeCloseTo(1.14285 * 16, 1)
+  })
+})
+
+describe("<ui-feed> tokens from outside", () => {
+  /** An event with an image label. */
+  const PICTURED = `<ui-event image="${AVATAR}">${CONTENT}</ui-event>`
+
+  /** The width of the first event's label box under `host`. */
+  function labelWidth(host: Element): number {
+    return labelOf(eventsOf(host)[0]!)!.getBoundingClientRect().width
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await feed(`style="--ui-feed-label-width: 50px"`, PICTURED)
+    expect(labelWidth(host)).toBe(50)
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-feed-label-width: 50px"><ui-feed>${PICTURED}</ui-feed></section>`
+    )
+    expect(labelWidth(wrapper.querySelector("ui-feed")!)).toBe(50)
+  })
+
+  it("takes a token set through `::part(feed)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(feed) { --ui-feed-label-width: 50px }</style><ui-feed class="themed">${PICTURED}</ui-feed></div>`
+    )
+    expect(labelWidth(wrapper.querySelector("ui-feed")!)).toBe(50)
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-feed-label-width", "50px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-feed-label-width")
+    })
+    const { host } = await feed("", PICTURED)
+    expect(labelWidth(host)).toBe(50)
+  })
+
+  it("owner tokens:  a part look token set on the feed reaches a summary", async () => {
+    const red = "rgb(255, 0, 0)"
+    const { events } = await feed(`style="--ui-feed-summary-color: ${red}"`)
+    expect(style(partRoot(events[0]!.querySelector("ui-summary")!)).color).toBe(red)
   })
 })
 

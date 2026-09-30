@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 
 import { expectAccessible } from "$test/a11y"
 
@@ -89,6 +89,54 @@ describe("<ui-rail> placement", () => {
   it("scales its text with size", async () => {
     const { root } = await railIn(`position="left" size="large"`)
     expect(parseFloat(getComputedStyle(root).fontSize)).toBeCloseTo(18, 0)
+  })
+})
+
+describe("<ui-rail> tokens from outside", () => {
+  /** The inner box's width. */
+  function measure(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("[part~=rail]")!).width
+  }
+
+  /** The element under test. */
+  const MARKUP = `<ui-rail>Rail</ui-rail>`
+
+  it("takes a token set on the HOST", async () => {
+    const host = await ElementFixture.render(MARKUP.replace("<ui-rail", `<ui-rail style="--ui-rail-width: 200px"`))
+    expect(measure(host)).toBe("200px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-rail-width: 200px"><div>${MARKUP}</div></section>`
+    )
+    expect(measure(wrapper.querySelector("ui-rail")!)).toBe("200px")
+  })
+
+  it("takes a token set through `::part(rail)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(rail) { --ui-rail-width: 200px }</style>${MARKUP.replace("<ui-rail", '<ui-rail class="themed"')}</div>`
+    )
+    expect(measure(wrapper.querySelector("ui-rail")!)).toBe("200px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-rail-width", "200px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-rail-width")
+    })
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("200px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const host = await ElementFixture.render(MARKUP)
+    expect(measure(host)).toBe("300px")
+  })
+
+  it("variations:  `close` derives from the base width", async () => {
+    const host = await ElementFixture.render(`<ui-rail close style="--ui-rail-width: 200px">Rail</ui-rail>`)
+    expect(measure(host)).toBe("216px")
   })
 })
 

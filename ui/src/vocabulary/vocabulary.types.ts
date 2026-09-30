@@ -25,7 +25,11 @@
  * - `verticalAlign` -- `vertical-align="middle"` => `middle aligned`
  * - `size` -- `size="small"` => `small`;  `medium` => nothing
  * - `color` -- `color="red"` => `red`
- * - `boolean` / `enum` / `string` / `number` / `json` -- no class;  typed property only
+ * - `valueOnly` -- `position="left"` => `left`:  a value emitted alone, placed as `color` is, that isn't a colour
+ *   (states, positions, speeds ...);  always with its own `values`
+ * - `boolean` / `enum` / `string` / `number` / `json` / `icon` -- no class;  typed property only
+ * - `icon` -- an icon name;  bare / `"true"` / `"yes"` => `spec.default`, else `""` ("the element's own icon",
+ *   none if it has none);  `"false"` / `"no"` => none (`undefined`), even over a default
  */
 export type AttributeKind =
   | "keyOnly"
@@ -37,14 +41,16 @@ export type AttributeKind =
   | "verticalAlign"
   | "size"
   | "color"
+  | "valueOnly"
   | "boolean"
   | "enum"
   | "string"
   | "number"
   | "json"
+  | "icon"
 
 /** Kinds `ClassBuilder` turns into classes;  the rest are property-only. */
-export type ClassAttributeKind = Exclude<AttributeKind, "boolean" | "enum" | "string" | "number" | "json">
+export type ClassAttributeKind = Exclude<AttributeKind, "boolean" | "enum" | "string" | "number" | "json" | "icon">
 
 /**
  * One attribute of a component, as declared in its vocabulary.

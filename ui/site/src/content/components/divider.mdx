@@ -99,6 +99,22 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
+  Theme with the public `--ui-divider-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or on
+  the inner box through `::part(divider)`.  They inherit into the shadow root, where the sheet reads each through a
+  private alias, so nothing inside blocks them.  A `section` divider swaps in `--ui-divider-section-margin`, whatever
+  the base margin.
+
+```css
+/* every divider on the page */
+:root {
+  --ui-divider-line-color: var(--ui-border-color-strong);
+}
+/* one region */
+.sidebar {
+  --ui-divider-margin: 0.5em;
+}
+```
+
   <CssTokens family="divider" />
 </Section>
 

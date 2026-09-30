@@ -224,7 +224,7 @@ describe("<ui-card> variations", () => {
     expect(style(header).color).not.toBe(style(partRoot(plain.querySelector("ui-header")!)).color)
   })
 
-  it("lays out a horizontal card:  image beside the content, `--ui-card-layout`", async () => {
+  it("lays out a horizontal card:  image beside the content, `--_ui-card-layout`", async () => {
     const host = await render(
       `<ui-card horizontal><img src="${PHOTO}" alt="Photo"><ui-content><ui-header>Side</ui-header></ui-content></ui-card>`
     )
@@ -233,7 +233,7 @@ describe("<ui-card> variations", () => {
     expect(style(rootOf(host)).flexDirection).toBe("row")
     expect(image.getBoundingClientRect().width).toBe(150)
     expect(content.getBoundingClientRect().left).toBeGreaterThanOrEqual(image.getBoundingClientRect().right - 1)
-    expect(style(content).getPropertyValue("--ui-card-layout").trim()).toBe("horizontal")
+    expect(style(content).getPropertyValue("--_ui-card-layout").trim()).toBe("horizontal")
     expect(style(content).borderTopWidth).toBe("0px")
   })
 
@@ -253,6 +253,33 @@ describe("<ui-card> variations", () => {
     await userEvent.hover(rootOf(host))
     await expect.poll(() => style(rootOf(host)).transform).toBe("matrix(1, 0, 0, 1, 0, -3)")
     await userEvent.unhover(rootOf(host))
+  })
+
+  it("takes its public tokens from the host, an ancestor or `::part(card)`", async () => {
+    const onHost = await render(`<ui-card style="--ui-card-radius: 20px" header="Host"></ui-card>`)
+    expect(style(rootOf(onHost)).borderTopLeftRadius).toBe("20px")
+    const wrapper = await ElementFixture.render(
+      `<div style="--ui-cards-spacing: 3em"><ui-cards><ui-card header="A"></ui-card></ui-cards></div>`
+    )
+    const group = wrapper.querySelector("ui-cards")!
+    expect(style(rootOf(group)).marginLeft).toBe("-24px")
+    const themed = await ElementFixture.render(
+      `<div><style>.themed::part(card) { --ui-card-width: 200px }</style><ui-card class="themed"></ui-card></div>`
+    )
+    expect(rootOf(themed.querySelector("ui-card")!).getBoundingClientRect().width).toBe(200)
+  })
+
+  it("owner tokens:  a part look token set on the card, above it or on the part reaches the header", async () => {
+    const red = "rgb(255, 0, 0)"
+    const card = `<ui-card><ui-content><ui-header>Title</ui-header></ui-content></ui-card>`
+    const onCard = await render(card.replace("<ui-card>", `<ui-card style="--ui-card-header-color: ${red}">`))
+    expect(style(partRoot(onCard.querySelector("ui-header")!)).color).toBe(red)
+    const above = await ElementFixture.render(`<section style="--ui-card-header-color: ${red}">${card}</section>`)
+    expect(style(partRoot(above.querySelector("ui-header")!)).color).toBe(red)
+    const onPart = await render(card.replace("<ui-header>", `<ui-header style="--ui-card-header-color: ${red}">`))
+    expect(style(partRoot(onPart.querySelector("ui-header")!)).color).toBe(red)
+    const plain = await render(card)
+    expect(style(partRoot(plain.querySelector("ui-header")!)).color).not.toBe(red)
   })
 
   it("scales with `size`, never twice for its content", async () => {

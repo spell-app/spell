@@ -11,6 +11,10 @@
  *   - `--ui-dimmer-blurred-background`, `--ui-dimmer-blurred-inverted-background` -- behind a blur (0.6)
  *   - `--ui-dimmer-blur` -- the `backdrop-filter` of `blurring` (`blur(5px) grayscale(0.7)`)
  *   - `--ui-dimmer-duration` -- the fade
+ * - Public tokens (`--ui-dimmer-*`) are NEVER declared here:  the shades are READ where they paint (nothing varies
+ *   them;  shade variations set `background` itself), and the duration through its private alias,
+ *   `--_ui-dimmer-duration: var(--ui-dimmer-duration, var(--ui-duration-slower))`.  So a value set on `:root`, an
+ *   ancestor, the host or `::part(dimmer)` reaches the box (`docs/theming.md` "Component tokens").
  * - A dark dimmer is the DARK scheme for its content (`color-scheme: dark`, `--ui-inverted: 1`);  `inverted` the
  *   light one.  So a plain `<ui-header>` reads light on the default dimmer, where Fomantic needed `inverted header`.
  * - Motion:  fades in from `@starting-style` and out while `display` / `overlay` transition (`allow-discrete`).
@@ -41,7 +45,8 @@
   }
 
   .ui.dimmer {
-    --ui-dimmer-duration-used: var(--ui-dimmer-duration, var(--ui-duration-slower));
+    /* The fade, in and out. */
+    --_ui-dimmer-duration: var(--ui-dimmer-duration, var(--ui-duration-slower));
     /* The dark scheme for the content. */
     --ui-inverted: 1;
     --ui-scheme: dark;
@@ -62,7 +67,9 @@
     margin: 0;
     padding: 1em;
     border: none;
+    /* The dark (default) dimmer;  `<ui-modal>`'s backdrop reads it too. */
     background: var(--ui-dimmer-background, oklch(0 0 0 / 0.85));
+    /* Its content's text. */
     color: var(--ui-dimmer-color, oklch(1 0 0));
     font-family: var(--ui-font-family);
     line-height: 1;
@@ -72,9 +79,9 @@
     user-select: none;
     will-change: opacity;
     transition:
-      opacity var(--ui-dimmer-duration-used) linear,
-      display var(--ui-dimmer-duration-used) allow-discrete,
-      overlay var(--ui-dimmer-duration-used) allow-discrete;
+      opacity var(--_ui-dimmer-duration) linear,
+      display var(--_ui-dimmer-duration) allow-discrete,
+      overlay var(--_ui-dimmer-duration) allow-discrete;
   }
 
   /* A page dimmer's dialog:  fixed over the viewport, in the top layer;  it IS the dimmer (no `::backdrop` of its own). */
@@ -131,11 +138,14 @@
   /* ## Blurring:  blur and grey what's behind, over a lighter shade. */
   .ui.blurring.dimmer,
   .blurring.dimmable > .ui.dimmer {
+    /* A dark dimmer behind a blur;  the flyout's and sidebar's `blurring` read it too. */
     background: var(--ui-dimmer-blurred-background, oklch(0 0 0 / 0.6));
+    /* The backdrop filter of `blurring`. */
     backdrop-filter: var(--ui-dimmer-blur, blur(5px) grayscale(0.7));
   }
   .ui.blurring.inverted.dimmer,
   .blurring.dimmable > .ui.inverted.dimmer {
+    /* A light dimmer behind a blur. */
     background: var(--ui-dimmer-blurred-inverted-background, oklch(1 0 0 / 0.6));
   }
 
@@ -155,7 +165,9 @@
     --ui-inverted: 0;
     --ui-scheme: light;
     color-scheme: light;
+    /* The light (`inverted`) dimmer. */
     background: var(--ui-dimmer-inverted-background, oklch(1 0 0 / 0.85));
+    /* Its content's text. */
     color: var(--ui-dimmer-inverted-color, oklch(0 0 0));
   }
   .ui.medium.inverted.dimmer {

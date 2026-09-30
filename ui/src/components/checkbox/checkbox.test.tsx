@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it, onTestFinished, vi } from "vitest"
 import { userEvent } from "vitest/browser"
 import { OBSERVE } from "solid-js"
 import { attribution } from "solid-js/attribution"
@@ -381,6 +381,55 @@ describe("<ui-radio> groups", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     expect(new FormData(form).get("size")).toBe("m")
+  })
+})
+
+describe("<ui-checkbox> tokens from outside", () => {
+  /** The drawn box's top-left radius, which `--ui-checkbox-radius` drives. */
+  function radius(host: Element): string {
+    return getComputedStyle(parts(host).label, "::before").borderTopLeftRadius
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await check(`<ui-checkbox style="--ui-checkbox-radius: 6px">A</ui-checkbox>`)
+    expect(radius(host)).toBe("6px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-checkbox-radius: 6px"><div><ui-checkbox>A</ui-checkbox></div></section>`
+    )
+    expect(radius(wrapper.querySelector("ui-checkbox")!)).toBe("6px")
+  })
+
+  it("takes a token set through `::part(checkbox)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(checkbox) { --ui-checkbox-radius: 6px }</style><ui-checkbox class="themed">A</ui-checkbox></div>`
+    )
+    expect(radius(wrapper.querySelector("ui-checkbox")!)).toBe("6px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-checkbox-radius", "6px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-checkbox-radius")
+    })
+    const { host } = await check(`<ui-checkbox>A</ui-checkbox>`)
+    expect(radius(host)).toBe("6px")
+  })
+
+  it("variations:  `inverted` swaps the label colour for its own token", async () => {
+    const red = "rgb(255, 0, 0)"
+    const { label: plain } = await check(`<ui-checkbox style="--ui-checkbox-label-color: ${red}">A</ui-checkbox>`)
+    expect(getComputedStyle(plain).color).toBe(red)
+    const { label: inverted } = await check(
+      `<ui-checkbox inverted style="--ui-checkbox-label-color: ${red}">A</ui-checkbox>`
+    )
+    expect(getComputedStyle(inverted).color).not.toBe(red)
+    const { label: themed } = await check(
+      `<ui-checkbox inverted style="--ui-checkbox-inverted-color: ${red}">A</ui-checkbox>`
+    )
+    expect(getComputedStyle(themed).color).toBe(red)
   })
 })
 

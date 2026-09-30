@@ -82,12 +82,18 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-rail-*` tokens on the rail's box, through `::part(rail)` (the box declares its own
-  defaults, so a value set on the host tag doesn't reach it).  `--ui-rail-width` is Fomantic's 300px.
+  Theme with the public `--ui-rail-*` tokens:  set one on the element, on any ancestor (a region, `:root`), or on the
+  rail's box through `::part(rail)`.  They inherit into the shadow root, where the sheet reads each through a private
+  alias, so nothing inside blocks them.  `--ui-rail-width` is Fomantic's 300px;  `close` and `dividing` rails add
+  their own distance to it.
 
 ```css
-ui-rail::part(rail) {
+/* every rail on the page */
+:root {
   --ui-rail-width: 240px;
+}
+/* one layout */
+.docs-page {
   --ui-rail-distance: 2em;
 }
 ```

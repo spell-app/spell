@@ -42,9 +42,9 @@ export const embedVocabulary = {
     { name: "alt", kind: "string", description: "Fomantic's placeholder `alt`;  used as `label` when there is none." },
     {
       name: "icon",
-      kind: "string",
+      kind: "icon",
       default: "circle-play",
-      description: 'Icon over the placeholder;  `icon=""` for none.'
+      description: 'Icon over the placeholder;  bare `icon` (or `"true"`) keeps the default, `icon="false"` shows none.'
     },
     {
       name: "aspect-ratio",

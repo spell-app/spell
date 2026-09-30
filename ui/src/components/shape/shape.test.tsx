@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -79,6 +79,23 @@ describe("<ui-shape> classes and markup", () => {
     wrapper.innerHTML = `<ui-shape active-index="2">${SIDES}</ui-shape>`
     await ElementFixture.settle(wrapper)
     expect(shown([...wrapper.querySelectorAll("ui-side")])).toEqual([false, false, true])
+  })
+
+  it("`active-index` parsed before the family loads (shape defined before its sides, as the barrel does)", async () => {
+    const wrapper = Fixture.render(
+      `<div><ui-late-shape active-index="1"><ui-late-side>One</ui-late-side><ui-late-side>Two</ui-late-side>` +
+        `<ui-late-side>Three</ui-late-side></ui-late-shape></div>`
+    )
+    const { UIShape, UISide } = await import("$/components/shape")
+    UIShape.define("ui-late-shape")
+    UISide.define("ui-late-side")
+    await ElementFixture.settle(wrapper)
+    const sides = [...wrapper.querySelectorAll("ui-late-side")]
+    expect(shown(sides)).toEqual([false, true, false])
+    const host = wrapper.querySelector<Shape>("ui-late-shape")!
+    const flipped = changes(host)
+    await host.next()
+    expect(flipped.map((detail) => detail.activeIndex)).toEqual([2])
   })
 
   it("the sides box is a polite live region;  hidden sides are out of the tree", async () => {
@@ -190,5 +207,45 @@ describe("<ui-shape> flipping", () => {
     await expectAccessible(root)
     for (const host of root.querySelectorAll<Shape>("ui-shape")) await host.next()
     await expectAccessible(root)
+  })
+})
+
+describe("<ui-shape> tokens from outside", () => {
+  /** The first side's face height. */
+  function face(sides: readonly Element[]): string {
+    return getComputedStyle(sides[0]!.shadowRoot!.querySelector("[part~=side]")!).height
+  }
+
+  it("takes a token set on the shape HOST", async () => {
+    const { sides } = await shape(`<ui-shape cube style="--ui-shape-cube-size: 100px">${SIDES}</ui-shape>`)
+    expect(face(sides)).toBe("100px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const { sides } = await shape(
+      `<section style="--ui-shape-cube-size: 100px"><ui-shape cube>${SIDES}</ui-shape></section>`
+    )
+    expect(face(sides)).toBe("100px")
+  })
+
+  it("takes a token set through `::part(side)`", async () => {
+    const { sides } = await shape(
+      `<style>.themed ui-side::part(side) { --ui-shape-cube-size: 100px }</style><ui-shape cube class="themed">${SIDES}</ui-shape>`
+    )
+    expect(face(sides)).toBe("100px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-shape-cube-size", "100px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-shape-cube-size")
+    })
+    const { sides } = await shape(`<ui-shape cube>${SIDES}</ui-shape>`)
+    expect(face(sides)).toBe("100px")
+  })
+
+  it("keeps its defaults when nothing is set", async () => {
+    const { sides } = await shape(`<ui-shape cube>${SIDES}</ui-shape>`)
+    expect(face(sides)).toBe("240px")
   })
 })

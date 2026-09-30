@@ -41,6 +41,38 @@ export class A11y {
       .filter((violation) => violation.nodes.length)
   }
 
+  /**
+   * WCAG contrast ratio of text `color` over a stack of `layers`, bottom first (e.g. the page, then a translucent
+   * `::backdrop`).
+   * - For what axe can't see:  it ignores `::backdrop`, so text drawn over a dialog's dimmer is measured against
+   *   the page.  Any CSS colour works;  the canvas resolves and composites them in sRGB.
+   */
+  static contrast(color: string, layers: string[]): number {
+    const [text, background] = [[...layers, color], layers].map(A11y.#composite)
+    const [light, dark] = [A11y.#luminance(text!), A11y.#luminance(background!)].sort((a, b) => b - a)
+    return (light! + 0.05) / (dark! + 0.05)
+  }
+
+  /** sRGB of `layers` painted over each other on one canvas pixel, bottom first, over opaque white. */
+  static #composite(layers: string[]): [number, number, number] {
+    const context = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!
+    for (const fill of ["white", ...layers]) {
+      context.fillStyle = fill
+      context.fillRect(0, 0, 1, 1)
+    }
+    const [red, green, blue] = context.getImageData(0, 0, 1, 1).data
+    return [red!, green!, blue!]
+  }
+
+  /** WCAG relative luminance of an sRGB colour (0-255 channels). */
+  static #luminance(rgb: [number, number, number]): number {
+    const [red, green, blue] = rgb.map((channel) => {
+      const value = channel / 255
+      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * red! + 0.7152 * green! + 0.0722 * blue!
+  }
+
   /** Human-readable summary of `violations`, one block per rule. */
   static format(violations: axe.Result[]) {
     if (!violations.length) return "no accessibility violations"

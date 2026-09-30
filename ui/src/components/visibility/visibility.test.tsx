@@ -4,9 +4,11 @@ import { UI, type VisibilityCalculations } from "$/runtime"
 import { expectAccessible } from "$test/a11y"
 
 import { ElementFixture } from "$test/ElementFixture"
+import { Fixture } from "$test/fixture"
 import type { UIHost } from "$/elements"
 
 import "$/components/visibility"
+import "$/components/segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/visibility/examples/elements/*.html", {
@@ -127,6 +129,24 @@ describe("<ui-visibility> events", () => {
     host.remove()
     await new Promise((resolve) => setTimeout(resolve, 60))
     expect(names).toEqual(["ui-hidden"])
+  })
+})
+
+describe("UI.observeVisibility() on a `display: contents` host", () => {
+  it("measures a <ui-segment>'s rendered box, even when observed before it renders", async () => {
+    const wrapper = Fixture.render(
+      `<div><div style="height: ${BELOW}px"></div><ui-segment><p style="height: 100px">Content</p></ui-segment>` +
+        `<div style="height: ${BELOW}px"></div></div>`
+    )
+    const segment = wrapper.querySelector<UIHost>("ui-segment")!
+    const seen: boolean[] = []
+    const onUpdate = (calculations: VisibilityCalculations) => seen.push(calculations.onScreen)
+    const stop = UI.observeVisibility(segment, { once: false, onUpdate })
+    await segment.ready
+    await expect.poll(() => seen).toEqual([false])
+    await scrollHostTo(segment.querySelector("p")!, 90)
+    await expect.poll(() => seen.at(-1)).toBe(true)
+    stop()
   })
 })
 

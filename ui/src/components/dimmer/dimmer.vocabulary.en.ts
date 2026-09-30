@@ -22,11 +22,9 @@ export const dimmerVocabulary = {
   attributes: [
     {
       name: "shade",
-      kind: "color",
+      kind: "valueOnly",
       values: ["medium", "light", "very light"],
-      description:
-        'Lighter than the default (Fomantic\'s shades):  `medium`, `light`, `very light`.  NOTE: `kind: "color"` ' +
-        "because it emits its value alone."
+      description: "Lighter than the default (Fomantic's shades):  `medium`, `light`, `very light`."
     },
     {
       name: "active",

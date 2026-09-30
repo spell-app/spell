@@ -111,6 +111,16 @@ describe("tab.css examples", () => {
     expect(Math.round(pane.getBoundingClientRect().top)).toBe(Math.round(menu.getBoundingClientRect().top))
   })
 
+  it("takes a public token from a wrapper of the tab set (static markup)", () => {
+    Sheets.adopt([...foundationCSS, segmentCSS, menuCSS, tabCSS])
+    const root = Fixture.render(
+      `<div style="--ui-tabs-pane-margin: 2em 0 0"><div class="ui tabs">` +
+        `<div class="ui menu"><button class="active item">A</button></div>` +
+        `<div class="ui active tab segment">A</div></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".ui.tab")!).marginTop).toBe("32px")
+  })
+
   it("shows a loading pane with a spinner", async () => {
     const root = await example("states")
     const loading = root.querySelector<HTMLElement>(".ui.loading.tab")!

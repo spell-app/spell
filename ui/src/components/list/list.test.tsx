@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import type { ListSelectDetail } from "$/components/components.types"
@@ -307,6 +307,76 @@ describe("<ui-list> nested", () => {
     await ElementFixture.tick()
     expect(rootOf(sub).className).toBe("ui bulleted list")
     sub.remove()
+  })
+})
+
+describe("<ui-list> tokens from outside", () => {
+  /** The middle item's top padding. */
+  function padding(host: Element): string {
+    return style(boxOf(itemsOf(host)[1]!)).paddingTop
+  }
+
+  it("takes a token set on the HOST, reaching its items", async () => {
+    const { host } = await list(`style="--ui-list-item-padding-block: 10px"`)
+    expect(padding(host)).toBe("10px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-list-item-padding-block: 10px"><div><ui-list>${ITEMS}</ui-list></div></section>`
+    )
+    await ElementFixture.settle(wrapper)
+    expect(padding(wrapper.querySelector("ui-list")!)).toBe("10px")
+  })
+
+  it("takes a token set through `::part(list)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(list) { --ui-list-item-padding-block: 10px }</style>` +
+        `<ui-list class="themed">${ITEMS}</ui-list></div>`
+    )
+    await ElementFixture.settle(wrapper)
+    expect(padding(wrapper.querySelector("ui-list")!)).toBe("10px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-list-item-padding-block", "10px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-list-item-padding-block")
+    })
+    const { host } = await list()
+    expect(padding(host)).toBe("10px")
+  })
+
+  it("variations:  `relaxed` swaps the padding, winning over the base token;  first-item padding derives", async () => {
+    const { host } = await list(`relaxed style="--ui-list-item-padding-block: 10px"`)
+    expect(padding(host)).not.toBe("10px")
+    const { items } = await list(`style="--ui-list-item-padding-left: 10px"`)
+    expect(style(boxOf(items[0]!)).paddingLeft).toBe("10px")
+  })
+
+  it("reaches a sub-list's items through the child tokens", async () => {
+    const { items } = await list(
+      `style="--ui-list-child-item-padding-block: 10px"`,
+      `<ui-item>One<ui-list><ui-item>A</ui-item><ui-item>B</ui-item></ui-list></ui-item>`
+    )
+    const sub = items[0]!.querySelector<UIHost>("ui-list")!
+    await ElementFixture.settle(sub)
+    expect(style(boxOf(itemsOf(sub)[1]!)).paddingTop).toBe("10px")
+  })
+
+  it("owner tokens:  a part look token set on the list or above reaches its content parts", async () => {
+    const red = "rgb(255, 0, 0)"
+    const content = `<ui-item><ui-content><ui-header>Title</ui-header></ui-content></ui-item>`
+    const { items } = await list(`style="--ui-list-header-color: ${red}"`, content)
+    const header = (holder: Element) => holder.querySelector("ui-header")!.shadowRoot!.querySelector(".header")!
+    expect(style(header(items[0]!)).color).toBe(red)
+    const above = await ElementFixture.render(
+      `<div style="--ui-list-header-color: ${red}"><ui-list>${content}</ui-list></div>`
+    )
+    await ElementFixture.settle(above)
+    expect(style(header(above)).color).toBe(red)
+    const inverted = await list(`inverted style="--ui-list-header-color: ${red}"`, content)
+    expect(style(header(inverted.items[0]!)).color).not.toBe(red)
   })
 })
 

@@ -89,10 +89,10 @@ export const placeholderLineVocabulary = {
   attributes: [
     {
       name: "length",
-      kind: "color",
+      kind: "valueOnly",
       values: ["full", "very long", "long", "medium", "short", "very short"],
       description:
-        'How long the bar is;  absent, it follows its position in the block.  `medium` IS a length here, not a size.  NOTE: `kind: "color"` because it emits its value alone.'
+        "How long the bar is;  absent, it follows its position in the block.  `medium` IS a length here, not a size."
     }
   ],
   events: [],

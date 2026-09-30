@@ -88,12 +88,13 @@ search.addEventListener("ui-select", (event) => {
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-search-*` tokens on the search box, through `::part(input)` for the input and
-  `::part(results)` for the results (each declares its own defaults, so a value set on the host tag doesn't reach
-  them).  `prompt` is the text field itself.
+  Theme with the public `--ui-search-*` tokens:  set one on the element, on any ancestor (`:root` included), or on
+  one piece through `::part(input)` / `::part(results)`.  They inherit into the shadow root, where the sheet reads
+  each through a private alias, so nothing inside blocks them.  `--ui-search-results-max-height` replaces the
+  viewport-based height of `scrolling` results at every width.  `prompt` is the text field itself.
 
 ```css
-ui-search::part(input) {
+ui-search {
   --ui-search-prompt-radius: var(--ui-radius);
 }
 ui-search::part(results) {
@@ -101,7 +102,10 @@ ui-search::part(results) {
 }
 ```
 
-  <CssTokens family="search" />
+  <CssTokens
+    family="search"
+    defaults={{ "--ui-search-results-max-height": "4 results;  6 / 8 / 12 from 768px / 992px / 1920px" }}
+  />
 </Section>
 
 <Section title="Accessibility">

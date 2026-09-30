@@ -266,8 +266,11 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-dropdown-*` tokens on the element or any ancestor.  Style the pieces with `::part()`:
-  `trigger`, `text`, `icon`, `menu`, `item`, `label`, `search` and `clear`.
+  Theme with the public `--ui-dropdown-*` tokens:  set one on the element or on any ancestor (`:root` included).
+  They inherit into the shadow root, where the sheet reads each through a private alias, so nothing inside blocks
+  them.  Variations build on them:  `floating` and `pointing` swap in their own `--ui-dropdown-floating-*` /
+  `--ui-dropdown-pointing-*` values.  Style the pieces with `::part()`:  `trigger`, `text`, `icon`, `menu`, `item`,
+  `label`, `search` and `clear`.
 
 ```css
 ui-dropdown::part(menu) {

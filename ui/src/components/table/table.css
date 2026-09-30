@@ -44,6 +44,11 @@
  * - Layering:  row / cell colours and states, hover, sorting and STACKED layout are in the `states` sublayer
  *   -- a later layer beats the `.ui.ui.ui.ui` specificity and `!important`s Fomantic needs to override widths,
  *   stripes and cell backgrounds.
+ * - Public tokens (`--ui-table-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-table-radius: var(--ui-table-radius, var(--ui-radius))`, and every rule reads
+ *   the alias.  So a value set on `:root`, an ancestor, the host, the table itself or in the app stylesheet reaches
+ *   the box (`docs/theming.md` "Component tokens").  The table is light DOM, so page CSS reaches it directly;  set
+ *   a token on the table, `<ui-table>` or any ancestor.
  * - NOTE: left out, on purpose:
  *   - `.ui.table.segment` / `.stacked` coupling and `.ui.attached + .ui.attached.table` (a middle table after
  *     another attached block):  the neighbour relation isn't visible from a table inside an element
@@ -80,9 +85,12 @@
     display: none;
   }
 
-  /* Scroller:  around the slot;  spaced by the host's position, since the table is always an only child. */
+  /*
+   * Scroller:  around the slot;  spaced by the host's position, since the table is always an only child.
+   * - `--_ui-table-row-height` here too:  the scroller's scrolling heights read it (the table's alias is below it).
+   */
   .scroller {
-    --ui-table-row-height: calc(2 * 0.785714em + var(--ui-line-height) * 1em);
+    --_ui-table-row-height: var(--ui-table-row-height, calc(2 * 0.785714em + var(--ui-line-height) * 1em));
     --_table-scroll-rows: 3;
     --_table-overflow-rows: 5;
     --_table-scroll-factor: 1;
@@ -96,75 +104,96 @@
     margin-block-end: 0;
   }
 
-  /* Tokens:  one per `table.variables` entry that still matters, from the global tokens. */
+  /*
+   * Tokens:  one per `table.variables` entry that still matters, from the global tokens -- each the private alias
+   * of its public token (never declare the public one:  it would block inherited values).
+   */
   .ui.table,
   :where(ui-table) > table {
-    --ui-table-margin: 1em;
-    --ui-table-background: var(--ui-surface);
-    --ui-table-color: var(--ui-text-color);
-    --ui-table-border-width: var(--ui-border-width);
-    --ui-table-border-color: var(--ui-border-color);
-    --ui-table-radius: var(--ui-radius);
-    --ui-table-duration: var(--ui-duration-fast);
-    --ui-table-row-border: var(--ui-border-width) solid var(--ui-border-color-internal);
-    --ui-table-cell-border: var(--ui-border-width) solid var(--ui-border-color-internal);
-    --ui-table-cell-padding-block: 0.785714em;
-    --ui-table-cell-padding-inline: 0.785714em;
-    --ui-table-header-padding-block: 0.928571em;
-    --ui-table-header-background: var(--ui-surface-muted);
-    --ui-table-header-color: var(--ui-text-color);
-    --ui-table-header-border: var(--ui-border-width) solid var(--ui-border-color-internal);
-    --ui-table-footer-background: var(--ui-surface-muted);
-    --ui-table-footer-color: var(--ui-text-color);
-    --ui-table-footer-border: var(--ui-border);
-    --ui-table-row-height: calc(2 * 0.785714em + var(--ui-line-height) * 1em);
-    --ui-table-responsive-row-padding: 1em;
-    --ui-table-responsive-row-shadow: 0 -1px 0 0 oklch(from var(--ui-ink) l c h / 0.1) inset;
-    --ui-table-responsive-cell-padding: 0.25em 0.75em;
-    --ui-table-definition-page-background: var(--ui-background);
-    --ui-table-definition-header-color: var(--ui-text-unselected);
-    --ui-table-definition-column-background: oklch(from var(--ui-ink) l c h / 0.03);
-    --ui-table-definition-column-color: var(--ui-text-selected);
-    --ui-table-active-background: color-mix(in oklab, var(--ui-ink) 12%, var(--ui-surface));
-    --ui-table-active-color: var(--ui-text-color);
+    --_ui-table-margin: var(--ui-table-margin, 1em);
+    --_ui-table-background: var(--ui-table-background, var(--ui-surface));
+    --_ui-table-color: var(--ui-table-color, var(--ui-text-color));
+    --_ui-table-border-width: var(--ui-table-border-width, var(--ui-border-width));
+    --_ui-table-border-color: var(--ui-table-border-color, var(--ui-border-color));
+    --_ui-table-radius: var(--ui-table-radius, var(--ui-radius));
+    --_ui-table-duration: var(--ui-table-duration, var(--ui-duration-fast));
+    --_ui-table-row-border: var(--ui-table-row-border, var(--ui-border-width) solid var(--ui-border-color-internal));
+    --_ui-table-cell-border: var(--ui-table-cell-border, var(--ui-border-width) solid var(--ui-border-color-internal));
+    --_ui-table-cell-padding-block: var(--ui-table-cell-padding-block, 0.785714em);
+    --_ui-table-cell-padding-inline: var(--ui-table-cell-padding-inline, 0.785714em);
+    --_ui-table-header-padding-block: var(--ui-table-header-padding-block, 0.928571em);
+    --_ui-table-header-background: var(--ui-table-header-background, var(--ui-surface-muted));
+    --_ui-table-header-color: var(--ui-table-header-color, var(--ui-text-color));
+    --_ui-table-header-border: var(
+      --ui-table-header-border,
+      var(--ui-border-width) solid var(--ui-border-color-internal)
+    );
+    --_ui-table-footer-background: var(--ui-table-footer-background, var(--ui-surface-muted));
+    --_ui-table-footer-color: var(--ui-table-footer-color, var(--ui-text-color));
+    --_ui-table-footer-border: var(--ui-table-footer-border, var(--ui-border));
+    --_ui-table-row-height: var(--ui-table-row-height, calc(2 * 0.785714em + var(--ui-line-height) * 1em));
+    --_ui-table-responsive-row-padding: var(--ui-table-responsive-row-padding, 1em);
+    --_ui-table-responsive-row-shadow: var(
+      --ui-table-responsive-row-shadow,
+      0 -1px 0 0 oklch(from var(--ui-ink) l c h / 0.1) inset
+    );
+    --_ui-table-responsive-cell-padding: var(--ui-table-responsive-cell-padding, 0.25em 0.75em);
+    --_ui-table-definition-page-background: var(--ui-table-definition-page-background, var(--ui-background));
+    --_ui-table-definition-header-color: var(--ui-table-definition-header-color, var(--ui-text-unselected));
+    --_ui-table-definition-column-background: var(
+      --ui-table-definition-column-background,
+      oklch(from var(--ui-ink) l c h / 0.03)
+    );
+    --_ui-table-definition-column-color: var(--ui-table-definition-column-color, var(--ui-text-selected));
+    --_ui-table-active-background: var(
+      --ui-table-active-background,
+      color-mix(in oklab, var(--ui-ink) 12%, var(--ui-surface))
+    );
+    --_ui-table-active-color: var(--ui-table-active-color, var(--ui-text-color));
     /* Fomantic's 0.3-alpha disabled text fails WCAG contrast;  a disabled ROW is still content to read. */
-    --ui-table-disabled-color: var(--ui-text-muted);
-    --ui-table-striped-background: oklch(from var(--ui-ink) l c h / 0.03);
-    --ui-table-selectable-background: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-table-selectable-color: var(--ui-text-selected);
-    --ui-table-sortable-hover-background: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-table-sortable-hover-color: var(--ui-text-hovered);
-    --ui-table-sortable-active-background: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-table-sortable-active-color: var(--ui-text-selected);
-    --ui-table-sortable-border: var(--ui-border);
-    --ui-table-sortable-icon-opacity: 0.8;
-    --ui-table-colored-border-size: 0.2em;
-    --ui-table-marker-width: 0.2em;
-    --ui-table-inverted-header-background: oklch(0 0 0 / 0.15);
-    --ui-table-inverted-cell-border-color: oklch(1 0 0 / 0.1);
-    --ui-table-stuck-background: var(--ui-surface);
-    --ui-table-stuck-header-background: var(--ui-surface-muted);
-    --ui-table-stuck-z: var(--ui-z-sticky);
-    --ui-table-padded: 1em;
-    --ui-table-very-padded: 1.5em;
-    --ui-table-compact-padding-block: 0.5em;
-    --ui-table-compact-padding-inline: 0.7em;
-    --ui-table-very-compact-padding-block: 0.4em;
-    --ui-table-very-compact-padding-inline: 0.6em;
+    --_ui-table-disabled-color: var(--ui-table-disabled-color, var(--ui-text-muted));
+    --_ui-table-striped-background: var(--ui-table-striped-background, oklch(from var(--ui-ink) l c h / 0.03));
+    --_ui-table-selectable-background: var(--ui-table-selectable-background, oklch(from var(--ui-ink) l c h / 0.05));
+    --_ui-table-selectable-color: var(--ui-table-selectable-color, var(--ui-text-selected));
+    --_ui-table-sortable-hover-background: var(
+      --ui-table-sortable-hover-background,
+      oklch(from var(--ui-ink) l c h / 0.05)
+    );
+    --_ui-table-sortable-hover-color: var(--ui-table-sortable-hover-color, var(--ui-text-hovered));
+    --_ui-table-sortable-active-background: var(
+      --ui-table-sortable-active-background,
+      oklch(from var(--ui-ink) l c h / 0.05)
+    );
+    --_ui-table-sortable-active-color: var(--ui-table-sortable-active-color, var(--ui-text-selected));
+    --_ui-table-sortable-border: var(--ui-table-sortable-border, var(--ui-border));
+    --_ui-table-sortable-icon-opacity: var(--ui-table-sortable-icon-opacity, 0.8);
+    --_ui-table-colored-border-size: var(--ui-table-colored-border-size, 0.2em);
+    --_ui-table-marker-width: var(--ui-table-marker-width, 0.2em);
+    --_ui-table-inverted-header-background: var(--ui-table-inverted-header-background, oklch(0 0 0 / 0.15));
+    --_ui-table-inverted-cell-border-color: var(--ui-table-inverted-cell-border-color, oklch(1 0 0 / 0.1));
+    --_ui-table-stuck-background: var(--ui-table-stuck-background, var(--ui-surface));
+    --_ui-table-stuck-header-background: var(--ui-table-stuck-header-background, var(--ui-surface-muted));
+    --_ui-table-stuck-z: var(--ui-table-stuck-z, var(--ui-z-sticky));
+    --_ui-table-padded: var(--ui-table-padded, 1em);
+    --_ui-table-very-padded: var(--ui-table-very-padded, 1.5em);
+    --_ui-table-compact-padding-block: var(--ui-table-compact-padding-block, 0.5em);
+    --_ui-table-compact-padding-inline: var(--ui-table-compact-padding-inline, 0.7em);
+    --_ui-table-very-compact-padding-block: var(--ui-table-very-compact-padding-block, 0.4em);
+    --_ui-table-very-compact-padding-inline: var(--ui-table-very-compact-padding-inline, 0.6em);
     /* private defaults:  flags this table answers for itself (a nested table never inherits them) */
     --_table-stack: 0;
     --_table-scroll-rows: 3;
     --_table-overflow-rows: 5;
     --_table-scroll-factor: 1;
     inline-size: 100%;
-    margin: var(--ui-table-margin) 0;
-    border: var(--ui-table-border-width) solid var(--ui-table-border-color);
-    border-radius: var(--ui-table-radius);
+    margin: var(--_ui-table-margin) 0;
+    border: var(--_ui-table-border-width) solid var(--_ui-table-border-color);
+    border-radius: var(--_ui-table-radius);
     border-collapse: separate;
     border-spacing: 0;
     box-shadow: none;
-    background: var(--ui-table-background);
-    color: var(--ui-table-color);
+    background: var(--_ui-table-background);
+    color: var(--_ui-table-color);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     line-height: var(--ui-line-height);
     text-align: start;
@@ -198,8 +227,8 @@
     --ui-scale: initial;
     --_table-hosted: initial;
     transition:
-      background var(--ui-table-duration) var(--ui-ease),
-      color var(--ui-table-duration) var(--ui-ease);
+      background var(--_ui-table-duration) var(--ui-ease),
+      color var(--_ui-table-duration) var(--ui-ease);
   }
   :is(.ui.table, :where(ui-table) > table) tr {
     --_table-mark-shadow: 0 0 #0000;
@@ -228,11 +257,11 @@
     box-shadow: none;
   }
   :is(.ui.table, :where(ui-table) > table) > thead > tr > th {
-    padding: var(--ui-table-header-padding-block) var(--ui-table-cell-padding-inline);
-    border-block-end: var(--ui-table-header-border);
+    padding: var(--_ui-table-header-padding-block) var(--_ui-table-cell-padding-inline);
+    border-block-end: var(--_ui-table-header-border);
     border-inline-start: none;
-    background: var(--ui-table-header-background);
-    color: var(--ui-table-header-color);
+    background: var(--_ui-table-header-background);
+    color: var(--_ui-table-header-color);
     font-style: normal;
     font-weight: var(--ui-font-weight-bold);
     text-align: inherit;
@@ -241,19 +270,19 @@
     cursor: auto;
   }
   :is(.ui.table, :where(ui-table) > table) > thead > tr:first-child > th:first-child {
-    border-start-start-radius: var(--ui-table-radius);
+    border-start-start-radius: var(--_ui-table-radius);
   }
   :is(.ui.table, :where(ui-table) > table) > thead > tr:first-child > th:last-child {
-    border-start-end-radius: var(--ui-table-radius);
+    border-start-end-radius: var(--_ui-table-radius);
   }
 
   /* Footer */
   :is(.ui.table, :where(ui-table) > table) > tfoot > tr > :is(th, td) {
-    padding: var(--ui-table-cell-padding-block) var(--ui-table-cell-padding-inline);
-    border-block-start: var(--ui-table-footer-border);
+    padding: var(--_ui-table-cell-padding-block) var(--_ui-table-cell-padding-inline);
+    border-block-start: var(--_ui-table-footer-border);
     border-inline-start: none;
-    background: var(--ui-table-footer-background);
-    color: var(--ui-table-footer-color);
+    background: var(--_ui-table-footer-background);
+    color: var(--_ui-table-footer-color);
     font-style: normal;
     font-weight: var(--ui-font-weight-normal);
     text-align: inherit;
@@ -262,26 +291,26 @@
     cursor: auto;
   }
   :is(.ui.table, :where(ui-table) > table) > tfoot > tr:last-child > :is(th, td):first-child {
-    border-end-start-radius: var(--ui-table-radius);
+    border-end-start-radius: var(--_ui-table-radius);
   }
   :is(.ui.table, :where(ui-table) > table) > tfoot > tr:last-child > :is(th, td):last-child {
-    border-end-end-radius: var(--ui-table-radius);
+    border-end-end-radius: var(--_ui-table-radius);
   }
 
   /* Rows:  a line between body rows;  none above the first, one between repeated bodies. */
   :is(.ui.table, :where(ui-table) > table) > tbody > tr > :is(td, th) {
-    border-block-start: var(--ui-table-row-border);
+    border-block-start: var(--_ui-table-row-border);
   }
   :is(.ui.table, :where(ui-table) > table) > tbody > tr:first-child > :is(td, th) {
     border-block-start: none;
   }
   :is(.ui.table, :where(ui-table) > table) > tbody + tbody > tr:first-child > :is(td, th) {
-    border-block-start: var(--ui-table-row-border);
+    border-block-start: var(--_ui-table-row-border);
   }
 
   /* Cells */
   :is(.ui.table, :where(ui-table) > table) > tbody > tr > :is(td, th) {
-    padding: var(--ui-table-cell-padding-block) var(--ui-table-cell-padding-inline);
+    padding: var(--_ui-table-cell-padding-block) var(--_ui-table-cell-padding-inline);
     text-align: inherit;
   }
   /* A header cell in the body (`<th scope="row">`) reads as a row header. */
@@ -304,10 +333,10 @@
    *   `empty-table-header`), so both are keyed.
    */
   .ui.definition.table > thead:not(.full-width) > tr > :is(th, td):first-child {
-    background: var(--ui-table-definition-page-background);
-    box-shadow: calc(var(--ui-table-colored-border-size) / -2) calc(-1 * var(--ui-table-colored-border-size)) 0
-      calc(var(--ui-table-colored-border-size) / 2) var(--ui-table-definition-page-background);
-    color: var(--ui-table-definition-header-color);
+    background: var(--_ui-table-definition-page-background);
+    box-shadow: calc(var(--_ui-table-colored-border-size) / -2) calc(-1 * var(--_ui-table-colored-border-size)) 0
+      calc(var(--_ui-table-colored-border-size) / 2) var(--_ui-table-definition-page-background);
+    color: var(--_ui-table-definition-header-color);
     font-weight: var(--ui-font-weight-normal);
     pointer-events: none;
   }
@@ -315,24 +344,24 @@
     pointer-events: auto;
   }
   .ui.definition.table > tfoot:not(.full-width) > tr > th:first-child {
-    background: var(--ui-table-definition-page-background);
-    box-shadow: calc(var(--ui-table-colored-border-size) / -2) var(--ui-table-colored-border-size) 0
-      calc(var(--ui-table-colored-border-size) / 2) var(--ui-table-definition-page-background);
-    color: var(--ui-table-definition-header-color);
+    background: var(--_ui-table-definition-page-background);
+    box-shadow: calc(var(--_ui-table-colored-border-size) / -2) var(--_ui-table-colored-border-size) 0
+      calc(var(--_ui-table-colored-border-size) / 2) var(--_ui-table-definition-page-background);
+    color: var(--_ui-table-definition-header-color);
     font-weight: var(--ui-font-weight-normal);
     pointer-events: none;
   }
   .ui.definition.table > tbody > tr > :is(td, th):first-child:not(.ignored),
   .ui.definition.table > tfoot > tr > td:first-child:not(.ignored),
   .ui.definition.table tr td.definition {
-    background: var(--ui-table-definition-column-background);
-    color: var(--ui-table-definition-column-color);
+    background: var(--_ui-table-definition-column-background);
+    color: var(--_ui-table-definition-column-color);
     font-weight: var(--ui-font-weight-bold);
   }
   .ui.definition.table > thead:not(.full-width) > tr > th:nth-child(2),
   .ui.definition.table > tfoot:not(.full-width) > tr > :is(th, td):nth-child(2),
   .ui.definition.table > tbody > tr > :is(td, th):nth-child(2) {
-    border-inline-start: var(--ui-table-border-width) solid var(--ui-table-border-color);
+    border-inline-start: var(--_ui-table-border-width) solid var(--_ui-table-border-color);
   }
 
   /* Structured:  collapsed borders, for header cells spanning rows and columns. */
@@ -343,13 +372,13 @@
     border-inline: none;
   }
   .ui.structured.sortable.table > thead > tr > th {
-    border-inline: var(--ui-table-sortable-border);
+    border-inline: var(--_ui-table-sortable-border);
   }
   .ui.structured.basic.table > * > tr > th {
     border-inline: none;
   }
   .ui.structured.celled.table > * > tr > :is(th, td) {
-    border-inline: var(--ui-table-cell-border);
+    border-inline: var(--_ui-table-cell-border);
   }
 }
 
@@ -421,29 +450,29 @@
     color: inherit;
   }
   .ui.table:not(.compact) tbody tr td.selectable > a:not(.ui) {
-    padding: var(--ui-table-cell-padding-block) var(--ui-table-cell-padding-inline);
+    padding: var(--_ui-table-cell-padding-block) var(--_ui-table-cell-padding-inline);
   }
 
   /* Attached */
   .ui.attached.table {
     inset-block: 0;
-    inline-size: calc(100% + 2 * var(--ui-table-border-width));
-    max-inline-size: calc(100% + 2 * var(--ui-table-border-width));
-    margin: 0 calc(-1 * var(--ui-table-border-width));
-    border: var(--ui-table-border-width) solid var(--ui-border-color-strong);
+    inline-size: calc(100% + 2 * var(--_ui-table-border-width));
+    max-inline-size: calc(100% + 2 * var(--_ui-table-border-width));
+    margin: 0 calc(-1 * var(--_ui-table-border-width));
+    border: var(--_ui-table-border-width) solid var(--ui-border-color-strong);
     border-radius: 0;
     box-shadow: none;
   }
   .ui[class*="top attached"].table {
-    margin-block: var(--ui-table-margin) 0;
-    border-radius: var(--ui-table-radius) var(--ui-table-radius) 0 0;
+    margin-block: var(--_ui-table-margin) 0;
+    border-radius: var(--_ui-table-radius) var(--_ui-table-radius) 0 0;
   }
   .ui.table[class*="top attached"]:first-child {
     margin-block-start: 0;
   }
   .ui[class*="bottom attached"].table {
-    margin-block: 0 var(--ui-table-margin);
-    border-radius: 0 0 var(--ui-table-radius) var(--ui-table-radius);
+    margin-block: 0 var(--_ui-table-margin);
+    border-radius: 0 0 var(--_ui-table-radius) var(--_ui-table-radius);
   }
   .ui[class*="bottom attached"].table:last-child {
     margin-block-end: 0;
@@ -468,7 +497,7 @@
   /* Striped */
   .ui.striped.table > tr:nth-child(2n),
   .ui.striped.table > tbody > tr:nth-child(2n) {
-    background-color: var(--ui-table-striped-background);
+    background-color: var(--_ui-table-striped-background);
   }
 
   /* Single line */
@@ -495,7 +524,7 @@
       .grey,
       .black
     ) {
-    border-block-start: var(--ui-table-colored-border-size) solid var(--ui-color);
+    border-block-start: var(--_ui-table-colored-border-size) solid var(--ui-color);
   }
 
   /* Column count */
@@ -600,12 +629,12 @@
 
   /* Sortable:  headers are controls;  a header `<button>` looks like the header's text. */
   .ui.sortable.table > thead > tr > th {
-    color: var(--ui-table-header-color);
+    color: var(--_ui-table-header-color);
     white-space: nowrap;
     cursor: pointer;
   }
   .ui.celled.sortable.table > thead > tr > th:not(:first-child) {
-    border-inline-start: var(--ui-table-sortable-border);
+    border-inline-start: var(--_ui-table-sortable-border);
   }
   .ui.sortable.table > thead > tr > th > button {
     appearance: none;
@@ -635,7 +664,7 @@
     block-size: 0.8em;
     margin-inline-start: 0.5em;
     background-color: currentColor;
-    opacity: var(--ui-table-sortable-icon-opacity);
+    opacity: var(--_ui-table-sortable-icon-opacity);
     vertical-align: -0.05em;
     mask: var(--_table-caret) center / contain no-repeat;
   }
@@ -663,17 +692,17 @@
   .ui.inverted.table {
     --ui-inverted: 1;
     --ui-scheme: dark;
-    --ui-table-cell-border: var(--ui-border-width) solid var(--ui-table-inverted-cell-border-color);
-    --ui-table-row-border: var(--ui-border-width) solid var(--ui-table-inverted-cell-border-color);
-    --ui-table-header-border: var(--ui-border-width) solid var(--ui-table-inverted-cell-border-color);
-    --ui-table-footer-border: var(--ui-border-width) solid var(--ui-table-inverted-cell-border-color);
-    --ui-table-header-background: var(--ui-table-inverted-header-background);
-    --ui-table-footer-background: var(--ui-table-inverted-header-background);
-    --ui-table-header-color: inherit;
-    --ui-table-footer-color: inherit;
-    --ui-table-striped-background: oklch(1 0 0 / 0.05);
-    --ui-table-selectable-background: oklch(1 0 0 / 0.08);
-    --ui-table-stuck-header-background: color-mix(in oklab, black 15%, var(--ui-surface));
+    --_ui-table-cell-border: var(--ui-border-width) solid var(--_ui-table-inverted-cell-border-color);
+    --_ui-table-row-border: var(--ui-border-width) solid var(--_ui-table-inverted-cell-border-color);
+    --_ui-table-header-border: var(--ui-border-width) solid var(--_ui-table-inverted-cell-border-color);
+    --_ui-table-footer-border: var(--ui-border-width) solid var(--_ui-table-inverted-cell-border-color);
+    --_ui-table-header-background: var(--_ui-table-inverted-header-background);
+    --_ui-table-footer-background: var(--_ui-table-inverted-header-background);
+    --_ui-table-header-color: inherit;
+    --_ui-table-footer-color: inherit;
+    --_ui-table-striped-background: oklch(1 0 0 / 0.05);
+    --_ui-table-selectable-background: oklch(1 0 0 / 0.08);
+    --_ui-table-stuck-header-background: color-mix(in oklab, black 15%, var(--ui-surface));
     color-scheme: dark;
     border: none;
     background: var(--ui-color, var(--ui-surface));
@@ -696,20 +725,20 @@
       .grey,
       .black
     ) {
-    --ui-table-stuck-background: var(--ui-color);
-    --ui-table-stuck-header-background: color-mix(in oklab, black 15%, var(--ui-color));
+    --_ui-table-stuck-background: var(--ui-color);
+    --_ui-table-stuck-header-background: color-mix(in oklab, black 15%, var(--ui-color));
   }
   .ui.inverted.definition.table > :is(thead, tfoot):not(.full-width) > tr > :is(th, td):first-child {
-    --ui-table-definition-page-background: var(--ui-background);
+    --_ui-table-definition-page-background: var(--ui-background);
     color-scheme: light;
   }
   .ui.inverted.definition.table > :is(tbody, tfoot) > tr > td:first-child {
-    --ui-table-definition-column-background: oklch(1 0 0 / 0.02);
+    --_ui-table-definition-column-background: oklch(1 0 0 / 0.02);
   }
 
   /* Basic:  no fills, a lighter border. */
   .ui.basic.table {
-    border: var(--ui-table-border-width) solid var(--ui-table-border-color);
+    border: var(--_ui-table-border-width) solid var(--_ui-table-border-color);
     box-shadow: none;
     background: transparent;
   }
@@ -722,14 +751,14 @@
     background: transparent;
   }
   .ui.basic.table > tbody > tr {
-    border-block-end: var(--ui-table-cell-border);
+    border-block-end: var(--_ui-table-cell-border);
   }
   .ui.basic.table > :is(tbody, tfoot) > tr > td,
   .ui.basic.table > tr > td {
     background: transparent;
   }
   .ui.basic.striped.table > tbody > tr:nth-child(2n) {
-    background-color: var(--ui-table-selectable-background);
+    background-color: var(--_ui-table-selectable-background);
   }
 
   /* Very basic:  no outer border, no padding at the edges. */
@@ -749,7 +778,7 @@
   /* Celled:  borders between cells. */
   .ui.celled.table > * > tr > :is(th, td),
   .ui.celled.table > tr > :is(th, td) {
-    border-inline-start: var(--ui-table-cell-border);
+    border-inline-start: var(--_ui-table-cell-border);
   }
   .ui.celled.table > * > tr > :is(th, td):first-child,
   .ui.celled.table > tr > :is(th, td):first-child {
@@ -758,52 +787,52 @@
 
   /* Padded */
   .ui.padded.table > * > tr > th {
-    padding-inline: var(--ui-table-padded);
+    padding-inline: var(--_ui-table-padded);
   }
   .ui.padded.table > * > tr > :is(th, td) {
-    padding: var(--ui-table-padded);
+    padding: var(--_ui-table-padded);
   }
   .ui[class*="very padded"].table > * > tr > th {
-    padding-inline: var(--ui-table-very-padded);
+    padding-inline: var(--_ui-table-very-padded);
   }
   .ui[class*="very padded"].table > * > tr > td {
-    padding: var(--ui-table-very-padded);
+    padding: var(--_ui-table-very-padded);
   }
 
   /* Compact */
   .ui.compact.table > * > tr > th {
-    padding-inline: var(--ui-table-compact-padding-inline);
+    padding-inline: var(--_ui-table-compact-padding-inline);
   }
   .ui.compact.table > :is(tbody, tfoot) > tr > td {
-    padding: var(--ui-table-compact-padding-block) var(--ui-table-compact-padding-inline);
+    padding: var(--_ui-table-compact-padding-block) var(--_ui-table-compact-padding-inline);
   }
   .ui[class*="very compact"].table > * > tr > th {
-    padding-inline: var(--ui-table-very-compact-padding-inline);
+    padding-inline: var(--_ui-table-very-compact-padding-inline);
   }
   .ui[class*="very compact"].table > :is(tbody, tfoot) > tr > td {
-    padding: var(--ui-table-very-compact-padding-block) var(--ui-table-very-compact-padding-inline);
+    padding: var(--_ui-table-very-compact-padding-block) var(--_ui-table-very-compact-padding-inline);
   }
 
   /* Stuck:  opaque rows, so sticky parts cover what scrolls under them. */
   .ui.stuck.table {
-    background: var(--ui-table-stuck-background);
+    background: var(--_ui-table-stuck-background);
   }
   .ui.stuck.table > thead > tr {
-    background: var(--ui-table-stuck-header-background);
+    background: var(--_ui-table-stuck-header-background);
   }
   .ui.stuck.table > tbody > tr {
-    background: var(--ui-table-stuck-background);
+    background: var(--_ui-table-stuck-background);
   }
   .ui.stuck.table > tfoot > tr {
-    background: var(--ui-table-stuck-header-background);
+    background: var(--_ui-table-stuck-header-background);
   }
   .ui.basic.stuck.table > :is(thead, tfoot) > tr {
-    background: var(--ui-table-stuck-background);
+    background: var(--_ui-table-stuck-background);
   }
   .ui.head.stuck.table > thead,
   .ui.foot.stuck.table > tfoot {
     position: sticky;
-    z-index: var(--ui-table-stuck-z);
+    z-index: var(--_ui-table-stuck-z);
   }
   .ui.head.stuck.table {
     border-block-start: 0;
@@ -812,7 +841,7 @@
     inset-block: 0 auto;
   }
   .ui.head.stuck.table > thead > tr:first-child > th {
-    border-block-start: var(--ui-table-cell-border);
+    border-block-start: var(--_ui-table-cell-border);
   }
   .ui.foot.stuck.table {
     border-block-end: 0;
@@ -821,7 +850,7 @@
     inset-block: auto 0;
   }
   .ui.foot.stuck.table > tfoot > tr:last-child > :is(td, th) {
-    border-block-end: var(--ui-table-cell-border);
+    border-block-end: var(--_ui-table-cell-border);
   }
   .ui.first.stuck.table {
     border-inline-start: 0;
@@ -830,7 +859,7 @@
     position: sticky;
     z-index: 1;
     inset-inline-start: 0;
-    border-inline-start: var(--ui-table-cell-border);
+    border-inline-start: var(--_ui-table-cell-border);
     background: inherit;
   }
   .ui.last.stuck.table {
@@ -840,14 +869,14 @@
     position: sticky;
     z-index: 1;
     inset-inline-end: 0;
-    border-inline-end: var(--ui-table-cell-border);
+    border-inline-end: var(--_ui-table-cell-border);
     background: inherit;
   }
   .ui.celled.first.stuck.table :is(th, td):first-child {
-    border-inline-end: var(--ui-table-cell-border);
+    border-inline-end: var(--_ui-table-cell-border);
   }
   .ui.celled.last.stuck.table :is(th, td):last-child {
-    border-inline-start: var(--ui-table-cell-border);
+    border-inline-start: var(--_ui-table-cell-border);
   }
 
   /* Scrolling / overflowing heights:  rows shown by page size, times the `short` ... `very long` factor. */
@@ -893,13 +922,13 @@
     overscroll-behavior: contain;
   }
   .scrolling.scroller {
-    max-block-size: calc(var(--ui-table-row-height) * (var(--_table-scroll-rows) * var(--_table-scroll-factor) + 1));
+    max-block-size: calc(var(--_ui-table-row-height) * (var(--_table-scroll-rows) * var(--_table-scroll-factor) + 1));
   }
   .overflowing.scroller {
-    max-block-size: calc(var(--ui-table-row-height) * var(--_table-overflow-rows) * var(--_table-scroll-factor));
+    max-block-size: calc(var(--_ui-table-row-height) * var(--_table-overflow-rows) * var(--_table-scroll-factor));
   }
   .resizable.scrolling.scroller {
-    block-size: calc(var(--ui-table-row-height) * (var(--_table-scroll-rows) * var(--_table-scroll-factor) + 1));
+    block-size: calc(var(--_ui-table-row-height) * (var(--_table-scroll-rows) * var(--_table-scroll-factor) + 1));
     max-block-size: none;
     resize: vertical;
   }
@@ -910,7 +939,7 @@
   @container style(--_table-hosted: 1) {
     .ui.scrolling.table > :is(thead, tfoot) {
       position: sticky;
-      z-index: var(--ui-table-stuck-z);
+      z-index: var(--_ui-table-stuck-z);
     }
     .ui.scrolling.table > thead {
       inset-block-start: 0;
@@ -920,10 +949,10 @@
     }
     .ui.scrolling.table > thead > tr,
     .ui.scrolling.table > tfoot > tr {
-      background: var(--ui-table-stuck-header-background);
+      background: var(--_ui-table-stuck-header-background);
     }
     .ui.basic.scrolling.table > :is(thead, tfoot) > tr {
-      background: var(--ui-table-stuck-background);
+      background: var(--_ui-table-stuck-background);
     }
   }
 
@@ -940,29 +969,29 @@
       table-layout: fixed;
     }
     .ui.scrolling.table > tbody {
-      max-block-size: calc(var(--ui-table-row-height) * var(--_table-scroll-rows) * var(--_table-scroll-factor));
+      max-block-size: calc(var(--_ui-table-row-height) * var(--_table-scroll-rows) * var(--_table-scroll-factor));
     }
     .ui.resizable.scrolling.table > tbody {
-      block-size: calc(var(--ui-table-row-height) * var(--_table-scroll-rows) * var(--_table-scroll-factor));
+      block-size: calc(var(--_ui-table-row-height) * var(--_table-scroll-rows) * var(--_table-scroll-factor));
       max-block-size: none;
       resize: vertical;
     }
     /* scrollbars in the head and foot only keep their width in step with the body's:  camouflaged */
     .ui.scrolling.table > thead {
-      border-radius: var(--ui-table-radius) var(--ui-table-radius) 0 0;
-      background: var(--ui-table-header-background);
-      color: var(--ui-table-header-background);
+      border-radius: var(--_ui-table-radius) var(--_ui-table-radius) 0 0;
+      background: var(--_ui-table-header-background);
+      color: var(--_ui-table-header-background);
       scrollbar-color: currentColor currentColor;
     }
     .ui.scrolling.table > tfoot {
-      border-radius: 0 0 var(--ui-table-radius) var(--ui-table-radius);
-      background: var(--ui-table-footer-background);
-      color: var(--ui-table-footer-background);
+      border-radius: 0 0 var(--_ui-table-radius) var(--_ui-table-radius);
+      background: var(--_ui-table-footer-background);
+      color: var(--_ui-table-footer-background);
       scrollbar-color: currentColor currentColor;
     }
     .ui.overflowing.table {
       display: block;
-      max-block-size: calc(var(--ui-table-row-height) * var(--_table-overflow-rows) * var(--_table-scroll-factor));
+      max-block-size: calc(var(--_ui-table-row-height) * var(--_table-overflow-rows) * var(--_table-scroll-factor));
       overflow: auto;
       overscroll-behavior: contain;
     }
@@ -1035,8 +1064,8 @@
     --_table-ink: var(--ui-warning-text);
   }
   .ui.table :is(tr, th, td).active {
-    --_table-tint: var(--ui-table-active-background);
-    --_table-ink: var(--ui-table-active-color);
+    --_table-tint: var(--_ui-table-active-background);
+    --_table-ink: var(--_ui-table-active-color);
   }
   .ui.table :is(tr, th, td):is(.primary:not(.marked), [class*="primary colored"]) {
     --_table-tint: var(--ui-primary-background);
@@ -1279,24 +1308,24 @@
 
   /* Marked:  a coloured edge on the left or right. */
   .ui.table :is(tr, td).left.marked {
-    --_table-mark-shadow: var(--ui-table-marker-width) 0 0 0 var(--_table-mark) inset;
+    --_table-mark-shadow: var(--_ui-table-marker-width) 0 0 0 var(--_table-mark) inset;
     box-shadow: var(--_table-mark-shadow);
   }
   .ui.table :is(tr, td).right.marked {
-    --_table-mark-shadow: calc(-1 * var(--ui-table-marker-width)) 0 0 0 var(--_table-mark) inset;
+    --_table-mark-shadow: calc(-1 * var(--_ui-table-marker-width)) 0 0 0 var(--_table-mark) inset;
     box-shadow: var(--_table-mark-shadow);
   }
   .ui.inverted.table :is(tr, td).left.marked {
-    --_table-mark-shadow: var(--ui-table-marker-width) 0 0 0 var(--_table-mark-inverted) inset;
+    --_table-mark-shadow: var(--_ui-table-marker-width) 0 0 0 var(--_table-mark-inverted) inset;
   }
   .ui.inverted.table :is(tr, td).right.marked {
-    --_table-mark-shadow: calc(-1 * var(--ui-table-marker-width)) 0 0 0 var(--_table-mark-inverted) inset;
+    --_table-mark-shadow: calc(-1 * var(--_ui-table-marker-width)) 0 0 0 var(--_table-mark-inverted) inset;
   }
 
   /* Disabled rows and cells:  faded, inert to the pointer. */
   .ui.table tr.disabled > :is(td, th),
   .ui.table tr > :is(td, th).disabled {
-    color: var(--ui-table-disabled-color);
+    color: var(--_ui-table-disabled-color);
     pointer-events: none;
   }
 
@@ -1307,30 +1336,30 @@
   .ui.selectable.table > tbody > tr:hover,
   .ui.selectable.table > tr:hover,
   .ui.table tbody tr td.selectable:hover {
-    background-image: linear-gradient(var(--ui-table-selectable-background), var(--ui-table-selectable-background));
-    color: var(--_table-ink, var(--ui-table-selectable-color));
+    background-image: linear-gradient(var(--_ui-table-selectable-background), var(--_ui-table-selectable-background));
+    color: var(--_table-ink, var(--_ui-table-selectable-color));
   }
   .ui.inverted.selectable.table > tbody > tr:hover,
   .ui.inverted.table tbody tr td.selectable:hover {
-    color: var(--_table-fill-on, var(--ui-table-selectable-color));
+    color: var(--_table-fill-on, var(--_ui-table-selectable-color));
   }
 
   /* Sortable:  hover and sorted headers. */
   .ui.sortable.table > thead > tr > th:not([data-sortable="false"], .disabled):hover {
-    color: var(--ui-table-sortable-hover-color);
+    color: var(--_ui-table-sortable-hover-color);
   }
   .ui.sortable.table:not(.basic) > thead > tr > th:not([data-sortable="false"], .disabled):hover {
-    background: var(--ui-table-sortable-hover-background);
+    background: var(--_ui-table-sortable-hover-background);
   }
   .ui.sortable.table thead th:is([aria-sort], .sorted) {
-    color: var(--ui-table-sortable-active-color);
+    color: var(--_ui-table-sortable-active-color);
     user-select: none;
   }
   .ui.sortable.table:not(.basic) thead th:is([aria-sort], .sorted) {
-    background: var(--ui-table-sortable-active-background);
+    background: var(--_ui-table-sortable-active-background);
   }
   .ui.sortable.table > thead > tr > th.disabled:hover {
-    color: var(--ui-table-disabled-color);
+    color: var(--_ui-table-disabled-color);
   }
   .ui.inverted.sortable.table:not(.basic) > thead > tr > th {
     border-inline-color: transparent;
@@ -1357,12 +1386,12 @@
     }
     .ui.table > :is(thead, tbody, tfoot) > tr,
     .ui.table > tr {
-      padding-block: var(--ui-table-responsive-row-padding);
-      box-shadow: var(--ui-table-responsive-row-shadow), var(--_table-mark-shadow);
+      padding-block: var(--_ui-table-responsive-row-padding);
+      box-shadow: var(--_ui-table-responsive-row-shadow), var(--_table-mark-shadow);
     }
     .ui.table > :is(thead, tbody, tfoot) > tr > :is(th, td),
     .ui.table > tr > :is(th, td) {
-      padding: var(--ui-table-responsive-cell-padding);
+      padding: var(--_ui-table-responsive-cell-padding);
       border: none;
       box-shadow: none;
       background: none;

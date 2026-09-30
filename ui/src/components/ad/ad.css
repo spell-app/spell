@@ -10,6 +10,10 @@
  *   served for the device, not for its container's width.
  * - An ad is a `<div>`, not an `<aside>`:  several `<aside>` landmarks with one name break axe's
  *   `landmark-unique`;  a page that wants a landmark wraps its ad column in one.
+ * - Public tokens (`--ui-ad-*`, the theming surface) are NEVER declared here:  the token block reads each through a
+ *   private alias, `--_ui-ad-margin: var(--ui-ad-margin, 1em 0)`, and every rule reads the alias.  So a value set on
+ *   `:root`, an ancestor, the host, `::part(ad)` or in the app stylesheet reaches the box (`docs/theming.md`
+ *   "Component tokens").
  */
 
 @layer ui.components.ad.types, ui.components.ad.content, ui.components.ad.variations, ui.components.ad.states;
@@ -30,19 +34,19 @@
     display: none;
   }
 
-  /* Tokens:  one per `ad.variables` entry. */
+  /* Tokens:  one per `ad.variables` entry, each the private alias of its public token. */
   .ui.ad {
-    --ui-ad-margin: 1em 0;
-    --ui-ad-test-background: oklch(0.4 0 0);
-    --ui-ad-test-color: var(--ui-ink-on-dark);
-    --ui-ad-test-font-size: 1em;
-    --ui-ad-test-mobile-font-size: 0.85714em;
+    --_ui-ad-margin: var(--ui-ad-margin, 1em 0);
+    --_ui-ad-test-background: var(--ui-ad-test-background, oklch(0.4 0 0));
+    --_ui-ad-test-color: var(--ui-ad-test-color, var(--ui-ink-on-dark));
+    --_ui-ad-test-font-size: var(--ui-ad-test-font-size, 1em);
+    --_ui-ad-test-mobile-font-size: var(--ui-ad-test-mobile-font-size, 0.85714em);
   }
 
   .ui.ad {
     display: block;
     box-sizing: border-box;
-    margin: var(--ui-ad-margin);
+    margin: var(--_ui-ad-margin);
     overflow: hidden;
   }
   :host(:first-child) > .ui.ad,
@@ -187,7 +191,7 @@
   /* Test:  a grey placeholder with its text in the middle. */
   .ui.test.ad {
     position: relative;
-    background: var(--ui-ad-test-background);
+    background: var(--_ui-ad-test-background);
   }
   .ui.test.ad::after {
     content: attr(data-text);
@@ -195,9 +199,9 @@
     top: 50%;
     left: 50%;
     width: 100%;
-    color: var(--ui-ad-test-color);
+    color: var(--_ui-ad-test-color);
     font-family: var(--ui-font-family);
-    font-size: var(--ui-ad-test-font-size);
+    font-size: var(--_ui-ad-test-font-size);
     font-weight: var(--ui-font-weight-bold);
     text-align: center;
     transform: translateX(-50%) translateY(-50%);
@@ -207,6 +211,6 @@
     content: "Ad";
   }
   .ui.mobile.test.ad::after {
-    font-size: var(--ui-ad-test-mobile-font-size);
+    font-size: var(--_ui-ad-test-mobile-font-size);
   }
 }

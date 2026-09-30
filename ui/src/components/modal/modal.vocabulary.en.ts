@@ -6,7 +6,7 @@
  * - Sizes are WIDTHS here (Fomantic's modal ratios), not text sizes:  `modal.css` reads the size class, never
  *   `--ui-scale`.
  * - A modal OWNS the `header`, `content`, `description` and `actions` parts:  slotted ones get `:state(in-modal)`
- *   and style themselves from `parts.css`, reading `--ui-modal-basic` / `--ui-modal-header-size` (`modal.css`).
+ *   and style themselves from `parts.css`, reading `--_ui-modal-basic` / `--_ui-modal-header-size` (`modal.css`).
  * - `closedby` mirrors `<dialog closedby>`:  `any` (Fomantic's `closable: true`), `closerequest` (Escape only),
  *   `none`.  `closable` is the close ICON (Fomantic's `closeIcon`).
  */

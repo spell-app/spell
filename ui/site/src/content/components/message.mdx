@@ -209,13 +209,16 @@ message.addEventListener("ui-dismiss", (event) => {
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-message-*` tokens on the message box, through `::part(message)` (the box declares its
-  own defaults, so a value set on the host tag doesn't reach it).  Style the other pieces with `::part()`:  `icon`,
-  `content`, `header` and `close`.
+  Theme with the public `--ui-message-*` tokens:  set one on the element, on any ancestor (`:root` for every
+  message), or on the box through `::part(message)`.  They inherit into the shadow root, where the sheet reads each
+  through a private alias, so nothing inside blocks them.  A slotted header reads `--ui-message-header-font-size`
+  from the message.  Style the other pieces with `::part()`:  `icon`, `content`, `header` and `close`.
 
 ```css
-ui-message::part(message) {
+:root {
   --ui-message-radius: 0;
+}
+ui-message.notice {
   --ui-message-padding: 1.5em 2em;
 }
 ui-message::part(close) {

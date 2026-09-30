@@ -19,6 +19,10 @@
  *   Fomantic's dark grey.  Fomantic's text-shadow outline of coloured icons is left out (an icon-font trick).
  * - Focus:  keyboard focus rings the focused icon (`:focus-visible` on its radio), for WCAG 2.4.7.
  * - Sizes:  `--ui-scale` (from `sizes.css`) scales the whole group.
+ * - Public tokens (`--ui-rating-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-rating-icon-width: var(--ui-rating-icon-width, 1.25em)`, and every rule reads
+ *   the alias.  So a value set on `:root`, an ancestor, the host, `::part(rating)` or in the app stylesheet
+ *   reaches the box (`docs/theming.md` "Component tokens").
  */
 
 @layer ui.components.rating.types, ui.components.rating.content, ui.components.rating.variations, ui.components.rating.states;
@@ -40,22 +44,25 @@
     outline: none;
   }
 
-  /* Tokens:  one per `rating.variables` entry that still matters, from the global tokens. */
+  /*
+   * Tokens:  one per `rating.variables` entry that still matters, from the global tokens -- each the private alias
+   * of its public token (never declare the public one:  it would block inherited values).
+   */
   .ui.rating {
-    --ui-rating-margin: 0 0.14285em;
-    --ui-rating-icon-width: 1.25em;
-    --ui-rating-icon-size: 1em;
-    --ui-rating-inactive-color: oklch(from var(--ui-ink) l c h / 0.15);
-    --ui-rating-active-color: var(--ui-text-dark);
-    --ui-rating-selected-color: var(--ui-text-color);
-    --ui-rating-duration: var(--ui-duration-fast);
-    --ui-rating-focus-width: var(--ui-focus-width, 2px);
-    --ui-rating-focus-color: var(--ui-focus-color);
+    --_ui-rating-margin: var(--ui-rating-margin, 0 0.14285em);
+    --_ui-rating-icon-width: var(--ui-rating-icon-width, 1.25em);
+    --_ui-rating-icon-size: var(--ui-rating-icon-size, 1em);
+    --_ui-rating-inactive-color: var(--ui-rating-inactive-color, oklch(from var(--ui-ink) l c h / 0.15));
+    --_ui-rating-active-color: var(--ui-rating-active-color, var(--ui-text-dark));
+    --_ui-rating-selected-color: var(--ui-rating-selected-color, var(--ui-text-color));
+    --_ui-rating-duration: var(--ui-rating-duration, var(--ui-duration-fast));
+    --_ui-rating-focus-width: var(--ui-rating-focus-width, var(--ui-focus-width, 2px));
+    --_ui-rating-focus-color: var(--ui-rating-focus-color, var(--ui-focus-color));
 
     display: inline-flex;
     box-sizing: border-box;
     min-inline-size: 0;
-    margin: var(--_rating-margin, var(--ui-rating-margin));
+    margin: var(--_rating-margin, var(--_ui-rating-margin));
     padding: 0;
     border: none;
     font-family: var(--ui-font-family);
@@ -85,13 +92,13 @@
     flex: 1 0 auto;
     align-items: center;
     justify-content: center;
-    width: var(--ui-rating-icon-width);
+    width: var(--_ui-rating-icon-width);
     height: auto;
     margin: 0;
     padding: 0;
     border-radius: var(--ui-radius-s);
     background: transparent;
-    color: var(--_rating-icon-color, var(--ui-rating-inactive-color));
+    color: var(--_rating-icon-color, var(--_ui-rating-inactive-color));
     font-style: normal;
     font-weight: var(--ui-font-weight-normal);
     line-height: 1;
@@ -99,13 +106,13 @@
     cursor: pointer;
     backface-visibility: hidden;
     transition:
-      opacity var(--ui-rating-duration) var(--ui-ease),
-      color var(--ui-rating-duration) var(--ui-ease);
+      opacity var(--_ui-rating-duration) var(--ui-ease),
+      color var(--_ui-rating-duration) var(--ui-ease);
   }
   .ui.rating .icon > svg {
     display: block;
-    width: var(--ui-rating-icon-size);
-    height: var(--ui-rating-icon-size);
+    width: var(--_ui-rating-icon-size);
+    height: var(--_ui-rating-icon-size);
     fill: currentColor;
     pointer-events: none;
   }
@@ -120,7 +127,7 @@
     cursor: inherit;
   }
   .ui.rating .icon:has(> input:focus-visible) {
-    outline: var(--ui-rating-focus-width) solid var(--ui-rating-focus-color);
+    outline: var(--_ui-rating-focus-width) solid var(--_ui-rating-focus-color);
     outline-offset: 1px;
   }
 }
@@ -132,18 +139,18 @@
 @layer ui.components.rating.types {
   /* Active (filled) icons. */
   .ui.rating .active.icon {
-    --_rating-icon-color: var(--ui-color, var(--ui-rating-active-color));
+    --_rating-icon-color: var(--ui-color, var(--_ui-rating-active-color));
   }
 
   /* Partly filled:  the base glyph stays inactive, the clipped copy over it is active. */
   .ui.rating .icon.partial.active {
-    --_rating-icon-color: var(--ui-rating-inactive-color);
+    --_rating-icon-color: var(--_ui-rating-inactive-color);
   }
   .ui.rating .icon > .fill {
     position: absolute;
     inset: 0;
     margin: auto;
-    color: var(--ui-color, var(--ui-rating-active-color));
+    color: var(--ui-color, var(--_ui-rating-active-color));
     clip-path: inset(0 calc(100% - var(--full, 0%)) 0 0);
   }
 }
@@ -157,7 +164,7 @@
   .ui.rating .icon.selected,
   .ui.rating .icon.selected.active,
   .ui.rating .icon.selected.partial.active {
-    --_rating-icon-color: var(--ui-color-hover, var(--ui-rating-selected-color));
+    --_rating-icon-color: var(--ui-color-hover, var(--_ui-rating-selected-color));
   }
   .ui.rating .icon.selected > .fill {
     display: none;

@@ -388,13 +388,20 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-grid-*` tokens on the grid's `grid` part (or on `.ui.grid` in your app stylesheet);
-  its rows and columns follow.
+  Theme with the public `--ui-grid-*` tokens:  set one on the grid element, on any ancestor (a region, `:root`), or
+  on the grid's box through `::part(grid)` (or on `.ui.grid` in your app stylesheet);  its rows and columns follow.
+  They inherit into the shadow roots, where the sheet reads each through a private alias, so nothing inside blocks
+  them.  `relaxed` and `compact` swap in their own gutter tokens (`--ui-grid-relaxed-gutter` ...), whatever the
+  base gutter.
 
 ```css
-ui-grid::part(grid) {
-  --ui-grid-gutter: 3em;
+/* every grid on the page */
+:root {
   --ui-grid-divider-color: var(--ui-border-color-strong);
+}
+/* one grid */
+ui-grid.roomy {
+  --ui-grid-gutter: 3em;
 }
 ```
 

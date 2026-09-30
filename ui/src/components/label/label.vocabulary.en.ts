@@ -79,7 +79,7 @@ export const labelVocabulary = {
     { name: "inverted", kind: "keyOnly", description: "For dark backgrounds." },
     {
       name: "icon",
-      kind: "string",
+      kind: "icon",
       description: "Icon name, shown before the text;  with no text the label gets the `icon` class (icon centred)."
     },
     {

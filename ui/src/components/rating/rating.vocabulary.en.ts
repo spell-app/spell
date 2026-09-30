@@ -31,7 +31,7 @@ export const ratingVocabulary = {
       key: "read-only",
       description: "Shows its value but can't be changed;  still focusable and submitted."
     },
-    { name: "icon", kind: "string", default: "star", description: "Icon name, e.g. `star` (default), `heart`." },
+    { name: "icon", kind: "icon", default: "star", description: "Icon name, e.g. `star` (default), `heart`." },
     { name: "max-rating", kind: "number", default: 4, description: "How many icons (Fomantic's default:  4)." },
     {
       name: "value",

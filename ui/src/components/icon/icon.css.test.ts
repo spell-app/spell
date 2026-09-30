@@ -186,3 +186,11 @@ function defineTestIcon() {
     }
   )
 }
+
+describe("icon.css tokens", () => {
+  it("takes a public token set on a wrapper of static markup", () => {
+    Sheets.adopt([...foundationCSS, iconCSS])
+    const root = Fixture.render(`<div style="--ui-icon-width: 30px"><span class="ui icon"></span></div>`)
+    expect(getComputedStyle(root.querySelector("span.ui.icon")!).width).toBe("30px")
+  })
+})

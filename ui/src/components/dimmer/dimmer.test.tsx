@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -169,6 +169,52 @@ describe("<ui-dimmer> element dimmer", () => {
   })
 })
 
+describe("<ui-dimmer> tokens from outside", () => {
+  const shade = "rgba(10, 20, 30, 0.5)"
+
+  /** The dimmer box's background colour. */
+  function background(box: Element): string {
+    return getComputedStyle(box).backgroundColor
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { box } = await dimmer(`<ui-dimmer active style="--ui-dimmer-background: ${shade}"></ui-dimmer>`)
+    expect(background(box)).toBe(shade)
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const { box } = await dimmer(
+      `<section style="--ui-dimmer-background: ${shade}"><ui-dimmer active></ui-dimmer></section>`
+    )
+    expect(background(box)).toBe(shade)
+  })
+
+  it("takes a token set through `::part(dimmer)`", async () => {
+    const { box } = await dimmer(
+      `<style>.themed::part(dimmer) { --ui-dimmer-background: ${shade} }</style><ui-dimmer active class="themed"></ui-dimmer>`
+    )
+    expect(background(box)).toBe(shade)
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-dimmer-background", shade)
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-dimmer-background")
+    })
+    const { box } = await dimmer(`<ui-dimmer active></ui-dimmer>`)
+    expect(background(box)).toBe(shade)
+  })
+
+  it("a shade swaps the background;  the duration reaches the fade", async () => {
+    const { box } = await dimmer(
+      `<ui-dimmer active shade="light" style="--ui-dimmer-background: ${shade}"></ui-dimmer>`
+    )
+    expect(background(box)).not.toBe(shade)
+    const { box: slow } = await dimmer(`<ui-dimmer style="--ui-dimmer-duration: 2s"></ui-dimmer>`)
+    expect(getComputedStyle(slow).transitionDuration.split(",")[0]).toBe("2s")
+  })
+})
+
 describe("<ui-dimmer on>", () => {
   it("on=hover:  shows while the pointer is over the parent", async () => {
     const { host, wrapper } = await dimmer(
@@ -237,6 +283,21 @@ describe("<ui-dimmer page>", () => {
     expect(closes.map((detail) => detail.reason)).toEqual(["escape"])
     expect(document.activeElement).toBe(trigger)
     expect(document.documentElement.classList.contains("ui-scroll-locked")).toBe(false)
+  })
+
+  it("with CloseWatcher (the browser's close requests), Escape hides one shown by a click", async () => {
+    UI.overlays.useCloseWatcher = true
+    const { host, wrapper } = await dimmer(
+      `<button id="show" commandfor="d" command="--show">Show</button><ui-dimmer id="d" page><p>Busy</p></ui-dimmer>`
+    )
+    const closes = record(host, "ui-close")
+    const shown = next(host, "ui-show")
+    await userEvent.click(wrapper.querySelector("#show")!)
+    await shown
+    await userEvent.keyboard("{Escape}")
+    await settle()
+    expect(closes.map((detail) => detail.reason)).toEqual(["escape"])
+    expect(host.active).toBe(false)
   })
 
   it("named 'Dimmed page' without an aria-label;  a click anywhere hides it", async () => {
