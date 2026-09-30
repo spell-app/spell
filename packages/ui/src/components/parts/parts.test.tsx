@@ -6,6 +6,7 @@ import { PART_NOUNS } from "./parts.vocabulary.en"
 import type { ComponentVocabulary } from "$/vocabulary"
 
 import { UIElement, type PartContext, type UIElementClass, type UIHost } from "$/elements"
+import { UI } from "$/runtime"
 import { ElementFixture } from "$test/ElementFixture"
 import { StubOwner } from "$test/StubOwner"
 
@@ -178,6 +179,25 @@ describe("<ui-header> standalone", () => {
     expect(root(link).localName).toBe("a")
     expect(root(link).getAttribute("role")).toBe("heading")
     expect(root(link).getAttribute("aria-level")).toBe("2")
+  })
+
+  it("keeps elements slotted into it live when `href` swaps its root tag", async () => {
+    // loaded first:  the header renders its slot synchronously, BEFORE the label connects (the old owner bug's
+    // trigger, `@spell/solid-element` fix 11)
+    await UI.load()
+    const host = await ElementFixture.render(`<ui-header>Dogs <ui-label>214</ui-label></ui-header>`)
+    const label = host.querySelector<UIHost>("ui-label")!
+    host.setAttribute("href", "#dogs")
+    await ElementFixture.settle(host)
+    expect(root(host).localName).toBe("a")
+    label.setAttribute("href", "#count")
+    await ElementFixture.settle(host)
+    expect(root(label).localName).toBe("a")
+    host.removeAttribute("href")
+    await ElementFixture.settle(host)
+    label.setAttribute("color", "red")
+    await ElementFixture.settle(host)
+    expect(root(label).className).toBe("ui red label")
   })
 
   it("follows `level` changes", async () => {

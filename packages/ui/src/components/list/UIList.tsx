@@ -85,9 +85,6 @@ export class UIList extends UIElement<typeof listVocabulary> implements ItemOwne
   ////////////////
 
   render(): JSX.Element {
-    // ONE slot, moved between roots:  a re-created slot would dispose the reactive roots of the items slotted
-    // into it (the fork renders a slotted child under its slot's owner)
-    const slot = (<slot />) as HTMLSlotElement
     return (
       <Dynamic
         component={this.isOrdered() ? OL : UL}
@@ -95,7 +92,7 @@ export class UIList extends UIElement<typeof listVocabulary> implements ItemOwne
         part={this.part("list")}
         role={ROLE}
       >
-        {slot}
+        <slot />
       </Dynamic>
     )
   }

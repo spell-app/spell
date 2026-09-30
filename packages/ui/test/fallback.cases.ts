@@ -91,7 +91,9 @@ export const FAMILY_FALLBACKS: readonly { family: string; html: string; root: st
       `<ui-table celled scrolling><table><caption>People</caption><thead><tr><th>Name</th></tr></thead>` +
       `<tbody><tr><td>Jill</td></tr></tbody></table></ui-table>`,
     root: "[role=region][part~=scroller]"
-  }
+  },
+  { family: "popup", html: `<ui-popup content="Tip" on="manual"></ui-popup>`, root: "[part~=popup]" },
+  { family: "modal", html: `<ui-modal header="Saved" closable>Done</ui-modal>`, root: "dialog[part~=modal]" }
 ]
 
 export const FALLBACK_CASES: readonly FallbackCase[] = [

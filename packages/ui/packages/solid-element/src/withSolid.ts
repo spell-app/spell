@@ -8,7 +8,7 @@
  * - Works on this package's elements AND on `component-register`'s (it only uses the shared element API:
  *   `renderRoot`, `addPropertyChangedCallback`, `addReleaseCallback`).
  * - Differences from `@solidjs/element` rc.11, each from its own fix module:
- *   - owner lookup crosses shadow roots (`owner.ts`)
+ *   - the owner is the element's CREATOR's, found across shadow roots, never its slot's (`owner.ts`)
  *   - the component runs untracked, inside an error boundary (`errors.ts`)
  *   - an adopted declarative shadow root is emptied first (`shadowRoot.ts`)
  *   - the element is provided as context, so hooks work from nested components (`current.ts`)

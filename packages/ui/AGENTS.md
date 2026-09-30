@@ -11,6 +11,8 @@ when working with code in this repository.
   pinned exactly) through our fork of its custom-element layer, `@spell/solid-element`.
 - The approved design is `docs/plan.md`.  Read "Decisions" and "Architecture" there BEFORE adding a component
   or runtime service.  `docs/report.md` is the generated status report (bundle, perf, hosts, HMR, fallbacks).
+- `docs/status.md` is the per-component checklist (status, tests, size, keyboard, docs page, deferred items).
+  MUST be updated in the same change that builds, finishes or defers anything in it.
 - Layout:
   - `packages/solid-element/` -- `@spell/solid-element`, the fork of `@solidjs/element` + `component-register`
     (upgrade, forms, lifecycle, error boundary, HMR fixes;  `UPSTREAM.md` maps each to a PR).  Its OWN yarn
@@ -157,6 +159,9 @@ when working with code in this repository.
     work around a wrong `target` in a component -- fix it there (`packages/solid-element/UPSTREAM.md`, PR 10).
 - **`keepAlive`:**  a removed element keeps its reactive root (until `dispose()` or garbage collection), so
   anything page-wide (overlay entries, document listeners) follows `connected()`, never disposal.
+- **Slots carry no Solid context:**  an element's root is owned by whoever CREATED it, never by the `<slot>` it's
+  assigned to (fork PR 11), so a `<slot>` may live in any `<Show>` / `<Dynamic>` branch, but context provided
+  around it never reaches slotted elements.  Owner data goes through `PartContext` / `OwnerContext`.
 - **Native fallback:**  every family sets `@proto static Fallback = <Name>Fallback` (plain DOM on
   `NativeFallback`, same class grammar, no Solid).  When a render throws, the element logs once, dispatches a
   cancelable `ui-error`, gets `:state(errored)` and shows the fallback;  siblings keep working

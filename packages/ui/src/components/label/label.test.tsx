@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 
 import { UI } from "$/runtime"
 import { expectAccessible } from "$test/a11y"
 
 import { ElementFixture } from "$test/ElementFixture"
+import { StubOwner } from "$test/StubOwner"
 import type { UIHost } from "$/elements"
 
 import "$/components/label"
@@ -185,6 +186,28 @@ describe("<ui-labels>", () => {
     const plain = await ElementFixture.render<UIHost>(`<ui-label>1</ui-label>`)
     const plainRoot = plain.shadowRoot!.querySelector<HTMLElement>("[part~=label]")!
     expect(getComputedStyle(child).borderRadius).not.toBe(getComputedStyle(plainRoot).borderRadius)
+  })
+})
+
+describe("<ui-label> statistic / standalone swap", () => {
+  beforeAll(() => StubOwner.defineFomanticOwners())
+
+  it("keeps elements slotted into it live when its root switches branch", async () => {
+    // loaded first:  the label renders its slot synchronously, BEFORE the detail connects (the old owner bug's
+    // trigger, `@spell/solid-element` fix 11)
+    await UI.load()
+    const holder = await ElementFixture.render(
+      `<div><stub-statistic><ui-label>Dogs<ui-detail>214</ui-detail></ui-label></stub-statistic><p></p></div>`
+    )
+    const label = holder.querySelector<UIHost>("ui-label")!
+    const detail = holder.querySelector<UIHost>("ui-detail")!
+    expect(label.matches(":state(in-statistic)")).toBe(true)
+    holder.querySelector("p")!.append(label)
+    await ElementFixture.settle(holder)
+    expect(label.shadowRoot!.querySelector("[part~=label]")!.className).toBe("ui label")
+    detail.setAttribute("href", "#dogs")
+    await ElementFixture.settle(holder)
+    expect(detail.shadowRoot!.firstElementChild!.localName).toBe("a")
   })
 })
 

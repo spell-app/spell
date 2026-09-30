@@ -175,7 +175,7 @@ describe("<ui-item> owned", () => {
     await expect.poll(() => header.matches(":state(in-owner)")).toBe(true)
   })
 
-  it("keeps elements inside it alive when its box changes tag (one slot, moved)", async () => {
+  it("keeps elements inside it alive when its box changes tag", async () => {
     const { owner } = await owned(`<ui-item><ui-header>Title</ui-header></ui-item>`)
     const header = owner.querySelector<UIHost>("ui-header")!
     owner.setAttribute("interactive", "")

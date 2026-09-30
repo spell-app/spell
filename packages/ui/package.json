@@ -36,6 +36,8 @@
     "./dist/list.js",
     "./dist/menu.js",
     "./dist/table.js",
+    "./dist/popup.js",
+    "./dist/modal.js",
     "./tools/demo/**"
   ],
   "main": "./dist/index.js",
@@ -149,6 +151,14 @@
     "./table": {
       "types": "./dist/components/table/index.d.ts",
       "import": "./dist/table.js"
+    },
+    "./popup": {
+      "types": "./dist/components/popup/index.d.ts",
+      "import": "./dist/popup.js"
+    },
+    "./modal": {
+      "types": "./dist/components/modal/index.d.ts",
+      "import": "./dist/modal.js"
     },
     "./styles": {
       "types": "./dist/styles/index.d.ts",

@@ -24,6 +24,8 @@ export class Styles {
   private readonly owned = new WeakSet<CSSStyleSheet>()
   /** names also pushed onto `document.adoptedStyleSheets` */
   private readonly pageNames = new Set<string>()
+  /** page names `ui.css` already carries, see `StyleRegisterOptions.linked` */
+  private readonly linkedNames = new Set<string>()
   /** foundation names, in order */
   private foundation: string[] = []
   /** utility names, in order */
@@ -44,10 +46,11 @@ export class Styles {
    * - Text:  built with `replaceSync`;  re-registering different text REPLACES the existing sheet's rules in place,
    *   so every root already using it updates with no re-push.
    * - A `CSSStyleSheet`:  used as-is;  a different object for an existing name is swapped into every root.
-   * - `page: true`:  also pushed onto `document.adoptedStyleSheets`, once.
+   * - `page: true`:  also pushed onto `document.adoptedStyleSheets`, once;  with `linked: true` too, only while
+   *   the page doesn't link `ui.css` (see `StyleRegisterOptions`).
    * - NOTE: `replaceSync` drops `@import` -- registered text MUST be self-contained.
    */
-  register(name: string, css: StyleSource, { page = false }: StyleRegisterOptions = {}): CSSStyleSheet {
+  register(name: string, css: StyleSource, { page = false, linked = false }: StyleRegisterOptions = {}): CSSStyleSheet {
     let sheet = this.sheets.get(name)
     let swapped = false
     if (typeof css === "string") {
@@ -64,6 +67,7 @@ export class Styles {
     const added = !this.sheets.has(name)
     this.sheets.set(name, sheet)
     this.owned.add(sheet)
+    if (page && linked) this.linkedNames.add(name)
     if (page && !this.pageNames.has(name)) {
       this.pageNames.add(name)
       this.refreshPage()
@@ -183,10 +187,12 @@ export class Styles {
   private refreshPage() {
     if (typeof document === "undefined") return
     const foreign = document.adoptedStyleSheets.filter((sheet) => !this.owned.has(sheet))
-    // a page that links `ui.css` already has every page sheet -- adopting them again just doubles the CSS
-    const ours = this.pageIsLinked ? [] : this.lookup([...this.pageNames])
+    // a page that links `ui.css` already has ITS sheets -- adopting them again just doubles the CSS;  component
+    // page sheets (`table`, `scroll-lock`) aren't in it
+    const linked = this.pageIsLinked
+    const ours = this.lookup([...this.pageNames].filter((name) => !linked || !this.linkedNames.has(name)))
     document.adoptedStyleSheets = [...foreign, ...ours]
-    if (!this.pageIsLinked && !this.watchingLoad && document.readyState !== "complete") {
+    if (!linked && !this.watchingLoad && document.readyState !== "complete") {
       // a `<link>` still loading may bring the marker;  re-check once the page has settled
       this.watchingLoad = true
       window.addEventListener("load", () => this.refreshPage(), { once: true })

@@ -83,19 +83,24 @@ describe.each(Object.entries(IMPLEMENTATIONS))("%s:  @solidjs/element test suite
     expect(clicks).toBe(1)
   })
 
-  test("HTML-authored provider and reader custom elements share context through slot markers", () => {
-    const Context = createContext("missing")
-    const providerTag = nextTag("library-provider")
-    const readerTag = nextTag("library-reader")
-    customElement(providerTag, {}, () => (
-      <Context value="slot">
-        <slot />
-      </Context>
-    ))
-    customElement(readerTag, {}, () => <span>{useContext(Context)}</span>)
-    document.body.innerHTML = `<${providerTag}><${readerTag}></${readerTag}></${providerTag}>`
-    expect(document.body.querySelector(readerTag)!.shadowRoot!.textContent).toBe("slot")
-  })
+  // NOTE:  the fork deliberately drops this (fix 11):  a slotted element adopting its SLOT's owner is disposed with
+  // the slot's branch.  `owner.test.tsx` pins the fork's side.
+  test.skipIf(_name === "fork")(
+    "HTML-authored provider and reader custom elements share context through slot markers",
+    () => {
+      const Context = createContext("missing")
+      const providerTag = nextTag("library-provider")
+      const readerTag = nextTag("library-reader")
+      customElement(providerTag, {}, () => (
+        <Context value="slot">
+          <slot />
+        </Context>
+      ))
+      customElement(readerTag, {}, () => <span>{useContext(Context)}</span>)
+      document.body.innerHTML = `<${providerTag}><${readerTag}></${readerTag}></${providerTag}>`
+      expect(document.body.querySelector(readerTag)!.shadowRoot!.textContent).toBe("slot")
+    }
+  )
 
   test("ancestor owner markers are found while walking up from custom elements", () => {
     const Context = createContext("missing")

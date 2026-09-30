@@ -99,9 +99,10 @@ export class UIRuntime {
       ["animations", animationsCSS],
       ["utilities", utilitiesCSS]
     ]
-    for (const [name, css] of foundation) this.styles.register(name, css, { page: true })
-    this.styles.register("typography", typographyCSS, { page: true })
-    this.styles.register("native", nativeCSS, { page: true })
+    // `linked`:  `ui.css` carries these, so a page that links it doesn't get them twice
+    for (const [name, css] of foundation) this.styles.register(name, css, { page: true, linked: true })
+    this.styles.register("typography", typographyCSS, { page: true, linked: true })
+    this.styles.register("native", nativeCSS, { page: true, linked: true })
     this.styles.setFoundation(foundation.map(([name]) => name).filter((name) => name !== "utilities"))
     this.styles.setUtilities(["utilities"])
   }

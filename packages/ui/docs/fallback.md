@@ -20,7 +20,8 @@ static render(host, root, error?, internals?): NativeFallbackHandle
   (each in `src/components/<name>/<name>.fallback.ts`), and one per family keyed by the host's tag:
   `ContentPartFallback` (`parts.fallback.ts`), `GridFallback`, `ImageFallback`, `PlaceholderFallback`,
   `BreadcrumbFallback`, `InputFallback` (input + textarea), `CheckboxFallback` (checkbox + radio), `FormFallback`
-  (form, field, fields), `ItemFallback`, `ListFallback`, `MenuFallback`, `TableFallback`.
+  (form, field, fields), `ItemFallback`, `ListFallback`, `MenuFallback`, `TableFallback`, `PopupFallback`,
+  `ModalFallback`.
 - Reads canonical English attribute names (a translated host maps them back first);  booleans go through
   `Converters` (`disabled="no"` is false).
 
@@ -50,6 +51,8 @@ static render(host, root, error?, internals?): NativeFallbackHandle
 | list      | `<ul>` / `<ol>` (`ordered`) with `role=list`, class grammar, `part`, slot;  the sub-list form (`class="list"`) inside a `<ui-item>` / `<ui-list>` parent, an `<ol>` under an ordered list;  items via `ItemFallback` | `ui-select`;  sub-lists behind translated or slotted parents;  numbering / bullets still come from `list.css` |
 | menu      | `<nav class="ui ... menu" part="menu" aria-label>` around the slot;  a sub-menu `<div class="[position] menu">` inside a `<ui-menu>` / `<ui-item>` parent | `interactive` (a `<nav>`, no menubar roles or roving focus), `ui-select`, sub-menus behind translated or slotted parents |
 | table     | `div.scroller` part around the slot (a focusable, named `role=region` while `scrolling` / `overflowing`), class grammar mirrored onto the slotted `<table>` (author classes kept, re-applied on `className` rewrites) | sorting (`ui-sort`, `aria-sort`, focusable headers, `client-sort`), data mode (`rows` / `columnDefs`:  nothing renders without a slotted `<table>`), translated `label` (English), later attribute changes (read once) |
+| popup     | the box in the class grammar (shorthands, slot) in a host that stays closed;  a tooltip-like popup's text as the target's native `title` (when it has none) | showing it at all:  popover, positioning, triggers, `ui-open` / `ui-close`, Escape;  click popups show nothing |
+| modal     | native `<dialog>` in the class grammar (shorthands, slot, close button) shown with `showModal()` while the host has `open`:  focus trap, dimmer, Escape;  approve / deny still fire the cancelable `ui-approve` / `ui-deny`;  `ui-hide` | `ui-open` / `ui-close` (no veto), `ui-show`, invoker commands, `closedby`, page scroll lock and the overlay stack, transitions, the close glyph (`×`), translated `close` label, a slotted header naming it |
 
 Everywhere:  `aria-labelledby` / `aria-describedby` idrefs dangle (they can't cross the shadow boundary),
 properties other than dropdown `value` / `options` are not read (only reflected attributes).

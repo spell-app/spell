@@ -160,29 +160,22 @@ export class UIItem extends UIElement<typeof itemVocabulary> {
   // ## Rendering
   ////////////////
 
-  /**
-   * The slot alone (unowned), a divider, or the item box.
-   * - HACK:  ONE default `<slot>`, created here and moved between branches and box tags:  the fork renders a
-   *   slotted child under the owner stamped on its SLOT (`lookupOwner()`), so a slot re-created by `<Show>` /
-   *   `<Dynamic>` would dispose the reactive roots of every element inside the item (a header, a sub-menu, a
-   *   dropdown) when the owner or the tag changes.  See `SUSPECTED-BUGS.md`.
-   */
+  /** The slot alone (unowned), a divider, or the item box. */
   render(): JSX.Element {
-    const slot = (<slot />) as HTMLSlotElement
     return (
-      <Show when={this.itemContext()} fallback={slot}>
+      <Show when={this.itemContext()} fallback={<slot />}>
         <Show
           when={this.attrs.type !== DIVIDER}
           fallback={<div class={DIVIDER} part={this.part("item")} role={SEPARATOR} />}
         >
-          {this.box(slot)}
+          {this.box()}
         </Show>
       </Show>
     )
   }
 
-  /** The owned item box, around the default `slot`. */
-  private box(slot: HTMLSlotElement): JSX.Element {
+  /** The owned item box, around the default slot. */
+  private box(): JSX.Element {
     const disabledButton = () => this.tag() === BUTTON && this.attrs.disabled
     return (
       <Dynamic
@@ -208,7 +201,7 @@ export class UIItem extends UIElement<typeof itemVocabulary> {
             <slot name={this.slot("icon")}>{this.glyph.svg()}</slot>
           </span>
         </Show>
-        {slot}
+        <slot />
       </Dynamic>
     )
   }

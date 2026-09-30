@@ -38,3 +38,18 @@ One `##` heading per item, `---` between items, then:
 - **Cause** -- the actual mechanism, not a guess
 - **Fix** -- the shape of the real solution
 - **Pinned at** -- where the problem is currently recorded or worked around
+
+---
+
+## `popup.anchored.css` skips the CSS pipeline
+
+- **Cost** -- one popup sheet ships unminified and unchecked by Lightning CSS (no `@custom-media`, no `@import`, no
+  lowering);  the popup has TWO registered sheets (`popup`, `popup-anchored`), and anything that lists a family's
+  sheets (`tools/demo/index.ts`) must name both.
+- **Cause** -- Lightning CSS 1.30 fails the whole file on `@container anchored(fallback: flip-block)` (anchored
+  container queries, which move the arrow when `position-try-fallbacks` flips a popup), so those rules live in a
+  separate file imported `?raw`.
+- **Fix** -- fold the rules back into `popup.css` once Lightning CSS parses anchored queries (or passes unknown
+  `@container` preludes through).
+- **Pinned at** -- `src/components/popup/popup.anchored.css` (header), `UIPopup.styles`, `popup.css.test.ts` ("the
+  anchored sheet parses in the browser"), `PAPERCUTS.md` 2026-09-29.

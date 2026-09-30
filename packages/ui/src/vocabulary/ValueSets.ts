@@ -52,8 +52,10 @@ export class ValueSets {
   @proto static sizes = ["mini", "tiny", "small", "medium", "large", "big", "huge", "massive"] as const
 
   /**
-   * Popup / tooltip positions, as Fomantic's `popup.js` `positions()` and `data-position` list them.
+   * Popup / tooltip positions:  Fomantic's 8 (`popup.js` `positions()`, `data-position`), plus 4 of our own.
    * - Map 1:1 onto anchor positioning's `position-area` (see plan, "Overlays").
+   * - Ours:  `left top` ... `right bottom`, BESIDE the target, lined up with its top / bottom edge.  NOT the same
+   *   as `top left` (above, lined up with its left edge):  word order matters here, unlike class words.
    */
   @proto static positions = [
     "top left",
@@ -63,7 +65,11 @@ export class ValueSets {
     "bottom center",
     "bottom right",
     "left center",
-    "right center"
+    "right center",
+    "left top",
+    "left bottom",
+    "right top",
+    "right bottom"
   ] as const
 
   /** `attached` positions, e.g. `top attached` segment, `top right attached` label, `left attached` button. */

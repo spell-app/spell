@@ -133,19 +133,13 @@ export class UIMenu extends UIElement<typeof menuVocabulary> implements ItemOwne
   // ## Rendering
   ////////////////
 
-  /**
-   * The root for this shape:  sub-menu, menubar or landmark.
-   * - HACK:  ONE `<slot>`, created here and moved between the branches, never one per branch:  the fork renders a
-   *   slotted child under the owner stamped on its SLOT (`lookupOwner()`), so a per-branch slot would dispose every
-   *   item's reactive root when the shape changes (`interactive` toggled).  See `SUSPECTED-BUGS.md`.
-   */
+  /** The root for this shape:  sub-menu, menubar or landmark. */
   render(): JSX.Element {
-    const slot = (<slot />) as HTMLSlotElement
     return (
       <Switch>
         <Match when={this.parent()}>
           <div class={this.subClasses()} part={this.part("menu")}>
-            {slot}
+            <slot />
           </div>
         </Match>
         <Match when={this.attrs.interactive}>
@@ -157,12 +151,12 @@ export class UIMenu extends UIElement<typeof menuVocabulary> implements ItemOwne
             aria-orientation={this.attrs.vertical ? VERTICAL : undefined}
             aria-label={this.ariaLabel.get() ?? undefined}
           >
-            {slot}
+            <slot />
           </div>
         </Match>
         <Match when={true}>
           <nav class={this.classes()} part={this.part("menu")} aria-label={this.ariaLabel.get() ?? undefined}>
-            {slot}
+            <slot />
           </nav>
         </Match>
       </Switch>
