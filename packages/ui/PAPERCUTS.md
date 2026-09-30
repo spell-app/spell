@@ -550,3 +550,23 @@ Log of things that slowed down development. Date · symptom · fix · project.
 - 2026-09-30 · Vitest browser `page.screenshot({ path })` to a scratch dir outside the repo fails:  `Access denied
   ... server.fs strict`. · Write it under the repo (a throwaway folder next to the probe test) and delete it after. ·
   spell/ui
+- 2026-09-30 · `yarn test:visual --os linux` couldn't start Docker:  `open -a Docker` exits 0 but no Docker process
+  ever appears, and `docker desktop start` times out.  `open -W -a Docker --stderr <file>` showed why:  Docker
+  Desktop 4.42.1 dies at launch on macOS 26.6 (`SIGSEGV` in `github.com/shoenig/go-m1cpu` init). · Update Docker
+  Desktop;  the CLI now fails after 180 s with a pointer to `docs/visual-testing.md` "Troubleshooting".  `linux`
+  baselines wait for it. · spell/ui visual
+- 2026-09-30 · A visual baseline of an open top flyout was WRONG but stable:  its header border drawn on one 512px
+  raster tile and not the next.  Cause:  `page.emulateMedia({ colorScheme })` on an already-loaded page makes
+  Chromium repaint only some tiles of a top-layer `<dialog>`;  the stale tile then survives every screenshot. ·
+  Load the page fresh per scheme, with the scheme emulated BEFORE `goto()` (`visual.spec.ts`). · spell/ui visual
+- 2026-09-30 · After fixing that capture flow the bad baseline stayed:  `--update-snapshots=changed` only rewrites
+  a baseline that differs beyond the tolerances, and during `toHaveScreenshot`'s retries a transient frame still
+  matched it. · After changing HOW captures are taken, delete the affected baselines and regenerate. · spell/ui
+  visual
+- 2026-09-30 · `page.evaluate("async ({ a }) => ...", arg)` returned `undefined`:  a STRING page function is
+  evaluated as an expression, and a function value isn't called with `arg`. · Build the call as a string,
+  `` `(${FN})(${JSON.stringify(arg)})` `` (`visual.spec.ts` `COMPARE`). · spell/ui visual
+- 2026-09-30 · Playwright's default screenshot `threshold` (0.2) passed a basic button whose 1px border went 0.05
+  OKLCH lightness darker (338 pixels, all "same"). · Measured with Playwright's own comparator
+  (`playwright-core/lib/coreBundle.js` `utils.getComparator("image/png")`) and set `threshold: 0.02`
+  (`VisualSettings.TOLERANCE`, `docs/visual-testing.md` "Tolerances"). · spell/ui visual

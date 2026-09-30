@@ -32,6 +32,30 @@ Entry format:  `` - `path/to/file.ts` `symbol()`: what looks wrong, why, and how
 
 ## 3. Styling / CSS
 
+- `src/components/calendar/calendar.css` field width (visual tests, 2026-09-30):  a `<ui-calendar>` field has no
+  width of its own, so it takes the browser's default `<input>` width -- 235px in chromium, 258px in webkit, 278px in
+  firefox.  The date-time field then cuts its value ("September 30, 2026 at 2:3" in chromium), and in webkit the
+  "Year" field wraps to a second row.  Screenshots:  `test/visual/baselines/local-darwin/{chromium,webkit,firefox}/
+  calendar/types-light.png`.
+- `src/components/dropdown/dropdown.css` multiple selection, open (visual tests, 2026-09-30):  the open menu of a
+  `fluid multiple selection` dropdown with two values chosen ends ~10px ABOVE the field's own border, which shows
+  as an empty bordered strip under the last item.  Screenshots:  `test/visual/baselines/local-darwin/*/dropdown/
+  types.open-multiple-light.png` (and `-dark`).
+- `src/components/dropdown/dropdown.css` anchored menu (visual tests, 2026-09-30):  the example's "Open selection"
+  dropdown (open from the start, below the 768px viewport) opens its menu UPWARDS in webkit and downwards in
+  chromium / firefox, although the page has room below.  Maybe webkit's position-try measures against the viewport
+  while the anchor is scrolled out of it.  Screenshots:  `test/visual/baselines/local-darwin/webkit/dropdown/
+  types-light.png` vs `.../chromium/dropdown/types-light.png`.
+- `src/components/image/image.css` class grammar on the page (visual tests `--parity`, 2026-09-30):  the static
+  `<div class="ui mini centered circular images">` of `image/examples/groups.html` renders its `<img>`s at full width
+  (circles ~700px across);  the element markup (`<ui-images size="mini" centered circular>`) gets 35px avatars.
+  The `mini` size seems not to reach page-level images in a group.  Prove:  `yarn test:visual --os local --browsers
+  chrome --grep image/groups --parity`, then `tools/results/visual/local-darwin/parity/chromium/image-groups.png`.
+- `src/components/card/card.css` links in a card (visual tests, 2026-09-30):  a card's `href` header and the extra
+  content's link are underlined, including the space between the icon and "22 Friends";  Fomantic's card links are
+  not underlined (colour and hover only).  Maybe deliberate (links distinguishable without colour, WCAG 1.4.1):
+  decide, then fix or note.  Screenshot:  `test/visual/baselines/local-darwin/chromium/card/types-dark.png`.
+
 - `src/components/items/items.css` / `card.css` / `grid.css`:  a group host that is a size container
   (`container-type: inline-size`) seems to keep its root's top margin from collapsing with the heading above it, so
   element markup shows a bigger gap than the static class grammar (seen in the Items examples' screenshots).
