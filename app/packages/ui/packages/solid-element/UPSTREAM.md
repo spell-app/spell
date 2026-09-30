@@ -258,6 +258,58 @@ How each fix in `@spell/solid-element` could land in `solidjs/solid`, branch `ne
   `@spell/ui`'s `test/events.test.tsx`:  `input` / `click` / `keydown` / `focusin` on `<ui-input>`, `<ui-button>`,
   `<ui-dropdown>` with and without a Solid app, and a rich dropdown item's nested element.
 
+## PR 11 -- a slotted element's root dies with its slot's branch (`owner.ts`)
+
+- **Problem:**  `lookupContext` (element `:19-31`) returns the `_$owner` stamped on the element's ASSIGNED SLOT
+  (or an ancestor's) before anything else, and `withSolid` runs `createRoot` under it.  In Solid 2 a root
+  created under an owner is that owner's CHILD (`createOwner()` links it;  `createRoot`'s own docs:  "disposed
+  when the parent is disposed"), unlike Solid 1, where roots were never owned and the slot preference only
+  carried context.  So when a component re-creates its `<slot>` (`<Show>` / `<Switch>` / `<Dynamic>` swapping the
+  element around it), the branch that rendered the old slot is disposed and takes with it the whole root of every
+  element slotted into it:  they stop updating, silently, and keep their last DOM.  The elements are still
+  connected (they're light DOM), so no disconnect ever re-renders them.
+  - racy too:  only when the host had ALREADY rendered its slot when the child connected (host defined first,
+    synchronous render);  a child connecting before its host renders walks past the unassigned slot.
+- **Is it Solid 2 generally?**  Yes, every `@solidjs/element` element slotted into a Solid-rendered `<slot>` that
+  can be re-created.  Minimal repro (the original's own API):
+
+  ```tsx
+  import { customElement } from "@solidjs/element"
+  import { flush, Show } from "solid-js"
+  customElement("x-child", { label: "before" }, (props) => <span>{props.label}</span>)
+  customElement("x-host", { wide: false }, (props) => (
+    <Show when={props.wide} fallback={<div><slot /></div>}>
+      <section><slot /></section>
+    </Show>
+  ))
+  document.body.innerHTML = "<x-host><x-child></x-child></x-host>"
+  const [host, child] = [document.querySelector("x-host"), document.querySelector("x-child")]
+  host.wide = true;  flush()
+  child.label = "after";  flush()
+  console.log(child.shadowRoot.textContent) // "before":  its root was disposed with the fallback branch
+  ```
+- **Answers:**  no upstream issue yet.
+- **Patch outline:**
+  - `lookupContext`:  the element's OWN stamp first (its creator), else the nearest stamped ancestor's, crossing
+    shadow roots (PR 8);  never read `assignedSlot`.  The creator owns the element's DOM, so its lifetime covers
+    the element's;  a slot only displays light DOM that someone else wrote
+  - skip a stamp whose owner `isDisposed()` (an element created in a branch, connected after it ended):
+    adopting it gives a root nothing ever disposes (`RUN_WITH_DISPOSED_OWNER`)
+  - the better upstream fix keeps slot context:  a `@solidjs/signals` primitive for a root that INHERITS an
+    owner's context without being its child (e.g. `createRoot(fn, { context: owner })`);  then `withSolid` could
+    take context from the slot and lifetime from the creator.  Solid 2 has no public way to do that today
+    (`_context` is copied only from the parent at creation, and mangled in prod), so this fork doesn't try.
+- **Breaking:**  yes:  context a component provides AROUND its `<slot>` no longer reaches slotted elements
+  (upstream's own test "HTML-authored provider and reader custom elements share context through slot markers"
+  fails;  `compat.test.tsx` skips it for the fork).  App context is unaffected:  an app-written element carries
+  the app's stamp, and an HTML-authored one inside it finds its nearest stamped ancestor.
+- **Cost:**  -0.1 kB min, -16 B min + gzip (the walk loses its two slot checks, gains `isDisposed`).
+- **Test:**  `owner.test.tsx` -- the swap above (the original freezes, both elements `keepAlive`);  the same with the
+  child connected before its host renders;  an app-written element keeps app context and updates across the
+  swap;  context around a `<slot>` no longer reaches slotted elements;  a disposed stamp is skipped.  `@spell/ui`:
+  `item`, `menu`, `list` (their one-moved-slot workaround removed), `label` (statistic / standalone swap),
+  `parts` (`<ui-header>` link / plain swap).
+
 ## HMR -- redefinition in place, live-instance registry, Vite plugin (`hot.ts`, `vite.ts`)
 
 - **Problem:**

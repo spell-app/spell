@@ -49,7 +49,9 @@ export const COMPONENTS = [
   "item",
   "list",
   "menu",
-  "table"
+  "table",
+  "popup",
+  "modal"
 ] as const
 
 /**

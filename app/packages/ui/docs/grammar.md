@@ -113,7 +113,8 @@ Enumerated values are validated against shared sets in `ValueSets` (or an inline
   (extensible: `ValueSets.add("hues", ...)`)
 - `sizes` -- `mini tiny small medium large big huge massive`
 - `positions` -- `top left`, `top center`, `top right`, `bottom left`, `bottom center`, `bottom right`,
-  `left center`, `right center`
+  `left center`, `right center`;  plus ours, `left top`, `left bottom`, `right top`, `right bottom` (beside the
+  target, lined up with its top / bottom edge -- word order matters)
 - `attachments` -- `top`, `bottom`, `left`, `right`, `top left`, `top right`, `bottom left`, `bottom right`
 - `alignments` -- `left center right justified`;  `verticalAlignments` -- `top middle bottom`
 - `floats` -- `left right`;  `devices` -- `mobile tablet computer`, `large screen`, `widescreen`
@@ -194,8 +195,10 @@ parts -- never `ui-list-item` / `ui-menu-item`:
 - Colour:  an item has no `ui`, so a coloured one adds `ui-<color>` (the utility remap class) for `colors.css`.
 - The item is a part (`isPart`):  transparent to other parts, so `<ui-item><ui-content><ui-header>` inside a list
   is the LIST's header (`.ui.list > .item > .content > .header`).
-- NOTE: a future Items view (`<ui-items>`) will own `item` too;  its content parts are keyed `in-item` today
-  (`parts.css`), which it will need to re-key or emit.
+- The Items VIEW (Phase B) reuses this tag:  `<ui-items><ui-item>`, never a second item element.  `<ui-items>`
+  owns `item` like list and menu;  there the item is NOT transparent -- it owns its content parts, so the
+  `in-item` keys in `parts.css` (`.ui.items > .item > .content > .header`) apply only under `<ui-items>`.
+  Decided 2026-09-29.
 
 ## Menus:  navigation by default, menubar opt-in
 
@@ -242,3 +245,78 @@ slotted `<table>` makes the element render one -- into its LIGHT DOM, text only:
 Why light DOM:  one styling path (the same page sheet and class grammar as a slotted table), native semantics
 in the document (find-in-page, copy, page CSS), and a server can render the same `<table>` markup itself, so
 first paint never needs the property.  No virtualization yet:  every row renders.
+
+## Popups:  `<ui-popup>` on a target, anchored by CSS
+
+```html
+<ui-button id="save">Save</ui-button>
+<ui-popup for="save" header="Saving" content="Stores a draft;  nothing is published."></ui-popup>
+
+<ui-button>Plan</ui-button>                                   <!-- no `for`:  the previous sibling -->
+<ui-popup on="click" position="bottom left" flowing header="Basic plan"><ui-button primary>Choose</ui-button></ui-popup>
+
+<button data-tooltip="Add users" data-position="bottom left" data-inverted>+</button>   <!-- CSS only -->
+```
+
+- Target:  the `target` PROPERTY, else `for` (an id in the popup's own tree), else the previous element sibling
+  (Fomantic's `inline` markup).
+- The HOST is the popover (`hint` for hover / focus popups when `UI.browser.supports.popoverHint`, else `manual`;
+  click and manual popups are always `manual` so `ui-close` can veto) and the positioned box:  anchor positioning
+  only, `position-area` from `position` (Fomantic's eight positions -- `top left` ... `right center` -- plus four
+  of ours, `left top` ... `right bottom`;  the plan's "11" was a miscount), `position-try-fallbacks: flip-block,
+  flip-inline`.  Anchored container queries move the arrow on a flip (`popup.anchored.css`, a raw sheet Lightning
+  CSS can't parse).
+- Our four positions share their class WORDS with Fomantic's (`left top` ~== `top left` as classes), so their
+  rules match the phrase, `[class*="left top"]` (Fomantic's own `very wide` idiom);  the tooltip's `data-position`
+  is one string, so it needs no trick.
+- Anchor:  the plan's named anchor (the target gets an `anchor-name` ADDED to its inline list, the host a
+  `position-anchor`) when the target has a box;  a `display: contents` target (`<ui-icon>`, `<ui-label>`, most
+  hosts) has none, and a tree-scoped name can't reach into its shadow root, so the popup then anchors to the
+  target's first shadow box IMPLICITLY (`showPopover({ source })`, `position-anchor: auto`).
+- `on`:  `hover` (+ keyboard focus;  `show-delay` / `hide-delay`, Fomantic's 50 / 70 ms), `focus`, `click`,
+  `manual`.  A hovered popup stays open while the pointer is over it (WCAG 1.4.13), where Fomantic defaulted to
+  `hoverable: false`.
+- Accessibility follows `on`:  tooltip-like (`role=tooltip`, the target `aria-describedby` it) or, for `click`, a
+  non-modal dialog (`role=dialog` named by `header`, the target `aria-haspopup=dialog` / `aria-expanded` /
+  `aria-controls`).  The ARIA goes on the element that takes focus -- a `<ui-button>`'s inner `<button>`, by
+  element reflection.  Escape and outside clicks come from `UI.overlays`.
+- Content:  `header` / `content` shorthands (Fomantic's `title` / `content`), slotted content, or `<ui-header>` /
+  `<ui-content>` parts (owner context `in-popup`).
+- The CSS-only tooltip (`data-tooltip`, `data-position`, `data-inverted`, `data-variation`) is `native.css`, a page
+  sheet;  pseudo-element text isn't reliably announced, so anything that matters belongs in a `<ui-popup>`.
+
+## Modals:  `<ui-modal>` on a native `<dialog>`
+
+```html
+<button class="ui button" commandfor="photo" command="--show">Change photo</button>
+<ui-modal id="photo" closable>
+  <ui-header>Profile Picture</ui-header>
+  <ui-content><ui-description>Is it okay to use this photo?</ui-description></ui-content>
+  <ui-actions><ui-button class="deny">Nope</ui-button><ui-button positive>Yep, that's me</ui-button></ui-actions>
+</ui-modal>
+<script>
+  await UI.modals.confirm({ title: "Delete?", message: "It can't be undone." })  // true / false
+</script>
+```
+
+- Shadow `<dialog class="ui ... modal">` opened with `showModal()`:  focus trap, `inert` page and top layer are the
+  browser's;  the `::backdrop` is the dimmer (no `ui-dimmer`).  Scroll lock, the keyboard scope and focus restore
+  come from `UI.overlays` (kind `modal`).
+- Sizes are WIDTHS (Fomantic's ratios of 850px ... on computers, 88% on tablets, 95% on phones) and header sizes;
+  text never scales.  `fullscreen`, `overlay fullscreen`, `basic`, `inverted`, `scrolling`,
+  `vertical-align="top|bottom"` (`top aligned`).
+- `closedby` mirrors `<dialog closedby>` and replaces Fomantic's `closable` setting:  `any` (Escape or the dimmer,
+  default), `closerequest` (Escape), `none`.  Natively when `UI.browser.supports.dialogClosedBy`, else through the
+  overlay's outside click;  Escape always through `UI.overlays`, so only the topmost overlay closes.  `closable`
+  is the close ICON (Fomantic's `closeIcon`) -- always INSIDE the box:  the dialog is its own scroll box, so
+  Fomantic's outside placement would be clipped.
+- Events:  `ui-open` (cancelable;  a user action -- the `--show` invoker command), `ui-close` (cancelable, with
+  `reason`:  `escape` / `outside` / `close` / `approve` / `deny` / `close-all`), then `ui-show` / `ui-hide` once
+  the CSS transition has ended.  Writing `open` is the app's own decision and fires no `ui-open` / `ui-close`.
+- Approve / deny:  Fomantic's `.approve` / `.ok` / `.positive` and `.deny` / `.cancel` / `.negative` classes, or
+  `<ui-button positive / negative>`, anywhere inside;  their cancelable `ui-approve` / `ui-deny` come first
+  (Fomantic's `onApprove` returning `false`).
+- Named by the host's `aria-label`, else the `header` shorthand, else a slotted `<ui-header>`.  The close icon is
+  LAST in the DOM, so the initial focus lands in the content (a confirm's Cancel), not on it.
+- `UI.modals.confirm()` / `alert()` / `prompt()` build a `<ui-modal>` in `<body>` (`ModalDialogs`, registered by
+  the family's barrel through `UI.modals.register()`), with the translated `ok` / `cancel` texts.

@@ -27,12 +27,12 @@ describe("Styles", () => {
     removeAppSheet()
   })
 
-  it("page sheets are NOT adopted into the document when ui.css is linked (--ui-page-sheet: linked)", () => {
+  it("ui.css's own page sheets are NOT adopted into the document when it's linked (--ui-page-sheet: linked)", () => {
     const marker = document.createElement("style")
     marker.textContent = ":root { --ui-page-sheet: linked }"
     document.head.append(marker)
     try {
-      const sheet = styles.register("native", "p { color: red }", { page: true })
+      const sheet = styles.register("native", "p { color: red }", { page: true, linked: true })
       expect(document.adoptedStyleSheets).not.toContain(sheet)
       // shadow roots still get it
       const host = Fixture.render("<div></div>")
@@ -42,6 +42,21 @@ describe("Styles", () => {
       expect(root.adoptedStyleSheets).toContain(sheet)
     } finally {
       marker.remove()
+    }
+  })
+
+  it("component page sheets (not in ui.css) still go onto a page that links ui.css", () => {
+    const marker = document.createElement("style")
+    marker.textContent = ":root { --ui-page-sheet: linked }"
+    document.head.append(marker)
+    try {
+      const sheet = styles.register("scroll-lock-test", "html.x { overflow: hidden }", { page: true })
+      expect(document.adoptedStyleSheets).toContain(sheet)
+    } finally {
+      marker.remove()
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
+        (each) => each !== styles.sheet("scroll-lock-test")
+      )
     }
   })
 

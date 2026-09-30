@@ -212,6 +212,14 @@
   [data-tooltip]:is([data-position="bottom left"], [data-position="bottom right"]):is(:hover, :focus-visible)::after {
     transform: scale(1);
   }
+  [data-tooltip]:is([data-position="left top"], [data-position="left bottom"])::after,
+  [data-tooltip]:is([data-position="right top"], [data-position="right bottom"])::after {
+    transform: scale(0.8);
+  }
+  [data-tooltip]:is([data-position="left top"], [data-position="left bottom"]):is(:hover, :focus-visible)::after,
+  [data-tooltip]:is([data-position="right top"], [data-position="right bottom"]):is(:hover, :focus-visible)::after {
+    transform: scale(1);
+  }
 
   /* Fixed width, wrapping */
   [data-tooltip][data-variation~="fixed"]::after {
@@ -364,6 +372,66 @@
     margin-inline-start: 2px;
     box-shadow: -1px 1px 0 0 var(--ui-tooltip-edge);
     transform-origin: right center;
+  }
+
+  /*
+   * Beside, lined up with the target's top / bottom edge (ours, not Fomantic's).  `left bottom` also matches the
+   * `~="bottom"` rules above, so these set the arrow's shadow and origins themselves.
+   */
+  [data-tooltip][data-position="left top"]::after {
+    inset: 0 100% auto auto;
+    margin-inline-end: var(--ui-tooltip-distance);
+    transform-origin: right top;
+  }
+  [data-tooltip][data-position="left bottom"]::after {
+    inset: auto 100% 0 auto;
+    margin-inline-end: var(--ui-tooltip-distance);
+    transform-origin: right bottom;
+  }
+  [data-tooltip]:is([data-position="left top"], [data-position="left bottom"])::before {
+    margin-inline-end: -1px;
+    box-shadow: 1px -1px 0 0 var(--ui-tooltip-edge);
+    transform-origin: top center;
+  }
+  [data-tooltip][data-position="left top"]::before {
+    inset: 1em 100% auto auto;
+  }
+  [data-tooltip][data-position="left bottom"]::before {
+    inset: auto 100% 1em auto;
+  }
+  [data-tooltip][data-position="right top"]::after {
+    inset: 0 auto auto 100%;
+    margin-inline-start: var(--ui-tooltip-distance);
+    transform-origin: left top;
+  }
+  [data-tooltip][data-position="right bottom"]::after {
+    inset: auto auto 0 100%;
+    margin-inline-start: var(--ui-tooltip-distance);
+    transform-origin: left bottom;
+  }
+  [data-tooltip]:is([data-position="right top"], [data-position="right bottom"])::before {
+    margin-inline-start: 2px;
+    box-shadow: -1px 1px 0 0 var(--ui-tooltip-edge);
+    transform-origin: right center;
+  }
+  [data-tooltip][data-position="right top"]::before {
+    inset: 1em auto auto 100%;
+  }
+  [data-tooltip][data-position="right bottom"]::before {
+    inset: auto auto 1em 100%;
+  }
+
+  /*******************************
+        Overlays before upgrade
+  *******************************/
+
+  /*
+   * A `<ui-popup>` / `<ui-modal>` whose script hasn't run yet (or never will:  no JS, a static SSR page) is
+   * hidden, rather than dumped inline next to its target.  Defined, the element shows itself as a popover /
+   * dialog.
+   */
+  :where(ui-popup, ui-modal):not(:defined) {
+    display: none;
   }
 
   /*******************************
