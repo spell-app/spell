@@ -380,3 +380,71 @@ export type ListSelectDetail = {
   /** click (or the click Enter / Space made) on the item's link / button */
   originalEvent?: Event
 }
+
+////////////////
+// ## Popup
+////////////////
+
+/** What opens a `<ui-popup>` (`on`):  Fomantic's names;  `hover` also opens on keyboard focus. */
+export type PopupTrigger = "hover" | "focus" | "click" | "manual"
+
+/** `detail` of the cancelable `ui-open` / `ui-close`, from a `<ui-popup>`. */
+export type PopupOpenDetail = {
+  /** state it's ABOUT to enter */
+  open: boolean
+  /** pointer / focus / click / key event that caused it;  none for a delayed hover or a dismissal request */
+  originalEvent?: Event
+}
+
+////////////////
+// ## Modal
+////////////////
+
+/**
+ * Why a `<ui-modal>` is closing, in `ui-close`'s `detail.reason`.
+ * - `escape` / `outside` / `close-all` -- as `UI.overlays` asks (`DismissReason`);  `outside` is a click on the
+ *   `::backdrop`
+ * - `close` -- the close icon
+ * - `approve` / `deny` -- an approve / deny button (after its own `ui-approve` / `ui-deny`)
+ */
+export type ModalCloseReason = "escape" | "outside" | "close-all" | "close" | "approve" | "deny"
+
+/** `detail` of the cancelable `ui-open`, and of `ui-show` / `ui-hide` (after the transition). */
+export type ModalOpenDetail = {
+  /** state it's entering / entered */
+  open: boolean
+  originalEvent?: Event
+}
+
+/** `detail` of the cancelable `ui-close`. */
+export type ModalCloseDetail = {
+  open: false
+  reason: ModalCloseReason
+  originalEvent?: Event
+}
+
+/** `detail` of the cancelable `ui-approve` / `ui-deny`. */
+export type ModalActionDetail = {
+  /** the button (or other element) that was activated, in the light DOM */
+  action: Element
+  originalEvent?: Event
+}
+
+/**
+ * Which activated elements inside a `<ui-modal>` approve or deny it:  Fomantic's `.actions` classes, plus the
+ * `positive` / `negative` attributes of a `<ui-button>`.
+ * - Matched against the light-DOM elements on a click's composed path, innermost first;  the native fallback
+ *   uses the same selectors.
+ */
+export const MODAL_ACTION_SELECTORS = {
+  approve: `.approve, .ok, .positive, [positive]:not([positive="false"], [positive="no"])`,
+  deny: `.deny, .cancel, .negative, [negative]:not([negative="false"], [negative="no"])`
+} as const
+
+/**
+ * Invoker commands a `<ui-modal>` answers (`<button commandfor="id" command="--show">`):  custom commands, since a
+ * custom element gets no built-in ones (`show-modal` only reaches a real `<dialog>`).
+ * - `--show` -- open, as a user action (the cancelable `ui-open` first)
+ * - `--close` -- close, reason `close` (the cancelable `ui-close` first)
+ */
+export const MODAL_COMMANDS = { show: "--show", close: "--close" } as const

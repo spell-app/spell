@@ -31,12 +31,12 @@ class UIThing extends HTMLElement {
 | `UI.keyboard` | `Keyboard` + `Chord` | Shortcut registry: `register(scope, "Mod+Shift+K", handler, { target, global, inEditable, preventDefault, stopPropagation })` returns a disposer. Scopes form a stack (`pushScope` / `popScope`); only the topmost scope fires, plus `global` registrations. One capture `keydown` listener. Keys typed into editable fields are ignored unless the chord has Ctrl / Meta / Alt or the registration sets `inEditable`. Dev builds warn on conflicts. |
 | `UI.overlays` | `Overlays` | Top-layer stack: `open(entry)` / `close(entry)` / `topmost(kind?)` / `closeAll(pool?)` / `isOpen`. Routes Escape (or a `CloseWatcher` close request) to the topmost entry and outside clicks to the topmost entry of each pool, using the `pointerdown`-origin rule and composed paths. Also handles scroll lock (reference counted) and focus restore. It only calls `entry.onDismiss(reason)`; the component decides what happens and then calls `close()`. |
 | `UI.focus` | `Focus` + `RovingTabindex` | `activeElementDeep()`, `focusables(root)` (flat tree: shadow roots and slots; skips `inert`, `hidden`, unrendered, `:disabled` and `tabindex=-1`), `first` / `last`, `containsDeep`, `trap(root)` (only for non-`<dialog>` cases), and `roving(container, items, { orientation, wrap })`. |
-| `UI.styles` | `Styles` + `AppStylesheet` | Named constructable sheets: `register(name, css, { page })`, `sheet(name)`, `setFoundation(names)`, `setUtilities(names)`, `adoptInto(shadowRoot, names)`, `appSheetReady`. |
+| `UI.styles` | `Styles` + `AppStylesheet` | Named constructable sheets: `register(name, css, { page, linked })`, `sheet(name)`, `setFoundation(names)`, `setUtilities(names)`, `adoptInto(shadowRoot, names)`, `appSheetReady`. `page` also puts a sheet on the document; `linked` marks one `ui.css` already carries (the foundation, typography, native), left off a page that links `ui.css`. Component page sheets (`table`, `scroll-lock`) always go on. |
 | `UI.transitions` | `Transitions` | `animate(el, name, "in" \| "out" \| "static", { duration, easing })` resolves `true` when the animation ends and `false` when interrupted. `whenTransitionEnds(el)`. |
 | `UI.i18n` | `I18n` | `locale`, `register(locale, pack)`, `t(key, params)` (lookup order: `pt-BR`, then `pt`, then `en`, then the key itself), `formatDate`, `formatNumber`, `weekdays()`, `months()`, `firstDayOfWeek()`, `displayName()`. |
 | `UI.ids` | `Ids` | `next(prefix)` and `ensure(el, prefix)` for ARIA id wiring. |
 | `UI.toasts` / `UI.toast()` | `Toasts` | Delegates to `Toasts.provider`, which `ui-toast` registers. Throws until then. |
-| `UI.modals` | `Modals` | `confirm` / `alert` / `prompt` delegate to `Modals.provider`, which `ui-modal` registers. Throws until then. |
+| `UI.modals` | `Modals` | `confirm` / `alert` / `prompt` delegate to the provider `ui-modal`'s barrel registers with `register(provider)` (`ModalDialogs`:  a `<ui-modal>` per call). Throws until then. |
 | `UI.api` | `Api` | `url(template, data)` and `request({ url, urlData, method, data, throttle, key, signal, timeout, headers, responseType })`. |
 
 ## Overlay entries
@@ -63,6 +63,8 @@ Defaults depend on `kind`:
 
 - Every entry that handles Escape or is modal pushes a keyboard scope, so page shortcuts go quiet while it's open.
 - A click on a modal `<dialog>`'s `::backdrop` counts as outside. The pointer position is compared with the dialog's box, because a backdrop click targets the dialog element itself.
+- `<ui-modal>` sets `closeOnOutsideClick: false` when the browser does light dismiss itself (`<dialog closedby>`, `UI.browser.supports.dialogClosedBy`) and routes the dialog's `cancel` through its own `ui-close`;  Escape always goes through `Overlays`.
+- `<ui-popup>` and the dropdown menu are `popover` entries with their target as `anchor`, so a click on the target never dismisses-then-reopens.
 - Scroll lock adds `ui-scroll-locked` to `<html>` and sets `--ui-scrollbar-width`. `Overlays` registers the matching rule as the page sheet `scroll-lock`, in `@layer ui.base`.
 
 ## Animation protocol

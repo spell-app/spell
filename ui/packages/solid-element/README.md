@@ -160,6 +160,10 @@ emptied right before the first render.  No hydration yet:  the client render rep
   - change callbacks get a 4th argument, `source`
   - outside listeners see `event.target` === the element (was the inner node);  handlers above an element now
     run for events from inside its shadow root (were skipped)
+  - an element's root is owned by whoever CREATED it (its own `_$owner`, else the nearest stamped ancestor,
+    across shadow roots), never by the `<slot>` it's assigned to:  a host re-creating its slot no longer
+    disposes the elements slotted into it.  Context a component provides AROUND its `<slot>` no longer reaches
+    slotted elements;  provide it above the light DOM instead (the app)
 - If you called `register()` with a capturing registry to get a base class, form association or shadow
   options:  pass `options` instead.
 

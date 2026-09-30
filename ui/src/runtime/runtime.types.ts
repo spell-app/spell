@@ -211,6 +211,12 @@ export type StyleSource = string | CSSStyleSheet
 export type StyleRegisterOptions = {
   /** also push onto `document.adoptedStyleSheets` (once), e.g. `native.css`, `layers.css` */
   page?: boolean
+  /**
+   * `page` sheet that `ui.css` already carries (the foundation, typography, native):  left off the page when the
+   * page links `ui.css` (`--ui-page-sheet: linked`), which would only double it.  Component page sheets
+   * (`table`, `scroll-lock`) aren't in `ui.css` and always go on.
+   */
+  linked?: boolean
 }
 
 /** `id` of the ONE app stylesheet components adopt -- see `docs/runtime.md`. */

@@ -1,10 +1,11 @@
 /**
  * `yarn dev` home page:  every example fragment of `src/components/<name>/examples/` (class grammar, light DOM)
  * beside its element markup in `examples/elements/` -- button, dropdown, icon, label, parts, divider, segment,
- * container, grid, image, text, flag, loader, placeholder, message, breadcrumb, input, checkbox, form, list, menu, table.
+ * container, grid, image, text, flag, loader, placeholder, message, breadcrumb, input, checkbox, form, list, menu, table,
+ * popup, modal.
  * - The originals need the component sheets on the PAGE;  the runtime already puts the foundation there.
  * - `item` has no examples of its own:  its look is its owners' (`list.css`, `menu.css`).
- * - Owners that don't exist yet (card, feed, modal, statistic ...) are `stub-*` elements (`StubOwner`).
+ * - Owners that don't exist yet (card, feed, statistic ...) are `stub-*` elements (`StubOwner`).
  * - `?only=<name>` shows one component's pairs (`yarn screenshots`).
  */
 
@@ -35,6 +36,9 @@ import formCSS from "$/components/form/form.css?inline"
 import listCSS from "$/components/list/list.css?inline"
 import menuCSS from "$/components/menu/menu.css?inline"
 import tableCSS from "$/components/table/table.css?inline"
+import popupCSS from "$/components/popup/popup.css?inline"
+import popupAnchoredCSS from "$/components/popup/popup.anchored.css?raw"
+import modalCSS from "$/components/modal/modal.css?inline"
 
 /** Original fragments, by path. */
 const ORIGINALS = import.meta.glob<string>("/src/components/*/examples/*.html", {
@@ -74,7 +78,10 @@ for (const [name, css] of Object.entries({
   form: formCSS,
   list: listCSS,
   menu: menuCSS,
-  table: tableCSS
+  table: tableCSS,
+  popup: popupCSS,
+  "popup-anchored": popupAnchoredCSS,
+  modal: modalCSS
 })) {
   UI.styles.register(name, css, { page: true })
 }

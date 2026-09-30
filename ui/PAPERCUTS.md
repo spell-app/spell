@@ -378,3 +378,26 @@ Log of things that slowed down development. Date · symptom · fix · project.
 - 2026-09-29 · axe's `aria-required-children` fails a `role=menubar` whose children are focusable custom-element
   hosts:  it can't see `ElementInternals` roles (`role=none`), so a `tabindex` on the host reads as an unknown
   focusable child. · Rove focus over the items' inner boxes (`UIItem.focusTarget`), never the hosts. · spell/ui
+- 2026-09-29 · Writing a fork test for owner adoption from a Solid "app":  `<Dynamic component={tag}>` does NOT
+  stamp `_$owner` (only compiler-emitted literal custom-element tags and `<slot>`s are stamped), and in Solid 2
+  `props.children` isn't a `Node` you can `append()` (the element came out `null`). · A test component that
+  `createElement`s the tag, stamps `getOwner()` itself and appends `children(() => props.children).toArray()`
+  (`Stamped` in `packages/solid-element/src/owner.test.tsx`). · spell/ui fork
+- 2026-09-29 · Vite failed the whole `popup.css` (`[lightningcss] Unexpected token Function("anchored")`):  Lightning
+  CSS 1.30 can't parse anchored container queries (`@container anchored(fallback: flip-block)`), though Chrome
+  ships them. · Moved those rules to `popup.anchored.css`, imported `?raw` (skips the CSS pipeline, so it MUST be
+  self-contained) and adopted as a second sheet (`CODE-DEBT.md`). · spell/ui popup
+- 2026-09-29 · A popup anchored to `<ui-icon>` / `<ui-label>` sat at the top of the page:  an `anchor-name` on a
+  `display: contents` host names no box, and a tree-scoped name can't reach the host's shadow box. · Anchor such
+  targets implicitly:  `showPopover({ source: firstShadowBox })` + `position-anchor: auto` (works across the
+  shadow boundary;  checked in a probe). · spell/ui popup
+- 2026-09-29 · Removing one of two popups on a target wiped the page's own `aria-describedby`:  the host was already
+  detached, so `getRootNode()` returned the host itself, the undo took the element-reflection branch, and setting
+  `ariaDescribedByElements = null` REMOVES the content attribute. · The undo is a closure made at add time,
+  remembering attribute vs reflection (`AriaRefs` in `UIPopup.tsx`). · spell/ui popup
+- 2026-09-29 · A modal reopened right after closing closed itself again:  `<dialog>`'s `close` event is a queued
+  task, so the first close's event arrived after the re-open and read as "the browser forced it". · Ignore
+  `close` while `dialog.open` (`UIModal.onClose`). · spell/ui modal
+- 2026-09-29 · `<button commandfor command="show-modal">` aimed at a custom element dispatches NO `command` event;
+  only custom commands (`--show`) reach a non-dialog / non-popover target. · `MODAL_COMMANDS` are `--show` /
+  `--close`. · spell/ui modal

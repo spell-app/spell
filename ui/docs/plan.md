@@ -163,7 +163,7 @@
   - `@import` inside it pulls in more; late insertion, `load` and text edits are picked up (MutationObserver + link `load`)
   - order inside a shadow root: tokens → component → utilities → app stylesheet
 - Responsive: container queries inside components (grid `stackable` / `doubling`, cards, forms, tables); `@custom-media` breakpoints (Lightning CSS) for page-level ones.
-- Build outputs: ESM per component with its CSS inlined as a constructable sheet; `ui.css` (tokens + utilities + native + animations) for no-runtime pages; `themes/*.css`. Budget: runtime + tokens ≤ 20 KB gzip; average component ≤ 4 KB gzip.
+- Build outputs: ESM per component with its CSS inlined as a constructable sheet; `ui.css` (tokens + utilities + native + animations) for no-runtime pages; `themes/*.css`. Budget: lazy runtime chunk < 50 KB gzip (raised from 20 KB by Owen, 2026-09-29); average component ≤ 4 KB gzip.
 
 ### Component runtime
 - `UIElement` base:
@@ -192,7 +192,7 @@
   - icon `aria-hidden` unless `label`; reduced motion honoured; `UI.keyboard` scopes shortcuts to the top overlay
 - Overlays (`OverlayElement` + `UI.overlays`):
   - `<dialog>` for `ui-modal`, `ui-flyout`, page `ui-dimmer`; `closedby` when supported else own handling; `requestClose()`
-  - popover attribute + anchor positioning (`position-anchor`, `position-area`, `position-try-fallbacks: flip-block, flip-inline`) for `ui-popup`/tooltip, `ui-dropdown` menu, `ui-search` results, `ui-toast` container; Fomantic's 11 positions map to `position-area`; no JS positioning fallback
+  - popover attribute + anchor positioning (`position-anchor`, `position-area`, `position-try-fallbacks: flip-block, flip-inline`) for `ui-popup`/tooltip, `ui-dropdown` menu, `ui-search` results, `ui-toast` container; Fomantic's 8 positions (+ 4 beside-and-aligned ones of ours) map to `position-area`; no JS positioning fallback
   - anchor and positioned element share a tree scope: dropdown/search keep both in their shadow; `ui-popup for="id"` positions its host (host carries `popover` + `position-anchor`; target gets an `anchor-name`)
 - Transitions: `animations.css` ports the catalogue (fade, scale, fly, slide, swing, flip, browse, drop, zoom; flash, shake, bounce, tada, pulse, jiggle, glow); `UI.transitions` runs in/out with `@starting-style` / `allow-discrete`; `ui-transition` element for user content; View Transitions for tab/accordion swaps.
 - Data-heavy components: `ui-dropdown` / `ui-select` / `ui-search` / `ui-table` accept `options` / `rows` properties; keyed rendering; virtualize above ~200 rows.
@@ -238,7 +238,7 @@ All under `src/components/`, no Elements/Collections/Views/Modules split. Each r
   - `form` (+ `ui-field`, `ui-fields`; validation engine), `message`
   - `list` (+ `ui-item`), `table`, `menu` (+ `ui-item`;  a nested `ui-menu` is the sub-menu), `breadcrumb`
 - **Phase B – views & remaining static components**:
-  - `card` (+ `ui-cards`), `item` (+ `ui-items`), `feed`, `comment` (+ `ui-comments`), `statistic` (+ `ui-statistics`), `step` (+ `ui-steps`), `rail`, `reveal`, `ad`, `emoji`
+  - `card` (+ `ui-cards`), `items` view (`<ui-items>` owning the SAME generic `<ui-item>` as list / menu / dropdown -- no second item tag;  decided 2026-09-29, see `docs/grammar.md` "Items"), `feed`, `comment` (+ `ui-comments`), `statistic` (+ `ui-statistics`), `step` (+ `ui-steps`), `rail`, `reveal`, `ad`, `emoji`
 - **Phase C – behaviour components**:
   - `transition`, `dimmer`
   - `popup` (CSS-only tooltip via `data-tooltip` in `native.css`; `ui-popup` with `for`, hover/click/focus/manual, 11 positions, wide/flowing/inverted/basic/colours)
@@ -254,14 +254,14 @@ All under `src/components/`, no Elements/Collections/Views/Modules split. Each r
   - `sticky` (`position: sticky` + `stuck` state via IntersectionObserver sentinel)
   - `embed`, `shape`, `nag`
   - `visibility` (`ui-visibility` + `UI.observeVisibility()`), `state` (behaviour util), `api` (`UI.api`)
-- **Phase D – site, hardening, release**: docs pages for every component (Fomantic's presentation, style and content as the model), theming guide, translation contract, kitchen sink, cross-browser visual baselines, axe audit of every example, bundle-size report, README, CHANGELOG, npm publish dry run.
+- **Phase D – site, hardening, release**: docs pages for every component (Fomantic's presentation, style and content as the model), theming guide, translation contract, kitchen sink, visual tests + cross-browser baselines for EVERY family (deferred here from each component's definition of done, Owen 2026-09-29), axe audit of every example, bundle-size report, README, CHANGELOG, npm publish dry run.
 
 ## Definition of done for a component
 
 1. `<name>.css`: complete port of the `.less` definition and `.variables` (every type/content/state/variation in `variation.variables`, Fomantic-only ones included); per-component tokens; no `!important` unless documented; colours/sizes via remap; no `rem`.
 2. `<name>.vocabulary.en.ts` + `<name>.ts`: element(s) with typed attributes/properties, events, slots, parts, `:state()`s, shorthand, semantic shadow markup, docstrings for the manifest.
 3. Accessibility: role/ARIA via internals, keyboard per APG, focus management, reduced motion.
-4. Tests: unit (class output from attributes, pure logic), integration (interaction, keyboard, events, form participation), a11y (axe on each example + keyboard walkthrough), visual (`toMatchScreenshot` per example, light and dark).
+4. Tests: unit (class output from attributes, pure logic), integration (interaction, keyboard, events, form participation), a11y (axe on each example + keyboard walkthrough).  Visual (`toMatchScreenshot` per example, light and dark) is DEFERRED to Phase D for all families.
 5. Docs page modelled on Fomantic's: Types / Content / States / Variations / Behaviour (API, events, slots, parts, tokens) / Accessibility; live examples with code panes; API tables generated from the custom-elements manifest.
 
 ## Tooling
