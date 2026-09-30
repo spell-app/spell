@@ -8,7 +8,7 @@ definition.  Each fix lives in its own module with its own test file, so each ca
 see [`UPSTREAM.md`](./UPSTREAM.md).
 
 - Peer dependencies:  `solid-js` and `@solidjs/web`, `2.0.0-rc.11` (pinned:  the RCs still churn).
-- Size:  4.00 kB min + gzip 9 with every export, vs 2.13 kB for `@solidjs/element` + `component-register`
+- Size:  4.73 kB min + gzip 9 with every export, vs 2.13 kB for `@solidjs/element` + `component-register`
   (`yarn measure`).  The HMR helpers are ~0.3 kB of that, and only when imported;  the dev-only code behind
   `import.meta.hot` is 0 bytes in a build.
 
@@ -114,6 +114,11 @@ definition:
   `el.flag = "yes"` can store `true`, a translated enum value its canonical one.  It also runs for properties
   captured at upgrade.
 - Attribute writes never reflect back (`primary="yes"` stays `"yes"`).
+- Defaults are never reflected:  a bare `<x-icon>` has no attributes, as with native elements (Lit's
+  `useDefault` has the same rule).  Only a property write reflects, and writing the default value back still
+  does.  Removing the attribute restores the default and leaves it removed.  A property set before upgrade is
+  an explicit write, so it reflects.  (`component-register` reflected defaults on connect, so components could
+  not tell a default from an author's choice.)
 - A key that would shadow a member of the element (`style`, `hidden`, `id`, `title`, or this package's own
   `dispose`, `internals` ...) throws at definition.  Rename the property (`{ hidden: { type: Boolean, property:
   "isHidden" } }` keeps attribute `hidden` and `props.hidden`), or set `property` to the same name to override
@@ -153,6 +158,8 @@ emptied right before the first render.  No hydration yet:  the client render rep
   - the component runs inside an error boundary:  errors are logged, not thrown out of `connectedCallback`
     (`errorBoundary: false` restores that)
   - change callbacks get a 4th argument, `source`
+  - outside listeners see `event.target` === the element (was the inner node);  handlers above an element now
+    run for events from inside its shadow root (were skipped)
 - If you called `register()` with a capturing registry to get a base class, form association or shadow
   options:  pass `options` instead.
 
@@ -165,6 +172,10 @@ What a fork can hide, it does:
 - Element property writes are always legal:  the prop signals allow writes from owned scopes, because
   `el.value = x` is a DOM API anyone may call from anywhere (a Solid app's component body, a memo).
 - `onError` and error-event listeners run outside any owner, so they may write signals.
+- Delegated events (`onClick`, `onInput` ...) don't leak out of the shadow root:  listeners outside see the
+  platform's `target` (the host) and `currentTarget`, and handlers ABOVE the element (a Solid app's
+  `<my-el onClick>`, an enclosing element's) run for events from inside it (`events.ts`;  plain
+  `@solidjs/element` leaves the inner node on the event and drops those handlers).
 
 What it can't (Solid 2 itself), with the patterns that work:
 

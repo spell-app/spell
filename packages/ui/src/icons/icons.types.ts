@@ -76,6 +76,8 @@ export type IconAliasMap = Readonly<Record<string, string>>
  * - `promise` is created once per icon and reused, so concurrent `get()` calls share one `import()`.
  * - `data` is filled in once `promise` resolves (or up front by `Icons.register()`), so `peek()` answers
  *   synchronously afterwards.
+ * - A MISS is an entry too:  `promise` resolves `undefined` and `data` stays unset, so a name known missing
+ *   in a style is never requested again.
  */
 export type IconEntry = {
   promise: Promise<IconData | undefined>

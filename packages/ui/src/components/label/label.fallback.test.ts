@@ -10,9 +10,6 @@ FallbackStub.define("x-fb-label", (host, root, internals) =>
   LabelFallback.render(host, root, new Error("boom"), internals)
 )
 
-/** Axe without contrast:  the stub has no stylesheet. */
-const AXE = { rules: { "color-contrast": { enabled: false } } }
-
 describe("LabelFallback", () => {
   it("renders a span with the class grammar, part, slot and detail", async () => {
     const host = Fixture.render<StubHost>(
@@ -24,7 +21,7 @@ describe("LabelFallback", () => {
     expect(label.getAttribute("aria-label")).toBe("Mail 23")
     expect(label.querySelector("slot")).not.toBeNull()
     expect(label.querySelector(".detail")!.textContent).toBe("23")
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 
   it("renders a link with href, and omits the delete button when removable", () => {

@@ -10,9 +10,6 @@ FallbackStub.define("x-fb-segment", (host, root, internals) =>
   SegmentFallback.render(host, root, new Error("boom"), internals)
 )
 
-/** Axe without contrast:  the stub has no stylesheet. */
-const AXE = { rules: { "color-contrast": { enabled: false } } }
-
 describe("SegmentFallback", () => {
   it("renders a div with the class grammar, part and slot", async () => {
     const host = Fixture.render<StubHost>(
@@ -24,6 +21,6 @@ describe("SegmentFallback", () => {
     expect(segment.getAttribute("part")).toBe("segment")
     expect(segment.getAttribute("aria-busy")).toBe("true")
     expect(segment.querySelector("slot")).not.toBeNull()
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 })

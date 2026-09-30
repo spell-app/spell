@@ -11,7 +11,7 @@ import {
   type UIHost
 } from "$/core"
 
-import { itemVocabulary } from "./dropdown.vocabulary.en"
+import { itemVocabulary } from "$/components/item"
 
 /**
  * The options a dropdown's light-DOM `<ui-item>` children describe, as a signal of `MenuEntry`s.

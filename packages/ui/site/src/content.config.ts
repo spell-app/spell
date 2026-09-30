@@ -16,6 +16,8 @@ const components = defineCollection({
     tag: z.string().regex(/^[a-z][a-z0-9]*-[a-z0-9-]+$/, "a custom element tag, e.g. ui-button"),
     /** how far along the port is;  anything but `done` gets a badge in the sidebar and masthead */
     status: z.enum(["planned", "in-progress", "done"]),
+    /** Fomantic's grouping, used by the sidebar and the index:  `Elements` (default) or `Modules` (interactive) */
+    category: z.enum(["Elements", "Modules"]).default("Elements"),
     /** one-line tagline under the title, Fomantic style:  "A button indicates a possible user action" */
     summary: z.string()
   })

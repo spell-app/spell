@@ -114,6 +114,6 @@ describe("<ui-segment> accessibility", () => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     // `heading-order` off only where the ORIGINAL fragment breaks it identically (a page of h1 ... h6 demos)
     const headingOrder = { enabled: !HEADING_DEMOS.some((name) => path.endsWith(name)) }
-    await expectAccessible(root, { rules: { "color-contrast": { enabled: false }, "heading-order": headingOrder } })
+    await expectAccessible(root, { rules: { "heading-order": headingOrder } })
   })
 })

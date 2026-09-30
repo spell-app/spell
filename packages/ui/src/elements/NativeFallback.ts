@@ -176,7 +176,8 @@ export abstract class NativeFallback<V extends ComponentVocabulary = ComponentVo
    * - `name` MUST be a vocabulary part (dev warning otherwise);  `extra` parts are added unchecked.
    * - Copies every `aria-*` from the host.  NOTE: idref ones (`aria-labelledby`) can't cross the shadow
    *   boundary, so they dangle.
-   * - `loading` becomes `aria-busy`.
+   * - a boolean `loading` becomes `aria-busy`;  a vocabulary where it isn't boolean (`<ui-image loading="lazy">`,
+   *   the native `<img loading>`) is left alone.
    */
   protected decorate<E extends Element>(target: E, name: string, ...extra: string[]): E {
     if (!this.vocabulary.parts.some((part) => part.name === name)) {
@@ -186,7 +187,10 @@ export abstract class NativeFallback<V extends ComponentVocabulary = ComponentVo
     for (const { name: attribute, value } of this.host.attributes) {
       if (attribute.startsWith("aria-")) target.setAttribute(attribute, value)
     }
-    if (Converters.boolean(this.host.getAttribute("loading"), "loading")) target.setAttribute("aria-busy", "true")
+    const loading = this.vocabulary.attributes.find(({ name }) => name === LOADING)
+    if (loading?.kind === "keyOnly" && Converters.boolean(this.host.getAttribute(LOADING), LOADING)) {
+      target.setAttribute("aria-busy", "true")
+    }
     return target
   }
 
@@ -196,3 +200,6 @@ export abstract class NativeFallback<V extends ComponentVocabulary = ComponentVo
     this.disposers.push(() => target.removeEventListener(type, handler as EventListener))
   }
 }
+
+/** The busy-flag attribute name. */
+const LOADING = "loading"

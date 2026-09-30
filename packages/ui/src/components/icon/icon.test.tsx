@@ -66,6 +66,16 @@ describe("<ui-icon> classes", () => {
     expect(outline.style.color).toBe("red")
   })
 
+  it.each(["github", "heart outline"])(
+    "a bare `<ui-icon name=%j>` draws, and its defaults are not reflected as attributes",
+    async (name) => {
+      const { host } = await icon(`<ui-icon name="${name}"></ui-icon>`)
+      await expect.poll(() => host.shadowRoot!.querySelector("svg path")).not.toBeNull()
+      expect(host.hasAttribute("variant")).toBe(false)
+      expect(host.outerHTML).not.toContain("variant=")
+    }
+  )
+
   it("sets `:state(disabled)` / `:state(loading)`", async () => {
     const { host } = await icon(`<ui-icon name="spinner" loading disabled></ui-icon>`)
     expect(host.matches(":state(loading)")).toBe(true)
@@ -87,7 +97,7 @@ describe("<ui-icon> accessibility", () => {
 
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
-    await expectAccessible(root, { rules: { "color-contrast": { enabled: false } } })
+    await expectAccessible(root)
   })
 })
 

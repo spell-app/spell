@@ -145,12 +145,13 @@ and one rule set consumes them. Sizes work the same way through `--ui-scale`.
 .ui-red {
   --ui-color: var(--ui-red);
   --ui-color-text: var(--ui-red-text);
+  --ui-color-on: var(--ui-red-on); /* white or ink, picked for WCAG contrast when generated */
 }
 
 /* component CSS */
 .ui.button {
   background: var(--ui-color, var(--ui-button-background));
-  color: var(--ui-color-contrast, inherit);
+  color: var(--ui-color-on, inherit);
 }
 ```
 
@@ -197,7 +198,7 @@ Per region, override tokens on a wrapper; per instance, set the generic tokens o
 ```html
 <section style="--ui-font-size: 18px; --ui-radius: 0">...</section>
 <section class="ui-dark">...</section>
-<ui-button style="--ui-color: hotpink; --ui-color-hover: deeppink; --ui-color-contrast: white">Hot</ui-button>
+<ui-button style="--ui-color: hotpink; --ui-color-hover: deeppink; --ui-color-on: black">Hot</ui-button>
 ```
 
 <Example

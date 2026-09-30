@@ -52,11 +52,11 @@
       oklch(from var(--ui-ink-on-dark) l c h / 0.8)
     );
     --ui-text-light: light-dark(
-      oklch(from var(--ui-ink-on-light) l c h / 0.4),
+      oklch(from var(--ui-ink-on-light) l c h / 0.58),
       oklch(from var(--ui-ink-on-dark) l c h / 0.7)
     );
     --ui-text-unselected: light-dark(
-      oklch(from var(--ui-ink-on-light) l c h / 0.4),
+      oklch(from var(--ui-ink-on-light) l c h / 0.58),
       oklch(from var(--ui-ink-on-dark) l c h / 0.5)
     );
     --ui-text-hovered: light-dark(
@@ -206,11 +206,11 @@
         oklch(from var(--ui-ink-on-dark) l c h / 0.8)
       );
       --ui-text-light: light-dark(
-        oklch(from var(--ui-ink-on-light) l c h / 0.4),
+        oklch(from var(--ui-ink-on-light) l c h / 0.58),
         oklch(from var(--ui-ink-on-dark) l c h / 0.7)
       );
       --ui-text-unselected: light-dark(
-        oklch(from var(--ui-ink-on-light) l c h / 0.4),
+        oklch(from var(--ui-ink-on-light) l c h / 0.58),
         oklch(from var(--ui-ink-on-dark) l c h / 0.5)
       );
       --ui-text-hovered: light-dark(

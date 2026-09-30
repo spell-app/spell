@@ -89,7 +89,8 @@ describe("message.css examples", () => {
     const header = getComputedStyle(message.querySelector(".header")!)
     expect(header.fontWeight).toBe("700")
     expect(parseFloat(header.fontSize)).toBeCloseTo(1.14285 * parseFloat(style.fontSize), 1)
-    expect(getComputedStyle(message.querySelector("p")!).opacity).toBe("0.85")
+    // opaque, not Fomantic's 0.85:  faded tinted text fails 4.5:1 (see `--ui-message-text-opacity`)
+    expect(getComputedStyle(message.querySelector("p")!).opacity).toBe("1")
     const list = root.querySelector(".ui.message .list li")!
     expect(getComputedStyle(list, "::before").content).toBe('"•"')
   })
@@ -213,10 +214,10 @@ describe("message.css in shadow roots", () => {
     const [one, two] = second!.querySelectorAll("p")
     expect(getComputedStyle(one!).marginTop).toBe("4px")
     expect(getComputedStyle(two!).marginTop).toBe("12px")
-    expect(getComputedStyle(two!).opacity).toBe("0.85")
+    expect(getComputedStyle(two!).opacity).toBe("1")
     const list = getComputedStyle(second!.querySelector("ul")!)
     expect(list.paddingLeft).toBe("16px")
-    expect(list.opacity).toBe("0.85")
+    expect(list.opacity).toBe("1")
   })
 
   it("hands slotted parts its header colour, header size and icon layout, but not its fill or scale", () => {

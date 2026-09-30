@@ -15,7 +15,6 @@
 
 import { addHook, runHooks, withCurrentElement } from "./current"
 import { restoreUpgradeProperties } from "./upgrade"
-import { reflect } from "./attributes"
 import { STATE, type SolidElement, type SolidElementClass } from "./solid-element.types"
 
 /** Run `fn` on every connect of the current element, the first included. */
@@ -30,17 +29,14 @@ export function onDisconnect(fn: () => void) {
 
 /**
  * `connectedCallback` body.
- * - First connect:  re-apply pre-upgrade properties, reflect defaults of reflecting props whose attribute is
- *   absent (as `component-register` did), then render.
+ * - First connect:  re-apply pre-upgrade properties (an explicit set, so it reflects), then render.
+ * - NEVER reflects defaults:  a bare element grows no attributes, as native elements and Lit's `useDefault`.
  */
 export function connected(element: SolidElement) {
   const state = element[STATE]
   restoreUpgradeProperties(element)
   if (!state.initialized) {
     const Class = element.constructor as SolidElementClass
-    for (const prop of Class.props.list) {
-      if (prop.reflect && !element.hasAttribute(prop.attribute!)) reflect(element, prop, state.values[prop.key])
-    }
     state.initialized = true
     const values = { ...state.values }
     withCurrentElement(element, () => Class.Component(values, { element }))

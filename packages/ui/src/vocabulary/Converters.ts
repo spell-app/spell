@@ -100,16 +100,21 @@ export class Converters {
   }
 
   /**
-   * Rich property value:  a string is parsed as JSON, anything else passes through.
-   * - Why:  `json` attributes are property-only (`AGENTS.md`), but plain HTML can still write
+   * Rich property value:  JSON text is parsed, a plain string stays a string, anything else passes through.
+   * - Why parse:  `json` attributes are property-first (`AGENTS.md`), but plain HTML can still write
    *   `options='[...]'` and frameworks without property binding set strings.
-   * - SIDE EFFECT (dev only): warns and returns `undefined` for invalid JSON.
+   * - Why not parse EVERY string:  a string is also a value -- `rules="email"` / `el.rules = "minLength[6]"` is
+   *   Fomantic's shorthand.  Only JSON-shaped text (starting `[`, `{` or `"`) is parsed.
+   * - Consumers MUST accept a string where they don't want one (`options` drops non-arrays).
+   * - SIDE EFFECT (dev only): warns and returns `undefined` for JSON-shaped text that doesn't parse (a typo).
    */
   static json<T = unknown>(value: unknown): T | undefined {
     if (typeof value !== "string") return value as T
-    if (value.trim() === "") return undefined
+    const text = value.trim()
+    if (text === "") return undefined
+    if (!JSON_START.includes(text[0]!)) return value as T
     try {
-      return JSON.parse(value) as T
+      return JSON.parse(text) as T
     } catch (error) {
       Converters.warn(`invalid JSON ${JSON.stringify(value)}: ${(error as Error).message}`)
       return undefined
@@ -149,3 +154,6 @@ const LIST_SEPARATOR = /[\s,]+/
 
 /** Runs of whitespace, collapsed by `enumValue()`. */
 const WHITESPACE = /\s+/g
+
+/** First characters of JSON text `Converters.json()` parses:  arrays, objects, quoted strings. */
+const JSON_START = '[{"'

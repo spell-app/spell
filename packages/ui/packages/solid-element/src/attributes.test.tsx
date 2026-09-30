@@ -98,4 +98,43 @@ describe("fix 4:  attribute <=> property", () => {
     element.setAttribute("count", "3")
     expect(element.count).toBe(3)
   })
+
+  reproduce(
+    "a bare element does not grow attributes for defaulted props",
+    ({ customElement }) => {
+      const tag = nextTag("no-default-reflect")
+      customElement(
+        tag,
+        { variant: { value: "solid", reflect: true }, open: { value: false, reflect: true } },
+        () => null
+      )
+      const element = mount(`<${tag}></${tag}>`).firstElementChild as HTMLElement
+      return element.outerHTML.replace(tag, "x").replace(tag, "x")
+    },
+    // `initializeProps` reflects every default on connect (component-register.js:40)
+    { original: '<x variant="solid"></x>', fork: "<x></x>" }
+  )
+
+  it("fork:  setting a prop to its default value reflects", () => {
+    const tag = nextTag("default-write")
+    customElement(tag, { variant: { value: "solid", reflect: true } }, () => null)
+    const element = mount(`<${tag}></${tag}>`).firstElementChild as HTMLElement & { variant: string }
+    expect(element.hasAttribute("variant")).toBe(false)
+    element.variant = "solid"
+    expect(element.getAttribute("variant")).toBe("solid")
+    element.variant = ""
+    expect(element.getAttribute("variant")).toBe("")
+  })
+
+  it("fork:  removing the attribute restores the default and leaves no attribute", () => {
+    const tag = nextTag("remove-restores")
+    customElement(tag, { variant: { value: "solid", reflect: true } }, () => null)
+    const element = mount(`<${tag} variant="outline"></${tag}>`).firstElementChild as HTMLElement & {
+      variant: string
+    }
+    expect(element.variant).toBe("outline")
+    element.removeAttribute("variant")
+    expect(element.variant).toBe("solid")
+    expect(element.hasAttribute("variant")).toBe(false)
+  })
 })

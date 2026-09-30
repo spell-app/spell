@@ -34,8 +34,8 @@ export class ElementFixture {
 
   /**
    * Make `host`'s render throw NOW, as a bug in an update would, and wait for the native fallback.
-   * - How:  its controller's `extraClasses()` starts throwing, then one `keyOnly` attribute is flipped and
-   *   flipped back -- the classes memo reads every class-emitting attribute, so it recomputes inside the render
+   * - How:  its controller's `extraClasses()` starts throwing, then an attribute (`keyOnly` first, else the
+   *   next that changes) is changed and changed back -- the classes memo reads every class-emitting attribute, so it recomputes inside the render
    *   effect and the fork's error boundary catches the throw.  The host's attributes end as they were.
    * - The fallback is built a microtask after the error (`UIElement.renderFallback()`), hence two ticks.
    */
@@ -48,14 +48,27 @@ export class ElementFixture {
       }
     })
     const { attributes } = controller.definition
-    // a `keyOnly` attribute emits a class, so the classes memo surely tracks it
-    const flag = attributes.find(({ spec }) => spec.kind === "keyOnly") ?? attributes[0]!
     const self = host as unknown as Record<string, unknown>
-    const before = self[flag.property]
-    self[flag.property] = !before
-    self[flag.property] = before
-    flush()
+    // a `keyOnly` attribute emits a class, so the classes memo surely tracks it;  the rest are tried in turn
+    // (a write that converts to the SAME value recomputes nothing), until the error boundary has caught the throw
+    const candidates = [...attributes].sort(
+      (a, b) => Number(b.spec.kind === "keyOnly") - Number(a.spec.kind === "keyOnly")
+    )
+    for (const { spec, property } of candidates) {
+      const before = self[property]
+      self[property] = ElementFixture.otherValue(spec, before)
+      self[property] = before
+      flush()
+      await ElementFixture.tick()
+      if (host.matches(":state(errored)")) break
+    }
     await ElementFixture.tick()
-    await ElementFixture.tick()
+  }
+
+  /** A value for `spec` that converts to something other than `before`:  toggled, another allowed value, or text. */
+  private static otherValue(spec: { kind: string; values?: unknown }, before: unknown): unknown {
+    if (spec.kind === "keyOnly") return !before
+    if (Array.isArray(spec.values)) return spec.values.find((value) => value !== before) ?? "x"
+    return before === "x" ? "y" : "x"
   }
 }

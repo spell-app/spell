@@ -26,8 +26,8 @@ import type {
 /**
  * Bundle measurer of the package:  what each tier, family and page scenario costs, min and min+gz.
  * - Builds the library IN MEMORY (`write: false`) with the repo's Vite config, entries overridden to the shared
- *   entries (`core`, `forms`) + one per family, and attributes every emitted module to a bucket
- *   (`PackageConfig.groups`).
+ *   entries (`core`, `forms`) + one per family + the `extra` ones (`api`), and attributes every emitted module to a
+ *   bucket (`PackageConfig.groups`).
  * - Sizes:  esbuild `transform({ minify: true })`, then gzip level 9;  kB = 1000 bytes.  Each tier is minified
  *   and gzipped ON ITS OWN, as a page fetches them as separate files, so a scenario is a sum of tiers.
  * - Tiers:
@@ -40,8 +40,8 @@ import type {
  *   - `standalone` -- each family built ALONE with the library bundled, for comparison
  * - Scenarios add, per family, only the shared entries its chunk actually imports (`families`):  a page with a
  *   button pays for `core`, a page with a dropdown for `core` + `forms`.
- * - Also checks `dist/`'s structure (`MeasureChecks`):  every family imports core, no shared-entry / library
- *   code elsewhere, nothing unattributed.
+ * - Also checks `dist/`'s structure (`MeasureChecks`):  every family imports core, no Rolldown runtime chunk, no
+ *   shared-entry / library code elsewhere, nothing unattributed.
  * - `yarn measure`:  `await new BundleMeasure(PACKAGE).write()`, into `tools/results/measure-results.json`.
  * - Plugins that only matter for a real build (`vite:dts`, `spell-emit-glyphs`) are dropped from the measured
  *   builds:  they'd write declaration files or copy 2,000 glyphs per build.
@@ -52,6 +52,9 @@ export class BundleMeasure {
 
   /** plugins left out of the measured builds, by name */
   static readonly SKIPPED_PLUGINS = new Set(["vite:dts", "spell-emit-glyphs"])
+
+  /** id of Rolldown's runtime module (`__name`, `__exportAll` ...);  `RUNTIME_MODULE_ID` in its types */
+  static readonly RUNTIME_MODULE = "\0rolldown/runtime.js"
 
   readonly config: PackageConfig
   /** the Vite config file, loaded once */
@@ -103,6 +106,7 @@ export class BundleMeasure {
     const byBucket = new Map<Bucket, string[]>()
     const checks: MeasureChecks = {
       entriesMissingCore: [],
+      runtimeChunks: [],
       coreOutsideCore: [],
       libraryBundled: [],
       lazyInEager: [],
@@ -111,6 +115,7 @@ export class BundleMeasure {
     }
     for (const chunk of chunks) {
       const lazy = lazyFiles.has(chunk.fileName)
+      if (chunk !== core && BundleMeasure.RUNTIME_MODULE in chunk.modules) checks.runtimeChunks.push(chunk.fileName)
       for (const [id, module] of Object.entries(chunk.modules)) {
         const code = module.code ?? ""
         if (!code.trim()) continue
@@ -170,6 +175,9 @@ export class BundleMeasure {
       scenarios: this.scenarios(library, shared, own, needs),
       standalone: await this.standalone(),
       lazy: { runtime: await size("runtime"), icons: await size("icons") },
+      extra: Object.fromEntries(
+        await Promise.all(Object.keys(config.extra ?? {}).map(async (name) => [name, await size(`extra:${name}`)]))
+      ),
       chunks: await Promise.all(
         chunks.map(async (chunk): Promise<ChunkSize> => ({
           file: chunk.fileName,
@@ -231,10 +239,10 @@ export class BundleMeasure {
     return loaded.config
   }
 
-  /** The measured build's entries:  the shared ones + one per family. */
+  /** The measured build's entries:  the shared ones + one per family + the `extra` ones. */
   private entries(): Record<string, string> {
     const shared = this.sharedEntries().map(({ name, entry }) => [name, entry])
-    return { ...Object.fromEntries(shared), ...this.config.entries }
+    return { ...Object.fromEntries(shared), ...this.config.entries, ...this.config.extra }
   }
 
   /** `config.shared`;  throws when empty. */

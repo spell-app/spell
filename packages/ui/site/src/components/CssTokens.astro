@@ -1,0 +1,53 @@
+---
+/**
+ * CSS custom properties of one component family, generated at BUILD time from its stylesheet
+ * (`src/components/<family>/<family>.css`) -- the `--ui-<family>-*` token block, so the table can't drift.
+ * - Parser is deliberately small:  every `--ui-<prefix>...: value;` declaration, first occurrence wins, with the
+ *   `/* comment *\/` right above it as the description when there is one.
+ * - `prefixes` defaults to `--ui-<family>-`.  The trailing dash matters:  `--ui-button-` excludes the group's
+ *   PRIVATE `--ui-buttons-*` position tokens (never set those from outside).
+ * - Renders through `TokenTable` (no swatches:  the tokens are declared inside the shadow root, so the page
+ *   can't `var()` them).
+ */
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
+
+import TokenTable from "./TokenTable.astro"
+
+type Props = {
+  /** family folder name, e.g. `button` */
+  family: string
+  /** token name prefixes to keep, default `["--ui-<family>-"]` */
+  prefixes?: string[]
+  /** table caption */
+  caption?: string
+}
+
+const { family, caption } = Astro.props
+const prefixes = Astro.props.prefixes ?? [`--ui-${family}-`]
+
+// NOTE: `cwd`, not `import.meta.url`:  the latter points into Astro's build chunks, not `src/`
+const css = readFileSync(resolve(process.cwd(), "../src/components", family, `${family}.css`), "utf8")
+const seen = new Set<string>()
+const tokens: Array<{ name: string; default: string; description?: string }> = []
+for (const match of css.matchAll(/(?:\/\*\s*([^*]*?)\s*\*\/\s*)?^[ \t]*(--ui-[a-z0-9-]+)\s*:\s*([^;{}]+);/gm)) {
+  const [, comment, name, value] = match
+  if (seen.has(name) || !prefixes.some((prefix) => name.startsWith(prefix))) continue
+  seen.add(name)
+  tokens.push({
+    name,
+    default: value.replace(/\s+/g, " ").trim(),
+    description: comment?.replace(/\s+/g, " ")
+  })
+}
+---
+
+{
+  tokens.length > 0 ? (
+    <TokenTable tokens={tokens} caption={caption} />
+  ) : (
+    <p class="site-note">
+      <code>{`<ui-${family}>`}</code> exposes no <code>--ui-{family}-*</code> tokens.
+    </p>
+  )
+}

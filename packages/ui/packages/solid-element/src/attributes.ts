@@ -13,6 +13,9 @@
  *   returns).  `component-register` held its guard for a microtask, which swallowed an author's own
  *   `setAttribute()` of the same attribute in the same tick.
  * - Attribute writes don't reflect back:  `primary="yes"` is never rewritten to `primary=""`.
+ * - Defaults never reflect:  only a property write does (writing the default value back included), and removing
+ *   the attribute restores the default without reflecting.  `component-register` reflected defaults on connect,
+ *   so a bare `<x-icon>` grew `variant="solid"` and the component then saw an explicit author choice.
  */
 
 import { STATE, type ChangeSource, type NormalizedProp, type SolidElement } from "./solid-element.types"

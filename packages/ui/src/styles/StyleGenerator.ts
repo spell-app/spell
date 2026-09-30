@@ -1,5 +1,7 @@
 import { kebabCase } from "$/util"
 
+import { ColorContrast } from "./ColorContrast"
+
 import type {
   ColorRecipe,
   ColorShift,
@@ -15,7 +17,6 @@ import {
   borderWidth,
   breakpoints,
   captionRatio,
-  contrastThreshold,
   disabledOpacity,
   durations,
   easings,
@@ -30,6 +31,7 @@ import {
   hues,
   lineHeights,
   neutrals,
+  onColors,
   radii,
   semanticAliases,
   semanticColors,
@@ -60,6 +62,8 @@ import {
  *   `light-dark()` token stream resolves where it is USED.  The concrete per-scheme bases
  *   (`--ui-red-on-light` / `--ui-red-on-dark`) hold no `light-dark()`, so THEY are registered (animatable,
  *   type-checked, document-wide initial values).
+ * - Text ON a solid colour is DATA:  `--ui-<name>-on` (white or ink) is picked here by WCAG contrast
+ *   (`ColorContrast`) against the colour and its states, per scheme -- see `onColors`.
  */
 export class StyleGenerator {
   /** First line of every generated sheet. */
@@ -179,39 +183,44 @@ export class StyleGenerator {
       declarations.push([`--ui-${name}`, this.lightDark(this.oklch(color.onLight), this.oklch(color.onDark))])
     }
     for (const [name, hue] of this.entries(hues)) {
+      const inverted: Oklch | undefined = (hue as HueDefinition).inverted
       declarations.push(
         [`--ui-${name}-on-light`, this.oklch(hue.onLight)],
         [`--ui-${name}-on-dark`, this.oklch(hue.onDark)],
         [`--ui-${name}`, `light-dark(var(--ui-${name}-on-light), var(--ui-${name}-on-dark))`],
         ...this.derived(`var(--ui-${name})`, name, this.statesOf(name), hueRoles),
-        [`--ui-${name}-inverted`, `var(--ui-${name}-on-dark)`]
+        [`--ui-${name}-inverted`, inverted ? this.oklch(inverted) : `var(--ui-${name}-on-dark)`],
+        ...this.onDeclarations(name, hue, this.statesOf(name), inverted)
       )
     }
     for (const [name, target] of this.entries(hueAliases)) {
       declarations.push(
         [`--ui-${name}`, `var(--ui-${target})`],
         ...this.derived(`var(--ui-${name})`, name, this.statesOf(target), hueRoles),
-        [`--ui-${name}-inverted`, `var(--ui-${target}-inverted)`]
+        [`--ui-${name}-inverted`, `var(--ui-${target}-inverted)`],
+        ...this.onAliases(name, target)
       )
     }
     for (const [name, semantic] of this.entries(semanticColors)) {
       if ("hue" in semantic) {
         declarations.push(
           [`--ui-${name}`, `var(--ui-${semantic.hue})`],
-          [`--ui-${name}-inverted`, `var(--ui-${semantic.hue}-inverted)`]
+          [`--ui-${name}-inverted`, `var(--ui-${semantic.hue}-inverted)`],
+          ...this.onAliases(name, semantic.hue)
         )
       } else {
         declarations.push(
           [`--ui-${name}-on-light`, this.oklch(semantic.onLight)],
           [`--ui-${name}-on-dark`, this.oklch(semantic.onDark)],
           [`--ui-${name}`, `light-dark(var(--ui-${name}-on-light), var(--ui-${name}-on-dark))`],
-          [`--ui-${name}-inverted`, `var(--ui-${name}-on-dark)`]
+          [`--ui-${name}-inverted`, `var(--ui-${name}-on-dark)`],
+          ...this.onDeclarations(name, semantic, hueStates)
         )
       }
       declarations.push(...this.derived(`var(--ui-${name})`, name, hueStates, semanticRoles))
     }
     for (const [name, target] of this.entries(semanticAliases)) {
-      for (const suffix of ["", "-inverted", ...this.derivedSuffixes()]) {
+      for (const suffix of ["", "-inverted", ...ON_SUFFIXES, ...this.derivedSuffixes()]) {
         declarations.push([`--ui-${name}${suffix}`, `var(--ui-${target}${suffix})`])
       }
     }
@@ -238,18 +247,21 @@ export class StyleGenerator {
 
   /**
    * Remap rules:  point the generic `--ui-color*` tokens at one colour, so component CSS needs no per-hue rules.
-   * - Roles (`-text`, `-header`, `-border`, `-background`, `-inverted`) point at the colour's OWN tokens,
-   *   so a theme's hand-tuned role (`--ui-yellow-text`, `--ui-red-background`) reaches components.
-   * - States (`-hover`, `-focus`, `-down`, `-active`) and `-contrast` are derived once, from `--ui-color`
-   *   on the same element:  they're mechanical recipes in Fomantic too, and it means a per-instance
-   *   `style="--ui-color: hotpink"` on a coloured element gets matching states.  `black` / `secondary`
-   *   get the lightening recipe.
-   * - Also `[data-variation~="red"]` => `--ui-variation-color`, Fomantic's tooltip / popup colour hook.
-   *   A separate token, so a coloured tooltip never recolours the element it hangs off.
+   * - Roles (`-text`, `-header`, `-border`, `-background`, `-inverted`) and the foregrounds (`-on`,
+   *   `-inverted-on`) point at the colour's OWN tokens, so a theme's hand-tuned role (`--ui-yellow-text`,
+   *   `--ui-red-background`) reaches components.
+   * - States (`-hover`, `-focus`, `-down`, `-active`) are derived once, from `--ui-color` on the same element:
+   *   they're mechanical recipes in Fomantic too, and it means a per-instance `style="--ui-color: hotpink"` on a
+   *   coloured element gets matching states.  `black` / `secondary` get the lightening recipe.
+   * - NOTE: `-on` is NOT derived:  it's picked by contrast at generation time, so a per-instance
+   *   `--ui-color` override must set `--ui-color-on` too.
+   * - Also `[data-variation~="red"]` => `--ui-variation-color` (+ `-inverted`, `-on`, `-inverted-on`),
+   *   Fomantic's tooltip / popup colour hook.  A separate token, so a coloured tooltip never recolours the
+   *   element it hangs off.
    */
   private colorRemaps(): string[] {
     const lines = this.comment("Remaps:  component CSS reads only the generic `--ui-color*` tokens.")
-    const suffixes = ["", ...this.keys(hueRoles).map((role) => `-${role}`), "-inverted"]
+    const suffixes = ["", ...this.keys(hueRoles).map((role) => `-${role}`), "-inverted", ...ON_SUFFIXES]
     for (const name of this.colorNames()) {
       lines.push(
         ...this.rule(
@@ -262,10 +274,7 @@ export class StyleGenerator {
     lines.push(
       ...this.rule(
         this.colorNames().flatMap((name) => this.remapSelectors(name)),
-        [
-          ...this.stateDeclarations("var(--ui-color)", "color", hueStates),
-          ["--ui-color-contrast", this.contrast("var(--ui-color)")]
-        ]
+        this.stateDeclarations("var(--ui-color)", "color", hueStates)
       ),
       ...this.rule(
         lightening.flatMap((name) => this.remapSelectors(name)),
@@ -276,10 +285,10 @@ export class StyleGenerator {
       lines.push(
         ...this.rule(
           [`[data-variation~="${name}"]`],
-          [
-            ["--ui-variation-color", `var(--ui-${name})`],
-            ["--ui-variation-color-inverted", `var(--ui-${name}-inverted)`]
-          ]
+          ["", "-inverted", ...ON_SUFFIXES].map((suffix): Declaration => [
+            `--ui-variation-color${suffix}`,
+            `var(--ui-${name}${suffix})`
+          ])
         )
       )
     }
@@ -434,12 +443,47 @@ export class StyleGenerator {
     return this.lightDark(`oklch(from var(--ui-ink-on-light) l c h / ${onLight})`, dark)
   }
 
+  ////////////////
+  // ## Foregrounds on a colour
+  ////////////////
+
   /**
-   * Black or white, whichever reads on `base`:  lightness above `contrastThreshold` => black.
-   * - `clamp(0, (threshold - l) * 1000, 1)` is a branch-free step function in relative colour syntax.
+   * `--ui-<name>-on` (per scheme) and `--ui-<name>-inverted-on` (on the `-inverted` colour, whatever the scheme).
+   * - Each is the `onColors` candidate `onColor()` picks for that colour + `states`.
+   * - `inverted` ~== the hue's own `inverted` override;  default `onDark`, as `--ui-<name>-inverted` is.
    */
-  private contrast(base: string): string {
-    return `oklch(from ${base} clamp(0, (${contrastThreshold} - l) * 1000, 1) 0 0)`
+  private onDeclarations(name: string, color: SchemeColor, states: HueStates, inverted?: Oklch): Declaration[] {
+    const light = this.onColor(color.onLight, states)
+    const dark = this.onColor(color.onDark, states)
+    return [
+      [`--ui-${name}-on`, light === dark ? light : this.lightDark(light, dark)],
+      [`--ui-${name}-inverted-on`, inverted ? this.onColor(inverted, states) : dark]
+    ]
+  }
+
+  /** `-on` / `-inverted-on` of an alias:  its target's. */
+  private onAliases(name: string, target: string): Declaration[] {
+    return ON_SUFFIXES.map((suffix): Declaration => [`--ui-${name}${suffix}`, `var(--ui-${target}${suffix})`])
+  }
+
+  /**
+   * CSS of the first `onColors` candidate reaching `ColorContrast.text` on `color` and every state of it,
+   * else of the candidate with the best worst case.
+   * - Never fails generation:  `colors.contrast.test.ts` is what fails, naming the pair.
+   */
+  private onColor(color: Oklch, states: HueStates): string {
+    const backgrounds = [color, ...Object.values(states).map((shift) => this.shifted(color, shift))]
+    const candidates = Object.values(onColors).map((candidate) => ({
+      css: candidate.css,
+      worst: Math.min(...backgrounds.map((background) => ColorContrast.ratio(candidate.color, background)))
+    }))
+    const passing = candidates.find((candidate) => candidate.worst >= ColorContrast.text)
+    return (passing ?? candidates.toSorted((a, b) => b.worst - a.worst)[0]!).css
+  }
+
+  /** `color` with `shift` applied, as `shift()` does in CSS (lightness clamped to `0..1`, as CSS does). */
+  private shifted([lightness, chroma, hue]: Oklch, shift: ColorShift): Oklch {
+    return [Math.min(1, Math.max(0, lightness + shift.lightness)), chroma * shift.chroma, hue]
   }
 
   /** `light-dark(<light>, <dark>)`. */
@@ -529,6 +573,9 @@ export class StyleGenerator {
 
 /** One `property: value` pair. */
 type Declaration = [property: string, value: string]
+
+/** Foreground suffixes every colour gets:  on the colour, and on its `-inverted` variant. */
+const ON_SUFFIXES = ["-on", "-inverted-on"] as const
 
 /** Spacing utility sides:  class infix => property suffix, shorthand first. */
 const SPACING_SIDES = [

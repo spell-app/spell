@@ -115,4 +115,14 @@ describe("fix 2:  prototype accessors and upgrade", () => {
     expect(element.label).toBe("property")
     expect(element.getAttribute("label")).toBe("property")
   })
+
+  it("fork:  a pre-upgrade property equal to the default still reflects (an explicit set)", () => {
+    const tag = nextTag("upgrade-default")
+    const element = document.createElement(tag) as HTMLElement & { variant: string }
+    element.variant = "solid"
+    customElement(tag, { variant: { value: "solid", reflect: true } }, () => null)
+    customElements.upgrade(element)
+    document.body.append(element)
+    expect(element.getAttribute("variant")).toBe("solid")
+  })
 })

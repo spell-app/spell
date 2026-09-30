@@ -10,9 +10,6 @@ FallbackStub.define("x-fb-divider", (host, root, internals) =>
   DividerFallback.render(host, root, new Error("boom"), internals)
 )
 
-/** Axe without contrast:  the stub has no stylesheet. */
-const AXE = { rules: { "color-contrast": { enabled: false } } }
-
 describe("DividerFallback", () => {
   it("renders a separator with the class grammar, part and slot", async () => {
     const host = Fixture.render<StubHost>(`<x-fb-divider horizontal>Or</x-fb-divider>`)
@@ -22,7 +19,7 @@ describe("DividerFallback", () => {
     expect(divider.getAttribute("part")).toBe("divider")
     expect(divider.hasAttribute("aria-orientation")).toBe(false)
     expect(divider.querySelector("slot")).not.toBeNull()
-    await expectAccessible(host, AXE)
+    await expectAccessible(host)
   })
 
   it("is vertical, or spacing only", () => {

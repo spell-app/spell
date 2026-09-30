@@ -23,7 +23,8 @@ import { FormHost } from "./FormHost"
  * - Pushes `formValue()` into `ElementInternals.setFormValue()` -- a `string[]` becomes a `FormData` with one
  *   entry per value, so `new FormData(form).getAll(name)` returns them all -- and `rules()` through `Validator`
  *   into `setValidity()`.
- * - `:state(invalid)` mirrors validity;  the anchor for the browser's bubble is `validationAnchor()`.
+ * - `:state(invalid)` follows `showsInvalid()` (default:  mirrors validity);  the anchor for the browser's bubble is
+ *   `validationAnchor()`.
  */
 export abstract class FormElement<V extends ComponentVocabulary = ComponentVocabulary> extends UIElement<V> {
   /** Host with the form-control API. */
@@ -75,6 +76,23 @@ export abstract class FormElement<V extends ComponentVocabulary = ComponentVocab
     return undefined
   }
 
+  /**
+   * Show `:state(invalid)` for `result`?  Tracked.
+   * - Default:  whenever invalid (`:invalid` semantics).  Text and check controls wait for the user, as
+   *   `:user-invalid` does.
+   */
+  protected showsInvalid(result: ValidationResult): boolean {
+    return !result.valid
+  }
+
+  /**
+   * What `setFormValue()` gets for `value`;  default `FormElement.submission()`.
+   * - A file input overrides it to submit its `File`s.
+   */
+  protected formSubmission(value: FieldValue, name: string | undefined): string | File | FormData | null {
+    return FormElement.submission(value, name)
+  }
+
   ////////////////
   // ## Wiring
   ////////////////
@@ -83,16 +101,16 @@ export abstract class FormElement<V extends ComponentVocabulary = ComponentVocab
   mount() {
     onFormReset(() => this.formReset())
     createEffect(
-      () => ({ value: this.formValue(), name: this.formName() }),
-      ({ value, name }) => this.formHost.internals.setFormValue(FormElement.submission(value, name))
+      () => this.formSubmission(this.formValue(), this.formName()),
+      (submission) => this.formHost.internals.setFormValue(submission)
     )
     createEffect(
-      () => this.validation(),
-      (result) => {
+      () => ({ result: this.validation(), shown: this.showsInvalid(this.validation()) }),
+      ({ result, shown }) => {
         const { internals } = this.formHost
         if (result.valid) internals.setValidity({})
         else internals.setValidity(result.flags, result.message, this.validationAnchor())
-        this.host.setState(INVALID_STATE, !result.valid)
+        this.host.setState(INVALID_STATE, shown)
       }
     )
     return super.mount()

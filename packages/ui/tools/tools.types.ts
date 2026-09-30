@@ -31,6 +31,13 @@ export type PackageConfig = {
    * - A family's scenarios add only the shared entries its chunk actually imports (statically).
    */
   shared: SharedEntry[]
+  /**
+   * Entries built WITH the rest but not sized as families or shared tiers, e.g. `{ api: "src/api.ts" }`.
+   * - Why:  an entry changes how Rolldown splits the others (`api` makes `core.js` export `__exportAll`), so the
+   *   measured `core.js` matches `dist/`'s only when every such entry is in the build.
+   * - Their modules belong in `extra:<name>` buckets (`groups`);  each is sized under `MeasureResults.extra`.
+   */
+  extra?: Record<string, string>
   /** true for module ids the library build leaves EXTERNAL (Solid and the fork, subpaths included) */
   external: (id: string) => boolean
   /**
@@ -67,6 +74,7 @@ export type OwnKind = "classes" | "css" | "vocabulary" | "fallback"
  * - `shared:<name>` -- a module of shared entry `<name>` (`shared:forms` => `forms.js`)
  * - `runtime` / `icons` -- the lazy `UIRuntime` chunk and the icon name / alias maps
  * - `own:<family>:<kind>` -- one family's classes, sheet, vocabulary or fallback
+ * - `extra:<name>` -- a module only `PackageConfig.extra` entry `<name>` holds (`extra:api` => `api.js`)
  * - `other` -- unattributed;  reported by a check so nothing is silently dropped
  */
 export type Bucket =
@@ -77,6 +85,7 @@ export type Bucket =
   | "icons"
   | "other"
   | `own:${string}:${OwnKind}`
+  | `extra:${string}`
 
 ////////////////
 // ## Measurement results (`measure-results.json`)
@@ -147,6 +156,8 @@ export type MeasureResults = {
    */
   standalone: Record<string, Size>
   lazy: { runtime: Size; icons: Size }
+  /** each `PackageConfig.extra` entry's own code (`extra:<name>` buckets), e.g. `api` */
+  extra: Record<string, Size>
   chunks: ChunkSize[]
   checks: MeasureChecks
 }
@@ -158,6 +169,11 @@ export type ScenarioName = "page with one button" | "all families" | "app alread
 export type MeasureChecks = {
   /** family entries that DON'T statically import the first shared entry's chunk (`core.js`) */
   entriesMissingCore: string[]
+  /**
+   * Chunks holding Rolldown's runtime module (`\0rolldown/runtime.js`:  `__name`, `__exportAll` ...) that aren't the
+   * first shared entry's:  a `rolldown-runtime-<hash>.js` every chunk using a helper imports, one more request per page
+   */
+  runtimeChunks: string[]
   /** shared-entry module ids found outside that entry's own chunk (e.g. hoisted into a common chunk) */
   coreOutsideCore: string[]
   /** `library`-bucket module ids found anywhere in the build (should be external) */

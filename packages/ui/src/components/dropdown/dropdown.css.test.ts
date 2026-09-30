@@ -6,7 +6,7 @@ import type { AttributeSpec, ComponentVocabulary } from "$/vocabulary"
 
 import { Fixture } from "$test/fixture"
 
-import { dropdownVocabulary, itemVocabulary } from "./dropdown.vocabulary.en"
+import { dropdownVocabulary } from "./dropdown.vocabulary.en"
 
 import buttonCSS from "$/components/button/button.css?inline"
 import dropdownCSS from "./dropdown.css?inline"
@@ -61,9 +61,11 @@ describe("dropdown.css source", () => {
     }
   })
 
-  it("covers every class word the vocabularies can emit", () => {
+  // NOTE: not `itemVocabulary`:  the dropdown draws its own `.item` rows (`active`, `disabled`);  a `<ui-item>`'s
+  // own class words are its list / menu owners' to style
+  it("covers every class word the vocabulary can emit", () => {
     const css = dropdownRaw + colorsCSS
-    for (const vocabulary of [dropdownVocabulary, itemVocabulary]) {
+    for (const vocabulary of [dropdownVocabulary]) {
       for (const phrase of classPhrases(vocabulary)) {
         if (DEFAULT_PHRASES.has(phrase)) continue
         expect(covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)

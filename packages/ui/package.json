@@ -21,6 +21,21 @@
     "./dist/divider.js",
     "./dist/segment.js",
     "./dist/container.js",
+    "./dist/grid.js",
+    "./dist/image.js",
+    "./dist/text.js",
+    "./dist/flag.js",
+    "./dist/loader.js",
+    "./dist/placeholder.js",
+    "./dist/message.js",
+    "./dist/breadcrumb.js",
+    "./dist/input.js",
+    "./dist/checkbox.js",
+    "./dist/form.js",
+    "./dist/item.js",
+    "./dist/list.js",
+    "./dist/menu.js",
+    "./dist/table.js",
     "./tools/demo/**"
   ],
   "main": "./dist/index.js",
@@ -38,6 +53,10 @@
     "./forms": {
       "types": "./dist/forms.d.ts",
       "import": "./dist/forms.js"
+    },
+    "./api": {
+      "types": "./dist/api.d.ts",
+      "import": "./dist/api.js"
     },
     "./button": {
       "types": "./dist/components/button/index.d.ts",
@@ -70,6 +89,66 @@
     "./container": {
       "types": "./dist/components/container/index.d.ts",
       "import": "./dist/container.js"
+    },
+    "./grid": {
+      "types": "./dist/components/grid/index.d.ts",
+      "import": "./dist/grid.js"
+    },
+    "./image": {
+      "types": "./dist/components/image/index.d.ts",
+      "import": "./dist/image.js"
+    },
+    "./text": {
+      "types": "./dist/components/text/index.d.ts",
+      "import": "./dist/text.js"
+    },
+    "./flag": {
+      "types": "./dist/components/flag/index.d.ts",
+      "import": "./dist/flag.js"
+    },
+    "./loader": {
+      "types": "./dist/components/loader/index.d.ts",
+      "import": "./dist/loader.js"
+    },
+    "./placeholder": {
+      "types": "./dist/components/placeholder/index.d.ts",
+      "import": "./dist/placeholder.js"
+    },
+    "./message": {
+      "types": "./dist/components/message/index.d.ts",
+      "import": "./dist/message.js"
+    },
+    "./breadcrumb": {
+      "types": "./dist/components/breadcrumb/index.d.ts",
+      "import": "./dist/breadcrumb.js"
+    },
+    "./input": {
+      "types": "./dist/components/input/index.d.ts",
+      "import": "./dist/input.js"
+    },
+    "./checkbox": {
+      "types": "./dist/components/checkbox/index.d.ts",
+      "import": "./dist/checkbox.js"
+    },
+    "./form": {
+      "types": "./dist/components/form/index.d.ts",
+      "import": "./dist/form.js"
+    },
+    "./item": {
+      "types": "./dist/components/item/index.d.ts",
+      "import": "./dist/item.js"
+    },
+    "./list": {
+      "types": "./dist/components/list/index.d.ts",
+      "import": "./dist/list.js"
+    },
+    "./menu": {
+      "types": "./dist/components/menu/index.d.ts",
+      "import": "./dist/menu.js"
+    },
+    "./table": {
+      "types": "./dist/components/table/index.d.ts",
+      "import": "./dist/table.js"
     },
     "./styles": {
       "types": "./dist/styles/index.d.ts",

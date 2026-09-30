@@ -80,7 +80,8 @@
 
   /* Image:  its natural size, never wider than its container. */
   .ui.image,
-  .ui.images > :is(img, svg) {
+  .ui.images > :is(img, svg),
+  .ui.images > ::slotted(:is(img, svg)) {
     position: relative;
     box-sizing: border-box;
     display: var(--_image-display, inline-block);

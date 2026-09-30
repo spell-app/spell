@@ -209,8 +209,6 @@ describe("<ui-buttons> / <ui-or>", () => {
 describe("<ui-button> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
-    // `color-contrast` off:  the ORIGINAL class-grammar fragments fail it the same way (palette tokens in
-    // `src/styles`, e.g. white on `--ui-positive` is 2.87:1) -- a foundation finding, see `docs/report.md`
-    await expectAccessible(root, { rules: { "color-contrast": { enabled: false } } })
+    await expectAccessible(root)
   })
 })

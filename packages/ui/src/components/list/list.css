@@ -1,0 +1,809 @@
+/*
+ * `<ui-list>` and the `<ui-item>`s inside it:  port of Fomantic's `list.less` + `list.variables`.
+ * - ONE sheet for the list AND its items:  the list adopts it after the foundation;  every item it owns adopts it
+ *   after `item.css` (`UIItem.sheetNames()` reads the owner's `styles`).
+ * - Shadow markup contract (class grammar on semantic elements):
+ *   - `<ui-list>`:  `<ul class="ui [size] [keyOnly ...] [relaxed] [floated] [aligned] list" part="list"
+ *     role="list"><slot></slot></ul>`, an `<ol>` when ordered;  `role="list"` because `list-style: none` drops
+ *     list semantics in Safari
+ *   - a `<ui-list>` inside a list (the SUB-LIST, `:state(in-list)`):  `<ul class="list" part="list" role="list">`
+ *     -- no `ui`, no variations:  it inherits the outer list's tokens, as Fomantic's `.ui.list .list > .item` does
+ *   - its `<ui-item>`s (`item.css`):  `<a | button | div class="[keyOnly ...] item" part="item">`, holding the
+ *     `image` shorthand's `<img class="ui avatar image">`, the icon box `<span class="icon" part="icon">`, then
+ *     the default `<slot>`;  the item HOST is `role=listitem` and carries `:state(in-list)`
+ * - Every ITEM rule has two selectors sharing one body, like `parts.css`:
+ *
+ *       :host(:state(in-list)) > .item,                 <- the element:  the item's own shadow root
+ *       :is(.ui.list, .ui.list .list) > .item { ... }   <- static class grammar (examples, SSR without scripts)
+ *
+ *   Host position replaces Fomantic's `:first-child` / `:last-child` / `+`:  `:host(:state(in-list):first-child)`.
+ * - Variations reach the items as INHERITED TOKENS:  each variation remaps `--ui-list-*` on the list root (class
+ *   selectors, combinations included:  `.ui.horizontal.divided.list`), and the item rules only read them.  Where
+ *   a variation changes STRUCTURE the items style-query a flag instead:  `--ui-list-marker: number` (an item's
+ *   `value` replaces its number) and `--ui-list-animated: 1` (hover indent).
+ * - The root declares EVERY token below, default included, so a list nested as a new top-level list never
+ *   inherits an outer list's look.  The sub-list re-declares the item geometry from the `--ui-list-child-*`
+ *   tokens (Fomantic's child items are tighter, never bordered, never horizontal).
+ * - Numbering is CSS counters:  `counter-reset: ordered` on the root (and every sub-list), `counter-increment`
+ *   on each item's `::before`;  counters cross shadow boundaries and nest (`counters(ordered, ".")` => `1.2`).
+ * - Hosts are `display: contents`:  the list root and item roots are the boxes, so the list's inline / table
+ *   layout applies to them directly.
+ *
+ * ## Tokens
+ *
+ * | Token                                   | Default                          | Remapped by, e.g.                          |
+ * | --------------------------------------- | -------------------------------- | ------------------------------------------ |
+ * | `--ui-list-layout`                      | `vertical`                       | `horizontal`;  also read by `parts.css`    |
+ * | `--ui-list-align`                       | `top`                            | `horizontal` (`middle`), `vertical-align`  |
+ * | `--ui-list-font-size`                   | the list's size                  | sizes;  horizontal items read it           |
+ * | `--ui-list-item-display`                | `list-item`                      | `horizontal` (`inline-block`)              |
+ * | `--ui-list-item-width`                  | `stretch`                        | `horizontal` (`auto`)                      |
+ * | `--ui-list-item-font-size`              | `initial` (inherit)              | `horizontal` (the root has `font-size: 0`) |
+ * | `--ui-list-item-line-height`            | `1.14285714em`                   | horizontal `divided` / `celled` (`0.6`)    |
+ * | `--ui-list-item-padding-block`          | `0.21428571em`                   | `relaxed`, `selection`                     |
+ * | `--ui-list-item-padding-left` / `-right`| `0`                              | `celled`, `selection`, `fitted` ...        |
+ * | `--ui-list-item-first-padding-top`      | `0`                              | `celled`, `horizontal`, `selection`        |
+ * | `--ui-list-item-first-padding-left`     | the item's left padding          | horizontal `relaxed` (`0`)                 |
+ * | `--ui-list-item-last-padding-bottom`    | `0`                              | `celled`, `horizontal`, `selection`        |
+ * | `--ui-list-item-last-padding-right`     | the item's right padding         | `horizontal` (`0`)                         |
+ * | `--ui-list-item-margin`                 | `0`                              | `horizontal`, `fitted selection`           |
+ * | `--ui-list-item-first-margin-left`      | `0`                              | `fitted selection`                         |
+ * | `--ui-list-item-last-margin-right`      | `0`                              | `fitted selection`                         |
+ * | `--ui-list-item-border-width`           | `0`                              | `divided`, `celled`                        |
+ * | `--ui-list-item-first-border-top`       | `0`                              | `celled`                                   |
+ * | `--ui-list-item-last-border-right`      | `0`                              | horizontal `celled`                        |
+ * | `--ui-list-item-last-border-bottom`     | `0`                              | `celled`                                   |
+ * | `--ui-list-item-border-color`           | `--ui-border-color`              | --                                         |
+ * | `--ui-list-item-radius`                 | `0`                              | `selection`                                |
+ * | `--ui-list-item-transition`             | `none`                           | `link`, `selection`, `animated`            |
+ * | `--ui-list-item-color`                  | `initial` (inherit)              | `link`, `selection`                        |
+ * | `--ui-list-item-active-color`           | `initial` (inherit)              | `link`, `selection`                        |
+ * | `--ui-list-item-{hover,down,active}-background` | `transparent`            | `selection`                                |
+ * | `--ui-list-link-color`                  | `--ui-link`                      | `link`, `selection`, `inverted`            |
+ * | `--ui-list-link-{hover,down,active}-color` | link hover / link             | `link`, `selection`                        |
+ * | `--ui-list-link-icon-color` / `-hover-color` | light / text colour         | `inverted`;  `selection` (`initial`)       |
+ * | `--ui-list-anchor-color` / `-hover-color` | link / link hover              | `link`, `inverted` (static `<a>`s inside)  |
+ * | `--ui-list-disabled-color`              | `--ui-text-disabled`             | --                                         |
+ * | `--ui-list-icon-display`                | `table-cell`                     | `horizontal` (`inline-block`)              |
+ * | `--ui-list-icon-slot-display`           | `table-cell`:  the item's slot   | `horizontal` (`contents`)                  |
+ * |                                         | after its icon box               |                                            |
+ * | `--ui-list-icon-padding`                | `0 0.28571429em 0 0`             | `horizontal`                               |
+ * | `--ui-list-image-display`               | `table-cell`                     | `horizontal`                               |
+ * | `--ui-list-content-distance`            | `0.5em`                          | read by `parts.css`                        |
+ * | `--ui-list-{content,header,description}-color` | text / text / 70% ink     | `inverted`;  read by `parts.css`           |
+ * | `--ui-list-marker`                      | `none`                           | `bulleted` (`bullet`), `ordered` (`number`)|
+ * | `--ui-list-marker-content`              | `none`                           | `bulleted`, `ordered`, `suffixed`          |
+ * | `--ui-list-marker-position`             | `absolute`                       | horizontal `ordered` (`static`)            |
+ * | `--ui-list-marker-margin`               | `0`                              | `bulleted`, `ordered`, horizontal ordered  |
+ * | `--ui-list-marker-color`                | `initial` (inherit)              | `ordered`, `inverted`, horizontal bullets  |
+ * | `--ui-list-marker-opacity` / `-align`   | `1` / `top`                      | `ordered`                                  |
+ * | `--ui-list-counter-increment`           | `none`                           | `ordered`                                  |
+ * | `--ui-list-counter-reset`               | `none`                           | `ordered`:  every sub-list resets          |
+ * | `--ui-list-first-marker-display`        | `initial` (shown)                | horizontal `bulleted` (`none`)             |
+ * | `--ui-list-animated`                    | `0`                              | `animated`                                 |
+ * | `--ui-list-sublist-margin` / `-padding` | `0` / `0.75em 0 0.25em 0.5em`    | `bulleted`, `ordered`, `horizontal` ...    |
+ * | `--ui-list-sublist-content-{margin,padding}-left` | `initial` (0)          | `ordered` / `bulleted`:  a sub-list in a   |
+ * |                                         |                                  | `<ui-content>` keeps its indent            |
+ * | `--ui-list-child-item-padding-block`    | `0.14285714em`                   | `selection`                                |
+ * | `--ui-list-child-item-padding-{left,right}` | `0`                          | `selection`, `divided` / `celled` markers  |
+ * | `--ui-list-child-item-edge-padding`     | `0`                              | `selection`                                |
+ * | `--ui-list-child-item-margin-inline`    | `0`                              | `fitted selection`                         |
+ * | `--ui-list-child-marker-margin`         | `0`                              | `bulleted`, `ordered` (`-2em`)             |
+ *
+ * - Owner tokens the ITEM root sets for what's slotted into it:  `--ui-icon-owner-*` (a slotted `<ui-icon>` is a
+ *   table cell beside the content, like Fomantic's `> .item > i.icon`), reset on slotted parts
+ *   (`::slotted(:state(in-list))`) so icons inside a content block stay inline;  `--ui-part: item` (a sub-list
+ *   inside a `<ui-content>` drops its indent, `--ui-part: content`);  `--ui-item-media: image` for the `image`
+ *   shorthand (`parts.css`:  the content beside it is an inline block, Fomantic's `img.image + .content`).
+ * - Colours:  `inverted` sets `color-scheme: dark` (+ `--ui-inverted: 1`), so the `light-dark()` text, border and
+ *   ink tokens (link list greys, selection backgrounds) resolve on-dark by themselves;  only Fomantic's explicit
+ *   inverted colours (content, header, links) are remapped.
+ * - NOTE: left out, on purpose:
+ *   - Fomantic's plain `ul.ui.list > li` / `ol.ui.list > li` markup (a `ul` meaning bulleted):  the element's
+ *     root is ALWAYS a `<ul>` / `<ol>` of `<ui-item>`s, so it says `bulleted` / `ordered` with classes
+ *   - `.ui.menu .ui.list` coupling:  `menu.css` owns it
+ *   - floated / aligned CONTENT (`right floated content`, `middle aligned content`):  `<ui-content>` has no such
+ *     attributes;  the static class-grammar rules stay
+ *   - a slotted `<img>` / `<ui-image>` FOLLOWED by a `<ui-content>`:  the content is a table cell (`parts.css`,
+ *     `:not(:first-child)`) beside an inline-block image, so it wraps below;  use the item's `image` shorthand
+ *   - links nested INSIDE a slotted part (`<ui-description>Watch <a>…</a>`):  out of this sheet's reach;  they
+ *     keep the page's link colour (static markup gets Fomantic's `.item a` rules)
+ *   - the icon cell's `:only-child` and `.loading.icon + .content` rules:  a shadow root can't see them;  instead
+ *     the item's slot after its icon box is the row's second cell, so text sits beside the icon
+ *   - Fomantic's rem-based size ladder:  sizes use `--ui-scale` of `--ui-font-size`, like every component
+ */
+
+@layer ui.components.list.types, ui.components.list.content, ui.components.list.variations, ui.components.list.states;
+
+/*******************************
+             List
+*******************************/
+
+@layer ui.components.list.types {
+  /* Hosts:  no box of their own;  the roots are the list and its items. */
+  :host {
+    display: contents;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+
+  /* Tokens:  one per `list.variables` entry that still matters;  the items and sub-lists inherit them. */
+  .ui.list {
+    --ui-list-layout: vertical;
+    --ui-list-align: top;
+    --ui-list-font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+    --ui-list-item-display: list-item;
+    --ui-list-item-width: stretch;
+    --ui-list-item-font-size: initial;
+    --ui-list-item-line-height: 1.14285714em;
+    --ui-list-item-padding-block: 0.21428571em;
+    --ui-list-item-padding-left: 0;
+    --ui-list-item-padding-right: 0;
+    --ui-list-item-first-padding-top: 0;
+    --ui-list-item-first-padding-left: var(--ui-list-item-padding-left);
+    --ui-list-item-last-padding-bottom: 0;
+    --ui-list-item-last-padding-right: var(--ui-list-item-padding-right);
+    --ui-list-item-margin: 0;
+    --ui-list-item-first-margin-left: 0;
+    --ui-list-item-last-margin-right: 0;
+    --ui-list-item-border-width: 0;
+    --ui-list-item-first-border-top: 0;
+    --ui-list-item-last-border-right: 0;
+    --ui-list-item-last-border-bottom: 0;
+    --ui-list-item-border-color: var(--ui-border-color);
+    --ui-list-item-radius: 0;
+    --ui-list-item-transition: none;
+    --ui-list-item-color: initial;
+    --ui-list-item-active-color: initial;
+    --ui-list-item-hover-background: transparent;
+    --ui-list-item-down-background: transparent;
+    --ui-list-item-active-background: transparent;
+    --ui-list-link-color: var(--ui-link);
+    --ui-list-link-hover-color: var(--ui-link-hover);
+    --ui-list-link-down-color: var(--ui-link-hover);
+    --ui-list-link-active-color: var(--ui-link);
+    --ui-list-link-icon-color: var(--ui-text-light);
+    --ui-list-link-icon-hover-color: var(--ui-text-color);
+    --ui-list-anchor-color: var(--ui-link);
+    --ui-list-anchor-hover-color: var(--ui-link-hover);
+    --ui-list-disabled-color: var(--ui-text-disabled);
+    --ui-list-icon-display: table-cell;
+    --ui-list-icon-slot-display: table-cell;
+    --ui-list-icon-min-width: 1.55em;
+    --ui-list-icon-padding: 0 0.28571429em 0 0;
+    --ui-list-image-display: table-cell;
+    --ui-list-image-distance: 0.5em;
+    --ui-list-content-distance: 0.5em;
+    --ui-list-content-color: var(--ui-text-color);
+    --ui-list-header-color: var(--ui-text-color);
+    --ui-list-description-color: oklch(from var(--ui-ink) l c h / 0.7);
+    --ui-list-marker: none;
+    --ui-list-marker-content: none;
+    --ui-list-marker-position: absolute;
+    --ui-list-marker-margin: 0;
+    --ui-list-marker-color: initial;
+    --ui-list-marker-opacity: 1;
+    --ui-list-marker-align: top;
+    --ui-list-counter-increment: none;
+    --ui-list-counter-reset: none;
+    --ui-list-first-marker-display: initial;
+    --ui-list-animated: 0;
+    --ui-list-sublist-margin: 0;
+    --ui-list-sublist-padding: 0.75em 0 0.25em 0.5em;
+    --ui-list-sublist-content-margin-left: initial;
+    --ui-list-sublist-content-padding-left: initial;
+    --ui-list-child-item-padding-block: 0.14285714em;
+    --ui-list-child-item-padding-left: 0;
+    --ui-list-child-item-padding-right: 0;
+    --ui-list-child-item-edge-padding: 0;
+    --ui-list-child-item-margin-inline: 0;
+    --ui-list-child-marker-margin: 0;
+    box-sizing: border-box;
+    margin: var(--_list-margin-top, 1em) 0 var(--_list-margin-bottom, 1em);
+    padding: 0;
+    font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+    list-style: none;
+  }
+  /* Spacing between neighbours:  none before the first, none after the last. */
+  .ui.list:first-child {
+    --_list-margin-top: 0;
+  }
+  .ui.list:last-child {
+    --_list-margin-bottom: 0;
+  }
+  /* Shadow DOM:  the root is always an only child, so the HOST's position decides. */
+  :host(:not(:first-child)) > .ui.list {
+    --_list-margin-top: initial;
+  }
+  :host(:not(:last-child)) > .ui.list {
+    --_list-margin-bottom: initial;
+  }
+  /* Components inside items don't scale twice. */
+  .list > slot {
+    --ui-scale: initial;
+  }
+
+  /* Sub-list:  Fomantic's `.ui.list .list`, tighter child items that never inherit the outer list's layout. */
+  :host(:state(in-list)) > .list,
+  .ui.list .list:not(.ui) {
+    --ui-list-layout: vertical;
+    --ui-list-animated: 0;
+    --ui-list-item-display: list-item;
+    --ui-list-item-width: stretch;
+    --ui-list-item-font-size: initial;
+    --ui-list-item-line-height: initial;
+    --ui-list-item-padding-block: var(--ui-list-child-item-padding-block);
+    --ui-list-item-padding-left: var(--ui-list-child-item-padding-left);
+    --ui-list-item-padding-right: var(--ui-list-child-item-padding-right);
+    --ui-list-item-first-padding-top: var(--ui-list-child-item-edge-padding);
+    --ui-list-item-first-padding-left: var(--ui-list-child-item-padding-left);
+    --ui-list-item-last-padding-bottom: var(--ui-list-child-item-edge-padding);
+    --ui-list-item-last-padding-right: var(--ui-list-child-item-padding-right);
+    --ui-list-item-margin: 0 var(--ui-list-child-item-margin-inline);
+    --ui-list-item-first-margin-left: var(--ui-list-child-item-margin-inline);
+    --ui-list-item-last-margin-right: var(--ui-list-child-item-margin-inline);
+    --ui-list-item-border-width: 0;
+    --ui-list-item-first-border-top: 0;
+    --ui-list-item-last-border-right: 0;
+    --ui-list-item-last-border-bottom: 0;
+    --ui-list-marker-margin: var(--ui-list-child-marker-margin);
+    --ui-list-first-marker-display: initial;
+    --ui-list-icon-display: table-cell;
+    --ui-list-icon-slot-display: table-cell;
+    --ui-list-icon-padding: 0 0.28571429em 0 0;
+    --ui-list-image-display: table-cell;
+    display: block;
+    clear: both;
+    margin: var(--ui-list-sublist-margin);
+    padding: var(--ui-list-sublist-padding);
+    counter-reset: var(--ui-list-counter-reset);
+    list-style: none;
+  }
+  /* A sub-list inside an item's content block starts at the content's edge. */
+  @container style(--ui-part: content) {
+    :host(:state(in-list)) > .list,
+    .ui.list .list:not(.ui) {
+      margin-left: var(--ui-list-sublist-content-margin-left, 0);
+      padding-left: var(--ui-list-sublist-content-padding-left, 0);
+    }
+  }
+
+  /*******************************
+               Items
+  *******************************/
+
+  /* Item:  a block (`list-item`) of the list, its first / last lose their outer padding. */
+  :host(:state(in-list)) > .item,
+  :is(.ui.list, .ui.list .list) > .item {
+    --ui-part: item;
+    /* Owner side:  a slotted `<ui-icon>` is a table cell beside the content, like Fomantic's `> .item > i.icon`. */
+    --ui-icon-owner-display: var(--ui-list-icon-display);
+    --ui-icon-owner-margin: 0 0.28571429em 0 0;
+    --ui-icon-owner-align: var(--ui-list-align);
+    --ui-icon-owner-size: initial;
+    --ui-icon-owner-opacity: initial;
+    position: relative;
+    display: var(--ui-list-item-display);
+    box-sizing: border-box;
+    width: var(--ui-list-item-width);
+    margin: var(--ui-list-item-margin);
+    padding: var(--ui-list-item-padding-block) var(--ui-list-item-padding-right) var(--ui-list-item-padding-block)
+      var(--ui-list-item-padding-left);
+    border: 0 solid var(--ui-list-item-border-color);
+    border-width: var(--ui-list-item-border-width);
+    border-radius: var(--ui-list-item-radius);
+    background: transparent;
+    color: var(--ui-list-item-color, inherit);
+    font-size: var(--ui-list-item-font-size, inherit);
+    line-height: var(--ui-list-item-line-height, inherit);
+    list-style: none;
+    table-layout: fixed;
+    transition: var(--ui-list-item-transition);
+  }
+  :host(:state(in-list):first-child) > .item,
+  :is(.ui.list, .ui.list .list) > .item:first-child {
+    margin-left: var(--ui-list-item-first-margin-left);
+    padding-top: var(--ui-list-item-first-padding-top);
+    padding-left: var(--ui-list-item-first-padding-left);
+    border-top-width: var(--ui-list-item-first-border-top);
+  }
+  :host(:state(in-list):last-child) > .item,
+  :is(.ui.list, .ui.list .list) > .item:last-child {
+    margin-right: var(--ui-list-item-last-margin-right);
+    padding-right: var(--ui-list-item-last-padding-right);
+    padding-bottom: var(--ui-list-item-last-padding-bottom);
+    border-right-width: var(--ui-list-item-last-border-right);
+    border-bottom-width: var(--ui-list-item-last-border-bottom);
+  }
+  /* Clear floated content. */
+  :host(:state(in-list)) > .item::after,
+  :is(.ui.list, .ui.list .list) > .item::after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+  }
+  /* Slotted parts (content, header, a sub-list) reset the icon owner tokens:  icons inside them stay inline. */
+  :host(:state(in-list)) > .item > slot::slotted(:state(in-list)) {
+    --ui-icon-owner-display: initial;
+    --ui-icon-owner-margin: initial;
+    --ui-icon-owner-align: initial;
+  }
+
+  /* Marker:  a bullet or a number in the item's `::before`, hung outside its start edge. */
+  :host(:state(in-list)) > .item::before,
+  :is(.ui.list, .ui.list .list) > .item::before {
+    content: var(--ui-list-marker-content);
+    position: var(--ui-list-marker-position);
+    top: auto;
+    left: auto;
+    margin: var(--ui-list-marker-margin);
+    color: var(--ui-list-marker-color, inherit);
+    font-weight: var(--ui-font-weight-normal);
+    text-align: right;
+    vertical-align: var(--ui-list-marker-align);
+    opacity: var(--ui-list-marker-opacity);
+    counter-increment: var(--ui-list-counter-increment);
+    pointer-events: none;
+    user-select: none;
+  }
+  :host(:state(in-list)) > :is(a, button).item::before,
+  :is(.ui.list, .ui.list .list) > a.item::before {
+    color: var(--ui-list-marker-color, var(--ui-text-color));
+  }
+  :host(:state(in-list):first-child) > .item::before,
+  :is(.ui.list, .ui.list .list) > .item:first-child::before {
+    display: var(--ui-list-first-marker-display, inline);
+  }
+
+  /*******************************
+            Icon and image
+  *******************************/
+
+  /* Icon:  the item's `icon` box (static:  an `.icon` child), a table cell beside the content. */
+  :host(:state(in-list)) > .item > .icon,
+  :is(.ui.list, .ui.list .list) > .item > .icon {
+    /* A `slot="icon"` `<ui-icon>` fills the box. */
+    --ui-icon-owner-display: inline-flex;
+    --ui-icon-owner-margin: 0;
+    display: var(--ui-list-icon-display);
+    min-width: var(--ui-list-icon-min-width);
+    margin: 0;
+    padding: var(--ui-list-icon-padding);
+    line-height: 1;
+    text-align: center;
+    vertical-align: var(--ui-list-align);
+    transition: color var(--ui-duration-fast) var(--ui-ease);
+  }
+
+  /* Whatever follows the icon box (text, a content block) is the next cell of the same row:  Fomantic's
+     `i.icon:only-child` escape (inline text beside a lone icon) can't be seen from a shadow root. */
+  :host(:state(in-list)) > .item > .icon + slot {
+    display: var(--ui-list-icon-slot-display);
+    width: 100%;
+    vertical-align: var(--ui-list-align);
+  }
+
+  /* Image:  a table cell;  an `<img>` itself (the `image` shorthand, Fomantic's `img.image`) is an inline block. */
+  :host(:state(in-list)) > .item > .image,
+  :is(.ui.list, .ui.list .list) > .item > .image {
+    display: var(--ui-list-image-display);
+    margin: 0;
+    background-color: transparent;
+    vertical-align: var(--ui-list-align);
+  }
+  :is(.ui.list, .ui.list .list) > .item > .image:not(img, :only-child) {
+    padding-right: var(--ui-list-image-distance);
+  }
+  :host(:state(in-list)) > .item > img.image,
+  :is(.ui.list, .ui.list .list) > .item > img.image,
+  :host(:state(in-list)) > .item > slot::slotted(img) {
+    display: inline-block;
+    vertical-align: var(--ui-list-align);
+  }
+  /* The content beside an `<img>` is an inline block too (`parts.css`, `--ui-item-media: image`). */
+  :host(:state(in-list)) > .item:has(> img.image) {
+    --ui-item-media: image;
+  }
+  /* The `image` shorthand is an avatar:  `image.css` isn't adopted in an item's shadow root. */
+  :host(:state(in-list)) > .item > img.avatar.image,
+  :is(.ui.list, .ui.list .list) > .item > img.avatar.image {
+    width: 2em;
+    height: 2em;
+    margin: 0 0.25em 0 0;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  /* Floated content (static markup:  `right floated content`). */
+  :is(.ui.list, .ui.list .list) > .item [class*="left floated"] {
+    float: left;
+    margin: 0 1em 0 0;
+  }
+  :is(.ui.list, .ui.list .list) > .item [class*="right floated"] {
+    float: right;
+    margin: 0 0 0 1em;
+  }
+}
+
+/*******************************
+            Content
+*******************************/
+
+@layer ui.components.list.content {
+  /* Link items:  an `<a>` / `<button>` item (static:  `a.item`, a selection list's items). */
+  :host(:state(in-list)) > :is(a, button).item,
+  :is(.ui.list, .ui.list .list) > a.item,
+  :is(.ui.selection.list, .ui.selection.list .list) > .item {
+    color: var(--ui-list-link-color);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  :host(:state(in-list)) > :is(a, button).item:hover,
+  :is(.ui.list, .ui.list .list) > a.item:hover,
+  :is(.ui.selection.list, .ui.selection.list .list) > .item:hover {
+    background: var(--ui-list-item-hover-background);
+    color: var(--ui-list-link-hover-color);
+  }
+  :host(:state(in-list)) > :is(a, button).item:active,
+  :is(.ui.list, .ui.list .list) > a.item:active,
+  :is(.ui.selection.list, .ui.selection.list .list) > .item:active {
+    background: var(--ui-list-item-down-background);
+    color: var(--ui-list-link-down-color);
+  }
+  :host(:state(in-list)) > :is(a, button).item:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: calc(-1 * var(--ui-focus-width));
+  }
+  /* A link item's icon is dimmer than its text. */
+  :host(:state(in-list)) > :is(a, button).item > .icon,
+  :is(.ui.list, .ui.list .list) > a.item > .icon {
+    color: var(--ui-list-link-icon-color, inherit);
+  }
+
+  /* Links inside an item:  slotted `<a>`s, and any in static markup. */
+  :host(:state(in-list)) > .item > slot::slotted(a:not(.ui)),
+  :is(.ui.list, .ui.list .list) > .item a:not(.ui) {
+    color: var(--ui-list-anchor-color);
+    cursor: pointer;
+  }
+  :host(:state(in-list)) > .item > slot::slotted(a:not(.ui):hover),
+  :is(.ui.list, .ui.list .list) > .item a:not(.ui):hover {
+    color: var(--ui-list-anchor-hover-color);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :host(:state(in-list)) > .item,
+    :is(.ui.list, .ui.list .list) > .item {
+      transition: none;
+    }
+  }
+}
+
+/*******************************
+           Variations
+*******************************/
+
+@layer ui.components.list.variations {
+  /* Horizontal:  items in a row;  the root's `font-size: 0` swallows the whitespace between them. */
+  .ui.horizontal.list {
+    --ui-list-layout: horizontal;
+    --ui-list-align: middle;
+    --ui-list-item-display: inline-block;
+    --ui-list-item-width: auto;
+    --ui-list-item-font-size: var(--ui-list-font-size);
+    --ui-list-item-margin: 0 1em 0 0;
+    --ui-list-item-last-margin-right: 0;
+    --ui-list-item-first-padding-top: 0.21428571em;
+    --ui-list-item-last-padding-bottom: 0.21428571em;
+    --ui-list-item-last-padding-right: 0;
+    --ui-list-icon-display: inline-block;
+    --ui-list-icon-slot-display: contents;
+    --ui-list-icon-padding: 0 0.25em 0 0;
+    --ui-list-image-display: inline-block;
+    --ui-list-sublist-padding: 0.75em 0 0;
+    display: inline-block;
+    font-size: 0;
+  }
+
+  /* Bulleted:  a bullet hung before each item. */
+  .ui.bulleted.list {
+    --ui-list-marker: bullet;
+    --ui-list-marker-content: "\2022";
+    --ui-list-marker-margin: 0 0 0 -1.25em;
+    --ui-list-child-marker-margin: 0 0 0 -1.25em;
+    --ui-list-sublist-padding: 0.75em 0 0.25em 1.25em;
+    --ui-list-sublist-content-padding-left: 1.25em;
+    margin-left: 1.25em;
+  }
+  .ui.horizontal.bulleted.list {
+    --ui-list-item-margin: 0 1em 0 1.75em;
+    --ui-list-item-first-margin-left: 0;
+    --ui-list-marker-color: var(--ui-text-color);
+    --ui-list-first-marker-display: none;
+    margin-left: 0;
+  }
+
+  /* Ordered:  CSS counters, `1.2` in sub-lists;  `suffixed` adds a dot. */
+  .ui.ordered.list {
+    --ui-list-marker: number;
+    --ui-list-marker-content: counters(ordered, ".") " ";
+    --ui-list-marker-margin: 0 0 0 -1.25em;
+    --ui-list-marker-color: var(--ui-text-color);
+    --ui-list-marker-opacity: 0.8;
+    --ui-list-marker-align: middle;
+    --ui-list-counter-increment: ordered;
+    --ui-list-counter-reset: ordered;
+    --ui-list-child-marker-margin: 0 0 0 -2em;
+    --ui-list-sublist-margin: 0 0 0 1em;
+    --ui-list-sublist-content-margin-left: 1em;
+    margin-left: 1.25em;
+    counter-reset: ordered;
+  }
+  .ui.suffixed.ordered.list {
+    --ui-list-marker-content: counters(ordered, ".") ".";
+  }
+  .ui.horizontal.ordered.list {
+    --ui-list-marker-position: static;
+    --ui-list-marker-margin: 0 0.5em 0 0;
+    margin-left: 0;
+  }
+  /* An item's `value` replaces its number (Fomantic's `data-value`). */
+  @container style(--ui-list-marker: number) {
+    :host(:state(in-list)) > .item[data-value]::before,
+    :is(.ui.list, .ui.list .list) > .item[data-value]::before {
+      content: attr(data-value);
+    }
+  }
+
+  /* Link:  items are links, muted until hovered;  the selected one strongest. */
+  .ui.link.list {
+    --ui-list-item-color: var(--ui-text-unselected);
+    --ui-list-item-active-color: var(--ui-text-selected);
+    --ui-list-item-transition: color var(--ui-duration-fast) var(--ui-ease);
+    --ui-list-link-color: var(--ui-text-unselected);
+    --ui-list-link-hover-color: var(--ui-text-hovered);
+    --ui-list-link-down-color: var(--ui-text-pressed);
+    --ui-list-link-active-color: var(--ui-text-selected);
+    --ui-list-anchor-color: var(--ui-text-unselected);
+    --ui-list-anchor-hover-color: var(--ui-text-hovered);
+  }
+
+  /* Selection:  items are choices with a hover background. */
+  .ui.selection.list {
+    --ui-list-item-padding-block: 0.5em;
+    --ui-list-item-padding-left: 0.5em;
+    --ui-list-item-padding-right: 0.5em;
+    --ui-list-item-first-padding-top: 0.5em;
+    --ui-list-item-first-padding-left: 0.5em;
+    --ui-list-item-last-padding-bottom: 0.5em;
+    --ui-list-item-last-padding-right: 0.5em;
+    --ui-list-item-radius: 0.5em;
+    --ui-list-item-transition:
+      color var(--ui-duration-fast) var(--ui-ease), padding-left var(--ui-duration-fast) var(--ui-ease),
+      background-color var(--ui-duration-fast) var(--ui-ease);
+    --ui-list-item-color: var(--ui-text-unselected);
+    --ui-list-item-active-color: var(--ui-text-selected);
+    --ui-list-item-hover-background: oklch(from var(--ui-ink) l c h / 0.05);
+    --ui-list-item-down-background: oklch(from var(--ui-ink) l c h / 0.1);
+    --ui-list-item-active-background: oklch(from var(--ui-ink) l c h / 0.1);
+    --ui-list-link-color: var(--ui-text-unselected);
+    --ui-list-link-hover-color: var(--ui-text-hovered);
+    --ui-list-link-down-color: var(--ui-text-pressed);
+    --ui-list-link-active-color: var(--ui-text-selected);
+    --ui-list-link-icon-color: initial;
+    --ui-list-child-item-padding-block: 0.5em;
+    --ui-list-child-item-padding-left: 0.5em;
+    --ui-list-child-item-padding-right: 0.5em;
+    --ui-list-child-item-edge-padding: 0.5em;
+  }
+
+  /* Animated:  items indent on hover (not in a row). */
+  .ui.animated.list:not(.horizontal) {
+    --ui-list-animated: 1;
+    --ui-list-item-transition:
+      color 0.25s var(--ui-ease) 0.1s, padding-left 0.25s var(--ui-ease) 0.1s,
+      background-color 0.25s var(--ui-ease) 0.1s;
+  }
+  @container style(--ui-list-animated: 1) {
+    :host(:state(in-list)) > .item:hover,
+    :is(.ui.list, .ui.list .list) > .item:hover {
+      padding-left: 1em;
+    }
+  }
+
+  /* Fitted:  no horizontal padding;  a selection list's backgrounds reach past its edges instead. */
+  .ui.fitted.list:not(.selection) {
+    --ui-list-item-padding-left: 0;
+    --ui-list-item-padding-right: 0;
+    --ui-list-item-first-padding-left: 0;
+    --ui-list-item-last-padding-right: 0;
+    --ui-list-child-item-padding-left: 0;
+    --ui-list-child-item-padding-right: 0;
+  }
+  .ui.fitted.selection.list {
+    --ui-list-item-margin: 0 -0.5em;
+    --ui-list-item-first-margin-left: -0.5em;
+    --ui-list-item-last-margin-right: -0.5em;
+    --ui-list-child-item-margin-inline: -0.5em;
+  }
+
+  /* Divided:  a rule between items. */
+  .ui.divided.list {
+    --ui-list-item-border-width: 1px 0 0;
+    --ui-list-item-first-border-top: 0;
+  }
+  .ui.divided.bulleted.list:not(.horizontal) {
+    --ui-list-item-padding-left: 1.25em;
+    --ui-list-item-first-padding-left: 1.25em;
+    --ui-list-sublist-padding: 0.75em 0 0.25em;
+    --ui-list-sublist-content-padding-left: 0;
+    margin-left: 0;
+  }
+  .ui.divided.ordered.list {
+    --ui-list-item-padding-left: 1.25em;
+    --ui-list-item-first-padding-left: 1.25em;
+    --ui-list-child-item-padding-left: 1em;
+    --ui-list-sublist-margin: 0;
+    --ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
+    --ui-list-sublist-content-margin-left: 0;
+    margin-left: 0;
+  }
+  .ui.divided.selection.list {
+    --ui-list-item-radius: 0;
+    --ui-list-item-margin: 0;
+  }
+  .ui.divided.horizontal.list {
+    --ui-list-item-border-width: 0 1px 0 0;
+    --ui-list-item-first-border-top: 0;
+    --ui-list-item-last-border-right: 0;
+    --ui-list-item-margin: 0;
+    --ui-list-item-first-margin-left: 0;
+    --ui-list-item-padding-left: 0.5em;
+    --ui-list-item-padding-right: 0.5em;
+    --ui-list-item-first-padding-left: 0.5em;
+    --ui-list-item-last-padding-right: 0;
+    --ui-list-item-line-height: 0.6;
+    margin-left: 0;
+  }
+
+  /* Celled:  a rule around every item. */
+  .ui.celled.list {
+    --ui-list-item-border-width: 1px 0 0;
+    --ui-list-item-first-border-top: 1px;
+    --ui-list-item-last-border-bottom: 1px;
+    --ui-list-item-padding-left: 0.5em;
+    --ui-list-item-padding-right: 0.5em;
+    --ui-list-item-first-padding-top: 0.21428571em;
+    --ui-list-item-first-padding-left: 0.5em;
+    --ui-list-item-last-padding-bottom: 0.21428571em;
+    --ui-list-item-last-padding-right: 0.5em;
+  }
+  .ui.celled.bulleted.list {
+    --ui-list-item-padding-left: 1.25em;
+    --ui-list-item-first-padding-left: 1.25em;
+    --ui-list-child-item-padding-left: 1.25em;
+    --ui-list-sublist-margin: 0 -1.25em;
+    --ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
+    margin-left: 0;
+  }
+  .ui.celled.ordered.list {
+    --ui-list-item-padding-left: 1.25em;
+    --ui-list-item-first-padding-left: 1.25em;
+    --ui-list-child-item-padding-left: 1em;
+    --ui-list-sublist-margin: 0;
+    --ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
+    --ui-list-sublist-content-margin-left: 0;
+    margin-left: 0;
+  }
+  .ui.celled.selection.list {
+    --ui-list-item-radius: 0;
+  }
+  .ui.horizontal.celled.list {
+    --ui-list-item-border-width: 0 0 0 1px;
+    --ui-list-item-first-border-top: 0;
+    --ui-list-item-last-border-right: 1px;
+    --ui-list-item-last-border-bottom: 0;
+    --ui-list-item-margin: 0;
+    --ui-list-item-first-margin-left: 0;
+    --ui-list-item-padding-left: 0.5em;
+    --ui-list-item-padding-right: 0.5em;
+    --ui-list-item-first-padding-left: 0.5em;
+    --ui-list-item-last-padding-right: 0.5em;
+    --ui-list-item-line-height: 0.6;
+    margin-left: 0;
+  }
+
+  /* Relaxed:  more space between items;  `very relaxed` more still. */
+  .ui.relaxed.list:not(.horizontal) {
+    --ui-list-item-padding-block: 0.42857143em;
+  }
+  .ui[class*="very relaxed"].list:not(.horizontal) {
+    --ui-list-item-padding-block: 0.85714286em;
+  }
+  .ui.horizontal.relaxed.list {
+    --ui-list-item-padding-left: 1em;
+    --ui-list-item-padding-right: 1em;
+    --ui-list-item-first-padding-left: 0;
+    --ui-list-item-last-padding-right: 0;
+  }
+  .ui.horizontal[class*="very relaxed"].list {
+    --ui-list-item-padding-left: 1.5em;
+    --ui-list-item-padding-right: 1.5em;
+  }
+
+  /* Inverted:  the dark scheme;  Fomantic's explicit inverted colours on top. */
+  .ui.inverted.list {
+    --ui-inverted: 1;
+    --ui-scheme: dark;
+    --ui-list-content-color: var(--ui-text-inverted-light);
+    --ui-list-header-color: var(--ui-text-inverted-color);
+    --ui-list-description-color: var(--ui-text-inverted-light);
+    --ui-list-link-icon-color: var(--ui-text-inverted-light);
+    --ui-list-anchor-color: var(--ui-text-inverted-color);
+    color-scheme: dark;
+  }
+  .ui.inverted.list:not(.link, .selection) {
+    --ui-list-link-color: var(--ui-text-inverted-color);
+    --ui-list-link-active-color: var(--ui-text-inverted-color);
+  }
+  .ui.inverted.ordered.list {
+    --ui-list-marker-color: var(--ui-text-inverted-light);
+  }
+  .ui.inverted.link.list {
+    --ui-list-anchor-color: var(--ui-text-inverted-unselected);
+    --ui-list-anchor-hover-color: var(--ui-text-inverted-hovered);
+  }
+
+  /* Aligned:  the icon, image and content of every item. */
+  .ui[class*="top aligned"].list {
+    --ui-list-align: top;
+  }
+  .ui[class*="middle aligned"].list {
+    --ui-list-align: middle;
+  }
+  .ui[class*="bottom aligned"].list {
+    --ui-list-align: bottom;
+  }
+
+  /* Floated. */
+  .ui[class*="left floated"].list {
+    float: left;
+  }
+  .ui[class*="right floated"].list {
+    float: right;
+  }
+}
+
+/*******************************
+             States
+*******************************/
+
+@layer ui.components.list.states {
+  /* Selected (`active`):  the current link, the chosen selection item. */
+  :host(:state(in-list)) > .active.item,
+  :is(.ui.list, .ui.list .list) > .active.item {
+    background: var(--ui-list-item-active-background);
+    color: var(--ui-list-item-active-color, inherit);
+  }
+  :host(:state(in-list)) > :is(a, button).active.item,
+  :is(.ui.list, .ui.list .list) > a.active.item,
+  :is(.ui.selection.list, .ui.selection.list .list) > .active.item {
+    color: var(--ui-list-link-active-color);
+  }
+
+  /* Hovered link item:  its icon brightens. */
+  :host(:state(in-list)) > :is(a, button).item:hover > .icon,
+  :is(.ui.list, .ui.list .list) > a.item:hover > .icon {
+    color: var(--ui-list-link-icon-hover-color, inherit);
+  }
+
+  /* Disabled:  greyed, not interactive. */
+  :host(:state(in-list)) > .disabled.item,
+  :is(.ui.list, .ui.list .list) > .disabled.item {
+    color: var(--ui-list-disabled-color);
+    pointer-events: none;
+  }
+}

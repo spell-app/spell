@@ -97,18 +97,23 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
     runtime on a button-only page would have pulled every family.
   - `rolldownOptions.preserveEntrySignatures: "allow-extension"`;  `button.css` + the button vocabulary land in a
     shared `button-<hash>.js` (the dropdown adopts `button.css`).
-  - `index.js` re-exports the element core as `E` and the vocabulary as `V` (`export * as`), which needs Rolldown's
-    `__exportAll` helper;  its runtime module (`__name`, `__exportAll`, 0.29 kB gzip) then becomes a shared
-    `rolldown-runtime-<hash>.js` that every chunk imports (one more request per page).  Without the namespaces it
-    stays inside `core.js`.  The measured build has no `index` entry, so the tables don't show it.
+  - The `E` / `V` namespaces are their own entry, `api` (`src/api.ts`, `@spell/ui/api`);  `index.js` is flat.
+    Namespacing a module that `core` also reaches (as `index.ts` once did with `export * as V from "$/vocabulary"`)
+    made Rolldown move its runtime module (`__name`, `__exportAll`) out of `core.js` into a shared
+    `rolldown-runtime-<hash>.js` that `core.js` and every family imported:  one more request per page (0.19 kB
+    min+gz).  So `V` namespaces an api-only re-export of the barrel (`vocabulary.api.ts`), and `api.ts` imports the
+    `forms` entry so the `forms` leaves stay in `forms.js`.  `core.js` keeps the helpers and exports `__exportAll`
+    to `api.js` (+0.06 kB min+gz).  A button-only page:  3 of our files instead of 4.  The check
+    `no Rolldown runtime chunk` guards it.
   - Icon glyphs are separate files (`dist/glyphs/<style>/<name>.js`, copied by `emitGlyphs()`), fetched by URL
     relative to the chunk holding `Icons` (`core.js`);  see `docs/icons.md`.
 - **Measuring** (`BundleMeasure`):  the repo's Vite config, built in memory with entries `core` + `forms` + one per
-  family (`vite:dts` and the glyph copy dropped);  every module is attributed to a bucket by id
-  (`tools/package.config.ts`):  `library`, `core`, `shared:forms`, `own:<family>:classes|css|vocabulary|fallback`,
-  lazy `runtime` / `icons`.  Each tier is minified (esbuild) and gzipped (level 9) ON ITS OWN;  a scenario sums, per
-  family, only the shared entries its chunk imports.  `library (as used)` bundles exactly the bindings `dist/`
-  imports from each peer specifier;  `library (full)` every export, for comparison.
+  family + `api` (it changes how `core.js` comes out;  `vite:dts` and the glyph copy dropped;  no `index` or
+  `styles`);  every module is attributed to a bucket by id (`tools/package.config.ts`):  `library`, `core`,
+  `shared:forms`, `own:<family>:classes|css|vocabulary|fallback`, `extra:api`, lazy `runtime` / `icons`.  Each tier
+  is minified (esbuild) and gzipped (level 9) ON ITS OWN;  a scenario sums, per family, only the shared entries its
+  chunk imports.  `library (as used)` bundles exactly the bindings `dist/` imports from each peer specifier;
+  `library (full)` every export, for comparison.
 - **Standalone** (for comparison):  each family built ALONE with Solid and the fork bundled and tree-shaken, eager
   chunks summed -- what an app bundling everything itself would ship.
 
@@ -117,12 +122,13 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 <!-- generated:bundle-tiers -->
 | Tier | min kB | min+gz kB | Loaded |
 | --- | --: | --: | --- |
-| library (as used:  the bindings `dist/` imports) | 73.73 | 26.66 | eager |
-| library (full:  every export of the peer set) | 171.57 | 59.87 | comparison |
-| core (element core + foundation JS) | 46.50 | 14.59 | eager |
-| forms (form base, validation, menu options;  imported by `dropdown`) | 17.73 | 6.36 | eager |
-| own, all 8 families | 290.65 | 71.11 | eager |
-| runtime (`UIRuntime` + foundation CSS) | 160.83 | 27.02 | lazy |
+| library (as used:  the bindings `dist/` imports) | 77.19 | 27.70 | eager |
+| library (full:  every export of the peer set) | 173.62 | 60.53 | comparison |
+| core (element core + foundation JS) | 47.28 | 14.94 | eager |
+| forms (form base, validation, menu options;  imported by `dropdown`, `input`, `checkbox`, `form`) | 20.27 | 7.32 | eager |
+| own, all 23 families | 686.47 | 177.41 | eager |
+| api (`E` / `V` namespaces, `@spell/ui/api`) | 0.70 | 0.31 | app only |
+| runtime (`UIRuntime` + foundation CSS) | 168.28 | 27.65 | lazy |
 | icons (name index + alias maps;  glyphs are separate files) | 70.64 | 20.50 | lazy |
 <!-- /generated:bundle-tiers -->
 
@@ -131,14 +137,29 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 <!-- generated:bundle-families -->
 | Family | own min+gz kB | classes | css | vocabulary | fallback | imports | page with only it | standalone (library bundled) |
 | --- | --: | --: | --: | --: | --: | --- | --: | --: |
-| `button` | **11.79** | 3.92 | 3.99 | 2.14 | 1.93 | core | 53.03 | 41.23 |
-| `dropdown` | **17.08** | 7.57 | 4.69 | 2.66 | 2.49 | core + forms | 64.68 | 59.53 |
-| `icon` | **5.72** | 2.20 | 1.83 | 1.25 | 1.58 | core | 46.96 | 35.92 |
-| `label` | **8.06** | 2.87 | 3.14 | 1.57 | 1.56 | core | 49.30 | 49.10 |
-| `parts` | **14.31** | 5.46 | 4.97 | 2.14 | 1.64 | core | 55.55 | 49.54 |
-| `divider` | **3.77** | 1.67 | 0.91 | 0.72 | 1.48 | core | 45.01 | 33.99 |
-| `segment` | **7.19** | 2.27 | 3.15 | 1.41 | 1.45 | core | 48.43 | 36.28 |
-| `container` | **3.20** | 1.45 | 0.77 | 0.56 | 1.40 | core | 44.45 | 32.05 |
+| `button` | **11.77** | 3.92 | 3.98 | 2.14 | 1.93 | core | 54.41 | 42.19 |
+| `dropdown` | **16.27** | 7.00 | 4.69 | 2.40 | 2.49 | core + forms | 66.23 | 65.48 |
+| `icon` | **5.72** | 2.20 | 1.83 | 1.25 | 1.58 | core | 48.35 | 36.92 |
+| `label` | **8.06** | 2.87 | 3.14 | 1.57 | 1.56 | core | 50.69 | 49.99 |
+| `parts` | **14.41** | 5.46 | 5.03 | 2.18 | 1.64 | core | 57.05 | 50.19 |
+| `divider` | **3.77** | 1.67 | 0.91 | 0.72 | 1.48 | core | 46.40 | 34.99 |
+| `segment` | **7.19** | 2.27 | 3.15 | 1.41 | 1.45 | core | 49.82 | 37.15 |
+| `container` | **3.20** | 1.45 | 0.77 | 0.56 | 1.40 | core | 45.84 | 32.89 |
+| `grid` | **7.78** | 2.44 | 3.26 | 1.51 | 1.44 | core | 50.42 | 38.52 |
+| `image` | **5.48** | 2.32 | 1.51 | 1.15 | 1.60 | core | 48.12 | 35.07 |
+| `text` | **2.70** | 1.47 | 0.38 | 0.43 | 1.40 | core | 45.34 | 32.39 |
+| `flag` | **6.05** | 1.87 | 0.54 | 2.92 | 1.64 | core | 48.69 | 36.92 |
+| `loader` | **4.21** | 1.65 | 1.23 | 0.75 | 1.54 | core | 46.85 | 34.05 |
+| `placeholder` | **5.82** | 3.31 | 1.27 | 0.83 | 1.57 | core | 48.46 | 35.56 |
+| `message` | **5.60** | 2.02 | 1.76 | 1.02 | 1.81 | core | 48.24 | 37.07 |
+| `breadcrumb` | **4.99** | 2.78 | 0.93 | 0.72 | 1.80 | core | 47.63 | 36.33 |
+| `input` | **10.11** | 4.61 | 2.63 | 1.88 | 2.22 | core + forms | 60.06 | 52.07 |
+| `checkbox` | **9.11** | 4.58 | 2.52 | 1.08 | 2.11 | core + forms | 59.06 | 44.83 |
+| `form` | **10.52** | 6.22 | 2.07 | 1.83 | 1.59 | core + forms | 60.47 | 47.74 |
+| `item` | **4.75** | 2.64 | 0.37 | 0.95 | 1.86 | core | 47.39 | 40.73 |
+| `list` | **6.75** | 2.03 | 3.05 | 0.92 | 1.65 | core | 49.38 | 45.97 |
+| `menu` | **9.78** | 2.83 | 4.10 | 1.39 | 1.62 | core | 52.42 | 48.60 |
+| `table` | **13.36** | 4.58 | 5.18 | 1.85 | 1.92 | core | 56.00 | 47.06 |
 <!-- /generated:bundle-families -->
 
 ### Scenarios
@@ -146,9 +167,9 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 <!-- generated:bundle-scenarios -->
 | Scenario | Adds up | shared runtime min+gz kB | standalone build |
 | --- | --- | --: | --: |
-| page with one button | library + core + own:button | **53.03** | 41.23 |
-| all families | library + core + forms + own (8 families) | **118.71** | 114.12 |
-| app already ships the library | core + forms + own (8 families) | **92.05** | -- |
+| page with one button | library + core + own:button | **54.41** | 42.19 |
+| all families | library + core + forms + own (23 families) | **227.36** | 224.97 |
+| app already ships the library | core + forms + own (23 families) | **199.67** | -- |
 <!-- /generated:bundle-scenarios -->
 
 ### Checks
@@ -157,6 +178,7 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | Check | Result |
 | --- | --- |
 | every family entry imports `core.js` | pass |
+| no Rolldown runtime chunk (`rolldown-runtime-<hash>.js`):  its helpers stay in `core.js` | pass |
 | no shared-entry module outside its own chunk (`core.js`, `forms.js` ...) | pass |
 | no Solid / fork module in `dist/` | pass |
 | runtime + icon data only in lazy chunks | pass |
@@ -189,12 +211,12 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 <!-- generated:loc -->
 | Group | Files | Lines | Code lines |
 | --- | --: | --: | --: |
-| element core | 23 | 3445 | 1967 |
-| components | 36 | 2199 | 1435 |
-| vocabularies & fallbacks | 24 | 2911 | 2394 |
-| foundation | 40 | 6225 | 3396 |
-| tests | 73 | 10460 | 8625 |
-| tooling | 38 | 3708 | 2653 |
+| element core | 24 | 3696 | 2123 |
+| components | 78 | 5233 | 3239 |
+| vocabularies & fallbacks | 46 | 4674 | 3762 |
+| foundation | 42 | 6659 | 3562 |
+| tests | 114 | 16745 | 13971 |
+| tooling | 38 | 3806 | 2730 |
 <!-- /generated:loc -->
 
 ### Per file
@@ -206,15 +228,16 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | `elements/Cell.ts` | 23 | 10 |
 | `elements/ClassBuilder.ts` | 184 | 121 |
 | `elements/ContentPart.tsx` | 85 | 48 |
+| `elements/ControlLabels.ts` | 223 | 144 |
 | `elements/Controlled.ts` | 86 | 41 |
 | `elements/ElementDefinition.ts` | 208 | 128 |
-| `elements/FormElement.ts` | 119 | 62 |
+| `elements/FormElement.ts` | 137 | 68 |
 | `elements/FormHost.ts` | 46 | 24 |
 | `elements/HostAttribute.ts` | 25 | 15 |
 | `elements/HotDefinitions.ts` | 124 | 74 |
 | `elements/IconGlyph.ts` | 49 | 28 |
 | `elements/MenuOptions.ts` | 303 | 191 |
-| `elements/NativeFallback.ts` | 198 | 110 |
+| `elements/NativeFallback.ts` | 205 | 114 |
 | `elements/OwnerContext.ts` | 84 | 46 |
 | `elements/PartContext.ts` | 175 | 96 |
 | `elements/Shorthand.ts` | 96 | 54 |
@@ -223,26 +246,58 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | `elements/UIHost.ts` | 74 | 30 |
 | `elements/Validator.ts` | 458 | 342 |
 | `elements/elements.types.ts` | 504 | 212 |
-| `elements/index.ts` | 36 | 20 |
-| `forms.ts` | 16 | 4 |
+| `elements/index.ts` | 37 | 21 |
+| `forms.ts` | 18 | 5 |
+| `components/breadcrumb/UIBreadcrumb.tsx` | 69 | 40 |
+| `components/breadcrumb/UIBreadcrumbSection.tsx` | 66 | 40 |
+| `components/breadcrumb/index.ts` | 13 | 5 |
 | `components/button/UIButton.tsx` | 244 | 169 |
 | `components/button/UIButtons.tsx` | 35 | 23 |
 | `components/button/UIOr.tsx` | 24 | 14 |
 | `components/button/index.ts` | 14 | 7 |
+| `components/checkbox/UICheckbox.tsx` | 53 | 28 |
+| `components/checkbox/UIRadio.tsx` | 148 | 93 |
+| `components/checkbox/index.ts` | 13 | 5 |
 | `components/container/UIContainer.tsx` | 27 | 17 |
 | `components/container/index.ts` | 10 | 3 |
 | `components/divider/UIDivider.tsx` | 58 | 33 |
 | `components/divider/index.ts` | 10 | 3 |
 | `components/dropdown/SlottedItems.ts` | 127 | 87 |
 | `components/dropdown/UIDropdown.tsx` | 825 | 606 |
-| `components/dropdown/UIItem.tsx` | 26 | 13 |
-| `components/dropdown/index.ts` | 13 | 5 |
-| `components/icon/UIIcon.tsx` | 81 | 46 |
+| `components/dropdown/index.ts` | 14 | 4 |
+| `components/flag/UIFlag.tsx` | 61 | 36 |
+| `components/flag/index.ts` | 12 | 4 |
+| `components/form/UIField.tsx` | 88 | 57 |
+| `components/form/UIFields.tsx` | 41 | 28 |
+| `components/form/UIForm.tsx` | 417 | 277 |
+| `components/form/UIFormHost.ts` | 53 | 32 |
+| `components/form/index.ts` | 16 | 7 |
+| `components/grid/UIColumn.ts` | 15 | 6 |
+| `components/grid/UIGrid.ts` | 15 | 6 |
+| `components/grid/UIRow.ts` | 13 | 6 |
+| `components/grid/index.ts` | 15 | 7 |
+| `components/icon/UIIcon.tsx` | 82 | 46 |
 | `components/icon/UIIcons.tsx` | 40 | 28 |
 | `components/icon/index.ts` | 12 | 5 |
+| `components/image/UIImage.tsx` | 68 | 45 |
+| `components/image/UIImages.tsx` | 29 | 18 |
+| `components/image/index.ts` | 13 | 5 |
+| `components/input/UIInput.tsx` | 225 | 147 |
+| `components/input/UITextarea.tsx` | 48 | 36 |
+| `components/input/index.ts` | 12 | 5 |
+| `components/item/UIItem.tsx` | 259 | 148 |
+| `components/item/index.ts` | 13 | 4 |
 | `components/label/UILabel.tsx` | 165 | 95 |
 | `components/label/UILabels.tsx` | 25 | 15 |
 | `components/label/index.ts` | 12 | 5 |
+| `components/list/UIList.tsx` | 169 | 89 |
+| `components/list/index.ts` | 13 | 4 |
+| `components/loader/UILoader.tsx` | 70 | 41 |
+| `components/loader/index.ts` | 10 | 3 |
+| `components/menu/UIMenu.tsx` | 294 | 179 |
+| `components/menu/index.ts` | 13 | 4 |
+| `components/message/UIMessage.tsx` | 109 | 60 |
+| `components/message/index.ts` | 10 | 3 |
 | `components/parts/PartElement.ts` | 13 | 5 |
 | `components/parts/UIActions.ts` | 14 | 6 |
 | `components/parts/UIAuthor.ts` | 25 | 15 |
@@ -258,9 +313,19 @@ all tree-shaken · `yarn measure` all checks pass · `yarn smoke` 8 / 8 pages ·
 | `components/parts/UITitle.ts` | 24 | 13 |
 | `components/parts/UIValue.ts` | 14 | 6 |
 | `components/parts/index.ts` | 48 | 41 |
+| `components/placeholder/UIPlaceholder.tsx` | 43 | 26 |
+| `components/placeholder/UIPlaceholderHeader.ts` | 13 | 6 |
+| `components/placeholder/UIPlaceholderImage.ts` | 17 | 9 |
+| `components/placeholder/UIPlaceholderLine.ts` | 18 | 9 |
+| `components/placeholder/UIPlaceholderParagraph.ts` | 12 | 6 |
+| `components/placeholder/index.ts` | 21 | 11 |
 | `components/segment/UISegment.tsx` | 70 | 46 |
 | `components/segment/UISegments.tsx` | 29 | 18 |
 | `components/segment/index.ts` | 13 | 5 |
+| `components/table/UITable.tsx` | 417 | 256 |
+| `components/table/index.ts` | 11 | 3 |
+| `components/text/UIText.tsx` | 33 | 21 |
+| `components/text/index.ts` | 10 | 3 |
 <!-- /generated:loc-files -->
 
 Counted by `LocCount` (non-blank, non-comment lines as "code").  The fork is not counted here:  693 code lines in
@@ -373,8 +438,8 @@ Solid, Vite dev server) and the smoke perf page (`dist/` + vendored production S
 <!-- generated:perf -->
 | Where | Build | Open: update / + layout / + frame ms | Keystroke update min / avg / max ms | + layout | + frame |
 | --- | --- | --: | --: | --: | --: |
-| vitest browser mode | dev (Vite dev server) | 17.9 / 17.9 / 19.2 | 0.4 / **1.8** / 4.7 | 1.0 / **3.7** / 9.4 | 13.1 / **15.7** / 16.2 |
-| smoke perf page | production (`dist/` + vendored peers) | 18.6 / 18.6 / 20.4 | 0.2 / **1.5** / 4.4 | 0.5 / **3.2** / 11.0 | 12.9 / **15.5** / 16.4 |
+| vitest browser mode | dev (Vite dev server) | 17.6 / 17.6 / 18.8 | 0.4 / **1.8** / 4.7 | 1.1 / **3.7** / 9.3 | 13.8 / **15.7** / 16.4 |
+| smoke perf page | production (`dist/` + vendored peers) | 16.6 / 16.6 / 18.2 | 0.3 / **1.4** / 4.0 | 0.8 / **3.1** / 10.1 | 14.6 / **15.8** / 16.4 |
 <!-- /generated:perf -->
 
 - The test asserts an average update under 16 ms;  it passes with large headroom.  No windowing needed.
@@ -460,9 +525,9 @@ other than esm.sh / unpkg are blocked.  Each host mounts ONE `<ui-dropdown>` wit
 - **ARIA:**  `aria-activedescendant` needs the listbox in the combobox's own shadow root, so rich `<ui-item>`
   content is PROJECTED into its row;  the combobox is named from `placeholder` (else `text`, else `name`);  a host
   `aria-label` is forwarded to the inner control.
-- **axe** passes on every element-markup example (`src/components/<name>/examples/elements/`, 39 files) with
-  `color-contrast` off (the class-grammar fragments fail it too), `heading-order` off for two pages of heading
-  demos;  and on every family's native fallback.
+- **axe** passes on every element-markup example (`src/components/<name>/examples/elements/`, 39 files),
+  `color-contrast` included (text inside a `.ui.disabled` element exempt, as WCAG exempts inactive components --
+  `test/a11y.ts`), with `heading-order` off for two pages of heading demos;  and on every family's native fallback.
 
 ## SSR / Declarative Shadow DOM
 
@@ -532,8 +597,9 @@ defines the element:  the fork ADOPTS the declarative root and empties it before
 ## Foundation bugs
 
 Open (from the spikes;  none changed by the promotion):
-1. **Palette contrast.**  White text fails WCAG 4.5:1 (`src/styles/`):  white on `--ui-positive` 2.87:1, primary
-   blue 4.28:1, red 4.38:1, an inverted basic button 2.17:1 (`CODE-DEBT.md`).
+1. ~~**Palette contrast.**~~  Fixed:  per-colour `--ui-<colour>-on` foregrounds picked by WCAG contrast at
+   generation time, darker red / green / blue / pink, `-text` capped at L 0.5 (`docs/theming.md`, "Contrast";
+   `src/styles/colors.contrast.test.ts`).
 2. `src/components/parts/parts.css`:  an in-feed `.date` outside a summary is a `<time>` with no `display`, so it
    stays inline (Fomantic's is a block).
 3. `src/components/segment/examples/variations.html`:  `ui top seamless attached segment` breaks the grammar

@@ -228,7 +228,8 @@
     --ui-color-focus: initial;
     --ui-color-down: initial;
     --ui-color-active: initial;
-    --ui-color-contrast: initial;
+    --ui-color-on: initial;
+    --ui-color-inverted-on: initial;
     --ui-scale: initial;
   }
 
@@ -516,7 +517,7 @@
   .ui.inverted.segment,
   .ui.inverted.segments > .ui.segment {
     --_segment-bg: var(--ui-color, var(--ui-segment-inverted-background));
-    --_segment-fg: var(--ui-color-contrast, var(--ui-segment-color));
+    --_segment-fg: var(--ui-color-on, var(--ui-segment-color));
     --_segment-accent: transparent;
     --_segment-accent-line: transparent;
     --_segment-border: none;

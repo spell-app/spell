@@ -466,7 +466,6 @@ describe("<ui-dropdown> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await ElementFixture.tick()
-    // `color-contrast` off:  the ORIGINAL class-grammar fragments fail it too (palette tokens) -- see `docs/report.md`
-    await expectAccessible(root, { rules: { "color-contrast": { enabled: false } } })
+    await expectAccessible(root)
   })
 })

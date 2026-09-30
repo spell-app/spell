@@ -3,8 +3,12 @@
  * One page per entry of the `components` collection (`src/content/components/<slug>.mdx`).
  * - The MDX body supplies the sections, in Fomantic's order:  Types, Content, States, Variations, then
  *   Usage (behaviour, events, slots, parts), Theming (tokens) and Accessibility.
- * - The API reference is appended here, from the custom-elements manifest, so every page gets it.
+ * - The manifest API reference is appended when `../custom-elements.json` exists (`yarn manifest`);  pages carry
+ *   their own generated `VocabularyTable` / `CssTokens` in the meantime, so no "coming soon" note on finished pages.
  */
+import { existsSync } from "node:fs"
+import { resolve } from "node:path"
+
 import { getCollection, render } from "astro:content"
 
 import ApiTable from "../../components/ApiTable.astro"
@@ -19,6 +23,7 @@ export async function getStaticPaths() {
 const { entry } = Astro.props
 const { Content } = await render(entry)
 const { title, summary, status, tag } = entry.data
+const hasManifest = existsSync(resolve(process.cwd(), "../custom-elements.json"))
 ---
 
 <Docs title={title} summary={summary} status={status} tag={tag}>
@@ -31,7 +36,9 @@ const { title, summary, status, tag } = entry.data
     )
   }
   <Content />
+  {hasManifest && (
   <Section title="API" description="Generated from the custom-elements manifest.">
     <ApiTable tag={tag} />
   </Section>
+  )}
 </Docs>

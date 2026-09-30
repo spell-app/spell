@@ -17,7 +17,8 @@ import iconCSS from "./icon.css?inline"
  * - `:state(in-icons)` when its flat-tree parent is a `<ui-icons>` (`PartContext`, direct mode):  `icon.css`
  *   stacks and positions it by that, since the group can't reach into its children's shadow roots.
  * - `variant` picks the set (`regular`, `brands`);  `outline` ~== `variant="regular"` (Fomantic's spelling).
- *   Without an explicit `variant` attribute the set is inferred from the name (`Icons.resolve()`), so the
+ *   Without an explicit `variant` attribute `Icons.get()` infers the set:  a trailing `outline` word means
+ *   `regular`, otherwise it tries the solid glyph first and falls back to `brands`, then `regular`.  So the
  *   vocabulary's `solid` default never overrides a brand name or a trailing `outline` word.
  ****************/
 export class UIIcon extends UIElement<typeof iconVocabulary> {

@@ -71,6 +71,7 @@ with `success` / `error` as aliases):
 | `--ui-red-hover / -focus / -down / -active` | states (darken + saturate;  `black` lightens) | `@redHover` ... |
 | `--ui-red-text / -header / -border / -background` | roles, per scheme | `@redTextColor` ... |
 | `--ui-red-inverted` | the colour on dark surfaces, whatever the scheme | `@lightRed` |
+| `--ui-red-on` / `--ui-red-inverted-on` | text ON the solid colour (white or ink), per scheme | `@white` |
 
 Neutrals:  `--ui-background`, `--ui-surface`, `--ui-surface-muted`, `--ui-surface-strong`, `--ui-highlight`,
 `--ui-ink`, `--ui-text-color` / `--ui-text-{dark,muted,light,unselected,hovered,pressed,selected,disabled}`
@@ -86,16 +87,16 @@ Component CSS never names a hue.  A colour class re-points the GENERIC tokens, a
 .ui.red, .ui-red {
   --ui-color: var(--ui-red);
   --ui-color-text: var(--ui-red-text);
-  /* ... -header, -border, -background, -inverted */
+  --ui-color-on: var(--ui-red-on);
+  /* ... -header, -border, -background, -inverted, -inverted-on */
 }
-/* generated once for every colour:  states + contrast derive from --ui-color on the same element */
+/* generated once for every colour:  states derive from --ui-color on the same element */
 .ui.red, .ui-red, .ui.orange, /* ... */ {
   --ui-color-hover: oklch(from var(--ui-color) calc(l - 0.05) calc(c * 1.1) h);
-  --ui-color-contrast: oklch(from var(--ui-color) clamp(0, (0.72 - l) * 1000, 1) 0 0);
 }
 
 /* component CSS (e.g. button.css) */
-.ui.button { background: var(--ui-color, var(--ui-button-background)); color: var(--ui-color-contrast, inherit); }
+.ui.button { background: var(--ui-color, var(--ui-button-background)); color: var(--ui-color-on, inherit); }
 .ui.button:hover { background: var(--ui-color-hover, var(--ui-button-hover-background)); }
 ```
 
@@ -107,6 +108,22 @@ Component CSS never names a hue.  A colour class re-points the GENERIC tokens, a
   the `ui-<hue>` utility).  A component that must not inherit a parent's colour resets it on its own `:host`.
 - `data-variation="red small"` (tooltips / popups) sets `--ui-variation-color` / `--ui-variation-scale`
   instead, so a coloured tooltip never recolours the element it hangs off.
+
+### Contrast
+
+Text on a solid colour is `--ui-<colour>-on`:  white or ink (`--ui-ink-on-light`), chosen by `StyleGenerator` at
+generation time as the first of `onColors` (white first) that reaches WCAG AA 4.5:1 on the colour AND its hover /
+focus / down / active states, separately for the light and dark scheme (`ColorContrast`, clipped to sRGB as axe
+does).  `contrast-color()` would do it in CSS, but is Chromium-only.
+
+- Light scheme:  white on red, green, blue, violet, purple, pink, brown, grey, black;  ink on orange, yellow,
+  olive, teal, info, warning.  Dark scheme (lighter `onDark` hues):  ink on everything but black.
+- `--ui-<colour>-inverted-on` is the dark-scheme pick, for the `-inverted` colour used whatever the scheme.
+- `-text` roles reach 4.5:1 on `--ui-background` in both schemes, hue `-border`s 3:1 (UI boundaries).
+- `colors.contrast.test.ts` measures every pair from the COMPUTED tokens, so a vocabulary change that breaks
+  contrast fails a test, naming the colour.
+- A theme that changes a base (`--ui-red-on-light`) should re-check its `-on`:  it's data, not derived.  The
+  classic theme keeps Fomantic's palette, and with it Fomantic's contrast failures.
 
 ## The app stylesheet (`#ui-app-stylesheet`)
 
@@ -158,13 +175,14 @@ Per region -- tokens inherit, so override them on a wrapper:
 Per instance -- set the generic tokens on an UNCOLOURED component;  they inherit into its shadow:
 
 ```html
-<ui-button style="--ui-color: hotpink; --ui-color-hover: deeppink; --ui-color-contrast: white">Hot</ui-button>
+<ui-button style="--ui-color: hotpink; --ui-color-hover: deeppink; --ui-color-on: black">Hot</ui-button>
 ```
 
 - Don't combine it with `color="..."`:  the inner `.ui.red` element's remap re-declares `--ui-color`,
   which beats the inherited value.
 - Derived states only come for free where a remap runs (they're derived from `--ui-color` on the element with
-  the colour class), so set the ones you need.
+  the colour class), so set the ones you need.  `--ui-color-on` is never derived (see "Contrast"):  set it
+  whenever you set `--ui-color`.
 
 NOTE: re-pointing a BASE on an intermediate element (`.card { --ui-red: hotpink }`) changes `--ui-red` below it,
 but not the derived `--ui-red-hover` / `-text` (custom properties substitute `var()` where they're declared,

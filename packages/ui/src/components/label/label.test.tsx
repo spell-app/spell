@@ -191,6 +191,6 @@ describe("<ui-labels>", () => {
 describe("<ui-label> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
-    await expectAccessible(root, { rules: { "color-contrast": { enabled: false } } })
+    await expectAccessible(root)
   })
 })

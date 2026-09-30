@@ -3,7 +3,7 @@
  * `<ui-actions>`, `<ui-title>`, `<ui-summary>`, `<ui-date>`, `<ui-author>`, `<ui-avatar>`, `<ui-detail>`,
  * `<ui-value>` -- plus the standalone page / content header:  port of Fomantic's `header.less` +
  * `header.variables`, and of the PART rules in the owners' definitions (card, item, feed, comment, modal,
- * message, list, statistic, step, accordion, popup, toast, search, label).  The owners' own boxes land later,
+ * message, list, menu, statistic, step, accordion, popup, toast, search, label).  The owners' own boxes land later,
  * in their own folders.
  * - ONE sheet, adopted by every part element after the foundation.
  * - Shadow markup contract:  `<div class="<noun> [keyOnly ...]" part="<noun>"><slot></slot></div>`, except
@@ -58,6 +58,10 @@
  * | `--ui-modal-header-size` | a length                        | modal sizes                        | header font size                                  |
  * | `--ui-message-layout`    | `block` / `icon`                | message `icon`                     | content (flex item beside the icon)               |
  * | `--ui-list-layout`       | `vertical` / `horizontal`       | list `horizontal`                  | content after an icon / image                     |
+ * | `--ui-item-media`        | `0` / `1` / `image`             | a list / menu item with an icon or | content:  a table cell beside it (`image`:  an    |
+ * |                          |                                 | image box (`item.css`;  `image`:   | inline block beside the `<img>`)                  |
+ * |                          |                                 | `list.css`)                        |                                                   |
+ * | `--ui-list-align`        | `top` / `middle` / `bottom`     | list `vertical-align`, horizontal  | content's vertical alignment                      |
  * | `--ui-statistic-layout`  | `vertical` / `horizontal`       | statistic(s) `horizontal`          | value, label                                      |
  * | `--ui-statistic-value-size` | a length                     | statistic sizes                    | value font size (text values:  `-text-value-size`) |
  * | `--ui-step-state`        | `normal` / `active` / `disabled` | step states                       | title, description colours                        |
@@ -630,7 +634,8 @@
   }
   :host(:state(in-feed)) > .meta > ::slotted(a),
   .in-feed.meta > a {
-    color: var(--ui-feed-meta-action-color, oklch(from var(--ui-ink) l c h / 0.5));
+    /* `text-light`, not Fomantic's 0.5 alpha (3.7:1 on white) */
+    color: var(--ui-feed-meta-action-color, var(--ui-text-light));
     cursor: pointer;
     transition: color var(--ui-duration-fast) var(--ui-ease);
   }
@@ -853,7 +858,12 @@
     display: table-cell;
     width: 100%;
     padding: 0 0 0 var(--ui-list-content-distance, 0.5em);
-    vertical-align: top;
+    vertical-align: var(--ui-list-align, top);
+  }
+  /* Static markup:  beside an `<img>` (Fomantic's `img.image + .content`), an inline block. */
+  img.image + .in-list.content {
+    display: inline-block;
+    width: auto;
   }
   :host(:state(in-list)) > .header,
   .in-list.header {
@@ -876,6 +886,16 @@
   .in-list.description {
     display: block;
     color: var(--ui-list-description-color, oklch(from var(--ui-ink) l c h / 0.7));
+  }
+
+  /* ## in-menu:  an item's sub header, `.ui.vertical.menu .item > .header:not(.ui)` (menu header ITEMS are
+     `<ui-item type="header">`). */
+  :host(:state(in-menu)) > .header,
+  .in-menu.header {
+    display: block;
+    margin: 0 0 0.5em;
+    font-size: 1em;
+    font-weight: var(--ui-font-weight-bold);
   }
 
   /* ## in-statistic:  `.ui.statistic > .value / .label`. */
@@ -1017,7 +1037,7 @@
     display: inline-block;
     margin-inline-start: var(--ui-label-detail-distance, 1em);
     font-weight: var(--ui-label-detail-weight, var(--ui-font-weight-bold));
-    opacity: var(--ui-label-detail-opacity, 0.8);
+    opacity: var(--ui-label-detail-opacity, 1);
     vertical-align: top;
   }
 }
@@ -1227,6 +1247,27 @@
     }
   }
 
+  /* List item showing an icon / image box of its own (`<ui-item icon>`, `item.css`):  the content is the table
+     cell beside it, as after a slotted icon. */
+  @container style(--ui-item-media: 1) {
+    :host(:state(in-list)) > .content {
+      display: table-cell;
+      width: 100%;
+      padding: 0 0 0 var(--ui-list-content-distance, 0.5em);
+      vertical-align: var(--ui-list-align, top);
+    }
+  }
+  /* ... beside the `image` shorthand's `<img>` (`list.css` sets `image`):  an inline block, Fomantic's
+     `img.image + .content`. */
+  @container style(--ui-item-media: image) {
+    :host(:state(in-list)) > .content {
+      display: inline-block;
+      width: auto;
+      padding: 0 0 0 var(--ui-list-content-distance, 0.5em);
+      vertical-align: var(--ui-list-align, top);
+    }
+  }
+
   /* Horizontal list:  content inline, centred on the icon. */
   @container style(--ui-list-layout: horizontal) {
     :host(:state(in-list)) > .content,
@@ -1235,7 +1276,7 @@
     .in-list.content:not(:first-child) {
       display: inline-block;
       width: auto;
-      vertical-align: middle;
+      vertical-align: var(--ui-list-align, middle);
     }
   }
 
