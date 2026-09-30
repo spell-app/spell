@@ -197,9 +197,10 @@ describe("dropdown.css in a shadow root", () => {
   })
 
   it('sizes a fallback icon inside the caret\'s <slot name="icon"> to the icon box, not the caret block', () => {
-    // Regression for the slot-fallback-vs-child-selector bug (REPORT.md "(j)" item 1):  the svg is FALLBACK
-    // content of `<slot name="icon">`, one level deeper than `.dropdown.icon`'s own children, so a `>`
-    // selector (the old rule) would leave it unstyled and it'd render at the browser's default SVG size.
+    // Regression for the slot-fallback-vs-child-selector bug (the Lit spike report's "(j)" item 1, tag
+    // `archive/lit-spike`):  the svg is FALLBACK content of `<slot name="icon">`, one level deeper than
+    // `.dropdown.icon`'s own children, so a `>` selector (the old rule) would leave it unstyled and it'd render at
+    // the browser's default SVG size.
     adoptIntoPage(foundationCSS)
     const host = Fixture.render(`<span></span>`)
     const shadow = host.attachShadow({ mode: "open" })

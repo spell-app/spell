@@ -7,14 +7,14 @@ summary: A dropdown allows a user to select a value from a series of options.
 
 import Example from "../../components/Example.astro"
 import Section from "../../components/Section.astro"
-// PLACEHOLDER until `ui-dropdown` lands in `src/components/dropdown/`;  the component agent replaces this page
-// (recipe:  `site/README.md`).  Examples use the TARGET markup, so they render as plain text until then.
+// First pass:  a live `ui-dropdown` (loaded by `src/scripts/components.ts`);  the full page follows the recipe in
+// `site/README.md`.
 
 <Section title="Types">
   <Example title="Selection" description="A dropdown can be used to select between choices in a form.">
     <ui-dropdown selection placeholder="Gender">
-      <ui-option value="1">Male</ui-option>
-      <ui-option value="0">Female</ui-option>
+      <ui-item value="1">Male</ui-item>
+      <ui-item value="0">Female</ui-item>
     </ui-dropdown>
   </Example>
 </Section>

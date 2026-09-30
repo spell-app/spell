@@ -14,12 +14,16 @@
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
     "types": ["vite/client"],
     "paths": {
       "$/*": ["./src/*"],
       "$test/*": ["./test/*"]
     }
   },
-  "include": ["src", "test"],
-  "exclude": ["spike", "site", "node_modules", "dist"]
+  "include": ["src", "test", "tools"],
+  // `packages/` are their own projects (own `tsconfig.json`, `yarn fork tsc`);  files the root imports from them
+  // are still checked here
+  "exclude": ["site", "packages", "node_modules", "dist", "vendor", "tools/frameworks/solid/dist"]
 }

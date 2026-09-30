@@ -13,14 +13,17 @@
 
   // Mirrors `.oxfmtrc.json` -- vendored, generated and scratch trees.
   "ignorePatterns": [
-    "spike/**",
     "build",
     "dist",
+    "vendor",
     ".cache",
     ".yarn",
+    ".vitest",
     "reference",
     "site/dist",
-    "spike/*/dist",
+    "packages/*/dist",
+    "tools/frameworks/solid/dist",
+    "tools/results",
     "coverage"
   ],
 

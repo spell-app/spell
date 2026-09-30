@@ -1,13 +1,13 @@
 # Icon data pipeline
 
 `src/icons/` is the DATA layer for icons:  Font Awesome 7 Free's icon paths, plus enough alias vocabulary
-that Fomantic's names (`setting`, `sign in`, `mail outline`, ...) keep working. It has no UI of its own --
+that Fomantic's names (`setting`, `sign in`, `mail outline`, ...) keep working.  It has no UI of its own --
 `ui-icon` (`src/components/icon/`, not built yet per `docs/plan.md`) will be the component that calls it.
 
 ## Regenerating
 
 ```sh
-yarn tsx scripts/gen-icons.ts
+yarn gen:icons
 ```
 
 `IconGenerator` (`scripts/gen-icons.ts`) does three things:
@@ -17,140 +17,141 @@ yarn tsx scripts/gen-icons.ts
    third-party, and not ours to commit.
 2. Reads (never writes) `reference/Fomantic-UI/src/themes/default/elements/icon.variables`, the read-only
    Fomantic clone's LESS source for its `@icon-map` family, to derive Fomantic's alias vocabulary.
-3. Writes every file under `src/icons/data/` as compact (no whitespace) JSON -- generated data, so no
-   header comment; this file is the regeneration record instead. It also writes `src/icons/data/index.ts`,
-   a tiny (one arrow per chunk) TypeScript map from chunk name to `() => import("./<chunk>.json")` --
-   `Icons.#loadChunk()` routes through it instead of a template-string `import()`, see "Alias maps are lazy
-   too, and chunk loading no longer globs `data/`" below.
+3. Writes, after deleting `src/icons/glyphs/` (so a dropped icon doesn't linger):
+   - `src/icons/glyphs/<style>/<name>.js`:  one ES module per free icon, `export default [width, height, "path"]`
+   - `src/icons/data/{aliases,fomantic-aliases,fomantic-clashes,names,search}.json`:  compact JSON, no header
+     (comments aren't valid JSON;  this file is the regeneration record)
 
 Re-run it whenever Font Awesome ships new icons, or the Fomantic reference clone updates its icon variables.
 
+**Generated files are COMMITTED**, like the JSON before them:  installs and CI need no network, and a diff shows
+exactly which icons a Font Awesome upgrade added or redrew.  `.oxfmtrc.json` ignores `src/icons/data/**` and
+`src/icons/glyphs/**`, so `yarn review` never reformats them.
+
 ## Output files and sizes
 
-Sizes below are what ships:  `.oxfmtrc.json` ignores `src/icons/data/`, so the compact JSON
-`gen-icons.ts` writes is final.  Measured at Font Awesome 7.3.1.
+Measured at Font Awesome 7.3.1.
 
-| File | Bytes | Loaded |
-| --- | ---: | --- |
-| `solid.json` (index: name -> chunk) | 37,535 | lazy, dynamic `import()` |
-| `solid-0-b.json` .. `solid-w-z.json` (16 chunks) | 8.0–50.8 KB each | lazy, one chunk per lookup, via `CHUNK_LOADERS` |
-| `regular.json` | 103,625 | lazy, via `CHUNK_LOADERS` |
-| `brands.json` | 560,557 | lazy, via `CHUNK_LOADERS` |
-| `aliases.json` (FA7's own aliases) | 18,383 | lazy, `Icons.#loadAliases()` |
-| `fomantic-aliases.json` | 20,747 | lazy, `Icons.#loadAliases()` |
-| `fomantic-clashes.json` (opt-in, see "Clashes") | 633 | lazy, `Icons.#loadAliases()` |
-| `search.json` (docs site only) | 96,204 | lazy, docs site only |
-| `index.ts` (chunk name -> loader, generated) | ~1.2 KB | eager (it's code, not data -- see below) |
+| Files | Count | Raw | Gzip | Loaded |
+| --- | ---: | ---: | ---: | --- |
+| `glyphs/solid/*.js` | 1,422 | 768 KB | - | lazy, one `import()` per icon drawn |
+| `glyphs/regular/*.js` | 169 | 101 KB | - | same |
+| `glyphs/brands/*.js` | 572 | 549 KB | - | same |
+| **all glyphs** | **2,163** | **1,418 KB** (8.7 MB allocated on disk) | 478 KB as one stream, 770 KB per-file | |
+| `data/names.json` (`{ solid, regular, brands }` name lists) | 1 | 28.6 KB | 9.2 KB | lazy, `Icons.#loadNames()` |
+| `data/aliases.json` (FA7's own aliases) | 1 | 18.0 KB | 7.6 KB | lazy, `Icons.#loadAliases()` |
+| `data/fomantic-aliases.json` | 1 | 20.3 KB | 9.5 KB | lazy, same |
+| `data/fomantic-clashes.json` (opt-in, see "Clashes") | 1 | 0.6 KB | 0.6 KB | lazy, same |
+| `data/search.json` (docs site only) | 1 | 93.9 KB | - | lazy, docs site only |
 
-Total `src/icons/data/`: ~1.6 MB, none of it in the initial JS bundle -- see "Alias maps are lazy too, and
-chunk loading no longer globs `data/`" below for what changed and why.
+None of it is in the initial JS bundle.  What a page pays (gzip, HTTP/2, no aliases involved):
 
-### A papercut: oxfmt reformats generated JSON
+- `Icons` code 1.7 KB, `names.json` 9.2 KB, and ~0.2-0.6 KB per glyph:  **~11 KB for one icon, ~15 KB for ten**.
+  (Before, one icon cost 26 KB and ten cost 358 KB:  see "Loading strategies".)
+- A name that needs an alias (`setting`, `mail outline`, `cog`) also loads the three alias maps:  +~27 KB, once.
+  `Icons.get()` skips them for an exact Font Awesome name (`user`, `github`), except under
+  `<html ui-icon-names="fomantic">`, which can remap exact names.
 
-**Resolved:**  `.oxfmtrc.json` now lists `src/icons/data/**` in `ignorePatterns`, so none of this happens
-any more.  The budgets below still carry the margin it needed -- kept so chunk file names don't churn.
-History, as first written:
+### Why these data files
 
-`.oxfmtrc.json`'s `ignorePatterns` doesn't exclude `src/icons/data/` (and isn't this pipeline's to edit --
-outside the file scope for this work), so `yarn format` / `yarn review` pretty-prints every file in there
-same as source. For a `[width, height, path]` tuple, the long `path` string forces the array past the
-120-column print width, so oxfmt explodes it across 5 lines -- about +22 bytes/icon. For a flat
-`name -> alias` map it's cheaper per entry but there are more entries, landing at a similar +12-15%
-overall. Logged in `PAPERCUTS.md`. Two consequences `gen-icons.ts` accounts for:
+- `names.json`:  telling a bare `github` (brands) from `user` (solid) needs the name lists, `Icons.names(style)`
+  feeds the docs icon browser, and it lets `get()` answer `undefined` for an unknown name WITHOUT a 404 request.
+  It replaces the old 37 KB `solid.json` chunk index and the whole-style `regular.json` / `brands.json` loads.
+- Alias maps are lazy for the same reason as before (`spike/lit/REPORT.md` "(j)" item 4):  a static import would
+  land ~14 KB gzip of vocabulary in the eager chunk of every component that can render an icon.
+- `search.json`:  solid-only `name -> search terms`, first 5 terms per icon (`SEARCH_TERMS_CAP`), 93.9 KB, just under
+  the 100 KB budget.  Font Awesome's full terms are ~200 KB.  NOTE:  FA7 roughly doubled terms per icon, so new
+  icons can push this over -- `buildSearchIndex()` then SKIPS the file and the generator says so (the docs
+  site would fall back to name-only search).  `Icons.ts` never imports it.
+- Removed with the chunked layout:  `solid.json`, `solid-*.json`, `regular.json`, `brands.json` and the generated
+  `data/index.ts` (`CHUNK_LOADERS`, a literal-specifier map that existed only to stop Vite globbing `data/`).
 
-- `MAX_CHUNK_BYTES` (52 KB, of the COMPACT write) is well under the 60 KB target specifically so the chunk
-  still fits once oxfmt reformats it -- see its docstring in `gen-icons.ts`.
-- `SEARCH_TERMS_CAP` (5 terms/icon, not 6) is similarly tuned against the POST-format size, not the
-  compact one `buildSearchIndex()` first measures.
+## Loading
 
-If `gen-icons.ts` is ever run standalone (skipping `yarn review`), the on-disk files will be a few percent
-SMALLER (compact) than the table above until the next full `yarn review` reformats them -- still correct,
-just under-budget rather than at it.
+`Icons.get(name, style?)`:
 
-### Chunking `solid.json`
+1. Explicit `style` is trusted before aliasing (`("apple", "brands")` is the Apple logo).
+2. Otherwise an exact Font Awesome name is looked up directly (solid, then brands).
+3. Otherwise `resolve()` applies Fomantic and Font Awesome aliases, `outline`, and word reordering.
+4. The result is checked against `names.json`, then `import()`s
+   `new URL("glyphs/<style>/<name>.js", import.meta.url)`.
 
-~1,420 free solid icons average ~550 bytes each (compact) as a `[width, height, path]` tuple -- the brief's
-"~200 icons per chunk" would put a chunk at ~120 KB, well over its own "~60 KB" cap, so `IconGenerator`
-packs by BYTE SIZE instead, in alphabetical order, landing at ~80-105 icons/chunk (16 chunks). Several
-single letters (`b`, `c`, `f`, `h`, `p`, `s`, `t`) hold more than one chunk's worth of icons alone, so a
-chunk boundary sometimes falls mid-letter -- its file name then uses a 2-character prefix
-(`solid-ba-bu.json`) instead of 1 (`solid-b-c.json`). **The file name is only a human-readable hint** --
-the actual name -> chunk routing is `solid.json`, never parsed from the file name. Re-running the
-generator can shift these boundaries (Font Awesome adds icons over time), which renames some chunk files;
-`IconGenerator.removeStaleChunks()` deletes whichever `solid-*.json` files from the PREVIOUS run are no
-longer in the new chunk set, so old boundaries don't linger on disk unreferenced.
+The URL is computed from the name, with `/* @vite-ignore */`:  there is NO name -> loader map.  A bundler
+therefore neither inlines the glyphs nor emits 2,000 entries (verified with a `vite build` of `src/icons/index.ts`
+alone:  the output is `index.js` 4.3 KB plus the four data chunks, no per-icon anything).  The module system is the
+cache:  a URL evaluates once per page, even across two bundles that share the same `glyphs/`.  A failed import is
+forgotten, so a later `get()` retries.
 
-### Alias maps are lazy too, and chunk loading no longer globs `data/`
+`Icons.register(name, data, style = "solid")` adds a glyph to the same cache without any request.
 
-**DECISION (2026-09-29), superseding "the 40 KB static import line" below:** the three alias maps
-(`aliases.json`, `fomantic-aliases.json`, `fomantic-clashes.json`, ~39.8 KB combined, ~14.1 KB min+gz) are
-now lazy, loaded once by `Icons.#loadAliases()` and cached forever after -- same shape as `#loadSolidIndex()`.
-`resolve()` (already `async`) awaits them; `peek()` stays fully synchronous and answers `undefined` for a
-name it can't resolve from what's cached yet, same as it already did for an unloaded chunk.
+`Icons.glyphBase` (default `""`) overrides the directory, e.g. a CDN:  `Icons.glyphBase = "https://cdn.example.com/ui/glyphs/"`.
 
-Why the change (`spike/lit/REPORT.md` "(j)" item 4):  a static top-of-file `import` lands its module in the
-EAGER chunk of every file that imports `Icons.ts` -- which, once `ui-icon` exists, is every component that
-can render an icon. 14.1 KB min+gz of alias data doesn't belong on that critical path just because
-`Icons.resolve()` wanted to stay synchronous for the common case; a page that renders one icon pays for the
-whole alias vocabulary before first paint, whether or not that icon ever needs an alias.
+## Shipping icons
 
-`Icons.#loadChunk()` had a second, unrelated bug from the same root cause (a bundler-visible static
-reference deciding more than intended) in the OTHER direction: it loaded chunks through a template-string
-`import(`./data/${chunk}.json`)`. Vite can't statically know which file a template specifier resolves to,
-so it treats EVERY file matching `./data/*.json` as a possible target and builds a lazy chunk for each --
-including `search.json` (96 KB), which nothing in `Icons.ts` ever loads. The fix is `src/icons/data/index.ts`
-(generated by `IconGenerator.writeChunkIndex()`), a `CHUNK_LOADERS` map of literal specifiers:
+The glyph files must be served NEXT TO THE BUILT MODULE that contains `Icons`:  `glyphs/` beside the emitted chunk.
+
+- **Library build (`@spell/ui`)**:  a tiny inline plugin in `vite.config.ts` emits `src/icons/glyphs/**` to
+  `dist/glyphs/**` (see "Build change" below).  `Icons` ends up in `dist/index.js` or a chunk beside it, so
+  `import.meta.url` resolves `dist/glyphs/`.  MUST NOT set `chunkFileNames` to a subdirectory without also
+  setting `Icons.glyphBase`.
+- **Consumer that bundles `@spell/ui`**:  the bundler moves `Icons` into the app's output, away from
+  `node_modules/@spell/ui/dist/glyphs/`.  Copy that directory next to the app's chunks (a
+  `vite-plugin-static-copy` rule, Rolldown `emitFile`, or a build step), or serve it anywhere and set
+  `Icons.glyphBase`.  Every icon in `glyphs/` may be requested (runtime names), so ship the whole directory
+  (1.4 MB raw, ~480 KB compressed), or...
+- **Tree-shakable path for apps that use a few known icons**:  no `glyphs/` deployment at all.
+
+  ```ts
+  import { Icons } from "@spell/ui/icons"
+  import user from "@spell/ui/icons/glyphs/solid/user.js"
+  import github from "@spell/ui/icons/glyphs/brands/github.js"
+
+  Icons.register("user", user)
+  Icons.register("github", github, "brands")
+  ```
+
+  The bundler includes just those files (three icons ~1.2 KB of JS), and `peek()` / `get()` answer them
+  synchronously / without a request.  TypeScript needs a declaration for the `.js` glyph modules:
+
+  ```ts
+  declare module "@spell/ui/icons/glyphs/*.js" {
+    const data: readonly [width: number, height: number, path: string]
+    export default data
+  }
+  ```
+
+  (In this repo it is `src/icons/glyphs.d.ts`, for `$/icons/glyphs/*.js`.)
+- **Dev / tests**:  Vite serves `src/icons/glyphs/` directly, so nothing is copied.
+- **Cross-origin hosting** needs CORS (module scripts).
+- Package exports (`package.json`) should map `"./icons/glyphs/*": "./dist/glyphs/*"` so the static-import path
+  works.
+
+### Build change (`vite.config.ts`)
 
 ```ts
-export const CHUNK_LOADERS: Readonly<Record<string, () => Promise<unknown>>> = {
-  "brands": () => import("./brands.json"),
-  "regular": () => import("./regular.json"),
-  "solid-0-b": () => import("./solid-0-b.json")
-  // ...
+import { readdirSync, readFileSync } from "node:fs"
+import path from "node:path"
+
+/** Copies `src/icons/glyphs/**` to `dist/glyphs/**`, next to the chunks, where `Icons` looks via `import.meta.url`. */
+function emitGlyphs(): Plugin {
+  const root = fileURLToPath(new URL("./src/icons/glyphs", import.meta.url))
+  return {
+    name: "spell-emit-glyphs",
+    apply: "build",
+    generateBundle() {
+      for (const entry of readdirSync(root, { recursive: true, withFileTypes: true })) {
+        if (!entry.isFile() || !entry.name.endsWith(".js")) continue
+        const file = path.join(entry.parentPath, entry.name)
+        this.emitFile({ type: "asset", fileName: `glyphs/${path.relative(root, file)}`, source: readFileSync(file) })
+      }
+    }
+  }
 }
+// plugins: [standardDecorators(), emitGlyphs(), dts(...)]
 ```
 
-Each entry has a literal, bundler-visible specifier, so Vite can see exactly which files are reachable and
-size everything else (`search.json`, the solid index's OWN file `solid.json` -- already a literal import in
-`#loadSolidIndex()` and unaffected by this bug) out of the build. `#loadChunk()` now does
-`CHUNK_LOADERS[chunk]()` instead of the template import, and throws if a chunk name isn't registered
-(a sign `gen-icons.ts` and `Icons.ts` drifted -- regenerate with `yarn gen:icons`).
-
-Net effect: `Icons.resolve()` and `Icons.names()` are `async` (see `Icons.ts`'s docstrings for why), and
-`Icons.peek()` is the fully-synchronous, cache-only escape hatch for a caller (e.g. a render function) that
-can't await -- it answers from whatever a previous `get()` / `preload()` already loaded, `undefined`
-otherwise (now including the alias maps, not just chunk data). `preload()` warms the alias maps and the
-solid index explicitly, so `preload([])` still readies `peek()` ahead of a batch of slotted icons.
-
-### The 40 KB "static import" line (historical, see above)
-
-The brief suggested keeping `solid.json` + `aliases.json` + `fomantic-aliases.json` + regular's names as
-static imports if their combined size is under 40 KB. In practice:
-
-- `regular.json` and `brands.json` are NOT "small" the way the brief assumed -- 104 KB and 561 KB. They're
-  lazy like every solid chunk, same as the brief's own "dynamic `import()`, Vite code-splits JSON" mechanism
-  already implies for any per-style file.
-- `aliases.json` + `fomantic-aliases.json` + `fomantic-clashes.json` were ~39.8 KB -- just under the 40 KB line (they were
-  ~44.6 KB, over it, while oxfmt still reformatted them).  `Icons.ts` imported them statically on that
-  reasoning: they were the only files it ever bundled eagerly, `Icons.resolve()` needed them for the common
-  case (alias lookup, `outline` word) to stay synchronous, and lazy-loading two ~20 KB lookup maps just to
-  shave the total under an approximate 40 KB guideline seemed like it would make every icon resolution
-  async for no real benefit. That reasoning missed the actual cost: it's not "every icon resolution", it's
-  "every component's EAGER chunk", landing on every page whether or not any icon on it needs an alias --
-  see the superseding decision above.
-- `solid.json` (37.5 KB) was NOT bundled statically, even though grouping it with the two alias maps was
-  what the brief's "under 40 KB together" had in mind. It's used for two things, both already inside
-  `get()`'s async path: routing a solid-style lookup to its chunk, and (in `resolve()`) telling a bare,
-  style-less name apart from a brands-only one. Neither needs to be synchronous, so there was no reason to
-  force it into the initial bundle -- this part of the reasoning still holds.
-
-### `search.json`
-
-Solid-only, for a future docs-site icon search. Font Awesome's full `search.terms` for every free solid
-icon comes to 200,774 bytes compact -- double the 100 KB budget -- so `IconGenerator` caps each icon at
-its first 5 terms (`SEARCH_TERMS_CAP`), landing at 96,204 bytes, just under 100 KB.  NOTE:  FA7 roughly
-doubled the terms per icon, so new icons can push this over -- `buildSearchIndex()` then SKIPS the file
-and the generator reports it. `Icons.ts` never imports this file: it exists for the docs site build only.
+Verified in a scratch lib build of `src/icons/index.ts`:  2,163 files in `dist/glyphs/`, `Icons` reads
+`new URL(`glyphs/${r}.js`, e.glyphBase || e.#_)` with no per-icon map.
 
 ## Alias strategy
 
@@ -283,7 +284,7 @@ Key points for that component:
 - First paint shouldn't need to await anything (per `AGENTS.md`'s "first paint MUST NOT need a rich
   property" rule) -- `ui-icon` should render nothing or a sized placeholder synchronously, then swap in the
   real `<svg>` once `Icons.get()` resolves. `Icons.peek()` lets it skip the placeholder entirely when the
-  icon's chunk is already warm (e.g. after `Icons.preload()` from a parent list).
+  icon is already loaded or `register()`ed (e.g. after `Icons.preload()` from a parent list).
 - `name` is Fomantic-or-FA7 vocabulary either way -- the component never needs to know which; that's
   exactly what `Icons.resolve()` is for.
 - `Icons.svgString()` is there for a component that builds its shadow root from one big template literal
@@ -291,8 +292,12 @@ Key points for that component:
 
 ## Loading strategies
 
-Experiment behind this section:  `spike/icons/` (throwaway, not wired into `src/`;  `yarn build`, `yarn measure`,
-`yarn test` there;  raw numbers in `spike/icons/results.json`).  Measured 2026-09-29 with Font Awesome Free
+Historical record of WHY the layout above was chosen.  "Today" / candidate 1 below is the PREVIOUS chunked-JSON
+layout (removed);  candidate 2 is what `src/icons/` now does.
+
+Experiment behind this section:  `spike/icons/`, removed from the tree;  restore it with
+`git checkout archive/spikes -- spike/icons` (`yarn build`, `yarn measure`, `yarn test` there;  raw numbers in
+`spike/icons/results.json`).  Measured 2026-09-29 with Font Awesome Free
 **7.3.1** (`@fortawesome/fontawesome-free@7.3.1`, which DOES ship `svgs/{solid,regular,brands}/*.svg`), Chromium
 153 headless via Playwright 1.63, a local static server with gzip on.
 
@@ -417,6 +422,9 @@ Two separately built apps (`/a/`, `/b/`), each drawing the same 10 icons, cold, 
   comment (generated from metadata):  attribution rests on `LICENSE.md`, same as today.
 
 ### Recommendation
+
+**Status (2026-09-29):  adopted and implemented** -- see "Loading" and "Shipping icons" above.  The delivery form chosen was
+the computed URL (last bullet below), not a template `import()`.  Below is the recommendation as written.
 
 **Adopt candidate 2, one ES module per icon**, behind the existing `Icons` API (`get`, `peek`, `resolve`, `svg`,
 `svgString` unchanged;  the lazy alias maps stay).

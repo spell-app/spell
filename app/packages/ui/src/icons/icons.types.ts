@@ -33,8 +33,9 @@ export type IconNames = "fontawesome" | "fomantic"
 export type IconStyle = "solid" | "regular" | "brands"
 
 /**
- * One icon's compact runtime shape, as written by `gen-icons.ts`:  `[width, height, path]`.
- * - A tuple rather than `{ width, height, path }` -- shipped ~2000 times across the data files,
+ * One icon's compact runtime shape:  `[width, height, path]`.
+ * - The `export default` of each generated `glyphs/<style>/<name>.js`.
+ * - A tuple rather than `{ width, height, path }` -- shipped ~2000 times across the glyph modules,
  *   so the saved object-key bytes add up.
  */
 export type IconData = readonly [width: number, height: number, path: string]
@@ -60,11 +61,8 @@ export type IconResolved = {
 // ## Data shapes
 ////////////////
 
-/** Shape of `solid-*.json` / `regular.json` / `brands.json`:  icon name -> its compact tuple. */
-export type IconChunk = Readonly<Record<string, IconData>>
-
-/** Shape of `solid.json`:  icon name -> the chunk file (without extension) that holds its data. */
-export type IconChunkIndex = Readonly<Record<string, string>>
+/** Shape of `names.json`:  every icon name available in each style, sorted. */
+export type IconNamesIndex = Readonly<Record<IconStyle, readonly string[]>>
 
 /** Shape of `aliases.json`, `fomantic-aliases.json` and `fomantic-clashes.json`:  alias -> canonical FA7 name. */
 export type IconAliasMap = Readonly<Record<string, string>>
@@ -74,12 +72,12 @@ export type IconAliasMap = Readonly<Record<string, string>>
 ////////////////
 
 /**
- * `Icons`' internal load state for one dynamically-imported chunk (a `solid-*` file, `regular`, or `brands`).
- * - `promise` is created once per chunk name and reused, so concurrent `get()` calls for the same chunk
- *   share one `import()` rather than racing separate fetches.
- * - `data` is filled in once `promise` resolves, so `peek()` can answer synchronously afterwards.
+ * `Icons`' internal state for one icon (`<style>/<name>`), shared by every `get()` caller.
+ * - `promise` is created once per icon and reused, so concurrent `get()` calls share one `import()`.
+ * - `data` is filled in once `promise` resolves (or up front by `Icons.register()`), so `peek()` answers
+ *   synchronously afterwards.
  */
-export type IconLoader = {
-  promise: Promise<IconChunk>
-  data?: IconChunk
+export type IconEntry = {
+  promise: Promise<IconData | undefined>
+  data?: IconData
 }

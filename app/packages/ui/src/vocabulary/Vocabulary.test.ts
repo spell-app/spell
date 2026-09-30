@@ -86,6 +86,41 @@ describe("Vocabulary registry", () => {
     expect(() => vocabulary.register({ ...card })).toThrow(/already registered/)
   })
 
+  it("replaces a registered vocabulary with a new version of it", () => {
+    const vocabulary = registry()
+    const next = { ...card }
+    expect(vocabulary.replace(next)).toBe(next)
+    expect(vocabulary.get("ui-card")).toBe(next)
+    // afterwards, the new version is the registered one:  registering it again is a no-op
+    expect(vocabulary.register(next)).toBe(next)
+    expect(() => vocabulary.register(card)).toThrow(/already registered/)
+  })
+
+  it("registers an unknown tag through replace()", () => {
+    const vocabulary = new Vocabulary()
+    expect(vocabulary.replace(button)).toBe(button)
+    expect(vocabulary.get("ui-button")).toBe(button)
+  })
+
+  it("re-resolves localized vocabularies of the old version, same prefix and dictionary", () => {
+    const vocabulary = registry()
+    vocabulary.define("ie", spanish)
+    expect(vocabulary.localizedFor("ui-card")?.vocabulary).toBe(card)
+    const next = {
+      ...card,
+      attributes: [...card.attributes, { name: "raised", kind: "keyOnly", description: "Raised." }]
+    } as const satisfies ComponentVocabulary
+    vocabulary.replace(next)
+    const tarjeta = vocabulary.localizedFor("ie-tarjeta")!
+    expect(tarjeta.vocabulary).toBe(next)
+    expect(tarjeta.tag).toBe("ie-tarjeta")
+    expect(vocabulary.canonicalize("ie-tarjeta", "tamano", "pequeno")).toEqual({ attribute: "size", value: "small" })
+    expect(vocabulary.canonicalize("ie-tarjeta", "raised")).toEqual({ attribute: "raised", value: undefined })
+    expect(vocabulary.localizedFor("ui-card")!.vocabulary).toBe(next)
+    // other components untouched
+    expect(vocabulary.localizedFor("ie-boton")!.vocabulary).toBe(button)
+  })
+
   it("keeps defaults on the prototype", () => {
     const vocabulary = new Vocabulary()
     expect(vocabulary.prefix).toBe("ui")

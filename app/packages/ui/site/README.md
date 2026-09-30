@@ -89,9 +89,9 @@ import Variation from "../../components/Variation.astro"
 ### Making examples live
 
 - Nothing to import:  `scripts/components.ts` (run by the layout on every page) imports the module for every
-  undefined `ui-*` tag on the page, by convention `ui-<name>` -> `src/components/<name>/<name>.ts`.  Write
-  `<ui-button>` and `$/components/button/button.ts` loads, on the pages that use it only.
-- A module that defines several tags (`ui-dropdown` + `ui-option`) is loaded through its main tag.
+  undefined `ui-*` tag on the page:  its family's barrel, `src/components/<family>/index.ts`.  Write
+  `<ui-button>` and `$/components/button/index.ts` loads, on the pages that use it only.
+- A family defines several tags (`ui-dropdown` + `ui-item`);  `familyOf()` maps each to its family.
 - Anything else client-side (setting a rich `options` property, listening for `ui-change`) goes in a small
   `.astro` component with a `<script>`, used from the MDX page, e.g. `src/components/DropdownDemo.astro`:
 

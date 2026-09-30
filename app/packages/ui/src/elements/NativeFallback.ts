@@ -12,8 +12,8 @@ import { ClassBuilder } from "./ClassBuilder"
 /****************
  * ### `NativeFallback`
  * Base of the per-component fallbacks:  plain native DOM a host shows when its real render throws.
- * - Library-neutral:  `createElement` + `setAttribute` only (no Lit, no Solid, NEVER `innerHTML` with user text),
- *   so both spikes render the identical thing.
+ * - Library-neutral:  `createElement` + `setAttribute` only (no Solid, NEVER `innerHTML` with user text), so
+ *   the fallback works whatever broke the Solid render.
  * - Same class grammar, `part`s and `<slot>` as the real element, so the component's adopted sheet still
  *   styles it and light-DOM children still show.
  * - Subclasses set `@proto static vocabulary` and implement `build()`;  callers only use `render()`.

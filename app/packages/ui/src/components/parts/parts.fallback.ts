@@ -1,5 +1,4 @@
-import { proto } from "$/util"
-import { NativeFallback, OwnerContext, type NativeFallbackRoot, type OwnerLookup } from "$/elements"
+import { NativeFallback, OwnerContext, proto, type NativeFallbackRoot, type OwnerLookup } from "$/core"
 
 import { PART_VOCABULARIES, headerVocabulary } from "./parts.vocabulary.en"
 

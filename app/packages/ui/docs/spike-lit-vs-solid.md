@@ -1,5 +1,8 @@
 # Lit vs Solid: the two spikes side by side
 
+> NOTE (2026-09-29):  the Solid spike is now the package (`src/`, `packages/solid-element/`, `tools/`;  status in
+> `docs/report.md`).  `spike/` is gone;  the paths below refer to git tag `archive/spikes`.
+
 **Decision (Owen, 2026-09-30):  Solid 2.**  The Lit spike is archived at git tag `archive/lit-spike` (`git checkout archive/lit-spike -- spike/lit` restores it);  `spike/lit/REPORT.md` there is the full Lit report.
 
 Both spikes build the same eight families (`button`, `dropdown`, `icon`, `label`, 13 content `parts`, `divider`, `segment`, `container`) on the same foundation (`src/`), CSS, vocabularies and native fallbacks, and are measured, smoke-tested and reported by the same tools (`spike/shared/`).  Full reports, with identical sections and generated tables:  `spike/lit/REPORT.md`, `spike/solid/REPORT.md`.  Numbers as of 2026-09-30.
