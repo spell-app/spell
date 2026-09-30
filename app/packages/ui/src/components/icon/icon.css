@@ -20,16 +20,22 @@
  *   re-points `--ui-size-*` to `--ui-icon-size-*`, so the generic `.ui.huge { --ui-scale }` remap picks the icon
  *   ratio.  The host resets `--ui-scale` (and the `--ui-color*` a coloured parent would hand down), so an icon in
  *   a large red button is neither scaled twice nor painted red on red.
+ * - Public tokens (`--ui-icon-*`, the theming surface, the size ladder included) are NEVER declared here:  the
+ *   token block (on every icon and group root) reads each through a private alias,
+ *   `--_ui-icon-distance: var(--ui-icon-distance, var(--ui-space-2xs))`, and every rule reads the alias;  the local
+ *   `--ui-size-*` ladder points at the ladder's aliases.  So a value set on `:root`, an ancestor, the host,
+ *   `::part(icon)` or in the app stylesheet reaches the box (`docs/theming.md` "Component tokens").  A bordered /
+ *   circular GROUP hands its members private switches (`--_ui-icons-first-position` ...).
  * - Owner tokens:  a `display: contents` host takes no box styles from `::slotted()`, so owners (button, label,
  *   header, menu ...) steer a slotted icon through inherited tokens, read here with Fomantic's defaults:
  *
  *   | Token                        | Default                         | Set by, e.g.                            |
  *   | ---------------------------- | ------------------------------- | --------------------------------------- |
- *   | `--ui-icon-owner-display`    | `inline-flex`                   | icon header:  `flex`                    |
- *   | `--ui-icon-owner-size`       | `1em`                           | header:  `1.5em`, icon header:  `3em`   |
- *   | `--ui-icon-owner-margin`     | `0 var(--ui-icon-distance) 0 0` | label, header:  their icon spacing      |
- *   | `--ui-icon-owner-opacity`    | `1`                             | button, dropdown:  `0.8`                |
- *   | `--ui-icon-owner-align`      | `-0.125em` (sized:  `middle`)   | header:  `middle`                       |
+ *   | `--_ui-icon-owner-display`    | `inline-flex`                   | icon header:  `flex`                    |
+ *   | `--_ui-icon-owner-size`       | `1em`                           | header:  `1.5em`, icon header:  `3em`   |
+ *   | `--_ui-icon-owner-margin`     | `0 var(--ui-icon-distance) 0 0` | label, header:  their icon spacing      |
+ *   | `--_ui-icon-owner-opacity`    | `1`                             | button, dropdown:  `0.8`                |
+ *   | `--_ui-icon-owner-align`      | `-0.125em` (sized:  `middle`)   | header:  `middle`                       |
  *
  * - The box rules key on `span.ui.icon:not(.label)`:  `ui icon header` / `message` / `button` / `label` are other
  *   components' roots.  They never share a shadow root with an icon, but static pages adopting several sheets do.
@@ -70,70 +76,70 @@
     display: none;
   }
 
-  /* Tokens:  one per `icon.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one private alias per `icon.variables` entry that still matters, from the global tokens. */
   span.ui.icon:not(.label),
   .ui.icons {
-    --ui-icon-width: 1.18em;
-    --ui-icon-height: 1em;
-    --ui-icon-distance: var(--ui-space-2xs);
-    --ui-icon-opacity: 1;
-    --ui-icon-link-opacity: 0.8;
-    --ui-icon-duration: var(--ui-duration-slow);
-    --ui-icon-loading-duration: 2s;
-    --ui-icon-disabled-opacity: var(--ui-disabled-opacity);
-    --ui-icon-circular-size: 2em;
-    --ui-icon-bordered-size: 2em;
-    --ui-icon-bordered-radius: var(--ui-radius-s);
-    --ui-icon-ring-width: 0.1em;
-    --ui-icon-ring-color: oklch(from var(--ui-ink) l c h / 0.1);
-    --ui-icon-inverted-color: var(--ui-ink-on-dark);
-    --ui-icon-inverted-background: var(--ui-black);
-    --ui-icon-corner-size: 0.45em;
-    --ui-icon-corner-offset: 0;
-    --ui-icon-corner-outline: var(--ui-background);
-    --ui-icon-corner-stroke: 1px;
-    --ui-icon-grouped-corner-offset: 1.15em;
+    --_ui-icon-width: var(--ui-icon-width, 1.18em);
+    --_ui-icon-height: var(--ui-icon-height, 1em);
+    --_ui-icon-distance: var(--ui-icon-distance, var(--ui-space-2xs));
+    --_ui-icon-opacity: var(--ui-icon-opacity, 1);
+    --_ui-icon-link-opacity: var(--ui-icon-link-opacity, 0.8);
+    --_ui-icon-duration: var(--ui-icon-duration, var(--ui-duration-slow));
+    --_ui-icon-loading-duration: var(--ui-icon-loading-duration, 2s);
+    --_ui-icon-disabled-opacity: var(--ui-icon-disabled-opacity, var(--ui-disabled-opacity));
+    --_ui-icon-circular-size: var(--ui-icon-circular-size, 2em);
+    --_ui-icon-bordered-size: var(--ui-icon-bordered-size, 2em);
+    --_ui-icon-bordered-radius: var(--ui-icon-bordered-radius, var(--ui-radius-s));
+    --_ui-icon-ring-width: var(--ui-icon-ring-width, 0.1em);
+    --_ui-icon-ring-color: var(--ui-icon-ring-color, oklch(from var(--ui-ink) l c h / 0.1));
+    --_ui-icon-inverted-color: var(--ui-icon-inverted-color, var(--ui-ink-on-dark));
+    --_ui-icon-inverted-background: var(--ui-icon-inverted-background, var(--ui-black));
+    --_ui-icon-corner-size: var(--ui-icon-corner-size, 0.45em);
+    --_ui-icon-corner-offset: var(--ui-icon-corner-offset, 0);
+    --_ui-icon-corner-outline: var(--ui-icon-corner-outline, var(--ui-background));
+    --_ui-icon-corner-stroke: var(--ui-icon-corner-stroke, 1px);
+    --_ui-icon-grouped-corner-offset: var(--ui-icon-grouped-corner-offset, 1.15em);
     /* Fomantic's icon ladder, relative to the surrounding text. */
-    --ui-icon-size-mini: 0.4;
-    --ui-icon-size-tiny: 0.5;
-    --ui-icon-size-small: 0.75;
-    --ui-icon-size-large: 1.5;
-    --ui-icon-size-big: 2;
-    --ui-icon-size-huge: 4;
-    --ui-icon-size-massive: 8;
+    --_ui-icon-size-mini: var(--ui-icon-size-mini, 0.4);
+    --_ui-icon-size-tiny: var(--ui-icon-size-tiny, 0.5);
+    --_ui-icon-size-small: var(--ui-icon-size-small, 0.75);
+    --_ui-icon-size-large: var(--ui-icon-size-large, 1.5);
+    --_ui-icon-size-big: var(--ui-icon-size-big, 2);
+    --_ui-icon-size-huge: var(--ui-icon-size-huge, 4);
+    --_ui-icon-size-massive: var(--ui-icon-size-massive, 8);
     /* The generic size remap (`sizes.css`) resolves `--ui-size-<size>` HERE, so it picks the icon ladder. */
-    --ui-size-mini: var(--ui-icon-size-mini);
-    --ui-size-tiny: var(--ui-icon-size-tiny);
-    --ui-size-small: var(--ui-icon-size-small);
-    --ui-size-large: var(--ui-icon-size-large);
-    --ui-size-big: var(--ui-icon-size-big);
-    --ui-size-huge: var(--ui-icon-size-huge);
-    --ui-size-massive: var(--ui-icon-size-massive);
+    --ui-size-mini: var(--_ui-icon-size-mini);
+    --ui-size-tiny: var(--_ui-icon-size-tiny);
+    --ui-size-small: var(--_ui-icon-size-small);
+    --ui-size-large: var(--_ui-icon-size-large);
+    --ui-size-big: var(--_ui-icon-size-big);
+    --ui-size-huge: var(--_ui-icon-size-huge);
+    --ui-size-massive: var(--_ui-icon-size-massive);
   }
 
   /* Icon:  a glyph box one line tall;  the `<svg>` inside keeps its aspect ratio, centred. */
   span.ui.icon:not(.label) {
     box-sizing: border-box;
-    display: var(--ui-icon-owner-display, inline-flex);
+    display: var(--_ui-icon-owner-display, inline-flex);
     align-items: center;
     justify-content: center;
     flex: none;
-    width: var(--_icon-width, var(--ui-icon-width));
-    height: var(--_icon-height, var(--ui-icon-height));
-    margin: var(--_icon-margin, var(--ui-icon-owner-margin, 0 var(--ui-icon-distance) 0 0));
+    width: var(--_icon-width, var(--_ui-icon-width));
+    height: var(--_icon-height, var(--_ui-icon-height));
+    margin: var(--_icon-margin, var(--_ui-icon-owner-margin, 0 var(--_ui-icon-distance) 0 0));
     padding: var(--_icon-padding, 0);
     border-radius: var(--_icon-radius, 0);
     background: var(--_icon-background, none);
     box-shadow: var(--_icon-ring, none);
     color: var(--_icon-color, var(--ui-color, inherit));
-    font-size: calc(var(--_icon-font, var(--ui-icon-owner-size, 1em)) * var(--ui-scale, 1));
+    font-size: calc(var(--_icon-font, var(--_ui-icon-owner-size, 1em)) * var(--ui-scale, 1));
     font-style: normal;
     font-weight: var(--ui-font-weight-normal);
     line-height: 1;
     text-align: center;
     text-decoration: inherit;
-    vertical-align: var(--ui-icon-owner-align, -0.125em);
-    opacity: var(--ui-icon-owner-opacity, var(--ui-icon-opacity));
+    vertical-align: var(--_ui-icon-owner-align, -0.125em);
+    opacity: var(--_ui-icon-owner-opacity, var(--_ui-icon-opacity));
     speak: none;
     backface-visibility: hidden;
   }
@@ -149,7 +155,7 @@
 
   /* Loading:  spins. */
   span.ui.loading:is(.icon, .icons):not(.label) {
-    animation: ui-icon-spin var(--ui-icon-loading-duration) linear infinite;
+    animation: ui-icon-spin var(--_ui-icon-loading-duration) linear infinite;
   }
 
   /*******************************
@@ -160,21 +166,21 @@
     position: relative;
     box-sizing: border-box;
     display: inline-block;
-    min-width: var(--ui-icon-width);
-    min-height: var(--ui-icon-height);
-    margin: var(--ui-icon-owner-margin, 0 var(--ui-icon-distance) 0 0);
+    min-width: var(--_ui-icon-width);
+    min-height: var(--_ui-icon-height);
+    margin: var(--_ui-icon-owner-margin, 0 var(--_ui-icon-distance) 0 0);
     font-size: calc(1em * var(--ui-scale, 1));
     line-height: 1;
     text-align: center;
-    vertical-align: var(--ui-icon-owner-align, -0.125em);
+    vertical-align: var(--_ui-icon-owner-align, -0.125em);
   }
 
   /*
    * Grouped icons:  stacked on the centre of the first one.  Static markup nests `.icon`s in `.icons`;
    * in shadow DOM each child is a `<ui-icon>` host with `:state(in-icons)` that styles its own root.
-   * - The group steers its children through inherited `--ui-icons-*` tokens (bordered / circular groups
-   *   centre the first icon and pull the corners in), the same way in both cases.
-   * - NEVER set `--ui-icons-*` or `--_icon-*` from outside;  theme with `--ui-icon-*`.
+   * - The group steers its children through inherited private `--_ui-icons-*` switches (bordered / circular
+   *   groups centre the first icon and pull the corners in), the same way in both cases.
+   * - NEVER set `--_ui-icons-*` or `--_icon-*` from outside;  theme with `--ui-icon-*`.
    */
   .ui.icons > .icon,
   :host(:state(in-icons)) > .ui.icon {
@@ -186,8 +192,8 @@
   }
   .ui.icons > .icon:first-child,
   :host(:state(in-icons):first-child) > .ui.icon {
-    position: var(--ui-icons-first-position, static);
-    translate: var(--ui-icons-first-translate, none);
+    position: var(--_ui-icons-first-position, static);
+    translate: var(--_ui-icons-first-translate, none);
     vertical-align: top;
   }
   /* Static markup only:  an unsized child doesn't inherit the group's scale (a host resets it). */
@@ -198,14 +204,16 @@
   /* Corner icon:  a small badge on one corner of the group (bottom right by default). */
   .ui.icons > .corner.icon,
   :host(:state(in-icons)) > .ui.corner.icon {
-    --_icon-font: var(--ui-icon-corner-size);
-    --_icon-offset: var(--ui-icons-corner-offset, var(--ui-icon-corner-offset));
+    --_icon-font: var(--_ui-icon-corner-size);
+    --_icon-offset: var(--_ui-icons-corner-offset, var(--_ui-icon-corner-offset));
     inset: auto var(--_icon-offset) var(--_icon-offset) auto;
     translate: none;
-    filter: drop-shadow(calc(var(--ui-icon-corner-stroke) * -1) 0 0 var(--_icon-outline, var(--ui-icon-corner-outline)))
-      drop-shadow(var(--ui-icon-corner-stroke) 0 0 var(--_icon-outline, var(--ui-icon-corner-outline)))
-      drop-shadow(0 calc(var(--ui-icon-corner-stroke) * -1) 0 var(--_icon-outline, var(--ui-icon-corner-outline)))
-      drop-shadow(0 var(--ui-icon-corner-stroke) 0 var(--_icon-outline, var(--ui-icon-corner-outline)));
+    filter: drop-shadow(
+        calc(var(--_ui-icon-corner-stroke) * -1) 0 0 var(--_icon-outline, var(--_ui-icon-corner-outline))
+      )
+      drop-shadow(var(--_ui-icon-corner-stroke) 0 0 var(--_icon-outline, var(--_ui-icon-corner-outline)))
+      drop-shadow(0 calc(var(--_ui-icon-corner-stroke) * -1) 0 var(--_icon-outline, var(--_ui-icon-corner-outline)))
+      drop-shadow(0 var(--_ui-icon-corner-stroke) 0 var(--_icon-outline, var(--_ui-icon-corner-outline)));
   }
   .ui.icons > [class*="bottom right corner"].icon,
   :host(:state(in-icons)) > .ui[class*="bottom right corner"].icon {
@@ -232,7 +240,7 @@
 @layer ui.components.icon.variations {
   /* Sized icons sit on the middle of the line, as in Fomantic. */
   .ui:is(.mini, .tiny, .small, .large, .big, .huge, .massive):is(.icon, .icons) {
-    vertical-align: var(--ui-icon-owner-align, middle);
+    vertical-align: var(--_ui-icon-owner-align, middle);
   }
 
   /* Fitted:  no gap after the glyph, no extra width. */
@@ -247,40 +255,40 @@
   /* Link:  dimmed until hovered. */
   span.ui.link:is(.icon, .icons):not(.disabled, .label) {
     cursor: pointer;
-    opacity: var(--ui-icon-link-opacity);
-    transition: opacity var(--ui-icon-duration) var(--ui-ease);
+    opacity: var(--_ui-icon-link-opacity);
+    transition: opacity var(--_ui-icon-duration) var(--ui-ease);
   }
 
   /* Circular / bordered:  the glyph in a ring. */
   span.ui.circular.icon:not(.label) {
-    --_icon-width: var(--ui-icon-circular-size);
-    --_icon-height: var(--ui-icon-circular-size);
+    --_icon-width: var(--_ui-icon-circular-size);
+    --_icon-height: var(--_ui-icon-circular-size);
     --_icon-radius: var(--ui-radius-circle);
-    vertical-align: var(--ui-icon-owner-align, middle);
+    vertical-align: var(--_ui-icon-owner-align, middle);
   }
   span.ui.bordered.icon:not(.label) {
-    --_icon-width: var(--ui-icon-bordered-size);
-    --_icon-height: var(--ui-icon-bordered-size);
-    --_icon-radius: var(--ui-icon-bordered-radius);
-    vertical-align: var(--ui-icon-owner-align, middle);
+    --_icon-width: var(--_ui-icon-bordered-size);
+    --_icon-height: var(--_ui-icon-bordered-size);
+    --_icon-radius: var(--_ui-icon-bordered-radius);
+    vertical-align: var(--_ui-icon-owner-align, middle);
   }
   /* The ring:  faint, or in the icon's own colour. */
   span.ui:is(.circular, .bordered).icon:not(.label) {
-    --_icon-ring: inset 0 0 0 var(--ui-icon-ring-width) var(--ui-color, var(--ui-icon-ring-color));
+    --_icon-ring: inset 0 0 0 var(--_ui-icon-ring-width) var(--ui-color, var(--_ui-icon-ring-color));
   }
 
   /* Inverted:  for dark backgrounds;  a circular / bordered one becomes a filled disc. */
   .ui.inverted.icon {
-    --_icon-color: var(--ui-color-inverted, var(--ui-icon-inverted-color));
+    --_icon-color: var(--ui-color-inverted, var(--_ui-icon-inverted-color));
   }
   span.ui.inverted:is(.circular, .bordered).icon:not(.label) {
     --_icon-ring: none;
-    --_icon-background: var(--ui-color, var(--ui-icon-inverted-background));
-    --_icon-color: var(--ui-color-on, var(--ui-icon-inverted-color));
+    --_icon-background: var(--ui-color, var(--_ui-icon-inverted-background));
+    --_icon-color: var(--ui-color-on, var(--_ui-icon-inverted-color));
   }
   .ui.icons > .inverted.corner.icon,
   :host(:state(in-icons)) > .ui.inverted.corner.icon {
-    --_icon-outline: var(--ui-icon-inverted-background);
+    --_icon-outline: var(--_ui-icon-inverted-background);
   }
 
   /* Flipped / rotated:  one transform built from tokens, so the two combine in Fomantic's order. */
@@ -308,24 +316,25 @@
 
   /* Bordered / circular GROUP:  a ring around the group;  the first icon centred, corners pulled in. */
   .ui:is(.bordered, .circular).icons {
-    --ui-icons-first-position: absolute;
-    --ui-icons-first-translate: -50% -50%;
-    --ui-icons-corner-offset: var(--ui-icon-grouped-corner-offset);
-    width: var(--ui-icon-bordered-size);
-    height: var(--ui-icon-bordered-size);
-    box-shadow: inset 0 0 0 var(--ui-icon-ring-width) var(--ui-icon-ring-color);
-    vertical-align: var(--ui-icon-owner-align, middle);
+    /* Private switches its members read (never theming:  the group's variation decides them). */
+    --_ui-icons-first-position: absolute;
+    --_ui-icons-first-translate: -50% -50%;
+    --_ui-icons-corner-offset: var(--_ui-icon-grouped-corner-offset);
+    width: var(--_ui-icon-bordered-size);
+    height: var(--_ui-icon-bordered-size);
+    box-shadow: inset 0 0 0 var(--_ui-icon-ring-width) var(--_ui-icon-ring-color);
+    vertical-align: var(--_ui-icon-owner-align, middle);
   }
   .ui.bordered.icons {
-    border-radius: var(--ui-icon-bordered-radius);
+    border-radius: var(--_ui-icon-bordered-radius);
   }
   .ui.circular.icons {
     border-radius: var(--ui-radius-circle);
   }
   .ui.inverted:is(.bordered, .circular).icons {
     box-shadow: none;
-    background-color: var(--ui-icon-inverted-background);
-    color: var(--ui-icon-inverted-color);
+    background-color: var(--_ui-icon-inverted-background);
+    color: var(--_ui-icon-inverted-color);
   }
 }
 
@@ -342,7 +351,7 @@
 
   span.ui.disabled:is(.icon, .icons):not(.label) {
     cursor: default;
-    opacity: var(--ui-icon-disabled-opacity);
+    opacity: var(--_ui-icon-disabled-opacity);
     pointer-events: none;
   }
 }

@@ -25,7 +25,7 @@ import accordionCSS from "./accordion.css?inline"
  * - Keyboard:  Tab between titles;  Enter / Space toggle (native);  ArrowDown / ArrowUp / Home / End move between
  *   this accordion's titles (APG's optional keys).
  * - Nested:  a `<ui-accordion>` inside another (`PartContext`, `:state(in-accordion)`) renders Fomantic's
- *   `accordion` without `ui` and inherits its parent's look through the `--ui-accordion-*` tokens.
+ *   `accordion` without `ui` and inherits its parent's look through the `--_ui-accordion-*` aliases.
  * - Animated when `UI.browser.supports.interpolateSize` (`:state(animated)`):  `::details-content` grows to
  *   `auto` height;  under `prefers-reduced-motion` the CSS drops the transition.
  * - SIDE EFFECT:  watches its own child list (a `MutationObserver`) to re-pair titles and contents.

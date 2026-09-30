@@ -30,11 +30,9 @@ export const menuVocabulary = {
     },
     {
       name: "position",
-      kind: "color",
+      kind: "valueOnly",
       values: ["left", "right", "center"],
-      description:
-        'Sub-menu only:  pushes it to the `right` / `left` end, or the `center`.  NOTE: `kind: "color"` because it ' +
-        "emits its value alone (`right menu`)."
+      description: "Sub-menu only:  pushes it to the `right` / `left` end, or the `center`."
     },
     { name: "secondary", kind: "keyOnly", description: "De-emphasized:  no box, rounded items." },
     {

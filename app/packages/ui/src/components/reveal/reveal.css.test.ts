@@ -96,3 +96,17 @@ describe("reveal.css examples", () => {
     expect(getComputedStyle(root.querySelector(".ui.visible.reveal")!).overflow).toBe("visible")
   })
 })
+
+describe("reveal.css tokens", () => {
+  it("takes a public token from a wrapper or the reveal itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, revealCSS])
+    const root = Fixture.render(
+      `<div style="--ui-reveal-duration: 1s"><div class="ui fade reveal"><div class="visible content">A</div>` +
+        `<div class="hidden content">B</div></div></div>` +
+        `<div class="ui rotate reveal" style="--ui-reveal-duration: 2s"><div class="visible content">A</div>` +
+        `<div class="hidden content">B</div></div>`
+    )
+    expect(getComputedStyle(root.querySelector(".visible")!).transitionDuration).toBe("1s")
+    expect(getComputedStyle(root.nextElementSibling!.querySelector(".visible")!).transitionDuration).toBe("2s")
+  })
+})

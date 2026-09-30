@@ -12,17 +12,23 @@
  *   the segments, forms and headers around it exactly as with Fomantic's markup.
  *   - the root is its shadow root's only child, so `:first-child` / `:last-child` spacing is re-decided by the
  *     HOST's position (`:host(:not(:first-child))`);  static markup keeps Fomantic's selectors
+ * - Public tokens (`--ui-message-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-message-radius: var(--ui-message-radius, var(--ui-radius))`, and every rule
+ *   reads the alias;  variations (`attached`, `floating`, `text-align` ...) set private `--_message-*` tokens read
+ *   in front of it.  So a value set on `:root`, an ancestor, the host, `::part(message)` or in the app stylesheet
+ *   reaches the box (`docs/theming.md` "Component tokens").
  * - OWNER side:  a message owns the `header` and `content` parts (`ownsParts`).  Slotted `<ui-header>` /
  *   `<ui-content>` style themselves from `parts.css` (context `in-message`), reading what the root sets:
- *   - `--ui-message-layout` (`block` / `icon`), declared on EVERY root, so a message nested in an icon message
+ *   - `--_ui-message-layout` (`block` / `icon`), declared on EVERY root, so a message nested in an icon message
  *     never inherits its layout
- *   - `--ui-message-header-font-size`, and the colour roles `--ui-color-header` / `--ui-color-text`
+ *   - `--_ui-message-header-font-size` (the alias of `--ui-message-header-font-size`, so a page sets it on the
+ *     message or above it), and the colour roles `--ui-color-header` / `--ui-color-text`
  *   - `inverted` sets `--ui-inverted: 1`, `color-scheme: dark` and `--ui-scheme: dark`:  content re-resolves its
  *     `light-dark()` tokens
  *   - the root's `<slot>` resets the rest of the colour remap (`--ui-color`, `-contrast`, `-background` ...)
  *     and `--ui-scale`, so a red message doesn't paint the buttons inside it red or rescale them;  the header /
  *     text roles stay, since tinting the message's own text is the point
- *   - a slotted `<ui-icon slot="icon">` is steered by the icon owner tokens (`--ui-icon-owner-*`) the icon box
+ *   - a slotted `<ui-icon slot="icon">` is steered by the icon owner switches (`--_ui-icon-owner-*`) the icon box
  *     sets
  * - Colours:  `color` (hues) and `state` (`positive negative error info success warning`) are both remaps
  *   (`colors.css`);  one rule set reads `--ui-color-background` / `-text` / `-header` / `-border`.
@@ -58,61 +64,61 @@
     display: none;
   }
 
-  /* Tokens:  one per `message.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one private alias per `message.variables` entry that still matters, from the global tokens. */
   .ui.message {
-    --ui-message-margin: 1em;
-    --ui-message-padding: 1em 1.5em;
-    --ui-message-background: var(--ui-surface-muted);
-    --ui-message-color: var(--ui-text-color);
-    --ui-message-radius: var(--ui-radius);
-    --ui-message-border-width: var(--ui-border-width);
-    --ui-message-border-color: var(--ui-border-color-strong);
-    --ui-message-attached-border-color: var(--ui-border-color);
-    --ui-message-shadow: 0 0 #0000;
-    --ui-message-floating-shadow: var(--ui-shadow-floating);
-    --ui-message-bottom-shadow: var(--ui-shadow-subtle);
-    --ui-message-duration: var(--ui-duration-fast);
-    --ui-message-header-font-size: 1.14285em;
-    --ui-message-header-paragraph-distance: 0.25em;
+    --_ui-message-margin: var(--ui-message-margin, 1em);
+    --_ui-message-padding: var(--ui-message-padding, 1em 1.5em);
+    --_ui-message-background: var(--ui-message-background, var(--ui-surface-muted));
+    --_ui-message-color: var(--ui-message-color, var(--ui-text-color));
+    --_ui-message-radius: var(--ui-message-radius, var(--ui-radius));
+    --_ui-message-border-width: var(--ui-message-border-width, var(--ui-border-width));
+    --_ui-message-border-color: var(--ui-message-border-color, var(--ui-border-color-strong));
+    --_ui-message-attached-border-color: var(--ui-message-attached-border-color, var(--ui-border-color));
+    --_ui-message-shadow: var(--ui-message-shadow, 0 0 #0000);
+    --_ui-message-floating-shadow: var(--ui-message-floating-shadow, var(--ui-shadow-floating));
+    --_ui-message-bottom-shadow: var(--ui-message-bottom-shadow, var(--ui-shadow-subtle));
+    --_ui-message-duration: var(--ui-message-duration, var(--ui-duration-fast));
+    --_ui-message-header-font-size: var(--ui-message-header-font-size, 1.14285em);
+    --_ui-message-header-paragraph-distance: var(--ui-message-header-paragraph-distance, 0.25em);
     /* Fomantic's 0.85 faded tinted text below 4.5:1 (brown text on its background:  4.06), so text stays opaque. */
-    --ui-message-text-opacity: 1;
-    --ui-message-paragraph-margin: 0.75em;
-    --ui-message-list-opacity: 1;
-    --ui-message-list-margin: 0.5em;
-    --ui-message-list-indent: 1em;
-    --ui-message-list-item-margin: 0.3em;
-    --ui-message-icon-size: 3em;
-    --ui-message-icon-opacity: 0.8;
-    --ui-message-icon-distance: 0.6em;
-    --ui-message-close-top: calc(1em - (var(--ui-line-height) - 1) * 0.5em);
-    --ui-message-close-right: 0.5em;
-    --ui-message-close-opacity: 0.7;
-    --ui-message-inverted-background: var(--ui-surface);
+    --_ui-message-text-opacity: var(--ui-message-text-opacity, 1);
+    --_ui-message-paragraph-margin: var(--ui-message-paragraph-margin, 0.75em);
+    --_ui-message-list-opacity: var(--ui-message-list-opacity, 1);
+    --_ui-message-list-margin: var(--ui-message-list-margin, 0.5em);
+    --_ui-message-list-indent: var(--ui-message-list-indent, 1em);
+    --_ui-message-list-item-margin: var(--ui-message-list-item-margin, 0.3em);
+    --_ui-message-icon-size: var(--ui-message-icon-size, 3em);
+    --_ui-message-icon-opacity: var(--ui-message-icon-opacity, 0.8);
+    --_ui-message-icon-distance: var(--ui-message-icon-distance, 0.6em);
+    --_ui-message-close-top: var(--ui-message-close-top, calc(1em - (var(--ui-line-height) - 1) * 0.5em));
+    --_ui-message-close-right: var(--ui-message-close-right, 0.5em);
+    --_ui-message-close-opacity: var(--ui-message-close-opacity, 0.7);
+    --_ui-message-inverted-background: var(--ui-message-inverted-background, var(--ui-surface));
     /* Owner tokens (`parts.css`):  declared on every root. */
-    --ui-message-layout: block;
+    --_ui-message-layout: block;
     position: relative;
     box-sizing: border-box;
     display: block;
     min-height: 1em;
-    margin-block: var(--_message-margin-top, var(--ui-message-margin))
-      var(--_message-margin-bottom, var(--ui-message-margin));
+    margin-block: var(--_message-margin-top, var(--_ui-message-margin))
+      var(--_message-margin-bottom, var(--_ui-message-margin));
     margin-inline: var(--_message-margin-inline, 0);
-    padding: var(--ui-message-padding);
-    border-radius: var(--_message-radius, var(--ui-message-radius));
-    background: var(--ui-color-background, var(--ui-message-background));
+    padding: var(--_ui-message-padding);
+    border-radius: var(--_message-radius, var(--_ui-message-radius));
+    background: var(--ui-color-background, var(--_ui-message-background));
     box-shadow:
-      inset 0 0 0 var(--ui-message-border-width)
-        var(--_message-border, var(--ui-color-border, var(--ui-message-border-color))),
-      var(--_message-shadow, var(--ui-message-shadow));
-    color: var(--ui-color-text, var(--ui-message-color));
+      inset 0 0 0 var(--_ui-message-border-width)
+        var(--_message-border, var(--ui-color-border, var(--_ui-message-border-color))),
+      var(--_message-shadow, var(--_ui-message-shadow));
+    color: var(--ui-color-text, var(--_ui-message-color));
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     line-height: var(--ui-line-height);
     text-align: var(--_message-text-align, start);
     transition:
-      opacity var(--ui-message-duration) var(--ui-ease),
-      color var(--ui-message-duration) var(--ui-ease),
-      background var(--ui-message-duration) var(--ui-ease),
-      box-shadow var(--ui-message-duration) var(--ui-ease);
+      opacity var(--_ui-message-duration) var(--ui-ease),
+      color var(--_ui-message-duration) var(--ui-ease),
+      background var(--_ui-message-duration) var(--ui-ease),
+      box-shadow var(--_ui-message-duration) var(--ui-ease);
   }
   /* Spacing between neighbours:  none before the first, none after the last. */
   .ui.message:first-child {
@@ -159,14 +165,14 @@
     font-weight: var(--ui-font-weight-bold);
   }
   .ui.message .header:not(.ui) {
-    font-size: var(--ui-message-header-font-size);
+    font-size: var(--_ui-message-header-font-size);
   }
 
   /* Paragraphs */
   .ui.message p,
   .ui.message ::slotted(p) {
-    margin: var(--ui-message-paragraph-margin) 0;
-    opacity: var(--ui-message-text-opacity);
+    margin: var(--_ui-message-paragraph-margin) 0;
+    opacity: var(--_ui-message-text-opacity);
   }
   .ui.message p:first-child,
   .ui.message ::slotted(p:first-child) {
@@ -178,16 +184,16 @@
   }
   .ui.message .header + p,
   .ui.message .header + slot::slotted(p:first-child) {
-    margin-top: var(--ui-message-header-paragraph-distance);
+    margin-top: var(--_ui-message-header-paragraph-distance);
   }
 
   /* Lists:  Fomantic's bullets in static markup;  native markers, same indent, when slotted. */
   .ui.message .list:not(.ui),
   .ui.message ::slotted(:is(ul, ol, .list):not(.ui)) {
-    margin: var(--ui-message-list-margin) 0 0;
+    margin: var(--_ui-message-list-margin) 0 0;
     padding: 0;
-    padding-inline-start: var(--ui-message-list-indent);
-    opacity: var(--ui-message-list-opacity);
+    padding-inline-start: var(--_ui-message-list-indent);
+    opacity: var(--_ui-message-list-opacity);
     text-align: left;
   }
   .ui.message .list:not(.ui):first-child,
@@ -199,11 +205,11 @@
     margin-bottom: 0;
   }
   .ui.message .header + slot::slotted(:is(ul, ol, .list):not(.ui):first-child) {
-    margin-top: var(--ui-message-list-margin);
+    margin-top: var(--_ui-message-list-margin);
   }
   .ui.message .list:not(.ui) li {
     position: relative;
-    margin: 0 0 var(--ui-message-list-item-margin);
+    margin: 0 0 var(--_ui-message-list-item-margin);
     padding: 0;
     list-style-type: none;
   }
@@ -229,8 +235,8 @@
   /* Close button:  top right, a quiet icon until hovered. */
   .ui.message > .close.icon {
     position: absolute;
-    top: var(--ui-message-close-top);
-    right: var(--ui-message-close-right);
+    top: var(--_ui-message-close-top);
+    right: var(--_ui-message-close-right);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -243,9 +249,9 @@
     background: none;
     color: inherit;
     font: inherit;
-    opacity: var(--ui-message-close-opacity);
+    opacity: var(--_ui-message-close-opacity);
     cursor: pointer;
-    transition: opacity var(--ui-message-duration) var(--ui-ease);
+    transition: opacity var(--_ui-message-duration) var(--ui-ease);
   }
   .ui.message > .close.icon > svg {
     width: auto;
@@ -262,7 +268,7 @@
   }
   /* Room for the close button beside the text. */
   .ui.message:has(> .close.icon) {
-    padding-right: calc(var(--ui-message-close-right) + 2em);
+    padding-right: calc(var(--_ui-message-close-right) + 2em);
   }
 }
 
@@ -273,7 +279,7 @@
 @layer ui.components.message.variations {
   /* Icon:  a large icon beside the content, which takes the rest of the line. */
   .ui.icon.message {
-    --ui-message-layout: icon;
+    --_ui-message-layout: icon;
     display: flex;
     align-items: center;
     width: 100%;
@@ -281,23 +287,23 @@
   .ui.icon.message > .icon:not(.close),
   .ui.icon.message > .icons {
     /* Owner side:  a slotted `<ui-icon>` fills the icon box. */
-    --ui-icon-owner-size: 1em;
-    --ui-icon-owner-margin: 0;
-    --ui-icon-owner-align: middle;
-    --ui-icon-owner-opacity: 1;
-    --ui-icon-owner-display: block;
+    --_ui-icon-owner-size: 1em;
+    --_ui-icon-owner-margin: 0;
+    --_ui-icon-owner-align: middle;
+    --_ui-icon-owner-opacity: 1;
+    --_ui-icon-owner-display: block;
     display: block;
     flex: 0 0 auto;
     width: auto;
-    margin-right: var(--ui-message-icon-distance);
-    font-size: var(--ui-message-icon-size);
+    margin-right: var(--_ui-message-icon-distance);
+    font-size: var(--_ui-message-icon-size);
     line-height: 1;
     vertical-align: middle;
-    opacity: var(--ui-message-icon-opacity);
+    opacity: var(--_ui-message-icon-opacity);
   }
   .ui.icon.message > .icon:not(.close):last-child,
   .ui.icon.message > .icons:last-child {
-    margin: 0 0 0 var(--ui-message-icon-distance);
+    margin: 0 0 0 var(--_ui-message-icon-distance);
   }
   .ui.icon.message > .icon:not(.close) > svg {
     display: block;
@@ -313,7 +319,7 @@
 
   /* Floating:  lifted off the page. */
   .ui.floating.message {
-    --_message-shadow: var(--ui-message-floating-shadow);
+    --_message-shadow: var(--_ui-message-floating-shadow);
   }
 
   /* Compact:  only as wide as its content. */
@@ -328,26 +334,26 @@
 
   /* Attached:  joined edge to edge with a segment or form below (above, for `bottom`). */
   .ui.attached.message {
-    --_message-margin-bottom: calc(var(--ui-message-border-width) * -1);
-    --_message-margin-inline: calc(var(--ui-message-border-width) * -1);
-    --_message-radius: var(--ui-message-radius) var(--ui-message-radius) 0 0;
-    --_message-border: var(--ui-color-border, var(--ui-message-attached-border-color));
+    --_message-margin-bottom: calc(var(--_ui-message-border-width) * -1);
+    --_message-margin-inline: calc(var(--_ui-message-border-width) * -1);
+    --_message-radius: var(--_ui-message-radius) var(--_ui-message-radius) 0 0;
+    --_message-border: var(--ui-color-border, var(--_ui-message-attached-border-color));
   }
   .ui.attached + .ui.attached.message:not(.top, .bottom) {
-    --_message-margin-top: calc(var(--ui-message-border-width) * -1);
+    --_message-margin-top: calc(var(--_ui-message-border-width) * -1);
     --_message-radius: 0;
   }
   .ui[class*="bottom attached"].message {
-    --_message-margin-top: calc(var(--ui-message-border-width) * -1);
-    --_message-margin-bottom: var(--ui-message-margin);
-    --_message-radius: 0 0 var(--ui-message-radius) var(--ui-message-radius);
-    --_message-shadow: var(--ui-message-bottom-shadow);
+    --_message-margin-top: calc(var(--_ui-message-border-width) * -1);
+    --_message-margin-bottom: var(--_ui-message-margin);
+    --_message-radius: 0 0 var(--_ui-message-radius) var(--_ui-message-radius);
+    --_message-shadow: var(--_ui-message-bottom-shadow);
   }
   .ui[class*="bottom attached"].message:last-child {
     --_message-margin-bottom: 0;
   }
   :host(:not(:last-child)) > .ui[class*="bottom attached"].message {
-    --_message-margin-bottom: var(--ui-message-margin);
+    --_message-margin-bottom: var(--_ui-message-margin);
   }
   .ui.attached.icon.message {
     width: auto;
@@ -373,7 +379,7 @@
     --ui-inverted: 1;
     --ui-scheme: dark;
     color-scheme: dark;
-    background: var(--ui-message-inverted-background);
+    background: var(--_ui-message-inverted-background);
   }
 }
 

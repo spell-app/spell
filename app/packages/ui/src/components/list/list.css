@@ -17,13 +17,20 @@
  *       :is(.ui.list, .ui.list .list) > .item { ... }   <- static class grammar (examples, SSR without scripts)
  *
  *   Host position replaces Fomantic's `:first-child` / `:last-child` / `+`:  `:host(:state(in-list):first-child)`.
- * - Variations reach the items as INHERITED TOKENS:  each variation remaps `--ui-list-*` on the list root (class
- *   selectors, combinations included:  `.ui.horizontal.divided.list`), and the item rules only read them.  Where
- *   a variation changes STRUCTURE the items style-query a flag instead:  `--ui-list-marker: number` (an item's
- *   `value` replaces its number) and `--ui-list-animated: 1` (hover indent).
- * - The root declares EVERY token below, default included, so a list nested as a new top-level list never
- *   inherits an outer list's look.  The sub-list re-declares the item geometry from the `--ui-list-child-*`
- *   tokens (Fomantic's child items are tighter, never bordered, never horizontal).
+ * - Public tokens (`--ui-list-*`, the theming surface) are NEVER declared here:  the list root reads each through a
+ *   private alias, `--_ui-list-item-padding-block: var(--ui-list-item-padding-block, 0.21428571em)`, and every rule
+ *   reads the alias.  So a value set on `:root`, an ancestor, the host, `::part(list)` or in the app stylesheet
+ *   reaches the list and its items (`docs/theming.md` "Component tokens");  set it on the list or above, not on an
+ *   item.
+ * - Variations reach the items as INHERITED TOKENS:  each variation writes the `--_ui-list-*` aliases on the list
+ *   root (class selectors, combinations included:  `.ui.horizontal.divided.list`), so it wins over the page's base
+ *   value, and the item rules only read them.  Where a variation changes STRUCTURE the items style-query a private
+ *   switch instead:  `--_ui-list-marker: number` (an item's `value` replaces its number) and
+ *   `--_ui-list-animated: 1` (hover indent).
+ * - The root declares EVERY alias below, default included, so a list nested as a new top-level list never
+ *   inherits an outer list's look.  The sub-list writes the item geometry aliases from the `--ui-list-child-*`
+ *   tokens' aliases (Fomantic's child items are tighter, never bordered, never horizontal);  it never re-declares
+ *   them from the public tokens, so the outer list's variations reach it.
  * - Numbering is CSS counters:  `counter-reset: ordered` on the root (and every sub-list), `counter-increment`
  *   on each item's `::before`;  counters cross shadow boundaries and nest (`counters(ordered, ".")` => `1.2`).
  * - Hosts are `display: contents`:  the list root and item roots are the boxes, so the list's inline / table
@@ -31,10 +38,12 @@
  *
  * ## Tokens
  *
+ * Public names (each read through its `--_ui-list-*` alias) but the `--_ui-*` switches.
+ *
  * | Token                                   | Default                          | Remapped by, e.g.                          |
  * | --------------------------------------- | -------------------------------- | ------------------------------------------ |
- * | `--ui-list-layout`                      | `vertical`                       | `horizontal`;  also read by `parts.css`    |
- * | `--ui-list-align`                       | `top`                            | `horizontal` (`middle`), `vertical-align`  |
+ * | `--_ui-list-layout`                      | `vertical`                       | `horizontal`;  also read by `parts.css`    |
+ * | `--_ui-list-align`                       | `top`                            | `horizontal` (`middle`), `vertical-align`  |
  * | `--ui-list-font-size`                   | the list's size                  | sizes;  horizontal items read it           |
  * | `--ui-list-item-display`                | `list-item`                      | `horizontal` (`inline-block`)              |
  * | `--ui-list-item-width`                  | `stretch`                        | `horizontal` (`auto`)                      |
@@ -71,7 +80,7 @@
  * | `--ui-list-image-display`               | `table-cell`                     | `horizontal`                               |
  * | `--ui-list-content-distance`            | `0.5em`                          | read by `parts.css`                        |
  * | `--ui-list-{content,header,description}-color` | text / text / 70% ink     | `inverted`;  read by `parts.css`           |
- * | `--ui-list-marker`                      | `none`                           | `bulleted` (`bullet`), `ordered` (`number`)|
+ * | `--_ui-list-marker` (switch)             | `none`                           | `bulleted` (`bullet`), `ordered` (`number`)|
  * | `--ui-list-marker-content`              | `none`                           | `bulleted`, `ordered`, `suffixed`          |
  * | `--ui-list-marker-position`             | `absolute`                       | horizontal `ordered` (`static`)            |
  * | `--ui-list-marker-margin`               | `0`                              | `bulleted`, `ordered`, horizontal ordered  |
@@ -80,7 +89,7 @@
  * | `--ui-list-counter-increment`           | `none`                           | `ordered`                                  |
  * | `--ui-list-counter-reset`               | `none`                           | `ordered`:  every sub-list resets          |
  * | `--ui-list-first-marker-display`        | `initial` (shown)                | horizontal `bulleted` (`none`)             |
- * | `--ui-list-animated`                    | `0`                              | `animated`                                 |
+ * | `--_ui-list-animated` (switch)           | `0`                              | `animated`                                 |
  * | `--ui-list-sublist-margin` / `-padding` | `0` / `0.75em 0 0.25em 0.5em`    | `bulleted`, `ordered`, `horizontal` ...    |
  * | `--ui-list-sublist-content-{margin,padding}-left` | `initial` (0)          | `ordered` / `bulleted`:  a sub-list in a   |
  * |                                         |                                  | `<ui-content>` keeps its indent            |
@@ -90,10 +99,10 @@
  * | `--ui-list-child-item-margin-inline`    | `0`                              | `fitted selection`                         |
  * | `--ui-list-child-marker-margin`         | `0`                              | `bulleted`, `ordered` (`-2em`)             |
  *
- * - Owner tokens the ITEM root sets for what's slotted into it:  `--ui-icon-owner-*` (a slotted `<ui-icon>` is a
+ * - Owner tokens the ITEM root sets for what's slotted into it:  `--_ui-icon-owner-*` (a slotted `<ui-icon>` is a
  *   table cell beside the content, like Fomantic's `> .item > i.icon`), reset on slotted parts
- *   (`::slotted(:state(in-list))`) so icons inside a content block stay inline;  `--ui-part: item` (a sub-list
- *   inside a `<ui-content>` drops its indent, `--ui-part: content`);  `--ui-item-media: image` for the `image`
+ *   (`::slotted(:state(in-list))`) so icons inside a content block stay inline;  `--_ui-part: item` (a sub-list
+ *   inside a `<ui-content>` drops its indent, `--_ui-part: content`);  `--_ui-item-media: image` for the `image`
  *   shorthand (`parts.css`:  the content beside it is an inline block, Fomantic's `img.image + .content`).
  * - Colours:  `inverted` sets `color-scheme: dark` (+ `--ui-inverted: 1`), so the `light-dark()` text, border and
  *   ink tokens (link list greys, selection backgrounds) resolve on-dark by themselves;  only Fomantic's explicit
@@ -128,77 +137,78 @@
     display: none;
   }
 
-  /* Tokens:  one per `list.variables` entry that still matters;  the items and sub-lists inherit them. */
+  /* Tokens:  the switches, and a private alias per `list.variables` entry that still matters;  the items and
+     sub-lists inherit them. */
   .ui.list {
-    --ui-list-layout: vertical;
-    --ui-list-align: top;
-    --ui-list-font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
-    --ui-list-item-display: list-item;
-    --ui-list-item-width: stretch;
-    --ui-list-item-font-size: initial;
-    --ui-list-item-line-height: 1.14285714em;
-    --ui-list-item-padding-block: 0.21428571em;
-    --ui-list-item-padding-left: 0;
-    --ui-list-item-padding-right: 0;
-    --ui-list-item-first-padding-top: 0;
-    --ui-list-item-first-padding-left: var(--ui-list-item-padding-left);
-    --ui-list-item-last-padding-bottom: 0;
-    --ui-list-item-last-padding-right: var(--ui-list-item-padding-right);
-    --ui-list-item-margin: 0;
-    --ui-list-item-first-margin-left: 0;
-    --ui-list-item-last-margin-right: 0;
-    --ui-list-item-border-width: 0;
-    --ui-list-item-first-border-top: 0;
-    --ui-list-item-last-border-right: 0;
-    --ui-list-item-last-border-bottom: 0;
-    --ui-list-item-border-color: var(--ui-border-color);
-    --ui-list-item-radius: 0;
-    --ui-list-item-transition: none;
-    --ui-list-item-color: initial;
-    --ui-list-item-active-color: initial;
-    --ui-list-item-hover-background: transparent;
-    --ui-list-item-down-background: transparent;
-    --ui-list-item-active-background: transparent;
-    --ui-list-link-color: var(--ui-link);
-    --ui-list-link-hover-color: var(--ui-link-hover);
-    --ui-list-link-down-color: var(--ui-link-hover);
-    --ui-list-link-active-color: var(--ui-link);
-    --ui-list-link-icon-color: var(--ui-text-light);
-    --ui-list-link-icon-hover-color: var(--ui-text-color);
-    --ui-list-anchor-color: var(--ui-link);
-    --ui-list-anchor-hover-color: var(--ui-link-hover);
-    --ui-list-disabled-color: var(--ui-text-disabled);
-    --ui-list-icon-display: table-cell;
-    --ui-list-icon-slot-display: table-cell;
-    --ui-list-icon-min-width: 1.55em;
-    --ui-list-icon-padding: 0 0.28571429em 0 0;
-    --ui-list-image-display: table-cell;
-    --ui-list-image-distance: 0.5em;
-    --ui-list-content-distance: 0.5em;
-    --ui-list-content-color: var(--ui-text-color);
-    --ui-list-header-color: var(--ui-text-color);
-    --ui-list-description-color: oklch(from var(--ui-ink) l c h / 0.7);
-    --ui-list-marker: none;
-    --ui-list-marker-content: none;
-    --ui-list-marker-position: absolute;
-    --ui-list-marker-margin: 0;
-    --ui-list-marker-color: initial;
-    --ui-list-marker-opacity: 1;
-    --ui-list-marker-align: top;
-    --ui-list-counter-increment: none;
-    --ui-list-counter-reset: none;
-    --ui-list-first-marker-display: initial;
-    --ui-list-animated: 0;
-    --ui-list-sublist-margin: 0;
-    --ui-list-sublist-padding: 0.75em 0 0.25em 0.5em;
-    --ui-list-sublist-content-margin-left: initial;
-    --ui-list-sublist-content-padding-left: initial;
-    --ui-list-child-item-padding-block: 0.14285714em;
-    --ui-list-child-item-padding-left: 0;
-    --ui-list-child-item-padding-right: 0;
-    --ui-list-child-item-edge-padding: 0;
-    --ui-list-child-item-margin-inline: 0;
-    --ui-list-child-marker-margin: 0;
+    --_ui-list-layout: vertical;
+    --_ui-list-align: top;
+    --_ui-list-font-size: var(--ui-list-font-size, calc(var(--ui-font-size) * var(--ui-scale, 1)));
+    --_ui-list-item-display: var(--ui-list-item-display, list-item);
+    --_ui-list-item-width: var(--ui-list-item-width, stretch);
+    --_ui-list-item-font-size: var(--ui-list-item-font-size, initial);
+    --_ui-list-item-line-height: var(--ui-list-item-line-height, 1.14285714em);
+    --_ui-list-item-padding-block: var(--ui-list-item-padding-block, 0.21428571em);
+    --_ui-list-item-padding-left: var(--ui-list-item-padding-left, 0);
+    --_ui-list-item-padding-right: var(--ui-list-item-padding-right, 0);
+    --_ui-list-item-first-padding-top: var(--ui-list-item-first-padding-top, 0);
+    --_ui-list-item-first-padding-left: var(--ui-list-item-first-padding-left, var(--_ui-list-item-padding-left));
+    --_ui-list-item-last-padding-bottom: var(--ui-list-item-last-padding-bottom, 0);
+    --_ui-list-item-last-padding-right: var(--ui-list-item-last-padding-right, var(--_ui-list-item-padding-right));
+    --_ui-list-item-margin: var(--ui-list-item-margin, 0);
+    --_ui-list-item-first-margin-left: var(--ui-list-item-first-margin-left, 0);
+    --_ui-list-item-last-margin-right: var(--ui-list-item-last-margin-right, 0);
+    --_ui-list-item-border-width: var(--ui-list-item-border-width, 0);
+    --_ui-list-item-first-border-top: var(--ui-list-item-first-border-top, 0);
+    --_ui-list-item-last-border-right: var(--ui-list-item-last-border-right, 0);
+    --_ui-list-item-last-border-bottom: var(--ui-list-item-last-border-bottom, 0);
+    --_ui-list-item-border-color: var(--ui-list-item-border-color, var(--ui-border-color));
+    --_ui-list-item-radius: var(--ui-list-item-radius, 0);
+    --_ui-list-item-transition: var(--ui-list-item-transition, none);
+    --_ui-list-item-color: var(--ui-list-item-color, initial);
+    --_ui-list-item-active-color: var(--ui-list-item-active-color, initial);
+    --_ui-list-item-hover-background: var(--ui-list-item-hover-background, transparent);
+    --_ui-list-item-down-background: var(--ui-list-item-down-background, transparent);
+    --_ui-list-item-active-background: var(--ui-list-item-active-background, transparent);
+    --_ui-list-link-color: var(--ui-list-link-color, var(--ui-link));
+    --_ui-list-link-hover-color: var(--ui-list-link-hover-color, var(--ui-link-hover));
+    --_ui-list-link-down-color: var(--ui-list-link-down-color, var(--ui-link-hover));
+    --_ui-list-link-active-color: var(--ui-list-link-active-color, var(--ui-link));
+    --_ui-list-link-icon-color: var(--ui-list-link-icon-color, var(--ui-text-light));
+    --_ui-list-link-icon-hover-color: var(--ui-list-link-icon-hover-color, var(--ui-text-color));
+    --_ui-list-anchor-color: var(--ui-list-anchor-color, var(--ui-link));
+    --_ui-list-anchor-hover-color: var(--ui-list-anchor-hover-color, var(--ui-link-hover));
+    --_ui-list-disabled-color: var(--ui-list-disabled-color, var(--ui-text-disabled));
+    --_ui-list-icon-display: var(--ui-list-icon-display, table-cell);
+    --_ui-list-icon-slot-display: var(--ui-list-icon-slot-display, table-cell);
+    --_ui-list-icon-min-width: var(--ui-list-icon-min-width, 1.55em);
+    --_ui-list-icon-padding: var(--ui-list-icon-padding, 0 0.28571429em 0 0);
+    --_ui-list-image-display: var(--ui-list-image-display, table-cell);
+    --_ui-list-image-distance: var(--ui-list-image-distance, 0.5em);
+    --_ui-list-content-distance: var(--ui-list-content-distance, 0.5em);
+    --_ui-list-content-color: var(--ui-list-content-color, var(--ui-text-color));
+    --_ui-list-header-color: var(--ui-list-header-color, var(--ui-text-color));
+    --_ui-list-description-color: var(--ui-list-description-color, oklch(from var(--ui-ink) l c h / 0.7));
+    --_ui-list-marker: none;
+    --_ui-list-marker-content: var(--ui-list-marker-content, none);
+    --_ui-list-marker-position: var(--ui-list-marker-position, absolute);
+    --_ui-list-marker-margin: var(--ui-list-marker-margin, 0);
+    --_ui-list-marker-color: var(--ui-list-marker-color, initial);
+    --_ui-list-marker-opacity: var(--ui-list-marker-opacity, 1);
+    --_ui-list-marker-align: var(--ui-list-marker-align, top);
+    --_ui-list-counter-increment: var(--ui-list-counter-increment, none);
+    --_ui-list-counter-reset: var(--ui-list-counter-reset, none);
+    --_ui-list-first-marker-display: var(--ui-list-first-marker-display, initial);
+    --_ui-list-animated: 0;
+    --_ui-list-sublist-margin: var(--ui-list-sublist-margin, 0);
+    --_ui-list-sublist-padding: var(--ui-list-sublist-padding, 0.75em 0 0.25em 0.5em);
+    --_ui-list-sublist-content-margin-left: var(--ui-list-sublist-content-margin-left, initial);
+    --_ui-list-sublist-content-padding-left: var(--ui-list-sublist-content-padding-left, initial);
+    --_ui-list-child-item-padding-block: var(--ui-list-child-item-padding-block, 0.14285714em);
+    --_ui-list-child-item-padding-left: var(--ui-list-child-item-padding-left, 0);
+    --_ui-list-child-item-padding-right: var(--ui-list-child-item-padding-right, 0);
+    --_ui-list-child-item-edge-padding: var(--ui-list-child-item-edge-padding, 0);
+    --_ui-list-child-item-margin-inline: var(--ui-list-child-item-margin-inline, 0);
+    --_ui-list-child-marker-margin: var(--ui-list-child-marker-margin, 0);
     box-sizing: border-box;
     margin: var(--_list-margin-top, 1em) 0 var(--_list-margin-bottom, 1em);
     padding: 0;
@@ -227,45 +237,45 @@
   /* Sub-list:  Fomantic's `.ui.list .list`, tighter child items that never inherit the outer list's layout. */
   :host(:state(in-list)) > .list,
   .ui.list .list:not(.ui) {
-    --ui-list-layout: vertical;
-    --ui-list-animated: 0;
-    --ui-list-item-display: list-item;
-    --ui-list-item-width: stretch;
-    --ui-list-item-font-size: initial;
-    --ui-list-item-line-height: initial;
-    --ui-list-item-padding-block: var(--ui-list-child-item-padding-block);
-    --ui-list-item-padding-left: var(--ui-list-child-item-padding-left);
-    --ui-list-item-padding-right: var(--ui-list-child-item-padding-right);
-    --ui-list-item-first-padding-top: var(--ui-list-child-item-edge-padding);
-    --ui-list-item-first-padding-left: var(--ui-list-child-item-padding-left);
-    --ui-list-item-last-padding-bottom: var(--ui-list-child-item-edge-padding);
-    --ui-list-item-last-padding-right: var(--ui-list-child-item-padding-right);
-    --ui-list-item-margin: 0 var(--ui-list-child-item-margin-inline);
-    --ui-list-item-first-margin-left: var(--ui-list-child-item-margin-inline);
-    --ui-list-item-last-margin-right: var(--ui-list-child-item-margin-inline);
-    --ui-list-item-border-width: 0;
-    --ui-list-item-first-border-top: 0;
-    --ui-list-item-last-border-right: 0;
-    --ui-list-item-last-border-bottom: 0;
-    --ui-list-marker-margin: var(--ui-list-child-marker-margin);
-    --ui-list-first-marker-display: initial;
-    --ui-list-icon-display: table-cell;
-    --ui-list-icon-slot-display: table-cell;
-    --ui-list-icon-padding: 0 0.28571429em 0 0;
-    --ui-list-image-display: table-cell;
+    --_ui-list-layout: vertical;
+    --_ui-list-animated: 0;
+    --_ui-list-item-display: list-item;
+    --_ui-list-item-width: stretch;
+    --_ui-list-item-font-size: initial;
+    --_ui-list-item-line-height: initial;
+    --_ui-list-item-padding-block: var(--_ui-list-child-item-padding-block);
+    --_ui-list-item-padding-left: var(--_ui-list-child-item-padding-left);
+    --_ui-list-item-padding-right: var(--_ui-list-child-item-padding-right);
+    --_ui-list-item-first-padding-top: var(--_ui-list-child-item-edge-padding);
+    --_ui-list-item-first-padding-left: var(--_ui-list-child-item-padding-left);
+    --_ui-list-item-last-padding-bottom: var(--_ui-list-child-item-edge-padding);
+    --_ui-list-item-last-padding-right: var(--_ui-list-child-item-padding-right);
+    --_ui-list-item-margin: 0 var(--_ui-list-child-item-margin-inline);
+    --_ui-list-item-first-margin-left: var(--_ui-list-child-item-margin-inline);
+    --_ui-list-item-last-margin-right: var(--_ui-list-child-item-margin-inline);
+    --_ui-list-item-border-width: 0;
+    --_ui-list-item-first-border-top: 0;
+    --_ui-list-item-last-border-right: 0;
+    --_ui-list-item-last-border-bottom: 0;
+    --_ui-list-marker-margin: var(--_ui-list-child-marker-margin);
+    --_ui-list-first-marker-display: initial;
+    --_ui-list-icon-display: table-cell;
+    --_ui-list-icon-slot-display: table-cell;
+    --_ui-list-icon-padding: 0 0.28571429em 0 0;
+    --_ui-list-image-display: table-cell;
     display: block;
     clear: both;
-    margin: var(--ui-list-sublist-margin);
-    padding: var(--ui-list-sublist-padding);
-    counter-reset: var(--ui-list-counter-reset);
+    margin: var(--_ui-list-sublist-margin);
+    padding: var(--_ui-list-sublist-padding);
+    counter-reset: var(--_ui-list-counter-reset);
     list-style: none;
   }
   /* A sub-list inside an item's content block starts at the content's edge. */
-  @container style(--ui-part: content) {
+  @container style(--_ui-part: content) {
     :host(:state(in-list)) > .list,
     .ui.list .list:not(.ui) {
-      margin-left: var(--ui-list-sublist-content-margin-left, 0);
-      padding-left: var(--ui-list-sublist-content-padding-left, 0);
+      margin-left: var(--_ui-list-sublist-content-margin-left, 0);
+      padding-left: var(--_ui-list-sublist-content-padding-left, 0);
     }
   }
 
@@ -276,45 +286,45 @@
   /* Item:  a block (`list-item`) of the list, its first / last lose their outer padding. */
   :host(:state(in-list)) > .item,
   :is(.ui.list, .ui.list .list) > .item {
-    --ui-part: item;
+    --_ui-part: item;
     /* Owner side:  a slotted `<ui-icon>` is a table cell beside the content, like Fomantic's `> .item > i.icon`. */
-    --ui-icon-owner-display: var(--ui-list-icon-display);
-    --ui-icon-owner-margin: 0 0.28571429em 0 0;
-    --ui-icon-owner-align: var(--ui-list-align);
-    --ui-icon-owner-size: initial;
-    --ui-icon-owner-opacity: initial;
+    --_ui-icon-owner-display: var(--_ui-list-icon-display);
+    --_ui-icon-owner-margin: 0 0.28571429em 0 0;
+    --_ui-icon-owner-align: var(--_ui-list-align);
+    --_ui-icon-owner-size: initial;
+    --_ui-icon-owner-opacity: initial;
     position: relative;
-    display: var(--ui-list-item-display);
+    display: var(--_ui-list-item-display);
     box-sizing: border-box;
-    width: var(--ui-list-item-width);
-    margin: var(--ui-list-item-margin);
-    padding: var(--ui-list-item-padding-block) var(--ui-list-item-padding-right) var(--ui-list-item-padding-block)
-      var(--ui-list-item-padding-left);
-    border: 0 solid var(--ui-list-item-border-color);
-    border-width: var(--ui-list-item-border-width);
-    border-radius: var(--ui-list-item-radius);
+    width: var(--_ui-list-item-width);
+    margin: var(--_ui-list-item-margin);
+    padding: var(--_ui-list-item-padding-block) var(--_ui-list-item-padding-right) var(--_ui-list-item-padding-block)
+      var(--_ui-list-item-padding-left);
+    border: 0 solid var(--_ui-list-item-border-color);
+    border-width: var(--_ui-list-item-border-width);
+    border-radius: var(--_ui-list-item-radius);
     background: transparent;
-    color: var(--ui-list-item-color, inherit);
-    font-size: var(--ui-list-item-font-size, inherit);
-    line-height: var(--ui-list-item-line-height, inherit);
+    color: var(--_ui-list-item-color, inherit);
+    font-size: var(--_ui-list-item-font-size, inherit);
+    line-height: var(--_ui-list-item-line-height, inherit);
     list-style: none;
     table-layout: fixed;
-    transition: var(--ui-list-item-transition);
+    transition: var(--_ui-list-item-transition);
   }
   :host(:state(in-list):first-child) > .item,
   :is(.ui.list, .ui.list .list) > .item:first-child {
-    margin-left: var(--ui-list-item-first-margin-left);
-    padding-top: var(--ui-list-item-first-padding-top);
-    padding-left: var(--ui-list-item-first-padding-left);
-    border-top-width: var(--ui-list-item-first-border-top);
+    margin-left: var(--_ui-list-item-first-margin-left);
+    padding-top: var(--_ui-list-item-first-padding-top);
+    padding-left: var(--_ui-list-item-first-padding-left);
+    border-top-width: var(--_ui-list-item-first-border-top);
   }
   :host(:state(in-list):last-child) > .item,
   :is(.ui.list, .ui.list .list) > .item:last-child {
-    margin-right: var(--ui-list-item-last-margin-right);
-    padding-right: var(--ui-list-item-last-padding-right);
-    padding-bottom: var(--ui-list-item-last-padding-bottom);
-    border-right-width: var(--ui-list-item-last-border-right);
-    border-bottom-width: var(--ui-list-item-last-border-bottom);
+    margin-right: var(--_ui-list-item-last-margin-right);
+    padding-right: var(--_ui-list-item-last-padding-right);
+    padding-bottom: var(--_ui-list-item-last-padding-bottom);
+    border-right-width: var(--_ui-list-item-last-border-right);
+    border-bottom-width: var(--_ui-list-item-last-border-bottom);
   }
   /* Clear floated content. */
   :host(:state(in-list)) > .item::after,
@@ -327,35 +337,35 @@
   }
   /* Slotted parts (content, header, a sub-list) reset the icon owner tokens:  icons inside them stay inline. */
   :host(:state(in-list)) > .item > slot::slotted(:state(in-list)) {
-    --ui-icon-owner-display: initial;
-    --ui-icon-owner-margin: initial;
-    --ui-icon-owner-align: initial;
+    --_ui-icon-owner-display: initial;
+    --_ui-icon-owner-margin: initial;
+    --_ui-icon-owner-align: initial;
   }
 
   /* Marker:  a bullet or a number in the item's `::before`, hung outside its start edge. */
   :host(:state(in-list)) > .item::before,
   :is(.ui.list, .ui.list .list) > .item::before {
-    content: var(--ui-list-marker-content);
-    position: var(--ui-list-marker-position);
+    content: var(--_ui-list-marker-content);
+    position: var(--_ui-list-marker-position);
     top: auto;
     left: auto;
-    margin: var(--ui-list-marker-margin);
-    color: var(--ui-list-marker-color, inherit);
+    margin: var(--_ui-list-marker-margin);
+    color: var(--_ui-list-marker-color, inherit);
     font-weight: var(--ui-font-weight-normal);
     text-align: right;
-    vertical-align: var(--ui-list-marker-align);
-    opacity: var(--ui-list-marker-opacity);
-    counter-increment: var(--ui-list-counter-increment);
+    vertical-align: var(--_ui-list-marker-align);
+    opacity: var(--_ui-list-marker-opacity);
+    counter-increment: var(--_ui-list-counter-increment);
     pointer-events: none;
     user-select: none;
   }
   :host(:state(in-list)) > :is(a, button).item::before,
   :is(.ui.list, .ui.list .list) > a.item::before {
-    color: var(--ui-list-marker-color, var(--ui-text-color));
+    color: var(--_ui-list-marker-color, var(--ui-text-color));
   }
   :host(:state(in-list):first-child) > .item::before,
   :is(.ui.list, .ui.list .list) > .item:first-child::before {
-    display: var(--ui-list-first-marker-display, inline);
+    display: var(--_ui-list-first-marker-display, inline);
   }
 
   /*******************************
@@ -366,46 +376,46 @@
   :host(:state(in-list)) > .item > .icon,
   :is(.ui.list, .ui.list .list) > .item > .icon {
     /* A `slot="icon"` `<ui-icon>` fills the box. */
-    --ui-icon-owner-display: inline-flex;
-    --ui-icon-owner-margin: 0;
-    display: var(--ui-list-icon-display);
-    min-width: var(--ui-list-icon-min-width);
+    --_ui-icon-owner-display: inline-flex;
+    --_ui-icon-owner-margin: 0;
+    display: var(--_ui-list-icon-display);
+    min-width: var(--_ui-list-icon-min-width);
     margin: 0;
-    padding: var(--ui-list-icon-padding);
+    padding: var(--_ui-list-icon-padding);
     line-height: 1;
     text-align: center;
-    vertical-align: var(--ui-list-align);
+    vertical-align: var(--_ui-list-align);
     transition: color var(--ui-duration-fast) var(--ui-ease);
   }
 
   /* Whatever follows the icon box (text, a content block) is the next cell of the same row:  Fomantic's
      `i.icon:only-child` escape (inline text beside a lone icon) can't be seen from a shadow root. */
   :host(:state(in-list)) > .item > .icon + slot {
-    display: var(--ui-list-icon-slot-display);
+    display: var(--_ui-list-icon-slot-display);
     width: 100%;
-    vertical-align: var(--ui-list-align);
+    vertical-align: var(--_ui-list-align);
   }
 
   /* Image:  a table cell;  an `<img>` itself (the `image` shorthand, Fomantic's `img.image`) is an inline block. */
   :host(:state(in-list)) > .item > .image,
   :is(.ui.list, .ui.list .list) > .item > .image {
-    display: var(--ui-list-image-display);
+    display: var(--_ui-list-image-display);
     margin: 0;
     background-color: transparent;
-    vertical-align: var(--ui-list-align);
+    vertical-align: var(--_ui-list-align);
   }
   :is(.ui.list, .ui.list .list) > .item > .image:not(img, :only-child) {
-    padding-right: var(--ui-list-image-distance);
+    padding-right: var(--_ui-list-image-distance);
   }
   :host(:state(in-list)) > .item > img.image,
   :is(.ui.list, .ui.list .list) > .item > img.image,
   :host(:state(in-list)) > .item > slot::slotted(img) {
     display: inline-block;
-    vertical-align: var(--ui-list-align);
+    vertical-align: var(--_ui-list-align);
   }
-  /* The content beside an `<img>` is an inline block too (`parts.css`, `--ui-item-media: image`). */
+  /* The content beside an `<img>` is an inline block too (`parts.css`, `--_ui-item-media: image`). */
   :host(:state(in-list)) > .item:has(> img.image) {
-    --ui-item-media: image;
+    --_ui-item-media: image;
   }
   /* The `image` shorthand is an avatar:  `image.css` isn't adopted in an item's shadow root. */
   :host(:state(in-list)) > .item > img.avatar.image,
@@ -437,21 +447,21 @@
   :host(:state(in-list)) > :is(a, button).item,
   :is(.ui.list, .ui.list .list) > a.item,
   :is(.ui.selection.list, .ui.selection.list .list) > .item {
-    color: var(--ui-list-link-color);
+    color: var(--_ui-list-link-color);
     text-decoration: none;
     cursor: pointer;
   }
   :host(:state(in-list)) > :is(a, button).item:hover,
   :is(.ui.list, .ui.list .list) > a.item:hover,
   :is(.ui.selection.list, .ui.selection.list .list) > .item:hover {
-    background: var(--ui-list-item-hover-background);
-    color: var(--ui-list-link-hover-color);
+    background: var(--_ui-list-item-hover-background);
+    color: var(--_ui-list-link-hover-color);
   }
   :host(:state(in-list)) > :is(a, button).item:active,
   :is(.ui.list, .ui.list .list) > a.item:active,
   :is(.ui.selection.list, .ui.selection.list .list) > .item:active {
-    background: var(--ui-list-item-down-background);
-    color: var(--ui-list-link-down-color);
+    background: var(--_ui-list-item-down-background);
+    color: var(--_ui-list-link-down-color);
   }
   :host(:state(in-list)) > :is(a, button).item:focus-visible {
     outline: var(--ui-focus-width) solid var(--ui-focus-color);
@@ -460,18 +470,18 @@
   /* A link item's icon is dimmer than its text. */
   :host(:state(in-list)) > :is(a, button).item > .icon,
   :is(.ui.list, .ui.list .list) > a.item > .icon {
-    color: var(--ui-list-link-icon-color, inherit);
+    color: var(--_ui-list-link-icon-color, inherit);
   }
 
   /* Links inside an item:  slotted `<a>`s, and any in static markup. */
   :host(:state(in-list)) > .item > slot::slotted(a:not(.ui)),
   :is(.ui.list, .ui.list .list) > .item a:not(.ui) {
-    color: var(--ui-list-anchor-color);
+    color: var(--_ui-list-anchor-color);
     cursor: pointer;
   }
   :host(:state(in-list)) > .item > slot::slotted(a:not(.ui):hover),
   :is(.ui.list, .ui.list .list) > .item a:not(.ui):hover {
-    color: var(--ui-list-anchor-hover-color);
+    color: var(--_ui-list-anchor-hover-color);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -489,69 +499,69 @@
 @layer ui.components.list.variations {
   /* Horizontal:  items in a row;  the root's `font-size: 0` swallows the whitespace between them. */
   .ui.horizontal.list {
-    --ui-list-layout: horizontal;
-    --ui-list-align: middle;
-    --ui-list-item-display: inline-block;
-    --ui-list-item-width: auto;
-    --ui-list-item-font-size: var(--ui-list-font-size);
-    --ui-list-item-margin: 0 1em 0 0;
-    --ui-list-item-last-margin-right: 0;
-    --ui-list-item-first-padding-top: 0.21428571em;
-    --ui-list-item-last-padding-bottom: 0.21428571em;
-    --ui-list-item-last-padding-right: 0;
-    --ui-list-icon-display: inline-block;
-    --ui-list-icon-slot-display: contents;
-    --ui-list-icon-padding: 0 0.25em 0 0;
-    --ui-list-image-display: inline-block;
-    --ui-list-sublist-padding: 0.75em 0 0;
+    --_ui-list-layout: horizontal;
+    --_ui-list-align: middle;
+    --_ui-list-item-display: inline-block;
+    --_ui-list-item-width: auto;
+    --_ui-list-item-font-size: var(--_ui-list-font-size);
+    --_ui-list-item-margin: 0 1em 0 0;
+    --_ui-list-item-last-margin-right: 0;
+    --_ui-list-item-first-padding-top: 0.21428571em;
+    --_ui-list-item-last-padding-bottom: 0.21428571em;
+    --_ui-list-item-last-padding-right: 0;
+    --_ui-list-icon-display: inline-block;
+    --_ui-list-icon-slot-display: contents;
+    --_ui-list-icon-padding: 0 0.25em 0 0;
+    --_ui-list-image-display: inline-block;
+    --_ui-list-sublist-padding: 0.75em 0 0;
     display: inline-block;
     font-size: 0;
   }
 
   /* Bulleted:  a bullet hung before each item. */
   .ui.bulleted.list {
-    --ui-list-marker: bullet;
-    --ui-list-marker-content: "\2022";
-    --ui-list-marker-margin: 0 0 0 -1.25em;
-    --ui-list-child-marker-margin: 0 0 0 -1.25em;
-    --ui-list-sublist-padding: 0.75em 0 0.25em 1.25em;
-    --ui-list-sublist-content-padding-left: 1.25em;
+    --_ui-list-marker: bullet;
+    --_ui-list-marker-content: "\2022";
+    --_ui-list-marker-margin: 0 0 0 -1.25em;
+    --_ui-list-child-marker-margin: 0 0 0 -1.25em;
+    --_ui-list-sublist-padding: 0.75em 0 0.25em 1.25em;
+    --_ui-list-sublist-content-padding-left: 1.25em;
     margin-left: 1.25em;
   }
   .ui.horizontal.bulleted.list {
-    --ui-list-item-margin: 0 1em 0 1.75em;
-    --ui-list-item-first-margin-left: 0;
-    --ui-list-marker-color: var(--ui-text-color);
-    --ui-list-first-marker-display: none;
+    --_ui-list-item-margin: 0 1em 0 1.75em;
+    --_ui-list-item-first-margin-left: 0;
+    --_ui-list-marker-color: var(--ui-text-color);
+    --_ui-list-first-marker-display: none;
     margin-left: 0;
   }
 
   /* Ordered:  CSS counters, `1.2` in sub-lists;  `suffixed` adds a dot. */
   .ui.ordered.list {
-    --ui-list-marker: number;
-    --ui-list-marker-content: counters(ordered, ".") " ";
-    --ui-list-marker-margin: 0 0 0 -1.25em;
-    --ui-list-marker-color: var(--ui-text-color);
-    --ui-list-marker-opacity: 0.8;
-    --ui-list-marker-align: middle;
-    --ui-list-counter-increment: ordered;
-    --ui-list-counter-reset: ordered;
-    --ui-list-child-marker-margin: 0 0 0 -2em;
-    --ui-list-sublist-margin: 0 0 0 1em;
-    --ui-list-sublist-content-margin-left: 1em;
+    --_ui-list-marker: number;
+    --_ui-list-marker-content: counters(ordered, ".") " ";
+    --_ui-list-marker-margin: 0 0 0 -1.25em;
+    --_ui-list-marker-color: var(--ui-text-color);
+    --_ui-list-marker-opacity: 0.8;
+    --_ui-list-marker-align: middle;
+    --_ui-list-counter-increment: ordered;
+    --_ui-list-counter-reset: ordered;
+    --_ui-list-child-marker-margin: 0 0 0 -2em;
+    --_ui-list-sublist-margin: 0 0 0 1em;
+    --_ui-list-sublist-content-margin-left: 1em;
     margin-left: 1.25em;
     counter-reset: ordered;
   }
   .ui.suffixed.ordered.list {
-    --ui-list-marker-content: counters(ordered, ".") ".";
+    --_ui-list-marker-content: counters(ordered, ".") ".";
   }
   .ui.horizontal.ordered.list {
-    --ui-list-marker-position: static;
-    --ui-list-marker-margin: 0 0.5em 0 0;
+    --_ui-list-marker-position: static;
+    --_ui-list-marker-margin: 0 0.5em 0 0;
     margin-left: 0;
   }
   /* An item's `value` replaces its number (Fomantic's `data-value`). */
-  @container style(--ui-list-marker: number) {
+  @container style(--_ui-list-marker: number) {
     :host(:state(in-list)) > .item[data-value]::before,
     :is(.ui.list, .ui.list .list) > .item[data-value]::before {
       content: attr(data-value);
@@ -560,54 +570,54 @@
 
   /* Link:  items are links, muted until hovered;  the selected one strongest. */
   .ui.link.list {
-    --ui-list-item-color: var(--ui-text-unselected);
-    --ui-list-item-active-color: var(--ui-text-selected);
-    --ui-list-item-transition: color var(--ui-duration-fast) var(--ui-ease);
-    --ui-list-link-color: var(--ui-text-unselected);
-    --ui-list-link-hover-color: var(--ui-text-hovered);
-    --ui-list-link-down-color: var(--ui-text-pressed);
-    --ui-list-link-active-color: var(--ui-text-selected);
-    --ui-list-anchor-color: var(--ui-text-unselected);
-    --ui-list-anchor-hover-color: var(--ui-text-hovered);
+    --_ui-list-item-color: var(--ui-text-unselected);
+    --_ui-list-item-active-color: var(--ui-text-selected);
+    --_ui-list-item-transition: color var(--ui-duration-fast) var(--ui-ease);
+    --_ui-list-link-color: var(--ui-text-unselected);
+    --_ui-list-link-hover-color: var(--ui-text-hovered);
+    --_ui-list-link-down-color: var(--ui-text-pressed);
+    --_ui-list-link-active-color: var(--ui-text-selected);
+    --_ui-list-anchor-color: var(--ui-text-unselected);
+    --_ui-list-anchor-hover-color: var(--ui-text-hovered);
   }
 
   /* Selection:  items are choices with a hover background. */
   .ui.selection.list {
-    --ui-list-item-padding-block: 0.5em;
-    --ui-list-item-padding-left: 0.5em;
-    --ui-list-item-padding-right: 0.5em;
-    --ui-list-item-first-padding-top: 0.5em;
-    --ui-list-item-first-padding-left: 0.5em;
-    --ui-list-item-last-padding-bottom: 0.5em;
-    --ui-list-item-last-padding-right: 0.5em;
-    --ui-list-item-radius: 0.5em;
-    --ui-list-item-transition:
+    --_ui-list-item-padding-block: 0.5em;
+    --_ui-list-item-padding-left: 0.5em;
+    --_ui-list-item-padding-right: 0.5em;
+    --_ui-list-item-first-padding-top: 0.5em;
+    --_ui-list-item-first-padding-left: 0.5em;
+    --_ui-list-item-last-padding-bottom: 0.5em;
+    --_ui-list-item-last-padding-right: 0.5em;
+    --_ui-list-item-radius: 0.5em;
+    --_ui-list-item-transition:
       color var(--ui-duration-fast) var(--ui-ease), padding-left var(--ui-duration-fast) var(--ui-ease),
       background-color var(--ui-duration-fast) var(--ui-ease);
-    --ui-list-item-color: var(--ui-text-unselected);
-    --ui-list-item-active-color: var(--ui-text-selected);
-    --ui-list-item-hover-background: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-list-item-down-background: oklch(from var(--ui-ink) l c h / 0.1);
-    --ui-list-item-active-background: oklch(from var(--ui-ink) l c h / 0.1);
-    --ui-list-link-color: var(--ui-text-unselected);
-    --ui-list-link-hover-color: var(--ui-text-hovered);
-    --ui-list-link-down-color: var(--ui-text-pressed);
-    --ui-list-link-active-color: var(--ui-text-selected);
-    --ui-list-link-icon-color: initial;
-    --ui-list-child-item-padding-block: 0.5em;
-    --ui-list-child-item-padding-left: 0.5em;
-    --ui-list-child-item-padding-right: 0.5em;
-    --ui-list-child-item-edge-padding: 0.5em;
+    --_ui-list-item-color: var(--ui-text-unselected);
+    --_ui-list-item-active-color: var(--ui-text-selected);
+    --_ui-list-item-hover-background: oklch(from var(--ui-ink) l c h / 0.05);
+    --_ui-list-item-down-background: oklch(from var(--ui-ink) l c h / 0.1);
+    --_ui-list-item-active-background: oklch(from var(--ui-ink) l c h / 0.1);
+    --_ui-list-link-color: var(--ui-text-unselected);
+    --_ui-list-link-hover-color: var(--ui-text-hovered);
+    --_ui-list-link-down-color: var(--ui-text-pressed);
+    --_ui-list-link-active-color: var(--ui-text-selected);
+    --_ui-list-link-icon-color: initial;
+    --_ui-list-child-item-padding-block: 0.5em;
+    --_ui-list-child-item-padding-left: 0.5em;
+    --_ui-list-child-item-padding-right: 0.5em;
+    --_ui-list-child-item-edge-padding: 0.5em;
   }
 
   /* Animated:  items indent on hover (not in a row). */
   .ui.animated.list:not(.horizontal) {
-    --ui-list-animated: 1;
-    --ui-list-item-transition:
+    --_ui-list-animated: 1;
+    --_ui-list-item-transition:
       color 0.25s var(--ui-ease) 0.1s, padding-left 0.25s var(--ui-ease) 0.1s,
       background-color 0.25s var(--ui-ease) 0.1s;
   }
-  @container style(--ui-list-animated: 1) {
+  @container style(--_ui-list-animated: 1) {
     :host(:state(in-list)) > .item:hover,
     :is(.ui.list, .ui.list .list) > .item:hover {
       padding-left: 1em;
@@ -616,156 +626,156 @@
 
   /* Fitted:  no horizontal padding;  a selection list's backgrounds reach past its edges instead. */
   .ui.fitted.list:not(.selection) {
-    --ui-list-item-padding-left: 0;
-    --ui-list-item-padding-right: 0;
-    --ui-list-item-first-padding-left: 0;
-    --ui-list-item-last-padding-right: 0;
-    --ui-list-child-item-padding-left: 0;
-    --ui-list-child-item-padding-right: 0;
+    --_ui-list-item-padding-left: 0;
+    --_ui-list-item-padding-right: 0;
+    --_ui-list-item-first-padding-left: 0;
+    --_ui-list-item-last-padding-right: 0;
+    --_ui-list-child-item-padding-left: 0;
+    --_ui-list-child-item-padding-right: 0;
   }
   .ui.fitted.selection.list {
-    --ui-list-item-margin: 0 -0.5em;
-    --ui-list-item-first-margin-left: -0.5em;
-    --ui-list-item-last-margin-right: -0.5em;
-    --ui-list-child-item-margin-inline: -0.5em;
+    --_ui-list-item-margin: 0 -0.5em;
+    --_ui-list-item-first-margin-left: -0.5em;
+    --_ui-list-item-last-margin-right: -0.5em;
+    --_ui-list-child-item-margin-inline: -0.5em;
   }
 
   /* Divided:  a rule between items. */
   .ui.divided.list {
-    --ui-list-item-border-width: 1px 0 0;
-    --ui-list-item-first-border-top: 0;
+    --_ui-list-item-border-width: 1px 0 0;
+    --_ui-list-item-first-border-top: 0;
   }
   .ui.divided.bulleted.list:not(.horizontal) {
-    --ui-list-item-padding-left: 1.25em;
-    --ui-list-item-first-padding-left: 1.25em;
-    --ui-list-sublist-padding: 0.75em 0 0.25em;
-    --ui-list-sublist-content-padding-left: 0;
+    --_ui-list-item-padding-left: 1.25em;
+    --_ui-list-item-first-padding-left: 1.25em;
+    --_ui-list-sublist-padding: 0.75em 0 0.25em;
+    --_ui-list-sublist-content-padding-left: 0;
     margin-left: 0;
   }
   .ui.divided.ordered.list {
-    --ui-list-item-padding-left: 1.25em;
-    --ui-list-item-first-padding-left: 1.25em;
-    --ui-list-child-item-padding-left: 1em;
-    --ui-list-sublist-margin: 0;
-    --ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
-    --ui-list-sublist-content-margin-left: 0;
+    --_ui-list-item-padding-left: 1.25em;
+    --_ui-list-item-first-padding-left: 1.25em;
+    --_ui-list-child-item-padding-left: 1em;
+    --_ui-list-sublist-margin: 0;
+    --_ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
+    --_ui-list-sublist-content-margin-left: 0;
     margin-left: 0;
   }
   .ui.divided.selection.list {
-    --ui-list-item-radius: 0;
-    --ui-list-item-margin: 0;
+    --_ui-list-item-radius: 0;
+    --_ui-list-item-margin: 0;
   }
   .ui.divided.horizontal.list {
-    --ui-list-item-border-width: 0 1px 0 0;
-    --ui-list-item-first-border-top: 0;
-    --ui-list-item-last-border-right: 0;
-    --ui-list-item-margin: 0;
-    --ui-list-item-first-margin-left: 0;
-    --ui-list-item-padding-left: 0.5em;
-    --ui-list-item-padding-right: 0.5em;
-    --ui-list-item-first-padding-left: 0.5em;
-    --ui-list-item-last-padding-right: 0;
-    --ui-list-item-line-height: 0.6;
+    --_ui-list-item-border-width: 0 1px 0 0;
+    --_ui-list-item-first-border-top: 0;
+    --_ui-list-item-last-border-right: 0;
+    --_ui-list-item-margin: 0;
+    --_ui-list-item-first-margin-left: 0;
+    --_ui-list-item-padding-left: 0.5em;
+    --_ui-list-item-padding-right: 0.5em;
+    --_ui-list-item-first-padding-left: 0.5em;
+    --_ui-list-item-last-padding-right: 0;
+    --_ui-list-item-line-height: 0.6;
     margin-left: 0;
   }
 
   /* Celled:  a rule around every item. */
   .ui.celled.list {
-    --ui-list-item-border-width: 1px 0 0;
-    --ui-list-item-first-border-top: 1px;
-    --ui-list-item-last-border-bottom: 1px;
-    --ui-list-item-padding-left: 0.5em;
-    --ui-list-item-padding-right: 0.5em;
-    --ui-list-item-first-padding-top: 0.21428571em;
-    --ui-list-item-first-padding-left: 0.5em;
-    --ui-list-item-last-padding-bottom: 0.21428571em;
-    --ui-list-item-last-padding-right: 0.5em;
+    --_ui-list-item-border-width: 1px 0 0;
+    --_ui-list-item-first-border-top: 1px;
+    --_ui-list-item-last-border-bottom: 1px;
+    --_ui-list-item-padding-left: 0.5em;
+    --_ui-list-item-padding-right: 0.5em;
+    --_ui-list-item-first-padding-top: 0.21428571em;
+    --_ui-list-item-first-padding-left: 0.5em;
+    --_ui-list-item-last-padding-bottom: 0.21428571em;
+    --_ui-list-item-last-padding-right: 0.5em;
   }
   .ui.celled.bulleted.list {
-    --ui-list-item-padding-left: 1.25em;
-    --ui-list-item-first-padding-left: 1.25em;
-    --ui-list-child-item-padding-left: 1.25em;
-    --ui-list-sublist-margin: 0 -1.25em;
-    --ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
+    --_ui-list-item-padding-left: 1.25em;
+    --_ui-list-item-first-padding-left: 1.25em;
+    --_ui-list-child-item-padding-left: 1.25em;
+    --_ui-list-sublist-margin: 0 -1.25em;
+    --_ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
     margin-left: 0;
   }
   .ui.celled.ordered.list {
-    --ui-list-item-padding-left: 1.25em;
-    --ui-list-item-first-padding-left: 1.25em;
-    --ui-list-child-item-padding-left: 1em;
-    --ui-list-sublist-margin: 0;
-    --ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
-    --ui-list-sublist-content-margin-left: 0;
+    --_ui-list-item-padding-left: 1.25em;
+    --_ui-list-item-first-padding-left: 1.25em;
+    --_ui-list-child-item-padding-left: 1em;
+    --_ui-list-sublist-margin: 0;
+    --_ui-list-sublist-padding: 0.75em 0 0.21428571em 0.5em;
+    --_ui-list-sublist-content-margin-left: 0;
     margin-left: 0;
   }
   .ui.celled.selection.list {
-    --ui-list-item-radius: 0;
+    --_ui-list-item-radius: 0;
   }
   .ui.horizontal.celled.list {
-    --ui-list-item-border-width: 0 0 0 1px;
-    --ui-list-item-first-border-top: 0;
-    --ui-list-item-last-border-right: 1px;
-    --ui-list-item-last-border-bottom: 0;
-    --ui-list-item-margin: 0;
-    --ui-list-item-first-margin-left: 0;
-    --ui-list-item-padding-left: 0.5em;
-    --ui-list-item-padding-right: 0.5em;
-    --ui-list-item-first-padding-left: 0.5em;
-    --ui-list-item-last-padding-right: 0.5em;
-    --ui-list-item-line-height: 0.6;
+    --_ui-list-item-border-width: 0 0 0 1px;
+    --_ui-list-item-first-border-top: 0;
+    --_ui-list-item-last-border-right: 1px;
+    --_ui-list-item-last-border-bottom: 0;
+    --_ui-list-item-margin: 0;
+    --_ui-list-item-first-margin-left: 0;
+    --_ui-list-item-padding-left: 0.5em;
+    --_ui-list-item-padding-right: 0.5em;
+    --_ui-list-item-first-padding-left: 0.5em;
+    --_ui-list-item-last-padding-right: 0.5em;
+    --_ui-list-item-line-height: 0.6;
     margin-left: 0;
   }
 
   /* Relaxed:  more space between items;  `very relaxed` more still. */
   .ui.relaxed.list:not(.horizontal) {
-    --ui-list-item-padding-block: 0.42857143em;
+    --_ui-list-item-padding-block: 0.42857143em;
   }
   .ui[class*="very relaxed"].list:not(.horizontal) {
-    --ui-list-item-padding-block: 0.85714286em;
+    --_ui-list-item-padding-block: 0.85714286em;
   }
   .ui.horizontal.relaxed.list {
-    --ui-list-item-padding-left: 1em;
-    --ui-list-item-padding-right: 1em;
-    --ui-list-item-first-padding-left: 0;
-    --ui-list-item-last-padding-right: 0;
+    --_ui-list-item-padding-left: 1em;
+    --_ui-list-item-padding-right: 1em;
+    --_ui-list-item-first-padding-left: 0;
+    --_ui-list-item-last-padding-right: 0;
   }
   .ui.horizontal[class*="very relaxed"].list {
-    --ui-list-item-padding-left: 1.5em;
-    --ui-list-item-padding-right: 1.5em;
+    --_ui-list-item-padding-left: 1.5em;
+    --_ui-list-item-padding-right: 1.5em;
   }
 
   /* Inverted:  the dark scheme;  Fomantic's explicit inverted colours on top. */
   .ui.inverted.list {
     --ui-inverted: 1;
     --ui-scheme: dark;
-    --ui-list-content-color: var(--ui-text-inverted-light);
-    --ui-list-header-color: var(--ui-text-inverted-color);
-    --ui-list-description-color: var(--ui-text-inverted-light);
-    --ui-list-link-icon-color: var(--ui-text-inverted-light);
-    --ui-list-anchor-color: var(--ui-text-inverted-color);
+    --_ui-list-content-color: var(--ui-text-inverted-light);
+    --_ui-list-header-color: var(--ui-text-inverted-color);
+    --_ui-list-description-color: var(--ui-text-inverted-light);
+    --_ui-list-link-icon-color: var(--ui-text-inverted-light);
+    --_ui-list-anchor-color: var(--ui-text-inverted-color);
     color-scheme: dark;
   }
   .ui.inverted.list:not(.link, .selection) {
-    --ui-list-link-color: var(--ui-text-inverted-color);
-    --ui-list-link-active-color: var(--ui-text-inverted-color);
+    --_ui-list-link-color: var(--ui-text-inverted-color);
+    --_ui-list-link-active-color: var(--ui-text-inverted-color);
   }
   .ui.inverted.ordered.list {
-    --ui-list-marker-color: var(--ui-text-inverted-light);
+    --_ui-list-marker-color: var(--ui-text-inverted-light);
   }
   .ui.inverted.link.list {
-    --ui-list-anchor-color: var(--ui-text-inverted-unselected);
-    --ui-list-anchor-hover-color: var(--ui-text-inverted-hovered);
+    --_ui-list-anchor-color: var(--ui-text-inverted-unselected);
+    --_ui-list-anchor-hover-color: var(--ui-text-inverted-hovered);
   }
 
   /* Aligned:  the icon, image and content of every item. */
   .ui[class*="top aligned"].list {
-    --ui-list-align: top;
+    --_ui-list-align: top;
   }
   .ui[class*="middle aligned"].list {
-    --ui-list-align: middle;
+    --_ui-list-align: middle;
   }
   .ui[class*="bottom aligned"].list {
-    --ui-list-align: bottom;
+    --_ui-list-align: bottom;
   }
 
   /* Floated. */
@@ -785,25 +795,25 @@
   /* Selected (`active`):  the current link, the chosen selection item. */
   :host(:state(in-list)) > .active.item,
   :is(.ui.list, .ui.list .list) > .active.item {
-    background: var(--ui-list-item-active-background);
-    color: var(--ui-list-item-active-color, inherit);
+    background: var(--_ui-list-item-active-background);
+    color: var(--_ui-list-item-active-color, inherit);
   }
   :host(:state(in-list)) > :is(a, button).active.item,
   :is(.ui.list, .ui.list .list) > a.active.item,
   :is(.ui.selection.list, .ui.selection.list .list) > .active.item {
-    color: var(--ui-list-link-active-color);
+    color: var(--_ui-list-link-active-color);
   }
 
   /* Hovered link item:  its icon brightens. */
   :host(:state(in-list)) > :is(a, button).item:hover > .icon,
   :is(.ui.list, .ui.list .list) > a.item:hover > .icon {
-    color: var(--ui-list-link-icon-hover-color, inherit);
+    color: var(--_ui-list-link-icon-hover-color, inherit);
   }
 
   /* Disabled:  greyed, not interactive. */
   :host(:state(in-list)) > .disabled.item,
   :is(.ui.list, .ui.list .list) > .disabled.item {
-    color: var(--ui-list-disabled-color);
+    color: var(--_ui-list-disabled-color);
     pointer-events: none;
   }
 }

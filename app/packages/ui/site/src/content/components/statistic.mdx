@@ -123,12 +123,14 @@ import VocabularyTable from "../../components/VocabularyTable.astro"
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-statistic-*` tokens on each statistic's box, through `::part(statistic)` (the box
-  declares its own defaults, so a value set on the host tag doesn't reach it).  The group's box is
-  `::part(group)`.  The `value` and `label` parts style the shorthands.
+  Theme with the public `--ui-statistic-*` tokens:  set one on the element, on any ancestor (a `<ui-statistics>`
+  group, `:root`), or on the box through `::part(statistic)` (the group's box is `::part(group)`).  They inherit into
+  the shadow root, where the sheet reads each through a private alias, so nothing inside blocks them.
+  `--ui-statistic-value-size` and `--ui-statistic-text-value-size` replace the size ladder's value sizes;
+  `horizontal` swaps in its own ladder.  The `value` and `label` parts style the shorthands.
 
 ```css
-ui-statistic::part(statistic) {
+ui-statistics {
   --ui-statistic-horizontal-spacing: 2.5em;
   --ui-statistic-row-spacing: 2em;
 }
@@ -137,7 +139,13 @@ ui-statistic::part(label) {
 }
 ```
 
-  <CssTokens family="statistic" />
+  <CssTokens
+    family="statistic"
+    defaults={{
+      "--ui-statistic-value-size": "4 × --ui-font-size;  horizontal 3 ×;  sizes 1.5 × ... 7 ×",
+      "--ui-statistic-text-value-size": "2 × --ui-font-size;  sizes 1 × ... 3 ×"
+    }}
+  />
 </Section>
 
 <Section title="Accessibility">

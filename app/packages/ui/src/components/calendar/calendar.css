@@ -5,7 +5,7 @@
  * - Shadow markup contract (class grammar on semantic elements):
  *
  *     <div class="ui [size color] [inverted compact fluid] calendar [active] [disabled]" part="calendar"
- *          style="--ui-calendar-anchor: --ui-calendar-7">
+ *          style="--_ui-calendar-anchor: --ui-calendar-7">
  *       <div class="ui left icon input [fluid] [disabled]" part="input">          (popup calendars)
  *         <input part="control">
  *         <button class="icon" part="trigger" aria-haspopup="dialog"><svg></button>
@@ -32,7 +32,7 @@
  *   - the table's last class is the view:  `year`, `month`, `day`, `hour`, `minute` (Fomantic's widths key on it)
  *   - NOTE: `.ui.calendar` also matches the popup (`ui calendar popup`, Fomantic's own class list), so rules for
  *     the ROOT say `.ui.calendar:not(.popup)`
- * - Positioning:  POPOVER + ANCHOR, no JS.  The field is the anchor (`anchor-name: var(--ui-calendar-anchor)`,
+ * - Positioning:  POPOVER + ANCHOR, no JS.  The field is the anchor (`anchor-name: var(--_ui-calendar-anchor)`,
  *   set per instance by the element);  `position-area` from the position words, flipping when there's no room.
  *   A popup WITHOUT `popover` (static markup) shows in flow while `visible`.
  * - Header:  a row of buttons ABOVE the table, not Fomantic's first `<th colspan>` row:  a grid's rows are its
@@ -45,6 +45,12 @@
  *   come for free.
  * - Focus:  the grid keeps ONE real tab stop (`tabindex="0"`, class `focus`);  while focus is in the grid it gets
  *   Fomantic's inset ring (2px here, for WCAG 2.4.11), the only focus indicator the cells need.
+ * - Public tokens (`--ui-calendar-*`, the theming surface) are NEVER declared here:  the token block reads each
+ *   through a private alias, `--_ui-calendar-radius: var(--ui-calendar-radius, var(--ui-radius))`, and every rule
+ *   reads the alias.  So a value set on `:root`, an ancestor, the host, `::part(calendar)` / `::part(popup)` or in
+ *   the app stylesheet reaches the box (`docs/theming.md` "Component tokens").  The popup re-declares them, so
+ *   `compact` writes a private `--_calendar-cell-padding` read in front of the alias.  `--_ui-calendar-anchor` (the
+ *   field's anchor name, set inline by the element) is a private switch.
  * - NOTE: left out, on purpose:
  *   - multi-month (`.ui.grid` of tables), week numbers (`andweek`), event dates:  no element support yet
  *   - Fomantic's `touchReadonly` field and the `.inline.field` append target
@@ -83,37 +89,46 @@
     outline: none;
   }
 
-  /* Tokens:  one per `calendar.variables` entry, from the global tokens;  declared on the root AND the popup. */
+  /*
+   * Tokens:  one per `calendar.variables` entry, from the global tokens;  declared on the root AND the popup, each
+   * the private alias of its public token (never declare the public one:  it would block inherited values).
+   */
   .ui.calendar {
-    --ui-calendar-background: var(--ui-surface);
-    --ui-calendar-color: var(--ui-text-color);
-    --ui-calendar-border-color: var(--ui-border-color-strong);
-    --ui-calendar-internal-border: var(--ui-border-color-internal);
-    --ui-calendar-header-background: var(--ui-surface-muted);
-    --ui-calendar-radius: var(--ui-radius);
-    --ui-calendar-shadow: var(--ui-shadow-floating);
-    --ui-calendar-distance: 0.5em;
-    --ui-calendar-focus-color: var(--ui-color, var(--ui-focus-border));
-    --ui-calendar-focus-width: 2px;
-    --ui-calendar-today-font-weight: var(--ui-font-weight-bold);
-    --ui-calendar-active-background: var(--ui-color, color-mix(in oklab, var(--ui-ink) 12%, var(--ui-surface)));
-    --ui-calendar-active-color: var(--ui-color-on, var(--ui-text-selected));
-    --ui-calendar-hover-background: oklch(from var(--ui-ink) l c h / 0.05);
-    --ui-calendar-range-background: var(--ui-color-background, oklch(from var(--ui-ink) l c h / 0.05));
-    --ui-calendar-range-color: var(--ui-color-text, var(--ui-text-selected));
-    --ui-calendar-adjacent-color: var(--ui-text-muted);
-    --ui-calendar-adjacent-background: oklch(from var(--ui-ink) l c h / 0.02);
-    --ui-calendar-disabled-color: var(--ui-text-disabled);
-    --ui-calendar-disabled-opacity: var(--ui-disabled-opacity);
-    --ui-calendar-cell-padding: 0.5em;
-    --ui-calendar-cell-inline-padding: 0.1em;
-    --ui-calendar-head-padding-top: 0.2em;
-    --ui-calendar-head-padding-bottom: 0.3em;
-    --ui-calendar-prev-next-width: calc(100% / 7);
-    --ui-calendar-width-year-month-minute: 15em;
-    --ui-calendar-width-day: 18em;
-    --ui-calendar-width-hour: 20em;
-    --ui-calendar-compact-padding: 0.3em;
+    --_ui-calendar-background: var(--ui-calendar-background, var(--ui-surface));
+    --_ui-calendar-color: var(--ui-calendar-color, var(--ui-text-color));
+    --_ui-calendar-border-color: var(--ui-calendar-border-color, var(--ui-border-color-strong));
+    --_ui-calendar-internal-border: var(--ui-calendar-internal-border, var(--ui-border-color-internal));
+    --_ui-calendar-header-background: var(--ui-calendar-header-background, var(--ui-surface-muted));
+    --_ui-calendar-radius: var(--ui-calendar-radius, var(--ui-radius));
+    --_ui-calendar-shadow: var(--ui-calendar-shadow, var(--ui-shadow-floating));
+    --_ui-calendar-distance: var(--ui-calendar-distance, 0.5em);
+    --_ui-calendar-focus-color: var(--ui-calendar-focus-color, var(--ui-color, var(--ui-focus-border)));
+    --_ui-calendar-focus-width: var(--ui-calendar-focus-width, 2px);
+    --_ui-calendar-today-font-weight: var(--ui-calendar-today-font-weight, var(--ui-font-weight-bold));
+    --_ui-calendar-active-background: var(
+      --ui-calendar-active-background,
+      var(--ui-color, color-mix(in oklab, var(--ui-ink) 12%, var(--ui-surface)))
+    );
+    --_ui-calendar-active-color: var(--ui-calendar-active-color, var(--ui-color-on, var(--ui-text-selected)));
+    --_ui-calendar-hover-background: var(--ui-calendar-hover-background, oklch(from var(--ui-ink) l c h / 0.05));
+    --_ui-calendar-range-background: var(
+      --ui-calendar-range-background,
+      var(--ui-color-background, oklch(from var(--ui-ink) l c h / 0.05))
+    );
+    --_ui-calendar-range-color: var(--ui-calendar-range-color, var(--ui-color-text, var(--ui-text-selected)));
+    --_ui-calendar-adjacent-color: var(--ui-calendar-adjacent-color, var(--ui-text-muted));
+    --_ui-calendar-adjacent-background: var(--ui-calendar-adjacent-background, oklch(from var(--ui-ink) l c h / 0.02));
+    --_ui-calendar-disabled-color: var(--ui-calendar-disabled-color, var(--ui-text-disabled));
+    --_ui-calendar-disabled-opacity: var(--ui-calendar-disabled-opacity, var(--ui-disabled-opacity));
+    --_ui-calendar-cell-padding: var(--ui-calendar-cell-padding, 0.5em);
+    --_ui-calendar-cell-inline-padding: var(--ui-calendar-cell-inline-padding, 0.1em);
+    --_ui-calendar-head-padding-top: var(--ui-calendar-head-padding-top, 0.2em);
+    --_ui-calendar-head-padding-bottom: var(--ui-calendar-head-padding-bottom, 0.3em);
+    --_ui-calendar-prev-next-width: var(--ui-calendar-prev-next-width, calc(100% / 7));
+    --_ui-calendar-width-year-month-minute: var(--ui-calendar-width-year-month-minute, 15em);
+    --_ui-calendar-width-day: var(--ui-calendar-width-day, 18em);
+    --_ui-calendar-width-hour: var(--ui-calendar-width-hour, 20em);
+    --_ui-calendar-compact-padding: var(--ui-calendar-compact-padding, 0.3em);
   }
 
   /* Root */
@@ -123,7 +138,7 @@
     display: inline-block;
     max-inline-size: 100%;
     anchor-scope: all;
-    color: var(--ui-calendar-color);
+    color: var(--_ui-calendar-color);
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     line-height: var(--ui-line-height);
@@ -133,12 +148,12 @@
   /* The field:  the anchor;  its icon box is a real button that opens the popup. */
   .ui.calendar > .ui.input {
     display: flex;
-    anchor-name: var(--ui-calendar-anchor, --ui-calendar);
+    anchor-name: var(--_ui-calendar-anchor, --ui-calendar);
   }
   .ui.calendar > .ui.input > button.icon {
     padding: 0;
     border: 0;
-    border-radius: var(--ui-calendar-radius);
+    border-radius: var(--_ui-calendar-radius);
     background: none;
     font: inherit;
     pointer-events: auto;
@@ -161,10 +176,10 @@
     box-sizing: border-box;
     padding: 0;
     overflow: hidden;
-    border: var(--ui-border-width) solid var(--ui-calendar-border-color);
-    border-radius: var(--ui-calendar-radius);
-    background: var(--ui-calendar-background);
-    color: var(--ui-calendar-color);
+    border: var(--ui-border-width) solid var(--_ui-calendar-border-color);
+    border-radius: var(--_ui-calendar-radius);
+    background: var(--_ui-calendar-background);
+    color: var(--_ui-calendar-color);
     font-size: 1em;
     line-height: var(--ui-line-height);
     text-align: center;
@@ -186,11 +201,11 @@
     z-index: var(--ui-z-popup);
     display: none;
     inline-size: min-content;
-    margin: var(--ui-calendar-distance) 0;
-    box-shadow: var(--ui-calendar-shadow);
+    margin: var(--_ui-calendar-distance) 0;
+    box-shadow: var(--_ui-calendar-shadow);
   }
   .ui.calendar > .ui.popup[popover] {
-    position-anchor: var(--ui-calendar-anchor, --ui-calendar);
+    position-anchor: var(--_ui-calendar-anchor, --ui-calendar);
     position-area: block-end span-inline-end;
     position-try-fallbacks: flip-block, flip-inline;
     inset: auto;
@@ -207,14 +222,14 @@
   .ui.calendar .header {
     display: flex;
     align-items: stretch;
-    border-block-end: var(--ui-border-width) solid var(--ui-calendar-internal-border);
-    background: var(--ui-calendar-header-background);
+    border-block-end: var(--ui-border-width) solid var(--_ui-calendar-internal-border);
+    background: var(--_ui-calendar-header-background);
     font-weight: var(--ui-font-weight-bold);
   }
   .ui.calendar .header > button {
     box-sizing: border-box;
     margin: 0;
-    padding: var(--ui-calendar-cell-padding) 0;
+    padding: var(--_calendar-cell-padding, var(--_ui-calendar-cell-padding)) 0;
     border: 0;
     background: none;
     color: inherit;
@@ -225,7 +240,7 @@
   }
   .ui.calendar .header > :is(.prev, .next).link {
     display: flex;
-    flex: 0 0 var(--ui-calendar-prev-next-width);
+    flex: 0 0 var(--_ui-calendar-prev-next-width);
     align-items: center;
     justify-content: center;
   }
@@ -255,29 +270,29 @@
   .ui.calendar .ui.table.year,
   .ui.calendar .ui.table.month,
   .ui.calendar .ui.table.minute {
-    min-inline-size: var(--ui-calendar-width-year-month-minute);
+    min-inline-size: var(--_ui-calendar-width-year-month-minute);
   }
   .ui.calendar .ui.table.day {
-    min-inline-size: var(--ui-calendar-width-day);
+    min-inline-size: var(--_ui-calendar-width-day);
   }
   .ui.calendar .ui.table.hour {
-    min-inline-size: var(--ui-calendar-width-hour);
+    min-inline-size: var(--_ui-calendar-width-hour);
   }
   .ui.calendar .ui.table :is(th, td) {
-    padding: var(--ui-calendar-cell-padding) var(--ui-calendar-cell-inline-padding);
+    padding: var(--_calendar-cell-padding, var(--_ui-calendar-cell-padding)) var(--_ui-calendar-cell-inline-padding);
     white-space: nowrap;
   }
   .ui.calendar .ui.table td {
-    border-block-start: var(--ui-border-width) solid var(--ui-calendar-internal-border);
+    border-block-start: var(--ui-border-width) solid var(--_ui-calendar-internal-border);
   }
   .ui.calendar .ui.table td + td {
-    border-inline-start: var(--ui-border-width) solid var(--ui-calendar-internal-border);
+    border-inline-start: var(--ui-border-width) solid var(--_ui-calendar-internal-border);
   }
   .ui.calendar .ui.table tbody tr:first-child td {
     border-block-start: 0;
   }
   .ui.calendar .ui.table thead + tbody tr:first-child td {
-    border-block-start: var(--ui-border-width) solid var(--ui-calendar-internal-border);
+    border-block-start: var(--ui-border-width) solid var(--_ui-calendar-internal-border);
   }
   .ui.calendar .ui.table tr .link {
     cursor: pointer;
@@ -294,9 +309,9 @@
 @layer ui.components.calendar.content {
   /* Weekday heads */
   .ui.calendar .ui.table thead th {
-    padding-block: var(--ui-calendar-head-padding-top) var(--ui-calendar-head-padding-bottom);
+    padding-block: var(--_ui-calendar-head-padding-top) var(--_ui-calendar-head-padding-bottom);
     border: 0;
-    background: var(--ui-calendar-header-background);
+    background: var(--_ui-calendar-header-background);
     font-weight: var(--ui-font-weight-bold);
   }
 
@@ -306,9 +321,9 @@
     box-sizing: border-box;
     inline-size: 100%;
     margin: 0;
-    padding: var(--ui-calendar-cell-padding);
+    padding: var(--_calendar-cell-padding, var(--_ui-calendar-cell-padding));
     border: 0;
-    border-block-start: var(--ui-border-width) solid var(--ui-calendar-internal-border);
+    border-block-start: var(--ui-border-width) solid var(--_ui-calendar-internal-border);
     background: none;
     color: inherit;
     font: inherit;
@@ -342,9 +357,12 @@
     inline-size: auto;
   }
 
-  /* Compact:  tighter cells. */
+  /*
+   * Compact:  tighter cells.  A private variation token in front of the alias, NOT the alias:  the popup
+   * (`ui calendar popup`) re-declares every alias, so a write on the root would never reach its cells.
+   */
   .ui.compact.calendar {
-    --ui-calendar-cell-padding: var(--ui-calendar-compact-padding);
+    --_calendar-cell-padding: var(--_ui-calendar-compact-padding);
   }
 
   /* Inverted:  the picker in the dark scheme;  every token re-resolves where it's used. */
@@ -364,55 +382,55 @@
   .ui.calendar .ui.table td.link:not(.disabled, .active):hover,
   .ui.calendar :is(.header, .today) > button:not(:disabled):hover,
   .ui.calendar .today.link:hover {
-    background: var(--ui-calendar-hover-background);
+    background: var(--_ui-calendar-hover-background);
   }
 
   /* Adjacent month days */
   .ui.calendar .ui.table tr .adjacent:not(.disabled, .active) {
-    background: var(--ui-calendar-adjacent-background);
-    color: var(--ui-calendar-adjacent-color);
+    background: var(--_ui-calendar-adjacent-background);
+    color: var(--_ui-calendar-adjacent-color);
   }
 
   /* Today */
   .ui.calendar .ui.table tr td.today {
-    font-weight: var(--ui-calendar-today-font-weight);
+    font-weight: var(--_ui-calendar-today-font-weight);
   }
 
   /* Range */
   .ui.calendar .ui.table tr td.range {
-    background: var(--ui-calendar-range-background);
+    background: var(--_ui-calendar-range-background);
     box-shadow: none;
-    color: var(--ui-calendar-range-color);
+    color: var(--_ui-calendar-range-color);
   }
 
   /* Chosen */
   .ui.calendar .ui.table tr td.active {
-    background: var(--ui-calendar-active-background);
-    color: var(--ui-calendar-active-color);
+    background: var(--_ui-calendar-active-background);
+    color: var(--_ui-calendar-active-color);
   }
 
   /* Focus:  the tab stop's ring, while focus is in the grid (or the static `focus` class on an open popup). */
   .ui.calendar .ui.table:focus-within tbody tr td.focus,
   .ui.calendar > .ui.popup:not([popover]).visible .ui.table tbody tr td.focus {
-    box-shadow: inset 0 0 0 var(--ui-calendar-focus-width) var(--ui-calendar-focus-color);
+    box-shadow: inset 0 0 0 var(--_ui-calendar-focus-width) var(--_ui-calendar-focus-color);
   }
   /* on the chosen cell (filled with the same hue) a gap in the box's colour keeps the ring visible */
   .ui.calendar .ui.table:focus-within tbody tr td.focus.active,
   .ui.calendar > .ui.popup:not([popover]).visible .ui.table tbody tr td.focus.active {
     box-shadow:
-      inset 0 0 0 var(--ui-calendar-focus-width) var(--ui-calendar-focus-color),
-      inset 0 0 0 calc(2 * var(--ui-calendar-focus-width)) var(--ui-calendar-background);
+      inset 0 0 0 var(--_ui-calendar-focus-width) var(--_ui-calendar-focus-color),
+      inset 0 0 0 calc(2 * var(--_ui-calendar-focus-width)) var(--_ui-calendar-background);
   }
   .ui.calendar :is(.header, .today) > button:focus-visible,
   .ui.calendar .today.link:focus-visible {
-    outline: var(--ui-calendar-focus-width) solid var(--ui-calendar-focus-color);
-    outline-offset: calc(-1 * var(--ui-calendar-focus-width));
+    outline: var(--_ui-calendar-focus-width) solid var(--_ui-calendar-focus-color);
+    outline-offset: calc(-1 * var(--_ui-calendar-focus-width));
   }
 
   /* Disabled cells and buttons:  grey, still focusable (APG), not choosable. */
   .ui.ui.calendar .ui.table tr .disabled,
   .ui.calendar .header > button:disabled {
-    color: var(--ui-calendar-disabled-color);
+    color: var(--_ui-calendar-disabled-color);
     cursor: default;
   }
   .ui.calendar .header > .title.link:disabled {
@@ -421,7 +439,7 @@
 
   /* Disabled calendar */
   .ui.disabled.calendar:not(.popup) {
-    opacity: var(--ui-calendar-disabled-opacity);
+    opacity: var(--_ui-calendar-disabled-opacity);
   }
   .ui.disabled.calendar > .ui.input,
   .ui.disabled.calendar .ui.table tr .link,

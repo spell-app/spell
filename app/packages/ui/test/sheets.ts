@@ -97,14 +97,15 @@ export class Sheets {
 
   /**
    * Class phrases `vocabulary` can emit for class-bearing attributes, one attribute at a time.
-   * - `size` / `color` are left out:  `sizes.css` / `colors.css` own those remaps.
+   * - `size` / `color` are left out:  `sizes.css` / `colors.css` own those remaps.  `valueOnly` too (it was `color`
+   *   until 2026-09-30, and states such as `error` are `colors.css` remaps).
    */
   static classPhrases(vocabulary: ComponentVocabulary): string[] {
     const builder = new ClassBuilder(vocabulary)
     const skip = new Set(["ui", vocabulary.noun])
     const phrases = new Set<string>()
     for (const spec of vocabulary.attributes) {
-      if (spec.kind === "size" || spec.kind === "color") continue
+      if (spec.kind === "size" || spec.kind === "color" || spec.kind === "valueOnly") continue
       const values: (string | true)[] =
         spec.kind === "keyOnly"
           ? [true]

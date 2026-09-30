@@ -122,6 +122,14 @@ describe("select.css examples", () => {
     await userEvent.keyboard("{Escape}")
   })
 
+  it("takes a public token from a wrapper (static markup)", () => {
+    adoptIntoPage(SHEETS)
+    const root = Fixture.render(
+      `<div style="--ui-select-radius: 12px"><select class="ui select" aria-label="A"><option>A</option></select></div>`
+    )
+    expect(getComputedStyle(root.querySelector("select")!).borderTopLeftRadius).toBe("12px")
+  })
+
   it("scales by size;  medium is the default", () => {
     adoptIntoPage(SHEETS)
     const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)

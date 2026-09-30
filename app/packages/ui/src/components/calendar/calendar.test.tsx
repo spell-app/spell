@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -86,7 +86,7 @@ describe("<ui-calendar> markup", () => {
   it("renders a field, an icon button and a closed popover dialog", async () => {
     const { root, input, trigger, popup } = await calendar(DATE)
     expect(root.className).toBe("ui calendar")
-    expect(root.style.getPropertyValue("--ui-calendar-anchor")).toMatch(/^--ui-calendar-\d+$/)
+    expect(root.style.getPropertyValue("--_ui-calendar-anchor")).toMatch(/^--ui-calendar-\d+$/)
     expect(input.parentElement!.className).toBe("ui left icon input")
     expect(input.value).toBe("September 30, 2026")
     expect(input.getAttribute("aria-label")).toBe("Due")
@@ -622,6 +622,62 @@ describe("<ui-calendar> forms", () => {
     await ElementFixture.tick()
     expect(host.value).toBe("2026-02-14")
     expect(new FormData(form).get("day")).toBe("2026-02-14")
+  })
+})
+
+describe("<ui-calendar> tokens from outside", () => {
+  /** The first cell's top padding, which `--ui-calendar-cell-padding` drives. */
+  function cellPadding(host: Calendar): string {
+    return getComputedStyle(parts(host).cells()[0]!).paddingTop
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await calendar(
+      INLINE.replace("<ui-calendar", `<ui-calendar style="--ui-calendar-cell-padding: 20px"`)
+    )
+    expect(cellPadding(host)).toBe("20px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<section style="--ui-calendar-cell-padding: 20px"><div>${INLINE}</div></section>`
+    )
+    expect(cellPadding(wrapper.querySelector<Calendar>("ui-calendar")!)).toBe("20px")
+  })
+
+  it("takes a token set through `::part(calendar)`", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><style>.themed::part(calendar) { --ui-calendar-cell-padding: 20px }</style>${INLINE.replace("<ui-calendar", `<ui-calendar class="themed"`)}</div>`
+    )
+    expect(cellPadding(wrapper.querySelector<Calendar>("ui-calendar")!)).toBe("20px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-calendar-cell-padding", "20px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-calendar-cell-padding")
+    })
+    const { host } = await calendar(INLINE)
+    expect(cellPadding(host)).toBe("20px")
+  })
+
+  it("reaches the popup's cells, set on the host;  `compact` reaches them too", async () => {
+    const { host, trigger } = await calendar(
+      DATE.replace("<ui-calendar", `<ui-calendar style="--ui-calendar-cell-padding: 20px"`)
+    )
+    trigger.click()
+    await ElementFixture.tick()
+    expect(cellPadding(host)).toBe("20px")
+    const { host: compact, trigger: compactTrigger } = await calendar(
+      DATE.replace("<ui-calendar", "<ui-calendar compact")
+    )
+    compactTrigger.click()
+    await ElementFixture.tick()
+    const cell = parts(compact).cells()[0]!
+    expect(parseFloat(getComputedStyle(cell).paddingTop)).toBeCloseTo(
+      0.3 * parseFloat(getComputedStyle(cell).fontSize),
+      1
+    )
   })
 })
 

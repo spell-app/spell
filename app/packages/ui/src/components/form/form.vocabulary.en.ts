@@ -5,7 +5,7 @@
  *   `<ui-form size="large" state="error">` => `ui large error form`;  `<ui-field width="4" required>` =>
  *   `required four wide field`;  `<ui-fields widths="2" inline>` => `inline two fields`,
  *   `widths="equal"` => `equal width fields`.  Fields have no `ui` (Fomantic styles them inside `.ui.form`).
- * - `state` is `kind: "color"`:  it emits its value alone (`error field`), a remap in `colors.css`.
+ * - `state` is `kind: "valueOnly"`:  it emits its value alone (`error field`), a remap in `colors.css`.
  * - Validation lives on `<ui-form>`:  `rules` is a PROPERTY (`json`) in Fomantic's `fields` shape.
  */
 
@@ -35,10 +35,10 @@ export const formVocabulary = {
     { name: "size", kind: "size", description: "Size of everything inside, `mini` ... `massive`." },
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: FORM_STATES,
       description:
-        'Form state:  shows the `<ui-message>`s of that state inside.  Failed validation sets `error` on top.  NOTE: `kind: "color"`.'
+        "Form state:  shows the `<ui-message>`s of that state inside.  Failed validation sets `error` on top."
     },
     {
       name: "equal-width",
@@ -126,10 +126,9 @@ export const fieldVocabulary = {
   attributes: [
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: FORM_STATES,
-      description:
-        'Field state:  tints its label and controls.  Failed validation shows `error` on top.  NOTE: `kind: "color"`.'
+      description: "Field state:  tints its label and controls.  Failed validation shows `error` on top."
     },
     { name: "inline", kind: "keyOnly", description: "Label beside the control, not above it." },
     {
@@ -172,9 +171,9 @@ export const fieldsVocabulary = {
   attributes: [
     {
       name: "state",
-      kind: "color",
+      kind: "valueOnly",
       values: FORM_STATES,
-      description: 'State of every field inside.  NOTE: `kind: "color"`.'
+      description: "State of every field inside."
     },
     { name: "inline", kind: "keyOnly", description: "Fields and their labels on one line." },
     { name: "grouped", kind: "keyOnly", description: "Fields stacked under one label (radio / checkbox groups)." },

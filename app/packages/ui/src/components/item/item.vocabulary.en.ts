@@ -29,16 +29,14 @@ export const itemVocabulary = {
     },
     {
       name: "position",
-      kind: "color",
+      kind: "valueOnly",
       values: ["left", "right"],
-      description:
-        'Menu:  `right` pushes the item (and what follows) to the far end.  NOTE: `kind: "color"` because it emits ' +
-        "its value alone (`right item`)."
+      description: "Menu:  `right` pushes the item (and what follows) to the far end."
     },
     { name: "value", kind: "string", description: "Value;  defaults to `text`.  Ordered list:  shown as the marker." },
     { name: "text", kind: "string", description: "Dropdown:  text;  defaults to the text content." },
     { name: "description", kind: "string", description: "Dropdown:  secondary text, shown at the end." },
-    { name: "icon", kind: "string", description: "Icon name, shown before the text." },
+    { name: "icon", kind: "icon", description: "Icon name, shown before the text." },
     {
       name: "image",
       kind: "string",

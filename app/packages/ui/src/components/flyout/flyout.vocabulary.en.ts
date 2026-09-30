@@ -28,12 +28,10 @@ export const flyoutVocabulary = {
   attributes: [
     {
       name: "position",
-      kind: "color",
+      kind: "valueOnly",
       values: ["left", "right", "top", "bottom"],
       default: "left",
-      description:
-        'Edge it slides in from:  `left` (default), `right`, `top`, `bottom`.  NOTE: `kind: "color"` because it ' +
-        "emits its value alone."
+      description: "Edge it slides in from:  `left` (default), `right`, `top`, `bottom`."
     },
     { name: "fullscreen", kind: "keyOnly", description: "The whole viewport wide." },
     { name: "inverted", kind: "keyOnly", description: "The dark scheme." },

@@ -77,6 +77,17 @@ describe("button.css examples", () => {
     }
   })
 
+  it("takes a public token from a wrapper or the button itself (static markup)", () => {
+    adoptIntoPage([...foundationCSS, buttonCSS])
+    const root = Fixture.render(
+      `<div style="--ui-button-radius: 20px"><button class="ui button">A</button></div>` +
+        `<button class="ui button" style="--ui-button-padding-block: 20px">B</button>`
+    )
+    const wrapped = root.querySelector(".ui.button")!
+    expect(getComputedStyle(wrapped).borderTopLeftRadius).toBe("20px")
+    expect(getComputedStyle(root.nextElementSibling!).paddingTop).toBe("20px")
+  })
+
   it("fills primary with the resolved --ui-blue", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
     const root = Fixture.render(EXAMPLES["./examples/types.html"]!)

@@ -19,8 +19,10 @@ type Vocabulary = typeof stickyVocabulary
  * - The host is `display: contents`, so the sentinels and the box are children of the host's PARENT, which is the
  *   box's containing block:  it sticks within its parent (Fomantic's `context`), whose end pushes it out
  *   (`:state(bound)`).
- * - `offset` / `bottom-offset` become `top` / `bottom` (custom properties `--ui-sticky-offset` /
- *   `--ui-sticky-bottom-offset`, inline on the box);  `pushing` also sticks it to the bottom edge.
+ * - `offset` / `bottom-offset` become `top` / `bottom` (the PRIVATE custom properties `--_ui-sticky-offset` /
+ *   `--_ui-sticky-bottom-offset`, inline on the box);  `pushing` also sticks it to the bottom edge.
+ *   - private:  the attributes decide them (the observer measures against the same numbers), and an inline
+ *     public name would block the page's value exactly like a sheet declaration
  * - Stuck:  the top sentinel (where the box would be) has passed the `offset` line while the box hasn't been pushed
  *   above it;  with `pushing`, also:  the bottom sentinel is below the bottom line.  Measured on every observer
  *   callback, against the nearest scroll container (else the document's viewport).
@@ -204,6 +206,6 @@ const BOTTOM = "bottom"
 const SENTINEL = "sentinel"
 const BOTTOM_SENTINEL = "bottom sentinel"
 
-/** Custom properties the box reads (`sticky.css`). */
-const OFFSET_PROPERTY = "--ui-sticky-offset"
-const BOTTOM_OFFSET_PROPERTY = "--ui-sticky-bottom-offset"
+/** Private custom properties the box reads (`sticky.css`), which win over the public tokens' aliases. */
+const OFFSET_PROPERTY = "--_ui-sticky-offset"
+const BOTTOM_OFFSET_PROPERTY = "--_ui-sticky-bottom-offset"

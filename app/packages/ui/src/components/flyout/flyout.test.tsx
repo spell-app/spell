@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -60,12 +60,71 @@ async function settle() {
 beforeEach(async () => {
   await UI.load()
   UI.overlays.useCloseWatcher = false
-  // speeds the slide up (a page `::part` rule beats the shadow's own)
+  // speeds the slide up (the dialog's alias reads the page's `::part` value)
   Fixture.render(`<style>ui-flyout::part(flyout) { --ui-flyout-duration: 1ms }</style>`)
 })
 
 afterEach(() => {
   for (const host of document.querySelectorAll<Flyout>("ui-flyout")) host.open = false
+})
+
+describe("<ui-flyout> tokens from outside", () => {
+  /** The dialog's width. */
+  function width(host: Element): string {
+    return getComputedStyle(host.shadowRoot!.querySelector("dialog")!).width
+  }
+
+  /** The inner box of the first `<ui-header>` in `root`. */
+  function header(root: Element): Element {
+    return root.querySelector("ui-header")!.shadowRoot!.firstElementChild!
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { host } = await flyout(`<ui-flyout style="--ui-flyout-width: 321px">x</ui-flyout>`)
+    expect(width(host)).toBe("321px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const { host } = await flyout(`<section style="--ui-flyout-width: 321px"><ui-flyout>x</ui-flyout></section>`)
+    expect(width(host)).toBe("321px")
+  })
+
+  it("takes a token set through `::part(flyout)`", async () => {
+    const { host } = await flyout(
+      `<style>.themed::part(flyout) { --ui-flyout-width: 321px }</style><ui-flyout class="themed">x</ui-flyout>`
+    )
+    expect(width(host)).toBe("321px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-flyout-width", "321px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-flyout-width")
+    })
+    const { host } = await flyout(`<ui-flyout>x</ui-flyout>`)
+    expect(width(host)).toBe("321px")
+  })
+
+  it("a `width` swaps it", async () => {
+    const { host } = await flyout(`<ui-flyout width="thin" style="--ui-flyout-width: 321px">x</ui-flyout>`)
+    expect(width(host)).toBe("200px")
+  })
+
+  it("owner tokens:  a part look token set on the flyout or above it reaches a slotted header;  `inverted` swaps it", async () => {
+    const red = "rgb(255, 0, 0)"
+    const { wrapper: onFlyout } = await flyout(
+      `<ui-flyout style="--ui-flyout-header-color: ${red}"><ui-header>H</ui-header></ui-flyout>`
+    )
+    expect(getComputedStyle(header(onFlyout)).color).toBe(red)
+    const { wrapper: above } = await flyout(
+      `<section style="--ui-flyout-header-color: ${red}"><ui-flyout><ui-header>H</ui-header></ui-flyout></section>`
+    )
+    expect(getComputedStyle(header(above)).color).toBe(red)
+    const { wrapper: inverted } = await flyout(
+      `<ui-flyout inverted style="--ui-flyout-header-color: ${red}"><ui-header>H</ui-header></ui-flyout>`
+    )
+    expect(getComputedStyle(header(inverted)).color).not.toBe(red)
+  })
 })
 
 describe("<ui-flyout> classes", () => {
@@ -232,6 +291,20 @@ describe("<ui-flyout> behaviour (DialogElement)", () => {
     await settle()
     expect(dialog.open).toBe(false)
     expect(document.activeElement).toBe(show)
+  })
+
+  it("with CloseWatcher (the browser's close requests), Escape closes one opened by a click", async () => {
+    UI.overlays.useCloseWatcher = true
+    const { host, dialog, wrapper } = await flyout(`<ui-flyout id="f" header="Hi">x</ui-flyout>`)
+    wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="f" command="--show">Show</button>`)
+    const closes = record(host, "ui-close")
+    const shown = next(host, "ui-show")
+    await userEvent.click(wrapper.querySelector("#show")!)
+    await shown
+    await userEvent.keyboard("{Escape}")
+    await settle()
+    expect(closes.map((detail) => detail.reason)).toEqual(["escape"])
+    expect(dialog.open).toBe(false)
   })
 
   it("is named by its header shorthand or aria-label", async () => {

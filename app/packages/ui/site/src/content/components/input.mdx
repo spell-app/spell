@@ -154,12 +154,14 @@ input.addEventListener("ui-change", (event) => console.log(event.detail.value, i
 </Section>
 
 <Section title="Theming">
-  Theme with the public `--ui-input-*` tokens, set on the root box through `::part(input)` (the box declares its own
-  defaults, so a value set on the host tag doesn't reach it).  Style the native control with `::part(control)`.
+  Theme with the public `--ui-input-*` tokens:  set one on the element, on any ancestor (a form, `:root`), or on the
+  root box through `::part(input)`.  They inherit into the shadow root, where the sheet reads each through a private
+  alias, so nothing inside blocks them;  `<ui-textarea>` reads the same set.  Style the native control with
+  `::part(control)`.
 
 ```css
-ui-input::part(input),
-ui-textarea::part(input) {
+ui-input,
+ui-textarea {
   --ui-input-radius: 0;
   --ui-input-border-color-focus: var(--ui-primary);
 }

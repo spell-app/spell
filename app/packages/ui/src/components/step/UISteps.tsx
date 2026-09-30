@@ -12,7 +12,7 @@ import stepCSS from "./step.css?inline"
  * A step group:  `<ol class="ui … steps" part="steps" role="list"><slot></slot></ol>` -- steps are a sequence, and
  * each `<ui-step>` host is a `listitem`.
  * - `role="list"` explicitly:  `list-style: none` drops the list semantics in Safari.
- * - The root resolves every variation into inherited `--ui-steps-*` tokens the steps read (`step.css`), including
+ * - The root resolves every variation into inherited `--_ui-steps-*` tokens the steps read (`step.css`), including
  *   stacking:  the host is a block and the size container `ui-steps` (`:state(steps)`), and the root turns
  *   `stacked` below 768px of it unless `unstackable`.
  * - Numbering (`ordered`) is a CSS counter reset here and incremented by each step, across the shadow boundaries.

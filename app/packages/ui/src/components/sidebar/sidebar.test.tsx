@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vitest"
 import { userEvent } from "vitest/browser"
 
 import { UI } from "$/runtime"
@@ -119,6 +119,52 @@ describe("<ui-sidebar> classes and markup", () => {
   })
 })
 
+describe("<ui-sidebar> tokens from outside", () => {
+  /** The panel's width. */
+  function width(panel: Element): string {
+    return getComputedStyle(panel).width
+  }
+
+  it("takes a token set on the HOST", async () => {
+    const { panel } = await pushable(`<ui-sidebar style="--ui-sidebar-width: 222px">${LINKS}</ui-sidebar>`)
+    expect(width(panel)).toBe("222px")
+  })
+
+  it("takes a token set on an ANCESTOR", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div style="--ui-sidebar-width: 222px"><ui-pushable><ui-sidebar>${LINKS}</ui-sidebar><ui-pusher></ui-pusher></ui-pushable></div>`
+    )
+    expect(width(wrapper.querySelector("ui-sidebar")!.shadowRoot!.querySelector("[part~=sidebar]")!)).toBe("222px")
+  })
+
+  it("takes a token set through `::part(sidebar)`", async () => {
+    Fixture.render(`<style>.themed::part(sidebar) { --ui-sidebar-width: 222px }</style>`)
+    const { panel } = await pushable(`<ui-sidebar class="themed">${LINKS}</ui-sidebar>`)
+    expect(width(panel)).toBe("222px")
+  })
+
+  it("takes a token set on `:root`", async () => {
+    document.documentElement.style.setProperty("--ui-sidebar-width", "222px")
+    onTestFinished(() => {
+      document.documentElement.style.removeProperty("--ui-sidebar-width")
+    })
+    const { panel } = await pushable(`<ui-sidebar>${LINKS}</ui-sidebar>`)
+    expect(width(panel)).toBe("222px")
+  })
+
+  it("a width word swaps it;  `inverted` swaps the background", async () => {
+    const { panel } = await pushable(`<ui-sidebar width="thin" style="--ui-sidebar-width: 222px">${LINKS}</ui-sidebar>`)
+    expect(width(panel)).toBe("150px")
+    const red = "rgb(255, 0, 0)"
+    const { panel: plain } = await pushable(`<ui-sidebar style="--ui-sidebar-background: ${red}">${LINKS}</ui-sidebar>`)
+    expect(getComputedStyle(plain).backgroundColor).toBe(red)
+    const { panel: inverted } = await pushable(
+      `<ui-sidebar inverted style="--ui-sidebar-background: ${red}">${LINKS}</ui-sidebar>`
+    )
+    expect(getComputedStyle(inverted).backgroundColor).not.toBe(red)
+  })
+})
+
 describe("<ui-sidebar> modal (default)", () => {
   it("shows:  focus moves in, the pusher moves aside, dims and goes inert;  aria-modal", async () => {
     const { host, panel, pusher, pusherBox, toggle } = await pushable(`<ui-sidebar>${LINKS}</ui-sidebar>`)
@@ -145,6 +191,24 @@ describe("<ui-sidebar> modal (default)", () => {
     expect(closes.map((detail) => detail.reason)).toEqual(["escape"])
     expect(pusher.hasAttribute("inert")).toBe(false)
     await expect.poll(() => translation(pusherBox)).toEqual([0, 0])
+    expect(document.activeElement).toBe(toggle)
+  })
+
+  it("with CloseWatcher (the browser's close requests), Escape hides it too", async () => {
+    UI.overlays.useCloseWatcher = true
+    const { host, toggle } = await pushable(`<ui-sidebar id="side">${LINKS}</ui-sidebar>`)
+    toggle.setAttribute("commandfor", "side")
+    toggle.setAttribute("command", "--toggle")
+    const closes = record(host, "ui-close")
+    const shown = next(host, "ui-show")
+    await userEvent.click(toggle)
+    await shown
+    const hidden = next(host, "ui-hide")
+    await userEvent.keyboard("{Escape}")
+    await settle()
+    await hidden
+    expect(host.visible).toBe(false)
+    expect(closes.map((detail) => detail.reason)).toEqual(["escape"])
     expect(document.activeElement).toBe(toggle)
   })
 

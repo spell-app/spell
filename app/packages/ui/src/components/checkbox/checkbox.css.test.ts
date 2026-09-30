@@ -42,7 +42,7 @@ describe("checkbox.css source", () => {
   it("parses with replaceSync, keeping the mask marks", () => {
     for (const css of [checkboxCSS, checkboxRaw]) {
       expect(Sheets.selectors(css).length).toBeGreaterThan(50)
-      expect(css).toMatch(/--ui-checkbox-check: ?url\("data:image\/svg\+xml/)
+      expect(css).toMatch(/--_ui-checkbox-check: ?var\(\s*--ui-checkbox-check,\s*url\("data:image\/svg\+xml/)
     }
   })
 
@@ -108,6 +108,14 @@ describe("checkbox.css examples", () => {
     const probe = Fixture.render(`<span style="background-color: var(--ui-green)"></span>`)
     const lane = getComputedStyle(root.querySelector(".ui.green.toggle.checkbox label")!, "::before")
     expect(lane.backgroundColor).toBe(getComputedStyle(probe).backgroundColor)
+  })
+
+  it("takes a public token from a wrapper (static markup)", () => {
+    Sheets.adopt([...foundationCSS, checkboxCSS])
+    const root = Fixture.render(
+      `<div style="--ui-checkbox-radius: 6px"><div class="ui checkbox"><input type="checkbox" id="t"><label for="t">A</label></div></div>`
+    )
+    expect(getComputedStyle(root.querySelector("label")!, "::before").borderTopLeftRadius).toBe("6px")
   })
 
   it("scales every part with `size`", () => {

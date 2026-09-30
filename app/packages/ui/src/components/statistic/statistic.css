@@ -16,11 +16,18 @@
  *   `:host(:nth-child(n + 2 of :state(statistic)))` for `.ui.statistic + .ui.statistic` (a statistic AFTER
  *   another, not necessarily adjacent:  a shadow root can't see its host's previous sibling).
  *
+ * ## Public tokens
+ * `--ui-statistic-*` (the theming surface) are NEVER declared here:  every statistic and group root reads each
+ * through a private alias (`--_ui-statistic-row-spacing: var(--ui-statistic-row-spacing, 1em)`), and every rule
+ * reads the alias.  So a value set on `:root`, an ancestor, the host, `::part(statistic)` / `::part(group)` or in
+ * the app stylesheet reaches the box (`docs/theming.md` "Component tokens").
+ *
  * ## Owner tokens (read by `parts.css`)
  * Every statistic root declares them, defaults included:
- * - `--ui-statistic-layout` -- `vertical` / `horizontal` (`horizontal`, or a horizontal group)
- * - `--ui-statistic-value-size` / `--ui-statistic-text-value-size` -- the value font sizes of its size (Fomantic's
- *   ladder, a multiple of `--ui-font-size`), the horizontal ladder while horizontal
+ * - `--_ui-statistic-layout` -- `vertical` / `horizontal` (`horizontal`, or a horizontal group)
+ * - `--_ui-statistic-value-size` / `--_ui-statistic-text-value-size` -- the aliases of the public value font sizes,
+ *   defaulting to its size's (Fomantic's ladder, a multiple of `--ui-font-size`);  `horizontal` swaps in the
+ *   horizontal ladder.  So a page sets them on the statistic, its group or above, not on the value part
  * - `--ui-inverted` -- `0` / `1`;  `inverted` also sets `color-scheme: dark`, and every `light-dark()` token follows
  *
  * ## Group -> statistic
@@ -87,22 +94,25 @@
     container: ui-statistics / inline-size;
   }
 
-  /* Tokens:  one per `statistic.variables` entry that still matters, from the global tokens. */
+  /* Tokens:  one private alias per `statistic.variables` entry that still matters, from the global tokens. */
   .ui.statistic,
   .ui.statistics {
-    --ui-statistic-margin: 1em 0;
-    --ui-statistic-horizontal-spacing: 1.5em;
-    --ui-statistic-row-spacing: 1em;
-    --ui-statistic-floated-distance: 2em;
-    --ui-statistic-stackable-padding: calc(var(--ui-font-size) * 1);
+    --_ui-statistic-margin: var(--ui-statistic-margin, 1em 0);
+    --_ui-statistic-horizontal-spacing: var(--ui-statistic-horizontal-spacing, 1.5em);
+    --_ui-statistic-row-spacing: var(--ui-statistic-row-spacing, 1em);
+    --_ui-statistic-floated-distance: var(--ui-statistic-floated-distance, 2em);
+    --_ui-statistic-stackable-padding: var(--ui-statistic-stackable-padding, calc(var(--ui-font-size) * 1));
   }
 
   /* Owner tokens every statistic root declares (see the header). */
   .ui.statistic,
   .ui.statistics > .statistic {
-    --ui-statistic-layout: var(--_statistics-layout, vertical);
-    --ui-statistic-value-size: calc(var(--ui-font-size) * var(--_statistic-value, 4));
-    --ui-statistic-text-value-size: calc(var(--ui-font-size) * var(--_statistic-tvalue, 2));
+    --_ui-statistic-layout: var(--_statistics-layout, vertical);
+    --_ui-statistic-value-size: var(--ui-statistic-value-size, calc(var(--ui-font-size) * var(--_statistic-value, 4)));
+    --_ui-statistic-text-value-size: var(
+      --ui-statistic-text-value-size,
+      calc(var(--ui-font-size) * var(--_statistic-tvalue, 2))
+    );
     --ui-inverted: var(--_statistics-inverted, 0);
   }
 
@@ -121,7 +131,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    margin: 1em calc(-1 * var(--ui-statistic-horizontal-spacing)) calc(-1 * var(--ui-statistic-row-spacing));
+    margin: 1em calc(-1 * var(--_ui-statistic-horizontal-spacing)) calc(-1 * var(--_ui-statistic-row-spacing));
   }
   :host(:first-child) > .ui.statistics,
   .ui.statistics:first-child {
@@ -133,11 +143,11 @@
   /* Standalone spacing:  only outside a group. */
   @container not style(--_statistics-group: 1) {
     .ui.statistic {
-      margin: var(--ui-statistic-margin);
+      margin: var(--_ui-statistic-margin);
     }
     :host(:nth-child(n + 2 of :state(statistic))) > .ui.statistic,
     .ui.statistic + .ui.statistic {
-      margin: 0 0 0 var(--ui-statistic-horizontal-spacing);
+      margin: 0 0 0 var(--_ui-statistic-horizontal-spacing);
     }
     :host(:first-child) > .ui.statistic,
     .ui.statistic:first-child {
@@ -160,7 +170,7 @@
       max-width: none;
       margin: var(
         --_statistics-member-margin,
-        0 var(--ui-statistic-horizontal-spacing) var(--ui-statistic-row-spacing)
+        0 var(--_ui-statistic-horizontal-spacing) var(--_ui-statistic-row-spacing)
       );
     }
   }
@@ -217,13 +227,13 @@
 
   /* Horizontal:  label beside the value, on the horizontal size ladder. */
   .ui.horizontal.statistic {
-    --ui-statistic-layout: horizontal;
+    --_ui-statistic-layout: horizontal;
     flex-direction: row;
     align-items: center;
   }
   .ui.horizontal.statistic,
   .ui.horizontal.statistics > .statistic {
-    --ui-statistic-value-size: calc(var(--ui-font-size) * var(--_statistic-hvalue, 3));
+    --_ui-statistic-value-size: calc(var(--ui-font-size) * var(--_statistic-hvalue, 3));
   }
   .ui.horizontal.statistics {
     --_statistics-layout: horizontal;
@@ -235,7 +245,7 @@
   @container style(--_statistics-layout: horizontal) {
     :host > .ui.statistic,
     .ui.statistics > .statistic {
-      --ui-statistic-value-size: calc(var(--ui-font-size) * var(--_statistic-hvalue, 3));
+      --_ui-statistic-value-size: calc(var(--ui-font-size) * var(--_statistic-hvalue, 3));
       flex-direction: row;
       align-items: center;
     }
@@ -260,11 +270,11 @@
   /* Floated */
   .ui[class*="left floated"].statistic {
     float: left;
-    margin: 0 var(--ui-statistic-floated-distance) var(--ui-statistic-row-spacing) 0;
+    margin: 0 var(--_ui-statistic-floated-distance) var(--_ui-statistic-row-spacing) 0;
   }
   .ui[class*="right floated"].statistic {
     float: right;
-    margin: 0 0 var(--ui-statistic-row-spacing) var(--ui-statistic-floated-distance);
+    margin: 0 0 var(--_ui-statistic-row-spacing) var(--_ui-statistic-floated-distance);
   }
   :host(:last-child) > .ui.floated.statistic,
   .ui.floated.statistic:last-child {
@@ -273,8 +283,8 @@
 
   /* Evenly divided:  each member at least 1/N of the row. */
   .ui:is(.one, .two, .three, .four, .five, .six, .seven, .eight, .nine, .ten).statistics {
-    --_statistics-member-margin: 0 0 var(--ui-statistic-row-spacing);
-    margin: 0 0 calc(-1 * var(--ui-statistic-row-spacing));
+    --_statistics-member-margin: 0 0 var(--_ui-statistic-row-spacing);
+    margin: 0 0 calc(-1 * var(--_ui-statistic-row-spacing));
   }
   .ui.one.statistics {
     --_statistics-min-width: 100%;
@@ -321,7 +331,7 @@
       box-sizing: border-box;
       width: 100%;
       margin: 0;
-      padding: calc(var(--ui-statistic-stackable-padding) / 2);
+      padding: calc(var(--_ui-statistic-stackable-padding) / 2);
     }
   }
 }

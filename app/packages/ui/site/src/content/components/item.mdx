@@ -12,7 +12,7 @@ import Variation from "../../components/Variation.astro"
 import VocabularyTable from "../../components/VocabularyTable.astro"
 // The item family has no examples folder of its own:  every example here is an item inside its owner
 // (`ui-dropdown`, `ui-list`, `ui-menu`), each of which loads its own family.  Fuller examples live on those pages.
-// No `CssTokens`:  `item.css` declares only an internal flag (`--ui-item-media`);  the look is the owner's.
+// No `CssTokens`:  `item.css` declares only an internal flag (`--_ui-item-media`);  the look is the owner's.
 
 <Section title="Types">
   <Example title="In a dropdown" description="Inside a dropdown an item is data:  the dropdown reads its `value`, text, `icon`, `flag`, `description` and `selected`, and draws the option rows itself.">

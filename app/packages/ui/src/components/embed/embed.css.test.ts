@@ -93,3 +93,15 @@ describe("embed.css examples", () => {
     expect(getComputedStyle(root.nextElementSibling!.querySelector(".embed")!).display).toBe("none")
   })
 })
+
+describe("embed.css tokens", () => {
+  it("takes a public token from a wrapper or the embed itself (static markup)", () => {
+    Sheets.adopt([...foundationCSS, embedCSS])
+    const root = Fixture.render(
+      `<div style="--ui-embed-ratio: 2 / 1"><div class="ui embed"></div></div>` +
+        `<div class="ui embed" style="--ui-embed-background: rgb(255, 0, 0)"></div>`
+    )
+    expect(getComputedStyle(root.firstElementChild!).aspectRatio).toBe("2 / 1")
+    expect(getComputedStyle(root.nextElementSibling!).backgroundColor).toBe("rgb(255, 0, 0)")
+  })
+})

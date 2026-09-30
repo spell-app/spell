@@ -22,9 +22,9 @@ import partsCSS from "$/components/parts/parts.css?inline"
  * - Completed:  a check replaces the icon (the `icon` glyph or the slotted `slot=icon`, which stays in the DOM,
  *   hidden);  an ordered step's number turns into a check in CSS.
  * - OWNER of the `content`, `title` and `description` parts (`ownsParts`):  slotted parts style themselves from
- *   `parts.css` (`:state(in-step)`), reading `--ui-step-state` / `--ui-step-layout` from this root.  The shorthands
+ *   `parts.css` (`:state(in-step)`), reading `--_ui-step-state` / `--_ui-step-layout` from this root.  The shorthands
  *   are the same parts drawn here with their static `in-step` classes, which is why the step adopts `parts.css`.
- * - Group variations (vertical, ordered, stacked, circular ...) arrive as inherited `--ui-steps-*` tokens from the
+ * - Group variations (vertical, ordered, stacked, circular ...) arrive as inherited `--_ui-steps-*` tokens from the
  *   `<ui-steps>` root;  `step.css` reads them (see its header).
  ****************/
 export class UIStep extends UIElement<typeof stepVocabulary> {
