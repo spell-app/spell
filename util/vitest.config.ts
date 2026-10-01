@@ -1,8 +1,7 @@
 import { defineConfig } from "vitest/config"
 import { playwright } from "@vitest/browser-playwright"
 
-// TODO: root vite.decorators.ts (build agent)
-import { standardDecorators } from "../ui/vite.decorators.ts"
+import { standardDecorators } from "../../vite.decorators.ts"
 
 /**
  * Every test runs in a REAL browser (Vitest browser mode + Playwright, chromium):  `dom.test.ts` needs shadow roots
