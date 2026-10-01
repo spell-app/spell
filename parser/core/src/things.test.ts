@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeEach } from "vitest"
 import { autoEffect, clearEffect } from "@risingstack/react-easy-state"
 
-import { raw } from "#spell-util"
-import { spellCore, Thing, List, App } from "#spell-core"
+import { raw } from "$/util"
+import { spellCore, Thing, List, App } from "$/core"
 
 /**
  * A thing, as a program declares one:  `a card is a thing`, with properties compiled as spell compiles them.

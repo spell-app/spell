@@ -4,9 +4,9 @@
 import React from "react"
 import _ from "lodash"
 
-import { Observable, view } from "#spell-util"
-import { spellCore } from "#spell-core/core"
-import type { PropCheck } from "#spell-core/spellCore.types"
+import { Observable, view } from "$/util"
+import { spellCore } from "$/core/core"
+import type { PropCheck } from "$/core/spellCore.types"
 
 /**
  * `List`: our array concept (1-based) -- what `a deck is a list` extends.

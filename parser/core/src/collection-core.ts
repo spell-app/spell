@@ -8,7 +8,7 @@
  */
 import _ from "lodash"
 import { spellCore } from "./core"
-import { assert } from "#spell-core"
+import { assert } from "$/core"
 import { defineSpellCoreModule } from "./spellCore.types"
 
 /**

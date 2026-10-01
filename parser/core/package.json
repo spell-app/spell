@@ -1,5 +1,5 @@
 {
-  "name": "@spell/spell-core",
+  "name": "@spell-app/core",
   "version": "0.8.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@spell/spell-util": "workspace:*",
+    "@spell-app/util": "workspace:*",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
