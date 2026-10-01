@@ -1,4 +1,0 @@
-node_modules
-.yarn/install-state.gz
-out
-*.vsix
