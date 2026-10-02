@@ -5,8 +5,9 @@ import { readEdit, serverConfig } from "$/server/site"
  * Edit mode for pages the page server serves:  hover a section, click "edit", change its HTML source, save -- the
  * page server writes the ORIGINAL file (`PATCH /_server/page`) and live reload shows the result.
  * - on while the site header's pencil is on (this tab);  `SectionEditor.mount()` adds the one instance to `<body>`
- * - what can be edited:  an element with an `id` (`EDITABLE`), or a `section` whose heading has one -- the
- *   section, found through its heading's `id` (`parent: "section"`)
+ * - what can be edited:  an element with an `id` (`EDITABLE`:  a docs page's `<ui-section>`, a plan item ...), or
+ *   a `section` whose heading has one (the goals pages) -- the section, found through its heading's `id`
+ *   (`parent: "section"`)
  * - the source comes fresh from the server with its `ETag`:  saving is refused (409) if the file changed since,
  *   and the dialog says to reload
  * - never commits:  the change sits in the working tree for review
@@ -154,9 +155,9 @@ export class SectionEditor extends HTMLElement {
   }
 }
 
-/** Elements editable by their own `id`. */
+/** Elements editable by their own `id`:  `ui-section` is every docs page's section (the goals pages':  `section`). */
 const EDITABLE =
-  "section, article, li, p, figure, blockquote, table, ui-segment, ui-message, ui-card, ui-table, ui-step"
+  "ui-section, section, article, li, p, figure, blockquote, table, ui-segment, ui-message, ui-card, ui-table, ui-step"
 
 /** The editable thing at `element`:  itself or an ancestor with an id, or a section through its heading. */
 function editableAt(element: Element): { element: Element; id: string; parent?: string } | undefined {
