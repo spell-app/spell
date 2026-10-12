@@ -1,6 +1,5 @@
-import { spellCore, Thing, List, App, h, positionOf, trigger, on } from "@spell/core"
+import { spellCore, Thing, List, App, Drawable, DrawableList, h, positionOf, spellPosition, sendTrigger, sendCall } from "@spell/core"
 
-spellCore.heading("definition of a Card with nice english aliases for working with it")
 /** definition of a Card with nice english aliases for working with it */
 export class Card extends Thing {
   /////////////////////////
@@ -26,7 +25,7 @@ export class Card extends Thing {
 
   /** value as a derivation of rank */
   get value() {
-    return positionOf(Card.Ranks, this.rank)
+    return spellPosition(positionOf(Card.Ranks, this.rank))
   }
 
   /** card direction:  up or down */
@@ -83,7 +82,7 @@ export class Card extends Thing {
   get shortRank() {
     if (this.rank === undefined) return "?"
     if (typeof this.rank === "number") return `${this.rank}`
-    return `${spellCore.getItemAt(this.rank, 1) ?? ""}`.toLocaleUpperCase()
+    return `${spellCore.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
   }
 
   get shortDirection() {
@@ -128,11 +127,11 @@ export class Card extends Thing {
   draw() {
     const className = `Card face-${this.direction} ${this.rank} ${this.suit} ui button compact fluid `
     if (this.isFaceDown) {
-      return h("div", { class: () => className, onClick: () => trigger("card-click", { card: this }) },
+      return h("div", { class: () => className, onClick: () => sendTrigger("card-click", { card: this }) },
         h("i", { class: "fitted bicycle icon" })
       )
     }
-    return h("div", { class: () => className + this.color, onClick: () => trigger("card-click", { card: this }) },
+    return h("div", { class: () => className + this.color, onClick: () => sendTrigger("card-click", { card: this }) },
       () => `${this.shortRank} `,
       h("span", { class: "suit" }, () => this.shortSuit)
     )
@@ -186,55 +185,11 @@ export class Card extends Thing {
   set pile(value) { this.setProp("pile", value) }
 }
 
-spellCore.heading("create a card instance with default properties")
 /** create a card instance with default properties */
-export function testCardSetup() {
-  return spellCore.test("test card setup", function testCardSetup() {
-    spellCore.echoTestAction(`the card is a new card whose rank is queen, suit is spades and direction is up`)
-    const card = new Card({
-      rank: "queen",
-      suit: "spades",
-      direction: "up"
-    })
-    spellCore.echo(card)
-    spellCore.expect(card.rank, `the rank of the card`, "queen", `queen`)
-    spellCore.expect(card.suit, `the suit of the card`, "spades", `spades`)
-    spellCore.expect(card.name, `the name of the card`, "queen-of-spades", `"queen-of-spades"`)
-    spellCore.expect(card.color, `the color of the card`, "black", `black`)
-    spellCore.expect(card.value, `the value of the card`, 12, `12`)
-    spellCore.expect(card.shortSuit, `the short-suit of the card`, "♠️", `"♠️"`)
-    spellCore.expect(card.shortRank, `the short-rank of the card`, "Q", `"Q"`)
-    spellCore.expect(card.shortName, `the short-name of the card`, "Q♠️", `"Q♠️"`)
-
-    spellCore.expect(card.isFaceUp, `the card is face up`, true, `yes`)
-    spellCore.expect(card.isFaceDown, `the card is face down`, false, `no`)
-
-    spellCore.expect(card.isAFaceCard, `the card is a face card`, true, `yes`)
-    spellCore.expect(!card.isAFaceCard, `the card is not a face card`, false, `false`)
-
-    spellCore.expect(card.isASuit("spades"), `the card is a spade`, true, `true`)
-    spellCore.expect(card.isASuit("clubs"), `the card is a club`, false, `false`)
-
-    spellCore.expect(card.isARank("queen"), `the card is a queen`, true, `true`)
-    spellCore.expect(card.isARank("ace"), `the card is an ace`, false, `false`)
-    spellCore.expect(card.isARank(2), `the card is a 2`, false, `false`)
-
-    spellCore.expect(card.isTheRankOfSuits("queen", "spades"), `the card is the queen of spades`, true, `true`)
-    spellCore.expect(card.isTheRankOfSuits("queen", "clubs"), `the card is the queen of clubs`, false, `false`)
-    spellCore.expect(!card.isTheRankOfSuits(2, "diamonds"), `the card is not the 2 of diamonds`, true, `true`)
-
-    spellCore.echoTestAction(`turn the card face down`)
-    card.turnFaceDown()
-    spellCore.expect(card.direction, `the direction of the card`, "down", `down`)
-
-    spellCore.echoTestAction(`turn the card over`)
-    card.turnOver()
-    spellCore.expect(card.isFaceUp, `the card is face up`, true, `true`)
-  })
+export function testCardSetup(...args) {
+  return sendCall("test_card_setup", args)
 }
-testCardSetup()
 // -----------
-spellCore.heading("Deck:   US standard card deck (without jokers currently)")
 //## Deck:   US standard card deck (without jokers currently)
 
 export class Deck extends List {
@@ -260,45 +215,22 @@ export class Deck extends List {
   set isSetUp(value) { this.setProp("isSetUp", value) }
 }
 
-export function testDeckCreation() {
-  return spellCore.test("test deck creation", function testDeckCreation() {
-    spellCore.echoTestAction(`the deck is a new deck`)
-    const deck = new Deck()
-    spellCore.echoTestAction(`set up the deck`)
-    deck.setUp()
-    spellCore.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-    spellCore.echoTestAction(`set up the deck`)
-    deck.setUp()
-    spellCore.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-    spellCore.echoTestAction(`set the queens to the cards in the deck where the rank of the card is "queen"`)
-    const queens = deck.filter((card) => card.rank == "queen")
-    spellCore.expect(queens.length, `the number of cards in the queens`, 4, `4`)
-    spellCore.expect(deck.lastItem?.name, `the name of the bottom card of the deck`, "king-of-spades", `"king-of-spades"`)
-    spellCore.expect(deck.firstItem?.shortName, `the short-name of the top card of the deck`, "A♣️", `"A♣️"`)
-
-    spellCore.echo("the deck before shuffling:")
-    spellCore.echoTestAction(`display the deck`)
-    deck.display()
-    spellCore.echoTestAction(`get the first card of the deck`)
-    const it = deck.firstItem
-    spellCore.expect(it?.isTheRankOfSuits("ace", "clubs"), `it is the ace of clubs`, true, `yes`)
-  })
+export function testDeckCreation(...args) {
+  return sendCall("test_deck_creation", args)
 }
-testDeckCreation()
 // -----------
-spellCore.heading("Pile of playing cards")
 /** Pile of playing cards */
 export class Pile extends List {
   static instanceType = Card
 
   get color() {
     if (this.isEmpty) return "none"
-    return this.lastItem?.color
+    return this.lastItem.color
   }
 
   get value() {
     if (this.isEmpty) return 0
-    return this.lastItem?.value
+    return this.lastItem.value
   }
 
   get state() {
@@ -311,13 +243,11 @@ export class Pile extends List {
   set name(value) { this.setProp("name", value) }
 }
 // -----------
-spellCore.heading("Klondike Solitaire Card Game")
 //////////////////////////////////
 // ## Klondike Solitaire Card Game
 //////////////////////////////////
 //-- See [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) for rules & naming conventions.
 
-spellCore.heading("Game bits")
 /** Game bits */
 export class Game extends App {
   static { this.declareProp("score", { type: "number" }) }
@@ -352,18 +282,18 @@ export class Game extends App {
               h("td", () => spellCore.drawThing(discards)),
               h("td"),
               h("td", () => spellCore.drawThing(foundations.firstItem)),
+              h("td", () => spellCore.drawThing(foundations.getItem(1))),
               h("td", () => spellCore.drawThing(foundations.getItem(2))),
-              h("td", () => spellCore.drawThing(foundations.getItem(3))),
-              h("td", () => spellCore.drawThing(foundations.getItem(4)))
+              h("td", () => spellCore.drawThing(foundations.getItem(3)))
             ),
             h("tr",
               h("td", () => spellCore.drawThing(tableaus.firstItem)),
+              h("td", () => spellCore.drawThing(tableaus.getItem(1))),
               h("td", () => spellCore.drawThing(tableaus.getItem(2))),
               h("td", () => spellCore.drawThing(tableaus.getItem(3))),
               h("td", () => spellCore.drawThing(tableaus.getItem(4))),
               h("td", () => spellCore.drawThing(tableaus.getItem(5))),
-              h("td", () => spellCore.drawThing(tableaus.getItem(6))),
-              h("td", () => spellCore.drawThing(tableaus.getItem(7)))
+              h("td", () => spellCore.drawThing(tableaus.getItem(6)))
             )
           )
         )
@@ -371,17 +301,15 @@ export class Game extends App {
     )
   }
 }
-export const game = new Game()
-spellCore.console.log(game)
+export let game
 
-spellCore.heading("set up all piles")
 /** set up all piles */
-export const allPiles = new List({ instanceType: "Pile" })
-export const foundations = new List({ instanceType: "Pile" })
-export const tableaus = new List({ instanceType: "Pile" })
+export let allPiles
+export let foundations
+export let tableaus
 
 /** set up stock pile: unplayed cards */
-export class Stock_Pile extends Pile {
+export class StockPile extends Pile {
   canPickUpCard(card) {
     return card === this.lastItem
   }
@@ -393,11 +321,10 @@ export class Stock_Pile extends Pile {
     )
   }
 }
-export const stock = new Stock_Pile({ name: "stock", droppable: false })
-allPiles.append(stock)
+export let stock
 
 /** set up discards: where played cards go when turning over stock */
-export class Discard_Pile extends Pile {
+export class DiscardPile extends Pile {
   canPickUpCard(card) {
     return card === this.lastItem
   }
@@ -406,8 +333,7 @@ export class Discard_Pile extends Pile {
     return h("div", { class: "Pile Discards stacked" }, () => spellCore.drawThing(this.lastItem))
   }
 }
-export const discards = new Discard_Pile({ name: "discards", droppable: false })
-allPiles.append(discards)
+export let discards
 
 /** set up foundation piles: where we build up from ace => king */
 export class Foundation extends Pile {
@@ -434,31 +360,10 @@ export class Foundation extends Pile {
     )
   }
 }
-const it = new Foundation({
-  name: "clubs",
-  symbol: "♣️",
-  droppable: true
-})
-foundations.append(it)
-const it2 = new Foundation({
-  name: "diamonds",
-  symbol: "♦️",
-  droppable: true
-})
-foundations.append(it2)
-const it3 = new Foundation({
-  name: "hearts",
-  symbol: "♥️",
-  droppable: true
-})
-foundations.append(it3)
-const it4 = new Foundation({
-  name: "spades",
-  symbol: "♠️",
-  droppable: true
-})
-foundations.append(it4)
-foundations.forEach((pile) => allPiles.append(pile))
+export let it
+export let it2
+export let it3
+export let it4
 
 /** set up tableau piles: vertical piles where we arrange from king to ace */
 export class Tableau extends Pile {
@@ -475,138 +380,54 @@ export class Tableau extends Pile {
     return h("div", { class: "Pile Tableau staggered" }, () => spellCore.drawItems(this))
   }
 }
-spellCore.getRange(1, 7).forEach((number) => {
-  const it5 = new Tableau({ name: `Tableau${number}`, droppable: true })
-  tableaus.append(it5)
-  allPiles.append(it5)
-})
 
 /** set up deck of cards */
-export const deck = new Deck()
-deck.setUp()
+export let deck
 // start with cards in the stock pile
-deck.forEach((card) => card.moveToPile(stock))
 
-spellCore.heading("actions")
-export function debugTheGame() {
-  spellCore.map(game.state, (line) => spellCore.console.log(line))
+export function debugTheGame(...args) {
+  return sendCall("debug_the_game", args)
 }
 
-export function resetTheStockPile() {
-  const cards = discards.clone()
-  cards.reverse()
-  cards.forEach((card) => {
-    card.moveToPile(stock)
-    card.turnFaceDown()
-  })
+export function resetTheStockPile(...args) {
+  return sendCall("reset_the_stock_pile", args)
 }
 
-export async function playFromTheStockPile() {
-  if (spellCore.processIsRunning("play_from_the_stock_pile")) return
-  spellCore.startProcess("play_from_the_stock_pile", "EXCLUSIVE")
-  try {
-    if (stock.isEmpty) await resetTheStockPile()
-
-    const it5 = stock.lastItem
-    it5?.turnFaceUp()
-    // pause for 150 msec
-    it5?.moveToPile(discards)
-  }
-  finally {
-    spellCore.stopProcess("play_from_the_stock_pile")
-  }
+export function playFromTheStockPile(...args) {
+  return sendCall("play_from_the_stock_pile", args)
 }
 
-export async function dealTheCards() {
-  if (spellCore.processIsRunning("deal_the_cards")) return
-  spellCore.startProcess("deal_the_cards", "EXCLUSIVE")
-  try {
-    /** pull all cards into stock with a nice animation */
-    const cards = allPiles.merged(Pile)
-    cards.reverse()
-    for (const card of cards) {
-      const startPile = card.pile
-      card.turnFaceDown()
-      if (startPile !== stock) await card.moveToPile(stock)
-    }
-    stock.randomize()
-
-    // deal cards into tableaus
-    for (const row of spellCore.getRange(1, 7)) {
-      stock.lastItem?.turnFaceUp()
-      for (const column of spellCore.getRange(row, 7)) {
-        await stock.lastItem?.moveToPile(tableaus.getItem(column))
-      }
-    }
-
-    await playFromTheStockPile()
-  }
-  finally {
-    spellCore.stopProcess("deal_the_cards")
-  }
+export function dealTheCards(...args) {
+  return sendCall("deal_the_cards", args)
 }
 
-on("card-click", (event) => {
-  const { card } = event
-  card.play()
-})
-
-export async function autoPlay() {
-  let anythingChanged = false
-  if (!discards.isEmpty) {
-    const testCard = discards.lastItem
-    if (await testCard?.play()) {
-      anythingChanged = true
-      await spellCore.pauseFor(500, "msec")
-    }
-  }
-
-  // attempt to move bottom card of tableaus to foundations
-  for (const pile of tableaus) {
-    if (pile.isEmpty) continue
-    const testCard = pile.lastItem
-    const foundation = foundations.filter((pile) => pile.name == testCard?.suit).firstItem
-    if (foundation?.canPlayCard(testCard)) {
-      anythingChanged = true
-      await testCard?.play()
-      await spellCore.pauseFor(100, "msec")
-    }
-  }
-
-  // attempt to move the entire pile of face-up cards
-  for (const pile of tableaus) {
-    const faceUpCards = pile.filter((card) => card.isFaceUp)
-    if (faceUpCards.isEmpty) continue
-    const testCard = faceUpCards.firstItem
-    if (testCard?.isARank("king") && testCard === pile.firstItem) continue
-    if (await testCard?.play()) {
-      anythingChanged = true
-      await spellCore.pauseFor(500, "msec")
-    }
-  }
-
-  // call auto-play again if anything actually changed
-  if (anythingChanged) await autoPlay()
+export function autoPlay(...args) {
+  return sendCall("auto_play", args)
 }
 
-export function resetTheGame() {
-  game.score = 0
-  dealTheCards()
+export function resetTheGame(...args) {
+  return sendCall("reset_the_game", args)
 }
 
-export async function cheat() {
-  const remainingPiles = tableaus.filter((pile) => !pile.isEmpty && pile.firstItem?.isFaceDown)
-  if (remainingPiles.isEmpty) return
-  const pile = remainingPiles.randomItem()
-  const unplaidCards = pile?.filter((card) => card.isFaceDown)
-  const card = unplaidCards?.randomItem()
-  card?.turnFaceUp()
-  await spellCore.pauseFor(30, "ticks")
-  card?.moveToPile(discards)
+export function cheat(...args) {
+  return sendCall("cheat", args)
 }
 
-spellCore.heading("rendering the bits")
-resetTheGame()
-game.start()
 // -----------
 spellCore.installStyles(undefined, `/* File styles.css */¬.Card {¬	position: relative;¬	height: 30px;¬}¬¬.Card .suit {¬	position: relative;¬	font-size: 1.5rem;¬	padding-left: 1px;¬	vertical-align: top;¬	top: -0.15rem;¬}¬¬.Pile {¬	position: relative;¬	min-height: 30px;¬}¬¬.Pile.Tableau {¬	min-height: 500px;¬}¬¬.Pile.stacked .Card {¬	position: absolute;¬	left: 0;¬	top: 0;¬}¬¬.Pile.staggered .Card {¬	margin-bottom: 8px !important;¬}¬¬.Pile > .Placeholder {¬	position: relative;¬	height: 30px;¬}¬¬.Pile > .Placeholder .suit {¬	position: relative;¬	font-size: 1.6rem;¬}¬¬.Pile > .Placeholder .suit.diamonds,¬.Pile > .Placeholder .suit.spades {¬	font-size: 1.75rem;¬	top: -0.1rem;¬}`)
+
+/** Binds each thing the program keeps, from Python's state. */
+export function adopt(state) {
+  game = state["game"]
+  allPiles = state["all_piles"]
+  foundations = state["foundations"]
+  tableaus = state["tableaus"]
+  stock = state["stock"]
+  discards = state["discards"]
+  it = state["it"]
+  it2 = state["it_2"]
+  it3 = state["it_3"]
+  it4 = state["it_4"]
+  deck = state["deck"]
+}
+
