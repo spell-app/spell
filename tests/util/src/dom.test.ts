@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vite-plus/test"
 
-import { closestAcrossShadow, flatParentFor, isBrowser, nextFrame, NodeType, whenDefined } from "./dom"
+import { closestAcrossShadow, flatParentFor, isBrowser, nextFrame, NodeType, whenDefined } from "$/util/dom"
 
 /** Unique tag per test, since `customElements.define()` can't be undone. */
 let tagCount = 0

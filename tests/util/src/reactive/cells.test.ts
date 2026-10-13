@@ -434,7 +434,7 @@ describe("one context per page", () => {
   test("a second copy of the module shares the page's context", async () => {
     // `?copy`:  Vite loads the file again, as a separate module -- as a `spell-runtime.js` beside the app's `$/util`
     // @ts-expect-error -- a query on purpose:  Vite loads the file again, a second module
-    const copy = (await import("./cells.ts?copy")) as typeof import("./cells")
+    const copy = (await import("$/util/reactive/cells.ts?copy")) as typeof import("$/util/reactive/cells")
     expect(copy.cellsContext).toBe(cellsContext)
   })
 })

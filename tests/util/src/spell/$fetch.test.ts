@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vite-plus/test"
-import { merge$fetchParms } from "./$fetch"
+import { merge$fetchParms } from "$/util/spell/$fetch"
 
 describe("merge$fetchParms()", () => {
   test("merges headers across params, field-by-field", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { camelCase, kebabCase, levenshtein, numberToWord, suggest } from "./string"
+import { camelCase, kebabCase, levenshtein, numberToWord, suggest } from "$/util/string"
 
 ////////////////
 // ## Names and words

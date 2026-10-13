@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { drawableAttributeFor, elementTagFor } from "./drawable"
+import { drawableAttributeFor, elementTagFor } from "$/util/spell/drawable"
 
 describe("a drawable type's element names", () => {
   test("its tag:  the project's name made singular, without the word drawable, then the class's", () => {
