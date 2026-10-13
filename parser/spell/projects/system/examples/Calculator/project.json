@@ -1,8 +1,0 @@
-{
-  "imports": [
-    {
-      "path": "/Calculator.spell",
-      "active": true
-    }
-  ]
-}
