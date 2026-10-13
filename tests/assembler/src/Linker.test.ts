@@ -110,7 +110,7 @@ describe("Linker.resolve()", () => {
     expect(LINKER.resolve("tsconfig.base.json")).toBe(join(ROOT, "tsconfig.base.json"))
     expect(LINKER.resolve("docs/tools/pages.js")).toBe(join(TOOLS, "pages.js"))
     expect(LINKER.resolve("#docs/../tools/pages.js")).toBe(join(TOOLS, "pages.js"))
-    expect(LINKER.resolve("doc-links.test.js")).toBe(join(TOOLS, "doc-links.test.js"))
+    expect(LINKER.resolve("doc-links.js")).toBe(join(TOOLS, "doc-links.js"))
     expect(LINKER.resolve("packages/docs/tools/pages.js:12")).toBe(join(TOOLS, "pages.js"))
     expect(LINKER.resolve("packages&#47;docs/tools/pages.js")).toBe(join(TOOLS, "pages.js"))
   })
