@@ -1,4 +1,4 @@
-/*! SPELL: WORDS TodosFormBased en */
+/*! SPELL: WORDS todos-form-based en */
 export const words = {
   lang: "en",
   types: {

@@ -1,4 +1,4 @@
-/*! SPELL: WORDS OutlineSolitaire en */
+/*! SPELL: WORDS outline-solitaire en */
 export const words = {
   lang: "en",
   types: {

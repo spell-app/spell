@@ -1,4 +1,4 @@
-/*! SPELL: WORDS DrawableSolitaire en */
+/*! SPELL: WORDS cards en */
 export const words = {
   lang: "en",
   types: {
@@ -24,7 +24,6 @@ export const words = {
       turnFaceDown: "turn a card face down",
       turnOver: "turn a card over",
       draw: "draw a card",
-      play: "play a card",
       pile: "pile"
     },
     Deck: {
@@ -33,27 +32,9 @@ export const words = {
       isSetUp: "is-set-up"
     },
     Pile: {
-      name: "name",
       color: "color",
       value: "value",
       state: "state"
-    },
-    Game: {
-      score: "score",
-      state: "state",
-      draw: "draw a game"
-    },
-    StockPile: {
-      draw: "draw a stock-pile"
-    },
-    DiscardPile: {
-      draw: "draw a discard-pile"
-    },
-    Foundation: {
-      draw: "draw a foundation"
-    },
-    Tableau: {
-      draw: "draw a tableau"
     }
   }
 }

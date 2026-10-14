@@ -1,4 +1,4 @@
-/*! SPELL: WORDS Solitaire en */
+/*! SPELL: WORDS solitaire en */
 export const words = {
   lang: "en",
   types: {

@@ -1,4 +1,4 @@
-/*! SPELL: WORDS CardTable en */
+/*! SPELL: WORDS card-table en */
 export const words = {
   lang: "en",
   types: {

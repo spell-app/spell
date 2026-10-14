@@ -1,4 +1,4 @@
-/*! SPELL: WORDS ThingReferences en */
+/*! SPELL: WORDS thing-references en */
 export const words = {
   lang: "en",
   types: {

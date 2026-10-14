@@ -1,6 +1,6 @@
 import { For } from "solid-js"
 import { spellCore, Thing, List, App, Drawable, DrawableList, prop, derived, drawn, position, on } from "@spell/core"
-import { Card, Deck, Pile } from "@spell/project/@test:fixtures:Cards"
+import { Card, Deck, Pile } from "@spell/project/@spell/test/cards"
 
 spellCore.heading("Klondike Solitaire Card Game")
 //////////////////////////////////
@@ -274,7 +274,7 @@ export async function dealTheCards() {
   }
 }
 
-declare module "@spell/project/@test:fixtures:Cards" {
+declare module "@spell/project/@spell/test/cards" {
   interface Card { play(): Promise<boolean | undefined> }
 }
 Card.prototype.play = async function (this: Card) {
@@ -368,7 +368,7 @@ resetTheGame()
 if (!spellCore.isCarryingOver) game.start()
 // -----------
 spellCore.installStyles(undefined, `/* File styles.css */¬.Card {¬	position: relative;¬	height: 30px;¬}¬¬.Card .suit {¬	position: relative;¬	font-size: 1.5rem;¬	padding-left: 1px;¬	vertical-align: top;¬	top: -0.15rem;¬}¬¬.Pile {¬	position: relative;¬	min-height: 30px;¬}¬¬.Pile.Tableau {¬	min-height: 500px;¬}¬¬.Pile.stacked .Card {¬	position: absolute;¬	left: 0;¬	top: 0;¬}¬¬.Pile.staggered .Card {¬	margin-bottom: 8px !important;¬}¬¬.Pile > .Placeholder {¬	position: relative;¬	height: 30px;¬}¬¬.Pile > .Placeholder .suit {¬	position: relative;¬	font-size: 1.6rem;¬}¬¬.Pile > .Placeholder .suit.diamonds,¬.Pile > .Placeholder .suit.spades {¬	font-size: 1.75rem;¬	top: -0.1rem;¬}`)
-declare module "@spell/project/@test:fixtures:Cards" {
+declare module "@spell/project/@spell/test/cards" {
   interface Pile {
     name: string
     droppable: boolean

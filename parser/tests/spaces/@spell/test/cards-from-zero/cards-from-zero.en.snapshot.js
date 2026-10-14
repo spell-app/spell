@@ -1,4 +1,4 @@
-/*! SPELL: WORDS CardsFromZero en */
+/*! SPELL: WORDS cards-from-zero en */
 export const words = {
   lang: "en",
   types: {

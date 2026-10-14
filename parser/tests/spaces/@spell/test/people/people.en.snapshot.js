@@ -1,4 +1,4 @@
-/*! SPELL: WORDS People en */
+/*! SPELL: WORDS people en */
 export const words = {
   lang: "en",
   types: {

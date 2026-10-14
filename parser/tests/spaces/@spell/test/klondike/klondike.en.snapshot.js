@@ -1,4 +1,4 @@
-/*! SPELL: WORDS Klondike en */
+/*! SPELL: WORDS klondike en */
 export const words = {
   lang: "en",
   types: {
