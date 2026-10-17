@@ -78,8 +78,9 @@ describe("Converter.convert():  the newest layout, split", () => {
       recentSince: "2026-10-06T22:56:42-04:00",
       repo: "https://github.com/spell-app/spell-app"
     })
+    // the epics pack from the epic server's route (epic `epic-eject` P7)
     expect(document.querySelector("body > ui-root > ui-components")!.getAttribute("source")).toBe(
-      "../../packages/epics/components/__pack/epics.pack.js"
+      "/_epic/pack/epics.pack.js"
     )
     expect(document.querySelectorAll("body > script")).toHaveLength(2)
     expect(document.body.getAttribute("class")).toBe("spell-doc-page plan-doc")

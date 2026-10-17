@@ -7,7 +7,9 @@ import { EXIT, EpicCommandError } from "./command.types"
 import { GROUP_VERBS, type GroupName } from "./epicGroups"
 import { EpicTools, type EpicToolName } from "./EpicTools"
 import { Git } from "./Git"
+import { Hub } from "./Hub"
 import { Parking } from "./Parking"
+import { Repos } from "./Repos"
 import { Requests } from "./Requests"
 import { Sessions } from "./Sessions"
 import { Shared } from "./Shared"
@@ -25,6 +27,7 @@ import { Worktrees } from "./Worktrees"
  *   (epic `epic-eject` P5:  they were `spell dev worktree` ...)
  * - `window`, `server` and the docs tools' groups (`ask`, `choices`, `comments`, `notes`, `agents`, `airplane`):
  *   scripts passed through, their arguments verbatim (`EpicTools.run()`)
+ * - `hub`, `repo`:  the machine's one epic server and the repos it serves (`Hub`, `Repos`;  epic `epic-eject` P7)
  * - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask new --help`, and an unknown one is
  *   refused;  every verb's help has its usage, what it does and an example (`epic close --help`);  an unknown verb
@@ -403,7 +406,7 @@ export class EpicProgram {
   // ## Windows and the page server
   ////////////////
 
-  /** `window`, `server`:  scripts passed through. */
+  /** `window`, `server`:  scripts passed through;  `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`). */
   private addWindowVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("Windows and the page server:")
@@ -423,6 +426,16 @@ export class EpicProgram {
               args.slice(1).filter((arg) => arg !== "--all")
             )
           : EpicTools.run("server", args)
+    )
+    this.group(
+      epic.command("hub"),
+      "the machine's ONE epic server:  every registered repo's pages, the engine's assets, the epic routes",
+      (args) => new Hub().run(args)
+    )
+    this.group(
+      epic.command("repo"),
+      "the repos the epic server serves (~/.spell-epic/repos.json5):  add, list, remove, default",
+      (args) => new Repos().run(args)
     )
   }
 

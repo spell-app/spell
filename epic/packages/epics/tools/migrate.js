@@ -9,6 +9,9 @@
  *   - `ui-section`:  `to-ui-section.js`, old `section.s2|s3` sections to `<ui-section>`
  *   - `answer-elements`:  `to-answer-elements.js`, a details or choice page (and the old shared templates of
  *     both) in the epics pack's elements, its old page script gone (epic `epic-workflow` P12)
+ *   - `engine-asset-routes`:  a page loads the engine's assets and pack from the epic server's routes, `/_epic/...`,
+ *     not from the checkout (`$/epics/server/engineLinks`, epic `epic-eject` P7);  the epic page's own step is
+ *     `EngineAssetRoutes`
  *   - NOT the shared-content repair (`relocate.js`):  it moves files between folders rather than fixing a page's
  *     markup, and `epic shared commit` runs its reorg every turn already
  * - `DATA_FILES`, beside the steps:  the tooling's data files outside the epics' folders renamed `.json` -> `.json5`
@@ -28,6 +31,7 @@ import { pathToFileURL } from "node:url"
 import { parseHTML } from "linkedom"
 
 import { DataFile } from "../src/data/DataFile.ts"
+import { linksEngineByPath, rewriteEngineLinks } from "../src/server/engineLinks.ts"
 import { TOOL_TEMPLATES } from "./answerPages.js"
 import { checkData, rowsFile } from "./choices.js"
 import { listPages } from "./details.js"
@@ -122,6 +126,18 @@ export const STEPS = [
         return convertChoicesPage(document, checkData(DataFile.read(rows)))
       }
       return convertDetailsPage(document)
+    }
+  },
+  {
+    name: "engine-asset-routes",
+    date: "2026-10-17",
+    kinds: ["guide", "cheatsheet", "command", "changelog", "template", "home", "list", "detail", "choice"],
+    description:
+      "the page loads the engine's assets and pack from /_epic/ (the epic server's routes), not from paths in the checkout (epic-eject P7)",
+    applies: linksEngineByPath,
+    run(document) {
+      const changes = rewriteEngineLinks(document)
+      return { changed: changes.length > 0, notes: changes.map(({ from, to }) => `${from} -> ${to}`) }
     }
   }
 ]

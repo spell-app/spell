@@ -11,6 +11,7 @@
  *   markup:  `templates/epics/plan-doc.md`, "Markup the script writes".
  */
 
+import { PACK_URL } from "$/epics/server/server.types"
 import { ProseBlocks, ProseCounted } from "$/epics/tool/planDoc.types"
 
 ////////////////
@@ -296,8 +297,8 @@ export const UPGRADE_EXCLUSIONS = [
 /** The old epic-page sheet's link, which a converted page drops (P14:  the elements style themselves). */
 export const PLAN_DOC_CSS = 'head > link[href$="/plan-doc.css"]'
 
-/** The pack a converted page loads, from `epics/<name>/`:  `<ui-components source>`. */
-export const PACK_SOURCE = "../../packages/epics/components/__pack/epics.pack.js"
+/** The pack a converted page loads:  `<ui-components source>`, the epic server's route (epic `epic-eject` P7). */
+export const PACK_SOURCE = PACK_URL
 
 /** `<body>` attributes that move onto `<epic-page>` (camelCase key there). */
 export const BODY_DATA = {

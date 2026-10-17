@@ -485,6 +485,62 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       description: "stop the page and vite servers whose checkout is gone",
       example: "epic server prune --dry-run"
     }
+  ],
+  hub: [
+    {
+      name: "serve",
+      usage: "[--port <n>]",
+      description: "run the machine's epic server in the foreground, until Ctrl-C",
+      example: "epic hub serve"
+    },
+    {
+      name: "start",
+      usage: "[--port <n>]",
+      description: "start it in the background if it isn't running",
+      example: "epic hub start"
+    },
+    {
+      name: "ensure",
+      usage: "[--port <n>]",
+      description:
+        "start it in the background if it isn't running (restarted when its code or repos changed), and print where it is",
+      example: "epic hub ensure"
+    },
+    { name: "stop", usage: "", description: "stop it", example: "epic hub stop" },
+    {
+      name: "status",
+      usage: "",
+      description: "JSON:  where it runs and what it serves;  exit 1 when it isn't running",
+      example: "epic hub status"
+    },
+    {
+      name: "url",
+      usage: "<file>",
+      description: "ensure it runs, then print the URL that serves <file>, a page in a registered repo's content",
+      example: "epic hub url epics/seo/seo.plan.html"
+    }
+  ],
+  repo: [
+    {
+      name: "add",
+      usage: "[<checkout>] [--name <name>] [--default]",
+      description:
+        "register the repo <checkout> is in (default:  this one) for the epic server;  --default:  served at /",
+      example: "epic repo add ~/www/spell-app/spell-app --default"
+    },
+    {
+      name: "list",
+      usage: "[--json]",
+      description: "every registered repo:  its URL prefix, checkout and content folder",
+      example: "epic repo list"
+    },
+    { name: "remove", usage: "<name>", description: "unregister a repo", example: "epic repo remove spell-app" },
+    {
+      name: "default",
+      usage: "<name>",
+      description: "serve that repo at / (every repo is at /r/<name>/ too)",
+      example: "epic repo default spell-app"
+    }
   ]
 }
 
@@ -492,7 +548,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  * A group of `epic`'s verbs:
  * - a docs tool or script passed through:  `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`,
  *   `server`
- * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`)
+ * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
+ *   `hub` (`Hub`), `repo` (`Repos`)
  */
 export type GroupName =
   | "ask"
@@ -507,6 +564,8 @@ export type GroupName =
   | "shared"
   | "window"
   | "server"
+  | "hub"
+  | "repo"
 
 /** One verb of a group, for its help:  `epic <group> <name> <usage>`, what it does, a whole command line. */
 export type GroupVerb = {

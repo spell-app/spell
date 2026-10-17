@@ -98,5 +98,9 @@ export const ROOT_ASSETS = [
   "packages/epics/tools/_assets/spell-ui.js"
 ] as const
 
-/** A page served from a worktree:  `/worktrees/<w>/...`, its checkout's root `/worktrees/<w>/`. */
-export const WORKTREE_PREFIX = /^\/worktrees\/[^/]+/
+/**
+ * A page served under a prefix of its own, which is its checkout's root:
+ * - a worktree's, on the main checkout's page server:  `/worktrees/<w>/...`, its root `/worktrees/<w>/`
+ * - a repo's, on the machine's epic server:  `/r/<repo>/...`, its root `/r/<repo>/` (epic `epic-eject` P7)
+ */
+export const WORKTREE_PREFIX = /^\/(?:worktrees|r)\/[^/]+/

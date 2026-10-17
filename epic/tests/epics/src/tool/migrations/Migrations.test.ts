@@ -26,7 +26,8 @@ describe("Migrations", () => {
       "owen-types-to-you-type",
       "links-agree",
       "stable-phase-ids",
-      "json5-data-files"
+      "json5-data-files",
+      "engine-asset-routes"
     ])
     expect(Migrations.named("updates-as-epic-update")?.description).toMatch(/<epic-update at summary>/)
     expect(Migrations.named("nope")).toBeUndefined()
@@ -53,6 +54,29 @@ describe("Migrations", () => {
       update.previousElementSibling?.localName
     ]).toEqual(["2026-10-05 10:00", "Moved the log", "epic-field"])
     expect(Migrations.run(document, { now })).toEqual([])
+  })
+})
+
+describe("EngineAssetRoutes", () => {
+  test("an epic page loads the engine from its routes;  on command only (not every edit);  once", () => {
+    const { document } = parseHTML(
+      '<html><head><link rel="stylesheet" href="../../packages/epics/tools/_assets/spell-doc.css" /></head><body>' +
+        '<ui-root><ui-components source="../../packages/epics/components/__pack/epics.pack.js"></ui-components>' +
+        '<epic-page epic="x"></epic-page></ui-root><script src="../../packages/epics/tools/_assets/spell-ui.js"></script>' +
+        "</body></html>"
+    )
+    const doc = document as unknown as Document
+    const notes: string[] = []
+    const now = new Date(2026, 9, 17)
+    expect(Migrations.named("engine-asset-routes")?.everyEdit).toBe(false)
+    expect(Migrations.run(doc, { now, notes }, ["engine-asset-routes"])).toEqual(["engine-asset-routes"])
+    expect(notes).toEqual([
+      "engine-asset-routes:  ../../packages/epics/tools/_assets/spell-doc.css -> /_epic/assets/spell-doc.css",
+      "engine-asset-routes:  ../../packages/epics/tools/_assets/spell-ui.js -> /_epic/assets/spell-ui.js",
+      "engine-asset-routes:  ../../packages/epics/components/__pack/epics.pack.js -> /_epic/pack/epics.pack.js"
+    ])
+    expect(doc.querySelector("ui-components")!.getAttribute("source")).toBe("/_epic/pack/epics.pack.js")
+    expect(Migrations.run(doc, { now }, ["engine-asset-routes"])).toEqual([])
   })
 })
 

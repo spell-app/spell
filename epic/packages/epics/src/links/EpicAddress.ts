@@ -220,7 +220,7 @@ export class EpicAddress {
   /**
    * The checkout's root, as a URL ending `/`, for a page at `href` that loads `assets` (absolute URLs);
    * `undefined` when neither says.
-   * - served (`http:`):  the origin, under its worktree's prefix (`/worktrees/<w>/`) if any
+   * - served (`http:`):  the origin, under its worktree's or repo's prefix (`/worktrees/<w>/`, `/r/<repo>/`) if any
    * - `file:`:  an asset that is one of `ROOT_ASSETS` (the epics pack, the docs bundle), minus that path
    */
   static rootUrl(href: string, assets: readonly string[]): string | undefined {

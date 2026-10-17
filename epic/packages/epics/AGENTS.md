@@ -22,7 +22,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   ```html
   <ui-root>
-    <ui-components source="../../packages/epics/components/__pack/epics.pack.js"></ui-components>
+    <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
     <epic-...> ... </epic-...>
   </ui-root>
   ```
@@ -506,7 +506,13 @@ The shared folders:
 
 In `tools/`:
 - `_assets/`:  shared page assets.
-  - Pages reach them from the checkout's root:  `<up>packages/epics/tools/_assets/`, `<up>` being the way up.
+  - Pages load them from the epic server's ENGINE ROUTE, `/_epic/assets/<file>` (and the pack from `/_epic/pack/`),
+    the same for every repo:  one engine per machine (epic `epic-eject` P7;  `$/epics/server`, `EpicServer`).
+    - Before P7, from the checkout's root, `<up>packages/epics/tools/_assets/`:  the migration step
+      `engine-asset-routes` moves a page over (both registries:  `EngineAssetRoutes`, and `migrate.js`'s `STEPS`).
+    - A page not migrated yet still loads THIS engine's files on the epic server:  it serves the old paths from the
+      routes (`legacyEnginePath()`).
+    - From `file://`, `check-spell.js` answers the routes from the engine's folders (`engineFileFor()`).
   - `spell-doc.css`:  page layout, and what UI doesn't cover.
     It reaches into widgets via UI tokens and `::part()`.
   - `spell-doc-runtime.js`:  page behaviour.
@@ -1523,7 +1529,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `<epic-link epic="seo" item="J3"></epic-link>`:  draws `seo J3` with J3's title as its tooltip;
     `saga`, `epic`, `item`, `phase` (rules:  [PLAN-DOC.md](src/tool/PLAN-DOC.md), "Links").
     - It's the epics pack's:  a guide using it loads the pack in its `<ui-root>`,
-      `<ui-components source="<up>packages/epics/components/__pack/epics.pack.js">`, as epic and details pages do.
+      `<ui-components source="/_epic/pack/epics.pack.js">`, as epic and details pages do.
   - Or a plain link to a SHORT ADDRESS, on any page:  `<a href="SAGA:/drawable-spell/python-target#T1">`.
     - The runtime rewrites it to the page and its `#id` (`wireAddresses()`), in that epic's tab.
     - `doc-links.js` gives it no target and leaves it alone.

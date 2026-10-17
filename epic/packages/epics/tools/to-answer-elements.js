@@ -26,6 +26,7 @@ import {
   commentBox,
   make
 } from "./answerPages.js"
+import { PACK_URL } from "../src/server/server.types.ts"
 
 /** Old markup a page Owen answers on still has:  its questions, or the old page scripts. */
 export const OLD_ANSWER_MARKUP = /class="[^"]*\bspell-question\b|_assets\/details\.js|_assets\/syntax-choices\.js/
@@ -269,19 +270,13 @@ function dropOldAssets(document, names, { keepBundle = false } = {}) {
 
 /**
  * Wrap the page's body in `<ui-root>`, its first child the epics pack's `<ui-components source>`, as an epic page's
- * is;  the scripts stay after it.  The way up to the root comes from the page's `spell-ui.js`.
+ * is;  the scripts stay after it.  The pack from the epic server's route, `/_epic/pack/` (epic `epic-eject` P7).
  */
 function loadPack(document) {
   if (document.querySelector("ui-root")) return
-  const bundle = document.querySelector('script[src$="_assets/spell-ui.js"]')?.getAttribute("src") ?? ""
-  // the docs package's old `packages/docs/tools/_assets/` too, on a page not relinked yet
-  const up = /^(.*?)packages\/(?:epics|docs)\/tools\/_assets\//.exec(bundle)?.[1] ?? ""
   const body = document.body
   const scripts = [...body.childNodes].filter((node) => node.localName === "script")
   const rest = [...body.childNodes].filter((node) => !scripts.includes(node))
-  const root = make(document, "ui-root", {}, [
-    make(document, "ui-components", { source: `${up}packages/epics/components/__pack/epics.pack.js` }),
-    ...rest
-  ])
+  const root = make(document, "ui-root", {}, [make(document, "ui-components", { source: PACK_URL }), ...rest])
   body.replaceChildren(root, ...scripts)
 }

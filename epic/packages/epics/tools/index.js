@@ -560,6 +560,7 @@ function goalSets() {
 /**
  * A new list page:  site header, breadcrumb back to the home, sticky title, lede, the markers, then `list.extra`.
  * - every list page is `<area>/index.html`, one folder deep:  `..` up to the root
+ * - the engine's assets from the epic server's route, `/_epic/assets/` (epic `epic-eject` P7)
  * - written once, when missing;  after that only between the markers
  */
 export function skeleton(list) {
@@ -570,7 +571,7 @@ export function skeleton(list) {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${text(list.title)}</title>
 <meta name="description" content="${attr(list.description)}" />
-<link rel="stylesheet" href="../packages/epics/tools/_assets/spell-doc.css" />
+<link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
 </head>
 <body class="spell-doc-page">
 <spell-site-header root=".."></spell-site-header>
@@ -587,8 +588,8 @@ ${END}
 ${list.extra ?? ""}
 </main>
 </div>
-<script src="../packages/epics/tools/_assets/highlight.min.js"></script>
-<script src="../packages/epics/tools/_assets/spell-ui.js"></script>
+<script src="/_epic/assets/highlight.min.js"></script>
+<script src="/_epic/assets/spell-ui.js"></script>
 </body>
 </html>
 `

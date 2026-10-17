@@ -50,7 +50,7 @@ describe("pullBoard()", () => {
   })
 
   it("loads the one-file bundle and the site header for the page's depth", () => {
-    expect(html).toContain('<script src="../packages/epics/tools/_assets/spell-ui.js"></script>')
+    expect(html).toContain('<script src="/_epic/assets/spell-ui.js"></script>')
     expect(html).toContain('<spell-site-header root=".."></spell-site-header>')
   })
 

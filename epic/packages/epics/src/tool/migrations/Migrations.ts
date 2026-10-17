@@ -1,3 +1,4 @@
+import { EngineAssetRoutes } from "./EngineAssetRoutes"
 import { Json5DataFiles } from "./Json5DataFiles"
 import { LinksAgree } from "./LinksAgree"
 import type { Migration, MigrationContext } from "./migrations.types"
@@ -25,7 +26,8 @@ export class Migrations {
     new ReaderIsYou(),
     new LinksAgree(),
     new StablePhaseIds(),
-    new Json5DataFiles()
+    new Json5DataFiles(),
+    new EngineAssetRoutes()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

@@ -62,8 +62,8 @@ export class MigrateCommands {
           : this.files.listEpics()
       code = await this.migrateEpics(docs, { step, dryRun, notify: Boolean(flags.notify) })
     } else if (kind === "epic") throw new PlanDocError(`no epic page step "${step}" (migrate --list lists them)`)
-    // the data files' step is both:  the epics' folders' renames, and the docs tools' for the rest
-    const epicOnly = step !== undefined && epicStep && step !== DATA_FILES
+    // a step both registries hold (the data files', the engine routes'):  the epic pages', then the docs tools'
+    const epicOnly = step !== undefined && epicStep && !BOTH_KINDS.includes(step)
     if (kind !== "epic" && !(epicFile && kind === undefined) && !(epicOnly && kind === undefined))
       code = Math.max(code, this.migrateOthers(kind, { file, step, dryRun }))
     return code
@@ -235,6 +235,13 @@ const LINKS = "links-agree"
 
 /** The step that changes only files beside the page, never the page:  it counts when it has files to rename. */
 const DATA_FILES = "json5-data-files"
+
+/**
+ * The steps the epic pages' registry (`Migrations`) AND the docs tools' (`migrate.js` `STEPS`) both hold, by one name:
+ * `--step <name>` runs both.
+ * - the data files' (`json5-data-files`), and the engine routes' (`engine-asset-routes`, epic `epic-eject` P7)
+ */
+const BOTH_KINDS: readonly string[] = [DATA_FILES, "engine-asset-routes"]
 
 /** An epic page's path:  `epics/<name>/<name>.plan.html` (or an older `<name>.html`);  `[1]` its name. */
 const PLAN_DOC = /(?:^|[\\/])epics[\\/]([^\\/]+)[\\/]\1(?:\.plan)?\.html$/

@@ -18,6 +18,7 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { ENGINE_ROUTES } from "../src/server/server.types.ts"
 import { ROOT } from "./pages.js"
 
 /** The built design system:  `spell dev design build` writes it, `yarn design:bundle` adds the bundle. */
@@ -141,7 +142,7 @@ export function pullBoard(source, file, { title, from, board } = {}) {
     '    <meta charset="utf-8" />',
     '    <meta name="viewport" content="width=device-width, initial-scale=1" />',
     `    <title>${escapeText(name)}</title>`,
-    `    <script src="${up}/packages/epics/tools/_assets/spell-ui.js"></script>`,
+    `    <script src="${ENGINE_ROUTES.assets.prefix}spell-ui.js"></script>`,
     ...head.map((line) => `    ${line}`),
     "  </head>",
     '  <body class="ui-typography">',

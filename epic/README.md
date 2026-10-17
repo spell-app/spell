@@ -83,6 +83,33 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 A repo's generated files, which `epic worktree merge-main` rebuilds instead of merging, are its own list:
 `.epic/generators.json5`, in each checkout (`MainMerge.generatorsOf()`).
 
+## The epic server:  one per machine
+
+`epic hub` runs ONE page server for every repo that uses spell-epic (`EpicServer`, `packages/epics/src/server/`;
+epic `epic-eject` P7), beside each checkout's own page server (`epic server`, spell-app's, port 4747).
+
+```sh
+epic repo add ~/www/spell-app/spell-app --default   # register a repo (its MAIN checkout), served at / too
+epic repo list
+epic hub ensure                                      # start it in the background:  http://127.0.0.1:4848/
+epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
+```
+
+| URL | What |
+| --- | --- |
+| `/_epic/assets/...` | this checkout's `packages/epics/tools/_assets/`:  `spell-ui.js`, `spell-doc.css`, the runtime |
+| `/_epic/pack/...` | this checkout's epics pack, `epics.pack.js` |
+| `/r/<repo>/...` | a registered repo's content folder (its `.epic/config.json5`'s `contentFolder`) |
+| `/...` | the DEFAULT repo's content folder too, so today's URLs keep working |
+| `/api/...` | the epic route modules (review, details, choices, comments, agents, airplane, running, links), for the default repo |
+
+- Its files are in `~/.spell-epic/`:  `repos.json5` (the repos), `server.json` (its pid file), `server.log`.
+  `SPELL_EPIC_HOME` moves the folder (the tests' temp homes);  `SPELL_EPIC_PORT` its port (default 4848).
+- `ensure` restarts it when its code or the repo list changed since it started.
+- Pages load the engine from the routes (the migration step `engine-asset-routes`);  a page not migrated yet still
+  loads THIS engine's files, from its old paths.
+- Not yet:  another repo's calls (`/api/...` from a `/r/<repo>/` page) reach the default repo's route modules.
+
 ## spell-app's packages
 
 The epic pages are drawn with Spell UI, and the tools run on spell's page server and page assembler.

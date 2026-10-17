@@ -26,6 +26,8 @@
  *     its section's stuck title while its details are read
  *     - at desktop and phone width (`checkItemLine()`)
  * - loads the page from `file://`, or from the page server when its `<body>` says `data-spell-needs-server`
+ *   - from `file://`, the engine's routes (`/_epic/assets/...`, `/_epic/pack/...`, epic `epic-eject` P7) are answered
+ *     from this engine's own folders (`engineFileFor()`), as the epic server would serve them
  * - a component set's page:  from the page server at its address (`/components/epics/...`),
  *   since it loads its site bundle from there
  *   - the sets:  `packages/epics/docs/` ..., `COMPONENT_SETS` in `$/server/page`
@@ -35,7 +37,7 @@
  * - prints a JSON summary on stdout (last thing written), problems on stderr
  * - Look at the screenshots too:  the checks can't see overlap, clipping or ugly wrapping.
  */
-import { mkdtempSync, mkdirSync, readFileSync } from "node:fs"
+import { existsSync, mkdtempSync, mkdirSync, readFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, relative, resolve, sep } from "node:path"
 import { pathToFileURL } from "node:url"
@@ -44,13 +46,17 @@ import { chromium } from "playwright"
 
 // By path, its types stripped by `node` itself:  this tool runs under plain `node`, so no `$/` alias
 import { COMPONENT_SETS } from "@spell-app/server/src/page/page.types.ts"
-import { ROOT, ensurePageServer, pageFile, serverUrl } from "./pages.js"
+import { engineFileFor } from "../src/server/engineLinks.ts"
+import { PACKAGE, ROOT, ensurePageServer, pageFile, serverUrl } from "./pages.js"
 
 /**
  * Elements the page's packs define, as `ui-*` (Spell UI) and `epic-*` (the `epics` pack, epic pages):
  * a tag that looks like one of theirs must be defined and draw into a shadow root.
  */
 const PACK_TAG = /^(ui|epic)-/
+
+/** The engine whose routes a `file://` page's `/_epic/...` requests are answered from:  this checkout. */
+const ENGINE = resolve(PACKAGE, "../..")
 
 /** The page's navigation:  its toolbar, an epic page's or any other's (`spell-doc-runtime.js` `buildNavigation()`). */
 const NAV = "nav.spell-toolbar"
@@ -180,6 +186,11 @@ async function open(viewport) {
   const label = `${viewport.width}px`
   page.on("pageerror", (error) => problem(`page error (${label}):  ${error}`))
   page.on("console", (message) => message.type() === "error" && problem(`console (${label}):  ${message.text()}`))
+  // a page from `file://` loading the engine's routes (`/_epic/...`):  answered from this engine's folders
+  await page.route(/^file:\/\/\/_epic\//, (route) => {
+    const file = engineFileFor(new URL(route.request().url()).pathname, ENGINE)
+    return file && existsSync(file) ? route.fulfill({ path: file }) : route.fulfill({ status: 404 })
+  })
   await page.goto(url)
   await settle(page)
   return page

@@ -8,6 +8,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { Window } from "../../../scripts/window.mjs"
+import { ENGINE_ROUTES } from "../src/server/server.types.ts"
 
 /** `packages/epics/tools`:  the docs scripts, `_assets`, the goals tooling. */
 export const TOOLS = dirname(fileURLToPath(import.meta.url))
@@ -286,16 +287,15 @@ export function ensurePageServer() {
  * A template's `html` fixed for a page `depth` folders below the checkout's root (`guides/glossary.html` is 1,
  * `epics/a/a.plan.html` 2).
  * - rewrites whatever depth the template assumed, `<up>` being the path up to the root:
- *   - `_assets` paths:  `<up>packages/epics/tools/_assets/`
+ *   - the engine's assets:  its route, `/_epic/assets/` (the epic server's, epic `epic-eject` P7;  `ENGINE_ROUTES`),
+ *     from wherever the template had them:  `tools/_assets/`, `packages/epics/tools/_assets/`, or the docs package's
+ *     old `packages/docs/tools/_assets/` (before epic `people-and-orgs` P16)
  *   - the home page's paths:  `<up>pages/index.html`
  *   - the areas' list pages:  `<up>epics/index.html` ...
  *   - the site header's `root`:  `<up>`
- *   - a component pack's script (`<ui-components source>`):  `<up>packages/<name>/components/__pack/`
- *     - the epics pack, on epic, details and choice pages
+ *   - the epics pack's script (`<ui-components source>`, on epic, details and choice pages):  its route,
+ *     `/_epic/pack/`;  another pack's:  `<up>packages/<name>/components/__pack/` (a repo's own)
  *     - from its old folder, `packages/<name>/pack/`, too
- *   - `_assets` from wherever the template had them:
- *     `tools/_assets/`, `packages/epics/tools/_assets/`, or the docs package's old `packages/docs/tools/_assets/`
- *     (before epic `people-and-orgs` P16)
  * - drops the template's `TEMPLATE:` how-to comment
  * - `docs:new`, `details new`, and the plan-doc tool's `epic new` (`PlanDocCommands`)
  */
@@ -304,13 +304,18 @@ export function atDepth(html, depth) {
   return (
     html
       // a component pack's script (`<ui-components source>`:  the epics pack, on epic, details and choice pages)
+      // the epics pack:  the engine's route;  another pack:  the repo's own, at this depth
+      .replace(
+        /(\bsource=")(?:\.\.\/)*\/?packages\/epics\/(?:components\/__)?pack\//g,
+        `$1${ENGINE_ROUTES.pack.prefix}`
+      )
       .replace(
         /(\bsource=")(?:\.\.\/)*packages\/([\w-]+)\/(?:components\/__)?pack\//g,
         `$1${up}packages/$2/components/__pack/`
       )
       .replace(
-        /((?:href|src)=")(?:\.\.\/)*(?:packages\/(?:docs|epics)\/)?(?:tools\/)?_assets\//g,
-        `$1${up}packages/epics/tools/_assets/`
+        /((?:href|src)=")(?:\.\.\/)*\/?(?:packages\/(?:docs|epics)\/)?(?:tools\/)?_assets\//g,
+        `$1${ENGINE_ROUTES.assets.prefix}`
       )
       .replace(/((?:href|src)=")(?:\.\.\/)*(?:pages\/)?index\.html/g, `$1${up}pages/index.html`)
       .replace(/((?:href|src)=")(?:\.\.\/)*(epics|guides|templates|brand)\/index\.html/g, `$1${up}$2/index.html`)

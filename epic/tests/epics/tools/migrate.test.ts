@@ -139,7 +139,7 @@ describe("page kinds", () => {
       expect(step.date).toMatch(/^\d{4}-\d\d-\d\d$/)
       expect(step.kinds.every((kind) => KINDS.includes(kind) && kind !== "epic")).toBe(true)
     }
-    expect(stepsFor("cheatsheet").map((step) => step.name)).toEqual(["ui-section"])
+    expect(stepsFor("cheatsheet").map((step) => step.name)).toEqual(["ui-section", "engine-asset-routes"])
     expect(stepsFor("goal-set")).toEqual([])
     expect(() => stepsFor("guide", "nope")).toThrow(/no step "nope"/)
   })
@@ -171,20 +171,21 @@ describe("migratePages", () => {
     expect(pages.map((page) => page.file.split("/").pop())).toEqual(["pick.html", "plain.html"])
     const { results } = migratePages(pages, { tidied: false })
     expect(report(results, root)).toEqual([
-      "epics/big/details/pick.html:  answer-elements",
+      "epics/big/details/pick.html:  answer-elements, engine-asset-routes",
       "  answer-elements:  meta list -> <epic-field>s",
       "  answer-elements:  Where we are -> <epic-field>s",
       "  answer-elements:  1 questions -> <epic-ask>",
       "  answer-elements:  1 comment boxes",
-      "epics/big/details/plain.html:  answer-elements",
+      "  engine-asset-routes:  ../../../packages/docs/tools/_assets/spell-ui.js -> /_epic/assets/spell-ui.js",
+      "epics/big/details/plain.html:  answer-elements, engine-asset-routes",
       "  answer-elements:  no questions:  its old script and sheet dropped",
-      "details pages:  2 of 2 changed (answer-elements 2)"
+      "  engine-asset-routes:  ../../../packages/docs/tools/_assets/spell-ui.js -> /_epic/assets/spell-ui.js",
+      "details pages:  2 of 2 changed (answer-elements 2, engine-asset-routes 2)"
     ])
     const html = readFileSync(join(root, "epics/big/details/pick.html"), "utf8")
     expect(html).not.toMatch(/spell-question|spell-option|details\.(js|css)|data-details-status/)
-    expect(html).toContain(
-      '<ui-root><ui-components source="../../../packages/epics/components/__pack/epics.pack.js"></ui-components>'
-    )
+    // the epics pack from the epic server's route (epic `epic-eject` P7)
+    expect(html).toContain('<ui-root><ui-components source="/_epic/pack/epics.pack.js"></ui-components>')
     expect(html).toContain("<h1>Pick</h1><epic-send></epic-send>")
     expect(html).toContain('<epic-field label="Asked by" data-details-by>session <code>w</code></epic-field>')
     expect(html).toContain('<epic-field label="Asked" data-details-asked>2026-10-05</epic-field>')
@@ -198,7 +199,8 @@ describe("migratePages", () => {
         '<epic-option letter="B" title="Second"><p>Two.</p></epic-option></epic-choices></epic-ask></ui-section>'
     )
     expect(html).toContain('</ui-section><epic-text-box type="notes"></epic-text-box>')
-    expect(html).toContain('<script src="../../../packages/docs/tools/_assets/spell-ui.js"></script>')
+    // then `engine-asset-routes`:  the bundle from the route too
+    expect(html).toContain('<script src="/_epic/assets/spell-ui.js"></script>')
     const plain = readFileSync(join(root, "epics/big/details/plain.html"), "utf8")
     expect(plain).not.toMatch(/details\.(js|css)|ui-root|epic-send/)
     expect(migratePages(pages, { tidied: false }).written).toEqual([])
@@ -232,7 +234,7 @@ describe("migratePages", () => {
     )
     expect(html).toContain('<p class="spell-choices-rule"><code>is</code> first</p>')
     expect(html).toContain("<epic-choices-bar></epic-choices-bar></main>")
-    expect(html).toContain('<script src="../../packages/docs/tools/_assets/highlight.min.js"></script>')
+    expect(html).toContain('<script src="/_epic/assets/highlight.min.js"></script>')
     expect(migratePages(pages, { tidied: false }).written).toEqual([])
   })
 
@@ -241,7 +243,39 @@ describe("migratePages", () => {
     migratePages(pagesFor(root, "template"), { tidied: false })
     const html = readFileSync(join(root, "templates/details.html"), "utf8")
     expect(html).toContain("<epic-ask>")
-    expect(html).toContain('source="../packages/epics/components/__pack/epics.pack.js"')
+    expect(html).toContain('source="/_epic/pack/epics.pack.js"')
+  })
+
+  test("engine-asset-routes:  what a page LOADS from the engine, from its routes;  a source link kept;  once", () => {
+    const guide =
+      '<!doctype html><html><head><link rel="stylesheet" href="../../packages/epics/tools/_assets/spell-doc.css" /></head>' +
+      '<body><ui-root><ui-components source="../../packages/epics/components/__pack/epics.pack.js"></ui-components>' +
+      '<main><p>See <a href="../../packages/epics/tools/_assets/spell-ui.js">the bundle</a>.</p></main></ui-root>' +
+      '<script src="../../packages/epics/tools/_assets/highlight.min.js"></script>' +
+      '<script src="../../packages/epics/tools/_assets/spell-ui.js"></script></body></html>'
+    const root = checkout({
+      "guides/x/x.html": guide,
+      "guides/new.html": '<script src="/_epic/assets/spell-ui.js"></script>'
+    })
+    const pages = pagesFor(root, "guide")
+    const dry = migratePages(pages, { dryRun: true, tidied: false })
+    expect(readFileSync(join(root, "guides/x/x.html"), "utf8")).toBe(guide)
+    expect(report(dry.results, root, { dryRun: true })).toEqual([
+      "guides/x/x.html:  would run engine-asset-routes",
+      "  engine-asset-routes:  ../../packages/epics/tools/_assets/spell-doc.css -> /_epic/assets/spell-doc.css",
+      "  engine-asset-routes:  ../../packages/epics/tools/_assets/highlight.min.js -> /_epic/assets/highlight.min.js",
+      "  engine-asset-routes:  ../../packages/epics/tools/_assets/spell-ui.js -> /_epic/assets/spell-ui.js",
+      "  engine-asset-routes:  ../../packages/epics/components/__pack/epics.pack.js -> /_epic/pack/epics.pack.js",
+      "guides:  1 of 2 would change (engine-asset-routes 1)"
+    ])
+    expect(migratePages(pages, { tidied: false }).written).toEqual([join(root, "guides/x/x.html")])
+    const html = readFileSync(join(root, "guides/x/x.html"), "utf8")
+    expect(html).toContain('<link rel="stylesheet" href="/_epic/assets/spell-doc.css">')
+    expect(html).toContain('<ui-components source="/_epic/pack/epics.pack.js">')
+    expect(html).toContain('<script src="/_epic/assets/spell-ui.js"></script>')
+    // a link naming the file for a reader:  as written
+    expect(html).toContain('<a href="../../packages/epics/tools/_assets/spell-ui.js">the bundle</a>')
+    expect(migratePages(pages, { tidied: false }).written).toEqual([])
   })
 
   test("a saga page is never a step's:  it keeps the old markup", () => {
