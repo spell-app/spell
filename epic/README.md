@@ -68,14 +68,14 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 - Folders are relative to the main checkout.  Every worktree reads the main checkout's file.
 - `epic config [key] [--json]` prints what's in force.
 - The hooks act only in a repo that has the file (the worktree hook excepted, which Claude Code needs everywhere).
-- `epic init`, which writes the file and makes the content folder, comes with P9 (the test repo).
+- `epic init` writes the file for a new repo, and makes its content folder:  "Using spell-epic in another repo", below.
 
 | Key | Default | What |
 | --- | --- | --- |
 | `contentFolder` | `"../spell-app-dev"` | the shared content repo:  epics, guides, sagas, pages, brand, the logs |
 | `baseBranch` | `"main"` | the branch worktrees start from and merge into |
 | `worktreesFolder` | `".claude/worktrees"` | where NEW worktrees go, one folder each, `<worktreesFolder>/<name>`;  may be beside the repo (`"../spell-app.worktrees"`) |
-| `installCommand` | `"yarn install"` | what makes a new worktree ready to run, from its root |
+| `installCommand` | `"yarn install"` | what makes a new worktree ready to run, from its root;  `""`:  nothing to install |
 | `installOnCreate` | `false` | whether the worktree hook runs `installCommand` before it hands a new worktree over (I2) |
 | `installTimeout` | `600` | the seconds that install may take before the hook fails |
 | `windows.default` | `"spell-app"` | the window file a worktree's window is opened from, by default |
@@ -83,6 +83,7 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | `windows.contentName` | `"spell-app-dev"` | the content repo's folder name in every window |
 | `windows.worktreeOnly` | `false` | whether EVERY worktree's window holds only the worktree and the content folder |
 | `linkSessionFolders` | `false` | whether the worktree hook links each new worktree's saved-session folder to the main checkout's |
+| `sharedFolders` | spell-app's eight | the content folder's folders every checkout links in at its root;  a checkout's `package.json` `"shared": { "links" }` wins (spell-app's branches) |
 
 A repo's generated files, which `epic worktree merge-main` rebuilds instead of merging, are its own list:
 `.epic/generators.json5`, in each checkout (`MainMerge.generatorsOf()`).
@@ -139,6 +140,63 @@ each;  the epic page's todo is in brackets.  `epic` is spell-epic's `bin/epic` (
     pages after the rename).
 16. Later, code rather than a command:  `epic server` hands over to `epic hub` (T16), the commands page learns the new
     verbs (T22), a call per repo on the epic server (T17, P9).
+
+## Using spell-epic in another repo
+
+Epic `epic-eject` P9 ran one epic end to end in a throwaway repo, `~/www/epic-try`:  `epic init`, a saga, an epic
+page with a phase, the review inbox, the docs pages served by the epic server, `/isolate done`'s merge and the
+worktree's removal.  With the plugin on (`bin/epic` on the `PATH`), in the repo's main checkout:
+
+```sh
+git init -b main                 # a git repo, with a first commit
+epic init --dry-run              # what it would write
+epic init                        # .epic/config.json5, the content repo, the links, .gitignore
+git add .epic/config.json5 .gitignore && git commit -m "epic init"
+epic repo add && epic hub ensure # the epic server serves its pages (at / when it's the only repo)
+```
+
+Then `/epic <name>` works there as in spell-app.
+
+What `epic init` does (`RepoInit`, `packages/epics/src/command/RepoInit.ts`), each step skipped when it's done, so it's
+safe to run again:
+1. Writes `.epic/config.json5` with every key (the table above), each with a comment, valued for THIS repo:
+   - `contentFolder`:  `../<repo>.epics`, beside it, as `spell-app.epics` will be
+   - `baseBranch`:  the remote's default branch, else the branch the main checkout is on
+   - `worktreesFolder`:  `../<repo>.worktrees`;  `windows.worktreeOnly`:  `true`
+   - `installCommand`:  what the lock file names (`yarn.lock`:  `yarn install`, `pnpm-lock.yaml`, `bun.lock`,
+     `package-lock.json` or a bare `package.json`:  `npm install`, `uv.lock`, `Gemfile.lock`);  none:  `""`.
+     `installOnCreate` is on when there is one.
+   - `windows.default`, `windows.repoName`:  the repo's folder name;  `windows.contentName`:  `<repo>.epics`
+   - `linkSessionFolders`:  `true`
+   - `sharedFolders`:  `["epics", "sagas", "guides", "pages"]`
+   - A file already there is kept as it is.
+2. Makes the content folder a git repo of its own, with those folders (a `.gitkeep` in each), a `README.md` and a
+   `.gitignore` for the tooling's scratch files (inboxes, locks, running agents).  The turn-end hook commits it.
+3. Links each folder in at the checkout's root;  every new worktree gets the same links from the worktree hook.
+4. Lists the links, and `workspaces/` (the VS Code window files, each machine's own), between `# shared:start` and
+   `# shared:end` in the repo's `.gitignore`.
+
+What the content folder holds:
+
+| Folder | What |
+| --- | --- |
+| `epics/` | an epic page per epic, `epics/<name>/<name>.plan.html`, its parts, review inbox and details pages;  `home.json5` (the tooling home) and `favorites.json5`;  the Epics list, `epics/index.html` |
+| `sagas/` | the sagas' list, `sagas/sagas.json5` (`epic saga new`), a page per saga, the Sagas list |
+| `guides/` | the guides epics write (`epic pages new durable guides/<page>.html`), the Guides list |
+| `pages/` | the docs home, `pages/index.html` (`epic pages index` makes it, a card per area the repo has), and the scratch details pages, `pages/details/` |
+
+Not spell-app's own (`brand/`, `ui/`, `goals/`, `agents/`), and no `templates/`:  the templates are spell-epic's.
+
+The verbs a skill names that spell-app spells `spell dev ...`:
+- `epic pages index | update | new | open | link | fuss | offline` (`spell dev docs ...`)
+- `epic server ...`:  in a repo without its own page server, the epic server (`epic hub`), same verbs
+- `epic window open <name> --no-open`:  writes the worktree's window file without opening VS Code
+
+Not yet (the epic page's issues and todos):
+- the epic server's review, details and comment routes serve the DEFAULT repo only (T17):  a second repo's pages draw,
+  but their review controls reach the default repo
+- the skills still name a few of spell-app's own tools (`spell dev vscode`, `spell dev wwod check`, `yarn vp fmt`,
+  the changelog)
 
 ## The epic server:  one per machine
 
