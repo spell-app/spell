@@ -24,15 +24,18 @@
  *   - every package window lists every worktree;  takes a window reload
  *
  * ## The window a session runs in
- * - The spell extension (`packages/vscode/src/WindowBridge.ts`) runs a small server in EVERY window and writes
- *   `~/.spell/windows/<pid>.json` (`{ pid, port, token, workspaceFile, folders }`), `pid` being the window's
+ * - spell-epic's VS Code extension (`vscode/src/WindowBridge.ts`) runs a small server in EVERY window and writes
+ *   `~/.spell-epic/windows/<pid>.json` (`{ pid, port, token, workspaceFile, folders }`), `pid` being the window's
  *   extension host.
+ *   - The spell language extension's bridge (spell-app's `packages/vscode`, until it drops it) writes the same into
+ *     `~/.spell/windows/`:  read too, after spell-epic's (`Window.registries`), so a window with either one works.
  * - A Claude Code session is a child of that extension host, so `Window.current()` walks up this process's parent
  *   pids to the first one with a registry file.  Not a session (a terminal's shell is a child of VS Code's pty
  *   host, not the extension host):  the window with `process.cwd()` in one of its folders after the first.
  * - Then `Window.request(op, body)` asks THAT window, not the focused one (which is what a `vscode://` URI gets).
  * - `import { Window } from "<relative path>/scripts/window.mjs"`:  the CLI runs only when this file is run.
- * - Tests:  `node --test scripts/window.test.mjs`.  `SPELL_WINDOWS_DIR` overrides the registry folder.
+ * - Tests:  `node --test scripts/window.test.mjs`.  `SPELL_EPIC_WINDOWS_DIR` and `SPELL_WINDOWS_DIR` override the
+ *   registry folders.
  *
  * ## A worktree's window
  * - `/isolate` and `/epic` open a worktree in a NEW window (`open <name>`).
@@ -641,23 +644,39 @@ export class Window {
   // ## The window a session runs in
   ////////////////
 
-  /** The registry folder:  `$SPELL_WINDOWS_DIR`, else `~/.spell/windows`.  Read on every call, for tests. */
+  /**
+   * spell-epic's registry folder, where its extension's bridges write (and the handoffs go):
+   * `$SPELL_EPIC_WINDOWS_DIR`, else `~/.spell-epic/windows`.  Read on every call, for tests.
+   */
   static get registry() {
-    return process.env.SPELL_WINDOWS_DIR || join(homedir(), ".spell", "windows")
+    return process.env.SPELL_EPIC_WINDOWS_DIR || join(homedir(), ".spell-epic", "windows")
   }
 
-  /** Every LIVE window's registry entry, by pid;  dead windows' files (a crash) are skipped, not deleted. */
+  /**
+   * Every registry folder read, spell-epic's first:  then the spell language extension's, `$SPELL_WINDOWS_DIR`, else
+   * `~/.spell/windows` (its bridge, while it still has one:  epic `epic-eject` P7)
+   */
+  static get registries() {
+    return [Window.registry, process.env.SPELL_WINDOWS_DIR || join(homedir(), ".spell", "windows")]
+  }
+
+  /**
+   * Every LIVE window's registry entry, by pid;  dead windows' files (a crash) are skipped, not deleted.
+   * - a window both extensions' bridges run in:  spell-epic's entry (`registries`, first found)
+   */
   static entries() {
     const entries = new Map()
-    const dir = Window.registry
-    if (!existsSync(dir)) return entries
-    for (const name of readdirSync(dir)) {
-      if (!/^\d+\.json$/.test(name)) continue
-      try {
-        const entry = JSON.parse(readFileSync(join(dir, name), "utf8"))
-        if (Number.isInteger(entry.pid) && isAlive(entry.pid)) entries.set(entry.pid, entry)
-      } catch {
-        // half-written or not ours:  skip it
+    for (const dir of Window.registries) {
+      if (!existsSync(dir)) continue
+      for (const name of readdirSync(dir)) {
+        if (!/^\d+\.json$/.test(name)) continue
+        try {
+          const entry = JSON.parse(readFileSync(join(dir, name), "utf8"))
+          if (Number.isInteger(entry.pid) && isAlive(entry.pid) && !entries.has(entry.pid))
+            entries.set(entry.pid, entry)
+        } catch {
+          // half-written or not ours:  skip it
+        }
       }
     }
     return entries
@@ -696,7 +715,7 @@ export class Window {
    */
   static async request(op, body = {}, window = Window.current()) {
     if (!window) {
-      throw new Error("no window:  the spell extension's bridge isn't running in this session's VS Code window")
+      throw new Error("no window:  the spell-epic extension's bridge isn't running in this session's VS Code window")
     }
     let response
     try {
@@ -743,7 +762,7 @@ export class Window {
       return Window.worktreeCommand(command, target, flags)
     const window = Window.current()
     if (!window) {
-      console.error("no window:  the spell extension's bridge isn't running in this session's VS Code window")
+      console.error("no window:  the spell-epic extension's bridge isn't running in this session's VS Code window")
       console.error("  (install it with `spell dev vscode`, then reload the window)")
       return 1
     }

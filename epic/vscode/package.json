@@ -1,0 +1,386 @@
+{
+  "name": "spell-epic",
+  "displayName": "Spell Epic",
+  "version": "0.1.0",
+  "private": true,
+  "description": "spell-epic's side bar:  the Review tab and Epic Docs, live from spell-epic's one page server per machine;  the window bridge Claude Code sessions reach their window through, and the handoff.",
+  "license": "MIT",
+  "repository": "https://github.com/spell-app/spell-epic",
+  "publisher": "spell-app",
+  "main": "./out/extension.js",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "cd .. && node_modules/.bin/tsc --noEmit -p vscode",
+    "package": "node build.mjs && vsce package --no-dependencies --skip-license --out spell-epic.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.100.0",
+    "@vscode/vsce": "^4.0.0"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "spellEpic.docView.back",
+        "title": "Back",
+        "category": "Spell Epic",
+        "icon": "$(arrow-left)",
+        "enablement": "spellEpic.docView.canGoBack"
+      },
+      {
+        "command": "spellEpic.docView.forward",
+        "title": "Forward",
+        "category": "Spell Epic",
+        "icon": "$(arrow-right)",
+        "enablement": "spellEpic.docView.canGoForward"
+      },
+      {
+        "command": "spellEpic.docView.reload",
+        "title": "Reload Doc",
+        "category": "Spell Epic",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "spellEpic.docView.restartServer",
+        "title": "Restart Page Server",
+        "category": "Spell Epic",
+        "icon": "$(server-process)"
+      },
+      {
+        "command": "spellEpic.docView.openExternal",
+        "title": "Open Doc in Browser",
+        "category": "Spell Epic",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "spellEpic.docView.home",
+        "title": "Home Page:  a fresh view at the docs' home page, for a page that stopped responding",
+        "category": "Spell Epic",
+        "icon": "$(home)"
+      },
+      {
+        "command": "spellEpic.reviewView.back",
+        "title": "Review:  Back",
+        "category": "Spell Epic",
+        "icon": "$(arrow-left)",
+        "enablement": "spellEpic.reviewView.canGoBack"
+      },
+      {
+        "command": "spellEpic.reviewView.forward",
+        "title": "Review:  Forward",
+        "category": "Spell Epic",
+        "icon": "$(arrow-right)",
+        "enablement": "spellEpic.reviewView.canGoForward"
+      },
+      {
+        "command": "spellEpic.reviewView.reload",
+        "title": "Review:  Reload Doc",
+        "category": "Spell Epic",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "spellEpic.reviewView.restartServer",
+        "title": "Review:  Restart Page Server",
+        "category": "Spell Epic",
+        "icon": "$(server-process)"
+      },
+      {
+        "command": "spellEpic.reviewView.openExternal",
+        "title": "Review:  Open Doc in Browser",
+        "category": "Spell Epic",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "spellEpic.reviewView.openEpic",
+        "title": "Review:  Open Epic...",
+        "category": "Spell Epic",
+        "icon": "$(checklist)"
+      },
+      {
+        "command": "spellEpic.reviewView.home",
+        "title": "Review:  Home Page (a fresh view at the docs' home page)",
+        "category": "Spell Epic",
+        "icon": "$(home)"
+      },
+      {
+        "command": "spellEpic.docView.inspect",
+        "title": "Inspect:  opens (or closes) Developer Tools;  then Cmd+Shift+C there (the arrow, top left) and click in the page",
+        "category": "Spell Epic",
+        "icon": "$(inspect)"
+      },
+      {
+        "command": "spellEpic.docView.showConsole",
+        "title": "Show Console:  opens (or closes) Developer Tools;  then its Console tab, and the page (127.0.0.1) in the menu at its top left",
+        "category": "Spell Epic",
+        "icon": "$(debug-console)"
+      },
+      {
+        "command": "spellEpic.docMenu.cut",
+        "title": "Cut",
+        "category": "Spell Epic"
+      },
+      {
+        "command": "spellEpic.docMenu.copy",
+        "title": "Copy",
+        "category": "Spell Epic"
+      },
+      {
+        "command": "spellEpic.docMenu.paste",
+        "title": "Paste",
+        "category": "Spell Epic"
+      },
+      {
+        "command": "spellEpic.docMenu.selectAll",
+        "title": "Select All",
+        "category": "Spell Epic"
+      },
+      {
+        "command": "spellEpic.docMenu.back",
+        "title": "Back",
+        "category": "Spell Epic",
+        "enablement": "webviewId == spellEpic.docView && spellEpic.docView.canGoBack || webviewId == spellEpic.reviewView && spellEpic.reviewView.canGoBack"
+      },
+      {
+        "command": "spellEpic.docMenu.forward",
+        "title": "Forward",
+        "category": "Spell Epic",
+        "enablement": "webviewId == spellEpic.docView && spellEpic.docView.canGoForward || webviewId == spellEpic.reviewView && spellEpic.reviewView.canGoForward"
+      },
+      {
+        "command": "spellEpic.docMenu.reload",
+        "title": "Reload",
+        "category": "Spell Epic"
+      },
+      {
+        "command": "spellEpic.docMenu.openExternal",
+        "title": "Open in Browser",
+        "category": "Spell Epic"
+      },
+      {
+        "command": "spellEpic.docMenu.inspect",
+        "title": "Inspect (Developer Tools)",
+        "category": "Spell Epic"
+      }
+    ],
+    "configuration": {
+      "title": "Spell Epic",
+      "properties": {
+        "spellEpic.docPreview.location": {
+          "type": "string",
+          "enum": [
+            "sidebar",
+            "beside"
+          ],
+          "default": "sidebar",
+          "enumDescriptions": [
+            "The \"Epic Docs\" tab, in the right (secondary) side bar.",
+            "Simple Browser, in an editor column beside the editor."
+          ],
+          "description": "Where docs pages open (`epic open`, `/spell-docs`).  Pages for review always open in the side bar's \"Review\" tab."
+        }
+      }
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "spellEpic.docView.back",
+          "when": "view == spellEpic.docView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "spellEpic.docView.forward",
+          "when": "view == spellEpic.docView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "spellEpic.docView.reload",
+          "when": "view == spellEpic.docView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "spellEpic.docView.home",
+          "when": "view == spellEpic.docView",
+          "group": "navigation@4"
+        },
+        {
+          "command": "spellEpic.docView.restartServer",
+          "when": "view == spellEpic.docView",
+          "group": "navigation@5"
+        },
+        {
+          "command": "spellEpic.docView.openExternal",
+          "when": "view == spellEpic.docView",
+          "group": "navigation@6"
+        },
+        {
+          "command": "spellEpic.reviewView.back",
+          "when": "view == spellEpic.reviewView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "spellEpic.reviewView.forward",
+          "when": "view == spellEpic.reviewView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "spellEpic.reviewView.reload",
+          "when": "view == spellEpic.reviewView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "spellEpic.reviewView.home",
+          "when": "view == spellEpic.reviewView",
+          "group": "navigation@4"
+        },
+        {
+          "command": "spellEpic.reviewView.restartServer",
+          "when": "view == spellEpic.reviewView",
+          "group": "navigation@5"
+        },
+        {
+          "command": "spellEpic.reviewView.openExternal",
+          "when": "view == spellEpic.reviewView",
+          "group": "navigation@6"
+        },
+        {
+          "command": "spellEpic.reviewView.openEpic",
+          "when": "view == spellEpic.reviewView",
+          "group": "navigation@0"
+        },
+        {
+          "command": "spellEpic.docView.inspect",
+          "when": "view == spellEpic.docView || view == spellEpic.reviewView",
+          "group": "navigation@7"
+        },
+        {
+          "command": "spellEpic.docView.showConsole",
+          "when": "view == spellEpic.docView || view == spellEpic.reviewView",
+          "group": "navigation@8"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "spellEpic.docMenu.cut",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView) && spellField && spellSelection",
+          "group": "1_edit@1"
+        },
+        {
+          "command": "spellEpic.docMenu.copy",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView) && spellSelection",
+          "group": "1_edit@2"
+        },
+        {
+          "command": "spellEpic.docMenu.paste",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView) && spellField",
+          "group": "1_edit@3"
+        },
+        {
+          "command": "spellEpic.docMenu.selectAll",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "group": "1_edit@4"
+        },
+        {
+          "command": "spellEpic.docMenu.back",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "group": "2_page@1"
+        },
+        {
+          "command": "spellEpic.docMenu.forward",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "group": "2_page@2"
+        },
+        {
+          "command": "spellEpic.docMenu.reload",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "group": "2_page@3"
+        },
+        {
+          "command": "spellEpic.docMenu.openExternal",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "group": "3_open@1"
+        },
+        {
+          "command": "spellEpic.docMenu.inspect",
+          "when": "(webviewId == spellEpic.docView || webviewId == spellEpic.reviewView)",
+          "group": "4_inspect@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "spellEpic.docMenu.cut",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.docMenu.copy",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.docMenu.paste",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.docMenu.selectAll",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.docMenu.back",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.docMenu.forward",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.docMenu.reload",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.docMenu.openExternal",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.docMenu.inspect",
+          "when": "false"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "secondarySidebar": [
+        {
+          "id": "spell-epic-docs",
+          "title": "Epic Docs",
+          "icon": "$(book)"
+        },
+        {
+          "id": "spell-epic-review",
+          "title": "Review",
+          "icon": "$(checklist)"
+        }
+      ]
+    },
+    "views": {
+      "spell-epic-docs": [
+        {
+          "type": "webview",
+          "id": "spellEpic.docView",
+          "name": "Epic Docs"
+        }
+      ],
+      "spell-epic-review": [
+        {
+          "type": "webview",
+          "id": "spellEpic.reviewView",
+          "name": "Review"
+        }
+      ]
+    }
+  },
+  "activationEvents": [
+    "onStartupFinished",
+    "onUri"
+  ],
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "packageManager": "yarn@4.18.0"
+}

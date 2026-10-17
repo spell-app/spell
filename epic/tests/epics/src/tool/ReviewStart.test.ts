@@ -31,6 +31,8 @@ beforeAll(async () => {
   mkdirSync(join(home, "windows"))
   process.env.SPELL_CLAUDE_HOME = home
   process.env.SPELL_WINDOWS_DIR = join(home, "windows")
+  // spell-epic's own bridges' folder:  empty, never the real one (the old extension's, above, holds the test's window)
+  process.env.SPELL_EPIC_WINDOWS_DIR = join(home, "epic-windows")
   bridge = createServer((request, response) => {
     let text = ""
     request.on("data", (chunk) => (text += chunk))
@@ -49,6 +51,7 @@ afterAll(() => {
   bridge.close()
   delete process.env.SPELL_CLAUDE_HOME
   delete process.env.SPELL_WINDOWS_DIR
+  delete process.env.SPELL_EPIC_WINDOWS_DIR
   rmSync(home, { recursive: true, force: true })
   rmSync(root, { recursive: true, force: true })
 })

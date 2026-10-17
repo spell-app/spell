@@ -426,7 +426,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "resume",
       usage: "<record> [--title <title>]...",
       description: "the move itself:  the Stop hook runs it",
-      example: "epic window resume ~/.spell/windows/handoffs/<id>.json"
+      example: "epic window resume ~/.spell-epic/windows/handoffs/<id>.json"
     },
     {
       name: "stay-check",

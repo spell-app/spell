@@ -23,6 +23,7 @@ parking and waking sessions, and the `epic` command that drives them.
 | `packages/epics/` | the epics package, `@spell-app/epics`:  the `<epic-*>` elements, the epic tool, the `epic` command's code (`src/command/`), the docs tools and their assets, Epic UI's pages (`docs/`) |
 | `tests/epics/` | its tests, at the same paths as the code |
 | `scripts/window.mjs` | the VS Code windows (`epic window`), and its test |
+| `vscode/` | spell-epic's VS Code extension, `spell-app.spell-epic` (its own yarn project):  the Review tab, Epic Docs, "Open Epic...", the window bridge and the handoff;  [its README](vscode/README.md) |
 | `templates/` | every kind of page's starting point (Q8):  details, review, choices, guides, cheatsheets, commands pages, component pages, the epic-page writing rules |
 
 ## Install
@@ -135,4 +136,6 @@ yarn ts                 # the epics package and its tests
 yarn test               # node and browser (chromium) projects, then the window script's own tests
 yarn lint
 yarn plugin:validate    # claude plugin validate .
+yarn vscode:check       # the VS Code extension's typecheck (after `yarn install` in vscode/)
+yarn vscode:package     # its bundle and vscode/spell-epic.vsix:  NOT installed by any script
 ```

@@ -1,0 +1,4 @@
+# Only the bundle and the manifest go in the .vsix -- see `yarn package`.
+**
+!package.json
+!out/extension.js

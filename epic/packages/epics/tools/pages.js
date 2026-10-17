@@ -251,8 +251,11 @@ export function docLinksRun(args) {
   }
 }
 
-/** Opens a doc in VS Code's doc preview:  the spell extension's URI handler (`packages/vscode/src/DocPreview.ts`). */
-const VSCODE_PREVIEW = "vscode://spell-app.spell-language/doc-preview"
+/**
+ * Opens a doc in VS Code's doc preview:  spell-epic's extension's URI handler (`vscode/src/DocPreview.ts`, its id
+ * `spell-app.spell-epic`;  epic `epic-eject` P7).
+ */
+const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
 
 /**
  * This checkout's page server (`spell dev server`), started in the background if it isn't running.

@@ -6,7 +6,8 @@
  * - The page server looks for the ONE running Claude session titled for the epic (`🚧 <epic>`, or the epic's name
  *   as a word in its title:  `RunningEpics`' `sessionsTitledFor()`).
  * - Found one:  it asks the VS Code window that session runs in (the spell extension's window bridge,
- *   `~/.spell/windows/<pid>.json`) to open the session's tab with `/epic review <epic>` typed into its input.
+ *   `~/.spell-epic/windows/<pid>.json`, or the spell language extension's `~/.spell/windows/`) to open the session's
+ *   tab with `/epic review <epic>` typed into its input.
  *   The bridge can only TYPE a prompt (Claude Code's extension has no "send"):  Owen presses Enter.
  * - None, or several:  sends nothing, and says which sessions it found.
  *
@@ -328,26 +329,38 @@ export class ReviewStart {
       .sort((a, b) => a.pid - b.pid)[0]
   }
 
-  /** Every window bridge's registry entry, by pid:  `$SPELL_WINDOWS_DIR`, else `~/.spell/windows`. */
+  /**
+   * Every window bridge's registry entry, by pid, from each of `windowsDirs`:  spell-epic's first, so a window both
+   * extensions' bridges run in answers through spell-epic's.
+   */
   static windows(): Map<number, WindowEntry> {
     const entries = new Map<number, WindowEntry>()
-    const dir = ReviewStart.windowsDir
-    if (!existsSync(dir)) return entries
-    for (const name of readdirSync(dir)) {
-      if (!/^\d+\.json$/.test(name)) continue
-      try {
-        const entry = JSON.parse(readFileSync(join(dir, name), "utf8")) as WindowEntry
-        if (Number.isInteger(entry.pid) && entry.port && entry.token) entries.set(entry.pid, entry)
-      } catch {
-        // half-written:  skip it
+    for (const dir of ReviewStart.windowsDirs) {
+      if (!existsSync(dir)) continue
+      for (const name of readdirSync(dir)) {
+        if (!/^\d+\.json$/.test(name)) continue
+        try {
+          const entry = JSON.parse(readFileSync(join(dir, name), "utf8")) as WindowEntry
+          if (Number.isInteger(entry.pid) && entry.port && entry.token && !entries.has(entry.pid))
+            entries.set(entry.pid, entry)
+        } catch {
+          // half-written:  skip it
+        }
       }
     }
     return entries
   }
 
-  /** The window bridges' registry folder:  `$SPELL_WINDOWS_DIR`, else `~/.spell/windows`. */
-  static get windowsDir(): string {
-    return process.env.SPELL_WINDOWS_DIR || join(homedir(), ".spell", "windows")
+  /**
+   * The window bridges' registry folders, as `scripts/window.mjs` reads them (`Window.registries`, epic `epic-eject`
+   * P7):  spell-epic's extension's (`$SPELL_EPIC_WINDOWS_DIR`, else `~/.spell-epic/windows`), then the spell language
+   * extension's (`$SPELL_WINDOWS_DIR`, else `~/.spell/windows`)
+   */
+  static get windowsDirs(): string[] {
+    return [
+      process.env.SPELL_EPIC_WINDOWS_DIR || join(homedir(), ".spell-epic", "windows"),
+      process.env.SPELL_WINDOWS_DIR || join(homedir(), ".spell", "windows")
+    ]
   }
 
   /** Every process's parent, by pid:  one `ps` call;  empty if it fails. */
@@ -396,7 +409,7 @@ export class ReviewStart {
    */
   private launch(args: string[]) {
     if (this.options.launch) return this.options.launch(args, this.mainRoot)
-    const dir = ReviewStart.windowsDir
+    const dir = ReviewStart.windowsDirs[0]!
     mkdirSync(dir, { recursive: true, mode: 0o700 })
     const log = openSync(join(dir, "wake.log"), "a")
     const script = join(this.mainRoot, "scripts", "window.mjs")

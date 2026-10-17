@@ -69,6 +69,7 @@ beforeAll(async () => {
   mkdirSync(join(root, ".home/windows"))
   process.env.SPELL_CLAUDE_HOME = join(root, ".home")
   process.env.SPELL_WINDOWS_DIR = join(root, ".home/windows")
+  process.env.SPELL_EPIC_WINDOWS_DIR = join(root, ".home/windows")
   process.env.SPELL_AIRPLANE_FILE = join(root, ".home/airplane.json")
   for (const [page, html] of Object.entries(PAGES)) {
     mkdirSync(dirname(join(root, page)), { recursive: true })
@@ -84,6 +85,7 @@ beforeAll(async () => {
 afterAll(async () => {
   delete process.env.SPELL_CLAUDE_HOME
   delete process.env.SPELL_WINDOWS_DIR
+  delete process.env.SPELL_EPIC_WINDOWS_DIR
   delete process.env.SPELL_AIRPLANE_FILE
   await server.stop()
   rmSync(root, { recursive: true, force: true })

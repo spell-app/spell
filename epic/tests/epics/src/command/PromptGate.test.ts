@@ -2,7 +2,7 @@
  * `PromptGate`:  what the `UserPromptSubmit` hook (the plugin's `hooks/prompt-gate.mjs`) lets through, blocks and
  * renames;  and the hook itself, run as Claude Code runs it.
  * - Saved prompts go in a temp folder (`SPELL_PROMPTS_DIR`), never `~/.spell/prompts`;  window entries too
- *   (`SPELL_WINDOWS_DIR`, left empty:  no window).
+ *   (`SPELL_WINDOWS_DIR`, `SPELL_EPIC_WINDOWS_DIR`, left empty:  no window).
  * - Was `.claude/hooks/prompt-gate.test.mjs` (`node --test`), until the gate moved into the epic code (epic
  *   `epic-eject` P5).
  */
@@ -19,6 +19,7 @@ const prompts = mkdtempSync(join(tmpdir(), "spell-prompts-"))
 const windows = mkdtempSync(join(tmpdir(), "spell-windows-"))
 process.env.SPELL_PROMPTS_DIR = prompts
 process.env.SPELL_WINDOWS_DIR = windows
+process.env.SPELL_EPIC_WINDOWS_DIR = windows
 
 /** The hook, as `.claude/settings.json` runs it. */
 const HOOK = resolve(import.meta.dirname, "../../../../hooks/prompt-gate.mjs")
@@ -282,7 +283,7 @@ describe("the hook", () => {
     const input = JSON.stringify({ prompt: "/isolate foo", cwd: ROOT, session_id: "x" })
     // no windows:  the window this test runs in (a worktree's, say) must not block the prompt
     const empty = mkdtempSync(join(tmpdir(), "windows-"))
-    const env = { ...process.env, SPELL_WINDOWS_DIR: empty }
+    const env = { ...process.env, SPELL_WINDOWS_DIR: empty, SPELL_EPIC_WINDOWS_DIR: empty }
     const ok = spawnSync(process.execPath, [HOOK], { input, encoding: "utf8", env })
     rmSync(empty, { recursive: true, force: true })
     expect(ok.status).toBe(0)

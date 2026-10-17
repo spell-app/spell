@@ -28,9 +28,13 @@ import {
   worktreeOf
 } from "./window.mjs"
 
-/** The temp registry folder. */
+/** The temp registry folder:  spell-epic's bridges' (`Window.registry`). */
 const dir = mkdtempSync(join(tmpdir(), "spell-windows-"))
-process.env.SPELL_WINDOWS_DIR = dir
+process.env.SPELL_EPIC_WINDOWS_DIR = dir
+
+/** The spell language extension's registry folder, read after spell-epic's:  a temp one too, never `~/.spell/windows`. */
+const oldDir = mkdtempSync(join(tmpdir(), "spell-windows-old-"))
+process.env.SPELL_WINDOWS_DIR = oldDir
 
 /** A live process that isn't our ancestor:  a `sleep`, killed after the tests. */
 const sleeper = spawn("sleep", ["60"], { stdio: "ignore" })

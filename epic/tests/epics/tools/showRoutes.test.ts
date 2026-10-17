@@ -1,6 +1,6 @@
 /**
  * Tests of the side bar link route (`scripts/showRoutes.ts`) on a real page server, in a scratch checkout, with an
- * EMPTY window registry (`SPELL_WINDOWS_DIR`):  nothing here ever reaches a real VS Code window or Chrome.
+ * EMPTY window registry (`SPELL_WINDOWS_DIR`, `SPELL_EPIC_WINDOWS_DIR`):  nothing here ever reaches a real VS Code window or Chrome.
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -23,6 +23,7 @@ beforeAll(async () => {
   writeFileSync(join(root, "guides/page.html"), "<!doctype html><title>x</title>")
   writeFileSync(join(root, "guides/data.json"), "{}")
   process.env.SPELL_WINDOWS_DIR = join(root, "no-windows")
+  process.env.SPELL_EPIC_WINDOWS_DIR = join(root, "no-windows")
   server = new PageServer({ root })
   await showRoutes.setup(server.routeContext())
   await server.start({ port: 0, routes: false, pidFile: false })
@@ -32,6 +33,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await server.stop()
   delete process.env.SPELL_WINDOWS_DIR
+  delete process.env.SPELL_EPIC_WINDOWS_DIR
   rmSync(root, { recursive: true, force: true })
 })
 

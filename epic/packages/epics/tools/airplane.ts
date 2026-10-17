@@ -111,20 +111,27 @@ function offlineCheck(root: string, fix: boolean): FlightCheck {
     : { name, status: "ok", detail: `${files.length} pages, nothing remote` }
 }
 
-/** The installed VS Code extension knows "Review:  Open Epic..." (`spell.reviewView.openEpic`). */
+/**
+ * An installed VS Code extension knows "Review:  Open Epic...":  spell-epic's (`spellEpic.reviewView.openEpic`), or
+ * the spell language extension's while it still has the Review tab (`spell.reviewView.openEpic`).
+ */
 function extensionCheck(): FlightCheck {
   const name = "extension"
   const folder = join(homedir(), ".vscode", "extensions")
   const installed = existsSync(folder)
-    ? readdirSync(folder).filter((entry) => entry.startsWith("spell-app.spell-language-"))
+    ? readdirSync(folder).filter((entry) => EXTENSIONS.some((prefix) => entry.startsWith(prefix)))
     : []
   const has = installed.some((entry) => {
     const manifest = join(folder, entry, "package.json")
-    return existsSync(manifest) && readFileSync(manifest, "utf8").includes(OPEN_EPIC)
+    return existsSync(manifest) && OPEN_EPIC.test(readFileSync(manifest, "utf8"))
   })
   return has
     ? { name, status: "ok", detail: "Review:  Open Epic... installed" }
-    : { name, status: "fail", detail: "too old for Review:  Open Epic...:  `spell dev vscode` from `main`" }
+    : {
+        name,
+        status: "fail",
+        detail: "no extension with Review:  Open Epic...:  spell-epic's `vscode/` (`yarn package`, then install it)"
+      }
 }
 
 /** Marks already waiting in the epics' inboxes;  `undefined` when none. */
@@ -145,7 +152,10 @@ function waitingCheck(root: string): FlightCheck | undefined {
 }
 
 /** The extension command `check` looks for in the installed extension's `package.json`. */
-const OPEN_EPIC = "spell.reviewView.openEpic"
+const OPEN_EPIC = /\b(?:spellEpic|spell)\.reviewView\.openEpic\b/
+
+/** The extensions' folder names' starts, `<publisher>.<name>-`:  spell-epic's, then the spell language extension's. */
+const EXTENSIONS = ["spell-app.spell-epic-", "spell-app.spell-language-"]
 
 ////////////////
 // ## The command
