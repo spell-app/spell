@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * Claude Code's `PostToolUse` hook on `ExitWorktree` (the plugin's `hooks/hooks.json`):  reminds the session that
- * leaving a worktree closes out its work, so its reply may end with `*You can close this tab*` (epic `epic-eject` P10,
- * Owen's r1:  a session left with `ExitWorktree` keep and never said it).
- * - The rule itself:  the isolate skill's "Closing line" (`skills/isolate/SKILL.md`).  This hook only points at it,
- *   so a bare `ExitWorktree`, outside `/isolate done`, follows it too.
- * - stdin `{ cwd, hook_event_name, tool_input: { action }, ... }`;  stdout `{ hookSpecificOutput }` JSON, or nothing.
+ * Claude Code's `PostToolUse` hook on `ExitWorktree` (the plugin's `hooks/hooks.json`):
+ * reminds the session that leaving a worktree closes out its work,
+ * so its reply may end with `*You can close this tab*`.
+ * - Epic `epic-eject` P10, Owen's r1:  a session left with `ExitWorktree` keep and never said it.
+ * - The rule itself:  the isolate skill's "Closing line" (`skills/isolate/SKILL.md`).
+ *   This hook only points at it, so a bare `ExitWorktree`, outside `/isolate done`, follows it too.
+ * - stdin `{ cwd, hook_event_name, tool_input: { action }, ... }`;
+ *   stdout `{ hookSpecificOutput }` JSON, or nothing.
  * - Only in a repo that uses epics (it has `.epic/config.json5`):  the plugin's hooks run in every repo.
  *   After `ExitWorktree`, `cwd` is the checkout the session went back to.
  * - Always exits 0, at once:  never blocks a session.

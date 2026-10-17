@@ -1,16 +1,22 @@
 /**
  * Convert a page Owen answers on from its OLD markup (before epic `epic-workflow` P12) to the epics pack's elements,
- * once:  the migration step `answer-elements` (`migrate.js`, J26:  the old page scripts go, so one way of drawing is
- * left).  Every word, id and answer key is kept:  the answers beside a page read the same afterwards.
- * - a DETAILS page (`convertDetailsPage()`):  `ui-section.spell-question` > `.spell-option[data-option][data-title]`,
- *   drawn by `_assets/details.js`, becomes a `<ui-section>` holding an `<epic-ask>` of an `<epic-question>` and an
- *   `<epic-choices>` of `<epic-option>`s;  the comment boxes, notes and Send that script added become
- *   `<epic-text-box>`es and an `<epic-send>`, written into the page
- * - a SYNTAX-CHOICES page (`convertChoicesPage()`):  its tables, drawn from `<slug>.rows.json5` by
- *   `_assets/syntax-choices.js`, are written into the page from that file, as `<epic-choice-rows>` of
- *   `<epic-choice-row>`s, with its `<epic-choices-bar>`
- * - both:  the meta list and the "Where we are" box become `<epic-field label>`s, and the page loads the epics pack
- *   (`<ui-root>` + `<ui-components>`) and `spell-ui.js` instead of the old script and sheet
+ * once:  the migration step `answer-elements`.
+ * - `migrate.js`, J26:  the old page scripts go, so one way of drawing is left
+ * - every word, id and answer key is kept:  the answers beside a page read the same afterwards
+ *
+ * - a DETAILS page (`convertDetailsPage()`):
+ *   - `ui-section.spell-question` > `.spell-option[data-option][data-title]`, drawn by `_assets/details.js`,
+ *     becomes a `<ui-section>` holding an `<epic-ask>`:
+ *     an `<epic-question>` and an `<epic-choices>` of `<epic-option>`s
+ *   - the comment boxes, notes and Send that script added
+ *     become `<epic-text-box>`es and an `<epic-send>`, written into the page
+ * - a SYNTAX-CHOICES page (`convertChoicesPage()`):
+ *   its tables, drawn from `<slug>.rows.json5` by `_assets/syntax-choices.js`, are written into the page
+ *   from that file, as `<epic-choice-rows>` of `<epic-choice-row>`s, with its `<epic-choices-bar>`
+ * - both:
+ *   - the meta list and the "Where we are" box become `<epic-field label>`s
+ *   - the page loads the epics pack (`<ui-root>` + `<ui-components>`) and `spell-ui.js`,
+ *     instead of the old script and sheet
  * - idempotent:  a converted page has none of the old markup left (`needsConversion()`)
  * - On a parsed page (linkedom), never markup put together in strings:  the makers are `answerPages.js`'s.
  */
@@ -71,9 +77,10 @@ export function convertDetailsPage(document) {
 }
 
 /**
- * One old question section, converted in place:  its prose before the first option into an `<epic-question>`, its
- * options into an `<epic-choices>`, anything after them after that, all in an `<epic-ask>`;  its `data-multiple`,
- * `data-select-all`, `data-filter` and `data-more` become the ask's.
+ * One old question section, converted in place, all into an `<epic-ask>`:
+ * - its prose before the first option into an `<epic-question>`
+ * - its options into an `<epic-choices>`, anything after them after that
+ * - its `data-multiple`, `data-select-all`, `data-filter` and `data-more` become the ask's
  */
 function convertQuestion(document, section) {
   const ask = make(document, ASK, {
@@ -163,8 +170,8 @@ function lastSectionOf(section) {
 ////////////////
 
 /**
- * Convert the choice page `document` in place, its rows from `data` (`ChoicesData`, checked:  the rows file
- * beside it);  what it did, `{ changed, notes }`.
+ * Convert the choice page `document` in place, its rows from `data` (`ChoicesData`, checked:  the rows file beside it).
+ * - returns what it did, `{ changed, notes }`
  * - the old script drew the rows where `[data-choices-sections]` was, and its bar at `main`'s end:  the same places
  */
 export function convertChoicesPage(document, data) {

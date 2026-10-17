@@ -9,19 +9,27 @@ import { Shared } from "./Shared"
 
 /****************
  * ### `RepoInit`
- * `epic init [--dry-run] [--json]`:  set a repo up for epics (epic `epic-eject` P9), in its main checkout or any
- * worktree of it.  In order, each step skipped when it's done already, so it's safe to run again:
- * 1. writes `.epic/config.json5` (`EpicConfig`), with values for THIS repo (`settingsFor()`):  the content folder
- *    `../<repo>.epics`, the base branch from git, worktrees in `../<repo>.worktrees`, the install command its lock
- *    file names (none without one), window names from the repo's name.  A file already there is kept as it is.
+ * `epic init [--dry-run] [--json]`:  set a repo up for epics (epic `epic-eject` P9),
+ * in its main checkout or any worktree of it.
+ *
+ * In order, each step skipped when it's done already, so it's safe to run again:
+ * 1. writes `.epic/config.json5` (`EpicConfig`), with values for THIS repo (`settingsFor()`):
+ *    - the content folder `../<repo>.epics`
+ *    - the base branch from git
+ *    - worktrees in `../<repo>.worktrees`
+ *    - the install command its lock file names (none without one)
+ *    - window names from the repo's name
+ *    - a file already there is kept as it is
  * 2. makes the content folder, a git repo of its own, with a folder for each of `sharedFolders`
  *    (`Shared.init()`):  `epics`, `sagas`, `guides`, `pages`
  * 3. links those folders in at the checkout's root (`Shared.link()`)
- * 4. lists the links in the repo's `.gitignore`, between `# shared:start` and `# shared:end`, and the window files'
- *    folder, `workspaces/` (`epic window`:  each machine's own)
- * - `--dry-run`:  says what it would do, and writes nothing;  `--json`:  the report as JSON
- * - it commits nothing in the repo:  it says which files to commit (the config and `.gitignore`), since every new
- *   worktree branches from the base branch and needs the `.gitignore` to leave the links alone
+ * 4. lists in the repo's `.gitignore`, between `# shared:start` and `# shared:end`:
+ *    the links, and the window files' folder, `workspaces/` (`epic window`:  each machine's own)
+ *
+ * - `--dry-run`:  says what it would do, and writes nothing
+ * - `--json`:  the report as JSON
+ * - it commits nothing in the repo:  it says which files to commit (the config and `.gitignore`),
+ *   since every new worktree branches from the base branch and needs the `.gitignore` to leave the links alone
  ****************/
 export class RepoInit {
   /** the repo's main checkout:  where the config goes, and the folders are relative to */
@@ -114,8 +122,8 @@ export class RepoInit {
    * The settings `epic init` writes for the repo whose main checkout is `main`:
    * - `contentFolder`:  `../<repo>.epics`;  `worktreesFolder`:  `../<repo>.worktrees`, both beside the repo
    * - `baseBranch`:  the remote's default branch (`origin/HEAD`), else the main checkout's branch, else `main`
-   * - `installCommand`:  what the repo's lock file names (`installCommandOf()`), `""` with none;  `installOnCreate`
-   *   on when there is one, so a worktree's window never opens without its packages
+   * - `installCommand`:  what the repo's lock file names (`installCommandOf()`), `""` with none
+   * - `installOnCreate`:  on when there is one, so a worktree's window never opens without its packages
    * - `windows`:  named for the repo and its content folder;  `worktreeOnly` on (every worktree is beside the repo)
    * - `linkSessionFolders` on:  each worktree's saved sessions show in every window's Claude panel
    * - `sharedFolders`:  what the epic tooling reads and writes (`INIT_FOLDERS`)
@@ -150,8 +158,8 @@ export class RepoInit {
   }
 
   /**
-   * `.epic/config.json5`'s text for `settings`:  every key, each with a comment saying what it is, in JSON5's
-   * JSON-compatible part (what `EpicConfig.parse()` and `DataFile` read).
+   * `.epic/config.json5`'s text for `settings`:  every key, each with a comment saying what it is.
+   * - in JSON5's JSON-compatible part (what `EpicConfig.parse()` and `DataFile` read)
    */
   static configText(settings: EpicSettings): string {
     const value = (key: keyof EpicSettings) => JSON.stringify(settings[key])
@@ -191,8 +199,9 @@ export class RepoInit {
   }
 
   /**
-   * `.gitignore` text `text` with its shared block (`# shared:start` ... `# shared:end`) listing `ignored`, one
-   * pattern a line (`/epics`):  the block replaced where it is, else added at the end.
+   * `.gitignore` text `text` with its shared block (`# shared:start` ... `# shared:end`) listing `ignored`,
+   * one pattern a line (`/epics`).
+   * - the block is replaced where it is, else added at the end
    * - `content`:  the content folder from the main checkout, for the block's comment
    */
   static withIgnoreBlock(text: string, ignored: string[], content: string): string {
@@ -262,8 +271,10 @@ export type InitReport = {
 
 /**
  * The content repo's folders for a new repo:  what the epic tooling reads and writes.
- * - `epics`:  epic pages, their parts, inboxes, `home.json5` and `favorites.json5`;  `sagas`:  the sagas' list and
- *   pages;  `guides`:  the durable docs epics write;  `pages`:  the docs home and the scratch details pages
+ * - `epics`:  epic pages, their parts, inboxes, `home.json5` and `favorites.json5`
+ * - `sagas`:  the sagas' list and pages
+ * - `guides`:  the durable docs epics write
+ * - `pages`:  the docs home and the scratch details pages
  * - not spell-app's own (`brand`, `ui`, `goals`, `agents`), nor `templates`, which are spell-epic's
  */
 const INIT_FOLDERS = ["epics", "sagas", "guides", "pages"]

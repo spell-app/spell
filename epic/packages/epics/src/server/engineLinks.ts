@@ -1,18 +1,18 @@
 /**
- * A page's links to the ENGINE's files (its stylesheet, its scripts, the epics pack), rewritten to the epic server's
- * engine routes (`/_epic/assets/...`, `/_epic/pack/...`;  epic `epic-eject` P7).
- * - What the asset-route migrations run:  the epic page's step (`EngineAssetRoutes`) and the other kinds' (`migrate.js`
- *   `STEPS`, `engine-asset-routes`).
- * - Plain `node` loads it (`migrate.js`, `check-spell.js`):  node built-ins only, relative imports by their `.ts` name,
- *   no alias, no `enum`.
+ * A page's links to the ENGINE's files (its stylesheet, its scripts, the epics pack),
+ * rewritten to the epic server's engine routes (`/_epic/assets/...`, `/_epic/pack/...`;  epic `epic-eject` P7).
+ * - What the asset-route migrations run:
+ *   the epic page's step (`EngineAssetRoutes`) and the other kinds' (`migrate.js` `STEPS`, `engine-asset-routes`).
+ * - Plain `node` loads it (`migrate.js`, `check-spell.js`):
+ *   node built-ins only, relative imports by their `.ts` name, no alias, no `enum`.
  */
 import { join, relative, resolve } from "node:path"
 
 import { ENGINE_ROUTES, engineUrlFor } from "./server.types.ts"
 
 /**
- * The elements that LOAD an engine file, and the attribute naming it:  a stylesheet or preload (`<link href>`), a
- * script (`<script src>`), a component pack (`<ui-components source>`).
+ * The elements that LOAD an engine file, and the attribute naming it:
+ * a stylesheet or preload (`<link href>`), a script (`<script src>`), a component pack (`<ui-components source>`).
  * - never a plain link (`<a href>`) or a `title`:  those name a source file for a reader, not something the page loads
  */
 export const ENGINE_LINKS = [
@@ -25,9 +25,10 @@ export const ENGINE_LINKS = [
 export type EngineLinkChange = { from: string; to: string }
 
 /**
- * Rewrite `document`'s links to the engine's files (`ENGINE_LINKS`) from checkout paths
- * (`../../packages/epics/tools/_assets/spell-ui.js`) to engine routes (`/_epic/assets/spell-ui.js`), IN PLACE;
- * returns each change, none when every link is a route already (idempotent).
+ * Rewrite `document`'s links to the engine's files (`ENGINE_LINKS`), IN PLACE:
+ * from checkout paths (`../../packages/epics/tools/_assets/spell-ui.js`)
+ * to engine routes (`/_epic/assets/spell-ui.js`).
+ * - returns each change, none when every link is a route already (idempotent)
  */
 export function rewriteEngineLinks(document: Document): EngineLinkChange[] {
   const changes: EngineLinkChange[] = []
@@ -50,7 +51,8 @@ export function linksEngineByPath(html: string): boolean {
 
 /**
  * The engine's file an engine route serves, from the engine's checkout `engine`:
- * `/_epic/assets/spell-ui.js` => `<engine>/packages/epics/tools/_assets/spell-ui.js`;  `undefined` for another path.
+ * `/_epic/assets/spell-ui.js` => `<engine>/packages/epics/tools/_assets/spell-ui.js`.
+ * - `undefined` for another path
  * - for a page checked from `file://` (`check-spell.js`):  its engine routes answered from the disk
  * - never a file outside the route's folder:  `undefined` for a path with `..` out of it
  */

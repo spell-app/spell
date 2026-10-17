@@ -39,13 +39,16 @@ export class Git {
   }
 
   /**
-   * The checkout to work on:  the nearest folder from `from` (default the current one) up that holds `marker`, a
-   * path relative to a checkout's root, e.g. `packages/epics/tools/pages.js`, or that is a checkout of a repo set up
-   * for epics (its main checkout has `.epic/config.json5`:  `isEpicCheckout()`);  else the one this code is in.
-   * - Why:  the `epic` on the `PATH` is the MAIN checkout's, but in a worktree the files to read or edit are the
-   *   worktree's.  The DATA is the caller's;  the CODE is always this copy's (`CODE_ROOT`).
-   * - the marker:  a repo that carries the epic tools itself (spell-app, before epic `epic-eject`'s switch-over);
-   *   the config file:  any other repo, which has none of the tools (epic `epic-eject` P9, `epic init`)
+   * The checkout to work on:  the nearest folder from `from` (default the current one) up that either
+   * - holds `marker`, a path relative to a checkout's root, e.g. `packages/epics/tools/pages.js`
+   * - or is a checkout of a repo set up for epics (its main checkout has `.epic/config.json5`:  `isEpicCheckout()`)
+   *
+   * Else the one this code is in.
+   * - Why:  the `epic` on the `PATH` is the MAIN checkout's,
+   *   but in a worktree the files to read or edit are the worktree's.
+   *   The DATA is the caller's;  the CODE is always this copy's (`CODE_ROOT`).
+   * - the marker:  a repo that carries the epic tools itself (spell-app, before epic `epic-eject`'s switch-over)
+   * - the config file:  any other repo, which has none of the tools (epic `epic-eject` P9, `epic init`)
    */
   static nearestCheckout(marker: string, from = process.cwd()): string {
     for (let dir = resolve(from); ; dir = dirname(dir)) {
@@ -55,8 +58,8 @@ export class Git {
   }
 
   /**
-   * Whether folder `dir` is the root of a checkout (it has a `.git`, folder or file) whose MAIN checkout has
-   * `.epic/config.json5`:  a repo `epic init` set up.
+   * Whether folder `dir` is the root of a checkout (it has a `.git`, folder or file)
+   * whose MAIN checkout has `.epic/config.json5`:  a repo `epic init` set up.
    */
   static isEpicCheckout(dir: string): boolean {
     if (!existsSync(join(dir, ".git"))) return false

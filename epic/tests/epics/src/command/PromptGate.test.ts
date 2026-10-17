@@ -1,10 +1,10 @@
 /**
- * `PromptGate`:  what the `UserPromptSubmit` hook (the plugin's `hooks/prompt-gate.mjs`) lets through, blocks and
- * renames;  and the hook itself, run as Claude Code runs it.
- * - Saved prompts go in a temp folder (`SPELL_PROMPTS_DIR`), never `~/.spell/prompts`;  window entries too
- *   (`SPELL_WINDOWS_DIR`, `SPELL_EPIC_WINDOWS_DIR`, left empty:  no window).
- * - Was `.claude/hooks/prompt-gate.test.mjs` (`node --test`), until the gate moved into the epic code (epic
- *   `epic-eject` P5).
+ * `PromptGate`:  what the `UserPromptSubmit` hook (the plugin's `hooks/prompt-gate.mjs`) lets through,
+ * blocks and renames;  and the hook itself, run as Claude Code runs it.
+ * - Saved prompts go in a temp folder (`SPELL_PROMPTS_DIR`), never `~/.spell/prompts`.
+ * - Window entries too (`SPELL_WINDOWS_DIR`, `SPELL_EPIC_WINDOWS_DIR`, left empty:  no window).
+ * - Was `.claude/hooks/prompt-gate.test.mjs` (`node --test`),
+ *   until the gate moved into the epic code (epic `epic-eject` P5).
  */
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"

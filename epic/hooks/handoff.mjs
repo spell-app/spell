@@ -1,15 +1,19 @@
 #!/usr/bin/env node
 /**
- * Claude Code's `Stop` hook (the plugin's `hooks/hooks.json`):  move a session to another window once its turn
- * ends:  a worktree's, or back from it.
- * - `/isolate` arms it with `epic window handoff <name>` (`--back`:  no skill uses it now), which
- *   writes the move to `<registry>/handoffs/<session id>.json`.  See `scripts/window.mjs`, "A worktree's window".
- * - stdin `{ session_id, transcript_path, cwd, ... }`.  No pending move for this session (every other turn):  exits
- *   at once.
- * - Else renames the record (`<session id>.running.json`, so the next turn won't move it again) and starts
- *   `window.mjs resume` on it, DETACHED, its output in `<registry>/handoffs/<session id>.log`.  Why detached:
- *   `resume` closes this session's old tab or window, which ends the `claude` process this hook runs under.
- * - The window script works on the SESSION's checkout (`EPIC_CHECKOUT`, from `cwd`):  this plugin is its own repo.
+ * Claude Code's `Stop` hook (the plugin's `hooks/hooks.json`):
+ * move a session to another window once its turn ends:  to a worktree's window, or back from it.
+ * - `/isolate` arms it with `epic window handoff <name>` (`--back`:  no skill uses it now),
+ *   which writes the move to `<registry>/handoffs/<session id>.json`.
+ *   See `scripts/window.mjs`, "A worktree's window".
+ * - stdin `{ session_id, transcript_path, cwd, ... }`.
+ * - No pending move for this session (every other turn):  exits at once.
+ * - A pending move:
+ *   - renames the record to `<session id>.running.json`, so the next turn won't move it again
+ *   - starts `window.mjs resume` on it, DETACHED, its output in `<registry>/handoffs/<session id>.log`
+ *   - why detached:  `resume` closes this session's old tab or window,
+ *     which ends the `claude` process this hook runs under
+ * - The window script works on the SESSION's checkout (`EPIC_CHECKOUT`, from `cwd`):
+ *   this plugin is its own repo.
  * - Never fails the turn:  every error exits 0 (it's logged, or written to stderr).
  */
 import { spawn } from "node:child_process"

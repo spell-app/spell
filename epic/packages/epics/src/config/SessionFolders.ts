@@ -13,8 +13,8 @@ import { join } from "node:path"
 
 /****************
  * ### `SessionFolders`
- * Claude Code's saved-session folders, one per folder a session started in:  `~/.claude/projects/<slug>/`, and the
- * LINK that makes a worktree's folder its main checkout's (epic `epic-eject` Q4, P8).
+ * Claude Code's saved-session folders, one per folder a session started in:  `~/.claude/projects/<slug>/`.
+ * And the LINK that makes a worktree's folder its main checkout's (epic `epic-eject` Q4, P8).
  *
  * ```ts
  * SessionFolders.slug("/Users/owen/www/spell-app/spell-app.worktrees/seo")
@@ -22,14 +22,17 @@ import { join } from "node:path"
  * SessionFolders.link(worktree, main)     // => { action: "linked", folder, target }
  * ```
  *
- * - Why link:  the Claude panel lists the sessions saved under its window's FIRST folder.  A worktree-only window's
- *   first folder is the worktree, so without the link its panel would list that worktree's sessions alone.
- *   Linked, every session is saved into main's folder, whichever folder it started in:  every window lists them all.
- *   - The layout test run (P2) tried it by hand:  sessions save through the link, and the link survives.
+ * - Why link:  the Claude panel lists the sessions saved under its window's FIRST folder.
+ *   - a worktree-only window's first folder is the worktree,
+ *     so without the link its panel would list that worktree's sessions alone
+ *   - linked, every session is saved into main's folder, whichever folder it started in:
+ *     every window lists them all
+ *   - the layout test run (P2) tried it by hand:  sessions save through the link, and the link survives
  * - The worktree hook makes the link when a NEW worktree is made (`linkSessionFolders` in `.epic/config.json5`),
  *   BEFORE any session works there;  `WorktreeRemove` takes it away again.
  * - Never deletes a session:  a folder that holds anything, or a link to somewhere else, is left as it is.
- * - Claude Code's folder:  `$CLAUDE_CONFIG_DIR`, else `~/.claude` (`home()`);  the tests point `HOME` at a temp folder.
+ * - Claude Code's folder:  `$CLAUDE_CONFIG_DIR`, else `~/.claude` (`home()`).
+ *   The tests point `HOME` at a temp folder.
  * - Its position:  node's own modules only, so plain `node` loads it (the hooks), types stripped;
  *   NEVER an alias, an `enum` or a parameter property.
  ****************/
@@ -56,7 +59,8 @@ export class SessionFolders {
 
   /**
    * Make worktree `worktree`'s saved-session folder a link to main checkout `main`'s;  says what it did.
-   * - `linked`:  made (nothing was there, or an EMPTY folder, replaced);  `ok`:  already the link
+   * - `linked`:  made (nothing was there, or an EMPTY folder, replaced)
+   * - `ok`:  already the link
    * - `kept`:  left alone, with `why`:  a folder with sessions in it, or a link to another folder
    * - main's folder is made first when it's missing, so the link never dangles
    * - SIDE EFFECT:  writes under `<home>/projects`
@@ -81,7 +85,8 @@ export class SessionFolders {
 
   /**
    * Take worktree `worktree`'s saved-session link away again;  says what it did.
-   * - `removed`:  it was a link to main checkout `main`'s folder;  `none`:  nothing there
+   * - `removed`:  it was a link to main checkout `main`'s folder
+   * - `none`:  nothing there
    * - `kept`:  anything else (a real folder, a link elsewhere):  never deleted
    * - SIDE EFFECT:  removes the link (only the link:  main's folder and its sessions stay)
    */
@@ -97,9 +102,10 @@ export class SessionFolders {
   }
 
   /**
-   * The project folders of `projects` (their names), each real folder ONCE:  a link to a folder that is also listed
-   * (a linked worktree's, Q4) is skipped, so its sessions aren't read twice.
-   * - a link to a folder NOT in `projects` stays listed;  a dangling link is skipped
+   * The project folders of `projects` (their names), each real folder ONCE.
+   * - a link to a folder that is also listed (a linked worktree's, Q4) is skipped, so its sessions aren't read twice
+   * - a link to a folder NOT in `projects` stays listed
+   * - a dangling link is skipped
    */
   static listed(projects = SessionFolders.projects()): string[] {
     if (!existsSync(projects)) return []
@@ -124,8 +130,8 @@ export class SessionFolders {
 }
 
 /**
- * What `SessionFolders.link()` / `unlink()` did:  `action`, the worktree's `folder`, main's `target`, and `why` it
- * was kept.
+ * What `SessionFolders.link()` / `unlink()` did:
+ * `action`, the worktree's `folder`, main's `target`, and `why` it was kept.
  */
 export type LinkResult = {
   action: "linked" | "ok" | "kept" | "removed" | "none"

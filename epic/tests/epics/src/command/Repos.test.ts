@@ -1,6 +1,6 @@
 /**
- * Tests of `epic repo` (`Repos`) and of `epic hub`'s checks before it starts anything (`Hub`), in a temp home folder:
- * no server is started here (the server itself:  `EpicServer.test.ts`).
+ * Tests of `epic repo` (`Repos`) and of `epic hub`'s checks before it starts anything (`Hub`), in a temp home folder.
+ * - no server is started here (the server itself:  `EpicServer.test.ts`)
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"

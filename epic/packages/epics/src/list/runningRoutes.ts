@@ -5,12 +5,13 @@
  * - `GET /api/epics/running` -- every running epic, as JSON (`RunningEpic[]`), never cached
  * - the Epics list page (`epics/index.html`), as it's served (`RunningEpics.render()`):
  *   the running epics' cards added, every card marked again and regrouped
- * - live reload:  a worktree's epic page changing reloads its page and the Epics list (`RunningEpics.watch()`);
- *   its rebuilt page assets (docs bundle, packs) hot-reload its pages served here;
- *   the watcher closes when the server stops
- * - worktree `<w>`'s files, at `/worktrees/<w>/...`:  the page server's mount, which this module tells it to make
- *   (`serveWorktrees()`), in the MAIN checkout only:  the worktrees' folder is the repo's `.epic/config.json5`'s
- *   (`EpicConfig`), which the server can't read
+ * - live reload (`RunningEpics.watch()`):
+ *   - a worktree's epic page changing reloads its page and the Epics list
+ *   - its rebuilt page assets (docs bundle, packs) hot-reload its pages served here
+ *   - the watcher closes when the server stops
+ * - worktree `<w>`'s files, at `/worktrees/<w>/...`:
+ *   the page server's mount, which this module tells it to make (`serveWorktrees()`), in the MAIN checkout only
+ *   - the worktrees' folder is the repo's `.epic/config.json5`'s (`EpicConfig`), which the server can't read
  *   - worktrees in the OLD place too, while the file has moved them beside the repo (`serveOldPlaces()`)
  * - reads only:  nothing here needs the page server's token
  */
@@ -51,11 +52,12 @@ const runningRoutes: RouteModule = {
 export default runningRoutes
 
 /**
- * Serve the worktrees left in each of the `old` places at the same URLs, `/worktrees/<w>/...`, as the new `place`'s:
- * each old folder mounted at a prefix of its own (`OLD_PLACE_PREFIX`), and laid over `/worktrees/<w>/` for a `<w>`
- * the new place doesn't have.
- * - why not a second `serveWorktrees()`:  the page server has ONE folder for `/worktrees/`, and a second mount at the
- *   same prefix is never reached.  Its badge and `SPELL_SERVER.worktrees` name the new place only
+ * Serve the worktrees left in each of the `old` places at the same URLs, `/worktrees/<w>/...`, as the new `place`'s.
+ * - each old folder is mounted at a prefix of its own (`OLD_PLACE_PREFIX`),
+ *   and laid over `/worktrees/<w>/` for a `<w>` the new place doesn't have
+ * - why not a second `serveWorktrees()`:
+ *   the page server has ONE folder for `/worktrees/`, and a second mount at the same prefix is never reached
+ * - its badge and `SPELL_SERVER.worktrees` name the new place only
  * - side effect:  mounts and overlays on the page server's static files
  */
 export function serveOldPlaces(files: SRV.StaticHandler, place: string, old: string[]): void {

@@ -38,29 +38,35 @@ import { Worktrees } from "./Worktrees"
 
 /****************
  * ### `Sessions`
- * `epic session <verb> ...`:  Claude Code sessions -- find, open, title, digest -- and what every other verb group
- * reads of them.  The `/session`, `/wtf` and `/worktrees` skills use it.
+ * `epic session <verb> ...`:  Claude Code sessions -- find, open, title, digest --
+ * and what every other verb group reads of them.
+ * The `/session`, `/wtf` and `/worktrees` skills use it.
  * - Where they are:  Claude Code's own folder (`home`, `~/.claude`):
  *   - running ones:  its registry, `sessions/<pid>.json`
  *   - saved ones:  their transcripts, `projects/<slug>/<id>.jsonl`
  *   - titles waiting for a session's next prompt:  `session-titles/<id>`
  * - The verbs (`run()`):
- *   - `list [<words>...] [--all] [--limit N]`:  this repo's saved sessions (main checkout, worktrees and package
- *     folders together), newest first, matching every word;  this session left out.  `--all`:  every project's.
+ *   - `list [<words>...] [--all] [--limit N]`:  this repo's saved sessions, newest first, matching every word
+ *     - the main checkout, worktrees and package folders together;  this session left out
+ *     - `--all`:  every project's
  *   - `find <name>`:  sessions titled `<name>` or that worked in worktree `<name>`, any project, newest first
- *   - `open <id prefix | exact title>`:  opens it in the VS Code Claude panel, in the window it RUNS in, else this
- *     session's window (the extension's URI handler, routed by `windowId`)
- *   - `title [<title>]`:  THIS session (`CLAUDE_CODE_SESSION_ID`):  alone, its title (`*` named by hand) and any
- *     queued one;  with a title, queues it for the next prompt, unless it already has it
- *   - `done [<name>]`:  mark finished work's sessions `✅ <title>`:  alone, THIS session;  with a name, every session
- *     titled `<name>` or that worked in worktree `<name>`.  Applied on each one's next prompt or resume (a hook
- *     applies a queued title:  nothing else can).  Reopening the work takes the ✅ off (`PromptGate`).
- *   - `icons [--dry-run]`:  every named session of this repo given the icon its work's state calls for
- *     (`workIcon()`), queued
+ *   - `open <id prefix | exact title>`:  opens it in the VS Code Claude panel,
+ *     in the window it RUNS in, else this session's window (the extension's URI handler, routed by `windowId`)
+ *   - `title [<title>]`:  THIS session (`CLAUDE_CODE_SESSION_ID`)
+ *     - alone:  its title (`*` named by hand) and any queued one
+ *     - with a title:  queues it for the next prompt, unless it already has it
+ *   - `done [<name>]`:  mark finished work's sessions `✅ <title>`
+ *     - alone:  THIS session
+ *     - with a name:  every session titled `<name>` or that worked in worktree `<name>`
+ *     - applied on each one's next prompt or resume (a hook applies a queued title:  nothing else can)
+ *     - reopening the work takes the ✅ off (`PromptGate`)
+ *   - `icons [--dry-run]`:  queues, for every named session of this repo,
+ *     the icon its work's state calls for (`workIcon()`)
  *   - `window [pid]`:  the VS Code window id a process runs in (default this session's)
  *   - `transcript <id prefix>`:  another session's prompts, last reply and waiting question
  *   - `--json` (`list`, `find`, `transcript`):  the data instead of lines
- * - Node built-ins only, plus the repo's config:  no spell.  Was `session.py` and `transcript.py`.
+ * - Node built-ins only, plus the repo's config:  no spell.
+ * - Was `session.py` and `transcript.py`.
  ****************/
 export class Sessions {
   /** Claude Code's own folder:  STATIC for the object's life;  a test that needs another builds another object */
@@ -201,8 +207,8 @@ export class Sessions {
   }
 
   /**
-   * `done [<name>]`:  queue `✅ <title>` for this session, or for every session of `name` (`named()`);  one
-   * already ✅, or with a ✅ queued, is left.
+   * `done [<name>]`:  queue `✅ <title>` for this session, or for every session of `name` (`named()`).
+   * - one already ✅, or with a ✅ queued, is left
    */
   private markDone(name: string): number {
     const me = process.env.CLAUDE_CODE_SESSION_ID
@@ -227,8 +233,9 @@ export class Sessions {
   }
 
   /**
-   * `icons`:  queue the icon each named session's work calls for (`workIcon()`), when its title (or the one queued)
-   * isn't that already;  says what it did, or (`dryRun`) would do.
+   * `icons`:  queue the icon each named session's work calls for (`workIcon()`),
+   * when its title (or the one queued) isn't that already.
+   * - says what it did, or (`dryRun`) would do
    * - a session's work:  its title without its icon (`bareTitle()`);  sessions of one name are looked up once
    * - a name with no worktree, branch or epic page (a session titled "SVG from image") is left as it is
    */
@@ -264,8 +271,9 @@ export class Sessions {
   }
 
   /**
-   * The icon work `name`'s state calls for (`TITLE_ICONS`), from its worktree, branch and epic page
-   * (`Worktrees.nameStatus()`);  `null` when `name` isn't work this repo knows.
+   * The icon work `name`'s state calls for (`TITLE_ICONS`),
+   * from its worktree, branch and epic page (`Worktrees.nameStatus()`).
+   * - `null` when `name` isn't work this repo knows
    * - with an epic page, its epic's state (`$/epics/list/EpicState`;  a session of it running counts as touched):
    *   📅 future, 🚧 in progress, 🚨 errors (every phase done, items need Owen), ⏸️ paused (untouched for days)
    * - ✅ finished:  its branch merged into `main`, or every phase of its plan done with nothing left to merge
@@ -379,8 +387,8 @@ export class Sessions {
   }
 
   /**
-   * The running sessions working on `epic`:  titled `<epic>` in Claude's session registry, with or without its icon
-   * (`🚧 epic-workflow`).
+   * The running sessions working on `epic`:
+   * titled `<epic>` in Claude's session registry, with or without its icon (`🚧 epic-workflow`).
    * - their `name` is the address `SendMessage` takes
    */
   ofEpic(epic: string): RunningSession[] {
@@ -396,8 +404,8 @@ export class Sessions {
 
   /**
    * The saved LOCAL sessions of the repo holding `cwd`, newest first.
-   * - this repo:  transcript folders named for its main checkout (`projectSlug(mainRoot)`), or starting with that
-   *   plus `-`:  worktrees and package folders share the prefix
+   * - this repo:  transcript folders named for its main checkout (`projectSlug(mainRoot)`),
+   *   or starting with that plus `-`:  worktrees and package folders share the prefix
    * - `everywhere`:  every project's sessions
    * - web, cloud and SDK sessions are left out:  only `LOCAL_ENTRYPOINTS` (or none recorded)
    */
@@ -460,8 +468,9 @@ export class Sessions {
   }
 
   /**
-   * The sessions titled `name` (`/rename`) or that worked in worktree `name`, newest first;  running or not, any
-   * project.  Used by `epic session find`, and by worktree / park status.
+   * The sessions titled `name` (`/rename`) or that worked in worktree `name`, newest first.
+   * - running or not, any project
+   * - used by `epic session find`, and by worktree / park status
    */
   named(name: string): NamedSession[] {
     // a `cwd` in worktree `name`:  the worktrees folder from the repo's `.epic/config.json5`
@@ -521,7 +530,7 @@ export class Sessions {
 
   /**
    * Session `id`'s title:  its last `custom-title`, else its last `ai-title`;  `null` when it has neither.
-   * - the same rule as `.claude/hooks/handoff.mjs`, which finds a session's tab by it
+   * - the same rule as the handoff hook (`hooks/handoff.mjs`), which finds a session's tab by it
    */
   title(id: string): string | null {
     const path = this.transcriptOf(id)
@@ -540,8 +549,9 @@ export class Sessions {
   /**
    * What another session has been doing, from its transcript:  for `/wtf <name>`.
    * - `idPrefix`:  a session id, or its first characters;  the newest matching transcript wins
-   * - prompts:  what Owen typed, oldest first (slash commands as `/name args`;  tool results, hook output and
-   *   reminders dropped);  sidechains (subagents) skipped
+   * - prompts:  what Owen typed, oldest first
+   *   - slash commands as `/name args`
+   *   - tool results, hook output and reminders dropped;  sidechains (subagents) skipped
    * - `lastReply`:  the session's last reply text
    * - `pending`:  an `AskUserQuestion` no answer has come back for yet
    * - returns `undefined` when no transcript matches
@@ -586,8 +596,9 @@ export class Sessions {
 
   /**
    * Queue `title` for session `id`:  `session-titles/<id>` in Claude Code's folder.
-   * - Claude can't run `/rename`:  the `UserPromptSubmit` hook `~/.claude/hooks/session-title.mjs` returns the
-   *   file as `sessionTitle` on the session's NEXT prompt, then deletes it (undocumented, found in CLI 2.1.287)
+   * - Claude can't run `/rename`:
+   *   the `UserPromptSubmit` hook `~/.claude/hooks/session-title.mjs` returns the file as `sessionTitle`
+   *   on the session's NEXT prompt, then deletes it (undocumented, found in CLI 2.1.287)
    */
   queueTitle(id: string, title: string): void {
     mkdirSync(join(this.home, "session-titles"), { recursive: true })
@@ -692,8 +703,8 @@ export class Sessions {
   /**
    * A typed prompt from a message's text, trimmed (line breaks kept);  `null` for harness noise.
    * - a slash command counts, as `/name args`:  a session started by `/clear` + `/epic` has no other prompt
-   * - reminders and IDE context (`<system-reminder>`, `<ide_selection>`, `<ide_opened_file>`) are dropped;  what's
-   *   left starting with `<` is not a prompt, nor are the harness's own messages:
+   * - reminders and IDE context (`<system-reminder>`, `<ide_selection>`, `<ide_opened_file>`) are dropped
+   * - what's left starting with `<` is not a prompt, nor are the harness's own messages:
    *   - a skill's instructions ("Base directory for this skill:")
    *   - another session's message ("Another Claude session sent a message:"), e.g. a subagent's report
    * - `entryPrompt()` collapses the result to one line, for summaries

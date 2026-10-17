@@ -8,12 +8,16 @@ argument-hint: "[<name>]"
 
 Get this session's work out of the way, e.g. while another session restructures packages,
 and make it cheap to pick back up.
-- The work ends up as a WIP commit on branch `<name>`, in worktree `<name>` (`epic worktree path <name>`), plus a note.
+- The work ends up as a WIP commit on branch `<name>`, in worktree `<name>`, plus a note.
+  - The worktree's folder:  `epic worktree path <name>`.
 - `/unpark` picks it up by hand.
 - `/wait-for <other>` waits for another session, then picks it up by itself.
 
 - PARKED note:  `PARKED-<name>.md` at the worktree root (gitignored, never committed).
-  - First line `<!-- park: <state> -->`, `<state>` one of `parked`, `waiting:<target>`, `resumed`.
+  - First line `<!-- park: <state> -->`, the state one of:
+    - `parked`
+    - `waiting:<target>`
+    - `resumed`
   - It's how a compacted or reopened session knows it's parked.
 - Status, from the repo root or a worktree (`spell help dev`):
   - `epic worktree status <name>`:  JSON, where a worktree / branch / plan / session stands
@@ -33,7 +37,8 @@ What `$ARGUMENTS` means:
 0. In plan mode:  ask Owen to leave it (shift+tab) first,
    as in [the isolate skill](../isolate/SKILL.md), "Start", step 0.
 1. `<name>`:
-   - in a worktree (the session's folder is a worktree's:  `.claude/worktrees/`, or beside the repo):  that worktree's name
+   - in a worktree:  that worktree's name
+     - the session's folder is a worktree's:  in `.claude/worktrees/`, or beside the repo
    - else `$ARGUMENTS`, lower-kebab-cased
    - none:  propose one from the work so far, in AskUserQuestion
    - Then rename the session `<name>` at once, before step 2:  `epic session title "🚧 <name>"`.
@@ -54,7 +59,8 @@ What `$ARGUMENTS` means:
        ```
 
      - Shared content needs no carrying:  every checkout already sees it.
-       That's `epics`, `guides`, `pages`, `goals` ..., `agents`:  links into `../spell-app-dev`.
+       That's `epics`, `guides`, `pages`, `goals` ..., `agents`:
+       links into the content folder (`epic config contentFolder`).
    - Steps 1-3 as written, then NOT steps 4-6 yet.
      - The commit and note (steps 3-4 below) come first, since isolate's step 6 ends the turn.
      - No `yarn install`:  parked work doesn't run.
@@ -71,7 +77,7 @@ What `$ARGUMENTS` means:
 
    - Nothing to commit:  skip, and say so.
    - BEFORE step 4, so the note can't be swept into the commit.
-   - Shared content (the epic page, logs, docs pages) is never in it:  committed for you, in `../spell-app-dev`.
+   - Shared content (the epic page, logs, docs pages) is never in it:  committed for you, in the content folder.
 4. Write `PARKED-<name>.md` at the worktree root:
 
    ```
@@ -122,8 +128,8 @@ Used by `/unpark` (after its window check), and by `/wait-for` when the wait end
 1. Read `PARKED-<name>.md`:  goal, where it stopped, next steps.
    Check the session's name ([the isolate skill](../isolate/SKILL.md), "Session name").
 2. Bring in the new `main`, the same way as [the isolate skill](../isolate/SKILL.md)'s "Finish", steps 2-3:
-   - A worktree cut before 2026-10-04 (`epic shared status` shows its folders `tracked`):
-     `epic shared migrate <name>` first.
+   - A worktree cut before 2026-10-04:  `epic shared migrate <name>` first.
+     - How to tell:  `epic shared status` shows its folders `tracked`.
    - `git log --oneline HEAD..main` empty:  nothing new, go on to step 4.
    - `epic worktree merge-main`:
      - merges `main`
@@ -135,8 +141,11 @@ Used by `/unpark` (after its window check), and by `/wait-for` when the wait end
      - Packages moved or renamed on `main` show up as rename / delete conflicts.
        Follow the move:  carry this branch's edits to the new path, and update its imports to the new aliases.
 3. Checks:
-   - `package.json` workspaces or any `yarn.lock` changed in the merge, or no `node_modules/`:  `yarn install`
-   - `yarn ts` and `yarn test` in each package this branch touches (`git diff --name-only main...HEAD`)
+   - `yarn install`, when either:
+     - the merge changed `package.json` workspaces, or any `yarn.lock`
+     - there's no `node_modules/`
+   - `yarn ts` and `yarn test` in each package this branch touches
+     - those packages:  `git diff --name-only main...HEAD`
 4. Can't resolve a conflict (keeping both sides needs Owen's call), or checks fail on this branch's code:
    - `git merge --abort` if still merging
    - then AskUserQuestion, listing each file and why

@@ -1,7 +1,7 @@
 /**
- * The extension's pure parts:  page URLs, the epic pages listed for "Open Epic...", where a served URL's file is, a
- * Claude tab's label.  No `vscode` here, and node built-ins only, so its tests run under plain `node`
- * (`tests/vscode/docUrls.test.ts`).
+ * The extension's pure parts:
+ * page URLs, the epic pages listed for "Open Epic...", where a served URL's file is, a Claude tab's label.
+ * - no `vscode` here, and node built-ins only, so its tests run under plain `node` (`tests/vscode/docUrls.test.ts`)
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { homedir } from "node:os"
@@ -84,8 +84,8 @@ export function planDocsIn(content: string, repo?: string): PlanDocEntry[] {
 }
 
 /**
- * Every epic page of every repo in `repos` (`{ name, content }`), most recently changed first;  a content folder
- * listed twice counts once.
+ * Every epic page of every repo in `repos` (`{ name, content }`), most recently changed first.
+ * - a content folder listed twice counts once
  */
 export function planDocsOf(repos: { name: string; content: string }[]): PlanDocEntry[] {
   const seen = new Set<string>()
@@ -114,8 +114,10 @@ export type ServerInfo = {
 /**
  * The file a page server serves at URL path `path` (decoded segments joined), for a link the page couldn't follow:
  * `undefined` when the server doesn't say.
- * - the epic server:  `/_epic/assets/...` and `/_epic/pack/...` in its engine;  `/r/<repo>/...` in that repo's
- *   content;  anything else in the default repo's content
+ * - the epic server:
+ *   - `/_epic/assets/...` and `/_epic/pack/...` in its engine
+ *   - `/r/<repo>/...` in that repo's content
+ *   - anything else in the default repo's content
  * - a checkout's page server:  under its root;  `/worktrees/<w>/...` in the folder it serves worktrees from
  */
 export function fileForPath(info: ServerInfo, path: string): string | undefined {

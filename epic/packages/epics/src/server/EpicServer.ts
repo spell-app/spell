@@ -26,8 +26,8 @@ import {
 
 /****************
  * ### `EpicServer`
- * spell-epic's ONE page server per machine (epic `epic-eject` P7):  every registered repo's content folder, the
- * engine's assets and pack, and the epic route modules, on one port.
+ * spell-epic's ONE page server per machine (epic `epic-eject` P7):
+ * every registered repo's content folder, the engine's assets and pack, and the epic route modules, on one port.
  *
  * ```text
  * /_epic/assets/...       spell-epic's packages/epics/tools/_assets/   (spell-ui.js, spell-doc.css, the runtime ...)
@@ -38,20 +38,22 @@ import {
  * /api/...                the epic route modules, for the default repo (below)
  * ```
  *
- * - The repos:  `~/.spell-epic/repos.json5` (`RepoList`), read as it starts;  `ensure()` restarts a server older
- *   than that file, so a repo added shows at the next opener.
+ * - The repos:  `~/.spell-epic/repos.json5` (`RepoList`), read as it starts.
+ *   `ensure()` restarts a server older than that file, so a repo added shows at the next opener.
  * - Pages not migrated to the engine routes yet (`../../packages/epics/tools/_assets/...`) still load THIS engine's
  *   assets:  an overlay serves the old paths from the engine routes (`legacyEnginePath()`).
- * - The ROUTE MODULES are spell-epic's own (`ROUTE_MODULES`), set up ONCE, for the default repo:  `root` is its main
- *   checkout, and the docs tools' `ROOT` is too (`EPIC_CHECKOUT`, set before they load).
- *   - Another repo's pages are served and live-reload, but their calls (`/api/...`) reach the default repo's routes:
- *     several route modules read the checkout once, as they load (`pages.js` `ROOT`), so one process serves one
- *     repo's calls.  TODO:  a call per repo (`/r/<repo>/api/...`), with the test repo (P9).
- *   - Page edits (`/api/pages`, `/api/files`):  the default repo's content folder, only inside its `writable`
- *     folders (its `package.json`'s `"pageServer"`, else `WRITABLE`).
+ * - The ROUTE MODULES are spell-epic's own (`ROUTE_MODULES`), set up ONCE, for the default repo:
+ *   `root` is its main checkout, and the docs tools' `ROOT` is too (`EPIC_CHECKOUT`, set before they load).
+ *   - Another repo's pages are served and live-reload,
+ *     but their calls (`/api/...`) reach the default repo's routes:
+ *     several route modules read the checkout once, as they load (`pages.js` `ROOT`),
+ *     so one process serves one repo's calls.
+ *     TODO:  a call per repo (`/r/<repo>/api/...`), with the test repo (P9).
+ *   - Page edits (`/api/pages`, `/api/files`):  the default repo's content folder,
+ *     only inside its `writable` folders (its `package.json`'s `"pageServer"`, else `WRITABLE`).
  * - NOT spell-app's page server:  no component sets, no Spell UI site, no app;  spell-app's own server keeps those.
- * - Its pid file and log are in spell-epic's home folder (`~/.spell-epic/server.json`, `server.log`);  its port
- *   `DEFAULT_EPIC_PORT` (4848), not spell-app's 4747.
+ * - Its pid file and log are in spell-epic's home folder (`~/.spell-epic/server.json`, `server.log`).
+ * - Its port:  `DEFAULT_EPIC_PORT` (4848), not spell-app's 4747.
  * - Run it with `epic hub` (`Hub`), never by hand.
  ****************/
 export class EpicServer {
@@ -86,8 +88,10 @@ export class EpicServer {
   private stops: (() => unknown)[] = []
 
   /**
-   * - `home`:  default `RepoList.homeFolder()`;  `engine`:  default this code's checkout
-   * - `repos`:  default the home folder's list;  `token`:  the guard's (default random)
+   * - `home`:  default `RepoList.homeFolder()`
+   * - `engine`:  default this code's checkout
+   * - `repos`:  default the home folder's list
+   * - `token`:  the guard's (default random)
    */
   constructor({
     home = RepoList.homeFolder(),
@@ -171,8 +175,9 @@ export class EpicServer {
   }
 
   /**
-   * The epic server of home folder `home`, started in the background if it isn't running, or restarted when it
-   * started before its code or the repo list last changed;  its info, `base` URL, and whether it was `launched`.
+   * The epic server of home folder `home`:  its info, `base` URL, and whether it was `launched`.
+   * - started in the background if it isn't running
+   * - restarted when it started before its code or the repo list last changed
    * - runs `bin/epic hub serve` (spell-epic's `tsx` loader is in it), output to `<home>/server.log`
    * - what `epic hub ensure`, `epic hub url` and the openers call
    */
@@ -211,7 +216,8 @@ export class EpicServer {
    * What a page served from `served` gets as `window.SPELL_SERVER`, beyond the web server's own:
    * - `file`:  its URL path as LIVE RELOAD reports it, under the prefix it was asked by (`/r/<repo>/...` or `/...`)
    * - `repo`, `base`:  its repo's name and URL prefix (`/` for the default repo's pages at the root)
-   * - `root`:  that repo's main checkout;  `engine`:  spell-epic's checkout
+   * - `root`:  that repo's main checkout
+   * - `engine`:  spell-epic's checkout
    * - `edit`, `etag`:  the page editor, for the default repo's pages
    * - and what route modules add (`addPageConfig()`)
    */
@@ -234,8 +240,9 @@ export class EpicServer {
   }
 
   /**
-   * Live reload:  each repo's content at its prefix (the default's at `/` too), and the engine's assets and pack at
-   * their routes (and at their old paths, for pages not migrated yet).
+   * Live reload:
+   * - each repo's content at its prefix (the default's at `/` too)
+   * - the engine's assets and pack at their routes (and at their old paths, for pages not migrated yet)
    */
   private watch(): void {
     const live = this.web.live!
@@ -255,10 +262,10 @@ export class EpicServer {
   ////////////////
 
   /**
-   * Import each of `ROUTE_MODULES` from the engine and run its `setup()`, for the default repo;  a failure is logged,
-   * not fatal.
-   * - SIDE EFFECT:  `EPIC_CHECKOUT` is the default repo's main checkout from here on, unless it was set:  the docs
-   *   tools read it as they load, as their root (`pages.js` `ROOT`)
+   * Import each of `ROUTE_MODULES` from the engine and run its `setup()`, for the default repo.
+   * - a failure is logged, not fatal
+   * - SIDE EFFECT:  `EPIC_CHECKOUT` is the default repo's main checkout from here on, unless it was set:
+   *   the docs tools read it as they load, as their root (`pages.js` `ROOT`)
    */
   private async loadRoutes(): Promise<void> {
     process.env.EPIC_CHECKOUT ??= this.defaultRepo!.checkout
@@ -275,8 +282,8 @@ export class EpicServer {
   /**
    * What a route module's `setup()` gets:  the page server's `RouteContext`, for the default repo.
    * - `root`:  the default repo's main checkout
-   * - `serveWorktrees()`:  only noted (`info.worktrees`):  a repo's pages are its shared content, the same in every
-   *   worktree, and the engine's assets are this checkout's, so there is nothing per worktree to serve
+   * - `serveWorktrees()`:  only noted (`info.worktrees`), since there is nothing per worktree to serve:
+   *   a repo's pages are its shared content, the same in every worktree, and the engine's assets are this checkout's
    * - tests set a route module up by hand with it, on a server started with `routes: false`
    */
   routeContext(): RouteContext {
@@ -295,8 +302,8 @@ export class EpicServer {
   }
 
   /**
-   * Where the page at URL path `path` is served from, as `SRV.StaticHandler.resolve()` finds it:  its file, or
-   * `undefined`.
+   * Where the page at URL path `path` is served from, as `SRV.StaticHandler.resolve()` finds it:
+   * its file, or `undefined`.
    */
   fileFor(path: string): string | undefined {
     const found = this.web.files.resolve(path)
@@ -316,9 +323,10 @@ const ENGINE_ROOT = resolve(fileURLToPath(import.meta.url), "..", "..", "..", ".
 const EPIC_BIN = join(ENGINE_ROOT, "bin", "epic")
 
 /**
- * The route modules, from spell-epic's checkout, in the order spell-app's page server loads them (its root
- * `package.json`'s `"pageServer"` `"routes"`, the epic ones):  pages Owen answers on, comments, the review loop, new
- * epics and favourites, epic links, the running epics, agents, side-bar links, airplane mode.
+ * The route modules, from spell-epic's checkout, in the order spell-app's page server loads them
+ * (its root `package.json`'s `"pageServer"` `"routes"`, the epic ones):
+ * pages Owen answers on, comments, the review loop, new epics and favourites, epic links, the running epics,
+ * agents, side-bar links, airplane mode.
  */
 export const ROUTE_MODULES = [
   "packages/epics/tools/detailsRoutes.ts",
@@ -334,8 +342,8 @@ export const ROUTE_MODULES = [
 ] as const
 
 /**
- * Folders a server older than whose code `ensure()` restarts:  the route modules' and this folder's, and the server
- * package's (spell-app's, through `.spell-app`).
+ * Folders whose code, when newer than a running server, makes `ensure()` restart it:
+ * the route modules' and this folder's, and the server package's (spell-app's, through `.spell-app`).
  */
 const SOURCES = [
   ...new Set([
@@ -352,7 +360,7 @@ const HOME_PAGE = "pages/index.html"
 const WRITABLE = ["epics", "guides", "pages", "templates", "brand", "sagas"]
 
 /**
- * Paths in a content folder live reload never reports:  a guide's `scripts/` and `experiments/` (but an experiment's
- * built `*.bundle.js`, which its guide loads), as spell-app's page server skips them.
+ * Paths in a content folder live reload never reports, as spell-app's page server skips them:
+ * a guide's `scripts/` and `experiments/` (but an experiment's built `*.bundle.js`, which its guide loads).
  */
 const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/

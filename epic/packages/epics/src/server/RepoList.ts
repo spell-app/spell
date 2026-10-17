@@ -19,8 +19,8 @@ import {
 
 /****************
  * ### `RepoList`
- * The REPOS the machine's one epic server serves (epic `epic-eject` P7):  `~/.spell-epic/repos.json5`, read and
- * written through `DataFile`, so Owen's comments in it stay.
+ * The REPOS the machine's one epic server serves (epic `epic-eject` P7):  `~/.spell-epic/repos.json5`.
+ * Read and written through `DataFile`, so Owen's comments in it stay.
  *
  * ```ts
  * const list = new RepoList()
@@ -29,8 +29,9 @@ import {
  * list.urlPathFor(".../spell-app-dev/epics/seo/seo.plan.html")   // => "/epics/seo/seo.plan.html"
  * ```
  *
- * - Each repo is kept as its NAME and MAIN checkout only;  where its content folder is comes from its own
- *   `.epic/config.json5` each time (`EpicConfig`), so a move there needs no second edit here.
+ * - Each repo is kept as its NAME and MAIN checkout only.
+ *   Where its content folder is comes from its own `.epic/config.json5` each time (`EpicConfig`),
+ *   so a move there needs no second edit here.
  * - The DEFAULT repo is served at `/` as well as `/r/<name>/`:  the one named `default`, else the first added.
  * - `epic repo add | list | remove | default` edit it (`Repos`);  nothing else writes it.
  * - The folder:  `~/.spell-epic/`, or `SPELL_EPIC_HOME` (tests give a temp folder:  the real file is never touched).
@@ -68,8 +69,8 @@ export class RepoList {
   }
 
   /**
-   * Every repo, in the order added, each with its content folder (its config's) and URL prefix;  the default one
-   * marked.
+   * Every repo, in the order added, each with its content folder (its config's) and URL prefix.
+   * - the default one marked
    * - a repo whose config won't read is left out, and said on stderr:  the rest are still served
    */
   repos(): Repo[] {
@@ -96,8 +97,9 @@ export class RepoList {
   }
 
   /**
-   * The repo whose content `file` is (or whose checkout holds it), and its path inside the content folder,
-   * `epics/seo/seo.plan.html`;  `undefined` outside every repo's content.
+   * The repo whose content `file` is (or whose checkout holds it),
+   * and its path inside the content folder, `epics/seo/seo.plan.html`.
+   * - `undefined` outside every repo's content
    * - by real paths:  a checkout's `epics/` link and a worktree's lead to the same file in the content folder
    */
   repoOf(file: string, repos = this.repos()): { repo: Repo; path: string } | undefined {
@@ -110,8 +112,10 @@ export class RepoList {
   }
 
   /**
-   * `file`'s URL path on the epic server:  `/<path>` for the default repo's content, `/r/<repo>/<path>` for another's;
-   * `undefined` for a file in no repo's content.
+   * `file`'s URL path on the epic server:
+   * - `/<path>` for the default repo's content
+   * - `/r/<repo>/<path>` for another's
+   * - `undefined` for a file in no repo's content
    */
   urlPathFor(file: string, repos = this.repos()): string | undefined {
     const found = this.repoOf(file, repos)
@@ -124,8 +128,8 @@ export class RepoList {
   ////////////////
 
   /**
-   * Register the repo `checkout` is in (its MAIN checkout, from any worktree), as `name` (default:  its folder's
-   * name);  returns it.
+   * Register the repo `checkout` is in (its MAIN checkout, from any worktree),
+   * as `name` (default:  its folder's name);  returns it.
    * - already there by that checkout:  renamed to `name` when one is given, else left
    * - `isDefault`:  served at `/` from now on
    * - throws `RepoListError` for a bad name, a name another checkout has, or a checkout that isn't a folder
@@ -174,7 +178,10 @@ export class RepoList {
     this.write({ ...data, default: name })
   }
 
-  /** Write `data`, its comments kept (`DataFile.write()`).  SIDE EFFECT:  makes the home folder. */
+  /**
+   * Write `data`, its comments kept (`DataFile.write()`).
+   * - SIDE EFFECT:  makes the home folder
+   */
   private write(data: RepoListData): void {
     mkdirSync(this.home, { recursive: true })
     DataFile.write(this.file, data)
@@ -194,8 +201,8 @@ export class RepoList {
 export class RepoListError extends Error {}
 
 /**
- * `path`'s real path (links followed);  for a file not there yet, its nearest folder that is, real, with the rest
- * after it.
+ * `path`'s real path (links followed).
+ * - a file not there yet:  its nearest folder that is, real, with the rest after it
  */
 function realOr(path: string): string {
   try {

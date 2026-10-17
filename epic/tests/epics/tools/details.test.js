@@ -1,6 +1,6 @@
 /**
- * Tests of `epic ask`'s functions (`tools/details.js`), in a scratch checkout:  the real template, a
- * scratch `details/` and an epic.
+ * Tests of `epic ask`'s functions (`tools/details.js`), in a scratch checkout:
+ * the real template, a scratch `details/` and an epic.
  */
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"

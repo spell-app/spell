@@ -12,14 +12,16 @@ The other half of `/park`.
 
 ## 1. What to unpark
 
-- `$ARGUMENTS` given:  `<worktree>/PARKED-<name>.md`, `<worktree>` being `epic worktree path <name>`.
-  Missing:  say so, then the list below.
+- `$ARGUMENTS` given:  its note, `PARKED-<name>.md` at the worktree's root.
+  - The worktree:  the folder `epic worktree path <name>` prints.
+  - Missing:  say so, then the list below.
 - None, and this session is in a worktree with a `PARKED-*.md`:  that one.
 - Else `epic park list`:
   - none:  say "nothing parked", and stop
   - one:  use it, naming it in the reply
   - several:  AskUserQuestion "Which parked work?", one option per entry
-    - labelled `<name>`, description its `stopped` line and `state`
+    - label:  `<name>`
+    - description:  its `stopped` line and `state`
     - 4 per question;  more in extra questions
 
 - Rename this session `<name>`, BEFORE anything else.
@@ -30,8 +32,10 @@ The other half of `/park`.
 
 ## 2. Parked by a session that's still open
 
-`epic worktree status <name>`:  a session in `sessions` with `running: true`, other than this one.
-AskUserQuestion:
+Another session still has it open, by `epic worktree status <name>`:
+- a session in its `sessions` with `running: true`, other than this one
+
+Then AskUserQuestion:
 
 - "Tell it to unpark (Recommended)":  `SendMessage` to it:  "Run `/unpark <name>` (asked by `<this session>`)."
   - Then one line, and stop.
@@ -49,7 +53,8 @@ AskUserQuestion:
     - The option it recommends first, with "(Recommended)"
       ([the isolate skill](../isolate/SKILL.md), "Start", step 2b).
   - "Open new window":
-    1. not yet in the worktree:  `EnterWorktree` with `path`:  the folder `epic worktree path <name>` prints
+    1. not yet in the worktree:  `EnterWorktree`
+       - its `path`:  the folder `epic worktree path <name>` prints
     2. both from the worktree's root, as [the isolate skill](../isolate/SKILL.md)'s "Start", steps 4-5:
        - `epic window open <name>` (`--pkg <pkg>` when this isn't a package window)
        - then `epic window handoff <name>`

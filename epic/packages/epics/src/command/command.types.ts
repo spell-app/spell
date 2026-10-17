@@ -37,8 +37,8 @@ export class EpicCommandError extends Error {
 EpicCommandError.prototype.name = "EpicCommandError"
 
 /**
- * A verb's arguments, read from the command line as typed:  `--key value` flags, `--switch` switches, the rest in
- * order (`parseVerbArgs()`).
+ * A verb's arguments, read from the command line as typed (`parseVerbArgs()`):
+ * `--key value` flags, `--switch` switches, the rest in order.
  * - flag names camelCased:  `--dry-run` is `dryRun`
  */
 export type VerbArgs = { positional: string[]; flags: Record<string, string | true> }
@@ -141,12 +141,15 @@ export type PendingQuestion = {
 
 /**
  * A running session, as `/worktrees` sees it -- `Sessions.live()`.
- * - `name`:  its title;  `agent`:  what `ListAgents` and `SendMessage` call it (the registry's name)
- * - `checkout`:  `main checkout`, `worktree <name>` or `(not in git)`;  `folder`:  `cwd` inside it (`""` at its root)
- * - `state`:  the registry's `busy` / `idle` / `waiting`, or `hung` for `busy` with no transcript write for
- *   `Stock.SILENT_MINUTES`
+ * - `name`:  its title
+ * - `agent`:  what `ListAgents` and `SendMessage` call it (the registry's name)
+ * - `checkout`:  `main checkout`, `worktree <name>` or `(not in git)`
+ * - `folder`:  `cwd` inside it (`""` at its root)
+ * - `state`:  the registry's `busy` / `idle` / `waiting`,
+ *   or `hung` for `busy` with no transcript write for `Stock.SILENT_MINUTES`
  * - `question`:  an `AskUserQuestion` with no answer after it, `questionMin` minutes ago
- * - `this`:  the session that ran the command;  `used`:  it has a transcript (got a prompt)
+ * - `this`:  the session that ran the command
+ * - `used`:  it has a transcript (got a prompt)
  */
 export type LiveSession = {
   id: string
@@ -185,7 +188,8 @@ export const ENTRYPOINT_PLACES: Record<string, string> = {
  * - 📅 a future epic written down (`/epic future`)
  * - ✅ merged (`epic session done`)
  * - from its epic's state (`epic session icons`;  `$/epics/list/EpicState`):
- *   🚨 errors (every phase done, items need Owen), ⏸️ paused (phases left, untouched for days)
+ *   - 🚨 errors (every phase done, items need Owen)
+ *   - ⏸️ paused (phases left, untouched for days)
  */
 export const TITLE_ICONS = { active: "🚧", future: "📅", done: "✅", errors: "🚨", paused: "⏸️" } as const
 
@@ -216,7 +220,8 @@ export type CheckoutPlace = { root?: string; label: string; branch: string; insi
  * Where session / worktree / plan `name` stands -- `Worktrees.nameStatus()`.
  * - `ahead`:  commits on branch `name` not in `main`
  * - `merged`:  the branch had commits of its own (its reflog moved past "Created") and all are in `main` now
- * - `plan`:  its epic page folder;  `planDone`:  every phase done
+ * - `plan`:  its epic page folder
+ * - `planDone`:  every phase done
  * - `finished`:  `merged` or `planDone`, `why` saying which (`park wait` adds "worktree removed", "session exited")
  */
 export type NameStatus = {
@@ -234,7 +239,8 @@ export type NameStatus = {
 
 /**
  * What an epic page's state is read from (`$/epics/list/EpicState` `EpicFacts`) -- `Worktrees.planFacts()`.
- * - `phases`:  each phase's status;  `updated`, `future`, `standing`:  the page's
+ * - `phases`:  each phase's status
+ * - `updated`, `future`, `standing`:  the page's
  * - `urgent`:  the ids of the items that need Owen
  */
 export type PlanFacts = {
@@ -246,8 +252,9 @@ export type PlanFacts = {
 }
 
 /**
- * An epic page's summary, from the `epic` tool's `summaries` (`summary --json` per file);  `error` when it couldn't
- * read the doc.  Only the fields read here.
+ * An epic page's summary, from the `epic` tool's `summaries` (`summary --json` per file).
+ * - `error` when it couldn't read the doc
+ * - only the fields read here
  */
 export type PlanSummary = {
   title?: string
@@ -267,7 +274,10 @@ export type ParkedNote = { name: string; file: string; state: string; stopped: s
 
 /**
  * What `Parking.waitFor()` ends with.
- * - `code`:  `0` finished (with the status, `why` saying which);  `2` time's up;  `3` nothing by that name
+ * - `code`:
+ *   - `0` finished (with the status, `why` saying which)
+ *   - `2` time's up
+ *   - `3` nothing by that name
  */
 export type WaitResult = { code: number; status?: NameStatus; message?: string }
 
@@ -311,22 +321,31 @@ export type StockReport = {
 
 /**
  * - `active` -- in process:  a session working in it, or touched in the last `Stock.RECENT_HOURS`
- * - `stalled` -- hung or parked:  `/park`ed, waiting, a busy session gone silent, a question nobody answered, work
- *   untouched for `Stock.RECENT_HOURS`, a plan with phases left and nothing working on it
- * - `dead` -- nothing of value left:  merged or empty worktrees and branches, sessions idle for `Stock.STALE_HOURS`
- *   (`Stock.RECENT_HOURS` outside any worktree), window files with no worktree
+ * - `stalled` -- hung or parked:
+ *   - `/park`ed, waiting, a busy session gone silent, a question nobody answered
+ *   - work untouched for `Stock.RECENT_HOURS`, a plan with phases left and nothing working on it
+ * - `dead` -- nothing of value left:
+ *   - merged or empty worktrees and branches
+ *   - sessions idle for `Stock.STALE_HOURS` (`Stock.RECENT_HOURS` outside any worktree)
+ *   - window files with no worktree
  */
 export type StockGroup = "active" | "stalled" | "dead"
 
 /**
  * One thing open:  a worktree, branch, plan, session, stash or window file.
- * - `key`:  `<kind>:<name>`;  `why`:  the reasons for its group, in words
- * - `actions`:  what `/worktrees` offers;  each action's `commands` are shell lines to run one by one from the MAIN
- *   checkout, `[]` for a step Claude takes (open a session, `/wtf`, ask)
+ * - `key`:  `<kind>:<name>`
+ * - `why`:  the reasons for its group, in words
+ * - `actions`:  what `/worktrees` offers
+ *   - each action's `commands` are shell lines to run one by one from the MAIN checkout
+ *   - `[]` for a step Claude takes (open a session, `/wtf`, ask)
  * - the other fields depend on `kind`:
- *   - worktree / branch:  `worktree` ... `morning`;  `unique`:  commits whose patch isn't in `main` yet (not
- *     squashed in);  `everCommitted`:  its reflog moved past "Created"
- *   - plan:  `plan`, `planDone`;  session:  `lastTouched`;  stash:  `stash` (sha);  window:  `file`
+ *   - worktree / branch:  `worktree` ... `morning`
+ *     - `unique`:  commits whose patch isn't in `main` yet (not squashed in)
+ *     - `everCommitted`:  its reflog moved past "Created"
+ *   - plan:  `plan`, `planDone`
+ *   - session:  `lastTouched`
+ *   - stash:  `stash` (sha)
+ *   - window:  `file`
  */
 export type StockItem = {
   key: string
@@ -362,10 +381,12 @@ export type StockAction = { id: string; label: string; commands: string[] }
 
 /**
  * The shared-content manifest (`Shared.configOf()`).
- * - `main`:  the main checkout;  `dir`:  the shared repo, absolute;  `links`:  folders every checkout links,
- *   relative to a checkout's root
- * - `worktrees`:  every folder holding worktrees, absolute, the new place first (`.epic/config.json5`'s
- *   `worktreesFolder`, then the old `.claude/worktrees` when it moved:  `EpicConfig.worktreesFolders`)
+ * - `main`:  the main checkout
+ * - `dir`:  the shared repo, absolute
+ * - `links`:  folders every checkout links, relative to a checkout's root
+ * - `worktrees`:  every folder holding worktrees, absolute, the new place first
+ *   (`.epic/config.json5`'s `worktreesFolder`, then the old `.claude/worktrees` when it moved:
+ *   `EpicConfig.worktreesFolders`)
  */
 export type SharedConfig = { main: string; dir: string; worktrees: string[]; links: string[] }
 
@@ -373,8 +394,8 @@ export type SharedConfig = { main: string; dir: string; worktrees: string[]; lin
  * What `epic shared rename` did, or would do (`SharedRename.run()`).
  * - `from` / `to`:  the content folder's old and new place, absolute;  a link is left at `from`
  * - `relinked`:  each checkout's link that went through `from`, and the folder it points at now (`to`)
- * - `config`:  the main checkout's `.epic/config.json5`, and the keys written into it (`contentFolder`,
- *   `windows.contentName`)
+ * - `config`:  the main checkout's `.epic/config.json5`, and the keys written into it
+ *   - `contentFolder`, `windows.contentName`
  * - `mentions`:  files that still name the old folder, left to people (`AGENTS.md`, Claude settings, memory notes)
  */
 export type RenameReport = {
@@ -397,7 +418,9 @@ export type LinkReport = {
 
 /**
  * `epic shared status`.
- * - `dir`, `exists`, `isRepo`:  the shared repo;  `dirty`:  files not committed;  `last`:  its newest commit
+ * - `dir`, `exists`, `isRepo`:  the shared repo
+ * - `dirty`:  files not committed
+ * - `last`:  its newest commit
  * - `checkouts`:  each checkout (`.` the main one) and its links
  */
 export type SharedStatus = {
@@ -411,9 +434,13 @@ export type SharedStatus = {
 
 /**
  * What `SharedMigration` does with one shared file of a worktree.
- * - `action`:  `skip` (the worktree didn't change it, or matches), `take` (the worktree's copy goes into the shared
- *   repo), `delete` (the worktree deleted it), `union` (a log changed on both sides:  merged, `text`), `rebuild` (a
- *   built file changed on both sides:  the shared copy stays, its tool runs again), `conflict`
+ * - `action`:
+ *   - `skip`:  the worktree didn't change it, or matches
+ *   - `take`:  the worktree's copy goes into the shared repo
+ *   - `delete`:  the worktree deleted it
+ *   - `union`:  a log changed on both sides:  merged, `text`
+ *   - `rebuild`:  a built file changed on both sides:  the shared copy stays, its tool runs again
+ *   - `conflict`
  */
 export type FoldReport = {
   file: string
@@ -423,8 +450,9 @@ export type FoldReport = {
 
 /**
  * `epic shared migrate`'s answer.
- * - `folds`:  every shared file's fate;  `conflicts`:  the files that stopped it;  `done`:  it went through (not a
- *   dry run, no conflicts)
+ * - `folds`:  every shared file's fate
+ * - `conflicts`:  the files that stopped it
+ * - `done`:  it went through (not a dry run, no conflicts)
  */
 export type MigrateReport = {
   worktree: string
@@ -439,8 +467,8 @@ export type MigrateReport = {
 ////////////////
 
 /**
- * One generated output family, and the command that rebuilds it from the merged source:  a line of a checkout's
- * `.epic/generators.json5` (`MainMerge.generatorsOf()`).
+ * One generated output family, and the command that rebuilds it from the merged source:
+ * a line of a checkout's `.epic/generators.json5` (`MainMerge.generatorsOf()`).
  * - `outputs`:  globs, relative to a checkout's root (`path.matchesGlob()`);  a folder is `<folder>/**`
  * - `run`:  the command, run in `cwd` (relative to a checkout's root)
  */
@@ -459,8 +487,8 @@ export type SnapshotReview = { file: string; keys: string[] }
  *   - `fast-forward`:  the branch had nothing of its own, so it moved to `main`
  *   - `merged`:  a merge commit, generated files regenerated
  *   - `conflicts`:  stopped mid-merge on `conflicts`;  resolve them, `git add` them, then `--continue`
- * - `untracked`:  conflicted files the merged `.gitignore` ignores (generated output no longer committed), taken out
- *   of the index and left on disk
+ * - `untracked`:  conflicted files the merged `.gitignore` ignores (generated output no longer committed),
+ *   taken out of the index and left on disk
  * - `regenerated`:  each generator that ran, and the files it staged
  * - `review`:  snapshot entries to show Owen (`SnapshotReview`)
  * - `unstaged`:  files a generator changed outside its `outputs`, left for a person to look at
@@ -543,8 +571,10 @@ export type PastedImage = {
 /**
  * How the `epic` command runs one of its tools, a script in a child `node` -- `EpicTools.run()`.
  * - `tool`:  the script, relative to a checkout's root
- * - `tsx`:  the `tsconfig.json` it runs under `tsx` with, relative to a checkout's root;  none:  plain `node`
- * - `cwd`:  the folder it runs in, relative to the DATA checkout's root (the caller's);  none:  the caller's folder
+ * - `tsx`:  the `tsconfig.json` it runs under `tsx` with, relative to a checkout's root
+ *   - none:  plain `node`
+ * - `cwd`:  the folder it runs in, relative to the DATA checkout's root (the caller's)
+ *   - none:  the caller's folder
  *   - the docs tools run in `packages/epics` (as `yarn workspace` ran them), and print paths relative to it
  * - `code`:  whose copy of the script runs
  *   - `own` (default):  the one beside the running `epic`, so every checkout runs ONE copy of the epic code

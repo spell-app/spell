@@ -1,42 +1,49 @@
 #!/usr/bin/env node
 /**
- * Claude Code's `WorktreeCreate` / `WorktreeRemove` hooks (the plugin's `hooks/hooks.json`):  `worktree.mjs create|remove`,
- * the hook's JSON on stdin.  They replace Claude's own git worktree logic, for `EnterWorktree`, `claude -w` and
- * agents' `isolation: "worktree"`.
+ * Claude Code's `WorktreeCreate` / `WorktreeRemove` hooks (the plugin's `hooks/hooks.json`):
+ * `worktree.mjs create|remove`, the hook's JSON on stdin.
+ * They replace Claude's own git worktree logic, for `EnterWorktree`, `claude -w` and agents' `isolation: "worktree"`.
  *
  * ## Why a hook
- * - A session in a worktree Claude made itself is saved under the WORKTREE's folder, so it drops out of the VS Code
- *   Claude panel's list (which shows one folder's sessions) and is orphaned if it never leaves.  A session in a
- *   worktree a hook made stays saved where it started:  the repo root, which every window lists
- *   (`scripts/window.mjs`).  Checked with CLI 2.1.287.
+ * - Where sessions are saved:
+ *   - a session in a worktree Claude made itself is saved under the WORKTREE's folder,
+ *     so it drops out of the VS Code Claude panel's list (which shows one folder's sessions),
+ *     and is orphaned if it never leaves
+ *   - a session in a worktree a hook made stays saved where it started:
+ *     the repo root, which every window lists (`scripts/window.mjs`)
+ *   - checked with CLI 2.1.287
  * - Names agree:  worktree `.claude/worktrees/<name>`, branch `<name>` (Claude's own adds `worktree-`).
  * - Branches from local `main` (unpushed work included), not `origin/main`.
- * - The folders and the branch come from the repo's `.epic/config.json5` (`EpicConfig`):  `worktreesFolder`,
- *   `baseBranch`, `contentFolder`;  the names above are their defaults.
- *   - `worktreesFolder` may be BESIDE the repo (`../spell-app.worktrees`, epic `epic-eject` P8):  new worktrees go
- *     there, and the old ones are still found in `.claude/worktrees` (`EpicConfig.worktreeFolder()`).
+ * - The folders and the branch come from the repo's `.epic/config.json5` (`EpicConfig`):
+ *   `worktreesFolder`, `baseBranch`, `contentFolder`;  the names above are their defaults.
+ *   - `worktreesFolder` may be BESIDE the repo (`../spell-app.worktrees`, epic `epic-eject` P8):
+ *     new worktrees go there, and the old ones are still found in `.claude/worktrees` (`EpicConfig.worktreeFolder()`).
  *
  * ## create
- * - stdin `{ name, cwd, session_id, transcript_path, ... }`  (CLI 2.1.287:  no branch or base field, whatever the
- *   docs say).  Prints the worktree's absolute path on stdout, the ONLY thing on stdout;  progress goes to stderr.
- * - An agent's worktree (`isolation: "worktree"`, name `agent-<id>`) started by a session in worktree `<owner>` (an
- *   epic's) is named `<owner>-agent-<id>`, worktree and branch:  `git worktree list` says whose it is, and `remove`
- *   and `/isolate done` know its work is safe once it's in `<owner>`'s branch (Owen, 2026-10-05).
+ * - stdin `{ name, cwd, session_id, transcript_path, ... }`
+ *   (CLI 2.1.287:  no branch or base field, whatever the docs say).
+ * - Prints the worktree's absolute path on stdout, the ONLY thing on stdout;  progress goes to stderr.
+ * - An agent's worktree (`isolation: "worktree"`, name `agent-<id>`) started by a session in worktree `<owner>`
+ *   (an epic's) is named `<owner>-agent-<id>`, worktree and branch (Owen, 2026-10-05):
+ *   - `git worktree list` says whose it is
+ *   - `remove` and `/isolate done` know its work is safe once it's in `<owner>`'s branch
  * - Reuses worktree `<name>` when it's already one, in either place, and branch `<name>` when it exists.
  * - Then, for a NEW worktree, in this order:
- *   1. links the shared content in (this plugin's `epic shared link`, epic `shared-content`), when the shared repo
- *      exists:  a failure there is a warning, never a failed hook
+ *   1. links the shared content in (this plugin's `epic shared link`, epic `shared-content`),
+ *      when the shared repo exists:  a failure there is a warning, never a failed hook
  *   2. `linkSessionFolders` on:  links the worktree's saved-session folder to the main checkout's (`SessionFolders`),
  *      before any session saves there;  a folder it can't link is a warning
- *   3. `installOnCreate` on:  runs `installCommand` in it (`installTimeout` seconds at most), so nothing opens the
- *      worktree without its packages (I2).  A failure FAILS the hook, saying how to carry on:  the worktree stays
+ *   3. `installOnCreate` on:  runs `installCommand` in it (`installTimeout` seconds at most),
+ *      so nothing opens the worktree without its packages (I2).
+ *      A failure FAILS the hook, saying how to carry on:  the worktree stays
  * - The hook's own time limit is in `hooks/hooks.json` (900s):  more than any install's.
  *
  * ## remove
- * - stdin `{ worktree_path, cwd, ... }`.  Runs on `ExitWorktree` `remove` (only with `discard_changes: true`), at
- *   session exit, and when an agent finishes.
- * - Never loses work:  a worktree with uncommitted changes, or whose branch has commits `main` lacks, is KEPT
- *   (exit 1 with the reason;  Claude shows stderr).  Otherwise removes the worktree and deletes its branch.
+ * - stdin `{ worktree_path, cwd, ... }`.
+ * - Runs on `ExitWorktree` `remove` (only with `discard_changes: true`), at session exit, and when an agent finishes.
+ * - Never loses work:  the worktree is KEPT (exit 1 with the reason;  Claude shows stderr) when it has
+ *   uncommitted changes, or its branch has commits `main` lacks.
+ * - Otherwise removes the worktree and deletes its branch.
  * - An agent's `<owner>-agent-<id>` counts as merged when its commits are in `main` OR in branch `<owner>`.
  * - Then removes the worktree's saved-session link, if it IS a link to the main checkout's folder.
  */
@@ -115,8 +122,8 @@ class Worktree {
 
   /**
    * Link the shared content into worktree `path`:  this plugin's `epic shared link`, run in the worktree.
-   * - only when the shared repo exists (`contentFolder` in `.epic/config.json5`):  before the cutover there's nothing
-   *   to link
+   * - only when the shared repo exists (`contentFolder` in `.epic/config.json5`):
+   *   before the cutover (epic `shared-content`) there's nothing to link
    * - its output goes to stderr (stdout is the worktree's path);  a failure is a warning
    */
   static linkShared(path, config) {
@@ -134,8 +141,9 @@ class Worktree {
   }
 
   /**
-   * Link worktree `path`'s saved-session folder to main checkout `root`'s (`SessionFolders.link()`), so its sessions
-   * save where every window's Claude panel looks (epic `epic-eject` Q4);  a folder it can't link is a warning.
+   * Link worktree `path`'s saved-session folder to main checkout `root`'s (`SessionFolders.link()`),
+   * so its sessions save where every window's Claude panel looks (epic `epic-eject` Q4).
+   * - a folder it can't link is a warning
    */
   static linkSessions(path, root) {
     try {
@@ -148,8 +156,8 @@ class Worktree {
   }
 
   /**
-   * Run the repo's `installCommand` in worktree `path`, in a shell, `installTimeout` seconds at most;  its output to
-   * stderr (stdout is the worktree's path).
+   * Run the repo's `installCommand` in worktree `path`, in a shell, `installTimeout` seconds at most.
+   * - its output goes to stderr (stdout is the worktree's path)
    * - throws, saying how to carry on, when it fails or runs out of time:  the worktree is kept, made and linked
    */
   static install(path, config) {
@@ -177,8 +185,9 @@ class Worktree {
   }
 
   /**
-   * The branch all of `branch`'s commits are in:  the base branch (`main`), else (an agent's `<owner>-agent-<id>`)
-   * `<owner>`;  else `""`.
+   * The branch all of `branch`'s commits are in, else `""`:
+   * - the base branch (`main`)
+   * - else, for an agent's `<owner>-agent-<id>`, branch `<owner>`
    */
   static mergedInto(root, branch) {
     const owner = branch.match(OWNED_AGENT)?.[1]

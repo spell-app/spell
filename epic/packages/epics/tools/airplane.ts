@@ -10,10 +10,11 @@
  *     ok    extension       Review:  Open Epic... installed
  *     note  waiting         3 marks in 2 epics, already waiting from before
  *
- * - `on` / `off`:  the switch (`AirplaneMode`, `~/.spell/airplane.json`);  the page server tells pages as it serves
- *   them, so a page reloaded after `on` says "queued for when you land"
+ * - `on` / `off`:  the switch (`AirplaneMode`, `~/.spell/airplane.json`)
+ *   - the page server tells pages as it serves them, so a page reloaded after `on` says "queued for when you land"
  * - `status [--json]` (default):  on or off, since when
- * - `check [--fix] [--json]`:  is this laptop ready to fly?  Exits 1 while anything isn't (`fixed` counts as ready)
+ * - `check [--fix] [--json]`:  is this laptop ready to fly?
+ *   Exits 1 while anything isn't (`fixed` counts as ready).
  *   - `checkout`:  run from the MAIN checkout:  its page server is the one the side bar uses on the plane
  *   - `page server`:  running;  `--fix` starts it (`spell dev server ensure`)
  *   - `offline pages`:  no docs page loads anything from the internet (`offline.ts`);
@@ -112,8 +113,9 @@ function offlineCheck(root: string, fix: boolean): FlightCheck {
 }
 
 /**
- * An installed VS Code extension knows "Review:  Open Epic...":  spell-epic's (`spellEpic.reviewView.openEpic`), or
- * the spell language extension's while it still has the Review tab (`spell.reviewView.openEpic`).
+ * An installed VS Code extension knows "Review:  Open Epic...":
+ * - spell-epic's (`spellEpic.reviewView.openEpic`)
+ * - or the spell language extension's, while it still has the Review tab (`spell.reviewView.openEpic`)
  */
 function extensionCheck(): FlightCheck {
   const name = "extension"

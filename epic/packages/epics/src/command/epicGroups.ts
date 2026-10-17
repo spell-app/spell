@@ -1,12 +1,13 @@
 /**
- * The verbs of `epic`'s groups (`GroupName`), for their help:
- * `epic ask new --help` prints that verb's usage, what it does and an example;  `epic ask --help` lists them
- * (epic `epic-workflow` P19).
+ * The verbs of `epic`'s groups (`GroupName`), for their help (epic `epic-workflow` P19):
+ * - `epic ask new --help` prints that verb's usage, what it does and an example
+ * - `epic ask --help` lists them
+ *
  * - Help only:  each group's tool or class reads its own arguments, passed through verbatim.
  *   - the tools' header comments (`packages/epics/tools/`, `scripts/window.mjs`, the page server's `cli.ts`)
  *     and the classes' (`Worktrees`, `Sessions` ...) say the same in more words:  keep them agreeing
- * - A verb not listed here is refused before the tool runs (`EpicProgram`), so each list is every verb the
- *   tool has.
+ * - A verb not listed here is refused before the tool runs (`EpicProgram`),
+ *   so each list is every verb the tool has.
  * - Lean:  data only, so `epic` starts fast.
  */
 export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
@@ -617,8 +618,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
 
 /**
  * A group of `epic`'s verbs:
- * - a docs tool or script passed through:  `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`,
- *   `server`
+ * - a docs tool or script passed through:
+ *   `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`, `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
  *   `hub` (`Hub`), `repo` (`Repos`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)

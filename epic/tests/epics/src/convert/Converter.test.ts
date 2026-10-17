@@ -1,6 +1,6 @@
 /**
- * Tests of `Converter`:  each generation of the old epic-page markup still in use, converted to `<epic-*>` markup,
- * valid and proved (`ConversionProof`), on small fixtures (`fixtures/`).
+ * Tests of `Converter`:  each generation of the old epic-page markup still in use,
+ * converted to `<epic-*>` markup, valid and proved (`ConversionProof`), on small fixtures (`fixtures/`).
  */
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"

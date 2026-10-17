@@ -1,6 +1,7 @@
 /**
- * Tests of spell-epic's VS Code extension's pure parts (`vscode/src/docUrls.ts`):  page URLs, the epic pages "Open
- * Epic..." lists, where a served URL's file is, a Claude tab's label, the bridge's registry folder.
+ * Tests of spell-epic's VS Code extension's pure parts (`vscode/src/docUrls.ts`):
+ * - page URLs, the epic pages "Open Epic..." lists, where a served URL's file is
+ * - a Claude tab's label, the bridge's registry folder
  * - Plain `node --test` (types stripped):  the extension's own code needs `vscode`, these parts don't.
  */
 import { deepEqual, equal } from "node:assert/strict"

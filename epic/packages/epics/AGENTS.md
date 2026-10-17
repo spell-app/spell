@@ -119,9 +119,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Each family drawing it imports its barrel first.
   - `links/` (`$/epics/links`) -- pointing at a saga, an epic, a phase or an item (epic `epic-workflow` P15, J32).
     - pure, node-safe at import, NOT in the `$/epics` barrel (the docs runtime imports it alone)
-    - `EpicAddress`:  a short address (`SAGA:/drawable-spell/python-target#T1`, the colon form read too)
-      or `<epic-link>`'s attributes, as the page (`sagas/<s>/<s>.saga.html`, `epics/<e>/<e>.plan.html`),
-      the `#id` and the short form a link draws
+    - `EpicAddress`:  a short address, or `<epic-link>`'s attributes,
+      as the page, the `#id` and the short form a link draws
+      - the short address:  `SAGA:/drawable-spell/python-target#T1`, the colon form read too
+      - the page:  `sagas/<s>/<s>.saga.html`, `epics/<e>/<e>.plan.html`
       - phases by number or name (`findPhase()`);  the checkout's root URL of a page
     - `PageTargets`:  what one page's DOM holds to land on (ids, titles, phases in order, its `<epic-page saga>`),
       on the browser's DOM or linkedom's
@@ -136,60 +137,72 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `list/` -- [the Epics list](../../epics/index.html), out of the page server since P16 of `people-and-orgs`:
     - `EpicState`:  an epic's state, the ONE rule every list and page draws it by
     - `EpicCards`:  the list's cards and groups, drawn alike by `spell dev docs index` and the page server
-      - each card's saga label, and the saga chips above the groups (epic `epic-workflow` P15):  the sagas come from
-        the caller (`docs index`);  `RunningEpics` takes a running card's saga from the written card's `data-saga*`
+      - each card's saga label, and the saga chips above the groups (epic `epic-workflow` P15)
+        - the sagas come from the caller (`docs index`)
+        - `RunningEpics` takes a running card's saga from the written card's `data-saga*`
       - `docs index`:  [index.js](tools/index.js)
     - `RunningEpics`:  the running epics, still in their worktrees, on the main checkout's page server
     - [runningRoutes.ts](src/list/runningRoutes.ts):  its route module
       - `GET /api/epics/running`
       - the list page's running cards, as it's served
     - `EpicState` and `EpicCards` load in plain `node` too (`docs index`):  their headers say what that forbids
-  - `config/` -- `EpicConfig`:  where a repo keeps its epic things, from ONE file, `.epic/config.json5`
-    (epic `epic-eject` P4).
-    - the keys:  the content folder, the base branch, the worktrees' folder, the install command, the window names,
-      whether session folders are linked;  each one's default is spell-app's layout before the file existed
+  - `config/` -- `EpicConfig` (epic `epic-eject` P4):
+    where a repo keeps its epic things, from ONE file, `.epic/config.json5`.
+    - the keys:
+      - the content folder, the base branch, the worktrees' folder, the install command, the window names,
+        whether session folders are linked
+      - each one's default is spell-app's layout before the file existed
     - the MAIN checkout's file, found through git's common dir (`SRV.checkoutOf()`), so every worktree reads the same
     - `epic config [key] [--json]` prints the values, for the skills (folders absolute)
-    - node only, NOT in the `$/epics` barrel (`$/epics/config/EpicConfig`);  plain `node` loads it by path too:
-      the hooks (`.claude/hooks/`) and the window script (`scripts/window.mjs`), before a worktree's `yarn install`
+    - node only, NOT in the `$/epics` barrel (`$/epics/config/EpicConfig`)
+      - plain `node` loads it by path too, before a worktree's `yarn install`:
+        the hooks ([hooks/](../../hooks/)) and the window script ([window.mjs](../../scripts/window.mjs))
       - so it reads its JSON5 itself (comments and trailing commas), not through `DataFile`, which needs `json5`
     - the page server never reads it:  the running epics' route module tells it where the worktrees are
       (`serveWorktrees()`, in the main checkout)
-    - worktrees may live beside the repo (epic `epic-eject` P8):  `worktreesFolders` is every place to look (the new
-      one, then the old `.claude/worktrees`), `worktreeFolder()` finds one in either, `newWorktreeFolder()` is where
-      a new one goes, `worktreeOnlyWindow()` picks its window's layout
-    - `SessionFolders`:  Claude Code's saved-session folders (`~/.claude/projects/<slug>`), and the link that makes a
-      worktree's main's (`linkSessionFolders`);  plain `node` loads it too (the worktree hook)
-  - `command/` -- the `epic` COMMAND itself (epic `epic-eject` P5):  `EpicProgram`, the commander tree, and a class
-    per verb group, a method per verb.
-    - `Requests` (`send`, `requests`, `file`, `home`, `merge`), `Worktrees` (`worktree`), `Sessions` (`session`),
-      `Parking` (`park`), `Stock` (`stock`), `Shared` (`shared`), with `MainMerge` (`worktree merge-main`),
-      `SharedMigration` (`shared migrate`) and `SharedRename` (`shared rename`);  `RepoInit` (`init`:  a repo set up
-      for epics, epic `epic-eject` P9)
-    - `WorktreeGuard`:  what the `SessionStart` hook (`hooks/worktree-guard.mjs`) tells a worktree's session that
-      starts outside its worktree, or in it unrecorded (epic `epic-eject` I3);  plain `node` loads it by path
+    - worktrees may live beside the repo (epic `epic-eject` P8):
+      - `worktreesFolders`:  every place to look, the new one, then the old `.claude/worktrees`
+      - `worktreeFolder()`:  finds one in either
+      - `newWorktreeFolder()`:  where a new one goes
+      - `worktreeOnlyWindow()`:  picks its window's layout
+    - `SessionFolders`:  Claude Code's saved-session folders (`~/.claude/projects/<slug>`)
+      - and the link that makes a worktree's main's (`linkSessionFolders`)
+      - plain `node` loads it too (the worktree hook)
+  - `command/` -- the `epic` COMMAND itself (epic `epic-eject` P5).
+    - `EpicProgram`, the commander tree, and a class per verb group, a method per verb:
+      - `Requests`:  `send`, `requests`, `file`, `home`, `merge`
+      - `Worktrees` (`worktree`), with `MainMerge` (`worktree merge-main`)
+      - `Sessions` (`session`), `Parking` (`park`), `Stock` (`stock`)
+      - `Shared` (`shared`), with `SharedMigration` (`shared migrate`) and `SharedRename` (`shared rename`)
+      - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
+    - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../../hooks/worktree-guard.mjs)) tells
+      a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
+      - plain `node` loads it by path
     - `EpicTools`:  the scripts it passes through (`window`, `server`, the docs tools' groups) and the `epic` tool,
       run in this process
-    - `PromptGate`:  the epic rules the `UserPromptSubmit` hook (`.claude/hooks/prompt-gate.mjs`) checks a prompt
-      against;  plain `node` loads it by path, with `command.types.ts`
+    - `PromptGate`:  the epic rules the `UserPromptSubmit` hook checks a prompt against
+      - the hook:  [prompt-gate.mjs](../../hooks/prompt-gate.mjs)
+      - plain `node` loads it by path, with `command.types.ts`
     - `Git`:  running git, and finding checkouts:  the main one, the caller's, the one this code is in
-    - ONE copy of the code:  every verb runs THIS checkout's code (the `epic` on the `PATH` is the main
-      checkout's), on the caller's checkout's data (`Git.nearestCheckout()`;  the tools get it as `EPIC_CHECKOUT`,
-      which `tools/pages.js` and `scripts/window.mjs` take as their root)
-    - the CLI package keeps only the entry (`packages/cli/src/epicMain.ts`) and the `spell dev` aliases;  this
-      folder NEVER imports `$/cli`, and loads no spell
+    - ONE copy of the code:  every verb runs THIS checkout's code, on the caller's checkout's data.
+      - the `epic` on the `PATH` is the main checkout's
+      - the caller's checkout:  `Git.nearestCheckout()`
+      - the tools get it as `EPIC_CHECKOUT`, which [pages.js](tools/pages.js) and the window script take as their root
+    - the CLI package keeps only the entry ([epicMain.ts](../cli/src/epicMain.ts)) and the `spell dev` aliases
+      - this folder NEVER imports `$/cli`, and loads no spell
     - node only, NOT in the `$/epics` barrel:  imported by path, `$/epics/command/EpicProgram`
     - its tests:  `tests/epics/src/command/`
   - `data/` -- `DataFile`:  the tooling's DATA FILES in the shared folders, as JSON5 (epic `epic-workflow` P21).
     - review inboxes, details pages' answers and drafts, choice pages' rows, running agents, the docs home's lists
       (`home.json5`, `favorites.json5`), the sagas' list, the commands page's data
-    - written keeping a comment Owen adds by hand:  spaces' `json5Edited()` (json5-writer), laid out as
-      `JSON.stringify()` would, in JSON5's JSON-compatible part (keys and text in double quotes)
-    - read by the `.json5` name first, then the old `.json`, written as `.json5` only (the old `.json` removed):
-      a checkout on older code keeps reading its files until it merges, and `epic migrate` renames the rest
-      (`json5-data-files`, and the docs tool's data files pass)
-    - node only, NOT in the `$/epics` barrel;  loads in plain `node` too (the docs tools' `details.js` ...):  it
-      imports spaces' editor by its relative path
+    - written keeping a comment Owen adds by hand:  spaces' `json5Edited()` (json5-writer)
+      - laid out as `JSON.stringify()` would, in JSON5's JSON-compatible part (keys and text in double quotes)
+    - read by the `.json5` name first, then the old `.json`;  written as `.json5` only (the old `.json` removed)
+      - a checkout on older code keeps reading its files until it merges
+      - `epic migrate` renames the rest (`json5-data-files`, and the docs tool's data files pass)
+    - node only, NOT in the `$/epics` barrel
+      - it loads in plain `node` too (the docs tools' `details.js` ...):
+        it imports spaces' editor by its relative path
   - `convert/` -- the converter, old markup => `<epic-*>` (`Converter`, `ConvertRun`).
     - A `ConversionProof` per doc:  every id, link target and word kept.
     - Every live doc was converted at the switch (P12 of epic `epic-components`).
@@ -201,14 +214,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `migrations/`:  the named, dated steps that bring an older epic page up to today's markup (`Migrations`)
       - `epic migrate` runs them, by page kind (`MigrateCommands`;  PLAN-DOC.md, "Migrations")
     - its template:  [plan.html](src/tool/templates/plan.html), in `tool/templates/`
-    - SAGA PAGES (epic `epic-workflow` P15):  `sagas/<id>/<id>.saga.html`, an epic page of kind "saga"
-      (`<epic-page kind="saga" saga="<id>">`), so every verb edits it, named `SAGA:/<id>` (`PlanDocFiles.findDoc()`)
+    - SAGA PAGES (epic `epic-workflow` P15):  an epic page of kind "saga", so every verb edits it
+      - its file:  `sagas/<id>/<id>.saga.html`, marked `<epic-page kind="saga" saga="<id>">`
+      - named `SAGA:/<id>` (`PlanDocFiles.findDoc()`)
       - made by `epic saga page <id> [--force]` (`SagaPage`) from [saga.html](src/tool/templates/saga.html):
         its Overview (the saga's purpose, Done so far, Ideas not done yet), Epics, Questions, Todos, Log;  one file
       - its Epics:  `<epic-cards saga>`, the epics whose page names the saga, drawn from the page server
         (`GET /api/epics/saga`, `SagaEpics`), asked again as epic pages change
-      - reviewed as an epic page is:  marks and comments in its own inbox beside it (`ReviewInbox.pathFor()`), the
-        review routes and comments routes take it (`SAGA_PAGE`), and its Send wakes `/epic review SAGA:/<id>`
+      - reviewed as an epic page is:
+        - marks and comments in its own inbox beside it (`ReviewInbox.pathFor()`)
+        - the review routes and comments routes take it (`SAGA_PAGE`)
+        - its Send wakes `/epic review SAGA:/<id>`
     - the page server's review routes ([reviewRoutes.ts](src/tool/reviewRoutes.ts)) and what they call:
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send or Do Now finds nobody listening
@@ -216,8 +232,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - the inboxes, one shape of comment for both (`CommentList`):
       - `ReviewInbox`:  an epic page's marks and comments
       - `GuideInbox`:  a docs page's comments and its Send (epic `epic-workflow` P13)
-    - SAGAS (P15):  `Sagas`, the shared list in Owen's order (`sagas/sagas.json5`, node only, loaded by path by the
-      docs index too), and each guide's saga meta (`guides()`, `sagaOf()`, `withSaga()`)
+    - SAGAS (P15):  `Sagas`
+      - the shared list in Owen's order, `sagas/sagas.json5`:  node only, loaded by path by the docs index too
+      - each guide's saga meta:  `guides()`, `sagaOf()`, `withSaga()`
       - `SagaCommands`:  `epic saga list | set | new | move | title | rename | page`
       - `epicRoutes`' `GET /api/epics/pages` answers the epic's saga too (`<epic-page>`'s meta line)
     - `SeeAlso` (P13):  an epic's See Also, GATHERED from its files, never kept by hand
@@ -232,8 +249,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - read by:
         - the link check (`epic check`, the docs tools' `doc-links.js --check`:  `problemsIn()`)
         - the openers (`spell dev docs link SAGA:/...`)
-        - the page server:  [linkRoutes.ts](src/tool/linkRoutes.ts), `GET /api/epics/target` (`<epic-link>`'s title
-          and short form) and the typed `/saga/<saga>[/<epic>]`
+        - the page server:  [linkRoutes.ts](src/tool/linkRoutes.ts)
+          - `GET /api/epics/target`:  `<epic-link>`'s title and short form
+          - the typed `/saga/<saga>[/<epic>]`
     - The old hand-written prose shapes have ONE set of rules, `ProseShapes`:
       a `Net effect` paragraph, a code accordion, an option grid ...
       - `ProseRewrite` turns them into elements,
@@ -280,8 +298,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [The barrel's test](../../tests/epics/components/index.test.tsx) checks every class the barrel exports.
 - The tooling's data files are JSON5, read and written through `DataFile` (`$/epics/data/DataFile`, see "Overview"):
   never `JSON.parse()` / `JSON.stringify()` on one, which would refuse or drop Owen's comments.
-  - A new one:  `<name>.json5`, its path given to `DataFile`;  a browser reader drops comments before `JSON.parse()`
-    (`commands.js`' `parseData()`).
+  - A new one:  `<name>.json5`, its path given to `DataFile`.
+  - A browser reader drops comments before `JSON.parse()` (`commands.js`' `parseData()`).
 - A change to epic page markup adds its MIGRATION STEP in the SAME commit (epic `epic-workflow` P8).
   - epic page markup:  what the tool writes, or what an element reads
   - the step:  a class in [migrations/](src/tool/migrations/), last in `Migrations.all`, with its test
@@ -463,15 +481,17 @@ The shared folders:
     - SAGAS (epic `epic-workflow` P15):  each card names its saga, a small label
       (the saga's title, its purpose the tooltip).
       - Above the groups, a row of SAGA CHIPS, one per saga in Owen's order, then "No saga", each with its count.
-      - A click shows only that saga's epics, by the state chips' rule (`nextShown()`):  the runtime's
-        `wireSagaChips()`;  remembered in this browser (`spell-epics-sagas`), for every Epics page.
+      - A click shows only that saga's epics, by the state chips' rule (`nextShown()`).
+        - the runtime's `wireSagaChips()`
+        - remembered in this browser (`spell-epics-sagas`), for every Epics page
       - The groups count only the cards that show.
-      - `$/epics/list/EpicCards` draws both (`epicSagaHtml()`, `epicSagaChipsHtml()`), the sagas passed in by
-        `docs index`;  each card carries its saga in `data-saga*` attributes, for the page server.
+      - `$/epics/list/EpicCards` draws both (`epicSagaHtml()`, `epicSagaChipsHtml()`).
+        - the sagas passed in by `docs index`
+        - each card carries its saga in `data-saga*` attributes, for the page server
     - The docs' home page's Epics count is by the same groups:
       `2 favorites · 5 active · 2 planning · 17 urgent · 7 done`.
-  - The GUIDES page (epic `epic-workflow` P15):  a section per saga, in Owen's order,
-    each headed by the saga's title linking its saga page (made or not yet), its purpose under it;  then "Misc", last.
+  - The GUIDES page (epic `epic-workflow` P15):  a section per saga, in Owen's order, then "Misc", last.
+    - Each is headed by the saga's title linking its saga page (made or not yet), its purpose under it.
     - A guide names its saga in its head, right after its description meta:
       `<meta name="spell-saga" content="<id>">` (`Sagas.withSaga()` writes it, `sagaOf()` reads it).
     - None, or a saga not in the list:  Misc.  `docs index` prints both kinds.
@@ -514,12 +534,14 @@ The shared folders:
 
 In `tools/`:
 - `_assets/`:  shared page assets.
-  - Pages load them from the epic server's ENGINE ROUTE, `/_epic/assets/<file>` (and the pack from `/_epic/pack/`),
-    the same for every repo:  one engine per machine (epic `epic-eject` P7;  `$/epics/server`, `EpicServer`).
-    - Before P7, from the checkout's root, `<up>packages/epics/tools/_assets/`:  the migration step
-      `engine-asset-routes` moves a page over (both registries:  `EngineAssetRoutes`, and `migrate.js`'s `STEPS`).
-    - A page not migrated yet still loads THIS engine's files on the epic server:  it serves the old paths from the
-      routes (`legacyEnginePath()`).
+  - Pages load them from the epic server's ENGINE ROUTE, the same for every repo:  one engine per machine.
+    - `/_epic/assets/<file>`, and the pack from `/_epic/pack/`
+    - epic `epic-eject` P7;  `$/epics/server`, `EpicServer`
+    - Before P7, from the checkout's root:  `<up>packages/epics/tools/_assets/`.
+      - The migration step `engine-asset-routes` moves a page over.
+      - Both registries list it:  `EngineAssetRoutes`, and `migrate.js`'s `STEPS`.
+    - A page not migrated yet still loads THIS engine's files on the epic server:
+      it serves the old paths from the routes (`legacyEnginePath()`).
     - From `file://`, `check-spell.js` answers the routes from the engine's folders (`engineFileFor()`).
   - `spell-doc.css`:  page layout, and what UI doesn't cover.
     It reaches into widgets via UI tokens and `::part()`.
@@ -915,14 +937,14 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - How to write one:  [the epic-page notes](../../templates/epics/plan-doc.md).
 - [details.html](../../templates/details.html):  a details page.
   - NEVER copy by hand:  `epic ask new <slug>`.
-  - The tool reads its OWN copy since epic `epic-workflow` P12:  [tools/templates/details.html](tools/templates/details.html).
+  - The tool reads [its OWN copy](tools/templates/details.html) since epic `epic-workflow` P12.
     - tracked with each branch, as the elements it's written in are
     - The shared one becomes a copy of it when the migration step `answer-elements` runs
       (see "Scripts", `migrate.js`).
 - [syntax-choices.html](../../templates/syntax-choices.html):  a choice page.
   - `syntax-choices.rows.json5` beside it is a small working example.
   - NEVER copy by hand:  `epic choices new <slug> --rows <rows.json5>`.
-  - The tool's own copy, as details.html's:  [tools/templates/syntax-choices.html](tools/templates/syntax-choices.html).
+  - The tool reads [its own copy](tools/templates/syntax-choices.html), as it does details.html's.
 - [review.html](../../templates/review.html), "Review":  a review page, going through a finished run's calls.
   - one question each (keep, change, talk over), then "Where first?"
   - saved from `ui-docs-rework`'s morning review, as the model
@@ -933,8 +955,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - Parked with goals:  `spell dev goals new-set` / `new` filled them.
     A copy is in [goals.zip](../goals.zip).
   - The rules:  [goals' AGENTS.md](../../goals/AGENTS.md), at the repo root.
-- [spell-ui-docs.html](../../templates/spell-ui-docs.html):  a components page (one element's), for Spell UI's set
-  ([its docs](../ui/docs/)).
+- [spell-ui-docs.html](../../templates/spell-ui-docs.html):  a components page (one element's),
+  for Spell UI's set ([its docs](../ui/docs/)).
   - Fomantic's docs layout in `<ui-*>` widgets:
     nav, masthead, Examples / Usage / API / Theming tabs, an "On this page" rail.
   - It loads the UI site's bundle, NOT `spell-ui.js`.
@@ -1094,8 +1116,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `draft` prints what Owen typed and hasn't sent (below):  read it before rewriting a page he may have open.
 - Written in the epics pack's `<epic-*>` elements (epic `epic-workflow` P12), so a question reads as an epic page's.
   - Each element has its page in Epic UI (`/components/epics/`, "Pages Owen answers on").
-  - a question:  a `<ui-section id>` holding an `<epic-ask>` of an `<epic-question>` and an `<epic-choices>`
-    of `<epic-option>`s
+  - a question:  a `<ui-section id>` holding an `<epic-ask>`
+    - the `<epic-ask>` holds an `<epic-question>`, and an `<epic-choices>` of `<epic-option>`s
     - the section's id is its answer's key
   - the boxes Owen types in:  `<epic-text-box>`es
     - the notes, a section's comment
@@ -1103,11 +1125,11 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - Send:  `<epic-send>`, in the sticky page header
   - what they hold and send:  the page's `AnswerForm` (`$/epics/answers`)
   - The tools build them as elements, never markup in strings ([answerPages.js](tools/answerPages.js)).
-    - the template:  the tool's own, [tools/templates/details.html](tools/templates/details.html)
+    - the template:  [the tool's own](tools/templates/details.html)
   - Before P12:  `ui-section.spell-question` > `.spell-option`, which a page script (`_assets/details.js`, gone) drew.
     - The migration step `answer-elements` converts such a page once ([to-answer-elements.js](tools/to-answer-elements.js)).
-- Owen's answer:  the page posts it to the page server's route module, [detailsRoutes.ts](tools/detailsRoutes.ts)
-  (`POST /api/docs/details/answer`).
+- Owen's answer:  the page posts it to the page server's route module (`POST /api/docs/details/answer`).
+  - The module:  [detailsRoutes.ts](tools/detailsRoutes.ts).
   - That writes `<slug>.answer.json5`, beside the page (`SRV.FileOperations.save()`).
   - `epic ask wait`, run in the background, exits with it, and so wakes the session.
 - What he typed and hasn't sent is a DRAFT (epic `epic-workflow` P18).

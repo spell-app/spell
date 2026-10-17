@@ -1,6 +1,7 @@
 /**
  * Tests of the comments route module on a real page server, over HTTP, in a scratch checkout:
- * comments added, edited and deleted on a guide, the home page and a worktree's page, and the pages that take none.
+ * - comments added, edited and deleted on a guide, the home page and a worktree's page
+ * - the pages that take none
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -63,7 +64,8 @@ const ON_TABLE = { anchor: "model#table-2", kind: "table", label: "1. The model"
 beforeAll(async () => {
   root = mkdtempSync(join(tmpdir(), "comments-routes-"))
   mkdirSync(join(root, ".git"))
-  // a Send may WAKE its epic (P16):  Claude's sessions, VS Code's windows and airplane mode are a scratch folder's,
+  // a Send may WAKE its epic (P16):
+  // Claude's sessions, VS Code's windows and airplane mode are a scratch folder's,
   // so a test can never type into a real session or open a real window
   mkdirSync(join(root, ".home/sessions"), { recursive: true })
   mkdirSync(join(root, ".home/windows"))
@@ -167,7 +169,8 @@ test("a docs page's SEND:  its epic, who is listening, what waits;  Send marks t
   ).toBe(403)
 })
 
-// epic `epic-workflow` I12:  a guide's Send wakes its epic as an epic page's does (P16), when nobody listens
+// epic `epic-workflow` I12:  a guide's Send wakes its epic when nobody listens,
+// as an epic page's does (P16)
 test("Send with nobody listening wakes the page's epic, and says what that did;  a listener:  no wake", async () => {
   const page = "/guides/py.html"
   ReviewInbox.update(join(root, "epics/py/py.inbox.json5"), (box) => box.setListening(null))
@@ -175,7 +178,8 @@ test("Send with nobody listening wakes the page's epic, and says what that did; 
   const answer = JSON.parse(
     (await ask(port, "POST", "/api/docs/comments/send", { body: JSON.stringify({ page }), headers: headers() })).text
   )
-  // no session, no window in the scratch folder:  nothing could be typed;  the page is told what to type
+  // no session, no window in the scratch folder:  nothing could be typed;
+  // the page is told what to type
   expect(answer.wake).toMatchObject({ command: "/epic review py" })
   expect(answer.wake.message).toEqual(expect.any(String))
 })

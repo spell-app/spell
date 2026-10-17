@@ -12,11 +12,12 @@ Owen has lost the thread:  hand it back in one screen.
 
 ## 1. Arguments
 
-- `$ARGUMENTS` holds an optional `<name>`, and an optional `?` (alone, or stuck to the name:  `seo?`).
+- `$ARGUMENTS` holds an optional name, and an optional `?`.
+  - The `?` stands alone, or stuck to the name:  `seo?`.
 - `?`, or Owen typed `wtf?` without the slash:  ASK mode (step 4).
 - No `<name>`:  THIS session.
 - `<name>`:  the plan or isolate session of that name.
-  - worktree `<name>` (`epic worktree path <name>`), branch `<name>`
+  - worktree and branch `<name>`;  its folder:  `epic worktree path <name>`
   - epic page `epics/<name>/`
   - a session renamed `<name>`
   - Nothing by that name:  say so in one line, list the names that do exist (worktrees, epic pages), and stop.
@@ -41,12 +42,12 @@ Owen has lost the thread:  hand it back in one screen.
   - `git log --oneline main..HEAD` (a worktree), or the session's own commits (`main`)
 - Epic page, if any:  the session's `/epic <name>`.
   Else the worktree's name, if `epic list` has it;  else one the session wrote to.
-  - ONE shared doc, in `epics/<name>/` of every checkout (a link into `../spell-app-dev`).
+  - ONE shared doc, in `epics/<name>/` of every checkout (a link into the content folder).
   - A branch from before 2026-10-02 still has it under `plans/<name>/`.
   - `epic summary <name> --json`:
     phases with status, next phase, open questions / issues / caveats / todos
   - its links:  `epic pages link <ABSOLUTE path> --hash <id>`:  the side bar link, then `• 🌐` (browser)
-- `/bedtime` run:  `epic summary <name> --json`, `bedtime`.
+- A `/bedtime` run:  the summary's `bedtime` field (`epic summary`, above).
   - The phases it's running (`P3-P6`) while it goes;  `null` once it's over.
   - What it decided shows red in the doc (judgement calls, issues).
     `/epic review <name>` goes through them.
@@ -58,8 +59,9 @@ Owen has lost the thread:  hand it back in one screen.
 
 Plain words, no jargon;  coined names defined in a few words.
 - Every plan item named is a link:
-  - the epic page's URL, plus its id, lower-case:  `<url>#q1`, `<url>#i3`;  a phase's stable id, `<url>#p-short-name`
-    (`epic summary <name> --json`), or its number, `<url>#p2`, which lands on P2
+  - the epic page's URL, plus its id, lower-case:  `<url>#q1`, `<url>#i3`
+  - a phase:  its stable id, `<url>#p-short-name`, from `epic summary <name> --json`
+    - or its number, `<url>#p2`, which lands on P2
   - text as the doc shows it:  `P2 · Short Name`, `Q1`
 - Sections with nothing in them are left out.
 - For `<name>`, the first line says which session:  its name, id, running / idle / waiting / not running.

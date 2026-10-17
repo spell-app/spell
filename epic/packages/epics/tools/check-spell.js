@@ -151,8 +151,9 @@ process.exit(problems.length ? 1 : 0)
 
 /**
  * Where to load `file` from:  `file://`, or the page server for a page that needs one.
- * - a page whose `<body>` says `data-spell-needs-server` (the `commands` template:  it fetches its JSON) loads from
- *   this checkout's page server, started if need be;  a server that won't start is a problem, and `file://` is used
+ * - a page whose `<body>` says `data-spell-needs-server` loads from this checkout's page server,
+ *   started if need be (the `commands` template:  it fetches its JSON)
+ * - a server that won't start is a problem, and `file://` is used
  */
 function pageUrl(file) {
   const local = pathToFileURL(resolve(file)).href
@@ -268,14 +269,16 @@ async function checkFold(page) {
 }
 
 /**
- * The ITEM LINE check (epic pages, epic `windows-and-review` Q6):  an open item's line sticks right under its
- * section's stuck title while its details are read.
- * - target:  the first `<epic-item>` with details (`source`, or children of its own) in a top-level item section;
- *   its section and it opened, its part loaded;  details shorter than two windows get filler paragraphs
- *   (`p[data-check-filler]`), and `main` room below, so the page can scroll anywhere in them
+ * The ITEM LINE check (epic pages, epic `windows-and-review` Q6):
+ * an open item's line sticks right under its section's stuck title while its details are read.
+ * - target:  the first `<epic-item>` with details (`source`, or children of its own) in a top-level item section
+ *   - its section and it opened, its part loaded
+ *   - details shorter than two windows get filler paragraphs (`p[data-check-filler]`), and `main` room below,
+ *     so the page can scroll anywhere in them
  * - scrolled to the middle of its details:  its line's top within 2px of its section's stuck title's bottom
  * - `shot`:  a screenshot of the stuck state, when given
- * - returns `{ target, line, under }`, or `{ target: null }` on a page without plan items;  records problems
+ * - returns `{ target, line, under }`, or `{ target: null }` on a page without plan items
+ * - records problems
  * - SIDE EFFECT:  a reload afterwards drops the filler and the room
  */
 async function checkItemLine(page, shot) {
@@ -334,8 +337,10 @@ function lengthenItem(id) {
 }
 
 /**
- * In the page, scrolled to the middle of item `id`'s details:  where its line is (`line`), and where its section's
- * stuck title ends (`under`):  the title of the `<ui-section>` the section draws in its shadow root.
+ * In the page, scrolled to the middle of item `id`'s details:
+ * - `line`:  where its line is
+ * - `under`:  where its section's stuck title ends
+ *   (the title of the `<ui-section>` the section draws in its shadow root)
  */
 function itemStuck(id) {
   const item = document.getElementById(id)
@@ -348,8 +353,10 @@ function itemStuck(id) {
 }
 
 /**
- * The section the fold check works on:  `{ id, kind }` (`ui-section`;  `epic` for an epic page's top-level block;
- * `section` for the old markup's h2 id).
+ * The section the fold check works on:  `{ id, kind }`, its kind
+ * - `ui-section`
+ * - `epic` for an epic page's top-level block
+ * - `section` for the old markup's h2 id
  */
 function foldTarget() {
   // one with content to hide, open to start with, if there is one
@@ -501,9 +508,10 @@ function openBiggestSection() {
 }
 
 /**
- * Scroll into the middle top-level section (`main > ui-section` or a Spell UI-shaped page's article's, an epic page's
- * top-level block, or `section.s2`),
- * part way down, and return its id (the h2's, for `section.s2`) and what it is.
+ * Scroll part way down into the middle top-level section,
+ * and return its id (the h2's, for `section.s2`) and what it is.
+ * - the sections:
+ *   `main > ui-section` or a Spell UI-shaped page's article's, an epic page's top-level block, or `section.s2`
  * - only sections that can scroll up to the top:  a short page's last section never sticks
  */
 function scrollToMiddleSection() {
@@ -589,8 +597,8 @@ function stuckAndActive({ id, nav }) {
 }
 
 /**
- * Whether the page's toolbar is shown inside the phone viewport:  stuck in the top half of the window (the page is
- * scrolled mid-way), no wider than it;  where it is, how big.
+ * Whether the page's toolbar is shown inside the phone viewport, and where it is, how big.
+ * - shown:  stuck in the top half of the window (the page is scrolled mid-way), no wider than it
  */
 function navOnScreen(nav) {
   const element = document.querySelector(nav)

@@ -1,8 +1,8 @@
 /**
  * The doc views:  docs pages, live from their page server, docked in the RIGHT side bar
  * (VS Code's secondary side bar), beside the editor AND the Claude tab, instead of taking an editor column.
- * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's:  its own view and command ids
- * (`spellEpic.*`), so both extensions run side by side.
+ * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's:
+ * its own view and command ids (`spellEpic.*`), so both extensions run side by side.
  * Two of them, each in its own view container, so the side bar shows them as two tabs, each keeping its own page:
  * - "Epic Docs" (`spellEpic.docView`, a book):  where `DocPreview` shows pages by default
  *   (`spellEpic.docPreview.location`:  `sidebar`):  `/spell-docs`, `epic open`
@@ -91,20 +91,20 @@ const VIEWS: Record<DocViewName, { id: string; empty: string }> = {
 declare const ENGINE_ROOT: string
 
 /**
- * spell-epic's `epic` command, from the checkout this extension was built from:  `restartServer()` runs
- * `epic hub stop` / `ensure` with it, for the epic server.
+ * spell-epic's `epic` command, from the checkout this extension was built from:
+ * `restartServer()` runs `epic hub stop` / `ensure` with it, for the epic server.
  */
 const ENGINE_EPIC = `node ${JSON.stringify(join(ENGINE_ROOT, "bin", "epic"))}`
 
 /**
- * A checkout's own `epic` command, run from its root:  `restartServer()` runs it in a shell for a CHECKOUT's page
- * server (spell-app's, epic `epic-eject` P5).
+ * A checkout's own `epic` command, run from its root:
+ * `restartServer()` runs it in a shell for a CHECKOUT's page server (spell-app's, epic `epic-eject` P5).
  */
 const EPIC = "node packages/cli/bin/epic.mjs"
 
 /**
- * The same checkout's `spell` CLI:  `spell dev server`, for a checkout from before `epic server` (P5), which has no
- * such verb.
+ * The same checkout's `spell` CLI, for `spell dev server`:
+ * a checkout from before `epic server` (P5) has no such verb.
  * - TODO:  drop it once every worktree has merged P5
  */
 const SPELL = "node packages/cli/bin/spell.mjs"
@@ -113,8 +113,9 @@ const SPELL = "node packages/cli/bin/spell.mjs"
 const COMMANDS = ["back", "forward", "reload", "restartServer", "openExternal"] as const
 
 /**
- * The right-click menu's items, `spellEpic.docMenu.<name>`:  one command each for both views, listed in `package.json`
- * (`webview/context`);  VS Code passes each the menu's context, whose `webview` says which view (`menuItem()`).
+ * The right-click menu's items, `spellEpic.docMenu.<name>`:
+ * one command each for both views, listed in `package.json` (`webview/context`).
+ * - VS Code passes each the menu's context, whose `webview` says which view (`menuItem()`)
  */
 const MENU = ["cut", "copy", "paste", "selectAll", "back", "forward", "reload", "openExternal", "inspect"] as const
 
@@ -192,11 +193,12 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * The Inspect and Show Console buttons, on both views' title bars:  open the developer tools that hold the page,
-   * and close them on the next click (Owen, 2026-10-10:  "can't close the browser console pane, no (x)").
-   * - VS Code's "Developer:  Toggle Developer Tools" (`workbench.action.toggleDevTools`):  the window's tools, the
-   *   same ones "Open Webview Developer Tools" opens in desktop VS Code (`webviewCommands.ts` calls
-   *   `nativeHostService.openDevTools()`), but it closes them too
+   * The Inspect and Show Console buttons, on both views' title bars:
+   * open the developer tools that hold the page, and close them on the next click
+   * (Owen, 2026-10-10:  "can't close the browser console pane, no (x)").
+   * - VS Code's "Developer:  Toggle Developer Tools" (`workbench.action.toggleDevTools`):
+   *   the window's tools, the same ones "Open Webview Developer Tools" opens in desktop VS Code
+   *   (`webviewCommands.ts` calls `nativeHostService.openDevTools()`), but it closes them too
    * - both open the SAME tools, on the tab last used:  neither command takes a tab or mode
    *   - so each button's tooltip says what to pick next:  the element picker (Cmd + Shift + C), or the Console tab
    *     and the page's frame (`127.0.0.1`) in its context menu
@@ -210,10 +212,11 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Pick an epic from a list, and show its epic page in the "Review" tab:  no terminal needed (epic `airplane` P4,
-   * for reviewing with no Claude, on a plane).
-   * - the epics:  every `epics/<name>/<name>.plan.html` of every registered repo (`RepoList`), and of the window's
-   *   first folder (the repo root) when it's none of theirs;  most recently changed first, each by its title
+   * Pick an epic from a list, and show its epic page in the "Review" tab:
+   * no terminal needed (epic `airplane` P4, for reviewing with no Claude, on a plane).
+   * - the epics:  every `epics/<name>/<name>.plan.html` of every registered repo (`RepoList`),
+   *   and of the window's first folder (the repo root) when it's none of theirs
+   * - most recently changed first, each by its title
    * - from ANY window:  the repos are the machine's, not the window's
    */
   static async pickEpic(): Promise<void> {
@@ -235,8 +238,9 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * The repos whose epics "Open Epic..." lists:  every registered one (`~/.spell-epic/repos.json5`), then the window's
-   * first folder (its content in place:  its `epics/` link), each `{ name, content }`.
+   * The repos whose epics "Open Epic..." lists, each `{ name, content }`:
+   * - every registered one (`~/.spell-epic/repos.json5`)
+   * - then the window's first folder (its content in place:  its `epics/` link)
    * - NEVER throws:  a list that won't read counts as none
    */
   static repos(): { name: string; content: string }[] {
@@ -254,9 +258,10 @@ export class DocView implements vscode.WebviewViewProvider {
   static showFile: ((file: string, view: DocViewName) => Promise<void>) | undefined
 
   /**
-   * An edit command, done IN the page (epic `windows-and-review` I2).  Why:  VS Code's own Copy, Paste, Select All,
-   * Undo ... (its keys and menus) reach a focused webview as `document.execCommand(<command>)` on the VIEW's
-   * document, never the page framed in it;  the view's script catches that call (`html()`) and sends it here.
+   * An edit command, done IN the page (epic `windows-and-review` I2).
+   * - why:  VS Code's own Copy, Paste, Select All, Undo ... (its keys and menus) reach a focused webview
+   *   as `document.execCommand(<command>)` on the VIEW's document, never the page framed in it
+   * - the view's script catches that call (`html()`) and sends it here
    * - copy / cut:  the page sends back its selection (`{ spell: "clipboard", text }`), which goes on the clipboard here
    *   (the page can't:  copying needs a key press IN it);  cut then deletes it there
    * - paste:  the clipboard's text, sent in, typed where the caret is
@@ -294,10 +299,11 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Show the home page, in the "Epic Docs" view, or in `view`:  the Home button on both views' title bars, right of
-   * Reload (epic `epic-workflow` r2).
-   * - a FRESH view (`rebuild()`), not a navigation:  a page that stopped responding ignores the view's messages, so
-   *   Home is the way back from it (Owen, 2026-10-12:  "spell doc's page is wedged")
+   * Show the home page, in the "Epic Docs" view, or in `view`:
+   * the Home button on both views' title bars, right of Reload (epic `epic-workflow` r2).
+   * - a FRESH view (`rebuild()`), not a navigation:
+   *   a page that stopped responding ignores the view's messages, so Home is the way back from it
+   *   (Owen, 2026-10-12:  "spell doc's page is wedged")
    */
   static async goHome(view: DocViewName = "docs"): Promise<void> {
     const url = await DocView.home?.()
@@ -362,10 +368,11 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Rebuild the view from scratch:  new html, so a new iframe, at the page in view (fresh `?t=` stamp), or at `to`;
-   * resolves to that URL, `undefined` when the view hasn't been shown yet (nothing to rebuild).
-   * - for a view gone wrong in a way a reload doesn't fix (clicks no longer reaching the page, PAPERCUTS `vscode`,
-   *   2026-10-06):  `epic window reload-view`.  The reload button only navigates the SAME iframe.
+   * Rebuild the view from scratch:  new html, so a new iframe, at the page in view (fresh `?t=` stamp), or at `to`.
+   * - resolves to that URL, `undefined` when the view hasn't been shown yet (nothing to rebuild)
+   * - `epic window reload-view`:  for a view gone wrong in a way a reload doesn't fix
+   *   (clicks no longer reaching the page, PAPERCUTS `vscode`, 2026-10-06)
+   *   - the reload button only navigates the SAME iframe
    * - NOT a fix for pages stuck on their placeholders (6 docs pages holding every connection to a host):
    *   live reload moved to websockets for that (`packages/server/src/webSocket.ts`)
    */
@@ -381,15 +388,16 @@ export class DocView implements vscode.WebviewViewProvider {
 
   /**
    * Restart the page server behind the page in view, then show the same page from it again.
-   * - the epic server (its `/api/server` says `epicServer`):  `epic hub stop`, then `epic hub ensure`, with the `epic`
-   *   of the spell-epic checkout this extension was built from (`ENGINE_EPIC`)
+   * - the epic server (its `/api/server` says `epicServer`):
+   *   `epic hub stop`, then `epic hub ensure`, with the `epic` of the spell-epic checkout this extension was built from
+   *   (`ENGINE_EPIC`)
    * - a checkout's page server:  which checkout, the server's own `/api/server` says (`root`)
    * - runs `epic server stop`, then `epic server ensure`, in a LOGIN shell (`$SHELL -lc`):
    *   a GUI VS Code's own `PATH` may have no `node`
-   *   - a checkout from before `epic server` (epic `epic-eject` P5):  `spell dev server stop` / `ensure` instead,
-   *     when `epic` refuses the verb
-   * - that checkout's own command (`node packages/cli/bin/epic.mjs`), never the `epic` on `PATH`:  the page server
-   *   is per checkout, and `epic server` runs the caller's copy of it
+   *   - a checkout from before `epic server` (epic `epic-eject` P5):
+   *     `spell dev server stop` / `ensure` instead, when `epic` refuses the verb
+   * - that checkout's own command (`node packages/cli/bin/epic.mjs`), never the `epic` on `PATH`:
+   *   the page server is per checkout, and `epic server` runs the caller's copy of it
    * - its port may change (a worktree's server takes any free one):  the page comes back on the new `base`
    */
   async restartServer(): Promise<void> {
@@ -458,8 +466,9 @@ export class DocView implements vscode.WebviewViewProvider {
   async remembered(): Promise<string | undefined> {
     const url = DocView.memory?.get<string>(`${this.id}.page`)
     if (!url) return undefined
-    // a page server restarting (`spell dev server ensure` after a merge) is back in a few seconds:  wait for it
-    // rather than forget the page (Owen, 2026-10-10:  "reloading either of those tabs forgets what page was shown")
+    // a page server restarting (`spell dev server ensure` after a merge) is back in a few seconds:
+    // wait for it rather than forget the page
+    // (Owen, 2026-10-10:  "reloading either of those tabs forgets what page was shown")
     for (let tries = 0; tries < REMEMBER_TRIES; tries++) {
       if (await serverRoot(new URL(url).origin)) return url
       await new Promise((done) => setTimeout(done, REMEMBER_WAIT_MS))
@@ -468,10 +477,11 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * The view's wrapper (re)loaded, showing `shown` (its frame's URL, `null` with no frame):  if that isn't the page
-   * this view should show, point it there.
-   * - why:  VS Code may rebuild a view's wrapper from the html it was FIRST given (a webview reload, the view moved or
-   *   re-made), which names the page the view first opened with, not the one in view since
+   * The view's wrapper (re)loaded, showing `shown` (its frame's URL, `null` with no frame):
+   * if that isn't the page this view should show, point it there.
+   * - why:  VS Code may rebuild a view's wrapper from the html it was FIRST given
+   *   (a webview reload, the view moved or re-made),
+   *   which names the page the view first opened with, not the one in view since
    * - the page:  the one last in view (`here`), else the one remembered for this window (`remembered()`)
    */
   async restore(shown: string | null | undefined): Promise<void> {
@@ -588,9 +598,9 @@ export class DocView implements vscode.WebviewViewProvider {
   /**
    * A link the page couldn't follow in the frame (see `followInFrame()` in `liveClient.ts`):
    * - `external`:  in the browser
-   * - `file`:  a file on the page server, opened in the editor;  a folder, revealed in the Explorer.  Where:  the
-   *   server's `/api/server` says (`fileForPath()`):  the epic server's repos and engine, or a checkout's root and the
-   *   folder its `/worktrees/<w>/` serves
+   * - `file`:  a file on the page server, opened in the editor;  a folder, revealed in the Explorer
+   *   - where:  the server's `/api/server` says (`fileForPath()`):
+   *     the epic server's repos and engine, or a checkout's root and the folder its `/worktrees/<w>/` serves
    */
   static async open({ url, kind }: OpenLink): Promise<void> {
     if (!url) return
@@ -628,8 +638,9 @@ async function serverRoot(origin: string): Promise<string | undefined> {
 }
 
 /**
- * What the page server at `origin` says of itself (`/api/server`):  the epic server's engine and repos, or a
- * checkout's root and the folder its `/worktrees/<w>/` serves;  `undefined`:  not a page server.
+ * What the page server at `origin` says of itself (`/api/server`):
+ * the epic server's engine and repos, or a checkout's root and the folder its `/worktrees/<w>/` serves.
+ * - `undefined`:  not a page server
  */
 async function serverInfo(origin: string): Promise<ServerInfo | undefined> {
   return fetch(`${origin}/api/server`, { signal: AbortSignal.timeout(2000) })
@@ -674,7 +685,7 @@ type EditCommand = { spell: "edit"; command: "copy" | "cut" | "paste" | "selectA
 type Clipboard = { spell: "clipboard"; text?: string }
 
 /**
- * What VS Code passes a right-click menu item:  the frame's `data-vscode-context` (`rightClick()` in `html()`), and the
- * view's id, `webview`.
+ * What VS Code passes a right-click menu item:
+ * the frame's `data-vscode-context` (`rightClick()` in `html()`), and the view's id, `webview`.
  */
 type MenuContext = { webview?: string; spellField?: boolean; spellSelection?: boolean }

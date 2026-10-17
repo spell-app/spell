@@ -6,26 +6,29 @@ import { EpicConfig } from "../config/EpicConfig.ts"
 
 /****************
  * ### `WorktreeGuard`
- * Brings a worktree's session back into its worktree when it starts somewhere else (epic `epic-eject` I3):  the
- * rules the `SessionStart` hook (`hooks/worktree-guard.mjs`) runs.  A thin hook, as the prompt gate's.
+ * Brings a worktree's session back into its worktree when it starts somewhere else (epic `epic-eject` I3).
+ * These are the rules the `SessionStart` hook (`hooks/worktree-guard.mjs`) runs:  a thin hook, as the prompt gate's.
  *
- * Why:  a reopened session goes back into its worktree only when its transcript holds a "worktree" note
- * (`worktree-state`), which Claude Code writes when a session ENTERS a worktree with `EnterWorktree`.  Otherwise
- * it works in whatever folder the tab got:  the window's first folder, often the main checkout.  So real branch work,
- * reopened from the wrong window, would land on `main`.  The Claude panel's own reopen can't be fixed from here (it
- * marks only `.claude/worktrees/<name>` folders), and a hook can't move a session:  it can only tell Claude.
+ * Why:  a reopened session goes back into its worktree only when its transcript holds a "worktree" note.
+ * - the note (`worktree-state`) is what Claude Code writes when a session ENTERS a worktree with `EnterWorktree`
+ * - without it, the session works in whatever folder the tab got:  the window's first folder, often the main checkout
+ * - so real branch work, reopened from the wrong window, would land on `main`
+ * - the Claude panel's own reopen can't be fixed from here (it marks only `.claude/worktrees/<name>` folders),
+ *   and a hook can't move a session:  it can only tell Claude
  *
  * What it tells Claude (`check()`), on a start-up or a resume, in a repo that uses epics (`.epic/config.json5`):
- * 1. LOST:  the transcript's last worktree note names a worktree that still exists, but the session's folder is
- *    outside it.  Claude is told to `EnterWorktree` back into it before anything else.
+ * 1. LOST:  the transcript's last worktree note names a worktree that still exists,
+ *    but the session's folder is outside it.
+ *    Claude is told to `EnterWorktree` back into it before anything else.
  *    - a session that LEFT on purpose (`ExitWorktree`) has a last note of `null`:  nothing said
- * 2. NOT RECORDED:  the session's folder is in a worktree BESIDE the repo (`../spell-app.worktrees/<name>`, a
- *    worktree-only window's new tab), and no worktree note names it.  Claude is told to `EnterWorktree` the folder
- *    it's already in, so Claude Code records it, and a reopen from any window comes back there.
+ * 2. NOT RECORDED:  the session's folder is in a worktree BESIDE the repo
+ *    (`../spell-app.worktrees/<name>`, a worktree-only window's new tab), and no worktree note names it.
+ *    Claude is told to `EnterWorktree` the folder it's already in,
+ *    so Claude Code records it, and a reopen from any window comes back there.
  *    - a worktree nested in the checkout doesn't need it:  the panel hands such a session its folder itself
  * - Its answer is the hook's JSON:  `additionalContext` for Claude, `systemMessage` a line for Owen.
- * - Its position:  node's own modules and `EpicConfig` by path, so plain `node` loads it;  NEVER an alias, an
- *   `enum` or a parameter property.
+ * - Its position:  node's own modules and `EpicConfig` by path, so plain `node` loads it.
+ *   NEVER an alias, an `enum` or a parameter property.
  ****************/
 export class WorktreeGuard {
   /**
@@ -65,9 +68,10 @@ export class WorktreeGuard {
   }
 
   /**
-   * The LAST worktree note in transcript `file` (`{"type":"worktree-state","worktreeSession":{...}}`):  its
-   * `worktreeSession`, `null` when the session left its worktree (`ExitWorktree`), `undefined` when there's none
-   * (or no transcript).
+   * The LAST worktree note in transcript `file` (`{"type":"worktree-state","worktreeSession":{...}}`):
+   * its `worktreeSession`.
+   * - `null` when the session left its worktree (`ExitWorktree`)
+   * - `undefined` when there's none (or no transcript)
    */
   static lastNote(file: string | undefined): WorktreeNote | null | undefined {
     if (!file || !existsSync(file)) return undefined

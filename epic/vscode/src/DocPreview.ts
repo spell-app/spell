@@ -1,16 +1,19 @@
 /**
- * Shows an `.html` doc (docs pages, epic pages, details pages) rendered:  in one of the right side bar's doc views
- * (`DocView`), or in VS Code's Simple Browser beside the editor -- setting `spellEpic.docPreview.location`.
+ * Shows an `.html` doc (docs pages, epic pages, details pages) rendered:
+ * in one of the right side bar's doc views (`DocView`), or in VS Code's Simple Browser beside the editor
+ * (setting `spellEpic.docPreview.location`).
  * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's, which it replaces.
  * - Which view:  `docs` (the "Epic Docs" tab, the default) or `review` (the "Review" tab:  `/epic review`).
  *   `review` is ALWAYS the side bar's "Review" tab:  the setting moves only `docs`.
- * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review]` -- what
- *   spell-epic's `packages/epics/tools/pages.js` `openInVSCode()` opens (`epic open`, `epic phase`).
- * - Or `?url=<http://127.0.0.1:port/...>`:  a page some local server already serves, shown as is.  Loopback URLs only;
- *   with a `file` too, the file is the fallback when the URL isn't loopback.
+ * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review]`.
+ *   - what spell-epic's `packages/epics/tools/pages.js` `openInVSCode()` opens (`epic open`, `epic phase`)
+ * - Or `?url=<http://127.0.0.1:port/...>`:  a page some local server already serves, shown as is.
+ *   - loopback URLs only
+ *   - with a `file` too, the file is the fallback when the URL isn't loopback
  * - Simple Browser loads only http(s).  For a `file`, the server that serves it, first found of:
- *   1. the EPIC SERVER, spell-epic's one per machine (`epic hub`), when it runs and the file is in a registered repo's
- *      content (`RepoList.urlPathFor()`):  every repo's pages on one port, from any window
+ *   1. the EPIC SERVER, spell-epic's one per machine (`epic hub`),
+ *      when it runs and the file is in a registered repo's content (`RepoList.urlPathFor()`):
+ *      every repo's pages on one port, from any window
  *   2. the MAIN checkout's page server, for a worktree's file, when it serves worktrees (`SRV.mainServerUrl()`)
  *   3. the file's checkout's page server (`spell dev server`, a `.spell-server.json` at its root)
  *   4. else a server of our own, in-process, on `127.0.0.1`, one per root, for as long as the extension runs:

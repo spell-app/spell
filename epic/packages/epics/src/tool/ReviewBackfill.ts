@@ -7,24 +7,26 @@ import { SessionFolders } from "$/epics/config/SessionFolders"
 
 /****************
  * ### `ReviewBackfill`
- * `epic backfill <name> | --all [--apply]`:  the one-off walk through an epic's past sessions, finding
- * the items Owen already went through before `/epic review` kept marks (`epics/epic-review`, P3).
- * - EVIDENCE:  in a session of the epic, Owen named the item's id in his own message, or answered a modal whose
- *   question or answer named it (Claude asked about it, he picked)
- * - a session of the epic:  titled `<name>` (`/rename`, the prompt hook, or Claude's own title), or working in its
- *   worktree (`.claude/worktrees/<name>`), or saved under that worktree's own project folder (older sessions)
+ * `epic backfill <name> | --all [--apply]`:  the one-off walk through an epic's past sessions,
+ * finding the items Owen already went through before `/epic review` kept marks (`epics/epic-review`, P3).
+ * - EVIDENCE:  in a session of the epic, Owen named the item's id in his own message,
+ *   or answered a modal whose question or answer named it (Claude asked about it, he picked)
+ * - a session of the epic:
+ *   - titled `<name>` (`/rename`, the prompt hook, or Claude's own title)
+ *   - or working in its worktree (`.claude/worktrees/<name>`)
+ *   - or saved under that worktree's own project folder (older sessions)
  * - only items not reviewed yet (`PlanDoc.reviewState()`):  struck, decided and decision-linked ones already count
- * - dry run by default:  what it would mark, and the line it saw;  `--apply` marks them, dated the day of the
- *   evidence, and logs each (`PlanDocCommands`)
- * - from then on every `/epic` session marks what it talks through (`.claude/skills/epic/SKILL.md`), so this runs
- *   once per old epic
+ * - dry run by default:  what it would mark, and the line it saw
+ *   - `--apply` marks them, dated the day of the evidence, and logs each (`PlanDocCommands`)
+ * - from then on every `/epic` session marks what it talks through (`.claude/skills/epic/SKILL.md`),
+ *   so this runs once per old epic
  * - Reads Claude Code's transcripts only:  knows nothing of epic pages, imports no other file of the tool.
  * - From `packages/epics/tools/review-backfill.js` (epic `epic-components`, P7), which now forwards here.
  ****************/
 export class ReviewBackfill {
   /**
-   * where Claude Code keeps transcripts:  one folder per project, `<slug>/<session id>.jsonl`.  STATIC for the
-   * object's life;  a test that needs a fixture builds its own `ReviewBackfill`
+   * where Claude Code keeps transcripts:  one folder per project, `<slug>/<session id>.jsonl`.
+   * STATIC for the object's life;  a test that needs a fixture builds its own `ReviewBackfill`
    */
   readonly projects: string
 
@@ -37,8 +39,8 @@ export class ReviewBackfill {
   ////////////////
 
   /**
-   * Transcripts of epic `name`'s sessions:  `{ id, file, title }`, from every project folder of the repo whose main
-   * root is `mainRoot`.
+   * Transcripts of epic `name`'s sessions, `{ id, file, title }`:
+   * from every project folder of the repo whose main root is `mainRoot`.
    */
   sessionsOf(name: string, mainRoot: string): BackfillSession[] {
     const slug = ReviewBackfill.projectSlug(mainRoot)
@@ -77,8 +79,8 @@ export class ReviewBackfill {
   ////////////////
 
   /**
-   * Evidence that Owen went through each of `ids` (upper case, `I7`) in `sessions`:  `{ [id]: [{ session, date,
-   * kind, quote }] }`, earliest first.
+   * Evidence that Owen went through each of `ids` (upper case, `I7`) in `sessions`:
+   * `{ [id]: [{ session, date, kind, quote }] }`, earliest first.
    * - `kind`:  `message` (he typed it) or `answer` (a modal he answered named it)
    * - STATIC:  reads the sessions' own files, wherever they were found
    */
@@ -136,9 +138,10 @@ const PROJECTS = join(homedir(), ".claude", "projects")
 const ITEM_ID = /\b([qcitvd])(\d+)\b/gi
 
 /**
- * A user entry whose text is Claude Code's, not Owen's:  skill bodies, reminders, interrupt notices, background
- * agents' notices (`<task-notification>`, which name agents "T1", "T2" ...), command output, a compacted
- * session's summary.
+ * A user entry whose text is Claude Code's, not Owen's:
+ * - skill bodies, reminders, interrupt notices
+ * - background agents' notices (`<task-notification>`, which name agents "T1", "T2" ...)
+ * - command output, a compacted session's summary
  */
 const NOT_OWEN =
   /^(Base directory for this skill|<system-reminder>|\[Request interrupted|Caveat:|<task-notification>|<local-command|<bash-|This session is being continued)/
@@ -169,8 +172,8 @@ function scan(path: string): { title: string | null; cwds: string[] } {
 /**
  * What Owen said in a user entry:  `{ kind, text }`s.
  * - `message`:  his typed text (a slash command's arguments included), never a skill body or a reminder
- * - `answer`:  a modal's questions and his answers (`toolUseResult.questions` / `.answers`):  he read the question
- *   and picked, so an id in either counts
+ * - `answer`:  a modal's questions and his answers (`toolUseResult.questions` / `.answers`):
+ *   he read the question and picked, so an id in either counts
  */
 function owenTexts(entry: TranscriptEntry): { kind: Evidence["kind"]; text: string }[] {
   const content = entry.message?.content

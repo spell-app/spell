@@ -11,27 +11,30 @@ import { Sessions } from "./Sessions"
 
 /****************
  * ### `EpicTools`
- * The tools the `epic` command runs:  scripts in a child `node`, terminal attached (`run()`), and the `epic` tool,
- * in this process (`planDoc()`).
+ * The tools the `epic` command runs:
+ * - scripts in a child `node`, terminal attached (`run()`)
+ * - the `epic` tool, in this process (`planDoc()`)
+ *
  * - ONE copy of the code:  every tool is the copy beside THIS code (`Git.CODE_ROOT`), whichever checkout calls it.
  *   - So a worktree 50 commits behind main runs main's tools, through main's `epic` on the `PATH`.
- *   - Its DATA stays the caller's:  the nearest checkout from the current folder (`Git.nearestCheckout()`), handed
- *     to the tool as `EPIC_CHECKOUT` (the docs tools' `pages.js` and the window script read it as their root).
- *   - The one exception:  a tool that SERVES its checkout (the page server), whose code is that checkout's
- *     (`code: "caller"`).
+ *   - Its DATA stays the caller's:  the nearest checkout from the current folder (`Git.nearestCheckout()`),
+ *     handed to the tool as `EPIC_CHECKOUT` (the docs tools' `pages.js` and the window script read it as their root).
+ *   - The one exception:  a tool that SERVES its checkout (the page server),
+ *     whose code is that checkout's (`code: "caller"`).
  * - All `static`:  no state;  `codeRoot` is the one seam, a test's fake checkout of tools.
  ****************/
 export class EpicTools {
   /**
    * Run tool `name` with `args` verbatim and this terminal attached;  resolves to its exit code.
    * - the script:  `codeRoot`'s copy (default this code's checkout), unless the tool's `code` is `caller`
-   * - the data:  the caller's checkout (`EPIC_CHECKOUT`);  a tool with a `cwd` runs in that folder of it, else (a repo
-   *   without the epic tools, one `epic init` set up) in that folder of the code's checkout
-   * - a child `node`, under THIS checkout's `tsx` when the tool has a `tsx` config:  the config's `$/...` imports
-   *   map into the CODE's checkout
+   * - the data:  the caller's checkout (`EPIC_CHECKOUT`)
+   *   - a tool with a `cwd` runs in that folder of it
+   *   - else (a repo without the epic tools, one `epic init` set up) in that folder of the code's checkout
+   * - a child `node`, under THIS checkout's `tsx` when the tool has a `tsx` config:
+   *   the config's `$/...` imports map into the CODE's checkout
    * - `env`:  added to this process's
-   * - `cwd`:  the caller's folder, default the current one;  `codeRoot`:  where the code is, default this checkout
-   *   (tests give a fake checkout of tools)
+   * - `cwd`:  the caller's folder, default the current one
+   * - `codeRoot`:  where the code is, default this checkout (tests give a fake checkout of tools)
    */
   static run(name: EpicToolName, args: string[], options: EpicToolOptions = {}): Promise<number> {
     const { env = {}, codeRoot = Git.CODE_ROOT, cwd = process.cwd() } = options
@@ -98,8 +101,9 @@ export class EpicTools {
 
   /**
    * Run the `epic` tool's command line `argv` (`add seo judgement "Title"`, the tool's own order) IN this process:
-   * `PlanDocCommands`, on the caller's checkout's epic pages (`PlanDocFiles`).  Resolves to its exit code, once its
-   * output is written (a pipe on macOS takes writes asynchronously, and the program exits at once).
+   * `PlanDocCommands`, on the caller's checkout's epic pages (`PlanDocFiles`).
+   * - resolves to its exit code, once its output is written
+   *   (a pipe on macOS takes writes asynchronously, and the program exits at once)
    * - loaded on first use (a dynamic `import()`):  the other verbs don't pay for linkedom and oxfmt
    * - gives the tool an epic's RUNNING sessions (`Sessions.ofEpic()`), for `migrate --notify`
    */
@@ -140,13 +144,14 @@ export class EpicTools {
    * - `airplane`:  airplane mode and its pre-flight check (`packages/epics/tools/airplane.ts`), in the caller's folder
    * - `details`, `choices`:  details and choice pages, in `packages/epics` as `yarn workspace` ran them
    * - `notes`, `comments`:  page notes and comments on docs pages, in the caller's folder (`--file` is from there)
-   * - `window`:  the VS Code windows (`scripts/window.mjs`);  plain `node`, so it runs in a worktree before its
-   *   `yarn install`
-   * - `server`:  the caller's checkout's page server (`packages/server`'s `cli.ts`);  `serve`:  every web server,
-   *   `epic server start --all` (root `scripts/serve.mjs`)
-   * - `pages <verb>`:  the docs pages' tools, `epic pages index` ... (`spell dev docs <verb>` in spell-app;
-   *   `runPages()`), in `packages/epics` as `yarn workspace` ran them, or the caller's folder for those that take
-   *   paths from there
+   * - `window`:  the VS Code windows (`scripts/window.mjs`);
+   *   plain `node`, so it runs in a worktree before its `yarn install`
+   * - `server`:  the caller's checkout's page server (`packages/server`'s `cli.ts`)
+   * - `serve`:  every web server, `epic server start --all` (root `scripts/serve.mjs`)
+   * - `pages <verb>`:  the docs pages' tools, `epic pages index` ...
+   *   (`spell dev docs <verb>` in spell-app;  `runPages()`)
+   *   - in `packages/epics` as `yarn workspace` ran them,
+   *     or the caller's folder for those that take paths from there
    * - static:  the one table
    */
   static readonly TOOLS = {
@@ -169,8 +174,8 @@ export class EpicTools {
   } satisfies Record<string, ToolSpec>
 
   /**
-   * Whether the caller's checkout has a page server of its own (`TOOLS.server`, spell-app's `packages/server`);  a
-   * repo `epic init` set up has none, and `epic server` is the machine's epic server there (`epic hub`).
+   * Whether the caller's checkout has a page server of its own (`TOOLS.server`, spell-app's `packages/server`).
+   * - a repo `epic init` set up has none, and `epic server` is the machine's epic server there (`epic hub`)
    */
   static hasPageServer(cwd = process.cwd()): boolean {
     const { tool } = EpicTools.TOOLS.server
@@ -178,8 +183,9 @@ export class EpicTools {
   }
 
   /**
-   * `epic pages <verb> <args>`:  the docs pages' tool for `<verb>` (`TOOLS`' `pages <verb>`);  resolves to its exit
-   * code.  The group refuses an unknown verb before this runs (`EpicProgram`).
+   * `epic pages <verb> <args>`:  the docs pages' tool for `<verb>` (`TOOLS`' `pages <verb>`).
+   * - resolves to its exit code
+   * - the group refuses an unknown verb before this runs (`EpicProgram`)
    */
   static runPages([verb, ...args]: string[]): Promise<number> {
     const name = `pages ${verb}` as EpicToolName
@@ -205,13 +211,14 @@ export type EpicToolOptions = { env?: NodeJS.ProcessEnv; codeRoot?: string; cwd?
 
 /**
  * The `epic` tool's modules, by alias (`tsx` resolves them at run time).
- * - HACK: specifiers in constants, so the CLI package's `tsc` (which follows this file from `epicMain.ts`) doesn't
- *   follow them;  the tool is type-checked here, in `packages/epics`.  Literal specifiers fail the CLI's `tsc`
- *   (spell's settings) in two ways (epic `epic-components` I5, 2026-10-07):
- *   - ES2023 (`toSorted()`, `findLast()`) in `Markup` and the converter:  the CLI's `lib` is ES2022
- *   - Solid's JSX:  the definitions import the vocabularies, which reach `$/ui/core` -> `ui`'s `.tsx`
- *   - REFACTOR: once the vocabularies' data lives clear of `$/ui/core` (and the CLI's `lib` is ES2023), import them
- *     plainly
+ * - HACK: specifiers in constants, so the CLI package's `tsc` doesn't follow them:
+ *   it follows this file from `epicMain.ts`.
+ *   - the tool is type-checked here, in `packages/epics`
+ *   - literal specifiers fail the CLI's `tsc` (spell's settings) in two ways (epic `epic-components` I5, 2026-10-07):
+ *     - ES2023 (`toSorted()`, `findLast()`) in `Markup` and the converter:  the CLI's `lib` is ES2022
+ *     - Solid's JSX:  the definitions import the vocabularies, which reach `$/ui/core` -> `ui`'s `.tsx`
+ *   - REFACTOR: once the vocabularies' data lives clear of `$/ui/core` (and the CLI's `lib` is ES2023),
+ *     import them plainly
  */
 const COMMANDS = "$/epics/tool/PlanDocCommands"
 /** `COMMANDS`' twin:  the docs on disk. */

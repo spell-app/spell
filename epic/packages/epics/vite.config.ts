@@ -14,9 +14,10 @@ import { fmtConfig, packageLint } from "../../vite.lint.ts"
  *   - `tools/vendor/`:  Claude Design's runtime
  */
 /**
- * The generated files in the docs tools' `_assets/`, from THIS folder:  the root's patterns for them (`epics/tools/_assets/...`, under any folder)
- * don't match here, where `yarn format` runs `vp fmt tools`, so it rewrote the bundle and the emoji chunks (P7 of
- * epic `epic-eject`).
+ * The generated files in the docs tools' `_assets/`, from THIS folder.
+ * - the root's patterns for them (`epics/tools/_assets/...`, under any folder) don't match here,
+ *   where `yarn format` runs `vp fmt tools`
+ * - so it rewrote the bundle and the emoji chunks (P7 of epic `epic-eject`)
  */
 const GENERATED_ASSETS = [
   "tools/_assets/spell-ui.js",

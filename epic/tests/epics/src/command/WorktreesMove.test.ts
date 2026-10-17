@@ -1,6 +1,7 @@
 /**
- * `epic worktree move`:  worktrees from the old place (`.claude/worktrees`) to the new one beside the repo
- * (epic `epic-eject` P8), on a throwaway repo, a scratch content repo and temp Claude Code folders.
+ * `epic worktree move` (epic `epic-eject` P8):
+ * worktrees from the old place (`.claude/worktrees`) to the new one beside the repo.
+ * - on a throwaway repo, a scratch content repo and temp Claude Code folders
  */
 import { execFileSync } from "node:child_process"
 import {

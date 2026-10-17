@@ -1,6 +1,7 @@
 /**
- * Tests of `migrate.js`:  the docs' page kinds and their migration steps (epic `epic-workflow`, P8), and that the
- * `epic` tool's copy of the comment anchor rules (`PlanAnchors`) agrees with `BlockAnchors.js`.
+ * Tests of `migrate.js`:
+ * - the docs' page kinds and their migration steps (epic `epic-workflow`, P8)
+ * - that the `epic` tool's copy of the comment anchor rules (`PlanAnchors`) agrees with `BlockAnchors.js`
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -47,7 +48,10 @@ const OLD_PAGE =
   '<!doctype html><html><body><main><section class="s2"><ui-sticky class="spell-h2"><h2 id="one">One</h2></ui-sticky>' +
   "<p>Words.</p></section></main></body></html>"
 
-/** A details page in the markup before epic `epic-workflow` P12:  a context section, one question of two options. */
+/**
+ * A details page in the markup before epic `epic-workflow` P12:
+ * a context section, one question of two options.
+ */
 const OLD_DETAILS =
   '<!doctype html><html><head><link rel="stylesheet" href="../../../packages/docs/tools/_assets/details.css"></head>' +
   '<body class="spell-doc-page"><div class="spell-doc"><main class="spell-doc-main">' +

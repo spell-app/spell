@@ -22,8 +22,8 @@ await build({
   sourcemap: true,
   tsconfig: resolve(here, "tsconfig.json"),
   define: { ENGINE_ROOT: JSON.stringify(resolve(here, "..")) },
-  // the assembler's json5.ts loads json5-writer through `import.meta.url` ON FIRST WRITE:  the extension only reads
-  // JSON5 (the repo list), so the empty `import.meta` of a CommonJS bundle is never reached
+  // the assembler's json5.ts loads json5-writer through `import.meta.url` ON FIRST WRITE:
+  // the extension only reads JSON5 (the repo list), so the empty `import.meta` of a CommonJS bundle is never reached
   logOverride: { "empty-import-meta": "silent" },
   logLevel: "info"
 })

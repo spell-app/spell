@@ -7,14 +7,19 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 
 /****************
  * ### `Hub`
- * `epic hub <verb>`:  the machine's ONE epic server (`EpicServer`, epic `epic-eject` P7), beside `epic server`, which
- * is still each checkout's own page server.  The same verbs as `epic server`:
+ * `epic hub <verb>`:  the machine's ONE epic server (`EpicServer`, epic `epic-eject` P7).
+ * It sits beside `epic server`, which is still each checkout's own page server.
+ *
+ * The same verbs as `epic server`:
  * - `serve [--port <n>]`:  run it in the foreground, until `Ctrl-C`
- * - `start` / `ensure [--port <n>]`:  start it in the background if it isn't running;  JSON
- *   `{ base, port, pid, repos, launched ... }`
- * - `stop`:  stop it;  `status`:  JSON, exit 1 when it isn't running
+ * - `start` / `ensure [--port <n>]`:  start it in the background if it isn't running;
+ *   JSON `{ base, port, pid, repos, launched ... }`
+ * - `stop`:  stop it
+ * - `status`:  JSON, exit 1 when it isn't running
  * - `url <file>`:  ensure it runs, then print the URL that serves `<file>` (a page in a registered repo's content)
- * - Its repos:  `epic repo` (`Repos`).  Its files:  `~/.spell-epic/` (`server.json`, `server.log`).
+ *
+ * - Its repos:  `epic repo` (`Repos`).
+ * - Its files:  `~/.spell-epic/` (`server.json`, `server.log`).
  * - The server's code loads on first use (a dynamic `import()`):  the other verbs don't pay for it.
  ****************/
 export class Hub {
@@ -57,8 +62,8 @@ export class Hub {
   }
 
   /**
-   * `file`'s URL on the epic server, started first if need be;  throws `EpicCommandError` for a file in no
-   * registered repo's content.
+   * `file`'s URL on the epic server, started first if need be.
+   * - throws `EpicCommandError` for a file in no registered repo's content
    */
   async urlOf(file: string, port = DEFAULT_EPIC_PORT): Promise<string> {
     const path = new RepoList({ home: this.home }).urlPathFor(file)

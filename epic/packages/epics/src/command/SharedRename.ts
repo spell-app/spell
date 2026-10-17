@@ -18,19 +18,25 @@ import { EpicCommandError, type RenameReport, type SharedConfig } from "./comman
 
 /****************
  * ### `SharedRename`
- * Rename the shared content repo:  `epic shared rename <new> [--dry-run]` (epic `epic-eject` P8:  `spell-app-dev` to
- * `spell-app.epics`, a MORNING job, Q17).  `run()` returns what it did, or would do (`RenameReport`).
+ * `epic shared rename <new> [--dry-run]`:  rename the shared content repo.
+ * - epic `epic-eject` P8:  `spell-app-dev` to `spell-app.epics`, a MORNING job (Q17)
+ * - `run()` returns what it did, or would do (`RenameReport`)
+ *
+ * The steps:
  * 1. Refuses when there's no content folder, the new name is taken, or the folder is already a link (renamed before).
- * 2. Moves the folder, then leaves a LINK at the old name, so old paths keep working:  running sessions, window
- *    files, pages and notes that still name it.
- * 3. Points every checkout's shared links at the new folder (`checkouts`:  main and every worktree), each link
- *    relative as `Shared.link()` writes it.  A link that doesn't go through the old folder is left alone.
- * 4. Writes the new place into the main checkout's `.epic/config.json5`:  `contentFolder`, and the window folder's
- *    name (`windows.contentName`) when it was the old folder's name.  Comments and other keys are kept.
- *    The file is TRACKED:  the change is the main checkout's to commit.
- * 5. Lists what still names the old folder and is NOT this command's to change (`mentions`):  the repo's
- *    `AGENTS.md` / `CLAUDE.md`, its Claude settings, Claude Code's settings and the repo's memory notes.  Read
- *    only:  those are edited by hand (or by Claude), then the link can go once nothing uses it.
+ * 2. Moves the folder, then leaves a LINK at the old name, so old paths keep working:
+ *    running sessions, window files, pages and notes that still name it.
+ * 3. Points every checkout's shared links at the new folder (`checkouts`:  main and every worktree).
+ *    - each link relative, as `Shared.link()` writes it
+ *    - a link that doesn't go through the old folder is left alone
+ * 4. Writes the new place into the main checkout's `.epic/config.json5`:
+ *    - `contentFolder`
+ *    - and the window folder's name (`windows.contentName`), when it was the old folder's name
+ *    - comments and other keys are kept
+ *    - the file is TRACKED:  the change is the main checkout's to commit
+ * 5. Lists what still names the old folder and is NOT this command's to change (`mentions`):
+ *    - the repo's `AGENTS.md` / `CLAUDE.md`, its Claude settings, Claude Code's settings and the repo's memory notes
+ *    - read only:  those are edited by hand (or by Claude), then the link can go once nothing uses it
  * - `dryRun`:  steps 1 and 5 for real, the rest only reported
  * - a bare name (`spell-app.epics`) goes beside the old folder;  a path is from the current folder
  ****************/
@@ -103,8 +109,8 @@ export class SharedRename {
 
   /**
    * Every checkout's shared link that goes through folder `from`:  `{ checkout, path }` each (the class's step 3).
-   * - read from each link's own text, not its real path:  after the move, the left-behind link would make an old
-   *   link look right
+   * - read from each link's own text, not its real path:
+   *   after the move, the left-behind link would make an old link look right
    */
   private relinks(from: string, to: string): RenameReport["relinked"] {
     const found: RenameReport["relinked"] = []
@@ -123,8 +129,10 @@ export class SharedRename {
 
   /**
    * The files that still name folder `name` (`spell-app-dev`) and that the rename leaves to people (step 5):
-   * the main checkout's `AGENTS.md`, `CLAUDE.md` and Claude settings;  Claude Code's own settings;  the repo's
-   * memory notes (`<home>/projects/<main's slug>/memory/`).  Read only.
+   * - the main checkout's `AGENTS.md`, `CLAUDE.md` and Claude settings
+   * - Claude Code's own settings
+   * - the repo's memory notes (`<home>/projects/<main's slug>/memory/`)
+   * - read only
    */
   private mentions(name: string): string[] {
     const main = this.config.main
@@ -141,9 +149,10 @@ export class SharedRename {
 
   /**
    * Config text `text` (the main checkout's `.epic/config.json5`) with the content folder moved from `from` to `to`:
-   * `contentFolder`, and `windows.contentName` when it was the old folder's name;  `keys` says which changed.
-   * - by text, so Owen's comments stay:  a key's value replaced where it's written, else the key added after `{`
-   *   (into `"windows"` when that's written)
+   * `contentFolder`, and `windows.contentName` when it was the old folder's name.
+   * - `keys` says which changed
+   * - by text, so Owen's comments stay:  a key's value replaced where it's written,
+   *   else the key added after `{` (into `"windows"` when that's written)
    * - no file yet (`""`):  a file of those keys
    * - static:  pure
    */
@@ -176,8 +185,8 @@ function linksOf(checkout: string, links: string[]): string[] {
 }
 
 /**
- * Config text `text` with top-level `key` set to `value`:  replaced where it's written, else added after the
- * object's `{`;  no object at all:  a new one.
+ * Config text `text` with top-level `key` set to `value`:
+ * replaced where it's written, else added after the object's `{`;  no object at all:  a new one.
  */
 function withValue(text: string, key: string, value: string): string {
   const written = new RegExp(`("${key}"\\s*:\\s*)"(?:[^"\\\\]|\\\\.)*"`)

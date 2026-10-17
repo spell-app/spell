@@ -20,8 +20,8 @@ import { Worktrees } from "./Worktrees"
  * - The verbs (`run()`):
  *   - `list`:  JSON:  every parked worktree's note (`PARKED-<name>.md`):  name, file, state, where it stopped
  *   - `candidates`:  JSON:  what `/wait-for ?` offers:  unfinished worktrees and epics, running sessions
- *   - `wait <name> [--every 60] [--max 7140]`:  poll until `<name>` finishes, then print its status JSON.  Exits `0`
- *     finished, `2` `--max` seconds passed (run it again), `3` nothing named `<name>`.
+ *   - `wait <name> [--every 60] [--max 7140]`:  poll until `<name>` finishes, then print its status JSON.
+ *     Exits `0` finished, `2` `--max` seconds passed (run it again), `3` nothing named `<name>`.
  * - Where a name stands, without waiting:  `epic worktree status <name>`.
  ****************/
 export class Parking {
@@ -74,8 +74,9 @@ export class Parking {
   ////////////////
 
   /**
-   * What `/wait-for ?` offers, each `{ name, label }`:  unfinished worktrees and epics, then running sessions outside
-   * any worktree.  The session that ran this is left out.
+   * What `/wait-for ?` offers, each `{ name, label }`:
+   * unfinished worktrees and epics, then running sessions outside any worktree.
+   * - the session that ran this is left out
    * - a worktree or epic counts while it isn't finished and has a worktree or commits of its own
    */
   candidates(): WaitCandidate[] {
@@ -99,8 +100,8 @@ export class Parking {
   }
 
   /**
-   * Every parked worktree's note, `<worktree>/PARKED-<name>.md`, sorted by name:  in either place, beside the repo
-   * or the old `.claude/worktrees` (`EpicConfig.worktreesFolders`).
+   * Every parked worktree's note, `<worktree>/PARKED-<name>.md`, sorted by name.
+   * - in either place:  beside the repo, or the old `.claude/worktrees` (`EpicConfig.worktreesFolders`)
    */
   notes(): ParkedNote[] {
     const config = new EpicConfig(this.main)
@@ -126,11 +127,15 @@ export class Parking {
 
   /**
    * Poll `name` every `every` seconds until it finishes, or `most` seconds pass (was `status.py --wait`).
-   * - finished:  `nameStatus()`'s `merged` / `planDone`, or, compared with when it started:  the worktree went
-   *   away, or every session of `name` that was running has exited.  NEVER "idle":  a session idles each time it
-   *   waits for Owen.
-   * - returns `{ code, status?, message? }`:  `0` finished (with the status, `why` saying which);  `2` time's up
-   *   (run it again:  a background Bash command is stopped after 2 hours);  `3` `name` matches nothing to wait on
+   * - finished:
+   *   - `nameStatus()`'s `merged` / `planDone`
+   *   - or, compared with when it started:
+   *     the worktree went away, or every session of `name` that was running has exited
+   *   - NEVER "idle":  a session idles each time it waits for Owen
+   * - returns `{ code, status?, message? }`:
+   *   - `0` finished (with the status, `why` saying which)
+   *   - `2` time's up (run it again:  a background Bash command is stopped after 2 hours)
+   *   - `3` `name` matches nothing to wait on
    */
   async waitFor(name: string, every: number, most: number): Promise<WaitResult> {
     const first = this.worktrees.nameStatus(name)

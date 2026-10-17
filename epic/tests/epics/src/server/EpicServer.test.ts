@@ -1,6 +1,6 @@
 /**
- * Tests of the machine's epic server (`EpicServer`):  two scratch repos, this checkout as the engine, a temp home;
- * started on a free port with no route modules and no pid file, and stopped after.
+ * Tests of the machine's epic server (`EpicServer`):  two scratch repos, this checkout as the engine, a temp home.
+ * - started on a free port with no route modules and no pid file, and stopped after
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"

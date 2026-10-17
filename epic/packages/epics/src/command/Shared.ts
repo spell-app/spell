@@ -35,30 +35,36 @@ import { SharedRename } from "./SharedRename"
 
 /****************
  * ### `Shared`
- * `epic shared <verb> ...`:  SHARED CONTENT (epic `shared-content`) -- docs pages, saga sets and the agents' logs live
- * ONCE, in a content repo beside the main checkout (`../spell-app-dev`), and every checkout links to them at its root:
- * `epics`, `guides`, `pages`, `templates`, `brand`, `ui`, `goals`, `agents` (`DEFAULT_LINKS`).  So every worktree
- * sees every edit at once, and none of it is merged.
+ * `epic shared <verb> ...`:  SHARED CONTENT (epic `shared-content`).
+ *
+ * - Docs pages, saga sets and the agents' logs live ONCE, in a content repo beside the main checkout
+ *   (`../spell-app-dev`).
+ * - Every checkout links to them at its root:
+ *   `epics`, `guides`, `pages`, `templates`, `brand`, `ui`, `goals`, `agents` (`DEFAULT_LINKS`).
+ * - So every worktree sees every edit at once, and none of it is merged.
  * - The verbs (`run()`):
  *   - `status [--json]` (default):  each checkout's links, and the shared repo's uncommitted files and last commit
  *   - `init [--import]`:  create the shared repo;  `--import` copies THIS checkout's folders in (the cutover, once)
- *   - `link [--all]`:  link this checkout's folders (`--all`:  every checkout);  a real folder is replaced only when
- *     it matches the shared one exactly
- *   - `commit [--session <id>] [--quiet]`:  commit whatever changed in the shared repo (the `Stop` hook, every turn),
- *     one commit per epic / guide / folder (`commit()`);  first the reorg's repair, for pages older checkouts still
- *     write the old way (`relocate.js reorg`)
+ *   - `link [--all]`:  link this checkout's folders (`--all`:  every checkout)
+ *     - a real folder is replaced only when it matches the shared one exactly
+ *   - `commit [--session <id>] [--quiet]`:  commit whatever changed in the shared repo (the `Stop` hook, every turn)
+ *     - one commit per epic / guide / folder (`commit()`)
+ *     - first the reorg's repair, for pages older checkouts still write the old way (`relocate.js reorg`)
  *   - `migrate <worktree> [--dry-run]`:  move a worktree cut before the cutover onto the shared content
  *     (`SharedMigration`);  stops, writing nothing, on a conflict
- *   - `rename <new> [--dry-run] [--json]`:  move the content folder to `<new>` (beside it, for a bare name), leave a
- *     link at the old name, relink every checkout and write the new place into `.epic/config.json5`
+ *   - `rename <new> [--dry-run] [--json]`:  move the content folder to `<new>` (beside it, for a bare name)
  *     (`SharedRename`;  epic `epic-eject` P8:  `spell-app-dev` to `spell-app.epics`)
+ *     - leaves a link at the old name
+ *     - relinks every checkout, and writes the new place into `.epic/config.json5`
  *   - `repair [--dry-run] [--json]`:  the docs tools' own logic (`packages/epics/tools/relocate.js`), then `link`
- * - `ui`:  Spell UI's hand-written docs pages (claude-design P6);  their bundle and data stay in each branch's
- *   `packages/ui/site/`
- * - before 2026-10-05 (epic `claude-design` P4) the docs were ONE link, `packages/docs/content`:  the shared repo
- *   keeps old-path links there for checkouts on older code (`packages/epics/tools/relocate.js` `reorgShared()`)
- * - the manifest:  the root `package.json`'s `"shared"` (`configOf()`);  where the shared repo and the worktrees
- *   are:  the repo's `.epic/config.json5` (`EpicConfig`:  `contentFolder`, `worktreesFolder`)
+ * - `ui`:  Spell UI's hand-written docs pages (claude-design P6);
+ *   their bundle and data stay in each branch's `packages/ui/site/`
+ * - before 2026-10-05 (epic `claude-design` P4) the docs were ONE link, `packages/docs/content`:
+ *   the shared repo keeps old-path links there for checkouts on older code
+ *   (`packages/epics/tools/relocate.js` `reorgShared()`)
+ * - the manifest:  the root `package.json`'s `"shared"` (`configOf()`)
+ * - where the shared repo and the worktrees are:
+ *   the repo's `.epic/config.json5` (`EpicConfig`:  `contentFolder`, `worktreesFolder`)
  * - only FOLDERS are linked:  Claude's Edit refuses to write through a link to a file
  * - the relocate tool is THIS code's copy (`RELOCATE_TOOL`), run on the caller's checkout (`--root`):
  *   one copy of the epic code, whichever checkout calls it
@@ -107,9 +113,10 @@ export class Shared {
         return reports.some((report) => report.action === "diverged") ? EXIT.ERRORS : EXIT.OK
       }
       case "commit": {
-        // first the reorg's repair (claude-design P4):  anything older code wrote at `packages/docs/content/...` since
-        // goes to its root folder, old-style links are fixed.  Until every checkout has merged the reorg:
-        // claude-design T1 removes this with the old-path links
+        // first the reorg's repair (claude-design P4):
+        // anything older code wrote at `packages/docs/content/...` since goes to its root folder,
+        // and old-style links are fixed.
+        // Until every checkout has merged the reorg:  claude-design T1 removes this with the old-path links
         if (existsSync(config.dir)) {
           const run = spawnSync(
             process.execPath,
@@ -177,8 +184,8 @@ export class Shared {
   ////////////////
 
   /**
-   * The main checkout, then every worktree in each of `config.worktrees` (a folder with a `.git` file):  the new
-   * place's, then the old place's, each sorted.
+   * The main checkout, then every worktree in each of `config.worktrees` (a folder with a `.git` file):
+   * the new place's, then the old place's, each sorted.
    */
   checkouts(): string[] {
     const { main, worktrees: places } = this.config
@@ -199,7 +206,8 @@ export class Shared {
    * - `tracked`:  still in this checkout's git (a branch before the cutover:  `epic shared migrate`)
    * - `missing`:  nothing there
    * - `real`:  a real folder (a fresh clone, or git wrote one over the link)
-   * - `dangling`:  a link to nothing;  `elsewhere`:  a link to some other folder
+   * - `dangling`:  a link to nothing
+   * - `elsewhere`:  a link to some other folder
    */
   linkState(checkout: string, path: string): LinkReport["state"] {
     if (Git.run(["ls-files", "--", path], checkout).out) return "tracked"
@@ -213,9 +221,10 @@ export class Shared {
 
   /**
    * Every checkout's links and the shared repo's state:  `epic shared status`.
-   * - each checkout's links from its OWN manifest (`configOf()`):  a branch from before the reorg links
-   *   `packages/docs/content`, a newer one the root folders
-   * - `peer.dirty`:  changed files not committed yet;  `peer.last`:  `<sha> <when> <subject>`
+   * - each checkout's links from its OWN manifest (`configOf()`):
+   *   a branch from before the reorg links `packages/docs/content`, a newer one the root folders
+   * - `peer.dirty`:  changed files not committed yet
+   * - `peer.last`:  `<sha> <when> <subject>`
    */
   status(): SharedStatus {
     const { config } = this
@@ -239,10 +248,14 @@ export class Shared {
   /**
    * Make checkout `checkout`'s links point at the shared folders;  what it did, per link.
    * - `links`:  which ones;  default the manifest's
-   * - `ok`:  already;  `linked`:  made (missing, dangling or pointing elsewhere);  `replaced`:  a real folder
-   *   identical to the shared one, swapped for the link
-   * - left alone, with the reason:  `tracked` (migrate first), `diverged` (a real folder that differs:  NEVER
-   *   overwrites the shared copy), `no-shared` (the shared repo has no such folder)
+   * - done:
+   *   - `ok`:  already
+   *   - `linked`:  made (missing, dangling or pointing elsewhere)
+   *   - `replaced`:  a real folder identical to the shared one, swapped for the link
+   * - left alone, with the reason:
+   *   - `tracked`:  migrate first
+   *   - `diverged`:  a real folder that differs (NEVER overwrites the shared copy)
+   *   - `no-shared`:  the shared repo has no such folder
    * - SIDE EFFECT:  removes old links and identical real folders, writes links (relative targets)
    */
   link(checkout: string, links = this.config.links): LinkReport[] {
@@ -302,16 +315,18 @@ export class Shared {
 
   /**
    * Commit whatever changed in the shared repo:  `epic shared commit`, run by the `Stop` hook after every turn.
-   * ONE commit per group of files (`Shared.group()`):  any session's turn sweeps up every session's pending edits,
-   * so the message says WHAT changed (`auto: epic seo`), never whose turn it was.  Returns the new commits' short
-   * shas, in order;  `[]` when nothing changed.
-   * - one at a time:  `<dir>/.git/spell-shared-commit.lock`, waited for up to 30s (never skipped:  the other
-   *   session's changes would sit uncommitted until someone's next turn)
+   * - ONE commit per group of files (`Shared.group()`)
+   *   - any session's turn sweeps up every session's pending edits,
+   *     so the message says WHAT changed (`auto: epic seo`), never whose turn it was
+   * - returns the new commits' short shas, in order;  `[]` when nothing changed
+   * - one at a time:  `<dir>/.git/spell-shared-commit.lock`, waited for up to 30s
+   *   (never skipped:  the other session's changes would sit uncommitted until someone's next turn)
    * - a git `index.lock` older than 2 minutes is a crashed git's:  removed
-   * - the index is reset first (nobody stages here by hand;  a crashed run may have left some), then ONE
-   *   `git status` pass;  a rename is two paths:  the new one in its group, the deletion in the old one's
-   * - message `auto: <group>`, trailers `Turn-end:` (the checkout whose turn ended, `main` or the worktree's name:
-   *   NOT the author) and `Session:`
+   * - the index is reset first (nobody stages here by hand;  a crashed run may have left some),
+   *   then ONE `git status` pass
+   *   - a rename is two paths:  the new one in its group, the deletion in the old one's
+   * - message `auto: <group>`, trailers `Turn-end:` and `Session:`
+   *   - `Turn-end:`  the checkout whose turn ended, `main` or the worktree's name:  NOT the author
    * - SIDE EFFECT:  `git add` / `git commit` in the shared repo, by pathspec (never `-A`)
    */
   commit({ session, checkout }: { session?: string; checkout?: string } = {}): string[] {
@@ -345,14 +360,15 @@ export class Shared {
 
   /**
    * The shared-content manifest of checkout `root` (any checkout).
-   * - `dir`:  `contentFolder` in the repo's `.epic/config.json5` (the MAIN checkout's);  `SPELL_SHARED_DIR` overrides
-   *   it (tests, a scratch repo)
+   * - `dir`:  `contentFolder` in the repo's `.epic/config.json5` (the MAIN checkout's)
+   *   - `SPELL_SHARED_DIR` overrides it (tests, a scratch repo)
    *   - it was `"shared": { "dir" }` in the main checkout's `package.json` until epic `epic-eject` P4
-   * - `worktrees`:  `worktreesFolder` in the same file, and the old place while it's moved (`worktreesFolders`):
-   *   where `checkouts()` finds the worktrees
-   * - `links`:  `"shared": { "links" }` in `root`'s OWN `package.json` (else the main one's), else `sharedFolders` in
-   *   `.epic/config.json5`:  which folders a checkout links is its branch's business in spell-app (the reorg changed
-   *   them, claude-design P4);  a repo set up by `epic init` has no `package.json` block, only the config
+   * - `worktrees`:  where `checkouts()` finds the worktrees
+   *   - `worktreesFolder` in the same file, and the old place while it's moved (`worktreesFolders`)
+   * - `links`:  `"shared": { "links" }` in `root`'s OWN `package.json` (else the main one's),
+   *   else `sharedFolders` in `.epic/config.json5`
+   *   - which folders a checkout links is its branch's business in spell-app (the reorg changed them, claude-design P4)
+   *   - a repo set up by `epic init` has no `package.json` block, only the config
    * - static:  made before there's a `Shared` to hold it
    */
   static configOf(root = Git.mainRoot()): SharedConfig {
@@ -371,8 +387,10 @@ export class Shared {
 
   /**
    * The commit group of shared-repo path `path` (`commit()`):  what the commit's message names.
-   * - `epics/<name>/...`:  `epic <name>`;  `sagas/<id>/...`:  `saga <id>`;  `goals/<set>/...`:  `goals/<set>`;
-   *   a file right under any of them (`sagas/sagas.json5`):  the folder (`sagas`)
+   * - `epics/<name>/...`:  `epic <name>`
+   * - `sagas/<id>/...`:  `saga <id>`
+   * - `goals/<set>/...`:  `goals/<set>`
+   * - a file right under any of those (`sagas/sagas.json5`):  the folder (`sagas`)
    * - `guides/<x>`, `<x>` a folder or a file:  `guides/<x>`
    * - the other shared folders (`pages`, `templates`, `ui`, `brand`, `agents`):  the folder
    * - anything else (the repo's own files, old-path links):  `other`

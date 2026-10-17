@@ -1,6 +1,7 @@
 /**
- * Tests of the side bar link route (`scripts/showRoutes.ts`) on a real page server, in a scratch checkout, with an
- * EMPTY window registry (`SPELL_WINDOWS_DIR`, `SPELL_EPIC_WINDOWS_DIR`):  nothing here ever reaches a real VS Code window or Chrome.
+ * Tests of the side bar link route (`scripts/showRoutes.ts`) on a real page server, in a scratch checkout,
+ * with an EMPTY window registry (`SPELL_WINDOWS_DIR`, `SPELL_EPIC_WINDOWS_DIR`):
+ * nothing here ever reaches a real VS Code window or Chrome.
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"

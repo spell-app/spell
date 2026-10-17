@@ -20,8 +20,10 @@ import { EpicConfig } from "$/epics/config/EpicConfig"
 import { SessionFolders } from "$/epics/config/SessionFolders"
 
 /**
- * Temp folders only:  a repo `app` with its content folder `app-dev` beside it, a worktree beside the repo, and a
- * temp Claude Code folder.  Never the real `spell-app-dev` or `~/.claude`.
+ * Temp folders only:  never the real `spell-app-dev` or `~/.claude`.
+ * - a repo `app` with its content folder `app-dev` beside it
+ * - a worktree beside the repo
+ * - a temp Claude Code folder
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "shared-rename-")))
 const MAIN = join(TEMP, "app")

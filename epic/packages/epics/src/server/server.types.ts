@@ -1,6 +1,6 @@
 /**
- * Types and constants of spell-epic's ONE page server per machine (`EpicServer`, epic `epic-eject` P7):  where it
- * keeps its files, the URLs it serves, the repos it serves them for.
+ * Types and constants of spell-epic's ONE page server per machine (`EpicServer`, epic `epic-eject` P7):
+ * where it keeps its files, the URLs it serves, the repos it serves them for.
  * - Data and pure helpers only:  nothing here starts a server or touches the disk.
  */
 
@@ -9,8 +9,8 @@
 ////////////////
 
 /**
- * spell-epic's folder in the home folder:  `~/.spell-epic/`, holding `repos.json5` (`REPOS_FILE`), the server's pid
- * file and its log.
+ * spell-epic's folder in the home folder, `~/.spell-epic/`:
+ * it holds `repos.json5` (`REPOS_FILE`), the server's pid file and its log.
  * - `SPELL_EPIC_HOME` puts it elsewhere:  tests give a temp folder, so no test touches the real one
  */
 export const HOME_FOLDER = ".spell-epic"
@@ -28,7 +28,8 @@ export const PID_FILE = "server.json"
 export const LOG_FILE = "server.log"
 
 /**
- * The port it asks for first:  `SPELL_EPIC_PORT`, else 4848;  taken, any free one (the pid file says which).
+ * The port it asks for first:  `SPELL_EPIC_PORT`, else 4848.
+ * - taken:  any free one (the pid file says which)
  * - NOT 4747, spell-app's page server's, so the two run side by side
  */
 export const DEFAULT_EPIC_PORT = Number(process.env.SPELL_EPIC_PORT) || 4848
@@ -39,8 +40,8 @@ export const DEFAULT_EPIC_PORT = Number(process.env.SPELL_EPIC_PORT) || 4848
 
 /**
  * Where the ENGINE's own files are served:  spell-epic's checkout, whichever repo the page is in.
- * - `/_epic/assets/...`:  the docs pages' assets (`packages/epics/tools/_assets/`):  `spell-ui.js`, `spell-doc.css`,
- *   the runtime, `highlight.min.js`, the emoji chunks
+ * - `/_epic/assets/...`:  the docs pages' assets (`packages/epics/tools/_assets/`):
+ *   `spell-ui.js`, `spell-doc.css`, the runtime, `highlight.min.js`, the emoji chunks
  * - `/_epic/pack/...`:  the epics component pack (`packages/epics/components/__pack/`), `epics.pack.js`
  * - one prefix, starting `_`, so no content folder's own folder can take it
  */
@@ -56,8 +57,8 @@ export const ENGINE_ROUTES = {
 export const PACK_URL = `${ENGINE_ROUTES.pack.prefix}epics.pack.js`
 
 /**
- * Where a registered repo's content folder is served:  `/r/<repo>/...`, with the same paths inside
- * (`/r/spell-app/epics/seo/seo.plan.html`).
+ * Where a registered repo's content folder is served:
+ * `/r/<repo>/...`, with the same paths inside (`/r/spell-app/epics/seo/seo.plan.html`).
  * - the DEFAULT repo is served at `/` too, so today's URLs keep working (`/epics/seo/seo.plan.html`)
  */
 export const REPO_PREFIX = "/r/"
@@ -66,8 +67,8 @@ export const REPO_PREFIX = "/r/"
 export const WORKTREES_PREFIX = "/worktrees/"
 
 /**
- * The engine's files as pages linked them before the asset routes, from a checkout's root:  the folder, and the
- * route it is now (`engineUrlFor()`).
+ * The engine's files as pages linked them before the asset routes, from a checkout's root:
+ * the folder, and the route it is now (`engineUrlFor()`).
  * - `packages/epics/tools/_assets/` (since epic `people-and-orgs` P16), and the docs package's before it
  * - `packages/epics/components/__pack/` (since P18), and `packages/epics/pack/` before it
  */
@@ -81,11 +82,12 @@ export const LEGACY_ENGINE_PATHS: readonly (readonly [folder: string, route: str
 
 /**
  * A page's link to one of the engine's files (`href`, `src`, `source`), as its engine route:
- * `../../packages/epics/tools/_assets/spell-ui.js` => `/_epic/assets/spell-ui.js`;  `undefined` for any other link.
+ * `../../packages/epics/tools/_assets/spell-ui.js` => `/_epic/assets/spell-ui.js`.
+ * - `undefined` for any other link
  * - the link from any depth (`../` any number of times), or from the root (`/packages/...`)
  * - an engine route already:  `undefined` (nothing to change)
- * - what the asset-route migrations write (`EngineAssetRoutes`, `migrate.js`), and the server's overlay for pages not
- *   migrated yet (`legacyEnginePath()`)
+ * - what the asset-route migrations write (`EngineAssetRoutes`, `migrate.js`),
+ *   and the server's overlay for pages not migrated yet (`legacyEnginePath()`)
  */
 export function engineUrlFor(href: string): string | undefined {
   const path = /^(?:\.\.\/)*\/?(?:\.\/)?(.*)$/.exec(href)?.[1] ?? href
@@ -94,10 +96,11 @@ export function engineUrlFor(href: string): string | undefined {
 }
 
 /**
- * The engine route a URL path of the OLD shape serves from:  `/packages/epics/tools/_assets/x.js`, or
- * `/r/<repo>/packages/...`, or `/worktrees/<w>/packages/...` => `/_epic/assets/x.js`;  else `undefined`.
- * - the server's overlay (`SRV.StaticHandler.overlays`), so a page not migrated yet still loads THIS engine's assets
- *   and pack
+ * The engine route a URL path of the OLD shape serves from;  else `undefined`.
+ * - `/packages/epics/tools/_assets/x.js`, `/r/<repo>/packages/...` or `/worktrees/<w>/packages/...`
+ *   => `/_epic/assets/x.js`
+ * - the server's overlay (`SRV.StaticHandler.overlays`),
+ *   so a page not migrated yet still loads THIS engine's assets and pack
  */
 export function legacyEnginePath(path: string): string | undefined {
   const match = /^(?:\/r\/[^/]+|\/worktrees\/[^/]+)?\/(packages\/.*)$/.exec(path)
@@ -119,8 +122,8 @@ export function encodedPath(path: string): string {
 ////////////////
 
 /**
- * A repo name:  what its URL prefix says, `/r/<name>/`.  Letters, digits, `.`, `_` and `-`, starting with a letter or
- * digit:  `spell-app`.
+ * A repo name:  what its URL prefix says, `/r/<name>/`.
+ * - letters, digits, `.`, `_` and `-`, starting with a letter or digit:  `spell-app`
  */
 export const REPO_NAME = /^[a-z0-9][\w.-]*$/i
 
@@ -149,8 +152,8 @@ export type RepoEntry = {
 export type Repo = RepoEntry & { content: string; prefix: string; isDefault: boolean }
 
 /**
- * What the epic server says of itself, at `/api/server` and in its pid file:  the page server's `ServerInfo`
- * (`root` being spell-epic's home folder, where the pid file is), plus what it serves.
+ * What the epic server says of itself, at `/api/server` and in its pid file:
+ * the page server's `ServerInfo` (`root` being spell-epic's home folder, where the pid file is), plus what it serves.
  * - `engine`:  spell-epic's checkout, whose assets, pack and route modules it serves
  * - `repos`:  every repo it serves, the default first
  * - `epicServer`:  `true`, so a reader can tell it from a checkout's page server

@@ -7,8 +7,9 @@ argument-hint: <name> | done
 # /isolate
 
 Work in worktree `<name>`, so this session's edits never collide with another session's.
-- Its folder:  `epic worktree path <name>`.  `.claude/worktrees/<name>`, or beside the repo
-  (`../spell-app.worktrees/<name>`) once its `.epic/config.json5` moves them (`worktreesFolder`, epic `epic-eject` P8).
+- Its folder:  `epic worktree path <name>` prints it.
+  - `.claude/worktrees/<name>`, or beside the repo (`../spell-app.worktrees/<name>`)
+    once its `.epic/config.json5` moves them (`worktreesFolder`, epic `epic-eject` P8).
 - The worktree, its branch and the session share one name.
 - `/epic` runs these steps too.
 - The session either moves to a NEW window of the worktree's own, or STAYS in this one.
@@ -17,15 +18,16 @@ Work in worktree `<name>`, so this session's edits never collide with another se
 ## Start:  `/isolate <name>`
 
 0. Checks and rename, BEFORE anything else.
-   - A typed `/isolate <name>` got them from the repo's `UserPromptSubmit` hook
-     ([prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs), read its header):
-     it renamed the session `<name>`, or blocked the prompt.
+   - A typed `/isolate <name>` got them already, from the repo's `UserPromptSubmit` hook:
+     it renamed the session after it, or blocked the prompt.
+     - The hook:  [prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs);  read its header.
    - "Isolate as <name>" in plain words never reaches the hook, so do its checks here:
    - in plan mode:  it's read-only apart from the plan file.
      - So `EnterWorktree` can't run, and ExitPlanMode would ask to APPROVE a half-made plan.
      - Ask the user to leave plan mode (shift+tab);  the plan file survives.
-   - in another worktree:  the session's folder is in worktree `<other>` (`.claude/worktrees/<other>`, or beside the repo),
-     or its window is a worktree's (`epic window which`:  `workspace` under `workspaces/ongoing/`).
+   - in another worktree:  the session's folder is in worktree `<other>`, or its window is a worktree's.
+     - the folder:  `.claude/worktrees/<other>`, or beside the repo
+     - the window:  `epic window which` prints a `workspace` under `workspaces/ongoing/`
      - `<other>` isn't `<name>`:  stop, saying so in one line
        ("`/isolate done` first, or start from a package window").
    - rename:  `epic session title "🚧 <name>"`.
@@ -37,8 +39,8 @@ Work in worktree `<name>`, so this session's edits never collide with another se
    Already mid-work ("isolate as <name>" in a running session):
    - edits already made in the main checkout won't follow:  the worktree is cut from COMMITTED `main`.
      - Shared content does follow, and `git status` never lists it.
-       `epics`, `guides`, `pages`, `templates`, `goals` and `agents` are links into `../spell-app-dev`
-       in every checkout.
+       `epics`, `guides`, `pages`, `templates`, `goals` and `agents` are links in every checkout
+       into the content folder (`epic config contentFolder`).
      - List the edits (`git status --short`) and AskUserQuestion, options:
        - "Carry them over"
        - "Commit on `main` first" (stage, then ask)
@@ -73,24 +75,30 @@ Work in worktree `<name>`, so this session's edits never collide with another se
        (each worktree is its own repo there:  `git.detectWorktrees`).
      - The window is retitled `⎇ <name>` and tinted (`stay`).
    - Why ask:  staying is quicker, and touches nothing else when this is the window's only session.
-     With others, they share its doc preview and Source Control ([window.mjs](${CLAUDE_PLUGIN_ROOT}/scripts/window.mjs), "Staying put").
-3. `EnterWorktree` with `name: "<name>"`, or `path` (the folder `epic worktree path <name>` prints) when reusing one.
-   - ALWAYS this way, whatever folder the session is in:  never start a session inside a worktree's folder to
-     work there.  Only a session that ENTERED with `EnterWorktree` comes back to its worktree when it's reopened
-     from another window;  one started there comes back in that window's folder, often `main` (epic `epic-eject` I3).
-   - The session-start guard ([worktree-guard.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree-guard.mjs)) says so when it
-     isn't:  a reopened session outside its worktree, or a new tab inside one.  Do what it says first.
+     - With others, they share its doc preview and Source Control.
+     - [window.mjs](${CLAUDE_PLUGIN_ROOT}/scripts/window.mjs), "Staying put"
+3. `EnterWorktree` with `name: "<name>"`.
+   - Reusing one:  `path` instead, the folder `epic worktree path <name>` prints.
+   - ALWAYS this way, whatever folder the session is in:
+     never start a session inside a worktree's folder to work there.
+     - Only a session that ENTERED with `EnterWorktree` comes back to its worktree
+       when it's reopened from another window.
+     - One started there comes back in that window's folder, often `main` (epic `epic-eject` I3).
+   - The session-start guard says so when it isn't ([worktree-guard.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree-guard.mjs)).
+     - It isn't:  a reopened session outside its worktree, or a new tab inside one.
+     - Do what it says first.
    - The repo's `WorktreeCreate` hook ([worktree.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree.mjs))
      makes it on branch `<name>`, from local `main`.
    - It keeps this session listed in every window.
 4. Open it in its own window, from the worktree's root (the root `AGENTS.md`, "Worktrees"):
    - `epic window open <name> [--color <look>]`:  a NEW window.
      - Its file:  `workspaces/ongoing/<name>.code-workspace`, in the main checkout, git-ignored.
-     - Its look:  this window's, or `<look>`'s, one of the 12 of `epic window color`
-       (`/isolate <name> -purple`, `/epic <name> -purple`;  epic `windows-and-review` P5).
-     - Its folders:  a worktree beside the repo:  `⎇ <name>` and the content folder only, every session listed
-       through its linked session folder (`linkSessionFolders`);  a nested one:  the MAIN root (so every session is
-       listed), then the worktree's root, `⎇ <name>`.
+     - Its look:  this window's, or `<look>`'s, one of the 12 of `epic window color`.
+       - e.g. `/isolate <name> -purple`, `/epic <name> -purple` (epic `windows-and-review` P5)
+     - Its folders:
+       - a worktree beside the repo:  `⎇ <name>` and the content folder only
+         - every session listed through its linked session folder (`linkSessionFolders`)
+       - a nested one:  the MAIN root (so every session is listed), then the worktree's root, `⎇ <name>`
      - `<pkg>`:  this session's window's.
    - This isn't a package window (a worktree's ...):  `open` takes `spell-app`'s, the whole repo's window and its look.
      - Never ask which package (Owen, 2026-10-07).
@@ -135,8 +143,9 @@ The turn after step 6, whatever Owen sends (`continue`, typed in by the move, or
 1. Old tab still open in the old window (its title didn't match):  say so in one line, close it by hand.
    - The log is `~/.spell/windows/handoffs/<session id>.log`.
    - Only after a move:  "Stay" skips this.
-2. No `node_modules/` at the worktree's root:  the install command, `epic config installCommand` (`yarn install`, a few
-   seconds).  With `installOnCreate` on, the worktree hook already ran it, before the window opened (I2).
+2. No `node_modules/` at the worktree's root:  run the install command, `epic config installCommand`.
+   - `yarn install` here, a few seconds.
+   - With `installOnCreate` on, the worktree hook already ran it, before the window opened (I2).
    - It prints an empty line (a repo with nothing to install, as `epic init` finds it):  skip this step.
 3. Check the session's name ("Session name" below).
 4. Carry on, with the first of these there is:
@@ -148,8 +157,9 @@ The turn after step 6, whatever Owen sends (`continue`, typed in by the move, or
 ## Session name
 
 The session MUST stay titled `🚧 <name>` while its work is under way.
-- Other icons:  `📅 <name>`, a future epic written down;  `✅ <name>`, merged (`epic session done`).
-  Owen, 2026-10-07.
+- Other icons (Owen, 2026-10-07):
+  - `📅 <name>`:  a future epic written down
+  - `✅ <name>`:  merged (`epic session done`)
 - Why:  the handoff finds its old tab by title,
   and Owen finds it in the panel's list by name, its icon saying where it stands.
 - It drifts:  Claude's own title ("Doc-plan SEO") wins when the hook never ran, or Owen renamed it.
@@ -169,18 +179,21 @@ The session MUST stay titled `🚧 <name>` while its work is under way.
 
 ## Merge, keep:  a standing epic
 
-A STANDING epic (`<epic-page standing>`, epic `epic-workflow`) merges each phase into `main` at once, and never
-leaves its worktree:  NOT "Finish" below.
+A STANDING epic merges each phase into `main` at once, and never leaves its worktree:  NOT "Finish" below.
+- It's marked `<epic-page standing>` (epic `epic-workflow`).
 - The steps:  [the epic skill](../epic/SKILL.md), "5. Each phase", step 4 ("A STANDING epic").
-- In short:  `merge-main` if `main` moved, `ExitWorktree` (keep), `epic merge <name>` in the main checkout,
-  `EnterWorktree` back with `path`.
+- In short:
+  1. `merge-main`, if `main` moved
+  2. `ExitWorktree` (keep)
+  3. `epic merge <name>`, in the main checkout
+  4. `EnterWorktree` back, with `path`
 - `/isolate done` in a standing epic's session:  say it stands, and ask first ("Stop standing, and finish?").
 
 ## Finish:  `/isolate done`
 
-0. Not in a worktree (the session's folder isn't a worktree's:  `.claude/worktrees/`, or beside the repo):
-   say so in one line, then offer to clean up.
-   - Candidates:  each worktree `<name>` (`.claude/worktrees/<name>`, or beside the repo:  `epic worktree list`) that
+0. Not in a worktree:  say so in one line, then offer to clean up.
+   - Not in one:  the session's folder isn't a worktree's, in `.claude/worktrees/` or beside the repo.
+   - Candidates, from `epic worktree list`:  each worktree `<name>` that
      - no session is in:  under "No session in" from `epic worktree list`.
        Why:  a fresh worktree has nothing outside `main` either, but its session is still using it.
      - has nothing uncommitted:  `git -C "$(epic worktree path <name>)" status --short`, fine from the main checkout
@@ -198,8 +211,8 @@ leaves its worktree:  NOT "Finish" below.
 1. Report what's uncommitted and unmerged in the worktree:
    `git status --short`, `git log --oneline main..HEAD`.
    - Commit only as the root's rules allow (stage, then ask).
-2. Unmerged commits (`main..HEAD` not empty):  AskUserQuestion "Merge `<name>` into `main`?",
-   options "Merge now" and "Leave unmerged", listing the commits in the question.
+2. Unmerged commits (`main..HEAD` not empty):  AskUserQuestion, listing the commits in the question.
+   - "Merge `<name>` into `main`?", options "Merge now" and "Leave unmerged"
    - On "Merge now", get the BRANCH ready to fast-forward `main`.
      All from the worktree:  branches are shared, so `main` is visible here.
    - NEVER `git -C <main checkout>` or `cd` there:  a worktree session refuses both.
@@ -208,8 +221,8 @@ leaves its worktree:  NOT "Finish" below.
      ("Changelog" in the root's `AGENTS.md`).
      - It's shared content:  write it straight in, nothing to commit on the branch for it.
      - It's committed for you at the turn's end.
-   - A worktree cut before 2026-10-04 (`epic shared status` shows its folders `tracked`, not `ok`):
-     `epic shared migrate <name>` first.
+   - A worktree cut before 2026-10-04:  `epic shared migrate <name>` first.
+     - How to tell:  `epic shared status` shows its folders `tracked`, not `ok`.
      - `--dry-run` shows what it moves.
      - Else merging `main` drags its old tracked copies of the docs, goals and logs into conflicts.
    - `git log --oneline HEAD..main` empty (`main` hasn't moved):  ready, go on to step 4.
@@ -248,7 +261,7 @@ leaves its worktree:  NOT "Finish" below.
    - Only when GitHub's `main` is up to date with local `main` (Q16 of `review-review`, answer C).
    - All from the worktree.
    - `git fetch origin main`, then `git rev-list --count origin/main..main`:
-     how far local `main` is ahead of GitHub's.
+     how far the local one is ahead of GitHub's.
      - Not 0:  NO offer;  say why in one line, e.g.
        "No pull request:  GitHub's `main` is 62 commits behind local `main`,
        so a PR would list all 62 as well as this branch's.  Push `main` first if you want one."
@@ -307,9 +320,9 @@ leaves its worktree:  NOT "Finish" below.
      - `/isolate <name>`, `/epic <name>` or `/unpark <name>` takes it off again (epic `windows-and-review` P6).
 
 7b. Agents' worktrees, WITHOUT asking (Owen, 2026-10-05), now in the main checkout.
-   - An agent this session started with `isolation: "worktree"` (an epic's phases)
-     got worktree `<name>-agent-<id>` (beside `<name>`'s), on branch `<name>-agent-<id>`.
-     The `WorktreeCreate` hook names it for its owner.
+   - An agent this session started with `isolation: "worktree"` (an epic's phases) got a worktree of its own.
+     - worktree and branch `<name>-agent-<id>`, beside `<name>`'s
+     - The `WorktreeCreate` hook names it for its owner.
    - It was kept when the agent finished, because its commits weren't in `main` yet.
    - For each in `git worktree list`:
    - Remove it when it's clean and its commits are in `<name>`:
@@ -331,10 +344,14 @@ leaves its worktree:  NOT "Finish" below.
 
 A reply that closes out the session's work ends with a line of its own, `*You can close this tab*`
 (Owen, 2026-10-07;  leaving a worktree added 2026-10-17, epic `epic-eject` r1).
-- Closing out:  merged, worktree gone, a worktree LEFT (`ExitWorktree`, keep or remove), `/isolate done`,
-  a `/bedtime` night reviewed ...
+- Closing out, any of:
+  - merged, or the worktree gone
+  - a worktree LEFT (`ExitWorktree`, keep or remove)
+  - `/isolate done`
+  - a `/bedtime` night reviewed ...
   - Leaving counts with or without this skill:  a bare `ExitWorktree` too.
-    The plugin's `PostToolUse` hook on it (`hooks/left-worktree.mjs`) reminds the session of this section.
+    - The plugin's `PostToolUse` hook on it reminds the session of this section:
+      [left-worktree.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/left-worktree.mjs).
 - Only when nothing is left for THIS session:
   - no uncommitted or unmerged work
   - no background task or agent still running
@@ -342,7 +359,8 @@ A reply that closes out the session's work ends with a line of its own, `*You ca
   - Open items may remain only if they're recorded elsewhere (the epic page, the code-debt log ...)
     and need no context from this session.
 - Otherwise leave the line out, and say what keeps the tab open.
-- With the line, when this session's worktree is still on disk (left with `keep`), or worktrees it made and left:
-  ALSO ask (AskUserQuestion) whether to run `/isolate done` (its step 0 cleans those up):
-  "Run `/isolate done`" (Recommended) and "Leave it".
+- With the line, ALSO ask (AskUserQuestion) whether to run `/isolate done`, when either is still on disk:
+  - this session's worktree (left with `keep`)
+  - worktrees it made and left:  its step 0 cleans those up
+  - Options:  "Run `/isolate done`" (Recommended) and "Leave it".
 - A repo's own `CLAUDE.md` may say the same:  spell-app's does.

@@ -1,15 +1,19 @@
 /**
- * `spell dev design pull | changed | pushed | state` (epic `claude-design`, P9):  the local half of Spell's claude.ai
- * design system.  Claude's `/design` skill (`.claude/skills/design/`) does the claude.ai half with its Artifact tool.
- * - `pull <board.dc.html> <page.html> [--title "..."] [--from <design link>]` -- a Claude Design artboard (read from
- *   a Design with the Artifact tool) as a spell-app-dev page:  its `<ui-*>` markup kept, Claude Design's runtime
- *   dropped, the one-file bundle and the site header added for the page's depth.  Prints what it couldn't carry.
- * - `changed [--json]` -- which files of the built system (`packages/ui/build/design-system/project/`, from
- *   `spell dev design build` + `yarn design:bundle`) differ from what was last pushed, and which were removed
- * - `pushed [--url <system link>]` -- record the built files as pushed (after the skill's publish)
- * - `state [--json]` -- the record:  the system's link, when it was pushed, how many files
- * - The record is SHARED content, `brand/design-system.json` in `../spell-app-dev`, so every checkout knows what
- *   claude.ai holds:  `{ url, pushedAt, by, files: { "project/<path>": "<sha256>" } }`.
+ * `spell dev design pull | changed | pushed | state` (epic `claude-design`, P9):
+ * the local half of Spell's claude.ai design system.
+ * Claude's `/design` skill (`.claude/skills/design/`) does the claude.ai half with its Artifact tool.
+ * - `pull <board.dc.html> <page.html> [--title "..."] [--from <design link>]`:
+ *   a Claude Design artboard (read from a Design with the Artifact tool) as a spell-app-dev page
+ *   - its `<ui-*>` markup kept, Claude Design's runtime dropped
+ *   - the one-file bundle and the site header added for the page's depth
+ *   - prints what it couldn't carry
+ * - `changed [--json]`:  which files of the built system differ from what was last pushed, and which were removed
+ *   - the built system, from `spell dev design build` + `yarn design:bundle`:
+ *     `packages/ui/build/design-system/project/`
+ * - `pushed [--url <system link>]`:  record the built files as pushed (after the skill's publish)
+ * - `state [--json]`:  the record:  the system's link, when it was pushed, how many files
+ * - The record is SHARED content, `brand/design-system.json` in `../spell-app-dev`,
+ *   so every checkout knows what claude.ai holds:  `{ url, pushedAt, by, files: { "project/<path>": "<sha256>" } }`.
  */
 import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from "node:fs"

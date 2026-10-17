@@ -21,6 +21,7 @@ A DETAILS PAGE:  a small page that explains one decision.
 ## Writing for Owen
 
 Owen runs 5+ epics at once, and reads a page cold, coming from another session.
+
 Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
 - The "Where we are" box first, every time:
   - which epic or session
@@ -72,9 +73,10 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
      - Page widgets:  [epics' AGENTS.md](packages/epics/AGENTS.md), "Writing a page"
        (tables, code folded, pros / cons, steps ...).
      - Icons only from `ICONS`, in [bundle-spell-ui.js](packages/epics/tools/bundle-spell-ui.js).
-   - one `<ui-section>` per question, ids `q1`, `q2` ..., header `Q1 · Short question`, holding an `<epic-ask>`:
-     the epics pack's elements, an epic page's question (epic `epic-workflow` P12;  each has its page in Epic UI,
-     `/components/epics/`):
+   - one `<ui-section>` per question, holding an `<epic-ask>`:
+     - ids `q1`, `q2` ..., header `Q1 · Short question`
+     - the epics pack's elements, as an epic page's question is (epic `epic-workflow` P12)
+     - each element has its page in Epic UI, `/components/epics/`
 
      ```html
      <ui-section id="q1" header="Q1 · Which card layout?" sticky collapsible dividing>
@@ -94,33 +96,37 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
      </ui-section>
      ```
 
-     - letters `A`, `B` ...;  the recommended one FIRST, with `recommended`
+     - letters `A`, `B` ...
+     - the recommended one FIRST, with `recommended`
      - `title`:  2-5 words
      - the summary:  one line;  everything longer in an `<epic-aside title="Details">` (it folds)
      - pick several:  `multiple` on the `<epic-ask>` (tick boxes);  else pick one (round ones)
      - The elements draw the rest:
-       - each option, its tick box and a comment box;  each question, an "Other" box and its state chip
+       - each option, its tick box and a comment box
+       - each question, an "Other" box and its state chip
        - Send, in the sticky header (`<epic-send>`, in the template)
-     - Written into the page (the template has them):  a comment box last in every other section with no section
-       inside it, `<epic-text-box for="<section id>">`;  the page's notes after the last question,
-       `<epic-text-box type="notes">`
+     - Written into the page (the template has them):
+       - a comment box last in every other section with no section inside it:  `<epic-text-box for="<section id>">`
+       - the page's notes, after the last question:  `<epic-text-box type="notes">`
      - The page NEVER locks:  Owen sends partial answers, and sends again whenever he likes (2026-10-08).
    - a picture page:  delete the question sections and `<epic-send>`;  nothing to send
 3. Epic page:  `yarn vp fmt <page>` once it's written.
 
 ### Rewriting a page Owen may have open
 
-- What he typed and picked and hasn't sent is a DRAFT beside the page, `<slug>.draft.json5`
-  (epic `epic-workflow` P18):  saved a moment after each change, and in his browser too.
-  - Your rewrite reloads the page (or patches it in place);  the draft comes back into it, by question / option /
-    section id, over what he sent, and Send says "Changes not sent".
-  - Text whose id your rewrite REMOVED is never dropped:  it shows in a box of its own above the notes,
-    "Kept from before the page changed", and goes with his next Send (`Kept from before the page changed:` in the
-    answer).
+- What he typed and picked and hasn't sent is a DRAFT (epic `epic-workflow` P18).
+  - It's beside the page, `<slug>.draft.json5`:  saved a moment after each change, and in his browser too.
+  - Your rewrite reloads the page (or patches it in place).
+    The draft comes back into it over what he sent, by question / option / section id,
+    and Send says "Changes not sent".
+  - Text whose id your rewrite REMOVED is never dropped:
+    - it shows in a box of its own above the notes, "Kept from before the page changed"
+    - it goes with his next Send (`Kept from before the page changed:` in the answer)
 - So, BEFORE rewriting:  `epic ask draft <slug>`.
   - It prints what's typed and not sent (exit 1:  nothing), as an answer reads.
-  - Take it into account:  keep the ids of questions he's typing in;  a new question gets a NEW id, not a reused
-    one, so his text never lands on a question it wasn't written for.
+  - Take it into account:
+    - keep the ids of questions he's typing in
+    - a new question gets a NEW id, not a reused one, so his text never lands on a question it wasn't written for
   - It's not an answer:  don't act on it as one.  He sends when he's ready.
 
 ## 3. Show it, and wait
@@ -141,8 +147,9 @@ Any page you name to Owen (a details page, an epic page, any docs page):
   - `🌐`, after a `•`, opens it in Chrome:  `Title • 🌐` (Owen, 2026-10-11)
   - Both go through the page server ([showRoutes.ts](packages/epics/tools/showRoutes.ts)):
     the Claude panel ignores `vscode://` links, and opens `localhost` ones in a VS Code tab.
-- `--hash`:  ALWAYS the id of what you mean (`q2`, `t4`, a phase's `p-epic-migrate` ...;  `p3` lands on P3).
-  The page lands there, below the sticky titles, unfolded.
+- `--hash`:  ALWAYS the id of what you mean.
+  - e.g. `q2`, `t4`, a phase's `p-epic-migrate` ...;  `p3` lands on P3
+  - The page lands there, below the sticky titles, unfolded.
 - No page server here has the route yet (older than it):  it prints a plain link, and says so.
 
 ## 4. The answer
@@ -160,15 +167,16 @@ Any page you name to Owen (a details page, an epic page, any docs page):
   ```
 
   Act on it.
-  - Epic:  record it, linking the page (`<a href="details/<slug>.html">`):
-    `epic decide <name>#Q<n> "..."`, or `epic add <name>#D`.
+  - Epic:  record it, with `epic decide <name>#Q<n> "..."`, or `epic add <name>#D`.
+    - Link the page:  `<a href="details/<slug>.html">`.
   - "(not decided yet)":  Owen hasn't picked.
     Never read it as "no", or as the recommended one.
   - "(new)":  changed since his send before.
     Act on those;  the rest you've seen.
   - comments:  answer each (in chat, or on the page when it's a fix to the page)
-  - "Kept from before the page changed":  what he typed for questions or sections a rewrite removed (P18), under
-    their old titles and ids;  read each against the page as it is now, and act on it as a comment
+  - "Kept from before the page changed":  what he typed for questions or sections a rewrite removed (P18)
+    - under their old titles and ids
+    - read each against the page as it is now, and act on it as a comment
 - A PARTIAL answer (anything "not decided yet"):  act on what's there, then wait again at once.
   - `epic ask wait <slug>`, Bash `run_in_background: true`:  every Send wakes you.
   - Stop once every question is decided, or Owen says he's done.

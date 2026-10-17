@@ -16,11 +16,15 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
 - The switch:  `~/.spell/airplane.json`, read by [`AirplaneMode`](packages/epics/tools/AirplaneMode.ts).
   - While it's on, the page server tells every page.
   - Then the review controls say "queued for when you land", instead of "start `/epic review`".
-- Works from ANY session, a worktree's too (Owen, 2026-10-10:  "when I land in any session, all should come back
-  online").
+- Works from ANY session, a worktree's too.
+  - Owen, 2026-10-10:  "when I land in any session, all should come back online".
   - Its commands act on the MAIN checkout:  its page server is the one the side bar uses.
   - So run each `spell dev ...` here from the main checkout's root:
-    `cd "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")" && epic airplane ...`.
+
+    ```sh
+    cd "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")" && epic airplane ...
+    ```
+
   - The inboxes, epic pages and pages are shared content:  the same files from every checkout.
   - Only `/docs-check` (step 3) stays per checkout:  it checks epics merged into `main`, so it runs there too.
 
@@ -61,11 +65,15 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
      - mark items as usual;  Send isn't needed:  every mark is taken at landing, sent or not
      - "+" on an epic page's header (or its Todos / Questions):  a new todo or question;
        the bubble on a phase or the summary:  a note
-     - any page, epic pages too:  the bullhorn beside a block (a section, table, aside, code, an item, a phase's
-       field ...), or select text and press ⌘ I (or the bullhorn floating beside it):  a comment, saved at once;
-       closed, it's a thread under its paragraph
-     - a thread Claude answered:  its header's pills -- the check ("that's good"), Revisit (reply:  into the box
-       at the thread's end, saved as you type), the x ("skip it");  a reply is taken at landing like a new comment
+     - any page, epic pages too:  a comment, saved at once
+       - the bullhorn beside a block (a section, table, aside, code, an item, a phase's field ...)
+       - or select text and press ⌘ I (or the bullhorn floating beside it)
+       - closed, it's a thread under its paragraph
+     - a thread Claude answered:  its header's pills
+       - the check ("that's good")
+       - Revisit (reply:  into the box at the thread's end, saved as you type)
+       - the x ("skip it")
+       - a reply is taken at landing like a new comment
      - Tab or a click away saves a comment or reply;  emptied, it's gone
      - a new epic:  the Epics page's New epic pill (its seedling):  a title and what it's for.
        It's written down as a future epic at once, and the landing asks whether to start it.
@@ -82,16 +90,22 @@ Owen is back online.  Gather everything, work through it in the background, then
    - each epic's marks, sent or not, its drafts, Do Now requests, and new items from the page's `+`
    - new epics made from the Epics page, not started (`newEpics`)
    - each epic's comments (`comments`:  on its epic page's blocks)
-   - comments on docs pages (`comments`);  page notes;  details answers since the flight;  (goals thoughts:  parked since 2026-10-11)
-   - A comment is listed when it's Claude's turn on its THREAD:  a new one, or one Owen REPLIED on since Claude
-     answered (his latest words:  the last of its `replies`, `by: "Owen"`).  Those he closed ("that's good",
-     "skip it") aren't.
+   - comments on docs pages (`comments`)
+   - page notes
+   - details answers since the flight
+   - (goals thoughts:  parked since 2026-10-11)
+   - A comment is listed when it's Claude's turn on its THREAD:
+     - a new one
+     - or one Owen REPLIED on since Claude answered
+       (his latest words:  the last of its `replies`, `by: "Owen"`)
+     - Those he closed ("that's good", "skip it") aren't.
    - Run it FIRST, while the switch is on:  its `since` is when the flight began, which picks the details answers.
 2. `epic airplane off`.
+
 2b. Bring every session back online:  `epic park list`, each entry still `parked`.
-   - Its session running (`epic worktree status <name>`, `running: true`):
-     `SendMessage` to it:  "Run `/unpark <name>` (asked by `/airplane land`)."
-     This session itself:  unpark it here, as [the unpark skill](../unpark/SKILL.md) says, once the rest is done.
+   - Its session running:  `SendMessage` to it:  "Run `/unpark <name>` (asked by `/airplane land`)."
+     - running:  `epic worktree status <name>` says `running: true`
+     - This session itself:  unpark it here, as [the unpark skill](../unpark/SKILL.md) says, once the rest is done.
    - Not running:  list it in the reply, with `/session <name>` to reopen it, then `/unpark <name>` there.
    - Nothing waiting AND nothing parked:  say so in one line, and stop.
 3. Reply at once, short:  the counts by place, and that the work runs in the background now.
@@ -103,17 +117,19 @@ Owen is back online.  Gather everything, work through it in the background, then
      - a note box's x:  skipped, reviewed with nothing to do
 
 4b. Docs pages' comments, in the session itself (quick):  `epic comments gather --json`.
-   - A comment on a page an epic OWNS (its `epic` in step 1's list:  epic `epic-workflow` P13) is NOT gathered:
-     it's that epic's.  Its running session takes it with its next `wait`;  none running:  answer it in 5, as that
-     epic's session would (`epic comments working`, then `answer`), or list it for `/epic review <epic>`.
+   - A comment on a page an epic OWNS is NOT gathered:  it's that epic's.
+     - Owned:  it has an `epic` in step 1's list (epic `epic-workflow` P13).
+     - Its running session takes it with its next `wait`.
+     - None running:  answer it in 5, as that epic's session would (`epic comments working`, then `answer`),
+       or list it for `/epic review <epic>`.
    - Every other waiting comment (and page note still new) goes into epic `guide-changes`, one phase per page.
      - The phase is made the first time.
      - A page whose phase is still open gets an Updated block in it.
      - A reply on a thread goes too, under its comment ("Owen replied on the thread").
    - Each is marked taken on its page.
-   - `/epic guide-changes` answers each on its thread:  `epic comments working <page>#<id> on` as it starts
-     (the thread shows "Claude: thinking…"), then `epic comments answer <page>#<id> --file <html>
-     [--commit <sha>]`, which turns it off.
+   - `/epic guide-changes` answers each on its thread:
+     - as it starts:  `epic comments working <page>#<id> on`, and the thread shows "Claude: thinking…"
+     - then `epic comments answer <page>#<id> --file <html> [--commit <sha>]`, which turns it off
    - Say which pages, and that `/epic guide-changes` works them;  nothing else to do for them now.
 5. The rest goes to background agents, up to 5 at once.
    They're named and listed (the root `CLAUDE.md`, "Delegated work").
@@ -126,16 +142,17 @@ Owen is back online.  Gather everything, work through it in the background, then
      - The cards `apply --all` makes for picks, todos and new items are Noted already.
    - Each comment on an epic page (`epics[].comments`):  as `/epic review` answers one ("7.3", step 3b).
      - First `epic inbox <name>#M3 working on`:  his thread shows "Claude: thinking…" until the answer lands.
-     - Into the item or phase it's on, then `epic inbox <name>#M3 done --file <answer.html>`:  the answer on
-       his thread too, his turn (and the thinking stub gone).  A reply of his:  answer his latest words.
+     - Into the item or phase it's on, then `epic inbox <name>#M3 done --file <answer.html>`.
+       - The answer goes on his thread too:  his turn, and the thinking stub gone.
+     - A reply of his:  answer his latest words.
    - Page notes were gathered in 4b with the comments.
-     One written into a page since:  read the page and the note, and answer under it
-     (`epic notes answer <page>#<id> --file`).
+     - One written into a page since:  read the page and the note, and answer under it.
+     - `epic notes answer <page>#<id> --file`
    - Details answers:  as `/details` takes them.  (Goals thoughts:  goals is parked, epic `epic-goals`.)
    - Nothing is decided for Owen:  an answer that needs him ends in option cards, and the item stays red.
 
-5b. New epics (`newEpics`, made with the Epics page's New epic):  ask which to start, with CHECKBOXES
-   (Owen, 2026-10-09).
+5b. New epics, made with the Epics page's New epic (`newEpics`):
+   ask which to start, with CHECKBOXES (Owen, 2026-10-09).
    - AskUserQuestion, `multiSelect`, "Start which new epics?"
    - One option per epic:  its title for the label;  `<name>` and the prompt's first line for the description.
    - 4 per question, up to 4 questions.

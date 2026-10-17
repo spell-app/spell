@@ -2,13 +2,15 @@
  * Types of `$/epics/convert`:  the converter from the old epic-page markup (`ui-section`, `ui-item[data-status]` ...)
  * to `<epic-*>` markup, and the proof that it lost nothing.
  * - Bottom of the folder's import graph:  `import type` only, apart from these constants and the tool's types file.
- *   `convert.types` <- `DocReading` <- `OldReading` / `NewReading` <- `ConversionProof`;
- *   `convert.types` <- `CardConverter` <- `ItemConverter` / `PhaseConverter` <- `Converter` <- `ConvertRun`;
- *   the second pass:  `convert.types` <- `ConvertedReading` / `Upgrader`, on the tool's `ProseShapes` and
- *   `ProseRewrite` (`$/epics/tool`).
- * - The OLD markup's selectors live here, once:  the converter reads them, and the proof's `OldReading` knows which
- *   of their text is chrome (`Chrome`:  the tool's, `$/epics/tool/planDoc.types`, re-exported here).  Rules for that
- *   markup:  `templates/epics/plan-doc.md`, "Markup the script writes".
+ *   - `convert.types` <- `DocReading` <- `OldReading` / `NewReading` <- `ConversionProof`
+ *   - `convert.types` <- `CardConverter` <- `ItemConverter` / `PhaseConverter` <- `Converter` <- `ConvertRun`
+ *   - the second pass:  `convert.types` <- `ConvertedReading` / `Upgrader`,
+ *     on the tool's `ProseShapes` and `ProseRewrite` (`$/epics/tool`)
+ * - The OLD markup's selectors live here, once:
+ *   - the converter reads them
+ *   - the proof's `OldReading` knows which of their text is chrome
+ *     (`Chrome`:  the tool's, `$/epics/tool/planDoc.types`, re-exported here)
+ *   - rules for that markup:  `templates/epics/plan-doc.md`, "Markup the script writes"
  */
 
 import { PACK_URL } from "$/epics/server/server.types"
@@ -19,8 +21,9 @@ import { ProseBlocks, ProseCounted } from "$/epics/tool/planDoc.types"
 ////////////////
 
 /**
- * A doc the converter can't convert:  markup it doesn't know where a structure is expected (a phase section holding
- * something other than phases), or a layout from before 2026-10-02 (`epic migrate` first).
+ * A doc the converter can't convert:
+ * - markup it doesn't know where a structure is expected (a phase section holding something other than phases)
+ * - or a layout from before 2026-10-02 (`epic migrate` first)
  * - `cause.where`:  the element, in a few words
  */
 export class ConvertError extends Error {
@@ -57,13 +60,16 @@ export type Conversion = {
   /** Was the input split (a skeleton plus parts)? */
   wasSplit: boolean
   /**
-   * Which pass made it:  `1`, the old markup => `<epic-*>` (`Converter`);  `2`, a converted doc => the P14 shapes
-   * (`Upgrader`).
+   * Which pass made it:
+   * - `1`, the old markup => `<epic-*>` (`Converter`)
+   * - `2`, a converted doc => the P14 shapes (`Upgrader`)
    */
   pass: 1 | 2
   /**
-   * The second pass's counts, by what it did (`question`, `net effect` ...) and, `kept:` first, by what it left as
-   * prose (`kept: net effect in other words`).  Empty for the first pass.
+   * The second pass's counts:
+   * - by what it did (`question`, `net effect` ...)
+   * - and, `kept:` first, by what it left as prose (`kept: net effect in other words`)
+   * - empty for the first pass
    */
   counts: Record<string, number>
 }
@@ -195,8 +201,9 @@ export const UPDATED_LABEL = "Updated"
 export const COMMITS_LABEL = "Commits"
 
 /**
- * Where a phase field the vocabulary has no name for goes (`Judgement calls:`, `Outcome:` ...):  the first of these
- * the phase has, else a new `goal`.  Kept whole, label and all, as a `<div>` at its end.
+ * Where a phase field the vocabulary has no name for goes (`Judgement calls:`, `Outcome:` ...):
+ * the first of these the phase has, else a new `goal`.
+ * - kept whole, label and all, as a `<div>` at its end
  */
 export const EXTRA_FIELD_HOSTS: readonly FieldName[] = ["done", "goal"]
 
@@ -205,12 +212,14 @@ export const EXTRA_FIELD_HOSTS: readonly FieldName[] = ["done", "goal"]
 ////////////////
 
 // What the old markup wrote that the elements now draw (`Chrome`), and a reply's title line (`replyTitleParts()`):
-// the tool's too (`IncomingHtml` turns old shapes into elements on the way in), so its types file holds them
+// the tool's too (`IncomingHtml` turns old shapes into elements on the way in),
+// so its types file holds them
 export { Chrome, replyTitleParts } from "$/epics/tool/planDoc.types"
 
 /**
- * Is `message` (`ui-message.plan-update`) the script's own UPDATE note, `header="UPDATE"` with its phase?  It becomes
- * `<epic-update phase>`;  a hand-written one (`header="DONE · option A"`, no phase) stays prose.
+ * Is `message` (`ui-message.plan-update`) the script's own UPDATE note, `header="UPDATE"` with its phase?
+ * - it becomes `<epic-update phase>`
+ * - a hand-written one (`header="DONE · option A"`, no phase) stays prose
  */
 export function isScriptUpdate(message: Element): boolean {
   return message.getAttribute("header") === "UPDATE" && /^\d+$/.test(message.getAttribute("data-phase") ?? "")
@@ -238,14 +247,15 @@ export const EXCLUSIONS = [
 // ## The second pass
 ////////////////
 
-// The old prose blocks' selectors and what the elements draw around them (`Drawn`):  the tool's too (`ProseShapes`,
-// its way in's and this pass's ONE set of rules), so its types file holds them
+// The old prose blocks' selectors and what the elements draw around them (`Drawn`):
+// the tool's too (`ProseShapes`, its way in's and this pass's ONE set of rules),
+// so its types file holds them
 export { Drawn, LABELLED_BLOCK } from "$/epics/tool/planDoc.types"
 
 /**
- * The shapes the SECOND pass reads (`Upgrader`, P14):  blocks in a converted doc that no element owned until P14, by
- * what they are -- the page's own, and the prose blocks (`ProseBlocks`, the tool's).  The proof's `ConvertedReading`
- * knows which of their text the new elements draw.
+ * The shapes the SECOND pass reads (`Upgrader`, P14):  blocks in a converted doc that no element owned until P14.
+ * - by what they are:  the page's own, and the prose blocks (`ProseBlocks`, the tool's)
+ * - the proof's `ConvertedReading` knows which of their text the new elements draw
  */
 export const Prose = {
   crumbs: "ui-breadcrumb.spell-crumbs",

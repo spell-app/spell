@@ -55,7 +55,8 @@ Owen has lots going at once:  show it all in one screen, sort it, and clean up w
    - Then the worktrees no session is in, one line.
 3. The three groups, in the order above, as numbered lists.
    - Owen refers to items by number:  1, 2 ... in the first group, carrying on in the next.
-   - Per item:  its kind and name in bold (`worktree seo`, `session SVG from image`), then its `why` in plain words.
+   - Per item:  its kind and name in bold, then its `why` in plain words.
+     - e.g. `worktree seo`, `session SVG from image`
    - An empty group:  one line, "nothing".
 4. Everything empty apart from this session:  "all clear", and stop.
 5. A session Owen asks about isn't listed:  it isn't running.
@@ -73,8 +74,9 @@ ONE details page asks about every item instead (Owen, 2026-10-03):
 - One question per item, in the groups' order:
   - `title`:  `<n> · <kind> <name>`
   - `text`:  its `why` in plain words, and when it was last touched
-  - `options`:  its `actions`, most useful first and `recommended` (NEVER `discard`);
-    each `summary` what it does, and `details` its commands
+  - `options`:  its `actions`
+    - most useful first, that one `recommended` (NEVER `discard`)
+    - each `summary` what it does, and `details` its commands
   - then "Leave it"
 - Skip this session's own item, as below.
 - Make it, show it, and END THE TURN with the page's link pair (`epic pages link <page>`):
@@ -113,16 +115,15 @@ In the order Owen will want to see them:  quick looks (`wtf`, `open`, `answer`) 
   - In a worktree session, the harness refuses git commands aimed outside the worktree.
   - Collect each refused line, and give Owen the list at the end:
     to paste, or to run `/worktrees` again from a session in the main checkout.
-- A command fails (a dirty worktree for `git worktree remove`, unmerged work for `git branch -d`):
-  NEVER retry with `--force` / `-D`.
-  Say why, and leave it for the next round.
+- A command fails:  NEVER retry with `--force` / `-D`.
+  - e.g. a dirty worktree for `git worktree remove`, unmerged work for `git branch -d`
+  - Say why, and leave it for the next round.
 - Per action id:
   - `remove`:  its commands.
-    - `-D` there means its commits are already in `main` (squashed):
-      run `git cherry main <branch>` first, and go on only if every line starts with `-`.
-    - A merged one removed:
-      `epic session done <name>`, so its sessions read `✅ <name>` once each is next opened
-      (epic `windows-and-review` P6).
+    - `-D` there means its commits are already in `main`, squashed.
+      Check first:  `git cherry main <branch>`, and go on only if every line starts with `-`.
+    - A merged one removed:  `epic session done <name>`.
+      Its sessions then read `✅ <name>`, once each is next opened (epic `windows-and-review` P6).
   - `discard`:  ALWAYS a second AskUserQuestion first, "Throw away `<name>`?", listing what goes:
     - `git log --oneline main..<branch>`
     - `git -C <worktree> status --short`

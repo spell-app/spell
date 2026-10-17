@@ -6,10 +6,11 @@ import { Git } from "./Git"
 
 /****************
  * ### `Repos`
- * `epic repo <verb>`:  the repos the machine's epic server serves (`RepoList`, `~/.spell-epic/repos.json5`;  epic
- * `epic-eject` P7).
- * - `add [<checkout>] [--name <name>] [--default]`:  register the repo `<checkout>` is in (default:  this one), as
- *   its folder's name or `<name>`;  `--default`:  served at `/` from now on
+ * `epic repo <verb>`:  the repos the machine's epic server serves
+ * (`RepoList`, `~/.spell-epic/repos.json5`;  epic `epic-eject` P7).
+ * - `add [<checkout>] [--name <name>] [--default]`:
+ *   register the repo `<checkout>` is in (default:  this one), as its folder's name or `<name>`
+ *   - `--default`:  served at `/` from now on
  * - `list [--json]`:  every repo, its content folder and URL prefix, the default marked
  * - `remove <name>`:  unregister it
  * - `default <name>`:  serve it at `/`

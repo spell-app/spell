@@ -19,29 +19,40 @@ import { Worktrees } from "./Worktrees"
 
 /****************
  * ### `EpicProgram`
- * `epic <verb> ...`:  the epic tools, a command of their own (epic `epic-workflow` P9) -- the commander tree, and
- * `epic --help`.  Each verb group registers here, under its own heading, and runs in THIS process.
- * - Most verbs edit or read an epic page (`epics/<name>/<name>.plan.html`):  the `epic` tool
- *   (`EpicTools.runPlanDoc()`), after `planDocArgs()` turns Owen's `seo#J3` addressing into the tool's arguments
- * - `send`, `requests`, `file`, `home`, `merge`:  `Requests`
- * - `worktree`, `session`, `park`, `shared`, `stock`:  `Worktrees`, `Sessions`, `Parking`, `Shared`, `Stock`
- *   (epic `epic-eject` P5:  they were `spell dev worktree` ...)
- * - `window`, `server` and the docs tools' groups (`ask`, `choices`, `comments`, `notes`, `agents`, `airplane`):
- *   scripts passed through, their arguments verbatim (`EpicTools.run()`)
- * - `hub`, `repo`:  the machine's one epic server and the repos it serves (`Hub`, `Repos`;  epic `epic-eject` P7)
- * - `pages`:  the docs pages' tools (`spell dev docs` in spell-app;  epic `epic-eject` P9), passed through
- * - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
- * - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
- * - Each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask new --help`, and an unknown one is
- *   refused;  every verb's help has its usage, what it does and an example (`epic close --help`);  an unknown verb
- *   exits 1, listing them;  a usage error exits 2 (`EXIT`)
- * - ONE copy of the code:  every verb runs THIS checkout's code, whichever checkout calls it;  the data is the
- *   caller's (`Git.nearestCheckout()`).  `epic --version` says which code runs.
- * - The old spellings still run here:  `spell dev plan-doc <verb> <name> ...`, `spell dev worktree ...`,
- *   `spell dev details ...` (the CLI's `devProgram.ts`), and `spell epic <verb>`
- * - Lean:  it loads no spell, and the `epic` tool only when a page verb runs, so `epic` starts in a fraction of a
- *   second.  Its entry is the CLI's `epicMain.ts`;  NEVER imports the CLI package (`$/cli`).
- * - NOTE: `spell dev commands` reads the `epic.command(...)` calls in this file's TEXT:  keep the receiver named `epic`
+ * `epic <verb> ...`, the epic tools' own command (epic `epic-workflow` P9):  its commander tree, and `epic --help`.
+ * Each verb group registers here, under its own heading, and runs in THIS process.
+ *
+ * - The verb groups:
+ *   - most verbs edit or read an epic page (`epics/<name>/<name>.plan.html`):
+ *     the `epic` tool (`EpicTools.runPlanDoc()`),
+ *     after `planDocArgs()` turns Owen's `seo#J3` addressing into the tool's arguments
+ *   - `send`, `requests`, `file`, `home`, `merge`:  `Requests`
+ *   - `worktree`, `session`, `park`, `shared`, `stock`:  `Worktrees`, `Sessions`, `Parking`, `Shared`, `Stock`
+ *     (epic `epic-eject` P5:  they were `spell dev worktree` ...)
+ *   - `window`, `server` and the docs tools' groups (`ask`, `choices`, `comments`, `notes`, `agents`, `airplane`):
+ *     scripts passed through, their arguments verbatim (`EpicTools.run()`)
+ *   - `hub`, `repo`:  the machine's one epic server and the repos it serves (`Hub`, `Repos`;  epic `epic-eject` P7)
+ *   - `pages`:  the docs pages' tools (`spell dev docs` in spell-app;  epic `epic-eject` P9), passed through
+ *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
+ *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
+ * - Help and mistakes:
+ *   - each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask new --help`,
+ *     and an unknown one is refused
+ *   - every verb's help has its usage, what it does and an example (`epic close --help`)
+ *   - an unknown verb exits 1, listing them;  a usage error exits 2 (`EXIT`)
+ * - ONE copy of the code:  every verb runs THIS checkout's code, whichever checkout calls it.
+ *   - the data is the caller's (`Git.nearestCheckout()`)
+ *   - `epic --version` says which code runs
+ * - The old spellings still run here:
+ *   - `spell dev plan-doc <verb> <name> ...`, `spell dev worktree ...`, `spell dev details ...`
+ *     (the CLI's `devProgram.ts`)
+ *   - `spell epic <verb>`
+ * - Lean:  it loads no spell, and the `epic` tool only when a page verb runs,
+ *   so `epic` starts in a fraction of a second.
+ *   - its entry is the CLI's `epicMain.ts`
+ *   - NEVER imports the CLI package (`$/cli`)
+ * - NOTE: `spell dev commands` reads the `epic.command(...)` calls in this file's TEXT:
+ *   keep the receiver named `epic`
  ****************/
 export class EpicProgram {
   /** the commander tree:  every verb on it */
@@ -78,8 +89,8 @@ export class EpicProgram {
   }
 
   /**
-   * Run the command line (`process.argv`, `epic <verb> ...`);  never resolves:  every verb exits the process with its
-   * code (`runVerb()`).
+   * Run the command line (`process.argv`, `epic <verb> ...`).
+   * - never resolves:  every verb exits the process with its code (`runVerb()`)
    */
   async parse(): Promise<void> {
     // output piped into e.g. `head`, which closed it:  nothing more to say
@@ -528,10 +539,10 @@ export class EpicProgram {
   ////////////////
 
   /**
-   * Make `verb` a verb on an epic page:  run by the `epic` tool, after `planDocArgs()`;  returns it, for its usage
-   * line and help.
-   * - `sample`:  a whole command line, for its help's "Example:" (a verb with its own help text has its examples
-   *   there)
+   * Make `verb` a verb on an epic page:  run by the `epic` tool, after `planDocArgs()`.
+   * - returns it, for its usage line and help
+   * - `sample`:  a whole command line, for its help's "Example:"
+   *   (a verb with its own help text has its examples there)
    * - its arguments are taken raw (`rawArgs()`):  `--goal` / `--details` ... are the tool's, not commander's
    * - `epic.command("<name>")` stays at each call:  `spell dev commands` finds the verbs by that text
    */
@@ -546,12 +557,12 @@ export class EpicProgram {
   }
 
   /**
-   * Make `command` group `name` of `epic`'s, run by `run` with its arguments verbatim, with a verb of its own for
-   * each of `GROUP_VERBS`, so `epic ask new --help` prints that verb's help.
+   * Make `command` group `name` of `epic`'s, run by `run` with its arguments verbatim.
+   * - a verb of its own for each of `GROUP_VERBS`, so `epic ask new --help` prints that verb's help
    * - an unknown verb (`epic ask bogus`):  refused, exit 1, listing the group's verbs
-   * - no verb (`epic agents`, `epic comments --json`):  the tool's default, or its usage;  a verb after a flag the
-   *   tool takes (`epic agents --epic seo list`) is the tool's to read:  commander can't tell a flag's value from a
-   *   verb
+   * - no verb (`epic agents`, `epic comments --json`):  the tool's default, or its usage
+   * - a verb after a flag the tool takes (`epic agents --epic seo list`) is the tool's to read:
+   *   commander can't tell a flag's value from a verb
    * - `epic.command("<name>")` stays at each call:  `spell dev commands` finds the verbs by that text
    */
   private group(command: Command, description: string, run: (args: string[]) => Promise<number>): Command {
@@ -597,8 +608,8 @@ export class EpicProgram {
    *   - folders absolute;  a window name by its dotted key, `windows.default`
    * - no key:  every value, `key:  value` a line;  `--json`:  all of them as JSON
    * - the repo:  the checkout the command runs in (any worktree reads the main checkout's file), else this code's
-   * - Returns 0.  Throws `EpicCommandError`:  exit 2 for an unknown key, listing the keys;  1 for a file that won't
-   *   read.
+   * - Returns 0.
+   * - Throws `EpicCommandError`:  exit 2 for an unknown key, listing the keys;  1 for a file that won't read.
    * - static:  needs no tree
    */
   static async config(args: string[]): Promise<number> {
@@ -652,8 +663,9 @@ async function runVerb(run: () => Promise<number>): Promise<never> {
 }
 
 /**
- * Refuse `typed`, a verb `command` doesn't have, listing those it does;  exits 1, as commander exits for a mistake
- * (a usage error, a verb's missing argument, is 2:  `EXIT.USAGE`).
+ * Refuse `typed`, a verb `command` doesn't have, listing those it does.
+ * - exits 1, as commander exits for a mistake
+ *   (a usage error, a verb's missing argument, is 2:  `EXIT.USAGE`)
  */
 function unknownVerb(command: Command, typed: string): never {
   const verbs = command.createHelp().visibleCommands(command)

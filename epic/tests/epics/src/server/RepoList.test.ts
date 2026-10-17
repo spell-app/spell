@@ -1,6 +1,6 @@
 /**
- * Tests of the epic server's repo list (`RepoList`, `~/.spell-epic/repos.json5`), in a temp home folder:  never the
- * real one.
+ * Tests of the epic server's repo list (`RepoList`, `~/.spell-epic/repos.json5`),
+ * in a temp home folder:  never the real one.
  */
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -22,8 +22,9 @@ function scratch(prefix: string): string {
 }
 
 /**
- * A repo's main checkout (no git:  it counts as its own main checkout) whose `.epic/config.json5` puts its content in
- * `content` (relative to it), with that folder made;  its path.
+ * A repo's main checkout whose `.epic/config.json5` puts its content in `content` (relative to it),
+ * with that folder made;  its path.
+ * - no git:  it counts as its own main checkout
  */
 function repo(name: string, content = "docs"): string {
   const checkout = join(scratch("epic-repos-"), name)

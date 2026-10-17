@@ -22,7 +22,7 @@ Another session is changing things this one depends on (e.g. moving packages).
 
 ## 1. Which one
 
-- `$ARGUMENTS` is `?` (or empty):  `epic park candidates`.
+- `?`, or no argument:  `epic park candidates`.
   - none:  say so, and stop
   - else AskUserQuestion "Wait for which?", one option per candidate
     - labelled with its `name`, described by its `label`
@@ -45,13 +45,14 @@ Another session is changing things this one depends on (e.g. moving packages).
 ## 3. Wait
 
 1. `epic worktree status <name>` already `finished`:  say why in one line, then step 4.
-2. Else `Bash`, with `run_in_background: true`, `timeout: 7200000`:
-   `epic park wait <name>` (checks every 60s;  gives up after ~2h).
+2. Else start the wait in the background:  `epic park wait <name>`.
+   - It checks every 60s, and gives up after ~2h.
+   - The `Bash` call's settings:  `run_in_background: true`, `timeout: 7200000`
 3. One line:
    "parked `<this>`;  waiting for `<name>` (checks every minute);  resumes on its own when it's <merged / done / ...>".
    - End the turn:  the poll's exit wakes this session.
 4. When it exits:
-   - 0:  finished.  Its JSON's `why` says which.  Step 4.
+   - 0:  finished, and its JSON's `why` says which:  step 4.
    - 2:  still going after 2 hours:  start it again (step 3.2), no message.
    - 3, or anything else:  say what it printed, and stop, still parked.
    - Owen writes while it waits:  answer him;  the wait goes on.

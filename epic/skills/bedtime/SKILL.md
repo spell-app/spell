@@ -20,8 +20,9 @@ The EPIC PAGE is the record, as on any day:
   Both go in the log.
   - While it's on, every item a command touches is marked the night's:  green until reviewed (D2).
     Unless it waits on Owen (an open judgement call or issue):  red beats green.
-  - And `epic summary <name> --json` has `"bedtime": "P<a>-P<b>"` (`null` when off):
+  - And `epic summary <name> --json` has `"bedtime": "P<a>-P<b>"` while it's on:
     that's how a compacted session knows it's still running.
+    - `null` when off
 - Style:  as in `/epic`:
   the epic page written for Owen coming back cold ([plan-doc.md](templates/epics/plan-doc.md), "Rules").
 
@@ -50,7 +51,7 @@ so he answers everything in one sitting.
   - just now:  "about to run P<a>-P<b> overnight"
   - decides:  "what I do while you sleep:  anything left open becomes a judgement call"
 - Questions:
-  - `phases` (`multiple`, "All" `recommended`, then each to-do phase)
+  - `phases`, `multiple`:  "All" first and `recommended`, then each to-do phase
   - "Isolate first?", when step 3 says so
   - then every real question of step 3, each with its options, one `recommended`
 - `--epic <name>`, slug `bedtime-<date>`, so the page stays with the epic page.
@@ -105,8 +106,11 @@ Until the run ends (step 6), these OVERRIDE the root rules and memory:
 - Commit after each phase without asking:  the `/bedtime` run is the ask.
   Stage the phase's files by name, never `git add -A`.
 - Don't stop between phases for review.
-- NEVER merge into `main`, push, `/isolate done`, `ExitWorktree`, or delete anything outside the worktree.
-  Something needing those:  `add <name>#T`, and go on.
+- NEVER any of these:
+  - merge into `main`, or push
+  - `/isolate done`, or `ExitWorktree`
+  - delete anything outside the worktree
+  - Something needing those:  `add <name>#T`, and go on.
 
 Owen writing in this session mid-run means he's awake:  bedtime mode ends there.
 - Say which phase it was on.
@@ -141,10 +145,12 @@ Everything else stands:
    - CALM by default:  add `--calm` (last), so it shows yellow (open) rather than red.  An issue too.
      - Owen:  "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
        (2026-10-10, "the principle of least surprise").
-     - RED (no `--calm`) only when it would surprise him:  it goes against something he said;
-       it drops, narrows or changes what he asked for;  a real fork he'd plausibly have picked differently
-       AND that matters to him (cost, behaviour he'll notice, something hard to undo);
-       or it needs his answer before work can go on.
+     - RED (no `--calm`) only when it would surprise him:
+       - it goes against something he said
+       - it drops, narrows or changes what he asked for
+       - a real fork he'd plausibly have picked differently AND that matters to him
+         (cost, behaviour he'll notice, something hard to undo)
+       - or it needs his answer before work can go on
      - Following WWOD is one case of calm, not the only one.
      - The rule in full:  [the epic skill](../epic/SKILL.md), "5. Each phase", step 2.
    - The phase's "To review" line lists it by itself:  the tool writes it on every edit.
@@ -161,7 +167,7 @@ Everything else stands:
    with the ids of its judgement calls.
 7. Commit:  `P<n>:  <Name> -- <one-line summary>`.
    - `WIP P<n>:  ...` for WIP;  an item fix:  `<name> I3:  ...`.
-   - The epic page is never in it:  it's shared content (`epics/`, a link into `../spell-app-dev`),
+   - The epic page is never in it:  it's shared content (`epics/`, a link into the content folder),
      committed for you at the turn's end.
 8. `epic commit <name>#P<N> <sha> "<what was built>"`:  the commit, under the phase's Commits.
 

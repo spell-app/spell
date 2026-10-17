@@ -15,9 +15,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
 - It's the user's view of the work:  they read it in the right side bar's REVIEW tab while you work.
   - That's the checkbox icon;  never the "Spell Docs" hat tab (Owen's rule, 2026-10-07).
 
-- Shared content:  the epic page lives in `epics/`, which spell-app doesn't track
-  (epic `shared-content`, 2026-10-04).
-  - In every checkout, `epics/` is a link into ONE shared repo, `../spell-app-dev`.
+- Shared content:  the epic page lives in `epics/`, which spell-app doesn't track (epic `shared-content`, 2026-10-04).
+  - In every checkout, `epics/` is a link into ONE shared repo, the content folder (`epic config contentFolder`).
   - So there is ONE epic page:  `main` and every worktree see each edit at once;  it never conflicts on merge.
   - Committed for you after every turn
     (the `Stop` hook, [shared-commit.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/shared-commit.mjs)).
@@ -36,7 +35,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
       - `q7.html`:  Q7's details
       - `log.html`
     - Edit a body's prose in ITS part file, at its real path:
-      `<content>/epics/<name>/parts/<id>.html`, `<content>` being what `epic config contentFolder` prints.
+      - the file:  `<content>/epics/<name>/parts/<id>.html`
+      - `<content>`:  what `epic config contentFolder` prints
     - Its relative links are relative to `parts/`:  one `../` more than the skeleton's.
   - A new Overview sub-section:  write it whole into the skeleton, inside `#overview`.
     - The next `epic` command moves its body into `parts/<id>.html`.
@@ -59,7 +59,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - In full:  `epic pages link <ABSOLUTE path> --hash <id> [--text "..."]`.
   - It prints the side bar link, then `• 🌐` (the browser link)
     ([the details skill](../details/SKILL.md), "Links to pages").
-  - `--hash`:  the id of what you mean (`q3`, `t4`;  a phase's stable id, `p-retry-logic`:  `p2` still lands on P2).
+  - `--hash`:  the id of what you mean.
+    - e.g. `q3`, `t4`;  a phase's stable id, `p-retry-logic` (`p2` still lands on P2)
   - A worktree's doc goes on the MAIN server when that one has the route, else the worktree's own.
 - Phase complete:  the LAST line of that reply's text says where we are.
   - Each phase is linked to its heading in the epic page:
@@ -108,9 +109,9 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - EXCEPT in another worktree (isolate's step 0 test;  the hook's note says so too):
     NOT a failure, and NOT this session's epic.
     Go to "From another worktree", and skip everything else.
-  - In `<name>`'s OWN window, its worktree already made
-    (`epic window which`:  `workspaces/ongoing/<name>`):
-    a session "From another worktree" launched.  See "Launched" there.
+  - In `<name>`'s OWN window, its worktree already made:  a session "From another worktree" launched.
+    - Its own window:  `epic window which` says `workspaces/ongoing/<name>`.
+    - See "Launched" there.
 - The kickoff prompt, SAFE before anything else:  the text after `<name>`, verbatim.
   - Write it to `~/.spell/prompts/<name>.md` at once, as the hook does when it blocks.
   - An older, different file there:  rename it `<name>.<time>.md` first.
@@ -179,8 +180,9 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
 - "2. Session" as "Staying in this window", with no question and no `window stay`:
   the window is already `⎇ <name>`, tinted.
   - `EnterWorktree` with `path`:  the folder `epic worktree path <name>` prints.
-    - Also in a worktree-only window, whose new tab already starts IN the worktree:  the session-start guard says
-      so, and entering records the worktree, so a reopen from any window comes back to it (epic `epic-eject` I3).
+    - Also in a worktree-only window, whose new tab already starts IN the worktree.
+      - The session-start guard says so.
+      - Entering records the worktree, so a reopen from any window comes back to it (epic `epic-eject` I3).
   - Then steps 2, 3 and 5, then "3. Plan".
 
 ## 2. Session:  stub doc, then move
@@ -190,13 +192,13 @@ All in the FIRST turn, in this order, then the turn ends.
   and the stub doc keeps the kickoff prompt safe whatever happens to this session.
 
 0. Where:  isolate's "Start", step 2b, with `stay-check --epic`:  a new window, or stay in this one.
-1. Isolate:  read [the isolate skill](../isolate/SKILL.md),
-   and follow "Start", step 3 (and step 0 mid-session), with this `<name>`:  `EnterWorktree`.
+1. Isolate, with this `<name>`:  `EnterWorktree`.
+   - Read [the isolate skill](../isolate/SKILL.md), and follow "Start", step 3 (and step 0 mid-session).
    - A skill can't invoke another, so follow its steps here.
-2. The install command in the worktree (`epic config installCommand`:  `yarn install`), a few seconds.
+2. The install command in the worktree, a few seconds:  `epic config installCommand` (`yarn install`).
    - Skip it when it's empty (a repo with nothing to install, as `epic init` finds it).
-   - Skip it when the worktree hook ran it already (`epic config installOnCreate` is `true`, and `node_modules/`
-     is there):  epic `epic-eject` I2.
+   - Skip it when the worktree hook ran it already (epic `epic-eject` I2):
+     `epic config installOnCreate` is `true`, and `node_modules/` is there.
    - The work needs it;  `epic` doesn't, since it runs the MAIN checkout's CLI.
 3. The STUB doc:
 
@@ -205,8 +207,10 @@ All in the FIRST turn, in this order, then the turn ends.
    ```
 
    - Its SAGA (epic `epic-workflow` P15):  `epic saga list --json` gives the sagas, in Owen's order.
-     - Ask in a modal which saga the epic serves:  the likeliest first, "(Recommended)", each option the saga's title
-       and its purpose;  "No saga" too.  No saga:  no `--saga`.
+     - Ask in a modal which saga the epic serves:
+       - the likeliest first, "(Recommended)"
+       - each option the saga's title and its purpose
+       - "No saga" too:  then no `--saga`
      - Later:  `epic saga set <name> <saga>`.
 
    - The prompt is quoted at the top of the Overview, and in the "Plan hung?" notice above it.
@@ -357,17 +361,22 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        an `<epic-update>` block at the end of the phase's description, after Goal:  **Update**: <summary>, dated.
        Never an "Updated" word in the text.
      - ALWAYS pass `--summary`:  5-10 words saying WHAT changed (Owen, 2026-10-11).
-       Never who or when ("From Owen's comment CM2 ...", "Owen, 2026-10-11:"):  the text says who, the block shows when.
-       E.g. `--summary "Tab labelled App/UI, right after App"`.
+       - Never who or when ("From Owen's comment CM2 ...", "Owen, 2026-10-11:"):
+         the text says who, the block shows when.
+       - E.g. `--summary "Tab labelled App/UI, right after App"`.
      - Then `update <name>#P<N> --changes ...` (or `--goal` ...), to make the fields say the new plan.
-   - Changed a prose block:  put
-     `<epic-update at="YYYY-MM-DD HH:MM" summary="what changed, one line" phase="N"><p>why</p></epic-update>`
-     right AFTER it (an update to a whole Overview sub-section:  last inside it).
+   - Changed a prose block:  put an `<epic-update>` right AFTER it.
+
+     ```html
+     <epic-update at="YYYY-MM-DD HH:MM" summary="what changed, one line" phase="N"><p>why</p></epic-update>
+     ```
+
+     - An update to a whole Overview sub-section:  last inside it.
      - The script marks items itself (a bare label in the title);  `phase <name>#P<N> done` drops both.
      - Its plan changes (`updated`) stay.
      - A note that should stay:  `<epic-note state="update" title="...">` (`plan-doc.md`, "UPDATE markers").
-3. Subagents:  named and listed, as the root `CLAUDE.md`'s "Delegated work" says
-   (`epic agents add` / `done`).
+3. Subagents:  named and listed, as the root `CLAUDE.md`'s "Delegated work" says.
+   - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record caveats, issues and decisions in the epic page as you find them".
 4. Close the phase:  `epic phase <name>#P<N> done --done "<ul><li>...</li></ul>"`.
@@ -378,14 +387,16 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
    - Done:  what was BUILT, ordered by what Owen asks about first:
      where to see it, what changed in how he works, what's rough or not yet tried by hand.
    - Commit messages, so the doc can list them (its phase's and items' "Commits"):
-     - a phase:  `P<n>:  <Name> -- <summary>`;  `P4 + P5:` for two;  `WIP P3:` for a parked part
+     - a phase:  `P<n>:  <Name> -- <summary>`
+       - `P4 + P5:` for two;  `WIP P3:` for a parked part
      - an item fix:  `<name> I3:  ...`.
        It MUST carry the epic's name:  `commits --backfill` ignores a bare `Fix I3:`, since it can't tell which epic.
    - After the phase's commit:  `epic commits <name> --backfill`, which finds them by subject.
      - The epic page is never in that commit:
        it's shared content, committed for you (see "Shared content" at the top).
-   - A STANDING epic (`<epic-page standing>`, `epic summary --json`'s `standing`;  epic `epic-workflow`):
-     the phase goes onto `main` AT ONCE, once its commit is made and its checks pass (Q8 of `epic-workflow`).
+   - A STANDING epic:  the phase goes onto `main` AT ONCE (Q8 of `epic-workflow`),
+     once its commit is made and its checks pass.
+     - Standing:  `<epic-page standing>`, and `epic summary --json`'s `standing` (epic `epic-workflow`).
      - Its own short doc pass comes first, in place of one Doc Review at the end:
        `/fussbudget` on the files the phase changed, and the guide brought in line, before the commit.
      - Then, no asking (the standing epic is the ask):
@@ -393,7 +404,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        2. `ExitWorktree` with `action: "keep"`:  a worktree session can't move `main`.
        3. `epic merge <name>`, in the main checkout:  checks it's on `main` and clean, then fast-forwards.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
-       4. `EnterWorktree` with `path`:  the folder `epic worktree path <name>` prints;  back, the window and session unchanged.
+       4. `EnterWorktree` with `path`, the folder `epic worktree path <name>` prints.
+          Back, the window and session unchanged.
        5. The changelog:  the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/isolate done`:  the worktree, the window and the session stay, for the next request.
      - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
@@ -489,11 +501,13 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
     and types `/epic review <name>` into its tab through its window's bridge:  Owen presses Enter there.
   - None, or several:  nothing is sent, and the page says which sessions it found.
 - And WOKEN by the page (epic `epic-workflow` P16):  Send, Review Now or Do Now pressed with NO session listening.
-  - The page server types `/epic review <name>` into the epic's running session (`🚧 <name>`);
-    else opens a new session in the epic's worktree window (opening the window if it's closed);
-    else, with no worktree, a new session in a main window.  Owen presses Enter.
-  - Once per epic per 10 minutes, or until a session listens;  never with several sessions titled for it,
-    in airplane mode, or for a Send with nothing new.
+  - The page server, the first of these that applies:
+    - types `/epic review <name>` into the epic's running session (`🚧 <name>`)
+    - else opens a new session in the epic's worktree window (opening the window if it's closed)
+    - else, with no worktree, a new session in a main window
+    - Owen presses Enter.
+  - Once per epic per 10 minutes, or until a session listens.
+  - Never with several sessions titled for it, in airplane mode, or for a Send with nothing new.
   - So marks no longer wait for Owen to remember `/epic review`:  a session typed into mid-turn reads it after.
 - Every `epic` command edits the epic's ONE shared doc, from any checkout.
 - The page's controls need a PAGE SERVER with the review routes (`epic server ensure`).
@@ -525,7 +539,8 @@ epic inbox <name> [--json]                 what's waiting, sent or not
   - E.g. `- commands (worktree commands)  5 / 9`.
 - Then ONE modal, header `Epic Review`, "Which epic do you want to review?":
   - the epics with anything not reviewed
-  - label `<name> (in progress)` / `<name> (done)`;  description `5 of 9 items not reviewed`
+  - label:  `<name> (in progress)` / `<name> (done)`
+  - description:  `5 of 9 items not reviewed`
   - 4 or fewer:  all
   - more:  the next 2, then "More" (the next names), until 4 or fewer
   - any other:  typed in Other
@@ -593,7 +608,7 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
    - Which doc, which item (id, title), and the rules:
      - `plan-doc.md` "Rules":  cold reader, bullets, examples, Net effect
      - and "Prose":  the blocks are ELEMENTS
-       (`<epic-code>`, `<epic-aside>`, `<epic-net-effect>`, `<epic-choices>`, `<epic-field label>`)
+       - `<epic-code>`, `<epic-aside>`, `<epic-net-effect>`, `<epic-choices>`, `<epic-field label>`
      - never `ui-accordion.spell-code`, or a `<p><b>Net effect:</b></p>` by hand
    - Add Details:  read the item, the code and docs it names, then write what its text leaves out, as MORE details.
      - `epic details <name>#<id> --more --file <html>`.
@@ -638,9 +653,9 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
      - Then `show <slug> --wait`, in the background.
    - "picks B · <card>, asks:  <note>" (a pick with a revisit, "B, but ..."):  `apply` leaves it.
      - `status ... underway`, then answer the note about B.
-     - A question, once he agrees:  decide it yourself,
-       `epic decide <name>#<id> "<card title>" --option B`.
-       Any other item:  he confirms with a plain pick.
+     - A question, once he agrees:  decide it yourself.
+       - `epic decide <name>#<id> "<card title>" --option B`
+       - Any other item:  he confirms with a plain pick.
      - Then `status ... done`.
      - `inbox clear` / `done` KEEP his pick as that set's `chosen` (with a Noted card), unless you decided otherwise.
        Once he picked, the card says Chosen.
@@ -650,21 +665,24 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
      - A long talk without them shows "nobody is reviewing", until `wait` runs again.
 
 3b. COMMENTS (epic `airplane` P11):  Owen's comments on the doc's blocks, or on text he selected (the bullhorns).
-   - Ids `M1` ... (epic `epic-workflow` P23), as the page shows them, keyed `m1` in the inbox;  `m1` and the old `cm1` read the same.
+   - Ids `M1` ... (epic `epic-workflow` P23), as the page shows them.
+     - The inbox keys them `m1` ...;  the old `cm1` reads the same.
    - Each is a THREAD on the page:  his comment, your answers, his replies, until he closes it
      ("that's good" / "skip it").
    - `epic inbox <name>` lists the ones waiting, under "comments".
      Each with the block's anchor (`p3#field-2`, an item's id) and the quoted text.
-     - A REPLY of his on a thread is waiting work too, as a new comment is:  listed under its comment,
-       "Owen replied:  ...".  Answer his latest words, the thread above for context.
+     - A REPLY of his on a thread is waiting work too, as a new comment is.
+       - It's listed under its comment, "Owen replied:  ...".
+       - Answer his latest words, the thread above for context.
    - Owen's SEND hands them over, as it does marks (Owen, 2026-10-10:  Send stays the way comments reach you).
      - A new comment, or his reply on a thread, turns Send blue on the page;  pressing it (or Review Now) wakes `wait`.
      - `wait` prints them under the send:  "comments, to answer on their threads", with his latest reply.
      - Each goes over once, until he speaks on its thread again.
      - A comment never wakes `wait` by itself, unsent.  Still check `inbox` on every wake:  one may wait unsent.
    - FIRST, as you start on one:  `epic inbox <name>#M3 working on`.
-     - His thread shows "Claude: thinking…" at its end (a turning notch) until your answer lands:
-       `inbox <name>#M3 done` turns it off.  Dropped without an answer:  `inbox <name>#M3 working off`.
+     - His thread shows "Claude: thinking…" at its end (a turning notch) until your answer lands.
+     - `inbox <name>#M3 done` turns it off.
+     - Dropped without an answer:  `inbox <name>#M3 working off`.
      - What he said before it counts as read:  more words of his go after it, as a new reply (waiting again).
    - Answer each like a revisit's note:  INTO the item it's on (`details --append`, his comment quoted).
      On a phase field or Overview prose:  into that phase or part.
@@ -672,9 +690,12 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
      - The answer goes on his thread too (a line or two;  the full one is in the doc):  his turn, the thread opens.
      - `--commit`:  the commit it was built in;  his Done line shows it.
      - No `--file`:  the thread says "Answered in the epic page".
+
 3c. GUIDE COMMENTS (epic `epic-workflow` P13):  his comments on the docs pages the epic OWNS, with the page's own Send.
-   - Owned:  the epic's guide and its `details/` pages, and every guide its See Also lists that no other epic
-     claims first (`SeeAlso.ownerOf()`:  the guide's epic, then an open one, then the one updated last).
+   - Owned:
+     - the epic's guide and its `details/` pages
+     - every guide its See Also lists that no other epic claims first
+       (`SeeAlso.ownerOf()`:  the guide's epic, then an open one, then the one updated last)
    - `wait` prints them under "sent from the pages <name> owns", each under its page;
      `epic inbox <name>` lists the ones waiting, sent or not.
    - One at a time, with the guide commands (not `epic inbox`):
@@ -704,15 +725,23 @@ When Owen says he's done ("stop reviewing", "that's it"), or the session must st
 ### 7.5 A saga page:  `/epic review SAGA:/<id>` (or "saga <id>")
 
 A SAGA PAGE (`sagas/<id>/<id>.saga.html`, epic `epic-workflow` P15) is reviewed exactly as an epic page is.
-- Its name, everywhere above:  its short address, `SAGA:/<id>` (`epic items SAGA:/epics --json`,
-  `epic inbox SAGA:/epics listen`, `epic inbox SAGA:/epics wait`, `epic add SAGA:/epics#T "..."`).
+- Its name, everywhere above:  its short address, `SAGA:/<id>`.
+
+  ```text
+  epic items SAGA:/epics --json
+  epic inbox SAGA:/epics listen
+  epic inbox SAGA:/epics wait
+  epic add SAGA:/epics#T "..."
+  ```
+
   - Owen may say "saga epics" or `/epic review saga epics`:  read it as `SAGA:/epics`.
   - Why the prefix:  a saga id may also be an epic's name (`output-targets`).
-- Its marks and comments wait in its own inbox, beside the page;  its Send wakes a new session in a main window,
-  `/epic review SAGA:/<id>` typed in, when nobody listens.
+- Its marks and comments wait in its own inbox, beside the page.
+- When nobody listens, its Send wakes a new session in a main window, `/epic review SAGA:/<id>` typed in.
 - Show it with `epic pages link <main root>/sagas/<id>/<id>.saga.html --hash <id> --review --show`.
-- No phases, branch or worktree:  answer in its items and its Overview (`#o1` Done so far, `#o2` Ideas not done
-  yet), and log as usual (`epic log SAGA:/<id> "..."`).
+- No phases, branch or worktree:  answer in its items and its Overview, and log as usual.
+  - its Overview:  `#o1` Done so far, `#o2` Ideas not done yet
+  - the log:  `epic log SAGA:/<id> "..."`
 - A session titled for an epic (`🚧 seo`) refuses it (the prompt hook):  run it in a main session.
 
 ## 8. Resume:  `/epic resume [<name>]`
@@ -783,8 +812,8 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
 - A stub epic page and a review page;  NO plan, worktree, window or phases.
 - `/epic <name>` plans it later, from what this leaves.
 
-- Runs from ANY window, `main` or a worktree:  the prompt hook lets it through, and titles the session `📅 <name>`;
-  not one titled for another epic, which keeps its title (epic-workflow I5).
+- Runs from ANY window, `main` or a worktree:  the prompt hook lets it through.
+  - It titles the session `📅 <name>`;  not one titled for another epic, which keeps its title (epic-workflow I5).
   - No worktree, no plan mode, no move.
 1. Name, collisions, kickoff prompt:  as "1. Name".
    - The rest of the text is the idea, kept verbatim in `~/.spell/prompts/<name>.md` until the doc holds it.
@@ -907,21 +936,23 @@ Owen starts work in THIS epic, in one block:  a phase, or a handful of its items
     - The epic's name first, so `commits --backfill` files it under each item.
     - Then `epic commits <name> --backfill`.
   - Reply as a phase's end does:  what was done per item (in words, ids after), checks with numbers, what's next.
-- Bedtime mode on (`epic summary <name> --json`, `bedtime`):  no modals, as `/bedtime` says.
+- Bedtime mode on:  no modals, as `/bedtime` says.
+  - It's on when `epic summary <name> --json` has a `bedtime`.
 
 ## 12. Request:  `/epic request <epic> [<rN>...]`
 
 A REQUEST is something Owen asked for in another session, sent here instead of done there
-(the `/send` skill, [skills/send/SKILL.md](../send/SKILL.md);  epic `epic-workflow`).
-- It's a folder, `epics/<epic>/requests/r3/`:  `request.md` (his words verbatim, the sender, what it was looking at)
-  and the screenshots he pasted.
+(`/send`, [the send skill](../send/SKILL.md);  epic `epic-workflow`).
+- It's a folder, `epics/<epic>/requests/r3/`, holding:
+  - `request.md`:  his words verbatim, the sender, what it was looking at
+  - the screenshots he pasted
 - It reaches this session one of three ways:
   - a message from the sender:  "New request r3 for epic `<epic>` ...":  the same steps
-  - a NEW session in the epic's window, `/epic request <epic> r3` typed in (the epic's session wasn't running):
-    first `EnterWorktree` with `path`:  the folder `epic worktree path <epic>` prints, as "Launched" does
+  - a NEW session in the epic's window, `/epic request <epic> r3` typed in, when the epic's session wasn't running
+    - first `EnterWorktree` with `path`, as "Launched" does:  the folder `epic worktree path <epic>` prints
   - the sender IS this epic's session:  it follows these steps itself
-- The prompt hook titled the session `🚧 <epic>` (so later requests reach it), and refuses `/epic request` in a session
-  titled for another epic.
+- The prompt hook titled the session `🚧 <epic>`, so later requests reach it.
+  - It refuses `/epic request` in a session titled for another epic.
 - No `<rN>`:  every request still `new` (`epic requests <epic>`).
 
 ```
@@ -937,17 +968,17 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
    1. read the request, and every to-do phase (`epic summary <epic> --json`, each one's part file)
    2. a phase still TO DO (never active or done) about the SAME thing:  the request JOINS it
       - its goal gets a bullet, Owen's ask in short, linked:  `<a href="requests/r3/request.md">r3</a>`
-        (`update <epic>#P<N> --goal ...`, the old bullets kept)
+        - `update <epic>#P<N> --goal ...`, the old bullets kept
       - `updated <epic>#P<N> "<p>r3 joined:  ...</p>"`
    3. else a NEW phase, drafted as "10. Add a phase" drafts one, his words as Owen's input
       - `--before <Doc Review's number>` while Doc Review is still to do;  else last
    4. `epic file <epic>#P<N> r3`:  his words, the context and the screenshots go into phase N's Requests field,
       and the request is marked filed (`P<N>`)
-   5. `epic check <epic>`;  report one line per request:  "r3 joined P6 · Comment Threads" or
-      "r3:  new P8 · Retry Logic"
+   5. `epic check <epic>`;  report one line per request:
+      "r3 joined P6 · Comment Threads", or "r3:  new P8 · Retry Logic"
 4. Its report back:
-   - one line per request, with the phase's link pair (`epic pages link <doc> --hash <phase id> --review`;  its
-     id, `p-retry-logic`, is in `epic summary <name> --json`)
+   - one line per request, with the phase's link pair:  `epic pages link <doc> --hash <phase id> --review`
+     - its id (`p-retry-logic`) is in `epic summary <name> --json`
    - then, when no phase is under way and bedtime mode is off:  "5. Each phase", step 5's modal,
      "Start P<N> · <Name>" first
    - a phase under way:  no modal;  the new work waits its turn.
@@ -957,18 +988,21 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
 
 Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by page kind
 ([PLAN-DOC.md](${CLAUDE_PLUGIN_ROOT}/packages/epics/src/tool/PLAN-DOC.md), "Migrations").
-- After ANY change to epic page markup (or another page kind's):  its step goes in the same commit (epics'
-  `AGENTS.md`, "Rules").  Before merging:  `epic migrate --all --dry-run`, its report in the phase's
-  summary.
+- After ANY change to epic page markup (or another page kind's):  its step goes in the same commit.
+  - The rule:  epics' `AGENTS.md`, "Rules".
+  - Before merging:  `epic migrate --all --dry-run`, its report in the phase's summary.
 - Once it's on `main` (a standing epic:  right after the phase merges):
-  1. `epic migrate --all --notify`:  idle epics are migrated there and then;  each epic with a RUNNING
-     session is skipped, and printed under `TELL:` with its line.
-  2. Send each `TELL:` line, as is, with `SendMessage` to the session it names (`to 🚧 seo:  ...`):  the command
-     can't send them itself.  One message each, never a request (`epic send`):  it's a chore, not a phase.
+  1. `epic migrate --all --notify`:
+     - idle epics are migrated there and then
+     - each epic with a RUNNING session is skipped, and printed under `TELL:` with its line
+  2. Send each `TELL:` line, as is, to the session it names:  the command can't send them itself.
+     - With `SendMessage` (`to 🚧 seo:  ...`), one message each.
+     - Never a request (`epic send`):  it's a chore, not a phase.
   3. Report one line:  "migrated N epics;  told seo, docs".
 - A session RECEIVING a migrate message ("New epic page migration step ... run `epic migrate <epic>`"):
-  - run it on its OWN epic only, at its leisure:  now if idle or between phases;  else at the end of the phase under
-    way, when running it now would disrupt that work
+  - run it on its OWN epic only, at its leisure:
+    - now, if idle or between phases
+    - else at the end of the phase under way, when running it now would disrupt that work
   - it may commit what changed WITHOUT asking (Owen's standing OK, 2026-10-11), as `<epic> migrate <step>:  ...`
     - epic pages are shared content, committed by the turn-end hook:  usually nothing is left for the branch
     - "commit" means the branch's own changes, when a step touched tracked files

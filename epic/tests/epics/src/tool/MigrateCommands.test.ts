@@ -1,8 +1,10 @@
 /**
- * Tests of `spell dev plan-doc migrate` (`MigrateCommands`, `PlanDocFiles.migrate()`) on a scratch checkout:  the
- * runner (steps in order, `--step`, `--dry-run` writes nothing, the lock, the per-page report, a second run up to
- * date), page kinds, `--notify` splitting running epics from idle ones, then `--all` over COPIES of the real epic
- * pages (never the shared ones).
+ * Tests of `spell dev plan-doc migrate` (`MigrateCommands`, `PlanDocFiles.migrate()`) on a scratch checkout:
+ * - the runner:  steps in order, `--step`, `--dry-run` writes nothing, the lock, the per-page report,
+ *   a second run up to date
+ * - page kinds
+ * - `--notify` splitting running epics from idle ones
+ * - then `--all` over COPIES of the real epic pages (never the shared ones)
  */
 import {
   cpSync,
@@ -58,8 +60,9 @@ function commands(running: Record<string, string[]> = {}) {
 const docOf = (name: string) => join(root, "epics", name, `${name}.plan.html`)
 
 /**
- * Write epic `name`:  three phases, split;  `old`:  phase 2 holds a plan change in the shape before 2026-10-11
- * (`<epic-updated>`), which `updates-as-epic-update` migrates.
+ * Write epic `name`:  three phases, split.
+ * - `old`:  phase 2 holds a plan change in the shape before 2026-10-11 (`<epic-updated>`),
+ *   which `updates-as-epic-update` migrates
  */
 async function writeEpic(name: string, { old = false }: { old?: boolean } = {}) {
   mkdirSync(join(root, "epics", name), { recursive: true })

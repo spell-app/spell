@@ -148,8 +148,8 @@ In an epic, the epic page shows its running agents at the top ("Agents running")
 ## `/bg ?`
 
 `epic agents list --json`, shown as a short table:  name, status, age, task.  Nothing running:  one line.
-- The list is the record, not this session's memory:  it survives a compacted session, and lists the agents other
-  sessions in this epic started too.
+- The list is the record, not this session's memory:
+  it survives a compacted session, and lists the agents other sessions in this epic started too.
 
 ## `/bg stop <name>`
 

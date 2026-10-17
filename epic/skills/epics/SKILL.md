@@ -10,7 +10,8 @@ Owen runs several epics at once:  one screen saying where each stands.
 - Read-only:  it lists, Owen acts.
 - His next steps:  `/wtf <name>`, `/epic <name>`, `/unpark <name>`, `/worktrees` to clean up.
 
-- Every epic page is shared content:  ONE copy, in `../spell-app-dev`, linked into every checkout as `epics`.
+- Every epic page is shared content:  ONE copy, in the content folder (`epic config contentFolder`),
+  linked into every checkout as `epics`.
   - On code from before 2026-10-05, the link is `packages/docs/content/epics`.
   - So any checkout lists every epic, and there's no "worktree copy" to prefer.
 - An epic's worktree and branch are both `<name>` (its folder:  `epic worktree path <name>`).
@@ -32,12 +33,17 @@ Owen runs several epics at once:  one screen saying where each stands.
    - `epic worktree list --json`:  `{ sessions[] }`.
      - Each with `name`, `branch`, `checkout`, `state` (`busy`, `waiting`, `idle` ...), `question`, `id`.
 2. Keep the open ones (`/epics all`:  every one):
-   `in progress`, `future`, or `done` with a worktree whose branch has work not in `main`.
+   - `in progress` or `future`
+   - `done`, with a worktree whose branch has work not in `main`
+
    Then, for those:
    - `epic summaries <file> ...`, every `file` in one call.
      - It gives JSON `{ <file>: summary }`, or `{ error }`.
-     - Each summary has `phases[]` (`n`, `name`, `status`), `active`, `next`, and `open` (items by kind).
-     - And `bedtime`:  the phases a `/bedtime` run is on, while it goes.
+     - Each summary has:
+       - `phases[]`:  each one's `n`, `name` and `status`
+       - `active` and `next`
+       - `open`:  items by kind
+       - `bedtime`:  the phases a `/bedtime` run is on, while it goes
    - a worktree epic:
      - `epic worktree status <name>`:  `ahead`, `merged`
      - `git -C "$(epic worktree path <name>)" status --short`:  uncommitted files

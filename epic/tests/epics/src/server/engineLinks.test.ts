@@ -1,6 +1,7 @@
 /**
- * Tests of the epic server's URL helpers:  the engine routes a page's old asset links become (`engineUrlFor()`,
- * `legacyEnginePath()`), and the page rewrite the asset-route migrations run (`rewriteEngineLinks()`).
+ * Tests of the epic server's URL helpers:
+ * - the engine routes a page's old asset links become (`engineUrlFor()`, `legacyEnginePath()`)
+ * - the page rewrite the asset-route migrations run (`rewriteEngineLinks()`)
  */
 import { join } from "node:path"
 

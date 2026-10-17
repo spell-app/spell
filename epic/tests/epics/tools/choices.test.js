@@ -1,6 +1,6 @@
 /**
- * Tests of `spell dev choices`' functions (`tools/choices.js`), in a scratch checkout:  the real template, a scratch
- * `details/` and an epic.
+ * Tests of `spell dev choices`' functions (`tools/choices.js`), in a scratch checkout:
+ * the real template, a scratch `details/` and an epic.
  */
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"

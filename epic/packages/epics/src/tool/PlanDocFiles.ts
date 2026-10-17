@@ -62,8 +62,8 @@ export class PlanDocFiles {
   readonly epics: string
 
   /**
-   * the template `new` copies:  the tool's OWN, in `<epic-*>` markup (`templates/plan.html` beside this), tracked
-   * with the code that writes it (the shared `templates/epics/plan.html` retired at the switch, P12)
+   * the template `new` copies:  the tool's OWN, in `<epic-*>` markup (`templates/plan.html` beside this)
+   * - tracked with the code that writes it (the shared `templates/epics/plan.html` retired at the switch, P12)
    */
   readonly template: string
 
@@ -71,15 +71,15 @@ export class PlanDocFiles {
   readonly details: string
 
   /**
-   * where the docs tools run (`index.js`, `check-spell.js`, `open.js`):  `packages/epics` of `root`, else (a repo
-   * without the epic tools, one `epic init` set up) the package of THIS code, beside `docsTools`
+   * where the docs tools run (`index.js`, `check-spell.js`, `open.js`):  `packages/epics` of `root`
+   * - else (a repo without the epic tools, one `epic init` set up) the package of THIS code, beside `docsTools`
    */
   readonly docsPackage: string
 
   /**
    * `packages/epics/tools` beside THIS code:  the docs tools this runs as children, never imports.
-   * - ONE copy of the code (epic `epic-eject` P5):  the running `epic`'s own tools, whichever checkout `root` is;
-   *   they work on `root` through `toolEnv`'s `EPIC_CHECKOUT`
+   * - ONE copy of the code (epic `epic-eject` P5):  the running `epic`'s own tools, whichever checkout `root` is
+   * - they work on `root` through `toolEnv`'s `EPIC_CHECKOUT`
    */
   readonly docsTools: string
 
@@ -118,8 +118,8 @@ export class PlanDocFiles {
   /**
    * The doc of epic `name`:  THIS checkout's `epics/<name>/`, either name (`planDocIn()`);  throws when there's none.
    * - a saga page's short address (`SAGA:/drawable-spell`):  that saga's page (`findSagaPage()`)
-   * - this checkout's path, not another's:  tidying and the URLs stay inside it (a path through another worktree,
-   *   made relative here, starts `../../.claude/...`, which oxfmt refuses)
+   * - this checkout's path, not another's:  tidying and the URLs stay inside it
+   *   (a path through another worktree, made relative here, starts `../../.claude/...`, which oxfmt refuses)
    */
   findDoc(name: string): string {
     const saga = SagaPage.idOf(name)
@@ -131,8 +131,9 @@ export class PlanDocFiles {
   }
 
   /**
-   * Saga `id`'s page (`SAGA:/<id>` to `findDoc()`, epic `epic-workflow` P15):  `sagas/<id>/<id>.saga.html`, an epic
-   * page of kind "saga", so the verbs that edit an epic page edit it too;  throws when there's none.
+   * Saga `id`'s page (`SAGA:/<id>` to `findDoc()`, epic `epic-workflow` P15):  `sagas/<id>/<id>.saga.html`.
+   * - an epic page of kind "saga", so the verbs that edit an epic page edit it too
+   * - throws when there's none
    */
   findSagaPage(id: string): string {
     const file = new SagaPage(this).fileOf(id)
@@ -141,10 +142,11 @@ export class PlanDocFiles {
   }
 
   /**
-   * Epic `name`'s epic page in folder `dir` (`epics/<name>/`):  `<name>.plan.html`, else `<name>.html` when that is an
-   * epic page (`<body class="... plan-doc">`, or an `<epic-page>`);  `undefined` when there's neither.
-   * - why both names:  epic pages were renamed `<name>.plan.html` on 2026-10-04 (`review-review` P4), and a worktree
-   *   cut before then still has `<name>.html` until it merges `main`
+   * Epic `name`'s epic page in folder `dir` (`epics/<name>/`):  `<name>.plan.html`, else `<name>.html`.
+   * - `<name>.html` only when that is an epic page (`<body class="... plan-doc">`, or an `<epic-page>`)
+   * - `undefined` when there's neither
+   * - why both names:  epic pages were renamed `<name>.plan.html` on 2026-10-04 (`review-review` P4),
+   *   and a worktree cut before then still has `<name>.html` until it merges `main`
    * - STATIC:  a folder's answer, whichever checkout it's in
    * - the docs tools' rule (`tools/pages.js` `planDocIn()`), which the docs index finds plan docs by too
    */
@@ -230,8 +232,9 @@ export class PlanDocFiles {
   }
 
   /**
-   * Refuse the doc at `file` unless it's in the `<epic-*>` markup:  what an editing command checks before it touches
-   * anything (the inbox, say) besides the doc.  Reads only the skeleton's text.
+   * Refuse the doc at `file` unless it's in the `<epic-*>` markup:
+   * what an editing command checks before it touches anything (the inbox, say) besides the doc.
+   * - reads only the skeleton's text
    */
   requireNewMarkup(file: string): void {
     if (existsSync(file) && !isEpicMarkup(readFileSync(file, "utf8"))) throw this.oldMarkup(file)
@@ -243,8 +246,9 @@ export class PlanDocFiles {
    * - first the MIGRATIONS (`plan.migrate()`, `Migrations`):
    *   - an older doc comes up to today's markup on its first edit, logged
    *   - a migration that would break the doc refuses the edit, as any change does
-   * - then the whole-doc pass (`updateStates()`), with the page's `recent-since` from the doc's checkout
-   *   (`recentSince()`);  then it stamps "updated", and writes it (`writeDoc()`)
+   * - then the whole-doc pass (`updateStates()`),
+   *   with the page's `recent-since` from the doc's checkout (`recentSince()`)
+   * - then it stamps "updated", and writes it (`writeDoc()`)
    * - REFUSES, writing nothing:
    *   - a doc in the old markup (`read()`)
    *   - an edit after which `Markup.validate()` finds a problem the doc didn't have before
@@ -275,10 +279,11 @@ export class PlanDocFiles {
    * - `ran`:  the steps that changed the page
    * - `notes`:  what they fixed or found, a line each
    * - `moves`:  comments whose block moved, written into the page's review inbox after the page (`links-agree`)
-   * - `renames`:  ids the page changed, its inbox rekeyed after the moves
-   *   (`stable-phase-ids`:  `ReviewInbox.renameIds()`)
-   * - writes only when something changed, logged (`migrated:  links-agree`), the items recoloured
-   *   (`updateStates()`);  NOT stamped "updated":  nobody worked on the epic
+   * - `renames`:  ids the page changed (`stable-phase-ids`),
+   *   its inbox rekeyed after the moves (`ReviewInbox.renameIds()`)
+   * - writes only when something changed:
+   *   logged (`migrated:  links-agree`), the items recoloured (`updateStates()`)
+   *   - NOT stamped "updated":  nobody worked on the epic
    * - `dryRun`:  the same report, nothing written
    * - REFUSES, writing nothing, as `edit()` does:  a doc in the old markup;  a migration that would break the doc
    * - `epic migrate` (`MigrateCommands`), and `rename` / `add-phase --before` for `links-agree`
@@ -376,8 +381,8 @@ export class PlanDocFiles {
     )
     outputs.push([file, await PlanParts.formatHTML(file, PlanMarkup.serialize(document as unknown as Document))])
     PlanParts.writeChanged(outputs)
-    // a part the doc was read from but no longer writes (its host's id changed:  `stable-phase-ids`;  its body
-    // emptied):  nothing loads it any more
+    // a part the doc was read from but no longer writes:  nothing loads it any more
+    // (its host's id changed, `stable-phase-ids`;  or its body emptied)
     for (const id of plan.parts?.hosts ?? []) if (!parts.has(id)) rmSync(PlanParts.partFile(file, id), { force: true })
   }
 
@@ -421,16 +426,17 @@ export class PlanDocFiles {
 
   /**
    * `git <args>` in this checkout, trimmed stdout ("" on failure).
-   * - NEVER in a content folder (`epics/` ...):  each is a link into the shared content repo, and git run there sees
-   *   THAT repo, not spell-app
+   * - NEVER in a content folder (`epics/` ...):
+   *   each is a link into the shared content repo, and git run there sees THAT repo, not spell-app
    */
   git(...args: string[]): string {
     return PlanDocFiles.gitIn(this.root, ...args)
   }
 
   /**
-   * `git <args>` in folder `cwd` (a checkout:  the doc's own, which may be another worktree), trimmed stdout (""
-   * on failure).  STATIC:  any checkout's.
+   * `git <args>` in folder `cwd` (a checkout:  the doc's own, which may be another worktree),
+   * trimmed stdout ("" on failure).
+   * - STATIC:  any checkout's
    */
   static gitIn(cwd: string, ...args: string[]): string {
     const run = spawnSync("git", args, { cwd, encoding: "utf8" })
@@ -444,8 +450,8 @@ export class PlanDocFiles {
   }
 
   /**
-   * Where epic `name` runs:  `.claude/worktrees/<name>` while that worktree exists (the repo's `worktreesFolder`,
-   * from the main checkout), else `main` (`MAIN_CHECKOUT`).
+   * Where epic `name` runs:  `.claude/worktrees/<name>` while that worktree exists, else `main` (`MAIN_CHECKOUT`).
+   * - the worktree's folder:  the repo's `worktreesFolder`, from the main checkout
    * - `list`'s `checkout`, which `/epics` reads;  the doc itself is the shared one either way (`findDoc()`)
    */
   epicCheckout(name: string, main = this.mainRoot()): string {
@@ -467,8 +473,8 @@ export class PlanDocFiles {
   }
 
   /**
-   * When "recent" starts for the doc at `file` (D2):  the commit time of `HEAD~2` in its checkout, ISO with offset;
-   * `null` without one (no git, or a history that short).
+   * When "recent" starts for the doc at `file` (D2):  the commit time of `HEAD~2` in its checkout, ISO with offset.
+   * - `null` without one (no git, or a history that short)
    * - so green means changed in this commit or the last:  everything since the commit before those
    */
   recentSince(file: string): string | null {

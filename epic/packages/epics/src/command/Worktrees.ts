@@ -32,17 +32,21 @@ import { Shared } from "./Shared"
  * `epic worktree <verb> ...`:  git worktrees, the sessions in them, and where a name stands.
  * `/worktrees`, `/isolate`, `/park` and `/wtf` use it.
  * - The verbs (`run()`):
- *   - `list [--json]`:  every live Claude Code session on this machine, with the worktree, branch and folder it
- *     works in (`<- this` marks the one that ran it), then this repo's worktrees no session is in.  Quick:  the
- *     whole report is `epic stock`.  (Was `worktrees.py --sessions`.)
- *   - `status <name>`:  JSON:  where worktree / branch / plan / session `<name>` stands (`nameStatus()`;  was
- *     `status.py <name>`)
- *   - `move <name> | --idle [--dry-run] [--json]`:  move a worktree (`--idle`:  every one no session works in) from
- *     the old place, `.claude/worktrees`, to the new one beside the repo (`move()`;  epic `epic-eject` P8)
- *   - `path <name>`:  worktree `<name>`'s folder, absolute:  where it is (the old place included), else where a new
- *     one goes (`EpicConfig.worktreeFolder()`).  What the skills give `EnterWorktree` (epic `epic-eject` P8)
- *   - `merge-main [--continue] [--json]`:  merge `main` into this checkout's branch, regenerating generated files
- *     (bundles, snapshots) both sides changed;  exits 1 when other files conflict (`MainMerge`)
+ *   - `list [--json]`:  every live Claude Code session on this machine,
+ *     with the worktree, branch and folder it works in, then this repo's worktrees no session is in
+ *     - `<- this` marks the one that ran it
+ *     - quick:  the whole report is `epic stock`
+ *     - was `worktrees.py --sessions`
+ *   - `status <name>`:  JSON:  where worktree / branch / plan / session `<name>` stands (`nameStatus()`)
+ *     - was `status.py <name>`
+ *   - `move <name> | --idle [--dry-run] [--json]`:  move a worktree (`--idle`:  every one no session works in)
+ *     from the old place, `.claude/worktrees`, to the new one beside the repo (`move()`;  epic `epic-eject` P8)
+ *   - `path <name>`:  worktree `<name>`'s folder, absolute (epic `epic-eject` P8)
+ *     - where it is (the old place included), else where a new one goes (`EpicConfig.worktreeFolder()`)
+ *     - what the skills give `EnterWorktree`
+ *   - `merge-main [--continue] [--json]`:  merge `main` into this checkout's branch (`MainMerge`)
+ *     - regenerates generated files (bundles, snapshots) both sides changed
+ *     - exits 1 when other files conflict
  * - What the other groups read of worktrees and epic pages:  `nameStatus()`, `planFile()`, `planFacts()` ...
  * - git runs in the MAIN checkout (`main`):  branches are shared, so every worktree gets the same answer.
  ****************/
@@ -117,14 +121,18 @@ export class Worktrees {
   ////////////////
 
   /**
-   * Move worktree `name` from the OLD place (`.claude/worktrees/<name>`) to the new one (`worktreesFolder`, beside the
-   * repo:  epic `epic-eject` P8);  what it did, or would do (`dryRun`).
-   * - refuses (`EpicCommandError`) while a live session works in it:  a busy worktree stays put until its
-   *   `/isolate done`;  also when the config hasn't moved the place, or the new folder is taken
-   * - `git worktree move`, then its shared links made again (they're relative, so the move breaks them:
-   *   `Shared.link()`), then its saved-session folder linked to main's (`linkSessionFolders`)
-   * - its window file, if any (`workspaces/ongoing/<name>.code-workspace`), still names the old folder:  the report
-   *   says so;  `epic window close <name>`, then `open <name>`, makes the worktree-only window
+   * Move worktree `name` from the OLD place (`.claude/worktrees/<name>`)
+   * to the new one (`worktreesFolder`, beside the repo:  epic `epic-eject` P8).
+   * - returns what it did, or would do (`dryRun`)
+   * - refuses (`EpicCommandError`):
+   *   - while a live session works in it:  a busy worktree stays put until its `/isolate done`
+   *   - when the config hasn't moved the place, or the new folder is taken
+   * - the steps:
+   *   1. `git worktree move`
+   *   2. its shared links made again (`Shared.link()`):  they're relative, so the move breaks them
+   *   3. its saved-session folder linked to main's (`linkSessionFolders`)
+   * - its window file, if any (`workspaces/ongoing/<name>.code-workspace`), still names the old folder:
+   *   the report says so;  `epic window close <name>`, then `open <name>`, makes the worktree-only window
    */
   move(name: string, { dryRun = false }: { dryRun?: boolean } = {}): MoveReport {
     const config = this.config
@@ -165,8 +173,8 @@ export class Worktrees {
   ////////////////
 
   /**
-   * Each worktree in the worktrees' folders (`.claude/worktrees/`, or beside the repo and the old place too:
-   * `EpicConfig.worktreesFolders`):  `{ name, path, branch }`.
+   * Each worktree in the worktrees' folders:  `{ name, path, branch }`.
+   * - the folders:  `.claude/worktrees/`, or beside the repo and the old place too (`EpicConfig.worktreesFolders`)
    */
   named(): { name: string; path: string; branch: string }[] {
     const roots = this.config.worktreesFolders
@@ -196,8 +204,9 @@ export class Worktrees {
 
   /**
    * Where session / worktree / plan `name` stands, for `/park`, `/unpark`, `/wait-for` (was `status.py <name>`).
-   * - `name` resolves as `/wtf <name>` does:  worktree `.claude/worktrees/<name>`, branch `<name>`, epic page
-   *   `epics/<name>/`, and the sessions titled `<name>` or that worked in that worktree
+   * - `name` resolves as `/wtf <name>` does:
+   *   worktree `.claude/worktrees/<name>`, branch `<name>`, epic page `epics/<name>/`,
+   *   and the sessions titled `<name>` or that worked in that worktree
    * - `ids`:  its session ids when already known:  finding them reads every transcript, so `park wait` finds them once
    */
   nameStatus(name: string, ids?: string[]): NameStatus {
@@ -253,9 +262,9 @@ export class Worktrees {
 
   /**
    * Epic page `name`'s live copy:  the worktree's when it has one, else the main checkout's;  or `null`.
-   * - in each:  `<name>.plan.html`, else an old `<name>.html` that is an epic page (`<body class="... plan-doc">`):
-   *   epic pages were renamed on 2026-10-04, and worktrees cut before keep the old name until they merge `main`
-   *   (`packages/epics/tools/pages.js` `planDocIn()` is the same)
+   * - in each:  `<name>.plan.html`, else an old `<name>.html` that is an epic page (`<body class="... plan-doc">`)
+   *   - epic pages were renamed on 2026-10-04, and worktrees cut before keep the old name until they merge `main`
+   *   - `packages/epics/tools/pages.js` `planDocIn()` is the same
    * - which folder:  `epicsDir()`, old layout included
    */
   planFile(name: string, worktree: string): string | null {
@@ -270,14 +279,15 @@ export class Worktrees {
   }
 
   /**
-   * The summaries of the epic pages at `files` (absolute), the ones not read yet in ONE `plan-doc summaries` run;
-   * a file it can't read is left out.
-   * - runs the `epic` tool of THIS code's checkout when it's installed, else the main checkout's:  a worktree's copy
-   *   needn't be installed, and the tool reads by path from any checkout
-   * - `<epic-*>` docs only:  the tool refuses a doc in the old markup, which comes back `{ error }` and is left out,
-   *   as is any other doc it can't read
-   * - SIDE EFFECT:  cached in `PLAN_SUMMARIES` for the rest of the run;  pass every file up front to read them in
-   *   one go (the tool takes ~0.5s to start)
+   * The summaries of the epic pages at `files` (absolute),
+   * the ones not read yet in ONE `plan-doc summaries` run.
+   * - a file it can't read is left out
+   * - runs the `epic` tool of THIS code's checkout when it's installed, else the main checkout's:
+   *   a worktree's copy needn't be installed, and the tool reads by path from any checkout
+   * - `<epic-*>` docs only:  the tool refuses a doc in the old markup,
+   *   which comes back `{ error }` and is left out, as is any other doc it can't read
+   * - SIDE EFFECT:  cached in `PLAN_SUMMARIES` for the rest of the run
+   *   - pass every file up front to read them in one go (the tool takes ~0.5s to start)
    */
   planSummaries(files: string[]): Map<string, PlanSummary> {
     const todo = files.filter((file) => !PLAN_SUMMARIES.has(file))
@@ -309,8 +319,8 @@ export class Worktrees {
   }
 
   /**
-   * Whether running session `record` goes by `name`:  its title (its icon left out:  `🚧 <name>`), its registry
-   * name, or its id's start.
+   * Whether running session `record` goes by `name`:
+   * its title (its icon left out:  `🚧 <name>`), its registry name, or its id's start.
    */
   private goesBy(record: RunningSession, name: string): boolean {
     const title = this.sessions.title(record.sessionId)
@@ -350,9 +360,10 @@ export class Worktrees {
   }
 
   /**
-   * What epic page `file`'s state is read from (`$/epics/list/EpicState` `EpicFacts`), from its skeleton's markup,
-   * with no parsing library (`PlanFacts`).
-   * - `phases`:  each `<epic-phase status>`;  `updated`, `future`, `standing`:  `<epic-page updated future standing>`
+   * What epic page `file`'s state is read from (`$/epics/list/EpicState` `EpicFacts`),
+   * from its skeleton's markup, with no parsing library (`PlanFacts`).
+   * - `phases`:  each `<epic-phase status>`
+   * - `updated`, `future`, `standing`:  `<epic-page updated future standing>`
    * - `urgent`:  the ids of the items that need Owen (`<epic-item state>`, `URGENT_STATES`:  red and orange chips)
    * - a doc still in the old markup (one restored from an old backup) reads as empty:
    *   the `epic` tool refuses it until it's converted (epic `epic-components` P15)
@@ -377,9 +388,9 @@ export class Worktrees {
   }
 
   /**
-   * The folder checkout `root` keeps its epic pages in:  `epics` (since 2026-10-05, claude-design P4), else the first
-   * older place that's there (a worktree on older code, until it merges `main`):  `packages/docs/content/epics`, then
-   * `packages/docs/epics`.
+   * The folder checkout `root` keeps its epic pages in:  `epics` (since 2026-10-05, claude-design P4).
+   * - else the first older place that's there (a worktree on older code, until it merges `main`):
+   *   `packages/docs/content/epics`, then `packages/docs/epics`
    * - static:  any checkout
    */
   static epicsDir(root: string): string {
@@ -389,9 +400,10 @@ export class Worktrees {
   }
 
   /**
-   * The sessions as a text table (title, agent, id, status, where, worktree, branch, folder;  `<- this` marks the
-   * one that ran it), then the worktrees no session is in, then a blank line:  `epic worktree list`, and the top
-   * of `epic stock`'s report.
+   * The sessions as a text table, then the worktrees no session is in, then a blank line:
+   * `epic worktree list`, and the top of `epic stock`'s report.
+   * - the table's columns:  title, agent, id, status, where, worktree, branch, folder
+   * - `<- this` marks the one that ran it
    * - static:  pure
    */
   static table(sessions: LiveSession[], idle: IdleWorktree[]): string[] {

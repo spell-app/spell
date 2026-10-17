@@ -1,6 +1,7 @@
 /**
- * Tests of `ReviewStart.wake()` (epic `epic-workflow` P16):  who a wake reaches, on a fake window registry and bridge,
- * with `epic window launch` stubbed.  The routes' cases (Send, Do Now, the cooldown) are `reviewRoutes.test.ts`'s.
+ * Tests of `ReviewStart.wake()` (epic `epic-workflow` P16):
+ * who a wake reaches, on a fake window registry and bridge, with `epic window launch` stubbed.
+ * - The routes' cases (Send, Do Now, the cooldown) are `reviewRoutes.test.ts`'s.
  * - NEVER the real `~/.claude` or `~/.spell`:  a wake types into VS Code
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
@@ -31,7 +32,8 @@ beforeAll(async () => {
   mkdirSync(join(home, "windows"))
   process.env.SPELL_CLAUDE_HOME = home
   process.env.SPELL_WINDOWS_DIR = join(home, "windows")
-  // spell-epic's own bridges' folder:  empty, never the real one (the old extension's, above, holds the test's window)
+  // spell-epic's own bridges' folder:  empty, never the real one
+  // (the old extension's, above, holds the test's window)
   process.env.SPELL_EPIC_WINDOWS_DIR = join(home, "epic-windows")
   bridge = createServer((request, response) => {
     let text = ""

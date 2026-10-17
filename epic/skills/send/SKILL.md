@@ -6,8 +6,8 @@ argument-hint: "[<epic>] <text>"
 
 # /send
 
-Owen says what he wants where he is;  it goes to the epic that owns it, and this session carries on with its own work
-(epic `epic-workflow`, Owen, 2026-10-11).
+Owen says what he wants where he is;  it goes to the epic that owns it,
+and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-10-11).
 - The request is written FIRST, into the epic's shared folder:  nothing is lost if that epic's session is closed.
 - The epic's session turns it into a phase:  [the epic skill](../epic/SKILL.md), "12. Request".
 - The command:  `epic send` ([Requests.ts](packages/epics/src/command/Requests.ts)).
@@ -32,12 +32,12 @@ Owen says what he wants where he is;  it goes to the epic that owns it, and this
 2. Owen's words, VERBATIM, into a scratchpad file (quotes and all survive a file, not a shell string):
    - `/send`:  the text after it (and the epic's name, if given)
    - by itself:  his whole message about it
-3. Screenshots:  count the images he pasted WITH this request (his message, or the ones just before it about the
-   same thing):  `--images <count>`.
+3. Screenshots:  count the images he pasted WITH this request, `--images <count>`.
+   - Those in his message, or the ones just before it about the same thing.
    - `send` takes the newest ones from this session's transcript.
 4. Context:  one or two lines the receiver needs to find it COLD.
-   - What this session was looking at:  the page and item id (`epics/python/python.plan.html#p4`), the file and line,
-     the command that misbehaved.
+   - What this session was looking at:
+     the page and item id (`epics/python/python.plan.html#p4`), the file and line, the command that misbehaved.
    - And what this session works on (its epic or worktree).
 5. Send, from the repo:
 

@@ -8,7 +8,10 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { fakeMainCheckout, fakeWorktree } from "$/server/test/checkouts"
 
-/** spell-app's config, as committed:  in the spell-app checkout spell-epic uses (`.spell-app`, the root's link). */
+/**
+ * spell-app's config, as committed:
+ * in the spell-app checkout spell-epic uses (`.spell-app`, the root's link).
+ */
 const REPO_CONFIG = resolve(dirname(fileURLToPath(import.meta.url)), "../../../../.spell-app", EpicConfig.FILE)
 
 /** A main checkout, a worktree in it, and one beside it, as git leaves them. */

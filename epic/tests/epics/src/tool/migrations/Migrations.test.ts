@@ -1,6 +1,8 @@
 /**
- * Tests of the epic page migrations:  the registry (`Migrations`) and the summary an update gets when it has none
- * (`UpdateSummary`).  Each step's own cases are `PlanDoc.migrate()`'s, in `PlanDoc.test.ts`.
+ * Tests of the epic page migrations:
+ * - the registry (`Migrations`)
+ * - the summary an update gets when it has none (`UpdateSummary`)
+ * - Each step's own cases are `PlanDoc.migrate()`'s, in `PlanDoc.test.ts`.
  */
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"

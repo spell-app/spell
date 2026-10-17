@@ -262,8 +262,8 @@ export function docLinksRun(args) {
 }
 
 /**
- * Opens a doc in VS Code's doc preview:  spell-epic's extension's URI handler (`vscode/src/DocPreview.ts`, its id
- * `spell-app.spell-epic`;  epic `epic-eject` P7).
+ * Opens a doc in VS Code's doc preview, through spell-epic's extension's URI handler.
+ * - `vscode/src/DocPreview.ts`, its id `spell-app.spell-epic` (epic `epic-eject` P7)
  */
 const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
 
@@ -271,8 +271,8 @@ const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
  * This checkout's page server (`spell dev server`), started in the background if it isn't running.
  * - returns `{ base, port }`, or `undefined` if it can't start (the caller falls back to `file://`)
  * - runs `packages/server/src/page/cli.ts ensure` under `tsx`, with that package's `tsconfig.json` for its aliases
- * - a checkout without that page server (a repo `epic init` set up):  the machine's epic server instead
- *   (`ensureEpicServer()`)
+ * - a checkout without that page server (a repo `epic init` set up):
+ *   the machine's epic server instead (`ensureEpicServer()`)
  * - ~1s when it has to start, ~0.3s when it runs
  * - `SPELL_NO_SERVER=1`:  never starts it
  */
@@ -324,14 +324,16 @@ const EPIC_BIN = join(PACKAGE, "..", "..", "bin", "epic")
  * A template's `html` fixed for a page `depth` folders below the checkout's root (`guides/glossary.html` is 1,
  * `epics/a/a.plan.html` 2).
  * - rewrites whatever depth the template assumed, `<up>` being the path up to the root:
- *   - the engine's assets:  its route, `/_epic/assets/` (the epic server's, epic `epic-eject` P7;  `ENGINE_ROUTES`),
- *     from wherever the template had them:  `tools/_assets/`, `packages/epics/tools/_assets/`, or the docs package's
- *     old `packages/docs/tools/_assets/` (before epic `people-and-orgs` P16)
+ *   - the engine's assets:  its route, `/_epic/assets/` (the epic server's, epic `epic-eject` P7;  `ENGINE_ROUTES`)
+ *     - from wherever the template had them:
+ *       - `tools/_assets/`, `packages/epics/tools/_assets/`
+ *       - the docs package's old `packages/docs/tools/_assets/` (before epic `people-and-orgs` P16)
  *   - the home page's paths:  `<up>pages/index.html`
  *   - the areas' list pages:  `<up>epics/index.html` ...
  *   - the site header's `root`:  `<up>`
- *   - the epics pack's script (`<ui-components source>`, on epic, details and choice pages):  its route,
- *     `/_epic/pack/`;  another pack's:  `<up>packages/<name>/components/__pack/` (a repo's own)
+ *   - the epics pack's script (`<ui-components source>`, on epic, details and choice pages):
+ *     its route, `/_epic/pack/`
+ *     - another pack's:  `<up>packages/<name>/components/__pack/` (a repo's own)
  *     - from its old folder, `packages/<name>/pack/`, too
  * - drops the template's `TEMPLATE:` how-to comment
  * - `docs:new`, `details new`, and the plan-doc tool's `epic new` (`PlanDocCommands`)

@@ -1,6 +1,8 @@
 /**
  * The worktree hook, `hooks/worktree.mjs`, run as Claude Code runs it (JSON on stdin), on a throwaway repo:
- * worktrees beside the repo, the old place still found, the session-folder link, the install before it hands over.
+ * - worktrees beside the repo, the old place still found
+ * - the session-folder link
+ * - the install before it hands over
  * - Claude Code's folder is a temp one (`CLAUDE_CONFIG_DIR`):  never the real `~/.claude`.
  */
 import { execFileSync, spawnSync } from "node:child_process"

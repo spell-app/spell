@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 /**
  * Claude Code's `SessionStart` and `PostToolUse` (`EnterWorktree`) hooks (the plugin's `hooks/hooks.json`):
- * says when the session's worktree is behind `main` (epic `epic-eject` P1):  the base branch, `baseBranch` in the
- * repo's `.epic/config.json5` (`EpicConfig`).
+ * says when the session's worktree is behind `main` (epic `epic-eject` P1).
+ * - `main` here is the repo's base branch:  `baseBranch` in its `.epic/config.json5` (`EpicConfig`).
  * - Why:  a worktree runs its OWN copy of the repo's code and pages, as old as its branch.
  *   Nothing told anyone, and windows sat 54-154 commits behind:  new features showed up half-done there.
  * - stdin `{ cwd, hook_event_name, tool_input, ... }`.
  *   The folder checked:  `tool_input.path` (an `EnterWorktree` into an existing worktree), else `cwd`.
  * - Only in a repo that uses epics (it has `.epic/config.json5`):  the plugin's hooks run in every repo.
  * - On `main`, outside git, or not behind:  nothing.
- * - Behind:  a line for Owen (`systemMessage`), and one for Claude (`additionalContext`):  offer the merge.
+ * - Behind:  a line for Owen (`systemMessage`), and one for Claude (`additionalContext`):
+ *   offer the merge.
  * - Always exits 0, within a few seconds:  never blocks a session.
  */
 import { spawnSync } from "node:child_process"

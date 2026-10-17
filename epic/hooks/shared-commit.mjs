@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 /**
- * Claude Code's `Stop` hook (the plugin's `hooks/hooks.json`):  after every turn, commit whatever changed in the
- * shared content repo (epic `shared-content`):  `epic shared commit`, run in the session's checkout.
+ * Claude Code's `Stop` hook (the plugin's `hooks/hooks.json`):
+ * after every turn, commit whatever changed in the shared content repo (epic `shared-content`).
+ * - It runs `epic shared commit` in the session's checkout.
  * - stdin `{ session_id, cwd, ... }`.
  * - Only in a repo that uses epics (it has `.epic/config.json5`), and whose content repo exists (`contentFolder`):
  *   the plugin's hooks run in every repo.  Else exits at once.
- * - The commit runs DETACHED, its output appended to `<shared repo>/.git/spell-shared.log`:  the turn never waits
- *   for git, and a failed commit never shows as a failed hook.  The next turn's commit picks up anything left.
+ * - The commit runs DETACHED, its output appended to `<shared repo>/.git/spell-shared.log`:
+ *   - the turn never waits for git
+ *   - a failed commit never shows as a failed hook
+ *   - the next turn's commit picks up anything left
  * - The `epic` it runs is this plugin's own (`bin/epic`), with its packages installed.
  * - Always exits 0.
  */

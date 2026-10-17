@@ -17,8 +17,9 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 import { Shared } from "$/epics/command/Shared"
 
 /**
- * A throwaway repo `spell-app` with a shared repo beside it, `spell-app-dev`:  the main checkout's content folders
- * start as real (ignored) folders, as right after the cutover;  worktree `wt` starts with none.
+ * A throwaway repo `spell-app` with a shared repo beside it, `spell-app-dev`.
+ * - the main checkout's content folders start as real (ignored) folders, as right after the cutover
+ * - worktree `wt` starts with none
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "shared-")))
 const MAIN = join(TEMP, "spell-app")

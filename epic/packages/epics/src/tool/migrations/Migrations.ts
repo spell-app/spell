@@ -8,15 +8,16 @@ import { UpdatesAsEpicUpdate } from "./UpdatesAsEpicUpdate"
 
 /****************
  * ### `Migrations`
- * Every MIGRATION of an epic page's markup, in the order they run (oldest first):  named, dated, idempotent steps
- * that bring an older page up to today's (`Migration`).  The epic page's share of the steps by page kind (J44 of
- * epic `epic-workflow`);  the docs package holds the other kinds' (`packages/epics/tools/migrate.js`).
+ * Every MIGRATION of an epic page's markup, in the order they run (oldest first):
+ * named, dated, idempotent steps that bring an older page up to today's (`Migration`).
+ * - the epic page's share of the steps by page kind (J44 of epic `epic-workflow`);
+ *   the docs package holds the other kinds' (`packages/epics/tools/migrate.js`)
  * - `epic migrate` runs them on every epic page on command (`MigrateCommands`), under each page's lock
  * - every write runs the cheap ones too (`everyEdit`), before the command's change (`PlanDocFiles.edit()`):
  *   an older doc comes up to date the first time anything edits it, and a migrated one costs a read
- * - A new step:  a class implementing `Migration` in this folder, its instance added to `all`, LAST, in the same
- *   commit as the markup change it follows (epics' `AGENTS.md`, "Rules");
- *   it must change nothing on a doc it has migrated already, and keep every word.
+ * - A new step:  a class implementing `Migration` in this folder, its instance added to `all`, LAST,
+ *   in the same commit as the markup change it follows (epics' `AGENTS.md`, "Rules").
+ *   It must change nothing on a doc it has migrated already, and keep every word.
  * - STATIC:  the registry.
  ****************/
 export class Migrations {
@@ -41,8 +42,8 @@ export class Migrations {
   }
 
   /**
-   * Run every step (or the steps named in `only`) on `document`, assembled, IN PLACE;  returns the names of the steps
-   * that changed something, in order (none:  `[]`).
+   * Run every step (or the steps named in `only`) on `document`, assembled, IN PLACE.
+   * - returns the names of the steps that changed something, in order (none:  `[]`)
    * - `steps`:  which to choose from (default:  `all`)
    */
   static run(

@@ -51,17 +51,23 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
 ## What's binding
 
 From `decisions --json`, later beats earlier:
-- an answered question:  its chosen option and its answer card;  a question born answered (a decision):  its title
+- an answered question:  its chosen option and its answer card
+- a question born answered (a decision):  its title
 - a judgement call:
   - closed:  accepted, binding
   - open:  how it was built, binding until Owen says otherwise
   - canceled:  reversed:  a doc that describes it as how things work is wrong
-- a closed caveat, issue or todo:  done;  a canceled one:  moot, so a doc still promising it is wrong
-- an open caveat:  a real limit;  a doc that says the opposite is wrong, a doc that leaves it out is fine
-- a phase's Done list:  what was BUILT, the strongest evidence;  its Updated notes beat its original Goal
+- a closed caveat, issue or todo:  done
+- a canceled one:  moot, so a doc still promising it is wrong
+- an open caveat:  a real limit
+  - a doc that says the opposite is wrong
+  - a doc that leaves it out is fine
+- a phase's Done list:  what was BUILT, the strongest evidence
+  - its Updated notes beat its original Goal
 - an Original Discussion (`<epic-original>`) is history, never binding
-- The code beats every doc when they disagree about what exists:  a command, flag, file or default a doc names is
-  checked against the code (`spell dev <noun>` with no verb prints its usage;  grep the source) before a fix.
+- The code beats every doc when they disagree about what exists.
+  - A command, flag, file or default a doc names is checked against the code before a fix.
+  - How:  `spell dev <noun>` with no verb prints its usage;  grep the source.
 
 ## What it never touches
 
@@ -75,7 +81,7 @@ From `decisions --json`, later beats earlier:
 
 ## Steps
 
-1. Is anyone else editing these?  As `/fussbudget`'s step 2:  `epic worktree list`, `epic agents list`.
+1. Is anyone else editing these?  As the fussbudget skill's step 2:  `epic worktree list`, `epic agents list`.
    - Another session or agent working on the same docs:  say who, and STOP.
      A mixed diff can't be reviewed.
 2. The right checkout:  `epic list --json`, each epic's `checkout`.
@@ -92,13 +98,13 @@ From `decisions --json`, later beats earlier:
      - the changelog entry:  its `<ui-section>` only
 4. Big:  more than 8 docs to read, or several epics:  fan out ("Fanning out").  Else the session does it itself.
 5. Pass 1, each doc, top to bottom, against the decisions:
-   - every statement about what the epic chose or built:  names, commands and flags, defaults, numbers, where things
-     live, what happens when, what's NOT done
+   - every statement about what the epic chose or built:
+     names, commands and flags, defaults, numbers, where things live, what happens when, what's NOT done
    - contradicts what's binding:  fix the sentence, in place, keeping its shape;  never rewrite a block that's true
    - says something the decisions don't cover:  check the code;  still unsure:  leave it, and note it for step 7
 6. Pass 2, the docs TOGETHER (the session itself, never split:  it needs one reader):
-   - a list of the facts the docs state (command names, flags, paths, element and option names, numbers,
-     behaviours), each with the docs that state it and how
+   - a list of the facts the docs state, each with the docs that state it and how
+     - command names, flags, paths, element and option names, numbers, behaviours
    - where two docs disagree:  the one that matches the decisions and the code wins;  fix the others
    - the same thing called two names:  the name the code (or the epic's guide) uses, everywhere
    - the changelog entry lists everything the phases' Done lists say was shipped, and nothing they don't
@@ -114,10 +120,11 @@ From `decisions --json`, later beats earlier:
    - Tracked docs (`AGENTS.md`, `README.md`, skills):  the diff waits in Source Control.
    - Shared docs (`guides/`, `templates/`, `ui/`, `agents/wwod/`):  edit at the REAL path
      (the root `AGENTS.md`, "Shared content").
-     - That's `<content>/<path>`, `<content>` being what `epic config contentFolder` prints.
+     - the path:  `<content>/<path>`
+     - `<content>`:  what `epic config contentFolder` prints
      - The turn's end commits them (`auto: guides/...`), one commit per folder, which Owen can revert whole.
-   - An edited docs page:  [epics' AGENTS.md](packages/epics/AGENTS.md), "Finishing a page", steps 2-4
-     (format, links, check-spell).
+   - An edited docs page:
+     format, links and check-spell, as [epics' AGENTS.md](packages/epics/AGENTS.md) says ("Finishing a page", steps 2-4).
 9. Report ("Report").
 
 ## Fanning out
@@ -127,7 +134,7 @@ From `decisions --json`, later beats earlier:
 - Each one NAMED and LISTED, as the root `CLAUDE.md`'s "Delegated work" says
   ([the bg skill](../bg/SKILL.md), "Names"):
   - `epic agents add docs-check-<n> "<its docs>"`:  prints its full name
-  - an `Agent` call (`general-purpose`, `run_in_background: true`),
+  - an `Agent` call:  type `general-purpose`, in the background (`run_in_background: true`),
     its `description` starting with that full name
   - `epic agents done docs-check-<n>` when it's back
 - Its prompt carries:
@@ -149,5 +156,5 @@ Short, per epic, in this order:
 4. Judgement calls added:  their ids, each in words ("the default port (J14)").
 5. Where to review:
    - Source Control (tracked docs)
-   - the shared docs' `auto:` commits in `spell-app-dev`
+   - the shared docs' `auto:` commits in the content folder
    - the epic page's link, `epic pages link <epic page> --review`

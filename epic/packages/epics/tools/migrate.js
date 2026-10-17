@@ -1,27 +1,32 @@
 /**
- * MIGRATE the docs' pages, by page KIND (epic `epic-workflow`, P8;  J44):  each kind's named, dated, idempotent steps,
- * oldest first, on each page of that kind, under its lock;  a report per page that changed.
- * - the epic page's steps are the `epic` tool's (`$/epics/tool/migrations`, `Migrations`):  this file holds the
- *   OTHER kinds', and `epic migrate` runs it as a child for them (`MigrateCommands`)
+ * MIGRATE the docs' pages, by page KIND (epic `epic-workflow`, P8;  J44):
+ * each kind's named, dated, idempotent steps, oldest first, on each page of that kind, under its lock;
+ * a report per page that changed.
+ * - the epic page's steps are the `epic` tool's (`$/epics/tool/migrations`, `Migrations`):
+ *   this file holds the OTHER kinds', and `epic migrate` runs it as a child for them (`MigrateCommands`)
  * - `KINDS`:  every page kind, the same list as `PAGE_KINDS` in `$/epics/tool/migrations` (`migrate.test.ts` checks)
  * - `pageKind()`:  which kind a page is, from where it lives and what it loads
- * - `STEPS`:  the steps.  Today's one-off fixers, as steps of their kind:
+ * - `STEPS`:  the steps, today's one-off fixers, as steps of their kind:
  *   - `ui-section`:  `to-ui-section.js`, old `section.s2|s3` sections to `<ui-section>`
- *   - `answer-elements`:  `to-answer-elements.js`, a details or choice page (and the old shared templates of
- *     both) in the epics pack's elements, its old page script gone (epic `epic-workflow` P12)
+ *   - `answer-elements`:  `to-answer-elements.js`, a details or choice page (and the old shared templates of both)
+ *     in the epics pack's elements, its old page script gone (epic `epic-workflow` P12)
  *   - `engine-asset-routes`:  a page loads the engine's assets and pack from the epic server's routes, `/_epic/...`,
- *     not from the checkout (`$/epics/server/engineLinks`, epic `epic-eject` P7);  the epic page's own step is
- *     `EngineAssetRoutes`
- *   - NOT the shared-content repair (`relocate.js`):  it moves files between folders rather than fixing a page's
- *     markup, and `epic shared commit` runs its reorg every turn already
- * - `DATA_FILES`, beside the steps:  the tooling's data files outside the epics' folders renamed `.json` -> `.json5`
- *   (epic `epic-workflow` P21;  `dataFileMoves()`), and every page's links to a data file by its old name, but an epic
- *   page's (`dataFileLinks()`).  Not a page kind's step:  it renames files, and touches only links.  An epic's own
- *   files and links are its page's step, `json5-data-files` (`$/epics/tool/migrations`)
- * - A new step:  an entry in `STEPS`, LAST, in the same commit as the markup change it follows;  it must change
- *   nothing on a page it has migrated already, and keep every word
+ *     not from the checkout (`$/epics/server/engineLinks`, epic `epic-eject` P7)
+ *     - the epic page's own step is `EngineAssetRoutes`
+ *   - NOT the shared-content repair (`relocate.js`):
+ *     it moves files between folders rather than fixing a page's markup,
+ *     and `epic shared commit` runs its reorg every turn already
+ * - `DATA_FILES`, beside the steps (epic `epic-workflow` P21):
+ *   - the tooling's data files outside the epics' folders renamed `.json` -> `.json5` (`dataFileMoves()`)
+ *   - every page's links to a data file by its old name, except an epic page's (`dataFileLinks()`)
+ *   - not a page kind's step:  it renames files, and touches only links
+ *   - an epic's own files and links are its page's step, `json5-data-files` (`$/epics/tool/migrations`)
+ * - A new step:  an entry in `STEPS`, LAST, in the same commit as the markup change it follows.
+ *   It must change nothing on a page it has migrated already, and keep every word.
  * - `node tools/migrate.js [--root <checkout>] [<kind>] [--file <page>] [--step <name>] [--dry-run] [--list]`:
- *   every kind with steps, or one kind;  one page (`--file`, its kind found unless given);  `--list`:  the steps
+ *   - every kind with steps, or one kind
+ *   - one page (`--file`, its kind found unless given)
+ *   - `--list`:  the steps
  *   - the data files' renames run with every kind (no `<kind>`, no `--file`), or alone with `--step json5-data-files`
  */
 import { existsSync, readdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
@@ -84,8 +89,8 @@ function kindPages(kind) {
 /**
  * The steps, oldest first:  `{ name, date, kinds, description, applies(html), run(document) }`.
  * - `applies(html)`:  a cheap test on the page's text, so a page with nothing to do isn't parsed
- * - `run(document, { file })`:  changes the page IN PLACE (`file`:  its path, for what lies beside it);  returns
- *   `{ changed, notes }`, `notes` one line each
+ * - `run(document, { file })`:  changes the page IN PLACE (`file`:  its path, for what lies beside it)
+ *   - returns `{ changed, notes }`, `notes` one line each
  */
 export const STEPS = [
   {
@@ -144,8 +149,8 @@ export const STEPS = [
 
 /**
  * Which kind page `file` is (`KINDS`), from where it lives in checkout `root` and what it loads.
- * - a details page with `<slug>.rows.json5` (or its old `.json`) beside it is a choice page;  a review page counts as
- *   a details page
+ * - a details page with `<slug>.rows.json5` (or its old `.json`) beside it is a choice page
+ * - a review page counts as a details page
  * - under `guides/`:  a page loading `commands.js` is a commands page, one with a card filter a cheatsheet
  */
 export function pageKind(file, root = ROOT, html = existsSync(file) ? readFileSync(file, "utf8") : "") {
@@ -172,9 +177,10 @@ export function stepsFor(kind, step) {
 }
 
 /**
- * The pages of checkout `root` that some step is for:  every page of the docs' areas, the Brand list page too, and
- * every details and choice page (`details.js` `listPages()`:  `findPages()` skips `details/` folders),
- * as `{ file, kind }`, sorted;  epic pages, goal sets, brand and components pages left out (no step is for them).
+ * The pages of checkout `root` that some step is for, as `{ file, kind }`, sorted:
+ * - every page of the docs' areas, the Brand list page too
+ * - every details and choice page (`details.js` `listPages()`:  `findPages()` skips `details/` folders)
+ * - epic pages, goal sets, brand and components pages left out (no step is for them)
  * - `kind`:  only that kind
  */
 export function pagesFor(root, kind) {
@@ -398,8 +404,8 @@ function fileOf(page, root) {
 }
 
 /**
- * The command line, `argv` after the script:  prints with `say(line)`;  returns the exit code (2:  a usage problem,
- * said on stderr).
+ * The command line, `argv` after the script:  prints with `say(line)`.
+ * - returns the exit code (2:  a usage problem, said on stderr)
  * - returns rather than exits:  `process.exit()` cuts off output still on its way down a pipe
  */
 export function main(argv, say = (line) => process.stdout.write(`${line}\n`)) {

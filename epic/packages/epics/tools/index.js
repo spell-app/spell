@@ -1,6 +1,6 @@
 /**
- * `epic pages index` (`spell dev docs index`):  write the home page's area cards and each area's list page, from
- * every page's `<title>` and description (claude-design P5).
+ * `epic pages index` (`spell dev docs index`):  write the home page's area cards and each area's list page,
+ * from every page's `<title>` and description (claude-design P5).
  * Usage (from `packages/epics`):  node tools/index.js
  * - The home, `pages/index.html`:  a routing page, one card per area in the top bar's order
  *   (`areaCards()`;  the site header's `PROPERTIES`), each with its count,
@@ -10,17 +10,18 @@
  *   - NOT `index:start` / `index:end`:  the home is shared, so an older checkout's `index.js` runs against it too
  *     - that one wrote three lists into the home
  *     - finding no markers, it stops instead of writing its lists back
- * - The list pages (`LISTS`), each `<area>/index.html`, written between `<!-- index:start -->` and
- *   `<!-- index:end -->`.
+ * - The list pages (`LISTS`), each `<area>/index.html`,
+ *   written between `<!-- index:start -->` and `<!-- index:end -->`.
  *   - a missing one is made from `skeleton()` first, so the rest of it is hand-authored after
  *   - Epics:  `epics/<name>/<name>.plan.html`, alphabetical within five groups
  *     - under a row of saga chips (each saga's count;  the runtime filters by them)
  *     - the groups (`$/epics/list/EpicCards`):  Favorites, Active, Planning, Urgent, Done
- *     - each card's title after its state's mark (`$/epics/list/EpicState`:  in progress, errors, paused, future,
- *       done), read from its phases, its "updated" date and the items that need Owen
+ *     - each card's title after its state's mark, read from its phases, its "updated" date and the items that need Owen
+ *       - the marks (`$/epics/list/EpicState`):  in progress, errors, paused, future, done
  *     - a star at its top right (`FAVORITES_FILE`), the day it was last worked on at its bottom right (`worked()`)
- *     - the page server adds the running epics' cards, marks every card again and regroups them by the favourites
- *       as it serves the page (a session running, today's date, a star clicked since)
+ *     - as it serves the page, the page server adds the running epics' cards,
+ *       marks every card again and regroups them by the favourites
+ *       (a session running, today's date, a star clicked since)
  *   - Guides:  `guides/**`, a section per saga in the sagas' order (epic `epic-workflow` P15)
  *     - each headed by the saga's title linking its saga page
  *     - each guide under the saga its meta names (`<meta name="spell-saga" content="<id>">`)
@@ -280,8 +281,8 @@ export function replaceBetween(html, start, end, body) {
 }
 
 /**
- * What the lists show for page `path`:  title, description, the saga it names, and a plan's status and last-worked
- * moment.
+ * What the lists show for page `path`:
+ * title, description, the saga it names, and a plan's status and last-worked moment.
  * - `saga`:  a guide's saga meta (`Sagas.sagaOf()`), an epic page's `<epic-page saga>`;  `null` for none
  * - title falls back to the file name, so a page without one still shows up (and looks wrong enough to fix)
  * - an epic page's title without its `Epic: ` (`planDoc.types` `TITLE_PREFIX`):  its card is in Epics already
@@ -700,9 +701,11 @@ ${body}
 }
 
 /**
- * The Guides page's sections (epic `epic-workflow` P15):  one per saga, in `sagas`' order, each headed by the saga's
- * title linking its saga page (`sagas/<id>/<id>.saga.html`, made or not yet), its purpose under it;  then "Misc",
- * for the guides that name no saga, or one that isn't in the list.
+ * The Guides page's sections (epic `epic-workflow` P15):
+ * - one per saga, in `sagas`' order
+ *   - headed by the saga's title, linking its saga page (`sagas/<id>/<id>.saga.html`, made or not yet)
+ *   - its purpose under it
+ * - then "Misc", for the guides that name no saga, or one that isn't in the list
  * - a guide's saga:  its `<meta name="spell-saga" content="<id>">` (`describe()`'s `saga`)
  * - each section's id `saga-<id>`, Misc's `misc`:  the toolbar lists the sagas
  * - a saga with no guides yet says so

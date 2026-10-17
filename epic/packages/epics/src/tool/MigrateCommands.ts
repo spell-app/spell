@@ -12,14 +12,19 @@ import { PlanDocFiles, type MigrateResult } from "./PlanDocFiles"
  * ### `MigrateCommands`
  * `epic migrate ...`:  bring pages up to today's markup, by page KIND (epic `epic-workflow`, P8;  J44):
  * every registered step, oldest first, on each page, under its lock, idempotent;  a report per page.
- * - `migrate`:  every kind, every page;  `migrate <kind> [--file <page>]`:  one kind, or one page of it
+ * - `migrate`:  every kind, every page
+ * - `migrate <kind> [--file <page>]`:  one kind, or one page of it
  * - `migrate <epic>... | --all`:  epic pages:  those, or every one the tool lists
- * - `--step <name>`:  just that step;  `--dry-run`:  the same report, nothing written;  `--list`:  the steps
- * - `--notify` (J39):  epics with a RUNNING session (titled for the epic) are skipped, and printed with the one-line
- *   message to send each:  the CLI can't send a `SendMessage`, so the session that ran it sends them;  idle epics
- *   are migrated there and then
- * - the epic page's steps:  `Migrations` (`PlanDocFiles.migrate()`);  the other kinds':  the docs tools'
- *   `packages/epics/tools/migrate.js`, run as a child `node` as its command line runs it, its output passed on
+ * - `--step <name>`:  just that step
+ * - `--dry-run`:  the same report, nothing written
+ * - `--list`:  the steps
+ * - `--notify` (J39):  epics with a RUNNING session (titled for the epic) are skipped,
+ *   and printed with the one-line message to send each
+ *   - the CLI can't send a `SendMessage`, so the session that ran it sends them
+ *   - idle epics are migrated there and then
+ * - the epic page's steps:  `Migrations` (`PlanDocFiles.migrate()`)
+ * - the other kinds':  the docs tools' `packages/epics/tools/migrate.js`
+ *   - run as a child `node` as its command line runs it, its output passed on
  * - it takes back the verb `migrate`, which only said "use `convert`" (J38):  `convert` stays the old-markup converter
  * - output through its owner's `print()` / `warn()`;  `run()` resolves to the exit code
  ****************/
@@ -70,8 +75,11 @@ export class MigrateCommands {
   }
 
   /**
-   * The kind and the epics `migrate`'s words name:  `migrate cheatsheet` a kind, `migrate seo docs` two epics,
-   * `migrate epic seo` both;  `--all` or any epic named:  epic pages only.
+   * The kind and the epics `migrate`'s words name:
+   * - `migrate cheatsheet`:  a kind
+   * - `migrate seo docs`:  two epics
+   * - `migrate epic seo`:  both
+   * - `--all` or any epic named:  epic pages only
    */
   static parse(positional: string[], flags: Flags): { kind?: PageKind; names: string[] } {
     const [first, ...rest] = positional
@@ -90,8 +98,8 @@ export class MigrateCommands {
   ////////////////
 
   /**
-   * Migrate each of `docs` (`{ name, file }`), printing a report per page and a total;  resolves to the exit code
-   * (1 when any page refused).
+   * Migrate each of `docs` (`{ name, file }`), printing a report per page and a total.
+   * - resolves to the exit code (1 when any page refused)
    * - `notify`:  an epic with a running session is only dry-run, and told to migrate itself when it would change
    */
   async migrateEpics(
@@ -148,8 +156,8 @@ export class MigrateCommands {
   }
 
   /**
-   * The sessions `--notify` couldn't migrate under, each with its one-line message:  for the session that ran it to
-   * send (`SendMessage`), since a command can't.
+   * The sessions `--notify` couldn't migrate under, each with its one-line message:
+   * for the session that ran it to send (`SendMessage`), since a command can't.
    */
   private printTell(tell: { epic: string; sessions: string[]; steps: string[] }[]): void {
     this.owner.print("TELL:  send each running session its line (SendMessage:  this command can't send them itself)")
@@ -174,7 +182,9 @@ export class MigrateCommands {
 
   /**
    * Run the docs tools' steps (`tools/migrate.js`):  `kind` (every kind but `epic` when none),
-   * one page (`file`), one step;  its output printed as it comes back.  Returns its exit code.
+   * one page (`file`), one step.
+   * - its output printed as it comes back
+   * - returns its exit code
    */
   private migrateOthers(
     kind: PageKind | undefined,
@@ -237,8 +247,8 @@ const LINKS = "links-agree"
 const DATA_FILES = "json5-data-files"
 
 /**
- * The steps the epic pages' registry (`Migrations`) AND the docs tools' (`migrate.js` `STEPS`) both hold, by one name:
- * `--step <name>` runs both.
+ * The steps the epic pages' registry (`Migrations`) AND the docs tools' (`migrate.js` `STEPS`) both hold, by one name.
+ * - `--step <name>` runs both
  * - the data files' (`json5-data-files`), and the engine routes' (`engine-asset-routes`, epic `epic-eject` P7)
  */
 const BOTH_KINDS: readonly string[] = [DATA_FILES, "engine-asset-routes"]
