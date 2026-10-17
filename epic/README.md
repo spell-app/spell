@@ -18,7 +18,7 @@ parking and waking sessions, and the `epic` command that drives them.
 | `.claude-plugin/plugin.json` | the plugin's manifest, `spell-epic` |
 | `.claude-plugin/marketplace.json` | a marketplace of one, this folder (`"source": "."`), so the plugin loads in place |
 | `skills/` | the skills:  `epic`, `epics`, `details`, `comment`, `docs-check`, `send`, `isolate`, `park`, `unpark`, `wait-for`, `worktrees`, `session`, `title`, `wtf`, `bg`, `bedtime`, `airplane` |
-| `hooks/` | `hooks.json`, and the hooks it runs:  making and removing worktrees, the behind-main notice, the worktree guard, the prompt gate, the end-of-turn window move and shared-content commit |
+| `hooks/` | `hooks.json`, and the hooks it runs:  making and removing worktrees, the behind-main notice, the worktree guard, the closing-line reminder on leaving a worktree (the isolate skill's "Closing line"), the prompt gate, the end-of-turn window move and shared-content commit |
 | `bin/epic` | the `epic` command;  on every session's `PATH` while the plugin is on |
 | `packages/epics/` | the epics package, `@spell-app/epics`:  the `<epic-*>` elements, the epic tool, the `epic` command's code (`src/command/`), the docs tools and their assets, Epic UI's pages (`docs/`) |
 | `tests/epics/` | its tests, at the same paths as the code |

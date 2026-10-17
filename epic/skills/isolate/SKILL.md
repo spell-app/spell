@@ -325,3 +325,24 @@ leaves its worktree:  NOT "Finish" below.
    - Merged:  the worktree can go (`git worktree remove "$(epic worktree path <name>)"`, `git branch -d <name>`).
    - Not merged:  how to merge later (`git merge <name>` from the main checkout), then the same cleanup.
    - Agents' worktrees:  how many step 7b removed, and any it kept.
+   - Then close the reply as "Closing line" below says.
+
+## Closing line
+
+A reply that closes out the session's work ends with a line of its own, `*You can close this tab*`
+(Owen, 2026-10-07;  leaving a worktree added 2026-10-17, epic `epic-eject` r1).
+- Closing out:  merged, worktree gone, a worktree LEFT (`ExitWorktree`, keep or remove), `/isolate done`,
+  a `/bedtime` night reviewed ...
+  - Leaving counts with or without this skill:  a bare `ExitWorktree` too.
+    The plugin's `PostToolUse` hook on it (`hooks/left-worktree.mjs`) reminds the session of this section.
+- Only when nothing is left for THIS session:
+  - no uncommitted or unmerged work
+  - no background task or agent still running
+  - no question waiting on Owen
+  - Open items may remain only if they're recorded elsewhere (the epic page, the code-debt log ...)
+    and need no context from this session.
+- Otherwise leave the line out, and say what keeps the tab open.
+- With the line, when this session's worktree is still on disk (left with `keep`), or worktrees it made and left:
+  ALSO ask (AskUserQuestion) whether to run `/isolate done` (its step 0 cleans those up):
+  "Run `/isolate done`" (Recommended) and "Leave it".
+- A repo's own `CLAUDE.md` may say the same:  spell-app's does.
