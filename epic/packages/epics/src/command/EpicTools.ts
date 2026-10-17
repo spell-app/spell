@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process"
 import { constants } from "node:os"
+import { existsSync } from "node:fs"
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
 
@@ -24,7 +25,8 @@ export class EpicTools {
   /**
    * Run tool `name` with `args` verbatim and this terminal attached;  resolves to its exit code.
    * - the script:  `codeRoot`'s copy (default this code's checkout), unless the tool's `code` is `caller`
-   * - the data:  the caller's checkout (`EPIC_CHECKOUT`);  a tool with a `cwd` runs in that folder of it
+   * - the data:  the caller's checkout (`EPIC_CHECKOUT`);  a tool with a `cwd` runs in that folder of it, else (a repo
+   *   without the epic tools, one `epic init` set up) in that folder of the code's checkout
    * - a child `node`, under THIS checkout's `tsx` when the tool has a `tsx` config:  the config's `$/...` imports
    *   map into the CODE's checkout
    * - `env`:  added to this process's
@@ -36,8 +38,9 @@ export class EpicTools {
     const spec: ToolSpec = EpicTools.TOOLS[name]
     const data = Git.nearestCheckout(spec.tool, cwd)
     const code = spec.code === "caller" ? data : codeRoot
+    const toolCwd = spec.cwd && (existsSync(join(data, spec.cwd)) ? join(data, spec.cwd) : join(code, spec.cwd))
     return EpicTools.runChild(process.execPath, [...EpicTools.toolArgs(spec, code), ...args], {
-      cwd: spec.cwd ? join(data, spec.cwd) : cwd,
+      cwd: toolCwd || cwd,
       env: {
         ...process.env,
         EPIC_CHECKOUT: data,
@@ -141,6 +144,9 @@ export class EpicTools {
    *   `yarn install`
    * - `server`:  the caller's checkout's page server (`packages/server`'s `cli.ts`);  `serve`:  every web server,
    *   `epic server start --all` (root `scripts/serve.mjs`)
+   * - `pages <verb>`:  the docs pages' tools, `epic pages index` ... (`spell dev docs <verb>` in spell-app;
+   *   `runPages()`), in `packages/epics` as `yarn workspace` ran them, or the caller's folder for those that take
+   *   paths from there
    * - static:  the one table
    */
   static readonly TOOLS = {
@@ -152,8 +158,37 @@ export class EpicTools {
     comments: { tool: "packages/epics/tools/comments.ts", tsx: "packages/epics/tsconfig.json" },
     window: { tool: "scripts/window.mjs" },
     server: { tool: "packages/server/src/page/cli.ts", tsx: "packages/server/tsconfig.json", code: "caller" },
-    serve: { tool: "scripts/serve.mjs", code: "caller" }
+    serve: { tool: "scripts/serve.mjs", code: "caller" },
+    "pages update": { tool: "packages/epics/tools/update.js", cwd: "packages/epics" },
+    "pages index": { tool: "packages/epics/tools/index.js", cwd: "packages/epics" },
+    "pages new": { tool: "packages/epics/tools/new-page.js", cwd: "packages/epics" },
+    "pages open": { tool: "packages/epics/tools/open.js", tsx: "packages/epics/tsconfig.json", cwd: "packages/epics" },
+    "pages link": { tool: "packages/epics/tools/link.ts", tsx: "packages/epics/tsconfig.json", cwd: "packages/epics" },
+    "pages fuss": { tool: "packages/epics/tools/fuss.ts", tsx: "packages/epics/tsconfig.json" },
+    "pages offline": { tool: "packages/epics/tools/offline.ts", tsx: "packages/epics/tsconfig.json" }
   } satisfies Record<string, ToolSpec>
+
+  /**
+   * Whether the caller's checkout has a page server of its own (`TOOLS.server`, spell-app's `packages/server`);  a
+   * repo `epic init` set up has none, and `epic server` is the machine's epic server there (`epic hub`).
+   */
+  static hasPageServer(cwd = process.cwd()): boolean {
+    const { tool } = EpicTools.TOOLS.server
+    return existsSync(join(Git.nearestCheckout(tool, cwd), tool))
+  }
+
+  /**
+   * `epic pages <verb> <args>`:  the docs pages' tool for `<verb>` (`TOOLS`' `pages <verb>`);  resolves to its exit
+   * code.  The group refuses an unknown verb before this runs (`EpicProgram`).
+   */
+  static runPages([verb, ...args]: string[]): Promise<number> {
+    const name = `pages ${verb}` as EpicToolName
+    if (!(name in EpicTools.TOOLS)) {
+      process.stderr.write("epic pages:  which verb?  index, update, new, open, link, fuss or offline\n")
+      return Promise.resolve(EXIT.USAGE)
+    }
+    return EpicTools.run(name, args)
+  }
 
   /**
    * This checkout's own `tsx` loader.

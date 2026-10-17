@@ -55,15 +55,15 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - NOT caveman (Owen, 2026-10-04).
   - Replies:  short, the same plain words.
 - Naming a doc in a reply (the epic page, a guide, any docs page):
-  paste what `spell dev docs link` prints, run in the checkout the doc is in.
-  - In full:  `spell dev docs link <ABSOLUTE path> --hash <id> [--text "..."]`.
+  paste what `epic pages link` prints, run in the checkout the doc is in.
+  - In full:  `epic pages link <ABSOLUTE path> --hash <id> [--text "..."]`.
   - It prints the side bar link, then `• 🌐` (the browser link)
     ([the details skill](../details/SKILL.md), "Links to pages").
   - `--hash`:  the id of what you mean (`q3`, `t4`;  a phase's stable id, `p-retry-logic`:  `p2` still lands on P2).
   - A worktree's doc goes on the MAIN server when that one has the route, else the worktree's own.
 - Phase complete:  the LAST line of that reply's text says where we are.
   - Each phase is linked to its heading in the epic page:
-    `spell dev docs link <epic page> --hash p1 --text "P1 · Short Name"`.
+    `epic pages link <epic page> --hash p1 --text "P1 · Short Name"`.
   - "<P1 link pair> complete.  Next is <P2 link pair>."
   - After the last phase:  "All done:  <P<N> · Doc Review link pair> complete."
 
@@ -192,6 +192,7 @@ All in the FIRST turn, in this order, then the turn ends.
    and follow "Start", step 3 (and step 0 mid-session), with this `<name>`:  `EnterWorktree`.
    - A skill can't invoke another, so follow its steps here.
 2. The install command in the worktree (`epic config installCommand`:  `yarn install`), a few seconds.
+   - Skip it when it's empty (a repo with nothing to install, as `epic init` finds it).
    - Skip it when the worktree hook ran it already (`epic config installOnCreate` is `true`, and `node_modules/`
      is there):  epic `epic-eject` I2.
    - The work needs it;  `epic` doesn't, since it runs the MAIN checkout's CLI.
@@ -258,7 +259,7 @@ Staying in this window (step 0):  skip steps 4 and 6.
       - Its goal names the text pass ("6. Doc Review"):
         - `/fussbudget branch` and `/fussbudget epic <name>`:  the branch's text and the epic page, rewritten
         - the epic's guide, written from the cleaned epic page to the same rules
-        - `spell dev docs fuss --branch` last:  its misses fixed, or listed for Owen
+        - `epic pages fuss --branch` last:  its misses fixed, or listed for Owen
    3. Overview:  the total estimate, then numbered sections (structure, code, flows):
       what will become guides
    4. Caveats, issues, todos, decisions (what + why), open questions (the doc's ids:  `Q1` ...)
@@ -431,16 +432,16 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
   2. Then the epic's guide (below), written from the CLEANED epic page, to the same rules:
      WWOD §6 and [writing.md](agents/wwod/writing.md).
   3. Last, the checker, on both:
-     - `spell dev docs fuss --branch`
-     - `spell dev docs fuss <the epic's guide>`:  it's shared content, not in the branch's diff
+     - `epic pages fuss --branch`
+     - `epic pages fuss <the epic's guide>`:  it's shared content, not in the branch's diff
      - Its misses fixed, or listed for Owen in the reply.
-- Turn it into the epic's guide:  `spell dev docs new durable <page> --title "..."` (fixes asset paths for the depth).
+- Turn it into the epic's guide:  `epic pages new durable <page> --title "..."` (fixes asset paths for the depth).
   - One page:  `guides/<name>.html`.
   - Several files (pages, experiments):  `guides/<name>/<name>.html`.
     Shared content too:  committed for you, like the epic page.
   - From the epic page:  Overview -> the body;  decisions -> a "Why" section;  open caveats -> "Limits".
   - Finish as [epics' AGENTS.md](packages/epics/AGENTS.md) says, "Finishing a page".
-  - Then `spell dev docs index`.
+  - Then `epic pages index`.
     The index is shared too:  `epic` keeps the epic's own card current from any checkout.
 - The epic page stays in `epics/` as the record:  every phase done.
 - Changelog:  write the epic's entry straight into the shared [changelog](guides/changelog.html)
@@ -493,7 +494,7 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
     in airplane mode, or for a Send with nothing new.
   - So marks no longer wait for Owen to remember `/epic review`:  a session typed into mid-turn reads it after.
 - Every `epic` command edits the epic's ONE shared doc, from any checkout.
-- The page's controls need a PAGE SERVER with the review routes (`spell dev server ensure`).
+- The page's controls need a PAGE SERVER with the review routes (`epic server ensure`).
   From `file://`, or a server without them, the page shows no menus.
 - Owen comes to a review COLD:  never a bare id in chat.
   Always what it is in words ("the highlight.js swap (T2)").
@@ -502,7 +503,7 @@ Commands, in the order a review uses them:
 ```
 epic list --json                           every epic:  status, checkout, not reviewed / items
 epic items <name> --json                   where reviews stand;  sections, items, states
-spell dev docs link <ABS doc> --hash <id> --review --show   show the doc in the Review tab, at <id>;  prints its links
+epic pages link <ABS doc> --hash <id> --review --show   show the doc in the Review tab, at <id>;  prints its links
 epic inbox <name> listen  /  unlisten      this session is (no longer) reviewing:  the page says so
 epic inbox <name> wait                     Bash run_in_background:  exits with work (or 2:  timeout)
 epic inbox <name> apply [ids]              approve / pick / todo marks into the doc;  prints what's left
@@ -541,7 +542,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
      (red:  an open question, an unreviewed judgement call or issue)
    - none:  the first `open` (yellow) one
    - none:  the top
-   - `spell dev docs link <ABS doc> --hash <that id> --review --show`:  the doc opens in the Review tab, at it.
+   - `epic pages link <ABS doc> --hash <that id> --review --show`:  the doc opens in the Review tab, at it.
 4. `epic inbox <name> listen`.
    - Then `epic inbox <name> wait`, with Bash `run_in_background: true`.
 5. END THE TURN, short:
@@ -625,7 +626,7 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
      - Then `status ... done ["<summary>"]`, since you wrote an answer.
        Only noting what he said, no answer needed:  `status ... noted "<what>"`.
      - Then `inbox <name>#<id> clear`, and `review <name>#<id> "<outcome>"`.
-   - In chat:  one line per item, with its link (`spell dev docs link ... --hash <id>`), never the answer itself.
+   - In chat:  one line per item, with its link (`epic pages link ... --hash <id>`), never the answer itself.
      (Q3 of `windows-and-review`:  a long review stays readable.)
    - He answers on the page (Revisit again), or says so in chat.
      A quick yes / no:  a modal.
@@ -707,7 +708,7 @@ A SAGA PAGE (`sagas/<id>/<id>.saga.html`, epic `epic-workflow` P15) is reviewed 
   - Why the prefix:  a saga id may also be an epic's name (`output-targets`).
 - Its marks and comments wait in its own inbox, beside the page;  its Send wakes a new session in a main window,
   `/epic review SAGA:/<id>` typed in, when nobody listens.
-- Show it with `spell dev docs link <main root>/sagas/<id>/<id>.saga.html --hash <id> --review --show`.
+- Show it with `epic pages link <main root>/sagas/<id>/<id>.saga.html --hash <id> --review --show`.
 - No phases, branch or worktree:  answer in its items and its Overview (`#o1` Done so far, `#o2` Ideas not done
   yet), and log as usual (`epic log SAGA:/<id> "..."`).
 - A session titled for an epic (`🚧 seo`) refuses it (the prompt hook):  run it in a main session.
@@ -759,7 +760,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - Behind `main` (`git log --oneline HEAD..main` not empty):
      `epic worktree merge-main`, as [the park skill](../park/SKILL.md)'s "Resume", steps 2-4.
      - Resuming is the go-ahead for its merge commit.
-   - No `node_modules/`:  `yarn install`.
+   - No `node_modules/`:  the install command (`epic config installCommand`;  empty:  nothing to install).
    - `epic open <name> --review`.
      In a new window:  after the handoff, as "2. Session", step 5.
 5. Reply, for someone who remembers nothing:  three lines at most.
@@ -822,7 +823,7 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
    - Then `yarn vp fmt <its real path>`.
    - Then `epic ask show <name>/analysis --wait`:  Bash, in the background.
      It opens in the side bar's Review tab.
-   - End the turn with its link pair (`spell dev docs link <page> --review`).
+   - End the turn with its link pair (`epic pages link <page> --review`).
 5. The answer (the waiter wakes the session):  each question becomes a decision:
 
    ```sh
@@ -876,7 +877,7 @@ Owen adds a phase to the epic under way, from items it already has, or from scra
        It's that phase's work now;  closed when the phase does it.
     5. `epic log <name> "P<n> added from <ids>:  <Name> (Owen)"`, `check`, `open`
 - When its report comes back:
-  - the new phase's link pair (`spell dev docs link <doc> --hash p<n> --review`)
+  - the new phase's link pair (`epic pages link <doc> --hash p<n> --review`)
   - and the next step, as "5. Each phase", step 5's modal ("Start P<n> · <Name>" among them)
 
 ## 11. Start:  `/epic start <P1 | ids>`
@@ -943,7 +944,7 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
    5. `epic check <epic>`;  report one line per request:  "r3 joined P6 · Comment Threads" or
       "r3:  new P8 · Retry Logic"
 4. Its report back:
-   - one line per request, with the phase's link pair (`spell dev docs link <doc> --hash <phase id> --review`;  its
+   - one line per request, with the phase's link pair (`epic pages link <doc> --hash <phase id> --review`;  its
      id, `p-retry-logic`, is in `epic summary <name> --json`)
    - then, when no phase is under way and bedtime mode is off:  "5. Each phase", step 5's modal,
      "Start P<N> · <Name>" first

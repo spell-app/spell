@@ -108,7 +108,8 @@ class Worktree {
     Worktree.git(root, "worktree", "add", "--quiet", ...args)
     Worktree.linkShared(path, config)
     if (config.linkSessionFolders) Worktree.linkSessions(path, root)
-    if (config.installOnCreate) Worktree.install(path, config)
+    // `installCommand: ""`:  a repo with nothing to install
+    if (config.installOnCreate && config.installCommand) Worktree.install(path, config)
     return path
   }
 

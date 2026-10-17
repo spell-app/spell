@@ -38,7 +38,8 @@ describe("EpicConfig", () => {
       "windows.repoName": "spell-app",
       "windows.contentName": "spell-app-dev",
       "windows.worktreeOnly": false,
-      linkSessionFolders: false
+      linkSessionFolders: false,
+      sharedFolders: "epics,guides,pages,templates,brand,ui,goals,agents"
     })
     expect(config.worktreeFolder("seo")).toBe(INSIDE)
     expect(config.worktreesPattern).toBe(".claude/worktrees")
@@ -102,6 +103,18 @@ describe("EpicConfig", () => {
       /"installTimeout" must be a number/
     )
     expect(() => EpicConfig.settingsFrom('{ "installTimeout": "9" }', "x.json5")).toThrow(/must be a number/)
+  })
+
+  test("the P9 keys:  no install command (an empty one), and the folders linked in", () => {
+    const settings = EpicConfig.settingsFrom('{ "installCommand": "", "sharedFolders": ["epics", "sagas"] }')
+    expect(settings.installCommand).toBe("")
+    expect(settings.sharedFolders).toEqual(["epics", "sagas"])
+    expect(() => EpicConfig.settingsFrom('{ "sharedFolders": "epics" }', "x.json5")).toThrow(
+      /"sharedFolders" must be a list of folder names/
+    )
+    expect(() => EpicConfig.settingsFrom('{ "sharedFolders": ["../up"] }', "x.json5")).toThrow(/list of folder names/)
+    // an empty name is still refused for every other text key
+    expect(() => EpicConfig.settingsFrom('{ "baseBranch": "" }', "x.json5")).toThrow(/"baseBranch" must be a string/)
   })
 
   test("a key left out keeps its default;  comments and trailing commas read;  an unknown key is skipped", () => {

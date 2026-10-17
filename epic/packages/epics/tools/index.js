@@ -1,10 +1,12 @@
 /**
- * `spell dev docs index`:  write the home page's area cards and each area's list page, from every page's `<title>`
- * and description (claude-design P5).
+ * `epic pages index` (`spell dev docs index`):  write the home page's area cards and each area's list page, from
+ * every page's `<title>` and description (claude-design P5).
  * Usage (from `packages/epics`):  node tools/index.js
  * - The home, `pages/index.html`:  a routing page, one card per area in the top bar's order
  *   (`areaCards()`;  the site header's `PROPERTIES`), each with its count,
  *   written between `<!-- areas:start -->` and `<!-- areas:end -->`
+ *   - a missing one is made from `homeSkeleton()` first (a repo `epic init` set up)
+ *   - only the areas this checkout HAS (`areaCards()`):  a repo with no Spell UI, app or brand gets no card for them
  *   - NOT `index:start` / `index:end`:  the home is shared, so an older checkout's `index.js` runs against it too
  *     - that one wrote three lists into the home
  *     - finding no markers, it stops instead of writing its lists back
@@ -62,9 +64,13 @@ import { DataFile } from "../src/data/DataFile.ts"
 import { Sagas } from "../src/tool/Sagas.ts"
 import { PageNotes } from "./PageNotes.js"
 import { BRAND, EPICS, GOALS, GUIDES, HOME, LIST_PAGES, ROOT, SAGAS, TEMPLATES, findPages, tidy } from "./pages.js"
+import { EpicConfig } from "../src/config/EpicConfig.ts"
 
 /** The home page, from the checkout's root. */
 const INDEX = relative(ROOT, HOME)
+
+/** The repo's name, as its windows show it (`windows.repoName`):  what the pages say they're about. */
+const REPO = EpicConfig.of(ROOT).windows.repoName
 
 /** The home's markers:  its area cards go between. */
 export const HOME_START = "<!-- areas:start -->"
@@ -90,23 +96,30 @@ const GROUP_COUNTS = {
 const WRITING_DOCS = `<ui-section id="writing-docs" header="Writing docs" sticky collapsible dividing collapsed>
 <ui-icon slot="icon" name="pen to square"></ui-icon>
 <ul>
-<li>Start from a template:  <code>spell dev docs new durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.</li>
+<li>Start from a template:  <code>epic pages new durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.</li>
 <li>An epic page:  run <code>/epic &lt;name&gt;</code> in Claude Code.  Never copy the plan template by hand.</li>
 <li>The rules:  <a href="../packages/epics/AGENTS.md">AGENTS.md</a>.  How the pages work:
 <a href="../guides/spell-docs/spell-docs.md">spell-docs.md</a>.</li>
-<li><code>docs new</code> lists the page on its area's page;  after renaming one or changing its title, run
-<code>spell dev docs index</code>.</li>
+<li><code>pages new</code> lists the page on its area's page;  after renaming one or changing its title, run
+<code>epic pages index</code>.</li>
 </ul>
 </ui-section>`
 
-/** The Sagas page's notes:  the parked first sagas, and how the list changes. */
-const SAGA_NOTES = `<ui-section id="parked" header="Parked sagas" sticky collapsible dividing collapsed>
+/**
+ * The Sagas page's notes:  the parked first sagas (a checkout with `goals/` only), and how the list changes.
+ * - a function:  `GOALS` is checked as the page is made
+ */
+const sagaNotes =
+  () => `<ui-section id="${existsSync(GOALS) ? "parked" : "changing"}" header="${existsSync(GOALS) ? "Parked sagas" : "Changing the list"}" sticky collapsible dividing collapsed>
 <ui-icon slot="icon" name="folder"></ui-icon>
 <ul>
-<li>The first sagas, by topic, with the questions still open:  <a href="../goals/index.html" target="_self">the parked
-saga sets</a>, read only (epic <code>epic-goals</code> rebuilds them).</li>
-<li>The list, its order and each epic's saga:  <code>epic saga list</code>, <code>new</code>, <code>move</code>,
-<code>title</code>, <code>rename</code>, <code>set</code>.  Then <code>spell dev docs index</code> writes this page again.</li>
+${
+  existsSync(GOALS)
+    ? `<li>The first sagas, by topic, with the questions still open:  <a href="../goals/index.html" target="_self">the parked
+saga sets</a>, read only (epic <code>epic-goals</code> rebuilds them).</li>\n`
+    : ""
+}<li>The list, its order and each epic's saga:  <code>epic saga list</code>, <code>new</code>, <code>move</code>,
+<code>title</code>, <code>rename</code>, <code>set</code>.  Then <code>epic pages index</code> writes this page again.</li>
 </ul>
 </ui-section>`
 
@@ -149,8 +162,8 @@ export const LISTS = [
     icon: "book open",
     has: (path) => path.startsWith("guides/"),
     none: "No guides yet.",
-    description: "Every guide in the spell monorepo:  design notes, references, how things work and why.",
-    lede: "Every guide in the spell monorepo:  design notes, references, how things work and why."
+    description: `Every guide in ${REPO}:  design notes, references, how things work and why.`,
+    lede: `Every guide in ${REPO}:  design notes, references, how things work and why.`
   },
   {
     id: "sagas",
@@ -162,7 +175,9 @@ export const LISTS = [
     none: 'No sagas yet:  epic saga new <id> "Title" --purpose "...".',
     description: "Every saga, an epic of epics:  the larger aims the epics serve, most exciting first.",
     lede: "Every saga, an epic of epics:  the larger aims the epics serve, in Owen's order, most exciting first.",
-    extra: SAGA_NOTES
+    get extra() {
+      return sagaNotes()
+    }
   },
   {
     id: "templates",
@@ -212,7 +227,9 @@ function main() {
     written.push(file)
     report.push(`${relative(ROOT, file)}:  ${list.id === "sagas" ? sagas.length : mine.length}`)
   }
-  const cards = areaCards(pages, undefined, sagas)
+  // only the areas this checkout has:  a repo `epic init` set up has Guides, Sagas and Epics
+  const cards = areaCards(pages, undefined, sagas).filter(hasArea)
+  if (!existsSync(HOME)) writeFileSync(HOME, homeSkeleton())
   if (!writeBetween(HOME, HOME_START, HOME_END, homeSection(cards))) process.exit(1)
   if (!tidy([HOME, ...written])) process.exit(1)
   console.log(`${INDEX}:  ${cards.length} areas;  ${report.join(", ")}`)
@@ -387,6 +404,7 @@ function epicFacts(page) {
  * - `pages`:  every page `describe()`d, so the counts come from the same data as the list pages;
  *   the Epics count by the Epics page's groups, `favorites` the starred epics' names (`readFavorites()`);
  *   the Sagas count is `sagas`' (`readSagas()`)
+ * - every area, whether this checkout has it or not:  the home shows only those it has (`hasArea()`, `main()`)
  */
 export function areaCards(pages, favorites = readFavorites(), sagas = readSagas()) {
   const of = (id) => pages.filter((page) => LISTS.find((list) => list.id === id).has(page.path))
@@ -402,7 +420,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       icon: "book open",
       href: "../guides/index.html",
       count: plural(of("guides").length, "guide"),
-      description: "Design notes, references and how-tos:  how each part of spell works, and why."
+      description: `Design notes, references and how-tos:  how each part works, and why.`
     },
     {
       id: "sagas",
@@ -412,7 +430,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       count: plural(sagas.length, "saga"),
       description:
         "Each saga an epic of epics:  the larger aims the epics serve, in Owen's order, most exciting first.",
-      meta: `and ${plural(goalSets(), "parked saga set")}, read only`
+      meta: existsSync(GOALS) ? `and ${plural(goalSets(), "parked saga set")}, read only` : undefined
     },
     {
       id: "epics",
@@ -427,6 +445,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
     },
     {
       id: "epic-ui",
+      set: "Epic UI",
       title: "Epic/UI",
       icon: "sitemap",
       href: setHome(epicUI),
@@ -437,6 +456,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
     },
     {
       id: "spell-ui",
+      set: "Spell UI",
       title: "Spell/UI",
       icon: "puzzle piece",
       href: setHome(spellUI),
@@ -453,6 +473,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
     },
     {
       id: "app-ui",
+      set: "App UI",
       title: "App/UI",
       icon: "window maximize",
       href: setHome(appUI),
@@ -494,6 +515,60 @@ function setPages(set, prefix = "") {
 /** A component set's home, from the home page's folder:  at its served address (`../components/epics/index.html`). */
 function setHome(set) {
   return `..${set.prefix}/index.html`
+}
+
+/**
+ * A new home page, `pages/index.html`:  site header, sticky title, lede, the markers, a note on how it's made.
+ * - for a repo `epic init` set up, which has none;  spell-app's is hand-authored
+ * - written once, when missing;  after that only between the markers
+ */
+export function homeSkeleton() {
+  const title = `${REPO} docs`
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${text(title)}</title>
+<meta name="description" content="${attr(`${REPO}'s docs:  guides, sagas and epics, one card each.`)}" />
+<link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+</head>
+<body class="spell-doc-page">
+<spell-site-header root=".."></spell-site-header>
+<div class="spell-doc">
+<main class="spell-doc-main">
+<ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${text(title)}</h1></header></ui-sticky>
+<p class="lede">Everything written about ${text(REPO)}, one card per area.</p>
+${HOME_START}
+${HOME_END}
+
+<ui-section id="about" header="About these docs" sticky collapsible dividing collapsed>
+<ui-icon slot="icon" name="circle info"></ui-icon>
+<ul>
+<li>Served by the epic server (<code>epic hub ensure</code>), which every repo using spell-epic shares.</li>
+<li>The cards above, and each area's list page, are written by <code>epic pages index</code>.  On this page, edit
+only outside its markers.</li>
+</ul>
+</ui-section>
+</main>
+</div>
+<script src="/_epic/assets/highlight.min.js"></script>
+<script src="/_epic/assets/spell-ui.js"></script>
+</body>
+</html>
+`
+}
+
+/**
+ * Whether this checkout has area card `card`'s area:  its list page's folder (`guides/` ...), a component set's
+ * pages (`packages/epics/docs/` ...), the app's package.
+ */
+export function hasArea(card) {
+  const list = LISTS.find((each) => each.id === card.id)
+  if (list) return existsSync(list.dir)
+  if (card.id === "app") return existsSync(join(ROOT, "packages", "app"))
+  const set = COMPONENT_SETS.find((each) => each.name === card.set)
+  return set ? existsSync(join(ROOT, set.dir)) : true
 }
 
 /** The home's one section:  the area cards in a grid. */

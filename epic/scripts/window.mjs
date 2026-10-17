@@ -187,9 +187,6 @@ const DEFAULT_WINDOW = CONFIG.windows.default
 /** The MAIN checkout's marker file (git-ignored):  worktree windows hide what's beside it (`filesExclude()`). */
 const MAIN_MARKER = ".spell-main"
 
-/** The shared links when the manifest has none:  root `package.json` `"shared": { "links" }`. */
-const SHARED_LINKS = ["epics", "guides", "pages", "templates", "brand", "ui", "goals", "agents"]
-
 /** How long a window gets to answer a request, in msec:  `show-doc` may start a server first. */
 const REQUEST_TIMEOUT = 10_000
 
@@ -204,9 +201,10 @@ const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
  * The window files, and the window a session runs in.
  ****************/
 export class Window {
-  /** Package names:  the folders of `packages/` with a `package.json`. */
+  /** Package names:  the folders of `packages/` with a `package.json`;  none in a repo without `packages/`. */
   static get packages() {
     const packages = join(ROOT, "packages")
+    if (!existsSync(packages)) return []
     return readdirSync(packages, { withFileTypes: true })
       .filter((entry) => entry.isDirectory() && existsSync(join(packages, entry.name, "package.json")))
       .map((entry) => entry.name)
@@ -245,7 +243,8 @@ export class Window {
    * - `.claude/worktrees` (each worktrees folder inside the checkout:  `worktreesPatterns`, the old place included
    *   while worktrees are left there):  a worktree is its own folder (a worktree window), or its own repo in Source
    *   Control
-   * - the shared links (`epics`, `guides` ...) in a CHECKOUT (beside its `package.json`):
+   * - the shared links (`epics`, `guides` ...) in a CHECKOUT (beside its `package.json`;  in a repo without one, beside
+   *   its `.epic` folder, which every checkout of a repo `epic init` set up has:  `checkoutMarker()`):
    *   their files show once, under the `spell-app-dev` folder (`windows.contentName`), at the real path edits need
    *   (root `AGENTS.md`, "Shared content")
    * - `worktree`:  also everything in the MAIN checkout's folder (beside its `.spell-main` marker,
@@ -257,7 +256,7 @@ export class Window {
     return {
       ...Object.fromEntries(CONFIG.worktreesPatterns.map((pattern) => [pattern, true])),
       ...(worktree && { "*": { when: MAIN_MARKER } }),
-      ...Object.fromEntries(sharedLinks().map((link) => [link, { when: "package.json" }]))
+      ...Object.fromEntries(sharedLinks().map((link) => [link, { when: checkoutMarker() }]))
     }
   }
 
@@ -276,6 +275,8 @@ export class Window {
    * `init`:  write the missing window files, and bring existing ones up to date;  returns the paths written.
    * - a package window:  its folders (`packageFolders()`) and `files.exclude`;
    *   its theme and every other setting are Owen's, kept
+   * - the whole repo's window, `windows.default` (`spell-app`), when it isn't a package's:  written when missing, so a
+   *   repo with no `packages/` (one `epic init` set up) has a window for `open` to start from
    * - a worktree's window (`workspaces/ongoing/`):  its `files.exclude`
    * - an existing file VS Code can't read as JSON (comments) is left alone
    * - NOTE:  a package window that changes folders while open re-reads its workspace;  its Claude panel may reload
@@ -284,6 +285,18 @@ export class Window {
     // the marker serves the old layout's windows only:  none are made once new worktrees go beside the repo
     if (CONFIG.worktreesPattern) Window.ensureMainMarker()
     const written = []
+    // in the MAIN checkout, where `open` looks for it, whichever checkout runs this
+    const repoWindow = join(MAIN_ROOT, "workspaces", `${DEFAULT_WINDOW}.code-workspace`)
+    if (!Window.packages.includes(DEFAULT_WINDOW) && !existsSync(repoWindow)) {
+      mkdirSync(dirname(repoWindow), { recursive: true })
+      const workspace = Window.workspace(DEFAULT_WINDOW)
+      workspace.folders = [
+        { path: "..", name: CONFIG.windows.repoName },
+        ...Window.sharedFolder(join(MAIN_ROOT, "workspaces"))
+      ]
+      writeFileSync(repoWindow, `${JSON.stringify(workspace, null, 2)}\n`)
+      written.push(relative(MAIN_ROOT, repoWindow))
+    }
     for (const pkg of Window.packages) {
       const file = Window.file(pkg)
       if (!existsSync(file)) {
@@ -414,13 +427,15 @@ export class Window {
 
   /**
    * `open`:  (re)write worktree `name`'s window file and open it with `code`;  returns `{ file, colors }`.
+   * - `noOpen` (`open <name> --no-open`):  write the file only, its colours in it, and never run `code`:  for a
+   *   window opened later by hand, and a check that changes nothing on the screen (epic `epic-eject` P9)
    * - already open:  VS Code focuses that window
    * - its colours (`workbench.colorCustomizations`) are NOT in the file yet:  a window starting up draws the theme's
    *   colours VS Code cached from the last window that had them, and only a CHANGE to the setting makes it read them
    *   (P5 of `windows-and-review`:  a probe opened green came up in an older probe's purple).
    *   `colors` go in once the window is up (`applyColors()`), a live change
    */
-  static open(name, pkg, { color = null, fromCurrent = true } = {}) {
+  static open(name, pkg, { color = null, fromCurrent = true, noOpen = false } = {}) {
     if (!existsSync(CONFIG.worktreeFolder(name))) throw new Error(`no worktree ${name}`)
     // a package, or any other window file (`spell-app`:  the whole repo's)
     if (!Window.packages.includes(pkg) && !existsSync(join(MAIN_ROOT, "workspaces", `${pkg}.code-workspace`)))
@@ -432,6 +447,11 @@ export class Window {
     const from = fromCurrent ? Window.currentWorkspace() : null
     const workspace = Window.worktreeWorkspace(pkg, name, { color, from })
     const colors = workspace.settings["workbench.colorCustomizations"] ?? null
+    // opened later by hand:  the colours go in now, nothing to wait for
+    if (noOpen) {
+      writeFileSync(file, `${JSON.stringify(workspace, null, 2)}\n`)
+      return { file, colors: null }
+    }
     delete workspace.settings["workbench.colorCustomizations"]
     writeFileSync(file, `${JSON.stringify(workspace, null, 2)}\n`)
     const run = spawnSync("code", [file], { encoding: "utf8" })
@@ -786,7 +806,7 @@ export class Window {
     const window = Window.current()
     if (!window) {
       console.error("no window:  the spell-epic extension's bridge isn't running in this session's VS Code window")
-      console.error("  (install it with `spell dev vscode`, then reload the window)")
+      console.error("  (install spell-epic's VS Code extension, vscode/spell-epic.vsix, then reload the window)")
       return 1
     }
     if (command === "which") {
@@ -806,7 +826,7 @@ export class Window {
       } catch (error) {
         console.error(error.message)
         if (/unknown op/.test(error.message))
-          console.error("  (this window's spell extension predates `reload-view`:  `spell dev vscode`, then reload it)")
+          console.error("  (this window's extension predates `reload-view`:  install it again, then reload the window)")
         return 1
       }
     }
@@ -909,8 +929,9 @@ export class Window {
       const pkg = flags.pkg ?? Window.packageOf(Window.current()) ?? DEFAULT_WINDOW
       const color = typeof flags.color === "string" ? flags.color : null
       // `--pkg` named:  that window's look, not this one's
-      const { file, colors } = Window.open(name, pkg, { color, fromCurrent: !flags.pkg })
-      console.log(`opened ${file}`)
+      const noOpen = flags["no-open"] === true
+      const { file, colors } = Window.open(name, pkg, { color, fromCurrent: !flags.pkg, noOpen })
+      console.log(noOpen ? `wrote ${file}  (not opened:  \`code ${file}\` opens it)` : `opened ${file}`)
       if (colors && !(await Window.applyColors(file, colors)))
         console.log("  (its window didn't show up in time:  colours written anyway;  a change to them applies them)")
       return 0
@@ -952,9 +973,9 @@ const USAGE = `usage:  epic window <command>
                                (moving:  in the window this session moves to)
   reload-view [--review]       rebuild the "Spell Docs" view (--review:  "Review") from scratch, a new
                                frame at the page it shows:  for a view gone wrong (clicks lost ...)
-  open <name> [--pkg <pkg>] [--color <look>]
+  open <name> [--pkg <pkg>] [--color <look>] [--no-open]
                                open worktree <name> in a new window (default package:  this window's;
-                               default look:  this window's)
+                               default look:  this window's);  --no-open:  write its window file only
   launch <name> [--pkg <pkg>] [--color <look>] [--prompt <text>]
                                make worktree <name> if needed, open its window, and start a NEW session
                                there, <text> typed in (default:  /epic <name>);  this session stays put
@@ -982,13 +1003,24 @@ function worktreePackage(file) {
   return pkg
 }
 
-/** The shared links' names:  the main checkout's `package.json` `"shared": { "links" }`, else `SHARED_LINKS`. */
+/**
+ * The shared links' names:  the main checkout's `package.json` `"shared": { "links" }`, else the config's
+ * `sharedFolders` (a repo `epic init` set up has no `package.json` block).
+ */
 function sharedLinks() {
   try {
-    return JSON.parse(readFileSync(join(MAIN_ROOT, "package.json"), "utf8")).shared?.links ?? SHARED_LINKS
+    return JSON.parse(readFileSync(join(MAIN_ROOT, "package.json"), "utf8")).shared?.links ?? CONFIG.sharedFolders
   } catch {
-    return SHARED_LINKS
+    return CONFIG.sharedFolders
   }
+}
+
+/**
+ * The file beside which a window folder is a CHECKOUT, for `files.exclude`'s `when`:  `package.json` in a repo that
+ * has one at its root (spell-app), else `.epic`, which every checkout of a repo `epic init` set up has.
+ */
+function checkoutMarker() {
+  return existsSync(join(MAIN_ROOT, "package.json")) ? "package.json" : ".epic"
 }
 
 /**

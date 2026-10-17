@@ -53,7 +53,7 @@ Owen runs several epics at once:  one screen saying where each stands.
    - `unmerged`:  every phase done, but its branch has commits not in `main` (`ahead` > 0)
    - `done`:  every phase done, nothing left outside `main` (`all` only)
    - `unreadable`:  `summaries` gave an `error` (`all` only, unless it's in a worktree)
-4. Links:  each listed epic's epic page, `spell dev docs link <file> --text "<name>"`.
+4. Links:  each listed epic's epic page, `epic pages link <file> --text "<name>"`.
    - One Bash call for all of them, one line each;  no `--show`.
    - It gives the side bar link, and the `🌐` (browser) link after it:  `Title • 🌐`.
 5. Reply:

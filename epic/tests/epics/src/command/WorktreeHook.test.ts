@@ -105,6 +105,14 @@ describe("worktree hook", () => {
     expect(readFileSync(mark, "utf8").trim()).toBe(join(BESIDE, "ready"))
   })
 
+  test('installOnCreate with no install command ("", a repo with no packages):  nothing to run, the worktree made', () => {
+    config({ installOnCreate: true, installCommand: "" })
+    const made = hook("create", { name: "bare", cwd: MAIN })
+    expect(made.status).toBe(0)
+    expect(made.stdout).toBe(join(BESIDE, "bare"))
+    expect(made.stderr).not.toMatch(/worktree hook: {2}in /)
+  })
+
   test("an install that fails, or runs out of time, fails the hook, saying how to carry on;  the worktree stays", () => {
     config({ installOnCreate: true, installCommand: "exit 3" })
     const failed = hook("create", { name: "broken", cwd: MAIN })

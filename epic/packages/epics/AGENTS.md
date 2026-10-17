@@ -164,7 +164,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     per verb group, a method per verb.
     - `Requests` (`send`, `requests`, `file`, `home`, `merge`), `Worktrees` (`worktree`), `Sessions` (`session`),
       `Parking` (`park`), `Stock` (`stock`), `Shared` (`shared`), with `MainMerge` (`worktree merge-main`),
-      `SharedMigration` (`shared migrate`) and `SharedRename` (`shared rename`)
+      `SharedMigration` (`shared migrate`) and `SharedRename` (`shared rename`);  `RepoInit` (`init`:  a repo set up
+      for epics, epic `epic-eject` P9)
     - `WorktreeGuard`:  what the `SessionStart` hook (`hooks/worktree-guard.mjs`) tells a worktree's session that
       starts outside its worktree, or in it unrecorded (epic `epic-eject` I3);  plain `node` loads it by path
     - `EpicTools`:  the scripts it passes through (`window`, `server`, the docs tools' groups) and the `epic` tool,

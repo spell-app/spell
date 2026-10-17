@@ -9,6 +9,7 @@ import { EpicTools, type EpicToolName } from "./EpicTools"
 import { Git } from "./Git"
 import { Hub } from "./Hub"
 import { Parking } from "./Parking"
+import { RepoInit } from "./RepoInit"
 import { Repos } from "./Repos"
 import { Requests } from "./Requests"
 import { Sessions } from "./Sessions"
@@ -28,6 +29,8 @@ import { Worktrees } from "./Worktrees"
  * - `window`, `server` and the docs tools' groups (`ask`, `choices`, `comments`, `notes`, `agents`, `airplane`):
  *   scripts passed through, their arguments verbatim (`EpicTools.run()`)
  * - `hub`, `repo`:  the machine's one epic server and the repos it serves (`Hub`, `Repos`;  epic `epic-eject` P7)
+ * - `pages`:  the docs pages' tools (`spell dev docs` in spell-app;  epic `epic-eject` P9), passed through
+ * - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
  * - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask new --help`, and an unknown one is
  *   refused;  every verb's help has its usage, what it does and an example (`epic close --help`);  an unknown verb
@@ -420,17 +423,25 @@ export class EpicProgram {
       epic.command("server"),
       "this checkout's page server;  start --all:  every web server (page server, editor, Spell UI)",
       (args) =>
-        args[0] === "start" && args.includes("--all")
-          ? EpicTools.run(
-              "serve",
-              args.slice(1).filter((arg) => arg !== "--all")
-            )
-          : EpicTools.run("server", args)
+        // a repo without its own page server (one `epic init` set up):  the machine's epic server, same verbs
+        !EpicTools.hasPageServer()
+          ? new Hub().run(args)
+          : args[0] === "start" && args.includes("--all")
+            ? EpicTools.run(
+                "serve",
+                args.slice(1).filter((arg) => arg !== "--all")
+              )
+            : EpicTools.run("server", args)
     )
     this.group(
       epic.command("hub"),
       "the machine's ONE epic server:  every registered repo's pages, the engine's assets, the epic routes",
       (args) => new Hub().run(args)
+    )
+    this.group(
+      epic.command("pages"),
+      "the docs pages:  the home and list pages (index), a new page, a page's links, opening one, its writing",
+      (args) => EpicTools.runPages(args)
     )
     this.group(
       epic.command("repo"),
@@ -456,6 +467,18 @@ export class EpicProgram {
       .allowUnknownOption()
       .addHelpText("after", CONFIG_HELP)
       .action(() => runVerb(() => EpicProgram.config(rawArgs("config"))))
+
+    epic
+      .command("init")
+      .description(
+        "set this repo up for epics:  its .epic/config.json5, the content repo beside it, the links and their " +
+          ".gitignore lines;  safe to run again"
+      )
+      .usage("[--dry-run] [--json]")
+      .argument("[args...]")
+      .allowUnknownOption()
+      .addHelpText("after", INIT_HELP)
+      .action(() => runVerb(() => new RepoInit().run(rawArgs("init"))))
   }
 
   ////////////////
@@ -706,11 +729,27 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
   windows.worktreeOnly whether every worktree's window holds only the worktree and the content folder
                        (a worktree beside the repo gets that window anyway)
   linkSessionFolders   whether the worktree hook links new worktrees' saved-session folders to main's
+  sharedFolders        the content repo's folders every checkout links in, comma-separated
 Any worktree reads the main checkout's file;  a key it leaves out takes its default.
 
 Examples:
   epic config contentFolder
   epic config --json`
+
+/** After `epic init --help`. */
+const INIT_HELP = `
+In the repo's main checkout (or any worktree of it), each step skipped when it's done:
+  .epic/config.json5   written for this repo:  content folder ../<repo>.epics, worktrees ../<repo>.worktrees,
+                       the base branch from git, the install command its lock file names (none without one),
+                       window names from the repo's;  a file already there is kept
+  ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/
+  the links            each of those folders linked in at the checkout's root
+  .gitignore           the links listed between # shared:start and # shared:end
+Then commit .epic/config.json5 and .gitignore on the base branch.
+
+Examples:
+  epic init --dry-run
+  epic init`
 
 /** After `epic file --help`. */
 const FILE_HELP = `

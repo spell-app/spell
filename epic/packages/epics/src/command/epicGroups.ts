@@ -565,6 +565,51 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       description: "serve that repo at / (every repo is at /r/<name>/ too)",
       example: "epic repo default spell-app"
     }
+  ],
+  pages: [
+    {
+      name: "index",
+      usage: "",
+      description:
+        "write the home page's area cards and each area's list page (epics, guides, sagas ...);  a missing one is made",
+      example: "epic pages index"
+    },
+    {
+      name: "update",
+      usage: "[<page>...]",
+      description: "check the docs pages against their template:  sections, links, the engine's assets",
+      example: "epic pages update guides/greet.html"
+    },
+    {
+      name: "new",
+      usage: '<kind> <page> --title "..."',
+      description: "make a page from a template (durable, ...), at the right depth, and list it on its area's page",
+      example: 'epic pages new durable guides/greet.html --title "How greet() works"'
+    },
+    {
+      name: "open",
+      usage: "[<page>] [--vs | --review]",
+      description: "show a page in Chrome, or in VS Code's side bar (--vs;  --review:  its Review tab)",
+      example: "epic pages open epics/seo/seo.plan.html --review"
+    },
+    {
+      name: "link",
+      usage: '<page> [--hash <id>] [--text "..."] [--review] [--show]',
+      description: "print a page's links for a reply:  the side bar's and the browser's;  --show:  show it too",
+      example: "epic pages link epics/seo/seo.plan.html --hash p1 --review"
+    },
+    {
+      name: "fuss",
+      usage: "<path>... | --branch",
+      description: "check the writing of pages and comments against the house rules",
+      example: "epic pages fuss --branch"
+    },
+    {
+      name: "offline",
+      usage: "[<page>...]",
+      description: "what the docs pages load from the internet, for airplane mode",
+      example: "epic pages offline"
+    }
   ]
 }
 
@@ -574,6 +619,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  *   `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
  *   `hub` (`Hub`), `repo` (`Repos`)
+ * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  */
 export type GroupName =
   | "ask"
@@ -590,6 +636,7 @@ export type GroupName =
   | "server"
   | "hub"
   | "repo"
+  | "pages"
 
 /** One verb of a group, for its help:  `epic <group> <name> <usage>`, what it does, a whole command line. */
 export type GroupVerb = {

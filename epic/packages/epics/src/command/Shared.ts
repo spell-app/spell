@@ -287,11 +287,15 @@ export class Shared {
           recursive: true,
           filter: (source) => !LITTER.has(basename(source))
         })
-      } else mkdirSync(join(config.dir, path), { recursive: true })
+      } else {
+        // a file in each, so git keeps the folder:  a fresh clone of the content repo can link it at once
+        mkdirSync(join(config.dir, path), { recursive: true })
+        writeFileSync(join(config.dir, path, ".gitkeep"), "")
+      }
     }
     gitOrThrow(["add", "-A"], config.dir)
     const sha = importFrom ? Git.run(["rev-parse", "--short", "HEAD"], importFrom).out : ""
-    const message = importFrom ? `Import from spell-app ${sha}`.trim() : "Shared content:  empty"
+    const message = importFrom ? `Import from ${basename(importFrom)} ${sha}`.trim() : "Shared content:  empty"
     gitOrThrow(["-c", "commit.gpgsign=false", "commit", "-q", "--allow-empty", "-m", message], config.dir)
     return importFrom ? "imported" : "created"
   }
@@ -346,8 +350,9 @@ export class Shared {
    *   - it was `"shared": { "dir" }` in the main checkout's `package.json` until epic `epic-eject` P4
    * - `worktrees`:  `worktreesFolder` in the same file, and the old place while it's moved (`worktreesFolders`):
    *   where `checkouts()` finds the worktrees
-   * - `links`:  `"shared": { "links" }` in `root`'s OWN `package.json` (else the main one's), else `DEFAULT_LINKS`:
-   *   which folders a checkout links is its branch's business (the reorg changed them, claude-design P4)
+   * - `links`:  `"shared": { "links" }` in `root`'s OWN `package.json` (else the main one's), else `sharedFolders` in
+   *   `.epic/config.json5`:  which folders a checkout links is its branch's business in spell-app (the reorg changed
+   *   them, claude-design P4);  a repo set up by `epic init` has no `package.json` block, only the config
    * - static:  made before there's a `Shared` to hold it
    */
   static configOf(root = Git.mainRoot()): SharedConfig {
@@ -360,7 +365,7 @@ export class Shared {
       main,
       dir: resolve(dir),
       worktrees: epic.worktreesFolders,
-      links: mine.links ?? theirs.links ?? DEFAULT_LINKS
+      links: mine.links ?? theirs.links ?? epic.sharedFolders
     }
   }
 
@@ -395,9 +400,6 @@ const CHECKOUT_MARKER = "packages/epics/tools/relocate.js"
 
 /** The docs tools' `relocate.js`, beside THIS code:  the reorg's repair (`commit`) and `repair`. */
 const RELOCATE_TOOL = fileURLToPath(new URL("../../tools/relocate.js", import.meta.url))
-
-/** The links when the manifest names none:  the docs' areas, then the goal sets and the logs. */
-const DEFAULT_LINKS = ["epics", "guides", "pages", "templates", "brand", "ui", "goals", "agents"]
 
 /** Never compared or copied:  OS litter. */
 const LITTER = new Set([".DS_Store"])
@@ -523,9 +525,9 @@ function readme(config: SharedConfig): string {
   const repo = basename(config.main)
   return `# ${basename(config.dir)}
 
-Shared content for \`${repo}\` (epic \`shared-content\`):  ${config.links.map((path) => `\`${path}\``).join(", ")}.
+Shared content for \`${repo}\`:  ${config.links.map((path) => `\`${path}\``).join(", ")}.
 
-- Content only:  the tools that read and write it live in \`${repo}\`.
+- Content only:  the epic tooling (spell-epic) reads and writes it, for \`${repo}\`.
 - Every checkout of \`${repo}\` (main and each worktree) links these folders in, so edits show everywhere at once.
 - Edit through the links in \`${repo}\`;  every Claude Code turn commits here by itself (\`epic shared commit\`).
 `

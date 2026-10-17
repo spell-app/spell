@@ -51,7 +51,8 @@ export class EpicConfig {
     installOnCreate: false,
     installTimeout: 600,
     windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
-    linkSessionFolders: false
+    linkSessionFolders: false,
+    sharedFolders: ["epics", "guides", "pages", "templates", "brand", "ui", "goals", "agents"]
   }
 
   /** the main checkout:  what the folders are relative to */
@@ -119,7 +120,7 @@ export class EpicConfig {
     return old === this.worktreesFolder ? [old] : [this.worktreesFolder, old]
   }
 
-  /** what makes a new worktree ready to run, from its root */
+  /** what makes a new worktree ready to run, from its root;  `""`:  nothing to run (a repo with no packages) */
   get installCommand(): string {
     return this.settings.installCommand
   }
@@ -142,6 +143,15 @@ export class EpicConfig {
   /** whether each worktree's saved-session folder is linked to the main checkout's */
   get linkSessionFolders(): boolean {
     return this.settings.linkSessionFolders
+  }
+
+  /**
+   * the content folder's folders every checkout links in at its root (`epics`, `sagas` ...):  `epic shared link`
+   * - a checkout's `package.json` `"shared": { "links" }` still wins, for a branch of spell-app cut before the file
+   *   existed (`Shared.configOf()`)
+   */
+  get sharedFolders(): string[] {
+    return this.settings.sharedFolders
   }
 
   /**
@@ -212,6 +222,7 @@ export class EpicConfig {
   /**
    * Every value as `epic config` prints it, by dotted key:  folders absolute, the rest as written.
    * - `{ contentFolder: "/.../spell-app-dev", ..., "windows.default": "spell-app", ... }`
+   * - `sharedFolders` as one comma-separated line, `epics,guides,...`, so a skill reads it as one value
    */
   values(): Record<string, string | boolean | number> {
     return {
@@ -225,7 +236,8 @@ export class EpicConfig {
       "windows.repoName": this.windows.repoName,
       "windows.contentName": this.windows.contentName,
       "windows.worktreeOnly": this.windows.worktreeOnly,
-      linkSessionFolders: this.linkSessionFolders
+      linkSessionFolders: this.linkSessionFolders,
+      sharedFolders: this.sharedFolders.join(",")
     }
   }
 
@@ -252,7 +264,7 @@ export class EpicConfig {
       contentFolder: valueOf(given, "contentFolder", defaults.contentFolder, file),
       baseBranch: valueOf(given, "baseBranch", defaults.baseBranch, file),
       worktreesFolder: valueOf(given, "worktreesFolder", defaults.worktreesFolder, file),
-      installCommand: valueOf(given, "installCommand", defaults.installCommand, file),
+      installCommand: valueOf(given, "installCommand", defaults.installCommand, file, "", { empty: true }),
       installOnCreate: valueOf(given, "installOnCreate", defaults.installOnCreate, file),
       installTimeout: valueOf(given, "installTimeout", defaults.installTimeout, file),
       windows: {
@@ -261,7 +273,8 @@ export class EpicConfig {
         contentName: valueOf(window, "contentName", defaults.windows.contentName, file, "windows."),
         worktreeOnly: valueOf(window, "worktreeOnly", defaults.windows.worktreeOnly, file, "windows.")
       },
-      linkSessionFolders: valueOf(given, "linkSessionFolders", defaults.linkSessionFolders, file)
+      linkSessionFolders: valueOf(given, "linkSessionFolders", defaults.linkSessionFolders, file),
+      sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file)
     }
   }
 
@@ -294,7 +307,8 @@ export class EpicConfig {
  *   the worktree hook, the window script, the epics list, the page server's `/worktrees/<w>/`
  *   - it may be outside the repo (`../spell-app.worktrees`, epic `epic-eject` P8);  then the old place,
  *     `.claude/worktrees`, is still read for the worktrees left there (`worktreesFolders`)
- * - `installCommand`:  what makes a new worktree ready to run (`yarn install`):  `/isolate`, `/epic`, the hook
+ * - `installCommand`:  what makes a new worktree ready to run (`yarn install`):  `/isolate`, `/epic`, the hook;
+ *   `""` for none (a repo with no packages to install)
  * - `installOnCreate`:  whether the worktree hook runs `installCommand` itself, before it hands a NEW worktree over
  *   (off:  the skills run it, after entering).  On, nothing opens the worktree without its packages (I2)
  * - `installTimeout`:  the seconds the hook's install may take (600)
@@ -308,6 +322,8 @@ export class EpicConfig {
  * - `linkSessionFolders`:  whether the worktree hook links each NEW worktree's saved-session folder
  *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (off;
  *   `SessionFolders`, epic `epic-eject` Q4)
+ * - `sharedFolders`:  the content folder's folders each checkout links in at its root (spell-app's nine;  `epic init`
+ *   writes `epics`, `sagas`, `guides`, `pages` for a new repo):  `epic shared link`, the turn-end commit hook
  */
 export type EpicSettings = {
   contentFolder: string
@@ -318,6 +334,7 @@ export type EpicSettings = {
   installTimeout: number
   windows: EpicWindows
   linkSessionFolders: boolean
+  sharedFolders: string[]
 }
 
 /** `EpicSettings.windows`:  the default window, the folder names every window shows, and its layout. */
@@ -343,24 +360,40 @@ function insideOf(root: string, path: string): string | undefined {
 
 /**
  * `given[key]`, of the same kind as `fallback`;  `fallback` when it's left out.
- * - throws `TypeError` naming the file and the key (`prefix` + `key`) when it's another kind, an empty string, or a
- *   number that isn't more than 0
+ * - throws `TypeError` naming the file and the key (`prefix` + `key`) when it's another kind, an empty string (unless
+ *   `empty`), or a number that isn't more than 0
  */
 function valueOf<T extends string | boolean | number>(
   given: Record<string, unknown>,
   key: string,
   fallback: T,
   file: string,
-  prefix = ""
+  prefix = "",
+  { empty: emptyOk = false } = {}
 ): T {
   const value = given[key]
   if (value === undefined) return fallback
-  const empty = typeof value === "string" ? !value.trim() : typeof value === "number" && !(value > 0)
+  const empty = typeof value === "string" ? !emptyOk && !value.trim() : typeof value === "number" && !(value > 0)
   if (typeof value !== typeof fallback || empty)
     throw new TypeError(
       `EpicConfig:  ${file}'s "${prefix}${key}" must be a ${typeof fallback}, not ${JSON.stringify(value)}`
     )
   return value as T
+}
+
+/**
+ * `given[key]`, a list of folder names (`["epics", "sagas"]`);  `fallback` when it's left out.
+ * - throws `TypeError` naming the file and the key when it isn't a list of plain names (no `/`, `..` or empty one)
+ */
+function foldersOf(given: Record<string, unknown>, key: string, fallback: string[], file: string): string[] {
+  const value = given[key]
+  if (value === undefined) return fallback
+  const plain = (each: unknown) => typeof each === "string" && /^[\w.-]+$/.test(each) && each !== "." && each !== ".."
+  if (!Array.isArray(value) || !value.every(plain))
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "${key}" must be a list of folder names, ["epics", ...], not ${JSON.stringify(value)}`
+    )
+  return value as string[]
 }
 
 /** `text` without what `cut(rest)` says to cut:  how many characters, at each place outside a double-quoted string. */

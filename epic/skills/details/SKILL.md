@@ -126,7 +126,7 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
 ## 3. Show it, and wait
 
 - Answer page:  `epic ask show <slug> --wait`, with Bash `run_in_background: true`.
-  - Then END THE TURN with the page's link pair (`spell dev docs link <page>`, below):
+  - Then END THE TURN with the page's link pair (`epic pages link <page>`, below):
     "answer in the side bar:  <link>".
   - Don't also ask in chat or the modal.
 - Picture page:  `epic ask show <slug>` (foreground), then AskUserQuestion.
@@ -135,7 +135,7 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
 ## Links to pages
 
 Any page you name to Owen (a details page, an epic page, any docs page):
-`spell dev docs link <page> --hash <id> --show`, and paste what it prints.
+`epic pages link <page> --hash <id> --show`, and paste what it prints.
 - It shows the page in this session's side bar NOW (`--show`), and prints two links:
   - the title opens it in the side bar (again)
   - `🌐`, after a `•`, opens it in Chrome:  `Title • 🌐` (Owen, 2026-10-11)
@@ -184,10 +184,10 @@ Any page you name to Owen (a details page, an epic page, any docs page):
     Route modules load when a page server starts.
   - Say so in one line;  ask in chat or the modal meanwhile.
   - Owen restarts it when no other session needs it:
-    `spell dev server stop`, then `spell dev server ensure`, in the checkout whose server it is.
+    `epic server stop`, then `epic server ensure`, in the checkout whose server it is.
 - "The page server restarted since this page loaded":  Owen reloads the page, then sends again.
 - `show` couldn't reach VS Code:  `spell dev vscode`, and reload the window.
-  Meanwhile the page's URL (`spell dev server url <ABSOLUTE path>`) works in any browser.
+  Meanwhile the page's URL (`epic server url <ABSOLUTE path>`) works in any browser.
 
 ## Commands (`epic ask ...`, from anywhere in the repo)
 

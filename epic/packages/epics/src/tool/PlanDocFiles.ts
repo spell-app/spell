@@ -70,7 +70,10 @@ export class PlanDocFiles {
   /** `pages/details/`:  scratch details pages (`epic ask new`), where the item picker's page lives */
   readonly details: string
 
-  /** `packages/epics` of `root`:  where the docs tools run (`index.js`, `check-spell.js`, `open.js`) */
+  /**
+   * where the docs tools run (`index.js`, `check-spell.js`, `open.js`):  `packages/epics` of `root`, else (a repo
+   * without the epic tools, one `epic init` set up) the package of THIS code, beside `docsTools`
+   */
   readonly docsPackage: string
 
   /**
@@ -88,7 +91,8 @@ export class PlanDocFiles {
     this.epics = join(root, "epics")
     this.template = template
     this.details = join(root, "pages", "details")
-    this.docsPackage = join(root, "packages", "epics")
+    const own = join(root, "packages", "epics")
+    this.docsPackage = existsSync(own) ? own : dirname(DOCS_TOOLS)
     this.docsTools = DOCS_TOOLS
     this.linker = new AS.Linker(root)
   }

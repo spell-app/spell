@@ -150,4 +150,4 @@ Short, per epic, in this order:
 5. Where to review:
    - Source Control (tracked docs)
    - the shared docs' `auto:` commits in `spell-app-dev`
-   - the epic page's link, `spell dev docs link <epic page> --review`
+   - the epic page's link, `epic pages link <epic page> --review`

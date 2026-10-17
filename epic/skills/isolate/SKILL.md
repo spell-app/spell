@@ -137,6 +137,7 @@ The turn after step 6, whatever Owen sends (`continue`, typed in by the move, or
    - Only after a move:  "Stay" skips this.
 2. No `node_modules/` at the worktree's root:  the install command, `epic config installCommand` (`yarn install`, a few
    seconds).  With `installOnCreate` on, the worktree hook already ran it, before the window opened (I2).
+   - It prints an empty line (a repo with nothing to install, as `epic init` finds it):  skip this step.
 3. Check the session's name ("Session name" below).
 4. Carry on, with the first of these there is:
    - the saved prompt `~/.spell/prompts/<name>.md`, then delete it

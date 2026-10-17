@@ -8,6 +8,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { Window } from "../../../scripts/window.mjs"
+import { EpicConfig } from "../src/config/EpicConfig.ts"
 import { ENGINE_ROUTES } from "../src/server/server.types.ts"
 
 /** `packages/epics/tools`:  the docs scripts, `_assets`, the goals tooling. */
@@ -125,10 +126,19 @@ export function throughLink(file) {
   return file
 }
 
-/** The root `package.json`'s `"shared".links`:  the shared repo's top folders, linked at the checkout's root. */
+/**
+ * The shared repo's top folders, linked at the checkout's root:  the root `package.json`'s `"shared".links`, else
+ * the repo's `.epic/config.json5` `sharedFolders` (a repo `epic init` set up has no `package.json` block).
+ */
 function sharedLinks() {
   try {
-    return JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).shared?.links ?? []
+    const links = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).shared?.links
+    if (links) return links
+  } catch {
+    // no package.json:  the config's
+  }
+  try {
+    return EpicConfig.of(ROOT).sharedFolders
   } catch {
     return []
   }
@@ -261,11 +271,14 @@ const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
  * This checkout's page server (`spell dev server`), started in the background if it isn't running.
  * - returns `{ base, port }`, or `undefined` if it can't start (the caller falls back to `file://`)
  * - runs `packages/server/src/page/cli.ts ensure` under `tsx`, with that package's `tsconfig.json` for its aliases
+ * - a checkout without that page server (a repo `epic init` set up):  the machine's epic server instead
+ *   (`ensureEpicServer()`)
  * - ~1s when it has to start, ~0.3s when it runs
  * - `SPELL_NO_SERVER=1`:  never starts it
  */
 export function ensurePageServer() {
   if (process.env.SPELL_NO_SERVER) return undefined
+  if (!existsSync(join(ROOT, "packages/server/src/page/cli.ts"))) return ensureEpicServer()
   const run = spawnSync(
     process.execPath,
     ["--import", "tsx", join(ROOT, "packages/server/src/page/cli.ts"), "ensure", "--root", ROOT],
@@ -285,6 +298,27 @@ export function ensurePageServer() {
     return undefined
   }
 }
+
+/**
+ * The machine's epic server (`epic hub`, spell-epic's `bin/epic`), started in the background if it isn't running,
+ * as this checkout's page server:  `{ base, port }`, `base` the URL this repo's content is served at
+ * (`http://127.0.0.1:4848/r/<repo>`, or the server's root for the default repo), so `serverUrl()` works unchanged:
+ * a checkout's shared folders are the content folder's.
+ * - `undefined` (and why, on stderr) when the repo isn't registered (`epic repo add`) or the server won't start
+ */
+function ensureEpicServer() {
+  const run = spawnSync(process.execPath, [EPIC_BIN, "hub", "url", join(ROOT, "pages")], { encoding: "utf8" })
+  const url = run.status === 0 ? run.stdout.trim() : ""
+  if (!url.endsWith("/pages")) {
+    console.error(`epic server not used (${(run.stderr || String(run.error ?? "")).trim().split("\n").at(-1)})`)
+    return undefined
+  }
+  const base = url.slice(0, -"/pages".length)
+  return { base, port: Number(new URL(base).port) }
+}
+
+/** spell-epic's `epic` command, beside this package:  `bin/epic` at its root. */
+const EPIC_BIN = join(PACKAGE, "..", "..", "bin", "epic")
 
 /**
  * A template's `html` fixed for a page `depth` folders below the checkout's root (`guides/glossary.html` is 1,
@@ -329,7 +363,16 @@ export function atDepth(html, depth) {
 
 /** URL of `file` on the page server at `base`, e.g. `http://127.0.0.1:4747/pages/index.html`. */
 export function serverUrl(base, file) {
-  return `${base}/${relative(ROOT, resolve(file)).split(sep).map(encodeURIComponent).join("/")}`
+  let path = relative(ROOT, resolve(file))
+  // shared content named through ANOTHER checkout's link (the main checkout's, from a worktree):  through this one's
+  if (path.startsWith("..")) {
+    try {
+      path = relative(ROOT, throughLink(realpathSync(file)))
+    } catch {
+      // not there:  as it was
+    }
+  }
+  return `${base}/${path.split(sep).map(encodeURIComponent).join("/")}`
 }
 
 /**

@@ -77,7 +77,7 @@ ONE details page asks about every item instead (Owen, 2026-10-03):
     each `summary` what it does, and `details` its commands
   - then "Leave it"
 - Skip this session's own item, as below.
-- Make it, show it, and END THE TURN with the page's link pair (`spell dev docs link <page>`):
+- Make it, show it, and END THE TURN with the page's link pair (`epic pages link <page>`):
   - `epic ask new <slug> --from <spec.json>`:  the spec in the scratchpad.
     Its shape:  `DetailsSpec`, in [details.js](packages/epics/tools/details.js).
   - Then `epic ask show <slug> --wait`, with Bash `run_in_background: true`.

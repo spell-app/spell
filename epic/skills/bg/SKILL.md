@@ -118,7 +118,7 @@ The helper's report reaches this session as a notice, between whatever else it's
 2. Reply, the FIRST line in bold, by itself:  `**Agent <full name> came back with:**`.
    - Then the report, short, in Owen's words:  what changed, where to look, what needs him.
    - Links as the root rules say:
-     - a page:  side bar + browser, `spell dev docs link ... --show`
+     - a page:  side bar + browser, `epic pages link ... --show`
      - an epic page:  `--review`
      - files:  `[file.ts](path)`
 3. A question in its report that only Owen can answer:  AskUserQuestion, with the epic and what it's for.

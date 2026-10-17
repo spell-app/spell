@@ -29,6 +29,7 @@ import { spawn, spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, openSync, readdirSync, readFileSync, realpathSync } from "node:fs"
 import { homedir } from "node:os"
 import { join, resolve, sep } from "node:path"
+import { fileURLToPath } from "node:url"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
 
@@ -36,6 +37,9 @@ import { AirplaneMode } from "../../tools/AirplaneMode"
 
 import { RunningEpics, sessionsTitledFor, type LiveSession } from "../list/RunningEpics"
 import { ReviewInbox, type InboxWoken, type PageInbox, type WakeClaim, type WokenState } from "./ReviewInbox"
+
+/** The window script beside this code, spell-epic's `scripts/window.mjs`:  `epic window launch` (`launch()`). */
+const WINDOW_SCRIPT = fileURLToPath(new URL("../../../../scripts/window.mjs", import.meta.url))
 
 /** How long a window's bridge gets to answer, in ms. */
 const BRIDGE_TIMEOUT = 5000
@@ -405,6 +409,8 @@ export class ReviewStart {
   /**
    * Run `epic window launch` with `args`, from the main checkout, detached:  the request doesn't wait for the
    * window to come up (up to 30s).
+   * - the window script beside THIS code (`WINDOW_SCRIPT`), on the main checkout (`EPIC_CHECKOUT`):  a repo set up
+   *   by `epic init` has no `scripts/window.mjs` of its own (epic `epic-eject` P9)
    * - its output goes to `wake.log` in the bridges' registry folder, where a failed launch can be read
    */
   private launch(args: string[]) {
@@ -412,8 +418,12 @@ export class ReviewStart {
     const dir = ReviewStart.windowsDirs[0]!
     mkdirSync(dir, { recursive: true, mode: 0o700 })
     const log = openSync(join(dir, "wake.log"), "a")
-    const script = join(this.mainRoot, "scripts", "window.mjs")
-    spawn(process.execPath, [script, ...args], { cwd: this.mainRoot, detached: true, stdio: ["ignore", log, log] })
+    spawn(process.execPath, [WINDOW_SCRIPT, ...args], {
+      cwd: this.mainRoot,
+      env: { ...process.env, EPIC_CHECKOUT: this.mainRoot },
+      detached: true,
+      stdio: ["ignore", log, log]
+    })
       .on("error", (error) => console.error("ReviewStart:  window launch failed", error))
       .unref()
   }
