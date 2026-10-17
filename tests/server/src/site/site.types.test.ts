@@ -9,24 +9,28 @@ function litTab(path: string): string | undefined {
 }
 
 describe("the site header's tabs", () => {
-  it("are in Owen's order (claude-design Q6), each list page its tab's home", () => {
+  it("are in Owen's order (epic-workflow J40), each list page its tab's home", () => {
     expect(PROPERTIES.map((property) => property.name)).toEqual([
-      "Epics",
       "Guides",
+      "Sagas",
+      "Epics",
+      "Epic/UI",
+      "Spell/UI",
+      "App",
+      "App/UI",
       "Brand",
-      "Spell UI",
-      "Templates",
-      "Goals",
-      "App"
+      "Templates"
     ])
     expect(PROPERTIES.map((property) => property.path)).toEqual([
-      "epics/index.html",
       "guides/index.html",
+      "sagas/index.html",
+      "epics/index.html",
+      "/components/epics/",
+      "/components/ui/",
+      "/editor/",
+      "/components/app/",
       "brand/index.html",
-      "/ui/",
-      "templates/index.html",
-      "goals/index.html",
-      "/editor/"
+      "templates/index.html"
     ])
     expect(SITE_HOME).toBe("pages/index.html")
   })
@@ -42,17 +46,40 @@ describe("the site header's tabs", () => {
     ["/brand/pony.html", "Brand"],
     ["/brand/compare.html", "Brand"],
     ["/brand/spell-design-system/Logo.spell.html", "Brand"],
-    ["/brand/components/ui-brand-logo.html", "Brand"],
-    ["/ui/", "Spell UI"],
-    ["/ui/components/ui-card.html", "Spell UI"],
-    ["/packages/ui/site/index.html", "Spell UI"],
-    ["/worktrees/w/ui/components/ui-card.html", "Spell UI"],
+    // the component sets:  their address, a worktree's, and their folder's long one (a file:// page too)
+    ["/components/ui/", "Spell/UI"],
+    ["/components/ui/ui-card.html", "Spell/UI"],
+    ["/packages/ui/site/index.html", "Spell/UI"],
+    ["/packages/ui/docs/ui-card.html", "Spell/UI"],
+    ["/worktrees/w/components/ui/ui-card.html", "Spell/UI"],
+    ["/components/epics/", "Epic/UI"],
+    ["/components/epics/epic-item.html", "Epic/UI"],
+    ["/worktrees/w/components/epics/epic-item.html", "Epic/UI"],
+    ["/packages/epics/docs/epic-item.html", "Epic/UI"],
+    ["/Users/owen/www/spell-app/spell-app/packages/epics/docs/index.html", "Epic/UI"],
+    ["/components/app/", "App/UI"],
+    ["/components/app/spell-app.html", "App/UI"],
+    ["/worktrees/w/components/app/", "App/UI"],
+    ["/packages/app/docs/index.html", "App/UI"],
+    // the brand's element set lights the Brand tab
+    ["/components/brand/", "Brand"],
+    ["/components/brand/brand-logo.html", "Brand"],
+    ["/packages/brand/docs/brand-logo.html", "Brand"],
+    // the old addresses:  no tab
+    ["/ui/components/ui-card.html", undefined],
+    ["/epic-ui/", undefined],
+    ["/packages/app/components/spell-app/SpellApp.tsx", undefined],
+    // Epic UI's old element pages, until the merge:  guides
+    ["/guides/epic-components/elements/epic-item.html", "Guides"],
     ["/templates/index.html", "Templates"],
     // the plan template is a template, not an epic;  the goals templates aren't goals
     ["/templates/epics/plan.html", "Templates"],
     ["/templates/goals/set/index.html", "Templates"],
-    ["/goals/index.html", "Goals"],
-    ["/goals/spell/motivation/motivation.html", "Goals"],
+    // the saga pages, and the parked goal sets under the same tab (epic `epic-workflow` P15)
+    ["/sagas/index.html", "Sagas"],
+    ["/sagas/epics/epics.saga.html", "Sagas"],
+    ["/goals/index.html", "Sagas"],
+    ["/goals/spell/motivation/motivation.html", "Sagas"],
     ["/editor/", "App"],
     // the home and the scratch details pages:  no tab
     ["/pages/index.html", undefined],
@@ -73,7 +100,7 @@ describe("the site header's tabs", () => {
     ["/packages/docs/solid/solid-2.html", "Guides"],
     // other packages' files
     ["/packages/server/AGENTS.md", undefined],
-    ["/packages/ui/docs/guides/x.html", undefined]
+    ["/packages/ui/notes/plan.md", undefined]
   ])("light %s:  %s", (path, tab) => {
     expect(litTab(path)).toBe(tab)
   })
