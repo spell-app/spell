@@ -1,0 +1,125 @@
+<!doctype html>
+<!--
+  TEMPLATE:  a page of a COMPONENT SET -- Epic UI (`packages/epics/docs/`, served at `/components/epics/`) or App UI
+  (`packages/app/components/`, at `/components/app/`) -- in Spell UI's page shape (epic `epic-workflow` P10, J23;  the sets:
+  `COMPONENT_SETS` in `packages/server/src/page/page.types.ts`).
+  - A page is its `<head>` and ONE `<main id="main" class="site-main" data-toc-header>`, as a Spell UI page is
+    (`templates/spell-ui-docs.html`):  the chrome (top bar, side column, contents list, footer, `<ui-root>`) is the
+    set's `_parts/layout.html`, written once;  the site bundle wraps the `main` in it on first load, and swaps only the
+    `main` after that.  So:  styles in `main` or the site's `site.css`, never `<head>`;  inline scripts in `main` run
+    again on every visit.
+  - Copy it to the set's folder (an element page:  `elements/<tag>.html` in Epic UI;  the set's home is its
+    `index.html`), then fill the `{{...}}`:  `{{title}}` the page's name (`<epic-item>`:  written `&lt;epic-item&gt;`),
+    `{{summary}}` its one line (also the `description`), `{{code}}` its code's folder.
+  - Its links are written as from the page's SERVED address (`/components/epics/elements/x.html`), not its file:  `../../` is
+    the checkout's root from an element page, `../` from the set's home.  So they hold at `/worktrees/<w>/components/epics/`
+    too.  `doc-links.js` links and checks them that way.
+  - It loads `_assets/site.js` (+ `.css`), which the page server lays over the set's folder:  the sets' build of
+    Spell UI's site (`packages/ui/site/_assets/sets/`), with the set's component pack in its layout (`<ui-components>`),
+    so `<epic-*>` examples draw live.
+  - The set's side column lists the new page once its data is rebuilt:  `yarn site:data` in the set's package
+    (`packages/epics` for Epic UI).
+  - Sections:  nested `<ui-section id header sticky collapsible dividing collapsed>`, every one folded to start, as on
+    every docs page.  Code:  `<ui-code language>` around a `<script type="text/plain">`, folded in a
+    `<ui-accordion class="spell-code" styled>`.
+  - Check it:  `node tools/check-spell.js ../../<set folder>/<page>.html` (in `packages/docs`):  it loads a set's page
+    from the page server at its short address.
+  - Opened as it is (from the page server, `/templates/component-set-docs.html`), it shows in Epic UI's chrome with
+    the placeholders showing, so a layout change can be checked here first.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Epic UI and App UI Components Page Template</title>
+    <meta
+      name="description"
+      content="Template for a components page or components guide of a component set (Epic UI, App UI):  Spell UI's page shape, the set's side column, live examples from its pack."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <!-- from a set's element page:  `../_assets/`;  from its home:  `_assets/` -->
+    <link rel="stylesheet" href="../components/epics/_assets/site.css" />
+    <script type="module" src="../components/epics/_assets/site.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="{{title}}">
+      <ui-segment vertical class="site-masthead">
+        <ui-container>
+          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+            <ui-item href="{{code}}" icon="code" aria-label="Its code" title="Its code"></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            {{title}}
+            <ui-header>{{summary}}</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">What it is, in a sentence or two: what it draws, and where it goes.</p>
+          <p class="meta">For anyone reading or writing its markup, or changing it.</p>
+
+          <ui-section id="1-example" header="1. Example" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>Live: the real element, drawn by the set's pack this page loads.</p>
+            <!-- the live example's markup -->
+          </ui-section>
+
+          <ui-section id="2-markup" header="2. Markup" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ui-accordion class="spell-code" styled>
+              <ui-title>Where it's from · N lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <!-- the markup, as a page writes it -->
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="3-attributes" header="3. Attributes" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Values</th>
+                    <th>Meaning</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>name</code></td>
+                    <td>text</td>
+                    <td>What it means.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked {{date}} against branch <code>{{branch}}</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+{
+  // spell-epic's import-alias table, as spell-app's own `tsconfig.base.json` names the same packages:  `$/name` is a
+  // package's barrel, `$/name/...` a file in its `src/`.  The epics package's `tsconfig.json` extends this.
+  // - `$/epics`:  this repo's own package, `packages/epics/`.
+  // - Every other alias:  spell-app's packages, in the spell-app checkout spell-epic uses:  the link `.spell-app`
+  //   at the root (the same packages `packages/epics/package.json` links in with `portal:`).
+  //   - Through the CHECKOUT's link, never a package's:  their own relative imports out of the package
+  //     (`ui`'s `../../vite.decorators.ts`) then land in that checkout, as they do there.
+  //   - Only the packages the epic code and Spell UI's source need:  ui, spell-solid, util, server, assembler.
+  //   - They go to npm when spell-epic is released (Q5 of epic `epic-eject`).
+  // - `tsc` and `tsx` read it through the package's `tsconfig.json`;  vite / vitest through `resolve.tsconfigPaths`,
+  //   which finds the tsconfig nearest the IMPORTING file:  spell-app's own files use spell-app's table.
+  // - Paths are fixed, never `${configDir}`:  `tsx` can't resolve it (4.20 throws, 4.23 ignores it).
+  "compilerOptions": {
+    "paths": {
+      // ## `epics`:  a component pack;  its elements live in `packages/epics/components/`, outside `src/`, so
+      // `$/epics/components` is longer than `$/epics/*` and wins
+      "$/epics": ["./packages/epics/src/index.ts"],
+      "$/epics/*": ["./packages/epics/src/*"],
+      "$/epics/components": ["./packages/epics/components/index.ts"],
+      "$/epics/components/*": ["./packages/epics/components/*"],
+
+      // ## spell-app's packages
+      "$/util": ["./.spell-app/packages/util/src/index.ts"],
+      "$/util/*": ["./.spell-app/packages/util/src/*"],
+      "$/server": ["./.spell-app/packages/server/src/index.ts"],
+      "$/server/*": ["./.spell-app/packages/server/src/*"],
+      "$/server/test/*": ["./.spell-app/packages/server/test/*"],
+      "$/assembler": ["./.spell-app/packages/assembler/src/index.ts"],
+      "$/assembler/*": ["./.spell-app/packages/assembler/src/*"],
+      "$/spell-solid": ["./.spell-app/packages/spell-solid/src/index.ts"],
+      "$/spell-solid/*": ["./.spell-app/packages/spell-solid/src/*"],
+      "$/ui": ["./.spell-app/packages/ui/src/index.ts"],
+      "$/ui/*": ["./.spell-app/packages/ui/src/*"],
+      "$/ui/components/*": ["./.spell-app/packages/ui/components/*"],
+      "$/ui/test/*": ["./.spell-app/packages/ui/test/*"],
+      "$/ui/tools/*": ["./.spell-app/packages/ui/tools/*"]
+    }
+  }
+}

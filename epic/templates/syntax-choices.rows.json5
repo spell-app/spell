@@ -1,0 +1,45 @@
+{
+  "sections": [
+    {
+      "id": "members",
+      "title": "Our own members",
+      "description": "Q1 · what a class holds or works out:  `is` / `has` / `can`, or a verb that asks the question"
+    },
+    {
+      "id": "settings",
+      "title": "Settings",
+      "description": "Q2 · options and props:  bare, the platform's way (`{ once: true }`)"
+    }
+  ],
+  "rows": [
+    {
+      "id": "members-UIDropdown-187",
+      "section": "members",
+      "file": "packages/ui/components/ui-dropdown/UIDropdown.tsx",
+      "line": 187,
+      "purpose": "menu open",
+      "current": "this.isOpen()",
+      "recommended": "this.isOpen()",
+      "note": "already `is`:  stays"
+    },
+    {
+      "id": "members-SourceElement-70",
+      "section": "members",
+      "file": "packages/ui/src/elements/LoadableComponent.tsx",
+      "line": 70,
+      "purpose": "save in flight",
+      "current": "this.saving.get()",
+      "recommended": "this.isSaving.get()"
+    },
+    {
+      "id": "settings-PartContext-273",
+      "section": "settings",
+      "file": "packages/ui/src/elements/PartContext.ts",
+      "line": 273,
+      "purpose": "direct part",
+      "current": "{ isDirect: true }",
+      "recommended": "{ direct: true }",
+      "note": "the field it's copied into takes the setting's name"
+    }
+  ]
+}

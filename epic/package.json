@@ -1,0 +1,47 @@
+{
+  "name": "spell-epic",
+  "version": "0.1.0",
+  "private": true,
+  "description": "spell-epic:  the epic tooling -- epic pages, the epic command, worktrees and windows, the review loop -- as a Claude Code plugin, loaded in place",
+  "license": "MIT",
+  "bin": {
+    "epic": "bin/epic"
+  },
+  "workspaces": [
+    "packages/epics"
+  ],
+  "type": "module",
+  "scripts": {
+    "epic": "node bin/epic",
+    "ts": "yarn workspace @spell-app/epics ts",
+    "test": "yarn workspace @spell-app/epics test && yarn test:scripts",
+    "test:node": "yarn workspace @spell-app/epics vp test run --project node",
+    "test:scripts": "node --test scripts/window.test.mjs",
+    "lint": "yarn workspace @spell-app/epics lint",
+    "format": "yarn workspace @spell-app/epics format",
+    "review": "yarn ts && yarn lint && yarn test && echo '== REVIEW PASSED\n===========\n'",
+    "plugin:validate": "claude plugin validate ."
+  },
+  "dependencies": {
+    "tsx": "4.20.3"
+  },
+  "devDependencies": {
+    "@vitest/browser-playwright": "catalog:",
+    "playwright": "1.63.0",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  },
+  "resolutions": {
+    "@solidjs/h": "2.0.0-rc.13",
+    "@solidjs/signals": "2.0.0-rc.13",
+    "@solidjs/web": "2.0.0-rc.13",
+    "solid-js": "2.0.0-rc.13",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.0.0",
+    "vitest": "5.0.1"
+  },
+  "engines": {
+    "node": ">=24.11"
+  },
+  "packageManager": "yarn@4.18.0"
+}
