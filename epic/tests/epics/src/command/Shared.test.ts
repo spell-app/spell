@@ -51,7 +51,7 @@ describe("sharedConfig()", () => {
     expect(config).toEqual({
       main: MAIN,
       dir: PEER,
-      worktrees: join(MAIN, ".claude", "worktrees"),
+      worktrees: [join(MAIN, ".claude", "worktrees")],
       links: ["epics", "guides", "pages", "templates", "brand", "ui", "goals", "agents"]
     })
     expect(Shared.configOf(WT)).toEqual(config)

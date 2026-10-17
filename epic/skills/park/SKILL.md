@@ -8,7 +8,7 @@ argument-hint: "[<name>]"
 
 Get this session's work out of the way, e.g. while another session restructures packages,
 and make it cheap to pick back up.
-- The work ends up as a WIP commit on branch `<name>`, in worktree `.claude/worktrees/<name>`, plus a note.
+- The work ends up as a WIP commit on branch `<name>`, in worktree `<name>` (`epic worktree path <name>`), plus a note.
 - `/unpark` picks it up by hand.
 - `/wait-for <other>` waits for another session, then picks it up by itself.
 
@@ -33,7 +33,7 @@ What `$ARGUMENTS` means:
 0. In plan mode:  ask Owen to leave it (shift+tab) first,
    as in [the isolate skill](../isolate/SKILL.md), "Start", step 0.
 1. `<name>`:
-   - in a worktree (the session's folder is under `.claude/worktrees/`):  that worktree's name
+   - in a worktree (the session's folder is a worktree's:  `.claude/worktrees/`, or beside the repo):  that worktree's name
    - else `$ARGUMENTS`, lower-kebab-cased
    - none:  propose one from the work so far, in AskUserQuestion
    - Then rename the session `<name>` at once, before step 2:  `epic session title "🚧 <name>"`.
@@ -78,7 +78,7 @@ What `$ARGUMENTS` means:
    <!-- park: parked -->
    # Parked:  <name>
 
-   Branch `<name>` (worktree `.claude/worktrees/<name>`).  Epic page:  [<name>](<link>) (or "none").
+   Branch `<name>` (worktree `<path>`, as `epic worktree path <name>` prints it).  Epic page:  [<name>](<link>) (or "none").
    Parked <YYYY-MM-DD HH:MM>, session `<session id>`.
 
    ## Goal

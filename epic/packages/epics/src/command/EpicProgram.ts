@@ -581,7 +581,7 @@ export class EpicProgram {
   static async config(args: string[]): Promise<number> {
     const json = args.includes("--json")
     const [key] = args.filter((arg) => !arg.startsWith("--"))
-    let values: Record<string, string | boolean>
+    let values: Record<string, string | boolean | number>
     try {
       values = EpicConfig.of(Git.nearestCheckout(".git")).values()
     } catch (error) {
@@ -695,12 +695,17 @@ const CONFIG_HELP = `
 The keys (folders print absolute;  the file's are relative to the main checkout):
   contentFolder        the shared content repo:  epics, guides, sagas, the logs
   baseBranch           the branch worktrees start from and merge into
-  worktreesFolder      where worktrees go, <worktreesFolder>/<name>
+  worktreesFolder      where new worktrees go, <worktreesFolder>/<name>;  may be beside the repo
+                       (../spell-app.worktrees), the old .claude/worktrees still read then
   installCommand       what makes a new worktree ready to run
+  installOnCreate      whether the worktree hook runs installCommand before handing a new worktree over
+  installTimeout       the seconds that install may take
   windows.default      the window a worktree's window is opened from, by default
   windows.repoName     the repo root's folder name in every window
   windows.contentName  the content repo's folder name in every window
-  linkSessionFolders   whether worktrees' saved-session folders are linked to main's
+  windows.worktreeOnly whether every worktree's window holds only the worktree and the content folder
+                       (a worktree beside the repo gets that window anyway)
+  linkSessionFolders   whether the worktree hook links new worktrees' saved-session folders to main's
 Any worktree reads the main checkout's file;  a key it leaves out takes its default.
 
 Examples:

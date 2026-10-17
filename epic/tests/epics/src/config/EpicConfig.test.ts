@@ -32,13 +32,20 @@ describe("EpicConfig", () => {
       baseBranch: "main",
       worktreesFolder: join(MAIN, ".claude", "worktrees"),
       installCommand: "yarn install",
+      installOnCreate: false,
+      installTimeout: 600,
       "windows.default": "spell-app",
       "windows.repoName": "spell-app",
       "windows.contentName": "spell-app-dev",
+      "windows.worktreeOnly": false,
       linkSessionFolders: false
     })
     expect(config.worktreeFolder("seo")).toBe(INSIDE)
     expect(config.worktreesPattern).toBe(".claude/worktrees")
+    // one place:  nothing moved
+    expect(config.worktreesFolders).toEqual([join(MAIN, ".claude", "worktrees")])
+    expect(config.worktreesPatterns).toEqual([".claude/worktrees"])
+    expect(config.worktreeOnlyWindow("seo")).toBe(false)
   })
 
   test("the repo's committed config holds the defaults, and reads as JSON5 reads it (`DataFile`'s reader)", () => {
@@ -55,10 +62,46 @@ describe("EpicConfig", () => {
     expect(config.main).toBe(other)
     expect(config.baseBranch).toBe("trunk")
     expect(config.worktreesFolder).toBe(join(TOP, "other.worktrees"))
-    // outside the checkout:  no pattern inside it, and a path is a worktree's only under that folder
+    // outside the checkout:  the new place has no pattern inside it;  the old place is still read
     expect(config.worktreesPattern).toBeUndefined()
+    expect(config.worktreesFolders).toEqual([join(TOP, "other.worktrees"), join(other, ".claude", "worktrees")])
+    expect(config.worktreesPatterns).toEqual([".claude/worktrees"])
     expect(config.worktreeNameOf(join(beside, "epics"))).toBe("vite")
-    expect(config.worktreeNameOf("/elsewhere/.claude/worktrees/seo")).toBeUndefined()
+    expect(config.worktreeNameOf("/elsewhere/.claude/worktrees/seo")).toBe("seo")
+    expect(config.worktreeNameOf(join(TOP, "other"))).toBeUndefined()
+  })
+
+  test("worktrees moved beside the repo:  new ones go there, old ones are found where they are", () => {
+    const moved = fakeMainCheckout(join(TOP, "moved"))
+    configFile(moved, '{ "worktreesFolder": "../moved.worktrees" }')
+    const old = fakeWorktree(moved, join(moved, ".claude", "worktrees", "old"))
+    const config = new EpicConfig(moved)
+    expect(config.worktreeFolder("old")).toBe(old)
+    expect(config.worktreeFolder("new")).toBe(join(TOP, "moved.worktrees", "new"))
+    expect(config.newWorktreeFolder("old")).toBe(join(TOP, "moved.worktrees", "old"))
+    expect(config.worktreeNameOf(join(old, "packages"))).toBe("old")
+    // the window:  a worktree beside the repo gets a worktree-only one, an old one keeps the old layout
+    expect(config.worktreeOnlyWindow("new")).toBe(true)
+    expect(config.worktreeOnlyWindow("old")).toBe(false)
+    expect(config.isOutside(join(TOP, "moved.worktrees", "new"))).toBe(true)
+    expect(config.isOutside(old)).toBe(false)
+  })
+
+  test("the P8 keys:  install in the hook, its timeout, worktree-only windows for every worktree", () => {
+    const main = fakeMainCheckout(join(TOP, "p8"))
+    configFile(
+      main,
+      '{ "installOnCreate": true, "installTimeout": 30, "windows": { "worktreeOnly": true }, "linkSessionFolders": true }'
+    )
+    const config = new EpicConfig(main)
+    expect(config.installOnCreate).toBe(true)
+    expect(config.installTimeout).toBe(30)
+    expect(config.windows.worktreeOnly).toBe(true)
+    expect(config.worktreeOnlyWindow("seo")).toBe(true)
+    expect(() => EpicConfig.settingsFrom('{ "installTimeout": 0 }', "x.json5")).toThrow(
+      /"installTimeout" must be a number/
+    )
+    expect(() => EpicConfig.settingsFrom('{ "installTimeout": "9" }', "x.json5")).toThrow(/must be a number/)
   })
 
   test("a key left out keeps its default;  comments and trailing commas read;  an unknown key is skipped", () => {

@@ -238,6 +238,22 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic worktree status seo"
     },
     {
+      name: "path",
+      usage: "<name>",
+      description:
+        "worktree <name>'s folder, absolute:  where it is (beside the repo, or the old .claude/worktrees), else " +
+        "where a new one goes:  what EnterWorktree's path takes",
+      example: "epic worktree path seo"
+    },
+    {
+      name: "move",
+      usage: "<name> | --idle [--dry-run] [--json]",
+      description:
+        "move a worktree from the old place (.claude/worktrees) beside the repo, its shared links and session " +
+        "folder made again;  --idle:  every one no session works in (a busy one stays until its /isolate done)",
+      example: "epic worktree move --idle --dry-run"
+    },
+    {
       name: "merge-main",
       usage: "[--continue] [--json]",
       description:
@@ -348,6 +364,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<worktree> [--dry-run] [--json]",
       description: "move a worktree cut before the cutover onto the shared content",
       example: "epic shared migrate seo --dry-run"
+    },
+    {
+      name: "rename",
+      usage: "<new> [--dry-run] [--json]",
+      description:
+        "rename the shared content folder (a bare name:  beside it), leave a link at the old name, relink every " +
+        "checkout, and write the new place into .epic/config.json5",
+      example: "epic shared rename spell-app.epics --dry-run"
     },
     {
       name: "repair",

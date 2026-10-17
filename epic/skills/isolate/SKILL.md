@@ -6,7 +6,9 @@ argument-hint: <name> | done
 
 # /isolate
 
-Work in worktree `.claude/worktrees/<name>`, so this session's edits never collide with another session's.
+Work in worktree `<name>`, so this session's edits never collide with another session's.
+- Its folder:  `epic worktree path <name>`.  `.claude/worktrees/<name>`, or beside the repo
+  (`../spell-app.worktrees/<name>`) once its `.epic/config.json5` moves them (`worktreesFolder`, epic `epic-eject` P8).
 - The worktree, its branch and the session share one name.
 - `/epic` runs these steps too.
 - The session either moves to a NEW window of the worktree's own, or STAYS in this one.
@@ -22,7 +24,7 @@ Work in worktree `.claude/worktrees/<name>`, so this session's edits never colli
    - in plan mode:  it's read-only apart from the plan file.
      - So `EnterWorktree` can't run, and ExitPlanMode would ask to APPROVE a half-made plan.
      - Ask the user to leave plan mode (shift+tab);  the plan file survives.
-   - in another worktree:  the session's folder is under `.claude/worktrees/<other>`,
+   - in another worktree:  the session's folder is in worktree `<other>` (`.claude/worktrees/<other>`, or beside the repo),
      or its window is a worktree's (`epic window which`:  `workspace` under `workspaces/ongoing/`).
      - `<other>` isn't `<name>`:  stop, saying so in one line
        ("`/isolate done` first, or start from a package window").
@@ -54,7 +56,7 @@ Work in worktree `.claude/worktrees/<name>`, so this session's edits never colli
    - No name:  propose one from the work so far in AskUserQuestion;  the user can type another.
    - Then rename (step 0's `epic session title`), since the hook only renames a name it was given.
 2. Collisions, from the repo root:
-   - a worktree at `.claude/worktrees/<name>` (`git worktree list`)
+   - a worktree at `epic worktree path <name>` (`git worktree list`)
    - a branch `<name>` or `worktree-<name>`
    - Any hit:  AskUserQuestion, options "Reuse `<name>`" and "Different name" (typed in "Other").
 
@@ -72,7 +74,12 @@ Work in worktree `.claude/worktrees/<name>`, so this session's edits never colli
      - The window is retitled `⎇ <name>` and tinted (`stay`).
    - Why ask:  staying is quicker, and touches nothing else when this is the window's only session.
      With others, they share its doc preview and Source Control ([window.mjs](${CLAUDE_PLUGIN_ROOT}/scripts/window.mjs), "Staying put").
-3. `EnterWorktree` with `name: "<name>"`, or `path: ".claude/worktrees/<name>"` when reusing one.
+3. `EnterWorktree` with `name: "<name>"`, or `path` (the folder `epic worktree path <name>` prints) when reusing one.
+   - ALWAYS this way, whatever folder the session is in:  never start a session inside a worktree's folder to
+     work there.  Only a session that ENTERED with `EnterWorktree` comes back to its worktree when it's reopened
+     from another window;  one started there comes back in that window's folder, often `main` (epic `epic-eject` I3).
+   - The session-start guard ([worktree-guard.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree-guard.mjs)) says so when it
+     isn't:  a reopened session outside its worktree, or a new tab inside one.  Do what it says first.
    - The repo's `WorktreeCreate` hook ([worktree.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree.mjs))
      makes it on branch `<name>`, from local `main`.
    - It keeps this session listed in every window.
@@ -81,7 +88,9 @@ Work in worktree `.claude/worktrees/<name>`, so this session's edits never colli
      - Its file:  `workspaces/ongoing/<name>.code-workspace`, in the main checkout, git-ignored.
      - Its look:  this window's, or `<look>`'s, one of the 12 of `epic window color`
        (`/isolate <name> -purple`, `/epic <name> -purple`;  epic `windows-and-review` P5).
-     - Its folders:  the MAIN root (so every session is listed), then the worktree's root, `⎇ <name>`.
+     - Its folders:  a worktree beside the repo:  `⎇ <name>` and the content folder only, every session listed
+       through its linked session folder (`linkSessionFolders`);  a nested one:  the MAIN root (so every session is
+       listed), then the worktree's root, `⎇ <name>`.
      - `<pkg>`:  this session's window's.
    - This isn't a package window (a worktree's ...):  `open` takes `spell-app`'s, the whole repo's window and its look.
      - Never ask which package (Owen, 2026-10-07).
@@ -127,7 +136,7 @@ The turn after step 6, whatever Owen sends (`continue`, typed in by the move, or
    - The log is `~/.spell/windows/handoffs/<session id>.log`.
    - Only after a move:  "Stay" skips this.
 2. No `node_modules/` at the worktree's root:  the install command, `epic config installCommand` (`yarn install`, a few
-   seconds).
+   seconds).  With `installOnCreate` on, the worktree hook already ran it, before the window opened (I2).
 3. Check the session's name ("Session name" below).
 4. Carry on, with the first of these there is:
    - the saved prompt `~/.spell/prompts/<name>.md`, then delete it
@@ -155,7 +164,7 @@ The session MUST stay titled `🚧 <name>` while its work is under way.
   - The prompt hook titles a typed `/isolate`, `/epic` or `/unpark <name>` so by itself.
   - Renamed:  one line, "session renamed `🚧 <name>` (was "<old>");  shows on your next message".
   - `epic session title` alone shows the current title, and any queued one.
-- `<name>`:  the worktree's (`.claude/worktrees/<name>`), which is the branch's and the epic page's.
+- `<name>`:  the worktree's (`epic worktree path <name>`), which is the branch's and the epic page's.
 
 ## Merge, keep:  a standing epic
 
@@ -168,12 +177,12 @@ leaves its worktree:  NOT "Finish" below.
 
 ## Finish:  `/isolate done`
 
-0. Not in a worktree (the session's folder isn't under `.claude/worktrees/`):
+0. Not in a worktree (the session's folder isn't a worktree's:  `.claude/worktrees/`, or beside the repo):
    say so in one line, then offer to clean up.
-   - Candidates:  each `.claude/worktrees/<name>` that
+   - Candidates:  each worktree `<name>` (`.claude/worktrees/<name>`, or beside the repo:  `epic worktree list`) that
      - no session is in:  under "No session in" from `epic worktree list`.
        Why:  a fresh worktree has nothing outside `main` either, but its session is still using it.
-     - has nothing uncommitted:  `git -C .claude/worktrees/<name> status --short`, fine from the main checkout
+     - has nothing uncommitted:  `git -C "$(epic worktree path <name>)" status --short`, fine from the main checkout
      - has nothing outside `main`:  `git log --oneline main..<branch>` empty.
        An agent's `<owner>-agent-<id>` (below):  or nothing outside branch `<owner>`.
    - None:  stop.
@@ -181,7 +190,7 @@ leaves its worktree:  NOT "Finish" below.
      - It takes 2-4 options, so one candidate is "Remove `<name>`" / "Keep it".
      - More than 4 go in several questions.
    - For each picked:
-     - `git worktree remove .claude/worktrees/<name>`
+     - `git worktree remove "$(epic worktree path <name>)"`
      - `git branch -d <branch>`
        - `-D` for an agent's branch that's only in `<owner>`, since `-d` checks against `main`
    - Then stop:  steps 1-8 are for a session IN a worktree.
@@ -298,7 +307,7 @@ leaves its worktree:  NOT "Finish" below.
 
 7b. Agents' worktrees, WITHOUT asking (Owen, 2026-10-05), now in the main checkout.
    - An agent this session started with `isolation: "worktree"` (an epic's phases)
-     got `.claude/worktrees/<name>-agent-<id>`, on branch `<name>-agent-<id>`.
+     got worktree `<name>-agent-<id>` (beside `<name>`'s), on branch `<name>-agent-<id>`.
      The `WorktreeCreate` hook names it for its owner.
    - It was kept when the agent finished, because its commits weren't in `main` yet.
    - For each in `git worktree list`:
@@ -312,6 +321,6 @@ leaves its worktree:  NOT "Finish" below.
      Remove it on the same checks when its branch is in `<name>`:
      `git merge-base --is-ancestor <branch> <name>`.
 8. One line;  in a worktree's window, plus "close this window when you're done with it".
-   - Merged:  the worktree can go (`git worktree remove .claude/worktrees/<name>`, `git branch -d <name>`).
+   - Merged:  the worktree can go (`git worktree remove "$(epic worktree path <name>)"`, `git branch -d <name>`).
    - Not merged:  how to merge later (`git merge <name>` from the main checkout), then the same cleanup.
    - Agents' worktrees:  how many step 7b removed, and any it kept.

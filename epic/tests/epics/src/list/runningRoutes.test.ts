@@ -81,3 +81,53 @@ describe("runningRoutes", () => {
     expect(stops).toHaveLength(1)
   })
 })
+
+describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () => {
+  const top = mkdtempSync(join(tmpdir(), "epics-running-moved-"))
+  const root = join(top, "repo")
+  const claudeHome = mkdtempSync(join(tmpdir(), "epics-running-claude-"))
+  const home = process.env.SPELL_CLAUDE_HOME
+  const stops: (() => unknown)[] = []
+  let server: PageServer
+  let port: number
+
+  /** An epic page for epic `name`, at phase `phase`. */
+  const page = (name: string, phase: string) =>
+    `<html><head><title>Epic: ${name}</title></head><body class="plan-doc"><epic-page epic="${name}">` +
+    `<epic-phase id="p1" title="${phase}" status="active"></epic-phase></epic-page></body></html>\n`
+
+  beforeAll(async () => {
+    process.env.SPELL_CLAUDE_HOME = claudeHome
+    put(root, ".epic/config.json5", '{ "worktreesFolder": "../repo.worktrees" }')
+    put(root, "epics/index.html", `<html><head></head><body>${MARKER}</body></html>\n`)
+    put(top, "repo.worktrees/new/epics/new/new.plan.html", page("new", "Beside"))
+    put(root, ".claude/worktrees/old/epics/old/old.plan.html", page("old", "Nested"))
+    server = new PageServer({ root })
+    await runningRoutes.setup({ ...server.routeContext(), onStop: (stop) => stops.push(stop) })
+    await server.start({ port: 0, routes: false, pidFile: false })
+    port = server.info.port
+  })
+
+  afterAll(async () => {
+    for (const stop of stops) await stop()
+    await server.stop()
+    if (home === undefined) delete process.env.SPELL_CLAUDE_HOME
+    else process.env.SPELL_CLAUDE_HOME = home
+    rmSync(top, { recursive: true, force: true })
+    rmSync(claudeHome, { recursive: true, force: true })
+  })
+
+  test("lists the epics of both places, the new place first, each at /worktrees/<w>/", async () => {
+    const list = JSON.parse((await ask(port, "GET", RUNNING_API)).text) as RunningEpic[]
+    expect(list.map(({ name, url }) => [name, url])).toEqual([
+      ["new", "/worktrees/new/epics/new/new.plan.html"],
+      ["old", "/worktrees/old/epics/old/old.plan.html"]
+    ])
+  })
+
+  test("serves both places' pages at /worktrees/<w>/:  the new place's, and the old one's through its overlay", async () => {
+    expect((await ask(port, "GET", "/worktrees/new/epics/new/new.plan.html")).text).toContain("Beside")
+    expect((await ask(port, "GET", "/worktrees/old/epics/old/old.plan.html")).text).toContain("Nested")
+    expect((await ask(port, "GET", "/worktrees/none/epics/x.html")).status).toBe(404)
+  })
+})

@@ -14,6 +14,7 @@ import { homedir } from "node:os"
 import { basename, join, relative } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { SessionFolders } from "$/epics/config/SessionFolders"
 import { epicStateFor } from "$/epics/list/EpicState"
 
 import {
@@ -405,10 +406,10 @@ export class Sessions {
     const projects = join(this.home, "projects")
     if (!existsSync(projects)) return []
     const found: SessionSummary[] = []
-    for (const dir of readdirSync(projects)) {
+    // each real folder once:  a linked worktree's folder (epic `epic-eject` Q4) IS main's
+    for (const dir of SessionFolders.listed(projects)) {
       if (!options.everywhere && dir !== prefix && !dir.startsWith(`${prefix}-`)) continue
       const folder = join(projects, dir)
-      if (!statSync(folder).isDirectory()) continue
       for (const name of readdirSync(folder)) {
         if (!name.endsWith(".jsonl")) continue
         const summary = this.summarize(join(folder, name))
@@ -489,14 +490,13 @@ export class Sessions {
     return found.sort((a, b) => b.last.localeCompare(a.last) || b.id.localeCompare(a.id))
   }
 
-  /** Every transcript file, of every project. */
+  /** Every transcript file, of every project:  each once, a linked worktree's folder skipped (`SessionFolders.listed()`). */
   transcripts(): string[] {
     const projects = join(this.home, "projects")
     if (!existsSync(projects)) return []
     const found: string[] = []
-    for (const dir of readdirSync(projects)) {
+    for (const dir of SessionFolders.listed(projects)) {
       const folder = join(projects, dir)
-      if (!statSync(folder).isDirectory()) continue
       for (const name of readdirSync(folder)) if (name.endsWith(".jsonl")) found.push(join(folder, name))
     }
     return found

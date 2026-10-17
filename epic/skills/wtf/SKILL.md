@@ -16,7 +16,7 @@ Owen has lost the thread:  hand it back in one screen.
 - `?`, or Owen typed `wtf?` without the slash:  ASK mode (step 4).
 - No `<name>`:  THIS session.
 - `<name>`:  the plan or isolate session of that name.
-  - worktree `.claude/worktrees/<name>`, branch `<name>`
+  - worktree `<name>` (`epic worktree path <name>`), branch `<name>`
   - epic page `epics/<name>/`
   - a session renamed `<name>`
   - Nothing by that name:  say so in one line, list the names that do exist (worktrees, epic pages), and stop.
@@ -35,7 +35,7 @@ Owen has lost the thread:  hand it back in one screen.
     - Owen's LAST stated intent (his words, not the plan's)
     - what's been done
     - what was asked, and not yet answered
-- Where:  in the session's checkout (`git -C .claude/worktrees/<name>` for `<name>`):
+- Where:  in the session's checkout (`git -C "$(epic worktree path <name>)"` for `<name>`):
   - `git branch --show-current`
   - `git status --short`
   - `git log --oneline main..HEAD` (a worktree), or the session's own commits (`main`)

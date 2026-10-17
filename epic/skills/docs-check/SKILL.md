@@ -80,7 +80,7 @@ From `decisions --json`, later beats earlier:
      A mixed diff can't be reviewed.
 2. The right checkout:  `epic list --json`, each epic's `checkout`.
    - Merged (`main`):  run from the main checkout.
-   - Not merged:  from its worktree, `.claude/worktrees/<name>`, where its code and its tracked docs are.
+   - Not merged:  from its worktree (`epic worktree path <name>`), where its code and its tracked docs are.
    - Elsewhere:  say so in one line, and stop.
 3. The lists, per epic, saved to the scratchpad:
    - `epic docs <name> --json > <scratch>/<name>.docs.json`

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { isAbsolute, join, relative, resolve, sep } from "node:path"
 
 // By its file, `.ts` and all:  plain `node` loads this file (the hooks, `scripts/window.mjs`), and finds the
@@ -13,7 +13,7 @@ import { checkoutOf } from "@spell-app/server/src/checkout.ts"
  * ```ts
  * const config = EpicConfig.of(process.cwd())   // the main checkout's file, from any worktree
  * config.contentFolder                           // => "/Users/owen/www/spell-app/spell-app-dev"
- * config.worktreeFolder("seo")                   // => "<main>/.claude/worktrees/seo"
+ * config.worktreeFolder("seo")                   // => "<main>/.claude/worktrees/seo":  where it is, or would go
  * config.baseBranch                              // => "main"
  * ```
  *
@@ -48,7 +48,9 @@ export class EpicConfig {
     baseBranch: "main",
     worktreesFolder: ".claude/worktrees",
     installCommand: "yarn install",
-    windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev" },
+    installOnCreate: false,
+    installTimeout: 600,
+    windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
     linkSessionFolders: false
   }
 
@@ -98,14 +100,38 @@ export class EpicConfig {
     return this.settings.baseBranch
   }
 
-  /** the folder holding every worktree, `<worktreesFolder>/<name>`:  `worktreesFolder`, from the main checkout */
+  /**
+   * the folder NEW worktrees go in, `<worktreesFolder>/<name>`:  `worktreesFolder`, from the main checkout
+   * - existing ones may still be in the old place:  `worktreesFolders`
+   */
   get worktreesFolder(): string {
     return resolve(this.main, this.settings.worktreesFolder)
+  }
+
+  /**
+   * every folder worktrees may be in, the new place first:  `worktreesFolder`, then the OLD place (the default,
+   * `.claude/worktrees`) when the file moved them (epic `epic-eject` P8:  `../spell-app.worktrees`)
+   * - the old place stays on the list for good:  harmless once it's empty, and a worktree there keeps working until
+   *   its `/isolate done`
+   */
+  get worktreesFolders(): string[] {
+    const old = resolve(this.main, EpicConfig.DEFAULTS.worktreesFolder)
+    return old === this.worktreesFolder ? [old] : [this.worktreesFolder, old]
   }
 
   /** what makes a new worktree ready to run, from its root */
   get installCommand(): string {
     return this.settings.installCommand
+  }
+
+  /** whether the worktree hook runs `installCommand` in a NEW worktree before handing it over (epic `epic-eject` I2) */
+  get installOnCreate(): boolean {
+    return this.settings.installOnCreate
+  }
+
+  /** how long the worktree hook's install may take, in seconds, before it's stopped and the hook fails */
+  get installTimeout(): number {
+    return this.settings.installTimeout
   }
 
   /** the window names:  the default window, and the folder names a window shows */
@@ -118,50 +144,87 @@ export class EpicConfig {
     return this.settings.linkSessionFolders
   }
 
-  /** Worktree `name`'s folder:  `<worktreesFolder>/<name>`. */
+  /**
+   * Worktree `name`'s folder:  where it IS, in any of `worktreesFolders`;  else where a new one goes,
+   * `<worktreesFolder>/<name>` (`newWorktreeFolder()`).
+   * - so an old worktree (`.claude/worktrees/seo`) is still found after the file moved new ones beside the repo
+   */
   worktreeFolder(name: string): string {
+    const found = this.worktreesFolders.map((folder) => join(folder, name)).find((folder) => existsSync(folder))
+    return found ?? this.newWorktreeFolder(name)
+  }
+
+  /** Where a NEW worktree `name` goes:  `<worktreesFolder>/<name>`, whatever is in the old place. */
+  newWorktreeFolder(name: string): string {
     return join(this.worktreesFolder, name)
   }
 
   /**
    * The name of the worktree `path` is in (`<worktreesFolder>/<name>/...`);  `undefined` outside one.
-   * - `path` under this repo's worktrees folder
-   * - or, while that folder is inside the checkout (`.claude/worktrees`), under the same folder of ANY checkout:
+   * - `path` under any of this repo's worktrees folders (`worktreesFolders`:  the new place and the old)
+   * - or under a worktrees folder inside the checkout (`.claude/worktrees`) of ANY checkout:
    *   a session's `cwd`, a path `lsof` printed, a test's made-up `/repo/.claude/worktrees/seo`
    */
   worktreeNameOf(path: string | null | undefined): string | undefined {
     if (!path) return undefined
-    const inside = relative(this.worktreesFolder, path)
-    if (inside && !inside.startsWith("..") && !isAbsolute(inside)) return inside.split(sep)[0] || undefined
-    const pattern = this.worktreesPattern
-    if (!pattern) return undefined
-    const marker = `${sep}${pattern.split("/").join(sep)}${sep}`
-    const at = path.indexOf(marker)
-    return at < 0 ? undefined : path.slice(at + marker.length).split(sep)[0] || undefined
+    for (const folder of this.worktreesFolders) {
+      const inside = insideOf(folder, path)
+      if (inside) return inside.split("/")[0] || undefined
+    }
+    for (const pattern of this.worktreesPatterns) {
+      const marker = `${sep}${pattern.split("/").join(sep)}${sep}`
+      const at = path.indexOf(marker)
+      if (at >= 0) return path.slice(at + marker.length).split(sep)[0] || undefined
+    }
+    return undefined
   }
 
   /**
-   * The worktrees folder as a path inside the checkout (`.claude/worktrees`), for a pattern in each checkout
-   * (a window's `files.exclude`);  `undefined` when it's outside the checkout (`../spell-app.worktrees`).
+   * The NEW worktrees folder as a path inside the checkout (`.claude/worktrees`);  `undefined` when it's outside
+   * the checkout (`../spell-app.worktrees`).
    */
   get worktreesPattern(): string | undefined {
-    const inside = relative(this.main, this.worktreesFolder)
-    return inside && !inside.startsWith("..") && !isAbsolute(inside) ? inside.split(sep).join("/") : undefined
+    return insideOf(this.main, this.worktreesFolder)
+  }
+
+  /**
+   * Every worktrees folder inside the checkout, as a path from its root (`.claude/worktrees`), for a pattern in each
+   * checkout (a window's `files.exclude`):  the old place too, while worktrees may be left there.
+   */
+  get worktreesPatterns(): string[] {
+    return this.worktreesFolders.flatMap((folder) => insideOf(this.main, folder) ?? [])
+  }
+
+  /** Whether `path` (a worktree's folder) is OUTSIDE the main checkout:  beside the repo, not nested in it. */
+  isOutside(path: string): boolean {
+    return insideOf(this.main, path) === undefined
+  }
+
+  /**
+   * Whether worktree `name`'s window holds only `⎇ <name>` and the content folder, no main checkout
+   * (epic `epic-eject` O3):  `windows.worktreeOnly`, or its folder is beside the repo.
+   * - a worktree still nested in the checkout keeps the old layout, the main root first (`scripts/window.mjs`)
+   */
+  worktreeOnlyWindow(name: string): boolean {
+    return this.windows.worktreeOnly || this.isOutside(this.worktreeFolder(name))
   }
 
   /**
    * Every value as `epic config` prints it, by dotted key:  folders absolute, the rest as written.
    * - `{ contentFolder: "/.../spell-app-dev", ..., "windows.default": "spell-app", ... }`
    */
-  values(): Record<string, string | boolean> {
+  values(): Record<string, string | boolean | number> {
     return {
       contentFolder: this.contentFolder,
       baseBranch: this.baseBranch,
       worktreesFolder: this.worktreesFolder,
       installCommand: this.installCommand,
+      installOnCreate: this.installOnCreate,
+      installTimeout: this.installTimeout,
       "windows.default": this.windows.default,
       "windows.repoName": this.windows.repoName,
       "windows.contentName": this.windows.contentName,
+      "windows.worktreeOnly": this.windows.worktreeOnly,
       linkSessionFolders: this.linkSessionFolders
     }
   }
@@ -190,10 +253,13 @@ export class EpicConfig {
       baseBranch: valueOf(given, "baseBranch", defaults.baseBranch, file),
       worktreesFolder: valueOf(given, "worktreesFolder", defaults.worktreesFolder, file),
       installCommand: valueOf(given, "installCommand", defaults.installCommand, file),
+      installOnCreate: valueOf(given, "installOnCreate", defaults.installOnCreate, file),
+      installTimeout: valueOf(given, "installTimeout", defaults.installTimeout, file),
       windows: {
         default: valueOf(window, "default", defaults.windows.default, file, "windows."),
         repoName: valueOf(window, "repoName", defaults.windows.repoName, file, "windows."),
-        contentName: valueOf(window, "contentName", defaults.windows.contentName, file, "windows.")
+        contentName: valueOf(window, "contentName", defaults.windows.contentName, file, "windows."),
+        worktreeOnly: valueOf(window, "worktreeOnly", defaults.windows.worktreeOnly, file, "windows.")
       },
       linkSessionFolders: valueOf(given, "linkSessionFolders", defaults.linkSessionFolders, file)
     }
@@ -224,28 +290,38 @@ export class EpicConfig {
  *   the epics, guides, sagas and logs every checkout links in (`epic shared`, the turn-end commit hook)
  * - `baseBranch`:  the branch worktrees start from and merge into (`main`):
  *   the worktree hook, `epic worktree merge-main`, `epic merge`, the behind-main notice
- * - `worktreesFolder`:  where worktrees go, relative to the main checkout (`.claude/worktrees`), one folder each:
+ * - `worktreesFolder`:  where NEW worktrees go, relative to the main checkout (`.claude/worktrees`), one folder each:
  *   the worktree hook, the window script, the epics list, the page server's `/worktrees/<w>/`
- * - `installCommand`:  what makes a new worktree ready to run (`yarn install`):  `/isolate`, `/epic`
- * - `windows`:  the VS Code window names (the window script)
+ *   - it may be outside the repo (`../spell-app.worktrees`, epic `epic-eject` P8);  then the old place,
+ *     `.claude/worktrees`, is still read for the worktrees left there (`worktreesFolders`)
+ * - `installCommand`:  what makes a new worktree ready to run (`yarn install`):  `/isolate`, `/epic`, the hook
+ * - `installOnCreate`:  whether the worktree hook runs `installCommand` itself, before it hands a NEW worktree over
+ *   (off:  the skills run it, after entering).  On, nothing opens the worktree without its packages (I2)
+ * - `installTimeout`:  the seconds the hook's install may take (600)
+ * - `windows`:  the VS Code windows (the window script)
  *   - `default`:  the window file a worktree's window is opened from when the session's window isn't a package's
  *     (`spell-app`:  `workspaces/spell-app.code-workspace`)
  *   - `repoName`:  the repo root's folder name in every window (`spell-app`)
  *   - `contentName`:  the content repo's folder name in every window (`spell-app-dev`)
- * - `linkSessionFolders`:  whether each worktree's saved-session folder is linked to the main checkout's
- *   (off).  NOTE:  nothing does the linking yet:  it's for worktrees beside the repo (epic `epic-eject` P8)
+ *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the content folder (off);
+ *     a worktree beside the repo gets that window anyway (`worktreeOnlyWindow()`)
+ * - `linkSessionFolders`:  whether the worktree hook links each NEW worktree's saved-session folder
+ *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (off;
+ *   `SessionFolders`, epic `epic-eject` Q4)
  */
 export type EpicSettings = {
   contentFolder: string
   baseBranch: string
   worktreesFolder: string
   installCommand: string
+  installOnCreate: boolean
+  installTimeout: number
   windows: EpicWindows
   linkSessionFolders: boolean
 }
 
-/** `EpicSettings.windows`:  the default window, and the folder names every window shows. */
-export type EpicWindows = { default: string; repoName: string; contentName: string }
+/** `EpicSettings.windows`:  the default window, the folder names every window shows, and its layout. */
+export type EpicWindows = { default: string; repoName: string; contentName: string; worktreeOnly: boolean }
 
 /** The text of `file`;  `""` when it isn't there. */
 function readOrEmpty(file: string): string {
@@ -257,10 +333,20 @@ function readOrEmpty(file: string): string {
 }
 
 /**
- * `given[key]`, of the same kind as `fallback`;  `fallback` when it's left out.
- * - throws `TypeError` naming the file and the key (`prefix` + `key`) when it's another kind
+ * Folder `path` as a path from `root` (`.claude/worktrees`), `/`-separated;  `undefined` when it's `root` itself or
+ * outside it.
  */
-function valueOf<T extends string | boolean>(
+function insideOf(root: string, path: string): string | undefined {
+  const inside = relative(root, path)
+  return inside && !inside.startsWith("..") && !isAbsolute(inside) ? inside.split(sep).join("/") : undefined
+}
+
+/**
+ * `given[key]`, of the same kind as `fallback`;  `fallback` when it's left out.
+ * - throws `TypeError` naming the file and the key (`prefix` + `key`) when it's another kind, an empty string, or a
+ *   number that isn't more than 0
+ */
+function valueOf<T extends string | boolean | number>(
   given: Record<string, unknown>,
   key: string,
   fallback: T,
@@ -269,7 +355,8 @@ function valueOf<T extends string | boolean>(
 ): T {
   const value = given[key]
   if (value === undefined) return fallback
-  if (typeof value !== typeof fallback || (typeof value === "string" && !value.trim()))
+  const empty = typeof value === "string" ? !value.trim() : typeof value === "number" && !(value > 0)
+  if (typeof value !== typeof fallback || empty)
     throw new TypeError(
       `EpicConfig:  ${file}'s "${prefix}${key}" must be a ${typeof fallback}, not ${JSON.stringify(value)}`
     )

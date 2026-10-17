@@ -1,9 +1,15 @@
 {
-  "description": "spell-epic's hooks:  worktrees made and removed its way, the behind-main notice, the prompt gate, and the end-of-turn window move and shared-content commit",
+  "description": "spell-epic's hooks:  worktrees made and removed its way, the behind-main notice, the worktree guard, the prompt gate, and the end-of-turn window move and shared-content commit",
   "hooks": {
     "WorktreeCreate": [
       {
-        "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/worktree.mjs\" create" }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/worktree.mjs\" create",
+            "timeout": 900
+          }
+        ]
       }
     ],
     "WorktreeRemove": [
@@ -14,7 +20,8 @@
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/behind-main.mjs\"", "timeout": 10 }
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/behind-main.mjs\"", "timeout": 10 },
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/worktree-guard.mjs\"", "timeout": 10 }
         ]
       }
     ],

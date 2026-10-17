@@ -18,7 +18,7 @@ parking and waking sessions, and the `epic` command that drives them.
 | `.claude-plugin/plugin.json` | the plugin's manifest, `spell-epic` |
 | `.claude-plugin/marketplace.json` | a marketplace of one, this folder (`"source": "."`), so the plugin loads in place |
 | `skills/` | the skills:  `epic`, `epics`, `details`, `comment`, `docs-check`, `send`, `isolate`, `park`, `unpark`, `wait-for`, `worktrees`, `session`, `title`, `wtf`, `bg`, `bedtime`, `airplane` |
-| `hooks/` | `hooks.json`, and the hooks it runs:  making and removing worktrees, the behind-main notice, the prompt gate, the end-of-turn window move and shared-content commit |
+| `hooks/` | `hooks.json`, and the hooks it runs:  making and removing worktrees, the behind-main notice, the worktree guard, the prompt gate, the end-of-turn window move and shared-content commit |
 | `bin/epic` | the `epic` command;  on every session's `PATH` while the plugin is on |
 | `packages/epics/` | the epics package, `@spell-app/epics`:  the `<epic-*>` elements, the epic tool, the `epic` command's code (`src/command/`), the docs tools and their assets, Epic UI's pages (`docs/`) |
 | `tests/epics/` | its tests, at the same paths as the code |
@@ -74,15 +74,71 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | --- | --- | --- |
 | `contentFolder` | `"../spell-app-dev"` | the shared content repo:  epics, guides, sagas, pages, brand, the logs |
 | `baseBranch` | `"main"` | the branch worktrees start from and merge into |
-| `worktreesFolder` | `".claude/worktrees"` | where worktrees go, one folder each, `<worktreesFolder>/<name>` |
+| `worktreesFolder` | `".claude/worktrees"` | where NEW worktrees go, one folder each, `<worktreesFolder>/<name>`;  may be beside the repo (`"../spell-app.worktrees"`) |
 | `installCommand` | `"yarn install"` | what makes a new worktree ready to run, from its root |
+| `installOnCreate` | `false` | whether the worktree hook runs `installCommand` before it hands a new worktree over (I2) |
+| `installTimeout` | `600` | the seconds that install may take before the hook fails |
 | `windows.default` | `"spell-app"` | the window file a worktree's window is opened from, by default |
 | `windows.repoName` | `"spell-app"` | the repo root's folder name in every window |
 | `windows.contentName` | `"spell-app-dev"` | the content repo's folder name in every window |
-| `linkSessionFolders` | `false` | whether each worktree's saved-session folder is linked to the main checkout's (nothing links them yet) |
+| `windows.worktreeOnly` | `false` | whether EVERY worktree's window holds only the worktree and the content folder |
+| `linkSessionFolders` | `false` | whether the worktree hook links each new worktree's saved-session folder to the main checkout's |
 
 A repo's generated files, which `epic worktree merge-main` rebuilds instead of merging, are its own list:
 `.epic/generators.json5`, in each checkout (`MainMerge.generatorsOf()`).
+
+## Worktrees beside the repo
+
+Epic `epic-eject` P8 moves new worktrees OUT of the repo (`worktreesFolder: "../spell-app.worktrees"`), each in a
+window of its own folder and the content folder:  no main checkout in it, each file once.
+- Worktrees left in the old place (`.claude/worktrees`) keep working there until their `/isolate done`:  the hooks, the
+  window script, the epics list, the page server's `/worktrees/<w>/`, parking and the session lists read both places
+  (`EpicConfig.worktreesFolders`).  `epic worktree path <name>` says where one is.
+- `epic worktree move <name> | --idle [--dry-run]` moves an idle one beside the repo;  a busy one stays put.
+- `linkSessionFolders`:  the hook links the worktree's `~/.claude/projects/<slug>` to main's (`SessionFolders`), so
+  every window's Claude panel lists every session.
+- `installOnCreate`:  the hook runs the install before it answers, so no window opens without packages.
+- A worktree's session gets there through `EnterWorktree`, never by starting in its folder:  only then does Claude
+  Code bring it back there when it's reopened from another window (I3).  The session-start guard
+  (`hooks/worktree-guard.mjs`) tells a session that comes back elsewhere, or starts in a worktree unrecorded, to enter.
+- `epic shared rename <new> [--dry-run]` renames the content folder (`spell-app-dev` to `spell-app.epics`), leaving
+  a link at the old name.
+
+## Switching a repo over
+
+The morning after epic `epic-eject`'s night (Q17:  nothing was installed, renamed or moved).  In order, one command
+each;  the epic page's todo is in brackets.  `epic` is spell-epic's `bin/epic` (step 7 puts it on the `PATH`).
+
+1. Merge `epic-eject` into spell-app's `main`:  `/isolate done` in its session.
+2. Point this repo at spell-app's main checkout (T10):  `ln -sfn ../spell-app .spell-app && yarn install`, here.
+3. Bring spell-epic up to date with the epic changes spell-app took since the snapshot (T12):
+   `git -C ../spell-app log --oneline 79c78e58c..main -- packages/epics tests/epics .claude scripts/window.mjs templates`,
+   then port each.
+4. Install the plugin for the machine (T6):
+   `claude plugin marketplace add ~/www/spell-app/spell-epic --scope user && claude plugin install spell-epic@spell-epic --scope user`.
+5. Bare `/epic` (T7):  `for skill in ~/www/spell-app/spell-epic/skills/*/; do ln -s "$skill" ~/.claude/skills/; done`,
+   and remove spell-app's own copies of those 17 skills (`.claude/skills/<name>`) in the same commit as step 6.
+6. Take spell-app's own hooks out of its `.claude/settings.json` (T9), or each hook runs twice.
+7. `epic` on the terminal's `PATH` (T8):  `ln -sfn ~/www/spell-app/spell-epic/bin/epic ~/.local/bin/epic`.
+8. The epic server (T14):  `epic repo add ~/www/spell-app/spell-app --default && epic hub ensure`.
+9. The shared pages load the engine from its routes (T13):  `epic migrate --step engine-asset-routes --dry-run`, then
+   without `--dry-run`, from spell-app's main checkout.
+10. The VS Code extension (T15):  `code --install-extension ~/www/spell-app/spell-epic/vscode/spell-epic.vsix`, then
+    the hand tests V7-V9.
+11. Templates leave the content folder (T11):  `rm -r ~/www/spell-app/spell-app-dev/templates`, once the tools read
+    spell-epic's copies (the turn-end commit records it).
+12. Rename the content folder (T18):  `epic shared rename spell-app.epics --dry-run`, then without;  then
+    `epic window init`, and edit the files it lists (Claude settings' extra folders, memory notes, `AGENTS.md`).
+    Commit the `.epic/config.json5` change it makes.
+13. New worktrees beside the repo (T19):  in spell-app's `.epic/config.json5`, `"worktreesFolder":
+    "../spell-app.worktrees"`, `"linkSessionFolders": true`, `"installOnCreate": true`;  commit on `main`, then
+    `epic config` to check.
+14. Move the idle worktrees (T20):  `epic worktree move --idle --dry-run`, then without.  Busy ones move at their
+    `/isolate done`.
+15. Hand tests:  V10-V13 (`/isolate try-move`, reopening its session from main's window, a new tab in its window, old
+    pages after the rename).
+16. Later, code rather than a command:  `epic server` hands over to `epic hub` (T16), the commands page learns the new
+    verbs (T22), a call per repo on the epic server (T17, P9).
 
 ## The epic server:  one per machine
 

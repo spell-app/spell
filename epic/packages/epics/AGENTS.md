@@ -155,11 +155,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - so it reads its JSON5 itself (comments and trailing commas), not through `DataFile`, which needs `json5`
     - the page server never reads it:  the running epics' route module tells it where the worktrees are
       (`serveWorktrees()`, in the main checkout)
+    - worktrees may live beside the repo (epic `epic-eject` P8):  `worktreesFolders` is every place to look (the new
+      one, then the old `.claude/worktrees`), `worktreeFolder()` finds one in either, `newWorktreeFolder()` is where
+      a new one goes, `worktreeOnlyWindow()` picks its window's layout
+    - `SessionFolders`:  Claude Code's saved-session folders (`~/.claude/projects/<slug>`), and the link that makes a
+      worktree's main's (`linkSessionFolders`);  plain `node` loads it too (the worktree hook)
   - `command/` -- the `epic` COMMAND itself (epic `epic-eject` P5):  `EpicProgram`, the commander tree, and a class
     per verb group, a method per verb.
     - `Requests` (`send`, `requests`, `file`, `home`, `merge`), `Worktrees` (`worktree`), `Sessions` (`session`),
-      `Parking` (`park`), `Stock` (`stock`), `Shared` (`shared`), with `MainMerge` (`worktree merge-main`) and
-      `SharedMigration` (`shared migrate`)
+      `Parking` (`park`), `Stock` (`stock`), `Shared` (`shared`), with `MainMerge` (`worktree merge-main`),
+      `SharedMigration` (`shared migrate`) and `SharedRename` (`shared rename`)
+    - `WorktreeGuard`:  what the `SessionStart` hook (`hooks/worktree-guard.mjs`) tells a worktree's session that
+      starts outside its worktree, or in it unrecorded (epic `epic-eject` I3);  plain `node` loads it by path
     - `EpicTools`:  the scripts it passes through (`window`, `server`, the docs tools' groups) and the `epic` tool,
       run in this process
     - `PromptGate`:  the epic rules the `UserPromptSubmit` hook (`.claude/hooks/prompt-gate.mjs`) checks a prompt

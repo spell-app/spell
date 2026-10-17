@@ -12,7 +12,7 @@ The other half of `/park`.
 
 ## 1. What to unpark
 
-- `$ARGUMENTS` given:  `.claude/worktrees/<name>/PARKED-<name>.md`.
+- `$ARGUMENTS` given:  `<worktree>/PARKED-<name>.md`, `<worktree>` being `epic worktree path <name>`.
   Missing:  say so, then the list below.
 - None, and this session is in a worktree with a `PARKED-*.md`:  that one.
 - Else `epic park list`:
@@ -49,7 +49,7 @@ AskUserQuestion:
     - The option it recommends first, with "(Recommended)"
       ([the isolate skill](../isolate/SKILL.md), "Start", step 2b).
   - "Open new window":
-    1. not yet in the worktree:  `EnterWorktree` with `path: ".claude/worktrees/<name>"`
+    1. not yet in the worktree:  `EnterWorktree` with `path`:  the folder `epic worktree path <name>` prints
     2. both from the worktree's root, as [the isolate skill](../isolate/SKILL.md)'s "Start", steps 4-5:
        - `epic window open <name>` (`--pkg <pkg>` when this isn't a package window)
        - then `epic window handoff <name>`

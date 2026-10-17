@@ -271,6 +271,22 @@ export type ParkedNote = { name: string; file: string; state: string; stopped: s
  */
 export type WaitResult = { code: number; status?: NameStatus; message?: string }
 
+/**
+ * What `epic worktree move` did to one worktree, or would do (`Worktrees.move()`).
+ * - `from` / `to`:  its old folder (`.claude/worktrees/<name>`) and its new one, beside the repo
+ * - `links`:  each shared link made again, `<path> <action>` (`Shared.link()`);  `[]` on a dry run
+ * - `sessionFolder`:  what linking its saved-session folder did (`SessionFolders.link()`), `null` when not asked to
+ * - `window`:  whether it has a window file, still naming the old folder
+ */
+export type MoveReport = {
+  name: string
+  from: string
+  to: string
+  links: string[]
+  sessionFolder: string | null
+  window: boolean
+}
+
 /** A worktree under `.claude/worktrees/` with no running session in it. */
 export type IdleWorktree = { path: string; branch: string }
 
@@ -348,9 +364,27 @@ export type StockAction = { id: string; label: string; commands: string[] }
  * The shared-content manifest (`Shared.configOf()`).
  * - `main`:  the main checkout;  `dir`:  the shared repo, absolute;  `links`:  folders every checkout links,
  *   relative to a checkout's root
- * - `worktrees`:  the folder holding the worktrees, absolute (`.epic/config.json5`'s `worktreesFolder`)
+ * - `worktrees`:  every folder holding worktrees, absolute, the new place first (`.epic/config.json5`'s
+ *   `worktreesFolder`, then the old `.claude/worktrees` when it moved:  `EpicConfig.worktreesFolders`)
  */
-export type SharedConfig = { main: string; dir: string; worktrees: string; links: string[] }
+export type SharedConfig = { main: string; dir: string; worktrees: string[]; links: string[] }
+
+/**
+ * What `epic shared rename` did, or would do (`SharedRename.run()`).
+ * - `from` / `to`:  the content folder's old and new place, absolute;  a link is left at `from`
+ * - `relinked`:  each checkout's link that went through `from`, and the folder it points at now (`to`)
+ * - `config`:  the main checkout's `.epic/config.json5`, and the keys written into it (`contentFolder`,
+ *   `windows.contentName`)
+ * - `mentions`:  files that still name the old folder, left to people (`AGENTS.md`, Claude settings, memory notes)
+ */
+export type RenameReport = {
+  from: string
+  to: string
+  dryRun: boolean
+  relinked: { checkout: string; path: string; to: string }[]
+  config: { file: string; keys: string[] }
+  mentions: string[]
+}
 
 /**
  * One link in one checkout:  its `state` (`Shared.linkState()`), and what `Shared.link()` did about it (`action`).

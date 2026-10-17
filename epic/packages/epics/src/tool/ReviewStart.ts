@@ -322,10 +322,10 @@ export class ReviewStart {
    */
   mainWindow(): WindowEntry | undefined {
     const main = real(this.mainRoot)
-    const worktrees = `${real(this.config.worktreesFolder)}${sep}`
+    const worktrees = this.config.worktreesFolders.map((folder) => `${real(folder)}${sep}`)
     return [...ReviewStart.windows().values()]
       .filter((entry) => entry.folders?.length && real(entry.folders[0]!) === main)
-      .filter((entry) => !entry.folders!.some((folder) => real(folder).startsWith(worktrees)))
+      .filter((entry) => !entry.folders!.some((folder) => worktrees.some((each) => real(folder).startsWith(each))))
       .sort((a, b) => a.pid - b.pid)[0]
   }
 

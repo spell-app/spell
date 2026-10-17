@@ -249,6 +249,39 @@ test("a worktree's window hides the MAIN root's files (beside `.spell-main`), ne
   assert.equal(exclude[".claude/worktrees"], true)
 })
 
+test("worktrees beside the repo (epic-eject P8):  a worktree-only window;  an old nested worktree keeps the old one", () => {
+  // a repo of its own, its config moving worktrees beside it:  `CONFIG` is read once, so in a child process
+  const top = mkdtempSync(join(tmpdir(), "window-beside-"))
+  const repo = join(top, "repo")
+  mkdirSync(join(repo, ".git", "worktrees"), { recursive: true })
+  mkdirSync(join(repo, ".epic"))
+  writeFileSync(join(repo, ".epic", "config.json5"), '{ "worktreesFolder": "../repo.worktrees" }')
+  mkdirSync(join(repo, ".claude", "worktrees", "old"), { recursive: true })
+  const code =
+    // by an env var, not an argument:  the script runs its CLI when it's `argv[1]`
+    "const { Window } = await import(process.env.WINDOW_SCRIPT);" +
+    'console.log(JSON.stringify({ seo: Window.worktreeWorkspace("ui", "seo"), old: Window.worktreeWorkspace("ui", "old"), ' +
+    "exclude: Window.filesExclude() }))"
+  const run = spawnSync(process.execPath, ["--input-type=module", "-e", code], {
+    encoding: "utf8",
+    env: { ...process.env, EPIC_CHECKOUT: repo, WINDOW_SCRIPT: join(import.meta.dirname, "window.mjs") }
+  })
+  rmSync(top, { recursive: true, force: true })
+  assert.equal(run.status, 0, run.stderr)
+  const { seo, old, exclude } = JSON.parse(run.stdout)
+  // no main checkout, nothing of main's hidden
+  assert.deepEqual(seo.folders, [{ path: "../../../repo.worktrees/seo", name: "⎇ seo" }])
+  assert.equal(seo.settings["files.exclude"]["*"], undefined)
+  // the old layout:  main first, its files hidden beside the marker
+  assert.deepEqual(
+    old.folders.map(({ name }) => name),
+    ["spell-app", "⎇ old"]
+  )
+  assert.deepEqual(old.settings["files.exclude"]["*"], { when: ".spell-main" })
+  // the old place is still hidden in every window while worktrees may be left there
+  assert.equal(exclude[".claude/worktrees"], true)
+})
+
 test("a package window:  the whole branch, then the shared repo;  shared links shown only under the shared repo", () => {
   const workspace = Window.workspace("ui")
   assert.deepEqual(workspace.folders, [

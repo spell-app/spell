@@ -78,7 +78,7 @@ Read the chosen phases IN FULL (epic page bodies, items, Overview), and the code
 Enough to find what would otherwise stop you mid-night.
 
 Then ask, in one or more AskUserQuestion calls (4 questions each, recommended option first):
-- Not in a worktree (the session's folder isn't under `.claude/worktrees/`):  "Isolate first?".
+- Not in a worktree (the session's folder isn't a worktree's:  `epic worktree list` marks it):  "Isolate first?".
   - Options:  "Isolate as `<proposed-name>` (Recommended)", "New branch here (`git switch -c`)", "Stop".
   - Never commit to `main`.
 - How many agents may the work use:  ONLY if Owen said "watch token budget";  otherwise up to 5, unasked.

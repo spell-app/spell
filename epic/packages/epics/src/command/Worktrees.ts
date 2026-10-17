@@ -1,9 +1,10 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { SessionFolders } from "$/epics/config/SessionFolders"
 import { URGENT_STATES } from "$/epics/list/EpicState"
 
 import {
@@ -15,6 +16,7 @@ import {
   type IdleWorktree,
   type LiveSession,
   type MergeMainReport,
+  type MoveReport,
   type NameStatus,
   type PlanFacts,
   type PlanSummary,
@@ -23,6 +25,7 @@ import {
 import { Git } from "./Git"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
+import { Shared } from "./Shared"
 
 /****************
  * ### `Worktrees`
@@ -34,6 +37,10 @@ import { Sessions } from "./Sessions"
  *     whole report is `epic stock`.  (Was `worktrees.py --sessions`.)
  *   - `status <name>`:  JSON:  where worktree / branch / plan / session `<name>` stands (`nameStatus()`;  was
  *     `status.py <name>`)
+ *   - `move <name> | --idle [--dry-run] [--json]`:  move a worktree (`--idle`:  every one no session works in) from
+ *     the old place, `.claude/worktrees`, to the new one beside the repo (`move()`;  epic `epic-eject` P8)
+ *   - `path <name>`:  worktree `<name>`'s folder, absolute:  where it is (the old place included), else where a new
+ *     one goes (`EpicConfig.worktreeFolder()`).  What the skills give `EnterWorktree` (epic `epic-eject` P8)
  *   - `merge-main [--continue] [--json]`:  merge `main` into this checkout's branch, regenerating generated files
  *     (bundles, snapshots) both sides changed;  exits 1 when other files conflict (`MainMerge`)
  * - What the other groups read of worktrees and epic pages:  `nameStatus()`, `planFile()`, `planFacts()` ...
@@ -80,6 +87,19 @@ export class Worktrees {
         if (!name) throw new EpicCommandError("status:  which name?")
         out(JSON.stringify(this.nameStatus(name), null, 2))
         return EXIT.OK
+      case "path":
+        if (!name) throw new EpicCommandError("path:  which worktree?")
+        out(this.config.worktreeFolder(name))
+        return EXIT.OK
+      case "move": {
+        if (!name && !flags.idle) throw new EpicCommandError("move:  which worktree?  (or --idle:  every idle one)")
+        const dryRun = Boolean(flags.dryRun)
+        const reports = flags.idle ? this.moveIdle({ dryRun }) : [this.move(name!, { dryRun })]
+        if (flags.json) out(JSON.stringify(reports, null, 2))
+        else for (const line of reports.flatMap((report) => moveLines(report, dryRun))) out(line)
+        if (!reports.length) out("no idle worktree in the old place:  nothing to move")
+        return EXIT.OK
+      }
       case "merge-main": {
         const checkout = Git.nearestCheckout(".git")
         const report = new MainMerge({ root: checkout }).run(flags.continue ? "continue" : "start")
@@ -88,19 +108,70 @@ export class Worktrees {
         return report.result === "conflicts" ? EXIT.ERRORS : EXIT.OK
       }
       default:
-        throw new EpicCommandError(`unknown verb '${verb}':  list, status or merge-main`)
+        throw new EpicCommandError(`unknown verb '${verb}':  list, status, path, move or merge-main`)
     }
+  }
+
+  ////////////////
+  // ## Moving worktrees to the new place
+  ////////////////
+
+  /**
+   * Move worktree `name` from the OLD place (`.claude/worktrees/<name>`) to the new one (`worktreesFolder`, beside the
+   * repo:  epic `epic-eject` P8);  what it did, or would do (`dryRun`).
+   * - refuses (`EpicCommandError`) while a live session works in it:  a busy worktree stays put until its
+   *   `/isolate done`;  also when the config hasn't moved the place, or the new folder is taken
+   * - `git worktree move`, then its shared links made again (they're relative, so the move breaks them:
+   *   `Shared.link()`), then its saved-session folder linked to main's (`linkSessionFolders`)
+   * - its window file, if any (`workspaces/ongoing/<name>.code-workspace`), still names the old folder:  the report
+   *   says so;  `epic window close <name>`, then `open <name>`, makes the worktree-only window
+   */
+  move(name: string, { dryRun = false }: { dryRun?: boolean } = {}): MoveReport {
+    const config = this.config
+    const [place, old] = config.worktreesFolders
+    if (!old) throw new EpicCommandError(`worktreesFolder is still ${place}:  set it beside the repo first`)
+    const from = join(old, name)
+    const to = config.newWorktreeFolder(name)
+    if (!existsSync(join(from, ".git"))) throw new EpicCommandError(`no worktree ${name} in ${old}`)
+    if (existsSync(to)) throw new EpicCommandError(`${to} is taken`)
+    const busy = this.sessions.live(this.main).find((session) => inFolder(session.cwd, from))
+    if (busy)
+      throw new EpicCommandError(
+        `a session works in ${name} (pid ${busy.pid}):  it moves at its /isolate done, not now`
+      )
+    const window = join(this.main, "workspaces", "ongoing", `${name}.code-workspace`)
+    const report: MoveReport = { name, from, to, links: [], sessionFolder: null, window: existsSync(window) }
+    if (dryRun) return report
+    mkdirSync(dirname(to), { recursive: true })
+    const moved = Git.run(["worktree", "move", from, to], this.main)
+    if (!moved.ok) throw new EpicCommandError(`git worktree move ${from} ${to} failed:  ${moved.err}`)
+    const shared = new Shared({ checkout: to })
+    report.links = shared.link(to, Shared.configOf(to).links).map(({ path, action }) => `${path} ${action}`)
+    if (config.linkSessionFolders) report.sessionFolder = SessionFolders.link(to, this.main).action
+    return report
+  }
+
+  /** `move --idle`:  move every worktree in the old place that no session works in;  a report each. */
+  moveIdle({ dryRun = false }: { dryRun?: boolean } = {}): MoveReport[] {
+    const old = this.config.worktreesFolders[1]
+    if (!old) return []
+    return this.idle(this.sessions.live(this.main))
+      .filter(({ path }) => inFolder(path, old) && path !== old)
+      .map(({ path }) => this.move(basename(path), { dryRun }))
   }
 
   ////////////////
   // ## Where sessions work
   ////////////////
 
-  /** Each worktree in the worktrees' folder (`.claude/worktrees/`):  `{ name, path, branch }`. */
+  /**
+   * Each worktree in the worktrees' folders (`.claude/worktrees/`, or beside the repo and the old place too:
+   * `EpicConfig.worktreesFolders`):  `{ name, path, branch }`.
+   */
   named(): { name: string; path: string; branch: string }[] {
-    const root = this.config.worktreesFolder
+    const roots = this.config.worktreesFolders
     return Worktrees.listOf(this.main)
-      .filter((it) => it.path.startsWith(`${root}/`) && it.branch !== "(detached)")
+      .filter((it) => roots.some((root) => it.path.startsWith(`${root}/`)) && it.branch !== "(detached)")
       .map((it) => ({ name: basename(it.path), path: it.path, branch: it.branch }))
   }
 
@@ -356,7 +427,7 @@ export type WorktreesProps = {
 }
 
 /** The flags of `epic worktree` that take no value. */
-const SWITCHES = ["json", "continue"]
+const SWITCHES = ["json", "continue", "idle", "dryRun"]
 
 /**
  * `planSummaries()`'s cache:  `{ file:  summary }`, for this process.
@@ -372,6 +443,19 @@ function out(text: string): void {
 /** Whether `path` is `folder` or inside it. */
 function inFolder(path: string, folder: string): boolean {
   return path === folder || path.startsWith(`${folder}/`)
+}
+
+/** `move`'s lines for one worktree:  the move, its links, its session folder, its window file. */
+function moveLines(report: MoveReport, dryRun: boolean): string[] {
+  const { name, from, to, links, sessionFolder, window } = report
+  return [
+    `${dryRun ? "would move" : "moved"} ${name}:  ${from} -> ${to}`,
+    ...(links.length ? [`  shared links:  ${links.join(", ")}`] : []),
+    ...(sessionFolder ? [`  session folder:  ${sessionFolder}`] : []),
+    ...(window
+      ? [`  its window file names the old folder:  epic window close ${name}, then epic window open ${name}`]
+      : [])
+  ]
 }
 
 /** `merge-main`'s report, for a person. */

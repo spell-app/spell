@@ -27,7 +27,8 @@ import { URGENT_STATES, epicStateFor, epicStateMark } from "./EpicState"
  * ### `RunningEpics`
  * Lets the main checkout's page server show every RUNNING epic's page:
  * the ones still in their worktree, not yet merged into the main checkout.
- * - where:  `.claude/worktrees/<w>/epics/<name>/<name>.plan.html`, or an old `<name>.html`
+ * - where:  `.claude/worktrees/<w>/epics/<name>/<name>.plan.html`, or an old `<name>.html`;  `<w>` in each of the
+ *   repo's worktrees folders, beside the repo (`../spell-app.worktrees`) and the old place (epic `epic-eject` P8)
  *   - a worktree on older code keeps its epic pages in `packages/docs/content/epics/` (before 2026-10-05)
  *     or `packages/docs/epics/` (before 2026-10-04):  found there too (`EPICS_DIRS`)
  * - Why:  each worktree has its own page server (its own port),
@@ -56,8 +57,14 @@ export class RunningEpics {
   /** the main checkout */
   readonly root: string
 
-  /** the folder holding the worktrees, `<root>/.claude/worktrees` (`worktreesFolder` in `.epic/config.json5`) */
-  readonly worktrees: string
+  /**
+   * the folders holding the worktrees, the new place first:  `<root>/.claude/worktrees` (`worktreesFolder` in
+   * `.epic/config.json5`), or beside the repo and the old place too (`EpicConfig.worktreesFolders`)
+   */
+  readonly worktrees: string[]
+
+  /** the watchers `watch()` started, one per worktrees folder there is, closed by `close()` */
+  private watchers: FSWatcher[] = []
 
   /** the Epics list page, `epics/index.html`, whose marker becomes the list (`spell dev docs index` writes it) */
   readonly index: string
@@ -68,15 +75,12 @@ export class RunningEpics {
    */
   readonly claudeHome: string
 
-  /** the watcher `watch()` started, closed by `close()` */
-  private watcher: FSWatcher | undefined
-
   constructor(
     root: string,
     { claudeHome = process.env.SPELL_CLAUDE_HOME || join(homedir(), ".claude") }: { claudeHome?: string } = {}
   ) {
     this.root = root
-    this.worktrees = new EpicConfig(root).worktreesFolder
+    this.worktrees = new EpicConfig(root).worktreesFolders
     this.index = join(root, "epics", "index.html")
     this.claudeHome = claudeHome
   }
@@ -90,8 +94,8 @@ export class RunningEpics {
     const found: RunningEpic[] = []
     const mainEpics = EPICS_DIRS.find((epics) => existsSync(join(this.root, epics)))
     const mainReal = mainEpics && realOrSelf(join(this.root, mainEpics))
-    for (const worktree of folders(this.worktrees)) {
-      const checkout = join(this.worktrees, worktree)
+    for (const worktree of this.worktreeNames()) {
+      const checkout = this.checkoutOf(worktree)
       const dir = EPICS_DIRS.find((epics) => existsSync(join(checkout, epics)))
       if (!dir) continue
       const shared = realOrSelf(join(checkout, dir)) === mainReal
@@ -116,30 +120,45 @@ export class RunningEpics {
    * Reload pages when a worktree's epic page changes:  that doc's own page, and the Epics page (its list).
    * - and a worktree's page assets (`ASSET_FILE`:  its docs runtime and bundle, its packs), so its pages served here
    *   (`/worktrees/<w>/...`) hot-reload when that worktree rebuilds them (the live client's `liveAction()`)
-   * - SIDE EFFECT:  one recursive `fs.watch` on `.claude/worktrees`, if it exists;  `close()` ends it
+   * - SIDE EFFECT:  one recursive `fs.watch` on each worktrees folder that exists (`.claude/worktrees`);  `close()`
+   *   ends them
    */
   watch(live: SRV.LiveReload): this {
-    if (!existsSync(this.worktrees)) return this
-    try {
-      this.watcher = watch(this.worktrees, { recursive: true }, (_event, name) => {
-        const path = name?.split(sep).join("/")
-        if (!name || !path) return
-        if (ASSET_FILE.test(path)) return live.changed(join(this.worktrees, name))
-        if (!EPIC_FILE.test(path)) return
-        live.changed(join(this.worktrees, name))
-        live.changed(this.index)
-      })
-      this.watcher.on("error", () => {})
-    } catch {
-      // can't watch:  pages just don't reload by themselves
+    for (const folder of this.worktrees) {
+      if (!existsSync(folder)) continue
+      try {
+        const watcher = watch(folder, { recursive: true }, (_event, name) => {
+          const path = name?.split(sep).join("/")
+          if (!name || !path) return
+          if (ASSET_FILE.test(path)) return live.changed(join(folder, name))
+          if (!EPIC_FILE.test(path)) return
+          live.changed(join(folder, name))
+          live.changed(this.index)
+        })
+        watcher.on("error", () => {})
+        this.watchers.push(watcher)
+      } catch {
+        // can't watch:  pages just don't reload by themselves
+      }
     }
     return this
   }
 
+  /** Every worktree's name, in each worktrees folder (the new place first), each name once. */
+  worktreeNames(): string[] {
+    return [...new Set(this.worktrees.flatMap((folder) => folders(folder)))]
+  }
+
+  /** Worktree `name`'s folder:  in the first worktrees folder that has it (the new place, then the old). */
+  checkoutOf(name: string): string {
+    const found = this.worktrees.map((folder) => join(folder, name)).find((folder) => existsSync(folder))
+    return found ?? join(this.worktrees[0]!, name)
+  }
+
   /** stop watching */
   close(): void {
-    this.watcher?.close()
-    this.watcher = undefined
+    for (const watcher of this.watchers) watcher.close()
+    this.watchers = []
   }
 
   /**
@@ -213,7 +232,7 @@ export class RunningEpics {
   ): PlacedCard {
     const { running, favorites, now, worked, sagas } = context
     const saga = sagas.get(epic.name)
-    const where = relative(this.root, join(this.worktrees, epic.worktree))
+    const where = relative(this.root, this.checkoutOf(epic.worktree))
     return epicCardHtml(
       {
         name: epic.name,
@@ -243,15 +262,15 @@ export class RunningEpics {
   /**
    * The names live Claude sessions run for.
    * - for each session whose process is alive (`sessions/<pid>.json`):
-   *   - the worktree it works in (its `cwd` under `.claude/worktrees/<w>`)
+   *   - the worktree it works in (its `cwd` under `.claude/worktrees/<w>`, or any of the worktrees folders)
    *   - its title without its icon (`🚧 airplane` -> `airplane`:  `/isolate` and `/epic` title a session for its epic)
    * - NEVER throws:  an unreadable record is skipped
    */
   runningNames(): Set<string> {
     const names = new Set<string>()
     for (const session of this.liveSessions()) {
-      if (session.cwd.startsWith(this.worktrees + sep))
-        names.add(session.cwd.slice(this.worktrees.length + 1).split(sep)[0]!)
+      const folder = this.worktrees.find((each) => session.cwd.startsWith(each + sep))
+      if (folder) names.add(session.cwd.slice(folder.length + 1).split(sep)[0]!)
       const title = bareTitle(session.title)
       if (title) names.add(title)
     }

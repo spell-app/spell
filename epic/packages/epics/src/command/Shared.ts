@@ -25,11 +25,13 @@ import {
   parseVerbArgs,
   type LinkReport,
   type MigrateReport,
+  type RenameReport,
   type SharedConfig,
   type SharedStatus
 } from "./command.types"
 import { Git } from "./Git"
 import { SharedMigration } from "./SharedMigration"
+import { SharedRename } from "./SharedRename"
 
 /****************
  * ### `Shared`
@@ -47,6 +49,9 @@ import { SharedMigration } from "./SharedMigration"
  *     write the old way (`relocate.js reorg`)
  *   - `migrate <worktree> [--dry-run]`:  move a worktree cut before the cutover onto the shared content
  *     (`SharedMigration`);  stops, writing nothing, on a conflict
+ *   - `rename <new> [--dry-run] [--json]`:  move the content folder to `<new>` (beside it, for a bare name), leave a
+ *     link at the old name, relink every checkout and write the new place into `.epic/config.json5`
+ *     (`SharedRename`;  epic `epic-eject` P8:  `spell-app-dev` to `spell-app.epics`)
  *   - `repair [--dry-run] [--json]`:  the docs tools' own logic (`packages/epics/tools/relocate.js`), then `link`
  * - `ui`:  Spell UI's hand-written docs pages (claude-design P6);  their bundle and data stay in each branch's
  *   `packages/ui/site/`
@@ -120,14 +125,23 @@ export class Shared {
       }
       case "migrate": {
         if (!name) throw new EpicCommandError("migrate:  which worktree?")
-        const worktree = join(config.worktrees, name)
-        if (!existsSync(join(worktree, ".git"))) throw new EpicCommandError(`no worktree ${worktree}`)
+        const worktree = config.worktrees.map((folder) => join(folder, name)).find((each) => existsSync(each))
+        if (!worktree || !existsSync(join(worktree, ".git")))
+          throw new EpicCommandError(`no worktree ${name} in ${config.worktrees.join(" or ")}`)
         const dryRun = Boolean(flags.dryRun)
         const report = new SharedMigration({ worktree, config }).run({ dryRun })
         if (flags.json)
           out(JSON.stringify({ ...report, folds: report.folds.map(({ text: _text, ...each }) => each) }, null, 2))
         else for (const line of migrateLines(report, dryRun)) out(line)
         return report.conflicts.length ? EXIT.ERRORS : EXIT.OK
+      }
+      case "rename": {
+        if (!name) throw new EpicCommandError("rename:  to what?  a folder name, like spell-app.epics")
+        const dryRun = Boolean(flags.dryRun)
+        const report = new SharedRename({ config, checkouts: this.checkouts() }).run(name, { dryRun })
+        if (flags.json) out(JSON.stringify(report, null, 2))
+        else for (const line of renameLines(report)) out(line)
+        return EXIT.OK
       }
       case "repair": {
         // the docs tools' own logic:  run, never imported (`relocate.js` is a plain node script)
@@ -141,7 +155,7 @@ export class Shared {
         return run.status ?? EXIT.ERRORS
       }
       default:
-        throw new EpicCommandError(`unknown verb '${verb}':  status, init, link, commit, migrate or repair`)
+        throw new EpicCommandError(`unknown verb '${verb}':  status, init, link, commit, migrate, rename or repair`)
     }
   }
 
@@ -162,15 +176,21 @@ export class Shared {
   // ## Checkouts and their links
   ////////////////
 
-  /** The main checkout, then every worktree in `config.worktrees` (a folder with a `.git` file). */
+  /**
+   * The main checkout, then every worktree in each of `config.worktrees` (a folder with a `.git` file):  the new
+   * place's, then the old place's, each sorted.
+   */
   checkouts(): string[] {
-    const { main, worktrees: trees } = this.config
-    const worktrees = existsSync(trees)
-      ? readdirSync(trees, { withFileTypes: true })
-          .filter((entry) => entry.isDirectory() && existsSync(join(trees, entry.name, ".git")))
-          .map((entry) => join(trees, entry.name))
-      : []
-    return [main, ...worktrees.sort()]
+    const { main, worktrees: places } = this.config
+    const worktrees = places.flatMap((trees) =>
+      existsSync(trees)
+        ? readdirSync(trees, { withFileTypes: true })
+            .filter((entry) => entry.isDirectory() && existsSync(join(trees, entry.name, ".git")))
+            .map((entry) => join(trees, entry.name))
+            .sort()
+        : []
+    )
+    return [main, ...worktrees]
   }
 
   /**
@@ -324,7 +344,8 @@ export class Shared {
    * - `dir`:  `contentFolder` in the repo's `.epic/config.json5` (the MAIN checkout's);  `SPELL_SHARED_DIR` overrides
    *   it (tests, a scratch repo)
    *   - it was `"shared": { "dir" }` in the main checkout's `package.json` until epic `epic-eject` P4
-   * - `worktrees`:  `worktreesFolder` in the same file:  where `checkouts()` finds the worktrees
+   * - `worktrees`:  `worktreesFolder` in the same file, and the old place while it's moved (`worktreesFolders`):
+   *   where `checkouts()` finds the worktrees
    * - `links`:  `"shared": { "links" }` in `root`'s OWN `package.json` (else the main one's), else `DEFAULT_LINKS`:
    *   which folders a checkout links is its branch's business (the reorg changed them, claude-design P4)
    * - static:  made before there's a `Shared` to hold it
@@ -338,7 +359,7 @@ export class Shared {
     return {
       main,
       dir: resolve(dir),
-      worktrees: epic.worktreesFolder,
+      worktrees: epic.worktreesFolders,
       links: mine.links ?? theirs.links ?? DEFAULT_LINKS
     }
   }
@@ -442,6 +463,22 @@ function migrateLines(report: MigrateReport, dryRun = false): string[] {
   return [...changed.map((each) => `${each.action.padEnd(8)} ${each.file}`), verdict]
 }
 
+/** `rename`'s lines:  the move, each link relinked, the config keys, what's left to people. */
+function renameLines(report: RenameReport): string[] {
+  const would = report.dryRun ? "would " : ""
+  return [
+    `${would}move ${report.from} -> ${report.to}, and leave a link at ${basename(report.from)}`,
+    ...report.relinked.map(({ checkout, path }) => `${would}relink ${join(checkout, path)}`),
+    report.config.keys.length
+      ? `${would}write ${report.config.keys.join(", ")} into ${report.config.file} (tracked:  commit it)`
+      : `${report.config.file}:  already says so`,
+    ...(report.mentions.length
+      ? [`still naming ${basename(report.from)}, to edit by hand:`, ...report.mentions.map((file) => `  ${file}`)]
+      : []),
+    ...(report.dryRun ? ["dry run:  nothing changed"] : ["next:  epic window init (the window files' folders)"])
+  ]
+}
+
 /** `status`'s table:  the shared repo, then a line per checkout with each link's state. */
 function statusLines(status: SharedStatus): string[] {
   const repo = !status.exists
@@ -474,10 +511,11 @@ function pendingPaths(dir: string): string[] {
 
 /** `checkout`'s short name:  `main` (the main checkout), a worktree's name, else its path relative to the main one. */
 function checkoutName({ main, worktrees }: SharedConfig, checkout: string): string {
-  const where = relative(main, checkout)
-  const inWorktrees = relative(worktrees, checkout)
-  if (inWorktrees && !inWorktrees.startsWith("..")) return inWorktrees
-  return where || "main"
+  for (const folder of worktrees) {
+    const inWorktrees = relative(folder, checkout)
+    if (inWorktrees && !inWorktrees.startsWith("..")) return inWorktrees
+  }
+  return relative(main, checkout) || "main"
 }
 
 /** The shared repo's `README.md`:  named for its folder and the repo's (`spell-app-dev`, `spell-app`). */

@@ -3,6 +3,7 @@ import { homedir } from "node:os"
 import { basename, join } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { SessionFolders } from "$/epics/config/SessionFolders"
 
 /****************
  * ### `ReviewBackfill`
@@ -46,7 +47,8 @@ export class ReviewBackfill {
     const worktreeSlug = ReviewBackfill.projectSlug(config.worktreeFolder(name))
     if (!existsSync(this.projects)) return []
     const found: BackfillSession[] = []
-    for (const folder of readdirSync(this.projects)) {
+    // each real folder once:  a linked worktree's folder (epic `epic-eject` Q4) IS main's, and would claim every session
+    for (const folder of SessionFolders.listed(this.projects)) {
       if (folder !== slug && !folder.startsWith(`${slug}-`)) continue
       // an older session made its worktree's own project folder:  every session in it is the epic's
       const worktreeFolder = folder === worktreeSlug

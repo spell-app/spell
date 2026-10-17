@@ -80,7 +80,7 @@ export class Parking {
    */
   candidates(): WaitCandidate[] {
     const config = new EpicConfig(this.main)
-    const names = new Set([...folders(config.worktreesFolder), ...folders(Worktrees.epicsDir(this.main))])
+    const names = new Set([...worktreeNames(config), ...folders(Worktrees.epicsDir(this.main))])
     const found: WaitCandidate[] = []
     for (const name of [...names].sort()) {
       const status = this.worktrees.nameStatus(name, [])
@@ -98,11 +98,14 @@ export class Parking {
     return found
   }
 
-  /** Every parked worktree's note, `.claude/worktrees/<name>/PARKED-<name>.md`, sorted by path. */
+  /**
+   * Every parked worktree's note, `<worktree>/PARKED-<name>.md`, sorted by name:  in either place, beside the repo
+   * or the old `.claude/worktrees` (`EpicConfig.worktreesFolders`).
+   */
   notes(): ParkedNote[] {
     const config = new EpicConfig(this.main)
     const found: ParkedNote[] = []
-    for (const name of folders(config.worktreesFolder).sort()) {
+    for (const name of worktreeNames(config).sort()) {
       const dir = config.worktreeFolder(name)
       for (const file of readdirSync(dir).sort()) {
         if (!/^PARKED-.*\.md$/.test(file)) continue
@@ -158,4 +161,9 @@ function out(text: string): void {
 function folders(dir: string): string[] {
   if (!existsSync(dir)) return []
   return readdirSync(dir).filter((name) => statSync(join(dir, name)).isDirectory())
+}
+
+/** Every worktree folder's name, in each of the repo's worktrees folders (`worktreesFolders`), each name once. */
+function worktreeNames(config: EpicConfig): string[] {
+  return [...new Set(config.worktreesFolders.flatMap((dir) => folders(dir)))]
 }
