@@ -92,6 +92,13 @@ test("fileForPath():  the epic server's engine and repos;  a checkout's root and
   equal(fileForPath(checkout, "/packages/x.ts"), "/repo/packages/x.ts")
   equal(fileForPath(checkout, "/worktrees/seo/epics/x.html"), "/repo/.claude/worktrees/seo/epics/x.html")
   equal(fileForPath({}, "/x"), undefined)
+  // several worktrees folders (J28):  the first that holds the worktree, else the first
+  const places = mkdtempSync(join(tmpdir(), "doc-urls-places-"))
+  mkdirSync(join(places, "old", "stayed"), { recursive: true })
+  const moved = { root: "/repo", worktreesFolders: [join(places, "new"), join(places, "old")] }
+  equal(fileForPath(moved, "/worktrees/stayed/x.html"), join(places, "old", "stayed", "x.html"))
+  equal(fileForPath(moved, "/worktrees/gone/x.html"), join(places, "new", "gone", "x.html"))
+  rmSync(places, { recursive: true, force: true })
 })
 
 test("tabShows():  the whole title, or its first 24 characters and an ellipsis", () => {

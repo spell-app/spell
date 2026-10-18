@@ -106,6 +106,8 @@ export function planDocsOf(repos: { name: string; content: string }[]): PlanDocE
 export type ServerInfo = {
   root?: string
   worktrees?: string
+  /** every folder its `/worktrees/<w>/` serves, `worktrees` first (epic `epic-eject` J28) */
+  worktreesFolders?: string[]
   epicServer?: boolean
   engine?: string
   repos?: { name: string; content: string; prefix: string; isDefault: boolean }[]
@@ -118,7 +120,8 @@ export type ServerInfo = {
  *   - `/_epic/assets/...` and `/_epic/pack/...` in its engine
  *   - `/r/<repo>/...` in that repo's content
  *   - anything else in the default repo's content
- * - a checkout's page server:  under its root;  `/worktrees/<w>/...` in the folder it serves worktrees from
+ * - a checkout's page server:  under its root;  `/worktrees/<w>/...` in the first folder it serves worktrees from
+ *   that holds `<w>`, else the first
  */
 export function fileForPath(info: ServerInfo, path: string): string | undefined {
   const parts = path.split("/").filter(Boolean).map(decodeURIComponent)
@@ -133,7 +136,11 @@ export function fileForPath(info: ServerInfo, path: string): string | undefined 
     return home && join(home.content, ...parts)
   }
   if (!info.root) return undefined
-  if (parts[0] === "worktrees" && info.worktrees) return join(info.worktrees, ...parts.slice(1))
+  const folders = info.worktreesFolders ?? (info.worktrees ? [info.worktrees] : [])
+  if (parts[0] === "worktrees" && parts[1] && folders.length) {
+    const folder = folders.find((each) => existsSync(join(each, parts[1]!))) ?? folders[0]!
+    return join(folder, ...parts.slice(1))
+  }
   return join(info.root, ...parts)
 }
 

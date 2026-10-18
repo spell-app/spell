@@ -294,7 +294,7 @@ export class EpicServer {
       live: this.web.live!,
       web: this.web,
       info: this.info,
-      serveWorktrees: (dir) => void (this.info.worktrees = resolve(dir)),
+      serveWorktrees: (...dirs) => void (this.info.worktrees = dirs[0] && resolve(dirs[0])),
       addPageConfig: (add) => void this.pageConfigs.push(add),
       onListening: (start) => this.listenings.push(start),
       onStop: (stop) => this.stops.push(stop)

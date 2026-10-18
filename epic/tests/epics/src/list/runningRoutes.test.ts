@@ -125,7 +125,8 @@ describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () =>
     ])
   })
 
-  test("serves both places' pages at /worktrees/<w>/:  the new place's, and the old one's through its overlay", async () => {
+  test("serves both places' pages at /worktrees/<w>/:  the server takes both folders, the new place first", async () => {
+    expect(server.info.worktreesFolders).toEqual([join(top, "repo.worktrees"), join(root, ".claude", "worktrees")])
     expect((await ask(port, "GET", "/worktrees/new/epics/new/new.plan.html")).text).toContain("Beside")
     expect((await ask(port, "GET", "/worktrees/old/epics/old/old.plan.html")).text).toContain("Nested")
     expect((await ask(port, "GET", "/worktrees/none/epics/x.html")).status).toBe(404)
