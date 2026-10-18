@@ -52,7 +52,7 @@ export class EpicConfig {
     installTimeout: 600,
     windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
     linkSessionFolders: false,
-    sharedFolders: ["epics", "guides", "pages", "brand", "ui", "goals", "agents"],
+    sharedFolders: ["epics", "guides", "pages", "brand", "ui", "goals", "sagas", "agents"],
     engineFolder: "../spell-epic",
     repoTemplates: ""
   }

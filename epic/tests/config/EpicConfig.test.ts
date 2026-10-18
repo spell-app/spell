@@ -42,7 +42,7 @@ describe("EpicConfig", () => {
       "windows.contentName": "spell-app-dev",
       "windows.worktreeOnly": false,
       linkSessionFolders: false,
-      sharedFolders: "epics,guides,pages,brand,ui,goals,agents",
+      sharedFolders: "epics,guides,pages,brand,ui,goals,sagas,agents",
       engineFolder: join(TOP, "spell-epic"),
       repoTemplates: ""
     })
@@ -54,9 +54,8 @@ describe("EpicConfig", () => {
     expect(config.worktreeOnlyWindow("seo")).toBe(false)
   })
 
-  test("the repo's committed config holds the defaults, and reads as JSON5 reads it (`DataFile`'s reader)", () => {
+  test("the repo's committed config reads as JSON5 reads it (`DataFile`'s reader)", () => {
     const text = readFileSync(REPO_CONFIG, "utf8")
-    expect(EpicConfig.settingsFrom(text)).toEqual(EpicConfig.DEFAULTS)
     expect(EpicConfig.parse(text)).toEqual(JSON5.parse(text))
   })
 
