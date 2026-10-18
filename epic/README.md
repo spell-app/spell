@@ -134,6 +134,8 @@ For the morning after epic `epic-eject`'s night:  that night nothing was install
 - `epic` is spell-epic's own command, `bin/epic`:  step 7 puts it on the terminal's path.
 
 1. Merge `epic-eject` into spell-app's `main`:  `/isolate done` in its session.
+   - Again if `main` already has it:  the branch took two more commits spell-epic needs (T26), the page server's
+     several worktrees folders (`cb93a0d6c`, J28) and the pack build's root pack (`86ef4864a`, J14).
 2. Point this repo at spell-app's main checkout (T10), here:
 
    ```sh
