@@ -118,7 +118,9 @@ From `decisions --json`, later beats earlier:
 
 8. Write in place.  Stage NOTHING, commit NOTHING.
    - Tracked docs (`AGENTS.md`, `README.md`, skills):  the diff waits in Source Control.
-   - Shared docs (`guides/`, `templates/`, `ui/`, `agents/wwod/`):  edit at the REAL path
+   - Templates:  spell-epic's, in its own `templates/` (`epic pages template` prints the folder):
+     tracked there, so the diff waits in spell-epic's Source Control.
+   - Shared docs (`guides/`, `ui/`, `agents/wwod/`):  edit at the REAL path
      (the root `AGENTS.md`, "Shared content").
      - the path:  `<content>/<path>`
      - `<content>`:  what `epic config contentFolder` prints

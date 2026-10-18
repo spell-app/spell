@@ -201,13 +201,19 @@ export class EpicServer {
   // ## What it serves
   ////////////////
 
-  /** The folders served:  the engine's routes, each repo at `/r/<repo>/`, the default repo at `/`. */
+  /**
+   * The folders served:  the engine's routes, each repo at `/r/<repo>/`, the default repo at `/`.
+   * - the engine's templates at each repo's `/r/<repo>/templates/` too, where its pages' `../templates/` leads
+   *   (epic `epic-eject` T11)
+   */
   private mounts(): SRV.Mount[] {
     const engine = Object.values(ENGINE_ROUTES).map((route) => ({
       prefix: route.prefix,
       dir: join(this.engine, route.dir)
     }))
-    const repos = this.repos.map((repo) => ({ prefix: repo.prefix, dir: repo.content }))
+    const templates = join(this.engine, ENGINE_ROUTES.templates.dir)
+    const repoTemplates = this.repos.map((repo) => ({ prefix: `${repo.prefix}templates/`, dir: templates }))
+    const repos = [...repoTemplates, ...this.repos.map((repo) => ({ prefix: repo.prefix, dir: repo.content }))]
     const home = this.defaultRepo ? [{ prefix: "/", dir: this.defaultRepo.content }] : []
     return [...engine, ...repos, ...home]
   }
@@ -253,8 +259,12 @@ export class EpicServer {
     for (const route of Object.values(ENGINE_ROUTES)) {
       const dir = join(this.engine, route.dir)
       live.watch(dir, { servedAt: route.prefix })
-      live.watch(dir, { servedAt: `/${route.dir}/` })
+      // the old paths too (`/src/tools/_assets/`), unless the route IS its folder's path (`/templates/`)
+      if (route.prefix !== `/${route.dir}/`) live.watch(dir, { servedAt: `/${route.dir}/` })
     }
+    // the templates at each repo's prefix
+    for (const repo of this.repos)
+      live.watch(join(this.engine, ENGINE_ROUTES.templates.dir), { servedAt: `${repo.prefix}templates/` })
   }
 
   ////////////////
@@ -355,7 +365,7 @@ export const SOURCES = [join(ENGINE_ROOT, "src"), join(ENGINE_ROOT, ".spell-app"
 const HOME_PAGE = "pages/index.html"
 
 /** Folders page edits may write when a repo's `package.json` names none:  the shared content areas. */
-const WRITABLE = ["epics", "guides", "pages", "templates", "brand", "sagas"]
+const WRITABLE = ["epics", "guides", "pages", "brand", "sagas"]
 
 /**
  * Paths in a content folder live reload never reports, as spell-app's page server skips them:

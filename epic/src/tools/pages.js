@@ -37,8 +37,22 @@ export const ROOT = process.env.EPIC_CHECKOUT ? resolve(process.env.EPIC_CHECKOU
 /** `epics/`:  epic pages, `epics/<name>/<name>.plan.html`, their inboxes and details pages. */
 export const EPICS = join(ROOT, "epics")
 
-/** `templates/`:  one starting point per kind of page. */
-export const TEMPLATES = join(ROOT, "templates")
+/**
+ * `templates/`:  one starting point per kind of page -- the ENGINE's, spell-epic's own `templates/` (epic `epic-eject`
+ * T11, Q8), whichever checkout the tools work on.
+ * - served at `/templates/` by both page servers (an engine route:  `ENGINE_ROUTES.templates`), so a page's
+ *   `../templates/index.html` (the top bar's Templates tab) works in every repo
+ * - its pages' paths are `templates/...` all the same (`pagePath()`), as they are served
+ * - a repo's own extra templates:  `REPO_TEMPLATES`, beside these
+ */
+export const TEMPLATES = join(PACKAGE, "templates")
+
+/**
+ * The repo's OWN templates, when it has any:  `repoTemplates` in its `.epic/config.json5`, a folder from the
+ * checkout's root;  `undefined` when the key is left out (the default:  the engine's templates are all there are).
+ * - listed on the Templates page beside the engine's, and found by name before them (`templateFile()`)
+ */
+export const REPO_TEMPLATES = repoTemplatesOf(ROOT)
 
 /** `guides/`:  every other docs page, with its `.md`, `.json`, `experiments/` and `examples/` beside it. */
 export const GUIDES = join(ROOT, "guides")
@@ -72,15 +86,18 @@ export const GOALS = join(ROOT, "goals")
  */
 export const SAGAS = join(ROOT, "sagas")
 
-/** Every folder `findPages()` walks:  the home first, then the areas. */
-export const AREAS = [PAGES, GUIDES, EPICS, TEMPLATES]
+/** Every folder `findPages()` walks:  the home first, then the areas (the repo's own templates last, if any). */
+export const AREAS = [PAGES, GUIDES, EPICS, TEMPLATES, ...(REPO_TEMPLATES ? [REPO_TEMPLATES] : [])]
 
 /**
  * Each area's list page, `<area>/index.html`, written by `index.js` (claude-design P5).
  * - every epic, guide, template and brand page, and every saga
+ * - the repo's own templates' too, when it has any (`REPO_TEMPLATES`)
  * - never listed themselves
  */
-export const LIST_PAGES = [EPICS, GUIDES, TEMPLATES, BRAND, SAGAS].map((area) => join(area, "index.html"))
+export const LIST_PAGES = [EPICS, GUIDES, TEMPLATES, BRAND, SAGAS, ...(REPO_TEMPLATES ? [REPO_TEMPLATES] : [])].map(
+  (area) => join(area, "index.html")
+)
 
 /** The old content folder (a link in checkouts cut before 2026-10-05, into the old-path links):  never walked. */
 export const OLD_CONTENT = join(PACKAGE, "content")
@@ -98,12 +115,69 @@ export function pageFile(page, cwd = process.env.INIT_CWD ?? process.cwd()) {
   if (isAbsolute(page)) return throughLink(page)
   const old = page.replace(/^(?:packages\/docs\/)?content\//, "")
   const candidates = [
+    pageAt(page),
     resolve(ROOT, page),
     ...AREAS.map((area) => resolve(area, page)),
     ...(old !== page ? [resolve(ROOT, reorgEntry(old.split("/")[0]), ...old.split("/").slice(1))] : []),
     resolve(cwd, page)
   ]
   return candidates.find((each) => existsSync(each)) ?? resolve(ROOT, page)
+}
+
+/**
+ * Page (or folder) `file`'s path from the checkout's root, as the page server serves it:
+ * `<ROOT>/guides/x.html` => `guides/x.html`, and the engine's templates as `templates/...` wherever spell-epic is
+ * (`TEMPLATES`:  `<spell-epic>/templates/durable.html` => `templates/durable.html`).
+ * - `/`-separated;  a file outside the checkout keeps its `../` path
+ * - the paths the lists, the checks and the openers use (`index.js`, `update.js`, `serverUrl()`);  `pageAt()` turns
+ *   one back into its file
+ */
+export function pagePath(file) {
+  const path = resolve(file)
+  const inTemplates = insideTemplates(path) ?? insideTemplates(realOrSelf(path))
+  if (inTemplates !== undefined) return ["templates", ...(inTemplates ? inTemplates.split(sep) : [])].join("/")
+  return relative(ROOT, path).split(sep).join("/")
+}
+
+/** Absolute `path` from the engine's `TEMPLATES` (`""` for the folder itself);  `undefined` outside it. */
+function insideTemplates(path) {
+  const inside = relative(TEMPLATES, path)
+  return inside.startsWith("..") || isAbsolute(inside) ? undefined : inside
+}
+
+/** `path` with its links followed (the checkout's `spell-epic` link ...);  as it is when it isn't there. */
+function realOrSelf(path) {
+  try {
+    return realpathSync(path)
+  } catch {
+    return path
+  }
+}
+
+/**
+ * The file a path from the checkout's root names (`pagePath()` turned round):  `templates/...` in the engine's
+ * `TEMPLATES`, anything else under `ROOT`.
+ */
+export function pageAt(path) {
+  const [top, ...rest] = path.split(/[\\/]/)
+  return top === "templates" ? join(TEMPLATES, ...rest) : resolve(ROOT, path)
+}
+
+/**
+ * Template `name`'s file:  `durable`, `durable.html`, `goals/index.html`, `epics/plan-doc.md`, or a path from the root
+ * (`templates/durable.html`);  `undefined` when there's none.
+ * - the repo's own templates first (`REPO_TEMPLATES`), then the engine's (`TEMPLATES`):  a repo may make its own
+ *   version of one
+ * - a bare name is an `.html` page
+ * - `epic pages template <name>` prints it, for the skills;  `epic pages new` copies it
+ */
+export function templateFile(name) {
+  const path = name.replace(/^templates\//, "")
+  const file = /\.\w+$/.test(path) ? path : `${path}.html`
+  return [REPO_TEMPLATES, TEMPLATES]
+    .filter(Boolean)
+    .map((dir) => join(dir, file))
+    .find((each) => existsSync(each))
 }
 
 /**
@@ -155,6 +229,19 @@ export function pageAndId([page, ...rest]) {
   const hash = page?.lastIndexOf("#") ?? -1
   if (hash <= 0) return page === undefined ? rest : [page, ...rest]
   return [page.slice(0, hash), page.slice(hash + 1), ...rest]
+}
+
+/**
+ * The repo's own templates folder, from checkout `root`:  its `.epic/config.json5`'s `repoTemplates`, from the
+ * checkout's root;  `undefined` for none (the key left out, or the config won't read).
+ */
+function repoTemplatesOf(root) {
+  try {
+    const folder = EpicConfig.of(root).repoTemplates
+    return folder ? resolve(root, folder) : undefined
+  } catch {
+    return undefined
+  }
 }
 
 /** Where top-level entry `name` of the old content folder went (`relocate.js` `reorgEntry()`, kept in step). */
@@ -365,16 +452,16 @@ export function atDepth(html, depth) {
 
 /** URL of `file` on the page server at `base`, e.g. `http://127.0.0.1:4747/pages/index.html`. */
 export function serverUrl(base, file) {
-  let path = relative(ROOT, resolve(file))
+  let path = pagePath(file)
   // shared content named through ANOTHER checkout's link (the main checkout's, from a worktree):  through this one's
   if (path.startsWith("..")) {
     try {
-      path = relative(ROOT, throughLink(realpathSync(file)))
+      path = pagePath(throughLink(realpathSync(file)))
     } catch {
       // not there:  as it was
     }
   }
-  return `${base}/${path.split(sep).map(encodeURIComponent).join("/")}`
+  return `${base}/${path.split(/[\\/]/).map(encodeURIComponent).join("/")}`
 }
 
 /**

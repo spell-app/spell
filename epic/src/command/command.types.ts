@@ -418,8 +418,8 @@ export type FileRewrite = { file: string; lines: { line: number; before: string;
  */
 export type LinkReport = {
   path: string
-  state: "ok" | "tracked" | "missing" | "real" | "dangling" | "elsewhere"
-  action?: "ok" | "tracked" | "linked" | "replaced" | "diverged" | "no-shared"
+  state: "ok" | "tracked" | "missing" | "real" | "dangling" | "elsewhere" | "dropped"
+  action?: "ok" | "tracked" | "linked" | "replaced" | "diverged" | "no-shared" | "unlinked"
 }
 
 /**

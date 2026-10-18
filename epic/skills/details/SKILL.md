@@ -13,7 +13,7 @@ A DETAILS PAGE:  a small page that explains one decision.
   and a waiter running in the background exits with it, which wakes this session.
 - Docs:  [the details guide](guides/details.html).
 
-- Explain as [plan-doc.md](templates/epics/plan-doc.md), "Explaining a question or issue", says:
+- Explain as [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Explaining a question or issue", says:
   - plain words, coined words defined
   - the real code, tables
   - options side by side, one recommended

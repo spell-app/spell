@@ -44,13 +44,19 @@ export const DEFAULT_EPIC_PORT = Number(process.env.SPELL_EPIC_PORT) || 4848
  *   `spell-ui.js`, `spell-doc.css`, the runtime, `highlight.min.js`, the emoji chunks
  * - `/_epic/pack/...`:  the epics component pack (spell-epic's `src/components/__pack/`), `epics.pack.js`
  * - one prefix, starting `_`, so no content folder's own folder can take it
+ * - and the templates, `/templates/...` (spell-epic's `templates/`, epic `epic-eject` T11):  NOT under `/_epic/`,
+ *   since every page links the Templates page as a content folder, `../templates/index.html` (the top bar's tab)
+ *   - so the content folders can't hold a `templates/` of their own:  a repo's own templates are `repoTemplates`
+ *     (`EpicConfig`), elsewhere
+ *   - served for each repo too, at `/r/<repo>/templates/` (`EpicServer`)
  */
 export const ENGINE_PREFIX = "/_epic"
 
 /** Each engine route:  its URL prefix, and the folder it serves, from the engine's checkout. */
 export const ENGINE_ROUTES = {
   assets: { prefix: `${ENGINE_PREFIX}/assets/`, dir: "src/tools/_assets" },
-  pack: { prefix: `${ENGINE_PREFIX}/pack/`, dir: "src/components/__pack" }
+  pack: { prefix: `${ENGINE_PREFIX}/pack/`, dir: "src/components/__pack" },
+  templates: { prefix: "/templates/", dir: "templates" }
 } as const
 
 /** The epic pack's script, as every page loads it:  `<ui-components source>`. */

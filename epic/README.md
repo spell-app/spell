@@ -28,7 +28,7 @@ ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` 
 | `scripts/` | dev-only scripts:  Epic UI's data (`site-data.ts`), spell-app's CLI for the pack build (`spell-app.mjs`) |
 | `types/` | the ambient helper types (`Prettify` ...) |
 | `vscode/` | spell-epic's VS Code extension, `spell-app.spell-epic` (its own yarn project):  the Review tab, Epic Docs, "Open Epic...", the window bridge and the handoff;  [its README](vscode/README.md) |
-| `templates/` | every kind of page's starting point (Q8):  details, review, choices, guides, cheatsheets, commands pages, component pages, the epic-page writing rules |
+| `templates/` | every kind of page's starting point (Q8, T11):  details, review, choices, guides, cheatsheets, commands pages, component pages, the epic-page writing rules;  served at `/templates/` (an engine route), the Templates list page `templates/index.html` written here by `epic pages index`;  `epic pages template <name>` prints one's path |
 
 ## Install
 
@@ -96,8 +96,9 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | `windows.contentName` | `"spell-app-dev"` | the content repo's folder name in every window |
 | `windows.worktreeOnly` | `false` | whether EVERY worktree's window holds only the worktree and the content folder |
 | `linkSessionFolders` | `false` | whether the worktree hook links each new worktree's saved-session folder to the main checkout's |
-| `sharedFolders` | spell-app's eight | the content folder's folders every checkout links in at its root;  a checkout's `package.json` `"shared": { "links" }` wins (spell-app's branches) |
+| `sharedFolders` | `epics`, `guides`, `pages`, `brand`, `ui`, `goals`, `agents` | the content folder's folders every checkout links in at its root;  a checkout's `package.json` `"shared": { "links" }` wins (spell-app's branches) |
 | `engineFolder` | `"../spell-epic"` | the spell-epic checkout, which `epic shared link` links in at every checkout's root as `spell-epic`, only where the checkout's `.gitignore` ignores that name (spell-app runs the engine through it:  its `$/epics` aliases, its page server's routes);  `""`:  no link (`epic init` writes that) |
+| `repoTemplates` | `""` | the repo's OWN page templates, a folder from each checkout's root:  listed on the Templates page beside spell-epic's `templates/`, and found by name before them (`epic pages new`, `epic pages template`);  `""`:  none, spell-epic's are all there are (T11) |
 
 A repo's generated files are its own list, in each checkout:  `.epic/generators.json5`.
 - `epic worktree merge-main` rebuilds them instead of merging them.
@@ -199,11 +200,12 @@ For the morning after epic `epic-eject`'s night:  that night nothing was install
     code --install-extension ~/www/spell-app/spell-epic/vscode/spell-epic.vsix
     ```
 
-11. Templates leave the content folder (T11), once the tools read spell-epic's copies.
-    The turn-end commit records it.
+11. Templates leave the content folder (T11, done 2026-10-18):  the tools read spell-epic's `templates/`, both page
+    servers serve it at `/templates/`, and spell-app's manifest no longer links `templates`.
+    Once spell-app's `main` has that, drop the old links from every checkout:
 
     ```sh
-    rm -r ~/www/spell-app/spell-app-dev/templates
+    cd ~/www/spell-app/spell-app && epic shared link --all
     ```
 
 12. Rename the content folder (T18):  run this, then again without `--dry-run`.

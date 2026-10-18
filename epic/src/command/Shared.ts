@@ -8,6 +8,7 @@ import {
   openSync,
   readdirSync,
   readFileSync,
+  readlinkSync,
   realpathSync,
   rmSync,
   statSync,
@@ -41,13 +42,16 @@ import { SharedRename } from "./SharedRename"
  * - Docs pages, saga sets and the agents' logs live ONCE, in a content repo beside the main checkout
  *   (`../spell-app-dev`).
  * - Every checkout links to them at its root:
- *   `epics`, `guides`, `pages`, `templates`, `brand`, `ui`, `goals`, `agents` (`DEFAULT_LINKS`).
+ *   `epics`, `guides`, `pages`, `brand`, `ui`, `goals`, `agents` (`EpicConfig`'s `sharedFolders`).
+ *   - not `templates` since epic `epic-eject` T11:  they're spell-epic's;  `link` removes a link the manifest dropped
+ *     (`unlinkDropped()`)
  * - So every worktree sees every edit at once, and none of it is merged.
  * - The verbs (`run()`):
  *   - `status [--json]` (default):  each checkout's links, and the shared repo's uncommitted files and last commit
  *   - `init [--import]`:  create the shared repo;  `--import` copies THIS checkout's folders in (the cutover, once)
  *   - `link [--all]`:  link this checkout's folders (`--all`:  every checkout)
  *     - a real folder is replaced only when it matches the shared one exactly
+ *     - a link to a shared folder the manifest no longer names is removed (`unlinkDropped()`)
  *   - `commit [--session <id>] [--quiet]`:  commit whatever changed in the shared repo (the `Stop` hook, every turn)
  *     - one commit per epic / guide / folder (`commit()`)
  *     - first the reorg's repair, for pages older checkouts still write the old way (`relocate.js reorg`)
@@ -173,7 +177,13 @@ export class Shared {
     for (const checkout of checkouts) {
       // each checkout's OWN links:  a branch from before the reorg (claude-design P4) still links `packages/docs/content`
       const engine = this.linkEngine(checkout)
-      for (const report of [...this.link(checkout, Shared.configOf(checkout).links), ...(engine ? [engine] : [])]) {
+      const { links } = Shared.configOf(checkout)
+      const reports = [
+        ...this.link(checkout, links),
+        ...this.unlinkDropped(checkout, links),
+        ...(engine ? [engine] : [])
+      ]
+      for (const report of reports) {
         all.push(report)
         if (report.action !== "ok") out(`${checkout}/${report.path}:  ${report.action}`)
       }
@@ -275,6 +285,32 @@ export class Shared {
       symlinkSync(relative(dirname(at), target), at)
       return { path, state, action: state === "real" ? "replaced" : "linked" }
     })
+  }
+
+  /**
+   * Remove checkout `checkout`'s links to shared folders its manifest no longer names (`links`):  what it removed,
+   * each `{ path, state: "dropped", action: "unlinked" }`.
+   * - e.g. `templates`, once the templates were spell-epic's (epic `epic-eject` T11):  a checkout that merged that
+   *   change drops the link at its next `epic shared link` (`--all`:  every checkout)
+   * - only a LINK at the checkout's root to the content folder's folder of the same name (`<dir>/<name>`), there
+   *   or not (a dangling one too, once the content folder dropped it):  never a real folder or file, never a link
+   *   elsewhere (`spell-epic`)
+   * - a checkout whose own manifest still names it (an older branch) keeps it:  `links` is that checkout's
+   * - SIDE EFFECT:  removes the links
+   */
+  unlinkDropped(checkout: string, links = this.config.links): LinkReport[] {
+    const named = new Set(links)
+    const content = realOrSelf(this.config.dir)
+    const dropped: LinkReport[] = []
+    for (const entry of readdirSync(checkout, { withFileTypes: true })) {
+      if (!entry.isSymbolicLink() || named.has(entry.name)) continue
+      const at = join(checkout, entry.name)
+      const target = resolve(checkout, readlinkSync(at))
+      if (basename(target) !== entry.name || realOrSelf(dirname(target)) !== content) continue
+      rmSync(at, { force: true })
+      dropped.push({ path: entry.name, state: "dropped", action: "unlinked" })
+    }
+    return dropped
   }
 
   /**
@@ -422,7 +458,7 @@ export class Shared {
    * - `goals/<set>/...`:  `goals/<set>`
    * - a file right under any of those (`sagas/sagas.json5`):  the folder (`sagas`)
    * - `guides/<x>`, `<x>` a folder or a file:  `guides/<x>`
-   * - the other shared folders (`pages`, `templates`, `ui`, `brand`, `agents`):  the folder
+   * - the other shared folders (`pages`, `ui`, `brand`, `agents`;  `templates`, before epic `epic-eject` T11):  the folder
    * - anything else (the repo's own files, old-path links):  `other`
    * - static:  pure
    */

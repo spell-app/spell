@@ -64,11 +64,30 @@ import { COMPONENT_SETS } from "@spell-app/server/src/page/page.types.ts"
 import { DataFile } from "../data/DataFile.ts"
 import { Sagas } from "../tool/Sagas.ts"
 import { PageNotes } from "./PageNotes.js"
-import { BRAND, EPICS, GOALS, GUIDES, HOME, LIST_PAGES, ROOT, SAGAS, TEMPLATES, findPages, tidy } from "./pages.js"
+import {
+  BRAND,
+  EPICS,
+  GOALS,
+  GUIDES,
+  HOME,
+  LIST_PAGES,
+  REPO_TEMPLATES,
+  ROOT,
+  SAGAS,
+  TEMPLATES,
+  atDepth,
+  findPages,
+  pageAt,
+  pagePath,
+  tidy
+} from "./pages.js"
 import { EpicConfig } from "../config/EpicConfig.ts"
 
 /** The home page, from the checkout's root. */
 const INDEX = relative(ROOT, HOME)
+
+/** The repo's own templates folder, from the checkout's root, with its `/` (`docs/templates/`);  none:  `undefined`. */
+const REPO_TEMPLATE_PATH = REPO_TEMPLATES && `${pagePath(REPO_TEMPLATES)}/`
 
 /** The repo's name, as its windows show it (`windows.repoName`):  what the pages say they're about. */
 const REPO = EpicConfig.of(ROOT).windows.repoName
@@ -99,8 +118,8 @@ const WRITING_DOCS = `<ui-section id="writing-docs" header="Writing docs" sticky
 <ul>
 <li>Start from a template:  <code>epic pages new durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.</li>
 <li>An epic page:  run <code>/epic &lt;name&gt;</code> in Claude Code.  Never copy the plan template by hand.</li>
-<li>The rules:  <a href="../packages/epics/AGENTS.md">AGENTS.md</a>.  How the pages work:
-<a href="../guides/spell-docs/spell-docs.md">spell-docs.md</a>.</li>
+<li>The rules:  spell-epic's <code>src/AGENTS.md</code>, where these templates live (<code>epic pages template</code>
+prints the folder).  How the pages work:  <a href="../guides/spell-docs/spell-docs.md">spell-docs.md</a>.</li>
 <li><code>pages new</code> lists the page on its area's page;  after renaming one or changing its title, run
 <code>epic pages index</code>.</li>
 </ul>
@@ -185,12 +204,29 @@ export const LISTS = [
     dir: TEMPLATES,
     title: "Templates",
     icon: "copy",
+    // the engine's (`templates/...`, wherever spell-epic is:  `pagePath()`);  the repo's own have a list of their own
     has: (path) => path.startsWith("templates/"),
     none: "No templates yet.",
     description: "A starting point for every kind of docs page, and how to write one.",
     lede: "A starting point for every kind of docs page, and how to write one.",
     extra: WRITING_DOCS
   },
+  // the repo's own templates, when it has any (`repoTemplates`):  their list page in their folder, so the engine's
+  // Templates page is the same for every repo
+  ...(REPO_TEMPLATES
+    ? [
+        {
+          id: "repo-templates",
+          dir: REPO_TEMPLATES,
+          title: `${REPO}'s templates`,
+          icon: "copy",
+          has: (path) => path.startsWith(REPO_TEMPLATE_PATH),
+          none: "No templates of its own yet.",
+          description: `${REPO}'s own page templates, beside spell-epic's (the Templates page).`,
+          lede: `${REPO}'s own page templates, beside <a href="${"../".repeat(REPO_TEMPLATE_PATH.split("/").length - 1)}templates/index.html">spell-epic's</a>:  <code>epic pages new</code> finds these first.`
+        }
+      ]
+    : []),
   {
     id: "brand",
     dir: BRAND,
@@ -210,11 +246,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) main()
 
 /** Write every list page, then the home's cards;  tidy them;  print what each holds, and the guides in Misc. */
 function main() {
-  const lists = new Set(LIST_PAGES.map((file) => relative(ROOT, file)))
+  const lists = new Set(LIST_PAGES.map((file) => pagePath(file)))
   const branches = branchCommits()
   const sagas = readSagas()
   const pages = [...findPages(), ...findPages(BRAND)]
-    .map((path) => relative(ROOT, path))
+    .map((path) => pagePath(path))
     .filter((path) => path !== INDEX && !lists.has(path))
     .map((path) => describe(path, branches))
   const written = []
@@ -222,11 +258,18 @@ function main() {
   for (const list of LISTS) {
     if (!existsSync(list.dir)) continue
     const file = join(list.dir, "index.html")
-    if (!existsSync(file)) writeFileSync(file, skeleton(list))
+    if (!existsSync(file)) writeFileSync(file, atDepth(skeleton(list), pagePath(file).split("/").length - 1))
     const mine = list.id === "sagas" ? pages : pages.filter((page) => list.has(page.path))
-    if (!writeBetween(file, START, END, listSection(list, mine, undefined, sagas))) process.exit(1)
+    const body = listSection(list, mine, undefined, sagas)
+    // the engine's Templates page (spell-epic's `templates/`):  every repo's `epic` writes the same list, so it's
+    // written only when its templates changed, never churned (`sameList()`)
+    if (list.dir === TEMPLATES && sameList(readFileSync(file, "utf8"), body)) {
+      report.push(`${pagePath(file)}:  ${mine.length} (unchanged)`)
+      continue
+    }
+    if (!writeBetween(file, START, END, body)) process.exit(1)
     written.push(file)
-    report.push(`${relative(ROOT, file)}:  ${list.id === "sagas" ? sagas.length : mine.length}`)
+    report.push(`${pagePath(file)}:  ${list.id === "sagas" ? sagas.length : mine.length}`)
   }
   // only the areas this checkout has:  a repo `epic init` set up has Guides, Sagas and Epics
   const cards = areaCards(pages, undefined, sagas).filter(hasArea)
@@ -254,13 +297,25 @@ export function readSagas() {
 }
 
 /**
+ * Whether list page `html` already holds list `body` between its markers, as `tidy()` left it:
+ * the same once the link targets `doc-links.js` adds (`target="..."`) and all whitespace are set aside.
+ */
+export function sameList(html, body) {
+  const from = html.indexOf(START)
+  const to = html.indexOf(END)
+  if (from < 0 || to < from) return false
+  const plain = (text) => text.replace(/\s+target="[^"]*"/g, "").replace(/\s+/g, "")
+  return plain(html.slice(from + START.length, to)) === plain(body)
+}
+
+/**
  * Replace what's between `start` and `end` in `file` with `body` (`replaceBetween()`);  `false` (and why, on stderr)
  * when the markers are missing.
  */
 function writeBetween(file, start, end, body) {
   const html = replaceBetween(readFileSync(file, "utf8"), start, end, body)
   if (html === undefined) {
-    console.error(`${relative(ROOT, file)}:  missing ${start} ... ${end}`)
+    console.error(`${pagePath(file)}:  missing ${start} ... ${end}`)
     return false
   }
   writeFileSync(file, html)
@@ -289,7 +344,7 @@ export function replaceBetween(html, start, end, body) {
  * - `branches`:  each branch's last commit (`branchCommits()`), for `worked()`
  */
 function describe(path, branches = new Map()) {
-  const html = readFileSync(`${ROOT}/${path}`, "utf8")
+  const html = readFileSync(pageAt(path), "utf8")
   const { document } = parseHTML(html)
   const full = document.querySelector("title")?.textContent.trim() || path
   const title = path.startsWith("epics/") ? full.replace(/^Epic:\s*/, "") : full
@@ -310,7 +365,7 @@ function describe(path, branches = new Map()) {
  * - `undefined` when none of them reads
  */
 function worked(path, html, updated, branches) {
-  const log = join(ROOT, path, "..", "parts", "log.html")
+  const log = join(pageAt(path), "..", "parts", "log.html")
   const events = [...eventTimesIn(html), ...(existsSync(log) ? eventTimesIn(readFileSync(log, "utf8")) : [])]
   return lastWorked([updated, ...events, branches.get(path.split("/")[1])])
 }
@@ -683,7 +738,7 @@ ${list.extra ?? ""}
  */
 export function listSection(list, pages, favorites = readFavorites(), sagas = readSagas()) {
   const epics = list.id === "epics"
-  const from = relative(ROOT, list.dir)
+  const from = pagePath(list.dir)
   if (list.id === "guides") return guideSections(list, pages, sagas)
   if (list.id === "sagas") return sagaSection(list, pages, sagas)
   const placed = () => pages.map((page) => epicCard(page, from, favorites, sagas))
@@ -712,7 +767,7 @@ ${body}
  */
 export function guideSections(list, pages, sagas) {
   if (!pages.length) return `<p class="meta">${text(list.none)}</p>`
-  const from = relative(ROOT, list.dir)
+  const from = pagePath(list.dir)
   const ids = new Set(sagas.map((saga) => saga.id))
   const cards = (mine) =>
     mine.length
@@ -743,7 +798,7 @@ ${misc.length ? cards(misc) : `<p class="meta">None.</p>`}
  * yet), its purpose, and how many epics and guides name it (of `pages`, every page `describe()`d).
  */
 export function sagaSection(list, pages, sagas) {
-  const from = relative(ROOT, list.dir)
+  const from = pagePath(list.dir)
   const count = (id, area) => pages.filter((page) => page.path.startsWith(`${area}/`) && page.saga === id).length
   const body = sagas.length
     ? `<ui-cards class="spell-grid" stackable>\n${sagas

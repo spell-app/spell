@@ -410,7 +410,10 @@ Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`)
 The pages live in SHARED root folders;  the tooling lives here, in `tools/`.
 - epics `shared-content` and `claude-design` P4
 - the tooling was in the docs package's own `tools/` until P16 of `people-and-orgs`
-- The pages, epic pages and templates are root folders of every checkout.
+- The pages and epic pages are root folders of every checkout.
+  - NOT the templates (epic `epic-eject` T11):  they're spell-epic's own [`templates/`](../templates/), served at
+    `/templates/` by both page servers (an engine route), and found by `epic pages template [<name>]`.
+    - A repo's own extra templates:  `repoTemplates` in its `.epic/config.json5`, a folder from the checkout's root.
   - Each is a folder link into the shared content repo, `../spell-app-dev`
     (the root's `AGENTS.md`, "Shared content").
   - They're NOT tracked by spell-app.
@@ -437,7 +440,7 @@ The pages live in SHARED root folders;  the tooling lives here, in `tools/`.
 
 The shared folders:
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
-  - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES`
+  - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
 - [The docs' home page](../../pages/index.html):  a routing page (P5 of `claude-design`).
   - One card per area, in the top bar's order, each with its count:
     Guides · Sagas · Epics · Epic/UI · Spell/UI · App · App/UI · Brand · Templates
@@ -528,7 +531,7 @@ The shared folders:
   - `spell-docs/`:  how the pages work, and the @spell-app/ui problems they hit.
     - [spell-docs.md](../../guides/spell-docs/spell-docs.md):  how the pages work
     - [spell-ui-findings.md](../../guides/spell-docs/spell-ui-findings.md):  the problems
-- `templates/`:  starting points, one per kind of doc (see "Templates").
+- `templates/`:  starting points, one per kind of doc (see "Templates"):  spell-epic's own, not the content folder's.
 - `epics/`:  epic pages, one per `/epic` session, each `<name>/<name>.plan.html` (see "Epic pages").
   - `<name>.html` before 2026-10-04.
     - The tools find either ([`planDocIn()`](tools/pages.js)).
@@ -938,6 +941,11 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 ## Templates
 
+- spell-epic's own, in its [`templates/`](../templates/) (epic `epic-eject` T11, Q8):  every repo's pages start from them.
+  - Served at `/templates/` (and `/r/<repo>/templates/`) by the epic server and spell-app's page server alike.
+  - `epic pages template <name>` prints one's path;  `epic pages index` writes the Templates list page,
+    `templates/index.html`, here.
+  - A repo adds its own only if it wants one:  `repoTemplates` (`EpicConfig`), listed beside these, found first.
 - [durable.html](../templates/durable.html):  a guide -- design notes, research, references.
   - prose sections, tables, code, callouts
 - [commands.html](../templates/commands.html) + `commands.json5`:  a command reference.

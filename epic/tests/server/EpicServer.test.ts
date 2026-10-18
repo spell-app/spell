@@ -87,6 +87,16 @@ describe("EpicServer", () => {
     expect((await ask(port, "GET", "/r/two/packages/epics/components/__pack/epics.pack.js")).status).toBe(200)
   })
 
+  // epic-eject T11:  the templates are the engine's, at /templates/ for every repo (its pages link `../templates/`)
+  test("the engine's templates at /templates/, and at each repo's /r/<repo>/templates/", async () => {
+    for (const path of ["/templates/index.html", "/templates/durable.html", "/r/two/templates/durable.html"]) {
+      const page = await ask(port, "GET", path)
+      expect(page.status, path).toBe(200)
+      expect(page.text, path).toContain("<title>")
+    }
+    expect((await ask(port, "GET", "/templates/missing.html")).status).toBe(404)
+  })
+
   test("every page's SPELL_SERVER:  its path under the prefix it was asked by, its repo, base and checkout", async () => {
     const config = (html: string) => JSON.parse(/window\.SPELL_SERVER = (\{.*?\})<\/script>/.exec(html)![1]!)
     const atRoot = config((await ask(port, "GET", "/epics/seo/seo.plan.html")).text)

@@ -24,7 +24,7 @@ The EPIC PAGE is the record, as on any day:
     that's how a compacted session knows it's still running.
     - `null` when off
 - Style:  as in `/epic`:
-  the epic page written for Owen coming back cold ([plan-doc.md](templates/epics/plan-doc.md), "Rules").
+  the epic page written for Owen coming back cold ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").
 
 ## 1. Find the phases
 
@@ -137,7 +137,7 @@ Everything else stands:
 
    - It prints the id (`J4`).
      The epic page's "Judgement calls" section is where Owen finds them, open until he reviews each.
-   - Its details ([plan-doc.md](templates/epics/plan-doc.md), "Prose"):
+   - Its details ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Prose"):
      - the options it weighed (any item kind takes them):
        an `<epic-choices>` of `<epic-option letter title [recommended]>`
      - the outcome:  an `<epic-net-effect>`

@@ -21,18 +21,42 @@
  *   the epics tool's `EpicTargets` knows the sagas (epic `epic-workflow` P15).
  * - NOTE:  ported from `doc-links.py` on 2026-10-03;  makes the same edits to every page.
  */
-import { readFileSync, writeFileSync } from "node:fs"
-import { basename, dirname, relative, resolve as resolvePath } from "node:path"
+import { readFileSync, realpathSync, writeFileSync } from "node:fs"
+import { basename, dirname, join, relative, resolve as resolvePath } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { AS } from "$/assembler"
 import { EpicTargets } from "$/epics/tool/EpicTargets"
 import { COMPONENT_SETS } from "$/server/page/page.types"
 
-import { ROOT } from "./pages.js"
+import { PACKAGE, ROOT, TEMPLATES } from "./pages.js"
 
-/** The component sets' folders, by their address folder:  `{ "components/epics": "packages/epics/docs" }`. */
-const SERVED = Object.fromEntries(COMPONENT_SETS.map((set) => [set.prefix.slice(1), set.dir]))
+/**
+ * The folders served at another address, by their address folder:
+ * - the component sets':  `{ "components/epics": "spell-epic/src/docs" }`
+ * - the engine's templates, at `templates/` (epic `epic-eject` T11):  `{ "templates": "spell-epic/templates" }`,
+ *   so a guide's `../templates/durable.html` checks against spell-epic's copy;  nothing when they ARE the checkout's
+ *   (spell-epic's own)
+ */
+const SERVED = {
+  ...Object.fromEntries(COMPONENT_SETS.map((set) => [set.prefix.slice(1), set.dir])),
+  ...(templatesDir() !== "templates" && { templates: templatesDir() })
+}
+
+/**
+ * The engine's templates from the checkout's root:  through its `spell-epic` link when it has one to this engine
+ * (spell-app:  `spell-epic/templates`, inside the repo, so its links check as the repo's own);  else as they are
+ * (`templates` in spell-epic itself).
+ */
+function templatesDir() {
+  const link = join(ROOT, "spell-epic")
+  try {
+    if (realpathSync(link) === realpathSync(PACKAGE)) return relative(ROOT, join(link, "templates"))
+  } catch {
+    // no link
+  }
+  return relative(ROOT, TEMPLATES)
+}
 
 /**
  * One linker for this checkout (or the command line's `--root`):  its bare-name index is built once per process.

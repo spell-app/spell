@@ -22,8 +22,9 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     (the `Stop` hook, [shared-commit.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/shared-commit.mjs)).
   - NEVER commit, stage, `git checkout --` or `git restore` it in spell-app.
     Nor the changelog, the docs' home page, or a details page.
-- Rules for the doc (sections, ids, markers, prose):  [plan-doc.md](templates/epics/plan-doc.md).
+- Rules for the doc (sections, ids, markers, prose):  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md).
   Read it first.
+  - It's spell-epic's, with every template:  `epic pages template epics/plan-doc.md` prints its path.
 - Structured edits go through `epic <verb> <name>[#<id>] ...` (cheat sheet below), never by hand.
   - Hand-edit only prose:  the summary, Overview, phase bodies, item details.
   - An epic page is SPLIT (P3 of `claude-design`;  new docs start so):

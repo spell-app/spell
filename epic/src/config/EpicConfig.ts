@@ -52,8 +52,9 @@ export class EpicConfig {
     installTimeout: 600,
     windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
     linkSessionFolders: false,
-    sharedFolders: ["epics", "guides", "pages", "templates", "brand", "ui", "goals", "agents"],
-    engineFolder: "../spell-epic"
+    sharedFolders: ["epics", "guides", "pages", "brand", "ui", "goals", "agents"],
+    engineFolder: "../spell-epic",
+    repoTemplates: ""
   }
 
   /** the main checkout:  what the folders are relative to */
@@ -165,6 +166,17 @@ export class EpicConfig {
   }
 
   /**
+   * the repo's OWN templates folder, as written:  a path from each checkout's root (a worktree's are its branch's);
+   * `""` (the default):  none, the engine's templates are all there are (spell-epic's `templates/`, epic `epic-eject`
+   * T11)
+   * - the docs tools list it beside the engine's on the Templates page, and look a template up there first
+   *   (`pages.js` `REPO_TEMPLATES`, `templateFile()`)
+   */
+  get repoTemplates(): string {
+    return this.settings.repoTemplates
+  }
+
+  /**
    * Worktree `name`'s folder:  where it IS, in any of `worktreesFolders`;  else where a new one goes,
    * `<worktreesFolder>/<name>` (`newWorktreeFolder()`).
    * - so an old worktree (`.claude/worktrees/seo`) is still found after the file moved new ones beside the repo
@@ -248,7 +260,8 @@ export class EpicConfig {
       "windows.worktreeOnly": this.windows.worktreeOnly,
       linkSessionFolders: this.linkSessionFolders,
       sharedFolders: this.sharedFolders.join(","),
-      engineFolder: this.engineFolder ?? ""
+      engineFolder: this.engineFolder ?? "",
+      repoTemplates: this.repoTemplates
     }
   }
 
@@ -286,7 +299,8 @@ export class EpicConfig {
       },
       linkSessionFolders: valueOf(given, "linkSessionFolders", defaults.linkSessionFolders, file),
       sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file),
-      engineFolder: valueOf(given, "engineFolder", defaults.engineFolder, file, "", { empty: true })
+      engineFolder: valueOf(given, "engineFolder", defaults.engineFolder, file, "", { empty: true }),
+      repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true })
     }
   }
 
@@ -334,11 +348,13 @@ export class EpicConfig {
  * - `linkSessionFolders`:  whether the worktree hook links each NEW worktree's saved-session folder
  *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (off;
  *   `SessionFolders`, epic `epic-eject` Q4)
- * - `sharedFolders`:  the content folder's folders each checkout links in at its root (spell-app's nine;  `epic init`
+ * - `sharedFolders`:  the content folder's folders each checkout links in at its root (spell-app's eight;  `epic init`
  *   writes `epics`, `sagas`, `guides`, `pages` for a new repo):  `epic shared link`, the turn-end commit hook
  * - `engineFolder`:  the spell-epic checkout, relative to the main checkout (`../spell-epic`), which `epic shared link`
  *   links in at each checkout's root as `spell-epic`:  spell-app runs the engine through it (its alias table, its page
  *   server's route modules, epic `epic-eject` I5);  `""`:  no link (a repo that only runs `epic`)
+ * - `repoTemplates`:  the repo's own page templates, a folder from each checkout's root (`""`, none:  the default);
+ *   listed beside the engine's (spell-epic's `templates/`, epic `epic-eject` T11), and found by name before them
  */
 export type EpicSettings = {
   contentFolder: string
@@ -351,6 +367,7 @@ export type EpicSettings = {
   linkSessionFolders: boolean
   sharedFolders: string[]
   engineFolder: string
+  repoTemplates: string
 }
 
 /** `EpicSettings.windows`:  the default window, the folder names every window shows, and its layout. */

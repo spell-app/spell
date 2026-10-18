@@ -167,6 +167,7 @@ export class EpicTools {
     "pages update": { tool: "src/tools/update.js", cwd: "." },
     "pages index": { tool: "src/tools/index.js", cwd: "." },
     "pages new": { tool: "src/tools/new-page.js", cwd: "." },
+    "pages template": { tool: "src/tools/template-path.js", cwd: "." },
     "pages open": { tool: "src/tools/open.js", tsx: "tsconfig.json", cwd: "." },
     "pages link": { tool: "src/tools/link.ts", tsx: "tsconfig.json", cwd: "." },
     "pages fuss": { tool: "src/tools/fuss.ts", tsx: "tsconfig.json" },
@@ -190,7 +191,7 @@ export class EpicTools {
   static runPages([verb, ...args]: string[]): Promise<number> {
     const name = `pages ${verb}` as EpicToolName
     if (!(name in EpicTools.TOOLS)) {
-      process.stderr.write("epic pages:  which verb?  index, update, new, open, link, fuss or offline\n")
+      process.stderr.write("epic pages:  which verb?  index, update, new, template, open, link, fuss or offline\n")
       return Promise.resolve(EXIT.USAGE)
     }
     return EpicTools.run(name, args)

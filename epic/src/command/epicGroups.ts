@@ -586,9 +586,19 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "new",
-      usage: '<kind> <page> --title "..."',
-      description: "make a page from a template (durable, ...), at the right depth, and list it on its area's page",
+      usage: '<kind> <page> --title "..." [--dry-run]',
+      description:
+        "make a page from a template (durable, ...), at the right depth, and list it on its area's page;  " +
+        "--dry-run:  say which template and page, write nothing",
       example: 'epic pages new durable guides/greet.html --title "How greet() works"'
+    },
+    {
+      name: "template",
+      usage: "[<name>]",
+      description:
+        "where a template is (spell-epic's templates/, the repo's own first:  repoTemplates);  " +
+        "no name:  the templates folders",
+      example: "epic pages template epics/plan-doc.md"
     },
     {
       name: "open",

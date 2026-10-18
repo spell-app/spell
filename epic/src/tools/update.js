@@ -16,7 +16,7 @@ import { mkdtempSync, readFileSync, statSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, relative } from "node:path"
 
-import { ASSETS, ROOT, TOOLS, docLinksRun, findPages } from "./pages.js"
+import { ASSETS, ROOT, TOOLS, docLinksRun, findPages, pageAt, pagePath } from "./pages.js"
 
 /** A page loading a site bundle (Spell UI's, or a component set's), not `spell-ui.js`:  by its script's address. */
 const SITE_BUNDLE = /\b(?:(?:epic-|app-)?ui|components\/[^/"]+)\/(?:site\/)?_assets\/site\.js\b/
@@ -36,11 +36,12 @@ step("bundle @spell-app/ui", "node", [join(TOOLS, "bundle-spell-ui.js"), ...(ski
 
 step("index", "node", [join(TOOLS, "index.js")])
 
-const pages = findPages().map((path) => relative(ROOT, path))
+// paths as served (`pagePath()`):  the engine's templates are `templates/...`, wherever spell-epic is
+const pages = findPages().map((path) => pagePath(path))
 if (!pages.length) fail("find pages", "no .html pages")
 console.log(`\n== pages:  ${pages.join(", ")}`)
 
-const links = docLinksRun(["--check", ...pages])
+const links = docLinksRun(["--check", ...pages.map((page) => pageAt(page))])
 step("check links", links.command, links.args, { env: links.env })
 
 const results = []
@@ -51,7 +52,7 @@ if (check) {
     // `yarn site:check` (packages/ui) checks those.  `ui/_assets/` since the pages moved (claude-design P6);  a
     // component set's (the `component-set-docs` template) loads its own, from `components/<set>/_assets/` (before
     // people-and-orgs P18, `epic-ui/_assets/`)
-    if (SITE_BUNDLE.test(readFileSync(join(ROOT, output), "utf8"))) continue
+    if (SITE_BUNDLE.test(readFileSync(pageAt(output), "utf8"))) continue
     const outDir = join(shots, output.replace(/\.html$/, "").replaceAll("/", "--"))
     const run = step(`check ${output}`, "node", [join(TOOLS, "check-spell.js"), output, outDir], {
       capture: true,
@@ -71,7 +72,7 @@ for (const output of pages) {
     : result.passed
       ? "checks passed"
       : `${result.problems?.length ?? "?"} problem(s)`
-  console.log(`  ${output}  ${kb(join(ROOT, output))}  ${verdict}`)
+  console.log(`  ${output}  ${kb(pageAt(output))}  ${verdict}`)
   for (const problem of result?.problems ?? []) console.log(`    - ${problem}`)
   if (result) console.log(`    screenshots:  ${result.screenshots}`)
 }

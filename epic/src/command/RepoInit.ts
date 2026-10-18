@@ -128,6 +128,7 @@ export class RepoInit {
    * - `linkSessionFolders` on:  each worktree's saved sessions show in every window's Claude panel
    * - `sharedFolders`:  what the epic tooling reads and writes (`INIT_FOLDERS`)
    * - `engineFolder`:  `""`, no `spell-epic` link:  only spell-app reaches the engine's code through one
+   * - `repoTemplates`:  `""`, none:  the engine's templates are the repo's (spell-epic's `templates/`, epic `epic-eject` T11)
    * - static:  needs no instance
    */
   static settingsFor(main: string): EpicSettings {
@@ -143,7 +144,8 @@ export class RepoInit {
       windows: { default: repo, repoName: repo, contentName: `${repo}.epics`, worktreeOnly: true },
       linkSessionFolders: true,
       sharedFolders: [...INIT_FOLDERS],
-      engineFolder: ""
+      engineFolder: "",
+      repoTemplates: ""
     }
   }
 
@@ -198,7 +200,10 @@ export class RepoInit {
   "sharedFolders": ${value("sharedFolders")},
   // the spell-epic checkout, linked in at every checkout's root as \`spell-epic\` ("":  no link;  a repo whose code
   // imports the engine, as spell-app's does, names it)
-  "engineFolder": ${value("engineFolder")}
+  "engineFolder": ${value("engineFolder")},
+  // the repo's own page templates, a folder from each checkout's root, listed beside spell-epic's
+  // ("":  none, spell-epic's templates are all there are)
+  "repoTemplates": ${value("repoTemplates")}
 }
 `
   }

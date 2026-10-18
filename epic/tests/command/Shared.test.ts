@@ -53,7 +53,7 @@ describe("sharedConfig()", () => {
       main: MAIN,
       dir: PEER,
       worktrees: [join(MAIN, ".claude", "worktrees")],
-      links: ["epics", "guides", "pages", "templates", "brand", "ui", "goals", "agents"]
+      links: ["epics", "guides", "pages", "brand", "ui", "goals", "agents"]
     })
     expect(Shared.configOf(WT)).toEqual(config)
   })
@@ -74,8 +74,8 @@ describe("before init", () => {
     const status = new Shared({ config }).status()
     expect(status).toMatchObject({ exists: false, isRepo: false })
     expect(status.checkouts.map(({ checkout, links }) => [checkout, links.map((link) => link.state)])).toEqual([
-      [".", Array(8).fill("real")],
-      [".claude/worktrees/wt", Array(8).fill("missing")]
+      [".", Array(7).fill("real")],
+      [".claude/worktrees/wt", Array(7).fill("missing")]
     ])
   })
 })
@@ -90,12 +90,12 @@ describe("init --import, then link", () => {
   })
 
   test("main:  identical real folders become links;  the worktree:  missing ones are made", () => {
-    expect(new Shared({ config }).link(MAIN).map((report) => report.action)).toEqual(Array(8).fill("replaced"))
-    expect(new Shared({ config }).link(WT).map((report) => report.action)).toEqual(Array(8).fill("linked"))
+    expect(new Shared({ config }).link(MAIN).map((report) => report.action)).toEqual(Array(7).fill("replaced"))
+    expect(new Shared({ config }).link(WT).map((report) => report.action)).toEqual(Array(7).fill("linked"))
     expect(lstatSync(join(WT, "goals")).isSymbolicLink()).toBe(true)
     expect(readFileSync(join(WT, "goals/index.html"), "utf8")).toBe("<h1>Goals</h1>\n")
     expect(new Shared({ config }).status().checkouts.flatMap(({ links }) => links.map((link) => link.state))).toEqual(
-      Array(16).fill("ok")
+      Array(14).fill("ok")
     )
     expect(git(MAIN, "status", "--porcelain")).toBe("")
   })
@@ -121,6 +121,33 @@ describe("init --import, then link", () => {
       state: "tracked",
       action: "tracked"
     })
+  })
+})
+
+describe("unlinkDropped()", () => {
+  // epic-eject T11:  the templates left the content folder for spell-epic, and the manifest dropped `templates`
+  test("a link to a shared folder the manifest no longer names goes, dangling or not;  real folders and other links stay", () => {
+    mkdirSync(join(PEER, "templates"), { recursive: true })
+    execFileSync("ln", ["-s", "../../../../spell-app-dev/templates", join(WT, "templates")])
+    execFileSync("ln", ["-s", "../../../../spell-app-dev/gone", join(WT, "gone")])
+    execFileSync("ln", ["-s", "../../../../elsewhere/templates", join(WT, "other")])
+    const shared = new Shared({ config })
+    expect(shared.unlinkDropped(WT)).toEqual([
+      { path: "gone", state: "dropped", action: "unlinked" },
+      { path: "templates", state: "dropped", action: "unlinked" }
+    ])
+    expect(lstatSync(join(WT, "templates"), { throwIfNoEntry: false })).toBeUndefined()
+    expect(lstatSync(join(WT, "other")).isSymbolicLink()).toBe(true)
+    // the links the manifest names, and main's real (ignored) templates folder, untouched
+    expect(lstatSync(join(WT, "goals")).isSymbolicLink()).toBe(true)
+    expect(shared.unlinkDropped(MAIN)).toEqual([])
+    expect(readFileSync(join(MAIN, "templates/t.html"), "utf8")).toBe("<h1>T</h1>\n")
+    // a checkout whose manifest still names it keeps it
+    execFileSync("ln", ["-s", "../../../../spell-app-dev/templates", join(WT, "templates")])
+    expect(shared.unlinkDropped(WT, [...config.links, "templates"])).toEqual([])
+    rmSync(join(WT, "templates"))
+    rmSync(join(WT, "other"))
+    rmSync(join(PEER, "templates"), { recursive: true })
   })
 })
 

@@ -42,8 +42,9 @@ describe("EpicConfig", () => {
       "windows.contentName": "spell-app-dev",
       "windows.worktreeOnly": false,
       linkSessionFolders: false,
-      sharedFolders: "epics,guides,pages,templates,brand,ui,goals,agents",
-      engineFolder: join(TOP, "spell-epic")
+      sharedFolders: "epics,guides,pages,brand,ui,goals,agents",
+      engineFolder: join(TOP, "spell-epic"),
+      repoTemplates: ""
     })
     expect(config.worktreeFolder("seo")).toBe(INSIDE)
     expect(config.worktreesPattern).toBe(".claude/worktrees")
@@ -116,6 +117,9 @@ describe("EpicConfig", () => {
     // `""`:  no engine link
     expect(new EpicConfig(MAIN).engineFolder).toBe(join(TOP, "spell-epic"))
     expect(EpicConfig.settingsFrom('{ "engineFolder": "" }').engineFolder).toBe("")
+    // epic-eject T11:  the repo's own templates, none by default;  a folder from each checkout's root, as written
+    expect(new EpicConfig(MAIN).repoTemplates).toBe("")
+    expect(EpicConfig.settingsFrom('{ "repoTemplates": "docs/templates" }').repoTemplates).toBe("docs/templates")
     expect(() => EpicConfig.settingsFrom('{ "sharedFolders": "epics" }', "x.json5")).toThrow(
       /"sharedFolders" must be a list of folder names/
     )
