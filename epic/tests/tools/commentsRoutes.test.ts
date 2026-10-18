@@ -51,8 +51,8 @@ const PAGES: Record<string, string> = {
   // a saga page (epic `epic-workflow` P15):  its comments in its own review inbox
   "sagas/epics/epics.saga.html": PAGE,
   // a component set (Epic UI), served at /components/epics/ from its package's docs/
-  "packages/epics/docs/epic-item.html": PAGE,
-  "packages/epics/docs/__parts/layout.html": PAGE,
+  "spell-epic/src/docs/epic-item.html": PAGE,
+  "spell-epic/src/docs/__parts/layout.html": PAGE,
   // epic py's guide:  a page epic py owns (`SeeAlso.ownerOf()`, epic `epic-workflow` P13)
   "guides/py.html": PAGE,
   "epics/py/py.plan.html": `<epic-page epic="py" updated="2026-10-13"><a slot="durable" href="../../guides/py.html">Py</a></epic-page>`,
@@ -349,7 +349,7 @@ test("a component set's page, at its address:  its inbox beside it in the set's 
   const { status, answer } = await post({ page, action: "add", ...ON_TABLE, text: "Show a reply too?" })
   expect(status).toBe(200)
   expect(answer.id).toBe("m1")
-  expect(inboxOf("packages/epics/docs/epic-item.html")).toMatchObject({
+  expect(inboxOf("spell-epic/src/docs/epic-item.html")).toMatchObject({
     comments: { m1: { text: "Show a reply too?", status: "new" } }
   })
   const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${page}`)).text)
