@@ -69,6 +69,8 @@ beforeAll(async () => {
   mkdirSync(join(home, "windows"))
   process.env.SPELL_CLAUDE_HOME = home
   process.env.SPELL_WINDOWS_DIR = join(home, "windows")
+  // spell-epic's own registry too, empty:  else a real window of Owen's (its extension's bridge) is found and typed into
+  process.env.SPELL_EPIC_WINDOWS_DIR = join(home, "epic-windows")
   process.env.SPELL_AIRPLANE_FILE = join(home, "airplane.json")
   root = mkdtempSync(join(tmpdir(), "review-routes-"))
   mkdirSync(join(root, ".git"))
@@ -88,6 +90,7 @@ afterAll(async () => {
   rmSync(root, { recursive: true, force: true })
   delete process.env.SPELL_CLAUDE_HOME
   delete process.env.SPELL_WINDOWS_DIR
+  delete process.env.SPELL_EPIC_WINDOWS_DIR
   delete process.env.SPELL_AIRPLANE_FILE
   rmSync(home, { recursive: true, force: true })
 })

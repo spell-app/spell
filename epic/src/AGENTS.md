@@ -1547,8 +1547,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - Each has a header comment, saying how it was run.
 - They live in the shared repo, so they DON'T run in place any more.
   - Node runs them from their real path in `../spell-app-dev`, where there's no `node_modules` and no `$/` aliases.
-  - To re-measure, copy one into the repo, under `packages/epics`, and run it there.
-    (Its `tsconfig.json` extends `tsconfig.base.json`.)
+  - To re-measure, copy one into a checkout with packages, and run it there:  spell-epic's root, or a package of
+    spell-app's, e.g. `packages/ui` (each `tsconfig.json` extends its repo's `tsconfig.base.json`).
 - Tables quote medians of several runs, never a single run.
 - Keep the scripts:  they re-measure on upgrades.
 - A guide's own LIVE elements, e.g. the custom elements guide's `<ui-counter>`:

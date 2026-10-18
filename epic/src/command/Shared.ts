@@ -172,7 +172,8 @@ export class Shared {
     const all: LinkReport[] = []
     for (const checkout of checkouts) {
       // each checkout's OWN links:  a branch from before the reorg (claude-design P4) still links `packages/docs/content`
-      for (const report of this.link(checkout, Shared.configOf(checkout).links)) {
+      const engine = this.linkEngine(checkout)
+      for (const report of [...this.link(checkout, Shared.configOf(checkout).links), ...(engine ? [engine] : [])]) {
         all.push(report)
         if (report.action !== "ok") out(`${checkout}/${report.path}:  ${report.action}`)
       }
@@ -274,6 +275,34 @@ export class Shared {
       symlinkSync(relative(dirname(at), target), at)
       return { path, state, action: state === "real" ? "replaced" : "linked" }
     })
+  }
+
+  /**
+   * Link the spell-epic checkout into checkout `checkout` at its root, as `spell-epic` (`ENGINE_LINK`):
+   * `engineFolder` in the repo's `.epic/config.json5` (epic `epic-eject` I5).  What it did, as `link()` reports it:
+   * - `ok`:  already;  `linked`:  made (missing, dangling or pointing elsewhere)
+   * - `real`, left alone (`action` `diverged`):  a real folder or file there, never removed
+   * - `undefined`:  nothing to link
+   *   - no `engineFolder`, or no such folder
+   *   - a checkout whose git doesn't ignore `spell-epic`:  a branch from before spell-app's switch to spell-epic,
+   *     which runs its own copy of the engine, and would show the link as a new file
+   * - Why a link:  spell-app's alias table (`$/epics`) and its page server's route modules reach the engine through
+   *   it, from the main checkout and every worktree alike
+   * - SIDE EFFECT:  writes the link (a relative target)
+   */
+  linkEngine(checkout: string): LinkReport | undefined {
+    const engine = new EpicConfig(this.config.main).engineFolder
+    if (!engine || !existsSync(engine)) return undefined
+    if (!Git.run(["check-ignore", "-q", "--no-index", ENGINE_LINK], checkout).ok) return undefined
+    const at = join(checkout, ENGINE_LINK)
+    const stat = lstatSync(at, { throwIfNoEntry: false })
+    const path = ENGINE_LINK
+    if (stat && !stat.isSymbolicLink()) return { path, state: "real", action: "diverged" }
+    if (stat && existsSync(at) && realOrSelf(at) === realOrSelf(engine)) return { path, state: "ok", action: "ok" }
+    const state = !stat ? "missing" : existsSync(at) ? "elsewhere" : "dangling"
+    if (stat) rmSync(at, { force: true })
+    symlinkSync(relative(checkout, engine), at)
+    return { path, state, action: "linked" }
   }
 
   ////////////////
@@ -413,6 +442,9 @@ export type SharedProps = { checkout?: string; config?: SharedConfig }
 
 /** The flags of `epic shared` that take no value. */
 const SWITCHES = ["json", "import", "all", "quiet", "dryRun"]
+
+/** The spell-epic checkout's link at a checkout's root (`linkEngine()`):  `engineFolder` in `.epic/config.json5`. */
+export const ENGINE_LINK = "spell-epic"
 
 /** What marks a checkout the verbs act on (`Git.nearestCheckout()`):  the docs tools' relocate script. */
 const CHECKOUT_MARKER = "packages/epics/tools/relocate.js"

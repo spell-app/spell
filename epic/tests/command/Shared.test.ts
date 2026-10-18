@@ -207,6 +207,39 @@ describe("commitShared()", () => {
   })
 })
 
+describe("linkEngine()", () => {
+  // a repo of its own, with spell-epic beside it:  `engineFolder`'s default
+  const top = join(TEMP, "engine")
+  const repo = join(top, "spell-app")
+  const engine = join(top, "spell-epic")
+  mkdirSync(join(engine, "bin"), { recursive: true })
+  mkdirSync(repo, { recursive: true })
+  git(repo, "init", "-q", "-b", "main")
+  const shared = new Shared({ checkout: repo, config: { main: repo, dir: join(top, "dev"), worktrees: [], links: [] } })
+
+  test("a branch that doesn't ignore spell-epic (from before the switch):  nothing linked", () => {
+    expect(shared.linkEngine(repo)).toBeUndefined()
+    expect(existsSync(join(repo, "spell-epic"))).toBe(false)
+  })
+
+  test("ignored:  linked, by a relative path;  again:  ok", () => {
+    put(".gitignore", "/spell-epic\n", repo)
+    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "missing", action: "linked" })
+    expect(lstatSync(join(repo, "spell-epic")).isSymbolicLink()).toBe(true)
+    expect(realpathSync(join(repo, "spell-epic"))).toBe(engine)
+    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "ok", action: "ok" })
+  })
+
+  test('a real folder there is never removed;  engineFolder "":  nothing linked', () => {
+    rmSync(join(repo, "spell-epic"))
+    mkdirSync(join(repo, "spell-epic"))
+    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "real", action: "diverged" })
+    rmSync(join(repo, "spell-epic"), { recursive: true })
+    put(".epic/config.json5", '{ "engineFolder": "" }\n', repo)
+    expect(shared.linkEngine(repo)).toBeUndefined()
+  })
+})
+
 /** The shared repo's last `count` commits, oldest first:  `[subject, files changed]`. */
 function commits(count: number): string[][] {
   return git(PEER, "log", `-${count}`, "--reverse", "--format=%H")

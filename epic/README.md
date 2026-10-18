@@ -97,6 +97,7 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | `windows.worktreeOnly` | `false` | whether EVERY worktree's window holds only the worktree and the content folder |
 | `linkSessionFolders` | `false` | whether the worktree hook links each new worktree's saved-session folder to the main checkout's |
 | `sharedFolders` | spell-app's eight | the content folder's folders every checkout links in at its root;  a checkout's `package.json` `"shared": { "links" }` wins (spell-app's branches) |
+| `engineFolder` | `"../spell-epic"` | the spell-epic checkout, which `epic shared link` links in at every checkout's root as `spell-epic`, only where the checkout's `.gitignore` ignores that name (spell-app runs the engine through it:  its `$/epics` aliases, its page server's routes);  `""`:  no link (`epic init` writes that) |
 
 A repo's generated files are its own list, in each checkout:  `.epic/generators.json5`.
 - `epic worktree merge-main` rebuilds them instead of merging them.
@@ -134,6 +135,14 @@ For the morning after epic `epic-eject`'s night:  that night nothing was install
 - `epic` is spell-epic's own command, `bin/epic`:  step 7 puts it on the terminal's path.
 
 1. Merge `epic-eject` into spell-app's `main`:  `/isolate done` in its session.
+   - Its switch commit (I5) takes spell-app's own engine out:  install the plugin first (step 4), and link `epic`
+     (step 7), then merge.
+   - Then the main checkout's `spell-epic` link, `yarn install`, and a restart of its page server:
+
+     ```sh
+     cd ~/www/spell-app/spell-app && epic shared link && yarn install && spell dev server stop && spell dev server ensure
+     ```
+
    - Again if `main` already has it:  the branch took two more commits spell-epic needs (T26), the page server's
      several worktrees folders (`cb93a0d6c`, J28) and the pack build's root pack (`86ef4864a`, J14).
 2. Point this repo at spell-app's main checkout (T10), here:

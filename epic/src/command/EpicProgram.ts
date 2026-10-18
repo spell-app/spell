@@ -356,6 +356,16 @@ export class EpicProgram {
       "bring pages up to today's markup, every step of their kind;  safe to run again",
       "epic migrate --all --dry-run"
     ).usage("[<kind>] [<epic>... | --all] [--file <page>] [--step <name>] [--dry-run] [--notify] [--list]")
+
+    // the `epic` tool in ITS OWN order (`summary seo`, `add seo judgement "Title"`), hidden:  what spell-app's old
+    // spelling, `spell dev plan-doc ...`, hands on to (epic `epic-eject` I5)
+    epic
+      .command("plan-doc", { hidden: true })
+      .description("the epic tool in its own order, for spell-app's `spell dev plan-doc ...`")
+      .argument("[args...]")
+      .allowUnknownOption()
+      .helpOption(false)
+      .action(() => runVerb(() => EpicTools.planDoc(rawArgs("plan-doc"))))
   }
 
   ////////////////

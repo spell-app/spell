@@ -52,7 +52,8 @@ export class EpicConfig {
     installTimeout: 600,
     windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
     linkSessionFolders: false,
-    sharedFolders: ["epics", "guides", "pages", "templates", "brand", "ui", "goals", "agents"]
+    sharedFolders: ["epics", "guides", "pages", "templates", "brand", "ui", "goals", "agents"],
+    engineFolder: "../spell-epic"
   }
 
   /** the main checkout:  what the folders are relative to */
@@ -155,6 +156,15 @@ export class EpicConfig {
   }
 
   /**
+   * the spell-epic checkout this repo's checkouts link in at their root as `spell-epic` (`engineFolder`, from the
+   * main checkout);  `undefined` when the key is `""`:  no link
+   * - `epic shared link` makes the link, only in a checkout whose `.gitignore` ignores it (`Shared.linkEngine()`)
+   */
+  get engineFolder(): string | undefined {
+    return this.settings.engineFolder ? resolve(this.main, this.settings.engineFolder) : undefined
+  }
+
+  /**
    * Worktree `name`'s folder:  where it IS, in any of `worktreesFolders`;  else where a new one goes,
    * `<worktreesFolder>/<name>` (`newWorktreeFolder()`).
    * - so an old worktree (`.claude/worktrees/seo`) is still found after the file moved new ones beside the repo
@@ -237,7 +247,8 @@ export class EpicConfig {
       "windows.contentName": this.windows.contentName,
       "windows.worktreeOnly": this.windows.worktreeOnly,
       linkSessionFolders: this.linkSessionFolders,
-      sharedFolders: this.sharedFolders.join(",")
+      sharedFolders: this.sharedFolders.join(","),
+      engineFolder: this.engineFolder ?? ""
     }
   }
 
@@ -274,7 +285,8 @@ export class EpicConfig {
         worktreeOnly: valueOf(window, "worktreeOnly", defaults.windows.worktreeOnly, file, "windows.")
       },
       linkSessionFolders: valueOf(given, "linkSessionFolders", defaults.linkSessionFolders, file),
-      sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file)
+      sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file),
+      engineFolder: valueOf(given, "engineFolder", defaults.engineFolder, file, "", { empty: true })
     }
   }
 
@@ -324,6 +336,9 @@ export class EpicConfig {
  *   `SessionFolders`, epic `epic-eject` Q4)
  * - `sharedFolders`:  the content folder's folders each checkout links in at its root (spell-app's nine;  `epic init`
  *   writes `epics`, `sagas`, `guides`, `pages` for a new repo):  `epic shared link`, the turn-end commit hook
+ * - `engineFolder`:  the spell-epic checkout, relative to the main checkout (`../spell-epic`), which `epic shared link`
+ *   links in at each checkout's root as `spell-epic`:  spell-app runs the engine through it (its alias table, its page
+ *   server's route modules, epic `epic-eject` I5);  `""`:  no link (a repo that only runs `epic`)
  */
 export type EpicSettings = {
   contentFolder: string
@@ -335,6 +350,7 @@ export type EpicSettings = {
   windows: EpicWindows
   linkSessionFolders: boolean
   sharedFolders: string[]
+  engineFolder: string
 }
 
 /** `EpicSettings.windows`:  the default window, the folder names every window shows, and its layout. */

@@ -42,7 +42,8 @@ describe("EpicConfig", () => {
       "windows.contentName": "spell-app-dev",
       "windows.worktreeOnly": false,
       linkSessionFolders: false,
-      sharedFolders: "epics,guides,pages,templates,brand,ui,goals,agents"
+      sharedFolders: "epics,guides,pages,templates,brand,ui,goals,agents",
+      engineFolder: join(TOP, "spell-epic")
     })
     expect(config.worktreeFolder("seo")).toBe(INSIDE)
     expect(config.worktreesPattern).toBe(".claude/worktrees")
@@ -112,6 +113,9 @@ describe("EpicConfig", () => {
     const settings = EpicConfig.settingsFrom('{ "installCommand": "", "sharedFolders": ["epics", "sagas"] }')
     expect(settings.installCommand).toBe("")
     expect(settings.sharedFolders).toEqual(["epics", "sagas"])
+    // `""`:  no engine link
+    expect(new EpicConfig(MAIN).engineFolder).toBe(join(TOP, "spell-epic"))
+    expect(EpicConfig.settingsFrom('{ "engineFolder": "" }').engineFolder).toBe("")
     expect(() => EpicConfig.settingsFrom('{ "sharedFolders": "epics" }', "x.json5")).toThrow(
       /"sharedFolders" must be a list of folder names/
     )
