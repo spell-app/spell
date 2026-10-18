@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, statSync } from "node:fs"
-import { dirname, join, relative, resolve, sep } from "node:path"
+import { join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { SRV, type ServedFile } from "$/server"
@@ -342,16 +342,14 @@ export const ROUTE_MODULES = [
 ] as const
 
 /**
- * Folders whose code, when newer than a running server, makes `ensure()` restart it:
- * the route modules' and this folder's, and the server package's (spell-app's, through `.spell-app`).
+ * Folders whose code, when newer than a running server, makes `ensure()` restart it
+ * (`SRV.newestChange()`:  every `.ts` / `.js` / `.mjs` file in them;  `_assets/` and `node_modules/` skipped):
+ * - ALL of spell-epic's code, `src/` (epic `epic-eject` I11):  the route modules import far beyond their own folders
+ *   (`config/`, `data/`, `links/`, `review/`, the elements' definitions ...), so watching only theirs and this one
+ *   missed a change to the rest
+ * - the server package's (spell-app's, through `.spell-app`)
  */
-const SOURCES = [
-  ...new Set([
-    ...ROUTE_MODULES.map((path) => dirname(join(ENGINE_ROOT, path))),
-    fileURLToPath(new URL(".", import.meta.url))
-  ]),
-  join(ENGINE_ROOT, ".spell-app", "packages", "server", "src")
-]
+export const SOURCES = [join(ENGINE_ROOT, "src"), join(ENGINE_ROOT, ".spell-app", "packages", "server", "src")]
 
 /** A repo's home page, in its content folder:  where its address (`/`, `/r/<repo>/`) leads. */
 const HOME_PAGE = "pages/index.html"

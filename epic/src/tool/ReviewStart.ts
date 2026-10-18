@@ -16,7 +16,9 @@
  * - Who, first match wins (`wake()`):
  *   1. the ONE running session titled for the epic:  the command typed into its tab, as `start()` does
  *   2. the epic's worktree (`.claude/worktrees/<epic>`) has a window open:  a NEW session there, the command typed in,
- *      through that window's bridge (never `window launch`, which rewrites the window file and its colours:  J48)
+ *      through that window's bridge
+ *      - straight to the bridge, not through `window launch`:  launch rewrote an open window's file and colours
+ *        before epic `epic-eject` P10 (J48);  now it leaves an open window alone, so either way would do
  *   3. a worktree, its window closed:  `epic window launch <epic> --prompt ...`, as `/send` opens one (P4)
  *   4. no worktree (an epic run in the main checkout, a future epic, a goal):  a new session in a main window
  *   5. no VS Code window at all:  nothing;  the page gives the command to type

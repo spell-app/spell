@@ -7,9 +7,10 @@ import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
+import { SRV } from "$/server"
 import { ask } from "$/server/test/serve"
 
-import { EpicServer, ROUTE_MODULES, localHighlight } from "$/epics/server/EpicServer"
+import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "$/epics/server/EpicServer"
 import { RepoList } from "$/epics/server/RepoList"
 
 /** This checkout:  the engine served. */
@@ -121,6 +122,15 @@ describe("EpicServer", () => {
   test("its route modules are spell-epic's own files", async () => {
     const { existsSync } = await import("node:fs")
     for (const path of ROUTE_MODULES) expect(existsSync(join(ENGINE, path)), path).toBe(true)
+  })
+
+  // epic `epic-eject` I11:  only the route modules' folders counted, so a change elsewhere in `src/` kept the old server
+  test("`ensure()` restarts it after a change anywhere in spell-epic's code:  all of `src/`, beyond the route modules", async () => {
+    const { statSync } = await import("node:fs")
+    expect(SOURCES).toContain(join(ENGINE, "src"))
+    // a file no route module's folder holds, which they import
+    const config = statSync(join(ENGINE, "src", "config", "EpicConfig.ts")).mtimeMs
+    expect(SRV.newestChange(SOURCES)).toBeGreaterThanOrEqual(config)
   })
 })
 
