@@ -1224,9 +1224,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@spell-app/assembler@portal:../../.spell-app/packages/assembler::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics":
+"@spell-app/assembler@portal:./.spell-app/packages/assembler::locator=%40spell-app%2Fepics%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@spell-app/assembler@portal:../../.spell-app/packages/assembler::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics"
+  resolution: "@spell-app/assembler@portal:./.spell-app/packages/assembler::locator=%40spell-app%2Fepics%40workspace%3A."
   dependencies:
     json5: "npm:^2.1.1"
     json5-writer: "npm:^0.2.0"
@@ -1235,17 +1235,17 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@spell-app/epics@workspace:packages/epics":
+"@spell-app/epics@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@spell-app/epics@workspace:packages/epics"
+  resolution: "@spell-app/epics@workspace:."
   dependencies:
     "@solidjs/h": "npm:2.0.0-rc.13"
     "@solidjs/web": "npm:2.0.0-rc.13"
-    "@spell-app/assembler": "portal:../../.spell-app/packages/assembler"
-    "@spell-app/server": "portal:../../.spell-app/packages/server"
-    "@spell-app/spell-solid": "portal:../../.spell-app/packages/spell-solid"
-    "@spell-app/ui": "portal:../../.spell-app/packages/ui"
-    "@spell-app/util": "portal:../../.spell-app/packages/util"
+    "@spell-app/assembler": "portal:./.spell-app/packages/assembler"
+    "@spell-app/server": "portal:./.spell-app/packages/server"
+    "@spell-app/spell-solid": "portal:./.spell-app/packages/spell-solid"
+    "@spell-app/ui": "portal:./.spell-app/packages/ui"
+    "@spell-app/util": "portal:./.spell-app/packages/util"
     "@types/node": "npm:^22.20.4"
     "@vitest/browser-playwright": "catalog:"
     axe-core: "npm:^4.13.0"
@@ -1261,29 +1261,31 @@ __metadata:
     vite: "catalog:"
     vite-plus: "catalog:"
     vitest: "catalog:"
+  bin:
+    epic: bin/epic
   languageName: unknown
   linkType: soft
 
-"@spell-app/server@portal:../../.spell-app/packages/server::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics":
+"@spell-app/server@portal:./.spell-app/packages/server::locator=%40spell-app%2Fepics%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@spell-app/server@portal:../../.spell-app/packages/server::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics"
+  resolution: "@spell-app/server@portal:./.spell-app/packages/server::locator=%40spell-app%2Fepics%40workspace%3A."
   dependencies:
     parse5: "npm:^7.3.0"
   languageName: node
   linkType: soft
 
-"@spell-app/spell-solid@portal:../../.spell-app/packages/spell-solid::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics":
+"@spell-app/spell-solid@portal:./.spell-app/packages/spell-solid::locator=%40spell-app%2Fepics%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@spell-app/spell-solid@portal:../../.spell-app/packages/spell-solid::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics"
+  resolution: "@spell-app/spell-solid@portal:./.spell-app/packages/spell-solid::locator=%40spell-app%2Fepics%40workspace%3A."
   peerDependencies:
     "@solidjs/web": 2.0.0-rc.13
     solid-js: 2.0.0-rc.13
   languageName: node
   linkType: soft
 
-"@spell-app/ui@portal:../../.spell-app/packages/ui::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics":
+"@spell-app/ui@portal:./.spell-app/packages/ui::locator=%40spell-app%2Fepics%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@spell-app/ui@portal:../../.spell-app/packages/ui::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics"
+  resolution: "@spell-app/ui@portal:./.spell-app/packages/ui::locator=%40spell-app%2Fepics%40workspace%3A."
   dependencies:
     dompurify: "npm:^3.4.0"
     highlight.js: "npm:^11.12.0"
@@ -1298,9 +1300,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@spell-app/util@portal:../../.spell-app/packages/util::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics":
+"@spell-app/util@portal:./.spell-app/packages/util::locator=%40spell-app%2Fepics%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@spell-app/util@portal:../../.spell-app/packages/util::locator=%40spell-app%2Fepics%40workspace%3Apackages%2Fepics"
+  resolution: "@spell-app/util@portal:./.spell-app/packages/util::locator=%40spell-app%2Fepics%40workspace%3A."
   dependencies:
     chalk: "npm:^5.6.0"
     global: "npm:^4.3.2"
@@ -4310,21 +4312,6 @@ __metadata:
   checksum: 10c0/ab55398007c5e5532957cb0beee2368529618ac0ab372d789806f5718123cc4367d57de3904b4e6a4170eb5a0b0f41373066d02ca0735a0c4d75c7d328d3e011
   languageName: node
   linkType: hard
-
-"spell-epic@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "spell-epic@workspace:."
-  dependencies:
-    "@vitest/browser-playwright": "catalog:"
-    playwright: "npm:1.63.0"
-    tsx: "npm:4.20.3"
-    vite: "catalog:"
-    vite-plus: "catalog:"
-    vitest: "catalog:"
-  bin:
-    epic: bin/epic
-  languageName: unknown
-  linkType: soft
 
 "split-on-first@npm:^1.0.0":
   version: 1.1.0

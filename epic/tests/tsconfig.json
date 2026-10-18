@@ -1,0 +1,10 @@
+{
+  // the tests:  the repo's own settings (../tsconfig.json), over this folder;  not the extension's (`vscode/`), which
+  // `node --test` runs with its types stripped and `yarn vscode:check` checks
+  "extends": "../tsconfig.json",
+  // `../types/app.d.ts`, as epics' own takes it:  not all of `../types` (see there)
+  // and the elements' JSX tag declarations (`<epic-text-box>` ...), which no file imports:  the package's own check
+  // takes them by folder
+  "include": [".", "../types/app.d.ts", "../src/components/**/*.types.ts"],
+  "exclude": ["vscode"]
+}

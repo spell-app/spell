@@ -1,36 +1,68 @@
 {
-  "name": "spell-epic",
+  "name": "@spell-app/epics",
   "version": "0.1.0",
   "private": true,
-  "description": "spell-epic:  the epic tooling -- epic pages, the epic command, worktrees and windows, the review loop -- as a Claude Code plugin, loaded in place",
+  "description": "spell-epic:  the epic tooling -- epic pages and their <epic-*> component pack, the epic command, worktrees and windows, the review loop, and every docs page's tooling -- as a Claude Code plugin, loaded in place",
   "license": "MIT",
   "bin": {
     "epic": "bin/epic"
   },
-  "workspaces": [
-    "packages/epics"
-  ],
   "type": "module",
   "scripts": {
     "epic": "node bin/epic",
-    "ts": "yarn workspace @spell-app/epics ts",
-    "test": "yarn workspace @spell-app/epics test && yarn test:scripts",
-    "test:node": "yarn workspace @spell-app/epics vp test run --project node",
-    "test:scripts": "node --test scripts/window.test.mjs && yarn test:vscode",
-    "test:vscode": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/vscode/*.test.ts",
-    "vscode:check": "node_modules/.bin/tsc --noEmit -p vscode",
-    "vscode:package": "cd vscode && yarn package",
-    "lint": "yarn workspace @spell-app/epics lint && vp lint --max-warnings 0 vscode/src tests/vscode",
-    "format": "yarn workspace @spell-app/epics format && vp fmt vscode/src vscode/build.mjs tests/vscode",
+    "/////// PACK AND DOCS": "",
+    "pack:build": "node scripts/spell-app.mjs dev pack build epics",
+    "pack:check": "node scripts/spell-app.mjs dev pack check epics",
+    "site:data": "tsx scripts/site-data.ts",
+    "docs:update": "node src/tools/update.js",
+    "docs:index": "node src/tools/index.js",
+    "docs:new": "node src/tools/new-page.js",
+    "docs:open": "tsx src/tools/open.js",
+    "plan-doc": "tsx src/tools/plan-doc.js",
+    "details": "node src/tools/details.js",
+    "docs:link": "tsx src/tools/link.ts",
+    "/////// DESIGN": "",
+    "design:bundle": "node src/tools/bundle-spell-ui.js --design",
+    "design:check": "node src/tools/check-design-bundle.js",
+    "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "plugin:validate": "claude plugin validate ."
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && tsc && tsc -p tests && echo '<< TSC PASSED\n'",
+    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src scripts tests vscode/src && echo '<< OXLINT PASSED\n'",
+    "lint:fix": "vp lint --fix src scripts tests vscode/src",
+    "format": "vp fmt src scripts tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts",
+    "/////// TESTING": "",
+    "test": "echo '>>>>>>>>>>>\n>> RUNNING TESTS' && vp test run && yarn test:scripts && echo '<< TESTS PASSED\n'",
+    "test:watch": "vp test",
+    "test:node": "vp test run --project node",
+    "test:scripts": "node --test tests/window.test.mjs && yarn test:vscode",
+    "test:vscode": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/vscode/*.test.ts",
+    "/////// PLUGIN AND EXTENSION": "",
+    "plugin:validate": "claude plugin validate .",
+    "vscode:check": "tsc --noEmit -p vscode",
+    "vscode:package": "cd vscode && yarn package"
   },
   "dependencies": {
+    "@spell-app/assembler": "portal:./.spell-app/packages/assembler",
+    "@spell-app/server": "portal:./.spell-app/packages/server",
+    "@spell-app/spell-solid": "portal:./.spell-app/packages/spell-solid",
+    "@spell-app/ui": "portal:./.spell-app/packages/ui",
+    "@spell-app/util": "portal:./.spell-app/packages/util",
+    "chalk": "^5.6.0",
+    "commander": "^14",
+    "json5": "^2.1.1",
+    "linkedom": "^0.18.13",
     "tsx": "4.20.3"
   },
   "devDependencies": {
+    "@solidjs/h": "2.0.0-rc.13",
+    "@solidjs/web": "2.0.0-rc.13",
+    "@types/node": "^22.20.4",
     "@vitest/browser-playwright": "catalog:",
+    "axe-core": "^4.13.0",
+    "esbuild": "^0.28.2",
     "playwright": "1.63.0",
+    "solid-js": "2.0.0-rc.13",
+    "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",
     "vitest": "catalog:"
@@ -46,5 +78,10 @@
   "engines": {
     "node": ">=24.11"
   },
-  "packageManager": "yarn@4.18.0"
+  "packageManager": "yarn@4.18.0",
+  "spellPack": {
+    "name": "epics",
+    "prefix": "epic-",
+    "dir": "src"
+  }
 }

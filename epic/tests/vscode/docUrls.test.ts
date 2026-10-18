@@ -85,8 +85,8 @@ test("fileForPath():  the epic server's engine and repos;  a checkout's root and
   }
   equal(fileForPath(hub, "/epics/a%20b/x.html"), "/app-dev/epics/a b/x.html")
   equal(fileForPath(hub, "/r/other/guides/x.md"), "/other-docs/guides/x.md")
-  equal(fileForPath(hub, "/_epic/assets/spell-doc.css"), "/e/packages/epics/tools/_assets/spell-doc.css")
-  equal(fileForPath(hub, "/_epic/pack/epics.pack.js"), "/e/packages/epics/components/__pack/epics.pack.js")
+  equal(fileForPath(hub, "/_epic/assets/spell-doc.css"), "/e/src/tools/_assets/spell-doc.css")
+  equal(fileForPath(hub, "/_epic/pack/epics.pack.js"), "/e/src/components/__pack/epics.pack.js")
   equal(fileForPath(hub, "/_epic/nope/x"), undefined)
   const checkout = { root: "/repo", worktrees: "/repo/.claude/worktrees" }
   equal(fileForPath(checkout, "/packages/x.ts"), "/repo/packages/x.ts")

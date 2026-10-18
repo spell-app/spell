@@ -11,9 +11,9 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
 - Every page saves to this laptop's page server.
 - `/airplane` gets the laptop ready before;  `/airplane land` works through what he left, after.
 
-- The repo actions are `epic airplane ...` ([airplane.ts](packages/epics/tools/airplane.ts));
+- The repo actions are `epic airplane ...` ([airplane.ts](${CLAUDE_PLUGIN_ROOT}/src/tools/airplane.ts));
   this skill holds the dialog.
-- The switch:  `~/.spell/airplane.json`, read by [`AirplaneMode`](packages/epics/tools/AirplaneMode.ts).
+- The switch:  `~/.spell/airplane.json`, read by [`AirplaneMode`](${CLAUDE_PLUGIN_ROOT}/src/tools/AirplaneMode.ts).
   - While it's on, the page server tells every page.
   - Then the review controls say "queued for when you land", instead of "start `/epic review`".
 - Works from ANY session, a worktree's too.

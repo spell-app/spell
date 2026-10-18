@@ -76,7 +76,7 @@ Work in worktree `<name>`, so this session's edits never collide with another se
      - The window is retitled `⎇ <name>` and tinted (`stay`).
    - Why ask:  staying is quicker, and touches nothing else when this is the window's only session.
      - With others, they share its doc preview and Source Control.
-     - [window.mjs](${CLAUDE_PLUGIN_ROOT}/scripts/window.mjs), "Staying put"
+     - [window.mjs](${CLAUDE_PLUGIN_ROOT}/src/window.mjs), "Staying put"
 3. `EnterWorktree` with `name: "<name>"`.
    - Reusing one:  `path` instead, the folder `epic worktree path <name>` prints.
    - ALWAYS this way, whatever folder the session is in:

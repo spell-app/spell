@@ -16,7 +16,7 @@ export const PREVIEW_PATH = "/doc-preview"
 /**
  * The window bridge's registry folder:  `$SPELL_EPIC_WINDOWS_DIR`, else `~/.spell-epic/windows`.
  * - NOT the spell language extension's `~/.spell/windows`:  while both are installed, each window runs both bridges,
- *   and each writes `<pid>.json`;  spell-epic's `scripts/window.mjs` reads this folder first
+ *   and each writes `<pid>.json`;  spell-epic's `src/window.mjs` reads this folder first
  */
 export function windowsFolder(env: NodeJS.ProcessEnv = process.env, home = homedir()): string {
   return env.SPELL_EPIC_WINDOWS_DIR || join(home, ".spell-epic", "windows")
@@ -145,7 +145,7 @@ export function fileForPath(info: ServerInfo, path: string): string | undefined 
 }
 
 /** The engine's routes, `/_epic/<route>/...`, by route:  their folders in spell-epic's checkout. */
-const ENGINE_FOLDERS = { assets: "packages/epics/tools/_assets", pack: "packages/epics/components/__pack" } as const
+const ENGINE_FOLDERS = { assets: "src/tools/_assets", pack: "src/components/__pack" } as const
 
 ////////////////
 // ## Claude tabs

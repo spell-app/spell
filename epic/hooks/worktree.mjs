@@ -10,7 +10,7 @@
  *     so it drops out of the VS Code Claude panel's list (which shows one folder's sessions),
  *     and is orphaned if it never leaves
  *   - a session in a worktree a hook made stays saved where it started:
- *     the repo root, which every window lists (`scripts/window.mjs`)
+ *     the repo root, which every window lists (`src/window.mjs`)
  *   - checked with CLI 2.1.287
  * - Names agree:  worktree `.claude/worktrees/<name>`, branch `<name>` (Claude's own adds `worktree-`).
  * - Branches from local `main` (unpushed work included), not `origin/main`.
@@ -51,8 +51,8 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, realpathSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 
-import { EpicConfig } from "../packages/epics/src/config/EpicConfig.ts"
-import { SessionFolders } from "../packages/epics/src/config/SessionFolders.ts"
+import { EpicConfig } from "../src/config/EpicConfig.ts"
+import { SessionFolders } from "../src/config/SessionFolders.ts"
 
 /** This plugin's `bin/epic`:  `hooks/` is beside `bin/`. */
 const EPIC = join(dirname(import.meta.dirname), "bin", "epic")

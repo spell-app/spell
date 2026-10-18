@@ -454,7 +454,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
   - Several files (pages, experiments):  `guides/<name>/<name>.html`.
     Shared content too:  committed for you, like the epic page.
   - From the epic page:  Overview -> the body;  decisions -> a "Why" section;  open caveats -> "Limits".
-  - Finish as [epics' AGENTS.md](packages/epics/AGENTS.md) says, "Finishing a page".
+  - Finish as [epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md) says, "Finishing a page".
   - Then `epic pages index`.
     The index is shared too:  `epic` keeps the epic's own card current from any checkout.
 - The epic page stays in `epics/` as the record:  every phase done.
@@ -987,7 +987,7 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
 ## Migrations:  bringing epic pages up to today's markup
 
 Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by page kind
-([PLAN-DOC.md](${CLAUDE_PLUGIN_ROOT}/packages/epics/src/tool/PLAN-DOC.md), "Migrations").
+([PLAN-DOC.md](${CLAUDE_PLUGIN_ROOT}/src/tool/PLAN-DOC.md), "Migrations").
 - After ANY change to epic page markup (or another page kind's):  its step goes in the same commit.
   - The rule:  epics' `AGENTS.md`, "Rules".
   - Before merging:  `epic migrate --all --dry-run`, its report in the phase's summary.

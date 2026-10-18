@@ -10,7 +10,7 @@ Owen says what he wants where he is;  it goes to the epic that owns it,
 and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-10-11).
 - The request is written FIRST, into the epic's shared folder:  nothing is lost if that epic's session is closed.
 - The epic's session turns it into a phase:  [the epic skill](../epic/SKILL.md), "12. Request".
-- The command:  `epic send` ([Requests.ts](packages/epics/src/command/Requests.ts)).
+- The command:  `epic send` ([Requests.ts](${CLAUDE_PLUGIN_ROOT}/src/command/Requests.ts)).
 
 ## When
 

@@ -7,10 +7,10 @@ dist/
 __screenshots__/
 
 # Epic UI's waiting comments (`<page>.inbox.json5` beside a page, and its lock):  per machine, never the record
-/packages/epics/docs/**/*.inbox.json*
+/src/docs/**/*.inbox.json*
 
 # a checkout's running agents when it has no epic (`epic agents`)
 /.spell-agents.json5
 
-# the plan-doc checks' screenshots (`packages/epics/demo/`)
+# the plan-doc checks' screenshots (`src/demo/`)
 demo/shots/

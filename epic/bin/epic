@@ -4,7 +4,7 @@
  * its verbs.
  * - On the `PATH` of every Claude Code session while the spell-epic plugin is on:  Claude Code puts a plugin's
  *   `bin/` there.  In a terminal:  link it onto your `PATH` (the README's "Install").
- * - Runs `packages/epics/src/command/epicMain.ts`, the lean entry:  it loads no spell, so a call starts in a fraction
+ * - Runs `src/command/epicMain.ts`, the lean entry:  it loads no spell, so a call starts in a fraction
  *   of a second.
  * - Every verb runs THIS copy's code, on the caller's checkout's data (`Git.nearestCheckout()`, `EPIC_CHECKOUT`).
  * - Plain ESM with no extension:  `"type": "module"` in spell-epic's `package.json` makes node read it so.
@@ -14,6 +14,6 @@ import { dirname, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { register } from "tsx/esm/api"
 
-const epics = resolve(dirname(fileURLToPath(import.meta.url)), "..", "packages", "epics")
-register({ tsconfig: resolve(epics, "tsconfig.json") })
-await import(pathToFileURL(resolve(epics, "src/command/epicMain.ts")).href)
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
+register({ tsconfig: resolve(root, "tsconfig.json") })
+await import(pathToFileURL(resolve(root, "src/command/epicMain.ts")).href)

@@ -55,7 +55,7 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
 1. `epic ask new <slug> --title "<Title>"`:  prints the page's path.
    - Many questions of one shape (a list to pick from):  `--from <spec.json>` builds the whole page from data instead.
      - The data:  title, lede, "Where we are", context, questions and their options.
-     - Its shape:  `DetailsSpec`, in [details.js](packages/epics/tools/details.js).
+     - Its shape:  `DetailsSpec`, in [details.js](${CLAUDE_PLUGIN_ROOT}/src/tools/details.js).
      - `/worktrees` and `/bedtime` use it.
    - In an epic (an epic page this session keeps):  add `--epic <name>`.
      - The page goes in `epics/<name>/details/`, beside the epic page
@@ -70,9 +70,9 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
    - meta:  "Asked by:  session `<name>`, while <doing what>"
    - the "Where we are" box:  filled in, never left as the template's placeholder ("Writing for Owen")
    - `1. Context`:  the picture.
-     - Page widgets:  [epics' AGENTS.md](packages/epics/AGENTS.md), "Writing a page"
+     - Page widgets:  [epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Writing a page"
        (tables, code folded, pros / cons, steps ...).
-     - Icons only from `ICONS`, in [bundle-spell-ui.js](packages/epics/tools/bundle-spell-ui.js).
+     - Icons only from `ICONS`, in [bundle-spell-ui.js](${CLAUDE_PLUGIN_ROOT}/src/tools/bundle-spell-ui.js).
    - one `<ui-section>` per question, holding an `<epic-ask>`:
      - ids `q1`, `q2` ..., header `Q1 · Short question`
      - the epics pack's elements, as an epic page's question is (epic `epic-workflow` P12)
@@ -145,7 +145,7 @@ Any page you name to Owen (a details page, an epic page, any docs page):
 - It shows the page in this session's side bar NOW (`--show`), and prints two links:
   - the title opens it in the side bar (again)
   - `🌐`, after a `•`, opens it in Chrome:  `Title • 🌐` (Owen, 2026-10-11)
-  - Both go through the page server ([showRoutes.ts](packages/epics/tools/showRoutes.ts)):
+  - Both go through the page server ([showRoutes.ts](${CLAUDE_PLUGIN_ROOT}/src/tools/showRoutes.ts)):
     the Claude panel ignores `vscode://` links, and opens `localhost` ones in a VS Code tab.
 - `--hash`:  ALWAYS the id of what you mean.
   - e.g. `q2`, `t4`, a phase's `p-epic-migrate` ...;  `p3` lands on P3
@@ -188,7 +188,7 @@ Any page you name to Owen (a details page, an epic page, any docs page):
 ## 5. When it fails
 
 - The page says "can't take answers yet":  the page server serving it is older than its route module.
-  - That's [detailsRoutes.ts](packages/epics/tools/detailsRoutes.ts).
+  - That's [detailsRoutes.ts](${CLAUDE_PLUGIN_ROOT}/src/tools/detailsRoutes.ts).
     Route modules load when a page server starts.
   - Say so in one line;  ask in chat or the modal meanwhile.
   - Owen restarts it when no other session needs it:

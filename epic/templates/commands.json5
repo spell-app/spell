@@ -11,7 +11,7 @@
           "cli": { "mark": "could", "note": "`spell dev docs new`" },
           "skill": { "mark": "no" },
           "yarn": { "mark": "same", "names": ["root docs:new", "docs docs:new"] },
-          "runs": "`packages/epics/tools/new-page.js`",
+          "runs": "`src/tools/new-page.js`",
           "target": "`spell dev docs new`;  yarn `docs:new` calls it"
         },
         {
@@ -19,7 +19,7 @@
           "cli": { "mark": "could" },
           "skill": { "mark": "other", "names": ["/spell-docs"] },
           "yarn": { "mark": "other", "names": ["root docs:open"], "note": "with `--vs`" },
-          "runs": "`packages/epics/tools/open.js`",
+          "runs": "`src/tools/open.js`",
           "notes": "A sample note under the operation."
         }
       ]

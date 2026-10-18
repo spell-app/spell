@@ -204,6 +204,22 @@ export function patternLint(prefix: string, names = Object.keys(PATTERN_FOLDERS)
   } satisfies NonNullable<OxlintConfig["overrides"]>[number]
 }
 
+/**
+ * The `spell-ui/*` rules on component `folders` (relative to the config's folder), and `testLint`, as a `lint` block's
+ * `overrides`:  for a repo that is ONE package, its elements not under `packages/<name>/` (spell-epic's
+ * `src/components/`, epic `epic-eject` J14).
+ * - spell-epic's own:  not in spell-app's copy of this file
+ */
+export function patternLintIn(folders: string[]) {
+  return [
+    {
+      files: folders.flatMap((folder) => [`${folder}/**/*.ts`, `${folder}/**/*.tsx`]),
+      rules: patternRules("error")
+    },
+    testLint
+  ] satisfies NonNullable<OxlintConfig["overrides"]>
+}
+
 /** Every `spell-ui/*` rule, set to `level`. */
 function patternRules(level: "error" | "off") {
   return {

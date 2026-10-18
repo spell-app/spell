@@ -1,6 +1,6 @@
 /**
  * Lets a Claude Code session (or any script it runs) talk to a VS Code window
- * (the client:  spell-epic's `scripts/window.mjs`, `epic window`):
+ * (the client:  spell-epic's `src/window.mjs`, `epic window`):
  * - to ITS OWN window:  add or remove a folder (a worktree), show a doc in a side bar doc view, close the session's tab
  * - to a worktree's window (`epic window open`):  open the session there, close the window, the HANDOFF
  *
@@ -12,7 +12,7 @@
  *   - a session's process tree is `claude` -> `Code Helper (Plugin)` (the window's EXTENSION HOST, one per window)
  *     -> `Code`, and this code runs in that extension host
  *   - so `process.pid` here is an ancestor of every command the window's sessions run:
- *     `scripts/window.mjs` walks up its parent pids until one has a registry file
+ *     `src/window.mjs` walks up its parent pids until one has a registry file
  * - Registry file, `~/.spell-epic/windows/<process.pid>.json`:
  *   ~== `{ pid, port, token, workspaceFile, folders }`;  folder 700, file 600, since `token` is the password.
  *   - `SPELL_EPIC_WINDOWS_DIR` overrides the folder, for tests (`windowsFolder()`)
@@ -302,7 +302,7 @@ export class WindowBridge {
   }
 }
 
-/** A window's registry file, `~/.spell-epic/windows/<pid>.json`:  what `scripts/window.mjs` reads. */
+/** A window's registry file, `~/.spell-epic/windows/<pid>.json`:  what `src/window.mjs` reads. */
 export type WindowEntry = {
   /** The window's extension host:  an ancestor of every process its sessions run. */
   pid: number

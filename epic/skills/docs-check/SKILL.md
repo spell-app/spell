@@ -13,7 +13,7 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
 - Two passes, in that order:
   1. each doc against the epic page's DECISIONS:  a statement that contradicts what was chosen or built is fixed
   2. all the epic's docs read TOGETHER:  names, commands, flags, behaviours, numbers made to agree
-- Its lists come from `epic` ([`EpicDocs`](packages/epics/src/tool/EpicDocs.ts)):
+- Its lists come from `epic` ([`EpicDocs`](${CLAUDE_PLUGIN_ROOT}/src/tool/EpicDocs.ts)):
   - `epic docs <name> [--json]`:  the docs, each with why it's listed, in four groups
     - `wrote`:
       - its guide (`<a slot="durable">`) and the pages in its folder
@@ -124,7 +124,7 @@ From `decisions --json`, later beats earlier:
      - `<content>`:  what `epic config contentFolder` prints
      - The turn's end commits them (`auto: guides/...`), one commit per folder, which Owen can revert whole.
    - An edited docs page:
-     format, links and check-spell, as [epics' AGENTS.md](packages/epics/AGENTS.md) says ("Finishing a page", steps 2-4).
+     format, links and check-spell, as [epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md) says ("Finishing a page", steps 2-4).
 9. Report ("Report").
 
 ## Fanning out

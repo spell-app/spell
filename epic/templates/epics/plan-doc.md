@@ -2,11 +2,11 @@
 
 How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `/epic <name>` session.
 
-- The tool: `packages/epics/src/tool/` (`epic`) edits the structured parts, in `<epic-*>` markup
+- The tool: spell-epic's `src/tool/` (`epic`) edits the structured parts, in `<epic-*>` markup
   (epic `epic-components`, switched over 2026-10-08).
-- The template `new` copies: `packages/epics/src/tool/templates/plan.html`. NEVER copy it by hand.
+- The template `new` copies: spell-epic's `src/tool/templates/plan.html`. NEVER copy it by hand.
 - The MARKUP -- every element, attribute and child, where each goes:
-  [`packages/epics/src/tool/PLAN-DOC.md`](../../packages/epics/src/tool/PLAN-DOC.md), and the element definitions
+  [`src/tool/PLAN-DOC.md`](../../src/tool/PLAN-DOC.md), and the element definitions
   it points to. This file holds what an author still needs: the rules, the prose, the ids, explaining a question,
   the review loop and the commands.
 
@@ -380,7 +380,7 @@ edit. The FIRST row that applies wins, top to bottom (`PLAN-DOC.md`, "Items", th
   closing the item ends it; a reply asking without cards (a yes / no in prose) doesn't make it orange.
 - The toolbar counts only what needs you: on an epic page, `attention` items in a red badge and `replied` ones in an
   orange one; on other pages, a red badge; none, no badge. The state filter has a chip per state, with how many.
-- In CSS: `<epic-page>`'s `--epic-state-*` (`packages/epics`), `spell-doc.css`'s `--spell-state-*` (the other doc
+- In CSS: `<epic-page>`'s `--epic-state-*` (`$/epics`), `spell-doc.css`'s `--spell-state-*` (the other doc
   pages): the same values.
 - Saga pages colour their items by the same states (an open question `attention`, any other open item `open`, a
   decided or done one `recent`, a canceled one `old`): the kind shows only in the id's letter (G, Q, D, R, W, I).
@@ -414,7 +414,7 @@ nothing flickers. The tool's `EpicParts` does it; the markup (`source`, `part-id
   | an item with details, `#q7`    | `parts/q7.html`  | its details (not its title)                                                 |
   | the log, `#log`                | `parts/log.html` | its events                                                                  |
 
-- How a part is told from a page: by its folder. Every page walker skips `parts/` folders (`packages/epics/tools/
+- How a part is told from a page: by its folder. Every page walker skips `parts/` folders (spell-epic's `src/tools/
 pages.js` `findPages()`, `relocate.js`, `spell static`): the docs' home page, `docs update` and link repairs never take
   a part for a page.
 - A part file: a one-line comment saying whose body it is, then the body's markup. Its relative URLs are relative to
@@ -472,8 +472,8 @@ go at once (the inbox's `now` queue), and Owen may call one off ("nevermind": `c
 session to stop that item's agent; `epic details` then refuses its write). A todo may carry Owen's note (from
 before 2026-10-09, when the note box had Make Todo), written into the new todo;  a skip (the note box's x) its note,
 kept as his reply. Read it with `epic inbox <name>`; shape, routes and helpers:
-`packages/epics/AGENTS.md`, "Review inbox". NEVER change its data by hand: go through `ReviewInbox`
-(`packages/epics/src/tool/ReviewInbox.ts`, its lock). A comment in it is fine: it's JSON5, and every save keeps it
+spell-epic's `src/AGENTS.md`, "Review inbox". NEVER change its data by hand: go through `ReviewInbox`
+(spell-epic's `src/tool/ReviewInbox.ts`, its lock). A comment in it is fine: it's JSON5, and every save keeps it
 (`DataFile`, epic `epic-workflow` P21), as in every data file the tooling keeps.
 
 The summary and every phase take marks too (epic `airplane` P2), as an Overview sub-section does: Revisit (with a

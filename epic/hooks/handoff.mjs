@@ -4,7 +4,7 @@
  * move a session to another window once its turn ends:  to a worktree's window, or back from it.
  * - `/isolate` arms it with `epic window handoff <name>` (`--back`:  no skill uses it now),
  *   which writes the move to `<registry>/handoffs/<session id>.json`.
- *   See `scripts/window.mjs`, "A worktree's window".
+ *   See `src/window.mjs`, "A worktree's window".
  * - stdin `{ session_id, transcript_path, cwd, ... }`.
  * - No pending move for this session (every other turn):  exits at once.
  * - A pending move:
@@ -21,14 +21,14 @@ import { existsSync, openSync, readFileSync, renameSync } from "node:fs"
 import { dirname, join } from "node:path"
 
 /** The window script, beside this plugin's `hooks/`. */
-const SCRIPT = join(dirname(import.meta.dirname), "scripts", "window.mjs")
+const SCRIPT = join(dirname(import.meta.dirname), "src", "window.mjs")
 
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   const { session_id: sessionId, transcript_path: transcript, cwd } = input
   if (cwd && !process.env.EPIC_CHECKOUT) process.env.EPIC_CHECKOUT = cwd
   // loaded in here, once `EPIC_CHECKOUT` says whose windows they are
-  const { Window } = await import("../scripts/window.mjs")
+  const { Window } = await import("../src/window.mjs")
   const file = sessionId && Window.handoffFile(sessionId)
   if (file && existsSync(file)) {
     const running = join(Window.handoffs, `${sessionId}.running.json`)

@@ -20,7 +20,7 @@ try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   const dir = input.tool_input?.path ?? input.cwd
   // loaded in here, so a config that won't read never fails the hook
-  const { EpicConfig } = await import("../packages/epics/src/config/EpicConfig.ts")
+  const { EpicConfig } = await import("../src/config/EpicConfig.ts")
   const config = dir && EpicConfig.of(dir)
   const main = config && existsSync(config.file) && config.baseBranch
   const behind = main && behindMain(dir, main)

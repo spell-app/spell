@@ -11,7 +11,7 @@
  * - Only in a repo that uses epics (it has `.epic/config.json5`):  the plugin's hooks run in every repo.
  *   After `ExitWorktree`, `cwd` is the checkout the session went back to.
  * - Always exits 0, at once:  never blocks a session.
- * - Its tests:  `tests/epics/src/command/LeftWorktree.test.ts`, which runs this file as the hook.
+ * - Its tests:  `tests/src/command/LeftWorktree.test.ts`, which runs this file as the hook.
  */
 import { existsSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url"
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   // loaded in here, so a config that won't read never fails the hook
-  const { EpicConfig } = await import("../packages/epics/src/config/EpicConfig.ts")
+  const { EpicConfig } = await import("../src/config/EpicConfig.ts")
   const config = input.cwd && EpicConfig.of(input.cwd)
   if (config && existsSync(config.file)) {
     const skill = fileURLToPath(new URL("../skills/isolate/SKILL.md", import.meta.url))

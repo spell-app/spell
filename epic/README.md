@@ -13,6 +13,9 @@ parking and waking sessions, and the `epic` command that drives them.
 
 ## What's in it
 
+ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` J14):  the code in `src/`, its tests in
+`tests/` at the same paths, the plugin's parts at the root.
+
 | Folder | What |
 | --- | --- |
 | `.claude-plugin/plugin.json` | the plugin's manifest, `spell-epic` |
@@ -20,9 +23,10 @@ parking and waking sessions, and the `epic` command that drives them.
 | `skills/` | the skills:  `epic`, `epics`, `details`, `comment`, `docs-check`, `send`, `isolate`, `park`, `unpark`, `wait-for`, `worktrees`, `session`, `title`, `wtf`, `bg`, `bedtime`, `airplane` |
 | `hooks/` | `hooks.json`, and the hooks it runs:  making and removing worktrees, the behind-main notice, the worktree guard, the closing-line reminder on leaving a worktree (the isolate skill's "Closing line"), the prompt gate, the end-of-turn window move and shared-content commit |
 | `bin/epic` | the `epic` command;  on every session's `PATH` while the plugin is on |
-| `packages/epics/` | the epics package, `@spell-app/epics`:  the `<epic-*>` elements, the epic tool, the `epic` command's code (`src/command/`), the docs tools and their assets, Epic UI's pages (`docs/`) |
-| `tests/epics/` | its tests, at the same paths as the code |
-| `scripts/window.mjs` | the VS Code windows (`epic window`), and its test |
+| `src/` | the code, `$/epics`:  the `<epic-*>` elements (`components/`, the pack in `components/__pack/`), the epic tool (`tool/`), the `epic` command's code (`command/`), the epic server (`server/`), the docs tools and their assets (`tools/`, `tools/_assets/`), Epic UI's pages (`docs/`), the VS Code windows (`window.mjs`, `epic window`);  its rules:  [src/AGENTS.md](src/AGENTS.md) |
+| `tests/` | its tests, at the same paths as the code (`tests/command/` for `src/command/` ...);  and the extension's (`tests/vscode/`) |
+| `scripts/` | dev-only scripts:  Epic UI's data (`site-data.ts`), spell-app's CLI for the pack build (`spell-app.mjs`) |
+| `types/` | the ambient helper types (`Prettify` ...) |
 | `vscode/` | spell-epic's VS Code extension, `spell-app.spell-epic` (its own yarn project):  the Review tab, Epic Docs, "Open Epic...", the window bridge and the handoff;  [its README](vscode/README.md) |
 | `templates/` | every kind of page's starting point (Q8):  details, review, choices, guides, cheatsheets, commands pages, component pages, the epic-page writing rules |
 
@@ -70,7 +74,7 @@ claude --plugin-dir /Users/owen/www/spell-app/spell-epic
 ## A repo that uses it:  `.epic/config.json5`
 
 Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`, in its main checkout.
-[`EpicConfig`](packages/epics/src/config/EpicConfig.ts) reads it.
+[`EpicConfig`](src/config/EpicConfig.ts) reads it.
 - Every key is optional;  a key left out takes its default, which is spell-app's layout.
 - Folders are relative to the main checkout.
   Every worktree reads the main checkout's file.
@@ -243,7 +247,7 @@ epic repo add && epic hub ensure # the epic server serves its pages (at / when i
 
 Then `/epic <name>` works there as in spell-app.
 
-What `epic init` does ([`RepoInit`](packages/epics/src/command/RepoInit.ts)).
+What `epic init` does ([`RepoInit`](src/command/RepoInit.ts)).
 Each step is skipped when it's done, so it's safe to run again.
 1. Writes `.epic/config.json5` with every key (the table above), each with a comment, valued for THIS repo:
    - `contentFolder`:  `../<repo>.epics`, beside it, as `spell-app.epics` will be
@@ -306,7 +310,7 @@ Not yet (the epic page's issues and todos):
 ## The epic server:  one per machine
 
 `epic hub` runs ONE page server for every repo that uses spell-epic (epic `epic-eject` P7).
-- It's [`EpicServer`](packages/epics/src/server/).
+- It's [`EpicServer`](src/server/).
 - It runs beside each checkout's own page server (`epic server`, spell-app's, port 4747).
 
 ```sh
@@ -318,7 +322,7 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 
 | URL | What |
 | --- | --- |
-| `/_epic/assets/...` | this checkout's `packages/epics/tools/_assets/`:  `spell-ui.js`, `spell-doc.css`, the runtime |
+| `/_epic/assets/...` | this checkout's `src/tools/_assets/`:  `spell-ui.js`, `spell-doc.css`, the runtime |
 | `/_epic/pack/...` | this checkout's epics pack, `epics.pack.js` |
 | `/r/<repo>/...` | a registered repo's content folder (its `.epic/config.json5`'s `contentFolder`) |
 | `/...` | the DEFAULT repo's content folder too, so today's URLs keep working |
@@ -340,7 +344,7 @@ The epic pages are drawn with Spell UI, and the tools run on spell's page server
 spell-epic uses those packages straight from a spell-app checkout (Q5), not from npm:
 - `.spell-app` at the root is a link to that checkout.
   - The `@spell-app/{ui,server,assembler,util,spell-solid}` dependencies are `portal:` links through it
-    (in [the epics package's `package.json`](packages/epics/package.json)).
+    (in [the root `package.json`](package.json)).
   - The alias table, `tsconfig.base.json`, maps `$/ui`, `$/server` and the rest into it.
   - Through the CHECKOUT's link, never a package's own:
     a package's relative imports out of itself (`ui`'s `../../vite.decorators.ts`) then land in that checkout,
@@ -355,13 +359,15 @@ spell-epic uses those packages straight from a spell-app checkout (Q5), not from
     ```
 
 - The component pack's build and check are still spell-app's CLI's (`spell dev pack`).
-  - In the epics package, `yarn pack:build` / `pack:check` run it through [spell-app.mjs](scripts/spell-app.mjs).
+  - `yarn pack:build` / `pack:check` run it through [spell-app.mjs](scripts/spell-app.mjs).
+  - It finds the pack from the root `package.json`'s `"spellPack": { "name": "epics", "prefix": "epic-", "dir": "src" }`:
+    a pack that is a whole checkout (J14;  spell-app's `packBuild.ts`, `rootPack()`).
 - At release:  publish those packages to npm, and depend on them there.
 
 ## Checks
 
 ```sh
-yarn ts                 # the epics package and its tests
+yarn ts                 # src/ and tests/
 yarn test               # node and browser (chromium) projects, then the window script's own tests
 yarn lint
 yarn plugin:validate    # claude plugin validate .
