@@ -396,7 +396,9 @@ export type SharedConfig = { main: string; dir: string; worktrees: string[]; lin
  * - `relinked`:  each checkout's link that went through `from`, and the folder it points at now (`to`)
  * - `config`:  the main checkout's `.epic/config.json5`, and the keys written into it
  *   - `contentFolder`, `windows.contentName`
- * - `mentions`:  files that still name the old folder, left to people (`AGENTS.md`, Claude settings, memory notes)
+ * - `rewrites`:  the files it rewrote (or would) to name the new folder:  the main checkout's `AGENTS.md`, `CLAUDE.md`
+ *   and Claude settings, the repo's memory notes (epic `epic-eject` J30)
+ * - `byHand`:  Claude Code's own settings, when they name the old folder:  the lines to edit, never written
  */
 export type RenameReport = {
   from: string
@@ -404,8 +406,12 @@ export type RenameReport = {
   dryRun: boolean
   relinked: { checkout: string; path: string; to: string }[]
   config: { file: string; keys: string[] }
-  mentions: string[]
+  rewrites: FileRewrite[]
+  byHand: FileRewrite[]
 }
+
+/** A file's lines naming the old content folder:  each line's number (from 1), as it was and as it's rewritten. */
+export type FileRewrite = { file: string; lines: { line: number; before: string; after: string }[] }
 
 /**
  * One link in one checkout:  its `state` (`Shared.linkState()`), and what `Shared.link()` did about it (`action`).

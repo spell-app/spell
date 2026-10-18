@@ -14,7 +14,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from "node:pat
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { SessionFolders } from "$/epics/config/SessionFolders"
 
-import { EpicCommandError, type RenameReport, type SharedConfig } from "./command.types"
+import { EpicCommandError, type FileRewrite, type RenameReport, type SharedConfig } from "./command.types"
 
 /****************
  * ### `SharedRename`
@@ -34,10 +34,16 @@ import { EpicCommandError, type RenameReport, type SharedConfig } from "./comman
  *    - and the window folder's name (`windows.contentName`), when it was the old folder's name
  *    - comments and other keys are kept
  *    - the file is TRACKED:  the change is the main checkout's to commit
- * 5. Lists what still names the old folder and is NOT this command's to change (`mentions`):
- *    - the repo's `AGENTS.md` / `CLAUDE.md`, its Claude settings, Claude Code's settings and the repo's memory notes
- *    - read only:  those are edited by hand (or by Claude), then the link can go once nothing uses it
- * - `dryRun`:  steps 1 and 5 for real, the rest only reported
+ * 5. Rewrites the files that name the old folder (`rewrites`;  Owen, 2026-10-18, epic `epic-eject` J30):
+ *    - the main checkout's `AGENTS.md`, `CLAUDE.md` and Claude settings (`.claude/settings.json`, `.local.json`):
+ *      their extra folders and permissions;  the tracked ones are the main checkout's to commit
+ *    - the repo's memory notes (`<home>/projects/<main's slug>/memory/*.md`)
+ *    - each mention:  the old folder's full path, its path from the main checkout (`../spell-app-dev`) and its bare
+ *      name (`spell-app-dev`, the window folder's too), in one pass (`SharedRename.renamed()`)
+ * 6. Lists the lines Claude Code's OWN settings (`<home>/settings.json`) still name it, for a person to edit
+ *    (`byHand`):  never written, as nothing outside the repo's folders is
+ * - then the link at the old name can go, once nothing uses it
+ * - `dryRun`:  step 1 for real, the rest only reported, every file and line it would rewrite among them
  * - a bare name (`spell-app.epics`) goes beside the old folder;  a path is from the current folder
  ****************/
 export class SharedRename {
@@ -47,7 +53,7 @@ export class SharedRename {
   /** every checkout whose links to relink:  the main one, then the worktrees (`Shared.checkouts()`) */
   readonly checkouts: string[]
 
-  /** Claude Code's own folder, for the mentions in its settings and memory notes (`SessionFolders.home()`) */
+  /** Claude Code's own folder:  its settings (listed), the repo's memory notes (rewritten;  `SessionFolders.home()`) */
   readonly claudeHome: string
 
   constructor({ config, checkouts, claudeHome = SessionFolders.home() }: SharedRenameProps) {
@@ -70,7 +76,8 @@ export class SharedRename {
       dryRun,
       relinked: this.relinks(from, target),
       config: { file: join(this.config.main, EpicConfig.FILE), keys: [] },
-      mentions: this.mentions(basename(from))
+      rewrites: this.rewritable().flatMap((file) => this.rewriteOf(file, from, target)),
+      byHand: this.rewriteOf(join(this.claudeHome, "settings.json"), from, target)
     }
     const { text, keys } = SharedRename.configText(readOrEmpty(report.config.file), this.config.main, from, target)
     report.config.keys = keys
@@ -86,6 +93,8 @@ export class SharedRename {
       mkdirSync(dirname(report.config.file), { recursive: true })
       writeFileSync(report.config.file, text)
     }
+    for (const { file } of report.rewrites)
+      writeFileSync(file, SharedRename.renamed(readOrEmpty(file), this.config.main, from, target))
     return report
   }
 
@@ -127,24 +136,42 @@ export class SharedRename {
     return found
   }
 
-  /**
-   * The files that still name folder `name` (`spell-app-dev`) and that the rename leaves to people (step 5):
-   * - the main checkout's `AGENTS.md`, `CLAUDE.md` and Claude settings
-   * - Claude Code's own settings
-   * - the repo's memory notes (`<home>/projects/<main's slug>/memory/`)
-   * - read only
-   */
-  private mentions(name: string): string[] {
+  /** The files the rename rewrites (step 5):  the main checkout's rules and Claude settings, the memory notes. */
+  private rewritable(): string[] {
     const main = this.config.main
     const memory = join(SessionFolders.folderOf(main, this.claudeHome), "memory")
-    const files = [
-      ...["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".claude/settings.local.json"].map((file) =>
-        join(main, file)
-      ),
-      join(this.claudeHome, "settings.json"),
-      ...listMarkdown(memory)
-    ]
-    return files.filter((file) => readOrEmpty(file).includes(name))
+    return [...REPO_FILES.map((file) => join(main, file)), ...listMarkdown(memory)]
+  }
+
+  /** File `file` with the content folder renamed from `from` to `to`:  its changed lines;  `[]`:  nothing to change. */
+  private rewriteOf(file: string, from: string, to: string): FileRewrite[] {
+    const before = readOrEmpty(file)
+    const after = SharedRename.renamed(before, this.config.main, from, to)
+    if (after === before) return []
+    const olds = before.split("\n")
+    const news = after.split("\n")
+    const lines = olds.flatMap((old, at) => (old === news[at] ? [] : [{ line: at + 1, before: old, after: news[at]! }]))
+    return [{ file, lines }]
+  }
+
+  /**
+   * Text `text` with every mention of the content folder moved from `from` to `to` (`main`:  the main checkout).
+   * - the forms, in one pass, so nothing is renamed twice:
+   *   - its full path:  `/Users/owen/www/spell-app/spell-app-dev`
+   *   - its path from the main checkout, when that has a folder in it:  `../spell-app-dev`
+   *   - its bare name:  `spell-app-dev`, also the window folder's name
+   * - a whole name only:  never inside a longer one (`spell-app-devtools`, `spell-app-dev2`, `x.spell-app-dev`)
+   * - lines stay lines:  no form holds a line break
+   * - static:  pure
+   */
+  static renamed(text: string, main: string, from: string, to: string): string {
+    const forms = new Map<string, string>([[from, to]])
+    const near = relative(main, from)
+    if (near.includes("/")) forms.set(near, relative(main, to))
+    forms.set(basename(from), basename(to))
+    const alternatives = [...forms.keys()].sort((a, b) => b.length - a.length).map(escapeRegExp)
+    const mention = new RegExp(`(?<![\\w.-])(?:${alternatives.join("|")})(?![\\w-]|\\.\\w)`, "g")
+    return text.replace(mention, (found) => forms.get(found)!)
   }
 
   /**
@@ -170,6 +197,14 @@ export class SharedRename {
     }
     return { text, keys }
   }
+}
+
+/** The main checkout's files that name the content folder, which the rename rewrites (step 5). */
+const REPO_FILES = ["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".claude/settings.local.json"]
+
+/** `text` as a regular expression that matches it literally. */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
 /** What `new SharedRename()` takes:  see its constructor. */

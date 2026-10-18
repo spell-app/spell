@@ -371,7 +371,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<new> [--dry-run] [--json]",
       description:
         "rename the shared content folder (a bare name:  beside it), leave a link at the old name, relink every " +
-        "checkout, and write the new place into .epic/config.json5",
+        "checkout, write the new place into .epic/config.json5, and rewrite AGENTS.md, CLAUDE.md, the Claude settings " +
+        "and the memory notes that name it (Claude Code's own settings:  listed, to edit by hand)",
       example: "epic shared rename spell-app.epics --dry-run"
     },
     {

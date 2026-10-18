@@ -116,6 +116,10 @@ Each opens in a window of its own folder and the content folder:  no main checko
   - The session-start guard ([worktree-guard.mjs](hooks/worktree-guard.mjs)) tells a session to enter:
     one that comes back elsewhere, or starts in a worktree unrecorded.
 - `epic shared rename <new> [--dry-run]` renames the content folder, leaving a link at the old name.
+  - It rewrites what names the old folder (J30):  the main checkout's `AGENTS.md`, `CLAUDE.md` and Claude settings,
+    and the repo's memory notes.
+  - Claude Code's own settings (`~/.claude/settings.json`) it only lists, line by line, to edit by hand.
+  - `--dry-run` shows every file and line it would rewrite.
   - e.g. `spell-app-dev` to `spell-app.epics`
 
 ## Switching a repo over
@@ -193,9 +197,9 @@ For the morning after epic `epic-eject`'s night:  that night nothing was install
     epic shared rename spell-app.epics --dry-run
     ```
 
-    - Then `epic window init`, and edit the files it lists:
-      Claude settings' extra folders, memory notes, `AGENTS.md`.
-    - Commit the `.epic/config.json5` change it makes.
+    - It rewrites `AGENTS.md`, the repo's Claude settings and the memory notes itself.
+    - Then `epic window init`, and edit `~/.claude/settings.json` by hand, the lines it lists.
+    - Commit the main checkout's files it changed:  `.epic/config.json5`, `AGENTS.md`, `.claude/settings.json`.
 13. New worktrees beside the repo (T19):  in spell-app's `.epic/config.json5`, set these.
 
     ```json5

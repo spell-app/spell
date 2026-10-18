@@ -23,6 +23,7 @@ import {
   EXIT,
   EpicCommandError,
   parseVerbArgs,
+  type FileRewrite,
   type LinkReport,
   type MigrateReport,
   type RenameReport,
@@ -483,18 +484,23 @@ function migrateLines(report: MigrateReport, dryRun = false): string[] {
   return [...changed.map((each) => `${each.action.padEnd(8)} ${each.file}`), verdict]
 }
 
-/** `rename`'s lines:  the move, each link relinked, the config keys, what's left to people. */
+/** `rename`'s lines:  the move, each link relinked, the config keys, each file and line rewritten, what's by hand. */
 function renameLines(report: RenameReport): string[] {
   const would = report.dryRun ? "would " : ""
+  const changes = ({ lines }: FileRewrite) =>
+    lines.flatMap(({ line, before, after }) => [`  ${String(line).padStart(4)} - ${before}`, `       + ${after}`])
   return [
     `${would}move ${report.from} -> ${report.to}, and leave a link at ${basename(report.from)}`,
     ...report.relinked.map(({ checkout, path }) => `${would}relink ${join(checkout, path)}`),
     report.config.keys.length
       ? `${would}write ${report.config.keys.join(", ")} into ${report.config.file} (tracked:  commit it)`
       : `${report.config.file}:  already says so`,
-    ...(report.mentions.length
-      ? [`still naming ${basename(report.from)}, to edit by hand:`, ...report.mentions.map((file) => `  ${file}`)]
-      : []),
+    ...report.rewrites.flatMap((each) => [`${would}rewrite ${each.file}:`, ...changes(each)]),
+    ...(report.rewrites.length ? ["(the main checkout's tracked files among them:  commit them with the config)"] : []),
+    ...report.byHand.flatMap((each) => [
+      `edit by hand, ${each.file} (Claude Code's own settings:  never written here):`,
+      ...changes(each)
+    ]),
     ...(report.dryRun ? ["dry run:  nothing changed"] : ["next:  epic window init (the window files' folders)"])
   ]
 }
