@@ -5,9 +5,11 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readlinkSync,
   realpathSync,
   renameSync,
   rmSync,
+  symlinkSync,
   writeFileSync
 } from "fs"
 import { tmpdir } from "os"
@@ -32,7 +34,7 @@ git(MAIN, "init", "-q", "-b", "main")
 // the shared repo beside it, by the repo's config (its default, written out)
 put("package.json", "{}")
 put(".epic/config.json5", '// where the shared repo is\n{ "contentFolder": "../spell-app-dev" }\n')
-put(".gitignore", "/epics\n/guides\n/pages\n/templates\n/brand\n/ui\n/goals\n/sagas\n/agents\n/.claude/worktrees\n")
+put(".gitignore", "/epics\n/guides\n/pages\n/templates\n/brand\n/sagas\n/goals\n/agents\n/.claude/worktrees\n")
 git(MAIN, "add", "-A")
 commit(MAIN, "first")
 put("pages/index.html", "<h1>Docs</h1>\n")
@@ -40,9 +42,8 @@ put("epics/x/x.plan.html", "<h1>X</h1>\n")
 put("guides/a.html", "<h1>A</h1>\n")
 put("templates/t.html", "<h1>T</h1>\n")
 put("brand/pony.html", "<h1>Pony</h1>\n")
-put("ui/index.html", "<h1>Spell UI</h1>\n")
+put("sagas/sagas.json5", '{ "sagas": [] }\n')
 put("goals/index.html", "<h1>Goals</h1>\n")
-put("sagas/sagas.json5", "{}\n")
 put("agents/PAPERCUTS.md", "# Papercuts\n")
 git(MAIN, "worktree", "add", "-q", "-b", "wt", WT)
 
@@ -54,7 +55,7 @@ describe("sharedConfig()", () => {
       main: MAIN,
       dir: PEER,
       worktrees: [join(MAIN, ".claude", "worktrees")],
-      links: ["epics", "guides", "pages", "brand", "ui", "goals", "sagas", "agents"]
+      links: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"]
     })
     expect(Shared.configOf(WT)).toEqual(config)
   })
@@ -75,8 +76,8 @@ describe("before init", () => {
     const status = new Shared({ config }).status()
     expect(status).toMatchObject({ exists: false, isRepo: false })
     expect(status.checkouts.map(({ checkout, links }) => [checkout, links.map((link) => link.state)])).toEqual([
-      [".", Array(8).fill("real")],
-      [".claude/worktrees/wt", Array(8).fill("missing")]
+      [".", Array(7).fill("real")],
+      [".claude/worktrees/wt", Array(7).fill("missing")]
     ])
   })
 })
@@ -91,12 +92,12 @@ describe("init --import, then link", () => {
   })
 
   test("main:  identical real folders become links;  the worktree:  missing ones are made", () => {
-    expect(new Shared({ config }).link(MAIN).map((report) => report.action)).toEqual(Array(8).fill("replaced"))
-    expect(new Shared({ config }).link(WT).map((report) => report.action)).toEqual(Array(8).fill("linked"))
+    expect(new Shared({ config }).link(MAIN).map((report) => report.action)).toEqual(Array(7).fill("replaced"))
+    expect(new Shared({ config }).link(WT).map((report) => report.action)).toEqual(Array(7).fill("linked"))
     expect(lstatSync(join(WT, "goals")).isSymbolicLink()).toBe(true)
     expect(readFileSync(join(WT, "goals/index.html"), "utf8")).toBe("<h1>Goals</h1>\n")
     expect(new Shared({ config }).status().checkouts.flatMap(({ links }) => links.map((link) => link.state))).toEqual(
-      Array(16).fill("ok")
+      Array(14).fill("ok")
     )
     expect(git(MAIN, "status", "--porcelain")).toBe("")
   })
@@ -265,6 +266,55 @@ describe("linkEngine()", () => {
     rmSync(join(repo, "spell-epic"), { recursive: true })
     put(".epic/config.json5", '{ "engineFolder": "" }\n', repo)
     expect(shared.linkEngine(repo)).toBeUndefined()
+  })
+})
+
+describe("linkContentBeside()", () => {
+  // a repo whose worktrees and content folder are both beside it (epic `epic-eject` T31)
+  const top = join(TEMP, "beside")
+  const repo = join(top, "spell-app")
+  const content = join(top, "spell-app.epics")
+  const trees = join(top, "spell-app.worktrees")
+  const link = join(trees, "spell-app.epics")
+  mkdirSync(content, { recursive: true })
+  mkdirSync(repo, { recursive: true })
+  git(repo, "init", "-q", "-b", "main")
+  put(
+    ".epic/config.json5",
+    '{ "contentFolder": "../spell-app.epics", "worktreesFolder": "../spell-app.worktrees" }\n',
+    repo
+  )
+  const shared = new Shared({ checkout: repo, config: { main: repo, dir: content, worktrees: [trees], links: [] } })
+
+  test("no worktrees folder yet:  nothing linked", () => {
+    expect(shared.linkContentBeside()).toBeUndefined()
+  })
+
+  test("linked, by a relative path:  ../spell-app.epics from a worktree's root reaches the content folder;  again:  ok", () => {
+    mkdirSync(join(trees, "seo"), { recursive: true })
+    const path = "../spell-app.worktrees/spell-app.epics"
+    expect(shared.linkContentBeside()).toEqual({ path, state: "missing", action: "linked" })
+    expect(readlinkSync(link)).toBe("../spell-app.epics")
+    expect(realpathSync(join(trees, "seo", "../spell-app.epics"))).toBe(content)
+    expect(shared.linkContentBeside()).toEqual({ path, state: "ok", action: "ok" })
+  })
+
+  test("a dangling link is made again;  a real folder there is never removed", () => {
+    rmSync(link)
+    symlinkSync("../gone", link)
+    expect(shared.linkContentBeside()).toMatchObject({ state: "dangling", action: "linked" })
+    expect(realpathSync(link)).toBe(content)
+    rmSync(link)
+    mkdirSync(link)
+    expect(shared.linkContentBeside()).toMatchObject({ state: "real", action: "diverged" })
+    expect(lstatSync(link).isDirectory()).toBe(true)
+    rmSync(link, { recursive: true })
+  })
+
+  test("worktrees nested in the checkout (.claude/worktrees):  nothing linked", () => {
+    put(".epic/config.json5", '{ "contentFolder": "../spell-app.epics" }\n', repo)
+    mkdirSync(join(repo, ".claude", "worktrees"), { recursive: true })
+    expect(shared.linkContentBeside()).toBeUndefined()
   })
 })
 

@@ -32,8 +32,12 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { EpicConfig } from "../config/EpicConfig.ts"
+
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
+/** the epic pages' folder:  the repo's content folder's (`EpicConfig.contentOf()`) */
+const EPICS = join(EpicConfig.contentOf(ROOT), "epics")
 const SHOTS = join(HERE, "shots")
 
 if (!process.env.CHECK_TOOLTIPS_UNDER_TSX) {
@@ -317,7 +321,7 @@ function copyDoc() {
     writeFileSync(file, html)
     return
   }
-  const from = join(ROOT, "epics", docName)
+  const from = join(EPICS, docName)
   const skeleton = join(from, `${docName}.plan.html`)
   if (!existsSync(skeleton)) {
     console.error(`check-tooltips-epics:  no ${skeleton}`)

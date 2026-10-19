@@ -2,6 +2,7 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, rmSync 
 import { basename, dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { PART_FILE, PARTS_DIR, PlanParts } from "$/epics/tool/PlanParts"
 
 import { ConvertError, EXCLUSIONS, KEPT, UPGRADE_EXCLUSIONS, type Conversion } from "./convert.types"
@@ -26,9 +27,9 @@ export class ConvertRun {
     this.root = resolve(root)
   }
 
-  /** The checkout's `epics/`:  the shared epic pages. */
+  /** The checkout's repo's `epics/`, in its content folder (`EpicConfig.contentOf()`):  the shared epic pages. */
   get epics(): string {
-    return join(this.root, "epics")
+    return join(EpicConfig.contentOf(this.root), "epics")
   }
 
   /** Every epic page's name, sorted:  each folder of `epics/` holding `<name>.plan.html`. */

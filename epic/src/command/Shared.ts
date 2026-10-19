@@ -52,6 +52,7 @@ import { SharedRename } from "./SharedRename"
  *   - `link [--all]`:  link this checkout's folders (`--all`:  every checkout)
  *     - a real folder is replaced only when it matches the shared one exactly
  *     - a link to a shared folder the manifest no longer names is removed (`unlinkDropped()`)
+ *     - and, worktrees beside the repo, ONE link in their folder to the content folder (`linkContentBeside()`)
  *   - `commit [--session <id>] [--quiet]`:  commit whatever changed in the shared repo (the `Stop` hook, every turn)
  *     - one commit per epic / guide / folder (`commit()`)
  *     - first the reorg's repair, for pages older checkouts still write the old way (`relocate.js reorg`)
@@ -174,6 +175,11 @@ export class Shared {
   /** Link each of `checkouts`, printing a line per link that wasn't already right;  every report. */
   private linkAll(checkouts: string[]): LinkReport[] {
     const all: LinkReport[] = []
+    const beside = this.linkContentBeside()
+    if (beside) {
+      all.push(beside)
+      if (beside.action !== "ok") out(`${resolve(this.config.main, beside.path)}:  ${beside.action}`)
+    }
     for (const checkout of checkouts) {
       // each checkout's OWN links:  a branch from before the reorg (claude-design P4) still links `packages/docs/content`
       const engine = this.linkEngine(checkout)
@@ -338,6 +344,40 @@ export class Shared {
     const state = !stat ? "missing" : existsSync(at) ? "elsewhere" : "dangling"
     if (stat) rmSync(at, { force: true })
     symlinkSync(relative(checkout, engine), at)
+    return { path, state, action: "linked" }
+  }
+
+  /**
+   * Link the content folder into the worktrees' folder, when that's BESIDE the repo (epic `epic-eject` T31):
+   * `<worktreesFolder>/<content folder's name>` -> the content folder, e.g.
+   * `spell-app.worktrees/spell-app.epics -> ../spell-app.epics`.
+   * - why:  the repo's tracked docs link shared pages at the content folder's real place, written from the MAIN
+   *   checkout (`../spell-app.epics/guides/changelog.html` from its root);  from a worktree beside the repo the same
+   *   text climbs out of the worktree into the worktrees' folder, and lands here
+   * - ONE link for every worktree:  `epic shared link` makes it, and the worktree hook runs that for each new one
+   * - what it did, as `link()` reports it, its `path` from the main checkout (`../spell-app.worktrees/spell-app.epics`):
+   *   - `ok`:  already;  `linked`:  made (missing, dangling or pointing elsewhere)
+   *   - `real`, left alone (`action` `diverged`):  a real folder or file there (a worktree of that name), never removed
+   * - `undefined`:  nothing to link
+   *   - the worktrees' folder inside the checkout (`.claude/worktrees`), or not made yet;  no content folder
+   *   - the content folder not where the docs' text leads from a worktree's root (it isn't beside the main checkout)
+   * - SIDE EFFECT:  writes the link (a relative target)
+   */
+  linkContentBeside(): LinkReport | undefined {
+    const { main, dir: content } = this.config
+    const epic = new EpicConfig(main)
+    const trees = epic.worktreesFolder
+    if (!epic.isOutside(trees) || !existsSync(trees) || !existsSync(content)) return undefined
+    // where the docs' text, written from the main checkout's root, leads from a worktree's root
+    const at = resolve(trees, "<worktree>", relative(main, content))
+    if (dirname(at) !== trees) return undefined
+    const path = relative(main, at)
+    const stat = lstatSync(at, { throwIfNoEntry: false })
+    if (stat && !stat.isSymbolicLink()) return { path, state: "real", action: "diverged" }
+    if (stat && existsSync(at) && realOrSelf(at) === realOrSelf(content)) return { path, state: "ok", action: "ok" }
+    const state = !stat ? "missing" : existsSync(at) ? "elsewhere" : "dangling"
+    if (stat) rmSync(at, { force: true })
+    symlinkSync(relative(trees, content), at)
     return { path, state, action: "linked" }
   }
 

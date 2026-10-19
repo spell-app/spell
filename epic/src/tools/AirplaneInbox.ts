@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { join, relative } from "node:path"
 
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 import { CommentList, type Comment, type IdentifiedComment } from "$/epics/tool/CommentList"
 import { FROM_PAGE } from "$/epics/tool/epicRoutes"
@@ -11,7 +12,7 @@ import { answerFile, readAnswer, listPages } from "./details.js"
 import { GuideChanges } from "./GuideChanges"
 import { notesIn, type PageNote } from "./notesOnDisk"
 
-/** Where page notes can be (`notesRoutes.ts` takes them on pages there), from the checkout's root. */
+/** Where page notes can be (`notesRoutes.ts` takes them on pages there), from the content folder. */
 const NOTE_FOLDERS = ["pages", "guides", "epics"]
 
 /****************
@@ -34,22 +35,23 @@ const NOTE_FOLDERS = ["pages", "guides", "epics"]
  ****************/
 export class AirplaneInbox {
   /**
-   * What's waiting under checkout `root`.
+   * What's waiting for checkout `root`:  in its repo's content folder (`EpicConfig.contentOf()`).
    * - `since`:  when the flight began (ISO time;  `AirplaneMode`'s `since`):
    *   details answers older than it were answered before, and are left out
    *   - none:  every details answer is left out (no way to tell new from handled)
    */
   static gather(root: string, { since }: { since?: string } = {}): AirplaneInbox {
+    const content = EpicConfig.contentOf(root)
     return Object.assign(new AirplaneInbox(), {
       since: since ?? null,
-      epics: epicsWaiting(root),
-      newEpics: newEpicsWaiting(root),
+      epics: epicsWaiting(content),
+      newEpics: newEpicsWaiting(content),
       notes: notesIn(
-        NOTE_FOLDERS.map((folder) => join(root, folder)),
-        root
+        NOTE_FOLDERS.map((folder) => join(content, folder)),
+        content
       ),
-      comments: guideCommentsWaiting(root),
-      details: since ? detailsAnswered(root, Date.parse(since)) : [],
+      comments: guideCommentsWaiting(root, content),
+      details: since ? detailsAnswered(content, Date.parse(since)) : [],
       thoughts: thoughtsWaiting(root)
     })
   }
@@ -124,9 +126,9 @@ export class AirplaneInbox {
 /** An epic made from the Epics page (`epicRoutes.ts`), not started:  `/airplane land` asks whether to start it. */
 export type NewEpic = { name: string; title: string; doc: string }
 
-/** Each future epic whose log says the Epics page made it (`FROM_PAGE`), by name. */
-function newEpicsWaiting(root: string): NewEpic[] {
-  const epics = join(root, "epics")
+/** Each future epic in content folder `content` whose log says the Epics page made it (`FROM_PAGE`), by name. */
+function newEpicsWaiting(content: string): NewEpic[] {
+  const epics = join(content, "epics")
   if (!existsSync(epics)) return []
   return readdirSync(epics)
     .sort()
@@ -138,14 +140,14 @@ function newEpicsWaiting(root: string): NewEpic[] {
       if (!/<epic-page\b[^>]*\sfuture[\s>=]/.test(html)) return []
       if (!(existsSync(log) ? readFileSync(log, "utf8") : html).includes(FROM_PAGE)) return []
       const title = /<title>(?:Epic:\s*)?([^<]*)<\/title>/.exec(html)?.[1]?.trim() || name
-      return [{ name, title, doc: relative(root, doc) }]
+      return [{ name, title, doc: relative(content, doc) }]
     })
 }
 
 /** An epic's inbox, as `/airplane land` takes it. */
 export type EpicWaiting = {
   name: string
-  /** the epic page, from the checkout's root */
+  /** the epic page, a page path (from the content folder) */
   doc: string
   /** every mark, sent or not:  `{ id, action, at, note?, pick?, ... , sent }` */
   marks: (Record<string, unknown> & { id: string; action: string; sent: boolean })[]
@@ -158,17 +160,20 @@ export type EpicWaiting = {
 }
 
 /**
- * A comment on a docs page still waiting, with its page (from the checkout's root).
+ * A comment on a docs page still waiting, with its page (a page path, from the content folder).
  * - `epic`:  the epic the page belongs to (`SeeAlso.ownerOf()`, epic `epic-workflow` P13):  that epic's session
  *   answers it;  none:  `epic comments gather` takes it into `guide-changes`
  */
 export type GuideCommentWaiting = IdentifiedComment & { page: string; epic?: string }
 
-/** The comments still waiting on every docs page, page by page, each with the epic its page belongs to. */
-function guideCommentsWaiting(root: string): GuideCommentWaiting[] {
+/**
+ * The comments still waiting on every docs page of checkout `root`'s content folder `content`, page by page, each with
+ * the epic its page belongs to.
+ */
+function guideCommentsWaiting(root: string, content: string): GuideCommentWaiting[] {
   const owners = new SeeAlso(root)
   return new GuideChanges({ root }).inboxFiles().flatMap((file) => {
-    const page = relative(root, file).replace(/\.inbox\.json5?$/, ".html")
+    const page = relative(content, file).replace(/\.inbox\.json5?$/, ".html")
     const epic = owners.ownerOf(page)
     return GuideInbox.read(file).commentList.waiting.map((comment) => ({ page, ...comment, ...(epic && { epic }) }))
   })
@@ -181,8 +186,8 @@ export type DetailsAnswered = { page: string; answered: string }
 export type ThoughtWaiting = { page: string; id: string; for: string; text: string; date: string }
 
 /** Each epic with anything in its inbox file, by name. */
-function epicsWaiting(root: string): EpicWaiting[] {
-  const epics = join(root, "epics")
+function epicsWaiting(content: string): EpicWaiting[] {
+  const epics = join(content, "epics")
   if (!existsSync(epics)) return []
   return readdirSync(epics)
     .sort()
@@ -213,11 +218,11 @@ type InboxFile = {
 }
 
 /** Details pages whose answer was saved after `since` (ms). */
-function detailsAnswered(root: string, since: number): DetailsAnswered[] {
-  return (listPages(root) as string[]).flatMap((page) => {
+function detailsAnswered(content: string, since: number): DetailsAnswered[] {
+  return (listPages(content) as string[]).flatMap((page) => {
     const answer = DataFile.found(answerFile(page))
     if (!answer || statSync(answer).mtimeMs < since || !readAnswer(page)) return []
-    return [{ page: relative(root, page), answered: statSync(answer).mtime.toISOString() }]
+    return [{ page: relative(content, page), answered: statSync(answer).mtime.toISOString() }]
   })
 }
 

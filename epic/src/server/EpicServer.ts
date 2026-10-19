@@ -3,14 +3,9 @@ import { join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { SRV, type ServedFile } from "$/server"
-import {
-  HIGHLIGHT_JS,
-  PageEditor,
-  pageServerSettings,
-  type PageConfig,
-  type RouteContext,
-  type RouteModule
-} from "$/server/page"
+import { HIGHLIGHT_JS, PageEditor, pageServerSettings, type PageConfig, type RouteModule } from "$/server/page"
+
+import type { ContentRouteContext } from "$/epics/list/runningRoutes"
 
 import { RepoList } from "./RepoList"
 import {
@@ -294,9 +289,12 @@ export class EpicServer {
    * - `root`:  the default repo's main checkout
    * - `serveWorktrees()`:  only noted (`info.worktrees`), since there is nothing per worktree to serve:
    *   a repo's pages are its shared content, the same in every worktree, and the engine's assets are this checkout's
+   * - `serveContent()`:  nothing to do:  each repo's content folder is served already, at its prefix (`mounts()`);  the
+   *   route modules read and write it there too, from `root`'s config (`EpicConfig.contentOf()`, `pages.js` `CONTENT`:
+   *   epic `epic-eject` P12), never through the main checkout's links
    * - tests set a route module up by hand with it, on a server started with `routes: false`
    */
-  routeContext(): RouteContext {
+  routeContext(): ContentRouteContext {
     return {
       root: this.defaultRepo?.checkout ?? this.home,
       router: this.web.router,
@@ -305,6 +303,7 @@ export class EpicServer {
       web: this.web,
       info: this.info,
       serveWorktrees: (...dirs) => void (this.info.worktrees = dirs[0] && resolve(dirs[0])),
+      serveContent: () => undefined,
       addPageConfig: (add) => void this.pageConfigs.push(add),
       onListening: (start) => this.listenings.push(start),
       onStop: (stop) => this.stops.push(stop)

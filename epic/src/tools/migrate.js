@@ -35,6 +35,7 @@ import { pathToFileURL } from "node:url"
 
 import { parseHTML } from "linkedom"
 
+import { EpicConfig } from "../config/EpicConfig.ts"
 import { DataFile } from "../data/DataFile.ts"
 import { linksEngineByPath, rewriteEngineLinks } from "../server/engineLinks.ts"
 import { TOOL_TEMPLATES } from "./answerPages.js"
@@ -148,13 +149,14 @@ export const STEPS = [
 ]
 
 /**
- * Which kind page `file` is (`KINDS`), from where it lives in checkout `root` and what it loads.
+ * Which kind page `file` is (`KINDS`), from where it lives (its page path:  `pathFrom()`, checkout `root`'s) and
+ * what it loads.
  * - a details page with `<slug>.rows.json5` (or its old `.json`) beside it is a choice page
  * - a review page counts as a details page
  * - under `guides/`:  a page loading `commands.js` is a commands page, one with a card filter a cheatsheet
  */
 export function pageKind(file, root = ROOT, html = existsSync(file) ? readFileSync(file, "utf8") : "") {
-  const path = relative(root, file).split(sep).join("/")
+  const path = pathFrom(file, root)
   if (/(^|\/)details\//.test(path)) return DataFile.exists(rowsFile(file)) ? "choice" : "detail"
   if (/^epics\/([^/]+)\/\1(\.plan)?\.html$/.test(path) || /<epic-page\b/.test(html)) return "epic"
   if (/\.goal\.html$/.test(path)) return "goal"
@@ -184,8 +186,13 @@ export function stepsFor(kind, step) {
  * - `kind`:  only that kind
  */
 export function pagesFor(root, kind) {
-  const areas = ["pages", "guides", "templates", "epics"].map((area) => join(root, area))
-  const found = [...findPages(areas), join(root, "brand", "index.html"), ...listPages(root)]
+  const content = EpicConfig.contentOf(root)
+  const areas = [
+    ...["pages", "guides"].map((area) => join(content, area)),
+    join(root, "templates"),
+    join(content, "epics")
+  ]
+  const found = [...findPages(areas), join(content, "brand", "index.html"), ...listPages(content)]
   const files = [...new Set(found)].filter((file) => existsSync(file)).sort((one, other) => one.localeCompare(other))
   return files
     .map((file) => ({ file, kind: pageKind(file, root) }))
@@ -249,12 +256,12 @@ export function report(results, root, { dryRun = false, all = false } = {}) {
     kinds.set(kind, counts)
     counts.pages++
     if (!ran.length) {
-      if (all) lines.push(`${relative(root, file)}:  up to date`)
+      if (all) lines.push(`${pathFrom(file, root)}:  up to date`)
       continue
     }
     counts.changed++
     for (const each of ran) counts.steps.set(each, (counts.steps.get(each) ?? 0) + 1)
-    lines.push(`${relative(root, file)}:  ${dryRun ? "would run " : ""}${ran.join(", ")}`)
+    lines.push(`${pathFrom(file, root)}:  ${dryRun ? "would run " : ""}${ran.join(", ")}`)
     for (const note of notes) lines.push(`  ${note}`)
   }
   for (const [kind, { pages, changed, steps }] of kinds) {
@@ -278,15 +285,15 @@ export function report(results, root, { dryRun = false, all = false } = {}) {
  * - the choice page template's example rows (`templates/syntax-choices.rows.json`)
  */
 export function dataFileMoves(root) {
+  const content = EpicConfig.contentOf(root)
   const found = [
-    ...["epics/home.json", "epics/favorites.json", "sagas/sagas.json", "templates/syntax-choices.rows.json"].map(
-      (path) => join(root, path)
-    ),
-    ...filesUnder(join(root, "sagas"), INBOX),
-    ...filesUnder(join(root, "guides"), INBOX),
-    ...filesUnder(join(root, "pages"), INBOX),
-    ...filesUnder(join(root, "pages", "details"), DETAILS_DATA),
-    ...COMMAND_FOLDERS.flatMap((folder) => filesUnder(join(root, folder), /\.json$/)).filter(isCommandsData),
+    ...["epics/home.json", "epics/favorites.json", "sagas/sagas.json"].map((path) => join(content, path)),
+    join(root, "templates/syntax-choices.rows.json"),
+    ...filesUnder(join(content, "sagas"), INBOX),
+    ...filesUnder(join(content, "guides"), INBOX),
+    ...filesUnder(join(content, "pages"), INBOX),
+    ...filesUnder(join(content, "pages", "details"), DETAILS_DATA),
+    ...COMMAND_FOLDERS.flatMap((folder) => filesUnder(folderOf(folder, root), /\.json$/)).filter(isCommandsData),
     ...readdirOr(join(root, "packages")).flatMap((name) => filesUnder(join(root, "packages", name, "docs"), INBOX))
   ]
   return [...new Set(found)]
@@ -308,8 +315,8 @@ export function renameDataFiles(moves) {
  * - `dryRun`:  the same count, nothing written
  */
 export function dataFileLinks(root, { dryRun = false } = {}) {
-  const pages = LINKING_FOLDERS.flatMap((folder) => filesUnder(join(root, folder), /\.html$/)).filter(
-    (file) => !EPIC_PAGE.test(relative(root, file).split(sep).join("/"))
+  const pages = LINKING_FOLDERS.flatMap((folder) => filesUnder(folderOf(folder, root), /\.html$/)).filter(
+    (file) => !EPIC_PAGE.test(pathFrom(file, root))
   )
   const changed = []
   for (const file of pages.sort((one, other) => one.localeCompare(other))) {
@@ -317,7 +324,7 @@ export function dataFileLinks(root, { dryRun = false } = {}) {
       let count = 0
       const before = readFileSync(file, "utf8")
       const after = before.replace(HREF, (whole, open, href, close) => {
-        const to = DataFile.linkFor(href, dirname(file), root)
+        const to = DataFile.linkFor(href, dirname(file), baseOf(file, root))
         if (to === undefined) return whole
         count++
         return `${open}${to}${close}`
@@ -336,13 +343,13 @@ function dataFilesReport(moves, links, root, { dryRun = false } = {}) {
   const clashes = moves.filter((move) => move.clash)
   const linked = links.reduce((sum, page) => sum + page.links, 0)
   return [
-    ...renamed.map((move) => `${relative(root, move.from)}:  ${dryRun ? "would be " : ""}renamed ${basename(move.to)}`),
+    ...renamed.map((move) => `${pathFrom(move.from, root)}:  ${dryRun ? "would be " : ""}renamed ${basename(move.to)}`),
     ...clashes.map(
-      (move) => `${relative(root, move.from)}:  LEFT, ${basename(move.to)} is there too (merge them by hand)`
+      (move) => `${pathFrom(move.from, root)}:  LEFT, ${basename(move.to)} is there too (merge them by hand)`
     ),
     ...links.map(
       ({ file, links: n }) =>
-        `${relative(root, file)}:  ${dryRun ? "would point " : ""}${n} link${n === 1 ? "" : "s"} to .json5`
+        `${pathFrom(file, root)}:  ${dryRun ? "would point " : ""}${n} link${n === 1 ? "" : "s"} to .json5`
     ),
     `data files:  ${renamed.length} ${dryRun ? "would be renamed" : "renamed"} .json -> .json5${clashes.length ? `, ${clashes.length} left` : ""};  ` +
       `${linked} link${linked === 1 ? "" : "s"} in ${links.length} page${links.length === 1 ? "" : "s"}`
@@ -406,11 +413,34 @@ const DATA_FILES = "json5-data-files"
 /** A problem to say, not a stack trace:  exit 2. */
 export class MigrateError extends Error {}
 
-/** Page argument `page`:  absolute as is, else from `root`, else as `pages.js` `pageFile()` reads it. */
+/**
+ * Page argument `page`:  absolute as is, else a page path in checkout `root`'s content folder, else from `root`,
+ * else as `pages.js` `pageFile()` reads it.
+ */
 function fileOf(page, root) {
   if (isAbsolute(page)) return page
-  const there = resolve(root, page)
-  return existsSync(there) ? there : pageFile(page)
+  const there = [EpicConfig.contentOf(root), root].map((base) => resolve(base, page)).find((file) => existsSync(file))
+  return there ?? pageFile(page)
+}
+
+/**
+ * The folder page paths are from for `file`, a page of checkout `root`:  its repo's content folder
+ * (`EpicConfig.contentOf()`, epic `epic-eject` P12) when it's in it, else the checkout (`templates/` ...).
+ */
+function baseOf(file, root) {
+  const content = EpicConfig.contentOf(root)
+  const inside = relative(content, file)
+  return inside.startsWith("..") || isAbsolute(inside) ? root : content
+}
+
+/** `file`'s page path, `/`-separated:  from `baseOf()`. */
+function pathFrom(file, root) {
+  return relative(baseOf(file, root), file).split(sep).join("/")
+}
+
+/** Top folder `folder` of checkout `root`'s pages:  `templates` in the checkout, the rest in its content folder. */
+function folderOf(folder, root) {
+  return join(folder === "templates" ? root : EpicConfig.contentOf(root), folder)
 }
 
 /**

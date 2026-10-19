@@ -113,7 +113,7 @@ export function check(path) {
  */
 export function checkText(text, docDir, file) {
   const checked = linker.check(text, linker.servedDir(docDir))
-  const page = file && relative(linker.root, resolvePath(file))
+  const page = file && relative(targets.content, resolvePath(file))
   return { ...checked, problems: [...checked.problems, ...targets.problemsIn(text, page)] }
 }
 

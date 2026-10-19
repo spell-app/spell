@@ -3,6 +3,7 @@ import { dirname, join } from "node:path"
 
 import { parseHTML } from "linkedom"
 
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { EpicAddress, PageTargets, SAGA_SCHEME, type Landing, type TargetAnswer } from "$/epics/links"
 
 import { Sagas } from "./Sagas"
@@ -20,8 +21,8 @@ import { Sagas } from "./Sagas"
  * - Node only (`node:fs`):  never in a barrel.
  ****************/
 export class EpicTargets {
-  /** the checkout's root */
-  readonly root: string
+  /** the content folder of checkout `root`'s repo (`EpicConfig.contentOf()`):  where page paths are from */
+  readonly content: string
 
   /** the sagas' list */
   readonly sagas: Sagas
@@ -29,15 +30,16 @@ export class EpicTargets {
   /** pages read, by file:  their mtime, and what they hold */
   private read = new Map<string, { mtime: number; targets: PageTargets; title: string }>()
 
+  /** The links of the repo checkout `root` is in. */
   constructor(root: string) {
-    this.root = root
+    this.content = EpicConfig.contentOf(root)
     this.sagas = new Sagas(root)
   }
 
   /**
-   * What `address` finds, from the page `from` (from the checkout's root) whose markup is `html` (default:  read
+   * What `address` finds, from the page `from` (a page path) whose markup is `html` (default:  read
    * from disk;  `epic check` passes the whole doc, parts in).
-   * - `href`:  from the root, `#id` kept (`epics/seo/seo.plan.html#j3`);  on the page it's in, `<page>#id`
+   * - `href`:  a page path, `#id` kept (`epics/seo/seo.plan.html#j3`);  on the page it's in, `<page>#id`
    * - `problem`:  why it's broken, in a few words;  `undefined` when it isn't
    * - NEVER throws:  a page that won't read is a problem
    */
@@ -48,7 +50,7 @@ export class EpicTargets {
     if (address.saga && !this.sagas.find(address.saga)) problems.push(`no saga "${address.saga}" in sagas/sagas.json5`)
     let read: { targets: PageTargets; title: string } | undefined
     if (samePage && html !== undefined) read = this.parse(html)
-    else if (page && existsSync(join(this.root, page))) read = this.pageAt(page)
+    else if (page && existsSync(join(this.content, page))) read = this.pageAt(page)
     else if (page)
       problems.push(
         address.epic || !address.saga ? `no page ${page}` : `saga ${address.saga} has no page yet (${page})`
@@ -80,8 +82,8 @@ export class EpicTargets {
   }
 
   /**
-   * Every short-address link (`<a href="SAGA:/...">`) and `<epic-link>` in `html`, a page at `from` (from the
-   * checkout's root), that's broken:  one line each, `broken link:  <the link> -- <why>`.
+   * Every short-address link (`<a href="SAGA:/...">`) and `<epic-link>` in `html`, a page at `from` (a page path),
+   * that's broken:  one line each, `broken link:  <the link> -- <why>`.
    * - `<pre>` and `<script>` blocks are skipped (as `Linker.check()` skips `<pre>`):  examples, not links
    */
   problemsIn(html: string, from?: string): string[] {
@@ -124,9 +126,9 @@ export class EpicTargets {
   // ## Reading pages
   ////////////////
 
-  /** The page at `page` (from the root), read once while unchanged. */
+  /** The page at page path `page`, read once while unchanged. */
   private pageAt(page: string): { targets: PageTargets; title: string } | undefined {
-    const file = join(this.root, page)
+    const file = join(this.content, page)
     try {
       const mtime = statSync(file).mtimeMs
       const kept = this.read.get(file)
@@ -157,7 +159,7 @@ export class EpicTargets {
    * parts hold:  an Overview heading, an old answer card.
    */
   private inParts(page: string, id: string): Landing | undefined {
-    const dir = join(this.root, dirname(page), "parts")
+    const dir = join(this.content, dirname(page), "parts")
     if (!existsSync(dir)) return undefined
     const wanted = new RegExp(`\\bid="${id}"`, "i")
     for (const name of readdirSync(dir))

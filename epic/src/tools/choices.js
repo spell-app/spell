@@ -50,7 +50,7 @@ import {
   today,
   waitForAnswer
 } from "./details.js"
-import { ROOT, atDepth, openInVSCode, serialize } from "./pages.js"
+import { CONTENT, ROOT, atDepth, openInVSCode, serialize } from "./pages.js"
 
 /** How long `wait` waits by default:  8 hours, as `epic ask wait`. */
 const DEFAULT_TIMEOUT = "8h"
@@ -63,24 +63,24 @@ async function main(argv) {
     if (command === "new") {
       if (!flags.rows || flags.rows === true) throw new Error("new needs --rows <rows.json5>")
       const data = DataFile.parse(readFileSync(findFile(flags.rows), "utf8"))
-      console.log(shown(createPage(ROOT, target, { ...flags, data })))
+      console.log(shown(createPage(CONTENT, target, { ...flags, data })))
       return 0
     }
     if (command === "show") {
-      const file = findChoicesPage(ROOT, target)
+      const file = findChoicesPage(CONTENT, target)
       await openInVSCode(file)
       return flags.wait ? await waitAndPrint(file, flags) : 0
     }
-    if (command === "wait") return await waitAndPrint(findChoicesPage(ROOT, target), flags)
+    if (command === "wait") return await waitAndPrint(findChoicesPage(CONTENT, target), flags)
     if (command === "answer") {
-      const file = findChoicesPage(ROOT, target)
+      const file = findChoicesPage(CONTENT, target)
       const answer = readAnswer(file)
       console.log(answer ? formatAnswer(file, answer) : `no answer yet:  ${shown(file)}`)
       return answer ? 0 : 1
     }
     if (command === "list") {
-      const pages = listPages(ROOT).filter((file) => isChoicesPage(file) && (!target || isEpicsPage(file, target)))
-      for (const file of pages) console.log(`${status(file)}  ${relative(ROOT, file)}`)
+      const pages = listPages(CONTENT).filter((file) => isChoicesPage(file) && (!target || isEpicsPage(file, target)))
+      for (const file of pages) console.log(`${status(file)}  ${relative(CONTENT, file)}`)
       return 0
     }
     console.error(USAGE)
@@ -103,8 +103,8 @@ const USAGE = `usage:  epic choices new <slug> --rows <rows.json5> [--title "...
 ////////////////
 
 /**
- * Write a new choice page `slug` in checkout `docs` from the template, and its rows beside it;  the page's
- * absolute path.
+ * Write a new choice page `slug` in content folder `docs` (`CONTENT`) from the template, and its rows beside it;
+ * the page's absolute path.
  * - `data`:  `ChoicesData`, checked (`checkData()`);  `title` / `description` flags beat its own
  * - `epic`:  in that epic's `details/` (the epic must exist);  else the scratch `pages/details/`
  * - refuses to overwrite either file
@@ -185,7 +185,7 @@ function json(value) {
 
 /** `path` as given:  absolute, else from where `spell` ran, the checkout's root or `packages/epics`. */
 function findFile(path) {
-  const found = [process.env.INIT_CWD ?? process.cwd(), ROOT, join(ROOT, "packages", "epics")]
+  const found = [process.env.INIT_CWD ?? process.cwd(), ROOT, join(ROOT, "packages/epics")]
     .map((base) => resolve(base, path))
     .find((each) => existsSync(each))
   if (!found) throw new Error(`no file ${path}`)

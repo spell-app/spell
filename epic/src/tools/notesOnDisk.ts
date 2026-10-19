@@ -28,8 +28,8 @@ export async function editNotes<T>(file: string, change: (notes: PageNotes) => T
 }
 
 /**
- * The page notes on every page under `folders`, page by page:  each note with its page, from checkout `root`
- * (epic `airplane`:  `epic notes list`, and `/airplane land`'s `AirplaneInbox`).
+ * The page notes on every page under `folders`, page by page:  each note with its page, from folder `root` (the
+ * content folder:  a page path;  epic `airplane`:  `epic notes list`, and `/airplane land`'s `AirplaneInbox`).
  * - `all`:  answered and done notes too;  default:  the `new` ones
  * - reads only the pages that hold one (a text check first);  skips `SKIPPED` folders
  */

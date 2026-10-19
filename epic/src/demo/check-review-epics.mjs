@@ -66,8 +66,12 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { EpicConfig } from "../config/EpicConfig.ts"
+
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
+/** the epic pages' folder:  the repo's content folder's (`EpicConfig.contentOf()`) */
+const EPICS = join(EpicConfig.contentOf(ROOT), "epics")
 const SHOTS = join(HERE, "shots")
 const TSCONFIG = join(ROOT, "tsconfig.json")
 
@@ -690,7 +694,7 @@ function copyDoc() {
     writeFileSync(file, readFileSync(join(HERE, "review-sample.html"), "utf8"))
     return
   }
-  const from = resolve(fromFolder ?? join(ROOT, "epics", docName))
+  const from = resolve(fromFolder ?? join(EPICS, docName))
   const skeleton = join(from, `${docName}.plan.html`)
   if (!existsSync(skeleton)) {
     console.error(`check-review-epics:  no ${skeleton}`)

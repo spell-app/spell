@@ -17,20 +17,20 @@
  * - `answer <page>#<id> --file <html>`:  Claude's reply under the note
  *   (the file's markup, as is:  a `<p>` or more), and the note `answered`
  * - `done <page>#<id>`:  the note `done`:  nothing more to do for it
- * - `<page>#<id>`:  the note `id` on `<page>`, from the checkout's root (`guides/x.html`) or from an area
+ * - `<page>#<id>`:  the note `id` on `<page>`, a page path (`guides/x.html`) or from an area
  *   (`pages.js` `pageFile()`);  as two words (`guides/x.html n3`) too (`pageAndId()`)
  * - Every write under the page's lock, atomic, formatted (`notesOnDisk.ts` `editNotes()`).
  * - New ones:  `epic comments gather` takes them into epic `guide-changes` too, with the page's comments.
  * - Exit codes:  0;  1 a note or page that isn't there, or can't change (the message says why);  2 usage.
  */
 import { readFileSync } from "node:fs"
-import { relative, resolve } from "node:path"
+import { resolve } from "node:path"
 
 import { editNotes, notesIn } from "./notesOnDisk"
 import { SeeAlso } from "$/epics/tool/SeeAlso"
 
 import { NotesError } from "./PageNotes.js"
-import { AREAS, ROOT, pageAndId, pageFile, parseArgs } from "./pages.js"
+import { AREAS, CONTENT, ROOT, pageAndId, pageFile, pagePath, parseArgs } from "./pages.js"
 
 const { positional, flags } = parseArgs(process.argv.slice(2))
 process.exitCode = await run(positional, flags)
@@ -48,7 +48,7 @@ async function run([verb = "list", ...words]: string[], flags: Record<string, st
       await editNotes(file, (notes) => notes.answer(id, reply))
     } else if (verb === "done") await editNotes(file, (notes) => notes.setStatus(id, "done"))
     else return usage()
-    console.log(`${relative(ROOT, file)}#${id}  ${verb === "done" ? "done" : "answered"}`)
+    console.log(`${pagePath(file)}#${id}  ${verb === "done" ? "done" : "answered"}`)
     return 0
   } catch (error) {
     if (!(error instanceof NotesError) && !isMissingFile(error)) throw error
@@ -63,7 +63,7 @@ async function run([verb = "list", ...words]: string[], flags: Record<string, st
  */
 function list(flags: Record<string, string | true>, epic?: string): number {
   const owners = new SeeAlso(ROOT)
-  const notes = notesIn(AREAS, ROOT, { all: Boolean(flags.all) }).filter(
+  const notes = notesIn(AREAS, CONTENT, { all: Boolean(flags.all) }).filter(
     (note) => !epic || owners.ownerOf(note.page) === epic
   )
   if (flags.json) console.log(JSON.stringify(notes, null, 2))

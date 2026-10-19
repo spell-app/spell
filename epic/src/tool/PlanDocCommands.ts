@@ -377,7 +377,7 @@ export class PlanDocCommands {
         return this.print(`${relative(process.cwd(), found)}:  was a future epic, now planned here`)
       }
     }
-    if (found) throw new PlanDocError(`${relative(files.root, found)} already exists`)
+    if (found) throw new PlanDocError(`${relative(files.content, found)} already exists`)
     const now = new Date()
     const today = PlanTime.isoDate(now)
     const fill: Record<string, string> = {
@@ -392,7 +392,7 @@ export class PlanDocCommands {
     // for the doc's own depth (`epics/<name>/`:  2)
     const fixed: string = atDepth(
       readFileSync(files.template, "utf8"),
-      relative(files.root, file).split(sep).length - 1
+      relative(files.content, file).split(sep).length - 1
     )
     const html = fixed
       .replace(/\{\{(\w+)\}\}/g, (whole: string, key: string) =>
@@ -616,7 +616,7 @@ export class PlanDocCommands {
    */
   private async splitDoc(file: string, { dryRun }: Flags = {}): Promise<void> {
     const { files } = this
-    const name = relative(files.root, file)
+    const name = relative(files.content, file)
     const plan = this.read(file)
     if (plan.parts!.split) return this.print(`${name}:  already split (${plan.parts!.hosts.length} parts)`)
     const count = new EpicParts(plan.document).hosts.length
@@ -627,13 +627,13 @@ export class PlanDocCommands {
       { split: true }
     )
     this.print(
-      `${name}:  split, ${this.read(file).parts!.hosts.length} parts in ${relative(files.root, join(dirname(file), PARTS_DIR))}/`
+      `${name}:  split, ${this.read(file).parts!.hosts.length} parts in ${relative(files.content, join(dirname(file), PARTS_DIR))}/`
     )
   }
 
   /** `join <name>`:  a split doc back into ONE file (its parts folder removed), logged:  the way back from `split`. */
   private async joinDoc(file: string): Promise<void> {
-    const name = relative(this.files.root, file)
+    const name = relative(this.files.content, file)
     if (!this.read(file).parts!.split) return this.print(`${name}:  one file already`)
     await this.edit(file, (doc) => doc.log("joined into one file:  every body back in the page"), { split: false })
     this.print(`${name}:  one file`)
@@ -685,7 +685,7 @@ export class PlanDocCommands {
     // the sagas, pages and ids they point at
     const linkProblems = [
       ...files.linker.check(html, dirname(file)).problems,
-      ...new EpicTargets(files.root).problemsIn(html, relative(files.root, file))
+      ...new EpicTargets(files.root).problemsIn(html, relative(files.content, file))
     ]
     const links = linkProblems.map((problem) => `link:  ${problem}`)
     // printed, but failing only with `--links`:
@@ -705,7 +705,9 @@ export class PlanDocCommands {
     for (const orphan of orphans) this.print(`NOTE:  ${PARTS_DIR}/${orphan}:  nothing loads it`)
     for (const problem of problems) this.warn(`PROBLEM:  ${problem}`)
     if (!problems.length)
-      this.print(`${relative(files.root, file)}:  structure ok${parts.split ? ` (${parts.hosts.length} parts)` : ""}`)
+      this.print(
+        `${relative(files.content, file)}:  structure ok${parts.split ? ` (${parts.hosts.length} parts)` : ""}`
+      )
     let browserOk = true
     if (!noBrowser) {
       const run = spawnSync("node", [join(files.docsTools, "check-spell.js"), relative(files.docsPackage, file)], {

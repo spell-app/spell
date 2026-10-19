@@ -15,7 +15,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, sep } from "node:path"
 
-import { EPICS, ROOT, planDocIn } from "./pages.js"
+import { EPICS, ROOT, pagePath, planDocIn } from "./pages.js"
 
 /** Tracked files never rewritten:  generated bundles, test fixtures, the knowledge graph's cache. */
 const SKIP = [/^packages\/docs\/_assets\//, /\/fixtures\//, /^graphify-out\//, /\/node_modules\//, /\.answer\.json$/]
@@ -34,7 +34,7 @@ for (const name of readdirSync(epics).sort()) {
   names.push(name)
   if (found.endsWith(".plan.html")) continue
   const to = join(epics, name, `${name}.plan.html`)
-  console.log(`rename  ${relative(ROOT, found)} -> ${relative(ROOT, to)}`)
+  console.log(`rename  ${pagePath(found)} -> ${pagePath(to)}`)
   if (!dryRun) run("git", ["mv", found, to])
 }
 
@@ -56,7 +56,7 @@ for (const file of files) {
   const after = rewrite(before, file)
   if (after === before) continue
   changed++
-  console.log(`links   ${relative(ROOT, file)}`)
+  console.log(`links   ${pagePath(file)}`)
   if (!dryRun) writeFileSync(file, after)
 }
 console.log(`${names.length} epic pages, ${changed} files with links rewritten${dryRun ? " (dry run)" : ""}`)

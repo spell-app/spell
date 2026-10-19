@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
@@ -162,10 +162,15 @@ function out(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
 }
 
-/** The folder names directly in `dir`, or none when it doesn't exist. */
+/**
+ * The folder names directly in `dir`, or none when it doesn't exist.
+ * - not a LINK to a folder:  the content folder's, beside the worktrees (`Shared.linkContentBeside()`), is no worktree
+ */
 function folders(dir: string): string[] {
   if (!existsSync(dir)) return []
-  return readdirSync(dir).filter((name) => statSync(join(dir, name)).isDirectory())
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
 }
 
 /** Every worktree folder's name, in each of the repo's worktrees folders (`worktreesFolders`), each name once. */

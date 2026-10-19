@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from "node:fs"
 import { join, relative, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import { EpicConfig } from "$/epics/config/EpicConfig"
+
 import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
 
 import { CommentList, CommentsError, type IdentifiedComment } from "./CommentList"
@@ -138,7 +140,9 @@ export class InboxCommands {
       guides
     }
     if (json) return this.owner.print(JSON.stringify(report, null, 2))
-    const lines = [`inbox:  ${relative(this.owner.files.root, path)}${existsSync(path) ? "" : "  (none:  no marks)"}`]
+    const lines = [
+      `inbox:  ${relative(this.owner.files.content, path)}${existsSync(path) ? "" : "  (none:  no marks)"}`
+    ]
     const { listening } = inbox
     lines.push(
       !listening
@@ -540,15 +544,18 @@ export class InboxCommands {
 class GuideSends {
   /** the checkout's root */
   readonly root: string
+  /** its repo's content folder (`EpicConfig.contentOf()`):  where the pages are */
+  readonly content: string
   /** the epic's name */
   readonly name: string
-  /** the pages it owns, from the root, as last found */
+  /** the pages it owns, as page paths (from the content folder), as last found */
   private pages: string[] = []
   /** when they were found, ms */
   private foundAt = -Infinity
 
   constructor(root: string, name: string) {
     this.root = root
+    this.content = EpicConfig.contentOf(root)
     this.name = name
   }
 
@@ -582,7 +589,7 @@ class GuideSends {
 
   /** Page `page`'s inbox file. */
   private inboxOf(page: string): string {
-    return join(this.root, GuideInbox.fileFor(page))
+    return join(this.content, GuideInbox.fileFor(page))
   }
 
   /** The inbox in `file`;  `undefined` while it can't be read (hand-edited mid-poll):  the next poll tries again. */
@@ -596,7 +603,7 @@ class GuideSends {
   }
 }
 
-/** A send `wait` took from one of the epic's pages:  the page (from the checkout's root), when, its comments. */
+/** A send `wait` took from one of the epic's pages:  the page (a page path), when, its comments. */
 type GuideWork = { page: string } & GuideSend
 
 /** The comments waiting on one of the epic's pages, as `inbox` prints them. */

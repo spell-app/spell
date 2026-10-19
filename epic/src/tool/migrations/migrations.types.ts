@@ -62,7 +62,10 @@ export type MigrationContext = {
   epic?: string
   /** The page's folder (`epics/seo`), when the runner knows the file:  for a step about the files beside it. */
   folder?: string
-  /** The checkout's root, when the runner knows it. */
+  /**
+   * The folder its page paths are from (the content folder:  `epics/seo` is `<root>/epics/seo`), when the runner
+   * knows it.
+   */
   root?: string
   /**
    * The page's review inbox as it stands (its marks and comments:  `ReviewInbox`), when the runner read it

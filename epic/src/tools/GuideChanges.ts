@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { dirname, join, posix, relative } from "node:path"
 
 import { PhaseIds } from "$/epics/phases"
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { CommentList, type IdentifiedComment } from "$/epics/tool/CommentList"
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
@@ -15,7 +16,7 @@ import { htmlOf } from "./PageNotes.js"
 /** The epic Owen's comments on docs pages no epic owns are gathered into, one phase per page. */
 export { GUIDE_CHANGES }
 
-/** The folders, from the checkout's root, whose pages take comments (`commentsRoutes.ts`). */
+/** The folders, from the content folder, whose pages take comments (`commentsRoutes.ts`). */
 const COMMENT_FOLDERS = ["guides", "pages", "epics"]
 
 /** Folders under those that hold no pages of their own:  a split epic page's bodies, experiments' output. */
@@ -50,34 +51,37 @@ const PROMPT =
  * - epic pages' comments are NOT gathered:  they wait in their epic's review inbox for `/epic review`
  ****************/
 export class GuideChanges {
-  /** the checkout's root:  its `guides/`, `pages/`, `epics/` */
+  /** the checkout's root:  its epic pages' tool (`PlanDocFiles`) and owners (`SeeAlso`) */
   readonly root: string
+  /** its repo's content folder (`EpicConfig.contentOf()`):  its `guides/`, `pages/`, `epics/` */
+  readonly content: string
   /** the epic gathered into:  `guide-changes`, or another (a scratch one, in a test) */
   readonly epic: string
 
   constructor({ root, epic = GUIDE_CHANGES }: { root: string; epic?: string }) {
     this.root = root
+    this.content = EpicConfig.contentOf(root)
     this.epic = epic
   }
 
   /**
-   * Every page with comments waiting or new notes, in page order;  `pages` (from the root:  `guides/x.html`) only
+   * Every page with comments waiting or new notes, in page order;  `pages` (page paths:  `guides/x.html`) only
    * those.
    * - no `pages`:  the comments on a page an epic owns are left out (`SeeAlso.ownerOf()`):  they're that epic's
    */
   waiting(pages?: string[]): PageWaiting[] {
     const notes = notesIn(
-      COMMENT_FOLDERS.map((folder) => join(this.root, folder)),
-      this.root
+      COMMENT_FOLDERS.map((folder) => join(this.content, folder)),
+      this.content
     )
     const found = new Map<string, PageWaiting>()
     const entry = (page: string) => {
-      if (!found.has(page)) found.set(page, { page, title: titleOf(join(this.root, page)), comments: [], notes: [] })
+      if (!found.has(page)) found.set(page, { page, title: titleOf(join(this.content, page)), comments: [], notes: [] })
       return found.get(page)!
     }
     const owners = new SeeAlso(this.root)
     for (const inbox of this.inboxFiles()) {
-      const page = relative(this.root, inbox).replace(INBOX_FILE, ".html")
+      const page = relative(this.content, inbox).replace(INBOX_FILE, ".html")
       // another epic's page:  its comments are that epic's, unless the caller named the page
       const owner = !pages && owners.ownerOf(page)
       if (owner && owner !== this.epic) continue
@@ -161,7 +165,7 @@ export class GuideChanges {
     return files.docPath(this.epic)
   }
 
-  /** A link from the epic's epic page (`epics/<epic>/`) to `page` (from the root), with `hash`. */
+  /** A link from the epic's epic page (`epics/<epic>/`) to `page` (a page path), with `hash`. */
   private hrefTo(page: string, hash = ""): string {
     return `../../${page}${hash ? `#${hash}` : ""}`
   }
@@ -197,14 +201,14 @@ export class GuideChanges {
 
   /** Mark what went into a phase as taken:  the comments in the page's inbox, the notes answered with a link. */
   private async markTaken({ page, phase, phaseId, phaseTitle, comments, notes }: Gathered): Promise<void> {
-    const file = join(this.root, page)
+    const file = join(this.content, page)
     // the phase's id too (epic `epic-engine` I16):  its thread's link finds it after an insert moves its number
     if (comments.length)
       GuideInbox.update(GuideInbox.fileFor(file), (list) => {
         for (const id of comments) list.take(id, { epic: this.epic, phase, phaseId, title: phaseTitle })
       })
     if (!notes.length) return
-    const doc = relative(dirname(file), join(this.root, "epics", this.epic, `${this.epic}.plan.html`))
+    const doc = relative(dirname(file), join(this.content, "epics", this.epic, `${this.epic}.plan.html`))
     const reply = `<p>Taken into <a href="${doc}#${phaseId}">${this.epic} P${phase}</a>.</p>`
     await editNotes(file, (pageNotes) => {
       for (const id of notes) pageNotes.answer(id, reply)
@@ -221,7 +225,7 @@ export class GuideChanges {
    */
   inboxFiles(): string[] {
     return COMMENT_FOLDERS.flatMap((folder) => {
-      const top = join(this.root, folder)
+      const top = join(this.content, folder)
       let names: string[]
       try {
         names = readdirSync(top, { recursive: true, encoding: "utf8" })
@@ -239,7 +243,7 @@ export class GuideChanges {
 
 /** A page with comments or notes waiting. */
 export type PageWaiting = {
-  /** the page, from the checkout's root:  `guides/x.html` */
+  /** the page, a page path (from the content folder):  `guides/x.html` */
   page: string
   /** its `<title>`, short:  the phase's name */
   title: string

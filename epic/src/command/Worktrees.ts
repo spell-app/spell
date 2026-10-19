@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, readFileSync } from "node:fs"
+import { existsSync, lstatSync, mkdirSync, readFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
@@ -392,15 +392,16 @@ export class Worktrees {
   }
 
   /**
-   * The folder checkout `root` keeps its epic pages in:  `epics` (since 2026-10-05, claude-design P4).
-   * - else the first older place that's there (a worktree on older code, until it merges `main`):
-   *   `packages/docs/content/epics`, then `packages/docs/epics`
+   * The folder checkout `root`'s epic pages are in:  `epics/` in its repo's content folder (`EpicConfig.contentOf()`,
+   * epic `epic-eject` P12), shared by every checkout.
+   * - a checkout with epic pages of its OWN first (a worktree on older code, until it merges `main`):  a real folder,
+   *   not a link, at `epics`, `packages/docs/content/epics` or `packages/docs/epics`
    * - static:  any checkout
    */
   static epicsDir(root: string): string {
-    const places = [["epics"], ["packages", "docs", "content", "epics"], ["packages", "docs", "epics"]]
-    const epics = join(root, "epics")
-    return places.map((parts) => join(root, ...parts)).find((dir) => existsSync(dir)) ?? epics
+    const own = ["epics", "packages/docs/content/epics", "packages/docs/epics"].map((path) => join(root, path))
+    const real = own.find((dir) => lstatSync(dir, { throwIfNoEntry: false })?.isDirectory())
+    return real ?? join(EpicConfig.contentOf(root), "epics")
   }
 
   /**
