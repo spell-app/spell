@@ -119,7 +119,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
           <slot name={this.slotForName("title")}>{this.title}</slot>
         </>
       ),
-      // after the title, never cut with it while folded:  a folded phase is where the pen matters
+      // after the title, on its first line:  a folded phase is where the pen matters
       mark: () => this.changedMark(),
       icon: () => (
         <span

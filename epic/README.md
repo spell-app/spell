@@ -362,14 +362,16 @@ spell-epic uses those packages straight from a spell-app checkout (Q5), not from
   - Through the CHECKOUT's link, never a package's own:
     a package's relative imports out of itself (`ui`'s `../../vite.decorators.ts`) then land in that checkout,
     as they do there.
-- Tonight it's the `epic-eject` worktree's checkout.
-  - The epic code needs that branch's server package, which `main` doesn't have yet:
-    `checkout.ts`, the running-epics route.
-  - Once `epic-eject` is merged:  point the link at the main checkout, then `yarn install`.
+- It's tracked, `../spell-app`:  spell-app's main checkout, beside this one.
+  - Set by hand, should it point elsewhere, then `yarn install`:
 
     ```sh
     ln -sfn ../spell-app .spell-app
     ```
+
+  - A worktree, one folder deeper (`spell-epic.worktrees/<name>/`), finds it through ONE link beside it,
+    `spell-epic.worktrees/spell-app -> ../spell-app`, which the worktree hook makes when it's missing
+    (`linkOutside()` in [the worktree hook](hooks/worktree.mjs);  epic `epic-engine` I13).
 
 - The component pack's build and check are still spell-app's CLI's (`spell dev pack`).
   - `yarn pack:build` / `pack:check` run it through [spell-app.mjs](scripts/spell-app.mjs).

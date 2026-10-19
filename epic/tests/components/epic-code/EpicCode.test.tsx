@@ -99,19 +99,19 @@ describe("<epic-code> actions slot", () => {
   })
 })
 
-// epic `epic-workflow` P25, J183 (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded")
+// Owen, 2026-10-19:  "always show the full title, wrapped" (J183's "ellipsis when collapsed" before)
 
 describe("<epic-code> heading, folded and open", () => {
-  test("folded:  ONE line cut with …, its title the tooltip;  open:  it wraps", async () => {
+  test("in full, wrapped, folded and open, no tooltip", async () => {
     const wrap = await ElementFixture.render(
-      `<div style="width: 320px"><epic-code title="A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"><pre>const x = 1</pre></epic-code></div>`
+      `<div style="width: 320px"><epic-code title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open"><pre>const x = 1</pre></epic-code></div>`
     )
     const host = wrap.querySelector("epic-code")!
     const heading = part(host, "heading")
     const lineHeight = parseFloat(getComputedStyle(heading).lineHeight)
-    expect([heading.getBoundingClientRect().height < lineHeight * 1.5, heading.title]).toEqual([
+    expect([heading.getBoundingClientRect().height > lineHeight * 1.5, heading.hasAttribute("title")]).toEqual([
       true,
-      "A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"
+      false
     ])
     part(host, "toggle").click()
     await ElementFixture.tick()

@@ -49,6 +49,13 @@ async function tick(root: Element, letter: string) {
   await ElementFixture.settle()
 }
 
+/** Press `key` where the focus is, as the keyboard does:  on the focused element, deep in its shadow roots. */
+function press(key: string) {
+  let focused = document.activeElement
+  while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement
+  focused!.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true, cancelable: true }))
+}
+
 /** What the page would send. */
 function gathered(): PageAnswer {
   return form().gather()
@@ -89,6 +96,70 @@ describe("<epic-ask>", () => {
     expect(section.getAttribute("data-state")).toBe("done")
     // green now, not the red it started
     expect(getComputedStyle(part(ask, "chip")).backgroundColor).not.toBe(red)
+  })
+
+  // I5:  each round tick box is a native radio in its option's own shadow root, which the browser never groups
+  test("pick one:  ONE radio group to the keyboard -- one tab stop, the arrow keys move the pick and the focus", async () => {
+    const section = await ElementFixture.render(question())
+    const ask = section.querySelector("epic-ask")!
+    await ElementFixture.settle()
+    const group = part(section.querySelector("epic-choices")!, "base")
+    expect([group.getAttribute("role"), group.getAttribute("aria-label")]).toEqual(["radiogroup", "Q1 · Which?"])
+    const box = (letter: string) => part<HTMLInputElement>(option(section, letter), "tick")
+    const stops = () => ["A", "B", "C"].map((letter) => box(letter).tabIndex)
+    // nothing picked:  the first option is the stop
+    expect(stops()).toEqual([0, -1, -1])
+    await tick(section, "B")
+    expect(stops()).toEqual([-1, 0, -1])
+    box("B").focus()
+    press("ArrowDown")
+    await ElementFixture.settle()
+    expect(gathered().answers.q1).toEqual({ picked: ["C"] })
+    expect([box("C").checked, box("B").checked, option(section, "C").shadowRoot!.activeElement]).toEqual([
+      true,
+      false,
+      box("C")
+    ])
+    expect(stops()).toEqual([-1, -1, 0])
+    // round the end, and back
+    press("ArrowRight")
+    await ElementFixture.settle()
+    expect(gathered().answers.q1).toEqual({ picked: ["A"] })
+    press("ArrowUp")
+    await ElementFixture.settle()
+    expect([gathered().answers.q1, option(section, "C").shadowRoot!.activeElement]).toEqual([
+      { picked: ["C"] },
+      box("C")
+    ])
+    expect(ask.matches(":state(done)")).toBe(true)
+    await expectAccessible(ask)
+  })
+
+  test("pick one:  the arrow keys skip the options Open hides;  in a comment box they move nothing", async () => {
+    const section = await ElementFixture.render(question("filter"))
+    await ElementFixture.settle()
+    const box = (letter: string) => part<HTMLInputElement>(option(section, letter), "tick")
+    box("B").focus()
+    press("ArrowDown")
+    await ElementFixture.settle()
+    // C is `done`, hidden:  round to A
+    expect(gathered().answers.q1).toEqual({ picked: ["A"] })
+    const comment = part(option(section, "A"), "comment")
+    comment.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, composed: true }))
+    await ElementFixture.settle()
+    expect(gathered().answers.q1).toEqual({ picked: ["A"] })
+  })
+
+  test("pick several:  no radio group, every tick box a tab stop, the arrow keys pick nothing", async () => {
+    const section = await ElementFixture.render(question("multiple"))
+    await ElementFixture.settle()
+    expect(part(section.querySelector("epic-choices")!, "base").hasAttribute("role")).toBe(false)
+    const box = (letter: string) => part<HTMLInputElement>(option(section, letter), "tick")
+    expect(["A", "B", "C"].map((letter) => box(letter).hasAttribute("tabindex"))).toEqual([false, false, false])
+    box("A").focus()
+    press("ArrowDown")
+    await ElementFixture.settle()
+    expect(gathered().answers.q1).toEqual({ picked: [] })
   })
 
   test("pick several, Select all / none over the options shown;  Open hides the `done` ones", async () => {

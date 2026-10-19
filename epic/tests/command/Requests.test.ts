@@ -1,11 +1,14 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
-import { join } from "path"
+import { dirname, join } from "path"
+import { fileURLToPath } from "url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { type SendRequestProps } from "$/epics/command/command.types"
 import { Requests } from "$/epics/command/Requests"
 import { Sessions } from "$/epics/command/Sessions"
+import { PlanDoc } from "$/epics/tool/PlanDoc"
+import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
 
 /** A fake `~/.claude`, and a fake checkout holding epic `tooling`. */
 const HOME = mkdtempSync(join(tmpdir(), "claude-home-"))
@@ -17,6 +20,9 @@ afterAll(() => {
 
 mkdirSync(join(ROOT, "epics", "tooling"), { recursive: true })
 writeFileSync(join(ROOT, "epics", "tooling", "tooling.plan.html"), "<html></html>")
+
+/** The `epic` tool's test fixtures:  `epic-plan.html`, a fresh epic page. */
+const TOOL_FIXTURES = fileURLToPath(new URL("../tool/fixtures", import.meta.url))
 
 /** Two tiny "images":  their bytes are all a test reads. */
 const RED = Buffer.from("red pixel").toString("base64")
@@ -124,6 +130,50 @@ describe("epicRequests() and fileRequest()", () => {
   test("an epic with no requests has none;  filing a missing one throws", () => {
     expect(requestsIn(ROOT).list("nope")).toEqual([])
     expect(() => requestsIn(ROOT).file("tooling", "r99", "P1")).toThrow(/no request 'r99'/)
+  })
+})
+
+// epic `epic-engine` I4 (epic-workflow's I10):  `epic requests` said r3 was in P18 after a phase went in ahead of it
+describe("a request filed into a phase:  its stable id kept, its number today shown", () => {
+  const page = join(ROOT, "epics", "phased", "phased.plan.html")
+  const record = join(ROOT, "epics", "phased", "requests", "r1", "request.md")
+  const files = new PlanDocFiles({ root: ROOT })
+
+  test("filed into P2, it says P3 once a phase goes in before it (add-phase --before 2)", async () => {
+    const plan = PlanDoc.parse(readFileSync(join(TOOL_FIXTURES, "epic-plan.html"), "utf8"))
+    for (const name of ["One", "Two"]) plan.addPhase(name)
+    mkdirSync(dirname(record), { recursive: true })
+    await files.writeDoc(page, plan, true)
+    const request = { id: "r1", epic: "phased", from: "🚧 python", at: "2026-10-19T09:00-04:00", status: "new" }
+    writeFileSync(record, Requests.markdown({ ...request, text: "move it along", images: [] }))
+    const requests = requestsIn(ROOT)
+
+    const where = await requests.phaseFiled("phased", "P2")
+    expect(where).toEqual({ filed: "P2 · Two", phase: "p-two" })
+    expect(await requests.phaseFiled("phased", "two")).toEqual(where)
+    expect(await requests.phaseFiled("phased", "9")).toEqual({ filed: "P9" })
+    requests.file("phased", "r1", where.filed, where.phase)
+    expect(readFileSync(record, "utf8")).toContain("filed: P2 · Two\nphase: p-two\n")
+
+    const moved = files.read(page)
+    moved.addPhase("Inserted", { before: 2 })
+    await files.writeDoc(page, moved, true)
+    expect((await requests.shown("phased"))[0]).toMatchObject({ filed: "P3 · Two", phase: "p-two" })
+    // the record keeps the number it had then
+    expect(requests.list("phased")[0]!.filed).toBe("P2 · Two")
+  })
+
+  test("filed elsewhere after, or its phase gone:  the words as written", async () => {
+    const requests = requestsIn(ROOT)
+    requests.file("phased", "r1", "P3 · Gone", "p-gone")
+    expect((await requests.shown("phased"))[0]!.filed).toBe("P3 · Gone")
+    requests.file("phased", "r1", "dropped:  done in P1")
+    expect(readFileSync(record, "utf8")).not.toContain("phase:")
+    expect((await requests.shown("phased"))[0]).toMatchObject({ filed: "dropped:  done in P1", phase: undefined })
+  })
+
+  test("an epic with no requests:  none, and its page never read", async () => {
+    expect((await requestsIn(ROOT).shown("nope")).length).toBe(0)
   })
 })
 

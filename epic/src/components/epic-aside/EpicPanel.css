@@ -3,7 +3,8 @@
  * sheet beside its own (the fill and the heading's type, through the private `--_epic-panel-*` below).
  * - The title row (`head`):  the heading, a `<button>` (the fold chevron then the words, the chevron turned down while
  *   open), filling the row up to the `actions` slot's box at its end (the page's own buttons, the bullhorn).
- *   The words never run under the buttons:  folded, one line cut with "…";  open, they wrap in their own column.
+ *   The words never run under the buttons:  they wrap in their own column, in full, folded or open (Owen,
+ *   2026-10-19:  "always show the full title, wrapped";  J183's "ellipsis when collapsed" before).
  * - The body, folded:  `hidden="until-found"` (find-in-page reveals it), drawn as nothing.
  * - Shared look from `<epic-page>`'s `:host`, each with a fallback:  `--epic-part-gap`, `--epic-accent`.
  */
@@ -34,7 +35,7 @@
     background: var(--_epic-panel-fill);
     color: var(--_epic-panel-ink);
   }
-  /* everything on the heading's FIRST line, so nothing moves as it wraps (open) or goes back to one line (folded) */
+  /* everything on the heading's FIRST line, however many lines it wraps to */
   .head {
     display: flex;
     align-items: flex-start;
@@ -63,15 +64,6 @@
   .heading {
     min-width: 0;
     overflow-wrap: anywhere;
-  }
-  /*
-   * FOLDED, the heading is ONE line, cut with "…", its words the tooltip;  OPEN, it wraps (Owen, 2026-10-18:  "ellipsis
-   * when collapsed, wrap when expanded").  Its first line never moves as it switches.
-   */
-  :host(:not(:state(open))) .heading {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
   }
   /* the `actions` slot's box:  the page's own buttons, the bullhorn;  the heading's inset on its right */
   .slotted-actions {

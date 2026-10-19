@@ -1,12 +1,13 @@
 /**
  * Check that a live edit updates an epic page in `<epic-*>` markup IN PLACE (P10 of epic `epic-components`),
  * in a real browser:  the `<epic-*>` elements are patched, never replaced, and the reader's state stays.
- * Usage:  node src/demo/check-live-epics.mjs [epic id] [--item <id>] [--bundle <spell-ui.js>]
- * - works on a COPY of a preview doc (`preview-epics/<name>/`, the converter's, git-ignored):
- *   `preview-epics/check-live/epics/<name>/` (an epic page's own path:  the page asks the review routes only there),
- *   served by this checkout's page server;  deleted afterwards
+ * Usage (from the repo root):  node src/demo/check-live-epics.mjs [epic id] [--item <id>] [--bundle <spell-ui.js>]
+ * - works on a COPY of epic page `epics/<name>/` (default `windows-and-review`;  its skeleton and parts, never its
+ *   inbox), in `src/demo/shots/live/epics/<name>/` (git-ignored), as deep as a real one;  deleted afterwards
+ * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
+ *   serving `src/demo/shots/live/`;  it wakes nobody;  stopped at the end
  * - the page is REVIEWED:  the review routes (`/api/epics/review/...`) are answered here, an empty inbox with a session
- *   listening (the real routes refuse a page outside `epics/`), so the items draw their review controls
+ *   listening, so the items draw their review controls and nothing reaches the copy's inbox
  * - the reader's state:
  *   - item `--item` (default `q2`:  one with a part, not approved) opened by a link to it (its part loads)
  *   - a half-typed note in its note box (`<epic-item>`'s, in its shadow root) with the focus
@@ -24,19 +25,36 @@
  *   - and sampled on every animation frame (what the reader could have seen)
  *   1. the doc:  the item's `title` changes (an attribute patched in place)
  *   2. the item's PART (`parts/<id>.html`):  a paragraph added (the part re-fetched in place:  `wireSourceBodies()`)
- *   3. the doc:  the Overview's summary text changes (a child of an `<epic-*>` element replaced, not the element)
+ *   3. the doc:  the Overview's summary text changes (`<epic-summary>`'s text, inside `<epic-overview>`)
  * - `--bundle`:  serve this file in place of the checkout's `spell-ui.js` (a runtime not yet built into it)
- * - prints a JSON summary on stdout, problems on stderr;  exit 1 on any problem, 2 without a preview copy or server
+ * - prints a JSON summary on stdout, problems on stderr;  exit 1 on any problem, 2 without the epic page
+ * - re-runs itself under `tsx` (the page server is TypeScript)
  */
-import { execFileSync } from "node:child_process"
+import { spawnSync } from "node:child_process"
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { chromium } from "playwright"
+const HERE = dirname(fileURLToPath(import.meta.url))
 
 /** The checkout's root. */
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
+const ROOT = resolve(HERE, "../..")
+
+if (!process.env.CHECK_LIVE_UNDER_TSX) {
+  const run = spawnSync(
+    process.execPath,
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    {
+      stdio: "inherit",
+      cwd: ROOT,
+      env: { ...process.env, CHECK_LIVE_UNDER_TSX: "1", TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json") }
+    }
+  )
+  process.exit(run.status ?? 1)
+}
+
+const { chromium } = await import("playwright")
+const { DemoServer } = await import("./DemoServer.ts")
 
 /** What the reader types into the note box. */
 const NOTE = "half-typed note"
@@ -51,26 +69,22 @@ const args = process.argv.slice(2)
 const name = args.find((arg, at) => !arg.startsWith("--") && !args[at - 1]?.startsWith("--")) ?? "windows-and-review"
 const itemId = valueOf("--item") ?? "q2"
 const bundle = valueOf("--bundle")
-const source = join(ROOT, "preview-epics", name)
-// under an `epics/<name>/` folder:  the page asks the review routes only on an epic page's own path (`PLAN_DOC_PAGE`)
-const copyRoot = join(ROOT, "preview-epics", "check-live")
+const source = join(ROOT, "epics", name)
+// under an `epics/<name>/` folder, as deep as the real one:  its links need no change
+const copyRoot = join(HERE, "shots", "live")
 const copy = join(copyRoot, "epics", name)
 const docFile = join(copy, `${name}.plan.html`)
 const partFile = join(copy, "parts", `${itemId}.html`)
 if (!existsSync(join(source, `${name}.plan.html`))) {
-  console.error(`check-live-epics:  no preview copy ${join(source, `${name}.plan.html`)}`)
+  console.error(`check-live-epics:  no epic page ${join(source, `${name}.plan.html`)}`)
   process.exit(2)
 }
 rmSync(copyRoot, { recursive: true, force: true })
-cpSync(source, copy, { recursive: true })
-// a preview copy sits two folders under the root;  this one, four
-writeFileSync(docFile, readFileSync(docFile, "utf8").replaceAll('"../../', '"../../../../'))
-const url = pageUrl(`preview-epics/check-live/epics/${name}/${name}.plan.html`)
-if (!url) {
-  rmSync(copyRoot, { recursive: true, force: true })
-  console.error("check-live-epics:  no page server (`spell dev server url` printed nothing)")
-  process.exit(2)
-}
+// the skeleton and its parts:  never the real page's inbox, agents or details
+cpSync(join(source, `${name}.plan.html`), docFile)
+if (existsSync(join(source, "parts"))) cpSync(join(source, "parts"), join(copy, "parts"), { recursive: true })
+const server = await DemoServer.start({ content: copyRoot })
+const url = `${server.base}/epics/${name}/${name}.plan.html`
 
 const problems = []
 const summary = { url, item: itemId, bundle: bundle ?? null, edits: [] }
@@ -83,7 +97,7 @@ try {
   await page.route("**/api/epics/review/**", (route) => route.fulfill({ json: { ...INBOX, listening: listener() } }))
   if (bundle) {
     const script = readFileSync(resolve(bundle))
-    await page.route("**/packages/epics/tools/_assets/spell-ui.js", (route) =>
+    await page.route("**/_epic/assets/spell-ui.js", (route) =>
       route.fulfill({ body: script, contentType: "text/javascript" })
     )
   }
@@ -124,12 +138,12 @@ try {
     writeFileSync(partFile, `${readFileSync(partFile, "utf8")}\n<p id="check-live-part">check-live</p>\n`)
     return () => !!document.getElementById("check-live-part")
   })
-  await edit("the Overview's summary (a child of <epic-overview>)", "doc", () => {
+  await edit("the Overview's summary (<epic-summary>'s text, in <epic-overview>)", "doc", () => {
     const html = readFileSync(docFile, "utf8")
-    const changed = html.replace(/(<p slot="summary">)/, `$1check-live summary. `)
+    const changed = html.replace(/(<epic-summary>)/, `$1check-live summary. `)
     if (changed === html) throw new Error(`no Overview summary in ${docFile}`)
     writeFileSync(docFile, changed)
-    return () => !!document.querySelector("epic-overview > [slot=summary]")?.textContent.includes("check-live summary")
+    return () => !!document.querySelector("epic-overview epic-summary")?.textContent.includes("check-live summary")
   })
   if (errors.length) problems.push(`page errors:  ${errors.join(" | ")}`)
 
@@ -167,6 +181,7 @@ try {
   problems.push(`the check itself failed:  ${error.stack ?? error}`)
 } finally {
   await browser.close()
+  await server.stop()
   rmSync(copyRoot, { recursive: true, force: true })
 }
 
@@ -226,7 +241,7 @@ function takeBlinks() {
  * In the page:  tell its live client `file` changed,
  * as the page server's watcher would (`window.__spellLiveChange`, `packages/server/src/liveClient.ts`).
  * - `file`:  `"doc"`, the page's own file;  `"part"`, item `id`'s part
- * - the page server doesn't watch `preview-epics/` (`package.json` `pageServer.watch`)
+ * - the demo server's own watcher announces it too, a moment later:  the patch is the same either way
  * - everything after this is the real path
  */
 function announce({ file, id }) {
@@ -276,15 +291,3 @@ function valueOf(flag) {
   return at < 0 ? undefined : args[at + 1]
 }
 
-/** This checkout's page server's URL for `file` (from the checkout's root), or `undefined` without one. */
-function pageUrl(file) {
-  try {
-    const out = execFileSync("node", [join(ROOT, "packages/cli/bin/spell.mjs"), "dev", "server", "url", file], {
-      cwd: ROOT,
-      encoding: "utf8"
-    })
-    return out.trim().split("\n").pop() || undefined
-  } catch {
-    return undefined
-  }
-}

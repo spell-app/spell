@@ -390,12 +390,12 @@ describe("<epic-item> actions slot", () => {
   })
 })
 
-// epic `epic-workflow` P25, J183 (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded")
+// Owen, 2026-10-19:  "always show the full title, wrapped" (J183's "ellipsis when collapsed" before)
 
 describe("<epic-item> title, folded and open", () => {
-  test("folded:  ONE line cut with …, its full text the tooltip;  open:  it wraps;  the buttons and the first line stay put", async () => {
+  test("in full, wrapped, folded and open, no tooltip;  the buttons on its first line;  nothing moves as it opens", async () => {
     const wrap = await ElementFixture.render(
-      `<div style="width: 320px"><epic-item id="c5" title="A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps" status="open" overnight><p>Why</p>` +
+      `<div style="width: 320px"><epic-item id="c5" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open" overnight><p>Why</p>` +
         `<button slot="actions" aria-label="Copy">C</button></epic-item></div>`
     )
     const host = wrap.querySelector("epic-item") as ItemHost
@@ -410,15 +410,14 @@ describe("<epic-item> title, folded and open", () => {
       button: button.getBoundingClientRect(),
       bed: bed.getBoundingClientRect()
     }
-    expect(title.getBoundingClientRect().height).toBeLessThan(lineHeight * 1.5)
-    expect(title.scrollWidth).toBeGreaterThan(title.clientWidth)
-    expect(getComputedStyle(title).textOverflow).toBe("ellipsis")
-    expect(title.title).toBe(
-      "A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"
-    )
-    // the pointer finds the tooltip:  the title itself, not a child of it
-    const box = title.getBoundingClientRect()
-    expect(root.elementFromPoint(box.left + 20, box.top + box.height / 2)?.closest("[title]")).toBe(title)
+    expect(title.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
+    expect(title.scrollWidth).toBeLessThanOrEqual(title.clientWidth)
+    expect([getComputedStyle(title).textOverflow, title.hasAttribute("title")]).toEqual(["clip", false])
+    // the buttons:  on the title's first line, at its right
+    expect([
+      folded.bed.top < folded.top + lineHeight,
+      folded.bed.left > title.getBoundingClientRect().right - 0.5
+    ]).toEqual([true, true])
     line.click()
     await ElementFixture.tick()
     expect(host.open).toBe(true)
@@ -430,7 +429,7 @@ describe("<epic-item> title, folded and open", () => {
     expect(bed.getBoundingClientRect().left).toBeCloseTo(folded.bed.left, 0)
     // nothing to unfold:  it never opens, so it always wraps
     const bare = await ElementFixture.render(
-      `<div style="width: 320px"><epic-item id="c6" title="A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps" status="open"></epic-item></div>`
+      `<div style="width: 320px"><epic-item id="c6" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open"></epic-item></div>`
     )
     const bareTitle = bare.querySelector("epic-item")!.shadowRoot!.querySelector<HTMLElement>("[part~='title']")!
     expect([bareTitle.getBoundingClientRect().height > lineHeight * 1.5, bareTitle.hasAttribute("title")]).toEqual([

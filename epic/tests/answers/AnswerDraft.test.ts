@@ -83,6 +83,30 @@ describe("AnswerDraft", () => {
     expect(AnswerDraft.merged(kept, [earlier])).toEqual(kept)
   })
 
+  // I9:  a part that joins after `settle()` takes its text back
+  test("restore():  kept text whose id a part holds again goes back, matched by id and text;  the rest stays", () => {
+    const before = typed({
+      answers: { q1: { picked: ["B"], other: "neither" }, "q1-more": { picked: ["B"] } },
+      comments: { context: "about it" },
+      notes: "my notes"
+    })
+    const { typed: after, kept } = AnswerDraft.settle(before, {})
+    expect(kept.map((each) => each.id)).toEqual(["q1", "context", "notes"])
+    // q1 and the notes come back;  the context section doesn't
+    const present = { q1: "Q1 · Layout?", "q1-A": "A · Grid", "q1-B": "B · List", notes: "Notes" }
+    const back = AnswerDraft.restore(after, kept, present, before)
+    expect(back.typed.answers).toEqual({ q1: { picked: ["B"], other: "neither" }, "q1-more": { picked: ["B"] } })
+    expect([back.typed.notes, back.typed.comments, back.kept, back.typed.kept]).toEqual([
+      "my notes",
+      {},
+      [{ id: "context", label: "1. Context", text: "about it" }],
+      [{ id: "context", label: "1. Context", text: "about it" }]
+    ])
+    // the same id with other words (a draft's, an earlier rewrite's):  left kept
+    const other = [{ id: "context", label: "1. Context", text: "something else" }]
+    expect(AnswerDraft.restore(after, other, { context: "1. Context" }, before).kept).toEqual(other)
+  })
+
   test("newest():  the newest draft newer than the answer;  none newer:  undefined", () => {
     const at = (saved: string) => ({ saved }) as DetailsDraft
     const [old, mid, last] = [at("2026-10-13T19:00:00Z"), at("2026-10-13T21:00:00Z"), at("2026-10-13T22:00:00Z")]

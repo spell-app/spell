@@ -10,19 +10,23 @@
  *   - or `--doc <name>`, a copy of `epics/<name>/`
  *     (its skeleton and parts:  a doc in `<epic-page>` markup;  never its inbox or details)
  *   - or of `--from <folder>` (a converted copy:  `spell dev plan-doc convert <name> --out <folder>`)
- *   - copied to `demo/shots/epics/<name>/<name>.plan.html` (git-ignored):
- *     the review routes take epic pages only (`epics/<name>/<name>.plan.html`), its inbox file lands beside it,
- *     and the tool finds it there (`PlanDocFiles({ root: demo/shots })`)
- * - the server:  a page server of its OWN on this checkout (`PageServer`, no pid file, a free port),
- *   so the routes are this branch's code as it is now;  stopped at the end
+ *   - copied to `src/demo/shots/epics/<name>/<name>.plan.html` (git-ignored), as deep as a real one, so its links
+ *     lead where a real page's do:  the review routes take epic pages only (`epics/<name>/<name>.plan.html`),
+ *     its inbox file lands beside it, and the tool finds it there (`PlanDocFiles({ root: src/demo/shots })`)
+ * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
+ *   serving `src/demo/shots/` as its content folder, so the routes are this branch's code as it is now;
+ *   stopped at the end
+ *   - it WAKES NOBODY (epic `epic-engine` I11):  a Send or Do Now with nobody listening reaches `DemoServer`'s
+ *     stubbed wake, never a window or a session on this machine;  the check asserts the wake was asked for
+ *   - airplane mode is off for it, whatever this machine's switch says
  * - Owen's side, clicked:
  *   - every item's buttons:  ONE group, Approve, Revisit, Make Todo, then Do Now apart (the wand)
  *     - an Overview sub-section's:  without Approve
  *     - the note box's:  Later, the x (skip this:  Owen, 2026-10-09;  no "now":  Do Now is the line's)
  *   - the fill:  Approve pressed dashed green, again none;  Make Todo the same
  *   - Revisit on an item with details:  it opens, its box focused;  ten lines grow it;
- *     the box's x saves a skip WITH its note, the id chip dashed grey
- *   - Revisit on an item without details:  a box under its line;  a draft saved on Tab, back after a reload;
+ *     the box's x saves a skip WITH its note, the id chip dashed in its state's colour
+ *   - Revisit on an item without details (one added to the copy):  a box under its line;  a draft saved on Tab, back after a reload;
  *     Later:  a revisit soon, shown under the line, and Edit puts it back in the box
  *   - Do Now WITH a note (an Overview sub-section):  a revisit now, dashed while nobody listens, the tooltip saying so;
  *     clicked again:  called off, the note back in its box
@@ -65,7 +69,7 @@ import { fileURLToPath } from "node:url"
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
 const SHOTS = join(HERE, "shots")
-const SERVER_TSCONFIG = join(ROOT, "packages/server/tsconfig.json")
+const TSCONFIG = join(ROOT, "tsconfig.json")
 
 if (!process.env.CHECK_REVIEW_UNDER_TSX) {
   const run = spawnSync(
@@ -74,14 +78,14 @@ if (!process.env.CHECK_REVIEW_UNDER_TSX) {
     {
       stdio: "inherit",
       cwd: ROOT,
-      env: { ...process.env, CHECK_REVIEW_UNDER_TSX: "1", TSX_TSCONFIG_PATH: SERVER_TSCONFIG }
+      env: { ...process.env, CHECK_REVIEW_UNDER_TSX: "1", TSX_TSCONFIG_PATH: TSCONFIG }
     }
   )
   process.exit(run.status ?? 1)
 }
 
 const { chromium } = await import("playwright")
-const { PageServer } = await import("@spell-app/server/src/page/PageServer.ts")
+const { DemoServer } = await import("./DemoServer.ts")
 const { PlanDocCommands } = await import("../tool/PlanDocCommands.ts")
 const { PlanDocFiles } = await import("../tool/PlanDocFiles.ts")
 const { ReviewInbox } = await import("../tool/ReviewInbox.ts")
@@ -131,12 +135,16 @@ tool.warn = (text) => void said.push(`! ${text}`)
 /** A judgement call to pick on (I8):  its text's cards, and a reply's;  the pick is the reply's `C`. */
 const pickCall = await addPickCall()
 
-const server = await new PageServer({ root: ROOT }).start({
-  port: 47_600 + Math.floor(Math.random() * 300),
-  pidFile: false
-})
-const base = `http://127.0.0.1:${server.info.port}`
-const pagePath = `/${file.slice(ROOT.length + 1)}`
+/**
+ * An open item with NO details, for the flows that need one (I3 of epic `epic-engine`):  added to the copy, since a
+ * real doc may have none (`epic-workflow`'s are all closed, or have details).  An item with details folds itself
+ * after Later, its said note and Edit folded away with it.
+ */
+const bareItem = await addBareItem()
+
+const server = await DemoServer.start({ content: SHOTS })
+const base = server.base
+const pagePath = `/epics/${docName}/${docName}.plan.html`
 const url = `${base}${pagePath}`
 summary.url = url
 
@@ -152,6 +160,7 @@ try {
   rmSync(inboxFile.replace(/\.json5$/, ".json"), { force: true })
 }
 summary.tool = said
+summary.wakes = server.wakes
 console.log(JSON.stringify(summary, null, 2))
 if (problems.length) {
   console.error(problems.map((problem) => `- ${problem}`).join("\n"))
@@ -238,16 +247,16 @@ async function run() {
     true
   )
 
+  const listed = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("epic-item"), (item) => ({
+      id: item.id,
+      open: item.getAttribute("status") === "open",
+      details: item.hasAttribute("source") || Array.from(item.children).some((child) => !child.hasAttribute("slot"))
+    }))
+  )
   const { question, approved, withDetails, bare } = pickItems(
-    (
-      await page.evaluate(() =>
-        Array.from(document.querySelectorAll("epic-item"), (item) => ({
-          id: item.id,
-          open: item.getAttribute("status") === "open",
-          details: item.hasAttribute("source") || Array.from(item.children).some((child) => !child.hasAttribute("slot"))
-        }))
-      )
-    ).filter((item) => item.id !== pickCall)
+    listed.filter((item) => item.id !== pickCall && item.id !== bareItem),
+    bareItem
   )
   const section = sections[0]
   summary.picked = { question, approved, withDetails, bare, section }
@@ -276,7 +285,8 @@ async function run() {
   await expectMark(page, approved, { action: "approve" }, `Approve on ${approved}`)
 
   // a todo's plane and x (Owen, 2026-10-09):  marked dashed, green and grey;  applied below
-  const todos = items.filter((id) => /^t\d+$/.test(id))
+  // open ones:  a real doc's done todos can't be queued (its chip outlined only while open)
+  const todos = listed.filter((item) => item.open && /^t\d+$/.test(item.id)).map((item) => item.id)
   if (todos.length >= 2) {
     await press(page, todos[0], "next")
     await expectMark(page, todos[0], { action: "next" }, `the plane on ${todos[0]}`)
@@ -318,14 +328,15 @@ async function run() {
   await noteButton(page, withDetails, "skip")
   await expectMark(page, withDetails, { action: "skip", note: SKIP_NOTE }, "the box's x (skip this)")
   expect(`${withDetails}'s box emptied`, await noteValue(page, withDetails), "")
-  // no line button wears a skip:  the id chip alone shows it, dashed grey
+  // no line button wears a skip:  the id chip alone shows it, dashed, in its STATE's colour (no colour of its own:
+  // Owen, 2026-10-11, epic `epic-workflow` I6:  a live mark's chip keeps its state's colour, so the counts match)
   expect(
-    `${withDetails}'s chip, skipped, unsent:  dashed grey`,
+    `${withDetails}'s chip, skipped, unsent:  dashed, its state's colour`,
     await page.evaluate((id) => {
       const chip = rootOf(id).querySelector("[part~='id']")
-      return { fill: chip.dataset.fill, color: chip.dataset.color }
+      return { fill: chip.dataset.fill, color: chip.dataset.color ?? null }
     }, withDetails),
-    { fill: "dashed", color: "grey" }
+    { fill: "dashed", color: null }
   )
 
   // an item without details:  a box under its line, a draft saved on Tab, back after a reload, Later, Edit
@@ -383,6 +394,8 @@ async function run() {
       section
     )
     if (!NOBODY.test(tip)) problems.push(`${section}:  a queued request doesn't say nobody is listening:  "${tip}"`)
+    // nobody listening:  the request woke the epic, through the demo server's stub (I11)
+    expect(`${section}'s Do Now, nobody listening:  the epic woken (stubbed)`, server.wakes.at(-1), docName)
     await page.screenshot({ path: join(out, "review-marked.png") })
     await press(page, section, "details")
     await waitInbox(
@@ -395,7 +408,7 @@ async function run() {
   }
 
   // a pick on the judgement call's REPLY cards (I8):  its set named by position, the pill dashed;  the text's untouched
-  await page.evaluate((id) => (document.getElementById(id).open = true), pickCall)
+  await openBody(page, pickCall)
   await page.waitForTimeout(400)
   expect(`${pickCall}'s pills, text then reply`, await pickPills(page, pickCall), [
     ["choose", "choose"],
@@ -479,6 +492,7 @@ async function run() {
     fill: null,
     state: "recent"
   })
+  await openBody(page, withDetails)
   expect(
     `${withDetails}:  skipped`,
     await page.evaluate((id) => {
@@ -504,6 +518,7 @@ async function run() {
     expect(`${todos[1]}'s chip:  grey`, await chipState(page, todos[1]), { fill: null, state: "old" })
   }
   // the pick:  the call approved with the reply's C (closed), that set chosen, a Noted card, the pill solid
+  await openBody(page, pickCall)
   expect(
     `${pickCall}, picked C from its reply`,
     await page.evaluate((id) => {
@@ -616,7 +631,12 @@ function measure(width) {
     if (title) {
       const range = document.createRange()
       range.selectNodeContents(title)
-      for (const rect of range.getClientRects()) {
+      // a title cut with "…" clips its text:  a range's rects run its full length, past what shows
+      const clips = getComputedStyle(title).overflowX !== "visible"
+      const shown = title.getBoundingClientRect()
+      for (const whole of range.getClientRects()) {
+        const right = clips ? Math.min(whole.right, shown.right) : whole.right
+        const rect = { left: whole.left, top: whole.top, bottom: whole.bottom, right, width: right - whole.left }
         const overlaps =
           rect.right > box.left + 1 &&
           rect.left < box.right - 1 &&
@@ -659,18 +679,15 @@ function measure(width) {
 ////////////////
 
 /**
- * Copy the doc (and its parts) to `folder`, its relative links moved deeper.
- * - the sample sits in `demo/` (two folders under the package), a real doc in `epics/<name>/`
- * - the copy:  six folders under the root
+ * Copy the doc (and its parts) to `folder`, as they are:  the copy is as deep in the demo server's content folder
+ * (`shots/epics/<name>/`) as a real doc is in the real one, so its links need no change.
+ * - the sample:  `review-sample.html`, beside this script, which loads the engine from its routes (`/_epic/...`)
  */
 function copyDoc() {
   rmSync(folder, { recursive: true, force: true })
   mkdirSync(folder, { recursive: true })
   if (docName === "review-sample" && !fromFolder) {
-    const html = readFileSync(join(HERE, "review-sample.html"), "utf8")
-      .replaceAll('"../../', '"../../../../../')
-      .replaceAll('"../pack/', '"../../../../pack/')
-    writeFileSync(file, html)
+    writeFileSync(file, readFileSync(join(HERE, "review-sample.html"), "utf8"))
     return
   }
   const from = resolve(fromFolder ?? join(ROOT, "epics", docName))
@@ -679,15 +696,11 @@ function copyDoc() {
     console.error(`check-review-epics:  no ${skeleton}`)
     process.exit(2)
   }
-  // two folders under the root -> six;  a part one deeper
-  writeFileSync(file, readFileSync(skeleton, "utf8").replaceAll('"../../', '"../../../../../../'))
+  writeFileSync(file, readFileSync(skeleton, "utf8"))
   const parts = join(from, "parts")
   if (!existsSync(parts)) return
   mkdirSync(join(folder, "parts"))
-  for (const name of readdirSync(parts)) {
-    const text = readFileSync(join(parts, name), "utf8").replaceAll('"../../../', '"../../../../../../../')
-    writeFileSync(join(folder, "parts", name), text)
-  }
+  for (const name of readdirSync(parts)) writeFileSync(join(folder, "parts", name), readFileSync(join(parts, name)))
   // never the real doc's inbox, agents or details:  the copy starts clean
 }
 
@@ -708,10 +721,10 @@ async function open(page) {
  * The items to click, four different ones (`items`:  `{ id, open, details }` each, in page order):
  * - a question (Do Now's lifecycle on it)
  * - an open item with details
- * - an open one without
+ * - an open one without:  `bare`, the one added to the copy (`addBareItem()`)
  * - an open item Approve closes or reviews, not a question (approving one needs a recommended option)
  */
-function pickItems(items) {
+function pickItems(items, bare) {
   const taken = new Set()
   const take = (...tests) => {
     for (const test of tests) {
@@ -724,10 +737,6 @@ function pickItems(items) {
     (item) => item.open && item.id.startsWith("q"),
     (item) => item.open
   )
-  const bare = take(
-    (item) => item.open && !item.details,
-    () => true
-  )
   const withDetails = take(
     (item) => item.open && item.details && item.id.startsWith("j"),
     (item) => item.details
@@ -738,6 +747,24 @@ function pickItems(items) {
     (item) => item.open && !item.id.startsWith("t")
   )
   return { question, approved, withDetails, bare }
+}
+
+/**
+ * Open item `id` and wait (4s at most) for its body:  a split doc's part (`source`) loads only once it's opened,
+ * and what Claude wrote into it (a reply, a chosen set) is in the page only then.
+ */
+async function openBody(page, id) {
+  await page.evaluate((id) => (document.getElementById(id).open = true), id)
+  await page
+    .waitForFunction(
+      (id) => {
+        const item = document.getElementById(id)
+        return !item.hasAttribute("source") || item.matches(":state(loaded)")
+      },
+      id,
+      { timeout: 4000 }
+    )
+    .catch(() => problems.push(`${id}:  its body never loaded`))
 }
 
 /** Click `id`'s `action` button, with the mouse (Playwright's CSS reaches into open shadow roots). */
@@ -813,6 +840,12 @@ async function addPickCall() {
     `<p>Two ways to store it.</p>${cards(["A", "B"])}` +
     `<epic-reply from="Claude" at="2026-10-08 10:00"><p>Or a third.</p>${cards(["A", "B", "C"])}</epic-reply>`
   await tool.run(["add", docName, "judgement", "check-review-epics:  which store?", "--details", details])
+  return said.at(-1).toLowerCase()
+}
+
+/** Add to the copy, by the tool, an open issue with no details;  returns its id. */
+async function addBareItem() {
+  await tool.run(["add", docName, "issue", "check-review-epics:  an item with no details"])
   return said.at(-1).toLowerCase()
 }
 

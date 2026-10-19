@@ -94,12 +94,12 @@ describe("<epic-aside> actions slot", () => {
   })
 })
 
-// epic `epic-workflow` P25, J183 (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded")
+// Owen, 2026-10-19:  "always show the full title, wrapped" (J183's "ellipsis when collapsed" before)
 
 describe("<epic-aside> heading, folded and open", () => {
-  test("folded:  ONE line cut with …, its words the tooltip;  open:  it wraps;  the slot's button stays put", async () => {
+  test("in full, wrapped, folded and open, no tooltip;  its first line and the slot's button stay put", async () => {
     const wrap = await ElementFixture.render(
-      `<div style="width: 320px"><epic-aside title="A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"><p>Text</p>` +
+      `<div style="width: 320px"><epic-aside title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open"><p>Text</p>` +
         `<button slot="actions" aria-label="Copy">C</button></epic-aside></div>`
     )
     const host = wrap.querySelector("epic-aside")!
@@ -107,11 +107,11 @@ describe("<epic-aside> heading, folded and open", () => {
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     const lineHeight = parseFloat(getComputedStyle(heading).lineHeight)
     const folded = { top: heading.getBoundingClientRect().top, button: button.getBoundingClientRect() }
-    expect(heading.getBoundingClientRect().height).toBeLessThan(lineHeight * 1.5)
-    expect(heading.scrollWidth).toBeGreaterThan(heading.clientWidth)
-    expect(heading.title).toBe(
-      "Aside:  A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"
-    )
+    expect([heading.getBoundingClientRect().height > lineHeight * 1.5, heading.hasAttribute("title")]).toEqual([
+      true,
+      false
+    ])
+    expect(folded.button.top).toBeLessThan(folded.top + lineHeight)
     part(host, "toggle").click()
     await ElementFixture.tick()
     expect(heading.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)

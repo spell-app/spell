@@ -1,5 +1,5 @@
 /**
- * Check P10's page header and section tools on preview copies (`preview-epics/<name>/`), in a real browser:  the
+ * Check P10's page header and section tools on scratch copies of epic pages, in a real browser:  the
  * review line, the step label (the state in it), the Phases section's `open/all` badge (against the items and phases in
  * the doc), the state filter (a chip hides its items and says how many), and the phases' plan changes (Owen,
  * 2026-10-11:  "lose the "Plan changes" surround"):  no box above the phases nor in a phase, each changed phase's pen
@@ -8,16 +8,19 @@
  * Usage (from the repo root):
  *   node src/demo/check-header-epics.mjs [--doc <name>]... [outDir]
  * - the docs:  `review-review` (plan changes) and `epic-components` (items in every state) unless named
- * - the server:  a page server of its OWN on this checkout (`PageServer`, no pid file, a free port);  stopped at the
- *   end.  Send / Review Now need the review routes on an epic page's path:  `check-review-epics.mjs` checks those
+ *   - each a SCRATCH COPY of `epics/<name>/` (its skeleton and parts, never its inbox), in
+ *     `src/demo/shots/header/epics/<name>/` (git-ignored), as deep as a real one, so its links need no change
+ * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
+ *   serving `src/demo/shots/header/`;  it wakes nobody;  stopped at the end.
+ *   Send / Review Now aren't pressed here:  `check-review-epics.mjs` checks those
  * - fails (exit 1) on a page error, a wrong count, a filter that doesn't hide, a missing box, a header control or
  *   chip running past the window, or a glyph off its box's centre by more than 1px;  at 280px and 900px, light and dark
- * - screenshots (outDir, default `demo/shots/p10/`):  `<doc>-<width>-<scheme>-top.png` (the header),
+ * - screenshots (outDir, default `src/demo/shots/p10/`):  `<doc>-<width>-<scheme>-top.png` (the header),
  *   `-phases.png`, `-filtered.png`
  * - re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
-import { mkdirSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -34,7 +37,7 @@ if (!process.env.CHECK_HEADER_UNDER_TSX) {
       env: {
         ...process.env,
         CHECK_HEADER_UNDER_TSX: "1",
-        TSX_TSCONFIG_PATH: join(ROOT, "packages/server/tsconfig.json")
+        TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json")
       }
     }
   )
@@ -42,7 +45,7 @@ if (!process.env.CHECK_HEADER_UNDER_TSX) {
 }
 
 const { chromium } = await import("playwright")
-const { PageServer } = await import("@spell-app/server/src/page/PageServer.ts")
+const { DemoServer } = await import("./DemoServer.ts")
 
 const args = process.argv.slice(2)
 const docs = args.flatMap((arg, index) => (args[index - 1] === "--doc" ? [arg] : []))
@@ -52,10 +55,9 @@ mkdirSync(out, { recursive: true })
 const problems = []
 const summary = {}
 
-const server = await new PageServer({ root: ROOT }).start({
-  port: 47_900 + Math.floor(Math.random() * 90),
-  pidFile: false
-})
+const CONTENT = join(HERE, "shots/header")
+for (const doc of docs) copyDoc(doc)
+const server = await DemoServer.start({ content: CONTENT, port: 47_900 + Math.floor(Math.random() * 90) })
 const browser = await chromium.launch()
 try {
   for (const doc of docs) await check(doc)
@@ -77,7 +79,7 @@ if (problems.length) {
 
 /** Every width and scheme of `doc`. */
 async function check(doc) {
-  const url = `http://127.0.0.1:${server.info.port}/preview-epics/${doc}/${doc}.plan.html`
+  const url = `${server.base}/epics/${doc}/${doc}.plan.html`
   for (const scheme of ["light", "dark"]) {
     for (const width of [280, 900]) {
       const context = await browser.newContext({
@@ -260,4 +262,22 @@ function readFacts(width) {
       badges
     }
   }
+}
+
+/** Copy epic page `doc` (and its parts) into the content folder, as they are;  never its inbox, agents or details. */
+function copyDoc(doc) {
+  const from = join(ROOT, "epics", doc)
+  const skeleton = join(from, `${doc}.plan.html`)
+  if (!existsSync(skeleton)) {
+    console.error(`check-header-epics:  no ${skeleton}`)
+    process.exit(2)
+  }
+  const folder = join(CONTENT, "epics", doc)
+  rmSync(folder, { recursive: true, force: true })
+  mkdirSync(folder, { recursive: true })
+  writeFileSync(join(folder, `${doc}.plan.html`), readFileSync(skeleton))
+  const parts = join(from, "parts")
+  if (!existsSync(parts)) return
+  mkdirSync(join(folder, "parts"))
+  for (const name of readdirSync(parts)) writeFileSync(join(folder, "parts", name), readFileSync(join(parts, name)))
 }

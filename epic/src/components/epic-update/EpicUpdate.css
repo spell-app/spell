@@ -3,6 +3,8 @@
  * - A block (`:state(block)`):  a faint orange box (orange is "changed since you looked").
  *   - Its title row:  the fold chevron, then the words:  `Update: <summary>`, the date floating right of its FIRST
  *     line, the lines under it running the full width (as a comment thread's message keeps room for its time).
+ *     ALWAYS in full, folded or open (Owen, 2026-10-19:  "always show the full title, wrapped";  J183's "ellipsis
+ *     when collapsed" before).
  *   - The date as a comment thread's message shows its time (`spell-doc.css`, `.spell-thread-when`):
  *     smaller, tabular figures, muted;  its float takes the title's font, so its line box and baseline are the
  *     title's first line's, and the smaller date sits on that baseline.
@@ -69,19 +71,6 @@
   }
   .slotted-actions[hidden] {
     display: none;
-  }
-  /*
-   * FOLDED, the title is ONE line beside the date, cut with "…", its words the tooltip;  OPEN, it wraps under the date
-   * (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded").  Its first line never moves as it switches.
-   */
-  :host(:state(block):not(:state(open))) .title {
-    display: block;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .title[title] > * {
-    pointer-events: none;
   }
   .time {
     color: var(--epic-muted, var(--ui-text-muted));

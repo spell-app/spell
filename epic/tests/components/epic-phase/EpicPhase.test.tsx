@@ -208,12 +208,12 @@ function firstLineTop(element: Element): number {
   return range.getBoundingClientRect().top
 }
 
-// epic `epic-workflow` P25, J183 (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded")
+// Owen, 2026-10-19:  "always show the full title, wrapped" (J183's "ellipsis when collapsed" before)
 describe("<epic-phase> title, folded and open", () => {
-  test("folded:  ONE line cut with …, the pen never cut, its full title the tooltip;  open:  it wraps", async () => {
+  test("in full, wrapped, folded and open, no tooltip;  the pen on its first line;  nothing moves as it opens", async () => {
     const host = await render(
       `<div style="width: 320px"><epic-section id="phases" kind="phases" open>` +
-        `<epic-phase id="p-long" title="A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps" status="active" changes="2"><button slot="actions" aria-label="Copy">C</button></epic-phase>` +
+        `<epic-phase id="p-long" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="active" changes="2"><button slot="actions" aria-label="Copy">C</button></epic-phase>` +
         `</epic-section></div>`,
       "#p-long"
     )
@@ -223,18 +223,17 @@ describe("<epic-phase> title, folded and open", () => {
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     const lineHeight = parseFloat(getComputedStyle(words).lineHeight)
     const folded = { top: firstLineTop(words), button: button.getBoundingClientRect() }
-    expect(header.getBoundingClientRect().height).toBeLessThan(lineHeight * 1.5)
-    expect(words.scrollWidth).toBeGreaterThan(words.clientWidth)
-    expect(header.title).toBe(
-      "P1 · A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"
-    )
-    // the pen:  whole, inside the title's box, after the cut words
+    expect(header.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
+    expect(words.scrollWidth).toBeLessThanOrEqual(words.clientWidth)
+    expect(header.hasAttribute("title")).toBe(false)
+    // the pen:  whole, inside the title's box, after the words, on their first line
     const [penBox, headerBox, wordsBox] = [pen, header, words].map((each) => each.getBoundingClientRect())
-    expect([penBox.width > 0, penBox.right <= headerBox.right + 0.5, penBox.left >= wordsBox.right - 0.5]).toEqual([
-      true,
-      true,
-      true
-    ])
+    expect([
+      penBox.width > 0,
+      penBox.right <= headerBox.right + 0.5,
+      penBox.left >= wordsBox.right - 0.5,
+      penBox.top < folded.top + lineHeight
+    ]).toEqual([true, true, true, true])
     inner(host).shadowRoot!.querySelector<HTMLElement>('[part~="toggle"]')!.click()
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(true)

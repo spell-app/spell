@@ -295,16 +295,22 @@ labels):
   red needs you). `review-as` stays in the doc as the record, never drawn on the buttons.
 - It flips the old rule (solid meant "not sent yet", 2026-10-06).
 - Send never goes solid on a details page: the page can't tell when Claude is done with the answer.
-- An item's id chip MATCHES its chosen review button while Owen's mark is live (2026-10-08): that button's colour and fill (Approve pressed, not sent: dashed green).
+- An item's id chip wears the FILL of Owen's live mark, in its own state's colour (Owen, 2026-10-11): a red question
+  marked Approve, not sent, is a dashed red chip. From 2026-10-08 it took the button's colour too, until a red item
+  marked Revisit turned blue and its section's red count matched no chip.
 
 ### The id chip: where your answer stands
 
 Owen, 2026-10-10: "it's not clear when an answer is queued and being addressed, so I keep filling in answers over and
 over ... leaning into outlines in the item chips". The chip's FILL says how far your answer got:
 
-- DASHED, in the answer's colour: given, not sent
+- DASHED: given, not sent
 - OUTLINED: sent: Claude has it, is on it, or the work it asked for is still due
 - SOLID: done: Claude did it, or noted it and nothing more is due (the item's state colour)
+
+While your own mark is live (dashed, or outlined once sent) the chip keeps its state's colour, and the Colour column
+below is the button's. Once Claude has it in hand, the outline takes the column's colour: a pick taken, a todo
+queued (green), work underway (blue).
 
 So a dashed or outlined chip is ANSWERED: don't answer it again. A solid red (needs you) or orange (Claude's options,
 your pick) chip waits on you, and only those (the toolbar counts them).

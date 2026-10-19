@@ -56,6 +56,8 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *   from its question (`ask`), which holds the picks.
  *   - its header:  the fold chevron (when it has pros and cons), then its tick box labelled by `A · title` (a click
  *     on the title ticks it), the thumbs-up, its `badge`;  at the end, the (?) of `more-details` and its state icon
+ *   - pick one:  its tick box is a tab stop only when its question says so (`EpicAsk.tabStop`, a roving `tabindex`);
+ *     the question moves the pick with the arrow keys
  *   - a comment box under it, always shown (`<epic-text-box>` for `<key>-<letter>`)
  *   - ticked:  framed green;  `done`, under the question's Open:  hidden
  *   - a tick, an untick or the (?) sends `ui-change`, which its question takes
@@ -114,6 +116,16 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   @E.cssState("ticked")
   get isTicked(): boolean {
     return !!this.ask && this.ask.isPicked(this.letter ?? "")
+  }
+
+  /**
+   * Its tick box's `tabindex`:  pick one, `0` when its question's tab stop is this option, else `-1` (a roving
+   * `tabindex`, I5);  pick several, none (every tick box a stop).
+   */
+  get tickTabIndex(): number | undefined {
+    const stop = this.ask?.tabStop
+    if (stop === undefined) return undefined
+    return stop === this.letter ? 0 : -1
   }
 
   /** "Provide more details" pressed on it, in its question. */
@@ -312,6 +324,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             class={TICK}
             part={this.partForName("tick")}
             checked={this.isTicked}
+            tabindex={this.tickTabIndex}
             onChange={this.onTick}
           />
           <span class={TITLE} part={this.partForName("title")}>

@@ -23,7 +23,8 @@
  *   (one agent, its `/api/epics/agents` answered here)
  * - `--list`:  print every control and its tooltip (the audit's table), not just the ones without
  * - fails (exit 1) on a page error, or a control with no tooltip
- * - the server:  a page server of its OWN on this checkout (`PageServer`, no pid file, a free port);  stopped at the end
+ * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
+ *   serving `src/demo/shots/` as its content folder;  it wakes nobody;  stopped at the end
  * - re-runs itself under `tsx` (the page server and the tool are TypeScript)
  */
 import { spawnSync } from "node:child_process"
@@ -45,7 +46,7 @@ if (!process.env.CHECK_TOOLTIPS_UNDER_TSX) {
       env: {
         ...process.env,
         CHECK_TOOLTIPS_UNDER_TSX: "1",
-        TSX_TSCONFIG_PATH: join(ROOT, "packages/server/tsconfig.json")
+        TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json")
       }
     }
   )
@@ -53,7 +54,7 @@ if (!process.env.CHECK_TOOLTIPS_UNDER_TSX) {
 }
 
 const { chromium } = await import("playwright")
-const { PageServer } = await import("@spell-app/server/src/page/PageServer.ts")
+const { DemoServer } = await import("./DemoServer.ts")
 const { PlanDocCommands } = await import("../tool/PlanDocCommands.ts")
 const { PlanDocFiles } = await import("../tool/PlanDocFiles.ts")
 
@@ -108,11 +109,8 @@ tool.print = () => {}
 tool.warn = () => {}
 if (docName === "tooltip-sample") await addPickCall()
 
-const server = await new PageServer({ root: ROOT }).start({
-  port: 47_300 + Math.floor(Math.random() * 300),
-  pidFile: false
-})
-const url = `http://127.0.0.1:${server.info.port}/${file.slice(ROOT.length + 1)}`
+const server = await DemoServer.start({ content: SHOTS, port: 47_300 + Math.floor(Math.random() * 300) })
+const url = `${server.base}/epics/${docName}/${docName}.plan.html`
 
 const browser = await chromium.launch()
 let controls = []
@@ -307,15 +305,15 @@ function survey() {
 // ## Helpers
 ////////////////
 
-/** Copy the doc (and its parts) to `folder`, its relative links moved deeper (as `check-review-epics.mjs` does). */
+/** Copy the doc (and its parts) to `folder`, as they are (as `check-review-epics.mjs` does). */
 function copyDoc() {
   rmSync(folder, { recursive: true, force: true })
   mkdirSync(folder, { recursive: true })
   if (docName === "tooltip-sample") {
-    const html = readFileSync(join(HERE, "review-sample.html"), "utf8")
-      .replaceAll('"../../', '"../../../../../')
-      .replaceAll('"../pack/', '"../../../../pack/')
-      .replaceAll('epic="review-sample"', 'epic="tooltip-sample"')
+    const html = readFileSync(join(HERE, "review-sample.html"), "utf8").replaceAll(
+      'epic="review-sample"',
+      'epic="tooltip-sample"'
+    )
     writeFileSync(file, html)
     return
   }
@@ -325,14 +323,11 @@ function copyDoc() {
     console.error(`check-tooltips-epics:  no ${skeleton}`)
     process.exit(2)
   }
-  writeFileSync(file, readFileSync(skeleton, "utf8").replaceAll('"../../', '"../../../../../../'))
+  writeFileSync(file, readFileSync(skeleton))
   const parts = join(from, "parts")
   if (!existsSync(parts)) return
   mkdirSync(join(folder, "parts"))
-  for (const name of readdirSync(parts)) {
-    const text = readFileSync(join(parts, name), "utf8").replaceAll('"../../../', '"../../../../../../../')
-    writeFileSync(join(folder, "parts", name), text)
-  }
+  for (const name of readdirSync(parts)) writeFileSync(join(folder, "parts", name), readFileSync(join(parts, name)))
 }
 
 /** A judgement call with option cards, so their Choose pills are drawn. */

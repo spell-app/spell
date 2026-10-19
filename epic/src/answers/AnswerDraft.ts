@@ -85,6 +85,64 @@ export class AnswerDraft {
   }
 
   /**
+   * Move KEPT text back where it was typed, now that a part holding its id has joined the page again (`present`,
+   * that part's ids):  a part slower than `settle()` (I9), which would otherwise show it twice, in the part and in
+   * the kept box.
+   * - only what `settle()` took off the page itself:  `gone`, the page as typed just before it (each settle's laid
+   *   over the last), holds each kept text's own value, matched by id AND text
+   *   - a question's picks, Other and "more details";  an option's pick;  a comment;  the notes
+   *   - kept text that came back from a draft or an answer sent has no `gone`:  it stays kept
+   * - what's moved back is laid into `typed`, which learns the part's ids (`present`);  the rest stays kept, in order
+   */
+  static restore(
+    typed: TypedAnswer,
+    kept: KeptText[],
+    present: PartLabels,
+    gone: TypedAnswer
+  ): { typed: TypedAnswer; kept: KeptText[] } {
+    const next: TypedAnswer = {
+      ...typed,
+      answers: { ...typed.answers },
+      comments: { ...typed.comments },
+      labels: { ...typed.labels, ...present }
+    }
+    const stays = kept.filter((entry) => !AnswerDraft.restoreOne(next, entry, present, gone))
+    if (stays.length) next.kept = stays.map((each) => ({ ...each }))
+    else delete next.kept
+    return { typed: next, kept: stays }
+  }
+
+  /** `restore()` for one kept `entry`:  laid back into `next` (and `true`), or left (`false`). */
+  private static restoreOne(next: TypedAnswer, entry: KeptText, present: PartLabels, gone: TypedAnswer): boolean {
+    const { id, text } = entry
+    if (!(id in present)) return false
+    const answer = gone.answers[id]
+    const more = gone.answers[`${id}${MORE_SUFFIX}`]
+    if (answer && !isMore(gone, id) && AnswerDraft.describe(gone, id, answer, more) === text) {
+      next.answers[id] = { ...answer, picked: [...answer.picked] }
+      if (more) next.answers[`${id}${MORE_SUFFIX}`] = { picked: [...more.picked] }
+      return true
+    }
+    if (text === PICKED_IT) {
+      const key = Object.keys(gone.answers).find((each) => id.startsWith(`${each}-`) && !isMore(gone, each))
+      const letter = key && id.slice(key.length + 1)
+      if (!key || !letter || !gone.answers[key]!.picked.includes(letter)) return false
+      const now = next.answers[key] ?? { picked: [] }
+      next.answers[key] = { ...now, picked: [...now.picked.filter((each) => each !== letter), letter] }
+      return true
+    }
+    if (id === NOTES_KEY && gone.notes === text) {
+      next.notes = text
+      return true
+    }
+    if (gone.comments[id] === text) {
+      next.comments[id] = text
+      return true
+    }
+    return false
+  }
+
+  /**
    * The newest of `drafts` (the server's, the browser's) that is newer than the answer `sent`;  `undefined` for
    * none:  a draft older than the answer was sent already (another window's, or Send's draft deleted late).
    */

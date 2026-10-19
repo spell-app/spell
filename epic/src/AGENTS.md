@@ -63,15 +63,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Every element with a TITLE ROW has an `actions` slot in it (epic `epic-workflow` P25):
     `<epic-section>`, `<epic-overview>`, `<epic-phase>`, `<epic-item>`, `<epic-aside>`, `<epic-code>`, `<epic-update>`.
     - What a page puts there (`<ui-button slot="actions">`) sits after the title, before the element's own buttons.
-    - The title (Owen, 2026-10-18, J183:  "ellipsis when collapsed, wrap when expanded"):
-      - folded:  ONE line, cut with "…", its full text the tooltip (`title`)
-      - open (or an item with nothing to unfold):  as many lines as it needs
-      - a phase's plan-changed pen comes after it, never cut (`FoldPieces.mark`)
-      - everything in the row sits on the title's FIRST line, so neither the title's first line nor a button moves
-        as it switches (`--_epic-fold-line` in `EpicFold.css`;  the item's line was one-line cells already)
+    - The title (Owen, 2026-10-19:  "I don't like the ellipsis in a collapsed issue/etc header -- make it always show
+      the full title, wrapped"):
+      - ALWAYS in full, as many lines as it needs, folded or open:  no "…", no tooltip
+      - Before:  J183 (2026-10-18), "ellipsis when collapsed, wrap when expanded".
+      - a phase's plan-changed pen comes after it, on its first line (`FoldPieces.mark`)
+      - everything in the row sits on the title's FIRST line, so nothing moves as it folds
+        (`--_epic-fold-line` in `EpicFold.css`;  the item's line is one-line cells)
       - collapse-all still shows only while open, before the chevron, as it did:  it moves the buttons before it
-      - NOT `<ui-section>` on guides:  their titles are short labels, and the tooltip would mean reaching into
-        Spell UI's shadow root
+      - CSS and the elements' own drawing only:  the page's markup is unchanged, so no migration step
+      - NOT `<ui-section>` on guides and details pages:  at phone width a title there still runs on under its buttons,
+        fading out (`spell-doc.css`;  Owen, 2026-10-10:  "stay in place and overlap")
     - A click on it never folds:  `CONTROLS` in `Fold.tsx` takes the slot and its box (`Fold.actions()`).
     - The slot, its child spec and its part:  [Fold.types.ts](components/epic-item/Fold.types.ts), which each
       vocabulary imports.
@@ -1173,6 +1175,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - Text whose id the rewrite removed is KEPT:  a box of its own above the notes, "Kept from before the page changed".
     - drawn by the notes box (`<epic-text-box type="notes">`), each under its old title with a × to drop it
     - sent with the rest (`kept`, `[{ id, label, text }]`)
+    - a part slower than the moment the page waits for a rewrite's parts (`DETAILS_SETTLE_MS`, 250ms) takes its text
+      back out of the box as it joins (`AnswerForm.takeBack()`, `AnswerDraft.restore()`;  epic `epic-engine` I9):
+      never shown twice
     - `epic ask answer` / `wait` print it last, "Kept from before the page changed:"
   - The rules (what's laid over what, what's kept):  `AnswerDraft`, in `$/epics/answers`.
 - `findPages()` skips every `details/` folder:  not in the index, not checked by `docs update`.
@@ -1363,7 +1368,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - Claude's:  a light violet box (`--ui-violet` mixed light), no side bar.
         - Its outline only a faint violet ring drawn as a shadow, its border clear, so nothing moves.
           Owen, 2026-10-10:  "lighten border around your replies, make it just border-as-shadow".
-        - Also "Taken into <epic> P<n>", and "Answered in the epic page" for an answer with no words here.
+        - Also "Taken into <epic> · <phase>", and "Answered in the epic page" for an answer with no words here.
+          - linked by the phase's stable id, so an insert never moves it (epic `epic-engine` I16, `takenInto()`);
+            one taken before:  "<epic> P<n>", at `#p<n>`
       - A green Done line once closed:  a check, "That's good." or "Skipped", the commit Claude named.
         A faint green ring, the same way.
       - While Claude THINKS about it (the comment's `working`):  "Claude: thinking…" last, in Claude's box.
@@ -1726,7 +1733,11 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
 - The plan-doc checks are in [the demo folder](demo/), with the review runtime.
   - Each runs Playwright on a COPY of a doc, never a shared one.
   - Their header comments have the details.
-  - `node src/demo/check-review-epics.mjs [--stub] [--doc <name>] [outDir]`, from the root:
+  - Every one serves its copies from a page server of its own,
+    [DemoServer.ts](demo/DemoServer.ts) (epic `epic-engine` I11):  spell-epic's `EpicServer`, this checkout's code.
+    - It WAKES NOBODY:  a Send or Do Now with nobody listening reaches a stubbed wake, never a window or a session.
+    - Airplane mode is off for it, whatever the machine's switch says.
+  - `node src/demo/check-review-epics.mjs [--doc <name>] [outDir]`, from the root:
     - It clicks through every review flow on `<epic-*>` controls, and reads each back from the inbox:
       Approve, Make Todo, Revisit and its note box, drafts across a reload, Later, Do Now, nevermind,
       Add Details Now, Send, Review Now.

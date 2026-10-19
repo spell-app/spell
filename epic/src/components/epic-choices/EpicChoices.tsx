@@ -4,6 +4,8 @@ import type { JSX } from "@solidjs/web"
 import { E } from "$/ui/core"
 
 import { Fold } from "$/epics/components/epic-item/Fold"
+// Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
+import { EpicAsk } from "$/epics/components/epic-ask/EpicAsk"
 
 import { epicChoicesVocabulary } from "./EpicChoices.en"
 import {
@@ -29,6 +31,8 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *   - find-in-page unfolds it
  *   - the folded heading names the chosen one, green with a check (`Choices  ✓ Chosen:  B · Bananas`),
  *     so the pick stays in sight while folded (Owen, 2026-10-10)
+ * - An `<epic-ask>`'s options, pick one:  a radio group (`role="radiogroup"`, labelled by the question's
+ *   `groupLabel`), which the question moves through with the arrow keys (I5).
  * - Reads its item's `answered` and its own `chosen` as they change (`EpicChoices.watch()`);
  *   `<epic-option>` reads the same, through the same statics.
  ****************/
@@ -51,6 +55,27 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
   @E.cssState("answering")
   get isAnswering(): boolean {
     return this.domElement.parentElement?.localName === ASK_TAG
+  }
+
+  /** The `<epic-ask>` it holds the options of, drawn;  `undefined` elsewhere.  Read again as it connects. */
+  @E.state accessor ask: EpicAsk | undefined = EpicChoices.askFor(this.domElement)
+
+  /** While connected, find its question again:  it may have moved. */
+  @E.whileConnected
+  protected findAsk() {
+    this.ask = EpicChoices.askFor(this.domElement)
+    return undefined
+  }
+
+  /** The drawn `<epic-ask>` whose options `element` holds, if any. */
+  private static askFor(element: Element): EpicAsk | undefined {
+    const parent = element.parentElement as E.DOMElement | null
+    return parent?.localName === ASK_TAG ? (parent.component as EpicAsk | undefined) : undefined
+  }
+
+  /** A pick-one question's options:  a radio group, labelled by the question (I5). */
+  get isRadioGroup(): boolean {
+    return !!this.ask && !this.ask.multiple
   }
 
   /** Its options' box:  folded until the reader opens it. */
@@ -95,7 +120,12 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
 
   render(): JSX.Element {
     return (
-      <div class={this.rootClass} part={this.partForName("base")}>
+      <div
+        class={this.rootClass}
+        part={this.partForName("base")}
+        role={this.isRadioGroup ? "radiogroup" : undefined}
+        aria-label={this.isRadioGroup ? this.ask?.groupLabel : undefined}
+      >
         <Show when={this.questionIsAnswered} fallback={<slot />}>
           <button
             type="button"

@@ -9,8 +9,8 @@ import { Fold } from "$/epics/components/epic-item/Fold"
  * ### `EpicPanel`
  * Base of the epic page's folded PANELS in prose -- `<epic-aside>`, `<epic-code>`:  a heading that folds a body.
  * - nothing else:  no sticky line, no contents entry (that's `EpicFold`'s, for sections and phases)
- * - The heading is a `<button>`:  the fold chevron, then `heading()`:  folded, ONE line cut with "…", its words the
- *   tooltip;  open, as many lines as it needs (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded").
+ * - The heading is a `<button>`:  the fold chevron, then `heading()`:  in full, as many lines as it needs, folded or
+ *   open (Owen, 2026-10-19:  "always show the full title, wrapped").
  *   After it in the row, the `actions` slot (`Fold.actions()`):  the page's own buttons, and the docs runtime's
  *   bullhorn.  The button ends where they start, so a click on one never folds the panel.
  *   The body (`body()`:  the element's children by default) is hidden `until-found` while folded,
@@ -69,12 +69,8 @@ export abstract class EpicPanel<V extends E.ComponentVocabulary> extends E.UICom
             onClick={this.fold.toggle}
           >
             {Fold.chevron()}
-            {/* folded:  ONE line, cut with "…", its words the tooltip;  open:  it wraps (EpicPanel.css) */}
-            <span
-              class={HEADING}
-              part={this.partForName("heading" as never)}
-              title={this.isOpen ? undefined : this.heading()}
-            >
+            {/* in full, wrapped, folded or open (EpicPanel.css) */}
+            <span class={HEADING} part={this.partForName("heading" as never)}>
               {this.heading()}
             </span>
           </button>

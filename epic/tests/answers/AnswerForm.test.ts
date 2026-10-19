@@ -393,6 +393,80 @@ describe("AnswerForm's draft (P18)", () => {
     expect(form.gather().kept).toEqual([{ id: "context", label: "Section context", text: "about the context" }])
   })
 
+  // I9:  a part slower than the settle (`DETAILS_SETTLE_MS`) showed its text twice:  back in it, and kept
+  test("a part that comes back after the settle takes its text back OUT of the kept box:  never shown twice", async () => {
+    vi.useFakeTimers()
+    const server = new FakeServer()
+    const form = formOn(server)
+    const q1 = new FakeAsk(at("a"), "q1")
+    const q2 = new FakeAsk(at("b"), "q2")
+    const box = new FakeBox(at("c"), "context")
+    const leaves = [q1, q2, box].map((part) => form.add(part))
+    q1.picks = ["B"]
+    form.edited()
+    q2.picks = ["A"]
+    form.edited()
+    box.text = "about the context"
+    form.edited()
+    for (const leave of leaves) leave()
+    await vi.advanceTimersByTimeAsync(250)
+    expect(form.kept.map((each) => each.id)).toEqual(["q1", "q2", "context"])
+    // the rewrite's parts, slower than the settle:  q1 and the context section come back, q2 doesn't
+    const lateQ1 = new FakeAsk(at("a"), "q1")
+    form.add(lateQ1)
+    const lateBox = new FakeBox(at("c"), "context")
+    form.add(lateBox)
+    expect([lateQ1.picks, lateBox.text]).toEqual([["B"], "about the context"])
+    expect(form.kept).toEqual([{ id: "q2", label: "Q2 · Which?", text: "picked A · Option A" }])
+    expect(form.gather()).toEqual({
+      answers: { q1: { picked: ["B"] } },
+      comments: { context: "about the context" },
+      notes: "",
+      kept: [{ id: "q2", label: "Q2 · Which?", text: "picked A · Option A" }]
+    })
+    // the draft follows:  the text in its part, not kept
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(server.drafts.at(-1)).toMatchObject({
+      answers: { q1: { picked: ["B"] } },
+      comments: { context: "about the context" },
+      kept: [{ id: "q2", label: "Q2 · Which?", text: "picked A · Option A" }]
+    })
+    // a later settle keeps it where it is
+    form.add(new FakeAsk(at("b"), "q3"))()
+    await vi.advanceTimersByTimeAsync(250)
+    expect([form.kept.map((each) => each.id), lateQ1.picks]).toEqual([["q2"], ["B"]])
+  })
+
+  test("a late option takes its pick back;  kept text the part never held (other words, a draft's) stays kept", async () => {
+    vi.useFakeTimers()
+    const form = formOn(new FakeServer())
+    const ask = new FakeAsk(at("a"), "q1")
+    const leave = form.add(ask)
+    ask.picks = ["A", "C"]
+    form.edited()
+    leave()
+    const without = new FakeAsk(at("a"), "q1", ["A", "B"])
+    const leaveWithout = form.add(without)
+    await vi.advanceTimersByTimeAsync(250)
+    expect(form.kept.map((each) => each.id)).toEqual(["q1-C"])
+    // option C comes back, later
+    leaveWithout()
+    const back = new FakeAsk(at("a"), "q1")
+    form.add(back)
+    expect([back.picks, form.kept]).toEqual([["A", "C"], []])
+
+    // kept text from a draft put back (no settle of this page's own):  stays kept, the part shows what was sent
+    const server = new FakeServer()
+    server.draft = draftOf("2026-10-14T05:00:00.000Z", {
+      kept: [{ id: "context", label: "Section context", text: "from before" }]
+    })
+    const reloaded = formOn(server)
+    await reloaded.load()
+    const box = new FakeBox(at("c"), "context")
+    reloaded.add(box)
+    expect([box.text, reloaded.kept.length]).toEqual(["", 1])
+  })
+
   test("a pick of an option gone from a question still there is kept under the option, and un-picked", async () => {
     vi.useFakeTimers()
     const form = formOn(new FakeServer())

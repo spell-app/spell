@@ -71,8 +71,8 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  * - The page's own buttons for its title (`slot="actions"`, `Fold.types.ts`):  first at the title's end, before its
  *   own tools (the badge, a phase's estimate, stays just after the title, where `<ui-section>` draws it).
  *   A click on one never folds:  `<ui-section>`'s actions never do.
- * - Its title (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded"):  folded, ONE line cut with "…", its
- *   full text the tooltip (`titleTip()`);  open, as many lines as it needs.  The buttons stay put either way.
+ * - Its title (Owen, 2026-10-19:  "always show the full title, wrapped"):  in full, as many lines as it needs,
+ *   folded or open;  the buttons sit on its first line.
  * - The DOM element's own `title` (a phase's, a sub-section's) would be a browser tooltip over all its content:
  *   the wrapper's EMPTY `title` stops it there (T8).
  * - The rail:  its DOM element's `contentsEntry` (`DOMEpicFoldElement`) is what the page's rail shows for it
@@ -296,9 +296,8 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
 
   /**
    * The fold:  the inner `<ui-section>` around the subclass's title pieces, the part note and the children.
-   * - `title`:  the header's content (`slot="header"` of the inner section):  one line cut with "…" while folded,
-   *   wrapping while open
-   * - `mark`:  after the title, never cut (a phase's plan-changed pen)
+   * - `title`:  the header's content (`slot="header"` of the inner section):  in full, wrapping, folded or open
+   * - `mark`:  after the title, on its first line, never cut (a phase's plan-changed pen)
    * - `icon`:  its icon
    * - `tools`:  what goes at the title's end (`slot="actions"` of the inner section), after the page's own buttons
    *   (its `actions` slot)
@@ -325,8 +324,8 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
               {pieces.icon!()}
             </span>
           </Show>
-          {/* folded:  ONE line, cut with "…", its full text the tooltip;  open:  it wraps (EpicFold.css) */}
-          <span slot="header" class="header" title={this.isOpen ? undefined : this.titleTip()}>
+          {/* in full, wrapped, folded or open (EpicFold.css) */}
+          <span slot="header" class="header">
             <span class="words">{pieces.title()}</span>
             {pieces.mark?.()}
           </span>
@@ -358,16 +357,6 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
         </ui-section>
       </div>
     )
-  }
-
-  /**
-   * The folded title's tooltip:  its title as the page's rail shows it (`3. Questions`, `P5 · Drawing Elements`),
-   * since one line may cut it.
-   * - reads `title`, so a live update's new title follows
-   */
-  protected titleTip(): string {
-    void (this as unknown as { title?: string }).title
-    return this.contentsEntry().label
   }
 
   /** Buttons in its `actions` slot (the page's own)? */
@@ -469,9 +458,9 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
 
 /** What a subclass draws in its fold (`EpicFold.renderFold()`);  each a function, read where it's drawn. */
 export type FoldPieces = {
-  /** The title:  number, id and text;  cut with "…" while folded. */
+  /** The title:  number, id and text;  in full, wrapped, folded or open. */
   title: () => JSX.Element
-  /** After the title, never cut:  a phase's plan-changed pen. */
+  /** After the title, on its first line:  a phase's plan-changed pen. */
   mark?: () => JSX.Element
   /** The icon before it. */
   icon?: () => JSX.Element

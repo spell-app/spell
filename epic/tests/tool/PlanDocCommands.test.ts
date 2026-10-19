@@ -9,9 +9,11 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
+import { PhaseIds } from "$/epics/phases"
 import { PlanDoc } from "$/epics/tool/PlanDoc"
 import { PlanDocCommands, movedDown } from "$/epics/tool/PlanDocCommands"
 import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
+import { ReviewInbox } from "$/epics/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -82,6 +84,32 @@ describe("PlanDocCommands add-phase --before", () => {
     ])
   })
 
+  // epic `epic-engine` I1 (epic-workflow's I7):  the inbox keys a phase by its STABLE id, so an insert moves nothing
+  test("a comment, mark and draft on P10 are on P11 after add-phase --before 10:  the inbox is left as it was", async () => {
+    const plan = FILES.read(file)
+    for (const name of ["Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]) plan.addPhase(name)
+    await FILES.writeDoc(file, plan, true)
+    const ten = FILES.read(file).phase(10).id
+    expect(ten).toBe("p-ten")
+    const inboxFile = ReviewInbox.pathFor(file)
+    ReviewInbox.update(inboxFile, (inbox) => {
+      inbox.commentList.add({ anchor: `${ten}#field-1`, kind: "field", label: "Ten", excerpt: "TBD" }, "wrong phase?")
+      inbox.setMark(ten, { action: "approve" })
+      inbox.setDraft(ten, "revisit", "half a note")
+    })
+    const inboxBefore = readFileSync(inboxFile, "utf8")
+    expect(await commands().run(["add-phase", "x", "Inserted", "--before", "10"])).toBe(0)
+    expect(readFileSync(inboxFile, "utf8")).toBe(inboxBefore)
+    const after = FILES.read(file)
+    const { comments, marks, drafts } = ReviewInbox.read(inboxFile).toRecord()
+    const [comment] = Object.values(comments)
+    for (const key of [comment!.anchor.split("#")[0]!, ...Object.keys(marks), ...Object.keys(drafts)]) {
+      const phase = after.document.getElementById(key)!
+      expect(`${PhaseIds.labelOf(phase)} · ${PhaseIds.titleOf(phase)}`).toBe("P11 · Ten")
+    }
+    expect(PhaseIds.titleOf(after.phase(10))).toBe("Inserted")
+  })
+
   test("refuses a bare --before, a phase that isn't there, or a started phase, writing nothing", async () => {
     const skeleton = readFileSync(file, "utf8")
     const owner = commands()
@@ -133,6 +161,14 @@ describe("PlanDocCommands calm:  an existing call or issue not urgent, or urgent
 })
 
 describe("PlanDocCommands add --details:  a name and its path", () => {
+  test("works in a repo with no `packages/` (spell-epic's own, epic `epic-engine` I14):  a bare name looked up", async () => {
+    rmSync(join(root, "packages"), { recursive: true, force: true })
+    const details = "<p>In <code>nowhere.ts</code>, and <code>zz/missing.ts</code>.</p>"
+    expect(await commands().run(["add", "x", "issue", "No packages", "--details", details])).toBe(0)
+    const part = readdirSync(parts).find((name) => /^i\d+\.html$/.test(name))!
+    expect(readFileSync(join(parts, part), "utf8")).toContain("<code>nowhere.ts</code>")
+  })
+
   test("written as the name, its path its tooltip, linked to the file (epic `airplane`)", async () => {
     mkdirSync(join(root, "packages", "x", "src"), { recursive: true })
     writeFileSync(join(root, "packages", "x", "src", "buildTsx.ts"), "export {}\n")

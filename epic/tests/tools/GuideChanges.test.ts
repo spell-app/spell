@@ -7,6 +7,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
+import { PhaseIds } from "$/epics/phases"
+import { takenInto } from "$/epics/tool/CommentList"
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
 
@@ -71,6 +73,7 @@ describe("GuideChanges.gather()", () => {
         epic: "gc",
         phase: 1,
         phaseId: "p-memory",
+        phaseTitle: "Memory",
         as: "phase",
         comments: [id],
         notes: ["n1"]
@@ -84,7 +87,10 @@ describe("GuideChanges.gather()", () => {
     expect(doc).toContain("Too wide on a phone?")
     expect(doc).toContain("Still true?")
     const inbox = GuideInbox.read(join(root, "guides", "memory", "memory.inbox.json5"))
-    expect(inbox.comments[id]).toMatchObject({ status: "taken", taken: { epic: "gc", phase: 1 } })
+    expect(inbox.comments[id]).toMatchObject({
+      status: "taken",
+      taken: { epic: "gc", phase: 1, phaseId: "p-memory", title: "Memory" }
+    })
     const page = readFileSync(join(root, "guides", "memory", "memory.html"), "utf8")
     expect(page).toMatch(
       /<spell-note id="n1" status="answered"[\s\S]*Taken into <a href="..\/..\/epics\/gc\/gc.plan.html#p-memory">gc P1/
@@ -103,6 +109,21 @@ describe("GuideChanges.gather()", () => {
       /<epic-update[^>]*summary="1 comment more from Owen"[^>]*>[\s\S]*1 comment more from Owen[\s\S]*And the second table\?/
     )
     expect(other).toBe("m1")
+  })
+
+  // epic `epic-engine` I16:  the thread's link goes by the phase's id, so an insert ahead of it moves nothing
+  test("a taken comment's link still finds its phase after add-phase --before:  P1 · Memory is P2", async () => {
+    const files = new PlanDocFiles({ root })
+    const doc = join(root, "epics", "gc", "gc.plan.html")
+    const plan = files.read(doc)
+    plan.addPhase("Inserted", { before: 1 })
+    await files.writeDoc(doc, plan, true)
+    const inbox = GuideInbox.read(join(root, "guides", "memory", "memory.inbox.json5"))
+    const taken = Object.values(inbox.comments).map((each) => each.taken!)
+    const into = takenInto(taken[0]!)
+    expect(into).toEqual({ hash: "p-memory", label: "gc · Memory" })
+    const phase = files.read(doc).document.getElementById(into.hash)!
+    expect(PhaseIds.labelOf(phase)).toBe("P2")
   })
 
   // epic `epic-workflow` P13:  a page an epic owns sends its comments to that epic, never into guide-changes

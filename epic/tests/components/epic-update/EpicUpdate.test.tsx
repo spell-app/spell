@@ -126,12 +126,12 @@ function firstLineTop(element: Element): number {
   return range.getBoundingClientRect().top
 }
 
-// epic `epic-workflow` P25, J183 (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded")
+// Owen, 2026-10-19:  "always show the full title, wrapped" (J183's "ellipsis when collapsed" before)
 
 describe("<epic-update> title, folded and open", () => {
-  test("open (as it starts):  the title wraps;  folded:  ONE line beside the date, cut with …, its words the tooltip", async () => {
+  test("in full, wrapped, open (as it starts) and folded, no tooltip;  the date on its first line, nothing moves", async () => {
     const wrap = await ElementFixture.render(
-      `<div style="width: 320px"><epic-update at="2026-10-11 14:30" summary="A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"><p>Why.</p></epic-update></div>`
+      `<div style="width: 320px"><epic-update at="2026-10-11 14:30" summary="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open"><p>Why.</p></epic-update></div>`
     )
     await ElementFixture.tick()
     const update = wrap.querySelector("epic-update")!
@@ -148,12 +148,10 @@ describe("<epic-update> title, folded and open", () => {
     shadow.querySelector<HTMLElement>('[part~="toggle"]')!.click()
     await ElementFixture.tick()
     expect(update.matches(":state(open)")).toBe(false)
-    expect(title.getBoundingClientRect().height).toBeLessThan(lineHeight * 1.5)
-    expect(title.scrollWidth).toBeGreaterThan(title.clientWidth)
-    expect(title.title).toBe(
-      "Update: A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"
-    )
-    expect(title.getBoundingClientRect().right).toBeLessThanOrEqual(time.getBoundingClientRect().left)
+    expect([title.getBoundingClientRect().height > lineHeight * 1.5, title.hasAttribute("title")]).toEqual([
+      true,
+      false
+    ])
     expect(firstLineTop(title)).toBeCloseTo(open.top, 0)
     expect(time.getBoundingClientRect().left).toBeCloseTo(open.time.left, 0)
   })

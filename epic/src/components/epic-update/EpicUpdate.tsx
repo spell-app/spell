@@ -20,7 +20,7 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *   - Its title row (Owen, 2026-10-11):  the fold chevron, **Update**: <summary>, and the date at the right,
  *     as a comment thread's message shows its time:  muted, tabular, on the first line's right, the title's later
  *     lines running the full width under it (narrow screens keep their room).
- *   - Folded, the title is ONE line cut with "…", its words the tooltip;  open, it wraps (Owen, 2026-10-18).
+ *   - The title in full, folded or open (Owen, 2026-10-19:  "always show the full title, wrapped").
  *   - Before the date, the `actions` slot (`Fold.actions()`):  the page's own buttons, and the docs runtime's
  *     bullhorn;  a click on one never folds it.
  *   - What changed under the title row.
@@ -65,16 +65,6 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
   @E.watches({ childList: true, characterData: true, subtree: true })
   get hasBody(): boolean {
     return !isServer && EpicUpdate.hasContent(this.domElement)
-  }
-
-  /**
-   * The title's tooltip while it's cut to one line:  folded (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when
-   * expanded");  `Update: <summary>`.
-   */
-  get cutTitleTip(): string | undefined {
-    if (!this.isBlock || this.isOpen) return undefined
-    const title = this.translationForKey("title")
-    return this.summary ? `${title}: ${this.summary}` : title
   }
 
   /** Buttons in its `actions` slot (the page's own, the bullhorn)? */
@@ -128,8 +118,8 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
                 </Show>
               </span>
             </Show>
-            {/* folded:  ONE line, cut with "…", its words the tooltip;  open:  it wraps (EpicUpdate.css) */}
-            <span id={TITLE_ID} class={TITLE} part={this.partForName("title")} title={this.cutTitleTip}>
+            {/* in full, wrapped, folded or open (EpicUpdate.css) */}
+            <span id={TITLE_ID} class={TITLE} part={this.partForName("title")}>
               <b>{this.translationForKey("title")}</b>
               <Show when={this.summary}>{(summary) => `: ${summary()}`}</Show>
             </span>

@@ -13,7 +13,19 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { after, beforeEach, test } from "node:test"
 
-import {
+/**
+ * The checkout the script works for:  a throwaway one with a `package.json` and no `.epic/config.json5`,
+ * so spell-app's layout (every key's default), whichever repo runs the tests.
+ * - spell-epic's own config (worktrees beside it, `spell-epic` windows) broke the layout tests run from it
+ *   (epic `epic-engine` I15)
+ * - set BEFORE the script loads:  it reads it once
+ */
+const checkout = mkdtempSync(join(tmpdir(), "spell-windows-repo-"))
+mkdirSync(join(checkout, ".git"))
+writeFileSync(join(checkout, "package.json"), "{}\n")
+process.env.EPIC_CHECKOUT = checkout
+
+const {
   LOOKS,
   Window,
   claudeSessions,
@@ -28,7 +40,7 @@ import {
   withoutStay,
   withStay,
   worktreeOf
-} from "../src/window.mjs"
+} = await import("../src/window.mjs")
 
 /** The temp registry folder:  spell-epic's bridges' (`Window.registry`). */
 const dir = mkdtempSync(join(tmpdir(), "spell-windows-"))
@@ -55,6 +67,7 @@ beforeEach(() => {
 after(() => {
   sleeper.kill()
   rmSync(dir, { recursive: true, force: true })
+  rmSync(checkout, { recursive: true, force: true })
 })
 
 test("no registry entries:  no window", () => {
@@ -282,6 +295,68 @@ test("worktrees beside the repo (epic-eject P8):  a worktree-only window;  an ol
   assert.deepEqual(old.settings["files.exclude"]["*"], { when: ".spell-main" })
   // the old place is still hidden in every window while worktrees may be left there
   assert.equal(exclude[".claude/worktrees"], true)
+})
+
+test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole repo's window first;  `init` puts the content folder back", () => {
+  // a repo of its own, as spell-epic's:  its default window named for it, worktrees and the content folder beside it
+  const top = mkdtempSync(join(tmpdir(), "window-plain-"))
+  const repo = join(top, "repo")
+  mkdirSync(join(repo, ".git", "worktrees"), { recursive: true })
+  mkdirSync(join(repo, ".epic"))
+  writeFileSync(
+    join(repo, ".epic", "config.json5"),
+    JSON.stringify({
+      worktreesFolder: "../repo.worktrees",
+      contentFolder: "../repo.epics",
+      windows: { default: "repo", repoName: "repo", contentName: "repo.epics", worktreeOnly: true }
+    })
+  )
+  mkdirSync(join(top, "repo.epics"))
+  mkdirSync(join(top, "repo.worktrees", "seo"), { recursive: true })
+  // an ongoing window file without the content folder (written while it was missing)
+  const ongoing = join(repo, "workspaces", "ongoing")
+  mkdirSync(ongoing, { recursive: true })
+  writeFileSync(
+    join(ongoing, "old.code-workspace"),
+    JSON.stringify({ folders: [{ path: "../../../repo.worktrees/old", name: "⎇ old" }], settings: {} })
+  )
+  const code =
+    "const { Window } = await import(process.env.WINDOW_SCRIPT);" +
+    "const { readFileSync } = await import('node:fs');" +
+    'const { file } = Window.open("seo", "repo", { fromCurrent: false, noOpen: true });' +
+    "const read = (path) => JSON.parse(readFileSync(path, 'utf8'));" +
+    "const repoWindow = read(Window.file('repo'));" +
+    "const written = Window.init();" +
+    "console.log(JSON.stringify({ seo: read(file), repoWindow, written, old: read(process.env.OLD) }))"
+  const run = spawnSync(process.execPath, ["--input-type=module", "-e", code], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      EPIC_CHECKOUT: repo,
+      OLD: join(ongoing, "old.code-workspace"),
+      WINDOW_SCRIPT: join(import.meta.dirname, "..", "src", "window.mjs")
+    }
+  })
+  rmSync(top, { recursive: true, force: true })
+  assert.equal(run.status, 0, run.stderr)
+  const { seo, repoWindow, written, old } = JSON.parse(run.stdout)
+  // no "no package repo":  the whole repo's window written by `open`, the repo then the content folder
+  assert.deepEqual(repoWindow.folders, [
+    { path: "..", name: "repo" },
+    { path: "../../repo.epics", name: "repo.epics" }
+  ])
+  // the worktree's window:  its own folder, then the content folder
+  assert.deepEqual(
+    seo.folders.map(({ name }) => name),
+    ["⎇ seo", "repo.epics"]
+  )
+  // `init` gives the old file its content folder, second;  the repo's window is there already
+  assert.deepEqual(old.folders, [
+    { path: "../../../repo.worktrees/old", name: "⎇ old" },
+    { path: "../../../repo.epics", name: "repo.epics" }
+  ])
+  assert.ok(written.includes("workspaces/ongoing/old.code-workspace"))
+  assert.ok(!written.includes("workspaces/repo.code-workspace"))
 })
 
 test("a package window:  the whole branch, then the shared repo;  shared links shown only under the shared repo", () => {

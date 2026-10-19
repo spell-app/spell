@@ -54,6 +54,7 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *     draft shows the draft's share, not the answer's
  *   - what was typed for a question, option or section that's gone from the page is KEPT (`settle()`, a moment
  *     after a part leaves, and after load), shown in its own box (the notes box draws it) and sent with the rest
+ *     - a part that comes back later than that moment takes its text back out of the kept box (`takeBack()`, I9)
  *   - only on a details page (`DETAILS_PAGE`):  an element's docs page keeps nothing
  * - Node-safe at import:  no `window` / `document` touched until `forPage()` or `watch()`;  `fetch` and the storage
  *   come in through `AnswerFormOptions`, so tests stub them.
@@ -116,6 +117,12 @@ export class AnswerForm {
   /** `settle()` waiting for the parts of a rewrite to join. */
   private settleTimer: ReturnType<typeof setTimeout> | undefined
 
+  /**
+   * The page as typed just before each `settle()` that kept something, laid over the last:  each kept text's own
+   * value, to move back into a part slower than the settle (`takeBack()`, I9).
+   */
+  private settledAway: TypedAnswer | undefined
+
   constructor(private readonly options: AnswerFormOptions) {
     this.link = new ServerLink(options)
   }
@@ -146,15 +153,22 @@ export class AnswerForm {
    * Register `part` while it's connected;  returns the undo.
    * - the answer already read back (or a draft over it):  it shows its share at once,
    *   and the page counts as sent still, unless it had changes before
+   * - text kept from its ids (it came back later than `settle()` waited):  moved back into it, out of the kept box
+   *   (`takeBack()`, I9)
    * - the undo, with a draft:  what it held is kept if it doesn't come back (`settle()`)
    */
   add(part: AnswerPart): () => void {
     this.parts.add(part)
+    const isTakenBack = this.takeBack(part)
     const shown = this.shown
     if (shown) {
       const wasPending = this.isPending
       part.showAnswer(shown)
-      if (!wasPending && this.sent) this.sentSnapshot = this.snapshot()
+      if (!wasPending && this.sent && !isTakenBack) this.sentSnapshot = this.snapshot()
+    }
+    if (isTakenBack) {
+      this.writeLocal()
+      this.saveSoon()
     }
     this.changed()
     return () => {
@@ -162,6 +176,22 @@ export class AnswerForm {
       if (this.typed) this.settleSoon()
       this.changed()
     }
+  }
+
+  /**
+   * Move the text `settle()` kept for `part`'s ids back into the draft (`AnswerDraft.restore()`), out of the kept
+   * box:  `part` joined later than the settle waited for (`DETAILS_SETTLE_MS`), and would show it twice (I9).
+   * Did it move any?
+   */
+  private takeBack(part: AnswerPart): boolean {
+    if (!this.typed || !this.settledAway || !this.kept.length) return false
+    const present: PartLabels = {}
+    part.labelsInto(present)
+    const { typed, kept } = AnswerDraft.restore(this.typed, this.kept, present, this.settledAway)
+    if (kept.length === this.kept.length) return false
+    this.typed = typed
+    this.kept = kept
+    return true
   }
 
   /** Something on the page changed:  everyone listening hears it. */
@@ -395,6 +425,7 @@ export class AnswerForm {
     const isMoved = kept.length !== this.kept.length || JSON.stringify(typed.answers) !== JSON.stringify(before.answers)
     this.typed = typed
     if (!isMoved) return
+    this.settledAway = this.settledAway ? AnswerDraft.over(this.settledAway, before) : before
     this.kept = kept
     const shown = this.shown!
     for (const part of this.parts) part.showAnswer(shown)

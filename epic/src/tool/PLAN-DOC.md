@@ -173,6 +173,8 @@ As `plan-doc.md`, "Ids":
     What says the number follows:
     - the `PN` in the words of links to it (`<a href="#p-docs">P5 · Docs</a>` says `P6`)
     - `phase` on items and `<epic-update>`s (and `of` on an older doc's `<epic-updated>` copies)
+    - a request filed into it (epic `epic-engine` I4):  `epic file` keeps the phase's id in its `request.md`
+      (`phase: p-docs`), and `epic requests` shows that phase's number today;  `filed:` keeps the one it had then
   - Prose naming a phase without a link isn't changed.
   - Refused while a phase from N on has started (done or active):  its commits and log say its number.
 - `update <name>#<P6 | id> --title "New title"` (epic `epic-workflow`):  a phase's or an item's new title.
@@ -323,7 +325,8 @@ As `plan-doc.md`, "Ids":
   - The x means nothing to do here.
     - It takes the note in the box along, or none.
     - It replaces any other mark, a pick too.
-    - No line button wears it:  the id chip alone does, grey (dashed, then outlined once sent).
+    - No line button wears it:  the id chip alone does, dashed, then outlined once sent, in its state's colour
+      (every live mark's chip does:  "The FILL" below).
   - `inbox apply`, on an item:  reviewed, and nothing else.
     - Its status stays as it was:  an open question stays open, since `skip` settles nothing.
     - No status card.
@@ -557,6 +560,11 @@ In Owen's words (2026-10-10):
 - DASHED:  his answer given, not sent.
 - OUTLINED:  sent.  Claude has it, is on it, or the work it asked for is still due.
 - SOLID:  done.  Claude did it, or noted it, and nothing more is due from anyone.
+- While his OWN mark is live (dashed, or outlined once sent), the chip keeps its STATE's colour:  only the fill shows
+  the mark, and the colour below is the button's (Owen, 2026-10-11, epic `epic-workflow` I6:  a red item marked
+  Revisit turned blue, and its section's red count matched no chip).
+  - Once Claude has it in hand, the outline is the colour below:  a pick taken (green), a todo queued (green),
+    work underway (blue).
 - So at a glance:
   - a dashed or outlined chip is ANSWERED (don't answer again)
   - solid red or orange WAITS ON OWEN
@@ -700,7 +708,7 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       work, called-off and immediate requests keyed `p7`, a new item's `near`, comment anchors (`p7`, `p7#field-1`)
     - left:  links INTO the page from other pages (guides, details pages, other epics, the changelog):  `#p7` still
       lands on the 7th phase;  what says a number as a RECORD (`phase="7"`, `taken: { phase: 7 }`, a request's
-      `filed: P7`, the log's words)
+      `filed: P7` (one filed since epic `epic-engine` I4 keeps its phase's id too), the log's words)
     - reports:  `stable-phase-ids:  12 phase ids (p1 -> p-epic-migrate, ...), 40 links, 3 in the inbox`
   - `json5-data-files` (2026-10-14, on command;  epic `epic-workflow` P21):  the epic's DATA FILES renamed `.json` ->
     `.json5`, the name the tooling writes now (`Json5DataFiles`, `$/epics/data/DataFile`)

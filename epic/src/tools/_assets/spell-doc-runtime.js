@@ -87,6 +87,7 @@ import {
   sectionTitle
 } from "../BlockAnchors.js"
 import { EpicAddress, PageTargets } from "$/epics/links"
+import { takenInto } from "$/epics/tool/CommentList"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
 const TAGS = [
@@ -4692,8 +4693,9 @@ function pendingReplyOf(comment) {
  * of each bit position absolute"):  no names, the colour says who.
  * - Owen's words (his comment, his replies):  plain on the ivory, no box (Owen, 2026-10-10:  "my text doesn't get
  *   bordered (but keep spacing the same)")
- * - Claude's:  a light violet box -- an answer;  "taken into <epic> P<n>";  answered in the epic page.  His latest
- *   (`data-latest`) is orange while Owen hasn't seen it (`unseen()`), as the whole thread is
+ * - Claude's:  a light violet box -- an answer;  "taken into <epic> · <phase>", linked by the phase's id
+ *   (`takenInto()`);  answered in the epic page.  His latest (`data-latest`) is orange while Owen hasn't seen it
+ *   (`unseen()`), as the whole thread is
  * - a green Done line once closed:  a check, what he said, the commit Claude named
  * - while Claude thinks about it (`working`):  "Claude: thinking…" last, light violet, a spinner;  his answer takes
  *   its place
@@ -4714,7 +4716,8 @@ function messagesHTML(comment, editing) {
   const { taken, done } = comment
   if (taken) {
     const after = messages.findIndex((each) => each.at > taken.at)
-    const where = `<a href="${attr(planLink(taken))}">${text(taken.epic)} P${text(String(taken.phase))}</a>`
+    const into = takenInto(taken)
+    const where = `<a href="${attr(planLink(taken.epic, into.hash))}">${text(into.label)}</a>`
     const line = { by: "claude", at: taken.at, body: `<p>Taken into ${where}, to work into the page there.</p>` }
     messages.splice(after < 0 ? messages.length : after, 0, line)
   }
@@ -4907,10 +4910,13 @@ function localStamp(iso) {
   return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())} ${two(date.getHours())}:${two(date.getMinutes())}`
 }
 
-/** The URL of the phase a comment was taken into, from this checkout's root (a worktree's `/worktrees/<w>/` too). */
-function planLink({ epic, phase }) {
+/**
+ * The URL of the phase a comment was taken into, from this checkout's root (a worktree's `/worktrees/<w>/` too):
+ * epic `epic`'s page, at `#hash` (`takenInto()`:  the phase's stable id, or an old taken comment's `p7`).
+ */
+function planLink(epic, hash) {
   const root = /^\/worktrees\/[^/]+\//.exec(location.pathname)?.[0] ?? "/"
-  return `${root}epics/${encodeURIComponent(epic)}/${encodeURIComponent(epic)}.plan.html#p${phase}`
+  return `${root}epics/${encodeURIComponent(epic)}/${encodeURIComponent(epic)}.plan.html#${encodeURIComponent(hash)}`
 }
 
 /**

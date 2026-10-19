@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { CommentList, CommentsError, type Comment } from "$/epics/tool/CommentList"
+import { CommentList, CommentsError, takenInto, type Comment } from "$/epics/tool/CommentList"
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { ReviewInbox } from "$/epics/tool/ReviewInbox"
 
@@ -51,6 +51,22 @@ describe("CommentList", () => {
     const other = comments.add(ON_FIELD, "two", NOW)
     comments.answer(other)
     expect([comments.comment(other).status, comments.waiting]).toEqual(["answered", []])
+  })
+
+  // epic `epic-engine` I16:  a phase's number moves when one goes in ahead of it;  its id never does
+  test("taken into a phase by its id and title too:  its thread links by the id;  an older one by its number", () => {
+    const comments = new CommentList({})
+    const id = comments.add(ON_FIELD, "one", NOW)
+    const into = { epic: "guide-changes", phase: 4, phaseId: "p-memory", title: "Memory" }
+    comments.take(id, into, NOW)
+    expect(comments.comment(id).taken).toEqual({ ...into, at: NOW.toISOString() })
+    expect(takenInto(comments.comment(id).taken!)).toEqual({ hash: "p-memory", label: "guide-changes · Memory" })
+    expect(takenInto({ epic: "guide-changes", phase: 4 })).toEqual({ hash: "p4", label: "guide-changes P4" })
+    // Undo keeps them;  an id that isn't a phase's is dropped
+    const restored = comments.restore(id, { ...comments.comment(id) })
+    expect(comments.comment(restored).taken).toMatchObject({ phaseId: "p-memory", title: "Memory" })
+    const bad = { ...comments.comment(id), taken: { ...into, phaseId: "#nope", at: NOW.toISOString() } }
+    expect(comments.comment(comments.restore("m9", bad)).taken).not.toHaveProperty("phaseId")
   })
 
   test("Undo:  a deleted or cleared comment comes back as it was, under its id unless a new one took it", () => {

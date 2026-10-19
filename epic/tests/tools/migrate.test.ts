@@ -26,6 +26,7 @@ import {
   STEPS,
   stepsFor
 } from "../../src/tools/migrate.js"
+import { formattedAlready, tidy } from "../../src/tools/pages.js"
 
 const dirs: string[] = []
 afterEach(() => {
@@ -281,6 +282,27 @@ describe("migratePages", () => {
     expect(html).toContain('<a href="../../packages/epics/tools/_assets/spell-ui.js">the bundle</a>')
     expect(migratePages(pages, { tidied: false }).written).toEqual([])
   })
+
+  // epic `epic-engine` I7:  oxfmt folds runs of spaces in text;  a page it didn't format before keeps them
+  test("tidied:  a page not formatted before keeps its text's spacing;  a formatted one is formatted after", () => {
+    const old = '<script src="../../packages/epics/tools/_assets/spell-ui.js"></script>'
+    const root = checkout({
+      "guides/bedtime/bedtime.html": `<!doctype html><html><body><h1>Bedtime:  epic-workflow</h1>${old}</body></html>`,
+      "guides/tidy/tidy.html": `<!doctype html><html><body><h1>Bedtime: epic-workflow</h1>${old}</body></html>`
+    })
+    const bedtime = join(root, "guides/bedtime/bedtime.html")
+    const neat = join(root, "guides/tidy/tidy.html")
+    expect(tidy([neat])).toBe(true)
+    expect(formattedAlready([bedtime, neat])).toEqual([neat])
+
+    const { written } = migratePages(pagesFor(root, "guide"))
+    expect(written).toEqual([bedtime, neat])
+    const html = readFileSync(bedtime, "utf8")
+    expect(html).toContain("<h1>Bedtime:  epic-workflow</h1>")
+    expect(html).toContain('<script src="/_epic/assets/spell-ui.js"></script>')
+    expect(readFileSync(neat, "utf8")).toContain('<script src="/_epic/assets/spell-ui.js"></script>')
+    expect(formattedAlready([bedtime, neat])).toEqual([neat])
+  }, 60_000)
 
   test("a saga page is never a step's:  it keeps the old markup", () => {
     const root = checkout({ "templates/goals/index.html": OLD_PAGE })

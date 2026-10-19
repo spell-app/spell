@@ -40,7 +40,7 @@ import { linksEngineByPath, rewriteEngineLinks } from "../server/engineLinks.ts"
 import { TOOL_TEMPLATES } from "./answerPages.js"
 import { checkData, rowsFile } from "./choices.js"
 import { listPages } from "./details.js"
-import { findPages, pageFile, parseArgs, ROOT, serialize, tidy } from "./pages.js"
+import { findPages, formattedAlready, pageFile, parseArgs, ROOT, serialize, tidy } from "./pages.js"
 import { withLocks } from "./relocate.js"
 import { convertChoicesPage, convertDetailsPage, needsConversion } from "./to-answer-elements.js"
 import { convertSections } from "./to-ui-section.js"
@@ -197,14 +197,22 @@ export function pagesFor(root, kind) {
  * returns `{ results, written }`:  `results` one per page, `{ file, kind, ran, notes }`.
  * - `dryRun`:  the same results, nothing written
  * - `tidied`:  tidy what it wrote, as every tool that writes a page does (link targets, oxfmt;  `pages.js` `tidy()`)
+ *   - oxfmt only on a page that was formatted BEFORE (`formattedAlready()`):  it folds runs of spaces in text, and a
+ *     page that wasn't keeps them (`Bedtime:  epic-workflow` in an h1:  epic `epic-engine` I7)
  */
 export function migratePages(pages, { step, dryRun = false, tidied = true } = {}) {
   const results = []
   const written = []
+  const due = new Set(
+    pages
+      .filter(({ file, kind }) => stepsFor(kind, step).some((each) => each.applies(readFileSync(file, "utf8"))))
+      .map(({ file }) => file)
+  )
+  // asked before any page changes:  which were formatted
+  const formatted = new Set(tidied && !dryRun ? formattedAlready([...due]) : [])
   for (const { file, kind } of pages) {
     const steps = stepsFor(kind, step)
-    const html = readFileSync(file, "utf8")
-    if (!steps.some((each) => each.applies(html))) {
+    if (!due.has(file)) {
       results.push({ file, kind, ran: [], notes: [] })
       continue
     }
@@ -226,7 +234,9 @@ export function migratePages(pages, { step, dryRun = false, tidied = true } = {}
     })
     results.push(result)
   }
-  if (tidied && written.length && !tidy(written)) throw new MigrateError("tidying the migrated pages failed (above)")
+  const format = written.filter((file) => formatted.has(resolve(ROOT, file)))
+  if (tidied && written.length && !tidy(written, { format }))
+    throw new MigrateError("tidying the migrated pages failed (above)")
   return { results, written }
 }
 

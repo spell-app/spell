@@ -4,13 +4,16 @@
  *
  * Usage (from the repo root):
  *   node src/demo/check-comment-jump.mjs [--guide <page>] [--doc <epic>] [outDir]
- * - the pages:  a guide (default `guides/python-target.html`) and an epic page (default `epic-workflow`), served by
- *   this checkout's page server (`ensurePageServer()`), so the runtime is this branch's bundle
+ * - the pages:  a guide (default `guides/python-target.html`) and an epic page (default `epic-workflow`), served by a
+ *   page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file), so the runtime is
+ *   this branch's bundle;  stopped at the end
+ *   - the epic page:  a SCRATCH COPY of `epics/<epic>/` (its skeleton and parts) in `src/demo/shots/jump/epics/`
+ *     (git-ignored);  the guide:  the real one, read only (the demo server serves the real `guides/` beside it)
  * - their COMMENTS ARE STUBBED (Playwright's `page.route`):  three threads on each page, on its first top-level
  *   sections (a guide) or its first items (an epic page), Claude having spoken last on the first and the third, so two
  *   wait on Owen.  The ids are keyed `m1` ... as an inbox file keys them
- * - reads and writes NOTHING on disk:  no inbox file is read for comments, and every POST to `/api/` is aborted, so
- *   nothing is sent and no session is woken
+ * - reads and writes NOTHING of the real pages:  no inbox file is read for comments, and every POST to `/api/` is
+ *   aborted, so nothing is sent and no session is woken (nor could one be:  the demo server's wake is stubbed)
  * - checks, on each page:
  *   - each thread's header shows its id, `M1` ...
  *   - the toolbar's bullhorn shows, its count 2
@@ -22,14 +25,33 @@
  * - and with no thread waiting:  no bullhorn
  * - screenshots (outDir, default a temporary folder):  `<page>-top.png`, `<page>-landed.png`, `<page>-jump.png`
  * - exits 1 on any miss
+ * - re-runs itself under `tsx` (the page server is TypeScript)
  */
-import { mkdirSync, mkdtempSync } from "node:fs"
+import { spawnSync } from "node:child_process"
+import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 
-import { chromium } from "playwright"
+const HERE = dirname(fileURLToPath(import.meta.url))
+const ROOT = resolve(HERE, "../..")
 
-import { ensurePageServer, pageFile } from "../tools/pages.js"
+if (!process.env.CHECK_JUMP_UNDER_TSX) {
+  const run = spawnSync(
+    process.execPath,
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    {
+      stdio: "inherit",
+      cwd: ROOT,
+      env: { ...process.env, CHECK_JUMP_UNDER_TSX: "1", TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json") }
+    }
+  )
+  process.exit(run.status ?? 1)
+}
+
+const { chromium } = await import("playwright")
+const { DemoServer } = await import("./DemoServer.ts")
+const { pageFile } = await import("../tools/pages.js")
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)
@@ -41,11 +63,17 @@ const out =
 mkdirSync(out, { recursive: true })
 pageFile(guide)
 
-const served = ensurePageServer()
-if (!served) {
-  console.error("check-comment-jump:  the page server didn't start")
+// the epic page's copy:  its skeleton and parts, never its inbox (as deep as the real one:  its links need no change)
+const CONTENT = join(HERE, "shots", "jump")
+const source = join(ROOT, "epics", epic)
+if (!existsSync(join(source, `${epic}.plan.html`))) {
+  console.error(`check-comment-jump:  no epic page ${join(source, `${epic}.plan.html`)}`)
   process.exit(2)
 }
+rmSync(CONTENT, { recursive: true, force: true })
+cpSync(join(source, `${epic}.plan.html`), join(CONTENT, "epics", epic, `${epic}.plan.html`))
+if (existsSync(join(source, "parts"))) cpSync(join(source, "parts"), join(CONTENT, "epics", epic, "parts"), { recursive: true })
+const served = await DemoServer.start({ content: CONTENT })
 const problems = []
 const browser = await chromium.launch()
 
@@ -58,6 +86,7 @@ await checkPage("epic", `${served.base}/epics/${epic}/${epic}.plan.html`, () =>
 await checkNoneWaiting(`${served.base}/${guide}`)
 
 await browser.close()
+await served.stop()
 console.log(`screenshots:  ${out}`)
 console.log(problems.length ? `\n${problems.length} problem(s):\n${problems.join("\n")}` : "\nall good")
 process.exitCode = problems.length ? 1 : 0

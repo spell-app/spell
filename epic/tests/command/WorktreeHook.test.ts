@@ -12,8 +12,10 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readlinkSync,
   realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync
 } from "node:fs"
 import { tmpdir } from "node:os"
@@ -127,6 +129,27 @@ describe("worktree hook", () => {
     const slow = hook("create", { name: "slow", cwd: MAIN })
     expect(slow.status).toBe(1)
     expect(slow.stderr).toMatch(/stopped after 1s \(installTimeout/)
+  })
+
+  test("a tracked link out of the repo (spell-epic's `.spell-app`) finds its target from a worktree too (I13)", () => {
+    config({})
+    // `.dep -> ../dep`:  found beside the main checkout, one folder short from `repo.worktrees/<name>/`
+    mkdirSync(join(TEMP, "dep"))
+    writeFileSync(join(TEMP, "dep", "package.json"), "{}\n")
+    symlinkSync("../dep", join(MAIN, ".dep"))
+    git(MAIN, "add", ".dep")
+    git(MAIN, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "dep")
+    const made = hook("create", { name: "deps", cwd: MAIN })
+    expect(made.status).toBe(0)
+    expect(made.stderr).toMatch(/\.dep's target linked/)
+    // ONE link beside the worktrees, which every worktree there shares;  the worktree itself untouched
+    expect(readlinkSync(join(BESIDE, "dep"))).toBe("../dep")
+    expect(realpathSync(join(made.stdout, ".dep", "package.json"))).toBe(join(TEMP, "dep", "package.json"))
+    expect(git(made.stdout, "status", "--porcelain")).toBe("")
+    // the next worktree finds it there:  nothing more to make
+    const next = hook("create", { name: "deps-two", cwd: MAIN })
+    expect(next.stderr).not.toMatch(/target linked/)
+    expect(existsSync(join(next.stdout, ".dep", "package.json"))).toBe(true)
   })
 
   test("remove never loses work:  uncommitted changes keep the worktree", () => {

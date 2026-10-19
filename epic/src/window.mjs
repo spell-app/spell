@@ -20,6 +20,8 @@
  *   extensions;  a one-folder window can't, and its Claude panel restarts.
  *   - NEVER add one any more:  VS Code writes the folder into the window file, where it outlives the worktree,
  *     unseen:  the files are `skip-worktree` in the main checkout (so Owen's theme changes never show either)
+ * - spell-epic tracks none:  its `.gitignore` takes the whole `workspaces/` folder, and the repo's window file is
+ *   written when it's missing (`ensureRepoWindow()`, by `open`, `launch` and `init`;  epic `epic-engine` I15)
  * - `git.detectWorktrees` on:  Source Control lists every worktree as its own repo, changes and diffs included,
  *   so a session that STAYS in its window when it isolates (below) is still reviewable there.
  *   - every package window lists every worktree;  takes a window reload
@@ -301,9 +303,9 @@ export class Window {
    * - a package window:  its folders (`packageFolders()`) and `files.exclude`;
    *   its theme and every other setting are Owen's, kept
    * - the whole repo's window, `windows.default` (`spell-app`), when it isn't a package's:
-   *   written when missing, so a repo with no `packages/` (one `epic init` set up)
-   *   has a window for `open` to start from
-   * - a worktree's window (`workspaces/ongoing/`):  its `files.exclude`
+   *   written when missing (`ensureRepoWindow()`)
+   * - a worktree's window (`workspaces/ongoing/`):  its `files.exclude`, and the content folder when it lacks it
+   *   (`withContentFolder()`)
    * - an existing file VS Code can't read as JSON (comments) is left alone
    * - NOTE:  a package window that changes folders while open re-reads its workspace;  its Claude panel may reload
    */
@@ -311,18 +313,8 @@ export class Window {
     // the marker serves the old layout's windows only:  none are made once new worktrees go beside the repo
     if (CONFIG.worktreesPattern) Window.ensureMainMarker()
     const written = []
-    // in the MAIN checkout, where `open` looks for it, whichever checkout runs this
-    const repoWindow = join(MAIN_ROOT, "workspaces", `${DEFAULT_WINDOW}.code-workspace`)
-    if (!Window.packages.includes(DEFAULT_WINDOW) && !existsSync(repoWindow)) {
-      mkdirSync(dirname(repoWindow), { recursive: true })
-      const workspace = Window.workspace(DEFAULT_WINDOW)
-      workspace.folders = [
-        { path: "..", name: CONFIG.windows.repoName },
-        ...Window.sharedFolder(join(MAIN_ROOT, "workspaces"))
-      ]
-      writeFileSync(repoWindow, `${JSON.stringify(workspace, null, 2)}\n`)
-      written.push(relative(MAIN_ROOT, repoWindow))
-    }
+    const repoWindow = Window.ensureRepoWindow()
+    if (repoWindow) written.push(relative(MAIN_ROOT, repoWindow))
     for (const pkg of Window.packages) {
       const file = Window.file(pkg)
       if (!existsSync(file)) {
@@ -342,11 +334,44 @@ export class Window {
       const file = join(ongoing, name)
       const old = !CONFIG.worktreeOnlyWindow(name.replace(/\.code-workspace$/, ""))
       const refreshed = refresh(file, (workspace) => {
+        workspace.folders = Window.withContentFolder(workspace.folders ?? [], ongoing)
         workspace.settings = { ...workspace.settings, "files.exclude": Window.filesExclude({ worktree: old }) }
       })
       if (refreshed) written.push(relative(MAIN_ROOT, file))
     }
     return written
+  }
+
+  /**
+   * The whole repo's window file, `workspaces/<windows.default>.code-workspace` in the MAIN checkout, written when
+   * it's missing and isn't a package's;  returns its path when written, else `null`.
+   * - so a repo with no `packages/` (spell-epic, one `epic init` set up) has a window for `open` and `launch` to
+   *   start from, without an `epic window init` first (epic `epic-engine` I15)
+   * - in the MAIN checkout, where `open` looks for it, whichever checkout runs this
+   * - its folders:  the repo root, then the content folder
+   */
+  static ensureRepoWindow() {
+    const file = join(MAIN_ROOT, "workspaces", `${DEFAULT_WINDOW}.code-workspace`)
+    if (Window.packages.includes(DEFAULT_WINDOW) || existsSync(file)) return null
+    mkdirSync(dirname(file), { recursive: true })
+    const workspace = Window.workspace(DEFAULT_WINDOW)
+    workspace.folders = [{ path: "..", name: CONFIG.windows.repoName }, ...Window.sharedFolder(dirname(file))]
+    writeFileSync(file, `${JSON.stringify(workspace, null, 2)}\n`)
+    return file
+  }
+
+  /**
+   * A worktree window's `folders` with the content folder in them:  right after the worktree's own (`⎇ <name>`),
+   * when it isn't there yet (`fromDir`:  where the window file is, its paths relative to it).
+   * - for a window file written while the content folder was missing, or by older code:  `init` puts it back
+   * - unchanged when it's there (wherever), or when there's no content folder
+   */
+  static withContentFolder(folders, fromDir) {
+    const [content] = Window.sharedFolder(fromDir)
+    if (!content || folders.some((folder) => resolve(fromDir, folder.path) === resolve(fromDir, content.path)))
+      return folders
+    const at = folders.findIndex((folder) => folder.name?.startsWith("⎇ "))
+    return at < 0 ? [...folders, content] : [...folders.slice(0, at + 1), content, ...folders.slice(at + 1)]
   }
 
   /**
@@ -459,6 +484,7 @@ export class Window {
    * - `noOpen` (`open <name> --no-open`):  write the file only, its colours in it, and never run `code`
    *   - for a window opened later by hand, and a check that changes nothing on the screen (epic `epic-eject` P9)
    * - already open:  VS Code focuses that window
+   * - `pkg` the whole repo's window (`windows.default`) and its file missing:  written first (`ensureRepoWindow()`)
    * - its colours (`workbench.colorCustomizations`) are NOT in the file yet:
    *   - a window starting up draws the theme's colours VS Code cached from the last window that had them,
    *     and only a CHANGE to the setting makes it read them
@@ -467,6 +493,8 @@ export class Window {
    */
   static open(name, pkg, { color = null, fromCurrent = true, noOpen = false } = {}) {
     if (!existsSync(CONFIG.worktreeFolder(name))) throw new Error(`no worktree ${name}`)
+    // the whole repo's window file is written when missing:  a repo's first `open` or `launch` needs no `init`
+    if (pkg === DEFAULT_WINDOW) Window.ensureRepoWindow()
     // a package, or any other window file (`spell-app`:  the whole repo's)
     if (!Window.packages.includes(pkg) && !existsSync(join(MAIN_ROOT, "workspaces", `${pkg}.code-workspace`)))
       throw new Error(`no package ${pkg}`)

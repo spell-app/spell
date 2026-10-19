@@ -29,6 +29,13 @@
  *   - `remove` and `/isolate done` know its work is safe once it's in `<owner>`'s branch
  * - Reuses worktree `<name>` when it's already one, in either place, and branch `<name>` when it exists.
  * - Then, for a NEW worktree, in this order:
+ *   0. makes what its tracked links point at beside it (`linkOutside()`, epic `epic-engine` I13):
+ *      a relative link that leaves the repo finds its target beside the main checkout, but not from a worktree
+ *      one folder deeper.  spell-epic's `.spell-app -> ../spell-app` is one:  its packages come through it
+ *      (`portal:./.spell-app/packages/...`), so without it the install fails.
+ *      - the missing target is made as a link to what main's link finds:  `../spell-epic.worktrees/spell-app`
+ *        -> `../spell-app`, ONE link every worktree there shares
+ *      - nothing in the worktree changes, so git sees nothing;  a link it can't make is a warning
  *   1. links the shared content in (this plugin's `epic shared link`, epic `shared-content`),
  *      when the shared repo exists:  a failure there is a warning, never a failed hook
  *   2. `linkSessionFolders` on:  links the worktree's saved-session folder to the main checkout's (`SessionFolders`),
@@ -48,8 +55,8 @@
  * - Then removes the worktree's saved-session link, if it IS a link to the main checkout's folder.
  */
 import { execFileSync, spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, realpathSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { existsSync, lstatSync, mkdirSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
+import { dirname, isAbsolute, join, relative, resolve } from "node:path"
 
 import { EpicConfig } from "../src/config/EpicConfig.ts"
 import { SessionFolders } from "../src/config/SessionFolders.ts"
@@ -113,11 +120,44 @@ class Worktree {
     console.error(`worktree hook:  git worktree add ${args.join(" ")}`)
     mkdirSync(dirname(path), { recursive: true })
     Worktree.git(root, "worktree", "add", "--quiet", ...args)
+    Worktree.linkOutside(path, root)
     Worktree.linkShared(path, config)
     if (config.linkSessionFolders) Worktree.linkSessions(path, root)
     // `installCommand: ""`:  a repo with nothing to install
     if (config.installOnCreate && config.installCommand) Worktree.install(path, config)
     return path
+  }
+
+  /**
+   * Make what worktree `path`'s tracked links point at OUTSIDE it, where it's missing:
+   * a link there to what the main checkout's same link finds (epic `epic-engine` I13, see the header).
+   * - only a relative link that leaves the worktree, is dangling in it, and resolves in `root`
+   * - never replaces anything:  a path that's there already (even a broken link) is left alone
+   * - nor makes a folder:  the link goes only where its folder is (the worktrees' folder, beside the worktree)
+   * - a link it can't make is a warning
+   */
+  static linkOutside(path, root) {
+    const tracked = Worktree.git(path, "ls-files", "-s")
+      .split("\n")
+      .filter((line) => line.startsWith("120000 "))
+      .map((line) => line.slice(line.indexOf("\t") + 1))
+    for (const name of tracked) {
+      const link = join(path, name)
+      try {
+        const target = readlinkSync(link)
+        const at = resolve(dirname(link), target)
+        const inside = at === path || at.startsWith(`${path}/`)
+        const mains = join(root, name)
+        if (isAbsolute(target) || inside || existsSync(link) || lstatSync(at, { throwIfNoEntry: false })) continue
+        if (!existsSync(mains)) continue
+        symlinkSync(relative(dirname(at), realpathSync(mains)), at)
+        console.error(`worktree hook:  ${name}'s target linked:  ${at} -> ${realpathSync(mains)}`)
+      } catch (error) {
+        console.error(
+          `worktree hook:  ${name} finds nothing from here, and its target couldn't be linked (${error.message})`
+        )
+      }
+    }
   }
 
   /**

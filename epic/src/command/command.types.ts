@@ -519,6 +519,9 @@ export type MergeMainReport = {
  * - `at`:  when, local time to the minute
  * - `status`:  `new` until the epic's session files it, then `filed`
  * - `filed`:  where it went, `P7 · Comment Threads`
+ * - `phase`:  the stable id of the phase it was filed into (`p-comment-threads`), when it went into one
+ *   (epic `epic-engine` I4):  `epic requests` shows that phase's number TODAY, so a phase inserted ahead of it moves
+ *   it along (`Requests.shown()`);  `filed` says the number it had then
  * - `text`:  Owen's words, verbatim
  * - `context`:  what the sender was looking at
  * - `images`:  file names beside `request.md`
@@ -530,6 +533,7 @@ export type EpicRequest = {
   at: string
   status: string
   filed?: string
+  phase?: string
   text: string
   context?: string
   images: string[]

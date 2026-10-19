@@ -4,6 +4,7 @@ import { join } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
+import { PhaseIds } from "$/epics/phases"
 
 import {
   EXIT,
@@ -36,8 +37,10 @@ import { Sessions } from "./Sessions"
  *       or the command that opens its window when none runs
  *     - no `<epic>`:  the tooling home's
  *   - `requests <epic> [--json]`:  every request sent to `<epic>`, and where each went
+ *     - one filed into a phase:  that phase's number TODAY (`shown()`), so a phase inserted ahead of it moves it along
  *   - `file <epic>#P7 <id>`:  file a request into phase P7:
- *     his words and screenshots in its Requests field (the `epic` tool's `add-request`), the request marked filed, `P7`
+ *     his words and screenshots in its Requests field (the `epic` tool's `add-request`), the request marked filed,
+ *     `P7 · Its Title`, and the phase's stable id kept (`phase:  p-its-title`;  epic `epic-engine` I4)
  *     - `file <epic> <id> "<where>"`, no phase:  only marked filed, saying where it went (`"dropped:  done in P3"`)
  *     - `add-request`, its old name, hidden (epic `epic-workflow` P19), does the same,
  *       its `--from` and `--file` (the request as html) taken as given rather than read from the epic's `requests/`
@@ -89,7 +92,7 @@ export class Requests {
       case "send":
         return this.sendVerb(epic, flags)
       case "requests": {
-        const requests = this.list(epic)
+        const requests = await this.shown(epic)
         if (flags.json) out(JSON.stringify(requests, null, 2))
         else if (!requests.length) out(`no requests in epic ${epic}`)
         else for (const request of requests) out(requestLine(request))
@@ -166,10 +169,21 @@ export class Requests {
     // into the phase's Requests field (`P7`, `p-epic-migrate`, its name:  the tool finds it)
     const exitCode = await EpicTools.runPlanDoc(["add-request", named, id, "--from", from, "--file", html])
     if (exitCode !== EXIT.OK) return exitCode
-    const phase = phaseOf(ref)
-    const filed = phase === undefined ? ref : phaseLabel(phase)
-    out(request ? requestLine(this.file(epic, id, filed)) : `${id}  into ${epic}#${filed}`)
+    const { filed, phase } = await this.phaseFiled(epic, ref)
+    out(request ? requestLine(this.file(epic, id, filed, phase)) : `${id}  into ${epic}#${filed}`)
     return EXIT.OK
+  }
+
+  /**
+   * Where a request filed into the phase `ref` names went (`P7`, `7`, its id or name, as `PhaseIds.find()` takes):
+   * `filed`, `P7 · Its Title`, and `phase`, its stable id;  a phase the page doesn't have:  `ref` as typed
+   * (`P7` for a number), and no id.
+   */
+  async phaseFiled(epic: string, ref: string): Promise<{ filed: string; phase?: string }> {
+    const phase = PhaseIds.find(await this.phasesOf(epic), ref)
+    if (phase) return { filed: phaseTitle(phase), phase: phase.id }
+    const number = phaseOf(ref)
+    return { filed: number === undefined ? ref : phaseLabel(number) }
   }
 
   ////////////////
@@ -263,15 +277,46 @@ export class Requests {
   }
 
   /**
+   * Every request in `epic`, as `epic requests` shows it:  `list()`'s, but each one filed into a phase (`phase`, its
+   * stable id) says where that phase is TODAY, `P11 · Doc Review`, however many phases went in ahead of it since
+   * (`add-phase --before`;  epic `epic-engine` I4).
+   * - a phase no longer on the page:  `filed` as written
+   * - reads the epic page only when a request names a phase
+   */
+  async shown(epic: string): Promise<EpicRequest[]> {
+    const requests = this.list(epic)
+    if (!requests.some((request) => request.phase)) return requests
+    const phases = await this.phasesOf(epic)
+    return requests.map((request) => {
+      const phase = request.phase ? phases.find((each) => each.id === request.phase) : undefined
+      return phase ? { ...request, filed: phaseTitle(phase) } : request
+    })
+  }
+
+  /**
    * Mark request `id` of `epic` filed:  `where` says where it went (`P7 · Comment Threads`, `joined P5`).
+   * - `phase`:  the stable id of the phase it went into (`phaseFiled()`), kept so `shown()` finds it after an insert;
+   *   none (filed elsewhere, or dropped):  any id it had goes
    * - returns the request as it now stands;  throws when there's no such request
    */
-  file(epic: string, id: string, where: string): EpicRequest {
+  file(epic: string, id: string, where: string, phase?: string): EpicRequest {
     const path = join(this.root, "epics", epic, "requests", id, "request.md")
     if (!existsSync(path)) throw new EpicCommandError(`no request '${id}' in epic '${epic}'`)
-    const request = { ...Requests.parse(readFileSync(path, "utf8")), status: "filed", filed: where }
+    const request: EpicRequest = { ...Requests.parse(readFileSync(path, "utf8")), status: "filed", filed: where, phase }
     writeFileSync(path, Requests.markdown(request))
     return request
+  }
+
+  /**
+   * `epic`'s phases, in order, from its epic page (`PhaseIds.phasesIn()`);  `[]` when it has no page.
+   * - the page's skeleton is enough:  a split page keeps every `<epic-phase>`, its id and title, in its own file
+   * - linkedom is loaded on first use:  the other verbs don't pay for it (as `EpicTools.planDoc()`)
+   */
+  private async phasesOf(epic: string): Promise<Element[]> {
+    const path = join(this.root, "epics", epic, `${epic}.plan.html`)
+    if (!existsSync(path)) return []
+    const { parseHTML } = await import("linkedom")
+    return PhaseIds.phasesIn(parseHTML(readFileSync(path, "utf8")).document as unknown as Document)
   }
 
   ////////////////
@@ -404,7 +449,9 @@ export class Requests {
    * epic: epic-workflow
    * from: 🚧 python
    * at: 2026-10-11T06:10-04:00
-   * status: new
+   * status: filed
+   * filed: P7 · Comment Threads
+   * phase: p-comment-threads
    * images: image-1.png
    * ---
    *
@@ -425,6 +472,7 @@ export class Requests {
       `at: ${request.at}`,
       `status: ${request.status}`,
       ...(request.filed ? [`filed: ${request.filed}`] : []),
+      ...(request.phase ? [`phase: ${request.phase}`] : []),
       ...(request.images.length ? [`images: ${request.images.join(", ")}`] : [])
     ]
     const context = request.context ? `\n## Context\n\n${request.context.trim()}\n` : ""
@@ -451,6 +499,7 @@ export class Requests {
       at: fields.at ?? "",
       status: fields.status ?? "new",
       filed: fields.filed || undefined,
+      phase: fields.phase || undefined,
       text: words.replace(/^\s*## Owen's words\s*/, "").trim(),
       context: context?.trim() || undefined,
       images: fields.images ? fields.images.split(/,\s*/) : []
@@ -481,6 +530,11 @@ const EXTENSIONS: Record<string, string> = {
 /** Write `text` to stdout, on its own line. */
 function out(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
+}
+
+/** A phase as a filed request names it:  `P7 · Comment Threads`, its number its place today. */
+function phaseTitle(phase: Element): string {
+  return `${PhaseIds.labelOf(phase)} · ${PhaseIds.titleOf(phase)}`
 }
 
 /** One request, one line:  `r3  new    🚧 python (83d39e12)  comment mechanism doesn't look right`. */

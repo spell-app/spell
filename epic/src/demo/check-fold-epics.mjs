@@ -4,17 +4,20 @@
  * Usage (from the repo root):
  *   node src/demo/check-fold-epics.mjs [--doc <name>] [--from <folder>] [--item <id>] [--guide <path>]
  *     [outDir]
- * - the epic page:  a SCRATCH COPY of `epics/<name>/` (default `airplane`), in `demo/shots/fold/epics/<name>/`
- *   (git-ignored):  the review routes take epic pages only (`epics/<name>/<name>.plan.html`)
+ * - the epic page:  a SCRATCH COPY of `epics/<name>/` (default `airplane`), in `src/demo/shots/fold/epics/<name>/`
+ *   (git-ignored), as deep as a real one, so its links need no change:  the review routes take epic pages only
+ *   (`epics/<name>/<name>.plan.html`)
  *   - `--from <folder>` (from the root):  copied from `<folder>/<name>/` instead, e.g. a doc the tool migrated
- *     under `preview-epics/`;  it must sit two folders under the root, as `epics/<name>/` does
+ *     under `preview-epics/`
  *   - one reply is made on it (the reply case);  its inbox file is deleted at the end
  *   - REFUSES to run while the copy's inbox file exists (a run killed half way:  delete it)
  * - the item:  `--item <id>` (default:  the first item with details in a Todos or Questions section);
  *   the item near the page's END:  the doc's last item with details
  * - the guide:  `--guide <path from the root>` (default `guides/solid/solid-2.html`), read as it is (a fold writes
  *   only the reader's own storage)
- * - the server:  a page server of its OWN on this checkout (`PageServer`, no pid file, a free port);  stopped at the end
+ * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
+ *   serving `src/demo/shots/fold/` as its content folder, the real one's `guides/` ... linked in;  it wakes nobody;
+ *   stopped at the end
  * - at 1200 x 900 and 390 x 844, the cases:
  *   - an item a link landed on (`#q5`), folded at once by its chevron;  by a click on its line;
  *     and after a wheel moves it to mid window
@@ -54,7 +57,7 @@ if (!process.env.CHECK_FOLD_UNDER_TSX) {
       env: {
         ...process.env,
         CHECK_FOLD_UNDER_TSX: "1",
-        TSX_TSCONFIG_PATH: join(ROOT, "packages/server/tsconfig.json")
+        TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json")
       }
     }
   )
@@ -62,7 +65,7 @@ if (!process.env.CHECK_FOLD_UNDER_TSX) {
 }
 
 const { chromium } = await import("playwright")
-const { PageServer } = await import("@spell-app/server/src/page/PageServer.ts")
+const { DemoServer } = await import("./DemoServer.ts")
 
 ////////////////
 // ## Settings
@@ -99,12 +102,9 @@ if (existsSync(inboxFile)) {
 copyDoc()
 mkdirSync(out, { recursive: true })
 
-const server = await new PageServer({ root: ROOT }).start({
-  port: 47_900 + Math.floor(Math.random() * 90),
-  pidFile: false
-})
-const base = `http://127.0.0.1:${server.info.port}`
-const docUrl = `${base}/src/demo/shots/fold/epics/${docName}/${docName}.plan.html`
+const server = await DemoServer.start({ content: join(HERE, "shots/fold"), port: 47_900 + Math.floor(Math.random() * 90) })
+const base = server.base
+const docUrl = `${base}/epics/${docName}/${docName}.plan.html`
 const browser = await chromium.launch()
 try {
   for (const size of SIZES) {
@@ -412,8 +412,8 @@ async function finish(page, logs, where, shot) {
 }
 
 /**
- * Copy the doc (and its parts) to `folder`, its relative links moved deeper, as `check-review-epics.mjs` does:
- * a real doc sits two folders under the root, the copy seven.  Never its inbox, agents or details.
+ * Copy the doc (and its parts) to `folder`, as they are:  as deep in the demo server's content folder as a real doc
+ * is in the real one, as `check-review-epics.mjs` does.  Never its inbox, agents or details.
  */
 function copyDoc() {
   const source = join(ROOT, from, docName)
@@ -424,15 +424,9 @@ function copyDoc() {
   }
   rmSync(folder, { recursive: true, force: true })
   mkdirSync(folder, { recursive: true })
-  writeFileSync(
-    join(folder, `${docName}.plan.html`),
-    readFileSync(skeleton, "utf8").replaceAll('"../../', '"../../../../../../../')
-  )
+  writeFileSync(join(folder, `${docName}.plan.html`), readFileSync(skeleton))
   const parts = join(source, "parts")
   if (!existsSync(parts)) return
   mkdirSync(join(folder, "parts"))
-  for (const name of readdirSync(parts)) {
-    const text = readFileSync(join(parts, name), "utf8").replaceAll('"../../../', '"../../../../../../../../')
-    writeFileSync(join(folder, "parts", name), text)
-  }
+  for (const name of readdirSync(parts)) writeFileSync(join(folder, "parts", name), readFileSync(join(parts, name)))
 }

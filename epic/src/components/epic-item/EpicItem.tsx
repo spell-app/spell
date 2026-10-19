@@ -67,8 +67,8 @@ import tooltipCSS from "./Tooltip.css?inline"
  * - Its LINE, in the shadow root, sticky while open (under the section titles stuck above it):
  *   - the fold chevron (only with details)
  *   - the id chip (`Q7`, a link to `#q7`), in its state's colour
- *   - the title (`title`, or `slot="title"`):  folded, ONE line cut with "…", its full text the tooltip;  open (or
- *     with nothing to unfold), as many lines as it needs (Owen, 2026-10-18)
+ *   - the title (`title`, or `slot="title"`):  in full, as many lines as it needs, folded or open (Owen,
+ *     2026-10-19:  "always show the full title, wrapped")
  *   - the page's own buttons (`slot="actions"`, and the docs runtime's bullhorn):  before its own;
  *     a click on one never folds it
  *   - the bed icon (`overnight`:  made overnight), the git icon (with commits)
@@ -328,19 +328,6 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return undefined
   })
 
-  /**
-   * The title's tooltip while it's cut to one line:  folded, with details to unfold (Owen, 2026-10-18:  "ellipsis
-   * when collapsed, wrap when expanded");  its full title, the `slot="title"` child's words when it has one.
-   * - an item with no details never opens:  its title always wraps, no tooltip
-   */
-  readonly cutTitleTip = createMemo((): string | undefined => {
-    if (!this.hasDetails() || this.isOpen()) return undefined
-    const slotted = this.slots.hasContent(this.slotForName("title"))
-      ? this.domElement.querySelector(':scope > [slot="title"]')?.textContent
-      : undefined
-    return (slotted ?? this.title ?? "").replace(/\s+/g, " ").trim() || undefined
-  })
-
   /** Anything at the line's end:  the page's own buttons, the bed and git icons, a review label, the review buttons. */
   readonly hasExtras = createMemo(
     () =>
@@ -533,8 +520,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             </button>
           </Show>
         </span>
-        {/* folded:  ONE line, cut with "…", its full text the tooltip;  open:  it wraps (EpicItem.css) */}
-        <span class={TITLE} part={this.partForName("title")} title={this.cutTitleTip()}>
+        {/* in full, wrapped, folded or open (EpicItem.css) */}
+        <span class={TITLE} part={this.partForName("title")}>
           <slot name={this.slotForName("title")}>{this.title}</slot>
         </span>
         <span class={[CELL, EXTRAS]} part={this.partForName("actions")} hidden={!this.hasExtras()}>

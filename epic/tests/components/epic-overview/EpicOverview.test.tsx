@@ -117,8 +117,8 @@ describe("<epic-overview> actions slot", () => {
     expect(button.assignedSlot?.getAttribute("name")).toBe("actions")
     const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
     expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(chevron.getBoundingClientRect().left + 0.5)
-    // folded, its title is one line, its words the tooltip (J183);  open, no tooltip
-    expect(host.shadowRoot!.querySelector(".header")!.getAttribute("title")).toBe("1. Overview")
+    // its title in full, folded or open:  no tooltip (Owen, 2026-10-19;  J183's tooltip before)
+    expect(host.shadowRoot!.querySelector(".header")!.hasAttribute("title")).toBe(false)
     button.click()
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(false)

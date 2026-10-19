@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { dirname, join, posix, relative } from "node:path"
 
+import { PhaseIds } from "$/epics/phases"
 import { CommentList, type IdentifiedComment } from "$/epics/tool/CommentList"
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
@@ -132,6 +133,7 @@ export class GuideChanges {
           epic: this.epic,
           phase,
           phaseId: plan.phase(phase).id,
+          phaseTitle: PhaseIds.titleOf(plan.phase(phase)),
           as: open ? "update" : "phase",
           comments: page.comments.map((each) => each.id),
           notes: page.notes.map((each) => each.id)
@@ -194,11 +196,12 @@ export class GuideChanges {
   }
 
   /** Mark what went into a phase as taken:  the comments in the page's inbox, the notes answered with a link. */
-  private async markTaken({ page, phase, phaseId, comments, notes }: Gathered): Promise<void> {
+  private async markTaken({ page, phase, phaseId, phaseTitle, comments, notes }: Gathered): Promise<void> {
     const file = join(this.root, page)
+    // the phase's id too (epic `epic-engine` I16):  its thread's link finds it after an insert moves its number
     if (comments.length)
       GuideInbox.update(GuideInbox.fileFor(file), (list) => {
-        for (const id of comments) list.take(id, { epic: this.epic, phase })
+        for (const id of comments) list.take(id, { epic: this.epic, phase, phaseId, title: phaseTitle })
       })
     if (!notes.length) return
     const doc = relative(dirname(file), join(this.root, "epics", this.epic, `${this.epic}.plan.html`))
@@ -254,6 +257,8 @@ export type Gathered = {
   phase: number
   /** the phase it went into, by its stable id (`p-solid-2`):  where a link to it goes */
   phaseId: string
+  /** that phase's title (`Solid 2`):  what a taken comment's link says */
+  phaseTitle: string
   /** `phase`:  a new phase;  `update`:  an update (`<epic-update>`) in the page's open phase */
   as: "phase" | "update"
   /** the comments' ids, now taken */

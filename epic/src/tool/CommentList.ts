@@ -301,8 +301,11 @@ export class CommentList {
       back.offset = Number.isInteger(offset) && Number(offset) >= 0 ? Number(offset) : 0
     }
     if (stamp(edited)) back.edited = stamp(edited)
-    if (taken && typeof taken.epic === "string" && Number.isInteger(taken.phase))
+    if (taken && typeof taken.epic === "string" && Number.isInteger(taken.phase)) {
       back.taken = { epic: taken.epic, phase: taken.phase, at: stamp(taken.at) ?? back.at }
+      if (typeof taken.phaseId === "string" && PHASE_ID.test(taken.phaseId)) back.taken.phaseId = taken.phaseId
+      if (short(taken.title)) back.taken.title = short(taken.title)
+    }
     const thread = Array.isArray(replies) ? replies.flatMap((reply) => restoredReply(reply, back.at)) : []
     if (thread.length) back.replies = thread
     if (done && RESOLUTIONS.includes(done.how)) back.done = { how: done.how, at: stamp(done.at) ?? back.at }
@@ -371,11 +374,15 @@ export class CommentList {
   // ## Claude's edits
   ////////////////
 
-  /** Mark comment `id` taken into `epic`'s phase `phase`:  no longer Owen's to change. */
-  take(id: string, { epic, phase }: { epic: string; phase: number }, now = new Date()): void {
+  /**
+   * Mark comment `id` taken into `epic`'s phase `phase`:  no longer Owen's to change.
+   * - `phaseId`, `title`:  the phase's stable id and its title (epic `epic-engine` I16), so its thread's link finds the
+   *   phase after an insert moves its number (`takenInto()`)
+   */
+  take(id: string, { epic, phase, phaseId, title }: TakenInto, now = new Date()): void {
     const comment = this.comment(id)
     comment.status = "taken"
-    comment.taken = { epic, phase, at: now.toISOString() }
+    comment.taken = { epic, phase, ...(phaseId ? { phaseId } : {}), ...(title ? { title } : {}), at: now.toISOString() }
   }
 
   /**
@@ -456,7 +463,7 @@ export type Comment = Required<Omit<CommentPlace, "quote" | "offset">> &
     /** `new` (saved, waiting for Claude), `taken` (in an epic's phase) or `answered` */
     status: "new" | "taken" | "answered"
     /** the phase it went into, and when */
-    taken?: { epic: string; phase: number; at: string }
+    taken?: TakenInto & { at: string }
     /** its thread after Owen's first words, in order:  Claude's answers, Owen's replies */
     replies?: CommentReply[]
     /** Owen closed the thread:  "that's good" (`good`) or "skip it" (`skip`), and when */
@@ -539,6 +546,31 @@ function checkedText(text: unknown): string {
   if (words.length > MAX_TEXT) throw new CommentsError(`a comment holds at most ${MAX_TEXT} characters`)
   return words
 }
+
+/**
+ * The phase a comment was taken into (`CommentList.take()`).
+ * - `phase`:  its number then, `7`
+ * - `phaseId`, `title`:  its stable id (`p-memory`) and title (`Memory`);  none in a comment taken before epic
+ *   `epic-engine` I16
+ */
+export type TakenInto = { epic: string; phase: number; phaseId?: string; title?: string }
+
+/**
+ * Where a taken comment's thread links, and what the link says (epic `epic-engine` I16):  `{ hash, label }`.
+ * - by the phase's stable id, `#p-memory`, so the link still lands after a phase goes in ahead of it;  its words the
+ *   epic and the phase's title, `guide-changes · Memory`
+ * - one taken before I16 (no id):  by its number, `#p7` (an old address, landing on the 7th phase), `guide-changes P7`
+ * - pure:  the docs runtime draws the thread with it
+ */
+export function takenInto({ epic, phase, phaseId, title }: TakenInto): { hash: string; label: string } {
+  return {
+    hash: phaseId || `p${phase}`,
+    label: phaseId && title ? `${epic} · ${title}` : `${epic} P${phase}`
+  }
+}
+
+/** A stable phase id, as `taken.phaseId` holds one:  `p-memory`. */
+const PHASE_ID = /^p-[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 /** A label or excerpt, as kept:  one line, at most `MAX_LABEL` characters. */
 function short(text: unknown): string {

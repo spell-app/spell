@@ -317,14 +317,20 @@ export function planLogFile(file) {
  * Tidy `files` (absolute, or relative to the checkout's root) the way a page must be committed:  link targets, then
  * oxfmt (`vp fmt`).
  * - `doc-links.js` first:  it may add attributes oxfmt then wraps
+ * - `format`:  the files oxfmt formats (default:  all of them);  the rest get their link targets only
  * - returns whether both succeeded;  their output is echoed
  * - run from `PACKAGE`, never a content folder:  each is a link, and a process started in one is in the shared repo,
  *   outside this yarn workspace
  * - every path goes ABSOLUTE:  from `PACKAGE` a page is `../../guides/...`, and oxfmt refuses `..`
  */
-export function tidy(files) {
+export function tidy(files, { format = files } = {}) {
   const paths = files.map((file) => resolve(ROOT, file))
-  for (const { command, args, env } of [docLinksRun(paths), { command: "yarn", args: ["vp", "fmt", ...paths] }]) {
+  const formatted = format.map((file) => resolve(ROOT, file))
+  const runs = [
+    docLinksRun(paths),
+    ...(formatted.length ? [{ command: "yarn", args: ["vp", "fmt", ...formatted] }] : [])
+  ]
+  for (const { command, args, env } of runs) {
     const run = spawnSync(command, args, { cwd: PACKAGE, encoding: "utf8", env })
     if (run.status !== 0) {
       process.stderr.write(`${run.stdout ?? ""}${run.stderr ?? ""}`)
@@ -332,6 +338,29 @@ export function tidy(files) {
     }
   }
   return true
+}
+
+/**
+ * Which of `files` (absolute, or relative to the checkout's root) oxfmt would leave as they are:  formatted already,
+ * as their absolute paths.  One `vp fmt --list-different` run.
+ * - for a tool rewriting a page it didn't write (`migrate.js`):  it formats after only a page that was formatted
+ *   before, so one that wasn't keeps its text's spacing (oxfmt folds `Bedtime:  epic-workflow` in an h1 to one space:
+ *   epic `epic-engine` I7), as `notesOnDisk.ts`' `editNotes()` does
+ * - a file oxfmt ignores counts as formatted:  `vp fmt` leaves it alone anyway
+ */
+export function formattedAlready(files) {
+  const paths = files.map((file) => resolve(ROOT, file))
+  if (!paths.length) return []
+  const run = spawnSync("yarn", ["vp", "fmt", "--list-different", ...paths], { cwd: PACKAGE, encoding: "utf8" })
+  const real = (path) => (existsSync(path) ? realpathSync(path) : path)
+  const different = new Set(
+    (run.stdout ?? "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => real(resolve(PACKAGE, line)))
+  )
+  return paths.filter((path) => !different.has(real(path)))
 }
 
 /**

@@ -159,20 +159,11 @@
     overflow-wrap: anywhere;
   }
   /*
-   * FOLDED (with details to unfold), the title is ONE line, cut with "…", its full text the tooltip;  OPEN, it wraps
-   * (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded")
-   * - its basis stays `10em` either way, so the buttons after it wrap (or not) the same, folded or open
-   * - its first line never moves:  only the lines under it come and go
+   * ALWAYS in full, wrapped onto as many lines as it needs, folded or open (Owen, 2026-10-19:  "always show the full
+   * title, wrapped";  J183's "ellipsis when collapsed" before)
+   * - the cells before it and the actions after it are one line tall, at the line's top:  they sit on its FIRST line
+   * - its basis, `10em`, decides whether the actions fit beside it or wrap under it, at the right
    */
-  .item.has-details:not(.unfolded) .title {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  /* cut, it carries the tooltip:  the pointer lands on it, not on what's inside (`Tooltip.css`) */
-  .title[title] ::slotted(*) {
-    pointer-events: none;
-  }
   /* a title with markup:  its links read as text, as today's */
   ::slotted(a) {
     color: inherit;

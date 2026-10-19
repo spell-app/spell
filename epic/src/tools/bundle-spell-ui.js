@@ -65,7 +65,7 @@
 
 import { build } from "esbuild"
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { Script } from "node:vm"
@@ -73,8 +73,14 @@ import { gzipSync } from "node:zlib"
 
 /** `src`, the folder of the docs tools (`tools/`). */
 const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-/** spell-app's `packages/ui`, through spell-epic's link to its checkout (`.spell-app`), unless `SPELL_UI_DIR` says otherwise. */
-const UI_DIR = resolve(process.env.SPELL_UI_DIR ?? join(DOCS, "../.spell-app/packages/ui"))
+/**
+ * spell-app's `packages/ui`, through spell-epic's link to its checkout (`.spell-app`), unless `SPELL_UI_DIR` says
+ * otherwise;  by its REAL path.
+ * - esbuild resolves UI's own imports (`dist/` chunk to chunk) to real paths:  had the entry's `@spell-app/ui/*` gone
+ *   through the link, the bundle held TWO of UI's modules (`core.js` ...), so two of `spell-solid`'s
+ *   `ShadowEvents`, and a `<ui-button>`'s page `onClick` ran twice (epic `epic-engine` I18:  Do Now called itself off)
+ */
+const UI_DIR = realPath(resolve(process.env.SPELL_UI_DIR ?? join(DOCS, "../.spell-app/packages/ui")))
 /** spell-app's `packages/brand`, beside it:  its elements join the design bundle (P11). */
 const BRAND_DIR = join(UI_DIR, "../brand")
 /** The brand's build of its elements for the design bundle (`vite.design.config.ts` there). */
@@ -368,6 +374,7 @@ async function bundle() {
     plugins: [spellUiResolver()]
   })
   checkOneSolid(result.metafile)
+  checkEachFileOnce(result.metafile)
   if (DESIGN) escapeForInlining()
   checkClassicScript()
   if (DESIGN) checkDesignBundle()
@@ -614,6 +621,21 @@ function checkOneSolid(metafile) {
 }
 
 /**
+ * Fails if one file made it into the bundle under two paths (a link's and its real one):  two module instances, so two
+ * of UI's `UIComponent`, `ShadowEvents` ... (epic `epic-engine` I18).
+ */
+function checkEachFileOnce(metafile) {
+  const seen = new Map()
+  for (const input of Object.keys(metafile.inputs)) {
+    if (input.includes(":")) continue
+    const real = realPath(resolve(input))
+    const other = seen.get(real)
+    if (other) fail(`${real} bundled twice, as ${other} and ${input}:  resolve both through its real path`)
+    seen.set(real, input)
+  }
+}
+
+/**
  * Fails if the output still needs ES module machinery a classic script on `file://` doesn't have.
  * - A top-level `import` / `export`, or `import.meta`:  it won't PARSE as a classic script.
  *   Parsed, not searched, since the writers carry program text in their strings
@@ -762,4 +784,9 @@ function argValue(name) {
 function fail(message) {
   console.error(`!! ${message}`)
   process.exit(1)
+}
+
+/** `path`'s real path (links resolved);  `path` itself when it isn't there (the UI check says so). */
+function realPath(path) {
+  return existsSync(path) ? realpathSync(path) : path
 }

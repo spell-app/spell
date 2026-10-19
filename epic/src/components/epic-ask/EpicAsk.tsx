@@ -41,6 +41,12 @@ const OPTION_ATTRIBUTES = [SELECTED, DONE, "letter"]
  * - It holds what's picked (`picks`) and what wants more details (`moreWanted`):  its options draw from them, and
  *   send a `ui-change` when Owen ticks one, which it takes (`onPick()`).
  *   - Before Owen picks:  the options marked `selected` (ticked to start with:  the review's item picker)
+ * - Pick one:  its options' round tick boxes are ONE radio group to the keyboard (I5), though each is a native radio
+ *   in its option's own shadow root, which the browser never groups:
+ *   - one tab stop (`tabStop`:  the option picked, else the first shown), a roving `tabindex` on the tick boxes
+ *   - the arrow keys move the pick and the focus to the next option shown, or the one before, round the ends
+ *     (`onArrowKey()`)
+ *   - `<epic-choices>` names the group:  `role="radiogroup"`, labelled by `groupLabel`
  * - Part of the page's answer (`AnswerForm`) while connected:  its picks under its key, "more details" under
  *   `<key>-more`.
  * - SIDE EFFECT:  writes its state on its `<ui-section>` (`data-state`) and on that section's button in the docs
@@ -150,6 +156,21 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   /** Its options shown (not hidden by the filter). */
   get shownOptions(): Element[] {
     return this.options.filter((option) => !(this.hidesDone && option.hasAttribute(DONE)))
+  }
+
+  /**
+   * Pick one:  the letter of the option whose tick box Tab stops on (a roving `tabindex`, I5):  the one picked, else
+   * the first shown;  `undefined` with `multiple`, where every tick box is a stop.
+   */
+  get tabStop(): string | undefined {
+    if (this.multiple) return undefined
+    const shown = this.shownOptions.map(letterOf)
+    return shown.find((letter) => this.isPicked(letter)) ?? shown[0]
+  }
+
+  /** What its options' group is called:  its section's title (`Q1 · Which layout?`), else its chip. */
+  get groupLabel(): string {
+    return this.domElement.closest("ui-section[id]")?.getAttribute("header") ?? this.chipLabel
   }
 
   /** Every option shown is ticked:  the button says Select none. */
@@ -292,6 +313,29 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
     this.form?.edited()
   }
 
+  /**
+   * Pick one:  an arrow key on an option's tick box moves the pick to the next option shown (Down, Right) or the one
+   * before (Up, Left), round the ends, and the focus with it, as a native radio group does (I5).
+   * - the tick boxes are native radios in the options' own shadow roots:  the browser groups none of them
+   * - a key anywhere else (an option's comment box, Other) is left alone
+   */
+  @E.on("keydown")
+  protected onArrowKey(event: KeyboardEvent) {
+    const step = ARROW_STEPS[event.key]
+    if (!step || this.multiple || event.altKey || event.ctrlKey || event.metaKey) return
+    const path = event.composedPath()
+    const box = path[0]
+    if (!(box instanceof HTMLInputElement) || box.type !== "radio") return
+    const shown = this.shownOptions
+    const at = shown.findIndex((option) => path.includes(option))
+    if (at < 0) return
+    event.preventDefault()
+    const next = shown[(at + step + shown.length) % shown.length]
+    this.chosen = [letterOf(next)]
+    this.form?.edited()
+    next.shadowRoot?.querySelector<HTMLElement>(TICK_PART)?.focus()
+  }
+
   /** Select all:  tick every option shown;  once they all are, untick them (Select none). */
   private readonly onSelectAll = () => {
     const shown = this.shownOptions.map(letterOf)
@@ -375,6 +419,12 @@ function letterOf(option: Element): string {
 const ASK_TAG = "epic-ask"
 const CHOICES_TAG = "epic-choices"
 const OPTION_TAG = "epic-option"
+
+/** Pick one:  the arrow keys that move the pick, and which way. */
+const ARROW_STEPS: Readonly<Record<string, number>> = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }
+
+/** An option's tick box, in its shadow root (`<epic-option>`'s `tick` part). */
+const TICK_PART = '[part~="tick"]'
 
 /** The answer key of "Provide more details":  `<key>-more`. */
 const MORE_SUFFIX = "-more"

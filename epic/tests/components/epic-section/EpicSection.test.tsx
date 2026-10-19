@@ -409,23 +409,23 @@ function firstLineTop(element: Element): number {
   return range.getBoundingClientRect().top
 }
 
-// epic `epic-workflow` P25, J183 (Owen, 2026-10-18:  "ellipsis when collapsed, wrap when expanded")
+// Owen, 2026-10-19:  "always show the full title, wrapped" (J183's "ellipsis when collapsed" before)
 
 describe("<epic-section> title, folded and open", () => {
-  test("folded:  ONE line cut with …, its full title the tooltip;  open:  it wraps;  the slot's button stays put", async () => {
+  test("in full, wrapped, folded and open, no tooltip;  its first line and the slot's button stay put", async () => {
     const host = await render(
-      `<div style="width: 320px"><epic-section id="report-long" kind="report" title="A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"><p>x</p><button slot="actions" aria-label="Copy">C</button></epic-section></div>`
+      `<div style="width: 320px"><epic-section id="report-long" kind="report" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open"><p>x</p><button slot="actions" aria-label="Copy">C</button></epic-section></div>`
     )
     const header = host.shadowRoot!.querySelector<HTMLElement>(".header")!
     const words = host.shadowRoot!.querySelector<HTMLElement>(".words")!
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     const lineHeight = parseFloat(getComputedStyle(words).lineHeight)
     const folded = { top: firstLineTop(words), button: button.getBoundingClientRect() }
-    expect(header.getBoundingClientRect().height).toBeLessThan(lineHeight * 1.5)
-    expect(words.scrollWidth).toBeGreaterThan(words.clientWidth)
-    expect(header.title).toBe(
-      "A long title that cannot fit on one line of the narrow side bar, so folded it is cut and open it wraps"
-    )
+    expect(header.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
+    expect(words.scrollWidth).toBeLessThanOrEqual(words.clientWidth)
+    expect([getComputedStyle(words).textOverflow, header.hasAttribute("title")]).toEqual(["clip", false])
+    // the slot's button sits on the title's first line, not lower
+    expect(button.getBoundingClientRect().top).toBeLessThan(folded.top + lineHeight)
 
     toggle(host).click()
     await ElementFixture.tick()
