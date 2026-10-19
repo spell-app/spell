@@ -12,7 +12,7 @@
  *   - or of `--from <folder>` (a converted copy:  `spell dev plan-doc convert <name> --out <folder>`)
  *   - copied to `src/demo/shots/epics/<name>/<name>.plan.html` (git-ignored), as deep as a real one, so its links
  *     lead where a real page's do:  the review routes take epic pages only (`epics/<name>/<name>.plan.html`),
- *     its inbox file lands beside it, and the tool finds it there (`PlanDocFiles({ root: src/demo/shots })`)
+ *     its inbox file lands beside it, and the tool finds it there (`PlanDocFiles({ root, content }`, both `src/demo/shots`:  never the real content folder)
  * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
  *   serving `src/demo/shots/` as its content folder, so the routes are this branch's code as it is now;
  *   stopped at the end
@@ -131,7 +131,7 @@ copyDoc()
 mkdirSync(join(SHOTS, "packages"), { recursive: true })
 
 /** The epic tool, on the copy:  what Claude runs, its output kept for the summary. */
-const tool = new PlanDocCommands({ files: new PlanDocFiles({ root: SHOTS }) })
+const tool = new PlanDocCommands({ files: new PlanDocFiles({ root: SHOTS, content: SHOTS }) })
 const said = []
 tool.print = (text) => void said.push(text)
 tool.warn = (text) => void said.push(`! ${text}`)

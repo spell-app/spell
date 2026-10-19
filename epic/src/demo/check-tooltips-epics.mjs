@@ -108,7 +108,7 @@ const file = join(folder, `${docName}.plan.html`)
 const inboxFile = join(folder, `${docName}.inbox.json5`)
 copyDoc()
 mkdirSync(join(SHOTS, "packages"), { recursive: true })
-const tool = new PlanDocCommands({ files: new PlanDocFiles({ root: SHOTS }) })
+const tool = new PlanDocCommands({ files: new PlanDocFiles({ root: SHOTS, content: SHOTS }) })
 tool.print = () => {}
 tool.warn = () => {}
 if (docName === "tooltip-sample") await addPickCall()

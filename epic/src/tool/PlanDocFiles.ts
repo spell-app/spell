@@ -93,9 +93,17 @@ export class PlanDocFiles {
   /** link targets for the checkout's pages:  its bare-name index is built once per process */
   readonly linker: AS.Linker
 
-  constructor({ root = CHECKOUT, template = TEMPLATE }: { root?: string; template?: string } = {}) {
+  /**
+   * - `content`:  the content folder, when it isn't the checkout's (`EpicConfig.contentOf()`):  a demo check's scratch
+   *   copies (`src/demo/shots/`), which sit inside a checkout whose config names the real one
+   */
+  constructor({
+    root = CHECKOUT,
+    template = TEMPLATE,
+    content = EpicConfig.contentOf(root)
+  }: { root?: string; template?: string; content?: string } = {}) {
     this.root = root
-    this.content = EpicConfig.contentOf(root)
+    this.content = content
     this.epics = join(this.content, "epics")
     this.template = template
     this.details = join(this.content, "pages", "details")
