@@ -61,8 +61,9 @@ export const ENGINE_ROUTES = {
 
 /**
  * EPIC UI, the elements' docs set (epic `epic-workflow` P10):  the engine's `src/docs/`, served at `/components/epics/`
- * by spell-app's page server (`COMPONENT_SETS` in `$/server/page`, its `dir` `spell-epic/src/docs`), not by an engine
- * route.
+ * by both page servers, not by an engine route:
+ * - spell-app's (`COMPONENT_SETS` in `$/server/page`, its `dir` `spell-epic/src/docs`)
+ * - the epic server, the same way (`EpicServer`'s `epicUiMounts()`, epic `epic-eject` I21)
  * - `path`:  its pages' PAGE PATHS start with it, as served (`components/epics/epic-item.html`:  `pages.js`
  *   `pagePath()`, `pageAt()`)
  * - `dir`:  its folder, from the engine's checkout

@@ -3,7 +3,14 @@ import { join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { SRV, type ServedFile } from "$/server"
-import { HIGHLIGHT_JS, PageEditor, pageServerSettings, type PageConfig, type RouteModule } from "$/server/page"
+import {
+  HIGHLIGHT_JS,
+  PageEditor,
+  pageServerSettings,
+  SETS_BUNDLE,
+  type PageConfig,
+  type RouteModule
+} from "$/server/page"
 
 import type { ContentRouteContext } from "$/epics/list/runningRoutes"
 
@@ -11,6 +18,7 @@ import { RepoList } from "./RepoList"
 import {
   DEFAULT_EPIC_PORT,
   ENGINE_ROUTES,
+  EPIC_UI,
   HOME_ENV,
   legacyEnginePath,
   LOG_FILE,
@@ -27,6 +35,8 @@ import {
  * ```text
  * /_epic/assets/...       spell-epic's src/tools/_assets/   (spell-ui.js, spell-doc.css, the runtime ...)
  * /_epic/pack/...         spell-epic's src/components/__pack/   (epics.pack.js)
+ * /components/epics/...   Epic UI, the elements' pages:  spell-epic's src/docs/   (EPIC_UI)
+ * /components/epics/_assets/...   their site bundle, spell-app's sets' build (SETS_BUNDLE, through .spell-app)
  * /r/<repo>/...           that repo's content folder (its .epic/config.json5's contentFolder)
  * /...                    the DEFAULT repo's content folder too, so today's URLs keep working
  * /api/server             what it serves (EpicServerInfo)
@@ -46,7 +56,9 @@ import {
  *     TODO:  a call per repo (`/r/<repo>/api/...`), with the test repo (P9).
  *   - Page edits (`/api/pages`, `/api/files`):  the default repo's content folder,
  *     only inside its `writable` folders (its `package.json`'s `"pageServer"`, else `WRITABLE`).
- * - NOT spell-app's page server:  no component sets, no Spell UI site, no app;  spell-app's own server keeps those.
+ * - Epic UI, the engine's own component set, at `/components/epics/` as spell-app's page server serves it
+ *   (`epicUiMounts()`, epic `epic-eject` I21:  it answered 404 here)
+ * - NOT spell-app's page server:  no other component set, no Spell UI site, no app;  spell-app's own server keeps those.
  * - Its pid file and log are in spell-epic's home folder (`~/.spell-epic/server.json`, `server.log`).
  * - Its port:  `DEFAULT_EPIC_PORT` (4848), not spell-app's 4747.
  * - Run it with `epic hub` (`Hub`), never by hand.
@@ -210,7 +222,23 @@ export class EpicServer {
     const repoTemplates = this.repos.map((repo) => ({ prefix: `${repo.prefix}templates/`, dir: templates }))
     const repos = [...repoTemplates, ...this.repos.map((repo) => ({ prefix: repo.prefix, dir: repo.content }))]
     const home = this.defaultRepo ? [{ prefix: "/", dir: this.defaultRepo.content }] : []
-    return [...engine, ...repos, ...home]
+    return [...engine, ...this.epicUiMounts(), ...repos, ...home]
+  }
+
+  /**
+   * Epic UI, the elements' docs set (`EPIC_UI`), as spell-app's page server mounts its component sets
+   * (`COMPONENT_SETS`, `componentSetPath()`):
+   * - `/components/epics/...`:  the engine's `src/docs/`, its pages, `__parts/` and `__data/`
+   * - `/components/epics/_assets/...`:  the sets' build of Spell UI's site (`SETS_BUNDLE`), from the spell-app
+   *   checkout the engine uses (`.spell-app`);  spell-app's page server builds it, so it's missing until that has run
+   * - the longer prefix wins (`SRV.StaticHandler`), so `_assets/` is the bundle's, never the docs folder's
+   */
+  private epicUiMounts(): SRV.Mount[] {
+    const prefix = `/${EPIC_UI.path}/`
+    return [
+      { prefix: `${prefix}${SET_ASSETS}/`, dir: join(this.engine, SPELL_APP, SETS_BUNDLE) },
+      { prefix, dir: join(this.engine, EPIC_UI.dir) }
+    ]
   }
 
   /**
@@ -244,6 +272,7 @@ export class EpicServer {
    * Live reload:
    * - each repo's content at its prefix (the default's at `/` too)
    * - the engine's assets and pack at their routes (and at their old paths, for pages not migrated yet)
+   * - Epic UI's pages and their site bundle, at their addresses (`epicUiMounts()`)
    */
   private watch(): void {
     const live = this.web.live!
@@ -260,6 +289,8 @@ export class EpicServer {
     // the templates at each repo's prefix
     for (const repo of this.repos)
       live.watch(join(this.engine, ENGINE_ROUTES.templates.dir), { servedAt: `${repo.prefix}templates/` })
+    for (const mount of this.epicUiMounts())
+      if (existsSync(mount.dir)) live.watch(mount.dir, { servedAt: mount.prefix })
   }
 
   ////////////////
@@ -359,6 +390,12 @@ export const ROUTE_MODULES = [
  * - the server package's (spell-app's, through `.spell-app`)
  */
 export const SOURCES = [join(ENGINE_ROOT, "src"), join(ENGINE_ROOT, ".spell-app", "packages", "server", "src")]
+
+/** The engine's link to the spell-app checkout it uses:  the server package, and the sets' site bundle. */
+const SPELL_APP = ".spell-app"
+
+/** A component set's site bundle, under its address:  `/components/epics/_assets/site.js`. */
+const SET_ASSETS = "_assets"
 
 /** A repo's home page, in its content folder:  where its address (`/`, `/r/<repo>/`) leads. */
 const HOME_PAGE = "pages/index.html"

@@ -2,12 +2,13 @@
  * Tests of the machine's epic server (`EpicServer`):  two scratch repos, this checkout as the engine, a temp home.
  * - started on a free port with no route modules and no pid file, and stopped after
  */
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "$/server"
+import { SETS_BUNDLE } from "$/server/page"
 import { ask } from "$/server/test/serve"
 
 import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "$/epics/server/EpicServer"
@@ -97,6 +98,21 @@ describe("EpicServer", () => {
     expect((await ask(port, "GET", "/templates/missing.html")).status).toBe(404)
   })
 
+  // epic-eject I21:  Epic UI answered 404 here, while spell-app's page server served it
+  test("Epic UI at /components/epics/, as spell-app's page server serves it:  the engine's src/docs/, the sets' site bundle at _assets/", async () => {
+    for (const path of ["/components/epics/", "/components/epics/epic-item.html", "/components/epics/__parts/layout.html"]) {
+      const page = await ask(port, "GET", path)
+      expect(page.status, path).toBe(200)
+    }
+    expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>The Epic Elements</title>")
+    expect((await ask(port, "GET", "/components/epics")).headers.location).toBe("/components/epics/")
+    expect(server.fileFor("/components/epics/epic-item.html")).toBe(join(ENGINE, "src/docs/epic-item.html"))
+    // the bundle is spell-app's page server's build, not committed:  checked where it has been built
+    const bundle = join(ENGINE, ".spell-app", SETS_BUNDLE, "site.js")
+    if (existsSync(bundle)) expect(server.fileFor("/components/epics/_assets/site.js")).toBe(bundle)
+    expect((await ask(port, "GET", "/components/epics/missing.html")).status).toBe(404)
+  })
+
   test("every page's SPELL_SERVER:  its path under the prefix it was asked by, its repo, base and checkout", async () => {
     const config = (html: string) => JSON.parse(/window\.SPELL_SERVER = (\{.*?\})<\/script>/.exec(html)![1]!)
     const atRoot = config((await ask(port, "GET", "/epics/seo/seo.plan.html")).text)
@@ -129,8 +145,7 @@ describe("EpicServer", () => {
     expect(server.fileFor("/nope.html")).toBeUndefined()
   })
 
-  test("its route modules are spell-epic's own files", async () => {
-    const { existsSync } = await import("node:fs")
+  test("its route modules are spell-epic's own files", () => {
     for (const path of ROUTE_MODULES) expect(existsSync(join(ENGINE, path)), path).toBe(true)
   })
 
