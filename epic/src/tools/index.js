@@ -66,6 +66,7 @@ import { Sagas } from "../tool/Sagas.ts"
 import { PageNotes } from "./PageNotes.js"
 import {
   BRAND,
+  CONTENT,
   EPICS,
   GOALS,
   GUIDES,
@@ -83,8 +84,8 @@ import {
 } from "./pages.js"
 import { EpicConfig } from "../config/EpicConfig.ts"
 
-/** The home page, from the checkout's root. */
-const INDEX = relative(ROOT, HOME)
+/** The home page, as a page path (`pages/index.html`). */
+const INDEX = pagePath(HOME)
 
 /** The repo's own templates folder, from the checkout's root, with its `/` (`docs/templates/`);  none:  `undefined`. */
 const REPO_TEMPLATE_PATH = REPO_TEMPLATES && `${pagePath(REPO_TEMPLATES)}/`
@@ -822,13 +823,13 @@ ${body}
 /** The starred epics' names (`FAVORITES_FILE`, shared;  its old `.json` too);  none when it's missing or won't read. */
 export function readFavorites() {
   try {
-    return favoritesIn(DataFile.read(join(ROOT, FAVORITES_FILE)))
+    return favoritesIn(DataFile.read(join(CONTENT, FAVORITES_FILE)))
   } catch {
     return new Set()
   }
 }
 
-/** Page `path` (from the checkout's root) as a link from folder `from` (a list page's):  `solid/solid-2.html`. */
+/** Page path `path` as a link from folder `from` (a list page's):  `solid/solid-2.html`. */
 function href(path, from) {
   return relative(from, path)
 }

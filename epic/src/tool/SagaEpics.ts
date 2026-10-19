@@ -6,6 +6,8 @@ import { parseHTML } from "linkedom"
 // Import directly:  the `$/server/site` barrel is browser code (the site header);  this file imports nothing
 import { URGENT_SELECTOR } from "$/epics/list/EpicState"
 
+import { EpicConfig } from "$/epics/config/EpicConfig"
+
 import type { SagaEpic, SagaEpicsAnswer } from "$/epics/components/epic-cards/EpicCards.types"
 
 import { PlanDocFiles } from "./PlanDocFiles"
@@ -21,11 +23,12 @@ import { PlanDocFiles } from "./PlanDocFiles"
  * - Node only (`node:fs`, linkedom):  NOT in the `$/epics` barrel, imported by path.
  ****************/
 export class SagaEpics {
-  /** the checkout's root:  its `epics/` (the shared copy every checkout reads) */
-  readonly root: string
+  /** the content folder of checkout `root`'s repo (`EpicConfig.contentOf()`):  its `epics/` */
+  readonly content: string
 
+  /** The sagas' epics of the repo checkout `root` is in. */
   constructor(root: string) {
-    this.root = root
+    this.content = EpicConfig.contentOf(root)
   }
 
   /**
@@ -34,7 +37,7 @@ export class SagaEpics {
    * - an epic page that won't parse is left out
    */
   of(saga: string): SagaEpicsAnswer {
-    const epics = join(this.root, "epics")
+    const epics = join(this.content, "epics")
     const names = existsSync(epics)
       ? readdirSync(epics, { withFileTypes: true })
           .filter((entry) => entry.isDirectory())

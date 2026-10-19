@@ -64,6 +64,7 @@ import { randomBytes } from "crypto"
 import { join } from "path"
 import * as vscode from "vscode"
 
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { RepoList } from "$/epics/server/RepoList"
 
 import { escapeAttribute, fileForPath, planDocsOf, samePage, stamped, type ServerInfo } from "./docUrls"
@@ -624,12 +625,13 @@ export class DocView implements vscode.WebviewViewProvider {
 export type DocViewName = "docs" | "review"
 
 /**
- * The home page of the window's first folder (the repo root), `undefined` when it has none:  `pages/index.html`.
+ * The home page of the window's first folder (the repo root), `undefined` when it has none:  `pages/index.html` in
+ * its repo's content folder (`EpicConfig.contentOf()`, epic `epic-eject` P12), not through a link at its root.
  * - the epic server's own home comes first (`DocPreview`'s `home`):  this is for a window with no epic server
  */
 export function docsIndex(): string | undefined {
   const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
-  return root && join(root, "pages", "index.html")
+  return root && join(EpicConfig.contentOf(root), "pages", "index.html")
 }
 
 /** The folder the page server at `origin` serves (its `/api/server`'s `root`);  `undefined`:  not a page server. */

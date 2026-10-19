@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs"
-import { dirname, join, relative, resolve, sep } from "node:path"
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import { KINDS, type ItemKind } from "./planDoc.types"
 
@@ -60,10 +60,9 @@ export class EpicDocs {
    * - never the epic page's own folder, nor any other epic page (`epics/`), nor generated pages:  `isDocPath()`
    */
   find(): EpicDocList {
-    const { root } = this.files
     const found = new Map<string, EpicDoc>()
     const add = (path: string, reason: DocReason, sha?: string) => {
-      if (!EpicDocs.isDocPath(path) || !isFile(join(root, path))) return
+      if (!EpicDocs.isDocPath(path) || !isFile(this.fileOf(path))) return
       const doc = found.get(path) ?? { path, group: "linked", reasons: [], commits: [] }
       if (!doc.reasons.includes(reason)) doc.reasons.push(reason)
       if (sha && !doc.commits.includes(sha)) doc.commits.push(sha)
@@ -106,7 +105,7 @@ export class EpicDocs {
     const parts = path.split("/")
     const folder = parts.at(-2)
     if (parts.length < 3 || `${folder}.html` !== parts.at(-1)) return []
-    return walk(join(this.files.root, dirname(path)))
+    return walk(this.fileOf(dirname(path)))
       .map((file) => this.relative(file))
       .filter((each) => each !== path)
   }
@@ -155,7 +154,7 @@ export class EpicDocs {
   /**
    * The shared pages changed by the shared repo's commits whose `Turn-end:` is this epic's checkout
    * (`<name>`, or one of its agents' worktrees, `<name>-agent-<hex>`).
-   * - the shared repo:  where the checkout's `guides/` link points;  none (no link):  nothing
+   * - the shared repo:  the content folder (`sharedRoot()`);  none (a checkout holding its own pages):  nothing
    * - a turn commits EVERY session's pending edits, so a page here may be another session's:  `/docs-check` reads
    *   it and finds nothing of this epic's in it, at worst
    */
@@ -179,12 +178,11 @@ export class EpicDocs {
    * every doc file spell-app tracks (`git ls-files`, `isDocPath()`).
    */
   mentioningFiles(): string[] {
-    const { root } = this.files
-    const shared = SHARED_DOC_DIRS.flatMap((dir) => walk(join(root, dir)).map((file) => this.relative(file)))
+    const shared = SHARED_DOC_DIRS.flatMap((dir) => walk(this.fileOf(dir)).map((file) => this.relative(file)))
     const tracked = this.files.git("-c", "core.quotepath=off", "ls-files").split("\n").filter(Boolean)
     const candidates = [...new Set([...shared, ...tracked])].filter((path) => EpicDocs.isDocPath(path))
     return candidates.filter((path) => {
-      const file = join(root, path)
+      const file = this.fileOf(path)
       return isFile(file) && EpicDocs.mentions(readFileSync(file, "utf8"), this.name)
     })
   }
@@ -199,7 +197,7 @@ export class EpicDocs {
 
   /** The epic's changelog entry:  `guides/changelog.html`, its `<ui-section id="<name>">`, and whether it's there. */
   changelogEntry(): ChangelogEntry {
-    const file = join(this.files.root, CHANGELOG)
+    const file = join(this.files.content, CHANGELOG)
     const html = existsSync(file) ? readFileSync(file, "utf8") : ""
     const found = new RegExp(`<ui-section\\b[^>]*\\bid="${escapeRegex(this.name)}"`).test(html)
     return { path: CHANGELOG, anchor: this.name, found }
@@ -326,9 +324,24 @@ export class EpicDocs {
     return commits
   }
 
-  /** `file` as a checkout path, `/`-separated. */
+  /**
+   * `file` as a checkout path, `/`-separated:  from the content folder for a page there (`guides/x.html`;  epic
+   * `epic-eject` P12), else from the checkout's root (`packages/ui/AGENTS.md`).
+   */
   private relative(file: string): string {
-    return relative(this.files.root, file).split(sep).join("/")
+    const { content, root } = this.files
+    const inContent = relative(content, file)
+    const from = inContent.startsWith("..") || isAbsolute(inContent) ? relative(root, file) : inContent
+    return from.split(sep).join("/")
+  }
+
+  /**
+   * The file checkout path `path` names (`relative()` turned round):  in the content folder when it's there, else in
+   * the checkout.
+   */
+  private fileOf(path: string): string {
+    const inContent = join(this.files.content, path)
+    return existsSync(inContent) ? inContent : join(this.files.root, path)
   }
 
   /**
@@ -342,11 +355,13 @@ export class EpicDocs {
     return path.startsWith("..") ? undefined : path
   }
 
-  /** The shared content repo:  the folder the checkout's `guides/` link points into;  `undefined` without one. */
+  /**
+   * The shared content repo:  the repo's content folder (`PlanDocFiles.content`);  `undefined` for a checkout that
+   * holds its own pages.
+   */
   private sharedRoot(): string | undefined {
-    const guides = join(this.files.root, "guides")
-    if (!lstatSync(guides, { throwIfNoEntry: false })?.isSymbolicLink()) return undefined
-    return dirname(realpathSync(guides))
+    const { content, root } = this.files
+    return content === resolve(root) ? undefined : content
   }
 }
 
@@ -456,7 +471,7 @@ export type EpicDecisions = {
 export const GROUPS = ["wrote", "related", "linked", "swept"] as const
 
 /** The shared folders whose pages are docs:  searched for mentions, and their `.html` / `.json5` listed. */
-export const SHARED_DOC_DIRS = ["guides", "templates", "ui", "agents/wwod"]
+export const SHARED_DOC_DIRS = ["guides", "templates", "agents/wwod"]
 
 /** The changelog:  listed apart, as `changelog`, never as a doc. */
 const CHANGELOG = "guides/changelog.html"

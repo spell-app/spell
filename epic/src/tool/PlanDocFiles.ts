@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, readdirSync, readFileSync, rmSync } from "node:fs"
-import { basename, dirname, join, relative, resolve, sep } from "node:path"
+import { existsSync, readdirSync, readFileSync, rmSync } from "node:fs"
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
@@ -52,11 +52,17 @@ import { SagaPage } from "./SagaPage"
  ****************/
 export class PlanDocFiles {
   /**
-   * the checkout's root:  its `epics/`, `pages/` and docs tools
+   * the checkout's root:  its repo's content folder (`content`) and docs tools
    * - STATIC for the object's life
    * - the command line makes one for the checkout it runs in (a worktree's, while the code may be main's)
    */
   readonly root: string
+
+  /**
+   * the repo's content folder (`EpicConfig.contentOf()`):  its `epics/`, `pages/`, `sagas/` (epic `epic-eject` P12),
+   * never through a link at the checkout's root
+   */
+  readonly content: string
 
   /** `epics/`:  epic pages, `epics/<name>/<name>.plan.html`, their inboxes and details pages */
   readonly epics: string
@@ -89,10 +95,11 @@ export class PlanDocFiles {
 
   constructor({ root = CHECKOUT, template = TEMPLATE }: { root?: string; template?: string } = {}) {
     this.root = root
-    this.epics = join(root, "epics")
+    this.content = EpicConfig.contentOf(root)
+    this.epics = join(this.content, "epics")
     this.template = template
-    this.details = join(root, "pages", "details")
-    const own = join(root, "packages", "epics")
+    this.details = join(this.content, "pages", "details")
+    const own = join(root, "packages/epics")
     this.docsPackage = existsSync(own) ? own : resolve(DOCS_TOOLS, "..", "..")
     this.docsTools = DOCS_TOOLS
     this.linker = new AS.Linker(root)
@@ -127,7 +134,8 @@ export class PlanDocFiles {
     if (saga) return this.findSagaPage(saga)
     this.docPath(name)
     const found = PlanDocFiles.planDocIn(join(this.epics, name), name)
-    if (!found) throw new PlanDocError(`no epic page for "${name}" (${relative(this.root, join(this.epics, name))}/)`)
+    if (!found)
+      throw new PlanDocError(`no epic page for "${name}" (${relative(this.content, join(this.epics, name))}/)`)
     return found
   }
 
@@ -220,14 +228,14 @@ export class PlanDocFiles {
    * - SIDE EFFECT:  names each missing part on stderr
    */
   read(file: string, options?: PlanDocOptions): PlanDoc {
-    if (!existsSync(file)) throw new PlanDocError(`no epic page ${relative(this.root, file)}:  \`epic new\` first`)
+    if (!existsSync(file)) throw new PlanDocError(`no epic page ${relative(this.content, file)}:  \`epic new\` first`)
     const html = readFileSync(file, "utf8")
     if (!isEpicMarkup(html)) throw this.oldMarkup(file)
     const plan = PlanDoc.parse(html, undefined, options)
     plan.parts = assembleEpic(plan.document, file)
     for (const id of plan.parts.missing)
       process.stderr.write(
-        `epic:  ${relative(this.root, PlanParts.partFile(file, id))} is missing:  #${id} has no body\n`
+        `epic:  ${relative(this.content, PlanParts.partFile(file, id))} is missing:  #${id} has no body\n`
       )
     return plan
   }
@@ -266,7 +274,7 @@ export class PlanDocFiles {
       const broken = plan.check().filter((problem) => !before.has(problem))
       if (broken.length)
         throw new PlanDocError(
-          `${relative(this.root, file)}:  nothing written:  the edit would break the doc:\n  ${broken.join("\n  ")}`
+          `${relative(this.content, file)}:  nothing written:  the edit would break the doc:\n  ${broken.join("\n  ")}`
         )
       await this.writeDoc(file, plan, split ?? plan.parts!.split)
       return result
@@ -300,7 +308,7 @@ export class PlanDocFiles {
         now,
         epic: basename(file).replace(/(\.plan)?\.html$/, ""),
         folder: dirname(file),
-        root: this.root,
+        root: this.content,
         inbox: inboxView(ReviewInbox.read(inboxFile)),
         notes: [],
         moves: []
@@ -321,7 +329,7 @@ export class PlanDocFiles {
       const broken = plan.check().filter((problem) => !before.has(problem))
       if (broken.length)
         throw new PlanDocError(
-          `${relative(this.root, file)}:  nothing written:  migrating would break the doc:\n  ${broken.join("\n  ")}`
+          `${relative(this.content, file)}:  nothing written:  migrating would break the doc:\n  ${broken.join("\n  ")}`
         )
       await this.writeDoc(file, plan, plan.parts!.split)
       return { ...done, written: true }
@@ -391,16 +399,15 @@ export class PlanDocFiles {
    * Rewrite the docs index:  a plan's status badge follows its phases.
    * - by running the docs index's script, `src/tools/index.js`, as a child `node`,
    *   as `spell dev docs index` runs it
-   * - shared content (`pages` a link):  ONE `pages/index.html` for every checkout, not tracked by spell-app,
-   *   so a worktree rewrites it too:  nothing to conflict on merge
-   * - a checkout WITHOUT the link (its own tracked home) in a worktree:
+   * - shared content (a content folder of its own, `content`):  ONE `pages/index.html` for every checkout, not
+   *   tracked by spell-app, so a worktree rewrites it too:  nothing to conflict on merge
+   * - a checkout holding its own pages (its own tracked home) in a worktree:
    *   left alone, or two epics' worktrees would conflict on merge
    * - SIDE EFFECT:  says on stderr when it failed
    */
   reindex(): void {
-    const pages = join(this.root, "pages")
-    const shared = lstatSync(pages, { throwIfNoEntry: false })?.isSymbolicLink()
-    if (!shared && EpicConfig.of(this.root).worktreeNameOf(pages)) return
+    const shared = this.content !== resolve(this.root)
+    if (!shared && EpicConfig.of(this.root).worktreeNameOf(join(this.content, "pages"))) return
     const run = spawnSync("node", [join(this.docsTools, "index.js")], {
       cwd: this.docsPackage,
       encoding: "utf8",
@@ -416,7 +423,7 @@ export class PlanDocFiles {
   private oldMarkup(file: string): PlanDocError {
     const name = basename(file).replace(/(\.plan)?\.html$/, "")
     return new PlanDocError(
-      `${relative(this.root, file)} is in the old markup, which the tool no longer reads:  convert it first ` +
+      `${relative(this.content, file)} is in the old markup, which the tool no longer reads:  convert it first ` +
         `(epic convert ${name} --out <folder>, then copy the converted doc back)`
     )
   }
@@ -464,11 +471,15 @@ export class PlanDocFiles {
   static readonly MAIN_CHECKOUT = "main"
 
   /**
-   * The spell-app checkout a doc belongs to:  its path up to `/epics/<name>/`, else this one.
+   * The spell-app checkout a doc belongs to:  this one for a doc in the content folder (a repo of its own);  else its
+   * path up to `/epics/<name>/`, else this one.
    * - another worktree's, maybe;  or an old one's `/epics/`
    * - git for a doc runs there, never in the doc's folder (`git()`)
    */
   checkoutOf(file: string): string {
+    const inContent = relative(this.content, resolve(file))
+    const shared = this.content !== resolve(this.root)
+    if (shared && !inContent.startsWith("..") && !isAbsolute(inContent)) return this.root
     const m = /^(.+?)[\\/](?:packages[\\/]docs[\\/](?:content[\\/])?)?epics[\\/][^\\/]+[\\/][^\\/]+$/.exec(file)
     return m ? m[1]! : this.root
   }

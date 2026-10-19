@@ -132,3 +132,24 @@ describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () =>
     expect((await ask(port, "GET", "/worktrees/none/epics/x.html")).status).toBe(404)
   })
 })
+
+// epic `epic-eject` P12:  the module tells the page server where the repo's pages are, when it can be told
+describe("runningRoutes, the content folder", () => {
+  const top = mkdtempSync(join(tmpdir(), "epics-running-content-"))
+  const root = join(top, "repo")
+  afterAll(() => rmSync(top, { recursive: true, force: true }))
+
+  test("hands the config's content folder to `serveContent()`;  a server without it is left as it was", async () => {
+    put(root, ".epic/config.json5", '{ "contentFolder": "../repo.epics" }')
+    put(top, "repo.epics/epics/index.html", `<html><body>${MARKER}</body></html>\n`)
+    const served: string[] = []
+    const stops: (() => unknown)[] = []
+    const server = new PageServer({ root })
+    const context = { ...server.routeContext(), onStop: (stop: () => unknown) => void stops.push(stop) }
+    await runningRoutes.setup({ ...context, serveContent: (dir: string) => void served.push(dir) } as typeof context)
+    expect(served).toEqual([join(top, "repo.epics")])
+    // an older page server:  no `serveContent()`, nothing called, nothing thrown
+    await runningRoutes.setup(context)
+    for (const stop of stops) await stop()
+  })
+})

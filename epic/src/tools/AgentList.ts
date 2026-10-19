@@ -38,18 +38,21 @@ export class AgentList {
 
   /**
    * The list for checkout `root`.
-   * - `epic`:  the epic it's for;  default:  the worktree's name, when `epics/<name>/<name>.plan.html` is there
+   * - `epic`:  the epic it's for;  default:  the worktree's name, when `epics/<name>/<name>.plan.html` is there, in
+   *   the repo's content folder (`EpicConfig.contentOf()`)
    */
   constructor(root: string, { epic }: { epic?: string } = {}) {
     const worktree = EpicConfig.of(root).worktreeNameOf(root)
-    epic ??= worktree && existsSync(join(root, "epics", worktree, `${worktree}.plan.html`)) ? worktree : undefined
-    this.file = epic ? join(root, "epics", epic, LIST_FILE) : join(root, CHECKOUT_LIST_FILE)
+    const epics = join(EpicConfig.contentOf(root), "epics")
+    epic ??= worktree && existsSync(join(epics, worktree, `${worktree}.plan.html`)) ? worktree : undefined
+    this.file = epic ? join(epics, epic, LIST_FILE) : join(root, CHECKOUT_LIST_FILE)
     this.prefix = epic ?? worktree ?? MAIN_PREFIX
   }
 
   /**
-   * The list beside epic page `file`, `<root>/epics/<epic>/<epic>.plan.html`:  that epic's (the page server's route).
-   * - `epics/` is a link into the shared content repo, so every checkout's copy of the doc names the same file
+   * The list beside epic page `file`, `<content>/epics/<epic>/<epic>.plan.html`:  that epic's (the page server's
+   * route).
+   * - the content folder holds no config:  it is its own (`EpicConfig.contentOf()`)
    */
   static forPlanDoc(file: string): AgentList {
     const epic = basename(file, ".plan.html")

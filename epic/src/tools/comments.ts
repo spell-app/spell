@@ -39,7 +39,7 @@
  * - Exit codes:  0;  1 a comment or page that isn't there (the message says why);  2 usage.
  */
 import { existsSync, readFileSync } from "node:fs"
-import { join, relative, resolve } from "node:path"
+import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { CommentList, CommentsError } from "$/epics/tool/CommentList"
@@ -49,7 +49,7 @@ import { SeeAlso } from "$/epics/tool/SeeAlso"
 
 import { duration } from "./details.js"
 import { GUIDE_CHANGES, GuideChanges } from "./GuideChanges"
-import { ROOT, pageAndId, pageFile, parseArgs } from "./pages.js"
+import { CONTENT, ROOT, pageAndId, pageFile, pagePath, parseArgs } from "./pages.js"
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { positional, flags } = parseArgs(process.argv.slice(2))
@@ -70,7 +70,7 @@ export async function run([verb = "list", ...rest]: string[], flags: Record<stri
     const commit = typeof flags.commit === "string" ? flags.commit : undefined
     GuideInbox.update(GuideInbox.fileFor(pageFile(page)), (comments) => comments.answer(id, reply, new Date(), commit))
     touchOwner(page)
-    console.log(`${relative(ROOT, pageFile(page))}#${CommentList.label(id)}  answered`)
+    console.log(`${pagePath(pageFile(page))}#${CommentList.label(id)}  answered`)
     return 0
   } catch (error) {
     if (!(error instanceof CommentsError) && !isMissingFile(error)) throw error
@@ -87,7 +87,7 @@ function working([page, id, on]: string[]): number {
   if (!page || !id || (on !== "on" && on !== "off")) return usage()
   GuideInbox.update(GuideInbox.fileFor(pageFile(page)), (comments) => comments.setWorking(id, on === "on"))
   touchOwner(page)
-  console.log(`${relative(ROOT, pageFile(page))}#${CommentList.label(id)}  working:  ${on}`)
+  console.log(`${pagePath(pageFile(page))}#${CommentList.label(id)}  working:  ${on}`)
   return 0
 }
 
@@ -97,9 +97,9 @@ function working([page, id, on]: string[]): number {
  * - nobody listening, or no epic owns the page:  nothing written
  */
 function touchOwner(page: string): void {
-  const epic = new SeeAlso(ROOT).ownerOf(relative(ROOT, pageFile(page)))
+  const epic = new SeeAlso(ROOT).ownerOf(pagePath(pageFile(page)))
   if (!epic) return
-  const file = ReviewInbox.pathFor(join(ROOT, "epics", epic, `${epic}.plan.html`))
+  const file = ReviewInbox.pathFor(join(CONTENT, "epics", epic, `${epic}.plan.html`))
   if (!existsSync(file) || !ReviewInbox.read(file).listening) return
   ReviewInbox.update(file, (box) => box.touchListening())
 }
@@ -150,7 +150,7 @@ async function wait(pages: string[], flags: Record<string, string | true>): Prom
 /** The comments in inbox files `files` (`all`, or only those `waiting` for Claude), each with its page. */
 function pageComments(files: string[], which: "all" | "waiting") {
   return files.flatMap((file) => {
-    const page = relative(ROOT, file).replace(/\.inbox\.json5?$/, ".html")
+    const page = pagePath(file).replace(/\.inbox\.json5?$/, ".html")
     const { commentList } = GuideInbox.read(file)
     return (which === "all" ? commentList.all : commentList.waiting).map((comment) => ({ page, ...comment }))
   })
@@ -188,7 +188,7 @@ const WAIT_POLL_MS = 2000
 /** Gather the waiting comments into the epic, one phase per page;  print what went where. */
 async function gather(pages: string[], flags: Record<string, string | true>): Promise<number> {
   const epic = typeof flags.epic === "string" ? flags.epic : GUIDE_CHANGES
-  const only = flags.all || !pages.length ? undefined : pages.map((page) => relative(ROOT, pageFile(page)))
+  const only = flags.all || !pages.length ? undefined : pages.map((page) => pagePath(pageFile(page)))
   const gathered = await new GuideChanges({ root: ROOT, epic }).gather(only)
   if (flags.json) console.log(JSON.stringify(gathered, null, 2))
   else if (!gathered.length) console.log("no comments waiting")

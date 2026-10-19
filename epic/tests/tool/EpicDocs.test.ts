@@ -1,9 +1,9 @@
 /**
  * Tests of `EpicDocs` (`spell dev plan-doc docs | decisions`):  its pure rules, then a scratch checkout with git,
- * a shared content repo behind a `guides/` link, and two epics' pages.
+ * a shared content repo its config names (no links), and two epics' pages.
  */
 import { spawnSync } from "node:child_process"
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -27,7 +27,6 @@ describe("EpicDocs rules", () => {
       "guides/airplane.html",
       "guides/dev/commands/commands.json",
       "templates/epics/plan-doc.md",
-      "ui/button.html",
       "agents/wwod/WWOD.md"
     ]
     const not = [
@@ -89,6 +88,9 @@ describe("EpicDocs on a scratch checkout", () => {
   const scratch = mkdtempSync(join(tmpdir(), "epic-docs-"))
   const root = join(scratch, "checkout")
   const shared = join(scratch, "shared")
+  // the checkout names its content folder in its config, and has NO links to it (epic `epic-eject` P12)
+  for (const dir of ["epics", "guides"]) mkdirSync(join(shared, dir), { recursive: true })
+  write(root, ".epic/config.json5", JSON.stringify({ contentFolder: "../shared" }))
   const files = new PlanDocFiles({ root })
 
   beforeAll(async () => {
@@ -96,10 +98,7 @@ describe("EpicDocs on a scratch checkout", () => {
       mkdirSync(dir, { recursive: true })
       git(dir, "init", "-q")
     }
-    write(root, ".gitignore", "epics\nguides\n")
-    for (const dir of ["epics", "guides"]) mkdirSync(join(shared, dir))
-    symlinkSync(join(shared, "epics"), join(root, "epics"))
-    symlinkSync(join(shared, "guides"), join(root, "guides"))
+    write(root, ".gitignore", ".epic\n")
     // spell-app's commits:  x's by its subject, y's by y's doc listing it, one listed in x's doc only
     const xs = commit(root, "x P1:  One -- the readme", { "README.md": "# r", "packages/a/AGENTS.md": "a", "a.ts": "" })
     const ys = commit(root, "P1:  One -- y's, named like x's", { "y-notes.md": "y" })
@@ -122,7 +121,7 @@ describe("EpicDocs on a scratch checkout", () => {
     const y = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"))
     y.addPhase("One")
     y.addCommit({ phase: 1 }, ys, "y's work", { base: null })
-    await files.writeDoc(join(root, "epics", "y", "y.plan.html"), y, true)
+    await files.writeDoc(join(shared, "epics", "y", "y.plan.html"), y, true)
     const x = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"))
     const durable = x.document.createElement("a")
     durable.setAttribute("slot", "durable")
@@ -142,7 +141,7 @@ describe("EpicDocs on a scratch checkout", () => {
     x.decide("q1", "Right it is", { option: "B", details: "<p>Because right.</p>" })
     x.addItem("judgement", "kept it small")
     x.setItem("j1", "done")
-    await files.writeDoc(join(root, "epics", "x", "x.plan.html"), x, true)
+    await files.writeDoc(join(shared, "epics", "x", "x.plan.html"), x, true)
     expect(xs).toMatch(/^[0-9a-f]{40}$/)
   })
 

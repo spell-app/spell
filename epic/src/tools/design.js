@@ -12,18 +12,18 @@
  *     `packages/ui/build/design-system/project/`
  * - `pushed [--url <system link>]`:  record the built files as pushed (after the skill's publish)
  * - `state [--json]`:  the record:  the system's link, when it was pushed, how many files
- * - The record is SHARED content, `brand/design-system.json` in `../spell-app-dev`,
+ * - The record is SHARED content, `brand/design-system.json` in the content folder (`../spell-app.epics`),
  *   so every checkout knows what claude.ai holds:  `{ url, pushedAt, by, files: { "project/<path>": "<sha256>" } }`.
  */
 import { createHash } from "node:crypto"
-import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
 import { ENGINE_ROUTES } from "../server/server.types.ts"
-import { ROOT } from "./pages.js"
+import { CONTENT, ROOT, pageFile, pagePath } from "./pages.js"
 
 /** The built design system:  `spell dev design build` writes it, `yarn design:bundle` adds the bundle. */
 export const BUILT = join(ROOT, "packages/ui/build/design-system")
@@ -44,14 +44,16 @@ async function main(argv) {
   if (verb === "pull") {
     const [board, page] = positional
     if (!board || !page) return usage("pull <board.dc.html> <page.html> [--title ...] [--from <design link>]")
-    const result = pullBoard(readFileSync(board, "utf8"), resolve(page), {
+    // a page path (`brand/pony.html`) is the content folder's:  `pageFile()`
+    const file = pageFile(page)
+    const result = pullBoard(readFileSync(board, "utf8"), file, {
       title: flags.title,
       from: flags.from,
       board: basename(board)
     })
-    mkdirSync(dirname(resolve(page)), { recursive: true })
-    writeFileSync(resolve(page), result.html)
-    console.log(`wrote ${resolve(page)}`)
+    mkdirSync(dirname(file), { recursive: true })
+    writeFileSync(file, result.html)
+    console.log(`wrote ${file}`)
     for (const note of result.notes) console.log(`  - ${note}`)
     return 0
   }
@@ -135,7 +137,9 @@ export function pullBoard(source, file, { title, from, board } = {}) {
   }
   let body = root.innerHTML.trim()
   body = fillHoles(body, defaults, notes)
-  const up = relative(dirname(file), ROOT) || "."
+  // the site header's `root`:  up from the page's folder to where the page server serves its page path from, `/`
+  const depth = pagePath(file).split("/").length - 1
+  const up = depth ? Array.from({ length: depth }, () => "..").join("/") : "."
   const name = title ?? document.querySelector("title")?.textContent.trim() ?? basename(file, ".html")
   const stamp = new Date().toISOString().slice(0, 10)
   const origin = `pulled from Claude Design${from ? `, ${from}` : ""}${board ? `, board ${board}` : ""}, ${stamp}`
@@ -198,9 +202,9 @@ function escapeText(text) {
 // ## Push record
 ////////////////
 
-/** The shared content repo (`../spell-app-dev`), found through this checkout's `agents` link. */
+/** The shared content repo (`../spell-app.epics`):  the repo's content folder (`pages.js` `CONTENT`). */
 export function sharedDir() {
-  return dirname(realpathSync(join(ROOT, "agents")))
+  return CONTENT
 }
 
 /** `brand/design-system.json` in the shared repo:  what was pushed to claude.ai. */

@@ -25,7 +25,7 @@
  * - `sweep [--days 14]` -- delete scratch pages (and their answers) older than that;  never an epic's
  *   - `new` sweeps first, by itself
  * - `<page>`:  a slug (`pick-layout`), `<epic>/<slug>`, or a path
- *   (absolute, or from the root, `pages/` or `packages/epics`)
+ *   (absolute, or from the content folder, its `pages/`, or the checkout's root)
  * - paths print absolute:  they mean the same in whichever checkout Claude reads them
  * - The answer itself is written by the page server's route module (`tools/detailsRoutes.ts`) into
  *   `<slug>.answer.json5` beside the page.
@@ -51,7 +51,7 @@ import {
   questionSection
 } from "./answerPages.js"
 import { DataFile } from "../data/DataFile.ts"
-import { ROOT, atDepth, openInVSCode, serialize } from "./pages.js"
+import { CONTENT, ROOT, atDepth, inContent, openInVSCode, serialize } from "./pages.js"
 
 /** How long `wait` waits by default:  8 hours (decision D9). */
 const DEFAULT_TIMEOUT = "8h"
@@ -75,38 +75,41 @@ async function main(argv) {
   try {
     if (command === "new") {
       // scratch pages sweep themselves:  nobody has to remember to
-      for (const file of sweep(ROOT, SWEEP_DAYS)) console.error(`swept ${relative(ROOT, file)}`)
+      for (const file of sweep(CONTENT, SWEEP_DAYS)) console.error(`swept ${relative(CONTENT, file)}`)
       const spec = flags.from ? DataFile.parse(readFileSync(findFile(flags.from), "utf8")) : undefined
-      console.log(shown(createPage(ROOT, target, { ...flags, spec })))
+      console.log(shown(createPage(CONTENT, target, { ...flags, spec })))
       return 0
     }
     if (command === "show") {
-      const file = findPage(ROOT, target)
+      const file = findPage(CONTENT, target)
       await openInVSCode(file, { view: "review" })
       return flags.wait ? await waitAndPrint(file, flags) : 0
     }
-    if (command === "wait") return await waitAndPrint(findPage(ROOT, target), flags)
+    if (command === "wait") return await waitAndPrint(findPage(CONTENT, target), flags)
     if (command === "answer") {
-      const file = findPage(ROOT, target)
+      const file = findPage(CONTENT, target)
       const answer = readAnswer(file)
       console.log(answer ? formatAnswer(file, answer) : `no answer yet:  ${shown(file)}`)
       return answer ? 0 : 1
     }
     if (command === "draft") {
-      const file = findPage(ROOT, target)
+      const file = findPage(CONTENT, target)
       const draft = readDraft(file)
       console.log(draft ? formatDraft(file, draft) : `nothing typed and not sent:  ${shown(file)}`)
       return draft ? 0 : 1
     }
     if (command === "list") {
-      if (target && !existsSync(join(ROOT, "epics", target))) throw new Error(`no epic '${target}' (epics/${target}/)`)
-      for (const file of listPages(ROOT).filter((page) => !target || isEpicsPage(page, target)))
-        console.log(`${readAnswer(file) ? "answered" : "waiting "}  ${relative(ROOT, file)}`)
+      if (target && !existsSync(join(CONTENT, "epics", target)))
+        throw new Error(`no epic '${target}' (epics/${target}/)`)
+      for (const file of listPages(CONTENT).filter((page) => !target || isEpicsPage(page, target)))
+        console.log(`${readAnswer(file) ? "answered" : "waiting "}  ${relative(CONTENT, file)}`)
       return 0
     }
     if (command === "sweep") {
-      const gone = sweep(ROOT, Number(flags.days ?? SWEEP_DAYS))
-      console.log(gone.length ? gone.map((file) => `deleted ${relative(ROOT, file)}`).join("\n") : "nothing to sweep")
+      const gone = sweep(CONTENT, Number(flags.days ?? SWEEP_DAYS))
+      console.log(
+        gone.length ? gone.map((file) => `deleted ${relative(CONTENT, file)}`).join("\n") : "nothing to sweep"
+      )
       return 0
     }
     console.error(USAGE)
@@ -132,8 +135,8 @@ const USAGE = `usage:  epic ask new <slug> [--title "..."] [--epic <name>] [--de
 ////////////////
 
 /**
- * Write a new details page `slug` in checkout `docs` (its root:  `pages/details/`, `epics/`) from the tool's template
- * (`answerPages.js` `TOOL_TEMPLATES`);  its absolute path.
+ * Write a new details page `slug` in content folder `docs` (`pages/details/`, `epics/`:  `CONTENT`) from the tool's
+ * template (`answerPages.js` `TOOL_TEMPLATES`);  its absolute path.
  * - `--epic <name>`:  in that epic's `details/` (the epic must exist);  else the scratch `details/`
  * - sets `<title>`, the h1, the breadcrumb, the description and the "Asked" date;  refuses to overwrite
  * - `spec`:  the whole page (`fillFromSpec()`)
@@ -190,9 +193,7 @@ function fillFromSpec(document, spec) {
  * (`yarn workspace` hides where yarn ran).
  */
 function findFile(path) {
-  const found = [ROOT, join(ROOT, "packages", "epics")]
-    .map((base) => resolve(base, path))
-    .find((each) => existsSync(each))
+  const found = [ROOT, join(ROOT, "packages/epics")].map((base) => resolve(base, path)).find((each) => existsSync(each))
   if (!found) throw new Error(`no file ${path}`)
   return found
 }
@@ -226,12 +227,9 @@ function findFile(path) {
  */
 export function findPage(docs, target) {
   if (!target) throw new Error("which page?  a slug, a path or <epic>/<slug>")
-  // `yarn workspace` sets `INIT_CWD` to `packages/epics`, not where `yarn` was run:
-  // so a path is from the root, `pages/` or the epics package
-  const path = [docs, join(docs, "pages"), join(docs, "packages", "epics")]
-    .map((base) => resolve(base, target))
-    .find((each) => existsSync(each))
-  if (target.endsWith(".html") && path) return path
+  // a path is from the content folder, its `pages/`, or the checkout's root
+  const path = [docs, join(docs, "pages"), ROOT].map((base) => resolve(base, target)).find((each) => existsSync(each))
+  if (target.endsWith(".html") && path) return inContent(path)
   const slug = target.replace(/\.html$/, "")
   const candidates = [join(docs, "pages", "details", `${slug}.html`)]
   if (slug.includes("/")) {
@@ -244,8 +242,8 @@ export function findPage(docs, target) {
   return found
 }
 
-/** Is `file` one of epic `epic`'s own pages (under `epics/<epic>/` in checkout `docs`)? */
-export function isEpicsPage(file, epic, docs = ROOT) {
+/** Is `file` one of epic `epic`'s own pages (under `epics/<epic>/` in content folder `docs`)? */
+export function isEpicsPage(file, epic, docs = CONTENT) {
   return relative(join(docs, "epics", epic), file).split("/")[0] !== ".."
 }
 

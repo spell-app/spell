@@ -2,10 +2,11 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join, relative } from "node:path"
 
 // By file name, `.ts` and all:  plain `node` loads this file by path (the docs index, `src/tools/index.js`)
+import { EpicConfig } from "../config/EpicConfig.ts"
 import { DataFile } from "../data/DataFile.ts"
 import { PlanDocError } from "./planDoc.types.ts"
 
-/** The sagas' shared folder, from the checkout's root:  `sagas/sagas.json5` and each saga's own folder. */
+/** The sagas' shared folder, from the content folder:  `sagas/sagas.json5` and each saga's own folder. */
 export const SAGAS = "sagas"
 
 /** A saga id:  lower case, hyphenated, one or two words (`drawable-spell`, `epics`). */
@@ -25,20 +26,25 @@ const SAGA_ID = /^[a-z][a-z0-9]*(-[a-z0-9]+)?$/
  * - Node only (`node:fs`):  NOT in the `$/epics` barrel, imported by path.
  *   - JSON5, saved keeping any comment added by hand (`DataFile`, epic `epic-workflow` P21);  its old name,
  *     `sagas.json`, is read while there's no `.json5`
- * - Its position:  imports only node's own modules, `./planDoc.types.ts` and `../data/DataFile.ts` (by file name), so
- *   plain `node` loads it by path, as the docs index does;  NEVER another import, an `enum` or a parameter property.
+ * - Its position:  imports only node's own modules, `./planDoc.types.ts`, `../data/DataFile.ts` and
+ *   `../config/EpicConfig.ts` (by file name), so plain `node` loads it by path, as the docs index does;  NEVER another
+ *   import, an `enum` or a parameter property.
  ****************/
 export class Sagas {
-  /** the checkout's root:  its `sagas/` */
-  readonly root: string
+  /**
+   * the content folder of the repo it was given a checkout of (`EpicConfig.contentOf()`;  or that folder itself):
+   * its `sagas/`, `guides/`
+   */
+  readonly content: string
 
+  /** The sagas of checkout `root`'s repo (or of content folder `root`). */
   constructor(root: string) {
-    this.root = root
+    this.content = EpicConfig.contentOf(root)
   }
 
-  /** The list's file:  `<root>/sagas/sagas.json5`. */
+  /** The list's file:  `<content>/sagas/sagas.json5`. */
   get file(): string {
-    return join(this.root, SAGAS, `sagas${DataFile.SUFFIX}`)
+    return join(this.content, SAGAS, `sagas${DataFile.SUFFIX}`)
   }
 
   /** Every saga, in Owen's order;  `[]` with no list yet.  Its old `sagas.json` while there's no `.json5`. */
@@ -51,7 +57,7 @@ export class Sagas {
     return this.list().find((saga) => saga.id === id)
   }
 
-  /** Saga `id`'s page, from the checkout's root:  `sagas/<id>/<id>.saga.html`. */
+  /** Saga `id`'s page, a page path (from the content folder):  `sagas/<id>/<id>.saga.html`. */
   static pageOf(id: string): string {
     return `${SAGAS}/${id}/${id}.saga.html`
   }
@@ -134,7 +140,7 @@ export class Sagas {
   ////////////////
 
   /**
-   * Every guide (`guides/**.html`, from the checkout's root) and the saga its meta names (`sagaOf()`), by path.
+   * Every guide (`guides/**.html`, as page paths) and the saga its meta names (`sagaOf()`), by path.
    * - skips the folders that hold no pages:  `experiments/`, `examples/`, `details/`, `parts/`, `node_modules/`
    *   (the docs tools' `SKIP_DIRS`), and the Guides list page itself
    */
@@ -148,12 +154,12 @@ export class Sagas {
         if (entry.isDirectory()) {
           if (!NO_PAGES.has(entry.name)) walk(path)
         } else if (entry.name.endsWith(".html")) {
-          const from = relative(this.root, path)
+          const from = relative(this.content, path)
           if (from !== GUIDES_LIST) found.push({ path: from, saga: Sagas.sagaOf(readFileSync(path, "utf8")) })
         }
       }
     }
-    walk(join(this.root, GUIDES))
+    walk(join(this.content, GUIDES))
     return found.sort((a, b) => a.path.localeCompare(b.path))
   }
 
@@ -218,13 +224,13 @@ export type Saga = {
 
 /** One guide, and the saga it names (`Sagas.guides()`). */
 export type GuideSaga = {
-  /** from the checkout's root:  `guides/solid/solid-2.html` */
+  /** a page path (from the content folder):  `guides/solid/solid-2.html` */
   path: string
   /** the saga its meta names;  `null` for none (the Guides page's Misc) */
   saga: string | null
 }
 
-/** The guides' shared folder, from the checkout's root. */
+/** The guides' shared folder, from the content folder. */
 const GUIDES = "guides"
 
 /** The Guides list page (`spell dev docs index` writes it):  not a guide. */

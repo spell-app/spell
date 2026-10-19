@@ -81,39 +81,50 @@ export class RunningEpics {
   ) {
     this.root = root
     this.worktrees = new EpicConfig(root).worktreesFolders
-    this.index = join(root, "epics", "index.html")
+    this.epics = join(EpicConfig.contentOf(root), "epics")
+    this.index = join(this.epics, "index.html")
     this.claudeHome = claudeHome
   }
 
+  /** the repo's epic pages:  `epics/` in its content folder (`EpicConfig.contentOf()`), shared by every checkout */
+  readonly epics: string
+
   /**
    * every running epic, by worktree then name
-   * - shared content (a worktree's epics folder IS the main checkout's, through a link into `../spell-app-dev`):
-   *   the card links the main checkout's own URL, so edit mode and live reload work there
+   * - shared content (a worktree's epics are the content folder's, as the main checkout's are):
+   *   the card links the page's own URL, `/epics/...`, so edit mode and live reload work there
+   * - a worktree on older code with epic pages of its own (a real `epics/` folder, or an old place:  `EPICS_DIRS`):
+   *   at `/worktrees/<w>/...`
    */
   list(): RunningEpic[] {
     const found: RunningEpic[] = []
-    const mainEpics = EPICS_DIRS.find((epics) => existsSync(join(this.root, epics)))
-    const mainReal = mainEpics && realOrSelf(join(this.root, mainEpics))
+    const mainReal = realOrSelf(this.epics)
     for (const worktree of this.worktreeNames()) {
       const checkout = this.checkoutOf(worktree)
-      const dir = EPICS_DIRS.find((epics) => existsSync(join(checkout, epics)))
-      if (!dir) continue
-      const shared = realOrSelf(join(checkout, dir)) === mainReal
-      for (const name of folders(join(checkout, dir))) {
-        const file = planDocIn(join(checkout, dir, name), name)
+      const own = EPICS_DIRS.find((epics) => existsSync(join(checkout, epics)))
+      const dir = own ? join(checkout, own) : this.epics
+      const shared = realOrSelf(dir) === mainReal
+      for (const name of folders(dir)) {
+        const file = planDocIn(join(dir, name), name)
         if (!file) continue
-        if (name !== worktree && EPICS_DIRS.some((epics) => existsSync(join(this.root, epics, name)))) continue
+        if (name !== worktree && existsSync(join(this.epics, name))) continue
         found.push({
           name,
           worktree,
-          url: shared
-            ? `/${mainEpics}/${name}/${basename(file)}`
-            : `/worktrees/${worktree}/${dir}/${name}/${basename(file)}`,
+          url: shared ? `/epics/${name}/${basename(file)}` : `/worktrees/${worktree}/${own}/${name}/${basename(file)}`,
           ...read(file)
         })
       }
     }
     return found
+  }
+
+  /**
+   * Whether `file`, a file the page server serves, is the Epics list page (`index`):  named there, or through a
+   * checkout's link into the content folder (an older checkout's `epics` link).
+   */
+  isIndex(file: string): boolean {
+    return file === this.index || realOrSelf(file) === realOrSelf(this.index)
   }
 
   /**
@@ -252,7 +263,7 @@ export class RunningEpics {
   /** The starred epics' names (`FAVORITES_FILE`, shared:  the page server's `/api/epics/favorite` writes it). */
   favorites(): Set<string> {
     try {
-      return favoritesIn(DataFile.read(join(this.root, FAVORITES_FILE)))
+      return favoritesIn(DataFile.read(join(dirname(this.epics), FAVORITES_FILE)))
     } catch {
       // a file that won't read:  none starred, rather than no list page
       return new Set()
@@ -448,8 +459,9 @@ export type RunningEpic = {
 export const MARKER = EPIC_CARDS_START
 
 /**
- * Where a checkout keeps its epic pages, relative to its root, newest layout first.
- * - `epics`:  since 2026-10-05 (epic `claude-design`, P4)
+ * Where a worktree on older code keeps its epic pages, relative to its root, newest layout first;  a checkout with
+ * none of them reads the content folder's (`RunningEpics.epics`, epic `epic-eject` P12).
+ * - `epics`:  since 2026-10-05 (epic `claude-design`, P4):  a link into the content folder (shared), or a real folder
  * - `packages/docs/content/epics`:  since 2026-10-04 (epic `shared-content`, P2)
  *   - a link into the shared repo's old-path links, so the same folder as `epics`
  * - `packages/docs/epics`:  a worktree cut before that, until it merges `main`

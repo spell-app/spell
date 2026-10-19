@@ -52,7 +52,7 @@ export class EpicConfig {
     installTimeout: 600,
     windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
     linkSessionFolders: false,
-    sharedFolders: ["epics", "guides", "pages", "brand", "ui", "goals", "sagas", "agents"],
+    sharedFolders: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"],
     engineFolder: "../spell-epic",
     repoTemplates: ""
   }
@@ -87,6 +87,26 @@ export class EpicConfig {
   /** The MAIN checkout of the repo `path` is in (`SRV.checkoutOf()`);  `path` itself outside git. */
   static mainOf(path = process.cwd()): string {
     return checkoutOf(path)?.main ?? resolve(path)
+  }
+
+  /**
+   * Where checkout `root`'s pages are:  its repo's content folder (`contentFolder`), the ONE place the tools read and
+   * write epics, guides, pages, sagas, brand and goals (epic `epic-eject` P12), never a link at the checkout's root.
+   * - `root` itself, a checkout that holds its own pages, when
+   *   - its repo has no config file (a test's made-up checkout;  the content folder itself, so `contentOf()` of a
+   *     content folder is that folder)
+   *   - the folder it names isn't there (a repo with no content repo yet), or the file won't read
+   * - the folders inside it, and the page paths from it (`epics/seo/seo.plan.html`), are as they were from the root:
+   *   the page servers serve it at `/`
+   */
+  static contentOf(root: string): string {
+    try {
+      const config = EpicConfig.of(root)
+      if (existsSync(config.file) && existsSync(config.contentFolder)) return config.contentFolder
+    } catch {
+      // a config that won't read:  the checkout's own
+    }
+    return resolve(root)
   }
 
   ////////////////
@@ -348,8 +368,10 @@ export class EpicConfig {
  * - `linkSessionFolders`:  whether the worktree hook links each NEW worktree's saved-session folder
  *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (off;
  *   `SessionFolders`, epic `epic-eject` Q4)
- * - `sharedFolders`:  the content folder's folders each checkout links in at its root (spell-app's eight;  `epic init`
- *   writes `epics`, `sagas`, `guides`, `pages` for a new repo):  `epic shared link`, the turn-end commit hook
+ * - `sharedFolders`:  the content folder's folders each checkout links in at its root (spell-app's seven, `ui` dropped
+ *   in epic `epic-eject` P12;  `epic init` writes `epics`, `sagas`, `guides`, `pages` for a new repo):
+ *   `epic shared link`, the turn-end commit hook
+ *   - for people and other tools only:  the engine reads pages from the content folder itself (`contentOf()`)
  * - `engineFolder`:  the spell-epic checkout, relative to the main checkout (`../spell-epic`), which `epic shared link`
  *   links in at each checkout's root as `spell-epic`:  spell-app runs the engine through it (its alias table, its page
  *   server's route modules, epic `epic-eject` I5);  `""`:  no link (a repo that only runs `epic`)

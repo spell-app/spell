@@ -384,6 +384,22 @@ describe("RunningEpics, shared content", () => {
       { name: "wt", worktree: "wt", url: "/epics/wt/wt.plan.html" }
     ])
   })
+
+  // epic `epic-eject` P12:  the content folder the config names, and no checkout links it in
+  it("reads the content folder the config names, with no links:  the Epics page, each worktree's", () => {
+    const root = join(temp, "repo")
+    const content = join(temp, "repo.epics")
+    put(content, "epics/wt/wt.plan.html", planDoc("Shared", [["active", "P1 · Go"]]))
+    put(content, "epics/index.html", "<h1>Epics</h1>")
+    put(root, ".epic/config.json5", '{ "contentFolder": "../repo.epics", "worktreesFolder": "../repo.worktrees" }')
+    mkdirSync(join(temp, "repo.worktrees", "wt"), { recursive: true })
+    const running = new RunningEpics(root)
+    expect(running.epics).toBe(join(content, "epics"))
+    expect(running.isIndex(join(content, "epics", "index.html"))).toBe(true)
+    expect(running.list().map(({ name, worktree, url }) => ({ name, worktree, url }))).toEqual([
+      { name: "wt", worktree: "wt", url: "/epics/wt/wt.plan.html" }
+    ])
+  })
 })
 
 // epic `airplane` P12:  which running session an epic page's "start a review" types into

@@ -11,8 +11,8 @@
  *   - `<link href>` that loads (`stylesheet`, `icon`, `preload`, `modulepreload`, `manifest`)
  *   - CSS `url(...)` and `@import`, in a page's `<style>` and in `.css` files
  * - What doesn't:  plain links (`<a href>`), and code shown on a page (`&lt;script ...` is text, not a tag)
- * - `<paths>`:  files and folders, from the current folder;  default:  the docs folders of this checkout
- *   (`DOCS_FOLDERS`), following their links into the shared content repo
+ * - `<paths>`:  files and folders, from the current folder;  default:  the docs folders of this checkout's content
+ *   folder (`DOCS_FOLDERS`;  `EpicConfig.contentOf()`)
  * - `--fix`:  first points the cdnjs highlight.js tag at the repo's copy (`HIGHLIGHT.local`), relative to each page,
  *   the way its `spell-ui.js` tag is;  then lists what's left
  * - `--json`:  `{ files, loads, fixed }`
@@ -23,6 +23,8 @@ import { dirname, extname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { HIGHLIGHT_JS } from "$/server/page"
+
+import { EpicConfig } from "$/epics/config/EpicConfig"
 
 /**
  * The checker:  finds a page's remote loads, the pages to check, and the highlight.js fix.
@@ -44,7 +46,8 @@ export class Offline {
   }
 
   /**
-   * `text`, the page at `file` in checkout `root`, with its cdnjs highlight.js tag pointing at the repo's copy.
+   * `text`, the page at `file` served from folder `root` (at `/`:  the content folder), with its cdnjs highlight.js tag
+   * pointing at the engine's copy.
    * - the path is relative to the page, as its `spell-ui.js` tag is, so it works from `file://` too
    */
   static fixHighlight(file: string, text: string, root: string): string {
@@ -95,11 +98,12 @@ export type RemoteLoad = { file: string; line: number; kind: string; url: string
 
 /**
  * highlight.js, the one remote file docs pages loaded (epic `airplane` P1).
- * - the page server's `HIGHLIGHT_JS` (`$/server/page`), its `local` from the checkout's root rather than from `/`
+ * - the page server's `HIGHLIGHT_JS` (`$/server/page`), its `local` from the served root (the content folder) rather
+ *   than from `/`
  */
 export const HIGHLIGHT = { cdn: HIGHLIGHT_JS.cdn, local: HIGHLIGHT_JS.local.slice(1) } as const
 
-/** The folders `spell dev docs offline` checks by default, from the checkout's root. */
+/** The folders `spell dev docs offline` checks by default, from the content folder (`EpicConfig.contentOf()`). */
 export const DOCS_FOLDERS = ["epics", "guides", "pages", "templates", "goals"]
 
 /** Files it reads. */
@@ -153,8 +157,10 @@ export function run(args: string[], { cwd = process.cwd() } = {}): number {
   const unknown = [...flags].find((flag) => !FLAGS.includes(flag))
   try {
     if (unknown) throw new OfflineError(`unknown flag ${unknown}:  ${FLAGS.join(", ")}`)
-    const root = checkoutOf(cwd)
-    if (!root) throw new OfflineError("not in a checkout")
+    const checkout = checkoutOf(cwd)
+    if (!checkout) throw new OfflineError("not in a checkout")
+    // pages are served from their repo's content folder, at `/`:  the highlight.js fix is relative to it
+    const root = EpicConfig.contentOf(checkout)
     const named = args.filter((arg) => !arg.startsWith("--"))
     const paths = named.length ? named : DOCS_FOLDERS.filter((folder) => existsSync(join(root, folder)))
     const files = Offline.filesUnder(paths, { cwd: named.length ? cwd : root })

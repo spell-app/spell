@@ -45,8 +45,11 @@ import { Sessions } from "./Sessions"
  *   - `merge <epic>`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in the main checkout
  ****************/
 export class Requests {
-  /** the checkout whose `epics/` holds the epics (every checkout shares one):  STATIC for the object's life */
+  /** the checkout it runs for:  STATIC for the object's life */
   readonly root: string
+
+  /** `epics/` in the repo's content folder (`EpicConfig.contentOf()`), which every checkout shares */
+  readonly epics: string
 
   /** the sessions:  senders' transcripts, receivers */
   readonly sessions: Sessions
@@ -57,6 +60,7 @@ export class Requests {
    */
   constructor({ root = Git.nearestCheckout(CHECKOUT_MARKER), sessions = new Sessions() }: RequestsProps = {}) {
     this.root = root
+    this.epics = join(EpicConfig.contentOf(root), "epics")
     this.sessions = sessions
   }
 
@@ -181,7 +185,7 @@ export class Requests {
    * - throws when `epic` has no epic page, or the transcript has fewer images than asked for
    */
   send({ epic, text, from, images = 0, context }: SendRequestProps): SentRequest {
-    const epicDir = join(this.root, "epics", epic)
+    const epicDir = join(this.epics, epic)
     if (!existsSync(join(epicDir, `${epic}.plan.html`))) {
       throw new EpicCommandError(`no epic '${epic}':  epics/${epic}/${epic}.plan.html isn't there`)
     }
@@ -254,7 +258,7 @@ export class Requests {
 
   /** Every request in `epic`, oldest first;  `[]` when it has none. */
   list(epic: string): EpicRequest[] {
-    const dir = join(this.root, "epics", epic, "requests")
+    const dir = join(this.epics, epic, "requests")
     if (!existsSync(dir)) return []
     return readdirSync(dir)
       .filter((name) => /^r\d+$/.test(name) && existsSync(join(dir, name, "request.md")))
@@ -267,7 +271,7 @@ export class Requests {
    * - returns the request as it now stands;  throws when there's no such request
    */
   file(epic: string, id: string, where: string): EpicRequest {
-    const path = join(this.root, "epics", epic, "requests", id, "request.md")
+    const path = join(this.epics, epic, "requests", id, "request.md")
     if (!existsSync(path)) throw new EpicCommandError(`no request '${id}' in epic '${epic}'`)
     const request = { ...Requests.parse(readFileSync(path, "utf8")), status: "filed", filed: where }
     writeFileSync(path, Requests.markdown(request))
@@ -304,7 +308,7 @@ export class Requests {
    * - SIDE EFFECT:  writes `epics/home.json5` (removing its old `.json`)
    */
   setHome(epic: string): void {
-    if (!existsSync(join(this.root, "epics", epic, `${epic}.plan.html`))) {
+    if (!existsSync(join(this.epics, epic, `${epic}.plan.html`))) {
       throw new EpicCommandError(`no epic '${epic}':  epics/${epic}/${epic}.plan.html isn't there`)
     }
     const set = new Date().toISOString().slice(0, 10)
@@ -313,7 +317,7 @@ export class Requests {
 
   /** Where the tooling home is kept. */
   private get homeFile(): string {
-    return join(this.root, "epics", `home${DataFile.SUFFIX}`)
+    return join(this.epics, `home${DataFile.SUFFIX}`)
   }
 
   ////////////////

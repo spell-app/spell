@@ -21,7 +21,7 @@ import { basename, dirname, join, relative } from "node:path"
 import { parseHTML } from "linkedom"
 
 import { DataFile } from "../data/DataFile.ts"
-import { GUIDES, PACKAGE, ROOT, TOOLS, atDepth, serialize, templateFile, tidy } from "./pages.js"
+import { CONTENT, GUIDES, PACKAGE, TOOLS, atDepth, pagePath, serialize, templateFile, tidy } from "./pages.js"
 
 const { positional, flags } = parseArgs(process.argv.slice(2))
 const [templateArg, page] = positional
@@ -33,15 +33,15 @@ if (!templateArg || !page?.endsWith(".html")) {
 if (/^templates\/epics\/|^plan$/.test(templateArg)) fail("epic pages:  `epic new <epic>`")
 const template = templateFile(templateArg)
 if (!template) fail(`no template ${templateArg}`)
-const file = /^(guides|pages)\//.test(page) ? join(ROOT, page) : join(GUIDES, page)
-if (existsSync(file)) fail(`${relative(ROOT, file)} already exists`)
+const file = /^(guides|pages)\//.test(page) ? join(CONTENT, page) : join(GUIDES, page)
+if (existsSync(file)) fail(`${pagePath(file)} already exists`)
 if (flags.dryRun) {
-  console.log(`would write ${relative(ROOT, file)} from ${template}`)
+  console.log(`would write ${pagePath(file)} from ${template}`)
   process.exit(0)
 }
 
 const title = flags.title ?? "Short Title"
-const html = atDepth(readFileSync(template, "utf8"), relative(ROOT, file).split("/").length - 1)
+const html = atDepth(readFileSync(template, "utf8"), pagePath(file).split("/").length - 1)
 const { document } = parseHTML(html)
 document.querySelector("title").textContent = title
 document.querySelector("h1").textContent = title

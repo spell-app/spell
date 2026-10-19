@@ -3,7 +3,7 @@
  * the other docs tools (the `epic` tool, `$/epics/tool`, has its own).
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs"
+import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
@@ -28,14 +28,19 @@ export const ASSETS = join(TOOLS, "_assets")
  */
 export const ROOT = process.env.EPIC_CHECKOUT ? resolve(process.env.EPIC_CHECKOUT) : PACKAGE
 
-/*
- * The content folders, one per area, each a link at the checkout's root into the shared content repo,
- * `../spell-app-dev` (epics `shared-content` and `claude-design` P4;  before 2026-10-05 all of them were
- * `packages/docs/content/`, where old-path links stay for older checkouts:  `relocate.js` `reorgShared()`).
+/**
+ * The repo's content folder (`.epic/config.json5` `contentFolder`:  `../spell-app.epics`), where every page is:  the
+ * ONE place the tools read and write epics, guides, pages, sagas, brand and goals (epic `epic-eject` P12).
+ * - never a link at the checkout's root:  a checkout may have none
+ * - page paths are from here (`epics/seo/seo.plan.html`), as the page servers serve it at `/` (`pagePath()`)
+ * - `ROOT` itself when there's no such folder:  a checkout holding its own pages (`EpicConfig.contentOf()`)
+ * - before 2026-10-05 the areas were all `packages/docs/content/`, where old-path links stay for older checkouts
+ *   (`relocate.js` `reorgShared()`)
  */
+export const CONTENT = EpicConfig.contentOf(ROOT)
 
 /** `epics/`:  epic pages, `epics/<name>/<name>.plan.html`, their inboxes and details pages. */
-export const EPICS = join(ROOT, "epics")
+export const EPICS = join(CONTENT, "epics")
 
 /**
  * `templates/`:  one starting point per kind of page -- the ENGINE's, spell-epic's own `templates/` (epic `epic-eject`
@@ -55,10 +60,10 @@ export const TEMPLATES = join(PACKAGE, "templates")
 export const REPO_TEMPLATES = repoTemplatesOf(ROOT)
 
 /** `guides/`:  every other docs page, with its `.md`, `.json`, `experiments/` and `examples/` beside it. */
-export const GUIDES = join(ROOT, "guides")
+export const GUIDES = join(CONTENT, "guides")
 
 /** `pages/`:  the home page (`HOME`) and the scratch details pages (`DETAILS`). */
-export const PAGES = join(ROOT, "pages")
+export const PAGES = join(CONTENT, "pages")
 
 /** `pages/index.html`:  the home page, a routing page:  a card per area (`index.js`, claude-design P5). */
 export const HOME = join(PAGES, "index.html")
@@ -71,20 +76,20 @@ export const DETAILS = join(PAGES, "details")
  * - NOT in `AREAS`:  its pages come from Claude Design, not the docs' templates, so `docs update` doesn't check
  *   them;  `index.js` lists them on `brand/index.html`
  */
-export const BRAND = join(ROOT, "brand")
+export const BRAND = join(CONTENT, "brand")
 
 /**
  * `goals/`:  the goal sets, `goals/<set>/index.html`:  the first sagas, PARKED (epic `epic-workflow` P6).
  * - their tooling:  `tools/goals/`
  */
-export const GOALS = join(ROOT, "goals")
+export const GOALS = join(CONTENT, "goals")
 
 /**
  * `sagas/`:  the sagas (epic `epic-workflow` P15):  their list in Owen's order, `sagas/sagas.json5`, each saga's page
  * in its folder (`sagas/<id>/<id>.saga.html`), and the Sagas list page (`index.js` writes it from the list).
  * - NOT in `AREAS`:  the Sagas list page lists the sagas from `sagas.json5`, not from the pages found
  */
-export const SAGAS = join(ROOT, "sagas")
+export const SAGAS = join(CONTENT, "sagas")
 
 /** Every folder `findPages()` walks:  the home first, then the areas (the repo's own templates last, if any). */
 export const AREAS = [PAGES, GUIDES, EPICS, TEMPLATES, ...(REPO_TEMPLATES ? [REPO_TEMPLATES] : [])]
@@ -103,64 +108,95 @@ export const LIST_PAGES = [EPICS, GUIDES, TEMPLATES, BRAND, SAGAS, ...(REPO_TEMP
 export const OLD_CONTENT = join(PACKAGE, "content")
 
 /**
- * The file a page argument means:  absolute as is (a shared repo's real path through this checkout's link to it),
- * else the first that exists of
- * - from the checkout's root (`guides/solid/solid-2.html`, `epics/seo/seo.plan.html`)
+ * The file a page argument means:  absolute, in the content folder when it names a page there through a link
+ * (`inContent()`);  else the first that exists of
+ * - its page path (`guides/solid/solid-2.html`, `epics/seo/seo.plan.html`:  `pageAt()`), or from the checkout's root
+ *   (`packages/brand/...`)
  * - from each area (`solid/solid-2.html` is a guide, `index.html` the home)
  * - an old path (`packages/docs/content/solid/solid-2.html`, `content/...`) moved by the reorg
  * - from `cwd`
- * - none:  from the root
+ * - none:  its page path's file
  */
 export function pageFile(page, cwd = process.env.INIT_CWD ?? process.cwd()) {
-  if (isAbsolute(page)) return throughLink(page)
+  if (isAbsolute(page)) return inContent(page)
   const old = page.replace(/^(?:packages\/docs\/)?content\//, "")
   const candidates = [
     pageAt(page),
     resolve(ROOT, page),
     ...AREAS.map((area) => resolve(area, page)),
-    ...(old !== page ? [resolve(ROOT, reorgEntry(old.split("/")[0]), ...old.split("/").slice(1))] : []),
+    ...(old !== page ? [pageAt([reorgEntry(old.split("/")[0]), ...old.split("/").slice(1)].join("/"))] : []),
     resolve(cwd, page)
   ]
-  return candidates.find((each) => existsSync(each)) ?? resolve(ROOT, page)
+  return inContent(candidates.find((each) => existsSync(each)) ?? pageAt(page))
 }
 
 /**
- * Page (or folder) `file`'s path from the checkout's root, as the page server serves it:
- * `<ROOT>/guides/x.html` => `guides/x.html`, and the engine's templates as `templates/...` wherever spell-epic is
- * (`TEMPLATES`:  `<spell-epic>/templates/durable.html` => `templates/durable.html`).
- * - `/`-separated;  a file outside the checkout keeps its `../` path
+ * Page (or folder) `file`'s PAGE PATH, as the page servers serve it, at `/`:
+ * - in the content folder:  from it (`<CONTENT>/guides/x.html` => `guides/x.html`), named there or through any
+ *   checkout's link into it (`<checkout>/guides/x.html`)
+ * - the engine's templates:  `templates/...`, wherever spell-epic is
+ *   (`TEMPLATES`:  `<spell-epic>/templates/durable.html` => `templates/durable.html`)
+ * - anything else:  from the checkout's root (`packages/brand/x.html`), which the page server serves at `/` too;
+ *   a file outside it keeps its `../` path
+ * - `/`-separated
  * - the paths the lists, the checks and the openers use (`index.js`, `update.js`, `serverUrl()`);  `pageAt()` turns
  *   one back into its file
  */
 export function pagePath(file) {
   const path = resolve(file)
-  const inTemplates = insideTemplates(path) ?? insideTemplates(realOrSelf(path))
+  const inTemplates = insideOf(TEMPLATES, path) ?? insideOf(TEMPLATES, realOf(path))
   if (inTemplates !== undefined) return ["templates", ...(inTemplates ? inTemplates.split(sep) : [])].join("/")
-  return relative(ROOT, path).split(sep).join("/")
+  const content = insideContent(path)
+  return (content ?? relative(ROOT, path)).split(sep).join("/")
 }
 
-/** Absolute `path` from the engine's `TEMPLATES` (`""` for the folder itself);  `undefined` outside it. */
-function insideTemplates(path) {
-  const inside = relative(TEMPLATES, path)
+/** Absolute `path` from folder `dir` (`""` for the folder itself);  `undefined` outside it. */
+function insideOf(dir, path) {
+  const inside = relative(dir, path)
   return inside.startsWith("..") || isAbsolute(inside) ? undefined : inside
 }
 
-/** `path` with its links followed (the checkout's `spell-epic` link ...);  as it is when it isn't there. */
-function realOrSelf(path) {
+/**
+ * Absolute `path` from the content folder, named there or through a link into it (any checkout's);  `undefined`
+ * outside it.
+ */
+function insideContent(path) {
+  return insideOf(CONTENT, path) ?? insideOf(realOf(CONTENT), realOf(path))
+}
+
+/**
+ * `path` with its links followed (a checkout's `spell-epic` link, an old checkout's `epics` link ...):  its nearest
+ * folder that exists, real, then the rest as it is;  so a page not made yet is followed too.
+ */
+function realOf(path) {
   try {
     return realpathSync(path)
   } catch {
-    return path
+    const parent = dirname(path)
+    return parent === path ? path : join(realOf(parent), basename(path))
   }
 }
 
 /**
- * The file a path from the checkout's root names (`pagePath()` turned round):  `templates/...` in the engine's
- * `TEMPLATES`, anything else under `ROOT`.
+ * The file page path `path` names (`pagePath()` turned round):
+ * - `templates/...`:  in the engine's `TEMPLATES`
+ * - in the content folder, when it's there or its top folder is one of the content folder's (`epics/new/...`)
+ * - anything else from the checkout's root (`packages/brand/...`)
  */
 export function pageAt(path) {
   const [top, ...rest] = path.split(/[\\/]/)
-  return top === "templates" ? join(TEMPLATES, ...rest) : resolve(ROOT, path)
+  if (top === "templates") return join(TEMPLATES, ...rest)
+  const content = resolve(CONTENT, path)
+  return existsSync(content) || contentTop(top) ? content : resolve(ROOT, path)
+}
+
+/**
+ * Whether `top`, a page path's first folder, is the content folder's (`epics`, `guides` ...):  there, and not a
+ * folder of the checkout's own (`packages`, which the content folder has too, for its old-path links).
+ */
+function contentTop(top) {
+  if (!top || !existsSync(join(CONTENT, top))) return false
+  return !lstatSync(join(ROOT, top), { throwIfNoEntry: false })?.isDirectory()
 }
 
 /**
@@ -181,41 +217,15 @@ export function templateFile(name) {
 }
 
 /**
- * `file` through this checkout's link to it, when it's a shared repo's REAL path
- * (`/.../spell-app-dev/epics/seo/seo.plan.html` -> `<ROOT>/epics/seo/seo.plan.html`);  else `file` as is.
- * - Why:  Claude edits shared pages at their real path, and a page server serves them only through a checkout's
- *   link:  a link made from the real path pointed at `/spell-app-dev/...`, which no server has (epic `epic-eject` I1).
- * - The links:  the root `package.json`'s `"shared".links`.
+ * `file` in the content folder, when it names a page there through a link (a checkout that still has its
+ * `epics` link ...:  `<checkout>/epics/seo/seo.plan.html` -> `<CONTENT>/epics/seo/seo.plan.html`);  else `file` as
+ * is.
+ * - Why:  the tools name each page ONE way, by its content folder path, whichever path it was handed by
+ *   (epic `epic-eject` P12;  before, the other way round, through this checkout's link:  I1)
  */
-export function throughLink(file) {
-  const path = resolve(file)
-  for (const link of sharedLinks()) {
-    try {
-      const real = realpathSync(join(ROOT, link))
-      if (path.startsWith(real + sep)) return join(ROOT, link, relative(real, path))
-    } catch {
-      // not linked in this checkout
-    }
-  }
-  return file
-}
-
-/**
- * The shared repo's top folders, linked at the checkout's root:  the root `package.json`'s `"shared".links`, else
- * the repo's `.epic/config.json5` `sharedFolders` (a repo `epic init` set up has no `package.json` block).
- */
-function sharedLinks() {
-  try {
-    const links = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).shared?.links
-    if (links) return links
-  } catch {
-    // no package.json:  the config's
-  }
-  try {
-    return EpicConfig.of(ROOT).sharedFolders
-  } catch {
-    return []
-  }
+export function inContent(file) {
+  const inside = insideContent(resolve(file))
+  return inside === undefined ? file : join(CONTENT, inside)
 }
 
 /**
@@ -314,16 +324,16 @@ export function planLogFile(file) {
 }
 
 /**
- * Tidy `files` (absolute, or relative to the checkout's root) the way a page must be committed:  link targets, then
- * oxfmt (`vp fmt`).
+ * Tidy `files` (absolute, or page paths:  `pageAt()`) the way a page must be committed:  link targets, then oxfmt
+ * (`vp fmt`).
  * - `doc-links.js` first:  it may add attributes oxfmt then wraps
  * - returns whether both succeeded;  their output is echoed
- * - run from `PACKAGE`, never a content folder:  each is a link, and a process started in one is in the shared repo,
- *   outside this yarn workspace
- * - every path goes ABSOLUTE:  from `PACKAGE` a page is `../../guides/...`, and oxfmt refuses `..`
+ * - run from `PACKAGE`, never the content folder:  a process started there is in the shared repo, outside this yarn
+ *   workspace
+ * - every path goes ABSOLUTE:  from `PACKAGE` a page is `../spell-app.epics/guides/...`, and oxfmt refuses `..`
  */
 export function tidy(files) {
-  const paths = files.map((file) => resolve(ROOT, file))
+  const paths = files.map((file) => (isAbsolute(file) ? file : pageAt(file)))
   for (const { command, args, env } of [docLinksRun(paths), { command: "yarn", args: ["vp", "fmt", ...paths] }]) {
     const run = spawnSync(command, args, { cwd: PACKAGE, encoding: "utf8", env })
     if (run.status !== 0) {
@@ -390,11 +400,11 @@ export function ensurePageServer() {
  * The machine's epic server (`epic hub`, spell-epic's `bin/epic`), started in the background if it isn't running,
  * as this checkout's page server:  `{ base, port }`, `base` the URL this repo's content is served at
  * (`http://127.0.0.1:4848/r/<repo>`, or the server's root for the default repo), so `serverUrl()` works unchanged:
- * a checkout's shared folders are the content folder's.
+ * it serves the content folder, and page paths are from it.
  * - `undefined` (and why, on stderr) when the repo isn't registered (`epic repo add`) or the server won't start
  */
 function ensureEpicServer() {
-  const run = spawnSync(process.execPath, [EPIC_BIN, "hub", "url", join(ROOT, "pages")], { encoding: "utf8" })
+  const run = spawnSync(process.execPath, [EPIC_BIN, "hub", "url", PAGES], { encoding: "utf8" })
   const url = run.status === 0 ? run.stdout.trim() : ""
   if (!url.endsWith("/pages")) {
     console.error(`epic server not used (${(run.stderr || String(run.error ?? "")).trim().split("\n").at(-1)})`)
@@ -450,18 +460,12 @@ export function atDepth(html, depth) {
   )
 }
 
-/** URL of `file` on the page server at `base`, e.g. `http://127.0.0.1:4747/pages/index.html`. */
+/**
+ * URL of `file` on the page server at `base`, e.g. `http://127.0.0.1:4747/pages/index.html`:  its page path
+ * (`pagePath()`), whichever path it's named by (the content folder's, or through any checkout's link into it).
+ */
 export function serverUrl(base, file) {
-  let path = pagePath(file)
-  // shared content named through ANOTHER checkout's link (the main checkout's, from a worktree):  through this one's
-  if (path.startsWith("..")) {
-    try {
-      path = pagePath(throughLink(realpathSync(file)))
-    } catch {
-      // not there:  as it was
-    }
-  }
-  return `${base}/${path.split(/[\\/]/).map(encodeURIComponent).join("/")}`
+  return `${base}/${pagePath(file).split("/").map(encodeURIComponent).join("/")}`
 }
 
 /**
@@ -488,7 +492,7 @@ export function serverUrl(base, file) {
  */
 export async function openInVSCode(file, { hash, view = "docs" } = {}) {
   if (!Window.inVSCode) return openInChrome(file, { hash })
-  const path = resolve(throughLink(file))
+  const path = resolve(inContent(file))
   const served = ensurePageServer()
   const review = view === "review"
   try {
@@ -509,7 +513,7 @@ export async function openInVSCode(file, { hash, view = "docs" } = {}) {
 /**
  * Show `file` in Chrome, in ONE tab per page, IN THE BACKGROUND:  `spell dev docs open <page>`;  `openInVSCode()`'s fallback.
  * - from this checkout's page server (live reload), started if need be;  `file://` if it can't start
- * - The tab is keyed by the page's path from the root (`/epics/<name>/<name>.plan.html`), not its full URL.
+ * - The tab is keyed by the page's path (`/epics/<name>/<name>.plan.html`:  `pagePath()`), not its full URL.
  *   - so the same page from another checkout (a worktree) reuses it:  re-pointed if the URL differs, else reloaded
  *   - the page names its tab the same way (`spell-doc-runtime.js` `window.name`;  links use that `target`)
  * - `hash`:  an id on the page to land on (`spell dev docs open SAGA:/saga/epic#T1`)
@@ -521,10 +525,10 @@ export async function openInVSCode(file, { hash, view = "docs" } = {}) {
  * - NOTE: `key` is an AppleScript keyword:  the variable is `pageKey`.
  */
 export function openInChrome(page, { hash } = {}) {
-  const file = throughLink(page)
+  const file = inContent(page)
   const served = ensurePageServer()
   const url = served ? serverUrl(served.base, file) : pathToFileURL(resolve(file)).href
-  openUrlInChrome(`${url}${hash ? `#${hash}` : ""}`, `/${relative(ROOT, resolve(file)).split(sep).join("/")}`)
+  openUrlInChrome(`${url}${hash ? `#${hash}` : ""}`, `/${pagePath(file)}`)
 }
 
 /**

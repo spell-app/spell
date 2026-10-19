@@ -72,6 +72,7 @@ import { join } from "node:path"
 
 import { SRV } from "$/server"
 import { COMPONENT_SETS, type RouteModule } from "$/server/page"
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 import {
   CommentList,
@@ -157,9 +158,13 @@ const commentsRoutes: RouteModule = {
       // never the catch-all `guide-changes`, which no session works
       const wake =
         send?.owned && !send.listening
-          ? await new ReviewStart(root).wakeFor(join(root, "epics", send.epic, `${send.epic}.plan.html`), send.epic, {
-              fresh
-            })
+          ? await new ReviewStart(root).wakeFor(
+              join(EpicConfig.contentOf(root), "epics", send.epic, `${send.epic}.plan.html`),
+              send.epic,
+              {
+                fresh
+              }
+            )
           : null
       reply.json({ ok: true, comments: shown(commentsOf(file)), send, wake })
     })
@@ -179,7 +184,8 @@ export default commentsRoutes
 /**
  * A docs page's Send, as the page header draws it (`PageSend`):  `{ send }`;  an epic page's:  `{}` (its own Send is
  * `<epic-page>`'s, on the review inbox).
- * - `root`:  the server's checkout:  its `epics/` (shared by every checkout) says who owns the page
+ * - `root`:  the server's checkout:  its repo's content folder's `epics/` (`EpicConfig.contentOf()`) says who owns
+ *   the page
  * - `page`:  the page's URL path (`/worktrees/<w>/guides/x.html` too);  `file`:  its file
  */
 export function sendOf(root: string, page: string, file: string): { send?: PageSend } {
@@ -187,7 +193,9 @@ export function sendOf(root: string, page: string, file: string): { send?: PageS
   const owner = new SeeAlso(root).ownerOf(page.replace(/^\/(?:worktrees\/[^/]+\/)?/, ""))
   const epic = owner ?? GUIDE_CHANGES
   const inbox = GuideInbox.read(GuideInbox.fileFor(file))
-  const review = ReviewInbox.read(ReviewInbox.pathFor(join(root, "epics", epic, `${epic}.plan.html`)))
+  const review = ReviewInbox.read(
+    ReviewInbox.pathFor(join(EpicConfig.contentOf(root), "epics", epic, `${epic}.plan.html`))
+  )
   return {
     send: {
       epic,

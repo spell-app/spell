@@ -84,9 +84,13 @@ async function serverCheck(root: string, fix: boolean): Promise<FlightCheck> {
   }
 }
 
-/** No docs page loads anything from the internet;  `fix`:  highlight.js pointed at the repo's copy first. */
-function offlineCheck(root: string, fix: boolean): FlightCheck {
+/**
+ * No docs page of checkout `checkout`'s content folder loads anything from the internet;
+ * `fix`:  highlight.js pointed at the engine's copy first.
+ */
+function offlineCheck(checkout: string, fix: boolean): FlightCheck {
   const name = "offline pages"
+  const root = EpicConfig.contentOf(checkout)
   const folders = DOCS_FOLDERS.filter((folder) => existsSync(join(root, folder)))
   const files = Offline.filesUnder(folders, { cwd: root })
   let fixed = 0
@@ -138,7 +142,7 @@ function extensionCheck(): FlightCheck {
 
 /** Marks already waiting in the epics' inboxes;  `undefined` when none. */
 function waitingCheck(root: string): FlightCheck | undefined {
-  const epics = join(root, "epics")
+  const epics = join(EpicConfig.contentOf(root), "epics")
   if (!existsSync(epics)) return undefined
   const counts = readdirSync(epics).flatMap((name) => {
     const inbox = DataFile.read<{ marks?: object; now?: unknown[] }>(

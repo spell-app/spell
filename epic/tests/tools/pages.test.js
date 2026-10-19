@@ -2,7 +2,7 @@
  * Tests of `tools/pages.js`' helpers for the docs tools' command lines.
  */
 import { execFileSync } from "node:child_process"
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -72,5 +72,73 @@ test("the templates are the engine's:  `templates/...` paths, wherever the check
     expect(got.none).toBeNull()
   } finally {
     rmSync(checkout, { recursive: true, force: true })
+  }
+})
+
+// epic `epic-eject` P12:  the pages are the content folder's, `contentFolder` in the repo's config, never through a
+// link at the checkout's root;  a path through an older checkout's link names the same page
+test("the content folder holds the pages:  areas, page paths, files and URLs from it;  no links needed", () => {
+  const top = realpathSync(mkdtempSync(join(tmpdir(), "content-")))
+  const checkout = join(top, "repo")
+  const content = join(top, "repo.epics")
+  const older = join(top, "older")
+  try {
+    const put = (path, text = "<title>x</title>\n") => {
+      mkdirSync(dirname(path), { recursive: true })
+      writeFileSync(path, text)
+    }
+    put(join(checkout, ".epic", "config.json5"), '{ "contentFolder": "../repo.epics" }\n')
+    put(join(checkout, "packages", "brand", "x.html"))
+    put(join(content, "guides", "x.html"))
+    put(join(content, "epics", "seo", "seo.plan.html"))
+    put(join(content, "pages", "index.html"))
+    // an older checkout, still linking the content folder's `epics` in at its root
+    mkdirSync(older)
+    symlinkSync(join(content, "epics"), join(older, "epics"))
+    const through = join(older, "epics", "seo", "seo.plan.html")
+    const script = `
+      import * as P from ${JSON.stringify(PAGES_JS)}
+      console.log(JSON.stringify({
+        content: P.CONTENT,
+        areas: [P.EPICS, P.GUIDES, P.PAGES, P.BRAND, P.GOALS, P.SAGAS, P.HOME],
+        guide: P.pagePath(${JSON.stringify(join(content, "guides", "x.html"))}),
+        through: P.pagePath(${JSON.stringify(through)}),
+        checkoutFile: P.pagePath(${JSON.stringify(join(checkout, "packages", "brand", "x.html"))}),
+        at: P.pageAt("guides/x.html"),
+        atNew: P.pageAt("epics/new/new.plan.html"),
+        atCheckout: P.pageAt("packages/brand/x.html"),
+        file: P.pageFile("guides/x.html"),
+        fromArea: P.pageFile("x.html"),
+        fileThrough: P.pageFile(${JSON.stringify(through)}),
+        inContent: P.inContent(${JSON.stringify(through)}),
+        url: P.serverUrl("http://h", ${JSON.stringify(through)}),
+        found: P.findPages().filter((file) => !file.startsWith(P.TEMPLATES))
+      }))`
+    const out = execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+      encoding: "utf8",
+      env: { ...process.env, EPIC_CHECKOUT: checkout }
+    })
+    const got = JSON.parse(out.trim().split("\n").at(-1))
+    expect(existsSync(join(checkout, "epics"))).toBe(false)
+    expect(got.content).toBe(content)
+    expect(got.areas).toEqual(
+      ["epics", "guides", "pages", "brand", "goals", "sagas", "pages/index.html"].map((path) => join(content, path))
+    )
+    expect(got.guide).toBe("guides/x.html")
+    expect(got.through).toBe("epics/seo/seo.plan.html")
+    expect(got.checkoutFile).toBe("packages/brand/x.html")
+    expect(got.at).toBe(join(content, "guides", "x.html"))
+    expect(got.atNew).toBe(join(content, "epics", "new", "new.plan.html"))
+    expect(got.atCheckout).toBe(join(checkout, "packages", "brand", "x.html"))
+    expect(got.file).toBe(join(content, "guides", "x.html"))
+    expect(got.fromArea).toBe(join(content, "guides", "x.html"))
+    expect(got.fileThrough).toBe(join(content, "epics", "seo", "seo.plan.html"))
+    expect(got.inContent).toBe(join(content, "epics", "seo", "seo.plan.html"))
+    expect(got.url).toBe("http://h/epics/seo/seo.plan.html")
+    expect(got.found).toEqual(
+      ["pages/index.html", "guides/x.html", "epics/seo/seo.plan.html"].map((path) => join(content, path))
+    )
+  } finally {
+    rmSync(top, { recursive: true, force: true })
   }
 })

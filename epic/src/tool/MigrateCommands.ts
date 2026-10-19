@@ -227,13 +227,13 @@ export class MigrateCommands {
     return existsSync(here) ? here : page
   }
 
-  /** An epic page given as `--file`:  from here, else from the checkout's root. */
+  /** An epic page given as `--file`:  from here, else a page path (from the content folder). */
   private pagePath(page: string): string {
     const here = resolve(page)
     if (existsSync(here)) return here
-    const there = resolve(this.files.root, page)
+    const there = resolve(this.files.content, page)
     if (existsSync(there)) return there
-    throw new PlanDocError(`no epic page ${relative(this.files.root, there)}`)
+    throw new PlanDocError(`no epic page ${relative(this.files.content, there)}`)
   }
 }
 

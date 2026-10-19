@@ -435,10 +435,17 @@ The pages live in SHARED root folders;  the tooling lives here, in `tools/`.
     node src/tools/check-spell.js guides/x.html
     ```
 
-  - A page argument is from the root, or from an area ([`pageFile()`](tools/pages.js)):
+  - A page argument is a page path, or from an area ([`pageFile()`](tools/pages.js)):
     `solid/solid-2.html` is a guide.
 
 The shared folders:
+- They're the repo's CONTENT FOLDER's (`contentFolder` in its `.epic/config.json5`;  `../spell-app.epics`), read and
+  written there, NEVER through a link at a checkout's root (epic `epic-eject` P12):
+  - `EpicConfig.contentOf(<checkout>)` ([EpicConfig.ts](config/EpicConfig.ts));  `pages.js` `CONTENT`
+  - a page's PATH is from the content folder (`epics/seo/seo.plan.html`:  `pagePath()`), as the page servers serve it
+    at `/`;  `pageAt()` turns one back into its file, `inContent()` maps a path through an older checkout's link
+  - spell-app's page server mounts it at `/` when the running epics' route module says where it is
+    (`serveContent()`, `runningRoutes.ts`)
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
 - [The docs' home page](../../pages/index.html):  a routing page (P5 of `claude-design`).

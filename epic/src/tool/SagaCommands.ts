@@ -201,9 +201,9 @@ export class SagaCommands {
    * (`<from>.saga.html`, `<from>.saga.inbox.json5` ...) renamed for `to`;  whether there was a folder.
    */
   private moveFolder(from: string, to: string): boolean {
-    const old = join(this.files.root, SAGAS, from)
+    const old = join(this.files.content, SAGAS, from)
     if (!existsSync(old)) return false
-    const folder = join(this.files.root, SAGAS, to)
+    const folder = join(this.files.content, SAGAS, to)
     renameSync(old, folder)
     for (const name of readdirSync(folder))
       if (name.startsWith(`${from}.`)) renameSync(join(folder, name), join(folder, `${to}${name.slice(from.length)}`))
@@ -234,19 +234,19 @@ export class SagaCommands {
           })
           if (count) {
             writeFileSync(path, next)
-            changed.push([relative(this.files.root, path), count])
+            changed.push([relative(this.files.content, path), count])
           }
         }
       }
     }
-    for (const folder of LINKED_FOLDERS) walk(join(this.files.root, folder))
+    for (const folder of LINKED_FOLDERS) walk(join(this.files.content, folder))
     return changed
   }
 }
 
 /** One saga as `saga list --json` gives it:  the list's fields, its page, its epics, how many guides name it. */
 export type SagaListing = Saga & {
-  /** its page, from the checkout's root:  `sagas/<id>/<id>.saga.html` (it may not be made yet) */
+  /** its page, a page path (from the content folder):  `sagas/<id>/<id>.saga.html` (it may not be made yet) */
   page: string
   /** the epics whose page names it, by name */
   epics: string[]

@@ -51,6 +51,7 @@ import { join } from "node:path"
 
 import { SRV } from "$/server"
 import type { RouteModule } from "$/server/page"
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 import { FAVORITES_FILE, favoritesIn } from "$/epics/list/EpicCards"
 
@@ -140,7 +141,7 @@ export function epicName(title: string): string {
 const RESERVED = new Set(["review", "resume", "color", "future", "phase", "start"])
 
 /**
- * Star (`favorite`) or unstar epic `name` in checkout `root`'s favourites (`FAVORITES_FILE`);
+ * Star (`favorite`) or unstar epic `name` in checkout `root`'s favourites (`FAVORITES_FILE`, in its content folder);
  * resolves to every starred epic's name after, sorted.
  * - SIDE EFFECT:  writes the file through the page server's one safe write (`SRV.FileOperations.save()`:
  *   read and written under its lock, all at once), keeping a comment added to it by hand (`DataFile.edited()`);
@@ -150,7 +151,7 @@ const RESERVED = new Set(["review", "resume", "color", "future", "phase", "start
 export async function setFavorite(root: string, name: string, favorite: boolean): Promise<string[]> {
   if (!EPIC_NAME.test(name)) throw new SRV.HttpError(400, `not an epic's name:  "${name}"`)
   let list: string[] = []
-  const file = join(root, FAVORITES_FILE)
+  const file = join(EpicConfig.contentOf(root), FAVORITES_FILE)
   await SRV.FileOperations.save(file, (current) =>
     DataFile.edited<unknown>(file, current, (read) => {
       const favorites = favoritesIn(read)
@@ -170,7 +171,7 @@ export async function setFavorite(root: string, name: string, favorite: boolean)
  * - reads the page's skeleton alone:  `<epic-page>` is there in a split page too
  */
 export function sagaLinkOf(root: string, name: string): SagaLink | null {
-  const file = PlanDocFiles.planDocIn(join(root, "epics", name), name)
+  const file = PlanDocFiles.planDocIn(join(EpicConfig.contentOf(root), "epics", name), name)
   if (!file) return null
   const page = /<epic-page\b[^>]*>/.exec(readFileSync(file, "utf8"))?.[0] ?? ""
   const id = /\ssaga="([^"]+)"/.exec(page)?.[1]

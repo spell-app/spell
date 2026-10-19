@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { dirname, join, posix, relative, resolve, sep } from "node:path"
 
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 
 /** The catch-all epic for comments on a page no epic owns (`epic comments gather`, `GuideChanges`). */
@@ -37,11 +38,15 @@ export const GUIDE_CHANGES = "guide-changes"
  *   docs' `GuideChanges`.
  ****************/
 export class SeeAlso {
-  /** the checkout's root:  its `epics/`, `guides/` */
-  readonly root: string
+  /**
+   * the content folder its pages are in:  its `epics/`, `guides/`
+   * - checkout `root`'s repo's (`EpicConfig.contentOf()`), never through a link at the checkout's root
+   */
+  readonly content: string
 
+  /** The See Alsos of the epics of the repo checkout `root` is in. */
   constructor(root: string) {
-    this.root = root
+    this.content = EpicConfig.contentOf(root)
   }
 
   ////////////////
@@ -55,11 +60,11 @@ export class SeeAlso {
    * - none for an epic with no files:  `[]`
    */
   linksOf(name: string): SeeAlsoLink[] {
-    const epic = join(this.root, EPICS, name)
+    const epic = join(this.content, EPICS, name)
     if (!existsSync(epic)) return []
-    const { durable, guides } = linksIn(this.root, name)
+    const { durable, guides } = linksIn(this.content, name)
     const page = (path: string, kind: SeeAlsoKind): SeeAlsoLink => {
-      const file = join(this.root, path)
+      const file = join(this.content, path)
       return {
         href: posix.relative(`${EPICS}/${name}`, path),
         title: titleOf(file),
@@ -68,8 +73,8 @@ export class SeeAlso {
       }
     }
     const newestFirst = (a: SeeAlsoLink, b: SeeAlsoLink) => b.updated.localeCompare(a.updated)
-    const own = detailsPages(this.root, name).map((path) =>
-      page(path, DataFile.exists(DataFile.besidePage(join(this.root, path), "rows")) ? "choices" : "details")
+    const own = detailsPages(this.content, name).map((path) =>
+      page(path, DataFile.exists(DataFile.besidePage(join(this.content, path), "rows")) ? "choices" : "details")
     )
     return [
       ...durable.map((path) => page(path, "durable")),
@@ -86,18 +91,19 @@ export class SeeAlso {
   ////////////////
 
   /**
-   * The epic page `page` (from the checkout's root:  `guides/python-target.html`) belongs to;  `undefined` for none.
+   * The epic page `page` (a page path, from the content folder:  `guides/python-target.html`) belongs to;
+   * `undefined` for none.
    * - the rules:  this class's banner
    */
   ownerOf(page: string): string | undefined {
     const path = posix.normalize(page.split(sep).join("/"))
     const own = OWN_PAGE.exec(path)
-    if (own) return existsSync(join(this.root, EPICS, own[1]!)) ? own[1] : undefined
+    if (own) return existsSync(join(this.content, EPICS, own[1]!)) ? own[1] : undefined
     return this.claims().get(path)?.[0]?.epic
   }
 
   /**
-   * Every page epic `name` owns that may take comments, from the checkout's root:
+   * Every page epic `name` owns that may take comments, as page paths (from the content folder):
    * its `details/` pages, and every page whose owner it is (`ownerOf()`).
    */
   ownedBy(name: string): string[] {
@@ -105,7 +111,7 @@ export class SeeAlso {
       .filter(([, claims]) => claims[0]?.epic === name)
       .map(([path]) => path)
       .sort()
-    return [...detailsPages(this.root, name), ...owned]
+    return [...detailsPages(this.content, name), ...owned]
   }
 
   /**
@@ -113,16 +119,16 @@ export class SeeAlso {
    * - kept in `CLAIMS` while the epics' files are as they were (`stampOf()`), for at most `CLAIMS_MAX_AGE_MS`
    */
   private claims(): Map<string, Claim[]> {
-    const names = epicNames(this.root)
-    const stamp = stampOf(this.root, names)
-    const kept = CLAIMS.get(this.root)
+    const names = epicNames(this.content)
+    const stamp = stampOf(this.content, names)
+    const kept = CLAIMS.get(this.content)
     if (kept && kept.stamp === stamp && Date.now() - kept.at < CLAIMS_MAX_AGE_MS) return kept.claims
     const claims = new Map<string, Claim[]>()
     for (const name of names) {
       if (name === GUIDE_CHANGES) continue
-      const facts = factsOf(this.root, name)
+      const facts = factsOf(this.content, name)
       if (!facts) continue
-      const { durable, guides } = linksIn(this.root, name)
+      const { durable, guides } = linksIn(this.content, name)
       for (const path of new Set([...durable, ...guides])) {
         if (NEVER_CLAIMED.test(path)) continue
         const claim = { epic: name, durable: durable.includes(path), ...facts }
@@ -130,7 +136,7 @@ export class SeeAlso {
       }
     }
     for (const list of claims.values()) list.sort(byClaim)
-    CLAIMS.set(this.root, { stamp, at: Date.now(), claims })
+    CLAIMS.set(this.content, { stamp, at: Date.now(), claims })
     return claims
   }
 }
@@ -170,7 +176,7 @@ type EpicFacts = {
 // ## Constants
 ////////////////
 
-/** The epics' folder, from the checkout's root. */
+/** The epics' folder, from the content folder. */
 const EPICS = "epics"
 
 /** A page in an epic's own folder (not its epic page, nor its parts):  `epics/<name>/details/x.html`. */
@@ -191,7 +197,7 @@ const NEVER_CLAIMED = /^guides\/(?:changelog|(?:[^/]+\/)*index)\.html$/
 /** How long the claims are kept, at most, ms:  a part edited in place leaves its folder's time as it was. */
 const CLAIMS_MAX_AGE_MS = 30_000
 
-/** Every checkout's claims, as last gathered:  by root. */
+/** Every content folder's claims, as last gathered:  by folder. */
 const CLAIMS = new Map<string, { stamp: string; at: number; claims: Map<string, Claim[]> }>()
 
 ////////////////
@@ -208,7 +214,7 @@ function byClaim(a: Claim, b: Claim): number {
   )
 }
 
-/** Every epic's folder name in checkout `root`, sorted;  none without `epics/`. */
+/** Every epic's folder name in content folder `root`, sorted;  none without `epics/`. */
 function epicNames(root: string): string[] {
   const folder = join(root, EPICS)
   if (!existsSync(folder)) return []
@@ -302,7 +308,7 @@ function pathOf(root: string, file: string, href: string): string | undefined {
   return path.startsWith("..") ? undefined : path
 }
 
-/** Epic `name`'s own pages, from the checkout's root:  every `.html` in its `details/` folder, sorted. */
+/** Epic `name`'s own pages, from the content folder:  every `.html` in its `details/` folder, sorted. */
 function detailsPages(root: string, name: string): string[] {
   const folder = join(root, EPICS, name, "details")
   if (!existsSync(folder)) return []

@@ -42,7 +42,7 @@ describe("EpicConfig", () => {
       "windows.contentName": "spell-app-dev",
       "windows.worktreeOnly": false,
       linkSessionFolders: false,
-      sharedFolders: "epics,guides,pages,brand,ui,goals,sagas,agents",
+      sharedFolders: "epics,guides,pages,brand,goals,sagas,agents",
       engineFolder: join(TOP, "spell-epic"),
       repoTemplates: ""
     })
@@ -157,6 +157,35 @@ describe("EpicConfig", () => {
       /"windows\.default" must be a string/
     )
     expect(() => EpicConfig.settingsFrom("[]", "x.json5")).toThrow(/must hold an object/)
+  })
+})
+
+// epic `epic-eject` P12:  the tools read pages from the content folder itself, never through a link at the root
+describe("EpicConfig.contentOf()", () => {
+  test("the content folder the config names, from the main checkout or a worktree;  no links needed", () => {
+    const main = fakeMainCheckout(join(TOP, "named"))
+    const worktree = fakeWorktree(main, join(TOP, "named.worktrees", "seo"))
+    const content = join(TOP, "named.epics")
+    mkdirSync(join(content, "epics"), { recursive: true })
+    configFile(main, '{ "contentFolder": "../named.epics" }')
+    expect(EpicConfig.contentOf(main)).toBe(content)
+    expect(EpicConfig.contentOf(worktree)).toBe(content)
+  })
+
+  test("the checkout itself:  no config file, a folder that isn't there, a file that won't read", () => {
+    expect(EpicConfig.contentOf(MAIN)).toBe(resolve(MAIN))
+    const missing = fakeMainCheckout(join(TOP, "missing"))
+    configFile(missing, '{ "contentFolder": "../missing.epics" }')
+    expect(EpicConfig.contentOf(missing)).toBe(resolve(missing))
+    const broken = fakeMainCheckout(join(TOP, "broken"))
+    configFile(broken, "{ nope")
+    expect(EpicConfig.contentOf(broken)).toBe(resolve(broken))
+  })
+
+  test("a content folder is its own:  it holds no config", () => {
+    const content = join(TOP, "own.epics")
+    mkdirSync(join(content, "epics"), { recursive: true })
+    expect(EpicConfig.contentOf(content)).toBe(content)
   })
 })
 

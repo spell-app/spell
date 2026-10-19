@@ -32,7 +32,7 @@ git(MAIN, "init", "-q", "-b", "main")
 // the shared repo beside it, by the repo's config (its default, written out)
 put("package.json", "{}")
 put(".epic/config.json5", '// where the shared repo is\n{ "contentFolder": "../spell-app-dev" }\n')
-put(".gitignore", "/epics\n/guides\n/pages\n/templates\n/brand\n/ui\n/goals\n/agents\n/.claude/worktrees\n")
+put(".gitignore", "/epics\n/guides\n/pages\n/templates\n/brand\n/sagas\n/goals\n/agents\n/.claude/worktrees\n")
 git(MAIN, "add", "-A")
 commit(MAIN, "first")
 put("pages/index.html", "<h1>Docs</h1>\n")
@@ -40,7 +40,7 @@ put("epics/x/x.plan.html", "<h1>X</h1>\n")
 put("guides/a.html", "<h1>A</h1>\n")
 put("templates/t.html", "<h1>T</h1>\n")
 put("brand/pony.html", "<h1>Pony</h1>\n")
-put("ui/index.html", "<h1>Spell UI</h1>\n")
+put("sagas/sagas.json5", '{ "sagas": [] }\n')
 put("goals/index.html", "<h1>Goals</h1>\n")
 put("agents/PAPERCUTS.md", "# Papercuts\n")
 git(MAIN, "worktree", "add", "-q", "-b", "wt", WT)
@@ -53,7 +53,7 @@ describe("sharedConfig()", () => {
       main: MAIN,
       dir: PEER,
       worktrees: [join(MAIN, ".claude", "worktrees")],
-      links: ["epics", "guides", "pages", "brand", "ui", "goals", "agents"]
+      links: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"]
     })
     expect(Shared.configOf(WT)).toEqual(config)
   })
