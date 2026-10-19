@@ -317,7 +317,7 @@ export class Requests {
    * - linkedom is loaded on first use:  the other verbs don't pay for it (as `EpicTools.planDoc()`)
    */
   private async phasesOf(epic: string): Promise<Element[]> {
-    const path = join(this.root, "epics", epic, `${epic}.plan.html`)
+    const path = join(this.epics, epic, `${epic}.plan.html`)
     if (!existsSync(path)) return []
     const { parseHTML } = await import("linkedom")
     return PhaseIds.phasesIn(parseHTML(readFileSync(path, "utf8")).document as unknown as Document)

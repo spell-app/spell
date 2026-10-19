@@ -218,7 +218,8 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      All from the worktree:  branches are shared, so `main` is visible here.
    - NEVER `git -C <main checkout>` or `cd` there:  a worktree session refuses both.
      `main` itself moves in step 7.
-   - First, the changelog:  add or move this branch's entry in [the changelog](guides/changelog.html)
+   - First, the changelog:  add or move this branch's entry in the changelog
+     (the content folder's `guides/changelog.html`)
      ("Changelog" in the root's `AGENTS.md`).
      - It's shared content:  write it straight in, nothing to commit on the branch for it.
      - It's committed for you at the turn's end.

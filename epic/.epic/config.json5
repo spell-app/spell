@@ -30,9 +30,11 @@
   // Each new worktree's saved-session folder linked to the main checkout's, so every window lists every session.
   "linkSessionFolders": true,
 
-  // The content folder's folders linked in at the root (`epic shared link`):  what an engine epic reads, and
-  // `pages`, whose home page the docs index writes after `epic new`.
-  "sharedFolders": ["epics", "guides", "pages", "sagas", "agents"],
+  // The content folder's folders linked in at the root (`epic shared link`):  NONE (epic `epic-eject` I23).
+  // - The tools read the content folder from `contentFolder` above, as spell-app's do since its P12.
+  // - Never `agents`:  this repo is the plugin, loaded in place, and Claude Code reads a plugin's root `agents/` as its
+  //   agent definitions (the content repo's logs and WWOD came up as 14 agent types).
+  "sharedFolders": [],
 
   // This repo IS the engine:  no `spell-epic` link.
   "engineFolder": "",

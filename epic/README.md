@@ -18,7 +18,7 @@ ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` 
 
 | Folder | What |
 | --- | --- |
-| `.claude-plugin/plugin.json` | the plugin's manifest, `spell-epic` |
+| `.claude-plugin/plugin.json` | the plugin's manifest, `spell-epic`;  `"agents": []`:  no agents, and a stray root `agents/` is never read as them (epic `epic-eject` I23:  the content repo's `agents` link was, its logs and WWOD as 14 agent types).  So the root links NO content folder (`sharedFolders: []`, `.epic/config.json5`) |
 | `.claude-plugin/marketplace.json` | a marketplace of one, this folder (`"source": "."`), so the plugin loads in place |
 | `skills/` | the skills:  `epic`, `epics`, `details`, `comment`, `docs-check`, `send`, `isolate`, `park`, `unpark`, `wait-for`, `worktrees`, `session`, `title`, `wtf`, `bg`, `bedtime`, `airplane` |
 | `hooks/` | `hooks.json`, and the hooks it runs:  making and removing worktrees, the behind-main notice, the worktree guard, the closing-line reminder on leaving a worktree (the isolate skill's "Closing line"), the prompt gate, the end-of-turn window move and shared-content commit |
@@ -96,7 +96,7 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | `windows.contentName` | `"spell-app-dev"` | the content repo's folder name in every window |
 | `windows.worktreeOnly` | `false` | whether EVERY worktree's window holds only the worktree and the content folder |
 | `linkSessionFolders` | `false` | whether the worktree hook links each new worktree's saved-session folder to the main checkout's |
-| `sharedFolders` | `epics`, `guides`, `pages`, `brand`, `ui`, `goals`, `agents` | the content folder's folders every checkout links in at its root;  a checkout's `package.json` `"shared": { "links" }` wins (spell-app's branches) |
+| `sharedFolders` | `epics`, `guides`, `pages`, `brand`, `ui`, `goals`, `agents` | the content folder's folders every checkout links in at its root;  a checkout's `package.json` `"shared": { "links" }` wins (spell-app's branches);  NEVER in a repo that's also a loaded plugin (spell-epic's own is `[]`):  Claude Code reads a plugin's root `agents/` as agents |
 | `engineFolder` | `"../spell-epic"` | the spell-epic checkout, which `epic shared link` links in at every checkout's root as `spell-epic`, only where the checkout's `.gitignore` ignores that name (spell-app runs the engine through it:  its `$/epics` aliases, its page server's routes);  `""`:  no link (`epic init` writes that) |
 | `repoTemplates` | `""` | the repo's OWN page templates, a folder from each checkout's root:  listed on the Templates page beside spell-epic's `templates/`, and found by name before them (`epic pages new`, `epic pages template`);  `""`:  none, spell-epic's are all there are (T11) |
 | `windowsFolder` | `""` | the VS Code window files' folder (`epic window`;  P13):  package windows in it, worktree windows in its `ongoing/`;  `""`:  the content folder's `windows/`, git-ignored there;  until `epic window move` makes it, the old `workspaces/` in the main checkout is read;  spell-epic's own:  `"workspaces"` (repos sharing a content folder each need their own) |

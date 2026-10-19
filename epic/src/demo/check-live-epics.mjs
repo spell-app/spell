@@ -55,6 +55,7 @@ if (!process.env.CHECK_LIVE_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
+const { EpicConfig } = await import("../config/EpicConfig.ts")
 
 /** What the reader types into the note box. */
 const NOTE = "half-typed note"
@@ -69,7 +70,7 @@ const args = process.argv.slice(2)
 const name = args.find((arg, at) => !arg.startsWith("--") && !args[at - 1]?.startsWith("--")) ?? "windows-and-review"
 const itemId = valueOf("--item") ?? "q2"
 const bundle = valueOf("--bundle")
-const source = join(ROOT, "epics", name)
+const source = join(EpicConfig.contentOf(ROOT), "epics", name)
 // under an `epics/<name>/` folder, as deep as the real one:  its links need no change
 const copyRoot = join(HERE, "shots", "live")
 const copy = join(copyRoot, "epics", name)
