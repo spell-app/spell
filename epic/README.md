@@ -99,6 +99,7 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | `sharedFolders` | `epics`, `guides`, `pages`, `brand`, `ui`, `goals`, `agents` | the content folder's folders every checkout links in at its root;  a checkout's `package.json` `"shared": { "links" }` wins (spell-app's branches) |
 | `engineFolder` | `"../spell-epic"` | the spell-epic checkout, which `epic shared link` links in at every checkout's root as `spell-epic`, only where the checkout's `.gitignore` ignores that name (spell-app runs the engine through it:  its `$/epics` aliases, its page server's routes);  `""`:  no link (`epic init` writes that) |
 | `repoTemplates` | `""` | the repo's OWN page templates, a folder from each checkout's root:  listed on the Templates page beside spell-epic's `templates/`, and found by name before them (`epic pages new`, `epic pages template`);  `""`:  none, spell-epic's are all there are (T11) |
+| `windowsFolder` | `""` | the VS Code window files' folder (`epic window`;  P13):  package windows in it, worktree windows in its `ongoing/`;  `""`:  the content folder's `windows/`, git-ignored there;  until `epic window move` makes it, the old `workspaces/` in the main checkout is read;  spell-epic's own:  `"workspaces"` (repos sharing a content folder each need their own) |
 
 A repo's generated files are its own list, in each checkout:  `.epic/generators.json5`.
 - `epic worktree merge-main` rebuilds them instead of merging them.
@@ -283,16 +284,17 @@ Each step is skipped when it's done, so it's safe to run again.
 
    - `windows.default`, `windows.repoName`:  the repo's folder name
    - `windows.contentName`:  `<repo>.epics`
+   - `windowsFolder`:  `../<repo>.epics/windows`, the VS Code window files, each machine's own
    - `linkSessionFolders`:  `true`
    - `sharedFolders`:  `["epics", "sagas", "guides", "pages"]`
    - A file already there is kept as it is.
 2. Makes the content folder a git repo of its own.
    - It holds those folders, a `.gitkeep` in each.
-   - And a `README.md`, and a `.gitignore` for the tooling's scratch files (inboxes, locks, running agents).
+   - And a `README.md`, and a `.gitignore` for the tooling's scratch files (inboxes, locks, running agents)
+     and the window files (`windows/`).
    - The turn-end hook commits it.
 3. Links each folder in at the checkout's root;  every new worktree gets the same links from the worktree hook.
 4. Lists the links in the repo's `.gitignore`, between `# shared:start` and `# shared:end`.
-   - And `workspaces/`:  the VS Code window files, each machine's own.
 
 What the content folder holds:
 

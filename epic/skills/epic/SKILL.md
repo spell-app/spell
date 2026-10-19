@@ -111,7 +111,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     NOT a failure, and NOT this session's epic.
     Go to "From another worktree", and skip everything else.
   - In `<name>`'s OWN window, its worktree already made:  a session "From another worktree" launched.
-    - Its own window:  `epic window which` says `workspaces/ongoing/<name>`.
+    - Its own window:  `epic window which` says `ongoing/<name>.code-workspace` (in `epic config windowsFolder`).
     - See "Launched" there.
 - The kickoff prompt, SAFE before anything else:  the text after `<name>`, verbatim.
   - Write it to `~/.spell/prompts/<name>.md` at once, as the hook does when it blocks.
@@ -752,7 +752,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
 - The epic page is the memory:  read it, don't redo it.
 
 0. Already home:  this window or this session is ALREADY the epic's own (Owen, 2026-10-10):
-   - the window:  `epic window which` says `workspaces/ongoing/<name>`
+   - the window:  `epic window which` says `ongoing/<name>.code-workspace` (in `epic config windowsFolder`)
    - or the session:  its folder is `epic worktree path <name>`'s
    - and `<name>` has an epic page (`epics/<name>/`), and is the `<name>` typed, if one was.
    - Then that's the epic, and nothing is asked:

@@ -44,7 +44,8 @@ describe("EpicConfig", () => {
       linkSessionFolders: false,
       sharedFolders: "epics,guides,pages,brand,goals,sagas,agents",
       engineFolder: join(TOP, "spell-epic"),
-      repoTemplates: ""
+      repoTemplates: "",
+      windowsFolder: join(TOP, "spell-app-dev", "windows")
     })
     expect(config.worktreeFolder("seo")).toBe(INSIDE)
     expect(config.worktreesPattern).toBe(".claude/worktrees")
@@ -125,6 +126,26 @@ describe("EpicConfig", () => {
     expect(() => EpicConfig.settingsFrom('{ "sharedFolders": ["../up"] }', "x.json5")).toThrow(/list of folder names/)
     // an empty name is still refused for every other text key
     expect(() => EpicConfig.settingsFrom('{ "baseBranch": "" }', "x.json5")).toThrow(/"baseBranch" must be a string/)
+  })
+
+  test("the window files (epic-eject P13):  the content folder's windows/;  the old workspaces/ until they move", () => {
+    const main = fakeMainCheckout(join(TOP, "windows"))
+    configFile(main, '{ "contentFolder": "../windows.epics" }')
+    const config = new EpicConfig(main)
+    const windows = join(TOP, "windows.epics", "windows")
+    expect(config.newWindowsFolder).toBe(windows)
+    expect(config.windowsFolder).toBe(windows)
+    expect(config.windowFile("ui")).toBe(join(windows, "ui.code-workspace"))
+    expect(config.worktreeWindowFile("seo")).toBe(join(windows, "ongoing", "seo.code-workspace"))
+    // the old folder there, the new one not yet:  the old one, until `epic window move`
+    mkdirSync(join(main, "workspaces"))
+    expect(config.windowsFolder).toBe(join(main, "workspaces"))
+    expect(config.oldWindowsFolder).toBe(join(main, "workspaces"))
+    mkdirSync(windows, { recursive: true })
+    expect(config.windowsFolder).toBe(windows)
+    // a folder of its own, from the main checkout
+    configFile(main, '{ "windowsFolder": "../my-windows" }')
+    expect(new EpicConfig(main).newWindowsFolder).toBe(join(TOP, "my-windows"))
   })
 
   test("a key left out keeps its default;  comments and trailing commas read;  an unknown key is skipped", () => {

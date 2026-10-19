@@ -31,6 +31,8 @@ const WORKTREE = `${ROOT}/.claude/worktrees/other/packages/ui`
 /** A package window, and a worktree's window. */
 const PACKAGE_WINDOW = { workspaceFile: `${ROOT}/workspaces/ui.code-workspace` }
 const OTHER_WINDOW = { workspaceFile: `${ROOT}/workspaces/ongoing/other.code-workspace` }
+/** the same worktree's window, its file in the windows folder (epic `epic-eject` P13) */
+const MOVED_WINDOW = { workspaceFile: `/top/content/windows/ongoing/other.code-workspace` }
 
 beforeEach(() => {
   for (const name of readdirSync(prompts)) rmSync(join(prompts, name))
@@ -132,6 +134,8 @@ describe("otherWorktree()", () => {
     expect(PromptGate.otherWorktree(WORKTREE, null, "other")).toBeNull()
     expect(PromptGate.otherWorktree(ROOT, OTHER_WINDOW, "new")).toBe("other")
     expect(PromptGate.otherWorktree(ROOT, OTHER_WINDOW, "other")).toBeNull()
+    // its file in the windows folder (epic-eject P13), or still the old place:  either counts
+    expect(PromptGate.otherWorktree(ROOT, MOVED_WINDOW, "new")).toBe("other")
     expect(PromptGate.otherWorktree(ROOT, PACKAGE_WINDOW, "new")).toBeNull()
     expect(PromptGate.otherWorktree(ROOT, null, "new")).toBeNull()
   })

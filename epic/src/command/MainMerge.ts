@@ -120,7 +120,7 @@ export class MainMerge {
     // Generated output one side no longer commits (the page server's bundles, since 2026-10-07):
     // a file `main` changed or in conflict, that the merged `.gitignore` ignores and ONE side's tree lacks,
     // leaves the index, kept on disk.
-    // (A file both sides track, though ignored, stays:  the `workspaces/*.code-workspace` files)
+    // (A file both sides track, though ignored, stays.)
     const base = gitOut(root, ["merge-base", "HEAD", "MERGE_HEAD"])
     const conflicted = gitLines(root, ["diff", "--name-only", "--diff-filter=U"])
     const theirs = gitLines(root, ["diff", "--name-only", base, "MERGE_HEAD"])

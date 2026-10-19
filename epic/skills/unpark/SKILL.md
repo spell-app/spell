@@ -46,7 +46,7 @@ Then AskUserQuestion:
 ## 3. The right window
 
 - This window:  `epic window which`, its `workspace` line.
-- `<name>`'s window file:  `workspaces/ongoing/<name>.code-workspace`, in the main checkout.
+- `<name>`'s window file:  `$(epic config windowsFolder)/ongoing/<name>.code-workspace`.
 - Different (or no window file):  `epic window stay-check` first.
   - Then AskUserQuestion "This window isn't `<name>`'s.  Open it in a new window?".
     - Its reasons in the question.

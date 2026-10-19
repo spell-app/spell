@@ -54,8 +54,18 @@ export class EpicConfig {
     linkSessionFolders: false,
     sharedFolders: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"],
     engineFolder: "../spell-epic",
-    repoTemplates: ""
+    repoTemplates: "",
+    windowsFolder: ""
   }
+
+  /**
+   * where the window files were before epic `epic-eject` P13, from the main checkout:  `epic window move` carries
+   * them from here to `windowsFolder`
+   */
+  static readonly OLD_WINDOWS_FOLDER = "workspaces"
+
+  /** the worktrees' window files' folder, in the windows folder:  `<windowsFolder>/ongoing/<name>.code-workspace` */
+  static readonly WORKTREE_WINDOWS = "ongoing"
 
   /** the main checkout:  what the folders are relative to */
   readonly main: string
@@ -197,6 +207,53 @@ export class EpicConfig {
   }
 
   /**
+   * the folder the VS Code window files are in (`epic window`;  epic `epic-eject` P13):  each machine's own, never
+   * tracked
+   * - package windows and the whole repo's (`windowFile()`), and the worktrees' in its `ongoing/`
+   *   (`worktreeWindowFile()`)
+   * - where they go:  `newWindowsFolder`
+   * - EXCEPT while the old folder, `workspaces/` in the main checkout, is there and the new one isn't:
+   *   the old one, so the windows keep working until `epic window move` carries the files over
+   */
+  get windowsFolder(): string {
+    const old = this.oldWindowsFolder
+    return existsSync(old) && !existsSync(this.newWindowsFolder) ? old : this.newWindowsFolder
+  }
+
+  /**
+   * where the window files go:  `windowsFolder` as written, from the main checkout;
+   * left out (`""`), the content folder's `windows/` (`<contentFolder>/windows`, git-ignored there)
+   * - repos sharing a content folder each need their own:  spell-epic's config keeps its `workspaces/`
+   */
+  get newWindowsFolder(): string {
+    const written = this.settings.windowsFolder
+    return written ? resolve(this.main, written) : join(this.contentFolder, "windows")
+  }
+
+  /** where the window files were before epic `epic-eject` P13:  `workspaces/` in the main checkout */
+  get oldWindowsFolder(): string {
+    return join(this.main, EpicConfig.OLD_WINDOWS_FOLDER)
+  }
+
+  /** the worktrees' window files' folder:  `<windowsFolder>/ongoing` */
+  get worktreeWindowsFolder(): string {
+    return join(this.windowsFolder, EpicConfig.WORKTREE_WINDOWS)
+  }
+
+  /**
+   * the window file of package `pkg`, or of the whole repo (`windows.default`):
+   * `<windowsFolder>/<pkg>.code-workspace`
+   */
+  windowFile(pkg: string): string {
+    return join(this.windowsFolder, `${pkg}.code-workspace`)
+  }
+
+  /** worktree `name`'s window file:  `<windowsFolder>/ongoing/<name>.code-workspace` */
+  worktreeWindowFile(name: string): string {
+    return join(this.worktreeWindowsFolder, `${name}.code-workspace`)
+  }
+
+  /**
    * Worktree `name`'s folder:  where it IS, in any of `worktreesFolders`;  else where a new one goes,
    * `<worktreesFolder>/<name>` (`newWorktreeFolder()`).
    * - so an old worktree (`.claude/worktrees/seo`) is still found after the file moved new ones beside the repo
@@ -281,7 +338,8 @@ export class EpicConfig {
       linkSessionFolders: this.linkSessionFolders,
       sharedFolders: this.sharedFolders.join(","),
       engineFolder: this.engineFolder ?? "",
-      repoTemplates: this.repoTemplates
+      repoTemplates: this.repoTemplates,
+      windowsFolder: this.windowsFolder
     }
   }
 
@@ -320,7 +378,8 @@ export class EpicConfig {
       linkSessionFolders: valueOf(given, "linkSessionFolders", defaults.linkSessionFolders, file),
       sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file),
       engineFolder: valueOf(given, "engineFolder", defaults.engineFolder, file, "", { empty: true }),
-      repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true })
+      repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true }),
+      windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true })
     }
   }
 
@@ -360,7 +419,7 @@ export class EpicConfig {
  * - `installTimeout`:  the seconds the hook's install may take (600)
  * - `windows`:  the VS Code windows (the window script)
  *   - `default`:  the window file a worktree's window is opened from when the session's window isn't a package's
- *     (`spell-app`:  `workspaces/spell-app.code-workspace`)
+ *     (`spell-app`:  `<windowsFolder>/spell-app.code-workspace`)
  *   - `repoName`:  the repo root's folder name in every window (`spell-app`)
  *   - `contentName`:  the content repo's folder name in every window (`spell-app-dev`)
  *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the content folder (off);
@@ -377,6 +436,10 @@ export class EpicConfig {
  *   server's route modules, epic `epic-eject` I5);  `""`:  no link (a repo that only runs `epic`)
  * - `repoTemplates`:  the repo's own page templates, a folder from each checkout's root (`""`, none:  the default);
  *   listed beside the engine's (spell-epic's `templates/`, epic `epic-eject` T11), and found by name before them
+ * - `windowsFolder`:  the VS Code window files' folder, relative to the main checkout (`epic window`, epic `epic-eject`
+ *   P13);  `""` (the default):  the content folder's `windows/`, `<contentFolder>/windows`
+ *   - each machine's own, never tracked:  the content repo git-ignores `windows/`
+ *   - before P13:  `workspaces/` in the main checkout, tracked by spell-app and marked `skip-worktree`
  */
 export type EpicSettings = {
   contentFolder: string
@@ -390,6 +453,7 @@ export type EpicSettings = {
   sharedFolders: string[]
   engineFolder: string
   repoTemplates: string
+  windowsFolder: string
 }
 
 /** `EpicSettings.windows`:  the default window, the folder names every window shows, and its layout. */

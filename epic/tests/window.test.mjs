@@ -34,6 +34,8 @@ const {
   claudeSessions,
   launchPlan,
   look,
+  movedWorkspace,
+  moveWindowFiles,
   parseLsof,
   processTable,
   stayAdvice,
@@ -180,16 +182,17 @@ test("request():  no window, or none listening, throws a clear error", async () 
 
 test("a worktree's window:  the main root first, then the worktree's root, then the shared content repo;  theme, tinted", () => {
   const workspace = Window.worktreeWorkspace("ui", "seo")
+  // the file's in the content folder's windows/ongoing (epic-eject P13):  paths relative to it
   assert.deepEqual(workspace.folders, [
-    { path: "../..", name: "spell-app" },
-    { path: "../../.claude/worktrees/seo", name: "⎇ seo" },
+    { path: "../../../spell-app", name: "spell-app" },
+    { path: "../../../spell-app/.claude/worktrees/seo", name: "⎇ seo" },
     // `[]` on a machine without `../spell-app-dev`
     ...Window.sharedFolder(dirname(Window.worktreeFile("seo")))
   ])
   assert.equal(workspace.spell.package, "ui")
   assert.equal(workspace.settings["workbench.colorTheme"], Window.theme("ui"))
   assert.deepEqual(workspace.settings["workbench.colorCustomizations"], tint("seo"))
-  assert.match(Window.worktreeFile("seo"), /\/workspaces\/ongoing\/seo\.code-workspace$/)
+  assert.match(Window.worktreeFile("seo"), /\/spell-app-dev\/windows\/ongoing\/seo\.code-workspace$/)
 })
 
 test("looks:  twelve names, Tomorrow Night Blue re-hued;  blue IS the theme;  an unknown name lists them", () => {
@@ -316,8 +319,9 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   )
   mkdirSync(join(top, "repo.epics"))
   mkdirSync(join(top, "repo.worktrees", "seo"), { recursive: true })
-  // an ongoing window file without the content folder (written while it was missing)
-  const ongoing = join(repo, "workspaces", "ongoing")
+  // an ongoing window file without the content folder (written while it was missing):  in the windows folder, the
+  // content folder's windows/
+  const ongoing = join(top, "repo.epics", "windows", "ongoing")
   mkdirSync(ongoing, { recursive: true })
   writeFileSync(
     join(ongoing, "old.code-workspace"),
@@ -343,10 +347,11 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   rmSync(top, { recursive: true, force: true })
   assert.equal(run.status, 0, run.stderr)
   const { seo, repoWindow, written, old } = JSON.parse(run.stdout)
-  // no "no package repo":  the whole repo's window written by `open`, the repo then the content folder
+  // no "no package repo":  the whole repo's window written by `open`, the repo then the content folder,
+  // each relative to the file, in the content folder's windows/
   assert.deepEqual(repoWindow.folders, [
-    { path: "..", name: "repo" },
-    { path: "../../repo.epics", name: "repo.epics" }
+    { path: "../../repo", name: "repo" },
+    { path: "..", name: "repo.epics" }
   ])
   // the worktree's window:  its own folder, then the content folder
   assert.deepEqual(
@@ -356,16 +361,16 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   // `init` gives the old file its content folder, second;  the repo's window is there already
   assert.deepEqual(old.folders, [
     { path: "../../../repo.worktrees/old", name: "⎇ old" },
-    { path: "../../../repo.epics", name: "repo.epics" }
+    { path: "../..", name: "repo.epics" }
   ])
-  assert.ok(written.includes("workspaces/ongoing/old.code-workspace"))
-  assert.ok(!written.includes("workspaces/repo.code-workspace"))
+  assert.ok(written.includes("../repo.epics/windows/ongoing/old.code-workspace"))
+  assert.ok(!written.includes("../repo.epics/windows/repo.code-workspace"))
 })
 
 test("a package window:  the whole branch, then the shared repo;  shared links shown only under the shared repo", () => {
   const workspace = Window.workspace("ui")
   assert.deepEqual(workspace.folders, [
-    { path: "..", name: "spell-app" },
+    { path: "../../spell-app", name: "spell-app" },
     ...Window.sharedFolder(dirname(Window.file("ui")))
   ])
   const exclude = workspace.settings["files.exclude"]
@@ -374,6 +379,84 @@ test("a package window:  the whole branch, then the shared repo;  shared links s
   assert.deepEqual(exclude.agents, { when: "package.json" })
   assert.equal(exclude["*"], undefined)
   assert.equal(exclude.packages, undefined)
+})
+
+test("movedWorkspace():  each folder path made relative to the new place;  every other byte kept", () => {
+  // Owen's layout, a comment and a trailing comma (JSONC), an absolute path, a "path" outside the folders
+  const text = `{
+  // my window
+  "folders": [
+    { "path": "..", "name": "spell-app" },
+    {
+      "path": "../../spell-app.epics",
+      "name": "spell-app.epics"
+    },
+    { "path": "/abs/elsewhere" },
+  ],
+  "settings": { "workbench.colorTheme": "Monokai", "x.path": "..", "path": ".." }
+}
+`
+  const from = "/top/spell-app/workspaces"
+  const to = "/top/spell-app.epics/windows"
+  const { text: moved, folders } = movedWorkspace(text, from, to)
+  assert.deepEqual(folders, [
+    ["..", "../../spell-app"],
+    ["../../spell-app.epics", ".."],
+    ["/abs/elsewhere", "/abs/elsewhere"]
+  ])
+  assert.equal(
+    moved,
+    text
+      .replace('{ "path": "..", "name": "spell-app" }', '{ "path": "../../spell-app", "name": "spell-app" }')
+      .replace('"path": "../../spell-app.epics"', '"path": ".."')
+  )
+  // no folders list:  as it was
+  assert.deepEqual(movedWorkspace('{ "settings": {} }', from, to), { text: '{ "settings": {} }', folders: [] })
+})
+
+test("moveWindowFiles():  package and worktree windows carried over, the old ones kept;  idempotent;  never overwrites", () => {
+  const top = mkdtempSync(join(tmpdir(), "window-move-"))
+  const from = join(top, "spell-app", "workspaces")
+  const to = join(top, "spell-app.epics", "windows")
+  mkdirSync(join(from, "ongoing"), { recursive: true })
+  const ui =
+    '{\n  "folders": [{ "path": "..", "name": "spell-app" }],\n  "settings": { "workbench.colorTheme": "Red" }\n}\n'
+  const seo = JSON.stringify({ folders: [{ path: "../../../spell-app.worktrees/seo", name: "⎇ seo" }] })
+  writeFileSync(join(from, "ui.code-workspace"), ui)
+  writeFileSync(join(from, "ongoing", "seo.code-workspace"), seo)
+  writeFileSync(join(from, "notes.txt"), "not a window file")
+  try {
+    // a dry run writes nothing
+    const dry = moveWindowFiles(from, to, { dryRun: true })
+    assert.deepEqual(
+      dry.map(({ file, action }) => [file, action]),
+      [
+        ["ui.code-workspace", "would move"],
+        ["ongoing/seo.code-workspace", "would move"]
+      ]
+    )
+    assert.equal(existsSync(to), false)
+    // the move:  each path still leads where it did
+    moveWindowFiles(from, to)
+    const movedUi = JSON.parse(readFileSync(join(to, "ui.code-workspace"), "utf8"))
+    assert.equal(join(to, movedUi.folders[0].path), join(top, "spell-app"))
+    assert.equal(movedUi.settings["workbench.colorTheme"], "Red")
+    const movedSeo = JSON.parse(readFileSync(join(to, "ongoing", "seo.code-workspace"), "utf8"))
+    assert.equal(join(to, "ongoing", movedSeo.folders[0].path), join(top, "spell-app.worktrees", "seo"))
+    assert.equal(existsSync(join(to, "notes.txt")), false)
+    // the old files untouched
+    assert.equal(readFileSync(join(from, "ui.code-workspace"), "utf8"), ui)
+    assert.equal(readFileSync(join(from, "ongoing", "seo.code-workspace"), "utf8"), seo)
+    // again:  up to date;  a file changed since (Owen's new theme) is kept
+    writeFileSync(join(to, "ui.code-workspace"), "{}")
+    assert.deepEqual(
+      moveWindowFiles(from, to).map(({ action }) => action),
+      ["kept", "up to date"]
+    )
+    assert.equal(readFileSync(join(to, "ui.code-workspace"), "utf8"), "{}")
+  } finally {
+    rmSync(top, { recursive: true, force: true })
+  }
 })
 
 test("tint():  a dark hue per name, the same every time", () => {
@@ -389,6 +472,9 @@ test("tint():  a dark hue per name, the same every time", () => {
 })
 
 test("packageOf():  a package window's package, else null", () => {
+  assert.equal(Window.packageOf({ workspaceFile: Window.file("ui") }), "ui")
+  assert.equal(Window.packageOf({ workspaceFile: Window.worktreeFile("seo") }), null)
+  // a window still open from its file's place before epic-eject P13
   assert.equal(Window.packageOf({ workspaceFile: "/repo/workspaces/ui.code-workspace" }), "ui")
   assert.equal(Window.packageOf({ workspaceFile: "/repo/workspaces/ongoing/seo.code-workspace" }), null)
   assert.equal(Window.packageOf(null), null)
@@ -497,7 +583,7 @@ test("handoff():  records the move, keyed by session;  needs a session and the w
     const worktree = { pid: process.ppid, port: 1, token: "t", folders: [], workspaceFile: Window.worktreeFile(name) }
     writeFileSync(join(dir, `${process.ppid}.json`), JSON.stringify(worktree))
     const back = Window.handoff(name, SESSION, { back: true })
-    assert.match(back.to, /workspaces\/ui\.code-workspace$/)
+    assert.equal(back.to, Window.file("ui"))
     assert.equal(back.to.includes(".claude"), false)
     assert.equal(back.close, "window")
     assert.equal(back.remove, Window.worktreeFile(name))
