@@ -61,6 +61,7 @@
  */
 import { spawn } from "child_process"
 import { randomBytes } from "crypto"
+import { existsSync } from "fs"
 import { join } from "path"
 import * as vscode from "vscode"
 
@@ -92,23 +93,25 @@ const VIEWS: Record<DocViewName, { id: string; empty: string }> = {
 declare const ENGINE_ROOT: string
 
 /**
- * spell-epic's `epic` command, from the checkout this extension was built from:
- * `restartServer()` runs `epic hub stop` / `ensure` with it, for the epic server.
+ * spell-epic's `epic` command, from the checkout this extension was built from:  what `restartServer()` runs.
+ * - `epic hub stop` / `ensure`, for the epic server
+ * - `epic server stop` / `ensure` in a checkout's root, for that checkout's page server
  */
 const ENGINE_EPIC = `node ${JSON.stringify(join(ENGINE_ROOT, "bin", "epic"))}`
 
 /**
- * A checkout's own `epic` command, run from its root:
- * `restartServer()` runs it in a shell for a CHECKOUT's page server (spell-app's, epic `epic-eject` P5).
+ * The `epic` command of a spell-app checkout cut before the switch (epic `epic-eject` I5), from its root:
+ * such a checkout still carries its own copy of the engine, and runs it.
+ * - `restartServer()` runs it for that checkout's page server, when the file is there
+ * - TODO:  drop it, and `OLD_SPELL`, once every worktree has merged I5
  */
-const EPIC = "node packages/cli/bin/epic.mjs"
+const OLD_EPIC = "packages/cli/bin/epic.mjs"
 
 /**
- * The same checkout's `spell` CLI, for `spell dev server`:
- * a checkout from before `epic server` (P5) has no such verb.
- * - TODO:  drop it once every worktree has merged P5
+ * The same old checkout's `spell` CLI, for `spell dev server`:
+ * a checkout from before `epic server` (epic `epic-eject` P5) has no such verb.
  */
-const SPELL = "node packages/cli/bin/spell.mjs"
+const OLD_SPELL = "node packages/cli/bin/spell.mjs"
 
 /** Each view's title-bar commands, `<view id>.<name>`:  each listed in `package.json` for both views. */
 const COMMANDS = ["back", "forward", "reload", "restartServer", "openExternal"] as const
@@ -375,7 +378,7 @@ export class DocView implements vscode.WebviewViewProvider {
    *   (clicks no longer reaching the page, PAPERCUTS `vscode`, 2026-10-06)
    *   - the reload button only navigates the SAME iframe
    * - NOT a fix for pages stuck on their placeholders (6 docs pages holding every connection to a host):
-   *   live reload moved to websockets for that (`packages/server/src/webSocket.ts`)
+   *   live reload moved to websockets for that (spell-app's `packages/server/src/webSocket.ts`)
    */
   rebuild(to?: string): string | undefined {
     if (!this.view) return undefined
@@ -396,9 +399,10 @@ export class DocView implements vscode.WebviewViewProvider {
    * - runs `epic server stop`, then `epic server ensure`, in a LOGIN shell (`$SHELL -lc`):
    *   a GUI VS Code's own `PATH` may have no `node`
    *   - a checkout from before `epic server` (epic `epic-eject` P5):
-   *     `spell dev server stop` / `ensure` instead, when `epic` refuses the verb
-   * - that checkout's own command (`node packages/cli/bin/epic.mjs`), never the `epic` on `PATH`:
-   *   the page server is per checkout, and `epic server` runs the caller's copy of it
+   *     `spell dev server stop` / `ensure` instead, when its own `epic` refuses the verb
+   * - with spell-epic's `epic`, the one this extension was built from (`ENGINE_EPIC`), never the `epic` on `PATH`,
+   *   run in that checkout's root:  the page server is per checkout, and `epic` acts on the checkout it's run in
+   *   - a checkout cut before the switch (epic `epic-eject` I5) runs its own copy instead (`OLD_EPIC`)
    * - its port may change (a worktree's server takes any free one):  the page comes back on the new `base`
    */
   async restartServer(): Promise<void> {
@@ -415,7 +419,10 @@ export class DocView implements vscode.WebviewViewProvider {
     }
     const command = info?.epicServer
       ? `${ENGINE_EPIC} hub stop; ${ENGINE_EPIC} hub ensure`
-      : `(${EPIC} server stop || ${SPELL} dev server stop); (${EPIC} server ensure || ${SPELL} dev server ensure)`
+      : existsSync(join(root, OLD_EPIC))
+        ? `(node ${OLD_EPIC} server stop || ${OLD_SPELL} dev server stop); ` +
+          `(node ${OLD_EPIC} server ensure || ${OLD_SPELL} dev server ensure)`
+        : `${ENGINE_EPIC} server stop; ${ENGINE_EPIC} server ensure`
     const output = await vscode.window.withProgress(
       { location: { viewId: this.id }, title: "Restarting the page server" },
       () => run(process.env.SHELL || "/bin/zsh", ["-lc", command], root)

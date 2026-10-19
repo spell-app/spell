@@ -8,19 +8,19 @@ argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] 
 
 An EPIC is a planning session and the work it plans;  its live record is the EPIC PAGE.
 - It was `/plan-doc` until 2026-10-02.
-- Its tool is `epic` (`spell dev plan-doc` until epic `epic-workflow` P9).
+- Its tool is `epic` (in spell-app, `spell dev plan-doc` until epic `epic-workflow` P9).
 
 Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole time.
 - The epic page:  `epics/<name>/<name>.plan.html`.
 - It's the user's view of the work:  they read it in the right side bar's REVIEW tab while you work.
-  - That's the checkbox icon;  never the "Spell Docs" hat tab (Owen's rule, 2026-10-07).
+  - That's the checkbox icon;  never the "Epic Docs" tab, the book (Owen's rule, 2026-10-07).
 
-- Shared content:  the epic page lives in `epics/`, which spell-app doesn't track (epic `shared-content`, 2026-10-04).
+- Shared content:  the epic page lives in `epics/`, which the repo doesn't track (epic `shared-content`, 2026-10-04).
   - In every checkout, `epics/` is a link into ONE shared repo, the content folder (`epic config contentFolder`).
   - So there is ONE epic page:  `main` and every worktree see each edit at once;  it never conflicts on merge.
   - Committed for you after every turn
     (the `Stop` hook, [shared-commit.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/shared-commit.mjs)).
-  - NEVER commit, stage, `git checkout --` or `git restore` it in spell-app.
+  - NEVER commit, stage, `git checkout --` or `git restore` it in the repo.
     Nor the changelog, the docs' home page, or a details page.
 - Rules for the doc (sections, ids, markers, prose):  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md).
   Read it first.
@@ -228,7 +228,7 @@ All in the FIRST turn, in this order, then the turn ends.
 5. `epic open <name> --review`, AFTER the handoff.
    - It shows in the right side bar's Review tab (the checkbox icon) of the window the session moves to,
      once it has:  one tab, reloaded on every later `open`.
-   - Needs the spell extension (`spell dev vscode`).
+   - Needs spell-epic's VS Code extension ([its README](${CLAUDE_PLUGIN_ROOT}/vscode/README.md)).
    - MUST print "... shows in ... once this session moves there".
      Why:  only a PENDING move defers it;  before the handoff, it shows in THIS window's side bar, the one being left.
 6. Isolate "Start", step 6:  END THE TURN.
@@ -264,7 +264,8 @@ Staying in this window (step 0):  skip steps 4 and 6.
       - The estimate:  wall-clock for Claude, agents included, review not (`30m`, `2h`, `1-2h`).
       - The LAST phase is always `Doc Review`.
       - Its goal names the text pass ("6. Doc Review"):
-        - `/fussbudget branch` and `/fussbudget epic <name>`:  the branch's text and the epic page, rewritten
+        - the repo's text-rewriting skill, if it has one (spell-app's `/fussbudget`):  the branch's text and the epic
+          page, rewritten
         - the epic's guide, written from the cleaned epic page to the same rules
         - `epic pages fuss --branch` last:  its misses fixed, or listed for Owen
    3. Overview:  the total estimate, then numbered sections (structure, code, flows):
@@ -347,7 +348,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
          - a real fork he'd plausibly have picked differently, AND that matters to him
            (cost, behaviour he'll notice, something hard to undo)
          - it needs his answer before work can go on
-       - Following WWOD is one case of calm, not the only one.
+       - Following the repo's house style is one case of calm, not the only one.
        - Never ask:  decide, and record it.
        - Owen flips it from its id chip while reviewing;  `epic calm <name>#<id> [<id>...] [--loud]` from the CLI.
    - Items added while the phase is active carry it.
@@ -417,7 +418,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      once its commit is made and its checks pass.
      - Standing:  `<epic-page standing>`, and `epic summary --json`'s `standing` (epic `epic-workflow`).
      - Its own short doc pass comes first, in place of one Doc Review at the end:
-       `/fussbudget` on the files the phase changed, and the guide brought in line, before the commit.
+       the repo's text-rewriting skill (spell-app's `/fussbudget`) on the files the phase changed,
+       and the guide brought in line, before the commit.
      - Then, no asking (the standing epic is the ask):
        1. `main` moved (`git log --oneline HEAD..main` not empty):  `epic worktree merge-main`.
        2. `ExitWorktree` with `action: "keep"`:  a worktree session can't move `main`.
@@ -425,7 +427,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
        4. `EnterWorktree` with `path`, the folder `epic worktree path <name>` prints.
           Back, the window and session unchanged.
-       5. The changelog:  the epic's entry, under "3. Merged into main", gets the phase's bullets.
+       5. The changelog, if the repo keeps one:
+          the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/isolate done`:  the worktree, the window and the session stay, for the next request.
      - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
      - `epic update <name> --standing [on|off]` makes an epic standing, or not;
@@ -454,8 +457,9 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
 - Prune:  close stale items;  make the summary and Overview true to what was BUILT.
 - "To test":  every hand check the work needs before merging is there, each a step and what should happen.
   - List the open ones in the reply, as bullets.
-- The text pass (epic `skillz` P7;  [the fussbudget skill](.claude/skills/fussbudget/SKILL.md)), in this order:
-  1. First, both named in full, so nothing asks:
+- The text pass (epic `skillz` P7), in this order:
+  1. First, the repo's text-rewriting skill, if it has one (its `AGENTS.md` or `.claude/skills/`;  spell-app's
+     `/fussbudget`), both named in full, so nothing asks:
      - `/fussbudget branch`:  the text this branch changed, docstrings and comments
      - `/fussbudget epic <name>`:  the epic page's prose.
        Epic-page work, so the background `<name>-plan-doc` agent runs it ("4. Fill the doc"),
@@ -463,7 +467,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      - Both rewrite in place, uncommitted:
        the branch's diff waits for Owen in Source Control, before the phase's commit.
   2. Then the epic's guide (below), written from the CLEANED epic page, to the same rules:
-     WWOD §6 and writing.md (the content folder's `agents/wwod/writing.md`).
+     the repo's writing rules, from its house style (spell-app's:  WWOD §6, and the content folder's
+     `agents/wwod/writing.md`).
   3. Last, the checker, on both:
      - `epic pages fuss --branch`
      - `epic pages fuss <the epic's guide>`:  it's shared content, not in the branch's diff
@@ -477,8 +482,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
   - Then `epic pages index`.
     The index is shared too:  `epic` keeps the epic's own card current from any checkout.
 - The epic page stays in `epics/` as the record:  every phase done.
-- Changelog:  write the epic's entry straight into the shared changelog, the content folder's `guides/changelog.html`
-  ("Changelog" in the root's `AGENTS.md`).
+- Changelog, if the repo keeps one (its `AGENTS.md` says):  write the epic's entry straight into it.
+  - The shared changelog is the content folder's `guides/changelog.html`:  `epic docs <name>` looks for the entry there.
   - It links the epic page and the guide.
   - Under "3. Merged into main" if "Finish" below merges it, else "2. In worktrees".
   - Nothing to commit on the branch for it, and no merge conflict:  every checkout sees the one file.
@@ -882,7 +887,8 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
      - a rough size
    - one question per HIGH-LEVEL open choice (what, where, how far, when):  options side by side, one recommended.
      Not the small ones:  those are the plan's.
-   - Then `yarn vp fmt <its real path>`.
+   - Then format it:  `yarn vp fmt <its ABSOLUTE path>`, from spell-epic's root
+     ([epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Finishing a page", step 2).
    - Then `epic ask show <name>/analysis --wait`:  Bash, in the background.
      It opens in the side bar's Review tab.
    - End the turn with its link pair (`epic pages link <page> --review`).

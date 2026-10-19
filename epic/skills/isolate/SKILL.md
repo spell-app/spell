@@ -8,7 +8,7 @@ argument-hint: <name> | done
 
 Work in worktree `<name>`, so this session's edits never collide with another session's.
 - Its folder:  `epic worktree path <name>` prints it.
-  - `.claude/worktrees/<name>`, or beside the repo (`../spell-app.worktrees/<name>`)
+  - `.claude/worktrees/<name>`, or beside the repo (`../<repo>.worktrees/<name>`)
     once its `.epic/config.json5` moves them (`worktreesFolder`, epic `epic-eject` P8).
 - The worktree, its branch and the session share one name.
 - `/epic` runs these steps too.
@@ -101,12 +101,12 @@ Work in worktree `<name>`, so this session's edits never collide with another se
          - every session listed through its linked session folder (`linkSessionFolders`)
        - a nested one:  the MAIN root (so every session is listed), then the worktree's root, `⎇ <name>`
      - `<pkg>`:  this session's window's.
-   - This isn't a package window (a worktree's ...):  `open` takes `spell-app`'s, the whole repo's window and its look.
+   - This isn't a package window (a worktree's ...):  `open` takes the whole repo's window and its look
+     (`epic config windows`, its `default`).
      - Never ask which package (Owen, 2026-10-07).
      - `--pkg <pkg>` only when Owen names one.
-   - `epic window` works before the worktree's `yarn install`.
-     - The `spell` link runs the MAIN checkout's CLI, which has its packages.
-     - `yarn window` didn't:  yarn runs no script before `yarn install`.
+   - `epic window` works before the worktree's install (`epic config installCommand`).
+     - `epic` is the plugin's, with its own packages.
    - It fails otherwise:  say so in one line, skip step 5, and do "Continue" now, in this window.
      - NEVER `code --add` / `-r`:  they restart the Claude panel, or target the focused window.
 5. Move the session there:  `epic window handoff <name> --prompt continue`.
@@ -119,7 +119,7 @@ Work in worktree `<name>`, so this session's edits never collide with another se
      then shows beside the session in the new window.
    - It fails:  say so in one line, and do "Continue" now, in this window.
 6. END THE TURN now, so the move happens at once.
-   - Nothing else this turn:  no `yarn install`, no exploring, no questions.
+   - Nothing else this turn:  no install, no exploring, no questions.
    - One line:  "isolated in worktree `<name>` (branch `<name>`);  moving to `⎇ <name>`:
      press enter on `continue` there".
    - Why:  the move waits for the turn to end, and Owen waits for the move.
@@ -145,7 +145,7 @@ The turn after step 6, whatever Owen sends (`continue`, typed in by the move, or
    - The log is `~/.spell/windows/handoffs/<session id>.log`.
    - Only after a move:  "Stay" skips this.
 2. No `node_modules/` at the worktree's root:  run the install command, `epic config installCommand`.
-   - `yarn install` here, a few seconds.
+   - In spell-app, `yarn install`:  a few seconds.
    - With `installOnCreate` on, the worktree hook already ran it, before the window opened (I2).
    - It prints an empty line (a repo with nothing to install, as `epic init` finds it):  skip this step.
 3. Check the session's name ("Session name" below).
@@ -218,9 +218,8 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      All from the worktree:  branches are shared, so `main` is visible here.
    - NEVER `git -C <main checkout>` or `cd` there:  a worktree session refuses both.
      `main` itself moves in step 7.
-   - First, the changelog:  add or move this branch's entry in the changelog
-     (the content folder's `guides/changelog.html`)
-     ("Changelog" in the root's `AGENTS.md`).
+   - First, the changelog, if the repo keeps one (its root `AGENTS.md` says where and how):
+     add or move this branch's entry.
      - It's shared content:  write it straight in, nothing to commit on the branch for it.
      - It's committed for you at the turn's end.
    - A worktree cut before 2026-10-04:  `epic shared migrate <name>` first.
@@ -231,8 +230,9 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - Else `git merge-tree --write-tree --name-only main HEAD`, which merges without touching any files:
      - exit 0, or conflicts ONLY in generated files:  `epic worktree merge-main`, then step 4.
        - No asking (Owen, 2026-10-03);  say in one line what it regenerated.
-       - Generated:  the root `.gitattributes`' `merge=binary` paths, and `yarn.lock`.
-         Those paths are bundles, site and brand assets, snapshots.
+       - Generated:  the files the checkout's `.epic/generators.json5` lists.
+         In spell-app:  the root `.gitattributes`' `merge=binary` paths (bundles, site and brand assets, snapshots),
+         and `yarn.lock`.
        - `merge-main` rebuilds each one both sides changed, from the merged source,
          with the command the checkout lists for it, in `.epic/generators.json5`.
          Then it commits the merge ("Merge main into `<name>`").
@@ -245,13 +245,13 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - Nothing unmerged:  skip this step and say "nothing to merge".
 3. Merge conflicts in other files (code, skills, docs prose).
    - These can't conflict any more:  the logs (`agents/*.md`), the changelog, the docs' home page and epic pages.
-     - They're shared content, untracked by spell-app.
+     - They're shared content, untracked by the repo.
      - One in conflict means a worktree not migrated yet (step 2).
    - AskUserQuestion, listing the conflicting files, options:
      - "Fix conflicts, then merge":
        - `epic worktree merge-main`:  it stops mid-merge, listing them
        - resolve each file, keeping BOTH sides' intent, and `git add` it
-       - run the checks of each package the conflicts touch (`yarn ts`, `yarn test` there), if installed
+       - run the checks of each package the conflicts touch (its `AGENTS.md` says which), if installed
        - `epic worktree merge-main --continue`:  regenerates the generated files and commits the merge
          (the answer counts as the ask), then step 4
      - "Exit anyway":  go on to step 4, unmerged

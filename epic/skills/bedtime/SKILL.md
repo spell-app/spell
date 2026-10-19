@@ -118,16 +118,17 @@ Owen writing in this session mid-run means he's awake:  bedtime mode ends there.
 - Go back to the root rules.
 
 Everything else stands:
-- `spell dev vscode` after each stage
-- the parser speed test, on parser changes
-- the three logs:
-  `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`, in the content folder (`epic config contentFolder`)
+- the repo's own rules (its `AGENTS.md`) and Owen's standing ones;  in spell-app, say:
+  - its VS Code extension rebuilt after each stage
+  - the parser speed test, on parser changes
+  - the three logs:
+    `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`, in the content folder (`epic config contentFolder`)
 - the epic page's rules
 
 ## 5. Each phase, in plan order
 
 1. `epic phase <name>#P<N> active`.
-2. Do the work, and run its verify and the touched packages' checks (`yarn ts`, `yarn test`).
+2. Do the work, and run its verify and the touched packages' checks (the repo's `AGENTS.md` says which).
 3. JUDGEMENT CALL (a choice Owen might have made differently):
    pick the option the plan and code best support, then record it, with the options and why:
 
@@ -151,7 +152,7 @@ Everything else stands:
        - a real fork he'd plausibly have picked differently AND that matters to him
          (cost, behaviour he'll notice, something hard to undo)
        - or it needs his answer before work can go on
-     - Following WWOD is one case of calm, not the only one.
+     - Following the repo's house style is one case of calm, not the only one.
      - The rule in full:  [the epic skill](../epic/SKILL.md), "5. Each phase", step 2.
    - The phase's "To review" line lists it by itself:  the tool writes it on every edit.
      Never hand-write a "Judgement calls:" line.

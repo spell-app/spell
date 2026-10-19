@@ -110,7 +110,9 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
        - the page's notes, after the last question:  `<epic-text-box type="notes">`
      - The page NEVER locks:  Owen sends partial answers, and sends again whenever he likes (2026-10-08).
    - a picture page:  delete the question sections and `<epic-send>`;  nothing to send
-3. Epic page:  `yarn vp fmt <page>` once it's written.
+3. In an epic:  format the page once it's written, as the engine's tools do:
+   `yarn vp fmt <its ABSOLUTE path>`, from spell-epic's root
+   ([epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Finishing a page", step 2).
 
 ### Rewriting a page Owen may have open
 
@@ -194,7 +196,8 @@ Any page you name to Owen (a details page, an epic page, any docs page):
   - Owen restarts it when no other session needs it:
     `epic server stop`, then `epic server ensure`, in the checkout whose server it is.
 - "The page server restarted since this page loaded":  Owen reloads the page, then sends again.
-- `show` couldn't reach VS Code:  `spell dev vscode`, and reload the window.
+- `show` couldn't reach VS Code:  spell-epic's VS Code extension is missing or old.
+  - Install it as [its README](${CLAUDE_PLUGIN_ROOT}/vscode/README.md) says, then reload the window.
   Meanwhile the page's URL (`epic server url <ABSOLUTE path>`) works in any browser.
 
 ## Commands (`epic ask ...`, from anywhere in the repo)

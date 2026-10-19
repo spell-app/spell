@@ -16,7 +16,7 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   "updated" date consistent, checks the markup before writing, and locks the file against parallel agents.
   Hand-edit only prose: the summary, Overview, phase bodies, item details.
   - in a SPLIT doc (see "Parts"; every new doc), a body's prose is in its part file, `parts/<id>.html`: edit it
-    there, at its real path (`/Users/owen/www/spell-app/spell-app-dev/epics/<name>/parts/<id>.html`)
+    there, at its real path (`<content folder>/epics/<name>/parts/<id>.html`;  `epic config contentFolder`)
 - Write for Owen coming back COLD (2026-10-04; the details skill's "Writing for Owen" is the same rule): he runs
   5+ epics, and reads an item weeks later, from another session. Enough that he can pick up ONE phase or item on
   its own. NOT caveman:
@@ -28,8 +28,8 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
     table of values
   - ids explained: "the inbox file decision (D1)", never a bare `D1`
   - identifiers, paths and numbers exact, but where the reader can reach them, not in the running text (next rule)
-- Plain text, plain paths (Owen, 2026-10-10, epic `airplane`: "Text is waaaay to dense to parse quickly"; WWOD §6
-  › "Plain text, plain paths", whose before / after is in `agents/wwod/writing.md`):
+- Plain text, plain paths (Owen, 2026-10-10, epic `airplane`: "Text is waaaay to dense to parse quickly"; in
+  spell-app, WWOD §6 › "Plain text, plain paths", whose before / after is in `agents/wwod/writing.md`):
   - say what it MEANS: a plain lead line saying what it adds up to, then one fact per bullet
   - at most two code spans in a sentence; the exact settings and values go in a folded `<epic-code>`, or a tooltip
   - no file path in the prose: the NAME, its path its tooltip (the browser's own, `title`):
@@ -37,7 +37,7 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
     click still opens it; and it turns `<code>name</code>, <code>path</code>` or `<code>name</code>
     (<code>path</code>)`, handed to it, into that ("The way in", `PLAN-DOC.md`)
   - no insider shorthand: "reads JSX the way app and ui do", not `jsx: "preserve"`
-  - `spell dev docs fuss <page>` finds what's left: `path-in-prose`, `code-dense`, `dense`
+  - `epic pages fuss <page>` finds what's left: `path-in-prose`, `code-dense`, `dense`
 - Questions, issues, judgement calls and decisions end with a **Net effect** (Owen, 2026-10-04): what concretely
   changes, one bullet each:
 
@@ -187,7 +187,7 @@ A SAGA PAGE is a saga's page, built of the same elements as an epic page (epic `
   - With no text it draws the short form; a phase by number (`7`, `P7`) or by name (its title's slug).
   - `saga` isn't needed with an `epic`.
   - A plain link may use the SHORT ADDRESS instead: `<a href="SAGA:/drawable-spell/python-target#T1">`, rewritten
-    to the page by the docs runtime. Owen types the same in chat, and `spell dev docs open | link SAGA:/...` opens
+    to the page by the docs runtime. Owen types the same in chat, and `epic pages open | link SAGA:/...` opens
     it.
   - `epic check --links` and `doc-links.js --check` fail on a saga, page or id that isn't there, and on an epic under a
     saga it doesn't name.
@@ -257,8 +257,8 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
   - it's a real fork he'd plausibly have picked differently, AND it matters to him (cost, behaviour he'll notice,
     something hard to undo)
   - it needs his answer before work can go on
-  - Following WWOD is one case of calm, not the only one. `calm <name>#<id> [<id>...] [--loud]` changes one already
-    written, as a click on its id chip does.
+  - Following the repo's house style is one case of calm, not the only one.
+    `calm <name>#<id> [<id>...] [--loud]` changes one already written, as a click on its id chip does.
 - Review marks (`/epic review`, and any session that talks an item through with Owen; `review`, `defer`, `queue`,
   `unqueue` write them):
   - reviewed: gone through with Owen, that day. Deferred: put off for now; still not reviewed. Queued, with
@@ -520,7 +520,7 @@ WAKING the epic (epic `epic-workflow` P16): Send, Review Now or Do Now pressed w
 server wake the epic, inside that request (no process runs while Owen isn't working; `ReviewStart.changeAndWake()`):
 
 - who, first match wins: the ONE running session titled for the epic (`🚧 <epic>`) gets `/epic review <epic>` typed
-  in; else the epic's worktree window gets a new session tab with it typed in (opened with `spell dev window launch`
+  in; else the epic's worktree window gets a new session tab with it typed in (opened with `epic window launch`
   when closed); else (no worktree: an epic run in the main checkout, a future epic) a new session in a main window.
   Never a new worktree. Owen presses Enter: the window bridge only types
 - the page says what it did, in its notice and in the orange pill under the review line, until a session listens:
@@ -741,7 +741,7 @@ command prints the usage.
 | `decisions <name> [--json]`                                                                                                                   | what the epic page settled:  phases' Done lists and Updated notes, items' status, chosen option and answer (`--json`:  their text).  For `/docs-check`                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `summaries <file.html> ...`                                                                                                                   | `summary --json` of each doc, by PATH (a worktree's too), as one JSON object `{ <file>: summary \| { error } }`; for `/epics`                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `check <name> [--no-browser] [--links]`                                                                                                       | ids unique, every `#id` link resolves, every phase has a status, a split doc's parts there (checked whole); its file links, printed as `LINK:`, failing only with `--links`; then `check-spell.js`                                                                                                                                                                                                                                                                                                                                                                                |
-| `open <name> [--review]`                                                                                                                      | show the doc rendered in VS Code's doc preview (the right side bar's "Spell Docs" tab;  `--review`:  its "Review" tab); needs the spell extension (`spell dev vscode`)                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `open <name> [--review]`                                                                                                                      | show the doc rendered in VS Code's doc preview (the right side bar's "Epic Docs" tab;  `--review`:  its "Review" tab); needs spell-epic's VS Code extension                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `inbox <name> [--json]`                                                                                                                       | the marks Owen left on the page (`<name>.inbox.json5`), by action, with their items' titles, sent or not; the `now` queue, agents at work, the session listening                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `inbox <name> listen [--session <id>]` / `unlisten`                                                                                           | this session (`$CLAUDE_CODE_SESSION_ID`) waits on the inbox / stopped: the page tells Owen whether anyone is listening                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `inbox <name> wait [--timeout <s>] [--json]`                                                                                                  | block (polls every 1s, default 3300s) until there's work, print it, exit 0; timeout: exit 2. Work: requests for now (taken off the queue, their items marked working) and a send not yet handed over (its marks by action)                                                                                                                                                                                                                                                                                                                                                        |

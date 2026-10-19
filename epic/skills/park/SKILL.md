@@ -141,10 +141,10 @@ Used by `/unpark` (after its window check), and by `/wait-for` when the wait end
      - Packages moved or renamed on `main` show up as rename / delete conflicts.
        Follow the move:  carry this branch's edits to the new path, and update its imports to the new aliases.
 3. Checks:
-   - `yarn install`, when either:
-     - the merge changed `package.json` workspaces, or any `yarn.lock`
+   - the install command (`epic config installCommand`;  spell-app's `yarn install`), when either:
+     - the merge changed the packages or their lock file (spell-app:  `package.json` workspaces, any `yarn.lock`)
      - there's no `node_modules/`
-   - `yarn ts` and `yarn test` in each package this branch touches
+   - the checks of each package this branch touches (its `AGENTS.md` says which;  spell-app's `yarn ts`, `yarn test`)
      - those packages:  `git diff --name-only main...HEAD`
 4. Can't resolve a conflict (keeping both sides needs Owen's call), or checks fail on this branch's code:
    - `git merge --abort` if still merging
