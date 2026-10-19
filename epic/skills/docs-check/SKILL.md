@@ -26,13 +26,13 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
       - A turn commits every session's edits,
         and a tool run over every page (`docs offline --fix`) changes them all.
       - Counted;  only `--json` lists them.
-    - and its changelog entry:  the `<name>` section of [the changelog](guides/changelog.html)
+    - and its changelog entry:  the `<name>` section of the changelog (the content folder's `guides/changelog.html`)
   - `epic decisions <name> [--json]`:  what the docs must agree with
     - each phase:  its Done list (what was built) and its Updated notes (how the plan changed)
     - each item:  its status, its chosen option, its answer;  `--json` adds its whole current text
 - Not `/fussbudget`:  that one fixes how text READS (WWOD §6);  this one fixes what it SAYS.
   A sentence it rewrites still follows WWOD §6
-  ([WWOD.md](agents/wwod/WWOD.md), and its before / afters in [writing.md](agents/wwod/writing.md)).
+  (the content folder's `agents/wwod/WWOD.md`, and its before / afters in `agents/wwod/writing.md`).
 
 ## Forms
 

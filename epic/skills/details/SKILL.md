@@ -11,7 +11,7 @@ A DETAILS PAGE:  a small page that explains one decision.
 - Owen picks on the page, and clicks Send.
 - The page server writes his answer beside the page,
   and a waiter running in the background exits with it, which wakes this session.
-- Docs:  [the details guide](guides/details.html).
+- Docs:  the details guide, the content folder's `guides/details.html`.
 
 - Explain as [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Explaining a question or issue", says:
   - plain words, coined words defined

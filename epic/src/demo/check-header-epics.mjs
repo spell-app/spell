@@ -48,6 +48,7 @@ if (!process.env.CHECK_HEADER_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
+const { EpicConfig } = await import("../config/EpicConfig.ts")
 
 const args = process.argv.slice(2)
 const docs = args.flatMap((arg, index) => (args[index - 1] === "--doc" ? [arg] : []))
@@ -280,7 +281,7 @@ function readFacts(width) {
 
 /** Copy epic page `doc` (and its parts) into the content folder, as they are;  never its inbox, agents or details. */
 function copyDoc(doc) {
-  const from = join(ROOT, "epics", doc)
+  const from = join(EpicConfig.contentOf(ROOT), "epics", doc)
   const skeleton = join(from, `${doc}.plan.html`)
   if (!existsSync(skeleton)) {
     console.error(`check-header-epics:  no ${skeleton}`)

@@ -121,7 +121,7 @@ Everything else stands:
 - `spell dev vscode` after each stage
 - the parser speed test, on parser changes
 - the three logs:
-  [PAPERCUTS.md](agents/PAPERCUTS.md), [SUSPECTED-BUGS.md](agents/SUSPECTED-BUGS.md), [CODE-DEBT.md](agents/CODE-DEBT.md)
+  `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`, in the content folder (`epic config contentFolder`)
 - the epic page's rules
 
 ## 5. Each phase, in plan order

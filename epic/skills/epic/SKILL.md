@@ -450,7 +450,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      - Both rewrite in place, uncommitted:
        the branch's diff waits for Owen in Source Control, before the phase's commit.
   2. Then the epic's guide (below), written from the CLEANED epic page, to the same rules:
-     WWOD §6 and [writing.md](agents/wwod/writing.md).
+     WWOD §6 and writing.md (the content folder's `agents/wwod/writing.md`).
   3. Last, the checker, on both:
      - `epic pages fuss --branch`
      - `epic pages fuss <the epic's guide>`:  it's shared content, not in the branch's diff
@@ -464,7 +464,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
   - Then `epic pages index`.
     The index is shared too:  `epic` keeps the epic's own card current from any checkout.
 - The epic page stays in `epics/` as the record:  every phase done.
-- Changelog:  write the epic's entry straight into the shared [changelog](guides/changelog.html)
+- Changelog:  write the epic's entry straight into the shared changelog, the content folder's `guides/changelog.html`
   ("Changelog" in the root's `AGENTS.md`).
   - It links the epic page and the guide.
   - Under "3. Merged into main" if "Finish" below merges it, else "2. In worktrees".
@@ -493,7 +493,8 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
 - Add Details and "revisit now":  by background agents.
 - "Revisit soon":  answered one at a time.
 - EVERY answer goes INTO its item, on the page;  the chat only links them (Q3 of `windows-and-review`).
-- No modal walk through items any more (epic `review-review`, 2026-10-04;  [its epic page](epics/review-review/review-review.plan.html), 1.1-1.2).
+- No modal walk through items any more (epic `review-review`, 2026-10-04;  its epic page, 1.1-1.2:
+  `epics/review-review/review-review.plan.html` in the content folder).
 
 - Runs from ANY window, `main` or a worktree.
   - The prompt hook lets `/epic review` through, and never renames the session.
@@ -656,7 +657,7 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
    - He answers on the page (Revisit again), or says so in chat.
      A quick yes / no:  a modal.
    - A call made name by name (he wants each name's context before a rule's renames go in):
-     a CHOICE page ([the Choice Pages guide](guides/syntax-choices.html)).
+     a CHOICE page (the Choice Pages guide, the content folder's `guides/syntax-choices.html`).
      - `epic choices new <slug> --epic <name> --rows <rows.json5>`.
      - Then `show <slug> --wait`, in the background.
    - "picks B · <card>, asks:  <note>" (a pick with a revisit, "B, but ..."):  `apply` leaves it.

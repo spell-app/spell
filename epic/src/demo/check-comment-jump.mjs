@@ -52,6 +52,7 @@ if (!process.env.CHECK_JUMP_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
+const { EpicConfig } = await import("../config/EpicConfig.ts")
 const { pageFile } = await import("../tools/pages.js")
 
 const args = process.argv.slice(2)
@@ -67,7 +68,7 @@ pageFile(guide)
 
 // the epic page's copy:  its skeleton and parts, never its inbox (as deep as the real one:  its links need no change)
 const CONTENT = join(HERE, "shots", "jump")
-const source = join(ROOT, "epics", epic)
+const source = join(EpicConfig.contentOf(ROOT), "epics", epic)
 if (!existsSync(join(source, `${epic}.plan.html`))) {
   console.error(`check-comment-jump:  no epic page ${join(source, `${epic}.plan.html`)}`)
   process.exit(2)

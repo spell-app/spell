@@ -15,13 +15,6 @@ __screenshots__/
 # the plan-doc checks' screenshots (`src/demo/`)
 /src/demo/shots/
 
-# the shared content folder's folders, linked in at the root (`epic shared link`, .epic/config.json5):  spell-app.epics'
-/epics
-/guides
-/pages
-/sagas
-/agents
-
 # the VS Code window files (`epic window`, src/window.mjs):  per machine, written when missing -- the repo's window
 # (`workspaces/spell-epic.code-workspace`) by `epic window open | launch | init`, a worktree's (`workspaces/ongoing/`)
 # by `open`.  Its `windowsFolder` (.epic/config.json5) keeps them here (epic `epic-engine` I15, J3;  `epic-eject` P13)

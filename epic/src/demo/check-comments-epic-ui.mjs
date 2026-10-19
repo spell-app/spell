@@ -88,9 +88,8 @@ if (existsSync(inbox(element))) {
   process.exit(2)
 }
 
-const served = await DemoServer.start({ content: join(SHOTS, "content") })
-served.server.web.files.mount({ prefix: "/components/epics/_assets/", dir: SETS_BUNDLE })
-served.server.web.files.mount({ prefix: "/components/epics/", dir: docs })
+// the server mounts Epic UI itself (epic `epic-eject` I21):  told to serve the scratch copy, so no real inbox is written
+const served = await DemoServer.start({ content: join(SHOTS, "content"), epicUi: docs })
 const problems = []
 const browser = await chromium.launch()
 

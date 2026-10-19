@@ -79,7 +79,16 @@ export class DemoServer {
    * Serve `content` (made if missing) on a free port near `port`, the real content folder's folders beside it;
    * the server, its address, and what it was asked to wake.
    */
-  static async start({ content, port = 47_600 + Math.floor(Math.random() * 300) }: { content: string; port?: number }) {
+  static async start({
+    content,
+    port = 47_600 + Math.floor(Math.random() * 300),
+    epicUi
+  }: {
+    content: string
+    port?: number
+    /** the folder to serve at `/components/epics/`:  a check's scratch copy of `src/docs/` (`EpicServer`'s `epicUi`) */
+    epicUi?: string
+  }) {
     const scratch = mkdtempSync(join(tmpdir(), "epic-demo-"))
     const windows = join(scratch, "windows")
     mkdirSync(windows)
@@ -117,7 +126,8 @@ export class DemoServer {
     const made = new EpicServer({
       home: env.SPELL_EPIC_HOME,
       engine: ENGINE,
-      repos: [{ name: "demo", checkout: ENGINE, content: folder, prefix: repoPrefixFor("demo"), isDefault: true }]
+      repos: [{ name: "demo", checkout: ENGINE, content: folder, prefix: repoPrefixFor("demo"), isDefault: true }],
+      epicUi
     })
     for (const [name, dir] of sharedFolders()) made.web.files.mount({ prefix: `/${name}/`, dir })
     const server = await made.start({ port, pidFile: false })
