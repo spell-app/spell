@@ -5,9 +5,11 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readlinkSync,
   realpathSync,
   renameSync,
   rmSync,
+  symlinkSync,
   writeFileSync
 } from "fs"
 import { tmpdir } from "os"
@@ -264,6 +266,55 @@ describe("linkEngine()", () => {
     rmSync(join(repo, "spell-epic"), { recursive: true })
     put(".epic/config.json5", '{ "engineFolder": "" }\n', repo)
     expect(shared.linkEngine(repo)).toBeUndefined()
+  })
+})
+
+describe("linkContentBeside()", () => {
+  // a repo whose worktrees and content folder are both beside it (epic `epic-eject` T31)
+  const top = join(TEMP, "beside")
+  const repo = join(top, "spell-app")
+  const content = join(top, "spell-app.epics")
+  const trees = join(top, "spell-app.worktrees")
+  const link = join(trees, "spell-app.epics")
+  mkdirSync(content, { recursive: true })
+  mkdirSync(repo, { recursive: true })
+  git(repo, "init", "-q", "-b", "main")
+  put(
+    ".epic/config.json5",
+    '{ "contentFolder": "../spell-app.epics", "worktreesFolder": "../spell-app.worktrees" }\n',
+    repo
+  )
+  const shared = new Shared({ checkout: repo, config: { main: repo, dir: content, worktrees: [trees], links: [] } })
+
+  test("no worktrees folder yet:  nothing linked", () => {
+    expect(shared.linkContentBeside()).toBeUndefined()
+  })
+
+  test("linked, by a relative path:  ../spell-app.epics from a worktree's root reaches the content folder;  again:  ok", () => {
+    mkdirSync(join(trees, "seo"), { recursive: true })
+    const path = "../spell-app.worktrees/spell-app.epics"
+    expect(shared.linkContentBeside()).toEqual({ path, state: "missing", action: "linked" })
+    expect(readlinkSync(link)).toBe("../spell-app.epics")
+    expect(realpathSync(join(trees, "seo", "../spell-app.epics"))).toBe(content)
+    expect(shared.linkContentBeside()).toEqual({ path, state: "ok", action: "ok" })
+  })
+
+  test("a dangling link is made again;  a real folder there is never removed", () => {
+    rmSync(link)
+    symlinkSync("../gone", link)
+    expect(shared.linkContentBeside()).toMatchObject({ state: "dangling", action: "linked" })
+    expect(realpathSync(link)).toBe(content)
+    rmSync(link)
+    mkdirSync(link)
+    expect(shared.linkContentBeside()).toMatchObject({ state: "real", action: "diverged" })
+    expect(lstatSync(link).isDirectory()).toBe(true)
+    rmSync(link, { recursive: true })
+  })
+
+  test("worktrees nested in the checkout (.claude/worktrees):  nothing linked", () => {
+    put(".epic/config.json5", '{ "contentFolder": "../spell-app.epics" }\n', repo)
+    mkdirSync(join(repo, ".claude", "worktrees"), { recursive: true })
+    expect(shared.linkContentBeside()).toBeUndefined()
   })
 })
 

@@ -12,6 +12,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readlinkSync,
   realpathSync,
   rmSync,
   writeFileSync
@@ -81,6 +82,25 @@ describe("worktree hook", () => {
   test("an agent's worktree, from a session in a worktree beside the repo, is named for it", () => {
     const made = hook("create", { name: "agent-a1b2", cwd: join(BESIDE, "seo") })
     expect(made.stdout).toBe(join(BESIDE, "seo-agent-a1b2"))
+  })
+
+  test("a content folder beside the repo:  the worktrees' folder gets ONE link to it (T31), its folders in the worktree", () => {
+    const content = join(TEMP, "repo.epics")
+    mkdirSync(join(content, "agents"), { recursive: true })
+    git(content, "init", "-q", "-b", "main")
+    config({ contentFolder: "../repo.epics", sharedFolders: ["agents"] })
+    const made = hook("create", { name: "docs", cwd: MAIN })
+    expect(made.status).toBe(0)
+    const link = join(BESIDE, "repo.epics")
+    expect(lstatSync(link).isSymbolicLink()).toBe(true)
+    expect(readlinkSync(link)).toBe("../repo.epics")
+    // the text docs write from the main checkout's root reaches the content folder from the worktree's too
+    expect(realpathSync(join(made.stdout, "../repo.epics"))).toBe(content)
+    expect(realpathSync(join(made.stdout, "agents"))).toBe(join(content, "agents"))
+    // a second worktree:  the same link, left as it is
+    expect(hook("create", { name: "docs2", cwd: MAIN }).status).toBe(0)
+    expect(readlinkSync(link)).toBe("../repo.epics")
+    config({})
   })
 
   test("linkSessionFolders:  the new worktree's saved-session folder is a link to main's;  remove takes it away", () => {

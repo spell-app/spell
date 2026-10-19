@@ -31,6 +31,9 @@
  * - Then, for a NEW worktree, in this order:
  *   1. links the shared content in (this plugin's `epic shared link`, epic `shared-content`),
  *      when the shared repo exists:  a failure there is a warning, never a failed hook
+ *      - worktrees beside the repo:  that also makes the worktrees' folder's ONE link to the content folder,
+ *        `spell-app.worktrees/spell-app.epics` (`Shared.linkContentBeside()`, epic `epic-eject` T31), so the docs'
+ *        `../spell-app.epics/...` links resolve from a worktree as from the main checkout
  *   2. `linkSessionFolders` on:  links the worktree's saved-session folder to the main checkout's (`SessionFolders`),
  *      before any session saves there;  a folder it can't link is a warning
  *   3. `installOnCreate` on:  runs `installCommand` in it (`installTimeout` seconds at most),
@@ -122,6 +125,7 @@ class Worktree {
 
   /**
    * Link the shared content into worktree `path`:  this plugin's `epic shared link`, run in the worktree.
+   * - and the worktrees' folder's link to the content folder, when it's beside the repo (`linkContentBeside()`)
    * - only when the shared repo exists (`contentFolder` in `.epic/config.json5`):
    *   before the cutover (epic `shared-content`) there's nothing to link
    * - its output goes to stderr (stdout is the worktree's path);  a failure is a warning

@@ -4,6 +4,12 @@
  * - Registry entries go in a temp folder (`SPELL_WINDOWS_DIR`), never `~/.spell/windows`.
  * - The "window" is a stand-in:  our own parent pid (an ancestor, like a session's extension host), a `sleep`
  *   child (alive, but not an ancestor), or a pid that has exited.
+ * - The repo the windows are for is a temp one (`EPIC_CHECKOUT`, set before the script loads:  it reads the config
+ *   once), with no `.epic/config.json5` settings of its own:  the defaults, spell-app's OLD layout (worktrees nested
+ *   in `.claude/worktrees`, the main root in every window).
+ *   - Never the checkout the tests run in:  its config moves worktrees beside the repo (spell-epic's since 2ad9973,
+ *     spell-app's since epic `epic-eject` T18), and a session's `EPIC_CHECKOUT` picks whichever it's in.
+ *   - The layout beside the repo has a test of its own (epic-eject P8), in a child process.
  */
 import assert from "node:assert/strict"
 import { spawn, spawnSync } from "node:child_process"
@@ -13,7 +19,16 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { after, beforeEach, test } from "node:test"
 
-import {
+/** The repo the windows are for:  a temp main checkout, its config the defaults. */
+const repo = join(mkdtempSync(join(tmpdir(), "spell-windows-repo-")), "spell-app")
+mkdirSync(join(repo, ".git"), { recursive: true })
+mkdirSync(join(repo, ".epic"))
+writeFileSync(join(repo, ".epic", "config.json5"), "{}\n")
+// a checkout with a `package.json`, as spell-app is:  its links sit beside it
+writeFileSync(join(repo, "package.json"), '{ "name": "spell-app" }\n')
+process.env.EPIC_CHECKOUT = repo
+
+const {
   LOOKS,
   Window,
   claudeSessions,
@@ -28,7 +43,7 @@ import {
   withoutStay,
   withStay,
   worktreeOf
-} from "../src/window.mjs"
+} = await import("../src/window.mjs")
 
 /** The temp registry folder:  spell-epic's bridges' (`Window.registry`). */
 const dir = mkdtempSync(join(tmpdir(), "spell-windows-"))
@@ -55,6 +70,7 @@ beforeEach(() => {
 after(() => {
   sleeper.kill()
   rmSync(dir, { recursive: true, force: true })
+  rmSync(dirname(repo), { recursive: true, force: true })
 })
 
 test("no registry entries:  no window", () => {
