@@ -1688,6 +1688,11 @@
           "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  Owen flips it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `plan-doc inbox apply`)."
         },
         {
+          "name": "failed",
+          "kind": "string",
+          "description": "A test that FAILED in Owen's test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It stays open;  gone once a run passes it."
+        },
+        {
           "name": "source",
           "kind": "string",
           "description": "Its details' part file (`parts/q7.html`), loaded into its children the first time it opens (its children without a `slot` are a placeholder the part replaces)."
@@ -1783,6 +1788,10 @@
         {
           "name": "overnight",
           "description": "With `overnight`:  the bed icon at the line's end, `made overnight`."
+        },
+        {
+          "name": "failed",
+          "description": "With `failed`:  a red \"failed → I42\" at its line's end, linking the issue the failure was filed as (epic `epic-engine` P4)."
         },
         {
           "name": "git",
@@ -1965,6 +1974,26 @@
           "key": "tipPick",
           "text": "pick {letter}",
           "description": "Id chip tooltip:  Owen's pick, as `{chosen}`."
+        },
+        {
+          "key": "failedMark",
+          "text": "failed → {id}",
+          "description": "A test that failed in a test run (`failed`):  its line's red mark, linking the issue."
+        },
+        {
+          "key": "failedMarkNone",
+          "text": "failed",
+          "description": "The same, with no issue named."
+        },
+        {
+          "key": "failedTip",
+          "text": "Failed in your test run:  filed as {id}",
+          "description": "The failed mark's tooltip."
+        },
+        {
+          "key": "failedTipNone",
+          "text": "Failed in your test run",
+          "description": "The failed mark's tooltip, no issue."
         },
         {
           "key": "madeOvernight",
@@ -3126,6 +3155,10 @@
         {
           "name": "agents",
           "description": "The running agents (an `<epic-agents>`, epic `skillz` P3), right before its blocks:  only while an agent runs."
+        },
+        {
+          "name": "test-run",
+          "description": "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the To test section's Start testing, or the address's `?test=1` (`?test=1&all=1`:  one epic of a run across every epic, `epic test --all`).  Its blocks, toolbar, review line and meta lines hide meanwhile."
         }
       ],
       "states": [
@@ -3136,6 +3169,10 @@
         {
           "name": "commits",
           "description": "Every commit shows (the git toggle is on)."
+        },
+        {
+          "name": "testing",
+          "description": "Test mode (epic `epic-engine` P4):  a test run shows over its blocks, until Esc or Done testing.  Page state, never in a doc."
         }
       ],
       "texts": [
@@ -4048,6 +4085,11 @@
           "name": "ui-filter",
           "detail": "{ states: string[] | undefined }",
           "description": "Its state filter changed:  its chips, `show all`, or the page's toolbar (`showStates()`).  `states` the ones showing;  none:  every state."
+        },
+        {
+          "name": "epic-test-start",
+          "detail": "{}",
+          "description": "The To test section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
         }
       ],
       "parts": [
@@ -4110,6 +4152,10 @@
         {
           "name": "new-list",
           "description": "A Todos or Questions section's new items waiting to be made:  dashed until sent, then outlined."
+        },
+        {
+          "name": "start-testing",
+          "description": "The To test section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its open tests one at a time (`epic-test-start`).  Only while the page is reviewed and a test is open."
         }
       ],
       "states": [
@@ -4216,6 +4262,16 @@
           "key": "addNew",
           "text": "New {kind}",
           "description": "An item section's comment-dots button on its title:  its name and tooltip."
+        },
+        {
+          "key": "startTesting",
+          "text": "Start testing · {count}",
+          "description": "The To test section's button on its title (epic `epic-engine` P4):  how many tests are open."
+        },
+        {
+          "key": "startTestingTip",
+          "text": "Go through the {count} open tests one at a time, answering each on the page",
+          "description": "Start testing's tooltip."
         },
         {
           "key": "newTodo",
@@ -4715,6 +4771,335 @@
       ]
     },
     {
+      "tag": "epic-test-run",
+      "name": "epic-test-run",
+      "folder": "epic-test-run",
+      "mainTag": "epic-test-run",
+      "main": true,
+      "page": true,
+      "href": "epic-test-run.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "test run",
+        "testing",
+        "walkthrough",
+        "start testing",
+        "to test",
+        "hand checks"
+      ],
+      "description": "A test run (epic `epic-engine` P4):  the open tests of the `<epic-page>` around it, ONE big card at a time -- the test's title and id, its Step (with buttons for the pages it says to open), Should, an Example screenshot (click to zoom) and If not -- answered Passed, Failed (a note and a pasted screenshot), Skip or Not now, each a review mark (`{ action: \"test\", result }`) in the page's inbox.  \"4 of 9\" and a thin bar say how far along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  Drawn by `<epic-page>` over its blocks in test mode (the To test section's Start testing, or `?test=1` on the page's address);  written in a doc only as an example, inside an `<epic-page>`.",
+      "noun": "test run",
+      "attributes": [
+        {
+          "name": "all",
+          "kind": "boolean",
+          "description": "The run is one epic of a run across every epic (`epic test --all`, the address's `?test=1&all=1`):  the summary card leads on to the next epic with open tests, \"Next:  <epic> (n tests)\"."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "epic-test-done",
+          "detail": "{}",
+          "description": "Owen left the run:  Esc, or \"Done testing\".  `<epic-page>` shows its blocks again."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The run:  its head, the progress bar, then the card."
+        },
+        {
+          "name": "head",
+          "description": "Its head:  \"Testing\", \"4 of 9\", and Done testing."
+        },
+        {
+          "name": "progress",
+          "description": "The thin bar under the head:  how many tests are answered (`<ui-progress>`)."
+        },
+        {
+          "name": "card",
+          "description": "The current test's card, or the summary's."
+        },
+        {
+          "name": "answers",
+          "description": "The four answers, ONE button group:  Passed (green), Failed (red), Skip (grey), Not now (yellow)."
+        },
+        {
+          "name": "failure",
+          "description": "Under the answers once Failed:  the note box and the screenshot's paste and drop area."
+        },
+        {
+          "name": "moves",
+          "description": "Back and Next, at the card's foot."
+        },
+        {
+          "name": "summary",
+          "description": "The summary card:  the counts, Send results, the next epic."
+        }
+      ],
+      "states": [
+        {
+          "name": "summary",
+          "description": "The summary card shows:  past the last test."
+        }
+      ],
+      "texts": [
+        {
+          "key": "run",
+          "text": "Test run",
+          "description": "The run's region, spoken."
+        },
+        {
+          "key": "testing",
+          "text": "Testing",
+          "description": "The head's title."
+        },
+        {
+          "key": "of",
+          "text": "{at} of {total}",
+          "description": "Where the run is:  \"4 of 9\"."
+        },
+        {
+          "key": "answered",
+          "text": "{count} of {total} answered",
+          "description": "The progress bar's name and tooltip."
+        },
+        {
+          "key": "done",
+          "text": "Done testing",
+          "description": "The head's button:  leave the run (Esc)."
+        },
+        {
+          "key": "doneTip",
+          "text": "Leave the run (Esc):  your answers stay",
+          "description": "Done testing's tooltip."
+        },
+        {
+          "key": "step",
+          "text": "Step",
+          "description": "The card's Step:  what to do."
+        },
+        {
+          "key": "should",
+          "text": "Should",
+          "description": "The card's Should:  what should happen."
+        },
+        {
+          "key": "example",
+          "text": "Example",
+          "description": "The card's Example:  a screenshot Claude took, or a line."
+        },
+        {
+          "key": "ifNot",
+          "text": "If not",
+          "description": "The card's If not:  what to tell Claude."
+        },
+        {
+          "key": "loading",
+          "text": "Loading the test's details ...",
+          "description": "The Step while the test's part file loads."
+        },
+        {
+          "key": "noDetails",
+          "text": "This test has no details:  its title is the step.",
+          "description": "The Step of a test with neither fields nor prose."
+        },
+        {
+          "key": "zoom",
+          "text": "Zoom {alt}",
+          "description": "An example screenshot, its button's name and tooltip."
+        },
+        {
+          "key": "openAction",
+          "text": "Opens {href}",
+          "description": "A Step's action button, its tooltip."
+        },
+        {
+          "key": "failedBefore",
+          "text": "failed before",
+          "description": "On the card of a test a run failed before."
+        },
+        {
+          "key": "deferredOn",
+          "text": "not now {date}",
+          "description": "On the card of a test put off before."
+        },
+        {
+          "key": "answers",
+          "text": "Your answer",
+          "description": "The answers' group, spoken."
+        },
+        {
+          "key": "passed",
+          "text": "Passed",
+          "description": "Answer:  it did what it should."
+        },
+        {
+          "key": "failed",
+          "text": "Failed",
+          "description": "Answer:  it didn't;  a note and a screenshot follow."
+        },
+        {
+          "key": "skip",
+          "text": "Skip",
+          "description": "Answer:  it no longer applies;  Claude closes it."
+        },
+        {
+          "key": "notnow",
+          "text": "Not now",
+          "description": "Answer:  can't do it yet;  it stays open, last next run."
+        },
+        {
+          "key": "passedTip",
+          "text": "It did what it should (P)",
+          "description": "Passed's tooltip."
+        },
+        {
+          "key": "failedTip",
+          "text": "It didn't:  say what went wrong (F)",
+          "description": "Failed's tooltip."
+        },
+        {
+          "key": "skipTip",
+          "text": "It no longer applies:  Claude closes it (S)",
+          "description": "Skip's tooltip."
+        },
+        {
+          "key": "notnowTip",
+          "text": "Can't do it yet:  it stays open, last next run (N)",
+          "description": "Not now's tooltip."
+        },
+        {
+          "key": "unsent",
+          "text": "not sent yet",
+          "description": "A chosen answer's state, before Send."
+        },
+        {
+          "key": "sent",
+          "text": "sent",
+          "description": "A chosen answer's state, once sent."
+        },
+        {
+          "key": "notServed",
+          "text": "Not served by the page server:  answers can't be saved here.",
+          "description": "Over the answers, while the page isn't reviewed (`file://`, no token)."
+        },
+        {
+          "key": "note",
+          "text": "What went wrong?  Claude files it as an issue",
+          "description": "The failure's note box."
+        },
+        {
+          "key": "noteLabel",
+          "text": "What went wrong with {id}",
+          "description": "The failure's note box, spoken."
+        },
+        {
+          "key": "paste",
+          "text": "Paste a screenshot (⌘V) or drop one here",
+          "description": "The failure's screenshot area, empty."
+        },
+        {
+          "key": "saving",
+          "text": "Saving the screenshot ...",
+          "description": "The screenshot area while it uploads."
+        },
+        {
+          "key": "tooBig",
+          "text": "That screenshot is over 8 MB:  crop it first.",
+          "description": "A notice:  too big."
+        },
+        {
+          "key": "notImage",
+          "text": "Only an image goes here.",
+          "description": "A notice:  something else was dropped."
+        },
+        {
+          "key": "removeShot",
+          "text": "Remove the screenshot",
+          "description": "The screenshot's ×."
+        },
+        {
+          "key": "back",
+          "text": "‹ Back",
+          "description": "Back to the test before (←)."
+        },
+        {
+          "key": "next",
+          "text": "Next ›",
+          "description": "On to the next test, or the summary (→)."
+        },
+        {
+          "key": "backTip",
+          "text": "The test before (←)",
+          "description": "Back's tooltip."
+        },
+        {
+          "key": "nextTip",
+          "text": "The next test (→)",
+          "description": "Next's tooltip."
+        },
+        {
+          "key": "summaryTitle",
+          "text": "{total} tests gone through",
+          "description": "The summary card's title."
+        },
+        {
+          "key": "countPassed",
+          "text": "{count} passed",
+          "description": "A summary count."
+        },
+        {
+          "key": "countFailed",
+          "text": "{count} failed",
+          "description": "A summary count."
+        },
+        {
+          "key": "countSkip",
+          "text": "{count} skipped",
+          "description": "A summary count."
+        },
+        {
+          "key": "countNotnow",
+          "text": "{count} not now",
+          "description": "A summary count."
+        },
+        {
+          "key": "countOpen",
+          "text": "{count} not answered",
+          "description": "A summary count."
+        },
+        {
+          "key": "summaryWhat",
+          "text": "Send results hands your answers to Claude:  passed tests close, each failure becomes an issue with your note and screenshot, skipped ones are canceled, not now stays open for the next run.",
+          "description": "The summary card's line on what Send does."
+        },
+        {
+          "key": "send",
+          "text": "Send results",
+          "description": "The summary card's Send."
+        },
+        {
+          "key": "sentAll",
+          "text": "Results sent",
+          "description": "The summary card's Send, once every answer has gone."
+        },
+        {
+          "key": "nextEpic",
+          "text": "Next:  {epic} ({count} tests)",
+          "description": "The summary card's link to the next epic with open tests (`epic test --all`)."
+        },
+        {
+          "key": "noTests",
+          "text": "No open tests:  nothing to run.",
+          "description": "The card of a run with no tests."
+        }
+      ]
+    },
+    {
       "tag": "epic-text-box",
       "name": "epic-text-box",
       "folder": "epic-text-box",
@@ -4743,10 +5128,11 @@
             "notes",
             "comment",
             "other",
-            "feedback"
+            "feedback",
+            "note"
           ],
           "default": "comment",
-          "description": "What it holds:  `notes` (the page's notes for Claude, once a page), `comment` (on the section `for` names, or an option, `q1-B`), `other` (question `for`'s Other, drawn by `<epic-ask>`), `feedback` (a choice page's, drawn by `<epic-choices-bar>`)."
+          "description": "What it holds:  `notes` (the page's notes for Claude, once a page), `comment` (on the section `for` names, or an option, `q1-B`), `other` (question `for`'s Other, drawn by `<epic-ask>`), `feedback` (a choice page's, drawn by `<epic-choices-bar>`), `note` (none of a page's answer:  read by the element drawing it, a test run's failure note, `<epic-test-run>`)."
         },
         {
           "name": "for",
@@ -4796,6 +5182,11 @@
           "key": "notes",
           "text": "Notes for Claude:  anything, any time",
           "description": "A `notes` box's placeholder."
+        },
+        {
+          "key": "note",
+          "text": "Your note",
+          "description": "A `note` box's placeholder, without one of its own."
         },
         {
           "key": "notesTitle",
@@ -5794,6 +6185,18 @@
       "docs": false,
       "tags": [
         "epic-summary"
+      ],
+      "tokens": []
+    },
+    "epic-test-run": {
+      "folder": "epic-test-run",
+      "mainTag": "epic-test-run",
+      "title": "<epic-test-run>",
+      "summary": "The <epic-test-run> element: an epic page's open tests, one at a time, each answered on the page.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-test-run"
       ],
       "tokens": []
     },

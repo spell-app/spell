@@ -120,6 +120,25 @@ export const NEW_TITLE_MAX = 300
 /** The page's own reload of its HTML:  the server's current token, as it serves the page now. */
 export const SERVER_INFO = /window\.SPELL_SERVER = (\{.*?\})<\/script>/
 
+/**
+ * The four answers of a TEST RUN (epic `epic-engine` P4), a test mark's `result`:
+ * `passed`, `failed` (with a note and a screenshot), `skip` (no longer applies), `notnow` (can't do it yet).
+ * - As `ReviewInbox`'s (a copy:  that module is node-only).
+ */
+export const TEST_RESULTS = ["passed", "failed", "skip", "notnow"] as const
+
+/** One of `TEST_RESULTS`. */
+export type TestResult = (typeof TEST_RESULTS)[number]
+
+/**
+ * The epics with open tests, in Owen's saga order (`GET`, `[{ epic, open, page }]`):  where a run started by
+ * `epic test --all` goes next.
+ */
+export const TESTS_API = "/api/epics/tests"
+
+/** The biggest screenshot a failed test takes, as the shot route caps it (`POST shot`). */
+export const SHOT_MAX_BYTES = 8 * 1024 * 1024
+
 /** The running-agents routes (`src/tools/agentRoutes.ts`):  every reply is the epic's list, `{ agents }`. */
 export const AGENTS_API = "/api/epics/agents"
 
@@ -157,6 +176,16 @@ export type NewItemInput = { kind: NewKind; title: string; note?: string; near?:
 
 /** A new item waiting in the inbox (`ReviewClient.newItems()`):  its key (`new1`) and its mark. */
 export type NewItem = { id: string } & InboxMark & { kind: NewKind; title: string }
+
+/**
+ * A test's answer in a run (epic `epic-engine` P4), its mark without the action:
+ * - `note`:  what Owen says went wrong (a failure's)
+ * - `shot`:  his screenshot, a path from the epic's folder (`tests/v3-20261019-1432.png`), as `POST shot` answered
+ */
+export type TestAnswer = { result: TestResult; note?: string; shot?: string }
+
+/** An epic with open tests (`GET /api/epics/tests`):  its name, how many, and its epic page's address. */
+export type TestsEntry = { epic: string; open: number; page: string }
 
 /** An item's immediate request on its way or being worked on:  `queued` while it waits with nobody listening. */
 export type Running = { action: NowAction; queued: boolean }

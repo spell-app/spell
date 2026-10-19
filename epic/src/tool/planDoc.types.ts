@@ -473,7 +473,8 @@ export type ReviewStatus = {
 
 /**
  * A mark Owen left on the page, as `PlanDoc.applyMark()` reads it (the inbox's shape:  `ReviewInbox`).
- * - `action`:  `approve`, `pick`, `todo`, `revisit`, `details`, `new` (a new item:  epic `airplane` P2)
+ * - `action`:  `approve`, `pick`, `todo`, `revisit`, `details`, `new` (a new item:  epic `airplane` P2),
+ *   `test` (a test run's answer:  epic `epic-engine` P4)
  */
 export type PlanMark = {
   /**
@@ -500,6 +501,10 @@ export type PlanMark = {
   title?: string
   /** a new item's:  the id of what it's about */
   near?: string
+  /** a test answer's (`action: "test"`, epic `epic-engine` P4):  `passed`, `failed`, `skip`, `notnow` */
+  result?: string
+  /** a test answer's screenshot, from the epic page's folder:  `tests/v3-20261019-1432.png` */
+  shot?: string
   /** when Owen made the mark (ISO) */
   at?: string
 }
@@ -510,6 +515,8 @@ export type MarkResult =
       applied: true
       /** what it did, for the log:  `approved:  closed (accepted)` */
       did: string
+      /** a failed test's answer (epic `epic-engine` P4):  the issue it was filed as, `i42` */
+      filed?: string
       /** never set:  declared so `result.left` reads without narrowing */
       left?: undefined
     }

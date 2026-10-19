@@ -8,6 +8,8 @@
  *   `/spell-docs`.  Not run from VS Code:  Chrome anyway.
  * - `--review`:  in the side bar's "Review" tab (`/epic review`), keeping the "Spell Docs" tab's page.  Implies
  *   `--vs`.
+ * - `--hash=<id>`:  an id on the page to land on;  `--query=<query>`:  the page's query, `test=1` (`epic test`:  a
+ *   test run, epic `epic-engine` P4)
  * - `<page>` may be a SHORT ADDRESS (epic `epic-workflow` P15):  `SAGA:/drawable-spell` (the saga page),
  *   `SAGA:/drawable-spell/python-target#T1` (the epic page, landing on T1)
  *   - read by `$/epics/links`, imported only then:  `spell dev docs open` runs this under `tsx`, while `epic open`
@@ -22,13 +24,19 @@ const args = process.argv.slice(2)
 const review = args.includes("--review")
 const vs = review || args.includes("--vs")
 const page = args.find((arg) => !arg.startsWith("--")) ?? "index.html"
-const { file, hash } = /^saga:\//i.test(page) ? await addressed(page) : { file: findPage(page) }
+const query = valueOf("--query")
+const { file, hash = valueOf("--hash") } = /^saga:\//i.test(page) ? await addressed(page) : { file: findPage(page) }
 if (!file) {
   console.error(`docs:open:  no page ${page}`)
   process.exit(1)
 }
-if (vs) await openInVSCode(file, { hash, view: review ? "review" : "docs" })
-else openInChrome(file, { hash })
+if (vs) await openInVSCode(file, { hash, query, view: review ? "review" : "docs" })
+else openInChrome(file, { hash, query })
+
+/** The value of flag `--<name>=<value>`, else `undefined`. */
+function valueOf(flag) {
+  return args.find((arg) => arg.startsWith(`${flag}=`))?.slice(flag.length + 1) || undefined
+}
 
 /** Short address `address` as its page's file (`null` if it isn't there) and the id to land on. */
 async function addressed(address) {

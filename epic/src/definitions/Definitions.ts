@@ -39,6 +39,7 @@ import { epicHiddenNoteVocabulary } from "$/epics/components/epic-state-filter/E
 import { epicStateFilterVocabulary } from "$/epics/components/epic-state-filter/EpicStateFilter.en"
 import { epicStatusVocabulary } from "$/epics/components/epic-status/EpicStatus.en"
 import { epicSummaryVocabulary } from "$/epics/components/epic-summary/EpicSummary.en"
+import { epicTestRunVocabulary } from "$/epics/components/epic-test-run/EpicTestRun.en"
 import { epicTextBoxVocabulary } from "$/epics/components/epic-text-box/EpicTextBox.en"
 import { epicThreadVocabulary } from "$/epics/components/epic-thread/EpicThread.en"
 import { epicThreadMessageVocabulary } from "$/epics/components/epic-thread/EpicThreadMessage.en"
@@ -103,6 +104,8 @@ export class Definitions {
     // `<epic-page>`'s toolbar and the docs runtime, never written in a doc
     "epic-state-filter": epicStateFilterVocabulary,
     "epic-hidden-note": epicHiddenNoteVocabulary,
+    // a test run (epic `epic-engine` P4):  drawn by `<epic-page>` over its blocks, written in a doc only as an example
+    "epic-test-run": epicTestRunVocabulary,
     // drawn only inside other elements' shadow roots, never written in a doc
     "epic-review": epicReviewVocabulary,
     "epic-new-item": epicNewItemVocabulary,

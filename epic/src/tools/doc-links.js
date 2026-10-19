@@ -136,7 +136,8 @@ export function check(path) {
  */
 export function checkText(text, docDir, file) {
   const { linker, dir } = linkerFor(docDir)
-  const checked = linker.check(text, linker.servedDir(dir))
+  // routes and a test's action links are served, not files:  `problemsIn()` checks the show route's pages
+  const checked = linker.check(EpicTargets.withoutServedLinks(text), linker.servedDir(dir))
   const page = file && relative(targets.content, resolvePath(file))
   return { ...checked, problems: [...checked.problems, ...targets.problemsIn(text, page)] }
 }

@@ -23,6 +23,7 @@ import { LISTEN_HEARTBEAT_MS, LISTEN_STALE_MS, ReviewInbox } from "./ReviewInbox
 import { SagaCommands } from "./SagaCommands"
 import { SagaPage } from "./SagaPage"
 import { Sagas } from "./Sagas"
+import { TestCommands } from "./TestCommands"
 
 /****************
  * ### `PlanDocCommands`
@@ -73,6 +74,9 @@ export class PlanDocCommands {
   /** the `saga` commands, on this object's files and output */
   readonly sagas: SagaCommands
 
+  /** the `test` command, and `add` / `details`' test fields, on this object's files and output */
+  readonly tests: TestCommands
+
   /**
    * - `files`:  the checkout's epic pages
    * - `sessionsOf`:  an epic's running sessions, for `migrate --notify`
@@ -83,6 +87,7 @@ export class PlanDocCommands {
     this.inbox = new InboxCommands(this)
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
+    this.tests = new TestCommands(this)
   }
 
   ////////////////
@@ -119,6 +124,7 @@ export class PlanDocCommands {
     if (command === "saga") return this.sagas.run(positional.slice(1), flags)
     if (command === "convert") return this.convert(positional.slice(1), flags)
     if (command === "split" && flags.done) return this.splitDone(flags)
+    if (command === "test" && flags.all) return this.tests.all(flags)
     if (!command || !name) return this.usage()
     if (command === "summaries") return this.printSummaries(positional.slice(1))
     // the shared doc, by THIS checkout's path (`findDoc()`);
@@ -199,9 +205,9 @@ export class PlanDocCommands {
           plan.log(`P${n} estimate:  ${rest[1]}`)
         })
       case "add": {
-        const id = await this.edit(file, (plan) =>
-          plan.addItem(need(rest[0], "a kind"), need(rest[1], "a title"), flags)
-        )
+        const [kind, title] = [need(rest[0], "a kind"), need(rest[1], "a title")]
+        const { id, example } = await this.edit(file, (plan) => this.tests.addItem(plan, kind, title, flags))
+        this.tests.saveExample(file, example)
         return this.print(id.toUpperCase())
       }
       case "calm": {
@@ -293,6 +299,8 @@ export class PlanDocCommands {
         return this.inbox.run(name, file, rest, flags)
       case "details":
         return this.details(name, file, rest, flags)
+      case "test":
+        return this.tests.run(name, file, flags)
       case "status":
         return this.status(file, rest, flags)
       case "original":
@@ -472,25 +480,31 @@ export class PlanDocCommands {
   /**
    * `details <name> <id> --file <html> [--append | --more]`:
    * an agent's details or reply into one item, under the doc's lock.
+   * - a test's fields instead of, or before, the file's HTML (epic `epic-engine` P4):
+   *   `--step`, `--should`, `--example`, `--if-not` (`TestCommands.fieldsOf()`)
    * - refused while Owen called the request off on the page ("nevermind", epic `windows-and-review` P2):
    *   nothing lands
    */
   private async details(name: string, file: string, rest: string[], flags: Flags): Promise<void> {
     const id = need(rest[0], "an item id")
-    const html = readFileSync(need(flags.file as string | undefined, "--file <html file>"), "utf8")
+    const fields = this.tests.fieldsOf(id, flags)
+    const given = typeof flags.file === "string" || !fields.html
+    const html =
+      fields.html + (given ? readFileSync(need(flags.file as string | undefined, "--file <html file>"), "utf8") : "")
     if (ReviewInbox.read(ReviewInbox.pathFor(file)).isCanceled(id))
       throw new PlanDocError(
         `${id.toUpperCase()}:  Owen called this request off on the page ("nevermind"):  nothing written.  ` +
           `\`epic inbox ${name}#${id} done\` and stop.`
       )
     if (flags.append && flags.more) throw new PlanDocError("--append or --more, not both")
-    return this.edit(file, (plan) => {
+    await this.edit(file, (plan) => {
       if (flags.more) plan.addMore(id, html)
       else plan.setDetails(id, html, { append: Boolean(flags.append) })
       plan.log(
         `${id.toUpperCase()} ${flags.more ? "more details added" : flags.append ? "reply added" : "details rewritten"}`
       )
     })
+    this.tests.saveExample(file, fields.example)
   }
 
   /**
@@ -691,7 +705,8 @@ export class PlanDocCommands {
     // short addresses and `<epic-link>`s (epic `epic-workflow` P15):
     // the sagas, pages and ids they point at
     const linkProblems = [
-      ...files.linker.check(html, dirname(file)).problems,
+      // routes and a test's action links are served, not files:  `problemsIn()` checks the show route's pages
+      ...files.linker.check(EpicTargets.withoutServedLinks(html), dirname(file)).problems,
       ...new EpicTargets(files.root).problemsIn(html, relative(files.content, file))
     ]
     const links = linkProblems.map((problem) => `link:  ${problem}`)
@@ -745,13 +760,15 @@ export class PlanDocCommands {
    * or Chrome when not run from VS Code.
    * - It runs `src/tools/open.js --review <file>` (`--vs` for Spell Docs),
    *   which starts the page server and asks the session's window (`pages.js` `openInVSCode()`).
+   * - `hash`:  an id to land on;  `query`:  the page's query, `test=1` (a test run:  `epic test`)
    * - a child `node`, not an import:  `open.js` with this terminal attached, as its command line runs it
    * - NEVER throws, nor fails the command:  as before, a doc not shown is no error
    */
-  openInVSCode(file: string, view: "review" | "docs" = "review"): void {
+  openInVSCode(file: string, view: "review" | "docs" = "review", { hash, query }: OpenOptions = {}): void {
     const { files } = this
     const flag = view === "docs" ? "--vs" : "--review"
-    spawnSync(process.execPath, [join(files.docsTools, "open.js"), flag, resolve(file)], {
+    const extra = [...(hash ? [`--hash=${hash}`] : []), ...(query ? [`--query=${query}`] : [])]
+    spawnSync(process.execPath, [join(files.docsTools, "open.js"), flag, resolve(file), ...extra], {
       cwd: files.docsPackage,
       stdio: "inherit",
       env: files.toolEnv
@@ -914,6 +931,9 @@ export class PlanDocCommands {
 /** Command-line flags (`parseArgs()`):  `--key value` is the value, a bare `--key` is `true`;  keys camel-cased. */
 export type Flags = Record<string, string | true>
 
+/** `openInVSCode()`'s options:  an id to land on, and the page's query (`test=1`). */
+export type OpenOptions = { hash?: string; query?: string }
+
 /** `new`'s flags. */
 type CreateFlags = { title?: string; prompt?: string; promptFile?: string; future?: boolean; saga?: string | true }
 
@@ -964,6 +984,17 @@ export const USAGE = `usage:  spell dev plan-doc <command> <name> ...    (doc:  
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
                                                    wouldn't surprise Owen, yellow (open) rather than red
+  add <name> test "title" --step html --should html [--example <png> | "text"] [--if-not html]
+                                                   a test Owen's test run steps him through:  what to do (a
+                                                   Step may hold <a class="epic-test-action" href> links,
+                                                   the run's buttons), what should happen, an example (a
+                                                   screenshot, copied to tests/<id>.png), what to tell Claude
+  test <name> [--at <id>]  /  test <name> --list [--json]
+                                                   Owen's test run:  the page in the Review tab in test mode
+                                                   (?test=1), at test <id>;  --list:  its open tests, in the
+                                                   run's order (deferred ones last)
+  test --all [--list] [--json]                     every epic with open tests, in Owen's saga order;  the
+                                                   first opened in test mode (?test=1&all=1)
   calm <name> <id>... [--loud]                     calls / issues not urgent (yellow, open), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
   decide <name> <Q id> "answer" [--details html] [--option A]
@@ -1052,7 +1083,7 @@ export const USAGE = `usage:  spell dev plan-doc <command> <name> ...    (doc:  
   inbox <name> done <id>...                        an agent finished an item:  its mark and spinner go (a mark
                                                    Owen changed meanwhile stays)
   inbox <name> clear <id>...                       drop marks (a revisit talked over)
-  details <name> <id> --file <html> [--append | --more]
+  details <name> <id> --file <html> [--append | --more]  /  details <name> <V id> --step ... --should ...
                                                    replace an item's details with the file's HTML, or (--append)
                                                    add it, e.g. a reply:  between the answer card and commits;
                                                    replacing moves the old text into its Original Discussion;

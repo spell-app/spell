@@ -40,6 +40,7 @@ import {
   NOTE,
   NOTE_OPEN,
   OVERNIGHT,
+  FAILED,
   REVIEW,
   STATE_TIP_KEYS,
   STATUS_SLOT,
@@ -333,6 +334,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     () =>
       this.slots.hasContent(this.slotForName("actions")) ||
       !!this.overnight ||
+      this.failed !== undefined ||
       this.hasCommits() ||
       !!this.review() ||
       this.reviewState.reviewing() ||
@@ -538,6 +540,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
               {this.bedGlyph.svg}
             </span>
           </Show>
+          <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
           <Show when={this.hasCommits()}>{this.gitButton()}</Show>
           <Show when={!this.reviewState.reviewing() && this.review()}>
             {(review) => (
@@ -556,6 +559,27 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </Show>
         </span>
       </div>
+    )
+  }
+
+  /**
+   * A test that failed in Owen's test run (`failed="i42"`, epic `epic-engine` P4):  a red "failed → I42" on its line,
+   * linking the issue it was filed as;  just "failed" without one.
+   */
+  private failedMark(): JSX.Element {
+    const issue = () => this.failed ?? ""
+    return (
+      <ui-label
+        class={FAILED}
+        part={this.partForName("failed")}
+        size="mini"
+        basic=""
+        color="red"
+        href={issue() ? `#${issue()}` : undefined}
+        title={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
+      >
+        {this.translationForKey(issue() ? "failedMark" : "failedMarkNone", { id: issue().toUpperCase() })}
+      </ui-label>
     )
   }
 

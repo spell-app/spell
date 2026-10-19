@@ -1721,6 +1721,49 @@
       ]
     },
     {
+      "path": "epic-test-run.html",
+      "title": "<epic-test-run>",
+      "summary": "The <epic-test-run> element: an epic page's open tests, one at a time, each answered on the page.",
+      "tag": "epic-test-run",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-test-run-answers",
+          "title": "The answers",
+          "parent": 3
+        },
+        {
+          "id": "epic-test-run-parts",
+          "title": "Parts",
+          "parent": 3
+        },
+        {
+          "id": "epic-test-run-events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        }
+      ]
+    },
+    {
       "path": "epic-text-box.html",
       "title": "<epic-text-box>",
       "summary": "A box Owen types in on a page he answers on: notes, a comment, Other, feedback.",

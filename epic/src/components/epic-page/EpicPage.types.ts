@@ -210,6 +210,7 @@ declare module "@solidjs/web/types/jsx.js" {
       // the pack's own families it draws in its shadow root
       "epic-new-item": UIJSXAttributes
       "epic-agents": UIJSXAttributes
+      "epic-test-run": UIJSXAttributes
     }
   }
 }

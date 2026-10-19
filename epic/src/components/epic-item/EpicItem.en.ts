@@ -120,6 +120,14 @@ export const epicItemVocabulary = {
         "while the page is reviewed (the inbox's `urgency`, applied by `plan-doc inbox apply`)."
     },
     {
+      name: "failed",
+      kind: "string",
+      format: "item id",
+      description:
+        "A test that FAILED in Owen's test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It " +
+        "stays open;  gone once a run passes it."
+    },
+    {
       name: "source",
       kind: "string",
       description:
@@ -204,6 +212,12 @@ export const epicItemVocabulary = {
     },
     { name: "overnight", description: "With `overnight`:  the bed icon at the line's end, `made overnight`." },
     {
+      name: "failed",
+      description:
+        'With `failed`:  a red "failed → I42" at its line\'s end, linking the issue the failure was filed as (epic ' +
+        "`epic-engine` P4)."
+    },
+    {
       name: "git",
       description:
         "With commits (`commits`, or `<epic-commit>` children):  a git icon at the line's end that shows or hides " +
@@ -285,6 +299,18 @@ export const epicItemVocabulary = {
       description: "Id chip tooltip:  Owen's mark (the chosen button, `{chosen}`), sent:  the chip outlined."
     },
     { key: "tipPick", text: "pick {letter}", description: "Id chip tooltip:  Owen's pick, as `{chosen}`." },
+    {
+      key: "failedMark",
+      text: "failed → {id}",
+      description: "A test that failed in a test run (`failed`):  its line's red mark, linking the issue."
+    },
+    { key: "failedMarkNone", text: "failed", description: "The same, with no issue named." },
+    {
+      key: "failedTip",
+      text: "Failed in your test run:  filed as {id}",
+      description: "The failed mark's tooltip."
+    },
+    { key: "failedTipNone", text: "Failed in your test run", description: "The failed mark's tooltip, no issue." },
     { key: "madeOvernight", text: "made overnight", description: "The bed icon's tooltip (`overnight`)." },
     { key: "sourceLoadError", text: "Couldn't load {source}.", description: "The part's fetch failed." },
     {

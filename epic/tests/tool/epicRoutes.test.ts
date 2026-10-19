@@ -118,6 +118,48 @@ describe("POST /api/epics/favorite", () => {
     expect(await sagaOf()).toBeNull()
   })
 
+  // epic `epic-engine` P4:  the run's summary card asks for the next epic to test
+  test("GET tests:  every epic with open tests, Owen's saga order;  no token needed", async () => {
+    const page = (name: string, saga: string, items: string) => {
+      mkdirSync(join(root, "epics", name), { recursive: true })
+      const html = `<epic-page epic="${name}" title="${name}" saga="${saga}">${items}</epic-page>`
+      writeFileSync(join(root, "epics", name, `${name}.plan.html`), html)
+    }
+    page("tested", "epics", '<epic-item id="v1" title="a" status="open"></epic-item>')
+    page("passed", "epics", '<epic-item id="v1" title="a" status="done"></epic-item>')
+    const answer = await ask(port, "GET", "/api/epics/tests")
+    expect(answer.status).toBe(200)
+    expect(JSON.parse(answer.text)).toEqual([
+      {
+        epic: "tested",
+        title: "tested",
+        saga: "epics",
+        open: 1,
+        page: "/epics/tested/tested.plan.html",
+        href: "../tested/tested.plan.html"
+      }
+    ])
+  })
+
+  // epic `epic-engine` I45:  a server that says which content folder it serves (the epic server, a demo's) is read
+  test("GET tests:  from the content folder the server says it serves, not the checkout's", async () => {
+    const other = join(root, "other-content")
+    mkdirSync(join(other, "epics", "copy"), { recursive: true })
+    writeFileSync(
+      join(other, "epics", "copy", "copy.plan.html"),
+      '<epic-page epic="copy" title="Copy"><epic-item id="v1" title="a" status="open"></epic-item></epic-page>'
+    )
+    const served = new PageServer({ root })
+    await epicRoutes.setup({ ...served.routeContext(), content: other } as Parameters<typeof epicRoutes.setup>[0])
+    await served.start({ port: 0, routes: false, pidFile: false })
+    try {
+      const answer = JSON.parse((await ask(served.info.port, "GET", "/api/epics/tests")).text)
+      expect(answer.map((each: { epic: string }) => each.epic)).toEqual(["copy"])
+    } finally {
+      await served.stop()
+    }
+  })
+
   test("refuses a name that isn't an epic's, a missing flag, and a write without the token", async () => {
     expect((await star({ name: "../etc", favorite: true })).status).toBe(400)
     expect((await star({ name: "seo" })).status).toBe(400)

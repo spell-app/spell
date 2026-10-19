@@ -26,6 +26,15 @@ const OWENS_ROWS: [string[], string[][]][] = [
   ],
   [["commit", "seo#p3", "abc123", "what it did"], [["commit", "seo", "abc123", "what it did", "--phase", "3"]]],
   [["add", "seo#J", "Title", "--details", "<p>d</p>"], [["add", "seo", "judgement", "Title", "--details", "<p>d</p>"]]],
+  // epic `epic-engine` P4:  a test's fields;  the test run, at a test or every epic's
+  [
+    ["add", "seo#V", "T", "--step", "Do", "--should", "Works"],
+    [["add", "seo", "test", "T", "--step", "Do", "--should", "Works"]]
+  ],
+  [["test", "seo"], [["test", "seo"]]],
+  [["test", "seo#V3"], [["test", "seo", "--at", "V3"]]],
+  [["test", "seo", "--list", "--json"], [["test", "seo", "--list", "--json"]]],
+  [["test", "--all"], [["test", "--all"]]],
   [["decide", "seo#Q3", "yes", "--option", "A"], [["decide", "seo", "Q3", "yes", "--option", "A"]]],
   [["choose", "seo#J9", "A", "built", "--set", "2"], [["choose", "seo", "J9", "A", "built", "--set", "2"]]],
   [["close", "seo#J3"], [["close", "seo", "J3"]]],

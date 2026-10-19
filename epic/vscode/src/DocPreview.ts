@@ -81,13 +81,18 @@ export class DocPreview {
     return index && existsSync(index) ? DocPreview.urlOf(index) : undefined
   }
 
-  /** Show `file` in doc view `view`, from the server that serves it;  at id `hash` on it, if given. */
-  static async show(file: string, hash?: string, view: DocViewName = "docs"): Promise<void> {
+  /**
+   * Show `file` in doc view `view`, from the server that serves it;  at id `hash` on it, if given.
+   * - `query`:  the page's query, without its `?` (`test=1`:  a test run, `epic test`);  another query is another page,
+   *   so the view loads it (`DocView.show()`)
+   */
+  static async show(file: string, hash?: string, view: DocViewName = "docs", query?: string): Promise<void> {
     if (!existsSync(file)) {
       void vscode.window.showErrorMessage(`Spell Epic:  no file '${file}'.`)
       return
     }
     const url = new URL(await DocPreview.urlOf(file))
+    if (query) url.search = query
     if (hash) url.hash = hash
     await DocPreview.showUrl(url.href, view)
   }

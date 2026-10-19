@@ -4,6 +4,8 @@ import {
   REVISIT_KEY_PREFIX,
   NOBODY_LISTENING,
   SUMMARY_ID,
+  TESTS_API,
+  TEST_RESULTS,
   emptyInbox,
   inboxOf,
   isImmediate,
@@ -23,6 +25,10 @@ import {
   type ReviewClientOptions,
   type Running,
   type StartAnswer,
+  type TestAnswer,
+  type TestResult,
+  type TestsEntry,
+  sentence,
   wakeOf,
   type WriteOptions
 } from "./review.types"
@@ -419,6 +425,65 @@ export class ReviewClient {
   }
 
   ////////////////
+  // ## Test runs (epic `epic-engine` P4)
+  ////////////////
+
+  /** Test `id`'s answer in a run (its `test` mark), if any. */
+  testAnswerOf(id: string): TestAnswer | undefined {
+    const mark = this.inbox.marks[id]
+    if (mark?.action !== TEST_ACTION || !isTestResult(mark.result)) return undefined
+    return { result: mark.result, ...(mark.note && { note: mark.note }), ...(mark.shot && { shot: mark.shot }) }
+  }
+
+  /**
+   * Answer test `id` (`{ action: "test", result, note?, shot? }`):  shown at once, then saved, as every mark;
+   * true when saved.
+   */
+  answerTest(id: string, answer: TestAnswer): Promise<boolean> {
+    return this.save(id, { action: TEST_ACTION, ...answer })
+  }
+
+  /**
+   * Save `png` (a data URL) as test `id`'s screenshot (`POST shot`);  its path from the epic's folder, as the route
+   * answers it (`tests/v3-20261019-1432.png`), or `undefined` when it failed (a notice says why).
+   * - its answer is the path, not the inbox:  the caller puts it in the test's mark (`answerTest()`)
+   * - NEVER throws
+   */
+  async saveShot(id: string, png: string): Promise<string | undefined> {
+    try {
+      const reply = (await this.link.post(`${REVIEW_API}/shot`, { page: this.options.page, id, png })) as {
+        shot?: unknown
+      }
+      if (typeof reply?.shot === "string") return reply.shot
+      this.notify("The page server kept no screenshot.")
+    } catch (failure) {
+      this.notify(sentence((failure as Error).message))
+    }
+    return undefined
+  }
+
+  /**
+   * Every epic with open tests, in Owen's saga order (`GET /api/epics/tests`):  where a run across every epic
+   * (`epic test --all`) goes next;  `[]` when the server can't say.
+   * - NEVER throws
+   */
+  async openTests(): Promise<TestsEntry[]> {
+    try {
+      const response = await this.options.fetch(TESTS_API, { cache: "no-store" })
+      if (!response.ok) return []
+      const entries = (await response.json()) as unknown
+      return Array.isArray(entries)
+        ? (entries as Partial<TestsEntry>[]).filter(
+            (entry): entry is TestsEntry =>
+              typeof entry?.epic === "string" && typeof entry.open === "number" && typeof entry.page === "string"
+          )
+        : []
+    } catch {
+      return []
+    }
+  }
+
+  ////////////////
   // ## Note box
   ////////////////
 
@@ -775,6 +840,14 @@ export class ReviewClient {
     this.changed()
     return undefined
   }
+}
+
+/** A test answer's action (epic `epic-engine` P4). */
+const TEST_ACTION = "test"
+
+/** Is `result` one of a test's four answers? */
+function isTestResult(result: unknown): result is TestResult {
+  return (TEST_RESULTS as readonly unknown[]).includes(result)
 }
 
 /** The summary's tag:  how the page finds it, having no id. */

@@ -10,6 +10,7 @@ import { SHOW_NOTE, type ReviewShows } from "$/epics/components/epic-review/Epic
 import { NEW_KIND_LOOKS } from "$/epics/components/epic-new-item/EpicNewItem.types"
 import { NEEDS_OWEN, STATUS_SLOT, STATUS_STATES } from "$/epics/components/epic-item/EpicItem.types"
 import { SHOW_ALL, STATE_PICK, type StatePickDetail } from "$/epics/components/epic-state-filter/EpicStateFilter.types"
+import { TEST_START } from "$/epics/components/epic-test-run/EpicTestRun.types"
 
 import { epicSectionVocabulary } from "./EpicSection.en"
 import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
@@ -117,6 +118,8 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   the Todos and Questions sections end with
  *   - the new items of their kind Owen asked for and Claude hasn't made yet (Edit, Remove:  `newItemList()`)
  *   - then a New todo / New question button, which opens the form there (`<epic-new-item>`)
+ * - The To test section's START TESTING (epic `epic-engine` P4), on its title while the page is reviewed and a test
+ *   is open:  "Start testing · 9", a `<ui-button>` that asks the page for its test run (`epic-test-start`)
  * - SIDE EFFECT:  observes its own children, from the first count on (`@watches`);
  *   follows the review inbox while connected (an Overview sub-section, Todos, Questions).
  ****************/
@@ -284,6 +287,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             : this.holdsItems()
               ? () => (
                   <>
+                    <Show when={kind === "tests" && this.reviewState.reviewing() && this.count()?.open}>
+                      {(open) => this.startTesting(open())}
+                    </Show>
                     {this.filter()}
                     <Show when={this.reviewState.reviewing() && this.newKind()}>
                       {(newKind) => this.newButton(newKind())}
@@ -374,6 +380,31 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
       >
         <ui-icon name="comment dots" />
       </button>
+    )
+  }
+
+  /**
+   * The To test section's Start testing (epic `epic-engine` P4):  a blue button, "Start testing · 9";  a click asks the
+   * page for its test run (`epic-test-start`, out of the shadow root).
+   */
+  private startTesting(open: number): JSX.Element {
+    return (
+      <ui-button
+        class={START_TESTING}
+        part={this.partForName("start-testing")}
+        color="blue"
+        basic=""
+        size="mini"
+        icon="flask"
+        title={this.translationForKey("startTestingTip", { count: open })}
+        onClick={(event: MouseEvent) => {
+          // a title's tool:  not a click on the title, which would fold it
+          event.stopPropagation()
+          this.send(TEST_START, {})
+        }}
+      >
+        {this.translationForKey("startTesting", { count: open })}
+      </ui-button>
     )
   }
 
@@ -758,6 +789,9 @@ export interface EpicSection extends E.AttributeValues<EpicSectionVocabulary> {}
 
 /** No counted children:  a kind that isn't counted, or a server render.  One list, so a recount keeps it. */
 const NOTHING_COUNTED: readonly Element[] = []
+
+/** Class of the To test section's Start testing. */
+const START_TESTING = "start-testing"
 
 /** Classes of the waiting new items (`newItemList()`):  the list, a card. */
 const NEW_LIST = "new-list"

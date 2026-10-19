@@ -27,12 +27,13 @@ export const epicTextBoxVocabulary = {
     {
       name: "type",
       kind: "enum",
-      values: ["notes", "comment", "other", "feedback"],
+      values: ["notes", "comment", "other", "feedback", "note"],
       default: "comment",
       description:
         "What it holds:  `notes` (the page's notes for Claude, once a page), `comment` (on the section `for` " +
         "names, or an option, `q1-B`), `other` (question `for`'s Other, drawn by `<epic-ask>`), `feedback` " +
-        "(a choice page's, drawn by `<epic-choices-bar>`)."
+        "(a choice page's, drawn by `<epic-choices-bar>`), `note` (none of a page's answer:  read by the element " +
+        "drawing it, a test run's failure note, `<epic-test-run>`)."
     },
     {
       name: "for",
@@ -75,6 +76,7 @@ export const epicTextBoxVocabulary = {
   states: [{ name: "filled", description: "Something is typed in it." }],
   texts: [
     { key: "notes", text: "Notes for Claude:  anything, any time", description: "A `notes` box's placeholder." },
+    { key: "note", text: "Your note", description: "A `note` box's placeholder, without one of its own." },
     { key: "notesTitle", text: "Notes", description: "The notes' title, where a draft keeps them." },
     {
       key: "keptTitle",

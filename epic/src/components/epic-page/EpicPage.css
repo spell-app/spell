@@ -109,6 +109,14 @@
   }
 
   /*
+   * ## TEST MODE (epic `epic-engine` P4):  the run over its blocks.  Only the header (Send, the step label) and the
+   * pill stay;  the blocks go by their slot, so the doc is never touched and every part already loaded stays
+   */
+  :host(:state(testing)) :is(.bar, .review-line, .meta, .see-also, .hung, .notice, epic-agents, slot:not([name])) {
+    display: none;
+  }
+
+  /*
    * ## The sticky header:  the h1, then its labels and controls at the right, each centred on the row.  The epic's
    * title under it is NOT sticky (Owen, 2026-10-10):  it scrolls away under the header, and the toolbar's bar sticks
    * right below the header (`--epic-head-h`, measured)

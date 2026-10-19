@@ -800,13 +800,15 @@ export class Window {
    * resolves to `{ window }` (the registry entry it showed in) or `{ later }` (the window file it will show in).
    * - `view`:  the side bar tab, `"docs"` ("Spell Docs", the default) or `"review"` ("Review");
    *   sent only when given, so an extension from before the tabs still shows the doc
+   * - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`);  sent only when given,
+   *   and an extension from before it shows the page without it
    * - a `handoff` pending for `sessionId`:  NOT here, where the session's tab is about to close,
    *   but in the window it moves to, once it has (`resume`)
    *   - the handoff keeps ONE doc, so the last asked for wins, whichever tab
    * - throws as `request()` does:  no window, or it failed
    */
-  static async show(file, { hash, view, sessionId = process.env.CLAUDE_CODE_SESSION_ID } = {}) {
-    const show = { file, ...(hash && { hash }), ...(view && { view }) }
+  static async show(file, { hash, query, view, sessionId = process.env.CLAUDE_CODE_SESSION_ID } = {}) {
+    const show = { file, ...(hash && { hash }), ...(query && { query }), ...(view && { view }) }
     const pending = SESSION_ID.test(sessionId ?? "") ? Window.handoffFile(sessionId) : null
     if (pending && existsSync(pending)) {
       const handoff = { ...JSON.parse(readFileSync(pending, "utf8")), show }

@@ -7,6 +7,7 @@ import { EpicConfig } from "$/epics/config/EpicConfig"
 import { EpicAddress, PageTargets, SAGA_SCHEME, type Landing, type TargetAnswer } from "$/epics/links"
 
 import { Sagas } from "./Sagas"
+import { ServedFolders } from "./ServedFolders"
 
 /****************
  * ### `EpicTargets`
@@ -27,6 +28,9 @@ export class EpicTargets {
   /** the sagas' list */
   readonly sagas: Sagas
 
+  /** the folders checkout `root` serves at another address, by address (`ServedFolders.under()`), absolute */
+  readonly served: [string, string][]
+
   /** pages read, by file:  their mtime, and what they hold */
   private read = new Map<string, { mtime: number; targets: PageTargets; title: string }>()
 
@@ -34,6 +38,12 @@ export class EpicTargets {
   constructor(root: string) {
     this.content = EpicConfig.contentOf(root)
     this.sagas = new Sagas(root)
+    // a set in spell-epic (Epic UI's `spell-epic/src/docs`) is THIS engine's, which serves it, from any checkout
+    const folderOf = (dir: string) =>
+      dir.startsWith(ENGINE_LINK) && !existsSync(join(root, ENGINE_LINK))
+        ? join(ServedFolders.ENGINE, dir.slice(ENGINE_LINK.length))
+        : join(root, dir)
+    this.served = Object.entries(ServedFolders.under(root)).map(([address, dir]) => [`${address}/`, folderOf(dir)])
   }
 
   /**
@@ -84,6 +94,9 @@ export class EpicTargets {
   /**
    * Every short-address link (`<a href="SAGA:/...">`) and `<epic-link>` in `html`, a page at `from` (a page path),
    * that's broken:  one line each, `broken link:  <the link> -- <why>`.
+   * - and every link to the page server's show route (`/api/docs/show?path=<page>`, a test's action link:  epic
+   *   `epic-engine` P4) whose `path` names no page:  in the content folder, or a folder served at another address
+   *   (`/components/epics/`:  `ServedFolders`);  a worktree's (`/worktrees/...`) isn't looked for
    * - `<pre>` and `<script>` blocks are skipped (as `Linker.check()` skips `<pre>`):  examples, not links
    */
   problemsIn(html: string, from?: string): string[] {
@@ -103,6 +116,8 @@ export class EpicTargets {
     for (const match of body.matchAll(A_HREF)) {
       const href = decodeEntities(match[1])
       if (SAGA_SCHEME.test(href)) report(href, () => EpicAddress.parse(href))
+      const shown = this.shownPageProblem(href)
+      if (shown) problems.push(`broken link:  ${href} -- ${shown}`)
     }
     for (const match of body.matchAll(EPIC_LINK)) {
       const attributes = Object.fromEntries(
@@ -112,6 +127,32 @@ export class EpicTargets {
       report(match[0], () => new EpicAddress({ saga, epic, item, phase }))
     }
     return problems
+  }
+
+  /**
+   * `html` with its links to SERVED ROUTES made inert for the file link check (`AS.Linker.check()`):
+   * their `href` `#`, which it skips.
+   * - a route (`/api/...`) and a test's action link (`a.epic-test-action`, epic `epic-engine` P4) are pages the page
+   *   server answers, opened in the side bar or the browser:  no file to find, and no tab of their own
+   * - the show route's own check is `problemsIn()`'s
+   * - only for checking:  never written back
+   */
+  static withoutServedLinks(html: string): string {
+    return html.replace(A_TAG, (tag) =>
+      SERVED_ROUTE.test(tag) || TEST_ACTION.test(tag) ? tag.replace(/\shref="[^"]*"/, ' href="#"') : tag
+    )
+  }
+
+  /** Why show-route link `href` is broken (its `path` names no page), else `undefined`;  any other link:  `undefined`. */
+  private shownPageProblem(href: string): string | undefined {
+    if (!href.startsWith(SHOW_ROUTE)) return undefined
+    const path = new URLSearchParams(href.slice(href.indexOf("?") + 1)).get("path")
+    if (!path) return "no path=<page>"
+    if (path.startsWith(WORKTREES)) return undefined
+    const page = path.split("#")[0]!.replace(/^\//, "")
+    const served = this.served.find(([address]) => page.startsWith(address))
+    const file = served ? join(served[1], page.slice(served[0].length)) : join(this.content, page)
+    return existsSync(file) ? undefined : `no page ${path}`
   }
 
   /**
@@ -179,6 +220,24 @@ const PRE = /<(pre|script)[\s>][\s\S]*?<\/\1>/gi
 
 /** An `<a>` with an `href`:  `[1]` the href, as written. */
 const A_HREF = /<a\s[^>]*?href="([^"]*)"/gi
+
+/** An `<a>` start tag, whole. */
+const A_TAG = /<a\b[^>]*>/gi
+
+/** A tag whose link is a page server route:  `href="/api/..."`. */
+const SERVED_ROUTE = /\shref="\/api\//
+
+/** A tag that is a test's action link (`<a class="epic-test-action">`). */
+const TEST_ACTION = /\sclass="[^"]*\bepic-test-action\b/
+
+/** The page server's show route (`showRoutes.ts`):  `/api/docs/show?path=<page>`. */
+const SHOW_ROUTE = "/api/docs/show?"
+
+/** A checkout's link to spell-epic, where spell-app's served sets name its folders (`spell-epic/src/docs`). */
+const ENGINE_LINK = "spell-epic/"
+
+/** A worktree's pages, as the main checkout's page server serves them. */
+const WORKTREES = "/worktrees/"
 
 /** An `<epic-link>` start tag:  `[1]` its attributes. */
 const EPIC_LINK = /<epic-link\b([^>]*)>/gi

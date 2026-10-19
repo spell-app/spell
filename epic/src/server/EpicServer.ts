@@ -347,11 +347,14 @@ export class EpicServer {
    * - `serveContent()`:  nothing to do:  each repo's content folder is served already, at its prefix (`mounts()`);  the
    *   route modules read and write it there too, from `root`'s config (`EpicConfig.contentOf()`, `pages.js` `CONTENT`:
    *   epic `epic-eject` P12), never through the main checkout's links
+   * - `content`:  the default repo's content folder, as served:  a route reading the epic pages reads these
+   *   (`GET /api/epics/tests`), so a demo server (`DemoServer`) answers from its copies
    * - tests set a route module up by hand with it, on a server started with `routes: false`
    */
   routeContext(): ContentRouteContext {
     return {
       root: this.defaultRepo?.checkout ?? this.home,
+      content: this.defaultRepo?.content,
       router: this.web.router,
       guard: this.web.guard,
       live: this.web.live!,

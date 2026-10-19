@@ -82,6 +82,8 @@ export const TITLE = "title"
 export const EXTRAS = "extras"
 export const GIT = "git"
 export const OVERNIGHT = "overnight"
+/** Class of a failed test's mark on its line (`failed`, epic `epic-engine` P4). */
+export const FAILED = "failed"
 export const REVIEW = "review"
 export const DETAILS = "details"
 export const LABEL = "label"

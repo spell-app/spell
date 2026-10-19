@@ -34,6 +34,11 @@ class FakeServer {
   wake: { state: "typed"; did: string; message: string } | undefined
   /** what "start a review" answers (`POST /api/epics/review/start`) */
   started = { state: "sent", command: "/epic review sample", sessions: ["🚧 sample"], message: "Typed it." }
+  /** the epics with open tests (`GET /api/epics/tests`, epic `epic-engine` P4) */
+  tests: unknown = [
+    { epic: "sample", open: 3, page: PAGE },
+    { epic: "other", title: "x" }
+  ]
   /** a POST to this route waits for `release()` */
   private held: { route: string; release?: () => void } | undefined
 
@@ -41,6 +46,7 @@ class FakeServer {
     const url = input
     if (url === PAGE) return new Response(`<script>window.SPELL_SERVER = {"token":"${this.token}"}</script>`)
     if (url.startsWith("/api/epics/review/inbox")) return json(this.inbox.forPage())
+    if (url === "/api/epics/tests") return json(this.tests)
     const route = url.replace("/api/epics/review/", "")
     const body = JSON.parse(init!.body as string) as Record<string, unknown>
     this.posts.push([route, body])
@@ -53,6 +59,7 @@ class FakeServer {
       return json({ error: failure.error }, failure.status)
     }
     if (route === "start") return json(this.started)
+    if (route === "shot") return json({ shot: `tests/${String(body.id)}-20261019-1432.png` })
     const id = body.id as string
     if (route === "mark") this.inbox.setMark(id, body.mark)
     if (route === "now") this.inbox.requestNow(id, body.action, (body.note ?? "") as string)
@@ -494,5 +501,50 @@ describe("ReviewClient.startReview()", () => {
     server.failures.set("start", { status: 400, error: "no page" })
     expect(await client.startReview()).toBeUndefined()
     expect(notices).toEqual(["Typed it.", "No page."])
+  })
+})
+
+// epic `epic-engine` P4:  a test run's answers, screenshots, and the epics left to test
+describe("ReviewClient's test runs", () => {
+  test("answerTest():  a `test` mark, read back by testAnswerOf();  another mark is no answer", async () => {
+    const { client, server } = await started()
+    expect(
+      await client.answerTest("v1", { result: "failed", note: "cut short", shot: "tests/v1-20261019-1432.png" })
+    ).toBe(true)
+    expect(server.posts.at(-1)).toEqual([
+      "mark",
+      {
+        page: PAGE,
+        id: "v1",
+        mark: { action: "test", result: "failed", note: "cut short", shot: "tests/v1-20261019-1432.png" }
+      }
+    ])
+    expect(client.testAnswerOf("v1")).toEqual({
+      result: "failed",
+      note: "cut short",
+      shot: "tests/v1-20261019-1432.png"
+    })
+    await client.answerTest("v1", { result: "passed" })
+    expect(client.testAnswerOf("v1")).toEqual({ result: "passed" })
+    await client.save("q1", { action: "approve" })
+    expect(client.testAnswerOf("q1")).toBeUndefined()
+  })
+
+  test("saveShot():  the route's path;  a refusal is a notice, and nothing", async () => {
+    const { client, server } = await started()
+    const notices: string[] = []
+    client.onNotice((message) => notices.push(message))
+    expect(await client.saveShot("v2", "data:image/png;base64,AAAA")).toBe("tests/v2-20261019-1432.png")
+    expect(server.posts.at(-1)).toEqual(["shot", { page: PAGE, id: "v2", png: "data:image/png;base64,AAAA" }])
+    server.failures.set("shot", { status: 413, error: "over 8 MB" })
+    expect(await client.saveShot("v2", "data:image/png;base64,AAAA")).toBeUndefined()
+    expect(notices).toEqual(["Over 8 MB."])
+  })
+
+  test("openTests():  the epics with open tests, well formed only;  none when the server can't say", async () => {
+    const { client, server } = await started()
+    expect(await client.openTests()).toEqual([{ epic: "sample", open: 3, page: PAGE }])
+    server.tests = { error: "nope" }
+    expect(await client.openTests()).toEqual([])
   })
 })

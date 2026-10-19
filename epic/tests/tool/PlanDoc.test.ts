@@ -9,6 +9,7 @@ import { PhaseIds } from "$/epics/phases"
 
 import { PlanDocError } from "$/epics/tool/planDoc.types"
 
+import { EpicTests } from "$/epics/tool/EpicTests"
 import { ItemPicker } from "$/epics/tool/ItemPicker"
 import { PlanCommits } from "$/epics/tool/PlanCommits"
 import { PlanDoc } from "$/epics/tool/PlanDoc"
@@ -2079,5 +2080,141 @@ describe("PlanDoc summary and check", () => {
       'link to missing #i7 ("I7")',
       'bad value:  <epic-item id="c1"> `status="maybe"` isn\'t one of its values (`open`, `decided`, `done`, `canceled`)'
     ])
+  })
+})
+
+////////////////
+// ## Test answers (epic `epic-engine` P4)
+////////////////
+
+describe("PlanDoc test answers:  Owen's test run", () => {
+  /** A fresh page with tests V1-V3, V1 in the test markup (Step, Should, Example), the others prose only. */
+  function withTests() {
+    const plan = freshPlan()
+    const fields = EpicTests.fieldsHTML({
+      step: 'Open <a class="epic-test-action" href="/epics/index.html">the Epics page</a>',
+      should: "Every epic shows",
+      example: { image: "tests/v1.png", text: "like this" }
+    })
+    plan.addItem("test", "The Epics page lists every epic", { details: fields })
+    plan.addItem("test", "Send wakes the session", { details: "<p>Press Send with nobody listening.</p>" })
+    plan.addItem("test", "Dark mode reads", { details: "<p>Switch to dark.</p>" })
+    return plan
+  }
+
+  test("passed:  the test closed and reviewed, `V1 passed (Owen's run)` logged;  a note kept as his reply", () => {
+    const plan = withTests()
+    const at = new Date(2026, 9, 1, 9, 30).toISOString()
+    expect(plan.applyMark({ id: "v1", action: "test", result: "passed", note: "fine", at })).toEqual({
+      applied: true,
+      did: "passed (Owen's run)"
+    })
+    const item = el(plan, "v1")
+    expect([item.getAttribute("status"), item.getAttribute("reviewed")]).toEqual(["done", "2026-10-01"])
+    expect(item.querySelector('epic-reply[from="Owen"]')?.getAttribute("re")).toBe("test passed")
+    expect(plan.document.querySelector("#log > epic-event:last-of-type")?.textContent).toContain(
+      "V1 passed (Owen's run)"
+    )
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("failed:  a NEW issue with his note and screenshot, linked both ways;  the test stays open, `failed`", () => {
+    const plan = withTests()
+    const result = plan.applyMark({
+      id: "V2",
+      action: "test",
+      result: "failed",
+      note: "Nothing happened.\n\nThe pill stayed grey.",
+      shot: "tests/v2-20261001-0930.png",
+      at: new Date(2026, 9, 1, 9, 30).toISOString()
+    })
+    expect(result).toEqual({ applied: true, did: "failed (Owen's run):  filed I1", filed: "i1" })
+    const test = el(plan, "v2")
+    expect([test.getAttribute("status"), test.getAttribute("failed"), test.getAttribute("reviewed")]).toEqual([
+      "open",
+      "i1",
+      "2026-10-01"
+    ])
+    expect(test.querySelector('epic-status a[href="#i1"]')?.textContent).toBe("I1")
+    const issue = el(plan, "i1")
+    expect(PlanItem.titleOf(issue)).toBe("V2 failed:  Send wakes the session")
+    expect(issue.querySelector('a[href="#v2"]')?.textContent).toBe("V2")
+    expect(issue.textContent).toContain("Owen:  Nothing happened.")
+    expect(issue.textContent).toContain("The pill stayed grey.")
+    const image = issue.querySelector("img")!
+    expect([image.getAttribute("src"), image.getAttribute("alt")]).toEqual([
+      "tests/v2-20261001-0930.png",
+      "Owen's screenshot of V2"
+    ])
+    expect(plan.document.querySelector("#log > epic-event:last-of-type")?.textContent).toContain(
+      "V2 failed (Owen's run):  filed I1"
+    )
+    expect(problems(plan)).toEqual([])
+    // a later run passes it:  closed, its `failed` gone
+    plan.applyMark({ id: "v2", action: "test", result: "passed" })
+    expect([test.getAttribute("status"), test.hasAttribute("failed")]).toEqual(["done", false])
+  })
+
+  test("a closed test that fails again reopens;  with no note or screenshot the issue says only the run", () => {
+    const plan = withTests()
+    plan.setItem("v3", "done")
+    expect(plan.applyMark({ id: "v3", action: "test", result: "failed" }).did).toBe("failed (Owen's run):  filed I1")
+    expect(el(plan, "v3").getAttribute("status")).toBe("open")
+    expect(el(plan, "i1").querySelector("img")).toBeNull()
+  })
+
+  test("skip:  canceled, `no longer applies (Owen's run)`", () => {
+    const plan = withTests()
+    expect(plan.applyMark({ id: "v3", action: "test", result: "skip" }).did).toBe(
+      "canceled:  no longer applies (Owen's run)"
+    )
+    expect([el(plan, "v3").getAttribute("status"), el(plan, "v3").getAttribute("reviewed")]).toEqual([
+      "canceled",
+      "2026-10-01"
+    ])
+  })
+
+  test("not now:  stays open, deferred today;  the next run puts it last", () => {
+    const plan = withTests()
+    expect(plan.applyMark({ id: "v1", action: "test", result: "notnow" }).did).toBe("not now:  deferred (Owen's run)")
+    const item = el(plan, "v1")
+    expect([item.getAttribute("status"), item.getAttribute("deferred"), item.hasAttribute("reviewed")]).toEqual([
+      "open",
+      "2026-10-01",
+      false
+    ])
+    expect(EpicTests.openIn(plan).map((test) => test.id)).toEqual(["V2", "V3", "V1"])
+  })
+
+  test("a test's answer on anything but a test is dropped (`gone`);  an unknown result is left", () => {
+    const plan = withTests()
+    plan.addItem("todo", "a todo")
+    expect(plan.applyMark({ id: "t1", action: "test", result: "passed" })).toEqual({
+      applied: false,
+      gone: true,
+      left: "T1 isn't a test:  its answer dropped"
+    })
+    expect(plan.applyMark({ id: "v1", action: "test", result: "maybe" })).toEqual({
+      applied: false,
+      left: "a test's answer?  maybe"
+    })
+  })
+
+  test("the run's tests:  page order, each with its Step (and action links), Should, Example;  older ones prose", () => {
+    const plan = withTests()
+    plan.setItem("v3", "canceled")
+    expect(EpicTests.openIn(plan)).toEqual([
+      {
+        id: "V1",
+        title: "The Epics page lists every epic",
+        step: "Open the Epics page",
+        actions: [{ text: "the Epics page", href: "/epics/index.html" }],
+        should: "Every epic shows",
+        example: "like this",
+        image: "tests/v1.png"
+      },
+      { id: "V2", title: "Send wakes the session", prose: "Press Send with nobody listening." }
+    ])
+    expect(problems(plan)).toEqual([])
   })
 })

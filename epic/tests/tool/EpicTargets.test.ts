@@ -129,3 +129,29 @@ describe("EpicTargets.problemsIn():  the link check", () => {
     ])
   })
 })
+
+// epic `epic-engine` P4:  a test's action links are served routes, not files
+describe("served links:  routes and a test's action links", () => {
+  test("withoutServedLinks():  `/api/` and `a.epic-test-action` hrefs made inert for the file check;  others kept", () => {
+    const html =
+      '<a class="epic-test-action" href="/epics/index.html">Epics</a> <a href="/api/docs/show?path=%2Fx.html">x</a> ' +
+      '<a href="../guides/y.html" target="y">y</a>'
+    expect(EpicTargets.withoutServedLinks(html)).toBe(
+      '<a class="epic-test-action" href="#">Epics</a> <a href="#">x</a> <a href="../guides/y.html" target="y">y</a>'
+    )
+  })
+
+  test("problemsIn():  a show route whose path names no page;  the content's and a served set's pages found", () => {
+    const show = (path: string) =>
+      `<a class="epic-test-action" href="/api/docs/show?path=${encodeURIComponent(path)}&amp;view=review">o</a>`
+    const html = [
+      show("/epics/seo/seo.plan.html"),
+      show("/components/epics/epic-item.html"),
+      show("/worktrees/w/anything.html"),
+      show("/epics/gone/gone.plan.html")
+    ].join("")
+    expect(new EpicTargets(root).problemsIn(html)).toEqual([
+      "broken link:  /api/docs/show?path=%2Fepics%2Fgone%2Fgone.plan.html&view=review -- no page /epics/gone/gone.plan.html"
+    ])
+  })
+})

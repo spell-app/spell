@@ -44,6 +44,7 @@ const PLAN = `<!doctype html><title>x</title><body class="plan-doc"><epic-page e
 <epic-section id="judgements" kind="judgements"><epic-item id="j3" title="a" status="open"></epic-item></epic-section>
 <epic-section id="decisions" kind="questions"><epic-item id="q8" title="b" status="open"></epic-item></epic-section>
 <epic-section id="issues" kind="issues"><epic-item id="i2" title="c" status="open"></epic-item></epic-section>
+<epic-section id="tests" kind="tests"><epic-item id="v1" title="d" status="open"></epic-item></epic-section>
 </epic-page>`
 
 /** an epic page in `<epic-*>` markup:  the summary, an Overview sub-section, a phase, an item */
@@ -565,5 +566,64 @@ describe("start, and waking the epic", () => {
     sessions(["🚧 big", process.pid])
     expect((await post("now", { page: PLAN_URL, id: "q8", action: "dance" })).status).toBe(400)
     expect(asked).toEqual([])
+  })
+})
+
+////////////////
+// ## A test run (epic `epic-engine` P4)
+////////////////
+
+describe("a test run:  answers and screenshots", () => {
+  /** a PNG's bytes:  its signature, then `size - 8` zeros (the route checks the signature and the size, no more) */
+  function png(size = 64) {
+    const bytes = Buffer.alloc(size)
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(bytes)
+    return bytes
+  }
+
+  /** `bytes` as the data URL a paste gives */
+  const dataUrl = (bytes: Buffer) => `data:image/png;base64,${bytes.toString("base64")}`
+
+  /** the screenshots' folder, beside the page (`root` is made in `beforeAll()`) */
+  const shots = () => join(root, "epics", "big", "tests")
+
+  beforeEach(() => rmSync(shots(), { recursive: true, force: true }))
+
+  test("shot:  written beside the page in tests/, never over one;  the mark then carries it", async () => {
+    const first = await post("shot", { page: PLAN_URL, id: "V1", png: dataUrl(png()) })
+    expect(first.status).toBe(200)
+    expect(first.body.shot).toMatch(/^tests\/v1-\d{8}-\d{4}\.png$/)
+    expect(readFileSync(join(root, "epics", "big", first.body.shot))).toEqual(png())
+    const second = await post("shot", { page: PLAN_URL, id: "v1", png: dataUrl(png(80)) })
+    expect(second.body.shot).not.toBe(first.body.shot)
+    expect(readFileSync(join(root, "epics", "big", first.body.shot))).toEqual(png())
+    const mark = { action: "test", result: "failed", note: "grey", shot: first.body.shot }
+    const marked = await post("mark", { page: PLAN_URL, id: "v1", mark })
+    expect(marked.status).toBe(200)
+    expect(written(PAGES.plan).marks.v1).toMatchObject(mark)
+  })
+
+  test("shot:  only a PNG, only a test's, at most 8 MB;  the guard as every write", async () => {
+    expect((await post("shot", { page: PLAN_URL, id: "v1", png: "data:image/jpeg;base64,AAAA" })).status).toBe(400)
+    expect((await post("shot", { page: PLAN_URL, id: "v1", png: dataUrl(Buffer.from("not a png")) })).status).toBe(400)
+    expect((await post("shot", { page: PLAN_URL, id: "j3", png: dataUrl(png()) })).status).toBe(400)
+    expect((await post("shot", { page: PLAN_URL, id: "v9", png: dataUrl(png()) })).status).toBe(400)
+    expect((await post("shot", { page: `/${PAGES.other}`, id: "v1", png: dataUrl(png()) })).status).toBe(403)
+    const big = await post("shot", { page: PLAN_URL, id: "v1", png: dataUrl(png(8 * 1024 * 1024 + 1)) })
+    expect([big.status, big.body.error]).toEqual([413, "a screenshot is 8 MB at most"])
+    expect(
+      (await post("shot", { page: PLAN_URL, id: "v1", png: dataUrl(png()) }, { "x-server-token": "nope" })).status
+    ).toBe(403)
+    expect(existsSync(shots())).toBe(false)
+  })
+
+  test("mark:  a test's answer only on a test, with a result", async () => {
+    expect((await post("mark", { page: PLAN_URL, id: "j3", mark: { action: "test", result: "passed" } })).status).toBe(
+      400
+    )
+    expect((await post("mark", { page: PLAN_URL, id: "v1", mark: { action: "test", result: "ok" } })).status).toBe(400)
+    expect((await post("mark", { page: PLAN_URL, id: "v1", mark: { action: "test", result: "notnow" } })).status).toBe(
+      200
+    )
   })
 })

@@ -45,6 +45,7 @@ SpellUI.registerPack({
       import("../epic-state-filter"),
       import("../epic-status"),
       import("../epic-summary"),
+      import("../epic-test-run"),
       import("../epic-text-box"),
       import("../epic-thread"),
       import("../epic-update")

@@ -38,8 +38,10 @@ export const RUNNING_API = "/api/epics/running"
  * lacks it):
  * - `serveContent(dir)`:  serve folder `dir` at `/` after the checkout (and at each worktree's `/worktrees/<w>/`),
  *   live-reload it at `/`, and root page edits and file writes there
+ * - `content`:  the content folder it serves at `/`, when it knows it (the epic server:  its default repo's, a demo's
+ *   scratch copy too);  none:  `root`'s config says (`EpicConfig.contentOf()`)
  */
-export type ContentRouteContext = RouteContext & { serveContent?: (dir: string) => void }
+export type ContentRouteContext = RouteContext & { serveContent?: (dir: string) => void; content?: string }
 
 const runningRoutes: RouteModule = {
   name: "running epics",

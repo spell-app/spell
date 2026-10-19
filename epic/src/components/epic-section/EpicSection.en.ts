@@ -95,6 +95,12 @@ export const epicSectionVocabulary = {
       description:
         "Its state filter changed:  its chips, `show all`, or the page's toolbar (`showStates()`).  `states` the ones " +
         "showing;  none:  every state."
+    },
+    {
+      name: "epic-test-start",
+      detail: "{}",
+      description:
+        "The To test section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
     }
   ],
   slots: [
@@ -145,6 +151,12 @@ export const epicSectionVocabulary = {
     {
       name: "new-list",
       description: "A Todos or Questions section's new items waiting to be made:  dashed until sent, then outlined."
+    },
+    {
+      name: "start-testing",
+      description:
+        "The To test section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its " +
+        "open tests one at a time (`epic-test-start`).  Only while the page is reviewed and a test is open."
     }
   ],
   states: [
@@ -172,6 +184,16 @@ export const epicSectionVocabulary = {
       key: "addNew",
       text: "New {kind}",
       description: "An item section's comment-dots button on its title:  its name and tooltip."
+    },
+    {
+      key: "startTesting",
+      text: "Start testing · {count}",
+      description: "The To test section's button on its title (epic `epic-engine` P4):  how many tests are open."
+    },
+    {
+      key: "startTestingTip",
+      text: "Go through the {count} open tests one at a time, answering each on the page",
+      description: "Start testing's tooltip."
     },
     ...NEW_KIND_TEXTS,
     ...NEW_LIST_TEXTS

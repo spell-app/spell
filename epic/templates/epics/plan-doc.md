@@ -124,7 +124,7 @@ written:
 | 5. Caveats         | `#caveats`    | limits and risks we accept                                                                                                                                                                                                                                                                                                                                |
 | 6. Todos           | `#todos`      | later work that isn't a caveat or an issue                                                                                                                                                                                                                                                                                                                |
 | 7. Issues          | `#issues`     | problems found, open until fixed                                                                                                                                                                                                                                                                                                                          |
-| 8. To test         | `#tests`      | what Owen checks by hand before merging: each a step and what should happen (`add <name>#V`); `close` one once it passes                                                                                                                                                                                                                                  |
+| 8. To test         | `#tests`      | what Owen checks by hand before merging, each a Step (what to do) and what it Should do (`add <name>#V --step ... --should ...`, "A test" below); Owen's test run answers them; `close` one by hand once it passes                                                                                                                                        |
 | 9. Log             | `#log`        | one-liners of plan changes, stamped with local date and time                                                                                                                                                                                                                                                                                              |
 
 - The elements draw each section's title, icon, rule, fold and `open/all` count: write only its contents.
@@ -228,6 +228,18 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
 - An item's status: `open`; `decided` (an answered question: a decision in force); `done` (closed, never
   removed: fixed, passed, accepted; NOT struck); `canceled` (made moot by another decision: closed like `done`,
   its title struck through; `reopen` undoes it).
+- A TEST (`#tests`, `add <name>#V`) is what Owen checks by hand, written so his TEST RUN can step him through it
+  (epic `epic-engine` P4):  its fields, in this order, each an `<epic-field label>`:
+  - Step:  exactly what to do, short;  `--step`.  A page to open is an ACTION link, shown as a button in the run:
+    `<a class="epic-test-action" href="...">Open the Epics page</a>` (an `epic pages link` URL)
+  - Should:  what should happen;  `--should`
+  - Example, optional:  a screenshot Claude took (`--example shot.png`, copied to `tests/<id>.png` beside the page)
+    and / or a line of text
+  - If not, optional:  what to tell Claude;  `--if-not`
+  - e.g. `epic add seo#V "The sitemap lists every guide" --step "Open <a class=\"epic-test-action\"
+    href=\"/sitemap.xml\">the sitemap</a>" --should "Every guide is in it" --example sitemap.png`
+  - an older test has only prose:  the run shows it as the Step.  `details <name>#V3 --step ... --should ...`
+    rewrites one in the fields, its prose kept in the Original Discussion
 - An answered question reads in the order it happened (Owen, 2026-10-04, I9 of `review-review`): the question as
   asked, its options (folded "Choices", the chosen one ticked), then the answer. `decide` writes it; answering
   again replaces the answer, the old one into the Original Discussion. Never hand-write the Choices: write the
@@ -491,6 +503,15 @@ waits in the inbox as a mark under its own key, `new1`, `new2` ... (`{ action: "
 All of it works with no session listening: the marks wait, dashed, until Send, Review Now or Do Now wakes the epic
 (below).
 
+Owen's TEST RUN (epic `epic-engine` P4): the page steps him through the epic's open tests one at a time, in the
+Review tab ("Start testing" on the To test section, or `epic test <name>`;  `epic test --all` for every epic's, in
+his saga order). Each test's answer is a mark on it, `{ action: "test", result, note?, shot? }`, sent with Send like
+any other:
+
+- `passed`;  `failed`, with his note and a screenshot he pasted (saved beside the page, `tests/v3-20261019-1432.png`,
+  `POST shot`);  `skip` (it no longer applies);  `notnow` (he can't do it yet)
+- only on a test;  `epic inbox <name>` and `wait` print each with its result, note and screenshot
+
 Review Now (the page header's wand, beside Send; epic `windows-and-review` P4): sends every mark AND turns each
 revisit waiting (unsent, or sent and still to talk over) into a request for now (`POST send { now: true }`,
 `ReviewInbox.reviewNow()`): the listening session answers them all at once, by background agents, into the items.
@@ -533,7 +554,7 @@ server types `/epic review` into it, above):
        - Q3  question, open · Where should the send button sit?
            picks A · In the page header, asks:  "A, but only on epic pages?"
      ...
-   next:  `epic inbox review-review apply` (approve, pick, todo, a todo's next phase or drop, skip, new, urgency)
+   next:  `epic inbox review-review apply` (approve, pick, todo, a todo's next phase or drop, skip, new, test results, urgency)
    ```
 
    - `now`: Add Details and revisit now, TAKEN off the queue, each item marked `working` (its spinner); the mark
@@ -553,6 +574,10 @@ server types `/epic review` into it, above):
    | approve             | an open question                                                   | answered with the option marked recommended (`decide`, that option chosen), reviewed; no recommended option: left, "needs talk"                                                    |
    | approve             | an open judgement call                                             | closed (accepted), reviewed                                                                                                                                                        |
    | approve             | an open test                                                       | closed (passed), reviewed                                                                                                                                                          |
+   | test passed         | a test (Owen's test run)                                           | closed (done), reviewed, a `failed` from an earlier run gone;  logged "V3 passed (Owen's run)";  a note kept as his reply                                                           |
+   | test failed         | a test                                                             | a NEW issue "V3 failed:  <title>", his note and screenshot (an `<img>`) in it, linking the test;  the test stays open (a closed one reopens), reviewed, `failed="i42"`, a Noted card linking the issue.  `apply` lists each failure's issue:  tell Owen one line each, with its link |
+   | test skip           | a test                                                             | canceled, "no longer applies (Owen's run)", reviewed                                                                                                                               |
+   | test notnow         | a test                                                             | stays open, deferred today:  the next run puts it last                                                                                                                             |
    | approve             | anything else (open caveat, issue, todo; closed or answered items) | reviewed                                                                                                                                                                           |
    | pick                | a question                                                         | answered with that option's title, the option chosen (in the card set the mark names), reviewed                                                                                    |
    | pick                | any other item (judgement call, issue, todo, caveat)               | APPROVED with that option: its card set's `chosen` set, then as approve (an open judgement call closed, accepted; reviewed); the option in the log line                            |

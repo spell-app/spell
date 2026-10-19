@@ -74,6 +74,9 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
     case "saga":
       // its own verbs and arguments (`saga set seo epics`):  no epic page to aim at
       return [["saga", ...args]]
+    case "test":
+      // `test seo#V3`:  the run, landing on V3;  `test --all`:  no epic
+      return [["test", ...around([]), ...(ref === undefined ? [] : ["--at", ref])]]
     default:
       if (ITEM_VERBS.includes(verb)) return [[verb, ...around(ref === undefined ? [] : [ref])]]
       refused(verb, target)
@@ -319,10 +322,10 @@ const ITEM_VERBS = [
 /**
  * Verbs that run with no epic named:
  * - on every epic (`list`, `migrate`)
- * - or by a flag (`split --done`, `backfill --all`, `convert --all`)
+ * - or by a flag (`split --done`, `backfill --all`, `convert --all`, `test --all`)
  * - or not on one (`saga`'s own verbs, `summaries`' files)
  */
-const NO_EPIC_VERBS = ["list", "migrate", "split", "backfill", "convert", "saga", "summaries", "update"]
+const NO_EPIC_VERBS = ["list", "migrate", "split", "backfill", "convert", "saga", "summaries", "update", "test"]
 
 /** Verbs on one phase, its ref after the epic:  `epic phase seo#P3 done` -> `phase seo 3 done`. */
 const PHASE_VERBS = ["phase", "updated", "add-request"]

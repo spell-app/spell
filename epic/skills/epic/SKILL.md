@@ -354,8 +354,21 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      - The phase's "To review" line lists the ones Owen hasn't reviewed;  the script writes it on every edit.
      - Never hand-write a "Judgement calls:" line.
    - Something only Owen can check (a live window, a click, a look):  a test, into "To test".
-     - `add <name>#V "<step>" --details "<p>what should happen</p>"`
-     - `close` it once he says it passed.
+     - First, check it yourself where you can (a test, a script, a browser screenshot):  only what you can't goes to
+       Owen.
+     - Written so his TEST RUN can step him through it on the page, one at a time (epic `epic-engine` P4):
+
+       ```text
+       add <name>#V "<what it checks>" --step "<exactly what to do>" --should "<what should happen>"
+           [--example <screenshot.png> | "a line"] [--if-not "<what to tell Claude>"]
+       ```
+
+       - `--step`:  short, exact;  a page to open is an action link, a button in the run:
+         `<a class="epic-test-action" href="<an epic pages link URL>">Open the Epics page</a>`
+       - `--example`:  a screenshot you took of it working, copied beside the page (`tests/<id>.png`)
+       - `details <name>#V3 --step ... --should ...` rewrites an older test in these fields
+     - He answers it in the run (passed, failed, skip, not now);  `inbox apply` closes it (7.3).
+       Told in chat instead:  `close` it once he says it passed.
    - Fixed or done:  `close <name>#<id>`.
      It stays, closed, NOT struck.
    - Made moot by another decision:  `cancel <name>#<id> "why"`.
@@ -637,6 +650,16 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
    - Up to 5 agents at once (root rules);  more:  the rest after.
 3. SENT marks:  `epic inbox <name> apply`.
    - Approvals, picks and todos land in the doc;  it prints each.
+   - TEST RESULTS from Owen's test run (epic `epic-engine` P4):  `wait` prints them under
+     "test, Owen's test run", each test with its result (`passed`, `FAILED`, `skip`, `not now`), his note and his
+     screenshot's path.  `apply` applies them all:
+     - passed:  the test closed;  skip:  canceled;  not now:  deferred, last in his next run
+     - failed:  a NEW issue, "V3 failed:  <title>", holding his note and screenshot, linked both ways;
+       the test stays open, marked failed
+     - then `apply` lists the failures, `V3 -> I12`:  tell Owen ONE line per failure, with the new issue's link
+       (`epic pages link <doc> --hash i12 --review`), e.g. "V3 failed:  the pill stayed grey -> I12";  the passes,
+       skips and not-nows in one line of counts
+     - fix the issues as any issue:  don't reopen the test by hand;  his next run tries it again
    - A pick works on ANY item's cards, a reply's too (I8 of `epic-components`):
      a question is answered with it, any other item approved with it.
    - `apply` itself gives each pick, todo and queued todo its outlined NOTED card;  an approval gets none (Q19):
@@ -1032,6 +1055,8 @@ file <name> <rN> "where it went"                    a request with no phase:  on
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab
 add <name>#Q|#J|#C|#I|#T|#V|#D "title" [--details "<p>html</p>"] [--calm]   prints the id (C3)
+add <name>#V "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a test, for Owen's test run
+test <name>[#V3] [--list [--json]]  /  test --all   Owen's test run in the Review tab (?test=1);  --list:  open tests
 calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option Owen settled in words, any item:  as his pick (latest set)

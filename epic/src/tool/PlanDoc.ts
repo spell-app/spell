@@ -615,9 +615,8 @@ export class PlanDoc extends PlanReader {
    * - throws on a kind not in `KINDS`;  `calm` on a kind that's never urgent
    */
   addItem(kind: string, title: string, { details, titleHTML = false, calm = false }: AddItemOptions = {}): string {
-    if (!isItemKind(kind)) throw new PlanDocError(`kind must be ${Object.keys(KINDS).join(" / ")}, not "${kind}"`)
-    const spec = KINDS[kind]
-    const id = `${spec.prefix}${Math.max(0, ...this.items(kind).map((item) => PlanItem.idNumber(item.id))) + 1}`
+    const id = this.nextId(kind)
+    const spec = KINDS[kind as ItemKind]
     if (calm && !CALM_ID.test(id)) throw new PlanDocError(`--calm is for a judgement call or an issue, not a ${kind}`)
     const section = this.section(spec.section)
     const heading = titleHTML ? this.titleFromHTML(title) : { title }
@@ -637,6 +636,16 @@ export class PlanDoc extends PlanReader {
     this.stamp(item)
     this.markUpdate(item)
     return id
+  }
+
+  /**
+   * The id the next `kind` item will get (`addItem()`'s):  one past the highest of its kind, `v4`.
+   * - throws on a kind not in `KINDS`
+   */
+  nextId(kind: string): string {
+    if (!isItemKind(kind)) throw new PlanDocError(`kind must be ${Object.keys(KINDS).join(" / ")}, not "${kind}"`)
+    const spec = KINDS[kind]
+    return `${spec.prefix}${Math.max(0, ...this.items(kind).map((item) => PlanItem.idNumber(item.id))) + 1}`
   }
 
   /**
@@ -932,6 +941,8 @@ export class PlanDoc extends PlanReader {
    *   - the rest as for an item
    * - `new`, a new todo or question Owen asked for from the page (epic `airplane` P2):
    *   made, as `plan-doc add` makes one (`addFromPage()`)
+   * - `test`, a test's answer from the page's test run (epic `epic-engine` P4:  `applyTest()`):
+   *   passed closes it, failed files an issue, skip cancels it, not now defers it
    * - an applied mark adds ONE log line (`J9 approved:  closed (accepted)`);  the methods it calls stamp the item
    */
   applyMark(mark: PlanMark): MarkResult {
@@ -968,7 +979,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /** `applyMark()`'s work on `item`, the log line aside. */
-  applyAction(item: Element, { action, pick, choices, when, note, at }: PlanMark): MarkResult {
+  applyAction(item: Element, { action, pick, choices, when, note, at, result, shot }: PlanMark): MarkResult {
     const kind = PlanItem.kindOf(item.id)
     const open = item.getAttribute("status") === "open"
     switch (action) {
@@ -1010,11 +1021,76 @@ export class PlanDoc extends PlanReader {
         this.review(item.id)
         return { applied: true, did: `skipped:  nothing to do, reviewed${note ? " (his note kept)" : ""}` }
       }
+      case "test":
+        return this.applyTest(item, kind, { result, note, shot, at })
       default:
         return this.leftForClaude({ action, pick, when, note }, () =>
           this.optionCards(item, choices).find((card) => card.letter === pick)
         )
     }
+  }
+
+  /**
+   * A test's answer from Owen's TEST RUN on the page (epic `epic-engine` P4):  `result`, maybe his `note` and `shot`.
+   * - `passed`:  closed (done), reviewed;  a `failed` from an earlier run goes
+   * - `failed`:  a NEW issue, "V3 failed:  <test title>", linking the test, with his note and his screenshot
+   *   (an `<img>`, its path from the epic page's folder, as the page's own) (`fileFailure()`)
+   *   - the test stays open (a closed one reopens), reviewed, `failed="i42"`,
+   *     and a Noted card linking the issue:  linked both ways
+   * - `skip`:  it no longer applies:  canceled, reviewed
+   * - `notnow`:  he can't do it yet:  stays open, deferred today, so the next run puts it last
+   * - his note kept as his reply (`keepNote()`), but a failure's:  that's in the issue
+   * - dropped (`gone`) when `item` isn't a test;  left for Claude when the result is none of those
+   */
+  private applyTest(
+    item: Element,
+    kind: string,
+    { result, note, shot, at }: Omit<PlanMark, "id" | "action">
+  ): MarkResult {
+    const label = item.id.toUpperCase()
+    if (kind !== "test") return { applied: false, gone: true, left: `${label} isn't a test:  its answer dropped` }
+    if (result !== "failed" && note) this.keepNote(item.id, { note, action: TEST_NOTE_AS[result!] ?? "test", at })
+    switch (result) {
+      case "passed":
+        if (item.getAttribute("status") !== "done") this.setItem(item.id, "done")
+        Markup.set(item, { failed: undefined })
+        this.review(item.id)
+        return { applied: true, did: `passed (${OWENS_RUN})` }
+      case "failed": {
+        const issue = this.fileFailure(item, { note, shot, at })
+        if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
+        Markup.set(item, { failed: issue })
+        this.review(item.id)
+        const link = `<a href="#${issue}">${issue.toUpperCase()}</a>`
+        this.noteStatus(item.id, `Failed in Owen's test run:  filed as ${link}.`)
+        return { applied: true, did: `failed (${OWENS_RUN}):  filed ${issue.toUpperCase()}`, filed: issue }
+      }
+      case "skip":
+        this.setItem(item.id, "canceled")
+        this.review(item.id)
+        return { applied: true, did: `canceled:  no longer applies (${OWENS_RUN})` }
+      case "notnow":
+        this.defer(item.id)
+        return { applied: true, did: `not now:  deferred (${OWENS_RUN})` }
+      default:
+        return { applied: false, left: `a test's answer?  ${result}` }
+    }
+  }
+
+  /**
+   * File test `item`'s failure as a new issue, "V3 failed:  <test title>";  its id (`i42`).
+   * - its details:  the run and a link back to the test, Owen's note in his words, his screenshot (`shot`, from the
+   *   epic page's folder:  the page's own relative path, so it shows in the page and its part alike)
+   */
+  private fileFailure(item: Element, { note, shot, at }: Pick<PlanMark, "note" | "shot" | "at">): string {
+    const label = item.id.toUpperCase()
+    const title = PlanItem.titleOf(item)
+    const when = PlanTime.clockTime(at ? new Date(at) : this.now)
+    const run = `<p>Owen's test run, ${PlanMarkup.text(when)}:  <a href="#${item.id}">${label}</a> failed.</p>`
+    const said = note ? promptHTML(note).replace("<p>", "<p><b>Owen:</b>  ") : ""
+    const alt = PlanMarkup.text(`Owen's screenshot of ${label}`)
+    const image = shot ? `<p><img src="${PlanMarkup.text(shot)}" alt="${alt}"></p>` : ""
+    return this.addItem("issue", `${label} failed:  ${title}`, { details: `${run}${said}${image}` })
   }
 
   /**
@@ -1892,6 +1968,12 @@ function textNodes(node: Node): Node[] {
 
 /** `PlanItem.asProse()`'s option for text as a reader sees it:  every element's heading, at any depth. */
 const PLAIN = { plain: true }
+
+/** Who a test answer's log line names (epic `epic-engine` P4):  `V3 passed (Owen's run)`. */
+const OWENS_RUN = "Owen's run"
+
+/** What Owen's note on a test answer is kept as (`<epic-reply re>`):  its result in words. */
+const TEST_NOTE_AS: Record<string, string> = { passed: "test passed", skip: "test skipped", notnow: "test not now" }
 
 /** What a rewrite of an item's details (`PlanDoc.setDetails()`) leaves where it is, slotted children aside. */
 const KEPT_ON_REWRITE = ["epic-answer", "epic-original", "epic-commit"]

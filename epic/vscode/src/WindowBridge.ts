@@ -26,8 +26,9 @@
  * - Ops:
  *   - `add-folder { path, name? }`:  add `path` as the window's last folder;  already there:  ok, no-op
  *   - `remove-folder { path }`:  remove it;  never folder 0 (the repo root);  not there:  ok, no-op
- *   - `show-doc { file, hash?, view? }`:  `DocPreview.show(file, hash, view)`
+ *   - `show-doc { file, hash?, view?, query? }`:  `DocPreview.show(file, hash, view, query)`
  *     - `hash`:  an id on the page to land on
+ *     - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
  *     - `view`:  the side bar tab, `"docs"` ("Spell Docs", the default) or `"review"` ("Review")
  *   - `reload-view { view? }`:  rebuild that doc view from scratch, a new iframe at the page in view
  *     (`DocView.rebuild()`);  answers its `url`, `null` when the view was never shown
@@ -203,7 +204,8 @@ export class WindowBridge {
         if (!existsSync(file) || !statSync(file).isFile()) throw new BridgeError(404, `no file '${file}'`)
         const view = body.view ?? "docs"
         if (view !== "docs" && view !== "review") throw new BridgeError(400, `bad view ${JSON.stringify(view)}`)
-        await DocPreview.show(file, typeof body.hash === "string" ? body.hash : undefined, view)
+        const hash = typeof body.hash === "string" ? body.hash : undefined
+        await DocPreview.show(file, hash, view, typeof body.query === "string" ? body.query : undefined)
         return { file, view }
       }
       case "reload-view": {

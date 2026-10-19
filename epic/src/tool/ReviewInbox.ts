@@ -39,6 +39,12 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       - none (an older mark):  the item's own (`PlanItem.choicesOf()`)
  *     - "pick B, but ...":  a revisit carrying the pick, `{ action: "revisit", when, note, pick: "B" }`;
  *       never applied:  Claude talks it over (`toMark()`)
+ *     - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item (`v3`) only:
+ *       `{ action: "test", result, note?, shot? }`
+ *       - `result`:  `passed`, `failed`, `skip` (no longer applies), `notnow` (can't do it yet):  `TEST_RESULTS`
+ *       - `note`:  what Owen says (a failure's);  `shot`:  his screenshot, `tests/v3-20261019-1432.png`,
+ *         from the epic page's folder (written by the review routes' `POST shot`)
+ *       - sent with the rest;  `plan-doc inbox apply` applies it (`PlanDoc.applyMark()`)
  *   - `drafts`:  `{ [id]: { action, note, at } }`, a note box's text as Owen types it (`setDraft()`),
  *     until the mark that uses it;  never sent or counted
  *   - `urgency`:  `{ [id]: { calm, at } }`, Owen's click on an open judgement call's or issue's id chip
@@ -322,6 +328,7 @@ export class ReviewInbox {
     const checked = mark === null ? null : { ...ReviewInbox.toMark(mark), at }
     if (checked && (checked.action === "new") !== NEW_ID.test(key))
       throw new InboxError(`a new item is asked for under its own key (new1 ...), never on an item:  ${key}`)
+    if (checked?.action === "test" && !TEST_ID.test(key)) throw new InboxError(`only a test is tested:  ${key}`)
     if (!checked || !ReviewInbox.isImmediate(checked)) this.now = this.now.filter((each) => each.id !== key)
     if (checked) this.marks[key] = checked
     else delete this.marks[key]
@@ -777,6 +784,9 @@ export class ReviewInbox {
    * - with a pick:  `choices` too, when given:
    *   which of the item's option card sets it's from, by position (`0`, `1` ...:  I8);  none, the item's own
    * - `todo`, `next`, `drop`, `skip`:  `note` trimmed, kept only when there is one
+   * - `test` (a test run's answer, epic `epic-engine` P4):  `result` one of `TEST_RESULTS`;
+   *   `note` trimmed, kept only when there is one;  `shot` kept when given, a screenshot in the epic's `tests/`
+   *   (`tests/v3-20261019-1432.png`:  `TEST_SHOT`)
    * - `new` (a new item, `setNew()`):
    *   - `kind`:  one of `NEW_KINDS`
    *   - `title`:  trimmed, never empty, at most `MAX_TITLE` characters
@@ -790,6 +800,7 @@ export class ReviewInbox {
     if (!mark || typeof mark !== "object" || Array.isArray(mark)) throw new InboxError("a mark is an object, or null")
     const { action, when = "soon", note = "", pick, choices } = mark as Record<string, unknown>
     if (action === "new") return toNewItem(mark as Record<string, unknown>)
+    if (action === "test") return toTestAnswer(mark as Record<string, unknown>)
     if (!isAction(action)) throw new InboxError(`no such action:  ${action} (${ACTIONS.join(" | ")})`)
     if (action === "revisit") {
       if (!REVISIT_WHEN.includes(when as RevisitWhen))
@@ -897,12 +908,22 @@ export type InboxMark = CheckedMark & { at: string }
 
 /**
  * A mark as `ReviewInbox.toMark()` checks it, before it's stamped.
- * - `when`, `note`:  a revisit's (`note` a todo's and a new item's too)
+ * - `when`, `note`:  a revisit's (`note` a todo's, a new item's and a test answer's too)
  * - `pick`:  a pick's letter, or a revisit's "pick B, but ..."
  * - `choices`:  with a pick, which of the item's option card sets it's from, by position (I8);  none:  its own
  * - `kind`, `title`, `near`:  a new item's (`action: "new"`, epic `airplane` P2)
+ * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4)
  */
-export type CheckedMark = { action: MarkAction; when?: RevisitWhen; note?: string } & PickFields & NewItemFields
+export type CheckedMark = { action: MarkAction; when?: RevisitWhen; note?: string } & PickFields &
+  NewItemFields &
+  TestFields
+
+/**
+ * A test answer's fields (`action: "test"`, epic `epic-engine` P4):
+ * - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`)
+ * - `shot`:  Owen's screenshot, from the epic page's folder:  `tests/v3-20261019-1432.png`
+ */
+export type TestFields = { result?: TestResult; shot?: string }
 
 /**
  * A new item's fields (`action: "new"`, `ReviewInbox.setNew()`):
@@ -997,8 +1018,9 @@ export const INBOX_VERSION = 1
  * - `revisit`:  talk it through again;  `when` `soon` (with the next batch) or `now` (immediate), `note` Owen's text
  * - `pick`:  an option card, by letter (`pick: "B"`), on any item (I8):  `choices` says which card set
  * - `new`:  a new todo or question Owen asks for from the page (`setNew()`, epic `airplane` P2), under its own key
+ * - `test`:  a test's answer from the page's test run (epic `epic-engine` P4):  `result`, maybe `note` and `shot`
  */
-export const ACTIONS = ["approve", "todo", "next", "drop", "skip", "details", "revisit", "pick", "new"] as const
+export const ACTIONS = ["approve", "todo", "next", "drop", "skip", "details", "revisit", "pick", "new", "test"] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]
 
@@ -1006,6 +1028,17 @@ export type MarkAction = (typeof ACTIONS)[number]
 export const NEW_KINDS = ["todo", "question", "issue", "test"] as const
 /** One of `NEW_KINDS`. */
 export type NewKind = (typeof NEW_KINDS)[number]
+
+/**
+ * A test's answers from the page's test run (epic `epic-engine` P4), as `PlanDoc.applyMark()` applies them:
+ * - `passed`:  the test closed, done
+ * - `failed`:  a new issue with Owen's note and screenshot;  the test stays open, marked failed
+ * - `skip`:  it no longer applies:  canceled
+ * - `notnow`:  he can't do it yet:  deferred, so the next run puts it last
+ */
+export const TEST_RESULTS = ["passed", "failed", "skip", "notnow"] as const
+/** One of `TEST_RESULTS`. */
+export type TestResult = (typeof TEST_RESULTS)[number]
 
 /** The summary's key in the inbox:  `<epic-summary>` has no id of its own (epic `airplane` P2). */
 export const SUMMARY_ID = "summary"
@@ -1055,6 +1088,18 @@ const ITEM_ID = /^(?:[a-z]{1,2}\d+|p-[a-z0-9]+(?:-[a-z0-9]+)*)$/
 /** A new item's key (`setNew()`):  `new1`, `new2` ... */
 const NEW_PREFIX = "new"
 const NEW_ID = /^new\d+$/
+
+/** A test item's id:  only a test takes a test answer. */
+const TEST_ID = /^v\d+$/
+
+/**
+ * A test answer's screenshot, from the epic page's folder:  `tests/v3-20261019-1432.png`
+ * (`-2` ... when two land in one minute), as the review routes' `POST shot` writes it.
+ */
+export const TEST_SHOT = /^tests\/v\d+-\d{8}-\d{4}(?:-\d+)?\.png$/
+
+/** The longest a test answer's note may be:  a few paragraphs, not a log. */
+const MAX_TEST_NOTE = 20_000
 
 /** The longest title a new item may have:  a line, not a page. */
 const MAX_TITLE = 300
@@ -1109,6 +1154,28 @@ function toNewItem({ kind, title, note = "", near }: Record<string, unknown>): C
     title: title.trim(),
     ...(note.trim() ? { note: note.trim() } : {}),
     ...(about ? { near: about } : {})
+  }
+}
+
+/**
+ * A test's answer (`action: "test"`) from a request, checked (`ReviewInbox.toMark()`):
+ * `{ action, result, note?, shot? }`, in that order.
+ * - an `InboxError` for a bad result, a note that isn't text (or is too long), a shot that isn't one of the epic's
+ *   `tests/` screenshots (`TEST_SHOT`)
+ */
+function toTestAnswer({ result, note = "", shot }: Record<string, unknown>): CheckedMark {
+  if (!TEST_RESULTS.includes(result as TestResult))
+    throw new InboxError(`a test's answer?  ${result} (${TEST_RESULTS.join(" | ")})`)
+  if (typeof note !== "string") throw new InboxError("a test answer's note is text")
+  if (note.length > MAX_TEST_NOTE) throw new InboxError(`a test answer's note:  ${MAX_TEST_NOTE} characters at most`)
+  const given = shot !== undefined && shot !== null && shot !== ""
+  if (given && (typeof shot !== "string" || !TEST_SHOT.test(shot)))
+    throw new InboxError(`not a test's screenshot:  ${JSON.stringify(shot)} (tests/v3-20261019-1432.png)`)
+  return {
+    action: "test",
+    result: result as TestResult,
+    ...(note.trim() ? { note: note.trim() } : {}),
+    ...(given ? { shot: shot as string } : {})
   }
 }
 

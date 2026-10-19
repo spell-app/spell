@@ -247,7 +247,7 @@ export class EpicProgram {
       epic.command("add"),
       "add an item (J judgement, Q question, I issue, C caveat, T todo, V test, D decision)"
     )
-      .usage('<epic>#J "Title" [--details <html>] [--calm]')
+      .usage('<epic>#J "Title" [--details <html>] [--calm]  |  <epic>#V "Title" --step <html> --should <html> ...')
       .addHelpText("after", ADD_HELP)
     this.page(
       epic.command("calm"),
@@ -276,7 +276,7 @@ export class EpicProgram {
       epic.command("details"),
       "write an agent's details or reply into an item;  --append adds it, --more under it",
       "epic details seo#J3 --file reply.html"
-    ).usage("<epic>#J3 --file <reply.html> [--append | --more]")
+    ).usage("<epic>#J3 --file <reply.html> [--append | --more]  |  <epic>#V3 --step <html> --should <html> ...")
     this.page(
       epic.command("status"),
       "Claude's status card on an item:  underway (spinner on), done, or noted",
@@ -316,6 +316,13 @@ export class EpicProgram {
     )
       .usage("<epic> [listen | unlisten | wait | apply]  |  <epic>#J3 working on | off  |  <epic>#J3 done | clear")
       .addHelpText("after", INBOX_HELP)
+    this.page(
+      epic.command("test"),
+      "Owen's test run:  the page in the Review tab, one test at a time, answered on the page;  --all:  every " +
+        "epic's;  --list:  the open tests"
+    )
+      .usage("<epic>[#V3] [--list [--json]]  |  --all [--list] [--json]")
+      .addHelpText("after", TEST_HELP)
 
     ////////////////
     // ## Epic page:  log and upkeep
@@ -829,9 +836,27 @@ const ADD_HELP = `
 Prints the new item's id.  The letter after # is its kind:
   J judgement   Q question   I issue   C caveat   T todo   V test (checked by hand)   D decision (a question born answered)
 --calm (last):  a judgement or issue that wouldn't surprise Owen, yellow rather than red.
+A test (V) Owen's test run steps him through, its fields HTML (epic details seo#V3 takes them too):
+  --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> is a button in the run
+  --should <html>     what should happen
+  --example <png>     a screenshot of it, copied to tests/<id>.png beside the page;  or a line of text
+  --if-not <html>     what to tell Claude when it doesn't
 
-Example:
-  epic add seo#J "Kept one file per template" --details "<p>Why ...</p>" --calm`
+Examples:
+  epic add seo#J "Kept one file per template" --details "<p>Why ...</p>" --calm
+  epic add seo#V "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"`
+
+/** After `epic test --help`. */
+const TEST_HELP = `
+The run shows one open test at a time:  its Step, Should, Example and If not;  Owen answers Passed, Failed (a note
+and a screenshot), Skip or Not now, and Send hands them to the session listening (epic inbox seo apply).
+
+Examples:
+  epic test seo                   the run, in the Review tab (the page with ?test=1)
+  epic test seo#V3                ... at V3
+  epic test seo --list [--json]   its open tests, in the run's order:  page order, Not now ones last
+  epic test --all [--list]        every epic with open tests, in Owen's saga order;  the first one opened,
+                                  its last card leading to the next`
 
 /** After `epic inbox --help`. */
 const INBOX_HELP = `
@@ -839,7 +864,7 @@ Examples:
   epic inbox seo                  what Owen sent from the page:  requests, marks, comments
   epic inbox seo listen           this session waits on the inbox;  unlisten:  stopped
   epic inbox seo wait             block until there's work, print it, exit 0 (run it in the background)
-  epic inbox seo apply [ids...]   apply the sent approve / pick / todo marks to the page;  --all:  sent or not
+  epic inbox seo apply [ids...]   apply the sent approve / pick / todo marks and test answers;  --all:  sent or not
   epic inbox seo#J3 working on    the page's spinner on an item (or a comment, seo#M3);  off:  stopped
   epic inbox seo#J3 done          an agent finished the item:  its mark and spinner go
   epic inbox seo#J3 clear         drop its marks (a revisit talked over)`

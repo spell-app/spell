@@ -758,3 +758,42 @@ describe("ReviewInbox waking the epic", () => {
     expect(inbox.isEmpty).toBe(true)
   })
 })
+
+describe("ReviewInbox test answers (epic `epic-engine` P4)", () => {
+  test("checked:  a result, a trimmed note, a screenshot in the epic's tests/;  in that order, nothing else", () => {
+    expect(
+      ReviewInbox.toMark({
+        action: "test",
+        result: "failed",
+        note: "  grey  ",
+        shot: "tests/v3-20261019-1432.png",
+        x: 1
+      })
+    ).toEqual({ action: "test", result: "failed", note: "grey", shot: "tests/v3-20261019-1432.png" })
+    expect(ReviewInbox.toMark({ action: "test", result: "passed", note: " ", shot: "" })).toEqual({
+      action: "test",
+      result: "passed"
+    })
+    expect(ReviewInbox.toMark({ action: "test", result: "notnow", shot: "tests/v3-20261019-1432-2.png" }).shot).toBe(
+      "tests/v3-20261019-1432-2.png"
+    )
+    for (const bad of [
+      { action: "test" },
+      { action: "test", result: "maybe" },
+      { action: "test", result: "skip", note: 3 },
+      { action: "test", result: "failed", shot: "../../etc/passwd" },
+      { action: "test", result: "failed", shot: "tests/v3.png" },
+      { action: "test", result: "failed", note: "x".repeat(20_001) }
+    ])
+      expect(() => ReviewInbox.toMark(bad)).toThrow(InboxError)
+  })
+
+  test("only on a test item;  waits for Send like any mark, and counts as unsent until then", () => {
+    const inbox = new ReviewInbox()
+    expect(() => inbox.setMark("j3", { action: "test", result: "passed" }, T1)).toThrow(/only a test/)
+    inbox.setMark("V3", { action: "test", result: "skip" }, T1)
+    expect(inbox.unsentMarks.map((mark) => [mark.id, mark.result])).toEqual([["v3", "skip"]])
+    inbox.markSent(T2)
+    expect(inbox.sentMarks.map((mark) => mark.id)).toEqual(["v3"])
+  })
+})

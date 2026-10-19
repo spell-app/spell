@@ -20,6 +20,13 @@
  *     a revisit may carry a `pick` letter too;  `choices`, the pick's card set by position (I8)
  *   - `id` must be an item, phase, Overview sub-section or the summary (`summary`) of that doc
  *     (400 otherwise:  `ReviewInbox.itemIds()`)
+ *   - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item only:
+ *     `{ action: "test", result: "passed" | "failed" | "skip" | "notnow", note?, shot? }`
+ * - `POST /api/epics/review/shot` `{ page, id, png }` -- Owen's screenshot of test `id` failing, pasted or dropped in
+ *   the test run (epic `epic-engine` P4):  `png` a PNG data URL, at most 8 MB (`MAX_SHOT`, else 413)
+ *   - written beside the page, `tests/v3-20261019-1432.png` (`TestShots.saveShot()`), never over a file
+ *   - answers `{ shot }`, that path:  the failure's mark carries it
+ *   - only a test's id (400);  its own body limit, since a screenshot is far bigger than a note
  * - `POST /api/epics/review/new` `{ page, id?, entry }` -- a NEW todo or question asked for from the page
  *   (epic `airplane` P2):  `entry` `{ kind, title, note?, near? }` under key `id` (`new1` ...),
  *   or, without one, the next free key
@@ -50,7 +57,8 @@
  * - writes:  under the inbox's lock, atomic (`ReviewInbox.updateAsync()`);
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  * - Loaded by the page server under `tsx` (`PageServer.loadRoutes()`), with `packages/server/tsconfig.json`'s aliases.
- *   Imports `ReviewInbox` only, never `PlanDoc`:  a request reads the doc's TEXT (`ReviewInbox.itemIds()`).
+ *   Imports `ReviewInbox` (and `TestShots`, as light), never `PlanDoc`:  a request reads the doc's TEXT
+ *   (`ReviewInbox.itemIds()`).
  * - From the docs tools' `reviewRoutes.ts` (epic `epic-components`, P7).
  */
 import { readFileSync } from "node:fs"
@@ -62,12 +70,19 @@ import { SAGA_PREFIX } from "$/epics/review/review.types"
 
 import { InboxError, ReviewInbox, type PageInbox } from "./ReviewInbox"
 import { ReviewStart } from "./ReviewStart"
+import { TestShots } from "./TestShots"
 
 /** Where the routes live. */
 const API = "/api/epics/review"
 
 /** Biggest body accepted:  a revisit note is a few lines. */
 const MAX_BODY = 64 * 1024
+
+/** Biggest screenshot a test run sends (`POST shot`):  8 MB of PNG. */
+const MAX_SHOT = 8 * 1024 * 1024
+
+/** Biggest `POST shot` body:  the screenshot as base64 (4 bytes for 3), and room for the rest. */
+const MAX_SHOT_BODY = Math.ceil((MAX_SHOT * 4) / 3) + MAX_BODY
 
 /** An epic page's file:  `epics/<name>/<name>.plan.html` (before 2026-10-05 under `packages/docs/content/`). */
 const PLAN_DOC = /\/(?:packages\/docs\/content\/)?epics\/([^/]+)\/\1\.plan\.html$/
@@ -82,6 +97,15 @@ const reviewRoutes: RouteModule = {
     api.get("/inbox", (request, reply) => {
       const inbox = ReviewInbox.read(ReviewInbox.pathFor(planDoc(web.files, request.query.page)))
       reply.set("Cache-Control", "no-store").json(inbox.forPage())
+    })
+    // before the other writes' body limit:  a screenshot is megabytes
+    api.post("/shot", guard.writeCheck, SRV.parseBodies({ limit: MAX_SHOT_BODY }), async (request, reply) => {
+      const body = request.body as { page?: unknown; id?: unknown; png?: unknown }
+      const file = planDoc(web.files, body.page)
+      const id = itemOf(file, body.id)
+      const png = asHttp(() => TestShots.pngOf(body.png))
+      if (png.length > MAX_SHOT) throw new SRV.HttpError(413, `a screenshot is ${MAX_SHOT / 1024 / 1024} MB at most`)
+      reply.json({ shot: await asHttpAsync(() => TestShots.saveShot(file, id, png)) })
     })
     api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
     api.post("/mark", async (request, reply) => {
@@ -200,6 +224,16 @@ function itemOf(file: string, id: unknown): string {
 async function update(file: string, change: (inbox: ReviewInbox) => unknown): Promise<PageInbox> {
   const inbox = await ReviewInbox.updateAsync(ReviewInbox.pathFor(file), (each) => asHttp(() => change(each)))
   return inbox.forPage()
+}
+
+/** `asHttp()` for async work:  an `InboxError` it rejects with becomes a 400. */
+async function asHttpAsync<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (error) {
+    if (error instanceof InboxError) throw new SRV.HttpError(400, error.message)
+    throw error
+  }
 }
 
 /** Run `fn`;  an `InboxError` it throws becomes a 400. */

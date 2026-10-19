@@ -45,6 +45,15 @@
  *   - `href` from the saga page's folder (`../../epics/x/x.plan.html`);  `facts` what its state is read from
  *   - gathered when asked, from the epic pages' skeletons:  nothing to keep up
  *   - a read, so no token;  400 for a malformed saga id, `{ epics: [] }` for one no epic names
+ *
+ * WAITING TO TEST (epic `epic-engine` P4):  the epics a test run steps through, "everything waiting to test"
+ * - `GET /api/epics/tests` -- answers `[{ epic, title, saga, open, page, href }]` (`EpicTestCount`):  every epic with
+ *   open tests, in Owen's saga order (`EpicTests.waiting()`)
+ *   - `page`, its URL path (`/epics/x/x.plan.html`);  `href`, from another epic page's folder (`../x/x.plan.html`)
+ *   - the run's summary card asks it for the next epic (`epic test --all`);  `epic test --all` lists the same
+ *   - gathered when asked, from the epic pages' skeletons;  a read, so no token
+ *   - from the content folder the server serves (`ContentRouteContext`'s `content`, the epic server's), else `root`'s:
+ *     so a demo server (`DemoServer`) answers from its copies (epic `epic-engine` I45)
  */
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
@@ -54,10 +63,12 @@ import type { RouteModule } from "$/server/page"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 import { FAVORITES_FILE, favoritesIn } from "$/epics/list/EpicCards"
+import type { ContentRouteContext } from "$/epics/list/runningRoutes"
 
 // the route `<epic-cards>` asks:  its family's types file (data only)
 import { SAGA_EPICS_API } from "$/epics/components/epic-cards/EpicCards.types"
 
+import { EpicTests, TESTS_API } from "./EpicTests"
 import { PlanDocCommands } from "./PlanDocCommands"
 import { PlanDocFiles } from "./PlanDocFiles"
 import { SagaEpics } from "./SagaEpics"
@@ -77,7 +88,7 @@ export const FROM_PAGE = "Made from the Epics page (New epic)"
 
 const epicRoutes: RouteModule = {
   name: "epics",
-  setup({ root, router, guard }) {
+  setup({ root, router, guard, content }: ContentRouteContext) {
     router.post(API, guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }), async (request, reply) => {
       const { title, prompt } = (request.body ?? {}) as { title?: unknown; prompt?: unknown }
       if (typeof title !== "string" || !title.trim()) throw new SRV.HttpError(400, "no title")
@@ -96,6 +107,9 @@ const epicRoutes: RouteModule = {
       reply
         .set("Cache-Control", "no-store")
         .json({ pages: new SeeAlso(root).linksOf(name), saga: sagaLinkOf(root, name) })
+    })
+    router.get(TESTS_API, (_request, reply) => {
+      reply.set("Cache-Control", "no-store").json(new EpicTests(content ?? EpicConfig.contentOf(root)).waiting())
     })
     router.get(SAGA_EPICS_API, (request, reply) => {
       const saga = String(request.query.saga ?? "")

@@ -523,6 +523,8 @@ export function serverUrl(base, file) {
  * - NOT run from VS Code (`Window.inVSCode`:  a CLI session in another terminal):
  *   `openInChrome()` instead, `hash` kept and `view` dropped
  * - `hash`:  an id on the page to land on, e.g. a goal `g1`
+ * - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
+ *   - an extension from before it ignores it:  the page shows as usual
  * - `view`:  which side bar tab;  each keeps its own page
  *   - `"docs"`:  "Spell Docs", the default
  *   - `"review"`:  "Review" (`/epic review`, `spell dev docs open <page> --review`)
@@ -533,21 +535,21 @@ export function serverUrl(base, file) {
  * - `open` itself failed (not macOS):  falls back to Chrome
  * - async for the bridge's http request;  never rejects
  */
-export async function openInVSCode(file, { hash, view = "docs" } = {}) {
-  if (!Window.inVSCode) return openInChrome(file, { hash })
+export async function openInVSCode(file, { hash, query, view = "docs" } = {}) {
+  if (!Window.inVSCode) return openInChrome(file, { hash, query })
   const path = resolve(inContent(file))
   const served = ensurePageServer()
   const review = view === "review"
   try {
-    const { window, later } = await Window.show(path, { hash, view: review ? "review" : undefined })
+    const { window, later } = await Window.show(path, { hash, query, view: review ? "review" : undefined })
     if (later) return console.log(`${path} shows in ${later} once this session moves there`)
     return console.log(`opened ${path} in VS Code (window ${window.pid})`)
   } catch (error) {
     if (!/^no window/.test(error.message)) console.error(`${error.message}:  falling back to the vscode:// URI`)
   }
-  const url = served && `${serverUrl(served.base, path)}${hash ? `#${hash}` : ""}`
-  const query = new URLSearchParams({ ...(url && { url }), file: path, ...(review && { view: "review" }) })
-  const run = spawnSync("open", [`${VSCODE_PREVIEW}?${query}`], { encoding: "utf8" })
+  const url = served && `${serverUrl(served.base, path)}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`
+  const params = new URLSearchParams({ ...(url && { url }), file: path, ...(review && { view: "review" }) })
+  const run = spawnSync("open", [`${VSCODE_PREVIEW}?${params}`], { encoding: "utf8" })
   if (run.status === 0) return console.log(`opened ${path} in VS Code`)
   console.error(`VS Code via \`open\` failed (${(run.stderr ?? String(run.error)).trim()}):  falling back to Chrome`)
   openInChrome(file)
@@ -559,7 +561,7 @@ export async function openInVSCode(file, { hash, view = "docs" } = {}) {
  * - The tab is keyed by the page's path (`/epics/<name>/<name>.plan.html`:  `pagePath()`), not its full URL.
  *   - so the same page from another checkout (a worktree) reuses it:  re-pointed if the URL differs, else reloaded
  *   - the page names its tab the same way (`spell-doc-runtime.js` `window.name`;  links use that `target`)
- * - `hash`:  an id on the page to land on (`spell dev docs open SAGA:/saga/epic#T1`)
+ * - `hash`:  an id on the page to land on (`spell dev docs open SAGA:/saga/epic#T1`);  `query`:  the page's query
  * - Never brings Chrome or its window forward:  the tab is made active in ITS window only.
  *   - a new tab goes in the front window
  *   - `openUrlInChrome()` with `front` does bring it forward, for a link Owen clicked
@@ -567,11 +569,11 @@ export async function openInVSCode(file, { hash, view = "docs" } = {}) {
  *   Chrome may still raise itself for a URL it's handed (seen 2026-10-01).
  * - NOTE: `key` is an AppleScript keyword:  the variable is `pageKey`.
  */
-export function openInChrome(page, { hash } = {}) {
+export function openInChrome(page, { hash, query } = {}) {
   const file = inContent(page)
   const served = ensurePageServer()
   const url = served ? serverUrl(served.base, file) : pathToFileURL(resolve(file)).href
-  openUrlInChrome(`${url}${hash ? `#${hash}` : ""}`, `/${pagePath(file)}`)
+  openUrlInChrome(`${url}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`, `/${pagePath(file)}`)
 }
 
 /**

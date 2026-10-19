@@ -221,6 +221,11 @@
     color: var(--ui-violet, #6550ca);
     opacity: 0.75;
   }
+  /* failed in a test run (`failed`, epic `epic-engine` P4):  red, needs Owen;  never wraps */
+  .failed {
+    flex: none;
+    white-space: nowrap;
+  }
   .overnight svg {
     display: block;
     width: auto;

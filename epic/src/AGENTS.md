@@ -117,6 +117,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `<epic-item>`, `<epic-section>`, `<epic-phase>`, `<epic-summary>`
       - `<epic-new-item>`:  the page's toolbar button, and the Todos and Questions sections' New todo / question
       - `<epic-option>`'s Choose pill
+      - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
+        and the epics left to test (`openTests()`)
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and Owen's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
@@ -1207,6 +1209,18 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - A new todo or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox <name> apply` makes the item.
+  - A TEST's answer from Owen's test run (epic `epic-engine` P4):  `{ action: "test", result, note?, shot? }`,
+    on a test only
+    - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`);  `shot`:  his screenshot, `tests/v3-<stamp>.png`
+      from the page's folder (`POST shot`, below)
+    - sent with Send;  `epic inbox <name> apply` applies it (`PlanDoc.applyMark()`:  passed closes, failed files a
+      new issue with the note and screenshot, skip cancels, not now defers):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
+    - the run itself is `<epic-page>`'s test mode (`?test=1`), drawn by `<epic-test-run>` (Epic UI's page says how):
+      one card per test from its `<epic-field label="Step">` ... (an older test's prose as its Step), the answers
+      P / F / S / N, its place in the address (`#v3`), kept there against the runtime's scroll-follow
+      (`spell-doc:place`);  `epic test <name>` opens it, `epic test --all` the
+      first epic with open tests, the run's last card leading to the next (`GET /api/epics/tests`,
+      [epicRoutes.ts](tool/epicRoutes.ts), `EpicTests.waiting()`)
   - `comments`:  Owen's comments on the doc's blocks, and on selected text (P11, see "Comments"):  `M1` ...
     - Written through the comments route.
     - Sent with Send, as marks are (Owen, 2026-10-10:  he keeps Send as the way comments reach Claude).
@@ -1236,6 +1250,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `send` and `now` answer `wake` too:  what waking the epic did (`WakeResult`), `null` while a session listens
     - `POST start { page }`:  the pill's click, `/epic review <epic>` typed into the epic's session (`StartResult`)
     - `POST new { page, id?, entry | null }`:  a new item from the page;  no `id`:  the next free key
+    - `POST shot { page, id, png }`:  a test run's screenshot (a PNG data URL, at most 8 MB, else 413), written
+      beside the page in `tests/` (`TestShots`), never over a file;  answers `{ shot }`, its path, which the
+      failure's mark carries (epic `epic-engine` P4)
   - A page whose token is stale (its server restarted) takes the new one from the page as served now,
     and retries once (`ReviewClient`).
     So nothing typed is refused for a restart.
@@ -1261,7 +1278,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - a Send on a docs page the epic owns (epic `epic-workflow` P13, see "Comments"):  each comment under its page
     - exits 2 on timeout
   - `epic inbox <name>` lists the comments waiting on the pages the epic owns too (`guides` in its JSON)
-  - `apply [ids]`:  the sent approve / pick / todo marks, into the doc (`PlanDoc.applyMark()`), then cleared
+  - `apply [ids]`:  the sent approve / pick / todo marks and test answers, into the doc (`PlanDoc.applyMark()`),
+    then cleared;  each failed test's new issue listed, for the session to tell Owen with its link
     - A revisit with a pick is left, "to talk over".
   - `<name>#<id> working on|off`
   - `<name>#<id> done`:  keeps a mark Owen changed meanwhile
@@ -1935,6 +1953,13 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
       threads, Send, the router's swap and back, at 1200 and 390px;  and a guide's still drawn by the docs bundle
     - on a scratch copy of `src/docs/` unless `--docs`;  nobody woken
     - Run it after touching the comments' code or look, or Epic UI's layout.
+  - `node src/demo/check-test-run.mjs [--doc <name>] [outDir]`, from the root (epic `epic-engine` P4):
+    - a test run on a scratch copy of an epic page, its To test section replaced by scratch tests (the new shape and
+      older prose-only ones):  Start testing, Passed, Failed with a note and a pasted screenshot, Skip, Not now, a
+      reload mid-run, the summary and Send results, Esc;  the marks read back from the copy's inbox file
+    - a run across every epic (`?test=1&all=1`):  the summary's Next opens the next copy in test mode
+    - at 390 and 1200px, light and dark, reduced motion
+    - Run it after touching `<epic-test-run>`, the page's test mode, or the test marks' routes.
   - `node src/demo/check-fold-epics.mjs [--doc <name>] [--item <id>] [--guide <path>] [outDir]`, from the root:
     - A fold never moves what was clicked:  the line or title stays put, within 1px, for 1.5s after the click.
     - Items a link landed on (at once, mid window, near the page's end), one opened by a click,

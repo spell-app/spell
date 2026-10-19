@@ -472,3 +472,66 @@ test("clear:  a phase's note is kept as Owen's reply in the phase;  a new item's
   ])
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
+
+// epic `epic-engine` P4:  a test run's four answers, printed, handed over by `wait`, applied
+test("a test run's answers:  printed, handed over by wait, applied;  each failure's new issue listed", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const title of ["one", "two", "three", "four"]) plan.addItem("test", title)
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("v1", { action: "test", result: "passed" }, T1)
+    inbox.setMark("v2", { action: "test", result: "failed", note: "grey", shot: "tests/v2-20261007-1000.png" }, T1)
+    inbox.setMark("v3", { action: "test", result: "skip" }, T1)
+    inbox.setMark("v4", { action: "test", result: "notnow" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, [], {})
+  expect(printed.join("\n")).toContain('V2  two  · FAILED · "grey" · screenshot tests/v2-20261007-1000.png')
+  printed = []
+  await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
+  const work = printed.join("\n")
+  expect(work).toContain(
+    "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers (4):"
+  )
+  expect(work).toMatch(
+    /V2 {2}test, open · two\n {8}FAILED\n {8}note: {2}"grey"\n {8}screenshot: {2}tests\/v2-20261007-1000\.png/
+  )
+  expect(work).toContain("test results")
+  printed = []
+  await commands().inbox.run("x", file, ["apply"], {})
+  expect(printed.join("\n").split("\n")).toEqual([
+    "V1  passed (Owen's run)",
+    "V2  failed (Owen's run):  filed I1",
+    "V3  canceled:  no longer applies (Owen's run)",
+    "V4  not now:  deferred (Owen's run)",
+    `failed tests (1):  tell Owen one line each, the issue's link (\`epic pages link ${file} --hash <issue> --review\`):`,
+    "  V2 -> I1"
+  ])
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(["v1", "v2", "v3", "v4"].map((id) => after.findItem(id)!.getAttribute("status"))).toEqual([
+    "done",
+    "open",
+    "canceled",
+    "open"
+  ])
+  expect(after.findItem("v2")!.getAttribute("failed")).toBe("i1")
+  expect(ReviewInbox.read(inboxFile).marks).toEqual({})
+})
+
+// epic `epic-engine` I44:  a failure's screenshot in its new issue, in a split page's part, as the part reads it
+test("a failed test's issue on a split page:  its screenshot written into the part as `../tests/...`", async () => {
+  const files = new PlanDocFiles({ root })
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addItem("test", "one", { details: "<p>Do it.</p>" })
+  await files.writeDoc(file, plan, true)
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("v1", { action: "test", result: "failed", note: "no", shot: "tests/v1-20261007-1000.png" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  expect(readFileSync(join(root, "epics", "x", "parts", "i1.html"), "utf8")).toContain(
+    'src="../tests/v1-20261007-1000.png"'
+  )
+  expect(files.read(file).findItem("i1")!.querySelector("img")!.getAttribute("src")).toBe("tests/v1-20261007-1000.png")
+  rmSync(join(root, "epics", "x", "parts"), { recursive: true, force: true })
+})

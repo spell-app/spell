@@ -200,7 +200,9 @@ export class InboxCommands {
       const parts: string[] = []
       if (mark.pick) parts.push(`picks ${mark.pick}${mark.choices ? ` (card set ${mark.choices + 1})` : ""}`)
       if (mark.when) parts.push(mark.when)
+      if (mark.result) parts.push(TEST_WORDS[mark.result])
       if (mark.note) parts.push(`"${mark.note}"`)
+      if (mark.shot) parts.push(`screenshot ${mark.shot}`)
       if (mark.near) parts.push(`about ${mark.near.toUpperCase()}`)
       if (!mark.sent) parts.push("unsent")
       else if (ReviewInbox.isImmediate(mark)) parts.push("requested now")
@@ -324,7 +326,9 @@ export class InboxCommands {
           else {
             if (mark.option) lines.push(`        picks ${mark.pick} · ${mark.option.title}`)
             else if (mark.pick) lines.push(`        picks ${mark.pick} (no such option card)`)
+            if (mark.result) lines.push(`        ${TEST_WORDS[mark.result]}`)
             if (mark.note) lines.push(`        note:  "${mark.note}"`)
+            if (mark.shot) lines.push(`        screenshot:  ${mark.shot}`)
           }
         }
       }
@@ -336,7 +340,7 @@ export class InboxCommands {
       if (sent.marks.length || sent.urgency.length)
         lines.push(
           `next:  \`epic inbox ${name} apply\` (approve, pick, todo, a todo's next phase or drop, skip, new, ` +
-            `urgency)`
+            `test results, urgency)`
         )
       if (talk.length)
         lines.push(
@@ -395,6 +399,8 @@ export class InboxCommands {
    *   - a todo's `next` (queued into the next phase) and `drop` (canceled)
    *   - `skip` (the note box's x:  reviewed, nothing to do)
    *   - new
+   *   - `test`, a test run's answers (epic `epic-engine` P4):  passed, failed, skip, not now;
+   *     each failure's new issue listed after, for the session to tell Owen with its link
    *   - and the sent urgency (an id chip clicked:  `PlanDoc.setCalm()`)
    * - a dry run on a parsed copy first:  the doc is written (`edit()`, its lock) only when something applies
    * - marks cleared under the inbox's lock, only while still the ones applied (`clearApplied()`, `clearUrgency()`);
@@ -428,6 +434,15 @@ export class InboxCommands {
     const lines: string[] = []
     for (const each of results) if (each.applied) lines.push(`${each.mark.id.toUpperCase()}  ${each.did}`)
     for (const each of calmed) lines.push(`${each.entry.id.toUpperCase()}  ${each.did}`)
+    const filed = results.flatMap((each) =>
+      each.applied && each.filed ? [{ test: each.mark.id, issue: each.filed }] : []
+    )
+    if (filed.length)
+      lines.push(
+        `failed tests (${filed.length}):  tell Owen one line each, the issue's link ` +
+          `(\`epic pages link ${file} --hash <issue> --review\`):`
+      )
+    for (const { test, issue } of filed) lines.push(`  ${test.toUpperCase()} -> ${issue.toUpperCase()}`)
     const left = results.filter((result) => !result.applied)
     if (left.length) lines.push("left:")
     for (const each of left)
@@ -618,9 +633,18 @@ const NO_WORK: TakenWork = { now: [], sent: null, canceled: [] }
 /** A sent mark's heading in `wait`'s print, where its action alone doesn't say it. */
 const SENT_HEADINGS: Partial<Record<string, string>> = {
   revisit: "revisit, to talk over",
+  test: "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers",
   next: "next, a todo for the next phase",
   drop: "drop, a todo dropped",
   skip: "skip, nothing to do"
+}
+
+/** A test answer's result in words, as `inbox` and `wait` print it. */
+const TEST_WORDS: Record<string, string> = {
+  passed: "passed",
+  failed: "FAILED",
+  skip: "skip:  no longer applies",
+  notnow: "not now:  can't do it yet"
 }
 
 /** A mark as `inbox` prints it:  with its item's title (`null` when the item's gone), and whether it's sent. */

@@ -15,6 +15,13 @@ import { Fold, expandAllUnder, foldAllUnder } from "$/epics/components/epic-item
 import { StateFilter } from "$/epics/components/epic-section/StateFilter"
 import { STATE_PICK, type StatePickDetail } from "$/epics/components/epic-state-filter/EpicStateFilter.types"
 import { FILTER, FILTER_STATES, type StateFilterEntry } from "$/epics/components/epic-section/EpicSection.types"
+import {
+  ALL_QUERY,
+  TEST_ALL,
+  TEST_DONE,
+  TEST_QUERY,
+  TEST_START
+} from "$/epics/components/epic-test-run/EpicTestRun.types"
 
 import { epicPageVocabulary } from "./EpicPage.en"
 import {
@@ -163,8 +170,16 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *   - one meta line, its short address (`SAGA:/drawable-spell`, copied on click), then its dates
  *   - Send and the review line as on an epic page:  its marks and comments wait in its own inbox, for the session
  *     running `/epic review SAGA:/<id>` (`reviewRoutes.ts`)
+ * - TEST MODE (epic `epic-engine` P4):  a TEST RUN over its blocks (`<epic-test-run>`), its open tests one at a time
+ *   - from the To test section's Start testing (`epic-test-start`), or the address's `?test=1` (`epic test <epic>`);
+ *     `?test=1&all=1` (or `?test=all`), one epic of a run across every epic (`epic test --all`)
+ *   - only the header (Send, the step label) and the pill stay:  the toolbar's bar, the review line, the meta lines,
+ *     See Also, the agents and the blocks hide (`:state(testing)`)
+ *   - the address keeps `?test=1` while it runs, so a reload resumes;  Esc or Done testing (`epic-test-done`) takes it
+ *     off, and the blocks come back
+ *   - page state, never in the doc:  the live update never sees it
  * - SIDE EFFECT:  observes its subtree and the site header while connected;
- *   follows the page's review and agents clients.
+ *   follows the page's review and agents clients;  rewrites the address's `?test=` as a run starts and ends.
  ****************/
 export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.proto static vocabulary = epicPageVocabulary
@@ -208,6 +223,18 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * (it's keyed by the epic's name, never an item's:  no mark is ever the page's).
    */
   readonly review = new ReviewState(() => this.epic ?? this.saga)
+
+  /**
+   * TEST MODE (epic `epic-engine` P4):  `"1"` while a test run shows over its blocks, `"all"` for one epic of a run
+   * across every epic;  `""` off.  From the address's `?test=` as it loads, then Start testing and Done testing.
+   */
+  @E.state accessor testRun = EpicPage.testQuery()
+
+  /** A test run shows over its blocks. */
+  @E.cssState("testing")
+  get isTesting(): boolean {
+    return !!this.testRun
+  }
 
   /** The review line, just copied:  it flashes and says so. */
   @E.state accessor isCopied = false
@@ -602,6 +629,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         <Show when={this.seeAlso.length}>{this.seeAlsoBox()}</Show>
         {/* a saga has no agents of its own:  no list to ask for */}
         {this.isSaga ? undefined : <epic-agents part={this.partForName("agents")} />}
+        <Show when={this.testRun}>
+          <epic-test-run part={this.partForName("test-run")} all={this.testRun === TEST_ALL ? "" : undefined} />
+        </Show>
         <slot />
       </div>
     )
@@ -1037,6 +1067,51 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     }
     if (this.showCommits) style[COMMITS_PROPERTY] = "block"
     return style
+  }
+
+  ////////////////
+  // ## Test mode (epic `epic-engine` P4)
+  ////////////////
+
+  /** The To test section's Start testing:  a run starts, the address saying so (`?test=1`), at its first test. */
+  @E.on(TEST_START)
+  protected onTestStart(event: Event) {
+    event.stopPropagation()
+    this.testRun = "1"
+    EpicPage.markTestQuery("1")
+    E.afterSolidUpdate(() => window.scrollTo({ top: 0, behavior: "instant" }))
+  }
+
+  /** The run left (Esc, Done testing):  the blocks back, `?test=` and the run's `#v3` off the address. */
+  @E.on(TEST_DONE, { target: "renderRoot" })
+  protected onTestDone(event: Event) {
+    event.stopPropagation()
+    this.testRun = ""
+    EpicPage.markTestQuery(undefined)
+  }
+
+  /**
+   * The address's `?test=` as the page loads:  `1` (any value), `all` (`?test=all`, or `?test=1&all=1` as
+   * `epic test --all` writes it), or `""` for none;  `""` on a server.
+   */
+  private static testQuery(): string {
+    if (isServer) return ""
+    const query = new URLSearchParams(location.search)
+    const value = query.get(TEST_QUERY)
+    if (value === null) return ""
+    return value === TEST_ALL || query.has(ALL_QUERY) ? TEST_ALL : "1"
+  }
+
+  /** Put `?test=<value>` on the address (`undefined`:  take it off, and the run's `#v3`), replacing it. */
+  private static markTestQuery(value: string | undefined) {
+    const url = new URL(location.href)
+    if (value) url.searchParams.set(TEST_QUERY, value)
+    else {
+      url.searchParams.delete(TEST_QUERY)
+      url.searchParams.delete(ALL_QUERY)
+      url.hash = ""
+    }
+    history.replaceState(history.state, "", url.href)
   }
 
   ////////////////

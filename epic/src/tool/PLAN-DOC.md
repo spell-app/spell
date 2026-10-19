@@ -303,6 +303,35 @@ As `plan-doc.md`, "Ids":
       - `skip`:  the note box's x, nothing to do
     - `review-as` is the record (the log, `review` outcomes, the state above), never drawn on the buttons:
       once Claude has handled a mark, they clear, and the chip shows the result.
+  - `failed`:  a test that failed in Owen's test run, the issue it was filed as (`i42`;  epic `epic-engine` P4).
+    - written by `inbox apply`, the test left open;  gone once a run passes it
+- A TEST (`v3`, epic `epic-engine` P4):  its text is FIELDS, in this order, so Owen's test run can step him through
+  it, one at a time, on the page:
+
+  ```html
+  <epic-item id="v3" title="The sitemap lists every guide" status="open">
+    <epic-field label="Step">Open <a class="epic-test-action" href="/sitemap.xml">the sitemap</a></epic-field>
+    <epic-field label="Should">Every guide is in it</epic-field>
+    <epic-field label="Example"><img src="tests/v3.png" alt="What it should look like"> a line or two</epic-field>
+    <epic-field label="If not">Say which guide is missing</epic-field>
+  </epic-item>
+  ```
+
+  - Step and Should, always;  Example and If not when there's one.
+  - `epic add <name>#V "title" --step ... --should ... [--example <png> | "text"] [--if-not ...]` writes them
+    (`EpicTests.fieldsHTML()`);  `details <name>#V3 --step ...` rewrites a test in them.
+  - A Step's `a.epic-test-action` links are pages to open:  the run shows each as a button.
+  - Screenshots live beside the page in `tests/`, their paths from the page's folder:
+    Claude's examples `tests/v3.png`, Owen's failures `tests/v3-20261019-1432.png`.
+  - An older test has only prose, still valid:  the run shows the prose as its Step.
+    No migration step:  the fields are new content a test MAY have, nothing an old page must change.
+  - Owen's answers in the run are review marks, `{ action: "test", result, note?, shot? }`, applied by
+    `inbox apply` (`PlanDoc.applyMark()`):
+    - `passed`:  `done`, reviewed, `failed` gone
+    - `failed`:  a new issue, "V3 failed:  <title>", linking the test, with his note and an `<img>` of his
+      screenshot;  the test stays open (a closed one reopens), reviewed, `failed="i42"`, a Noted card linking it
+    - `skip`:  `canceled` ("no longer applies"), reviewed
+    - `notnow`:  `deferred`, today:  the run puts deferred tests last
 - A TODO's review buttons (Owen, 2026-10-09):  the plane, Revisit, the x, in one group.
   No Approve, Make Todo or Do Now.
   - The plane (`next`, green):  "Do it in the next phase".
