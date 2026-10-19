@@ -201,7 +201,7 @@ export class InboxCommands {
       if (mark.pick) parts.push(`picks ${mark.pick}${mark.choices ? ` (card set ${mark.choices + 1})` : ""}`)
       if (mark.when) parts.push(mark.when)
       if (mark.result) parts.push(TEST_WORDS[mark.result])
-      if (mark.note) parts.push(`"${mark.note}"`)
+      if (mark.note) parts.push(mark.action === "test" ? `comment "${mark.note}"` : `"${mark.note}"`)
       if (mark.shot) parts.push(`screenshot ${mark.shot}`)
       if (mark.near) parts.push(`about ${mark.near.toUpperCase()}`)
       if (!mark.sent) parts.push("unsent")
@@ -327,7 +327,8 @@ export class InboxCommands {
             if (mark.option) lines.push(`        picks ${mark.pick} · ${mark.option.title}`)
             else if (mark.pick) lines.push(`        picks ${mark.pick} (no such option card)`)
             if (mark.result) lines.push(`        ${TEST_WORDS[mark.result]}`)
-            if (mark.note) lines.push(`        note:  "${mark.note}"`)
+            // a test's note is Owen's COMMENT on it, with any result (it may still need work:  read every one)
+            if (mark.note) lines.push(`        ${mark.action === "test" ? "comment" : "note"}:  "${mark.note}"`)
             if (mark.shot) lines.push(`        screenshot:  ${mark.shot}`)
           }
         }

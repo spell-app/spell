@@ -41,8 +41,8 @@
         <article class="site-article">
           <p class="lede">
             <code>&lt;epic-test-run&gt;</code> is a TEST RUN: it steps Owen through an epic page's open tests, one big
-            card at a time, and he answers each on the page: Passed, Failed (a note and a pasted screenshot), Skip or Not
-            now. The listening session closes the passed ones and files each failure as an issue.
+            card at a time, and he answers each on the page: Passed, Failed (with a pasted screenshot), Skip or Not
+            now, with a comment on any of them. The listening session closes the passed ones and files each failure as an issue.
           </p>
           <p class="meta">
             For anyone changing how hand checks are run, or how a test is written.<br />
@@ -160,12 +160,18 @@
                 </thead>
                 <tbody>
                   <tr><td>Passed</td><td>P</td><td>green</td><td>the next test; applied, the test closes</td></tr>
-                  <tr><td>Failed</td><td>F</td><td>red</td><td>a note box and a screenshot (paste or drop); applied, an issue with both</td></tr>
+                  <tr><td>Failed</td><td>F</td><td>red</td><td>a screenshot (paste or drop); applied, an issue with the comment and the screenshot</td></tr>
                   <tr><td>Skip</td><td>S</td><td>grey</td><td>the next test; applied, canceled</td></tr>
                   <tr><td>Not now</td><td>N</td><td>yellow</td><td>the next test; applied, deferred, last next run</td></tr>
                 </tbody>
               </table>
             </ui-table>
+              <p>
+                A COMMENT box on every card, under the answers ("Comment (optional)"):  it goes with whichever answer he
+                picks, typed before or after choosing, and stays when he changes the answer.  Kept as he types:  in the
+                answer's <code>note</code>, or, before an answer, the inbox's draft for the test, so a reload keeps it.
+                <code>epic inbox apply</code> puts it on the test as his reply;  the summary lists the tests commented on.
+              </p>
               <p>← and → move;  Esc leaves.  An answered test shows its answer, dashed until sent, outlined once sent, and takes another.</p>
             </ui-section>
             <ui-section id="epic-test-run-parts" header="Parts" sticky collapsible dividing collapsed>
@@ -181,9 +187,10 @@
                   <tr><td><code>progress</code></td><td>The thin bar: how many are answered.</td></tr>
                   <tr><td><code>card</code></td><td>The current test's card.</td></tr>
                   <tr><td><code>answers</code></td><td>The four answers, one group.</td></tr>
-                  <tr><td><code>failure</code></td><td>Once failed: the note box and the screenshot's area.</td></tr>
+                  <tr><td><code>comment</code></td><td>Every card's comment box, under the answers.</td></tr>
+                  <tr><td><code>failure</code></td><td>Once failed: the screenshot's area.</td></tr>
                   <tr><td><code>moves</code></td><td>Back and Next.</td></tr>
-                  <tr><td><code>summary</code></td><td>The summary card: the counts, Send results, the next epic.</td></tr>
+                  <tr><td><code>summary</code></td><td>The summary card: the counts, the tests commented on, Send results, the next epic.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -209,7 +216,7 @@
               <li>Side bar first: at 390px the answers sit two by two; on a wide card, four in a row.</li>
               <li>The card: the test's id chip in its state's colour, its title, then each field under a small mono label.</li>
               <li>The answers by the fill rule: a grey outline at rest (the icon in its colour), dashed in its colour once chosen, outlined once sent.</li>
-              <li>A failure on Owen's ivory: his note box, then the screenshot's dashed area with its thumbnail and ×.</li>
+              <li>Owen's words on his ivory: the comment box on every card;  a failure's screenshot area, dashed, its thumbnail and ×.</li>
               <li>Light and dark through the page's tokens;  no motion of its own.</li>
             </ul>
           </ui-section>

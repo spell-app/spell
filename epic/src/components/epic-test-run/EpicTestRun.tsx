@@ -30,8 +30,12 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  * - The four ANSWERS, one button group:  Passed (green), Failed (red), Skip (grey), Not now (yellow)
  *   - each a review mark, `{ action: "test", result, note?, shot? }`, through the page's one `ReviewClient`
  *   - the fill rule:  grey outline at rest, dashed in its colour once chosen, outlined once sent
- *   - Passed, Skip and Not now move on to the next test;  Failed opens the failure:  a note box (`<epic-text-box>`),
- *     saved as typed, and a screenshot pasted (⌘V) or dropped, saved through `POST shot` and shown as a thumbnail
+ *   - Passed, Skip and Not now move on to the next test;  Failed opens the failure's screenshot area:  pasted (⌘V) or
+ *     dropped, saved through `POST shot` and shown as a thumbnail
+ * - A COMMENT on every card, under the answers (Owen, 2026-10-19:  "e.g. it did part of what you asked, I want to
+ *   explain how"):  an `<epic-text-box>`, kept as he types -- in the test's answer once it has one (its `note`), else
+ *   as the inbox's draft for it -- so it survives a reload, goes with whichever answer he picks, before or after
+ *   typing, and stays when he changes the answer
  *   - an answered test shows its answer, and takes another
  * - "4 of 9" and a thin bar of how many are answered;  Back and Next;  the keys P / F / S / N, ← →, Esc to leave
  *   (only drawn by the page:  an example written in a doc takes no keys)
@@ -75,7 +79,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   /** The next epic with open tests, for a run across every epic (`all`);  none until asked, or none left. */
   @E.state accessor nextEpic: TestsEntry | undefined = undefined
 
-  /** What's typed in each failure's note box, not saved yet:  test id -> text. */
+  /** What's typed in each test's comment box, not saved yet:  test id -> text. */
   private readonly typed = new Map<string, string>()
 
   /** The note's save, waiting for the typing to stop. */
@@ -84,7 +88,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   /** The move after an answer, waiting a moment so the press shows. */
   private moveTimer?: E.CancelablePromise<unknown>
 
-  /** The current failure's note box, as drawn. */
+  /** The current test's comment box, as drawn. */
   private noteBox?: HTMLElement & { value: string }
 
   ////////////////
@@ -132,6 +136,20 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     const counts = { passed: 0, failed: 0, skip: 0, notnow: 0, open: 0 }
     for (const id of this.tests()) counts[this.answerOf(id)?.result ?? "open"]++
     return counts
+  })
+
+  /**
+   * The tests Owen commented on, in the run's order:  each one's id, answer (none yet:  `undefined`) and comment
+   * (its answer's, else its draft).
+   */
+  readonly commented = createMemo((): { id: string; result?: TestResult; note: string }[] => {
+    void this.review.reviewing()
+    const client = this.review.client
+    return this.tests().flatMap((id) => {
+      const answer = client?.testAnswerOf(id)
+      const note = (answer?.note ?? client?.draftOf(id)?.note ?? "").trim()
+      return note ? [{ id, result: answer?.result, note }] : []
+    })
   })
 
   /** Every answer of the run has gone with a Send (none:  false). */
@@ -301,6 +319,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
         <Show when={this.fields()?.example.length || this.fields()?.shots.length}>{this.exampleField()}</Show>
         <Show when={this.fields()?.ifNot.length}>{this.field("ifNot", this.fields()!.ifNot)}</Show>
         {this.answers(id)}
+        {this.commentBox(id)}
         <Show when={answer()?.result === "failed"}>{this.failure(id)}</Show>
         {this.moves()}
       </article>
@@ -418,14 +437,10 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     )
   }
 
-  /**
-   * A failure's note and screenshot:  the note box (saved as typed), and the screenshot's area -- its thumbnail, or
-   * where to paste or drop one.
-   */
-  private failure(id: string): JSX.Element {
-    const shot = () => this.pasted[id] ?? this.answerOf(id)?.shot
+  /** Test `id`'s comment box, under the answers, whatever the answer (or none yet):  saved as typed. */
+  private commentBox(id: string): JSX.Element {
     return (
-      <div class="failure" part={this.partForName("failure")}>
+      <div class="comment" part={this.partForName("comment")}>
         <epic-text-box
           ref={(box: HTMLElement) => this.drawnNote(box as HTMLElement & { value: string }, id)}
           type="note"
@@ -434,6 +449,15 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           onInput={() => this.typeNote(id)}
           onFocusOut={() => this.flushNote()}
         />
+      </div>
+    )
+  }
+
+  /** A failure's screenshot:  its area -- its thumbnail, or where to paste or drop one. */
+  private failure(id: string): JSX.Element {
+    const shot = () => this.pasted[id] ?? this.answerOf(id)?.shot
+    return (
+      <div class="failure" part={this.partForName("failure")}>
         <div
           class={["drop", { saving: this.savingShot === id }]}
           tabindex="0"
@@ -523,6 +547,22 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
             </li>
           </Show>
         </ul>
+        <Show when={this.commented().length}>
+          <p class="commented-title">{this.translationForKey("commentedTitle")}</p>
+          <ul class="commented">
+            <For each={this.commented()}>
+              {(each) => (
+                <li>
+                  <ui-label class="id" size="mini" basic="">
+                    {each.id.toUpperCase()}
+                  </ui-label>
+                  <span class="result">{this.translationForKey(each.result ?? "unanswered")}</span>
+                  <span class="said">{each.note}</span>
+                </li>
+              )}
+            </For>
+          </ul>
+        </Show>
         <p class="what">{this.translationForKey("summaryWhat")}</p>
         <div class="ends">
           <ui-button
@@ -556,25 +596,29 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   /**
    * An answer pressed (or its key):  marked at once, then saved.
    * - Passed, Skip, Not now:  on to the next test, a moment later (the press shows first)
-   * - Failed:  the failure opens, its note box focused;  pressed again, it keeps the note and screenshot
+   * - Failed:  the screenshot's area opens, the comment box focused;  pressed again, it keeps both
+   * - the comment goes with it, whichever it is (typed, saved in an earlier answer, or the draft);  a screenshot only
+   *   with Failed
    */
   @E.untracked
   private answer(result: TestResult) {
     const id = this.at
     const client = this.review.client
     if (!client?.reviewing || !this.item()) return
+    this.noteTimer?.cancel()
+    this.noteTimer = undefined
+    const note = this.commentOf(id).trim()
     if (result !== "failed") {
-      void client.answerTest(id, { result })
+      void client.answerTest(id, { result, ...(note && { note }) })
       this.moveTimer?.cancel()
       this.moveTimer = E.after(ANSWER_PAUSE_MS / 1000, () => {
         if (this.at === id) this.move(1)
       })
       return
     }
-    if (client.testAnswerOf(id)?.result !== "failed") {
-      const note = this.typed.get(id)?.trim()
-      void client.answerTest(id, { result, ...(note && { note }) })
-    }
+    const prior = client.testAnswerOf(id)
+    if (prior?.result !== "failed" || (prior.note ?? "") !== note)
+      void client.answerTest(id, { result, ...(note && { note }), ...(prior?.shot && { shot: prior.shot }) })
     E.afterSolidUpdate(() => E.beforeNextPaint(() => this.focusNote()))
   }
 
@@ -641,14 +685,42 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   }
 
   ////////////////
-  // ## The failure:  its note and screenshot
+  // ## The comment, and a failure's screenshot
   ////////////////
 
-  /** The note box, drawn for test `id`:  what was typed, else the note saved. */
+  /**
+   * The current test's comment as the inbox holds it:  its answer's, else its draft.  Followed (`onSavedComment()`),
+   * so a box drawn before the inbox was read (a reload) fills once it is.
+   */
+  get savedComment(): string {
+    void this.review.reviewing()
+    const client = this.review.client
+    return client?.testAnswerOf(this.at)?.note ?? client?.draftOf(this.at)?.note ?? ""
+  }
+
+  /** The inbox's comment for the current test changed:  into its box, unless Owen is typing there. */
+  @E.onChange("savedComment")
+  protected onSavedComment(text: string) {
+    const box = this.noteBox
+    if (!box?.isConnected || this.typed.has(this.at) || box.value === text) return
+    if (box.shadowRoot?.activeElement) return
+    box.value = text
+  }
+
+  /** The comment box, drawn for test `id`:  its comment as it stands. */
   @E.untracked
   private drawnNote(box: HTMLElement & { value: string }, id: string) {
     this.noteBox = box
-    box.value = this.typed.get(id) ?? this.answerOf(id)?.note ?? ""
+    box.value = this.commentOf(id)
+  }
+
+  /**
+   * Test `id`'s comment as it stands:  what was typed this visit, else its answer's (`note`), else the inbox's draft
+   * for it (typed before an answer, kept across a reload).
+   */
+  private commentOf(id: string): string {
+    const client = this.review.client
+    return this.typed.get(id) ?? client?.testAnswerOf(id)?.note ?? client?.draftOf(id)?.note ?? ""
   }
 
   /** The note box's field, focused. */
@@ -656,7 +728,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     this.noteBox?.shadowRoot?.querySelector("textarea")?.focus({ preventScroll: true })
   }
 
-  /** A keystroke in test `id`'s note:  kept, and saved once the typing stops. */
+  /** A keystroke in test `id`'s comment:  kept, and saved once the typing stops. */
   @E.untracked
   private typeNote(id: string) {
     this.typed.set(id, this.noteBox?.value ?? "")
@@ -664,25 +736,36 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     this.noteTimer = E.after(NOTE_SAVE_MS / 1000, () => this.saveNote(id))
   }
 
-  /** Save the note being typed now, if any (the box left, a move). */
+  /** Save the comment being typed now, if any (the box left, a move). */
   @E.untracked
   private flushNote() {
     if (!this.noteTimer) return
     this.saveNote(this.at)
   }
 
-  /** Save test `id`'s typed note into its failure (unchanged, or no longer failed:  nothing). */
+  /**
+   * Save test `id`'s typed comment:  into its answer (unchanged:  nothing);  no answer yet, as the inbox's draft
+   * for it, which its answer takes over (the route drops the draft once a mark carries a note).
+   */
   @E.untracked
   private saveNote(id: string) {
     this.noteTimer?.cancel()
     this.noteTimer = undefined
     const client = this.review.client
     const text = this.typed.get(id)
-    const answer = client?.testAnswerOf(id)
-    if (!client || text === undefined || answer?.result !== "failed") return
+    if (!client?.reviewing || text === undefined) return
+    const answer = client.testAnswerOf(id)
     const note = text.trim()
+    if (!answer) {
+      if ((client.draftOf(id)?.note ?? "") !== text) void client.saveDraft(id, text)
+      return
+    }
     if ((answer.note ?? "") === note) return
-    void client.answerTest(id, { result: "failed", ...(note && { note }), ...(answer.shot && { shot: answer.shot }) })
+    void client.answerTest(id, {
+      result: answer.result,
+      ...(note && { note }),
+      ...(answer.shot && { shot: answer.shot })
+    })
   }
 
   /** A paste anywhere on the page, while a failure shows:  an image in it is the test's screenshot. */
@@ -723,7 +806,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     this.savingShot = ""
     const answer = client.testAnswerOf(id)
     if (!shot || answer?.result !== "failed") return
-    const note = (this.typed.get(id) ?? answer.note ?? "").trim()
+    const note = this.commentOf(id).trim()
     await client.answerTest(id, { result: "failed", ...(note && { note }), shot })
   }
 

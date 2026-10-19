@@ -34,6 +34,9 @@
  *   - RELOAD mid-run:  back at v5, "4 of 5", v2's note and screenshot still there (Back to it, and forward again)
  *   - v5:  N, not now, on to v4;  → past it, the summary:  1 passed, 1 failed, 1 skipped, 1 not now, 1 not answered
  *   - Send results:  the inbox's `sent` moves, the button says so
+ *   - a COMMENT on v1 (then Passed) and on v5 before its answer (the inbox's draft, back after the reload, then Not
+ *     now):  each in its mark;  the summary lists the tests commented on;  after `epic inbox <copy> apply`, each is
+ *     Owen's reply in its test's details
  *   - Esc:  the blocks back, `?test` off the address;  v5's line says "failed → I9" (`failed="i9"`)
  *   - a run across every epic (`?test=1&all=1`):  the summary's "Next:  test-run-next (2 tests)" opens it, in test
  *     mode, "1 of 2"
@@ -72,6 +75,8 @@ if (!process.env.CHECK_TEST_RUN_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
+const { PlanDocCommands } = await import("../tool/PlanDocCommands.ts")
+const { PlanDocFiles } = await import("../tool/PlanDocFiles.ts")
 const JSON5 = (await import("json5")).default
 
 ////////////////
@@ -87,6 +92,8 @@ const out = args.find((arg, index) => !arg.startsWith("--") && !flagged.has(inde
 const SAMPLE = "test-run-sample"
 const NEXT = "test-run-next"
 const NOTE = "check-test-run:  the card never showed"
+const PASSED_COMMENT = "It did, but the second title wrapped a beat late"
+const NOTNOW_COMMENT = "Needs main first"
 const problems = []
 const summary = { from, bundle: bundle ?? null }
 
@@ -113,6 +120,7 @@ try {
   await walk()
   await looks()
   await acrossEpics()
+  await applied()
 } catch (error) {
   problems.push(`threw:  ${error.stack ?? error}`)
 } finally {
@@ -177,10 +185,15 @@ async function walk() {
   }).catch(() => problems.push("Esc didn't close the zoom"))
   expect("Esc on the zoom leaves the run running", await page.evaluate(() => !!run()), true)
 
-  // P:  passed, on to v2
+  // a COMMENT on v1 (Owen, 2026-10-19:  "it did part of what you asked"), then Esc out of its box and P:  passed,
+  // the comment with it, on to v2
+  expect("every card has its comment box", await page.evaluate(() => noteField()?.placeholder), "Comment (optional)")
+  await page.evaluate(() => noteField().focus())
+  await page.keyboard.type(PASSED_COMMENT)
+  await page.keyboard.press("Escape")
   await page.keyboard.press("p")
   await waitForCard(page, "v2")
-  await expectMark("P on v1", "v1", { action: "test", result: "passed" })
+  await expectMark("P on v1, with its comment", "v1", { action: "test", result: "passed", note: PASSED_COMMENT })
   expect("on to v2:  2 of 5, 1 answered", pick(await page.evaluate(() => cardFacts()), ["at", "answered"]), {
     at: "2 of 5",
     answered: 1
@@ -239,7 +252,14 @@ async function walk() {
     labels: ["failed before · I9"]
   })
 
-  // RELOAD mid-run:  back at v5, the answers kept
+  // a comment on v5 BEFORE its answer:  the inbox's draft for it
+  await page.evaluate(() => noteField().focus())
+  await page.keyboard.type(NOTNOW_COMMENT)
+  await page.keyboard.press("Escape")
+  const draft = await waitFor(async () => (await readInbox()).drafts?.v5?.note)
+  expect("v5's comment, typed before an answer:  the inbox's draft", draft, NOTNOW_COMMENT)
+
+  // RELOAD mid-run:  back at v5, the answers kept, its comment too
   expect("the address names the test", new URL(page.url()).hash, "#v5")
   await page.reload()
   await waitForCard(page, "v5")
@@ -247,6 +267,9 @@ async function walk() {
     at: "4 of 5",
     answered: 3
   })
+  await page
+    .waitForFunction((said) => noteField()?.value === said, NOTNOW_COMMENT, { timeout: 4000 })
+    .catch(() => problems.push("v5's comment didn't survive the reload"))
   await page.keyboard.press("ArrowLeft")
   await waitForCard(page, "v3")
   expect("← :  v3, its Skip shown", (await page.evaluate(() => answerFacts("skip"))).pressed, "true")
@@ -264,7 +287,8 @@ async function walk() {
   // v5:  N, not now;  v4 (deferred, last);  → the summary
   await page.keyboard.press("n")
   await waitForCard(page, "v4")
-  await expectMark("N on v5", "v5", { action: "test", result: "notnow" })
+  await expectMark("N on v5, its comment with it", "v5", { action: "test", result: "notnow", note: NOTNOW_COMMENT })
+  expect("the draft gone once the answer carries it", (await readInbox()).drafts?.v5, undefined)
   expect("v4, deferred, last:  5 of 5", pick(await page.evaluate(() => cardFacts()), ["at", "answered", "labels"]), {
     at: "5 of 5",
     answered: 4,
@@ -275,6 +299,7 @@ async function walk() {
   expect("the summary", await page.evaluate(() => summaryFacts()), {
     at: "5 of 5",
     counts: ["1 passed", "1 failed", "1 skipped", "1 not now", "1 not answered"],
+    commented: ["V1", "V2", "V5"],
     send: "Send results"
   })
   await page.screenshot({ path: join(out, "run-summary.png") })
@@ -315,6 +340,29 @@ async function walk() {
   summary.logs = logs
   if (logs.length) problems.push(`page errors:  ${logs.join(" | ")}`)
   await context.close()
+}
+
+/**
+ * Claude's side, on the copy:  `epic inbox <copy> apply` (the tool, in this process):  each COMMENT lands on its test
+ * as Owen's reply (`<epic-reply from="Owen">`), in its details:  the passed one's and the not-now one's.
+ */
+async function applied() {
+  const tool = new PlanDocCommands({ files: new PlanDocFiles({ root: CONTENT, content: CONTENT }) })
+  const said = []
+  tool.print = (text) => void said.push(text)
+  tool.warn = (text) => void said.push(`! ${text}`)
+  await tool.run(["inbox", SAMPLE, "apply"])
+  summary.applied = said.join("\n")
+  const parts = join(sampleFolder, "parts")
+  const files = [join(sampleFolder, `${SAMPLE}.plan.html`), ...readdirSync(parts).map((name) => join(parts, name))]
+  const html = files.map((file) => readFileSync(file, "utf8")).join("\n")
+  for (const [id, comment, re] of [
+    ["v1", PASSED_COMMENT, "test passed"],
+    ["v5", NOTNOW_COMMENT, "test not now"]
+  ]) {
+    const reply = new RegExp(`<epic-reply[^>]*from="Owen"[^>]*re="${re}"[^>]*>\\s*<p>\\s*${comment.replace(/ /g, "\\s+")}\\s*</p>`)
+    if (!reply.test(html)) problems.push(`after apply:  ${id}'s comment isn't its reply ("${re}")`)
+  }
 }
 
 /** v1's Example:  a screenshot "Claude took", drawn and shot in the browser, into the copy's `tests/`. */
@@ -441,6 +489,7 @@ function HELPERS() {
     return {
       at: text(root.querySelector(".where")),
       counts: Array.from(root.querySelectorAll(".counts li:not([data-zero])"), (li) => text(li)),
+      commented: Array.from(root.querySelectorAll(".commented li .id"), (id) => text(id)),
       send: text(root.querySelector("ui-button.send"))
     }
   }
@@ -491,6 +540,16 @@ async function pasteImage(page) {
 async function readInbox() {
   const response = await fetch(`${server.base}/api/epics/review/inbox?page=${encodeURIComponent(pagePath)}`)
   return response.json()
+}
+
+/** Wait until `read()` answers something (6s at most);  its answer. */
+async function waitFor(read) {
+  for (let tries = 0; tries < 40; tries++) {
+    const value = await read()
+    if (value) return value
+    await new Promise((resolve) => setTimeout(resolve, 150))
+  }
+  return read()
 }
 
 /** Wait for test `id`'s mark to pass `ok`;  the mark. */

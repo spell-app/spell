@@ -72,6 +72,13 @@ class FakeRoutes {
       const at = new Date().toISOString()
       if (body.mark) this.inbox.marks[body.id as string] = { ...(body.mark as object), at } as Inbox["marks"][string]
       else delete this.inbox.marks[body.id as string]
+      // the route:  a mark carrying a note takes the place of its draft
+      if ((body.mark as { note?: string } | null)?.note !== undefined) delete this.inbox.drafts[body.id as string]
+    }
+    if (route === "draft") {
+      const at = new Date().toISOString()
+      if (body.note) this.inbox.drafts[body.id as string] = { action: "revisit", note: body.note as string, at }
+      else delete this.inbox.drafts[body.id as string]
     }
     if (route === "send") this.inbox.sent = new Date(Date.now() + 1000).toISOString()
     return json(this.inbox)
@@ -240,7 +247,7 @@ describe("<epic-test-run>", () => {
     answer(host, "failed").click()
     await settle(host)
     expect(routes.inbox.marks.v1).toMatchObject({ action: "test", result: "failed" })
-    const box = runOf(host)!.querySelector<HTMLElement & { value: string }>(".failure epic-text-box")!
+    const box = runOf(host)!.querySelector<HTMLElement & { value: string }>(".comment epic-text-box")!
     const field = box.shadowRoot!.querySelector("textarea")!
     field.value = "Still cut short"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
@@ -257,6 +264,35 @@ describe("<epic-test-run>", () => {
     expect(routes.inbox.marks.v1).toMatchObject({ note: "Still cut short" })
     await settle(host)
     expect(runOf(host)!.querySelector(".drop ui-button.shot img")).not.toBeNull()
+  })
+
+  test("a COMMENT on every card:  a draft before an answer, then with whichever answer;  the summary lists it", async () => {
+    await adoptClient(routes)
+    const host = await render()
+    const field = () => runOf(host)!.querySelector(".comment epic-text-box")!.shadowRoot!.querySelector("textarea")!
+    expect(field().placeholder).toBe("Comment (optional)")
+    field().value = "Only the first half worked"
+    field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    field().dispatchEvent(new FocusEvent("focusout", { bubbles: true, composed: true }))
+    await vi.waitFor(() => expect(routes.inbox.drafts.v1?.note).toBe("Only the first half worked"))
+    expect(routes.inbox.marks.v1).toBeUndefined()
+    // a reload of the run (a new card) finds it again, from the draft
+    await key(host, "ArrowRight")
+    await key(host, "ArrowLeft")
+    expect(field().value).toBe("Only the first half worked")
+    // Passed:  the comment goes with it, the draft gone
+    await key(host, "p")
+    expect(routes.inbox.marks.v1).toMatchObject({ result: "passed", note: "Only the first half worked" })
+    expect(routes.inbox.drafts.v1).toBeUndefined()
+    await afterAnswer(host)
+    // back, and changed to Not now:  the comment stays
+    await key(host, "ArrowLeft")
+    await key(host, "n")
+    expect(routes.inbox.marks.v1).toMatchObject({ result: "notnow", note: "Only the first half worked" })
+    await afterAnswer(host)
+    for (let at = 0; at < 4; at++) await key(host, "ArrowRight")
+    const listed = Array.from(runOf(host)!.querySelectorAll(".commented li"), (li) => words(li))
+    expect(listed).toEqual(["V1Not nowOnly the first half worked"])
   })
 
   test("past the last:  the summary's counts, Send results, and with `all` the next epic", async () => {

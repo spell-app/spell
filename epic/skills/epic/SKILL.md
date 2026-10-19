@@ -651,7 +651,7 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
 3. SENT marks:  `epic inbox <name> apply`.
    - Approvals, picks and todos land in the doc;  it prints each.
    - TEST RESULTS from Owen's test run (epic `epic-engine` P4):  `wait` prints them under
-     "test, Owen's test run", each test with its result (`passed`, `FAILED`, `skip`, `not now`), his note and his
+     "test, Owen's test run", each test with its result (`passed`, `FAILED`, `skip`, `not now`), his COMMENT and his
      screenshot's path.  `apply` applies them all:
      - passed:  the test closed;  skip:  canceled;  not now:  deferred, last in his next run
      - failed:  a NEW issue, "V3 failed:  <title>", holding his note and screenshot, linked both ways;
@@ -660,6 +660,11 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
        (`epic pages link <doc> --hash i12 --review`), e.g. "V3 failed:  the pill stayed grey -> I12";  the passes,
        skips and not-nows in one line of counts
      - fix the issues as any issue:  don't reopen the test by hand;  his next run tries it again
+     - his COMMENT, with ANY result, lands on the test as his reply (`<epic-reply from="Owen">`;  a skip's in its
+       cancel line too).  READ EVERY ONE:  a passed test with a comment may still need work (Owen, 2026-10-19:  "it
+       did part of what you asked, I want to explain how").  A comment that says something is missing or wrong:
+       `epic add <name>#I "<what>" --calm --details "<p>From <a href=\"#v3\">V3</a>'s comment:  ...</p>"`, the
+       issue linking the test
    - A pick works on ANY item's cards, a reply's too (I8 of `epic-components`):
      a question is answered with it, any other item approved with it.
    - `apply` itself gives each pick, todo and queued todo its outlined NOTED card;  an approval gets none (Q19):

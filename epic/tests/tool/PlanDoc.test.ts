@@ -2186,6 +2186,28 @@ describe("PlanDoc test answers:  Owen's test run", () => {
     expect(EpicTests.openIn(plan).map((test) => test.id)).toEqual(["V2", "V3", "V1"])
   })
 
+  test("a COMMENT with any result lands on the test as Owen's reply;  a skip's in its cancel line too", () => {
+    const plan = withTests()
+    const at = new Date(2026, 9, 1, 9, 30).toISOString()
+    const replyOf = (id: string) => {
+      const reply = el(plan, id).querySelector('epic-reply[from="Owen"]')
+      return reply && [reply.getAttribute("re"), reply.textContent?.trim()]
+    }
+    plan.applyMark({ id: "v1", action: "test", result: "notnow", note: "Needs main first.", at })
+    expect([el(plan, "v1").getAttribute("status"), replyOf("v1")]).toEqual([
+      "open",
+      ["test not now", "Needs main first."]
+    ])
+    expect(plan.applyMark({ id: "v3", action: "test", result: "skip", note: "Moot since P3.", at }).did).toBe(
+      'canceled:  no longer applies (Owen\'s run):  "Moot since P3."'
+    )
+    expect(replyOf("v3")).toEqual(["test skipped", "Moot since P3."])
+    plan.applyMark({ id: "v2", action: "test", result: "failed", note: "Half of it.", at })
+    expect(replyOf("v2")).toEqual(["test failed", "Half of it."])
+    expect(el(plan, "i1").textContent).toContain("Owen:  Half of it.")
+    expect(problems(plan)).toEqual([])
+  })
+
   test("a test's answer on anything but a test is dropped (`gone`);  an unknown result is left", () => {
     const plan = withTests()
     plan.addItem("todo", "a todo")

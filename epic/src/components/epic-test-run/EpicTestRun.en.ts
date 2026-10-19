@@ -20,7 +20,7 @@ export const epicTestRunVocabulary = {
   description:
     "A test run (epic `epic-engine` P4):  the open tests of the `<epic-page>` around it, ONE big card at a time -- " +
     "the test's title and id, its Step (with buttons for the pages it says to open), Should, an Example screenshot " +
-    "(click to zoom) and If not -- answered Passed, Failed (a note and a pasted screenshot), Skip or Not now, " +
+    "(click to zoom) and If not -- answered Passed, Failed (with a pasted screenshot), Skip or Not now, a comment with any of them, " +
     'each a review mark (`{ action: "test", result }`) in the page\'s inbox.  "4 of 9" and a thin bar say how far ' +
     "along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  " +
     "Drawn by `<epic-page>` over its blocks in test mode (the To test section's Start testing, or `?test=1` on the " +
@@ -52,11 +52,20 @@ export const epicTestRunVocabulary = {
       description: "The four answers, ONE button group:  Passed (green), Failed (red), Skip (grey), Not now (yellow)."
     },
     {
+      name: "comment",
+      description:
+        "Under the answers on every card:  the comment box (`<epic-text-box>`), saved as typed, going with whichever " +
+        "answer is picked."
+    },
+    {
       name: "failure",
-      description: "Under the answers once Failed:  the note box and the screenshot's paste and drop area."
+      description: "Under the comment once Failed:  the screenshot's paste and drop area."
     },
     { name: "moves", description: "Back and Next, at the card's foot." },
-    { name: "summary", description: "The summary card:  the counts, Send results, the next epic." }
+    {
+      name: "summary",
+      description: "The summary card:  the counts, the tests commented on, Send results, the next epic."
+    }
   ],
   states: [{ name: "summary", description: "The summary card shows:  past the last test." }],
   texts: [
@@ -100,8 +109,18 @@ export const epicTestRunVocabulary = {
       text: "Not served by the page server:  answers can't be saved here.",
       description: "Over the answers, while the page isn't reviewed (`file://`, no token)."
     },
-    { key: "note", text: "What went wrong?  Claude files it as an issue", description: "The failure's note box." },
-    { key: "noteLabel", text: "What went wrong with {id}", description: "The failure's note box, spoken." },
+    {
+      key: "note",
+      text: "Comment (optional)",
+      description: "Every card's comment box, under the answers:  goes with whichever answer is picked."
+    },
+    { key: "noteLabel", text: "Your comment on {id}", description: "The comment box, spoken." },
+    {
+      key: "commentedTitle",
+      text: "Your comments",
+      description: "The summary's list of the tests commented on, each with its answer."
+    },
+    { key: "unanswered", text: "not answered", description: "A commented test's answer, in the summary:  none yet." },
     {
       key: "paste",
       text: "Paste a screenshot (⌘V) or drop one here",

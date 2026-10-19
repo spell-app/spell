@@ -486,7 +486,7 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
     inbox.markSent(T2)
   })
   await commands().inbox.run("x", file, [], {})
-  expect(printed.join("\n")).toContain('V2  two  · FAILED · "grey" · screenshot tests/v2-20261007-1000.png')
+  expect(printed.join("\n")).toContain('V2  two  · FAILED · comment "grey" · screenshot tests/v2-20261007-1000.png')
   printed = []
   await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
   const work = printed.join("\n")
@@ -494,7 +494,7 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
     "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers (4):"
   )
   expect(work).toMatch(
-    /V2 {2}test, open · two\n {8}FAILED\n {8}note: {2}"grey"\n {8}screenshot: {2}tests\/v2-20261007-1000\.png/
+    /V2 {2}test, open · two\n {8}FAILED\n {8}comment: {2}"grey"\n {8}screenshot: {2}tests\/v2-20261007-1000\.png/
   )
   expect(work).toContain("test results")
   printed = []

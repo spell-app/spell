@@ -244,7 +244,16 @@
     color: var(--_act-ink);
   }
 
-  /* ## A failure:  the note box, then the screenshot's area */
+  /* ## The comment, on every card:  Owen's words, on his ivory */
+  .comment {
+    margin-block: 0 10px;
+    padding: 6px;
+    border: 1px solid color-mix(in oklab, var(--_run-ivory-ink) 30%, transparent);
+    border-radius: 12px;
+    background: var(--_run-ivory);
+  }
+
+  /* ## A failure:  the screenshot's area */
   .failure {
     display: grid;
     gap: 8px;
@@ -324,6 +333,41 @@
   }
   .counts li[data-color="yellow"] ui-icon {
     color: light-dark(var(--_run-yellow-ink), var(--_run-yellow));
+  }
+  .commented-title {
+    margin: 0 0 4px;
+    font: 700 12px/1.2 var(--_run-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--_run-muted);
+  }
+  .commented {
+    display: grid;
+    gap: 4px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+  }
+  .commented li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: var(--_run-ivory);
+    color: var(--_run-ivory-ink);
+  }
+  .commented .result {
+    flex: none;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .commented .said {
+    flex: 1 1 12em;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
   }
   .what {
     margin: 0 0 12px;

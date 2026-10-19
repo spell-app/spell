@@ -1217,7 +1217,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
       new issue with the note and screenshot, skip cancels, not now defers):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
     - the run itself is `<epic-page>`'s test mode (`?test=1`), drawn by `<epic-test-run>` (Epic UI's page says how):
       one card per test from its `<epic-field label="Step">` ... (an older test's prose as its Step), the answers
-      P / F / S / N, its place in the address (`#v3`), kept there against the runtime's scroll-follow
+      P / F / S / N, a COMMENT box on every card (the mark's `note`, with any answer;  before one, the inbox's draft;
+      `apply` keeps it on the test as Owen's reply), its place in the address (`#v3`), kept there against the runtime's scroll-follow
       (`spell-doc:place`);  `epic test <name>` opens it, `epic test --all` the
       first epic with open tests, the run's last card leading to the next (`GET /api/epics/tests`,
       [epicRoutes.ts](tool/epicRoutes.ts), `EpicTests.waiting()`)

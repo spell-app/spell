@@ -1039,7 +1039,9 @@ export class PlanDoc extends PlanReader {
    *     and a Noted card linking the issue:  linked both ways
    * - `skip`:  it no longer applies:  canceled, reviewed
    * - `notnow`:  he can't do it yet:  stays open, deferred today, so the next run puts it last
-   * - his note kept as his reply (`keepNote()`), but a failure's:  that's in the issue
+   * - his COMMENT (the mark's `note`, any result;  Owen, 2026-10-19:  "it did part of what you asked, I want to
+   *   explain how"):  kept on the test as his reply (`keepNote()`, `<epic-reply from="Owen" re="test passed">`);
+   *   a failure's in its new issue too, a skip's in the cancel line
    * - dropped (`gone`) when `item` isn't a test;  left for Claude when the result is none of those
    */
   private applyTest(
@@ -1049,7 +1051,7 @@ export class PlanDoc extends PlanReader {
   ): MarkResult {
     const label = item.id.toUpperCase()
     if (kind !== "test") return { applied: false, gone: true, left: `${label} isn't a test:  its answer dropped` }
-    if (result !== "failed" && note) this.keepNote(item.id, { note, action: TEST_NOTE_AS[result!] ?? "test", at })
+    if (note) this.keepNote(item.id, { note, action: TEST_NOTE_AS[result!] ?? "test", at })
     switch (result) {
       case "passed":
         if (item.getAttribute("status") !== "done") this.setItem(item.id, "done")
@@ -1068,7 +1070,10 @@ export class PlanDoc extends PlanReader {
       case "skip":
         this.setItem(item.id, "canceled")
         this.review(item.id)
-        return { applied: true, did: `canceled:  no longer applies (${OWENS_RUN})` }
+        return {
+          applied: true,
+          did: `canceled:  no longer applies (${OWENS_RUN})${note ? `:  "${PlanMarkup.squeeze(note)}"` : ""}`
+        }
       case "notnow":
         this.defer(item.id)
         return { applied: true, did: `not now:  deferred (${OWENS_RUN})` }
@@ -1973,7 +1978,12 @@ const PLAIN = { plain: true }
 const OWENS_RUN = "Owen's run"
 
 /** What Owen's note on a test answer is kept as (`<epic-reply re>`):  its result in words. */
-const TEST_NOTE_AS: Record<string, string> = { passed: "test passed", skip: "test skipped", notnow: "test not now" }
+const TEST_NOTE_AS: Record<string, string> = {
+  passed: "test passed",
+  failed: "test failed",
+  skip: "test skipped",
+  notnow: "test not now"
+}
 
 /** What a rewrite of an item's details (`PlanDoc.setDetails()`) leaves where it is, slotted children aside. */
 const KEPT_ON_REWRITE = ["epic-answer", "epic-original", "epic-commit"]
