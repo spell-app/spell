@@ -52,6 +52,8 @@ describe("epic init", () => {
     expect(config.windows).toEqual({ default: "try", repoName: "try", contentName: "try.epics", worktreeOnly: true })
     expect(config.linkSessionFolders).toBe(true)
     expect(config.sharedFolders).toEqual(["epics", "sagas", "guides", "pages"])
+    // the window files in the content repo (epic-eject P13)
+    expect(config.newWindowsFolder).toBe(join(CONTENT, "windows"))
     // every key, each with its comment
     const text = readFileSync(config.file, "utf8")
     expect(text).toMatch(/\/\/ the branch worktrees start from and merge into\n {2}"baseBranch": "trunk",/)
@@ -65,8 +67,10 @@ describe("epic init", () => {
       expect(realpathSync(join(MAIN, folder))).toBe(join(CONTENT, folder))
     }
     expect(readFileSync(join(MAIN, ".gitignore"), "utf8")).toMatch(
-      /^# shared:start .*\n\/epics\n\/sagas\n\/guides\n\/pages\n\/workspaces\/\n# shared:end\n$/
+      /^# shared:start .*\n\/epics\n\/sagas\n\/guides\n\/pages\n# shared:end\n$/
     )
+    // the window files:  in the content repo, ignored there (epic-eject P13)
+    expect(readFileSync(join(CONTENT, ".gitignore"), "utf8")).toMatch(/^\/windows\/$/m)
     // nothing but the two files to commit:  the links are ignored
     expect(Git.run(["status", "--porcelain"], MAIN).out.split("\n").sort()).toEqual(["?? .epic/", "?? .gitignore"])
     expect(readFileSync(join(CONTENT, "README.md"), "utf8")).not.toMatch(/spell-app/)

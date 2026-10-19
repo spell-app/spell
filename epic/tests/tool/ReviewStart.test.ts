@@ -8,9 +8,10 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { createServer, type Server } from "node:http"
 import type { AddressInfo } from "node:net"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import { afterAll, beforeAll, beforeEach, expect, test } from "vite-plus/test"
 
+import { EpicConfig } from "$/epics/config/EpicConfig"
 import { ReviewStart } from "$/epics/tool/ReviewStart"
 import { fakeMainCheckout, fakeWorktree } from "$/server/test/checkouts"
 
@@ -95,10 +96,14 @@ test("a worktree, its window closed:  `epic window launch <epic>`, from the main
   expect(asked).toEqual([])
 })
 
-test("the worktree's window found by its window file, too (`workspaces/ongoing/<epic>.code-workspace`)", async () => {
+test("the worktree's window found by its window file, too (`<windowsFolder>/ongoing/<epic>.code-workspace`)", async () => {
   worktree("big")
-  mkdirSync(join(root, "workspaces", "ongoing"), { recursive: true })
-  const file = join(root, "workspaces", "ongoing", "big.code-workspace")
+  // the windows folder in the scratch checkout:  never the default, beside it in the temp folder
+  mkdirSync(join(root, ".epic"), { recursive: true })
+  writeFileSync(join(root, EpicConfig.FILE), '{ "windowsFolder": "windows" }')
+  const file = EpicConfig.of(root).worktreeWindowFile("big")
+  expect(file).toBe(join(root, "windows", "ongoing", "big.code-workspace"))
+  mkdirSync(dirname(file), { recursive: true })
   writeFileSync(file, "{}")
   window([root], file)
   expect((await starter().wake("big")).state).toBe("opened")

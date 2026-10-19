@@ -32,7 +32,7 @@ import { Worktrees } from "./Worktrees"
  *   - `/park` notes and `/bedtime` reports in worktrees
  *   - epic pages with phases left
  *   - `park:<name>` stashes left behind
- *   - window files (`workspaces/ongoing/<name>.code-workspace`) with no worktree
+ *   - window files (`<windowsFolder>/ongoing/<name>.code-workspace`) with no worktree
  * - a session working in a worktree belongs to that worktree's item;  the rest are items of their own
  ****************/
 export class Stock {
@@ -262,7 +262,7 @@ export class Stock {
 
   /** Window files with no worktree:  `epic window close` deletes them;  a session that left without it, didn't. */
   private windowItems(worktrees: Set<string>): StockItem[] {
-    const folder = join(this.main, "workspaces", "ongoing")
+    const folder = this.config.worktreeWindowsFolder
     if (!existsSync(folder)) return []
     const items: StockItem[] = []
     for (const file of readdirSync(folder).sort()) {
@@ -308,8 +308,7 @@ export class Stock {
   private deadActions(item: StockItem): StockAction[] {
     const found = item.sessions.filter((session) => session.state === "idle" && !session.this).map(kill)
     const commands: string[] = []
-    if (existsSync(join(this.main, "workspaces", "ongoing", `${item.name}.code-workspace`)))
-      commands.push(`epic window close ${item.name}`)
+    if (existsSync(this.config.worktreeWindowFile(item.name))) commands.push(`epic window close ${item.name}`)
     if (item.worktree) commands.push(`git worktree remove ${relative(this.main, item.worktree)}`)
     // `-d` refuses unmerged work;  squashed-in commits need `-D`, which `discard` asks about separately
     if (item.branch) commands.push(`git branch ${item.ahead ? "-D" : "-d"} ${item.branch}`)

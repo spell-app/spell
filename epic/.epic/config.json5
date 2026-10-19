@@ -35,5 +35,10 @@
   "sharedFolders": ["epics", "guides", "pages", "sagas", "agents"],
 
   // This repo IS the engine:  no `spell-epic` link.
-  "engineFolder": ""
+  "engineFolder": "",
+
+  // The VS Code window files (`epic window`):  its own `workspaces/`, git-ignored here, as before epic `epic-eject`
+  // P13.  NOT the content folder's `windows/` (the default):  that's spell-app's, and two repos' windows in one
+  // folder would mix (`epic window init` and `epic stock` read every file in it as their own).
+  "windowsFolder": "workspaces"
 }

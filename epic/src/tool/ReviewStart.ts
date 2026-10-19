@@ -309,10 +309,10 @@ export class ReviewStart {
 
   /**
    * The open window of epic `epic`'s worktree, else `undefined`:  the one opened from its window file
-   * (`workspaces/ongoing/<epic>.code-workspace`, `epic window open`), else one showing its folder.
+   * (`<windowsFolder>/ongoing/<epic>.code-workspace`, `epic window open`), else one showing its folder.
    */
   worktreeWindowOf(epic: string): WindowEntry | undefined {
-    const file = real(join(this.mainRoot, "workspaces", "ongoing", `${epic}.code-workspace`))
+    const file = real(this.config.worktreeWindowFile(epic))
     const folder = real(this.worktreeOf(epic))
     const entries = [...ReviewStart.windows().values()]
     return (

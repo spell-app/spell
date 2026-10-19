@@ -27,7 +27,8 @@ Work in worktree `<name>`, so this session's edits never collide with another se
      - Ask the user to leave plan mode (shift+tab);  the plan file survives.
    - in another worktree:  the session's folder is in worktree `<other>`, or its window is a worktree's.
      - the folder:  `.claude/worktrees/<other>`, or beside the repo
-     - the window:  `epic window which` prints a `workspace` under `workspaces/ongoing/`
+     - the window:  `epic window which` prints a `workspace` under an `ongoing/` folder
+       (`$(epic config windowsFolder)/ongoing/`, or the old `workspaces/ongoing/`)
      - `<other>` isn't `<name>`:  stop, saying so in one line
        ("`/isolate done` first, or start from a package window").
    - rename:  `epic session title "🚧 <name>"`.
@@ -92,7 +93,7 @@ Work in worktree `<name>`, so this session's edits never collide with another se
    - It keeps this session listed in every window.
 4. Open it in its own window, from the worktree's root (the root `AGENTS.md`, "Worktrees"):
    - `epic window open <name> [--color <look>]`:  a NEW window.
-     - Its file:  `workspaces/ongoing/<name>.code-workspace`, in the main checkout, git-ignored.
+     - Its file:  `$(epic config windowsFolder)/ongoing/<name>.code-workspace`, each machine's own, never committed.
      - Its look:  this window's, or `<look>`'s, one of the 12 of `epic window color`.
        - e.g. `/isolate <name> -purple`, `/epic <name> -purple` (epic `windows-and-review` P5)
      - Its folders:
@@ -298,7 +299,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      That's just confusing things".
    - The worktree's window stays open for Owen to read the summary;  he closes it.
    - Its file goes with `epic window close <name>` later, or `/worktrees` lists it.
-     That file:  `workspaces/ongoing/<name>.code-workspace`.
+     That file:  `$(epic config windowsFolder)/ongoing/<name>.code-workspace`.
    - NEVER `handoff <name> --back` from here.
    - It STAYED in its window ("Stay" above):
      `epic window stay --end` puts the window's title and title bar back.

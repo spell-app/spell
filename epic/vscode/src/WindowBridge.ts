@@ -42,7 +42,8 @@
  *     - none (or only several-tab matches):  ok, `closed: false`, `matches` per title
  *     - closing the tab ends that tab's `claude` process
  *     - `{ title }`, one title, still works
- * - NEVER adds a folder unless the window was opened from a SAVED workspace file (`workspaces/<pkg>.code-workspace`):
+ * - NEVER adds a folder unless the window was opened from a SAVED workspace file
+ *   (`<windowsFolder>/<pkg>.code-workspace`):
  *   in a one-folder or untitled window, the change re-opens the window as a new workspace,
  *   which restarts every extension -- including the Claude panel whose session asked.
  *   - `remove-folder` has no such rule:  it only ever takes away a folder `add-folder` put there
@@ -245,7 +246,7 @@ export class WindowBridge {
       throw new BridgeError(
         409,
         "this window isn't a saved workspace:  adding a folder would restart its extensions (and the Claude panel)." +
-          "  Open it from workspaces/<pkg>.code-workspace."
+          "  Open it from its window file, <pkg>.code-workspace in `epic config windowsFolder`."
       )
     }
     if (!existsSync(folder) || !statSync(folder).isDirectory()) throw new BridgeError(404, `no folder '${folder}'`)

@@ -390,7 +390,7 @@ export class Shared {
    * - already a git repo:  `exists`, nothing done
    * - `importFrom` (a checkout):  copies its folders for every link in, and commits `Import from spell-app <sha>`
    * - else an empty repo with the link folders, so a fresh clone can link and start
-   * - always:  `.gitignore` (locks, temp files, scratch details pages) and a `README.md`
+   * - always:  `.gitignore` (locks, temp files, scratch details pages, the window files) and a `README.md`
    */
   init({ importFrom }: { importFrom?: string } = {}): string {
     const { config } = this
@@ -563,6 +563,8 @@ sagas/**/*.inbox.json*
 # an epic's running agents (\`epic agents\`):  what's running now, never committed;  \`.json\` before P21
 epics/*/agents.json
 epics/*/agents.json5
+# VS Code's window files (\`epic window\`, epic epic-eject P13):  each machine's own, never committed
+/windows/
 `
 
 /** Write `text` to stdout, on its own line. */

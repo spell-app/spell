@@ -3,7 +3,13 @@
  * `epic window <command>`:  the VS Code windows Owen works in, one per package.
  *
  * ## Window files
- * - `workspaces/<pkg>.code-workspace`:  open a package's window from it (`code workspaces/ui.code-workspace`).
+ * - Where:  the windows folder (`windowsFolder` in the repo's `.epic/config.json5`;  epic `epic-eject` P13), by
+ *   default the content folder's `windows/`, `../spell-app.epics/windows`:  each machine's own, git-ignored there.
+ *   - Before P13 they were in spell-app, `workspaces/`, tracked and marked `skip-worktree`:
+ *     `move` carries them over once (`moveWindowFiles()`), each folder path rewritten for the new place.
+ *   - Their folder paths are relative to the FILE:  every writer computes them from the windows folder.
+ * - `<windowsFolder>/<pkg>.code-workspace`:  open a package's window from it
+ *   (`code <windowsFolder>/ui.code-workspace`).
  * - Its FIRST folder is the repo root, the whole branch;  then the shared content repo.
  *   - Why the root first:  the Claude Code panel lists only the sessions saved under a window's first folder,
  *     so every window lists every session.
@@ -14,14 +20,14 @@
  *   - generated files, icons and screenshots stay out of Quick Open and Find
  *     through the root's `.vscode/settings.json` (`search.exclude`)
  * - The folders and names come from the repo's `.epic/config.json5` (`EpicConfig`, `CONFIG`):
- *   the content repo (`contentFolder`), the worktrees' folder (`worktreesFolder`), the window names (`windows`).
+ *   the content repo (`contentFolder`), the worktrees' folder (`worktreesFolder`), the window files' folder
+ *   (`windowsFolder`), the window names (`windows`).
  *   The names in this header are their defaults.
  * - A saved workspace can gain and lose folders (a worktree, while a session works in it) without restarting
  *   extensions;  a one-folder window can't, and its Claude panel restarts.
- *   - NEVER add one any more:  VS Code writes the folder into the window file, where it outlives the worktree,
- *     unseen:  the files are `skip-worktree` in the main checkout (so Owen's theme changes never show either)
- * - spell-epic tracks none:  its `.gitignore` takes the whole `workspaces/` folder, and the repo's window file is
- *   written when it's missing (`ensureRepoWindow()`, by `open`, `launch` and `init`;  epic `epic-engine` I15)
+ *   - NEVER add one any more:  VS Code writes the folder into the window file, where it outlives the worktree
+ * - The whole repo's window file is written when it's missing (`ensureRepoWindow()`, by `open`, `launch` and `init`;
+ *   epic `epic-engine` I15):  spell-epic's, in its own git-ignored `workspaces/` (its `windowsFolder`)
  * - `git.detectWorktrees` on:  Source Control lists every worktree as its own repo, changes and diffs included,
  *   so a session that STAYS in its window when it isolates (below) is still reviewable there.
  *   - every package window lists every worktree;  takes a window reload
@@ -69,8 +75,7 @@
  *   - Log:  `<registry>/handoffs/<session id>.log`.
  * - Docs shown while the move is pending (`show`, `epic open`) wait for it, then show in the window the
  *   session moved to:  the window it's leaving is about to close its tab.
- * - Its file:  `workspaces/ongoing/<name>.code-workspace` in the main checkout, beside the package windows' files;
- *   git ignores `workspaces/ongoing/`.
+ * - Its file:  `<windowsFolder>/ongoing/<name>.code-workspace`, beside the package windows' files.
  * - A worktree BESIDE the repo (`worktreesFolder` outside it, or `windows.worktreeOnly`;  epic `epic-eject` P8):
  *   a worktree-only window, `⎇ <name>` then the content folder.
  *   - no main checkout, no `.spell-main` marker, no hiding
@@ -115,6 +120,8 @@
  * ## Commands
  * - `init`:  write the window file of every package that lacks one, and bring the others up to date:
  *   folders and `files.exclude` (a worktree's window:  `files.exclude`);  themes and other settings are Owen's, kept
+ * - `move [--dry-run]`:  carry the window files from the old folder, `workspaces/` in the main checkout, to the
+ *   windows folder, once (`moveWindowFiles()`);  never deletes the old ones
  * - `which`:  this session's window:  pid, workspace file, folders
  * - `add <path> [--name <name>]`:  add a folder (a worktree) to the window
  *   - needs a window opened from its `.code-workspace` (else the change would restart its extensions,
@@ -124,7 +131,7 @@
  *   - the doc preview:  the right side bar's "Spell Docs" tab;  `--review`:  its "Review" tab
  *   - while a `handoff` is pending:  in the window this session is moving to, once it has
  * - `open <name> [--pkg <pkg>] [--color <look>]`:  write worktree `<name>`'s window file and open it in a new window
- *   - `<pkg>` (a package, or any `workspaces/<pkg>.code-workspace`) defaults to this session's window's package,
+ *   - `<pkg>` (a package, or any `<windowsFolder>/<pkg>.code-workspace`) defaults to this session's window's package,
  *     else `spell-app` (the whole repo's window)
  *   - its look:  `--pkg`'s window's when named, else this session's window's
  * - `close <name>`:  close that window, delete the file
@@ -154,7 +161,7 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
-import { dirname, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { EpicConfig } from "./config/EpicConfig.ts"
@@ -181,8 +188,17 @@ function checkoutAround(dir) {
 /** The repo's `.epic/config.json5`, the MAIN checkout's:  its folders and window names. */
 const CONFIG = EpicConfig.of(ROOT)
 
-/** The MAIN checkout's root, even when run from a worktree:  where the window files are. */
+/** The MAIN checkout's root, even when run from a worktree:  the repo root every package window shows. */
 const MAIN_ROOT = CONFIG.main
+
+/**
+ * The window files' folder (`windowsFolder`, `EpicConfig.windowsFolder`):  package windows in it, worktree windows
+ * in its `ongoing/` (`WORKTREE_WINDOWS`)
+ */
+const WINDOWS = CONFIG.windowsFolder
+
+/** The worktrees' window files' folder:  `<windowsFolder>/ongoing`. */
+const WORKTREE_WINDOWS = CONFIG.worktreeWindowsFolder
 
 /** Each package's starting theme:  VS Code's built-ins, all different.  Owen picks real ones in the files. */
 const THEMES = {
@@ -203,7 +219,7 @@ const FALLBACK_THEME = "Default Dark+"
 
 /**
  * `open`'s window file when this session's window isn't a package's:
- * `workspaces/<default>.code-workspace`, the whole repo's (`windows.default`, `spell-app`).
+ * `<windowsFolder>/<default>.code-workspace`, the whole repo's (`windows.default`, `spell-app`).
  */
 const DEFAULT_WINDOW = CONFIG.windows.default
 
@@ -234,9 +250,9 @@ export class Window {
       .sort()
   }
 
-  /** `workspaces/<pkg>.code-workspace`. */
+  /** `<windowsFolder>/<pkg>.code-workspace`:  a package's window file, or the whole repo's. */
   static file(pkg) {
-    return join(ROOT, "workspaces", `${pkg}.code-workspace`)
+    return CONFIG.windowFile(pkg)
   }
 
   /**
@@ -255,9 +271,13 @@ export class Window {
     }
   }
 
-  /** A package window's folders, relative to `workspaces/`:  the repo root, then the shared content repo. */
+  /**
+   * A package window's folders, relative to the windows folder:  the MAIN repo root, then the shared content repo.
+   * - the main checkout's, whichever checkout runs this:  one windows folder for the repo (before epic `epic-eject`
+   *   P13, a worktree's `init` wrote its branch's own copies, pointing at the worktree)
+   */
   static packageFolders() {
-    return [{ path: "..", name: CONFIG.windows.repoName }, ...Window.sharedFolder(join(ROOT, "workspaces"))]
+    return [{ path: relative(WINDOWS, MAIN_ROOT), name: CONFIG.windows.repoName }, ...Window.sharedFolder(WINDOWS)]
   }
 
   /**
@@ -304,7 +324,7 @@ export class Window {
    *   its theme and every other setting are Owen's, kept
    * - the whole repo's window, `windows.default` (`spell-app`), when it isn't a package's:
    *   written when missing (`ensureRepoWindow()`)
-   * - a worktree's window (`workspaces/ongoing/`):  its `files.exclude`, and the content folder when it lacks it
+   * - a worktree's window (`<windowsFolder>/ongoing/`):  its `files.exclude`, and the content folder when it lacks it
    *   (`withContentFolder()`)
    * - an existing file VS Code can't read as JSON (comments) is left alone
    * - NOTE:  a package window that changes folders while open re-reads its workspace;  its Claude panel may reload
@@ -318,17 +338,18 @@ export class Window {
     for (const pkg of Window.packages) {
       const file = Window.file(pkg)
       if (!existsSync(file)) {
+        mkdirSync(WINDOWS, { recursive: true })
         writeFileSync(file, `${JSON.stringify(Window.workspace(pkg), null, 2)}\n`)
-        written.push(relative(ROOT, file))
+        written.push(relative(MAIN_ROOT, file))
         continue
       }
       const refreshed = refresh(file, (workspace) => {
         workspace.folders = Window.packageFolders()
         workspace.settings = { ...workspace.settings, "files.exclude": Window.filesExclude() }
       })
-      if (refreshed) written.push(relative(ROOT, file))
+      if (refreshed) written.push(relative(MAIN_ROOT, file))
     }
-    const ongoing = join(MAIN_ROOT, "workspaces", "ongoing")
+    const ongoing = WORKTREE_WINDOWS
     for (const name of existsSync(ongoing) ? readdirSync(ongoing) : []) {
       if (!name.endsWith(".code-workspace")) continue
       const file = join(ongoing, name)
@@ -343,19 +364,17 @@ export class Window {
   }
 
   /**
-   * The whole repo's window file, `workspaces/<windows.default>.code-workspace` in the MAIN checkout, written when
-   * it's missing and isn't a package's;  returns its path when written, else `null`.
+   * The whole repo's window file, `<windowsFolder>/<windows.default>.code-workspace`, written when it's missing and
+   * isn't a package's;  returns its path when written, else `null`.
    * - so a repo with no `packages/` (spell-epic, one `epic init` set up) has a window for `open` and `launch` to
    *   start from, without an `epic window init` first (epic `epic-engine` I15)
-   * - in the MAIN checkout, where `open` looks for it, whichever checkout runs this
-   * - its folders:  the repo root, then the content folder
+   * - its folders:  the MAIN repo root, then the content folder (`packageFolders()`)
    */
   static ensureRepoWindow() {
-    const file = join(MAIN_ROOT, "workspaces", `${DEFAULT_WINDOW}.code-workspace`)
+    const file = Window.file(DEFAULT_WINDOW)
     if (Window.packages.includes(DEFAULT_WINDOW) || existsSync(file)) return null
     mkdirSync(dirname(file), { recursive: true })
     const workspace = Window.workspace(DEFAULT_WINDOW)
-    workspace.folders = [{ path: "..", name: CONFIG.windows.repoName }, ...Window.sharedFolder(dirname(file))]
     writeFileSync(file, `${JSON.stringify(workspace, null, 2)}\n`)
     return file
   }
@@ -388,17 +407,51 @@ export class Window {
   }
 
   ////////////////
+  // ## Moving the window files out of the repo
+  ////////////////
+
+  /**
+   * `move`:  carry the window files from the old folder, `workspaces/` in the main checkout, to the windows folder
+   * (`EpicConfig.newWindowsFolder`;  epic `epic-eject` P13);  returns `moveWindowFiles()`'s report.
+   * - nothing to do when the old folder isn't there, or IS the windows folder (spell-epic's `workspaces/`)
+   */
+  static move({ dryRun = false } = {}) {
+    const from = CONFIG.oldWindowsFolder
+    const to = CONFIG.newWindowsFolder
+    if (!existsSync(from) || real(from) === real(to)) return { from, to, files: [] }
+    return { from, to, files: moveWindowFiles(from, to, { dryRun }) }
+  }
+
+  /** `move [--dry-run]`, printed:  a line per file, its folder paths' rewrites under it;  resolves to the exit code. */
+  static moveCommand({ dryRun = false } = {}) {
+    const { from, to, files } = Window.move({ dryRun })
+    if (!files.length) {
+      console.log(`no window files to move from ${from} to ${to}`)
+      return 0
+    }
+    console.log(`${dryRun ? "would move" : "moving"} the window files from ${from} to ${to}:`)
+    for (const { file, action, folders } of files) {
+      console.log(`  ${file}  ${action}`)
+      for (const [old, now] of folders) if (old !== now) console.log(`      ${old}  ->  ${now}`)
+    }
+    const counts = Object.entries(Object.groupBy(files, ({ action }) => action))
+    console.log(counts.map(([action, each]) => `${each.length} ${action}`).join(", "))
+    if (!dryRun) console.log(`the old files are still in ${from}:  delete them once every window is reopened`)
+    return 0
+  }
+
+  ////////////////
   // ## A worktree's window
   ////////////////
 
-  /** `workspaces/ongoing/<name>.code-workspace`, in the main checkout. */
+  /** `<windowsFolder>/ongoing/<name>.code-workspace`. */
   static worktreeFile(name) {
-    return join(MAIN_ROOT, "workspaces", "ongoing", `${name}.code-workspace`)
+    return CONFIG.worktreeWindowFile(name)
   }
 
   /**
    * The window file of worktree `name`, opened from `pkg`'s window.
-   * - folder paths are relative to `workspaces/ongoing/`
+   * - folder paths are relative to `<windowsFolder>/ongoing/`, where the file goes
    * - `spell.package`:  `pkg`, for `handoff --back`;  VS Code ignores a top-level key it doesn't know
    * - its folders, by `EpicConfig.worktreeOnlyWindow()` (epic `epic-eject` P8, O3):
    *   - a worktree beside the repo (or `windows.worktreeOnly`):  `⎇ <name>` then the content folder, nothing else
@@ -428,7 +481,7 @@ export class Window {
       if (source.settings["workbench.colorCustomizations"])
         settings["workbench.colorCustomizations"] = source.settings["workbench.colorCustomizations"]
     } else settings["workbench.colorCustomizations"] = tint(name)
-    const ongoing = join(MAIN_ROOT, "workspaces", "ongoing")
+    const ongoing = WORKTREE_WINDOWS
     return {
       folders: [
         ...(only ? [] : [{ path: relative(ongoing, MAIN_ROOT), name: CONFIG.windows.repoName }]),
@@ -467,10 +520,10 @@ export class Window {
     return { file, changed }
   }
 
-  /** `pkg`'s theme:  from its window file in the main checkout (Owen may have changed it), else `THEMES`. */
+  /** `pkg`'s theme:  from its window file (Owen may have changed it), else `THEMES`. */
   static theme(pkg) {
     try {
-      const file = join(MAIN_ROOT, "workspaces", `${pkg}.code-workspace`)
+      const file = Window.file(pkg)
       const theme = JSON.parse(readFileSync(file, "utf8")).settings?.["workbench.colorTheme"]
       if (theme) return theme
     } catch {
@@ -496,8 +549,7 @@ export class Window {
     // the whole repo's window file is written when missing:  a repo's first `open` or `launch` needs no `init`
     if (pkg === DEFAULT_WINDOW) Window.ensureRepoWindow()
     // a package, or any other window file (`spell-app`:  the whole repo's)
-    if (!Window.packages.includes(pkg) && !existsSync(join(MAIN_ROOT, "workspaces", `${pkg}.code-workspace`)))
-      throw new Error(`no package ${pkg}`)
+    if (!Window.packages.includes(pkg) && !existsSync(Window.file(pkg))) throw new Error(`no package ${pkg}`)
     if (color) look(color)
     const file = Window.worktreeFile(name)
     mkdirSync(dirname(file), { recursive: true })
@@ -686,7 +738,7 @@ export class Window {
     if (back) {
       if (!from?.workspaceFile || real(from.workspaceFile) !== real(file)) return null
       const pkg = worktreePackage(file)
-      const to = join(MAIN_ROOT, "workspaces", `${pkg}.code-workspace`)
+      const to = Window.file(pkg)
       handoff = { sessionId, to, from: from.pid, close: "window", remove: file, show: null, prompt }
     }
     mkdirSync(Window.handoffs, { recursive: true, mode: 0o700 })
@@ -763,9 +815,16 @@ export class Window {
     return process.env.CLAUDE_CODE_ENTRYPOINT === "claude-vscode" || process.env.TERM_PROGRAM === "vscode"
   }
 
-  /** The package of `window` (a registry entry):  its workspace file's `workspaces/<pkg>.code-workspace`. */
+  /**
+   * The package of `window` (a registry entry):  its workspace file's `<windowsFolder>/<pkg>.code-workspace`;
+   * else `null` (a worktree's window, or none)
+   * - or `workspaces/<pkg>.code-workspace`:  a window still open from its file's place before epic `epic-eject` P13
+   */
   static packageOf(window) {
-    return window?.workspaceFile?.match(/workspaces[\\/]([^\\/]+)\.code-workspace$/)?.[1] ?? null
+    const file = window?.workspaceFile
+    if (!file?.endsWith(".code-workspace")) return null
+    if (real(dirname(file)) === real(WINDOWS)) return basename(file, ".code-workspace")
+    return file.match(/workspaces[\\/]([^\\/]+)\.code-workspace$/)?.[1] ?? null
   }
 
   ////////////////
@@ -896,6 +955,7 @@ export class Window {
       console.log(written.length ? `wrote ${written.join(", ")}` : "every window file is up to date")
       return 0
     }
+    if (command === "move") return Window.moveCommand({ dryRun: flags["dry-run"] === true })
     const bare = ["which", "stay-check", "reload-view", "color"].includes(command) || (command === "stay" && flags.end)
     if (!COMMANDS.includes(command) || (!bare && !target)) {
       console.error(USAGE)
@@ -1052,6 +1112,7 @@ export class Window {
 /** Every command. */
 const COMMANDS = [
   "init",
+  "move",
   "which",
   "add",
   "remove",
@@ -1069,8 +1130,10 @@ const COMMANDS = [
 
 /** Usage, printed for a bad command. */
 const USAGE = `usage:  epic window <command>
-  init                         write each package's missing workspaces/<pkg>.code-workspace, and bring
+  init                         write each package's missing <windowsFolder>/<pkg>.code-workspace, and bring
                                every window file up to date (folders, files.exclude;  theme kept)
+  move [--dry-run]             carry the window files from workspaces/ (the main checkout's, before epic-eject
+                               P13) to the windows folder, folder paths rewritten;  never deletes the old ones
   which                        this session's VS Code window:  pid, workspace file, folders
   add <path> [--name <name>]   add a folder (a worktree) to the window
   remove <path>                remove it again
@@ -1152,6 +1215,75 @@ function refresh(file, change) {
   if (fresh === text) return false
   writeFileSync(file, fresh)
   return true
+}
+
+/**
+ * Copy every window file in folder `from` and its `ongoing/` to the same place in folder `to`, each folder path
+ * rewritten for its new place (`movedWorkspace()`);  returns a report per file (`dryRun`:  what it would do).
+ * - `{ file, action, folders }` each:
+ *   - `file`:  its path in the folder (`ui.code-workspace`, `ongoing/seo.code-workspace`)
+ *   - `action`:  `moved` (`would move`);  `up to date`, the same text there;
+ *     `kept`, ANOTHER text there (written since:  never overwritten)
+ *   - `folders`:  `[old, new]` per folder path
+ * - NEVER deletes or changes a file in `from`:  run again, it's `up to date`
+ * - plain function, no config:  the tests run it on temp folders
+ */
+export function moveWindowFiles(from, to, { dryRun = false } = {}) {
+  const report = []
+  for (const sub of ["", EpicConfig.WORKTREE_WINDOWS]) {
+    const dir = join(from, sub)
+    if (!existsSync(dir)) continue
+    for (const name of readdirSync(dir).sort()) {
+      if (!name.endsWith(".code-workspace")) continue
+      const file = sub ? `${sub}/${name}` : name
+      const text = readFileSync(join(dir, name), "utf8")
+      const { text: moved, folders } = movedWorkspace(text, dir, join(to, sub))
+      const target = join(to, sub, name)
+      const there = existsSync(target) ? readFileSync(target, "utf8") : null
+      const action = there === moved ? "up to date" : there !== null ? "kept" : dryRun ? "would move" : "moved"
+      if (action === "moved") {
+        mkdirSync(dirname(target), { recursive: true })
+        writeFileSync(target, moved)
+      }
+      report.push({ file, action, folders })
+    }
+  }
+  return report
+}
+
+/**
+ * Window file text `text`, from folder `fromDir`, as it reads in folder `toDir`:  `{ text, folders }`.
+ * - each relative `"path"` in its `"folders"` list resolved from `fromDir`, then made relative to `toDir`;
+ *   an absolute one kept
+ * - everything else kept byte for byte:  only those strings change (Owen's theme, colours, comments, layout)
+ * - `folders`:  `[old, new]` per folder path
+ */
+export function movedWorkspace(text, fromDir, toDir) {
+  const folders = []
+  const list = /"folders"\s*:\s*\[/.exec(text)
+  if (!list) return { text, folders }
+  const start = list.index + list[0].length
+  const end = closingBracket(text, start)
+  const rewritten = text.slice(start, end).replace(/("path"\s*:\s*)("(?:[^"\\]|\\.)*")/g, (_, key, literal) => {
+    const old = JSON.parse(literal)
+    const now = isAbsolute(old) ? old : relative(toDir, resolve(fromDir, old)) || "."
+    folders.push([old, now])
+    return `${key}${JSON.stringify(now)}`
+  })
+  return { text: text.slice(0, start) + rewritten + text.slice(end), folders }
+}
+
+/** Where the `[` list whose text starts at `start` ends:  its `]`, strings skipped;  the text's end if none. */
+function closingBracket(text, start) {
+  let depth = 1
+  for (let at = start; at < text.length; at++) {
+    const char = text[at]
+    if (char === '"') {
+      for (at++; at < text.length && text[at] !== '"'; at++) if (text[at] === "\\") at++
+    } else if (char === "[") depth++
+    else if (char === "]" && --depth === 0) return at
+  }
+  return text.length
 }
 
 /** Whether a process `pid` exists:  signal 0 checks without signalling;  EPERM means it exists, someone else's. */

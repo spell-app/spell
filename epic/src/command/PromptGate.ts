@@ -44,7 +44,8 @@ import { TITLE_ICONS } from "./command.types.ts"
  *      and `ExitPlanMode` would ask Owen to approve a half-made plan.
  * 2. In another worktree, on `/isolate` or `/epic <name>`:  blocks the prompt (`otherWorktree()`).  "In" means either:
  *    - `cwd` is under `.claude/worktrees/<other>`
- *    - the session's VS Code window is a worktree's (`workspaces/ongoing/<other>.code-workspace`).
+ *    - the session's VS Code window is a worktree's (`<windowsFolder>/ongoing/<other>.code-workspace`;
+ *      before epic `epic-eject` P13, `workspaces/ongoing/`:  any `ongoing/` folder's window file counts).
  *      A new session there starts at the MAIN root, so `cwd` alone misses it.
  *    - Re-entering the SAME `<name>` is fine.
  *    - `/epic <name>` there is NOT blocked (Owen, 2026-10-07):
@@ -109,7 +110,7 @@ export class PromptGate {
           text,
           `You're in worktree \`${other}\`:  \`/${skill}\` there would nest one worktree's work in another.  ` +
             `\`/isolate done\` first, or run \`/${skill} ${name}\` from a package's window ` +
-            `(\`workspaces/<pkg>.code-workspace\`)` +
+            `(\`<pkg>.code-workspace\`, in \`epic config windowsFolder\`)` +
             (text ? ":  it picks the text up." : ".")
         )
       }
@@ -219,7 +220,7 @@ export class PromptGate {
     const byCwd = worktreeOf(cwd)
     if (byCwd) return byCwd === name ? null : byCwd
     const file = window?.workspaceFile ?? ""
-    const ongoing = /[\\/]workspaces[\\/]ongoing[\\/]([^\\/]+)\.code-workspace$/.exec(file)
+    const ongoing = /[\\/]ongoing[\\/]([^\\/]+)\.code-workspace$/.exec(file)
     if (ongoing && ongoing[1] !== name) return ongoing[1]!
     return null
   }

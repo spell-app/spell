@@ -24,5 +24,5 @@ __screenshots__/
 
 # the VS Code window files (`epic window`, src/window.mjs):  per machine, written when missing -- the repo's window
 # (`workspaces/spell-epic.code-workspace`) by `epic window open | launch | init`, a worktree's (`workspaces/ongoing/`)
-# by `open`.  Unlike spell-app's, tracked and skip-worktree in its main checkout (epic `epic-engine` I15, J3)
+# by `open`.  Its `windowsFolder` (.epic/config.json5) keeps them here (epic `epic-engine` I15, J3;  `epic-eject` P13)
 /workspaces/

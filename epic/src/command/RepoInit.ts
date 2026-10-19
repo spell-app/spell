@@ -18,13 +18,14 @@ import { Shared } from "./Shared"
  *    - the base branch from git
  *    - worktrees in `../<repo>.worktrees`
  *    - the install command its lock file names (none without one)
- *    - window names from the repo's name
+ *    - window names from the repo's name;  the window files in the content folder's `windows/` (git-ignored there)
  *    - a file already there is kept as it is
  * 2. makes the content folder, a git repo of its own, with a folder for each of `sharedFolders`
  *    (`Shared.init()`):  `epics`, `sagas`, `guides`, `pages`
  * 3. links those folders in at the checkout's root (`Shared.link()`)
- * 4. lists in the repo's `.gitignore`, between `# shared:start` and `# shared:end`:
- *    the links, and the window files' folder, `workspaces/` (`epic window`:  each machine's own)
+ * 4. lists in the repo's `.gitignore`, between `# shared:start` and `# shared:end`:  the links
+ *    - not the window files (`epic window`:  each machine's own):  they're in the content folder since epic
+ *      `epic-eject` P13, whose `.gitignore` takes them (`Shared.init()`)
  *
  * - `--dry-run`:  says what it would do, and writes nothing
  * - `--json`:  the report as JSON
@@ -97,7 +98,7 @@ export class RepoInit {
     // the `.gitignore` block
     const ignoreFile = report.gitignore.file
     const before = existsSync(ignoreFile) ? readFileSync(ignoreFile, "utf8") : ""
-    const ignored = [...folders.map((folder) => `/${folder}`), WINDOWS_LINE]
+    const ignored = folders.map((folder) => `/${folder}`)
     const after = RepoInit.withIgnoreBlock(before, ignored, relative(main, content))
     report.gitignore.action = after === before ? "ok" : before ? "updated" : "written"
     if (!dryRun && after !== before) writeFileSync(ignoreFile, after)
@@ -129,6 +130,7 @@ export class RepoInit {
    * - `sharedFolders`:  what the epic tooling reads and writes (`INIT_FOLDERS`)
    * - `engineFolder`:  `""`, no `spell-epic` link:  only spell-app reaches the engine's code through one
    * - `repoTemplates`:  `""`, none:  the engine's templates are the repo's (spell-epic's `templates/`, epic `epic-eject` T11)
+   * - `windowsFolder`:  `../<repo>.epics/windows`, the content folder's `windows/` (epic `epic-eject` P13)
    * - static:  needs no instance
    */
   static settingsFor(main: string): EpicSettings {
@@ -145,7 +147,8 @@ export class RepoInit {
       linkSessionFolders: true,
       sharedFolders: [...INIT_FOLDERS],
       engineFolder: "",
-      repoTemplates: ""
+      repoTemplates: "",
+      windowsFolder: `../${repo}.epics/windows`
     }
   }
 
@@ -203,7 +206,10 @@ export class RepoInit {
   "engineFolder": ${value("engineFolder")},
   // the repo's own page templates, a folder from each checkout's root, listed beside spell-epic's
   // ("":  none, spell-epic's templates are all there are)
-  "repoTemplates": ${value("repoTemplates")}
+  "repoTemplates": ${value("repoTemplates")},
+  // the VS Code window files (\`epic window\`), each machine's own:  git-ignored in the content repo
+  // ("":  the content folder's windows/)
+  "windowsFolder": ${value("windowsFolder")}
 }
 `
   }
@@ -300,9 +306,6 @@ const INSTALLERS: [file: string, command: string][] = [
   ["uv.lock", "uv sync"],
   ["Gemfile.lock", "bundle install"]
 ]
-
-/** The window files' folder, `workspaces/` in the main checkout (`epic window`):  each machine's own, never tracked. */
-const WINDOWS_LINE = "/workspaces/"
 
 /** The `.gitignore` block's first and last lines, as spell-app's own `.gitignore` has them. */
 const BLOCK_START = "# shared:start"

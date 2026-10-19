@@ -395,6 +395,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic window init"
     },
     {
+      name: "move",
+      usage: "[--dry-run]",
+      description:
+        "carry the window files once from the main checkout's workspaces/ to the windows folder " +
+        "(epic config windowsFolder), each folder path rewritten;  the old files are kept",
+      example: "epic window move --dry-run"
+    },
+    {
       name: "which",
       usage: "",
       description: "this session's VS Code window:  pid, workspace file, folders",

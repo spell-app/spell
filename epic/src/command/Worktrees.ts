@@ -131,7 +131,7 @@ export class Worktrees {
    *   1. `git worktree move`
    *   2. its shared links made again (`Shared.link()`):  they're relative, so the move breaks them
    *   3. its saved-session folder linked to main's (`linkSessionFolders`)
-   * - its window file, if any (`workspaces/ongoing/<name>.code-workspace`), still names the old folder:
+   * - its window file, if any (`<windowsFolder>/ongoing/<name>.code-workspace`), still names the old folder:
    *   the report says so;  `epic window close <name>`, then `open <name>`, makes the worktree-only window
    */
   move(name: string, { dryRun = false }: { dryRun?: boolean } = {}): MoveReport {
@@ -147,7 +147,7 @@ export class Worktrees {
       throw new EpicCommandError(
         `a session works in ${name} (pid ${busy.pid}):  it moves at its /isolate done, not now`
       )
-    const window = join(this.main, "workspaces", "ongoing", `${name}.code-workspace`)
+    const window = config.worktreeWindowFile(name)
     const report: MoveReport = { name, from, to, links: [], sessionFolder: null, window: existsSync(window) }
     if (dryRun) return report
     mkdirSync(dirname(to), { recursive: true })
