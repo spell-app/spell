@@ -120,8 +120,8 @@ body {
  * - `<main>` runs the window's full width, with no side padding;  each kind of block places itself:
  *   - BARS (the sticky page header and its toolbar, section titles, the footer, a bottom bar like the syntax guide's
  *     Send):  their background and rule edge to edge, their contents in the reading column
- *   - TABLES (`ui-table`, a bare `table`):  in the column, as prose, with an expand button above the top-left corner
- *     that runs one the full width, less the page's 16px gutter, remembered per table (the runtime's
+ *   - TABLES (`ui-table`, a bare `table`):  in the column, as prose, with an expand button over the top right corner
+ *     (right of the bullhorn, in the table's actions row) that runs one the full width, less the page's 16px gutter, remembered per table (the runtime's
  *     `wireTableWidths()`;  Owen, 2026-10-13);  a table still scrolls inside its box when it's wider than that
  *   - everything else, PROSE and INSETS (paragraphs, lists, asides, code, messages, cards, comment threads):  the
  *     READING COLUMN, `--spell-measure` wide (880px, its 16px gutters included, so its text is 848px at most),
@@ -168,7 +168,10 @@ body {
   min-width: 0;
   padding: 0 0 var(--spell-doc-pad-end);
 }
-/* PROSE and INSETS:  the reading column */
+/*
+ * PROSE and INSETS:  the reading column.  Not the comment pane:  it's fixed on the screen, and the column's margin
+ * pushed it 176px right of where it was put at 1200px, half off the window (epic `epic-engine` I26)
+ */
 body.spell-doc-page
   :is(.spell-doc-main, .spell-doc-main ui-section)
   > :not(
@@ -182,7 +185,8 @@ body.spell-doc-page
     epic-choices-bar,
     .spell-toolbar-alone,
     .spell-crumbs,
-    .spell-comment-mark:has(+ .spell-full-width),
+    .spell-block-actions:has(+ .spell-full-width),
+    epic-comment-pane,
     [slot]
   ) {
   margin-inline: var(--spell-column-inset);
@@ -195,39 +199,10 @@ body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-me
   display: block;
 }
 /*
- * TABLES:  the expand button, in a zero-height bar just before each (`wireTableWidths()`), so it takes no room:  a
- * small quiet circle over the table's top-left corner, the page's ground under it
+ * TABLES:  the expand button (`wireTableWidths()`), a `<ui-button circular basic size="mini">` in the table's actions
+ * row, right of its bullhorn, over the table's top right corner (`spell-comments.css`, "A block's actions row");
+ * pressed (`active`) while the table runs wide
  */
-.spell-table-toggle {
-  position: relative;
-  height: 0;
-}
-.spell-table-toggle > button {
-  position: absolute;
-  bottom: 2px;
-  left: 0;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 1px solid var(--spell-table-rule);
-  border-radius: 50%;
-  background: var(--spell-bg);
-  color: var(--spell-muted);
-  font-size: 10px;
-  cursor: pointer;
-}
-.spell-table-toggle > button:hover,
-.spell-table-toggle.is-wide > button {
-  color: var(--spell-doc-accent);
-  border-color: currentColor;
-}
-/* the pointer lands on the titled button, so its tooltip shows ("TOOLTIPS that show") */
-.spell-table-toggle > button > * {
-  pointer-events: none;
-}
 /* phone width:  the column is the page already */
 @container (max-width: 600px) {
   .spell-table-toggle {
@@ -255,15 +230,9 @@ body.spell-doc-page .spell-doc-main :is(.spell-page-head, .spell-filter, footer.
   margin-inline: 0;
   padding-inline: var(--spell-column-inset);
 }
-/*
- * the page's bullhorn and Send where the narrow layout had them, 12px out past the column's edge:  so the Epics page's
- * New epic pill, left of them on the title's row, still shows its seedling
- */
-body.spell-doc-page .spell-doc-main .spell-page-head > .spell-comment-mark.at-page {
+/* the header's tools row where the narrow layout had its bullhorn, 12px out past the column's edge */
+body.spell-doc-page .spell-doc-main .spell-page-head > .spell-head-tools {
   inset-inline-end: calc(var(--spell-column-inset) - 12px);
-}
-body.spell-doc-page .spell-doc-main .spell-page-head > .spell-send {
-  inset-inline-end: calc(var(--spell-column-inset) + 20px);
 }
 body.spell-doc-page .spell-doc-main ui-section {
   --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 8px;
@@ -375,12 +344,12 @@ body.spell-one-line-head .spell-page-head > h1 {
   display: inline-block;
   margin: 0;
 }
-.spell-page-head > h1 > .spell-head-divider {
-  color: var(--spell-muted);
-  font: var(--spell-eyebrow-font);
+/* the page's own crumb, emptied (the title after it says its words):  only the divider before it, at phone width none */
+.spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb-section[active]::part(divider) {
+  margin-inline-start: 8px;
 }
 @media (max-width: 720px) {
-  .spell-page-head > h1 > .spell-head-divider {
+  .spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb-section[active]::part(divider) {
     display: none;
   }
 }
@@ -391,43 +360,63 @@ body.spell-one-line-head .spell-page-head > h1 {
   font-size: 2rem;
 }
 /*
- * the header's actions (the page's bullhorn) never wrap onto a row of their own:  they stay at the h1's row's right,
- * over its end when it's long (Owen, 2026-10-10:  "They should stay in place and overlap the header instead")
+ * ## The header's TOOLS ROW (`addHeadTool()`, epic `epic-engine` I38):  ONE row at the h1's line's right, so nothing in
+ * it overlaps:  the comments' Send, the page's own tools (the Epics page's New epic pill and sort), the page's bullhorn
+ * last.  It never wraps onto a row of its own:  it stays at the h1's row's right, over its end when it's long (Owen,
+ * 2026-10-10:  "They should stay in place and overlap the header instead"), on the head's fill
  */
 .spell-page-head {
   position: relative;
 }
-.spell-doc-main .spell-page-head > .spell-comment-mark.at-page {
+.spell-doc-main .spell-page-head > .spell-head-tools {
   position: absolute;
   top: 8px;
   inset-inline-end: 4px;
-  height: calc(2rem * 1.1);
-}
-/*
- * ## A docs page's SEND (the runtime's `drawSend()`, epic `epic-workflow` P13):  at the h1's row's right, room left
- * for the page's bullhorn beyond it;  it never wraps onto a row of its own, it overlaps a long title instead, as the
- * bullhorn does;  a pill (the paper plane, "Send", the count of comments not sent), blue by the fill rule
- * (`templates/epics/plan-doc.md`, "Colours"):  grey outline with nothing waiting, dashed while some aren't sent,
- * outlined once sent;  then who is listening, small and quiet
- */
-.spell-doc-main .spell-page-head > .spell-send {
-  --_tint: var(--ui-blue, #2185d0);
-  position: absolute;
-  top: 8px;
-  inset-inline-end: 36px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  max-width: calc(100% - 8px);
   height: calc(2rem * 1.1);
   padding-inline-start: 8px;
   background: var(--spell-head-fill, var(--spell-bg));
+}
+body.spell-one-line-head .spell-doc-main .spell-page-head > .spell-head-tools {
+  top: 4px;
+  height: 28px;
+}
+.spell-head-tools > * {
+  flex: none;
+}
+/*
+ * phone width, three tools or more (the Epics page's Send, New epic, sort and bullhorn):  too wide to lie over the
+ * title, they take a line of their own under it, at its right, wrapping if they must:  never past the window
+ */
+@media (max-width: 600px) {
+  body.spell-doc-page .spell-doc-main .spell-page-head > .spell-head-tools:has(> :nth-child(3)) {
+    position: static;
+    flex: 1 0 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    height: auto;
+    min-height: 28px;
+    max-width: none;
+    padding-inline-start: 0;
+  }
+}
+/*
+ * ## A docs page's SEND (the runtime's `drawSend()`, epic `epic-workflow` P13):  first in the header's tools row;  a
+ * pill (the paper plane, "Send", the count of comments not sent), blue by the fill rule (`templates/epics/plan-doc.md`,
+ * "Colours"):  grey outline with nothing waiting, dashed while some aren't sent, outlined once sent;  then who is
+ * listening, small and quiet
+ */
+.spell-doc-main .spell-head-tools > .spell-send {
+  --_tint: var(--ui-blue, #2185d0);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font: 600 13px/1.4 var(--spell-sans);
   letter-spacing: normal;
   text-transform: none;
-}
-body.spell-one-line-head .spell-doc-main .spell-page-head > .spell-send {
-  top: 4px;
-  height: 28px;
 }
 /* the stuck headings' background reaches a few px past the column, over the cards' outer 1px borders */
 :is(ui-sticky.spell-h2 > h2, ui-sticky.spell-h3 > h3, .spell-filter, .spell-page-head) {
@@ -607,15 +596,30 @@ ui-button.spell-fold {
 /*
  * a narrow title keeps its count, actions and fold arrow in place, on its row:  its text runs on under them, fading
  * out, rather than wrapping them onto a row of their own (Owen, 2026-10-10:  "stay in place and overlap")
+ * - NOT on a DETAILS PAGE (`epic ask`'s):  Owen answers there, so a title shows IN FULL, wrapped, as an epic page's
+ *   titles do (Owen, 2026-10-19:  "make it always show the full title, wrapped";  epic `epic-engine` I21)
+ *   - the count and actions go to a row of their own, below, only when the title doesn't fit beside them
+ *   - the icon, like the fold arrow, beside the title's first line
+ *   - which pages:  `.spell-details-page` (the template's), any page with an `<epic-ask>` (those written before the
+ *     template had the class), and the older choices pages
  */
 @media (max-width: 560px) {
   .spell-doc-main ui-section::part(heading) {
     min-width: 0;
   }
-  .spell-doc-main ui-section::part(header) {
+  body:not(.spell-details-page, .spell-choices-page, :has(epic-ask)) .spell-doc-main ui-section::part(header) {
     overflow: hidden;
     white-space: nowrap;
     mask-image: linear-gradient(to left, transparent, black 20px);
+  }
+  body:is(.spell-details-page, .spell-choices-page, :has(epic-ask)) .spell-doc-main ui-section {
+    &::part(title) {
+      flex-wrap: wrap;
+    }
+    &::part(icon) {
+      align-self: flex-start;
+      height: 1lh;
+    }
   }
 }
 /*
@@ -785,10 +789,12 @@ pre code {
 *******************************/
 
 /*
- * ## Item filter:  a section's state chips (`span.spell-item-filter`, slotted into its title's `actions` by the
- * runtime's `wireItemFilters()`):  the saga pages' item lists (`.plan-items`) and the index's epics
- * (`.spell-epics`).  Just after the title, left of the count badge;  a click filters by the runtime's `nextShown()`,
- * hiding items (`data-spell-hidden`), with "6 hidden · show all" under them.
+ * ## Item filter:  a section's state chips (`<epic-state-filter class="spell-item-filter">`, the epics pack's, slotted
+ * into its title's `actions` by the runtime's `wireItemFilters()`):  the saga pages' item lists (`.plan-items`) and the
+ * index's epics (`<epic-list class="spell-epics">`'s cards).  Just after the title, left of the count badge;  a click
+ * hides items (`data-spell-hidden`), with "6 hidden · show all" under them (`<epic-hidden-note>`).
+ * - the chips' look is the element's, an epic page's;  its state colours here are the page's (`--spell-state-*`):
+ *   SOLID while its items show, OUTLINED while hidden (Owen, 2026-10-10);  `old` the plain grey
  */
 .spell-doc-main ui-section::part(actions) {
   order: 1;
@@ -796,151 +802,35 @@ pre code {
 .spell-doc-main ui-section::part(badge) {
   order: 2;
 }
-.spell-doc-main .spell-item-filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-/*
- * A chip per state, in its colour (`--spell-state-*`), with how many:  SOLID while its items show, OUTLINED while
- * hidden (Owen, 2026-10-10).  `old` is the plain grey:  its chips' pale grey is too faint for a ring.
- */
-.spell-doc-main button.spell-state-toggle {
-  --_state: var(--ui-grey, #767676);
-  --_state-on: var(--ui-grey-on, #fff);
-  display: inline-grid;
-  place-items: center;
-  box-sizing: border-box;
-  min-width: 22px;
-  height: 18px;
-  padding: 0 5px;
-  border: 1.5px solid var(--_state);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--spell-ink);
-  font: 700 11px/1 var(--spell-sans);
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-}
-.spell-doc-main button.spell-state-toggle[data-state="attention"] {
-  --_state: var(--spell-state-attention);
-  --_state-on: var(--spell-state-attention-on);
-}
-.spell-doc-main button.spell-state-toggle[data-state="progress"] {
-  --_state: var(--spell-state-progress);
-  --_state-on: var(--spell-state-progress-on);
-}
-.spell-doc-main button.spell-state-toggle[data-state="open"] {
-  --_state: var(--spell-state-open);
-  --_state-on: var(--spell-state-open-on);
-}
-.spell-doc-main button.spell-state-toggle[data-state="recent"] {
-  --_state: var(--spell-state-recent);
-  --_state-on: var(--spell-state-recent-on);
-}
-.spell-doc-main button.spell-state-toggle[aria-pressed="true"] {
-  background: var(--_state);
-  color: var(--_state-on);
-}
-.spell-doc-main button.spell-state-toggle:focus-visible {
-  outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent));
-  outline-offset: 1px;
+.spell-doc-main :is(epic-state-filter, epic-hidden-note) {
+  --epic-ink: var(--spell-ink);
+  --epic-muted: var(--spell-muted);
+  --epic-sans: var(--spell-sans);
+  --epic-accent: var(--spell-doc-accent);
+  --epic-state-attention: var(--spell-state-attention);
+  --epic-state-attention-on: var(--spell-state-attention-on);
+  --epic-state-replied: var(--spell-state-replied);
+  --epic-state-replied-on: var(--spell-state-replied-on);
+  --epic-state-progress: var(--spell-state-progress);
+  --epic-state-progress-on: var(--spell-state-progress-on);
+  --epic-state-open: var(--spell-state-open);
+  --epic-state-open-on: var(--spell-state-open-on);
+  --epic-state-recent: var(--spell-state-recent);
+  --epic-state-recent-on: var(--spell-state-recent-on);
 }
 .spell-doc-main :is(.plan-items, .spell-epics) > [data-spell-hidden] {
   display: none;
 }
-.spell-doc-main a.spell-hidden-note:not([hidden]) {
-  display: inline-block;
+.spell-doc-main epic-hidden-note.spell-hidden-note {
   margin: 4px 0 0 4px;
-  color: var(--spell-muted);
-  font-size: 0.85rem;
 }
-/*
- * an epic card's state, before its title (`$/epics/list/EpicState`):  in progress [3/6], or an errors / paused /
- * future / done icon
- */
-.spell-doc-main .spell-epic-state {
-  margin-right: 4px;
-  vertical-align: 0.1em;
+.spell-doc-main epic-hidden-note.spell-hidden-note[hidden] {
+  display: none;
 }
-/*
- * ## Epics groups (epic `airplane` P8, `$/epics/list/EpicCards`):  Favorites, Active, Planning, Urgent, Done, each a
- * small heading with its count over its own card grid;  an empty one is `hidden`.
- * - each card:  a star at its top right (a button:  the runtime's `wireFavorites()` toggles it), the day it was last
- *   worked on at its bottom right;  both absolute, in the card's box (`::part(card)`:  the host is
- *   `display: contents`), so the title and meta line keep room for them
- */
-.spell-doc-main .spell-epic-group {
-  margin-top: 4px;
-
-  /* space only after a group that shows */
-  &:not([hidden]) ~ .spell-epic-group {
-    margin-top: 18px;
-  }
-  &[hidden] {
-    display: none;
-  }
-}
-.spell-doc-main .spell-epic-group-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 8px;
-  font: var(--spell-eyebrow-font);
-  letter-spacing: var(--spell-eyebrow-tracking);
-  text-transform: uppercase;
-  color: var(--spell-muted);
-
-  .spell-epic-group-count {
-    font-variant-numeric: tabular-nums;
-  }
-}
-.spell-doc-main ui-cards.spell-epics {
-  ui-card::part(card) {
-    position: relative;
-  }
-  ui-header,
-  ui-meta {
-    padding-right: 22px;
-  }
-  .spell-epic-star {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    display: inline-flex;
-    padding: 3px;
-    border: 0;
-    border-radius: 4px;
-    background: none;
-    color: var(--spell-muted);
-    cursor: pointer;
-    line-height: 1;
-
-    &:hover,
-    &:focus-visible {
-      color: var(--spell-favorite);
-    }
-    &[aria-pressed="true"] {
-      color: var(--spell-favorite);
-    }
-    &:disabled {
-      cursor: default;
-      opacity: 0.6;
-    }
-  }
-  .spell-epic-worked {
-    position: absolute;
-    right: 6px;
-    bottom: 3px;
-    font-size: 0.75em;
-    font-variant-numeric: tabular-nums;
-    color: var(--spell-muted);
-  }
-}
-
 /*
  * ## Page notes (epic `airplane`, P3):  `<spell-notes>` groups of `<spell-note>` cards, written into the page
- * (`tools/PageNotes.js`), drawn by the runtime's "Page notes" (`wireNotes()`).
+ * (`tools/PageNotes.js`), drawn by the runtime's "Page notes" (`wireNotes()`):  each note's head line is an
+ * `<epic-page-note-head>` (the epics pack, epic `epic-engine` P3), its look its own sheet's.
  * - a note is Owen's:  an ivory card (`--spell-warm`);  Claude's replies under it, violet (Claude's voice)
  * - FOLDED until opened (`spell-note[open]`):  only the head line shows, with the note's first line
  * - its status, by the colour scheme:  new yellow (open), answered violet, done grey
@@ -973,7 +863,7 @@ pre code {
   margin: 6px 0;
 }
 /* folded:  the head line only (before the runtime draws one:  the text, so a `file://` page without it reads) */
-.spell-doc-main spell-note:has(> .spell-note-head):not([open]) > :not(.spell-note-head) {
+.spell-doc-main spell-note:has(> epic-page-note-head):not([open]) > :not(epic-page-note-head) {
   display: none;
 }
 .spell-doc-main spell-note-reply {
@@ -992,140 +882,12 @@ pre code {
   font: var(--spell-eyebrow-font);
   letter-spacing: var(--spell-eyebrow-tracking);
 }
-.spell-doc-main .spell-note-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-.spell-doc-main button.spell-note-fold {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-  padding: 2px 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.spell-doc-main button.spell-note-fold > ui-icon {
-  align-self: center;
-  color: var(--spell-muted);
-}
-.spell-doc-main .spell-note-preview {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  color: var(--spell-muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.spell-doc-main spell-note[open] .spell-note-preview {
-  visibility: hidden;
-}
-.spell-doc-main .spell-note-status {
-  flex: none;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--spell-state-open);
-  color: var(--spell-state-open-on);
-  font-size: 0.75rem;
-}
-.spell-doc-main .spell-note-status[data-note-status="answered"] {
-  background: var(--ui-violet, #6435c9);
-  color: var(--ui-violet-on, #fff);
-}
-.spell-doc-main .spell-note-status[data-note-status="done"] {
-  background: var(--spell-state-old);
-  color: var(--spell-state-old-on);
-}
 /*
- * ## Sagas on the Epics page (epic `epic-workflow` P15, `$/epics/list/EpicCards`)
- * - the SAGA CHIPS above the groups:  a pill per saga and "No saga", each with its count;  pressed (the toolbar's
- *   deeper ivory) while its epics show, outlined while hidden (the runtime's `wireSagaChips()`)
- * - a card's saga:  a small label under its description;  a card whose saga is hidden goes (`data-spell-saga-hidden`)
+ * the Epics page's sort pill (`<epic-sort>`, which the runtime's `wireEpicSort()` puts in the page header;  its look
+ * is its own, as are its list's groups, chips and cards:  the epics pack's `epic-list` family, epic `epic-engine` P3)
  */
-.spell-doc-main .spell-saga-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0 0 14px;
-}
-.spell-doc-main button.spell-saga-chip {
+.spell-doc-main epic-sort {
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 10px;
-  border: 1px solid var(--spell-rail-edge);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--spell-muted);
-  font: 500 0.8rem var(--spell-sans);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--spell-rail-hover);
-  }
-  &[aria-pressed="true"] {
-    background: var(--spell-rail-selected);
-    color: var(--spell-rail-ink);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent));
-    outline-offset: 1px;
-  }
-  .spell-saga-count {
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
-}
-.spell-doc-main ui-cards.spell-epics {
-  .spell-epic-saga {
-    margin-top: 4px;
-  }
-  > [data-spell-saga-hidden] {
-    display: none;
-  }
-}
-/*
- * the Epics page's sort buttons (the runtime's `wireEpicSort()`):  one grouped pill, A–Z and Date, the one in use
- * pressed (the toolbar's deeper ivory, as its current section)
- */
-.spell-doc-main .spell-epic-sort {
-  display: inline-flex;
-  flex: none;
-  /* room for the page's bullhorn, at the header's right end */
-  margin-inline-end: 24px;
-  border: 1px solid var(--spell-rail-edge);
-  border-radius: 999px;
-  overflow: hidden;
-}
-.spell-doc-main .spell-epic-sort > button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 10px;
-  border: none;
-  background: none;
-  color: var(--spell-rail-ink);
-  font: 500 0.8rem var(--spell-sans);
-  cursor: pointer;
-}
-.spell-doc-main .spell-epic-sort > button + button {
-  border-inline-start: 1px solid var(--spell-rail-edge);
-}
-.spell-doc-main .spell-epic-sort > button:hover {
-  background: var(--spell-rail-hover);
-}
-.spell-doc-main .spell-epic-sort > button[aria-pressed="true"] {
-  background: var(--spell-rail-selected);
-}
-.spell-doc-main .spell-epic-sort ui-icon {
-  pointer-events: none;
 }
 /* the Epics page's New epic pill */
 .spell-doc-main .spell-new-epic {
@@ -1265,6 +1027,20 @@ ui-tab > pre {
 .spell-doc-main ui-table :is(td, th) {
   vertical-align: top;
 }
+/*
+ * NO table ever STACKS, `unstackable` written or not (Owen, 2026-10-19, I36 of `epic-engine`:  a table drawn as its
+ * header cells, then each row's cells one under another, at the side bar's width:  "I hate it").  Too wide for its
+ * column, it scrolls sideways inside its own box instead (the rule above), never the page.
+ * - Spell UI stacks a `<ui-table>` below a 768px VIEWPORT unless it's `unstackable`;  it has no page-wide token for
+ *   "never" (`--ui-table-stack-by` only picks the viewport or the table's own width).  So this sets back the flag its
+ *   own stacking rules raise (`--_table-stack`, `UITable.css` "Stackable") to the value `unstackable` leaves:  this
+ *   sheet is unlayered, so it beats every rule in Spell UI's layers.
+ * - Pages write `unstackable` too (the plan-doc rules, the migrations), so a page read without this sheet holds
+ * - NOT a table that asks to stack (`stackable`, `stack-by`):  a demo of stacking, as the component creation guide's
+ */
+ui-table:not([stackable], [stack-by]) > table {
+  --_table-stack: 0;
+}
 /* cell borders in `--spell-table-rule`, a bare table's and a `ui-table`'s alike */
 .spell-doc-main ui-table {
   --ui-table-border-color: var(--spell-table-rule);
@@ -1314,6 +1090,19 @@ ui-tab > pre {
 }
 .spell-doc-main ui-table :is(td, th).num {
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/*
+ * A TWO-COLUMN table (every row two cells:  a term and what it is, `VERB | DOES`):  its first column never wraps, the
+ * second takes the rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap").  Too wide for the
+ * column then (phone width), the table scrolls sideways inside its own box, as every table does:  never the page.
+ * - a `ui-table`'s and a bare table's alike;  a row with a cell spanning both keeps wrapping
+ */
+.spell-doc-main
+  table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(2)):not(:has(> :is(thead, tbody, tfoot) > tr > :nth-child(3)))
+  > :is(thead, tbody, tfoot)
+  > tr
+  > :first-child:not([colspan]) {
   white-space: nowrap;
 }
 /*
@@ -1405,158 +1194,166 @@ ui-accordion.spell-aside::part(content) {
 }
 
 /*
- * An epic page's navigation (`nav.spell-toolbar`, the runtime's `buildToolbar()`;  epic `airplane` P8, Owen 2026-10-10:
- * "a sticky top toolbar instead"):  slotted into the last row of `<epic-page>`'s sticky header
- * (its `toolbar` slot), so it sticks with it, and the titles below stick under it.
- * - the row's ivory band, its rule and its tools at the right are `<epic-page>`'s (`EpicPage.css`, "The toolbar");
- *   this is the section buttons, taking the room the tools leave
- * - one round button per top-level block, its icon and badges, NO label (Owen, 2026-10-10:  "lose the titles"):
- *   the name is its tooltip;  the current one a deeper ivory (scroll-follow)
+ * THE TOOLBAR, every page's navigation:  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`, one
+ * `<ui-item>` link per top-level section (the runtime's `toolbarMenu()`;  epic `airplane` P8, a menu since epic
+ * `epic-engine` P3).  Its look through the menu's tokens, the boxes it draws through `::part()`:
+ * - a box of its own (the menu's host is `display: contents`):  measured, slotted and banded as one
+ * - the items:  pills of the band's ink, the current one a deeper ivory (`selected`, scroll-follow), hover a step
+ *   between;  each icon centred by the menu (its icon box has no margin here)
+ * - a row too narrow for them all scrolls sideways (never the page);  what the page adds after them (the bullhorn, the
+ *   spell syntax guide's Expand all) stays at its right
+ * - badges (`<ui-label class="spell-toolbar-count">`):  how many items wait on Owen, red urgent, orange Claude's reply
+ *   waiting on his pick;  none, no badge
+ * - EPIC PAGES (no `spell-toolbar-titled`):  slotted into the last row of `<epic-page>`'s sticky header (its `toolbar`
+ *   slot), so it sticks with it, and the titles below stick under it;  the row's band, its rule and its tools at the
+ *   right are `<epic-page>`'s (`EpicPage.css`, "The toolbar")
+ *   - one round button per top-level block, its icon and badges, NO label (Owen, 2026-10-10:  "lose the titles"):
+ *     the name is its tooltip
  *   - every button the same width, badge or not (Owen, 2026-10-10:  "Make epic page icons consistent, with badge or
  *     no"):  the badges hang over the icon's top right, a third of a badge on the icon ("Make badge 1/3 way overlap
  *     the icon"), in the row's top padding
- * - badges:  how many items wait on Owen, red urgent, orange Claude's reply waiting on his pick;  none, no badge
- * - a row too narrow for them all scrolls sideways (never the page)
+ * - the pointer lands on the item's link, which carries its tooltip (`titleInside()`):  everything inside it lets the
+ *   pointer through ("TOOLTIPS that show")
  */
-.spell-toolbar {
+ui-menu.spell-toolbar {
+  --ui-menu-secondary-inline-margin: 0;
+  --ui-menu-secondary-item-margin: 0;
+  --ui-menu-secondary-item-padding: 0 7px;
+  --ui-menu-secondary-item-radius: 999px;
+  --ui-menu-secondary-item-color: var(--spell-rail-ink);
+  --ui-menu-secondary-hover-background: var(--spell-rail-hover);
+  --ui-menu-secondary-active-background: var(--spell-rail-selected);
+  --ui-menu-secondary-active-color: var(--spell-rail-ink);
+  --ui-menu-hover-color: var(--spell-rail-ink);
+  --ui-menu-active-weight: 500;
+  --ui-menu-item-weight: 500;
+  --ui-menu-icon-margin: 0;
+  --ui-menu-icon-opacity: 1;
+  --ui-menu-icon-size: 14px;
+  display: block;
   flex: 1 1 auto;
   min-width: 0;
 }
-.spell-toolbar-items {
+ui-menu.spell-toolbar::part(menu) {
   display: flex;
   gap: 1px;
+  min-height: 0;
+  margin: 0;
   /* a button's icon lines up with the header's inset */
   padding: 4px 4px 4px calc(var(--epic-inset, 16px) - 7px);
   overflow: auto hidden;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
+  font: 500 13px/1 var(--spell-sans);
 }
-.spell-doc-page .spell-toolbar-item {
-  display: inline-flex;
+.spell-toolbar > ui-item::part(item) {
   flex: none;
-  align-items: center;
+  justify-content: center;
   gap: 3px;
+  box-sizing: border-box;
   height: 30px;
   min-width: 30px;
-  justify-content: center;
-  box-sizing: border-box;
-  padding: 0 7px;
-  border-radius: 999px;
-  color: var(--spell-rail-ink);
-  font: 500 13px/1 var(--spell-sans);
-  text-decoration: none;
+  font: inherit;
   white-space: nowrap;
 }
-.spell-doc-page .spell-toolbar-item:hover {
-  background: var(--spell-rail-hover);
-  color: var(--spell-rail-ink);
-}
-.spell-toolbar-item:focus-visible {
+.spell-toolbar > ui-item:focus-visible::part(item),
+.spell-toolbar > ui-item::part(item):focus-visible {
   outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent));
   outline-offset: -2px;
 }
-.spell-doc-page .spell-toolbar-item[selected] {
-  background: var(--spell-rail-selected);
+.spell-toolbar > ui-item[hidden] {
+  display: none;
 }
-/* the icon in a box of its own, the same size however tight the row */
-.spell-toolbar-icon {
-  display: inline-flex;
-  font-size: 14px;
+.spell-toolbar > ui-item::part(icon),
+.spell-toolbar > ui-item > * {
+  pointer-events: none;
 }
-.spell-toolbar-count {
+/* the mark keeps its size however tight the row:  only a title shrinks */
+.spell-toolbar > ui-item::part(icon) {
+  flex: none;
+}
+.spell-toolbar-count::part(label) {
+  box-sizing: border-box;
   min-width: 18px;
   height: 18px;
+  margin: 0;
   padding: 0 5px;
-  box-sizing: border-box;
+  border: 0;
   border-radius: 999px;
   font: 700 11px/18px var(--spell-sans);
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
-.spell-toolbar-count + .spell-toolbar-count {
+.spell-toolbar-count + .spell-toolbar-count::part(label) {
   margin-inline-start: -3px;
 }
-.spell-toolbar-count.urgent {
+.spell-toolbar-count.urgent::part(label) {
   background: var(--spell-state-attention);
   color: var(--spell-state-attention-on);
 }
-.spell-toolbar-count.replied {
+.spell-toolbar-count.replied::part(label) {
   background: var(--spell-state-replied);
   color: var(--spell-state-replied-on);
 }
 /* an epic page's buttons:  one round size, apart enough for a badge hanging off the one before */
-.spell-toolbar:not(.spell-toolbar-titled) .spell-toolbar-items {
+ui-menu.spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
   gap: 6px;
 }
-.spell-doc-page .spell-toolbar:not(.spell-toolbar-titled) .spell-toolbar-item {
+.spell-toolbar:not(.spell-toolbar-titled) > ui-item::part(item) {
   width: 30px;
   padding: 0;
 }
-/* their badges:  over the icon's top right, a third of a badge's width and height on the icon */
-.spell-toolbar-icon:has(> .spell-toolbar-badges) {
-  position: relative;
-}
-.spell-toolbar-badges {
+/*
+ * their badges:  over the icon's top right, a third of a badge's width and height on the icon (the icon centred in
+ * the 30px button, 14px high and about as wide)
+ */
+.spell-toolbar:not(.spell-toolbar-titled) > ui-item > .spell-toolbar-count::part(label),
+.spell-toolbar > ui-item.spell-toolbar-waiting > .spell-toolbar-count::part(label) {
   --_badge: 16px;
   position: absolute;
-  bottom: calc(100% - var(--_badge) / 3);
-  left: calc(100% - var(--_badge) / 3);
-  display: flex;
-}
-.spell-toolbar-badges > .spell-toolbar-count {
+  top: calc(8px + var(--_badge) / 3 - var(--_badge));
+  left: calc(50% + 7px - var(--_badge) / 3);
   min-width: var(--_badge);
   height: var(--_badge);
   padding: 0 4px;
   font-size: 10px;
   line-height: var(--_badge);
 }
+/* both kinds:  the orange one after the red, overlapping it a little */
+.spell-toolbar:not(.spell-toolbar-titled) > ui-item > .spell-toolbar-count + .spell-toolbar-count::part(label) {
+  margin: 0;
+  left: calc(50% + 7px - var(--_badge) / 3 + var(--_badge) - 3px);
+}
 
 /*
  * The BULLHORN at the toolbar's right (the comments' runtime adds it:  `PageComments.drawWaiting()`;  epic
- * `epic-workflow` P23):  the threads waiting on Owen, their count an orange badge as an epic page's "replied" one;
- * each click lands on the next.  Hidden while none waits.  Last in the row, the section buttons taking the room left:
- * an epic page's, just left of `<epic-page>`'s own tools;  a guide's, at the band's right
+ * `epic-workflow` P23):  an item of the menu like the section buttons, the threads waiting on Owen, their count an
+ * orange badge as an epic page's "replied" one;  each click lands on the next.  Hidden while none waits.  Last in the
+ * row, held at its right while the section buttons scroll under it:  an epic page's, just left of `<epic-page>`'s own
+ * tools;  a guide's, at the band's right
  */
-.spell-toolbar:has(> .spell-toolbar-waiting:not([hidden])) {
-  display: flex;
-  align-items: center;
+.spell-toolbar > [data-rail] + ui-item.spell-toolbar-waiting::part(item) {
+  margin-inline-start: auto;
 }
-.spell-toolbar:has(> .spell-toolbar-waiting:not([hidden])) > .spell-toolbar-items {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.spell-toolbar-waiting {
-  display: flex;
-  flex: none;
-  /* room above for its badge, as the section buttons have */
-  padding: 4px 4px 4px 2px;
-}
-.spell-toolbar-titled > .spell-toolbar-waiting {
-  padding-inline-end: calc(var(--_out) - 7px);
-}
-.spell-toolbar-waiting[hidden] {
-  display: none;
-}
-.spell-doc-page .spell-toolbar-waiting > button.spell-toolbar-item {
+.spell-toolbar > ui-item.spell-toolbar-waiting::part(item) {
+  position: sticky;
+  right: 0;
   width: 30px;
   padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
+  background: var(--spell-rail-fill);
+  box-shadow: -6px 0 6px -2px var(--spell-rail-bg);
 }
-.spell-doc-page .spell-toolbar-waiting > button.spell-toolbar-item:hover {
-  background: var(--spell-rail-hover);
+.spell-toolbar > ui-item.spell-toolbar-waiting:hover::part(item) {
+  background: linear-gradient(var(--spell-rail-hover), var(--spell-rail-hover)), var(--spell-rail-fill);
 }
-/* the pointer lands on the titled button, so its tooltip shows ("TOOLTIPS that show") */
-.spell-toolbar-waiting > button > * {
-  pointer-events: none;
-}
-.spell-toolbar-waiting .spell-toolbar-icon {
-  position: relative;
+/* at least room for its badge, two digits hanging off its icon's right:  at phone width the gutter alone left the page
+   2px of sideways scroll (epic `epic-engine` I25) */
+.spell-toolbar-titled > ui-item.spell-toolbar-waiting::part(item) {
+  margin-inline-end: 3px;
 }
 
 /*
- * ## Every other page's toolbar (`nav.spell-toolbar-titled`, the runtime's `buildPageToolbar()`;  Owen, 2026-10-10:
+ * ## Every other page's toolbar (`.spell-toolbar-titled`, the runtime's `buildPageToolbar()`;  Owen, 2026-10-10:
  * "Make the floating sidebar in guides a sticky top toolbar like the epic page.  Have section titles in this one"):
  * the last row of the sticky page header (`.spell-page-head`), or of the filter bar, or a sticky bar of its own
  * (`.spell-toolbar-alone`)
@@ -1591,13 +1388,19 @@ ui-accordion.spell-aside::part(content) {
   margin-bottom: -10px;
 }
 /* the first button's mark lines up with the column's text (a button's own padding:  7px) */
-.spell-toolbar-titled .spell-toolbar-items {
+ui-menu.spell-toolbar-titled::part(menu) {
   padding: 3px calc(var(--_out) - 7px);
 }
-.spell-doc-page .spell-toolbar-titled .spell-toolbar-item {
+.spell-toolbar-titled > ui-item::part(item) {
   flex: 0 1 auto;
   min-width: 0;
-  gap: 5px;
+  gap: 10px;
+}
+/* the marks only:  every button the same width, as an epic page's (and as wide as they were before the menu) */
+.spell-toolbar-icons > ui-item::part(item) {
+  flex: none;
+  width: 34px;
+  padding: 0;
 }
 .spell-toolbar-label {
   min-width: 0;
@@ -1607,7 +1410,7 @@ ui-accordion.spell-aside::part(content) {
 .spell-toolbar-icons .spell-toolbar-label {
   display: none;
 }
-.spell-toolbar-icon > b {
+.spell-toolbar > ui-item > b[slot="icon"] {
   font: 700 12px var(--spell-sans);
 }
 /* a page without a sticky header or filter bar:  its toolbar sticks by itself, where the filter bar would */
@@ -1619,10 +1422,10 @@ ui-accordion.spell-aside::part(content) {
 }
 /*
  * an item's number (`Q3` shows 3):  a round badge, its colour the item's state (`data-state` on the button, from its
- * section;  a details page's questions, `details.js` `markState()`):  red nothing picked yet, green picked, blue
+ * section;  a details page's questions, `<epic-ask>`'s `markState()`):  red nothing picked yet, green picked, blue
  * Claude has more to do (more details asked for, or only Other written);  no state:  plain
  */
-.spell-toolbar-icon > b.spell-toolbar-number {
+.spell-toolbar > ui-item > b.spell-toolbar-number {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1635,15 +1438,15 @@ ui-accordion.spell-aside::part(content) {
   font-variant-numeric: tabular-nums;
   background: var(--spell-rail-hover);
 }
-.spell-toolbar-item[data-state="attention"] .spell-toolbar-number {
+.spell-toolbar-item[data-state="attention"] > .spell-toolbar-number {
   background: var(--spell-state-attention);
   color: var(--spell-state-attention-on);
 }
-.spell-toolbar-item[data-state="done"] .spell-toolbar-number {
+.spell-toolbar-item[data-state="done"] > .spell-toolbar-number {
   background: var(--spell-state-recent);
   color: var(--spell-state-recent-on);
 }
-.spell-toolbar-item[data-state="working"] .spell-toolbar-number {
+.spell-toolbar-item[data-state="working"] > .spell-toolbar-number {
   background: var(--spell-state-progress);
   color: var(--spell-state-progress-on);
 }
@@ -1661,33 +1464,36 @@ ui-accordion.spell-aside::part(content) {
   color: var(--ui-red-text, var(--spell-state-attention));
   font-size: 0.9em;
 }
-.spell-jump-waiting {
-  display: grid;
-  gap: 1px;
+/* the waiting threads:  Spell UI's vertical menu, a line a thread, its title a header item */
+ui-menu.spell-jump-waiting {
+  --ui-menu-secondary-vertical-item-margin: 0;
+  --ui-menu-secondary-item-padding: 4px 8px;
+  --ui-menu-secondary-item-radius: 6px;
+  --ui-menu-secondary-item-color: inherit;
+  --ui-menu-secondary-hover-background: var(--spell-rail-hover, rgb(0 0 0 / 6%));
+  --ui-menu-header-padding: 0 0 0.25em;
+  --ui-menu-header-weight: 400;
+  --ui-menu-header-size: 0.85em;
+  --ui-menu-header-color: color-mix(in srgb, currentColor 65%, transparent);
+  --ui-menu-header-transform: none;
+  display: block;
   margin-top: 0.9em;
 }
-.spell-jump-waiting-title {
-  margin: 0 0 0.25em;
-  color: color-mix(in srgb, currentColor 65%, transparent);
-  font-size: 0.85em;
+ui-menu.spell-jump-waiting::part(menu) {
+  display: grid;
+  gap: 1px;
+  width: auto;
+  min-height: 0;
+  margin: 0;
 }
-.spell-jump-thread {
+ui-item.spell-jump-thread::part(item) {
+  display: block;
   overflow: hidden;
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: inherit;
-  font: inherit;
   font-size: 0.9em;
+  line-height: 1.4;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: pointer;
-}
-.spell-jump-thread:hover,
-.spell-jump-thread:focus-visible {
-  background: var(--spell-rail-hover, rgb(0 0 0 / 6%));
 }
 /* the pointer lands on the titled line, so its tooltip shows ("TOOLTIPS that show") */
 .spell-jump-thread > * {
@@ -1732,10 +1538,10 @@ ui-accordion.spell-aside::part(content) {
 *******************************/
 
 /*
- * A page of card grids (`spell-grid`) gets a wider reading column, so three cards fit (`<main>` works its inset out
- * from the measure, "Layout");  cards as dense as the source's
+ * A page of card grids (`spell-grid`, the Epics page's `<epic-list>`) gets a wider reading column, so three cards fit
+ * (`<main>` works its inset out from the measure, "Layout");  cards as dense as the source's
  */
-.spell-doc:has(ui-cards.spell-grid) {
+.spell-doc:has(ui-cards.spell-grid, epic-list) {
   --spell-measure: 1080px;
 }
 .spell-doc-main ui-cards.spell-grid {
@@ -1766,12 +1572,15 @@ ui-accordion.spell-aside::part(content) {
 .spell-doc-main ui-cards > ui-card[data-spell-wide]::part(card) {
   grid-column: 1 / -1;
 }
-/* a card's title link reads as a title (the brand's serif, its ink), the accent and an underline on hover */
-.spell-doc-main ui-card ui-header > a {
+/*
+ * a card's title link reads as a title (the brand's serif, its ink), the accent and an underline on hover;  an
+ * `<epic-card>`'s too (its title link is its own child:  the page's link colour beats its `::slotted()` rule)
+ */
+.spell-doc-main :is(ui-card ui-header, epic-card) > a {
   color: var(--spell-heading-ink);
   text-decoration: none;
 }
-.spell-doc-main ui-card ui-header > a:is(:hover, :focus-visible) {
+.spell-doc-main :is(ui-card ui-header, epic-card) > a:is(:hover, :focus-visible) {
   color: var(--spell-doc-accent);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1826,7 +1635,7 @@ ui-accordion.spell-aside::part(content) {
 .spell-doc-main .commands-notes {
   margin-top: 4px;
 }
-.spell-doc-main [data-commands-families] td > code {
+.spell-doc-main [data-commands-family] td > code {
   white-space: nowrap;
 }
 

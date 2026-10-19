@@ -8,6 +8,7 @@ import { parseHTML } from "linkedom"
 import { AS } from "$/assembler"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile, type DataFileMove } from "$/epics/data/DataFile"
+import { RepoList } from "$/epics/server/RepoList"
 import { SRV } from "$/server"
 
 import { planDocIn } from "../tools/pages.js"
@@ -21,6 +22,7 @@ import { PlanMarkup } from "./PlanMarkup"
 import { PART_SOURCE, PARTS_DIR, PlanParts } from "./PlanParts"
 import { ReviewInbox } from "./ReviewInbox"
 import { SagaPage } from "./SagaPage"
+import { ServedFolders } from "./ServedFolders"
 
 /****************
  * ### `PlanDocFiles`
@@ -110,7 +112,10 @@ export class PlanDocFiles {
     const own = join(root, "packages/epics")
     this.docsPackage = existsSync(own) ? own : resolve(DOCS_TOOLS, "..", "..")
     this.docsTools = DOCS_TOOLS
-    this.linker = new AS.Linker(root)
+    // under the checkout the content is served in, which isn't this one for spell-epic's own epics (I22);  told its
+    // served addresses, so `components/epics/` and `templates/` check as the folders they serve (I27)
+    const linkRoot = new RepoList().linkRootOf(root, content)
+    this.linker = new AS.Linker(linkRoot, { served: ServedFolders.under(linkRoot) })
   }
 
   /** The environment the docs tools run in:  this process's, with `root` as the checkout they work on. */
@@ -317,6 +322,7 @@ export class PlanDocFiles {
         epic: basename(file).replace(/(\.plan)?\.html$/, ""),
         folder: dirname(file),
         root: this.content,
+        linker: this.linker,
         inbox: inboxView(ReviewInbox.read(inboxFile)),
         notes: [],
         moves: []

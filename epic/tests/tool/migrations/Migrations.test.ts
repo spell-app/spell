@@ -29,7 +29,9 @@ describe("Migrations", () => {
       "links-agree",
       "stable-phase-ids",
       "json5-data-files",
-      "engine-asset-routes"
+      "engine-asset-routes",
+      "engine-links",
+      "unstackable-tables"
     ])
     expect(Migrations.named("updates-as-epic-update")?.description).toMatch(/<epic-update at summary>/)
     expect(Migrations.named("nope")).toBeUndefined()
@@ -79,6 +81,37 @@ describe("EngineAssetRoutes", () => {
     ])
     expect(doc.querySelector("ui-components")!.getAttribute("source")).toBe("/_epic/pack/epics.pack.js")
     expect(Migrations.run(doc, { now }, ["engine-asset-routes"])).toEqual([])
+  })
+})
+
+describe("UnstackableTables", () => {
+  test("every <ui-table> unstackable, its own words after;  one that asks to stack listed;  on command only;  once", () => {
+    const { document } = parseHTML(
+      `<html><body><main><epic-page epic="x" title="X"><epic-item id="t8" title="T">` +
+        `<epic-reply from="Claude" at="2026-10-19 16:40"><ui-table compact celled><table><tr><td>a</td></tr></table>` +
+        `</ui-table></epic-reply></epic-item>` +
+        `<ui-table celled compact striped unstackable><table><tr><td>b</td></tr></table></ui-table>` +
+        `<epic-original><ui-table><table><tr><td>history</td></tr></table></ui-table></epic-original>` +
+        `<ui-table celled stack-by="container"><table><tr><td>a demo</td></tr></table></ui-table>` +
+        `<epic-code title="x.html"><pre>&lt;ui-table&gt;</pre></epic-code>` +
+        `</epic-page></main></body></html>`
+    )
+    const doc = document as unknown as Document
+    const notes: string[] = []
+    const now = new Date(2026, 9, 19)
+    expect(Migrations.named("unstackable-tables")?.everyEdit).toBe(false)
+    expect(Migrations.run(doc, { now, notes }, ["unstackable-tables"])).toEqual(["unstackable-tables"])
+    expect(Array.from(doc.querySelectorAll("ui-table"), (table) => table.outerHTML.split("<table>")[0])).toEqual([
+      '<ui-table compact="" celled="" unstackable="">',
+      '<ui-table celled="" compact="" striped="" unstackable="">',
+      '<ui-table unstackable="">',
+      '<ui-table celled="" stack-by="container">'
+    ])
+    expect(notes).toEqual([
+      "unstackable-tables:  2 <ui-table>s made unstackable",
+      "unstackable-tables:  LEFT:  <ui-table>:  asks to stack (a demo of stacking?)"
+    ])
+    expect(Migrations.run(doc, { now }, ["unstackable-tables"])).toEqual([])
   })
 })
 

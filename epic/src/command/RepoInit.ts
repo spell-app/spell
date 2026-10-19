@@ -176,7 +176,7 @@ export class RepoInit {
 // - Folders are relative to this repo's main checkout;  every worktree reads this (the main checkout's) file.
 // - Every key is optional:  one left out takes spell-epic's default.
 {
-  // the content repo:  epic pages, sagas, guides, pages;  a git repo of its own, linked in at the root
+  // the content repo:  epic pages, sagas, guides, pages;  a git repo of its own, read from there
   "contentFolder": ${value("contentFolder")},
   // the branch worktrees start from and merge into
   "baseBranch": ${value("baseBranch")},

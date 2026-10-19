@@ -1,0 +1,73 @@
+/*
+ * `<epic-page-note-head>` (`EpicPageNoteHead.tsx`):  an old page note's head line, as the note card drew it
+ * (`spell-doc.css`, "Page notes", until epic `epic-engine` P3).
+ * - one line:  the icon, who and when, the first line while folded (muted, cut short), the status chip
+ * - the status, by the colour scheme:  new yellow (open), answered violet, done grey
+ */
+
+@layer ui.components.epic-page-note-head;
+
+@layer ui.components.epic-page-note-head {
+  :host {
+    display: flex;
+    min-width: 0;
+  }
+  .fold {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+    padding: 2px 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .fold:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--ui-focus-color, Highlight);
+  }
+  /* no box of its own:  the icon sits on the line's baseline, as it always has */
+  .icon {
+    display: contents;
+    color: var(--spell-muted, var(--ui-text-muted, GrayText));
+  }
+  /* who and when, never broken across lines (a phone's width:  the preview gives way instead) */
+  .who {
+    display: inline-flex;
+    flex: none;
+    align-items: baseline;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .preview {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--spell-muted, var(--ui-text-muted, GrayText));
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  :host([open]) .preview {
+    visibility: hidden;
+  }
+  .status {
+    flex: none;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--spell-state-open, var(--ui-yellow, #fbbd08));
+    color: var(--spell-state-open-on, var(--ui-yellow-on, #1b1c1d));
+    font-size: 12px;
+  }
+  .status[data-status="answered"] {
+    background: var(--ui-violet, #6435c9);
+    color: var(--ui-violet-on, #fff);
+  }
+  .status[data-status="done"] {
+    background: var(--spell-state-old, var(--ui-grey-background, light-dark(#eeeeee, #34343b)));
+    color: var(--spell-state-old-on, var(--ui-grey-text, GrayText));
+  }
+}

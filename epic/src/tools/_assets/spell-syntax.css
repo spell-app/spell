@@ -10,31 +10,44 @@
 *******************************/
 
 /*
- * At the right of the page toolbar's ivory band (`spell-doc.css`, "Every other page's toolbar"):  drawn as its section
- * buttons, which take the room left
+ * At the right of the page toolbar's ivory band (`spell-doc.css`, "Every other page's toolbar"), in its menu's row
+ * after the section buttons, which take the room left (and scroll under it):  drawn as they are
  */
-.spell-toolbar-titled:has(> .spell-syntax-folds) {
-  display: flex;
-  align-items: center;
-}
-.spell-toolbar-titled > .spell-toolbar-items:has(+ .spell-syntax-folds) {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding-inline-end: 0;
-}
-.spell-syntax-folds {
+.spell-toolbar-titled > .spell-syntax-folds {
+  position: sticky;
+  right: 0;
   display: flex;
   flex: none;
+  align-items: center;
   gap: 1px;
-  padding-inline-end: calc(var(--_out) - 7px);
+  margin-inline-start: auto;
+  background: var(--spell-rail-fill);
 }
-.spell-doc-page button.spell-syntax-fold {
-  border: none;
-  background: none;
-  cursor: pointer;
+/* `<ui-button basic>`s drawn as the toolbar's section buttons (`spell-doc.css`, `.spell-toolbar-item`):  no ring, a
+   pill of the band's ink, its hover tint;  the words go with the section titles' (`.spell-toolbar-icons`) */
+.spell-doc-page ui-button.spell-syntax-fold {
+  --ui-button-basic-border-width: 0px;
+  --ui-button-basic-background-hover: var(--spell-rail-hover);
+  --ui-button-basic-background-down: var(--spell-rail-selected);
+  flex: none;
 }
-.spell-doc-page button.spell-syntax-fold:hover {
+.spell-doc-page ui-button.spell-syntax-fold::part(button) {
+  height: 30px;
+  min-width: 30px;
+  margin: 0;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--spell-rail-ink);
+  font: 500 13px/1 var(--spell-sans);
+  white-space: nowrap;
+}
+.spell-doc-page ui-button.spell-syntax-fold:hover::part(button) {
   background: var(--spell-rail-hover);
+}
+/* the pointer lands on the titled button, not its words, so its tooltip shows ("TOOLTIPS that show") */
+.spell-doc-page ui-button.spell-syntax-fold > * {
+  pointer-events: none;
 }
 
 /*******************************
@@ -77,7 +90,7 @@ a.spell-syntax-source:is(:hover, :focus-visible) {
   color: var(--spell-doc-accent);
   text-decoration: underline;
 }
-.spell-syntax-rename:not([data-open], :hover, :focus-visible) {
+.spell-syntax-rename:not([data-open], :hover, :focus-within) {
   opacity: 0.55;
 }
 /* the box to suggest another name, under it once its pencil is clicked */

@@ -7,8 +7,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
+import { ThreadFacts } from "$/epics/comments"
 import { PhaseIds } from "$/epics/phases"
-import { takenInto } from "$/epics/tool/CommentList"
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
 
@@ -128,7 +128,7 @@ describe("GuideChanges.gather()", () => {
     await files.writeDoc(doc, plan, true)
     const inbox = GuideInbox.read(join(root, "guides", "memory", "memory.inbox.json5"))
     const taken = Object.values(inbox.comments).map((each) => each.taken!)
-    const into = takenInto(taken[0]!)
+    const into = ThreadFacts.takenInto(taken[0]!)
     expect(into).toEqual({ hash: "p-memory", label: "gc · Memory" })
     const phase = files.read(doc).document.getElementById(into.hash)!
     expect(PhaseIds.labelOf(phase)).toBe("P2")

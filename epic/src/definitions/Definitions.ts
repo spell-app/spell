@@ -1,26 +1,31 @@
 import { epicAgentsVocabulary } from "$/epics/components/epic-agents/EpicAgents.en"
 import { epicAnswerVocabulary } from "$/epics/components/epic-answer/EpicAnswer.en"
-import { epicAskVocabulary } from "$/epics/components/epic-ask/EpicAsk.en"
 import { epicMoreVocabulary } from "$/epics/components/epic-answer/EpicMore.en"
 import { epicReplyVocabulary } from "$/epics/components/epic-answer/EpicReply.en"
 import { epicAsideVocabulary } from "$/epics/components/epic-aside/EpicAside.en"
+import { epicAskVocabulary } from "$/epics/components/epic-ask/EpicAsk.en"
 import { epicCardsVocabulary } from "$/epics/components/epic-cards/EpicCards.en"
 import { epicChoiceRowVocabulary } from "$/epics/components/epic-choice-rows/EpicChoiceRow.en"
 import { epicChoiceRowsVocabulary } from "$/epics/components/epic-choice-rows/EpicChoiceRows.en"
-import { epicChoicesVocabulary } from "$/epics/components/epic-choices/EpicChoices.en"
 import { epicChoicesBarVocabulary } from "$/epics/components/epic-choices-bar/EpicChoicesBar.en"
+import { epicChoicesVocabulary } from "$/epics/components/epic-choices/EpicChoices.en"
 import { epicOptionVocabulary } from "$/epics/components/epic-choices/EpicOption.en"
 import { epicCodeVocabulary } from "$/epics/components/epic-code/EpicCode.en"
+import { epicCommentPaneVocabulary } from "$/epics/components/epic-comment-pane/EpicCommentPane.en"
 import { epicCommitVocabulary } from "$/epics/components/epic-commit/EpicCommit.en"
 import { epicEventVocabulary } from "$/epics/components/epic-event/EpicEvent.en"
 import { epicItemVocabulary } from "$/epics/components/epic-item/EpicItem.en"
 import { epicLinkVocabulary } from "$/epics/components/epic-link/EpicLink.en"
+import { epicCardVocabulary } from "$/epics/components/epic-list/EpicCard.en"
+import { epicListVocabulary } from "$/epics/components/epic-list/EpicList.en"
+import { epicSortVocabulary } from "$/epics/components/epic-list/EpicSort.en"
 import { epicNetEffectVocabulary } from "$/epics/components/epic-net-effect/EpicNetEffect.en"
 import { epicNewItemVocabulary } from "$/epics/components/epic-new-item/EpicNewItem.en"
 import { epicNoteVocabulary } from "$/epics/components/epic-note/EpicNote.en"
 import { epicOriginalVocabulary } from "$/epics/components/epic-original/EpicOriginal.en"
 import { epicVersionVocabulary } from "$/epics/components/epic-original/EpicVersion.en"
 import { epicOverviewVocabulary } from "$/epics/components/epic-overview/EpicOverview.en"
+import { epicPageNoteHeadVocabulary } from "$/epics/components/epic-page-note-head/EpicPageNoteHead.en"
 import { epicPageVocabulary } from "$/epics/components/epic-page/EpicPage.en"
 import { epicFieldVocabulary } from "$/epics/components/epic-phase/EpicField.en"
 import { epicPhaseVocabulary } from "$/epics/components/epic-phase/EpicPhase.en"
@@ -30,9 +35,14 @@ import { epicQuestionVocabulary } from "$/epics/components/epic-question/EpicQue
 import { epicReviewVocabulary } from "$/epics/components/epic-review/EpicReview.en"
 import { epicSectionVocabulary } from "$/epics/components/epic-section/EpicSection.en"
 import { epicSendVocabulary } from "$/epics/components/epic-send/EpicSend.en"
+import { epicHiddenNoteVocabulary } from "$/epics/components/epic-state-filter/EpicHiddenNote.en"
+import { epicStateFilterVocabulary } from "$/epics/components/epic-state-filter/EpicStateFilter.en"
 import { epicStatusVocabulary } from "$/epics/components/epic-status/EpicStatus.en"
 import { epicSummaryVocabulary } from "$/epics/components/epic-summary/EpicSummary.en"
 import { epicTextBoxVocabulary } from "$/epics/components/epic-text-box/EpicTextBox.en"
+import { epicThreadVocabulary } from "$/epics/components/epic-thread/EpicThread.en"
+import { epicThreadMessageVocabulary } from "$/epics/components/epic-thread/EpicThreadMessage.en"
+import { epicThreadsVocabulary } from "$/epics/components/epic-thread/EpicThreads.en"
 import { epicUpdateVocabulary } from "$/epics/components/epic-update/EpicUpdate.en"
 
 import { Formats, type EpicAttributeSpec, type EpicTag, type EpicVocabulary } from "./definitions.types"
@@ -85,10 +95,25 @@ export class Definitions {
     "epic-choice-rows": epicChoiceRowsVocabulary,
     "epic-choice-row": epicChoiceRowVocabulary,
     "epic-choices-bar": epicChoicesBarVocabulary,
+    // the Epics page's list, its cards and its sort buttons (epic `epic-engine` P3)
+    "epic-list": epicListVocabulary,
+    "epic-card": epicCardVocabulary,
+    "epic-sort": epicSortVocabulary,
+    // the state filter's chips and the line under a filtered list (epic `epic-engine` P3):  drawn by `<epic-section>`,
+    // `<epic-page>`'s toolbar and the docs runtime, never written in a doc
+    "epic-state-filter": epicStateFilterVocabulary,
+    "epic-hidden-note": epicHiddenNoteVocabulary,
     // drawn only inside other elements' shadow roots, never written in a doc
     "epic-review": epicReviewVocabulary,
     "epic-new-item": epicNewItemVocabulary,
-    "epic-agents": epicAgentsVocabulary
+    "epic-agents": epicAgentsVocabulary,
+    "epic-thread-message": epicThreadMessageVocabulary,
+    // what the docs runtime's comments draw on every page that takes comments (epic `epic-engine` P3)
+    "epic-threads": epicThreadsVocabulary,
+    "epic-thread": epicThreadVocabulary,
+    "epic-comment-pane": epicCommentPaneVocabulary,
+    // an old page note's head line (`<spell-note>`, epic `airplane` P3)
+    "epic-page-note-head": epicPageNoteHeadVocabulary
   } as const
 
   /** Every tag, in `all`'s order. */

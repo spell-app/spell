@@ -32,7 +32,7 @@
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../packages/epics/src/tool/PLAN-DOC.md"
+              href="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -71,15 +71,15 @@
             For anyone writing links in epic pages, saga pages or guides, or changing this element.<br />
             Its vocabulary (every name it uses):
             <a
-              href="../../packages/epics/components/epic-link/EpicLink.en.ts"
-              target="src-packages-epics-components-epic-link-epiclink-en-ts"
-              ><code title="packages/epics/components/epic-link/EpicLink.en.ts">EpicLink.en.ts</code></a
+              href="../../spell-epic/src/components/epic-link/EpicLink.en.ts"
+              target="src-spell-epic-src-components-epic-link-epiclink-en-ts"
+              ><code title="spell-epic/src/components/epic-link/EpicLink.en.ts">EpicLink.en.ts</code></a
             >.<br />
             Its component:
             <a
-              href="../../packages/epics/components/epic-link/EpicLink.tsx"
-              target="src-packages-epics-components-epic-link-epiclink-tsx"
-              ><code title="packages/epics/components/epic-link/EpicLink.tsx">EpicLink.tsx</code></a
+              href="../../spell-epic/src/components/epic-link/EpicLink.tsx"
+              target="src-spell-epic-src-components-epic-link-epiclink-tsx"
+              ><code title="spell-epic/src/components/epic-link/EpicLink.tsx">EpicLink.tsx</code></a
             >, with its style sheet (<code>.css</code>) and tests beside it.
           </p>
 
@@ -133,9 +133,9 @@
             <ul>
               <li>Epic pages, saga pages and details pages load it already.</li>
               <li>
-                A guide loads it with one more line in its <code>&lt;ui-root&gt;</code>:
-                <code>&lt;ui-components source="&lt;up&gt;packages/epics/components/__pack/epics.pack.js"&gt;</code>. Without it, use
-                a plain <code>&lt;a href="SAGA:/..."&gt;</code>: the docs runtime rewrites it.
+                Every other page the docs runtime runs on loads it too, at start (epic <code>epic-engine</code> P3).
+                Without the runtime, use a plain <code>&lt;a href="SAGA:/..."&gt;</code>, or add the pack to the
+                page's <code>&lt;ui-root&gt;</code>: <code>&lt;ui-components source="/_epic/pack/epics.pack.js"&gt;</code>.
               </li>
             </ul>
             <p><b>Its children:</b></p>

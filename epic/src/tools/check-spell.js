@@ -8,7 +8,7 @@
  *   - console / page errors
  *   - a `ui-*` or `epic-*` element (the `epics` pack's, an epic page's) that isn't defined,
  *     or never rendered (no shadow root)
- *   - a toolbar (`nav.spell-toolbar`, epic `airplane` P8) that doesn't list every top-level section,
+ *   - a toolbar (`.spell-toolbar`, Spell UI's menu;  epic `airplane` P8) that doesn't list every top-level section,
  *     or an entry that points nowhere
  *     - the goals pages' sections:  the h2s heading a sticky section
  *     - an epic page's:  its `<epic-*>` blocks
@@ -32,6 +32,9 @@
  *   since it loads its site bundle from there
  *   - the sets:  `packages/epics/docs/` ..., `COMPONENT_SETS` in `$/server/page`
  *   - `--base <url>` checks it on another server, e.g. the main checkout's `http://localhost:4747/worktrees/<w>`
+ * - `--base <url>`:  ANY page from that server, as it's shown there (epic `epic-engine` I25:  python-target's
+ *   2px of sideways scroll came from the toolbar's bullhorn, drawn only when served), e.g. the epic server,
+ *   `http://127.0.0.1:4848`
  *   - it has Spell UI's page shape, no toolbar:  the toolbar checks find no top-level section, and pass
  * - reports, never fails on:  icons with no `<svg>` drawn in their shadow tree (no reliable "done loading" signal)
  * - prints a JSON summary on stdout (last thing written), problems on stderr
@@ -59,7 +62,7 @@ const PACK_TAG = /^(ui|epic)-/
 const ENGINE = PACKAGE
 
 /** The page's navigation:  its toolbar, an epic page's or any other's (`spell-doc-runtime.js` `buildNavigation()`). */
-const NAV = "nav.spell-toolbar"
+const NAV = ".spell-toolbar"
 
 const baseAt = process.argv.indexOf("--base")
 const baseArg = baseAt > 0 ? process.argv[baseAt + 1] : undefined
@@ -91,7 +94,7 @@ if (desktop.icons.blankCount) console.error(`NOTE: ${desktop.icons.blankCount} i
 
 await desk.evaluate(openBiggestSection)
 await desk.waitForTimeout(800)
-const middle = await desk.evaluate(scrollToMiddleSection)
+const middle = await desk.evaluate(scrollToMiddleSection, NAV)
 await desk.waitForTimeout(600)
 await desk.screenshot({ path: join(out, "desk-mid.png") })
 const stuck = await desk.evaluate(stuckAndActive, { id: middle.id, nav: NAV })
@@ -153,12 +156,14 @@ process.exit(problems.length ? 1 : 0)
  * Where to load `file` from:  `file://`, or the page server for a page that needs one.
  * - a page whose `<body>` says `data-spell-needs-server` loads from this checkout's page server,
  *   started if need be (the `commands` template:  it fetches its JSON)
+ * - `--base`:  every page from that server
  * - a server that won't start is a problem, and `file://` is used
  */
 function pageUrl(file) {
   const local = pathToFileURL(resolve(file)).href
   const inSet = setAddress(file)
-  if (!inSet && !/<body\b[^>]*\bdata-spell-needs-server\b/.test(readFileSync(file, "utf8"))) return local
+  // `--base`:  any page from that server, as it shows there (its comments, Send, the toolbar's bullhorn)
+  if (!baseArg && !inSet && !/<body\b[^>]*\bdata-spell-needs-server\b/.test(readFileSync(file, "utf8"))) return local
   const served = baseArg ? { base: baseArg.replace(/\/$/, "") } : ensurePageServer()
   if (served) return inSet ? `${served.base}${inSet}` : serverUrl(served.base, file)
   problem("page needs the page server, and it didn't start")
@@ -513,9 +518,18 @@ function openBiggestSection() {
  * - the sections:
  *   `main > ui-section` or a Spell UI-shaped page's article's, an epic page's top-level block, or `section.s2`
  * - only sections that can scroll up to the top:  a short page's last section never sticks
+ * - "into" it from where its title starts to stick, the bottom of the page's sticky head (its toolbar, `nav`;  else
+ *   the site header):  scrolled from the window's top instead, a short section (epic `crdt`'s four Questions, 228px)
+ *   went most of the way under the head, its title pushed out with it (epic `epic-engine` I25)
  */
-function scrollToMiddleSection() {
+function scrollToMiddleSection(nav) {
   const room = document.documentElement.scrollHeight - innerHeight
+  const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--spell-site-header-height"))
+  /** where titles stick:  the toolbar's bottom while it's in the window's top half, else the site header's */
+  const stack = () => {
+    const bottom = document.querySelector(nav)?.getBoundingClientRect().bottom
+    return bottom > 0 && bottom < innerHeight / 2 ? bottom : header || 0
+  }
   // a section barely taller than its title (an empty "Todos" in a new epic page) has no middle to stick over:  skip it
   const top =
     ":is(main, main .site-article) > ui-section, main epic-page > :is(epic-overview, epic-section), section.s2"
@@ -523,13 +537,14 @@ function scrollToMiddleSection() {
   // is, never stuck (epic `epic-workflow` I1:  a new epic page's Questions failed so, the page too short to scroll)
   const into = (s) => Math.min(600, s.offsetHeight / 2)
   const sections = [...document.querySelectorAll(top)].filter(
-    (s) => s.offsetHeight > 200 && s.getBoundingClientRect().top + scrollY + into(s) + 100 < room
+    (s) => s.offsetHeight > 200 && s.getBoundingClientRect().top + scrollY + into(s) - stack() + 100 < room
   )
   const middle = sections[Math.floor(sections.length / 2)]
   if (!middle) return { id: undefined }
   middle.scrollIntoView()
-  const target = scrollY + into(middle)
-  window.scrollBy(0, into(middle))
+  const by = into(middle) - stack()
+  const target = scrollY + by
+  window.scrollBy(0, by)
   // fell short (the page shorter than it measured, a part still loading):  nothing to judge
   if (scrollY < target - 2) return { id: undefined }
   if (middle.localName.startsWith("epic-")) return { id: middle.id, tag: middle.localName }
@@ -542,7 +557,7 @@ function scrollToMiddleSection() {
  * - stuck:  both of
  *   - its title's top is within 160px BELOW the fixed site header (`--spell-site-header-height`;  never under it):
  *     room for a sticky bar above it, e.g. an epic page's page header, CHEATSHEET's filter
- *   - it's what shows at its own middle
+ *   - it's what shows at its own middle, 40px in from the title's left
  *   - Scrolled mid-section, a title that DIDN'T stick is far above.
  *     One stuck but covered, e.g. by an h3 sticking at the same offset, doesn't count.
  *   - `<ui-section>`:  its title is its shadow `title` part, and it must ALSO say `:state(stuck)`;
@@ -550,6 +565,8 @@ function scrollToMiddleSection() {
  *   - an epic page's block:  the same, of the `<ui-section>` it draws in its shadow root;
  *     what shows there is the block's host
  *   - h2:  one its short section's end pushed out (`:state(bound)`) counts:  it stuck, then left with its section
+ *     - only with its bottom AT its section's bottom, where the section's end pushes it:  `<ui-sticky>` says
+ *       `bound` of a title that never stuck too, scrolled away at its section's top (epic `epic-engine` I35)
  * - active:  the rail's `selected` entry
  */
 function stuckAndActive({ id, nav }) {
@@ -561,8 +578,10 @@ function stuckAndActive({ id, nav }) {
       ? element
       : null
   const title = section ? section.shadowRoot?.querySelector('[part~="title"]') : element
-  const left = document.querySelector("main").getBoundingClientRect().left + 40
   const rect = title?.getBoundingClientRect()
+  // 40px into the title itself:  `main` spans the window in the wide layout, the reading column centred in it, so
+  // `main`'s left + 40 is its margin, where nothing shows (epic `epic-engine` I33:  a goal page's h2 failed so)
+  const left = (rect?.width ? rect.left : document.querySelector("main").getBoundingClientRect().left) + 40
   const probe = rect ? Math.max(4, rect.top + rect.height / 2) : 16
   const shown = document.elementFromPoint(left, probe)
   const active = document.querySelector(`:is(${nav}) [data-rail][selected]`)
@@ -574,7 +593,9 @@ function stuckAndActive({ id, nav }) {
   let bound = false
   let stuckState = false
   try {
-    bound = !!element?.parentElement?.matches("ui-sticky:state(bound)")
+    const sticky = element?.parentElement
+    const end = sticky?.parentElement?.getBoundingClientRect().bottom
+    bound = !!sticky?.matches("ui-sticky:state(bound)") && !!rect && Math.abs(rect.bottom - end) <= 2
     stuckState = !!section?.matches(":state(stuck)")
   } catch {
     // a browser without custom states:  judge by position alone

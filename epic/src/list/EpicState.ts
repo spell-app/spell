@@ -9,9 +9,8 @@
  * - `future` -- written down with `/epic future`, not planned yet
  *
  * Who draws it:
- * - the epic cards `docs index` writes (`src/tools/index.js`), plain `node`:  it imports this FILE by path
- * - the page server's live cards on the Epics page (`RunningEpics`, through epics' route module
- *   `runningRoutes.ts`), which re-mark every card
+ * - the Epics page's cards, `<epic-card>` (`$/epics/components`, epic `epic-engine` P3), in the browser;  and their
+ *   groups, which `docs index` (`src/tools/index.js`, plain `node`:  it imports this FILE by path) counts on the home
  * - `<epic-page>`'s header mark (`$/epics/components`), in the browser
  * - the session titles' icons (`spell dev session icons`, `packages/cli`)
  *
@@ -125,20 +124,6 @@ export function epicStateFor(facts: EpicFacts, now: Date = new Date()): EpicStat
   }
 }
 
-/**
- * `state`'s mark before an epic card's title, as HTML:
- * - in progress:  the phase count (`6/8`, or `planning`) in a small blue outlined label
- * - the rest:  its icon, in its colour
- * - the tooltip says which state, and why
- */
-export function epicStateMark(state: EpicState): string {
-  const tip = escape(state.tip)
-  if (state.name === "progress") {
-    return `<ui-label class="spell-epic-state" size="mini" color="blue" basic title="${tip}">${state.count || "planning"}</ui-label>`
-  }
-  return `<ui-icon class="spell-epic-state" name="${state.icon}" color="${state.color}" title="${tip}"></ui-icon>`
-}
-
 /** Urgent item `ids` in words, by kind, in `KINDS`' order:  `2 questions, 1 judgement call`. */
 export function urgentWords(ids: readonly string[]): string {
   const counts = new Map<string, number>()
@@ -162,9 +147,4 @@ export function idleDays(updated: string | null | undefined, now: Date = new Dat
   const then = new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]))
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   return Math.round((today.getTime() - then.getTime()) / 86_400_000)
-}
-
-/** `value` for a double-quoted attribute. */
-function escape(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 }

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-hidden-note</title>
+    <meta
+      name="description"
+      content="The &lt;epic-hidden-note&gt; element: the line under a filtered list, 3 hidden · show all."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-hidden-note&gt;">
+      <ui-segment vertical class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-hidden-note&gt;
+            <ui-header>The &lt;epic-hidden-note&gt; element: the line under a filtered list, 3 hidden · show all.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-hidden-note&gt;</code> is the quiet line under a list the state filter hides items of:
+            "3 hidden · show all". A click shows them all again.
+          </p>
+          <p class="meta">
+            For anyone changing how items are filtered.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P3), in the
+            <a href="../../spell-epic/src/components/epic-state-filter/" target="src-spell-epic-src-components-epic-state-filter"><code title="spell-epic/src/components/epic-state-filter/">epic-state-filter</code></a> family, with <a href="epic-state-filter.html" target="src-spell-epic-src-docs-epic-state-filter-html"><code>&lt;epic-state-filter&gt;</code></a>.<br />
+            Its vocabulary: <a href="../../spell-epic/src/components/epic-state-filter/EpicHiddenNote.en.ts" target="src-spell-epic-src-components-epic-state-filter-epichiddennote-en-ts"><code title="spell-epic/src/components/epic-state-filter/EpicHiddenNote.en.ts">EpicHiddenNote.en.ts</code></a><br />
+            Its component: <a href="../../spell-epic/src/components/epic-state-filter/EpicHiddenNote.tsx" target="src-spell-epic-src-components-epic-state-filter-epichiddennote-tsx"><code title="spell-epic/src/components/epic-state-filter/EpicHiddenNote.tsx">EpicHiddenNote.tsx</code></a>.
+          </p>
+
+          <ui-section id="1-example" header="1. Example" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="eye"></ui-icon>
+<epic-hidden-note count="3"></epic-hidden-note>
+            <ui-accordion class="spell-code" styled>
+              <ui-title>The example above · 1 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-hidden-note count="3"></epic-hidden-note>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="2-markup" header="2. Markup" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              Nobody writes it in a doc: <a href="epic-section.html" target="src-spell-epic-src-docs-epic-section-html"><code>&lt;epic-section&gt;</code></a> draws it under its items,
+              and the docs runtime under each of the Epics page's lists (<a href="../../spell-epic/src/tools/_assets/spell-doc-runtime.js" target="src-spell-epic-src-tools-assets-spell-doc-runtime-js"><code title="spell-epic/src/tools/_assets/spell-doc-runtime.js">wireItemFilters()</code></a>). With nothing hidden, its owner leaves it out.
+            </p>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" header="3. Where it goes" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="compass"></ui-icon>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Parent</th><th>How many</th><th>As</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>&lt;epic-section&gt;</code>, under its items</td><td>one</td><td>Its part <code>hidden-note</code>.</td></tr>
+                  <tr><td>a docs page, after a filtered list</td><td>one per list</td><td><code>.spell-hidden-note</code>.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>It has no children.</p>
+          </ui-section>
+
+          <ui-section id="4-attributes" header="4. Attributes" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Attribute</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>count</code></td><td>How many items the filter hides.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="epic-hidden-note-parts" header="Parts" sticky collapsible dividing collapsed>
+              <p>Pieces of what it draws.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Part</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>base</code></td><td>The line, a <code>&lt;button&gt;</code> drawn as a link.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+            <ui-section id="epic-hidden-note-events" header="Events" sticky collapsible dividing collapsed>
+              <p>What it tells its owner.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Event</th><th>Detail</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>epic-show-all</code></td><td><code>{}</code></td><td>Its line was clicked: the owner clears the filter.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" header="5. How it looks" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>Muted text, the accent and an underline under the pointer.</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-19 against branch <code>epic-engine</code> (P3).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

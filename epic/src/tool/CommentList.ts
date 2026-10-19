@@ -377,7 +377,7 @@ export class CommentList {
   /**
    * Mark comment `id` taken into `epic`'s phase `phase`:  no longer Owen's to change.
    * - `phaseId`, `title`:  the phase's stable id and its title (epic `epic-engine` I16), so its thread's link finds the
-   *   phase after an insert moves its number (`takenInto()`)
+   *   phase after an insert moves its number (`ThreadFacts.takenInto()`, `$/epics/comments`)
    */
   take(id: string, { epic, phase, phaseId, title }: TakenInto, now = new Date()): void {
     const comment = this.comment(id)
@@ -554,20 +554,6 @@ function checkedText(text: unknown): string {
  *   `epic-engine` I16
  */
 export type TakenInto = { epic: string; phase: number; phaseId?: string; title?: string }
-
-/**
- * Where a taken comment's thread links, and what the link says (epic `epic-engine` I16):  `{ hash, label }`.
- * - by the phase's stable id, `#p-memory`, so the link still lands after a phase goes in ahead of it;  its words the
- *   epic and the phase's title, `guide-changes · Memory`
- * - one taken before I16 (no id):  by its number, `#p7` (an old address, landing on the 7th phase), `guide-changes P7`
- * - pure:  the docs runtime draws the thread with it
- */
-export function takenInto({ epic, phase, phaseId, title }: TakenInto): { hash: string; label: string } {
-  return {
-    hash: phaseId || `p${phase}`,
-    label: phaseId && title ? `${epic} · ${title}` : `${epic} P${phase}`
-  }
-}
 
 /** A stable phase id, as `taken.phaseId` holds one:  `p-memory`. */
 const PHASE_ID = /^p-[a-z0-9]+(?:-[a-z0-9]+)*$/

@@ -136,16 +136,19 @@ async function stubbedPage(url, anchors, answered = [true, false, true]) {
 /** Where the page stands:  the bullhorn, the thread the focus is in, the thread ids drawn. */
 function state(page) {
   return page.evaluate(() => {
-    const box = document.querySelector("nav.spell-toolbar > .spell-toolbar-waiting")
-    const thread = document.activeElement?.closest?.(".spell-thread") ?? null
+    const box = document.querySelector(".spell-toolbar > .spell-toolbar-waiting")
+    // a thread is an `<epic-thread>`:  the focus on its fold, in its shadow root, is the thread's
+    const thread = document.activeElement?.closest?.("epic-thread") ?? null
     const rect = thread?.getBoundingClientRect()
     return {
       shown: box ? !box.hidden : false,
       count: box?.querySelector(".spell-toolbar-count")?.textContent ?? null,
       thread: thread?.id ?? null,
-      open: thread?.hasAttribute("data-open") ?? null,
+      open: thread?.hasAttribute("open") ?? null,
       onScreen: rect ? rect.top >= 0 && rect.top < innerHeight - 40 : null,
-      ids: [...document.querySelectorAll(".spell-thread .spell-thread-id")].map((each) => each.textContent)
+      ids: [...document.querySelectorAll("epic-thread")].map(
+        (each) => each.shadowRoot?.querySelector('[part~="id"]')?.textContent ?? ""
+      )
     }
   })
 }
@@ -154,7 +157,8 @@ function state(page) {
 async function checkPage(name, url, anchors) {
   const page = await stubbedPage(url, anchors)
   try {
-    await page.waitForSelector("nav.spell-toolbar > .spell-toolbar-waiting:not([hidden])", { timeout: 20_000 })
+    // the toolbar's menu item:  its host has no box of its own (`display: contents`), so attached, not visible
+    await page.waitForSelector(".spell-toolbar > .spell-toolbar-waiting:not([hidden])", { state: "attached", timeout: 20_000 })
   } catch {
     check(`${name}:  the toolbar's bullhorn shows`, false)
     await page.screenshot({ path: join(out, `${name}-top.png`) })
@@ -165,14 +169,15 @@ async function checkPage(name, url, anchors) {
   check(`${name}:  each thread shows its id, M1 ...`, now.ids.join(" ") === "M1 M2 M3", now.ids.join(" "))
   await page.screenshot({ path: join(out, `${name}-top.png`) })
   const order = await page.evaluate(() =>
-    [...document.querySelectorAll('.spell-thread[data-turn="owen"]')].map((each) => each.id)
+    [...document.querySelectorAll("epic-thread")].filter((each) => each.comment?.turn === "owen").map((each) => each.id)
   )
   for (const [step, want] of [
     ["lands on the first waiting thread", order[0]],
     ["goes on to the next", order[1]],
     ["comes round to the first again", order[0]]
   ]) {
-    await page.click("nav.spell-toolbar > .spell-toolbar-waiting > button")
+    // the button the `<ui-item>` draws, in its shadow root
+    await page.click('.spell-toolbar > .spell-toolbar-waiting [part~="item"]')
     await page.waitForTimeout(900)
     now = await state(page)
     check(
@@ -218,7 +223,7 @@ async function checkNoneWaiting(url) {
     () => [...document.querySelectorAll("main ui-section[id]")].map((each) => each.id),
     [false, false, false]
   )
-  await page.waitForSelector(".spell-thread", { timeout: 20_000 }).catch(() => {})
+  await page.waitForSelector("epic-thread", { timeout: 20_000 }).catch(() => {})
   await page.waitForTimeout(500)
   const now = await state(page)
   check("none waiting:  threads drawn, no bullhorn", now.ids.length === 3 && !now.shown, JSON.stringify(now))

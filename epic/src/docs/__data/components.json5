@@ -21,6 +21,14 @@
     {
       "id": "answering",
       "title": "Pages Owen answers on"
+    },
+    {
+      "id": "epics-page",
+      "title": "The Epics page"
+    },
+    {
+      "id": "comments",
+      "title": "Comments"
     }
   ],
   "components": [
@@ -377,6 +385,184 @@
       ]
     },
     {
+      "tag": "epic-card",
+      "name": "epic-card",
+      "folder": "epic-card",
+      "mainTag": "epic-card",
+      "main": true,
+      "page": true,
+      "href": "epic-card.html",
+      "topics": [
+        "epics-page"
+      ],
+      "aka": [
+        "epic card",
+        "epics list card",
+        "favorite",
+        "star"
+      ],
+      "description": "One epic's card on the Epics page (epic `epic-engine` P3), in an `<epic-list>`:  its state's mark before its linked title, its description, its saga's label and meta line;  a star at its top right that stars or unstars it on the page server, and the day it was last worked on at its bottom right.  Written by `epic pages index` (`$/epics/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` and `favorite` as it serves the page.",
+      "noun": "card",
+      "attributes": [
+        {
+          "name": "epic",
+          "kind": "string",
+          "description": "The epic's name, its folder in `epics/`:  `airplane`."
+        },
+        {
+          "name": "phases",
+          "kind": "string",
+          "description": "Its phases' statuses, in order, space-separated:  `done done active todo`.  None:  no phases yet."
+        },
+        {
+          "name": "updated",
+          "kind": "string",
+          "description": "Its epic page's `updated` day:  how long since anyone worked on it (paused after 3 days)."
+        },
+        {
+          "name": "urgent",
+          "kind": "string",
+          "description": "The ids of its items that need Owen (red and orange chips), space-separated:  `q3 j12`."
+        },
+        {
+          "name": "future",
+          "kind": "boolean",
+          "description": "Written down with `/epic future`, not planned yet."
+        },
+        {
+          "name": "standing",
+          "kind": "boolean",
+          "description": "Open for good:  every phase done is NOT done."
+        },
+        {
+          "name": "running",
+          "kind": "boolean",
+          "description": "A Claude session is running for it:  in progress, never paused.  The page server's to set."
+        },
+        {
+          "name": "active",
+          "kind": "string",
+          "description": "The phase under way, as its mark's tooltip says it:  `P8 · Review Polish`."
+        },
+        {
+          "name": "worked",
+          "kind": "string",
+          "description": "When it was last worked on, local ISO:  `2026-10-09T14:34-04:00`.  Drawn as `10/9`."
+        },
+        {
+          "name": "saga",
+          "kind": "string",
+          "description": "The saga it serves:  `drawable-spell`.  Its label, and the list's saga chips, go by it."
+        },
+        {
+          "name": "saga-title",
+          "kind": "string",
+          "description": "The saga's title, its label's words:  `Drawable Spell`."
+        },
+        {
+          "name": "saga-purpose",
+          "kind": "string",
+          "description": "The saga's purpose, its label's tooltip."
+        },
+        {
+          "name": "favorite",
+          "kind": "boolean",
+          "description": "Starred:  its list shows it under Favorites, and only there."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "Its title:  a link to its epic page, `<a href>`."
+        },
+        {
+          "name": "description",
+          "description": "What the epic is, one line:  its page's description."
+        },
+        {
+          "name": "meta",
+          "description": "The meta line:  the phase under way and its page's path."
+        }
+      ],
+      "events": [
+        {
+          "name": "epic-favorite",
+          "detail": "{ epic: string, favorite: boolean, favorites: string[] }",
+          "description": "The page server starred (`favorite`) or unstarred it;  `favorites`:  every starred epic, as it answered.  Its `<epic-list>` sets every card's star by it."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The card, a `<ui-card>`."
+        },
+        {
+          "name": "mark",
+          "description": "Its state's mark before the title:  `3/6` in progress, or the state's icon."
+        },
+        {
+          "name": "saga",
+          "description": "Its saga's label, a `<ui-label>`."
+        },
+        {
+          "name": "star",
+          "description": "The star at its top right, a `<ui-button>`."
+        },
+        {
+          "name": "worked",
+          "description": "The day it was last worked on, at its bottom right, a `<time>`."
+        }
+      ],
+      "states": [],
+      "texts": [
+        {
+          "key": "planning",
+          "text": "planning",
+          "description": "In progress with no phases yet:  the mark's words."
+        },
+        {
+          "key": "star",
+          "text": "Star {epic}",
+          "description": "The star's name, not starred."
+        },
+        {
+          "key": "unstar",
+          "text": "Unstar {epic}",
+          "description": "The star's name, starred."
+        },
+        {
+          "key": "starTip",
+          "text": "Star it:  listed first, under Favorites",
+          "description": "The star's tooltip, not starred."
+        },
+        {
+          "key": "unstarTip",
+          "text": "A favorite:  listed first.  Click to unstar",
+          "description": "The star's tooltip, starred."
+        },
+        {
+          "key": "starOffline",
+          "text": "Starring needs the epic server (epic hub ensure)",
+          "description": "The star's tooltip where it can't star:  opened from disk, or no write token."
+        },
+        {
+          "key": "worked",
+          "text": "Last worked on {date}",
+          "description": "The day's tooltip:  the full date and time."
+        },
+        {
+          "key": "starFailed",
+          "text": "Couldn't star {epic}:  {error}",
+          "description": "A toast:  the server refused."
+        },
+        {
+          "key": "unstarFailed",
+          "text": "Couldn't unstar {epic}:  {error}",
+          "description": "A toast:  the server refused."
+        }
+      ]
+    },
+    {
       "tag": "epic-cards",
       "name": "epic-cards",
       "folder": "epic-cards",
@@ -392,7 +578,7 @@
         "saga epics",
         "epics list"
       ],
-      "description": "A saga page's Epics (epic `epic-workflow` P15):  a card for each epic whose page names the saga (`<epic-page saga>`), grouped by state as on the Epics page.  Drawn from the page server (`GET /api/epics/saga`), and asked again whenever an epic page changes, so it never goes stale.",
+      "description": "A saga page's Epics (epic `epic-workflow` P15):  a card for each epic whose page names the saga (`<epic-page saga>`), grouped by state as on the Epics page, with its cards:  an `<epic-list>` of `<epic-card>`s.  Drawn from the page server (`GET /api/epics/saga`), and asked again whenever an epic page changes, so it never goes stale.",
       "noun": "cards",
       "attributes": [
         {
@@ -406,15 +592,11 @@
       "parts": [
         {
           "name": "base",
-          "description": "The box around the groups."
+          "description": "The box around the list."
         },
         {
-          "name": "group",
-          "description": "One group:  its heading (icon, title, how many), then its cards."
-        },
-        {
-          "name": "card",
-          "description": "One epic's card:  its state's mark, linked title, summary and meta line."
+          "name": "list",
+          "description": "The cards, an `<epic-list no-favorites>` of `<epic-card>`s:  the Epics page's groups and cards."
         },
         {
           "name": "note",
@@ -427,26 +609,6 @@
           "key": "label",
           "text": "The saga's epics",
           "description": "The whole list, spoken."
-        },
-        {
-          "key": "activeTitle",
-          "text": "Active",
-          "description": "A group:  phases left."
-        },
-        {
-          "key": "planningTitle",
-          "text": "Planning",
-          "description": "A group:  future epics, and ones with no phases yet."
-        },
-        {
-          "key": "urgentTitle",
-          "text": "Urgent",
-          "description": "A group:  every phase done, items waiting on Owen."
-        },
-        {
-          "key": "doneTitle",
-          "text": "Done",
-          "description": "A group:  every phase done, nothing waiting."
         },
         {
           "key": "phases",
@@ -1003,6 +1165,125 @@
       ]
     },
     {
+      "tag": "epic-comment-pane",
+      "name": "epic-comment-pane",
+      "folder": "epic-comment-pane",
+      "mainTag": "epic-comment-pane",
+      "main": true,
+      "page": true,
+      "href": "epic-comment-pane.html",
+      "topics": [
+        "comments"
+      ],
+      "aka": [
+        "comment box",
+        "comment pane",
+        "bullhorn box",
+        "new comment",
+        "floating pane"
+      ],
+      "description": "The small floating pane Owen writes a NEW comment in (epic `airplane` P11;  Owen, 2026-10-10:  \"a little floating pane below the selected text that I can move around -- don't scroll the page and lose context!\"), drawn by the docs runtime's comments when he clicks a bullhorn or comments on selected text.  Fixed on the screen just under what he clicked (`near`), above it when there's no room below;  he drags it by its header.  Ivory, 8px inside on every side, no buttons below its text.  Its header:  the bullhorn, the first words it's on (its tooltip the block in full), the floppy once saved, the trash once saved, and ×.  Its field is slotted:  the comments' code saves it as he types.",
+      "noun": "comment pane",
+      "attributes": [
+        {
+          "name": "headline",
+          "kind": "string",
+          "description": "The first words it's on, in quotes (`“Owen leaves a comment …”`), or `This page`."
+        },
+        {
+          "name": "about",
+          "kind": "string",
+          "description": "Which block it's on, in full (`On a table in “Comments”`):  its header's tooltip."
+        },
+        {
+          "name": "saved",
+          "kind": "string",
+          "description": "The floppy, in its header, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy."
+        },
+        {
+          "name": "failed",
+          "kind": "boolean",
+          "description": "The last save failed:  the floppy red, `saved` saying why."
+        },
+        {
+          "name": "deletable",
+          "kind": "boolean",
+          "description": "The comment is saved:  the trash shows, to delete it at once (Undo in the toast that follows)."
+        },
+        {
+          "name": "near",
+          "kind": "json",
+          "description": "Where to open:  the box of what Owen clicked or selected, `{ left, top, bottom }` in the window's pixels.  It goes 8px under it, above it when there's no room below, never past the window's edges, 8px in.  A property;  none:  centred near the top."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "Owen's field (a `<ui-textarea>`), under the header."
+        }
+      ],
+      "events": [
+        {
+          "name": "epic-comment-close",
+          "detail": "{}",
+          "description": "× pressed:  save what's typed, then close it."
+        },
+        {
+          "name": "epic-comment-delete",
+          "detail": "{}",
+          "description": "The trash pressed:  delete the comment at once (Undo in the toast that follows)."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The pane:  ivory, an outline, rounded, lifted off the page by a shadow."
+        },
+        {
+          "name": "header",
+          "description": "Its header:  the bullhorn, the first words, the floppy, the trash, ×;  drags it."
+        }
+      ],
+      "states": [
+        {
+          "name": "placed",
+          "description": "Put on the screen (`near`):  it shows from then on."
+        }
+      ],
+      "texts": [
+        {
+          "key": "label",
+          "text": "Comment on {headline}",
+          "description": "The pane, a dialog, for a screen reader."
+        },
+        {
+          "key": "dragTip",
+          "text": "(Drag to move)",
+          "description": "After its header's tooltip."
+        },
+        {
+          "key": "closeTitle",
+          "text": "Close",
+          "description": "×'s tooltip."
+        },
+        {
+          "key": "closeLabel",
+          "text": "Close the comment box",
+          "description": "×, for a screen reader."
+        },
+        {
+          "key": "deleteTitle",
+          "text": "Delete this comment",
+          "description": "The trash's tooltip."
+        },
+        {
+          "key": "deleteLabel",
+          "text": "Delete this comment (Undo in the toast that follows)",
+          "description": "The trash, for a screen reader."
+        }
+      ]
+    },
+    {
       "tag": "epic-commit",
       "name": "epic-commit",
       "folder": "epic-commit",
@@ -1220,6 +1501,59 @@
           "key": "labelled",
           "text": "{label}:",
           "description": "A labelled block's label (`label`)."
+        }
+      ]
+    },
+    {
+      "tag": "epic-hidden-note",
+      "name": "epic-hidden-note",
+      "folder": "epic-hidden-note",
+      "mainTag": "epic-hidden-note",
+      "main": true,
+      "page": true,
+      "href": "epic-hidden-note.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "hidden note",
+        "show all",
+        "N hidden"
+      ],
+      "description": "Under a list the state filter (`<epic-state-filter>`) hides items of:  a quiet line, `3 hidden · show all`;  a click asks its owner to show everything again (`epic-show-all`).  Drawn by `<epic-section>` under its items, and by the docs runtime under the Epics page's lists.  Nothing hidden:  its owner leaves it out.",
+      "noun": "hidden-note",
+      "attributes": [
+        {
+          "name": "count",
+          "kind": "number",
+          "description": "How many items the filter hides."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "epic-show-all",
+          "detail": "{}",
+          "description": "Its line was clicked:  the owner clears the filter, and every item shows."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The line, a `<button>` drawn as a link."
+        }
+      ],
+      "states": [],
+      "texts": [
+        {
+          "key": "hiddenNote",
+          "text": "{count} hidden · show all",
+          "description": "The line;  a click shows all."
+        },
+        {
+          "key": "hiddenTip",
+          "text": "Show everything:  clear the filter",
+          "description": "The line's tooltip."
         }
       ]
     },
@@ -1766,6 +2100,121 @@
           "key": "broken",
           "text": "Not found:  {target}",
           "description": "A broken link's tooltip."
+        }
+      ]
+    },
+    {
+      "tag": "epic-list",
+      "name": "epic-list",
+      "folder": "epic-list",
+      "mainTag": "epic-list",
+      "main": true,
+      "page": true,
+      "href": "epic-list.html",
+      "topics": [
+        "epics-page"
+      ],
+      "aka": [
+        "epics list",
+        "epics page",
+        "epic groups",
+        "saga chips",
+        "favorites"
+      ],
+      "description": "The Epics page's list (epic `epic-engine` P3):  its `<epic-card>`s in five groups -- Favorites, Active, Planning, Urgent, Done -- each under a heading with its count, by title within each or newest first (`<epic-sort>`);  above them a chip per saga, in the sagas' order, then No saga, each with its count:  a click shows only that saga's epics.  It never moves its cards:  it places and hides them from its shadow root.  Written by `epic pages index` (`$/epics/list/EpicCards` `epicListHtml()`).",
+      "noun": "list",
+      "attributes": [
+        {
+          "name": "sagas",
+          "kind": "string",
+          "description": "The sagas' ids, in Owen's order, space-separated:  the chips' order.  A saga none of its cards names gets no chip;  a card naming a saga not listed is No saga's."
+        },
+        {
+          "name": "no-favorites",
+          "kind": "boolean",
+          "description": "No Favorites group:  a starred card stays in its own group.  A saga page's Epics (`<epic-cards>`):  Favorites is Owen's own list, on the Epics page."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "Its cards, `<epic-card>`s, in any order."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The box around the chips and the groups."
+        },
+        {
+          "name": "chips",
+          "description": "The saga chips' row."
+        },
+        {
+          "name": "chip",
+          "description": "One saga's chip:  its title and how many of its epics there are;  pressed while shown."
+        },
+        {
+          "name": "cards",
+          "description": "The grid of headings and cards."
+        },
+        {
+          "name": "group-title",
+          "description": "A group's heading:  its icon, title and how many of its cards show."
+        }
+      ],
+      "states": [],
+      "texts": [
+        {
+          "key": "favoritesTitle",
+          "text": "Favorites",
+          "description": "A group:  the starred epics, whatever their state."
+        },
+        {
+          "key": "activeTitle",
+          "text": "Active",
+          "description": "A group:  phases left, in progress or paused."
+        },
+        {
+          "key": "planningTitle",
+          "text": "Planning",
+          "description": "A group:  future epics, and ones with no phases yet."
+        },
+        {
+          "key": "urgentTitle",
+          "text": "Urgent",
+          "description": "A group:  every phase done, items waiting on Owen."
+        },
+        {
+          "key": "doneTitle",
+          "text": "Done",
+          "description": "A group:  every phase done, nothing waiting."
+        },
+        {
+          "key": "chipsLabel",
+          "text": "Show the epics of a saga",
+          "description": "The chips' row, spoken."
+        },
+        {
+          "key": "noSaga",
+          "text": "No saga",
+          "description": "The chip of the epics that name no saga."
+        },
+        {
+          "key": "noSagaTip",
+          "text": "Epics that name no saga yet:  epic saga set <epic> <saga>",
+          "description": "The No saga chip's tooltip."
+        },
+        {
+          "key": "showOnly",
+          "text": "Click to show only {saga}",
+          "description": "A chip's tooltip's last line, while shown."
+        },
+        {
+          "key": "showToo",
+          "text": "Click to show {saga} too",
+          "description": "A chip's tooltip's last line, while hidden."
         }
       ]
     },
@@ -2589,7 +3038,7 @@
         },
         {
           "name": "toolbar",
-          "description": "The sticky bar's last row:  the section toolbar the docs runtime adds to an epic page (`<nav slot=\"toolbar\" class=\"spell-toolbar\">`, `spell-doc-runtime.js` `buildToolbar()`);  never in a doc."
+          "description": "The sticky bar's last row:  the section toolbar the docs runtime adds to an epic page (`<ui-menu slot=\"toolbar\" class=\"spell-toolbar\">`, `spell-doc-runtime.js` `buildToolbar()`);  never in a doc."
         }
       ],
       "events": [],
@@ -2946,66 +3395,6 @@
           "description": "The toolbar's collapse-all button:  its name and tooltip."
         },
         {
-          "key": "filterLabel",
-          "text": "Show items by state",
-          "description": "The state filter's group, for a screen reader."
-        },
-        {
-          "key": "chipWords",
-          "text": "{count} {words}:  {does}",
-          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
-        },
-        {
-          "key": "showAll",
-          "text": "show everything",
-          "description": "A state chip's click:  every state shows again."
-        },
-        {
-          "key": "chipOnly",
-          "text": "show only these",
-          "description": "A state chip's click:  only its state shows."
-        },
-        {
-          "key": "chipAlso",
-          "text": "show these too",
-          "description": "A state chip's click, hidden:  its state shows too."
-        },
-        {
-          "key": "chipHide",
-          "text": "hide these",
-          "description": "A state chip's click, showing:  its state hides."
-        },
-        {
-          "key": "stateProgress",
-          "text": "Claude is working on it",
-          "description": "A state chip's words:  `progress` (blue)."
-        },
-        {
-          "key": "stateAttention",
-          "text": "needs attention",
-          "description": "A state chip's words:  `attention` (red)."
-        },
-        {
-          "key": "stateReplied",
-          "text": "Claude answered:  your turn to pick",
-          "description": "A state chip's words:  `replied` (orange)."
-        },
-        {
-          "key": "stateOpen",
-          "text": "open, still undecided",
-          "description": "A state chip's words:  `open` (yellow)."
-        },
-        {
-          "key": "stateRecent",
-          "text": "decided or done",
-          "description": "A state chip's words:  `recent` (green)."
-        },
-        {
-          "key": "stateOld",
-          "text": "no longer relevant",
-          "description": "A state chip's words:  `old` (grey)."
-        },
-        {
           "key": "reviewLineAirplane",
           "text": "Airplane mode:  what you mark here waits for",
           "description": "The review line in airplane mode (no Claude), before `/airplane land`."
@@ -3039,6 +3428,95 @@
           "key": "hungAfter",
           "text": "and pick “Reuse”.",
           "description": "The aside, after `/epic <name>`."
+        }
+      ]
+    },
+    {
+      "tag": "epic-page-note-head",
+      "name": "epic-page-note-head",
+      "folder": "epic-page-note-head",
+      "mainTag": "epic-page-note-head",
+      "main": true,
+      "page": true,
+      "href": "epic-page-note-head.html",
+      "topics": [
+        "comments"
+      ],
+      "aka": [
+        "page note",
+        "note head",
+        "spell note",
+        "old note"
+      ],
+      "description": "The head line of an old page note (`<spell-note>`, epic `airplane` P3:  written into a guide before comments replaced them, read only since), drawn by the docs runtime first in each note:  \"Owen · 10/10 14:02\", the note's first line while it's folded, its status (new yellow, answered violet, done grey) and how many replies.  The whole line is one button:  a click folds or unfolds the note.",
+      "noun": "note head",
+      "attributes": [
+        {
+          "name": "at",
+          "kind": "string",
+          "description": "When Owen wrote it, as the note says:  `2026-10-09 22:10`."
+        },
+        {
+          "name": "status",
+          "kind": "enum",
+          "values": [
+            "new",
+            "answered",
+            "done"
+          ],
+          "default": "new",
+          "description": "The note's status, by the colour scheme:  `new` yellow (open), `answered` violet, `done` grey."
+        },
+        {
+          "name": "replies",
+          "kind": "number",
+          "description": "How many replies Claude wrote under it;  none:  not said."
+        },
+        {
+          "name": "preview",
+          "kind": "string",
+          "description": "The note's first line:  shown while it's folded."
+        },
+        {
+          "name": "open",
+          "kind": "boolean",
+          "description": "The note is open:  its preview hides.  A click flips it, and says so (`epic-page-note-fold`)."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "epic-page-note-fold",
+          "detail": "{ open: boolean }",
+          "description": "Owen clicked it:  the note should open or fold, as `open` now says."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The line, a `<button>`:  the icon, who and when, the preview, the status."
+        },
+        {
+          "name": "status",
+          "description": "Its status chip, and how many replies."
+        }
+      ],
+      "states": [],
+      "texts": [
+        {
+          "key": "who",
+          "text": "Owen",
+          "description": "Who wrote a page note."
+        },
+        {
+          "key": "reply",
+          "text": "1 reply",
+          "description": "After the status:  one reply."
+        },
+        {
+          "key": "replies",
+          "text": "{count} replies",
+          "description": "After the status:  several replies."
         }
       ]
     },
@@ -3603,7 +4081,7 @@
         },
         {
           "name": "hidden-note",
-          "description": "Under a filtered list:  \"3 hidden · show all\"."
+          "description": "Under a filtered list:  \"3 hidden · show all\", an `<epic-hidden-note>`."
         },
         {
           "name": "empty",
@@ -3653,11 +4131,6 @@
         }
       ],
       "texts": [
-        {
-          "key": "hiddenTip",
-          "text": "Show everything:  clear the filter",
-          "description": "The note under a filtered list:  its tooltip."
-        },
         {
           "key": "partNote",
           "text": "Loads from {source} when opened (needs the page server).",
@@ -3738,71 +4211,6 @@
           "key": "count",
           "text": "{open} open of {total}",
           "description": "The count badge's tooltip:  `3/7` in words."
-        },
-        {
-          "key": "filterLabel",
-          "text": "Show items by state",
-          "description": "The state filter's group, for a screen reader."
-        },
-        {
-          "key": "chipWords",
-          "text": "{count} {words}:  {does}",
-          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
-        },
-        {
-          "key": "showAll",
-          "text": "show everything",
-          "description": "A state chip's click:  every state shows again."
-        },
-        {
-          "key": "chipOnly",
-          "text": "show only these",
-          "description": "A state chip's click:  only its state shows."
-        },
-        {
-          "key": "chipAlso",
-          "text": "show these too",
-          "description": "A state chip's click, hidden:  its state shows too."
-        },
-        {
-          "key": "chipHide",
-          "text": "hide these",
-          "description": "A state chip's click, showing:  its state hides."
-        },
-        {
-          "key": "stateProgress",
-          "text": "Claude is working on it",
-          "description": "A state chip's words:  `progress` (blue)."
-        },
-        {
-          "key": "stateAttention",
-          "text": "needs attention",
-          "description": "A state chip's words:  `attention` (red)."
-        },
-        {
-          "key": "stateReplied",
-          "text": "Claude answered:  your turn to pick",
-          "description": "A state chip's words:  `replied` (orange)."
-        },
-        {
-          "key": "stateOpen",
-          "text": "open, still undecided",
-          "description": "A state chip's words:  `open` (yellow)."
-        },
-        {
-          "key": "stateRecent",
-          "text": "decided or done",
-          "description": "A state chip's words:  `recent` (green)."
-        },
-        {
-          "key": "stateOld",
-          "text": "no longer relevant",
-          "description": "A state chip's words:  `old` (grey)."
-        },
-        {
-          "key": "hiddenNote",
-          "text": "{count} hidden · show all",
-          "description": "Under a filtered list;  a click shows all."
         },
         {
           "key": "addNew",
@@ -3920,6 +4328,187 @@
           "key": "sendTip",
           "text": "Send what's on the page:  a partial answer is fine, send again any time",
           "description": "The button's tooltip."
+        }
+      ]
+    },
+    {
+      "tag": "epic-sort",
+      "name": "epic-sort",
+      "folder": "epic-sort",
+      "mainTag": "epic-sort",
+      "main": true,
+      "page": true,
+      "href": "epic-sort.html",
+      "topics": [
+        "epics-page"
+      ],
+      "aka": [
+        "sort",
+        "sort buttons",
+        "A-Z",
+        "by date"
+      ],
+      "description": "The Epics page's sort buttons (Owen, 2026-10-13:  \"Add buttons to epics header to sort by date or alphabetical\"):  A–Z sorts each group of every `<epic-list>` on the page by title, Date by when each epic was last worked on, newest first.  The one in use is pressed, and remembered in this browser.  The docs runtime puts it in the Epics page's header.",
+      "noun": "sort",
+      "attributes": [],
+      "slots": [],
+      "events": [
+        {
+          "name": "epic-sort",
+          "detail": "{ sort: \"title\" | \"date\" }",
+          "description": "The reader picked a sort:  every `<epic-list>` on the page sorts by it."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The pair of buttons, a `<ui-buttons>`."
+        }
+      ],
+      "states": [],
+      "texts": [
+        {
+          "key": "label",
+          "text": "Sort the epics in each group",
+          "description": "The pair, spoken."
+        },
+        {
+          "key": "title",
+          "text": "A–Z",
+          "description": "The title sort's words."
+        },
+        {
+          "key": "titleTip",
+          "text": "Sort each group by title, A to Z",
+          "description": "The title sort's tooltip."
+        },
+        {
+          "key": "date",
+          "text": "Date",
+          "description": "The date sort's words."
+        },
+        {
+          "key": "dateTip",
+          "text": "Sort each group by when it was last worked on, newest first",
+          "description": "The date sort's tooltip."
+        },
+        {
+          "key": "inUse",
+          "text": "{words}, in use",
+          "description": "The pressed button's name, spoken."
+        }
+      ]
+    },
+    {
+      "tag": "epic-state-filter",
+      "name": "epic-state-filter",
+      "folder": "epic-state-filter",
+      "mainTag": "epic-state-filter",
+      "main": true,
+      "page": true,
+      "href": "epic-state-filter.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "state chips",
+        "state filter",
+        "chips",
+        "filter by state"
+      ],
+      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-pick`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.",
+      "noun": "state-filter",
+      "attributes": [
+        {
+          "name": "counts",
+          "kind": "string",
+          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old."
+        },
+        {
+          "name": "shown",
+          "kind": "string",
+          "description": "The states showing, space-separated;  no attribute:  every state shows;  `\"\"`, none (the owner's choice left none of these)."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "epic-state-pick",
+          "detail": "{ state, shown }",
+          "description": "A chip was clicked:  its `state`, and what should show next by the one rule (`shown`, the states;  `StateFilter.nextShown()`).  The owner filters, and sets `shown`."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The group of chips."
+        },
+        {
+          "name": "chip",
+          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed`."
+        }
+      ],
+      "states": [],
+      "texts": [
+        {
+          "key": "filterLabel",
+          "text": "Show items by state",
+          "description": "The state filter's group, for a screen reader."
+        },
+        {
+          "key": "chipWords",
+          "text": "{count} {words}:  {does}",
+          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
+        },
+        {
+          "key": "showAll",
+          "text": "show everything",
+          "description": "A state chip's click:  every state shows again."
+        },
+        {
+          "key": "chipOnly",
+          "text": "show only these",
+          "description": "A state chip's click:  only its state shows."
+        },
+        {
+          "key": "chipAlso",
+          "text": "show these too",
+          "description": "A state chip's click, hidden:  its state shows too."
+        },
+        {
+          "key": "chipHide",
+          "text": "hide these",
+          "description": "A state chip's click, showing:  its state hides."
+        },
+        {
+          "key": "stateProgress",
+          "text": "Claude is working on it",
+          "description": "A state chip's words:  `progress` (blue)."
+        },
+        {
+          "key": "stateAttention",
+          "text": "needs attention",
+          "description": "A state chip's words:  `attention` (red)."
+        },
+        {
+          "key": "stateReplied",
+          "text": "Claude answered:  your turn to pick",
+          "description": "A state chip's words:  `replied` (orange)."
+        },
+        {
+          "key": "stateOpen",
+          "text": "open, still undecided",
+          "description": "A state chip's words:  `open` (yellow)."
+        },
+        {
+          "key": "stateRecent",
+          "text": "decided or done",
+          "description": "A state chip's words:  `recent` (green)."
+        },
+        {
+          "key": "stateOld",
+          "text": "no longer relevant",
+          "description": "A state chip's words:  `old` (grey)."
         }
       ]
     },
@@ -4256,6 +4845,244 @@
       ]
     },
     {
+      "tag": "epic-thread",
+      "name": "epic-thread",
+      "folder": "epic-thread",
+      "mainTag": "epic-thread",
+      "main": true,
+      "page": true,
+      "href": "epic-thread.html",
+      "topics": [
+        "comments"
+      ],
+      "aka": [
+        "comment",
+        "comment thread",
+        "bullhorn comment",
+        "thread",
+        "conversation",
+        "reply"
+      ],
+      "description": "One comment's whole thread (epic `airplane` P11;  an element since epic `epic-engine` P3), drawn by the docs runtime's comments under the paragraph, list item or cell holding its quote, else under its block, on a guide, an epic page or an Epic UI page:  one ivory pane that folds.  Its header:  a chevron, the bullhorn (a green check circle once done), its id (`M3`), the first words it's on;  while it's Owen's turn, his answer (an item's review pills:  That's good, Reply, Skip it), Reopen once done, the pen while Claude hasn't had his words, the trash.  Then the messages in order (`<epic-thread-message>`), and his reply box, slotted.  Orange while Claude spoke last and Owen hasn't answered (`unseen`).  It draws what it's given and says what Owen did:  the comments' code saves and redraws.",
+      "noun": "thread",
+      "attributes": [
+        {
+          "name": "comment",
+          "kind": "json",
+          "description": "The comment, as the comments route answers it (`GET /api/docs/comments`):  `id`, `text`, `at`, `status`, `turn`, `replies`, `working`, `done`, `taken`, and where it is (`kind`, `label`, `excerpt`, `quote`).  A property;  JSON in markup."
+        },
+        {
+          "name": "open",
+          "kind": "boolean",
+          "description": "Unfolded:  the messages and the reply box show.  A click on its header flips it, and says so (`epic-thread-fold`)."
+        },
+        {
+          "name": "unseen",
+          "kind": "boolean",
+          "description": "ORANGE:  Claude spoke last and Owen hasn't answered yet (✓, a reply, ×).  The whole thread's ground, Claude's latest reply stronger.  Orange is our colour for \"changed since you looked\"."
+        },
+        {
+          "name": "moved",
+          "kind": "boolean",
+          "description": "Its block changed or moved since:  it says what it was on (the comment's `excerpt`)."
+        },
+        {
+          "name": "boxed",
+          "kind": "enum",
+          "values": [
+            "first",
+            "pending"
+          ],
+          "description": "Owen's words now in the box under it, so the thread leaves them out:  `first` (his first words, in the pen's box), `pending` (his pending reply, in the reply box).  The pen hides while `first`."
+        },
+        {
+          "name": "saved",
+          "kind": "string",
+          "description": "The box's floppy, in its corner, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy."
+        },
+        {
+          "name": "failed",
+          "kind": "boolean",
+          "description": "The box's last save failed:  the floppy red, `saved` saying why."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "Owen's box, last in its body while open:  the reply box, or the pen's box over his first words (a `<ui-textarea>`, which the comments' code keeps across redraws)."
+        }
+      ],
+      "events": [
+        {
+          "name": "epic-thread-fold",
+          "detail": "{ open: boolean }",
+          "description": "Owen clicked its header (not one of its buttons):  it unfolded or folded, as `open` now says."
+        },
+        {
+          "name": "epic-thread-edit",
+          "detail": "{}",
+          "description": "The pen:  Owen will change his first words, while Claude hasn't had them."
+        },
+        {
+          "name": "epic-thread-delete",
+          "detail": "{}",
+          "description": "The trash:  Owen deletes the comment, at once (Undo in the toast that follows)."
+        },
+        {
+          "name": "epic-thread-answer",
+          "detail": "{ act: \"good\" | \"reply\" | \"skip\" | \"reopen\" }",
+          "description": "Owen's answer, from its review pills (an `<epic-review buttons=thread>` in its shadow root):  That's good, Reply, Skip it;  Reopen once done."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The thread:  its header, then its body while open."
+        },
+        {
+          "name": "header",
+          "description": "Its header:  the fold, Owen's answer, the pen, the trash;  a click folds it."
+        },
+        {
+          "name": "fold",
+          "description": "The fold:  the chevron, the bullhorn (a check circle once done), its id, the first words it's on."
+        },
+        {
+          "name": "id",
+          "description": "Its id, `M3`:  small and muted, an outline and no fill."
+        },
+        {
+          "name": "headline",
+          "description": "The first words it's on, in quotes;  its tooltip says the block in full."
+        },
+        {
+          "name": "answer",
+          "description": "Owen's answer while it's his turn (the review pills), or Reopen once done."
+        },
+        {
+          "name": "body",
+          "description": "The messages and the box:  shown while open."
+        },
+        {
+          "name": "reply",
+          "description": "Owen's box, its floppy in the corner."
+        }
+      ],
+      "states": [],
+      "texts": [
+        {
+          "key": "foldTip",
+          "text": "Fold this thread",
+          "description": "After the fold's tooltip while open."
+        },
+        {
+          "key": "unfoldTip",
+          "text": "Unfold this thread",
+          "description": "After the fold's tooltip while folded."
+        },
+        {
+          "key": "editTitle",
+          "text": "Edit your last words",
+          "description": "The pen's tooltip."
+        },
+        {
+          "key": "editLabel",
+          "text": "Edit your last words:  Claude hasn't taken them yet",
+          "description": "The pen, for a screen reader."
+        },
+        {
+          "key": "deleteTitle",
+          "text": "Delete this comment",
+          "description": "The trash's tooltip."
+        },
+        {
+          "key": "deleteNew",
+          "text": "Delete this comment (Undo in the toast that follows)",
+          "description": "The trash, for a screen reader, while Claude hasn't had it."
+        },
+        {
+          "key": "deleteHad",
+          "text": "Delete this comment:  gone from the page, whatever Claude did with it (Undo in the toast that follows)",
+          "description": "The trash, for a screen reader, once Claude has had it."
+        },
+        {
+          "key": "moved",
+          "text": "The block changed since:  it was “{excerpt}”.",
+          "description": "Above the messages, when its block changed or moved since (`moved`)."
+        },
+        {
+          "key": "answeredInDoc",
+          "text": "Answered on the epic page.",
+          "description": "Claude's answer with no words on the thread:  an epic page's comment, answered in the doc."
+        },
+        {
+          "key": "takenInto",
+          "text": "Taken into",
+          "description": "Claude took it into an epic's phase:  before the link."
+        },
+        {
+          "key": "takenWhy",
+          "text": ", to work into the page there.",
+          "description": "Claude took it into an epic's phase:  after the link."
+        },
+        {
+          "key": "good",
+          "text": "That's good.",
+          "description": "The Done line:  Owen said that's good."
+        },
+        {
+          "key": "skip",
+          "text": "Skipped:  nothing more to do.",
+          "description": "The Done line:  Owen skipped it."
+        },
+        {
+          "key": "builtIn",
+          "text": "Built in",
+          "description": "The Done line:  before the commit Claude named."
+        },
+        {
+          "key": "thinking",
+          "text": "thinking…",
+          "description": "Claude's stub while he thinks about it (`working`)."
+        }
+      ]
+    },
+    {
+      "tag": "epic-threads",
+      "name": "epic-threads",
+      "folder": "epic-threads",
+      "mainTag": "epic-threads",
+      "main": true,
+      "page": true,
+      "href": "epic-threads.html",
+      "topics": [
+        "comments"
+      ],
+      "aka": [
+        "comments",
+        "comment threads",
+        "threads"
+      ],
+      "description": "The comment threads under one block of a page (`<epic-thread>`s), in order, a little apart:  drawn by the docs runtime's comments right after the paragraph, list item or cell holding their quotes, else after their block (a docs section's first in its body).  Its edges are the block's it's under (an epic page item's note box's;  a guide paragraph's measure):  the page's sheet sets them.",
+      "noun": "threads",
+      "attributes": [],
+      "slots": [
+        {
+          "name": "",
+          "description": "The threads (`<epic-thread>`)."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The column of its threads, 6px apart."
+        }
+      ],
+      "states": [],
+      "texts": []
+    },
+    {
       "tag": "epic-update",
       "name": "epic-update",
       "folder": "epic-update",
@@ -4574,6 +5401,18 @@
       ],
       "tokens": []
     },
+    "epic-card": {
+      "folder": "epic-card",
+      "mainTag": "epic-card",
+      "title": "<epic-card>",
+      "summary": "The <epic-card> element: one epic's card on the Epics page, its state, link, saga, star and last-worked day.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-card"
+      ],
+      "tokens": []
+    },
     "epic-cards": {
       "folder": "epic-cards",
       "mainTag": "epic-cards",
@@ -4646,6 +5485,18 @@
       ],
       "tokens": []
     },
+    "epic-comment-pane": {
+      "folder": "epic-comment-pane",
+      "mainTag": "epic-comment-pane",
+      "title": "<epic-comment-pane>",
+      "summary": "The <epic-comment-pane> element: the floating pane Owen writes a new comment in.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-comment-pane"
+      ],
+      "tokens": []
+    },
     "epic-commit": {
       "folder": "epic-commit",
       "mainTag": "epic-commit",
@@ -4682,6 +5533,18 @@
       ],
       "tokens": []
     },
+    "epic-hidden-note": {
+      "folder": "epic-hidden-note",
+      "mainTag": "epic-hidden-note",
+      "title": "<epic-hidden-note>",
+      "summary": "The <epic-hidden-note> element: the line under a filtered list, 3 hidden · show all.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-hidden-note"
+      ],
+      "tokens": []
+    },
     "epic-item": {
       "folder": "epic-item",
       "mainTag": "epic-item",
@@ -4703,6 +5566,18 @@
       "docs": false,
       "tags": [
         "epic-link"
+      ],
+      "tokens": []
+    },
+    "epic-list": {
+      "folder": "epic-list",
+      "mainTag": "epic-list",
+      "title": "<epic-list>",
+      "summary": "The <epic-list> element: the Epics page's list, every epic's card in five groups, under a row of saga chips.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-list"
       ],
       "tokens": []
     },
@@ -4790,6 +5665,18 @@
       ],
       "tokens": []
     },
+    "epic-page-note-head": {
+      "folder": "epic-page-note-head",
+      "mainTag": "epic-page-note-head",
+      "title": "<epic-page-note-head>",
+      "summary": "The <epic-page-note-head> element: an old page note's head line.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-page-note-head"
+      ],
+      "tokens": []
+    },
     "epic-phase": {
       "folder": "epic-phase",
       "mainTag": "epic-phase",
@@ -4862,6 +5749,30 @@
       ],
       "tokens": []
     },
+    "epic-sort": {
+      "folder": "epic-sort",
+      "mainTag": "epic-sort",
+      "title": "<epic-sort>",
+      "summary": "The <epic-sort> element: the Epics page's sort buttons, A to Z or newest first, for every list on the page.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-sort"
+      ],
+      "tokens": []
+    },
+    "epic-state-filter": {
+      "folder": "epic-state-filter",
+      "mainTag": "epic-state-filter",
+      "title": "<epic-state-filter>",
+      "summary": "The <epic-state-filter> element: the state filter's chips, a pill per item state with how many, solid while it shows.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-state-filter"
+      ],
+      "tokens": []
+    },
     "epic-status": {
       "folder": "epic-status",
       "mainTag": "epic-status",
@@ -4895,6 +5806,30 @@
       "docs": false,
       "tags": [
         "epic-text-box"
+      ],
+      "tokens": []
+    },
+    "epic-thread": {
+      "folder": "epic-thread",
+      "mainTag": "epic-thread",
+      "title": "<epic-thread>",
+      "summary": "The <epic-thread> element: one comment's whole thread on a page, as the docs runtime's comments draw it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-thread"
+      ],
+      "tokens": []
+    },
+    "epic-threads": {
+      "folder": "epic-threads",
+      "mainTag": "epic-threads",
+      "title": "<epic-threads>",
+      "summary": "The <epic-threads> element: the comment threads under one block of a page.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-threads"
       ],
       "tokens": []
     },

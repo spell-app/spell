@@ -246,6 +246,17 @@ export type DecideOptions = {
   choices?: number
 }
 
+/** `PlanDoc.choose()`'s options. */
+export type ChooseOptions = {
+  /**
+   * how it was settled, and what came of it (one line):  `Owen, 2026-10-06:  'require the parens';  built`;
+   * on the Noted card in place of what happens next, and in the log line
+   */
+  outcome?: string
+  /** which of the item's card sets, counting from 1 (`PlanItem.choiceSets()`);  none:  its LATEST */
+  set?: number
+}
+
 /**
  * What `PlanDoc.renameEntry()` did:  the phase's or item's `id` and `label`, the title it `was`, its `title` now (the
  * words drawn), and how many `links` to it it rewrote.

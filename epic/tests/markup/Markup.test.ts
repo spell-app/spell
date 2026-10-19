@@ -107,7 +107,52 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     current: "this.open",
     recommended: "this.isOpen"
   },
-  "epic-choices-bar": {}
+  "epic-choices-bar": {},
+  // the Epics page's (epic `epic-engine` P3)
+  "epic-list": { sagas: "drawable-spell epics" },
+  "epic-card": {
+    epic: "seo",
+    phases: "done active todo",
+    updated: "2026-10-08",
+    urgent: "q3 j12",
+    future: true,
+    standing: true,
+    running: true,
+    active: "P2 · Site Map",
+    worked: "2026-10-09T14:34-04:00",
+    saga: "epics",
+    sagaTitle: "Epic Tooling",
+    sagaPurpose: "Epics & co",
+    favorite: true
+  },
+  "epic-sort": {},
+  "epic-state-filter": { counts: "attention:1 open:4", shown: "open" },
+  "epic-hidden-note": { count: 3 },
+  "epic-threads": {},
+  "epic-thread": {
+    comment: '{"id":"m3","text":"Why?"}',
+    open: true,
+    unseen: true,
+    moved: true,
+    boxed: "first",
+    saved: "Saved 14:02",
+    failed: true
+  },
+  "epic-thread-message": {
+    by: "claude",
+    at: "2026-10-18T08:05:00.000Z",
+    stamp: "10/18 08:05",
+    older: true,
+    latest: true
+  },
+  "epic-comment-pane": {
+    headline: "“2. Context”",
+    about: "On “2. Context”",
+    saved: "Saved 14:02",
+    failed: true,
+    deletable: true
+  },
+  "epic-page-note-head": { at: "2026-10-09 22:10", status: "answered", replies: 1, preview: "Show icons", open: true }
 }
 
 /** A fresh linkedom document. */

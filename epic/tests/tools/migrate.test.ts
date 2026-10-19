@@ -91,6 +91,9 @@ describe("page kinds", () => {
   test("a page's kind:  from where it lives and what it loads", () => {
     const root = checkout({
       "guides/x/x.html": "<main></main>",
+      // `<epic-page>` named in an attribute's text is no epic page (I25:  the epic tool's guide)
+      "guides/tool.html": '<ui-step description="its data moves onto <epic-page>, its chrome dropped"></ui-step>',
+      "sagas/s/s.saga.html": '<ui-root>\n  <epic-page kind="saga"></epic-page>\n</ui-root>',
       "guides/c.html": '<div class="spell-filter"></div>',
       "guides/dev/commands/commands.html": '<script src="commands.js"></script><div class="spell-filter"></div>',
       "guides/changelog.html": "",
@@ -100,6 +103,9 @@ describe("page kinds", () => {
       "templates/goals/index.html": "",
       "epics/seo/seo.plan.html": "<epic-page></epic-page>",
       "epics/seo/details/q1.html": "",
+      // the epic `details`:  its page is in a folder called `details/`, and is no details page
+      "epics/details/details.plan.html": "<epic-page></epic-page>",
+      "epics/details/details/q1.html": "",
       "pages/details/pick.html": "",
       "pages/details/pick.rows.json": "[]",
       "brand/pony.html": "",
@@ -109,6 +115,8 @@ describe("page kinds", () => {
     expect(
       [
         "guides/x/x.html",
+        "guides/tool.html",
+        "sagas/s/s.saga.html",
         "guides/c.html",
         "guides/dev/commands/commands.html",
         "guides/changelog.html",
@@ -118,12 +126,16 @@ describe("page kinds", () => {
         "templates/goals/index.html",
         "epics/seo/seo.plan.html",
         "epics/seo/details/q1.html",
+        "epics/details/details.plan.html",
+        "epics/details/details/q1.html",
         "pages/details/pick.html",
         "brand/pony.html",
         "ui/button.html"
       ].map(kind)
     ).toEqual([
       "guide",
+      "guide",
+      "epic",
       "cheatsheet",
       "command",
       "changelog",
@@ -131,6 +143,8 @@ describe("page kinds", () => {
       "list",
       "template",
       "goal-set",
+      "epic",
+      "detail",
       "epic",
       "detail",
       "choice",
@@ -144,7 +158,11 @@ describe("page kinds", () => {
       expect(step.date).toMatch(/^\d{4}-\d\d-\d\d$/)
       expect(step.kinds.every((kind) => KINDS.includes(kind) && kind !== "epic")).toBe(true)
     }
-    expect(stepsFor("cheatsheet").map((step) => step.name)).toEqual(["ui-section", "engine-asset-routes"])
+    expect(stepsFor("cheatsheet").map((step) => step.name)).toEqual([
+      "ui-section",
+      "engine-asset-routes",
+      "components-not-markup"
+    ])
     expect(stepsFor("goal-set")).toEqual([])
     expect(() => stepsFor("guide", "nope")).toThrow(/no step "nope"/)
   })
@@ -303,6 +321,94 @@ describe("migratePages", () => {
     expect(readFileSync(neat, "utf8")).toContain('<script src="/_epic/assets/spell-ui.js"></script>')
     expect(formattedAlready([bedtime, neat])).toEqual([neat])
   }, 60_000)
+
+  test("components-not-markup:  bare tables and <details> asides in components, every <ui-table> unstackable, every other byte kept;  once", () => {
+    const table = '<table id="sizes"><tr><th>a</th></tr><tr><td class="num right aligned">1</td></tr></table>'
+    const guide =
+      '<!doctype html><html><body><main><ui-section id="one" header="One"><p>Words.</p>' +
+      table +
+      "<ui-table celled><table><tr><td>kept</td></tr></table></ui-table>" +
+      '<ui-table celled stack-by="container"><table><tr><td>a demo</td></tr></table></ui-table>' +
+      '<table class="ui very basic table"><tr><td>its own look</td></tr></table>' +
+      '<details id="why" class="extra"><summary>Why <code>x</code>?</summary><p>Because.</p></details>' +
+      "<details open><summary>a.ts · 1 line</summary><pre><code>const a = 1</code></pre></details>" +
+      "<details><p>No summary.</p></details>" +
+      "<template><table><tr><td>an example</td></tr></table></template>" +
+      "<epic-choice-rows><table><tr><td>its data</td></tr></table></epic-choice-rows>" +
+      "</ui-section></main>" +
+      '<script src="/_epic/assets/spell-ui.js"></script></body></html>'
+    const root = checkout({
+      "guides/x/x.html": guide,
+      "guides/own/own.html": `<main><table><tr><td>a</td></tr></table></main><script>document.querySelector("main > table")</script>`,
+      // its own script:  its tables stay where they are, but an attribute moves nothing
+      "guides/drawn/drawn.html": `<main><ui-table compact><table><tr><td>a</td></tr></table></ui-table></main><script src="x.js"></script>`,
+      "templates/durable.html": `<main>\n  ${table}\n</main>`
+    })
+    const pages = pagesFor(root)
+    const dry = migratePages(pages, { dryRun: true, tidied: false })
+    expect(readFileSync(join(root, "guides/x/x.html"), "utf8")).toBe(guide)
+    expect(report(dry.results, root, { dryRun: true })).toEqual([
+      "guides/drawn/drawn.html:  would run components-not-markup",
+      "  components-not-markup:  1 <ui-table>s made unstackable",
+      "guides/own/own.html:  nothing to change",
+      "  components-not-markup:  LEFT for a person:  <table>:  the page runs its own inline script",
+      "guides/x/x.html:  would run components-not-markup",
+      "  components-not-markup:  1 tables -> <ui-table celled compact striped unstackable>",
+      "  components-not-markup:  1 <ui-table>s made unstackable",
+      "  components-not-markup:  2 <details> -> <ui-accordion styled>",
+      "  components-not-markup:  <details> in #one:  started open, now folded",
+      "  components-not-markup:  LEFT for a person:  <ui-table> in #one:  asks to stack (a demo of stacking?)",
+      "  components-not-markup:  LEFT for a person:  <table> in #one:  its own class (which <ui-table> look?)",
+      "  components-not-markup:  LEFT for a person:  <table> in #one:  in <epic-choice-rows>, which reads its children",
+      "  components-not-markup:  LEFT for a person:  <details> in #one:  no <summary> first",
+      // a template:  only this step, never `answer-elements`' on a page it isn't for
+      "templates/durable.html:  would run components-not-markup",
+      "  components-not-markup:  1 tables -> <ui-table celled compact striped unstackable>",
+      "guides:  2 of 3 would change (components-not-markup 2)",
+      "templates:  1 of 1 would change (components-not-markup 1)"
+    ])
+
+    expect(migratePages(pages, { tidied: false }).written).toEqual([
+      join(root, "guides/drawn/drawn.html"),
+      join(root, "guides/x/x.html"),
+      join(root, "templates/durable.html")
+    ])
+    const html = readFileSync(join(root, "guides/x/x.html"), "utf8")
+    expect(html).toContain(`<p>Words.</p><ui-table celled compact striped unstackable>${table}</ui-table>`)
+    expect(html).toContain("<ui-table celled unstackable><table><tr><td>kept</td></tr></table></ui-table>")
+    expect(html).toContain('<ui-table celled stack-by="container"><table>')
+    expect(readFileSync(join(root, "guides/drawn/drawn.html"), "utf8")).toContain(
+      "<ui-table compact unstackable><table>"
+    )
+    expect(html).toContain('<table class="ui very basic table">')
+    expect(html).toContain(
+      '<ui-accordion id="why" class="spell-aside extra" styled><ui-title>Why <code>x</code>?</ui-title>' +
+        "<ui-content><p>Because.</p></ui-content></ui-accordion>"
+    )
+    expect(html).toContain(
+      '<ui-accordion class="spell-code" styled><ui-title>a.ts · 1 line</ui-title>' +
+        "<ui-content><pre><code>const a = 1</code></pre></ui-content></ui-accordion>"
+    )
+    expect(html).toContain("<details><p>No summary.</p></details>")
+    expect(html).toContain("<template><table><tr><td>an example</td></tr></table></template>")
+    expect(html).toContain("<epic-choice-rows><table>")
+    // a table starting a line:  laid out inside, as written by hand
+    expect(readFileSync(join(root, "templates/durable.html"), "utf8")).toContain(
+      `<main>\n  <ui-table celled compact striped unstackable>\n    ${table}\n  </ui-table>\n</main>`
+    )
+    // every other byte:  the page as it was, the new elements taken out
+    const unwrapped = html
+      .replace(/<ui-table celled compact striped unstackable>(.*?)<\/ui-table>/, "$1")
+      .replace("<ui-table celled unstackable>", "<ui-table celled>")
+      .replace(/<ui-accordion id="why"[^]*?<\/ui-accordion>/, "")
+      .replace(/<ui-accordion class="spell-code"[^]*?<\/ui-accordion>/, "")
+    const old = guide.replace(/<details id="why"[^]*?<\/details>/, "").replace(/<details open>[^]*?<\/details>/, "")
+    expect(unwrapped.replace(/<!doctype html>/i, "")).toBe(old.replace(/<!doctype html>/i, ""))
+
+    const again = migratePages(pages, { tidied: false })
+    expect(again.written).toEqual([])
+    expect(report(again.results, root).at(-2)).toBe("guides:  0 of 3 changed")
+  })
 
   test("a saga page is never a step's:  it keeps the old markup", () => {
     const root = checkout({ "templates/goals/index.html": OLD_PAGE })

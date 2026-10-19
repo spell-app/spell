@@ -198,7 +198,7 @@
    *    right below the header once the title has scrolled away.
    * - on the rail's ivory band, edge to edge, square, its own rule under it and none above
    *   (Owen, 2026-10-10:  "full-page-width, no rounding ... a rule below, but none above")
-   * - the docs runtime's section buttons (`nav.spell-toolbar`, slotted) take the room,
+   * - the docs runtime's section buttons (`ui-menu.spell-toolbar`, slotted) take the room,
    *   and scroll sideways if they must
    * - at the right:  the page's state chips, collapse-all, a gap, then the new item button (Owen, 2026-10-10)
    */

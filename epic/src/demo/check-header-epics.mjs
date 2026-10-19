@@ -6,7 +6,9 @@
  * while it isn't done, and the first one's `<epic-update>` blocks after its Goal, each `Update: <summary>` with its
  * date on the title row's right.
  * Usage (from the repo root):
- *   node src/demo/check-header-epics.mjs [--doc <name>]... [outDir]
+ *   node src/demo/check-header-epics.mjs [--doc <name>]... [--bundle <spell-ui.js>] [outDir]
+ * - `--bundle`:  that file served as the pages' `spell-ui.js`, a bundle built elsewhere (a runtime not yet in
+ *   `_assets/`), as the other demo checks take it
  * - the docs:  `review-review` (plan changes) and `epic-components` (items in every state) unless named
  *   - each a SCRATCH COPY of `epics/<name>/` (its skeleton and parts, never its inbox), in
  *     `src/demo/shots/header/epics/<name>/` (git-ignored), as deep as a real one, so its links need no change
@@ -50,7 +52,10 @@ const { DemoServer } = await import("./DemoServer.ts")
 const args = process.argv.slice(2)
 const docs = args.flatMap((arg, index) => (args[index - 1] === "--doc" ? [arg] : []))
 if (!docs.length) docs.push("review-review", "epic-components")
-const out = args.find((arg, index) => !arg.startsWith("--") && args[index - 1] !== "--doc") ?? join(HERE, "shots/p10")
+const bundle = args.includes("--bundle") ? readFileSync(resolve(args[args.indexOf("--bundle") + 1])) : undefined
+const out =
+  args.find((arg, index) => !arg.startsWith("--") && !["--doc", "--bundle"].includes(args[index - 1])) ??
+  join(HERE, "shots/p10")
 mkdirSync(out, { recursive: true })
 const problems = []
 const summary = {}
@@ -88,6 +93,10 @@ async function check(doc) {
         colorScheme: scheme
       })
       const page = await context.newPage()
+      if (bundle)
+        await page.route("**/_epic/assets/spell-ui.js", (route) =>
+          route.fulfill({ body: bundle, contentType: "text/javascript" })
+        )
       const logs = []
       page.on("pageerror", (error) => logs.push(`pageerror:  ${error.message}`))
       // a failed load is reported by `response` below, with its URL:  the review routes refuse a preview copy's path
@@ -184,18 +193,20 @@ async function check(doc) {
 
       // a filter:  the first item section with two states or more;  its first chip hides that state's items
       const filtered = await page.evaluate(async () => {
-        const section = Array.from(document.querySelectorAll("epic-section")).find(
-          (it) => it.shadowRoot?.querySelectorAll('[part~="filter"] button[data-color]').length >= 2
-        )
+        // its chips:  its `<epic-state-filter>`'s buttons (epic `epic-engine` P3)
+        const chipsOf = (it) =>
+          it.shadowRoot?.querySelector('[part~="filter"] epic-state-filter')?.shadowRoot?.querySelectorAll("button[data-color]") ?? []
+        const section = Array.from(document.querySelectorAll("epic-section")).find((it) => chipsOf(it).length >= 2)
         if (!section) return null
         section.setAttribute("open", "")
-        const chip = section.shadowRoot.querySelector('[part~="filter"] button[data-color]')
+        const chip = chipsOf(section)[0]
         const state = chip.dataset.state
         chip.click()
         await new Promise((done) => setTimeout(done, 300))
         const items = Array.from(section.querySelectorAll(":scope > epic-item"))
         const hidden = items.filter((item) => getComputedStyle(item).display === "none")
-        const note = section.shadowRoot.querySelector('[part~="hidden-note"]')?.textContent ?? ""
+        // the line under it:  its `<epic-hidden-note>`'s button
+        const note = section.shadowRoot.querySelector('[part~="hidden-note"]')?.shadowRoot?.textContent.trim() ?? ""
         return { id: section.id, state, hidden: hidden.length, note }
       })
       if (filtered) {
@@ -205,7 +216,8 @@ async function check(doc) {
         await page.screenshot({ path: name("filtered") })
         // shown again for the next run:  the choice is remembered per page
         await page.evaluate(
-          (id) => document.getElementById(id).shadowRoot.querySelector('[part~="hidden-note"]').click(),
+          (id) =>
+            document.getElementById(id).shadowRoot.querySelector('[part~="hidden-note"]').shadowRoot.querySelector("button").click(),
           filtered.id
         )
       }
@@ -228,7 +240,9 @@ function readFacts(width) {
   const boxes = [
     ...root.querySelectorAll("button.send, button.review-now, button.git"),
     ...Array.from(document.querySelectorAll("epic-section"), (section) =>
-      Array.from(section.shadowRoot?.querySelectorAll('[part~="filter"] button, button.toggle') ?? [])
+      Array.from(section.shadowRoot?.querySelectorAll("button.toggle") ?? []).concat(
+        Array.from(section.shadowRoot?.querySelector('[part~="filter"] epic-state-filter')?.shadowRoot?.querySelectorAll("button") ?? [])
+      )
     ).flat()
   ]
   for (const box of boxes) {

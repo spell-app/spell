@@ -1,41 +1,41 @@
 /**
- * The Epics page's cards (`epics/index.html`), drawn alike by everything that writes them
- * (epic `airplane` P8, Owen 2026-10-10:  "Divide the epics cards into groups - favorites - active - planning -
- * urgent stuff to do - done done.  Within those bins, sort alphabetically"):
- * - five GROUPS, in `EPIC_GROUPS`' order, each under a small heading with its count (`epicGroupsHtml()`):
- *   - Favorites:  the epics Owen starred, whatever their state;  a starred epic shows ONLY here
- *   - Active:  phases left, in progress or paused (a paused one keeps its grey mark)
- *   - Planning:  future epics, and epics still being planned (no phases yet)
- *   - Urgent:  every phase done, items waiting on Owen (the `errors` state)
- *   - Done:  every phase done, nothing waiting
- *   - alphabetical by title within each;  an empty group is in the markup, `hidden`
- * - each card (`epicCardHtml()`):
- *   - the state's mark and the linked title, description, meta line
- *   - a STAR at its top right (`epicStarHtml()`):  click to star / unstar, the docs runtime's "Favorite epics"
- *   - the date it was last worked on at its bottom right, without the year (`epicWorkedHtml()`:  `10/9`)
+ * The Epics page's cards (`epics/index.html`), as everything that writes them writes them:
+ * ELEMENTS of the epics pack (epic `epic-engine` P3), which draw and sort themselves in the browser.
+ * - `<epic-list>` (`epicListHtml()`):  the page's one list, every epic's card inside, flat
+ *   - it draws the five GROUPS, in `EPIC_GROUPS`' order, each under a small heading with its count
+ *     (epic `airplane` P8, Owen 2026-10-10:  "Divide the epics cards into groups - favorites - active - planning -
+ *     urgent stuff to do - done done.  Within those bins, sort alphabetically"):
+ *     - Favorites:  the epics Owen starred, whatever their state;  a starred epic shows ONLY here
+ *     - Active:  phases left, in progress or paused (a paused one keeps its grey mark)
+ *     - Planning:  future epics, and epics still being planned (no phases yet)
+ *     - Urgent:  every phase done, items waiting on Owen (the `errors` state)
+ *     - Done:  every phase done, nothing waiting
+ *     - alphabetical by title within each, or newest first (`<epic-sort>`);  an empty group isn't drawn
+ *   - and the SAGA CHIPS above them (epic `epic-workflow` P15):  one per saga with epics, in `sagas`' order
+ *     (its `sagas` attribute), then "No saga";  a click shows only that saga's epics
+ * - `<epic-card>` (`epicCardHtml()`), one per epic:  its facts as attributes, its title link, description and meta
+ *   line as children;  it draws the state's mark, the saga's label, the STAR (click to star / unstar) and the date it
+ *   was last worked on
  * - favourites are stored in ONE shared file, `FAVORITES_FILE` (`["airplane", "spell-element"]`):
  *   the page server's route writes it (`src/tool/epicRoutes.ts`), every checkout reads it (JSON5, its
  *   old `favorites.json` while there's no `.json5`:  `DataFile`, which the callers read it through)
- * - SAGAS (epic `epic-workflow` P15):  each card names the saga its epic serves, a small label (its title, its
- *   purpose the tooltip;  `epicSagaHtml()`);  above the groups, a row of SAGA CHIPS (`epicSagaChipsHtml()`), one per
- *   saga in the sagas' order and "No saga", each with its count;  the docs runtime filters the cards by them
- *   - the sagas come from the caller (`docs index` reads `sagas/sagas.json5`):  this file imports nothing
- *   - each card carries its saga in data attributes too (`data-saga`, `data-saga-title`, `data-saga-purpose`),
- *     so the page server, which can't read the sagas, draws a running epic's card from the written one
+ * - the sagas come from the caller (`docs index` reads `sagas/sagas.json5`):  this file imports nothing of them
+ *   - each card carries its saga's id, title and purpose (`saga`, `saga-title`, `saga-purpose`),
+ *     so the page server, which can't read the sagas, draws a running epic's card from the written ones
  *
- * Who draws them:
+ * Who writes them:
  * - `docs index` (`src/tools/index.js`), plain `node`:  it imports this FILE by path
  * - the page server, through epics' route module `runningRoutes.ts` (`RunningEpics`), which adds the running epics'
- *   cards, re-marks every card and regroups them by the favourites as it serves the page
- * - the docs runtime moves a card between groups when its star is clicked (plain DOM:  it reads `data-group`)
+ *   cards and marks each card `running` and `favorite` as they are now, as it serves the page
+ * - the elements (`src/components/epic-list/`) read the same rules from here:  `epicGroupFor()`, `byTitle()`
  *
  * Its position:  browser-safe, and imports ONLY files that load in plain `node`.
  * - each by its file name and relative path:  plain `node` resolves nothing else
- * - those files:  `./EpicState.ts`, and the epic pages' dates (`PlanDates`)
+ * - those files:  `./EpicState.ts`
  * - NEVER an alias, an `enum` or a parameter property:  plain `node` can't strip those
  */
 import { PlanDates } from "../dates/PlanDates.ts"
-import { epicStateFor, epicStateMark, type EpicFacts, type EpicState } from "./EpicState.ts"
+import { epicStateFor, type EpicFacts, type EpicState } from "./EpicState.ts"
 
 /** The Epics page's groups, in the page's order. */
 export const EPIC_GROUPS = ["favorites", "active", "planning", "urgent", "done"] as const
@@ -46,18 +46,12 @@ export type EpicGroupName = (typeof EPIC_GROUPS)[number]
 /** Where the favourites are kept, from a checkout's root:  a JSON list of epic ids (shared content). */
 export const FAVORITES_FILE = "epics/favorites.json5"
 
-/** The Epics page's own markers around its groups:  the page server rewrites what's between (`RunningEpics`). */
+/**
+ * The Epics page's own markers, inside its `<epic-list>`, around its cards:  the page server adds the running epics'
+ * cards before the end one (`RunningEpics`).
+ */
 export const EPIC_CARDS_START = "<!-- running-epics -->"
 export const EPIC_CARDS_END = "<!-- running-epics:end -->"
-
-/** How each group's heading reads:  its title and icon (an icon of the docs bundle's `ICONS`). */
-const GROUP_LOOKS: Record<EpicGroupName, { title: string; icon: string }> = {
-  favorites: { title: "Favorites", icon: "star" },
-  active: { title: "Active", icon: "circle half stroke" },
-  planning: { title: "Planning", icon: "seedling" },
-  urgent: { title: "Urgent", icon: "circle exclamation" },
-  done: { title: "Done", icon: "circle check" }
-}
 
 /** A saga, as a card's label and the chips draw it:  `sagas/sagas.json5`'s fields (`$/epics/tool/Sagas`). */
 export type SagaLook = {
@@ -70,7 +64,7 @@ export type SagaLook = {
 }
 
 /**
- * One epic's card, as `epicCardHtml()` draws it.
+ * One epic's card, as `epicCardHtml()` writes it.
  * - `name`:  the epic (its folder);  `title`:  its epic page's title, without `Epic: `
  * - `href` / `target`:  the link to its epic page
  * - `description`:  its `<meta name="description">`, if any
@@ -93,13 +87,17 @@ export type EpicCard = {
   saga?: SagaLook
 }
 
-/** A card's markup, with what `epicGroupsHtml()` places it by:  its group (favourites already decided), its title. */
+/**
+ * A card's markup, with where it shows:  its group (a favourite's is `favorites`) and its title.
+ * - the home page's Epics count is by `group` (`docs index`)
+ */
 export type PlacedCard = { group: EpicGroupName; title: string; html: string }
 
 /**
  * The group an epic shows in when it isn't a favourite, from its state:
  * errors are Urgent, done is Done, future is Planning;
  * in progress or paused is Active with phases, Planning without (`state.count` is `""` with no phases).
+ * - `<epic-list>` places its cards by it too
  */
 export function epicGroupFor(state: EpicState): Exclude<EpicGroupName, "favorites"> {
   if (state.name === "errors") return "urgent"
@@ -109,134 +107,64 @@ export function epicGroupFor(state: EpicState): Exclude<EpicGroupName, "favorite
 }
 
 /**
- * Epic `card`'s markup on the Epics page, as of `now`, with where it goes.
- * - `id="epic-<name>"`:  a live update of the page matches the card by it, wherever it moved
- * - `data-epic`:  its name;  `data-title`:  what the groups sort by;  `data-group`:  its group when not a favourite
- * - `data-status`:  `done` or `open`, so the section counts it and its filter steps through them
- * - `data-phases`, `data-updated`, `data-urgent`, `data-future`, `data-standing`:  what its state is read from,
- *   so the page server marks it again as it serves the page
- * - `data-worked`:  its last-worked moment
- * - `data-saga`, `data-saga-title`, `data-saga-purpose`:  its saga (`epicSagaHtml()`),
- *   for the chips' filter and the page server
+ * Epic `card`'s `<epic-card>` on the Epics page, as of `now`, with where it shows.
+ * - `id="epic-<name>"`:  a live update of the page matches the card by it;  `epic`:  its name
+ * - its facts, which its state is read from (`EpicState`), so the card marks itself as it's drawn:
+ *   `phases`, `updated`, `urgent`, `future`, `standing`, `active`
+ *   - `running`, a session running for it, is the page server's to add (`RunningEpics`)
+ * - `data-status`:  `done` or `open`, so the docs runtime counts it on the section's title and its state chips
+ *   filter it, as they do a saga page's items
+ * - `worked`:  its last-worked moment, local ISO
+ * - `saga`, `saga-title`, `saga-purpose`:  its saga, for its label, the list's chips and the page server
+ * - `favorite`:  starred
+ * - children:  the title linking its epic page, then its description and meta line in their slots
  */
 export function epicCardHtml(card: EpicCard, now: Date = new Date()): PlacedCard {
-  const { name, title, facts, worked, favorite = false } = card
+  const { name, title, facts, worked, favorite = false, saga } = card
   const state = epicStateFor(facts, now)
-  const group = epicGroupFor(state)
-  const data =
-    ` data-epic="${attr(name)}" data-title="${attr(title)}" data-group="${group}"` +
-    ` data-status="${state.name === "done" ? "done" : "open"}"` +
-    ` data-phases="${attr(facts.phases.join(" "))}"` +
-    (facts.updated ? ` data-updated="${attr(facts.updated)}"` : "") +
-    (facts.urgent?.length ? ` data-urgent="${attr(facts.urgent.join(" "))}"` : "") +
-    (facts.future ? " data-future" : "") +
-    (facts.standing ? " data-standing" : "") +
-    (worked ? ` data-worked="${isoLocal(worked)}"` : "") +
-    (card.saga
-      ? ` data-saga="${attr(card.saga.id)}" data-saga-title="${attr(card.saga.title)}"` +
-        ` data-saga-purpose="${attr(card.saga.purpose)}"`
-      : "")
+  const attributes =
+    `id="epic-${attr(name)}" epic="${attr(name)}" data-status="${state.name === "done" ? "done" : "open"}"` +
+    ` phases="${attr(facts.phases.join(" "))}"` +
+    (facts.updated ? ` updated="${attr(facts.updated)}"` : "") +
+    (facts.urgent?.length ? ` urgent="${attr(facts.urgent.join(" "))}"` : "") +
+    (facts.future ? " future" : "") +
+    (facts.standing ? " standing" : "") +
+    (facts.active ? ` active="${attr(facts.active)}"` : "") +
+    (worked ? ` worked="${isoLocal(worked)}"` : "") +
+    (saga
+      ? ` saga="${attr(saga.id)}" saga-title="${attr(saga.title)}" saga-purpose="${attr(saga.purpose)}"`
+      : "") +
+    (favorite ? " favorite" : "")
   const target = card.target ? ` target="${attr(card.target)}"` : ""
   const html =
-    `<ui-card id="epic-${attr(name)}"${data}><ui-content>\n` +
-    `<ui-header>${epicStateMark(state)} <a href="${attr(card.href)}"${target}>${text(title)}</a></ui-header>\n` +
-    (card.description ? `<ui-description>${text(card.description)}</ui-description>\n` : "") +
-    (card.saga ? `${epicSagaHtml(card.saga)}\n` : "") +
-    `<ui-meta>${text(card.meta)}</ui-meta>\n` +
-    `</ui-content>${epicStarHtml(name, favorite)}${worked ? epicWorkedHtml(worked) : ""}</ui-card>`
-  return { group: favorite ? "favorites" : group, title, html }
+    `<epic-card ${attributes}>\n` +
+    `<a href="${attr(card.href)}"${target}>${text(title)}</a>\n` +
+    (card.description ? `<span slot="description">${text(card.description)}</span>\n` : "") +
+    `<span slot="meta">${text(card.meta)}</span>\n` +
+    `</epic-card>`
+  return { group: favorite ? "favorites" : epicGroupFor(state), title, html }
 }
 
 /**
- * The cards in their groups, as the Epics page shows them.
- * - each group a `div.spell-epic-group[data-group]`, holding:
- *   - its heading (title, count)
- *   - a `ui-cards.spell-epics` of its cards, alphabetical by title
- * - every group is written, an empty one `hidden`:  the runtime moves a card into it when it's starred
+ * The Epics page's list:  `<epic-list>`, holding every card (`cards`), which it groups, sorts and filters itself.
+ * - `sagas`:  the sagas' ids, in their order, for its chips (`sagas`:  the list, `docs index`'s `readSagas()`)
+ * - the cards between the page server's markers (`EPIC_CARDS_START` / `_END`)
+ * - written by group, then title:  the order the list draws them in by default, so the page reads the same before the
+ *   pack has drawn it, and a re-run with nothing new changes nothing
  */
-export function epicGroupsHtml(cards: readonly PlacedCard[]): string {
-  return EPIC_GROUPS.map((group) => {
-    // `filter()` makes a new array, so sorting it in place leaves `cards` alone.
-    // No `toSorted()`:  every package that type-checks this file must know it, and `cli`'s target doesn't.
-    const mine = cards.filter((card) => card.group === group).sort((a, b) => byTitle(a.title, b.title))
-    const { title, icon } = GROUP_LOOKS[group]
-    return (
-      `<div class="spell-epic-group" data-group="${group}"${mine.length ? "" : " hidden"}>\n` +
-      `<div class="spell-epic-group-title" role="heading" aria-level="3"><ui-icon name="${icon}"></ui-icon> ${title} ` +
-      `<span class="spell-epic-group-count">${mine.length}</span></div>\n` +
-      `<ui-cards class="spell-grid spell-epics" stackable>\n${mine.map((card) => card.html).join("\n")}\n</ui-cards>\n` +
-      `</div>`
-    )
-  }).join("\n")
-}
-
-/**
- * A card's saga:  a small label, the saga's title, its purpose the browser's own tooltip.
- * - in the card's content, after the description:  NOT in its meta line, which the page server reads back
- */
-export function epicSagaHtml(saga: SagaLook): string {
+export function epicListHtml(cards: readonly PlacedCard[], sagas: readonly SagaLook[]): string {
+  // a copy, sorted in place:  no `toSorted()`, which every package that type-checks this file must know
+  const ordered = [...cards].sort((a, b) => EPIC_GROUPS.indexOf(a.group) - EPIC_GROUPS.indexOf(b.group) || byTitle(a.title, b.title))
   return (
-    `<ui-label class="spell-epic-saga" size="mini" basic="" icon="bullseye" title="${attr(saga.purpose)}">` +
-    `${text(saga.title)}</ui-label>`
+    `<epic-list class="spell-epics"${sagas.length ? ` sagas="${attr(sagas.map((saga) => saga.id).join(" "))}"` : ""}>\n` +
+    `${EPIC_CARDS_START}\n${ordered.map((card) => card.html).join("\n")}\n${EPIC_CARDS_END}\n` +
+    `</epic-list>`
   )
 }
-
-/**
- * The SAGA CHIPS above the groups:  a button per saga, in `sagas`' order, then "No saga";  each with how many of
- * `cards` are its (`data-saga`), all pressed (showing).
- * - the docs runtime counts them again as the page changes, and filters by them (`wireSagaChips()`);  what it
- *   shows is remembered in the browser
- * - a card naming a saga that isn't in `sagas` counts as "No saga"
- */
-export function epicSagaChipsHtml(sagas: readonly SagaLook[], cards: readonly PlacedCard[]): string {
-  const ids = new Set(sagas.map((saga) => saga.id))
-  const sagaOf = (card: PlacedCard) => {
-    const id = /\sdata-saga="([^"]*)"/.exec(card.html)?.[1] ?? ""
-    return ids.has(id) ? id : ""
-  }
-  const count = (id: string) => cards.filter((card) => sagaOf(card) === id).length
-  const chip = (id: string, title: string, tip: string) =>
-    `<button type="button" class="spell-saga-chip" data-saga="${attr(id)}" aria-pressed="true" title="${attr(tip)}">` +
-    `${text(title)} <span class="spell-saga-count">${count(id)}</span></button>`
-  return (
-    `<div class="spell-saga-chips" role="group" aria-label="Show the epics of a saga">\n` +
-    [...sagas.map((saga) => chip(saga.id, saga.title, saga.purpose)), chip("", NO_SAGA, NO_SAGA_TIP)].join("\n") +
-    `\n</div>`
-  )
-}
-
-/** The chip of the epics that name no saga. */
-const NO_SAGA = "No saga"
-const NO_SAGA_TIP = "Epics that name no saga yet:  epic saga set <epic> <saga>"
 
 /** How the groups sort their cards:  by title, ignoring case, numbers as numbers. */
 export function byTitle(a: string, b: string): number {
   return a.localeCompare(b, "en", { sensitivity: "base", numeric: true })
-}
-
-/**
- * The star at a card's top right:  a button, `aria-pressed` while it's a favourite.
- * - the browser's own tooltip (`title`) and an `aria-label`:  it's an icon alone
- * - a solid star when starred, else its outline;  `spell-doc.css` colours it
- */
-export function epicStarHtml(name: string, favorite: boolean): string {
-  const label = favorite ? `Unstar ${name}` : `Star ${name}`
-  const tip = favorite ? "A favorite:  listed first.  Click to unstar" : "Star it:  listed first, under Favorites"
-  return (
-    `<button type="button" class="spell-epic-star" aria-pressed="${favorite}" aria-label="${attr(label)}" ` +
-    `title="${tip}"><ui-icon name="${favorite ? "star" : "star outline"}"></ui-icon></button>`
-  )
-}
-
-/**
- * The last-worked date at a card's bottom right:  month and day, no year (`10/9`);
- * its `title` the full date and time, as epic pages draw dates (`10/9/26 14:34`).
- */
-export function epicWorkedHtml(worked: Date): string {
-  return (
-    `<time class="spell-epic-worked" datetime="${isoLocal(worked)}" ` +
-    `title="Last worked on ${PlanDates.formatDate(worked)}">${worked.getMonth() + 1}/${worked.getDate()}</time>`
-  )
 }
 
 /**
@@ -278,8 +206,11 @@ export function favoritesIn(list: unknown): Set<string> {
 /** A log line's time:  `<epic-event at="2026-10-09T00:26-04:00">`, `$1`. */
 const EVENT_TIME = /<epic-event\b[^>]*?\sat="([^"]+)"/g
 
-/** `date` as local ISO with its offset, to the minute:  `2026-10-09T14:34-04:00`. */
-function isoLocal(date: Date): string {
+/**
+ * `date` as local ISO with its offset, to the minute:  `2026-10-09T14:34-04:00`:  a card's `worked`, which the newest-first
+ * sort compares as text.
+ */
+export function isoLocal(date: Date): string {
   const two = (value: number) => String(Math.floor(Math.abs(value))).padStart(2, "0")
   const offset = -date.getTimezoneOffset()
   return (

@@ -245,8 +245,8 @@ export const FILTER_STATES = [
 ] as const
 
 /**
- * The state filter's texts, in every vocabulary that draws its chips:  `<epic-section>`'s, and `<epic-page>`'s
- * (its toolbar filters every section at once).
+ * The state filter's texts:  `<epic-state-filter>`'s vocabulary, the one element that draws its chips (for
+ * `<epic-section>`, `<epic-page>`'s toolbar and the docs runtime;  epic `epic-engine` P3).
  */
 export const FILTER_TEXTS = [
   { key: "filterLabel", text: "Show items by state", description: "The state filter's group, for a screen reader." },
@@ -304,10 +304,9 @@ export type SectionCount = {
   attention: number
 }
 
-/** Classes of the filter's chips and its "hidden" line. */
+/** Classes of the filter's box and its chips (`<epic-state-filter>`'s, and the box its owners put it in). */
 export const FILTER = "filter"
 export const CHIP = "chip"
-export const HIDDEN_NOTE = "hidden-note"
 
 /** Class of an item section's new button, on its title (`newButton()`). */
 export const NEW_HERE = "new-here"

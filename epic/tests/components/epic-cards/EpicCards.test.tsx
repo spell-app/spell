@@ -4,6 +4,9 @@ import { ElementFixture } from "$/ui/test/ElementFixture"
 import { expectAccessible } from "$/ui/test/A11y"
 
 import "$/ui/components/ui-icon"
+import "$/ui/components/ui-card"
+import "$/ui/components/ui-label"
+import "$/ui/components/ui-button"
 import "$/epics/components/epic-cards"
 
 import type { SagaEpic } from "$/epics/components/epic-cards/EpicCards.types"
@@ -29,8 +32,33 @@ function answering(epics: SagaEpic[]) {
 /** Render a list for saga `epics`, and wait until it has drawn its groups or its note. */
 async function render() {
   const host = await ElementFixture.render(`<epic-cards saga="epics"></epic-cards>`)
-  await vi.waitFor(() => expect(host.shadowRoot!.querySelector(".group, .note")).toBeTruthy())
+  await vi.waitFor(() => expect(host.shadowRoot!.querySelector("epic-list, .note")).toBeTruthy())
   return host
+}
+
+/** Its list, `<epic-list>`, once its groups are drawn. */
+async function listOf(host: Element): Promise<Element> {
+  const list = host.shadowRoot!.querySelector("epic-list")!
+  await vi.waitFor(() => expect(list.shadowRoot?.querySelector(".group-title")).toBeTruthy())
+  return list
+}
+
+/** The groups as drawn:  each heading's group and the cards under it, in order (`order` places them). */
+function groupsOf(list: Element): [string, string[]][] {
+  const placed = Array.from(list.querySelectorAll("epic-card"))
+    .filter((card) => getComputedStyle(card).display !== "none")
+    .map((card) => [Number(getComputedStyle(card).order), card.getAttribute("epic")!] as const)
+  const headings = Array.from(list.shadowRoot!.querySelectorAll<HTMLElement>(".group-title"), (title) => [
+    Number(title.style.order),
+    title.dataset.group!
+  ] as const)
+  return headings.map(([at, group], i) => [
+    group,
+    placed
+      .filter(([order]) => order > at && order < (headings[i + 1]?.[0] ?? Infinity))
+      .sort((a, b) => a[0] - b[0])
+      .map(([, epic]) => epic)
+  ])
 }
 
 afterEach(() => {
@@ -48,22 +76,36 @@ describe("<epic-cards>", () => {
     ])
     const host = await render()
     expect(fetched.mock.calls[0]![0]).toBe("/api/epics/saga?saga=epics")
-    const groups = Array.from(host.shadowRoot!.querySelectorAll(".group"), (group) => [
-      group.getAttribute("data-group"),
-      Array.from(group.querySelectorAll(".card"), (card) => card.getAttribute("data-epic"))
-    ])
-    expect(groups).toEqual([
+    // the Epics page's own list and cards (epic `epic-engine` I39), with no Favorites group
+    const list = await listOf(host)
+    expect(list.hasAttribute("no-favorites")).toBe(true)
+    expect(groupsOf(list)).toEqual([
       ["active", ["alpha", "zeta"]],
       ["planning", ["idea"]],
       ["urgent", ["waiting"]],
       ["done", ["shipped"]]
     ])
-    const zeta = host.shadowRoot!.querySelector('[data-epic="zeta"]')!
-    expect(zeta.querySelector("a")!.getAttribute("href")).toBe("../../epics/zeta/zeta.plan.html")
-    expect(zeta.querySelector("a")!.getAttribute("target")).toBe("zeta")
-    expect(zeta.querySelector(".summary")!.textContent).toBe("What zeta does.")
-    expect(zeta.querySelector(".meta")!.textContent).toBe("in progress · 1/2 phases · P2 · Two")
+    const zeta = list.querySelector('epic-card[epic="zeta"]')!
+    expect(zeta.getAttribute("phases")).toBe("done active")
+    expect(zeta.getAttribute("active")).toBe("P2 · Two")
+    expect(zeta.querySelector(":scope > a")!.getAttribute("href")).toBe("../../epics/zeta/zeta.plan.html")
+    expect(zeta.querySelector(":scope > a")!.getAttribute("target")).toBe("zeta")
+    expect(zeta.querySelector('[slot="description"]')!.textContent).toBe("What zeta does.")
+    expect(zeta.querySelector('[slot="meta"]')!.textContent).toBe("in progress · 1/2 phases · P2 · Two")
     await expectAccessible(host)
+  })
+
+  test("a starred epic keeps its group, its star solid;  its last-worked day at its corner", async () => {
+    answering([
+      { ...epic("starred", ["active"]), favorite: true, worked: "2026-10-09T14:34-04:00" },
+      epic("plain", ["active"])
+    ])
+    const list = await listOf(await render())
+    expect(groupsOf(list)).toEqual([["active", ["plain", "starred"]]])
+    const starred = list.querySelector('epic-card[epic="starred"]')!
+    expect(starred.hasAttribute("favorite")).toBe(true)
+    await vi.waitFor(() => expect(starred.shadowRoot!.querySelector(".star")!.getAttribute("icon")).toBe("star"))
+    expect(starred.shadowRoot!.querySelector("time")!.getAttribute("datetime")).toBe("2026-10-09T14:34-04:00")
   })
 
   test("asks again when an epic page changes;  no epic names the saga:  says so", async () => {
@@ -76,7 +118,7 @@ describe("<epic-cards>", () => {
       async () => new Response(JSON.stringify({ saga: "epics", epics: [epic("one", ["todo"])] }))
     )
     dispatchEvent(new CustomEvent("spell-server:file", { detail: { path: "/epics/one/one.plan.html" } }))
-    await vi.waitFor(() => expect(host.shadowRoot!.querySelector('[data-epic="one"]')).toBeTruthy())
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector('epic-card[epic="one"]')).toBeTruthy())
     expect(host.shadowRoot!.querySelector(".note")).toBeNull()
     // a file that isn't an epic page's asks nothing
     const asked = fetched.mock.calls.length
@@ -89,14 +131,15 @@ describe("<epic-cards>", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 404 }))
     const host = await render()
     expect(host.shadowRoot!.querySelector(".note")!.textContent).toBe("Couldn't ask the page server for the epics.")
-    expect(host.shadowRoot!.querySelector(".group")).toBeNull()
+    expect(host.shadowRoot!.querySelector("epic-list")).toBeNull()
   })
 
   test("in the side bar's ~320px:  one column, nothing overflows", async () => {
     answering([epic("alpha", ["active"]), epic("beta", ["active"])])
     const host = await ElementFixture.render(`<div style="width: 320px"><epic-cards saga="epics"></epic-cards></div>`)
     const cards = host.querySelector("epic-cards")!
-    await vi.waitFor(() => expect(cards.shadowRoot!.querySelectorAll(".card").length).toBe(2))
+    await vi.waitFor(() => expect(cards.shadowRoot!.querySelectorAll("epic-card").length).toBe(2))
+    await listOf(cards)
     expect(cards.scrollWidth).toBeLessThanOrEqual(320)
   })
 })

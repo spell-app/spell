@@ -27,6 +27,7 @@ const OWENS_ROWS: [string[], string[][]][] = [
   [["commit", "seo#p3", "abc123", "what it did"], [["commit", "seo", "abc123", "what it did", "--phase", "3"]]],
   [["add", "seo#J", "Title", "--details", "<p>d</p>"], [["add", "seo", "judgement", "Title", "--details", "<p>d</p>"]]],
   [["decide", "seo#Q3", "yes", "--option", "A"], [["decide", "seo", "Q3", "yes", "--option", "A"]]],
+  [["choose", "seo#J9", "A", "built", "--set", "2"], [["choose", "seo", "J9", "A", "built", "--set", "2"]]],
   [["close", "seo#J3"], [["close", "seo", "J3"]]],
   [["reopen", "seo#J3"], [["reopen", "seo", "J3"]]],
   [["cancel", "seo#J3", "why"], [["cancel", "seo", "J3", "why"]]],

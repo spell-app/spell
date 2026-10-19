@@ -235,9 +235,12 @@ describe("migrate:  the runner", () => {
       "epic 2026-10-14 stable-phase-ids",
       "epic 2026-10-14 json5-data-files",
       "epic 2026-10-17 engine-asset-routes",
+      "epic 2026-10-19 engine-links",
+      "epic 2026-10-19 unstackable-tables",
       expect.stringMatching(/cheatsheet.* 2026-10-02 ui-section$/),
       expect.stringMatching(/detail,choice.* 2026-10-14 answer-elements$/),
       expect.stringMatching(/detail,choice 2026-10-17 engine-asset-routes$/),
+      expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
       "data-files 2026-10-14 json5-data-files"
     ])
   })

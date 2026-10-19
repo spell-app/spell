@@ -3,7 +3,9 @@
  * the line or title folded stays where it is on screen, to the pixel, from the click until 1.5s after.
  * Usage (from the repo root):
  *   node src/demo/check-fold-epics.mjs [--doc <name>] [--from <folder>] [--item <id>] [--guide <path>]
- *     [outDir]
+ *     [--bundle <spell-ui.js>] [outDir]
+ * - `--bundle`:  that file served as the pages' `spell-ui.js`, a bundle built elsewhere (a runtime not yet in
+ *   `_assets/`), as the other demo checks take it
  * - the epic page:  a SCRATCH COPY of `epics/<name>/` (default `airplane`), in `src/demo/shots/fold/epics/<name>/`
  *   (git-ignored), as deep as a real one, so its links need no change:  the review routes take epic pages only
  *   (`epics/<name>/<name>.plan.html`)
@@ -77,7 +79,7 @@ const docName = flagValue("--doc") ?? "airplane"
 const guide = flagValue("--guide") ?? "guides/solid/solid-2.html"
 const from = flagValue("--from") ?? "epics"
 const flagged = new Set(
-  ["--doc", "--from", "--item", "--guide"].flatMap((name) => (args.includes(name) ? [args.indexOf(name) + 1] : []))
+  ["--doc", "--from", "--item", "--guide", "--bundle"].flatMap((name) => (args.includes(name) ? [args.indexOf(name) + 1] : []))
 )
 const out = args.find((arg, index) => !arg.startsWith("--") && !flagged.has(index)) ?? join(HERE, "shots/fold")
 const SIZES = [
@@ -298,6 +300,13 @@ async function guideCases(size) {
 async function openPage(size, url) {
   const context = await browser.newContext({ viewport: size })
   const page = await context.newPage()
+  const bundle = flagValue("--bundle")
+  if (bundle) {
+    const code = readFileSync(resolve(bundle))
+    await page.route("**/_epic/assets/spell-ui.js", (route) =>
+      route.fulfill({ body: code, contentType: "text/javascript" })
+    )
+  }
   const logs = []
   page.on("pageerror", (error) => logs.push(`pageerror:  ${error.message}`))
   page.on("console", (message) => {

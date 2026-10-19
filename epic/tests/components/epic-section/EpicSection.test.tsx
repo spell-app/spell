@@ -199,12 +199,27 @@ function questions(states: string[]): string {
   return `<epic-section id="decisions" kind="questions" open>${items.join("")}</epic-section>`
 }
 
+/** `host`'s state chips, as drawn (its `<epic-state-filter>`'s buttons). */
+function chipButtons(host: Element): HTMLButtonElement[] {
+  const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')
+  return Array.from(filter?.shadowRoot?.querySelectorAll<HTMLButtonElement>("button") ?? [])
+}
+
+/** `host`'s `state` chip. */
+function chip(host: Element, state: string): HTMLButtonElement {
+  return chipButtons(host).find((button) => button.dataset.state === state)!
+}
+
 /** `host`'s state chips, as drawn:  `state` => pressed. */
 function chips(host: Element): Record<string, boolean> {
-  const buttons = host.shadowRoot!.querySelectorAll<HTMLButtonElement>('[part~="filter"] button')
   return Object.fromEntries(
-    Array.from(buttons, (button) => [button.dataset.state!, button.getAttribute("aria-pressed") === "true"])
+    chipButtons(host).map((button) => [button.dataset.state!, button.getAttribute("aria-pressed") === "true"])
   )
+}
+
+/** The line under `host`'s filtered list (its `<epic-hidden-note>`'s button). */
+function hiddenNote(host: Element): HTMLButtonElement {
+  return host.shadowRoot!.querySelector('[part~="hidden-note"]')!.shadowRoot!.querySelector("button")!
 }
 
 /** The ids of `host`'s items that show. */
@@ -273,10 +288,12 @@ describe("<epic-section> counts and state filter", () => {
   test("a chip per state its items are in, with how many, all solid;  no filter icon;  passes axe", async () => {
     const host = await render(questions(["open:attention", "open:open", "decided:old", "open"]))
     expect(chips(host)).toEqual({ attention: true, open: true, old: true })
-    const counts = Array.from(host.shadowRoot!.querySelectorAll('[part~="filter"] button'), (chip) => chip.textContent)
+    const counts = chipButtons(host).map((button) => button.textContent)
     expect(counts).toEqual(["1", "2", "1"])
-    expect(host.shadowRoot!.querySelector('[part~="filter"] svg')).toBeNull()
-    const open = host.shadowRoot!.querySelector<HTMLButtonElement>('[data-state="open"]')!
+    expect(
+      host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!.shadowRoot!.querySelector("svg")
+    ).toBeNull()
+    const open = chip(host, "open")
     expect(open.title).toBe("2 open, still undecided:  show only these")
     expect(getComputedStyle(open).backgroundColor).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
     await expectAccessible(host)
@@ -285,15 +302,15 @@ describe("<epic-section> counts and state filter", () => {
   test("Owen's rule:  all on, a click shows only that;  a hidden one shows too;  a shown one hides;  the last one, all again", async () => {
     const host = await render(questions(["open:attention", "open:open", "decided:recent", "open:open"]))
     const click = async (state: string) => {
-      host.shadowRoot!.querySelector<HTMLButtonElement>(`[data-state="${state}"]`)!.click()
+      chip(host, state).click()
       await ElementFixture.tick()
     }
     await click("open")
     expect(chips(host)).toEqual({ attention: false, open: true, recent: false })
     expect(shownIds(host)).toEqual(["q2", "q4"])
-    expect(host.shadowRoot!.querySelector('[part~="hidden-note"]')!.textContent).toBe("2 hidden · show all")
+    expect(hiddenNote(host).textContent).toBe("2 hidden · show all")
     // hidden, outlined:  no fill
-    const red = host.shadowRoot!.querySelector<HTMLButtonElement>('[data-state="attention"]')!
+    const red = chip(host, "attention")
     expect(getComputedStyle(red).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
     expect(red.title).toBe("1 needs attention:  show these too")
     await click("attention")
@@ -309,7 +326,7 @@ describe("<epic-section> counts and state filter", () => {
 
   test("remembered per page;  a choice its states have left hides the list, and says so", async () => {
     const host = await render(questions(["open:attention", "open:open"]))
-    host.shadowRoot!.querySelector<HTMLButtonElement>('[data-state="attention"]')!.click()
+    chip(host, "attention").click()
     await ElementFixture.tick()
     expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({
       decisions: ["attention"]
@@ -322,7 +339,7 @@ describe("<epic-section> counts and state filter", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     expect(shownIds(again)).toEqual([])
-    const note = again.shadowRoot!.querySelector<HTMLButtonElement>('[part~="hidden-note"]')!
+    const note = hiddenNote(again)
     expect(note.textContent).toBe("2 hidden · show all")
     note.click()
     await ElementFixture.tick()
@@ -332,7 +349,7 @@ describe("<epic-section> counts and state filter", () => {
   test("`replied` (orange, Owen's turn to pick):  its own chip", async () => {
     const host = await render(questions(["open:replied", "open:open", "open:attention"]))
     expect(chips(host)).toEqual({ attention: true, replied: true, open: true })
-    expect(host.shadowRoot!.querySelector('[data-state="replied"]')!.getAttribute("data-color")).toBe("orange")
+    expect(chip(host, "replied").getAttribute("data-color")).toBe("orange")
   })
 
   test("collapse-all, beside the chevron while open:  its phases fold, it stays open", async () => {

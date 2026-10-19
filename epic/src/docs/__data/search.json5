@@ -179,6 +179,48 @@
       ]
     },
     {
+      "path": "epic-card.html",
+      "title": "<epic-card>",
+      "summary": "The <epic-card> element: one epic's card on the Epics page, its state, link, saga, star and last-worked day.",
+      "tag": "epic-card",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-card-parts",
+          "title": "Parts",
+          "parent": 3
+        },
+        {
+          "id": "epic-card-events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
       "path": "epic-cards.html",
       "title": "<epic-cards>",
       "summary": "The <epic-cards> element: a saga page's Epics, a card per epic serving the saga, grouped by state.",
@@ -446,6 +488,35 @@
       ]
     },
     {
+      "path": "epic-comment-pane.html",
+      "title": "<epic-comment-pane>",
+      "summary": "The <epic-comment-pane> element: the floating pane Owen writes a new comment in.",
+      "tag": "epic-comment-pane",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-attributes",
+          "title": "3. Attributes"
+        },
+        {
+          "id": "events",
+          "title": "Events",
+          "parent": 2
+        },
+        {
+          "id": "4-how-it-looks",
+          "title": "4. How it looks"
+        }
+      ]
+    },
+    {
       "path": "epic-commit.html",
       "title": "<epic-commit>",
       "summary": "The <epic-commit> element: one commit that built a phase or fixed an item, its short sha linked.",
@@ -582,6 +653,44 @@
       ]
     },
     {
+      "path": "epic-hidden-note.html",
+      "title": "<epic-hidden-note>",
+      "summary": "The <epic-hidden-note> element: the line under a filtered list, 3 hidden · show all.",
+      "tag": "epic-hidden-note",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-hidden-note-parts",
+          "title": "Parts",
+          "parent": 3
+        },
+        {
+          "id": "epic-hidden-note-events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        }
+      ]
+    },
+    {
       "path": "epic-item.html",
       "title": "<epic-item>",
       "summary": "One item of an epic page: a question, judgement call, caveat, todo, issue or test, drawn as a line that unfolds.",
@@ -683,6 +792,43 @@
         {
           "id": "parts",
           "title": "Parts and states",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-list.html",
+      "title": "<epic-list>",
+      "summary": "The <epic-list> element: the Epics page's list, every epic's card in five groups, under a row of saga chips.",
+      "tag": "epic-list",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-list-parts",
+          "title": "Parts",
           "parent": 3
         },
         {
@@ -994,6 +1140,22 @@
         {
           "id": "6-written-by",
           "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-page-note-head.html",
+      "title": "<epic-page-note-head>",
+      "summary": "The <epic-page-note-head> element: an old page note's head line.",
+      "tag": "epic-page-note-head",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-attributes",
+          "title": "2. Attributes"
         }
       ]
     },
@@ -1376,6 +1538,90 @@
       ]
     },
     {
+      "path": "epic-sort.html",
+      "title": "<epic-sort>",
+      "summary": "The <epic-sort> element: the Epics page's sort buttons, A to Z or newest first, for every list on the page.",
+      "tag": "epic-sort",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-sort-parts",
+          "title": "Parts",
+          "parent": 3
+        },
+        {
+          "id": "epic-sort-events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-state-filter.html",
+      "title": "<epic-state-filter>",
+      "summary": "The <epic-state-filter> element: the state filter's chips, a pill per item state with how many, solid while it shows.",
+      "tag": "epic-state-filter",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-state-filter-parts",
+          "title": "Parts",
+          "parent": 3
+        },
+        {
+          "id": "epic-state-filter-events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
       "path": "epic-status.html",
       "title": "<epic-status>",
       "summary": "Claude's status card on an item: what Claude took Owen's mark to mean, then that it's done.",
@@ -1513,6 +1759,59 @@
         {
           "id": "6-written-by",
           "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-thread.html",
+      "title": "<epic-thread>",
+      "summary": "The <epic-thread> element: one comment's whole thread on a page, as the docs runtime's comments draw it.",
+      "tag": "epic-thread",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-threads.html",
+      "title": "<epic-threads>",
+      "summary": "The <epic-threads> element: the comment threads under one block of a page.",
+      "tag": "epic-threads",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-where-it-goes",
+          "title": "2. Where it goes"
         }
       ]
     },

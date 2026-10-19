@@ -1,9 +1,11 @@
 import { EngineAssetRoutes } from "./EngineAssetRoutes"
+import { EngineLinks } from "./EngineLinks"
 import { Json5DataFiles } from "./Json5DataFiles"
 import { LinksAgree } from "./LinksAgree"
 import type { Migration, MigrationContext } from "./migrations.types"
 import { ReaderIsYou } from "./ReaderIsYou"
 import { StablePhaseIds } from "./StablePhaseIds"
+import { UnstackableTables } from "./UnstackableTables"
 import { UpdatesAsEpicUpdate } from "./UpdatesAsEpicUpdate"
 
 /****************
@@ -28,7 +30,9 @@ export class Migrations {
     new LinksAgree(),
     new StablePhaseIds(),
     new Json5DataFiles(),
-    new EngineAssetRoutes()
+    new EngineAssetRoutes(),
+    new EngineLinks(),
+    new UnstackableTables()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

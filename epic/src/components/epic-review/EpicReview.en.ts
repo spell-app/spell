@@ -48,7 +48,9 @@ export const epicReviewVocabulary = {
       default: "item",
       description:
         "Whose:  `item` (Approve, Revisit, Make Todo, Do Now), `todo` (the plane, Revisit, the x;  its note box the " +
-        "plane, Revisit Later, the x), `part` (an Overview sub-section, a phase, the summary:  no Approve)."
+        "plane, Revisit Later, the x), `part` (an Overview sub-section, a phase, the summary:  no Approve);  a " +
+        "comment thread's answer, drawn by `<epic-thread>` with no inbox behind it:  `thread` (That's good, Reply, " +
+        "Skip it), `closed` (Reopen)."
     },
     {
       name: "label",
@@ -78,6 +80,13 @@ export const epicReviewVocabulary = {
       description:
         "Revisit or Edit pressed:  the reader is taken to the note box, which then takes the focus.  The family that " +
         "draws it unfolds to show the box."
+    },
+    {
+      name: "epic-thread-answer",
+      detail: '{ act: "good" | "reply" | "skip" | "reopen" }',
+      description:
+        "A comment thread's answer button pressed (`buttons=thread` or `closed`):  which.  The comments' code acts " +
+        "on it:  the thread closes, the cursor goes into its reply box, or it opens again."
     },
     {
       name: "epic-chosen",

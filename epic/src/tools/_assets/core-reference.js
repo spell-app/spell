@@ -25,10 +25,16 @@
  *   - a class keeps its name (`spell_core.Thing`)
  * - Placeholders the page holds, all optional:
  *   - `[data-core-stats]` (a `ui-statistics`)
- *   - `[data-core-modules]`:  one nested `<ui-section>` per file, numbered after its parent section, each a table
- *     with a sub-heading row per heading of the file (`headingRuns()`)
+ *   - `[data-core-modules]`:  REPLACED by one nested `<ui-section data-core-module>` per file, numbered after its
+ *     parent section, each a table with a sub-heading row per heading of the file (`headingRuns()`)
+ *     - the sections take its place, so they're its section's children, as a page writes nested sections:  inside the
+ *       placeholder's box they took the reading column's indent twice (epic `epic-engine` P3)
  *   - `[data-core-filter]` (a `ui-input`):  hides rows without every typed word
  *   - `[data-core-not-ported]`:  spell_core's missing names, by why, each linked to its row
+ * - Built from elements (`el()`), never from markup in strings (epic `epic-engine` P3):  Spell UI's own, as a page
+ *   writes them (`<ui-section>`, `<ui-table>` round a real `<table>`, `<ui-label>`, `<ui-statistic>`, `<ui-message>`,
+ *   the source link a `<ui-button>`), in the page's light DOM, so the runtime's contents, sticky titles, table widths
+ *   and comment anchors take them as hand-written ones
  * - From `file://` it shows a notice where the tables go:
  *   the page needs the PAGE SERVER (`spell dev docs open <page>`).
  * - Classic script, no imports:  same rule as every docs asset.
@@ -105,14 +111,13 @@
     const holder = document.querySelector("[data-core-modules]")
     if (holder) {
       const number = sectionNumber(holder.closest("ui-section"))
-      holder.innerHTML = [...modules]
-        .map(([module, rows], i) => moduleHTML(module, rows, missing, number ? `${number}.${i + 1} ` : ""))
-        .join("\n")
+      const sections = [...modules].map(([module, rows], i) =>
+        moduleSection(module, rows, missing, number ? `${number}.${i + 1} ` : "")
+      )
+      holder.replaceWith(...sections)
     }
-    const stats = document.querySelector("[data-core-stats]")
-    if (stats) stats.innerHTML = statsHTML(statements, modules, missing)
-    const list = document.querySelector("[data-core-not-ported]")
-    if (list) list.innerHTML = notPortedHTML(statements, notPorted)
+    document.querySelector("[data-core-stats]")?.replaceChildren(...statistics(statements, modules, missing))
+    document.querySelector("[data-core-not-ported]")?.replaceChildren(notPortedList(statements, notPorted))
     const filter = document.querySelector("[data-core-filter]")
     if (filter) wireFilter(filter)
   }
@@ -130,29 +135,58 @@
 
   /**
    * One file:  a nested `<ui-section>` with its table, a `<tbody>` per run of names under one heading.
-   * - a link to its source file in the title bar's `actions`, an icon (a phone has little room)
+   * - a link to its source file in the title bar's `actions`:  a round icon button (a phone has little room);  `tiny`,
+   *   its icon 11px, as the bare icon it was before
    * - its count in the `badge`
    */
-  function moduleHTML(module, statements, missing, prefix) {
+  function moduleSection(module, statements, missing, prefix) {
     const file = sourceFile(module)
     const notIn = missing ? statements.filter((statement) => missing.has(jsName(statement))).length : 0
-    const badge = notIn ? `${statements.length} · ${notIn} not in Python` : `${statements.length}`
-    const bodies = headingRuns(statements)
-      .map(({ heading, rows }) => {
-        const head = heading ? `<tr><th colspan="${COLUMNS.length}">${text(heading)}</th></tr>` : ""
-        return `<tbody>${head}${rows.map((statement) => rowHTML(statement, missing)).join("")}</tbody>`
-      })
-      .join("")
     const path = `packages/core/src/${file}`
-    return `<ui-section id="${attr(`file-${slug(module)}`)}" header="${attr(prefix + module)}" badge="${attr(badge)}" sticky collapsible dividing collapsed>
-      <a slot="actions" href="${attr(sourceHref(file))}" target="${attr(`src-${slug(path)}`)}" title="${attr(path)}" aria-label="${attr(`Open ${file.split("/").pop()}`)}"><ui-icon name="code"></ui-icon></a>
-      <ui-table celled compact striped unstackable>
-        <table>
-          <thead><tr>${COLUMNS.map((label) => `<th>${label}</th>`).join("")}</tr></thead>
-          ${bodies}
-        </table>
-      </ui-table>
-    </ui-section>`
+    const source = el("ui-button", {
+      slot: "actions",
+      circular: "",
+      basic: "",
+      size: "tiny",
+      icon: "code",
+      href: sourceHref(file),
+      target: `src-${slug(path)}`,
+      title: path,
+      "aria-label": `Open ${file.split("/").pop()}`
+    })
+    titleInside(source)
+    const bodies = headingRuns(statements).map(({ heading, rows }) =>
+      el(
+        "tbody",
+        {},
+        heading ? el("tr", {}, el("th", { colspan: String(COLUMNS.length) }, ...withCode(heading))) : "",
+        ...rows.map((statement) => row(statement, missing))
+      )
+    )
+    return el(
+      "ui-section",
+      {
+        id: `file-${slug(module)}`,
+        header: prefix + module,
+        badge: notIn ? `${statements.length} · ${notIn} not in Python` : `${statements.length}`,
+        sticky: "",
+        collapsible: "",
+        dividing: "",
+        collapsed: "",
+        "data-core-module": ""
+      },
+      source,
+      el(
+        "ui-table",
+        { celled: "", compact: "", striped: "", unstackable: "" },
+        el(
+          "table",
+          {},
+          el("thead", {}, el("tr", {}, ...COLUMNS.map((label) => el("th", {}, label)))),
+          ...bodies
+        )
+      )
+    )
   }
 
   /**
@@ -173,65 +207,72 @@
   }
 
   /** One name's row. */
-  function rowHTML(statement, missing) {
-    const name = jsName(statement)
-    return `<tr id="${attr(rowId(statement))}"><td>${nameHTML(statement)}</td><td><code>${escape(pythonName(statement))}</code></td>${portedHTML(name, missing)}<td>${text(statement.description ?? "")}</td></tr>`
+  function row(statement, missing) {
+    return el(
+      "tr",
+      { id: rowId(statement) },
+      el("td", {}, ...nameParts(statement)),
+      el("td", {}, el("code", {}, pythonName(statement))),
+      ported(jsName(statement), missing),
+      el("td", {}, ...withCode(statement.description ?? ""))
+    )
   }
 
   /** The javascript name, with its parameters, and a label saying what it is unless it's a method of `core`. */
-  function nameHTML(statement) {
+  function nameParts(statement) {
     const params = statement.params ? `(${statement.params.map((param) => param.name).join(", ")})` : ""
-    const code = `<code>${escape(jsName(statement) + (statement.kind ? params || "()" : ""))}</code>`
     const kind = kindOf(statement)
-    const label = kind === "method" ? "" : ` <ui-label size="mini">${kind}</ui-label>`
-    const extending = statement.superType ? ` extends <code>${escape(statement.superType)}</code>` : ""
-    return code + label + extending
+    return [
+      el("code", {}, jsName(statement) + (statement.kind ? params || "()" : "")),
+      ...(kind === "method" ? [] : [" ", el("ui-label", { size: "mini" }, kind)]),
+      ...(statement.superType ? [" extends ", el("code", {}, statement.superType)] : [])
+    ]
   }
 
   /** "in Python" cell:  ✓, or ✗ with why as its tooltip;  "?" without `not_ported_yet.json5`. */
-  function portedHTML(name, missing) {
-    if (!missing) return `<td title="this checkout has no packages/py/core/not_ported_yet.json5">?</td>`
+  function ported(name, missing) {
+    if (!missing) return el("td", { title: "this checkout has no packages/py/core/not_ported_yet.json5" }, "?")
     const why = missing.get(name)
-    if (why === undefined) return `<td class="yes positive" title="spell_core has it">✓</td>`
-    return `<td class="no negative" title="${attr(why)}">✗ not yet</td>`
+    if (why === undefined) return el("td", { class: "yes positive", title: "spell_core has it" }, "✓")
+    return el("td", { class: "no negative", title: why }, "✗ not yet")
   }
 
   /** Headline numbers:  names, files, how many Python has and hasn't. */
-  function statsHTML(statements, modules, missing) {
+  function statistics(statements, modules, missing) {
     const notIn = missing ? statements.filter((statement) => missing.has(jsName(statement))).length : undefined
     return [
       [statements.length, "names"],
       [modules.size, "files"],
       [notIn === undefined ? "?" : statements.length - notIn, "in Python"],
       [notIn ?? "?", "not in Python yet"]
-    ]
-      .map(([value, label]) => `<ui-statistic value="${value}" label="${label}"></ui-statistic>`)
-      .join("")
+    ].map(([value, label]) => el("ui-statistic", { value: String(value), label }))
   }
 
   /** spell_core's missing names:  one bullet per group, its why, then its names linked to their rows. */
-  function notPortedHTML(statements, notPorted) {
+  function notPortedList(statements, notPorted) {
     if (!notPorted)
-      return `<ui-message state="warning" header="No list of what Python lacks"><p>This checkout has no <code>packages/py/core/not_ported_yet.json5</code>.</p></ui-message>`
+      return el(
+        "ui-message",
+        { state: "warning", header: "No list of what Python lacks" },
+        el("p", {}, "This checkout has no ", el("code", {}, "packages/py/core/not_ported_yet.json5"), ".")
+      )
     const byName = new Map(statements.map((statement) => [jsName(statement), statement]))
     const items = (notPorted.groups ?? []).map((group) => {
-      const names = group.names.map((name) => {
+      const names = group.names.flatMap((name, i) => {
         const statement = byName.get(name)
-        return statement
-          ? `<a href="#${attr(rowId(statement))}"><code>${escape(name)}</code></a>`
-          : `<code>${escape(name)}</code>`
+        const code = el("code", {}, name)
+        return [i ? ", " : "", statement ? el("a", { href: `#${rowId(statement)}` }, code) : code]
       })
-      return `<li>${text(group.why)} (${group.names.length}):<br />${names.join(", ")}</li>`
+      return el("li", {}, ...withCode(group.why), ` (${group.names.length}):`, el("br"), ...names)
     })
-    return `<ul>${items.join("")}</ul>`
+    return el("ul", {}, ...items)
   }
 
   /** Show `message` where the tables go (or at the top of `main`). */
   function notice(message) {
     const holder = document.querySelector("[data-core-modules]") ?? document.querySelector("main")
-    holder?.insertAdjacentHTML(
-      "afterbegin",
-      `<ui-message state="warning" header="Reference not drawn"><p>${text(message)}</p></ui-message>`
+    holder?.prepend(
+      el("ui-message", { state: "warning", header: "Reference not drawn" }, el("p", {}, ...withCode(message)))
     )
   }
 
@@ -319,7 +360,7 @@
         .toLowerCase()
         .split(/\s+/)
         .filter(Boolean)
-      for (const section of document.querySelectorAll("[data-core-modules] > ui-section")) {
+      for (const section of document.querySelectorAll("ui-section[data-core-module]")) {
         let shown = 0
         for (const body of section.querySelectorAll("tbody")) {
           let inBody = 0
@@ -341,21 +382,38 @@
   // ## Text
   ////////////////
 
-  /** `value` escaped, with `` `code` `` (and a flattened ```` ```lang ...``` ```` block) as `<code>`. */
-  function text(value) {
-    return escape(String(value))
-      .replace(/```(?:[a-z]+\s)?([\s\S]*?)```/g, (_, code) => `<code>${code.trim()}</code>`)
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
+  /**
+   * `value` as nodes:  its `` `code` `` spans (and a flattened ```` ```lang ...``` ```` block) as `<code>`, the rest as
+   * text, never markup.
+   */
+  function withCode(value) {
+    return String(value)
+      .replace(/```(?:[a-z]+\s)?([\s\S]*?)```/g, (_, code) => `\`${code.trim()}\``)
+      .split("`")
+      .map((part, i) => (i % 2 ? el("code", {}, part) : part))
+      .filter((part) => part !== "")
   }
 
-  /** `value` safe in an attribute. */
-  function attr(value) {
-    return escape(String(value)).replace(/"/g, "&quot;")
+  /** A new `tag` with `attributes`, holding `children` (nodes or text;  `""` skipped):  as `spell-syntax.js`'s. */
+  function el(tag, attributes = {}, ...children) {
+    const node = document.createElement(tag)
+    for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value)
+    node.append(...children.filter((child) => child !== ""))
+    return node
   }
 
-  /** `value` with `&`, `<`, `>` escaped. */
-  function escape(value) {
-    return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  /**
+   * `host`'s `title` (a `<ui-button>`'s) on the button inside it too, once drawn:  the element the pointer lands on
+   * carries the tooltip (VS Code's side bar shows only that one's), as `spell-doc-helpers.js`' `titleInside()` does.
+   * - the bundle defines `<ui-button>` after this script has drawn
+   */
+  function titleInside(host) {
+    void customElements.whenDefined(host.localName).then(() =>
+      requestAnimationFrame(() => {
+        const inner = host.shadowRoot?.querySelector('[part~="button"]')
+        if (inner) inner.title = host.title
+      })
+    )
   }
 
   /** `value` as an id:  lowercase words joined by dashes. */

@@ -259,6 +259,12 @@ export class EpicProgram {
       "answer a question:  the answer goes into it;  --option marks the chosen option",
       'epic decide seo#Q3 "Both, the sitemap first" --option A'
     ).usage('<epic>#Q3 "answer" [--details <html>] [--option A]')
+    this.page(
+      epic.command("choose"),
+      "an option Owen settled in conversation, on ANY item, recorded as the page's pick does:  chosen on its latest " +
+        "card set (--set N:  the Nth), the item answered / closed / reviewed, a Noted card",
+      `epic choose seo#J9 A "Owen, 2026-10-06:  'require the parens';  built"`
+    ).usage('<epic>#J9 <letter> ["outcome"] [--set N]')
     this.page(epic.command("close"), "close an item:  done", "epic close seo#J3").usage("<epic>#J3")
     this.page(epic.command("reopen"), "open a closed or canceled item again", "epic reopen seo#J3").usage("<epic>#J3")
     this.page(
@@ -421,7 +427,8 @@ export class EpicProgram {
 
     this.group(
       epic.command("shared"),
-      "shared content:  docs pages, sagas and logs in one repo beside the checkout, linked into every one",
+      "shared content:  docs pages, sagas and logs in the content folder, a repo beside the checkout, read from there;  " +
+        "a checkout links in only the folders its config names (sharedFolders)",
       (args) => new Shared().run(args)
     )
   }

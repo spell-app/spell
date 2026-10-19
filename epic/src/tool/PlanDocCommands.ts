@@ -30,9 +30,9 @@ import { Sagas } from "./Sagas"
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `$/epics/definitions`
- * - Commands:  `new`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `close`, `cancel`,
- *   `reopen`, `commit`, `commits`, `log`, `bedtime`, `overnight`, `prompt`, `summary`, `docs`, `decisions`, `check`,
- *   `open`, `migrate`, `convert`, `split`, `join`, `inbox`, `details`, `status`, `original`
+ * - Commands:  `new`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `close`,
+ *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `overnight`, `prompt`, `summary`, `docs`, `decisions`,
+ *   `check`, `open`, `migrate`, `convert`, `split`, `join`, `inbox`, `details`, `status`, `original`
  *   (`spell dev plan-doc` with no command lists them:  `USAGE`).
  * - `docs`, `decisions` (`EpicDocs`, for `/docs-check`):
  *   the docs an epic wrote besides its epic page, and what its epic page settled
@@ -217,6 +217,13 @@ export class PlanDocCommands {
           return decided
         })
         return this.print(id.toUpperCase())
+      }
+      case "choose": {
+        const id = need(rest[0], "an item id")
+        const letter = need(rest[1], "the option's letter")
+        const set = flags.set === undefined ? undefined : Number(flags.set)
+        const did = await this.edit(file, (plan) => plan.choose(id, letter, { outcome: rest[2], set }))
+        return this.print(`${id.toUpperCase()} ${did}`)
       }
       case "commit":
         return this.commit(file, rest, flags)
@@ -962,6 +969,11 @@ export const USAGE = `usage:  spell dev plan-doc <command> <name> ...    (doc:  
   decide <name> <Q id> "answer" [--details html] [--option A]
                                                    answer a question:  the answer goes INTO it (an ivory card);
                                                    --option marks the chosen option card;  prints its id
+  choose <name> <id> <letter> ["outcome"] [--set N]
+                                                   an option Owen settled IN CONVERSATION, on any item, as the
+                                                   page's pick records it:  chosen on the item's latest card
+                                                   set (--set N:  the Nth);  a question answered, a judgement
+                                                   call closed, any item reviewed;  a Noted card (the outcome)
   close <name> <id>  /  reopen <name> <id>         close an item (done) / open it again
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it

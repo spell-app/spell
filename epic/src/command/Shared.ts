@@ -40,9 +40,10 @@ import { SharedRename } from "./SharedRename"
  * `epic shared <verb> ...`:  SHARED CONTENT (epic `shared-content`).
  *
  * - Docs pages, saga sets and the agents' logs live ONCE, in a content repo beside the main checkout
- *   (`../spell-app-dev`).
- * - Every checkout links to them at its root:
- *   `epics`, `guides`, `pages`, `brand`, `ui`, `goals`, `agents` (`EpicConfig`'s `sharedFolders`).
+ *   (`../spell-app.epics`, `EpicConfig`'s `contentFolder`).
+ * - The tools and page servers read the pages there, never through a link (epic `epic-eject` P12).
+ * - A checkout links in at its root only the folders its config names (`EpicConfig`'s `sharedFolders`):
+ *   spell-app's `agents`;  the default, from before P12:  `epics`, `guides`, `pages`, `brand`, `goals`, `sagas`, `agents`.
  *   - not `templates` since epic `epic-eject` T11:  they're spell-epic's;  `link` removes a link the manifest dropped
  *     (`unlinkDropped()`)
  * - So every worktree sees every edit at once, and none of it is merged.
@@ -659,11 +660,11 @@ function readme(config: SharedConfig): string {
   const repo = basename(config.main)
   return `# ${basename(config.dir)}
 
-Shared content for \`${repo}\`:  ${config.links.map((path) => `\`${path}\``).join(", ")}.
+Shared content for \`${repo}\`:  its epic pages, sagas, guides and pages, one copy for every checkout.
 
-- Content only:  the epic tooling (spell-epic) reads and writes it, for \`${repo}\`.
-- Every checkout of \`${repo}\` (main and each worktree) links these folders in, so edits show everywhere at once.
-- Edit through the links in \`${repo}\`;  every Claude Code turn commits here by itself (\`epic shared commit\`).
+- Content only:  the epic tooling (spell-epic) reads and writes it here, for \`${repo}\`, never through a link.
+- Every checkout of \`${repo}\` (main and each worktree) links in only ${config.links.map((path) => `\`${path}\``).join(", ")}.
+- Every Claude Code turn commits here by itself (\`epic shared commit\`).
 `
 }
 

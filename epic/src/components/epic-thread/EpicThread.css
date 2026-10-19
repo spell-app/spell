@@ -1,0 +1,253 @@
+/*
+ * `<epic-thread>` (`EpicThread.tsx`):  one comment's thread, the old comments' look kept as it was (epic `airplane`
+ * P11, Owen's rulings of 2026-10-10;  `spell-comments.css` until epic `epic-engine` P3).
+ * - ALL IVORY, whoever spoke last ("Make the entire thing ivory"):  the comment pane's ground, outline and corners;
+ *   no shadow:  it sits in the page, it doesn't float over it.
+ * - ORANGE while it's Owen's turn (`unseen`):  `--ui-orange` mixed into the ivory, 13% (22% in the dark, where less
+ *   reads brown);  Claude's latest reply stronger (`<epic-thread-message latest>`).  Outline and header as ever.
+ * - Its header:  14.4px, the ivory's ink;  the fold a button the width of what names the thread.
+ * - Its body, while open:  the messages 2px apart, 6px in;  Owen's box last, its floppy in the corner.
+ * - What was said (the messages' children, in this shadow root):  the page's prose, small:  paragraphs 3px apart,
+ *   code in the brand's code well, links in the page's accent.
+ * - Reads the page's tokens (`--spell-*`, from `spell-doc.css` or `spell-comments.css`), with Spell UI's as fallbacks;
+ *   public tokens are never declared here:  `--epic-thread-head-room` (the comments' `makeRoom()`) and
+ *   `--epic-thread-link` (a docs page's link colour, `spell-comments.css`) are read only.
+ *   - Except `--epic-muted`:  the page's muted ink for the review pills it draws, as `<epic-page>` sets it.
+ */
+
+@layer ui.components.epic-thread;
+
+@layer ui.components.epic-thread {
+  :host {
+    --_epic-thread-violet: var(--ui-violet, #6435c9);
+    --_epic-thread-green: var(--ui-green-text, var(--ui-green, #21ba45));
+    --_epic-thread-orange: var(--ui-orange, #f2711c);
+    --_epic-thread-ivory: var(--spell-rail-bg, var(--ui-brown-background, light-dark(#f7efe2, #2c2152)));
+    --_epic-thread-ivory-ink: var(--spell-rail-ink, var(--ui-brown-text, light-dark(#534323, #eaddc4)));
+    --_epic-thread-rule: var(--spell-rail-rule, color-mix(in srgb, var(--_epic-thread-ivory-ink) 22%, transparent));
+    --_epic-thread-hover: var(
+      --spell-rail-hover,
+      color-mix(in srgb, var(--_epic-thread-ivory-ink) 9%, var(--_epic-thread-ivory))
+    );
+    --_epic-thread-ink: var(--spell-ink, var(--ui-text-color, CanvasText));
+    --_epic-thread-muted: var(--spell-muted, var(--ui-text-muted, GrayText));
+    --_epic-thread-mono: var(--spell-mono, var(--ui-font-family-mono, ui-monospace, monospace));
+    --epic-muted: var(--_epic-thread-muted);
+    display: block;
+    /* never wider than the column:  a folded thread's header is one line, its first words cut short */
+    min-width: 0;
+    margin-inline: 0;
+    border: 1px solid var(--_epic-thread-rule);
+    border-radius: 10px;
+    background: var(--_epic-thread-ivory);
+    color: var(--_epic-thread-ink);
+  }
+  :host([unseen]) {
+    background: light-dark(
+      color-mix(in srgb, var(--_epic-thread-orange) 13%, var(--_epic-thread-ivory)),
+      color-mix(in srgb, var(--_epic-thread-orange) 22%, var(--_epic-thread-ivory))
+    );
+  }
+
+  /* ## Its header */
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+    /* a corner bullhorn just above it:  room on its right (the comments' `makeRoom()`) */
+    padding: 2px var(--epic-thread-head-room, 4px) 2px 6px;
+    color: var(--_epic-thread-ivory-ink);
+    font-size: 14.4px;
+    cursor: pointer;
+  }
+  .fold {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    min-height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .fold:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent, Highlight));
+  }
+  /* `ui-icon`'s host is `display: contents`:  a span to turn, or colour */
+  .chevron,
+  .mark {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 14px;
+  }
+  .chevron {
+    font-size: 12px;
+    transition: rotate 0.15s;
+  }
+  :host([open]) .chevron {
+    rotate: 90deg;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chevron {
+      transition: none;
+    }
+  }
+  .mark.done {
+    color: var(--_epic-thread-green);
+  }
+  /*
+   * its id (`M3`;  epic `epic-workflow` P23, Owen 2026-10-10:  "use `M3` for mark 1"):  small and muted, an outline
+   * and no fill, quieter than an epic page item's id chip;  Cmd / Ctrl + K takes it
+   */
+  .id {
+    flex: none;
+    padding: 1px 5px;
+    border: 1px solid var(--_epic-thread-rule);
+    border-radius: 999px;
+    color: color-mix(in srgb, var(--_epic-thread-ivory-ink) 65%, transparent);
+    font: 600 10px/1.2 var(--_epic-thread-mono);
+    font-style: normal;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  /* what it's on, as the pane's header says it */
+  .headline {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-style: italic;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /*
+   * the pen and the trash:  `<ui-button circular basic size="mini">`s with no ring, a tint under the pointer (Owen,
+   * 2026-10-10:  "no round border like everything else"), through the component's own tokens
+   */
+  .tool {
+    --ui-button-basic-border-width: 0px;
+    --ui-button-basic-background-hover: var(--_epic-thread-hover);
+    flex: none;
+  }
+  .tool.edit {
+    font-size: 12.8px;
+  }
+
+  /* ## Its body, while open */
+  .body {
+    display: grid;
+    gap: 2px;
+    padding: 0 6px 4px;
+  }
+  /* its block changed or moved since:  what it was on, quiet, above the messages */
+  .moved {
+    margin: 0;
+    color: var(--_epic-thread-muted);
+    font-size: 13.6px;
+  }
+
+  /* what was said:  the page's prose, small */
+  epic-thread-message :is(p, ul, ol) {
+    margin-block: 0 3px;
+  }
+  epic-thread-message :is(p, li) {
+    max-width: 72ch;
+  }
+  :is(epic-thread-message, .html) > :first-child {
+    margin-top: 0;
+  }
+  :is(epic-thread-message, .html) > :last-child {
+    margin-bottom: 0;
+  }
+  epic-thread-message :is(ul, ol) {
+    padding-left: 20px;
+  }
+  /* links:  the page's link colour (`--epic-thread-link`, which a docs page sets to its accent), else Spell UI's */
+  epic-thread-message a {
+    color: var(--epic-thread-link, var(--ui-link, LinkText));
+  }
+  /* code:  the brand's code well, its text in the strongest ink (`spell-doc.css`) */
+  epic-thread-message code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--spell-code-bg, var(--ui-code-background, light-dark(#f3f2ef, #26272d)));
+    color: var(--spell-heading-ink, inherit);
+    font-family: var(--_epic-thread-mono);
+    font-size: 0.88em;
+    overflow-wrap: break-word;
+  }
+  epic-thread-message pre {
+    max-width: 100%;
+    margin: 6px 0;
+    padding: 8px 10px;
+    overflow: auto;
+    border-radius: 8px;
+    background: var(--spell-code-bg, var(--ui-code-background, light-dark(#f3f2ef, #26272d)));
+    font-family: var(--_epic-thread-mono);
+    font-size: 0.9em;
+    line-height: 1.5;
+  }
+  epic-thread-message pre code {
+    padding: 0;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+    overflow-wrap: normal;
+  }
+  /* the Done line's check, where a name would be */
+  .check {
+    display: inline-grid;
+    place-items: center;
+    margin-right: 6px;
+  }
+  /* Claude thinking:  a turning notch */
+  .spin {
+    display: inline-grid;
+    place-items: center;
+    margin-right: 5px;
+    font-size: 0.8em;
+    vertical-align: -0.05em;
+    animation: epic-thread-spin 0.9s linear infinite;
+  }
+  @keyframes epic-thread-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spin {
+      animation-duration: 3s;
+    }
+  }
+
+  /*
+   * Owen's BOX, last (Owen, 2026-10-10:  "Probably should have a comment box at the bottom for me"):  slotted, so
+   * the comments' code keeps it across redraws;  its look is the page's (`spell-comments.css`, `.spell-comment-field`);
+   * its floppy in the lower right corner
+   */
+  .reply {
+    position: relative;
+    margin-top: 2px;
+  }
+  .floppy {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    color: var(--_epic-thread-muted);
+    font-size: 12.8px;
+  }
+  .floppy[data-failed] {
+    color: var(--ui-red, #db2828);
+  }
+  /* the floppy's tooltip shows on it, not on its icon (VS Code's side bar:  `Tooltip.css`) */
+  .floppy > * {
+    pointer-events: none;
+  }
+}

@@ -122,6 +122,25 @@ describe("RepoList", () => {
     expect(list.urlPathFor(join(one, "package.json"))).toBeUndefined()
   })
 
+  test("linkRootOf():  the registered repo whose content another checkout shares (I22);  else the checkout", () => {
+    const list = new RepoList({ home: scratch("epic-home-") })
+    const app = repo("app")
+    // the engine's own epics are the app's content:  its config names the app's content folder
+    const engine = join(scratch("epic-engine-"), "engine")
+    mkdirSync(join(engine, ".epic"), { recursive: true })
+    writeFileSync(join(engine, ".epic", "config.json5"), `{ "contentFolder": "${join(app, "docs")}" }\n`)
+    const own = scratch("epic-own-")
+    // nobody registered yet:  each its own
+    expect(list.linkRootOf(engine)).toBe(engine)
+    list.add(app)
+    expect(list.linkRootOf(engine)).toBe(app)
+    expect(list.linkRootOf(app)).toBe(app)
+    // a checkout holding its own pages
+    expect(list.linkRootOf(own)).toBe(own)
+    // a content folder of its own (a demo check's scratch copies):  no repo's
+    expect(list.linkRootOf(engine, join(own, "docs"))).toBe(engine)
+  })
+
   test("a repo whose config won't read is left out, the rest still listed", () => {
     const list = new RepoList({ home: scratch("epic-home-") })
     const [good, bad] = [repo("good"), repo("bad")]

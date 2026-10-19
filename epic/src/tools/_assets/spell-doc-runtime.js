@@ -46,9 +46,8 @@
  *   comments wait in an inbox file (a docs page's own, an epic page's review inbox), drawn under their blocks.
  *   Their own module, `spell-doc-comments.js` (epic `epic-engine` P2), which Epic UI's pages load alone too.
  *   PAGE NOTES (`wireNotes()`), written into docs pages before them:  each `<spell-note>` a folded card
- * - FAVORITE EPICS (`wireFavorites()`):  on the Epics page, a card's star moves it into Favorites and back, at once
- * - SAGA CHIPS (`wireSagaChips()`):  on the Epics page, a chip per saga above the groups;  a click shows only that
- *   saga's epics, by the state chips' rule (`nextShown()`), remembered in this browser
+ * - the EPICS PAGE's sort buttons, `<epic-sort>`, in its header (`wireEpicSort()`):  its list, its cards' stars and
+ *   saga chips are the epics pack's elements (`<epic-list>`, `<epic-card>`), which do their own
  * LANDING -- where a jump puts its target, ONE model for every kind of jump:
  * - the line:  just below the lowest title that will be stuck over the target:  site header + `--spell-top` (page
  *   header, filter bar) + the stack of the target's sections' titles
@@ -73,19 +72,23 @@
  * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-open` / `ui-close` mean the user).
  */
 
-import { aboutTip, commentLabel, commentsOnPage, firstWords, wireComments } from "./spell-doc-comments.js"
+import { commentsOnPage, firstWords, wireComments } from "./spell-doc-comments.js"
 import {
-  attr,
-  beforeToolbar,
+  addBlockAction,
+  addHeadTool,
+  alignBlockActions,
+  dropBlockAction,
+  el,
   growField,
   noteToast,
   postJSON,
   readJSON,
-  shortStamp,
-  text,
+  titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
+import { ThreadFacts } from "$/epics/comments"
 import { EpicAddress, PageTargets } from "$/epics/links"
+import { ComponentPacks } from "@spell-app/ui/ui-components"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
 const TAGS = [
@@ -94,6 +97,7 @@ const TAGS = [
   "ui-content",
   "ui-menu",
   "ui-item",
+  "ui-label",
   "ui-sticky",
   "ui-button",
   "ui-input",
@@ -121,6 +125,15 @@ const SETTLE_MS = 450
 const FOLD_HOLD_MS = 600
 
 /**
+ * How long a live reload holds the page at its saved scroll (`holdScroll()`), ms:  while the folds it put back draw,
+ * and their parts load.
+ */
+const RESTORE_HOLD_MS = 1500
+
+/** What the reader does that stops the page landing by itself:  he's moving it. */
+const READER_INPUT = ["wheel", "touchstart", "keydown", "pointerdown"]
+
+/**
  * An epic page's folding blocks (`$/epics`):  its sections, in the outline, the folds and the landing.
  * Each host has `open` (page state) and `contentsEntry` (`EpicFoldHost`).
  */
@@ -138,6 +151,12 @@ const SECTIONS = `ui-section, ${EPIC_FOLDS}`
  */
 const EPIC_WAIT_MS = 5000
 
+/**
+ * The `epics` pack's script at the engine's route (`EpicServer`'s `/_epic/pack/`), as epic pages name it:
+ * what `loadEpicsPack()` loads on a page that names none.
+ */
+const EPICS_PACK = "/_epic/pack/epics.pack.js"
+
 /** Space between the stuck titles and an element a link lands on inside an epic page, px (`EpicFold`'s `LAND_GAP`). */
 const EPIC_LAND_GAP = 8
 
@@ -149,6 +168,9 @@ const FILTER_KEY_PREFIX = "spell-filter:"
 
 /** `localStorage` key prefix of a page's folds (`{ [section or heading id]: folded }`), per page like the filter's. */
 const FOLD_KEY_PREFIX = "spell-folds:"
+
+/** `sessionStorage` key prefix of the folds a live reload puts back (`{ [id]: open }`, `keepFoldsForReload()`). */
+const KEPT_FOLDS_KEY_PREFIX = "spell-doc:kept-folds:"
 
 /**
  * `localStorage` key prefix of a page's item filters (`{ [section id]: "all" | state }`), per page.
@@ -168,13 +190,23 @@ else void start()
 
 /** Highlight at once (plain DOM);  wire the widgets once their elements are defined. */
 async function start() {
+  loadEpicsPack()
   nameTab()
   const main = document.querySelector("main.spell-doc-main") ?? document.querySelector("main")
   if (!main) return
   // where to land, read before anything scrolls:  scroll-follow rewrites the address as the page moves
   const landing = { hash: hashId(), scroll: window.SPELL_SERVER?.takeScroll?.() }
+  // a LIVE reload (the page's code changed) comes back as the reader left it:  every fold, and the scroll
+  const kept = takeKeptFolds(landing.scroll !== undefined)
+  keepFoldsForReload(main)
+  if (landing.scroll !== undefined) {
+    // never the section the address names:  `<epic-*>` blocks follow the address's `#hash` by themselves as they
+    // first connect, and landed on its top (I23 of `epic-engine`);  the address follows the scroll again once landed
+    landing.hash = undefined
+    if (location.hash) history.replaceState(history.state, "", `${location.pathname}${location.search}`)
+  }
   // an old phase address (`#p7`) shows the phase's stable id it landed on (`addressedId()`)
-  if (landing.hash && landing.hash !== decodeHash(location.hash.slice(1)))
+  else if (landing.hash && landing.hash !== decodeHash(location.hash.slice(1)))
     history.replaceState(null, "", `#${landing.hash}`)
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
@@ -182,7 +214,7 @@ async function start() {
   // an epic page:  its saved folds before its blocks first draw (so nothing animates), then the blocks, which the
   // outline reads (their labels, icons and counts)
   if (main.querySelector("epic-page")) {
-    restoreEpicFolds(main)
+    restoreEpicFolds(main, kept)
     await epicsDrawn(main)
   }
   const outline = outlineOf(main)
@@ -193,7 +225,7 @@ async function start() {
   else markItemStates(main)
   const rail = buildNavigation(main, outline, counts)
   // before the sections first draw, so a saved fold doesn't animate shut
-  const folds = wireFolds(main, outline)
+  const folds = wireFolds(main, outline, kept)
   const used = TAGS.filter((tag) => document.querySelector(tag))
   await Promise.all(used.map((tag) => customElements.whenDefined(tag)))
   const sticky = trackStickyHeights(main, outline)
@@ -214,26 +246,40 @@ async function start() {
   wireNotes(main)
   void wireComments(main, { go, fitToolbar: fitTitles })
   wireNewEpic(main)
-  wireSagaChips(main)
   wireEpicSort(main)
-  wireFavorites(main)
-  // the docs index tool rewrites this page after a new epic:  its header comes back without the pill, a starred card
-  // maybe in its old place too
+  // the docs index tool rewrites this page after a new epic:  its header comes back without the pill and the sort
   addEventListener("spell-doc:updated", () => {
     wireNewEpic(main)
-    wireSagaChips(main)
     wireEpicSort(main)
-    wireFavorites(main)
   })
+}
+
+/**
+ * Load the `epics` pack on EVERY page this runtime runs on (epic `epic-engine` P3), so an `<epic-*>` element in it,
+ * written or drawn by our tools, upgrades:  a guide, a list or details page, the changelog, not only an epic page.
+ * - Through `ComponentPacks.load()`, as `<ui-root>` loads a `<ui-components source>`:  ONE script per page, keyed by
+ *   its URL, the pack registered once.  So a page that names the pack already (an epic page's root, a saga page's old
+ *   path) loads it by THAT source, and its root's load and this one are the same.
+ * - No `<ui-root>` needed:  the pack defines its tags for the whole document.  Most guides have none.
+ * - Async (a `<script>` added):  it never holds up the first paint, or `start()`.
+ *   An element made before it registers upgrades as it does;  wait with `customElements.whenDefined()`.
+ * - A pack that can't load (a page from `file://`):  a console warning, and the page goes on without.
+ */
+function loadEpicsPack() {
+  const declared = [...document.querySelectorAll("ui-components[source]")]
+    .map((element) => element.getAttribute("source"))
+    .find((source) => source && ComponentPacks.nameFor(new URL(source, document.baseURI).href) === "epics")
+  ComponentPacks.load(declared ?? EPICS_PACK).catch((error) => console.warn("spell-doc:  the epics pack", error))
 }
 
 /**
  * The page's head on ONE line, as an epic page's (Owen, 2026-10-13:  "Make the header changes in the other doc
  * files"):  `DOCS / SPELL SYNTAX`, the crumbs then the title, in the crumbs' own type, the title twice their size
  * and bold (`spell-doc.css`, "The page's head on one line").
- * - a copy of the page's breadcrumb (`.spell-crumbs`, before the sticky head) goes INTO the h1, before its text,
- *   its last section (the page itself) left out:  the title says it;  `data-spell-added`, so a live update steps
- *   around it
+ * - a copy of the page's breadcrumb (`.spell-crumbs`, before the sticky head) goes INTO the h1, before its text;
+ *   `data-spell-added`, so a live update steps around it
+ *   - its last section (the page itself) stays, emptied:  the title says its words;  so the `/` before the title is
+ *     the breadcrumb's own divider (epic `epic-engine` P3:  a `<span>` of ours before)
  * - the breadcrumb itself stays where it was, hidden (`<body class="spell-one-line-head">`):  live updates still
  *   patch it, and the copy follows when the page reloads
  * - a page with no breadcrumb:  the title alone, in the same type
@@ -248,22 +294,25 @@ function oneLineHead(main) {
   trail.classList.add("spell-head-crumbs")
   trail.dataset.spellAdded = ""
   trail.removeAttribute("id")
-  trail.querySelector(":scope > ui-breadcrumb-section[active]")?.remove()
-  const divider = document.createElement("span")
-  divider.className = "spell-head-divider"
-  divider.dataset.spellAdded = ""
-  divider.setAttribute("aria-hidden", "true")
-  divider.textContent = "/"
-  h1.prepend(trail, divider)
+  const page = trail.querySelector(":scope > ui-breadcrumb-section[active]")
+  if (page) {
+    page.textContent = ""
+    // the space before it too:  the divider sits as the old one did, `spell-doc.css` spacing it
+    if (page.previousSibling?.nodeType === Node.TEXT_NODE && !page.previousSibling.textContent.trim())
+      page.previousSibling.remove()
+  }
+  h1.prepend(trail)
 }
 
 /**
  * The wide layout, every page's (`spell-doc.css`, "Layout";  epic `epic-engine` P2):  every table sits in the reading
- * column, as prose does, with an EXPAND button above its top-left corner that runs it the page's full width
+ * column, as prose does, with an EXPAND button over its top right corner that runs it the page's full width
  * (Owen, 2026-10-13:  "make tables fit in the column by default, but have an expand button ... Remember that setting
  * per table").
- * - The button sits in a zero-height bar just before the table (`.spell-table-toggle`, `data-spell-added`), so it
- *   takes no room;  a click flips it back to the column.
+ * - The button is a `<ui-button circular basic>` (`.spell-table-toggle`) in the table's ACTIONS ROW
+ *   (`addBlockAction()`), right of its bullhorn (Owen, 2026-10-19:  "The expand button should be to the right of the
+ *   bullhorn rather than in its own line"):  a line of no height, so it takes no room;  a click flips it back.
+ * - Expanded, the row moves with the table:  its buttons stay over the table's top right corner.
  * - Expanded:  CSS can't know how far in a table starts (a list's indent, an item's inset), so this measures it,
  *   moving the table out to the page's gutter with the page's width, less the gutter on both sides.
  *   Again whenever its parent changes size (a section or item opening, the window resizing).
@@ -289,16 +338,17 @@ function wireTableWidths(main) {
     const parent = box.parentElement
     if (!toggle || !parent || !box.isConnected) return
     const wide = isWide(box)
-    toggle.classList.toggle("is-wide", wide)
-    const button = toggle.querySelector("button")
-    button.title = wide ? "Back into the column" : "Expand to the page's width"
-    button.setAttribute("aria-label", button.title)
-    button.querySelector("ui-icon").setAttribute("name", wide ? "arrows left right to line" : "arrows left right")
+    const row = toggle.closest(".spell-block-actions")
+    toggle.toggleAttribute("active", wide)
+    toggle.title = wide ? "Back into the column" : "Expand to the page's width"
+    toggle.setAttribute("aria-label", toggle.title)
+    toggle.setAttribute("icon", wide ? "arrows left right to line" : "arrows left right")
+    titleInside(toggle)
     if (!wide) {
-      for (const each of [box, toggle]) each.style.removeProperty("margin-inline-start")
-      box.style.removeProperty("width")
+      for (const each of [box, row]) each.style.removeProperty("margin-inline-start")
+      for (const each of [box, row]) each.style.removeProperty("width")
       box.style.removeProperty("max-width")
-      return
+      return alignBlockActions(row)
     }
     if (!parent.getClientRects().length) return
     const page = main.getBoundingClientRect()
@@ -310,7 +360,9 @@ function wireTableWidths(main) {
     box.style.maxWidth = "none"
     box.style.width = `${page.width - 2 * gutter}px`
     box.style.marginInlineStart = start
-    toggle.style.marginInlineStart = start
+    row.style.width = box.style.width
+    row.style.marginInlineStart = start
+    alignBlockActions(row)
   }
   const flip = (box) => {
     const saved = readJSON(storeKey)
@@ -321,28 +373,26 @@ function wireTableWidths(main) {
     place(box)
   }
   const toggleFor = (box) => {
-    const toggle = document.createElement("div")
+    const toggle = document.createElement("ui-button")
     toggle.className = "spell-table-toggle"
-    toggle.dataset.spellAdded = ""
-    const button = document.createElement("button")
-    button.type = "button"
-    const icon = document.createElement("ui-icon")
-    button.append(icon)
-    button.addEventListener("click", () => flip(box))
-    toggle.append(button)
+    for (const name of ["circular", "basic"]) toggle.setAttribute(name, "")
+    toggle.setAttribute("size", "mini")
+    toggle.addEventListener("click", () => flip(box))
     return toggle
   }
   const watch = () => {
     // a table a live update replaced:  its button goes with it
     for (const [box, toggle] of toggles) {
-      if (box.isConnected && toggle.nextElementSibling === box) continue
-      toggle.remove()
+      const row = toggle.closest(".spell-block-actions")
+      if (box.isConnected && row?.nextElementSibling === box) continue
+      for (const name of ["width", "margin-inline-start"]) row?.style.removeProperty(name)
+      dropBlockAction(toggle)
       toggles.delete(box)
     }
     for (const box of boxesIn(main)) {
       if (toggles.has(box) || !box.parentElement) continue
       const toggle = toggleFor(box)
-      box.before(toggle)
+      addBlockAction(box, toggle, "expand")
       toggles.set(box, toggle)
       sizes.observe(box.parentElement)
       place(box)
@@ -446,8 +496,8 @@ function tableKey(box, main) {
 
 /**
  * Land where the page should open, once its sections have drawn and folded:
- * - a live reload's saved scroll position (`SPELL_SERVER.takeScroll()`):  exactly there, and again after a fold's
- *   transition (`SETTLE_MS`) unless the reader scrolled meanwhile
+ * - a live reload's saved scroll position (`SPELL_SERVER.takeScroll()`):  exactly there, held while the page settles
+ *   (`holdScroll()`);  its `#hash` was dropped (`start()`)
  * - else the URL's `#hash`:
  *   - a section or heading WITHOUT unfolding the target itself:  the address follows the section being read
  *     (`followScroll()`), so a reload (or VS Code restarting) lands on it, folded or not, as the reader left it
@@ -460,11 +510,7 @@ function tableKey(box, main) {
  */
 function land({ hash, scroll }, jump, follow) {
   if (scroll !== undefined) {
-    scrollTo({ top: scroll, behavior: "instant" })
-    const landed = scrollY
-    setTimeout(() => {
-      if (Math.abs(scrollY - landed) < 2) scrollTo({ top: scroll, behavior: "instant" })
-    }, SETTLE_MS)
+    holdScroll(scroll)
     follow?.update()
   } else if (hash) {
     const landed = jump(hash, { unfoldTarget: document.getElementById(hash)?.localName === "epic-item" })
@@ -472,13 +518,34 @@ function land({ hash, scroll }, jump, follow) {
     // item has no box of its own:  `display: contents`), so land once more when the page has settled, unless the
     // reader has moved meanwhile
     let moved = false
-    for (const type of ["wheel", "touchstart", "keydown", "pointerdown"])
-      addEventListener(type, () => (moved = true), { once: true, passive: true })
+    for (const type of READER_INPUT) addEventListener(type, () => (moved = true), { once: true, passive: true })
     setTimeout(() => !moved && jump(hash, { unfoldTarget: false }), SETTLE_MS * 2)
     void landed.then(() => follow?.followAddress())
     return
   } else follow?.update()
   follow?.followAddress()
+}
+
+/**
+ * Keep the page at `top` while it settles after a live reload:  every frame for `RESTORE_HOLD_MS`,
+ * until the reader does anything (`READER_INPUT`).
+ * - why:  the page grows as it settles (the folds put back draw, their parts load), and the browser and the elements
+ *   scroll it meanwhile;  one scroll, and one more after `SETTLE_MS` only when nothing else had moved it, landed short
+ *   (I23 of `epic-engine`:  1150 -> 671)
+ * - the page may be too short for `top` at first:  it gets there as it grows
+ */
+function holdScroll(top) {
+  const reader = new AbortController()
+  for (const type of READER_INPUT)
+    addEventListener(type, () => reader.abort(), { once: true, passive: true, signal: reader.signal })
+  const until = performance.now() + RESTORE_HOLD_MS
+  const hold = () => {
+    if (reader.signal.aborted) return
+    if (Math.abs(scrollY - top) >= 1) scrollTo({ top, behavior: "instant" })
+    if (performance.now() < until) requestAnimationFrame(hold)
+    else reader.abort()
+  }
+  hold()
 }
 
 /**
@@ -1488,8 +1555,8 @@ function outermost(item, section) {
 ////////////////
 
 /**
- * Where an item stands, in the colours Owen reads at a glance:  `[state, tooltip words]`, in the item filter's order
- * after "all" (the epic pages' order, `<epic-section>`'s `FILTER_STATES`).
+ * Where an item stands, in the colours Owen reads at a glance:  `[state, tooltip words]` (an id chip's tooltip,
+ * `stateTip()`;  the filter's chips are `<epic-state-filter>`'s, in its order, `FILTER_STATES`).
  * - the colour scheme (Q20 of epic `epic-components`, 2026-10-08;  `templates/epics/plan-doc.md`, "Colours"):
  *   attention red, progress blue (Claude is working on it), open yellow, recent green, old grey;
  *   `spell-doc.css`'s `--spell-state-*` tokens
@@ -1564,22 +1631,24 @@ function markItemStates(main) {
 /**
  * The status filter on every top-level `<ui-section>` with a filterable list
  * (the index's `.spell-epics`, a `.plan-items` list, each holding `[data-status]` children):
- * - ONE chip per state the section has items in, in its colour, with how many (Owen, 2026-10-10:  no filter icon):
- *   SOLID while its items show, OUTLINED while hidden
- * - a click, by `nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown one
- *   hides;  the only one showing, everything again
- * - in the title's `actions` slot (`span.spell-item-filter`);  `spell-doc.css` puts it left of the count badge
- * - a filtered list shows "3 hidden · show all" under it (`.spell-hidden-note`):  a click there shows all
+ * - its chips are the epics pack's, `<epic-state-filter>` (epic `epic-engine` P3:  the ONE chip element, an epic page's
+ *   too):  a chip per state the section has items in, in its colour, with how many (Owen, 2026-10-10:  no filter
+ *   icon);  SOLID while its items show, OUTLINED while hidden
+ * - a click (`epic-state-pick`), by the one rule (`StateFilter.nextShown()`, in the element):  everything showing, only
+ *   that state;  else a hidden state shows too and a shown one hides;  the only one showing, everything again
+ * - in the title's `actions` slot (`.spell-item-filter`);  `spell-doc.css` puts it left of the count badge
+ * - a filtered list shows "3 hidden · show all" under it (`<epic-hidden-note class="spell-hidden-note">`):  a click
+ *   there (`epic-show-all`) shows all
  * - the choice:  `data-show="<states shown>"` on the section (none for all), `data-spell-hidden` on the items it
  *   hides (CSS hides them);  remembered per page (`localStorage`, `{ [section id]: [states] }`);  all by default
- * - an epic page's sections filter themselves (`<epic-section>`), by the same rule
+ * - an epic page's sections filter themselves (`<epic-section>`), with the same element
  * - SIDE EFFECT:  marks the items' states (`markItemStates()`), adds the chips and notes to the page;
  *   callable again (it replaces the ones it added)
  */
 function wireItemFilters(main) {
   const key = `${ITEM_FILTER_KEY_PREFIX}${location.pathname}`
   const saved = readJSON(key)
-  for (const old of main.querySelectorAll(":scope > ui-section > .spell-item-filter, a.spell-hidden-note")) old.remove()
+  for (const old of main.querySelectorAll(":scope > ui-section > .spell-item-filter, .spell-hidden-note")) old.remove()
   markItemStates(main)
   for (const section of main.querySelectorAll(":scope > ui-section[id]")) {
     const lists = Array.from(section.querySelectorAll(".plan-items, .spell-epics")).filter((list) =>
@@ -1589,32 +1658,22 @@ function wireItemFilters(main) {
     const counts = new Map()
     for (const item of lists.flatMap(itemsOf))
       counts.set(item.dataset.spellState, (counts.get(item.dataset.spellState) ?? 0) + 1)
-    const present = ITEM_STATES.filter(([state]) => counts.has(state))
-    const states = present.map(([state]) => state)
-    const group = document.createElement("span")
-    group.className = "spell-item-filter"
-    group.slot = "actions"
-    group.dataset.spellAdded = ""
-    group.setAttribute("role", "group")
-    group.setAttribute("aria-label", "Show items by state")
-    const buttons = present.map(([state]) => stateButton(state, counts.get(state)))
-    group.append(...buttons)
+    const states = [...counts.keys()]
+    const chips = el("epic-state-filter", {
+      class: "spell-item-filter",
+      slot: "actions",
+      counts: [...counts].map(([state, count]) => `${state}:${count}`).join(" "),
+      "data-spell-added": true
+    })
+    chips.addEventListener("epic-state-pick", (event) => choose(event.detail.shown))
     const notes = lists.map((list) => {
-      const note = document.createElement("a")
-      note.className = "spell-hidden-note"
-      note.href = "#"
-      note.dataset.spellAdded = ""
-      note.addEventListener("click", (event) => {
-        event.preventDefault()
-        choose(states)
-      })
+      const note = el("epic-hidden-note", { class: "spell-hidden-note", hidden: true, "data-spell-added": true })
+      note.addEventListener("epic-show-all", () => choose(states))
       list.after(note)
       return note
     })
-    const filter = { section, lists, notes, buttons, present, counts }
-    for (const button of buttons)
-      button.addEventListener("click", () => choose(nextShown(states, filterShown(filter), button.dataset.state)))
-    section.append(group)
+    section.append(chips)
+    const filter = { section, lists, notes, chips, states }
     const remembered = Array.isArray(saved[section.id]) ? saved[section.id].filter((state) => counts.has(state)) : []
     showItems(filter, remembered.length ? remembered : states)
 
@@ -1625,67 +1684,22 @@ function wireItemFilters(main) {
       writeJSON(key, saved)
     }
   }
-
-  /** A state chip:  `state` (`spell-doc.css` colours it by it), its `count` of items. */
-  function stateButton(state, count) {
-    const button = document.createElement("button")
-    button.type = "button"
-    button.className = "spell-state-toggle"
-    button.dataset.state = state
-    button.textContent = String(count)
-    return button
-  }
 }
 
 /**
- * What shows after a click on `clicked`'s chip, of the states `present`, `shown` showing now (Owen, 2026-10-10:
- * "if all states are showing and I click one state, I want you to show just that state"):
- * - everything showing:  only `clicked`;  `clicked` hidden:  it shows too;
- *   `clicked` showing with others:  it hides;  `clicked` the only one showing:  everything again
- * - the epic pages' rule too:  `$/epics` `StateFilter.nextShown()`, the same lines (the pack can't be imported)
+ * Show the items of the states `shown` in a filter's section (`{ section, lists, notes, chips, states }`):  its chips
+ * say which (`shown`, none while every state shows);  an "N hidden" note under each list that hides any.
  */
-function nextShown(present, shown, clicked) {
-  const showing = present.filter((state) => shown.includes(state))
-  if (showing.length === present.length) return [clicked]
-  if (!showing.includes(clicked)) return present.filter((state) => state === clicked || showing.includes(state))
-  if (showing.length === 1) return [...present]
-  return showing.filter((state) => state !== clicked)
-}
-
-/** The states a filter shows now (`{ buttons }`, see `wireItemFilters()`). */
-function filterShown({ buttons }) {
-  return buttons
-    .filter((button) => button.getAttribute("aria-pressed") === "true")
-    .map((button) => button.dataset.state)
-}
-
-/**
- * Show the items of the states `shown` in a filter's section (`{ section, lists, notes, buttons, present, counts }`):
- * each chip pressed or not, its tooltip saying how many, which state and what its click does;
- * an "N hidden" note under each list that hides any.
- */
-function showItems({ section, lists, notes, buttons, present, counts }, shown) {
+function showItems({ section, lists, notes, chips, states }, shown) {
   const showing = new Set(shown)
-  const states = present.map(([state]) => state)
-  for (const button of buttons) {
-    const state = button.dataset.state
-    button.setAttribute("aria-pressed", String(showing.has(state)))
-    const words = ITEM_STATES.find(([each]) => each === state)?.[1] ?? ""
-    const next = nextShown(states, [...showing], state)
-    const does =
-      next.length === states.length
-        ? "show everything"
-        : next.length === 1 && next[0] === state
-          ? "show only these"
-          : next.includes(state)
-            ? "show these too"
-            : "hide these"
-    button.title = `${counts.get(state)} ${words}:  ${does}`
-    button.setAttribute("aria-label", button.title)
-  }
   const everything = states.every((state) => showing.has(state))
-  if (everything) delete section.dataset.show
-  else section.dataset.show = [...showing].join(" ")
+  if (everything) {
+    delete section.dataset.show
+    chips.removeAttribute("shown")
+  } else {
+    section.dataset.show = [...showing].join(" ")
+    chips.setAttribute("shown", section.dataset.show)
+  }
   lists.forEach((list, index) => {
     let hidden = 0
     for (const item of itemsOf(list)) {
@@ -1694,7 +1708,7 @@ function showItems({ section, lists, notes, buttons, present, counts }, shown) {
       if (hide) hidden++
     }
     notes[index].hidden = hidden === 0
-    notes[index].textContent = `${hidden} hidden · show all`
+    notes[index].setAttribute("count", String(hidden))
   })
 }
 
@@ -1712,7 +1726,8 @@ const MIN_TITLE_PX = 50
 
 /**
  * The page's navigation:  an epic page's toolbar (`buildToolbar()`), else the page toolbar (`buildPageToolbar()`).
- * - returns the `<nav>`, whose `[data-rail]` entries scroll-follow marks;  none without top-level sections
+ * - both the SAME element, Spell UI's menu (`toolbarMenu()`):  a guide's and an epic page's band look and behave alike
+ * - returns the menu, whose `[data-rail]` items scroll-follow marks `selected`;  none without top-level sections
  * - `data-rail`:  the name the floating rail gave them (gone since epic `airplane` P8);  kept, as scroll-follow,
  *   a details page's `<epic-ask>` and `check-spell.js` read it
  */
@@ -1738,38 +1753,34 @@ function buildNavigation(main, outline, counts) {
  *   measured as the filter bar is:  `trackStickyHeights()`)
  * - HEADINGS (the saga pages):  only the h2s that head a sticky section
  * - callable again (a page updated in place):  replaces the toolbar it built before
- * - SIDE EFFECT:  adds the `<nav>` inside `main`, marked `data-spell-added` so the live patch steps around it;
+ * - SIDE EFFECT:  adds the menu inside `main`, marked `data-spell-added` so the live patch steps around it;
  *   removes a hand-written `.spell-toc-open` (pages before 2026-10-01 had a "Contents" button)
  */
 function buildPageToolbar(main, outline, counts) {
-  for (const old of document.querySelectorAll(".spell-toc-open, nav.spell-toolbar")) old.remove()
   const groups = outline.sections ? outline.groups : outline.groups.filter((group) => headingSection(group.element))
-  const entries = groups.map(({ element, id, label, glyph }) => {
+  const items = groups.map(({ element, id, label, glyph }) => {
     // an item id first in the label (`Q3 · When?`) says more than any icon:  every question's would be the same
     const itemNumber = label.match(/^[A-Z](\d+)\b/)?.[1]
-    const mark = itemNumber
-      ? `<b class="spell-toolbar-number">${text(itemNumber)}</b>`
-      : glyph
-        ? `<ui-icon name="${attr(glyph)}"></ui-icon>`
-        : `<b>${text((label.match(/^\d+/) ?? [label.charAt(0)])[0])}</b>`
-    const name = itemNumber ? label : shortLabel(label)
     const count = counts.get(element)
-    const badge = count?.attention
-      ? `<span class="spell-toolbar-count urgent" title="${needYou(count)}">${count.attention}</span>`
-      : ""
-    const state = element.dataset.state ? ` data-state="${attr(element.dataset.state)}"` : ""
-    return (
-      `<a class="spell-toolbar-item" href="#${attr(id)}" data-rail="${attr(id)}" title="${attr(label)}"${state}>` +
-      `<span class="spell-toolbar-icon">${mark}</span><span class="spell-toolbar-label">${text(name)}</span>` +
-      `${badge}</a>`
-    )
+    return toolbarItem({
+      id,
+      tip: label,
+      glyph: itemNumber ? undefined : glyph,
+      mark: itemNumber
+        ? el("b", { slot: "icon", class: "spell-toolbar-number" }, itemNumber)
+        : glyph
+          ? undefined
+          : el("b", { slot: "icon" }, (label.match(/^\d+/) ?? [label.charAt(0)])[0]),
+      title: itemNumber ? label : shortLabel(label),
+      state: element.dataset.state,
+      badges: count?.attention ? [["urgent", count.attention, needYou(count)]] : []
+    })
   })
-  if (!entries.length) return undefined
-  const toolbar = document.createElement("nav")
-  toolbar.className = "spell-toolbar spell-toolbar-titled"
-  toolbar.dataset.spellAdded = ""
-  toolbar.setAttribute("aria-label", "Sections")
-  toolbar.innerHTML = `<div class="spell-toolbar-items">${entries.join("")}</div>`
+  if (!items.length) {
+    removeToolbar()
+    return undefined
+  }
+  const toolbar = toolbarMenu(items, { titled: true })
   const head =
     main.querySelector(":scope > ui-sticky.spell-h1 > .spell-page-head") ?? main.querySelector(".spell-filter")
   if (head) head.append(toolbar)
@@ -1778,13 +1789,9 @@ function buildPageToolbar(main, outline, counts) {
     const first = groups[0].element
     ;(outline.sections ? first : (headingSection(first) ?? first)).before(toolbar)
   }
-  // the current button in view, on a row scrolled sideways
-  new MutationObserver((changes) => {
-    for (const { target } of changes) if (target.hasAttribute("selected")) scrollIntoRow(target)
-  }).observe(toolbar, { subtree: true, attributeFilter: ["selected"] })
-  // fitted again as the window changes width, and as the icons draw and the fonts load
-  const fit = new ResizeObserver(() => fitTitles(toolbar))
-  for (const box of [toolbar, ...toolbar.querySelectorAll(".spell-toolbar-icon")]) fit.observe(box)
+  // fitted again as the window changes width, as the items draw and the fonts load
+  new ResizeObserver(() => fitTitles(toolbar)).observe(toolbar)
+  void customElements.whenDefined("ui-item").then(() => nextFrames(2).then(() => fitTitles(toolbar)))
   void document.fonts?.ready.then(() => fitTitles(toolbar))
   return toolbar
 }
@@ -1793,21 +1800,27 @@ function buildPageToolbar(main, outline, counts) {
  * The page toolbar's titles:  shown, shrinking with `...` (CSS), while each gets `MIN_TITLE_PX` or more of the row;
  * else gone (`spell-toolbar-icons`), the marks only (Owen, 2026-10-10:  "remove the titles entirely if they each only
  * get less than 50px").
- * - each title's share:  the row's room, less every button's mark, badge and padding, split evenly
+ * - each title's share:  the row's room, less every button's mark, badge and padding, and what else the row holds (the
+ *   bullhorn, the spell syntax guide's Expand all), split evenly
+ * - measured on the items' drawn boxes:  a `<ui-item>` is `display: contents`, its box is in its shadow root
  */
 function fitTitles(toolbar) {
-  const row = toolbar.firstElementChild
-  const items = Array.from(row.children)
+  const row = toolbarRow(toolbar)
+  const items = [...toolbar.querySelectorAll(":scope > [data-rail]")]
   toolbar.classList.remove("spell-toolbar-icons")
-  if (!items.length) return
+  if (!row || !items.length) return
   const style = getComputedStyle(row)
+  const others = [...toolbar.children]
+    .filter((child) => !child.hasAttribute("data-rail") && !child.hidden)
+    .reduce((sum, child) => sum + boxOf(child).width, 0)
   const room =
     row.clientWidth -
     parseFloat(style.paddingLeft) -
     parseFloat(style.paddingRight) -
-    (parseFloat(style.columnGap) || 0) * (items.length - 1)
+    (parseFloat(style.columnGap) || 0) * (toolbar.children.length - 1) -
+    others
   const fixed = items.reduce(
-    (sum, item) => sum + item.offsetWidth - (item.querySelector(".spell-toolbar-label")?.offsetWidth ?? 0),
+    (sum, item) => sum + boxOf(item).width - (item.querySelector(".spell-toolbar-label")?.offsetWidth ?? 0),
     0
   )
   if ((room - fixed) / items.length < MIN_TITLE_PX) toolbar.classList.add("spell-toolbar-icons")
@@ -1832,50 +1845,106 @@ function fitTitles(toolbar) {
  * - a window too narrow for every button:  the row scrolls sideways (`spell-doc.css`, "Toolbar"), the current button
  *   scrolled into view
  * - callable again (a page updated in place):  replaces the toolbar built before
- * - SIDE EFFECT:  appends the `<nav>` to `page`, marked `data-spell-added` so the live patch steps around it
+ * - SIDE EFFECT:  appends the menu to `page`, marked `data-spell-added` so the live patch steps around it
  */
 function buildToolbar(page, outline, counts) {
-  for (const old of document.querySelectorAll(".spell-toc-open, nav.spell-toolbar")) old.remove()
-  const entries = outline.groups.map(({ element, id, label, glyph }) => {
+  const items = outline.groups.map(({ element, id, label, glyph }) => {
     const count = counts.get(element)
     const replied = count?.replied ?? 0
     const urgent = (count?.attention ?? 0) - replied
     const name = shortLabel(label)
-    // spoken:  the name, then what the badges say
-    const spoken = [name, urgent > 0 && `${urgent} urgent`, replied > 0 && `${replied} replied`]
-      .filter(Boolean)
-      .join(", ")
-    // no icon:  the label's first letter stands in
-    const mark = glyph ? `<ui-icon name="${attr(glyph)}"></ui-icon>` : `<b>${text(name.charAt(0))}</b>`
-    const badges =
-      badge("urgent", urgent, `${urgent} urgent`) +
-      badge("replied", replied, `${replied} replied:  ${replied === 1 ? "waits" : "wait"} for your pick`)
-    // the badges inside the icon's box, over its top right:  every button the same width, badges or not
-    return (
-      `<a class="spell-toolbar-item" href="#${attr(id)}" data-rail="${attr(id)}" title="${attr(name)}" ` +
-      `aria-label="${attr(spoken)}"><span class="spell-toolbar-icon">${mark}` +
-      (badges && `<span class="spell-toolbar-badges">${badges}</span>`) +
-      `</span></a>`
-    )
+    const waits = replied === 1 ? "waits" : "wait"
+    return toolbarItem({
+      id,
+      tip: name,
+      glyph,
+      // no icon:  the label's first letter stands in
+      mark: glyph ? undefined : el("b", { slot: "icon" }, name.charAt(0)),
+      badges: [
+        ["urgent", urgent, `${urgent} urgent`],
+        ["replied", replied, `${replied} replied:  ${waits} for your pick`]
+      ].filter(([, number]) => number > 0)
+    })
   })
-  if (!entries.length) return undefined
-  const toolbar = document.createElement("nav")
-  toolbar.className = "spell-toolbar"
+  if (!items.length) {
+    removeToolbar()
+    return undefined
+  }
+  const toolbar = toolbarMenu(items, { titled: false })
   toolbar.slot = "toolbar"
-  toolbar.dataset.spellAdded = ""
-  toolbar.setAttribute("aria-label", "Sections")
-  toolbar.innerHTML = `<div class="spell-toolbar-items">${entries.join("")}</div>`
-  // the current button in view, on a row scrolled sideways
-  new MutationObserver((changes) => {
-    for (const { target } of changes) if (target.hasAttribute("selected")) scrollIntoRow(target)
-  }).observe(toolbar, { subtree: true, attributeFilter: ["selected"] })
   page.append(toolbar)
   return toolbar
+}
 
-  /** A badge of `number` items of `kind`, or nothing for none. */
-  function badge(kind, number, tip) {
-    return number > 0 ? `<span class="spell-toolbar-count ${kind}" title="${attr(tip)}">${number}</span>` : ""
+/**
+ * THE TOOLBAR, every page's (epic `epic-engine` P3:  Owen, 2026-10-19, "Why are we not using <ui-xxxx> or <epic-xxx>
+ * components for these pages?"):  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`, a `<nav>` landmark of
+ * `<ui-item>` links (`toolbarItem()`), its look `spell-doc.css`'s ("Toolbar"), through the menu's tokens.
+ * - the current item `selected` (scroll-follow), which the menu draws, and says (`aria-current`)
+ * - `titled`:  a guide's, each item its mark and its title (`spell-toolbar-titled`);  else an epic page's, marks only,
+ *   every item the same width
+ * - after the items, what a page or the comments add to the row:  the toolbar's bullhorn (`PageComments`), the spell
+ *   syntax guide's Expand all and Collapse all;  the items scroll sideways under them (`spell-doc.css`)
+ * - the current item scrolled into view, on a row scrolled sideways (`scrollIntoRow()`)
+ * - SIDE EFFECT:  removes the toolbar built before (`removeToolbar()`), keeping what was added to its row
+ */
+function toolbarMenu(items, { titled }) {
+  const kept = removeToolbar()
+  const toolbar = el("ui-menu", {
+    class: titled ? "spell-toolbar spell-toolbar-titled" : "spell-toolbar",
+    secondary: true,
+    "aria-label": "Sections",
+    "data-spell-added": true
+  })
+  toolbar.append(...items, ...kept)
+  new MutationObserver((changes) => {
+    for (const { target } of changes) if (target.hasAttribute("selected")) scrollIntoRow(target)
+  }).observe(toolbar, { attributeFilter: ["selected"], subtree: true })
+  return toolbar
+}
+
+/**
+ * One toolbar item:  a `<ui-item>` link to section `id` (`data-rail`), its mark (`glyph`, the menu's icon box;  else
+ * `mark`, a `slot="icon"` element), its `title` when the toolbar is titled, its `badges` (`[kind, number, words]`:
+ * `<ui-label>`s over the mark's top right), `state` (`data-state`, a details page's question's colour).
+ * - its tooltip `tip` on the link inside, where the pointer lands (`titleInside()`):  its mark, title and badges let
+ *   the pointer through (`spell-doc.css`), so it shows in VS Code too;  the badges say theirs in it, and to a screen
+ *   reader
+ */
+function toolbarItem({ id, tip, glyph, mark, title, state, badges }) {
+  const said = [tip, ...badges.map(([, , words]) => words)].join(" · ")
+  const item = el(
+    "ui-item",
+    {
+      class: "spell-toolbar-item",
+      href: `#${id}`,
+      "data-rail": id,
+      icon: glyph,
+      title: said,
+      "aria-label": said,
+      "data-state": state
+    },
+    mark,
+    title && el("span", { class: "spell-toolbar-label" }, title),
+    ...badges.map(([kind, number]) =>
+      el("ui-label", { class: `spell-toolbar-count ${kind}`, circular: true, size: "mini" }, String(number))
+    )
+  )
+  titleInside(item, "item")
+  return item
+}
+
+/**
+ * Take the page's toolbar away (and a hand-written `.spell-toc-open`:  pages before 2026-10-01 had a "Contents"
+ * button);  returns what pages and the comments had added to its row, for the toolbar built next.
+ */
+function removeToolbar() {
+  const kept = []
+  for (const old of document.querySelectorAll(".spell-toc-open, .spell-toolbar")) {
+    kept.push(...[...old.children].filter((child) => !child.hasAttribute("data-rail")))
+    old.remove()
   }
+  return kept
 }
 
 /** A block's label without its number:  `3. Questions` is `Questions`. */
@@ -1883,13 +1952,25 @@ function shortLabel(label) {
   return label.replace(/^\d+(?:\.\d+)*\.?\s+/, "")
 }
 
+/** The toolbar's row:  the menu's `<nav>`, in its shadow root;  `undefined` before it has drawn. */
+function toolbarRow(toolbar) {
+  return toolbar.shadowRoot?.querySelector('[part~="menu"]') ?? undefined
+}
+
+/** The box `element` draws:  a `<ui-item>`'s item, in its shadow root (the host is `display: contents`). */
+function boxOf(element) {
+  const box = element.shadowRoot?.querySelector('[part~="item"]') ?? element
+  return box.getBoundingClientRect()
+}
+
 /** Scroll `item`'s row sideways (never the page) until it shows whole, centred if it has to move. */
 function scrollIntoRow(item) {
-  const row = item.parentElement
+  const row = toolbarRow(item.parentElement)
   if (!row || row.scrollWidth <= row.clientWidth) return
-  const start = item.getBoundingClientRect().left - row.getBoundingClientRect().left + row.scrollLeft
-  if (start >= row.scrollLeft && start + item.offsetWidth <= row.scrollLeft + row.clientWidth) return
-  row.scrollTo({ left: start - (row.clientWidth - item.offsetWidth) / 2, behavior: "smooth" })
+  const box = boxOf(item)
+  const start = box.left - row.getBoundingClientRect().left + row.scrollLeft
+  if (start >= row.scrollLeft && start + box.width <= row.scrollLeft + row.clientWidth) return
+  row.scrollTo({ left: start - (row.clientWidth - box.width) / 2, behavior: "smooth" })
 }
 
 ////////////////
@@ -1918,10 +1999,11 @@ function scrollIntoRow(item) {
  *   - a `<ui-section>` unfolds WITHOUT its height animation (`--ui-section-duration: 0s` on `main` for a few frames):
  *     the jump measures the target once it has drawn,
  *     and a growing box would move it (scroll anchoring) after the page has landed
+ * - `kept`:  the folds a live reload puts back (`takeKeptFolds()`), over the saved ones and the markup's
  * - callable again (a page updated in place):  drops the listeners of the call before (`foldWiring`);
  *   a heading that has its chevron keeps it
  */
-function wireFolds(main, outline) {
+function wireFolds(main, outline, kept) {
   foldWiring?.abort()
   foldWiring = new AbortController()
   const { signal } = foldWiring
@@ -1935,7 +2017,8 @@ function wireFolds(main, outline) {
   function wireSectionFolds() {
     const startFolded = document.body.classList.contains("plan-doc")
     for (const section of main.querySelectorAll("ui-section[collapsible][id]"))
-      if (section.id in saved) setCollapsed(section, !!saved[section.id])
+      if (kept && section.id in kept) setCollapsed(section, !kept[section.id])
+      else if (section.id in saved) setCollapsed(section, !!saved[section.id])
       else if (startFolded) setCollapsed(section, true)
     main.addEventListener("ui-open", onToggle, { signal })
     main.addEventListener("ui-close", onToggle, { signal })
@@ -2040,14 +2123,15 @@ function wireFolds(main, outline) {
       const section = sticky.parentElement
       const button = document.createElement("ui-button")
       button.className = "spell-fold"
-      for (const [name, value] of Object.entries({ circular: "", basic: "", size: "mini", icon: "chevron down" }))
-        button.setAttribute(name, value)
-      const tip = document.createElement("ui-popup")
-      for (const [name, value] of Object.entries({ inverted: "", size: "mini", content: "Fold / unfold" }))
-        tip.setAttribute(name, value)
-      heading.prepend(button, tip)
+      // its tooltip the browser's own, on the button the pointer lands on ("TOOLTIPS";  a `<ui-popup>` before I32)
+      const tip = "Fold / unfold"
+      const attributes = { circular: "", basic: "", size: "mini", icon: "chevron down", title: tip, "aria-label": tip }
+      for (const [name, value] of Object.entries(attributes)) button.setAttribute(name, value)
+      titleInside(button)
+      heading.prepend(button)
       heading.classList.add("spell-foldable")
-      setFolded(section, heading.id in saved ? !!saved[heading.id] : section.dataset.fold === "closed")
+      if (kept && heading.id in kept) setFolded(section, !kept[heading.id])
+      else setFolded(section, heading.id in saved ? !!saved[heading.id] : section.dataset.fold === "closed")
       heading.addEventListener("click", (event) => {
         // the chevron's own `<button>` (in its shadow root) comes first in the path:  look for the HOST
         const path = event.composedPath()
@@ -2115,11 +2199,53 @@ function wireFolds(main, outline) {
  * An epic page's blocks the reader left open on this page (saved folds, `spell-folds:<path>`):
  * open again, before they first draw (their `open` attribute), so nothing animates;
  * the rest start folded, as the blocks do.
+ * - `kept`:  after a live reload, every block AND item open before it (`takeKeptFolds()`), whoever opened it
  */
-function restoreEpicFolds(main) {
+function restoreEpicFolds(main, kept) {
   const saved = readJSON(`${FOLD_KEY_PREFIX}${location.pathname}`)
-  for (const block of main.querySelectorAll(EPIC_FOLDS))
-    if (block.id && saved[block.id] === false) block.setAttribute("open", "")
+  for (const block of main.querySelectorAll(kept ? EPIC_OPENERS : EPIC_FOLDS)) {
+    if (!block.id) continue
+    if (kept && block.id in kept) block.toggleAttribute("open", kept[block.id])
+    else if (saved[block.id] === false) block.setAttribute("open", "")
+  }
+}
+
+/**
+ * Keep every fold as it is as the page goes (`pagehide`), for a LIVE reload to put back (`takeKeptFolds()`):
+ * `{ [id]: open }` in `sessionStorage`, of every section, folding heading, epic page block and ITEM with an id.
+ * - why:  the saved folds (`spell-folds:<path>`) hold only what the reader folded or unfolded himself, never an
+ *   item nor what a link opened;  a reload for new code must come back as he left it (I23 of `epic-engine`)
+ * - written on every `pagehide`;  read only after a live reload:  a reload the reader asks for starts from the saved
+ *   folds, as before
+ */
+function keepFoldsForReload(main) {
+  addEventListener("pagehide", () => {
+    const folds = {}
+    for (const block of main.querySelectorAll(`ui-section[collapsible][id], ${EPIC_OPENERS}`))
+      if (block.id) folds[block.id] = !isCollapsed(block)
+    for (const heading of main.querySelectorAll(".spell-foldable[id]"))
+      folds[heading.id] = !heading.parentElement.parentElement.classList.contains("spell-folded")
+    try {
+      sessionStorage.setItem(`${KEPT_FOLDS_KEY_PREFIX}${location.pathname}`, JSON.stringify(folds))
+    } catch {
+      // storage blocked:  a live reload starts from the saved folds
+    }
+  })
+}
+
+/**
+ * The folds `keepFoldsForReload()` kept as the page last went, when this load is a LIVE reload (`live`);
+ * else `undefined`.  Forgets them either way.
+ */
+function takeKeptFolds(live) {
+  const key = `${KEPT_FOLDS_KEY_PREFIX}${location.pathname}`
+  try {
+    const kept = live ? JSON.parse(sessionStorage.getItem(key) ?? "null") : null
+    sessionStorage.removeItem(key)
+    return kept ?? undefined
+  } catch {
+    return undefined
+  }
 }
 
 /**
@@ -2508,40 +2634,30 @@ function wireJumpKey(go, canGo) {
 function openJumpPrompt(go, canGo) {
   const epicPage = document.body.classList.contains("plan-doc")
   const header = epicPage ? "Jump to which item?" : "Jump to which comment?"
-  const modal = document.createElement("ui-modal")
-  for (const [name, value] of Object.entries({ size: "tiny", closedby: "closerequest", header }))
-    modal.setAttribute(name, value)
-  modal.dataset.spellAdded = ""
-  const content = document.createElement("ui-content")
-  const label = document.createElement("label")
-  label.className = "ui-native spell-jump"
-  label.append(epicPage ? "Its id:  J7, q3, P2, M3 ..." : "Its id:  M3, or any id on the page")
-  const input = document.createElement("input")
-  input.type = "text"
-  input.autofocus = true
-  input.autocomplete = "off"
-  input.spellcheck = false
-  const miss = document.createElement("p")
-  miss.className = "spell-jump-miss"
-  miss.setAttribute("role", "alert")
-  miss.hidden = true
-  label.append(input)
-  content.append(label, miss)
-  const actions = document.createElement("ui-actions")
-  const cancel = document.createElement("ui-button")
-  cancel.className = "cancel"
-  cancel.textContent = "Cancel"
-  const approve = document.createElement("ui-button")
-  approve.className = "approve"
-  approve.setAttribute("primary", "")
-  approve.textContent = "Go"
-  actions.append(cancel, approve)
+  const input = el("input", { type: "text", autofocus: true, autocomplete: "off", spellcheck: "false" })
+  const miss = el("p", { class: "spell-jump-miss", role: "alert", hidden: true })
+  const approve = el("ui-button", { class: "approve", primary: true }, "Go")
   const waiting = jumpWaitingList((id) => {
     input.value = id
     approve.click()
   })
-  if (waiting) content.append(waiting)
-  modal.append(content, actions)
+  const modal = el(
+    "ui-modal",
+    { size: "tiny", closedby: "closerequest", header, "data-spell-added": true },
+    el(
+      "ui-content",
+      {},
+      el(
+        "label",
+        { class: "ui-native spell-jump" },
+        epicPage ? "Its id:  J7, q3, P2, M3 ..." : "Its id:  M3, or any id on the page",
+        input
+      ),
+      miss,
+      waiting
+    ),
+    el("ui-actions", {}, el("ui-button", { class: "cancel" }, "Cancel"), approve)
+  )
   let target = ""
   let thread = ""
   input.addEventListener("keydown", (event) => {
@@ -2587,31 +2703,33 @@ function openJumpPrompt(go, canGo) {
  * The jump dialog's list of the threads waiting on Owen (Claude spoke last;  `PageComments.waitingOnOwen`), in page
  * order:  a line each, "M3 · his first words", that `pick(label)` takes;  `undefined` when none wait, or the page takes
  * no comments.
+ * - Spell UI's menu (epic `epic-engine` P3):  a `<ui-menu vertical secondary link>`, its title a header item, each line
+ *   a `<ui-item>` button, so it takes the focus, and Enter
  */
 function jumpWaitingList(pick) {
   const waiting = commentsOnPage()?.waitingInPageOrder() ?? []
   if (!waiting.length) return undefined
-  const list = document.createElement("div")
-  list.className = "spell-jump-waiting"
-  const title = document.createElement("p")
-  title.className = "spell-jump-waiting-title"
-  title.textContent = waiting.length === 1 ? "Waiting on you:" : `${waiting.length} waiting on you:`
-  list.append(title)
-  for (const comment of waiting) {
-    const label = commentLabel(comment.id)
-    const line = document.createElement("button")
-    line.type = "button"
-    line.className = "spell-jump-thread"
-    line.title = `${aboutTip({ id: comment.id, place: comment })}\n(Jump there)`
-    const id = document.createElement("b")
-    id.textContent = label
-    const words = document.createElement("span")
-    words.textContent = firstWords(comment.text)
-    line.append(id, " · ", words)
+  const title = waiting.length === 1 ? "Waiting on you:" : `${waiting.length} waiting on you:`
+  const lines = waiting.map((comment) => {
+    const label = ThreadFacts.label(comment.id)
+    const tip = `${ThreadFacts.aboutTip({ id: comment.id, place: comment })}\n(Jump there)`
+    const line = el(
+      "ui-item",
+      { class: "spell-jump-thread", title: tip },
+      el("b", {}, label),
+      " · ",
+      el("span", {}, firstWords(comment.text))
+    )
     line.addEventListener("click", () => pick(label))
-    list.append(line)
-  }
-  return list
+    titleInside(line, "item")
+    return line
+  })
+  return el(
+    "ui-menu",
+    { class: "spell-jump-waiting", vertical: true, secondary: true, fluid: true, link: true, "aria-label": title },
+    el("ui-item", { class: "spell-jump-waiting-title", type: "header" }, title),
+    ...lines
+  )
 }
 
 /** Is `event`'s key typed into a field (an input, a textarea, a select, editable text)? */
@@ -2987,7 +3105,8 @@ function readSaved(key) {
 
 /**
  * PAGE NOTES (epic `airplane`, P3):  notes written INTO a page (`<spell-notes>` / `<spell-note>`;  the markup and its
- * rules:  `src/tools/PageNotes.js`), each drawn as a folded card (`drawNoteCards()`).
+ * rules:  `src/tools/PageNotes.js`), each drawn as a folded card (`drawNoteCards()`), its head line an
+ * `<epic-page-note-head>` (the epics pack;  epic `epic-engine` P3).
  * - READ ONLY since P11:  comments (below) replaced the bubbles and the Note pill that wrote them;
  *   the notes already written still show, and `epic notes` still answers them
  * - every page, `file://` too;  drawn again on `spell-doc:updated` (an answer changes the page)
@@ -2999,284 +3118,43 @@ function wireNotes(main) {
 
 /**
  * Give each `<spell-note>` its head line, again after every update (the status or replies may have changed):
- * "Owen · 10/10 14:02", the first line of the note while folded, its status, how many replies.
- * - the head is a button that folds and unfolds the card (the note's `open`, which a live patch keeps)
+ * an `<epic-page-note-head>`, "Owen · 10/10 14:02", the first line of the note while folded, its status, how many
+ * replies.
+ * - a click on it folds and unfolds the card (the note's `open`, which a live patch keeps)
  */
 function drawNoteCards(main) {
   for (const note of main.querySelectorAll("spell-note")) {
-    note.querySelector(":scope > .spell-note-head")?.remove()
-    const status = note.getAttribute("status") || "new"
-    const replies = note.querySelectorAll(":scope > spell-note-reply").length
-    const head = document.createElement("div")
-    head.className = "spell-note-head"
-    head.dataset.spellAdded = ""
-    head.innerHTML =
-      `<button type="button" class="spell-note-fold" aria-expanded="${note.hasAttribute("open")}">` +
-      `<ui-icon name="comment"></ui-icon><b>Owen</b> · ${text(shortStamp(note.getAttribute("at")))}` +
-      `<span class="spell-note-preview">${text(noteText(note).split("\n")[0])}</span>` +
-      `<span class="spell-note-status" data-note-status="${attr(status)}">${text(status)}` +
-      `${replies ? ` · ${replies} ${replies === 1 ? "reply" : "replies"}` : ""}</span></button>`
-    head.querySelector(".spell-note-fold").addEventListener("click", () => {
-      note.toggleAttribute("open")
-      head.querySelector(".spell-note-fold").setAttribute("aria-expanded", String(note.hasAttribute("open")))
+    note.querySelector(":scope > epic-page-note-head")?.remove()
+    const head = el("epic-page-note-head", {
+      "data-spell-added": true,
+      at: note.getAttribute("at") ?? undefined,
+      status: note.getAttribute("status") || "new",
+      replies: note.querySelectorAll(":scope > spell-note-reply").length,
+      preview: noteText(note).split("\n")[0],
+      open: note.hasAttribute("open")
     })
+    head.addEventListener("epic-page-note-fold", (event) => note.toggleAttribute("open", !!event.detail?.open))
     note.prepend(head)
   }
 }
 
 ////////////////
-// ## Favorite epics
+// ## The Epics page's sort
 ////////////////
 
-/** The page server's route that stars and unstars an epic (`src/tool/epicRoutes.ts`). */
-const FAVORITE_API = "/api/epics/favorite"
-
-/** An Epics page group (`$/epics/list/EpicCards` `epicGroupsHtml()`):  its heading's count, its card list. */
-const EPIC_GROUP = ".spell-epic-group[data-group]"
-
-/** Whether the stars' click listener is on `document` already:  once per page, whatever re-wires it. */
-let favoritesWired = false
-
 /**
- * FAVORITE EPICS (epic `airplane` P8, Owen 2026-10-10):  the star at each Epics card's top right
- * (`$/epics/list/EpicCards` `epicStarHtml()`).
- * - a click stars or unstars the epic at once:  the card moves to Favorites (or back to its own group,
- *   `data-group`), alphabetical there, and each group's count follows (`regroupEpics()`);  no reload
- * - then the page server writes it (`FAVORITE_API`, into the shared `epics/favorites.json5`);  refused:  the card
- *   goes back, and a toast says why
- * - its answer (every favourite) sets every star:  another window may have starred one meanwhile
- * - the card's own link never fires:  the star is a button of its own, its click stopped there
- * - only served by the page server with a token:  from `file://`, the stars show what the docs index tool wrote, and
- *   say they need the page server
- * - a live update of the page (`spell-doc:updated`) may leave a moved card twice:  `regroupEpics()` keeps one
- */
-function wireFavorites(main) {
-  const stars = main.querySelectorAll(".spell-epic-star")
-  if (!stars.length) return
-  const writable = !!window.SPELL_SERVER?.token && location.protocol !== "file:"
-  if (!writable) {
-    for (const star of stars) {
-      star.disabled = true
-      star.title = "Starring needs the page server (spell dev server ensure)"
-    }
-    return
-  }
-  regroupEpics(main)
-  if (favoritesWired) return
-  favoritesWired = true
-  document.addEventListener("click", (event) => {
-    const star = event.target instanceof Element ? event.target.closest(".spell-epic-star") : null
-    if (!star) return
-    event.preventDefault()
-    event.stopPropagation()
-    void toggleFavorite(star.closest("ui-card[data-epic]"))
-  })
-}
-
-/** Star or unstar `card`'s epic:  at once on the page, then on the page server (`wireFavorites()`). */
-async function toggleFavorite(card) {
-  const main = card?.closest("main")
-  if (!main) return
-  const name = card.dataset.epic
-  const favorite = card.querySelector(".spell-epic-star").getAttribute("aria-pressed") !== "true"
-  setStar(card, favorite)
-  regroupEpics(main)
-  try {
-    const { favorites } = await postJSON(FAVORITE_API, { name, favorite })
-    const starred = new Set(favorites)
-    for (const each of main.querySelectorAll("ui-card[data-epic]")) setStar(each, starred.has(each.dataset.epic))
-  } catch (error) {
-    setStar(card, !favorite)
-    noteToast(`Couldn't ${favorite ? "star" : "unstar"} ${name}:  ${error.message}`, "error")
-  }
-  regroupEpics(main)
-}
-
-/** `card`'s star drawn as `favorite` says:  solid and pressed, or its outline (`epicStarHtml()`'s look). */
-function setStar(card, favorite) {
-  const star = card.querySelector(".spell-epic-star")
-  if (!star) return
-  const name = card.dataset.epic
-  star.setAttribute("aria-pressed", String(favorite))
-  star.setAttribute("aria-label", `${favorite ? "Unstar" : "Star"} ${name}`)
-  star.title = favorite ? "A favorite:  listed first.  Click to unstar" : "Star it:  listed first, under Favorites"
-  star.querySelector("ui-icon")?.setAttribute("name", favorite ? "star" : "star outline")
-}
-
-/**
- * Put every Epics card in its group:  Favorites when starred, else its own (`data-group`);  in each, alphabetical by
- * title (`data-title`), or newest first by when it was last worked on (`data-worked`), as the header's sort buttons
- * say (`epicSort()`);  each group's count, and empty ones hidden.
- * - a card twice (`data-epic`:  a live update re-added one this moved):  the first stays
- * - each group's count and `hidden` leave out the cards the saga chips hide (`data-spell-saga-hidden`)
- * - SIDE EFFECT:  moves cards between the groups' lists;  callable any time
- */
-function regroupEpics(main) {
-  const groups = new Map(
-    Array.from(main.querySelectorAll(EPIC_GROUP), (group) => [group.dataset.group, group.querySelector("ui-cards")])
-  )
-  if (!groups.size) return
-  const seen = new Set()
-  const cards = []
-  for (const card of main.querySelectorAll(`${EPIC_GROUP} ui-card[data-epic]`)) {
-    if (seen.has(card.dataset.epic)) card.remove()
-    else {
-      seen.add(card.dataset.epic)
-      cards.push(card)
-    }
-  }
-  const byTitle = (a, b) =>
-    (a.dataset.title ?? "").localeCompare(b.dataset.title ?? "", "en", { sensitivity: "base", numeric: true })
-  // newest first:  `data-worked` is a local ISO time, so its text sorts as the time does;  none last
-  const byDate = (a, b) => (b.dataset.worked ?? "").localeCompare(a.dataset.worked ?? "") || byTitle(a, b)
-  const order = epicSort() === "date" ? byDate : byTitle
-  for (const [name, list] of groups) {
-    const mine = cards
-      .filter((card) => {
-        const starred = card.querySelector(".spell-epic-star")?.getAttribute("aria-pressed") === "true"
-        return (starred ? "favorites" : card.dataset.group) === name
-      })
-      .toSorted(order)
-    // only what's out of place moves:  a card that stays keeps its focus and hover
-    mine.forEach((card, index) => {
-      if (list?.children[index] !== card) list?.insertBefore(card, list.children[index] ?? null)
-    })
-    const group = list?.closest(EPIC_GROUP)
-    if (!group) continue
-    const showing = mine.filter((card) => !card.hasAttribute("data-spell-saga-hidden")).length
-    group.hidden = showing === 0
-    const count = group.querySelector(".spell-epic-group-count")
-    if (count) count.textContent = String(showing)
-  }
-}
-
-////////////////
-// ## Saga chips
-////////////////
-
-/** `localStorage` key of the sagas the Epics page shows:  their ids (`""` for No saga);  absent:  every one. */
-const SAGA_SHOWN_KEY = "spell-epics-sagas"
-
-/**
- * SAGA CHIPS, on the Epics page (epic `epic-workflow` P15):  `$/epics/list/EpicCards` `epicSagaChipsHtml()` writes a
- * chip per saga above the groups, in the sagas' order, and "No saga";  this counts each saga's cards again (the page
- * server adds the running epics' cards) and filters by them.
- * - a click, by the state chips' rule (`nextShown()`):  every saga showing, only that one;  a hidden one shows too, a
- *   shown one hides;  the only one showing, every saga again
- * - a card's saga:  its `data-saga`;  none, or one with no chip:  No saga's
- * - a hidden saga's cards get `data-spell-saga-hidden` (CSS hides them), and the groups count only what shows
- *   (`regroupEpics()`)
- * - remembered in this browser (`SAGA_SHOWN_KEY`):  one choice for every Epics page
- * - works from `file://` too;  callable again (a chip is wired once)
- */
-function wireSagaChips(main) {
-  const row = main.querySelector(".spell-saga-chips")
-  if (!row) return
-  const chips = Array.from(row.querySelectorAll("button.spell-saga-chip[data-saga]"))
-  const ids = chips.map((chip) => chip.dataset.saga)
-  const cards = Array.from(main.querySelectorAll(`${EPIC_GROUP} ui-card[data-epic]`))
-  const sagaOf = (card) => (ids.includes(card.dataset.saga ?? "") ? (card.dataset.saga ?? "") : "")
-  for (const chip of chips) {
-    const count = chip.querySelector(".spell-saga-count")
-    if (count) count.textContent = String(cards.filter((card) => sagaOf(card) === chip.dataset.saga).length)
-    if ("spellWired" in chip.dataset) continue
-    chip.dataset.spellWired = ""
-    chip.addEventListener("click", () => {
-      const shown = nextShown(ids, sagasShown(ids), chip.dataset.saga)
-      try {
-        localStorage.setItem(SAGA_SHOWN_KEY, JSON.stringify(shown))
-      } catch {
-        // storage blocked:  filtered for this visit only
-      }
-      wireSagaChips(main)
-    })
-  }
-  const shown = new Set(sagasShown(ids))
-  for (const chip of chips) {
-    const on = shown.has(chip.dataset.saga)
-    chip.setAttribute("aria-pressed", String(on))
-    const words = chip.dataset.saga ? chip.firstChild?.textContent?.trim() : "No saga"
-    chip.dataset.tip ??= chip.title
-    chip.title = `${chip.dataset.tip}\n${on ? `Click to show only ${words}` : `Click to show ${words} too`}`
-  }
-  for (const card of cards) card.toggleAttribute("data-spell-saga-hidden", !shown.has(sagaOf(card)))
-  regroupEpics(main)
-}
-
-/** The sagas the Epics page shows, of `ids`:  as remembered (`SAGA_SHOWN_KEY`), else every one. */
-function sagasShown(ids) {
-  let saved
-  try {
-    saved = JSON.parse(readSaved(SAGA_SHOWN_KEY) || "null")
-  } catch {
-    saved = null
-  }
-  const shown = Array.isArray(saved) ? ids.filter((id) => saved.includes(id)) : []
-  return shown.length ? shown : [...ids]
-}
-
-/** `localStorage` key of the Epics page's sort:  `title` (the default) or `date`. */
-const EPIC_SORT_KEY = "spell-epics-sort"
-
-/** How the Epics page sorts the cards in each group:  `title` (A to Z) or `date` (last worked on, newest first). */
-function epicSort() {
-  return readSaved(EPIC_SORT_KEY) === "date" ? "date" : "title"
-}
-
-/**
- * SORT, on the Epics page (Owen, 2026-10-13:  "Add buttons to epics header to sort by date or alphabetical, within
- * the sessions"):  two buttons in the page header, A to Z and by date, the pressed one the order of the cards inside
- * each group (Favorites, Active ...);  the groups stay where they are.
- * - remembered in this browser (`EPIC_SORT_KEY`);  the page server serves them A to Z, so the page sorts again on load
- * - works from `file://` too:  only the stars need the server
+ * The Epics page's SORT buttons (Owen, 2026-10-13:  "Add buttons to epics header to sort by date or alphabetical,
+ * within the sessions"):  an `<epic-sort>` (the epics pack, epic `epic-engine` P3) in the page header, beside the New
+ * epic pill.
+ * - only where the page has an `<epic-list>`, which follows it;  the elements do the rest:  the buttons, remembering,
+ *   the sorting, the groups, the saga chips, the stars
+ * - callable again (a page updated in place):  one at most
+ * - SIDE EFFECT:  adds it to the header, marked `data-spell-added` so the live patch steps around it
  */
 function wireEpicSort(main) {
   const head = main.querySelector(".spell-page-head")
-  if (!head || !main.querySelector(EPIC_GROUP)) return
-  let group = head.querySelector(":scope > .spell-epic-sort")
-  if (!group) {
-    group = document.createElement("span")
-    group.className = "spell-epic-sort"
-    group.dataset.spellAdded = ""
-    group.setAttribute("role", "group")
-    group.setAttribute("aria-label", "Sort the epics in each group")
-    for (const [sort, icon, words, tip] of EPIC_SORTS) {
-      const button = document.createElement("button")
-      button.type = "button"
-      button.dataset.sort = sort
-      button.title = tip
-      const glyph = document.createElement("ui-icon")
-      glyph.setAttribute("name", icon)
-      button.append(glyph, words)
-      button.addEventListener("click", () => {
-        try {
-          localStorage.setItem(EPIC_SORT_KEY, sort)
-        } catch {
-          // storage blocked:  sorted for this visit only
-        }
-        markEpicSort(group)
-        regroupEpics(main)
-      })
-      group.append(button)
-    }
-    beforeToolbar(head, group)
-  }
-  markEpicSort(group)
-  regroupEpics(main)
-}
-
-/** The sort buttons:  `[sort, icon, words, tooltip]`. */
-const EPIC_SORTS = [
-  ["title", "arrow down a z", "A–Z", "Sort each group by title, A to Z"],
-  ["date", "clock", "Date", "Sort each group by when it was last worked on, newest first"]
-]
-
-/** Press the button of the sort in use. */
-function markEpicSort(group) {
-  const sort = epicSort()
-  for (const button of group.querySelectorAll("button[data-sort]")) {
-    button.setAttribute("aria-pressed", String(button.dataset.sort === sort))
-  }
+  if (!head || !main.querySelector("epic-list") || head.querySelector("epic-sort")) return
+  addHeadTool(head, el("epic-sort", { "data-spell-added": true }), "page")
 }
 
 ////////////////
@@ -3301,14 +3179,17 @@ function wireNewEpic(main) {
   if (!/(^|\/)epics\/(index\.html)?$/.test(location.pathname)) return
   if (!window.SPELL_SERVER?.token || location.protocol === "file:") return
   const head = main.querySelector(".spell-page-head")
-  if (!head || head.querySelector(":scope > .spell-new-epic")) return
-  const pill = document.createElement("span")
-  pill.className = "spell-new-epic"
-  pill.dataset.spellAdded = ""
+  if (!head || head.querySelector(".spell-new-epic")) return
   // the browser's own tooltip, a `title` (Owen, 2026-10-10:  never a `<ui-popup>` as a tooltip)
-  pill.innerHTML = `<ui-button circular basic size="tiny" icon="seedling" title="Write an idea down as a future epic">New epic</ui-button>`
-  pill.querySelector("ui-button").addEventListener("click", openNewEpicBox)
-  beforeToolbar(head, pill)
+  const tip = "Write an idea down as a future epic"
+  const button = el(
+    "ui-button",
+    { circular: true, basic: true, size: "tiny", icon: "seedling", title: tip },
+    "New epic"
+  )
+  button.addEventListener("click", openNewEpicBox)
+  titleInside(button)
+  addHeadTool(head, el("span", { class: "spell-new-epic", "data-spell-added": true }, button), "page")
 }
 
 /** Open the New epic box, with the draft typed so far. */
@@ -3384,7 +3265,7 @@ function newEpicBox() {
 function noteText(note) {
   const blocks = []
   for (const child of note.childNodes) {
-    if (child.nodeType === Node.ELEMENT_NODE && child.matches(".spell-note-head, spell-note-reply")) continue
+    if (child.nodeType === Node.ELEMENT_NODE && child.matches("epic-page-note-head, spell-note-reply")) continue
     const words = child.nodeType === Node.ELEMENT_NODE ? inlineText(child) : child.textContent
     if (words.trim()) blocks.push(words.trim())
   }

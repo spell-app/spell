@@ -303,6 +303,7 @@ export type EpicTarget = {
 /** Verbs on one item, its id after the epic:  `epic close seo#J3` -> `close seo J3`. */
 const ITEM_VERBS = [
   "decide",
+  "choose",
   "close",
   "reopen",
   "cancel",
@@ -332,6 +333,7 @@ const INBOX_ITEM_VERBS = ["working", "done", "clear"]
 /** What follows the item in an example, for the verbs that take more:  `epic status seo#J3 underway "..."`. */
 const ITEM_EXAMPLES: Record<string, string> = {
   decide: ' "answer"',
+  choose: ' A ["outcome"]',
   cancel: ' ["why"]',
   details: " --file <reply.html>",
   status: ' underway "<reading>"',

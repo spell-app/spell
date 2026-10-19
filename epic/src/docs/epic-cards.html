@@ -32,7 +32,7 @@
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../packages/epics/src/tool/PLAN-DOC.md"
+              href="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -57,21 +57,21 @@
           <p class="meta">
             Written for: anyone reading or writing a saga page's markup, or changing this element.<br />
             Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-workflow</code> P15), in the
-            <a href="../../packages/epics/components/epic-cards/" target="src-packages-epics-components-epic-cards"
-              ><code title="packages/epics/components/epic-cards/">epic-cards</code></a
+            <a href="../../spell-epic/src/components/epic-cards/" target="src-spell-epic-src-components-epic-cards"
+              ><code title="spell-epic/src/components/epic-cards/">epic-cards</code></a
             >
             folder of the epics package.<br />
             Its vocabulary (attributes, parts, texts):
             <a
-              href="../../packages/epics/components/epic-cards/EpicCards.en.ts"
-              target="src-packages-epics-components-epic-cards-epiccards-en-ts"
-              ><code title="packages/epics/components/epic-cards/EpicCards.en.ts">EpicCards.en.ts</code></a
+              href="../../spell-epic/src/components/epic-cards/EpicCards.en.ts"
+              target="src-spell-epic-src-components-epic-cards-epiccards-en-ts"
+              ><code title="spell-epic/src/components/epic-cards/EpicCards.en.ts">EpicCards.en.ts</code></a
             >.<br />
             The component:
             <a
-              href="../../packages/epics/components/epic-cards/EpicCards.tsx"
-              target="src-packages-epics-components-epic-cards-epiccards-tsx"
-              ><code title="packages/epics/components/epic-cards/EpicCards.tsx">EpicCards.tsx</code></a
+              href="../../spell-epic/src/components/epic-cards/EpicCards.tsx"
+              target="src-spell-epic-src-components-epic-cards-epiccards-tsx"
+              ><code title="spell-epic/src/components/epic-cards/EpicCards.tsx">EpicCards.tsx</code></a
             >.
           </p>
 
@@ -113,9 +113,9 @@
             </ui-accordion>
             <p>
               From the tool's saga page template (<a
-                href="../../packages/epics/src/tool/templates/saga.html"
-                target="src-packages-epics-src-tool-templates-saga-html"
-                ><code title="packages/epics/src/tool/templates/saga.html">saga.html</code></a
+                href="../../spell-epic/src/tool/templates/saga.html"
+                target="src-spell-epic-src-tool-templates-saga-html"
+                ><code title="spell-epic/src/tool/templates/saga.html">saga.html</code></a
               >), which <code>epic saga page &lt;id&gt;</code> fills in. Nothing else goes in it: the cards come from
               the epic pages.
             </p>
@@ -183,15 +183,14 @@
                   <tbody>
                     <tr>
                       <td><code>base</code></td>
-                      <td>The box around the groups.</td>
+                      <td>The box around the list.</td>
                     </tr>
                     <tr>
-                      <td><code>group</code></td>
-                      <td>One group: its heading (icon, title, how many), then its cards.</td>
-                    </tr>
-                    <tr>
-                      <td><code>card</code></td>
-                      <td>One epic's card: its state's mark, linked title, summary and meta line.</td>
+                      <td><code>list</code></td>
+                      <td>
+                        The cards, an <a href="epic-list.html" target="src-spell-epic-src-docs-epic-list-html"><code>&lt;epic-list no-favorites&gt;</code></a>
+                        of <a href="epic-card.html" target="src-spell-epic-src-docs-epic-card-html"><code>&lt;epic-card&gt;</code></a>s: the Epics page's groups and cards.
+                      </td>
                     </tr>
                     <tr>
                       <td><code>note</code></td>
@@ -207,18 +206,17 @@
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
-                The Epics page's groups, in its order: Active, Planning, Urgent, Done. An empty group isn't drawn.
-                Favorites isn't one here: it's Owen's own list, on the Epics page.
+                The Epics page's own list and cards (epic <code>epic-engine</code> I39): an
+                <a href="epic-list.html" target="src-spell-epic-src-docs-epic-list-html"><code>&lt;epic-list&gt;</code></a> of
+                <a href="epic-card.html" target="src-spell-epic-src-docs-epic-card-html"><code>&lt;epic-card&gt;</code></a>s,
+                so an epic looks and behaves the same on both pages: its mark, star, saga label and last-worked day.
               </li>
               <li>
-                Each epic's state and group by the same rule the Epics page uses: in progress blue, errors red, done
-                green, paused and future grey. Its why is the mark's tooltip.
+                Its groups, in the Epics page's order: Active, Planning, Urgent, Done. No Favorites: that's Owen's own
+                list, on the Epics page (<code>no-favorites</code>); a starred epic keeps its group, its star solid.
               </li>
-              <li>
-                Each card: the title links to the epic page, in that epic's own tab; the summary, at most four lines;
-                then the state, phases done of all, and the phase under way.
-              </li>
-              <li>A grid of cards at least 260px wide: one column in the side bar.</li>
+              <li>Each card: the title links to the epic page, in that epic's own tab; the summary, at most four lines; then the state, phases done of all, and the phase under way.</li>
+              <li>A grid of cards at least 260px wide: three to a row in an epic page's column, one in the side bar.</li>
             </ul>
           </ui-section>
 
@@ -228,9 +226,9 @@
               <li><code>epic saga page &lt;id&gt;</code>: the saga page template writes it, once.</li>
               <li>
                 What it draws comes from the page server, <code>GET /api/epics/saga?saga=&lt;id&gt;</code> (<a
-                  href="../../packages/epics/src/tool/SagaEpics.ts"
-                  target="src-packages-epics-src-tool-sagaepics-ts"
-                  ><code title="packages/epics/src/tool/SagaEpics.ts">SagaEpics</code></a
+                  href="../../spell-epic/src/tool/SagaEpics.ts"
+                  target="src-spell-epic-src-tool-sagaepics-ts"
+                  ><code title="spell-epic/src/tool/SagaEpics.ts">SagaEpics</code></a
                 >): every epic page whose <code>&lt;epic-page saga&gt;</code> names it. It asks again whenever an epic
                 page changes.
               </li>
@@ -239,7 +237,7 @@
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
             <p class="meta">
-              Last checked 2026-10-14 against branch <code>epic-workflow-p15-page</code>: the tables come from its
+              Last checked 2026-10-19 against branch <code>epic-engine</code> (I39): the tables come from its
               vocabulary file, so they change with it.
             </p>
           </footer>

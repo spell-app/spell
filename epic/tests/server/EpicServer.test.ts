@@ -78,6 +78,18 @@ describe("EpicServer", () => {
     expect((await ask(port, "GET", "/r/two/../one/.epic/config.json5")).status).toBeGreaterThanOrEqual(400)
   })
 
+  // epic-engine I25:  a page's data from the checkout serving it (the spell syntax guide's), and its links to code
+  test("each repo's checkout under its content:  the content first, no dot files", async () => {
+    put(join(top, "one"), "packages/spell/spellSyntax.json", '{ "one": true }')
+    put(join(top, "two"), "packages/spell/spellSyntax.json", '{ "two": true }')
+    put(join(top, "one"), "pages/index.html", "the checkout's own")
+    expect(JSON.parse((await ask(port, "GET", "/packages/spell/spellSyntax.json")).text)).toEqual({ one: true })
+    expect(JSON.parse((await ask(port, "GET", "/r/two/packages/spell/spellSyntax.json")).text)).toEqual({ two: true })
+    expect((await ask(port, "GET", "/pages/index.html")).text).toContain("one home")
+    expect((await ask(port, "GET", "/.epic/config.json5")).status).toBe(403)
+    expect((await ask(port, "GET", "/r/two/.epic/config.json5")).status).toBe(403)
+  })
+
   test("the engine's assets and pack at /_epic/;  at their old checkout paths too, for pages not migrated", async () => {
     const css = await ask(port, "GET", "/_epic/assets/spell-doc.css")
     expect([css.status, css.headers["content-type"]]).toEqual([200, "text/css; charset=utf-8"])

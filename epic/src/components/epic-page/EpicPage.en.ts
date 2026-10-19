@@ -1,14 +1,10 @@
 /**
  * Every name `<epic-page>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
- * - Pure data:  `import type`, plus data from `epic-section`'s types file.
- *   - the state filter's texts (`FILTER_TEXTS`), for its toolbar's chips
+ * - Pure data:  `import type` only (its toolbar's chips are `<epic-state-filter>`'s, with their texts).
  * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"
-
-// the state filter's chips, as a section's
-import { FILTER_TEXTS } from "$/epics/components/epic-section/EpicSection.types"
 
 /****************
  * ### `<epic-page>`
@@ -124,7 +120,7 @@ export const epicPageVocabulary = {
       name: "toolbar",
       description:
         "The sticky bar's last row:  the section toolbar the docs runtime adds to an epic page " +
-        '(`<nav slot="toolbar" class="spell-toolbar">`, `spell-doc-runtime.js` `buildToolbar()`);  never in a doc.'
+        '(`<ui-menu slot="toolbar" class="spell-toolbar">`, `spell-doc-runtime.js` `buildToolbar()`);  never in a doc.'
     }
   ],
   parts: [
@@ -346,7 +342,6 @@ export const epicPageVocabulary = {
       text: "Fold everything on the page",
       description: "The toolbar's collapse-all button:  its name and tooltip."
     },
-    ...FILTER_TEXTS,
     {
       key: "reviewLineAirplane",
       text: "Airplane mode:  what you mark here waits for",

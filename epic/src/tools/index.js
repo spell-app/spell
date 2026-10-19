@@ -13,15 +13,15 @@
  * - The list pages (`LISTS`), each `<area>/index.html`,
  *   written between `<!-- index:start -->` and `<!-- index:end -->`.
  *   - a missing one is made from `skeleton()` first, so the rest of it is hand-authored after
- *   - Epics:  `epics/<name>/<name>.plan.html`, alphabetical within five groups
- *     - under a row of saga chips (each saga's count;  the runtime filters by them)
- *     - the groups (`$/epics/list/EpicCards`):  Favorites, Active, Planning, Urgent, Done
+ *   - Epics:  `epics/<name>/<name>.plan.html`, ONE `<epic-list>` of `<epic-card>`s (`$/epics/list/EpicCards`,
+ *     epic `epic-engine` P3), which the elements draw:
+ *     - five groups, alphabetical within each:  Favorites, Active, Planning, Urgent, Done
+ *     - a row of saga chips above them (each saga's count;  a click filters by them)
  *     - each card's title after its state's mark, read from its phases, its "updated" date and the items that need Owen
  *       - the marks (`$/epics/list/EpicState`):  in progress, errors, paused, future, done
  *     - a star at its top right (`FAVORITES_FILE`), the day it was last worked on at its bottom right (`worked()`)
  *     - as it serves the page, the page server adds the running epics' cards,
- *       marks every card again and regroups them by the favourites
- *       (a session running, today's date, a star clicked since)
+ *       and marks every card `running` and `favorite` as they are now
  *   - Guides:  `guides/**`, a section per saga in the sagas' order (epic `epic-workflow` P15)
  *     - each headed by the saga's title linking its saga page
  *     - each guide under the saga its meta names (`<meta name="spell-saga" content="<id>">`)
@@ -48,13 +48,10 @@ import { parseHTML } from "linkedom"
 
 // By path, its types stripped by `node` itself:  this tool runs under plain `node`, so no `$/` alias
 import {
-  EPIC_CARDS_END,
-  EPIC_CARDS_START,
   EPIC_GROUPS,
   FAVORITES_FILE,
   epicCardHtml,
-  epicGroupsHtml,
-  epicSagaChipsHtml,
+  epicListHtml,
   eventTimesIn,
   lastWorked,
   favoritesIn
@@ -730,10 +727,9 @@ ${list.extra ?? ""}
 /**
  * A list page's section:  a `<ui-section>` with the list's icon, and a card per page.
  * - id and header:  `list.section`'s when it has one (Brand:  its index has sections of its own), else the list's
- * - Epics:  ALWAYS its five groups (`$/epics/list/EpicCards` `epicGroupsHtml()`), between the page server's
- *   markers (`EPIC_CARDS_START` / `_END`):  it adds the running epics' cards there, and regroups them all by the
- *   favourites (`favorites`:  the starred epics' names) as it serves the page;  before the markers, the saga chips
- *   (`epicSagaChipsHtml()`), each card naming its saga (`sagas`:  the list, `readSagas()`)
+ * - Epics:  ALWAYS its `<epic-list>` (`$/epics/list/EpicCards` `epicListHtml()`), which groups, sorts and filters
+ *   its cards itself;  each card starred as `favorites` says (the starred epics' names) and naming its saga (`sagas`:
+ *   the list, `readSagas()`);  the page server adds the running epics' cards between its markers
  * - Guides:  a section per saga, then Misc (`guideSections()`);  Sagas:  a card per saga (`sagaSection()`)
  * - open, not `collapsed`:  the list IS the page
  */
@@ -742,10 +738,11 @@ export function listSection(list, pages, favorites = readFavorites(), sagas = re
   const from = pagePath(list.dir)
   if (list.id === "guides") return guideSections(list, pages, sagas)
   if (list.id === "sagas") return sagaSection(list, pages, sagas)
-  const placed = () => pages.map((page) => epicCard(page, from, favorites, sagas))
-  const groups = (cards) => `${epicSagaChipsHtml(sagas, cards)}\n${EPIC_CARDS_START}\n${epicGroupsHtml(cards)}`
   const body = epics
-    ? `${groups(placed())}\n${EPIC_CARDS_END}`
+    ? epicListHtml(
+        pages.map((page) => epicCard(page, from, favorites, sagas)),
+        sagas
+      )
     : pages.length
       ? `<ui-cards class="spell-grid" stackable>\n${pages.map((page) => card(page, from)).join("\n")}\n</ui-cards>`
       : `<p class="meta">${text(list.none)}</p>`
@@ -847,7 +844,8 @@ ${page.description ? `<ui-description>${text(page.description)}</ui-description>
  * An epic's card, on the list page in folder `from`, with the group it goes in (`$/epics/list/EpicCards`
  * `epicCardHtml()`):  the state's mark, linked title, description, the active phase in the meta line, the star
  * (`favorites`:  the starred epics' names), the last-worked date, its saga's label (`sagas`:  the list).
- * - SAME markup as `$/server/page` `RunningEpics`' cards:  both draw them with `epicCardHtml()`
+ * - SAME markup as `RunningEpics`' running cards (`$/epics/list/RunningEpics`):  both write them with
+ *   `epicCardHtml()`
  */
 function epicCard(page, from, favorites, sagas = []) {
   const name = page.path.split("/")[1]

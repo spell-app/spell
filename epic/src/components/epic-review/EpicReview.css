@@ -124,6 +124,19 @@
     }
   }
 
+  /*
+   * ## A thread's answer (`buttons="thread"` / `"closed"`, drawn by `<epic-thread>`):  the line's group on the
+   * thread's ivory, so on the page's ground, as on an item's line;  no fill to follow, each button in its colour under
+   * the pointer (the old comments' look, epic `airplane` P11)
+   */
+  :host(:is([buttons="thread"], [buttons="closed"])) .review-controls ui-button::part(button) {
+    background: var(--_epic-act-paper);
+  }
+  :host(:is([buttons="thread"], [buttons="closed"])) .review-controls ui-button:hover::part(button) {
+    box-shadow: inset 0 0 0 1.5px var(--_act);
+    color: var(--_act);
+  }
+
   /* the pick's letter:  a decision, so green, wearing the fill (dashed until sent, then outlined) */
   .review-pick {
     --_act: var(--_epic-act-green);

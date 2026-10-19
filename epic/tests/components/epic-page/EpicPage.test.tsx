@@ -681,14 +681,22 @@ function filterPage(questions: string[], todos: string[]): string {
 /** The toolbar's chips, as drawn:  `state+` while it shows, `state-` while hidden, and the count. */
 function pageChips(host: Element): string[] {
   return Array.from(
-    host.shadowRoot!.querySelectorAll<HTMLButtonElement>('[part~="filter"] button'),
+    chipsOf(host),
     (chip) => `${chip.dataset.state}${chip.getAttribute("aria-pressed") === "true" ? "+" : "-"}${chip.textContent}`
   )
 }
 
+/** The chips `host` draws (its `<epic-state-filter>`'s buttons):  a page's toolbar's, or a section's. */
+function chipsOf(host: Element): HTMLButtonElement[] {
+  const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')
+  return Array.from(filter?.shadowRoot?.querySelectorAll<HTMLButtonElement>("button") ?? [])
+}
+
 /** Click the toolbar's `state` chip, and let the sections and the toolbar follow. */
 async function pickPageState(host: Element, state: string) {
-  host.shadowRoot!.querySelector<HTMLButtonElement>(`[part~="filter"] button[data-state="${state}"]`)!.click()
+  chipsOf(host)
+    .find((chip) => chip.dataset.state === state)!
+    .click()
   await ElementFixture.tick()
   await ElementFixture.tick()
 }
@@ -729,7 +737,9 @@ describe("<epic-page> toolbar", () => {
     const host = await render(filterPage(["open", "recent"], ["open"]))
     await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+2", "recent+1"]))
     const questions = host.querySelector("#decisions")!
-    questions.shadowRoot!.querySelector<HTMLButtonElement>('[part~="filter"] button[data-state="open"]')!.click()
+    chipsOf(questions)
+      .find((chip) => chip.dataset.state === "open")!
+      .click()
     await ElementFixture.tick()
     await ElementFixture.tick()
     // Questions shows only open;  Todos still everything

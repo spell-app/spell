@@ -13,6 +13,8 @@
  *   - `engine-asset-routes`:  a page loads the engine's assets and pack from the epic server's routes, `/_epic/...`,
  *     not from the checkout (`$/epics/server/engineLinks`, epic `epic-eject` P7)
  *     - the epic page's own step is `EngineAssetRoutes`
+ *   - `components-not-markup`:  `to-components.js`, a page's bare tables and `<details>` asides in components
+ *     (epic `epic-engine` P3);  what it can't call is left, and listed
  *   - NOT the shared-content repair (`relocate.js`):
  *     it moves files between folders rather than fixing a page's markup,
  *     and `epic shared commit` runs its reorg every turn already
@@ -44,6 +46,7 @@ import { listPages } from "./details.js"
 import { findPages, formattedAlready, pageFile, parseArgs, ROOT, serialize, tidy } from "./pages.js"
 import { withLocks } from "./relocate.js"
 import { convertChoicesPage, convertDetailsPage, needsConversion } from "./to-answer-elements.js"
+import { convertMarkup, hasMarkup } from "./to-components.js"
 import { convertSections } from "./to-ui-section.js"
 
 /**
@@ -92,6 +95,7 @@ function kindPages(kind) {
  * - `applies(html)`:  a cheap test on the page's text, so a page with nothing to do isn't parsed
  * - `run(document, { file })`:  changes the page IN PLACE (`file`:  its path, for what lies beside it)
  *   - returns `{ changed, notes }`, `notes` one line each
+ *   - notes with nothing `changed`:  what it left for a person, reported all the same
  */
 export const STEPS = [
   {
@@ -145,6 +149,25 @@ export const STEPS = [
       const changes = rewriteEngineLinks(document)
       return { changed: changes.length > 0, notes: changes.map(({ from, to }) => `${from} -> ${to}`) }
     }
+  },
+  {
+    name: "components-not-markup",
+    date: "2026-10-19",
+    kinds: ["guide", "cheatsheet", "command", "changelog", "template", "home", "list", "detail", "choice"],
+    description:
+      "a page's bare tables in <ui-table>, every <ui-table> unstackable, its <details> asides as <ui-accordion>s;  the rest listed (to-components.js, epic-engine P3, I36)",
+    applies: hasMarkup,
+    run(document) {
+      const { tables, unstacked, asides, opened, left } = convertMarkup(document)
+      const notes = [
+        ...(tables ? [`${tables} tables -> <ui-table celled compact striped unstackable>`] : []),
+        ...(unstacked ? [`${unstacked} <ui-table>s made unstackable`] : []),
+        ...(asides ? [`${asides} <details> -> <ui-accordion styled>`] : []),
+        ...opened.map((where) => `${where}:  started open, now folded`),
+        ...left.map((why) => `LEFT for a person:  ${why}`)
+      ]
+      return { changed: tables + unstacked + asides > 0, notes }
+    }
   }
 ]
 
@@ -157,8 +180,10 @@ export const STEPS = [
  */
 export function pageKind(file, root = ROOT, html = existsSync(file) ? readFileSync(file, "utf8") : "") {
   const path = pathFrom(file, root)
+  // before `details/`:  the epic `details` has its page there (epic `epic-engine` P3)
+  if (EPIC_PAGE.test(path)) return "epic"
   if (/(^|\/)details\//.test(path)) return DataFile.exists(rowsFile(file)) ? "choice" : "detail"
-  if (/^epics\/([^/]+)\/\1(\.plan)?\.html$/.test(path) || /<epic-page\b/.test(html)) return "epic"
+  if (EPIC_PAGE_TAG.test(html)) return "epic"
   if (/\.goal\.html$/.test(path)) return "goal"
   if (path === "pages/index.html") return "home"
   if (/^(epics|guides|templates|brand)\/index\.html$/.test(path)) return "list"
@@ -171,6 +196,13 @@ export function pageKind(file, root = ROOT, html = existsSync(file) ? readFileSy
   if (/\bclass="[^"]*\bspell-filter\b/.test(html)) return "cheatsheet"
   return "guide"
 }
+
+/**
+ * An `<epic-page>` ELEMENT, starting a line or right after a tag:  never the name in an attribute's text (the epic
+ * tool's guide describes `<epic-page>` in a step's `description`, and was taken for an epic page, so no guide step
+ * ran on it:  epic `epic-engine` I25)
+ */
+const EPIC_PAGE_TAG = /(^|>)[ \t]*<epic-page\b/m
 
 /** The steps for `kind`, oldest first (or just `step`);  throws for a step that isn't one. */
 export function stepsFor(kind, step) {
@@ -228,9 +260,12 @@ export function migratePages(pages, { step, dryRun = false, tidied = true } = {}
       const ran = []
       const notes = []
       for (const each of steps) {
+        // only a step with something to do, on the page as the steps before left it:  a step's `run()` may change
+        // a page it isn't for (`answer-elements` drops a details page's old script, there or not)
+        if (!each.applies(serialize(document))) continue
         const done = each.run(document, { file })
-        if (!done.changed) continue
-        ran.push(each.name)
+        if (done.changed) ran.push(each.name)
+        // one that changed nothing may still say what it left, or skipped
         notes.push(...done.notes.map((note) => `${each.name}:  ${note}`))
       }
       if (ran.length && !dryRun) {
@@ -256,7 +291,8 @@ export function report(results, root, { dryRun = false, all = false } = {}) {
     kinds.set(kind, counts)
     counts.pages++
     if (!ran.length) {
-      if (all) lines.push(`${pathFrom(file, root)}:  up to date`)
+      if (notes.length) lines.push(`${pathFrom(file, root)}:  nothing to change`, ...notes.map((note) => `  ${note}`))
+      else if (all) lines.push(`${pathFrom(file, root)}:  up to date`)
       continue
     }
     counts.changed++

@@ -210,7 +210,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
     section?.setAttribute(STATE_ATTRIBUTE, state)
     if (section)
       document
-        .querySelector(`nav.spell-toolbar [data-rail="${CSS.escape(section.id)}"]`)
+        .querySelector(`.spell-toolbar [data-rail="${CSS.escape(section.id)}"]`)
         ?.setAttribute(STATE_ATTRIBUTE, state)
   }
 

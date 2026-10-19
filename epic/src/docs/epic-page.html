@@ -29,7 +29,7 @@
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="../../packages/epics/src/tool/PLAN-DOC.md"
+              href="../../spell-epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -59,20 +59,20 @@
           <p class="meta">
             Written for: anyone reading or writing an epic page's markup, or changing this element.<br />
             Status: <ui-label size="mini" color="green">built</ui-label> in
-            <a href="../../packages/epics/components/epic-page/" target="src-packages-epics-components-epic-page"
-              ><code title="packages/epics/components/epic-page/">epic-page/</code></a
+            <a href="../../spell-epic/src/components/epic-page/" target="src-spell-epic-src-components-epic-page"
+              ><code title="spell-epic/src/components/epic-page/">epic-page/</code></a
             >.<br />
             Its vocabulary (attributes, slots, parts, children):
             <a
-              href="../../packages/epics/components/epic-page/EpicPage.en.ts"
-              target="src-packages-epics-components-epic-page-epicpage-en-ts"
-              ><code title="packages/epics/components/epic-page/EpicPage.en.ts">EpicPage.en.ts</code></a
+              href="../../spell-epic/src/components/epic-page/EpicPage.en.ts"
+              target="src-spell-epic-src-components-epic-page-epicpage-en-ts"
+              ><code title="spell-epic/src/components/epic-page/EpicPage.en.ts">EpicPage.en.ts</code></a
             >.<br />
             The component:
             <a
-              href="../../packages/epics/components/epic-page/EpicPage.tsx"
-              target="src-packages-epics-components-epic-page-epicpage-tsx"
-              ><code title="packages/epics/components/epic-page/EpicPage.tsx">EpicPage.tsx</code></a
+              href="../../spell-epic/src/components/epic-page/EpicPage.tsx"
+              target="src-spell-epic-src-components-epic-page-epicpage-tsx"
+              ><code title="spell-epic/src/components/epic-page/EpicPage.tsx">EpicPage.tsx</code></a
             >.
           </p>
 
@@ -160,7 +160,7 @@
                 <ui-code language="html"
                   ><script type="text/plain">
                     <ui-root
-                      ><ui-components source="../../packages/epics/components/__pack/epics.pack.js"></ui-components
+                      ><ui-components source="/_epic/pack/epics.pack.js"></ui-components
                       ><spell-site-header root="../.."></spell-site-header>
                       <div class="spell-doc">
                         <main class="spell-doc-main">
@@ -395,8 +395,8 @@
                     <td>
                       On an epic page, the saga it serves (<code>drawable-spell</code>); on a saga page, the saga it is.
                       One of
-                      <a href="../../sagas/sagas.json" target="src-sagas-sagas-json"
-                        ><code title="sagas/sagas.json">sagas.json</code></a
+                      <a href="../../sagas/sagas.json5" target="src-sagas-sagas-json5"
+                        ><code title="sagas/sagas.json5">sagas.json</code></a
                       >'s ids.
                     </td>
                     <td>on a saga page</td>
@@ -735,9 +735,9 @@
               <li>
                 <code>spell dev plan-doc new &lt;name&gt; [--title ...] [--prompt ...] [--future]</code>: copies the
                 tool's template (<a
-                  href="../../packages/epics/src/tool/templates/plan.html"
-                  target="src-packages-epics-src-tool-templates-plan-html"
-                  title="packages/epics/src/tool/templates/plan.html"
+                  href="../../spell-epic/src/tool/templates/plan.html"
+                  target="src-spell-epic-src-tool-templates-plan-html"
+                  title="spell-epic/src/tool/templates/plan.html"
                   ><code>plan.html</code></a
                 >) and fills <code>epic</code>, <code>title</code>, <code>branch</code>, <code>worktree</code>,
                 <code>started</code> and <code>updated</code>. With <code>--future</code>: <code>future</code>, and no
@@ -767,9 +767,9 @@
               <li>
                 The rules for the doc's data:
                 <a
-                  href="../../packages/epics/src/tool/PLAN-DOC.md"
-                  target="src-packages-epics-src-tool-plan-doc-md"
-                  title="packages/epics/src/tool/PLAN-DOC.md"
+                  href="../../spell-epic/src/tool/PLAN-DOC.md"
+                  target="src-spell-epic-src-tool-plan-doc-md"
+                  title="spell-epic/src/tool/PLAN-DOC.md"
                   ><code>PLAN-DOC.md</code></a
                 >, "The page".
               </li>
@@ -803,9 +803,9 @@
               <li>
                 Made by <code>epic saga page &lt;id&gt;</code> from the tool's
                 <a
-                  href="../../packages/epics/src/tool/templates/saga.html"
-                  target="src-packages-epics-src-tool-templates-saga-html"
-                  ><code title="packages/epics/src/tool/templates/saga.html">saga.html</code></a
+                  href="../../spell-epic/src/tool/templates/saga.html"
+                  target="src-spell-epic-src-tool-templates-saga-html"
+                  ><code title="spell-epic/src/tool/templates/saga.html">saga.html</code></a
                 >; every <code>epic</code> verb edits it as <code>SAGA:/&lt;id&gt;</code>.
               </li>
             </ul>

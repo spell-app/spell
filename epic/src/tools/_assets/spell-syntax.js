@@ -12,6 +12,11 @@
  *   - Fetched from the checkout SERVING the page, so each branch shows its own rules.
  *   - From `file://` it says so where the tables go:  the page needs the page server.
  * - Built from elements (`el()`), never from markup in strings.
+ *   - its buttons Spell UI's `<ui-button>`s (epic `epic-engine` P3):  the pencils, the resets, the wands, Expand all
+ *     and Collapse all;  their icons centred by the component, each one's `title` on the button the pointer lands on too
+ *     (`titleInside()`)
+ *   - the boxes stay native `<textarea>`s:  750 of them, read and written as plain values;  a reset button is made
+ *     only once its box first differs (`resetButton()`)
  * - Each module:  a nested `<ui-section>` where `[data-syntax-modules]` is,
  *   holding a table Rule name | Syntax | Purpose, a row per rule class (its internal classes first).
  *   - OPEN, as every section of this page, unlike other docs pages
@@ -197,15 +202,11 @@
     const tip = rule.ruleNames.length ? rule.ruleNames.join(", ") : "no rule name of its own"
     const name = el(rule.file ? "a" : "span", { class: "spell-syntax-source", title: tip }, rule.className)
     if (rule.file) name.href = fileUrl(rule)
-    const rename = el(
-      "button",
-      {
-        type: "button",
-        class: "spell-choice-reset spell-syntax-rename",
-        title: `Suggest another name for ${rule.className}`,
-        "aria-label": `Suggest another name for ${rule.className}`
-      },
-      el("ui-icon", { name: "pen to square" })
+    const rename = iconButton(
+      "spell-syntax-rename",
+      "pen to square",
+      `Suggest another name for ${rule.className}`,
+      `Suggest another name for ${rule.className}`
     )
     const nameBox = box(rule, "name", rule.className, `Class name of ${rule.className}`)
     nameBox.hidden = true
@@ -291,13 +292,14 @@
       title: tip,
       "aria-label": `${WAND_WORDS}:  ${rule.className}`
     })
+    titleInside(wand)
     wand.addEventListener("click", () => void askForDetails(rule, wand, text))
     wands.set(rule.className, wand)
     return el("td", { class: "spell-syntax-purpose" }, el("p", {}, text, " ", wand))
   }
 
   /**
-   * A box holding `value`, keyed `<Class>.<field>`, with its round reset button.
+   * A box holding `value`, keyed `<Class>.<field>`;  its round reset button comes once it differs (`mark()`).
    * - one line for the class's name (Enter adds none);  as many as the code has for a writer's output
    */
   function box(rule, field, value, label) {
@@ -311,15 +313,46 @@
       ...(field === "name" && { "data-one-line": "" })
     })
     input.value = value
-    const reset = el(
-      "button",
-      { type: "button", class: "spell-choice-reset", "aria-label": "Back to what the code has", hidden: "" },
-      el("ui-icon", { name: "clock rotate left" })
-    )
-    reset.title = `Back to ${value.split("\n")[0]}${value.includes("\n") ? " ..." : ""}`
-    const holder = el("div", { class: "spell-choice-field spell-syntax-box", "data-box": key }, input, reset)
-    boxes.set(key, { key, input, reset, holder, generated: value })
+    const holder = el("div", { class: "spell-choice-field spell-syntax-box", "data-box": key }, input)
+    boxes.set(key, { key, input, reset: undefined, holder, generated: value })
     return holder
+  }
+
+  /**
+   * `one` box's round reset button, after its text:  "back to what the code has".
+   * - made the first time the box differs, not for every box up front:  most are never changed, and each
+   *   `<ui-button>` draws a shadow root
+   */
+  function resetButton(one) {
+    const { generated } = one
+    const reset = iconButton(
+      "spell-choice-reset",
+      "clock rotate left",
+      `Back to ${generated.split("\n")[0]}${generated.includes("\n") ? " ..." : ""}`,
+      "Back to what the code has"
+    )
+    one.holder.append(reset)
+    return reset
+  }
+
+  /**
+   * A round, icon-only `<ui-button>` of the page's own, plain (no ring:  `syntax-choices.css`, `spell-syntax.css`):
+   * `tip` its tooltip, on the inner button too (`titleInside()`);  `label` what a screen reader hears.
+   * - `tiny`:  its icon 11px, near the 13px glyph the raw buttons drew before (`mini`'s is 9px), the button a one-line
+   *   box's height
+   */
+  function iconButton(className, icon, tip, label) {
+    const button = el("ui-button", {
+      class: className,
+      circular: "",
+      basic: "",
+      size: "tiny",
+      icon,
+      title: tip,
+      "aria-label": label
+    })
+    titleInside(button)
+    return button
   }
 
   /**
@@ -389,7 +422,7 @@
     const head = document.querySelector(".spell-page-head")
     if (!head) return
     const add = () => {
-      const toolbar = head.querySelector(":scope > nav.spell-toolbar")
+      const toolbar = head.querySelector(":scope > .spell-toolbar")
       if (toolbar && !toolbar.querySelector(".spell-syntax-folds")) toolbar.append(foldButtons())
     }
     // a frame after the toolbar comes:  an icon drawn while the bundle is still starting stays blank
@@ -399,19 +432,22 @@
     document.addEventListener("ui-close", keepFolds)
   }
 
-  /** The two buttons, in a box of their own. */
+  /**
+   * The two buttons, in a box of their own:  `<ui-button basic>`s drawn as the toolbar's section buttons
+   * (`spell-syntax.css`), their words the toolbar's `.spell-toolbar-label`, which go when its titles go.
+   */
   function foldButtons() {
     const buttons = FOLD_BUTTONS.map(([isFolded, icon, label]) => {
       const button = el(
-        "button",
-        { type: "button", class: "spell-toolbar-item spell-syntax-fold", title: label },
-        el("span", { class: "spell-toolbar-icon" }, el("ui-icon", { name: icon })),
+        "ui-button",
+        { class: "spell-syntax-fold", basic: "", icon, title: label, "aria-label": label },
         el("span", { class: "spell-toolbar-label" }, label)
       )
+      titleInside(button)
       button.addEventListener("click", () => foldAll(isFolded))
       return button
     })
-    return el("div", { class: "spell-syntax-folds" }, ...buttons)
+    return el("span", { class: "spell-syntax-folds" }, ...buttons)
   }
 
   /**
@@ -513,7 +549,8 @@
   function mark(one) {
     const isChanged = isBoxChanged(one)
     one.holder.toggleAttribute("data-changed", isChanged)
-    one.reset.hidden = !isChanged
+    if (isChanged) one.reset ??= resetButton(one)
+    if (one.reset) one.reset.hidden = !isChanged
     if (isChanged && one.key.endsWith(".name")) showNameBox(one, "show")
     const row = one.holder.closest("tr")
     row.toggleAttribute("data-edited", !!row.querySelector(".spell-syntax-box[data-changed]"))
@@ -765,6 +802,7 @@
     wand.title = isAsked
       ? "Asked Claude for more details:  the thread is below"
       : `${WAND_WORDS}:  ask Claude, in a comment here`
+    titleInside(wand)
   }
 
   /**
@@ -855,5 +893,19 @@
     for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value)
     node.append(...children.filter((child) => child !== ""))
     return node
+  }
+
+  /**
+   * `host`'s `title` (a `<ui-button>`'s) on the button inside it too, once drawn:  the element the pointer lands on
+   * carries the tooltip (VS Code's side bar shows only that one's), as `spell-doc-helpers.js`' `titleInside()` does.
+   * - the bundle defines `<ui-button>` after this script has drawn;  called again when the title changes
+   */
+  function titleInside(host) {
+    void customElements.whenDefined(host.localName).then(() =>
+      requestAnimationFrame(() => {
+        const inner = host.shadowRoot?.querySelector('[part~="button"]')
+        if (inner) inner.title = host.title
+      })
+    )
   }
 })()

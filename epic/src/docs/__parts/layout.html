@@ -9,10 +9,11 @@
   - Relative URLs here are against THIS file AS SERVED (`/components/epics/__parts/`):  `../../..` is the checkout's
     root, at `/worktrees/<w>/components/epics/` too.  The shell makes them absolute as it mounts.
   - Against Spell UI's:
-    - `<ui-components>`:  the epics pack (`packages/epics/components/__pack/epics.pack.js`), for the pages' live
-      examples;  the site bundle shares its Solid and Spell UI with it (`SitePacks.ts`)
+    - `<ui-components>`:  the epics pack, from the epic server's engine route (`/_epic/pack/epics.pack.js`:
+      spell-epic's `src/components/__pack/`), for the pages' live examples;  the site bundle shares its Solid and
+      Spell UI with it (`SitePacks.ts`)
     - the brand reads "Epic UI";  the side column's links and groups come from `__data/` (`yarn site:data`, in
-      `packages/epics`), not Spell UI's
+      spell-epic), not Spell UI's
   - A new set (App UI, `packages/app/docs/`) copies this file and changes those two.
   - Only `<body>` is used.
 -->
@@ -23,7 +24,7 @@
   </head>
   <body>
     <ui-root class="site" stack-with="page" icons="fa7-brands, fomantic" display="when-ready">
-      <ui-components source="../../../packages/epics/components/__pack/epics.pack.js"></ui-components>
+      <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
       <!--
         Top bar:  ONLY while the right column is hidden (narrower than 1200px);  wide screens have none (Owen:  "lose the
         top bar entirely").  The menu button and the brand only below 992px, where the nav panel moves into the flyout.

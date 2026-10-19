@@ -123,6 +123,31 @@ export class RepoList {
     return `${found.repo.isDefault ? "/" : found.repo.prefix}${encodedPath(found.path)}`
   }
 
+  /**
+   * The checkout the pages of checkout `root` are LAID UNDER when served:  where their links to code resolve, so the
+   * linker's root (`AS.Linker`;  epic `epic-engine` I22).
+   * - `root` itself:
+   *   - when it holds its own pages (`content` is `root`), or its repo is registered (spell-app, a worktree of it)
+   *   - when no registered repo has `content` (another machine's list, a test's made-up checkout)
+   * - ELSE the registered repo whose content folder `content` is:  spell-epic's epic pages are spell-app's content,
+   *   served by spell-app's page server under spell-app's checkout, where the engine's files are `spell-epic/...`
+   *   (its `engineFolder` link), not this checkout's `src/...`
+   * - `content`:  default `root`'s (`EpicConfig.contentOf()`)
+   * - a list that won't read:  `root`
+   */
+  linkRootOf(root: string, content = EpicConfig.contentOf(root)): string {
+    if (resolve(content) === resolve(root)) return root
+    let repos: Repo[]
+    try {
+      repos = this.repos()
+    } catch {
+      return root
+    }
+    const main = realOr(EpicConfig.mainOf(root))
+    if (repos.some((repo) => realOr(repo.checkout) === main)) return root
+    return repos.find((repo) => realOr(repo.content) === realOr(content))?.checkout ?? root
+  }
+
   ////////////////
   // ## Writing
   ////////////////

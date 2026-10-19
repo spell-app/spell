@@ -31,6 +31,7 @@ import {
   type CommitLogEntry,
   type CommitOptions,
   type CommitTarget,
+  type ChooseOptions,
   type DecideOptions,
   type FinishedState,
   type ItemDescription,
@@ -405,7 +406,7 @@ export class PlanDoc extends PlanReader {
    */
   setPhase(n: number, status: string, { done }: { done?: string } = {}): void {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
-    Markup.set(this.phase(n), { status })
+    Markup.set<"epic-phase">(this.phase(n), { status })
     if (status === "done") {
       this.removeUpdateMarkers(n)
       if (done) this.setDone(n, done)
@@ -668,7 +669,7 @@ export class PlanDoc extends PlanReader {
       const set = this.chooseOption(question, option, choices)
       for (const other of PlanItem.choiceSets(question)) if (other !== set) Markup.set(other, { chosen: undefined })
     }
-    Markup.set(question, { status: "decided", answered: true })
+    Markup.set<"epic-item">(question, { status: "decided", answered: true })
     this.placeQuestion(question)
     this.stamp(question)
     this.markUpdate(question)
@@ -751,7 +752,7 @@ export class PlanDoc extends PlanReader {
     let live: "open" | "decided" =
       Object.values(KINDS).find((spec) => new RegExp(`^${spec.prefix}\\d+$`).test(item.id))?.live ?? "open"
     if (question) live = item.hasAttribute("answered") ? "decided" : "open"
-    Markup.set(item, { status: status === "open" ? live : (status as "done" | "canceled") })
+    Markup.set<"epic-item">(item, { status: status === "open" ? live : (status as "done" | "canceled") })
     if (question) this.placeQuestion(item)
     this.stamp(item)
     this.markUpdate(item)
@@ -1048,6 +1049,7 @@ export class PlanDoc extends PlanReader {
    * - any other kind:  APPROVED with it (`approve()`:  an open judgement call closed, accepted;  reviewed)
    * - either way, a Noted status card, `Chose B · <title>:  <what was recorded>;  <what happens next>` (Q19;
    *   Noted, not Done:  Owen, 2026-10-10), and the option in the log line
+   *   - `outcome` (`choose()`'s, a choice settled in conversation):  in place of what happens next
    * - left for Claude when the item has no such set, or the set no such option
    */
   private pickOption(
@@ -1055,7 +1057,8 @@ export class PlanDoc extends PlanReader {
     kind: string,
     open: boolean,
     pick: string | undefined,
-    choices: number | undefined
+    choices: number | undefined,
+    outcome?: string
   ): MarkResult {
     const set = PlanItem.choiceSet(item, choices)
     if (!set) return { applied: false, left: `no option cards${cardSetWords(choices)}:  can't pick ${pick}` }
@@ -1077,8 +1080,37 @@ export class PlanDoc extends PlanReader {
       const closed = /\((\w+)\)/.exec(approved)?.[1]
       recorded = closed ? `recorded, the ${kind === "judgement" ? "call" : kind} ${closed}` : "recorded"
     }
-    this.noteStatus(item.id, pickedWords(option, `${recorded};  ${this.nextStepWords()}`))
+    this.noteStatus(item.id, pickedWords(option, `${recorded};  ${outcome ?? this.nextStepWords()}`))
     return { applied: true, did }
+  }
+
+  /**
+   * Option `letter` of item `id` chosen, as Owen settled it IN CONVERSATION (a reply, the chat), not with the page's
+   * Choose pill:  `epic choose seo#J9 A "Owen, 2026-10-06:  'require the parens';  built"`.
+   * Returns what it did (`picked A:  ...;  approved:  closed (accepted)`).
+   * - exactly what the page's pick does (`pickOption()`, `applyMark()`'s):  that set's `chosen`;  a question answered
+   *   with the option's title;  a judgement call (or test) closed, accepted;  an issue, caveat or todo reviewed
+   *   (still open:  fixing it is its own work);  a Noted card;  reviewed as approved
+   * - the set:  `set` (from 1), else the item's LATEST (Claude's last reply's, often), never one in its Original
+   *   Discussion
+   * - `outcome`:  on the Noted card in place of what happens next, and in the log line
+   * - throws when the item has no such set, or the set no such option;  nothing is changed then
+   */
+  choose(id: string, letter: string, { outcome, set }: ChooseOptions = {}): string {
+    const item = this.item(id)
+    const label = item.id.toUpperCase()
+    const sets = PlanItem.choiceSets(item)
+    if (!sets.length) throw new PlanDocError(`${label} has no option cards to choose from`)
+    const choices = set === undefined ? sets.length - 1 : Number(set) - 1
+    if (!Number.isInteger(choices) || !sets[choices])
+      throw new PlanDocError(`${label} has no card set ${set}:  it has ${sets.length} (--set 1 to ${sets.length})`)
+    const open = item.getAttribute("status") === "open"
+    const pick = String(letter).trim().toUpperCase()
+    const result = this.pickOption(item, PlanItem.kindOf(item.id), open, pick, choices, outcome)
+    if (!result.applied) throw new PlanDocError(`${label}:  ${result.left}`)
+    this.log(`${label} ${result.did};  settled in conversation${outcome ? `:  ${outcome}` : ""}`)
+    this.reviewedAs(item, "approve")
+    return result.did
   }
 
   /**

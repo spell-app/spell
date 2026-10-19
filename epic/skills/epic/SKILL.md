@@ -331,6 +331,11 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
    - Found a problem:  `add <name>#I`.
    - A limit we accept:  `add <name>#C`.
    - A choice:  `add <name>#D` (a question born answered).
+   - Owen settles an item's options IN WORDS (a reply, the chat:  "require the parens"), not with the page's pick:
+     `choose <name>#<id> <letter> "<outcome>"` right away, before or with building it.
+     - It records it as his pick would:  that card set's `chosen`, the item green (a question answered, a call
+       closed;  an issue or caveat only reviewed), a Noted card with the outcome.
+     - Skipped, the item stays red with nothing chosen, though the work is built (`outline-spell` J9, 2026-10-19).
    - A choice made WITHOUT Owen (he is away, or an agent decided):  `add <name>#J`.
      - Ids `J1` ...;  see `/bedtime`.
      - CALM by default:  `--calm` (last), yellow (open) rather than red.  The same for an issue.
@@ -644,6 +649,8 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
      - Then `status ... done ["<summary>"]`, since you wrote an answer.
        Only noting what he said, no answer needed:  `status ... noted "<what>"`.
      - Then `inbox <name>#<id> clear`, and `review <name>#<id> "<outcome>"`.
+     - His answer in words names an option ("require the parens", "B"):  `choose <name>#<id> <letter> "<outcome>"`
+       as soon as he says it (section 5, step 2), not a `review`.
    - In chat:  one line per item, with its link (`epic pages link ... --hash <id>`), never the answer itself.
      (Q3 of `windows-and-review`:  a long review stays readable.)
    - He answers on the page (Revisit again), or says so in chat.
@@ -654,9 +661,8 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
      - Then `show <slug> --wait`, in the background.
    - "picks B · <card>, asks:  <note>" (a pick with a revisit, "B, but ..."):  `apply` leaves it.
      - `status ... underway`, then answer the note about B.
-     - A question, once he agrees:  decide it yourself.
-       - `epic decide <name>#<id> "<card title>" --option B`
-       - Any other item:  he confirms with a plain pick.
+     - Once he agrees (in words, a reply or the chat), record it yourself, on any item:
+       `epic choose <name>#<id> B "Owen, <date>:  '<his words>'"`.
      - Then `status ... done`.
      - `inbox clear` / `done` KEEP his pick as that set's `chosen` (with a Noted card), unless you decided otherwise.
        Once he picked, the card says Chosen.
@@ -1027,6 +1033,7 @@ phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / p
 add <name>#Q|#J|#C|#I|#T|#V|#D "title" [--details "<p>html</p>"] [--calm]   prints the id (C3)
 calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
+choose <name>#<id> <letter> ["outcome"] [--set N]   an option Owen settled in words, any item:  as his pick (latest set)
 commit <name>#P<N> | <name>#<id>  <sha> "..."       list a commit under a phase or an item
 commits <name> --backfill                           every phase / item commit (`P3:`, `<name> I3:`), once
 update <name> --standing [on|off]                   a standing epic:  each phase merges on its own, never done

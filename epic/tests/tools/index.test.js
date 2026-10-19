@@ -79,8 +79,9 @@ describe("the list pages", () => {
   const epics = LISTS.find((list) => list.id === "epics")
   const guides = LISTS.find((list) => list.id === "guides")
 
-  // epic `airplane` P8 (Owen, 2026-10-10):  favorites, active, planning, urgent, done;  alphabetical in each
-  it("list epics in groups:  Favorites, Active (paused too), Planning, Urgent, Done;  alphabetical in each", () => {
+  // epic `airplane` P8 (Owen, 2026-10-10):  favorites, active, planning, urgent, done;  alphabetical in each.
+  // Since epic `epic-engine` P3 the elements draw them (`<epic-list>`, `<epic-card>`):  the page holds their facts.
+  it("list epics as ONE <epic-list> of <epic-card>s, by group then title:  Favorites, Active, Planning, Urgent, Done", () => {
     const loud = { ...epic("e", ["done"]), urgent: ["q1"] }
     const pages = [
       epic("a", ["done"]),
@@ -93,58 +94,32 @@ describe("the list pages", () => {
       loud
     ]
     const html = listSection(epics, pages, new Set(["z", "s"]), [])
-    const groups = Array.from(
-      html.matchAll(/<div class="spell-epic-group" data-group="(\w+)"( hidden)?>/g),
-      (m) => m[1]
-    )
-    expect(groups).toEqual(["favorites", "active", "planning", "urgent", "done"])
-    const order = Array.from(html.matchAll(/data-epic="(\w+)"/g), (m) => m[1])
-    // a starred epic ONLY under Favorites;  paused `p` is Active, marked grey
+    const order = Array.from(html.matchAll(/<epic-card id="epic-\w+" epic="(\w+)"/g), (m) => m[1])
+    // a starred epic first, wherever its state puts it;  paused `p` is Active
     expect(order).toEqual(["s", "z", "b", "p", "c", "f", "e", "a"])
-    expect(html).toMatch(/<\/div>\n<!-- running-epics -->\n<div class="spell-epic-group" data-group="favorites">/)
-    expect(html).toMatch(/<!-- running-epics:end -->\n<\/ui-section>$/)
-    expect(html).toContain(`Favorites <span class="spell-epic-group-count">2</span>`)
+    expect(html).toMatch(/<epic-list class="spell-epics">\n<!-- running-epics -->\n<epic-card/)
+    expect(html).toMatch(/<!-- running-epics:end -->\n<\/epic-list>\n<\/ui-section>$/)
     expect(html).toContain(`<a href="b/b.plan.html">b</a>`)
-    // the facts the page server marks each card again from (`RunningEpics.render()`)
-    expect(html).toContain(
-      `<ui-card id="epic-p" data-epic="p" data-title="p" data-group="active" data-status="open" data-phases="todo" data-updated="2026-01-01">`
-    )
-    expect(html).toContain(
-      `<ui-icon class="spell-epic-state" name="circle pause" color="grey" title="paused:  no update since 2026-01-01, 0/1 phases done"></ui-icon> <a href="p/p.plan.html">`
-    )
-    expect(html).toMatch(
-      /data-epic="e" data-title="e" data-group="urgent" data-status="open" data-phases="done" data-updated="[\d-]+" data-urgent="q1">/
-    )
-    // the star, top right;  the day last worked on, bottom right, no year
-    expect(html).toContain(`aria-pressed="true" aria-label="Unstar s"`)
-    expect(html).toContain(`aria-pressed="false" aria-label="Star a"`)
-    expect(html).toMatch(
-      /<time class="spell-epic-worked" datetime="2026-10-09T14:34[+-]\d\d:\d\d" title="Last worked on 10\/9\/26 14:34">10\/9<\/time><\/ui-card>/
-    )
-    expect(html).toContain(
-      `name="circle exclamation" color="red" title="errors:  every phase done, but 1 question need you"`
-    )
+    // the facts the card draws its state from, and the page server marks it again by
+    expect(html).toContain(`<epic-card id="epic-p" epic="p" data-status="open" phases="todo" updated="2026-01-01">`)
+    expect(html).toMatch(/<epic-card id="epic-e" epic="e" data-status="open" phases="done" updated="[\d-]+" urgent="q1">/)
+    expect(html).toMatch(/<epic-card id="epic-s" epic="s" data-status="done" [^>]*worked="2026-10-09T14:34[+-]\d\d:\d\d" favorite>/)
+    expect(html).toMatch(/<epic-card id="epic-a" epic="a" data-status="done" phases="done" updated="[\d-]+">/)
     expect(html).not.toMatch(/sleeping|😴/)
   })
 
   // epic `epic-workflow` P15
-  it("name each epic's saga on its card, under a row of saga chips in the sagas' order, each with its count", () => {
+  it("name each epic's saga on its card;  the list names the sagas, in order, for its chips", () => {
     const pages = [
       { ...epic("a", ["active"]), saga: "epics" },
       { ...epic("b", ["active"]), saga: "gone" },
       epic("c", [])
     ]
     const html = listSection(epics, pages, new Set(), SAGAS)
-    const chips = Array.from(
-      html.matchAll(
-        /data-saga="([^"]*)" aria-pressed="true" title="[^"]*">([^<]*) <span class="spell-saga-count">(\d+)/g
-      ),
-      (m) => `${m[1] || "-"} ${m[2]} ${m[3]}`
-    )
-    expect(chips).toEqual(["drawable-spell Drawable Spell 0", "epics Epic Tooling 1", "- No saga 2"])
-    expect(html.indexOf("spell-saga-chips")).toBeLessThan(html.indexOf("<!-- running-epics -->"))
-    expect(html).toContain(`data-saga="epics" data-saga-title="Epic Tooling" data-saga-purpose="Epics &amp; co."`)
-    expect(html).toContain(`title="Epics &amp; co.">Epic Tooling</ui-label>`)
+    expect(html).toContain(`<epic-list class="spell-epics" sagas="drawable-spell epics">`)
+    expect(html).toContain(` saga="epics" saga-title="Epic Tooling" saga-purpose="Epics &amp; co.">`)
+    // a saga not in the list:  none on the card (the list counts it as No saga)
+    expect(html).toMatch(/<epic-card id="epic-b" epic="b" data-status="open" phases="active" updated="[\d-]+" active="P1 · Phase">/)
   })
 
   it("list guides by saga, in the sagas' order, each headed by its saga page's link;  the rest in Misc, last", () => {

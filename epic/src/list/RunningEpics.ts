@@ -12,16 +12,12 @@ import {
   EPIC_CARDS_START,
   FAVORITES_FILE,
   epicCardHtml,
-  epicGroupsHtml,
-  epicStarHtml,
   eventTimesIn,
   lastWorked,
   favoritesIn,
-  type EpicGroupName,
-  type PlacedCard,
   type SagaLook
 } from "./EpicCards"
-import { URGENT_STATES, epicStateFor, epicStateMark } from "./EpicState"
+import { URGENT_STATES } from "./EpicState"
 
 /****************
  * ### `RunningEpics`
@@ -39,14 +35,13 @@ import { URGENT_STATES, epicStateFor, epicStateMark } from "./EpicState"
  *   - `/api/epics/running`:  the list, as JSON (`list()`:  `RunningEpic[]`)
  *   - the Epics list page, as below (`render()`), and live reload (`watch()`)
  * - The Epics list page (`epics/index.html`;  the home page until claude-design P5), on each request (`render()`):
- *   - running and merged epics in ONE list, in the page's five groups (`EpicCards`):
- *     Favorites, Active, Planning, Urgent, Done
- *   - each card's title after its state's mark (`EpicState`)
- *   - the running epics' cards join the written ones between its markers (`EPIC_CARDS_START` / `_END`)
- *   - EVERY card marked again, as `docs index` can't know when it writes the page:
- *     - in progress or paused:  decided by a session running for it, and today's date
- *     - its star:  from the favourites as they are now (`FAVORITES_FILE`), and the groups rebuilt by them
- *   - opened from disk:  the groups, marks and stars as `docs index` wrote them
+ *   - running and merged epics in ONE list, its `<epic-list>`, which groups, sorts and filters them in the browser
+ *     (`EpicCards`):  Favorites, Active, Planning, Urgent, Done
+ *   - the running epics' cards join the written ones before its end marker (`EPIC_CARDS_END`)
+ *   - EVERY card marked as things are now, as `docs index` can't know when it writes the page:
+ *     - `running`:  a session running for it (its state's mark, in progress or paused, is the card's to draw)
+ *     - `favorite`:  from the favourites as they are now (`FAVORITES_FILE`)
+ *   - opened from disk:  the cards as `docs index` wrote them
  * - Live:  an epic page's change reloads its page and the list page (`watch()`).
  * - Which docs:  `<name>` === `<w>` (the epic the worktree is for), or any `<name>` the main checkout lacks.
  *   The rest are stale copies of epics merged before the worktree was cut.
@@ -173,63 +168,55 @@ export class RunningEpics {
   }
 
   /**
-   * `page` (the Epics list page) as of now:
-   * every card marked again, the running epics' cards added, and the cards grouped by the favourites as they are now.
-   * - no `MARKER`:  as is
-   * - each card `docs index` wrote (its `data-phases` ...):  its state's mark again, and its star (`favorites()`)
-   *   - the mark from a session running for it (`runningNames()`) and today's date
-   *   - a card without them (an older index):  as is
-   * - a merged epic's card of the same name (`data-epic`) goes:  the worktree's doc is the live one
-   *   - its last-worked moment (`data-worked`:  it may hold the branch's last commit) carries over to the running card
-   *   - and so does its saga (`data-saga`, its title and purpose:  the page server can't read the sagas' list)
-   * - between the markers (`EPIC_CARDS_START` / `_END`, `docs index` writes them):
-   *   every card regrouped (`epicGroupsHtml()`)
-   *   - a starred one under Favorites, else in its own group (`data-group`)
-   * - an index without the end marker (written before the groups):  the running cards at the marker, as before
-   * - the cards' markup:  `EpicCards` `epicCardHtml()`, as `docs index` draws them
+   * `page` (the Epics list page) as of now:  every card marked again, and the running epics' cards added.
+   * - no `<epic-list>` between its markers (`MARKER` ... `EPIC_CARDS_END`):  as is
+   *   - an index written before epic `epic-engine` P3 (`<ui-card>`s in groups) too:  `docs index` writes it anew
+   * - each card `docs index` wrote (`<epic-card>`):  `running` when a session runs for it (`runningNames()`),
+   *   `favorite` when it's starred (`favorites()`)
+   * - a merged epic's card of the same name (`epic`) goes:  the worktree's doc is the live one
+   *   - its last-worked moment (`worked`:  it may hold the branch's last commit) carries over to the running card
+   * - a running card's saga:  its doc's, with the title and purpose a written card gives it (the page server can't
+   *   read the sagas' list)
+   * - the running cards go before the end marker:  `<epic-list>` places every card itself
+   * - the cards' markup:  `EpicCards` `epicCardHtml()`, as `docs index` writes them
    */
   render(page: string, now: Date = new Date()): string {
-    if (!page.includes(MARKER)) return page
+    const from = page.indexOf(MARKER)
+    const to = page.indexOf(EPIC_CARDS_END, from)
+    if (from < 0 || to < 0 || !LIST.test(page.slice(0, from))) return page
     const running = this.runningNames()
     const favorites = this.favorites()
     const epics = this.list()
     let html = page.replace(CARD, (card: string, name: string) =>
-      remark(card, { running: running.has(name), favorite: favorites.has(name), now })
+      remark(card, { running: running.has(name), favorite: favorites.has(name) })
     )
+    const sagas = new Map<string, SagaLook>()
+    for (const [card] of html.matchAll(CARD)) {
+      const saga = sagaOf(card)
+      if (saga) sagas.set(saga.id, saga)
+    }
     const workedBefore = new Map<string, string>()
-    const sagaBefore = new Map<string, SagaLook>()
     for (const epic of epics) {
-      // oxfmt splits a closing tag over lines (`</ui-card\n  >`)
-      const merged = new RegExp(`<ui-card\\b[^>]*\\bdata-epic="${escapeRegExp(epic.name)}"[\\s\\S]*?</ui-card\\s*>`)
+      // oxfmt splits a closing tag over lines (`</epic-card\n  >`)
+      const merged = new RegExp(`<epic-card\\b[^>]*\\sepic="${escapeRegExp(epic.name)}"[\\s\\S]*?</epic-card\\s*>\\n?`)
       html = html.replace(merged, (card) => {
-        const worked = dataOf(card, "worked")
+        const worked = attributeOf(card, "worked")
         if (worked) workedBefore.set(epic.name, worked)
-        const saga = sagaOf(card)
-        if (saga) sagaBefore.set(epic.name, saga)
         return ""
       })
     }
-    const added = epics.map((epic) =>
-      this.runningCard(epic, { running, favorites, now, worked: workedBefore, sagas: sagaBefore })
-    )
-    const from = html.indexOf(EPIC_CARDS_START)
-    const to = html.indexOf(EPIC_CARDS_END, from)
-    if (to < 0) return epics.length ? html.replace(MARKER, added.map((card) => card.html).join("")) : html
-    const region = html.slice(from + EPIC_CARDS_START.length, to)
-    const cards: PlacedCard[] = Array.from(region.matchAll(CARD), ([card, name]) => ({
-      html: card,
-      title: decode(dataOf(card, "title") ?? name!),
-      group: favorites.has(name!) ? "favorites" : ((dataOf(card, "group") as EpicGroupName | undefined) ?? "active")
-    }))
-    return `${html.slice(0, from)}${EPIC_CARDS_START}\n${epicGroupsHtml([...cards, ...added])}\n${html.slice(to)}`
+    if (!epics.length) return html
+    const added = epics.map((epic) => this.runningCard(epic, { running, favorites, now, worked: workedBefore, sagas }))
+    const end = html.indexOf(EPIC_CARDS_END, html.indexOf(MARKER))
+    return `${html.slice(0, end)}${added.join("\n")}\n${html.slice(end)}`
   }
 
   /**
    * Running epic `epic`'s card (`epicCardHtml()`), linking its epic page where it runs, its worktree in the meta line.
    * - `running`:  the names sessions run for
    * - `favorites`:  the starred epics
-   * - `worked`:  the merged cards' `data-worked`, by name (`render()`)
-   * - `sagas`:  the merged cards' sagas, by name;  used while the running doc still names that saga
+   * - `worked`:  the merged cards' `worked`, by name (`render()`)
+   * - `sagas`:  every saga a written card names, by id:  the running doc's saga's title and purpose
    */
   private runningCard(
     epic: RunningEpic,
@@ -240,24 +227,25 @@ export class RunningEpics {
       worked: Map<string, string>
       sagas: Map<string, SagaLook>
     }
-  ): PlacedCard {
+  ): string {
     const { running, favorites, now, worked, sagas } = context
-    const saga = sagas.get(epic.name)
     const where = relative(this.root, this.checkoutOf(epic.worktree))
-    return epicCardHtml(
+    const isRunning = running.has(epic.name) || running.has(epic.worktree)
+    const { html } = epicCardHtml(
       {
         name: epic.name,
         title: epic.title,
         href: epic.url,
         target: epic.name,
         meta: `${epic.active ? `${epic.active} · ` : ""}${where}`,
-        facts: { ...epic, running: running.has(epic.name) || running.has(epic.worktree) },
+        facts: { ...epic, running: isRunning },
         worked: lastWorked([epic.worked, worked.get(epic.name)]),
         favorite: favorites.has(epic.name),
-        saga: saga && saga.id === epic.saga ? saga : undefined
+        saga: epic.saga ? sagas.get(epic.saga) : undefined
       },
       now
     )
+    return isRunning ? html.replace(/^<epic-card\b/, "<epic-card running") : html
   }
 
   /** The starred epics' names (`FAVORITES_FILE`, shared:  the page server's `/api/epics/favorite` writes it). */
@@ -356,57 +344,51 @@ export function titleNames(title: string, epic: string): boolean {
 /** The fields `RunningEpics.liveSessions()` reads of a session's record, `~/.claude/sessions/<pid>.json`. */
 type SessionRecord = { pid?: number; sessionId?: string; cwd?: string; name?: string; status?: string }
 
+/** The Epics page's list, as `docs index` writes it since epic `epic-engine` P3:  its opening tag. */
+const LIST = /<epic-list\b[^>]*>\s*$/
+
 /** An epic's card on the Epics page:  its whole markup, `$1` its name. */
-const CARD = /<ui-card\b[^>]*\bdata-epic="([^"]*)"[\s\S]*?<\/ui-card\s*>/g
+const CARD = /<epic-card\b[^>]*\sepic="([^"]*)"[\s\S]*?<\/epic-card\s*>/g
 
-/** The state's mark in a card's header:  `<ui-icon class="spell-epic-state" ...>`, a label, or an old emoji `<span>`. */
-const MARK = /<(ui-icon|ui-label|span)\b[^>]*\bclass="spell-epic-state"[^>]*>[\s\S]*?<\/\1\s*>/
-
-/** A card's star (`epicStarHtml()`), its closing tag maybe split over lines by oxfmt. */
-const STAR = /<button\b[^>]*\bclass="spell-epic-star"[\s\S]*?<\/button\s*>/
-
-/** The saga epic card `card` names (`data-saga`, `data-saga-title`, `data-saga-purpose`);  `undefined` for none. */
+/** The saga epic card `card` names (`saga`, `saga-title`, `saga-purpose`);  `undefined` for none. */
 function sagaOf(card: string): SagaLook | undefined {
-  const id = dataOf(card, "saga")
+  const id = attributeOf(card, "saga")
   if (!id) return undefined
-  return { id, title: decode(dataOf(card, "saga-title") ?? id), purpose: decode(dataOf(card, "saga-purpose") ?? "") }
+  return {
+    id,
+    title: decode(attributeOf(card, "saga-title") ?? id),
+    purpose: decode(attributeOf(card, "saga-purpose") ?? "")
+  }
 }
 
-/** Attribute `data-<name>` of epic card `card`'s opening tag:  its value, `""` when bare;  `undefined` without it. */
-function dataOf(card: string, name: string): string | undefined {
-  const open = /^<ui-card\b[^>]*>/.exec(card)?.[0] ?? ""
-  const match = new RegExp(`\\sdata-${name}(?:="([^"]*)")?(?=[\\s>])`).exec(open)
-  return match ? (match[1] ?? "") : undefined
+/** Attribute `name` of epic card `card`'s opening tag:  its value, `""` when bare;  `undefined` without it. */
+function attributeOf(card: string, name: string): string | undefined {
+  const found = attributesOf(card).find(([each]) => each === name)
+  return found ? (found[1] ?? "") : undefined
 }
 
 /**
- * Epic card `card` (as `docs index` wrote it) with its state's mark and `data-status` as of `now`,
- * a session `running` for it or not, and its star as `favorite` says.
- * - As is without its facts (`data-phases`:  an index written before 2026-10-10).
+ * Epic card `card`'s opening tag's attributes, in order:  `[name, value]`, `value` `undefined` when bare.
+ * - read one after another, so a value holding an attribute's name (`active="P2 · running"`) is never taken for it:
+ *   `epicCardHtml()` writes every value in double quotes, its own quotes escaped
  */
-function remark(card: string, { running, favorite, now }: { running: boolean; favorite: boolean; now: Date }): string {
-  const phases = dataOf(card, "phases")
-  if (phases === undefined) return card
-  const open = /^<ui-card\b[^>]*>/.exec(card)?.[0] ?? ""
-  const state = epicStateFor(
-    {
-      phases: phases.split(" ").filter(Boolean),
-      updated: dataOf(card, "updated"),
-      urgent: (dataOf(card, "urgent") ?? "").split(" ").filter(Boolean),
-      future: dataOf(card, "future") !== undefined,
-      standing: dataOf(card, "standing") !== undefined,
-      // the meta line, which oxfmt may break over lines:  `P2 · Site Map · epics/seo/seo.plan.html`
-      active: decode(/<ui-meta>([^<]*) · /.exec(card)?.[1]?.replace(/\s+/g, " ").trim() ?? "") || undefined,
-      running
-    },
-    now
-  )
-  const status = state.name === "done" ? "done" : "open"
-  const name = dataOf(card, "epic") ?? ""
-  return card
-    .replace(open, open.replace(/\sdata-status="[^"]*"/, ` data-status="${status}"`))
-    .replace(MARK, epicStateMark(state))
-    .replace(STAR, epicStarHtml(decode(name), favorite))
+function attributesOf(card: string): [string, string | undefined][] {
+  const open = /^<epic-card\b([^>]*)>/.exec(card)?.[1] ?? ""
+  return Array.from(open.matchAll(/\s+([^\s=>]+)(?:="([^"]*)")?/g), ([, name, value]) => [name!, value])
+}
+
+/**
+ * Epic card `card` (as `docs index` wrote it), marked `running` when a session runs for it and `favorite` when it's
+ * starred, as they are now;  the rest as written.
+ */
+function remark(card: string, { running, favorite }: { running: boolean; favorite: boolean }): string {
+  const kept = attributesOf(card).filter(([name]) => name !== "running" && name !== "favorite")
+  const marks = [...(running ? [["running"]] : []), ...(favorite ? [["favorite"]] : [])] as [string][]
+  const open = [...kept, ...marks]
+    .map(([name, value]) => (value === undefined ? ` ${name}` : ` ${name}="${value}"`))
+    .join("")
+  // a function:  a `$` in a value is text, never a replacement pattern
+  return card.replace(/^<epic-card\b[^>]*>/, () => `<epic-card${open}>`)
 }
 
 /** Whether process `pid` is alive:  signal 0 checks without sending anything;  `EPERM`:  alive, not ours. */

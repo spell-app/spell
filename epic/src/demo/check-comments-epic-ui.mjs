@@ -3,7 +3,9 @@
  * threads and Send, drawn by `spell-comments.js` beside the site's own Spell UI.
  *
  * Usage (from the repo root):
- *   node src/demo/check-comments-epic-ui.mjs [--page <element>] [--docs <folder>] [--bundle <spell-ui.js>] [--keep] [outDir]
+ *   node src/demo/check-comments-epic-ui.mjs [--page <element>] [--docs <folder>] [--bundle <spell-ui.js>]
+ *     [--comments <spell-comments.js>] [--keep] [outDir]
+ * - `--comments`:  that file served as Epic UI's pages' `spell-comments.js`, one built elsewhere (as `--bundle`)
  * - the pages:  Epic UI's (`--page`, default `epic-item`, then `epic-page` for the router's swap), served as spell-app's
  *   page server serves them, at `/components/epics/`, by a page server of its OWN (`DemoServer`:  this checkout's
  *   `EpicServer` on a free port, no pid file, nobody woken), with the sets' build of Spell UI's site laid over them
@@ -57,9 +59,10 @@ const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)
 const element = flag("--page", "epic-item")
 const bundle = flag("--bundle", undefined)
+const commentsScript = flag("--comments", undefined)
 const keep = args.includes("--keep")
 /** The flags that take a value:  the word after one isn't the out folder. */
-const VALUED = ["--page", "--docs", "--bundle"]
+const VALUED = ["--page", "--docs", "--bundle", "--comments"]
 const out =
   args.find((arg, at) => !arg.startsWith("--") && !VALUED.includes(args[at - 1])) ??
   mkdtempSync(join(tmpdir(), "check-comments-epic-ui-"))
@@ -112,6 +115,10 @@ async function newPage(width) {
   page.errors = []
   page.on("pageerror", (error) => page.errors.push(String(error)))
   page.on("console", (message) => message.type() === "error" && page.errors.push(message.text()))
+  if (commentsScript) {
+    const code = readFileSync(resolve(commentsScript))
+    await page.route("**/spell-comments.js", (route) => route.fulfill({ body: code, contentType: "text/javascript" }))
+  }
   return page
 }
 
@@ -145,18 +152,22 @@ async function checkWidth(width) {
   // the page's bullhorn:  ONE pane, saved as typed, a thread under the masthead once closed
   await page.hover(".site-masthead")
   await page.click(".site-masthead > .spell-comment-mark.at-page > ui-button")
-  await page.waitForSelector(".spell-comment-pane textarea", { timeout: 5000 })
-  check(`${name}:  the page's bullhorn opens one pane`, (await page.$$(".spell-comment-pane")).length === 1)
+  await page.waitForSelector("epic-comment-pane > textarea", { timeout: 5000 })
+  check(`${name}:  the page's bullhorn opens one pane`, (await page.$$("epic-comment-pane")).length === 1)
   await page.keyboard.type(`A comment on the whole page, at ${width}px.`)
-  await page.waitForSelector(".spell-comment-pane .spell-comment-saved:not([hidden]):not([data-failed])", {
+  // the pane's floppy:  its `saved` (the tooltip), not `failed`
+  await page.waitForSelector("epic-comment-pane[saved]:not([failed])", {
     timeout: 5000
   }).catch(() => {})
-  const saved = await page.$(".spell-comment-pane .spell-comment-saved:not([hidden]):not([data-failed])")
+  const saved = await page.$("epic-comment-pane[saved]:not([failed])")
   check(`${name}:  the pane saves as Owen types`, !!saved)
   await page.screenshot({ path: join(out, `${name}-pane.png`) })
   await page.keyboard.press("Escape")
-  await page.waitForSelector(".site-masthead + .spell-comments .spell-thread", { timeout: 5000 }).catch(() => {})
-  check(`${name}:  the page's comment draws as a thread under the masthead`, !!(await page.$(".site-masthead + .spell-comments .spell-thread")))
+  await page.waitForSelector(".site-masthead + epic-threads > epic-thread", { timeout: 5000 }).catch(() => {})
+  check(
+    `${name}:  the page's comment draws as a thread under the masthead`,
+    !!(await page.$(".site-masthead + epic-threads > epic-thread"))
+  )
 
   // selected text in a section's list:  ⌘ / Ctrl I
   const section = await page.evaluate(() => {
@@ -183,7 +194,7 @@ async function checkWidth(width) {
   }, section)
   await page.waitForTimeout(300)
   await page.keyboard.press("ControlOrMeta+i")
-  const textPane = await page.waitForSelector(".spell-comment-pane textarea", { timeout: 5000 }).catch(() => null)
+  const textPane = await page.waitForSelector("epic-comment-pane > textarea", { timeout: 5000 }).catch(() => null)
   check(`${name}:  ⌘ I on text selected in section ${section} opens the pane`, !!textPane && !!quote, quote)
   if (textPane) {
     await page.keyboard.type("What does this line mean?")
@@ -192,7 +203,7 @@ async function checkWidth(width) {
     await page.waitForTimeout(600)
   }
   const inItem = await page.evaluate(
-    (id) => !!document.querySelector(`#${CSS.escape(id)} > ul > li > .spell-comments .spell-thread`),
+    (id) => !!document.querySelector(`#${CSS.escape(id)} > ul > li > epic-threads > epic-thread`),
     section
   )
   check(`${name}:  the text comment's thread is in its list item`, inItem)
@@ -227,7 +238,7 @@ async function checkWidth(width) {
     send?.state === "unsent" && send.who === "no epic owns this page",
     JSON.stringify(send)
   )
-  await page.click(".site-masthead > .spell-send > button")
+  await page.click(".site-masthead > .spell-send > .spell-send-button")
   await page.waitForSelector('.site-masthead > .spell-send[data-state="sent"]', { timeout: 5000 }).catch(() => {})
   check(`${name}:  a click on Send sends them`, !!(await page.$('.site-masthead > .spell-send[data-state="sent"]')))
   check(`${name}:  the inbox says they were sent`, !!GuideInbox.read(inbox(element)).sent)
@@ -249,7 +260,7 @@ async function checkWidth(width) {
   await page.waitForTimeout(2500)
   const swapped = await page.evaluate(() => ({
     page: document.querySelectorAll(".site-masthead > .spell-comment-mark.at-page").length,
-    threads: document.querySelectorAll(".spell-thread").length,
+    threads: document.querySelectorAll("epic-thread").length,
     floats: document.querySelectorAll(".spell-comment-float").length,
     send: document.querySelector(".site-masthead > .spell-send")?.dataset.state
   }))
@@ -261,7 +272,7 @@ async function checkWidth(width) {
   await page.goBack()
   await page.waitForFunction((name) => location.pathname.endsWith(`/${name}.html`), element, { timeout: 10_000 })
   await page.waitForTimeout(2500)
-  const back = await page.evaluate(() => document.querySelectorAll(".spell-thread").length)
+  const back = await page.evaluate(() => document.querySelectorAll("epic-thread").length)
   check(`${name}:  back again, the threads draw again`, back === held.length, `${back}`)
 
   check(`${name}:  no page errors`, !page.errors.length, page.errors.slice(0, 3).join(" | "))
@@ -323,11 +334,12 @@ async function checkGuide() {
   })
   await page.goto(`${served.base}/guides/python-target.html`)
   const drawn = await page
-    .waitForSelector(".spell-thread", { state: "attached", timeout: 20_000 })
+    .waitForSelector("epic-thread", { state: "attached", timeout: 20_000 })
     .then(() => true)
     .catch(() => false)
   const look = await page.evaluate(() => {
-    const thread = document.querySelector(".spell-thread")
+    // an `<epic-thread>`:  its host is the ivory box
+    const thread = document.querySelector("epic-thread")
     return thread && { radius: getComputedStyle(thread).borderTopLeftRadius, marks: document.querySelectorAll(".spell-comment-mark").length }
   })
   check(

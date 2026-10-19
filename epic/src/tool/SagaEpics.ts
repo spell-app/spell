@@ -5,8 +5,10 @@ import { parseHTML } from "linkedom"
 
 // Import directly:  the `$/server/site` barrel is browser code (the site header);  this file imports nothing
 import { URGENT_SELECTOR } from "$/epics/list/EpicState"
+import { FAVORITES_FILE, eventTimesIn, favoritesIn, isoLocal, lastWorked } from "$/epics/list/EpicCards"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { DataFile } from "$/epics/data/DataFile"
 
 import type { SagaEpic, SagaEpicsAnswer } from "$/epics/components/epic-cards/EpicCards.types"
 
@@ -18,6 +20,8 @@ import { PlanDocFiles } from "./PlanDocFiles"
  * every epic page whose `<epic-page saga>` names it.
  * - GATHERED when asked, from each epic page's SKELETON (no parts):  its title, summary, phases' statuses, `updated`,
  *   `future`, `standing` and the items that need Owen -- what `$/epics/list/EpicState` reads an epic's state from
+ *   - and when it was last worked on (its `updated`, its log lines:  the doc's and its `parts/log.html`), and whether
+ *     Owen starred it (`FAVORITES_FILE`):  its card is the Epics page's, `<epic-card>` (epic `epic-engine` I39)
  * - nothing kept:  an epic that joins or leaves the saga, or finishes a phase, shows on the next ask
  * - read by the page server (`GET /api/epics/saga?saga=<id>`, `epicRoutes.ts`), which `<epic-cards>` asks
  * - Node only (`node:fs`, linkedom):  NOT in the `$/epics` barrel, imported by path.
@@ -43,14 +47,27 @@ export class SagaEpics {
           .filter((entry) => entry.isDirectory())
           .map((entry) => entry.name)
       : []
+    const favorites = this.favorites()
     const found = names.flatMap((name): SagaEpic[] => {
       const file = PlanDocFiles.planDocIn(join(epics, name), name)
       if (!file) return []
       const epic = SagaEpics.read(name, readFileSync(file, "utf8"), file.endsWith(".plan.html"))
-      return epic?.saga === saga ? [epic.card] : []
+      if (epic?.saga !== saga) return []
+      const log = join(epics, name, "parts", "log.html")
+      const worked = lastWorked([epic.card.worked, ...(existsSync(log) ? eventTimesIn(readFileSync(log, "utf8")) : [])])
+      return [{ ...epic.card, worked: worked && isoLocal(worked), favorite: favorites.has(name) }]
     })
     found.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: "base" }))
     return { saga, epics: found }
+  }
+
+  /** The starred epics' names (`FAVORITES_FILE`);  none when it won't read.  NEVER throws. */
+  favorites(): Set<string> {
+    try {
+      return favoritesIn(DataFile.read(join(this.content, FAVORITES_FILE)))
+    } catch {
+      return new Set()
+    }
   }
 
   /**
@@ -79,8 +96,16 @@ export class SagaEpics {
           urgent: Array.from(document.querySelectorAll(URGENT_SELECTOR), (item) => item.id),
           // its number by its place, never its id:  phase ids may be words (P15's stable ids)
           active: active ? `P${phases.indexOf(active) + 1} · ${(activeTitle ?? "").trim()}` : undefined
-        }
+        },
+        // the doc's own:  its `updated` day and log lines;  `of()` adds its log part's
+        worked: SagaEpics.worked([page.getAttribute("updated"), ...eventTimesIn(html)])
       }
     }
+  }
+
+  /** The latest of `values` (`lastWorked()`), local ISO;  `undefined` when none reads. */
+  private static worked(values: (string | null)[]): string | undefined {
+    const date = lastWorked(values)
+    return date && isoLocal(date)
   }
 }

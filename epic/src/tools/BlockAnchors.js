@@ -1,7 +1,8 @@
 /**
  * BLOCK ANCHORS:  where a COMMENT sits on its page (epic `airplane`, P11).
  * - A comment is Owen's, on one MAJOR BLOCK of a docs page or epic page (`BLOCK_KINDS`):
- *   - a docs page's:  a section, a table, an aside, a code block, a message, a set of cards or steps, a top-level list
+ *   - a docs page's:  a section, a table, an aside, a code block, a message, a set of cards or steps (the Epics
+ *     page's `<epic-list>` too), a top-level list
  *   - an epic page's:  an item, a phase's field, an update (`<epic-update>`, even inside an item or a field), the
  *     summary, Overview prose, and its tables, asides and code
  *   - or the whole page (`PAGE_ANCHOR`)
@@ -36,7 +37,7 @@ export const BLOCK_KINDS = [
   ["aside", "ui-accordion.spell-aside, epic-aside"],
   ["code", "ui-accordion.spell-code, ui-code, epic-code, pre"],
   ["message", "ui-message"],
-  ["cards", "ui-cards"],
+  ["cards", "ui-cards, epic-list"],
   ["steps", "ui-steps"],
   ["list", "ui-list, ul, ol"]
 ]

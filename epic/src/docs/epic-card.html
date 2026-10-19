@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-card</title>
+    <meta
+      name="description"
+      content="The &lt;epic-card&gt; element: one epic's card on the Epics page, its state, link, saga, star and last-worked day."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-card&gt;">
+      <ui-segment vertical class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-card&gt;
+            <ui-header>The &lt;epic-card&gt; element: one epic's card on the Epics page, its state, link, saga, star and last-worked day.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-card&gt;</code> is one epic's card on the Epics page, drawn from what the epic's page says.
+          </p>
+          <ul>
+            <li>Its state's mark before its title, by the one rule every list and page uses: in progress, errors, paused, future, done.</li>
+            <li>Its description, its saga's label and its meta line.</li>
+            <li>A star at its top right: a click stars or unstars the epic on the page server.</li>
+            <li>The day it was last worked on at its bottom right, the full date its tooltip.</li>
+          </ul>
+          <p class="meta">
+            For anyone changing the Epics page's cards.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P3), in the
+            <a href="../../spell-epic/src/components/epic-list/" target="src-spell-epic-src-components-epic-list"><code title="spell-epic/src/components/epic-list/">epic-list</code></a> family, with <code>&lt;epic-list&gt;</code>,
+            <code>&lt;epic-card&gt;</code> and <code>&lt;epic-sort&gt;</code>.<br />
+            Its vocabulary: <a href="../../spell-epic/src/components/epic-list/EpicCard.en.ts" target="src-spell-epic-src-components-epic-list-epiccard-en-ts"><code title="spell-epic/src/components/epic-list/EpicCard.en.ts">EpicCard.en.ts</code></a><br />
+            Its component: <a href="../../spell-epic/src/components/epic-list/EpicCard.tsx" target="src-spell-epic-src-components-epic-list-epiccard-tsx"><code title="spell-epic/src/components/epic-list/EpicCard.tsx">EpicCard.tsx</code></a>.
+          </p>
+
+          <ui-section id="1-example" header="1. Example" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <div style="max-width: 360px">
+              <epic-card id="epic-epic-engine" epic="epic-engine" updated="2026-10-19" phases="done done active todo" active="P3 · Pages as Components" running worked="2026-10-19T16:13-04:00" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+                <a href="../../epics/epic-engine/epic-engine.plan.html" target="epic-engine">Epic Engine</a>
+                <span slot="description">One engine for every repo's epics.</span>
+                <span slot="meta">P3 · Pages as Components · epics/epic-engine/epic-engine.plan.html</span>
+              </epic-card>
+            </div>
+
+            <ui-accordion class="spell-code" styled>
+              <ui-title>The example above · 5 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-card id="epic-epic-engine" epic="epic-engine" updated="2026-10-19" phases="done done active todo" active="P3 · Pages as Components" running worked="2026-10-19T16:13-04:00" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+                      <a href="../../epics/epic-engine/epic-engine.plan.html" target="epic-engine">Epic Engine</a>
+                      <span slot="description">One engine for every repo's epics.</span>
+                      <span slot="meta">P3 · Pages as Components · epics/epic-engine/epic-engine.plan.html</span>
+                    </epic-card>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <p>
+              A running epic, mid-way: in progress, its phases done of all in a blue label. Opened without the page
+              server's write token, its star is disabled and says why.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-markup" header="2. Markup" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ui-accordion class="spell-code" styled>
+              <ui-title>A card, written as from this page · 18 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-card
+                      id="epic-airplane"
+                      epic="airplane"
+                      data-status="open"
+                      phases="done active todo"
+                      updated="2026-10-08"
+                      urgent="q3"
+                      active="P2 · Site Map"
+                      worked="2026-10-09T14:34-04:00"
+                      saga="epics"
+                      saga-title="Epic Tooling"
+                      saga-purpose="Epics:  their pages, the review loop ..."
+                      favorite
+                    >
+                      <a href="../../epics/airplane/airplane.plan.html" target="airplane">Airplane</a>
+                      <span slot="description">Work with no Claude, on a plane.</span>
+                      <span slot="meta">P2 · Site Map · epics/airplane/airplane.plan.html</span>
+                    </epic-card>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>Written by <a href="../../spell-epic/src/list/EpicCards.ts" target="src-spell-epic-src-list-epiccards-ts"><code title="spell-epic/src/list/EpicCards.ts">epicCardHtml()</code></a>, for <code>epic pages index</code> and the page server alike.</li>
+              <li><code>data-status</code>: <code>done</code> or <code>open</code>, for the docs runtime's count and state chips.</li>
+              <li>The page server marks each card <code>running</code> and <code>favorite</code> as they are now, as it serves the page.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" header="3. Where it goes" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="compass"></ui-icon>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Parent</th><th>How many</th><th>As</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><a href="epic-list.html" target="src-spell-epic-src-docs-epic-list-html"><code>&lt;epic-list&gt;</code></a></td><td>any number</td><td>One epic.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>Its children: the title link, then <code>slot="description"</code> and <code>slot="meta"</code>.</p>
+          </ui-section>
+
+          <ui-section id="4-attributes" header="4. Attributes" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Attribute</th><th>Value</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>epic</code> (required)</td><td>an epic's name</td><td>Its folder in <a href="../../epics/" target="src-epics"><code>epics/</code></a>: <code>airplane</code>.</td></tr>
+                  <tr><td><code>phases</code></td><td>statuses, space-separated</td><td>Each phase's status, in order: <code>done done active todo</code>.</td></tr>
+                  <tr><td><code>updated</code></td><td>a date</td><td>Its page's <code>updated</code> day: paused after 3 days without one.</td></tr>
+                  <tr><td><code>urgent</code></td><td>item ids</td><td>Its items that need Owen: <code>q3 j12</code>.</td></tr>
+                  <tr><td><code>future</code></td><td>present or not</td><td>Written down with <code>/epic future</code>, not planned yet.</td></tr>
+                  <tr><td><code>standing</code></td><td>present or not</td><td>Open for good: every phase done is not done.</td></tr>
+                  <tr><td><code>running</code></td><td>present or not</td><td>A session runs for it: never paused. The page server's to set.</td></tr>
+                  <tr><td><code>active</code></td><td>text</td><td>The phase under way: <code>P8 · Review Polish</code>.</td></tr>
+                  <tr><td><code>worked</code></td><td>a time</td><td>When it was last worked on: drawn as <code>10/9</code>.</td></tr>
+                  <tr><td><code>saga</code>, <code>saga-title</code>, <code>saga-purpose</code></td><td>a saga id, text</td><td>The saga it serves: its label's words and tooltip.</td></tr>
+                  <tr><td><code>favorite</code></td><td>present or not</td><td>Starred: under Favorites, and only there.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="epic-card-parts" header="Parts" sticky collapsible dividing collapsed>
+              <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Part</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>base</code></td><td>The card, a <code>&lt;ui-card&gt;</code>.</td></tr>
+                  <tr><td><code>mark</code></td><td>Its state's mark before the title.</td></tr>
+                  <tr><td><code>saga</code></td><td>Its saga's label, a <code>&lt;ui-label&gt;</code>.</td></tr>
+                  <tr><td><code>star</code></td><td>The star at its top right, a <code>&lt;ui-button&gt;</code>.</td></tr>
+                  <tr><td><code>worked</code></td><td>The day it was last worked on, a <code>&lt;time&gt;</code>.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+            <ui-section id="epic-card-events" header="Events" sticky collapsible dividing collapsed>
+              <p>What it tells the page.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Event</th><th>Detail</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>epic-favorite</code></td><td><code>{ epic, favorite, favorites }</code></td><td>The page server starred or unstarred it: <code>favorites</code> is every starred epic, which its list stars every card by.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" header="5. How it looks" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>A Spell UI card (<code>&lt;ui-card&gt;</code>), as dense as the docs pages' card grids.</li>
+              <li>The mark: in progress, its phases done of all (<code>3/6</code>, or <code>planning</code>) in a small blue outlined label; the rest, the state's icon in its colour.</li>
+              <li>The star: grey until pointed at, the page's yellow once starred (Owen, 2026-10-10: "make it yellow").</li>
+              <li>The meta line in the brand's mono, small.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" header="6. Written by" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li><code>epic pages index</code>, from each epic page; the page server, for an epic still in its worktree.</li>
+              <li>A star click writes the shared <a href="../../epics/favorites.json5" target="src-epics-favorites-json5"><code>epics/favorites.json5</code></a>, through <code>POST /api/epics/favorite</code>.</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-19 against branch <code>epic-engine</code> (P3).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

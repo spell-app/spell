@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { epicStateFor, epicStateMark, idleDays, urgentWords } from "$/epics/list/EpicState"
+import { epicStateFor, idleDays, urgentWords } from "$/epics/list/EpicState"
 
 // epic `airplane` P8 (Owen, 2026-10-10):  in progress, errors, done, paused;  future as before;  no sleeping
 describe("epicStateFor()", () => {
@@ -59,16 +59,6 @@ describe("the rest", () => {
     ])
     expect(epicStateFor({ phases: ["done"], standing: true, urgent: ["q3"] }, now).name).toBe("errors")
     expect(epicStateFor({ phases: ["done", "todo"], standing: true, active: "P2 · x" }, now).name).toBe("progress")
-  })
-
-  it("draws a card's mark:  the count for in progress, else the icon;  the tooltip escaped", () => {
-    const now = new Date(2026, 9, 10)
-    expect(epicStateMark(epicStateFor({ phases: ["done", "todo"], active: "P2 · <a> & b" }, now))).toBe(
-      '<ui-label class="spell-epic-state" size="mini" color="blue" basic title="in progress:  P2 · &lt;a&gt; &amp; b under way">1/2</ui-label>'
-    )
-    expect(epicStateMark(epicStateFor({ phases: ["done"] }, now))).toBe(
-      '<ui-icon class="spell-epic-state" name="circle check" color="green" title="done:  every phase done, nothing needs you"></ui-icon>'
-    )
   })
 
   it("counts calendar days, and words urgent items by kind", () => {

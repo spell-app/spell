@@ -93,4 +93,17 @@ describe("IncomingHtml.nodes()", () => {
       '<p>Built: <code title="packages/spell/src/node/buildTsx.ts">buildTsx()</code></p>'
     )
   })
+
+  test("a <ui-table> comes in unstackable, its own words first (epic `epic-engine` I36);  a demo of stacking kept", () => {
+    const { document } = parseHTML("<!doctype html><html><body></body></html>")
+    const nodes = IncomingHtml.nodes(
+      document as unknown as Document,
+      "<ui-table compact celled><table><tr><td>a</td></tr></table></ui-table>" +
+        '<ui-table stackable="tablet"><table><tr><td>b</td></tr></table></ui-table>'
+    )
+    expect(nodes.map((node) => (node as Element).outerHTML.split("<table>")[0])).toEqual([
+      '<ui-table compact="" celled="" unstackable="">',
+      '<ui-table stackable="tablet">'
+    ])
+  })
 })

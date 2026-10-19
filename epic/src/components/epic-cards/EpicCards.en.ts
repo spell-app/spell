@@ -19,8 +19,9 @@ export const epicCardsVocabulary = {
   ui: false,
   description:
     "A saga page's Epics (epic `epic-workflow` P15):  a card for each epic whose page names the saga " +
-    "(`<epic-page saga>`), grouped by state as on the Epics page.  Drawn from the page server (`GET " +
-    "/api/epics/saga`), and asked again whenever an epic page changes, so it never goes stale.",
+    "(`<epic-page saga>`), grouped by state as on the Epics page, with its cards:  an `<epic-list>` of " +
+    "`<epic-card>`s.  Drawn from the page server (`GET /api/epics/saga`), and asked again whenever an epic page " +
+    "changes, so it never goes stale.",
   attributes: [
     {
       name: "saga",
@@ -33,9 +34,11 @@ export const epicCardsVocabulary = {
   events: [],
   slots: [],
   parts: [
-    { name: "base", description: "The box around the groups." },
-    { name: "group", description: "One group:  its heading (icon, title, how many), then its cards." },
-    { name: "card", description: "One epic's card:  its state's mark, linked title, summary and meta line." },
+    { name: "base", description: "The box around the list." },
+    {
+      name: "list",
+      description: "The cards, an `<epic-list no-favorites>` of `<epic-card>`s:  the Epics page's groups and cards."
+    },
     {
       name: "note",
       description: "Instead of cards:  no epic names the saga yet, the page opened from disk, or no answer."
@@ -44,10 +47,6 @@ export const epicCardsVocabulary = {
   states: [],
   texts: [
     { key: "label", text: "The saga's epics", description: "The whole list, spoken." },
-    { key: "activeTitle", text: "Active", description: "A group:  phases left." },
-    { key: "planningTitle", text: "Planning", description: "A group:  future epics, and ones with no phases yet." },
-    { key: "urgentTitle", text: "Urgent", description: "A group:  every phase done, items waiting on Owen." },
-    { key: "doneTitle", text: "Done", description: "A group:  every phase done, nothing waiting." },
     { key: "phases", text: "{count} phases", description: "A card's meta line:  phases done of all (`6/8`)." },
     {
       key: "none",

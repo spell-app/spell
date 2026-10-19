@@ -4,7 +4,8 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { CommentList, CommentsError, takenInto, type Comment } from "$/epics/tool/CommentList"
+import { ThreadFacts } from "$/epics/comments"
+import { CommentList, CommentsError, type Comment } from "$/epics/tool/CommentList"
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { ReviewInbox } from "$/epics/tool/ReviewInbox"
 
@@ -60,8 +61,14 @@ describe("CommentList", () => {
     const into = { epic: "guide-changes", phase: 4, phaseId: "p-memory", title: "Memory" }
     comments.take(id, into, NOW)
     expect(comments.comment(id).taken).toEqual({ ...into, at: NOW.toISOString() })
-    expect(takenInto(comments.comment(id).taken!)).toEqual({ hash: "p-memory", label: "guide-changes · Memory" })
-    expect(takenInto({ epic: "guide-changes", phase: 4 })).toEqual({ hash: "p4", label: "guide-changes P4" })
+    expect(ThreadFacts.takenInto(comments.comment(id).taken!)).toEqual({
+      hash: "p-memory",
+      label: "guide-changes · Memory"
+    })
+    expect(ThreadFacts.takenInto({ epic: "guide-changes", phase: 4 })).toEqual({
+      hash: "p4",
+      label: "guide-changes P4"
+    })
     // Undo keeps them;  an id that isn't a phase's is dropped
     const restored = comments.restore(id, { ...comments.comment(id) })
     expect(comments.comment(restored).taken).toMatchObject({ phaseId: "p-memory", title: "Memory" })

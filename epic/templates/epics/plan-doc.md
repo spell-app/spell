@@ -565,7 +565,7 @@ server types `/epic review` into it, above):
    | approve             | a phase, the summary, an Overview sub-section                      | logged only (the page has no Approve for them)                                                                                                                                     |
    | new                 | a new todo or question (`new1`)                                    | made as `add` makes it: Owen's note its details (a question's lead), "About P3." linking `near`; a Noted status card "Made from the page: Owen's new todo, written <time>."         |
    | revisit soon        | any item                                                           | left: answered INTO the item as a reply (`details --append`), the chat only linking it (Q3 of `windows-and-review`), then `inbox <name>#<id> clear`                                |
-   | revisit with a pick | any item                                                           | left, NOT answered ("to talk over: picks B · ..., asks: ..."): answer the note about that option; once Owen agrees, he picks it plainly (a question: or `decide ... --option B`), then `clear` |
+   | revisit with a pick | any item                                                           | left, NOT answered ("to talk over: picks B · ..., asks: ..."): answer the note about that option; once Owen agrees (a pick, or in words), record it:  `choose <name>#<id> B "<outcome>"` on any item, then `clear` |
 
    Each applied mark logs one line (`J9 approved:  closed (accepted)`); a mark Owen changed meanwhile stays. Each
    pick, todo and queued todo also gets a "Claude • Noted" status card (outlined, NOT the green Done:  it only
@@ -643,7 +643,10 @@ decide from WITHOUT asking back: in the item's details, or an Overview sub-secti
   never pseudo-code.
 - Concrete cases: name the affected components / examples / tests ("breadcrumb `divider-icon`: the divider stays
   empty in Safari").
-- Many values: a `ui-table` (the 19 renamed emoji: name, today, if changed, other names that reach each).
+- Many values: a `ui-table` (the 19 renamed emoji: name, today, if changed, other names that reach each), always
+  `<ui-table celled compact striped unstackable>`: never stacked, at any width (Owen, 2026-10-19: a table drawn in the
+  side bar as its header cells, then each row's cells one under another, "I hate it"). Too wide, it scrolls sideways
+  in its own box.
 - Options: side by side, an `<epic-choices>` of `<epic-option letter="A" title="...">`, after the item's text (a
   question's) or where the prose weighs them (any item, a reply); each says what changes, the cost, and a short
   code sample; mark ONE `recommended` and say why:
@@ -663,7 +666,7 @@ decide from WITHOUT asking back: in the item's details, or an Overview sub-secti
   </epic-choices>
   ```
 
-  Any item's options are picked (Choose; a question's also `decide --option`): a question is answered with the
+  Any item's options are picked (Choose;  settled in words:  `choose <name>#<id> <letter>`;  a question's also `decide --option`): a question is answered with the
   option, any other item approved with it (I8). (An old option grid, `ui-grid.spell-pros-cons`, is still turned into `<epic-choices>` on the way in,
   wherever it sits.)
 

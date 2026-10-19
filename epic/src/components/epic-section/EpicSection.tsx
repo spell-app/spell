@@ -9,13 +9,12 @@ import { ReviewState } from "$/epics/components/epic-review/ReviewState"
 import { SHOW_NOTE, type ReviewShows } from "$/epics/components/epic-review/EpicReview.types"
 import { NEW_KIND_LOOKS } from "$/epics/components/epic-new-item/EpicNewItem.types"
 import { NEEDS_OWEN, STATUS_SLOT, STATUS_STATES } from "$/epics/components/epic-item/EpicItem.types"
+import { SHOW_ALL, STATE_PICK, type StatePickDetail } from "$/epics/components/epic-state-filter/EpicStateFilter.types"
 
 import { epicSectionVocabulary } from "./EpicSection.en"
 import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
 import { StateFilter } from "./StateFilter"
 import {
-  CHIP,
-  CHIP_CLICK_KEYS,
   CLOSED_STATUSES,
   COUNT_ATTRIBUTES,
   COUNTED,
@@ -23,7 +22,6 @@ import {
   FILTER,
   FILTER_KEY,
   FILTER_STATES,
-  HIDDEN_NOTE,
   ITEM_KINDS,
   NEW_HERE,
   NUMBERED_BLOCKS,
@@ -393,36 +391,18 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     )
   }
 
-  /** The filter's chips:  one per state its items are in, with how many, solid while they show. */
+  /**
+   * The filter's chips:  one per state its items are in, with how many, solid while they show
+   * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3);  a click comes back as `epic-state-pick`.
+   */
   private filter(): JSX.Element {
     return (
       <Show when={this.present().length}>
-        <span
-          class={FILTER}
-          part={this.partForName("filter")}
-          role="group"
-          aria-label={this.translationForKey("filterLabel")}
-        >
-          <For each={this.present()}>
-            {(state) => {
-              const on = () => this.showing().has(state.state)
-              const words = () => this.chipWords(state)
-              return (
-                <button
-                  type="button"
-                  class={CHIP}
-                  data-state={state.state}
-                  data-color={state.color}
-                  aria-pressed={on() ? "true" : "false"}
-                  aria-label={words()}
-                  title={words()}
-                  onClick={() => this.pickState(state.state)}
-                >
-                  {this.stateCounts().get(state.state) ?? 0}
-                </button>
-              )
-            }}
-          </For>
+        <span class={FILTER} part={this.partForName("filter")}>
+          <epic-state-filter
+            counts={[...this.stateCounts()].map(([state, count]) => `${state}:${count}`).join(" ")}
+            shown={this.chosen ? [...this.showing()].join(" ") : undefined}
+          />
           {/* the hidden items, by id:  nothing in the doc changes */}
           <style>{this.hiddenRules()}</style>
         </span>
@@ -430,30 +410,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     )
   }
 
-  /** Under a filtered list:  `3 hidden · show all`;  a click shows everything. */
+  /** Under a filtered list:  `3 hidden · show all` (`<epic-hidden-note>`);  a click shows everything (`onShowAll()`). */
   private hiddenNote(): JSX.Element {
-    return (
-      <button
-        type="button"
-        class={HIDDEN_NOTE}
-        part={this.partForName("hidden-note")}
-        title={this.translationForKey("hiddenTip")}
-        onClick={this.showAll}
-      >
-        {this.translationForKey("hiddenNote", { count: this.hidden().length })}
-      </button>
-    )
-  }
-
-  /** A chip's name and tooltip:  how many, which state, and what its click does (`StateFilter.clickDoes()`). */
-  private chipWords(state: FilterState): string {
-    const words = this.translationForKey(state.words)
-    const count = this.stateCounts().get(state.state) ?? 0
-    const present = this.present().map((it) => it.state as string)
-    const does = this.translationForKey(
-      CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing()], state.state)]
-    )
-    return this.translationForKey("chipWords", { count, words, does })
+    return <epic-hidden-note part={this.partForName("hidden-note")} count={this.hidden().length} />
   }
 
   /** The rule hiding the filtered-out items:  `::slotted(#q3, ...)`;  `""` with none. */
@@ -646,6 +605,13 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     EpicSection.save(PHASE_TOGGLES_KEY, shown)
   }
 
+  /** One of its state chips, clicked (`<epic-state-filter>`'s `epic-state-pick`). */
+  @E.on(STATE_PICK, { target: "renderRoot" })
+  protected onStatePick(event: CustomEvent<StatePickDetail>) {
+    event.stopPropagation()
+    this.pickState(event.detail.state)
+  }
+
   /** A state chip, clicked:  what shows next, by `StateFilter.nextShown()`'s rule. */
   @E.untracked
   private pickState(state: string) {
@@ -654,9 +620,10 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     this.showStates(next.length === present.length ? undefined : next)
   }
 
-  /** "Show all", under a filtered list. */
-  @E.untracked
-  private readonly showAll = () => {
+  /** "Show all", under a filtered list (`<epic-hidden-note>`'s `epic-show-all`). */
+  @E.on(SHOW_ALL, { target: "renderRoot" })
+  protected onShowAll(event: Event) {
+    event.stopPropagation()
     this.showStates(undefined)
   }
 

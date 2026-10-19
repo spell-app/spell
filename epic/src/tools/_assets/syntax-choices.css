@@ -35,21 +35,22 @@
   outline-offset: -1px;
 }
 
-/* the round "back to the recommendation" button:  just the icon, grey, the accent on hover */
-.spell-choice-reset {
+/*
+ * The page's round icon buttons beside a box or a name, `<ui-button circular basic size="tiny">` (`spell-syntax.js`
+ * `iconButton()`):  the reset ("back to what the code has") and the class name's pencil.  Just the icon, grey, no
+ * ring;  the accent on a tint under the pointer.
+ */
+:is(.spell-choice-reset, .spell-syntax-rename) {
+  --ui-button-basic-border-width: 0px;
+  --ui-button-basic-background-hover: var(--spell-tint);
   flex: none;
-  display: inline-grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
+}
+:is(.spell-choice-reset, .spell-syntax-rename)::part(button) {
+  margin: 0;
   background: transparent;
   color: var(--spell-muted);
-  cursor: pointer;
 }
-.spell-choice-reset:is(:hover, :focus-visible) {
+:is(.spell-choice-reset, .spell-syntax-rename):is(:hover, :focus-within)::part(button) {
   background: var(--spell-tint);
   color: var(--spell-doc-accent);
 }

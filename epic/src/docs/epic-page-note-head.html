@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-page-note-head</title>
+    <meta
+      name="description"
+      content="The &lt;epic-page-note-head&gt; element: an old page note&#x27;s head line."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-page-note-head&gt;">
+      <ui-segment vertical class="site-masthead">
+        <ui-container>
+          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+            <ui-item
+              href="../../spell-epic/src/AGENTS.md"
+              icon="book"
+              aria-label="How comments work, src/AGENTS.md"
+              title="How comments work, src/AGENTS.md"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            &lt;epic-page-note-head&gt;
+            <ui-header>The &lt;epic-page-note-head&gt; element: an old page note&#x27;s head line.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            The head line of an old page note (<code>&lt;spell-note&gt;</code>), written into a guide before comments
+            replaced them:  who and when, its first line while folded, its status.  A click folds the note.
+          </p>
+          <p class="meta">
+            For anyone changing how comments look or work on a page.<br />
+            Its vocabulary (every name it uses):
+            <a href="../../spell-epic/src/components/epic-page-note-head/EpicPageNoteHead.en.ts" target="src-spell-epic-src-components-epic-page-note-head-epicpagenotehead-en-ts"><code title="spell-epic/src/components/epic-page-note-head/EpicPageNoteHead.en.ts">EpicPageNoteHead.en.ts</code></a>.<br />
+            Its component:
+            <a href="../../spell-epic/src/components/epic-page-note-head/EpicPageNoteHead.tsx" target="src-spell-epic-src-components-epic-page-note-head-epicpagenotehead-tsx"><code title="spell-epic/src/components/epic-page-note-head/EpicPageNoteHead.tsx">EpicPageNoteHead.tsx</code></a>, with its style
+            sheet (<code>.css</code>) and tests beside it.
+          </p>
+
+          <ui-section id="1-example" header="1. Example" sticky collapsible dividing>
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <epic-page-note-head at="2026-10-09 22:10" status="done" replies="1" preview="Show icons as I will click them rather than saying &quot;the plus button&quot;"></epic-page-note-head>
+            <epic-page-note-head at="2026-10-10 09:12" status="new" preview="Is the second step still right?"></epic-page-note-head>
+            <p class="meta">Live: the real element.  On a guide the docs runtime puts one first in each note, and a click opens the note.</p>
+          </ui-section>
+
+          <ui-section id="2-attributes" header="2. Attributes" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Name</th><th>Values</th><th>Meaning</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>at</code></td><td>a date and time</td><td>When Owen wrote it:  shown without the year, <code>10/9 22:10</code>.</td></tr>
+                  <tr><td><code>status</code></td><td><code>new</code>, <code>answered</code>, <code>done</code></td><td>Yellow, violet, grey.</td></tr>
+                  <tr><td><code>replies</code></td><td>a number</td><td>How many replies Claude wrote.</td></tr>
+                  <tr><td><code>preview</code></td><td>text</td><td>The note's first line, while folded.</td></tr>
+                  <tr><td><code>open</code></td><td>boolean</td><td>The note is open.  A click flips it and says so (<code>epic-page-note-fold</code>).</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-19 against branch <code>epic-engine</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

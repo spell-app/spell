@@ -13,13 +13,8 @@ import { ReviewState } from "$/epics/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
 import { Fold, expandAllUnder, foldAllUnder } from "$/epics/components/epic-item/Fold"
 import { StateFilter } from "$/epics/components/epic-section/StateFilter"
-import {
-  CHIP,
-  CHIP_CLICK_KEYS,
-  FILTER,
-  FILTER_STATES,
-  type StateFilterEntry
-} from "$/epics/components/epic-section/EpicSection.types"
+import { STATE_PICK, type StatePickDetail } from "$/epics/components/epic-state-filter/EpicStateFilter.types"
+import { FILTER, FILTER_STATES, type StateFilterEntry } from "$/epics/components/epic-section/EpicSection.types"
 
 import { epicPageVocabulary } from "./EpicPage.en"
 import {
@@ -781,48 +776,39 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * The page's state filter, in the toolbar:  a chip per state the page's items are in, with how many.
+   * The page's state filter, in the toolbar:  a chip per state the page's items are in, with how many
+   * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3).
    * - solid while EVERY section showing that state shows it
-   * - a click filters every section at once, by the sections' own rule (`StateFilter.nextShown()`)
+   * - a click (`epic-state-pick`) filters every section at once, by the sections' own rule (`StateFilter.nextShown()`)
    */
   private pageFilter(): JSX.Element {
+    const chips = () => this.filterChips()
     return (
-      <Show when={this.filterChips().length}>
-        <span
-          class={FILTER}
-          part={this.partForName("filter")}
-          role="group"
-          aria-label={this.translationForKey("filterLabel")}
-        >
-          <For each={this.filterChips()}>
-            {(chip) => (
-              <button
-                type="button"
-                class={CHIP}
-                data-state={chip.state}
-                data-color={chip.color}
-                aria-pressed={chip.on ? "true" : "false"}
-                aria-label={this.chipWords(chip)}
-                title={this.chipWords(chip)}
-                onClick={() => this.pickState(chip.state)}
-              >
-                {chip.count}
-              </button>
-            )}
-          </For>
+      <Show when={chips().length}>
+        <span class={FILTER} part={this.partForName("filter")}>
+          <epic-state-filter
+            counts={chips()
+              .map((chip) => `${chip.state}:${chip.count}`)
+              .join(" ")}
+            shown={
+              chips().every((chip) => chip.on)
+                ? undefined
+                : chips()
+                    .filter((chip) => chip.on)
+                    .map((chip) => chip.state)
+                    .join(" ")
+            }
+          />
         </span>
       </Show>
     )
   }
 
-  /** A page chip's name and tooltip:  how many, which state, what its click does. */
-  private chipWords(chip: StateFilterEntry): string {
-    const chips = this.filterChips()
-    const present = chips.map((it) => it.state as string)
-    const shown = chips.filter((it) => it.on).map((it) => it.state as string)
-    const words = this.translationForKey(FILTER_STATES.find((it) => it.state === chip.state)!.words)
-    const does = this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, shown, chip.state)])
-    return this.translationForKey("chipWords", { count: chip.count, words, does })
+  /** A toolbar chip, clicked (`<epic-state-filter>`'s `epic-state-pick`):  every section filtered at once. */
+  @E.on(STATE_PICK, { target: "renderRoot" })
+  protected onStatePick(event: CustomEvent<StatePickDetail>) {
+    event.stopPropagation()
+    this.pickState(event.detail.state)
   }
 
   /**

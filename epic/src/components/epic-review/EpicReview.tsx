@@ -26,11 +26,14 @@ import {
   SAID_NOTE,
   SAID_WHAT,
   SHOW_NOTE,
+  THREAD_ANSWER,
+  THREAD_BUTTONS_OF,
   type EpicReviewVocabulary,
   type NoteButtonSpec,
   type NoteHow,
   type ReviewButtonSpec,
-  type ReviewFill
+  type ReviewFill,
+  type ThreadButtonSpec
 } from "./EpicReview.types"
 
 import reviewCSS from "./EpicReview.css?inline"
@@ -59,6 +62,9 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  * - A button that chose an action (a review button, a note box button) sends `epic-chosen`:
  *   `<epic-item>` folds, so Owen moves on to the next (Owen, 2026-10-10).
  * - SIDE EFFECT:  the note box listens for `pagehide` while connected, to save a draft as the page goes.
+ * - A comment THREAD's answer (`buttons="thread"` / `"closed"`, drawn by `<epic-thread>`;  epic `epic-engine` P3):
+ *   the same group, look and colours, That's good / Reply / Skip it, or Reopen (`threadControls()`).
+ *   - No inbox behind them:  a press only says which (`epic-thread-answer`), and the comments' code acts on it.
  ****************/
 export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   @E.proto static vocabulary = epicReviewVocabulary
@@ -78,6 +84,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /** Follow the inbox while connected (kept alive:  a removed one must stop listening). */
   @E.whileConnected
   protected followReviews() {
+    // a thread's answer has no inbox to follow
+    if (this.threadButtons) return undefined
     return this.review.connect()
   }
 
@@ -86,10 +94,16 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     return this.label || (this.of ?? "").toUpperCase()
   }
 
+  /** A comment thread's answer buttons (`buttons="thread"` / `"closed"`);  `undefined` for the review kinds. */
+  get threadButtons(): readonly ThreadButtonSpec[] | undefined {
+    return THREAD_BUTTONS_OF[this.buttons ?? "item"]
+  }
+
   render(): JSX.Element {
     return (
       <>
-        <Show when={this.shows === "buttons"}>{this.controls()}</Show>
+        <Show when={this.shows === "buttons" && this.threadButtons}>{(specs) => this.threadControls(specs)}</Show>
+        <Show when={this.shows === "buttons" && !this.threadButtons}>{this.controls()}</Show>
         <Show when={this.shows === "note"}>{this.noteBox()}</Show>
         <Show when={this.shows === "said"}>{this.said()}</Show>
       </>
@@ -164,6 +178,48 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         <Show when={doNow()}>{(spec) => this.button(spec(), REVIEW_DO_NOW)}</Show>
       </span>
     )
+  }
+
+  /**
+   * A comment thread's answer (epic `epic-engine` P3;  Owen, 2026-10-10:  "Make top buttons same semantics/look as
+   * pills in item header"):  the line's group, its buttons always a grey outline on the page's ground, each in its
+   * colour under the pointer (`EpicReview.css`, "A thread's answer").
+   * - tooltips (`title`;  Owen, 2026-10-10:  "No tooltip on those same buttons"):  the name, and for the two that
+   *   close it, that they do;  a screen reader hears what each does
+   * - a press says which (`epic-thread-answer`, `{ act }`):  the thread's own line doesn't fold for it
+   */
+  private threadControls(specs: () => readonly ThreadButtonSpec[]): JSX.Element {
+    return (
+      <span
+        class={REVIEW_CONTROLS}
+        part={this.partForName("base")}
+        role="group"
+        aria-label={this.translationForKey("threadAnswer")}
+      >
+        <ui-buttons class={REVIEW_GROUP} basic="" icon="" size="mini">
+          <For each={specs()}>
+            {(spec) => (
+              <ui-button
+                icon={spec.icon}
+                data-act={spec.act}
+                data-color={spec.color}
+                title={this.translationForKey(spec.title)}
+                aria-label={`${this.translationForKey(spec.label)}:  ${this.translationForKey(spec.tip)}`}
+                onClick={(event: MouseEvent) => this.answer(event, spec)}
+              />
+            )}
+          </For>
+        </ui-buttons>
+      </span>
+    )
+  }
+
+  /** A thread's answer button pressed:  say which;  the click goes no further (its line would fold). */
+  @E.untracked
+  private answer(event: MouseEvent, spec: ThreadButtonSpec) {
+    event.preventDefault()
+    event.stopPropagation()
+    this.send(THREAD_ANSWER, { act: spec.act })
   }
 
   /** One review button, as its action stands. */

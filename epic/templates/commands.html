@@ -15,11 +15,12 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <!--
-          TEMPLATE:  `spell dev docs new commands <topic>/<topic>.html` copies this page AND `commands.json` beside it,
-          as `<topic>.json`.
-          - The operations live in the JSON;  `_assets/commands.js` draws them into `[data-commands-families]` (one
-            nested `<ui-section>` per family), `[data-commands-stats]` and the `[data-commands-filter]` input.  Its
-            header comment has the JSON's shape.
+          TEMPLATE:  `spell dev docs new commands <topic>/<topic>.html` copies this page AND `commands.json5` beside it,
+          as `<topic>.json5`.
+          - The operations live in the JSON;  `_assets/commands.js` draws them in place of `[data-commands-families]`
+            (one nested `<ui-section>` per family, its `<ui-table>`), `[data-commands-stats]` (a `<ui-statistic>`
+            each) and the `[data-commands-filter]` input:  Spell UI elements, built with the DOM.  Its header comment has the
+            JSON's shape.
           - The page FETCHES the JSON, so it needs the page server (`spell dev docs open <page>`);  from `file://` it shows
             a notice instead.  `data-spell-needs-server` tells `check-spell.js` to load it from the server.
           - Prose sections around the tables are hand-written, as on any guide.
@@ -38,7 +39,7 @@
         <ui-list class="spell-meta">
           <ui-item icon="user">Written for: who reads this, and what they're about to do</ui-item>
           <ui-item icon="folder"
-            >Data: <code>short-title.json</code> beside this page, drawn by the page server</ui-item
+            >Data: <code>short-title.json5</code> beside this page, drawn by the page server</ui-item
           >
         </ui-list>
 

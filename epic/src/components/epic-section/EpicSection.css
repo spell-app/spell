@@ -121,26 +121,6 @@
     }
   }
 
-  /* under a filtered list:  a quiet line, a link to show all */
-  .hidden-note {
-    display: block;
-    margin: 6px 0 0;
-    padding: 0;
-    border: none;
-    background: none;
-    color: var(--epic-muted, var(--ui-text-muted));
-    font: 14px/1.4 var(--epic-sans, var(--ui-font-family));
-    cursor: pointer;
-  }
-  .hidden-note:hover {
-    color: var(--epic-accent, var(--ui-link));
-    text-decoration: underline;
-  }
-  .hidden-note:focus-visible {
-    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
-    outline-offset: 1px;
-  }
-
   /*
    * ## New items waiting to be made (a Todos or Questions section, epic `airplane` P2;  `newItemList()`):
    * - Owen's own words, on his ivory (as `<epic-new-item>`'s form)

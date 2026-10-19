@@ -12,8 +12,10 @@
  *   - live reload is the page server's (`/api/server/live.js`), not ours
  * - Opened from disk (`file://`):  the same buttons explain how to start the server, and link to the page on it.
  * - Classic script, no imports:  `file://` pages can't load modules.  `window.SpellUI.UI` is the bundle's `UI`.
- * - The buttons follow the docs' rule:  pills with an icon and text, or circles with an icon, an `aria-label` and a
- *   `<ui-popup>` tooltip right after.
+ * - The buttons follow the docs' rule:  pills with an icon and text, or circles with an icon and an `aria-label`;
+ *   each with the browser's own tooltip, a `title`, on the button the pointer lands on too (`titleInside()`)
+ *   - `<ui-button>`s built as elements, never markup in strings (epic `epic-engine` P3);  before it, a `<ui-popup>`
+ *     after each was its tooltip, against the docs' rule (`src/AGENTS.md`, TOOLTIPS)
  */
 ;(function () {
   /** goals' routes on this server, when it has them:  `{ api, token }` */
@@ -58,19 +60,20 @@
     const hero = document.querySelector("main header.goals-hero")
     if (!hero) return
     const waiting = document.querySelectorAll('li.goals-thought[data-status="new"]').length
-    const tools = document.createElement("div")
-    tools.className = "goals-page-tools"
-    tools.innerHTML =
-      pill("talk", "comments", "Talk", `Talk ${NAME} through with Claude:  /goals ${BASE}`, true) +
-      pill("thought", "comment dots", "Thought", `Jot a thought about ${NAME}, for Claude to digest later`) +
+    const tools = el(
+      "div",
+      { class: "goals-page-tools" },
+      pill("talk", "comments", ["Talk"], `Talk ${NAME} through with Claude:  /goals ${BASE}`, true),
+      pill("thought", "comment dots", ["Thought"], `Jot a thought about ${NAME}, for Claude to digest later`),
       pill(
         "update",
         "wand magic sparkles",
-        waiting ? `Update <span class="goals-count">${waiting}</span>` : "Update",
+        waiting ? ["Update ", el("span", { class: "goals-count" }, String(waiting))] : ["Update"],
         `Have Claude work the new thoughts into ${NAME}:  /goals-update ${BASE}`
-      ) +
-      `<span class="goals-tool-gap"></span>` +
+      ),
+      el("span", { class: "goals-tool-gap" }),
       circle("vscode", "up right from square", "Open in VS Code", "Show this page in VS Code, beside your code")
+    )
     hero.append(tools)
     tools.addEventListener("click", (event) => {
       const button = event.target.closest("[data-goals]")
@@ -90,11 +93,12 @@
       if (heading.id === "history") continue
       const label = heading.textContent.replace(/^\s*\d+\.\s*/, "").trim()
       const target = `${BASE}/${heading.id}`
-      const tools = document.createElement("span")
-      tools.className = "goals-heading-tools"
-      tools.innerHTML =
-        circle("thought", "comment dots", `Add a thought about ${label}`, `Add a thought about ${label}`) +
+      const tools = el(
+        "span",
+        { class: "goals-heading-tools" },
+        circle("thought", "comment dots", `Add a thought about ${label}`, `Add a thought about ${label}`),
         circle("talk", "comments", `Talk ${label} through`, `Talk ${label} through with Claude`)
+      )
       tools.addEventListener("click", (event) => {
         const button = event.target.closest("[data-goals]")
         if (!button) return
@@ -113,11 +117,12 @@
       const title = item.querySelector(".plan-title")?.textContent.trim() ?? ""
       const label = `${id} · ${title}`
       const target = `${BASE}/${id}`
-      const tools = document.createElement("span")
-      tools.className = "goals-item-tools"
-      tools.innerHTML =
-        circle("thought", "comment dots", `Add a thought about ${id}`, `Add a thought about ${id}`) +
+      const tools = el(
+        "span",
+        { class: "goals-item-tools" },
+        circle("thought", "comment dots", `Add a thought about ${id}`, `Add a thought about ${id}`),
         circle("talk", "comments", `Talk ${id} through`, `Talk ${id} through with Claude:  /goals ${target}`)
+      )
       tools.addEventListener("click", (event) => {
         const button = event.target.closest("[data-goals]")
         if (!button) return
@@ -130,25 +135,30 @@
     }
   }
 
-  /** A pill button:  icon and text, with a tooltip. */
-  function pill(action, icon, text, tip, primary = false) {
-    return (
-      `<ui-button data-goals="${action}" circular size="tiny" ${primary ? "primary" : "basic"} icon="${icon}">${text}</ui-button>` +
-      tooltip(tip)
+  /** A pill button:  icon and `words` (text and elements), `tip` its tooltip. */
+  function pill(action, icon, words, tip, primary = false) {
+    const button = el(
+      "ui-button",
+      { "data-goals": action, circular: "", size: "tiny", [primary ? "primary" : "basic"]: "", icon, title: tip },
+      ...words
     )
+    titleInside(button)
+    return button
   }
 
-  /** A round, icon-only button, with an `aria-label` and a tooltip. */
+  /** A round, icon-only button:  `label` what a screen reader hears, `tip` its tooltip. */
   function circle(action, icon, label, tip) {
-    return (
-      `<ui-button data-goals="${action}" circular basic size="mini" icon="${icon}" aria-label="${escape(label)}"></ui-button>` +
-      tooltip(tip)
-    )
-  }
-
-  /** A tooltip for the element before it. */
-  function tooltip(text) {
-    return `<ui-popup inverted size="mini" position="bottom center" content="${escape(text)}"></ui-popup>`
+    const button = el("ui-button", {
+      "data-goals": action,
+      circular: "",
+      basic: "",
+      size: "mini",
+      icon,
+      title: tip,
+      "aria-label": label
+    })
+    titleInside(button)
+    return button
   }
 
   ////////////////
@@ -464,7 +474,28 @@
     }
   }
 
-  /** One element from HTML. */
+  /** A new `tag` with `attributes`, holding `children` (nodes or text):  as `spell-syntax.js`'s. */
+  function el(tag, attributes = {}, ...children) {
+    const node = document.createElement(tag)
+    for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value)
+    node.append(...children)
+    return node
+  }
+
+  /**
+   * `host`'s `title` (a `<ui-button>`'s) on the button inside it too, once drawn:  the element the pointer lands on
+   * carries the tooltip (VS Code's side bar shows only that one's), as `spell-doc-helpers.js`' `titleInside()` does.
+   */
+  function titleInside(host) {
+    void customElements.whenDefined(host.localName).then(() =>
+      requestAnimationFrame(() => {
+        const inner = host.shadowRoot?.querySelector('[part~="button"]')
+        if (inner) inner.title = host.title
+      })
+    )
+  }
+
+  /** One element from HTML:  the parked dialogs' (`thoughtModal()` ...), unused until goals is rebuilt. */
   function element(html) {
     const template = document.createElement("template")
     template.innerHTML = html.trim()

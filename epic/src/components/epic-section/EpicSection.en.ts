@@ -15,14 +15,7 @@ import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "$/epics/components/epic-item/F
 import { NEW_KIND_TEXTS, NEW_LIST_TEXTS } from "$/epics/components/epic-new-item/EpicNewItem.types"
 import { REVIEW_PARTS } from "$/epics/components/epic-review/EpicReview.types"
 
-import {
-  FILTER_TEXTS,
-  FOLD_EVENTS,
-  FOLD_OPEN_ATTRIBUTE,
-  FOLD_PARTS,
-  FOLD_STATES,
-  FOLD_TEXTS
-} from "./EpicSection.types"
+import { FOLD_EVENTS, FOLD_OPEN_ATTRIBUTE, FOLD_PARTS, FOLD_STATES, FOLD_TEXTS } from "./EpicSection.types"
 
 /****************
  * ### `<epic-section>`
@@ -135,7 +128,7 @@ export const epicSectionVocabulary = {
         "An item section's state filter:  one chip per state its items are in, with how many, solid while that " +
         "state's items show, outlined while hidden."
     },
-    { name: "hidden-note", description: 'Under a filtered list:  "3 hidden · show all".' },
+    { name: "hidden-note", description: 'Under a filtered list:  "3 hidden · show all", an `<epic-hidden-note>`.' },
     { name: "empty", description: 'An item section with no items:  "None yet".' },
     ...REVIEW_PARTS,
     {
@@ -159,12 +152,6 @@ export const epicSectionVocabulary = {
     { name: "tools", description: "Its title has tools:  the Phases toggles, or a state filter (items in it)." }
   ],
   texts: [
-    {
-      key: "hiddenTip",
-      text: "Show everything:  clear the filter",
-      description: "The note under a filtered list:  its tooltip."
-    },
-
     ...FOLD_TEXTS,
     { key: "epicsTitle", text: "Epics" },
     { key: "phasesTitle", text: "Phases" },
@@ -181,8 +168,6 @@ export const epicSectionVocabulary = {
     { key: "showVerify", text: "Show each phase's Verify", description: "The Phases title's Verify toggle, off." },
     { key: "hideVerify", text: "Hide each phase's Verify", description: "The Verify toggle, on." },
     { key: "count", text: "{open} open of {total}", description: "The count badge's tooltip:  `3/7` in words." },
-    ...FILTER_TEXTS,
-    { key: "hiddenNote", text: "{count} hidden · show all", description: "Under a filtered list;  a click shows all." },
     {
       key: "addNew",
       text: "New {kind}",

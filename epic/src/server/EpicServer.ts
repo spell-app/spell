@@ -27,8 +27,8 @@ import {
  * ```text
  * /_epic/assets/...       spell-epic's src/tools/_assets/   (spell-ui.js, spell-doc.css, the runtime ...)
  * /_epic/pack/...         spell-epic's src/components/__pack/   (epics.pack.js)
- * /r/<repo>/...           that repo's content folder (its .epic/config.json5's contentFolder)
- * /...                    the DEFAULT repo's content folder too, so today's URLs keep working
+ * /r/<repo>/...           that repo's content folder (its .epic/config.json5's contentFolder), then its main checkout
+ * /...                    the DEFAULT repo's content folder and checkout too, so today's URLs keep working
  * /api/server             what it serves (EpicServerInfo)
  * /api/...                the epic route modules, for the default repo (below)
  * ```
@@ -200,6 +200,10 @@ export class EpicServer {
    * The folders served:  the engine's routes, each repo at `/r/<repo>/`, the default repo at `/`.
    * - the engine's templates at each repo's `/r/<repo>/templates/` too, where its pages' `../templates/` leads
    *   (epic `epic-eject` T11)
+   * - each repo's main CHECKOUT under its content, where the content has no such file (epic `epic-engine` I25), as
+   *   spell-app's page server lays the two:  a page's links to code (`../../packages/...`, `../../spell-epic/src/...`)
+   *   and the data a page draws from the checkout serving it (the spell syntax guide's `spellSyntax.json`, the core
+   *   reference page's declarations) resolve here too;  dot files never served
    */
   private mounts(): SRV.Mount[] {
     const engine = Object.values(ENGINE_ROUTES).map((route) => ({
@@ -208,8 +212,21 @@ export class EpicServer {
     }))
     const templates = join(this.engine, ENGINE_ROUTES.templates.dir)
     const repoTemplates = this.repos.map((repo) => ({ prefix: `${repo.prefix}templates/`, dir: templates }))
-    const repos = [...repoTemplates, ...this.repos.map((repo) => ({ prefix: repo.prefix, dir: repo.content }))]
-    const home = this.defaultRepo ? [{ prefix: "/", dir: this.defaultRepo.content }] : []
+    // at one prefix the first folder holding the path answers (`SRV.StaticHandler`):  the content, then the checkout
+    const repos = [
+      ...repoTemplates,
+      ...this.repos.flatMap((repo) => [
+        { prefix: repo.prefix, dir: repo.content },
+        { prefix: repo.prefix, dir: repo.checkout }
+      ])
+    ]
+    const repo = this.defaultRepo
+    const home = repo
+      ? [
+          { prefix: "/", dir: repo.content },
+          { prefix: "/", dir: repo.checkout }
+        ]
+      : []
     return [...engine, ...repos, ...home]
   }
 

@@ -1,5 +1,7 @@
 import { Markup } from "$/epics/markup"
 
+import { unstackTables } from "../tools/to-components.js"
+
 import { ProseBlocks } from "./planDoc.types"
 
 import { PathTooltips } from "./PathTooltips"
@@ -17,6 +19,8 @@ import { ProseRewrite } from "./ProseRewrite"
  *   (`ui-grid.spell-pros-cons`, lettered cards) -> `<epic-choices>`;  a `Net effect` paragraph and its list ->
  *   `<epic-net-effect>`;  `ui-accordion.spell-code` -> `<epic-code>`;  `ui-accordion.spell-aside` -> `<epic-aside>`;
  *   `ui-message.plan-update` -> `<epic-note>`;  a labelled block (`<b>Where:</b>`) -> `<epic-field label>`
+ * - a `<ui-table>` without `unstackable` gets it (`unstackTables()`, the migrations' rule;  epic `epic-engine` I36,
+ *   Owen, 2026-10-19:  a table that stacks at the side bar's width, "I hate it"):  no table ever stacks
  * - a name and its file's path (`<code>buildTsx()</code>, <code>packages/.../buildTsx.ts</code>`) -> the name with
  *   its path as its tooltip, `<code title="path">name</code>` (`PathTooltips`, which says exactly which forms)
  * - anything else:  prose, as it is (a pros / cons grid without letters stays a grid, a `<ui-code>` in a code
@@ -34,6 +38,7 @@ export class IncomingHtml {
       if (child.matches(ProseBlocks.reply)) child.replaceWith(rewrite.reply(child))
     }
     rewrite.rewrite(box, { history: false })
+    unstackTables(box)
     PathTooltips.rewrite(box)
     PlanMarkup.trimWhitespace(box)
     return Array.from(box.childNodes)

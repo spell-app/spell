@@ -1659,6 +1659,61 @@ describe("PlanDoc review inbox", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  ////////////////
+  // ### A choice settled in conversation:  `choose()` (`epic choose`)
+  ////////////////
+
+  test("choose:  the LATEST set's option chosen, as the page's pick records it;  the outcome on the card and logged", () => {
+    const plan = freshPlan()
+    plan.addItem("judgement", "which store?", { details: `<p>weighed</p>${OPTIONS}` })
+    plan.setDetails("j1", replyWith("A", "B", "C"), { append: true })
+    const outcome = "Owen, 2026-10-01:  'option a';  built"
+    expect(plan.choose("j1", "a", { outcome })).toBe(
+      "picked A:  Option A (a reply's options);  approved:  closed (accepted)"
+    )
+    expect(chosen(plan, "j1")).toEqual([null, "A"])
+    expect(Markup.read(el(plan, "j1"))).toMatchObject({ status: "done", reviewed: "2026-10-01", reviewAs: "approve" })
+    expect(el(plan, "j1").querySelector("epic-status")!.textContent).toBe(
+      `Chose A · Option A:  recorded, the call accepted;  ${outcome}`
+    )
+    expect(lastLog(plan)).toBe(
+      `J1 picked A:  Option A (a reply's options);  approved:  closed (accepted);  settled in conversation:  ${outcome}`
+    )
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("choose --set:  that set (from 1);  a question answered with the option, an issue reviewed and left open", () => {
+    const plan = freshPlan()
+    plan.addItem("question", "which?", { details: `<p>why</p>${OPTIONS}` })
+    plan.setDetails("q1", replyWith("A", "B", "C"), { append: true })
+    expect(plan.choose("q1", "B", { set: 1 })).toBe("picked B:  Unfold it")
+    expect(Markup.read(el(plan, "q1"))).toMatchObject({ status: "decided", answered: true, reviewAs: "approve" })
+    expect(el(plan, "q1").querySelector(":scope > epic-answer")!.getAttribute("title")).toBe("Unfold it")
+    expect(chosen(plan, "q1")).toEqual(["B", null])
+    // no outcome:  the card says what happens next, as a page pick's does
+    expect(el(plan, "q1").querySelector("epic-status")!.textContent).toBe(
+      `Chose B · Unfold it:  recorded as the answer;  ${plan.nextStepWords()}`
+    )
+    plan.addItem("issue", "slow", { details: `<p>two fixes</p>${OPTIONS}` })
+    expect(plan.choose("i1", "A")).toBe("picked A:  Keep folds;  approved:  reviewed")
+    expect([status(plan, "i1"), chosen(plan, "i1")]).toEqual(["open", ["A"]])
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("choose refuses an item with no cards, a set or option it hasn't, changing nothing", () => {
+    const plan = freshPlan()
+    plan.addItem("caveat", "plain")
+    plan.addItem("judgement", "which store?", { details: `<p>weighed</p>${OPTIONS}` })
+    const before = plan.document.documentElement.outerHTML
+    expect(() => plan.choose("c1", "A")).toThrow(new PlanDocError("C1 has no option cards to choose from"))
+    expect(() => plan.choose("j1", "A", { set: 2 })).toThrow(
+      new PlanDocError("J1 has no card set 2:  it has 1 (--set 1 to 1)")
+    )
+    expect(() => plan.choose("j1", "Q")).toThrow(new PlanDocError("J1:  no option Q in card set 1"))
+    expect(() => plan.choose("j9", "A")).toThrow(PlanDocError)
+    expect(plan.document.documentElement.outerHTML).toBe(before)
+  })
+
   test("keepNote:  Owen's note as his reply, before Claude's answer to it;  once", () => {
     const plan = inboxPlan()
     plan.setDetails("c1", '<epic-reply from="Claude" at="2026-10-01 09:20"><p>a</p></epic-reply>', { append: true })

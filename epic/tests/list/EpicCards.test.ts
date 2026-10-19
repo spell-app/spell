@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import {
+  EPIC_CARDS_END,
+  EPIC_CARDS_START,
   byTitle,
   epicCardHtml,
   epicGroupFor,
-  epicGroupsHtml,
-  epicSagaChipsHtml,
-  epicWorkedHtml,
+  epicListHtml,
   eventTimesIn,
   lastWorked,
   favoritesIn,
@@ -30,46 +30,61 @@ describe("epicGroupFor()", () => {
   })
 })
 
-describe("epicGroupsHtml()", () => {
-  test("writes every group in order, an empty one hidden;  alphabetical by title, numbers as numbers", () => {
-    const card = (name: string, title: string, favorite = false) =>
-      epicCardHtml({ name, title, href: `${name}.html`, meta: name, facts: { phases: ["active"] }, favorite }, NOW)
-    const html = epicGroupsHtml([card("b", "epic 10"), card("a", "Epic 9"), card("s", "Star", true)])
-    expect(Array.from(html.matchAll(/data-group="(\w+)"( hidden)?>\n/g), (m) => `${m[1]}${m[2] ?? ""}`)).toEqual([
-      "favorites",
-      "active",
-      "planning hidden",
-      "urgent hidden",
-      "done hidden"
-    ])
-    expect(Array.from(html.matchAll(/data-epic="(\w+)"/g), (m) => m[1])).toEqual(["s", "a", "b"])
-    expect(byTitle("Epic 9", "epic 10")).toBeLessThan(0)
+// epic `epic-engine` P3:  elements, which draw, group and sort themselves
+describe("epicCardHtml()", () => {
+  test("writes an <epic-card>:  its facts as attributes, its link, description and meta line as children", () => {
+    const { html, group, title } = epicCardHtml(
+      {
+        name: "seo",
+        title: "SEO & <co>",
+        href: "seo/seo.plan.html",
+        target: "seo",
+        description: 'Meta "tags"',
+        meta: "P2 · Site Map · epics/seo/seo.plan.html",
+        facts: { phases: ["done", "active"], updated: "2026-10-08", urgent: ["q1"], active: "P2 · Site Map" },
+        worked: new Date(2026, 9, 9, 7, 5),
+        saga: { id: "epics", title: "Epic Tooling", purpose: "Epics <3" }
+      },
+      NOW
+    )
+    expect([group, title]).toEqual(["active", "SEO & <co>"])
+    expect(html).toMatch(
+      /^<epic-card id="epic-seo" epic="seo" data-status="open" phases="done active" updated="2026-10-08" urgent="q1" active="P2 · Site Map" worked="2026-10-09T07:05[+-]\d\d:\d\d" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics &lt;3">\n/
+    )
+    expect(html).toContain(`<a href="seo/seo.plan.html" target="seo">SEO &amp; &lt;co&gt;</a>\n`)
+    expect(html).toContain(`<span slot="description">Meta "tags"</span>\n`)
+    expect(html).toMatch(/<span slot="meta">P2 · Site Map · epics\/seo\/seo.plan.html<\/span>\n<\/epic-card>$/)
+  })
+
+  test("a starred epic shows under Favorites;  a done one is `done`;  bare attributes for future and standing", () => {
+    const card = (facts: Parameters<typeof epicCardHtml>[0]["facts"], favorite = false) =>
+      epicCardHtml({ name: "a", title: "A", href: "a.html", meta: "a", facts, favorite }, NOW)
+    expect(card({ phases: ["active"] }, true)).toMatchObject({ group: "favorites" })
+    expect(card({ phases: ["active"] }, true).html).toMatch(/ favorite>\n/)
+    expect(card({ phases: ["done"] }).html).toContain(' data-status="done" phases="done">')
+    expect(card({ phases: [], future: true }).html).toContain(' phases="" future>')
+    expect(card({ phases: ["done"], standing: true }).html).toContain(' data-status="open" phases="done" standing>')
   })
 })
 
-// epic `epic-workflow` P15
-describe("sagas", () => {
-  test("a card names its saga:  a label, its purpose the tooltip;  the chips count each saga's cards, then No saga", () => {
-    const saga = { id: "epics", title: "Epic Tooling", purpose: "Epics <3" }
-    const card = (name: string, withSaga = true) =>
-      epicCardHtml(
-        { name, title: name, href: "x", meta: name, facts: { phases: [] }, saga: withSaga ? saga : undefined },
-        NOW
-      )
-    const named = card("a")
-    expect(named.html).toContain(`data-saga="epics" data-saga-title="Epic Tooling" data-saga-purpose="Epics &lt;3"`)
-    expect(named.html).toContain(
-      `<ui-label class="spell-epic-saga" size="mini" basic="" icon="bullseye" title="Epics &lt;3">Epic Tooling</ui-label>`
+describe("epicListHtml()", () => {
+  test("ONE <epic-list>:  the sagas' ids in order, the cards by group then title between the page server's markers", () => {
+    const card = (name: string, title: string, favorite = false, phases = ["active"]) =>
+      epicCardHtml({ name, title, href: `${name}.html`, meta: name, facts: { phases }, favorite }, NOW)
+    const html = epicListHtml(
+      [card("b", "epic 10"), card("d", "Done", false, ["done"]), card("a", "Epic 9"), card("s", "Star", true)],
+      [
+        { id: "drawable-spell", title: "Drawable Spell", purpose: "x" },
+        { id: "epics", title: "Epic Tooling", purpose: "y" }
+      ]
     )
-    const chips = epicSagaChipsHtml(
-      [saga, { id: "tooling", title: "Dev Tooling", purpose: "tools" }],
-      [named, card("b"), card("c", false)]
-    )
-    expect(
-      Array.from(chips.matchAll(/data-saga="([^"]*)"[^>]*>([^<]*) <span class="spell-saga-count">(\d+)/g), (m) =>
-        m.slice(1).join("|")
-      )
-    ).toEqual(["epics|Epic Tooling|2", "tooling|Dev Tooling|0", "|No saga|1"])
+    expect(html).toMatch(/^<epic-list class="spell-epics" sagas="drawable-spell epics">\n<!-- running-epics -->\n/)
+    expect(html).toMatch(/\n<!-- running-epics:end -->\n<\/epic-list>$/)
+    expect(Array.from(html.matchAll(/ epic="(\w+)"/g), (m) => m[1])).toEqual(["s", "a", "b", "d"])
+    expect(html.indexOf(EPIC_CARDS_START)).toBeLessThan(html.indexOf(EPIC_CARDS_END))
+    expect(byTitle("Epic 9", "epic 10")).toBeLessThan(0)
+    // no sagas:  no attribute
+    expect(epicListHtml([], [])).toMatch(/^<epic-list class="spell-epics">\n/)
   })
 })
 
@@ -84,12 +99,6 @@ describe("last worked", () => {
     expect(eventTimesIn(log)).toEqual(["2026-10-09T00:26-04:00", "2026-10-09T22:08-04:00"])
     expect(lastWorked(["2026-10-09", ...eventTimesIn(log), undefined])).toEqual(new Date("2026-10-10T02:08:00Z"))
     expect(lastWorked([null, "x"])).toBeUndefined()
-  })
-
-  test("shows month and day without the year;  the full date and time in its title", () => {
-    expect(epicWorkedHtml(new Date(2026, 9, 9, 7, 5))).toMatch(
-      /^<time class="spell-epic-worked" datetime="2026-10-09T07:05[+-]\d\d:\d\d" title="Last worked on 10\/9\/26 07:05">10\/9<\/time>$/
-    )
   })
 })
 

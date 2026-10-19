@@ -160,6 +160,42 @@ describe("PlanDocCommands calm:  an existing call or issue not urgent, or urgent
   })
 })
 
+describe("PlanDocCommands choose:  an option Owen settled in conversation, on any item", () => {
+  test("chooses on the latest card set (or --set N), prints what it did;  the doc written keeps it", async () => {
+    const owner = commands()
+    const options = (...letters: string[]) =>
+      `<epic-choices>${letters.map((letter) => `<epic-option letter="${letter}" title="Way ${letter}"></epic-option>`).join("")}</epic-choices>`
+    await owner.run(["add", "x", "judgement", "A call", "--details", `<p>two ways</p>${options("A", "B")}`])
+    const reply = `<epic-reply from="Claude" at="2026-10-01 09:20"><p>or:</p>${options("A", "B", "C")}</epic-reply>`
+    writeFileSync(join(root, "reply.html"), reply)
+    await owner.run(["details", "x", "j1", "--append", "--file", join(root, "reply.html")])
+    printed = []
+    expect(await owner.run(["choose", "x", "J1", "c", "Owen:  'C, please';  built"])).toBe(0)
+    expect(printed).toEqual(["J1 picked C:  Way C (a reply's options);  approved:  closed (accepted)"])
+    const plan = FILES.read(file)
+    const sets = Array.from(plan.item("j1").querySelectorAll("epic-choices"), (set) => set.getAttribute("chosen"))
+    expect([plan.item("j1").getAttribute("status"), sets]).toEqual(["done", [null, "C"]])
+    // the doc is written formatted:  its spaces squeezed
+    expect(plan.item("j1").querySelector("epic-status")!.textContent!.replace(/\s+/g, " ")).toBe(
+      "Chose C · Way C: recorded, the call accepted; Owen: 'C, please'; built"
+    )
+
+    await owner.run(["add", "x", "question", "Which?", "--details", `<p>why</p>${options("A", "B")}`])
+    expect(await owner.run(["choose", "x", "q1", "B", "--set", "1"])).toBe(0)
+    expect(FILES.read(file).item("q1").querySelector(":scope > epic-answer")!.getAttribute("title")).toBe("Way B")
+  })
+
+  test("refuses no letter, or an option the item hasn't, writing nothing", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "issue", "An issue"])
+    const doc = readFileSync(file, "utf8")
+    expect(await owner.run(["choose", "x", "i1"])).toBe(1)
+    expect(await owner.run(["choose", "x", "i1", "A"])).toBe(1)
+    expect(warned.at(-1)).toBe("epic:  I1 has no option cards to choose from")
+    expect(readFileSync(file, "utf8")).toBe(doc)
+  })
+})
+
 describe("PlanDocCommands add --details:  a name and its path", () => {
   test("works in a repo with no `packages/` (spell-epic's own, epic `epic-engine` I14):  a bare name looked up", async () => {
     rmSync(join(root, "packages"), { recursive: true, force: true })

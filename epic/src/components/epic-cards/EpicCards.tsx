@@ -2,19 +2,10 @@ import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "$/ui/core"
-// Import directly:  the `$/server/site` barrel is the site header's;  these files import only each other
-import { epicGroupFor } from "$/epics/list/EpicCards"
-import { epicStateFor, type EpicState } from "$/epics/list/EpicState"
+import { epicStateFor } from "$/epics/list/EpicState"
 
 import { epicCardsVocabulary } from "./EpicCards.en"
-import {
-  CARD_GROUPS,
-  EPIC_FILE,
-  SAGA_EPICS_API,
-  type CardsProblem,
-  type SagaEpic,
-  type SagaEpicsAnswer
-} from "./EpicCards.types"
+import { EPIC_FILE, SAGA_EPICS_API, type CardsProblem, type SagaEpic, type SagaEpicsAnswer } from "./EpicCards.types"
 
 import cardsCSS from "./EpicCards.css?inline"
 
@@ -22,14 +13,17 @@ import cardsCSS from "./EpicCards.css?inline"
  * ### `EpicCards`
  * The component behind `<epic-cards>`:  a saga page's Epics (epic `epic-workflow` P15) --
  * a card for each epic whose page names the saga, grouped by state as on the Epics page.
+ * - THE EPICS PAGE'S OWN CARDS (epic `epic-engine` I39):  an `<epic-list no-favorites>` of `<epic-card>`s, drawn in
+ *   its shadow root, so an epic looks and behaves the same on both pages (its mark, star, saga label, date)
  * - DRAWN FROM DATA, never a copy in the page:  the page server answers `GET /api/epics/saga?saga=<id>`
  *   (`$/epics/tool/SagaEpics`), reading every epic page's `<epic-page saga>` as it's asked
  *   - asked again whenever an epic page changes (`spell-server:file`):  an epic that joins the saga, finishes a phase
  *     or leaves shows at once
- * - each epic's state and group by the ONE rule the Epics page uses (`$/epics/list/EpicState`, `EpicCards`):
- *   Active, Planning, Urgent, Done;  an empty group isn't drawn;  by title within each
+ * - each epic's state and group by the ONE rule the Epics page uses (`$/epics/list/EpicState`, `<epic-list>`):
+ *   Active, Planning, Urgent, Done (no Favorites:  Owen's own list, on the Epics page);  an empty group isn't drawn;
+ *   by title within each
  * - each card:  the state's mark (its why the tooltip), the linked title (its epic page, in that epic's tab), the
- *   epic's summary, and a meta line:  its state, phases done of all, the phase under way
+ *   epic's summary, and a meta line:  its state, phases done of all, the phase under way;  its star and last-worked day
  * - no cards:  a note says why -- no epic names the saga yet, the page opened from disk, or no answer
  * - SIDE EFFECT:  asks the page server while connected, and listens for its file changes
  ****************/
@@ -60,20 +54,6 @@ export class EpicCards extends E.UIComponent<typeof epicCardsVocabulary> {
   ////////////////
   // ## Derived state
   ////////////////
-
-  /** The cards in their groups, in `CARD_GROUPS`' order, by title within each;  only groups with cards. */
-  readonly groups = createMemo(() => {
-    const placed = (this.epics ?? []).map((epic) => {
-      const state = epicStateFor(epic.facts)
-      return { epic, state, group: epicGroupFor(state) as string }
-    })
-    return CARD_GROUPS.map((look) => ({
-      ...look,
-      cards: placed
-        .filter((card) => card.group === look.group)
-        .sort((a, b) => a.epic.title.localeCompare(b.epic.title, undefined, { numeric: true, sensitivity: "base" }))
-    })).filter((group) => group.cards.length)
-  })
 
   /** Why the note shows instead of cards;  `undefined` while there are cards, or before the first answer. */
   readonly note = createMemo((): CardsProblem | undefined => {
@@ -149,48 +129,52 @@ export class EpicCards extends E.UIComponent<typeof epicCardsVocabulary> {
             </p>
           )}
         </Show>
-        <For each={this.groups()} keyed={(group) => group.group}>
-          {(group) => (
-            <section class={GROUP} part={this.partForName("group")} data-group={group().group}>
-              <h3 class={GROUP_TITLE}>
-                <ui-icon name={group().icon} />
-                {this.translationForKey(group().title)}
-                <span class={COUNT}>{group().cards.length}</span>
-              </h3>
-              <ul class={CARDS}>
-                <For each={group().cards} keyed={(card) => card.epic.name}>
-                  {(card) => this.card(card().epic, card().state)}
-                </For>
-              </ul>
-            </section>
-          )}
-        </For>
+        <Show when={this.epics?.length}>
+          <epic-list part={this.partForName("list")} no-favorites="">
+            <For each={this.epics ?? []} keyed={(epic) => epic.name}>
+              {(epic) => this.card(epic)}
+            </For>
+          </epic-list>
+        </Show>
       </div>
     )
   }
 
-  /** One epic's card:  the state's mark, the linked title, its summary, then its state and phases. */
-  private card(epic: SagaEpic, state: EpicState): JSX.Element {
+  /**
+   * One epic's `<epic-card>`, as `epicCardHtml()` writes the Epics page's:  its facts as attributes;  its title
+   * linking its epic page (in that epic's tab), its summary and its meta line as children.
+   * - `epic`:  the epic as last answered, read where it's drawn, so a new answer redraws the card in place
+   */
+  private card(epic: () => SagaEpic): JSX.Element {
+    const facts = () => epic().facts
+    const flag = (on: boolean | undefined) => (on ? "" : undefined)
     return (
-      <li class={CARD} part={this.partForName("card")} data-epic={epic.name} data-state={state.name}>
-        <div class={CARD_TITLE}>
-          <span class={MARK} data-color={state.color} title={state.tip}>
-            <ui-icon name={state.icon} />
-          </span>
-          <a href={epic.href} target={epic.name}>
-            {epic.title}
-          </a>
-        </div>
-        <Show when={epic.summary}>
-          <p class={SUMMARY}>{epic.summary}</p>
+      <epic-card
+        epic={epic().name}
+        data-status={epicStateFor(facts()).name === "done" ? "done" : "open"}
+        phases={facts().phases.join(" ")}
+        updated={facts().updated ?? undefined}
+        urgent={facts().urgent?.length ? facts().urgent!.join(" ") : undefined}
+        future={flag(facts().future)}
+        standing={flag(facts().standing)}
+        active={facts().active}
+        worked={epic().worked}
+        favorite={flag(epic().favorite)}
+      >
+        <a href={epic().href} target={epic().name}>
+          {epic().title}
+        </a>
+        <Show when={epic().summary}>
+          <span slot="description">{epic().summary}</span>
         </Show>
-        <p class={META}>{this.metaOf(epic, state)}</p>
-      </li>
+        <span slot="meta">{this.metaOf(epic())}</span>
+      </epic-card>
     )
   }
 
   /** A card's meta line:  `in progress · 6/8 phases · P8 · Review Polish`, each part only when it has something. */
-  private metaOf(epic: SagaEpic, state: EpicState): string {
+  private metaOf(epic: SagaEpic): string {
+    const state = epicStateFor(epic.facts)
     const phases = state.count ? this.translationForKey("phases", { count: state.count }) : ""
     return [state.words, phases, epic.facts.active ?? ""].filter(Boolean).join(" · ")
   }
@@ -201,12 +185,3 @@ export interface EpicCards extends E.AttributeValues<typeof epicCardsVocabulary>
 
 /** Classes of what it draws. */
 const NOTE = "note"
-const GROUP = "group"
-const GROUP_TITLE = "group-title"
-const COUNT = "count"
-const CARDS = "card-list"
-const CARD = "card"
-const CARD_TITLE = "card-title"
-const MARK = "mark"
-const SUMMARY = "summary"
-const META = "meta"

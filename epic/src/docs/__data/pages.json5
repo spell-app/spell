@@ -10,6 +10,8 @@
         "epic-summary",
         "epic-prompt",
         "epic-section",
+        "epic-state-filter",
+        "epic-hidden-note",
         "epic-cards",
         "epic-phase",
         "epic-field",
@@ -47,9 +49,19 @@
       "id": "answering",
       "title": "Pages Owen answers on",
       "tags": ["epic-ask", "epic-text-box", "epic-send", "epic-choice-rows", "epic-choice-row", "epic-choices-bar"]
+    },
+    {
+      "id": "epics-page",
+      "title": "The Epics page",
+      "tags": ["epic-list", "epic-card", "epic-sort"]
+    },
+    {
+      "id": "comments",
+      "title": "Comments",
+      "tags": ["epic-threads", "epic-thread", "epic-comment-pane", "epic-page-note-head"]
     }
   ],
-  "drawnOnly": ["epic-review", "epic-new-item", "epic-agents"],
+  "drawnOnly": ["epic-review", "epic-new-item", "epic-agents", "epic-thread-message"],
   "nav": {
     "start": [{ "id": "index", "file": "index.html", "label": "The Epic Elements", "icon": "layer group" }],
     "foundation": [

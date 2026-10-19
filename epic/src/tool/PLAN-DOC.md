@@ -453,6 +453,7 @@ The blocks prose used to shape by hand, now each an element (epic `epic-componen
 | `<epic-link>`                 | `<epic-link saga="drawable-spell" epic="python-target" item="T1"></epic-link>`:  a link to a saga page (`saga` alone), an epic page (`epic`), or an item or phase on one (`item="T1"`, `phase="7"` or `phase="epic-migrate"`);  none of `saga` / `epic`:  the page it's in.  No text:  draws the short form (`python-target T1`, `T1` here, `P7 · Epic Migrate`), the target's title its tooltip ("Links") |
 | `<epic-field label>`          | `<epic-field label="Where"><p>the inbox file</p></epic-field>`:  a labelled block, `Where:` before its prose (`What should happen`, `Step`);  a phase's fields have `name` instead |
 | `<epic-section kind="report">` | `<epic-section id="overnight" kind="report" title="Overnight · 2026-10-04">...</epic-section>`:  a run's report, after the Overview (`The page`) |
+| a table                       | `<ui-table celled compact striped unstackable><table>...</table></ui-table>`:  Spell UI's, not an element of ours;  ALWAYS `unstackable` (epic `epic-engine` I36;  Owen, 2026-10-19:  a table drawn at the side bar's width as its header cells, then each row's cells one under another, "I hate it"):  too wide, it scrolls sideways in its own box.  The tool's way in adds `unstackable` to one without (`IncomingHtml`) |
 | the crumbs                    | none written:  `<epic-page>` draws `Docs › Epics › <title>` from its `title` (an older doc's `.spell-crumbs` before it:  it draws none) |
 
 ## Status cards
@@ -722,6 +723,27 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       list, guides' and scratch details pages' files, the commands page's data):  the docs tool's data files pass
       (`migrate.js` `DATA_FILES`), which `epic migrate` runs with every kind, or `--step json5-data-files` alone
     - reports:  `json5-data-files:  3 links to .json5` and `json5-data-files:  12 to .json5 (agents.json, ...)`
+  - `engine-links` (2026-10-19, on command;  epic `epic-engine` I27):  links to files that left spell-app with the
+    engine lead to where they are now (`EngineLinks`)
+    - `../../packages/epics/tools/pages.js` -> `../../spell-epic/src/tools/pages.js`;  tests, skills, hooks, the
+      window script and the CLI's epic files the same way;  Epic UI's pages at their address, `components/epics/`
+    - each move rests on git's renames or the commit that moved the file (`MOVES`, its comments say which)
+    - only a DEAD link changes, and only to a place that's there;  as the I22 linker writes it (from the checkout
+      the page is served under, `RepoList.linkRootOf()`), its `#hash` kept, its linker-made tab name the new file's
+    - a file that's gone (deleted, folded into another file, never tracked):  its words stay, unlinked
+    - a link ONE folder too deep, past the checkout's root (I34):  the same tail from the root when that's there, or
+      where it moved;  never two folders
+    - reports each change once with its count (`... -> ... (7 links)`);  a dead link it can't place:  `left for you`
+    - needs the page's linker (`context.linker`, `PlanDocFiles.linker`):  `epic check` and every write use it, told
+      the served folders (`ServedFolders`:  `components/<set>/`, `templates/`) as `doc-links.js`'s is
+  - `unstackable-tables` (2026-10-19, on command;  epic `epic-engine` I36):  every `<ui-table>` is `unstackable`, so no
+    table stacks its cells at a narrow width (`UnstackableTables`)
+    - `<ui-table compact celled>` -> `<ui-table compact celled unstackable>`:  the attribute after the page's own
+    - the docs pages' share is `components-not-markup`'s, by the same rule (`unstackTables()`, `to-components.js`)
+    - the log and Original Discussions too:  an attribute changes no word
+    - a table that asks to stack (`stackable`, `stack-by`) is left, `LEFT` in the notes:  a demo of stacking
+    - `spell-doc.css` draws every table unstacked anyway;  this keeps the page true without it
+    - reports:  `unstackable-tables:  9 <ui-table>s made unstackable`
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,

@@ -31,8 +31,11 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `item`:  an item's four (`REVIEW_BUTTONS`), the note box's two (`NOTE_BUTTONS`)
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
  * - `part`:  a part of the plan -- an Overview sub-section, a phase, the summary:  no Approve (`PART_BUTTONS`)
+ * - `thread`:  a comment thread's, while it's Owen's turn (`<epic-thread>`, epic `epic-engine` P3):  That's good,
+ *   Reply, Skip it (`THREAD_BUTTONS`);  no note box, no inbox
+ * - `closed`:  a closed thread's Reopen (`CLOSED_BUTTONS`)
  */
-export const REVIEW_KINDS = ["item", "todo", "part"] as const
+export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed"] as const
 
 /** One of `REVIEW_KINDS`. */
 export type ReviewKind = (typeof REVIEW_KINDS)[number]
@@ -113,11 +116,74 @@ export const TODO_BUTTONS: readonly ReviewButtonSpec[] = [
  */
 export const PART_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.filter((spec) => spec.action !== "approve")
 
-/** The line's buttons of each `buttons`. */
+/** The line's buttons of each `buttons`:  none of the review inbox's for a thread's (`THREAD_BUTTONS_OF`). */
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
   todo: TODO_BUTTONS,
-  part: PART_BUTTONS
+  part: PART_BUTTONS,
+  thread: [],
+  closed: []
+}
+
+/**
+ * A comment THREAD's answer buttons (`buttons="thread"` or `"closed"`;  epic `epic-engine` P3):  the line's group,
+ * same look, same colours, but no inbox behind them.
+ * - Owen, 2026-10-10:  "Make top buttons same semantics/look as pills in item header"
+ * - a press only says which (`THREAD_ANSWER`):  the comments' code (`spell-doc-comments.js`) acts on it
+ * - always a grey outline on the page's ground, each in its colour under the pointer:  the thread closes, or the
+ *   cursor goes into its reply box, at once
+ */
+export type ThreadButtonSpec = {
+  /** what Owen answers:  `good` / `skip` close the thread, `reply` goes to its reply box, `reopen` opens it again */
+  act: ThreadAct
+  color: ReviewColor
+  /** its `ui-icon` */
+  icon: string
+  /** its name, then its tooltip (`title`) */
+  label: "threadGood" | "threadReply" | "threadSkip" | "threadReopen"
+  title: "threadGoodTitle" | "threadReplyTitle" | "threadSkipTitle" | "threadReopenTitle"
+  /** what it does, for a screen reader */
+  tip: "threadGoodTip" | "threadReplyTip" | "threadSkipTip" | "threadReopenTip"
+}
+
+/** What a thread's answer button answers (`ThreadButtonSpec.act`). */
+export type ThreadAct = "good" | "reply" | "skip" | "reopen"
+
+/**
+ * While it's Owen's turn:
+ * - Approve's check (green, decided):  "that's good" -- done, it folds
+ * - Revisit's history (blue, an ask of Claude):  reply -- the cursor into the box under the messages
+ * - the note box's x (grey, no longer relevant):  "skip it" -- done, nothing more to do
+ */
+export const THREAD_BUTTONS: readonly ThreadButtonSpec[] = [
+  { act: "good", color: "green", icon: "check", label: "threadGood", title: "threadGoodTitle", tip: "threadGoodTip" },
+  {
+    act: "reply",
+    color: "blue",
+    icon: "history",
+    label: "threadReply",
+    title: "threadReplyTitle",
+    tip: "threadReplyTip"
+  },
+  { act: "skip", color: "grey", icon: "xmark", label: "threadSkip", title: "threadSkipTitle", tip: "threadSkipTip" }
+]
+
+/** A closed thread's one button:  open it again (the toast's Undo does the same). */
+export const CLOSED_BUTTONS: readonly ThreadButtonSpec[] = [
+  {
+    act: "reopen",
+    color: "blue",
+    icon: "rotate left",
+    label: "threadReopen",
+    title: "threadReopenTitle",
+    tip: "threadReopenTip"
+  }
+]
+
+/** A thread's answer buttons, by `buttons`;  none for the review kinds. */
+export const THREAD_BUTTONS_OF: Readonly<Partial<Record<ReviewKind, readonly ThreadButtonSpec[]>>> = {
+  thread: THREAD_BUTTONS,
+  closed: CLOSED_BUTTONS
 }
 
 /** One note box button:  what it makes of the note (`how`), its colour, icon, name and tooltip. */
@@ -165,7 +231,9 @@ export type NoteHow = NoteButtonSpec["how"]
 export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpec[]>> = {
   item: NOTE_BUTTONS,
   todo: TODO_NOTE_BUTTONS,
-  part: NOTE_BUTTONS
+  part: NOTE_BUTTONS,
+  thread: [],
+  closed: []
 }
 
 ////////////////
@@ -208,6 +276,12 @@ export const SHOW_NOTE = "epic-show-note"
  *   not one that cleared a mark or called a request off
  */
 export const CHOSEN = "epic-chosen"
+
+/**
+ * The event a thread's answer button sends (`buttons="thread"` / `"closed"`):  `{ act }`, which one
+ * (`ThreadAct`).  It crosses shadow roots:  the comments' code hears it on the `<epic-thread>` that draws it.
+ */
+export const THREAD_ANSWER = "epic-thread-answer"
 
 ////////////////
 // ## In the vocabularies
@@ -327,6 +401,27 @@ export const REVIEW_TEXTS = [
   { key: "saidSent", text: "{how} · sent {time}", description: "A marked note:  sent." },
   { key: "saidUnsent", text: "{how} · not sent yet", description: "A marked note:  not sent." },
   { key: "edit", text: "Edit", description: "A marked note's button:  back into the note box." },
+  { key: "threadAnswer", text: "Your answer", description: "A thread's answer buttons, for a screen reader." },
+  { key: "threadGood", text: "That's good", description: "A thread's check:  its name." },
+  { key: "threadGoodTitle", text: "That's good:  done", description: "A thread's check:  its tooltip." },
+  { key: "threadGoodTip", text: "done:  the thread folds, green", description: "A thread's check:  what it does." },
+  { key: "threadReply", text: "Reply", description: "A thread's Reply:  its name." },
+  { key: "threadReplyTitle", text: "Reply", description: "A thread's Reply:  its tooltip." },
+  {
+    key: "threadReplyTip",
+    text: "the cursor into the box under the thread, saved as you type;  Claude takes it up",
+    description: "A thread's Reply:  what it does."
+  },
+  { key: "threadSkip", text: "Skip it", description: "A thread's x:  its name." },
+  { key: "threadSkipTitle", text: "Skip it:  done, nothing more to do", description: "A thread's x:  its tooltip." },
+  { key: "threadSkipTip", text: "done, nothing more to do", description: "A thread's x:  what it does." },
+  { key: "threadReopen", text: "Reopen", description: "A closed thread's button:  its name." },
+  {
+    key: "threadReopenTitle",
+    text: "Reopen:  your turn on it again",
+    description: "A closed thread's button:  its tooltip."
+  },
+  { key: "threadReopenTip", text: "your turn on it again", description: "A closed thread's button:  what it does." },
   { key: "editTip", text: "Edit:  put your note back in the box", description: "A marked note's button:  tooltip." }
 ] as const
 

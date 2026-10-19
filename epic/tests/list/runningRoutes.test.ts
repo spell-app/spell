@@ -12,8 +12,12 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { PageServer } from "$/server/page"
 import { ask } from "$/server/test/serve"
 
+import { EPIC_CARDS_END } from "$/epics/list/EpicCards"
 import { MARKER, type RunningEpic } from "$/epics/list/RunningEpics"
 import runningRoutes, { RUNNING_API } from "$/epics/list/runningRoutes"
+
+/** The Epics page's list, empty, as `docs index` writes it (`epicListHtml()`). */
+const LIST = `<epic-list class="spell-epics">\n${MARKER}\n${EPIC_CARDS_END}\n</epic-list>`
 
 /** Write `html` at `path` under `root`, making folders. */
 function put(root: string, path: string, html: string): void {
@@ -32,7 +36,7 @@ describe("runningRoutes", () => {
 
   beforeAll(async () => {
     process.env.SPELL_CLAUDE_HOME = claudeHome
-    put(root, "epics/index.html", `<html><head></head><body>${MARKER}</body></html>\n`)
+    put(root, "epics/index.html", `<html><head></head><body>${LIST}</body></html>\n`)
     put(
       root,
       ".claude/worktrees/seo/epics/seo/seo.plan.html",
@@ -71,9 +75,9 @@ describe("runningRoutes", () => {
     expect((await ask(port, "GET", "/_server/epics")).status).toBe(404)
   })
 
-  test("serves the Epics page with the running epic's card at the marker", async () => {
+  test("serves the Epics page with the running epic's card in its list", async () => {
     const page = (await ask(port, "GET", "/epics/index.html")).text
-    expect(page).not.toContain(MARKER)
+    expect(page).toMatch(/<epic-card id="epic-seo"[\s\S]*<!-- running-epics:end -->/)
     expect(page).toContain('href="/worktrees/seo/epics/seo/seo.plan.html"')
   })
 

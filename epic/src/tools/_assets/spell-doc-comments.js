@@ -5,8 +5,15 @@
  *   - the docs bundle, `spell-ui.js`, through the page runtime (`spell-doc-runtime.js`):  guides, epic pages ...
  *   - `spell-comments.js` by itself (`spell-comments.entry.js`), on Epic UI's pages:  they load Spell UI's site
  *     bundle, not the docs bundle, so nothing else of the runtime;  it draws with the page's own Spell UI
- * - Plain DOM:  it makes `<ui-*>` markup and lets the page's Spell UI draw it, never imports Spell UI itself.
- * - Its look:  `spell-comments.css`, beside it.
+ * - Plain DOM:  it makes elements and lets the page draw them, never imports Spell UI or the epics pack itself:
+ *   - Spell UI's (`<ui-button>`), which the page's Spell UI draws
+ *   - the epics pack's (epic `epic-engine` P3):  each comment's thread (`<epic-thread>`, in an `<epic-threads>` box
+ *     under its block) and the comment pane (`<epic-comment-pane>`), which every page that takes comments loads
+ *     (the docs runtime's `loadEpicsPack()`;  Epic UI's layout);  each upgrades as the pack registers
+ *   - Owen's field, in the pane or a thread:  a native `<textarea>` this code owns, so it lives through every redraw
+ *   - what a thread shows, and its ids and words:  `ThreadFacts` (`$/epics/comments`), which the elements share
+ * - Its look:  `spell-comments.css`, beside it (the bullhorns, Send, Owen's field, where a thread sits);  the
+ *   elements' own sheets draw the rest.
  */
 
 import {
@@ -23,16 +30,18 @@ import {
   sectionOf,
   sectionTitle
 } from "../BlockAnchors.js"
-import { takenInto } from "$/epics/tool/CommentList"
+import { ThreadFacts } from "$/epics/comments"
 import {
-  attr,
-  beforeToolbar,
+  addBlockAction,
+  addHeadTool,
+  alignBlockActions,
+  dropBlockAction,
+  el,
   growField,
   noteToast,
   postJSON,
   readJSON,
-  shortStamp,
-  text,
+  titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
 
@@ -76,9 +85,6 @@ const QUOTE_HIGHLIGHT = "spell-comment-quote"
 /** How long after Owen stops typing the comment box saves itself, ms. */
 const COMMENT_SAVE_MS = 600
 
-/** How many characters of the selected text (or the block's) the comment box's header shows. */
-const HEADLINE_CHARS = 40
-
 /** How long after the page's content changes (an epic page's part loading) the comments draw again, ms. */
 const REDRAW_MS = 150
 
@@ -95,27 +101,9 @@ const SEND_POLL_MS = 30_000
  *   `Fold.types.ts`, in the epics pack
  * - a docs section has its own (`ui-section`'s `actions` slot, `.at-section`);  every other block (a paragraph, a
  *   table, a list, a message, cards, a phase's field, the summary) has no title row:  its bullhorn sits over its
- *   corner (`.at-block`)
+ *   corner, first in its actions row (`.at-block`, in `.spell-block-actions`:  `addBlockAction()`)
  */
 const TITLE_ROW_BLOCKS = "epic-item, epic-update[at], epic-aside, epic-code"
-
-/** What a block kind is called in the bullhorn's tooltip and the comment box. */
-const KIND_NAMES = {
-  section: "section",
-  item: "item",
-  field: "field",
-  update: "update",
-  summary: "summary",
-  prose: "paragraph",
-  table: "table",
-  aside: "aside",
-  code: "code block",
-  message: "message",
-  cards: "cards",
-  steps: "steps",
-  list: "list",
-  page: "page"
-}
 
 /**
  * COMMENTS (epic `airplane`, P11):  Owen's comments for Claude, on a page's blocks or on text he selected, kept by
@@ -132,20 +120,21 @@ const KIND_NAMES = {
  *   - the box is a small PANE, fixed on the screen, just under the selection (or the button clicked):  the page
  *     never scrolls, and Owen drags it by its header (Owen, 2026-10-10:  "a little floating pane below the selected
  *     text that I can move around -- don't scroll the page and lose context!")
- *   - in it:  a header (the first words, a floppy, a trash once saved, ×) and a textarea that grows, with no
- *     placeholder;  ivory, no buttons below (Owen, 2026-10-10);  it saves itself as Owen types, the floppy says so;
- *     ×, Escape or the focus leaving it (Tab, a click elsewhere) closes it;  what's typed and not saved yet is kept
- *     in this browser (`COMMENT_DRAFT_KEY_PREFIX`)
+ *   - in it (`<epic-comment-pane>`):  a header (the first words, a floppy, a trash once saved, ×) and a textarea
+ *     that grows, with no placeholder;  ivory, no buttons below (Owen, 2026-10-10);  it saves itself as Owen types,
+ *     the floppy says so;  ×, Escape or the focus leaving it (Tab, a click elsewhere) closes it;  what's typed and
+ *     not saved yet is kept in this browser (`COMMENT_DRAFT_KEY_PREFIX`)
  *   - NEVER an empty comment:  nothing typed saves nothing;  emptied, it's deleted at once
  *   - the pane is for writing a NEW comment;  once saved and closed, it's a THREAD (below)
  *   - THREADS (Owen, 2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane"):  every
  *     comment shows as one, folding, under the paragraph (list item, cell ...) holding its quote (`holderOf()`), else
- *     under its block (`thread()`)
+ *     under its block:  an `<epic-thread>` (`thread()`), in an `<epic-threads>` box
  *     - all ivory, the pane's outline and corners, whoever spoke last;  its edges an epic page item's note box's, else
  *       the block's it's under (spell-comments.css)
- *     - its header:  a chevron, the bullhorn (a check circle once done), the pane's summary (`headline()`), then
- *       Owen's answer while it's his turn (Claude spoke last):  the epic page's review pills, Approve / Revisit /
- *       the x, as "that's good" / reply / "skip it";  Reopen once done;  the trash, always
+ *     - its header:  a chevron, the bullhorn (a check circle once done), the pane's summary
+ *       (`ThreadFacts.headline()`), then Owen's answer while it's his turn (Claude spoke last):  an epic page item's
+ *       review pills (`<epic-review buttons="thread">`), Approve / Revisit / the x, as "that's good" / reply /
+ *       "skip it";  Reopen once done;  the trash, always
  *     - the messages in order, a bold "You:" / "Claude:" first:  his plain on the ivory, Claude's in a light violet
  *       box;  each one's time in its top right corner (the first's with the day);  then a green Done line once
  *       closed;  "Claude: thinking…" last while Claude is at work on it (`working`)
@@ -157,8 +146,8 @@ const KIND_NAMES = {
  *   - the BULLHORN only ever starts a new comment:  no count, since the block's threads are right there (Owen,
  *     2026-10-10:  "Bullhorn to the far right is unnecessary")
  * - IDS (epic `epic-workflow` P23;  Owen, 2026-10-10:  "use `M3` for mark 1"):  shown `M3`, small and muted in each
- *   thread's header, before its summary (`threadHead()`);  the server keys them `m3`, and a typed id takes `M3`,
- *   `m3` or `cm3` (`commentNumber()`)
+ *   thread's header, before its summary (`<epic-thread>`);  the server keys them `m3`, and a typed id takes `M3`,
+ *   `m3` or `cm3` (`ThreadFacts.numberOf()`)
  * - JUMPING to the threads waiting on Owen (Claude spoke last;  Owen, 2026-10-10:  "Is there a way to jump to comments
  *   in replies?"):
  *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it:  each click lands on the next, in
@@ -265,12 +254,21 @@ class PageComments {
      * draft)
      */
     this.open = null
-    /** the open pane's element (`showPane()`), in `main` but fixed on the screen:  a redraw never touches it */
+    /**
+     * the open pane's element (`showPane()`, an `<epic-comment-pane>`), in `main` but fixed on the screen:  a redraw
+     * never touches it
+     */
     this.pane = null
     /**
-     * each open thread's REPLY BOX, by comment id (`replyBoxFor()`):  `{ id, how: "reply", box, field, saved(),
-     * busy(), finish(), flush() }`;  `box`:  its element, kept across redraws while Owen is in it or it holds words
-     * not saved yet
+     * each comment's THREAD, by comment id (`thread()`):  ONE `<epic-thread>` for the visit, given what the server
+     * holds at each redraw, and moved only when its place changes, so Owen's box in it and the cursor stay
+     */
+    this.threads = new Map()
+    /**
+     * each open thread's REPLY BOX, by comment id (`replyBoxFor()`):  `{ id, how: "reply", box, field, floppy,
+     * saved(), busy(), finish(), flush() }`;  `box` (`field`):  its `<textarea>`, slotted into the thread, kept across
+     * redraws while Owen is in it or it holds words not saved yet;  `floppy`:  how its last save went
+     * (`{ tip, failed }`, none before one), which the thread shows
      */
     this.replyBoxes = new Map()
     /**
@@ -312,7 +310,7 @@ class PageComments {
   unseen(comment) {
     // orange while it's Owen's turn, seen or not, until he answers (✓, a reply, ×):  Owen, 2026-10-10, on a thread
     // gone ivory once looked at:  "I was expecting this to be orange, not ivory"
-    return comment.turn === "owen" && !!latestClaudeAt(comment)
+    return comment.turn === "owen" && !!ThreadFacts.latestClaudeAt(comment)
   }
 
   /**
@@ -324,8 +322,9 @@ class PageComments {
     if (!comment || !this.unseen(comment)) return
     const read = readJSON(this.readKey)
     // read already:  nothing to change (the thread stays orange until Owen answers, so the watcher fires again)
-    if ((read[id] ?? "") >= latestClaudeAt(comment)) return
-    read[id] = latestClaudeAt(comment)
+    const latest = ThreadFacts.latestClaudeAt(comment)
+    if ((read[id] ?? "") >= latest) return
+    read[id] = latest
     writeJSON(this.readKey, read)
     this.draw()
   }
@@ -336,7 +335,7 @@ class PageComments {
    */
   watchSeen() {
     this.seenWatch?.disconnect()
-    const threads = this.main.querySelectorAll(".spell-thread[data-unseen][data-open]")
+    const threads = this.main.querySelectorAll("epic-thread[unseen][open]")
     for (const [id, timer] of this.seenTimers)
       if (![...threads].some((each) => each.id === `comment-${id}`)) {
         clearTimeout(timer)
@@ -371,28 +370,32 @@ class PageComments {
 
   /**
    * Keep a corner bullhorn off a thread's buttons (Owen, 2026-10-10:  "Overlap in bullhorn buttons"):  a block with no
-   * title row has its bullhorn over its top right corner (`.at-block`), so a thread just under a short block (a
-   * one-line paragraph) can lie under it:  that thread's header leaves room on its right, its buttons moving left.
+   * title row has its bullhorn over its top right corner, in its actions row (`.spell-block-actions`, with a table's
+   * expand button), so a thread just under a short block (a one-line paragraph) can lie under them:  that thread's
+   * header leaves room on its right, its buttons moving left (`--epic-thread-head-room`, which `<epic-thread>` reads).
    * - a block with a title row has its bullhorn IN that row (`TITLE_ROW_BLOCKS`), beside its own buttons:  nothing
    *   to move.  Before P25 of epic `epic-workflow` this also moved an item's corner bullhorn left of its review pills,
    *   and an update's left of its date.
    */
   makeRoom() {
-    const marks = this.main.querySelectorAll(".spell-comment-mark.at-block")
-    const horns = [...marks]
-      .map((each) => each.querySelector(":scope > ui-button"))
+    alignBlockActions(this.main)
+    const horns = [...this.main.querySelectorAll(".spell-block-actions ui-button")]
       .filter((each) => each?.checkVisibility?.({ contentVisibilityAuto: true }) !== false)
       .map((each) => each?.getBoundingClientRect())
       .filter((rect) => rect?.width)
-    for (const head of this.main.querySelectorAll(".spell-thread-head")) {
-      head.style.paddingRight = ""
+    for (const thread of this.threads.values()) {
+      thread.style.removeProperty(HEAD_ROOM)
+      // not drawn yet (the pack still loading):  a resize comes once it is
+      const head = thread.isConnected ? thread.header : undefined
+      if (!head) continue
       const box = head.getBoundingClientRect()
       // hidden (a folded part's, `until-found`):  its place means nothing until it shows, and that's a resize
       if (!box.width || head.checkVisibility?.({ contentVisibilityAuto: true }) === false) continue
       const over = horns.filter(
         (rect) => rect.left < box.right && rect.right > box.left && rect.top < box.bottom && rect.bottom > box.top
       )
-      if (over.length) head.style.paddingRight = `${Math.ceil(box.right - Math.min(...over.map((r) => r.left))) + 4}px`
+      if (over.length)
+        thread.style.setProperty(HEAD_ROOM, `${Math.ceil(box.right - Math.min(...over.map((r) => r.left))) + 4}px`)
     }
   }
 
@@ -404,7 +407,7 @@ class PageComments {
       })
       const answer = response.ok ? await response.json() : {}
       if (answer.takesComments !== true) return false
-      this.list = withTurns(answer.comments)
+      this.list = ThreadFacts.withTurns(answer.comments)
       this.keepSend(answer)
       return true
     } catch {
@@ -441,35 +444,34 @@ class PageComments {
   drawSend() {
     const sticky = pageHeadIn(this.main)
     const head = sticky?.matches(".spell-page-head") ? sticky : (sticky?.querySelector(".spell-page-head") ?? sticky)
-    head?.querySelector(":scope > .spell-send")?.remove()
+    head?.querySelector(":scope > .spell-send, :scope > .spell-head-tools > .spell-send")?.remove()
     const send = this.send
     if (!head || !send) return
     const unsent = send.unsent.length
     const state = unsent ? "unsent" : send.waiting.length ? "sent" : "idle"
-    const box = document.createElement("span")
-    box.className = "spell-send"
-    box.dataset.spellAdded = ""
-    box.dataset.state = state
-    const button = document.createElement("button")
-    button.type = "button"
-    button.className = "spell-send-button"
-    button.title = sendWords(send, state)
-    button.setAttribute("aria-label", button.title)
-    button.innerHTML =
-      `<ui-icon name="paper plane"></ui-icon><span>${state === "sent" ? "Sent" : "Send"}</span>` +
-      (unsent ? `<span class="spell-send-count">${unsent}</span>` : "")
+    const button = iconButton("paper plane", sendWords(send, state), { size: "tiny" })
+    button.classList.add("spell-send-button")
+    button.append(
+      el("span", {}, state === "sent" ? "Sent" : "Send"),
+      unsent ? el("span", { class: "spell-send-count" }, String(unsent)) : ""
+    )
     button.addEventListener("click", () => void this.sendNow())
-    const who = document.createElement("span")
-    who.className = "spell-send-who"
-    who.dataset.listening = send.listening ? "yes" : "no"
-    who.textContent = !send.owned
+    const words = !send.owned
       ? "no epic owns this page"
       : send.listening
         ? `${send.epic} is listening`
         : "nobody is listening"
-    who.title = whoWords(send)
-    box.append(button, who)
-    beforeToolbar(head, box)
+    const who = el(
+      "span",
+      { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no", title: whoWords(send) },
+      words
+    )
+    // the header's tools row, first (`addHeadTool()`)
+    addHeadTool(
+      head,
+      el("span", { class: "spell-send", "data-spell-added": true, "data-state": state }, button, who),
+      "send"
+    )
   }
 
   /** Send, clicked:  every comment waiting so far goes to the page's epic;  a toast says so.  NEVER throws. */
@@ -479,7 +481,7 @@ class PageComments {
     if (!send.unsent.length) return noteToast("Nothing new to send:  every comment here went with an earlier Send.")
     try {
       const answer = await postJSON(`${COMMENTS_API}/send`, { page: location.pathname })
-      this.list = answer.comments ? withTurns(answer.comments) : this.list
+      this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
       this.keepSend(answer)
       const count = `${send.unsent.length} comment${send.unsent.length === 1 ? "" : "s"}`
       // nobody listening:  the server woke the epic (P16) and says what it did;  else they wait for its review
@@ -499,24 +501,24 @@ class PageComments {
 
   /**
    * Draw it all again:  every bullhorn, every comment's thread, the quotes' highlight.
-   * - a thread goes under the paragraph (list item, cell ...) holding its quote, else under its block (`holderOf()`)
+   * - a thread goes under the paragraph (list item, cell ...) holding its quote, else under its block (`holderOf()`),
+   *   in that block's box of threads (`<epic-threads>`, `boxFor()`)
+   * - each comment's thread is ONE `<epic-thread>` for the visit (`threads`):  given what the server holds now, and
+   *   moved only when its place changed, so Owen's box in it, what's typed and the cursor stay as they are
    * - a comment whose block can't be found any more goes under the page header, saying so
    * - the open pane stays as it is, where Owen put it, the cursor in it;  the comment it's writing has no thread yet
-   * - a reply box Owen is in moves into its thread drawn again, what's typed and the cursor kept
+   * - a thread that had to move takes back the cursor it had:  in its box (the selection kept), or on its fold
    */
   draw() {
     const { main } = this
     const field = this.fields().find((each) => document.activeElement === each.field)?.field
-    const typing = !!field
-    const [start, end] = typing ? [field.selectionStart, field.selectionEnd] : [0, 0]
-    // a thread's fold in focus (Owen opened it, so it was seen:  `markSeen()`) keeps the focus once drawn again
-    const folded = document.activeElement?.closest?.(".spell-thread")?.id
-    const onFold = !!folded && document.activeElement.matches(".spell-thread-fold")
+    const [start, end] = field ? [field.selectionStart, field.selectionEnd] : [0, 0]
+    const onFold = [...this.threads.values()].find((each) => each.isFoldFocused)
     this.read = readJSON(this.readKey)
-    for (const old of main.querySelectorAll(".spell-comment-mark, .spell-comments")) old.remove()
+    for (const old of main.querySelectorAll(".spell-comment-mark")) dropBlockAction(old)
     const blocks = blocksIn(main)
     const head = pageHeadIn(main)
-    const threads = new Map()
+    const groups = new Map()
     const quotes = []
     for (const comment of this.list) {
       const { block, exact } = findBlock(main, comment, blocks)
@@ -526,26 +528,44 @@ class PageComments {
       if (quoted) quotes.push({ ...quoted, id: comment.id })
       if (this.open?.id === comment.id) continue
       const under = quoted ? holderOf(block, quoted) : at
-      if (!threads.has(under)) threads.set(under, [])
-      threads.get(under).push({ comment, exact: exact && Boolean(block) })
+      if (!groups.has(under)) groups.set(under, [])
+      groups.get(under).push({ comment, exact: exact && Boolean(block) })
     }
     const ids = new Set(this.list.map((each) => each.id))
     if (this.editing && !ids.has(this.editing.id)) this.editing = null
     for (const id of this.replyBoxes.keys()) if (!ids.has(id)) this.replyBoxes.delete(id)
+    // gone, or being written in the pane again:  no thread
+    for (const [id, thread] of this.threads)
+      if (!ids.has(id) || this.open?.id === id) {
+        thread.remove()
+        this.threads.delete(id)
+      }
     for (const block of head ? [head, ...blocks] : blocks) this.addBullhorn(block)
     this.drawSend()
-    for (const [under, found] of threads) this.boxFor(under).append(...found.map((each) => this.thread(each)))
-    // grown to their words once shown:  a folded thread's has no height to measure
-    for (const each of main.querySelectorAll(".spell-thread-reply > textarea"))
-      if (each.getClientRects().length) growField(each)
+    const boxes = new Map()
+    for (const [under, found] of groups) {
+      const box = this.boxFor(under)
+      boxes.set(box, found.length)
+      found.forEach((each, at) => placeAt(box, this.thread(each), at))
+    }
+    // what's left in a box after its threads moved on, and the boxes no block has now
+    for (const [box, count] of boxes) while (box.children.length > count) box.lastElementChild.remove()
+    for (const old of main.querySelectorAll(`${THREADS_TAG}[data-spell-added]`)) if (!boxes.has(old)) old.remove()
     this.quotes = highlightQuotes(quotes)
     this.makeRoom()
     this.watchSeen()
     this.drawWaiting()
-    if (onFold) main.querySelector(`#${CSS.escape(folded)} .spell-thread-fold`)?.focus({ preventScroll: true })
-    if (!typing || !field.isConnected) return
+    // grown to their words once shown:  a thread just opened draws its box on the next frame
+    requestAnimationFrame(() => this.growFields())
+    if (onFold?.isConnected && !onFold.isFoldFocused) onFold.focusFold()
+    if (!field?.isConnected || document.activeElement === field) return
     field.focus({ preventScroll: true })
     field.setSelectionRange(start, end)
+  }
+
+  /** Every box in an open thread as tall as its words (`growField()`):  a folded thread's has no height to measure. */
+  growFields() {
+    for (const replying of this.fields()) if (replying.field.getClientRects().length) growField(replying.field)
   }
 
   ////////////////
@@ -573,55 +593,50 @@ class PageComments {
 
   /** The comment with id `typed` (`M3`, `m3`, the old `cm3`, a `#` aside), else `undefined`. */
   find(typed) {
-    const number = commentNumber(typed)
-    return number === undefined ? undefined : this.list.find((each) => commentNumber(each.id) === number)
+    const number = ThreadFacts.numberOf(typed)
+    return number === undefined ? undefined : this.list.find((each) => ThreadFacts.numberOf(each.id) === number)
   }
 
   /**
    * The toolbar's BULLHORN (Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count, jumps to
-   * the next thread waiting on you"):  at the right of the page's toolbar (`nav.spell-toolbar`, an epic page's and a
+   * the next thread waiting on you"):  at the right of the page's toolbar (`.spell-toolbar`, an epic page's and a
    * guide's alike), an orange count of the threads waiting on Owen;  hidden when none.
-   * - made again whenever the toolbar is (a live update builds it anew, then draws the comments again)
+   * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):  a `<ui-item link>` (a button),
+   *   its count a `<ui-label>` over the icon's top right, as a section's badge
+   * - kept when the toolbar is built anew (a live update), and drawn again with the comments
    * - where it goes:  `waitingHome()`, the one place to change to move it
    */
   drawWaiting() {
     const home = this.waitingHome()
     if (!home) return
-    let box = home.querySelector(":scope > .spell-toolbar-waiting")
-    if (!box) {
-      box = document.createElement("div")
-      box.className = "spell-toolbar-waiting"
-      box.hidden = true
-      const button = document.createElement("button")
-      button.type = "button"
-      button.className = "spell-toolbar-item"
-      button.addEventListener("click", () => this.nextWaiting())
-      box.append(button)
+    let bullhorn = home.querySelector(":scope > .spell-toolbar-waiting")
+    if (!bullhorn) {
+      bullhorn = el(
+        "ui-item",
+        { class: "spell-toolbar-item spell-toolbar-waiting", link: true, icon: "bullhorn", hidden: true },
+        el("ui-label", { class: "spell-toolbar-count replied", circular: true, size: "mini" })
+      )
+      bullhorn.addEventListener("click", () => this.nextWaiting())
     }
-    if (home.lastElementChild !== box) home.append(box)
-    const button = box.firstElementChild
+    if (home.lastElementChild !== bullhorn) home.append(bullhorn)
     const count = this.waitingInPageOrder().length
     const tip = `${count} ${count === 1 ? "thread waits" : "threads wait"} on you:  jump to the next`
-    if (button.dataset.count !== String(count)) {
-      button.dataset.count = String(count)
-      button.innerHTML =
-        `<span class="spell-toolbar-icon"><ui-icon name="bullhorn"></ui-icon><span class="spell-toolbar-badges">` +
-        `<span class="spell-toolbar-count replied">${count}</span></span></span>`
-    }
-    button.title = tip
-    button.setAttribute("aria-label", tip)
-    if (box.hidden === !count) return
-    box.hidden = !count
+    bullhorn.querySelector(".spell-toolbar-count").textContent = String(count)
+    bullhorn.title = tip
+    bullhorn.setAttribute("aria-label", tip)
+    titleInside(bullhorn, "item")
+    if (bullhorn.hidden === !count) return
+    bullhorn.hidden = !count
     // a guide's titles share the row with it:  fitted again
     if (home.classList.contains("spell-toolbar-titled")) this.fitToolbar?.(home)
   }
 
   /**
-   * Where the toolbar's bullhorn goes:  the page's toolbar (`nav.spell-toolbar`), last in its row, after a page's own
-   * tools there (the spell syntax guide's Expand all and Collapse all);  none without a toolbar.
+   * Where the toolbar's bullhorn goes:  the page's toolbar (`.spell-toolbar`, Spell UI's menu), last in its row,
+   * after a page's own tools there (the spell syntax guide's Expand all and Collapse all);  none without a toolbar.
    */
   waitingHome() {
-    return document.querySelector("nav.spell-toolbar")
+    return document.querySelector(".spell-toolbar")
   }
 
   /**
@@ -649,7 +664,7 @@ class PageComments {
     const anchor = `comment-${id}`
     if (this.go) await this.go(anchor)
     else document.getElementById(anchor)?.scrollIntoView({ block: "start" })
-    document.getElementById(anchor)?.querySelector(".spell-thread-fold")?.focus({ preventScroll: true })
+    this.threadOf(id)?.focusFold?.()
   }
 
   /** Every reply box there is:  each thread's (`replyBoxes`), and the pen's (`editing`). */
@@ -702,7 +717,9 @@ class PageComments {
 
   /**
    * The bullhorn of `block`:  in a docs section's title (its `actions` slot), in an epic page block's title row (its
-   * `actions` slot:  `TITLE_ROW_BLOCKS`), in the page header, else just before the block, over its top right corner.
+   * `actions` slot:  `TITLE_ROW_BLOCKS`), in the page header, else first in the block's actions row
+   * (`addBlockAction()`:  a line of no height just before it, over its top right corner;  a table's expand button
+   * after it).
    * - in a title row it's the last of the page's own buttons there, before the block's own (pills, date, fold)
    * - quiet until the block is hovered, always:  a click opens the pane for a NEW comment on it
    * - no count, and nothing to say about the block's comments (Owen, 2026-10-10:  "Bullhorn to the far right is
@@ -711,7 +728,7 @@ class PageComments {
    */
   addBullhorn(block) {
     const place = this.placeOf(block)
-    const what = place.kind === "page" ? "this page" : `this ${KIND_NAMES[place.kind] ?? place.kind}`
+    const what = place.kind === "page" ? "this page" : `this ${ThreadFacts.kindName(place.kind)}`
     const tip = `Comment on ${what}`
     const where =
       place.kind === "section" || place.kind === "page"
@@ -719,14 +736,9 @@ class PageComments {
         : block.matches(TITLE_ROW_BLOCKS)
           ? "title"
           : "block"
-    const mark = document.createElement(where === "block" ? "div" : "span")
-    mark.className = `spell-comment-mark at-${where}`
-    mark.dataset.spellAdded = ""
-    mark.innerHTML =
-      `<ui-button circular basic size="mini" icon="bullhorn" title="${attr(tip)}" aria-label="${attr(tip)}">` +
-      `</ui-button>`
-    titleInside(mark.querySelector("ui-button"))
-    mark.querySelector("ui-button").addEventListener("click", (event) => {
+    const button = iconButton("bullhorn", tip)
+    const mark = el("span", { class: `spell-comment-mark at-${where}`, "data-spell-added": true }, button)
+    button.addEventListener("click", (event) => {
       event.stopPropagation()
       this.openBox({ key: place.anchor, place }, event.currentTarget.getBoundingClientRect())
     })
@@ -734,11 +746,11 @@ class PageComments {
       mark.slot = "actions"
       block.append(mark)
     } else if (where === "page") {
-      // in the page header, before its toolbar:  the toolbar stays its last row
+      // in the page header's tools row, last (`addHeadTool()`):  the toolbar stays its last row
       const head = block.querySelector(".spell-page-head")
-      if (head) beforeToolbar(head, mark)
+      if (head) addHeadTool(head, mark, "comment")
       else block.append(mark)
-    } else block.before(mark)
+    } else addBlockAction(block, mark, "comment")
   }
 
   /** Where `block` is, as a comment on it is saved:  `{ anchor, kind, label, excerpt }` (`BlockAnchors.js`). */
@@ -755,9 +767,10 @@ class PageComments {
   }
 
   /**
-   * The box of threads under `under` (a block, or the paragraph holding a quote:  `holderOf()`), made on first use:  a
-   * docs section's first in its body (under its title);  a list item's or cell's last inside it;  the page's right
-   * under the page header;  anything else's right after it.
+   * The box of threads under `under` (a block, or the paragraph holding a quote:  `holderOf()`), an `<epic-threads>`
+   * made on first use:  a docs section's first in its body (under its title);  a list item's or cell's last inside
+   * it;  the page's right under the page header;  anything else's right after it.
+   * - only one this code made (`data-spell-added`):  never one a page writes as an example (Epic UI's)
    */
   boxFor(under) {
     const where = under.localName === "ui-section" ? "first" : HOLDS_INSIDE.test(under.localName) ? "last" : "after"
@@ -767,10 +780,8 @@ class PageComments {
         : where === "last"
           ? under.lastElementChild
           : under.nextElementSibling
-    if (next?.classList.contains("spell-comments")) return next
-    const box = document.createElement("div")
-    box.className = "spell-comments"
-    box.dataset.spellAdded = ""
+    if (next?.localName === THREADS_TAG && next.hasAttribute("data-spell-added")) return next
+    const box = el(THREADS_TAG, { "data-spell-added": true })
     if (where === "after") under.after(box)
     else if (where === "last") under.append(box)
     else if (next) next.before(box)
@@ -884,9 +895,9 @@ class PageComments {
     this.folds.set(id, true)
     this.draw()
     this.markSeen(id)
-    const fold = this.main.querySelector(`#comment-${CSS.escape(id)} .spell-thread-fold`)
-    fold?.scrollIntoView({ block: "nearest" })
-    fold?.focus({ preventScroll: true })
+    const thread = this.threadOf(id)
+    thread?.header?.scrollIntoView({ block: "nearest" })
+    thread?.focusFold?.()
   }
 
   /** Show the floating bullhorn beside a selection in a block;  hide it otherwise. */
@@ -904,14 +915,10 @@ class PageComments {
   /** The floating bullhorn, made once (in `body`, outside `main`):  a click comments on the selection. */
   floatingBullhorn() {
     if (this.floating) return this.floating
-    const button = document.createElement("button")
-    button.type = "button"
-    button.className = "spell-comment-float"
-    button.hidden = true
     const tip = `Comment on this text (${/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl "}I)`
-    button.title = tip
-    button.setAttribute("aria-label", tip)
-    button.innerHTML = `<ui-icon name="bullhorn"></ui-icon>`
+    const button = iconButton("bullhorn", tip)
+    button.classList.add("spell-comment-float")
+    button.hidden = true
     // keep the selection:  a press would otherwise clear it before the click
     button.addEventListener("pointerdown", (event) => event.preventDefault())
     button.addEventListener("click", () => {
@@ -928,38 +935,47 @@ class PageComments {
 
   /**
    * A comment's THREAD (Owen, 2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane"):
-   * one folding pane, all ivory, whoever spoke last (Owen, 2026-10-10:  "Make the entire thing ivory").
-   * - its header (`threadHead()`);  a click on it, not on one of its buttons, folds it
-   * - its body:  the messages in order (`messagesHTML()`), then, while Claude thinks about it, a "Claude: thinking…"
-   *   stub (`working`);  then, unless it's done, Owen's REPLY BOX (`replyBoxFor()`;  Owen, 2026-10-10:  "Probably
-   *   should have a comment box at the bottom for me")
+   * its `<epic-thread>` (the epics pack), made on first use and kept for the visit, given what to show now.
+   * - the element draws it all:  its header, Owen's answer, the messages, the floppy (`EpicThread.tsx`)
+   * - this says what:  the comment, whether it's open, orange (`unseen()`), moved, and which of Owen's words stand in
+   *   the box under it (`boxed`)
+   * - its box:  Owen's REPLY BOX (`replyBoxFor()`;  Owen, 2026-10-10:  "Probably should have a comment box at the
+   *   bottom for me"), or the pen's box while he edits his first words;  none once done
    * - open while it's Owen's turn (Claude spoke last), or Claude is thinking about it, or he opened it on this visit
    *   (`folds`), or he's writing in it;  else folded to its header
    * - `exact` false:  its block changed or moved since, so it says what it was on
    */
   thread({ comment, exact }) {
-    const thread = document.createElement("div")
-    thread.className = "spell-thread"
-    thread.id = `comment-${comment.id}`
-    thread.dataset.turn = comment.turn
-    // orange while it has a reply from Claude Owen hasn't seen (`unseen()`):  the whole thread, that reply stronger
-    thread.toggleAttribute("data-unseen", this.unseen(comment))
+    let thread = this.threads.get(comment.id)
+    if (!thread) {
+      thread = el(THREAD_TAG, { id: `comment-${comment.id}` })
+      this.wireThread(thread, comment.id)
+      this.threads.set(comment.id, thread)
+    }
     const editing = this.editing?.id === comment.id ? this.editing : null
     const replying = editing ?? (comment.turn === "done" ? null : this.replyBoxFor(comment))
     const writing = !!replying && (replying.busy() || !!editing)
     if (comment.turn === "done") this.replyBoxes.delete(comment.id)
     const thinking = !!comment.working && comment.turn !== "done"
     const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "owen" || thinking))
-    thread.toggleAttribute("data-open", open)
-    thread.innerHTML =
-      threadHead(comment, open, !editing) +
-      `<div class="spell-thread-body">` +
-      (exact ? "" : `<p class="spell-comment-moved">The block changed since:  it was “${text(comment.excerpt)}”.</p>`) +
-      messagesHTML(comment, editing ? "edit" : replying?.saved() ? "reply" : undefined) +
-      `</div>`
-    if (replying) thread.querySelector(".spell-thread-body").append(replying.box)
-    this.wireThread(thread, comment.id)
+    thread.comment = comment
+    thread.toggleAttribute("open", open)
+    // orange while it has a reply from Claude Owen hasn't answered (`unseen()`):  the whole thread, that reply stronger
+    thread.toggleAttribute("unseen", this.unseen(comment))
+    thread.toggleAttribute("moved", !exact)
+    setOrDrop(thread, "boxed", editing ? "first" : replying?.saved() ? "pending" : undefined)
+    this.showFloppy(thread, replying)
+    // its box:  the reply box, or the pen's;  moved in only when it isn't there already (the cursor stays)
+    const box = replying?.box
+    if (box ? thread.firstElementChild !== box || thread.childElementCount !== 1 : thread.childElementCount)
+      thread.replaceChildren(...(box ? [box] : []))
     return thread
+  }
+
+  /** Thread `thread`'s floppy, as Owen's box in it last saved (`replying.floppy`):  none before a save. */
+  showFloppy(thread, replying) {
+    setOrDrop(thread, "saved", replying?.floppy?.tip)
+    thread.toggleAttribute("failed", !!replying?.floppy?.failed)
   }
 
   /**
@@ -971,7 +987,7 @@ class PageComments {
    *   holds, so Claude taking his reply empties it
    */
   replyBoxFor(comment) {
-    const saved = pendingReplyOf(comment)?.text ?? ""
+    const saved = ThreadFacts.pendingReplyOf(comment)?.text ?? ""
     const kept = this.replyBoxes.get(comment.id)
     if (kept && (kept.busy() || kept.saved() === saved)) return kept
     kept?.drop()
@@ -982,50 +998,44 @@ class PageComments {
 
   /**
    * A reply box for comment `id`:  `how` `reply` (his reply) or `edit` (his first words);  `saved`, the words the
-   * server holds for it.  The pane's field, no placeholder, an `aria-label` (Owen, 2026-10-10), its floppy in the
-   * corner;  wired by `wireReply()`.
+   * server holds for it.  The pane's field:  a `<textarea>`, no placeholder, an `aria-label` (Owen, 2026-10-10);  its
+   * thread draws the floppy in its corner.  Wired by `wireReply()`.
+   * - a native `<textarea>` this code makes and keeps, slotted into the thread:  it lives through every redraw, the
+   *   cursor and what's typed with it (not a `<ui-textarea>`, whose form look would have to be undone)
    */
   makeBox(id, how, saved) {
-    const box = document.createElement("div")
-    box.className = "spell-thread-reply"
-    box.innerHTML =
-      `<textarea class="spell-comment-field" rows="1" aria-label="${how === "edit" ? "Your comment" : "Your reply"}">` +
-      `</textarea><span class="spell-comment-saved" hidden><ui-icon name="floppy disk outline"></ui-icon></span>`
-    const replying = { id, how, box, field: box.querySelector("textarea") }
+    const field = el("textarea", {
+      class: "spell-comment-field",
+      rows: 1,
+      "aria-label": how === "edit" ? "Your comment" : "Your reply"
+    })
+    const replying = { id, how, box: field, field, floppy: null }
     this.wireReply(replying, saved)
     return replying
   }
 
-  /** Wire `thread`, comment `id`'s:  its fold, Owen's answer, Reopen, the pen, the trash. */
+  /**
+   * Wire `thread`, comment `id`'s:  what Owen does on it, as it says (`<epic-thread>`'s events).
+   * - its header folded or unfolded:  remembered for the visit;  unfolded, seen (`markSeen()`)
+   * - his answer (its review pills):  That's good and Skip it close it, Reply puts the cursor in its box, Reopen
+   * - the pen:  his first words into a box to change;  the trash:  deleted at once, Undo in the toast
+   */
   wireThread(thread, id) {
-    const fold = thread.querySelector(".spell-thread-fold")
-    thread.querySelector(".spell-thread-head").addEventListener("click", (event) => {
-      if (event.target.closest("ui-button, button:not(.spell-thread-fold)")) return
-      const opening = !thread.hasAttribute("data-open")
+    thread.addEventListener("epic-thread-fold", (event) => {
+      const opening = !!event.detail?.open
       this.folds.set(id, opening)
-      thread.toggleAttribute("data-open", opening)
-      fold.setAttribute("aria-expanded", String(opening))
-      fold.title = fold.title.replace(/\((Fold|Unfold) this thread\)$/, `(${opening ? "Fold" : "Unfold"} this thread)`)
-      const field = thread.querySelector(".spell-thread-reply > textarea")
-      if (opening && field) growField(field)
-      // unfolded:  seen (`markSeen()`)
-      if (opening) this.markSeen(id)
+      if (!opening) return
+      requestAnimationFrame(() => this.growFields())
+      this.markSeen(id)
     })
-    for (const button of thread.querySelectorAll(".spell-thread-answer ui-button")) {
-      titleInside(button)
-      button.addEventListener("click", (event) => {
-        event.stopPropagation()
-        const { act } = button.dataset
-        if (act === "reply") this.focusReply(id)
-        else if (act === "reopen") void this.reopen(id)
-        else void this.resolve(id, act)
-      })
-    }
-    thread.querySelector(".spell-thread-edit")?.addEventListener("click", (event) => {
-      event.stopPropagation()
-      this.startEdit(id)
+    thread.addEventListener("epic-thread-answer", (event) => {
+      const act = event.detail?.act
+      if (act === "reply") void this.focusReply(id)
+      else if (act === "reopen") void this.reopen(id)
+      else if (act === "good" || act === "skip") void this.resolve(id, act)
     })
-    wireDelete(thread.querySelector(".spell-comment-delete"), () => this.remove(id))
+    thread.addEventListener("epic-thread-edit", () => this.startEdit(id))
+    thread.addEventListener("epic-thread-delete", () => void this.remove(id))
   }
 
   /**
@@ -1069,7 +1079,7 @@ class PageComments {
   /** POST `change` to the comments route for this page, and keep the list it answers;  throws what `postJSON()` does. */
   async post(change, options) {
     const answer = await postJSON(COMMENTS_API, { page: location.pathname, ...change }, options)
-    this.list = answer.comments ? withTurns(answer.comments) : this.list
+    this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
     this.keepSend(answer)
     return answer
   }
@@ -1081,10 +1091,12 @@ class PageComments {
   /**
    * The cursor into thread `id`'s reply box, at the end (Revisit:  "reply");  the thread opens, and the page scrolls
    * only as far as it must to show it.  The pen's box open on it:  that one.
+   * - once the thread has drawn its body:  a thread just opened shows its box on the next frame
    */
-  focusReply(id) {
+  async focusReply(id) {
     this.folds.set(id, true)
     this.draw()
+    await nextFrame()
     const replying = this.editing?.id === id ? this.editing : this.replyBoxes.get(id)
     const field = replying?.field
     if (!field?.isConnected) return
@@ -1099,12 +1111,12 @@ class PageComments {
    * (and for the thread's reply box), the cursor in it.  Another one open is saved and closed first.
    */
   startEdit(id) {
-    if (this.editing?.id === id) return this.focusReply(id)
+    if (this.editing?.id === id) return void this.focusReply(id)
     void this.closeEdit()
     const comment = this.list.find((each) => each.id === id)
     if (!comment) return
     this.editing = this.makeBox(id, "edit", comment.text)
-    this.focusReply(id)
+    void this.focusReply(id)
   }
 
   /**
@@ -1115,7 +1127,7 @@ class PageComments {
     const editing = this.editing
     if (!editing) return true
     if (!(await editing.finish())) {
-      noteToast(editing.box.querySelector(".spell-comment-saved").title, "error")
+      noteToast(editing.floppy?.tip ?? "Not saved", "error")
       return false
     }
     if (this.editing === editing) this.editing = null
@@ -1137,8 +1149,13 @@ class PageComments {
    */
   wireReply(replying, saved) {
     const { id, how, box, field } = replying
-    const floppy = box.querySelector(".spell-comment-saved")
     const slot = `${id}~${how}`
+    // how the last save went, shown by the thread the box is in (its floppy)
+    const showFloppy = (floppy) => {
+      replying.floppy = floppy
+      const thread = this.threads.get(id)
+      if (thread && box.parentElement === thread) this.showFloppy(thread, replying)
+    }
     let saving = Promise.resolve(true)
     let timer = 0
     let pending = 0
@@ -1156,16 +1173,12 @@ class PageComments {
         await this.post({ action: how, id, text: words }, { keepalive })
         saved = words
         keep()
-        floppy.hidden = !words
-        floppy.removeAttribute("data-failed")
-        floppy.title = `Saved ${localStamp(new Date().toISOString()).slice(11)} · waiting for Claude`
+        showFloppy(words ? { tip: savedTip() } : null)
         // whose turn it is changed:  its header's buttons with it
         if (this.replyBoxes.get(id) === replying || this.editing === replying) this.draw()
         return true
       } catch (error) {
-        floppy.hidden = false
-        floppy.setAttribute("data-failed", "")
-        floppy.title = `Not saved:  ${error.message} (kept in this browser)`
+        showFloppy({ tip: notSavedTip(error), failed: true })
         return false
       }
     }
@@ -1307,56 +1320,51 @@ class PageComments {
   /**
    * Put the pane on the screen under `near`, else above it when there's no room below, never past the window's
    * edges;  the cursor in its field.
+   * - an `<epic-comment-pane>` (the epics pack), which places itself under `near` and Owen drags;  its field is a
+   *   `<textarea>` this code makes, slotted into it
    * - fixed on the screen, in `main` (where the comments' styles reach):  the page scrolls under it
+   * - the cursor goes in once the pane has drawn (it upgrades as the pack registers)
    */
   showPane(near) {
-    const pane = (this.pane = this.paneFor(this.open))
+    const open = this.open
+    const field = el("textarea", { class: "spell-comment-field", rows: 3, "aria-label": "Your comment" })
+    const pane = (this.pane = el(
+      PANE_TAG,
+      {
+        "data-spell-added": true,
+        headline: ThreadFacts.headline(open.place),
+        about: ThreadFacts.aboutTip(open)
+      },
+      field
+    ))
+    pane.near = near ? { left: near.left, top: near.top, bottom: near.bottom } : undefined
+    this.wirePane(pane, field, open)
     this.main.append(pane)
-    const field = pane.querySelector("textarea")
-    if (field) growField(field)
-    const { width, height } = pane.getBoundingClientRect()
-    const left = near?.left ?? (innerWidth - width) / 2
-    let top = near ? near.bottom + 8 : 80
-    if (near && top + height > innerHeight - 8) top = near.top - height - 8
-    movePane(pane, left, top)
-    this.focusPane()
+    void drawn(pane).then(() => {
+      if (this.pane !== pane) return
+      growField(field)
+      this.focusPane()
+    })
   }
 
-  /** The cursor into the open pane's field, at the end (or into the pane, when it has none);  no scrolling. */
+  /** The cursor into the open pane's field, at the end;  no scrolling. */
   focusPane() {
-    const field = this.pane?.querySelector("textarea")
-    if (!field) return this.pane?.focus({ preventScroll: true })
+    const field = this.pane?.querySelector(":scope > textarea")
+    if (!field) return
     field.focus({ preventScroll: true })
     field.setSelectionRange(field.value.length, field.value.length)
   }
 
   /**
-   * The pane's markup and wiring, for `open` (`openBox()`'s):  a header, then the text;  no buttons below it.
-   * - the header:  a few words of what it's on (the selected text, else the block:  `headline()`), the floppy, the
-   *   trash, ×;  its tooltip names the block in full (`aboutTip()`);  Owen drags the pane by it
-   * - the field has no placeholder (Owen, 2026-10-10:  "remove the 'Anything:  a correction...' placeholder")
-   * - the trash deletes the comment, one click, Undo in its toast (`wireDelete()`);  shown once it's saved
+   * Wire pane `pane` and its `field`, for `open` (`openBox()`'s).
    * - × or Escape closes it (⌘ / Ctrl Enter too, in the field), saving what's typed first;  so does the focus
    *   leaving it (Tab, a click elsewhere):  emptied, the comment goes
+   * - the trash deletes the comment, one click, Undo in its toast;  shown once it's saved
+   * - the field has no placeholder (Owen, 2026-10-10:  "remove the 'Anything:  a correction...' placeholder")
    */
-  paneFor(open) {
-    const pane = document.createElement("div")
-    pane.className = "spell-comment-pane"
-    pane.dataset.spellAdded = ""
-    pane.tabIndex = -1
-    pane.setAttribute("role", "dialog")
-    pane.setAttribute("aria-label", `Comment on ${headline(open.place)}`)
-    pane.innerHTML =
-      `<div class="spell-comment-about" title="${attr(`${aboutTip(open)}\n(Drag to move)`)}">` +
-      `<ui-icon name="bullhorn"></ui-icon><span class="spell-comment-on">${text(headline(open.place))}</span>` +
-      `<span class="spell-comment-saved" hidden><ui-icon name="floppy disk outline"></ui-icon></span>` +
-      deleteButton("saved", !open.id) +
-      `<button type="button" class="spell-comment-tool spell-comment-close" title="${CLOSE_TIP}" ` +
-      `aria-label="Close the comment box"><ui-icon name="xmark"></ui-icon></button></div>` +
-      `<textarea class="spell-comment-field" rows="3" aria-label="Your comment"></textarea>`
-    wireDrag(pane, pane.querySelector(".spell-comment-about"))
-    const close = this.wireField(pane, open)
-    pane.querySelector(".spell-comment-close").addEventListener("click", () => void close())
+  wirePane(pane, field, open) {
+    const close = this.wireField(pane, field, open)
+    pane.addEventListener("epic-comment-close", () => void close())
     pane.addEventListener("keydown", (event) => {
       const closing = event.key === "Escape" || (event.key === "Enter" && (event.metaKey || event.ctrlKey))
       if (!closing) return
@@ -1366,17 +1374,15 @@ class PageComments {
     })
     // focus leaving the pane (Tab, a click elsewhere;  Owen, 2026-10-10:  "Tabbing out of a bullhorn modal saves it
     // automatically.  If it's empty, delete it"):  closed as × closes it, so what's typed is saved, and an emptied
-    // comment goes, with no Undo.  Another window or tab keeps the focus here:  it stays open.
+    // comment goes, with no Undo.  Another window or tab keeps the focus here:  it stays open.  Its own buttons
+    // (in its shadow root) count as in it:  the focus there is the pane's.
     pane.addEventListener("focusout", () => {
       setTimeout(() => {
         if (this.pane !== pane || pane.contains(document.activeElement)) return
         void close()
       })
     })
-    wireDelete(pane.querySelector(".spell-comment-delete"), () =>
-      open.discard ? open.discard() : this.remove(open.id)
-    )
-    return pane
+    pane.addEventListener("epic-comment-delete", () => void (open.discard ? open.discard() : this.remove(open.id)))
   }
 
   /**
@@ -1392,11 +1398,10 @@ class PageComments {
    *   - A new comment's draft that copies a comment already on its block is dropped (`draftOf()`).
    * - leaving the page (`pagehide`):  what's typed and not saved yet goes at once (`flush()`)
    */
-  wireField(pane, open) {
+  wireField(pane, field, open) {
     const { key, place } = open
-    const field = pane.querySelector("textarea")
-    const floppy = pane.querySelector(".spell-comment-saved")
-    const trash = pane.querySelector(".spell-comment-delete")
+    // the floppy, in the pane's header, says how the last save went;  `floppy`:  its tooltip then
+    let floppy = ""
     // what the server holds;  one save at a time, in order, so a quick typist never adds the comment twice
     let saved = (open.text ?? "").trim()
     let saving = Promise.resolve(true)
@@ -1429,20 +1434,20 @@ class PageComments {
         const before = slot()
         open.id = words ? (open.id ?? answer.id) : undefined
         saved = words
-        this.list = answer.comments ? withTurns(answer.comments) : this.list
+        this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
         this.keepSend(answer)
         keep(before)
-        floppy.hidden = !words
-        floppy.removeAttribute("data-failed")
-        floppy.title = `Saved ${localStamp(new Date().toISOString()).slice(11)} · waiting for Claude`
-        trash.hidden = !open.id
+        floppy = words ? savedTip() : ""
+        setOrDrop(pane, "saved", floppy || undefined)
+        pane.removeAttribute("failed")
+        pane.toggleAttribute("deletable", !!open.id)
         // its highlight on the page, at once;  its thread waits until the pane closes
         if (this.open === open) this.draw()
         return true
       } catch (error) {
-        floppy.hidden = false
-        floppy.setAttribute("data-failed", "")
-        floppy.title = `Not saved:  ${error.message} (kept in this browser)`
+        floppy = notSavedTip(error)
+        pane.setAttribute("saved", floppy)
+        pane.setAttribute("failed", "")
         return false
       }
     }
@@ -1479,7 +1484,7 @@ class PageComments {
     })
     field.addEventListener("blur", () => void saveNow())
     return async () => {
-      if (!(await open.finish())) return noteToast(floppy.title, "error")
+      if (!(await open.finish())) return noteToast(floppy, "error")
       if (this.open === open) this.closePane()
     }
   }
@@ -1536,170 +1541,6 @@ function whoWords({ epic, owned, listening }) {
   return `No Claude session is reviewing epic ${epic}:  sent comments wait for /epic review ${epic} or /airplane land`
 }
 
-/**
- * A few words of what a comment box is on, for its header:  the start of the selected text, else of its block's
- * text, in quotes;  "This page" for the page.
- */
-function headline(place) {
-  if (place.kind === "page") return "This page"
-  const words = (place.quote || place.excerpt || place.label || "").replace(/\s+/g, " ").trim()
-  if (!words) return `This ${KIND_NAMES[place.kind] ?? place.kind}`
-  return `“${words.length > HEADLINE_CHARS ? `${words.slice(0, HEADLINE_CHARS).trimEnd()}…` : words}”`
-}
-
-/** The comment box header's tooltip:  which block it's on, in full ("On a field in Guide Comments"). */
-export function aboutTip({ id, place }) {
-  const what = place.kind === "page" ? "the page" : `a ${KIND_NAMES[place.kind] ?? place.kind}`
-  const named = place.kind === "section" || place.kind === "item"
-  const on = named && place.label ? `“${place.label}”` : what
-  const where = place.kind === "page" || named || !place.label ? "" : ` in “${place.label}”`
-  return `${id ? `Comment ${commentLabel(id)}, on` : "On"} ${on}${where}${place.quote ? `:  “${place.quote}”` : ""}`
-}
-
-/**
- * A thread's header (`PageComments.thread()`):  a chevron, the bullhorn (a check circle once done), its id (`M3`,
- * small and muted;  epic `epic-workflow` P23), the pane's summary (`headline()`:  the quote's first words, else the block's;  its tooltip the full place), then
- * - Owen's answer while it's his turn (`answerButtons()`);  Reopen once done
- * - the pen while his first words wait for Claude, unread (`pendingOf()`);  not while its box is open (`withPen`).
- *   His pending reply needs none:  it's in the reply box
- * - the trash, always
- * No date:  each message has its own time (Owen, 2026-10-10:  "Dont need date in the top if it's next to who spoke").
- */
-function threadHead(comment, open, withPen) {
-  const done = comment.turn === "done"
-  const tip = `${aboutTip({ id: comment.id, place: comment })}\n(${open ? "Fold" : "Unfold"} this thread)`
-  const pending = withPen && pendingOf(comment) === "edit" && "edit"
-  const label = commentLabel(comment.id)
-  return (
-    `<div class="spell-thread-head">` +
-    `<button type="button" class="spell-thread-fold" aria-expanded="${open}" title="${attr(tip)}">` +
-    `<span class="spell-thread-chevron"><ui-icon name="chevron right"></ui-icon></span>` +
-    `<span class="spell-thread-mark"><ui-icon name="${done ? "circle check" : "bullhorn"}"></ui-icon></span>` +
-    `<span class="spell-thread-id">${text(label)}</span>` +
-    `<span class="spell-thread-headline">${text(headline(comment))}</span></button>` +
-    (comment.turn === "owen" ? answerButtons(THREAD_ANSWERS) : done ? answerButtons([REOPEN]) : "") +
-    (pending
-      ? `<button type="button" class="spell-comment-tool spell-thread-edit" data-how="${pending}" ` +
-        `title="${attr(EDIT_TIP)}" aria-label="Edit your last words:  Claude hasn't taken them yet"><ui-icon name="edit"></ui-icon></button>`
-      : "") +
-    deleteButton(comment.status === "new" ? "saved" : "had") +
-    `</div>`
-  )
-}
-
-/**
- * Owen's answer on a thread, while it's his turn (Owen, 2026-10-10:  "Make top buttons same semantics/look as pills
- * in item header"):  an epic page item's review pills (`<epic-review>`, `$/epics`), drawn here with the same
- * markup, since a guide doesn't load that pack:  ONE grouped pill of square icon buttons, a grey outline at rest,
- * each in its colour under the pointer.
- * - Approve's check (green, decided):  "that's good" -- done, it folds
- * - Revisit's history (blue, an ask of Claude):  reply -- the cursor into the reply box under the messages
- *   (`focusReply()`)
- * - the note box's x (grey, no longer relevant):  "skip it" -- done, nothing more to do
- * - tooltips (`title`;  Owen, 2026-10-10:  "No tooltip on those same buttons"):  the name and, for the two that
- *   close it, that they do;  also on the button the pointer lands on (`titleInside()`);  a screen reader hears
- *   what it does
- */
-const THREAD_ANSWERS = [
-  {
-    act: "good",
-    color: "green",
-    icon: "check",
-    label: "That's good",
-    title: "That's good:  done",
-    tip: "done:  the thread folds, green"
-  },
-  {
-    act: "reply",
-    color: "blue",
-    icon: "history",
-    label: "Reply",
-    title: "Reply",
-    tip: "the cursor into the box under the thread, saved as you type;  Claude takes it up"
-  },
-  {
-    act: "skip",
-    color: "grey",
-    icon: "xmark",
-    label: "Skip it",
-    title: "Skip it:  done, nothing more to do",
-    tip: "done, nothing more to do"
-  }
-]
-
-/** A closed thread's one button:  open it again (the toast's Undo does the same). */
-const REOPEN = {
-  act: "reopen",
-  color: "blue",
-  icon: "rotate left",
-  label: "Reopen",
-  title: "Reopen:  your turn on it again",
-  tip: "your turn on it again"
-}
-
-/** The pen's tooltip:  his words, while Claude hasn't taken them. */
-const EDIT_TIP = "Edit your last words"
-
-/** What a thread says for Claude's answer with no words here:  an epic page's comment, answered in the doc. */
-const ANSWERED_IN_DOC = "<p>Answered on the epic page.</p>"
-
-/** `specs` (`THREAD_ANSWERS`, `REOPEN`) as a thread header's grouped pill. */
-function answerButtons(specs) {
-  return (
-    `<span class="spell-thread-answer" role="group" aria-label="Your answer"><ui-buttons basic icon size="mini">` +
-    specs
-      .map(
-        ({ act, color, icon, label, title, tip }) =>
-          `<ui-button icon="${icon}" data-act="${act}" data-color="${color}" title="${attr(title)}" ` +
-          `aria-label="${attr(`${label}:  ${tip}`)}"></ui-button>`
-      )
-      .join("") +
-    `</ui-buttons></span>`
-  )
-}
-
-/**
- * Put `host`'s `title` (a `<ui-button>`'s) on the button inside it too, once drawn:  the element the pointer lands
- * on carries the tooltip itself (Owen, 2026-10-10:  "No tooltip on those same buttons"), as an epic page item's note
- * buttons do, rather than leaving the browser to find it on the shadow host.
- */
-function titleInside(host) {
-  const copy = () => {
-    const inner = host.shadowRoot?.querySelector('[part~="button"]')
-    if (inner) inner.title = host.title
-    return !!inner
-  }
-  if (!copy()) void customElements.whenDefined(host.localName).then(() => requestAnimationFrame(copy))
-}
-
-/** When Claude last replied on `comment`'s thread (an ISO time), else "". */
-function latestClaudeAt(comment) {
-  return comment.replies?.findLast((each) => each.by !== "Owen" && each.at)?.at ?? ""
-}
-
-/**
- * `comments` as the server answered (none:  `[]`), each with whose `turn` it is on its thread:  the server's
- * (`CommentList.turnOf()`), else worked out the same way here -- a page server started before threads sends none.
- */
-function withTurns(comments = []) {
-  return comments.map((comment) => (comment.turn ? comment : { ...comment, turn: turnOf(comment) }))
-}
-
-/**
- * A comment id's number, however typed or keyed:  `M3`, `m3`, `cm3` (any case, a `#` before it aside) -> 3;  else
- * `undefined`.  As `CommentList.idOf()`.
- */
-function commentNumber(typed) {
-  const number = /^#?c?m(\d+)$/i.exec(String(typed ?? "").trim())?.[1]
-  return number === undefined ? undefined : Number(number)
-}
-
-/** A comment's id as Owen sees it:  `M3` (`cm3`, `m3` alike;  `CommentList.label()`). */
-export function commentLabel(id) {
-  const number = commentNumber(id)
-  return number === undefined ? String(id) : `M${number}`
-}
-
 /** The first line of `words`, cut to a short line with `…`. */
 export function firstWords(words) {
   const line = String(words ?? "")
@@ -1707,120 +1548,6 @@ export function firstWords(words) {
     .trim()
   return line.length > 60 ? `${line.slice(0, 60).trimEnd()}…` : line
 }
-
-/** Whose turn it is on `comment`'s thread, as `CommentList.turnOf()` has it:  `done`, `owen` or `claude`. */
-function turnOf(comment) {
-  if (comment.done) return "done"
-  const last = comment.replies?.at(-1)
-  if (last) return last.by === "Owen" ? "claude" : "owen"
-  return comment.status === "answered" ? "owen" : "claude"
-}
-
-/**
- * Owen's words on `comment` that Claude hasn't had yet, which he may still change:  `edit` (his first words, while
- * the comment is `new` and Claude isn't thinking about it), `reply` (his pending reply:  `pendingReplyOf()`);  else
- * `null`.
- */
-function pendingOf(comment) {
-  if (comment.done) return null
-  if (comment.status === "new" && !comment.replies?.length) return comment.working ? null : "edit"
-  return pendingReplyOf(comment) ? "reply" : null
-}
-
-/**
- * Owen's PENDING reply on `comment`:  its thread's last entry, his, not taken since, nor being thought about
- * (`working`);  else `null`.  As the server's `CommentList` has it:  his next save changes it, rather than adding
- * another.
- */
-function pendingReplyOf(comment) {
-  const last = comment.replies?.at(-1)
-  if (last?.by !== "Owen") return null
-  const taken = comment.taken?.at ?? (comment.status === "taken" ? comment.at : undefined)
-  // the later of the two (ISO dates compare as strings);  "" for neither
-  const held = [taken, comment.working].reduce((late, each) => (each && each > late ? each : late), "")
-  return held && held >= last.at ? null : last
-}
-
-/**
- * A thread's messages, in order (Owen, 2026-10-10:  "lose the 'claude' 'You' bit -- move the time to the top-right
- * of each bit position absolute"):  no names, the colour says who.
- * - Owen's words (his comment, his replies):  plain on the ivory, no box (Owen, 2026-10-10:  "my text doesn't get
- *   bordered (but keep spacing the same)")
- * - Claude's:  a light violet box -- an answer;  "taken into <epic> · <phase>", linked by the phase's id
- *   (`takenInto()`);  answered in the epic page.  His latest (`data-latest`) is orange while Owen hasn't seen it
- *   (`unseen()`), as the whole thread is
- * - a green Done line once closed:  a check, what he said, the commit Claude named
- * - while Claude thinks about it (`working`):  "Claude: thinking…" last, light violet, a spinner;  his answer takes
- *   its place
- * - each one's time in its top right corner:  the day with it on the first, and whenever the day changes;  the
- *   full date and time as its tooltip
- * - `editing` (the reply box's `how`, when it holds words of his):  the box stands in for them -- `edit` his first,
- *   `reply` his pending reply
- */
-function messagesHTML(comment, editing) {
-  const said = [{ by: "Owen", at: comment.at, text: comment.text }, ...(comment.replies ?? [])]
-  if (editing === "edit") said.shift()
-  else if (editing === "reply" && pendingReplyOf(comment)) said.pop()
-  const messages = said.map((each) =>
-    each.by === "Owen"
-      ? { by: "owen", at: each.at, body: commentHTML(each.text ?? "") }
-      : { by: "claude", at: each.at, body: each.html || ANSWERED_IN_DOC }
-  )
-  const { taken, done } = comment
-  if (taken) {
-    const after = messages.findIndex((each) => each.at > taken.at)
-    const into = takenInto(taken)
-    const where = `<a href="${attr(planLink(taken.epic, into.hash))}">${text(into.label)}</a>`
-    const line = { by: "claude", at: taken.at, body: `<p>Taken into ${where}, to work into the page there.</p>` }
-    messages.splice(after < 0 ? messages.length : after, 0, line)
-  }
-  // answered before threads, in an epic page:  no entry of Claude's at all
-  if (comment.status === "answered" && !comment.replies?.some((each) => each.by !== "Owen"))
-    messages.push({ by: "claude", at: "", body: ANSWERED_IN_DOC })
-  if (done) {
-    const commit = comment.replies?.findLast((each) => each.commit)?.commit
-    const words = done.how === "skip" ? "Skipped:  nothing more to do." : "That's good."
-    const built = commit ? `  Built in <code>${text(commit)}</code>.` : ""
-    const check = `<span class="spell-thread-check"><ui-icon name="circle check"></ui-icon></span>`
-    messages.push({ by: "done", at: done.at, body: `<p>${check}${words}${built}</p>` })
-  }
-  // Claude thinking about it now (`working`, since when):  a stub his answer replaces (Owen, 2026-10-10:  "You could
-  // put in a stub and replace that when you've thought")
-  if (comment.working && !done) {
-    const spin = `<span class="spell-thread-spin" aria-hidden="true"><ui-icon name="circle notch"></ui-icon></span>`
-    messages.push({ by: "thinking", at: comment.working, body: `<p>${spin}thinking…</p>` })
-  }
-  // Claude's latest reply:  orange while the thread is (`unseen()`), the reply Owen hasn't seen
-  const latest = messages.findLastIndex((each) => each.by === "claude" && each.at)
-  let day = ""
-  return messages
-    .map(({ by, at, body }, index) => {
-      const local = at ? localStamp(at) : ""
-      const shown = !local ? "" : local.slice(0, 10) === day ? local.slice(11) : shortStamp(local)
-      if (local) day = local.slice(0, 10)
-      // the time over the top right corner;  a hidden copy floats there, so the first line's text stops short of it
-      const when = shown
-        ? `<span class="spell-thread-room" aria-hidden="true">${text(shown)}</span>` +
-          `<time class="spell-thread-when" datetime="${attr(at)}" title="${attr(local)}">${text(shown)}</time>`
-        : ""
-      // who, in bold, at the start of the first line (Owen, 2026-10-10:  "Put You in bold, same line, before me and
-      // Claude: before yours");  the Done line has its check instead
-      const who = WHO[by] ? `<b class="spell-thread-who">${WHO[by]}</b> ` : ""
-      const said = who && body.startsWith("<p>") ? `<p>${who}${body.slice(3)}` : who + body
-      // all but the last smaller and quieter (Owen, 2026-10-10:  "Make font smaller for "not current" things --
-      // everything other than last message");  the thinking stub or the Done line is the last when there
-      const older = index < messages.length - 1 ? " data-older" : ""
-      const newest = index === latest ? " data-latest" : ""
-      return (
-        `<div class="spell-thread-msg" data-by="${by}"${older}${newest}>${when}` +
-        `<div class="spell-thread-text">${said}</div></div>`
-      )
-    })
-    .join("")
-}
-
-/** Who said a thread's message, as its first word says it (`messagesHTML()`):  the thinking stub is Claude's. */
-const WHO = { owen: "You:", claude: "Claude:", thinking: "Claude:" }
 
 /**
  * Where a quote's thread goes (Owen, 2026-10-10:  "show them under the paragraph where they were defined"):  the
@@ -1864,73 +1591,19 @@ function highlightQuotes(quotes) {
   return found
 }
 
-/**
- * What the pane's × says, in its tooltip:  a few words, as every comment button's (Owen, 2026-10-10:  "The buttons
- * don't have browser tooltips -- unclear what they do");  the rest is in its `aria-label`.
- */
-const CLOSE_TIP = "Close"
-
 /** How long the toast saying a comment was deleted offers Undo, ms. */
 const UNDO_MS = 6000
 
-/** What a trash says:  its tooltip, then (`aria-label`) a comment still waiting for Claude, and one Claude has. */
-const DELETE_TIP = "Delete this comment"
-const DELETE_TELLS = {
-  saved: "Delete this comment (Undo in the toast that follows)",
-  had: "Delete this comment:  gone from the page, whatever Claude did with it (Undo in the toast that follows)"
-}
-
 /**
- * A comment's trash (Owen, 2026-10-10:  "allow me to delete bullhorn comments"):  on its thread's header, and in the
- * pane's;  icon only, plain as the pane's × (Owen, 2026-10-10:  "no round border like everything else").
- * `state`:  `saved` while Claude hasn't had it, else `had`;  `hidden`:  not saved yet (a new comment's pane).
+ * A control the comments draw (epic `epic-engine` I26;  Owen, 2026-10-19:  "Why are we not using <ui-xxxx> ...
+ * components for these pages?"):  a `<ui-button circular basic size="mini">` with `icon`, never a raw `<button>`, so
+ * the component centres its icon;  `tip` its tooltip and name, on the inner button too (`titleInside()`).
+ * - `size`:  another size (Send's pill:  `tiny`, as the New epic pill)
  */
-function deleteButton(state, hidden = false) {
-  const tells = DELETE_TELLS[state === "saved" ? "saved" : "had"]
-  return (
-    `<button type="button" class="spell-comment-tool spell-comment-delete" title="${DELETE_TIP}" ` +
-    `aria-label="${attr(tells)}"${hidden ? " hidden" : ""}><ui-icon name="trash can"></ui-icon></button>`
-  )
-}
-
-/**
- * Wire trash `button` (`deleteButton()`) to `act`:  one click deletes at once, no dialog;  the toast that says so
- * offers Undo (`PageComments.remove()`).
- * - Before 2026-10-10 it took two clicks, the first turning it red:  Owen clicked once, and thought it broken
- */
-function wireDelete(button, act) {
-  button?.addEventListener("click", (event) => {
-    event.stopPropagation()
-    void act()
-  })
-}
-
-/** Put the pane at (`left`, `top`) on the screen, inside the window's edges, 8px in. */
-function movePane(pane, left, top) {
-  const { width, height } = pane.getBoundingClientRect()
-  pane.style.left = `${Math.max(8, Math.min(left, innerWidth - width - 8))}px`
-  pane.style.top = `${Math.max(8, Math.min(top, innerHeight - height - 8))}px`
-}
-
-/** Let `handle` drag `pane` around the screen (not from a button on it). */
-function wireDrag(pane, handle) {
-  handle.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0 || event.target.closest("ui-button, button")) return
-    event.preventDefault()
-    const start = pane.getBoundingClientRect()
-    const dx = event.clientX - start.left
-    const dy = event.clientY - start.top
-    handle.setPointerCapture(event.pointerId)
-    const move = (each) => movePane(pane, each.clientX - dx, each.clientY - dy)
-    const stop = () => {
-      handle.removeEventListener("pointermove", move)
-      handle.removeEventListener("pointerup", stop)
-      handle.removeEventListener("pointercancel", stop)
-    }
-    handle.addEventListener("pointermove", move)
-    handle.addEventListener("pointerup", stop)
-    handle.addEventListener("pointercancel", stop)
-  })
+export function iconButton(icon, tip, { size = "mini" } = {}) {
+  const button = el("ui-button", { circular: true, basic: true, size, icon, title: tip, "aria-label": tip })
+  titleInside(button)
+  return button
 }
 
 /** A docs section's first child in its body (not its slotted icon, header or actions);  `null` for none. */
@@ -1938,36 +1611,43 @@ function firstContentChild(section) {
   return Array.from(section.children).find((child) => !child.hasAttribute("slot")) ?? null
 }
 
-/**
- * A comment's text as markup:  a `<p>` per block (split at blank lines), a single newline a `<br>`,
- * `backticked` runs `<code>`.  `PageNotes.js` `htmlOf()` does the same on the server.
- */
-function commentHTML(words) {
-  return words
-    .trim()
-    .split(/\n[ \t]*\n\s*/)
-    .map(
-      (block) =>
-        `<p>${text(block.trim())
-          .replace(/`([^`]+)`/g, "<code>$1</code>")
-          .replace(/\n/g, "<br />")}</p>`
-    )
-    .join("")
+/** The epics pack's tags this draws (`<epic-thread>` ...):  each upgrades as the pack registers. */
+const THREADS_TAG = "epic-threads"
+const THREAD_TAG = "epic-thread"
+const PANE_TAG = "epic-comment-pane"
+
+/** The room a thread's header leaves on its right for a corner bullhorn above it (`makeRoom()`;  `EpicThread.css`). */
+const HEAD_ROOM = "--epic-thread-head-room"
+
+/** Put `child` at index `at` of `box`'s children, moving it only when it isn't there already (the cursor stays). */
+function placeAt(box, child, at) {
+  const there = box.children[at]
+  if (there !== child) box.insertBefore(child, there ?? null)
 }
 
-/** An ISO time as local `YYYY-MM-DD HH:MM` (`shortStamp()` takes it from there). */
-function localStamp(iso) {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return iso ?? ""
-  const two = (value) => String(value).padStart(2, "0")
-  return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())} ${two(date.getHours())}:${two(date.getMinutes())}`
+/** Set `element`'s attribute `name` to `value`;  `undefined`:  take it away. */
+function setOrDrop(element, name, value) {
+  if (value === undefined) element.removeAttribute(name)
+  else if (element.getAttribute(name) !== value) element.setAttribute(name, value)
 }
 
-/**
- * The URL of the phase a comment was taken into, from this checkout's root (a worktree's `/worktrees/<w>/` too):
- * epic `epic`'s page, at `#hash` (`takenInto()`:  the phase's stable id, or an old taken comment's `p7`).
- */
-function planLink(epic, hash) {
-  const root = /^\/worktrees\/[^/]+\//.exec(location.pathname)?.[0] ?? "/"
-  return `${root}epics/${encodeURIComponent(epic)}/${encodeURIComponent(epic)}.plan.html#${encodeURIComponent(hash)}`
+/** Resolves once `element` (one of the pack's) is defined and has drawn.  NEVER rejects. */
+async function drawn(element) {
+  await customElements.whenDefined(element.localName)
+  await element.ready?.catch(() => undefined)
+}
+
+/** Resolves on the next frame:  what an element was just told to show has drawn by then. */
+function nextFrame() {
+  return new Promise((resolve) => requestAnimationFrame(() => resolve()))
+}
+
+/** The floppy's tooltip once saved:  `Saved 14:02 · waiting for Claude`. */
+function savedTip() {
+  return `Saved ${ThreadFacts.localStamp(new Date().toISOString()).slice(11)} · waiting for Claude`
+}
+
+/** The floppy's tooltip when a save failed:  why, and that the words are kept. */
+function notSavedTip(error) {
+  return `Not saved:  ${error.message} (kept in this browser)`
 }

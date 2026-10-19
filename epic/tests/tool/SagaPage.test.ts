@@ -123,7 +123,10 @@ describe("SagaEpics", () => {
         standing: false,
         urgent: ["q1"],
         active: "P2 · Two"
-      }
+      },
+      // as its `<epic-card>` draws it (epic `epic-engine` I39):  the day its page was updated, local;  not starred
+      worked: expect.stringMatching(/^2026-10-14T00:00[+-]\d\d:\d\d$/),
+      favorite: false
     })
     expect(new SagaEpics(root).of("tooling").epics).toEqual([])
   })

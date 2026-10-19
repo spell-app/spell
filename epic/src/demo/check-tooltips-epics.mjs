@@ -14,7 +14,9 @@
  *   - it fails on a control whose centre has no `title` of its own, or is covered by something else
  *
  * Usage (from the repo root):
- *   node src/demo/check-tooltips-epics.mjs [--doc <name>] [--list]
+ *   node src/demo/check-tooltips-epics.mjs [--doc <name>] [--list] [--bundle <spell-ui.js>]
+ * - `--bundle`:  that file served as the pages' `spell-ui.js`, a bundle built elsewhere (a runtime not yet in
+ *   `_assets/`), as the other demo checks take it
  * - the doc:  a SCRATCH COPY, as `check-review-epics.mjs` makes it
  *   - `review-sample.html` (default), with a judgement call of option cards added
  *   - or `--doc <name>`, a copy of `epics/<name>/`
@@ -69,6 +71,7 @@ const { PlanDocFiles } = await import("../tool/PlanDocFiles.ts")
 const args = process.argv.slice(2)
 const docName = args.includes("--doc") ? args[args.indexOf("--doc") + 1] : "tooltip-sample"
 const listAll = args.includes("--list")
+const bundle = args.includes("--bundle") ? readFileSync(resolve(args[args.indexOf("--bundle") + 1])) : undefined
 const problems = []
 
 /** The agent the "Agents running" panel shows:  `/api/epics/agents` answered by the page itself. */
@@ -149,6 +152,8 @@ if (problems.length) {
 async function run() {
   const context = await browser.newContext({ viewport: { width: 900, height: 1000 } })
   const page = await context.newPage()
+  if (bundle)
+    await page.route("**/_epic/assets/spell-ui.js", (route) => route.fulfill({ body: bundle, contentType: "text/javascript" }))
   page.on("pageerror", (error) => problems.push(`pageerror:  ${error.message}`))
   await page.route("**/api/epics/agents?*", (route) => route.fulfill({ json: { agents: [AGENT] } }))
   await page.goto(url)
