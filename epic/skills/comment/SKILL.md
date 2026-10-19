@@ -49,8 +49,9 @@ Review any file through PLAN MODE's comment tab.
 5. Write the reviewed text back to the real file:  the plan file's body below the `---`,
    with the header and (for non-`.md`) the fence stripped.
    - Check it:  `git diff --stat <path>` shows only what the comments changed.
-   - The file is a generated or checked one (an epic page, a WWOD file):
-     run its check (`epic check`, `spell dev wwod check` ...).
+   - The file is a generated or checked one:  run its check.
+     - an epic page:  `epic check`
+     - the repo's own (a house-style file ...):  the check its docs name
 6. Next file:  step 2.
    - After the last:  one line per file ("`<path>`:  N rounds, M comments applied", or "approved as is").
    - Stage the changes;  commit only when Owen says.

@@ -12,11 +12,11 @@ Owen runs several epics at once:  one screen saying where each stands.
 
 - Every epic page is shared content:  ONE copy, in the content folder (`epic config contentFolder`),
   read from there by every checkout (epic `epic-eject` P12), never through a link.
-  - On code from before 2026-10-05, the link is `packages/docs/content/epics`.
+  - In spell-app, on code from before 2026-10-05, the link is `packages/docs/content/epics`.
   - So any checkout lists every epic, and there's no "worktree copy" to prefer.
 - An epic's worktree and branch are both `<name>` (its folder:  `epic worktree path <name>`).
   It may have none:  planned on `main`, or merged and removed.
-- A worktree cut before 2026-10-04 that hasn't run `epic shared migrate <name>` still has its own old copy
+- A spell-app worktree cut before 2026-10-04 that hasn't run `epic shared migrate <name>` still has its own old copy
   (`packages/docs/epics/<name>/`).
   `epic` reads that one for it.
 

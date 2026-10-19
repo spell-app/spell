@@ -19,7 +19,7 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
 - Works from ANY session, a worktree's too.
   - Owen, 2026-10-10:  "when I land in any session, all should come back online".
   - Its commands act on the MAIN checkout:  its page server is the one the side bar uses.
-  - So run each `spell dev ...` here from the main checkout's root:
+  - So run each `epic ...` here from the main checkout's root:
 
     ```sh
     cd "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")" && epic airplane ...
@@ -35,8 +35,9 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
    - `page server`:  `--fix` starts it, or restarts one older than its code
    - `offline pages`:  `--fix` points every page's highlight.js at the repo's copy.
      Anything else remote it names:  fix the page by hand, or tell Owen which pages will look plain.
-   - `extension`, too old:  `spell dev vscode`.
-     - Run it from `main`, never a branch behind it:  it installs into VS Code.
+   - `extension`, too old:  spell-epic's VS Code extension, rebuilt and installed
+     as [its README](${CLAUDE_PLUGIN_ROOT}/vscode/README.md) says.
+     - From spell-epic's main checkout, never a branch behind it:  it installs into VS Code.
      - Then ask Owen to reload the window (Developer:  Reload Window).
    - `waiting`:  marks already in the inboxes from before:  say which epics;  they'll be gathered at landing too
 2. Running sessions:  `epic worktree list`.

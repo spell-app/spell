@@ -26,13 +26,15 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
       - A turn commits every session's edits,
         and a tool run over every page (`docs offline --fix`) changes them all.
       - Counted;  only `--json` lists them.
-    - and its changelog entry:  the `<name>` section of the changelog (the content folder's `guides/changelog.html`)
+    - and its changelog entry, if the repo keeps a changelog:  its `<name>` section
+      (`epic docs` looks in the content folder's `guides/changelog.html`)
   - `epic decisions <name> [--json]`:  what the docs must agree with
     - each phase:  its Done list (what was built) and its Updated notes (how the plan changed)
     - each item:  its status, its chosen option, its answer;  `--json` adds its whole current text
-- Not `/fussbudget`:  that one fixes how text READS (WWOD §6);  this one fixes what it SAYS.
-  A sentence it rewrites still follows WWOD §6
-  (the content folder's `agents/wwod/WWOD.md`, and its before / afters in `agents/wwod/writing.md`).
+- Not a text-rewriting skill (spell-app's `/fussbudget`):  that one fixes how text READS;  this one fixes what it SAYS.
+  A sentence it rewrites still follows the repo's writing rules, from the house style its `AGENTS.md` names
+  (spell-app's:  WWOD §6, the content folder's `agents/wwod/WWOD.md`, and its before / afters in
+  `agents/wwod/writing.md`).
 
 ## Forms
 
@@ -67,7 +69,7 @@ From `decisions --json`, later beats earlier:
 - an Original Discussion (`<epic-original>`) is history, never binding
 - The code beats every doc when they disagree about what exists.
   - A command, flag, file or default a doc names is checked against the code before a fix.
-  - How:  `spell dev <noun>` with no verb prints its usage;  grep the source.
+  - How:  the command's own help (`epic <verb> --help`, the repo's CLI's);  grep the source.
 
 ## What it never touches
 
@@ -81,7 +83,7 @@ From `decisions --json`, later beats earlier:
 
 ## Steps
 
-1. Is anyone else editing these?  As the fussbudget skill's step 2:  `epic worktree list`, `epic agents list`.
+1. Is anyone else editing these?  `epic worktree list`, `epic agents list`.
    - Another session or agent working on the same docs:  say who, and STOP.
      A mixed diff can't be reviewed.
 2. The right checkout:  `epic list --json`, each epic's `checkout`.
@@ -95,7 +97,7 @@ From `decisions --json`, later beats earlier:
      - every `wrote` and `related` one
      - a `linked` one only where it describes this epic's work:
        search it for the epic's name, its commands, its elements
-     - the changelog entry:  its `<ui-section>` only
+     - the changelog entry, if there is one:  its `<ui-section>` only
 4. Big:  more than 8 docs to read, or several epics:  fan out ("Fanning out").  Else the session does it itself.
 5. Pass 1, each doc, top to bottom, against the decisions:
    - every statement about what the epic chose or built:
@@ -107,7 +109,7 @@ From `decisions --json`, later beats earlier:
      - command names, flags, paths, element and option names, numbers, behaviours
    - where two docs disagree:  the one that matches the decisions and the code wins;  fix the others
    - the same thing called two names:  the name the code (or the epic's guide) uses, everywhere
-   - the changelog entry lists everything the phases' Done lists say was shipped, and nothing they don't
+   - the changelog entry, if any, lists everything the phases' Done lists say was shipped, and nothing they don't
 7. What it couldn't decide (two readings both defensible, or the epic page contradicting itself):
    ONE judgement call per question, in the epic's epic page, never one per fix:
 

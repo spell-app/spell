@@ -1800,7 +1800,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
 3. `yarn tsx src/tools/doc-links.js --check <page>`
 4. `node src/tools/check-spell.js <page>` must pass, and LOOK at its four screenshots:
    the checks can't see overlap, clipping or bad wrapping
-5. `spell dev docs index`, when the page is new, renamed, or its `<title>` / description changed
+5. `epic pages index`, when the page is new, renamed, or its `<title>` / description changed
 
 ## Scripts
 

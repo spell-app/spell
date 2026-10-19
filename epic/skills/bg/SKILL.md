@@ -96,8 +96,9 @@ The task, word for word:
   agents (`general-purpose`, `Explore` ...), never forks.  Each one:  named `<full name>-<x>`, listed first with
   `epic agents add <full name>-<x> "<its task>"`, and `epic agents done <full name>-<x>` when it's back.
   <n> is 1:  start none.
-- House rules:  WWOD (`agents/wwod/WWOD.md`) and the package's `AGENTS.md` for code;  stage your changes, NEVER
-  commit unless the task says to;  shared content (`epics/`, `guides/`, `agents/` ...) edited at its REAL path,
+- House rules:  the repo's `AGENTS.md`, the house style it names, and the package's `AGENTS.md`, for code;
+  stage your changes, NEVER commit unless the task says to;
+  shared content (`epics/`, `guides/`, `agents/` ...) edited at its REAL path,
   `<content>/<path>` (`<content>`:  what `epic config contentFolder` prints), never git-added;  in a worktree, plain separate shell commands
   (no `$(...)`, no `&&` chains, no `cd`).
 - You can't ask Owen anything:  no AskUserQuestion.  A choice he might make differently:  take the default the code

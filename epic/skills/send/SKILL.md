@@ -1,6 +1,6 @@
 ---
 name: send
-description: Send a request to another epic instead of doing it here -- Owen's words verbatim, the screenshots he pasted, what this session was looking at -- and wake that epic's session, or open its window.  Use for `/send [<epic>] <text>`, and BY ITSELF whenever Owen asks this session to change how he WORKS (dev tooling:  the epic page, comments, the Review tab, details pages, skills, hooks, windows, worktrees, `spell dev` / `epic`) rather than this session's own work -- the root `CLAUDE.md`'s "Tooling requests".  E.g. "fix this in the plan doc", "comment mechanism doesn't look right", a screenshot of the Review tab.
+description: Send a request to another epic instead of doing it here -- Owen's words verbatim, the screenshots he pasted, what this session was looking at -- and wake that epic's session, or open its window.  Use for `/send [<epic>] <text>`, and BY ITSELF whenever Owen asks this session to change how he WORKS (dev tooling:  the epic page, comments, the Review tab, details pages, skills, hooks, windows, worktrees, `epic` and the repo's own dev commands) rather than this session's own work -- the root `CLAUDE.md`'s "Tooling requests".  E.g. "fix this in the plan doc", "comment mechanism doesn't look right", a screenshot of the Review tab.
 argument-hint: "[<epic>] <text>"
 ---
 
@@ -17,7 +17,8 @@ and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-
 - `/send [<epic>] <text>`:  always.
 - By itself (no `/send`):  Owen asks for a change to DEV TOOLING, how he works, not what this session builds.
   - Dev tooling:  the epic page and its comments, marks and buttons;  the Review tab;  details pages;
-    every skill and hook;  windows, worktrees, the page server;  `spell dev` and `epic`.
+    every skill and hook;  windows, worktrees, the page server;
+    `epic`, and the repo's own dev commands (spell-app's `spell dev`).
   - Not:  this session's OWN epic's content.
     "Fix P4's file list in the plan doc" in `🚧 python` is python's job;
     "the plan doc's comment box covers the text" is tooling.

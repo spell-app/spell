@@ -313,14 +313,16 @@ The verbs a skill names that spell-app spells `spell dev ...`:
 - `epic server ...`:  in a repo without its own page server, the epic server (`epic hub`), same verbs
 - `epic window open <name> --no-open`:  writes the worktree's window file without opening VS Code
 
+What the skills leave to the repo's own `AGENTS.md` (spell-app's names its tools for each):
+- the checks to run, per package
+- its changelog, if it keeps one
+- its house style, and a skill that rewrites text to it, if it has one (spell-app's WWOD and `/fussbudget`)
+- NOT the pages' formatting:  that's the engine's, `yarn vp fmt` from spell-epic's root
+  ([src/AGENTS.md](src/AGENTS.md), "Finishing a page")
+
 Not yet (the epic page's issues and todos):
 - the epic server's review, details and comment routes serve the DEFAULT repo only (T17):
   a second repo's pages draw, but their review controls reach the default repo
-- the skills still name a few of spell-app's own tools:
-  - `spell dev vscode`
-  - `spell dev wwod check`
-  - `yarn vp fmt`
-  - the changelog
 
 ## The epic server:  one per machine
 

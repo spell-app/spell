@@ -434,8 +434,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "open",
-      usage: "<name> [--pkg <pkg>] [--color <look>]",
-      description: "open worktree <name> in a new window",
+      usage: "<name> [--pkg <pkg>] [--color <look>] [--no-open]",
+      description: "open worktree <name> in a new window (--no-open:  only write its window file)",
       example: "epic window open seo --color purple"
     },
     {
