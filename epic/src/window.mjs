@@ -497,27 +497,40 @@ export class Window {
    * Change the window file of the window this session runs in:  `change(workspace)` edits it in place (`refresh()`).
    * - VS Code takes a settings change at once:  no reload, its extensions (the Claude panel) untouched
    *   (Q11 of `windows-and-review`, tested on a throwaway window).
-   * - Returns `{ file, written }`;  throws without a window file.
+   * - Returns `{ file, written, stale }`;  throws without a window file.
+   * - A window still open from its old file, gone since `epic window move`:  its new file is changed,
+   *   and `stale` is true, since the window shows it only once reopened from there (`currentFile()`)
    */
   static editCurrent(change) {
-    const file = Window.current()?.workspaceFile
+    const { file, stale } = Window.currentFile()
     if (!file) throw new Error("this window wasn't opened from a .code-workspace file:  nothing to write its look into")
-    return { file, written: refresh(file, change) }
+    return { file, written: refresh(file, change), stale }
   }
 
-  /** `color <look>`:  give this session's window look `name` (`LOOKS`);  returns its file. */
+  /**
+   * The window file of the window this session runs in:  `{ file, stale }`, `file` `null` when there's none.
+   * - `stale`:  the window was opened from its old place, `workspaces/` (before epic `epic-eject` P13),
+   *   that file is gone, and `file` is its moved copy in the windows folder (`movedWindowFile()`)
+   */
+  static currentFile() {
+    const opened = Window.current()?.workspaceFile ?? null
+    const file = opened && movedWindowFile(opened, CONFIG.oldWindowsFolder, CONFIG.windowsFolder)
+    return { file, stale: Boolean(file) && file !== opened }
+  }
+
+  /** `color <look>`:  give this session's window look `name` (`LOOKS`);  returns `editCurrent()`'s `{ file, stale }`. */
   static color(name) {
     look(name)
-    return Window.editCurrent((workspace) => withLook((workspace.settings ??= {}), name)).file
+    return Window.editCurrent((workspace) => withLook((workspace.settings ??= {}), name))
   }
 
   /** `stay <name>` / `stay --end`:  retitle and tint this session's window for worktree `name` / put it back. */
   static stay(name, { end = false } = {}) {
     let changed = false
-    const { file } = Window.editCurrent((workspace) => {
+    const { file, stale } = Window.editCurrent((workspace) => {
       changed = end ? withoutStay(workspace) : Boolean(withStay(workspace, name))
     })
-    return { file, changed }
+    return { file, changed, stale }
   }
 
   /** `pkg`'s theme:  from its window file (Owen may have changed it), else `THEMES`. */
@@ -590,7 +603,7 @@ export class Window {
   /** The window file of the window this session runs in, parsed;  `null` when there's none (or it's JSONC). */
   static currentWorkspace() {
     try {
-      const file = Window.current()?.workspaceFile
+      const { file } = Window.currentFile()
       return file ? JSON.parse(readFileSync(file, "utf8")) : null
     } catch {
       return null
@@ -1032,16 +1045,19 @@ export class Window {
         return 0
       }
       if (command === "color") {
-        console.log(`${relative(MAIN_ROOT, Window.color(target))}:  look ${target.toLowerCase()}`)
+        const { file, stale } = Window.color(target)
+        console.log(`${relative(MAIN_ROOT, file)}:  look ${target.toLowerCase()}`)
+        if (stale) console.log(staleLine(file))
         return 0
       }
-      const { file, changed } = Window.stay(target, { end: Boolean(flags.end) })
+      const { file, changed, stale } = Window.stay(target, { end: Boolean(flags.end) })
       const what = flags.end
         ? changed
           ? "title and title bar put back"
           : "wasn't retitled:  nothing to put back"
         : `titled ⎇ ${target}`
       console.log(`${relative(MAIN_ROOT, file)}:  ${what}`)
+      if (stale) console.log(staleLine(file))
       return 0
     } catch (error) {
       console.error(error.message)
@@ -1271,6 +1287,24 @@ export function movedWorkspace(text, fromDir, toDir) {
     return `${key}${JSON.stringify(now)}`
   })
   return { text: text.slice(0, start) + rewritten + text.slice(end), folders }
+}
+
+/**
+ * Window file `file`, or its moved copy:  `file` under `oldFolder` (`workspaces/`, before epic `epic-eject` P13)
+ * and gone, and the same path under `newFolder` there;  else `file` itself.
+ * - a window opened before `epic window move` still names its old file, until it's reopened
+ */
+export function movedWindowFile(file, oldFolder, newFolder) {
+  if (existsSync(file)) return file
+  const within = relative(resolve(oldFolder), resolve(file))
+  if (!within || within.startsWith("..") || isAbsolute(within)) return file
+  const moved = join(newFolder, within)
+  return existsSync(moved) ? moved : file
+}
+
+/** The line saying a window open from its old file shows a change only once reopened from `file`. */
+function staleLine(file) {
+  return `  (this window is still open from its old file, gone since \`epic window move\`:  \`code ${file}\` reopens it, and shows this)`
 }
 
 /** Where the `[` list whose text starts at `start` ends:  its `]`, strings skipped;  the text's end if none. */

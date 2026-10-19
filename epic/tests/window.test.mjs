@@ -34,6 +34,7 @@ const {
   claudeSessions,
   launchPlan,
   look,
+  movedWindowFile,
   movedWorkspace,
   moveWindowFiles,
   parseLsof,
@@ -412,6 +413,27 @@ test("movedWorkspace():  each folder path made relative to the new place;  every
   )
   // no folders list:  as it was
   assert.deepEqual(movedWorkspace('{ "settings": {} }', from, to), { text: '{ "settings": {} }', folders: [] })
+})
+
+test("movedWindowFile():  a window file gone from the old place is read from the new one", () => {
+  const top = mkdtempSync(join(tmpdir(), "window-moved-"))
+  const from = join(top, "spell-app", "workspaces")
+  const to = join(top, "spell-app.epics", "windows")
+  const old = join(from, "ongoing", "seo.code-workspace")
+  const moved = join(to, "ongoing", "seo.code-workspace")
+  // neither there:  as it was
+  assert.equal(movedWindowFile(old, from, to), old)
+  mkdirSync(dirname(moved), { recursive: true })
+  writeFileSync(moved, "{}\n")
+  assert.equal(movedWindowFile(old, from, to), moved)
+  // the old one still there:  it's the one the window shows
+  mkdirSync(dirname(old), { recursive: true })
+  writeFileSync(old, "{}\n")
+  assert.equal(movedWindowFile(old, from, to), old)
+  // outside the old folder:  never mapped
+  const elsewhere = join(top, "elsewhere", "ongoing", "seo.code-workspace")
+  assert.equal(movedWindowFile(elsewhere, from, to), elsewhere)
+  rmSync(top, { recursive: true, force: true })
 })
 
 test("moveWindowFiles():  package and worktree windows carried over, the old ones kept;  idempotent;  never overwrites", () => {
