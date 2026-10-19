@@ -199,10 +199,19 @@ body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-me
   display: block;
 }
 /*
- * TABLES:  the expand button (`wireTableWidths()`), a `<ui-button circular basic size="mini">` in the table's actions
- * row, right of its bullhorn, over the table's top right corner (`spell-comments.css`, "A block's actions row");
- * pressed (`active`) while the table runs wide
+ * TABLES:  the expand button (`wireTableWidths()`), a `<ui-button basic size="mini">` in the table's actions row, right
+ * of its bullhorn, over the table's top right corner, centred on its header row (`spell-comments.css`, "A block's
+ * actions row");  its icon says which way it goes (`arrows left right`, `... to line` while the table runs wide)
+ * - a BARE icon (Owen, 2026-10-19:  "Should be bare icon without the circle border"):  no edge, no fill, hovered or
+ *   pressed;  hovered, the icon darkens
  */
+:is(.spell-doc-main, .site-main) .spell-block-actions ui-button.spell-table-toggle {
+  --ui-button-basic-border-width: 0px;
+  --ui-button-basic-background-hover: transparent;
+  --ui-button-basic-background-down: transparent;
+  --ui-button-basic-background-active: transparent;
+  background: transparent;
+}
 /* phone width:  the column is the page already */
 @container (max-width: 600px) {
   .spell-table-toggle {

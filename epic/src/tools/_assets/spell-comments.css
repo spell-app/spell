@@ -108,7 +108,8 @@
  * block's top right corner, the bullhorn first, then a table's expand button (Owen, 2026-10-19:  "The expand button
  * should be to the right of the bullhorn rather than in its own line").  A text block's too:  its text keeps its full
  * width, the buttons on the page's ground over the end of its first line (Owen, 2026-10-10:  overlap, not wrap).
- * - the buttons are `<ui-button circular basic size="mini">`s, as drawn:  the component centres their icons
+ * - the buttons are `<ui-button basic size="mini">`s, as drawn:  the component centres their icons;  the bullhorn
+ *   circular, the table's expand button a bare icon (`spell-doc.css`, "TABLES")
  */
 :is(.spell-doc-main, .site-main) .spell-block-actions {
   position: relative;
@@ -126,6 +127,14 @@
   display: flex;
   align-items: center;
   gap: 2px;
+}
+/*
+ * a table's:  centred on its header row instead (Owen, 2026-10-19:  "expand button is not centered vertically"), its
+ * height measured (`--spell-block-head`, `alignBlockActions()`)
+ */
+:is(.spell-doc-main, .site-main) .spell-block-actions.at-head-row > .spell-block-buttons {
+  top: var(--spell-block-gap, 0px);
+  height: var(--spell-block-head);
 }
 :is(.spell-doc-main, .site-main) .spell-block-actions ui-button {
   border-radius: 999px;

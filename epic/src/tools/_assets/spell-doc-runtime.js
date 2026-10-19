@@ -319,7 +319,7 @@ function oneLineHead(main) {
  * column, as prose does, with an EXPAND button over its top right corner that runs it the page's full width
  * (Owen, 2026-10-13:  "make tables fit in the column by default, but have an expand button ... Remember that setting
  * per table").
- * - The button is a `<ui-button circular basic>` (`.spell-table-toggle`) in the table's ACTIONS ROW
+ * - The button is a bare icon (`.spell-table-toggle`, a `<ui-button basic>` with no edge:  `spell-doc.css`) in the table's ACTIONS ROW
  *   (`addBlockAction()`), right of its bullhorn (Owen, 2026-10-19:  "The expand button should be to the right of the
  *   bullhorn rather than in its own line"):  a line of no height, so it takes no room;  a click flips it back.
  * - Expanded, the row moves with the table:  its buttons stay over the table's top right corner.
@@ -385,7 +385,7 @@ function wireTableWidths(main) {
   const toggleFor = (box) => {
     const toggle = document.createElement("ui-button")
     toggle.className = "spell-table-toggle"
-    for (const name of ["circular", "basic"]) toggle.setAttribute(name, "")
+    toggle.setAttribute("basic", "")
     toggle.setAttribute("size", "mini")
     toggle.addEventListener("click", () => flip(box))
     return toggle
