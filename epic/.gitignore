@@ -14,3 +14,10 @@ __screenshots__/
 
 # the plan-doc checks' screenshots (`src/demo/`)
 demo/shots/
+
+# the shared content folder's folders, linked in at the root (`epic shared link`, .epic/config.json5):  spell-app.epics'
+/epics
+/guides
+/pages
+/sagas
+/agents

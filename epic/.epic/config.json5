@@ -1,0 +1,39 @@
+// Where spell-epic keeps its own epic things, as any repo the engine runs in does (`EpicConfig`, src/config/).
+// - Since 2026-10-18 (Owen, closing epic `epic-workflow`):  the engine's own work is an epic too, `epic-engine`, the
+//   standing tooling home;  its code is this repo's, its pages are spell-app's.
+// - Folders are relative to the MAIN checkout:  every worktree reads the main checkout's copy of this file.
+// - `epic config [key]` prints what's in force (`--json`:  all of it).
+{
+  // The shared content repo:  spell-app's, so the engine's epics list beside spell-app's (Owen's pick).
+  "contentFolder": "../spell-app.epics",
+
+  // The branch worktrees start from and merge into.
+  "baseBranch": "main",
+
+  // Where NEW worktrees go:  one folder each, `<worktreesFolder>/<name>`, on branch `<name>`, beside the repo.
+  "worktreesFolder": "../spell-epic.worktrees",
+
+  // What makes a new worktree ready to run, from its root;  run BEFORE its window opens.
+  "installCommand": "yarn install",
+  "installOnCreate": true,
+
+  // The VS Code windows (`epic window`).
+  "windows": {
+    // No package windows here:  a worktree's window is opened from the whole repo's.
+    "default": "spell-epic",
+    "repoName": "spell-epic",
+    "contentName": "spell-app.epics",
+    // Every worktree's window:  just its own folder and the content folder.
+    "worktreeOnly": true
+  },
+
+  // Each new worktree's saved-session folder linked to the main checkout's, so every window lists every session.
+  "linkSessionFolders": true,
+
+  // The content folder's folders linked in at the root (`epic shared link`):  what an engine epic reads, and
+  // `pages`, whose home page the docs index writes after `epic new`.
+  "sharedFolders": ["epics", "guides", "pages", "sagas", "agents"],
+
+  // This repo IS the engine:  no `spell-epic` link.
+  "engineFolder": ""
+}
