@@ -9,7 +9,10 @@ import { fileURLToPath } from "node:url"
 
 import { expect, test } from "vite-plus/test"
 
-import { pageAndId } from "../../src/tools/pages.js"
+import { COMPONENT_SETS } from "$/server/page/page.types"
+
+import { EPIC_UI } from "../../src/server/server.types.ts"
+import { EPIC_UI_DOCS, pageAndId, pageAt, pagePath } from "../../src/tools/pages.js"
 
 /** `src/tools/pages.js`, run in a child for another checkout (`EPIC_CHECKOUT` is read as it loads). */
 const PAGES_JS = resolve(dirname(fileURLToPath(import.meta.url)), "../../src/tools/pages.js")
@@ -23,6 +26,16 @@ test("pageAndId():  `<page>#<id>` is the page and the id;  the two words read th
   expect(pageAndId(["guides/x.html", "cm3", "on"])).toEqual(["guides/x.html", "cm3", "on"])
   expect(pageAndId(["guides/x.html#n3"])).toEqual(["guides/x.html", "n3"])
   expect(pageAndId([])).toEqual([])
+})
+
+// epic `epic-engine` P2 (T3):  Epic UI's pages take comments;  the tools name each by its served path
+test("Epic UI's pages are the engine's `src/docs/`, named `components/epics/...` as spell-app serves them", () => {
+  const set = COMPONENT_SETS.find((each) => each.name === "Epic UI")
+  expect(set?.prefix).toBe(`/${EPIC_UI.path}`)
+  expect(set?.dir.endsWith(`/${EPIC_UI.dir}`)).toBe(true)
+  expect(EPIC_UI_DOCS).toBe(resolve(dirname(fileURLToPath(import.meta.url)), "../../src/docs"))
+  expect(pagePath(join(EPIC_UI_DOCS, "epic-item.html"))).toBe("components/epics/epic-item.html")
+  expect(pageAt("components/epics/epic-item.html")).toBe(join(EPIC_UI_DOCS, "epic-item.html"))
 })
 
 // epic `epic-eject` T11:  every template is the engine's, spell-epic's own `templates/`, whichever checkout the tools

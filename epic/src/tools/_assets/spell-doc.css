@@ -13,6 +13,9 @@
 
 @layer ui.reset, ui.tokens, ui.base, ui.components, ui.utilities, ui.theme, ui.app;
 
+/* the comments' look (bullhorns, threads, the pane, Send's pill):  its own sheet, which Epic UI's pages load too */
+@import url("spell-comments.css");
+
 /* Before UI adopts its tokens:  follow the OS already, so the page doesn't flash light. */
 @layer ui.tokens {
   :root {
@@ -110,41 +113,10 @@ body {
 *******************************/
 
 /*
- * One content column, centred;  nothing beside it (the contents column went, Owen, 2026-10-08;  the floating rail
- * too:  the navigation is a toolbar in the sticky page header since epic `airplane` P8, "Toolbar").
- * - `--spell-measure`:  the column's width, its 16px side padding included (`--spell-doc-pad-inline`), so its text is
- *   848px at most;  the wide layout below centres its reading column by it too
- */
-:root {
-  --spell-measure: 880px;
-}
-.spell-doc {
-  display: grid;
-  grid-template-columns: minmax(0, var(--spell-measure));
-  justify-content: center;
-}
-/*
- * `--spell-doc-pad-inline`:  the inline padding, as a token, so a block may run edge to edge by breaking out of it
- * (`<epic-page>`, epic `epic-components` P14;  the toolbars)
- * - little room above the page's first line, under the site header (Owen, 2026-10-10:  "Significantly less padding
- *   above";  32px before)
- * - a window's worth of empty ground below the last line (`--spell-doc-pad-end`):  the window, less the site header
- *   and the page header that stick above everything
- *   - so folding something near the page's end never makes the page shorter than where it's scrolled to:
- *     the browser would pull the page back, and what was clicked would jump down
- *   - epic `airplane` J10, Owen 2026-10-10:  "add spacer below the page, this happens more than you think";
- *     96px before.  The runtime still holds the page's height while it folds (`holdWhileFolding()`), as a second guard
- */
-.spell-doc-main {
-  --spell-doc-pad-inline: 16px;
-  --spell-doc-pad-end: max(96px, calc(100vh - var(--spell-site-header-height, 0px) - var(--spell-top, 0px)));
-  min-width: 0;
-  padding: 10px var(--spell-doc-pad-inline) var(--spell-doc-pad-end);
-}
-
-/*
- * ## The wide layout (`<body class="spell-wide">`;  epic `epic-workflow`, Owen 2026-10-12:  "This is nice for reading
- * prose, but horrible for tables").  Opt-in while Owen tries it on a few pages;  then every page's.
+ * THE WIDE LAYOUT, every page's (epic `epic-engine` P2, Owen 2026-10-19;  tried on the spell syntax guide and an epic
+ * page first, as `<body class="spell-wide">`, epic `epic-workflow`, Owen 2026-10-12:  the one centred column of
+ * everything "is nice for reading prose, but horrible for tables").  Nothing beside the column:  the contents column
+ * went (Owen, 2026-10-08), and the floating rail (a toolbar in the sticky page header since epic `airplane` P8).
  * - `<main>` runs the window's full width, with no side padding;  each kind of block places itself:
  *   - BARS (the sticky page header and its toolbar, section titles, the footer, a bottom bar like the syntax guide's
  *     Send):  their background and rule edge to edge, their contents in the reading column
@@ -152,37 +124,59 @@ body {
  *     that runs one the full width, less the page's 16px gutter, remembered per table (the runtime's
  *     `wireTableWidths()`;  Owen, 2026-10-13);  a table still scrolls inside its box when it's wider than that
  *   - everything else, PROSE and INSETS (paragraphs, lists, asides, code, messages, cards, comment threads):  the
- *     reading column, as wide as the narrow layout's text (`--spell-measure`), centred;  a paragraph keeps its 72ch
+ *     READING COLUMN, `--spell-measure` wide (880px, its 16px gutters included, so its text is 848px at most),
+ *     centred;  a paragraph keeps its 72ch
  *   - a block a page wants full width anyway:  `class="spell-full-width"`
  * - An epic page:  `<epic-page>` insets everything by `--epic-inset`, and its bands already run edge to edge (epics'
  *   `EpicPage.css`), so the inset becomes the reading column's (`--spell-column-inset`)
- * - Phone width:  the column is the window less the 16px gutter, as the narrow layout's
+ * - Phone width:  the column is the window less the 16px gutter
  * - `--spell-column-inset`:  from `<main>`'s edge to the reading column's text, at least the gutter.  Registered as a
  *   length, so it's worked out once, in px, on `<main>`, and every block inherits the same number, inside shadow roots
  *   too, however deep (a `%` would measure each block's own parent).  `100cqi`:  `.spell-doc`'s width, the window's.
+ * - `body.spell-doc-page` in front of a rule:  the weight it had as `body.spell-wide`'s, over the rules it overrides;
+ *   every page in this layout has the class.  A page still saying `spell-wide` (another branch's) is drawn the same:
+ *   nothing reads the class now.
+ * - `--spell-doc-pad-inline`:  `<main>`'s inline padding, as a token, 0 now, so a block may run edge to edge by
+ *   breaking out of it (`<epic-page>`, epic `epic-components` P14;  the toolbars);  the narrow layout's was 16px
+ * - little room above the page's first line, under the site header (Owen, 2026-10-10:  "Significantly less padding
+ *   above";  32px before):  none, the page's head is a band from the site header down (below)
+ * - a window's worth of empty ground below the last line (`--spell-doc-pad-end`):  the window, less the site header
+ *   and the page header that stick above everything
+ *   - so folding something near the page's end never makes the page shorter than where it's scrolled to:
+ *     the browser would pull the page back, and what was clicked would jump down
+ *   - epic `airplane` J10, Owen 2026-10-10:  "add spacer below the page, this happens more than you think";
+ *     96px before.  The runtime still holds the page's height while it folds (`holdWhileFolding()`), as a second guard
  */
+:root {
+  --spell-measure: 880px;
+}
 @property --spell-column-inset {
   syntax: "<length>";
   inherits: true;
   initial-value: 16px;
 }
-body.spell-wide .spell-doc {
+.spell-doc {
   container-type: inline-size;
+  display: grid;
   grid-template-columns: minmax(0, 1fr);
 }
-body.spell-wide .spell-doc-main {
+.spell-doc-main {
   --spell-gutter: 16px;
   --spell-column-inset: max(var(--spell-gutter), (100cqi - var(--spell-measure)) / 2 + var(--spell-gutter));
   --spell-doc-pad-inline: 0px;
+  --spell-doc-pad-end: max(96px, calc(100vh - var(--spell-site-header-height, 0px) - var(--spell-top, 0px)));
+  min-width: 0;
+  padding: 0 0 var(--spell-doc-pad-end);
 }
 /* PROSE and INSETS:  the reading column */
-body.spell-wide
+body.spell-doc-page
   :is(.spell-doc-main, .spell-doc-main ui-section)
   > :not(
     ui-section,
     ui-sticky,
     epic-page,
     footer,
+    .spell-filter,
     .spell-full-width,
     #choices-bar,
     epic-choices-bar,
@@ -192,6 +186,13 @@ body.spell-wide
     [slot]
   ) {
   margin-inline: var(--spell-column-inset);
+}
+/*
+ * a block whose element is `display: contents` (Spell UI's message, feed and list:  the inner box IS the block) has
+ * no box for that margin:  a box of its own here, so it sits in the column too, not edge to edge
+ */
+body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-message, ui-feed, ui-list):not([slot]) {
+  display: block;
 }
 /*
  * TABLES:  the expand button, in a zero-height bar just before each (`wireTableWidths()`), so it takes no room:  a
@@ -238,53 +239,54 @@ body.spell-wide
  * toolbar alike (Owen, 2026-10-13:  "white/ivory/white looks weird, especially when collapsed"), from right under the
  * site header
  */
-body.spell-wide .spell-doc-main {
-  padding-top: 0;
+/* a page that starts with no band (a cheatsheet's plain header, the goals pages' hero):  a little room above, as before */
+.spell-doc-main > :first-child:not(.spell-crumbs, ui-sticky, epic-page) {
+  margin-top: 10px;
 }
-/* an epic page:  its header's ivory starts right under the site header, its own padding the room above */
-body.plan-doc .spell-doc-main:not(:has(.spell-crumbs)) {
-  padding-top: 0;
-}
-body.spell-wide .spell-doc-main > .spell-crumbs {
+body.spell-doc-page .spell-doc-main > .spell-crumbs {
   margin: 0;
   padding: 10px var(--spell-column-inset) 2px;
   background: var(--spell-head-fill);
 }
-body.spell-wide .spell-doc-main .spell-page-head {
+body.spell-doc-page .spell-doc-main .spell-page-head {
   background: var(--spell-head-fill);
 }
-body.spell-wide .spell-doc-main :is(.spell-page-head, .spell-filter, footer.spell-doc-footer) {
+body.spell-doc-page .spell-doc-main :is(.spell-page-head, .spell-filter, footer.spell-doc-footer) {
   margin-inline: 0;
   padding-inline: var(--spell-column-inset);
 }
-body.spell-wide .spell-doc-main .spell-page-head > .spell-comment-mark.at-page {
-  inset-inline-end: var(--spell-column-inset);
+/*
+ * the page's bullhorn and Send where the narrow layout had them, 12px out past the column's edge:  so the Epics page's
+ * New epic pill, left of them on the title's row, still shows its seedling
+ */
+body.spell-doc-page .spell-doc-main .spell-page-head > .spell-comment-mark.at-page {
+  inset-inline-end: calc(var(--spell-column-inset) - 12px);
 }
-body.spell-wide .spell-doc-main .spell-page-head > .spell-send {
-  inset-inline-end: calc(var(--spell-column-inset) + 32px);
+body.spell-doc-page .spell-doc-main .spell-page-head > .spell-send {
+  inset-inline-end: calc(var(--spell-column-inset) + 20px);
 }
-body.spell-wide .spell-doc-main ui-section {
+body.spell-doc-page .spell-doc-main ui-section {
   --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 8px;
   --spell-fold-end: calc(var(--spell-column-inset) + 4px);
 }
-body.spell-wide .spell-doc-main ui-section ui-section {
+body.spell-doc-page .spell-doc-main ui-section ui-section {
   --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 6px;
 }
-body.spell-wide .spell-doc-main ui-section::part(title) {
+body.spell-doc-page .spell-doc-main ui-section::part(title) {
   margin-inline: 0;
 }
-body.spell-wide .spell-doc-main .spell-toolbar.spell-toolbar-titled {
+body.spell-doc-page .spell-doc-main .spell-toolbar.spell-toolbar-titled {
   --_out: var(--spell-column-inset);
 }
-body.spell-wide .spell-doc-main .spell-toolbar.spell-toolbar-alone {
+body.spell-doc-page .spell-doc-main .spell-toolbar.spell-toolbar-alone {
   margin-inline: 0;
 }
-body.spell-wide .spell-doc-main :is(#choices-bar.spell-choices-bar, epic-choices-bar) {
+body.spell-doc-page .spell-doc-main :is(#choices-bar.spell-choices-bar, epic-choices-bar) {
   margin-inline: 0;
   padding-inline: var(--spell-column-inset);
 }
 /* an epic page:  everything in `<epic-page>` sits the column's inset in from its bands */
-body.spell-wide epic-page {
+body.spell-doc-page epic-page {
   --epic-inset: var(--spell-column-inset);
 }
 
@@ -426,66 +428,6 @@ body.spell-one-line-head .spell-page-head > h1 {
 body.spell-one-line-head .spell-doc-main .spell-page-head > .spell-send {
   top: 4px;
   height: 28px;
-}
-.spell-send-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 12px;
-  border: 1px solid var(--spell-rule);
-  border-radius: 999px;
-  background: none;
-  color: var(--spell-muted);
-  font: inherit;
-  cursor: pointer;
-}
-.spell-send-button > * {
-  pointer-events: none;
-}
-.spell-send-button:hover {
-  color: var(--_tint);
-}
-.spell-send[data-state="unsent"] > .spell-send-button {
-  border: 2px dashed var(--_tint);
-  padding: 2px 11px;
-  color: var(--_tint);
-}
-.spell-send[data-state="sent"] > .spell-send-button {
-  border: 2px solid var(--_tint);
-  padding: 2px 11px;
-  color: var(--_tint);
-}
-.spell-send-button:focus-visible {
-  outline: 2px solid var(--ui-focus-color, var(--_tint));
-  outline-offset: 1px;
-}
-.spell-send-count {
-  min-width: 1.4em;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: var(--_tint);
-  color: var(--ui-blue-on, #fff);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-.spell-send-who {
-  color: var(--spell-muted);
-  font-weight: 400;
-}
-.spell-send-who[data-listening="yes"]::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-inline-end: 5px;
-  border-radius: 50%;
-  background: var(--ui-green, #21ba45);
-  vertical-align: 1px;
-}
-@media (max-width: 720px) {
-  .spell-send-who {
-    display: none;
-  }
 }
 /* the stuck headings' background reaches a few px past the column, over the cards' outer 1px borders */
 :is(ui-sticky.spell-h2 > h2, ui-sticky.spell-h3 > h3, .spell-filter, .spell-page-head) {
@@ -1004,8 +946,10 @@ pre code {
  * - its status, by the colour scheme:  new yellow (open), answered violet, done grey
  * - read only since P11:  guide comments (below) replaced the bubbles that wrote them
  */
+/* one column no wider than the group:  a folded note's one-line preview ends in "...", never past the column */
 .spell-doc-main spell-notes {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   margin: 12px 0;
 }
@@ -1191,521 +1135,6 @@ pre code {
   gap: 8px;
 }
 
-/*
- * ## Guide comments (epic `airplane`, P11):  Owen's comments on a page's blocks, from the inbox file
- * (`GuideInbox`, `src/tool/`), drawn by the runtime's "Comments" (`PageComments`).
- * - the BULLHORN (`.spell-comment-mark`):  in a section's title (`.at-section`, its `actions` slot), in an epic page
- *   block's title row (`.at-title`:  an item's, update's, aside's or code block's `actions` slot, before its own
- *   buttons;  epic `epic-workflow` P25), in the page header (`.at-page`), else (`.at-block`:  a block with no title
- *   row) a line of no height just before the block, its button over the block's top right corner;  shown only while
- *   the block is hovered (a section:  its innermost hovered one) or focused.
- *   It starts a new comment;  no count:  the block's threads are right there (Owen, 2026-10-10:  "Bullhorn to the
- *   far right is unnecessary")
- * - every comment's THREAD (`.spell-thread`, in a `.spell-comments` box), under the paragraph holding the quote, else
- *   the block:  one ivory pane that folds;  its header (chevron, bullhorn, the pane's summary, Owen's answer as a
- *   epic page item's review pills, the trash), then the messages:  his plain on the ivory, Claude's light violet, a
- *   green Done line, "Claude: thinking…";  each one's time in its top right corner;  then his reply box
- * - the comment pane (`.spell-comment-pane`):  floating, fixed on the screen;  its header, then a textarea that grows
- *   with its text (`growField()`)
- */
-.spell-doc-main .spell-comment-mark {
-  display: inline-flex;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.spell-doc-main .spell-comment-mark.at-block {
-  display: block;
-  position: relative;
-  z-index: 2;
-  height: 0;
-}
-/*
- * over the block's top right corner, a text block's too:  its text keeps its full width, the bullhorn on the page's
- * ground over the end of its first line (Owen, 2026-10-10:  overlap, not wrap)
- */
-.spell-doc-main .spell-comment-mark.at-block > ui-button {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  border-radius: 999px;
-  background: var(--spell-bg);
-}
-.spell-doc-main .spell-comment-mark:not(.at-block) {
-  position: relative;
-}
-.spell-doc-main
-  :is(
-    ui-section:hover:not(:has(ui-section:hover)) > .spell-comment-mark,
-    :is(epic-item, epic-update, epic-aside, epic-code):hover > .spell-comment-mark,
-    .spell-page-head:hover > .spell-comment-mark,
-    .spell-comment-mark:has(+ :hover),
-    .spell-comment-mark:hover,
-    .spell-comment-mark:focus-within
-  ) {
-  opacity: 1;
-}
-.spell-doc-main .spell-comments {
-  display: grid;
-  gap: 6px;
-  margin: 8px 0 12px;
-}
-/*
- * under an epic page's ITEM:  in from its edges as far as its note box is ("Your note:  a question ..."), so the thread
- * lines up with it (Owen, 2026-10-10:  "same indent as comment box"):  the item's details' padding, `EpicItem.css`
- * (`--epic-item-indent` on the left, 6px on the right)
- * - anywhere else the thread's edges are the block's it's under:  a guide's paragraph or table, an item's paragraph
- *   (inside its details already), a phase's field (its note box spans the phase's text)
- */
-.spell-doc-main epic-item + .spell-comments {
-  padding-inline: var(--epic-item-indent, 26px) 6px;
-}
-/* under a guide's paragraph:  its measure too, so both edges are the paragraph's (a list item's is inside it) */
-.spell-doc-main p + .spell-comments {
-  max-width: 72ch;
-}
-/* in an epic page item's details, its note box's edges, as above */
-.spell-doc-main epic-item p + .spell-comments {
-  max-width: none;
-}
-/*
- * a THREAD (`thread()`;  Owen, 2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane";
- * "Make the entire thing ivory"):  ONE ivory pane, the comment pane's outline and corners, whoever spoke last;  no
- * shadow:  it sits in the page, it doesn't float over it
- * - its header:  chevron, bullhorn (a green check circle once done), the summary, Owen's answer, the trash
- * - its body, while open:  the messages, 8px in on every side;  then the reply box
- */
-.spell-doc-main .spell-thread {
-  --spell-thread-violet: var(--ui-violet, #6435c9);
-  --spell-thread-green: var(--ui-green-text, var(--ui-green, #21ba45));
-  /* never wider than the column:  a folded thread's header is one line, its summary cut short */
-  min-width: 0;
-  /* the edges of what it's under:  an epic page item's note box (`.spell-comments` above), else the block's (Owen,
-     2026-10-10:  "same indent as comment box";  32px in on each side before) */
-  margin-inline: 0;
-  border: 1px solid var(--spell-rail-rule);
-  border-radius: 10px;
-  background: var(--spell-rail-bg);
-  color: var(--spell-ink);
-}
-/*
- * a reply from Claude Owen hasn't SEEN (`unseen()`;  Owen, 2026-10-10:  "make the background of the entire bullhorn
- * thread + the last claude reply orange"):  orange, our colour for "changed since you looked" -- the whole thread's
- * ground a light orange, that reply's box a stronger one;  outline and header as ever.  Seen:  he unfolds it, or
- * it's open on screen a moment, and it's ivory again.
- * - before 2026-10-10 only its outline and header were orange
- */
-.spell-doc-main .spell-thread[data-unseen] {
-  --spell-thread-orange: var(--ui-orange, #f2711c);
-  /* more orange in the dark:  13% of it on the dark ground reads as brown */
-  background: light-dark(
-    color-mix(in srgb, var(--spell-thread-orange) 13%, var(--spell-rail-bg)),
-    color-mix(in srgb, var(--spell-thread-orange) 22%, var(--spell-rail-bg))
-  );
-}
-.spell-doc-main .spell-thread[data-unseen] .spell-thread-msg[data-latest] {
-  background: light-dark(
-    color-mix(in srgb, var(--spell-thread-orange) 30%, var(--spell-rail-bg)),
-    color-mix(in srgb, var(--spell-thread-orange) 40%, var(--spell-rail-bg))
-  );
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--spell-thread-orange) 45%, transparent);
-}
-.spell-doc-main .spell-thread-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 24px;
-  padding: 2px 4px 2px 6px;
-  color: var(--spell-rail-ink);
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-.spell-doc-main button.spell-thread-fold {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  min-height: 24px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.spell-doc-main button.spell-thread-fold:focus-visible {
-  border-radius: 4px;
-  outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent));
-}
-/* `ui-icon`'s host is `display: contents`:  a span to turn, or colour */
-.spell-doc-main .spell-thread-chevron,
-.spell-doc-main .spell-thread-mark {
-  display: inline-grid;
-  flex: none;
-  place-items: center;
-  width: 14px;
-}
-.spell-doc-main .spell-thread-chevron {
-  font-size: 0.75rem;
-  transition: rotate 0.15s;
-}
-.spell-doc-main .spell-thread[data-open] .spell-thread-chevron {
-  rotate: 90deg;
-}
-@media (prefers-reduced-motion: reduce) {
-  .spell-doc-main .spell-thread-chevron {
-    transition: none;
-  }
-}
-.spell-doc-main .spell-thread[data-turn="done"] .spell-thread-mark {
-  color: var(--spell-thread-green);
-}
-/*
- * its id (`M3`;  epic `epic-workflow` P23, Owen 2026-10-10:  "use `M3` for mark 1"):  small and muted, an outline and
- * no fill, quieter than an epic page item's id chip;  Cmd / Ctrl + K takes it
- */
-.spell-doc-main .spell-thread-id {
-  flex: none;
-  padding: 1px 5px;
-  border: 1px solid var(--spell-rail-rule);
-  border-radius: 999px;
-  color: color-mix(in srgb, var(--spell-rail-ink) 65%, transparent);
-  font: 600 10px/1.2 var(--spell-mono);
-  font-style: normal;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-/* what it's on, as the pane's header says it (`headline()`) */
-.spell-doc-main .spell-thread-headline {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  font-style: italic;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/*
- * Owen's answer (`answerButtons()`):  an epic page item's review pills (`EpicReview.css`, "The line's controls"), as
- * they look there:  one grouped pill of 24px squares, the glyph centred, muted at rest, its colour under the pointer
- */
-.spell-doc-main .spell-thread-answer {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  font-size: 14px;
-  line-height: 1;
-}
-.spell-doc-main .spell-thread-answer ui-button::part(button) {
-  display: inline-grid;
-  place-items: center;
-  box-sizing: border-box;
-  width: 24px;
-  height: 24px;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  /* the page's ground under them, as on an item's line:  on the ivory, a basic button's own is see-through */
-  background: var(--spell-bg);
-  color: var(--spell-muted);
-  font-size: 12px;
-  line-height: 1;
-}
-.spell-doc-main .spell-thread-answer ui-button::part(icon) {
-  margin: 0;
-}
-.spell-doc-main .spell-thread-answer ui-button[data-color="green"] {
-  --_act: var(--ui-green, #00853a);
-}
-.spell-doc-main .spell-thread-answer ui-button[data-color="blue"] {
-  --_act: var(--ui-blue, #1a67e0);
-}
-.spell-doc-main .spell-thread-answer ui-button[data-color="grey"] {
-  --_act: var(--ui-grey, light-dark(#767676, #a0a0a0));
-}
-.spell-doc-main .spell-thread-answer ui-button:hover::part(button) {
-  box-shadow: inset 0 0 0 1.5px var(--_act);
-  color: var(--_act);
-}
-.spell-doc-main .spell-thread-body {
-  display: none;
-  gap: 2px;
-  padding: 0 6px 4px;
-}
-.spell-doc-main .spell-thread[data-open] > .spell-thread-body {
-  display: grid;
-}
-/*
- * a MESSAGE (`messagesHTML()`;  Owen, 2026-10-10:  "lose the 'claude' 'You' bit -- move the time to the top-right of
- * each bit position absolute"):  no names, the colour says who
- * - Owen's:  plain on the ivory, no box, but the same padding and (clear) border as Claude's, so the spacing is one
- * - Claude's:  a light violet box, a thin violet outline;  no thick side bar (Owen, 2026-10-10)
- * - the Done line:  green ink, a thin green outline, its check where a name would be
- * - the time over the top right corner;  a hidden copy of it floats there (`.spell-thread-room`), so the first
- *   line's text stops short of it and the rest run full width
- */
-.spell-doc-main .spell-thread-msg {
-  position: relative;
-  /* tight (Owen, 2026-10-10:  "Tighten up padding a lot") */
-  padding: 2px 6px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  /* a step under the page's text (Owen, 2026-10-10:  "Make text in comments smaller");  the times keep theirs */
-  font-size: 0.9em;
-  line-height: 1.35;
-}
-/*
- * every message but the LAST smaller still, and quieter (Owen, 2026-10-10:  "Make font smaller for "not current"
- * things -- everything other than last message");  the thinking stub and the Done line count as the last
- */
-.spell-doc-main .spell-thread-msg[data-older] {
-  font-size: 0.8em;
-}
-.spell-doc-main .spell-thread-msg[data-older] > .spell-thread-text {
-  color: color-mix(in srgb, var(--spell-ink) 72%, var(--spell-rail-bg));
-}
-/*
- * Claude's:  its outline only a faint ring, drawn as a shadow (Owen, 2026-10-10:  "lighten border around your
- * replies, make it just border-as-shadow");  the border stays, clear, so nothing moves
- */
-.spell-doc-main .spell-thread-msg:is([data-by="claude"], [data-by="thinking"]) {
-  background: color-mix(in srgb, var(--spell-thread-violet) 9%, var(--spell-bg));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--spell-thread-violet) 16%, transparent);
-}
-/*
- * Claude THINKING about it (`working`;  Owen, 2026-10-10:  "What does it look like when you're thinking?  You could
- * put in a stub and replace that when you've thought"):  Claude's box, its words violet and quiet, a turning notch
- */
-.spell-doc-main .spell-thread-msg[data-by="thinking"] .spell-thread-text {
-  color: var(--spell-thread-violet);
-  font-style: italic;
-}
-.spell-doc-main .spell-thread-msg[data-by="thinking"] .spell-thread-who {
-  font-style: normal;
-}
-.spell-doc-main .spell-thread-spin {
-  display: inline-grid;
-  place-items: center;
-  margin-right: 5px;
-  font-size: 0.8em;
-  vertical-align: -0.05em;
-  animation: spell-thread-spin 0.9s linear infinite;
-}
-@keyframes spell-thread-spin {
-  to {
-    rotate: 1turn;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .spell-doc-main .spell-thread-spin {
-    animation-duration: 3s;
-  }
-}
-.spell-doc-main .spell-thread-msg[data-by="done"] {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--spell-thread-green) 25%, transparent);
-  color: var(--spell-thread-green);
-}
-.spell-doc-main :is(.spell-thread-when, .spell-thread-room) {
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.4rem;
-  white-space: nowrap;
-}
-.spell-doc-main .spell-thread-when {
-  position: absolute;
-  top: 2px;
-  right: 6px;
-  color: var(--spell-muted);
-}
-.spell-doc-main .spell-thread-room {
-  float: right;
-  margin-left: 10px;
-  visibility: hidden;
-}
-.spell-doc-main .spell-thread-text > :first-child {
-  margin-top: 0;
-}
-.spell-doc-main .spell-thread-text > :last-child {
-  margin-bottom: 0;
-}
-.spell-doc-main .spell-thread-text > :is(p, ul, ol) {
-  margin-block: 0 3px;
-}
-.spell-doc-main .spell-thread-who {
-  font-weight: 700;
-}
-.spell-doc-main .spell-thread-text > :is(ul, ol) {
-  padding-left: 20px;
-}
-/* its block changed or moved since:  what it was on, quiet, above the messages */
-.spell-doc-main .spell-comment-moved {
-  margin: 0;
-  color: var(--spell-muted);
-  font-size: 0.85rem;
-}
-.spell-doc-main .spell-thread-check {
-  display: inline-grid;
-  place-items: center;
-  margin-right: 6px;
-}
-/* the pen:  Owen's words, while Claude hasn't taken them;  a plain icon button, as the trash */
-.spell-doc-main .spell-thread-edit {
-  font-size: 0.8rem;
-}
-/*
- * the REPLY BOX (`replyBoxFor()`), last in every open thread (Owen, 2026-10-10:  "Probably should have a comment box
- * at the bottom for me"):  the pane's field, its floppy in the lower right corner;  a line or two empty, growing
- * with its words (`growField()`)
- */
-.spell-doc-main .spell-thread-reply {
-  position: relative;
-  margin-top: 2px;
-}
-.spell-doc-main .spell-thread-reply > textarea.spell-comment-field {
-  min-height: 2lh;
-  padding: 4px 26px 4px 6px;
-  resize: none;
-}
-.spell-doc-main .spell-thread-reply > .spell-comment-saved {
-  position: absolute;
-  right: 8px;
-  bottom: 6px;
-}
-.spell-doc-main .spell-thread-reply > .spell-comment-saved[hidden] {
-  display: none;
-}
-/*
- * TOOLTIPS that show (Owen, 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do"):  in VS
- * Code's side bar (Electron 38 and up, on macOS) a `title`'s tooltip mostly shows only while the pointer is on the
- * titled element ITSELF, not on its icon inside (electron/electron#49843).  So the icons inside a comment's buttons
- * take no pointer:  it lands on the button, which carries the `title` (a `<ui-button>`'s, its inner button:
- * `titleInside()`).  A plain browser shows them either way.
- */
-.spell-doc-main :is(.spell-comment-tool, button.spell-thread-fold, .spell-comment-saved) > *,
-.spell-doc-main :is(.spell-thread-answer, .spell-comment-mark) ui-button::part(icon),
-.spell-comment-float > * {
-  pointer-events: none;
-}
-/* a comment's quoted text, on the page:  soft, under the text (`highlightQuotes()`) */
-::highlight(spell-comment-quote) {
-  background-color: color-mix(in srgb, var(--ui-yellow, #fbbd08) 28%, transparent);
-}
-/* the bullhorn floating beside selected text (in `body`, outside `main`) */
-.spell-comment-float {
-  position: fixed;
-  z-index: 1000;
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 1px solid var(--spell-rule);
-  border-radius: 999px;
-  background: var(--spell-bg);
-  color: var(--spell-ink);
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
-  cursor: pointer;
-}
-.spell-comment-float[hidden] {
-  display: none;
-}
-/*
- * the PANE (`.spell-comment-pane`, in `main`, fixed on the screen):  small, just under the selection (or the button
- * clicked), dragged by its header;  the page never scrolls for it (Owen, 2026-10-10:  "a little floating pane ...
- * don't scroll the page and lose context!").  Ivory, as the toolbar (Owen's voice), lifted off the page by a shadow
- * (Owen, 2026-10-10:  "make the modal bg beige so it stands out");  it saves as it's typed, so no buttons and no
- * dashed "not saved" border
- */
-.spell-doc-main .spell-comment-pane {
-  position: fixed;
-  z-index: 1000;
-  box-sizing: border-box;
-  width: min(380px, calc(100vw - 16px));
-  /* Owen, 2026-10-10:  "reduce padding inside bullhorn frame to 8px" */
-  padding: 8px;
-  border: 1px solid var(--spell-rail-rule);
-  border-radius: 10px;
-  background: var(--spell-rail-bg);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 22%);
-  outline: none;
-}
-/* its header:  the bullhorn, a few words of what it's on (its tooltip the whole), the floppy, ×;  drags the pane */
-.spell-doc-main .spell-comment-about {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 4px;
-  color: var(--spell-rail-ink);
-  font-size: 0.9rem;
-  cursor: move;
-  user-select: none;
-  touch-action: none;
-}
-.spell-doc-main .spell-comment-on {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  font-style: italic;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/* a comment's trash (`deleteButton()`), on its card and in the pane:  one click deletes, Undo in the toast */
-.spell-doc-main .spell-comment-delete[hidden] {
-  display: none;
-}
-/* a comment's quote on the page, under the pointer:  a click opens it */
-.spell-over-quote .spell-doc-main {
-  cursor: pointer;
-}
-/* the floppy:  saved (its tooltip the time), red when the last save failed */
-.spell-doc-main .spell-comment-saved {
-  color: var(--spell-muted);
-  font-size: 0.8rem;
-}
-.spell-doc-main .spell-comment-saved[data-failed] {
-  color: var(--ui-red, #db2828);
-}
-/* an icon button in a pane's or card's header (×, the trash, the pen):  plain, a tint under the pointer */
-.spell-doc-main .spell-comment-tool {
-  display: inline-grid;
-  flex: none;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-}
-.spell-doc-main .spell-comment-tool:hover {
-  background: var(--spell-rail-hover);
-}
-.spell-doc-main .spell-comment-tool:focus-visible {
-  outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent));
-  outline-offset: -2px;
-}
-/* a block, not inline:  no line-gap under it, so the pane's 8px is 8px at the bottom too */
-.spell-doc-main textarea.spell-comment-field {
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 4lh;
-  max-height: 50vh;
-  padding: 8px 10px;
-  border: 1px solid var(--spell-rail-rule);
-  border-radius: 6px;
-  background: var(--spell-bg);
-  color: var(--spell-ink);
-  font: inherit;
-  /* a step under the page's text, as a thread's messages (Owen, 2026-10-10:  "Make text in comments smaller") */
-  font-size: 0.9em;
-  line-height: 1.4;
-  resize: vertical;
-}
-
 /* the New epic box (outside `main`):  a textarea that grows with its text (`growField()`) */
 .spell-note-box textarea.spell-note-field {
   box-sizing: border-box;
@@ -1750,6 +1179,22 @@ pre code {
 /* ## Messages, tables, cards:  page spacing;  tables scroll inside their box at phone width */
 .spell-doc-main :is(ui-message, ui-cards, ui-accordion, ui-statistics, ui-steps, ui-tabs, ui-grid, ui-feed, ui-items) {
   margin: 16px 0;
+}
+/*
+ * a step no wider than its group, its words wrapping beside its number:  a wrapping row of steps (`ui-steps`) sizes
+ * each to its text on one line, so a long description ran past the column (cut off at its section's edge in the
+ * narrow layout, past the window in the wide one)
+ */
+.spell-doc-main ui-steps > ui-step::part(step) {
+  max-width: 100%;
+}
+.spell-doc-main ui-steps > ui-step::part(content) {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+/* tabs that don't fit the column on one row wrap onto the next, never past the window (phone width) */
+.spell-doc-main ui-tabs::part(menu) {
+  flex-wrap: wrap;
 }
 /* a code block inside a tab pane:  the tabs already space it */
 ui-tab > ui-accordion.spell-code {
@@ -2286,9 +1731,12 @@ ui-accordion.spell-aside::part(content) {
           CHEATSHEET
 *******************************/
 
-/* A page of card grids (`spell-grid`) gets a wider content column, so three cards fit;  cards as dense as the source's */
+/*
+ * A page of card grids (`spell-grid`) gets a wider reading column, so three cards fit (`<main>` works its inset out
+ * from the measure, "Layout");  cards as dense as the source's
+ */
 .spell-doc:has(ui-cards.spell-grid) {
-  grid-template-columns: minmax(0, 1080px);
+  --spell-measure: 1080px;
 }
 .spell-doc-main ui-cards.spell-grid {
   --spell-card-min: 330px;

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs"
-import { dirname, join, posix, relative } from "node:path"
+import { dirname, join, posix, relative, resolve, sep } from "node:path"
+import { fileURLToPath } from "node:url"
 
 import { PhaseIds } from "$/epics/phases"
 import { EpicConfig } from "$/epics/config/EpicConfig"
@@ -8,6 +9,8 @@ import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
 import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
 import { GUIDE_CHANGES, SeeAlso } from "$/epics/tool/SeeAlso"
+
+import { EPIC_UI } from "../server/server.types"
 
 import { targetOf } from "./BlockAnchors.js"
 import { editNotes, notesIn, type PageNote } from "./notesOnDisk"
@@ -18,6 +21,9 @@ export { GUIDE_CHANGES }
 
 /** The folders, from the content folder, whose pages take comments (`commentsRoutes.ts`). */
 const COMMENT_FOLDERS = ["guides", "pages", "epics"]
+
+/** Epic UI's folder, the engine's own (`EPIC_UI`):  its pages take comments too, in inbox files beside them. */
+const EPIC_UI_DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", EPIC_UI.dir)
 
 /** Folders under those that hold no pages of their own:  a split epic page's bodies, experiments' output. */
 const SKIPPED = /(^|\/)(parts|experiments|node_modules)(\/|$)/
@@ -41,6 +47,8 @@ const PROMPT =
  *     the page's Send (`plan-doc inbox <epic> wait`), or wait for its next `/epic review`;  a page the caller names
  *     is gathered all the same
  *   - its page notes still `new` (`<spell-note status="new">`, written before P11:  `notesOnDisk.ts`)
+ *   - Epic UI's pages too (the engine's `src/docs/`, `EPIC_UI`;  epic `epic-engine` P2):  no epic owns one, so their
+ *     comments come here;  each by its served path, `components/epics/<page>` (`pageOf()`)
  * - ONE PHASE PER PAGE:  the comments its goal, each linked back to the page and its block, quoted;
  *   a page with a phase still open (to do or under way) gets an update in it instead (`addPhaseUpdate()`):
  *   an `<epic-update>` block at the end of its description, `Update: N comments more from Owen`
@@ -57,11 +65,30 @@ export class GuideChanges {
   readonly content: string
   /** the epic gathered into:  `guide-changes`, or another (a scratch one, in a test) */
   readonly epic: string
+  /** Epic UI's folder:  the engine's `src/docs/`, or another (a test's) */
+  readonly epicUi: string
 
-  constructor({ root, epic = GUIDE_CHANGES }: { root: string; epic?: string }) {
+  constructor({ root, epic = GUIDE_CHANGES, epicUi = EPIC_UI_DOCS }: { root: string; epic?: string; epicUi?: string }) {
     this.root = root
     this.content = EpicConfig.contentOf(root)
     this.epic = epic
+    this.epicUi = epicUi
+  }
+
+  /**
+   * The page path of inbox file `inbox`'s page:  from the content folder (`guides/x.html`), or Epic UI's as served
+   * (`components/epics/epic-item.html`).
+   */
+  pageOf(inbox: string): string {
+    const inEpicUi = relative(this.epicUi, inbox)
+    const path = inEpicUi.startsWith("..") ? relative(this.content, inbox) : `${EPIC_UI.path}/${inEpicUi}`
+    return path.split(sep).join("/").replace(INBOX_FILE, ".html")
+  }
+
+  /** Page path `page`'s file (`pageOf()` turned round). */
+  fileOf(page: string): string {
+    const epicUi = `${EPIC_UI.path}/`
+    return page.startsWith(epicUi) ? join(this.epicUi, page.slice(epicUi.length)) : join(this.content, page)
   }
 
   /**
@@ -76,12 +103,12 @@ export class GuideChanges {
     )
     const found = new Map<string, PageWaiting>()
     const entry = (page: string) => {
-      if (!found.has(page)) found.set(page, { page, title: titleOf(join(this.content, page)), comments: [], notes: [] })
+      if (!found.has(page)) found.set(page, { page, title: titleOf(this.fileOf(page)), comments: [], notes: [] })
       return found.get(page)!
     }
     const owners = new SeeAlso(this.root)
     for (const inbox of this.inboxFiles()) {
-      const page = relative(this.content, inbox).replace(INBOX_FILE, ".html")
+      const page = this.pageOf(inbox)
       // another epic's page:  its comments are that epic's, unless the caller named the page
       const owner = !pages && owners.ownerOf(page)
       if (owner && owner !== this.epic) continue
@@ -201,7 +228,7 @@ export class GuideChanges {
 
   /** Mark what went into a phase as taken:  the comments in the page's inbox, the notes answered with a link. */
   private async markTaken({ page, phase, phaseId, phaseTitle, comments, notes }: Gathered): Promise<void> {
-    const file = join(this.content, page)
+    const file = this.fileOf(page)
     // the phase's id too (epic `epic-engine` I16):  its thread's link finds it after an insert moves its number
     if (comments.length)
       GuideInbox.update(GuideInbox.fileFor(file), (list) => {
@@ -220,12 +247,12 @@ export class GuideChanges {
   ////////////////
 
   /**
-   * Every docs page's inbox file (`<page>.inbox.json5` beside a `<page>.html`, never an epic page's), sorted.
+   * Every docs page's inbox file (`<page>.inbox.json5` beside a `<page>.html`, never an epic page's), sorted:  the
+   * content folder's, then Epic UI's.
    * - by its `.json5` name, also when only its old `.json` is there (`GuideInbox.read()` reads either)
    */
   inboxFiles(): string[] {
-    return COMMENT_FOLDERS.flatMap((folder) => {
-      const top = join(this.content, folder)
+    return [...COMMENT_FOLDERS.map((folder) => join(this.content, folder)), this.epicUi].flatMap((top) => {
       let names: string[]
       try {
         names = readdirSync(top, { recursive: true, encoding: "utf8" })

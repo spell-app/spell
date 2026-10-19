@@ -52,8 +52,16 @@ function epicText(): string {
   return new PlanDocFiles({ root }).read(join(root, "epics", "gc", "gc.plan.html")).toString()
 }
 
+/** The scratch checkout's Epic UI folder (the engine's `src/docs/` in real use):  one element's page. */
+const EPIC_UI = join(root, "epic-ui")
+mkdirSync(EPIC_UI)
+writeFileSync(
+  join(EPIC_UI, "epic-item.html"),
+  `<!doctype html><html><head><title>epic-item</title></head><body><main id="main" class="site-main"></main></body></html>\n`
+)
+
 describe("GuideChanges.gather()", () => {
-  const changes = new GuideChanges({ root, epic: "gc" })
+  const changes = new GuideChanges({ root, epic: "gc", epicUi: EPIC_UI })
 
   test("nothing waiting:  no epic is made", async () => {
     rmSync(join(root, "guides", "memory", "memory.html"))
@@ -124,6 +132,24 @@ describe("GuideChanges.gather()", () => {
     expect(into).toEqual({ hash: "p-memory", label: "gc · Memory" })
     const phase = files.read(doc).document.getElementById(into.hash)!
     expect(PhaseIds.labelOf(phase)).toBe("P2")
+  })
+
+  // epic `epic-engine` P2 (T3):  Epic UI's pages take comments, beside them in the engine's `src/docs/`;  no epic
+  // owns one, so they're gathered too, each page by its served path
+  test("an Epic UI page's comments:  found beside it, named `components/epics/...`, gathered into a phase, taken", async () => {
+    const inbox = GuideInbox.fileFor(join(EPIC_UI, "epic-item.html"))
+    const id = GuideInbox.update(inbox, (comments) =>
+      comments.add({ anchor: "1-example", kind: "section", label: "1. Example", excerpt: "1. Example" }, "Why two?")
+    )
+    expect(changes.inboxFiles()).toContain(inbox)
+    expect(changes.pageOf(inbox)).toBe("components/epics/epic-item.html")
+    expect(changes.fileOf("components/epics/epic-item.html")).toBe(join(EPIC_UI, "epic-item.html"))
+    expect(changes.fileOf("guides/plain.html")).toBe(join(root, "guides", "plain.html"))
+    expect(await changes.gather()).toMatchObject([
+      { page: "components/epics/epic-item.html", as: "phase", comments: [id] }
+    ])
+    expect(epicText()).toMatch(/href="\.\.\/\.\.\/components\/epics\/epic-item\.html#1-example"/)
+    expect(GuideInbox.read(inbox).comments[id]).toMatchObject({ status: "taken", taken: { epic: "gc" } })
   })
 
   // epic `epic-workflow` P13:  a page an epic owns sends its comments to that epic, never into guide-changes

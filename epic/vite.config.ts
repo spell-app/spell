@@ -11,7 +11,8 @@ import { fmtConfig, packageLint, patternLintIn } from "./vite.lint.ts"
  * - Tests:  `vitest.config.ts` beside this.
  * - Not ours to lint or format:
  *   - `src/components/__pack/`:  generated
- *   - in the docs tools' `_assets/`:  the bundle `spell dev docs update` writes (`spell-ui.js`, `lazy/`, `emoji/`),
+ *   - in the docs tools' `_assets/`:  the bundles `spell dev docs update` writes (`spell-ui.js`, `spell-comments.js`,
+ *     `lazy/`, `emoji/`),
  *     and the vendored highlight.js
  *   - `src/tools/vendor/`:  Claude Design's runtime
  *   - the spell-app checkout spell-epic uses (`.spell-app`), and the extension's build (`vscode/out`)
@@ -22,6 +23,7 @@ import { fmtConfig, packageLint, patternLintIn } from "./vite.lint.ts"
  */
 const GENERATED_ASSETS = [
   "src/tools/_assets/spell-ui.js",
+  "src/tools/_assets/spell-comments.js",
   "src/tools/_assets/lazy/**",
   "src/tools/_assets/emoji/**",
   "src/tools/_assets/highlight.min.js"
@@ -50,6 +52,7 @@ export default defineConfig({
         "vscode/out",
         "src/components/__pack",
         "src/tools/_assets/spell-ui.js",
+        "src/tools/_assets/spell-comments.js",
         "src/tools/_assets/lazy",
         "src/tools/_assets/emoji",
         "src/tools/_assets/highlight.min.js",

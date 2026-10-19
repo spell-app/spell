@@ -12,6 +12,7 @@ import {
   findBlock,
   kindOf,
   offsetIn,
+  pageHeadIn,
   quoteIn,
   targetOf,
   textOf
@@ -161,6 +162,41 @@ describe("targetOf()", () => {
       "memory",
       "",
       ""
+    ])
+  })
+})
+
+// epic `epic-engine` P2 (T3):  Epic UI's pages, in Spell UI's page shape, take comments too
+describe("a component set's page (Epic UI's, in Spell UI's page shape)", () => {
+  /** An Epic UI page's `main`:  its masthead, then its body's article of sections, a table and live examples. */
+  const SITE = `<main id="main" class="site-main">
+    <ui-segment vertical class="site-masthead"><ui-container>
+      <ui-menu class="site-page-links"><ui-item href="x">Code</ui-item></ui-menu>
+      <ui-header level="1" class="site-title">&lt;epic-item&gt;<ui-header>One item</ui-header></ui-header>
+    </ui-container></ui-segment>
+    <ui-container class="site-body"><article class="site-article">
+      <p class="lede">What it is.</p>
+      <ui-section id="1-example" header="1. Example">
+        <ul><li>Click a line.</li></ul>
+        <epic-item id="q21" title="A question"><p>Body.</p></epic-item>
+      </ui-section>
+      <ui-section id="4-attributes" header="4. Attributes">
+        <ui-table><table><tr><td>open</td></tr></table></ui-table>
+      </ui-section>
+    </article></ui-container>
+  </main>`
+
+  test("its masthead is the page header (the page's comments), never content;  its sections, lists, tables and examples are blocks", () => {
+    const main = mainOf(SITE)
+    const head = pageHeadIn(main)
+    expect(head?.classList.contains("site-masthead")).toBe(true)
+    expect(findBlock(main, { anchor: "page" }).block).toBe(head)
+    expect(blocksIn(main).map((block) => anchorOf(block, main))).toEqual([
+      "1-example",
+      "1-example#list-1",
+      "q21",
+      "4-attributes",
+      "4-attributes#table-1"
     ])
   })
 })

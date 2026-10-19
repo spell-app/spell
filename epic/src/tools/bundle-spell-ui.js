@@ -37,6 +37,15 @@
  *     and `spell-ui:lazy` points UI's loader hooks (`CodeHighlighter.engineLoader` ...) at the scripts.
  *   - A page that shows no code loads none.
  *
+ * The COMMENTS' own script (epic `epic-engine` P2, T3):  `_assets/spell-comments.js`, built after `spell-ui.js`.
+ *
+ *   node tools/bundle-spell-ui.js --comments     (only it:  it needs no UI build)
+ *
+ * - Entry `_assets/spell-comments.entry.js`:  the docs runtime's comments (`spell-doc-comments.js`) for the pages that
+ *   load Spell UI's site bundle instead of this one (Epic UI's)
+ * - A classic script (IIFE) with NO Spell UI and no Solid in it, and no global of its own:  it runs beside the page's
+ *   Spell UI, never with a second one (`checkNoSpellUI()`)
+ *
  * The DESIGN target (epic `claude-design`, P8):  a claude.ai Design System's `components/bundle.js`.
  *
  *   node tools/bundle-spell-ui.js --design [--out <dir>] [--skip-ui-build]     (yarn design:bundle)
@@ -97,6 +106,11 @@ const DESIGN_MAX_BYTES = 6_000_000
 
 const ENTRY = join(ASSETS, DESIGN ? "spell-ui.design.entry.js" : "spell-ui.entry.js")
 const OUTFILE = DESIGN ? join(resolve(argValue("--out") ?? DESIGN_OUT), "bundle.js") : join(ASSETS, "spell-ui.js")
+/** Building ONLY the comments' own script (`--comments`). */
+const COMMENTS_ONLY = args.includes("--comments")
+/** The comments' own script:  its entry, and the classic script it's built into. */
+const COMMENTS_ENTRY = join(ASSETS, "spell-comments.entry.js")
+const COMMENTS_OUT = join(ASSETS, "spell-comments.js")
 /** Page behaviour, the RUNTIME's file;  bundled as an empty module while it doesn't exist yet. */
 const PAGE_RUNTIME = join(ASSETS, "spell-doc-runtime.js")
 
@@ -295,16 +309,19 @@ const LAZY = [
   }
 ]
 
-if (!args.includes("--skip-ui-build")) {
-  buildUI()
-  if (DESIGN) buildBrand()
+if (!COMMENTS_ONLY) {
+  if (!args.includes("--skip-ui-build")) {
+    buildUI()
+    if (DESIGN) buildBrand()
+  }
+  if (!DESIGN) {
+    writeEmojiChunks()
+    await writeLazyScripts()
+  }
+  const warnings = await bundle()
+  report(warnings)
 }
-if (!DESIGN) {
-  writeEmojiChunks()
-  await writeLazyScripts()
-}
-const warnings = await bundle()
-report(warnings)
+if (!DESIGN) report(await bundleComments(), COMMENTS_OUT)
 
 ////////////////
 // ## UI build
@@ -378,6 +395,31 @@ async function bundle() {
   if (DESIGN) escapeForInlining()
   checkClassicScript()
   if (DESIGN) checkDesignBundle()
+  return result.warnings.map((warning) => `${warning.location?.file ?? ""}: ${warning.text}`)
+}
+
+/**
+ * Bundles the comments' own script, `COMMENTS_ENTRY` into `COMMENTS_OUT`, then checks it has no Spell UI or Solid in it
+ * and runs as a classic script.
+ * - no `globalName`:  `window.SpellUI` stays the page's
+ * - Returns esbuild's warnings, as text.
+ */
+async function bundleComments() {
+  const result = await build({
+    entryPoints: [COMMENTS_ENTRY],
+    outfile: COMMENTS_OUT,
+    bundle: true,
+    format: "iife",
+    platform: "browser",
+    target: "esnext",
+    supported: { "dynamic-import": false },
+    minify: true,
+    legalComments: "eof",
+    metafile: true,
+    logLevel: "silent"
+  })
+  checkNoSpellUI(result.metafile)
+  checkClassicScript(COMMENTS_OUT)
   return result.warnings.map((warning) => `${warning.location?.file ?? ""}: ${warning.text}`)
 }
 
@@ -621,6 +663,19 @@ function checkOneSolid(metafile) {
 }
 
 /**
+ * Fails if the comments' own script took in any of Spell UI, spell-solid or Solid:  the page it runs on has its own,
+ * and two copies handle every event twice (epic `epic-engine` I18).
+ */
+function checkNoSpellUI(metafile) {
+  const shared = Object.keys(metafile.inputs).filter(
+    (input) =>
+      /(?:^|\/)packages\/(?:ui|spell-solid)\//.test(realPath(resolve(input))) ||
+      /node_modules\/(?:solid-js|@solidjs)\//.test(input)
+  )
+  if (shared.length) fail(`${relative(DOCS, COMMENTS_OUT)} took in what the page shares:\n  ${shared.join("\n  ")}`)
+}
+
+/**
  * Fails if one file made it into the bundle under two paths (a link's and its real one):  two module instances, so two
  * of UI's `UIComponent`, `ShadowEvents` ... (epic `epic-engine` I18).
  */
@@ -761,12 +816,12 @@ function lazyModule() {
 // ## Output
 ////////////////
 
-/** Prints the bundle's size (raw, gzip) and any esbuild warnings. */
-function report(warnings) {
-  const code = readFileSync(OUTFILE)
+/** Prints a bundle's size (raw, gzip) and any esbuild warnings:  `file`, by default the main one. */
+function report(warnings, file = OUTFILE) {
+  const code = readFileSync(file)
   const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`
   // relative inside the checkout, else (an `--out` elsewhere) absolute
-  const shown = relative(resolve(DOCS, ".."), OUTFILE).startsWith("..") ? OUTFILE : relative(DOCS, OUTFILE)
+  const shown = relative(resolve(DOCS, ".."), file).startsWith("..") ? file : relative(DOCS, file)
   console.log(`-- ${shown}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`)
   for (const warning of warnings) console.warn(`!! ${warning}`)
 }

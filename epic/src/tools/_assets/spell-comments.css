@@ -1,0 +1,645 @@
+/*
+ * The COMMENTS' look:  the bullhorns, the comment pane, the threads, a docs page's Send pill (epic `airplane` P11;
+ * the code:  `spell-doc-comments.js`).  Its own sheet since epic `epic-engine` P2 (T3), so two kinds of page load it:
+ * - the docs pages (guides, epic pages ...):  through `spell-doc.css`, its `@import` at the top
+ * - Epic UI's pages (`/components/epics/`), which load Spell UI's site and not `spell-doc.css`:  linked by
+ *   `spell-comments.js` as it runs
+ * - so every rule is for a page's `main` of either kind:  `:is(.spell-doc-main, .site-main)`, one class's weight, as
+ *   `.spell-doc-main` alone had in `spell-doc.css`
+ * - imported FIRST, so a docs page's own rules come after these:  `spell-doc.css` keeps only where Send and the page's
+ *   bullhorn sit in its page head;  every comment element on a guide drew the same before and after the move (their
+ *   computed styles compared, 2026-10-19)
+ */
+
+/*
+ * The tokens these rules read, for a page WITHOUT `spell-doc.css` (the site's):  the same values as its `:root`, which
+ * comes later on a docs page and so wins there
+ */
+:root {
+  --spell-mono: var(--ui-font-family-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  --spell-sans: var(--ui-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif);
+  --spell-bg: var(--ui-background, Canvas);
+  --spell-ink: var(--spell-text-body, var(--ui-text-color, CanvasText));
+  --spell-muted: var(--spell-text-muted, var(--ui-text-muted, GrayText));
+  --spell-rule: var(--spell-border-subtle, var(--ui-border-color, light-dark(#e3e0d8, #34343b)));
+  --spell-doc-accent: var(--spell-text-accent, var(--ui-link, LinkText));
+  --spell-rail-bg: var(--ui-brown-background, light-dark(#f7efe2, #2c2152));
+  --spell-rail-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+  --spell-rail-hover: color-mix(in srgb, var(--spell-rail-ink) 9%, var(--spell-rail-bg));
+  --spell-rail-rule: color-mix(in srgb, var(--spell-rail-ink) 22%, transparent);
+}
+
+/*
+ * ## Send's pill (a docs page's;  where it sits:  `spell-doc.css`'s page head, or the site's masthead below)
+ */
+.spell-send-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  border: 1px solid var(--spell-rule);
+  border-radius: 999px;
+  background: none;
+  color: var(--spell-muted);
+  font: inherit;
+  cursor: pointer;
+}
+.spell-send-button > * {
+  pointer-events: none;
+}
+.spell-send-button:hover {
+  color: var(--_tint);
+}
+.spell-send[data-state="unsent"] > .spell-send-button {
+  border: 2px dashed var(--_tint);
+  padding: 2px 11px;
+  color: var(--_tint);
+}
+.spell-send[data-state="sent"] > .spell-send-button {
+  border: 2px solid var(--_tint);
+  padding: 2px 11px;
+  color: var(--_tint);
+}
+.spell-send-button:focus-visible {
+  outline: 2px solid var(--ui-focus-color, var(--_tint));
+  outline-offset: 1px;
+}
+.spell-send-count {
+  min-width: 1.4em;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--_tint);
+  color: var(--ui-blue-on, #fff);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.spell-send-who {
+  color: var(--spell-muted);
+  font-weight: 400;
+}
+.spell-send-who[data-listening="yes"]::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-inline-end: 5px;
+  border-radius: 50%;
+  background: var(--ui-green, #21ba45);
+  vertical-align: 1px;
+}
+@media (max-width: 720px) {
+  .spell-send-who {
+    display: none;
+  }
+}
+
+/*
+ * ## Guide comments (epic `airplane`, P11):  Owen's comments on a page's blocks, from the inbox file
+ * (`GuideInbox`, `src/tool/`), drawn by the runtime's "Comments" (`PageComments`).
+ * - the BULLHORN (`.spell-comment-mark`):  in a section's title (`.at-section`, its `actions` slot), in an epic page
+ *   block's title row (`.at-title`:  an item's, update's, aside's or code block's `actions` slot, before its own
+ *   buttons;  epic `epic-workflow` P25), in the page header (`.at-page`), else (`.at-block`:  a block with no title
+ *   row) a line of no height just before the block, its button over the block's top right corner;  shown only while
+ *   the block is hovered (a section:  its innermost hovered one) or focused.
+ *   It starts a new comment;  no count:  the block's threads are right there (Owen, 2026-10-10:  "Bullhorn to the
+ *   far right is unnecessary")
+ * - every comment's THREAD (`.spell-thread`, in a `.spell-comments` box), under the paragraph holding the quote, else
+ *   the block:  one ivory pane that folds;  its header (chevron, bullhorn, the pane's summary, Owen's answer as a
+ *   epic page item's review pills, the trash), then the messages:  his plain on the ivory, Claude's light violet, a
+ *   green Done line, "Claude: thinking…";  each one's time in its top right corner;  then his reply box
+ * - the comment pane (`.spell-comment-pane`):  floating, fixed on the screen;  its header, then a textarea that grows
+ *   with its text (`growField()`)
+ */
+:is(.spell-doc-main, .site-main) .spell-comment-mark {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+:is(.spell-doc-main, .site-main) .spell-comment-mark.at-block {
+  display: block;
+  position: relative;
+  z-index: 2;
+  height: 0;
+}
+/*
+ * over the block's top right corner, a text block's too:  its text keeps its full width, the bullhorn on the page's
+ * ground over the end of its first line (Owen, 2026-10-10:  overlap, not wrap)
+ */
+:is(.spell-doc-main, .site-main) .spell-comment-mark.at-block > ui-button {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  border-radius: 999px;
+  background: var(--spell-bg);
+}
+:is(.spell-doc-main, .site-main) .spell-comment-mark:not(.at-block) {
+  position: relative;
+}
+:is(.spell-doc-main, .site-main)
+  :is(
+    ui-section:hover:not(:has(ui-section:hover)) > .spell-comment-mark,
+    :is(epic-item, epic-update, epic-aside, epic-code):hover > .spell-comment-mark,
+    :is(.spell-page-head, .site-masthead):hover > .spell-comment-mark,
+    .spell-comment-mark:has(+ :hover),
+    .spell-comment-mark:hover,
+    .spell-comment-mark:focus-within
+  ) {
+  opacity: 1;
+}
+:is(.spell-doc-main, .site-main) .spell-comments {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+/*
+ * under an epic page's ITEM:  in from its edges as far as its note box is ("Your note:  a question ..."), so the thread
+ * lines up with it (Owen, 2026-10-10:  "same indent as comment box"):  the item's details' padding, `EpicItem.css`
+ * (`--epic-item-indent` on the left, 6px on the right)
+ * - anywhere else the thread's edges are the block's it's under:  a guide's paragraph or table, an item's paragraph
+ *   (inside its details already), a phase's field (its note box spans the phase's text)
+ */
+:is(.spell-doc-main, .site-main) epic-item + .spell-comments {
+  padding-inline: var(--epic-item-indent, 26px) 6px;
+}
+/* under a guide's paragraph:  its measure too, so both edges are the paragraph's (a list item's is inside it) */
+:is(.spell-doc-main, .site-main) p + .spell-comments {
+  max-width: 72ch;
+}
+/* in an epic page item's details, its note box's edges, as above */
+:is(.spell-doc-main, .site-main) epic-item p + .spell-comments {
+  max-width: none;
+}
+/*
+ * a THREAD (`thread()`;  Owen, 2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane";
+ * "Make the entire thing ivory"):  ONE ivory pane, the comment pane's outline and corners, whoever spoke last;  no
+ * shadow:  it sits in the page, it doesn't float over it
+ * - its header:  chevron, bullhorn (a green check circle once done), the summary, Owen's answer, the trash
+ * - its body, while open:  the messages, 8px in on every side;  then the reply box
+ */
+:is(.spell-doc-main, .site-main) .spell-thread {
+  --spell-thread-violet: var(--ui-violet, #6435c9);
+  --spell-thread-green: var(--ui-green-text, var(--ui-green, #21ba45));
+  /* never wider than the column:  a folded thread's header is one line, its summary cut short */
+  min-width: 0;
+  /* the edges of what it's under:  an epic page item's note box (`.spell-comments` above), else the block's (Owen,
+     2026-10-10:  "same indent as comment box";  32px in on each side before) */
+  margin-inline: 0;
+  border: 1px solid var(--spell-rail-rule);
+  border-radius: 10px;
+  background: var(--spell-rail-bg);
+  color: var(--spell-ink);
+}
+/*
+ * a reply from Claude Owen hasn't SEEN (`unseen()`;  Owen, 2026-10-10:  "make the background of the entire bullhorn
+ * thread + the last claude reply orange"):  orange, our colour for "changed since you looked" -- the whole thread's
+ * ground a light orange, that reply's box a stronger one;  outline and header as ever.  Seen:  he unfolds it, or
+ * it's open on screen a moment, and it's ivory again.
+ * - before 2026-10-10 only its outline and header were orange
+ */
+:is(.spell-doc-main, .site-main) .spell-thread[data-unseen] {
+  --spell-thread-orange: var(--ui-orange, #f2711c);
+  /* more orange in the dark:  13% of it on the dark ground reads as brown */
+  background: light-dark(
+    color-mix(in srgb, var(--spell-thread-orange) 13%, var(--spell-rail-bg)),
+    color-mix(in srgb, var(--spell-thread-orange) 22%, var(--spell-rail-bg))
+  );
+}
+:is(.spell-doc-main, .site-main) .spell-thread[data-unseen] .spell-thread-msg[data-latest] {
+  background: light-dark(
+    color-mix(in srgb, var(--spell-thread-orange) 30%, var(--spell-rail-bg)),
+    color-mix(in srgb, var(--spell-thread-orange) 40%, var(--spell-rail-bg))
+  );
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--spell-thread-orange) 45%, transparent);
+}
+:is(.spell-doc-main, .site-main) .spell-thread-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 2px 4px 2px 6px;
+  color: var(--spell-rail-ink);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+:is(.spell-doc-main, .site-main) button.spell-thread-fold {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+:is(.spell-doc-main, .site-main) button.spell-thread-fold:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent));
+}
+/* `ui-icon`'s host is `display: contents`:  a span to turn, or colour */
+:is(.spell-doc-main, .site-main) .spell-thread-chevron,
+:is(.spell-doc-main, .site-main) .spell-thread-mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 14px;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-chevron {
+  font-size: 0.75rem;
+  transition: rotate 0.15s;
+}
+:is(.spell-doc-main, .site-main) .spell-thread[data-open] .spell-thread-chevron {
+  rotate: 90deg;
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.spell-doc-main, .site-main) .spell-thread-chevron {
+    transition: none;
+  }
+}
+:is(.spell-doc-main, .site-main) .spell-thread[data-turn="done"] .spell-thread-mark {
+  color: var(--spell-thread-green);
+}
+/*
+ * its id (`M3`;  epic `epic-workflow` P23, Owen 2026-10-10:  "use `M3` for mark 1"):  small and muted, an outline and
+ * no fill, quieter than an epic page item's id chip;  Cmd / Ctrl + K takes it
+ */
+:is(.spell-doc-main, .site-main) .spell-thread-id {
+  flex: none;
+  padding: 1px 5px;
+  border: 1px solid var(--spell-rail-rule);
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--spell-rail-ink) 65%, transparent);
+  font: 600 10px/1.2 var(--spell-mono);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+/* what it's on, as the pane's header says it (`headline()`) */
+:is(.spell-doc-main, .site-main) .spell-thread-headline {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-style: italic;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/*
+ * Owen's answer (`answerButtons()`):  an epic page item's review pills (`EpicReview.css`, "The line's controls"), as
+ * they look there:  one grouped pill of 24px squares, the glyph centred, muted at rest, its colour under the pointer
+ */
+:is(.spell-doc-main, .site-main) .spell-thread-answer {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  font-size: 14px;
+  line-height: 1;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-answer ui-button::part(button) {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  /* the page's ground under them, as on an item's line:  on the ivory, a basic button's own is see-through */
+  background: var(--spell-bg);
+  color: var(--spell-muted);
+  font-size: 12px;
+  line-height: 1;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-answer ui-button::part(icon) {
+  margin: 0;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-answer ui-button[data-color="green"] {
+  --_act: var(--ui-green, #00853a);
+}
+:is(.spell-doc-main, .site-main) .spell-thread-answer ui-button[data-color="blue"] {
+  --_act: var(--ui-blue, #1a67e0);
+}
+:is(.spell-doc-main, .site-main) .spell-thread-answer ui-button[data-color="grey"] {
+  --_act: var(--ui-grey, light-dark(#767676, #a0a0a0));
+}
+:is(.spell-doc-main, .site-main) .spell-thread-answer ui-button:hover::part(button) {
+  box-shadow: inset 0 0 0 1.5px var(--_act);
+  color: var(--_act);
+}
+:is(.spell-doc-main, .site-main) .spell-thread-body {
+  display: none;
+  gap: 2px;
+  padding: 0 6px 4px;
+}
+:is(.spell-doc-main, .site-main) .spell-thread[data-open] > .spell-thread-body {
+  display: grid;
+}
+/*
+ * a MESSAGE (`messagesHTML()`;  Owen, 2026-10-10:  "lose the 'claude' 'You' bit -- move the time to the top-right of
+ * each bit position absolute"):  no names, the colour says who
+ * - Owen's:  plain on the ivory, no box, but the same padding and (clear) border as Claude's, so the spacing is one
+ * - Claude's:  a light violet box, a thin violet outline;  no thick side bar (Owen, 2026-10-10)
+ * - the Done line:  green ink, a thin green outline, its check where a name would be
+ * - the time over the top right corner;  a hidden copy of it floats there (`.spell-thread-room`), so the first
+ *   line's text stops short of it and the rest run full width
+ */
+:is(.spell-doc-main, .site-main) .spell-thread-msg {
+  position: relative;
+  /* tight (Owen, 2026-10-10:  "Tighten up padding a lot") */
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  /* a step under the page's text (Owen, 2026-10-10:  "Make text in comments smaller");  the times keep theirs */
+  font-size: 0.9em;
+  line-height: 1.35;
+}
+/*
+ * every message but the LAST smaller still, and quieter (Owen, 2026-10-10:  "Make font smaller for "not current"
+ * things -- everything other than last message");  the thinking stub and the Done line count as the last
+ */
+:is(.spell-doc-main, .site-main) .spell-thread-msg[data-older] {
+  font-size: 0.8em;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-msg[data-older] > .spell-thread-text {
+  color: color-mix(in srgb, var(--spell-ink) 72%, var(--spell-rail-bg));
+}
+/*
+ * Claude's:  its outline only a faint ring, drawn as a shadow (Owen, 2026-10-10:  "lighten border around your
+ * replies, make it just border-as-shadow");  the border stays, clear, so nothing moves
+ */
+:is(.spell-doc-main, .site-main) .spell-thread-msg:is([data-by="claude"], [data-by="thinking"]) {
+  background: color-mix(in srgb, var(--spell-thread-violet) 9%, var(--spell-bg));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--spell-thread-violet) 16%, transparent);
+}
+/*
+ * Claude THINKING about it (`working`;  Owen, 2026-10-10:  "What does it look like when you're thinking?  You could
+ * put in a stub and replace that when you've thought"):  Claude's box, its words violet and quiet, a turning notch
+ */
+:is(.spell-doc-main, .site-main) .spell-thread-msg[data-by="thinking"] .spell-thread-text {
+  color: var(--spell-thread-violet);
+  font-style: italic;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-msg[data-by="thinking"] .spell-thread-who {
+  font-style: normal;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-spin {
+  display: inline-grid;
+  place-items: center;
+  margin-right: 5px;
+  font-size: 0.8em;
+  vertical-align: -0.05em;
+  animation: spell-thread-spin 0.9s linear infinite;
+}
+@keyframes spell-thread-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.spell-doc-main, .site-main) .spell-thread-spin {
+    animation-duration: 3s;
+  }
+}
+:is(.spell-doc-main, .site-main) .spell-thread-msg[data-by="done"] {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--spell-thread-green) 25%, transparent);
+  color: var(--spell-thread-green);
+}
+:is(.spell-doc-main, .site-main) :is(.spell-thread-when, .spell-thread-room) {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4rem;
+  white-space: nowrap;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-when {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  color: var(--spell-muted);
+}
+:is(.spell-doc-main, .site-main) .spell-thread-room {
+  float: right;
+  margin-left: 10px;
+  visibility: hidden;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-text > :first-child {
+  margin-top: 0;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-text > :last-child {
+  margin-bottom: 0;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-text > :is(p, ul, ol) {
+  margin-block: 0 3px;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-who {
+  font-weight: 700;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-text > :is(ul, ol) {
+  padding-left: 20px;
+}
+/* its block changed or moved since:  what it was on, quiet, above the messages */
+:is(.spell-doc-main, .site-main) .spell-comment-moved {
+  margin: 0;
+  color: var(--spell-muted);
+  font-size: 0.85rem;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-check {
+  display: inline-grid;
+  place-items: center;
+  margin-right: 6px;
+}
+/* the pen:  Owen's words, while Claude hasn't taken them;  a plain icon button, as the trash */
+:is(.spell-doc-main, .site-main) .spell-thread-edit {
+  font-size: 0.8rem;
+}
+/*
+ * the REPLY BOX (`replyBoxFor()`), last in every open thread (Owen, 2026-10-10:  "Probably should have a comment box
+ * at the bottom for me"):  the pane's field, its floppy in the lower right corner;  a line or two empty, growing
+ * with its words (`growField()`)
+ */
+:is(.spell-doc-main, .site-main) .spell-thread-reply {
+  position: relative;
+  margin-top: 2px;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-reply > textarea.spell-comment-field {
+  min-height: 2lh;
+  padding: 4px 26px 4px 6px;
+  resize: none;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-reply > .spell-comment-saved {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+}
+:is(.spell-doc-main, .site-main) .spell-thread-reply > .spell-comment-saved[hidden] {
+  display: none;
+}
+/*
+ * TOOLTIPS that show (Owen, 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do"):  in VS
+ * Code's side bar (Electron 38 and up, on macOS) a `title`'s tooltip mostly shows only while the pointer is on the
+ * titled element ITSELF, not on its icon inside (electron/electron#49843).  So the icons inside a comment's buttons
+ * take no pointer:  it lands on the button, which carries the `title` (a `<ui-button>`'s, its inner button:
+ * `titleInside()`).  A plain browser shows them either way.
+ */
+:is(.spell-doc-main, .site-main) :is(.spell-comment-tool, button.spell-thread-fold, .spell-comment-saved) > *,
+:is(.spell-doc-main, .site-main) :is(.spell-thread-answer, .spell-comment-mark) ui-button::part(icon),
+.spell-comment-float > * {
+  pointer-events: none;
+}
+/* a comment's quoted text, on the page:  soft, under the text (`highlightQuotes()`) */
+::highlight(spell-comment-quote) {
+  background-color: color-mix(in srgb, var(--ui-yellow, #fbbd08) 28%, transparent);
+}
+/* the bullhorn floating beside selected text (in `body`, outside `main`) */
+.spell-comment-float {
+  position: fixed;
+  z-index: 1000;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--spell-rule);
+  border-radius: 999px;
+  background: var(--spell-bg);
+  color: var(--spell-ink);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
+  cursor: pointer;
+}
+.spell-comment-float[hidden] {
+  display: none;
+}
+/*
+ * the PANE (`.spell-comment-pane`, in `main`, fixed on the screen):  small, just under the selection (or the button
+ * clicked), dragged by its header;  the page never scrolls for it (Owen, 2026-10-10:  "a little floating pane ...
+ * don't scroll the page and lose context!").  Ivory, as the toolbar (Owen's voice), lifted off the page by a shadow
+ * (Owen, 2026-10-10:  "make the modal bg beige so it stands out");  it saves as it's typed, so no buttons and no
+ * dashed "not saved" border
+ */
+:is(.spell-doc-main, .site-main) .spell-comment-pane {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  width: min(380px, calc(100vw - 16px));
+  /* Owen, 2026-10-10:  "reduce padding inside bullhorn frame to 8px" */
+  padding: 8px;
+  border: 1px solid var(--spell-rail-rule);
+  border-radius: 10px;
+  background: var(--spell-rail-bg);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 22%);
+  outline: none;
+}
+/* its header:  the bullhorn, a few words of what it's on (its tooltip the whole), the floppy, ×;  drags the pane */
+:is(.spell-doc-main, .site-main) .spell-comment-about {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  color: var(--spell-rail-ink);
+  font-size: 0.9rem;
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+}
+:is(.spell-doc-main, .site-main) .spell-comment-on {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-style: italic;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* a comment's trash (`deleteButton()`), on its card and in the pane:  one click deletes, Undo in the toast */
+:is(.spell-doc-main, .site-main) .spell-comment-delete[hidden] {
+  display: none;
+}
+/* a comment's quote on the page, under the pointer:  a click opens it */
+.spell-over-quote :is(.spell-doc-main, .site-main) {
+  cursor: pointer;
+}
+/* the floppy:  saved (its tooltip the time), red when the last save failed */
+:is(.spell-doc-main, .site-main) .spell-comment-saved {
+  color: var(--spell-muted);
+  font-size: 0.8rem;
+}
+:is(.spell-doc-main, .site-main) .spell-comment-saved[data-failed] {
+  color: var(--ui-red, #db2828);
+}
+/* an icon button in a pane's or card's header (×, the trash, the pen):  plain, a tint under the pointer */
+:is(.spell-doc-main, .site-main) .spell-comment-tool {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+:is(.spell-doc-main, .site-main) .spell-comment-tool:hover {
+  background: var(--spell-rail-hover);
+}
+:is(.spell-doc-main, .site-main) .spell-comment-tool:focus-visible {
+  outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent));
+  outline-offset: -2px;
+}
+/* a block, not inline:  no line-gap under it, so the pane's 8px is 8px at the bottom too */
+:is(.spell-doc-main, .site-main) textarea.spell-comment-field {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 4lh;
+  max-height: 50vh;
+  padding: 8px 10px;
+  border: 1px solid var(--spell-rail-rule);
+  border-radius: 6px;
+  background: var(--spell-bg);
+  color: var(--spell-ink);
+  font: inherit;
+  /* a step under the page's text, as a thread's messages (Owen, 2026-10-10:  "Make text in comments smaller") */
+  font-size: 0.9em;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+/*
+ * ## On the site's pages (Epic UI's, in Spell UI's page shape):  the masthead is the page header (`pageHeadIn()`).
+ * - Its segment and container are `display: contents` hosts, so these place themselves by the column the site's
+ *   `site.css` gives its masthead and body:  `--site-gutter` in from `main`'s edges (3em), 1em below Fomantic's
+ *   computer width (992px), as there
+ * - the page's bullhorn:  over the masthead's top right corner (its box:  the site's `.site-page`, as wide and as high
+ *   as `main`), at the column's right edge, above the page's own links (`.site-page-links`)
+ * - Send:  under the title, at the column's right edge
+ * - the page's threads (`.spell-comments` after the masthead):  in the column, as the lede under them
+ */
+.site-main {
+  --_spell-site-column: var(--site-gutter, 3em);
+}
+@media (width < 992px) {
+  .site-main {
+    --_spell-site-column: 1em;
+  }
+}
+.site-main > .site-masthead > .spell-comment-mark.at-page {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: var(--_spell-site-column);
+}
+.site-main > .site-masthead > .spell-send {
+  --_tint: var(--ui-blue, #2185d0);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 12px var(--_spell-site-column) 0;
+  font: 600 13px/1.4 var(--spell-sans);
+}
+.site-main > .site-masthead + .spell-comments {
+  margin: 0 var(--_spell-site-column);
+}

@@ -50,7 +50,7 @@ export class AirplaneInbox {
         NOTE_FOLDERS.map((folder) => join(content, folder)),
         content
       ),
-      comments: guideCommentsWaiting(root, content),
+      comments: guideCommentsWaiting(root),
       details: since ? detailsAnswered(content, Date.parse(since)) : [],
       thoughts: thoughtsWaiting(root)
     })
@@ -167,13 +167,14 @@ export type EpicWaiting = {
 export type GuideCommentWaiting = IdentifiedComment & { page: string; epic?: string }
 
 /**
- * The comments still waiting on every docs page of checkout `root`'s content folder `content`, page by page, each with
- * the epic its page belongs to.
+ * The comments still waiting on every docs page of checkout `root`'s content folder, and Epic UI's, page by page, each
+ * with the epic its page belongs to.
  */
-function guideCommentsWaiting(root: string, content: string): GuideCommentWaiting[] {
+function guideCommentsWaiting(root: string): GuideCommentWaiting[] {
   const owners = new SeeAlso(root)
-  return new GuideChanges({ root }).inboxFiles().flatMap((file) => {
-    const page = relative(content, file).replace(/\.inbox\.json5?$/, ".html")
+  const changes = new GuideChanges({ root })
+  return changes.inboxFiles().flatMap((file) => {
+    const page = changes.pageOf(file)
     const epic = owners.ownerOf(page)
     return GuideInbox.read(file).commentList.waiting.map((comment) => ({ page, ...comment, ...(epic && { epic }) }))
   })

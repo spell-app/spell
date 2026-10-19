@@ -59,6 +59,18 @@ export const ENGINE_ROUTES = {
   templates: { prefix: "/templates/", dir: "templates" }
 } as const
 
+/**
+ * EPIC UI, the elements' docs set (epic `epic-workflow` P10):  the engine's `src/docs/`, served at `/components/epics/`
+ * by spell-app's page server (`COMPONENT_SETS` in `$/server/page`, its `dir` `spell-epic/src/docs`), not by an engine
+ * route.
+ * - `path`:  its pages' PAGE PATHS start with it, as served (`components/epics/epic-item.html`:  `pages.js`
+ *   `pagePath()`, `pageAt()`)
+ * - `dir`:  its folder, from the engine's checkout
+ * - its pages take comments, in inbox files beside them:  the tools find them there (`GuideChanges.inboxFiles()`;
+ *   epic `epic-engine` P2, T3)
+ */
+export const EPIC_UI = { path: "components/epics", dir: "src/docs" } as const
+
 /** The epic pack's script, as every page loads it:  `<ui-components source>`. */
 export const PACK_URL = `${ENGINE_ROUTES.pack.prefix}epics.pack.js`
 

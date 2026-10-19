@@ -17,6 +17,8 @@
   - It loads `_assets/site.js` (+ `.css`), which the page server lays over the set's folder:  the sets' build of
     Spell UI's site (`packages/ui/site/_assets/sets/`), with the set's component pack in its layout (`<ui-components>`),
     so `<epic-*>` examples draw live.
+  - And the comments, `/_epic/assets/spell-comments.js` (epic `epic-engine` P2):  the bullhorns, threads and Send of
+    the docs pages, alone, drawn with the site's own Spell UI (spell-epic's `src/tools/_assets/spell-comments.entry.js`).
   - The set's side column lists the new page once its data is rebuilt:  `yarn site:data` in the set's package
     (spell-epic, for Epic UI).
   - Sections:  nested `<ui-section id header sticky collapsible dividing collapsed>`, every one folded to start, as on
@@ -52,6 +54,8 @@
     <!-- from a set's element page:  `../_assets/`;  from its home:  `_assets/` -->
     <link rel="stylesheet" href="../components/epics/_assets/site.css" />
     <script type="module" src="../components/epics/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="{{title}}">

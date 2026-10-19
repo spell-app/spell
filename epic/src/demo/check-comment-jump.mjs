@@ -3,7 +3,8 @@
  * bullhorn and its count, Cmd / Ctrl + K on a comment's id, and the list of threads waiting on Owen under its box.
  *
  * Usage (from the repo root):
- *   node src/demo/check-comment-jump.mjs [--guide <page>] [--doc <epic>] [outDir]
+ *   node src/demo/check-comment-jump.mjs [--guide <page>] [--doc <epic>] [--bundle <spell-ui.js>] [outDir]
+ * - `--bundle`:  that file served as the pages' `spell-ui.js`, a bundle built elsewhere (a runtime not yet in `_assets/`)
  * - the pages:  a guide (default `guides/python-target.html`) and an epic page (default `epic-workflow`), served by a
  *   page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file), so the runtime is
  *   this branch's bundle;  stopped at the end
@@ -28,7 +29,7 @@
  * - re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
-import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs"
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -57,6 +58,7 @@ const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)
 const guide = flag("--guide", "guides/python-target.html")
 const epic = flag("--doc", "epic-workflow")
+const bundle = flag("--bundle", undefined)
 const out =
   args.find((arg, at) => !arg.startsWith("--") && !args[at - 1]?.startsWith("--")) ??
   mkdtempSync(join(tmpdir(), "check-comment-jump-"))
@@ -103,6 +105,10 @@ function check(what, ok, extra = "") {
  */
 async function stubbedPage(url, anchors, answered = [true, false, true]) {
   const page = await browser.newPage({ viewport: { width: 1200, height: 900 } })
+  if (bundle) {
+    const code = readFileSync(resolve(bundle))
+    await page.route("**/_epic/assets/spell-ui.js", (route) => route.fulfill({ body: code, contentType: "text/javascript" }))
+  }
   page.errors = []
   page.on("pageerror", (error) => page.errors.push(String(error)))
   await page.route("**/api/**", (route) => (route.request().method() === "POST" ? route.abort() : route.fallback()))

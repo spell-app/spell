@@ -254,9 +254,12 @@ async function guideCases(size) {
   await page.waitForFunction((id) => !document.getElementById(id)?.collapsed, target.section, { timeout: 15_000 })
   await page.waitForTimeout(150)
   const measure = `document.getElementById(${JSON.stringify(target.section)}).shadowRoot.querySelector('[part~="title"]')`
+  // on the title's words:  the title's bar runs the window's width, its words in the reading column (its padding)
   const point = await page.evaluate((measure) => {
-    const box = eval(measure).getBoundingClientRect()
-    return { x: box.left + Math.min(80, box.width / 2), y: box.top + box.height / 2 }
+    const title = eval(measure)
+    const box = title.getBoundingClientRect()
+    const start = box.left + parseFloat(getComputedStyle(title).paddingLeft)
+    return { x: start + Math.min(80, (box.right - start) / 2), y: box.top + box.height / 2 }
   }, measure)
   const watched = await watchWhile(page, () => clickAt(page, point), { measure })
   if (!(await page.evaluate((id) => document.getElementById(id).collapsed, target.section)))

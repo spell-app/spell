@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, describe, expect, it } from "vite-plus/test"
@@ -88,5 +88,21 @@ describe("EpicUISite", () => {
     expect(search.pages[1]).toMatchObject({ title: "<epic-item>", summary: "One item.", tag: "epic-item" })
     expect(search.pages[1]!.sections.map((section) => section.id)).toEqual(["examples", "attributes"])
     expect(search.pages[0]!.tag).toBeUndefined()
+  })
+})
+
+// epic `epic-engine` P2 (T3):  each page draws the comments itself, beside the site's Spell UI
+describe("Epic UI's pages", () => {
+  it("each loads the comments' own script after the site's, the template too", () => {
+    const docs = join(import.meta.dirname, "../../src/docs")
+    const pages = readdirSync(docs).filter((name) => name.endsWith(".html"))
+    const template = join(import.meta.dirname, "../../templates/component-set-docs.html")
+    expect(pages.length).toBeGreaterThan(30)
+    for (const file of [...pages.map((name) => join(docs, name)), template]) {
+      const html = readFileSync(file, "utf8")
+      const site = html.search(/_assets\/site\.js"><\/script>/)
+      const comments = html.indexOf('<script defer src="/_epic/assets/spell-comments.js"></script>')
+      expect([file, site >= 0 && comments > site]).toEqual([file, true])
+    }
   })
 })

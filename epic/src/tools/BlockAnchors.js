@@ -64,8 +64,11 @@ const OUTER_BLOCK = BLOCK_KINDS.filter(([kind]) => kind !== "section")
   .map(([, selector]) => selector)
   .join(", ")
 
-/** Not the page's own content:  its header, notes, what the runtime adds (comments, bullhorns ...). */
-const NOT_CONTENT = "spell-notes, [data-spell-added], .spell-page-head, ui-sticky.spell-h1, nav, footer"
+/**
+ * Not the page's own content:  its header (a component set's page's:  its masthead), notes, what the runtime adds
+ * (comments, bullhorns ...).
+ */
+const NOT_CONTENT = "spell-notes, [data-spell-added], .spell-page-head, ui-sticky.spell-h1, .site-masthead, nav, footer"
 
 /** An epic page's parts that aren't its text:  the log, commits, an older doc's plan changes copies. */
 const NOT_PLAN_TEXT = "epic-event, epic-commit, epic-updated[slot], [slot='status']"
@@ -95,9 +98,16 @@ export function blockAround(node, blocks) {
   return null
 }
 
-/** The sticky page header in `main` (`ui-sticky.spell-h1`, else `.spell-page-head`):  where page comments go. */
+/**
+ * The page header in `main`, where page comments go:  a docs page's sticky one (`ui-sticky.spell-h1`, else
+ * `.spell-page-head`);  a component set's page's masthead (Epic UI's, in Spell UI's page shape:  `.site-masthead`).
+ */
 export function pageHeadIn(main) {
-  return main.querySelector("ui-sticky.spell-h1") ?? main.querySelector(".spell-page-head")
+  return (
+    main.querySelector("ui-sticky.spell-h1") ??
+    main.querySelector(".spell-page-head") ??
+    main.querySelector(":scope > .site-masthead")
+  )
 }
 
 /** The nearest container with an id around `block` (never `block` itself), inside `main`;  `null` for none. */

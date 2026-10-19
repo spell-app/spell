@@ -3,7 +3,7 @@
  * (epic `epic-eject` T11:  every template is the engine's, spell-epic's `templates/`, not the repo's).
  * - no `<name>`:  the engine's templates folder (`TEMPLATES`), then the repo's own (`repoTemplates`), if it has one
  * - `<name>`:  that template's file (`templateFile()`), the repo's own first:  `durable`, `review.html`,
- *   `epics/plan-doc.md` (the epic-page writing rules), `templates/goals/index.html`
+ *   `epics/plan-doc.md` (the epic-page writing rules)
  *   - none:  says so, exit 1
  */
 import { REPO_TEMPLATES, TEMPLATES, templateFile } from "./pages.js"
