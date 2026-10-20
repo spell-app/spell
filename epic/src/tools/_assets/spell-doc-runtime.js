@@ -144,6 +144,8 @@ const EPIC_OPENERS = `${EPIC_FOLDS}, epic-item`
 
 /** Every element the outline takes for a section:  `<ui-section>`s and an epic page's folding blocks. */
 const SECTIONS = `ui-section, ${EPIC_FOLDS}`
+/** What folds, for `holdWhileFolding()`:  the sections and epic blocks, and accordions (asides, code) */
+const FOLDING = `${SECTIONS}, ui-accordion`
 
 /**
  * How long `start()` waits for an epic page's elements (the `epics` pack, loaded by `<ui-root>`) to define and draw,
@@ -2048,10 +2050,13 @@ function wireFolds(main, outline, kept) {
    *   and the browser pulls it back:  the header jumps down.  So the page keeps its height (`min-height`) until the
    *   reader scrolls back far enough for the shorter page to hold him
    * - stops after `FOLD_HOLD_MS`, or at once when the reader scrolls
+   * - ONLY a fold's `ui-close` (a section, an epic block, an accordion):  a `<ui-popup>` sends a cancelable `ui-close`
+   *   as it hides, and a hidden popup's top is 0, so holding it scrolled the page to the top (epic `epic-engine` r5)
    */
   function holdWhileFolding(event) {
     if (event.defaultPrevented || !event.cancelable || !(event.target instanceof Element)) return
     const element = event.target
+    if (!element.matches(FOLDING) || !element.getClientRects().length) return
     queueMicrotask(() => {
       const root = document.documentElement
       const before = element.getBoundingClientRect().top
