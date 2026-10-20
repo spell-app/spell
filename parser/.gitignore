@@ -10,3 +10,6 @@ __pycache__/
 .venv/
 # `agents/`:  a link to spell-util's agents/ (WWOD and the three logs), made by the top repo's setup
 /agents
+
+# the declarations each package builds for the repos above this one (`spell-types`, epic repo-split I12):  never committed
+dist-types/
