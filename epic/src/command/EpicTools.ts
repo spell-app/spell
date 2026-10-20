@@ -2,7 +2,8 @@ import { spawn } from "node:child_process"
 import { constants } from "node:os"
 import { existsSync } from "node:fs"
 import { join } from "node:path"
-import { pathToFileURL } from "node:url"
+
+import { tsxImports } from "../tools/packageDir"
 
 import { EXIT, type ToolSpec } from "./command.types"
 import { planDocArgs } from "./epicArgs"
@@ -54,11 +55,11 @@ export class EpicTools {
   }
 
   /**
-   * `node`'s arguments before the tool's own, for `spec` in checkout `root`:  the `tsx` loader if any, the script.
-   * - the loader is THIS checkout's:  a worktree's tool runs before the worktree has a `node_modules`
+   * `node`'s arguments before the tool's own, for `spec` in checkout `root`:  the `tsx` loaders if any, the script.
+   * - the loaders are THIS checkout's (`TSX_IMPORTS`):  a worktree's tool runs before the worktree has a `node_modules`
    */
   static toolArgs(spec: ToolSpec, root: string): string[] {
-    return spec.tsx ? ["--import", EpicTools.TSX_LOADER, join(root, spec.tool)] : [join(root, spec.tool)]
+    return spec.tsx ? [...EpicTools.TSX_IMPORTS, join(root, spec.tool)] : [join(root, spec.tool)]
   }
 
   /**
@@ -198,10 +199,12 @@ export class EpicTools {
   }
 
   /**
-   * This checkout's own `tsx` loader.
-   * - static:  where every tool's loader comes from
+   * This checkout's own `tsx` loader and the run-time alias hook, as `node --import` arguments (`tsxImports()`):  as
+   * this code's install resolves them (a workspace of the top `spell` install hoists them there, epic `epic-engine`
+   * P10), never `<root>/node_modules/...` by hand.
+   * - static:  where every tool's loaders come from
    */
-  static readonly TSX_LOADER = pathToFileURL(join(Git.CODE_ROOT, "node_modules", "tsx", "dist", "loader.mjs")).href
+  static readonly TSX_IMPORTS = tsxImports(Git.CODE_ROOT)
 }
 
 /** A tool `EpicTools.run()` runs, e.g. `details`. */

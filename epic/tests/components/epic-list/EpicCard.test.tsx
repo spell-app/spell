@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { expectAccessible } from "@spell-app/ui/test/A11y"
 
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-card"
-import "$/ui/components/ui-label"
-import "$/ui/components/ui-button"
+import "@spell-app/ui/ui-icon"
+import "@spell-app/ui/ui-card"
+import "@spell-app/ui/ui-label"
+import "@spell-app/ui/ui-button"
 import "$/epics/components/epic-list"
 
 /** Today, as a card's `updated` writes it. */
@@ -51,7 +51,9 @@ describe("<epic-card>", () => {
     const saga = root.querySelector(".saga")!
     expect([saga.textContent!.trim(), saga.getAttribute("title")]).toEqual(["Epic Tooling", "Epics & co"])
     const worked = root.querySelector("time")!
-    expect(worked.textContent).toBe(`${new Date("2026-10-09T14:34-04:00").getMonth() + 1}/${new Date("2026-10-09T14:34-04:00").getDate()}`)
+    expect(worked.textContent).toBe(
+      `${new Date("2026-10-09T14:34-04:00").getMonth() + 1}/${new Date("2026-10-09T14:34-04:00").getDate()}`
+    )
     expect(worked.getAttribute("title")).toMatch(/^Last worked on \d+\/\d+\/26 \d\d:\d\d$/)
     // the title is its own link, in its header
     expect((root.querySelector(".header slot") as HTMLSlotElement).assignedElements()[0]!.localName).toBe("a")
@@ -74,7 +76,9 @@ describe("<epic-card>", () => {
     await vi.waitFor(() => expect(mark(host)[1]).toBe("circle exclamation"))
     expect(mark(host)[2]).toBe("errors:  every phase done, but 1 question, 1 judgement call need you")
     host.removeAttribute("urgent")
-    await vi.waitFor(() => expect(mark(host)).toEqual(["ui-icon", "circle check", "done:  every phase done, nothing needs you"]))
+    await vi.waitFor(() =>
+      expect(mark(host)).toEqual(["ui-icon", "circle check", "done:  every phase done, nothing needs you"])
+    )
   })
 
   test("its star:  disabled from disk, saying why;  served, a click stars it at once, then on the page server", async () => {

@@ -1,7 +1,7 @@
 import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "$/ui/core"
+import { E } from "@spell-app/ui/core"
 
 import { SHOT_MAX_BYTES, type ReviewClient, type TestResult, type TestsEntry } from "$/epics/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel

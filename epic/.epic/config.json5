@@ -1,11 +1,12 @@
 // Where spell-epic keeps its own epic things, as any repo the engine runs in does (`EpicConfig`, src/config/).
 // - Since 2026-10-18 (Owen, closing epic `epic-workflow`):  the engine's own work is an epic too, `epic-engine`, the
-//   standing tooling home;  its code is this repo's, its pages are spell-app's.
+//   standing tooling home;  its code is this repo's, its pages are in the shared content folder, `spell.epics`.
 // - Folders are relative to the MAIN checkout:  every worktree reads the main checkout's copy of this file.
 // - `epic config [key]` prints what's in force (`--json`:  all of it).
 {
-  // The shared content repo:  spell-app's, so the engine's epics list beside spell-app's (Owen's pick).
-  "contentFolder": "../spell-app.epics",
+  // The shared content repo, beside the child repos in the top `spell` repo (epic `epic-engine` P10):  spell-app's
+  // too, so the engine's epics list beside spell-app's (Owen's pick).
+  "contentFolder": "../spell.epics",
 
   // The branch worktrees start from and merge into.
   "baseBranch": "main",
@@ -22,7 +23,7 @@
     // No package windows here:  a worktree's window is opened from the whole repo's.
     "default": "spell-epic",
     "repoName": "spell-epic",
-    "contentName": "spell-app.epics",
+    "contentName": "spell.epics",
     // Every worktree's window:  just its own folder and the content folder.
     "worktreeOnly": true
   },

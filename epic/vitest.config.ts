@@ -1,17 +1,16 @@
-import { realpathSync } from "node:fs"
 import { resolve } from "node:path"
-import { pathToFileURL } from "node:url"
+import { fileURLToPath } from "node:url"
 import { defineConfig, type TestProjectConfiguration, type UserConfig } from "vite-plus"
 import { playwright } from "vite-plus/test/browser-playwright"
 
 /**
- * Spell UI's own config, from spell-app's `ui` package, in the spell-app checkout spell-epic uses (`.spell-app`, the
- * root's link);  by its file:  the package's `exports` don't list it.
- * - HACK: its path in a constant, so `tsc` doesn't follow it:  type-checked here, `ui`'s config meets ITS checkout's
- *   copy of vite's types beside spell-epic's, and comparing the two runs out of stack ("Excessive stack depth
- *   comparing types 'Plugin<any>'").  Spell-app checks that file itself.
+ * Spell UI's own config, from the `@spell-app/ui` workspace (spell-ui, a child repo of the top `spell` install, epic
+ * `epic-engine` P10), by its package entry (`./vite.config.ts`).
+ * - HACK: its specifier in a constant, so `tsc` doesn't follow it:  type-checked here, `ui`'s config meets ITS repo's
+ *   view of vite's types beside spell-epic's, and comparing the two runs out of stack ("Excessive stack depth
+ *   comparing types 'Plugin<any>'").  spell-ui checks that file itself.
  */
-const UI_CONFIG = pathToFileURL(resolve(import.meta.dirname, "./.spell-app/packages/ui/vite.config.ts")).href
+const UI_CONFIG = "@spell-app/ui/vite.config.ts"
 const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConfig }
 
 /**
@@ -20,7 +19,7 @@ const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConf
  *   `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
  * - `browser` -- `components/**`:  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
  *   chromium), as Spell UI's are.  `baseConfig()`:  Spell UI's plugins (decorators BEFORE Solid), Solid dedupe,
- *   Lightning CSS;  Spell UI's test helpers come from `$/ui/test/...`
+ *   Lightning CSS;  Spell UI's test helpers come from `@spell-app/ui/test/...`
  * - NOT here:  the window script's and the extension's tests (`tests/window.test.mjs`, `tests/vscode/`), plain
  *   `node --test` (`yarn test:scripts`)
  * - `prefix` / `root`:  for a config that lists these beside others (`epics:node` / `epics:browser`), `root` set to
@@ -29,11 +28,8 @@ const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConf
 /** The tests live in tests/, at the same paths as the code in src/. */
 const TESTS = resolve(import.meta.dirname, "tests")
 
-/** spell-epic's root. */
-const REPO = import.meta.dirname
-
-/** The spell-app checkout spell-epic uses, by its real path:  the root's link `.spell-app`. */
-const SPELL_APP = realpathSync(resolve(REPO, ".spell-app"))
+/** Spell UI's test setup (`@spell-app/ui/test/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
+const UI_SETUP = fileURLToPath(import.meta.resolve("@spell-app/ui/test/setup.ts"))
 
 export function epicsProjects({
   prefix = "",
@@ -54,16 +50,16 @@ export function epicsProjects({
     {
       ...baseConfig(),
       ...(root && { root }),
-      // Spell UI's files the page fetches, not imports (its icon packs' SVGs, beside `BuiltInPacks.ts`):  they're in
-      // the spell-app checkout, outside this repo, which the test server serves only when told
-      server: { fs: { allow: [REPO, SPELL_APP] } },
+      // Spell UI's files the page fetches, not imports (its icon packs' SVGs, beside `BuiltInPacks.ts`), and the
+      // hoisted `node_modules`:  in the top `spell` repo, outside this one, which Vite's default allow list covers (the
+      // workspace root it finds above, the top's `package.json` with its `workspaces`;  epic `epic-engine` P10)
       test: {
         name: `${prefix}browser`,
         dir: TESTS,
         include: ["components/**/*.test.{ts,tsx}"],
-        // Spell UI's core first, as a page has it:  its settings for `$/spell-element` (`test/setup.ts` in spell-app's
-        // `ui`)
-        setupFiles: [resolve(import.meta.dirname, "./.spell-app/packages/ui/test/setup.ts")],
+        // Spell UI's core first, as a page has it:  its settings for `@spell-app/spell-element` (spell-ui's
+        // `test/setup.ts`)
+        setupFiles: [UI_SETUP],
         testTimeout: 10_000,
         browser: {
           enabled: true,

@@ -33,12 +33,12 @@ ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` 
 
 Not run yet:  these are the steps (Owen, 2026-10-17:  the install waits for him).
 
-1. `yarn install` here.
-   - spell-epic needs a spell-app checkout with its own `yarn install` done:  see "spell-app's packages", below.
+1. `yarn install` at the top `spell` repo, above this one:  ONE install over every child repo, spell-epic a workspace
+   of it (see "The other repos' packages", below).  Never in here alone.
 2. Add this folder as a marketplace, for the whole machine, and install the plugin from it:
 
    ```sh
-   claude plugin marketplace add /Users/owen/www/spell-app/spell-epic --scope user
+   claude plugin marketplace add /Users/owen/www/spell/spell-epic --scope user
    claude plugin install spell-epic@spell-epic --scope user
    ```
 
@@ -52,7 +52,7 @@ Not run yet:  these are the steps (Owen, 2026-10-17:  the install waits for him)
    ```
 
    - Then remove the repo's own copies of those skills
-     ([spell-app's skills folder](.spell-app/.claude/skills/), a folder per skill),
+     (spell-app's skills folder, `../spell-app/.claude/skills/`, a folder per skill),
      or they win over the links in that repo.
 4. In a terminal, outside Claude Code:  link `bin/epic` onto your `PATH`.
    - Into `~/.local/bin` here, or wherever your path looks:
@@ -61,13 +61,13 @@ Not run yet:  these are the steps (Owen, 2026-10-17:  the install waits for him)
    ln -s "$PWD/bin/epic" ~/.local/bin/epic
    ```
 
-5. Remove the repo's own copies of the hooks from [its Claude settings](.spell-app/.claude/settings.json),
+5. Remove the repo's own copies of the hooks from its Claude settings (spell-app's `../spell-app/.claude/settings.json`),
    or each runs twice.
 
 To try it in ONE session first, with nothing installed:
 
 ```sh
-claude --plugin-dir /Users/owen/www/spell-app/spell-epic
+claude --plugin-dir /Users/owen/www/spell/spell-epic
 ```
 
 ## A repo that uses it:  `.epic/config.json5`
@@ -156,7 +156,8 @@ For the morning after epic `epic-eject`'s night:  that night nothing was install
 
    - Again if `main` already has it:  the branch took two more commits spell-epic needs (T26), the page server's
      several worktrees folders (`cb93a0d6c`, J28) and the pack build's root pack (`86ef4864a`, J14).
-2. Point this repo at spell-app's main checkout (T10), here:
+2. Point this repo at spell-app's main checkout (T10), here (until epic `epic-engine` P10:  now a workspace of the top
+   `spell` install, no link):
 
    ```sh
    ln -sfn ../spell-app .spell-app && yarn install
@@ -182,8 +183,8 @@ For the morning after epic `epic-eject`'s night:  that night nothing was install
    ```
 
    - And remove spell-app's own copies of those 17 skills, in the same commit as step 6
-     ([spell-app's skills folder](.spell-app/.claude/skills/), a folder per skill).
-6. Take spell-app's own hooks out of [its Claude settings](.spell-app/.claude/settings.json) (T9),
+     (spell-app's skills folder, `.claude/skills/`, a folder per skill).
+6. Take spell-app's own hooks out of its Claude settings, `.claude/settings.json` (T9),
    or each hook runs twice.
 7. `epic` on the terminal's `PATH` (T8):
 
@@ -370,35 +371,32 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 - The app is the repo's own server, never the epic server's:  `/editor/` only finds it, or starts it (`RepoApp`).
   spell-app's is the editor its page server starts and records (spaces' `appRoutes`, `EditorServer`).
 
-## spell-app's packages
+## The other repos' packages
 
 The epic pages are drawn with Spell UI, and the tools run on spell's page server and page assembler.
-spell-epic uses those packages straight from a spell-app checkout (Q5), not from npm:
-- `.spell-app` at the root is a link to that checkout.
-  - The `@spell-app/{ui,server,assembler,util,spell-element}` dependencies are `portal:` links through it
-    (in [the root `package.json`](package.json)).
-  - So is the dev dependency `@spell-app/toolchain` (epic `repo-split` P6), what every package's configs share:
+spell-epic is a child repo of the top `spell` repo, and a WORKSPACE of its one install (epic `epic-engine` P10), not
+an npm user:
+- Its `@spell-app/{ui,server,assembler,util,spell-element}` dependencies, and the dev dependency
+  `@spell-app/toolchain`, are `workspace:*` (in [the root `package.json`](package.json)):  spell-ui, spell-server,
+  spell-element and spell-util, beside it in the top repo (its `repos.json5` lists them, and what spell-epic needs).
+  - No resolutions or Solid pins here:  the top `package.json` holds them;  the tool versions' catalog is in
+    `.yarnrc.yml`, the same as every child repo's.
+  - `@spell-app/toolchain` (spell-util's) is what every package's configs share:
     - the lint and format settings, `@spell-app/toolchain/lint` (`vite.config.ts`)
     - the TypeScript settings, `@spell-app/toolchain/tsconfig.base.json`, which `tsconfig.json` extends beside the
       alias table
     - the ambient helper types (`Prettify` ...), `@spell-app/toolchain/types`, in `tsconfig.json`'s `"types"`
+    - `spell-types`, which builds the lower repos' declarations (`yarn ts` runs `spell-types --below` first), and
+      `@spell-app/toolchain/aliases`, the run-time hook that runs their source with their own `$/` names (`bin/epic`,
+      the `tsx` scripts)
   - A file of theirs is imported by its npm name, an entry its `package.json` `exports` names
-    (`@spell-app/server/checkout`, `@spell-app/assembler/DataFile`), never by its path in `src/`
+    (`@spell-app/ui/core`, `@spell-app/server/checkout`, `@spell-app/assembler/DataFile`), never by its path
     (WWOD §4 › "Package names across repos").
-  - The alias table, `tsconfig.base.json`, maps `$/ui`, `$/server` and the rest into it.
-  - Through the CHECKOUT's link, never a package's own:
-    a package's relative imports out of itself (`ui`'s `../../vite.decorators.ts`) then land in that checkout,
-    as they do there.
-- It's tracked, `../spell-app`:  spell-app's main checkout, beside this one.
-  - Set by hand, should it point elsewhere, then `yarn install`:
-
-    ```sh
-    ln -sfn ../spell-app .spell-app
-    ```
-
-  - A worktree, one folder deeper (`spell-epic.worktrees/<name>/`), finds it through ONE link beside it,
-    `spell-epic.worktrees/spell-app -> ../spell-app`, which the worktree hook makes when it's missing
-    (`linkOutside()` in [the worktree hook](hooks/worktree.mjs);  epic `epic-engine` I13).
+    - `tsc` reads the entry's `types`, its BUILT declarations (`dist-types/`, git-ignored there);  Vite, Vitest, `tsx`
+      and node its `default`, the source.
+  - The alias table, `tsconfig.base.json`, holds spell-epic's own `$/epics` only.
+  - A tool that needs one's FOLDER (Spell UI's site bundle, its icon packs, the brand's design build) asks Node's
+    resolver, [`packageDir()`](src/tools/packageDir.ts), never a path to a sibling by hand.
 
 - The component pack's build and check are Spell UI's own pack tooling, `spell-ui-pack` (`@spell-app/ui`'s bin;
   `tools/ComponentPack.ts` there;  epic `repo-split` P5), which spell-app's CLI (`spell dev pack`) calls too.

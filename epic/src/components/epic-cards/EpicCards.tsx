@@ -1,7 +1,7 @@
 import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "$/ui/core"
+import { E } from "@spell-app/ui/core"
 import { epicStateFor } from "$/epics/list/EpicState"
 
 import { epicCardsVocabulary } from "./EpicCards.en"

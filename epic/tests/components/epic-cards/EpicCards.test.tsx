@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { expectAccessible } from "@spell-app/ui/test/A11y"
 
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-card"
-import "$/ui/components/ui-label"
-import "$/ui/components/ui-button"
+import "@spell-app/ui/ui-icon"
+import "@spell-app/ui/ui-card"
+import "@spell-app/ui/ui-label"
+import "@spell-app/ui/ui-button"
 import "$/epics/components/epic-cards"
 
 import type { SagaEpic } from "$/epics/components/epic-cards/EpicCards.types"
@@ -48,10 +48,10 @@ function groupsOf(list: Element): [string, string[]][] {
   const placed = Array.from(list.querySelectorAll("epic-card"))
     .filter((card) => getComputedStyle(card).display !== "none")
     .map((card) => [Number(getComputedStyle(card).order), card.getAttribute("epic")!] as const)
-  const headings = Array.from(list.shadowRoot!.querySelectorAll<HTMLElement>(".group-title"), (title) => [
-    Number(title.style.order),
-    title.dataset.group!
-  ] as const)
+  const headings = Array.from(
+    list.shadowRoot!.querySelectorAll<HTMLElement>(".group-title"),
+    (title) => [Number(title.style.order), title.dataset.group!] as const
+  )
   return headings.map(([at, group], i) => [
     group,
     placed

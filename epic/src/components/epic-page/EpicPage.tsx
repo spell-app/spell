@@ -1,7 +1,7 @@
 import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI } from "$/ui/core"
+import { E, UI } from "@spell-app/ui/core"
 // The file itself (`list/` has no barrel):  it has no imports, so the pack bundles it as is
 import { URGENT_SELECTOR, epicStateFor, type EpicState } from "$/epics/list/EpicState"
 

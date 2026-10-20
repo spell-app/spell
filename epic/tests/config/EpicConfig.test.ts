@@ -6,13 +6,10 @@ import JSON5 from "json5"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
-import { fakeMainCheckout, fakeWorktree } from "$/server/test/checkouts"
+import { fakeMainCheckout, fakeWorktree } from "@spell-app/server/test/checkouts"
 
-/**
- * spell-app's config, as committed:
- * in the spell-app checkout spell-epic uses (`.spell-app`, the root's link).
- */
-const REPO_CONFIG = resolve(dirname(fileURLToPath(import.meta.url)), "../../.spell-app", EpicConfig.FILE)
+/** spell-epic's own config, as committed (comments and all). */
+const REPO_CONFIG = resolve(dirname(fileURLToPath(import.meta.url)), "../..", EpicConfig.FILE)
 
 /** A main checkout, a worktree in it, and one beside it, as git leaves them. */
 const TOP = realpathSync(mkdtempSync(join(tmpdir(), "epic-config-")))

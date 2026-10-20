@@ -1,12 +1,15 @@
 import { spawnSync } from "node:child_process"
+import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { expect, test } from "vite-plus/test"
 
+import { packageDir } from "$/epics/tools/packageDir"
+
 /**
- * Spell UI's pack tooling, `spell-ui-pack` (`yarn pack:check`;  epic `repo-split` P5), from the spell-app checkout
- * spell-epic links `@spell-app/ui` from (`.spell-app`).
+ * Spell UI's pack tooling, `spell-ui-pack` (`yarn pack:check`;  epic `repo-split` P5), from the `@spell-app/ui`
+ * workspace (spell-ui), where Node's resolver finds it.
  */
-const SPELL_UI_PACK = fileURLToPath(new URL("../node_modules/@spell-app/ui/bin/spell-ui-pack.mjs", import.meta.url))
+const SPELL_UI_PACK = join(packageDir("@spell-app/ui")!, "bin/spell-ui-pack.mjs")
 
 /** spell-epic's root:  the package, whose `package.json` names the pack (`"spellPack"`, its `src/`). */
 const PACKAGE = fileURLToPath(new URL("../", import.meta.url))

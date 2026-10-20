@@ -6,7 +6,7 @@ import { EpicConfig } from "$/epics/config/EpicConfig"
 import { RealPath } from "$/epics/config/RealPath"
 import { SessionFolders } from "$/epics/config/SessionFolders"
 import { DataFile } from "$/epics/data/DataFile"
-import type { SRV } from "$/server"
+import type { SRV } from "@spell-app/server"
 
 import { planDocIn } from "../tools/pages.js"
 import {

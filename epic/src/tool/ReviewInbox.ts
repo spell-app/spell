@@ -1,4 +1,4 @@
-import { SRV } from "$/server"
+import { SRV } from "@spell-app/server"
 
 import { DataFile } from "$/epics/data/DataFile"
 

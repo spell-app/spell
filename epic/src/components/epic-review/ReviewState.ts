@@ -1,6 +1,6 @@
 import { isServer } from "@solidjs/web"
 
-import { E } from "$/spell-element"
+import { E } from "@spell-app/spell-element"
 
 import {
   NOTICE_MS,

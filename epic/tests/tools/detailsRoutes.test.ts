@@ -7,8 +7,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 
-import { PageServer } from "$/server/page"
-import { ask } from "$/server/test/serve"
+import { PageServer } from "@spell-app/server/page"
+import { ask } from "@spell-app/server/test/serve"
 
 import { AskListeners } from "../../src/tools/AskListeners"
 import detailsRoutes, { type DetailsAnswer, type DetailsDraft } from "../../src/tools/detailsRoutes"

@@ -76,8 +76,8 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { SRV } from "$/server"
-import { COMPONENTS_PREFIX, type RouteModule } from "$/server/page"
+import { SRV } from "@spell-app/server"
+import { COMPONENTS_PREFIX, type RouteModule } from "@spell-app/server/page"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 import {

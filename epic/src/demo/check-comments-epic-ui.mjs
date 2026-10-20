@@ -11,13 +11,14 @@
  * - `--set`:  which set (`SETS`, below):  `epics` (Epic UI, the engine's `src/docs/`), `ui` (Spell UI), `app` (App
  *   UI) or `brand`, at `/components/<set>/`
  *   - `--checkout`:  the spell-app checkout Spell UI's, App UI's and Brand's pages, and their site bundle, come from
- *     (default `.spell-app`):  a worktree's, to check its pages before they merge
+ *     (default the epic server's default repo's, `~/.spell-epic/repos.json5`):  a worktree's, to check its pages
+ *     before they merge;  each set's folder and bundle as its settings name them (`componentSets()`)
  * - the pages:  the set's (`--page`, default the set's `page`, then `--swap`, default its `swap`, for the router's
  *   swap), served as spell-app's page server serves them, at `/components/<set>/`, by a page server of its OWN
  *   (`DemoServer`:  this checkout's `EpicServer` on a free port, no pid file, nobody woken), with Spell UI's site
- *   bundle laid over them (the checkout's `packages/ui/site/_assets/`, built by its page server or `yarn site:bundle`
- *   in its `packages/ui`;  a checkout from before epic `epic-engine`, its `sets/`, the other sets' own build then)
- *   - Epic UI's:  the epic server's own, from `.spell-app` (`epicUiMounts()`)
+ *   bundle laid over them (the checkout's settings' set's `assets`:  spell-ui's `site/_assets/`, built by spell-app's
+ *   page server or `yarn site:bundle` in spell-ui;  else Spell UI's, the `@spell-app/ui` workspace's)
+ *   - Epic UI's:  the epic server's own (`epicUiMounts()`)
  *   - App UI's layout loads the app's element pack, `/element/spell.pack.js`, which no server here builds:  stubbed,
  *     empty, and its root's error about it let through (its live examples don't draw;  not what this checks)
  *   - `--docs`:  the folder served there;  default a SCRATCH COPY of the set's folder in `src/demo/shots/<set>-ui/`
@@ -63,7 +64,7 @@ const ROOT = resolve(HERE, "../..")
 if (!process.env.CHECK_EPIC_UI_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", "--import", import.meta.resolve("@spell-app/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,
@@ -76,6 +77,9 @@ if (!process.env.CHECK_EPIC_UI_UNDER_TSX) {
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
 const { GuideInbox } = await import("../tool/GuideInbox.ts")
+const { RepoList } = await import("../server/RepoList.ts")
+const { packageDir } = await import("../tools/packageDir.ts")
+const { componentSets, pageServerSettings } = await import("@spell-app/server/page/settings")
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)
@@ -98,7 +102,10 @@ if (!set) {
   console.error(`check-comments-epic-ui:  --set is ${Object.keys(SETS).join(", ")}, not "${setName}"`)
   process.exit(2)
 }
-const checkout = resolve(flag("--checkout", join(ROOT, ".spell-app")))
+const checkout = resolve(flag("--checkout", undefined) ?? new RepoList().defaultRepo?.checkout ?? ROOT)
+/** the set's entry in the checkout's settings (`componentSets()`):  its folder and site bundle there */
+const named = componentSets(pageServerSettings(checkout)).find((each) => each.prefix === `/components/${setName}`)
+if (named && setName !== "epics") set.dir = named.dir
 const element = flag("--page", set.page)
 const swapTo = flag("--swap", set.swap)
 const bundle = flag("--bundle", undefined)
@@ -114,12 +121,13 @@ const out =
 mkdirSync(out, { recursive: true })
 
 /**
- * Spell UI's site bundle in the checkout, as spell-app's page server lays it over a set's folder (its settings' set's
- * `assets`, `componentSets()`):  every set's since epic `epic-engine`;  a checkout from before it, which still has the sets' own build
- * (`site/_src/sets.ts`), gives the other sets its `sets/`.
+ * Spell UI's site bundle, as spell-app's page server lays it over a set's folder:  the checkout's settings' set's
+ * `assets` (`componentSets()`), every set's since epic `epic-engine`;  else Spell UI's own, the `@spell-app/ui`
+ * workspace's `site/_assets/`.
  */
-const SITE = join(checkout, "packages/ui/site")
-const BUNDLE = join(SITE, "_assets", existsSync(join(SITE, "_src/sets.ts")) && setName !== "ui" ? "sets" : "")
+const BUNDLE = named?.assets
+  ? join(checkout, named.assets)
+  : join(packageDir("@spell-app/ui") ?? "@spell-app/ui (not installed)", "site", "_assets")
 if (!existsSync(join(BUNDLE, "site.js"))) {
   console.error(`check-comments-epic-ui:  no ${BUNDLE}/site.js:  start spell-app's page server once to build it`)
   process.exit(2)

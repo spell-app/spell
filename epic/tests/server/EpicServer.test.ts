@@ -7,9 +7,9 @@ import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "$/server"
-import { componentSets, pageServerSettings, type ComponentSetSetting } from "$/server/page"
-import { ask } from "$/server/test/serve"
+import { SRV } from "@spell-app/server"
+import { componentSets, type ComponentSetSetting } from "@spell-app/server/page"
+import { ask } from "@spell-app/server/test/serve"
 
 import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "$/epics/server/EpicServer"
 import { RepoList } from "$/epics/server/RepoList"
@@ -150,13 +150,9 @@ describe("EpicServer", () => {
     expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>The Epic Elements</title>")
     expect((await ask(port, "GET", "/components/epics")).headers.location).toBe("/components/epics/")
     expect(server.fileFor("/components/epics/epic-item.html")).toBe(join(ENGINE, "src/docs/epic-item.html"))
-    // the bundle is the engine's spell-app checkout's build, not committed:  checked where it has been built;  its
-    // folder from that checkout's settings
-    const assets = componentSets(pageServerSettings(join(ENGINE, ".spell-app"))).find(
-      (set) => set.prefix === "/components/epics"
-    )!.assets
-    const bundle = join(ENGINE, ".spell-app", assets, "site.js")
-    if (existsSync(bundle)) expect(server.fileFor("/components/epics/_assets/site.js")).toBe(bundle)
+    // the bundle:  the one the DEFAULT repo's settings give Epic UI, from its checkout (`SETS`)
+    expect(server.fileFor("/components/epics/_assets/site.js")).toBe(join(top, "one", SETS.epics!.assets!, "site.js"))
+    expect((await ask(port, "GET", "/components/epics/_assets/site.js")).text).toBe(`// one ${SETS.epics!.assets}`)
     expect((await ask(port, "GET", "/components/epics/missing.html")).status).toBe(404)
   })
 

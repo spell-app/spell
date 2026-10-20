@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, describe, expect, it } from "vite-plus/test"
 
-import { keepingCommentsIn } from "$/util/node/json5"
+import { keepingCommentsIn } from "@spell-app/util/node/json5"
 import { Definitions } from "$/epics/definitions"
 
 import { EpicUISite, type EpicUIPages } from "$/epics/site/EpicUISite"

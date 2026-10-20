@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "$/spell-element"
+import { E } from "@spell-app/spell-element"
 
 // the folded panel, shared with `<epic-aside>`:  its file, not the `epic-aside` barrel (which would define it here)
 import { EpicPanel } from "$/epics/components/epic-aside/EpicPanel"

@@ -24,7 +24,7 @@ import { basename, dirname, join, resolve } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
-import { SRV } from "$/server"
+import { SRV } from "@spell-app/server"
 
 export class AgentList {
   /** the list's file */

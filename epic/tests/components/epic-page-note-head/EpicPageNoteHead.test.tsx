@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
 
-import "$/ui/components/ui-icon"
+import "@spell-app/ui/ui-icon"
 import "$/epics/components/epic-page-note-head"
 
 /** `element`'s shadow part `name`. */

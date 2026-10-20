@@ -12,8 +12,8 @@
  * - writes:  under the list's lock, all at once (`AgentList.redirect()`, through `SRV.FileOperations.save()`);
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`), as the review routes' do
  */
-import { SRV } from "$/server"
-import type { RouteModule } from "$/server/page"
+import { SRV } from "@spell-app/server"
+import type { RouteModule } from "@spell-app/server/page"
 
 import { planDoc } from "$/epics/tool/reviewRoutes"
 

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { expectAccessible } from "@spell-app/ui/test/A11y"
 
 // the page's own Spell UI, which draws the code:  the docs bundle defines it on a real page
-import "$/ui/components/ui-code"
+import "@spell-app/ui/ui-code"
 import "$/epics/components/epic-code"
 
 /** `element`'s shadow part `name`. */

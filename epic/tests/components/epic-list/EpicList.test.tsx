@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { expectAccessible } from "@spell-app/ui/test/A11y"
 
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-card"
-import "$/ui/components/ui-label"
-import "$/ui/components/ui-button"
+import "@spell-app/ui/ui-icon"
+import "@spell-app/ui/ui-card"
+import "@spell-app/ui/ui-label"
+import "@spell-app/ui/ui-button"
 import "$/epics/components/epic-list"
 
 import { SAGAS_SHOWN_KEY, SORT_KEY } from "$/epics/components/epic-list/EpicList.types"
@@ -41,7 +41,8 @@ function headings(list: Element): string[] {
 function chips(list: Element): string[] {
   return Array.from(
     list.shadowRoot!.querySelectorAll(".chip"),
-    (chip) => `${chip.textContent!.replace(/\s+/g, " ").trim()}${chip.getAttribute("aria-pressed") === "true" ? "*" : ""}`
+    (chip) =>
+      `${chip.textContent!.replace(/\s+/g, " ").trim()}${chip.getAttribute("aria-pressed") === "true" ? "*" : ""}`
   )
 }
 

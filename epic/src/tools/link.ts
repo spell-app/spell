@@ -23,7 +23,7 @@ import { existsSync, readFileSync } from "node:fs"
 
 import { EpicAddress } from "$/epics/links"
 import { EpicTargets } from "$/epics/tool/EpicTargets"
-import { SRV } from "$/server"
+import { SRV } from "@spell-app/server"
 
 import { Window } from "../window.mjs"
 import { ROOT, ensurePageServer, pageFile, parseArgs, serverUrl } from "./pages.js"

@@ -37,13 +37,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 - Made by `spell dev pack new epics --prefix epic-`.
   - Its build and check are Spell UI's own pack tooling, `spell-ui-pack`
-    ([ComponentPack.ts](../ui/tools/ComponentPack.ts), epic `repo-split` P5), which the CLI's `spell dev pack` calls
+    ([ComponentPack.ts](../../spell-ui/tools/ComponentPack.ts), epic `repo-split` P5), which the CLI's `spell dev pack` calls
     too:  every pack builds and checks the same way.
 - `components/<tag>/` (`$/epics/components`) -- one folder per element family.
   - Written exactly like a Spell UI family:
-    [ui's AGENTS.md](../ui/AGENTS.md), "Overview" and "Solid authoring".
+    [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Overview" and "Solid authoring".
   - Every file named for its COMPONENT:
-    - `<Name>.tsx`:  the component, on [`$/spell-element`](../spell-element/AGENTS.md)'s `E.UIComponent`
+    - `<Name>.tsx`:  the component, on [`@spell-app/spell-element`](../../spell-element/AGENTS.md)'s `E.UIComponent`
     - `<Name>.en.ts`:  its tag's vocabulary (topics + aka, skeleton text)
     - `<Name>.css`
     - `<Name>.types.ts`:  only what several of its files share
@@ -57,7 +57,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The lint rules hold them to it (`yarn lint`).
       They flag a hand-written effect, observer, listener, `untrack()` or timer,
       and an exported function component.
-    - Those rules:  [ui's AGENTS.md](../ui/AGENTS.md), "Solid authoring", "The lint guard".
+    - Those rules:  [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring", "The lint guard".
   - A piece several families draw is a family of its own.
     - It's drawn in their shadow roots, and never written in a doc.
     - Those pieces:  `<epic-review>`, `<epic-new-item>`, `<epic-agents>`, `<epic-thread-message>`.
@@ -345,10 +345,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `SpellUI.registerPack({ name, prefix, catalog, define })`, where `define()` imports every family barrel
   - `epics.pack.js` -- the CLASSIC script (an IIFE) a page loads, minified
     - Solid, spell-element and Spell UI's shared modules are NOT in it:
-      `solid-js`, `@solidjs/web`, `$/spell-element`, `$/ui/core`, `$/ui/forms`.
+      `solid-js`, `@solidjs/web`, `@spell-app/spell-element`, `@spell-app/ui/core`, `@spell-app/ui/forms`.
     - It takes them from the docs bundle's `globalThis.SpellUI.packModules`,
       so a page has ONE Solid and one `UIComponent`.
-      - `$/spell-element` there is Spell UI's core, which carries it.
+      - `@spell-app/spell-element` there is Spell UI's core, which carries it.
 - `tools/` -- every docs page's tooling:  the scripts, their route modules, and `_assets/` (see "Layout", "Scripts").
   - Plain `node` scripts (`.js`) beside `tsx` ones (`.ts`).
     `tsconfig.json` takes both (`allowJs`).
@@ -362,15 +362,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   2. in the same change, commit the pack, `components/__pack/`, and the docs data the build writes too, `docs/__data/`
   - `yarn pack:check` exits 1 while either is stale, and the pack's test (`pack.test.ts`) runs it:
     so `yarn test` and `yarn review` fail until you build.
-- Elements are written on `$/spell-element`:  `import { E } from "$/spell-element"` (`E.UIComponent`, `@E.state` ...).
+- Elements are written on `@spell-app/spell-element`:  `import { E } from "@spell-app/spell-element"` (`E.UIComponent`, `@E.state` ...).
   - A file that also uses Spell UI's own pieces (`E.IconGlyph`, `E.LoadableBody`, `E.Converters` ...)
-    takes `E` from `$/ui/core` instead:  the same names, and Spell UI's on top (epic `people-and-orgs` P17).
-- They import Spell UI's code ONLY from `$/ui/core` / `$/ui/forms`, as a Spell UI family does.
+    takes `E` from `@spell-app/ui/core` instead:  the same names, and Spell UI's on top (epic `people-and-orgs` P17).
+- They import Spell UI's code ONLY from `@spell-app/ui/core` / `@spell-app/ui/forms`, as a Spell UI family does.
   - Solid only from `solid-js` / `@solidjs/web`.
   - The build fails on any other Spell UI, spell-element or Solid import, which the page couldn't share:
-    a deeper `$/ui/...` or `$/spell-element/...`, say.
+    a deeper `@spell-app/ui/...` or `@spell-app/spell-element/...`, say.
   - Another shared module:
-    add it to Spell UI's `packModules` AND to `PACK_MODULES`, in [ComponentPack.ts](../ui/tools/ComponentPack.ts).
+    add it to Spell UI's `packModules` AND to `PACK_MODULES`, in [ComponentPack.ts](../../spell-ui/tools/ComponentPack.ts).
 - Every tag starts `epic-`:  `<ui-root>` knows the pack's tags by that prefix.
 - Every sheet NAME starts `epic-` too:  `elementSetup = { styleSheets: { "epic-item": itemCSS } }`.
   - Spell UI keeps ONE sheet per name for the whole page, and the first class to register a name wins.
@@ -555,7 +555,7 @@ The shared folders:
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
     - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (the checkout's `"pageServer"` `"componentSets"`, read with
-      `componentSets()` in `$/server/page`), in Spell UI's page shape.
+      `componentSets()` in `@spell-app/server/page`), in Spell UI's page shape.
       Their cards link the sets' addresses:
 
       ```text
@@ -798,7 +798,7 @@ In `tools/`:
   - The template tools (`docs new`, `epic new`, `goals new`) set it.
   - Everything that sticks or lands starts below it:
     `siteHeaderHeight()` in `spell-doc-runtime.js`, and its header's "Landing".
-  - The element itself is `$/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
+  - The element itself is `@spell-app/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
 - Pages MUST still open straight from disk (`file://`):  no ES modules, hence the one classic bundle.
   - But the openers (`docs open`, `epic open`) show them from this checkout's PAGE SERVER
@@ -1199,7 +1199,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 - No `templates/goals/` any more (epic `epic-engine` P2, T1):  the parked goal sets' templates are only in spell-app's
   `packages/goals.zip`, an older copy;  their last versions are in this repo's history, before P2.
 - [spell-ui-docs.html](../templates/spell-ui-docs.html):  a components page (one element's),
-  for Spell UI's set ([its docs](../ui/docs/)).
+  for Spell UI's set ([its docs](../../spell-ui/docs/)).
   - Fomantic's docs layout in `<ui-*>` widgets:
     nav, masthead, Examples / Usage / API / Theming tabs, an "On this page" rail.
   - It loads the UI site's bundle, NOT `spell-ui.js`.
@@ -1858,7 +1858,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - The page loads it right after `spell-ui.js`.
   - It's built as a component pack is, so the elements extend the page's own Spell UI:
     - Vite, on Spell UI's `baseConfig()`
-    - Solid, `$/spell-element` and `$/ui/core`, from the page's `SpellUI.packModules`
+    - Solid, `@spell-app/spell-element` and `@spell-app/ui/core`, from the page's `SpellUI.packModules`
   - It may import Spell UI's doc-only families (`$/ui/docs-components/<family>`), from the checkout's source.
     - Why:  `spell-ui.js` is built from `ui`'s `dist/`, which has none.
   - Rebuild it after editing the elements, or when a doc-only family it imports changes.
@@ -1876,7 +1876,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - every local link resolves
     - one target per destination
     - no nested links
-  - The rules themselves live in `$/assembler` (`AS.Linker`):  how a path resolves, which target a link gets.
+  - The rules themselves live in `@spell-app/assembler` (`AS.Linker`):  how a path resolves, which target a link gets.
   - A page in the CONTENT folder links as it's served:  laid under the checkout that serves it (epic `epic-engine` I22).
     - spell-app's pages, and spell-epic's own epics too:  spell-app serves that content, so a code name in an
       epic-engine reply links `../../../spell-epic/src/...` (spell-app's `spell-epic` link), never
@@ -1888,7 +1888,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - links to the engine's old places in spell-app (`packages/epics/...`):  the migration step `engine-links`
     - `doc-links.js` is its command line.
     - The `epic` tool links through the same code.
-  - Run it under `tsx`, never plain `node`:  it imports `$/assembler`.
+  - Run it under `tsx`, never plain `node`:  it imports `@spell-app/assembler`.
     - The tools run it through `docLinksRun()`, in [pages.js](tools/pages.js).
 - A link to a SAGA, an EPIC, a PHASE or an ITEM is written by what it points at, never by a path
   (epic `epic-workflow` P15):
@@ -1899,7 +1899,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - The runtime rewrites it to the page and its `#id` (`wireAddresses()`), in that epic's tab.
     - `doc-links.js` gives it no target and leaves it alone.
   - `doc-links.js --check` fails on a saga, page or id that isn't there, and on an epic under a saga it doesn't name
-    (the epics tool's `EpicTargets`:  `Linker`, in `$/assembler`, imports no package and skips them).
+    (the epics tool's `EpicTargets`:  `Linker`, in `@spell-app/assembler`, imports no package and skips them).
 
 ## Finishing a page
 
@@ -2060,8 +2060,8 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     - Run it after touching the comments' runtime, the toolbar or the jump dialog.
   - `node src/demo/check-comments-epic-ui.mjs [--set epics | ui | app | brand] [--checkout <spell-app>] [--page <name>]
     [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--keep] [--dark] [outDir]`, from the root:
-    - `--set ui` / `app` / `brand`:  Spell UI's, App UI's or Brand's pages, from `--checkout`'s `packages/<set>/docs/`
-      (default `.spell-app`;  a spell-app worktree's, to check its pages before they merge), with that checkout's site
+    - `--set ui` / `app` / `brand`:  Spell UI's, App UI's or Brand's pages, from the folder `--checkout`'s settings name (`componentSets()`)
+      (default the epic server's default repo's;  a spell-app worktree's, to check its pages before they merge), with that checkout's site
       bundle (Epic UI's too, when `--checkout` is named);  a tabbed page's toolbar too
     - `--set ui`:  three element pages' live examples still draw and answer a click (a dropdown, a modal, a checkbox)
     - `--dark`:  all of it in the dark colour scheme
@@ -2124,8 +2124,8 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - Text and regexes, not a DOM:  it edits only what it links.
   - Its page arguments are from where it runs:  a guide, from epics' folder, is `../../guides/x.html`.
   - `--root <checkout>`:  links resolve in another checkout (a copy of the pages beside a copy of the code).
-  - The linking itself is `$/assembler`'s `Linker`.
-  - `PlanParts.formatHTML()` is `$/assembler`'s `formatHTML()` too.
+  - The linking itself is `@spell-app/assembler`'s `Linker`.
+  - `PlanParts.formatHTML()` is `@spell-app/assembler`'s `formatHTML()` too.
 - [relocate.js](tools/relocate.js):  the docs' moves, and their repairs.
   - into the docs package's `content/`, 2026-10-04
   - out into the root folders, 2026-10-05

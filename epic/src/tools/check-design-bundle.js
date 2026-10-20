@@ -30,6 +30,8 @@ import { fileURLToPath } from "node:url"
 
 import { chromium } from "playwright"
 
+import { packageDir } from "./packageDir.ts"
+
 /** `src/tools`. */
 const TOOLS = dirname(fileURLToPath(import.meta.url))
 /** Claude Design's artboard runtime, as a Design loads it (`support.js` there). */
@@ -82,8 +84,9 @@ class Component extends DCLogic {
 </html>`
 
 const [bundleArg, outArg] = process.argv.slice(2)
+// default:  where `yarn design:bundle` writes it, in Spell UI's (the `@spell-app/ui` workspace's) design-system build
 const bundlePath = resolve(
-  bundleArg || join(TOOLS, "../../.spell-app/packages/ui/build/design-system/project/components/bundle.js")
+  bundleArg || join(packageDir("@spell-app/ui") ?? TOOLS, "build/design-system/project/components/bundle.js")
 )
 if (!existsSync(bundlePath)) {
   console.error(`!! no bundle at ${bundlePath}:  run \`yarn design:bundle\` first`)

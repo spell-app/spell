@@ -84,11 +84,13 @@ describe("EpicTools.run()", () => {
 })
 
 describe("EpicTools.toolArgs()", () => {
-  test("plain node:  just the script;  tsx:  this checkout's loader first", () => {
+  test("plain node:  just the script;  tsx:  this checkout's loader and the alias hook first", () => {
     expect(EpicTools.toolArgs(EpicTools.TOOLS.window, "/wt")).toEqual(["/wt/src/window.mjs"])
     expect(EpicTools.toolArgs(EpicTools.TOOLS.notes, "/wt")).toEqual([
       "--import",
-      EpicTools.TSX_LOADER,
+      expect.stringMatching(/\/tsx\/dist\/loader\.mjs$/),
+      "--import",
+      expect.stringMatching(/\/toolchain\/src\/aliases\.ts$/),
       "/wt/src/tools/notes.ts"
     ])
   })

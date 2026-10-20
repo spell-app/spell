@@ -1,8 +1,8 @@
 import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { E, UI } from "$/ui/core"
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import { E, UI } from "@spell-app/ui/core"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { expectAccessible } from "@spell-app/ui/test/A11y"
 
 import "$/epics/components/epic-item"
 

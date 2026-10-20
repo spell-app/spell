@@ -4,11 +4,11 @@ import { fmtConfig, packageLint, patternLintIn } from "@spell-app/toolchain/lint
 
 /**
  * spell-epic's Vite+ config:  only the `lint` / `fmt` blocks (what `vp check`, `vp lint`, `vp fmt` and the Oxc editor
- * extension read), from spell-app's toolchain package, `@spell-app/toolchain/lint` (a `portal:` dev dependency, epic
- * `repo-split` P6):  the copy of its `vite.lint.ts` that was here is gone.
+ * extension read), from the shared toolchain package, `@spell-app/toolchain/lint` (spell-util's, a workspace of the top
+ * `spell` install, epic `epic-engine` P10):  the copy of its `vite.lint.ts` that was here is gone.
  * - ONE block for the whole repo:  spell-epic is one package (epic `epic-eject` J14), so the root is the package.
  * - The pack's BUILD is Spell UI's, the same for every pack:
- *   `spell-ui-pack build` (`packages/ui/tools/ComponentPack.ts` there), on Spell UI's `baseConfig()`.
+ *   `spell-ui-pack build` (`@spell-app/ui`'s `tools/ComponentPack.ts`, in spell-ui), on Spell UI's `baseConfig()`.
  * - Tests:  `vitest.config.ts` beside this.
  * - Not ours to lint or format:
  *   - `src/components/__pack/`:  generated
@@ -16,7 +16,7 @@ import { fmtConfig, packageLint, patternLintIn } from "@spell-app/toolchain/lint
  *     `lazy/`, `emoji/`),
  *     and the vendored highlight.js
  *   - `src/tools/vendor/`:  Claude Design's runtime
- *   - the spell-app checkout spell-epic uses (`.spell-app`), and the extension's build (`vscode/out`)
+ *   - the extension's build (`vscode/out`)
  */
 /**
  * The generated files in the docs tools' `_assets/`.
@@ -48,7 +48,6 @@ export default defineConfig({
       ignorePatterns: [
         "dist",
         ".vitest",
-        ".spell-app",
         "node_modules",
         "vscode/out",
         "src/components/__pack",

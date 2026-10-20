@@ -12,8 +12,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { PageServer } from "$/server/page"
-import { ask } from "$/server/test/serve"
+import { PageServer } from "@spell-app/server/page"
+import { ask } from "@spell-app/server/test/serve"
 
 import { ReviewInbox } from "$/epics/tool/ReviewInbox"
 import reviewRoutes from "$/epics/tool/reviewRoutes"

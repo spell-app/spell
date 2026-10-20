@@ -20,20 +20,21 @@
  * - Why not in `spell-ui.js`:  that bundle is built from `ui`'s `dist/`, which has no docs families;
  *   and only the page that needs these pays for them.
  * - The entry lives in SHARED content, which has no `node_modules`:
- *   `$/ui/docs-components/...` resolves to THIS checkout's `packages/ui/src/` by alias, so the script is built from the
- *   branch that runs this.
+ *   `$/ui/docs-components/...` resolves to Spell UI's `src/` by alias (the `@spell-app/ui` workspace Node's resolver finds
+ *   from here, spell-ui), so the script is built from the checkout that runs this.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
+import { packageDir } from "./packageDir.ts"
 import { parseArgs } from "./pages.js"
 
 /** `src`, the folder of the docs tools (`tools/`). */
 const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 
-/** `packages/ui`:  its Vite config (`baseConfig()`) and the docs families' source. */
-const UI_DIR = join(DOCS, "../.spell-app/packages/ui")
+/** Spell UI (`@spell-app/ui`, spell-ui):  its Vite config (`baseConfig()`) and the docs families' source. */
+const UI_DIR = packageDir("@spell-app/ui") ?? join(DOCS, "@spell-app/ui (not installed)")
 
 /**
  * The modules a script SHARES with the page instead of bundling:
@@ -41,7 +42,13 @@ const UI_DIR = join(DOCS, "../.spell-app/packages/ui")
  * - The same list as the pack build's `PACK_MODULES` (`packages/cli/src/dev/packBuild.ts`):  keep them in step.
  *   Not imported from there:  `packBuild.ts` reaches `$/util`'s barrel, which this package's `tsc` can't check.
  */
-const PACK_MODULES = ["solid-js", "@solidjs/web", "$/spell-element", "$/ui/core", "$/ui/forms"]
+const PACK_MODULES = [
+  "solid-js",
+  "@solidjs/web",
+  "@spell-app/spell-element",
+  "@spell-app/ui/core",
+  "@spell-app/ui/forms"
+]
 
 /** Imports bundled from `ui`'s source:  the doc-only families and what they import of `ui` beyond the core. */
 const UI_SOURCE = /^\$\/ui\/(docs-components|components\/components\.types)(\/|$)/

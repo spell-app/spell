@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI } from "$/ui/core"
+import { E, UI } from "@spell-app/ui/core"
 
 import { PlanDates } from "$/epics/dates"
 import { readEpicDate } from "$/epics/list/EpicCards"
@@ -125,14 +125,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
           />
         }
       >
-        <ui-label
-          class={MARK}
-          part={this.partForName("mark")}
-          size="mini"
-          color="blue"
-          basic=""
-          title={state().tip}
-        >
+        <ui-label class={MARK} part={this.partForName("mark")} size="mini" color="blue" basic="" title={state().tip}>
           {state().count || this.translationForKey("planning")}
         </ui-label>
       </Show>

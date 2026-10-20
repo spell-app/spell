@@ -1,32 +1,48 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, realpathSync } from "node:fs"
-import { resolve } from "node:path"
+import { existsSync, readFileSync, realpathSync } from "node:fs"
+import { dirname, join, resolve } from "node:path"
+import JSON5 from "json5"
 import { describe, expect, test, vi } from "vite-plus/test"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
 
 /**
  * The real `epic` command, end to end:  `bin/epic` run as a separate process, as a user would.
- * - Its data:  the spell-app checkout spell-epic uses (`.spell-app`), its epic pages (`unified-server`, merged long
- *   ago) and worktrees.
+ * - Its data:  spell-app's checkout, beside spell-epic in the top `spell` repo (`SPELL_APP`), its epic pages
+ *   (`unified-server`, merged long ago) and worktrees;  skipped without it.
  * - Moved from spell-app's CLI tests (`tests/cli/src/cli.test.ts`) at the switch (epic `epic-eject` I5).
  */
 const EPIC = resolve(import.meta.dirname, "../../bin/epic")
 
-/** spell-app's checkout:  the caller's data. */
-const SPELL_APP = resolve(import.meta.dirname, "../../.spell-app")
+/**
+ * spell-app's checkout:  the caller's data.  The top `spell` repo's child repo `spell-app`, as its `repos.json5` lists
+ * them (epic `epic-engine` P10);  `undefined` outside one, or when it isn't cloned.
+ */
+const SPELL_APP = topRepoChild("spell-app")
+
+/** Child repo `name` of the top `spell` repo above spell-epic:  its folder, when `repos.json5` lists it and it's there. */
+function topRepoChild(name: string): string | undefined {
+  for (let dir = resolve(import.meta.dirname, "../.."); dir !== dirname(dir); dir = dirname(dir)) {
+    const list = join(dir, "repos.json5")
+    if (!existsSync(list)) continue
+    const { repos } = JSON5.parse(readFileSync(list, "utf8")) as { repos: { name: string }[] }
+    const folder = join(dir, name)
+    return repos.some((repo) => repo.name === name) && existsSync(folder) ? realpathSync(folder) : undefined
+  }
+  return undefined
+}
 
 // each run starts node and loads the epic code through `tsx`;  a test making several runs is over vitest's 5s default
 vi.setConfig({ testTimeout: 30_000 })
 
 /** Run `epic ...args` from `cwd`. */
-function epic(args: string[], cwd = realpathSync(SPELL_APP)) {
+function epic(args: string[], cwd = SPELL_APP!) {
   const { status, stdout, stderr } = spawnSync(process.execPath, [EPIC, ...args], { cwd, encoding: "utf8" })
   return { status, stdout, stderr }
 }
 
 // its epic pages are in its content folder (epic `epic-eject` P12), not behind an `epics/` link at its root
-describe.skipIf(!existsSync(resolve(EpicConfig.contentOf(realpathSync(SPELL_APP)), "epics", "unified-server")))(
+describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP), "epics", "unified-server")))(
   "epic",
   () => {
     test("--help lists the verbs under headings, and how to name an item", () => {

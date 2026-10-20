@@ -1,11 +1,11 @@
 /**
- * Builds @spell-app/ui from its CURRENT working tree (`../ui`),
+ * Builds @spell-app/ui from its CURRENT working tree (spell-ui, the workspace Node's resolver finds:  `UI_DIR`),
  * then bundles `_assets/spell-ui.entry.js` into `_assets/spell-ui.js`:  ONE minified classic script (IIFE),
  * because docs open from `file://`, where browsers refuse ES modules.
  *
  *   node tools/bundle-spell-ui.js [--skip-ui-build]
  *
- * - `--skip-ui-build`:  reuse `../ui/dist` as is.
+ * - `--skip-ui-build`:  reuse its `dist/` as is.
  * - `SPELL_UI_DIR` overrides where UI lives.
  * - UI build:  `yarn build` (`tsc && vite build`).
  *   If `tsc` fails on in-progress work, falls back to `vite build` alone, and says so.
@@ -67,7 +67,7 @@
  * - No `bundle.css`:  every element adopts its own sheets and the theme its page sheet;
  *   page typography is UI's opt-in `class="ui-typography"` on `<body>`.
  * - The brand's `<brand-*>` elements too (P11;  `<ui-brand-*>` before epic `people-and-orgs` P18):
- *   `@spell-app/brand/design` is the brand's own build of them, `packages/brand/dist/brand-design.js`.
+ *   `@spell-app/brand/design` is the brand's own build of them, spell-brand's `dist/brand-design.js`.
  *   - Built by `vite.design.config.ts`, run first unless `--skip-ui-build`
  *     (Solid JSX needs the Solid compiler, which esbuild isn't).
  *   - Its `$/ui/core` / `$/ui/forms` imports resolve to UI's `dist/`, the modules UI's own elements use,
@@ -82,20 +82,29 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { Script } from "node:vm"
 import { gzipSync } from "node:zlib"
 
+import { packageDir } from "./packageDir.ts"
+
 /** `src`, the folder of the docs tools (`tools/`). */
 const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 /**
- * spell-app's `packages/ui`, through spell-epic's link to its checkout (`.spell-app`), unless `SPELL_UI_DIR` says
- * otherwise;  by its REAL path.
+ * Spell UI, the `@spell-app/ui` package:  spell-ui, where Node's resolver finds it from here (a workspace of the top
+ * `spell` install, epic `epic-engine` P10;  `packageDir()`), unless `SPELL_UI_DIR` says otherwise;  by its REAL path.
  * - esbuild resolves UI's own imports (`dist/` chunk to chunk) to real paths:  had the entry's `@spell-app/ui/*` gone
- *   through the link, the bundle held TWO of UI's modules (`core.js` ...), so two of `spell-element`'s
+ *   through a link, the bundle held TWO of UI's modules (`core.js` ...), so two of `spell-element`'s
  *   `ShadowEvents`, and a `<ui-button>`'s page `onClick` ran twice (epic `epic-engine` I18:  Do Now called itself off)
  */
-const UI_DIR = realPath(resolve(process.env.SPELL_UI_DIR ?? join(DOCS, "../.spell-app/packages/ui")))
-/** spell-app's `packages/brand`, beside it:  its elements join the design bundle (P11). */
-const BRAND_DIR = join(UI_DIR, "../brand")
+const UI_DIR = realPath(
+  resolve(process.env.SPELL_UI_DIR ?? packageDir("@spell-app/ui") ?? "@spell-app/ui (not installed)")
+)
+/** spell-element, the `@spell-app/spell-element` package, by its real path:  its source must never be bundled. */
+const ELEMENT_DIR = packageDir("@spell-app/spell-element")
+/**
+ * The brand, the `@spell-app/brand` package (spell-brand), where Node's resolver finds it:  its elements join the
+ * design bundle (P11).  Only the design target reads it (`brandDir()`).
+ */
+const BRAND_DIR = packageDir("@spell-app/brand")
 /** The brand's build of its elements for the design bundle (`vite.design.config.ts` there). */
-const BRAND_DESIGN = join(BRAND_DIR, "dist/brand-design.js")
+const BRAND_DESIGN = join(BRAND_DIR ?? "@spell-app/brand (not installed)", "dist/brand-design.js")
 const ASSETS = join(DOCS, "tools/_assets")
 
 const args = process.argv.slice(2)
@@ -335,6 +344,8 @@ function buildUI() {
 
 /** Builds the brand's elements for the design bundle, `BRAND_DESIGN`, from its working tree (P11). */
 function buildBrand() {
+  if (!BRAND_DIR)
+    fail("no @spell-app/brand installed:  the design bundle needs spell-brand (`yarn install` at the top)")
   run("yarn", ["vp", "build", "--config", "vite.design.config.ts"], "build the brand elements (@spell-app/brand)", {
     cwd: BRAND_DIR
   })
@@ -461,7 +472,7 @@ function spellUiResolver() {
       // `$/spell-element`, what the brand's elements are written on:  Spell UI's `dist/core.js`, which carries it
       pluginBuild.onResolve({ filter: /^\$\/spell-element$/ }, () => ({ path: uiDistPath("@spell-app/ui/core") }))
       pluginBuild.onResolve({ filter: /^\$\/ui(\/.*)?$/ }, ({ path }) => {
-        const file = uiDistPath(`@spell-app/ui${path.slice("$/ui".length)}`)
+        const file = uiDistPath(`@spell-app/ui${path.slice("@spell-app/ui".length)}`)
         if (!existsSync(file)) fail(`${path} (a brand element's import) has no ${relative(DOCS, file)}`)
         return { path: file }
       })
@@ -664,9 +675,7 @@ function checkOneSolid(metafile) {
  * sends it to `dist/core.js`;  epic `epic-engine` P9).
  */
 function checkNoElementSource(metafile) {
-  const sources = Object.keys(metafile.inputs).filter((input) =>
-    /(?:^|\/)packages\/spell-element\//.test(realPath(resolve(input)))
-  )
+  const sources = Object.keys(metafile.inputs).filter((input) => isInside(realPath(resolve(input)), ELEMENT_DIR))
   if (sources.length) fail(`spell-element bundled from its source, a second copy:\n  ${sources.join("\n  ")}`)
 }
 
@@ -677,7 +686,7 @@ function checkNoElementSource(metafile) {
 function checkNoSpellUI(metafile) {
   const shared = Object.keys(metafile.inputs).filter(
     (input) =>
-      /(?:^|\/)packages\/(?:ui|spell-element)\//.test(realPath(resolve(input))) ||
+      [UI_DIR, ELEMENT_DIR].some((dir) => isInside(realPath(resolve(input)), dir)) ||
       /node_modules\/(?:solid-js|@solidjs)\//.test(input)
   )
   if (shared.length) fail(`${relative(DOCS, COMMENTS_OUT)} took in what the page shares:\n  ${shared.join("\n  ")}`)
@@ -852,4 +861,9 @@ function fail(message) {
 /** `path`'s real path (links resolved);  `path` itself when it isn't there (the UI check says so). */
 function realPath(path) {
   return existsSync(path) ? realpathSync(path) : path
+}
+
+/** Is `path` in folder `dir` (both real paths)?  Never when there's no `dir`. */
+function isInside(path, dir) {
+  return dir !== undefined && (path === dir || path.startsWith(`${dir}/`))
 }

@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
-import { readJSON5File } from "$/util/node/json5"
-import { PageOutline } from "$/ui/docs-components/ui-docs-search/PageOutline"
+import { readJSON5File } from "@spell-app/util/node/json5"
+import { SiteSearchBuilder } from "@spell-app/ui/tools/SiteSearchBuilder"
 import type {
   SiteAttribute,
   SiteDataFile,
@@ -14,7 +14,7 @@ import type {
   SiteSearchFile,
   SiteSearchPage,
   SiteTag
-} from "$/ui/docs-components/docs-components.types"
+} from "@spell-app/ui/docs-components/docs-components.types"
 import { Definitions } from "$/epics/definitions"
 import type { EpicTag, EpicVocabulary } from "$/epics/definitions"
 
@@ -32,7 +32,7 @@ import type { EpicTag, EpicVocabulary } from "$/epics/definitions"
  *   - a new element shows up by itself:  under "Other" until `pages.json5` files it, `planned` until its page exists
  *   - the elements drawn only inside others' shadow roots (`pages.json5` `drawnOnly`) are never listed
  * - `__data/search.json5` (`SiteSearchFile`):  every page's title and sections, for the side column's search.
- *   Read from the page files by Spell UI's own rules (`PageOutline`).
+ *   Read from the page files by Spell UI's own rules (`SiteSearchBuilder.page()`, on its `PageOutline`).
  * - Written by `yarn site:data` (`scripts/site-data.ts`).
  *   - `EpicUISite.test.ts` fails while they're stale
  *   - rerun after adding or changing an element, or a page's sections
@@ -162,7 +162,8 @@ export class EpicUISite {
   static searchPage(path: string, html: string): SiteSearchPage {
     const { document } = parseHTML(html)
     const main = document.querySelector("main#main") ?? document.body
-    const { sections, tabs } = PageOutline.sections(main as unknown as Element)
+    // its sections and tabs as Spell UI's search file reads a page's (a package entry;  `PageOutline` itself isn't one)
+    const { sections, tabs = {} } = SiteSearchBuilder.page(path, html)
     const title = main.getAttribute("data-toc-header")?.trim() || document.querySelector("title")?.textContent?.trim()
     const summary = EpicUISite.summaryOf(html)
     const tag = path === HOME ? undefined : path.replace(/\.html$/, "")

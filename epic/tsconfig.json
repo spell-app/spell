@@ -1,6 +1,6 @@
 {
-  // The TypeScript settings every package shares are spell-app's toolchain's (`@spell-app/toolchain`, a `portal:` dev
-  // dependency, epic `repo-split` P6);  the alias table is this repo's own (`./tsconfig.base.json`).  What's ours below.
+  // The TypeScript settings every package shares are the toolchain's (`@spell-app/toolchain`, spell-util's, a workspace
+  // of the top `spell` install);  the alias table is this repo's own (`./tsconfig.base.json`).  What's ours below.
   "extends": ["@spell-app/toolchain/tsconfig.base.json", "./tsconfig.base.json"],
   "compilerOptions": {
     "target": "ES2022",

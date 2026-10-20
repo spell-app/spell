@@ -1,13 +1,13 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { expectAccessible } from "@spell-app/ui/test/A11y"
 
 import type { ThreadComment } from "$/epics/comments"
 import type { DOMThreadElement } from "$/epics/components/epic-thread"
 
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-icon"
+import "@spell-app/ui/ui-button"
+import "@spell-app/ui/ui-icon"
 import "$/epics/components/epic-thread"
 
 /** `element`'s shadow part `name`. */

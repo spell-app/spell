@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import type { SRV } from "$/server"
+import type { SRV } from "@spell-app/server"
 
 import { EpicConfig } from "../config/EpicConfig"
 import { EpicServer } from "../server/EpicServer"

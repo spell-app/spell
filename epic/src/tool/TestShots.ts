@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path"
 
-import { SRV } from "$/server"
+import { SRV } from "@spell-app/server"
 
 import { InboxError } from "./ReviewInbox"
 

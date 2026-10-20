@@ -82,7 +82,10 @@ export class Hub {
 
   /** Serve in the foreground until `Ctrl-C`;  resolves to 0 once stopped. */
   private async serve(port: number): Promise<number> {
-    const [{ EpicServer }, { SRV }] = await Promise.all([import("$/epics/server/EpicServer"), import("$/server")])
+    const [{ EpicServer }, { SRV }] = await Promise.all([
+      import("$/epics/server/EpicServer"),
+      import("@spell-app/server")
+    ])
     const server = await new EpicServer({ home: this.home }).start({ port })
     const repos = server.repos.map((repo) => `${repo.name}${repo.isDefault ? " (at /)" : ""}`).join(", ")
     out(`epic server:  ${server.web.url}/  (repos:  ${repos || "none"};  engine ${server.engine})`)
@@ -92,7 +95,7 @@ export class Hub {
 
   /** The server's pid file, `<home>/server.json`. */
   private async pidFile() {
-    const { SRV } = await import("$/server")
+    const { SRV } = await import("@spell-app/server")
     return new SRV.PidFile(this.home, PID_FILE)
   }
 }

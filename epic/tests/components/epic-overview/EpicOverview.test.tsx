@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import type { E } from "$/ui/core"
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import type { E } from "@spell-app/ui/core"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { expectAccessible } from "@spell-app/ui/test/A11y"
 
-import "$/ui/components/ui-section"
+import "@spell-app/ui/ui-section"
 import "$/epics/components/epic-overview"
 import "$/epics/components/epic-section"
 import "$/epics/components/epic-summary"

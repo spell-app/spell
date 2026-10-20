@@ -4,6 +4,7 @@
   "private": true,
   "description": "spell-epic:  the epic tooling -- epic pages and their <epic-*> component pack, the epic command, worktrees and windows, the review loop, and every docs page's tooling -- as a Claude Code plugin, loaded in place",
   "license": "MIT",
+  "repository": "https://github.com/spell-app/spell-epic",
   "bin": {
     "epic": "bin/epic"
   },
@@ -13,20 +14,20 @@
     "/////// PACK AND DOCS": "",
     "pack:build": "spell-ui-pack build",
     "pack:check": "spell-ui-pack check",
-    "site:data": "tsx scripts/site-data.ts",
+    "site:data": "tsx --import @spell-app/toolchain/aliases scripts/site-data.ts",
     "docs:update": "node src/tools/update.js",
     "docs:index": "node src/tools/index.js",
     "docs:new": "node src/tools/new-page.js",
-    "docs:open": "tsx src/tools/open.js",
-    "plan-doc": "tsx src/tools/plan-doc.js",
+    "docs:open": "tsx --import @spell-app/toolchain/aliases src/tools/open.js",
+    "plan-doc": "tsx --import @spell-app/toolchain/aliases src/tools/plan-doc.js",
     "details": "node src/tools/details.js",
-    "docs:link": "tsx src/tools/link.ts",
+    "docs:link": "tsx --import @spell-app/toolchain/aliases src/tools/link.ts",
     "/////// DESIGN": "",
     "design:bundle": "node src/tools/bundle-spell-ui.js --design",
     "design:check": "node src/tools/check-design-bundle.js",
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && tsc && tsc -p tests && echo '<< TSC PASSED\n'",
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && spell-types --below && tsc && tsc -p tests && echo '<< TSC PASSED\n'",
     "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src scripts tests vscode/src && echo '<< OXLINT PASSED\n'",
     "lint:fix": "vp lint --fix src scripts tests vscode/src",
     "format": "vp fmt src scripts tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts",
@@ -42,11 +43,11 @@
     "vscode:package": "cd vscode && yarn package"
   },
   "dependencies": {
-    "@spell-app/assembler": "portal:./.spell-app/packages/assembler",
-    "@spell-app/server": "portal:./.spell-app/packages/server",
-    "@spell-app/spell-element": "portal:./.spell-app/packages/spell-element",
-    "@spell-app/ui": "portal:./.spell-app/packages/ui",
-    "@spell-app/util": "portal:./.spell-app/packages/util",
+    "@spell-app/assembler": "workspace:*",
+    "@spell-app/server": "workspace:*",
+    "@spell-app/spell-element": "workspace:*",
+    "@spell-app/ui": "workspace:*",
+    "@spell-app/util": "workspace:*",
     "chalk": "^5.6.0",
     "commander": "^14",
     "json5": "^2.1.1",
@@ -56,7 +57,7 @@
   "devDependencies": {
     "@solidjs/h": "2.0.0-rc.13",
     "@solidjs/web": "2.0.0-rc.13",
-    "@spell-app/toolchain": "portal:./.spell-app/packages/toolchain",
+    "@spell-app/toolchain": "workspace:*",
     "@types/node": "^22.20.4",
     "@vitest/browser-playwright": "catalog:",
     "axe-core": "^4.13.0",
@@ -67,16 +68,6 @@
     "vite": "catalog:",
     "vite-plus": "catalog:",
     "vitest": "catalog:"
-  },
-  "resolutions": {
-    "@solidjs/h": "2.0.0-rc.13",
-    "@solidjs/signals": "2.0.0-rc.13",
-    "@solidjs/web": "2.0.0-rc.13",
-    "solid-js": "2.0.0-rc.13",
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.0.0",
-    "vitest": "5.0.1",
-    "@spell-app/util@workspace:*": "portal:./.spell-app/packages/util",
-    "@spell-app/toolchain@workspace:*": "portal:./.spell-app/packages/toolchain"
   },
   "engines": {
     "node": ">=24.11"

@@ -1,7 +1,7 @@
 import { Show, type Accessor } from "solid-js"
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { E } from "$/ui/core"
+import { E } from "@spell-app/ui/core"
 
 import { NOBODY_LISTENING, ReviewClient, picks } from "$/epics/review"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)

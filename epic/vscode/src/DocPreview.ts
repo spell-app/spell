@@ -30,7 +30,7 @@ import { existsSync } from "fs"
 import { dirname, join, resolve, sep } from "path"
 import * as vscode from "vscode"
 
-import { SRV } from "$/server"
+import { SRV } from "@spell-app/server"
 
 import { RepoList } from "$/epics/server/RepoList"
 import { ENGINE_ROUTES, PID_FILE } from "$/epics/server/server.types"

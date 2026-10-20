@@ -21,8 +21,8 @@
 import { spawn } from "node:child_process"
 import { sep } from "node:path"
 
-import { SRV } from "$/server"
-import type { RouteModule } from "$/server/page"
+import { SRV } from "@spell-app/server"
+import type { RouteModule } from "@spell-app/server/page"
 
 import { Window } from "../window.mjs"
 import { openUrlInChrome } from "./pages.js"

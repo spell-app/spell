@@ -63,8 +63,8 @@
  */
 import { readFileSync } from "node:fs"
 
-import { SRV } from "$/server"
-import type { RouteModule } from "$/server/page"
+import { SRV } from "@spell-app/server"
+import type { RouteModule } from "@spell-app/server/page"
 
 import { SAGA_PREFIX } from "$/epics/review/review.types"
 

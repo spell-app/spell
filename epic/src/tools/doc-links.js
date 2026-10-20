@@ -28,7 +28,7 @@ import { readFileSync, realpathSync, writeFileSync } from "node:fs"
 import { basename, dirname, relative, resolve as resolvePath } from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { AS } from "$/assembler"
+import { AS } from "@spell-app/assembler"
 import { RepoList } from "$/epics/server/RepoList"
 import { EpicTargets } from "$/epics/tool/EpicTargets"
 import { ServedFolders } from "$/epics/tool/ServedFolders"

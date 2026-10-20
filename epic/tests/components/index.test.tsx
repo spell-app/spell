@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { E, UI } from "$/ui/core"
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { E, UI } from "@spell-app/ui/core"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
 
-import "$/ui/components/ui-item"
+import "@spell-app/ui/ui-item"
 import * as Components from "$/epics/components"
 
 ////////////////

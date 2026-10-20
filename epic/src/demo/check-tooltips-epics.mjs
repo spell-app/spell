@@ -45,7 +45,7 @@ const SHOTS = join(HERE, "shots")
 if (!process.env.CHECK_TOOLTIPS_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", "--import", import.meta.resolve("@spell-app/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,

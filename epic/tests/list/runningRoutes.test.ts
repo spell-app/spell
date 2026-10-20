@@ -9,8 +9,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { PageServer } from "$/server/page"
-import { ask } from "$/server/test/serve"
+import { PageServer } from "@spell-app/server/page"
+import { ask } from "@spell-app/server/test/serve"
 
 import { EPIC_CARDS_END } from "$/epics/list/EpicCards"
 import { MARKER, type RunningEpic } from "$/epics/list/RunningEpics"

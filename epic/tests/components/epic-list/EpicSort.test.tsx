@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { expectAccessible } from "@spell-app/ui/test/A11y"
 
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-button"
+import "@spell-app/ui/ui-icon"
+import "@spell-app/ui/ui-button"
 import "$/epics/components/epic-list"
 
 import { SORT_KEY } from "$/epics/components/epic-list/EpicList.types"

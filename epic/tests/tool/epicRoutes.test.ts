@@ -8,8 +8,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { PageServer } from "$/server/page"
-import { ask } from "$/server/test/serve"
+import { PageServer } from "@spell-app/server/page"
+import { ask } from "@spell-app/server/test/serve"
 
 import epicRoutes, { FROM_PAGE, epicName, newEpic, setFavorite } from "$/epics/tool/epicRoutes"
 
