@@ -6,21 +6,45 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./checkout": "./src/checkout.ts",
-    "./page": "./src/page/index.ts",
-    "./page/prune": "./src/page/prune.ts",
-    "./page/settings": "./src/page/settings.ts",
-    "./site": "./src/site/index.ts",
-    "./site/site.types": "./src/site/site.types.ts",
-    "./test/serve": "./test/serve.ts"
+    ".": {
+      "types": "./dist-types/src/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./checkout": {
+      "types": "./dist-types/src/checkout.d.ts",
+      "default": "./src/checkout.ts"
+    },
+    "./page": {
+      "types": "./dist-types/src/page/index.d.ts",
+      "default": "./src/page/index.ts"
+    },
+    "./page/prune": {
+      "types": "./dist-types/src/page/prune.d.ts",
+      "default": "./src/page/prune.ts"
+    },
+    "./page/settings": {
+      "types": "./dist-types/src/page/settings.d.ts",
+      "default": "./src/page/settings.ts"
+    },
+    "./site": {
+      "types": "./dist-types/src/site/index.d.ts",
+      "default": "./src/site/index.ts"
+    },
+    "./site/site.types": {
+      "types": "./dist-types/src/site/site.types.d.ts",
+      "default": "./src/site/site.types.ts"
+    },
+    "./test/serve": {
+      "types": "./dist-types/test/serve.d.ts",
+      "default": "./test/serve.ts"
+    }
   },
   "scripts": {
     "server": "tsx src/page/cli.ts",
     "favicon": "tsx scripts/favicon.ts",
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && tsc && tsc -p tsconfig.node.json && tsc -p ../tests/server && echo '<< TSC PASSED\n'",
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && spell-types && tsc -p tsconfig.node.json && tsc -p ../tests/server && echo '<< TSC PASSED\n'",
     "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src test scripts && cd ../tests/server && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\n'",
     "lint:fix": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT --fix' && vp lint --fix src test scripts && cd ../tests/server && vp lint --fix . && echo '<< OXLINT PASSED\n'",
     "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt . && cd ../tests/server && vp fmt . && echo '<< OXFMT PASSED\n'",
