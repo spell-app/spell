@@ -6,8 +6,11 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { SRV, type ServedFile, type ServerInfo } from "$/server"
 import {
   PageEditor,
+  besideFolders,
   componentSets,
   engineRoutes,
+  folderUrl,
+  isBeside,
   pageServerSettings,
   type ComponentSet,
   type EngineRoute,
@@ -139,6 +142,10 @@ export class PageServer {
         ...Object.assign({}, ...this.pageConfigs.map((add) => add(served)))
       })
     })
+    // the settings' folders OUTSIDE the checkout (`../spell-ui/docs`, in the repo beside it):  each mounted on its
+    // own at `/_beside/<folder>/` (`folderUrl()`), so the overlays below can lead there (epic `repo-split` P8)
+    for (const folder of besideFolders(settings))
+      this.web.files.mount({ prefix: folderUrl(folder), dir: join(this.root, folder) })
     this.web.files.overlays.push(
       (path) => componentSetPath(path, this.componentSets),
       (path) => engineRoutePath(path, this.engineRoutes)
@@ -176,8 +183,8 @@ export class PageServer {
       this.web.live!.watch(join(this.root, set.assets), { servedAt: `${set.prefix}/${SET_ASSETS}` })
     }
     // the engine routes' files at their routes too, so a page loading `/_epic/...` hot-reloads them
-    for (const [route, folder] of this.engineRoutes)
-      this.web.live!.watch(join(this.root, folder.slice(1)), { servedAt: route })
+    for (const [route, folder] of Object.entries(settings.engineRoutes ?? {}))
+      this.web.live!.watch(join(this.root, folder), { servedAt: route.endsWith("/") ? route : `${route}/` })
     if (routes) for (const path of settings.routes ?? []) await this.loadRoutes(path)
     const { port: actual } = await this.web.listen({ port })
     this.info.port = actual
@@ -490,6 +497,8 @@ const DEFAULT_WATCH = ["epics", "guides", "pages", "brand"]
  *   - the bundle then takes `/components/<set>/` as its site's root (the folder above its `_assets/`)
  * - `/components/<set>/<x>` -> its pages' folder (`dir`):  the set's pages, `__parts/` and `__data/`
  * - the same under `/worktrees/<w>/` (that worktree's set and bundle)
+ *   - EXCEPT a folder outside the checkout (`../spell-ui/docs`, `isBeside()`):  the MAIN checkout's, served at
+ *     `/_beside/...` (`folderUrl()`), from a worktree's address too;  a worktree of every repo is epic `repo-split` P9's
  * - a `StaticHandler` overlay:  served only when the file is there, else the path as asked (a 404)
  */
 export function componentSetPath(path: string, sets: readonly ComponentSet[]): string | undefined {
@@ -497,9 +506,9 @@ export function componentSetPath(path: string, sets: readonly ComponentSet[]): s
   const set = match && sets.find((each) => each.prefix === match[2])
   if (!match || !set) return undefined
   const [, base = "", , rest = "/"] = match
-  return rest.startsWith(`/${SET_ASSETS}/`)
-    ? `${base}/${set.assets}${rest.slice(SET_ASSETS.length + 1)}`
-    : `${base}/${set.dir}${rest}`
+  const assets = rest.startsWith(`/${SET_ASSETS}/`)
+  const folder = assets ? set.assets : set.dir
+  return `${isBeside(folder) ? "" : base}${folderUrl(folder)}${assets ? rest.slice(SET_ASSETS.length + 1) : rest}`
 }
 
 /**

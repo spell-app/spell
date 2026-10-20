@@ -41,15 +41,24 @@ export type BundleSpec = {
   name: string
   /** what it is, for people */
   title: string
-  /** the folder its build runs in, relative to the checkout */
+  /**
+   * the package it's built in, by its npm name, e.g. `@spell-app/brand`:  found through the checkout's `node_modules`,
+   * wherever its repo is (epic `repo-split` P8:  Spell UI's and the brand's are repos beside spell-app's)
+   */
+  package: string
+  /** the folder its build runs in, relative to `package`'s folder */
   cwd: string
   /** the build, run in `cwd` */
   run: string[]
-  /** the folder the build writes, relative to the checkout */
+  /** the folder the build writes, relative to `package`'s folder */
   output: string
   /** a file every build writes in `output`:  missing => stale */
   entry: string
-  /** files and folders the build reads, relative to the checkout:  a change to one makes the bundle stale */
+  /**
+   * files and folders the build reads:  a change to one makes the bundle stale
+   * - a package's, by its npm name and a path in it:  `@spell-app/ui/src`
+   * - anything else, from the install's root (the folder holding `yarn.lock`):  `yarn.lock`
+   */
   sources: string[]
 }
 
@@ -57,7 +66,7 @@ export type BundleSpec = {
 export type BundleCheck = {
   /** the bundle's `name` */
   name: string
-  /** its `output` folder, relative to the checkout */
+  /** its `output` folder, relative to the checkout:  as the settings' `bundles` name it (`../spell-ui/site/_assets`) */
   output: string
   /** the hash of its sources now */
   sources: string
@@ -96,51 +105,54 @@ export const BUNDLE_RECORD = ".bundle.json"
  * - the lock file
  */
 const SPELL_UI_SOURCES = [
-  "packages/ui/src",
-  "packages/ui/components",
-  "packages/spell-element/src",
-  "packages/ui/vite.config.ts",
-  "packages/server/src/site",
+  "@spell-app/ui/src",
+  "@spell-app/ui/components",
+  "@spell-app/spell-element/src",
+  "@spell-app/ui/vite.config.ts",
+  "@spell-app/server/src/site",
   "yarn.lock"
 ]
 
 /**
  * How each bundle built on demand is built.
- * - WHICH are built:  the ones whose `output` folders the repo root's `package.json` names
+ * - WHICH are built:  the ones whose `output` folders the checkout's root `package.json` names
  *   (`"pageServer": { "bundles": [...] }`, `Bundle.specs()`), the list the page server reads too
  * - the page server builds the stale ones when it starts (`spell dev bundles build --stale`)
  * - `sources`:  generous, so a change never leaves one stale unnoticed
  *   - `Bundle.sourceFiles()` skips tests, snapshots, dot files and the icon packs
- * - their `output` folders are in the root `.gitignore`
+ * - their `output` folders are in their own repos' `.gitignore`
+ * - each by its PACKAGE, never by the checkout's layout (epic `repo-split` P8)
  */
 export const BUNDLES: BundleSpec[] = [
   {
     name: "ui-site",
     title: "Spell UI's docs site bundle",
-    cwd: "packages/ui",
+    package: "@spell-app/ui",
+    cwd: ".",
     run: ["yarn", "site:bundle"],
-    output: "packages/ui/site/_assets",
+    output: "site/_assets",
     entry: "site.js",
     sources: [
       ...SPELL_UI_SOURCES,
-      "packages/ui/site/_src",
-      "packages/ui/vite.site.config.ts",
-      "packages/ui/scripts/site-bundle.ts"
+      "@spell-app/ui/site/_src",
+      "@spell-app/ui/vite.site.config.ts",
+      "@spell-app/ui/scripts/site-bundle.ts"
     ]
   },
   {
     name: "brand",
     title: "brand pages' bundle",
-    cwd: "packages/brand",
+    package: "@spell-app/brand",
+    cwd: ".",
     run: ["yarn", "build"],
-    output: "packages/brand/_assets/ui",
+    output: "_assets/ui",
     entry: "brand-ui.js",
     sources: [
       ...SPELL_UI_SOURCES,
-      "packages/brand/src",
-      "packages/brand/components",
-      "packages/brand/vite.config.ts",
-      "packages/brand/scripts/build.ts"
+      "@spell-app/brand/src",
+      "@spell-app/brand/components",
+      "@spell-app/brand/vite.config.ts",
+      "@spell-app/brand/scripts/build.ts"
     ]
   }
 ]

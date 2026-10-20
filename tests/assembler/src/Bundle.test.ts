@@ -1,4 +1,13 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  utimesSync,
+  writeFileSync
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
@@ -11,23 +20,40 @@ function put(root: string, path: string, text: string): void {
   writeFileSync(join(root, path), text)
 }
 
+/**
+ * An install as the top repo `spell` holds one (epic `repo-split` P8):  `yarn.lock` and `node_modules/` at `top`,
+ * each package a folder of its own, linked in as `node_modules/<name>`.
+ */
+function install(top: string, packages: Record<string, string>): void {
+  put(top, "yarn.lock", "# lock\n")
+  for (const [name, folder] of Object.entries(packages)) {
+    put(top, `${folder}/package.json`, JSON.stringify({ name }))
+    mkdirSync(dirname(join(top, "node_modules", name)), { recursive: true })
+    symlinkSync(join(top, folder), join(top, "node_modules", name))
+  }
+}
+
 /** A bundle whose build is a `node -e` script:  it writes `out/entry.js`, or fails when `src/FAIL` exists. */
 const SPEC: AS.BundleSpec = {
   name: "demo",
   title: "a demo bundle",
-  cwd: "pkg",
+  package: "@demo/pkg",
+  cwd: ".",
   run: [
     process.execPath,
     "-e",
     `const fs = require("fs");  if (fs.existsSync("src/FAIL")) process.exit(3);  fs.mkdirSync("out", { recursive: true });  fs.writeFileSync("out/entry.js", "built")`
   ],
-  output: "pkg/out",
+  output: "out",
   entry: "entry.js",
-  sources: ["pkg/src", "pkg/config.ts", "pkg/missing.ts"]
+  sources: ["@demo/pkg/src", "@demo/pkg/config.ts", "@demo/pkg/missing.ts", "yarn.lock"]
 }
 
 describe("Bundle", () => {
+  // the package `@demo/pkg` in its own folder, `pkg/`, beside the checkout, `app/`
   const root = mkdtempSync(join(tmpdir(), "assembler-bundle-"))
+  install(root, { "@demo/pkg": "pkg" })
+  mkdirSync(join(root, "app"))
   put(root, "pkg/src/a.ts", "a")
   put(root, "pkg/src/deep/b.tsx", "b")
   put(root, "pkg/src/a.test.ts", "test")
@@ -36,18 +62,25 @@ describe("Bundle", () => {
   put(root, "pkg/src/.hidden", "dot")
   put(root, "pkg/src/icons/icon-packs/pack/x.svg", "<svg/>")
   put(root, "pkg/config.ts", "config")
-  const bundle = new AS.Bundle(root, SPEC)
+  const bundle = new AS.Bundle(join(root, "app"), SPEC)
 
   afterAll(() => rmSync(root, { recursive: true, force: true }))
 
   test("its sources:  every file under them, sorted;  NEVER tests, snapshots, dot files or the icon packs", () => {
-    expect(bundle.sourceFiles()).toEqual(["pkg/config.ts", "pkg/src/a.ts", "pkg/src/deep/b.tsx"])
+    // a package's by its name, the install's root's by their path:  the same wherever the repos are
+    expect(bundle.sourceFiles()).toEqual([
+      "@demo/pkg/config.ts",
+      "@demo/pkg/src/a.ts",
+      "@demo/pkg/src/deep/b.tsx",
+      "yarn.lock"
+    ])
+    expect(bundle.outputDir).toBe(join(realpathSync(root), "pkg/out"))
   })
 
   test("stale until built, current after;  stale again when a source changes, or its entry goes", () => {
     expect(bundle.check()).toEqual({
       name: "demo",
-      output: "pkg/out",
+      output: "../pkg/out",
       sources: bundle.sourcesHash(),
       stale: "never built"
     })
@@ -76,60 +109,71 @@ describe("Bundle", () => {
   test("a failed build throws, naming the command, and records nothing", () => {
     rmSync(join(root, "pkg/out"), { recursive: true, force: true })
     put(root, "pkg/src/FAIL", "")
-    expect(() => bundle.build({ stdio: "ignore" })).toThrow(/^Bundle\.build\(\):  `.+` \(in pkg\) failed:  exit 3$/)
+    expect(() => bundle.build({ stdio: "ignore" })).toThrow(
+      /^Bundle\.build\(\):  `.+` \(in \.\.\/pkg\) failed:  exit 3$/
+    )
     expect(existsSync(bundle.recordFile)).toBe(false)
     expect(bundle.check().stale).toBe("never built")
   })
 })
 
-describe("Bundle.all()", () => {
-  const repo = mkdtempSync(join(tmpdir(), "assembler-bundles-"))
-  put(
-    repo,
-    "package.json",
-    JSON.stringify({ pageServer: { bundles: ["packages/ui/site/_assets", "packages/brand/_assets/ui"] } })
-  )
+/** An install holding Spell UI's and the brand's packages, each its own repo beside the checkout, `spell-app/`. */
+function top(): string {
+  const dir = mkdtempSync(join(tmpdir(), "assembler-bundles-"))
+  install(dir, { "@spell-app/ui": "spell-ui", "@spell-app/brand": "spell-brand" })
+  mkdirSync(join(dir, "spell-app"))
+  return dir
+}
 
-  afterAll(() => rmSync(repo, { recursive: true, force: true }))
+/** The two bundles' folders, as spell-app's root `package.json` names them. */
+const BUNDLES = ["../spell-ui/site/_assets", "../spell-brand/_assets/ui"]
+
+describe("Bundle.all()", () => {
+  const dir = top()
+  const repo = join(dir, "spell-app")
+  put(repo, "package.json", JSON.stringify({ pageServer: { bundles: BUNDLES } }))
+
+  afterAll(() => rmSync(dir, { recursive: true, force: true }))
 
   test("every bundle, or the ones named, in that order;  an unknown name says which there are", () => {
     expect(AS.Bundle.all(repo).map((bundle) => bundle.name)).toEqual(["ui-site", "brand"])
     expect(AS.Bundle.all(repo, ["brand", "ui-site"]).map((bundle) => bundle.outputDir)).toEqual([
-      join(repo, "packages/brand/_assets/ui"),
-      join(repo, "packages/ui/site/_assets")
+      join(realpathSync(dir), "spell-brand/_assets/ui"),
+      join(realpathSync(dir), "spell-ui/site/_assets")
     ])
+    expect(AS.Bundle.all(repo).map((bundle) => bundle.output)).toEqual(BUNDLES)
     expect(() => AS.Bundle.all(repo, ["nope"])).toThrow("Bundle.all():  no bundle 'nope';  bundles:  ui-site, brand")
   })
 })
 
 describe("Bundle.specs()", () => {
-  const temp = mkdtempSync(join(tmpdir(), "assembler-specs-"))
+  const dir = top()
 
-  afterAll(() => rmSync(temp, { recursive: true, force: true }))
+  afterAll(() => rmSync(dir, { recursive: true, force: true }))
 
-  /** A checkout under `temp` whose `package.json` is `json` (none:  no file) */
+  /** A checkout under `dir` whose `package.json` is `json` (none:  no file) */
   function checkout(name: string, json?: unknown): string {
-    if (json !== undefined) put(temp, `${name}/package.json`, JSON.stringify(json))
-    return join(temp, name)
+    if (json !== undefined) put(dir, `${name}/package.json`, JSON.stringify(json))
+    return join(dir, name)
   }
 
   test("the folders the root's package.json names, in its order, each with the bundle that builds into it", () => {
-    const only = checkout("only", { pageServer: { bundles: ["packages/brand/_assets/ui"] } })
+    const only = checkout("only", { pageServer: { bundles: ["../spell-brand/_assets/ui"] } })
     expect(AS.Bundle.specs(only).map((spec) => spec.name)).toEqual(["brand"])
   })
 
   test("none without a list, as the page server;  a folder no bundle builds into throws", () => {
     expect(AS.Bundle.specs(checkout("none"))).toEqual([])
     expect(AS.Bundle.specs(checkout("bare", { name: "x" }))).toEqual([])
-    const odd = checkout("odd", { pageServer: { bundles: ["packages/nope/_assets"] } })
-    expect(() => AS.Bundle.specs(odd)).toThrow("Bundle.specs():  no bundle builds into 'packages/nope/_assets'")
+    const odd = checkout("odd", { pageServer: { bundles: ["../spell-nope/_assets"] } })
+    expect(() => AS.Bundle.specs(odd)).toThrow("Bundle.specs():  no bundle builds into '../spell-nope/_assets'")
   })
 
-  // the ONE list:  the page server waits on these folders (page-server's `BundleBuild`), the CLI builds their bundles
-  test("the repo's list names every bundle, each once", () => {
-    const repoRoot = join(import.meta.dirname, "../../..")
-    const outputs = AS.Bundle.specs(repoRoot).map((spec) => spec.output)
-    expect([...outputs].sort()).toEqual(AS.BUNDLES.map((spec) => spec.output).sort())
+  // the ONE list:  spell-app's own (its page-server tests check its real settings name every bundle)
+  test("a checkout naming every bundle's folder gets every bundle, each once", () => {
+    const every = checkout("every", { pageServer: { bundles: BUNDLES } })
+    const outputs = AS.Bundle.specs(every).map((spec) => spec.name)
+    expect([...outputs].sort()).toEqual(AS.BUNDLES.map((spec) => spec.name).sort())
     expect(new Set(outputs).size).toBe(outputs.length)
   })
 })

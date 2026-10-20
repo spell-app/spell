@@ -1,23 +1,59 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, join, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { dirname, join } from "node:path"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { AS } from "$/assembler"
 
-/** The checkout these tests run in:  its real files are what links resolve to. */
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
+/**
+ * A top repo as `spell` is (epic `repo-split` P8):  its install (`yarn.lock`, `node_modules/@spell-app/*`) over the
+ * repos beside the checkout, `spell-app/`, which these tests link pages in.
+ * - Spell UI's repo, `spell-ui/`, and spell-server's `server` package:  what pages name, as `packages/ui/...` (the old
+ *   monorepo's spelling) or `spell-ui/...`.
+ * - Made here:  a test never reads another repo's real files.
+ */
+const TOP = realpathSync(mkdtempSync(join(tmpdir(), "linker-top-")))
 
-/** `packages/ui/tools`:  a package's folder outside its `src/`. */
-const TOOLS = join(ROOT, "packages/ui/tools")
+/** Write an empty file (or `text`) at `path` under `TOP`, making folders. */
+function put(path: string, text = ""): void {
+  mkdirSync(dirname(join(TOP, path)), { recursive: true })
+  writeFileSync(join(TOP, path), text)
+}
+
+for (const file of [
+  "yarn.lock",
+  "spell-ui/package.json",
+  "spell-ui/AGENTS.md",
+  "spell-ui/README.md",
+  "spell-ui/tools/SiteCheck.ts",
+  "spell-server/server/package.json",
+  "spell-server/server/src/page/PageServer.ts",
+  "spell-app/tsconfig.base.json",
+  "spell-app/pages/index.html",
+  "spell-app/guides/index.html",
+  "spell-app/guides/spell-docs/spell-docs.md"
+])
+  put(file)
+mkdirSync(join(TOP, "node_modules", "@spell-app"), { recursive: true })
+symlinkSync(join(TOP, "spell-ui"), join(TOP, "node_modules", "@spell-app", "ui"))
+symlinkSync(join(TOP, "spell-server", "server"), join(TOP, "node_modules", "@spell-app", "server"))
+afterAll(() => rmSync(TOP, { recursive: true, force: true }))
+
+/** The checkout these tests link pages in:  spell-app, in the top repo. */
+const ROOT = join(TOP, "spell-app")
+
+/** Spell UI's `tools/`:  a package's folder outside its `src/`, in the repo beside the checkout. */
+const TOOLS = join(TOP, "spell-ui/tools")
 
 /** `epics/`:  epic pages. */
 const EPICS = join(ROOT, "epics")
 
 /** A page in `guides/spell-docs/`, two folders down from the root, as most pages are. */
 const PAGE_DIR = join(ROOT, "guides", "spell-docs")
+
+/** How a page in `PAGE_DIR` links Spell UI's `SiteCheck.ts`, and that link's target. */
+const SITE_CHECK = 'href="../../../spell-ui/tools/SiteCheck.ts" target="src-spell-ui-tools-sitecheck-ts"'
 
 /** One linker for every test:  its bare-name index is built once. */
 const LINKER = new AS.Linker(ROOT)
@@ -39,17 +75,18 @@ function linked(body: string) {
 describe("Linker.link()", () => {
   test("links a code span naming a real file, relative to the page, with its own target", () => {
     expect(linked("<p><code>packages/ui/tools/SiteCheck.ts</code></p>")).toBe(
-      '<p><a href="../../packages/ui/tools/SiteCheck.ts" target="src-packages-ui-tools-sitecheck-ts">' +
-        "<code>packages/ui/tools/SiteCheck.ts</code></a></p>"
+      `<p><a ${SITE_CHECK}><code>packages/ui/tools/SiteCheck.ts</code></a></p>`
+    )
+    // the new layout's own spelling, from the top repo (epic `repo-split` P8):  the same file, the same link
+    expect(linked("<p><code>spell-ui/tools/SiteCheck.ts</code></p>")).toBe(
+      `<p><a ${SITE_CHECK}><code>spell-ui/tools/SiteCheck.ts</code></a></p>`
     )
   })
 
   test("links a name with its path as its tooltip to that path, keeping the tooltip;  idempotent", () => {
     const span = '<code title="packages/ui/tools/SiteCheck.ts:12">ROOT</code>'
     const result = link(`<p>From ${span}.</p>`)
-    expect(/<body>([\s\S]*)<\/body>/.exec(result.text)?.[1]).toBe(
-      `<p>From <a href="../../packages/ui/tools/SiteCheck.ts" target="src-packages-ui-tools-sitecheck-ts">${span}</a>.</p>`
-    )
+    expect(/<body>([\s\S]*)<\/body>/.exec(result.text)?.[1]).toBe(`<p>From <a ${SITE_CHECK}>${span}</a>.</p>`)
     expect(LINKER.link(result.text, PAGE_DIR).text).toBe(result.text)
     // the title is the path:  a name that's no file, under a title that's missing, is reported by its title
     expect(link('<code title="zz/missing.ts">pages.js</code>')).toMatchObject({
@@ -60,7 +97,7 @@ describe("Linker.link()", () => {
 
   test("links a folder with a trailing slash", () => {
     expect(linked("<code>packages/ui/tools</code>")).toBe(
-      '<a href="../../packages/ui/tools/" target="src-packages-ui-tools"><code>packages/ui/tools</code></a>'
+      '<a href="../../../spell-ui/tools/" target="src-spell-ui-tools"><code>packages/ui/tools</code></a>'
     )
     expect(linked("<code>guides/spell-docs</code>")).toBe(
       '<a href="./" target="src-guides-spell-docs"><code>guides/spell-docs</code></a>'
@@ -113,14 +150,15 @@ describe("Linker.link()", () => {
 })
 
 describe("Linker.resolve()", () => {
-  test("resolves against the page's folder, the repo root, `packages/`, `#name/` aliases and bare file names", () => {
+  test("resolves against the page's folder, the repo root, `packages/`, the top repo, `#name/` aliases and bare file names", () => {
     // a content folder's file is found where it is, not through the checkout's old link (epic `epic-eject` P12)
     const guides = LINKER.content ? join(LINKER.content, "guides", "spell-docs") : PAGE_DIR
     expect(LINKER.resolve("spell-docs.md", PAGE_DIR)).toBe(join(guides, "spell-docs.md"))
     expect(LINKER.resolve("tsconfig.base.json")).toBe(join(ROOT, "tsconfig.base.json"))
     expect(LINKER.resolve("ui/tools/SiteCheck.ts")).toBe(join(TOOLS, "SiteCheck.ts"))
     expect(LINKER.resolve("#ui/../tools/SiteCheck.ts")).toBe(join(TOOLS, "SiteCheck.ts"))
-    expect(LINKER.resolve("PageServer.ts")).toBe(join(ROOT, "packages/server/src/page/PageServer.ts"))
+    expect(LINKER.resolve("PageServer.ts")).toBe(join(TOP, "spell-server/server/src/page/PageServer.ts"))
+    expect(LINKER.resolve("spell-ui/tools/SiteCheck.ts")).toBe(join(TOOLS, "SiteCheck.ts"))
     expect(LINKER.resolve("packages/ui/tools/SiteCheck.ts:12")).toBe(join(TOOLS, "SiteCheck.ts"))
     expect(LINKER.resolve("packages&#47;ui/tools/SiteCheck.ts")).toBe(join(TOOLS, "SiteCheck.ts"))
   })
@@ -193,11 +231,11 @@ describe("Linker.check()", () => {
 })
 
 describe("Linker served folders", () => {
-  /** A linker that serves `packages/server/src` at `/srv/`, as the page server serves a component set. */
-  const served = new AS.Linker(ROOT, { served: { srv: "packages/server/src" } })
+  /** A linker that serves the server's `src/` (beside the checkout) at `/srv/`, as the page server serves a component set. */
+  const served = new AS.Linker(ROOT, { served: { srv: "../spell-server/server/src" } })
 
-  /** A page in `packages/server/src/page/`, served at `/srv/page/`. */
-  const dir = served.servedDir(join(ROOT, "packages", "server", "src", "page"))
+  /** A page in the server's `src/page/`, served at `/srv/page/`. */
+  const dir = served.servedDir(join(TOP, "spell-server", "server", "src", "page"))
 
   test("puts a page in a served folder at its address;  any other page stays where it is", () => {
     expect(dir).toBe(join(ROOT, "srv", "page"))
@@ -210,9 +248,9 @@ describe("Linker served folders", () => {
       dir
     )
     expect(text).toBe(
-      '<p><a href="../../packages/ui/tools/SiteCheck.ts" target="src-packages-ui-tools-sitecheck-ts">' +
+      '<p><a href="../../../spell-ui/tools/SiteCheck.ts" target="src-spell-ui-tools-sitecheck-ts">' +
         "<code>packages/ui/tools/SiteCheck.ts</code></a> " +
-        '<a href="PageServer.ts" target="src-packages-server-src-page-pageserver-ts">' +
+        '<a href="PageServer.ts" target="src-spell-server-server-src-page-pageserver-ts">' +
         "<code>packages/server/src/page/PageServer.ts</code></a></p>"
     )
     expect(served.check(text, dir)).toEqual({ destinations: 2, problems: [] })

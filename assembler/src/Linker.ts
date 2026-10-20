@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, readdirSync, statSync } from "node:fs"
-import { join, relative, resolve as resolvePath } from "node:path"
+import { existsSync, lstatSync, readdirSync, realpathSync, statSync } from "node:fs"
+import { dirname, join, relative, resolve as resolvePath } from "node:path"
 
 import { parseHTML } from "linkedom"
 
@@ -29,6 +29,13 @@ import { contentFolderOf } from "./contentFolder"
  * - Knows the checkout's LAYOUT as folder names only:
  *   `packages/*`, and the shared areas `pages/`, `guides/`, `epics/`, `templates/`.
  *   It imports no other package, so spell-epic's docs tools and its `epic` tool both import it.
+ * - The REPOS beside the checkout (epic `repo-split` P8):  inside the top repo `spell`, the folder holding the ONE
+ *   install (`yarn.lock`, `top`), each package is in a repo of its own there.
+ *   - `spell-ui/tools/SiteCheck.ts` resolves from `top`, and links as `../../../spell-ui/tools/SiteCheck.ts`.
+ *   - `packages/<name>/...` (the old monorepo's spelling, in every page written before P8) is package
+ *     `@spell-app/<name>`'s folder, found through `top`'s `node_modules`:  `packages/ui/tools` is spell-ui's `tools/`.
+ *   - A file anywhere under `top` counts as inside the repo (`check()`);  its target is its path from `top`.
+ *   - With no `yarn.lock` above the checkout, `top` is the checkout itself:  the monorepo layout, as before.
  * - SERVED folders (`served`, epic `epic-workflow` P10):  a folder the page server serves at another address.
  *   - E.g. a component set:  `packages/ui/docs/` at `/components/ui/`.
  *   - Its pages' links are written as from that address, so they hold under `/worktrees/<w>/` too.
@@ -45,10 +52,19 @@ export class Linker {
   /** the checkout's root:  links resolve inside it, and a target is a slug of the path relative to it */
   readonly root: string
 
-  /** `packages/` */
+  /** `packages/`:  the old monorepo's packages, when the checkout has the folder */
   readonly packages: string
 
-  /** `packages/ui` */
+  /**
+   * the folder holding the install, and every repo beside the checkout:  the nearest folder up with a `yarn.lock`
+   * (the top repo `spell`);  the checkout itself without one
+   */
+  readonly top: string
+
+  /** each `@spell-app/*` package's folder by its short name (`ui` => `<top>/spell-ui`), through `top`'s `node_modules` */
+  readonly packageDirs: ReadonlyMap<string, string>
+
+  /** Spell UI's folder:  `@spell-app/ui`'s, else `packages/ui` */
   readonly ui: string
 
   /** the home page's folder, `pages/`:  what `resolve()` resolves against when no page folder is given */
@@ -99,9 +115,13 @@ export class Linker {
       ...this.contentAreas
     ]
     this.packages = join(root, "packages")
-    this.ui = join(this.packages, "ui")
+    this.top = installRoot(root)
+    this.packageDirs = spellPackagesIn(this.top)
+    this.ui = this.packageDirs.get("ui") ?? join(this.packages, "ui")
     this.home = join(root, "pages")
-    this.nodeModules = [join(this.ui, "node_modules"), join(root, "node_modules")]
+    this.nodeModules = [
+      ...new Set([join(this.ui, "node_modules"), join(root, "node_modules"), join(this.top, "node_modules")])
+    ]
     this.special = new Map([
       ["solidjs/solid", "https://github.com/solidjs/solid/tree/next"],
       ["solidjs/solid-docs", "https://github.com/solidjs/solid-docs/tree/v2-rebuild"],
@@ -161,7 +181,9 @@ export class Linker {
    */
   targetFor(dest: string): string {
     if (URL_START.test(dest)) return `ext-${slug(dest.replace(/^https?:\/\/(www\.)?/, "")).slice(0, 80)}`
-    const rel = relative(this.root, this.inCheckout(dest))
+    const inCheckout = this.inCheckout(dest)
+    // a file in a repo beside the checkout:  its path from `top` (`spell-ui/tools/SiteCheck.ts`)
+    const rel = relative(isUnder(inCheckout, this.root) ? this.root : this.top, inCheckout)
     const plan = PLAN_DOC.exec(rel)
     if (plan) return plan[1]
     return `src-${slug(rel).slice(0, 80)}`
@@ -252,14 +274,17 @@ export class Linker {
     if (!/[A-Za-z0-9]/.test(path)) return undefined
     if (!PATH_CHARS.test(path) || (!path.includes("/") && !path.includes("."))) return undefined
     const alias = ALIAS.exec(path)
-    if (alias) path = join(this.packages, alias[1], "src", alias[2])
+    if (alias) path = join("packages", alias[1], "src", alias[2])
+    // `packages/<name>/...` and `<name>/...`:  that package's folder, wherever its repo is (epic `repo-split` P8)
+    const inPackage = this.inPackage(path)
     // `resolvePath`, not `join`:  an absolute `path` stands on its own
     const bases = path.startsWith("node_modules/")
       ? [this.root, this.ui]
-      : [this.root, this.packages, this.home, this.ui]
-    const candidates = [pageDir, join(pageDir, "experiments"), ...bases].map((base) =>
-      this.real(resolvePath(base, path))
-    )
+      : [this.root, this.packages, this.top, this.home, this.ui]
+    const candidates = [
+      ...[pageDir, join(pageDir, "experiments"), ...bases].map((base) => this.real(resolvePath(base, path))),
+      ...(inPackage ? [inPackage] : [])
+    ]
     const found = candidates.find((candidate) => existsSync(candidate))
     if (found) return found
     if (!path.replace(/\/+$/, "").includes("/")) {
@@ -270,9 +295,20 @@ export class Linker {
   }
 
   /**
+   * `path` as a file of a package found by its short name (`packageDirs`):  `packages/ui/tools/x.ts` or
+   * `ui/tools/x.ts` => `<spell-ui>/tools/x.ts`;  `undefined` when its first folder names no package.
+   */
+  private inPackage(path: string): string | undefined {
+    const [first, ...rest] = path.replace(/^packages\//, "").split("/")
+    const dir = first ? this.packageDirs.get(first) : undefined
+    return dir && join(dir, ...rest)
+  }
+
+  /**
    * Where bare file names (`withSolid.ts`) are looked up:
    * - every package's `src/`, and its `components/` (a component set's elements:  `UIButton.tsx`)
-   *   - none in a repo without `packages/`:  a plain one, spell-epic's own (epic `epic-engine` I14)
+   *   - the old monorepo's `packages/*`, and every `@spell-app/*` package in `top`'s install
+   *   - none in a repo without either:  a plain one, spell-epic's own (epic `epic-engine` I14)
    * - a plain repo's own `src/`, when it has one (spell-epic's:  `PlanDocFiles.ts`)
    * - the repo's `tests/`, where every package's tests live (`List.test.ts`)
    * - the docs' pages (every area:  `pages/`, `guides/`, `epics/`, `templates/`), the content folder's when it has them
@@ -282,12 +318,17 @@ export class Linker {
    */
   private get indexRoots(): string[] {
     return [
-      ...(isDir(this.packages) ? readdirSync(this.packages) : [])
-        .flatMap((name) => [join(this.packages, name, "src"), join(this.packages, name, "components")])
+      ...[
+        ...new Set([
+          ...(isDir(this.packages) ? readdirSync(this.packages).map((name) => join(this.packages, name)) : []),
+          ...this.packageDirs.values()
+        ])
+      ]
+        .flatMap((dir) => [join(dir, "src"), join(dir, "components")])
         .filter(isDir),
       ...[join(this.root, "src"), join(this.root, "tests")].filter(isDir),
       ...AREAS.map((area) => this.real(join(this.root, area))),
-      ...[join(this.root, "spell-epic", "src")].filter(isDir),
+      ...[...new Set([join(this.root, "spell-epic", "src"), join(this.top, "spell-epic", "src")])].filter(isDir),
       join(this.ui, "notes")
     ]
   }
@@ -367,10 +408,12 @@ export class Linker {
 
   /**
    * Whether `path`, absolute and normalised, is the repo root or inside it:
-   * a content folder's file counts, at its place in the checkout (`inCheckout()`)
+   * - a content folder's file counts, at its place in the checkout (`inCheckout()`)
+   * - and a file of a repo beside it, in the top repo (`top`)
    */
   private isInside(path: string): boolean {
-    return isUnder(this.inCheckout(path), this.root)
+    const inCheckout = this.inCheckout(path)
+    return isUnder(inCheckout, this.root) || isUnder(inCheckout, this.top)
   }
 }
 
@@ -546,4 +589,23 @@ function decodeEntities(text: string): string {
   if (!text.includes("&")) return text
   const { document } = parseHTML(`<html><body><p>${text.replaceAll("<", "&lt;")}</p></body></html>`)
   return document.querySelector("p")?.textContent ?? text
+}
+
+/** The nearest folder up from `root` holding a `yarn.lock` (its install's root);  `root` itself without one. */
+function installRoot(root: string): string {
+  for (let at = resolvePath(root); ; at = dirname(at)) {
+    if (existsSync(join(at, "yarn.lock"))) return at
+    if (dirname(at) === at) return resolvePath(root)
+  }
+}
+
+/** Each `@spell-app/*` package installed in `top`'s `node_modules`, its real folder by its short name. */
+function spellPackagesIn(top: string): Map<string, string> {
+  const scope = join(top, "node_modules", "@spell-app")
+  const found = new Map<string, string>()
+  for (const name of isDir(scope) ? readdirSync(scope) : []) {
+    const dir = join(scope, name)
+    if (existsSync(join(dir, "package.json"))) found.set(name, realpathSync(dir))
+  }
+  return found
 }

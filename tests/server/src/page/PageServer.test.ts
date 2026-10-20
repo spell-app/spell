@@ -11,6 +11,7 @@ import {
   engineRoutePath,
   engineRoutes,
   findById,
+  folderUrl,
   replaceById,
   urlPathOf
 } from "$/server/page"
@@ -425,6 +426,46 @@ describe("PageServer", () => {
     ])
     expect(componentSets({})).toEqual([])
     expect(engineRoutes({})).toEqual([])
+  })
+
+  // epic `repo-split` P8:  inside the top repo `spell`, spell-app names Spell UI's and spell-epic's folders beside it
+  it("serves the folders its settings name BESIDE the checkout (`../ui/docs`), at /_beside/ (folderUrl())", async () => {
+    const top = mkdtempSync(join(tmpdir(), "srv-top-"))
+    const checkout = join(top, "app")
+    for (const dir of ["app", "ui/docs", "ui/site/_assets", "engine/assets"])
+      mkdirSync(join(top, dir), { recursive: true })
+    writeFileSync(join(top, "ui", "docs", "ui-button.html"), "<!doctype html><head></head><p>beside</p>\n")
+    writeFileSync(join(top, "ui", "site", "_assets", "site.js"), "export const BESIDE = 1\n")
+    writeFileSync(join(top, "engine", "assets", "engine.js"), "// beside\n")
+    writeFileSync(join(top, "secret.txt"), "never served\n")
+    const componentSets = { ui: { name: "Spell UI", dir: "../ui/docs", assets: "../ui/site/_assets" } }
+    const settings = { componentSets, engineRoutes: { "/_epic/assets/": "../engine/assets" } }
+    writeFileSync(join(checkout, "package.json"), JSON.stringify({ pageServer: settings }))
+    const beside = await new PageServer({ root: checkout }).start({ port: 0, routes: false, pidFile: false })
+    try {
+      const at = beside.info.port
+      expect((await ask(at, "GET", "/components/ui/ui-button.html")).text).toContain("<p>beside</p>")
+      expect((await ask(at, "GET", "/components/ui/_assets/site.js")).text).toBe("export const BESIDE = 1\n")
+      expect((await ask(at, "GET", "/_epic/assets/engine.js")).text).toBe("// beside\n")
+      // only the named folders:  never the checkout's parent whole
+      expect((await ask(at, "GET", "/_beside/secret.txt")).status).toBe(404)
+      expect((await ask(at, "GET", "/_beside/ui/docs/ui-button.html")).status).toBe(200)
+      // from a worktree's address:  the main checkout's (a worktree of every repo is P9's)
+      expect(componentSetPath("/worktrees/w/components/ui/x.html", beside.componentSets)).toBe(
+        "/_beside/ui/docs/x.html"
+      )
+      expect(engineRoutes(settings)).toEqual([["/_epic/assets/", "/_beside/engine/assets/"]])
+    } finally {
+      await beside.stop()
+      rmSync(top, { recursive: true, force: true })
+    }
+    expect([folderUrl("app/docs"), folderUrl("./app/docs/"), folderUrl("../ui/docs"), folderUrl(".")]).toEqual([
+      "/app/docs",
+      "/app/docs",
+      "/_beside/ui/docs",
+      ""
+    ])
+    expect(() => folderUrl("../../x")).toThrow(/above the checkout's parent/)
   })
 
   it("serves no component sets and no engine routes when its root's settings name none", () => {

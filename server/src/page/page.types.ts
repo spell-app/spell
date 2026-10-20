@@ -92,14 +92,15 @@ export type PageServerSettings = {
   /**
    * the COMPONENT SETS it serves, by id, in the top bar's order (`ComponentSet`, `componentSets()`):
    * each at `/components/<id>/`, its pages' folder with its site bundle laid over it at `_assets/`;  none by default
-   * - e.g. `"ui": { "name": "Spell UI", "dir": "packages/ui/docs", "assets": "packages/ui/site/_assets" }`
+   * - e.g. `"ui": { "name": "Spell UI", "dir": "../spell-ui/docs", "assets": "../spell-ui/site/_assets" }`:  a folder
+   *   beside the checkout (`../`) is served at `/_beside/...` (`folderUrl()`, epic `repo-split` P8)
    * - the server knows nothing of what they are:  the folders come from here (epic `repo-split` P4, Q3)
    */
   componentSets?: Record<string, ComponentSetSetting>
   /**
    * ENGINE ROUTES:  URL prefixes served from a folder of the checkout, under every worktree's address too
    * (`EngineRoute`, `engineRoutes()`);  none by default
-   * - e.g. `"/_epic/assets/": "spell-epic/src/tools/_assets"`:  the epic engine, through the checkout's link
+   * - e.g. `"/_epic/assets/": "../spell-epic/src/tools/_assets"`:  the epic engine, beside the checkout in the top repo
    * - live reload reports a change in one at its route
    */
   engineRoutes?: Record<string, string>
@@ -128,7 +129,7 @@ export type PageScript = {
  * - `dir`:  its pages' folder, relative to the checkout, e.g. `packages/ui/docs`
  *   - Epic UI's is spell-epic's, through the checkout's `spell-epic` link (epic `epic-eject` I5)
  * - `assets`:  the site bundle its pages load as `_assets/`, relative to the checkout
- *   - today Spell UI's site bundle (`packages/ui/site/_assets`), for every set:  it holds `globalThis.SpellUI`
+ *   - today Spell UI's site bundle (`../spell-ui/site/_assets`), for every set:  it holds `globalThis.SpellUI`
  *     (`SitePacks`) for the component packs a set's pages load, the epics pack, for the comments, on all of them
  *   - the other sets had a build of their own (its `sets/`), from epic `epic-workflow` P10 until epic
  *     `epic-engine` gave Spell UI's pages the packs too

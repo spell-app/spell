@@ -1,7 +1,7 @@
 import { spawnSync, type StdioOptions } from "node:child_process"
 import { createHash } from "node:crypto"
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
-import { join, relative, sep } from "node:path"
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs"
+import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
 import { AS } from "$/assembler"
 
@@ -16,7 +16,8 @@ import { AS } from "$/assembler"
  * - The page server runs `spell dev bundles build --stale` when it starts, so a page always loads a current build.
  * - WHICH bundles:  the ones whose output folders the checkout's root `package.json` names,
  *   in `"pageServer": { "bundles": [...] }`, the list the page server reads too (`Bundle.specs()`)
- * - Knows the checkout's LAYOUT as folder names only (`AS.BUNDLES`):  imports no other package.
+ * - Knows no checkout's LAYOUT:  each bundle by its PACKAGE (`AS.BUNDLES`), found through the checkout's
+ *   `node_modules` wherever its repo is (epic `repo-split` P8);  imports no other package.
  */
 export class Bundle {
   /** the checkout's root */
@@ -35,9 +36,21 @@ export class Bundle {
     return this.spec.name
   }
 
+  /** the folder of its package, `spec.package`, as the checkout finds it;  throws when it isn't installed */
+  get packageDir(): string {
+    const found = packageFolder(this.spec.package, this.root)
+    if (!found) throw new Error(`Bundle:  ${this.spec.package} isn't installed where ${this.root} finds packages`)
+    return found
+  }
+
   /** its output folder, absolute */
   get outputDir(): string {
-    return join(this.root, this.spec.output)
+    return join(this.packageDir, this.spec.output)
+  }
+
+  /** its output folder, relative to the checkout, `/`-separated:  as the settings' `bundles` name it */
+  get output(): string {
+    return relative(canonical(this.root), this.outputDir).split(sep).join("/")
   }
 
   /** where its last build recorded its sources' hash */
@@ -74,7 +87,11 @@ export class Bundle {
     if (!existsSync(file)) return []
     const settings = JSON.parse(readFileSync(file, "utf8")) as { pageServer?: { bundles?: string[] } }
     return (settings.pageServer?.bundles ?? []).map((folder) => {
-      const spec = AS.BUNDLES.find((each) => each.output === folder)
+      const wanted = canonical(resolve(root, folder))
+      const spec = AS.BUNDLES.find((each) => {
+        const dir = packageFolder(each.package, root)
+        return dir !== undefined && canonical(join(dir, each.output)) === wanted
+      })
       if (!spec) throw new TypeError(`Bundle.specs():  no bundle builds into '${folder}' (package.json's "pageServer")`)
       return spec
     })
@@ -83,7 +100,7 @@ export class Bundle {
   /** Is it stale, and why. */
   check(): AS.BundleCheck {
     const sources = this.sourcesHash()
-    const found = { name: this.name, output: this.spec.output, sources }
+    const found = { name: this.name, output: this.output, sources }
     const record = this.record()
     if (!record) return { ...found, stale: "never built" }
     const entry = statSync(join(this.outputDir, this.spec.entry), { throwIfNoEntry: false })
@@ -110,10 +127,12 @@ export class Bundle {
     const sources = this.sourcesHash()
     const started = performance.now()
     const [command, ...args] = this.spec.run
-    const run = spawnSync(command!, args, { cwd: join(this.root, this.spec.cwd), stdio })
+    const cwd = join(this.packageDir, this.spec.cwd)
+    const run = spawnSync(command!, args, { cwd, stdio })
     if (run.status !== 0) {
       const why = run.error ? run.error.message : `exit ${run.status ?? run.signal}`
-      throw new Error(`Bundle.build():  \`${this.spec.run.join(" ")}\` (in ${this.spec.cwd}) failed:  ${why}`)
+      const where = relative(canonical(this.root), cwd).split(sep).join("/") || "."
+      throw new Error(`Bundle.build():  \`${this.spec.run.join(" ")}\` (in ${where}) failed:  ${why}`)
     }
     const record: AS.BundleRecord = { sources, built: new Date().toISOString() }
     writeFileSync(this.recordFile, `${JSON.stringify(record, null, 2)}\n`)
@@ -121,35 +140,49 @@ export class Bundle {
   }
 
   /**
-   * The hash of every source file:  each one's path (relative to the checkout) and bytes, in path order.
+   * The hash of every source file:  each one's name (`sourceFiles()`) and bytes, in name order.
    * - a missing source adds nothing, so adding it later changes the hash
    */
   sourcesHash(): string {
     const hash = createHash("sha256").update(`${BUNDLE_FORMAT}\n${this.spec.run.join(" ")}\n`)
-    for (const file of this.sourceFiles()) hash.update(`${file}\n`).update(readFileSync(join(this.root, file)))
+    for (const [name, file] of this.sources()) hash.update(`${name}\n`).update(readFileSync(file))
     return hash.digest("hex").slice(0, 16)
   }
 
   /**
-   * Its source files, relative to the checkout, `/`-separated and sorted:
-   * every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs).
+   * Its source files, sorted, by name:  a package's by its npm name and its path in it (`@spell-app/ui/src/core.ts`),
+   * anything else by its path from the install's root (`yarn.lock`);  `/`-separated.
+   * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs)
+   * - the same names wherever the repos are, so a move makes no bundle stale
    */
   sourceFiles(): string[] {
-    const files: string[] = []
-    for (const source of this.spec.sources) walk(join(this.root, source))
-    return files.map((file) => relative(this.root, file).split(sep).join("/")).sort()
+    return this.sources().map(([name]) => name)
+  }
 
-    /** add `path`, or every file under it, to `files` */
-    function walk(path: string): void {
+  /** `sourceFiles()`'s names, each with its file, absolute;  sorted by name. */
+  private sources(): Array<[name: string, file: string]> {
+    const found: Array<[string, string]> = []
+    for (const source of this.spec.sources) {
+      const scoped = /^(@[^/]+\/[^/]+)(?:\/(.*))?$/.exec(source)
+      const base = scoped ? packageFolder(scoped[1]!, this.root) : installRoot(this.root)
+      if (!base) continue
+      const prefix = scoped ? scoped[1]! : ""
+      walk(join(base, scoped ? (scoped[2] ?? "") : source), base, prefix)
+    }
+    return found.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+
+    /** add `path`, or every file under it, to `found`, named from `base` with `prefix` */
+    function walk(path: string, base: string, prefix: string): void {
       const stat = statSync(path, { throwIfNoEntry: false })
       if (!stat) return
       if (!stat.isDirectory()) {
-        files.push(path)
+        const name = relative(base, path).split(sep).join("/")
+        found.push([prefix ? `${prefix}/${name}` : name, path])
         return
       }
       for (const entry of readdirSync(path, { withFileTypes: true })) {
         if (SKIPPED.test(entry.name)) continue
-        if (entry.isDirectory() || entry.isFile()) walk(join(path, entry.name))
+        if (entry.isDirectory() || entry.isFile()) walk(join(path, entry.name), base, prefix)
       }
     }
   }
@@ -165,10 +198,37 @@ export class Bundle {
 }
 
 /** Bump to make every bundle stale once, e.g. when what a build records changes. */
-const BUNDLE_FORMAT = "bundle 1"
+const BUNDLE_FORMAT = "bundle 2"
+
+/**
+ * The real folder of package `name` as `from` finds it in `node_modules` (each folder up, as node does);
+ * `undefined` when it isn't installed.
+ */
+function packageFolder(name: string, from: string): string | undefined {
+  for (let at = resolve(from); ; at = dirname(at)) {
+    const link = join(at, "node_modules", name)
+    if (existsSync(join(link, "package.json"))) return realpathSync(link)
+    if (dirname(at) === at) return undefined
+  }
+}
+
+/** The install's root above `from`:  the nearest folder up holding `yarn.lock`;  `from` itself without one. */
+function installRoot(from: string): string {
+  for (let at = resolve(from); ; at = dirname(at)) {
+    if (existsSync(join(at, "yarn.lock"))) return at
+    if (dirname(at) === at) return resolve(from)
+  }
+}
+
+/** `path` with its links followed as far as it exists:  two spellings of one folder compare equal. */
+function canonical(path: string): string {
+  if (existsSync(path)) return realpathSync(path)
+  const parent = dirname(path)
+  return parent === path ? path : join(canonical(parent), basename(path))
+}
 
 /**
  * Names never part of a bundle's sources:  dot files, `node_modules`, snapshots, tests, and the icon packs
- * (each bundle LINKS `packages/ui/src/icons/icon-packs`, never bundles it).
+ * (each bundle LINKS Spell UI's `src/icons/icon-packs`, never bundles it).
  */
 const SKIPPED = /^(\..*|node_modules|__snapshots__|icon-packs|.*\.test\.[cm]?[jt]sx?)$/
