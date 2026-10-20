@@ -522,6 +522,7 @@
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@playwright/test": "1.63.0",
+    "@solidjs/h": "2.0.0-rc.13",
     "@solidjs/vite-plugin": "3.0.0-next.47",
     "@solidjs/web": "2.0.0-rc.13",
     "@spell-app/assembler": "workspace:*",
