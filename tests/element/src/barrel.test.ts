@@ -38,7 +38,7 @@ describe("$/spell-element", () => {
   })
 
   it("imports nothing but util's generic files, Solid, and itself", () => {
-    const sources = import.meta.glob<string>("../../../packages/spell-element/src/**/*.{ts,tsx}", {
+    const sources = import.meta.glob<string>("../../src/**/*.{ts,tsx}", {
       eager: true,
       query: "?raw",
       import: "default"

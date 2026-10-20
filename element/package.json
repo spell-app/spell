@@ -4,6 +4,7 @@
   "private": true,
   "description": "What makes a custom element on Solid, for every component set:  the DOM element and component bases, the reactive members' decorators, shadow events and hot reloading",
   "license": "MIT",
+  "repository": "https://github.com/spell-app/spell-element",
   "type": "module",
   "sideEffects": [
     "./src/HotDefinitions.ts"
@@ -18,10 +19,10 @@
   "scripts": {
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && tsc && tsc -p ../../tests/spell-element && echo '<< TSC PASSED\n'",
-    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src test && cd ../../tests/spell-element && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\n'",
-    "lint:fix": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT --fix' && vp lint --fix src test && cd ../../tests/spell-element && vp lint --fix . && echo '<< OXLINT PASSED\n'",
-    "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt src test vite.config.ts vitest.config.ts && cd ../../tests/spell-element && vp fmt . && echo '<< OXFMT PASSED\n'",
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && tsc && tsc -p ./tests && echo '<< TSC PASSED\n'",
+    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src test && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\n'",
+    "lint:fix": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT --fix' && vp lint --fix src test && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\n'",
+    "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt src test vite.config.ts vitest.config.ts && cd ./tests && vp fmt . && echo '<< OXFMT PASSED\n'",
     "/////// TESTING": "",
     "test": "echo '>>>>>>>>>>>\n>> RUNNING TESTS' && vp test run && echo '<< TESTS PASSED\n'",
     "test:watch": "vp test"
@@ -47,5 +48,8 @@
   "engines": {
     "node": ">=24.11"
   },
-  "packageManager": "yarn@4.18.0"
+  "packageManager": "yarn@4.18.0",
+  "dependencies": {
+    "@spell-app/util": "workspace:*"
+  }
 }

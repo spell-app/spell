@@ -33,7 +33,7 @@ export default defineConfig({
   },
   test: {
     // the tests live in the repo's tests/ folder, at the same paths as the code
-    dir: resolve(import.meta.dirname, "../../tests/spell-element"),
+    dir: resolve(import.meta.dirname, "./tests"),
     include: ["src/**/*.test.{ts,tsx}"],
     // the stand-in settings, installed before every test file
     setupFiles: [resolve(import.meta.dirname, "test/TestSettings.ts")],
