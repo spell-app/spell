@@ -244,10 +244,10 @@
     color: var(--_act-ink);
   }
 
-  /* ## The comment, on every card:  Owen's words, on his ivory */
+  /* ## The comment, on every card:  Owen's words, on his ivory, the same on all four sides (its box has no margin) */
   .comment {
     margin-block: 0 10px;
-    padding: 6px;
+    padding: 8px;
     border: 1px solid color-mix(in oklab, var(--_run-ivory-ink) 30%, transparent);
     border-radius: 12px;
     background: var(--_run-ivory);

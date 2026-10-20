@@ -106,8 +106,10 @@ const BLOCK_ACTIONS = ["comment", "expand"]
  * the row is a line of no height just before the block, but the block's own top margin (a table's 12px, a list's)
  * may lie between them, or collapse into the margin above:  CSS can't know which, so this measures it
  * (`--spell-block-gap`, read by `spell-comments.css`'s `.spell-block-buttons`).
- * - a table's buttons are centred on its header row (its first row):  its height too, `--spell-block-head`, and the
- *   row marked `.at-head-row`
+ * - a table's buttons are centred on its header row (its first row):  the gap down to that ROW's top (the table's
+ *   own top border lies above it), its height, `--spell-block-head`, and the row marked `.at-head-row`
+ *   - to the hundredth of a pixel, not whole pixels:  the gap to the TABLE's top, and both rounded, left the expand
+ *     button 1.65px above the row's middle (epic `epic-engine` r1, the repo-split analysis page's Q5)
  * - all reads, then all writes;  a row or block not drawn (a folded section's) is skipped until it shows:  its
  *   callers run again on a resize (the comments' `makeRoom()`, a table's `place()`)
  */
@@ -116,11 +118,9 @@ export function alignBlockActions(root) {
   const sizes = rows.map((row) => {
     const block = row.nextElementSibling
     if (!block || !row.getClientRects().length || !block.getClientRects().length) return undefined
-    const head = block.querySelector("tr")?.getBoundingClientRect().height
-    return {
-      gap: `${Math.round(block.getBoundingClientRect().top - row.getBoundingClientRect().top)}px`,
-      head: head ? `${Math.round(head)}px` : undefined
-    }
+    const head = block.querySelector("tr")?.getBoundingClientRect()
+    const top = head?.height ? head.top : block.getBoundingClientRect().top
+    return { gap: pixels(top - row.getBoundingClientRect().top), head: head?.height ? pixels(head.height) : undefined }
   })
   rows.forEach((row, at) => {
     const size = sizes[at]
@@ -134,6 +134,11 @@ export function alignBlockActions(root) {
     }
     row.classList.toggle("at-head-row", !!size.head)
   })
+}
+
+/** `value` px as CSS, to the hundredth. */
+function pixels(value) {
+  return `${Math.round(value * 100) / 100}px`
 }
 
 /**

@@ -249,6 +249,7 @@ async function start() {
   wireJumpKey(go, canGo)
   wireFilter(main)
   wireTableWidths(main)
+  wireTableHeads(main)
   wireStuckTrail(main)
   // UI renders its shadow content a little after the definitions:  land once it has
   await nextFrames(2)
@@ -341,9 +342,7 @@ function wireTableWidths(main) {
     for (const entry of entries) for (const box of boxesIn(entry.target)) place(box)
   })
   // the box that moves:  a `<ui-table>` host, else the bare table
-  const boxesIn = (root) => [
-    ...new Set([...root.querySelectorAll("table")].map((table) => table.closest("ui-table") ?? table))
-  ]
+  const boxesIn = tableBoxes
   const isWide = (box) => !!readJSON(storeKey)[tableKey(box, main)]
   const place = (box) => {
     const toggle = toggles.get(box)
@@ -413,6 +412,182 @@ function wireTableWidths(main) {
   watch()
   new MutationObserver(() => requestAnimationFrame(watch)).observe(main, { childList: true, subtree: true })
   addEventListener("resize", () => requestAnimationFrame(() => toggles.forEach((_toggle, box) => place(box))))
+}
+
+/**
+ * A table's HEADER ROW sticks (epic `epic-engine` r4;  Owen, 2026-10-19:  "make the table headers sticky"):  while its
+ * rows scroll past, it stays just under the stuck titles, the page header's and the sections', until the table ends.
+ * - its header:  its `<thead>`, else a first row of `<th>`s alone
+ * - a PIN, not the row itself:  `position: sticky` on a `<thead>` holds only inside its nearest scroll box, and a table
+ *   wider than its column scrolls sideways in its own box (every `<ui-table>`, a bare table at phone width), which
+ *   scrolls nothing up or down.  So a COPY of the header (`.spell-table-pin`, `data-spell-added`) sticks instead:
+ *   - a line of no height just before the table (and its actions row), sticking at the line below the titles:  the
+ *     browser holds it there while the page scrolls, as it holds the titles
+ *   - shown only while the table's own header is under that line, over the table's width as it shows (its box's,
+ *     wide or not, scrolled sideways or not), its columns as wide as the table's, moved sideways with them
+ *   - as the table ends, it goes up with the table's last row, cut off at the line:  never over a title
+ *   - the copy draws as the table does:  the same classes in the same place (a `<ui-table>` copy for a `<ui-table>`);
+ *     no pointer, no ids, hidden from readers
+ * - the line, below the titles stuck over the table (`tableLine()`)
+ * - read only for the tables on screen (an IntersectionObserver), a frame at a time, on any scroll (the page's, or a
+ *   table's sideways) or resize;  tables a part's body or a live update adds later get theirs too
+ */
+function wireTableHeads(main) {
+  const pins = new Map()
+  const onScreen = new Set()
+  const watched = new WeakSet()
+  // tables whose copy can't stick (a scroll box between them and the page):  left alone until the window changes
+  let unpinnable = new WeakSet()
+  const screen = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) onScreen.add(entry.target)
+      else onScreen.delete(entry.target)
+    }
+    schedule()
+  })
+  let frame = 0
+  const schedule = () => {
+    frame ||= requestAnimationFrame(() => {
+      frame = 0
+      update()
+    })
+  }
+  const watch = () => {
+    for (const box of tableBoxes(main)) {
+      if (watched.has(box) || !headRows(tableOf(box)).length) continue
+      watched.add(box)
+      screen.observe(box)
+    }
+  }
+  const update = () => {
+    for (const [box, pin] of pins) {
+      if (box.isConnected) continue
+      pin.remove()
+      pins.delete(box)
+      onScreen.delete(box)
+    }
+    for (const [box, pin] of pins) if (!onScreen.has(box)) pin.hidden = true
+    for (const box of onScreen) if (box.isConnected && !unpinnable.has(box)) place(box)
+  }
+  const place = (box) => {
+    const table = tableOf(box)
+    const rows = headRows(table)
+    if (!rows.length) return
+    const head = rows[0].getBoundingClientRect()
+    const height = rows.at(-1).getBoundingClientRect().bottom - head.top
+    const line = tableLine(box)
+    const end = table.getBoundingClientRect().bottom
+    let pin = pins.get(box)
+    if (!(head.top < line - 0.5 && end > line + 1)) {
+      if (pin) pin.hidden = true
+      return
+    }
+    if (!pin) {
+      pin = el("div", { class: "spell-table-pin", "data-spell-added": true, "aria-hidden": "true", inert: true })
+      pin.hidden = true
+      pins.set(box, pin)
+      const row = box.previousElementSibling
+      ;(row?.classList.contains("spell-block-actions") ? row : box).before(pin)
+    }
+    // shown again:  the header as it is now (a live update may have changed it)
+    if (pin.hidden) copyHead(pin, box, table, rows)
+    pin.hidden = false
+    setStyle(pin, "top", `${line}px`)
+    const view = pin.firstElementChild
+    const area = box.getBoundingClientRect()
+    const at = pin.getBoundingClientRect()
+    // not held at the line:  nothing, rather than a copy out of place
+    if (Math.abs(at.top - line) > 1) {
+      pin.hidden = true
+      unpinnable.add(box)
+      return
+    }
+    setStyle(view, "left", `${area.left - at.left}px`)
+    setStyle(view, "width", `${area.width}px`)
+    // each column as wide as the table's, and the copy moved to where the table's header is (sideways too)
+    const copies = [...view.querySelectorAll("tr")].flatMap((each) => [...each.cells])
+    const widths = rows.flatMap((each) => [...each.cells]).map((cell) => cell.getBoundingClientRect().width)
+    widths.forEach((width, n) => copies[n] && setStyle(copies[n], "width", `${width}px`))
+    const copy = view.querySelector("table")
+    const first = view.querySelector("tr")
+    // the copy as wide as the row, its own edges added (`table-layout: fixed` keeps the columns as set)
+    const edges = copy.getBoundingClientRect().width - first.getBoundingClientRect().width
+    setStyle(copy, "width", `${head.width + edges}px`)
+    const shift = parseFloat(copy.style.translate) || 0
+    setStyle(copy, "translate", `${shift + head.left - first.getBoundingClientRect().left}px`)
+    // leaving with the table's last row:  up, the part above the line cut off
+    const up = Math.min(0, end - (line + height))
+    setStyle(view, "translate", up ? `0 ${up}px` : "")
+    setStyle(view, "clip-path", up ? `inset(${-up}px 0 0 0)` : "")
+  }
+  watch()
+  new MutationObserver(() => requestAnimationFrame(watch)).observe(main, { childList: true, subtree: true })
+  // capture:  a table's own sideways scroll too, which doesn't bubble
+  document.addEventListener("scroll", schedule, { capture: true, passive: true })
+  addEventListener("resize", () => {
+    unpinnable = new WeakSet()
+    schedule()
+  })
+}
+
+/** Set `element`'s inline style `name` to `value` ("" removes it), unless it's that already. */
+function setStyle(element, name, value) {
+  if (element.style.getPropertyValue(name) === value) return
+  if (value) element.style.setProperty(name, value)
+  else element.style.removeProperty(name)
+}
+
+/** The `<table>` of a table's box (`tableBoxes()`):  the box itself, or the `<ui-table>`'s own. */
+function tableOf(box) {
+  return box.localName === "table" ? box : box.querySelector(":scope > table")
+}
+
+/** A table's header rows (`wireTableHeads()`):  its `<thead>`'s, else its first row when it holds `<th>`s alone. */
+function headRows(table) {
+  if (!table) return []
+  if (table.tHead?.rows.length) return [...table.tHead.rows]
+  const first = table.rows[0]
+  return first?.cells.length && [...first.cells].every((cell) => cell.localName === "th") ? [first] : []
+}
+
+/**
+ * Draw a copy of `table`'s header `rows` into `pin` (`wireTableHeads()`):  the table's own tag and classes, in a
+ * shallow copy of its `<ui-table>`, so the page's rules draw it as they draw the table;  never its ids, the table's
+ * inline styles (the expand button's widths) or its body.
+ */
+function copyHead(pin, box, table, rows) {
+  const copy = table.cloneNode(false)
+  const head = el("thead", {}, ...rows.map((row) => row.cloneNode(true)))
+  copy.append(head)
+  const host = box === table ? undefined : box.cloneNode(false)
+  host?.append(copy)
+  for (const each of [copy, host]) {
+    each?.removeAttribute("id")
+    each?.removeAttribute("style")
+  }
+  for (const each of head.querySelectorAll("[id]")) each.removeAttribute("id")
+  pin.replaceChildren(el("div", { class: "spell-table-pin-view" }, host ?? copy))
+}
+
+/**
+ * Where a table's header sticks (`wireTableHeads()`), px from the window's top:  the bottom of what is stuck over it.
+ * - an epic page's:  its `--epic-stack` (the page header and bar, the stuck block titles), and the line of the item
+ *   it's in, which sticks there too
+ * - a `<ui-section>` page's:  the site header and the TOP-LEVEL section's stack (`--spell-stack`, the page header and
+ *   its title):  a nested section's stuck title joins that one's row (`wireStuckTrail()`), its own room left empty
+ * - a headings page's (the saga pages):  the page header, then the h2's and h3's above it
+ */
+function tableLine(box) {
+  const style = getComputedStyle(box)
+  const px = (name) => parseFloat(style.getPropertyValue(name)) || 0
+  if (box.closest("epic-page")) {
+    const line = box.parentElement?.closest("epic-item")?.shadowRoot?.querySelector('[part~="line"]')
+    return (px("--epic-stack") || siteHeaderHeight()) + (line?.getBoundingClientRect().height ?? 0)
+  }
+  let section = box.closest("ui-section")
+  while (section?.parentElement?.closest("ui-section")) section = section.parentElement.closest("ui-section")
+  if (section) return siteHeaderHeight() + (parseFloat(section.style.getPropertyValue("--spell-stack")) || 0)
+  return siteHeaderHeight() + px("--spell-top") + px("--spell-h2-h") + px("--spell-h3-h")
 }
 
 /**
@@ -502,8 +677,16 @@ function tableKey(box, main) {
   if (box.id) return box.id
   const holder = box.parentElement.closest("[id]")
   const root = holder && main.contains(holder) ? holder : main
-  const boxes = [...new Set([...root.querySelectorAll("table")].map((table) => table.closest("ui-table") ?? table))]
-  return `${root === main ? "page" : root.id}#table-${boxes.indexOf(box) + 1}`
+  return `${root === main ? "page" : root.id}#table-${tableBoxes(root).indexOf(box) + 1}`
+}
+
+/**
+ * The tables in `root`, each by its BOX:  its `<ui-table>` host, else the bare table.  Never a pinned header's copy
+ * (`wireTableHeads()`), which isn't the page's.
+ */
+function tableBoxes(root) {
+  const tables = [...root.querySelectorAll("table")].filter((table) => !table.closest(".spell-table-pin"))
+  return [...new Set(tables.map((table) => table.closest("ui-table") ?? table))]
 }
 
 /**

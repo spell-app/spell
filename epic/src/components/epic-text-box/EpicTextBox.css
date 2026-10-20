@@ -2,6 +2,7 @@
  * `<epic-text-box>` (`EpicTextBox.tsx`):  a box Owen types in, one line to start, growing with its text.
  * - The look of the epic page's note boxes (`<epic-agents>`' redirect box):  the page's ground, a quiet rule,
  *   6px corners;  the focus ring the page's.
+ * - Its margin sets it apart on a page;  a `note` has none:  the frame its element draws round it is its margin.
  * - Grows with its text (`field-sizing`), up to a third of the window, then scrolls.
  * - A notes box's KEPT text (P18), above its field:  the page changed under Owen, a warning, so an ORANGE edge and
  *   title;  the texts are his own words, so his IVORY (`templates/epics/plan-doc.md`, "Colours").
@@ -18,6 +19,11 @@
   }
   :host([hidden]) {
     display: none;
+  }
+  /* a `note` sits in a frame the element drawing it gives (a test run's comment):  no margin of its own, so the
+     frame's padding is the same on all four sides (r3) */
+  :host([type="note"]) {
+    margin: 0;
   }
   .field {
     display: block;

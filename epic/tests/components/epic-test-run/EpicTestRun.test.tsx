@@ -241,6 +241,28 @@ describe("<epic-test-run>", () => {
     ])
   })
 
+  test("the comment's ivory frame is the same on all four sides, empty and with lines (r3)", async () => {
+    await adoptClient(routes)
+    const host = await render()
+    const frame = runOf(host)!.querySelector<HTMLElement>(".comment")!
+    const box = frame.querySelector<HTMLElement & { value: string }>("epic-text-box")!
+    const sides = () => {
+      const outer = frame.getBoundingClientRect()
+      const inner = box.shadowRoot!.querySelector("textarea")!.getBoundingClientRect()
+      const rule = parseFloat(getComputedStyle(frame).borderTopWidth)
+      return [
+        inner.top - outer.top - rule,
+        outer.right - rule - inner.right,
+        outer.bottom - rule - inner.bottom,
+        inner.left - outer.left - rule
+      ].map(Math.round)
+    }
+    expect(sides()).toEqual([8, 8, 8, 8])
+    box.value = "One\nTwo\nThree\nFour"
+    await settle(host)
+    expect(sides()).toEqual([8, 8, 8, 8])
+  })
+
   test("Failed:  the note box and the screenshot's area;  the note saved, a pasted screenshot saved and kept", async () => {
     await adoptClient(routes)
     const host = await render()

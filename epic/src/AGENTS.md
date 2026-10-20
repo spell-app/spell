@@ -789,6 +789,17 @@ In `tools/`:
       - the runtime's `wireTableWidths()` measures how far in a table starts,
         so one inside a list item or an epic item's details goes out to the gutter too
       - no button at phone width:  the column is the page already
+      - its HEADER ROW sticks under the stuck titles while its rows scroll past (Owen, 2026-10-19:  "make the table
+        headers sticky";  epic `epic-engine` r4):  every page's tables, guides, details pages, an epic page's items
+        - a `<thead>`, else a first row of `<th>`s alone
+        - a COPY of it sticks, the runtime's `wireTableHeads()`:  a `<thead>` can't stick inside the box a table
+          scrolls sideways in (every `<ui-table>`, a bare table at phone width)
+        - `.spell-table-pin` (`data-spell-added`), a line of no height before the table, held at the line by the
+          browser;  shown while the table's own header is under the line, its columns measured to the table's, moved
+          sideways with it, wide or not;  it leaves with the table's last row, cut off at the line
+        - the line (`tableLine()`):  an epic page's `--epic-stack` and the open item's line;  else the TOP-LEVEL
+          section's stack (a nested stuck title joins its row);  a saga page's h2 and h3
+        - `tableBoxes()` leaves the copies out:  no expand button on one, and no table key counts one
     - the page's HEAD (breadcrumb, title, toolbar):  one ivory band from the site header down
       - an epic page's header and subtitle too (`EpicPage.css`)
     - everything else, prose and insets (paragraphs, lists, asides, code, messages, cards, comment threads):
