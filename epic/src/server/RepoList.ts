@@ -1,8 +1,9 @@
-import { mkdirSync, realpathSync } from "node:fs"
+import { mkdirSync } from "node:fs"
 import { homedir } from "node:os"
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { basename, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { RealPath } from "$/epics/config/RealPath"
 import { DataFile } from "$/epics/data/DataFile"
 
 import {
@@ -103,9 +104,9 @@ export class RepoList {
    * - by real paths:  a checkout's `epics/` link and a worktree's lead to the same file in the content folder
    */
   repoOf(file: string, repos = this.repos()): { repo: Repo; path: string } | undefined {
-    const real = realOr(resolve(file))
+    const real = RealPath.of(file)
     for (const repo of repos) {
-      const inside = relative(realOr(repo.content), real)
+      const inside = relative(RealPath.of(repo.content), real)
       if (inside && !inside.startsWith("..") && !isAbsolute(inside)) return { repo, path: inside.split(sep).join("/") }
     }
     return undefined
@@ -143,9 +144,9 @@ export class RepoList {
     } catch {
       return root
     }
-    const main = realOr(EpicConfig.mainOf(root))
-    if (repos.some((repo) => realOr(repo.checkout) === main)) return root
-    return repos.find((repo) => realOr(repo.content) === realOr(content))?.checkout ?? root
+    const main = EpicConfig.mainOf(root)
+    if (repos.some((repo) => RealPath.same(repo.checkout, main))) return root
+    return repos.find((repo) => RealPath.same(repo.content, content))?.checkout ?? root
   }
 
   ////////////////
@@ -155,7 +156,8 @@ export class RepoList {
   /**
    * Register the repo `checkout` is in (its MAIN checkout, from any worktree),
    * as `name` (default:  its folder's name);  returns it.
-   * - already there by that checkout:  renamed to `name` when one is given, else left
+   * - already there by that checkout (any spelling of it):  renamed to `name` when one is given, else left;  its
+   *   path made the real one
    * - `isDefault`:  served at `/` from now on
    * - throws `RepoListError` for a bad name, a name another checkout has, or a checkout that isn't a folder
    * - SIDE EFFECT:  writes the file (and makes its folder)
@@ -163,16 +165,18 @@ export class RepoList {
   add(checkout: string, { name, isDefault = false }: { name?: string; isDefault?: boolean } = {}): Repo {
     const main = EpicConfig.mainOf(resolve(checkout))
     const data = this.read()
-    const there = data.repos.find((entry) => entry.checkout === main)
+    // by real paths:  an entry written before a move behind a compat link is the same repo, and takes the real path
+    const there = data.repos.find((entry) => RealPath.same(entry.checkout, main))
     const repoName = name ?? there?.name ?? basename(main)
     if (!REPO_NAME.test(repoName))
       throw new RepoListError(`"${repoName}" can't be a repo name:  letters, digits, ".", "_" and "-" only`)
-    const clash = data.repos.find((entry) => entry.name === repoName && entry.checkout !== main)
+    const clash = data.repos.find((entry) => entry.name === repoName && !RealPath.same(entry.checkout, main))
     if (clash) throw new RepoListError(`"${repoName}" is ${clash.checkout} already:  give this one another --name`)
     if (there) {
       // renamed:  the default follows it
       if (data.default === there.name) data.default = repoName
       there.name = repoName
+      there.checkout = main
     } else data.repos.push({ name: repoName, checkout: main })
     if (isDefault) data.default = repoName
     this.write(data)
@@ -224,16 +228,3 @@ export class RepoList {
 
 /** A repo list change that can't be made:  its message says why, for Owen. */
 export class RepoListError extends Error {}
-
-/**
- * `path`'s real path (links followed).
- * - a file not there yet:  its nearest folder that is, real, with the rest after it
- */
-function realOr(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    const parent = dirname(path)
-    return parent === path ? path : join(realOr(parent), basename(path))
-  }
-}

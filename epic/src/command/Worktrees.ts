@@ -1,10 +1,11 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync } from "node:fs"
-import { basename, dirname, join, relative, resolve } from "node:path"
+import { existsSync, lstatSync, mkdirSync, readFileSync } from "node:fs"
+import { basename, dirname, join, relative } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { EpicRepo } from "$/epics/config/EpicRepo"
+import { RealPath } from "$/epics/config/RealPath"
 import { SessionFolders } from "$/epics/config/SessionFolders"
 import { URGENT_STATES } from "$/epics/list/EpicState"
 
@@ -156,7 +157,7 @@ export class Worktrees {
     const to = config.newWorktreeFolder(name)
     if (!existsSync(join(from, ".git"))) throw new EpicCommandError(`no worktree ${name} in ${old}`)
     if (existsSync(to)) throw new EpicCommandError(`${to} is taken`)
-    const busy = this.sessions.live(this.main).find((session) => inFolder(session.cwd, from))
+    const busy = this.sessions.live(this.main).find((session) => RealPath.isIn(session.cwd, from))
     if (busy)
       throw new EpicCommandError(
         `a session works in ${name} (pid ${busy.pid}):  it moves at its /isolate done, not now`
@@ -195,10 +196,10 @@ export class Worktrees {
    */
   remove(target: string, { force = false }: { force?: boolean } = {}): string[] {
     const named = this.named().find((it) => it.name === target)
-    const at = [resolve(target), ...(existsSync(target) ? [realpathSync(target)] : [])]
-    const path = named?.path ?? Worktrees.listOf(this.main).find((it) => at.includes(it.path))?.path
+    // git's own spelling of it:  an unrepaired worktree's is its old path, through a compat link (I59)
+    const path = named?.path ?? Worktrees.listOf(this.main).find((it) => RealPath.same(it.path, target))?.path
     if (!path) throw new EpicCommandError(`no worktree ${target} in this repo:  epic worktree list names them`)
-    if (path === this.main) throw new EpicCommandError(`${path} is the main checkout:  never removed`)
+    if (RealPath.same(path, this.main)) throw new EpicCommandError(`${path} is the main checkout:  never removed`)
     const lines: string[] = []
     const stopped = CheckoutServers.said(CheckoutServers.stop(path))
     if (stopped) lines.push(`${stopped}`)
@@ -214,7 +215,7 @@ export class Worktrees {
     const old = this.config.worktreesFolders[1]
     if (!old) return []
     return this.idle(this.sessions.live(this.main))
-      .filter(({ path }) => inFolder(path, old) && path !== old)
+      .filter(({ path }) => RealPath.from(old, path))
       .map(({ path }) => this.move(basename(path), { dryRun }))
   }
 
@@ -225,27 +226,29 @@ export class Worktrees {
   /**
    * Each worktree in the worktrees' folders:  `{ name, path, branch }`.
    * - the folders:  `.claude/worktrees/`, or beside the repo and the old place too (`EpicConfig.worktreesFolders`)
+   * - `path` as git lists it:  an unrepaired worktree's old path, after a move behind a compat link, matches its
+   *   folder all the same (`RealPath`, epic `epic-engine` I59)
    */
   named(): { name: string; path: string; branch: string }[] {
     const roots = this.config.worktreesFolders
     return Worktrees.listOf(this.main)
-      .filter((it) => roots.some((root) => it.path.startsWith(`${root}/`)) && it.branch !== "(detached)")
+      .filter((it) => roots.some((root) => RealPath.from(root, it.path)) && it.branch !== "(detached)")
       .map((it) => ({ name: basename(it.path), path: it.path, branch: it.branch }))
   }
 
   /** Each worktree in the worktrees' folder that no session in `sessions` works in. */
   idle(sessions: LiveSession[]): IdleWorktree[] {
     return this.named()
-      .filter(({ path }) => !sessions.some((session) => inFolder(session.cwd, path)))
+      .filter(({ path }) => !sessions.some((session) => RealPath.isIn(session.cwd, path)))
       .map(({ path, branch }) => ({ path, branch }))
   }
 
-  /** The live sessions that started in this repo (its main checkout or a worktree), by registry file. */
+  /**
+   * The live sessions that started in this repo (its main checkout or a worktree inside it), by registry file.
+   * - a session's `cwd` may be an old spelling of the checkout (started before a move behind a compat link)
+   */
   repoSessions(): RunningSession[] {
-    const main = this.main
-    return [...this.sessions.running().values()].filter(
-      (record) => record.cwd === main || record.cwd?.startsWith(`${main}/`)
-    )
+    return [...this.sessions.running().values()].filter((record) => RealPath.isIn(record.cwd, this.main))
   }
 
   ////////////////
@@ -393,7 +396,7 @@ export class Worktrees {
     const top = Git.run(["rev-parse", "--show-toplevel"], cwd)
     if (!top.ok) return { label: "(not in git)", branch: "", inside: cwd }
     const root = top.out
-    const label = resolve(root) === resolve(Git.mainRoot(cwd)) ? "main checkout" : `worktree ${basename(root)}`
+    const label = RealPath.same(root, Git.mainRoot(cwd)) ? "main checkout" : `worktree ${basename(root)}`
     const branch = Git.run(["branch", "--show-current"], cwd).out || "(detached)"
     const inside = relative(root, cwd)
     return { root, label, branch, inside }
@@ -505,11 +508,6 @@ const PLAN_SUMMARIES = new Map<string, PlanSummary>()
 /** Write `text` to stdout, on its own line. */
 function out(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
-}
-
-/** Whether `path` is `folder` or inside it. */
-function inFolder(path: string, folder: string): boolean {
-  return path === folder || path.startsWith(`${folder}/`)
 }
 
 /** `move`'s lines for one worktree:  the move, its links, its session folder, its window file. */

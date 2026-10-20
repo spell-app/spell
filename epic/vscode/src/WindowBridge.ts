@@ -60,7 +60,7 @@ import * as vscode from "vscode"
 
 import { DocPreview } from "./DocPreview"
 import { DocView } from "./DocView"
-import { tabShows, windowsFolder } from "./docUrls"
+import { folderIndex, tabShows, windowsFolder } from "./docUrls"
 
 /** Largest request body accepted, in bytes:  ops carry a path or two. */
 const MAX_BODY = 64 * 1024
@@ -299,9 +299,12 @@ export class WindowBridge {
     return { closed: false, matches }
   }
 
-  /** Index of `folder` among the window's folders, or -1. */
+  /** Index of `folder` among the window's folders, or -1:  by real paths (`folderIndex()`). */
   static indexOf(folder: string): number {
-    return (vscode.workspace.workspaceFolders ?? []).findIndex((each) => resolve(each.uri.fsPath) === folder)
+    return folderIndex(
+      (vscode.workspace.workspaceFolders ?? []).map((each) => each.uri.fsPath),
+      folder
+    )
   }
 }
 

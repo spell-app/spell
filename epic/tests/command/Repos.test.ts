@@ -2,7 +2,7 @@
  * Tests of `epic repo` (`Repos`) and of `epic hub`'s checks before it starts anything (`Hub`), in a temp home folder.
  * - no server is started here (the server itself:  `EpicServer.test.ts`)
  */
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
@@ -12,7 +12,7 @@ import { Hub } from "$/epics/command/Hub"
 import { Repos } from "$/epics/command/Repos"
 import { RepoList } from "$/epics/server/RepoList"
 
-const top = mkdtempSync(join(tmpdir(), "epic-repo-cmd-"))
+const top = realpathSync(mkdtempSync(join(tmpdir(), "epic-repo-cmd-")))
 afterAll(() => rmSync(top, { recursive: true, force: true }))
 
 /** A scratch repo checkout whose content is its `docs/`. */

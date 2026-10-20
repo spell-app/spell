@@ -13,7 +13,16 @@
  */
 import assert from "node:assert/strict"
 import { spawn, spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync
+} from "node:fs"
 import { createServer } from "node:http"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
@@ -368,6 +377,71 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   ])
   assert.ok(written.includes("../repo.epics/windows/ongoing/old.code-workspace"))
   assert.ok(!written.includes("../repo.epics/windows/repo.code-workspace"))
+})
+
+test("a repo moved behind a compat link (I59):  `init` drops the content folder that's gone, adds the one found", () => {
+  // spell-epic moved to spell/, its content folder to spell/new.epics, links at the old names;  its config still
+  // names `../repo.epics`, which only the OLD spelling of the checkout finds
+  const top = realpathSync(mkdtempSync(join(tmpdir(), "window-moved-")))
+  const real = join(top, "spell", "repo")
+  mkdirSync(join(real, ".git"), { recursive: true })
+  mkdirSync(join(real, ".epic"))
+  writeFileSync(
+    join(real, ".epic", "config.json5"),
+    JSON.stringify({
+      worktreesFolder: "../repo.worktrees",
+      contentFolder: "../repo.epics",
+      windowsFolder: "workspaces",
+      windows: { default: "repo", repoName: "repo", contentName: "repo.epics", worktreeOnly: true }
+    })
+  )
+  mkdirSync(join(top, "spell", "new.epics"))
+  mkdirSync(join(top, "spell", "repo.worktrees", "seo"), { recursive: true })
+  mkdirSync(join(top, "old"))
+  symlinkSync("../spell/repo", join(top, "old", "repo"))
+  symlinkSync("../spell/new.epics", join(top, "old", "repo.epics"))
+  // a worktree's window file from before the move:  its content folder `../../../repo.epics`, gone from spell/
+  const ongoing = join(real, "workspaces", "ongoing")
+  mkdirSync(ongoing, { recursive: true })
+  writeFileSync(
+    join(ongoing, "seo.code-workspace"),
+    JSON.stringify({
+      folders: [
+        { path: "../../../repo.worktrees/seo", name: "⎇ seo" },
+        { path: "../../../repo.epics", name: "repo.epics" }
+      ],
+      settings: {}
+    })
+  )
+  const code =
+    "const { Window } = await import(process.env.WINDOW_SCRIPT);" +
+    "const { readFileSync } = await import('node:fs');" +
+    "const written = Window.init();" +
+    "console.log(JSON.stringify({ written, seo: JSON.parse(readFileSync(process.env.SEO, 'utf8')) }))"
+  const run = spawnSync(process.execPath, ["--input-type=module", "-e", code], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      // the checkout by its OLD spelling, as a session started before the move has it
+      EPIC_CHECKOUT: join(top, "old", "repo"),
+      SEO: join(ongoing, "seo.code-workspace"),
+      WINDOW_SCRIPT: join(import.meta.dirname, "..", "src", "window.mjs")
+    }
+  })
+  rmSync(top, { recursive: true, force: true })
+  assert.equal(run.status, 0, run.stderr)
+  const { written, seo } = JSON.parse(run.stdout)
+  // the dead entry gone, the content folder where it really is, second
+  assert.deepEqual(seo.folders, [
+    { path: "../../../repo.worktrees/seo", name: "⎇ seo" },
+    { path: "../../../new.epics", name: "repo.epics" }
+  ])
+  assert.ok(written.includes("workspaces/ongoing/seo.code-workspace"))
+  // said, with what to change
+  assert.match(
+    run.stderr,
+    /contentFolder \.\.\/repo\.epics is missing beside .*spell\/repo;  using .*spell\/new\.epics/
+  )
 })
 
 test("a package window:  the whole branch, then the shared repo;  shared links shown only under the shared repo", () => {

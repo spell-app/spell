@@ -1,8 +1,9 @@
-import { existsSync, readdirSync, readFileSync, realpathSync, watch, type FSWatcher } from "node:fs"
+import { existsSync, readdirSync, readFileSync, watch, type FSWatcher } from "node:fs"
 import { homedir } from "node:os"
 import { basename, dirname, join, relative, sep } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { RealPath } from "$/epics/config/RealPath"
 import { SessionFolders } from "$/epics/config/SessionFolders"
 import { DataFile } from "$/epics/data/DataFile"
 import type { SRV } from "$/server"
@@ -94,12 +95,11 @@ export class RunningEpics {
    */
   list(): RunningEpic[] {
     const found: RunningEpic[] = []
-    const mainReal = realOrSelf(this.epics)
     for (const worktree of this.worktreeNames()) {
       const checkout = this.checkoutOf(worktree)
       const own = EPICS_DIRS.find((epics) => existsSync(join(checkout, epics)))
       const dir = own ? join(checkout, own) : this.epics
-      const shared = realOrSelf(dir) === mainReal
+      const shared = RealPath.same(dir, this.epics)
       for (const name of folders(dir)) {
         const file = planDocIn(join(dir, name), name)
         if (!file) continue
@@ -120,7 +120,7 @@ export class RunningEpics {
    * checkout's link into the content folder (an older checkout's `epics` link).
    */
   isIndex(file: string): boolean {
-    return file === this.index || realOrSelf(file) === realOrSelf(this.index)
+    return RealPath.same(file, this.index)
   }
 
   /**
@@ -269,8 +269,9 @@ export class RunningEpics {
   runningNames(): Set<string> {
     const names = new Set<string>()
     for (const session of this.liveSessions()) {
-      const folder = this.worktrees.find((each) => session.cwd.startsWith(each + sep))
-      if (folder) names.add(session.cwd.slice(folder.length + 1).split(sep)[0]!)
+      // by real paths:  a session started before a move behind a compat link keeps the old spelling (I59)
+      const inside = this.worktrees.map((each) => RealPath.from(each, session.cwd)).find(Boolean)
+      if (inside) names.add(inside.split("/")[0]!)
       const title = bareTitle(session.title)
       if (title) names.add(title)
     }
@@ -476,15 +477,6 @@ const EPIC_FILE = /^[^/]+\/(?:packages\/docs\/(?:content\/)?)?epics\/([^/]+)\/\1
  */
 const ASSET_FILE =
   /^[^/]+\/packages\/(?:epics\/tools\/_assets|docs\/tools\/_assets|[^/]+\/components\/__pack|epics\/pack)\/.+\.(?:m?js|css)$/
-
-/** `path` with every link resolved, or `path` itself when it doesn't exist. */
-function realOrSelf(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    return path
-  }
-}
 
 /** The sub-folders of `dir`, sorted;  none if it's missing. */
 function folders(dir: string): string[] {

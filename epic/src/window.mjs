@@ -159,12 +159,13 @@
  * - No window (the extension isn't installed, or the window wasn't reloaded since):  exits 1, saying so.
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { EpicConfig } from "./config/EpicConfig.ts"
+import { RealPath } from "./config/RealPath.ts"
 import { SessionFolders } from "./config/SessionFolders.ts"
 
 /** The engine, spell-epic:  the folder this script's `scripts/` is in, with the plugin's `hooks/` beside it. */
@@ -362,8 +363,8 @@ export class Window {
    *   its theme and every other setting are Owen's, kept
    * - the whole repo's window, `windows.default` (`spell-app`), when it isn't a package's:
    *   written when missing (`ensureRepoWindow()`)
-   * - a worktree's window (`<windowsFolder>/ongoing/`):  its `files.exclude`, and the content folder when it lacks it
-   *   (`withContentFolder()`)
+   * - a worktree's window (`<windowsFolder>/ongoing/`):  its `files.exclude`, and the content folder when it lacks it,
+   *   a folder that's gone (an old content folder) dropped (`withContentFolder()`)
    * - an existing file VS Code can't read as JSON (comments) is left alone
    * - NOTE:  a package window that changes folders while open re-reads its workspace;  its Claude panel may reload
    */
@@ -421,14 +422,23 @@ export class Window {
    * A worktree window's `folders` with the content folder in them:  right after the worktree's own (`⎇ <name>`),
    * when it isn't there yet (`fromDir`:  where the window file is, its paths relative to it).
    * - for a window file written while the content folder was missing, or by older code:  `init` puts it back
-   * - unchanged when it's there (wherever), or when there's no content folder
+   * - unchanged when it's there (wherever, any spelling of it), or when there's no content folder
+   * - a folder that ISN'T there is dropped first, unless it's the worktree's own (`⎇ <name>`) or the repo root
+   *   (`windows.repoName`):  an old content folder (epic `epic-engine` I59), e.g. `../../../spell-app.epics` after
+   *   spell-epic moved to `~/www/spell/` and its content folder to `spell.epics`
    */
   static withContentFolder(folders, fromDir) {
+    const kept = folders.filter(
+      (folder) =>
+        folder.name?.startsWith("⎇ ") ||
+        folder.name === CONFIG.windows.repoName ||
+        existsSync(resolve(fromDir, folder.path ?? ""))
+    )
     const [content] = Window.sharedFolder(fromDir)
-    if (!content || folders.some((folder) => resolve(fromDir, folder.path) === resolve(fromDir, content.path)))
-      return folders
-    const at = folders.findIndex((folder) => folder.name?.startsWith("⎇ "))
-    return at < 0 ? [...folders, content] : [...folders.slice(0, at + 1), content, ...folders.slice(at + 1)]
+    if (!content || kept.some((folder) => RealPath.same(resolve(fromDir, folder.path), resolve(fromDir, content.path))))
+      return kept
+    const at = kept.findIndex((folder) => folder.name?.startsWith("⎇ "))
+    return at < 0 ? [...kept, content] : [...kept.slice(0, at + 1), content, ...kept.slice(at + 1)]
   }
 
   /**
@@ -1780,13 +1790,9 @@ export function stayAdvice({ window, others = [], epic = false }) {
   return { recommend: "window", others: listed, reasons }
 }
 
-/** `path` with symlinks resolved (`/tmp` -> `/private/tmp`), as `process.cwd()` reports it;  as is if missing. */
+/** `path` with symlinks resolved (`/tmp` -> `/private/tmp`), as `process.cwd()` reports it (`RealPath.of()`). */
 function real(path) {
-  try {
-    return realpathSync(path)
-  } catch {
-    return path
-  }
+  return RealPath.of(path)
 }
 
 /**

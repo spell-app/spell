@@ -2,6 +2,7 @@ import { existsSync, readdirSync, statSync } from "node:fs"
 import { basename, join, relative } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { RealPath } from "$/epics/config/RealPath"
 
 import {
   EXIT,
@@ -135,7 +136,7 @@ export class Stock {
     claimed: Set<string>
   ): StockItem {
     const { main, config } = this
-    const here = sessions.filter((session) => worktree && inFolder(session.cwd, worktree))
+    const here = sessions.filter((session) => RealPath.isIn(session.cwd, worktree))
     for (const session of here) claimed.add(session.id)
     const base = config.baseBranch
     const ahead = branch ? this.count(`${base}..${branch}`) : 0
@@ -516,11 +517,6 @@ function describeSessions(item: StockItem): string {
       (session.question ? `, asked a question ${session.questionMin} min ago` : "")
   )
   return bits.length ? `session ${bits.join(", ")}` : "no session"
-}
-
-/** Whether `path` is `folder` or inside it. */
-function inFolder(path: string, folder: string): boolean {
-  return path === folder || path.startsWith(`${folder}/`)
 }
 
 /** `text`'s lines, empty ones dropped. */

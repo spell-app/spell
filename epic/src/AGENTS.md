@@ -197,6 +197,27 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - each one's default is spell-app's layout before the file existed;  `app`'s:  none
     - the MAIN checkout's file, found through git's common dir (`SRV.checkoutOf()`), so every worktree reads the same
     - `epic config [key] [--json]` prints the values, for the skills (folders absolute)
+    - a repo MOVED behind compat links (repo-split's move to `~/www/spell/`;  epic `epic-engine` I59):
+      - `main` (and `mainOf()`) is the main checkout's REAL path, whatever spelling it was found by:  an unrepaired
+        worktree's `.git` file names the OLD one
+      - a configured folder (`contentFolder`, `worktreesFolder`, `windowsFolder`, `engineFolder`) missing beside the
+        real main checkout, but there beside an OLD spelling of it, is used from there (its real path), with ONE line
+        on stderr per process:  `contentFolder ../spell-app.epics is missing beside <main>;  using <found> -- update
+        <main>/.epic/config.json5`
+        - the old spellings:  the one `of()` was given, and the one each worktree's `.git` file names (from git's
+          `<main>/.git/worktrees/*/gitdir`), so the main checkout finds it too
+        - once every worktree is repaired, none is left:  update the file at the move (move-check.md's checklist)
+      - `contentOf()` never falls back to the checkout itself silently when the file NAMES a content folder:  it says so
+      - `epic window init` drops a worktree window's folder that's gone (the old content folder) and adds the one in
+        force (`withContentFolder()`, [window.mjs](./window.mjs))
+    - `RealPath` (epic `epic-engine` I59):  every compare of checkout, worktree, content-folder and session paths,
+      links followed on BOTH sides
+      - `of()`:  the real path;  a missing one, its nearest folder that's there, real, then the rest as given
+      - `same()`, `isIn()`, `from()`:  equal, inside, the path inside
+      - who:  `EpicConfig` (`main`, `worktreeNameOf()`), `Worktrees` (`named()`, `idle()`, `remove()`,
+        `repoSessions()`), `Sessions.live()`'s `inRepo`, `Stock`, `RunningEpics`, `RepoList`, `WorktreeGuard`,
+        `SharedMigration`, the window script, the extension's `WindowBridge.indexOf()` (`folderIndex()`)
+      - plain `node` loads it by path:  node's own modules only
     - node only, NOT in the `$/epics` barrel (`$/epics/config/EpicConfig`)
       - plain `node` loads it by path too, before a worktree's `yarn install`:
         the hooks ([hooks/](../hooks/)) and the window script ([window.mjs](./window.mjs))

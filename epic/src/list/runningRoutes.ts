@@ -27,6 +27,7 @@ import { resolve } from "node:path"
 import type { RouteContext, RouteModule } from "$/server/page"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { RealPath } from "$/epics/config/RealPath"
 
 import { RunningEpics } from "./RunningEpics"
 
@@ -49,7 +50,7 @@ const runningRoutes: RouteModule = {
     const { root, router, web, live, onStop, serveWorktrees } = context
     const config = EpicConfig.of(root)
     // the main checkout's server shows every worktree;  a worktree's own server shows none
-    if (config.main === resolve(root)) serveWorktrees(...config.worktreesFolders)
+    if (RealPath.same(config.main, root)) serveWorktrees(...config.worktreesFolders)
     const content = EpicConfig.contentOf(root)
     if (content !== resolve(root)) context.serveContent?.(content)
     const epics = new RunningEpics(root)

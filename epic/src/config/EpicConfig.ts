@@ -1,10 +1,12 @@
-import { existsSync, readFileSync } from "node:fs"
-import { isAbsolute, join, relative, resolve, sep } from "node:path"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { dirname, isAbsolute, join, resolve, sep } from "node:path"
 
 // By the server's package entry (its `exports`, epic `repo-split` P6):  plain `node` loads this file (the hooks,
 // `src/window.mjs`), and finds the server package in `node_modules` (spell-app's, linked in:  `portal:`).  The
 // server's checkout finder:  the main checkout from any worktree, with no `git` run
 import { checkoutOf } from "@spell-app/server/checkout"
+
+import { RealPath } from "./RealPath.ts"
 
 /****************
  * ### `EpicConfig`
@@ -35,8 +37,13 @@ import { checkoutOf } from "@spell-app/server/checkout"
  *   - Packages below epics never read it (the server, spaces):  they find the main checkout through git
  *     (`SRV.checkoutOf()`), or are told by epics' route module (`PageServer.serveWorktrees()`).
  * - Node only (`node:fs`):  NOT in the `$/epics` barrel, imported by path (`$/epics/config/EpicConfig`).
- * - Its position:  imports only node's own modules and the server's `checkout.ts` by its file, so plain
- *   `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
+ * - Its position:  imports only node's own modules, the server's `checkout.ts` by its entry and `RealPath` beside it,
+ *   so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
+ * - A repo moved behind a compat link (repo-split's move to `~/www/spell/`;  epic `epic-engine` I59):
+ *   - `main` is the REAL path, and every path compare is real on both sides (`RealPath`), so an old spelling (a
+ *     worktree's `.git` file, a session's `cwd`) still matches
+ *   - a configured folder missing beside the real `main`, but there beside its OLD spelling (`../spell-app.epics`
+ *     moved too), is found there, with a warning on stderr to update the file (`folderFor()`)
  ****************/
 export class EpicConfig {
   /** where a repo's config is, from its main checkout */
@@ -68,7 +75,7 @@ export class EpicConfig {
   /** the worktrees' window files' folder, in the windows folder:  `<windowsFolder>/ongoing/<name>.code-workspace` */
   static readonly WORKTREE_WINDOWS = "ongoing"
 
-  /** the main checkout:  what the folders are relative to */
+  /** the main checkout, its REAL path (links followed):  what the folders are relative to */
   readonly main: string
 
   /** the config file, `<main>/.epic/config.json5`, there or not */
@@ -77,27 +84,44 @@ export class EpicConfig {
   /** the values as written (folders relative to `main`), the defaults filling in what the file leaves out */
   readonly settings: EpicSettings
 
+  /** the top-level keys the file itself names (`contentFolder` ...):  none with no file */
+  readonly named: ReadonlySet<string>
+
+  /** `main` as given, when it's another spelling of the real one (an old path, through a compat link) */
+  private readonly givenMain: string
+
+  /** `oldMains`' answer, once asked */
+  private oldMainsFound: string[] | undefined
+
   /**
    * The config of the repo whose MAIN checkout is `main`.
+   * - `main`:  any spelling of it;  kept REAL (`RealPath.of()`), the one given remembered for `folderFor()`
    * - throws `SyntaxError` on a file that won't read, `TypeError` on a value of the wrong kind:  each names the file
    */
   constructor(main: string) {
-    this.main = resolve(main)
+    this.givenMain = resolve(main)
+    this.main = RealPath.of(main)
     this.file = join(this.main, EpicConfig.FILE)
-    this.settings = EpicConfig.settingsFrom(readOrEmpty(this.file), this.file)
+    const text = readOrEmpty(this.file)
+    this.settings = EpicConfig.settingsFrom(text, this.file)
+    this.named = new Set(text.trim() ? Object.keys(EpicConfig.parse(text, this.file) as object) : [])
   }
 
   /**
    * The config of the repo `path` is in:  its MAIN checkout's file, from the main checkout or any worktree.
    * - outside git:  `path` counts as the main checkout
+   * - the main checkout as the worktree's `.git` file names it:  an old spelling too, for `folderFor()`
    */
   static of(path = process.cwd()): EpicConfig {
-    return new EpicConfig(EpicConfig.mainOf(path))
+    return new EpicConfig(checkoutOf(path)?.main ?? resolve(path))
   }
 
-  /** The MAIN checkout of the repo `path` is in (`SRV.checkoutOf()`);  `path` itself outside git. */
+  /**
+   * The MAIN checkout of the repo `path` is in (`SRV.checkoutOf()`), its REAL path;  `path` itself outside git.
+   * - real:  a worktree's `.git` file may name an old spelling of it, through a compat link (epic `epic-engine` I59)
+   */
   static mainOf(path = process.cwd()): string {
-    return checkoutOf(path)?.main ?? resolve(path)
+    return RealPath.of(checkoutOf(path)?.main ?? path)
   }
 
   /**
@@ -113,7 +137,16 @@ export class EpicConfig {
   static contentOf(root: string): string {
     try {
       const config = EpicConfig.of(root)
-      if (existsSync(config.file) && existsSync(config.contentFolder)) return config.contentFolder
+      if (existsSync(config.file)) {
+        const content = config.contentFolder
+        if (existsSync(content)) return content
+        // named, but not there:  said, never silent (epic `epic-engine` I59);  a repo with no content repo yet names none
+        if (config.named.has("contentFolder"))
+          warnOnce(
+            `contentFolder ${config.settings.contentFolder} is missing:  ${content};  using the checkout itself,` +
+              ` ${resolve(root)} -- update ${config.file}`
+          )
+      }
     } catch {
       // a config that won't read:  the checkout's own
     }
@@ -126,7 +159,7 @@ export class EpicConfig {
 
   /** the shared content repo (epics, guides, sagas ...):  `contentFolder`, from the main checkout */
   get contentFolder(): string {
-    return resolve(this.main, this.settings.contentFolder)
+    return this.folderFor("contentFolder", this.settings.contentFolder)
   }
 
   /** the branch worktrees start from and merge into */
@@ -139,7 +172,7 @@ export class EpicConfig {
    * - existing ones may still be in the old place:  `worktreesFolders`
    */
   get worktreesFolder(): string {
-    return resolve(this.main, this.settings.worktreesFolder)
+    return this.folderFor("worktreesFolder", this.settings.worktreesFolder)
   }
 
   /**
@@ -193,7 +226,7 @@ export class EpicConfig {
    * - `epic shared link` makes the link, only in a checkout whose `.gitignore` ignores it (`Shared.linkEngine()`)
    */
   get engineFolder(): string | undefined {
-    return this.settings.engineFolder ? resolve(this.main, this.settings.engineFolder) : undefined
+    return this.settings.engineFolder ? this.folderFor("engineFolder", this.settings.engineFolder) : undefined
   }
 
   /**
@@ -228,7 +261,7 @@ export class EpicConfig {
    */
   get newWindowsFolder(): string {
     const written = this.settings.windowsFolder
-    return written ? resolve(this.main, written) : join(this.contentFolder, "windows")
+    return written ? this.folderFor("windowsFolder", written) : join(this.contentFolder, "windows")
   }
 
   /** where the window files were before epic `epic-eject` P13:  `workspaces/` in the main checkout */
@@ -296,8 +329,10 @@ export class EpicConfig {
     }
     for (const pattern of this.worktreesPatterns) {
       const marker = `${sep}${pattern.split("/").join(sep)}${sep}`
-      const at = path.indexOf(marker)
-      if (at >= 0) return path.slice(at + marker.length).split(sep)[0] || undefined
+      for (const each of new Set([path, RealPath.of(path)])) {
+        const at = each.indexOf(marker)
+        if (at >= 0) return each.slice(at + marker.length).split(sep)[0] || undefined
+      }
     }
     return undefined
   }
@@ -330,6 +365,61 @@ export class EpicConfig {
    */
   worktreeOnlyWindow(name: string): boolean {
     return this.windows.worktreeOnly || this.isOutside(this.worktreeFolder(name))
+  }
+
+  /**
+   * Folder `written` (config key `key`), from the main checkout:  where it is.
+   * - beside the REAL main checkout, when it's there (or `written` is absolute)
+   * - else beside an OLD spelling of the main checkout (`oldMains`), when it's there:  its real path, with a warning
+   *   on stderr, once per process, to update the file (epic `epic-engine` I59)
+   *   - e.g. spell-epic moved to `~/www/spell/` behind a compat link, with `"contentFolder": "../spell-app.epics"`:
+   *     missing beside `~/www/spell/spell-epic`, there beside `~/www/spell-app/spell-epic` (the old path)
+   * - else beside the real main checkout, missing:  the caller says so (`contentOf()`)
+   */
+  private folderFor(key: string, written: string): string {
+    const folder = resolve(this.main, written)
+    if (existsSync(folder) || isAbsolute(written)) return folder
+    for (const old of this.oldMains) {
+      const found = resolve(old, written)
+      if (!existsSync(found)) continue
+      const real = RealPath.of(found)
+      warnOnce(`${key} ${written} is missing beside ${this.main};  using ${real} -- update ${this.file}`)
+      return real
+    }
+    return folder
+  }
+
+  /**
+   * The main checkout's OTHER spellings, which link to it:  where it was before a move behind a compat link.
+   * - the one this config was given, when it isn't the real one (`of()` from a worktree whose `.git` file names it)
+   * - and the one each worktree's `.git` file names, until `git worktree repair` (git's own record of each worktree,
+   *   `<main>/.git/worktrees/<id>/gitdir`, names that file):  so the main checkout finds it too
+   * - read once, the first time a folder is missing
+   * - NEVER throws:  what won't read is skipped
+   */
+  private get oldMains(): string[] {
+    if (this.oldMainsFound) return this.oldMainsFound
+    const found = new Set<string>()
+    if (this.givenMain !== this.main) found.add(this.givenMain)
+    const records = join(this.main, ".git", "worktrees")
+    try {
+      for (const id of readdirSync(records)) {
+        try {
+          const dotGit = readFileSync(join(records, id, "gitdir"), "utf8").trim()
+          const gitdir = /^gitdir:\s*(.+)$/m.exec(readFileSync(dotGit, "utf8"))?.[1]?.trim()
+          if (!gitdir) continue
+          // `<main>/.git/worktrees/<id>`
+          const old = dirname(dirname(dirname(resolve(dirname(dotGit), gitdir))))
+          if (old !== this.main && RealPath.of(old) === this.main) found.add(old)
+        } catch {
+          // a worktree gone, or a record that won't read
+        }
+      }
+    } catch {
+      // no worktrees, or not a main checkout
+    }
+    this.oldMainsFound = [...found]
+    return this.oldMainsFound
   }
 
   /**
@@ -516,10 +606,20 @@ function readOrEmpty(file: string): string {
 /**
  * Folder `path` as a path from `root` (`.claude/worktrees`), `/`-separated;  `undefined` when it's `root` itself or
  * outside it.
+ * - links followed on both sides (`RealPath.from()`):  an old spelling of either still counts
  */
 function insideOf(root: string, path: string): string | undefined {
-  const inside = relative(root, path)
-  return inside && !inside.startsWith("..") && !isAbsolute(inside) ? inside.split(sep).join("/") : undefined
+  return RealPath.from(root, path) || undefined
+}
+
+/** The messages `warnOnce()` has written, this process. */
+const WARNED = new Set<string>()
+
+/** Write `message` on stderr, as `EpicConfig:  <message>`, once per process:  a hook or a server asks many times. */
+function warnOnce(message: string): void {
+  if (WARNED.has(message)) return
+  WARNED.add(message)
+  process.stderr.write(`EpicConfig:  ${message}\n`)
 }
 
 /**

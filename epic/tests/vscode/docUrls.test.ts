@@ -1,17 +1,18 @@
 /**
  * Tests of spell-epic's VS Code extension's pure parts (`vscode/src/docUrls.ts`):
  * - page URLs, the epic pages "Open Epic..." lists, where a served URL's file is
- * - a Claude tab's label, the bridge's registry folder
+ * - a Claude tab's label, the bridge's registry folder, a window's folder by any spelling (`folderIndex()`)
  * - Plain `node --test` (types stripped):  the extension's own code needs `vscode`, these parts don't.
  */
 import { deepEqual, equal } from "node:assert/strict"
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { after, test } from "node:test"
 
 import {
   fileForPath,
+  folderIndex,
   isLoopback,
   planDocsIn,
   planDocsOf,
@@ -110,4 +111,19 @@ test("tabShows():  the whole title, or its first 24 characters and an ellipsis",
 test("windowsFolder():  SPELL_EPIC_WINDOWS_DIR, else ~/.spell-epic/windows -- never the spell extension's", () => {
   equal(windowsFolder({ SPELL_EPIC_WINDOWS_DIR: "/tmp/w" }, "/home/o"), "/tmp/w")
   equal(windowsFolder({}, "/home/o"), "/home/o/.spell-epic/windows")
+})
+
+test("folderIndex():  a window's folder by any spelling -- one reopened from the recent list after a move (I59)", () => {
+  // `old/repo.worktrees -> ../new/repo.worktrees`:  the window holds the OLD spelling, a session asks by the real one
+  const moved = mkdtempSync(join(tmpdir(), "doc-urls-moved-"))
+  const real = join(realpathSync(moved), "new", "repo.worktrees", "seo")
+  mkdirSync(real, { recursive: true })
+  mkdirSync(join(moved, "old"))
+  symlinkSync("../new/repo.worktrees", join(moved, "old", "repo.worktrees"))
+  const folders = ["/repo", join(moved, "old", "repo.worktrees", "seo")]
+  equal(folderIndex(folders, real), 1)
+  equal(folderIndex(folders, join(moved, "old", "repo.worktrees", "seo")), 1)
+  equal(folderIndex(folders, "/repo/"), 0)
+  equal(folderIndex(folders, join(real, "..", "other")), -1)
+  rmSync(moved, { recursive: true, force: true })
 })

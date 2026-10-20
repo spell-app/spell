@@ -4,7 +4,7 @@
  * - The routes' cases (Send, Do Now, the cooldown) are `reviewRoutes.test.ts`'s.
  * - NEVER the real `~/.claude` or `~/.spell`:  a wake types into VS Code
  */
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { createServer, type Server } from "node:http"
 import type { AddressInfo } from "node:net"
 import { tmpdir } from "node:os"
@@ -27,8 +27,8 @@ let refuse = false
 const launched: [string[], string][] = []
 
 beforeAll(async () => {
-  home = mkdtempSync(join(tmpdir(), "review-wake-"))
-  root = fakeMainCheckout(mkdtempSync(join(tmpdir(), "review-wake-root-")))
+  home = realpathSync(mkdtempSync(join(tmpdir(), "review-wake-")))
+  root = fakeMainCheckout(realpathSync(mkdtempSync(join(tmpdir(), "review-wake-root-"))))
   mkdirSync(join(home, "sessions"))
   mkdirSync(join(home, "windows"))
   process.env.SPELL_CLAUDE_HOME = home

@@ -15,6 +15,8 @@ import { dirname, join, relative } from "node:path"
 
 import { fileURLToPath } from "node:url"
 
+import { RealPath } from "$/epics/config/RealPath"
+
 import { EpicCommandError, type FoldReport, type MigrateReport, type SharedConfig } from "./command.types"
 import { Sessions } from "./Sessions"
 import { Shared } from "./Shared"
@@ -256,7 +258,7 @@ function refuseUnless(worktree: string, branch: string, config: SharedConfig): v
   }
   const busy = new Sessions()
     .live(config.main)
-    .find((session) => session.state === "busy" && (session.cwd === worktree || session.cwd.startsWith(`${worktree}/`)))
+    .find((session) => session.state === "busy" && RealPath.isIn(session.cwd, worktree))
   if (busy) throw new EpicCommandError(`session "${busy.name}" is busy in ${worktree}:  wait until it's idle`)
 }
 

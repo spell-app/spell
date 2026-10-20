@@ -14,6 +14,7 @@ import { homedir } from "node:os"
 import { basename, join, relative } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { RealPath } from "$/epics/config/RealPath"
 import { SessionFolders } from "$/epics/config/SessionFolders"
 import { epicStateFor } from "$/epics/list/EpicState"
 
@@ -385,7 +386,8 @@ export class Sessions {
         agent: record.name ?? null,
         pid: record.pid,
         cwd,
-        inRepo: cwd === main || cwd.startsWith(`${main}/`),
+        // a session started before a move behind a compat link keeps the old spelling (epic `epic-engine` I59)
+        inRepo: RealPath.isIn(cwd, main),
         where: ENTRYPOINT_PLACES[record.entrypoint ?? ""] ?? record.entrypoint ?? null,
         checkout: place.label,
         branch: place.branch,

@@ -4,7 +4,7 @@
  * - the Epics page served with its card
  * - the watcher closed with the server
  */
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
@@ -26,9 +26,9 @@ function put(root: string, path: string, html: string): void {
 }
 
 describe("runningRoutes", () => {
-  const root = mkdtempSync(join(tmpdir(), "epics-running-"))
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-")))
   // no running sessions:  never this machine's (`RunningEpics.claudeHome`)
-  const claudeHome = mkdtempSync(join(tmpdir(), "epics-running-claude-"))
+  const claudeHome = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-claude-")))
   const home = process.env.SPELL_CLAUDE_HOME
   const stops: (() => unknown)[] = []
   let server: PageServer
@@ -87,9 +87,9 @@ describe("runningRoutes", () => {
 })
 
 describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () => {
-  const top = mkdtempSync(join(tmpdir(), "epics-running-moved-"))
+  const top = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-moved-")))
   const root = join(top, "repo")
-  const claudeHome = mkdtempSync(join(tmpdir(), "epics-running-claude-"))
+  const claudeHome = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-claude-")))
   const home = process.env.SPELL_CLAUDE_HOME
   const stops: (() => unknown)[] = []
   let server: PageServer
@@ -139,7 +139,7 @@ describe("runningRoutes, worktrees moved beside the repo (epic-eject P8)", () =>
 
 // epic `epic-eject` P12:  the module tells the page server where the repo's pages are, when it can be told
 describe("runningRoutes, the content folder", () => {
-  const top = mkdtempSync(join(tmpdir(), "epics-running-content-"))
+  const top = realpathSync(mkdtempSync(join(tmpdir(), "epics-running-content-")))
   const root = join(top, "repo")
   afterAll(() => rmSync(top, { recursive: true, force: true }))
 

@@ -1,11 +1,16 @@
 /**
  * The extension's pure parts:
- * page URLs, the epic pages listed for "Open Epic...", where a served URL's file is, a Claude tab's label.
- * - no `vscode` here, and node built-ins only, so its tests run under plain `node` (`tests/vscode/docUrls.test.ts`)
+ * page URLs, the epic pages listed for "Open Epic...", where a served URL's file is, a Claude tab's label, a window's
+ * folder.
+ * - no `vscode` here, and node built-ins only (`RealPath` too, by its file), so its tests run under plain `node`
+ *   (`tests/vscode/docUrls.test.ts`)
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
+
+// By its file, not `$/epics/...`:  plain `node` runs this file's tests, with no alias table
+import { RealPath } from "../../src/config/RealPath.ts"
 
 /** The extension's id, `<publisher>.<name>`:  its `vscode://` URIs start with it. */
 export const EXTENSION_ID = "spell-app.spell-epic"
@@ -20,6 +25,15 @@ export const PREVIEW_PATH = "/doc-preview"
  */
 export function windowsFolder(env: NodeJS.ProcessEnv = process.env, home = homedir()): string {
   return env.SPELL_EPIC_WINDOWS_DIR || join(home, ".spell-epic", "windows")
+}
+
+/**
+ * Index of `folder` among a window's `folders`, or -1:  `WindowBridge.indexOf()`.
+ * - by real paths (`RealPath.same()`):  a window reopened from VS Code's recent list after a move behind a compat link
+ *   holds the OLD spelling of its folders (epic `epic-engine` I59)
+ */
+export function folderIndex(folders: string[], folder: string): number {
+  return folders.findIndex((each) => RealPath.same(each, folder))
 }
 
 /** `url` with a fresh `?t=` stamp:  a URL no frame or browser has cached, so loading it is a reload. */

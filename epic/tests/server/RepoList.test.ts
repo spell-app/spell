@@ -2,7 +2,7 @@
  * Tests of the epic server's repo list (`RepoList`, `~/.spell-epic/repos.json5`),
  * in a temp home folder:  never the real one.
  */
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, describe, expect, test } from "vite-plus/test"
@@ -16,7 +16,7 @@ afterEach(() => {
 
 /** A scratch folder, removed after the test. */
 function scratch(prefix: string): string {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), prefix)))
   dirs.push(dir)
   return dir
 }

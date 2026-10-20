@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vite-plus/test"
@@ -45,9 +45,9 @@ function put(root: string, path: string, html: string): void {
 }
 
 describe("RunningEpics", () => {
-  const root = mkdtempSync(join(tmpdir(), "srv-epics-"))
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-")))
   // no running sessions but the ones a test writes:  never this machine's (`RunningEpics.claudeHome`)
-  const claudeHome = mkdtempSync(join(tmpdir(), "srv-epics-claude-"))
+  const claudeHome = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-claude-")))
   const home = process.env.SPELL_CLAUDE_HOME
   let server: PageServer
   let port: number
@@ -171,7 +171,7 @@ describe("RunningEpics", () => {
     expect(html).not.toContain(">old<")
     expect(html).toContain('epic="other"')
     expect(html.match(/epic="seo"/g)).toHaveLength(1)
-    const stale = mkdtempSync(join(tmpdir(), "srv-epics-stale-"))
+    const stale = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-stale-")))
     try {
       put(
         stale,
@@ -188,7 +188,9 @@ describe("RunningEpics", () => {
       expect(new RunningEpics(stale).list()[0]?.updated).toBe("2026-01-01")
       // its card says the facts:  the card draws itself paused, from `updated`
       const quiet = new RunningEpics(stale).render(list(""))
-      expect(quiet).toContain('<epic-card id="epic-slow" epic="slow" data-status="open" phases="done todo" updated="2026-01-01"')
+      expect(quiet).toContain(
+        '<epic-card id="epic-slow" epic="slow" data-status="open" phases="done todo" updated="2026-01-01"'
+      )
       expect(quiet).not.toContain("<epic-card running")
       // a session working in its worktree (this process:  alive):  `running`, so in progress however old the doc
       put(
@@ -211,7 +213,7 @@ describe("RunningEpics", () => {
   // epic `epic-components` P8:  converted docs say it in attributes
   // (the old markup read no more since P15)
   it("reads an epic page in <epic-*> markup:  phases, the active one's label, the page's updated date", () => {
-    const fresh = mkdtempSync(join(tmpdir(), "srv-epics-new-"))
+    const fresh = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-new-")))
     try {
       put(
         fresh,
@@ -237,7 +239,7 @@ describe("RunningEpics", () => {
   // the ONE rule, `EpicState`, as the Epics list page and `<epic-page>` draw it (epic `airplane` P8):  the card draws
   // its state from these facts (`<epic-card>`, epic `epic-engine` P3)
   it("writes a future epic `future`;  every phase done:  `urgent` items while they need Owen, else done", () => {
-    const quiet = mkdtempSync(join(tmpdir(), "srv-epics-quiet-"))
+    const quiet = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-quiet-")))
     try {
       put(
         quiet,
@@ -267,14 +269,16 @@ describe("RunningEpics", () => {
       const html = epics.render(list(""))
       expect(html).toContain('<epic-card id="epic-idea" epic="idea" data-status="open" phases="" future>')
       expect(html).toContain('<epic-card id="epic-calm" epic="calm" data-status="done" phases="done done">')
-      expect(html).toContain('<epic-card id="epic-loud" epic="loud" data-status="open" phases="done done" urgent="i2 q1">')
+      expect(html).toContain(
+        '<epic-card id="epic-loud" epic="loud" data-status="open" phases="done done" urgent="i2 q1">'
+      )
     } finally {
       rmSync(quiet, { recursive: true, force: true })
     }
   })
 
   it("marks every written card `favorite` as the favourites are now;  a value naming a mark is left alone", () => {
-    const starred = mkdtempSync(join(tmpdir(), "srv-epics-stars-"))
+    const starred = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-stars-")))
     try {
       put(starred, "epics/favorites.json", JSON.stringify(["zed"]))
       const page = list(
@@ -290,7 +294,7 @@ describe("RunningEpics", () => {
   })
 
   it("carries a merged card's last-worked moment to the running one;  its saga from any written card naming it", () => {
-    const grouped = mkdtempSync(join(tmpdir(), "srv-epics-groups-"))
+    const grouped = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-groups-")))
     try {
       put(
         grouped,
@@ -329,7 +333,7 @@ describe("RunningEpics", () => {
     const old = `${MARKER}\n<div class="spell-epic-group" data-group="active"><ui-cards><ui-card data-epic="a"></ui-card></ui-cards></div>\n${EPIC_CARDS_END}`
     expect(new RunningEpics(root).render(old)).toBe(old)
     expect(new RunningEpics(root).render("<p>no marker</p>")).toBe("<p>no marker</p>")
-    const empty = mkdtempSync(join(tmpdir(), "srv-epics-none-"))
+    const empty = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-none-")))
     try {
       expect(new RunningEpics(empty).render(list(""))).toBe(list(""))
     } finally {
@@ -342,7 +346,7 @@ describe("RunningEpics", () => {
 // every checkout's `epics` is a link to the same folder;
 // a checkout on older code reaches it through its `packages/docs/content` link and the old-path links
 describe("RunningEpics, shared content", () => {
-  const temp = mkdtempSync(join(tmpdir(), "srv-epics-shared-"))
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-shared-")))
   afterAll(() => rmSync(temp, { recursive: true, force: true }))
 
   it("links a worktree's epic through the main checkout's own URL, whichever layout the worktree has", () => {

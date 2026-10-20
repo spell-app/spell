@@ -1,9 +1,10 @@
-import { existsSync, readFileSync, realpathSync } from "node:fs"
-import { basename, sep } from "node:path"
+import { existsSync, readFileSync } from "node:fs"
+import { basename } from "node:path"
 
 // By relative path, `.ts` and all:  the `SessionStart` hook loads this file with plain `node` (types stripped)
 import { EpicConfig } from "../config/EpicConfig.ts"
 import { EpicRepo } from "../config/EpicRepo.ts"
+import { RealPath } from "../config/RealPath.ts"
 
 /****************
  * ### `WorktreeGuard`
@@ -46,12 +47,12 @@ export class WorktreeGuard {
     if (!cwd || (source !== "startup" && source !== "resume")) return undefined
     const config = EpicConfig.of(cwd)
     if (!existsSync(config.file)) return undefined
-    const here = real(cwd)
+    const here = RealPath.of(cwd)
     const note = WorktreeGuard.lastNote(transcript)
-    const recorded = note?.worktreePath ? real(note.worktreePath) : undefined
+    const recorded = note?.worktreePath ? RealPath.of(note.worktreePath) : undefined
     const stray = WorktreeGuard.stray(config, here) ?? (recorded ? WorktreeGuard.stray(config, recorded) : undefined)
     if (stray) return stray
-    if (recorded && existsSync(recorded) && !inside(here, recorded)) {
+    if (recorded && existsSync(recorded) && !RealPath.isIn(here, recorded)) {
       const name = note!.worktreeName || basename(recorded)
       return WorktreeGuard.output(
         `⎇ ${name}:  this session was reopened outside its worktree;  Claude moves back in first.`,
@@ -63,8 +64,9 @@ export class WorktreeGuard {
     }
     const name = config.worktreeNameOf(here)
     const folder = name && config.worktreeFolder(name)
-    if (!name || !folder || !config.isOutside(folder) || (recorded && inside(recorded, real(folder)))) return undefined
-    const path = real(folder)
+    if (!name || !folder || !config.isOutside(folder) || (recorded && RealPath.isIn(recorded, RealPath.of(folder))))
+      return undefined
+    const path = RealPath.of(folder)
     return WorktreeGuard.output(
       `⎇ ${name}:  Claude enters its worktree properly first, so a reopen from another window comes back here.`,
       `This session started inside worktree ${name}'s folder (${path}) without EnterWorktree, so Claude Code ` +
@@ -135,17 +137,3 @@ export type GuardOutput = {
 
 /** A transcript's worktree note, as Claude Code writes it (CLI 2.1.296):  the fields read here. */
 export type WorktreeNote = { worktreePath?: string; worktreeName?: string; originalCwd?: string }
-
-/** Whether `path` is `folder` or inside it. */
-function inside(path: string, folder: string): boolean {
-  return path === folder || path.startsWith(folder + sep)
-}
-
-/** `path` with symlinks resolved (`/tmp` -> `/private/tmp`);  as is if missing. */
-function real(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    return path
-  }
-}

@@ -1,9 +1,9 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import JSON5 from "json5"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { fakeMainCheckout, fakeWorktree } from "$/server/test/checkouts"
@@ -15,7 +15,7 @@ import { fakeMainCheckout, fakeWorktree } from "$/server/test/checkouts"
 const REPO_CONFIG = resolve(dirname(fileURLToPath(import.meta.url)), "../../.spell-app", EpicConfig.FILE)
 
 /** A main checkout, a worktree in it, and one beside it, as git leaves them. */
-const TOP = mkdtempSync(join(tmpdir(), "epic-config-"))
+const TOP = realpathSync(mkdtempSync(join(tmpdir(), "epic-config-")))
 const MAIN = fakeMainCheckout(join(TOP, "repo"))
 const INSIDE = fakeWorktree(MAIN, join(MAIN, ".claude", "worktrees", "seo"))
 afterAll(() => rmSync(TOP, { recursive: true, force: true }))
@@ -221,13 +221,23 @@ describe("EpicConfig.contentOf()", () => {
   })
 
   test("the checkout itself:  no config file, a folder that isn't there, a file that won't read", () => {
-    expect(EpicConfig.contentOf(MAIN)).toBe(resolve(MAIN))
-    const missing = fakeMainCheckout(join(TOP, "missing"))
-    configFile(missing, '{ "contentFolder": "../missing.epics" }')
-    expect(EpicConfig.contentOf(missing)).toBe(resolve(missing))
-    const broken = fakeMainCheckout(join(TOP, "broken"))
-    configFile(broken, "{ nope")
-    expect(EpicConfig.contentOf(broken)).toBe(resolve(broken))
+    const write = vi.spyOn(process.stderr, "write").mockImplementation(() => true)
+    try {
+      expect(EpicConfig.contentOf(MAIN)).toBe(resolve(MAIN))
+      const missing = fakeMainCheckout(join(TOP, "missing"))
+      configFile(missing, '{ "contentFolder": "../missing.epics" }')
+      expect(EpicConfig.contentOf(missing)).toBe(resolve(missing))
+      const broken = fakeMainCheckout(join(TOP, "broken"))
+      configFile(broken, "{ nope")
+      expect(EpicConfig.contentOf(broken)).toBe(resolve(broken))
+      // a folder the file NAMES, not there:  said, never silent (epic `epic-engine` I59);  the rest quiet
+      expect(write.mock.calls.map(([text]) => String(text))).toEqual([
+        `EpicConfig:  contentFolder ../missing.epics is missing:  ${join(TOP, "missing.epics")};  using the checkout` +
+          ` itself, ${missing} -- update ${join(missing, EpicConfig.FILE)}\n`
+      ])
+    } finally {
+      write.mockRestore()
+    }
   })
 
   test("a content folder is its own:  it holds no config", () => {

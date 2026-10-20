@@ -2,7 +2,7 @@
  * Tests of the machine's epic server (`EpicServer`):  two scratch repos, this checkout as the engine, a temp home.
  * - started on a free port with no route modules and no pid file, and stopped after
  */
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
@@ -62,7 +62,7 @@ function withComponentSets(checkout: string): void {
 }
 
 describe("EpicServer", () => {
-  const top = mkdtempSync(join(tmpdir(), "epic-server-"))
+  const top = realpathSync(mkdtempSync(join(tmpdir(), "epic-server-")))
   const home = join(top, "home")
   let server: EpicServer
   let port: number
@@ -236,7 +236,7 @@ describe("EpicServer", () => {
 
 describe("EpicServer, no repo registered", () => {
   test("serves the engine alone;  route modules get its home folder", async () => {
-    const home = mkdtempSync(join(tmpdir(), "epic-server-empty-"))
+    const home = realpathSync(mkdtempSync(join(tmpdir(), "epic-server-empty-")))
     const server = new EpicServer({ home, engine: ENGINE })
     try {
       await server.start({ port: 0, routes: false, pidFile: false, bundles: false })

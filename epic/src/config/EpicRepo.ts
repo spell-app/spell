@@ -1,9 +1,10 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { basename, dirname, join, sep } from "node:path"
 
 // By relative path, `.ts` and all:  the hooks load this file with plain `node` (types stripped)
 import { EpicConfig } from "./EpicConfig.ts"
+import { RealPath } from "./RealPath.ts"
 
 /****************
  * ### `EpicRepo`
@@ -67,7 +68,7 @@ export class EpicRepo {
     }
     const owner = worktree ? EpicRepo.mainOfPath(worktree) : null
     let own: boolean
-    if (owner) own = real(owner) === real(here) || EpicRepo.sameUrl(origin(owner), origin(here))
+    if (owner) own = RealPath.same(owner, here) || EpicRepo.sameUrl(origin(owner), origin(here))
     else if (repo && origin(here)) own = EpicRepo.sameUrl(repo, origin(here))
     else return undefined
     const checkout = own ? here : (owner ?? EpicRepo.checkoutByUrl(repo, here))
@@ -201,13 +202,4 @@ function normalUrl(url: string): string {
     .replace(/^([^/:]+):(?!\d)/, "$1/")
     .replace(/\/+$/, "")
     .replace(/\.git$/, "")
-}
-
-/** `path` with links resolved;  as is when missing. */
-function real(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    return path
-  }
 }

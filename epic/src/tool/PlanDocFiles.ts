@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, rmSync } from "node:fs"
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
@@ -8,6 +8,7 @@ import { parseHTML } from "linkedom"
 import { AS } from "$/assembler"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { EpicRepo } from "$/epics/config/EpicRepo"
+import { RealPath } from "$/epics/config/RealPath"
 import { DataFile, type DataFileMove } from "$/epics/data/DataFile"
 import { RepoList } from "$/epics/server/RepoList"
 import { SRV } from "$/server"
@@ -514,9 +515,8 @@ export class PlanDocFiles {
    * - git for a doc runs there, never in the doc's folder (`git()`)
    */
   checkoutOf(file: string): string {
-    const inContent = relative(this.content, resolve(file))
     const shared = this.content !== resolve(this.root)
-    if (shared && !inContent.startsWith("..") && !isAbsolute(inContent)) return this.root
+    if (shared && RealPath.isIn(file, this.content)) return this.root
     const m = /^(.+?)[\\/](?:packages[\\/]docs[\\/](?:content[\\/])?)?epics[\\/][^\\/]+[\\/][^\\/]+$/.exec(file)
     return m ? m[1]! : this.root
   }
