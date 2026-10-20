@@ -294,7 +294,7 @@ export class ComponentPack {
     return `/* GENERATED -- do not edit:  \`spell dev pack build ${this.name}\`, from every vocabulary, \`<Name>.en.ts\` */
 // sources:  ${hash}
 
-import type { RootCatalogEntry } from "$/ui"
+import type { RootCatalogEntry } from "@spell-app/ui"
 
 /** Every tag of the \`${this.name}\` pack => what \`<ui-root>\` needs before its family loads. */
 export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
