@@ -1,40 +1,44 @@
-import { dirname, relative, resolve, sep } from "node:path"
+import { existsSync } from "node:fs"
+import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 import { definePlugin, defineRule, type ESTree, type Rule } from "vite-plus/lint/plugins"
 
 /**
- * `spell`:  an oxlint plugin for the repo's own import rules, in every package and its tests
- * (WWOD §4, "Package aliases, never `../`";  epic `repo-split` P3 and P6).
+ * `spell`:  an oxlint plugin for the repos' own import rules, in every package and its tests
+ * (WWOD §4, "Package aliases, never `../`";  epic `repo-split` P3, P6 and I13).
  * - Unlike `spell-ui/*` (`lint.patterns.ts`), which holds component files to Spell UI's patterns,
- *   these hold for EVERY file under `packages/` and `tests/`:  on in `lintBase` (`lint.ts`).
- * - Files at the repo root (`vite.config.ts` ...) aren't in a package:  no rule here looks at them.
+ *   these hold for EVERY file of a package or its tests:  on in `lintBase` (`lint.ts`).
+ * - Laid out as the top repo `spell` holds its child repos (epic `repo-split` P8, Q16):
+ *   - a repo of several packages (spell-lang ...):  `<repo>/<name>/`, its tests `<repo>/tests/<name>/`
+ *   - a flat repo, ONE package (spell-ui ...):  the repo itself, its tests `<repo>/tests/`
+ * - Files at a multi-package repo's root (`vite.config.ts` ...) aren't in a package:  no rule here looks at them.
  */
 
 ////////////////
 // ## Rules
 ////////////////
 
-/**
- * The repo root, whose `packages/` and `tests/` the rules read:  this file is in `packages/toolchain/src/`.
- * - Until epic `repo-split` P8 cuts the repos;  then each repo's root holds its packages.
- */
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
+/** The file that marks the top repo, the folder holding every child repo:  its list of them. */
+const TOP_MARK = "repos.json5"
 
-/** The folders whose sub-folders are packages:  `packages/<name>/` (the code) and `tests/<name>/` (its tests). */
-const PACKAGE_FOLDERS = new Set(["packages", "tests"])
+/**
+ * The top repo when no `repos.json5` is found above a file:  the folder holding spell-util, which this file is in
+ * (`spell-util/toolchain/src/`).
+ */
+const FALLBACK_TOP = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
 
 /** `vi.*` calls that take a module path:  a mock is an import too. */
 const VI_CALLS = new Set(["mock", "doMock", "unmock", "doUnmock", "importActual", "importMock"])
 
 /**
  * A relative import that climbs out of its package into ANOTHER package's folder:
- * `import { checkoutOf } from "../../../../server/src/checkout.ts"`, from `packages/spaces/`.
- * - A package's code (`packages/<a>/`) and its tests (`tests/<a>/`) count as ONE package:
+ * `import { checkoutOf } from "../../../../spell-server/server/src/checkout.ts"`, from `spell-app/spaces/`.
+ * - A package's code (`<repo>/<a>/`) and its tests (`<repo>/tests/<a>/`) count as ONE package:
  *   a test may reach its own package's files, and they its test folder.
  * - Looks at every module path a file names (`moduleVisitor()`).
  * - NOT a file path read or spawned (`resolve(import.meta.dirname, "../..")`, `new URL("..", import.meta.url)`):
  *   no alias reaches those.
- * - A path into the repo root's own files (`../../vite.config.ts`) is fine:  they're nobody's package.
+ * - A path into a repo root's own files (`../../vite.config.ts`) is fine:  they're nobody's package.
  * - Its fix, in its message:  the package's alias inside its repo (`$/parser`, from `spell`);  its npm name from
  *   another repo (`no-cross-repo-alias`), and in a file Vite loads as a config, which has no alias table
  *   (`@spell-app/server/checkout`, `@spell-app/ui/vite.config.ts`):  an entry its `package.json` `exports` names.
@@ -73,11 +77,11 @@ const noCrossPackageImport = defineRule({
 })
 
 /**
- * The repos the packages go to (epic `repo-split` P8), by package folder:  each `packages/<name>/`, and its tests.
+ * Each package's repo, by package name:  where `$/<name>` is an alias (epic `repo-split` P8).
  * - Inside ONE repo, a package names another by its alias (`$/parser`, from `spell`);  from ANOTHER repo, by its npm
- *   name (`@spell-app/ui/core`, from the app), as it will once the repos are cut.
- * - A package missing here is in no repo yet:  the rule leaves its imports alone.
- * - `epics`:  spell-epic, a repo already (`$/epics`, through the checkout's link).
+ *   name (`@spell-app/ui/core`, from the app).
+ * - A package missing here is in no known repo:  the rule leaves its imports alone.
+ * - The flat repos (one package each) are `FLAT_REPOS`.
  */
 export const REPO_OF: Readonly<Record<string, string>> = {
   util: "spell-util",
@@ -99,6 +103,14 @@ export const REPO_OF: Readonly<Record<string, string>> = {
   vscode: "spell-app",
   "page-server": "spell-app",
   epics: "spell-epic"
+}
+
+/** The repos that ARE one package, by folder:  their package's name (`spell-ui` is `ui`, `$/ui`). */
+export const FLAT_REPOS: Readonly<Record<string, string>> = {
+  "spell-element": "spell-element",
+  "spell-ui": "ui",
+  "spell-brand": "brand",
+  "spell-epic": "epics"
 }
 
 /**
@@ -169,11 +181,43 @@ function moduleVisitor(check: (node: ESTree.Node, path: string) => void) {
   }
 }
 
-/** The package a path is in, by its folder from the root (`packages/ui`, `tests/ui`), if it's in one. */
-function packageOf(path: string): { name: string; folder: string } | undefined {
-  const parts = relative(ROOT, path).split(sep)
-  if (parts.length < 3 || !PACKAGE_FOLDERS.has(parts[0]!)) return undefined
-  return { name: parts[1]!, folder: `${parts[0]}/${parts[1]}` }
+/**
+ * The package a path is in, if it's in one:  its name and its folder from the top repo (`spell-lang/core`,
+ * `spell-lang/tests/core`, `spell-ui`, `spell-ui/tests`).
+ * - Its repo:  the child-repo folder under the top repo (`topOf()`) that it's in.
+ * - A flat repo (`FLAT_REPOS`):  every file in it is its package's, its tests' too.
+ * - A repo of several packages:  `<repo>/<name>/...` or `<repo>/tests/<name>/...`;  its root's own files are in none.
+ */
+export function packageOf(path: string): { name: string; folder: string } | undefined {
+  const parts = relative(topOf(path), path).split(sep)
+  const [repo, first, second] = parts
+  if (!repo || repo.startsWith("..") || parts.length < 2) return undefined
+  const flat = FLAT_REPOS[repo]
+  if (flat) return { name: flat, folder: first === "tests" ? `${repo}/tests` : repo }
+  if (first === "tests") return parts.length > 3 ? { name: second!, folder: `${repo}/tests/${second}` } : undefined
+  return parts.length > 2 ? { name: first!, folder: `${repo}/${first}` } : undefined
+}
+
+/** `topOf()`'s answers, by folder. */
+const TOPS = new Map<string, string>()
+
+/**
+ * The top repo holding `path`:  the nearest folder up with a `repos.json5` (`TOP_MARK`), so a worktree of the top
+ * repo counts as its own;  else `FALLBACK_TOP`.
+ */
+function topOf(path: string): string {
+  const start = dirname(path)
+  const cached = TOPS.get(start)
+  if (cached) return cached
+  let top = FALLBACK_TOP
+  for (let at = start; dirname(at) !== at; at = dirname(at)) {
+    if (existsSync(join(at, TOP_MARK))) {
+      top = at
+      break
+    }
+  }
+  TOPS.set(start, top)
+  return top
 }
 
 /** The text of a string literal, or of a template literal with nothing put in it. */

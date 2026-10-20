@@ -14,14 +14,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its entries (`package.json` `exports`), each a SOURCE file:
   - `@spell-app/toolchain/lint` ([lint.ts](src/lint.ts)):  the lint (oxlint) and format (oxfmt) settings, the
     `lint` / `fmt` blocks every `vite.config.ts` spreads (`packageLint()`, `rootLint()`, `fmtConfig`);
-    the root's `vite.config.ts` too, which `vp check` and the editor read.
-    - Was the root's `vite.lint.ts`.
+    each repo's root `vite.config.ts` too, which `vp check` and the editor read.
+    - A repo of several packages:  `rootLint()` at its root (globs `<name>/**`, `tests/<name>/**`), `packageLint()` in
+      each package.
+    - A flat repo (spell-ui, spell-brand, spell-element):  its root IS the package, `packageLint({ name })` there.
+    - Was spell-app's root `vite.lint.ts`.
   - `@spell-app/toolchain/lint/patterns` ([lint.patterns.ts](src/lint.patterns.ts)):  the `spell-ui/*` rules,
     Spell UI's patterns in every set's component files ("The lint guard" in [ui's AGENTS.md](../../spell-ui/AGENTS.md)).
   - `@spell-app/toolchain/lint/imports` ([lint.imports.ts](src/lint.imports.ts)):  the `spell/*` rules, on everywhere:
     - `no-cross-package-import`:  no `../` from one package (or its tests) into another's folder
-    - `no-cross-repo-alias`:  no `$/` alias into another future repo's package (`REPO_OF`, the list of repos):
+    - `no-cross-repo-alias`:  no `$/` alias into another repo's package (`REPO_OF`, each package's repo):
       its npm name instead
+    - A file's package is where it sits in the top repo `spell` (the folder with `repos.json5`):  `<repo>/<name>/` or
+      `<repo>/tests/<name>/`;  a flat repo (`FLAT_REPOS`) is one package, its `tests/` too (epic `repo-split` I13).
   - `@spell-app/toolchain/decorators` ([decorators.ts](src/decorators.ts)):  the decorator pre-pass, every Vite and
     Vitest config's (standard decorators lowered by esbuild, before the Solid plugin)
   - `@spell-app/toolchain/packageVersion` ([packageVersion.ts](src/packageVersion.ts)):  `__PACKAGE_VERSION__`

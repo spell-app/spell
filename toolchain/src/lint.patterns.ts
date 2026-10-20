@@ -2,7 +2,7 @@ import { definePlugin, defineRule, type ESTree, type Rule } from "vite-plus/lint
 
 /**
  * `spell-ui`:  an oxlint plugin that keeps Spell UI's component files on Spell UI's patterns
- * (`packages/ui/AGENTS.md`, "Solid authoring";  epic `spell-element` P10).
+ * (spell-ui's `AGENTS.md`, "Solid authoring";  epic `spell-element` P10).
  * - Each rule flags something a component does BY HAND that a decorator or a helper already does,
  *   and its message names that decorator or helper.
  * - Turned on only for the component folders `PATTERN_FOLDERS` names (`lint.ts`):
@@ -38,7 +38,7 @@ const noSolidEffect = defineRule({
   meta: {
     type: "suggestion",
     docs: { description: "No hand-written Solid effects in a component:  a decorator says it" },
-    messages: { call: '{{advice}}  (`packages/ui/AGENTS.md`, "Solid authoring")' }
+    messages: { call: '{{advice}}  (`AGENTS.md` in spell-ui, "Solid authoring")' }
   },
   create(context) {
     return {
@@ -121,7 +121,7 @@ const noUntrack = defineRule({
   }
 })
 
-/** The platform's timing calls, and the helper (`packages/spell-element/src/timing.ts`) that says WHEN instead. */
+/** The platform's timing calls, and the helper (spell-element's `src/timing.ts`) that says WHEN instead. */
 const TIMERS: Record<string, string> = {
   setTimeout: "`E.after(seconds, fn)` (or `E.soon(fn)` for a zero delay)",
   setInterval: "`E.every(seconds, fn)`",
