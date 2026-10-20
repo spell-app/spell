@@ -10,6 +10,8 @@
  *   stdout `PromptGate.gate()`'s answer, JSON, or nothing to let the prompt through.
  * - The window script works on the SESSION's checkout (`EPIC_CHECKOUT`, from `cwd`):
  *   this plugin is its own repo.
+ *   - ALWAYS `cwd`, never one the session inherited:  a window could hand its sessions the checkout that opened it
+ *     (epic `epic-engine` P9).
  * - Plain `node`:  `PromptGate.ts` loads with its types stripped.
  * - Never fails a prompt:  any error exits 0, the prompt untouched.
  * - Its tests:  `tests/src/command/PromptGate.test.ts`, which runs this file as the hook too.
@@ -18,7 +20,7 @@ import { readFileSync } from "node:fs"
 
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
-  if (input.cwd && !process.env.EPIC_CHECKOUT) process.env.EPIC_CHECKOUT = input.cwd
+  if (input.cwd) process.env.EPIC_CHECKOUT = input.cwd
   // loaded in here, so a gate that won't load never fails the prompt
   const { PromptGate } = await import("../src/command/PromptGate.ts")
   const { Window } = await import("../src/window.mjs")

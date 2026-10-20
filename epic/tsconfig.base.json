@@ -8,7 +8,7 @@
   //   at the root (the same packages the root `package.json` links in with `portal:`).
   //   - Through the CHECKOUT's link, never a package's:  their own relative imports out of the package
   //     (`ui`'s `../../vite.decorators.ts`) then land in that checkout, as they do there.
-  //   - Only the packages the epic code and Spell UI's source need:  ui, spell-solid, util, server, page-server (the
+  //   - Only the packages the epic code and Spell UI's source need:  ui, spell-element, util, server, page-server (the
   //     epic server builds spell-app's bundles with its `BundleBuild`), assembler.
   //   - They go to npm when spell-epic is released (Q5 of epic `epic-eject`).
   // - `tsc` and `tsx` read it through the root `tsconfig.json`;  vite / vitest through `resolve.tsconfigPaths`,
@@ -30,8 +30,6 @@
       "$/page-server/*": ["./.spell-app/packages/page-server/src/*"],
       "$/assembler": ["./.spell-app/packages/assembler/src/index.ts"],
       "$/assembler/*": ["./.spell-app/packages/assembler/src/*"],
-      "$/spell-solid": ["./.spell-app/packages/spell-solid/src/index.ts"],
-      "$/spell-solid/*": ["./.spell-app/packages/spell-solid/src/*"],
       "$/spell-element": ["./.spell-app/packages/spell-element/src/index.ts"],
       "$/spell-element/*": ["./.spell-app/packages/spell-element/src/*"],
       "$/ui": ["./.spell-app/packages/ui/src/index.ts"],

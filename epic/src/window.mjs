@@ -170,13 +170,50 @@ import { SessionFolders } from "./config/SessionFolders.ts"
 /** The engine, spell-epic:  the folder this script's `scripts/` is in, with the plugin's `hooks/` beside it. */
 const ENGINE = dirname(dirname(fileURLToPath(import.meta.url)))
 
+/** Whether `envCheckout()` has said its `EPIC_CHECKOUT` is stale:  once per process. */
+let staleSaid = false
+
 /**
  * The repo root the windows are for:  a worktree's own, when run from one.
- * - `EPIC_CHECKOUT` when set:  `epic window` runs ONE copy of this script (its own) for the caller's checkout, and
- *   says which (`EpicTools.run()`, epic `epic-eject` P5);  the hooks set it to their session's checkout
+ * - `EPIC_CHECKOUT` when set (`envCheckout()`):  `epic window` runs ONE copy of this script (its own) for the caller's
+ *   checkout, and says which (`EpicTools.run()`, epic `epic-eject` P5);  the hooks set it to their session's checkout
  * - else the git checkout the current folder is in:  the engine is a repo of its own, never the one worked on (P6)
  */
-const ROOT = process.env.EPIC_CHECKOUT ? resolve(process.env.EPIC_CHECKOUT) : checkoutAround(process.cwd())
+const ROOT = envCheckout() ?? checkoutAround(process.cwd())
+
+/**
+ * `EPIC_CHECKOUT`, the checkout the `epic` command hands its tools (the docs tools' `pages.js` and this script take it
+ * as their root), resolved;  `undefined` when it isn't set, or names no folder.
+ * - No folder:  a STALE one, inherited (epic `epic-engine` P9:  repo-split's window carried the long-gone
+ *   `spell-app.worktrees/epic-eject`, which `code` had handed it, so `check-spell.js` there served pages from a
+ *   content folder that didn't exist).  Said on stderr, once, and left out.
+ * - Why it leaked:  VS Code gives a window the environment of the `code` command that opened it, so every Claude
+ *   session in it had it;  `codeEnv()` now leaves it out.
+ */
+export function envCheckout(env = process.env) {
+  if (!env.EPIC_CHECKOUT) return undefined
+  const checkout = resolve(env.EPIC_CHECKOUT)
+  if (existsSync(checkout)) return checkout
+  if (!staleSaid) console.error(`EPIC_CHECKOUT ${checkout} doesn't exist:  left out (a stale one, inherited)`)
+  staleSaid = true
+  return undefined
+}
+
+/**
+ * The engine's own per-run settings, never handed to a VS Code window (`codeEnv()`):  the checkout the `epic`
+ * command's tools work on, their `tsx` config, and yarn's starting folder.
+ */
+const ENGINE_ENV = ["EPIC_CHECKOUT", "TSX_TSCONFIG_PATH", "INIT_CWD"]
+
+/**
+ * The environment for a `code` command:  this process's, without the engine's own settings (`ENGINE_ENV`).
+ * - VS Code gives the window `code` opens the command's environment, so every Claude session in that window
+ *   inherits it, and with `EPIC_CHECKOUT` its docs tools worked on the checkout that OPENED the window, long after
+ *   it was gone (epic `epic-engine` P9)
+ */
+export function codeEnv(env = process.env) {
+  return Object.fromEntries(Object.entries(env).filter(([key]) => !ENGINE_ENV.includes(key)))
+}
 
 /** The nearest folder at or above `dir` holding `.git` (a checkout, or a worktree);  `dir` itself if none. */
 function checkoutAround(dir) {
@@ -578,7 +615,7 @@ export class Window {
     }
     delete workspace.settings["workbench.colorCustomizations"]
     writeFileSync(file, `${JSON.stringify(workspace, null, 2)}\n`)
-    const run = spawnSync("code", [file], { encoding: "utf8" })
+    const run = spawnSync("code", [file], { encoding: "utf8", env: codeEnv() })
     if (run.status !== 0) throw new Error(`\`code ${file}\` failed:  ${run.stderr || run.error?.message}`)
     return { file, colors }
   }
@@ -773,7 +810,7 @@ export class Window {
     const { sessionId, to, from, close, remove, show, prompt } = handoff
     titles = [titles ?? []].flat().filter(Boolean)
     if (!SESSION_ID.test(sessionId ?? "")) throw new Error(`bad session id '${sessionId}'`)
-    if (!Window.windowOf(to)) spawnSync("code", [to], { encoding: "utf8" })
+    if (!Window.windowOf(to)) spawnSync("code", [to], { encoding: "utf8", env: codeEnv() })
     const window = await Window.waitFor(to)
     await Window.request("open-session", prompt ? { sessionId, prompt } : { sessionId }, window)
     let shown

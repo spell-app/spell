@@ -56,8 +56,8 @@ export { registerPack } from "@spell-app/ui"
 
 /**
  * What a component pack imports, by the specifier its build leaves external => the page's copy of that module.
- * - `$/spell-solid`, what the packs' elements are written on:  Spell UI's core module, which carries all of it
- *   (`$/ui/core` re-exports it, and its `E` holds every name spell-solid's `E` does), so a page has one.
+ * - `$/spell-element`, what the packs' elements are written on:  Spell UI's core module, which carries all of it
+ *   (`$/ui/core` re-exports it, and its `E` holds every name spell-element's `E` does), so a page has one.
  * - `$/ui/components/ui-root` is for `<spell-app>` / `<spell-editor>`'s scripts (`spell-solid-shared.js`, `packages/app`
  *   `vite.solid.config.ts`), not for packs:  `<spell-app>` is a root, a subclass of `UIRoot`.
  * - `@solidjs/h` likewise:  what compiled spell draws with (`spell-runtime.js`, through `spell-solid-shared.js`),
@@ -71,7 +71,7 @@ export const packModules = Object.freeze({
   "solid-js": solid,
   "@solidjs/web": solidWeb,
   "@solidjs/h": solidH,
-  "$/spell-solid": uiCore,
+  "$/spell-element": uiCore,
   "$/ui/core": uiCore,
   "$/ui/forms": uiForms,
   "$/ui/components/ui-root": uiRoot,

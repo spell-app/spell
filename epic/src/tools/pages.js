@@ -7,7 +7,7 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSyn
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { Window } from "../window.mjs"
+import { Window, envCheckout } from "../window.mjs"
 import { EpicConfig } from "../config/EpicConfig.ts"
 import { ENGINE_ROUTES, EPIC_UI } from "../server/server.types.ts"
 
@@ -26,9 +26,10 @@ export const ASSETS = join(TOOLS, "_assets")
  * The checkout the docs tools work on:  the repo, or a worktree of it.  Page paths are relative to it.
  * - `EPIC_CHECKOUT` when set:  the `epic` command runs ONE copy of the tools (its own) on the caller's checkout,
  *   and says which (`EpicTools.run()`, epic `epic-eject` P5)
+ *   - not one that names no folder:  a stale one, inherited (`envCheckout()`, epic `epic-engine` P9)
  * - else the checkout this file is in
  */
-export const ROOT = process.env.EPIC_CHECKOUT ? resolve(process.env.EPIC_CHECKOUT) : PACKAGE
+export const ROOT = envCheckout() ?? PACKAGE
 
 /**
  * The repo's content folder (`.epic/config.json5` `contentFolder`:  `../spell-app.epics`), where every page is:  the

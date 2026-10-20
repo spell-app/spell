@@ -15,9 +15,9 @@ const UI_CONFIG = pathToFileURL(resolve(import.meta.dirname, "./.spell-app/packa
 const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConfig }
 
 /**
- * vitest config for `@spell-app/epics`, a component pack (`spell dev pack`):  two projects, over `tests/`.
- * - `node` -- everything but the elements:  the epic code's tests, `pack.test.ts` among them (`spell dev pack check
- *   epics`:  `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
+ * vitest config for `@spell-app/epics`, a component pack (`spell-ui-pack`):  two projects, over `tests/`.
+ * - `node` -- everything but the elements:  the epic code's tests, `pack.test.ts` among them (`spell-ui-pack check`:
+ *   `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
  * - `browser` -- `components/**`:  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
  *   chromium), as Spell UI's are.  `baseConfig()`:  Spell UI's plugins (decorators BEFORE Solid), Solid dedupe,
  *   Lightning CSS;  Spell UI's test helpers come from `$/ui/test/...`
@@ -61,7 +61,8 @@ export function epicsProjects({
         name: `${prefix}browser`,
         dir: TESTS,
         include: ["components/**/*.test.{ts,tsx}"],
-        // Spell UI's core first, as a page has it:  its settings for `$/spell-solid` (`test/setup.ts` in spell-app's `ui`)
+        // Spell UI's core first, as a page has it:  its settings for `$/spell-element` (`test/setup.ts` in spell-app's
+        // `ui`)
         setupFiles: [resolve(import.meta.dirname, "./.spell-app/packages/ui/test/setup.ts")],
         testTimeout: 10_000,
         browser: {

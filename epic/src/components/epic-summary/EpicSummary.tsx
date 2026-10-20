@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "$/spell-solid"
+import { E } from "$/spell-element"
 
 import { STATUS_SLOT } from "$/epics/components/epic-item/EpicItem.types"
 

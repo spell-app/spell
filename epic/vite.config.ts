@@ -6,8 +6,8 @@ import { fmtConfig, packageLint, patternLintIn } from "./vite.lint.ts"
  * spell-epic's Vite+ config:  only the `lint` / `fmt` blocks (what `vp check`, `vp lint`, `vp fmt` and the Oxc editor
  * extension read), from `vite.lint.ts`, a copy of spell-app's.
  * - ONE block for the whole repo:  spell-epic is one package (epic `epic-eject` J14), so the root is the package.
- * - The pack's BUILD is spell-app's CLI's, the same for every pack:
- *   `spell dev pack build epics` (`packages/cli/src/dev/packBuild.ts` there), on Spell UI's `baseConfig()`.
+ * - The pack's BUILD is Spell UI's, the same for every pack:
+ *   `spell-ui-pack build` (`packages/ui/tools/ComponentPack.ts` there), on Spell UI's `baseConfig()`.
  * - Tests:  `vitest.config.ts` beside this.
  * - Not ours to lint or format:
  *   - `src/components/__pack/`:  generated

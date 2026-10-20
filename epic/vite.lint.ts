@@ -169,12 +169,12 @@ export const testLint = {
 /**
  * The folders of COMPONENT files, by package (its folder under `packages/`):
  * `patternLint()` turns the `spell-ui/*` rules on there.
- * - Every set's elements, all written on `$/spell-solid`, held to the same patterns, each in its package's
+ * - Every set's elements, all written on `$/spell-element`, held to the same patterns, each in its package's
  *   `components/`:  Spell UI's (and its docs site's widgets, `src/docs-components/`), the epics', the brand's, and
  *   the app's own (`<spell-app>`, `<spell-editor>`).
  * - Not:
  *   - `app`'s `src/`:  WWOD §17's function components (Owen:  "other than app components")
- *   - the element core (`$/spell-solid`, and `ui`'s `src/elements/`):  the decorators and helpers themselves
+ *   - the element core (`$/spell-element`, and `ui`'s `src/elements/`):  the decorators and helpers themselves
  *   - tests (`testLint`)
  */
 export const PATTERN_FOLDERS: Record<string, string[]> = {

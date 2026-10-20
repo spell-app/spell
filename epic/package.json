@@ -11,8 +11,8 @@
   "scripts": {
     "epic": "node bin/epic",
     "/////// PACK AND DOCS": "",
-    "pack:build": "node scripts/spell-app.mjs dev pack build epics",
-    "pack:check": "node scripts/spell-app.mjs dev pack check epics",
+    "pack:build": "spell-ui-pack build",
+    "pack:check": "spell-ui-pack check",
     "site:data": "tsx scripts/site-data.ts",
     "docs:update": "node src/tools/update.js",
     "docs:index": "node src/tools/index.js",
@@ -44,7 +44,7 @@
   "dependencies": {
     "@spell-app/assembler": "portal:./.spell-app/packages/assembler",
     "@spell-app/server": "portal:./.spell-app/packages/server",
-    "@spell-app/spell-solid": "portal:./.spell-app/packages/spell-solid",
+    "@spell-app/spell-element": "portal:./.spell-app/packages/spell-element",
     "@spell-app/ui": "portal:./.spell-app/packages/ui",
     "@spell-app/util": "portal:./.spell-app/packages/util",
     "chalk": "^5.6.0",

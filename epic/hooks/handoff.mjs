@@ -17,6 +17,8 @@
  *     which ends the `claude` process this hook runs under
  * - The window script works on the SESSION's checkout (`EPIC_CHECKOUT`, from `cwd`):
  *   this plugin is its own repo.
+ *   - ALWAYS `cwd`, never one the session inherited:  a window could hand its sessions the checkout that opened it
+ *     (epic `epic-engine` P9).
  * - Never fails the turn:  every error exits 0 (it's logged, or written to stderr).
  */
 import { spawn } from "node:child_process"
@@ -29,7 +31,7 @@ const SCRIPT = join(dirname(import.meta.dirname), "src", "window.mjs")
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   const { session_id: sessionId, transcript_path: transcript, cwd } = input
-  if (cwd && !process.env.EPIC_CHECKOUT) process.env.EPIC_CHECKOUT = cwd
+  if (cwd) process.env.EPIC_CHECKOUT = cwd
   // loaded in here, once `EPIC_CHECKOUT` says whose windows they are
   const { Window } = await import("../src/window.mjs")
   const file = sessionId && Window.handoffFile(sessionId)

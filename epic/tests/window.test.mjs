@@ -32,6 +32,8 @@ const {
   LOOKS,
   Window,
   claudeSessions,
+  codeEnv,
+  envCheckout,
   launchPlan,
   look,
   movedWindowFile,
@@ -789,6 +791,15 @@ test("launch():  the epic's window open, its session running:  typed into it;  n
     rmSync(home, { recursive: true, force: true })
     server.close()
   }
+})
+
+test("codeEnv() + envCheckout():  a window never inherits the engine's checkout;  one that names no folder is left out", () => {
+  // epic `epic-engine` P9:  a window `code` opened carried `EPIC_CHECKOUT` into every session in it
+  const env = { PATH: "/bin", EPIC_CHECKOUT: repo, TSX_TSCONFIG_PATH: "/t/tsconfig.json", INIT_CWD: "/x", HOME: "/h" }
+  assert.deepEqual(codeEnv(env), { PATH: "/bin", HOME: "/h" })
+  assert.equal(envCheckout({ EPIC_CHECKOUT: repo }), repo)
+  assert.equal(envCheckout({}), undefined)
+  assert.equal(envCheckout({ EPIC_CHECKOUT: join(repo, "gone-worktree") }), undefined)
 })
 
 /** Write a registry entry for `pid` with `folders`. */

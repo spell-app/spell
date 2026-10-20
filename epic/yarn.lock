@@ -1243,7 +1243,7 @@ __metadata:
     "@solidjs/web": "npm:2.0.0-rc.13"
     "@spell-app/assembler": "portal:./.spell-app/packages/assembler"
     "@spell-app/server": "portal:./.spell-app/packages/server"
-    "@spell-app/spell-solid": "portal:./.spell-app/packages/spell-solid"
+    "@spell-app/spell-element": "portal:./.spell-app/packages/spell-element"
     "@spell-app/ui": "portal:./.spell-app/packages/ui"
     "@spell-app/util": "portal:./.spell-app/packages/util"
     "@types/node": "npm:^22.20.4"
@@ -1274,9 +1274,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@spell-app/spell-solid@portal:./.spell-app/packages/spell-solid::locator=%40spell-app%2Fepics%40workspace%3A.":
+"@spell-app/spell-element@portal:./.spell-app/packages/spell-element::locator=%40spell-app%2Fepics%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@spell-app/spell-solid@portal:./.spell-app/packages/spell-solid::locator=%40spell-app%2Fepics%40workspace%3A."
+  resolution: "@spell-app/spell-element@portal:./.spell-app/packages/spell-element::locator=%40spell-app%2Fepics%40workspace%3A."
   peerDependencies:
     "@solidjs/web": 2.0.0-rc.13
     solid-js: 2.0.0-rc.13

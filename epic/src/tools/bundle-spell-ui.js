@@ -88,7 +88,7 @@ const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
  * spell-app's `packages/ui`, through spell-epic's link to its checkout (`.spell-app`), unless `SPELL_UI_DIR` says
  * otherwise;  by its REAL path.
  * - esbuild resolves UI's own imports (`dist/` chunk to chunk) to real paths:  had the entry's `@spell-app/ui/*` gone
- *   through the link, the bundle held TWO of UI's modules (`core.js` ...), so two of `spell-solid`'s
+ *   through the link, the bundle held TWO of UI's modules (`core.js` ...), so two of `spell-element`'s
  *   `ShadowEvents`, and a `<ui-button>`'s page `onClick` ran twice (epic `epic-engine` I18:  Do Now called itself off)
  */
 const UI_DIR = realPath(resolve(process.env.SPELL_UI_DIR ?? join(DOCS, "../.spell-app/packages/ui")))
@@ -387,6 +387,7 @@ async function bundle() {
   })
   checkOneSolid(result.metafile)
   checkEachFileOnce(result.metafile)
+  checkNoElementSource(result.metafile)
   if (DESIGN) escapeForInlining()
   checkClassicScript()
   if (DESIGN) checkDesignBundle()
@@ -457,8 +458,8 @@ function spellUiResolver() {
         if (!existsSync(BRAND_DESIGN)) fail(`${relative(DOCS, BRAND_DESIGN)} is missing:  run without --skip-ui-build`)
         return { path: BRAND_DESIGN }
       })
-      // `$/spell-solid`, what the brand's elements are written on:  Spell UI's `dist/core.js`, which carries it
-      pluginBuild.onResolve({ filter: /^\$\/spell-solid$/ }, () => ({ path: uiDistPath("@spell-app/ui/core") }))
+      // `$/spell-element`, what the brand's elements are written on:  Spell UI's `dist/core.js`, which carries it
+      pluginBuild.onResolve({ filter: /^\$\/spell-element$/ }, () => ({ path: uiDistPath("@spell-app/ui/core") }))
       pluginBuild.onResolve({ filter: /^\$\/ui(\/.*)?$/ }, ({ path }) => {
         const file = uiDistPath(`@spell-app/ui${path.slice("$/ui".length)}`)
         if (!existsSync(file)) fail(`${path} (a brand element's import) has no ${relative(DOCS, file)}`)
@@ -658,13 +659,25 @@ function checkOneSolid(metafile) {
 }
 
 /**
- * Fails if the comments' own script took in any of Spell UI, spell-solid or Solid:  the page it runs on has its own,
+ * Fails if spell-element's SOURCE made it into the bundle:  a second copy beside the one Spell UI's `dist/core.js`
+ * carries, so two `UIComponent`s and two `ShadowEvents` (the brand's `$/spell-element` import, unless the resolver
+ * sends it to `dist/core.js`;  epic `epic-engine` P9).
+ */
+function checkNoElementSource(metafile) {
+  const sources = Object.keys(metafile.inputs).filter((input) =>
+    /(?:^|\/)packages\/spell-element\//.test(realPath(resolve(input)))
+  )
+  if (sources.length) fail(`spell-element bundled from its source, a second copy:\n  ${sources.join("\n  ")}`)
+}
+
+/**
+ * Fails if the comments' own script took in any of Spell UI, spell-element or Solid:  the page it runs on has its own,
  * and two copies handle every event twice (epic `epic-engine` I18).
  */
 function checkNoSpellUI(metafile) {
   const shared = Object.keys(metafile.inputs).filter(
     (input) =>
-      /(?:^|\/)packages\/(?:ui|spell-solid)\//.test(realPath(resolve(input))) ||
+      /(?:^|\/)packages\/(?:ui|spell-element)\//.test(realPath(resolve(input))) ||
       /node_modules\/(?:solid-js|@solidjs)\//.test(input)
   )
   if (shared.length) fail(`${relative(DOCS, COMMENTS_OUT)} took in what the page shares:\n  ${shared.join("\n  ")}`)

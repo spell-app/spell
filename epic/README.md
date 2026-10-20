@@ -25,7 +25,7 @@ ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` 
 | `bin/epic` | the `epic` command;  on every session's `PATH` while the plugin is on |
 | `src/` | the code, `$/epics`:  the `<epic-*>` elements (`components/`, the pack in `components/__pack/`), the epic tool (`tool/`), the `epic` command's code (`command/`), the epic server (`server/`), the docs tools and their assets (`tools/`, `tools/_assets/`), Epic UI's pages (`docs/`), the VS Code windows (`window.mjs`, `epic window`);  its rules:  [src/AGENTS.md](src/AGENTS.md) |
 | `tests/` | its tests, at the same paths as the code (`tests/command/` for `src/command/` ...);  and the extension's (`tests/vscode/`) |
-| `scripts/` | dev-only scripts:  Epic UI's data (`site-data.ts`), spell-app's CLI for the pack build (`spell-app.mjs`) |
+| `scripts/` | dev-only scripts:  Epic UI's data (`site-data.ts`) |
 | `types/` | the ambient helper types (`Prettify` ...) |
 | `vscode/` | spell-epic's VS Code extension, `spell-app.spell-epic` (its own yarn project):  the Review tab, Epic Docs, "Open Epic...", the window bridge and the handoff;  [its README](vscode/README.md) |
 | `templates/` | every kind of page's starting point (Q8, T11):  details, review, choices, guides, cheatsheets, commands pages, component pages, the epic-page writing rules;  served at `/templates/` (an engine route), the Templates list page `templates/index.html` written here by `epic pages index`;  `epic pages template <name>` prints one's path |
@@ -376,7 +376,7 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 The epic pages are drawn with Spell UI, and the tools run on spell's page server and page assembler.
 spell-epic uses those packages straight from a spell-app checkout (Q5), not from npm:
 - `.spell-app` at the root is a link to that checkout.
-  - The `@spell-app/{ui,server,assembler,util,spell-solid}` dependencies are `portal:` links through it
+  - The `@spell-app/{ui,server,assembler,util,spell-element}` dependencies are `portal:` links through it
     (in [the root `package.json`](package.json)).
   - The alias table, `tsconfig.base.json`, maps `$/ui`, `$/server` and the rest into it.
   - Through the CHECKOUT's link, never a package's own:
@@ -393,10 +393,11 @@ spell-epic uses those packages straight from a spell-app checkout (Q5), not from
     `spell-epic.worktrees/spell-app -> ../spell-app`, which the worktree hook makes when it's missing
     (`linkOutside()` in [the worktree hook](hooks/worktree.mjs);  epic `epic-engine` I13).
 
-- The component pack's build and check are still spell-app's CLI's (`spell dev pack`).
-  - `yarn pack:build` / `pack:check` run it through [spell-app.mjs](scripts/spell-app.mjs).
+- The component pack's build and check are Spell UI's own pack tooling, `spell-ui-pack` (`@spell-app/ui`'s bin;
+  `tools/ComponentPack.ts` there;  epic `repo-split` P5), which spell-app's CLI (`spell dev pack`) calls too.
+  - `yarn pack:build` / `pack:check` run `spell-ui-pack build` / `check` in the root.
   - It finds the pack from the root `package.json`'s `"spellPack": { "name": "epics", "prefix": "epic-", "dir": "src" }`:
-    a pack that is a whole checkout (J14;  spell-app's `packBuild.ts`, `rootPack()`).
+    a pack that is a whole checkout (J14).
 - At release:  publish those packages to npm, and depend on them there.
 
 ## Checks

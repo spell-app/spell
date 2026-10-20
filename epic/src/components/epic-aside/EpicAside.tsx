@@ -1,4 +1,4 @@
-import { E } from "$/spell-solid"
+import { E } from "$/spell-element"
 
 import { epicAsideVocabulary } from "./EpicAside.en"
 import { EpicPanel } from "./EpicPanel"

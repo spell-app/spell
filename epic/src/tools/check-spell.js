@@ -51,7 +51,7 @@ import { chromium } from "playwright"
 // By path, its types stripped by `node` itself:  this tool runs under plain `node`, so no `$/` alias
 import { componentSets, pageServerSettings } from "@spell-app/server/src/page/settings.ts"
 import { engineFileFor } from "../server/engineLinks.ts"
-import { PACKAGE, ROOT, ensurePageServer, pageFile, serverUrl } from "./pages.js"
+import { CONTENT, PACKAGE, ROOT, ensurePageServer, pageFile, pagePath, serverUrl } from "./pages.js"
 
 /**
  * Elements the page's packs define, as `ui-*` (Spell UI) and `epic-*` (the `epics` pack, epic pages):
@@ -118,7 +118,9 @@ const overflow = await phone.evaluate(() => document.documentElement.scrollWidth
 if (overflow > 0) problem(`${overflow}px horizontal scroll at phone width`)
 itemLine.phone = await checkItemLine(phone, join(out, "phone-item.png"))
 await phone.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2))
-const mainWidth = await phone.evaluate(() => Math.round(document.querySelector("main").getBoundingClientRect().width))
+const mainWidth = await phone.evaluate(() =>
+  Math.round((document.querySelector("main") ?? document.body).getBoundingClientRect().width)
+)
 if (mainWidth < 390 - 40) problem(`content column only ${mainWidth}px wide at phone width (390px)`)
 const rail = await phone.evaluate(navOnScreen, NAV)
 if (desktop.topLevel && !rail.shown) problem("the toolbar isn't shown at the top at phone width")
@@ -166,6 +168,11 @@ function pageUrl(file) {
   // `--base`:  any page from that server, as it shows there (its comments, Send, the toolbar's bullhorn)
   if (!baseArg && !inSet && !/<body\b[^>]*\bdata-spell-needs-server\b/.test(readFileSync(file, "utf8"))) return local
   const served = baseArg ? { base: baseArg.replace(/\/$/, "") } : ensurePageServer()
+  // a page outside the content folder has no address there (`../x.html`):  say so, not what a 404 page breaks
+  if (served && !inSet && pagePath(file).startsWith("../")) {
+    console.error(`${file} is outside the content folder, ${CONTENT}, so no server has it`)
+    process.exit(2)
+  }
   if (served) return inSet ? `${served.base}${inSet}` : serverUrl(served.base, file)
   problem("page needs the page server, and it didn't start")
   return local
@@ -198,7 +205,13 @@ async function open(viewport) {
     const file = engineFileFor(new URL(route.request().url()).pathname, ENGINE)
     return file && existsSync(file) ? route.fulfill({ path: file }) : route.fulfill({ status: 404 })
   })
-  await page.goto(url)
+  const response = await page.goto(url)
+  // a server's error page (a 404) has none of the page's shape:  every check would fail on it, or throw
+  if (response && !response.ok()) {
+    console.error(`${url}:  ${response.status()} ${response.statusText()}`)
+    await browser.close()
+    process.exit(1)
+  }
   await settle(page)
   return page
 }
@@ -582,7 +595,8 @@ function stuckAndActive({ id, nav }) {
   const rect = title?.getBoundingClientRect()
   // 40px into the title itself:  `main` spans the window in the wide layout, the reading column centred in it, so
   // `main`'s left + 40 is its margin, where nothing shows (epic `epic-engine` I33:  a goal page's h2 failed so)
-  const left = (rect?.width ? rect.left : document.querySelector("main").getBoundingClientRect().left) + 40
+  const left =
+    (rect?.width ? rect.left : (document.querySelector("main") ?? document.body).getBoundingClientRect().left) + 40
   const probe = rect ? Math.max(4, rect.top + rect.height / 2) : 16
   const shown = document.elementFromPoint(left, probe)
   const active = document.querySelector(`:is(${nav}) [data-rail][selected]`)
