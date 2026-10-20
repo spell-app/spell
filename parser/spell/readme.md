@@ -98,7 +98,7 @@ Notes:
       - click one for its docs, spell and compiled code
     - "Thing Explorer":  every thing the program has made, in the order made or by type
       - with its properties as they change, and its actions:  ▶ does one
-  - Its code is `dist-runner/`, in `packages/app`, built from [the app's runner](../app/src/runner/).
+  - Its code is `dist-runner/`, in `packages/app`, built from [the app's runner](../../spell-app/app/src/runner/).
     - Building the extension builds it.
     - After changing the runner alone:  `yarn build:runner` (in `packages/app`), and close / reopen the panel.
 - Spell indents with tabs:  the extension sets `.spell` files to tabs, and formatting always uses them.

@@ -3,7 +3,7 @@
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in this package, `@spell-app/py`.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
@@ -13,11 +13,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [ts/](ts/index.ts):  the TypeScript that writes Python, `$/py` (`PY`)
   - [core/](core/pyproject.toml):  `spell_core`, what compiled Python imports
   - NOT here:  `spell_quart`, Python's web server, which serves a program as a web app on Quart.
-    It's in the spaces package, [its Python side](../spaces/src/server/py/pyproject.toml)
-    ([spaces' AGENTS.md](../spaces/AGENTS.md);  epic `people-and-orgs` P14).
+    It's in the spaces package, [its Python side](../../spell-app/spaces/src/server/py/pyproject.toml)
+    ([spaces' AGENTS.md](../../spell-app/spaces/AGENTS.md);  epic `people-and-orgs` P14).
 - ONE yarn workspace, `@spell-app/py`.
   - Its TypeScript is in `ts/`, not the usual source folder:
-    [the alias table](../../tsconfig.base.json) points `$/py` there.
+    [the alias table](../tsconfig.base.json) points `$/py` there.
   - `core/` is a uv project of its own, beside it:  yarn doesn't look in it.
 - It imports only `$/parser` and `$/util`.
   - The parser's helpers the writers share come through its barrel, `P`:
@@ -32,7 +32,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - then `core/`:  ruff and pytest
 - Tests live in the repo's `tests/py/`, at the same paths as the code they test:
   - TypeScript, found by vitest (our `vitest.config.ts` points there):
-    - [PyWriter.ts](ts/PyWriter.ts) => [PyWriter.test.ts](../../tests/py/ts/PyWriter.test.ts)
+    - [PyWriter.ts](ts/PyWriter.ts) => [PyWriter.test.ts](../tests/py/ts/PyWriter.test.ts)
   - `core/tests/` => `tests/py/core/tests/`
     - Its pytest finds them by its `testpaths`;  the yarn scripts hand ruff their folder too.
 
@@ -93,7 +93,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     ```
 
 - It runs a compiled program with `python -m spell_core.run <program> --seed n`.
-  - cli's [`runPython()`](../cli/src/commands/runCommand.ts) runs it through uv in this project.
+  - cli's [`runPython()`](../../spell-app/cli/src/commands/runCommand.ts) runs it through uv in this project.
   - Its flags:
     - `--no-pauses`:  a pause doesn't wait
     - `--page`:  print what it drew, as HTML
@@ -121,15 +121,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `game.trigger("card-click", card=game.ref(card))`, `game.call("deal_the_cards")`:  each answered by its patch.
   - `game.thing(id)`, `game.named("stock")`:  what the page holds now, by id.
   - After each, the patches so far must add up to the whole state, else `PatchMismatchError`.
-  - The contract's 300 clicks per game play through it ([patches_in_a_game.py](../../tests/py/core/tests/patches_in_a_game.py)).
+  - The contract's 300 clicks per game play through it ([patches_in_a_game.py](../tests/py/core/tests/patches_in_a_game.py)).
 - Five checks keep it in step with the javascript core ([core's AGENTS.md](../core/AGENTS.md)):
   - the core's method list ([core.declarations.json5](../core/core.declarations.json5)):
     `spell_core` has each name, or lists it, with why, in [not_ported_yet.json5](core/not_ported_yet.json5)
-  - seeded random:  both read [seededRandom.expected.json5](../../tests/core/seededRandom.expected.json5)
-  - state by id:  both write and read [stateById.expected.json5](../../tests/core/stateById.expected.json5)
-  - saved by id:  both write and read [savedById.expected.json5](../../tests/core/savedById.expected.json5)
+  - seeded random:  both read [seededRandom.expected.json5](../tests/core/seededRandom.expected.json5)
+  - state by id:  both write and read [stateById.expected.json5](../tests/core/stateById.expected.json5)
+  - saved by id:  both write and read [savedById.expected.json5](../tests/core/savedById.expected.json5)
   - Those three are with the JavaScript core's tests (`tests/core/`).
-  - the core contract (cli's [contract.test.ts](../../tests/cli/src/contract.test.ts)):
+  - the core contract (cli's [contract.test.ts](../../spell-app/tests/cli/src/contract.test.ts)):
     a compiled program prints exactly what javascript prints
 - The terminal-drawing study (P15) is in `core/experiments/terminal`.
   - Its tests need their own uv group, `study`, so the runs above leave them out.

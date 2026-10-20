@@ -3,7 +3,7 @@
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in this package, `@spell-app/parser`.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
@@ -79,13 +79,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - e.g. `ListAddRelative` => `list_add_relative`
   - `P.Rule.ruleNameFor()` works it out.
   - The builds:
-    app's [vite.config.ts](../app/vite.config.ts) and [vite.editor.config.ts](../app/vite.editor.config.ts).
-  - Pinned by app's [build.test.ts](../app/src/build.test.ts).
+    app's [vite.config.ts](../../spell-app/app/vite.config.ts) and [vite.editor.config.ts](../../spell-app/app/vite.editor.config.ts).
+  - Pinned by app's [build.test.ts](../../spell-app/app/src/build.test.ts).
 
 ## Imports
 
 - As WWOD §4 (examples there are ours).  `import { P } from "$/parser"`.
-- [barrel.test.ts](../../tests/parser/src/barrel.test.ts) is the smoke test for circular imports through the barrel:
+- [barrel.test.ts](../tests/parser/src/barrel.test.ts) is the smoke test for circular imports through the barrel:
   run it after moving files.
   - The tests live in the repo's `tests/parser/`, at the same paths as the code.
 

@@ -14,5 +14,5 @@ export default defineConfig({
   plugins: [standardDecorators(), packageVersion(import.meta.dirname)],
   resolve: { tsconfigPaths: true },
   // the tests live in the repo's tests/ folder, at the same paths as the code
-  test: { dir: resolve(import.meta.dirname, "../../tests/parser") }
+  test: { dir: resolve(import.meta.dirname, "../tests/parser") }
 })

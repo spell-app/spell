@@ -6,7 +6,7 @@ import { core } from "$/core"
 import { coreDeclarations, docsIn, paramNamesOf, unlistedCoreNames } from "$/core/coreDeclarations"
 
 /** Where `yarn gen:declarations` writes the core's method list. */
-const DECLARATIONS_FILE = resolve(import.meta.dirname, "../../../packages/core/core.declarations.json5")
+const DECLARATIONS_FILE = resolve(import.meta.dirname, "../../../core/core.declarations.json5")
 
 describe("the core's method list, core.declarations.json5", () => {
   test("is up to date with the core:  if not, run `yarn gen:declarations` in packages/core", () => {

@@ -4,7 +4,7 @@ This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in this package, `@spell-app/spell`.
 - Code imports it as `$/spell`;  its namespace is `SP`.
 
-**READ the repo root's `AGENTS.md` and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+**READ the repo root's `AGENTS.md` and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 - the root's:  the repo's layout
 - WWOD:  the house style every package shares
 - Only what's local is below.
@@ -20,23 +20,23 @@ when working with code in this package, `@spell-app/spell`.
   - [parser](../parser/AGENTS.md), `$/parser` (`P`):  the generic rule-based parser.
     [PARSING.md](PARSING.md), here, maps its pipeline.
   - [core](../core/AGENTS.md), `$/core` (`SC`):  the runtime compiled spell runs on.
-  - [util](../util/AGENTS.md), `$/util`:  utilities.
-  - [lsp](../lsp/AGENTS.md), `$/lsp` (`LSP`):  spell's language server.
+  - [util](../../spell-util/util/AGENTS.md), `$/util`:  utilities.
+  - [lsp](../../spell-app/lsp/AGENTS.md), `$/lsp` (`LSP`):  spell's language server.
     See "Language server" in [PARSING.md](PARSING.md).
-  - `../vscode`:  the VS Code extension that runs it.
+  - `../../spell-app/vscode`:  the VS Code extension that runs it.
     Its own yarn project, NOT a workspace.
-  - [app](../app/AGENTS.md), `$/app`:  the web app.
+  - [app](../../spell-app/app/AGENTS.md), `$/app`:  the web app.
     - Also the runner, and the `<spell-app>` / `<spell-editor>` elements.
     - `yarn start` is run THERE.
-  - [spaces](../spaces/AGENTS.md), `$/spaces`:  where projects live, and the editor's server.
+  - [spaces](../../spell-app/spaces/AGENTS.md), `$/spaces`:  where projects live, and the editor's server.
     - Spell's project groups (`@spell/examples`, `owen@spell` ...), their lists, and a project's file edits.
     - The built-in projects and the test projects, and reading and writing projects on disk.
     - This package NEVER imports it (see "Projects live in spaces" below).
-  - [cli](../cli/AGENTS.md):  the `spell` command line.
+  - [cli](../../spell-app/cli/AGENTS.md):  the `spell` command line.
     It runs this package's SOURCE (and the others') through `tsx`.
 - `src/rules/`:  spell's rule modules (see "Parser rules" below).
 - Tests live in the repo's `tests/spell/`, at the same paths as the code they test:
-  [SpellProject.ts](src/SpellProject.ts) => [SpellProject.test.ts](../../tests/spell/src/SpellProject.test.ts).
+  [SpellProject.ts](src/SpellProject.ts) => [SpellProject.test.ts](../tests/spell/src/SpellProject.test.ts).
   - `yarn test` here runs them (`vitest.config.ts` points there).
   - Their helpers stay here, in `src/test/` (`$/spell/test`).
   - The projects they read are spaces' test projects, `tests/spaces/@spell/test/`
@@ -65,7 +65,7 @@ when working with code in this package, `@spell-app/spell`.
   - It colours a snippet without a project, for `<ui-code language="spell">`.
   - Call it as `SP.SpellHighlighter.spans(text)`.
   - The app's `<spell-code>` colours pages with it, from source, in a lazy chunk
-    ([SpellLanguage](../app/components/spell-code/SpellLanguage.ts)):  nothing to regenerate after a grammar change.
+    ([SpellLanguage](../../spell-app/app/components/spell-code/SpellLanguage.ts)):  nothing to regenerate after a grammar change.
 - [targets.ts](src/targets.ts):  the TARGETS spell compiles to, `SP.TARGETS`.
   Each is a language, the runtime its code runs on, and the writer that writes it:
   - `js/solid`:  ALWAYS compiled, as the editor, the runners and `spell run` run it
@@ -107,9 +107,9 @@ when working with code in this package, `@spell-app/spell`.
       spaces' disk reader, or `$/spaces/models/projectGroups` alone.
     - Spell NEVER imports spaces.
   - Where each group's projects are:
-    - [spaces' built-ins](../spaces/@spell/), committed:
+    - [spaces' built-ins](../../spell-app/spaces/@spell/), committed:
       `@spell/examples`, `@spell/library`, `@spell/guides`
-    - `@spell/test`:  the test projects, [tests/spaces/@spell/test/](../../tests/spaces/@spell/test/), committed
+    - `@spell/test`:  the test projects, [tests/spaces/@spell/test/](../../spell-app/tests/spaces/@spell/test/), committed
     - `owen@spell`:  Owen's own, in spell-spaces beside the main checkout, outside git
   - A project's URLs and folder come from ONE function, [SpellUrls](src/SpellUrls.ts) (`SP.SpellUrls`).
   - See "Projects" in [PARSING.md](PARSING.md).
@@ -121,15 +121,15 @@ when working with code in this package, `@spell-app/spell`.
       - `fixtureProjectId()`
     - NEVER update a fixture to follow its example.
   - Each fixture's compiled output is checked against the snapshots beside it
-    ([fixtures.test.ts](../../tests/spell/src/test/fixtures.test.ts)):
+    ([fixtures.test.ts](../tests/spell/src/test/fixtures.test.ts)):
     - `<Project>.snapshot.js`:  the javascript target
     - `<Project>.snapshot.declarations.json5`:  its declarations
     - `<Project>.en.snapshot.js`:  its words (`SP.SpellWords`)
       - Its name ends as a snapshot's does, which keeps it out of the project's files.
     - `<Project>.snapshot.tsx`:  the TypeScript target
-    - `<Project>.snapshot.tsc.txt`:  what `tsc` says of it ([typescript.test.ts](../../tests/spell/src/test/typescript.test.ts))
+    - `<Project>.snapshot.tsc.txt`:  what `tsc` says of it ([typescript.test.ts](../tests/spell/src/test/typescript.test.ts))
     - `<Project>.snapshot.py`:  the Python target
-    - `<Project>.snapshot.pyright.txt`:  what pyright says of the Python ([python.test.ts](../../tests/spell/src/test/python.test.ts))
+    - `<Project>.snapshot.pyright.txt`:  what pyright says of the Python ([python.test.ts](../tests/spell/src/test/python.test.ts))
     - `<Project>.elements.snapshot.js`:  the Python targets' page file, for a fixture that draws
     - `<Project>.lib.snapshot.ts`:  the library target, for the fixtures in `LIBRARY_FIXTURES`
     - The Python ones only for the fixtures in `PYTHON_FIXTURES`:  every fixture but `todos-form-based`, so far.
@@ -196,7 +196,7 @@ when working with code in this package, `@spell-app/spell`.
         - the globals:  `Number`, `Boolean`, `Text`, `Comment` ...
         - a parser class:  `Keyword`
     - So the prod build keeps class names:  [parser's AGENTS.md](../parser/AGENTS.md), `keepNames`.
-    - [ruleNames.test.ts](../../tests/spell/src/rules/ruleNames.test.ts) pins every rule's name, module and registration order:
+    - [ruleNames.test.ts](../tests/spell/src/rules/ruleNames.test.ts) pins every rule's name, module and registration order:
       a renamed class that changes a rule's name fails it.
   - The SPELL SYNTAX TABLE, [spellSyntax.json](spellSyntax.json):  every rule class, by module, with
     - each syntax it's registered with
@@ -204,9 +204,9 @@ when working with code in this package, `@spell-app/spell`.
       (comments left out)
     - its aliases
     - its docstring's first sentence
-    - What [the spell syntax guide](../../../spell-app.epics/guides/spell-syntax/spell-syntax.html) draws.
+    - What [the spell syntax guide](../../spell.epics/guides/spell-syntax/spell-syntax.html) draws.
     - Generated:  `yarn gen:syntax`, after adding, renaming or changing a rule, its class docstring or its tests.
-      [spellSyntax.test.ts](../../tests/spell/src/node/spellSyntax.test.ts) fails until you do.
+      [spellSyntax.test.ts](../tests/spell/src/node/spellSyntax.test.ts) fails until you do.
     - So a class docstring's first sentence says what the rule is FOR, in plain words:  it's the guide's Purpose.
   - ONE `syntax` per registration.
     - A rule with several calls `addRule()` once per syntax, each with the `tests` for that syntax.
@@ -384,7 +384,7 @@ when working with code in this package, `@spell-app/spell`.
 - A built-in type's members (`the length of the name`) are DATA in `SP.BUILT_IN_TYPE_TABLE`, NOT rules.
   - The table:  [builtinTypes.ts](src/builtinTypes.ts).
   - Add one there, with the real `core` method or javascript property its `readAs` names.
-  - Then `yarn scopes --builtins`, in `../lsp`.
+  - Then `yarn scopes --builtins`, in `../../spell-app/lsp`.
   - See "Built-in types" in `PARSING.md`.
 - A `parse()` which understood a statement but mustn't take it REFUSES it, NOT returns `undefined`.
   - `return SpellStatement.refuse(match, "why")`:  the line's error then says why.
@@ -441,5 +441,5 @@ As WWOD §8, plus our self-namespace:
 The other namespaces live in their own packages:
 - `P`:  `../parser`
 - `SC`:  `../core`
-- `LSP`:  `../lsp`
-- `UI`:  `../app`
+- `LSP`:  `../../spell-app/lsp`
+- `UI`:  `../../spell-app/app`

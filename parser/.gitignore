@@ -1,0 +1,12 @@
+node_modules
+.yarn/install-state.gz
+.DS_Store
+.vitest/
+*.log
+# `/park`'s note on where parked work stopped:  never committed
+PARKED-*.md
+*.code-workspace
+__pycache__/
+.venv/
+# `agents/`:  a link to spell-util's agents/ (WWOD and the three logs), made by the top repo's setup
+/agents

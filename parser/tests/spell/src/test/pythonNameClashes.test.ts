@@ -86,7 +86,7 @@ describe("Python's name clashes in today's spell", () => {
     // the core's own methods, as Python names them
     naming.where = "the core's methods (core.declarations.json5)"
     const core = JSON.parse(
-      readFileSync(resolve(import.meta.dirname, "../../../../packages/core/core.declarations.json5"), "utf8")
+      readFileSync(resolve(import.meta.dirname, "../../../../core/core.declarations.json5"), "utf8")
     ) as { statements: Array<{ kind: string; name: string }> }
     for (const { kind, name } of core.statements) if (kind === "method") naming.nameOf(name, "method")
 

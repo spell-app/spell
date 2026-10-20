@@ -28,7 +28,7 @@ const SOURCE = [
 ]
 
 /** spell_core's uv project. */
-const SPELL_CORE = resolve(import.meta.dirname, "../../../../packages/py/core")
+const SPELL_CORE = resolve(import.meta.dirname, "../../../../py/core")
 
 /** `SOURCE`, one file of its own project, compiled by `writer`. */
 function compiled(writer: P.ProgramWriter): string {

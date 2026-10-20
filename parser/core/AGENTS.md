@@ -3,7 +3,7 @@
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in this package, `@spell-app/core`.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
@@ -17,26 +17,26 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its Python twin is `spell_core`, what spell compiled to Python imports ("The Python core", below).
 - [core.scopes.js](src/core.scopes.js) is GENERATED:  the built-in types' docs, for pages with no parser.
   - Built from spell's table of built-in types, `BUILT_IN_TYPE_TABLE` ([builtinTypes.ts](../spell/src/builtinTypes.ts)).
-  - By `yarn scopes --builtins`, in `../lsp`.
+  - By `yarn scopes --builtins`, in `../../spell-app/lsp`.
   - NEVER edit it by hand:  edit the table, run that.
 - [core.declarations.json5](core.declarations.json5) is GENERATED too:
   the core's method list, what another target's core must have (Python's `spell_core`, say).
   - Read from the running core by [`coreDeclarations()`](src/coreDeclarations.ts).
   - Each name's `section` and `description` come from the lead of its docstring, in the module's source.
-    - They're what [the core reference page](../../../spell-app.epics/guides/targets/core-reference.html) shows
+    - They're what [the core reference page](../../spell.epics/guides/targets/core-reference.html) shows
       (epic `python-target` P29).
     - A name with no docstring fails `coreDeclarations.test.ts`.
   - Written by `yarn gen:declarations` ([writeCoreDeclarations.ts](src/writeCoreDeclarations.ts)).
-  - [coreDeclarations.test.ts](../../tests/core/src/coreDeclarations.test.ts) fails until you run it,
+  - [coreDeclarations.test.ts](../tests/core/src/coreDeclarations.test.ts) fails until you run it,
     after adding, renaming or removing anything on `core`.
-  - Python's [test_core_declarations.py](../../tests/py/core/tests/test_core_declarations.py) checks `spell_core` against it:
+  - Python's [test_core_declarations.py](../tests/py/core/tests/test_core_declarations.py) checks `spell_core` against it:
     a new name fails there too,
     until it's ported or listed in py's [not_ported_yet.json5](../py/core/not_ported_yet.json5).
 - Random numbers come from the core's own generator, [`ParkMiller`](src/ParkMiller.ts), NEVER `Math.random()`:
   - `core.seedRandom(n)` makes everything random after it repeat;  unseeded, each run differs.
   - `core.shuffled()` is lodash's shuffle, step for step.
   - Python's core deals the same from the same seed:
-    both read [seededRandom.expected.json5](../../tests/core/seededRandom.expected.json5) in their tests.
+    both read [seededRandom.expected.json5](../tests/core/seededRandom.expected.json5) in their tests.
 - Positions count from where a project's lists start:  1, spell's own, or 0 (the project file's `"listsStartAt": 0`).
   - The helpers that convert:  [positions.ts](src/positions.ts), used by `List` and the collection helpers.
   - Negative positions count from the end either way:  `-1` is the last item.
@@ -58,7 +58,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - A drawable thing's own element, e.g. `<solitaire-card>`:
   - [elements.ts](src/elements.ts) names its tag.
   - The page makes the element, through `core.elementDefiner`:
-    app's [SpellElement.tsx](../app/src/runner/SpellElement.tsx) sets it.
+    app's [SpellElement.tsx](../../spell-app/app/src/runner/SpellElement.tsx) sets it.
   - Compiled TypeScript hands the page its own element class too (epic `drawable-thing` P10):
     `core.useElement(Card, CardElement)`, which the page builds the tag on.
     - It imports that class's base as `@spell/elements` (`SPELL_ELEMENTS_MODULE`), not from core.
@@ -83,7 +83,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Who may value-import it
 
-- ONLY the app's runner entry, [spellRuntime.ts](../app/src/runner/spellRuntime.ts), may value-import `$/core`,
+- ONLY the app's runner entry, [spellRuntime.ts](../../spell-app/app/src/runner/spellRuntime.ts), may value-import `$/core`,
   in every bundle.
   - Anything else -- the app, the parser, the language --
     puts it in a shared chunk, or loads a second copy.
@@ -93,7 +93,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - its types:  `import type` from `$/core/core.types`
     - or the runtime's own API, e.g. `runtimeConsole()`
   - Pinned by two of app's tests:
-    [element.build.test.ts](../../tests/app/src/runner/element.build.test.ts) and [build.test.ts](../../tests/app/src/build.test.ts).
+    [element.build.test.ts](../../spell-app/tests/app/src/runner/element.build.test.ts) and [build.test.ts](../../spell-app/tests/app/src/build.test.ts).
 - The ONE other entry:  `$/core/model` ([model.ts](src/model.ts), epic `people-and-orgs` P3).
   - The core with no drawing, so no Solid, and no running program's list of things.
     - References by name are in it all the same, searching what `searchThings()` was given (P9).
@@ -145,8 +145,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `core.canTake()` / `canGiveUp()` ask without moving.
   - A plain array has no guards.
 - Tests:
-  - [List.test.ts](../../tests/core/src/classes/List.test.ts)
-  - end to end, spell's [membership.test.ts](../../tests/spell/src/parserTests/membership.test.ts)
+  - [List.test.ts](../tests/core/src/classes/List.test.ts)
+  - end to end, spell's [membership.test.ts](../tests/spell/src/parserTests/membership.test.ts)
 
 ## JSON
 
@@ -181,7 +181,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Each writer keeps the ids it gave:  one writer per page.
   - `StateMirror.read()` reads each state INTO the things it read before, by id:  the same objects, changed.
   - `fromJSON()` reads through a new mirror, so JSON with ids keeps each thing as one.
-  - Python's twin is `spell_core.state`:  both write [stateById.expected.json5](../../tests/core/stateById.expected.json5), and read it.
+  - Python's twin is `spell_core.state`:  both write [stateById.expected.json5](../tests/core/stateById.expected.json5), and read it.
 - SAVING things by id ([saving.ts](src/saving.ts), epic `people-and-orgs` P2):  what lasts, as opposed to a page's state.
   - `new Saver().save(thing)`:  the thing as an entry, by key, `"Person#owen"`.
     - Every thing it reaches is written INSIDE what holds it (decision Q42):
@@ -203,7 +203,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The loader brings an older entry up step by step (`upgradeEntry()`):
       each version's renames and drops, then its upgrade method on the made thing.
     - A newer file than its type reads as it is.
-  - Python's twin is `spell_core.saving`:  both write [savedById.expected.json5](../../tests/core/savedById.expected.json5), and read it.
+  - Python's twin is `spell_core.saving`:  both write [savedById.expected.json5](../tests/core/savedById.expected.json5), and read it.
 - CHECKING a saved entry against its class ([checking.ts](src/checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.
@@ -232,9 +232,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The four files both cores read stay in the JavaScript core:
     its method list here, the three expected files with its tests (`tests/core/`):
     - [core.declarations.json5](core.declarations.json5)
-    - [seededRandom.expected.json5](../../tests/core/seededRandom.expected.json5)
-    - [stateById.expected.json5](../../tests/core/stateById.expected.json5)
-    - [savedById.expected.json5](../../tests/core/savedById.expected.json5)
+    - [seededRandom.expected.json5](../tests/core/seededRandom.expected.json5)
+    - [stateById.expected.json5](../tests/core/stateById.expected.json5)
+    - [savedById.expected.json5](../tests/core/savedById.expected.json5)
 
 ## Decorators
 
