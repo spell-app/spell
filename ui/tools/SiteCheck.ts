@@ -10,6 +10,7 @@ import { chromium, type Browser, type BrowserContextOptions, type Page } from "p
 
 import { FOLDS_KEY } from "../site/_src/site.types.ts"
 import { TocIndex } from "../src/docs-components/ui-docs-toc/TocIndex.ts"
+import { SPELL_APP, SPELL_CLI } from "./spellApp.ts"
 import { SITE_PAGES, SiteCheckError } from "./tools.types.ts"
 import { environment } from "./environment.ts"
 import { Terminal } from "./Terminal.ts"
@@ -669,7 +670,7 @@ function parseCommandLine(argv: string[]) {
 // ## Constants
 ////////////////
 
-/** `packages/ui/`. */
+/** Spell UI's folder. */
 const PACKAGE = fileURLToPath(new URL("..", import.meta.url))
 
 /** The site's pages, `docs/` (`SITE_PAGES`):  what the page server serves at `SITE_ADDRESS`. */
@@ -678,11 +679,9 @@ const SITE = join(PACKAGE, SITE_PAGES)
 /** Where the page server serves Spell UI's docs (the page server's `componentSets` setting). */
 const SITE_ADDRESS = "/components/ui"
 
-/** Repo root (of this worktree):  where `spell dev server ensure` runs. */
-const REPO = resolve(PACKAGE, "..", "..")
-
-/** This checkout's own `spell` CLI:  run with `node`, never the `spell` on `PATH` (maybe another checkout's). */
-const SPELL = join(REPO, "packages", "cli", "bin", "spell.mjs")
+/** Where `spell dev server ensure` runs, and that checkout's own CLI:  spell-app's (`spellApp.ts`). */
+const REPO = SPELL_APP
+const SPELL = SPELL_CLI
 
 /** Default screenshot folder;  `tools/results` is git-ignored. */
 const DEFAULT_OUT = join(PACKAGE, "tools", "results", "site-check")

@@ -23,7 +23,8 @@ import type { DesignExportResult, DesignTokensFile, ThemedValue } from "$/ui/too
 
 const UI = fileURLToPath(new URL("../../", import.meta.url))
 const DATA = readJSON5File<SiteDataFile>(join(UI, "docs/__data/components.json5"))
-const BRAND = join(UI, "../brand")
+/** A brand:  a FIXTURE cut from spell-brand's docs set (`fixtures/brand/`);  Spell UI never reads the brand's repo, above it */
+const BRAND = join(UI, "tests/tools/fixtures/brand")
 const BRAND_DATA = readJSON5File<SiteDataFile>(join(BRAND, "docs/__data/components.json5"))
 /** Spell UI's site data with the brand's merged in, as the export sees it */
 let all: SiteDataFile
@@ -34,7 +35,7 @@ let tokens: DesignTokensFile
 beforeAll(() => {
   const exporter = new DesignExport({
     data: DATA,
-    // the brand's folder is the caller's to give (epic `repo-split` P5):  `spell dev design build` gives spell-app's
+    // the brand's folder is the caller's to give (epic `repo-split` P5):  `spell dev design build` gives spell-brand's
     brand: BRAND,
     git: { branch: "main", sha: "abc1234", user: "Test" },
     now: new Date(0)
@@ -214,7 +215,10 @@ describe("DesignExport.build() brand cards", () => {
     expect(logo).toContain("<brand-logo")
     expect(files.get("README.md")).toContain("### Brand")
     expect(tokens.meta.paths).toMatchObject({
-      docs: expect.arrayContaining(["../brand/docs/__data/components.json5", "../brand/docs/brand-*.html"])
+      docs: expect.arrayContaining([
+        "tests/tools/fixtures/brand/docs/__data/components.json5",
+        "tests/tools/fixtures/brand/docs/brand-*.html"
+      ])
     })
   })
 

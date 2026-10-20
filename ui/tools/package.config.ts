@@ -69,14 +69,15 @@ export const DIST_IMPORTS: ImportMap["imports"] = {
 function bucket(id: string): Bucket {
   if (id.startsWith("\0")) return "core"
   // `runtime.types.ts` reads `version` from it;  the bundler inlines the one string into `core`
-  if (id.endsWith("/packages/ui/package.json")) return "core"
+  if (id === `${ROOT}package.json`) return "core"
   if (/\/node_modules\/(solid-js|@solidjs)\//.test(id)) {
     return "library"
   }
   if (/\/node_modules\/(temporal-(polyfill|utils)|highlight\.js|marked|dompurify)\//.test(id)) return "data"
   // a path under a `src/`, or under ui's `components/` (outside `src/`, kept as `components/...`)
   const file = id.split("?")[0]!
-  const src = /\/packages\/ui\/(components\/.+)$/.exec(file)?.[1] ?? /\/src\/(.+)$/.exec(file)?.[1]
+  const src =
+    (file.startsWith(`${ROOT}components/`) ? file.slice(ROOT.length) : undefined) ?? /\/src\/(.+)$/.exec(file)?.[1]
   if (!src) return "other"
   if (
     /^(forms\.ts|elements\/(FormComponent|DOMFormControl|Validator|MenuOptions|ControlLabels|LabelWatch)\.ts)$/.test(

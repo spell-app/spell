@@ -19,20 +19,17 @@ import { execFileSync } from "node:child_process"
 import path from "node:path"
 import { build, type Rolldown } from "vite"
 
+import { SPELL_APP, SPELL_CLI } from "../tools/spellApp.ts"
 import { Terminal } from "../tools/Terminal.ts"
 
-/** `packages/ui/`. */
+/** Spell UI's folder. */
 const UI = path.resolve(import.meta.dirname, "..")
-
-/** Repo root (of this checkout):  where `spell dev server ensure` runs. */
-const REPO = path.resolve(UI, "../..")
-
-/** This checkout's own `spell` CLI:  run with `node`, never the `spell` on `PATH` (maybe another checkout's). */
-const SPELL = path.join(REPO, "packages/cli/bin/spell.mjs")
 
 execFileSync("yarn", ["site:bundle"], { cwd: UI, stdio: "inherit" })
 const base = ensurePageServer()
-Terminal.out(`\nSpell UI site:  ${base}/ui/  (live reload);  watching the bundle's sources, Ctrl-C to stop\n`)
+Terminal.out(
+  `\nSpell UI site:  ${base}/components/ui/  (live reload);  watching the bundle's sources, Ctrl-C to stop\n`
+)
 const watcher = (await build({
   configFile: path.join(UI, "vite.site.config.ts"),
   build: { watch: {} }
@@ -46,13 +43,13 @@ function report(event: Rolldown.RolldownWatcherEvent): void {
 }
 
 /**
- * This checkout's page server origin, e.g. `http://127.0.0.1:54769`.
+ * spell-app's page server origin, e.g. `http://127.0.0.1:54769` (`SPELL_APP`'s:  it serves this site).
  * - SIDE EFFECT:  `spell dev server ensure` starts it in the background if it isn't running
  * - it prints `{ base, port, ... }` as JSON, maybe after other lines:  parsed from the first `{`
  */
 function ensurePageServer(): string {
-  const text = execFileSync(process.execPath, [SPELL, "dev", "server", "ensure"], {
-    cwd: REPO,
+  const text = execFileSync(process.execPath, [SPELL_CLI, "dev", "server", "ensure"], {
+    cwd: SPELL_APP,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],
     timeout: 60000

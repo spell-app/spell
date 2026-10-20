@@ -6,11 +6,14 @@ import { readJSON5File } from "@spell-app/util/node/json5"
 import type { SiteDataFile } from "$/ui/docs-components/docs-components.types"
 import { DesignBrand } from "$/ui/tools/DesignBrand"
 
-/** Spell UI's folder, and the brand's beside it. */
+/**
+ * Spell UI's folder, and a brand's:  a FIXTURE, two families cut from spell-brand's docs set (`fixtures/brand/`).
+ * - Spell UI never reads the brand's own repo:  it's above Spell UI (epic `repo-split` P8).  The caller names it.
+ */
 const UI = fileURLToPath(new URL("../../", import.meta.url))
-const BRAND = join(UI, "../brand")
+const BRAND = join(UI, "tests/tools/fixtures/brand")
 
-/** The brand package's committed docs-set data. */
+/** The fixture brand's docs-set data. */
 const BRAND_DATA = readJSON5File<SiteDataFile>(join(BRAND, "docs/__data/components.json5"))
 
 describe("DesignBrand.examples()", () => {
@@ -38,8 +41,11 @@ describe("DesignBrand.read()", () => {
     const source = DesignBrand.read(BRAND, UI)!
     expect(source).toMatchObject({
       group: "Brand",
-      componentsPath: "../brand/components",
-      docsPaths: ["../brand/docs/__data/components.json5", "../brand/docs/brand-*.html"]
+      componentsPath: "tests/tools/fixtures/brand/components",
+      docsPaths: [
+        "tests/tools/fixtures/brand/docs/__data/components.json5",
+        "tests/tools/fixtures/brand/docs/brand-*.html"
+      ]
     })
     expect(Object.keys(source.data.families)).toContain("brand-phone")
     expect(DesignBrand.read(join(UI, "../nowhere"), UI)).toBeUndefined()

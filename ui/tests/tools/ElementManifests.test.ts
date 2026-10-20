@@ -7,26 +7,16 @@ import { readJSON5File } from "@spell-app/util/node/json5"
 import type { SiteDataFile } from "$/ui/docs-components/docs-components.types"
 import { ElementManifests } from "$/ui/tools/ElementManifests"
 
-/** `packages/ui`, and the brand package beside it. */
+/** Spell UI's folder (the brand's manifests are checked in spell-brand's own tests:  it's above Spell UI). */
 const UI = fileURLToPath(new URL("../../", import.meta.url))
-const BRAND = join(UI, "../brand")
 
-/** The committed site data of each. */
+/** Its committed site data. */
 const DATA = readJSON5File<SiteDataFile>(join(UI, "docs/__data/components.json5"))
-const BRAND_DATA = readJSON5File<SiteDataFile>(join(BRAND, "docs/__data/components.json5"))
 
 describe("ElementManifests.outputs()", () => {
   test("are current (else run `yarn site:data`)", () => {
     for (const [file, text] of new ElementManifests({ data: DATA, packageFolder: UI }).outputs(join(UI, "docs/__data")))
       expect(readFileSync(file, "utf8") === text, file).toBe(true)
-  })
-
-  test("leaves the brand's manifests current (else `yarn site:data` in packages/brand)", () => {
-    const manifests = new ElementManifests({ data: BRAND_DATA, packageFolder: BRAND, componentsPath: "components" })
-    const [[elements], [custom]] = manifests.outputs(join(BRAND, "docs/__data"))
-    const written = JSON.parse(readFileSync(elements!, "utf8")) as { modules: unknown[] }
-    expect(written.modules).toEqual(manifests.customElements().modules)
-    expect(readFileSync(custom!, "utf8")).toBe(JSON.stringify(manifests.htmlCustomData(), null, 2) + "\n")
   })
 })
 
