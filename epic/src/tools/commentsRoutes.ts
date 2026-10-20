@@ -9,7 +9,8 @@
  * - Where it's kept (`inboxOf()`):
  *   - a docs page's:  its own inbox file, `<page>.inbox.json5` beside it (`GuideInbox`);
  *     its Send hands them to the session of the epic the page belongs to (below);
- *     a page no epic owns:  Claude takes them into epic `guide-changes` with `epic comments gather`
+ *     a page no epic owns:  to the standing epic `feedback`'s (epic `epic-engine` T9), which takes them into a phase
+ *     per page (`epic comments gather`)
  *   - an epic page's:  the epic's review inbox, `<name>.inbox.json5`, under `comments` (`ReviewInbox`);
  *     Claude answers them as a revisit's note (`/epic review`, `/airplane land`)
  *   - a SAGA page's (`sagas/<id>/<id>.saga.html`, epic `epic-workflow` P15):  the same, in its own inbox,
@@ -22,17 +23,20 @@
  *   - each comment with its thread (`replies`, `done`) and whose `turn` it is (`CommentList.turnOf()`)
  *   - `working` while Claude thinks about it (`epic comments working`):  the thread's "Claude: thinking…" stub
  *   - `send`, for the page header's Send (epic `epic-workflow` P13):
- *     `{ epic, owned, listening, sent, unsent, waiting }` (`PageSend`)
+ *     `{ epic, owned, wakes, listening, sent, unsent, waiting }` (`PageSend`)
  *     - on a docs page only:  an epic page's Send is the review inbox's (`reviewRoutes.ts`)
- *     - `epic`:  the epic the page belongs to (`SeeAlso.ownerOf()`), else `guide-changes` (`owned: false`)
+ *     - `epic`:  the epic the page belongs to (`SeeAlso.ownerOf()`), else the standing `feedback` (`owned: false`,
+ *       epic `epic-engine` T9)
+ *     - `wakes`:  a Send with nobody listening wakes that epic:  always for an owned page;  for `feedback`, once its
+ *       epic page is made
  *     - `listening`:  the session listening to that epic's review inbox (`ReviewInbox.liveListener()`), else `null`
  *     - `sent`:  Owen's last Send on the page
  *     - `unsent`:  the ids of the comments a Send would hand over
  *     - `waiting`:  every comment waiting for Claude, sent or not
  * - `POST /api/docs/comments/send` `{ page }` -- a docs page's SEND (P13):  every comment waiting so far is sent
  *   (`GuideInbox.markSent()`), and the epic's `plan-doc inbox <epic> wait` takes them
- *   - nobody listening to the page's epic (one an epic owns):  it WAKES that epic, as an epic page's Send does
- *     (P16, `ReviewStart.wakeFor()`)
+ *   - nobody listening to the page's epic:  it WAKES that epic, as an epic page's Send does (P16,
+ *     `ReviewStart.wakeFor()`);  a page no epic owns wakes `feedback` (epic `epic-engine` T9), once it's made
  *   - answers `{ ok, comments, send, wake }`;  `wake`:  what waking did, else `null`
  *   - an epic page:  400 (its Send is `/api/epics/review/send`)
  * - `POST /api/docs/comments` `{ page, action, ... }` -- change one comment;  answers `{ ok, id, comments, send? }`
@@ -68,7 +72,7 @@
  * - Before P11 docs pages took PAGE NOTES, written into the page (`PageNotes.js`):  the ones written still show,
  *   read only, and `epic notes` still answers them
  */
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { SRV } from "$/server"
@@ -86,7 +90,7 @@ import {
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { ReviewInbox } from "$/epics/tool/ReviewInbox"
 import { ReviewStart } from "$/epics/tool/ReviewStart"
-import { GUIDE_CHANGES, SeeAlso } from "$/epics/tool/SeeAlso"
+import { SeeAlso } from "$/epics/tool/SeeAlso"
 
 import { rowsFile } from "./choicesRoutes"
 
@@ -169,16 +173,10 @@ const commentsRoutes: RouteModule = {
       })
       const { send } = sendOf(root, page as string, file)
       // nobody listening to the page's epic:  wake it, as an epic page's Send does (P16, `ReviewStart.wakeFor()`);
-      // never the catch-all `guide-changes`, which no session works
+      // a page no epic owns wakes the standing `feedback` (epic `epic-engine` T9)
       const wake =
-        send?.owned && !send.listening
-          ? await new ReviewStart(root).wakeFor(
-              join(EpicConfig.contentOf(root), "epics", send.epic, `${send.epic}.plan.html`),
-              send.epic,
-              {
-                fresh
-              }
-            )
+        send?.wakes && !send.listening
+          ? await new ReviewStart(root).wakeFor(planDocOf(root, send.epic), send.epic, { fresh })
           : null
       reply.json({ ok: true, comments: shown(commentsOf(file)), send, wake })
     })
@@ -204,16 +202,17 @@ export default commentsRoutes
  */
 export function sendOf(root: string, page: string, file: string): { send?: PageSend } {
   if (PLAN_DOC.test(file)) return {}
-  const owner = new SeeAlso(root).ownerOf(page.replace(/^\/(?:worktrees\/[^/]+\/)?/, ""))
-  const epic = owner ?? GUIDE_CHANGES
+  const owners = new SeeAlso(root)
+  const path = page.replace(/^\/(?:worktrees\/[^/]+\/)?/, "")
+  const epic = owners.epicFor(path)
+  const owned = !!owners.ownerOf(path)
   const inbox = GuideInbox.read(GuideInbox.fileFor(file))
-  const review = ReviewInbox.read(
-    ReviewInbox.pathFor(join(EpicConfig.contentOf(root), "epics", epic, `${epic}.plan.html`))
-  )
+  const review = ReviewInbox.read(ReviewInbox.pathFor(planDocOf(root, epic)))
   return {
     send: {
       epic,
-      owned: !!owner,
+      owned,
+      wakes: owned || existsSync(planDocOf(root, epic)),
       listening: review.liveListener()?.session ?? null,
       sent: inbox.sent,
       unsent: inbox.unsentComments.map((comment) => comment.id),
@@ -224,8 +223,11 @@ export function sendOf(root: string, page: string, file: string): { send?: PageS
 
 /**
  * A docs page's Send, for its page header (epic `epic-workflow` P13).
- * - `epic`:  the epic its comments go to:  the one it belongs to (`SeeAlso.ownerOf()`), else `guide-changes`
- * - `owned`:  an epic owns it (`false`:  `guide-changes`, the catch-all)
+ * - `epic`:  the epic its comments go to:  the one it belongs to (`SeeAlso.ownerOf()`), else the standing `feedback`
+ *   (`SeeAlso.epicFor()`, epic `epic-engine` T9)
+ * - `owned`:  an epic owns it (`false`:  `feedback`'s, the inbox for every page no epic owns)
+ * - `wakes`:  a Send while nobody listens wakes `epic`'s session (`ReviewStart.wakeFor()`):  an owned page's always;
+ *   `feedback`'s once its epic page is there (else its comments wait for `/airplane land`'s sweep, which makes it)
  * - `listening`:  the session listening to that epic's review inbox, else `null`
  * - `sent`:  Owen's last Send on the page, ISO, else `null`
  * - `unsent`:  the ids of the comments a Send would hand over
@@ -234,10 +236,16 @@ export function sendOf(root: string, page: string, file: string): { send?: PageS
 export type PageSend = {
   epic: string
   owned: boolean
+  wakes: boolean
   listening: string | null
   sent: string | null
   unsent: string[]
   waiting: string[]
+}
+
+/** Epic `epic`'s epic page, in checkout `root`'s repo's content folder (there or not). */
+function planDocOf(root: string, epic: string): string {
+  return join(EpicConfig.contentOf(root), "epics", epic, `${epic}.plan.html`)
 }
 
 /** `comments` as the page gets them:  each with whose `turn` it is on its thread. */

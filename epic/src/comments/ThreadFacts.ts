@@ -139,8 +139,8 @@ export class ThreadFacts {
   /**
    * Where a taken comment's thread links, and what the link says (epic `epic-engine` I16):  `{ hash, label }`.
    * - by the phase's stable id, `#p-memory`, so the link still lands after a phase goes in ahead of it;  its words
-   *   the epic and the phase's title, `guide-changes · Memory`
-   * - one taken before I16 (no id):  by its number, `#p7` (an old address, landing on the 7th phase), `guide-changes P7`
+   *   the epic and the phase's title, `feedback · Memory`
+   * - one taken before I16 (no id):  by its number, `#p7` (an old address, landing on the 7th phase), `feedback P7`
    */
   static takenInto({ epic, phase, phaseId, title }: TakenInto): { hash: string; label: string } {
     return {

@@ -420,8 +420,8 @@ class PageComments {
   ////////////////
 
   /**
-   * Keep a docs page's Send state from a comments route's answer (`send`:  `{ epic, owned, listening, sent, unsent,
-   * waiting }`, `commentsRoutes.ts` `PageSend`);  an epic page's answer has none (its Send is `<epic-page>`'s).
+   * Keep a docs page's Send state from a comments route's answer (`send`:  `{ epic, owned, wakes, listening, sent,
+   * unsent, waiting }`, `commentsRoutes.ts` `PageSend`);  an epic page's answer has none (its Send is `<epic-page>`'s).
    * - the epic's review inbox joins the files whose change redraws the page:  who is listening is in it
    */
   keepSend(answer) {
@@ -436,8 +436,9 @@ class PageComments {
    * belongs to, as an epic page's do with its Send.
    * - a pill:  the paper plane, "Send" and how many comments wait for it;  blue by the fill rule (`templates/epics/
    *   plan-doc.md`, "Colours"):  grey outline with nothing waiting, dashed while some aren't sent, outlined once sent
-   * - beside it, who is listening:  "python-target is listening", or nobody (then the comments wait, sent, for the
-   *   epic's next `/epic review`), or no epic owns the page (`/airplane land` gathers it into `guide-changes`)
+   * - beside it, who is listening:  "python-target is listening", or nobody (then Send wakes the epic's session);
+   *   a page no epic owns:  the standing epic `feedback`'s (epic `epic-engine` T9), "feedback is listening", or
+   *   "nobody is listening:  Send wakes feedback" (`whoLabel()`)
    * - a click sends (`POST /api/docs/comments/send`), and a toast says what went where
    * - drawn again with the comments;  none on an epic page, or from a server without it
    */
@@ -456,15 +457,10 @@ class PageComments {
       unsent ? el("span", { class: "spell-send-count" }, String(unsent)) : ""
     )
     button.addEventListener("click", () => void this.sendNow())
-    const words = !send.owned
-      ? "no epic owns this page"
-      : send.listening
-        ? `${send.epic} is listening`
-        : "nobody is listening"
     const who = el(
       "span",
       { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no", title: whoWords(send) },
-      words
+      whoLabel(send)
     )
     // the header's tools row, first (`addHeadTool()`)
     addHeadTool(
@@ -484,13 +480,14 @@ class PageComments {
       this.list = answer.comments ? ThreadFacts.withTurns(answer.comments) : this.list
       this.keepSend(answer)
       const count = `${send.unsent.length} comment${send.unsent.length === 1 ? "" : "s"}`
-      // nobody listening:  the server woke the epic (P16) and says what it did;  else they wait for its review
-      const later = !send.owned
-        ? `:  no epic owns this page, so /airplane land gathers them into ${send.epic}`
-        : this.send.listening
-          ? ""
-          : answer.wake?.message
-            ? `.  ${answer.wake.message}`
+      // nobody listening:  the server woke the epic (P16;  a page no epic owns:  `feedback`, epic `epic-engine` T9)
+      // and says what it did;  else they wait for its review, or (`feedback` not made yet) for /airplane land
+      const later = this.send.listening
+        ? ""
+        : answer.wake?.message
+          ? `.  ${answer.wake.message.replace(/\.$/, "")}`
+          : !send.wakes
+            ? `:  nobody is listening, so /airplane land gathers them into ${send.epic}`
             : `:  nobody is listening, so they wait for /epic review ${send.epic}`
       noteToast(`Sent ${count} to ${send.epic}${later}.`, later ? "warning" : "success")
       this.draw()
@@ -1526,19 +1523,32 @@ class PageComments {
  * A docs page's Send's tooltip (`drawSend()`):  what a click sends, and to which epic;  or why it sends nothing.
  * - `state`:  `unsent`, `sent` or `idle`
  */
-function sendWords({ epic, owned, unsent, waiting }, state) {
+function sendWords({ epic, unsent, waiting }, state) {
   const count = (n) => `${n} comment${n === 1 ? "" : "s"}`
-  if (state === "unsent") return `Send ${count(unsent.length)} to ${owned ? `epic ${epic}` : epic}`
+  if (state === "unsent") return `Send ${count(unsent.length)} to epic ${epic}`
   if (state === "sent") return `Sent to ${epic}:  ${count(waiting.length)} waiting for Claude`
   return "Nothing to send:  no comment here is waiting for Claude"
 }
 
+/**
+ * Who is listening, beside a docs page's Send (`drawSend()`):  `python-target is listening`, `nobody is listening`;
+ * a page no epic owns names the standing epic its comments go to (epic `epic-engine` T9):  `feedback is listening`,
+ * `nobody is listening:  Send wakes feedback`.
+ */
+function whoLabel({ epic, owned, wakes, listening }) {
+  if (listening) return `${epic} is listening`
+  if (owned) return "nobody is listening"
+  return wakes ? `nobody is listening:  Send wakes ${epic}` : "no epic owns this page"
+}
+
 /** The tooltip of who is listening, beside a docs page's Send (`drawSend()`):  where its comments go, and when. */
-function whoWords({ epic, owned, listening }) {
-  if (!owned)
-    return `No epic's See Also lists this page:  its comments go to epic ${epic}, which /airplane land gathers`
-  if (listening) return `A Claude session is reviewing epic ${epic}:  Send hands it these comments now`
-  return `No Claude session is reviewing epic ${epic}:  sent comments wait for /epic review ${epic} or /airplane land`
+function whoWords({ epic, owned, wakes, listening }) {
+  const where = owned
+    ? `epic ${epic}`
+    : `epic ${epic}, the standing epic for every page no epic owns (no epic's See Also lists this one)`
+  if (listening) return `A Claude session is reviewing ${where}:  Send hands it these comments now`
+  if (wakes) return `No Claude session is reviewing ${where}:  Send wakes its session`
+  return `No epic's See Also lists this page, and epic ${epic} isn't made yet:  /airplane land gathers its comments`
 }
 
 /** The first line of `words`, cut to a short line with `…`. */

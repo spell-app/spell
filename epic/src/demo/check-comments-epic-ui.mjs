@@ -19,7 +19,9 @@
  *   - the bullhorns:  in the masthead (the page), each section's title row, a table's corner;  one click opens ONE pane
  *   - a comment on the page:  saved as typed (the floppy), its thread drawn under the masthead once the pane closes
  *   - a comment on selected text (⌘ / Ctrl I) in a section's list:  its quote highlighted, its thread in the list item
- *   - Send:  "no epic owns this page" (Epic UI's pages are no epic's), a click sends both
+ *   - Send:  to the standing epic `feedback` (Epic UI's pages are no epic's;  epic `epic-engine` T9), "feedback is
+ *     listening" or "nobody is listening:  Send wakes feedback";  a click sends both, and wakes feedback or nobody
+ *     (the server's wake is stubbed:  `DemoServer`)
  *   - the router's swap to another page:  that page's bullhorns, no thread from the last;  back:  the threads again
  *   - the server's inbox holds what the page shows
  *   - no page errors
@@ -233,15 +235,15 @@ async function checkWidth(width) {
     return box && { state: box.dataset.state, who: box.querySelector(".spell-send-who")?.textContent }
   })
   check(
-    `${name}:  Send shows, unsent, "no epic owns this page"`,
-    send?.state === "unsent" && send.who === "no epic owns this page",
+    `${name}:  Send shows, unsent, and names feedback`,
+    send?.state === "unsent" && /^(feedback is listening|nobody is listening:  Send wakes feedback)$/.test(send.who),
     JSON.stringify(send)
   )
   await page.click(".site-masthead > .spell-send > .spell-send-button")
   await page.waitForSelector('.site-masthead > .spell-send[data-state="sent"]', { timeout: 5000 }).catch(() => {})
   check(`${name}:  a click on Send sends them`, !!(await page.$('.site-masthead > .spell-send[data-state="sent"]')))
   check(`${name}:  the inbox says they were sent`, !!GuideInbox.read(inbox(element)).sent)
-  check(`${name}:  nobody woken`, !served.wakes.length, served.wakes.join(", "))
+  check(`${name}:  feedback woken, or nobody`, served.wakes.every((epic) => epic === "feedback"), served.wakes.join(", "))
   await page.evaluate(() => scrollTo(0, 0))
   await page.waitForTimeout(300)
   await page.screenshot({ path: join(out, `${name}-sent.png`) })

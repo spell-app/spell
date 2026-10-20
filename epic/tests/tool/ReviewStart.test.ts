@@ -179,3 +179,35 @@ test("a session resumed in a new process, mid-turn:  found by its transcript's t
     rmSync(join(home, "sessions", `${process.pid}.json`), { force: true })
   }
 })
+
+// epic `epic-engine` T9 (J7):  a page no epic owns wakes the STANDING epic `feedback`, which has no worktree:
+// a new session in a main window, or the one session titled for it
+test("feedback, woken from a page no epic owns:  a new session in a main window;  its own session once it has one", async () => {
+  const planDoc = join(root, "epics", "feedback", "feedback.plan.html")
+  mkdirSync(dirname(planDoc), { recursive: true })
+  window([root])
+  const first = await starter().wakeFor(planDoc, "feedback", { fresh: true })
+  expect(first).toMatchObject({ state: "opened", command: "/epic review feedback" })
+  expect(asked).toEqual([["open-session", { prompt: "/epic review feedback" }]])
+  asked.splice(0)
+  const id = "0f0f0f0f-5555-6666-7777-888888888888"
+  writeFileSync(
+    join(home, "sessions", `${process.pid}.json`),
+    JSON.stringify({
+      pid: process.pid,
+      sessionId: id,
+      cwd: root,
+      status: "idle",
+      name: "🚧 feedback",
+      nameSource: "hook"
+    })
+  )
+  try {
+    const wake = await starter().wake("feedback")
+    expect(wake).toMatchObject({ state: "typed", did: "typed /epic review feedback into 🚧 feedback" })
+    expect(asked).toEqual([["open-session", { sessionId: id, prompt: "/epic review feedback" }]])
+  } finally {
+    rmSync(join(home, "sessions", `${process.pid}.json`), { force: true })
+    rmSync(join(root, "epics"), { recursive: true, force: true })
+  }
+})

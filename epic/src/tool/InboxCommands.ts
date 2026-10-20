@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs"
-import { join, relative, resolve } from "node:path"
+import { relative, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { PageInboxes } from "../tools/PageInboxes"
 
 import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
 
@@ -22,7 +22,7 @@ import {
   type ListedUrgency,
   type TakenWork
 } from "./ReviewInbox"
-import { SeeAlso } from "./SeeAlso"
+import { FEEDBACK, SeeAlso, epicNamed } from "./SeeAlso"
 
 /****************
  * ### `InboxCommands`
@@ -49,8 +49,11 @@ export class InboxCommands {
    * `inbox <name> [<what> ...]`:  the review inbox of epic `name`'s doc at `file`;
    * resolves to the exit code (`undefined` for 0).
    * - throws a `PlanDocError` for an unknown `what`, or a missing argument
+   * - `name` may be an old name:  read as today's (`epicNamed()`:  `guide-changes` is `feedback`), as `findDoc()`
+   *   found `file`
    */
-  async run(name: string, file: string, [what, ...args]: string[], flags: Flags): Promise<number | void> {
+  async run(asked: string, file: string, [what, ...args]: string[], flags: Flags): Promise<number | void> {
+    const name = epicNamed(asked)
     const path = ReviewInbox.pathFor(file)
     switch (what) {
       case undefined:
@@ -554,25 +557,30 @@ export class InboxCommands {
  * ### `GuideSends`
  * The pages an epic owns (`SeeAlso.ownedBy()`:  its details pages, the guides its See Also claims), and the comments
  * Owen sent from them (epic `epic-workflow` P13, J27):  how `inbox <name> wait` hears a guide's Send.
+ * - the standing `feedback` epic (epic `epic-engine` T9):  every page no epic owns that holds comments
+ *   (`PageInboxes.unowned()`), Epic UI's pages too, besides its own `details/` pages
  * - the pages are found again every `GUIDES_FOUND_MS`, so a guide linked mid-wait is heard
  * - each page's inbox read without its lock (atomic writes);  only taking a send locks it (`GuideInbox.takeSent()`)
  ****************/
 class GuideSends {
   /** the checkout's root */
   readonly root: string
-  /** its repo's content folder (`EpicConfig.contentOf()`):  where the pages are */
-  readonly content: string
   /** the epic's name */
   readonly name: string
-  /** the pages it owns, as page paths (from the content folder), as last found */
+  /** the docs pages' inbox files:  where page paths' inboxes are (Epic UI's too), and the unowned pages */
+  private readonly inboxes: PageInboxes
+  /**
+   * the pages it owns, as page paths (from the content folder, or Epic UI's as served, `components/epics/...`), as
+   * last found
+   */
   private pages: string[] = []
   /** when they were found, ms */
   private foundAt = -Infinity
 
   constructor(root: string, name: string) {
     this.root = root
-    this.content = EpicConfig.contentOf(root)
     this.name = name
+    this.inboxes = new PageInboxes({ root })
   }
 
   /** Take every send not taken yet from the epic's pages:  each page with its comments;  `[]` for none. */
@@ -598,14 +606,15 @@ class GuideSends {
   /** The pages the epic owns, found again once `GUIDES_FOUND_MS` has passed. */
   private owned(): string[] {
     if (Date.now() - this.foundAt < GUIDES_FOUND_MS) return this.pages
-    this.pages = new SeeAlso(this.root).ownedBy(this.name)
+    const owned = new SeeAlso(this.root).ownedBy(this.name)
+    this.pages = this.name === FEEDBACK ? [...owned, ...this.inboxes.unowned()] : owned
     this.foundAt = Date.now()
     return this.pages
   }
 
-  /** Page `page`'s inbox file. */
+  /** Page `page`'s inbox file:  in the content folder, or Epic UI's (`PageInboxes.fileOf()`). */
   private inboxOf(page: string): string {
-    return join(this.content, GuideInbox.fileFor(page))
+    return GuideInbox.fileFor(this.inboxes.fileOf(page))
   }
 
   /** The inbox in `file`;  `undefined` while it can't be read (hand-edited mid-poll):  the next poll tries again. */

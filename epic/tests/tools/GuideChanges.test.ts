@@ -152,7 +152,7 @@ describe("GuideChanges.gather()", () => {
     expect(GuideInbox.read(inbox).comments[id]).toMatchObject({ status: "taken", taken: { epic: "gc" } })
   })
 
-  // epic `epic-workflow` P13:  a page an epic owns sends its comments to that epic, never into guide-changes
+  // epic `epic-workflow` P13:  a page an epic owns sends its comments to that epic, never into feedback
   test("a page another epic owns is left out;  named, it's gathered all the same", async () => {
     mkdirSync(join(root, "epics", "py"), { recursive: true })
     writeFileSync(
@@ -164,5 +164,24 @@ describe("GuideChanges.gather()", () => {
     expect(changes.waiting()).toEqual([])
     expect(await changes.gather()).toEqual([])
     expect(changes.waiting(["guides/owned.html"]).map((page) => page.comments.length)).toEqual([1])
+  })
+
+  // epic `epic-engine` T9 (J7):  by default they go to the STANDING epic `feedback`, made the first time;
+  // `guide-changes`, its old name, is read as `feedback`
+  test("by default into feedback:  made the first time, titled Feedback, standing;  guide-changes is feedback", async () => {
+    expect(new GuideChanges({ root, epic: "guide-changes" }).epic).toBe("feedback")
+    const feedback = new GuideChanges({ root, epicUi: EPIC_UI })
+    expect(feedback.epic).toBe("feedback")
+    // a page no epic links yet (`gc`, the scratch epic above, owns the pages its phases link)
+    writeFileSync(join(root, "guides", "fresh.html"), GUIDE.replace(/<spell-notes[\s\S]*<\/spell-notes>/, ""))
+    const id = comment("guides/fresh.html", "Into feedback?")
+    expect(await feedback.gather()).toMatchObject([{ page: "guides/fresh.html", epic: "feedback", comments: [id] }])
+    const doc = readFileSync(join(root, "epics", "feedback", "feedback.plan.html"), "utf8")
+    expect(doc).toMatch(/<epic-page\b[^>]*\sstanding[\s=>]/)
+    expect(doc).toMatch(/<epic-page\b[^>]*\stitle="Feedback"/)
+    expect(GuideInbox.read(GuideInbox.fileFor(join(root, "guides", "fresh.html"))).comments[id]).toMatchObject({
+      status: "taken",
+      taken: { epic: "feedback" }
+    })
   })
 })

@@ -1,6 +1,5 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs"
-import { dirname, join, posix, relative, resolve, sep } from "node:path"
-import { fileURLToPath } from "node:url"
+import { existsSync, readFileSync } from "node:fs"
+import { dirname, join, posix, relative } from "node:path"
 
 import { PhaseIds } from "$/epics/phases"
 import { EpicConfig } from "$/epics/config/EpicConfig"
@@ -8,39 +7,33 @@ import { CommentList, type IdentifiedComment } from "$/epics/tool/CommentList"
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
 import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
-import { GUIDE_CHANGES, SeeAlso } from "$/epics/tool/SeeAlso"
-
-import { EPIC_UI } from "../server/server.types"
+import { FEEDBACK, SeeAlso, epicNamed } from "$/epics/tool/SeeAlso"
 
 import { targetOf } from "./BlockAnchors.js"
 import { editNotes, notesIn, type PageNote } from "./notesOnDisk"
+import { PageInboxes } from "./PageInboxes"
 import { htmlOf } from "./PageNotes.js"
 
-/** The epic Owen's comments on docs pages no epic owns are gathered into, one phase per page. */
-export { GUIDE_CHANGES }
+/** The standing epic Owen's comments on pages no epic owns go to, one phase per page (epic `epic-engine` T9). */
+export { FEEDBACK }
 
-/** The folders, from the content folder, whose pages take comments (`commentsRoutes.ts`). */
-const COMMENT_FOLDERS = ["guides", "pages", "epics"]
+/** The folders, from the content folder, whose pages may hold page notes (written before P11). */
+const NOTE_FOLDERS = ["guides", "pages", "epics"]
 
-/** Epic UI's folder, the engine's own (`EPIC_UI`):  its pages take comments too, in inbox files beside them. */
-const EPIC_UI_DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", EPIC_UI.dir)
-
-/** Folders under those that hold no pages of their own:  a split epic page's bodies, experiments' output. */
-const SKIPPED = /(^|\/)(parts|experiments|node_modules)(\/|$)/
-
-/** A docs page's inbox file, by its name or its old one (epic `epic-workflow` P21):  `<page>.inbox.json5`. */
-const INBOX_FILE = /\.inbox\.json5?$/
-
-/** The kickoff prompt of the epic, when the first gather makes it. */
+/** The kickoff prompt of the epic, when the first gather makes it (the real one's is written by hand). */
 const PROMPT =
-  "Owen's comments on the docs pages (guides, the home page, epics' own pages), gathered from each page's inbox by " +
-  "`epic comments gather`:  one phase per page.  Work each comment into its page (or say why not), then answer " +
-  "it under the comment:  `epic comments answer <page>#<id> --file <reply.html>`."
+  "Owen's comments on the pages no epic owns (guides no epic claims, Epic UI's pages, the list pages, the " +
+  "changelog), sent with each page's Send or gathered from each page's inbox by `epic comments gather`:  one phase " +
+  "per page.  Work each comment into its page, send it on to the epic that should do it, or say why not;  then " +
+  "answer it under the comment:  `epic comments answer <page>#<id> --file <reply.html>`."
 
 /****************
  * ### `GuideChanges`
- * Gathers the comments Owen left on docs pages into ONE epic, `guide-changes` (epic `airplane`, P11):
- * `epic comments gather` (`comments.ts`), and `/airplane land`.
+ * Gathers the comments Owen left on docs pages into ONE epic, the standing `feedback` (epic `airplane`, P11;  called
+ * `guide-changes` before epic `epic-engine` T9, a name still read as `feedback`):  `epic comments gather`
+ * (`comments.ts`), and `/airplane land`.
+ * - since T9 a page no epic owns has a Send too, which wakes `feedback`'s session (`commentsRoutes.ts`);  its
+ *   session runs this to take what was sent into phases, and the sweep takes what was never sent
  * - what it gathers, per page:
  *   - its inbox's comments still waiting (`GuideInbox`, `<page>.inbox.json5`;  `CommentList` `waiting`), on a page
  *     NO epic owns (`SeeAlso.ownerOf()`, epic `epic-workflow` P13):  an owned page's go to its epic's session with
@@ -53,7 +46,8 @@ const PROMPT =
  *   a page with a phase still open (to do or under way) gets an update in it instead (`addPhaseUpdate()`):
  *   an `<epic-update>` block at the end of its description, `Update: N comments more from Owen`
  *   - a page's phase is found by the link to it in the phase's Symptom
- * - the epic is made the first time (`plan-doc new guide-changes --title "Guide Changes"`)
+ * - the epic is made the first time, if it isn't there yet (`epic new feedback --title "Feedback"`, then
+ *   `epic update feedback --standing on`):  each phase done merges on its own, the epic never done
  * - then each comment is marked taken (`taken:  { epic, phase }`), each note answered with a link to the phase:
  *   the page shows where it went, and Owen can no longer edit it
  * - epic pages' comments are NOT gathered:  they wait in their epic's review inbox for `/epic review`
@@ -63,32 +57,31 @@ export class GuideChanges {
   readonly root: string
   /** its repo's content folder (`EpicConfig.contentOf()`):  its `guides/`, `pages/`, `epics/` */
   readonly content: string
-  /** the epic gathered into:  `guide-changes`, or another (a scratch one, in a test) */
+  /** the epic gathered into:  `feedback` (asked as its old name, `guide-changes`, too), or another (a test's) */
   readonly epic: string
-  /** Epic UI's folder:  the engine's `src/docs/`, or another (a test's) */
-  readonly epicUi: string
+  /** the docs pages' inbox files, and which page each is for */
+  readonly inboxes: PageInboxes
 
-  constructor({ root, epic = GUIDE_CHANGES, epicUi = EPIC_UI_DOCS }: { root: string; epic?: string; epicUi?: string }) {
+  constructor({ root, epic = FEEDBACK, epicUi }: { root: string; epic?: string; epicUi?: string }) {
     this.root = root
     this.content = EpicConfig.contentOf(root)
-    this.epic = epic
-    this.epicUi = epicUi
+    this.epic = epicNamed(epic)
+    this.inboxes = new PageInboxes({ root, epicUi })
   }
 
-  /**
-   * The page path of inbox file `inbox`'s page:  from the content folder (`guides/x.html`), or Epic UI's as served
-   * (`components/epics/epic-item.html`).
-   */
+  /** Epic UI's folder:  the engine's `src/docs/`, or another (a test's). */
+  get epicUi(): string {
+    return this.inboxes.epicUi
+  }
+
+  /** The page path of inbox file `inbox`'s page (`PageInboxes.pageOf()`). */
   pageOf(inbox: string): string {
-    const inEpicUi = relative(this.epicUi, inbox)
-    const path = inEpicUi.startsWith("..") ? relative(this.content, inbox) : `${EPIC_UI.path}/${inEpicUi}`
-    return path.split(sep).join("/").replace(INBOX_FILE, ".html")
+    return this.inboxes.pageOf(inbox)
   }
 
-  /** Page path `page`'s file (`pageOf()` turned round). */
+  /** Page path `page`'s file (`PageInboxes.fileOf()`). */
   fileOf(page: string): string {
-    const epicUi = `${EPIC_UI.path}/`
-    return page.startsWith(epicUi) ? join(this.epicUi, page.slice(epicUi.length)) : join(this.content, page)
+    return this.inboxes.fileOf(page)
   }
 
   /**
@@ -98,7 +91,7 @@ export class GuideChanges {
    */
   waiting(pages?: string[]): PageWaiting[] {
     const notes = notesIn(
-      COMMENT_FOLDERS.map((folder) => join(this.content, folder)),
+      NOTE_FOLDERS.map((folder) => join(this.content, folder)),
       this.content
     )
     const found = new Map<string, PageWaiting>()
@@ -180,15 +173,20 @@ export class GuideChanges {
   // ## The epic
   ////////////////
 
-  /** The epic's epic page;  made the first time, as `plan-doc new <epic> --title "Guide Changes"`. */
+  /**
+   * The epic's epic page;  made the first time, as `epic new feedback --title "Feedback"`, then made standing
+   * (`epic update feedback --standing on`):  its phases merge on their own, and it's never done.
+   */
   private async epicDoc(files: PlanDocFiles): Promise<string> {
     const found = PlanDocFiles.planDocIn(join(files.epics, this.epic), this.epic)
     if (found) return found
     const commands = new PlanDocCommands({ files })
     // the tool prints what it wrote;  here that goes nowhere
     commands.print = () => {}
-    const made = await commands.run(["new", this.epic, "--title", "Guide Changes", "--prompt", PROMPT])
+    const title = this.epic === FEEDBACK ? "Feedback" : this.epic
+    const made = await commands.run(["new", this.epic, "--title", title, "--prompt", PROMPT])
     if (made !== 0) throw new Error(`GuideChanges.gather():  couldn't make epic ${this.epic}`)
+    if (this.epic === FEEDBACK) await commands.run(["standing", this.epic, "on"])
     return files.docPath(this.epic)
   }
 
@@ -246,25 +244,9 @@ export class GuideChanges {
   // ## Finding inboxes
   ////////////////
 
-  /**
-   * Every docs page's inbox file (`<page>.inbox.json5` beside a `<page>.html`, never an epic page's), sorted:  the
-   * content folder's, then Epic UI's.
-   * - by its `.json5` name, also when only its old `.json` is there (`GuideInbox.read()` reads either)
-   */
+  /** Every docs page's inbox file, sorted (`PageInboxes.inboxFiles()`). */
   inboxFiles(): string[] {
-    return [...COMMENT_FOLDERS.map((folder) => join(this.content, folder)), this.epicUi].flatMap((top) => {
-      let names: string[]
-      try {
-        names = readdirSync(top, { recursive: true, encoding: "utf8" })
-      } catch {
-        return []
-      }
-      const pages = names
-        .filter((name) => INBOX_FILE.test(name) && !SKIPPED.test(name))
-        .map((name) => join(top, name.replace(INBOX_FILE, ".html")))
-        .filter((page) => existsSync(page))
-      return [...new Set(pages)].map((page) => GuideInbox.fileFor(page)).sort()
-    })
+    return this.inboxes.inboxFiles()
   }
 }
 

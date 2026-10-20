@@ -15,6 +15,8 @@ import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
 import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
 import { ReviewInbox } from "$/epics/tool/ReviewInbox"
 
+import { PageInboxes } from "../../src/tools/PageInboxes"
+
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
 
@@ -320,6 +322,40 @@ test("wait:  a Send on a guide the epic owns wakes it, each comment under its pa
   expect(said).toMatch(/^sent from the pages x owns \(1 comment\):\n {2}guides\/x\.html {2}\(sent [^)]+\):\n {4}- M1/)
   expect(said).toMatch(/epic comments working <page>#<M id> on/)
   expect(GuideInbox.read(guide).hasNewSend).toBe(false)
+})
+
+// epic `epic-engine` T9 (J7):  the STANDING epic `feedback` hears every page no epic owns;  `guide-changes` is it too
+test("wait:  feedback hears a Send on a page no epic owns, not on one an epic owns;  asked as guide-changes too", async () => {
+  // only the scratch checkout's inboxes:  never the engine's real Epic UI folder's
+  const found = PageInboxes.prototype.inboxFiles
+  vi.spyOn(PageInboxes.prototype, "inboxFiles").mockImplementation(function (this: PageInboxes) {
+    return found.call(this).filter((each) => each.startsWith(root))
+  })
+  const feedback = join(root, "epics", "feedback", "feedback.plan.html")
+  mkdirSync(join(root, "epics", "feedback"), { recursive: true })
+  writeFileSync(feedback, readFileSync(file, "utf8").replace(/epic="x"/, 'epic="feedback"'))
+  const owned = GuideInbox.fileFor(ownGuide())
+  rmSync(owned, { force: true })
+  mkdirSync(join(root, "pages"), { recursive: true })
+  writeFileSync(join(root, "pages", "list.html"), "<!doctype html><title>List</title>")
+  const unowned = GuideInbox.fileFor(join(root, "pages", "list.html"))
+  for (const inbox of [owned, unowned])
+    GuideInbox.update(inbox, (comments, box) => {
+      comments.add({ anchor: "page", kind: "page", label: "" }, "Which epic?", new Date(T1))
+      box.markSent(T2)
+    })
+  try {
+    expect(await commands().inbox.run("guide-changes", feedback, ["wait"], { timeout: "5" })).toBeUndefined()
+    const said = printed.join("\n")
+    expect(said).toMatch(/^sent from the pages feedback owns \(1 comment\):\n {2}pages\/list\.html {2}\(sent /)
+    expect(said).not.toContain("guides/x.html")
+    expect(GuideInbox.read(unowned).hasNewSend).toBe(false)
+    expect(GuideInbox.read(owned).hasNewSend).toBe(true)
+  } finally {
+    rmSync(join(root, "epics", "feedback"), { recursive: true, force: true })
+    rmSync(join(root, "pages"), { recursive: true, force: true })
+    rmSync(owned, { force: true })
+  }
 })
 
 test("wait --json:  the send's comments, as the inbox holds them", async () => {

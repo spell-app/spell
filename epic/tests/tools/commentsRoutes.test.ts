@@ -149,12 +149,14 @@ test("a docs page's SEND:  its epic, who is listening, what waits;  Send marks t
   expect((await get(page)).send).toEqual({
     epic: "py",
     owned: true,
+    wakes: true,
     listening: null,
     sent: null,
     unsent: [],
     waiting: []
   })
-  expect((await get("/guides/solid/solid-2.html")).send).toMatchObject({ epic: "guide-changes", owned: false })
+  // no epic owns it:  the standing `feedback` epic's (epic `epic-engine` T9), which isn't made here:  no wake
+  expect((await get("/guides/solid/solid-2.html")).send).toMatchObject({ epic: "feedback", owned: false, wakes: false })
   expect((await get("/epics/big/big.plan.html")).send).toBeUndefined()
   const added = await post({ page, action: "add", anchor: "page", kind: "page", text: "Say more" })
   expect(added.answer.send).toMatchObject({ unsent: ["m1"], waiting: ["m1"] })
@@ -194,6 +196,39 @@ test("Send with nobody listening wakes the page's epic, and says what that did; 
   // the page is told what to type
   expect(answer.wake).toMatchObject({ command: "/epic review py" })
   expect(answer.wake.message).toEqual(expect.any(String))
+})
+
+// epic `epic-engine` T9 (J7):  a page no epic owns sends to the STANDING epic `feedback`, and wakes it as an owned
+// page's Send wakes its epic;  before `feedback` is made, its comments wait for /airplane land's sweep (no wake)
+test("a page no epic owns:  Send goes to feedback;  nobody listening wakes feedback once it's made", async () => {
+  const page = "/components/epics/epic-item.html"
+  const sendTo = async () =>
+    JSON.parse(
+      (await ask(port, "POST", "/api/docs/comments/send", { body: JSON.stringify({ page }), headers: headers() })).text
+    )
+  await post({ page, action: "add", anchor: "page", kind: "page", text: "Why two?" })
+  const before = await sendTo()
+  expect(before.send).toMatchObject({ epic: "feedback", owned: false, wakes: false, listening: null })
+  expect(before.wake).toBeNull()
+  mkdirSync(join(root, "epics/feedback"), { recursive: true })
+  writeFileSync(
+    join(root, "epics/feedback/feedback.plan.html"),
+    `<epic-page epic="feedback" standing updated="2026-10-19"></epic-page>`
+  )
+  await post({ page, action: "add", anchor: "page", kind: "page", text: "And this?" })
+  const after = await sendTo()
+  expect(after.send).toMatchObject({ epic: "feedback", owned: false, wakes: true, listening: null })
+  // no session, no window in the scratch folder:  nothing typed;  the page is told what to type
+  expect(after.wake).toMatchObject({ command: "/epic review feedback" })
+  // a session listening to feedback:  it takes them, no wake
+  ReviewInbox.update(join(root, "epics/feedback/feedback.inbox.json5"), (box) => box.setListening("feedback-1"))
+  await post({ page, action: "add", anchor: "page", kind: "page", text: "Third" })
+  const heard = await sendTo()
+  expect(heard.send).toMatchObject({ epic: "feedback", listening: "feedback-1" })
+  expect(heard.wake).toBeNull()
+  // the tests after it start from no inbox, and no feedback epic
+  rmSync(join(root, "spell-epic/src/docs/epic-item.inbox.json5"))
+  rmSync(join(root, "epics/feedback"), { recursive: true })
 })
 
 test("edits and deletes a new comment;  the last one out takes the file", async () => {

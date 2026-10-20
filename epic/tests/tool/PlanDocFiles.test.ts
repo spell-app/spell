@@ -2,7 +2,7 @@
  * Tests of `PlanDocFiles`:  reading a doc whole (either markup), editing it under its lock, writing it as a skeleton
  * and parts (`EpicParts`) or one file, and refusing what an edit mustn't touch.
  */
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -66,6 +66,23 @@ describe("PlanDocFiles", () => {
     await FILES.writeDoc(file, richPlan(), false)
     return file
   }
+
+  // epic `epic-engine` T9:  `guide-changes`, the standing `feedback` epic's old name, finds `feedback`
+  test("findDoc():  an epic's old name finds today's;  an epic still called that, itself", () => {
+    const root = folder()
+    const files = new PlanDocFiles({ root })
+    const page = (name: string) => {
+      mkdirSync(join(root, "epics", name), { recursive: true })
+      writeFileSync(join(root, "epics", name, `${name}.plan.html`), `<epic-page epic="${name}"></epic-page>`)
+      return join(root, "epics", name, `${name}.plan.html`)
+    }
+    const feedback = page("feedback")
+    expect(files.findDoc("guide-changes")).toBe(feedback)
+    expect(files.findDoc("feedback")).toBe(feedback)
+    expect(() => files.findDoc("nothing")).toThrow(PlanDocError)
+    const old = page("guide-changes")
+    expect(files.findDoc("guide-changes")).toBe(old)
+  })
 
   test("one file stays one file;  split writes a skeleton and parts;  join puts it back;  nothing lost", async () => {
     const file = await oneFile()

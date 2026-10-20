@@ -71,7 +71,7 @@ CommentsError.prototype.name = "CommentsError"
  *   - `new`:  saved, waiting for Claude;  Owen may edit or delete it
  *   - any status:  Owen may CLEAR it (`clear()`):  gone from the inbox, its highlight with it
  *   - deleted or cleared:  the page's Undo puts it back as it was (`restore()`)
- *   - `taken`:  Claude took it:  a guide's into epic `guide-changes` (`taken`:  which phase)
+ *   - `taken`:  Claude took it:  a guide's into epic `feedback` (`taken`:  which phase)
  *   - `answered`:  Claude answered it (an epic page's:  in the doc;  `replies` may hold the answer)
  * - a THREAD (Owen, 2026-10-10:  "the entire comment thread should be in one collapsable pane"):  the comment, then
  *   `replies` in order, Claude's (`answer()`) and Owen's (`reply()`), then maybe `done` (`resolve()`)

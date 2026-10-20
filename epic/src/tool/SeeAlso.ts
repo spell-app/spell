@@ -4,8 +4,21 @@ import { dirname, join, posix, relative, resolve, sep } from "node:path"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 
-/** The catch-all epic for comments on a page no epic owns (`epic comments gather`, `GuideChanges`). */
-export const GUIDE_CHANGES = "guide-changes"
+/**
+ * The STANDING epic for every page no epic owns (epic `epic-engine` T9, J7):  guides no epic claims, Epic UI's pages,
+ * the list pages, the changelog.  A Send on such a page hands its comments to `feedback`'s session and wakes it, as an
+ * owned page's Send wakes its epic;  `epic comments gather` sweeps what's left into it, a phase per page
+ * (`GuideChanges`).
+ */
+export const FEEDBACK = "feedback"
+
+/** `FEEDBACK`'s old name, before epic `epic-engine` T9:  read as `feedback` wherever an epic is named (`epicNamed()`). */
+export const OLD_FEEDBACK = "guide-changes"
+
+/** Epic name `name`, its old name read as today's:  `guide-changes` is `feedback`. */
+export function epicNamed(name: string): string {
+  return name === OLD_FEEDBACK ? FEEDBACK : name
+}
 
 /****************
  * ### `SeeAlso`
@@ -27,9 +40,10 @@ export const GUIDE_CHANGES = "guide-changes"
  *      links it in passing)
  *   2. then an OPEN one (phases left, none yet, or standing) before one that's done
  *   3. then the one updated last (`<epic-page updated>`, then its file's time)
- * - none:  `undefined`;  the caller files it under `GUIDE_CHANGES`, as `epic comments gather` does
- * - never claimed:  the changelog and a folder's index (every epic links them), nor by `guide-changes` itself,
- *   whose phases link every page it gathered
+ * - none:  `undefined`;  its comments go to the standing epic `FEEDBACK` (`epicFor()`):  its Send wakes it, and
+ *   `epic comments gather` sweeps into it
+ * - never claimed:  the changelog and a folder's index (every epic links them), nor by `feedback` itself (or its
+ *   old name, `guide-changes`), whose phases link every page it gathered
  *
  * - Reads files only, never writes.  The claims of every epic are kept between calls (`CLAIMS`) while no epic page
  *   or part folder changed, and for at most `CLAIMS_MAX_AGE_MS`:  the page server asks on every guide's load.
@@ -103,8 +117,18 @@ export class SeeAlso {
   }
 
   /**
+   * The epic page `page`'s comments go to:  its owner (`ownerOf()`), else the standing `FEEDBACK` epic (epic
+   * `epic-engine` T9).
+   */
+  epicFor(page: string): string {
+    return this.ownerOf(page) ?? FEEDBACK
+  }
+
+  /**
    * Every page epic `name` owns that may take comments, as page paths (from the content folder):
    * its `details/` pages, and every page whose owner it is (`ownerOf()`).
+   * - `feedback`'s:  only its own `details/` pages here;  the pages no epic owns that hold comments are
+   *   `PageInboxes.unowned()`'s, which finds the inbox files
    */
   ownedBy(name: string): string[] {
     const owned = [...this.claims()]
@@ -125,7 +149,7 @@ export class SeeAlso {
     if (kept && kept.stamp === stamp && Date.now() - kept.at < CLAIMS_MAX_AGE_MS) return kept.claims
     const claims = new Map<string, Claim[]>()
     for (const name of names) {
-      if (name === GUIDE_CHANGES) continue
+      if (epicNamed(name) === FEEDBACK) continue
       const facts = factsOf(this.content, name)
       if (!facts) continue
       const { durable, guides } = linksIn(this.content, name)

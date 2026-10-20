@@ -23,6 +23,7 @@ import { PlanMarkup } from "./PlanMarkup"
 import { PART_SOURCE, PARTS_DIR, PlanParts } from "./PlanParts"
 import { ReviewInbox } from "./ReviewInbox"
 import { SagaPage } from "./SagaPage"
+import { epicNamed } from "./SeeAlso"
 import { ServedFolders } from "./ServedFolders"
 
 /****************
@@ -140,6 +141,8 @@ export class PlanDocFiles {
   /**
    * The doc of epic `name`:  THIS checkout's `epics/<name>/`, either name (`planDocIn()`);  throws when there's none.
    * - a saga page's short address (`SAGA:/drawable-spell`):  that saga's page (`findSagaPage()`)
+   * - an epic's old name, when no epic of that name is there:  today's (`epicNamed()`:  `guide-changes` is
+   *   `feedback`, epic `epic-engine` T9)
    * - this checkout's path, not another's:  tidying and the URLs stay inside it
    *   (a path through another worktree, made relative here, starts `../../.claude/...`, which oxfmt refuses)
    */
@@ -147,7 +150,10 @@ export class PlanDocFiles {
     const saga = SagaPage.idOf(name)
     if (saga) return this.findSagaPage(saga)
     this.docPath(name)
-    const found = PlanDocFiles.planDocIn(join(this.epics, name), name)
+    const today = epicNamed(name)
+    const found =
+      PlanDocFiles.planDocIn(join(this.epics, name), name) ??
+      (today === name ? undefined : PlanDocFiles.planDocIn(join(this.epics, today), today))
     if (!found)
       throw new PlanDocError(`no epic page for "${name}" (${relative(this.content, join(this.epics, name))}/)`)
     return found

@@ -67,7 +67,7 @@ export const ENGINE_ROUTES = {
  * - `path`:  its pages' PAGE PATHS start with it, as served (`components/epics/epic-item.html`:  `pages.js`
  *   `pagePath()`, `pageAt()`)
  * - `dir`:  its folder, from the engine's checkout
- * - its pages take comments, in inbox files beside them:  the tools find them there (`GuideChanges.inboxFiles()`;
+ * - its pages take comments, in inbox files beside them:  the tools find them there (`PageInboxes.inboxFiles()`;
  *   epic `epic-engine` P2, T3)
  */
 export const EPIC_UI = { path: "components/epics", dir: "src/docs" } as const

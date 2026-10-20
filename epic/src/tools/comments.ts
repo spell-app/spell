@@ -7,18 +7,21 @@
  *     guides/solid/solid-2.html#M3  table in 2. Memory  2026-10-10T14:02:00.000Z
  *       Too wide on a phone?
  *     epic comments gather
- *     guides/solid/solid-2.html  ->  guide-changes#P4 (new phase):  M3
+ *     guides/solid/solid-2.html  ->  feedback#P4 (new phase):  M3
  *     epic comments answer guides/solid/solid-2.html#M3 --file /tmp/reply.html
  *
  * - `list [<epic>] [--all] [--json]` (default):  every comment still waiting, on every docs page, by page
  *   - `<epic>`:  only that epic's:  on a page it owns (its own `epics/<epic>/details/`, or a guide its See Also
- *     claims:  `SeeAlso.ownerOf()`), or taken into it
+ *     claims:  `SeeAlso.ownerOf()`), or taken into it;  `feedback` (or `guide-changes`):  on a page no epic owns
  *   - `--all`:  taken and answered ones too
  *   - `--json`:  `[{ page, id, anchor, kind, label, excerpt, quote?, text, at, status, ... }]`
  * - `gather [<page>... | --all] [--epic <name>] [--json]`:  every waiting comment (and page note still `new`) into
- *   epic `guide-changes`, one phase per page (`GuideChanges`);  each comment marked taken
+ *   the standing epic `feedback`, one phase per page (`GuideChanges`);  each comment marked taken
  *   - no page:  every page no epic owns (as `--all`)
- *   - `--epic`:  another epic than `guide-changes` (a scratch one, to try it)
+ *   - `--epic`:  another epic than `feedback` (a scratch one, to try it);  its old name, `guide-changes`, is
+ *     `feedback` (epic `epic-engine` T9)
+ *   - since T9 a page no epic owns has a Send that wakes `feedback`'s session:  that session gathers what was
+ *     sent;  `/airplane land` sweeps the rest
  *   - `--json`:  `[{ page, epic, phase, as: "phase" | "update", comments, notes }]`
  * - `answer <page>#<id> --file <html> [--commit <sha>]`:  Claude's answer on the comment's thread (the file's
  *   markup, as is);  `--commit`, the commit it was built in (the thread's Done line shows it)
@@ -45,10 +48,10 @@ import { fileURLToPath } from "node:url"
 import { CommentList, CommentsError } from "$/epics/tool/CommentList"
 import { GuideInbox } from "$/epics/tool/GuideInbox"
 import { ReviewInbox } from "$/epics/tool/ReviewInbox"
-import { SeeAlso } from "$/epics/tool/SeeAlso"
+import { SeeAlso, epicNamed } from "$/epics/tool/SeeAlso"
 
 import { duration } from "./details.js"
-import { GUIDE_CHANGES, GuideChanges } from "./GuideChanges"
+import { FEEDBACK, GuideChanges } from "./GuideChanges"
 import { CONTENT, ROOT, pageAndId, pageFile, pagePath, parseArgs } from "./pages.js"
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -94,11 +97,11 @@ function working([page, id, on]: string[]): number {
 /**
  * A session answering comments on a page an epic owns is still listening to that epic (epic `epic-workflow` P13):
  * stamp the heartbeat of the session listening to its review inbox, as `epic inbox ... working` does.
- * - nobody listening, or no epic owns the page:  nothing written
+ * - a page no epic owns:  the standing `feedback` epic's session (epic `epic-engine` T9)
+ * - nobody listening:  nothing written
  */
 function touchOwner(page: string): void {
-  const epic = new SeeAlso(ROOT).ownerOf(pagePath(pageFile(page)))
-  if (!epic) return
+  const epic = new SeeAlso(ROOT).epicFor(pagePath(pageFile(page)))
   const file = ReviewInbox.pathFor(join(CONTENT, "epics", epic, `${epic}.plan.html`))
   if (!existsSync(file) || !ReviewInbox.read(file).listening) return
   ReviewInbox.update(file, (box) => box.touchListening())
@@ -106,13 +109,17 @@ function touchOwner(page: string): void {
 
 /**
  * Print the comments:  waiting ones unless `--all`;  as JSON with `--json`.
- * - `epic`:  only epic `epic`'s:  on a page it owns (`SeeAlso.ownerOf()`), or taken into one of its phases
+ * - `epic`:  only epic `epic`'s:  on a page it owns (`SeeAlso.epicFor()`:  `feedback`'s, a page no epic owns), or
+ *   taken into one of its phases;  its old name read as today's (`guide-changes`:  `feedback`)
  */
-function list(flags: Record<string, string | true>, epic?: string): number {
+function list(flags: Record<string, string | true>, asked?: string): number {
   const comments = pageComments(new GuideChanges({ root: ROOT }).inboxFiles(), flags.all ? "all" : "waiting")
   const owners = new SeeAlso(ROOT)
+  const epic = asked && epicNamed(asked)
   const shown = epic
-    ? comments.filter((comment) => comment.taken?.epic === epic || owners.ownerOf(comment.page) === epic)
+    ? comments.filter(
+        (comment) => (comment.taken && epicNamed(comment.taken.epic) === epic) || owners.epicFor(comment.page) === epic
+      )
     : comments
   if (flags.json) console.log(JSON.stringify(shown, null, 2))
   else if (!shown.length) console.log(flags.all ? "no comments" : "no comments waiting")
@@ -187,7 +194,7 @@ const WAIT_POLL_MS = 2000
 
 /** Gather the waiting comments into the epic, one phase per page;  print what went where. */
 async function gather(pages: string[], flags: Record<string, string | true>): Promise<number> {
-  const epic = typeof flags.epic === "string" ? flags.epic : GUIDE_CHANGES
+  const epic = typeof flags.epic === "string" ? flags.epic : FEEDBACK
   const only = flags.all || !pages.length ? undefined : pages.map((page) => pagePath(pageFile(page)))
   const gathered = await new GuideChanges({ root: ROOT, epic }).gather(only)
   if (flags.json) console.log(JSON.stringify(gathered, null, 2))

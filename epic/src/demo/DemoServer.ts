@@ -32,6 +32,9 @@ import { ReviewStart, type StartResult, type WakeResult } from "../tool/ReviewSt
  *   - a wake (Send, Review Now or Do Now with nobody listening) never types into a window, opens a session or
  *     launches one:  `ReviewStart`'s `wake()` is stubbed, recording the epic in `wakes`, and answering what a
  *     machine with no VS Code window would (`no-vscode`);  the review pill's `start()` likewise (`starts`)
+ *   - a DOCS page's wake (`wakeFor()`) too, before it claims the wake in the epic's inbox:  the comments routes find
+ *     a docs page's epic through this checkout's REAL content folder (its owner, or the standing `feedback`, epic
+ *     `epic-engine` T9), whose inbox a check must never write
  *   - and in case the stub misses, the window registries are an empty folder of its own
  *     (`SPELL_EPIC_WINDOWS_DIR`, `SPELL_WINDOWS_DIR`)
  *   - airplane mode is off, whatever this machine's switch says (`SPELL_AIRPLANE_FILE`, a file that isn't there):
@@ -102,11 +105,14 @@ export class DemoServer {
     Object.assign(process.env, env)
     const wakes: string[] = []
     const starts: string[] = []
-    const { wake, start } = ReviewStart.prototype
+    const { wake, wakeFor, start } = ReviewStart.prototype
     ReviewStart.prototype.wake = async (epic: string): Promise<WakeResult> => {
       wakes.push(epic)
       const command = ReviewStart.commandFor(epic)
       return { state: "no-vscode", command, sessions: [], did: "", message: `No VS Code window is open (a demo check)` }
+    }
+    ReviewStart.prototype.wakeFor = async function (this: ReviewStart, _planDoc: string, epic: string) {
+      return this.wake(epic)
     }
     ReviewStart.prototype.start = async (epic: string): Promise<StartResult> => {
       starts.push(epic)
@@ -114,7 +120,7 @@ export class DemoServer {
       return { state: "none", command, sessions: [], message: `Nothing started (a demo check)` }
     }
     const restore = () => {
-      Object.assign(ReviewStart.prototype, { wake, start })
+      Object.assign(ReviewStart.prototype, { wake, wakeFor, start })
       for (const [key, value] of Object.entries(saved)) {
         if (value === undefined) delete process.env[key]
         else process.env[key] = value

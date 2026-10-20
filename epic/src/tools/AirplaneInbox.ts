@@ -26,7 +26,8 @@ const NOTE_FOLDERS = ["pages", "guides", "epics"]
  *   - comments on the doc's blocks still waiting (`comments`, P11)
  * - guide comments still waiting:  each docs page's inbox file (`<page>.inbox.json5`, `GuideInbox`, P11), sent or not
  *   - a page an epic owns (`SeeAlso.ownerOf()`, epic `epic-workflow` P13):  its `epic`, whose session answers them
- *   - the rest:  `epic comments gather` takes them into epic `guide-changes`
+ *   - the rest:  the standing epic `feedback`'s (epic `epic-engine` T9):  its session takes the sent ones when their
+ *     Send wakes it;  `epic comments gather` sweeps every one left into it
  * - new epics from the Epics page's New epic button, not started yet (future, their log says so:  `epicRoutes.ts`)
  * - page notes not yet answered (`<spell-note status="new">` in guides and other pages:  `notesOnDisk.ts`)
  * - details pages answered since the flight began (`<slug>.answer.json5`, newer than `since`)
@@ -162,7 +163,7 @@ export type EpicWaiting = {
 /**
  * A comment on a docs page still waiting, with its page (a page path, from the content folder).
  * - `epic`:  the epic the page belongs to (`SeeAlso.ownerOf()`, epic `epic-workflow` P13):  that epic's session
- *   answers it;  none:  `epic comments gather` takes it into `guide-changes`
+ *   answers it;  none:  the standing `feedback`'s, which `epic comments gather` takes it into
  */
 export type GuideCommentWaiting = IdentifiedComment & { page: string; epic?: string }
 

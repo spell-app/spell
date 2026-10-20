@@ -20,7 +20,7 @@
  * - `<page>#<id>`:  the note `id` on `<page>`, a page path (`guides/x.html`) or from an area
  *   (`pages.js` `pageFile()`);  as two words (`guides/x.html n3`) too (`pageAndId()`)
  * - Every write under the page's lock, atomic, formatted (`notesOnDisk.ts` `editNotes()`).
- * - New ones:  `epic comments gather` takes them into epic `guide-changes` too, with the page's comments.
+ * - New ones:  `epic comments gather` takes them into epic `feedback` too, with the page's comments.
  * - Exit codes:  0;  1 a note or page that isn't there, or can't change (the message says why);  2 usage.
  */
 import { readFileSync } from "node:fs"

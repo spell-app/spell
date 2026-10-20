@@ -115,7 +115,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "gather",
       usage: "[<page>... | --all] [--epic <epic>] [--json]",
-      description: "the waiting comments (and new page notes) into epic guide-changes, one phase per page",
+      description: "the waiting comments (and new page notes) into the standing epic feedback, one phase per page",
       example: "epic comments gather guides/solid/solid-2.html"
     },
     {

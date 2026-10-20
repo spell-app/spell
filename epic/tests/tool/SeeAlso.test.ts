@@ -8,7 +8,7 @@ import { dirname, join } from "node:path"
 
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { GUIDE_CHANGES, SeeAlso } from "$/epics/tool/SeeAlso"
+import { FEEDBACK, OLD_FEEDBACK, SeeAlso, epicNamed } from "$/epics/tool/SeeAlso"
 
 const root = mkdtempSync(join(tmpdir(), "see-also-"))
 
@@ -73,8 +73,9 @@ beforeAll(() => {
   })
   // done long ago, the targets guide's first writer
   epic("output-targets", { phases: ["done"], updated: "2026-10-01", links: ["../../guides/targets/targets.html"] })
-  // the catch-all links every page it gathered:  never an owner
-  epic(GUIDE_CHANGES, { phases: ["todo"], updated: "2026-10-14", links: ["../../guides/solid.html"] })
+  // the standing catch-all links every page it gathered:  never an owner (epic `epic-engine` T9);  nor its old name
+  epic(FEEDBACK, { phases: ["todo"], standing: true, updated: "2026-10-14", links: ["../../guides/solid.html"] })
+  epic(OLD_FEEDBACK, { phases: ["todo"], updated: "2026-10-14", links: ["../../guides/solid.html"] })
 })
 
 afterAll(() => rmSync(root, { recursive: true, force: true }))
@@ -107,7 +108,7 @@ describe("linksOf():  an epic's See Also, gathered", () => {
   })
 
   test("a title's site suffix goes", () => {
-    expect(new SeeAlso(root).linksOf(GUIDE_CHANGES).map((link) => link.title)).toEqual(["Solid 2"])
+    expect(new SeeAlso(root).linksOf(FEEDBACK).map((link) => link.title)).toEqual(["Solid 2"])
   })
 })
 
@@ -138,12 +139,23 @@ describe("ownerOf():  which epic a page belongs to", () => {
     }
   })
 
-  test("never the changelog, nor anything only guide-changes links;  a details page is its own epic's", () => {
+  test("never the changelog, nor anything only feedback (or guide-changes) links;  a details page is its own epic's", () => {
     const see = new SeeAlso(root)
     expect(see.ownerOf("guides/changelog.html")).toBeUndefined()
     expect(see.ownerOf("guides/solid.html")).toBeUndefined()
     expect(see.ownerOf("epics/python-target/details/bedtime.html")).toBe("python-target")
     expect(see.ownerOf("epics/nobody/details/x.html")).toBeUndefined()
+  })
+
+  // epic `epic-engine` T9 (J7):  a page no epic owns is the standing `feedback` epic's
+  test("epicFor():  the owner, else feedback;  epicNamed():  guide-changes is feedback", () => {
+    const see = new SeeAlso(root)
+    expect(see.epicFor("guides/python-target.html")).toBe("python-target")
+    expect(see.epicFor("guides/solid.html")).toBe(FEEDBACK)
+    expect(see.epicFor("guides/changelog.html")).toBe("feedback")
+    expect(see.epicFor("components/epics/epic-item.html")).toBe("feedback")
+    expect(epicNamed("guide-changes")).toBe("feedback")
+    expect(epicNamed("python-target")).toBe("python-target")
   })
 
   test("ownedBy():  an epic's details pages and the guides it owns", () => {

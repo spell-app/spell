@@ -293,11 +293,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `epicRoutes`' `GET /api/epics/pages` answers the epic's saga too (`<epic-page>`'s meta line)
     - `SeeAlso` (P13):  an epic's See Also, GATHERED from its files, never kept by hand
       - its guide (`<a slot="durable">`), its `details/` pages, every `guides/` page its page and parts link to
-      - which epic a docs page belongs to (`ownerOf()`):  where that page's Send hands its comments
+      - which epic a docs page belongs to (`ownerOf()`):  where that page's Send hands its comments;
+        none:  the standing `feedback` (`epicFor()`, epic `epic-engine` T9)
       - read by:
         - the page server:  `GET /api/epics/pages` (`<epic-page>`'s See Also box), and the docs tools' comments routes
         - `epic inbox <name> wait`:  a guide's Send wakes it
-        - the docs tools' `GuideChanges`
+        - the docs tools' `GuideChanges` and `PageInboxes` (the pages no epic owns:  `feedback`'s)
     - `EpicTargets` (P15):  what a link to a saga, an epic, a phase or an item finds in a checkout
       - the page, the id, its title, what's broken (no saga, no page, no id, an epic under a saga it doesn't name)
       - read by:
@@ -454,8 +455,9 @@ Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`)
   - No toolbar bullhorn and no Cmd / Ctrl + K for a comment's id:  these pages have no toolbar, and the site's
     Cmd / Ctrl + K is its search.
   - Kept in `<page>.inbox.json5` beside a page, git-ignored.
-  - No epic owns these pages:  Send says "no epic owns this page", and `/airplane land` gathers them into
-    `guide-changes`.  `epic comments list` names each by its served path:  `components/epics/epic-item.html#M1`.
+  - No epic owns these pages, so their comments go to the standing epic `feedback` (epic `epic-engine` T9):
+    Send says "feedback is listening", or "nobody is listening:  Send wakes feedback".
+    `epic comments list` names each by its served path:  `components/epics/epic-item.html#M1`.
   - [check-comments-epic-ui.mjs](demo/check-comments-epic-ui.mjs) checks them in a browser.
 - The epic's write-up and how-to guides stay in the shared guides:
   [Epic Pages as Components](../../guides/epic-components/epic-components.html),
@@ -1631,8 +1633,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
   Owen comments, presses Send, and the session working the epic the page BELONGS to gets them.
   - The page header's right:  a pill, the paper plane, "Send" and how many comments aren't sent yet.
     - blue by the fill rule (grey outline:  nothing waiting;  dashed:  some not sent;  outlined:  sent)
-    - then who is listening:  "python-target is listening" (a green dot), "nobody is listening",
-      or "no epic owns this page";  each says more in its tooltip
+    - then who is listening:  "python-target is listening" (a green dot), "nobody is listening";
+      a page no epic owns:  "feedback is listening", "nobody is listening:  Send wakes feedback"
+      (or "no epic owns this page" in a repo with no `feedback` epic yet);  each says more in its tooltip
     - The runtime's `drawSend()`.
       It asks again every 30s, since a session that stops leaves only an old heartbeat.
     - Not on an epic page:  its Send is `<epic-page>`'s.
@@ -1640,14 +1643,18 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - a page in `epics/<name>/details/`:  epic `<name>`
     - else the epic whose See Also lists it:  its guide's epic first (J88), then an open one,
       then the one updated last (Owen's Q12)
-    - none:  `guide-changes`, as before
+    - none:  the STANDING epic `feedback` (epic `epic-engine` T9, J7;  `SeeAlso.epicFor()`), the inbox for every
+      page no epic owns:  guides no epic claims, Epic UI's pages, the list pages, the changelog
+      - its `epic inbox feedback wait` hears every such page's Send (`PageInboxes.unowned()`)
+      - its old name, `guide-changes`, is read as `feedback` (`epicNamed()`:  `epic` commands, `comments gather
+        --epic`, `comments list`)
   - A click:  `POST /api/docs/comments/send`;  the comments waiting are sent (`GuideInbox` `sent`).
   - The epic's `epic inbox <name> wait` wakes on it, and prints each comment under its page.
     - The session answers each with `epic comments working` / `answer` (below), one at a time.
   - Nobody listening:  the Send WAKES the epic, as an epic page's does (P16, `ReviewStart.wakeFor()`).
     - `/epic review` typed into its session, or a new session in its window;  the toast says what it did
     - The comments wait, sent, for that review (its first `wait` takes them), or `/airplane land`.
-    - Never for `guide-changes`.
+    - A page no epic owns wakes `feedback`, once its epic page is there (`PageSend`'s `wakes`).
 - Where they're kept (git-ignored in the shared repo:  waiting work, per machine):
   - a docs page's:  its INBOX FILE, `<page>.inbox.json5` beside it, with its `sent` and `handedOver`
     - [GuideInbox.ts](tool/GuideInbox.ts), in the `epic` tool since P13:  the tool's `wait` reads it
@@ -1716,10 +1723,12 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `answer` puts Claude's answer on the thread:  Owen's turn.  `--commit`:  the Done line shows it.
   - `list <epic>`:  the comments on the pages that epic owns, and those taken into it.
   - Epic UI's pages too (epic `epic-engine` P2):  by their served path, `components/epics/epic-item.html#M1`,
-    their inboxes found in the engine's `src/docs/` (`GuideChanges.inboxFiles()`, `pages.js` `EPIC_UI_DOCS`).
+    their inboxes found in the engine's `src/docs/` (`PageInboxes.inboxFiles()`, `pages.js` `EPIC_UI_DOCS`).
   - `working` and `answer` stamp the heartbeat of the session listening to the page's epic, if any.
-  - `gather` takes every waiting comment (and page note still `new`) into ONE epic, `guide-changes`.
+  - `gather` takes every waiting comment (and page note still `new`) into ONE epic, the standing `feedback`
+    (`guide-changes` before epic `epic-engine` T9).
     - Only on pages NO epic owns (P13):  an owned page's go to its epic, unless the page is named.
+    - `feedback`'s session runs it when a Send wakes it;  `/airplane land` sweeps what was never sent.
     - one phase per page;  an Updated block in the page's phase while it's open
     - a reply rides along under its comment ("Owen replied on the thread")
     - each comment then `taken`
@@ -1758,7 +1767,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   epic notes done <page>#<id>
   ```
 
-  - `epic comments gather` takes the `new` ones into `guide-changes`, with the comments.
+  - `epic comments gather` takes the `new` ones into `feedback`, with the comments.
 - Regenerated pages keep their notes:
   `index.js` puts the groups of the part it rewrites back into their sections (`replaceBetween()`).
 

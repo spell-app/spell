@@ -123,15 +123,19 @@ Owen is back online.  Gather everything, work through it in the background, then
      - Its running session takes it with its next `wait`.
      - None running:  answer it in 5, as that epic's session would (`epic comments working`, then `answer`),
        or list it for `/epic review <epic>`.
-   - Every other waiting comment (and page note still new) goes into epic `guide-changes`, one phase per page.
-     - The phase is made the first time.
+   - Every other waiting comment (and page note still new) goes into the standing epic `feedback`, one phase per
+     page:  the inbox for every page no epic owns (epic `epic-engine` T9;  `guide-changes` before, read as
+     `feedback`).
+     - Online, those pages' Send wakes `feedback`'s session, which gathers them itself;  on the plane nothing woke
+       it, so they're swept in here.
+     - The phase is made the first time;  the epic too, if it isn't there yet (standing).
      - A page whose phase is still open gets an Updated block in it.
      - A reply on a thread goes too, under its comment ("Owen replied on the thread").
    - Each is marked taken on its page.
-   - `/epic guide-changes` answers each on its thread:
+   - `/epic review feedback` works them, as its Overview says (what "done" is for a feedback phase):
      - as it starts:  `epic comments working <page>#<id> on`, and the thread shows "Claude: thinking…"
      - then `epic comments answer <page>#<id> --file <html> [--commit <sha>]`, which turns it off
-   - Say which pages, and that `/epic guide-changes` works them;  nothing else to do for them now.
+   - Say which pages, and that `/epic review feedback` works them;  nothing else to do for them now.
 5. The rest goes to background agents, up to 5 at once.
    They're named and listed (the root `CLAUDE.md`, "Delegated work").
    - Each Do Now, revisit and phase note:  as `/epic review` answers one ("7.3", step 2).

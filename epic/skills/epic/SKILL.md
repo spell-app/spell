@@ -622,6 +622,10 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
 - solid:  done
 - Leave work you queued `queued` until it's built, so his chip stays outlined.
 
+A revisit note that says just `do it` (now or soon) means:  DO it, no question back -- the call as written, the todo
+as asked.  Revisit puts it in a judgement call's or todo's empty note box for him (Owen, 2026-10-19:  "I generally
+want you to just do it").
+
 1. Exit 2 (timeout, nothing happened):  arm `wait` again, and end the turn with one line ("still listening").
 
 1b. CANCELED:  Owen said "nevermind" on a running Do Now (epic `windows-and-review` P2).
@@ -750,6 +754,11 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
      - `epic comments working <page>#M3 on` as you start:  his thread shows "Claude: thinking…".
      - Work it into the page (or say why not).
      - `epic comments answer <page>#M3 --file <answer.html> [--commit <sha>]`:  his turn, the thread opens.
+   - `/epic review feedback`, the STANDING epic for every page NO epic owns (epic `epic-engine` T9):
+     those pages' Send wakes it, and `wait` prints their comments the same way.
+     - First `epic comments gather`:  a phase per page (an Updated block in its phase while that's open),
+       each comment marked taken.
+     - Then work each phase as its Overview says, and close it when every comment in it is answered.
 4. Arm `wait` again (always, unless he said stop), then reply:
    - what landed:  bullets, items in words, ids after
    - what's being worked on in the background
