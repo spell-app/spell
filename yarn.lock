@@ -2088,6 +2088,7 @@ __metadata:
     esbuild: "npm:^0.28.2"
     json5: "npm:^2.1.1"
     playwright: "npm:^1.63.0"
+    pyright: "npm:1.1.414"
     semver: "npm:^7.8.5"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
