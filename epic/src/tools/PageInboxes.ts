@@ -65,7 +65,7 @@ export class PageInboxes {
 
   /**
    * Every docs page's inbox file (`<page>.inbox.json5` beside a `<page>.html`, never an epic page's), sorted:  the
-   * content folder's, then each component set's (`COMPONENT_SETS`' order).
+   * content folder's, then each component set's (`ComponentSetFolders`' order).
    * - by its `.json5` name, also when only its old `.json` is there (`GuideInbox.read()` reads either)
    */
   inboxFiles(): string[] {

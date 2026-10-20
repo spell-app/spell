@@ -1,7 +1,8 @@
 import { isAbsolute, join, relative, sep } from "node:path"
 
-// Import directly:  the page server's barrel would load the whole server into every `epic` call
-import { COMPONENT_SETS } from "@spell-app/server/src/page/page.types.ts"
+// Import directly, by path:  the page server's barrel would load the whole server into every `epic` call, and plain
+// `node` loads this file (`pages.js`), which knows no `$/` alias;  `settings.ts` is node built-ins only
+import { componentSets, pageServerSettings } from "@spell-app/server/src/page/settings.ts"
 
 import { EPIC_UI } from "../server/server.types.ts"
 
@@ -9,23 +10,27 @@ import { EPIC_UI } from "../server/server.types.ts"
  * ### `ComponentSetFolders`
  * Where each COMPONENT SET's pages are on disk, and the PAGE PATH the tools name each one by:  its address, as the
  * page servers serve it (`components/app/Chooser.html`), never its folder (`packages/app/docs/Chooser.html`).
- * - The sets:  spell-app's `COMPONENT_SETS`, read through `.spell-app`, as the epic server's `componentSetMounts()`
- *   reads them:  Spell UI, Epic UI, App UI, Brand.
+ * - The sets:  the ones checkout `root`'s settings name (its root `package.json`'s `"pageServer"` `"componentSets"`,
+ *   `componentSets()`), as the epic server's `componentSetMounts()` reads them:  spell-app's are Spell UI, Epic UI,
+ *   App UI, Brand.
  *   - each in its folder in checkout `root` (`packages/app/docs/`)
- *   - except Epic UI:  the engine's own `src/docs/` (`epicUi`), wherever spell-epic is
+ *   - except Epic UI:  the engine's own `src/docs/` (`epicUi`), wherever spell-epic is;  listed even when the
+ *     settings don't name it (spell-epic's own checkout), since the epic server serves it for every repo
  * - Their pages take comments, in inbox files beside them (`commentsRoutes.ts`);
  *   `PageInboxes` finds them, and `pages.js` names them (`pagePath()`, `pageAt()`).
  * - Reads no files:  a set whose folder isn't there is listed all the same.
  ****************/
 export class ComponentSetFolders {
-  /** each set's page-path prefix (`components/app`) and folder, in `COMPONENT_SETS`' order */
+  /** each set's page-path prefix (`components/app`) and folder, in the settings' order;  Epic UI last if they lack it */
   readonly folders: readonly ComponentSetFolder[]
 
   constructor({ root, epicUi }: { root: string; epicUi: string }) {
-    this.folders = COMPONENT_SETS.map((set) => {
+    const folders = componentSets(pageServerSettings(root)).map((set) => {
       const path = set.prefix.slice(1)
       return { name: set.name, path, dir: path === EPIC_UI.path ? epicUi : join(root, set.dir) }
     })
+    const hasEpicUi = folders.some(({ path }) => path === EPIC_UI.path)
+    this.folders = hasEpicUi ? folders : [...folders, { name: EPIC_UI.name, path: EPIC_UI.path, dir: epicUi }]
   }
 
   /**

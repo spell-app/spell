@@ -352,7 +352,7 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 | `/_epic/assets/...` | this checkout's `src/tools/_assets/`:  `spell-ui.js`, `spell-doc.css`, the runtime |
 | `/_epic/pack/...` | this checkout's epics pack, `epics.pack.js` |
 | `/components/epics/...` | Epic UI, the elements' docs:  this checkout's `src/docs/` |
-| `/components/<set>/...` | the default repo's other component sets, as spell-app's page server serves them (`COMPONENT_SETS`):  Spell UI, App UI, the brand's;  each repo's at `/r/<repo>/components/<set>/` |
+| `/components/<set>/...` | the default repo's other component sets, as spell-app's page server serves them (the ones its `package.json`'s `"pageServer"` `"componentSets"` names):  Spell UI, App UI, the brand's;  each repo's at `/r/<repo>/components/<set>/` |
 | `/r/<repo>/...` | a registered repo's content folder (its `.epic/config.json5`'s `contentFolder`) |
 | `/...` | the DEFAULT repo's content folder too, so today's URLs keep working |
 | `/editor/` | the default repo's APP, the top bar's App tab (its `.epic/config.json5`'s `"app"`;  each repo's at `/r/<repo>/editor/`):  answering, a redirect to it;  not, it's started (its `app.start`, in the background, its output in `~/.spell-epic/app-<repo>.log`) behind a "Starting ..." page that goes there once it answers;  none declared, a page saying so |

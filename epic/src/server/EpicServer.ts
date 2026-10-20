@@ -3,15 +3,8 @@ import { join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { SRV, type ServedFile } from "$/server"
-import {
-  COMPONENT_SETS,
-  HIGHLIGHT_JS,
-  PageEditor,
-  pageServerSettings,
-  SITE_BUNDLE,
-  type PageConfig,
-  type RouteModule
-} from "$/server/page"
+import { componentSets, PageEditor, pageServerSettings, type PageConfig, type RouteModule } from "$/server/page"
+import { BundleBuild } from "$/page-server"
 
 import type { ContentRouteContext } from "$/epics/list/runningRoutes"
 
@@ -21,6 +14,7 @@ import {
   DEFAULT_EPIC_PORT,
   ENGINE_ROUTES,
   EPIC_UI,
+  HIGHLIGHT_JS,
   HOME_ENV,
   legacyEnginePath,
   LOG_FILE,
@@ -38,9 +32,10 @@ import {
  * /_epic/assets/...       spell-epic's src/tools/_assets/   (spell-ui.js, spell-doc.css, the runtime ...)
  * /_epic/pack/...         spell-epic's src/components/__pack/   (epics.pack.js)
  * /components/epics/...   Epic UI, the elements' pages:  spell-epic's src/docs/   (EPIC_UI)
- * /components/epics/_assets/...   their site bundle, spell-app's (its COMPONENT_SETS entry's, through .spell-app)
- * /components/<set>/...   every OTHER component set the default repo's checkout has (COMPONENT_SETS):  Spell UI, App UI,
- *                         the brand's;  its site bundle at _assets/, from that checkout (`componentSetMounts()`)
+ * /components/epics/_assets/...   their site bundle, spell-app's (its settings' Epic UI set's, through .spell-app)
+ * /components/<set>/...   every OTHER component set the default repo's checkout names (its package.json's
+ *                         "pageServer" "componentSets"):  Spell UI, App UI, the brand's;  its site bundle at _assets/,
+ *                         from that checkout (`componentSetMounts()`)
  * /r/<repo>/...           that repo's content folder (its .epic/config.json5's contentFolder), then its main checkout
  * /r/<repo>/components/<set>/...   that repo's component sets, the same way
  * /...                    the DEFAULT repo's content folder and checkout too, so today's URLs keep working
@@ -68,6 +63,8 @@ import {
  *   (`epicUiMounts()`, epic `epic-eject` I21:  it answered 404 here)
  * - The OTHER component sets, as spell-app's page server serves them (`componentSetMounts()`, epic `epic-engine` I48:
  *   the top bar's Spell/UI and App/UI tabs answered 404 here)
+ * - The sets' SITE BUNDLE (Spell UI's, `packages/ui/site/_assets`) isn't committed:  it builds spell-app's bundles
+ *   itself as it starts (`buildBundles()`, epic `epic-engine` P8), so it never waits for spell-app's page server
  * - The APP (the top bar's App tab, `/editor/`;  epic `epic-engine` I49):  each repo's, as its `.epic/config.json5`'s
  *   `"app"` declares it (`RepoApp`):  redirected to while it answers;  else started (its own command, detached, from
  *   its main checkout) behind a "Starting ..." page that goes there once it does;  none declared:  a page saying so.
@@ -115,6 +112,9 @@ export class EpicServer {
 
   /** every component set's folders, at their addresses:  Epic UI's, then the repos' others */
   private readonly setMounts: SRV.Mount[]
+
+  /** spell-app's bundles' build, once `start()` has begun it (`buildBundles()`) */
+  private bundles?: BundleBuild
 
   /**
    * - `home`:  default `RepoList.homeFolder()`
@@ -187,13 +187,17 @@ export class EpicServer {
    * - `port`:  wanted (default `DEFAULT_EPIC_PORT`);  taken:  any free one
    * - `routes`:  load the route modules (default `true`;  tests turn it off)
    * - `pidFile`:  write `server.json` (default `true`)
+   * - `bundles`:  build spell-app's stale bundles in the background (default `true`;  tests turn it off:
+   *   `buildBundles()`)
    */
   async start({
     port = DEFAULT_EPIC_PORT,
     routes = true,
-    pidFile = true
-  }: { port?: number; routes?: boolean; pidFile?: boolean } = {}): Promise<this> {
+    pidFile = true,
+    bundles = true
+  }: { port?: number; routes?: boolean; pidFile?: boolean; bundles?: boolean } = {}): Promise<this> {
     this.watch()
+    if (bundles) this.buildBundles()
     if (routes && this.defaultRepo) await this.loadRoutes()
     const { port: actual } = await this.web.listen({ port })
     this.info.port = actual
@@ -277,51 +281,78 @@ export class EpicServer {
   }
 
   /**
-   * Every OTHER component set a repo's checkout has, as spell-app's page server serves them
-   * (`COMPONENT_SETS`, `componentSetPath()`;  epic `epic-engine` I48):
-   * - the sets:  spell-app's own list, through `.spell-app`, never a copy:  Spell UI, App UI, the brand's
-   *   - each where the repo's MAIN checkout has its folder (`dir`):  a repo without one gets nothing
+   * Every OTHER component set a repo's checkout names, as spell-app's page server serves them
+   * (`componentSets()`, `componentSetPath()`;  epic `epic-engine` I48):
+   * - the sets:  the ones the repo's MAIN checkout's settings name (its root `package.json`'s `"pageServer"`
+   *   `"componentSets"`, `pageServerSettings()`), never a copy:  spell-app's are Spell UI, App UI, the brand's
+   *   - each where that checkout has its folder (`dir`):  a repo naming none gets nothing
    *   - NOT Epic UI:  the engine's own (`epicUiMounts()`)
    * - `/components/<set>/...`:  the default repo's;  `/r/<repo>/components/<set>/...`:  each repo's
    * - `<set address>/_assets/...`:  its site bundle (`assets`), from the same checkout:  Spell UI's site bundle, every
-   *   set's since epic `epic-engine`;  spell-app's page server builds it, so missing until that has run
+   *   set's since epic `epic-engine`;  built, not committed (spell-app's:  `buildBundles()`)
    * - the longer prefix wins (`SRV.StaticHandler`), so `_assets/` is the bundle's, never the set's folder's
    */
   private componentSetMounts(): SRV.Mount[] {
     return this.repos.flatMap((repo) => {
       const bases = repo === this.defaultRepo ? ["/", repo.prefix] : [repo.prefix]
-      return COMPONENT_SETS.filter(
-        (set) => set.prefix !== `/${EPIC_UI.path}` && existsSync(join(repo.checkout, set.dir))
-      ).flatMap((set) =>
-        bases.flatMap((base) => {
-          const prefix = `${base}${set.prefix.slice(1)}/`
-          return [
-            { prefix: `${prefix}${SET_ASSETS}/`, dir: join(repo.checkout, set.assets) },
-            { prefix, dir: join(repo.checkout, set.dir) }
-          ]
-        })
-      )
+      return componentSets(pageServerSettings(repo.checkout))
+        .filter((set) => set.prefix !== `/${EPIC_UI.path}` && existsSync(join(repo.checkout, set.dir)))
+        .flatMap((set) =>
+          bases.flatMap((base) => {
+            const prefix = `${base}${set.prefix.slice(1)}/`
+            return [
+              { prefix: `${prefix}${SET_ASSETS}/`, dir: join(repo.checkout, set.assets) },
+              { prefix, dir: join(repo.checkout, set.dir) }
+            ]
+          })
+        )
     })
   }
 
   /**
    * Epic UI, the elements' docs set (`EPIC_UI`), as spell-app's page server mounts its component sets
-   * (`COMPONENT_SETS`, `componentSetPath()`):
+   * (`componentSets()`, `componentSetPath()`):
    * - `/components/epics/...`:  the engine's `src/docs/`, its pages, `__parts/` and `__data/`
-   * - `/components/epics/_assets/...`:  the site bundle spell-app's `COMPONENT_SETS` gives Epic UI (`assets`), from
-   *   the spell-app checkout the engine uses (`.spell-app`);  spell-app's page server builds it, so it's missing until
-   *   that has run
-   *   - read from the list, never named here:  Spell UI's site bundle since epic `epic-engine` (every set's, packs and
-   *     all), the other sets' own build in its `sets/` before;  whichever the checkout has
+   * - `/components/epics/_assets/...`:  the site bundle the settings of the spell-app checkout the engine uses
+   *   (`.spell-app`) give Epic UI (`assets`), else their first set's;  built as the server starts (`buildBundles()`)
+   *   - read from the settings, never named here:  Spell UI's site bundle since epic `epic-engine` (every set's, packs
+   *     and all), the other sets' own build in its `sets/` before;  whichever the checkout has
+   *   - none (a checkout naming no sets):  no bundle, the pages unstyled
    * - the longer prefix wins (`SRV.StaticHandler`), so `_assets/` is the bundle's, never the docs folder's
    */
   private epicUiMounts(): SRV.Mount[] {
     const prefix = `/${EPIC_UI.path}/`
-    const assets = COMPONENT_SETS.find((set) => set.prefix === `/${EPIC_UI.path}`)?.assets ?? SITE_BUNDLE
+    const sets = componentSets(pageServerSettings(this.spellApp))
+    const assets = (sets.find((set) => set.prefix === `/${EPIC_UI.path}`) ?? sets[0])?.assets
     return [
-      { prefix: `${prefix}${SET_ASSETS}/`, dir: join(this.engine, SPELL_APP, assets) },
+      ...(assets ? [{ prefix: `${prefix}${SET_ASSETS}/`, dir: join(this.spellApp, assets) }] : []),
       { prefix, dir: this.epicUiDir }
     ]
+  }
+
+  /** The spell-app checkout the engine uses:  its server package, and the sets' site bundle (`.spell-app`). */
+  get spellApp(): string {
+    return join(this.engine, SPELL_APP)
+  }
+
+  /**
+   * Build spell-app's bundles whose sources changed since their last build, in the background
+   * (`$/page-server`'s `BundleBuild`:  `spell dev bundles build --stale`, with that checkout's own CLI;  epic
+   * `epic-engine` P8, r8).
+   * - the bundles:  that checkout's settings' `"bundles"`, Spell UI's site bundle among them, which every component
+   *   set's pages load at `_assets/` (`epicUiMounts()`, `componentSetMounts()`)
+   * - so the epic server never waits for spell-app's page server to build it:  only those two build it
+   * - a request for a missing file of one waits while it runs (`BundleBuild.wait`):  a set's page opened at once
+   *   still gets its bundle;  live reload reloads the pages once it's written (the set mounts are watched)
+   * - its output goes to the server's log, `bundles:  ...`;  `stop()` ends it
+   * - NEVER throws:  a checkout without the CLI builds nothing, a failed build leaves the old bundle
+   */
+  private buildBundles(): void {
+    if (this.bundles) return
+    const build = (this.bundles = new BundleBuild({ root: this.spellApp }))
+    this.web.router.use(build.wait)
+    build.start()
+    this.stops.push(() => build.stop())
   }
 
   /**
@@ -446,7 +477,7 @@ export class EpicServer {
 
 /** `html`, its cdnjs highlight.js tag pointing at the engine's copy:  pages load offline (`HIGHLIGHT_JS`). */
 export function localHighlight(html: string): string {
-  return html.replaceAll(HIGHLIGHT_JS.cdn, `${ENGINE_ROUTES.assets.prefix}highlight.min.js`)
+  return html.replaceAll(HIGHLIGHT_JS.cdn, HIGHLIGHT_JS.local)
 }
 
 /** spell-epic's checkout:  `src/server/` is two folders down. */
@@ -480,11 +511,15 @@ export const ROUTE_MODULES = [
  * - ALL of spell-epic's code, `src/` (epic `epic-eject` I11):  the route modules import far beyond their own folders
  *   (`config/`, `data/`, `links/`, `review/`, the elements' definitions ...), so watching only theirs and this one
  *   missed a change to the rest
- * - the server package's (spell-app's, through `.spell-app`)
+ * - the server package's and the page-server package's (spell-app's, through `.spell-app`:  `BundleBuild` is the
+ *   latter's)
  */
-export const SOURCES = [join(ENGINE_ROOT, "src"), join(ENGINE_ROOT, ".spell-app", "packages", "server", "src")]
+export const SOURCES = [
+  join(ENGINE_ROOT, "src"),
+  ...["server", "page-server"].map((name) => join(ENGINE_ROOT, ".spell-app", "packages", name, "src"))
+]
 
-/** The engine's link to the spell-app checkout it uses:  the server package, and the sets' site bundle. */
+/** The engine's link to the spell-app checkout it uses:  the server packages, the sets' settings and site bundle. */
 const SPELL_APP = ".spell-app"
 
 /** A component set's site bundle, under its address:  `/components/epics/_assets/site.js`. */

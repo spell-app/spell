@@ -146,11 +146,20 @@ export function excerptOf(block) {
 
 /**
  * A section's (or plan part's) title, as a reader sees it (`2. Memory`):
- * its `header` or `title`, or its `slot="header"` / `slot="title"` text.
+ * its `label` (a `<ui-section>`'s since spell-app's epic `property-editor` P10), `header` (its old name) or `title`,
+ * or its `slot="label"` / `slot="header"` / `slot="title"` text.
  */
 export function sectionTitle(section) {
-  const slotted = Array.from(section.children).find((child) => /^(header|title)$/.test(child.getAttribute("slot")))
-  return squash(section.getAttribute("header") ?? section.getAttribute("title") ?? slotted?.textContent ?? "")
+  const slotted = Array.from(section.children).find((child) =>
+    /^(label|header|title)$/.test(child.getAttribute("slot"))
+  )
+  return squash(
+    section.getAttribute("label") ??
+      section.getAttribute("header") ??
+      section.getAttribute("title") ??
+      slotted?.textContent ??
+      ""
+  )
 }
 
 /**

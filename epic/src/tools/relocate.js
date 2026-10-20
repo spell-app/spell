@@ -659,7 +659,7 @@ export function relinkDocsPackage(dir, { dryRun = false } = {}) {
  * Where a link's target went in the component sets' layout (epic `people-and-orgs` P18, 2026-10-13).
  * - each `[pattern, replacement]`, on the repo-relative path a link points at;  first match wins
  * - a set's PAGES are linked at their SERVED address, `components/<set>/<page>`
- *   (the page server's `COMPONENT_SETS`):  a set's folder doesn't draw its pages at its own address, only there
+ *   (the page server's component sets, `componentSets()`):  a set's folder doesn't draw its pages at its own address, only there
  *   - Spell UI's:  from the shared `ui/` (its component index is `components.html` now, its pages flat)
  *   - Epic UI's:  from `packages/epic-components/` or `epic-ui/`
  *   - App UI's:  from `packages/app/components/` or `app-ui/`

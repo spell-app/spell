@@ -114,8 +114,8 @@ const out =
 mkdirSync(out, { recursive: true })
 
 /**
- * Spell UI's site bundle in the checkout, as spell-app's page server lays it over a set's folder (`COMPONENT_SETS`'
- * `assets`):  every set's since epic `epic-engine`;  a checkout from before it, which still has the sets' own build
+ * Spell UI's site bundle in the checkout, as spell-app's page server lays it over a set's folder (its settings' set's
+ * `assets`, `componentSets()`):  every set's since epic `epic-engine`;  a checkout from before it, which still has the sets' own build
  * (`site/_src/sets.ts`), gives the other sets its `sets/`.
  */
 const SITE = join(checkout, "packages/ui/site")
@@ -306,7 +306,8 @@ async function checkWidth(width) {
   const { hovered, header } = await page.evaluate(() => {
     const section = document.querySelectorAll("main > .site-body ui-section[id]:not(ui-section ui-section)")[1]
     section?.scrollIntoView({ block: "center" })
-    return { hovered: section?.id, header: section?.getAttribute("header") }
+    // its title:  `label`, or `header`, its old name (spell-app's epic `property-editor` P10)
+    return { hovered: section?.id, header: section?.getAttribute("label") ?? section?.getAttribute("header") }
   })
   // its title, drawn in its shadow root (the host itself has no box of its own to aim at)
   await page.locator(`[id="${hovered}"]`).getByText(header, { exact: true }).first().hover().catch(() => {})

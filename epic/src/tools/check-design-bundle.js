@@ -11,9 +11,10 @@
  *   - no page errors (so `<ui-emoji>`, whose names don't load there, throws nothing)
  *   - `window.SpellUI` and `ui-button` defined
  *   - icons OUTSIDE the docs' ~90 (`ICONS`) draw an `<svg>`:  a solid, a regular (`… outline`), a brand, an FA alias
- *   - `<ui-code>` gets highlight.js tokens for `ts`, and for `spell` (spell's own highlighter)
+ *   - `<ui-code>` gets highlight.js tokens for `ts`
+ *     - not `spell`:  spell's colouring left Spell UI (epic `repo-split` P2), so the design bundle shows it plain
  *   - `<ui-markdown>` renders a heading
- *   - the brand (P11):  `<ui-brand-logo>` draws its outlined `<svg>`, `<ui-brand-color-picker>` its picker, and the
+ *   - the brand (P11):  `<brand-logo>` draws its outlined `<svg>`, `<brand-color-picker>` its picker, and the
  *     `spell-brand` theme is on (its brand role `--spell-surface-warm` resolves on the page)
  * - 2. a Design artboard:  a board (`BOARD`) under Claude Design's own runtime (`vendor/claude-design/dc-runtime.js`,
  *   React plus `dc-runtime`, copied from a Design on claude.ai, 2026-10-05), loading the bundle with
@@ -42,14 +43,12 @@ const CARD = `
 <ui-icon id="brand" name="github"></ui-icon>
 <ui-icon id="fa-alias" name="cog"></ui-icon>
 <ui-code id="ts" language="ts"><script type="text/plain">const answer: number = 42 // a comment</script></ui-code>
-<ui-code id="spell" language="spell"><script type="text/plain">## Piles
-a pile is a list of cards</script></ui-code>
 <ui-markdown><script type="text/markdown"># Hello
 
 Some *markdown*.</script></ui-markdown>
 <ui-emoji name="smile"></ui-emoji>
-<ui-brand-logo id="logo" variant="lockup"></ui-brand-logo>
-<ui-brand-color-picker id="picker" value="#6550CA"></ui-brand-color-picker>`
+<brand-logo id="logo" variant="lockup"></brand-logo>
+<brand-color-picker id="picker" value="#6550CA"></brand-color-picker>`
 
 /**
  * A Design artboard, as `Control.dc.html` in the P1 spike:  `<x-dc>` template holes, a `DCLogic` component, React
@@ -132,8 +131,8 @@ async function checkCard() {
     if (!count) problems.push(`card:  <ui-code language="${language}"> has no highlight tokens`)
   }
   if (!state.markdownHeading) problems.push("card:  <ui-markdown> rendered no heading")
-  if (!state.brand.logo) problems.push("card:  <ui-brand-logo> drew no <svg>")
-  if (!state.brand.picker) problems.push("card:  <ui-brand-color-picker> drew no picker")
+  if (!state.brand.logo) problems.push("card:  <brand-logo> drew no <svg>")
+  if (!state.brand.picker) problems.push("card:  <brand-color-picker> drew no picker")
   if (!state.brand.theme) problems.push("card:  the spell-brand theme isn't on (no --spell-surface-warm)")
   return { ...state, errors }
 }
@@ -185,7 +184,7 @@ async function checkBoard() {
 function inspectCard() {
   const markdown = document.querySelector("ui-markdown")?.shadowRoot?.querySelector("[part~=body]")
   const icons = Object.fromEntries(["solid", "outline", "brand", "fa-alias"].map((id) => [id, drawn(`#${id}`)]))
-  const codeTokens = { ts: tokens("#ts"), spell: tokens("#spell") }
+  const codeTokens = { ts: tokens("#ts") }
   const markdownHeading = markdown?.querySelector("h1, h2, h3")?.textContent ?? null
   const brand = {
     logo: drawn("#logo"),

@@ -7,7 +7,7 @@
 import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { keepingCommentsIn } from "$/assembler/json5"
+import { keepingCommentsIn } from "$/util/node/json5"
 import { EpicUISite } from "$/epics/site/EpicUISite"
 
 const site = new EpicUISite()

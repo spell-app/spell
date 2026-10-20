@@ -22,9 +22,8 @@ import { existsSync, readFileSync, readdirSync, realpathSync, statSync, writeFil
 import { dirname, extname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { HIGHLIGHT_JS } from "$/server/page"
-
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { HIGHLIGHT_JS } from "$/epics/server/server.types"
 
 /**
  * The checker:  finds a page's remote loads, the pages to check, and the highlight.js fix.
@@ -98,7 +97,7 @@ export type RemoteLoad = { file: string; line: number; kind: string; url: string
 
 /**
  * highlight.js, the one remote file docs pages loaded (epic `airplane` P1).
- * - the page server's `HIGHLIGHT_JS` (`$/server/page`), its `local` from the served root (the content folder) rather
+ * - the engine's `HIGHLIGHT_JS` (`server.types.ts`), its `local` from the served root (the content folder) rather
  *   than from `/`
  */
 export const HIGHLIGHT = { cdn: HIGHLIGHT_JS.cdn, local: HIGHLIGHT_JS.local.slice(1) } as const

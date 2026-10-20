@@ -399,7 +399,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 `docs/`:  the pages of the `<epic-*>` elements, a COMPONENT SET (epic `epic-workflow` P10).
 Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`).
-- Served by the page server (`COMPONENT_SETS`, [page.types.ts](../server/src/page/page.types.ts)):
+- Served by the page server, as its checkout's settings name it (the root `package.json`'s `"pageServer"`
+  `"componentSets"`, `componentSets()` in [settings.ts](../server/src/page/settings.ts)), and by the epic server:
   - at `/components/epics/`
   - and at `/worktrees/<w>/components/epics/` for a worktree's
   - The top bar's Epic/UI tab opens it.
@@ -531,7 +532,8 @@ The shared folders:
     - Owen's order (2026-10-11, epic `epic-workflow` J40);  the slashed names are the tabs' labels (J41).
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
-    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (`COMPONENT_SETS` in `$/server/page`), in Spell UI's page shape.
+    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (the checkout's `"pageServer"` `"componentSets"`, read with
+      `componentSets()` in `$/server/page`), in Spell UI's page shape.
       Their cards link the sets' addresses:
 
       ```text
@@ -1015,7 +1017,8 @@ In `tools/`:
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
   - Code colors:  highlight.js (`highlight.min.js`, in `_assets/`), committed so pages load offline.
-    - Older pages still name cdnjs:  the page server swaps that tag for the local copy (`localHighlight()`).
+    - Older pages still name cdnjs:  the page servers swap that tag for the local copy (`HIGHLIGHT_JS` in
+      `server.types.ts`;  the epic server's `localHighlight()`, spell-app's in its `page-server` package).
 - Headings:
   - One `h1`.
   - A numbered top-level `<ui-section>` per major section (`header="2. Read-after-write"`), each with a stable `id`.
@@ -1766,8 +1769,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `list <epic>`:  the comments on the pages that epic owns, and those taken into it.
   - every component set's pages too:  by their served path, `components/epics/epic-item.html#M1`,
     `components/app/Chooser.html#M1`;  their inboxes found in the sets' folders (`PageInboxes.inboxFiles()`, `pages.js`
-    `pagePath()` / `pageAt()`, both through `ComponentSetFolders`:  spell-app's `COMPONENT_SETS`, Epic UI's the
-    engine's `src/docs/`, App UI's and Brand's the checkout's `packages/<set>/docs/`).
+    `pagePath()` / `pageAt()`, both through `ComponentSetFolders`:  the sets the checkout's settings name
+    (`componentSets()`), Epic UI's the engine's `src/docs/` (named or not), App UI's and Brand's the checkout's
+    `packages/<set>/docs/`).
   - `working` and `answer` stamp the heartbeat of the session listening to the page's epic, if any.
   - `gather` takes every waiting comment (and page note still `new`) into ONE epic, the standing `feedback`
     (`guide-changes` before epic `epic-engine` T9).

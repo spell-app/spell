@@ -51,7 +51,7 @@ describe("AirplaneMode", () => {
     writeFileSync(join(root, "docs", "page.html"), "<!doctype html><head></head><p>page</p>\n")
     const server = new PageServer({ root })
     await airplaneRoutes.setup(server.routeContext())
-    await server.start({ port: 0, routes: false, pidFile: false, bundles: false })
+    await server.start({ port: 0, routes: false, pidFile: false })
     /** the page's `window.SPELL_SERVER`, as served */
     const config = async () => {
       const answer = await ask(server.info.port, "GET", "/docs/page.html")

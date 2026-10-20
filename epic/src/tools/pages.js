@@ -62,8 +62,8 @@ export const EPIC_UI_DOCS = join(PACKAGE, EPIC_UI.dir)
 
 /**
  * Every COMPONENT SET's pages, named by their address:  `components/app/...` for `packages/app/docs/...`
- * (`ComponentSetFolders`:  spell-app's `COMPONENT_SETS`);  Epic UI's the engine's `EPIC_UI_DOCS`, the others the
- * checkout's (`ROOT`).
+ * (`ComponentSetFolders`:  the sets the checkout's settings name, `componentSets()`);  Epic UI's the engine's
+ * `EPIC_UI_DOCS`, the others the checkout's (`ROOT`).
  */
 const SETS = new ComponentSetFolders({ root: ROOT, epicUi: EPIC_UI_DOCS })
 

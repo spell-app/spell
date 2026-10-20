@@ -73,7 +73,7 @@ describe("RepoApp", () => {
     list.add(repo(top, "plain"))
     process.env.EPIC_CHECKOUT = "/the/epic/server/s"
     server = new EpicServer({ home, token: "t0ken" })
-    await server.start({ port: 0, routes: false, pidFile: false })
+    await server.start({ port: 0, routes: false, pidFile: false, bundles: false })
     port = server.info.port
   })
 

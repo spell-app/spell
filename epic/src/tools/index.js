@@ -57,7 +57,7 @@ import {
   favoritesIn
 } from "../list/EpicCards.ts"
 import { URGENT_SELECTOR } from "../list/EpicState.ts"
-import { COMPONENT_SETS } from "@spell-app/server/src/page/page.types.ts"
+import { COMPONENTS_PREFIX, componentSets, pageServerSettings } from "@spell-app/server/src/page/settings.ts"
 import { DataFile } from "../data/DataFile.ts"
 import { Sagas } from "../tool/Sagas.ts"
 import { PageNotes } from "./PageNotes.js"
@@ -89,6 +89,12 @@ const REPO_TEMPLATE_PATH = REPO_TEMPLATES && `${pagePath(REPO_TEMPLATES)}/`
 
 /** The repo's name, as its windows show it (`windows.repoName`):  what the pages say they're about. */
 const REPO = EpicConfig.of(ROOT).windows.repoName
+
+/**
+ * The component sets checkout `ROOT`'s settings name (its root `package.json`'s `"pageServer"` `"componentSets"`,
+ * `componentSets()`):  spell-app's are Spell UI, Epic UI, App UI and Brand;  a repo `epic init` set up has none.
+ */
+const SETS = componentSets(pageServerSettings(ROOT))
 
 /** The home's markers:  its area cards go between. */
 export const HOME_START = "<!-- areas:start -->"
@@ -452,7 +458,7 @@ function epicFacts(page) {
  * - `id`:  the card's id, so the old `pages/index.html#epics` / `#guides` / `#templates` links land on its card
  * - `href`:  from the home's folder;  none for the App, which only a server has (`/editor/`, `RepoApp` on the epic server):
  *   a link there would break from `file://`, and `doc-links.js --check` can't resolve it
- * - Spell UI, Epic UI, App UI (`COMPONENT_SETS`):
+ * - Spell UI, Epic UI, App UI (`SETS`;  `set`:  its id, `epics` for `/components/epics/`):
  *   - their home at its served address (`/components/epics/`), since their pages load their site bundle from there
  *   - their page counts from their folders (`packages/epics/docs/`)
  * - `pages`:  every page `describe()`d, so the counts come from the same data as the list pages;
@@ -464,9 +470,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
   const of = (id) => pages.filter((page) => LISTS.find((list) => list.id === id).has(page.path))
   const groups = of("epics").map((page) => epicCard(page, "epics", favorites).group)
   const counts = EPIC_GROUPS.map((name) => [name, groups.filter((group) => group === name).length])
-  const [spellUI, epicUI, appUI] = ["Spell UI", "Epic UI", "App UI"].map((name) =>
-    COMPONENT_SETS.find((set) => set.name === name)
-  )
+  const [spellUI, epicUI, appUI] = ["ui", "epics", "app"].map(setOf)
   return [
     {
       id: "guides",
@@ -499,7 +503,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
     },
     {
       id: "epic-ui",
-      set: "Epic UI",
+      set: "epics",
       title: "Epic/UI",
       icon: "sitemap",
       href: setHome(epicUI),
@@ -510,7 +514,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
     },
     {
       id: "spell-ui",
-      set: "Spell UI",
+      set: "ui",
       title: "Spell/UI",
       icon: "puzzle piece",
       href: setHome(spellUI),
@@ -527,7 +531,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
     },
     {
       id: "app-ui",
-      set: "App UI",
+      set: "app",
       title: "App/UI",
       icon: "window maximize",
       href: setHome(appUI),
@@ -557,12 +561,22 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
 }
 
 /**
- * How many pages a component set has (`COMPONENT_SETS`), besides its home.
+ * Component set `id` (`epics`:  `/components/epics/`), as `SETS` has it;  one they don't name:  its address alone,
+ * no `dir` (no pages, and no card:  `hasArea()`).
+ */
+function setOf(id) {
+  const prefix = `${COMPONENTS_PREFIX}/${id}`
+  return SETS.find((set) => set.prefix === prefix) ?? { prefix }
+}
+
+/**
+ * How many pages a component set has (`SETS`), besides its home.
  * - the `.html` files of its folder
  * - or only those starting `prefix`:  Spell UI's element pages, `ui-*.html`, beside its other pages
  * - its layout and footer (`__parts/`) never count
  */
 function setPages(set, prefix = "") {
+  if (!set.dir) return 0
   return htmlFiles(join(ROOT, set.dir)).filter((name) => name !== "index.html" && name.startsWith(prefix)).length
 }
 
@@ -621,8 +635,9 @@ export function hasArea(card) {
   const list = LISTS.find((each) => each.id === card.id)
   if (list) return existsSync(list.dir)
   if (card.id === "app") return existsSync(join(ROOT, "packages", "app"))
-  const set = COMPONENT_SETS.find((each) => each.name === card.set)
-  return set ? existsSync(join(ROOT, set.dir)) : true
+  if (!card.set) return true
+  const { dir } = setOf(card.set)
+  return dir !== undefined && existsSync(join(ROOT, dir))
 }
 
 /** The home's one section:  the area cards in a grid. */

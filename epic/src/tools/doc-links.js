@@ -17,7 +17,8 @@
  *   - the tools that run it (`update.js`, `pages.js` `tidy()`, goals' check) go through `pages.js` `docLinksRun()`
  * - A component set's pages link as from their SERVED address,
  *   so their links hold at `/worktrees/<w>/components/epics/` too.
- *   - e.g. `packages/epics/docs/`, served at `/components/epics/` (`COMPONENT_SETS` in `$/server/page`)
+ *   - e.g. `spell-epic/src/docs/`, served at `/components/epics/` (the checkout's `"pageServer"` `"componentSets"`,
+ *     `ServedFolders`)
  *   - their links are written and checked from there (`Linker`'s `served`, `servedDir()`)
  * - `--check` also checks short addresses (`href="SAGA:/..."`) and `<epic-link>`s, which `Linker` leaves alone:
  *   the epics tool's `EpicTargets` knows the sagas (epic `epic-workflow` P15).

@@ -8,7 +8,7 @@ import { dirname, join, resolve } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "$/server"
-import { COMPONENT_SETS } from "$/server/page"
+import { componentSets, pageServerSettings, type ComponentSetSetting } from "$/server/page"
 import { ask } from "$/server/test/serve"
 
 import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "$/epics/server/EpicServer"
@@ -38,15 +38,24 @@ function repo(top: string, name: string): string {
 }
 
 /**
- * Give the scratch repo at `checkout` spell-app's component sets, as its checkout lays them (`COMPONENT_SETS`):
- * each set's home page, and its site bundle's `site.js`, saying which folder it is;  Epic UI's folder too, which the
- * engine's stands in for.
- * - each set's `assets` as the list has it:  ONE site bundle since epic `epic-engine`, two before (Spell UI's own, the
- *   other sets' `sets/`)
+ * The component sets a scratch repo's settings name, as spell-app's do (its root `package.json`'s `"pageServer"`
+ * `"componentSets"`):  ONE site bundle for every set since epic `epic-engine`.
  */
-function componentSets(checkout: string): void {
+const SETS: Record<string, ComponentSetSetting> = {
+  ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets" },
+  epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets: "packages/ui/site/_assets" },
+  app: { name: "App UI", dir: "packages/app/docs", assets: "packages/ui/site/_assets" },
+  brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
+}
+
+/**
+ * Give the scratch repo at `checkout` component sets:  its settings naming them (`SETS`), and each set's home page and
+ * its site bundle's `site.js`, saying which folder it is;  Epic UI's folder too, which the engine's stands in for.
+ */
+function withComponentSets(checkout: string): void {
   const name = checkout.split("/").at(-1)
-  for (const set of COMPONENT_SETS) {
+  put(checkout, "package.json", JSON.stringify({ pageServer: { componentSets: SETS } }))
+  for (const set of Object.values(SETS)) {
     put(checkout, `${set.dir}/index.html`, `${name} ${set.name} home`)
     put(checkout, `${set.assets}/site.js`, `// ${name} ${set.assets}`)
   }
@@ -61,11 +70,12 @@ describe("EpicServer", () => {
   beforeAll(async () => {
     const list = new RepoList({ home })
     const one = repo(top, "one")
-    componentSets(one)
+    withComponentSets(one)
     list.add(one)
     list.add(repo(top, "two"))
+    put(join(top, "two"), "packages/ui/docs/index.html", "two's own")
     server = new EpicServer({ home, engine: ENGINE, token: "t0ken" })
-    await server.start({ port: 0, routes: false, pidFile: false })
+    await server.start({ port: 0, routes: false, pidFile: false, bundles: false })
     port = server.info.port
   })
 
@@ -140,8 +150,11 @@ describe("EpicServer", () => {
     expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>The Epic Elements</title>")
     expect((await ask(port, "GET", "/components/epics")).headers.location).toBe("/components/epics/")
     expect(server.fileFor("/components/epics/epic-item.html")).toBe(join(ENGINE, "src/docs/epic-item.html"))
-    // the bundle is spell-app's page server's build, not committed:  checked where it has been built
-    const assets = COMPONENT_SETS.find((set) => set.prefix === "/components/epics")!.assets
+    // the bundle is the engine's spell-app checkout's build, not committed:  checked where it has been built;  its
+    // folder from that checkout's settings
+    const assets = componentSets(pageServerSettings(join(ENGINE, ".spell-app"))).find(
+      (set) => set.prefix === "/components/epics"
+    )!.assets
     const bundle = join(ENGINE, ".spell-app", assets, "site.js")
     if (existsSync(bundle)) expect(server.fileFor("/components/epics/_assets/site.js")).toBe(bundle)
     expect((await ask(port, "GET", "/components/epics/missing.html")).status).toBe(404)
@@ -149,8 +162,8 @@ describe("EpicServer", () => {
 
   // epic-engine I48:  the top bar's Spell/UI and App/UI tabs answered "Not found" here, while spell-app's page server
   // served them
-  test("every other component set the repo's checkout has, at /components/<set>/ and /r/<repo>/components/<set>/, its site bundle at _assets/", async () => {
-    const sets = COMPONENT_SETS.filter((set) => set.prefix !== "/components/epics")
+  test("every other component set the repo's checkout names, at /components/<set>/ and /r/<repo>/components/<set>/, its site bundle at _assets/", async () => {
+    const sets = componentSets({ componentSets: SETS }).filter((set) => set.prefix !== "/components/epics")
     expect(sets.map((set) => set.prefix)).toEqual(["/components/ui", "/components/app", "/components/brand"])
     for (const set of sets)
       for (const base of ["", "/r/one"]) {
@@ -171,7 +184,7 @@ describe("EpicServer", () => {
     // Epic UI stays the engine's, not the repo's own folder of it
     expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>The Epic Elements</title>")
     expect((await ask(port, "GET", "/r/one/components/epics/")).status).toBe(404)
-    // a repo without component sets:  nothing
+    // a repo whose settings name no component sets:  nothing, though it has Spell UI's folder
     expect((await ask(port, "GET", "/r/two/components/ui/")).status).toBe(404)
   })
 
@@ -226,7 +239,7 @@ describe("EpicServer, no repo registered", () => {
     const home = mkdtempSync(join(tmpdir(), "epic-server-empty-"))
     const server = new EpicServer({ home, engine: ENGINE })
     try {
-      await server.start({ port: 0, routes: false, pidFile: false })
+      await server.start({ port: 0, routes: false, pidFile: false, bundles: false })
       expect(server.defaultRepo).toBeUndefined()
       expect((await ask(server.info.port, "GET", "/_epic/assets/spell-doc.css")).status).toBe(200)
       expect((await ask(server.info.port, "GET", "/epics/x.html")).status).toBe(404)

@@ -30,7 +30,8 @@
  *     from this engine's own folders (`engineFileFor()`), as the epic server would serve them
  * - a component set's page:  from the page server at its address (`/components/epics/...`),
  *   since it loads its site bundle from there
- *   - the sets:  `packages/epics/docs/` ..., `COMPONENT_SETS` in `$/server/page`
+ *   - the sets:  `packages/ui/docs/` ..., the ones the checkout's settings name (its root `package.json`'s
+ *     `"pageServer"` `"componentSets"`, `componentSets()`)
  *   - `--base <url>` checks it on another server, e.g. the main checkout's `http://localhost:4747/worktrees/<w>`
  * - `--base <url>`:  ANY page from that server, as it's shown there (epic `epic-engine` I25:  python-target's
  *   2px of sideways scroll came from the toolbar's bullhorn, drawn only when served), e.g. the epic server,
@@ -48,7 +49,7 @@ import { pathToFileURL } from "node:url"
 import { chromium } from "playwright"
 
 // By path, its types stripped by `node` itself:  this tool runs under plain `node`, so no `$/` alias
-import { COMPONENT_SETS } from "@spell-app/server/src/page/page.types.ts"
+import { componentSets, pageServerSettings } from "@spell-app/server/src/page/settings.ts"
 import { engineFileFor } from "../server/engineLinks.ts"
 import { PACKAGE, ROOT, ensurePageServer, pageFile, serverUrl } from "./pages.js"
 
@@ -173,7 +174,7 @@ function pageUrl(file) {
 /** A component set's page `file` at its address (`/components/epics/x.html`);  `undefined` for any other page. */
 function setAddress(file) {
   const path = relative(ROOT, resolve(file)).split(sep).join("/")
-  const set = COMPONENT_SETS.find((each) => path.startsWith(`${each.dir}/`))
+  const set = componentSets(pageServerSettings(ROOT)).find((each) => path.startsWith(`${each.dir}/`))
   return set && `${set.prefix}${path.slice(set.dir.length).replace(/\/index\.html$/, "/")}`
 }
 
@@ -478,9 +479,9 @@ function inspectPage(nav) {
     danglingRail: railIds.filter((id) => !document.getElementById(id)),
     missingFromRail: topLevel.filter((id) => !railIds.includes(id)),
     codeBlocks: document.querySelectorAll("ui-accordion.spell-code").length,
-    // a `<ui-code>` draws its own `<pre>`, in its shadow root
+    // a `<ui-code>` draws its own `<pre>`, in its shadow root;  so does spell-app's `<spell-code>` (epic `repo-split` I1)
     codeWithoutPre: [...document.querySelectorAll("ui-accordion.spell-code")].filter(
-      (a) => !a.querySelector("pre, ui-code")
+      (a) => !a.querySelector("pre, ui-code, spell-code")
     ).length,
     icons: { total: icons.length, blankCount: blank.length, blank: blank.slice(0, 10).map(describe) }
   }

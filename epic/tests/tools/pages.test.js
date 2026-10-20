@@ -9,8 +9,6 @@ import { fileURLToPath } from "node:url"
 
 import { expect, test } from "vite-plus/test"
 
-import { COMPONENT_SETS } from "$/server/page/page.types"
-
 import { EPIC_UI } from "../../src/server/server.types.ts"
 import { EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath } from "../../src/tools/pages.js"
 
@@ -28,28 +26,66 @@ test("pageAndId():  `<page>#<id>` is the page and the id;  the two words read th
   expect(pageAndId([])).toEqual([])
 })
 
-// epic `epic-engine` P2 (T3):  Epic UI's pages take comments;  the tools name each by its served path
-test("Epic UI's pages are the engine's `src/docs/`, named `components/epics/...` as spell-app serves them", () => {
-  const set = COMPONENT_SETS.find((each) => each.name === "Epic UI")
-  expect(set?.prefix).toBe(`/${EPIC_UI.path}`)
-  expect(set?.dir.endsWith(`/${EPIC_UI.dir}`)).toBe(true)
+// epic `epic-engine` P2 (T3):  Epic UI's pages take comments;  the tools name each by its served path, even in a
+// checkout whose settings name no component sets (spell-epic's own, `ROOT` here)
+test("Epic UI's pages are the engine's `src/docs/`, named `components/epics/...` as the page servers serve them", () => {
+  expect(ROOT).toBe(resolve(dirname(fileURLToPath(import.meta.url)), "../.."))
   expect(EPIC_UI_DOCS).toBe(resolve(dirname(fileURLToPath(import.meta.url)), "../../src/docs"))
-  expect(pagePath(join(EPIC_UI_DOCS, "epic-item.html"))).toBe("components/epics/epic-item.html")
+  expect(pagePath(join(EPIC_UI_DOCS, "epic-item.html"))).toBe(`${EPIC_UI.path}/epic-item.html`)
   expect(pageAt("components/epics/epic-item.html")).toBe(join(EPIC_UI_DOCS, "epic-item.html"))
 })
 
-// epic `epic-engine`:  every component set's pages are named by their address, App UI's and Brand's too (spell-app's,
-// in the checkout), as the epic server mounts them (`componentSetMounts()`)
-test("every component set's pages are `components/<set>/...`:  App UI's and Brand's from the checkout's folders", () => {
-  for (const set of COMPONENT_SETS.filter((each) => each.name !== "Epic UI")) {
-    const file = join(ROOT, set.dir, "x.html")
-    expect(pagePath(file)).toBe(`${set.prefix.slice(1)}/x.html`)
-    expect(pageAt(`${set.prefix.slice(1)}/x.html`)).toBe(file)
+// epic `epic-engine`:  every component set's pages are named by their address, App UI's and Brand's too, as the epic
+// server mounts them (`componentSetMounts()`);  the sets the checkout's settings name (epic `epic-engine` P8)
+test("every component set the checkout's settings name is `components/<set>/...`, from its folder;  Epic UI the engine's", () => {
+  const checkout = realpathSync(mkdtempSync(join(tmpdir(), "sets-")))
+  try {
+    const assets = "packages/ui/site/_assets"
+    const componentSets = {
+      ui: { name: "Spell UI", dir: "packages/ui/docs", assets },
+      epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets },
+      app: { name: "App UI", dir: "packages/app/docs", assets },
+      brand: { name: "Brand", dir: "packages/brand/docs", assets }
+    }
+    writeFileSync(join(checkout, "package.json"), JSON.stringify({ pageServer: { componentSets } }))
+    const at = (path) => join(checkout, path)
+    const script = `
+      import * as P from ${JSON.stringify(PAGES_JS)}
+      console.log(JSON.stringify({
+        ui: P.pagePath(${JSON.stringify(at("packages/ui/docs/x.html"))}),
+        app: P.pagePath(${JSON.stringify(at("packages/app/docs/Chooser.inbox.json5"))}),
+        brand: P.pageAt("components/brand/index.html"),
+        uiAt: P.pageAt("components/ui/x.html"),
+        epicUi: P.pagePath(P.EPIC_UI_DOCS + "/epic-item.html"),
+        epicUiAt: P.pageAt("components/epics/epic-item.html"),
+        code: P.pagePath(${JSON.stringify(at("packages/app/src/x.ts"))})
+      }))`
+    const run = (env) =>
+      JSON.parse(
+        execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+          encoding: "utf8",
+          env: { ...process.env, EPIC_CHECKOUT: checkout, ...env }
+        })
+          .trim()
+          .split("\n")
+          .at(-1)
+      )
+    expect(run()).toEqual({
+      ui: "components/ui/x.html",
+      app: "components/app/Chooser.inbox.json5",
+      brand: at("packages/brand/docs/index.html"),
+      uiAt: at("packages/ui/docs/x.html"),
+      epicUi: "components/epics/epic-item.html",
+      epicUiAt: join(EPIC_UI_DOCS, "epic-item.html"),
+      // their code isn't a set's
+      code: "packages/app/src/x.ts"
+    })
+    // settings naming none:  only Epic UI is a set
+    writeFileSync(join(checkout, "package.json"), "{}")
+    expect(run()).toMatchObject({ ui: "packages/ui/docs/x.html", epicUi: "components/epics/epic-item.html" })
+  } finally {
+    rmSync(checkout, { recursive: true, force: true })
   }
-  expect(pagePath(join(ROOT, "packages/app/docs/Chooser.inbox.json5"))).toBe("components/app/Chooser.inbox.json5")
-  expect(pageAt("components/brand/index.html")).toBe(join(ROOT, "packages/brand/docs/index.html"))
-  // their code isn't a set's
-  expect(pagePath(join(ROOT, "packages/app/src/x.ts"))).toBe("packages/app/src/x.ts")
 })
 
 // epic `epic-eject` T11:  every template is the engine's, spell-epic's own `templates/`, whichever checkout the tools

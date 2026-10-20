@@ -157,7 +157,7 @@ const MOVES: readonly (readonly [string, string | null])[] = [
   // the plan-doc checks' screenshots:  git-ignored there (`/src/demo/shots/`), never in a checkout but the one that ran
   ["packages/epics/demo/shots/", null],
   ["packages/epics/demo/", "spell-epic/src/demo/"],
-  // Epic UI:  spell-epic's src/docs/, which spell-app's page server serves at /components/epics/ (`COMPONENT_SETS`)
+  // Epic UI:  spell-epic's src/docs/, which spell-app's page server serves at /components/epics/ (its componentSets)
   ["packages/epics/docs/", "components/epics/"],
   ["packages/epics/tools/", "spell-epic/src/tools/"],
   ["packages/epics/components/", "spell-epic/src/components/"],

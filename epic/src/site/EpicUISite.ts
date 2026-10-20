@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
-import { readJSON5File } from "$/assembler/json5"
+import { readJSON5File } from "$/util/node/json5"
 import { PageOutline } from "$/ui/docs-components/ui-docs-search/PageOutline"
 import type {
   SiteAttribute,

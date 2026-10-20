@@ -2,8 +2,10 @@ import { realpathSync } from "node:fs"
 import { join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { componentSets, pageServerSettings } from "$/server/page/settings"
+
 import { EpicConfig } from "$/epics/config/EpicConfig"
-import { COMPONENT_SETS } from "$/server/page/page.types"
+import { EPIC_UI } from "$/epics/server/server.types"
 
 /****************
  * ### `ServedFolders`
@@ -16,7 +18,10 @@ import { COMPONENT_SETS } from "$/server/page/page.types"
  * //      templates: "spell-epic/templates" }
  * ```
  *
- * - the component sets' (`COMPONENT_SETS` in `$/server/page`):  `components/epics` is `spell-epic/src/docs`
+ * - the component sets the checkout's settings name (its root `package.json`'s `"pageServer"` `"componentSets"`,
+ *   `componentSets()`):  spell-app's `components/epics` is `spell-epic/src/docs`
+ * - Epic UI (`EPIC_UI`) when they don't name it:  the engine's `src/docs/`, which the epic server serves for every
+ *   repo, found as the templates are
  * - the engine's templates, at `templates/` (epic `epic-eject` T11), through the checkout's `spell-epic` link when it
  *   has one to this engine's repo;  nothing when they ARE the checkout's (spell-epic's own)
  * - Who asks:  the docs tools' linker (`doc-links.js`) and the `epic` tool's (`PlanDocFiles.linker`:  `epic check`'s
@@ -33,27 +38,28 @@ export class ServedFolders {
    * - `engine`:  the engine's checkout, whose `templates/` are served (default `ENGINE`)
    */
   static under(root: string, engine = ServedFolders.ENGINE): Record<string, string> {
-    const templates = ServedFolders.templatesDir(root, engine)
+    const templates = ServedFolders.engineDir(root, engine, "templates")
     return {
-      ...Object.fromEntries(COMPONENT_SETS.map((set) => [set.prefix.slice(1), set.dir])),
+      [EPIC_UI.path]: ServedFolders.engineDir(root, engine, EPIC_UI.dir),
+      ...Object.fromEntries(componentSets(pageServerSettings(root)).map((set) => [set.prefix.slice(1), set.dir])),
       ...(templates !== "templates" && { templates })
     }
   }
 
   /**
-   * The engine's templates from checkout `root`:  through its `spell-epic` link when it has one to the engine's repo
-   * (spell-app:  `spell-epic/templates`, inside the repo, so its links check as the repo's own);  else as they are
+   * The engine's folder `folder` from checkout `root`:  through its `spell-epic` link when it has one to the engine's
+   * repo (spell-app:  `spell-epic/templates`, inside the repo, so its links check as the repo's own);  else as it is
    * (`templates` in spell-epic itself).
    */
-  private static templatesDir(root: string, engine: string): string {
+  private static engineDir(root: string, engine: string, folder: string): string {
     const link = join(root, "spell-epic")
     try {
       // any checkout of it:  `node bin/epic` run from a worktree of spell-epic, its link the main checkout
       if (EpicConfig.mainOf(realpathSync(link)) === EpicConfig.mainOf(realpathSync(engine)))
-        return relative(root, join(link, "templates"))
+        return relative(root, join(link, folder))
     } catch {
       // no link
     }
-    return relative(root, join(engine, "templates"))
+    return relative(root, join(engine, folder))
   }
 }

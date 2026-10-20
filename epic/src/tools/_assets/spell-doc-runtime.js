@@ -618,7 +618,12 @@ function wireStuckTrail(main) {
   const childrenOf = (section) =>
     [...section.querySelectorAll("ui-section")].filter((each) => each.parentElement.closest("ui-section") === section)
   const titleOf = (section) =>
-    (section.getAttribute("header") ?? section.querySelector(':scope > [slot="header"]')?.textContent ?? "")
+    (
+      section.getAttribute("label") ??
+      section.getAttribute("header") ??
+      section.querySelector(':scope > [slot="label"], :scope > [slot="header"]')?.textContent ??
+      ""
+    )
       .replace(/\s+/g, " ")
       .trim()
   const update = () => {
@@ -1601,11 +1606,14 @@ function nodeOf(element) {
   return { element, id: element.id, label, glyph: glyph || undefined, children: [] }
 }
 
-/** A `<ui-section>`'s label:  its `header`, else the text of its `slot="header"` child. */
+/**
+ * A `<ui-section>`'s label:  its `label` (`header`, its old name), else the text of its `slot="label"` (`"header"`)
+ * child.  Spell UI's pages say `label` since spell-app's epic `property-editor` P10.
+ */
 function sectionLabel(section) {
-  const header = section.getAttribute("header")?.trim()
-  if (header) return header
-  const slotted = section.querySelector(':scope > [slot="header"]')
+  const label = (section.getAttribute("label") ?? section.getAttribute("header"))?.trim()
+  if (label) return label
+  const slotted = section.querySelector(':scope > [slot="label"], :scope > [slot="header"]')
   return slotted ? labelOf(slotted) : ""
 }
 

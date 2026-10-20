@@ -44,6 +44,8 @@ import * as solid from "solid-js"
 import * as uiCore from "@spell-app/ui/core"
 import * as uiForms from "@spell-app/ui/forms"
 import * as uiRoot from "@spell-app/ui/ui-root"
+import * as uiCode from "@spell-app/ui/ui-code"
+import * as uiMarkdown from "@spell-app/ui/ui-markdown"
 import "spell-ui:lazy"
 import "./spell-ui-sources.js"
 import "./spell-doc-runtime.js"
@@ -60,6 +62,10 @@ export { registerPack } from "@spell-app/ui"
  *   `vite.solid.config.ts`), not for packs:  `<spell-app>` is a root, a subclass of `UIRoot`.
  * - `@solidjs/h` likewise:  what compiled spell draws with (`spell-runtime.js`, through `spell-solid-shared.js`),
  *   so a program on a docs page draws with the page's one Solid.
+ * - `$/ui/components/ui-code` and `$/ui/components/ui-markdown` likewise (epic `repo-split` P2):  the families spell's
+ *   own `<spell-code>` / `<spell-markdown>` (spell-app's app package, `spell-code.js` / `spell-markdown.js`) EXTEND,
+ *   through `spell-ui-shared.js`, so they extend THIS page's `UICode` / `UIMarkdown`:  one Spell UI.  Without them
+ *   those scripts stop with an error saying so.  Not packs' externals:  the epics pack imports neither.
  */
 export const packModules = Object.freeze({
   "solid-js": solid,
@@ -68,7 +74,9 @@ export const packModules = Object.freeze({
   "$/spell-solid": uiCore,
   "$/ui/core": uiCore,
   "$/ui/forms": uiForms,
-  "$/ui/components/ui-root": uiRoot
+  "$/ui/components/ui-root": uiRoot,
+  "$/ui/components/ui-code": uiCode,
+  "$/ui/components/ui-markdown": uiMarkdown
 })
 
 void UI.load()

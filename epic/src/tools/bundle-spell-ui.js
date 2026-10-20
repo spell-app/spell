@@ -30,7 +30,9 @@
  * - The source elements' ENGINES stay lazy the same way (`LAZY`):
  *   - `<ui-code>`'s highlight.js (with all its languages)
  *   - `<ui-markdown>`'s marked (and DOMPurify, only for `sanitized`)
- *   - spell's pre-compiled highlighter
+ *   - NOT spell's colouring:  Spell UI holds nothing of spell (epic `repo-split` P2).  spell-app's page server adds
+ *     `/element/spell-language.js` to the pages it serves, which registers `spell` with this bundle's `UI.code`;
+ *     elsewhere (the epic server, `file://`) spell code shows plain (`repo-split` Q23 A).
  *
  *   - Each is built from UI's SOURCE into a classic script, `_assets/lazy/<name>.js`.
  *   - Their `dist/` chunks are stubbed out of the bundle,
@@ -299,13 +301,6 @@ const LAZY = [
     source: join(UI_DIR, "components/ui-markdown/MarkdownSanitizer.ts"),
     chunk: /(?:^|\/)MarkdownSanitizer-[\w-]+\.js$/,
     hook: `MarkdownRenderer.sanitizerLoader = () => lazy("markdown-sanitizer", "__spellMarkdownSanitizer")`
-  },
-  {
-    name: "spell-en",
-    global: "__spellHighlightEn",
-    source: join(UI_DIR, "src/languages/spell.en.bundle.js"),
-    chunk: /(?:^|\/)spell\.en-[\w-]+\.js$/,
-    hook: `SpellLanguage.bundleLoader = (variant) => variant === "en" ? lazy("spell-en", "__spellHighlightEn") : undefined`
   }
 ]
 
@@ -791,7 +786,7 @@ async function writeLazyScripts() {
  */
 function lazyModule() {
   return [
-    `import { CodeHighlighter, SpellLanguage } from "@spell-app/ui/ui-code"`,
+    `import { CodeHighlighter } from "@spell-app/ui/ui-code"`,
     `import { MarkdownRenderer } from "@spell-app/ui/ui-markdown"`,
     baseUrlSource(),
     `const base = bundleUrl("lazy/")`,

@@ -74,6 +74,21 @@ const PAGES: Record<string, string> = {
   )
 }
 
+/**
+ * The scratch checkout's settings (its root `package.json`'s `"pageServer"`):  the component sets it serves, as
+ * spell-app's name them, so the page server serves them at `/components/<set>/`.
+ */
+const SETTINGS = {
+  pageServer: {
+    componentSets: {
+      ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets" },
+      epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets: "packages/ui/site/_assets" },
+      app: { name: "App UI", dir: "packages/app/docs", assets: "packages/ui/site/_assets" },
+      brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
+    }
+  }
+}
+
 /** A comment on the second table of section `model`. */
 const ON_TABLE = { anchor: "model#table-2", kind: "table", label: "1. The model", excerpt: "Name Size" }
 
@@ -93,6 +108,7 @@ beforeAll(async () => {
     mkdirSync(dirname(join(root, page)), { recursive: true })
     writeFileSync(join(root, page), html)
   }
+  writeFileSync(join(root, "package.json"), JSON.stringify(SETTINGS))
   // worktrees at `/worktrees/<w>/`, as epics' running-epics route module has the main server serve them
   server = new PageServer({ root }).serveWorktrees(join(root, ".claude", "worktrees"))
   await commentsRoutes.setup(server.routeContext())

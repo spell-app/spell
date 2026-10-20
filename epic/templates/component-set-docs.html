@@ -2,7 +2,7 @@
 <!--
   TEMPLATE:  a page of a COMPONENT SET -- Epic UI (spell-epic's `src/docs/`, served at `/components/epics/`) or App UI
   (`packages/app/components/`, at `/components/app/`) -- in Spell UI's page shape (epic `epic-workflow` P10, J23;  the sets:
-  `COMPONENT_SETS` in `packages/server/src/page/page.types.ts`).
+  the checkout's root `package.json`, `"pageServer"` `"componentSets"`, read by `packages/server/src/page/settings.ts`).
   - A page is its `<head>` and ONE `<main id="main" class="site-main" data-toc-header>`, as a Spell UI page is
     (`templates/spell-ui-docs.html`):  the chrome (top bar, side column, contents list, footer, `<ui-root>`) is the
     set's `_parts/layout.html`, written once;  the site bundle wraps the `main` in it on first load, and swaps only the

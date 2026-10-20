@@ -62,15 +62,32 @@ export const ENGINE_ROUTES = {
 /**
  * EPIC UI, the elements' docs set (epic `epic-workflow` P10):  the engine's `src/docs/`, served at `/components/epics/`
  * by both page servers, not by an engine route:
- * - spell-app's (`COMPONENT_SETS` in `$/server/page`, its `dir` `spell-epic/src/docs`)
+ * - spell-app's (its root `package.json`'s `"pageServer"` `"componentSets"`, `componentSets()` in `$/server/page`;
+ *   its `dir` `spell-epic/src/docs`)
  * - the epic server, the same way (`EpicServer`'s `epicUiMounts()`, epic `epic-eject` I21)
+ * - `name`:  what prose calls it
  * - `path`:  its pages' PAGE PATHS start with it, as served (`components/epics/epic-item.html`:  `pages.js`
  *   `pagePath()`, `pageAt()`)
  * - `dir`:  its folder, from the engine's checkout
  * - its pages take comments, in inbox files beside them:  the tools find them there (`PageInboxes.inboxFiles()`;
  *   epic `epic-engine` P2, T3)
  */
-export const EPIC_UI = { path: "components/epics", dir: "src/docs" } as const
+export const EPIC_UI = { name: "Epic UI", path: "components/epics", dir: "src/docs" } as const
+
+/**
+ * Code colours (highlight.js) for every docs page, from the engine instead of cdnjs (epic `airplane` P1).
+ * - `cdn`:  the tag older pages still carry, a plain blocking `<script>`:  a hanging network (plane wifi asking to
+ *   pay first) held the page's own scripts up behind it, and the page showed raw markup for tens of seconds
+ * - `local`:  the same file (11.9.0), at the engine's assets route
+ * - who swaps the one for the other:  the epic server as it serves a page (`EpicServer`'s `localHighlight()`),
+ *   `epic airplane` / `spell dev docs offline --fix` in the files (`offline.ts`);  spell-app's page server has its own
+ *   swap (its `page-server` package)
+ * - the engine's own since epic `epic-engine` P8 (r8):  it was spell-app's `HIGHLIGHT_JS` in `$/server/page`
+ */
+export const HIGHLIGHT_JS = {
+  cdn: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js",
+  local: `${ENGINE_ROUTES.assets.prefix}highlight.min.js`
+} as const
 
 /** The epic pack's script, as every page loads it:  `<ui-components source>`. */
 export const PACK_URL = `${ENGINE_ROUTES.pack.prefix}epics.pack.js`

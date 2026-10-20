@@ -35,6 +35,19 @@ mkdirSync(join(root, "epics"))
 mkdirSync(join(root, "guides", "memory"), { recursive: true })
 writeFileSync(join(root, "guides", "memory", "memory.html"), GUIDE)
 writeFileSync(join(root, "guides", "plain.html"), GUIDE.replace(/<spell-notes[\s\S]*<\/spell-notes>/, ""))
+// the component sets its settings name, as spell-app's do (its root `package.json`'s `"pageServer"`)
+const assets = "packages/ui/site/_assets"
+writeFileSync(
+  join(root, "package.json"),
+  JSON.stringify({
+    pageServer: {
+      componentSets: {
+        app: { name: "App UI", dir: "packages/app/docs", assets },
+        brand: { name: "Brand", dir: "packages/brand/docs", assets }
+      }
+    }
+  })
+)
 // the scratch checkout has no docs tools:  the home page isn't rebuilt, and says so on stderr
 vi.spyOn(process.stderr, "write").mockImplementation(() => true)
 

@@ -58,7 +58,8 @@
  *   - any `.html` under `guides/`, `pages/` (the home page, details pages),
  *     `epics/` (epic pages, an epic's own pages) and `sagas/` (saga pages, epic `epic-workflow` P15)
  *   - a component set's pages, at its address (`/components/epics/...`, `/components/app/...`), but not its `__parts/`
- *     - the sets:  `COMPONENT_SETS`, epic `people-and-orgs` P18
+ *     - the sets:  whatever the server serves under `/components/<set>/` (`COMPONENTS_PREFIX`, epic `people-and-orgs`
+ *       P18):  the sets its checkout's settings name, and Epic UI on the epic server
  *     - kept in `<page>.inbox.json5` beside each, in the set's tracked `docs/` folder,
  *       git-ignored there (the repo's `.gitignore`)
  *   - NOT a split epic page's `parts/` (they're shown inside their doc), nor an epic page's pre-2026-10-04 name
@@ -76,7 +77,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { SRV } from "$/server"
-import { COMPONENT_SETS, type RouteModule } from "$/server/page"
+import { COMPONENTS_PREFIX, type RouteModule } from "$/server/page"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 import {
@@ -101,8 +102,12 @@ const SEND_API = "/api/docs/comments/send"
 /** Biggest body accepted:  a comment is a few paragraphs. */
 const MAX_BODY = 64 * 1024
 
-/** The component sets' address folders (`components/epics` ...):  their pages take comments too. */
-const SET_FOLDERS = COMPONENT_SETS.map((set) => set.prefix.slice(1)).join("|")
+/**
+ * A component set's address folder (`components/epics` ...):  their pages take comments too.
+ * - any set's, not a list:  `/components/<set>/` is the sets' alone, and a page is only found where the server serves
+ *   one (`commentsPage()`);  so spell-app's settings' sets and the epic server's Epic UI alike (epic `epic-engine` P8)
+ */
+const SET_FOLDERS = `${COMPONENTS_PREFIX.slice(1)}/[^/]+`
 
 /**
  * A page that may take comments, by URL path:  under `guides/`, `pages/`, `epics/` or `sagas/`,
