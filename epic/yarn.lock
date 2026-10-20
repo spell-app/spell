@@ -1228,8 +1228,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@spell-app/assembler@portal:./.spell-app/packages/assembler::locator=%40spell-app%2Fepics%40workspace%3A."
   dependencies:
+    "@spell-app/util": "workspace:*"
     json5: "npm:^2.1.1"
-    json5-writer: "npm:^0.2.0"
     linkedom: "npm:^0.18.13"
     vite-plus: "catalog:"
   languageName: node
@@ -1297,6 +1297,8 @@ __metadata:
   peerDependencies:
     "@solidjs/web": 2.0.0-rc.13
     solid-js: 2.0.0-rc.13
+  bin:
+    spell-ui-pack: ./bin/spell-ui-pack.mjs
   languageName: node
   linkType: soft
 
@@ -1307,6 +1309,7 @@ __metadata:
     chalk: "npm:^5.6.0"
     global: "npm:^4.3.2"
     json5: "npm:^2.1.1"
+    json5-writer: "npm:^0.2.0"
     lodash: "npm:^4.17.21"
     node-storage-shim: "npm:^2.0.1"
     pluralize: "npm:^8.0.0"
