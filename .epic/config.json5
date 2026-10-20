@@ -1,0 +1,55 @@
+// The top repo's epic settings:  where a session working HERE (`~/www/spell`, every window's folder 1 once epic
+// `repo-split` P9 lands) keeps its epic things.
+// - Read by spell-epic's `EpicConfig` (spell-epic/src/config/EpicConfig.ts), as every repo's `.epic/config.json5` is:
+//   epic `epic-engine` P10 (spell-epic as a workspace of this install) and epic `repo-split` P9 (the multi-repo
+//   tooling) are what read it here.
+// - Folders are relative to the MAIN checkout of this repo:  `~/www/spell`.
+// - Written in P7 for P9:  the folders are this layout's;  the keys marked GUESS are P9's to settle.
+// - A key left out takes its default (`EpicConfig.DEFAULTS`);  `epic config [key]` prints what's in force.
+{
+  // The child repos (their list:  `repos.json5`, beside `package.json`):  naming it switches spell-epic's MULTI-REPO
+  // mode on (epic `epic-engine` P10):  an epic's worktree is one of `spell` with one of every child repo inside it.
+  "repos": "repos.json5",
+
+  // The shared content repo:  epics, guides, sagas, pages, brand, the logs until spell-util's agents/ takes them.
+  // - In this repo, git-ignored (epic `repo-split` J5):  a link to `~/www/spell-app/spell-app.epics` until the move.
+  "contentFolder": "spell.epics",
+
+  // The branch worktrees start from and merge into:  every child repo's is `main` too.
+  "baseBranch": "main",
+
+  // Where an epic's worktree goes:  a worktree of `spell`, with a worktree of each child repo inside it (layout 2.5).
+  // GUESS:  P9 decides which child repos get one (every repo, or only those the epic changes).
+  "worktreesFolder": "../spell.worktrees",
+
+  // What makes a new worktree ready to run, from its root:  the ONE install, over every child repo there.
+  "installCommand": "yarn install",
+  // The worktree hook runs it BEFORE the window opens, within "installTimeout" seconds (600 left out).
+  "installOnCreate": true,
+
+  // The VS Code windows (`epic window`).
+  "windows": {
+    // The window a worktree's window is opened from, when the session's own window isn't one:
+    // `<windowsFolder>/<default>.code-workspace`, the whole top repo's.
+    "default": "spell",
+    // The repo root's folder name in every window:  folder 1, so the Claude panel lists every repo's sessions.
+    "repoName": "spell",
+    // The content repo's folder name in every window.
+    "contentName": "spell.epics"
+  },
+
+  // Whether the worktree hook links each NEW worktree's saved-session folder to the main checkout's,
+  // so every window's Claude panel lists every session.
+  "linkSessionFolders": true,
+
+  // The content folder's folders every checkout links in at its root (`epic shared link`):  none here (epic-engine
+  // P10).  WWOD and the logs:  the `agents` link, git-ignored, to spell-util's main checkout once the move (epic
+  // `repo-split` P9) puts them there.
+  "sharedFolders": [],
+
+  // The epic engine:  the spell-epic child repo, already inside the top repo, so no link (`""`, epic-engine P10).
+  "engineFolder": "",
+
+  // The VS Code window files, each machine's own:  the content repo's `windows/`, git-ignored there.
+  "windowsFolder": "spell.epics/windows"
+}
