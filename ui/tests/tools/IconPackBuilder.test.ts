@@ -260,7 +260,7 @@ describe("IconPackBuilder.build() over an existing pack", () => {
 
 describe("src/icons/icon-packs/", () => {
   /** `src/icons/icon-packs/`. */
-  const PACKS = path.resolve(import.meta.dirname, "../../../packages/ui/src/icons/icon-packs")
+  const PACKS = path.resolve(import.meta.dirname, "../../src/icons/icon-packs")
 
   it("every shipped SVG passes verify", () => {
     const files = readdirSync(PACKS, { recursive: true, encoding: "utf8" }).filter((file) => file.endsWith(".svg"))

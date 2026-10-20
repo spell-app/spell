@@ -292,7 +292,7 @@
 - Nothing outside `spike/` changes, except:
   - the new `components/*/ui-<name>.fallback.ts` files
   - the [icons doc](icons.md)'s section
-  - entries in [the papercuts log](../../../agents/PAPERCUTS.md) and [the suspected-bugs log](../../../agents/SUSPECTED-BUGS.md)
+  - entries in [the papercuts log](../agents/PAPERCUTS.md) and [the suspected-bugs log](../agents/SUSPECTED-BUGS.md)
 - Git:  stage after each agent's checks pass, then ask Owen before committing.
 
 ## Verification

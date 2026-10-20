@@ -9,11 +9,11 @@ Plain, hand-authored `.html` pages in [fomantic-ui.com](https://fomantic-ui.com)
 
 More:
 - Where a widget can't do what a page needs, that's a gap in the library,
-  recorded in the plan doc of epic `spell-ui-pages` ([its folder](../../../../spell-app.epics/epics/spell-ui-pages/)).
+  recorded in the plan doc of epic `spell-ui-pages` ([its folder](../../spell.epics/epics/spell-ui-pages/)).
 - No build step to VIEW a page:  pages are static files loading ONE bundle.
   - The page server builds it when it starts, if it's stale (not committed since 2026-10-07).
 - Served at `/components/ui/` by the repo's page server, live-reloading
-  ([`packages/server`](../../server/), its `componentSets` setting in the root `package.json`).
+  ([`packages/server`](../../spell-server/server/), its `componentSets` setting in the root `package.json`).
 
 ## A component set
 
@@ -121,7 +121,7 @@ yarn site:new ui-card                                         # => packages/ui/d
 yarn site:new getting-started --title "Getting started" --summary "One line."   # => packages/ui/docs/getting-started.html
 ```
 
-- From [the template](../../../spell-epic/templates/spell-ui-docs.html), spell-epic's (every template is the engine's).
+- From [the template](../../spell-epic/templates/spell-ui-docs.html), spell-epic's (every template is the engine's).
   - Title / summary / status from [the pages data](__data/pages.json5):  fix a summary THERE, then `yarn site:data`.
   - It refuses to overwrite (`--force`).
 - A sub-tag gets a page of its own once its family's entry in `pages.json5` lists it under `pages`
@@ -131,7 +131,7 @@ yarn site:new getting-started --title "Getting started" --summary "One line."   
     - a Theming tab only when a family token names it
   - Its family page keeps the whole family's API, and a one-line link to it.
   - The nav, search, card index and kitchen sink follow.
-- How to write one (sources, examples, usage, theming, gaps):  [the pages guide](../../../../spell-app.epics/epics/spell-ui-pages/PAGES.md).
+- How to write one (sources, examples, usage, theming, gaps):  [the pages guide](../../spell.epics/epics/spell-ui-pages/PAGES.md).
   - The model page:  [`ui-button.html`](ui-button.html).
 - Content is nested `<ui-section id header sticky collapsible dividing>`s:
   a section per topic, a section per example inside it.

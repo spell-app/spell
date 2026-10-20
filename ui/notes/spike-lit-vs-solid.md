@@ -104,7 +104,7 @@ Either way, before building more families:
 - decide whether to send the fork's patches upstream (`spike/solid-element/UPSTREAM.md`),
   which lowers the ownership risk
 - adopt one-module-per-icon loading ([the icons doc](icons.md), "Loading strategies")
-- fix the palette contrast debt ([the code-debt log](../../../agents/CODE-DEBT.md))
+- fix the palette contrast debt ([the code-debt log](../agents/CODE-DEBT.md))
 
 ## Appendix: history
 

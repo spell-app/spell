@@ -30,7 +30,7 @@ describe("<ui-button> server render to Declarative Shadow DOM", () => {
     const dsd =
       `<ui-button primary><template shadowrootmode="open" shadowrootdelegatesfocus>` +
       `<style>${css}</style>${html}</template>Save</ui-button>`
-    const cache = resolve(import.meta.dirname, "../../../packages/ui/.cache")
+    const cache = resolve(import.meta.dirname, "../../.cache")
     await mkdir(cache, { recursive: true })
     await writeFile(resolve(cache, "ssr-button.html"), dsd)
     expect(html).toContain('class="ui primary button"')

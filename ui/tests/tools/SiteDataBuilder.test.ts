@@ -8,7 +8,7 @@ import type { SitePagesFile } from "$/ui/docs-components/docs-components.types"
 import { SiteDataBuilder } from "$/ui/tools/SiteDataBuilder"
 import { SITE_PAGES } from "$/ui/tools/tools.types"
 
-import { writeOrCheck } from "../../../packages/ui/scripts/generatedFiles.ts"
+import { writeOrCheck } from "../../scripts/generatedFiles.ts"
 
 /**
  * The site's committed data is what `yarn site:data` would write now.
@@ -64,7 +64,7 @@ describe("SiteDataBuilder.build()", () => {
     // every page the data names exists
     for (const entry of data.components.filter((tag) => tag.page))
       expect(
-        () => readFileSync(join(import.meta.dirname, "../../../packages/ui", SITE_PAGES, entry.href!)),
+        () => readFileSync(join(import.meta.dirname, "../..", SITE_PAGES, entry.href!)),
         entry.href
       ).not.toThrow()
   }, 60_000)

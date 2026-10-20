@@ -1,5 +1,5 @@
 {
-  "extends": ["../tsconfig.node.json", "../../../tsconfig.base.json"],
+  "extends": ["../tsconfig.node.json", "../tsconfig.base.json"],
   "compilerOptions": {
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["node", "vite/client"],

@@ -19,7 +19,7 @@ const BROWSERS = environment.isAllBrowsers ? (["chromium", "firefox", "webkit"] 
  * - `root` stays this package, so these still mean this package's files:
  *   `/src/...` and `/components/...` globs, `/test/fixtures/...` URLs, `setupFiles`.
  */
-const TESTS = resolve(import.meta.dirname, "../../tests/ui")
+const TESTS = resolve(import.meta.dirname, "./tests")
 
 /** The folders of tests, as the code's:  `src/`, the families' `components/`, and the cross-family `test/`. */
 const TEST_FOLDERS = "{src,components,test}"

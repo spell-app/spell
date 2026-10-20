@@ -8,7 +8,7 @@ import type { SiteDataFile } from "$/ui/docs-components/docs-components.types"
 import { ElementManifests } from "$/ui/tools/ElementManifests"
 
 /** `packages/ui`, and the brand package beside it. */
-const UI = fileURLToPath(new URL("../../../packages/ui/", import.meta.url))
+const UI = fileURLToPath(new URL("../../", import.meta.url))
 const BRAND = join(UI, "../brand")
 
 /** The committed site data of each. */

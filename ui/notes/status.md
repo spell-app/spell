@@ -40,7 +40,7 @@ A checklist of every component in [the plan](plan.md):  what's done, in progress
   - Built:
     - the base class, `reset.css`
     - the static render (`data-state`, ARIA)
-    - tests:  [the shared states test](../../../tests/ui/test/sharedStates.test.tsx)
+    - tests:  [the shared states test](../tests/test/sharedStates.test.tsx)
 
 - **Component names** (2026-10-08, epic `wwod-spell-ui` P15):
   - the class behind a tag is its COMPONENT:  `UIComponent`, `FormComponent`, `LoadableComponent`, `PartComponent`
@@ -51,10 +51,10 @@ A checklist of every component in [the plan](plan.md):  what's done, in progress
   - The API says "DOM element" too:  `@onChange(..., { writesDOMElement: true })`, `isControlledByPage()`.
   - Built, every family (steps 1-3).
 - **Resumed 2026-10-01** in the monorepo (`packages/ui`), on branch `worktree-ui-component-creation`.
-  - Its epic page:  [`ui-component-creation`](../../../../spell-app.epics/epics/ui-component-creation/ui-component-creation.plan.html).
+  - Its epic page:  [`ui-component-creation`](../../spell.epics/epics/ui-component-creation/ui-component-creation.plan.html).
   - What's in it:
     - icon follow-ups
-    - a sweep of [the suspected-bugs log](../../../agents/SUSPECTED-BUGS.md)
+    - a sweep of [the suspected-bugs log](../agents/SUSPECTED-BUGS.md)
     - Owen's decisions ("To review (Owen)", below)
     - Phase D chores
 - **`<ui-root>`** (P17-P20, 2026-10-01):  built.
@@ -67,7 +67,7 @@ A checklist of every component in [the plan](plan.md):  what's done, in progress
   - the docs site uses `page`
   - More:  [the theming doc](theming.md), "Stacking".
 - Every check passes after the move.
-  - `yarn test:hmr` and `yarn site:build` needed a fix each ([the papercuts log](../../../agents/PAPERCUTS.md)).
+  - `yarn test:hmr` and `yarn site:build` needed a fix each ([the papercuts log](../agents/PAPERCUTS.md)).
 - Visual:  Mac baselines for chromium / firefox / webkit.
   Linux baselines wait on a working Docker Desktop.
 
@@ -180,7 +180,7 @@ NOTE:  links are relative, so they work on GitHub and in VS Code.
 | hot reload | ✅ | `yarn test:hmr` |
 | framework hosts (vanilla, React, Vue, Solid 2) | ✅ | `yarn smoke`, 8 pages |
 | SSR / declarative shadow DOM | ✅ | render only, no hydration |
-| `@spell-app/util` (`$/util`) | ✅ | `@proto`, `class`, `string` (case, `numberToWord`, `suggest`), `dom`, `Constructor` / `Prettify`:  moved from `src/util/` to [`packages/util`](../../util/README.md) (2026-09-30), shared with `spell`;  `$/ui/util` re-exports it, bundles unchanged (`core` 14.48 kB, 54.63 kB with one button) |
+| `@spell-app/util` (`$/util`) | ✅ | `@proto`, `class`, `string` (case, `numberToWord`, `suggest`), `dom`, `Constructor` / `Prettify`:  moved from `src/util/` to [`packages/util`](../../spell-util/util/README.md) (2026-09-30), shared with `spell`;  `$/ui/util` re-exports it, bundles unchanged (`core` 14.48 kB, 54.63 kB with one button) |
 | published type declarations | ✅ | fixed 2026-09-30:  `dist/index.d.ts`, `dist/core.d.ts`, `dist/components/ui-<name>/index.d.ts` ... exist as `exports` says, util's inlined in `dist/_util/`;  `yarn smoke` runs `tools/DeclarationCheck.ts`;  per-file, not rolled up (see `declarations()` in `vite.config.ts`) |
 
 ## Phase D -- site, hardening, release

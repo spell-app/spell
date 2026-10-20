@@ -7,7 +7,7 @@ import type { SiteDataFile } from "$/ui/docs-components/docs-components.types"
 import { DesignBrand } from "$/ui/tools/DesignBrand"
 
 /** Spell UI's folder, and the brand's beside it. */
-const UI = fileURLToPath(new URL("../../../packages/ui/", import.meta.url))
+const UI = fileURLToPath(new URL("../../", import.meta.url))
 const BRAND = join(UI, "../brand")
 
 /** The brand package's committed docs-set data. */

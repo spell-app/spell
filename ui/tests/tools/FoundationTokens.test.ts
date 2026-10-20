@@ -4,7 +4,7 @@ import { FoundationTokens } from "$/ui/tools/FoundationTokens"
 
 describe("FoundationTokens.groups()", () => {
   test("groups every :root token of the generated sheets, none left over, colours typed", () => {
-    const groups = new FoundationTokens(new URL("../../../packages/ui/src/styles/", import.meta.url).pathname).groups()
+    const groups = new FoundationTokens(new URL("../../src/styles/", import.meta.url).pathname).groups()
     const ids = groups.map((group) => group.id)
     expect(ids).toEqual(expect.arrayContaining(["typography", "spacing", "radii", "palette", "brand", "semantic"]))
     expect(ids).not.toContain("other")

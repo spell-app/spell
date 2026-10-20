@@ -21,7 +21,7 @@ import type { DesignExportResult, DesignTokensFile, ThemedValue } from "$/ui/too
 // ## Fixtures
 ////////////////
 
-const UI = fileURLToPath(new URL("../../../packages/ui/", import.meta.url))
+const UI = fileURLToPath(new URL("../../", import.meta.url))
 const DATA = readJSON5File<SiteDataFile>(join(UI, "docs/__data/components.json5"))
 const BRAND = join(UI, "../brand")
 const BRAND_DATA = readJSON5File<SiteDataFile>(join(BRAND, "docs/__data/components.json5"))

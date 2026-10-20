@@ -133,7 +133,7 @@ function loc() {
       "vocabularies & fallbacks": ["components/*/*.[a-z][a-z].ts", "components/*/*.fallback.ts"],
       foundation: ["src/{util,vocabulary,runtime,styles,icons}/*.ts", "components/*.ts", "src/index.ts"],
       // the tests live in the repo's tests/ folder;  their helpers in test/
-      tests: ["../../tests/ui/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"],
+      tests: ["tests/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"],
       tooling: ["tools/**/*.{ts,tsx,js,html}", "vite.config.ts", "vitest.config.ts"]
     }
   }).count()

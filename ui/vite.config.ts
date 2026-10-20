@@ -17,6 +17,22 @@ const SRC = fileURLToPath(new URL("./src", import.meta.url))
 const COMPONENTS_DIR = fileURLToPath(new URL("./components", import.meta.url))
 
 /**
+ * The `src/` folders of `util` and `spell-element`, which live in repos of their own (epic `repo-split` P8):
+ * found by their npm names, so the declarations build doesn't depend on where those repos sit.
+ */
+const UTIL_SRC = path.dirname(createRequire(import.meta.url).resolve("@spell-app/util"))
+const ELEMENT_SRC = path.dirname(createRequire(import.meta.url).resolve("@spell-app/spell-element"))
+
+/**
+ * The declarations program's root:  the folder holding this repo, `UTIL_SRC` and `ELEMENT_SRC`
+ * (`~/www/spell`, where the repos sit side by side).
+ */
+const DECLARATIONS_ROOT = commonFolder([path.resolve("."), UTIL_SRC, ELEMENT_SRC])
+
+/** Where `vite-plugin-dts` writes this repo's own files, under `dist/`:  its path from `DECLARATIONS_ROOT`. */
+const UI_WRITTEN = `${slashed(path.relative(DECLARATIONS_ROOT, path.resolve(".")))}/`
+
+/**
  * Browsers the CSS is compiled FOR:  the platform floor the plan commits to (anchor positioning everywhere).
  * - MUST stay modern:  with Vite's default (`baseline-widely-available`) Lightning CSS lowers `light-dark()`
  *   into `--lightningcss-light` variables resolved where a token is DECLARED, which freezes `:root`'s colour
@@ -223,19 +239,21 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  * `vite-plugin-dts` options for the published declarations:
  * `dist/index.d.ts`, `dist/core.d.ts`, `dist/components/ui-<name>/index.d.ts` ... --
  * the paths `package.json` `exports` names.
- * - `src/` imports `$/util` (`../util/src`) and `$/spell-element` (`../spell-element/src`), OUTSIDE this package.
- *   - So the program's root is `packages/` (`compilerOptions.rootDir`, else TS6059).
+ * - `src/` imports `@spell-app/util` (`UTIL_SRC`) and `@spell-app/spell-element` (`ELEMENT_SRC`), in other repos.
+ *   - So the program's root is the folder holding all three (`DECLARATIONS_ROOT`;  `compilerOptions.rootDir`, else
+ *     TS6059).
  *   - All three `src/` trees are included, with ui's `components/`.
- * - Then `beforeWriteFile` moves what the plugin wrote:
- *   - `dist/ui/src/**` up to `dist/**`
- *   - `dist/ui/components/**` to `dist/components/**` (where it was while the families lived in `src/components/`)
- *   - `dist/util/src/**` to `dist/_util/**` (not `dist/util/`:  that's `src/util/`'s)
+ * - Then `beforeWriteFile` moves what the plugin wrote (the folders as they sit under `DECLARATIONS_ROOT`):
+ *   - `dist/spell-ui/src/**` up to `dist/**`
+ *   - `dist/spell-ui/components/**` to `dist/components/**` (where it was while the families lived in
+ *     `src/components/`)
+ *   - `dist/spell-util/util/src/**` to `dist/_util/**` (not `dist/util/`:  that's `src/util/`'s)
  *   - `dist/spell-element/src/**` to `dist/_spell-element/**`
  * - It also rewrites `$/ui` specifiers, and `@spell-app/util` / `@spell-app/spell-element` ones (their npm names, as
  *   `ui` imports them from another repo since epic `repo-split` P6), to relative ones (a `declare module`
  *   augmentation's too).
  *   - `pathsToAliases: false`:
- *     the plugin's own rewrite measures from the layout BEFORE the move, and gets `../packages/ui/src/...`.
+ *     the plugin's own rewrite measures from the layout BEFORE the move, and gets `../spell-ui/src/...`.
  * - `?inline` CSS imports (`styles/index.ts`) become `declare const x: string`:  only `vite/client` types them.
  * - Why not `bundleTypes`:  it rolls each entry up on its own, so a class like `UIComponent` is copied into every entry
  *   that reaches it, and a class with private members is a DIFFERENT type in each copy.
@@ -249,17 +267,17 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  */
 export function declarations(): PluginOptions {
   return {
-    include: ["src", "components", "../util/src", "../spell-element/src"],
+    include: ["src", "components", fromHere(UTIL_SRC), fromHere(ELEMENT_SRC)],
     exclude: [
       // visual-test hooks:  they import `test/test.types.ts`, whose `vitest` augmentations this program can't resolve
       "components/**/*.visual.ts",
-      "../util/src/spell/**",
-      "../util/src/index.ts",
+      `${fromHere(UTIL_SRC)}/spell/**`,
+      `${fromHere(UTIL_SRC)}/index.ts`,
       // dev-only, never in a build
-      "../spell-element/src/HotDefinitions.ts"
+      `${fromHere(ELEMENT_SRC)}/HotDefinitions.ts`
     ],
-    entryRoot: "..",
-    compilerOptions: { rootDir: "..", paths: declarationPaths() },
+    entryRoot: DECLARATIONS_ROOT,
+    compilerOptions: { rootDir: DECLARATIONS_ROOT, paths: declarationPaths() },
     pathsToAliases: false,
     beforeWriteFile: rewriteDeclaration
   }
@@ -270,12 +288,13 @@ export function declarations(): PluginOptions {
  * names, each to its SOURCE, by absolute path.
  * - Their npm names through `node_modules` would make them a LIBRARY's files to TypeScript, which writes no
  *   declarations for those:  `dist/_util/` and `dist/_spell-element/` would be empty (`yarn smoke` catches it).
- * - Every path the three trees import by, as the root's `tsconfig.base.json` maps them:  these REPLACE its table.
+ * - Every path the three trees import by, as their repos' `tsconfig.base.json` map them:  these REPLACE this repo's
+ *   table.
  */
 function declarationPaths(): Record<string, string[]> {
   const ui = path.resolve(".")
-  const util = path.resolve("../util/src")
-  const element = path.resolve("../spell-element/src")
+  const util = UTIL_SRC
+  const element = ELEMENT_SRC
   return {
     "$/ui": [`${ui}/src/index.ts`],
     "$/ui/*": [`${ui}/src/*`],
@@ -308,8 +327,8 @@ function rewriteDeclaration(filePath: string, content: string) {
   const written = path.relative(dist, filePath).split(path.sep).join("/")
   // a package outside this one, by the `dist/` folder its declarations go to
   const outside = OUTSIDE.find(({ written: prefix }) => written.startsWith(prefix))
-  const moved = written.startsWith("ui/src/")
-    ? written.slice("ui/src/".length)
+  const moved = written.startsWith(`${UI_WRITTEN}src/`)
+    ? written.slice(`${UI_WRITTEN}src/`.length)
     : outside && `${outside.folder}/${written.slice(outside.written.length)}`
   if (!moved) return false
   const fromDir = path.posix.dirname(moved)
@@ -351,15 +370,33 @@ function rewriteDeclaration(filePath: string, content: string) {
  * - `folder`:  where they go instead
  */
 const OUTSIDE = [
-  { alias: "$/ui/components", src: path.resolve("components"), written: "ui/components/", folder: "components" },
-  { alias: "$/util", src: path.resolve("../util/src"), written: "util/src/", folder: "_util" },
+  { alias: "$/ui/components", src: path.resolve("components"), written: `${UI_WRITTEN}components/`, folder: "components" },
+  { alias: "$/util", src: UTIL_SRC, written: `${slashed(path.relative(DECLARATIONS_ROOT, UTIL_SRC))}/`, folder: "_util" },
   {
     alias: "$/spell-element",
-    src: path.resolve("../spell-element/src"),
-    written: "spell-element/src/",
+    src: ELEMENT_SRC,
+    written: `${slashed(path.relative(DECLARATIONS_ROOT, ELEMENT_SRC))}/`,
     folder: "_spell-element"
   }
 ]
+
+/** The deepest folder holding every one of `folders`. */
+function commonFolder(folders: readonly string[]): string {
+  const [first = [], ...rest] = folders.map((folder) => folder.split(path.sep))
+  let length = 0
+  while (length < first.length && rest.every((parts) => parts[length] === first[length])) length++
+  return first.slice(0, length).join(path.sep) || path.sep
+}
+
+/** A folder's path from this repo's root, `/`-separated:  for `vite-plugin-dts`'s `include` / `exclude` globs. */
+function fromHere(folder: string): string {
+  return slashed(path.relative(".", folder))
+}
+
+/** A path with `/` between its parts, whatever the platform. */
+function slashed(file: string): string {
+  return file.split(path.sep).join("/")
+}
 
 /**
  * Hot module replacement for the components in `yarn dev` (`tools/HotElements.ts`;
