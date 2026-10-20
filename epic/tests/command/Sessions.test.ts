@@ -1,7 +1,7 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { Sessions } from "$/epics/command/Sessions"
 
@@ -112,6 +112,57 @@ describe("digest()", () => {
     expect(digest.prompts.map((it) => it.text)).toEqual(["/epic seo"])
     expect(digest.pending).toEqual([{ question: "Which?" }])
     expect(new Sessions({ home: HOME }).digest("zzzz")).toBeUndefined()
+  })
+})
+
+// epic `epic-engine` r2:  a handoff's session showed Claude Code's own title, written AFTER its custom one, while
+// `epic session title` said "already ... nothing to do"
+describe("title <title>:  titled only when the tab shows it", () => {
+  const custom = { type: "custom-title", customTitle: "🚧 editor" }
+  const ai = { type: "ai-title", aiTitle: "Claude in Chrome browser automation" }
+  // outside this repo's folders:  `saved()` above never sees them
+  transcript("-titles", "t-custom-ai", [custom, ai])
+  transcript("-titles", "t-ai-custom", [ai, custom])
+  transcript("-titles", "t-custom", [custom])
+  transcript("-titles", "t-resumed", [custom, ai])
+
+  /** `epic session title <args>` run as session `id`:  what it printed, and what it queued. */
+  async function title(id: string, ...args: string[]): Promise<{ said: string; queued: string | null }> {
+    const said: string[] = []
+    vi.stubEnv("CLAUDE_CODE_SESSION_ID", id)
+    const write = vi.spyOn(process.stdout, "write").mockImplementation((text) => said.push(String(text)) > 0)
+    try {
+      expect(await new Sessions({ home: HOME }).run(["title", ...args])).toBe(0)
+    } finally {
+      write.mockRestore()
+      vi.unstubAllEnvs()
+    }
+    const file = join(HOME, "session-titles", id)
+    return { said: said.join(""), queued: existsSync(file) ? readFileSync(file, "utf8") : null }
+  }
+
+  test("custom, then Claude's own:  not titled, so queued", async () => {
+    const { said, queued } = await title("t-custom-ai", "🚧 editor")
+    expect(queued).toBe("🚧 editor")
+    expect(said).toMatch(/queued "🚧 editor" for t-custom \(was "Claude in Chrome browser automation"\)/)
+    // queued now:  nothing more to do
+    expect((await title("t-custom-ai", "🚧 editor")).said).toMatch(/already "🚧 editor" \(queued\)/)
+  })
+  test("Claude's own, then custom;  custom alone:  titled, nothing queued", async () => {
+    for (const id of ["t-ai-custom", "t-custom"]) {
+      const { said, queued } = await title(id, "🚧 editor")
+      expect(said).toMatch(/is already "🚧 editor":  nothing to do/)
+      expect(queued).toBeNull()
+    }
+  })
+  test("alone:  the title, and what its tab may show", async () => {
+    expect((await title("t-resumed")).said).toBe('*🚧 editor  (its tab may show "Claude in Chrome browser automation")\n')
+    expect((await title("t-custom")).said).toBe("*🚧 editor\n")
+  })
+  test("--force (Continue after a handoff, a resume):  queued whatever the tab seems to show", async () => {
+    const { said, queued } = await title("t-custom", "--force", "🚧 editor")
+    expect(queued).toBe("🚧 editor")
+    expect(said).toMatch(/queued "🚧 editor" for t-custom/)
   })
 })
 

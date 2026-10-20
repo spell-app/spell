@@ -9,6 +9,9 @@
  * - No pending move for this session (every other turn):  exits at once.
  * - A pending move:
  *   - renames the record to `<session id>.running.json`, so the next turn won't move it again
+ *   - queues the session's own title (its last `custom-title`) for its next prompt, unless one is queued:
+ *     resumed in the new window, its tab may show Claude Code's own title instead (epic `epic-engine` r2), and the
+ *     `continue` typed there puts it back (`SessionFolders.requeueTitle()`)
  *   - starts `window.mjs resume` on it, DETACHED, its output in `<registry>/handoffs/<session id>.log`
  *   - why detached:  `resume` closes this session's old tab or window,
  *     which ends the `claude` process this hook runs under
@@ -33,6 +36,7 @@ try {
   if (file && existsSync(file)) {
     const running = join(Window.handoffs, `${sessionId}.running.json`)
     renameSync(file, running)
+    await requeueTitle(sessionId)
     const args = [SCRIPT, "resume", running]
     for (const title of sessionTitles(transcript)) args.push("--title", title)
     const log = openSync(join(Window.handoffs, `${sessionId}.log`), "a", 0o600)
@@ -40,6 +44,16 @@ try {
   }
 } catch (error) {
   console.error(`handoff hook:  ${error.message}`)
+}
+
+/** `SessionFolders.requeueTitle()`:  never stops the move. */
+async function requeueTitle(sessionId) {
+  try {
+    const { SessionFolders } = await import("../src/config/SessionFolders.ts")
+    SessionFolders.requeueTitle(sessionId)
+  } catch (error) {
+    console.error(`handoff hook:  no title queued:  ${error.message}`)
+  }
 }
 
 /**

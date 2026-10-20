@@ -202,6 +202,29 @@ describe("gate()", () => {
     expect(existsSync(join(prompts, "foo.md"))).toBe(false)
   })
 
+  // epic `epic-engine` r2:  Claude Code's own title written after the session's name may be what its tab shows
+  test("renames when the transcript ends in Claude's own title;  `/epic resume`, `/unpark` always", () => {
+    const dir = mkdtempSync(join(tmpdir(), "transcripts-"))
+    try {
+      const write = (name: string, ...entries: object[]) => {
+        writeFileSync(join(dir, name), entries.map((it) => JSON.stringify(it) + "\n").join(""))
+        return join(dir, name)
+      }
+      const custom = { type: "custom-title", customTitle: "🚧 foo" }
+      const ai = { type: "ai-title", aiTitle: "Chrome automation" }
+      const asked = (prompt: string, transcript_path?: string) =>
+        gate({ prompt, cwd: ROOT, session_title: "🚧 foo", transcript_path }, PACKAGE_WINDOW)?.hookSpecificOutput
+          ?.sessionTitle
+      expect(asked("/epic foo", write("ai-last.jsonl", custom, ai))).toBe("🚧 foo")
+      expect(asked("/epic foo", write("custom-last.jsonl", ai, custom))).toBeUndefined()
+      expect(asked("/epic foo", join(dir, "missing.jsonl"))).toBeUndefined()
+      expect(asked("/epic resume foo", join(dir, "custom-last.jsonl"))).toBe("🚧 foo")
+      expect(asked("/unpark foo")).toBe("🚧 foo")
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   test("re-entering the same worktree, `/unpark` and `/epic resume` aren't blocked", () => {
     expect(gate({ prompt: "/isolate other", cwd: WORKTREE }, null)?.decision).toBeUndefined()
     expect(gate({ prompt: "/unpark foo", cwd: WORKTREE }, OTHER_WINDOW)?.decision).toBeUndefined()

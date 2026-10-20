@@ -12,7 +12,8 @@ Other skills that rename a session run the same command:  `/isolate`, `/park`, `
 ## 1. With a title:  `/title <title>`
 
 - `epic session title <title>`.  It checks first:
-  - this session already has `<title>` (or has it queued):  nothing to do
+  - its tab already shows `<title>` (or it's queued):  nothing to do
+    - not when Claude's own title came after `<title>` in its transcript:  the tab may show that
   - else it queues `<title>`
 - Reply in one line:  "titled `<title>` (was "<old>");  shows on your next message".
 
@@ -20,6 +21,7 @@ Other skills that rename a session run the same command:  `/isolate`, `/park`, `
 
 - `epic session title`:  the current title, and any title queued.
   - `*` = set by hand;  else Claude's own, or the first prompt.
+  - "its tab may show ...":  Claude's own title came after it;  offer the current one again.
 - Offer 3 short titles in the AskUserQuestion modal:  2-4 words, the work's name, e.g. `session tools`.
   - The current one described in the question.
   - "Other" takes a typed title.

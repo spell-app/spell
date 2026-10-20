@@ -27,7 +27,7 @@ The other half of `/park`.
 - Rename this session `<name>`, BEFORE anything else.
   - A typed `/unpark <name>` already was, by the repo's `UserPromptSubmit` hook
     ([prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs)).
-  - Else (no argument, or plain words):  `epic session title "🚧 <name>"`.
+  - Else (no argument, or plain words):  `epic session title --force "🚧 <name>"`.
     It lands on the next prompt, or when the session opens in its new window.
 
 ## 2. Parked by a session that's still open

@@ -2,6 +2,7 @@ import {
   lstatSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   readlinkSync,
   realpathSync,
   rmSync,
@@ -115,5 +116,64 @@ describe("SessionFolders", () => {
     expect(SessionFolders.recordTitle({ sessionId: "none", nameSource: "derived" }, home)).toBe("")
     expect(SessionFolders.customTitle("s3", home)).toBe("🚧 far")
     expect(SessionFolders.transcriptOf("s3", home)).toBe(join(home, "projects", "-b", "s3.jsonl"))
+  })
+
+  // epic `epic-engine` r2:  after a handoff, ba126030's tab showed Claude Code's own title, written after its custom one
+  test("shownTitle():  the record's name, else the transcript's LAST title line, custom or Claude's own", () => {
+    const home = join(HOME, "shown")
+    const custom = { type: "custom-title", customTitle: "🚧 editor" }
+    const ai = { type: "ai-title", aiTitle: "Claude in Chrome browser automation" }
+    const write = (id: string, ...entries: object[]) => {
+      mkdirSync(join(home, "projects", "-a"), { recursive: true })
+      writeFileSync(join(home, "projects", "-a", `${id}.jsonl`), entries.map((it) => JSON.stringify(it) + "\n").join(""))
+    }
+    write("custom-ai", custom, ai)
+    write("ai-custom", ai, custom)
+    write("custom", custom)
+    write("cleared", ai, { type: "custom-title", customTitle: "" })
+    const path = (id: string) => join(home, "projects", "-a", `${id}.jsonl`)
+
+    expect(SessionFolders.shownTitle("custom-ai", home)).toBe("Claude in Chrome browser automation")
+    expect(SessionFolders.shownTitle("ai-custom", home)).toBe("🚧 editor")
+    expect(SessionFolders.shownTitle("custom", home)).toBe("🚧 editor")
+    expect(SessionFolders.shownTitle("cleared", home)).toBeNull()
+    expect(SessionFolders.shownTitle("none", home)).toBeNull()
+    // running, titled by the prompt hook:  its record says what the tab shows;  a made-up name doesn't
+    const hook = { sessionId: "custom-ai", name: "🚧 editor", nameSource: "hook" }
+    expect(SessionFolders.shownTitle("custom-ai", home, hook)).toBe("🚧 editor")
+    const derived = { sessionId: "custom-ai", name: "editor-cb", nameSource: "derived" }
+    expect(SessionFolders.shownTitle("custom-ai", home, derived)).toBe("Claude in Chrome browser automation")
+    // finding a session BY its name is unchanged:  the last custom title (I51)
+    expect(SessionFolders.customTitle("custom-ai", home)).toBe("🚧 editor")
+    expect(SessionFolders.recordTitle(derived, home)).toBe("🚧 editor")
+
+    expect(SessionFolders.lastTitleLine(path("custom-ai"))).toEqual({
+      title: "Claude in Chrome browser automation",
+      custom: false
+    })
+    expect(SessionFolders.lastTitleLine(path("ai-custom"))).toEqual({ title: "🚧 editor", custom: true })
+  })
+
+  test("requeueTitle():  the session's own title queued for its next prompt (the handoff), unless one is", () => {
+    const home = join(HOME, "requeue")
+    mkdirSync(join(home, "projects", "-a"), { recursive: true })
+    const line = (entry: object) => JSON.stringify(entry) + "\n"
+    writeFileSync(
+      join(home, "projects", "-a", "moved.jsonl"),
+      line({ type: "custom-title", customTitle: "🚧 editor" }) + line({ type: "ai-title", aiTitle: "Chrome automation" })
+    )
+    writeFileSync(join(home, "projects", "-a", "untitled.jsonl"), line({ type: "ai-title", aiTitle: "Chrome automation" }))
+    const queued = (id: string) => readFileSync(join(home, "session-titles", id), "utf8")
+
+    expect(SessionFolders.requeueTitle("moved", home)).toBe("🚧 editor")
+    expect(queued("moved")).toBe("🚧 editor")
+    // another title queued (a ✅, say) stays
+    writeFileSync(join(home, "session-titles", "moved"), "✅ editor")
+    expect(SessionFolders.requeueTitle("moved", home)).toBeNull()
+    expect(queued("moved")).toBe("✅ editor")
+    // no title of its own, no transcript, a bad id:  nothing
+    expect(SessionFolders.requeueTitle("untitled", home)).toBeNull()
+    expect(SessionFolders.requeueTitle("none", home)).toBeNull()
+    expect(SessionFolders.requeueTitle("../x", home)).toBeNull()
   })
 })

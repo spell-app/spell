@@ -155,7 +155,9 @@ The turn after step 6, whatever Owen sends (`continue`, typed in by the move, or
    - In spell-app, `yarn install`:  a few seconds.
    - With `installOnCreate` on, the worktree hook already ran it, before the window opened (I2).
    - It prints an empty line (a repo with nothing to install, as `epic init` finds it):  skip this step.
-3. Check the session's name ("Session name" below).
+3. Title the session again, whatever it seems to be:  `epic session title --force "🚧 <name>"` ("Session name" below).
+   - A session reopened in a new window may show Claude's own title, though its transcript has its name (epic
+     `epic-engine` r2).  The move queued it already, for the `continue` it typed;  this costs nothing.
 4. Carry on, with the first of these there is:
    - the saved prompt `~/.spell/prompts/<name>.md`, then delete it
    - the work under way (mid-session)
@@ -178,8 +180,11 @@ The session MUST stay titled `🚧 <name>` while its work is under way.
   - [the park skill](../park/SKILL.md)'s "Resume" (`/unpark`, `/wait-for`)
   - Owen reopening the session to carry on ("start P3", "continue")
 - How:  `epic session title "🚧 <name>"`.
-  - It checks first:  already `🚧 <name>` (or queued), it does nothing.
+  - It checks first:  its tab already shows `🚧 <name>` (or it's queued), it does nothing.
+    - "Shows":  the session's running record says so, else its transcript's LAST title line is `🚧 <name>`.
+      Claude's own title written after it may be what the tab shows.
   - Else it queues it, which lands on Owen's NEXT prompt.
+  - `--force`:  queues it all the same.  "Continue" and a resume use it.
   - The prompt hook titles a typed `/isolate`, `/epic` or `/unpark <name>` so by itself.
   - Renamed:  one line, "session renamed `🚧 <name>` (was "<old>");  shows on your next message".
   - `epic session title` alone shows the current title, and any queued one.

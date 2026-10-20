@@ -827,7 +827,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - Rename this session `<name>`, first.
      - A typed `/epic resume <name>` already was, by the prompt hook
        ([prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs)).
-     - Else `epic session title "🚧 <name>"`.
+     - Else `epic session title --force "🚧 <name>"`.
 2. Its own session still running (not this one):  as [the unpark skill](../unpark/SKILL.md), step 2.
    Tell it, or resume here.
    - Found by `epic worktree status <name>`:  `sessions`, `running: true`.

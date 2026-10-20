@@ -6,6 +6,7 @@ import { join } from "node:path"
 import { LOOKS, worktreeOf } from "../window.mjs"
 import { TITLE_ICONS } from "./command.types.ts"
 import { EpicRepo, type EpicHome } from "../config/EpicRepo.ts"
+import { SessionFolders } from "../config/SessionFolders.ts"
 
 /****************
  * ### `PromptGate`
@@ -21,7 +22,7 @@ import { EpicRepo, type EpicHome } from "../config/EpicRepo.ts"
  *   (undocumented, CLI 2.1.287;  see `~/.claude/hooks/session-title.mjs`).
  *
  * What it does, in order (`gate()`):
- * - Input:  the hook's stdin, `{ prompt, cwd, session_id, session_title, permission_mode, ... }`
+ * - Input:  the hook's stdin, `{ prompt, cwd, session_id, session_title, transcript_path, permission_mode, ... }`
  * - Acts only on these (`parseCommand()`):
  *   - `/isolate <name>`, not `/isolate done`
  *   - `/epic <name> [plan]`, not `/epic review ...` or `/epic done` (which is `/isolate done`)
@@ -63,6 +64,9 @@ import { EpicRepo, type EpicHome } from "../config/EpicRepo.ts"
  *      - Let through, the session NOT renamed (it stays `<other>`'s), with a note (`additionalContext`)
  *        sending Claude to the `/epic` skill's "From another worktree", which asks first.
  * 3. Otherwise:  renames the session `🚧 <name>` (`hookSpecificOutput.sessionTitle`), unless it already is.
+ *    - "already is":  its `session_title`, and its transcript's last title line too (`rename()`)
+ *    - `/epic resume` and `/unpark` rename it whatever it seems to be:  a resumed session's tab may show
+ *      Claude Code's own title (epic `epic-engine` r2), and a rename costs nothing
  *    - `/epic future <name>`:  `📅 <name>`, and neither block above (it makes no worktree).
  *    - The icons:  `TITLE_ICONS`.
  *    - A ✅ title (its work merged, epic `windows-and-review` P6) isn't `<name>`, so reopening takes the ✅ off;
@@ -75,7 +79,8 @@ import { EpicRepo, type EpicHome } from "../config/EpicRepo.ts"
  *   - An older file is kept as `<name>.<time>.md`.
  * - Natural-language triggers ("isolate as foo") never reach here:  each skill's step 0 repeats these checks.
  *
- * Its position:  imports only node's own modules, the window script and this folder's types, by relative path,
+ * Its position:  imports only node's own modules, the window script, this folder's types and the config folder's
+ * plain-node classes (`EpicRepo`, `SessionFolders`), by relative path,
  * so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
  * All `static`:  no state, one answer per prompt.
  ****************/
@@ -129,7 +134,7 @@ export class PromptGate {
       }
     }
 
-    return rename(input, `${TITLE_ICONS.active} ${name}`)
+    return rename(input, `${TITLE_ICONS.active} ${name}`, skill === "epic resume" || skill === "unpark")
   }
 
   /**
@@ -260,6 +265,7 @@ export type GateInput = {
   cwd?: string
   session_id?: string
   session_title?: string | null
+  transcript_path?: string
   permission_mode?: string
 }
 
@@ -279,12 +285,22 @@ export type GateCommand = { skill: string; name: string; text: string; color: st
 
 /**
  * Title the session `title` (`hookSpecificOutput.sessionTitle`), unless it already is;  `null`:  nothing to do.
+ * - "already is":  its `session_title` is `title`, and so is its transcript's LAST title line, when it has one
+ *   - not when Claude Code's own title (`ai-title`) came after it:  the tab may show that (epic `epic-engine` r2;
+ *     `SessionFolders.shownTitle()`)
+ * - `always`:  whatever it seems to be
  * - reopened:  a ✅ queued when its work merged (epic `windows-and-review` P6) and not yet applied must not land now
  */
-function rename(input: GateInput, title: string): GateAnswer | null {
+function rename(input: GateInput, title: string, always = false): GateAnswer | null {
   PromptGate.dropDoneTitle(input.session_id)
-  if (input.session_title === title) return null
+  if (!always && input.session_title === title && lastTitle(input.transcript_path) === title) return null
   return { hookSpecificOutput: { hookEventName: "UserPromptSubmit", sessionTitle: title } }
+
+  /** Transcript `path`'s last title line, either kind;  `session_title`'s when there's none to read. */
+  function lastTitle(path: string | undefined): string | null | undefined {
+    const line = path && existsSync(path) ? SessionFolders.lastTitleLine(path) : null
+    return line ? line.title : input.session_title
+  }
 }
 
 /**

@@ -52,9 +52,10 @@ import { Worktrees } from "./Worktrees"
  *   - `find <name>`:  sessions titled `<name>` or that worked in worktree `<name>`, any project, newest first
  *   - `open <id prefix | exact title>`:  opens it in the VS Code Claude panel,
  *     in the window it RUNS in, else this session's window (the extension's URI handler, routed by `windowId`)
- *   - `title [<title>]`:  THIS session (`CLAUDE_CODE_SESSION_ID`)
+ *   - `title [<title>] [--force]`:  THIS session (`CLAUDE_CODE_SESSION_ID`)
  *     - alone:  its title (`*` named by hand) and any queued one
- *     - with a title:  queues it for the next prompt, unless it already has it
+ *     - with a title:  queues it for the next prompt, unless its tab shows it already (`shownTitle()`)
+ *     - `--force`:  queues it whatever the tab seems to show:  "Continue" after a handoff, a resume
  *   - `done [<name>]`:  mark finished work's sessions `✅ <title>`
  *     - alone:  THIS session
  *     - with a name:  every session titled `<name>` or that worked in worktree `<name>`
@@ -93,7 +94,7 @@ export class Sessions {
       case "open":
         return this.open(rest.join(" ").trim())
       case "title":
-        return this.titleThis(rest.join(" ").trim())
+        return this.titleThis(rest.join(" ").trim(), Boolean(flags.force))
       case "done":
         return this.markDone(rest.join(" ").trim())
       case "icons":
@@ -184,31 +185,38 @@ export class Sessions {
     return EXIT.OK
   }
 
-  /** `title [<title>]`:  show THIS session's title, or queue a new one unless it already has it. */
-  private titleThis(title: string): number {
+  /**
+   * `title [<title>]`:  show THIS session's title, or queue a new one unless its tab shows it already.
+   * - "shows":  `shownTitle()`, NOT its last `custom-title`:  Claude Code's own title (`ai-title`) written after it
+   *   may be what the tab shows (epic `epic-engine` r2)
+   * - `force`:  queue it all the same
+   */
+  private titleThis(title: string, force = false): number {
     const me = process.env.CLAUDE_CODE_SESSION_ID
     if (!me) throw new EpicCommandError("title:  needs CLAUDE_CODE_SESSION_ID")
     const transcript = this.transcriptOf(me)
     const summary = transcript ? this.summarize(transcript) : undefined
     const current = summary?.title ?? null
+    const shown = this.shownTitle(me)
     const queued = this.queuedTitle(me)
     if (!title) {
-      out(`${summary?.named ? "*" : " "}${current ?? "?"}${queued ? `  (queued:  ${queued})` : ""}`)
+      const tab = shown && shown !== current ? `  (its tab may show "${shown}")` : ""
+      out(`${summary?.named ? "*" : " "}${current ?? "?"}${tab}${queued ? `  (queued:  ${queued})` : ""}`)
       return EXIT.OK
     }
     // so skills can call it on every resume / phase start:  "check, rename if needed" is one command
-    if (queued === title || (current === title && queued === null)) {
+    if (!force && (queued === title || (shown === title && queued === null))) {
       out(`${me.slice(0, 8)} is already "${title}"${queued ? " (queued)" : ""}:  nothing to do`)
       return EXIT.OK
     }
     this.queueTitle(me, title)
-    out(`queued "${title}" for ${me.slice(0, 8)} (was "${current ?? "?"}"):  applied on the next prompt`)
+    out(`queued "${title}" for ${me.slice(0, 8)} (was "${shown ?? current ?? "?"}"):  applied on the next prompt`)
     return EXIT.OK
   }
 
   /**
    * `done [<name>]`:  queue `✅ <title>` for this session, or for every session of `name` (`named()`).
-   * - one already ✅, or with a ✅ queued, is left
+   * - one whose tab shows ✅ already (`shownTitle()`), or with a ✅ queued, is left
    */
   private markDone(name: string): number {
     const me = process.env.CLAUDE_CODE_SESSION_ID
@@ -222,7 +230,7 @@ export class Sessions {
       const queued = this.queuedTitle(id)
       const bare = bareTitle(queued ?? title) || name
       const done = `${TITLE_ICONS.done} ${bare}`
-      if ((queued ?? title) === done) {
+      if ((queued ?? this.shownTitle(id)) === done) {
         out(`${id.slice(0, 8)} is already done:  "${done}"`)
         continue
       }
@@ -234,7 +242,7 @@ export class Sessions {
 
   /**
    * `icons`:  queue the icon each named session's work calls for (`workIcon()`),
-   * when its title (or the one queued) isn't that already.
+   * when the title its tab shows (`shownTitle()`), or the one queued, isn't that already.
    * - says what it did, or (`dryRun`) would do
    * - a session's work:  its title without its icon (`bareTitle()`);  sessions of one name are looked up once
    * - a name with no worktree, branch or epic page (a session titled "SVG from image") is left as it is
@@ -247,6 +255,7 @@ export class Sessions {
       byName.set(name, [...(byName.get(name) ?? []), it])
     }
     let queued = 0
+    const live = this.running()
     for (const [name, sessions] of [...byName].sort(([a], [b]) => a.localeCompare(b))) {
       const icon = this.workIcon(
         name,
@@ -255,7 +264,7 @@ export class Sessions {
       if (!icon) continue
       const wanted = `${icon} ${name}`
       for (const it of sessions) {
-        const now = this.queuedTitle(it.id) ?? it.title
+        const now = this.queuedTitle(it.id) ?? this.shownTitle(it.id, live) ?? it.title
         if (now === wanted) continue
         if (!dryRun) this.queueTitle(it.id, wanted)
         queued++
@@ -293,6 +302,14 @@ export class Sessions {
     // a plan all done whose branch still has commits `main` lacks isn't finished:  it waits to merge
     if (status.finished && status.ahead === 0) return TITLE_ICONS.done
     return TITLE_ICONS.active
+  }
+
+  /**
+   * The title session `id`'s tab shows (`SessionFolders.shownTitle()`), its registry record found in `live`;  `null`
+   * for none.  Not `title()`, its name to find it by.
+   */
+  shownTitle(id: string, live = this.running()): string | null {
+    return SessionFolders.shownTitle(id, this.home, live.get(id))
   }
 
   /** Session `id`'s title from its transcript, or `null`. */
@@ -532,6 +549,7 @@ export class Sessions {
   /**
    * Session `id`'s title:  its last `custom-title`, else its last `ai-title`;  `null` when it has neither.
    * - the same rule as the handoff hook (`hooks/handoff.mjs`), which finds a session's tab by it
+   * - whether its tab SHOWS a title, to title it again or not:  `shownTitle()`
    */
   title(id: string): string | null {
     const path = this.transcriptOf(id)
@@ -730,7 +748,7 @@ export type SessionsProps = {
 }
 
 /** The flags of `epic session` that take no value. */
-const SWITCHES = ["all", "json", "dryRun"]
+const SWITCHES = ["all", "json", "dryRun", "force"]
 
 /** Longest prompt and reply a transcript digest prints, in characters. */
 const PROMPT_LIMIT = 800

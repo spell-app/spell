@@ -11,7 +11,8 @@ import {
   rmdirSync,
   statSync,
   symlinkSync,
-  unlinkSync
+  unlinkSync,
+  writeFileSync
 } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
@@ -161,11 +162,52 @@ export class SessionFolders {
    */
   static customTitle(id: string, home = SessionFolders.home()): string | null {
     const path = SessionFolders.transcriptOf(id, home)
-    if (!path) return null
-    const size = statSync(path).size
-    const tail = lastCustomTitle(readEnd(path, Math.min(size, TITLE_TAIL)))
-    if (tail !== undefined || size <= TITLE_TAIL) return tail ?? null
-    return lastCustomTitle(readFileSync(path, "utf8")) ?? null
+    return path ? (fromEnd(path, lastCustomTitle) ?? null) : null
+  }
+
+  /**
+   * The title session `id`'s tab SHOWS, as far as can be told;  `null` for none, or no transcript.
+   * - It decides whether a session still needs titling (`epic session title`, `done`, `icons`;  epic `epic-engine`
+   *   r2).  Finding a session BY its name is `customTitle()`'s, the title Owen gave it.
+   * - `record`, its registry record while it runs:  its `name`, unless Claude Code made that up (`recordTitle()`)
+   * - else its transcript's LAST title line, Owen's or Claude Code's own (`lastTitleLine()`):
+   *   a session resumed in a new process (a handoff, a reload) shows whichever came last
+   *   - e.g. session ba126030 after its handoff:  `🚧 property-editor`, then `Claude in Chrome browser automation`;
+   *     its tab showed the second, while `epic session title` said "already 🚧 property-editor:  nothing to do"
+   *   - Claude Code writes both again before each reply, the custom one first:  once a session has had an
+   *     `ai-title`, its transcript ends in one however it's titled since, and only its record tells better
+   */
+  static shownTitle(id: string, home = SessionFolders.home(), record?: SessionRecordNames): string | null {
+    if (record?.name && record.nameSource !== "derived") return record.name
+    const path = SessionFolders.transcriptOf(id, home)
+    return (path && SessionFolders.lastTitleLine(path)?.title) || null
+  }
+
+  /**
+   * Transcript `path`'s last title line, either kind;  `null` for none.
+   * - `custom`:  a `custom-title` (`/rename`, a skill's, the prompt gate's), not Claude Code's own `ai-title`
+   * - its end first, as `customTitle()`
+   */
+  static lastTitleLine(path: string): TitleLine | null {
+    return fromEnd(path, lastTitle) ?? null
+  }
+
+  /**
+   * Queue session `id`'s own title (`customTitle()`) for its next prompt, unless another title is queued:
+   * `<home>/session-titles/<id>`, which the `UserPromptSubmit` hook `~/.claude/hooks/session-title.mjs` applies.
+   * - the handoff ([handoff.mjs](../../hooks/handoff.mjs)), as it moves a session:  resumed in the new window, its
+   *   tab may show Claude Code's own title (`shownTitle()`), and the `continue` typed there puts its own back
+   * - returns the title queued;  `null`:  none to queue, or one queued already
+   */
+  static requeueTitle(id: string, home = SessionFolders.home()): string | null {
+    if (!/^[\w-]+$/.test(id)) return null
+    const file = join(home, "session-titles", id)
+    if (existsSync(file)) return null
+    const title = SessionFolders.customTitle(id, home)
+    if (!title) return null
+    mkdirSync(join(home, "session-titles"), { recursive: true })
+    writeFileSync(file, title)
+    return title
   }
 
   /**
@@ -185,11 +227,40 @@ export class SessionFolders {
   }
 }
 
-/** How much of a transcript's end `SessionFolders.customTitle()` reads first, in bytes. */
+/** How much of a transcript's end `SessionFolders.customTitle()` and `lastTitleLine()` read first, in bytes. */
 const TITLE_TAIL = 4 * 1024 * 1024
 
 /** The fields of a session's registry record (`sessions/<pid>.json`) its title comes from. */
 export type SessionRecordNames = { sessionId?: string; name?: string; nameSource?: string }
+
+/** A transcript's title line (`SessionFolders.lastTitleLine()`):  its title, and whether it's a `custom-title`. */
+export type TitleLine = { title: string; custom: boolean }
+
+/** `find` on the end of transcript `path` (`TITLE_TAIL`) first;  found nothing there, on the whole file. */
+function fromEnd<T>(path: string, find: (text: string) => T | undefined): T | undefined {
+  const size = statSync(path).size
+  const tail = find(readEnd(path, Math.min(size, TITLE_TAIL)))
+  if (tail !== undefined || size <= TITLE_TAIL) return tail
+  return find(readFileSync(path, "utf8"))
+}
+
+/** The last title line in transcript text `text`, either kind;  `undefined` for none. */
+function lastTitle(text: string): TitleLine | undefined {
+  let found: TitleLine | undefined
+  for (const line of text.split("\n")) {
+    if (!line.includes('"custom-title"') && !line.includes('"ai-title"')) continue
+    try {
+      const entry = JSON.parse(line) as { type?: string; customTitle?: unknown; aiTitle?: unknown }
+      const title = entry.type === "custom-title" ? entry.customTitle : entry.aiTitle
+      if (entry.type === "custom-title" || entry.type === "ai-title") {
+        found = { title: typeof title === "string" ? title : "", custom: entry.type === "custom-title" }
+      }
+    } catch {
+      // the tail's first line, cut in half:  not a title
+    }
+  }
+  return found
+}
 
 /** The last `custom-title` in transcript text `text`:  `""` when it was cleared;  `undefined` for none. */
 function lastCustomTitle(text: string): string | undefined {
