@@ -509,6 +509,28 @@ export type MergeMainReport = {
   regenerated: { name: string; files: string[] }[]
   review: SnapshotReview[]
   unstaged: string[]
+  /** a multi-repo top's epic worktree (`MainMerge.runAll()`):  the repo's folder name;  left out for a single repo */
+  repo?: string
+  /** a multi-repo top's:  why this repo's merge couldn't start or go on (the others went on) */
+  error?: string
+}
+
+/**
+ * One repo's checkout in an epic's worktree, as it stands (`Worktrees.repoStates()`, `epic worktree repos`):
+ * - `repo`:  its folder name;  `worktree`:  its folder in the epic's worktree;  `made`:  that's there
+ * - `branch`:  the epic's branch, `null` when the repo has none;  `base`:  its base branch
+ * - `ahead` / `behind`:  commits the branch has that `base` lacks, and the other way
+ * - `dirty`:  `git status --short`'s lines in its worktree
+ */
+export type RepoState = {
+  repo: string
+  worktree: string
+  made: boolean
+  branch: string | null
+  base: string
+  ahead: number
+  behind: number
+  dirty: string[]
 }
 
 ////////////////

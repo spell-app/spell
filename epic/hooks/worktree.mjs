@@ -55,6 +55,20 @@
  *      A failure FAILS the hook, saying how to carry on:  the worktree stays
  * - The hook's own time limit is in `hooks/hooks.json` (900s):  more than any install's.
  *
+ * ## A multi-repo top (epic `epic-engine` P10, repo-split's Q9 A)
+ * - When the repo is a MULTI-REPO TOP, or a child repo of one (`EpicConfig.top`:  the top's `.epic/config.json5`
+ *   names its child repos, `"repos": "repos.json5"`), an epic's worktree is the top's, `<worktreesFolder>/<name>/`:
+ *   - `create`:  `git worktree add` of the TOP first, then of EVERY child repo cloned in the top's main checkout,
+ *     inside it at the same folder names (`EpicConfig.repoCheckouts()`), ALL on branch `<name>` (each from its own
+ *     `baseBranch`, or its branch `<name>` when there);  stdout is the TOP's worktree
+ *     - one that's there already is reused, and a child cloned since is added
+ *     - the shared links once (the top's), the session-folder links for the top's worktree and each child's (all to
+ *       the main TOP checkout's folder:  every session saved under `~/www/spell`'s), then ONE install, at the top
+ *   - `remove`:  the worktree_path may be the top's worktree or any child's in it.  Every repo is checked FIRST
+ *     (uncommitted changes, commits its base branch lacks):  any one kept keeps them all.  Then the servers stop
+ *     (once, for the whole folder), each child's worktree and branch go, then the top's
+ * - A single repo (no `repos`, other people's setups):  everything above, as before.
+ *
  * ## remove
  * - stdin `{ worktree_path, cwd, ... }`.
  * - Runs on `ExitWorktree` `remove` (only with `discard_changes: true`), at session exit, and when an agent finishes.
@@ -128,6 +142,8 @@ class Worktree {
     // ANOTHER repo's epic:  never a worktree of its name here, even one made before (epic `epic-engine` I47)
     const home = owner || AGENT.test(name) ? undefined : EpicRepo.elsewhere(name, root)
     if (home) throw new Error(EpicRepo.refusal(home))
+    // a multi-repo top (epic `epic-engine` P10):  the top's worktree, with every child repo's inside it
+    if (config.top) return Worktree.createAll(name, config.top)
     // where it is (either place), else the new place
     const path = config.worktreeFolder(name)
     if (existsSync(join(path, ".git"))) {
@@ -143,6 +159,39 @@ class Worktree {
     if (config.linkSessionFolders) Worktree.linkSessions(path, root)
     // `installCommand: ""`:  a repo with nothing to install
     if (config.installOnCreate && config.installCommand) Worktree.install(path, config)
+    return path
+  }
+
+  /**
+   * `create` for a MULTI-REPO top `top` (its config):  epic `name`'s worktree of the top, then of every child repo
+   * inside it, all on branch `name`;  returns the top's worktree.
+   * - each from its own `baseBranch`, or its branch `name` when it has one;  one that's there is reused
+   * - then, when anything was made:  the shared links (the top's), the session-folder links (each new worktree's
+   *   folder to the main top checkout's), ONE install at the top
+   */
+  static createAll(name, top) {
+    if (!existsSync(join(top.main, ".git")))
+      throw new Error(`the top repo ${top.main} isn't a git repo:  \`git init\` it first (it lists child repos)`)
+    const checkouts = top.repoCheckouts(name)
+    const made = []
+    for (const { repo, main, worktree } of checkouts) {
+      if (existsSync(join(worktree, ".git"))) {
+        console.error(`worktree hook:  reusing ${worktree}`)
+        continue
+      }
+      const base = new EpicConfig(main).baseBranch
+      const args = Worktree.hasBranch(main, name) ? [worktree, name] : ["-b", name, worktree, base]
+      console.error(`worktree hook:  ${repo}:  git worktree add ${args.join(" ")}`)
+      mkdirSync(dirname(worktree), { recursive: true })
+      Worktree.git(main, "worktree", "add", "--quiet", ...args)
+      Worktree.linkOutside(worktree, main)
+      made.push(worktree)
+    }
+    const path = checkouts[0].worktree
+    if (!made.length) return path
+    Worktree.linkShared(path, top)
+    if (top.linkSessionFolders) for (const each of made) Worktree.linkSessions(each, top.main)
+    if (top.installOnCreate && top.installCommand) Worktree.install(path, top)
     return path
   }
 
@@ -264,7 +313,11 @@ class Worktree {
     // the session folder's name is made from the real path, as `create` had it from git
     path = realpathSync(path)
     const root = Worktree.root(path)
-    const base = new EpicConfig(root).baseBranch
+    const config = new EpicConfig(root)
+    // a multi-repo top's epic worktree, or a child's in it (epic `epic-engine` P10):  every repo's
+    const name = config.top?.worktreeNameOf(path)
+    if (name) return Worktree.removeAll(name, config.top)
+    const base = config.baseBranch
     const branch = Worktree.git(path, "branch", "--show-current")
     if (Worktree.git(path, "status", "--porcelain")) throw new Error(`kept ${path}:  it has uncommitted changes`)
     const into = branch && Worktree.mergedInto(root, branch)
@@ -278,6 +331,41 @@ class Worktree {
     if (branch) Worktree.git(root, "branch", into === base ? "-d" : "-D", branch)
     const unlinked = SessionFolders.unlink(path, root).action === "removed" ? ", and its session-folder link" : ""
     return `removed ${path}${branch ? ` and branch ${branch}` : ""}${unlinked}${servers}`
+  }
+
+  /**
+   * `remove` for epic `name`'s worktree of MULTI-REPO top `top`:  every repo's, the children first, then the top's.
+   * - checks every repo FIRST:  uncommitted changes, or commits its base branch (or an agent's owner) lacks, in ANY
+   *   repo keep them ALL (throws, naming the repo)
+   * - then stops the servers in the whole folder, once
+   */
+  static removeAll(name, top) {
+    const checkouts = top.repoCheckouts(name).filter(({ worktree }) => existsSync(join(worktree, ".git")))
+    const branches = new Map()
+    for (const { repo, main, worktree } of checkouts) {
+      const branch = Worktree.git(worktree, "branch", "--show-current")
+      if (Worktree.git(worktree, "status", "--porcelain"))
+        throw new Error(`kept ${checkouts[0].worktree}:  ${repo} (${worktree}) has uncommitted changes`)
+      const into = branch && Worktree.mergedInto(main, branch)
+      if (branch && !into) {
+        const owner = branch.match(OWNED_AGENT)?.[1] ?? new EpicConfig(main).baseBranch
+        throw new Error(
+          `kept ${checkouts[0].worktree}:  ${repo}'s branch ${branch} has commits ${owner} doesn't;  merge it first`
+        )
+      }
+      branches.set(worktree, { branch, into, base: new EpicConfig(main).baseBranch })
+    }
+    const path = checkouts[0]?.worktree ?? join(top.worktreesFolder, name)
+    const servers = Worktree.stopServers(path)
+    const removed = []
+    for (const { repo, main, worktree } of [...checkouts.slice(1).reverse(), ...checkouts.slice(0, 1)]) {
+      const { branch, into, base } = branches.get(worktree)
+      Worktree.git(main, "worktree", "remove", worktree)
+      if (branch) Worktree.git(main, "branch", into === base ? "-d" : "-D", branch)
+      SessionFolders.unlink(worktree, top.main)
+      removed.push(repo)
+    }
+    return `removed ${path} (${removed.join(", ")}) and branch ${name} in each${servers}`
   }
 
   /** Stop checkout `path`'s servers (`CheckoutServers.stop()`):  `", stopped ..."` for the report, or `""`;  never throws. */

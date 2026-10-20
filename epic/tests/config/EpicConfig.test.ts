@@ -49,7 +49,10 @@ describe("EpicConfig", () => {
       "app.path": "/editor/",
       "app.url": "",
       "app.urlFile": "",
-      "app.start": ""
+      "app.start": "",
+      // a single repo:  no child repos, no multi-repo top (epic-engine P10)
+      repos: "",
+      top: ""
     })
     // no app declared
     expect(config.app).toBeUndefined()

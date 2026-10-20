@@ -32,6 +32,9 @@ import { RealPath } from "../config/RealPath.ts"
  *    an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):  `spell-app.worktrees/epic-engine`.
  *    Claude is told to edit nothing there (a link in it, `spell-epic`, leads to the other repo's MAIN checkout), to
  *    leave it (`ExitWorktree` keep), and to offer `epic window launch <name>`;  never sent back into it (1).
+ * - A MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10):  the worktree is the epic's worktree of the TOP
+ *   (`~/www/spell.worktrees/<name>`), even for a session in a child repo's folder inside it:  that's the folder
+ *   Claude is told to `EnterWorktree`.
  * - Its answer is the hook's JSON:  `additionalContext` for Claude, `systemMessage` a line for Owen.
  * - Its position:  node's own modules and `EpicConfig` by path, so plain `node` loads it.
  *   NEVER an alias, an `enum` or a parameter property.
@@ -45,7 +48,9 @@ export class WorktreeGuard {
   static check(input: GuardInput): GuardOutput | undefined {
     const { cwd, transcript_path: transcript, source } = input
     if (!cwd || (source !== "startup" && source !== "resume")) return undefined
-    const config = EpicConfig.of(cwd)
+    // a child repo of a multi-repo top (epic `epic-engine` P10):  the TOP's worktrees, whose each holds every repo's
+    const own = EpicConfig.of(cwd)
+    const config = own.top ?? own
     if (!existsSync(config.file)) return undefined
     const here = RealPath.of(cwd)
     const note = WorktreeGuard.lastNote(transcript)

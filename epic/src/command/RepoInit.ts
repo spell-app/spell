@@ -150,7 +150,8 @@ export class RepoInit {
       engineFolder: "",
       repoTemplates: "",
       windowsFolder: `../${repo}.epics/windows`,
-      app: { ...EpicConfig.DEFAULTS.app }
+      app: { ...EpicConfig.DEFAULTS.app },
+      repos: ""
     }
   }
 

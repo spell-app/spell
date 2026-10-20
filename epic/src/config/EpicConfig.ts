@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
-import { dirname, isAbsolute, join, resolve, sep } from "node:path"
+import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 
 // By the server's package entry (its `exports`, epic `repo-split` P6):  plain `node` loads this file (the hooks,
 // `src/window.mjs`), and finds the server package in `node_modules` (spell-app's, linked in:  `portal:`).  The
@@ -39,6 +39,11 @@ import { RealPath } from "./RealPath.ts"
  * - Node only (`node:fs`):  NOT in the `$/epics` barrel, imported by path (`$/epics/config/EpicConfig`).
  * - Its position:  imports only node's own modules, the server's `checkout.ts` by its entry and `RealPath` beside it,
  *   so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
+ * - A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A):  the top repo's file names its child repos
+ *   (`"repos": "repos.json5"`);  each child finds it as the folder above its main checkout (`top`).  An epic's
+ *   worktree is then the TOP's, `<worktreesFolder>/<epic>/`, with each child's inside it (`repoCheckouts()`);  a
+ *   child's `worktreesFolder` is the top's, and its own worktree of an epic `<epic>/<repo>` in it.  No `repos`:  a
+ *   single repo, as before.
  * - A repo moved behind a compat link (repo-split's move to `~/www/spell/`;  epic `epic-engine` I59):
  *   - `main` is the REAL path, and every path compare is real on both sides (`RealPath`), so an old spelling (a
  *     worktree's `.git` file, a session's `cwd`) still matches
@@ -63,7 +68,8 @@ export class EpicConfig {
     engineFolder: "../spell-epic",
     repoTemplates: "",
     windowsFolder: "",
-    app: { path: "/editor/", url: "", urlFile: "", start: "" }
+    app: { path: "/editor/", url: "", urlFile: "", start: "" },
+    repos: ""
   }
 
   /**
@@ -92,6 +98,12 @@ export class EpicConfig {
 
   /** `oldMains`' answer, once asked */
   private oldMainsFound: string[] | undefined
+
+  /** `repos`' answer, once asked */
+  private reposFound: string[] | undefined
+
+  /** `top`'s answer, once asked:  `null` for none */
+  private topFound: EpicConfig | null | undefined
 
   /**
    * The config of the repo whose MAIN checkout is `main`.
@@ -170,20 +182,110 @@ export class EpicConfig {
   /**
    * the folder NEW worktrees go in, `<worktreesFolder>/<name>`:  `worktreesFolder`, from the main checkout
    * - existing ones may still be in the old place:  `worktreesFolders`
+   * - a CHILD repo of a multi-repo top (`top`):  the TOP's, where each epic's worktree is (`~/www/spell.worktrees`);
+   *   its own worktree of epic `<name>` is `<name>/<repo>` in it (`newWorktreeFolder()`)
    */
   get worktreesFolder(): string {
+    const top = this.top
+    return top && top !== this ? top.worktreesFolder : this.ownWorktreesFolder
+  }
+
+  /** `worktreesFolder` as this repo's own file has it, from its main checkout:  a child repo's place before its top's */
+  private get ownWorktreesFolder(): string {
     return this.folderFor("worktreesFolder", this.settings.worktreesFolder)
   }
 
   /**
-   * every folder worktrees may be in, the new place first:  `worktreesFolder`, then the OLD place (the default,
-   * `.claude/worktrees`) when the file moved them (epic `epic-eject` P8:  `../spell-app.worktrees`)
-   * - the old place stays on the list for good:  harmless once it's empty, and a worktree there keeps working until
-   *   its `/isolate done`
+   * every folder worktrees may be in, the new place first:  `worktreesFolder`, then the OLD places:  a child repo's
+   * own `worktreesFolder` (its worktrees from before its top's), and the default, `.claude/worktrees`, when the file
+   * moved them (epic `epic-eject` P8:  `../spell-app.worktrees`)
+   * - the old places stay on the list for good:  harmless once empty, and a worktree there keeps working until its
+   *   `/isolate done`
    */
   get worktreesFolders(): string[] {
     const old = resolve(this.main, EpicConfig.DEFAULTS.worktreesFolder)
-    return old === this.worktreesFolder ? [old] : [this.worktreesFolder, old]
+    return [...new Set([this.worktreesFolder, this.ownWorktreesFolder, old])]
+  }
+
+  /**
+   * The child repos this repo holds, lowest first, when it's a MULTI-REPO TOP (epic `epic-engine` P10, repo-split's
+   * Q9 A):  `repos` in its config;  `[]` for any other repo (a single repo, or a child).
+   * - `repos`:  a list of names (`["spell-util", ...]`), or a file from the main checkout listing them
+   *   (`"repos.json5"`:  `{ "repos": [{ "name": "spell-util", ... }, ...] }`, the top repo `spell`'s own list)
+   * - a file that won't read:  `[]`, said on stderr
+   */
+  get repos(): string[] {
+    if (this.reposFound) return this.reposFound
+    const written = this.settings.repos
+    let names: string[] = []
+    if (Array.isArray(written)) names = written
+    else if (written) {
+      const file = resolve(this.main, written)
+      try {
+        const data = EpicConfig.parse(readFileSync(file, "utf8"), file) as { repos?: unknown } | unknown[]
+        const list = Array.isArray(data) ? data : (data as { repos?: unknown }).repos
+        names = (Array.isArray(list) ? list : [])
+          .map((each) => (typeof each === "string" ? each : (each as { name?: unknown })?.name))
+          .filter((name): name is string => typeof name === "string" && /^[\w.-]+$/.test(name))
+      } catch (error) {
+        warnOnce(`repos ${written} won't read (${(error as Error).message}):  a single repo`)
+      }
+    }
+    this.reposFound = names
+    return names
+  }
+
+  /**
+   * The MULTI-REPO TOP this repo belongs to (epic `epic-engine` P10):  its config.
+   * - this config itself, when it lists child repos (`repos`)
+   * - the folder ABOVE its main checkout's, when that is a top whose `repos` names this repo (`~/www/spell` for
+   *   `~/www/spell/spell-epic`)
+   * - `undefined`:  a single repo, as every repo was before:  its worktrees, merges and windows are its own
+   * - What it changes:  an epic's worktree is the top's, `<top's worktreesFolder>/<epic>/`, holding a worktree of
+   *   every child repo at the same folder names, all on branch `<epic>` (`repoCheckouts()`)
+   */
+  get top(): EpicConfig | undefined {
+    if (this.topFound !== undefined) return this.topFound ?? undefined
+    if (this.repos.length) {
+      this.topFound = this
+      return this
+    }
+    let found: EpicConfig | undefined
+    const parent = dirname(this.main)
+    try {
+      if (parent !== this.main && existsSync(join(parent, EpicConfig.FILE))) {
+        const up = new EpicConfig(parent)
+        if (up.repos.includes(this.repoName)) found = up
+      }
+    } catch {
+      // a top whose config won't read:  a single repo
+    }
+    this.topFound = found ?? null
+    return found
+  }
+
+  /** The repo's folder name:  its main checkout's (`spell-epic`) */
+  get repoName(): string {
+    return basename(this.main)
+  }
+
+  /**
+   * Every repo's checkout in epic `name`'s worktree, the TOP first, then each child repo cloned in the top's main
+   * checkout (it has `.git`), in `repos` order (lowest first):  `{ repo, main, worktree, top }`.
+   * - a multi-repo top (`top`):  `<worktreesFolder>/<name>` for the top, `<worktreesFolder>/<name>/<repo>` for each
+   *   child, where the worktree hook makes them (made or not)
+   * - a single repo:  just its own, where it is or would go (`worktreeFolder()`)
+   */
+  repoCheckouts(name: string): RepoCheckout[] {
+    const top = this.top
+    if (!top) return [{ repo: this.repoName, main: this.main, worktree: this.worktreeFolder(name), top: true }]
+    const folder = join(top.worktreesFolder, name)
+    return [
+      { repo: top.repoName, main: top.main, worktree: folder, top: true },
+      ...top.repos
+        .filter((repo) => existsSync(join(top.main, repo, ".git")))
+        .map((repo) => ({ repo, main: join(top.main, repo), worktree: join(folder, repo), top: false }))
+    ]
   }
 
   /** what makes a new worktree ready to run, from its root;  `""`:  nothing to run (a repo with no packages) */
@@ -304,15 +406,22 @@ export class EpicConfig {
    * Worktree `name`'s folder:  where it IS, in any of `worktreesFolders`;  else where a new one goes,
    * `<worktreesFolder>/<name>` (`newWorktreeFolder()`).
    * - so an old worktree (`.claude/worktrees/seo`) is still found after the file moved new ones beside the repo
+   * - a child repo of a multi-repo top (`top`):  ITS worktree, `<top's worktreesFolder>/<name>/<repo>`, else one in
+   *   its own old places
    */
   worktreeFolder(name: string): string {
-    const found = this.worktreesFolders.map((folder) => join(folder, name)).find((folder) => existsSync(folder))
-    return found ?? this.newWorktreeFolder(name)
+    const olds = this.worktreesFolders.slice(1).map((folder) => join(folder, name))
+    return [this.newWorktreeFolder(name), ...olds].find((folder) => existsSync(folder)) ?? this.newWorktreeFolder(name)
   }
 
-  /** Where a NEW worktree `name` goes:  `<worktreesFolder>/<name>`, whatever is in the old place. */
+  /**
+   * Where a NEW worktree `name` goes:  `<worktreesFolder>/<name>`, whatever is in the old place.
+   * - a child repo of a multi-repo top:  `<worktreesFolder>/<name>/<repo>`, inside the epic's worktree of the top
+   */
   newWorktreeFolder(name: string): string {
-    return join(this.worktreesFolder, name)
+    const top = this.top
+    const own = top && top !== this ? [this.repoName] : []
+    return join(this.worktreesFolder, name, ...own)
   }
 
   /**
@@ -362,8 +471,13 @@ export class EpicConfig {
    * Whether worktree `name`'s window holds only `⎇ <name>` and the content folder, no main checkout
    * (epic `epic-eject` O3):  `windows.worktreeOnly`, or its folder is beside the repo.
    * - a worktree still nested in the checkout keeps the old layout, the main root first (`src/window.mjs`)
+   * - a MULTI-REPO top's epic worktree (`top`;  epic `epic-engine` P10, repo-split's Q9 A):  the top's
+   *   `windows.worktreeOnly` alone, off by default:  the main top checkout first (`~/www/spell`, its files hidden), so
+   *   its Claude panel lists every session, then the epic's worktree, then the content folder
    */
   worktreeOnlyWindow(name: string): boolean {
+    const top = this.top
+    if (top) return top.windows.worktreeOnly
     return this.windows.worktreeOnly || this.isOutside(this.worktreeFolder(name))
   }
 
@@ -447,7 +561,9 @@ export class EpicConfig {
       "app.path": this.settings.app.path,
       "app.url": this.settings.app.url,
       "app.urlFile": this.settings.app.urlFile && resolve(this.main, this.settings.app.urlFile),
-      "app.start": this.settings.app.start
+      "app.start": this.settings.app.start,
+      repos: this.repos.join(","),
+      top: this.top?.main ?? ""
     }
   }
 
@@ -492,6 +608,7 @@ export class EpicConfig {
       engineFolder: valueOf(given, "engineFolder", defaults.engineFolder, file, "", { empty: true }),
       repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true }),
       windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true }),
+      repos: reposOf(given, defaults.repos, file),
       app: {
         path: valueOf(app, "path", defaults.app.path, file, "app."),
         url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
@@ -519,6 +636,12 @@ export class EpicConfig {
     }
   }
 }
+
+/**
+ * One repo's checkout in an epic's worktree (`EpicConfig.repoCheckouts()`):  the repo's folder name, its MAIN
+ * checkout, its worktree for the epic (made or not), and whether it's the top (or the single repo)
+ */
+export type RepoCheckout = { repo: string; main: string; worktree: string; top: boolean }
 
 /**
  * What `.epic/config.json5` holds:  where a repo keeps its epic things.  Every key is optional in the file.
@@ -560,6 +683,11 @@ export class EpicConfig {
  *   - before P13:  `workspaces/` in the main checkout, tracked by spell-app and marked `skip-worktree`
  * - `app`:  the repo's app, which the top bar's App tab opens through the epic server (epic `epic-engine` I49;
  *   `EpicApp`);  left out:  none, and the tab says so
+ * - `repos`:  a MULTI-REPO TOP's child repos (epic `epic-engine` P10):  a file from the main checkout listing them
+ *   (`"repos.json5"`, the top repo `spell`'s), or their names;  `""` (the default):  a single repo, as before
+ *   - on, an epic's worktree is `<worktreesFolder>/<epic>/`:  a worktree of the top with one of every child repo
+ *     inside it, all on branch `<epic>`, one install at its top (`top`, `repoCheckouts()`;  the worktree hook)
+ *   - read in the TOP's config;  a child repo finds its top as the folder above its main checkout (`top`)
  */
 export type EpicSettings = {
   contentFolder: string
@@ -575,6 +703,7 @@ export type EpicSettings = {
   repoTemplates: string
   windowsFolder: string
   app: EpicApp
+  repos: string | string[]
 }
 
 /**
@@ -658,6 +787,21 @@ function foldersOf(given: Record<string, unknown>, key: string, fallback: string
       `EpicConfig:  ${file}'s "${key}" must be a list of folder names, ["epics", ...], not ${JSON.stringify(value)}`
     )
   return value as string[]
+}
+
+/**
+ * `given.repos`:  a file listing the child repos (`"repos.json5"`), or their names (`["spell-util", ...]`);
+ * `fallback` (`""`, none) when it's left out.
+ * - throws `TypeError` naming the file for anything else
+ */
+function reposOf(given: Record<string, unknown>, fallback: string | string[], file: string): string | string[] {
+  const value = given.repos
+  if (value === undefined) return fallback
+  const plain = (each: unknown) => typeof each === "string" && /^[\w.-]+$/.test(each) && each !== "." && each !== ".."
+  if (typeof value === "string" || (Array.isArray(value) && value.every(plain))) return value as string | string[]
+  throw new TypeError(
+    `EpicConfig:  ${file}'s "repos" must be a file ("repos.json5") or a list of repo names, not ${JSON.stringify(value)}`
+  )
 }
 
 /** `text` without what `cut(rest)` says to cut:  how many characters, at each place outside a double-quoted string. */

@@ -22,6 +22,7 @@ import {
   type NameStatus,
   type PlanFacts,
   type PlanSummary,
+  type RepoState,
   type RunningSession
 } from "./command.types"
 import { CheckoutServers } from "./CheckoutServers"
@@ -48,10 +49,17 @@ import { Shared } from "./Shared"
  *     - an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):  that repo's, said on stderr
  *     - where it is (the old place included), else where a new one goes (`EpicConfig.worktreeFolder()`)
  *     - what the skills give `EnterWorktree`
- *   - `remove <name | path> [--force]`:  remove a worktree, its servers stopped FIRST (`remove()`, epic `epic-engine` I53)
+ *   - `remove <name | path> [--force] [--branches]`:  remove a worktree, its servers stopped FIRST (`remove()`, epic
+ *     `epic-engine` I53);  `--branches`:  and its branch in each repo, when merged (`git branch -d`)
+ *   - `repos [<name>] [--json]`:  each repo's checkout in epic `<name>`'s worktree (default:  the one this runs in),
+ *     with its branch, what's uncommitted, and how far it is ahead of and behind its base branch (`repoStates()`)
  *   - `merge-main [--continue] [--json]`:  merge `main` into this checkout's branch (`MainMerge`)
  *     - regenerates generated files (bundles, snapshots) both sides changed
  *     - exits 1 when other files conflict
+ *     - a multi-repo top's epic worktree:  each repo's base branch into its `<name>` branch (`MainMerge.runAll()`)
+ * - A MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10, repo-split's Q9 A):  `main` is the main TOP checkout
+ *   (`~/www/spell`), from any child repo, and an epic's worktree is the top's, holding a worktree of every child repo:
+ *   `remove` removes them all (children first), `repos` lists them, `status`'s `ahead` counts every repo's commits
  * - What the other groups read of worktrees and epic pages:  `nameStatus()`, `planFile()`, `planFacts()` ...
  * - git runs in the MAIN checkout (`main`):  branches are shared, so every worktree gets the same answer.
  ****************/
@@ -67,7 +75,7 @@ export class Worktrees {
    * - `sessions`:  default `new Sessions()`
    */
   constructor({ main = Git.mainRoot(), sessions = new Sessions() }: WorktreesProps = {}) {
-    this.main = main
+    this.main = Worktrees.topOf(main)
     this.sessions = sessions
   }
 
@@ -115,18 +123,32 @@ export class Worktrees {
       }
       case "remove": {
         if (!name) throw new EpicCommandError("remove:  which worktree?  (its name, or its folder)")
-        for (const line of this.remove(name, { force: Boolean(flags.force) })) out(line)
+        const options = { force: Boolean(flags.force), branches: Boolean(flags.branches) }
+        for (const line of this.remove(name, options)) out(line)
+        return EXIT.OK
+      }
+      case "repos": {
+        const epic = name ?? this.config.worktreeNameOf(RealPath.of(process.cwd()))
+        if (!epic) throw new EpicCommandError("repos:  which epic?  (not run in an epic's worktree)")
+        const states = this.repoStates(epic)
+        if (flags.json) out(JSON.stringify(states, null, 2))
+        else for (const line of repoLines(states)) out(line)
         return EXIT.OK
       }
       case "merge-main": {
         const checkout = Git.nearestCheckout(".git")
-        const report = new MainMerge({ root: checkout }).run(flags.continue ? "continue" : "start")
-        if (flags.json) out(JSON.stringify(report, null, 2))
-        else for (const line of mergeMainLines(report)) out(line)
-        return report.result === "conflicts" ? EXIT.ERRORS : EXIT.OK
+        const reports = MainMerge.runAll(checkout, flags.continue ? "continue" : "start")
+        // one repo:  its report as before;  a multi-repo top:  one per repo, `repo` in each
+        const single = reports.length === 1 && !reports[0]!.repo
+        if (flags.json) out(JSON.stringify(single ? reports[0] : reports, null, 2))
+        else
+          for (const report of reports)
+            for (const line of report.error ? [`${report.repo}:  FAILED:  ${report.error}`] : mergeMainLines(report))
+              out(report.repo && !report.error ? `${report.repo}:  ${line}` : line)
+        return reports.some((report) => report.result === "conflicts" || report.error) ? EXIT.ERRORS : EXIT.OK
       }
       default:
-        throw new EpicCommandError(`unknown verb '${verb}':  list, status, path, move, remove or merge-main`)
+        throw new EpicCommandError(`unknown verb '${verb}':  list, status, path, move, remove, repos or merge-main`)
     }
   }
 
@@ -194,20 +216,71 @@ export class Worktrees {
    * - what `/isolate done` (`/epic done`) and `/worktrees`' clean-up (`Stock`) run;  the `WorktreeRemove` hook stops
    *   the servers itself
    */
-  remove(target: string, { force = false }: { force?: boolean } = {}): string[] {
+  remove(target: string, { force = false, branches = false }: { force?: boolean; branches?: boolean } = {}): string[] {
+    const top = this.config.top
+    const epic = top && (target.includes("/") ? top.worktreeNameOf(target) : target)
+    if (top && epic && existsSync(join(top.worktreesFolder, epic, ".git")))
+      return this.removeEpic(epic, { force, branches })
     const named = this.named().find((it) => it.name === target)
     // git's own spelling of it:  an unrepaired worktree's is its old path, through a compat link (I59)
     const path = named?.path ?? Worktrees.listOf(this.main).find((it) => RealPath.same(it.path, target))?.path
     if (!path) throw new EpicCommandError(`no worktree ${target} in this repo:  epic worktree list names them`)
-    if (RealPath.same(path, this.main)) throw new EpicCommandError(`${path} is the main checkout:  never removed`)
+    const main = named?.main ?? this.main
+    if (RealPath.same(path, main)) throw new EpicCommandError(`${path} is the main checkout:  never removed`)
     const lines: string[] = []
     const stopped = CheckoutServers.said(CheckoutServers.stop(path))
     if (stopped) lines.push(`${stopped}`)
-    const removed = Git.run(["worktree", "remove", ...(force ? ["--force"] : []), path], this.main)
-    if (!removed.ok) throw new EpicCommandError(`git worktree remove ${path} failed:  ${removed.err}`)
-    lines.push(`removed ${path}`)
-    if (SessionFolders.unlink(path, this.main).action === "removed") lines.push("  and its session-folder link")
+    const branch = named?.branch ?? Worktrees.listOf(main).find((it) => it.path === path)?.branch
+    lines.push(...Worktrees.removeOne(path, main, { force, sessions: this.main }))
+    if (branches && branch && branch !== "(detached)") lines.push(Worktrees.deleteBranch(main, branch))
     return lines
+  }
+
+  /**
+   * Remove epic `name`'s worktree of a MULTI-REPO top (epic `epic-engine` P10):  every child repo's in it, then the
+   * top's;  the servers in the whole folder stopped FIRST, once.
+   * - every repo checked first, unless `force`:  uncommitted changes in ANY keep them ALL (`EpicCommandError`)
+   * - `branches`:  then each repo's branch `<name>`, when merged (`git branch -d`:  an unmerged one stays, said)
+   */
+  removeEpic(
+    name: string,
+    { force = false, branches = false }: { force?: boolean; branches?: boolean } = {}
+  ): string[] {
+    const checkouts = this.config.repoCheckouts(name).filter(({ worktree }) => existsSync(join(worktree, ".git")))
+    if (!force)
+      for (const { repo, worktree } of checkouts)
+        if (Git.run(["status", "--porcelain"], worktree).out)
+          throw new EpicCommandError(`${repo} has uncommitted changes (${worktree}):  nothing removed`)
+    const lines: string[] = []
+    const stopped = CheckoutServers.said(CheckoutServers.stop(checkouts[0]!.worktree))
+    if (stopped) lines.push(stopped)
+    // the children first:  they're inside the top's
+    for (const { repo, main, worktree } of [...checkouts.slice(1).reverse(), checkouts[0]!]) {
+      const branch = Git.run(["branch", "--show-current"], worktree).out
+      lines.push(
+        ...Worktrees.removeOne(worktree, main, { force, sessions: this.main }).map((line) => `${repo}:  ${line}`)
+      )
+      if (branches && branch) lines.push(`${repo}:  ${Worktrees.deleteBranch(main, branch)}`)
+    }
+    return lines
+  }
+
+  /**
+   * `git worktree remove [--force] <path>` in main checkout `main`, then its saved-session link, if it's one to
+   * `sessions`' (the main checkout whose folder they're saved in);  a line each.  Throws git's refusal.
+   */
+  static removeOne(path: string, main: string, { force = false, sessions = main } = {}): string[] {
+    const removed = Git.run(["worktree", "remove", ...(force ? ["--force"] : []), path], main)
+    if (!removed.ok) throw new EpicCommandError(`git worktree remove ${path} failed:  ${removed.err}`)
+    const lines = [`removed ${path}`]
+    if (SessionFolders.unlink(path, sessions).action === "removed") lines.push("  and its session-folder link")
+    return lines
+  }
+
+  /** `git branch -d <branch>` in `main`:  a line saying what happened;  an unmerged branch stays, never `-D`. */
+  static deleteBranch(main: string, branch: string): string {
+    const deleted = Git.run(["branch", "-d", branch], main)
+    return deleted.ok ? `deleted branch ${branch}` : `kept branch ${branch}:  ${deleted.err.split("\n")[0]}`
   }
 
   /** `move --idle`:  move every worktree in the old place that no session works in;  a report each. */
@@ -229,11 +302,63 @@ export class Worktrees {
    * - `path` as git lists it:  an unrepaired worktree's old path, after a move behind a compat link, matches its
    *   folder all the same (`RealPath`, epic `epic-engine` I59)
    */
-  named(): { name: string; path: string; branch: string }[] {
-    const roots = this.config.worktreesFolders
-    return Worktrees.listOf(this.main)
+  named(): { name: string; path: string; branch: string; main?: string }[] {
+    const config = this.config
+    // this repo's own:  `main` left out, it's `this.main`
+    const own = Worktrees.namedIn(this.main, config.worktreesFolders).map(({ main: _, ...it }) => it)
+    const top = config.top
+    if (!top) return own
+    // a multi-repo top:  also each child repo's worktrees in its OWN old places (from before its top's)
+    const children = top.repos
+      .map((repo) => join(this.main, repo))
+      .filter((main) => existsSync(join(main, ".git")))
+      .flatMap((main) => Worktrees.namedIn(main, new EpicConfig(main).worktreesFolders.slice(1)))
+    return [...own, ...children]
+  }
+
+  /** The worktrees of the repo at `main` in `roots`:  `{ name, path, branch, main }`, detached ones left out. */
+  static namedIn(main: string, roots: string[]): { name: string; path: string; branch: string; main: string }[] {
+    return Worktrees.listOf(main)
       .filter((it) => roots.some((root) => RealPath.from(root, it.path)) && it.branch !== "(detached)")
-      .map((it) => ({ name: basename(it.path), path: it.path, branch: it.branch }))
+      .map((it) => ({ name: basename(it.path), path: it.path, branch: it.branch, main }))
+  }
+
+  /**
+   * Each repo's checkout in epic `name`'s worktree (`EpicConfig.repoCheckouts()`;  one, in a single repo), as it
+   * stands:  `RepoState`.
+   * - `ahead`:  commits on branch `name` its base branch lacks;  `behind`:  the other way;  0 with no branch
+   * - `dirty`:  `git status --short` lines in its worktree;  `made`:  the worktree is there
+   */
+  repoStates(name: string): RepoState[] {
+    return this.config.repoCheckouts(name).map(({ repo, main, worktree }) => {
+      const base = new EpicConfig(main).baseBranch
+      const made = existsSync(join(worktree, ".git"))
+      const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${name}`], main).ok ? name : null
+      const count = (range: string) => (branch ? Number(Git.run(["rev-list", "--count", range], main).out || 0) : 0)
+      const dirty = made ? Git.run(["status", "--short"], worktree).out.split("\n").filter(Boolean) : []
+      return {
+        repo,
+        worktree,
+        made,
+        branch,
+        base,
+        ahead: count(`${base}..${name}`),
+        behind: count(`${name}..${base}`),
+        dirty
+      }
+    })
+  }
+
+  /**
+   * The main TOP checkout when main checkout `main` is a multi-repo top or a child repo of one (`EpicConfig.top`);
+   * else `main`.  A config that won't read:  `main`.
+   */
+  static topOf(main: string): string {
+    try {
+      return new EpicConfig(main).top?.main ?? main
+    } catch {
+      return main
+    }
   }
 
   /** Each worktree in the worktrees' folder that no session in `sessions` works in. */
@@ -267,7 +392,12 @@ export class Worktrees {
     const config = this.config
     const worktree = config.worktreeFolder(name)
     const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${name}`], main).ok ? name : null
-    const ahead = branch ? Number(Git.run(["rev-list", "--count", `${config.baseBranch}..${name}`], main).out || 0) : 0
+    // a multi-repo top:  every repo's commits on branch `name` (epic `epic-engine` P10)
+    const ahead = config.top
+      ? this.repoStates(name).reduce((sum, state) => sum + state.ahead, 0)
+      : branch
+        ? Number(Git.run(["rev-list", "--count", `${config.baseBranch}..${name}`], main).out || 0)
+        : 0
     const reflog = branch ? Git.run(["reflog", "show", "--format=%H", `refs/heads/${name}`], main).out : ""
     const moved = reflog.split("\n").filter(Boolean).length > 1
     const merged = !!branch && moved && ahead === 0
@@ -497,7 +627,7 @@ export type WorktreesProps = {
 }
 
 /** The flags of `epic worktree` that take no value. */
-const SWITCHES = ["json", "continue", "idle", "dryRun", "force"]
+const SWITCHES = ["json", "continue", "idle", "dryRun", "force", "branches"]
 
 /**
  * `planSummaries()`'s cache:  `{ file:  summary }`, for this process.
@@ -521,6 +651,16 @@ function moveLines(report: MoveReport, dryRun: boolean): string[] {
       ? [`  its window file names the old folder:  epic window close ${name}, then epic window open ${name}`]
       : [])
   ]
+}
+
+/** `repos`' report, for a person:  a line per repo. */
+function repoLines(states: RepoState[]): string[] {
+  return states.map(({ repo, worktree, made, branch, base, ahead, behind, dirty }) =>
+    !made
+      ? `${repo}:  no worktree (${worktree})`
+      : `${repo}:  ${branch ?? "no branch"}, ${ahead} ahead of ${base}, ${behind} behind` +
+        (dirty.length ? `, ${dirty.length} uncommitted` : "")
+  )
 }
 
 /** `merge-main`'s report, for a person. */

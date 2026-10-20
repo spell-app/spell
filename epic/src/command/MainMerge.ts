@@ -180,6 +180,41 @@ export class MainMerge {
     return report
   }
 
+  /**
+   * `epic worktree merge-main`, from checkout `root`:  a report per repo.
+   * - a single repo:  `root`'s merge alone (`run()`), its errors thrown as before
+   * - in an epic's worktree of a MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10), from its top or any child
+   *   repo's folder in it:  EVERY repo's, each its own base branch into its `<epic>` branch, the child repos lowest
+   *   first (`repos`' order), the top last;  `repo` in each report
+   *   - one that can't merge (uncommitted changes, a generator failing) has `error`, and the others go on:
+   *     each says clearly whether it merged (repo-split's C5)
+   *   - `continue`:  only the repos with a merge in progress
+   * - `make`:  the merge of one checkout (tests pass their own generators)
+   */
+  static runAll(
+    root: string,
+    mode: "start" | "continue" = "start",
+    make: (root: string) => MainMerge = (root) => new MainMerge({ root })
+  ): MergeMainReport[] {
+    const top = EpicConfig.of(root).top
+    const epic = top?.worktreeNameOf(root)
+    if (!top || !epic) return [make(root).run(mode)]
+    const checkouts = top.repoCheckouts(epic).filter(({ worktree }) => existsSync(join(worktree, ".git")))
+    const reports: MergeMainReport[] = []
+    for (const { repo, worktree } of [...checkouts.slice(1), ...checkouts.slice(0, 1)]) {
+      if (mode === "continue" && !Git.run(["rev-parse", "-q", "--verify", "MERGE_HEAD"], worktree).ok) continue
+      try {
+        reports.push({ ...make(worktree).run(mode), repo })
+      } catch (error) {
+        const branch = gitOut(worktree, ["branch", "--show-current"])
+        reports.push({ ...emptyReport(branch), repo, error: (error as Error).message })
+      }
+    }
+    if (mode === "continue" && !reports.length)
+      throw new EpicCommandError("merge-main --continue:  no merge in progress")
+    return reports
+  }
+
   /** where a checkout lists its generated files:  `<root>/.epic/generators.json5` (epic `epic-eject` T4) */
   static readonly GENERATORS_FILE = ".epic/generators.json5"
 
@@ -277,6 +312,11 @@ function reviewSnapshots(root: string, files: string[]): SnapshotReview[] {
       return { file, keys: keys.map(([key]) => key) }
     })
     .filter((review) => review.keys.length)
+}
+
+/** A report of nothing done, for branch `branch`:  `runAll()`'s for a repo that failed. */
+function emptyReport(branch: string): MergeMainReport {
+  return { branch, result: "up-to-date", conflicts: [], untracked: [], regenerated: [], review: [], unstaged: [] }
 }
 
 /** Tracked files changed, deleted or new (not ignored) in the working tree, against the index. */

@@ -782,6 +782,10 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
                        (a worktree beside the repo gets that window anyway)
   linkSessionFolders   whether the worktree hook links new worktrees' saved-session folders to main's
   sharedFolders        the content repo's folders every checkout links in, comma-separated
+  repos                a MULTI-REPO top's child repos, comma-separated (its "repos":  "repos.json5", or the
+                       names):  an epic's worktree is then <worktreesFolder>/<epic>, a worktree of the top with
+                       one of every child repo inside it, all on branch <epic>;  empty:  a single repo
+  top                  the multi-repo top's main checkout this repo is (or is a child of);  empty:  none
 Any worktree reads the main checkout's file;  a key it leaves out takes its default.
 
 Examples:

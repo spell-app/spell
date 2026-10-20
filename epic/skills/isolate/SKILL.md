@@ -15,6 +15,20 @@ Work in worktree `<name>`, so this session's edits never collide with another se
 - The session either moves to a NEW window of the worktree's own, or STAYS in this one.
   Owen picks, each time (step 2b).
 
+## A multi-repo top
+
+When `epic config repos` prints names, the repo is a MULTI-REPO top, or a child repo of one (`~/www/spell` and the
+repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P10).  Then:
+- The worktree is the TOP's:  `epic worktree path <name>` prints `~/www/spell.worktrees/<name>`, a git worktree of the
+  top with a git worktree of EVERY child repo inside it, at the same folder names, ALL on branch `<name>`.
+  - The `WorktreeCreate` hook makes them all, and runs ONE install, at its top.
+  - Each repo is its own git repo:  run git in the repo's folder (`git -C <name's folder>/spell-ui ...`).
+- `epic worktree repos [<name>]` lists each repo's checkout:  its branch, how far it is ahead of and behind its
+  `main`, and what's uncommitted.  `--json` for the numbers.
+- What changes below, step by step:  each step that says "the worktree" or `main..HEAD` means EACH repo `repos`
+  lists;  the commands that loop over the repos themselves are named there.
+- A single repo (any other setup):  every step as written, for its one checkout.
+
 ## Start:  `/isolate <name>`
 
 0. Checks and rename, BEFORE anything else.
@@ -219,11 +233,15 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - For each picked:
      - `epic worktree remove <name>`:  its page and vite servers stopped first, then git's remove
        - never a bare `git worktree remove`:  it leaves them running (epic `epic-engine` I53)
+       - a multi-repo top:  every child repo's worktree, then the top's;  `--branches` deletes each repo's merged
+         branch too, in place of the `git branch -d` below
      - `git branch -d <branch>`
        - `-D` for an agent's branch that's only in `<owner>`, since `-d` checks against `main`
    - Then stop:  steps 1-8 are for a session IN a worktree.
 1. Report what's uncommitted and unmerged in the worktree:
    `git status --short`, `git log --oneline main..HEAD`.
+   - A multi-repo top:  `epic worktree repos`, then those two in each repo it lists ahead or uncommitted.
+     A repo the epic never touched (0 ahead, nothing uncommitted) is left out of every step below.
    - Commit only as the root's rules allow (stage, then ask).
 2. Unmerged commits (`main..HEAD` not empty):  AskUserQuestion, listing the commits in the question.
    - "Merge `<name>` into `main`?", options "Merge now" and "Leave unmerged"
@@ -239,6 +257,10 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      - How to tell:  `epic shared status` shows its folders `tracked`, not `ok`.
      - `--dry-run` shows what it moves.
      - Else merging `main` drags its old tracked copies of the docs, goals and logs into conflicts.
+   - A multi-repo top:  `epic worktree merge-main` merges EVERY repo's `main` into its `<name>` branch, a line per
+     repo saying what it did;  run the `merge-tree` check below in each repo `epic worktree repos` lists behind
+     first.  A repo that stopped on conflicts, or FAILED, is named:  fix it in that repo's folder, then
+     `epic worktree merge-main --continue` (it goes on only where a merge is in progress).
    - `git log --oneline HEAD..main` empty (`main` hasn't moved):  ready, go on to step 4.
    - Else `git merge-tree --write-tree --name-only main HEAD`, which merges without touching any files:
      - exit 0, or conflicts ONLY in generated files:  `epic worktree merge-main`, then step 4.
@@ -328,6 +350,11 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      - Either fails:  say which, and don't merge.
    - `git merge --ff-only <name>`.
      - Refused (`main` moved since step 2):  say so, and don't merge.
+     - A multi-repo top:  `epic merge <name>` in the main TOP checkout instead.
+       - It fast-forwards ONLY the repos whose `<name>` branch has commits beyond their `main`, each in its own
+         main checkout, after checking them all (on `main`, clean, holding all of `main`):  one failing check
+         merges nothing, and says which repo.
+       - A line per repo it moved.
      - `/isolate <name>` re-enters the worktree to merge `main` in again.
    - Merged:  `epic session done`.
      - This session's name gets a ✅ (`✅ <name>`), so the Claude panel tells finished work from live work.
@@ -351,6 +378,8 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      `git merge-base --is-ancestor <branch> <name>`.
 8. One line;  in a worktree's window, plus "close this window when you're done with it".
    - Merged:  the worktree can go (`epic worktree remove <name>`, `git branch -d <name>`).
+     - A multi-repo top:  `epic worktree remove <name> --branches`:  every repo's worktree, children first, and its
+       merged branch.
    - Not merged:  how to merge later (`git merge <name>` from the main checkout), then the same cleanup.
    - Agents' worktrees:  how many step 7b removed, and any it kept.
    - Then close the reply as "Closing line" below says.

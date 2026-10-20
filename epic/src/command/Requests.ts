@@ -46,6 +46,7 @@ import { Sessions } from "./Sessions"
  *       its `--from` and `--file` (the request as html) taken as given rather than read from the epic's `requests/`
  *   - `home [<epic>]`:  the TOOLING HOME, the epic dev-tooling requests go to;  with `<epic>`, set it
  *   - `merge <epic>`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in the main checkout
+ *     - a multi-repo top (epic `epic-engine` P10):  each repo whose branch `<epic>` has commits (`mergeEach()`)
  ****************/
 export class Requests {
   /** the checkout it runs for:  STATIC for the object's life */
@@ -78,9 +79,20 @@ export class Requests {
     if (!verb) throw new EpicCommandError(`which verb?  ${VERBS}`)
     if (verb === "merge") {
       if (!named) throw new EpicCommandError("merge:  which epic?")
-      const commits = Requests.merge(named)
-      out(commits.length ? `main fast-forwarded to ${named}:` : `nothing to merge:  main already has ${named}`)
-      for (const commit of commits) out(`  ${commit}`)
+      const merged = Requests.mergeEach(named)
+      if (merged.length === 1 && !merged[0]!.repo) {
+        const { commits } = merged[0]!
+        out(commits.length ? `main fast-forwarded to ${named}:` : `nothing to merge:  main already has ${named}`)
+        for (const commit of commits) out(`  ${commit}`)
+        return EXIT.OK
+      }
+      // a multi-repo top:  each repo whose branch has commits
+      const moved = merged.filter(({ commits }) => commits.length)
+      if (!moved.length) out(`nothing to merge:  every repo's main already has ${named}`)
+      for (const { repo, base, commits } of moved) {
+        out(`${repo}:  ${base} fast-forwarded to ${named}:`)
+        for (const commit of commits) out(`  ${commit}`)
+      }
       return EXIT.OK
     }
     if (verb === "home") {
@@ -428,6 +440,42 @@ export class Requests {
     const merged = Git.run(["merge", "--ff-only", epic], main)
     if (!merged.ok) throw new EpicCommandError(`merge:  git merge --ff-only ${epic} failed:\n${merged.err}`)
     return commits
+  }
+
+  /**
+   * `merge()` for every repo of a MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10):  `{ repo, base, commits }`
+   * each, in `repoCheckouts()` order, the top first;  a single repo:  `merge()`'s alone, no `repo`.
+   * - run in the main checkout of the top (or of a child repo):  each repo's own main checkout is merged into
+   * - ONLY the repos whose branch `<epic>` has commits beyond their base branch:  a repo the epic never touched, or
+   *   with no branch `<epic>`, is skipped
+   * - EVERY repo checked before any moves (on its base branch, clean, the branch holding all of it):  one failing
+   *   check throws, naming the repo, and nothing is merged
+   */
+  static mergeEach(epic: string, cwd = process.cwd()): { repo?: string; base: string; commits: string[] }[] {
+    const main = Git.mainRoot(cwd)
+    const top = new EpicConfig(main).top
+    if (!top) return [{ base: new EpicConfig(main).baseBranch, commits: Requests.merge(epic, cwd) }]
+    const toplevel = Git.run(["rev-parse", "--show-toplevel"], cwd).out
+    if (!toplevel || realpathSync(toplevel) !== realpathSync(main))
+      throw new EpicCommandError(`merge:  run it in the main checkout (${top.main}):  ExitWorktree (keep) first`)
+    const repos = top.repoCheckouts(epic).flatMap(({ repo, main: checkout }) => {
+      const base = new EpicConfig(checkout).baseBranch
+      if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], checkout).ok) return []
+      const ahead = Number(Git.run(["rev-list", "--count", `${base}..${epic}`], checkout).out || 0)
+      return ahead ? [{ repo, checkout, base }] : []
+    })
+    for (const { repo, checkout, base } of repos) {
+      const branch = Git.run(["branch", "--show-current"], checkout).out
+      if (branch !== base) throw new EpicCommandError(`merge:  ${repo}'s main checkout is on '${branch}', not ${base}`)
+      const dirty = Git.run(["status", "--short"], checkout).out
+      if (dirty) throw new EpicCommandError(`merge:  ${repo}'s main checkout has uncommitted changes:\n${dirty}`)
+      if (!Git.run(["merge-base", "--is-ancestor", base, epic], checkout).ok)
+        throw new EpicCommandError(
+          `merge:  ${repo}'s ${base} has moved since ${epic} last took it:  in its worktree, epic worktree merge-main, ` +
+            "then again;  nothing merged"
+        )
+    }
+    return repos.map(({ repo, checkout, base }) => ({ repo, base, commits: Requests.merge(epic, checkout) }))
   }
 
   /**

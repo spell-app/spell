@@ -76,6 +76,10 @@
  * - Docs shown while the move is pending (`show`, `epic open`) wait for it, then show in the window the
  *   session moved to:  the window it's leaving is about to close its tab.
  * - Its file:  `<windowsFolder>/ongoing/<name>.code-workspace`, beside the package windows' files.
+ * - A MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10:  `~/www/spell`, `"repos"` in its config):  the TOP's
+ *   config throughout, from any child repo or worktree.  Folder 1 of every window is the main top checkout, its files
+ *   hidden in an epic's window;  then `⎇ <name>`, the epic's worktree of the top (each child repo's inside it);  then
+ *   the content folder.  `windows.worktreeOnly` in the top's config drops folder 1.
  * - A worktree BESIDE the repo (`worktreesFolder` outside it, or `windows.worktreeOnly`;  epic `epic-eject` P8):
  *   a worktree-only window, `⎇ <name>` then the content folder.
  *   - no main checkout, no `.spell-main` marker, no hiding
@@ -224,8 +228,18 @@ function checkoutAround(dir) {
   }
 }
 
-/** The repo's `.epic/config.json5`, the MAIN checkout's:  its folders and window names. */
-const CONFIG = EpicConfig.of(ROOT)
+/**
+ * The repo's `.epic/config.json5`, the MAIN checkout's:  its folders and window names.
+ * - a MULTI-REPO top's child repo (`EpicConfig.top`, epic `epic-engine` P10):  the TOP's.  Folder 1 of every window
+ *   is the main TOP checkout (`~/www/spell`), every session saved under it;  an epic's window is that, its files
+ *   hidden, then the epic's worktree of the top (every repo's inside it), then the content folder
+ */
+const CONFIG = topConfig(EpicConfig.of(ROOT))
+
+/** `config`'s multi-repo top's config, when it has one (`EpicConfig.top`);  else `config`. */
+export function topConfig(config) {
+  return config.top ?? config
+}
 
 /** The MAIN checkout's root, even when run from a worktree:  the repo root every package window shows. */
 const MAIN_ROOT = CONFIG.main

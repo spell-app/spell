@@ -67,11 +67,18 @@ export class EpicRepo {
       return origins.get(dir)!
     }
     const owner = worktree ? EpicRepo.mainOfPath(worktree) : null
+    // a multi-repo top and its child repos are ONE home (epic `epic-engine` P10):  an epic's worktree holds them all
+    const family = EpicRepo.familyOf(here)
     let own: boolean
-    if (owner) own = RealPath.same(owner, here) || EpicRepo.sameUrl(origin(owner), origin(here))
-    else if (repo && origin(here)) own = EpicRepo.sameUrl(repo, origin(here))
+    if (owner)
+      own =
+        family.some((main) => RealPath.same(owner, main)) ||
+        family.some((main) => EpicRepo.sameUrl(origin(owner), origin(main)))
+    else if (repo && family.some((main) => origin(main)))
+      own = family.some((main) => EpicRepo.sameUrl(repo, origin(main)))
     else return undefined
-    const checkout = own ? here : (owner ?? EpicRepo.checkoutByUrl(repo, here))
+    // a multi-repo top's own epic:  the TOP's checkout, whose worktree holds every repo's (`familyOf()`'s second)
+    const checkout = own ? (family[1] ?? here) : (owner ?? EpicRepo.checkoutByUrl(repo, here))
     const folder = checkout ? new EpicConfig(checkout).worktreeFolder(name) : null
     return {
       name,
@@ -111,6 +118,24 @@ export class EpicRepo {
       `no worktree ${home.name} here.  Open its own window:  \`epic window launch ${home.name}\`` +
       ` (it finds ${home.name}'s repo from here)${enter}.`
     )
+  }
+
+  /**
+   * The main checkouts that count as main checkout `here`'s repo:  `here` alone, or, in a MULTI-REPO top
+   * (`EpicConfig.top`, epic `epic-engine` P10), the top's and every child repo's cloned in it
+   */
+  static familyOf(here: string): string[] {
+    try {
+      const top = new EpicConfig(here).top
+      if (!top) return [here]
+      return [
+        here,
+        top.main,
+        ...top.repos.map((repo) => join(top.main, repo)).filter((main) => existsSync(join(main, ".git")))
+      ]
+    } catch {
+      return [here]
+    }
   }
 
   /** Epic `name`'s page in main checkout `here`'s content folder:  `<name>.plan.html`, or an old `<name>.html`. */

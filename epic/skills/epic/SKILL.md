@@ -417,6 +417,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        - `P4 + P5:` for two;  `WIP P3:` for a parked part
      - an item fix:  `<name> I3:  ...`.
        It MUST carry the epic's name:  `commits --backfill` ignores a bare `Fix I3:`, since it can't tell which epic.
+   - A multi-repo top:  one commit in EACH repo the phase changed, all with the same subject, each in the repo's
+     folder (`epic worktree repos` lists what's uncommitted where);  the lowest repo first (`repos.json5`'s order).
    - After the phase's commit:  `epic commits <name> --backfill`, which finds them by subject.
      - The epic page is never in that commit:
        it's shared content, committed for you (see "Shared content" at the top).
@@ -428,8 +430,11 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        and the guide brought in line, before the commit.
      - Then, no asking (the standing epic is the ask):
        1. `main` moved (`git log --oneline HEAD..main` not empty):  `epic worktree merge-main`.
+          - A multi-repo top (`epic config repos` prints names;  [the isolate skill](../isolate/SKILL.md), "A
+            multi-repo top"):  `epic worktree repos` says which repos are behind;  `merge-main` merges every one.
        2. `ExitWorktree` with `action: "keep"`:  a worktree session can't move `main`.
        3. `epic merge <name>`, in the main checkout:  checks it's on `main` and clean, then fast-forwards.
+          - A multi-repo top:  in the main TOP checkout;  only the repos whose `<name>` branch has commits move.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
        4. `EnterWorktree` with `path`, the folder `epic worktree path <name>` prints.
           Back, the window and session unchanged.
