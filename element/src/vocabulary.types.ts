@@ -7,10 +7,10 @@
  *   and a translation can rename all of them in one place.
  * - Canonical names are English and never change;  CSS, `ClassBuilder` output and `:state()`s always use them.
  *   - A `Dictionary` only renames what AUTHORS type:  tags, attribute names, attribute values, events, slots, parts.
- * - The types live here, in spell-solid, since every set's elements are declared by one.
+ * - The types live here, in spell-element, since every set's elements are declared by one.
  *   - The code that reads them is Spell UI's, `$/ui/vocabulary`:
  *     the registry, value sets, converters, class words.
- *   - spell-solid reaches it through its settings (`SpellSolidSettings.words`).
+ *   - spell-element reaches it through its settings (`SpellSolidSettings.words`).
  *   - The shared value sets and topics are Spell UI's too (`$/ui/vocabulary`'s `ValueSets`):
  *     it names them by augmenting `ValueSetNames` and `TopicNames`.
  * - Types only, importing nothing:  it erases completely.
@@ -337,7 +337,7 @@ export type SkeletonPart =
  * The topics a component may be filed under:  a set's runtime adds them by augmenting this interface,
  * so a vocabulary's `topics` are checked against them.
  * - Spell UI's are `ValueSets.topics` (`$/ui/vocabulary`):
- *   `declare module "$/spell-solid/vocabulary.types" { interface TopicNames extends Record<..., true> {} }`
+ *   `declare module "$/spell-element/vocabulary.types" { interface TopicNames extends Record<..., true> {} }`
  */
 export interface TopicNames {}
 
@@ -366,7 +366,7 @@ export type ComponentTopic = NamesOf<TopicNames>
  * - `booleans` -- spellings the boolean converter understands, so a translation can map `sí` => `yes`
  * - `topics` -- what a component is filed under (a vocabulary's `topics`), so a translation maps them once
  * - The names are the RUNTIME's:  Spell UI adds its sets by augmenting this interface,
- *   `declare module "$/spell-solid/vocabulary.types" { interface ValueSetNames extends Record<keyof ValueSets, true> {} }`,
+ *   `declare module "$/spell-element/vocabulary.types" { interface ValueSetNames extends Record<keyof ValueSets, true> {} }`,
  *   so a vocabulary's `values: "hues"` is checked against them.
  */
 export interface ValueSetNames {}
@@ -379,7 +379,7 @@ export type ValueSetName = NamesOf<ValueSetNames>
 
 /**
  * The keys of a registry of names (`ValueSetNames`, `TopicNames`), or any text while it has none:
- * spell-solid alone checks no name, a program with Spell UI checks every one.
+ * spell-element alone checks no name, a program with Spell UI checks every one.
  */
 export type NamesOf<Registry> = [keyof Registry] extends [never] ? string : Extract<keyof Registry, string>
 

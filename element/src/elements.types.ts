@@ -1,14 +1,14 @@
 /**
- * Shared types for `$/spell-solid`, what makes a custom element on Solid:
+ * Shared types for `$/spell-element`, what makes a custom element on Solid:
  * - how a `ComponentVocabulary` becomes typed, converted property values (`AttributeValues`)
  * - what the pieces of `UIComponent` hand each other:  `ElementSetup`, `ResolvedAttribute`, the owner context's
- * - the settings a component set's runtime hands spell-solid as it loads (`SpellSolidSettings`)
+ * - the settings a component set's runtime hands spell-element as it loads (`SpellSolidSettings`)
  * - Runtime-light:  types, plus a few constants (`AriaNames`, `ERROR_EVENT`, `ERRORED_STATE`, `NO_ANIMATION`).
  * - The BOTTOM of the package's import graph:  `import type` only (the package's types as `E`, erased),
  *   so it NEVER loads a class module, the DOM or Solid.
  */
 
-import type { E } from "$/spell-solid"
+import type { E } from "$/spell-element"
 
 ////////////////
 // ## Class builder
@@ -401,7 +401,7 @@ export type ElementSetup = {
  * - The names are the RUNTIME's:  a component set adds its own by augmenting this interface, so
  *   `elementSetup.animation` is checked against them.
  *   - Spell UI's are Fomantic's (`UIT.Animations`, `components.types.ts`):
- *     `declare module "$/spell-solid/elements.types" { interface ElementAnimations extends Record<UIT.Animation, true> {} }`
+ *     `declare module "$/spell-element/elements.types" { interface ElementAnimations extends Record<UIT.Animation, true> {} }`
  * - `none` is every set's:  no motion.
  */
 export interface ElementAnimations {
@@ -499,10 +499,10 @@ export const ERRORED_STATE = "errored"
 ////////////////
 
 /**
- * What a component set's runtime hands spell-solid as it loads (`SpellSolid.install()`):
- * the services the element bases call, so spell-solid never imports the set that draws with them.
+ * What a component set's runtime hands spell-element as it loads (`SpellSolid.install()`):
+ * the services the element bases call, so spell-element never imports the set that draws with them.
  * - Spell UI's:  `packages/ui/src/elements/SpellUISettings.ts`, installed as `$/ui/core` loads.
- * - Every element of the page uses the same ones:  a page has one spell-solid.
+ * - Every element of the page uses the same ones:  a page has one spell-element.
  */
 export type SpellSolidSettings = {
   /** the page's runtime, which styles and texts wait for */

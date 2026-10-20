@@ -1,5 +1,5 @@
 /**
- * Barrel for `$/spell-solid`:  what makes a custom element on Solid, for every component set
+ * Barrel for `$/spell-element`:  what makes a custom element on Solid, for every component set
  * (Spell UI's, the epics', the app's, the brand's, a space's).
  * - `UIComponent`, the COMPONENT base:  one instance per element, its `render()` returns JSX
  * - `DOMElement`, the DOM element base
@@ -20,7 +20,7 @@
  * - NOTE: the files import this barrel back, as `E`:  a cycle, on purpose (WWOD §4 › "ONE namespace per sub-system").
  *   - What a file reads while it EVALUATES (a base class, a decorator, a static initializer)
  *     comes from its own file instead (WWOD §4 › "Circular imports").
- *   - The order below puts each such file before its readers;  `tests/spell-solid/src/barrel.test.ts` checks it.
+ *   - The order below puts each such file before its readers;  `tests/spell-element/src/barrel.test.ts` checks it.
  * - NOTE: Spell UI's `$/ui/core` re-exports all of it, so its `E` holds these names too, and a page has ONE copy:
  *   Spell UI's core bundle carries it, and a component pack reads it from there (`SpellUI.packModules`).
  */
@@ -47,6 +47,6 @@ export * from "./SlotContent"
 
 /**
  * The package namespace (WWOD §4):
- * `import { E } from "$/spell-solid"`, then `E.UIComponent`, `@E.state` (`AGENTS.md`).
+ * `import { E } from "$/spell-element"`, then `E.UIComponent`, `@E.state` (`AGENTS.md`).
  */
-export * as E from "$/spell-solid"
+export * as E from "$/spell-element"

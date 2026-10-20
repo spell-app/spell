@@ -1,14 +1,7 @@
 {
-  // spell-solid's tests:  they draw their elements on a page with Spell UI's runtime, so Spell UI's settings
-  // (packages/ui/tsconfig.json) over this folder, as `tests/ui` has them
-  "extends": "../../packages/ui/tsconfig.json",
-  // and Spell UI's own folders, as its tsconfig includes them:  the JSX tags and Vitest types they declare reach the
-  // tests;  spell-solid's source is compiled through them
-  "include": [
-    ".",
-    "../../packages/ui/src",
-    "../../packages/ui/test",
-    "../../packages/ui/tools",
-    "../../packages/ui/site/_src"
-  ]
+  // spell-element's tests:  the package's own settings (packages/spell-element/tsconfig.json) over this folder, with
+  // no Spell UI:  they draw on the package's stand-in settings and helpers, in its `test/`
+  "extends": "../../packages/spell-element/tsconfig.json",
+  // and the package's own folders, so its source and helpers are compiled with the tests
+  "include": [".", "../../packages/spell-element/src", "../../packages/spell-element/test"]
 }
