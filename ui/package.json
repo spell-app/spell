@@ -88,30 +88,96 @@
   ],
   "module": "./dist/index.js",
   "exports": {
-    ".": "./src/index.ts",
-    "./api": "./src/api.ts",
-    "./core": "./src/core.ts",
-    "./docs-components/docs-components.types": "./src/docs-components/docs-components.types.ts",
-    "./forms": "./src/forms.ts",
-    "./icons": "./src/icons/index.ts",
+    ".": {
+      "types": "./dist-types/src/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./api": {
+      "types": "./dist-types/src/api.d.ts",
+      "default": "./src/api.ts"
+    },
+    "./core": {
+      "types": "./dist-types/src/core.d.ts",
+      "default": "./src/core.ts"
+    },
+    "./docs-components/docs-components.types": {
+      "types": "./dist-types/src/docs-components/docs-components.types.d.ts",
+      "default": "./src/docs-components/docs-components.types.ts"
+    },
+    "./forms": {
+      "types": "./dist-types/src/forms.d.ts",
+      "default": "./src/forms.ts"
+    },
+    "./icons": {
+      "types": "./dist-types/src/icons/index.d.ts",
+      "default": "./src/icons/index.ts"
+    },
     "./icons/*": "./src/icons/icon-packs/*",
-    "./property": "./src/property/index.ts",
-    "./runtime": "./src/runtime/index.ts",
-    "./styles": "./src/styles/index.ts",
+    "./property": {
+      "types": "./dist-types/src/property/index.d.ts",
+      "default": "./src/property/index.ts"
+    },
+    "./runtime": {
+      "types": "./dist-types/src/runtime/index.d.ts",
+      "default": "./src/runtime/index.ts"
+    },
+    "./styles": {
+      "types": "./dist-types/src/styles/index.d.ts",
+      "default": "./src/styles/index.ts"
+    },
     "./styles/ui.css": "./src/styles/ui.css",
-    "./test/A11y": "./test/A11y.ts",
-    "./test/ElementFixture": "./test/ElementFixture.ts",
-    "./test/MemberClashes": "./test/MemberClashes.ts",
-    "./test/setup.ts": "./test/setup.ts",
-    "./tools/ComponentPack": "./tools/ComponentPack.ts",
-    "./tools/ElementManifests": "./tools/ElementManifests.ts",
-    "./tools/packModules": "./tools/packModules.ts",
-    "./tools/SiteDataBuilder": "./tools/SiteDataBuilder.ts",
-    "./tools/SiteSearchBuilder": "./tools/SiteSearchBuilder.ts",
-    "./tools/StaticRenderer": "./tools/StaticRenderer.ts",
-    "./tools/tools.types": "./tools/tools.types.ts",
-    "./ui-*": "./components/ui-*/index.ts",
-    "./vite.config.ts": "./vite.config.ts"
+    "./test/A11y": {
+      "types": "./dist-types/test/A11y.d.ts",
+      "default": "./test/A11y.ts"
+    },
+    "./test/ElementFixture": {
+      "types": "./dist-types/test/ElementFixture.d.ts",
+      "default": "./test/ElementFixture.ts"
+    },
+    "./test/MemberClashes": {
+      "types": "./dist-types/test/MemberClashes.d.ts",
+      "default": "./test/MemberClashes.ts"
+    },
+    "./test/setup.ts": {
+      "types": "./dist-types/test/setup.d.ts",
+      "default": "./test/setup.ts"
+    },
+    "./tools/ComponentPack": {
+      "types": "./dist-types/tools/ComponentPack.d.ts",
+      "default": "./tools/ComponentPack.ts"
+    },
+    "./tools/ElementManifests": {
+      "types": "./dist-types/tools/ElementManifests.d.ts",
+      "default": "./tools/ElementManifests.ts"
+    },
+    "./tools/packModules": {
+      "types": "./dist-types/tools/packModules.d.ts",
+      "default": "./tools/packModules.ts"
+    },
+    "./tools/SiteDataBuilder": {
+      "types": "./dist-types/tools/SiteDataBuilder.d.ts",
+      "default": "./tools/SiteDataBuilder.ts"
+    },
+    "./tools/SiteSearchBuilder": {
+      "types": "./dist-types/tools/SiteSearchBuilder.d.ts",
+      "default": "./tools/SiteSearchBuilder.ts"
+    },
+    "./tools/StaticRenderer": {
+      "types": "./dist-types/tools/StaticRenderer.d.ts",
+      "default": "./tools/StaticRenderer.ts"
+    },
+    "./tools/tools.types": {
+      "types": "./dist-types/tools/tools.types.d.ts",
+      "default": "./tools/tools.types.ts"
+    },
+    "./ui-*": {
+      "types": "./dist-types/components/ui-*/index.d.ts",
+      "default": "./components/ui-*/index.ts"
+    },
+    "./vite.config.ts": {
+      "types": "./dist-types/vite.config.d.ts",
+      "default": "./vite.config.ts"
+    }
   },
   "publishConfig": {
     "main": "./dist/index.js",
@@ -395,7 +461,7 @@
     "clean": "rm -rf ./.cache ./build ./dist ./coverage ./test-results ./vendor ./tools/frameworks/solid/dist",
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && tsc && tsc -p tsconfig.node.json && tsc -p ./tests && echo '<< TSC PASSED\n'",
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && spell-types --below && spell-types && tsc -p tsconfig.node.json && tsc -p ./tests && echo '<< TSC PASSED\n'",
     "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src components test scripts tools && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\n'",
     "lint:fix": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT --fix' && vp lint --fix src components test scripts tools && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\n'",
     "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt . && cd ./tests && vp fmt . && echo '<< OXFMT PASSED\n'",
