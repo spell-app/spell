@@ -341,6 +341,8 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 | --- | --- |
 | `/_epic/assets/...` | this checkout's `src/tools/_assets/`:  `spell-ui.js`, `spell-doc.css`, the runtime |
 | `/_epic/pack/...` | this checkout's epics pack, `epics.pack.js` |
+| `/components/epics/...` | Epic UI, the elements' docs:  this checkout's `src/docs/` |
+| `/components/<set>/...` | the default repo's other component sets, as spell-app's page server serves them (`COMPONENT_SETS`):  Spell UI, App UI, the brand's;  each repo's at `/r/<repo>/components/<set>/` |
 | `/r/<repo>/...` | a registered repo's content folder (its `.epic/config.json5`'s `contentFolder`) |
 | `/...` | the DEFAULT repo's content folder too, so today's URLs keep working |
 | `/api/...` | the epic route modules (review, details, choices, comments, agents, airplane, running, links), for the default repo |
@@ -354,6 +356,7 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 - Pages load the engine from the routes (the migration step `engine-asset-routes`).
   A page not migrated yet still loads THIS engine's files, from its old paths.
 - Not yet:  another repo's calls (`/api/...` from a `/r/<repo>/` page) reach the default repo's route modules.
+- Not here:  the app (the top bar's App tab, `/editor/`):  spell-app's page server runs it (spaces' `appRoutes`).
 
 ## spell-app's packages
 

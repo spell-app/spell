@@ -8,7 +8,7 @@ import { dirname, join, resolve } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "$/server"
-import { SETS_BUNDLE } from "$/server/page"
+import { COMPONENT_SETS, SETS_BUNDLE, SITE_BUNDLE } from "$/server/page"
 import { ask } from "$/server/test/serve"
 
 import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "$/epics/server/EpicServer"
@@ -37,6 +37,17 @@ function repo(top: string, name: string): string {
   return checkout
 }
 
+/**
+ * Give the scratch repo at `checkout` spell-app's component sets, as its checkout lays them (`COMPONENT_SETS`):
+ * each set's home page, and the two site bundles' `site.js`;  Epic UI's folder too, which the engine's stands in for.
+ */
+function componentSets(checkout: string): void {
+  const name = checkout.split("/").at(-1)
+  for (const set of COMPONENT_SETS) put(checkout, `${set.dir}/index.html`, `${name} ${set.name} home`)
+  put(checkout, `${SITE_BUNDLE}/site.js`, `// ${name} Spell UI's site`)
+  put(checkout, `${SETS_BUNDLE}/site.js`, `// ${name} the sets' site`)
+}
+
 describe("EpicServer", () => {
   const top = mkdtempSync(join(tmpdir(), "epic-server-"))
   const home = join(top, "home")
@@ -45,7 +56,9 @@ describe("EpicServer", () => {
 
   beforeAll(async () => {
     const list = new RepoList({ home })
-    list.add(repo(top, "one"))
+    const one = repo(top, "one")
+    componentSets(one)
+    list.add(one)
     list.add(repo(top, "two"))
     server = new EpicServer({ home, engine: ENGINE, token: "t0ken" })
     await server.start({ port: 0, routes: false, pidFile: false })
@@ -123,6 +136,35 @@ describe("EpicServer", () => {
     const bundle = join(ENGINE, ".spell-app", SETS_BUNDLE, "site.js")
     if (existsSync(bundle)) expect(server.fileFor("/components/epics/_assets/site.js")).toBe(bundle)
     expect((await ask(port, "GET", "/components/epics/missing.html")).status).toBe(404)
+  })
+
+  // epic-engine I48:  the top bar's Spell/UI and App/UI tabs answered "Not found" here, while spell-app's page server
+  // served them
+  test("every other component set the repo's checkout has, at /components/<set>/ and /r/<repo>/components/<set>/, its site bundle at _assets/", async () => {
+    const sets = COMPONENT_SETS.filter((set) => set.prefix !== "/components/epics")
+    expect(sets.map((set) => set.prefix)).toEqual(["/components/ui", "/components/app", "/components/brand"])
+    for (const set of sets)
+      for (const base of ["", "/r/one"]) {
+        const home = await ask(port, "GET", `${base}${set.prefix}/`)
+        expect([home.status, home.text.endsWith(`one ${set.name} home`)], `${base}${set.prefix}/`).toEqual([200, true])
+        const site = await ask(port, "GET", `${base}${set.prefix}/_assets/site.js`)
+        const bundle = set.assets === SITE_BUNDLE ? "Spell UI's site" : "the sets' site"
+        expect([site.status, site.text], `${base}${set.prefix}/_assets/site.js`).toEqual([200, `// one ${bundle}`])
+      }
+    expect(server.fileFor("/components/ui/index.html")).toBe(join(top, "one", "packages/ui/docs/index.html"))
+    // its SPELL_SERVER.file is its address, as live reload reports its folder's changes
+    const config = (path: string) => async () =>
+      JSON.parse(/window\.SPELL_SERVER = (\{.*?\})<\/script>/.exec((await ask(port, "GET", path)).text)![1]!)
+    expect((await config("/components/app/index.html")()).file).toBe("/components/app/index.html")
+    expect((await config("/r/one/components/ui/")()).file).toBe("/r/one/components/ui/index.html")
+    expect((await config("/components/epics/epic-item.html")()).file).toBe("/components/epics/epic-item.html")
+    expect((await ask(port, "GET", "/components/ui")).headers.location).toBe("/components/ui/")
+    expect((await ask(port, "GET", "/components/app/missing.html")).status).toBe(404)
+    // Epic UI stays the engine's, not the repo's own folder of it
+    expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>The Epic Elements</title>")
+    expect((await ask(port, "GET", "/r/one/components/epics/")).status).toBe(404)
+    // a repo without component sets:  nothing
+    expect((await ask(port, "GET", "/r/two/components/ui/")).status).toBe(404)
   })
 
   test("every page's SPELL_SERVER:  its path under the prefix it was asked by, its repo, base and checkout", async () => {

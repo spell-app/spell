@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { SRV, type ServedFile } from "$/server"
 import {
+  COMPONENT_SETS,
   HIGHLIGHT_JS,
   PageEditor,
   pageServerSettings,
@@ -37,7 +38,10 @@ import {
  * /_epic/pack/...         spell-epic's src/components/__pack/   (epics.pack.js)
  * /components/epics/...   Epic UI, the elements' pages:  spell-epic's src/docs/   (EPIC_UI)
  * /components/epics/_assets/...   their site bundle, spell-app's sets' build (SETS_BUNDLE, through .spell-app)
+ * /components/<set>/...   every OTHER component set the default repo's checkout has (COMPONENT_SETS):  Spell UI, App UI,
+ *                         the brand's;  its site bundle at _assets/, from that checkout (`componentSetMounts()`)
  * /r/<repo>/...           that repo's content folder (its .epic/config.json5's contentFolder), then its main checkout
+ * /r/<repo>/components/<set>/...   that repo's component sets, the same way
  * /...                    the DEFAULT repo's content folder and checkout too, so today's URLs keep working
  * /api/server             what it serves (EpicServerInfo)
  * /api/...                the epic route modules, for the default repo (below)
@@ -58,7 +62,9 @@ import {
  *     only inside its `writable` folders (its `package.json`'s `"pageServer"`, else `WRITABLE`).
  * - Epic UI, the engine's own component set, at `/components/epics/` as spell-app's page server serves it
  *   (`epicUiMounts()`, epic `epic-eject` I21:  it answered 404 here)
- * - NOT spell-app's page server:  no other component set, no Spell UI site, no app;  spell-app's own server keeps those.
+ * - The OTHER component sets, as spell-app's page server serves them (`componentSetMounts()`, epic `epic-engine` I48:
+ *   the top bar's Spell/UI and App/UI tabs answered 404 here)
+ * - NOT spell-app's page server:  no app (the top bar's App tab, `/editor/`);  spell-app's own server keeps it.
  * - Its pid file and log are in spell-epic's home folder (`~/.spell-epic/server.json`, `server.log`).
  * - Its port:  `DEFAULT_EPIC_PORT` (4848), not spell-app's 4747.
  * - Run it with `epic hub` (`Hub`), never by hand.
@@ -97,6 +103,9 @@ export class EpicServer {
   /** the folder served at `/components/epics/`:  the engine's `src/docs/`, or the one the constructor was given */
   private readonly epicUiDir: string
 
+  /** every component set's folders, at their addresses:  Epic UI's, then the repos' others */
+  private readonly setMounts: SRV.Mount[]
+
   /**
    * - `home`:  default `RepoList.homeFolder()`
    * - `engine`:  default this code's checkout
@@ -117,6 +126,7 @@ export class EpicServer {
     this.epicUiDir = resolve(epicUi ?? join(this.engine, EPIC_UI.dir))
     this.repos = repos ?? new RepoList({ home: this.home }).repos()
     this.defaultRepo = this.repos.find((repo) => repo.isDefault) ?? this.repos[0]
+    this.setMounts = [...this.epicUiMounts(), ...this.componentSetMounts()]
     this.pidFile = new SRV.PidFile(this.home, PID_FILE)
     this.info = {
       pid: process.pid,
@@ -246,7 +256,35 @@ export class EpicServer {
           { prefix: "/", dir: repo.checkout }
         ]
       : []
-    return [...engine, ...this.epicUiMounts(), ...repos, ...home]
+    return [...engine, ...this.setMounts, ...repos, ...home]
+  }
+
+  /**
+   * Every OTHER component set a repo's checkout has, as spell-app's page server serves them
+   * (`COMPONENT_SETS`, `componentSetPath()`;  epic `epic-engine` I48):
+   * - the sets:  spell-app's own list, through `.spell-app`, never a copy:  Spell UI, App UI, the brand's
+   *   - each where the repo's MAIN checkout has its folder (`dir`):  a repo without one gets nothing
+   *   - NOT Epic UI:  the engine's own (`epicUiMounts()`)
+   * - `/components/<set>/...`:  the default repo's;  `/r/<repo>/components/<set>/...`:  each repo's
+   * - `<set address>/_assets/...`:  its site bundle (`assets`), from the same checkout:  Spell UI's own for Spell UI,
+   *   the sets' build for the others;  spell-app's page server builds them, so missing until that has run
+   * - the longer prefix wins (`SRV.StaticHandler`), so `_assets/` is the bundle's, never the set's folder's
+   */
+  private componentSetMounts(): SRV.Mount[] {
+    return this.repos.flatMap((repo) => {
+      const bases = repo === this.defaultRepo ? ["/", repo.prefix] : [repo.prefix]
+      return COMPONENT_SETS.filter(
+        (set) => set.prefix !== `/${EPIC_UI.path}` && existsSync(join(repo.checkout, set.dir))
+      ).flatMap((set) =>
+        bases.flatMap((base) => {
+          const prefix = `${base}${set.prefix.slice(1)}/`
+          return [
+            { prefix: `${prefix}${SET_ASSETS}/`, dir: join(repo.checkout, set.assets) },
+            { prefix, dir: join(repo.checkout, set.dir) }
+          ]
+        })
+      )
+    })
   }
 
   /**
@@ -267,7 +305,8 @@ export class EpicServer {
 
   /**
    * What a page served from `served` gets as `window.SPELL_SERVER`, beyond the web server's own:
-   * - `file`:  its URL path as LIVE RELOAD reports it, under the prefix it was asked by (`/r/<repo>/...` or `/...`)
+   * - `file`:  its URL path as LIVE RELOAD reports it, under the prefix it was asked by (`/r/<repo>/...` or `/...`);
+   *   a component set's page:  its address (`/components/ui/ui-button.html`), where its folder is watched
    * - `repo`, `base`:  its repo's name and URL prefix (`/` for the default repo's pages at the root)
    * - `root`:  that repo's main checkout
    * - `engine`:  spell-epic's checkout
@@ -279,8 +318,15 @@ export class EpicServer {
     const repo = asked ?? this.defaultRepo
     const base = asked ? asked.prefix : "/"
     const inside = repo && relative(repo.content, served.file)
-    const file =
-      inside && !inside.startsWith("..") ? `${base}${inside.split(sep).map(encodeURIComponent).join("/")}` : undefined
+    const set = this.setMounts.find(
+      (mount) => served.path.startsWith(mount.prefix) && !relative(mount.dir, served.file).startsWith("..")
+    )
+    const inSet = set && relative(set.dir, served.file)
+    const file = inSet
+      ? `${set.prefix}${inSet.split(sep).map(encodeURIComponent).join("/")}`
+      : inside && !inside.startsWith("..")
+        ? `${base}${inside.split(sep).map(encodeURIComponent).join("/")}`
+        : undefined
     return {
       ...(file && { file }),
       ...(repo && { repo: repo.name, root: repo.checkout }),
@@ -296,7 +342,7 @@ export class EpicServer {
    * Live reload:
    * - each repo's content at its prefix (the default's at `/` too)
    * - the engine's assets and pack at their routes (and at their old paths, for pages not migrated yet)
-   * - Epic UI's pages and their site bundle, at their addresses (`epicUiMounts()`)
+   * - the component sets' pages and their site bundles, at their addresses (`epicUiMounts()`, `componentSetMounts()`)
    */
   private watch(): void {
     const live = this.web.live!
@@ -313,7 +359,7 @@ export class EpicServer {
     // the templates at each repo's prefix
     for (const repo of this.repos)
       live.watch(join(this.engine, ENGINE_ROUTES.templates.dir), { servedAt: `${repo.prefix}templates/` })
-    for (const mount of this.epicUiMounts())
+    for (const mount of this.setMounts)
       if (existsSync(mount.dir)) live.watch(mount.dir, { servedAt: mount.prefix })
   }
 
