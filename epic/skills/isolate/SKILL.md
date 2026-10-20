@@ -212,7 +212,8 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      - It takes 2-4 options, so one candidate is "Remove `<name>`" / "Keep it".
      - More than 4 go in several questions.
    - For each picked:
-     - `git worktree remove "$(epic worktree path <name>)"`
+     - `epic worktree remove <name>`:  its page and vite servers stopped first, then git's remove
+       - never a bare `git worktree remove`:  it leaves them running (epic `epic-engine` I53)
      - `git branch -d <branch>`
        - `-D` for an agent's branch that's only in `<owner>`, since `-d` checks against `main`
    - Then stop:  steps 1-8 are for a session IN a worktree.
@@ -337,14 +338,14 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - Remove it when it's clean and its commits are in `<name>`:
      - clean:  `git -C <path> status --short` empty
      - in `<name>`:  `git log --oneline <name>..<branch>` empty
-     - then `git worktree remove <path>`, and `git branch -D <branch>`.
+     - then `epic worktree remove <path>` (its servers stopped first), and `git branch -D <branch>`.
        `-d` checks against `main` only;  the `log` check is the safety.
    - Else keep it, and list it in step 8 with why (uncommitted files, or commits `<name>` lacks).
    - A pre-2026-10-05 agent worktree is plain `agent-<id>`.
      Remove it on the same checks when its branch is in `<name>`:
      `git merge-base --is-ancestor <branch> <name>`.
 8. One line;  in a worktree's window, plus "close this window when you're done with it".
-   - Merged:  the worktree can go (`git worktree remove "$(epic worktree path <name>)"`, `git branch -d <name>`).
+   - Merged:  the worktree can go (`epic worktree remove <name>`, `git branch -d <name>`).
    - Not merged:  how to merge later (`git merge <name>` from the main checkout), then the same cleanup.
    - Agents' worktrees:  how many step 7b removed, and any it kept.
    - Then close the reply as "Closing line" below says.

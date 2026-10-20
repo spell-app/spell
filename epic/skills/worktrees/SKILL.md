@@ -116,7 +116,7 @@ In the order Owen will want to see them:  quick looks (`wtf`, `open`, `answer`) 
   - Collect each refused line, and give Owen the list at the end:
     to paste, or to run `/worktrees` again from a session in the main checkout.
 - A command fails:  NEVER retry with `--force` / `-D`.
-  - e.g. a dirty worktree for `git worktree remove`, unmerged work for `git branch -d`
+  - e.g. a dirty worktree for `epic worktree remove`, unmerged work for `git branch -d`
   - Say why, and leave it for the next round.
 - Per action id:
   - `remove`:  its commands.
@@ -149,7 +149,9 @@ In the order Owen will want to see them:  quick looks (`wtf`, `open`, `answer`) 
     - `drop` shows `git stash show -p <sha>` first.
     - Then it finds the entry's current `stash@{n}` by its sha (`git stash list --format='%H %gd'`), and drops that.
     - Never a bare `git stash pop`.
-- Page servers left by removed worktrees:  `epic server prune` (`--dry-run` first).
+- Page servers:  `epic worktree remove` stops a worktree's own before it goes (never a bare `git worktree remove`).
+  - Any left by a folder deleted another way:  every session's start stops them, hourly;  now:  `epic server prune`
+    (`--dry-run` first).
 - NEVER touch this session's own worktree, branch or window.
 
 ## 5. Where we stand

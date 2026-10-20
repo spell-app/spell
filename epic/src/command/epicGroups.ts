@@ -255,6 +255,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic worktree move --idle --dry-run"
     },
     {
+      name: "remove",
+      usage: "<name | path> [--force]",
+      description:
+        "remove a worktree, its page and vite servers stopped FIRST, and its session-folder link;  not its branch " +
+        "(git branch -d after);  --force:  git's, for one with changes",
+      example: "epic worktree remove seo"
+    },
+    {
       name: "merge-main",
       usage: "[--continue] [--json]",
       description:
@@ -518,7 +526,9 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "prune",
       usage: "[--dry-run]",
-      description: "stop the page and vite servers whose checkout is gone",
+      description:
+        "stop the page and vite servers whose checkout is gone (a removal stops its own first;  every session's " +
+        "start runs this, hourly)",
       example: "epic server prune --dry-run"
     }
   ],

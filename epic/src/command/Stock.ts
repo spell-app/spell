@@ -309,7 +309,8 @@ export class Stock {
     const found = item.sessions.filter((session) => session.state === "idle" && !session.this).map(kill)
     const commands: string[] = []
     if (existsSync(this.config.worktreeWindowFile(item.name))) commands.push(`epic window close ${item.name}`)
-    if (item.worktree) commands.push(`git worktree remove ${relative(this.main, item.worktree)}`)
+    // `epic worktree remove`:  its servers stopped first (epic `epic-engine` I53)
+    if (item.worktree) commands.push(`epic worktree remove ${relative(this.main, item.worktree)}`)
     // `-d` refuses unmerged work;  squashed-in commits need `-D`, which `discard` asks about separately
     if (item.branch) commands.push(`git branch ${item.ahead ? "-D" : "-d"} ${item.branch}`)
     found.unshift(action("remove", item.worktree ? "remove worktree and branch" : "delete the branch", commands))
@@ -319,7 +320,7 @@ export class Stock {
   /** Throw the work away:  ALWAYS asked about on its own, listing what goes. */
   private discard(item: StockItem): StockAction {
     const commands = item.worktree ? [`epic window close ${item.name}`] : []
-    if (item.worktree) commands.push(`git worktree remove --force ${relative(this.main, item.worktree)}`)
+    if (item.worktree) commands.push(`epic worktree remove --force ${relative(this.main, item.worktree)}`)
     if (item.branch) commands.push(`git branch -D ${item.branch}`)
     return action("discard", "throw the work away (asks again first)", commands)
   }

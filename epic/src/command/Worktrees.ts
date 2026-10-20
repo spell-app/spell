@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, mkdirSync, readFileSync } from "node:fs"
+import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
@@ -23,6 +23,7 @@ import {
   type PlanSummary,
   type RunningSession
 } from "./command.types"
+import { CheckoutServers } from "./CheckoutServers"
 import { Git } from "./Git"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
@@ -46,6 +47,7 @@ import { Shared } from "./Shared"
  *     - an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):  that repo's, said on stderr
  *     - where it is (the old place included), else where a new one goes (`EpicConfig.worktreeFolder()`)
  *     - what the skills give `EnterWorktree`
+ *   - `remove <name | path> [--force]`:  remove a worktree, its servers stopped FIRST (`remove()`, epic `epic-engine` I53)
  *   - `merge-main [--continue] [--json]`:  merge `main` into this checkout's branch (`MainMerge`)
  *     - regenerates generated files (bundles, snapshots) both sides changed
  *     - exits 1 when other files conflict
@@ -110,6 +112,11 @@ export class Worktrees {
         if (!reports.length) out("no idle worktree in the old place:  nothing to move")
         return EXIT.OK
       }
+      case "remove": {
+        if (!name) throw new EpicCommandError("remove:  which worktree?  (its name, or its folder)")
+        for (const line of this.remove(name, { force: Boolean(flags.force) })) out(line)
+        return EXIT.OK
+      }
       case "merge-main": {
         const checkout = Git.nearestCheckout(".git")
         const report = new MainMerge({ root: checkout }).run(flags.continue ? "continue" : "start")
@@ -118,7 +125,7 @@ export class Worktrees {
         return report.result === "conflicts" ? EXIT.ERRORS : EXIT.OK
       }
       default:
-        throw new EpicCommandError(`unknown verb '${verb}':  list, status, path, move or merge-main`)
+        throw new EpicCommandError(`unknown verb '${verb}':  list, status, path, move, remove or merge-main`)
     }
   }
 
@@ -134,6 +141,7 @@ export class Worktrees {
    *   - while a live session works in it:  a busy worktree stays put until its `/isolate done`
    *   - when the config hasn't moved the place, or the new folder is taken
    * - the steps:
+   *   0. its servers stopped (`CheckoutServers.stop()`):  they serve the old folder
    *   1. `git worktree move`
    *   2. its shared links made again (`Shared.link()`):  they're relative, so the move breaks them
    *   3. its saved-session folder linked to main's (`linkSessionFolders`)
@@ -156,6 +164,8 @@ export class Worktrees {
     const window = config.worktreeWindowFile(name)
     const report: MoveReport = { name, from, to, links: [], sessionFolder: null, window: existsSync(window) }
     if (dryRun) return report
+    // its servers serve the old folder, which goes:  stopped first (epic `epic-engine` I53)
+    CheckoutServers.stop(from)
     mkdirSync(dirname(to), { recursive: true })
     const moved = Git.run(["worktree", "move", from, to], this.main)
     if (!moved.ok) throw new EpicCommandError(`git worktree move ${from} ${to} failed:  ${moved.err}`)
@@ -163,6 +173,40 @@ export class Worktrees {
     report.links = shared.link(to, Shared.configOf(to).links).map(({ path, action }) => `${path} ${action}`)
     if (config.linkSessionFolders) report.sessionFolder = SessionFolders.link(to, this.main).action
     return report
+  }
+
+  ////////////////
+  // ## Removing a worktree
+  ////////////////
+
+  /**
+   * Remove worktree `target` (its name, or its folder), its web servers stopped FIRST (epic `epic-engine` I53);
+   * returns what it did, a line each.
+   * - Why:  `git worktree remove` left the page server and the editor's vite running, and nothing ever stopped them
+   *   once their folder was gone (`CheckoutServers`)
+   * - the steps, in the main checkout:
+   *   1. its servers stopped (`CheckoutServers.stop()`)
+   *   2. `git worktree remove [--force]`:  git refuses a worktree with changes, unless `force`
+   *   3. its saved-session link taken away, if it's one to main's (`SessionFolders.unlink()`), as the worktree hook does
+   * - NOT its branch:  the caller deletes it (`git branch -d`), as it would after `git worktree remove`
+   * - refuses (`EpicCommandError`) the main checkout, a folder that isn't one of the repo's worktrees, and git's refusal
+   * - what `/isolate done` (`/epic done`) and `/worktrees`' clean-up (`Stock`) run;  the `WorktreeRemove` hook stops
+   *   the servers itself
+   */
+  remove(target: string, { force = false }: { force?: boolean } = {}): string[] {
+    const named = this.named().find((it) => it.name === target)
+    const at = [resolve(target), ...(existsSync(target) ? [realpathSync(target)] : [])]
+    const path = named?.path ?? Worktrees.listOf(this.main).find((it) => at.includes(it.path))?.path
+    if (!path) throw new EpicCommandError(`no worktree ${target} in this repo:  epic worktree list names them`)
+    if (path === this.main) throw new EpicCommandError(`${path} is the main checkout:  never removed`)
+    const lines: string[] = []
+    const stopped = CheckoutServers.said(CheckoutServers.stop(path))
+    if (stopped) lines.push(`${stopped}`)
+    const removed = Git.run(["worktree", "remove", ...(force ? ["--force"] : []), path], this.main)
+    if (!removed.ok) throw new EpicCommandError(`git worktree remove ${path} failed:  ${removed.err}`)
+    lines.push(`removed ${path}`)
+    if (SessionFolders.unlink(path, this.main).action === "removed") lines.push("  and its session-folder link")
+    return lines
   }
 
   /** `move --idle`:  move every worktree in the old place that no session works in;  a report each. */
@@ -450,7 +494,7 @@ export type WorktreesProps = {
 }
 
 /** The flags of `epic worktree` that take no value. */
-const SWITCHES = ["json", "continue", "idle", "dryRun"]
+const SWITCHES = ["json", "continue", "idle", "dryRun", "force"]
 
 /**
  * `planSummaries()`'s cache:  `{ file:  summary }`, for this process.

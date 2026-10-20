@@ -219,6 +219,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `Sessions` (`session`), `Parking` (`park`), `Stock` (`stock`)
       - `Shared` (`shared`), with `SharedMigration` (`shared migrate`) and `SharedRename` (`shared rename`)
       - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
+    - `CheckoutServers`:  a checkout's web servers (page server, vite) stopped as it goes (epic `epic-engine` I53)
+      - `stop()`, BEFORE a removal:  the worktree hook, `epic worktree remove` (`/isolate done`, `/worktrees`' clean-up
+        through `Stock`), `epic worktree move`
+      - `atSessionStart()`:  the servers whose checkout is gone already, at most once an hour (a stamp in
+        `~/.spell-epic`), from the `SessionStart` hook ([server-prune.mjs](../hooks/server-prune.mjs))
+      - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):  by process, never a pid file;  never a
+        live checkout's
+      - plain `node` loads it by path, `prune.ts` too (through the `@spell-app/server` package)
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path

@@ -21,6 +21,9 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it.
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
+- Removing a worktree stops its page and vite servers FIRST (`CheckoutServers`, epic `epic-engine` I53):
+  - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
+  - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.

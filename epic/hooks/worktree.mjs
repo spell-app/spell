@@ -60,7 +60,10 @@
  * - Runs on `ExitWorktree` `remove` (only with `discard_changes: true`), at session exit, and when an agent finishes.
  * - Never loses work:  the worktree is KEPT (exit 1 with the reason;  Claude shows stderr) when it has
  *   uncommitted changes, or its branch has commits `main` lacks.
- * - Otherwise removes the worktree and deletes its branch.
+ * - Otherwise stops the worktree's servers FIRST (its page server, the editor's vite:  `CheckoutServers.stop()`,
+ *   epic `epic-engine` I53), then removes the worktree and deletes its branch.
+ *   - Why:  nothing else ever stopped them, once their folder was gone.
+ *   - a server that won't stop is a warning:  the removal goes on
  * - An agent's `<owner>-agent-<id>` counts as merged when its commits are in `main` OR in branch `<owner>`.
  * - Then removes the worktree's saved-session link, if it IS a link to the main checkout's folder.
  */
@@ -68,6 +71,7 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve } from "node:path"
 
+import { CheckoutServers } from "../src/command/CheckoutServers.ts"
 import { EpicRepo } from "../src/config/EpicRepo.ts"
 import { EpicConfig } from "../src/config/EpicConfig.ts"
 import { SessionFolders } from "../src/config/SessionFolders.ts"
@@ -250,7 +254,10 @@ class Worktree {
     return intos.find((into) => Worktree.git(root, "rev-list", "--count", `${into}..${branch}`) === "0") ?? ""
   }
 
-  /** `remove`:  remove the worktree and its branch, unless that would lose work;  returns what happened. */
+  /**
+   * `remove`:  remove the worktree and its branch, unless that would lose work;  returns what happened.
+   * - its servers stopped first (`CheckoutServers.stop()`), once it's sure to go
+   */
   static remove({ worktree_path: path }) {
     path = resolve(path)
     if (!existsSync(path)) return `${path} is already gone`
@@ -265,11 +272,23 @@ class Worktree {
       const owner = branch.match(OWNED_AGENT)?.[1]
       throw new Error(`kept ${path}:  branch ${branch} has commits ${owner ?? base} doesn't;  merge it first`)
     }
+    const servers = Worktree.stopServers(path)
     Worktree.git(root, "worktree", "remove", path)
     // `-d` checks against the base branch only:  in its owner's branch alone (checked above) needs `-D`
     if (branch) Worktree.git(root, "branch", into === base ? "-d" : "-D", branch)
     const unlinked = SessionFolders.unlink(path, root).action === "removed" ? ", and its session-folder link" : ""
-    return `removed ${path}${branch ? ` and branch ${branch}` : ""}${unlinked}`
+    return `removed ${path}${branch ? ` and branch ${branch}` : ""}${unlinked}${servers}`
+  }
+
+  /** Stop checkout `path`'s servers (`CheckoutServers.stop()`):  `", stopped ..."` for the report, or `""`;  never throws. */
+  static stopServers(path) {
+    try {
+      const said = CheckoutServers.said(CheckoutServers.stop(path))
+      return said && `;  ${said}`
+    } catch (error) {
+      console.error(`worktree hook:  ${path}'s servers not stopped (${error.message});  \`epic server prune\` later`)
+      return ""
+    }
   }
 }
 

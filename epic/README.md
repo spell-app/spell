@@ -21,7 +21,7 @@ ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` 
 | `.claude-plugin/plugin.json` | the plugin's manifest, `spell-epic`;  `"agents": []`:  no agents, and a stray root `agents/` is never read as them (epic `epic-eject` I23:  the content repo's `agents` link was, its logs and WWOD as 14 agent types).  So the root links NO content folder (`sharedFolders: []`, `.epic/config.json5`) |
 | `.claude-plugin/marketplace.json` | a marketplace of one, this folder (`"source": "."`), so the plugin loads in place |
 | `skills/` | the skills:  `epic`, `epics`, `details`, `comment`, `docs-check`, `send`, `isolate`, `park`, `unpark`, `wait-for`, `worktrees`, `session`, `title`, `wtf`, `bg`, `bedtime`, `airplane` |
-| `hooks/` | `hooks.json`, and the hooks it runs:  making and removing worktrees, the behind-main notice, the worktree guard, the closing-line reminder on leaving a worktree (the isolate skill's "Closing line"), the prompt gate, the end-of-turn window move and shared-content commit |
+| `hooks/` | `hooks.json`, and the hooks it runs:  making and removing worktrees (a removed one's servers stopped first), the behind-main notice, the worktree guard, the hourly prune of servers whose checkout is gone, the closing-line reminder on leaving a worktree (the isolate skill's "Closing line"), the prompt gate, the end-of-turn window move and shared-content commit |
 | `bin/epic` | the `epic` command;  on every session's `PATH` while the plugin is on |
 | `src/` | the code, `$/epics`:  the `<epic-*>` elements (`components/`, the pack in `components/__pack/`), the epic tool (`tool/`), the `epic` command's code (`command/`), the epic server (`server/`), the docs tools and their assets (`tools/`, `tools/_assets/`), Epic UI's pages (`docs/`), the VS Code windows (`window.mjs`, `epic window`);  its rules:  [src/AGENTS.md](src/AGENTS.md) |
 | `tests/` | its tests, at the same paths as the code (`tests/command/` for `src/command/` ...);  and the extension's (`tests/vscode/`) |
@@ -118,6 +118,12 @@ Each opens in a window of its own folder and the content folder:  no main checko
     the hooks, the window script, the epics list, the page server's `/worktrees/<w>/`, parking and the session lists.
   - `epic worktree path <name>` says where one is.
 - `epic worktree move <name> | --idle [--dry-run]` moves an idle one beside the repo;  a busy one stays put.
+- A worktree's web servers (its page server, the editor's vite) stop BEFORE it goes (`CheckoutServers`, epic
+  `epic-engine` I53):  removed by the worktree hook, `epic worktree remove <name>` or `epic worktree move`.
+  - Never a bare `git worktree remove`:  it leaves them running, and nothing else ever stops them.
+  - A folder deleted another way:  every session's start stops its servers, at most once an hour
+    ([server-prune.mjs](hooks/server-prune.mjs));  `epic server prune` does it now.
+  - Never a live checkout's:  a server stops only when its checkout and working folder are both gone (or going).
 - `linkSessionFolders`:  the hook links the worktree's saved-session folder to main's (`SessionFolders`),
   so every window's Claude panel lists every session.
   - That folder:  `~/.claude/projects/<slug>`
