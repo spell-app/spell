@@ -9,3 +9,6 @@ PARKED-*.md
 
 # the declarations each package builds for the repos above this one (`spell-types`, epic repo-split I12):  never committed
 dist-types/
+
+# the shared rules and logs, linked in until WWOD and the logs move here (epic repo-split Q6)
+/agents
