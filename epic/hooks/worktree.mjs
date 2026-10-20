@@ -38,10 +38,12 @@
  * - Then, for a NEW worktree, in this order:
  *   0. makes what its tracked links point at beside it (`linkOutside()`, epic `epic-engine` I13):
  *      a relative link that leaves the repo finds its target beside the main checkout, but not from a worktree
- *      one folder deeper.  spell-epic's `.spell-app -> ../spell-app` is one:  its packages come through it
- *      (`portal:./.spell-app/packages/...`), so without it the install fails.
- *      - the missing target is made as a link to what main's link finds:  `../spell-epic.worktrees/spell-app`
- *        -> `../spell-app`, ONE link every worktree there shares
+ *      one folder deeper (e.g. a tracked `.dep -> ../dep`;  spell-epic's old `.spell-app -> ../spell-app` was one,
+ *      until epic `epic-engine` P10 made it a plain workspace of the top `spell` install)
+ *      - the missing target is made as a link to what main's link finds:  `../<repo>.worktrees/dep` -> `../dep`,
+ *        ONE link every worktree there shares
+ *      - in a multi-repo top's epic worktree each repo's siblings are its siblings there too, so it finds nothing
+ *        to make
  *      - nothing in the worktree changes, so git sees nothing;  a link it can't make is a warning
  *   1. links the shared content in (this plugin's `epic shared link`, epic `shared-content`),
  *      when the shared repo exists:  a failure there is a warning, never a failed hook

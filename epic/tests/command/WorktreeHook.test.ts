@@ -150,7 +150,7 @@ describe("worktree hook", () => {
     expect(slow.stderr).toMatch(/stopped after 1s \(installTimeout/)
   })
 
-  test("a tracked link out of the repo (spell-epic's `.spell-app`) finds its target from a worktree too (I13)", () => {
+  test("a tracked link out of the repo (`.dep -> ../dep`) finds its target from a worktree too (I13)", () => {
     config({})
     // `.dep -> ../dep`:  found beside the main checkout, one folder short from `repo.worktrees/<name>/`
     mkdirSync(join(TEMP, "dep"))

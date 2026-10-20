@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readFileSync } from "node:fs"
 import { basename, dirname, join, relative } from "node:path"
-import { pathToFileURL } from "node:url"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { EpicRepo } from "$/epics/config/EpicRepo"
@@ -30,6 +29,7 @@ import { Git } from "./Git"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
 import { Shared } from "./Shared"
+import { tsxImports } from "../tools/packageDir"
 
 /****************
  * ### `Worktrees`
@@ -474,9 +474,10 @@ export class Worktrees {
    */
   planSummaries(files: string[]): Map<string, PlanSummary> {
     const todo = files.filter((file) => !PLAN_SUMMARIES.has(file))
-    const root = [Git.CODE_ROOT, this.main].find((it) => existsSync(join(it, "node_modules")))
+    // the first whose install has `tsx`, as Node's resolver finds it:  a hoisted install (the top `spell`'s, epic
+    // `epic-engine` P10) has no `<root>/node_modules/tsx` (I60)
+    const root = [Git.CODE_ROOT, this.main].find((it) => tsxImports(it).length)
     if (todo.length && root) {
-      const loader = pathToFileURL(join(root, "node_modules", "tsx", "dist", "loader.mjs")).href
       // the docs tools, and the tsconfig they run on:  spell-epic's `src/tools/` (epic `epic-eject` J14);  else a
       // spell-app checkout's package, `epics` since epic `people-and-orgs` P16, `docs` on a checkout from before
       const [tools, tsconfig] = [
@@ -489,7 +490,8 @@ export class Worktrees {
         join(root, "tools"),
         join(root, "tsconfig.json")
       ]
-      const run = spawnSync(process.execPath, ["--import", loader, join(tools!, "plan-doc.js"), "summaries", ...todo], {
+      const args = [...tsxImports(root), join(tools!, "plan-doc.js"), "summaries", ...todo]
+      const run = spawnSync(process.execPath, args, {
         cwd: root,
         encoding: "utf8",
         env: { ...process.env, TSX_TSCONFIG_PATH: tsconfig }
