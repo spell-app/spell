@@ -10,6 +10,8 @@ import { ReviewState } from "./ReviewState"
 import {
   BUTTONS_OF,
   CHOSEN,
+  DO_IT_ID,
+  DO_IT_NOTE,
   NOTE_ACTIONS,
   NOTE_BOX,
   NOTE_BUTTONS_OF,
@@ -59,6 +61,7 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  * - Revisit and Edit take the reader to the note box (`takeToNote()`):
  *   - `epic-show-note`, so the family unfolds
  *   - then the box beside it (the `<epic-review shows="note">` of the same shadow root) takes the focus
+ *   - a judgement call's or todo's EMPTY box gets "do it", selected and saved as the draft (Owen, 2026-10-19)
  * - A button that chose an action (a review button, a note box button) sends `epic-chosen`:
  *   `<epic-item>` folds, so Owen moves on to the next (Owen, 2026-10-10).
  * - SIDE EFFECT:  the note box listens for `pagehide` while connected, to save a draft as the page goes.
@@ -356,6 +359,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             placeholder={this.translationForKey("notePlaceholder")}
             aria-label={this.translationForKey("noteLabel", { id: this.name })}
             onInput={() => this.onInput()}
+            onFocus={() => this.selectDoIt()}
             onBlur={() => this.flush()}
             onKeyDown={(event: KeyboardEvent) => this.onNoteKey(event)}
           />
@@ -561,31 +565,56 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    * 3. the note takes the focus, trying each frame until it can, for `FOCUS_HOLD_MS` at most
    *    (details just opened may not be drawn yet, a part may still be loading)
    * - Edit (`note`):  the marked note goes back in the box, unless something is typed there already
+   * - Revisit on a judgement call or a todo whose box is EMPTY (no draft, no earlier note):  "do it" in it, as if
+   *   Owen had typed it (`DO_IT_NOTE`;  Owen, 2026-10-19), selected and saved as the draft (`fillIn()`)
    */
   @E.untracked
   private takeToNote(note?: string) {
     const client = this.review.client
     if (!client) return
     const id = this.review.id()
+    const doIt = !note && DO_IT_ID.test(id) && !client.typedOf(id).trim() && !client.markOf(id)?.note
     if (note && !client.typedOf(id)) client.type(id, note)
     client.openBox(id)
     this.send(SHOW_NOTE, { of: id })
     const until = performance.now() + FOCUS_HOLD_MS
     const focus = () => {
-      const box = this.noteBeside()
-      box?.focus({ preventScroll: true })
-      const focused = !!box && box.matches(":focus")
+      const box = this.noteBoxBeside()
+      const input = box?.noteInput
+      input?.focus({ preventScroll: true })
+      const focused = !!input && input.matches(":focus")
+      if (focused && doIt) box!.fillIn(DO_IT_NOTE)
       if (!focused && performance.now() < until) E.beforeNextPaint(focus)
     }
     E.beforeNextPaint(focus)
   }
 
-  /** The note's `<textarea>` of the note box beside it:  the `<epic-review shows="note">` of the same `of`, if drawn. */
-  private noteBeside(): HTMLTextAreaElement | undefined {
+  /** The note box beside it:  the `<epic-review shows="note">` of the same `of` in its shadow root, if drawn. */
+  private noteBoxBeside(): EpicReview | undefined {
     const root = this.domElement.getRootNode() as ParentNode
     const selector = `${this.domElement.localName}[shows="note"][of="${CSS.escape(this.of ?? "")}"]`
-    const box = root.querySelector<E.DOMElement<EpicReview>>(selector)
-    return box?.component?.noteInput
+    return root.querySelector<E.DOMElement<EpicReview>>(selector)?.component
+  }
+
+  /**
+   * Only the note box:  `text` in its EMPTY note, as if typed (kept, backed up, saved as the draft at once), and
+   * selected, so the first key typed replaces it.  A note holding words is left alone.
+   */
+  @E.untracked
+  fillIn(text: string) {
+    const note = this.noteInput
+    if (!note || note.value.trim()) return
+    note.value = text
+    this.onInput()
+    this.flush()
+    note.select()
+  }
+
+  /** The note took the focus holding just "do it" (`DO_IT_NOTE`):  selected, so typing replaces it. */
+  @E.untracked
+  private selectDoIt() {
+    const note = this.noteInput
+    if (note?.value === DO_IT_NOTE) note.select()
   }
 }
 

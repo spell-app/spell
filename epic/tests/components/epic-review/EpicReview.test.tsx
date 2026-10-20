@@ -51,8 +51,11 @@ class FakeRoutes {
     const id = body.id as string
     const at = new Date().toISOString()
     if (route === "mark") {
-      if (body.mark) this.inbox.marks[id] = { ...(body.mark as Inbox["marks"][string]), at }
+      const mark = body.mark as Inbox["marks"][string] | null
+      if (mark) this.inbox.marks[id] = { ...mark, at }
       else delete this.inbox.marks[id]
+      // as `ReviewInbox.setMark()`:  the note box's text is in the mark now, or gone with it
+      if (!mark || mark.note !== undefined) delete this.inbox.drafts[id]
     }
     if (route === "urgency") {
       if (body.calm === null) delete this.inbox.urgency[id]
@@ -418,6 +421,60 @@ describe("<epic-item> review controls", () => {
     expect(deep(host).querySelector(".under-line [part~='note-box'] >>> textarea")).toBeNull()
   })
 
+  test('Revisit on a judgement call or a todo:  an EMPTY box gets "do it", selected and saved as the draft (Owen, 2026-10-19)', async () => {
+    await adoptClient()
+    const host = await render(`<div><epic-item id="j3" title="A call" status="open" open><p>Text</p></epic-item>
+      <epic-item id="t9" title="A bare todo" status="open"></epic-item></div>`)
+    const [call, todo] = Array.from(host.querySelectorAll("epic-item"))
+    // a call with details:  its docked box
+    button(call!, "revisit").click()
+    const note = deep(call!).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+    await vi.waitFor(() => expect(note.value).toBe("do it"))
+    // selected, so his first key replaces it
+    expect([note.matches(":focus"), note.selectionStart, note.selectionEnd]).toEqual([true, 0, 5])
+    await vi.waitFor(() => expect(routes.inbox.drafts.j3?.note).toBe("do it"))
+    // the box's floppy says Saved
+    await vi.waitFor(() =>
+      expect(deep(call!).querySelector("[part~='note-box'] >>> .note-saved")!.hasAttribute("hidden")).toBe(false)
+    )
+    // a todo without details:  its box under its line;  Later makes it the mark's note
+    button(todo!, "revisit").click()
+    await settle()
+    const bare = deep(todo!).querySelector<HTMLTextAreaElement>(".under-line [part~='note-box'] >>> textarea")!
+    await vi.waitFor(() => expect(bare.value).toBe("do it"))
+    await vi.waitFor(() => expect(routes.inbox.drafts.t9?.note).toBe("do it"))
+    deep(todo!).querySelector<HTMLButtonElement>('button[data-how="soon"]')!.click()
+    await settle()
+    expect(routes.inbox.marks.t9).toMatchObject({ action: "revisit", when: "soon", note: "do it" })
+  })
+
+  test('"do it" never over his words:  a draft, or an earlier note, stays;  a question gets nothing', async () => {
+    routes.inbox.drafts.j4 = { action: "revisit", note: "my own words", at: "2026-10-19T10:00:00.000Z" }
+    routes.inbox.marks.t3 = { action: "skip", note: "moot since P3", at: "2026-10-19T10:00:00.000Z" }
+    await adoptClient()
+    const host = await render(`<div><epic-item id="j4" title="A call" status="open" open><p>Text</p></epic-item>
+      <epic-item id="t3" title="A todo" status="open" open><p>Text</p></epic-item>
+      <epic-item id="q5" title="A question" status="open" open><p>Text</p></epic-item>
+      <epic-item id="i6" title="An issue" status="open" open><p>Text</p></epic-item></div>`)
+    const [call, todo, question, issue] = Array.from(host.querySelectorAll("epic-item"))
+    const box = (item: Element) =>
+      deep(item).querySelector<HTMLTextAreaElement>("[part~='details'] [part~='note-box'] >>> textarea")!
+    // one at a time:  each Revisit holds the focus until its box has it
+    for (const item of [call!, todo!, question!, issue!]) {
+      button(item, "revisit").click()
+      await vi.waitFor(() => expect(box(item).matches(":focus")).toBe(true))
+    }
+    await settle()
+    expect([box(call!).value, box(todo!).value, box(question!).value, box(issue!).value]).toEqual([
+      "my own words",
+      "",
+      "",
+      ""
+    ])
+    expect(routes.inbox.drafts).toEqual({ j4: expect.objectContaining({ note: "my own words" }) })
+    expect(routes.posts.filter(([route]) => route === "draft")).toEqual([])
+  })
+
   test("an item without details:  its box lines up where details start;  its chevron shows, and folds the box away", async () => {
     await adoptClient()
     const host =
@@ -434,6 +491,8 @@ describe("<epic-item> review controls", () => {
     expect(Math.round(box.getBoundingClientRect().left)).toBe(Math.round(docked.getBoundingClientRect().left))
     expect(box.getBoundingClientRect().left - bare!.getBoundingClientRect().left).toBeGreaterThan(20)
     expect(toggle()?.getAttribute("aria-expanded")).toBe("true")
+    // its box holds a todo's "do it", selected:  words selected in a field are no drag over the title, so it folds
+    expect(String(window.getSelection())).toBe("do it")
     toggle()!.click()
     await settle()
     expect(deep(bare!).querySelector(".under-line [part~='note-box']")).toBeNull()

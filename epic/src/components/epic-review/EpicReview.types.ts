@@ -237,6 +237,23 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
 }
 
 ////////////////
+// ## "do it"
+////////////////
+
+/**
+ * What Revisit puts in an EMPTY note box on a judgement call or a todo (`DO_IT_ID`), as if Owen had typed it
+ * (Owen, 2026-10-19:  "When I press the 'review' button in a Judgement call or todo, I generally want you to just do
+ * it ... I'll update the text if I mean something else").
+ * - selected, so his first key replaces it;  saved as the draft at once, as typed words are
+ * - Claude's side (the epic skill, 7.3):  a revisit note "do it" means do it, no question back
+ * - never translated:  it's Owen's words to Claude, which Claude reads
+ */
+export const DO_IT_NOTE = "do it"
+
+/** The items whose empty note box Revisit fills with `DO_IT_NOTE`:  judgement calls and todos (`j3`, `t5`). */
+export const DO_IT_ID = /^[jt]\d+$/i
+
+////////////////
 // ## Shadow markup
 ////////////////
 

@@ -773,8 +773,10 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       if (target.classList.contains(TOGGLE) || target.classList.contains(LINE)) break
       if (target.matches(CONTROLS)) return
     }
-    // a drag that selected text in the title isn't a click on it
-    if (String(window.getSelection() ?? "")) return
+    // a drag that selected text in the title isn't a click on it;  words selected in a FIELD are no drag (the
+    // note box's "do it", selected):  Chrome reads them out of the selection, but as a collapsed one
+    const selection = window.getSelection()
+    if (selection && !selection.isCollapsed && String(selection)) return
     this.toggle(event)
   }
 

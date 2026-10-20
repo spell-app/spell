@@ -478,7 +478,9 @@ active, flag what changed so the user can spot it:
 ## Review inbox
 
 Owen marks items ON the page (served by the page server): approve, todo, Add Details, revisit (soon / now, with a
-note), pick an option. Picks work wherever option cards are (I8 of `epic-components`): a question's, a judgement
+note), pick an option. Revisit on a judgement call or a todo puts `do it` in its EMPTY note box, selected and saved as
+his draft (Owen, 2026-10-19:  "I generally want you to just do it"):  he types over it when he means something else,
+and a revisit note `do it` means do it, no question back. Picks work wherever option cards are (I8 of `epic-components`): a question's, a judgement
 call's text, a reply, More Details; the mark names WHICH card set by position (`{ pick: "B", choices: 1 }`; none:
 the item's own). An item may carry a pick AND a revisit note together ("pick B, but ..."): the revisit mark holds
 the `pick`. A CLOSED item's cards (an answered question, an accepted call) take Choose pills too, on every option
