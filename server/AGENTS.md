@@ -3,7 +3,7 @@
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in this package, `@spell-app/server`.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
@@ -12,7 +12,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Serving pages locally, for every package:  `$/server` (`SRV`).
   - Before this package, six servers each had their own mime table, path check, port choice and opener.
     Now they share these.
-  - Docs:  [the page server guide](../../../spell-app.epics/guides/server.html):  the library, the page server's flows,
+  - Docs:  [the page server guide](../../spell.epics/guides/server.html):  the library, the page server's flows,
     route modules, safety, why.
 - What's in it:
   - [mime.ts](src/mime.ts) -- ONE content-type table, `typeFor()`
@@ -110,7 +110,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - It's GENERIC (epic `repo-split` P4):  its code names nothing of spell-app's or spell-epic's folders.
   - What the page server serves beyond the checkout comes from its settings (below):
     the component sets, the engine routes, the page scripts, the route modules.
-  - What only spell-app's page server does is [page-server](../page-server/AGENTS.md)'s route module.
+  - What only spell-app's page server does is [page-server](../../spell-app/page-server/AGENTS.md)'s route module.
   - It goes to the bottom repo, spell-server, when the repos split (P8);  page-server goes to spell-app.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
   - `$/server/page/...` -- the page server (one per checkout):
@@ -173,7 +173,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `/api/server` reports it (`contentFolder`);  `spell dev server url <file>` gives a file of it its path there
           (`contentPathOf()`).
       - The shared pages' bridges (the engine's old folders, `/ui/` answering "not found"):  page-server's route
-        module ([page-server's AGENTS.md](../page-server/AGENTS.md)).
+        module ([page-server's AGENTS.md](../../spell-app/page-server/AGENTS.md)).
     - And the COMPONENT SETS:  the docs of each set of elements, in Spell UI's page shape, in its package's `docs/`.
       - The list:  the settings' `"componentSets"`, by id, in the top bar's order (`componentSets()`, epic `repo-split`
         P4;  `ComponentSet`, in [page.types.ts](src/page/page.types.ts)).
@@ -194,7 +194,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The bundles it serves are NOT committed:  page-server's route module builds them (`BundleBuild`).
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.
-      - [ProjectBuild](../spaces/src/server/node/routes/ProjectBuild.ts), in spaces' routes,
+      - [ProjectBuild](../../spell-app/spaces/src/server/node/routes/ProjectBuild.ts), in spaces' routes,
         runs `spell compile --stale --all @spell/examples @spell/library` as the page server starts.
       - The page server knows nothing of spell projects.
   - `$/server/site/...` -- browser code:

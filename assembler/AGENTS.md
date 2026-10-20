@@ -3,7 +3,7 @@
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in this package, `@spell-app/assembler`.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 

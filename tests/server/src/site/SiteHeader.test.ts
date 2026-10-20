@@ -12,7 +12,7 @@ import { PageServer } from "$/server/page"
  * - the header, bundled from its source (`build()`, into the checkout as `/site.js`), as the docs bundle defines it
  * - a checkout of its own, its content folder beside it (`PageServer.serveContent()`), as spell-app's
  */
-const SOURCE = resolve(import.meta.dirname, "../../../../packages/server/src/site/SiteHeader.ts")
+const SOURCE = resolve(import.meta.dirname, "../../../../server/src/site/SiteHeader.ts")
 
 const main = mkdtempSync(join(tmpdir(), "srv-header-"))
 const content = `${main}.epics`

@@ -1,0 +1,27 @@
+{
+  "name": "spell-server",
+  "private": true,
+  "description": "Serving pages locally (server) and assembling them (assembler):  Spell's generic page-server library",
+  "license": "MIT",
+  "repository": "https://github.com/spell-app/spell-server",
+  "workspaces": [
+    "server",
+    "assembler"
+  ],
+  "type": "module",
+  "scripts": {
+    "ts": "yarn workspaces foreach -W --exclude spell-server -pv -j 4 run ts",
+    "test": "yarn workspaces foreach -W --exclude spell-server -pv -j 4 run test",
+    "lint": "yarn workspaces foreach -W --exclude spell-server -pv -j 4 run lint",
+    "format": "yarn workspaces foreach -W --exclude spell-server -pv -j 4 run format",
+    "review": "yarn workspaces foreach -W --exclude spell-server -v run review"
+  },
+  "devDependencies": {
+    "@spell-app/toolchain": "workspace:*",
+    "vite-plus": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.11"
+  },
+  "packageManager": "yarn@4.18.0"
+}

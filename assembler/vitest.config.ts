@@ -11,7 +11,7 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     // the tests live in the repo's tests/ folder, at the same paths as the code
-    dir: resolve(import.meta.dirname, "../../tests/assembler"),
+    dir: resolve(import.meta.dirname, "../tests/assembler"),
     environment: "node",
     include: ["src/**/*.test.ts"]
   }
