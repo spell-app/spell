@@ -1,7 +1,7 @@
 """Spell's tests:  the ✅ / ❌ / ❓ lines, character for character as the JavaScript core prints them.
 
 The expected lines come from the JavaScript core's own run of Cards.spell,
-`packages/cli/src/__snapshots__/contract/Cards.out.txt`.
+spell-app's `tests/cli/src/__snapshots__/contract/cards.out.txt` (frozen here as `cards.javascript.out.txt`).
 """
 
 import math

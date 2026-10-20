@@ -13,9 +13,9 @@ import { parseSpellProject } from "$/spell/test"
  * written with PEP 8's trailing underscore (`class_`, `list_`, `position_`).
  * - Owen, on the epic's guide:  "add all 'clashes in current spell' here so I can tell you what to do with them".
  * - Where they come from:
- *   - every spell project, each compiled to Python:
- *     - the `@spell` space's built-ins (examples, library, `packages/spaces/@spell/`)
- *     - the test projects (`tests/spaces/@spell/test/`)
+ *   - every frozen test project (`tests/spaces/@spell/test/`), each compiled to Python
+ *     - NOT the `@spell` space's built-ins (examples, library) since epic `repo-split` C11:  they're spell-app's
+ *       (its `spaces/@spell/`), which spell-lang's tests never read;  none of them clashed then
  *   - the core's own methods, `core.declarations.json5`, as Python names them
  * - Pinned in `pythonNameClashes.snapshot.json5`, beside this:  a new clash is a diff to read.
  * - The guide's "PEP 8's names" table lists them for Owen to decide each.
@@ -69,11 +69,7 @@ describe("Python's name clashes in today's spell", () => {
     const naming = new NotingNaming(P.Naming.PYTHON, P.Naming.PYTHON_CLASHES)
     const writer = new PY.PyWriter()
     writer.naming = naming
-    const dirs = [
-      ...projectsIn(resolve(repo, "packages/spaces/@spell/examples")),
-      ...projectsIn(resolve(repo, "packages/spaces/@spell/library")),
-      ...projectsIn(resolve(repo, "tests/spaces/@spell/test"))
-    ]
+    const dirs = projectsIn(resolve(repo, "tests/spaces/@spell/test"))
     for (const dir of dirs) {
       // its place, e.g. `@spell/examples/solitaire`
       naming.where = dir.slice(dir.lastIndexOf("@spell"))
@@ -85,9 +81,9 @@ describe("Python's name clashes in today's spell", () => {
     }
     // the core's own methods, as Python names them
     naming.where = "the core's methods (core.declarations.json5)"
-    const core = JSON.parse(
-      readFileSync(resolve(import.meta.dirname, "../../../../core/core.declarations.json5"), "utf8")
-    ) as { statements: Array<{ kind: string; name: string }> }
+    const core = JSON.parse(readFileSync(resolve(repo, "core/core.declarations.json5"), "utf8")) as {
+      statements: Array<{ kind: string; name: string }>
+    }
     for (const { kind, name } of core.statements) if (kind === "method") naming.nameOf(name, "method")
 
     const clashes = [...naming.noted.values()].sort(

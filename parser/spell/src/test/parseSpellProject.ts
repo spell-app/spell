@@ -54,17 +54,19 @@ export function parseSpellProject(
 
 /**
  * Frozen projects tests run against, the `@spell/test` group.
- * - Their folder:  `tests/spaces/@spell/test/<project>/` at the repo root, e.g. `solitaire`.
+ * - Their folder:  `tests/spaces/@spell/test/<project>/` at spell-lang's root, e.g. `solitaire`.
+ *   - spell-lang's since epic `repo-split` C11 (spell-app's before):  spell's own tests read them, and spell-app's
+ *     spaces reads them DOWN, as its `@spell/test` space folder.
  * - Why:  tests assert exact lines, docstrings and compiled output, and the live examples get edited.
  * - Tests read ONLY here.
- *   So editing or deleting a built-in example (`packages/spaces/@spell/`) or your own project (spell-spaces)
+ *   So editing or deleting a built-in example (spell-app's `spaces/@spell/`) or your own project (spell.spaces)
  *   can't break one.
  * - The same folder as spaces' `environment.testFilesRoot` (a test checks):  spell never imports spaces.
  * - NEVER update a fixture to follow its example:  it's frozen so tests don't move.
  *   - Change a test's input in the test, or add another fixture:
  *     copy a project in, then `yarn test:fixtures:bless`.  See `compiledFixture()`.
  */
-export const FIXTURES_DIR = resolve(CODE_FOLDERS.packagesDir, "..", "tests", "spaces", "@spell", "test")
+export const FIXTURES_DIR = resolve(CODE_FOLDERS.repoDir, "tests", "spaces", "@spell", "test")
 
 /** The fixtures' group, `@spell/test` (spaces' `PROJECT_GROUPS`). */
 export const FIXTURES_GROUP = "@spell/test"

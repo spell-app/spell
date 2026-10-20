@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { describeTypecheckError, typecheck } from "$/spell/node/typecheck"
+import { APP_DIR, describeTypecheckError, typecheck } from "$/spell/node/typecheck"
 import { P } from "$/parser"
 import { compiledFixture } from "$/spell/test"
 
@@ -38,10 +38,15 @@ describe("a writer's naming map", () => {
 
   // so every place TypeScript names a type agrees:  annotations, `List<Card>`, interfaces, the text.
   // NOT snake_case:  there `const card = new card()` takes the class's name (epic `drawable-thing`, P11's Done list)
-  test("TypeScript, types in SCREAMING_SNAKE_CASE:  still checks clean with tsc, as Solitaire does", () => {
-    const { errors } = typecheck({ "Solitaire.tsx": typedIn("SCREAMING_SNAKE_CASE", new P.TSWriter()) })
-    expect(errors["Solitaire.tsx"]!.map(describeTypecheckError)).toEqual([])
-  }, 60_000)
+  // `tsc` checks compiled spell against the app's types:  skipped without spell-app's `@spell-app/app` (`APP_DIR`)
+  test.skipIf(!APP_DIR)(
+    "TypeScript, types in SCREAMING_SNAKE_CASE:  still checks clean with tsc, as Solitaire does",
+    () => {
+      const { errors } = typecheck({ "Solitaire.tsx": typedIn("SCREAMING_SNAKE_CASE", new P.TSWriter()) })
+      expect(errors["Solitaire.tsx"]!.map(describeTypecheckError)).toEqual([])
+    },
+    60_000
+  )
 
   test("javascript's own map writes what spell always wrote", () => {
     const naming = new P.Naming(P.Naming.JAVASCRIPT)

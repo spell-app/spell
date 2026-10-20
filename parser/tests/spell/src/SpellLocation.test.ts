@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 import { SpellLocation } from "$/spell/SpellLocation"
 
-// spell's project groups are spaces':  registered as it loads
-import "@spell-app/spaces/models/projectGroups"
+// spell's project groups are spaces' (spell-app's):  a test double of them, registered as it loads (epic `repo-split` C11)
+import "./projectGroups.double"
 
 // Make sure we don't re-use registry items.
 SpellLocation.useRegistry = false

@@ -11,9 +11,9 @@ describe("the spell syntax table, spellSyntax.json", () => {
   const data = spellSyntax()
   const rows = data.modules.flatMap((module) => module.rules)
 
-  test("is up to date with the rules:  if not, run `yarn gen:syntax` in packages/spell", () => {
+  test("is up to date with the rules:  if not, run `yarn gen:syntax` in spell/", () => {
     const written = JSON.parse(readFileSync(SYNTAX_FILE, "utf8")) as unknown
-    expect(written, "spellSyntax.json is out of date:  run `yarn gen:syntax` in packages/spell").toEqual(data)
+    expect(written, "spellSyntax.json is out of date:  run `yarn gen:syntax` in spell/").toEqual(data)
   })
 
   test("lists each rule class once, every rule name under one", () => {
@@ -28,7 +28,7 @@ describe("the spell syntax table, spellSyntax.json", () => {
     expect(rows.find((row) => row.className === "IsGtLt")).toMatchObject({
       ruleNames: ["is_gt_lt"],
       internal: false,
-      file: "packages/spell/src/rules/math/IsGtLt.ts",
+      file: "spell/src/rules/math/IsGtLt.ts",
       syntaxes: [
         {
           syntax: "(operator:is (greater|less) than (or equal to)?) {expression:operand}",

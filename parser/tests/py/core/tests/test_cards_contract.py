@@ -2,8 +2,10 @@
 
 - The program below is the Cards fixture (`tests/spaces/@spell/test/cards/`) in the shape the Python writer emits:
   the contract between the writer and spell_core (epic page python-target, P10).
-- Its tests' lines must be the JavaScript run's, character for character:
-  the contract's own `Cards.out.txt` (`tests/cli/src/__snapshots__/contract/`).
+- Its tests' lines must be the JavaScript run's, character for character:  `cards.javascript.out.txt` beside this
+  file, a frozen copy of spell-app's contract snapshot (its `tests/cli/src/__snapshots__/contract/cards.out.txt`,
+  epic `repo-split` C11:  spell-lang's tests never read spell-app's files).  The frozen Cards fixture's run doesn't
+  change;  if the JavaScript core's output does, copy the new one here.
 - `pause for 50 msec` is left out:  this program was written in P10, before pauses (P11).
 - Its `to test` methods are named without `test_`, so pytest runs them only inside `core.test()`, as spell does.
 """
@@ -15,7 +17,7 @@ import pytest
 from spell_core import List, Thing, core, prop, spell_position
 
 # What the JavaScript core prints for the Cards fixture:  its stdout.
-CARDS_OUTPUT = Path(__file__).parents[3] / "cli" / "src" / "__snapshots__" / "contract" / "Cards.out.txt"
+CARDS_OUTPUT = Path(__file__).parent / "cards.javascript.out.txt"
 
 
 class Card(Thing):

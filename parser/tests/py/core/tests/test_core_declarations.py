@@ -1,7 +1,7 @@
 """spell_core against the core's method list, `core.declarations.json5`:  nothing the JavaScript core has
 is missed.
 
-- The list is written from the JavaScript core by `yarn gen:declarations` (in `packages/core`), beside `py/`.
+- The list is written from the JavaScript core by `yarn gen:declarations` (in `core/`), beside `py/`.
 - Each name, snake_cased, must be on `core` (`getItemAt` is `core.get_item_at()`),
   or in `not_ported_yet.json5` (`NOT_PORTED_YET`), with why.
 - A class compiled code imports keeps its name, on the package:  `spell_core.Thing`.
@@ -20,14 +20,12 @@ from spell_core import core
 REPO = Path(__file__).parents[4]
 
 # The JavaScript core's method list:  see `coreDeclarations.ts`.
-DECLARATIONS: dict[str, Any] = json.loads(
-    (REPO / "packages" / "core" / "core.declarations.json5").read_text(encoding="utf-8")
-)
+DECLARATIONS: dict[str, Any] = json.loads((REPO / "core" / "core.declarations.json5").read_text(encoding="utf-8"))
 
 # What spell_core doesn't have yet, by the JavaScript name, grouped by why:
-# `not_ported_yet.json5`, in spell_core's folder (`packages/py/core/`).
+# `not_ported_yet.json5`, in spell_core's folder (`py/core/`).
 # The core reference page reads it too.  Take a name out as it's ported.
-NOT_PORTED_YET_FILE = REPO / "packages" / "py" / "core" / "not_ported_yet.json5"
+NOT_PORTED_YET_FILE = REPO / "py" / "core" / "not_ported_yet.json5"
 NOT_PORTED_YET: set[str] = {
     name for group in json.loads(NOT_PORTED_YET_FILE.read_text(encoding="utf-8"))["groups"] for name in group["names"]
 }

@@ -1,23 +1,40 @@
 import { execFileSync } from "child_process"
-import { existsSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "fs"
+import { existsSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
 /**
- * The repo's code folders:  what compiled spell is checked against.
- * - Found from this file's folder, `packages/spell/src/node/`.
+ * spell-lang's code folders:  what compiled spell is checked against.
+ * - Found from this file's folder, `spell/src/node/`.
  * - `srcDir`:  spell's `src/`
- * - `packagesDir`:  the repo's `packages/`
+ * - `repoDir`:  spell-lang's root, holding its packages (`core/`, `py/` ...) and its `tests/`
  * - `coreDir`:  `core`'s `src/`
  * - Spell's own folders only.
- *   Where PROJECTS are is spaces' (`$/spaces/server/node/environment`), which spell never imports.
+ *   Where PROJECTS are is spaces' (`$/spaces/server/node/environment`, spell-app's), which spell never imports.
  */
 export const CODE_FOLDERS = (() => {
   const srcDir = resolve(fileURLToPath(import.meta.url), "..", "..")
-  const packagesDir = resolve(srcDir, "..", "..")
-  return { srcDir, packagesDir, coreDir: resolve(packagesDir, "core", "src") }
+  const repoDir = resolve(srcDir, "..", "..")
+  return { srcDir, repoDir, coreDir: resolve(repoDir, "core", "src") }
 })()
+
+/**
+ * The editor app's folder (`@spell-app/app`, spell-app's), when it's installed beside spell-lang;  else `undefined`.
+ * - The `ts/solid` target's check reads its types (`typecheck()`):  compiled spell's elements ARE the app's.
+ * - A higher repo's:  spell-lang alone (`yarn clone spell-lang`) has none, and the checks that need it skip
+ *   (epic `repo-split` C11).
+ */
+export const APP_DIR: string | undefined = installedPackage("@spell-app/app")
+
+/** The real folder of installed package `name` (found up from spell's own folder, in `node_modules`);  else `undefined`. */
+function installedPackage(name: string): string | undefined {
+  for (let folder = CODE_FOLDERS.srcDir; ; folder = dirname(folder)) {
+    const candidate = join(folder, "node_modules", name)
+    if (existsSync(join(candidate, "package.json"))) return realpathSync(candidate)
+    if (dirname(folder) === folder) return undefined
+  }
+}
 
 /**
  * `tsc` on compiled spell's TypeScript (the `ts/solid` target):  what it says is wrong, by file.
@@ -28,7 +45,7 @@ export const CODE_FOLDERS = (() => {
  *   - `<ui-*>` tags are typed as `app` types them (`UI_JSX_TYPES`).
  * - Standard decorators (`@prop`, `@drawn`), never `experimentalDecorators`.
  * - A drawable type's element class (epic `drawable-thing` P10), `class CardElement extends SpellElement<Card>`:
- *   - checked against app's `SpellElement` and Spell UI's source
+ *   - checked against app's `SpellElement` and Spell UI's declarations (`@spell-app/ui`'s, epic `repo-split` I12)
  *   - as `@spell/elements` is app's `spellElements.ts`
  *   - With the 2023 javascript library, which Spell UI's own files use (`toReversed()`, `findLast()`).
  * - `files`:  each file's name, e.g. `Solitaire.tsx`, and its code.
@@ -37,6 +54,7 @@ export const CODE_FOLDERS = (() => {
  * - `projects`:  each project they import, `@spell/project/<id>`, as the path of its compiled output.
  * - Used by `spell compile` (on a `ts/solid` target) and spell's `typescript.test.ts`.
  * - NODE-ONLY:  runs the workspace's `tsc` (TypeScript 7) in a child process.
+ * - Needs the editor app installed beside spell-lang (`APP_DIR`, spell-app's):  throws without it.
  */
 export function typecheck(
   files: Record<string, string>,
@@ -74,8 +92,8 @@ export function describeTypecheckError({ line, column, code, message }: Typechec
 }
 
 /**
- * The first `node_modules/.bin/<name>` at or above `packages/spell/`, e.g. `tsc`.
- * - Why a search:  yarn hoists to the monorepo root.
+ * The first `node_modules/.bin/<name>` at or above `spell/`, e.g. `tsc`.
+ * - Why a search:  yarn hoists to the install's root, the top repo `spell` (`~/www/spell`).
  * - Throws if none, i.e. no `yarn install`.
  */
 export function nodeBinary(name: string): string {
@@ -99,40 +117,38 @@ function nodeModulesDir(): string {
  *   so compiled spell's `<ui-button>` checks the same way.
  * - A declaration file only:  nothing of `app`'s runs here.
  */
-const UI_JSX_TYPES = "app/src/solid/solid.types.ts"
+const UI_JSX_TYPES = "src/solid/solid.types.ts"
 
 /**
  * What compiled TypeScript imports as `@spell/elements`:  app's `SpellElement`, and Spell UI's `E`.
  * - Its source, for its types:  nothing of `app`'s runs here.
  */
-const SPELL_ELEMENTS_SOURCE = "app/src/runner/spellElements.ts"
+const SPELL_ELEMENTS_SOURCE = "src/runner/spellElements.ts"
 
 /**
  * A `tsconfig.json` checking `names`, with `@spell/core` pointing at `core`'s source.
  * - `core`'s settings, plus Solid's JSX and `<ui-*>`'s JSX types -- see `typecheck()`.
- * - `@spell/elements` pointing at app's source.
- * - The aliases Spell UI's files import each other by:  `$/spell-element` too, which Spell UI's core re-exports.
+ * - `@spell/elements` pointing at app's source (`APP_DIR`).
+ * - ONE core:  the app's own imports of `@spell-app/core` go to the same source.
+ * - The other repos' packages (`@spell-app/util`, `@spell-app/ui` ...) by their declarations, through the
+ *   folder's `node_modules` link (epic `repo-split` I12):  their own `$/` aliases are theirs, not core's.
  */
 function tsconfig(names: string[], projects: Record<string, string>) {
-  const { packagesDir, coreDir } = CODE_FOLDERS
-  const repo = resolve(packagesDir, "..")
+  const { coreDir } = CODE_FOLDERS
+  const app = APP_DIR
+  if (!app)
+    throw new Error("typecheck():  no @spell-app/app installed beside spell-lang:  it checks against the app's types")
+  const nodeModules = nodeModulesDir()
   const imported = Object.fromEntries(Object.entries(projects).map(([id, path]) => [`@spell/project/${id}`, [path]]))
   return {
     extends: resolve(coreDir, "..", "tsconfig.json"),
     compilerOptions: {
       paths: {
         "@spell/core": [`${coreDir}/index.ts`],
-        "$/util": [`${packagesDir}/util/src/index.ts`],
-        "$/util/*": [`${packagesDir}/util/src/*`],
+        "@spell-app/core": [`${coreDir}/index.ts`],
         "$/core": [`${coreDir}/index.ts`],
         "$/core/*": [`${coreDir}/*`],
-        "@spell/elements": [resolve(packagesDir, SPELL_ELEMENTS_SOURCE)],
-        "$/spell-element": [`${packagesDir}/spell-element/src/index.ts`],
-        "$/spell-element/*": [`${packagesDir}/spell-element/src/*`],
-        "$/ui": [`${packagesDir}/ui/src/index.ts`],
-        "$/ui/*": [`${packagesDir}/ui/src/*`],
-        // Spell UI's families, outside its `src/` (as `tsconfig.base.json`):  longer than `$/ui/*`, so it wins
-        "$/ui/components/*": [`${packagesDir}/ui/components/*`],
+        "@spell/elements": [resolve(app, SPELL_ELEMENTS_SOURCE)],
         ...imported
       },
       lib: ["ES2023", "DOM", "DOM.Iterable"],
@@ -142,10 +158,10 @@ function tsconfig(names: string[], projects: Record<string, string>) {
       // uses none of it (the toolchain's types bring it all the same)
       types: ["node", "@spell-app/toolchain/types"],
       // `node_modules` too:  a scoped package's types (`@spell-app/toolchain/types`) are looked up only there
-      typeRoots: [`${repo}/node_modules/@types`, `${repo}/node_modules`],
+      typeRoots: [`${nodeModules}/@types`, nodeModules],
       noUnusedLocals: false
     },
-    files: [...names, resolve(packagesDir, UI_JSX_TYPES)],
+    files: [...names, resolve(app, UI_JSX_TYPES)],
     // none:  `files` only (else `core`'s own `include` would be inherited)
     include: []
   }

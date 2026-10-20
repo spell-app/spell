@@ -1,6 +1,6 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { describeTypecheckError, typecheck, type TypecheckResult } from "$/spell/node/typecheck"
+import { APP_DIR, describeTypecheckError, typecheck, type TypecheckResult } from "$/spell/node/typecheck"
 import { SP } from "$/spell"
 import { compiledFixture, fixtureImports, fixturePath, fixtureProjectNames, solidSample } from "$/spell/test"
 
@@ -15,6 +15,8 @@ import { compiledFixture, fixtureImports, fixturePath, fixtureProjectNames, soli
  * - Errors in `core`'s own files fail the test:  only the fixtures' may be listed.
  * - Checked with them, in the same `tsc` run:  `Cards.sample.tsx` (`solidSample()`), the Solid TypeScript the target
  *   writes, by hand -- JSX, `<ui-*>` tags and standard decorators must check clean -- and `MISTAKES`, which must not.
+ * - Skipped without the editor app installed beside spell-lang (`APP_DIR`, spell-app's):  compiled spell's elements
+ *   are checked against the app's types (epic `repo-split` C11).
  */
 let result: TypecheckResult
 
@@ -25,6 +27,7 @@ export const shown = <Show when={true} fallbak={<i />}>{"yes"}</Show>
 `
 
 beforeAll(() => {
+  if (!APP_DIR) return
   const files = Object.fromEntries(
     fixtureProjectNames().map((name) => [`${name}.tsx`, compiledFixture(name, "ts/solid")])
   )
@@ -37,7 +40,7 @@ beforeAll(() => {
   result = typecheck({ ...files, "Cards.sample.tsx": solidSample(), "Mistakes.tsx": MISTAKES }, { projects })
 }, 60_000)
 
-describe("fixture projects as TypeScript, checked by tsc", () => {
+describe.skipIf(!APP_DIR)("fixture projects as TypeScript, checked by tsc (needs spell-app's @spell-app/app)", () => {
   test("core's own files check clean", () => {
     expect(result.other).toEqual([])
   })

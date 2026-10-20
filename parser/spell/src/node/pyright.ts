@@ -51,7 +51,7 @@ export function describePyrightError({ line, rule, message }: PyrightError): str
 const PYRIGHT_CONFIG = {
   pythonVersion: "3.12",
   typeCheckingMode: "basic",
-  extraPaths: [resolve(CODE_FOLDERS.packagesDir, "py", "core")]
+  extraPaths: [resolve(CODE_FOLDERS.repoDir, "py", "core")]
 }
 
 /** One of pyright's diagnostics, as `--outputjson` writes it. */
