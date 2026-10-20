@@ -31,6 +31,13 @@ Work in worktree `<name>`, so this session's edits never collide with another se
        (`$(epic config windowsFolder)/ongoing/`, or the old `workspaces/ongoing/`)
      - `<other>` isn't `<name>`:  stop, saying so in one line
        ("`/isolate done` first, or start from a package window").
+   - ANOTHER REPO's epic (epic `epic-engine` I47):  `epic list --json` gives `<name>` a `repo`
+     (its page says it's worked in another repo:  `epic-engine` typed in spell-app's window).
+     - Stop:  no rename, no `EnterWorktree`.
+       The `WorktreeCreate` hook refuses that worktree here anyway, saying where it belongs.
+     - AskUserQuestion "Open `<name>` in its own window?", then `epic window launch <name> --prompt "/isolate <name>"`
+       (it finds the epic's repo from here).
+     - The prompt hook's note says the same for a typed `/isolate <name>`.
    - rename:  `epic session title "🚧 <name>"`.
      It lands on the next prompt, or when the session opens in its new window.
    - a saved prompt, `~/.spell/prompts/<name>.md`:  it's the task to carry on with once isolated.

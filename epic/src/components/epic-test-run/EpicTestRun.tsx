@@ -3,7 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "$/ui/core"
 
-import { SHOT_MAX_BYTES, type TestResult, type TestsEntry } from "$/epics/review"
+import { SHOT_MAX_BYTES, type ReviewClient, type TestResult, type TestsEntry } from "$/epics/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel
 import { ReviewState } from "$/epics/components/epic-review/ReviewState"
 import { EpicPage } from "$/epics/components/epic-page/EpicPage"
@@ -39,6 +39,11 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *   - an answered test shows its answer, and takes another
  * - "4 of 9" and a thin bar of how many are answered;  Back and Next;  the keys P / F / S / N, ← →, Esc to leave
  *   (only drawn by the page:  an example written in a doc takes no keys)
+ * - LEAVING SENDS (I52;  Owen, 2026-10-19:  "I pressed 'Done Testing' ... and you later said 'no test results have
+ *   come in'"):  Done testing, Esc and the summary's Next epic hand the run's unsent answers to Claude (the page's
+ *   Send), and the notice line says so ("3 results sent to Claude");  nothing answered:  it just leaves
+ *   - the send fails (the page server gone, `file://`):  the notice says so, and they wait, Send blue
+ *   - not per answer:  each send wakes a waiting session (`handedOver`), so a run of 17 would wake it 17 times
  * - Its place is the address's `#v3` (replaced, never pushed):  a reload resumes there;  without one, at the first
  *   test not answered
  * - Past the last, the SUMMARY:  the counts, Send results (the page's Send), and with `all` (`epic test --all`) the
@@ -90,6 +95,9 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
 
   /** The current test's comment box, as drawn. */
   private noteBox?: HTMLElement & { value: string }
+
+  /** The answers and comments on their way to the inbox:  leaving waits for them before it sends. */
+  private readonly saving = new Set<Promise<unknown>>()
 
   ////////////////
   // ## Derived state
@@ -578,7 +586,13 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           </ui-button>
           <Show when={this.nextEpic}>
             {(next) => (
-              <ui-button class="next-epic" color="blue" icon="arrow right" href={this.nextHref(next())}>
+              <ui-button
+                class="next-epic"
+                color="blue"
+                icon="arrow right"
+                href={this.nextHref(next())}
+                onClick={(event: MouseEvent) => this.onNextEpic(event, this.nextHref(next()))}
+              >
                 {this.translationForKey("nextEpic", { epic: next().epic, count: next().open })}
               </ui-button>
             )}
@@ -609,7 +623,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     this.noteTimer = undefined
     const note = this.commentOf(id).trim()
     if (result !== "failed") {
-      void client.answerTest(id, { result, ...(note && { note }) })
+      this.track(client.answerTest(id, { result, ...(note && { note }) }))
       this.moveTimer?.cancel()
       this.moveTimer = E.after(ANSWER_PAUSE_MS / 1000, () => {
         if (this.at === id) this.move(1)
@@ -618,7 +632,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     }
     const prior = client.testAnswerOf(id)
     if (prior?.result !== "failed" || (prior.note ?? "") !== note)
-      void client.answerTest(id, { result, ...(note && { note }), ...(prior?.shot && { shot: prior.shot }) })
+      this.track(client.answerTest(id, { result, ...(note && { note }), ...(prior?.shot && { shot: prior.shot }) }))
     E.afterSolidUpdate(() => E.beforeNextPaint(() => this.focusNote()))
   }
 
@@ -650,12 +664,79 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     dispatchEvent(new Event(PLACE_EVENT))
   }
 
-  /** Leave the run (Esc, Done testing):  the note saved, and the page told. */
+  /** Leave the run (Esc, Done testing):  the note saved, the page told, and its unsent answers sent (`sendAnswers()`). */
   @E.untracked
   private leave() {
     this.moveTimer?.cancel()
     this.flushNote()
+    const sending = this.sendAnswers()
     this.send(TEST_DONE, {})
+    void sending
+  }
+
+  /**
+   * The summary's Next epic:  the run's unsent answers sent first (`sendAnswers()`), then on;  a send that failed
+   * stays here, the notice saying why.
+   */
+  @E.untracked
+  private onNextEpic(event: MouseEvent, href: string) {
+    this.flushNote()
+    if (!this.unsentAnswers().length) return
+    event.preventDefault()
+    void this.sendAnswers().then((sent) => sent && location.assign(href))
+  }
+
+  /**
+   * Hand the run's unsent answers to Claude, as the run is left:  the page's Send, once the answers and comments on
+   * their way are saved;  true when they went, or there were none.
+   * - the notice line says what went ("3 results sent to Claude");  with nobody listening, Send's own notice stays
+   *   (saved, and how the epic was woken)
+   * - it failed (the page server gone, not served):  the notice says so;  the answers wait, Send blue in the header
+   * - its words are read now:  the run is gone by the time the send answers
+   */
+  @E.untracked
+  private async sendAnswers(): Promise<boolean> {
+    const client = this.review.client
+    const ids = this.unsentAnswers()
+    const count = ids.length
+    if (!client || !count) return true
+    const said = {
+      sent: count === 1 ? this.translationForKey("leftSentOne") : this.translationForKey("leftSent", { count }),
+      notServed: this.translationForKey("leftNotServed", { count }),
+      failed: this.translationForKey("leftFailed", { count, error: "{error}" }),
+      noReason: this.translationForKey("noReason")
+    }
+    if (!client.reviewing) {
+      client.notify(said.notServed)
+      return false
+    }
+    await Promise.allSettled([...this.saving])
+    // sent meanwhile (the header's Send, the summary's):  nothing left to say
+    if (!ids.some((id) => EpicTestRun.isUnsent(client, id))) return true
+    const sent = await client.send()
+    if (sent && client.listening) client.notify(said.sent)
+    else if (!sent) client.notify(said.failed.replace("{error}", client.lastWriteError || said.noReason))
+    return sent
+  }
+
+  /** The run's answers not sent yet, by test id. */
+  @E.untracked
+  private unsentAnswers(): string[] {
+    const client = this.review.client
+    if (!client) return []
+    return this.tests().filter((id) => !!client.testAnswerOf(id) && EpicTestRun.isUnsent(client, id))
+  }
+
+  /** Is item `id`'s mark waiting for a Send? */
+  private static isUnsent(client: ReviewClient, id: string): boolean {
+    const mark = client.markOf(id)
+    return !!mark && !client.isSent(mark)
+  }
+
+  /** Keep `saving` (an answer or a comment on its way) until it's saved, or failed. */
+  private track(saving: Promise<unknown>) {
+    this.saving.add(saving)
+    void saving.finally(() => this.saving.delete(saving))
   }
 
   /**
@@ -757,15 +838,17 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     const answer = client.testAnswerOf(id)
     const note = text.trim()
     if (!answer) {
-      if ((client.draftOf(id)?.note ?? "") !== text) void client.saveDraft(id, text)
+      if ((client.draftOf(id)?.note ?? "") !== text) this.track(client.saveDraft(id, text))
       return
     }
     if ((answer.note ?? "") === note) return
-    void client.answerTest(id, {
-      result: answer.result,
-      ...(note && { note }),
-      ...(answer.shot && { shot: answer.shot })
-    })
+    this.track(
+      client.answerTest(id, {
+        result: answer.result,
+        ...(note && { note }),
+        ...(answer.shot && { shot: answer.shot })
+      })
+    )
   }
 
   /** A paste anywhere on the page, while a failure shows:  an image in it is the test's screenshot. */
@@ -776,7 +859,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
       ?.getAsFile()
     if (!file) return
     event.preventDefault()
-    void this.takeShot(file)
+    this.track(this.takeShot(file))
   }
 
   /** A file dropped on the screenshot's area. */
@@ -784,7 +867,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   private onDrop(event: DragEvent) {
     event.preventDefault()
     const file = event.dataTransfer?.files[0]
-    if (file) void this.takeShot(file)
+    if (file) this.track(this.takeShot(file))
   }
 
   /**

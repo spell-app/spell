@@ -7,6 +7,7 @@ import { parseHTML } from "linkedom"
 
 import { AS } from "$/assembler"
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { EpicRepo } from "$/epics/config/EpicRepo"
 import { DataFile, type DataFileMove } from "$/epics/data/DataFile"
 import { RepoList } from "$/epics/server/RepoList"
 import { SRV } from "$/server"
@@ -184,10 +185,14 @@ export class PlanDocFiles {
    *   - `future` for an epic not planned yet
    *   - else `done`
    * - `checkout`:  `main`, or `.claude/worktrees/<name>`:  where it runs (`epicCheckout()`)
+   * - `repo`:  for an epic worked in ANOTHER repo only (`EpicRepo`, epic `epic-engine` I47):  that repo's main
+   *   checkout;  its `checkout` is then that repo's worktree, `../spell-epic.worktrees/epic-engine`, else that repo's
+   *   main checkout, both from this one;  never a worktree of this repo
    * - SIDE EFFECT:  a doc that won't read (in the old markup:  `read()`) is left out, and named on stderr
    */
   listEpics(): EpicListing[] {
     const main = this.mainRoot()
+    const origins = new Map<string, string | null>()
     const dir = this.epics
     const names = existsSync(dir)
       ? readdirSync(dir, { withFileTypes: true })
@@ -206,6 +211,17 @@ export class PlanDocFiles {
       }
       const sections = plan.reviewSections()
       const phases = plan.phases
+      const page = plan.document.querySelector("epic-page")
+      const attribute = (key: string) => page?.getAttribute(key)?.trim() || null
+      const home = EpicRepo.homeOf(
+        name,
+        file,
+        { worktree: attribute("worktree"), repo: attribute("repo") },
+        main,
+        origins
+      )
+      const elsewhere = home && !home.own && home.checkout ? home.checkout : null
+      const there = elsewhere && (home!.made ? home!.worktree! : elsewhere)
       return [
         {
           name,
@@ -215,7 +231,8 @@ export class PlanDocFiles {
             : !plan.standing && phases.length && phases.every((phase) => phase.status === "done")
               ? "done"
               : "in progress",
-          checkout: this.epicCheckout(name, main),
+          checkout: there ? relative(main, there) : this.epicCheckout(name, main),
+          ...(elsewhere && { repo: elsewhere }),
           saga: plan.saga,
           notReviewed: sections.reduce((sum, section) => sum + section.notReviewed, 0),
           total: sections.reduce((sum, section) => sum + section.total, 0),
@@ -617,8 +634,10 @@ export type EpicListing = {
   title: string
   /** `in progress`, `future` or `done` */
   status: EpicStatus
-  /** where it runs:  `main`, or `.claude/worktrees/<name>` */
+  /** where it runs:  `main`, or `.claude/worktrees/<name>`;  another repo's epic:  that repo's worktree or checkout */
   checkout: string
+  /** an epic worked in ANOTHER repo only:  that repo's main checkout (`EpicRepo`, epic `epic-engine` I47) */
+  repo?: string
   /** the saga it serves, its id (`<epic-page saga>`);  `null` for none */
   saga: string | null
   /** how many of its items aren't reviewed */

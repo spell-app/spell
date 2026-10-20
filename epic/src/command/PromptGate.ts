@@ -5,6 +5,7 @@ import { join } from "node:path"
 // By relative path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
 import { LOOKS, worktreeOf } from "../window.mjs"
 import { TITLE_ICONS } from "./command.types.ts"
+import { EpicRepo, type EpicHome } from "../config/EpicRepo.ts"
 
 /****************
  * ### `PromptGate`
@@ -37,6 +38,15 @@ import { TITLE_ICONS } from "./command.types.ts"
  *   - A look right after the name (`/epic x -purple`, epic `windows-and-review` P5) is the window's, not the plan's:
  *     left out of the text saved below.
  *   - `<name>` is lower-kebab-cased as the skills do (`"Docs Index"` -> `docs-index`).
+ * 0. ANOTHER REPO's epic (`EpicRepo.elsewhere()`, epic `epic-engine` I47), on `/isolate`, `/epic <name>`,
+ *    `/epic resume`, `/epic request` and `/unpark`:  `/epic resume epic-engine` typed in spell-app's window.
+ *    - Let through, NOT renamed (a session titled for the epic would count as its session:  `epic window launch`
+ *      would type into it), with a note for Claude (`additionalContext`) and a line for Owen (`systemMessage`):
+ *      the epic is worked in `<repo>`;  no worktree here;  `epic window launch <name> --prompt "<the command>"`
+ *      opens its own window.
+ *    - Any text after the name is saved first, as below, so the new window's `/epic <name>` picks it up.
+ *    - Why:  the session's `EnterWorktree` made `spell-app.worktrees/epic-engine`, and its edits went through that
+ *      worktree's `spell-epic` link into spell-epic's MAIN checkout.  The worktree hook refuses that worktree too.
  * 0. `/epic review <name>`, first:  blocked in a session titled for a DIFFERENT epic
  *    (`🚧 <other>`:  epic `airplane` P12, Q10 B;  `reviewRefusal()`).  Any other review passes untouched.
  * 1. Plan mode, on `/isolate` or `/epic <name>`:  blocks the prompt.
@@ -81,6 +91,9 @@ export class PromptGate {
     const command = PromptGate.parseCommand(input.prompt)
     if (!command) return null
     const { skill, name, text } = command
+    // another repo's epic:  its own window, never a worktree here (epic `epic-engine` I47)
+    const home = skill === "epic future" || !input.cwd ? undefined : EpicRepo.elsewhere(name, input.cwd)
+    if (home) return elsewhereNote(home, command)
     // a future epic is only written down:  no worktree, so nothing to block;
     // it gets its own icon ... but never over another epic's session:
     // that one keeps its title, the address its requests come to
@@ -258,6 +271,7 @@ export type GateAnswer =
   | { decision: "block"; reason: string }
   | {
       hookSpecificOutput: { hookEventName: "UserPromptSubmit"; sessionTitle?: string; additionalContext?: string }
+      systemMessage?: string
     }
 
 /** A gated prompt, `parseCommand()`'s answer:  see there. */
@@ -285,6 +299,27 @@ function launchNote(other: string, name: string, text: string): GateAnswer {
     `This session works in worktree \`${other}\`:  \`/epic ${name}\` must NOT run here.  Owen means "open a new ` +
     `window for epic \`${name}\`".${saved}  Follow the /epic skill's "From another worktree":  ask him first.`
   return { hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: note } }
+}
+
+/**
+ * The hook's answer to a command naming epic `home`, ANOTHER repo's (`gate()`, step 0;  epic `epic-engine` I47):
+ * let through, NOT renamed, a note sending Claude to the epic's own window, and a line for Owen.
+ * - SIDE EFFECT:  `text` after `/epic <name>` or `/isolate <name>` saved first (`savePrompt()`)
+ */
+function elsewhereNote(home: EpicHome, { skill, name, text }: GateCommand): GateAnswer {
+  const plain = skill === "epic" || skill === "isolate"
+  const saved =
+    plain && text ? `  Its text is saved in ${PromptGate.savePrompt(name, text).replace(homedir(), "~")}.` : ""
+  const typed = plain || !text ? `/${skill} ${name}` : `/${skill} ${name} ${text.split("\n")[0]}`
+  const launch = `epic window launch ${name} --prompt ${JSON.stringify(typed)}`
+  const note =
+    `${EpicRepo.refusal(home)}${saved}  So \`${typed}\` must NOT run here:  no EnterWorktree, no worktree ` +
+    `${name} in this repo, no session rename.  Ask Owen (AskUserQuestion) whether to open ${name}'s own window, ` +
+    `then run \`${launch}\`;  if it fails, say so in one line.`
+  return {
+    hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: note },
+    systemMessage: `⎇ ${name} is worked in ${home.checkout ?? home.url}:  its own window, not this one (\`${launch}\`).`
+  }
 }
 
 /**

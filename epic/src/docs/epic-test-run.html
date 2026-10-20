@@ -108,6 +108,12 @@
               <li><code>?test=1&amp;all=1</code>: one epic of a run across every epic (<code>epic test --all</code>), its summary leading to the next</li>
             </ul>
             <p>Esc or Done testing leaves it, the blocks back, <code>?test</code> off the address. Its place stays in the address (<code>#v3</code>): a reload resumes there.</p>
+            <p>
+              LEAVING SENDS (I52): Done testing, Esc and the summary's next epic hand the run's unsent answers to Claude
+              (the page's Send, as Send results does), and the notice line at the window's foot says so: "3 results
+              sent to Claude". Nothing answered: it just leaves. The send failing (the page server gone, a
+              <code>file://</code> page): the notice says so, and the answers wait, Send blue in the header.
+            </p>
             <p>A TEST item's details, in order (<code>epic add &lt;epic&gt;#V --step ... --should ...</code> writes them):</p>
             <ui-table celled compact striped unstackable>
               <table>
@@ -152,7 +158,7 @@
               </table>
             </ui-table>
             <ui-section id="epic-test-run-answers" header="The answers" sticky collapsible dividing collapsed>
-              <p>Each a review mark on the test, <code>{ action: "test", result, note?, shot? }</code>, sent with Send like any mark.</p>
+              <p>Each a review mark on the test, <code>{ action: "test", result, note?, shot? }</code>, sent with Send like any mark, or by leaving the run. Not one by one as given: each send wakes a waiting session, so a run of 17 tests would wake it 17 times.</p>
             <ui-table celled compact striped unstackable>
               <table>
                 <thead>
@@ -172,7 +178,7 @@
                 answer's <code>note</code>, or, before an answer, the inbox's draft for the test, so a reload keeps it.
                 <code>epic inbox apply</code> puts it on the test as his reply;  the summary lists the tests commented on.
               </p>
-              <p>← and → move;  Esc leaves.  An answered test shows its answer, dashed until sent, outlined once sent, and takes another.</p>
+              <p>← and → move;  Esc leaves, sending the answers.  An answered test shows its answer, dashed until sent, outlined once sent, and takes another.</p>
             </ui-section>
             <ui-section id="epic-test-run-parts" header="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws.</p>
@@ -203,7 +209,7 @@
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>epic-test-done</code></td><td><code>{}</code></td><td>Owen left the run: Esc, or Done testing.</td></tr>
+                  <tr><td><code>epic-test-done</code></td><td><code>{}</code></td><td>Owen left the run: Esc, or Done testing. The run has sent its unsent answers.</td></tr>
                 </tbody>
               </table>
             </ui-table>

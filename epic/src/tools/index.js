@@ -450,7 +450,7 @@ function epicFacts(page) {
  *
  * Each `{ id, title, icon, href?, count?, description, meta? }`.
  * - `id`:  the card's id, so the old `pages/index.html#epics` / `#guides` / `#templates` links land on its card
- * - `href`:  from the home's folder;  none for the App, which only the page server has (`/editor/`):
+ * - `href`:  from the home's folder;  none for the App, which only a server has (`/editor/`, `RepoApp` on the epic server):
  *   a link there would break from `file://`, and `doc-links.js --check` can't resolve it
  * - Spell UI, Epic UI, App UI (`COMPONENT_SETS`):
  *   - their home at its served address (`/components/epics/`), since their pages load their site bundle from there
@@ -523,7 +523,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       title: "App",
       icon: "wand magic sparkles",
       description: "The spell editor:  write and run spell in the browser.",
-      meta: "Page server only:  /editor/, the top bar's App tab (spell dev server ensure)"
+      meta: "Served only:  /editor/, the top bar's App tab, which starts it if it isn't up (the repo's app in .epic/config.json5)"
     },
     {
       id: "app-ui",

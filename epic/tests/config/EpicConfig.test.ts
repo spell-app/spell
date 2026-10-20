@@ -45,8 +45,14 @@ describe("EpicConfig", () => {
       sharedFolders: "epics,guides,pages,brand,goals,sagas,agents",
       engineFolder: join(TOP, "spell-epic"),
       repoTemplates: "",
-      windowsFolder: join(TOP, "spell-app-dev", "windows")
+      windowsFolder: join(TOP, "spell-app-dev", "windows"),
+      "app.path": "/editor/",
+      "app.url": "",
+      "app.urlFile": "",
+      "app.start": ""
     })
+    // no app declared
+    expect(config.app).toBeUndefined()
     expect(config.worktreeFolder("seo")).toBe(INSIDE)
     expect(config.worktreesPattern).toBe(".claude/worktrees")
     // one place:  nothing moved
@@ -166,6 +172,27 @@ describe("EpicConfig", () => {
     expect(config.windows).toEqual({ ...EpicConfig.DEFAULTS.windows, default: "whole" })
     expect(config.linkSessionFolders).toBe(true)
     expect(config.baseBranch).toBe("main")
+  })
+
+  // epic `epic-engine` I49:  the top bar's App tab, through the epic server
+  test("the repo's app:  its URL or record file (from the main checkout) and start command;  `path` defaults", () => {
+    const main = fakeMainCheckout(join(TOP, "with-app"))
+    configFile(main, '{ "app": { "urlFile": ".app.json", "start": "node app.mjs" } }')
+    const config = new EpicConfig(main)
+    expect(config.app).toEqual({ path: "/editor/", url: "", urlFile: join(main, ".app.json"), start: "node app.mjs" })
+    expect(config.values()["app.urlFile"]).toBe(join(main, ".app.json"))
+    configFile(main, '{ "app": { "path": "/studio/", "url": "http://localhost:5173/" } }')
+    expect(new EpicConfig(main).app).toEqual({
+      path: "/studio/",
+      url: "http://localhost:5173/",
+      urlFile: "",
+      start: ""
+    })
+    // a start command alone is no app:  nothing says where it answers
+    configFile(main, '{ "app": { "start": "node app.mjs" } }')
+    expect(new EpicConfig(main).app).toBeUndefined()
+    expect(() => EpicConfig.settingsFrom('{ "app": "http://x/" }', "x.json5")).toThrow(/"app" must be an object/)
+    expect(() => EpicConfig.settingsFrom('{ "app": { "url": 3 } }', "x.json5")).toThrow(/"app\.url" must be a string/)
   })
 
   test("refuses, naming the file:  text that won't read, a value of the wrong kind, an empty name", () => {

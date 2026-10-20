@@ -104,6 +104,12 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     The user can type another in "Other".
 - Checks and rename, BEFORE anything else:
   as [the isolate skill](../isolate/SKILL.md)'s "Start", step 0.
+  - ANOTHER REPO's epic (`epic list --json` gives it a `repo`;  epic `epic-engine` I47):
+    NOT this window's, whatever the command (`/epic <name>`, `resume`, `request`).
+    - No rename, no `EnterWorktree`, no worktree `<name>` here:  the `WorktreeCreate` hook refuses one.
+    - AskUserQuestion "Open `<name>` in its own window?", then `epic window launch <name> --prompt "<the command>"`;
+      it finds the epic's repo from here.
+    - The prompt hook's note says so for a typed command;  its text is saved, as below.
   - A typed `/epic <name> ...` got them from the repo's `UserPromptSubmit` hook
     ([prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs)).
   - It renamed the session `<name>`, or blocked the prompt (plan mode) and saved its text.
@@ -560,6 +566,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
 ### 7.1 Pick a doc (no `<name>`)
 
 - `epic list --json`:  `{ name, title, status, checkout, notReviewed, total }` each, in progress first.
+  - `repo` too, for an epic worked in ANOTHER repo:  that repo's main checkout;  `checkout` is then that repo's.
 - As reply text, every epic in two groups (in progress / done), most not-reviewed first.
   - E.g. `- commands (worktree commands)  5 / 9`.
 - Then ONE modal, header `Epic Review`, "Which epic do you want to review?":
@@ -816,6 +823,9 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    Tell it, or resume here.
    - Found by `epic worktree status <name>`:  `sessions`, `running: true`.
 3. Where:  the epic page's checkout (`list --json`, `checkout`).
+   - a `repo` too:  ANOTHER repo's epic (epic `epic-engine` I47).
+     Never `EnterWorktree` here, by name or path:  "1. Name"'s check, `epic window launch <name> --prompt
+     "/epic resume <name>"`.
    - `main`:  no worktree;  work in the main checkout, this window.
    - a worktree (`.claude/worktrees/<name>`, or beside the repo):  as [the unpark skill](../unpark/SKILL.md), step 3.
      - That's `stay-check --epic`, a new window or stay, and `EnterWorktree` with `path`.

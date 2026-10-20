@@ -100,6 +100,10 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | `engineFolder` | `"../spell-epic"` | the spell-epic checkout, which `epic shared link` links in at every checkout's root as `spell-epic`, only where the checkout's `.gitignore` ignores that name (spell-app runs the engine through it:  its `$/epics` aliases, its page server's routes);  `""`:  no link (`epic init` writes that) |
 | `repoTemplates` | `""` | the repo's OWN page templates, a folder from each checkout's root:  listed on the Templates page beside spell-epic's `templates/`, and found by name before them (`epic pages new`, `epic pages template`);  `""`:  none, spell-epic's are all there are (T11) |
 | `windowsFolder` | `""` | the VS Code window files' folder (`epic window`;  P13):  package windows in it, worktree windows in its `ongoing/`;  `""`:  the content folder's `windows/`, git-ignored there;  until `epic window move` makes it, the old `workspaces/` in the main checkout is read;  spell-epic's own:  `"workspaces"` (repos sharing a content folder each need their own) |
+| `app.path` | `"/editor/"` | the repo's APP (epic `epic-engine` I49):  its address on the epic server, the top bar's App tab (`/editor/`, and `/r/<repo>/editor/`) |
+| `app.url` | `""` | where the app answers (`"http://localhost:3000/"`);  `""` with no `urlFile`:  no app, and the tab says so |
+| `app.urlFile` | `""` | OR a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout:  wins while it's there (spell-app's `".spell-server.editor.json"`) |
+| `app.start` | `""` | the shell command that starts it, run in the background from the main checkout when it doesn't answer (spell-app's `"node packages/cli/bin/spell.mjs dev server ensure"`:  its page server, which starts the editor);  `""`:  the tab says it isn't up |
 
 A repo's generated files are its own list, in each checkout:  `.epic/generators.json5`.
 - `epic worktree merge-main` rebuilds them instead of merging them.
@@ -345,6 +349,8 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 | `/components/<set>/...` | the default repo's other component sets, as spell-app's page server serves them (`COMPONENT_SETS`):  Spell UI, App UI, the brand's;  each repo's at `/r/<repo>/components/<set>/` |
 | `/r/<repo>/...` | a registered repo's content folder (its `.epic/config.json5`'s `contentFolder`) |
 | `/...` | the DEFAULT repo's content folder too, so today's URLs keep working |
+| `/editor/` | the default repo's APP, the top bar's App tab (its `.epic/config.json5`'s `"app"`;  each repo's at `/r/<repo>/editor/`):  answering, a redirect to it;  not, it's started (its `app.start`, in the background, its output in `~/.spell-epic/app-<repo>.log`) behind a "Starting ..." page that goes there once it answers;  none declared, a page saying so |
+| `/api/app/<repo>` | how a repo's app stands:  up, starting, failed and why (what the "Starting ..." page polls) |
 | `/api/...` | the epic route modules (review, details, choices, comments, agents, airplane, running, links), for the default repo |
 
 - Its files are in `~/.spell-epic/`:
@@ -356,7 +362,8 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 - Pages load the engine from the routes (the migration step `engine-asset-routes`).
   A page not migrated yet still loads THIS engine's files, from its old paths.
 - Not yet:  another repo's calls (`/api/...` from a `/r/<repo>/` page) reach the default repo's route modules.
-- Not here:  the app (the top bar's App tab, `/editor/`):  spell-app's page server runs it (spaces' `appRoutes`).
+- The app is the repo's own server, never the epic server's:  `/editor/` only finds it, or starts it (`RepoApp`).
+  spell-app's is the editor its page server starts and records (spaces' `appRoutes`, `EditorServer`).
 
 ## spell-app's packages
 

@@ -84,8 +84,10 @@ export type RunningSession = {
   entrypoint?: string
   /** folder it started in */
   cwd?: string
-  /** title the registry knows, when any */
+  /** title the registry knows, when any;  its address (`SendMessage`'s `to`) */
   name?: string
+  /** `hook`, `derived` ...:  `derived` when Claude Code made `name` up (`SessionFolders.recordTitle()`) */
+  nameSource?: string
   /** what a `waiting` session waits for, e.g. `permission` */
   waitingFor?: string
   /** when the record last changed, in ms */

@@ -24,7 +24,8 @@ export const epicTestRunVocabulary = {
     'each a review mark (`{ action: "test", result }`) in the page\'s inbox.  "4 of 9" and a thin bar say how far ' +
     "along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  " +
     "Drawn by `<epic-page>` over its blocks in test mode (the To test section's Start testing, or `?test=1` on the " +
-    "page's address);  written in a doc only as an example, inside an `<epic-page>`.",
+    "page's address);  written in a doc only as an example, inside an `<epic-page>`.  Leaving it (Done testing, " +
+    "Esc, the summary's next epic) sends its unsent answers, and the notice line says so.",
   attributes: [
     {
       name: "all",
@@ -38,7 +39,9 @@ export const epicTestRunVocabulary = {
     {
       name: "epic-test-done",
       detail: "{}",
-      description: 'Owen left the run:  Esc, or "Done testing".  `<epic-page>` shows its blocks again.'
+      description:
+        'Owen left the run:  Esc, or "Done testing".  `<epic-page>` shows its blocks again;  the run has sent its ' +
+        "unsent answers (I52)."
     }
   ],
   slots: [],
@@ -74,7 +77,32 @@ export const epicTestRunVocabulary = {
     { key: "of", text: "{at} of {total}", description: 'Where the run is:  "4 of 9".' },
     { key: "answered", text: "{count} of {total} answered", description: "The progress bar's name and tooltip." },
     { key: "done", text: "Done testing", description: "The head's button:  leave the run (Esc)." },
-    { key: "doneTip", text: "Leave the run (Esc):  your answers stay", description: "Done testing's tooltip." },
+    {
+      key: "doneTip",
+      text: "Leave the run (Esc):  your answers go to Claude",
+      description: "Done testing's tooltip:  leaving sends the run's unsent answers (I52)."
+    },
+    {
+      key: "leftSent",
+      text: "{count} results sent to Claude",
+      description: "The notice line, the run left (Done testing, Esc, Next epic):  its unsent answers sent."
+    },
+    { key: "leftSentOne", text: "1 result sent to Claude", description: "As `leftSent`, for one answer." },
+    {
+      key: "leftFailed",
+      text: "Couldn't send your answers ({count}):  {error}.  They're kept:  Send in the header sends them",
+      description: "The notice line, the run left but its send failed:  the answers wait, Send blue."
+    },
+    {
+      key: "leftNotServed",
+      text: "Not sent:  the page isn't served by the page server.  Your answers ({count}) are kept",
+      description: "The notice line, the run left while not reviewed (`file://`, no token)."
+    },
+    {
+      key: "noReason",
+      text: "the page server didn't answer",
+      description: "Why the send failed, when the client couldn't say."
+    },
     { key: "step", text: "Step", description: "The card's Step:  what to do." },
     { key: "should", text: "Should", description: "The card's Should:  what should happen." },
     { key: "example", text: "Example", description: "The card's Example:  a screenshot Claude took, or a line." },
@@ -143,8 +171,8 @@ export const epicTestRunVocabulary = {
     {
       key: "summaryWhat",
       text:
-        "Send results hands your answers to Claude:  passed tests close, each failure becomes an issue with your " +
-        "note and screenshot, skipped ones are canceled, not now stays open for the next run.",
+        "Send results hands your answers to Claude (Done testing does too):  passed tests close, each failure becomes " +
+        "an issue with your note and screenshot, skipped ones are canceled, not now stays open for the next run.",
       description: "The summary card's line on what Send does."
     },
     { key: "send", text: "Send results", description: "The summary card's Send." },

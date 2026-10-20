@@ -341,5 +341,41 @@ describe("<epic-test-run>", () => {
     expect(card(host).id).toBe("V1")
     await key(host, "Escape")
     expect([host.matches(":state(testing)"), location.search, runOf(host)]).toEqual([false, "", null])
+    // nothing answered:  it just leaves, nothing sent
+    expect(routes.posts.some(([route]) => route === "send")).toBe(false)
+  })
+
+  test("Done testing SENDS the run's unsent answers (I52), after their saves;  the notice says how many", async () => {
+    routes.inbox.listening = { session: "s", since: new Date().toISOString() }
+    const client = await adoptClient(routes)
+    const notices: string[] = []
+    client.onNotice((message) => notices.push(message))
+    const host = await render()
+    await key(host, "p")
+    await afterAnswer(host)
+    await key(host, "s")
+    // left at once, the Skip's save maybe still on its way:  the send goes after it
+    runOf(host)!.querySelector<HTMLElement>("ui-button.leave")!.click()
+    await settle(host)
+    expect(runOf(host)).toBeNull()
+    await vi.waitFor(() => expect(notices.at(-1)).toBe("2 results sent to Claude"))
+    expect(routes.posts.map(([route]) => route)).toEqual(["mark", "mark", "send"])
+    expect(["v1", "v2"].every((id) => client.isSent(client.markOf(id)!))).toBe(true)
+  })
+
+  test("leaving, the send failing:  the notice says so, the answers wait unsent", async () => {
+    const client = await adoptClient(routes)
+    const notices: string[] = []
+    client.onNotice((message) => notices.push(message))
+    const host = await render()
+    await key(host, "p")
+    await afterAnswer(host)
+    const fetch = routes.fetch.getMockImplementation()!
+    routes.fetch.mockImplementation(async (input, init) =>
+      input.endsWith("/send") ? new Response("gone", { status: 502 }) : fetch(input, init)
+    )
+    await key(host, "Escape")
+    await vi.waitFor(() => expect(notices.at(-1)).toMatch(/^Couldn't send your answers \(1\): .+They're kept/))
+    expect(client.isSent(client.markOf("v1")!)).toBe(false)
   })
 })

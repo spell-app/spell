@@ -36,6 +36,8 @@ and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-
 3. Screenshots:  count the images he pasted WITH this request, `--images <count>`.
    - Those in his message, or the ones just before it about the same thing.
    - `send` takes the newest ones from this session's transcript.
+   - One he pasted while this session was mid-turn counts too:  it's in the transcript like any other
+     (epic `epic-engine` I50).  Never describe it in words instead.
 4. Context:  one or two lines the receiver needs to find it COLD.
    - What this session was looking at:
      the page and item id (`epics/python/python.plan.html#p4`), the file and line, the command that misbehaved.

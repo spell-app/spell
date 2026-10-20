@@ -3,6 +3,7 @@ import { basename, sep } from "node:path"
 
 // By relative path, `.ts` and all:  the `SessionStart` hook loads this file with plain `node` (types stripped)
 import { EpicConfig } from "../config/EpicConfig.ts"
+import { EpicRepo } from "../config/EpicRepo.ts"
 
 /****************
  * ### `WorktreeGuard`
@@ -26,6 +27,10 @@ import { EpicConfig } from "../config/EpicConfig.ts"
  *    Claude is told to `EnterWorktree` the folder it's already in,
  *    so Claude Code records it, and a reopen from any window comes back there.
  *    - a worktree nested in the checkout doesn't need it:  the panel hands such a session its folder itself
+ * 0. STRAY, first:  the session's folder, or the worktree its last note names, is a worktree of THIS repo named for
+ *    an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):  `spell-app.worktrees/epic-engine`.
+ *    Claude is told to edit nothing there (a link in it, `spell-epic`, leads to the other repo's MAIN checkout), to
+ *    leave it (`ExitWorktree` keep), and to offer `epic window launch <name>`;  never sent back into it (1).
  * - Its answer is the hook's JSON:  `additionalContext` for Claude, `systemMessage` a line for Owen.
  * - Its position:  node's own modules and `EpicConfig` by path, so plain `node` loads it.
  *   NEVER an alias, an `enum` or a parameter property.
@@ -44,6 +49,8 @@ export class WorktreeGuard {
     const here = real(cwd)
     const note = WorktreeGuard.lastNote(transcript)
     const recorded = note?.worktreePath ? real(note.worktreePath) : undefined
+    const stray = WorktreeGuard.stray(config, here) ?? (recorded ? WorktreeGuard.stray(config, recorded) : undefined)
+    if (stray) return stray
     if (recorded && existsSync(recorded) && !inside(here, recorded)) {
       const name = note!.worktreeName || basename(recorded)
       return WorktreeGuard.output(
@@ -64,6 +71,26 @@ export class WorktreeGuard {
         `hasn't recorded the worktree:  reopened from another window, the session would work in that window's ` +
         `folder instead (epic-eject I3).  Before anything else, run EnterWorktree with path "${path}" (the folder ` +
         `you're already in).  If it refuses, say so in one line and carry on.`
+    )
+  }
+
+  /**
+   * The guard's answer when `path` is in a worktree of `config`'s repo named for an epic worked in ANOTHER repo
+   * (step 0);  else `undefined`.
+   */
+  static stray(config: EpicConfig, path: string): GuardOutput | undefined {
+    const name = config.worktreeNameOf(path)
+    const home = name ? EpicRepo.elsewhere(name, config.main) : undefined
+    if (!name || !home) return undefined
+    const folder = config.worktreeFolder(name)
+    return WorktreeGuard.output(
+      `⎇ ${name}:  this worktree is a stray, in the wrong repo (${basename(config.main)}):  ` +
+        `epic ${name} is worked in ${home.checkout ?? home.url}.`,
+      `This session works in, or was last in, worktree ${name} of ${config.main} (${folder}), but epic ${name} is ` +
+        `worked in ANOTHER repo:  ${EpicRepo.refusal(home)}  Before anything else:  edit NOTHING in ${folder} ` +
+        `(a link in it may lead into the other repo's main checkout);  if you're in it, ExitWorktree with action ` +
+        `"keep";  never EnterWorktree it.  Tell Owen in one line, and offer \`epic window launch ${name}\`.  ` +
+        `Removing the stray worktree is Owen's call, once no session works in it.`
     )
   }
 

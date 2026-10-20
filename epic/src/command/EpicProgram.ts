@@ -2,6 +2,7 @@ import chalk from "chalk"
 import { Command } from "commander"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { EpicRepo } from "$/epics/config/EpicRepo"
 
 import { EXIT, EpicCommandError } from "./command.types"
 import { GROUP_VERBS, type GroupName } from "./epicGroups"
@@ -444,6 +445,21 @@ export class EpicProgram {
   // ## Windows and the page server
   ////////////////
 
+  /**
+   * The options `epic window <args>` runs with:  `open`, `launch` and `close` of an epic worked in ANOTHER repo run
+   * in THAT repo's checkout (`EpicRepo.elsewhere()`, epic `epic-engine` I47), so `epic window launch epic-engine`
+   * typed in spell-app's window opens spell-epic's worktree window, never a spell-app one.
+   * - said on stderr;  any other command, or a name that's this repo's or no epic's:  as before (`{}`)
+   */
+  static windowOptions(args: string[], cwd = process.cwd()): { cwd?: string } {
+    const [command, name] = args.filter((arg, at) => !arg.startsWith("--") && !args[at - 1]?.startsWith("--"))
+    if (!name || !["open", "launch", "close"].includes(command ?? "")) return {}
+    const home = EpicRepo.elsewhere(name, cwd)
+    if (!home?.checkout) return {}
+    process.stderr.write(`epic ${name} is worked in ${home.checkout}:  its window, from there\n`)
+    return { cwd: home.checkout }
+  }
+
   /** `window`, `server`:  scripts passed through;  `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`). */
   private addWindowVerbs(): void {
     const epic = this.epic
@@ -452,7 +468,7 @@ export class EpicProgram {
     this.group(
       epic.command("window"),
       "VS Code windows per package and worktree:  open, close, handoff, show, stay-check ...",
-      (args) => EpicTools.run("window", args)
+      (args) => EpicTools.run("window", args, EpicProgram.windowOptions(args))
     )
     this.group(
       epic.command("server"),

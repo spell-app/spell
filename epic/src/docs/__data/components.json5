@@ -4789,7 +4789,7 @@
         "to test",
         "hand checks"
       ],
-      "description": "A test run (epic `epic-engine` P4):  the open tests of the `<epic-page>` around it, ONE big card at a time -- the test's title and id, its Step (with buttons for the pages it says to open), Should, an Example screenshot (click to zoom) and If not -- answered Passed, Failed (with a pasted screenshot), Skip or Not now, a comment with any of them, each a review mark (`{ action: \"test\", result }`) in the page's inbox.  \"4 of 9\" and a thin bar say how far along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  Drawn by `<epic-page>` over its blocks in test mode (the To test section's Start testing, or `?test=1` on the page's address);  written in a doc only as an example, inside an `<epic-page>`.",
+      "description": "A test run (epic `epic-engine` P4):  the open tests of the `<epic-page>` around it, ONE big card at a time -- the test's title and id, its Step (with buttons for the pages it says to open), Should, an Example screenshot (click to zoom) and If not -- answered Passed, Failed (with a pasted screenshot), Skip or Not now, a comment with any of them, each a review mark (`{ action: \"test\", result }`) in the page's inbox.  \"4 of 9\" and a thin bar say how far along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  Drawn by `<epic-page>` over its blocks in test mode (the To test section's Start testing, or `?test=1` on the page's address);  written in a doc only as an example, inside an `<epic-page>`.  Leaving it (Done testing, Esc, the summary's next epic) sends its unsent answers, and the notice line says so.",
       "noun": "test run",
       "attributes": [
         {
@@ -4803,7 +4803,7 @@
         {
           "name": "epic-test-done",
           "detail": "{}",
-          "description": "Owen left the run:  Esc, or \"Done testing\".  `<epic-page>` shows its blocks again."
+          "description": "Owen left the run:  Esc, or \"Done testing\".  `<epic-page>` shows its blocks again;  the run has sent its unsent answers (I52)."
         }
       ],
       "parts": [
@@ -4878,8 +4878,33 @@
         },
         {
           "key": "doneTip",
-          "text": "Leave the run (Esc):  your answers stay",
-          "description": "Done testing's tooltip."
+          "text": "Leave the run (Esc):  your answers go to Claude",
+          "description": "Done testing's tooltip:  leaving sends the run's unsent answers (I52)."
+        },
+        {
+          "key": "leftSent",
+          "text": "{count} results sent to Claude",
+          "description": "The notice line, the run left (Done testing, Esc, Next epic):  its unsent answers sent."
+        },
+        {
+          "key": "leftSentOne",
+          "text": "1 result sent to Claude",
+          "description": "As `leftSent`, for one answer."
+        },
+        {
+          "key": "leftFailed",
+          "text": "Couldn't send your answers ({count}):  {error}.  They're kept:  Send in the header sends them",
+          "description": "The notice line, the run left but its send failed:  the answers wait, Send blue."
+        },
+        {
+          "key": "leftNotServed",
+          "text": "Not sent:  the page isn't served by the page server.  Your answers ({count}) are kept",
+          "description": "The notice line, the run left while not reviewed (`file://`, no token)."
+        },
+        {
+          "key": "noReason",
+          "text": "the page server didn't answer",
+          "description": "Why the send failed, when the client couldn't say."
         },
         {
           "key": "step",
@@ -5088,7 +5113,7 @@
         },
         {
           "key": "summaryWhat",
-          "text": "Send results hands your answers to Claude:  passed tests close, each failure becomes an issue with your note and screenshot, skipped ones are canceled, not now stays open for the next run.",
+          "text": "Send results hands your answers to Claude (Done testing does too):  passed tests close, each failure becomes an issue with your note and screenshot, skipped ones are canceled, not now stays open for the next run.",
           "description": "The summary card's line on what Send does."
         },
         {

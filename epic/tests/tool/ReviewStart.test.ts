@@ -137,3 +137,45 @@ test("a window that refuses:  `failed`, in words, nothing kept", async () => {
     /^Couldn't wake big:  the session's window refused:  no thanks\.  Type \/epic review big/
   )
 })
+
+// epic `epic-engine` I51:  Do Now on outline-spell's page opened a NEW session beside its running one.  Resumed in a
+// new process (its window reloaded), the session's registry record had a name Claude Code made up
+// (`outline-spell-cb`, `nameSource: "derived"`);  only its transcript still said `🚧 outline-spell`.
+test("a session resumed in a new process, mid-turn:  found by its transcript's title, and typed into", async () => {
+  const id = "0f0f0f0f-1111-2222-3333-444444444444"
+  const worktreeFolder = worktree("big")
+  window([worktreeFolder])
+  mkdirSync(join(home, "projects", "-big"), { recursive: true })
+  writeFileSync(
+    join(home, "projects", "-big", `${id}.jsonl`),
+    [
+      { type: "custom-title", customTitle: "🚧 big" },
+      { type: "ai-title", aiTitle: "Fix the parser" }
+    ]
+      .map((entry) => JSON.stringify(entry))
+      .join("\n") + "\n"
+  )
+  const record = { pid: process.pid, sessionId: id, cwd: worktreeFolder, status: "busy" }
+  writeFileSync(
+    join(home, "sessions", `${process.pid}.json`),
+    JSON.stringify({ ...record, name: "big-cb", nameSource: "derived" })
+  )
+  try {
+    const wake = await starter().wake("big")
+    expect(wake).toMatchObject({
+      state: "typed",
+      did: "typed /epic review big into 🚧 big",
+      message: "Typed /epic review big into 🚧 big:  press Enter there.  It reads it once its turn ends."
+    })
+    expect(asked).toEqual([["open-session", { sessionId: id, prompt: "/epic review big" }]])
+    // a name the session was given (`/rename`, the prompt gate) is its title as it is
+    asked.splice(0)
+    writeFileSync(
+      join(home, "sessions", `${process.pid}.json`),
+      JSON.stringify({ ...record, name: "🚧 big", nameSource: "hook" })
+    )
+    expect((await starter().wake("big")).state).toBe("typed")
+  } finally {
+    rmSync(join(home, "sessions", `${process.pid}.json`), { force: true })
+  }
+})

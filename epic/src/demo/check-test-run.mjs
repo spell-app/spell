@@ -40,6 +40,8 @@
  *   - Esc:  the blocks back, `?test` off the address;  v5's line says "failed → I9" (`failed="i9"`)
  *   - a run across every epic (`?test=1&all=1`):  the summary's "Next:  test-run-next (2 tests)" opens it, in test
  *     mode, "1 of 2"
+ *   - on the next epic, P and S, then Done testing at once:  both answers SENT in its copy's inbox, no Send pressed
+ *     (I52), the notice line saying so
  *   - progress right throughout ("N of 5", the bar's answered count)
  * - and at 390 and 1200px, light and dark, reduced motion:  nothing wider than the window;  screenshots (outDir,
  *   default `src/demo/shots/test-run/`):  `run-<width>-<scheme>.png`, `run-failed.png`, `run-zoom.png`,
@@ -418,7 +420,41 @@ async function acrossEpics() {
   await page.waitForURL(`**/${NEXT}.plan.html?**`, { timeout: 8000 })
   await waitForCard(page, "v1")
   expect("the next epic, in test mode", pick(await page.evaluate(() => cardFacts()), ["at", "id"]), { at: "1 of 2", id: "V1" })
+  await leaveSends(page)
   await context.close()
+}
+
+/**
+ * I52 (Owen, 2026-10-19:  "I pressed 'Done Testing' ... and you later said 'no test results have come in'"):  on the
+ * next epic's copy, two answers, then Done testing at once -- the run gone, both answers SENT in that copy's inbox
+ * (no Send pressed), and the notice line saying so.
+ */
+async function leaveSends(page) {
+  const nextPath = `/epics/${NEXT}/${NEXT}.plan.html`
+  await page.keyboard.press("p")
+  await waitForCard(page, "v2")
+  await page.keyboard.press("s")
+  await page.evaluate(() => runRoot().querySelector("ui-button.leave").click())
+  await page.waitForFunction(() => !run(), null, { timeout: 4000 }).catch(() => problems.push("Done testing didn't leave the run"))
+  const sentAll = await waitFor(async () => {
+    const inbox = await readInbox(nextPath)
+    const marks = Object.values(inbox.marks ?? {})
+    const sent = inbox.sent && marks.length === 2 && marks.every((mark) => Date.parse(mark.at) <= Date.parse(inbox.sent))
+    return sent ? inbox : undefined
+  })
+  if (!sentAll) problems.push("Done testing with 2 answers:  the copy's inbox doesn't show them sent")
+  else
+    expect("Done testing SENT the answers:  the copy's inbox", Object.fromEntries(Object.entries(sentAll.marks).map(([id, mark]) => [id, mark.result])), {
+      v1: "passed",
+      v2: "skip"
+    })
+  const notice = await page.evaluate(() => {
+    const line = Array.from(document.body.querySelectorAll(":scope > [role=status]")).find((each) => !each.hidden)
+    return line?.shadowRoot?.querySelector("p")?.textContent ?? ""
+  })
+  // nobody listens to the copy:  Send's own notice (saved, and the wake);  a listening session:  "2 results sent"
+  if (!/^(2 results sent to Claude|Saved\.)/.test(notice)) problems.push(`Done testing's notice:  "${notice}"`)
+  summary.leftNotice = notice
 }
 
 ////////////////
@@ -536,9 +572,9 @@ async function pasteImage(page) {
   })
 }
 
-/** The copy's inbox, as the page server answers it. */
-async function readInbox() {
-  const response = await fetch(`${server.base}/api/epics/review/inbox?page=${encodeURIComponent(pagePath)}`)
+/** The copy's inbox (`path`:  another copy's page), as the page server answers it. */
+async function readInbox(path = pagePath) {
+  const response = await fetch(`${server.base}/api/epics/review/inbox?page=${encodeURIComponent(path)}`)
   return response.json()
 }
 

@@ -3,6 +3,7 @@ import { homedir } from "node:os"
 import { basename, dirname, join, relative, sep } from "node:path"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { SessionFolders } from "$/epics/config/SessionFolders"
 import { DataFile } from "$/epics/data/DataFile"
 import type { SRV } from "$/server"
 
@@ -278,6 +279,8 @@ export class RunningEpics {
 
   /**
    * Every live Claude session (`sessions/<pid>.json`, its process alive):  its pid, id, title, status and folder.
+   * - the title its tab shows (`SessionFolders.recordTitle()`):  a session resumed in a new process keeps its
+   *   `🚧 <epic>` only in its transcript (epic `epic-engine` I51)
    * - NEVER throws:  an unreadable record is skipped
    */
   liveSessions(): LiveSession[] {
@@ -292,7 +295,7 @@ export class RunningEpics {
         sessions.push({
           pid: record.pid,
           sessionId: record.sessionId ?? "",
-          title: record.name ?? "",
+          title: SessionFolders.recordTitle(record, this.claudeHome),
           status: record.status ?? "",
           cwd: record.cwd ?? ""
         })
@@ -342,7 +345,16 @@ export function titleNames(title: string, epic: string): boolean {
 }
 
 /** The fields `RunningEpics.liveSessions()` reads of a session's record, `~/.claude/sessions/<pid>.json`. */
-type SessionRecord = { pid?: number; sessionId?: string; cwd?: string; name?: string; status?: string }
+type SessionRecord = {
+  pid?: number
+  sessionId?: string
+  cwd?: string
+  /** its address, and its title unless Claude Code made it up (`nameSource`) */
+  name?: string
+  /** `hook`, `derived` ...:  `derived` when Claude Code made the `name` up (`SessionFolders.recordTitle()`) */
+  nameSource?: string
+  status?: string
+}
 
 /** The Epics page's list, as `docs index` writes it since epic `epic-engine` P3:  its opening tag. */
 const LIST = /<epic-list\b[^>]*>\s*$/

@@ -165,6 +165,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { EpicConfig } from "./config/EpicConfig.ts"
+import { SessionFolders } from "./config/SessionFolders.ts"
 
 /** The engine, spell-epic:  the folder this script's `scripts/` is in, with the plugin's `hooks/` beside it. */
 const ENGINE = dirname(dirname(fileURLToPath(import.meta.url)))
@@ -1617,11 +1618,14 @@ function launchedLine(name, prompt, { action, file, sessions }) {
 /**
  * Every live Claude Code session:  `{ pid, sessionId, title, cwd }` each, from Claude's own registry,
  * `sessions/<pid>.json` in `$SPELL_CLAUDE_HOME`, else `~/.claude`;  a record whose process is gone is skipped.
- * - `title`:  its name, icon and all (`🚧 seo`);  `""` when it has none
+ * - `title`:  the title its tab shows, icon and all (`🚧 seo`);  `""` when it has none
+ *   - its record's `name`, or its transcript's title when Claude Code made that up for a resumed session
+ *     (`SessionFolders.recordTitle()`;  epic `epic-engine` I50, I51)
  * - the same records `RunningEpics.liveSessions()` reads, in `$/epics`
  */
 function liveSessions() {
-  const folder = join(process.env.SPELL_CLAUDE_HOME || join(homedir(), ".claude"), "sessions")
+  const home = process.env.SPELL_CLAUDE_HOME || join(homedir(), ".claude")
+  const folder = join(home, "sessions")
   if (!existsSync(folder)) return []
   const sessions = []
   for (const name of readdirSync(folder)) {
@@ -1629,7 +1633,8 @@ function liveSessions() {
     try {
       const record = JSON.parse(readFileSync(join(folder, name), "utf8"))
       if (!Number.isInteger(record.pid) || !record.sessionId || !isAlive(record.pid)) continue
-      sessions.push({ pid: record.pid, sessionId: record.sessionId, title: record.name ?? "", cwd: record.cwd ?? "" })
+      const title = SessionFolders.recordTitle(record, home)
+      sessions.push({ pid: record.pid, sessionId: record.sessionId, title, cwd: record.cwd ?? "" })
     } catch {
       // half-written, or not a session's:  skip it
     }

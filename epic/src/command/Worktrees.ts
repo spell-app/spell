@@ -4,6 +4,7 @@ import { basename, dirname, join, relative, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
+import { EpicRepo } from "$/epics/config/EpicRepo"
 import { SessionFolders } from "$/epics/config/SessionFolders"
 import { URGENT_STATES } from "$/epics/list/EpicState"
 
@@ -42,6 +43,7 @@ import { Shared } from "./Shared"
  *   - `move <name> | --idle [--dry-run] [--json]`:  move a worktree (`--idle`:  every one no session works in)
  *     from the old place, `.claude/worktrees`, to the new one beside the repo (`move()`;  epic `epic-eject` P8)
  *   - `path <name>`:  worktree `<name>`'s folder, absolute (epic `epic-eject` P8)
+ *     - an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):  that repo's, said on stderr
  *     - where it is (the old place included), else where a new one goes (`EpicConfig.worktreeFolder()`)
  *     - what the skills give `EnterWorktree`
  *   - `merge-main [--continue] [--json]`:  merge `main` into this checkout's branch (`MainMerge`)
@@ -91,10 +93,14 @@ export class Worktrees {
         if (!name) throw new EpicCommandError("status:  which name?")
         out(JSON.stringify(this.nameStatus(name), null, 2))
         return EXIT.OK
-      case "path":
+      case "path": {
         if (!name) throw new EpicCommandError("path:  which worktree?")
-        out(this.config.worktreeFolder(name))
+        // another repo's epic:  ITS worktree, said on stderr (epic `epic-engine` I47)
+        const home = EpicRepo.elsewhere(name, this.main)
+        if (home?.worktree) process.stderr.write(`epic ${name} is ${basename(home.checkout!)}'s:  its worktree there\n`)
+        out(home?.worktree ?? this.config.worktreeFolder(name))
         return EXIT.OK
+      }
       case "move": {
         if (!name && !flags.idle) throw new EpicCommandError("move:  which worktree?  (or --idle:  every idle one)")
         const dryRun = Boolean(flags.dryRun)

@@ -30,6 +30,8 @@ Owen runs several epics at once:  one screen saying where each stands.
        - `done`:  else
        - `future`:  written down with `/epic future`, not planned yet ([the epic skill](../epic/SKILL.md), "9. Future")
      - `checkout`:  where it runs:  `main`, or the worktree's folder (`.claude/worktrees/<name>`, or beside the repo)
+     - `repo`:  only for an epic worked in ANOTHER repo (epic `epic-engine` I47):  that repo's main checkout;
+       its `checkout` is that repo's too
    - `epic worktree list --json`:  `{ sessions[] }`.
      - Each with `name`, `branch`, `checkout`, `state` (`busy`, `waiting`, `idle` ...), `question`, `id`.
 2. Keep the open ones (`/epics all`:  every one):

@@ -55,7 +55,8 @@ export class EpicConfig {
     sharedFolders: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"],
     engineFolder: "../spell-epic",
     repoTemplates: "",
-    windowsFolder: ""
+    windowsFolder: "",
+    app: { path: "/editor/", url: "", urlFile: "", start: "" }
   }
 
   /**
@@ -235,6 +236,19 @@ export class EpicConfig {
     return join(this.main, EpicConfig.OLD_WINDOWS_FOLDER)
   }
 
+  /**
+   * the repo's APP, as the top bar's App tab opens it (epic `epic-engine` I49):  where the epic server answers for it
+   * (`path`), where it answers (`url`, or the record `urlFile` its server writes) and what starts it (`start`)
+   * - `undefined`:  none declared (neither `url` nor `urlFile`):  the tab shows a page saying so
+   * - `urlFile`:  absolute, from the main checkout
+   * - the epic server's `RepoApp` reads it, at each click
+   */
+  get app(): EpicApp | undefined {
+    const app = this.settings.app
+    if (!app.url && !app.urlFile) return undefined
+    return { ...app, urlFile: app.urlFile && resolve(this.main, app.urlFile) }
+  }
+
   /** the worktrees' window files' folder:  `<windowsFolder>/ongoing` */
   get worktreeWindowsFolder(): string {
     return join(this.windowsFolder, EpicConfig.WORKTREE_WINDOWS)
@@ -339,7 +353,11 @@ export class EpicConfig {
       sharedFolders: this.sharedFolders.join(","),
       engineFolder: this.engineFolder ?? "",
       repoTemplates: this.repoTemplates,
-      windowsFolder: this.windowsFolder
+      windowsFolder: this.windowsFolder,
+      "app.path": this.settings.app.path,
+      "app.url": this.settings.app.url,
+      "app.urlFile": this.settings.app.urlFile && resolve(this.main, this.settings.app.urlFile),
+      "app.start": this.settings.app.start
     }
   }
 
@@ -362,6 +380,10 @@ export class EpicConfig {
     if (typeof windows !== "object" || windows === null || Array.isArray(windows))
       throw new TypeError(`EpicConfig:  ${file}'s "windows" must be an object, { "default": ..., ... }`)
     const window = windows as Record<string, unknown>
+    const appGiven = given.app === undefined ? {} : given.app
+    if (typeof appGiven !== "object" || appGiven === null || Array.isArray(appGiven))
+      throw new TypeError(`EpicConfig:  ${file}'s "app" must be an object, { "url": ..., "start": ... }`)
+    const app = appGiven as Record<string, unknown>
     return {
       contentFolder: valueOf(given, "contentFolder", defaults.contentFolder, file),
       baseBranch: valueOf(given, "baseBranch", defaults.baseBranch, file),
@@ -379,7 +401,13 @@ export class EpicConfig {
       sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file),
       engineFolder: valueOf(given, "engineFolder", defaults.engineFolder, file, "", { empty: true }),
       repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true }),
-      windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true })
+      windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true }),
+      app: {
+        path: valueOf(app, "path", defaults.app.path, file, "app."),
+        url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
+        urlFile: valueOf(app, "urlFile", defaults.app.urlFile, file, "app.", { empty: true }),
+        start: valueOf(app, "start", defaults.app.start, file, "app.", { empty: true })
+      }
     }
   }
 
@@ -440,6 +468,8 @@ export class EpicConfig {
  *   P13);  `""` (the default):  the content folder's `windows/`, `<contentFolder>/windows`
  *   - each machine's own, never tracked:  the content repo git-ignores `windows/`
  *   - before P13:  `workspaces/` in the main checkout, tracked by spell-app and marked `skip-worktree`
+ * - `app`:  the repo's app, which the top bar's App tab opens through the epic server (epic `epic-engine` I49;
+ *   `EpicApp`);  left out:  none, and the tab says so
  */
 export type EpicSettings = {
   contentFolder: string
@@ -454,7 +484,22 @@ export type EpicSettings = {
   engineFolder: string
   repoTemplates: string
   windowsFolder: string
+  app: EpicApp
 }
+
+/**
+ * `EpicSettings.app`:  the repo's app (spell-app's:  the editor), as the epic server opens it (`RepoApp`).
+ * - `path`:  its address on the epic server (`/editor/`, the top bar's App tab), and under the repo's prefix
+ *   (`/r/<repo>/editor/`)
+ * - `url`:  where it answers (`http://localhost:3000/`)
+ * - `urlFile`:  OR a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout:  wins over
+ *   `url` while it's there (spell-app's `.spell-server.editor.json`, spaces' `EditorServer`;  as its page server's
+ *   `/editor` reads it, `appRoutes.ts`)
+ * - `start`:  the shell command that starts it, run DETACHED from the main checkout when it doesn't answer
+ *   (`node packages/cli/bin/spell.mjs dev server ensure`);  `""`:  nothing to run, the tab says it isn't up
+ * - neither `url` nor `urlFile`:  no app (the default)
+ */
+export type EpicApp = { path: string; url: string; urlFile: string; start: string }
 
 /** `EpicSettings.windows`:  the default window, the folder names every window shows, and its layout. */
 export type EpicWindows = { default: string; repoName: string; contentName: string; worktreeOnly: boolean }

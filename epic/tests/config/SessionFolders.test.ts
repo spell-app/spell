@@ -86,4 +86,34 @@ describe("SessionFolders", () => {
     expect(SessionFolders.listed(projects)).toEqual(["-main", "-moved", "-other"])
     expect(SessionFolders.listed(join(HOME, "missing"))).toEqual([])
   })
+
+  // epic `epic-engine` I50, I51:  a resumed session's record has a made-up name;  its transcript has its title
+  test("recordTitle():  the record's name, or its transcript's last custom title when the name was made up", () => {
+    const home = join(HOME, "titles")
+    const line = (entry: object) => JSON.stringify(entry) + "\n"
+    const write = (folder: string, id: string, text: string) => {
+      mkdirSync(join(home, "projects", folder), { recursive: true })
+      writeFileSync(join(home, "projects", folder, `${id}.jsonl`), text)
+    }
+    write(
+      "-a",
+      "s1",
+      line({ type: "custom-title", customTitle: "🚧 old" }) + line({ type: "custom-title", customTitle: "🚧 seo" })
+    )
+    // an ai-title is Claude Code's guess:  never the title asked for
+    write("-a", "s2", line({ type: "ai-title", aiTitle: "seo work" }))
+    // the title far from the end (a long turn since):  found in the whole file
+    write(
+      "-b",
+      "s3",
+      line({ type: "custom-title", customTitle: "🚧 far" }) + `{"pad":"${"x".repeat(5 * 1024 * 1024)}"}\n`
+    )
+    expect(SessionFolders.recordTitle({ sessionId: "s1", name: "seo-cb", nameSource: "derived" }, home)).toBe("🚧 seo")
+    expect(SessionFolders.recordTitle({ sessionId: "s1", name: "🚧 given", nameSource: "hook" }, home)).toBe("🚧 given")
+    expect(SessionFolders.recordTitle({ sessionId: "s1" }, home)).toBe("🚧 seo")
+    expect(SessionFolders.recordTitle({ sessionId: "s2", name: "seo-a1", nameSource: "derived" }, home)).toBe("seo-a1")
+    expect(SessionFolders.recordTitle({ sessionId: "none", nameSource: "derived" }, home)).toBe("")
+    expect(SessionFolders.customTitle("s3", home)).toBe("🚧 far")
+    expect(SessionFolders.transcriptOf("s3", home)).toBe(join(home, "projects", "-b", "s3.jsonl"))
+  })
 })

@@ -224,6 +224,71 @@ describe("nextRequestId()", () => {
 })
 
 /** Write transcript `id` into the fake home, one JSON line per entry. */
+// epic `epic-engine` I50:  a screenshot pasted while the sender was mid-turn, and a receiver resumed in a new process
+describe("send() with a mid-turn screenshot, to a resumed session", () => {
+  const GREEN = Buffer.from("green pixel").toString("base64")
+  const image = (data: string) => ({ type: "image", source: { type: "base64", media_type: "image/png", data } })
+  mkdirSync(join(ROOT, "epics", "midturn"), { recursive: true })
+  writeFileSync(join(ROOT, "epics", "midturn", "midturn.plan.html"), "<html></html>")
+  // as Claude Code writes them (2.1.301):  Owen's prompt between turns is a `user` entry;  one sent mid-turn is
+  // queued, then written as a `queued_command` attachment when the turn takes it, never as a `user` entry
+  transcript("sender44", [
+    { type: "custom-title", customTitle: "🚧 property-editor" },
+    { type: "user", message: { content: [{ type: "text", text: "show the whole set" }, image(RED)] } },
+    {
+      type: "attachment",
+      attachment: {
+        type: "queued_command",
+        prompt: [image(GREEN), { type: "text", text: "this box is ugly" }],
+        commandMode: "prompt",
+        origin: { kind: "human" },
+        humanTurn: true
+      }
+    },
+    { type: "queue-operation", operation: "remove", content: "this box is ugly", reason: "absorbed_mid_turn" },
+    // a subagent's hand-back is queued the same way:  never Owen's
+    {
+      type: "attachment",
+      attachment: { type: "queued_command", prompt: [image("eA==")], origin: { kind: "peer", from: "a1" } }
+    }
+  ])
+  // the receiver, resumed in a new process:  Claude Code made its registry name up;  its tab shows its title
+  transcript("resumed55", [{ type: "custom-title", customTitle: "🚧 midturn" }])
+  writeFileSync(
+    join(HOME, "sessions", `${process.ppid}.json`),
+    JSON.stringify({
+      pid: process.ppid,
+      sessionId: "resumed55",
+      name: "midturn-cb",
+      nameSource: "derived",
+      status: "busy"
+    })
+  )
+
+  test("takes the screenshot Owen pasted mid-turn, the newest, and never a subagent's", () => {
+    const sent = send({
+      root: ROOT,
+      epic: "midturn",
+      text: "this box is ugly",
+      from: "sender44",
+      images: 1,
+      home: HOME
+    })
+    expect(readFileSync(join(sent.folder, "image-1.png"), "utf8")).toBe("green pixel")
+    const both = send({ root: ROOT, epic: "midturn", text: "both", from: "sender44", images: 2, home: HOME })
+    expect(readFileSync(join(both.folder, "image-1.png"), "utf8")).toBe("red pixel")
+    expect(readFileSync(join(both.folder, "image-2.png"), "utf8")).toBe("green pixel")
+    expect(() => send({ root: ROOT, epic: "midturn", text: "x", from: "sender44", images: 3, home: HOME })).toThrow(
+      /pasted 2/
+    )
+  })
+
+  test("tells the epic's session resumed in a new process, by its address", () => {
+    const sent = send({ root: ROOT, epic: "midturn", text: "x", from: "sender44", home: HOME })
+    expect(sent.receivers.map((it) => it.name)).toEqual(["midturn-cb"])
+  })
+})
+
 function transcript(id: string, entries: object[]): void {
   const folder = join(HOME, "projects", "-repo")
   mkdirSync(folder, { recursive: true })

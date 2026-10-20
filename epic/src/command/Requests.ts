@@ -237,6 +237,8 @@ export class Requests {
   /**
    * The newest `count` images Owen pasted into session `id`, oldest first.
    * - only images in his own prompts:  not a tool's (a `Read` of a picture), nor a subagent's (sidechains)
+   * - a prompt he sent MID-TURN too (`promptBlocks()`):  Claude Code queues it, and writes it as an `attachment`
+   *   (`queued_command`), never a `user` entry (epic `epic-engine` I50:  "couldn't be attached")
    * - `[]` when the session has no transcript
    */
   pastedImages(id: string | undefined, count: number): PastedImage[] {
@@ -246,10 +248,8 @@ export class Requests {
     for (const line of readFileSync(path, "utf8").split("\n")) {
       // cheap pre-check:  most lines have no image
       if (!line.includes('"image"')) continue
-      const entry = Sessions.parseJSONLine(line)
-      if (entry.type !== "user" || entry.isSidechain || entry.isMeta) continue
-      const content = (entry.message as { content?: unknown } | undefined)?.content
-      if (!Array.isArray(content)) continue
+      const content = Requests.promptBlocks(Sessions.parseJSONLine(line))
+      if (!content) continue
       for (const block of content) {
         const source = block?.type === "image" ? block.source : undefined
         if (source?.type === "base64" && typeof source.data === "string") {
@@ -258,6 +258,25 @@ export class Requests {
       }
     }
     return found.slice(-count)
+  }
+
+  /**
+   * The content blocks of transcript entry `entry` when it's a prompt Owen sent, else `undefined`:
+   * - a `user` entry:  a prompt sent between turns (not a subagent's, nor a meta one Claude Code adds)
+   * - an `attachment` of type `queued_command` from a human:  a prompt sent while Claude was mid-turn, which Claude
+   *   Code hands over with the turn's next tool result (`attachment.prompt`, the same blocks)
+   *   - not a peer's (`origin.kind` `peer`:  a subagent's hand-back)
+   */
+  static promptBlocks(entry: Record<string, unknown>): PromptBlock[] | undefined {
+    if (entry.isSidechain || entry.isMeta) return undefined
+    if (entry.type === "user") {
+      const content = (entry.message as { content?: unknown } | undefined)?.content
+      return Array.isArray(content) ? content : undefined
+    }
+    if (entry.type !== "attachment") return undefined
+    const queued = entry.attachment as { type?: string; prompt?: unknown; origin?: { kind?: string } } | undefined
+    if (queued?.type !== "queued_command" || (queued.origin?.kind ?? "human") !== "human") return undefined
+    return Array.isArray(queued.prompt) ? queued.prompt : undefined
   }
 
   /** Session `id`, as a request names its sender:  its title and the start of its id, `🚧 python (83d39e12)`. */
@@ -522,6 +541,12 @@ const VERBS = "send, requests, file, home or merge"
 
 /** How `file` is called, for its errors. */
 const FILE_USAGE = 'epic file <epic>#P3 <request id>  |  epic file <epic> <request id> "where it went"'
+
+/** A content block of a prompt, as a transcript holds it:  text, an image ... */
+type PromptBlock = {
+  type?: string
+  source?: { type?: string; media_type?: string; data?: unknown }
+}
 
 /** File extensions for the image types a transcript holds. */
 const EXTENSIONS: Record<string, string> = {

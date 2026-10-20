@@ -188,8 +188,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     where a repo keeps its epic things, from ONE file, `.epic/config.json5`.
     - the keys:
       - the content folder, the base branch, the worktrees' folder, the install command, the window names,
-        whether session folders are linked
-      - each one's default is spell-app's layout before the file existed
+        whether session folders are linked;  and the repo's app (`app`, epic `epic-engine` I49), which the epic
+        server's `/editor/` opens, starting it when it's down (`RepoApp`, in `server/`)
+      - each one's default is spell-app's layout before the file existed;  `app`'s:  none
     - the MAIN checkout's file, found through git's common dir (`SRV.checkoutOf()`), so every worktree reads the same
     - `epic config [key] [--json]` prints the values, for the skills (folders absolute)
     - node only, NOT in the `$/epics` barrel (`$/epics/config/EpicConfig`)
@@ -203,6 +204,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `worktreeFolder()`:  finds one in either
       - `newWorktreeFolder()`:  where a new one goes
       - `worktreeOnlyWindow()`:  picks its window's layout
+    - `EpicRepo`:  which REPO an epic is worked in, from its page's `worktree` / `repo` (epic `epic-engine` I47)
+      - repos share one content folder, so another repo's epic page is found from here too
+      - the worktree hook refuses another repo's epic's worktree;  the prompt gate and the session-start guard say
+        which window;  `epic worktree path`, `epic window launch|open|close` and `epic list` use that repo's
+      - plain `node` loads it (the hooks)
     - `SessionFolders`:  Claude Code's saved-session folders (`~/.claude/projects/<slug>`)
       - and the link that makes a worktree's main's (`linkSessionFolders`)
       - plain `node` loads it too (the worktree hook)

@@ -126,6 +126,12 @@ export function legacyEnginePath(path: string): string | undefined {
   return match ? engineUrlFor(match[1]!) : undefined
 }
 
+/**
+ * Where a repo's APP says how it stands (`RepoApp`, epic `epic-engine` I49):  `/api/app/<repo>`, `AppStatus` as JSON.
+ * - the App tab's "Starting ..." page polls it
+ */
+export const APP_API = "/api/app"
+
 /** The URL prefix repo `name` is served at:  `/r/<name>/`. */
 export function repoPrefixFor(name: string): string {
   return `${REPO_PREFIX}${encodeURIComponent(name)}/`
@@ -186,4 +192,26 @@ export type EpicServerInfo = {
   repos: Repo[]
   epicServer: true
   worktrees?: string
+}
+
+/**
+ * How a repo's app stands (`RepoApp.status()`, `/api/app/<repo>`):
+ * - `declared`:  its config names one (`EpicApp`)
+ * - `up`:  it answers at `url`
+ * - `starting`:  its start command runs, or ran, and it doesn't answer yet;  `since`:  when it began
+ * - `canStart`:  its config names a start command
+ * - `failed`:  why the start failed (it exited with an error, or the app didn't answer in time), or why the config
+ *   won't read
+ * - `log`:  where the start command's output goes
+ */
+export type AppStatus = {
+  repo: string
+  declared: boolean
+  up: boolean
+  url?: string
+  starting: boolean
+  canStart?: boolean
+  since?: string
+  failed?: string
+  log: string
 }

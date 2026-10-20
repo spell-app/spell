@@ -15,6 +15,7 @@ import {
 
 import type { ContentRouteContext } from "$/epics/list/runningRoutes"
 
+import { RepoApp } from "./RepoApp"
 import { RepoList } from "./RepoList"
 import {
   DEFAULT_EPIC_PORT,
@@ -43,7 +44,10 @@ import {
  * /r/<repo>/...           that repo's content folder (its .epic/config.json5's contentFolder), then its main checkout
  * /r/<repo>/components/<set>/...   that repo's component sets, the same way
  * /...                    the DEFAULT repo's content folder and checkout too, so today's URLs keep working
+ * /editor/                the default repo's APP (the top bar's App tab):  started if it isn't up, then redirected to
+ * /r/<repo>/editor/       each repo's (`RepoApp`;  the path is its config's `app.path`)
  * /api/server             what it serves (EpicServerInfo)
+ * /api/app/<repo>         how a repo's app stands (`AppStatus`):  what the "Starting ..." page polls
  * /api/...                the epic route modules, for the default repo (below)
  * ```
  *
@@ -64,7 +68,10 @@ import {
  *   (`epicUiMounts()`, epic `epic-eject` I21:  it answered 404 here)
  * - The OTHER component sets, as spell-app's page server serves them (`componentSetMounts()`, epic `epic-engine` I48:
  *   the top bar's Spell/UI and App/UI tabs answered 404 here)
- * - NOT spell-app's page server:  no app (the top bar's App tab, `/editor/`);  spell-app's own server keeps it.
+ * - The APP (the top bar's App tab, `/editor/`;  epic `epic-engine` I49):  each repo's, as its `.epic/config.json5`'s
+ *   `"app"` declares it (`RepoApp`):  redirected to while it answers;  else started (its own command, detached, from
+ *   its main checkout) behind a "Starting ..." page that goes there once it does;  none declared:  a page saying so.
+ *   spell-app's is the editor its page server starts (spaces' `appRoutes.ts`).
  * - Its pid file and log are in spell-epic's home folder (`~/.spell-epic/server.json`, `server.log`).
  * - Its port:  `DEFAULT_EPIC_PORT` (4848), not spell-app's 4747.
  * - Run it with `epic hub` (`Hub`), never by hand.
@@ -90,6 +97,9 @@ export class EpicServer {
 
   /** what `/api/server` answers;  `port` set by `start()` */
   readonly info: EpicServerInfo
+
+  /** each repo's app, in `repos`' order (`RepoApp`) */
+  readonly apps: RepoApp[]
 
   /** more fields for every page's `window.SPELL_SERVER`, from route modules (`addPageConfig()`) */
   private pageConfigs: PageConfig[] = []
@@ -158,6 +168,13 @@ export class EpicServer {
       if (repo === this.defaultRepo) router.get("/", (_request, reply) => reply.redirect(`/${HOME_PAGE}`))
     }
     const repo = this.defaultRepo
+    // each repo's app (the top bar's App tab):  the default's at `/` too
+    this.apps = this.repos.map((each) => new RepoApp(each, this.home))
+    for (const app of this.apps) {
+      app.route(router, app.repo.prefix)
+      if (app.repo === this.defaultRepo) app.route(router, "/")
+    }
+    RepoApp.routeStatus(router, this.apps)
     if (repo) {
       const writable = pageServerSettings(repo.checkout).writable ?? WRITABLE
       new PageEditor({ root: repo.content, writable }).route(router, this.web.guard)
@@ -359,8 +376,7 @@ export class EpicServer {
     // the templates at each repo's prefix
     for (const repo of this.repos)
       live.watch(join(this.engine, ENGINE_ROUTES.templates.dir), { servedAt: `${repo.prefix}templates/` })
-    for (const mount of this.setMounts)
-      if (existsSync(mount.dir)) live.watch(mount.dir, { servedAt: mount.prefix })
+    for (const mount of this.setMounts) if (existsSync(mount.dir)) live.watch(mount.dir, { servedAt: mount.prefix })
   }
 
   ////////////////

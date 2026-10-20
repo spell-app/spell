@@ -27,6 +27,13 @@
  *   (an epic's) is named `<owner>-agent-<id>`, worktree and branch (Owen, 2026-10-05):
  *   - `git worktree list` says whose it is
  *   - `remove` and `/isolate done` know its work is safe once it's in `<owner>`'s branch
+ * - REFUSES `<name>` when it's an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):
+ *   the hook fails with one line saying where it's worked, and how to get there (`epic window launch <name>`).
+ *   - Why:  repos share one content folder, so `/epic resume epic-engine` in spell-app's window found spell-epic's
+ *     epic page, and `EnterWorktree` made `spell-app.worktrees/epic-engine`, whose `spell-epic` link then took its
+ *     edits into spell-epic's MAIN checkout.
+ *   - before reusing one:  a stray worktree of that name made before is refused too
+ *   - an agent's worktree never is
  * - Reuses worktree `<name>` when it's already one, in either place, and branch `<name>` when it exists.
  * - Then, for a NEW worktree, in this order:
  *   0. makes what its tracked links point at beside it (`linkOutside()`, epic `epic-engine` I13):
@@ -61,6 +68,7 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve } from "node:path"
 
+import { EpicRepo } from "../src/config/EpicRepo.ts"
 import { EpicConfig } from "../src/config/EpicConfig.ts"
 import { SessionFolders } from "../src/config/SessionFolders.ts"
 
@@ -113,6 +121,9 @@ class Worktree {
     const config = new EpicConfig(root)
     const owner = AGENT.test(name) ? Worktree.owner(config, cwd) : ""
     if (owner) name = `${owner}-${name}`
+    // ANOTHER repo's epic:  never a worktree of its name here, even one made before (epic `epic-engine` I47)
+    const home = owner || AGENT.test(name) ? undefined : EpicRepo.elsewhere(name, root)
+    if (home) throw new Error(EpicRepo.refusal(home))
     // where it is (either place), else the new place
     const path = config.worktreeFolder(name)
     if (existsSync(join(path, ".git"))) {

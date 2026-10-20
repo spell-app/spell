@@ -388,14 +388,15 @@ export class Sessions {
 
   /**
    * The running sessions working on `epic`:
-   * titled `<epic>` in Claude's session registry, with or without its icon (`🚧 epic-workflow`).
+   * titled `<epic>`, with or without its icon (`🚧 epic-workflow`), as its tab shows it.
+   * - the title:  its registry `name`, or its transcript's when Claude Code made that up for a resumed session
+   *   (`SessionFolders.recordTitle()`;  epic `epic-engine` I50:  `/send` told nobody, and opened a second window)
    * - their `name` is the address `SendMessage` takes
    */
   ofEpic(epic: string): RunningSession[] {
-    return [...this.running().values()].filter((session) => {
-      const title = session.name ?? this.title(session.sessionId)
-      return title !== null && title !== undefined && bareTitle(title) === epic
-    })
+    return [...this.running().values()].filter(
+      (session) => bareTitle(SessionFolders.recordTitle(session, this.home)) === epic
+    )
   }
 
   ////////////////

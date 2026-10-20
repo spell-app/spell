@@ -131,6 +131,7 @@ export class RepoInit {
    * - `engineFolder`:  `""`, no `spell-epic` link:  only spell-app reaches the engine's code through one
    * - `repoTemplates`:  `""`, none:  the engine's templates are the repo's (spell-epic's `templates/`, epic `epic-eject` T11)
    * - `windowsFolder`:  `../<repo>.epics/windows`, the content folder's `windows/` (epic `epic-eject` P13)
+   * - `app`:  none (the default);  the file shows how to declare one, in a comment
    * - static:  needs no instance
    */
   static settingsFor(main: string): EpicSettings {
@@ -148,7 +149,8 @@ export class RepoInit {
       sharedFolders: [...INIT_FOLDERS],
       engineFolder: "",
       repoTemplates: "",
-      windowsFolder: `../${repo}.epics/windows`
+      windowsFolder: `../${repo}.epics/windows`,
+      app: { ...EpicConfig.DEFAULTS.app }
     }
   }
 
@@ -210,6 +212,8 @@ export class RepoInit {
   // the VS Code window files (\`epic window\`), each machine's own:  git-ignored in the content repo
   // ("":  the content folder's windows/)
   "windowsFolder": ${value("windowsFolder")}
+  // and the repo's app, which the docs' App tab opens through the epic server (started there when it isn't up):
+  // "app": { "path": "/editor/", "url": "http://localhost:3000/", "start": "npm run dev" }
 }
 `
   }

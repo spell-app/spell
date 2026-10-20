@@ -1,10 +1,15 @@
 import {
+  closeSync,
   existsSync,
   lstatSync,
   mkdirSync,
+  openSync,
+  readFileSync,
+  readSync,
   readdirSync,
   realpathSync,
   rmdirSync,
+  statSync,
   symlinkSync,
   unlinkSync
 } from "node:fs"
@@ -127,6 +132,90 @@ export class SessionFolders {
     }
     return names.sort()
   }
+
+  ////////////////
+  // ## A running session's title
+  ////////////////
+
+  /**
+   * The title a running session's tab shows, from its registry record (`sessions/<pid>.json`):
+   * its `name`, unless Claude Code made that up;  then the title Owen gave it (`customTitle()`);  `""` for none.
+   * - a session RESUMED in a new process (VS Code restarted, its window reloaded) gets a made-up `name`
+   *   (`nameSource: "derived"`:  its folder and two hex digits, `outline-spell-cb`), while its tab still shows
+   *   `🚧 outline-spell`:  finding a session by its record's `name` alone missed it (epic `epic-engine` I51:
+   *   a Do Now opened a new session beside the epic's running one;  I50:  `/send` found no session to tell)
+   * - the `name` stays the session's ADDRESS (`SendMessage`'s `to`):  only its title is looked up here
+   */
+  static recordTitle(record: SessionRecordNames, home = SessionFolders.home()): string {
+    const name = record.name ?? ""
+    if (name && record.nameSource !== "derived") return name
+    return (record.sessionId && SessionFolders.customTitle(record.sessionId, home)) || name
+  }
+
+  /**
+   * The title Owen gave session `id` (`/rename`, or the prompt gate's `🚧 <epic>`):  its transcript's last
+   * `custom-title`;  `null` for none, or no transcript.
+   * - never an `ai-title`:  Claude Code's own guess at a title names no epic on purpose
+   * - reads the transcript's last `TITLE_TAIL` bytes first:  Claude Code writes the title again before each reply,
+   *   so it's nearly always there;  the whole file only when it isn't
+   */
+  static customTitle(id: string, home = SessionFolders.home()): string | null {
+    const path = SessionFolders.transcriptOf(id, home)
+    if (!path) return null
+    const size = statSync(path).size
+    const tail = lastCustomTitle(readEnd(path, Math.min(size, TITLE_TAIL)))
+    if (tail !== undefined || size <= TITLE_TAIL) return tail ?? null
+    return lastCustomTitle(readFileSync(path, "utf8")) ?? null
+  }
+
+  /**
+   * The transcript of session `id`:  `<projects>/<any folder>/<id>.jsonl`, the newest when two folders hold one
+   * (a session that moved);  `undefined` for none.
+   */
+  static transcriptOf(id: string, home = SessionFolders.home()): string | undefined {
+    const projects = SessionFolders.projects(home)
+    if (!existsSync(projects)) return undefined
+    let newest: { path: string; mtime: number } | undefined
+    for (const dir of readdirSync(projects)) {
+      const path = join(projects, dir, `${id}.jsonl`)
+      const stat = statSync(path, { throwIfNoEntry: false })
+      if (stat && (!newest || stat.mtimeMs > newest.mtime)) newest = { path, mtime: stat.mtimeMs }
+    }
+    return newest?.path
+  }
+}
+
+/** How much of a transcript's end `SessionFolders.customTitle()` reads first, in bytes. */
+const TITLE_TAIL = 4 * 1024 * 1024
+
+/** The fields of a session's registry record (`sessions/<pid>.json`) its title comes from. */
+export type SessionRecordNames = { sessionId?: string; name?: string; nameSource?: string }
+
+/** The last `custom-title` in transcript text `text`:  `""` when it was cleared;  `undefined` for none. */
+function lastCustomTitle(text: string): string | undefined {
+  let title: string | undefined
+  for (const line of text.split("\n")) {
+    if (!line.includes('"custom-title"')) continue
+    try {
+      const entry = JSON.parse(line) as { type?: string; customTitle?: unknown }
+      if (entry.type === "custom-title") title = typeof entry.customTitle === "string" ? entry.customTitle : ""
+    } catch {
+      // the tail's first line, cut in half:  not a title
+    }
+  }
+  return title
+}
+
+/** The last `bytes` of file `path`, as text. */
+function readEnd(path: string, bytes: number): string {
+  const buffer = Buffer.alloc(bytes)
+  const fd = openSync(path, "r")
+  try {
+    readSync(fd, buffer, 0, bytes, statSync(path).size - bytes)
+  } finally {
+    closeSync(fd)
+  }
+  return buffer.toString("utf8")
 }
 
 /**
