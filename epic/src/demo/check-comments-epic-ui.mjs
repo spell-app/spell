@@ -1,21 +1,23 @@
 /**
  * Check COMMENTS ON A COMPONENT SET'S PAGES in a real browser (epic `epic-engine` P2, T3):  the docs pages' bullhorns,
- * pane, threads and Send, drawn by `spell-comments.js` beside the site's own Spell UI.  Epic UI's by default;  App UI's
- * and Brand's (spell-app's) with `--set`.
+ * pane, threads and Send, drawn by `spell-comments.js` beside the site's own Spell UI.  Epic UI's by default;  Spell
+ * UI's, App UI's and Brand's (spell-app's) with `--set`.
  *
  * Usage (from the repo root):
- *   node src/demo/check-comments-epic-ui.mjs [--set epics | app | brand] [--checkout <spell-app>] [--page <name>]
- *     [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--comments <spell-comments.js>] [--keep] [outDir]
+ *   node src/demo/check-comments-epic-ui.mjs [--set epics | ui | app | brand] [--checkout <spell-app>] [--page <name>]
+ *     [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--comments <spell-comments.js>] [--keep] [--dark]
+ *     [outDir]
  * - `--comments`:  that file served as the pages' `spell-comments.js`, one built elsewhere (as `--bundle`)
- * - `--set`:  which set (`SETS`, below):  `epics` (Epic UI, the engine's `src/docs/`), `app` (App UI) or `brand`, at
- *   `/components/<set>/`
- *   - `--checkout`:  the spell-app checkout App UI's and Brand's pages come from (default `.spell-app`):  a worktree's,
- *     to check its pages before they merge
+ * - `--set`:  which set (`SETS`, below):  `epics` (Epic UI, the engine's `src/docs/`), `ui` (Spell UI), `app` (App
+ *   UI) or `brand`, at `/components/<set>/`
+ *   - `--checkout`:  the spell-app checkout Spell UI's, App UI's and Brand's pages, and their site bundle, come from
+ *     (default `.spell-app`):  a worktree's, to check its pages before they merge
  * - the pages:  the set's (`--page`, default the set's `page`, then `--swap`, default its `swap`, for the router's
  *   swap), served as spell-app's page server serves them, at `/components/<set>/`, by a page server of its OWN
- *   (`DemoServer`:  this checkout's `EpicServer` on a free port, no pid file, nobody woken), with the sets' build of
- *   Spell UI's site laid over them (spell-app's `packages/ui/site/_assets/sets/`, built by its page server:  run it
- *   once if that folder is missing)
+ *   (`DemoServer`:  this checkout's `EpicServer` on a free port, no pid file, nobody woken), with Spell UI's site
+ *   bundle laid over them (the checkout's `packages/ui/site/_assets/`, built by its page server or `yarn site:bundle`
+ *   in its `packages/ui`;  a checkout from before epic `epic-engine`, its `sets/`, the other sets' own build then)
+ *   - Epic UI's:  the epic server's own, from `.spell-app` (`epicUiMounts()`)
  *   - App UI's layout loads the app's element pack, `/element/spell.pack.js`, which no server here builds:  stubbed,
  *     empty, and its root's error about it let through (its live examples don't draw;  not what this checks)
  *   - `--docs`:  the folder served there;  default a SCRATCH COPY of the set's folder in `src/demo/shots/<set>-ui/`
@@ -26,7 +28,8 @@
  *   - no docs bundle on the page (one Spell UI):  only the site's
  *   - the bullhorns:  in the masthead (the page), each section's title row, a table's corner;  one click opens ONE pane
  *   - a comment on the page:  saved as typed (the floppy), its thread drawn under the masthead once the pane closes
- *   - a comment on selected text (⌘ / Ctrl I) in a section's list:  its quote highlighted, its thread in the list item
+ *   - a comment on selected text (⌘ / Ctrl I) in a section's list:  its quote highlighted, its thread in the list item;
+ *     a page with no list in a section (Spell UI's):  in a paragraph, its thread after it
  *   - Send:  to the standing epic `feedback` (a set's pages are no epic's;  epic `epic-engine` T9), "feedback is
  *     listening" or "nobody is listening:  Send wakes feedback";  a click sends both, and wakes feedback or nobody
  *     (the server's wake is stubbed:  `DemoServer`)
@@ -36,12 +39,14 @@
  *     the article, a button per top-level section;  a button lands its section under the stuck band and is marked;
  *     the bullhorn's count, and its clicks landing on each waiting thread in turn;  ⌘ / Ctrl K listing them, an id
  *     landing on its thread, words going to the site's search;  the router's swap:  the next page's toolbar
- *   - a page in TABS (Brand's element pages, the swap's):  the toolbar the shown tab's sections, and another tab's
- *     once it's shown
+ *   - a page in TABS (Spell UI's and Brand's element pages, the swap's):  the toolbar the shown tab's sections, and
+ *     another tab's once it's shown
+ *   - Spell UI's:  the page's own live examples still draw (`<ui-docs-example>`'s upgraded, no element left undefined)
  *   - no page errors
  * - and, for Epic UI, on a GUIDE (`guides/python-target.html`), served with `--bundle` as its `spell-ui.js` when given:
  *   the docs runtime still draws bullhorns, and a thread has the comments' look (`spell-comments.css`, through
  *   `spell-doc.css`)
+ * - `--dark`:  all of it in the dark colour scheme
  * - screenshots (outDir, default a temporary folder):  `<width>-<step>.png`
  * - exits 1 on any miss
  * - re-runs itself under `tsx` (the page server is TypeScript)
@@ -83,6 +88,7 @@ const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) 
  */
 const SETS = {
   epics: { dir: join(ROOT, "src", "docs"), page: "epic-item", swap: "epic-page" },
+  ui: { dir: "packages/ui/docs", page: "utilities", swap: "ui-button" },
   app: { dir: "packages/app/docs", page: "AppRoot", swap: "Chooser", stub: "/element/spell.pack.js" },
   brand: { dir: "packages/brand/docs", page: "index", swap: "brand-color", pack: "packages/brand/components/__pack" }
 }
@@ -98,6 +104,8 @@ const swapTo = flag("--swap", set.swap)
 const bundle = flag("--bundle", undefined)
 const commentsScript = flag("--comments", undefined)
 const keep = args.includes("--keep")
+/** `--dark`:  every page in the dark colour scheme (the site follows the browser's until the viewer picks one) */
+const scheme = args.includes("--dark") ? "dark" : "light"
 /** The flags that take a value:  the word after one isn't the out folder. */
 const VALUED = ["--page", "--swap", "--set", "--checkout", "--docs", "--bundle", "--comments"]
 const out =
@@ -105,10 +113,15 @@ const out =
   mkdtempSync(join(tmpdir(), "check-comments-epic-ui-"))
 mkdirSync(out, { recursive: true })
 
-/** The sets' build of Spell UI's site, as spell-app's page server lays it over a set's folder (`SETS_BUNDLE`). */
-const SETS_BUNDLE = join(ROOT, ".spell-app/packages/ui/site/_assets/sets")
-if (!existsSync(join(SETS_BUNDLE, "site.js"))) {
-  console.error(`check-comments-epic-ui:  no ${SETS_BUNDLE}/site.js:  start spell-app's page server once to build it`)
+/**
+ * Spell UI's site bundle in the checkout, as spell-app's page server lays it over a set's folder (`COMPONENT_SETS`'
+ * `assets`):  every set's since epic `epic-engine`;  a checkout from before it, which still has the sets' own build
+ * (`site/_src/sets.ts`), gives the other sets its `sets/`.
+ */
+const SITE = join(checkout, "packages/ui/site")
+const BUNDLE = join(SITE, "_assets", existsSync(join(SITE, "_src/sets.ts")) && setName !== "ui" ? "sets" : "")
+if (!existsSync(join(BUNDLE, "site.js"))) {
+  console.error(`check-comments-epic-ui:  no ${BUNDLE}/site.js:  start spell-app's page server once to build it`)
   process.exit(2)
 }
 
@@ -128,15 +141,20 @@ if (existsSync(inbox(element))) {
   process.exit(2)
 }
 
-// the server mounts Epic UI itself (epic `epic-eject` I21):  told to serve the scratch copy, so no real inbox is written;
-// another set:  its scratch copy mounted at its address, as spell-app's page server does (`componentSetPath()`)
+// the server mounts Epic UI itself (epic `epic-eject` I21):  told to serve the scratch copy, so no real inbox is written,
+// with the `--checkout`'s bundle when one is named (a mount of the same prefix laid first wins);  another set:  its
+// scratch copy mounted at its address, as spell-app's page server does (`componentSetPath()`)
 const served = await DemoServer.start(
   setName === "epics"
-    ? { content: join(SHOTS, "content"), epicUi: docs }
+    ? {
+        content: join(SHOTS, "content"),
+        epicUi: docs,
+        mounts: flag("--checkout", undefined) ? [{ prefix: `${PREFIX}/_assets/`, dir: BUNDLE }] : []
+      }
     : {
         content: join(SHOTS, "content"),
         mounts: [
-          { prefix: `${PREFIX}/_assets/`, dir: SETS_BUNDLE },
+          { prefix: `${PREFIX}/_assets/`, dir: BUNDLE },
           { prefix: `${PREFIX}/`, dir: docs },
           ...(set.pack ? [{ prefix: `/${set.pack}/`, dir: join(checkout, set.pack) }] : [])
         ]
@@ -145,8 +163,13 @@ const served = await DemoServer.start(
 const problems = []
 const browser = await chromium.launch()
 
+// the pages load the checkout's bundle
+const bundleServed = await fetch(`${served.base}${PREFIX}/_assets/site.js`).then((answer) => answer.text())
+check(`the set's site bundle is ${BUNDLE}'s`, bundleServed === readFileSync(join(BUNDLE, "site.js"), "utf8"))
+
 for (const width of [1200, 390]) await checkWidth(width)
 if (setName === "epics") await checkGuide()
+if (setName === "ui") await checkExamples()
 
 await browser.close()
 await served.stop()
@@ -162,7 +185,7 @@ function check(what, ok, extra = "") {
 
 /** A new page at `width`, its errors kept. */
 async function newPage(width) {
-  const page = await browser.newPage({ viewport: { width, height: width > 600 ? 900 : 844 } })
+  const page = await browser.newPage({ viewport: { width, height: width > 600 ? 900 : 844 }, colorScheme: scheme })
   page.errors = []
   page.on("pageerror", (error) => page.errors.push(String(error)))
   // the stubbed pack (`set.stub`) registers none:  its root says so, which isn't this check's to fail on
@@ -230,21 +253,28 @@ async function checkWidth(width) {
     !!(await page.$(".site-masthead + epic-threads > epic-thread"))
   )
 
-  // selected text in a section's list:  ⌘ / Ctrl I
-  const section = await page.evaluate(() => {
-    const found = [...document.querySelectorAll("main ui-section[id]")].find((each) =>
-      each.querySelector(":scope > ul > li")
+  // selected text in a section's list:  ⌘ / Ctrl I;  a page with no list in a section (Spell UI's:  its prose is
+  // `<ui-markdown>`'s, in a shadow root, which a text comment doesn't reach):  in a paragraph, a live example's
+  const { section, holder } = await page.evaluate(() => {
+    const sections = [...document.querySelectorAll("main ui-section[id]")]
+    const hasText = (each) => [...each.childNodes].some((node) => node.nodeType === 3 && node.textContent.trim().length > 8)
+    const inList = sections.flatMap((each) => [...each.querySelectorAll(":scope > ul > li")]).find(hasText)
+    const inParagraph = [...document.querySelectorAll("main ui-section[id] p")].find(
+      (each) => hasText(each) && !each.closest("[data-spell-added], template")
     )
-    if (!found) return null
-    found.collapsed = false
-    return found.id
+    const found = inList ?? inParagraph
+    if (!found) return {}
+    found.dataset.checkText = ""
+    for (let open = found.closest("ui-section"); open; open = open.parentElement?.closest("ui-section"))
+      open.collapsed = false
+    return { section: found.closest("ui-section").id, holder: found.localName }
   })
   await page.waitForTimeout(500)
-  const quote = await page.evaluate((id) => {
-    const li = document.querySelector(`#${CSS.escape(id)} > ul > li`)
-    li.scrollIntoView({ block: "center" })
-    const text = [...li.childNodes].find((node) => node.nodeType === 3 && node.textContent.trim().length > 8)
-    if (!text) return ""
+  const quote = await page.evaluate(() => {
+    const holder = document.querySelector("[data-check-text]")
+    if (!holder) return ""
+    holder.scrollIntoView({ block: "center" })
+    const text = [...holder.childNodes].find((node) => node.nodeType === 3 && node.textContent.trim().length > 8)
     const start = text.textContent.search(/\S/)
     const range = document.createRange()
     range.setStart(text, start)
@@ -252,7 +282,7 @@ async function checkWidth(width) {
     getSelection().removeAllRanges()
     getSelection().addRange(range)
     return range.toString()
-  }, section)
+  })
   await page.waitForTimeout(300)
   await page.keyboard.press("ControlOrMeta+i")
   const textPane = await page.waitForSelector("epic-comment-pane > textarea", { timeout: 5000 }).catch(() => null)
@@ -263,11 +293,14 @@ async function checkWidth(width) {
     await page.keyboard.press("Escape")
     await page.waitForTimeout(600)
   }
+  // a list item holds its thread at its end;  a paragraph has it right after
   const inItem = await page.evaluate(
-    (id) => !!document.querySelector(`#${CSS.escape(id)} > ul > li > epic-threads > epic-thread`),
-    section
+    () =>
+      !!document.querySelector(
+        "li[data-check-text] > epic-threads > epic-thread, p[data-check-text] + epic-threads > epic-thread"
+      )
   )
-  check(`${name}:  the text comment's thread is in its list item`, inItem)
+  check(`${name}:  the text comment's thread is in its ${holder === "li" ? "list item" : "paragraph's place"}`, inItem)
   await page.screenshot({ path: join(out, `${name}-threads.png`) })
   // a section's bullhorn, in its title row, while it's hovered
   const { hovered, header } = await page.evaluate(() => {
@@ -557,6 +590,50 @@ async function clear(name) {
     )
   check(`cleared the comments on ${name}`, !GuideInbox.read(inbox(name)).commentList.all.length)
   await page.close()
+}
+
+/**
+ * Spell UI's own live EXAMPLES, beside the comments and the epics pack (the site's bundle shares its Spell UI with
+ * the pack):  on three element pages, every example drawn and no tag left undefined, and one each still answers a
+ * click:  a dropdown opens, a modal shows, a checkbox ticks.
+ */
+async function checkExamples() {
+  const tries = [
+    ["ui-dropdown", "main ui-docs-example ui-dropdown", (element) => element.matches(":state(open)")],
+    ["ui-modal", "main ui-docs-example ui-button[commandfor]", () => !!document.querySelector("ui-modal")
+      && [...document.querySelectorAll("ui-modal")].some((modal) => modal.shadowRoot?.querySelector("dialog[open]"))],
+    ["ui-checkbox", "main ui-docs-example ui-checkbox", (element) => element.checked === true]
+  ]
+  for (const [name, selector, answered] of tries) {
+    const page = await newPage(1200)
+    await page.goto(pageUrl(name))
+    await page.waitForFunction(() => document.querySelector("ui-root")?.matches(":state(ready)"), null, {
+      timeout: 20_000
+    })
+    await page.waitForTimeout(800)
+    const drawn = await page.evaluate(() => {
+      const examples = [...document.querySelectorAll("ui-docs-example")]
+      const tags = [...document.querySelectorAll("*")].map((each) => each.localName)
+      return {
+        examples: examples.length,
+        upgraded: examples.filter((each) => each.shadowRoot).length,
+        undefined: [...new Set(tags.filter((tag) => /^(ui|epic)-/.test(tag) && !customElements.get(tag)))]
+      }
+    })
+    const target = page.locator(selector).first()
+    await target.scrollIntoViewIfNeeded()
+    await target.click()
+    await page.waitForTimeout(600)
+    const ok = await target.evaluate(answered)
+    await page.screenshot({ path: join(out, `example-${name}.png`) })
+    check(
+      `${name}:  its live examples draw, and one answers a click`,
+      drawn.examples > 0 && drawn.upgraded === drawn.examples && !drawn.undefined.length && ok,
+      JSON.stringify({ ...drawn, clicked: ok })
+    )
+    check(`${name}:  no page errors`, !page.errors.length, page.errors.slice(0, 3).join(" | "))
+    await page.close()
+  }
 }
 
 /** A guide:  the docs runtime still draws the bullhorns, and a thread has the comments' look. */

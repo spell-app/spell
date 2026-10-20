@@ -8,7 +8,7 @@ import { dirname, join, resolve } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "$/server"
-import { COMPONENT_SETS, SETS_BUNDLE, SITE_BUNDLE } from "$/server/page"
+import { COMPONENT_SETS } from "$/server/page"
 import { ask } from "$/server/test/serve"
 
 import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "$/epics/server/EpicServer"
@@ -39,13 +39,17 @@ function repo(top: string, name: string): string {
 
 /**
  * Give the scratch repo at `checkout` spell-app's component sets, as its checkout lays them (`COMPONENT_SETS`):
- * each set's home page, and the two site bundles' `site.js`;  Epic UI's folder too, which the engine's stands in for.
+ * each set's home page, and its site bundle's `site.js`, saying which folder it is;  Epic UI's folder too, which the
+ * engine's stands in for.
+ * - each set's `assets` as the list has it:  ONE site bundle since epic `epic-engine`, two before (Spell UI's own, the
+ *   other sets' `sets/`)
  */
 function componentSets(checkout: string): void {
   const name = checkout.split("/").at(-1)
-  for (const set of COMPONENT_SETS) put(checkout, `${set.dir}/index.html`, `${name} ${set.name} home`)
-  put(checkout, `${SITE_BUNDLE}/site.js`, `// ${name} Spell UI's site`)
-  put(checkout, `${SETS_BUNDLE}/site.js`, `// ${name} the sets' site`)
+  for (const set of COMPONENT_SETS) {
+    put(checkout, `${set.dir}/index.html`, `${name} ${set.name} home`)
+    put(checkout, `${set.assets}/site.js`, `// ${name} ${set.assets}`)
+  }
 }
 
 describe("EpicServer", () => {
@@ -124,8 +128,12 @@ describe("EpicServer", () => {
   })
 
   // epic-eject I21:  Epic UI answered 404 here, while spell-app's page server served it
-  test("Epic UI at /components/epics/, as spell-app's page server serves it:  the engine's src/docs/, the sets' site bundle at _assets/", async () => {
-    for (const path of ["/components/epics/", "/components/epics/epic-item.html", "/components/epics/__parts/layout.html"]) {
+  test("Epic UI at /components/epics/, as spell-app's page server serves it:  the engine's src/docs/, its site bundle at _assets/", async () => {
+    for (const path of [
+      "/components/epics/",
+      "/components/epics/epic-item.html",
+      "/components/epics/__parts/layout.html"
+    ]) {
       const page = await ask(port, "GET", path)
       expect(page.status, path).toBe(200)
     }
@@ -133,7 +141,8 @@ describe("EpicServer", () => {
     expect((await ask(port, "GET", "/components/epics")).headers.location).toBe("/components/epics/")
     expect(server.fileFor("/components/epics/epic-item.html")).toBe(join(ENGINE, "src/docs/epic-item.html"))
     // the bundle is spell-app's page server's build, not committed:  checked where it has been built
-    const bundle = join(ENGINE, ".spell-app", SETS_BUNDLE, "site.js")
+    const assets = COMPONENT_SETS.find((set) => set.prefix === "/components/epics")!.assets
+    const bundle = join(ENGINE, ".spell-app", assets, "site.js")
     if (existsSync(bundle)) expect(server.fileFor("/components/epics/_assets/site.js")).toBe(bundle)
     expect((await ask(port, "GET", "/components/epics/missing.html")).status).toBe(404)
   })
@@ -148,8 +157,7 @@ describe("EpicServer", () => {
         const home = await ask(port, "GET", `${base}${set.prefix}/`)
         expect([home.status, home.text.endsWith(`one ${set.name} home`)], `${base}${set.prefix}/`).toEqual([200, true])
         const site = await ask(port, "GET", `${base}${set.prefix}/_assets/site.js`)
-        const bundle = set.assets === SITE_BUNDLE ? "Spell UI's site" : "the sets' site"
-        expect([site.status, site.text], `${base}${set.prefix}/_assets/site.js`).toEqual([200, `// one ${bundle}`])
+        expect([site.status, site.text], `${base}${set.prefix}/_assets/site.js`).toEqual([200, `// one ${set.assets}`])
       }
     expect(server.fileFor("/components/ui/index.html")).toBe(join(top, "one", "packages/ui/docs/index.html"))
     // its SPELL_SERVER.file is its address, as live reload reports its folder's changes

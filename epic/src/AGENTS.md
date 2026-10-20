@@ -408,7 +408,8 @@ Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`)
 - Tracked and versioned with the branch, like code:  an element's page changes in the same commit as the element.
 - In Spell UI's page shape:
   - the top bar, a side column of every element by group, the page's contents list, the theme switch
-  - The pages load the sets' build of Spell UI's site (`_assets/`, laid over the folder by the page server).
+  - The pages load Spell UI's site bundle (`_assets/`, laid over the folder by the page server), every set's since
+    epic `epic-engine` (the other sets' own build, its `sets/`, before).
     It loads the epics pack for the live examples.
 - ONE flat folder:
 
@@ -1730,9 +1731,14 @@ Each kind of page has ONE name, written everywhere a person reads it.
       site's Spell UI (see "Epic UI, the docs set").  Before, the route took their comments, but no page could make one.
     - App UI's and Brand's (spell-app's) too, since epic `epic-engine`'s sets work:  the same line in every page's
       head, and the epics pack in their layout (`<ui-components source="/_epic/pack/epics.pack.js">`), whose
-      elements draw the threads and the pane.  Spell UI's own pages don't load it.
-    - a page in TABS (a components page's Examples, Usage, API, Theming:  Brand's element pages):  the toolbar lists
-      the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
+      elements draw the threads and the pane.
+    - Spell UI's own too (spell-app's `packages/ui/docs/`, at `/components/ui/`), the same way.  Its site bundle
+      couldn't load a pack until then:  `SitePacks` (`globalThis.SpellUI`'s `registerPack` and `packModules`) was the
+      other sets' own build of the site alone;  it's the one bundle now, every set's.
+      - Its prose is `<ui-markdown>`'s, in a shadow root:  a text comment there doesn't open (the selection isn't in
+        the page's `main`);  the page, each section and a live example's light-DOM text take comments.
+    - a page in TABS (a components page's Examples, Usage, API, Theming:  Spell UI's and Brand's element pages):  the
+      toolbar lists the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
   - NOT:
     - an epic page's `parts/`
     - details pages (questions, or comment boxes alone:  their `<epic-send>`;  epic `epic-engine` r6), choice pages
@@ -2026,10 +2032,13 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
       on a guide and an epic page (epic `epic-workflow` P23)
     - their comments stubbed in the browser, every POST aborted:  no inbox read or written, nobody woken
     - Run it after touching the comments' runtime, the toolbar or the jump dialog.
-  - `node src/demo/check-comments-epic-ui.mjs [--set epics | app | brand] [--checkout <spell-app>] [--page <name>]
-    [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--keep] [outDir]`, from the root:
-    - `--set app` / `brand`:  App UI's or Brand's pages, from `--checkout`'s `packages/<set>/docs/` (default
-      `.spell-app`;  a spell-app worktree's, to check its pages before they merge);  a tabbed page's toolbar too
+  - `node src/demo/check-comments-epic-ui.mjs [--set epics | ui | app | brand] [--checkout <spell-app>] [--page <name>]
+    [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--keep] [--dark] [outDir]`, from the root:
+    - `--set ui` / `app` / `brand`:  Spell UI's, App UI's or Brand's pages, from `--checkout`'s `packages/<set>/docs/`
+      (default `.spell-app`;  a spell-app worktree's, to check its pages before they merge), with that checkout's site
+      bundle (Epic UI's too, when `--checkout` is named);  a tabbed page's toolbar too
+    - `--set ui`:  three element pages' live examples still draw and answer a click (a dropdown, a modal, a checkbox)
+    - `--dark`:  all of it in the dark colour scheme
     - comments on Epic UI's pages (epic `epic-engine` P2):  the bullhorns, a page comment and a text one, their
       threads, Send, the router's swap and back, at 1200 and 390px;  and a guide's still drawn by the docs bundle
     - their toolbar (epic `epic-engine` T11):  a button per section landing it under the band, the bullhorn's count

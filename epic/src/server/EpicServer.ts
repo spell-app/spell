@@ -8,7 +8,7 @@ import {
   HIGHLIGHT_JS,
   PageEditor,
   pageServerSettings,
-  SETS_BUNDLE,
+  SITE_BUNDLE,
   type PageConfig,
   type RouteModule
 } from "$/server/page"
@@ -38,7 +38,7 @@ import {
  * /_epic/assets/...       spell-epic's src/tools/_assets/   (spell-ui.js, spell-doc.css, the runtime ...)
  * /_epic/pack/...         spell-epic's src/components/__pack/   (epics.pack.js)
  * /components/epics/...   Epic UI, the elements' pages:  spell-epic's src/docs/   (EPIC_UI)
- * /components/epics/_assets/...   their site bundle, spell-app's sets' build (SETS_BUNDLE, through .spell-app)
+ * /components/epics/_assets/...   their site bundle, spell-app's (its COMPONENT_SETS entry's, through .spell-app)
  * /components/<set>/...   every OTHER component set the default repo's checkout has (COMPONENT_SETS):  Spell UI, App UI,
  *                         the brand's;  its site bundle at _assets/, from that checkout (`componentSetMounts()`)
  * /r/<repo>/...           that repo's content folder (its .epic/config.json5's contentFolder), then its main checkout
@@ -283,8 +283,8 @@ export class EpicServer {
    *   - each where the repo's MAIN checkout has its folder (`dir`):  a repo without one gets nothing
    *   - NOT Epic UI:  the engine's own (`epicUiMounts()`)
    * - `/components/<set>/...`:  the default repo's;  `/r/<repo>/components/<set>/...`:  each repo's
-   * - `<set address>/_assets/...`:  its site bundle (`assets`), from the same checkout:  Spell UI's own for Spell UI,
-   *   the sets' build for the others;  spell-app's page server builds them, so missing until that has run
+   * - `<set address>/_assets/...`:  its site bundle (`assets`), from the same checkout:  Spell UI's site bundle, every
+   *   set's since epic `epic-engine`;  spell-app's page server builds it, so missing until that has run
    * - the longer prefix wins (`SRV.StaticHandler`), so `_assets/` is the bundle's, never the set's folder's
    */
   private componentSetMounts(): SRV.Mount[] {
@@ -308,14 +308,18 @@ export class EpicServer {
    * Epic UI, the elements' docs set (`EPIC_UI`), as spell-app's page server mounts its component sets
    * (`COMPONENT_SETS`, `componentSetPath()`):
    * - `/components/epics/...`:  the engine's `src/docs/`, its pages, `__parts/` and `__data/`
-   * - `/components/epics/_assets/...`:  the sets' build of Spell UI's site (`SETS_BUNDLE`), from the spell-app
-   *   checkout the engine uses (`.spell-app`);  spell-app's page server builds it, so it's missing until that has run
+   * - `/components/epics/_assets/...`:  the site bundle spell-app's `COMPONENT_SETS` gives Epic UI (`assets`), from
+   *   the spell-app checkout the engine uses (`.spell-app`);  spell-app's page server builds it, so it's missing until
+   *   that has run
+   *   - read from the list, never named here:  Spell UI's site bundle since epic `epic-engine` (every set's, packs and
+   *     all), the other sets' own build in its `sets/` before;  whichever the checkout has
    * - the longer prefix wins (`SRV.StaticHandler`), so `_assets/` is the bundle's, never the docs folder's
    */
   private epicUiMounts(): SRV.Mount[] {
     const prefix = `/${EPIC_UI.path}/`
+    const assets = COMPONENT_SETS.find((set) => set.prefix === `/${EPIC_UI.path}`)?.assets ?? SITE_BUNDLE
     return [
-      { prefix: `${prefix}${SET_ASSETS}/`, dir: join(this.engine, SPELL_APP, SETS_BUNDLE) },
+      { prefix: `${prefix}${SET_ASSETS}/`, dir: join(this.engine, SPELL_APP, assets) },
       { prefix, dir: this.epicUiDir }
     ]
   }
