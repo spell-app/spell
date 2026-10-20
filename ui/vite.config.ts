@@ -7,6 +7,7 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { standardDecorators } from "@spell-app/toolchain/decorators"
+import { fmtConfig, packageLint } from "@spell-app/toolchain/lint"
 import { environment } from "./tools/environment.ts"
 import { hotElements } from "./tools/HotElements.ts"
 
@@ -191,10 +192,16 @@ export function baseConfig() {
  * - `css.transformer: "lightningcss"` so component CSS gets nesting / `@custom-media` lowering with the same engine
  *   that minifies it.  NOTE: postcss is never used.
  * - `vite-plugin-dts` emits `.d.ts` for consumers, laid out like `exports` says (`declarations()`).
+ * - Also `vp lint` / `vp fmt`:  the toolchain's settings (`@spell-app/toolchain/lint`), as Spell UI's OWN package's
+ *   (`packageLint({ name: "ui" })`, the `spell-ui/*` rules in its component folders):  spell-ui is a flat repo, so this
+ *   is its root block too, the one the editor and `vp check` read (epic `repo-split` I13;  spell-app's root block
+ *   covered it before).
  */
 export default defineConfig(() => {
   const base = baseConfig()
   return {
+    fmt: { ...fmtConfig, ignorePatterns: [...fmtConfig.ignorePatterns, ...FMT_IGNORE] },
+    lint: packageLint({ name: "ui", ignorePatterns: LINT_IGNORE }),
     ...base,
     plugins: [...base.plugins, hotElementsPlugin(), emitIconPacks(), dts(declarations())],
     build: {
@@ -219,6 +226,29 @@ export default defineConfig(() => {
     }
   } satisfies UserConfig
 })
+
+/**
+ * What `vp lint` skips, from this folder:  built, vendored and generated trees (the toolchain's `rootLintIgnore`, as
+ * they sit in a flat repo).
+ */
+const LINT_IGNORE = [
+  "build",
+  "dist",
+  ".cache",
+  ".vitest",
+  "vendor",
+  "coverage",
+  "src/icons/icon-packs",
+  "src/icons/data",
+  "components/ui-emoji/data",
+  "site/dist",
+  "site/_assets",
+  "tools/frameworks/solid/dist",
+  "tools/results"
+]
+
+/** What `vp fmt` skips besides the toolchain's list:  the hand-laid-out docs pages and the site's built bundle. */
+const FMT_IGNORE = ["docs/**", "site/_assets/**"]
 
 /**
  * Chunk file names:  an emoji data chunk (`components/ui-emoji/data/<set>/<letter>.json`)
@@ -370,8 +400,18 @@ function rewriteDeclaration(filePath: string, content: string) {
  * - `folder`:  where they go instead
  */
 const OUTSIDE = [
-  { alias: "$/ui/components", src: path.resolve("components"), written: `${UI_WRITTEN}components/`, folder: "components" },
-  { alias: "$/util", src: UTIL_SRC, written: `${slashed(path.relative(DECLARATIONS_ROOT, UTIL_SRC))}/`, folder: "_util" },
+  {
+    alias: "$/ui/components",
+    src: path.resolve("components"),
+    written: `${UI_WRITTEN}components/`,
+    folder: "components"
+  },
+  {
+    alias: "$/util",
+    src: UTIL_SRC,
+    written: `${slashed(path.relative(DECLARATIONS_ROOT, UTIL_SRC))}/`,
+    folder: "_util"
+  },
   {
     alias: "$/spell-element",
     src: ELEMENT_SRC,

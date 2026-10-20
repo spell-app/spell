@@ -93,82 +93,84 @@ describe("spell-ui/no-function-component", () => {
 ////////////////
 
 /**
- * Every `spell-ui/*` rule turned off on purpose:  `file` (from the repo root), the rule, and the reason
- * its disable comment gives (the comment's text after `--`).
+ * Every `spell-ui/*` rule turned off on purpose in Spell UI's component folders:  `file` (from spell-ui's root), the
+ * rule, and the reason its disable comment gives (the comment's text after `--`).
+ * - Spell UI's own folders only (`PATTERN_FOLDERS.ui`):  the brand's and the app's are in their own repos, which this
+ *   one can't see (epic `repo-split` P8).
  */
 const ALLOWED: readonly Allowed[] = [
   {
-    file: "packages/ui/components/ui-dropdown/SlottedItems.ts",
+    file: "components/ui-dropdown/SlottedItems.ts",
     rule: "no-solid-effect",
     reason: "a helper class, not a component:  no decorator reaches it"
   },
   {
-    file: "packages/ui/components/ui-dropdown/SlottedItems.ts",
+    file: "components/ui-dropdown/SlottedItems.ts",
     rule: "no-mutation-observer",
     reason: "a helper class:  `@E.watches` is for components"
   },
   {
-    file: "packages/ui/components/ui-form/FormBinding.ts",
+    file: "components/ui-form/FormBinding.ts",
     rule: "no-solid-effect",
     reason: "a helper class, not a component:  one effect per bound control, in a root of its own"
   },
   {
-    file: "packages/ui/components/ui-form/UIForm.tsx",
+    file: "components/ui-form/UIForm.tsx",
     rule: "no-mutation-observer",
     reason: "only while connected:  `@E.watches` lasts the element's whole life"
   },
   {
-    file: "packages/ui/components/ui-form/UIRepeat.tsx",
+    file: "components/ui-form/UIRepeat.tsx",
     rule: "no-mutation-observer",
     reason: "only while connected:  `@E.watches` lasts the element's whole life"
   },
   {
-    file: "packages/ui/components/ui-item/UIItem.tsx",
+    file: "components/ui-item/UIItem.tsx",
     rule: "no-untrack",
     reason: "half-tracked on purpose (above)"
   },
   {
-    file: "packages/ui/components/ui-menu/UIMenu.tsx",
+    file: "components/ui-menu/UIMenu.tsx",
     rule: "no-untrack",
     reason: "half-tracked on purpose (above)"
   },
   {
-    file: "packages/ui/components/ui-root/LoaderMessage.ts",
+    file: "components/ui-root/LoaderMessage.ts",
     rule: "no-solid-effect",
     reason: "a static helper drawing plain DOM:  no members to decorate"
   },
   {
-    file: "packages/ui/components/ui-root/PlaceholderSkeleton.ts",
+    file: "components/ui-root/PlaceholderSkeleton.ts",
     rule: "no-solid-effect",
     reason: "a static helper drawing plain DOM:  no members to decorate"
   },
   {
-    file: "packages/ui/components/ui-root/UIRoot.tsx",
+    file: "components/ui-root/UIRoot.tsx",
     rule: "no-mutation-observer",
     reason: "only while connected:  `@E.watches` lasts the element's whole life"
   },
   {
-    file: "packages/ui/components/ui-table/TableClassMirror.ts",
+    file: "components/ui-table/TableClassMirror.ts",
     rule: "no-mutation-observer",
     reason: "a helper class, watching ANOTHER element (the table)"
   },
   {
-    file: "packages/ui/components/ui-table/UITable.tsx",
+    file: "components/ui-table/UITable.tsx",
     rule: "no-solid-effect",
     reason: "the class mirror's RENDER effect:  a throw must reach the error boundary"
   },
   {
-    file: "packages/ui/components/ui-table/UITable.tsx",
+    file: "components/ui-table/UITable.tsx",
     rule: "no-mutation-observer",
     reason: "watches the managed TABLE, swapped with it"
   },
   {
-    file: "packages/ui/components/ui-visibility/UIVisibility.tsx",
+    file: "components/ui-visibility/UIVisibility.tsx",
     rule: "no-mutation-observer",
     reason: "only while `images` is on and the element connected"
   },
   {
-    file: "packages/ui/src/docs-components/ui-docs-toc/UIDocsToc.tsx",
+    file: "src/docs-components/ui-docs-toc/UIDocsToc.tsx",
     rule: "no-mutation-observer",
     reason: "watches the FOLLOWED content, another element"
   }
@@ -194,8 +196,8 @@ describe("spell-ui/* disable comments", () => {
 // ## Helpers
 ////////////////
 
-/** The repo root. */
-const ROOT = fileURLToPath(new URL("../../../", import.meta.url))
+/** spell-ui's root:  this file is in `tests/tools/`. */
+const ROOT = fileURLToPath(new URL("../../", import.meta.url))
 
 /** A disable comment the rules allow:  one line, one rule, a reason. */
 const NEXT_LINE = /\/\/ oxlint-disable-next-line spell-ui\/([\w-]+) -- (.+)$/
@@ -212,14 +214,12 @@ function disableComments(): Allowed[] {
   return sorted(found)
 }
 
-/** The component files the rules cover (`PATTERN_FOLDERS`), tests left out, from the repo root. */
+/** Spell UI's component files the rules cover (`PATTERN_FOLDERS.ui`), tests left out, from spell-ui's root. */
 function componentFiles(): string[] {
-  return Object.entries(PATTERN_FOLDERS).flatMap(([name, folders]) =>
-    folders.flatMap((folder) =>
-      (readdirSync(join(ROOT, "packages", name, folder), { recursive: true }) as string[])
-        .filter((path) => /\.tsx?$/.test(path) && !/\.test\.tsx?$/.test(path))
-        .map((path) => relative(ROOT, join(ROOT, "packages", name, folder, path)))
-    )
+  return (PATTERN_FOLDERS.ui ?? []).flatMap((folder) =>
+    (readdirSync(join(ROOT, folder), { recursive: true }) as string[])
+      .filter((path) => /\.tsx?$/.test(path) && !/\.test\.tsx?$/.test(path))
+      .map((path) => relative(ROOT, join(ROOT, folder, path)))
   )
 }
 
@@ -231,7 +231,7 @@ function sorted(list: readonly Allowed[]): Allowed[] {
 
 /** One allowed use:  where, which rule, and why. */
 type Allowed = {
-  /** from the repo root */
+  /** from spell-ui's root */
   file: string
   /** the rule's name, without `spell-ui/` */
   rule: string
