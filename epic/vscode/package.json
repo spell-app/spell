@@ -349,7 +349,7 @@
         {
           "id": "spell-epic-docs",
           "title": "Epic Docs",
-          "icon": "$(book)"
+          "icon": "media/spell.svg"
         },
         {
           "id": "spell-epic-review",
