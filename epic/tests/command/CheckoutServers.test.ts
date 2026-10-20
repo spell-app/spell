@@ -14,7 +14,7 @@ import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { serverProcesses } from "@spell-app/server/src/page/prune.ts"
+import { serverProcesses } from "@spell-app/server/page/prune"
 
 import { CheckoutServers } from "$/epics/command/CheckoutServers"
 import { Worktrees } from "$/epics/command/Worktrees"

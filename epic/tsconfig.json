@@ -1,29 +1,19 @@
 {
-  "extends": "./tsconfig.base.json",
+  // The TypeScript settings every package shares are spell-app's toolchain's (`@spell-app/toolchain`, a `portal:` dev
+  // dependency, epic `repo-split` P6);  the alias table is this repo's own (`./tsconfig.base.json`).  What's ours below.
+  "extends": ["@spell-app/toolchain/tsconfig.base.json", "./tsconfig.base.json"],
   "compilerOptions": {
     "target": "ES2022",
-    "useDefineForClassFields": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
     // the docs tools (`tools/`) are partly plain node scripts:  parsed (`allowJs`), not type-checked (no `checkJs`)
     "allowJs": true,
     "jsx": "preserve",
     "jsxImportSource": "@solidjs/web",
-    "types": ["vite/client", "node"]
+    // `@spell-app/toolchain/types`:  the ambient helper types (`Prettify` ...), used bare (WWOD §9);  with Vite's client
+    // types
+    "types": ["vite/client", "node", "@spell-app/toolchain/types"]
   },
-  // `./types/app.d.ts`:  the repo's ambient helper types (`Prettify` ...), used bare (WWOD §9).  Not all of
-  // `./types`:  its `global.d.ts` pulls in spell, whose `util` doesn't compile at this target.
-  "include": ["./types/app.d.ts", "src", "scripts", "vite.config.ts", "vitest.config.ts"],
+  "include": ["src", "scripts", "vite.config.ts", "vitest.config.ts"],
   // - `src/components/__pack/` is generated (`spell-ui-pack build`, `yarn pack:build`):  not ours to check
   // - `src/tools/_assets/`:  the docs pages' browser code (`spell-ui.entry.js` pulls in UI source), bundled, not checked
   // - `src/tools/vendor/`:  minified third-party code (Claude Design's runtime, for `check-design-bundle.js`)

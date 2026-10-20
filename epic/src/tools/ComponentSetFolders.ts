@@ -1,8 +1,9 @@
 import { isAbsolute, join, relative, sep } from "node:path"
 
-// Import directly, by path:  the page server's barrel would load the whole server into every `epic` call, and plain
-// `node` loads this file (`pages.js`), which knows no `$/` alias;  `settings.ts` is node built-ins only
-import { componentSets, pageServerSettings } from "@spell-app/server/src/page/settings.ts"
+// The settings' own package entry (its `exports`, epic `repo-split` P6), not the page server's barrel:  that would load
+// the whole server into every `epic` call, and plain `node` loads this file (`pages.js`), which knows no `$/` alias;
+// `settings.ts` is node built-ins only
+import { componentSets, pageServerSettings } from "@spell-app/server/page/settings"
 
 import { EPIC_UI } from "../server/server.types.ts"
 

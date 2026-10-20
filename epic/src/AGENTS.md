@@ -230,7 +230,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `~/.spell-epic`), from the `SessionStart` hook ([server-prune.mjs](../hooks/server-prune.mjs))
       - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):  by process, never a pid file;  never a
         live checkout's
-      - plain `node` loads it by path, `prune.ts` too (through the `@spell-app/server` package)
+      - plain `node` loads it by path, `prune.ts` too (the server package's entry `@spell-app/server/page/prune`)
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path

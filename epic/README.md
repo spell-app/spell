@@ -26,7 +26,6 @@ ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` 
 | `src/` | the code, `$/epics`:  the `<epic-*>` elements (`components/`, the pack in `components/__pack/`), the epic tool (`tool/`), the `epic` command's code (`command/`), the epic server (`server/`), the docs tools and their assets (`tools/`, `tools/_assets/`), Epic UI's pages (`docs/`), the VS Code windows (`window.mjs`, `epic window`);  its rules:  [src/AGENTS.md](src/AGENTS.md) |
 | `tests/` | its tests, at the same paths as the code (`tests/command/` for `src/command/` ...);  and the extension's (`tests/vscode/`) |
 | `scripts/` | dev-only scripts:  Epic UI's data (`site-data.ts`) |
-| `types/` | the ambient helper types (`Prettify` ...) |
 | `vscode/` | spell-epic's VS Code extension, `spell-app.spell-epic` (its own yarn project):  the Review tab, Epic Docs, "Open Epic...", the window bridge and the handoff;  [its README](vscode/README.md) |
 | `templates/` | every kind of page's starting point (Q8, T11):  details, review, choices, guides, cheatsheets, commands pages, component pages, the epic-page writing rules;  served at `/templates/` (an engine route), the Templates list page `templates/index.html` written here by `epic pages index`;  `epic pages template <name>` prints one's path |
 
@@ -378,6 +377,14 @@ spell-epic uses those packages straight from a spell-app checkout (Q5), not from
 - `.spell-app` at the root is a link to that checkout.
   - The `@spell-app/{ui,server,assembler,util,spell-element}` dependencies are `portal:` links through it
     (in [the root `package.json`](package.json)).
+  - So is the dev dependency `@spell-app/toolchain` (epic `repo-split` P6), what every package's configs share:
+    - the lint and format settings, `@spell-app/toolchain/lint` (`vite.config.ts`)
+    - the TypeScript settings, `@spell-app/toolchain/tsconfig.base.json`, which `tsconfig.json` extends beside the
+      alias table
+    - the ambient helper types (`Prettify` ...), `@spell-app/toolchain/types`, in `tsconfig.json`'s `"types"`
+  - A file of theirs is imported by its npm name, an entry its `package.json` `exports` names
+    (`@spell-app/server/checkout`, `@spell-app/assembler/DataFile`), never by its path in `src/`
+    (WWOD §4 › "Package names across repos").
   - The alias table, `tsconfig.base.json`, maps `$/ui`, `$/server` and the rest into it.
   - Through the CHECKOUT's link, never a package's own:
     a package's relative imports out of itself (`ui`'s `../../vite.decorators.ts`) then land in that checkout,

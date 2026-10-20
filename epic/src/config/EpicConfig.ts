@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from "node:fs"
 import { isAbsolute, join, relative, resolve, sep } from "node:path"
 
-// By its file, `.ts` and all:  plain `node` loads this file (the hooks, `src/window.mjs`), and finds the
-// server package in `node_modules` (spell-app's, linked in:  `portal:`).  The server's checkout finder:  the main
-// checkout from any worktree, with no `git` run
-import { checkoutOf } from "@spell-app/server/src/checkout.ts"
+// By the server's package entry (its `exports`, epic `repo-split` P6):  plain `node` loads this file (the hooks,
+// `src/window.mjs`), and finds the server package in `node_modules` (spell-app's, linked in:  `portal:`).  The
+// server's checkout finder:  the main checkout from any worktree, with no `git` run
+import { checkoutOf } from "@spell-app/server/checkout"
 
 /****************
  * ### `EpicConfig`

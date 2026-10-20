@@ -35,7 +35,7 @@ import { fileURLToPath } from "node:url"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 import { SRV } from "$/server"
-import { PageServer } from "$/server/page/PageServer"
+import { PageServer } from "$/server/page"
 
 import { AirplaneInbox } from "./AirplaneInbox.ts"
 import { AirplaneMode } from "./AirplaneMode.ts"

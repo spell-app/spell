@@ -57,7 +57,7 @@ import {
   favoritesIn
 } from "../list/EpicCards.ts"
 import { URGENT_SELECTOR } from "../list/EpicState.ts"
-import { COMPONENTS_PREFIX, componentSets, pageServerSettings } from "@spell-app/server/src/page/settings.ts"
+import { COMPONENTS_PREFIX, componentSets, pageServerSettings } from "@spell-app/server/page/settings"
 import { DataFile } from "../data/DataFile.ts"
 import { Sagas } from "../tool/Sagas.ts"
 import { PageNotes } from "./PageNotes.js"

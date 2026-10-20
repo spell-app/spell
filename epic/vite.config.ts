@@ -1,10 +1,11 @@
 import { defineConfig } from "vite-plus"
 
-import { fmtConfig, packageLint, patternLintIn } from "./vite.lint.ts"
+import { fmtConfig, packageLint, patternLintIn } from "@spell-app/toolchain/lint"
 
 /**
  * spell-epic's Vite+ config:  only the `lint` / `fmt` blocks (what `vp check`, `vp lint`, `vp fmt` and the Oxc editor
- * extension read), from `vite.lint.ts`, a copy of spell-app's.
+ * extension read), from spell-app's toolchain package, `@spell-app/toolchain/lint` (a `portal:` dev dependency, epic
+ * `repo-split` P6):  the copy of its `vite.lint.ts` that was here is gone.
  * - ONE block for the whole repo:  spell-epic is one package (epic `epic-eject` J14), so the root is the package.
  * - The pack's BUILD is Spell UI's, the same for every pack:
  *   `spell-ui-pack build` (`packages/ui/tools/ComponentPack.ts` there), on Spell UI's `baseConfig()`.
