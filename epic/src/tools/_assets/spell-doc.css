@@ -1093,15 +1093,6 @@ ui-tab > pre {
 ui-table:not([stackable], [stack-by]) {
   --ui-table-stack-by: none;
 }
-/*
- * FALLBACK, until spell-app's `main` has `--ui-table-stack-by: none` (its branch `epic-engine-stack`, I40):  the
- * Spell UI built from `main` ignores the token's `none`, so this sets back the PRIVATE flag its stacking rules raise
- * (`--_table-stack`, `UITable.css` "Stackable") to the value `unstackable` leaves;  this sheet is unlayered, so it beats
- * every rule in Spell UI's layers.  DELETE it once that branch is merged and `spell-ui.js` rebuilt from it.
- */
-ui-table:not([stackable], [stack-by]) > table {
-  --_table-stack: 0;
-}
 /* cell borders in `--spell-table-rule`, a bare table's and a `ui-table`'s alike */
 .spell-doc-main ui-table {
   --ui-table-border-color: var(--spell-table-rule);

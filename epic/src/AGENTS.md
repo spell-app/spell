@@ -1031,9 +1031,7 @@ In `tools/`:
       - too wide for its column, it scrolls sideways in its own box, never the page
       - `spell-doc.css` holds every `<ui-table>` unstacked whatever its markup ("NO table ever STACKS");  a table
         that asks to stack (`stackable`, `stack-by`) still does:  a demo of stacking
-        - by Spell UI's public token, `--ui-table-stack-by: none` (epic `epic-engine` I40);  the private
-          `--_table-stack` rule beside it is a fallback until spell-app's `main` has `none` (its branch
-          `epic-engine-stack`), then goes
+        - by Spell UI's public token, `--ui-table-stack-by: none` (epic `epic-engine` I40;  spell-app 3d7061910)
       - the migrations add the word to a page's tables (`components-not-markup`, the epic page's
         `unstackable-tables`), and the epic tool's way in to what it's handed (`IncomingHtml`)
     - never a bare `<table>`:  the migration step `components-not-markup` wraps one (see "Scripts")
