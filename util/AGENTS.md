@@ -3,7 +3,7 @@
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in this package, `@spell-app/util`.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
@@ -36,7 +36,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Commands:  `yarn review`, `yarn ts`, `yarn lint`, `yarn format`, `yarn test`.
   - The tests:  a real browser (chromium) for the generic files;  node for `src/spell/`.
 - Barrel only, as WWOD §4 › "Package aliases, never `../`" says, with ONE exception here:
-  [ui's util barrel](../ui/src/util/index.ts) imports the generic files one by one (`$/util/class` ...).
+  [ui's util barrel](../../spell-ui/src/util/index.ts) imports the generic files one by one (`$/util/class` ...).
   - Why:  so spell's utilities never reach `ui`'s bundles or published declarations.
   - `ui` keeps its own `util` barrel (`$/ui/util`) for package-specific helpers.
 

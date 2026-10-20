@@ -3,7 +3,7 @@
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in this package, `@spell-app/toolchain`.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
@@ -17,7 +17,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     the root's `vite.config.ts` too, which `vp check` and the editor read.
     - Was the root's `vite.lint.ts`.
   - `@spell-app/toolchain/lint/patterns` ([lint.patterns.ts](src/lint.patterns.ts)):  the `spell-ui/*` rules,
-    Spell UI's patterns in every set's component files ("The lint guard" in [ui's AGENTS.md](../ui/AGENTS.md)).
+    Spell UI's patterns in every set's component files ("The lint guard" in [ui's AGENTS.md](../../spell-ui/AGENTS.md)).
   - `@spell-app/toolchain/lint/imports` ([lint.imports.ts](src/lint.imports.ts)):  the `spell/*` rules, on everywhere:
     - `no-cross-package-import`:  no `../` from one package (or its tests) into another's folder
     - `no-cross-repo-alias`:  no `$/` alias into another future repo's package (`REPO_OF`, the list of repos):
@@ -27,14 +27,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `@spell-app/toolchain/packageVersion` ([packageVersion.ts](src/packageVersion.ts)):  `__PACKAGE_VERSION__`
   - `@spell-app/toolchain/tsconfig.base.json` ([its file](tsconfig.base.json)):  the TypeScript settings every
     package shares.
-    - A package extends it beside the repo's alias table:
-      `"extends": ["@spell-app/toolchain/tsconfig.base.json", "../../tsconfig.base.json"]`.
+    - Each repo's alias table, `tsconfig.base.json` at its root, extends it (epic `repo-split` P8);
+      a package's `tsconfig.json` extends that table:  `"extends": "../tsconfig.base.json"`.
     - A config's `tsconfig.node.json` extends it alone:  configs import other packages by npm name.
   - `@spell-app/toolchain/types` ([types/index.d.ts](types/index.d.ts)):  the global types, for a `tsconfig.json`'s
     `"types"` (WWOD §9 › "Ambient globals used bare").
 - Its files import each other relatively, with `.ts` extensions, and no package but its tools (`vite-plus`, esbuild).
-- Its tests:  [tests/toolchain/](../../tests/toolchain/), at the same paths as the code.
-  - The `spell-ui/*` rules' tests stay Spell UI's ([LintPatterns.test.ts](../../tests/ui/tools/LintPatterns.test.ts)):
+- Its tests:  [tests/toolchain/](../tests/toolchain/), at the same paths as the code.
+  - The `spell-ui/*` rules' tests stay Spell UI's ([LintPatterns.test.ts](../../spell-ui/tests/tools/LintPatterns.test.ts)):
     their allow-list is Spell UI's.
 - A dev dependency of every package (`workspace:*`);  a dependency of the assembler, whose `formatHTML()` reads
   `fmtConfig` at run time.

@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 import { describe, test } from "vite-plus/test"
 import { RuleTester } from "vite-plus/lint/plugins-dev"
 
-import { IMPORT_RULES } from "../../../packages/toolchain/src/lint.imports.ts"
+import { IMPORT_RULES } from "../../../toolchain/src/lint.imports.ts"
 
 /**
  * The `spell/*` lint rules (`lint.imports.ts`, the toolchain's):  what each flags, and what it lets through.
@@ -28,7 +28,7 @@ describe("spell/no-cross-package-import", () => {
       at("packages/app/vite.config.ts", `import env from "@spell-app/spaces/server/node/environment"`),
       // a package and its tests are ONE package
       at("tests/ui/tools/LintPatterns.test.ts", `import { Tool } from "../../../packages/ui/tools/Tool.ts"`),
-      at("tests/toolchain/src/a.test.ts", `import { x } from "../../../packages/toolchain/src/lint.ts"`),
+      at("tests/toolchain/src/a.test.ts", `import { x } from "../../../toolchain/src/lint.ts"`),
       at("packages/ui/vitest.config.ts", `const x = import("../../tests/ui/tests.types.ts")`),
       // the repo root's own files belong to no package
       at("packages/brand/vite.config.ts", `import { x } from "../../vite.config.ts"`),

@@ -9,7 +9,7 @@ import { defineConfig } from "vite-plus"
 export default defineConfig({
   test: {
     // the tests live in the repo's tests/ folder, at the same paths as the code
-    dir: resolve(import.meta.dirname, "../../tests/toolchain"),
+    dir: resolve(import.meta.dirname, "../tests/toolchain"),
     environment: "node",
     include: ["src/**/*.test.ts"]
   }

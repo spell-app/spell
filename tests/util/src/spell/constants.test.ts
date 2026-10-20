@@ -8,7 +8,7 @@ describe("`PACKAGE_VERSION`", () => {
   // the version of the package under test, util's own, which vite hands over (`vite.packageVersion.ts`)
   test("is our package.json's version -- handed over by vite", () => {
     const { version } = JSON.parse(
-      readFileSync(resolve(import.meta.dirname, "../../../../packages/util/package.json"), "utf8")
+      readFileSync(resolve(import.meta.dirname, "../../../../util/package.json"), "utf8")
     )
     expect(PACKAGE_VERSION).toBe(version)
   })
