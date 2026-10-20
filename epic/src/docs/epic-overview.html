@@ -132,6 +132,11 @@
                 sub-sections <code>1.1 Structure</code> and <code>1.2 A doc, before and after</code>, each folding on
                 its own.
               </li>
+              <li>
+                Expand-all, the double chevron pointing down at its title's end, opens it and everything in it at once:
+                its sub-sections, their items and asides, parts loading as they open. Collapse-all, beside it while it's
+                open, folds everything inside again.
+              </li>
               <li>Its number is its place among the page's blocks: always <code>1</code>.</li>
               <li>
                 Taken from
@@ -153,9 +158,15 @@
                 <code>&lt;ui-button slot=&quot;actions&quot;&gt;</code> children (epic <code>epic-workflow</code> P25).
               </p>
               <ul>
-                <li>They sit after the title, before collapse-all and the fold chevron.</li>
+                <li>
+                  They sit after the title, before its review buttons (while the page is reviewed), expand-all,
+                  collapse-all and the fold chevron.
+                </li>
                 <li>A click on one never folds or unfolds it.</li>
-                <li>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</li>
+                <li>
+                  The docs runtime puts the Overview's bullhorn there too, first: a comment on the whole Overview. Its
+                  summary and prose keep their own bullhorns, over their corners.
+                </li>
               </ul>
               <epic-overview id="overview-example">
                 <epic-summary>Every folding element's title row takes the page's own buttons.</epic-summary>
@@ -182,6 +193,46 @@
                   >
                 </ui-content>
               </ui-accordion>
+            </ui-section>
+            <ui-section
+              id="epic-overview-review"
+              header="While the page is reviewed"
+              sticky
+              collapsible
+              dividing
+              collapsed
+            >
+              <p>
+                On a reviewed epic page, the Overview takes review notes on its title row, as an item does on its line
+                (epic <code>epic-engine</code> I55;  Owen, 2026-10-20: "The buttons on the left should move into the
+                1. Overview header, as well as a bullhorn").
+              </p>
+              <ul>
+                <li>
+                  In its title row, in order: the bullhorn, then Revisit and Make Todo in one pill, then Do Now (the
+                  wand), then expand-all, collapse-all and the fold chevron.
+                </li>
+                <li>
+                  Revisit opens it and its note box, right under the title row, above the summary. Leaving the box empty
+                  closes it.
+                </li>
+                <li>
+                  A marked note shows there too, with its Edit.
+                </li>
+                <li>
+                  The marks are keyed <code>summary</code> in the review inbox, as the summary's were: only an Overview
+                  holding an <code>&lt;epic-summary&gt;</code> takes them.
+                </li>
+                <li>
+                  Before, <code>&lt;epic-summary&gt;</code> drew the buttons and an open note box under its lede.
+                </li>
+                <li>
+                  They need the page server and a page's review inbox, so this page can't show them:
+                  <a href="../../guides/epic-components/review.html" target="src-guides-epic-components-review-html"
+                    >Reviewing an Epic Page</a
+                  > shows them on a real epic page.
+                </li>
+              </ul>
             </ui-section>
           </ui-section>
 

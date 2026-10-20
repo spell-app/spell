@@ -100,7 +100,9 @@ export class ThreadFacts {
    * comment's):  "Comment M3, on ..."
    */
   static aboutTip({ id, place }: { id?: string; place: ThreadPlace }): string {
-    const what = place.kind === "page" ? "the page" : `a ${ThreadFacts.kindName(place.kind)}`
+    const what = THE_ONE.includes(place.kind)
+      ? `the ${ThreadFacts.kindName(place.kind)}`
+      : `a ${ThreadFacts.kindName(place.kind)}`
     const named = place.kind === "section" || place.kind === "item"
     const on = named && place.label ? `“${place.label}”` : what
     const where = place.kind === "page" || named || !place.label ? "" : ` in “${place.label}”`
@@ -171,8 +173,12 @@ const HEADLINE_CHARS = 40
 /** A local stamp's month, day and time (`localStamp()`, or a note's `at`). */
 const SHORT_STAMP = /^\d{4}-(\d\d)-(\d\d)[ T](\d\d:\d\d)/
 
+/** The blocks a page has one of:  "the page", "the Overview" (`aboutTip()`). */
+const THE_ONE: readonly string[] = ["page", "overview"]
+
 /** What a block kind is called, where it isn't its own name (`kindName()`). */
 const KIND_NAMES: Readonly<Record<string, string>> = {
+  overview: "Overview",
   prose: "paragraph",
   code: "code block"
 }

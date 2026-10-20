@@ -8,6 +8,7 @@ import "$/ui/components/ui-section"
 import "$/epics/components/epic-section"
 import "$/epics/components/epic-phase"
 import "$/epics/components/epic-update"
+import "$/epics/components/epic-item"
 
 /** `host`'s inner `<ui-section>`. */
 function inner(host: Element): E.DOMElement {
@@ -242,5 +243,26 @@ describe("<epic-phase> title, folded and open", () => {
     expect(firstLineTop(words)).toBeCloseTo(folded.top, 0)
     // collapse-all shows only while open (as before P25), so the slot's button keeps its height, not its x
     expect(button.getBoundingClientRect().top).toBeCloseTo(folded.button.top, 0)
+  })
+})
+
+// Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
+describe("<epic-phase> expand-all", () => {
+  test("folded or open, before collapse-all and the chevron;  a click opens the phase and its items", async () => {
+    const host = await ElementFixture.render<E.DOMElement>(
+      `<epic-phase id="p2" title="Two" status="todo"><epic-item id="t1" title="Do it" status="open"><p>How.</p>` +
+        `</epic-item></epic-phase>`
+    )
+    await inner(host).ready
+    await ElementFixture.settle(host)
+    const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
+    const expand = tools.querySelector<HTMLButtonElement>('[part~="expand-all"]')!
+    expect([tools.lastElementChild === expand, expand.title]).toEqual([true, "Open everything in P1 · Two"])
+    expand.click()
+    await vi.waitFor(() => expect(host.querySelector("epic-item")!.matches(":state(open)")).toBe(true))
+    expect(host.matches(":state(open)")).toBe(true)
+    await ElementFixture.tick()
+    expect(tools.lastElementChild!.matches('[part~="collapse-all"]')).toBe(true)
+    expect(tools.lastElementChild!.previousElementSibling).toBe(expand)
   })
 })

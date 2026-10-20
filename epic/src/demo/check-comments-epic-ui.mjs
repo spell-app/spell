@@ -24,6 +24,10 @@
  *     (the server's wake is stubbed:  `DemoServer`)
  *   - the router's swap to another page:  that page's bullhorns, no thread from the last;  back:  the threads again
  *   - the server's inbox holds what the page shows
+ *   - the TOOLBAR (epic `epic-engine` T11), its comments answered in the scratch inbox so they wait on Owen:  first in
+ *     the article, a button per top-level section;  a button lands its section under the stuck band and is marked;
+ *     the bullhorn's count, and its clicks landing on each waiting thread in turn;  ⌘ / Ctrl K listing them, an id
+ *     landing on its thread, words going to the site's search;  the router's swap:  the next page's toolbar
  *   - no page errors
  * - and on a GUIDE (`guides/python-target.html`), served with `--bundle` as its `spell-ui.js` when given:  the docs
  *   runtime still draws bullhorns, and a thread has the comments' look (`spell-comments.css`, through `spell-doc.css`)
@@ -276,9 +280,177 @@ async function checkWidth(width) {
   const back = await page.evaluate(() => document.querySelectorAll("epic-thread").length)
   check(`${name}:  back again, the threads draw again`, back === held.length, `${back}`)
 
+  await checkToolbar(page, name, held)
+
   check(`${name}:  no page errors`, !page.errors.length, page.errors.slice(0, 3).join(" | "))
   await page.close()
   if (!keep) await clear(element)
+}
+
+/**
+ * The TOOLBAR (epic `epic-engine` T11):  the docs pages' band under the masthead, a button per top-level section, the
+ * comments' bullhorn and Cmd / Ctrl + K.  Claude answers the page's comments first (in the scratch inbox), so they
+ * wait on Owen.
+ */
+async function checkToolbar(page, name, held) {
+  GuideInbox.update(inbox(element), (comments) => {
+    for (const { id } of held) comments.answer(id, "<p>Answered, for the toolbar's check.</p>")
+  })
+  await page.reload()
+  await page.waitForSelector(".spell-toolbar > .spell-toolbar-waiting:not([hidden])", { timeout: 15_000 }).catch(() => {})
+  await page.waitForTimeout(800)
+  const bar = await page.evaluate(() => {
+    const article = document.querySelector("main .site-article")
+    const sections = [...article.querySelectorAll(":scope > ui-section[id]")].map((each) => each.id)
+    const toolbar = article.querySelector(":scope > ui-sticky.site-sticky-bar > ui-menu.spell-toolbar")
+    const items = [...(toolbar?.querySelectorAll(":scope > [data-rail]") ?? [])].map((each) => each.dataset.rail)
+    const bullhorn = toolbar?.querySelector(":scope > .spell-toolbar-waiting")
+    return {
+      first: article.firstElementChild?.matches("ui-sticky.spell-site-toolbar"),
+      sections,
+      items,
+      count: bullhorn && !bullhorn.hidden ? bullhorn.querySelector(".spell-toolbar-count")?.textContent : null,
+      bands: document.querySelectorAll(".spell-toolbar").length
+    }
+  })
+  check(
+    `${name}:  the toolbar, first in the article:  a button per top-level section`,
+    bar.first && bar.bands === 1 && bar.items.length === bar.sections.length && bar.items.join() === bar.sections.join(),
+    `${bar.items.length} of ${bar.sections.length}`
+  )
+  check(`${name}:  the bullhorn counts the threads waiting on Owen`, bar.count === String(held.length), `${bar.count}`)
+  await page.screenshot({ path: join(out, `${name}-toolbar.png`) })
+
+  // a button lands its section just under the band, and is marked
+  const target = bar.sections[2]
+  // the item's own box, in its shadow root:  the `<ui-item>` host is `display: contents`
+  await page.locator(`.spell-toolbar > [data-rail="${target}"] [part~="item"]`).click()
+  await page.waitForTimeout(1200)
+  const landed = await page.evaluate((id) => {
+    const band = document.querySelector("ui-sticky.spell-site-toolbar > ui-menu").getBoundingClientRect()
+    const section = document.getElementById(id)
+    const sentinel = section.shadowRoot?.querySelector(".sentinel") ?? section
+    return {
+      gap: Math.round(sentinel.getBoundingClientRect().top - band.bottom),
+      bandTop: Math.round(band.top),
+      selected: document.querySelector(".spell-toolbar > [selected]")?.dataset.rail
+    }
+  }, target)
+  check(
+    `${name}:  a button lands its section under the stuck band, and is marked`,
+    Math.abs(landed.gap) <= 3 && landed.selected === target,
+    JSON.stringify(landed)
+  )
+  await page.screenshot({ path: join(out, `${name}-landed.png`) })
+  // scrolled back up, the first section's button is marked
+  await page.evaluate(() => scrollTo(0, 0))
+  await page.waitForTimeout(300)
+  const top = await page.evaluate(() => document.querySelector(".spell-toolbar > [selected]")?.dataset.rail)
+  check(`${name}:  at the top, the first section's button is marked`, top === bar.sections[0], `${top}`)
+
+  // the bullhorn:  each click the next waiting thread, opened, on screen
+  const visits = []
+  for (let click = 0; click < held.length + 1; click++) {
+    await page.locator('.spell-toolbar > .spell-toolbar-waiting [part~="item"]').click()
+    await page.waitForTimeout(1300)
+    visits.push(
+      await page.evaluate(() => {
+        const threads = [...document.querySelectorAll("epic-thread[id^='comment-']")]
+        const shown = threads.find((thread) => {
+          const box = thread.getBoundingClientRect()
+          return box.top >= 0 && box.top < innerHeight * 0.6 && thread.hasAttribute("open")
+        })
+        return shown?.id.replace("comment-", "")
+      })
+    )
+  }
+  const order = held.map((each) => each.id)
+  check(
+    `${name}:  the bullhorn lands on each waiting thread in turn, then round again`,
+    visits.join() === [...order, order[0]].join(),
+    visits.join()
+  )
+
+  // Cmd / Ctrl + K:  the waiting threads listed;  M2 lands on its thread
+  await page.evaluate(() => scrollTo(0, 0))
+  await page.keyboard.press("ControlOrMeta+k")
+  await page.waitForSelector("ui-modal .spell-jump input", { timeout: 5000 }).catch(() => {})
+  await page.waitForTimeout(400)
+  const dialog = await page.evaluate(() => ({
+    header: document.querySelector("ui-modal[header]")?.getAttribute("header"),
+    open: document.querySelectorAll("dialog[open], ui-modal:not([hidden])").length,
+    lines: [...document.querySelectorAll(".spell-jump-thread > b")].map((each) => each.textContent),
+    search: document.querySelector("ui-docs-search")?.matches(":focus-within") ?? false
+  }))
+  check(
+    `${name}:  ⌘ K opens the jump dialog (not the site's search), the waiting threads under its box`,
+    !!dialog.header && dialog.lines.join() === order.map((id) => id.toUpperCase()).join(),
+    JSON.stringify(dialog)
+  )
+  await page.screenshot({ path: join(out, `${name}-jump.png`) })
+  const last = order.at(-1)
+  await page.keyboard.type(last.toUpperCase())
+  await page.keyboard.press("Enter")
+  await page.waitForTimeout(1200)
+  const jumped = await page.evaluate((id) => {
+    const thread = document.getElementById(`comment-${id}`)
+    const box = thread?.getBoundingClientRect()
+    return { open: thread?.hasAttribute("open"), top: box && Math.round(box.top), modal: !!document.querySelector("ui-modal") }
+  }, last)
+  check(
+    `${name}:  ⌘ K, ${last.toUpperCase()}:  lands on its thread, opened`,
+    jumped.open && jumped.top >= 0 && jumped.top < 600 && !jumped.modal,
+    JSON.stringify(jumped)
+  )
+
+  // words, not an id:  the site's search, with them typed in
+  await page.keyboard.press("ControlOrMeta+k")
+  await page.waitForSelector("ui-modal .spell-jump input", { timeout: 5000 }).catch(() => {})
+  await page.waitForTimeout(400)
+  await page.keyboard.type("thread")
+  await page.keyboard.press("Enter")
+  await page.waitForTimeout(1200)
+  const searched = await page.evaluate(() => {
+    let active = document.activeElement
+    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+    return { value: active?.value, field: active?.getRootNode()?.host?.localName }
+  })
+  check(
+    `${name}:  ⌘ K, words:  the site's search, the words typed in`,
+    searched.value === "thread" && searched.field === "ui-docs-search",
+    JSON.stringify(searched)
+  )
+  await page.screenshot({ path: join(out, `${name}-search.png`) })
+  await page.keyboard.press("Escape")
+  await page.keyboard.press("Escape")
+
+  // the router's swap:  the next page's own toolbar, no bullhorn (nothing waits there)
+  await page.evaluate(() => {
+    const link = document.createElement("a")
+    link.href = "epic-page.html"
+    document.querySelector("main .site-article").append(link)
+    link.click()
+  })
+  await page.waitForFunction(() => location.pathname.endsWith("/epic-page.html"), null, { timeout: 10_000 })
+  await page.waitForTimeout(2500)
+  const next = await page.evaluate(() => {
+    const article = document.querySelector("main .site-article")
+    const sections = [...article.querySelectorAll(":scope > ui-section[id]")].map((each) => each.id)
+    const items = [...document.querySelectorAll(".spell-toolbar > [data-rail]")].map((each) => each.dataset.rail)
+    const bullhorn = document.querySelector(".spell-toolbar > .spell-toolbar-waiting")
+    return {
+      same: items.join() === sections.join(),
+      items: items.length,
+      bands: document.querySelectorAll(".spell-toolbar").length,
+      bullhorn: !!bullhorn && !bullhorn.hidden
+    }
+  })
+  check(
+    `${name}:  the router's swap:  the next page's toolbar, no bullhorn`,
+    next.same && next.items > 0 && next.bands === 1 && !next.bullhorn,
+    JSON.stringify(next)
+  )
+  await page.screenshot({ path: join(out, `${name}-swapped.png`) })
 }
 
 /** Clear every comment on Epic UI page `name` through the route, as the trash does. */

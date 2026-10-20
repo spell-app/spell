@@ -24,6 +24,7 @@ import { ACTIONS_SLOT } from "./Fold.types"
  *   - its fold button (`fold.button()`)
  *   - the chevron (`Fold.chevron()`)
  *   - the collapse-all button of an open title (`Fold.collapseAllButton()`, folding all under it:  `foldAllUnder()`)
+ *   - the expand-all button of a fold's title and the page toolbar (`Fold.expandAllButton()`, `expandAllUnder()`)
  *   - the box of a title row's `actions` slot (`Fold.actions()`):  the page's own buttons there
  * - Those are methods, not tags of their own (P10):
  *   - the button is named by `aria-labelledby`, whose ids must be in the same shadow root as the card's heading:
@@ -56,6 +57,13 @@ export class Fold {
   readonly close = (): boolean => {
     if (!this.isOpen()) return false
     this.toggled = false
+    return true
+  }
+
+  /** Open it, if folded, as the reader would (expand-all, `expandAllUnder()`);  true when it was folded. */
+  readonly open = (): boolean => {
+    if (this.isOpen()) return false
+    this.toggled = true
     return true
   }
 
@@ -145,7 +153,11 @@ export class Fold {
     )
   }
 
-  /** Expand-all's button, the page toolbar's:  collapse-all's look, its double chevron pointing down. */
+  /**
+   * Expand-all's button, collapse-all's look, its double chevron pointing down:  the page toolbar's, and every fold
+   * title's (`EpicFold`), just before its collapse-all (Owen, 2026-10-20:  "This should have an 'Expand all' next to
+   * collapse all").
+   */
   static expandAllButton({ label, part, onCollapse: onExpand }: CollapseAllOptions): JSX.Element {
     return (
       <button type="button" class={COLLAPSE_ALL} part={part} aria-label={label} title={label} onClick={onExpand}>
@@ -211,27 +223,39 @@ export function foldAllUnder(root: Element): number {
 }
 
 /**
- * Open everything under `root`:  the page toolbar's expand-all (Owen, 2026-10-13:  "Add expand all button next to
- * collapse all").
- * - every section, phase and item inside it, through their own `expand()`:  the cancelable `ui-open`, as a click's
- * - NOT the cards and panels inside them (asides, code, replies ...):  those stay as the reader left them, so an
- *   opened page reads as a list of items, not every aside at once
+ * Open everything under `root`:  expand-all.
+ * - the page toolbar's (Owen, 2026-10-13:  "Add expand all button next to collapse all"):
+ *   - every section, phase and item inside it, through their own `expand()`:  the cancelable `ui-open`, as a click's,
+ *     so the page remembers each as a click's
+ *   - NOT the cards and panels inside them (asides, code, replies ...):  those stay as the reader left them, so an
+ *     opened page reads as a list of items, not every aside at once
+ * - a fold title's (`cards`, `EpicFold.expandAll()`;  Owen, 2026-10-20):  the cards and panels too, through their
+ *   `fold` (`Fold.open()`):  the reader's toggles, as if each were opened by hand;  collapse-all's mirror
  * - returns how many it opened
  */
-export function expandAllUnder(root: Element): number {
+export function expandAllUnder(root: Element, { cards = false }: { cards?: boolean } = {}): number {
   let opened = 0
   for (const element of root.querySelectorAll("*")) {
     if (!element.localName.startsWith(EPIC_PREFIX)) continue
-    const component = (element as Partial<E.DOMElement>).component as { expand?: () => boolean } | undefined
-    if (component?.expand?.()) opened++
+    const component = (element as Partial<E.DOMElement>).component as Collapsible | undefined
+    if (!component) continue
+    const open = component.expand
+      ? component.expand()
+      : cards && component.fold instanceof Fold && component.fold.open()
+    if (open) opened++
   }
   return opened
 }
 
-/** What `foldAllUnder()` folds:  a component that folds itself (`collapse()`), or one with a box that folds (`fold`). */
+/**
+ * What `foldAllUnder()` folds and `expandAllUnder()` opens:  a component that folds itself (`collapse()`,
+ * `expand()`), or one with a box that folds (`fold`).
+ */
 type Collapsible = {
   /** fold it as a click would;  true when it was open */
   collapse?: () => boolean
+  /** open it as a click would;  true when it was folded */
+  expand?: () => boolean
   /** its box's fold */
   fold?: unknown
 }

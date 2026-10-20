@@ -3,8 +3,8 @@
  * - A comment is Owen's, on one MAJOR BLOCK of a docs page or epic page (`BLOCK_KINDS`):
  *   - a docs page's:  a section, a table, an aside, a code block, a message, a set of cards or steps (the Epics
  *     page's `<epic-list>` too), a top-level list
- *   - an epic page's:  an item, a phase's field, an update (`<epic-update>`, even inside an item or a field), the
- *     summary, Overview prose, and its tables, asides and code
+ *   - an epic page's:  the Overview as a whole (epic `epic-engine` I55), an item, a phase's field, an update
+ *     (`<epic-update>`, even inside an item or a field), the summary, Overview prose, and its tables, asides and code
  *   - or the whole page (`PAGE_ANCHOR`)
  * - Its ANCHOR finds that block again, also after the page changed:
  *   - the block's own `id`, when it has one (every section and plan item has)
@@ -23,11 +23,13 @@
 /**
  * The major blocks of a page, by kind:  `[kind, selector]`, the first match naming an element's kind.
  * - only the OUTERMOST counts:  a table in an aside is the aside's, a list in a plan item the item's;
- *   docs sections nest, so every one counts;  so do updates (`NESTED_BLOCKS`)
+ *   docs sections nest, so every one counts;  so do updates (`NESTED_BLOCKS`);  the Overview holds blocks of its own
+ *   as a section does (its summary, prose, its sub-sections' items ...), each with its own bullhorn
  * - an update:  `<epic-update>` drawn as a block, with its date (`at`);  a bare UPDATE label isn't one
  */
 export const BLOCK_KINDS = [
   ["section", "ui-section"],
+  ["overview", "epic-overview"],
   ["item", "epic-item"],
   ["field", "epic-field"],
   ["update", "epic-update[at]"],
@@ -60,8 +62,11 @@ const ANY_BLOCK = BLOCK_KINDS.map(([, selector]) => selector).join(", ")
  */
 const NESTED_BLOCKS = "epic-update[at]"
 
-/** A block that holds its own blocks:  every kind but a docs section. */
-const OUTER_BLOCK = BLOCK_KINDS.filter(([kind]) => kind !== "section")
+/** The kinds that hold blocks that count by themselves:  a docs section, the Overview. */
+const HOLDERS = ["section", "overview"]
+
+/** A block that holds its own blocks:  every kind but `HOLDERS`. */
+const OUTER_BLOCK = BLOCK_KINDS.filter(([kind]) => !HOLDERS.includes(kind))
   .map(([, selector]) => selector)
   .join(", ")
 
@@ -129,9 +134,12 @@ export function anchorOf(block, main, blocks = blocksIn(main)) {
   return `${section?.id ?? PAGE_ANCHOR}#${kind}-${peers.indexOf(block) + 1}`
 }
 
-/** `block`'s excerpt:  a section's or item's title, else the first `EXCERPT_LENGTH` characters of its text. */
+/**
+ * `block`'s excerpt:  a section's or item's title (none for the Overview:  it has its id), else the first
+ * `EXCERPT_LENGTH` characters of its text.
+ */
 export function excerptOf(block) {
-  if (block.matches("ui-section, epic-item, epic-section, epic-phase")) return sectionTitle(block)
+  if (block.matches("ui-section, epic-overview, epic-item, epic-section, epic-phase")) return sectionTitle(block)
   // trimmed after the cut:  the server keeps it trimmed, and a space left at the end would never match again
   return textOf(block).slice(0, EXCERPT_LENGTH).trim()
 }

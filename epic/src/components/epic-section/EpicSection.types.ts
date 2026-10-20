@@ -59,6 +59,12 @@ export const FOLD_PARTS = [
   },
   { name: "body", description: "Around its children:  sets `--epic-stack` for them." },
   {
+    name: "expand-all",
+    description:
+      "Always, folded or open, the double chevron pointing down before collapse-all:  opens it and everything inside " +
+      "it (sections, phases, items, cards and panels), parts loading as they open."
+  },
+  {
     name: "collapse-all",
     description: "While open, the double chevron before the fold chevron:  folds everything inside it, not itself."
   },
@@ -80,6 +86,11 @@ export const FOLD_TEXTS = [
     description: "Its part can't load:  the page was opened from disk."
   },
   { key: "partError", text: "Couldn't load {source}.", description: "Its part couldn't be loaded." },
+  {
+    key: "expandAll",
+    text: "Open everything in {name}",
+    description: "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
+  },
   {
     key: "collapseAll",
     text: "Fold everything in {name}",

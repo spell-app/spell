@@ -212,22 +212,22 @@ describe("<epic-thread>", () => {
     expect([host.isFoldFocused, document.activeElement]).toEqual([true, host])
   })
 
-  test("accessible in both schemes (axe;  contrast aside, below)", async () => {
-    for (const scheme of ["light", "dark"]) {
-      const wrap = await ElementFixture.render(
-        `<div style="color-scheme: ${scheme}; background: ${scheme === "dark" ? "#1b1c1d" : "#fff"}"><epic-thread open></epic-thread></div>`
-      )
-      const host = wrap.querySelector<DOMThreadElement & { comment: unknown }>("epic-thread")!
-      host.comment = comment({
-        status: "answered",
-        turn: "owen",
-        replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>Answered.</p>" }]
-      })
-      await ElementFixture.settle(wrap)
-      // NOTE: its id chip (`M3`) is muted on purpose (Owen, 2026-10-10:  "small and muted"), 2.7:1, as it was before
-      // it was an element:  its contrast is an issue of epic `epic-engine`'s, not this test's
-      await expectAccessible(host, { rules: { "color-contrast": { enabled: false } } })
-    }
+  test("accessible in both schemes, on the ivory and on the orange of Owen's turn (axe, contrast included)", async () => {
+    for (const scheme of ["light", "dark"])
+      for (const unseen of ["", "unseen"]) {
+        const wrap = await ElementFixture.render(
+          `<div style="color-scheme: ${scheme}; background: ${scheme === "dark" ? "#1b1c1d" : "#fff"}"><epic-thread open ${unseen}></epic-thread></div>`
+        )
+        const host = wrap.querySelector<DOMThreadElement & { comment: unknown }>("epic-thread")!
+        host.comment = comment({
+          status: "answered",
+          turn: "owen",
+          replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>Answered.</p>" }]
+        })
+        await ElementFixture.settle(wrap)
+        // its id chip (`M3`, 10px) included:  epic `epic-engine` I41
+        await expectAccessible(host)
+      }
   })
 })
 

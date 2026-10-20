@@ -72,21 +72,32 @@
  * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-open` / `ui-close` mean the user).
  */
 
-import { commentsOnPage, firstWords, wireComments } from "./spell-doc-comments.js"
+import { wireComments } from "./spell-doc-comments.js"
 import {
+  FIELDS,
   addBlockAction,
   addHeadTool,
   alignBlockActions,
   dropBlockAction,
   el,
   growField,
+  nextFrames,
   noteToast,
   postJSON,
   readJSON,
   titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
-import { ThreadFacts } from "$/epics/comments"
+import {
+  fitTitles,
+  keepFitted,
+  removeToolbar,
+  shortLabel,
+  titledItems,
+  toolbarItem,
+  toolbarMenu,
+  wireJumpKey
+} from "./spell-doc-toolbar.js"
 import { EpicAddress, PageTargets } from "$/epics/links"
 import { ComponentPacks } from "@spell-app/ui/ui-components"
 
@@ -1916,9 +1927,6 @@ function itemsOf(list) {
 // ## Toolbar
 ////////////////
 
-/** Below this many px for each title, a page toolbar shows its buttons' icons only (`fitTitles()`). */
-const MIN_TITLE_PX = 50
-
 /**
  * The page's navigation:  an epic page's toolbar (`buildToolbar()`), else the page toolbar (`buildPageToolbar()`).
  * - both the SAME element, Spell UI's menu (`toolbarMenu()`):  a guide's and an epic page's band look and behave alike
@@ -1937,11 +1945,11 @@ function buildNavigation(main, outline, counts) {
  * header, in place of the floating rail.
  * - each:  the section's mark and its title, a link to it (`wireAnchors()` lands it);  scroll-follow marks the current
  *   one `selected`, by `data-rail`
- *   - the mark:  an item's number for an item (`Q3 · When?` shows 3, coloured by the section's `data-state`:  a
- *     details page's questions, `<epic-ask>`);  else its `<ui-icon>`;  else its number (`2.`);  else its first letter
+ *   - the mark:  an item's number, an icon, a number or a letter (`titledItems()`, `spell-doc-toolbar.js`, which Epic
+ *     UI's pages build theirs with too)
  *   - a red badge:  how many of its items need Owen (`counts`, `attention`);  none, none
- * - titles too long for the row end in `...`;  when each would get under `MIN_TITLE_PX`, they go, and the buttons
- *   show their marks only, the title as their tooltip (`fitTitles()`);  still too wide, the row scrolls sideways
+ * - titles too long for the row end in `...`;  when each would get under 50px, they go, and the buttons show their
+ *   marks only, the title as their tooltip (`fitTitles()`);  still too wide, the row scrolls sideways
  * - where:  the last row of the sticky page header (`ui-sticky.spell-h1 > header.spell-page-head`), so it sticks with
  *   it and the titles stick below it;  a page without one (the saga pages, a cheat sheet):  the last row of its
  *   filter bar (`.spell-filter`), else a sticky bar of its own before the first section (`.spell-toolbar-alone`,
@@ -1953,23 +1961,9 @@ function buildNavigation(main, outline, counts) {
  */
 function buildPageToolbar(main, outline, counts) {
   const groups = outline.sections ? outline.groups : outline.groups.filter((group) => headingSection(group.element))
-  const items = groups.map(({ element, id, label, glyph }) => {
-    // an item id first in the label (`Q3 · When?`) says more than any icon:  every question's would be the same
-    const itemNumber = label.match(/^[A-Z](\d+)\b/)?.[1]
+  const items = titledItems(groups, (element) => {
     const count = counts.get(element)
-    return toolbarItem({
-      id,
-      tip: label,
-      glyph: itemNumber ? undefined : glyph,
-      mark: itemNumber
-        ? el("b", { slot: "icon", class: "spell-toolbar-number" }, itemNumber)
-        : glyph
-          ? undefined
-          : el("b", { slot: "icon" }, (label.match(/^\d+/) ?? [label.charAt(0)])[0]),
-      title: itemNumber ? label : shortLabel(label),
-      state: element.dataset.state,
-      badges: count?.attention ? [["urgent", count.attention, needYou(count)]] : []
-    })
+    return count?.attention ? [["urgent", count.attention, needYou(count)]] : []
   })
   if (!items.length) {
     removeToolbar()
@@ -1985,40 +1979,8 @@ function buildPageToolbar(main, outline, counts) {
     ;(outline.sections ? first : (headingSection(first) ?? first)).before(toolbar)
   }
   // fitted again as the window changes width, as the items draw and the fonts load
-  new ResizeObserver(() => fitTitles(toolbar)).observe(toolbar)
-  void customElements.whenDefined("ui-item").then(() => nextFrames(2).then(() => fitTitles(toolbar)))
-  void document.fonts?.ready.then(() => fitTitles(toolbar))
+  keepFitted(toolbar)
   return toolbar
-}
-
-/**
- * The page toolbar's titles:  shown, shrinking with `...` (CSS), while each gets `MIN_TITLE_PX` or more of the row;
- * else gone (`spell-toolbar-icons`), the marks only (Owen, 2026-10-10:  "remove the titles entirely if they each only
- * get less than 50px").
- * - each title's share:  the row's room, less every button's mark, badge and padding, and what else the row holds (the
- *   bullhorn, the spell syntax guide's Expand all), split evenly
- * - measured on the items' drawn boxes:  a `<ui-item>` is `display: contents`, its box is in its shadow root
- */
-function fitTitles(toolbar) {
-  const row = toolbarRow(toolbar)
-  const items = [...toolbar.querySelectorAll(":scope > [data-rail]")]
-  toolbar.classList.remove("spell-toolbar-icons")
-  if (!row || !items.length) return
-  const style = getComputedStyle(row)
-  const others = [...toolbar.children]
-    .filter((child) => !child.hasAttribute("data-rail") && !child.hidden)
-    .reduce((sum, child) => sum + boxOf(child).width, 0)
-  const room =
-    row.clientWidth -
-    parseFloat(style.paddingLeft) -
-    parseFloat(style.paddingRight) -
-    (parseFloat(style.columnGap) || 0) * (toolbar.children.length - 1) -
-    others
-  const fixed = items.reduce(
-    (sum, item) => sum + boxOf(item).width - (item.querySelector(".spell-toolbar-label")?.offsetWidth ?? 0),
-    0
-  )
-  if ((room - fixed) / items.length < MIN_TITLE_PX) toolbar.classList.add("spell-toolbar-icons")
 }
 
 /**
@@ -2037,7 +1999,7 @@ function fitTitles(toolbar) {
  * - in the header's `toolbar` slot (`<epic-page>`'s):  it sticks with the header, and the header's measured height,
  *   where every title below sticks (`--epic-stack`), takes it in;  `<epic-page>` draws the rest of that row at its
  *   right (the page's state filter, collapse-all, the new item button)
- * - a window too narrow for every button:  the row scrolls sideways (`spell-doc.css`, "Toolbar"), the current button
+ * - a window too narrow for every button:  the row scrolls sideways (`spell-toolbar.css`), the current button
  *   scrolled into view
  * - callable again (a page updated in place):  replaces the toolbar built before
  * - SIDE EFFECT:  appends the menu to `page`, marked `data-spell-added` so the live patch steps around it
@@ -2071,102 +2033,8 @@ function buildToolbar(page, outline, counts) {
   return toolbar
 }
 
-/**
- * THE TOOLBAR, every page's (epic `epic-engine` P3:  Owen, 2026-10-19, "Why are we not using <ui-xxxx> or <epic-xxx>
- * components for these pages?"):  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`, a `<nav>` landmark of
- * `<ui-item>` links (`toolbarItem()`), its look `spell-doc.css`'s ("Toolbar"), through the menu's tokens.
- * - the current item `selected` (scroll-follow), which the menu draws, and says (`aria-current`)
- * - `titled`:  a guide's, each item its mark and its title (`spell-toolbar-titled`);  else an epic page's, marks only,
- *   every item the same width
- * - after the items, what a page or the comments add to the row:  the toolbar's bullhorn (`PageComments`), the spell
- *   syntax guide's Expand all and Collapse all;  the items scroll sideways under them (`spell-doc.css`)
- * - the current item scrolled into view, on a row scrolled sideways (`scrollIntoRow()`)
- * - SIDE EFFECT:  removes the toolbar built before (`removeToolbar()`), keeping what was added to its row
- */
-function toolbarMenu(items, { titled }) {
-  const kept = removeToolbar()
-  const toolbar = el("ui-menu", {
-    class: titled ? "spell-toolbar spell-toolbar-titled" : "spell-toolbar",
-    secondary: true,
-    "aria-label": "Sections",
-    "data-spell-added": true
-  })
-  toolbar.append(...items, ...kept)
-  new MutationObserver((changes) => {
-    for (const { target } of changes) if (target.hasAttribute("selected")) scrollIntoRow(target)
-  }).observe(toolbar, { attributeFilter: ["selected"], subtree: true })
-  return toolbar
-}
-
-/**
- * One toolbar item:  a `<ui-item>` link to section `id` (`data-rail`), its mark (`glyph`, the menu's icon box;  else
- * `mark`, a `slot="icon"` element), its `title` when the toolbar is titled, its `badges` (`[kind, number, words]`:
- * `<ui-label>`s over the mark's top right), `state` (`data-state`, a details page's question's colour).
- * - its tooltip `tip` on the link inside, where the pointer lands (`titleInside()`):  its mark, title and badges let
- *   the pointer through (`spell-doc.css`), so it shows in VS Code too;  the badges say theirs in it, and to a screen
- *   reader
- */
-function toolbarItem({ id, tip, glyph, mark, title, state, badges }) {
-  const said = [tip, ...badges.map(([, , words]) => words)].join(" · ")
-  const item = el(
-    "ui-item",
-    {
-      class: "spell-toolbar-item",
-      href: `#${id}`,
-      "data-rail": id,
-      icon: glyph,
-      title: said,
-      "aria-label": said,
-      "data-state": state
-    },
-    mark,
-    title && el("span", { class: "spell-toolbar-label" }, title),
-    ...badges.map(([kind, number]) =>
-      el("ui-label", { class: `spell-toolbar-count ${kind}`, circular: true, size: "mini" }, String(number))
-    )
-  )
-  titleInside(item, "item")
-  return item
-}
-
-/**
- * Take the page's toolbar away (and a hand-written `.spell-toc-open`:  pages before 2026-10-01 had a "Contents"
- * button);  returns what pages and the comments had added to its row, for the toolbar built next.
- */
-function removeToolbar() {
-  const kept = []
-  for (const old of document.querySelectorAll(".spell-toc-open, .spell-toolbar")) {
-    kept.push(...[...old.children].filter((child) => !child.hasAttribute("data-rail")))
-    old.remove()
-  }
-  return kept
-}
-
-/** A block's label without its number:  `3. Questions` is `Questions`. */
-function shortLabel(label) {
-  return label.replace(/^\d+(?:\.\d+)*\.?\s+/, "")
-}
-
-/** The toolbar's row:  the menu's `<nav>`, in its shadow root;  `undefined` before it has drawn. */
-function toolbarRow(toolbar) {
-  return toolbar.shadowRoot?.querySelector('[part~="menu"]') ?? undefined
-}
-
-/** The box `element` draws:  a `<ui-item>`'s item, in its shadow root (the host is `display: contents`). */
-function boxOf(element) {
-  const box = element.shadowRoot?.querySelector('[part~="item"]') ?? element
-  return box.getBoundingClientRect()
-}
-
-/** Scroll `item`'s row sideways (never the page) until it shows whole, centred if it has to move. */
-function scrollIntoRow(item) {
-  const row = toolbarRow(item.parentElement)
-  if (!row || row.scrollWidth <= row.clientWidth) return
-  const box = boxOf(item)
-  const start = box.left - row.getBoundingClientRect().left + row.scrollLeft
-  if (start >= row.scrollLeft && start + box.width <= row.scrollLeft + row.clientWidth) return
-  row.scrollTo({ left: start - (row.clientWidth - box.width) / 2, behavior: "smooth" })
-}
+// the menu itself, its items, fitting their titles and the jump key:  `spell-doc-toolbar.js`, which Epic UI's pages
+// load too (epic `epic-engine` T11)
 
 ////////////////
 // ## Folding
@@ -2793,149 +2661,7 @@ function wireAddresses() {
   }
 }
 
-////////////////
-// ## Jump to an item (Cmd / Ctrl + K)
-////////////////
-
-/**
- * Cmd-K (Ctrl-K) on an epic page asks which item to jump to (Owen, 2026-10-10:  "add command-k which brings up
- * ui-prompt asking what number I want to jump to (e.g. J7)"), and lands there exactly as a link to `#j7` does
- * (`go()`:  what hides it unfolds, an item opens, it lands below the stuck titles).
- * - any id on the page, case and a `#` aside:  `J7`, `q3`, `P2`, `o1`, `#decisions`
- * - a COMMENT's (epic `epic-workflow` P23;  Owen, 2026-10-10:  "⌘K taking comment ids"):  `M3` (`m3`, the old `cm3`)
- *   lands on its thread, opened, below the stuck titles (`PageComments.landOn()`);  under the box, the threads
- *   waiting on Owen (Claude spoke last), each a line "M3 · his first words" that lands there
- * - an epic page, and every page that takes comments (a guide:  comment ids, and any other id on it)
- * - an id that isn't there:  the dialog says so and stays open, the text selected for typing over
- * - never while typing in a field (a note box, the new item form), nor with a dialog already open
- * - the dialog is a `<ui-modal>` built as `UI.modals.prompt()` builds its own (`ModalDialogs`):
- *   no `<ui-prompt>` element exists, and `prompt()` closes on any answer, so it couldn't stay open on a miss;
- *   here its cancelable `ui-approve` is cancelled instead
- * - K is free:  the live client takes only Cmd / Ctrl + A C X V Z in VS Code's view (`liveClient.ts` `editKey()`)
- */
-function wireJumpKey(go, canGo) {
-  const epicPage = document.body.classList.contains("plan-doc")
-  document.addEventListener("keydown", (event) => {
-    if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey || event.defaultPrevented) return
-    if (event.key.toLowerCase() !== "k" || event.isComposing || !(epicPage || commentsOnPage())) return
-    if (document.querySelector("dialog[open], ui-modal:not([hidden])") || typingIn(event)) return
-    event.preventDefault()
-    openJumpPrompt(go, canGo)
-  })
-}
-
-/**
- * The jump dialog:  an id typed, Go lands there;  Cancel or Escape just closes it.
- * - a comment's id (`M3`) lands on its thread, opened;  the threads waiting on Owen are listed under the box
- *   (`jumpWaitingList()`)
- */
-function openJumpPrompt(go, canGo) {
-  const epicPage = document.body.classList.contains("plan-doc")
-  const header = epicPage ? "Jump to which item?" : "Jump to which comment?"
-  const input = el("input", { type: "text", autofocus: true, autocomplete: "off", spellcheck: "false" })
-  const miss = el("p", { class: "spell-jump-miss", role: "alert", hidden: true })
-  const approve = el("ui-button", { class: "approve", primary: true }, "Go")
-  const waiting = jumpWaitingList((id) => {
-    input.value = id
-    approve.click()
-  })
-  const modal = el(
-    "ui-modal",
-    { size: "tiny", closedby: "closerequest", header, "data-spell-added": true },
-    el(
-      "ui-content",
-      {},
-      el(
-        "label",
-        { class: "ui-native spell-jump" },
-        epicPage ? "Its id:  J7, q3, P2, M3 ..." : "Its id:  M3, or any id on the page",
-        input
-      ),
-      miss,
-      waiting
-    ),
-    el("ui-actions", {}, el("ui-button", { class: "cancel" }, "Cancel"), approve)
-  )
-  let target = ""
-  let thread = ""
-  input.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter") return
-    // its default would press what has the focus by then:  a comment's thread takes it to its fold, which folds it
-    event.preventDefault()
-    approve.click()
-  })
-  input.addEventListener("input", () => (miss.hidden = true))
-  modal.addEventListener("ui-approve", (event) => {
-    const id = input.value.trim().replace(/^#/, "").toLowerCase()
-    const comment = commentsOnPage()?.find(id)
-    if (comment) {
-      thread = comment.id
-      return
-    }
-    if (id && canGo(id)) {
-      target = id
-      return
-    }
-    // stays open:  says what it couldn't find
-    event.preventDefault()
-    miss.textContent = id ? `No ${input.value.trim()} on this page.` : "Type an id first."
-    miss.hidden = false
-    input.select()
-  })
-  modal.addEventListener(
-    "ui-hide",
-    () => {
-      modal.remove()
-      if (thread) void commentsOnPage()?.landOn(thread)
-      else if (target) go(target)
-    },
-    { once: true }
-  )
-  document.body.append(modal)
-  modal.visible = true
-  // the input once the dialog has drawn:  `autofocus` alone loses to the dialog's own focus on some opens
-  void nextFrames(2).then(() => input.focus())
-}
-
-/**
- * The jump dialog's list of the threads waiting on Owen (Claude spoke last;  `PageComments.waitingOnOwen`), in page
- * order:  a line each, "M3 · his first words", that `pick(label)` takes;  `undefined` when none wait, or the page takes
- * no comments.
- * - Spell UI's menu (epic `epic-engine` P3):  a `<ui-menu vertical secondary link>`, its title a header item, each line
- *   a `<ui-item>` button, so it takes the focus, and Enter
- */
-function jumpWaitingList(pick) {
-  const waiting = commentsOnPage()?.waitingInPageOrder() ?? []
-  if (!waiting.length) return undefined
-  const title = waiting.length === 1 ? "Waiting on you:" : `${waiting.length} waiting on you:`
-  const lines = waiting.map((comment) => {
-    const label = ThreadFacts.label(comment.id)
-    const tip = `${ThreadFacts.aboutTip({ id: comment.id, place: comment })}\n(Jump there)`
-    const line = el(
-      "ui-item",
-      { class: "spell-jump-thread", title: tip },
-      el("b", {}, label),
-      " · ",
-      el("span", {}, firstWords(comment.text))
-    )
-    line.addEventListener("click", () => pick(label))
-    titleInside(line, "item")
-    return line
-  })
-  return el(
-    "ui-menu",
-    { class: "spell-jump-waiting", vertical: true, secondary: true, fluid: true, link: true, "aria-label": title },
-    el("ui-item", { class: "spell-jump-waiting-title", type: "header" }, title),
-    ...lines
-  )
-}
-
-/** Is `event`'s key typed into a field (an input, a textarea, a select, editable text)? */
-function typingIn(event) {
-  return event
-    .composedPath()
-    .some((node) => node instanceof Element && (node.isContentEditable || node.matches(`${FIELDS}, textarea, input`)))
-}
+// ## Jump to an item (Cmd / Ctrl + K):  `wireJumpKey()`, in `spell-doc-toolbar.js`
 
 ////////////////
 // ## Paging
@@ -3009,9 +2735,6 @@ function pageOwnsKey(event, space) {
   }
   return true
 }
-
-/** What types or picks with a paging key. */
-const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
 
 /** What Space presses. */
 const CONTROLS = "a[href], button, summary, [tabindex], ui-button, ui-checkbox, ui-title, ui-item"
@@ -3478,13 +3201,4 @@ function noteText(note) {
     const inner = Array.from(node.childNodes, inlineText).join("")
     return node.localName === "code" ? `\`${inner}\`` : inner
   }
-}
-
-////////////////
-// ## Helpers
-////////////////
-
-/** Resolves after `count` animation frames:  long enough for UI's first render after its definitions. */
-async function nextFrames(count) {
-  for (let left = count; left > 0; left--) await new Promise((resolve) => requestAnimationFrame(resolve))
 }

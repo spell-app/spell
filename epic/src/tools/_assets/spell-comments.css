@@ -85,8 +85,9 @@
  * ## Guide comments (epic `airplane`, P11):  Owen's comments on a page's blocks, from the inbox file
  * (`GuideInbox`, `src/tool/`), drawn by the runtime's "Comments" (`PageComments`).
  * - the BULLHORN (`.spell-comment-mark`):  in a section's title (`.at-section`, its `actions` slot), in an epic page
- *   block's title row (`.at-title`:  an item's, update's, aside's or code block's `actions` slot, before its own
- *   buttons;  epic `epic-workflow` P25), in the page header (`.at-page`), else (`.at-block`:  a block with no title
+ *   block's title row (`.at-title`:  the Overview's, an item's, update's, aside's or code block's `actions` slot,
+ *   before its own buttons;  epic `epic-workflow` P25;  the Overview's shown while it's hovered outside its
+ *   sub-sections, epic `epic-engine` I55), in the page header (`.at-page`), else (`.at-block`:  a block with no title
  *   row) first in the block's ACTIONS ROW (below);  shown only while the block is hovered (a section:  its innermost
  *   hovered one) or focused.
  *   It starts a new comment;  no count:  the block's threads are right there (Owen, 2026-10-10:  "Bullhorn to the
@@ -147,6 +148,7 @@
   :is(
     ui-section:hover:not(:has(ui-section:hover)) > .spell-comment-mark,
     :is(epic-item, epic-update, epic-aside, epic-code):hover > .spell-comment-mark,
+    epic-overview:hover:not(:has(epic-section:hover)) > .spell-comment-mark,
     :is(.spell-page-head, .site-masthead):hover > .spell-comment-mark,
     .spell-block-actions:is(:hover, :has(+ :hover)) .spell-comment-mark,
     .spell-comment-mark:focus-within

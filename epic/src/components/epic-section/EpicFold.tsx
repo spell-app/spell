@@ -8,7 +8,7 @@ import { PhaseIds } from "$/epics/phases"
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
 import { EpicPage } from "$/epics/components/epic-page/EpicPage"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel
-import { Fold, foldAllUnder } from "$/epics/components/epic-item/Fold"
+import { Fold, expandAllUnder, foldAllUnder } from "$/epics/components/epic-item/Fold"
 
 import {
   BODY,
@@ -57,6 +57,10 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   - while open, a double chevron beside the fold chevron folds everything inside it, not itself
  *     (`collapseAll()`;  each subclass adopts `CollapseAll.css`)
  *   - `<epic-page>`'s toolbar folds the whole page, every block through its `collapse()`
+ * - Expand-all (Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"):
+ *   - always, folded or open, a double chevron pointing down just before collapse-all:  opens it and everything inside
+ *     it, parts loading as they open (`expandAll()`);  on a folded block, all of it in one click
+ *   - each open is the reader's, as a click's:  the page remembers the blocks' and items' folds
  * - Sticky line:  a top-level fold sticks below the page header (`EpicPage.signalsOf(page).top`);
  *   a nested one below its parent's title (the inner sections stack themselves).
  *   Its children get `--epic-stack`, the bottom of the stuck titles above them (px from the viewport top),
@@ -151,6 +155,32 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   collapseAll(): number {
     this.keepTitlePut()
     return foldAllUnder(this.domElement) + this.foldOwnBoxes()
+  }
+
+  /**
+   * Expand-all, the double chevron pointing down on its title:  open it and everything inside it.
+   * - itself first, as a click would (`expand()`), its part loaded
+   * - then, round by round:  every section, phase and item inside, through its `expand()`, and every card and panel
+   *   (`expandAllUnder()`, `cards`);  each part loaded before the next round, which opens what it brought
+   *   (`EXPAND_ROUNDS` at most:  Overview > sub-section > item > aside is four)
+   * - Resolves with how many it opened;  NEVER rejects:  a part that can't load shows its note.
+   */
+  @E.untracked
+  async expandAll(): Promise<number> {
+    let opened = this.expand() ? 1 : 0
+    if (!this.isOpen) return 0
+    if (this.foldAttrs.source) await this.body.load().catch(() => undefined)
+    for (let round = 0; round < EXPAND_ROUNDS; round++) {
+      const now = expandAllUnder(this.domElement, { cards: true })
+      const parts = Array.from(this.domElement.querySelectorAll(`[${SOURCE}]`), (element) => {
+        const component = (element as Partial<E.DOMElement>).component as { loadBody?: () => Promise<void> } | undefined
+        return component?.loadBody ? component.loadBody().catch(() => undefined) : Promise.resolve()
+      })
+      await Promise.all(parts)
+      opened += now
+      if (!now) break
+    }
+    return opened
   }
 
   /** Fold the boxes it draws itself (in its shadow root), for `collapseAll()`;  how many it folded.  None by default. */
@@ -329,21 +359,25 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
             <span class="words">{pieces.title()}</span>
             {pieces.mark?.()}
           </span>
-          <Show when={pieces.tools || this.isOpen || this.hasActions}>
-            <span slot="actions" class="tools" part={this.partForName("tools" as never)}>
-              {/* the page's own buttons first, then its tools */}
-              <slot name={this.slotForName("actions" as never)} />
-              {pieces.tools?.()}
-              {/* last, so it sits beside the fold chevron */}
-              <Show when={this.isOpen}>
-                {Fold.collapseAllButton({
-                  label: this.translationForKey("collapseAll" as never, { name: this.contentsEntry().label }),
-                  part: this.partForName("collapse-all" as never),
-                  onCollapse: () => this.collapseAll()
-                })}
-              </Show>
-            </span>
-          </Show>
+          {/* always:  expand-all shows folded or open */}
+          <span slot="actions" class="tools" part={this.partForName("tools" as never)}>
+            {/* the page's own buttons first, then its tools */}
+            <slot name={this.slotForName("actions" as never)} />
+            {pieces.tools?.()}
+            {/* last, so they sit beside the fold chevron:  expand-all, then collapse-all (only while open) */}
+            {Fold.expandAllButton({
+              label: this.translationForKey("expandAll" as never, { name: this.contentsEntry().label }),
+              part: this.partForName("expand-all" as never),
+              onCollapse: () => void this.expandAll()
+            })}
+            <Show when={this.isOpen}>
+              {Fold.collapseAllButton({
+                label: this.translationForKey("collapseAll" as never, { name: this.contentsEntry().label }),
+                part: this.partForName("collapse-all" as never),
+                onCollapse: () => this.collapseAll()
+              })}
+            </Show>
+          </span>
           <div class={BODY} part={this.partForName("body" as never)} style={{ [STACK_PROPERTY]: `${this.stack}px` }}>
             <Show when={this.failureText}>
               <p class={NOTE} part={this.partForName("note" as never)}>
@@ -473,6 +507,12 @@ export type FoldPieces = {
   /** Content below the children. */
   after?: () => JSX.Element
 }
+
+/** The rounds of `expandAll()` at most:  each opens one level deeper, once the level above has loaded its parts. */
+const EXPAND_ROUNDS = 6
+
+/** The attribute naming a fold's or an item's part file. */
+const SOURCE = "source"
 
 /** Space between the stuck titles and an element a link lands on, px. */
 const LAND_GAP = 8

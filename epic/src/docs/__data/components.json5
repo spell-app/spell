@@ -2815,7 +2815,7 @@
         "introduction",
         "kickoff"
       ],
-      "description": "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then the substance in numbered sub-sections.",
+      "description": "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then the substance in numbered sub-sections.  While the page is reviewed, it takes review notes on its title row (Revisit, Make Todo, Do Now), keyed `summary` in the review inbox.",
       "noun": "overview",
       "attributes": [
         {
@@ -2895,6 +2895,10 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
+          "name": "expand-all",
+          "description": "Always, folded or open, the double chevron pointing down before collapse-all:  opens it and everything inside it (sections, phases, items, cards and panels), parts loading as they open."
+        },
+        {
           "name": "collapse-all",
           "description": "While open, the double chevron before the fold chevron:  folds everything inside it, not itself."
         },
@@ -2909,6 +2913,18 @@
         {
           "name": "estimate",
           "description": "The estimate line."
+        },
+        {
+          "name": "review-buttons",
+          "description": "The review buttons (P9, an `<epic-review>`):  the note bubble, a pick's letter, Approve / Revisit / Make Todo, then Do Now (the wand);  a todo's:  the plane (next phase), Revisit, the x (drop).  Only while the page is reviewed (served by the page server, its inbox answering)."
+        },
+        {
+          "name": "note-box",
+          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+        },
+        {
+          "name": "said",
+          "description": "A note marked and closed (an `<epic-review>`):  `You · revisit soon · sent 10:42`, the note, Edit."
         }
       ],
       "states": [
@@ -2942,6 +2958,11 @@
           "description": "Its part couldn't be loaded."
         },
         {
+          "key": "expandAll",
+          "text": "Open everything in {name}",
+          "description": "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
+        },
+        {
           "key": "collapseAll",
           "text": "Fold everything in {name}",
           "description": "The collapse-all button's name and tooltip;  `name` its title (`3. Questions`)."
@@ -2960,6 +2981,11 @@
           "key": "estimate",
           "text": "Estimate:",
           "description": "Before the estimate."
+        },
+        {
+          "key": "reviewLabel",
+          "text": "the Overview",
+          "description": "Its name in the review controls' words (`Review the Overview`, `the Overview:  your note`);  keyed `summary` in the review inbox."
         }
       ]
     },
@@ -3691,6 +3717,10 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
+          "name": "expand-all",
+          "description": "Always, folded or open, the double chevron pointing down before collapse-all:  opens it and everything inside it (sections, phases, items, cards and panels), parts loading as they open."
+        },
+        {
           "name": "collapse-all",
           "description": "While open, the double chevron before the fold chevron:  folds everything inside it, not itself."
         },
@@ -3747,6 +3777,11 @@
           "key": "partError",
           "text": "Couldn't load {source}.",
           "description": "Its part couldn't be loaded."
+        },
+        {
+          "key": "expandAll",
+          "text": "Open everything in {name}",
+          "description": "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
         },
         {
           "key": "collapseAll",
@@ -4106,6 +4141,10 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
+          "name": "expand-all",
+          "description": "Always, folded or open, the double chevron pointing down before collapse-all:  opens it and everything inside it (sections, phases, items, cards and panels), parts loading as they open."
+        },
+        {
           "name": "collapse-all",
           "description": "While open, the double chevron before the fold chevron:  folds everything inside it, not itself."
         },
@@ -4186,6 +4225,11 @@
           "key": "partError",
           "text": "Couldn't load {source}.",
           "description": "Its part couldn't be loaded."
+        },
+        {
+          "key": "expandAll",
+          "text": "Open everything in {name}",
+          "description": "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
         },
         {
           "key": "collapseAll",
@@ -4729,7 +4773,7 @@
         "abstract",
         "tl;dr"
       ],
-      "description": "The Overview's summary, two sentences, drawn as a lede at the top of `1. Overview`.  The text stays the page's own children.  While the page is reviewed, it takes review notes as an Overview sub-section does (Revisit, Make Todo, Do Now), keyed `summary` in the review inbox:  it has no id of its own.",
+      "description": "The Overview's summary, two sentences, drawn as a lede at the top of `1. Overview`.  The text stays the page's own children.  Reviewed as the Overview:  `<epic-overview>` draws the review controls on its title row, keyed `summary` in the review inbox.",
       "noun": "summary",
       "attributes": [],
       "slots": [
@@ -4751,32 +4795,10 @@
         {
           "name": "base",
           "description": "The lede."
-        },
-        {
-          "name": "review",
-          "description": "Under the lede:  the review buttons, a marked note, the note box."
-        },
-        {
-          "name": "review-buttons",
-          "description": "The review buttons (P9, an `<epic-review>`):  the note bubble, a pick's letter, Approve / Revisit / Make Todo, then Do Now (the wand);  a todo's:  the plane (next phase), Revisit, the x (drop).  Only while the page is reviewed (served by the page server, its inbox answering)."
-        },
-        {
-          "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
-        },
-        {
-          "name": "said",
-          "description": "A note marked and closed (an `<epic-review>`):  `You · revisit soon · sent 10:42`, the note, Edit."
         }
       ],
       "states": [],
-      "texts": [
-        {
-          "key": "summaryLabel",
-          "text": "the summary",
-          "description": "Its name in the review controls' words (`Review the summary`, `the summary:  your note`)."
-        }
-      ]
+      "texts": []
     },
     {
       "tag": "epic-test-run",

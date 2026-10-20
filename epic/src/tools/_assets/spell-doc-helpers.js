@@ -1,9 +1,18 @@
 /*
- * Small helpers the docs pages' scripts share:  the page runtime (`spell-doc-runtime.js`) and the comments
- * (`spell-doc-comments.js`), which Epic UI's pages load by themselves too (`spell-comments.js`).
+ * Small helpers the docs pages' scripts share:  the page runtime (`spell-doc-runtime.js`), the comments
+ * (`spell-doc-comments.js`) and the toolbar (`spell-doc-toolbar.js`), which Epic UI's pages load by themselves too
+ * (`spell-comments.js`).
  * - Plain DOM, no Spell UI imports:  the comments' own script runs beside the page's Spell UI, never with a second one
  *   (a toast goes through the page's `window.SpellUI`)
  */
+
+/** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
+export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
+
+/** Resolves after `count` animation frames:  long enough for UI's first render after its definitions. */
+export async function nextFrames(count) {
+  for (let left = count; left > 0; left--) await new Promise((resolve) => requestAnimationFrame(resolve))
+}
 
 /** The object saved as JSON under `key`, or `{}` (nothing saved, bad JSON, or storage that throws). */
 export function readJSON(key) {

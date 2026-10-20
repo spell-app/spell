@@ -1,0 +1,337 @@
+/*
+ * THE TOOLBAR's look, every page's navigation, and the jump dialog (Cmd / Ctrl + K):  the code is
+ * `spell-doc-toolbar.js`.  Its own sheet since epic `epic-engine` T11, so two kinds of page load it:
+ * - the docs pages (guides, epic pages ...):  through `spell-doc.css`, its `@import` at the top;  `spell-doc.css` keeps
+ *   where a docs page PUTS it ("Toolbar" there:  the page header's last row, a band edge to edge)
+ * - Epic UI's pages (`/components/epics/`), which load Spell UI's site and not `spell-doc.css`:  linked by
+ *   `spell-comments.js` as it runs;  where they put it:  "On Epic UI's pages", last
+ * - the tokens it reads that only `spell-doc.css` defines carry their values for the site's pages there too
+ */
+
+/*
+ * The navigation's colours:  the brand's IVORY (Polished Ivory, the warm accent:  UI's `--ui-brown-background` /
+ * `--ui-brown-text`, a warm surface in dark mode);  the current section a deeper ivory, hover a step between (Owen,
+ * 2026-10-04).  `rail` in their names:  the floating right-edge rail they were made for (gone, epic `airplane` P8);
+ * `<epic-page>` reads them too (`--epic-toolbar-*`)
+ */
+:root {
+  --spell-rail-bg: var(--ui-brown-background, light-dark(#f7efe2, #2c2152));
+  --spell-rail-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+  --spell-rail-hover: color-mix(in srgb, var(--spell-rail-ink) 9%, var(--spell-rail-bg));
+  --spell-rail-selected: color-mix(in srgb, var(--spell-rail-ink) 18%, var(--spell-rail-bg));
+  --spell-rail-rule: color-mix(in srgb, var(--spell-rail-ink) 22%, transparent);
+  /*
+   * the page's head above the toolbar:  a lighter ivory;  the toolbar's edges:  a darker one, drawn as shadows
+   * (Owen, 2026-10-13:  "lighter beige", "Rule above/below should be darker beige -- use a shadow for it");
+   * `<epic-page>` reads them too (`--epic-head-fill`, `--epic-toolbar-edge`)
+   */
+  --spell-head-fill: color-mix(in oklab, var(--spell-rail-bg) 45%, var(--spell-bg));
+  --spell-rail-edge: color-mix(in oklab, var(--spell-rail-ink) 22%, var(--spell-rail-bg));
+  /* the ivory over the opaque surface, in case a theme's is see-through:  text scrolls under the stuck bar */
+  --spell-rail-fill: linear-gradient(var(--spell-rail-bg), var(--spell-rail-bg)) var(--ui-surface, Canvas);
+}
+
+/*
+ * THE TOOLBAR, every page's navigation:  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`, one
+ * `<ui-item>` link per top-level section (`toolbarMenu()`, `spell-doc-toolbar.js`;  epic `airplane` P8, a menu since epic
+ * `epic-engine` P3).  Its look through the menu's tokens, the boxes it draws through `::part()`:
+ * - a box of its own (the menu's host is `display: contents`):  measured, slotted and banded as one
+ * - the items:  pills of the band's ink, the current one a deeper ivory (`selected`, scroll-follow), hover a step
+ *   between;  each icon centred by the menu (its icon box has no margin here)
+ * - a row too narrow for them all scrolls sideways (never the page);  what the page adds after them (the bullhorn, the
+ *   spell syntax guide's Expand all) stays at its right
+ * - badges (`<ui-label class="spell-toolbar-count">`):  how many items wait on Owen, red urgent, orange Claude's reply
+ *   waiting on his pick;  none, no badge
+ * - EPIC PAGES (no `spell-toolbar-titled`):  slotted into the last row of `<epic-page>`'s sticky header (its `toolbar`
+ *   slot), so it sticks with it, and the titles below stick under it;  the row's band, its rule and its tools at the
+ *   right are `<epic-page>`'s (`EpicPage.css`, "The toolbar")
+ *   - one round button per top-level block, its icon and badges, NO label (Owen, 2026-10-10:  "lose the titles"):
+ *     the name is its tooltip
+ *   - every button the same width, badge or not (Owen, 2026-10-10:  "Make epic page icons consistent, with badge or
+ *     no"):  the badges hang over the icon's top right, a third of a badge on the icon ("Make badge 1/3 way overlap
+ *     the icon"), in the row's top padding
+ * - the pointer lands on the item's link, which carries its tooltip (`titleInside()`):  everything inside it lets the
+ *   pointer through ("TOOLTIPS that show")
+ */
+ui-menu.spell-toolbar {
+  --ui-menu-secondary-inline-margin: 0;
+  --ui-menu-secondary-item-margin: 0;
+  --ui-menu-secondary-item-padding: 0 7px;
+  --ui-menu-secondary-item-radius: 999px;
+  --ui-menu-secondary-item-color: var(--spell-rail-ink);
+  --ui-menu-secondary-hover-background: var(--spell-rail-hover);
+  --ui-menu-secondary-active-background: var(--spell-rail-selected);
+  --ui-menu-secondary-active-color: var(--spell-rail-ink);
+  --ui-menu-hover-color: var(--spell-rail-ink);
+  --ui-menu-active-weight: 500;
+  --ui-menu-item-weight: 500;
+  --ui-menu-icon-margin: 0;
+  --ui-menu-icon-opacity: 1;
+  --ui-menu-icon-size: 14px;
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+ui-menu.spell-toolbar::part(menu) {
+  display: flex;
+  gap: 1px;
+  min-height: 0;
+  margin: 0;
+  /* a button's icon lines up with the header's inset */
+  padding: 4px 4px 4px calc(var(--epic-inset, 16px) - 7px);
+  overflow: auto hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  font: 500 13px/1 var(--spell-sans);
+}
+.spell-toolbar > ui-item::part(item) {
+  flex: none;
+  justify-content: center;
+  gap: 3px;
+  box-sizing: border-box;
+  height: 30px;
+  min-width: 30px;
+  font: inherit;
+  white-space: nowrap;
+}
+.spell-toolbar > ui-item:focus-visible::part(item),
+.spell-toolbar > ui-item::part(item):focus-visible {
+  outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent));
+  outline-offset: -2px;
+}
+.spell-toolbar > ui-item[hidden] {
+  display: none;
+}
+.spell-toolbar > ui-item::part(icon),
+.spell-toolbar > ui-item > * {
+  pointer-events: none;
+}
+/* the mark keeps its size however tight the row:  only a title shrinks */
+.spell-toolbar > ui-item::part(icon) {
+  flex: none;
+}
+.spell-toolbar-count::part(label) {
+  box-sizing: border-box;
+  min-width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 999px;
+  font: 700 11px/18px var(--spell-sans);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.spell-toolbar-count + .spell-toolbar-count::part(label) {
+  margin-inline-start: -3px;
+}
+.spell-toolbar-count.urgent::part(label) {
+  background: var(--spell-state-attention);
+  color: var(--spell-state-attention-on);
+}
+.spell-toolbar-count.replied::part(label) {
+  background: var(--spell-state-replied);
+  color: var(--spell-state-replied-on);
+}
+/* an epic page's buttons:  one round size, apart enough for a badge hanging off the one before */
+ui-menu.spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
+  gap: 6px;
+}
+.spell-toolbar:not(.spell-toolbar-titled) > ui-item::part(item) {
+  width: 30px;
+  padding: 0;
+}
+/*
+ * their badges:  over the icon's top right, a third of a badge's width and height on the icon (the icon centred in
+ * the 30px button, 14px high and about as wide)
+ */
+.spell-toolbar:not(.spell-toolbar-titled) > ui-item > .spell-toolbar-count::part(label),
+.spell-toolbar > ui-item.spell-toolbar-waiting > .spell-toolbar-count::part(label) {
+  --_badge: 16px;
+  position: absolute;
+  top: calc(8px + var(--_badge) / 3 - var(--_badge));
+  left: calc(50% + 7px - var(--_badge) / 3);
+  min-width: var(--_badge);
+  height: var(--_badge);
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: var(--_badge);
+}
+/* both kinds:  the orange one after the red, overlapping it a little */
+.spell-toolbar:not(.spell-toolbar-titled) > ui-item > .spell-toolbar-count + .spell-toolbar-count::part(label) {
+  margin: 0;
+  left: calc(50% + 7px - var(--_badge) / 3 + var(--_badge) - 3px);
+}
+
+/*
+ * The BULLHORN at the toolbar's right (the comments' runtime adds it:  `PageComments.drawWaiting()`;  epic
+ * `epic-workflow` P23):  an item of the menu like the section buttons, the threads waiting on Owen, their count an
+ * orange badge as an epic page's "replied" one;  each click lands on the next.  Hidden while none waits.  Last in the
+ * row, held at its right while the section buttons scroll under it:  an epic page's, just left of `<epic-page>`'s own
+ * tools;  a guide's, at the band's right
+ */
+.spell-toolbar > [data-rail] + ui-item.spell-toolbar-waiting::part(item) {
+  margin-inline-start: auto;
+}
+.spell-toolbar > ui-item.spell-toolbar-waiting::part(item) {
+  position: sticky;
+  right: 0;
+  width: 30px;
+  padding: 0;
+  background: var(--spell-rail-fill);
+  box-shadow: -6px 0 6px -2px var(--spell-rail-bg);
+}
+.spell-toolbar > ui-item.spell-toolbar-waiting:hover::part(item) {
+  background: linear-gradient(var(--spell-rail-hover), var(--spell-rail-hover)), var(--spell-rail-fill);
+}
+/* at least room for its badge, two digits hanging off its icon's right:  at phone width the gutter alone left the page
+   2px of sideways scroll (epic `epic-engine` I25) */
+.spell-toolbar-titled > ui-item.spell-toolbar-waiting::part(item) {
+  margin-inline-end: 3px;
+}
+
+/* ## A titled toolbar's buttons (a guide's, Epic UI's):  each its mark and its title */
+/* the first button's mark lines up with the column's text (a button's own padding:  7px) */
+ui-menu.spell-toolbar-titled::part(menu) {
+  padding: 3px calc(var(--_out, 16px) - 7px);
+}
+.spell-toolbar-titled > ui-item::part(item) {
+  flex: 0 1 auto;
+  min-width: 0;
+  gap: 10px;
+}
+/* the marks only:  every button the same width, as an epic page's (and as wide as they were before the menu) */
+.spell-toolbar-icons > ui-item::part(item) {
+  flex: none;
+  width: 34px;
+  padding: 0;
+}
+.spell-toolbar-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spell-toolbar-icons .spell-toolbar-label {
+  display: none;
+}
+.spell-toolbar > ui-item > b[slot="icon"] {
+  font: 700 12px var(--spell-sans);
+}
+
+/*
+ * an item's number (`Q3` shows 3):  a round badge, its colour the item's state (`data-state` on the button, from its
+ * section;  a details page's questions, `<epic-ask>`'s `markState()`):  red nothing picked yet, green picked, blue
+ * Claude has more to do (more details asked for, or only Other written);  no state:  plain
+ */
+.spell-toolbar > ui-item > b.spell-toolbar-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  padding: 0 4px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  background: var(--spell-rail-hover);
+}
+.spell-toolbar-item[data-state="attention"] > .spell-toolbar-number {
+  background: var(--spell-state-attention);
+  color: var(--spell-state-attention-on);
+}
+.spell-toolbar-item[data-state="done"] > .spell-toolbar-number {
+  background: var(--spell-state-recent);
+  color: var(--spell-state-recent-on);
+}
+.spell-toolbar-item[data-state="working"] > .spell-toolbar-number {
+  background: var(--spell-state-progress);
+  color: var(--spell-state-progress-on);
+}
+
+/*
+ * ## The jump dialog (Cmd / Ctrl + K, `openJumpPrompt()`):  a miss says so in red;  the threads waiting on
+ * Owen listed under the box, a line each, "M3 · his first words" (epic `epic-workflow` P23)
+ */
+.spell-jump {
+  display: grid;
+  gap: 0.5em;
+}
+.spell-jump-miss {
+  margin: 0.5em 0 0;
+  color: var(--ui-red-text, var(--spell-state-attention));
+  font-size: 0.9em;
+}
+/* the waiting threads:  Spell UI's vertical menu, a line a thread, its title a header item */
+ui-menu.spell-jump-waiting {
+  --ui-menu-secondary-vertical-item-margin: 0;
+  --ui-menu-secondary-item-padding: 4px 8px;
+  --ui-menu-secondary-item-radius: 6px;
+  --ui-menu-secondary-item-color: inherit;
+  --ui-menu-secondary-hover-background: var(--spell-rail-hover, rgb(0 0 0 / 6%));
+  --ui-menu-header-padding: 0 0 0.25em;
+  --ui-menu-header-weight: 400;
+  --ui-menu-header-size: 0.85em;
+  --ui-menu-header-color: color-mix(in srgb, currentColor 65%, transparent);
+  --ui-menu-header-transform: none;
+  display: block;
+  margin-top: 0.9em;
+}
+ui-menu.spell-jump-waiting::part(menu) {
+  display: grid;
+  gap: 1px;
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+ui-item.spell-jump-thread::part(item) {
+  display: block;
+  overflow: hidden;
+  font-size: 0.9em;
+  line-height: 1.4;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* the pointer lands on the titled line, so its tooltip shows ("TOOLTIPS that show") */
+.spell-jump-thread > * {
+  pointer-events: none;
+}
+.spell-jump-thread > b {
+  color: var(--ui-orange-text, var(--spell-state-replied));
+  font: 600 0.9em var(--spell-mono);
+}
+
+/*
+ * ## On EPIC UI'S PAGES (`spell-comments.js`'s `wireToolbar()`;  epic `epic-engine` T11, Owen 2026-10-20:  "Epic UI
+ * pages should have a toolbar"):  the site's page bar (`<ui-sticky class="site-sticky-bar">`), first in the page's
+ * article, under the masthead;  it sticks at the site's top (the narrow screens' top bar), and the site sticks the
+ * section titles below it (`SiteSections`)
+ * - the docs pages' ivory band, out to the page column's edges as the masthead's (the column's gutter:  3em, 1em
+ *   below 992px, as `site.css`), a darker edge above and below;  the first button's mark in line with the text
+ * - above the stuck section titles (`--ui-z-sticky`)
+ * - the state colours `spell-doc.css` defines, for its badges:  the same values
+ */
+.site-main {
+  --spell-state-attention: light-dark(var(--ui-red, #db2828), var(--ui-red-on-light, #db2828));
+  --spell-state-attention-on: light-dark(var(--ui-red-on, #fff), var(--ui-ink-on-dark, #fff));
+  --spell-state-replied: var(--ui-orange, #f2711c);
+  --spell-state-replied-on: var(--ui-orange-on, #1b1c1d);
+}
+ui-sticky.spell-site-toolbar::part(sticky) {
+  z-index: calc(var(--ui-z-sticky, 10) + 1);
+  margin-block: 0 1.5em;
+}
+.spell-site-toolbar > ui-menu.spell-toolbar {
+  --_out: var(--site-gutter, 3em);
+  margin-inline: calc(-1 * var(--_out));
+  background: var(--spell-rail-fill);
+  box-shadow:
+    0 -1px 0 var(--spell-rail-edge),
+    0 1px 0 var(--spell-rail-edge);
+}
+@media (max-width: 991.98px) {
+  .spell-site-toolbar > ui-menu.spell-toolbar {
+    --_out: 1em;
+  }
+}

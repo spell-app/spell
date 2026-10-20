@@ -99,11 +99,17 @@ const SEND_POLL_MS = 30_000
  * slot, after the title and before their own buttons (review pills, the date, the fold), never over them.
  * - an epic page's item, update (drawn as a block, with its date), aside and code block:
  *   `Fold.types.ts`, in the epics pack
+ * - the Overview (`<epic-overview>`, a comment on all of it):  first in its title row, before its review buttons,
+ *   expand-all, collapse-all and the fold (epic `epic-engine` I55;  Owen, 2026-10-20:  "The buttons on the left should
+ *   move into the 1. Overview header, as well as a bullhorn");  its summary and prose keep their own, on their corners
  * - a docs section has its own (`ui-section`'s `actions` slot, `.at-section`);  every other block (a paragraph, a
  *   table, a list, a message, cards, a phase's field, the summary) has no title row:  its bullhorn sits over its
  *   corner, first in its actions row (`.at-block`, in `.spell-block-actions`:  `addBlockAction()`)
  */
-const TITLE_ROW_BLOCKS = "epic-item, epic-update[at], epic-aside, epic-code"
+const TITLE_ROW_BLOCKS = "epic-overview, epic-item, epic-update[at], epic-aside, epic-code"
+
+/** The blocks whose box of threads goes FIRST in them, under their title:  a docs section, the Overview. */
+const THREADS_FIRST = /^(ui-section|epic-overview)$/
 
 /**
  * COMMENTS (epic `airplane`, P11):  Owen's comments for Claude, on a page's blocks or on text he selected, kept by
@@ -765,12 +771,12 @@ class PageComments {
 
   /**
    * The box of threads under `under` (a block, or the paragraph holding a quote:  `holderOf()`), an `<epic-threads>`
-   * made on first use:  a docs section's first in its body (under its title);  a list item's or cell's last inside
-   * it;  the page's right under the page header;  anything else's right after it.
+   * made on first use:  a docs section's and the Overview's first in its body (under its title);  a list item's or
+   * cell's last inside it;  the page's right under the page header;  anything else's right after it.
    * - only one this code made (`data-spell-added`):  never one a page writes as an example (Epic UI's)
    */
   boxFor(under) {
-    const where = under.localName === "ui-section" ? "first" : HOLDS_INSIDE.test(under.localName) ? "last" : "after"
+    const where = THREADS_FIRST.test(under.localName) ? "first" : HOLDS_INSIDE.test(under.localName) ? "last" : "after"
     const next =
       where === "first"
         ? firstContentChild(under)

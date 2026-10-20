@@ -1,14 +1,10 @@
 /**
  * Every name `<epic-summary>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
- * - Pure data:  `import type`, plus data from `epic-review`'s types file.
- *   - the review controls' parts (`REVIEW_PARTS`):  the summary takes review notes (epic `airplane` P2)
+ * - Pure data:  `import type` only.
  * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"
-
-// the review controls the summary draws, as `<epic-item>` does
-import { REVIEW_PARTS } from "$/epics/components/epic-review/EpicReview.types"
 
 /****************
  * ### `<epic-summary>`
@@ -22,8 +18,8 @@ export const epicSummaryVocabulary = {
   ui: false,
   description:
     "The Overview's summary, two sentences, drawn as a lede at the top of `1. Overview`.  The text stays the page's " +
-    "own children.  While the page is reviewed, it takes review notes as an Overview sub-section does (Revisit, Make " +
-    "Todo, Do Now), keyed `summary` in the review inbox:  it has no id of its own.",
+    "own children.  Reviewed as the Overview:  `<epic-overview>` draws the review controls on its title row, keyed " +
+    "`summary` in the review inbox.",
   attributes: [],
   events: [],
   slots: [
@@ -39,19 +35,9 @@ export const epicSummaryVocabulary = {
         "under the lede."
     }
   ],
-  parts: [
-    { name: "base", description: "The lede." },
-    { name: "review", description: "Under the lede:  the review buttons, a marked note, the note box." },
-    ...REVIEW_PARTS
-  ],
+  parts: [{ name: "base", description: "The lede." }],
   states: [],
-  texts: [
-    {
-      key: "summaryLabel",
-      text: "the summary",
-      description: "Its name in the review controls' words (`Review the summary`, `the summary:  your note`)."
-    }
-  ],
+  texts: [],
   children: [
     { tag: "flow", description: "The summary." },
     {

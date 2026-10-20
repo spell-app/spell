@@ -78,6 +78,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - everything in the row sits on the title's FIRST line, so nothing moves as it folds
         (`--_epic-fold-line` in `EpicFold.css`;  the item's line is one-line cells)
       - collapse-all still shows only while open, before the chevron, as it did:  it moves the buttons before it
+      - expand-all (a fold's:  the Overview, a section, a phase;  Owen, 2026-10-20) shows folded or open, just before
+        collapse-all:  it opens the block and everything in it, cards too, parts loading as they open (`expandAll()`)
       - CSS and the elements' own drawing only:  the page's markup is unchanged, so no migration step
       - NOT `<ui-section>` on guides:  at phone width a title there still runs on under its buttons,
         fading out (`spell-doc.css`;  Owen, 2026-10-10:  "stay in place and overlap")
@@ -113,8 +115,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Also token refresh, polling, and note-draft backups (the old page runtime's localStorage keys).
     - It touches no browser global until `forPage()` / `watch()`.
     - Used by:
-      - `<epic-review>`:  the review controls drawn by items, sections (Overview parts), phases and the summary
-        - `<epic-item>`, `<epic-section>`, `<epic-phase>`, `<epic-summary>`
+      - `<epic-review>`:  the review controls drawn by items, sections (Overview parts), phases and the Overview
+        - `<epic-item>`, `<epic-section>`, `<epic-phase>`, `<epic-overview>` (keyed `summary`, on its title row:  epic
+          `epic-engine` I55;  `<epic-summary>` drew them under its lede before)
       - `<epic-new-item>`:  the page's toolbar button, and the Todos and Questions sections' New todo / question
       - `<epic-option>`'s Choose pill
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
@@ -445,15 +448,27 @@ Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`)
   - The bullhorns, the pane, the threads and Send, all of "Comments" below.
   - Each page loads the comments by themselves, after the site's bundle, in its `<head>`:
     `<script defer src="/_epic/assets/spell-comments.js">` (the template has it too).
-    - It's the docs runtime's comments ([spell-doc-comments.js](tools/_assets/spell-doc-comments.js)) and nothing
-      else of it:  these pages load Spell UI's site, not the docs bundle.
+    - It's the docs runtime's comments ([spell-doc-comments.js](tools/_assets/spell-doc-comments.js)) and its
+      toolbar ([spell-doc-toolbar.js](tools/_assets/spell-doc-toolbar.js), epic `epic-engine` T11), and nothing else
+      of it:  these pages load Spell UI's site, not the docs bundle.
     - It holds NO Spell UI:  the page's own draws its `<ui-*>` markup, so there's one Spell UI on the page
       (epic `epic-engine` I18:  two handle every event twice).  The build checks it.
-    - Its look:  `spell-comments.css`, which it links.
-    - The site's router swaps `main` for the next page:  the comments are taken down and wired again for it.
+    - Its look:  `spell-comments.css` and `spell-toolbar.css`, which it links.
+    - The site's router swaps `main` for the next page:  the toolbar and the comments are taken down and wired again
+      for it.
   - The masthead is the page header:  the page's bullhorn over its corner, Send under the title.
-  - No toolbar bullhorn and no Cmd / Ctrl + K for a comment's id:  these pages have no toolbar, and the site's
-    Cmd / Ctrl + K is its search.
+  - A TOOLBAR (epic `epic-engine` T11;  Owen, 2026-10-20:  "Epic UI pages should have a toolbar"):  a guide's, built
+    by the same code (`titledItems()`, `toolbarMenu()`), first in the page's article, under the masthead
+    - a button per top-level section (its icon and title, `1. Example` shows `Example`), the section being read
+      marked;  the comments' bullhorn at its right, its orange count, each click the next thread waiting on Owen
+    - in the site's page bar, `<ui-sticky class="site-sticky-bar">` (`SiteSections`' `PAGE_BAR`):  it sticks at the
+      site's top (under the narrow screens' top bar), the section titles stick below it, links land below both
+    - the docs pages' ivory band, out to the page column's edges;  marks only when the titles don't fit (390px)
+    - the site's "On this page" column stays (1200px and wider):  it lists the nested sections too, and holds the
+      site's header and look controls (J:  keep both)
+  - Cmd / Ctrl + K, on a page that takes comments:  the docs pages' jump dialog, taking a comment's id (`M3`) or any
+    id on the page;  anything else typed goes to the site's SEARCH, words and all (J:  one key for both;  `/` still
+    opens the search straight away).  Elsewhere the key stays the search's.
   - Kept in `<page>.inbox.json5` beside a page, git-ignored.
   - No epic owns these pages, so their comments go to the standing epic `feedback` (epic `epic-engine` T9):
     Send says "feedback is listening", or "nobody is listening:  Send wakes feedback".
@@ -651,7 +666,8 @@ In `tools/`:
     - the toolbar, sticky headers, scroll-follow, code colors
     - generic:  an epic page's `<epic-*>` elements do their own (see "Epic pages")
     - the comments are their own module, `spell-doc-comments.js`, which it imports (epic `epic-engine` P2, T3);
-      `spell-doc-helpers.js`, what both share
+      so is the toolbar, `spell-doc-toolbar.js` (its menu, items, fitting their titles, the jump key:  T11);
+      `spell-doc-helpers.js`, what they share
     - EVERY control it or the comments draw is a Spell UI component, never a raw `<button>` (epic `epic-engine`
       I26;  Owen, 2026-10-19:  "Why are we not using <ui-xxxx> or <epic-xxx> components for these pages?"):
       - an icon button:  `<ui-button circular basic size="mini" icon="..." title aria-label>` (the comments'
@@ -680,7 +696,9 @@ In `tools/`:
       first, then a table's expand button:  never a row or corner of their own (see "Comments", WHERE it sits)
   - `spell-comments.css`:  the comments' look on the page, `@import`ed first by `spell-doc.css`:  the bullhorns,
     Send, Owen's field, where a box of threads sits;  the threads and the pane draw themselves (their own sheets).
-  - `spell-comments.entry.js` -> `spell-comments.js`:  the comments ALONE, for Epic UI's pages
+  - `spell-toolbar.css`:  the toolbar's look and the jump dialog's, `@import`ed by `spell-doc.css` (which keeps where
+    a docs page puts the toolbar), linked by `spell-comments.js` (epic `epic-engine` T11)
+  - `spell-comments.entry.js` -> `spell-comments.js`:  the toolbar and the comments ALONE, for Epic UI's pages
     (see "Epic UI, the docs set").
     - no Spell UI or Solid in it:  it draws with the page's
     - GENERATED by [bundle-spell-ui.js](tools/bundle-spell-ui.js), with `spell-ui.js`.  NEVER edit `spell-comments.js`.
@@ -863,7 +881,8 @@ In `tools/`:
       - A rule under it, and none above (Owen, 2026-10-10).
       - The same band as an epic page's.
     - Spell UI's menu (epic `epic-engine` P3):  `<ui-menu class="spell-toolbar" secondary>`, a `<ui-item>` link per
-      section, its look through the menu's tokens (`spell-doc.css`, "Toolbar");  an epic page's is the same element.
+      section, its look through the menu's tokens (`spell-toolbar.css`);  an epic page's is the same element, and
+      Epic UI's pages' (`spell-doc-toolbar.js`, epic `epic-engine` T11).
     - Each button:  the section's icon and its title.
       - the current one a deeper ivory (scroll-follow:  the item's `selected`)
       - a red badge counting what needs Owen (a `<ui-label>`)
@@ -1012,6 +1031,9 @@ In `tools/`:
       - too wide for its column, it scrolls sideways in its own box, never the page
       - `spell-doc.css` holds every `<ui-table>` unstacked whatever its markup ("NO table ever STACKS");  a table
         that asks to stack (`stackable`, `stack-by`) still does:  a demo of stacking
+        - by Spell UI's public token, `--ui-table-stack-by: none` (epic `epic-engine` I40);  the private
+          `--_table-stack` rule beside it is a fallback until spell-app's `main` has `none` (its branch
+          `epic-engine-stack`), then goes
       - the migrations add the word to a page's tables (`components-not-markup`, the epic page's
         `unstackable-tables`), and the epic tool's way in to what it's handed (`IncomingHtml`)
     - never a bare `<table>`:  the migration step `components-not-markup` wraps one (see "Scripts")
@@ -1437,7 +1459,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   (epic `airplane`, P11).
   - The BULLHORN beside each major block:
     - a section (in its title), table, aside, code block, message, cards, steps, top-level list
-    - an epic page's items, phase fields, summary and Overview prose
+    - an epic page's Overview as a whole (epic `epic-engine` I55), items, phase fields, summary and Overview prose
     - an epic page's updates (`<epic-update>` blocks), even inside an item or a field:  each has its own bullhorn
       (Owen, 2026-10-11:  "Those items are bullhorn-able")
     - the page header:  the whole page
@@ -1451,7 +1473,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       in the right spot, to the left of the 'default' buttons like collapse"):
       - a block with a TITLE ROW:  in that row, its `actions` slot, never over a button
         - a docs section:  `<ui-section>`'s own slot (`.at-section`)
-        - an epic page's item, update (with a date), aside and code block (`.at-title`, `TITLE_ROW_BLOCKS`):
+        - an epic page's Overview, item, update (with a date), aside and code block (`.at-title`, `TITLE_ROW_BLOCKS`):
           after the title, before the block's own buttons (review pills, Do Now, the date, the fold)
         - every epic element with a title row has the slot:  [Fold.types.ts](components/epic-item/Fold.types.ts)
       - a block with NO title row (a paragraph, a table, a list, a message, cards, a phase's field, the summary):
@@ -2003,6 +2025,8 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     [outDir]`, from the root:
     - comments on Epic UI's pages (epic `epic-engine` P2):  the bullhorns, a page comment and a text one, their
       threads, Send, the router's swap and back, at 1200 and 390px;  and a guide's still drawn by the docs bundle
+    - their toolbar (epic `epic-engine` T11):  a button per section landing it under the band, the bullhorn's count
+      and its jumps, Cmd / Ctrl + K on a comment's id and on words (the site's search), the router's swap
     - on a scratch copy of `src/docs/` unless `--docs`;  nobody woken
     - Run it after touching the comments' code or look, or Epic UI's layout.
   - `node src/demo/check-test-run.mjs [--doc <name>] [outDir]`, from the root (epic `epic-engine` P4):

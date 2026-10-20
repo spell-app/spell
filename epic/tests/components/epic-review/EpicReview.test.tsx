@@ -14,6 +14,7 @@ import "$/epics/components/epic-choices"
 import "$/epics/components/epic-section"
 import "$/epics/components/epic-phase"
 import "$/epics/components/epic-summary"
+import "$/epics/components/epic-overview"
 
 ////////////////
 // ## Fakes
@@ -723,7 +724,7 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
 })
 
 // epic `airplane` P2:  notes on the phases and the summary
-describe("<epic-phase> and <epic-summary> review controls", () => {
+describe("<epic-phase> and <epic-overview> review controls", () => {
   test("a phase:  Revisit, Make Todo, Do Now in its title;  a note box at its body's end;  Make Todo marks it", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Plan-Doc Notes" status="todo" open></epic-phase>`)
@@ -736,22 +737,53 @@ describe("<epic-phase> and <epic-summary> review controls", () => {
     expect(button(host, "todo").dataset.fill).toBe("dashed")
   })
 
-  test("the summary:  keyed `summary`;  its buttons and note box under the lede;  nothing unless reviewed", async () => {
+  // epic `epic-engine` I55 (Owen, 2026-10-20:  "The buttons on the left should move into the 1. Overview header")
+  test("the Overview:  keyed `summary`;  its buttons in its title row, the note box under it once Revisit opens it", async () => {
     await adoptClient({ served: false })
-    const quiet = await render(`<epic-summary>Two sentences.</epic-summary>`)
+    const quiet = await render(
+      `<epic-overview id="overview"><epic-summary>Two sentences.</epic-summary></epic-overview>`
+    )
     expect(actions(quiet)).toEqual([])
     ReviewClient.adopt(undefined)
     await adoptClient()
-    const host = await render(`<epic-summary>Two sentences.</epic-summary>`)
+    const host = await render(
+      `<epic-overview id="overview"><epic-summary>Two sentences.</epic-summary>` +
+        `<epic-section id="o1" kind="overview-part" title="Structure"><p>Hello</p></epic-section></epic-overview>`
+    )
+    // in the title row (`tools`), before expand-all and the fold;  folded or open
     expect(actions(host)).toEqual(["revisit", "todo", "details"])
-    expect(deep(host).querySelector("[part~='note-box'] >>> textarea")!.getAttribute("aria-label")).toBe(
-      "the summary:  your note"
+    const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
+    const [review, expand] = ['[part~="review-buttons"]', '[part~="expand-all"]'].map((selector) =>
+      tools.querySelector(selector)!
+    )
+    expect(review.compareDocumentPosition(expand) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // no note box until Revisit;  the summary draws none of its own any more
+    expect(deep(host).querySelector("[part~='note-box']")).toBeNull()
+    expect(host.querySelector("epic-summary")!.shadowRoot!.querySelector("epic-review")).toBeNull()
+    button(host, "revisit").click()
+    await settle()
+    await vi.waitFor(() => expect(deep(host).querySelector("[part~='note-box'] >>> textarea")).not.toBeNull())
+    expect(host.matches(":state(open)")).toBe(true)
+    const textarea = deep(host).querySelector("[part~='note-box'] >>> textarea")!
+    expect(textarea.getAttribute("aria-label")).toBe("the Overview:  your note")
+    // under the title row, above the summary
+    const box = host.shadowRoot!.querySelector("[part~='note-box']")!
+    expect(box.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      host.querySelector("epic-summary")!.getBoundingClientRect().top + 0.5
     )
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "details").click()
     await settle()
     expect(routes.posts.at(-1)).toEqual(["now", { page: PAGE, id: "summary", action: "details" }])
     await expectAccessible(host)
+  })
+
+  test("an Overview with no `<epic-summary>` (an older doc's), or a summary alone:  no review controls", async () => {
+    await adoptClient()
+    const older = await render(`<epic-overview id="overview" open><p slot="summary">Two sentences.</p></epic-overview>`)
+    expect(actions(older)).toEqual([])
+    const alone = await render(`<epic-summary>Two sentences.</epic-summary>`)
+    expect(actions(alone)).toEqual([])
   })
 })
 

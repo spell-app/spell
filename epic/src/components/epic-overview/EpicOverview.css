@@ -27,6 +27,21 @@
   ::slotted(:not([slot], epic-summary, epic-prompt)) {
     order: 2;
   }
+  /* the box of comments on the whole Overview (the docs runtime puts it first):  under the title row, as its note box */
+  ::slotted(epic-threads:first-child) {
+    order: 0;
+  }
+
+  /*
+   * ## Its review controls, while reviewed (keyed `summary`):  the buttons on the title row, `tools`;  a marked note and
+   * the note box first in the body, under the title row, in the page's size
+   */
+  [part~="said"],
+  [part~="note-box"] {
+    display: block;
+    margin: 0 0 14px;
+    font-size: 15px;
+  }
 
   /* an older doc's summary (`<epic-summary>` draws its own):  a lede, a paragraph in the body face */
   ::slotted([slot="summary"]) {

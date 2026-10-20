@@ -68,6 +68,12 @@ describe("ThreadFacts", () => {
       "Comment M3, on a table in “2. Context”:  “Kind”"
     )
     expect(ThreadFacts.aboutTip({ place: comment({ kind: "section" }) })).toBe("On “2. Context”")
+    // the whole Overview (epic `epic-engine` I55):  "the", as the page
+    const overview = comment({ kind: "overview", excerpt: "", label: "" })
+    expect([ThreadFacts.headline(overview), ThreadFacts.aboutTip({ place: overview })]).toEqual([
+      "This Overview",
+      "On the Overview"
+    ])
   })
 
   test("times:  local, then no year", () => {

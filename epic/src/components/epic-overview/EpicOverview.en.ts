@@ -1,11 +1,14 @@
 /**
  * Every name `<epic-overview>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
- * - Pure data:  `import type`, plus the fold pieces (`FOLD_*`) from `epic-section`'s types file, and the `actions`
- *   slot (`ACTIONS_*`) from the folds', data too.
+ * - Pure data:  `import type`, plus the fold pieces (`FOLD_*`) from `epic-section`'s types file, the `actions`
+ *   slot (`ACTIONS_*`) from the folds', and the review controls' parts (`REVIEW_PARTS`), data too.
  * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"
+
+// the review controls it draws, keyed `summary` (epic `epic-engine` I55)
+import { REVIEW_PARTS } from "$/epics/components/epic-review/EpicReview.types"
 
 import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "$/epics/components/epic-item/Fold.types"
 // the fold pieces every folding block shares
@@ -29,7 +32,8 @@ export const epicOverviewVocabulary = {
   ui: false,
   description:
     "An epic page's Overview:  the two-sentence summary, the prompt that started the plan, the total estimate, then " +
-    "the substance in numbered sub-sections.",
+    "the substance in numbered sub-sections.  While the page is reviewed, it takes review notes on its title row " +
+    "(Revisit, Make Todo, Do Now), keyed `summary` in the review inbox.",
   attributes: [
     {
       name: "id",
@@ -75,7 +79,8 @@ export const epicOverviewVocabulary = {
       description:
         "An older doc's folded Kickoff prompt:  a `<details>` around the `prompt` slot (`<epic-prompt>` draws its own)."
     },
-    { name: "estimate", description: "The estimate line." }
+    { name: "estimate", description: "The estimate line." },
+    ...REVIEW_PARTS
   ],
   states: [...FOLD_STATES],
   texts: [
@@ -84,7 +89,14 @@ export const epicOverviewVocabulary = {
     ...FOLD_TEXTS,
     { key: "title", text: "Overview", description: "Its title, after its number." },
     { key: "prompt", text: "Kickoff prompt", description: "The folded prompt's title." },
-    { key: "estimate", text: "Estimate:", description: "Before the estimate." }
+    { key: "estimate", text: "Estimate:", description: "Before the estimate." },
+    {
+      key: "reviewLabel",
+      text: "the Overview",
+      description:
+        "Its name in the review controls' words (`Review the Overview`, `the Overview:  your note`);  keyed `summary` " +
+        "in the review inbox."
+    }
   ],
   children: [
     ACTIONS_CHILD,

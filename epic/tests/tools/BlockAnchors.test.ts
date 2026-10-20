@@ -88,7 +88,7 @@ describe("findBlock()", () => {
 })
 
 describe("blocksIn() on an epic page", () => {
-  test("items, a phase's fields, the summary, Overview prose;  never the log or a status card", () => {
+  test("the Overview, items, a phase's fields, the summary, Overview prose;  never the log or a status card", () => {
     const main = mainOf(`<main><epic-page>
       <epic-overview id="overview"><epic-summary>Lets Owen work.</epic-summary>
         <epic-section id="o1" title="What works"><p>One.</p><p>Two.</p></epic-section></epic-overview>
@@ -98,7 +98,9 @@ describe("blocksIn() on an epic page", () => {
         <epic-field name="goal"><ul><li>a</li></ul></epic-field></epic-phase></epic-section>
       <epic-section id="log"><epic-event>P3 done</epic-event></epic-section>
     </epic-page></main>`)
+    // the Overview as a whole (epic `epic-engine` I55), and the blocks inside it, each its own
     expect(blocksIn(main).map((block: Element) => `${kindOf(block)} ${anchorOf(block, main)}`)).toEqual([
+      "overview overview",
       "summary overview#summary-1",
       "prose o1#prose-1",
       "prose o1#prose-2",
@@ -107,6 +109,8 @@ describe("blocksIn() on an epic page", () => {
       "field p3#field-2"
     ])
     expect(excerptOf(main.querySelector("#q3"))).toBe("Which file?")
+    // the Overview's:  none, it has its id
+    expect(excerptOf(main.querySelector("#overview"))).toBe("")
   })
 
   test("updates (`<epic-update at>`):  their own blocks, in a phase, an item or an Overview part;  never a bare label", () => {
@@ -121,6 +125,7 @@ describe("blocksIn() on an epic page", () => {
         <epic-update at="2026-10-11 10:00" summary="Split"><p>Split it.</p></epic-update></epic-phase></epic-section>
     </epic-page></main>`)
     expect(blocksIn(main).map((block: Element) => `${kindOf(block)} ${anchorOf(block, main)}`)).toEqual([
+      "overview overview",
       "prose o1#prose-1",
       "update o1#update-1",
       "item q3",

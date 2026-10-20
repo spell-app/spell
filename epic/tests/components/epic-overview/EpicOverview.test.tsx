@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vite-plus/test"
+import { describe, expect, test, vi } from "vite-plus/test"
 
 import type { E } from "$/ui/core"
 import { ElementFixture } from "$/ui/test/ElementFixture"
@@ -9,6 +9,7 @@ import "$/epics/components/epic-overview"
 import "$/epics/components/epic-section"
 import "$/epics/components/epic-summary"
 import "$/epics/components/epic-prompt"
+import "$/epics/components/epic-item"
 
 /** `host`'s inner `<ui-section>`. */
 function inner(host: Element): E.DOMElement {
@@ -122,5 +123,35 @@ describe("<epic-overview> actions slot", () => {
     button.click()
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(false)
+  })
+})
+
+// Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
+describe("<epic-overview> expand-all", () => {
+  test("folded:  expand-all after the page's own buttons, before the chevron;  a click opens it, its parts and items", async () => {
+    const host = await ElementFixture.render<E.DOMElement>(
+      `<epic-overview id="overview"><button slot="actions" aria-label="Copy">C</button>` +
+        `<epic-summary>Summary</epic-summary>` +
+        `<epic-section id="o1" kind="overview-part" title="Structure"><p>Hello</p>` +
+        `<epic-item id="q1" title="Which?" status="open"><p>Which?</p></epic-item></epic-section></epic-overview>`
+    )
+    await inner(host).ready
+    await ElementFixture.settle(host)
+    const expand = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="tools"] [part~="expand-all"]')!
+    expect(expand.title).toBe("Open everything in 1. Overview")
+    const button = host.querySelector<HTMLElement>("button[slot=actions]")!
+    const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
+    const [b, e, c] = [button, expand, chevron].map((each) => each.getBoundingClientRect())
+    expect([b.right <= e.left + 0.5, e.right <= c.left + 0.5]).toEqual([true, true])
+    expand.click()
+    const part = host.querySelector("epic-section")!
+    const item = host.querySelector("epic-item")!
+    await vi.waitFor(() => expect(item.matches(":state(open)")).toBe(true))
+    expect([host.matches(":state(open)"), part.matches(":state(open)")]).toEqual([true, true])
+    // open:  collapse-all after it, then the chevron
+    await ElementFixture.tick()
+    const all = host.shadowRoot!.querySelector('[part~="collapse-all"]')!
+    expect(all.previousElementSibling).toBe(expand)
+    await expectAccessible(host)
   })
 })

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "vite-plus/test"
+import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { E, UI } from "$/ui/core"
 import { ElementFixture } from "$/ui/test/ElementFixture"
@@ -7,6 +7,8 @@ import { expectAccessible } from "$/ui/test/A11y"
 import "$/ui/components/ui-section"
 import "$/epics/components/epic-section"
 import "$/epics/components/epic-phase"
+import "$/epics/components/epic-item"
+import "$/epics/components/epic-aside"
 
 /** Fixture parts the test server serves:  `fixtures/` beside this file, by its URL path. */
 const FIXTURES = new URL("fixtures", import.meta.url).pathname
@@ -369,6 +371,45 @@ describe("<epic-section> counts and state filter", () => {
     ;(host as FoldHost & { open: boolean }).open = false
     await ElementFixture.tick()
     expect(host.shadowRoot!.querySelector('[part~="collapse-all"]')).toBeNull()
+  })
+
+  // Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
+  test("expand-all, folded or open, just before collapse-all:  one click opens it and everything inside, parts loading", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p1" title="One" status="active" source="${FIXTURES}/phase-part.html"></epic-phase>` +
+        `<epic-phase id="p2" title="Two" status="todo"><p>Later.</p></epic-phase></epic-section>`
+    )
+    await ElementFixture.settle(host)
+    const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
+    // folded:  expand-all shows, collapse-all doesn't;  last in the title's tools, beside the chevron
+    const expand = tools.querySelector<HTMLButtonElement>('[part~="expand-all"]')!
+    expect([tools.lastElementChild === expand, tools.querySelector('[part~="collapse-all"]')]).toEqual([true, null])
+    expect([expand.title, expand.getAttribute("aria-label")]).toEqual([
+      "Open everything in 1. Phases",
+      "Open everything in 1. Phases"
+    ])
+    const opened: string[] = []
+    host.addEventListener("ui-open", (event) => opened.push((event.target as Element).id))
+    expand.click()
+    // the phase's part loads, then the item in it opens, then its aside
+    await vi.waitFor(() => expect(host.querySelector("epic-aside")?.matches(":state(open)")).toBe(true))
+    const phases = Array.from(host.querySelectorAll("epic-phase"))
+    expect([host, ...phases, host.querySelector("epic-item")!].map((each) => each.matches(":state(open)"))).toEqual([
+      true,
+      true,
+      true,
+      true
+    ])
+    // each a click's open:  the page remembers the blocks' and items' folds by these
+    expect(opened).toEqual(["phases", "p1", "p2", "q7"])
+    // open:  expand-all, then collapse-all, beside the chevron
+    await ElementFixture.tick()
+    const all = tools.querySelector('[part~="collapse-all"]')!
+    expect([tools.lastElementChild === all, all.previousElementSibling === expand]).toEqual([true, true])
+    const [e, c] = [expand, all].map((each) => each.getBoundingClientRect())
+    expect([e.width, e.height, e.right <= c.left + 0.5, Math.abs(e.top - c.top) < 0.5]).toEqual([24, 24, true, true])
+    await expectAccessible(host)
   })
 
   test("no Plan changes box above the phases (Owen, 2026-10-11):  an older doc's copies show nowhere", async () => {

@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { ElementFixture } from "$/ui/test/ElementFixture"
+
+import { expandAllUnder, foldAllUnder } from "$/epics/components/epic-item/Fold"
 import { expectAccessible } from "$/ui/test/A11y"
 
 import "$/epics/components/epic-answer"
@@ -127,5 +129,24 @@ describe("every card folds from its heading (fold.button())", () => {
     link.click()
     await ElementFixture.tick()
     expect(find(host, "[part~='body']").hidden).toBe(false)
+  })
+})
+
+// Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all":  collapse-all's mirror
+describe("expandAllUnder():  the cards too, when asked (a fold title's expand-all)", () => {
+  test("cards folded by collapse-all open again with `cards`;  without it (the page toolbar's) they stay folded", async () => {
+    const wrap = await card(`<div>${CARDS.map((each) => each.html).join("")}</div>`)
+    // a body folded until-found (`Fold.hidden()`)
+    const hidden = () =>
+      Array.from(wrap.children).filter((host) => host.shadowRoot!.querySelector("[hidden=until-found]")).length
+    expect(foldAllUnder(wrap)).toBe(CARDS.length)
+    await ElementFixture.tick()
+    expect(hidden()).toBeGreaterThan(0)
+    expect(expandAllUnder(wrap)).toBe(0)
+    expect(expandAllUnder(wrap, { cards: true })).toBe(CARDS.length)
+    await ElementFixture.tick()
+    expect(hidden()).toBe(0)
+    // open already:  nothing more to open
+    expect(expandAllUnder(wrap, { cards: true })).toBe(0)
   })
 })

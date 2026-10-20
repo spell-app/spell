@@ -106,13 +106,16 @@
   /*
    * its id (`M3`;  epic `epic-workflow` P23, Owen 2026-10-10:  "use `M3` for mark 1"):  small and muted, an outline
    * and no fill, quieter than an epic page item's id chip;  Cmd / Ctrl + K takes it
+   * - its ink:  the ivory's, a fifth of the page's ink in it (darker in light, lighter in dark), so 10px text reads
+   *   at least 4.5:1 on the ivory and on the orange of Owen's turn, in both schemes (epic `epic-engine` I41:  the
+   *   ivory's ink at 65% read 2.6-3.9:1);  its outline stays the faint rule
    */
   .id {
     flex: none;
     padding: 1px 5px;
     border: 1px solid var(--_epic-thread-rule);
     border-radius: 999px;
-    color: color-mix(in srgb, var(--_epic-thread-ivory-ink) 65%, transparent);
+    color: color-mix(in oklab, var(--_epic-thread-ivory-ink) 80%, var(--_epic-thread-ink));
     font: 600 10px/1.2 var(--_epic-thread-mono);
     font-style: normal;
     font-variant-numeric: tabular-nums;

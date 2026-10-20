@@ -1092,6 +1092,11 @@
           "parent": 0
         },
         {
+          "id": "epic-overview-review",
+          "title": "While the page is reviewed",
+          "parent": 0
+        },
+        {
           "id": "2-markup",
           "title": "2. Markup"
         },
@@ -1102,12 +1107,12 @@
         {
           "id": "epic-overview-parents",
           "title": "Its parents",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "epic-overview-children",
           "title": "Its children",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "4-attributes",
@@ -1116,22 +1121,22 @@
         {
           "id": "epic-overview-slots",
           "title": "Slots",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-overview-parts",
           "title": "Parts",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-overview-states",
           "title": "States",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "epic-overview-events",
           "title": "Events",
-          "parent": 6
+          "parent": 7
         },
         {
           "id": "5-how-it-looks",
