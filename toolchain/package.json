@@ -4,8 +4,13 @@
   "private": true,
   "description": "The toolchain every package shares:  the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig and the global types",
   "license": "MIT",
+  "bin": {
+    "spell-types": "./bin/spell-types.ts"
+  },
   "type": "module",
   "exports": {
+    "./aliases": "./src/aliases.ts",
+    "./declarations": "./src/declarations.ts",
     "./decorators": "./src/decorators.ts",
     "./lint": "./src/lint.ts",
     "./lint/imports": "./src/lint.imports.ts",
@@ -28,6 +33,7 @@
   },
   "dependencies": {
     "esbuild": "^0.28.2",
+    "json5": "^2.2.3",
     "vite-plus": "catalog:"
   },
   "devDependencies": {

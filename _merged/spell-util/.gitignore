@@ -6,3 +6,6 @@ node_modules
 # `/park`'s note on where parked work stopped:  never committed
 PARKED-*.md
 *.code-workspace
+
+# the declarations each package builds for the repos above this one (`spell-types`, epic repo-split I12):  never committed
+dist-types/
