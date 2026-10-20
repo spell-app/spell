@@ -22,6 +22,18 @@ export const DETAILS_API = "/api/docs/details/answer"
 export const DETAILS_DRAFT_API = "/api/docs/details/draft"
 
 /**
+ * Who waits for a details page's answer (`detailsRoutes.ts`, epic `epic-engine` r6):  `GET ?page=` answers
+ * `{ listening }`, the session's `epic ask wait` (`AnswerListener`), or `null`.
+ */
+export const DETAILS_LISTENING_API = "/api/docs/details/listening"
+
+/**
+ * How often a details page asks who is waiting, in ms, while it's in view:  a wait that ends leaves no file change
+ * to announce it, and its heartbeat goes stale in 90s (`AskListeners`).
+ */
+export const DETAILS_LISTEN_POLL_MS = 30_000
+
+/**
  * How long after the last change a details page saves its draft, in ms:  "a moment after he stops typing"
  * (P18;  a choice page waits 5s, `CHOICES_SAVE_MS`).  The browser's own copy is written at once.
  */
@@ -148,6 +160,20 @@ export type AskPart = AnswerPart & {
  * - `working` (blue, Claude's to do):  "Provide more details" asked, or only Other written
  */
 export type AskState = "attention" | "done" | "working"
+
+/**
+ * A session waiting for a details page's answer (`epic ask wait`, `ask show --wait`):  since when, and its last
+ * heartbeat, ISO (`detailsRoutes.ts` `DetailsListener`).
+ */
+export type AnswerListener = { since: string; seen: string }
+
+/**
+ * Who hears a details page's Send, as `<epic-send>` says it beside the button (epic `epic-engine` r6):
+ * - `text`:  "repo-split is listening", "nobody is waiting yet";  `""` where the page can't tell (no page server)
+ * - `title`:  the tooltip, saying more
+ * - `isListening`:  a session waits (a green dot)
+ */
+export type ListenLine = { text: string; title: string; isListening: boolean }
 
 /**
  * Where a details page's answer stands, which the Send bar shows (the colour scheme's FILL RULE):

@@ -10,11 +10,14 @@ import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 import { PageServer } from "$/server/page"
 import { ask } from "$/server/test/serve"
 
+import { AskListeners } from "../../src/tools/AskListeners"
 import detailsRoutes, { type DetailsAnswer, type DetailsDraft } from "../../src/tools/detailsRoutes"
 
 let root: string
 let server: PageServer
 let port: number
+/** `SPELL_EPIC_HOME` before these tests */
+let home: string | undefined
 
 /** pages in the scratch checkout, relative to it */
 const PAGES = [
@@ -29,6 +32,9 @@ const PAGES = [
 beforeAll(async () => {
   root = mkdtempSync(join(tmpdir(), "details-routes-"))
   mkdirSync(join(root, ".git"))
+  // `epic ask wait`'s heartbeats (`AskListeners`):  a scratch home folder's, never the real one
+  home = process.env.SPELL_EPIC_HOME
+  process.env.SPELL_EPIC_HOME = join(root, ".epic-home")
   for (const page of PAGES) {
     mkdirSync(dirname(join(root, page)), { recursive: true })
     writeFileSync(join(root, page), "<!doctype html><title>x</title>")
@@ -42,6 +48,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await server.stop()
+  if (home === undefined) delete process.env.SPELL_EPIC_HOME
+  else process.env.SPELL_EPIC_HOME = home
   rmSync(root, { recursive: true, force: true })
 })
 
@@ -104,7 +112,7 @@ test("the page reads its answer back:  null before one is sent", async () => {
   expect(got.status).toBe(200)
   expect(JSON.parse(got.text).answer.page).toBe("/pages/details/pick.html")
   const none = await ask(port, "GET", "/api/docs/details/answer?page=%2Fepics%2Fbig%2Fdetails%2Fshape.html")
-  expect(JSON.parse(none.text)).toEqual({ answer: null })
+  expect(JSON.parse(none.text)).toEqual({ answer: null, listening: null })
   expect((await ask(port, "GET", "/api/docs/details/answer?page=%2Fguides%2Fother.html")).status).toBe(403)
   // the old path answers not found:  no alias (epic `people-and-orgs` P16)
   expect((await ask(port, "GET", "/api/details/answer?page=%2Fpages%2Fdetails%2Fpick.html")).status).toBe(404)
@@ -180,4 +188,28 @@ test("writes need the token, our origin and our host", async () => {
   expect((await answer(path, undefined, { "content-type": "application/json" })).status).toBe(403)
   expect((await answer(path, undefined, page({ origin: "http://evil.example" }))).status).toBe(403)
   expect((await answer(path, undefined, page({ host: "evil.example" }))).status).toBe(403)
+})
+
+// epic `epic-engine` r6:  the page said "nobody is listening" while `epic ask show --wait` waited on it
+test("who waits for the answer:  `epic ask wait`'s heartbeat, in the GETs and the answer's reply;  gone once stale", async () => {
+  const path = "/epics/big/details/shape.html"
+  const file = join(root, PAGES[1]!)
+  const listening = async () =>
+    JSON.parse((await ask(port, "GET", `/api/docs/details/listening?page=${encodeURIComponent(path)}`)).text).listening
+  expect(await listening()).toBeNull()
+  // this test's own process waits:  it's running
+  const { since, seen } = AskListeners.stamp(file)
+  expect(await listening()).toEqual({ since, seen })
+  const read = JSON.parse((await ask(port, "GET", `/api/docs/details/answer?page=${encodeURIComponent(path)}`)).text)
+  expect(read.listening).toEqual({ since, seen })
+  const sent = await answer(path, { q1: { picked: ["A"] } })
+  expect(JSON.parse(sent.text).listening).toEqual({ since, seen })
+  // three missed heartbeats:  gone
+  AskListeners.stamp(file, { at: new Date(Date.now() - 91_000).toISOString() })
+  expect(await listening()).toBeNull()
+  AskListeners.stamp(file)
+  AskListeners.stop(file)
+  expect(await listening()).toBeNull()
+  expect(JSON.parse((await answer(path, { q1: { picked: ["B"] } })).text).listening).toBeNull()
+  expect((await ask(port, "GET", "/api/docs/details/listening?page=%2Fguides%2Fother.html")).status).toBe(403)
 })

@@ -58,7 +58,8 @@
  *     - kept in `<page>.inbox.json5` beside each, in the set's tracked `docs/` folder,
  *       git-ignored there (the repo's `.gitignore`)
  *   - NOT a split epic page's `parts/` (they're shown inside their doc), nor an epic page's pre-2026-10-04 name
- *   - NOT a details page with questions, or a choice page:  they're answered on the page
+ *   - NOT a details page (questions, or only comment boxes and notes:  its `<epic-send>`), or a choice page:  they're
+ *     answered on the page
  *   - NOT `templates/`, the parked goal sets in `goals/` (they have thoughts), or the brand pages (`brand/`)
  *   - anything else:  `takesComments: false` to a GET, 403 to a POST;  no such page:  404;  bad input:  400
  * - every write:  under the inbox file's lock (`SRV.FileLock`), atomic;
@@ -124,6 +125,19 @@ const PLAN_DOC = /\.(?:plan|saga)\.html$/
  * (before epic `epic-workflow` P12, `.spell-question`:  a page its migration hasn't reached yet).
  */
 const ANSWERED_ON_PAGE = /<epic-ask\b|class="spell-question\b/
+
+/**
+ * A details page answered on the page with no questions:  only its sections' comment boxes and the notes, sent by
+ * its `<epic-send>` (`DETAILS_FILE`:  in a `details/` folder;  Epic UI's `<epic-send>` page shows one, and takes
+ * comments).
+ * - why (epic `epic-engine` r6):  such a page took comments, so the runtime drew the comments' Send in its header
+ *   beside `<epic-send>`, over it:  grey with no bullhorn comments, "nobody is listening" with no `epic inbox wait`;
+ *   Owen took it for the page's Send
+ */
+const DETAILS_SEND = /<epic-send\b/
+
+/** A details page's file, in a `details/` folder (`detailsRoutes.ts` `isDetailsPage()`, any depth). */
+const DETAILS_FILE = /[/\\]details[/\\][^/\\]+\.html$/
 
 const commentsRoutes: RouteModule = {
   name: "comments",
@@ -246,7 +260,9 @@ export function commentsPage(files: SRV.StaticHandler, page: unknown): string {
   // an epic or saga page is never answered on the page, whatever its prose names:  `epic-workflow`'s item titles name
   // `<epic-ask>`, and it took no comments (epic `epic-workflow` P25)
   if (PLAN_DOC.test(resolved.file)) return resolved.file
-  if (ANSWERED_ON_PAGE.test(readFileSync(resolved.file, "utf8")) || DataFile.exists(rowsFile(resolved.file)))
+  const html = readFileSync(resolved.file, "utf8")
+  const isDetailsSend = DETAILS_FILE.test(resolved.file) && DETAILS_SEND.test(html)
+  if (ANSWERED_ON_PAGE.test(html) || isDetailsSend || DataFile.exists(rowsFile(resolved.file)))
     throw new SRV.HttpError(403, `${page} is answered on the page, not with comments`)
   return resolved.file
 }

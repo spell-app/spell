@@ -5,14 +5,18 @@ import { AnswerDraft } from "./AnswerDraft"
 import {
   DETAILS_API,
   DETAILS_DRAFT_API,
+  DETAILS_LISTEN_POLL_MS,
+  DETAILS_LISTENING_API,
   DETAILS_PAGE,
   DETAILS_SAVE_MS,
   DETAILS_SETTLE_MS,
   DRAFT_KEY_PREFIX,
+  type AnswerListener,
   type AnswerPart,
   type AskPart,
   type DetailsDraft,
   type KeptText,
+  type ListenLine,
   type PageAnswer,
   type PartLabels,
   type SendFill,
@@ -43,6 +47,10 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *     whole page again (the route marks what changed since the send before)
  * - On load (`load()`), `GET` reads the answer already sent, and every part shows its share of it.
  *   A part that connects later gets it as it registers.
+ * - WHO HEARS a Send (epic `epic-engine` r6):  `listening`, the session waiting for the answer (`epic ask wait`),
+ *   read with the answer on load, asked again every `DETAILS_LISTEN_POLL_MS` while the page is in view (`watch()`),
+ *   and answered by each send;  `<epic-send>` says it (`listenLine`).  Nobody waiting:  Send still saves the answer,
+ *   and says so (`notice`):  the next `ask wait` or `ask answer` reads it.
  * - Keeps a DRAFT of what's typed and not sent (P18:  agents rewrote a page under Owen, and lost what he typed):
  *   - every change Owen makes (`edited()`) goes into `typed`, the page as he left it, at once;  a copy goes into
  *     the browser's storage at once, and to the page server a moment later (`DETAILS_SAVE_MS`,
@@ -92,6 +100,15 @@ export class AnswerForm {
 
   /** The draft's last save failed:  `draftText` says why. */
   isDraftError = false
+
+  /**
+   * The session waiting for the answer (`epic ask wait`);  `null` for none;  `undefined` while unknown (not asked
+   * yet, no page server, not a details page).
+   */
+  listening: AnswerListener | null | undefined
+
+  /** What the last send did, when nobody was waiting for it:  saved for the next look;  `""` otherwise. */
+  notice = ""
 
   /** The page as last sent (`snapshot()`), to tell "Changes not sent";  `null` before the first send. */
   private sentSnapshot: string | null = null
@@ -287,7 +304,30 @@ export class AnswerForm {
     if (!this.sent) return { text: "Not sent", color: "grey" }
     const { decided, total } = this.decided
     const when = PlanDates.formatDate(new Date(this.sent.answered))
-    return { text: `Sent ${when} · ${decided} of ${total} decided`, color: "green" }
+    // a page of comment boxes alone has no question to count
+    const count = total ? ` · ${decided} of ${total} decided` : ""
+    return { text: `Sent ${when}${count}`, color: "green" }
+  }
+
+  /**
+   * Who hears a Send, for `<epic-send>` (`ListenLine`):  "repo-split is listening" (a session's `epic ask wait`), or
+   * "nobody is waiting yet";  nothing where the page can't tell.
+   */
+  get listenLine(): ListenLine {
+    if (this.listening === undefined) return { text: "", title: "", isListening: false }
+    const who = epicOf(this.options.page) ?? "Claude"
+    if (this.listening)
+      return {
+        text: `${who} is listening`,
+        title: `A session is waiting for this page's answer (epic ask wait, since ${clockOf(this.listening.since)}):  Send wakes it`,
+        isListening: true
+      }
+    return {
+      text: "nobody is waiting yet",
+      title:
+        "No session is waiting for this page's answer (epic ask wait).  Send still saves it:  Claude reads it when it next looks.",
+      isListening: false
+    }
   }
 
   /** Drop `item` from the kept text (Owen's ×):  a change like any other, so the draft follows. */
@@ -315,15 +355,20 @@ export class AnswerForm {
       return this.fail("This page isn't on the page server, so it can't send:  answer in chat instead.")
     this.isSending = true
     this.error = ""
+    this.notice = ""
     this.changed()
     try {
       const page = this.gather()
       const reply = (await this.link.post(DETAILS_API, { page: this.options.page, ...page })) as {
         answer?: SentAnswer
+        listening?: AnswerListener | null
       }
       this.sent = reply.answer
       this.sentSnapshot = this.snapshot()
       this.draftDone()
+      // a page server from before r6 answers no `listening`:  it can't tell
+      if (reply.listening !== undefined) this.listening = reply.listening
+      if (reply.listening === null) this.notice = NOBODY_NOTICE
     } catch (failure) {
       this.error = `${sentence((failure as Error).message)}  Send again, or answer in chat instead.`
     } finally {
@@ -347,10 +392,12 @@ export class AnswerForm {
   /** `load()`'s work. */
   private async read() {
     if (!this.keepsDrafts) return
-    const [answer, draft] = await Promise.all([
-      this.fetchJson<SentAnswer>(DETAILS_API, "answer"),
+    const [reply, draft] = await Promise.all([
+      this.fetchReply<{ answer?: SentAnswer | null; listening?: AnswerListener | null }>(DETAILS_API),
       this.fetchJson<DetailsDraft>(DETAILS_DRAFT_API, "draft")
     ])
+    const answer = reply?.answer ?? undefined
+    if (reply && reply.listening !== undefined) this.listening = reply.listening
     if (answer) {
       this.sent = answer
       this.kept = answer.kept ?? []
@@ -379,6 +426,21 @@ export class AnswerForm {
       this.saveSoon()
     }
     this.settleSoon()
+  }
+
+  /**
+   * Ask again who is waiting for the answer (`DETAILS_LISTENING_API`);  a change redraws.
+   * - a session that started waiting clears the "nobody is waiting" notice:  it reads the answer saved
+   * - NEVER throws:  no answer leaves it as it was
+   */
+  async refreshListening(): Promise<void> {
+    if (!this.keepsDrafts) return
+    const reply = await this.fetchReply<{ listening?: AnswerListener | null }>(DETAILS_LISTENING_API)
+    if (!reply || reply.listening === undefined) return
+    const before = JSON.stringify(this.listening ?? null)
+    this.listening = reply.listening
+    if (this.listening) this.notice = ""
+    if (JSON.stringify(this.listening) !== before) this.changed()
   }
 
   /** Say why it can't send. */
@@ -472,10 +534,16 @@ export class AnswerForm {
     const leaving = () => void this.saveDraft({ keepalive: true })
     const hidden = () => {
       if (window.document.visibilityState === "hidden") leaving()
+      else void this.refreshListening()
     }
     window.addEventListener("pagehide", leaving)
     window.document.addEventListener("visibilitychange", hidden)
+    // who is waiting, asked again while the page is in view:  a wait that ends announces nothing
+    const poll = window.setInterval(() => {
+      if (window.document.visibilityState === "visible") void this.refreshListening()
+    }, DETAILS_LISTEN_POLL_MS)
     return () => {
+      window.clearInterval(poll)
       window.removeEventListener("pagehide", leaving)
       window.document.removeEventListener("visibilitychange", hidden)
       if (this.saveTimer) clearTimeout(this.saveTimer)
@@ -557,13 +625,21 @@ export class AnswerForm {
    * - NEVER throws
    */
   private async fetchJson<T>(api: string, what: string): Promise<T | undefined> {
+    return (await this.fetchReply<Record<string, T | null>>(api))?.[what] ?? undefined
+  }
+
+  /**
+   * `GET <api>?page=` for this page:  the whole reply, or `undefined` (no route, no page server, a failure).
+   * - NEVER throws
+   */
+  private async fetchReply<T>(api: string): Promise<T | undefined> {
     if (!this.options.server || this.options.protocol === "file:") return undefined
     try {
       const response = await this.options.fetch(`${api}?page=${encodeURIComponent(this.options.page)}`, {
         cache: "no-store"
       })
       if (!response.ok) return undefined
-      return ((await response.json()) as Record<string, T | null>)[what] ?? undefined
+      return (await response.json()) as T
     } catch {
       return undefined
     }
@@ -573,6 +649,14 @@ export class AnswerForm {
 ////////////////
 // ## Helpers
 ////////////////
+
+/** What a send says when nobody was waiting for it (`notice`):  saved all the same, for the next look. */
+const NOBODY_NOTICE = "Saved:  nobody is waiting yet;  Claude reads it when it next looks."
+
+/** The epic a details page belongs to, from its path (`/epics/<name>/details/x.html`);  `undefined` for a scratch one. */
+function epicOf(page: string): string | undefined {
+  return /\/epics\/([^/]+)\/details\/[^/]+\.html$/.exec(page)?.[1]
+}
 
 /** A page with nothing on it:  what a first change is laid over. */
 const EMPTY: TypedAnswer = { answers: {}, comments: {}, notes: "", labels: {} }

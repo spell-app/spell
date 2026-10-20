@@ -18,6 +18,11 @@
  *   - it deletes the page's draft:  sent, it's done with
  * - `GET /api/docs/details/answer?page=<path>` -- the answer sent, or `{ answer: null }`:  the page shows it on load
  *   - a plain fetch of the missing `.answer.json5` would log a 404 in every fresh page's console
+ *   - and who is waiting for it, `listening` (below)
+ * - `GET /api/docs/details/listening?page=<path>` -- `{ listening }`:  the session waiting for the answer
+ *   (`epic ask wait`, `ask show --wait`), `{ since, seen }`, or `null` for none (epic `epic-engine` r6)
+ *   - from the wait's heartbeat (`AskListeners`), dropped once stale:  the page asks again every 30s
+ *   - the answer's POST answers it too:  the page says whether a session got it, or it waits for the next look
  * - `POST /api/docs/details/draft` `{ page, answers, comments, notes, labels, kept }` --
  *   save what's typed and not sent to `<slug>.draft.json5` beside the page (P18)
  *   - a moment after each change, and as the page goes away
@@ -31,6 +36,7 @@
  * - every POST needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  */
 import { DataFile } from "$/epics/data/DataFile"
+import { AskListeners } from "./AskListeners"
 import { SRV } from "$/server"
 import type { RouteModule } from "$/server/page"
 
@@ -53,8 +59,13 @@ const detailsRoutes: RouteModule = {
   setup({ router, guard, web }) {
     const api = new SRV.Router()
     api.get("/answer", (request, reply) => {
-      const answer = DataFile.read<DetailsAnswer>(answerFile(detailsPage(web.files, request.query.page))) ?? null
-      reply.set("Cache-Control", "no-store").json({ answer })
+      const file = detailsPage(web.files, request.query.page)
+      const answer = DataFile.read<DetailsAnswer>(answerFile(file)) ?? null
+      reply.set("Cache-Control", "no-store").json({ answer, listening: listeningOn(file) })
+    })
+    api.get("/listening", (request, reply) => {
+      const file = detailsPage(web.files, request.query.page)
+      reply.set("Cache-Control", "no-store").json({ listening: listeningOn(file) })
     })
     api.get("/draft", (request, reply) => {
       const draft = DataFile.read<DetailsDraft>(draftFile(detailsPage(web.files, request.query.page))) ?? null
@@ -69,7 +80,7 @@ const detailsRoutes: RouteModule = {
       const answer = await saveAnswer(file, body.page as string, answers, notes, toComments(body.comments), {
         kept: toKept(body.kept)
       })
-      reply.json({ ok: true, answer })
+      reply.json({ ok: true, answer, listening: listeningOn(file) })
     })
     api.post("/draft", async (request, reply) => {
       const body = request.body as PostBody & { labels?: unknown }
@@ -156,6 +167,15 @@ export async function saveAnswer(
   })
   DataFile.remove(draftFile(file))
   return answer
+}
+
+/**
+ * The session waiting for details page `file`'s answer (`epic ask wait`), as the page shows it:  when it started and
+ * its last heartbeat;  `null` for none (`AskListeners.liveFor()`).
+ */
+export function listeningOn(file: string): DetailsListener | null {
+  const listener = AskListeners.liveFor(file)
+  return listener ? { since: listener.since, seen: listener.seen } : null
 }
 
 /** `<slug>.answer.json5` beside page `<slug>.html`. */
@@ -301,6 +321,9 @@ export type DetailsDraft = Omit<DetailsAnswer, "answered" | "changes" | "changed
  * (`q3`, `q1-B`, `context`, `notes`), its old title, what was typed or picked.
  */
 export type KeptText = { id: string; label: string; text: string }
+
+/** A session waiting for a details page's answer (`listeningOn()`):  since when, its last heartbeat;  ISO. */
+export type DetailsListener = { since: string; seen: string }
 
 /** A POST's body, unchecked. */
 type PostBody = { page?: unknown; answers?: unknown; comments?: unknown; notes?: unknown; kept?: unknown }

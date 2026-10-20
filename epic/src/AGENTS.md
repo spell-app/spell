@@ -1332,6 +1332,23 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - The module:  [detailsRoutes.ts](tools/detailsRoutes.ts).
   - That writes `<slug>.answer.json5`, beside the page (`SRV.FileOperations.save()`).
   - `epic ask wait`, run in the background, exits with it, and so wakes the session.
+  - Any of it is an answer:  a pick, Other, a section's comment, the notes.  A page with no questions, only comment
+    boxes and notes, sends them all the same (`Sent 10/19/26 22:22`, no "0 of 0 decided").
+- WHO HEARS IT (epic `epic-engine` r6):  `<epic-send>` says, after the button.
+  - Why:  Owen typed comments on such a page while `epic ask show --wait` waited on it, and saw "nobody is listening"
+    (the comments' Send, below, drawn over the page's own).
+  - "repo-split is listening" (a green dot):  a session's `epic ask wait` (or `ask show --wait`) waits for the answer.
+    - The wait keeps a heartbeat while it waits, gone as it ends:  `~/.spell-epic/asks/<hash>.json5`, one per page
+      ([AskListeners.ts](tools/AskListeners.ts)).  In the home folder, not beside the page:  the content repo is
+      committed every turn.
+    - Stale after 90s, or once its process is gone.
+    - The route module answers it (`GET /api/docs/details/listening`, and with the answer's GET and POST);  the page
+      asks again every 30s while in view.
+  - "nobody is waiting yet":  Send still works.  The answer is saved beside the page, and an orange line under Send
+    says so:  "Saved:  nobody is waiting yet;  Claude reads it when it next looks" (the next `ask wait` / `answer`).
+    - It wakes no session (a docs page's Send does).
+  - A details page takes no bullhorn comments, questions or not (`commentsRoutes.ts`, its `<epic-send>`):  so no
+    second Send in its header.
 - What he typed and hasn't sent is a DRAFT (epic `epic-workflow` P18).
   - Why:  agents rewrote a page under him twice, and everything he hadn't sent was lost (request r4).
   - `<slug>.draft.json5` beside the page, through the same route module (`POST /api/docs/details/draft`)
@@ -1675,7 +1692,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - App UI's and the brand's (spell-app's) don't load it yet.
   - NOT:
     - an epic page's `parts/`
-    - details pages with questions, choice pages
+    - details pages (questions, or comment boxes alone:  their `<epic-send>`;  epic `epic-engine` r6), choice pages
     - `templates/`, the parked goal sets in `goals/` (thoughts), the Brand tab's own pages (`brand/`)
 - Claude's side, for docs pages ([comments.ts](tools/comments.ts), [GuideChanges.ts](tools/GuideChanges.ts)):
 

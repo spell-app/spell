@@ -51,7 +51,8 @@
             A details page's Send, in its sticky header: where the answer stands, then a round blue Send. It sends the
             whole page, partial answers too, as often as Owen likes: the page never locks. Beside them, the draft's
             save: what's typed and not sent is kept beside the page, and comes back when the page reloads or is
-            rewritten.
+            rewritten. After the button, who hears it: <code>repo-split is listening</code> while a session waits for
+            the answer, else <code>nobody is waiting yet</code>. Send works either way.
           </p>
           <p class="meta">
             For anyone writing a page Owen answers on (a details or choice page), or changing this element.<br />
@@ -59,7 +60,7 @@
             <a href="../../spell-epic/src/components/epic-send/" target="src-spell-epic-src-components-epic-send"
               ><code title="spell-epic/src/components/epic-send/">epic-send/</code></a
             >
-            (epic <code>epic-workflow</code> P12; the draft P18).<br />
+            (epic <code>epic-workflow</code> P12; the draft P18; who hears it, epic <code>epic-engine</code> r6).<br />
             Its vocabulary (every table below comes from it):
             <a
               href="../../spell-epic/src/components/epic-send/EpicSend.en.ts"
@@ -141,8 +142,24 @@
                       </td>
                     </tr>
                     <tr>
+                      <td><code>who</code></td>
+                      <td>
+                        Who hears a Send, muted, after the button (r6): <code>repo-split is listening</code> with a
+                        green dot (a session's <code>epic ask wait</code>), or <code>nobody is waiting yet</code>; the
+                        tooltip says more. None where the page can't ask (no page server).
+                      </td>
+                    </tr>
+                    <tr>
                       <td><code>error</code></td>
                       <td>Why it couldn't send, under them.</td>
+                    </tr>
+                    <tr>
+                      <td><code>notice</code></td>
+                      <td>
+                        Sent with nobody waiting, under them in orange:
+                        <code>Saved: nobody is waiting yet; Claude reads it when it next looks.</code> Gone once a
+                        session waits, or at the next send.
+                      </td>
                     </tr>
                   </tbody>
                 </table></ui-table
@@ -180,7 +197,8 @@
             <ul>
               <li>
                 The line: <code>Not sent</code> (grey; blue with something on the page),
-                <code>Changes not sent</code> (blue), <code>Sent 10/8/26 14:34 · 5 of 17 decided</code> (green).
+                <code>Changes not sent</code> (blue), <code>Sent 10/8/26 14:34 · 5 of 17 decided</code> (green;
+                <code>Sent 10/8/26 14:34</code> on a page with no questions, only comment boxes and notes).
               </li>
               <li>
                 Send by the fill rule: a grey outline with nothing to send, dashed blue with changes not sent, a blue
@@ -190,6 +208,16 @@
                 The draft's save beside the line, muted (<code>draft not saved yet</code>, <code>saving draft…</code>,
                 <code>draft saved 14:04</code>, <code>draft from 14:04 put back</code>); ORANGE, a warning, when the
                 page server can't take it (<code>draft kept in this browser only: ...</code>). Gone once sent.
+              </li>
+              <li>
+                After Send, who hears it, muted (epic <code>epic-engine</code> r6): <code>repo-split is listening</code>
+                with a green dot while a session's <code>epic ask wait</code> (or <code>ask show --wait</code>) waits
+                for the answer, else <code>nobody is waiting yet</code>. The page asks again every 30s:
+                <code>ask wait</code> keeps a heartbeat in <code>~/.spell-epic/asks/</code>.
+              </li>
+              <li>
+                Send works with nobody waiting too: the answer is saved beside the page, and an orange line says so,
+                <code>Saved: nobody is waiting yet; Claude reads it when it next looks.</code>
               </li>
               <li>Why it couldn't send, in red, under them.</li>
             </ul></ui-section
@@ -204,8 +232,8 @@
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
             <p class="meta">
-              Last checked 2026-10-14 against branch <code>epic-workflow-p18</code> (P18): the tables are its
-              vocabulary's (epic-send); the rest from its component and its stylesheet.
+              Last checked 2026-10-19 against branch <code>epic-engine</code> (r6): the tables are its vocabulary's
+              (epic-send); the rest from its component and its stylesheet.
             </p>
           </footer>
         </article></ui-container

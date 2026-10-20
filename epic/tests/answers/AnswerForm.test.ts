@@ -28,9 +28,12 @@ class FakeServer {
   posts: Record<string, unknown>[] = []
   drafts: Record<string, unknown>[] = []
   failure: { status: number; error: string } | undefined
+  /** who waits for the answer (epic `epic-engine` r6);  `undefined`:  a server from before, which never says */
+  listening: { since: string; seen: string } | null | undefined
 
   readonly fetch = vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
-    if (url.startsWith("/api/docs/details/answer?")) return json({ answer: this.answer })
+    if (url.startsWith("/api/docs/details/answer?")) return json({ answer: this.answer, listening: this.listening })
+    if (url.startsWith("/api/docs/details/listening?")) return json({ listening: this.listening })
     if (url.startsWith("/api/docs/details/draft?")) return json({ draft: this.draft })
     const body = JSON.parse(init!.body as string) as Record<string, unknown>
     if (url === "/api/docs/details/draft") {
@@ -48,7 +51,7 @@ class FakeServer {
       answered: "2026-10-14T04:00:00.000Z",
       changes: this.answer ? this.answer.changes + 1 : 0
     }
-    return json({ ok: true, answer: this.answer })
+    return json({ ok: true, answer: this.answer, listening: this.listening })
   })
 }
 
@@ -200,6 +203,52 @@ describe("AnswerForm", () => {
     expect(form.stateLine.text).toMatch(/^Sent \d+\/\d+\/26 \d\d:\d\d · 1 of 1 decided$/)
     ask.picks = ["B"]
     expect([form.fill, form.stateLine]).toEqual(["pending", { text: "Changes not sent", color: "blue" }])
+  })
+
+  // epic `epic-engine` r6:  a page of comment boxes alone, and who hears its Send
+  test("comments alone count:  pending, sent;  no question to count", async () => {
+    const form = formOn(new FakeServer())
+    const box = new FakeBox(at("a"), "l-main")
+    form.add(box)
+    box.text = "Make the top project just spell"
+    expect([form.isEmpty, form.fill, form.stateLine]).toEqual([false, "pending", { text: "Not sent", color: "blue" }])
+    await form.send()
+    expect(form.fill).toBe("sent")
+    expect(form.stateLine.text).toMatch(/^Sent \d+\/\d+\/26 \d\d:\d\d$/)
+  })
+
+  test("who hears it:  nothing said before the server says;  nobody, then a session's `ask wait`", async () => {
+    const server = new FakeServer()
+    const form = formOn(server, { page: "/epics/repo-split/details/layout.html" })
+    await form.load()
+    expect(form.listenLine.text).toBe("")
+    server.listening = null
+    await form.refreshListening()
+    expect(form.listenLine).toMatchObject({ text: "nobody is waiting yet", isListening: false })
+    server.listening = { since: "2026-10-20T02:12:00.000Z", seen: "2026-10-20T02:14:00.000Z" }
+    await form.refreshListening()
+    expect(form.listenLine).toMatchObject({ text: "repo-split is listening", isListening: true })
+    expect(formOn(server).listenLine.text).toBe("")
+  })
+
+  test("Send with nobody waiting:  saved, and it says so;  a session that starts waiting clears that", async () => {
+    const server = new FakeServer()
+    server.listening = null
+    const form = formOn(server)
+    const box = new FakeBox(at("a"), "notes")
+    form.add(box)
+    box.text = "Is this worth it?"
+    await form.send()
+    expect([form.fill, form.error, form.notice]).toEqual([
+      "sent",
+      "",
+      "Saved:  nobody is waiting yet;  Claude reads it when it next looks."
+    ])
+    server.listening = { since: "2026-10-20T02:20:00.000Z", seen: "2026-10-20T02:20:00.000Z" }
+    await form.refreshListening()
+    expect([form.notice, form.listenLine.text]).toEqual(["", "Claude is listening"])
+    await form.send()
+    expect(form.notice).toBe("")
   })
 
   test("refuses to send an empty page never sent, or a page off the page server;  a route's error said, editable still", async () => {

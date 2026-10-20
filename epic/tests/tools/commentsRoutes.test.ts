@@ -46,12 +46,19 @@ const PAGES: Record<string, string> = {
   "epics/old/old.html": PAGE,
   "pages/details/asks.html": PAGE.replace("<p>Body.</p>", "<epic-ask><epic-choices></epic-choices></epic-ask>"),
   "pages/details/plain.html": PAGE,
+  // a details page of comment boxes and notes alone, sent by its `<epic-send>` (epic `epic-engine` r6)
+  "epics/big/details/layout.html": PAGE.replace("</h1>", "</h1><epic-send></epic-send>").replace(
+    "<p>Body.</p>",
+    '<p>Body.</p><epic-text-box for="model"></epic-text-box>'
+  ),
   "templates/durable.html": PAGE,
   "goals/spell/index.html": PAGE,
   // a saga page (epic `epic-workflow` P15):  its comments in its own review inbox
   "sagas/epics/epics.saga.html": PAGE,
   // a component set (Epic UI), served at /components/epics/ from its package's docs/
   "spell-epic/src/docs/epic-item.html": PAGE,
+  // Epic UI's page of `<epic-send>`, showing one live:  not a details page, so it takes comments
+  "spell-epic/src/docs/epic-send.html": PAGE.replace("<p>Body.</p>", "<p>Body.</p><epic-send></epic-send>"),
   "spell-epic/src/docs/__parts/layout.html": PAGE,
   // epic py's guide:  a page epic py owns (`SeeAlso.ownerOf()`, epic `epic-workflow` P13)
   "guides/py.html": PAGE,
@@ -363,6 +370,15 @@ test("a component set's page, at its address:  its inbox beside it in the set's 
   )
 })
 
+// epic `epic-engine` r6:  the runtime drew the comments' Send over a details page's own, "nobody is listening"
+test("a details page with only comment boxes is answered on the page (its <epic-send>):  no comments, no 2nd Send", async () => {
+  const read = JSON.parse((await ask(port, "GET", "/api/docs/comments?page=/epics/big/details/layout.html")).text)
+  expect(read).toEqual({ page: "/epics/big/details/layout.html", takesComments: false, comments: [] })
+  // Epic UI's own page of the element, which shows one live, still takes comments
+  const epicUi = JSON.parse((await ask(port, "GET", "/api/docs/comments?page=/components/epics/epic-send.html")).text)
+  expect(epicUi.takesComments).toBe(true)
+})
+
 test("an epic page's comments go in the epic's REVIEW INBOX, beside its marks;  a quote rides along", async () => {
   const page = "/epics/big/big.plan.html"
   const quoted = { ...ON_TABLE, anchor: "p3#field-2", kind: "field", quote: "the inbox file", offset: 14 }
@@ -406,6 +422,7 @@ test("no comments on an epic page's parts, details pages with questions, templat
     "/epics/big/parts/p3.html",
     "/epics/old/old.html",
     "/pages/details/asks.html",
+    "/epics/big/details/layout.html",
     "/templates/durable.html",
     "/goals/spell/index.html",
     "/guides/../templates/durable.html"

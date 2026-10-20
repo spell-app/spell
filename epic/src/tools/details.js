@@ -14,6 +14,7 @@
  *   - `--wait`:  then `wait`
  * - `wait <page> [--timeout 8h]` -- block until Owen sends an answer NEWER than the wait's start
  *   - prints it as plain text, exit 0
+ *   - while it waits, the page's Send says it's listening (a heartbeat in `~/.spell-epic/asks/`, `AskListeners`)
  *   - run it in the BACKGROUND:  its exit wakes the session
  *   - timeout:  exit 2, saying so
  * - `answer <page>` -- print the answer already sent (exit 1 if none)
@@ -50,6 +51,7 @@ import {
   make,
   questionSection
 } from "./answerPages.js"
+import { AskListeners } from "./AskListeners.ts"
 import { DataFile } from "../data/DataFile.ts"
 import { CONTENT, ROOT, atDepth, inContent, openInVSCode, serialize } from "./pages.js"
 
@@ -360,7 +362,8 @@ export function formatAnswer(page, answer) {
     const got = answer.answers?.[askKey(question)]
     return got?.picked?.length || got?.other
   })
-  lines.push(`  ${decided.length} of ${questions.length} decided`)
+  // a page of comment boxes alone (epic `epic-engine` r6) has no question to count
+  if (questions.length) lines.push(`  ${decided.length} of ${questions.length} decided`)
   for (const question of questions) {
     const key = askKey(question)
     const got = answer.answers?.[key] ?? { picked: [] }
@@ -427,11 +430,16 @@ function optionOf(question, letter) {
     .find((child) => child.localName === OPTION && child.getAttribute("letter") === letter)
 }
 
-/** `wait`:  wait for `file`'s answer, print it;  exit code 0, or 2 on timeout. */
+/**
+ * `wait`:  wait for `file`'s answer, print it;  exit code 0, or 2 on timeout.
+ * - LISTENING meanwhile (epic `epic-engine` r6):  its heartbeat (`AskListeners.hold()`) makes the page's Send say
+ *   "<epic> is listening";  gone as the wait ends
+ */
 async function waitAndPrint(file, flags) {
   const timeout = duration(flags.timeout ?? DEFAULT_TIMEOUT)
   console.log(`waiting for an answer on ${shown(file)} (up to ${flags.timeout ?? DEFAULT_TIMEOUT})`)
-  const answer = await waitForAnswer(file, { timeout })
+  const release = AskListeners.hold(file)
+  const answer = await waitForAnswer(file, { timeout }).finally(release)
   if (!answer) {
     console.log(`no answer yet after ${flags.timeout ?? DEFAULT_TIMEOUT}:  ${shown(file)}`)
     return 2

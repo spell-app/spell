@@ -168,6 +168,29 @@ test("formats a partial answer:  the questions not decided yet say so", () => {
   ])
 })
 
+// epic `epic-engine` r6:  repo-split's layout page, comment boxes and notes, no question
+test("formats a page with no questions:  its comments and notes, no count of what's decided", () => {
+  // outside the folders `list` walks:  only its markup matters here
+  const page = join(docs, "layout.html")
+  writeFileSync(
+    page,
+    `<h1>Layout</h1><ui-section id="l-main" header="2.2 The main checkout"><epic-text-box for="l-main"></epic-text-box></ui-section>`
+  )
+  const answer = {
+    page: "/x",
+    answered: "2026-10-20T02:22:00.000Z",
+    changes: 0,
+    answers: {},
+    comments: { "l-main": "Make the top project just spell" },
+    notes: "Is this worth it?"
+  }
+  expect(formatAnswer(page, answer).split("\n").slice(1)).toEqual([
+    "  Comments:",
+    "    2.2 The main checkout:  Make the top project just spell",
+    "  Notes:  Is this worth it?"
+  ])
+})
+
 test("formats kept text:  questions gone from the page, under their old titles", () => {
   const page = join(docs, "pages/details/pick-layout.html")
   const answer = {

@@ -3,7 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "$/ui/core"
 
-import { AnswerForm, type SendFill } from "$/epics/answers"
+import { AnswerForm, type ListenLine, type SendFill } from "$/epics/answers"
 
 import { epicSendVocabulary } from "./EpicSend.en"
 
@@ -20,7 +20,9 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *     never solid, since the page can't tell when Claude is done with it
  *   - the draft's save, muted beside them ("draft saved 14:04";  orange when it can't save to the page server:
  *     the browser still keeps it;  epic `epic-workflow` P18)
- *   - why the last send failed, under them
+ *   - after Send, who hears it (epic `epic-engine` r6):  "repo-split is listening" with a green dot (a session's
+ *     `epic ask wait`), or "nobody is waiting yet" (`AnswerForm.listenLine`)
+ *   - why the last send failed, under them;  or, sent with nobody waiting, that it's saved for Claude's next look
  * - A click sends the whole page (`AnswerForm.send()`):  partial answers too, again whenever Owen likes.
  * - SIDE EFFECT:  as it connects, the page's form reads back the answer already sent (`AnswerForm.load()`), and any
  *   draft newer than it, which every question and box shows;  and saves the draft as the page goes away
@@ -73,6 +75,18 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
   get draftLine(): { text: string; isError: boolean } {
     void this.version
     return { text: this.form?.draftText ?? "", isError: !!this.form?.isDraftError }
+  }
+
+  /** Who hears a Send (`AnswerForm.listenLine`). */
+  get listenLine(): ListenLine {
+    void this.version
+    return this.form?.listenLine ?? { text: "", title: "", isListening: false }
+  }
+
+  /** What the last send did with nobody waiting;  `""` for nothing to say. */
+  get notice(): string {
+    void this.version
+    return this.form?.notice ?? ""
   }
 
   /** A send on its way:  Send spins. */
@@ -129,10 +143,25 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
             title={this.translationForKey("sendTip")}
             onClick={this.onSend}
           />
+          <Show when={this.listenLine.text}>
+            <span
+              class={WHO}
+              part={this.partForName("who")}
+              data-listening={this.listenLine.isListening ? "" : undefined}
+              title={this.listenLine.title}
+            >
+              {this.listenLine.text}
+            </span>
+          </Show>
         </div>
         <Show when={this.error}>
           <p class={ERROR} part={this.partForName("error")} role="alert">
             {this.error}
+          </p>
+        </Show>
+        <Show when={!this.error && this.notice}>
+          <p class={NOTICE} part={this.partForName("notice")} role="status">
+            {this.notice}
           </p>
         </Show>
       </div>
@@ -154,3 +183,5 @@ const STATE = "state"
 const DRAFT = "draft"
 const SEND = "send"
 const ERROR = "error"
+const WHO = "who"
+const NOTICE = "notice"
