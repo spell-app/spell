@@ -174,6 +174,10 @@
       "types": "./dist-types/components/ui-*/index.d.ts",
       "default": "./components/ui-*/index.ts"
     },
+    "./vocabulary/SkeletonText": {
+      "types": "./dist-types/src/vocabulary/SkeletonText.d.ts",
+      "default": "./src/vocabulary/SkeletonText.ts"
+    },
     "./vite.config.ts": {
       "types": "./dist-types/vite.config.d.ts",
       "default": "./vite.config.ts"
