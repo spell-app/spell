@@ -1,16 +1,24 @@
 /**
- * Check COMMENTS ON EPIC UI'S PAGES in a real browser (epic `epic-engine` P2, T3):  the docs pages' bullhorns, pane,
- * threads and Send, drawn by `spell-comments.js` beside the site's own Spell UI.
+ * Check COMMENTS ON A COMPONENT SET'S PAGES in a real browser (epic `epic-engine` P2, T3):  the docs pages' bullhorns,
+ * pane, threads and Send, drawn by `spell-comments.js` beside the site's own Spell UI.  Epic UI's by default;  App UI's
+ * and Brand's (spell-app's) with `--set`.
  *
  * Usage (from the repo root):
- *   node src/demo/check-comments-epic-ui.mjs [--page <element>] [--docs <folder>] [--bundle <spell-ui.js>]
- *     [--comments <spell-comments.js>] [--keep] [outDir]
- * - `--comments`:  that file served as Epic UI's pages' `spell-comments.js`, one built elsewhere (as `--bundle`)
- * - the pages:  Epic UI's (`--page`, default `epic-item`, then `epic-page` for the router's swap), served as spell-app's
- *   page server serves them, at `/components/epics/`, by a page server of its OWN (`DemoServer`:  this checkout's
- *   `EpicServer` on a free port, no pid file, nobody woken), with the sets' build of Spell UI's site laid over them
- *   (spell-app's `packages/ui/site/_assets/sets/`, built by its page server:  run it once if that folder is missing)
- *   - `--docs`:  the folder served there;  default a SCRATCH COPY of `src/docs/` in `src/demo/shots/epic-ui/`
+ *   node src/demo/check-comments-epic-ui.mjs [--set epics | app | brand] [--checkout <spell-app>] [--page <name>]
+ *     [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--comments <spell-comments.js>] [--keep] [outDir]
+ * - `--comments`:  that file served as the pages' `spell-comments.js`, one built elsewhere (as `--bundle`)
+ * - `--set`:  which set (`SETS`, below):  `epics` (Epic UI, the engine's `src/docs/`), `app` (App UI) or `brand`, at
+ *   `/components/<set>/`
+ *   - `--checkout`:  the spell-app checkout App UI's and Brand's pages come from (default `.spell-app`):  a worktree's,
+ *     to check its pages before they merge
+ * - the pages:  the set's (`--page`, default the set's `page`, then `--swap`, default its `swap`, for the router's
+ *   swap), served as spell-app's page server serves them, at `/components/<set>/`, by a page server of its OWN
+ *   (`DemoServer`:  this checkout's `EpicServer` on a free port, no pid file, nobody woken), with the sets' build of
+ *   Spell UI's site laid over them (spell-app's `packages/ui/site/_assets/sets/`, built by its page server:  run it
+ *   once if that folder is missing)
+ *   - App UI's layout loads the app's element pack, `/element/spell.pack.js`, which no server here builds:  stubbed,
+ *     empty, and its root's error about it let through (its live examples don't draw;  not what this checks)
+ *   - `--docs`:  the folder served there;  default a SCRATCH COPY of the set's folder in `src/demo/shots/<set>-ui/`
  *     (git-ignored), so no real inbox is written.  `--docs src/docs` writes the real (git-ignored) inbox beside the
  *     page:  `epic comments list` sees it then
  *   - `--keep`:  leave the comments made;  else each is cleared at the end
@@ -19,7 +27,7 @@
  *   - the bullhorns:  in the masthead (the page), each section's title row, a table's corner;  one click opens ONE pane
  *   - a comment on the page:  saved as typed (the floppy), its thread drawn under the masthead once the pane closes
  *   - a comment on selected text (⌘ / Ctrl I) in a section's list:  its quote highlighted, its thread in the list item
- *   - Send:  to the standing epic `feedback` (Epic UI's pages are no epic's;  epic `epic-engine` T9), "feedback is
+ *   - Send:  to the standing epic `feedback` (a set's pages are no epic's;  epic `epic-engine` T9), "feedback is
  *     listening" or "nobody is listening:  Send wakes feedback";  a click sends both, and wakes feedback or nobody
  *     (the server's wake is stubbed:  `DemoServer`)
  *   - the router's swap to another page:  that page's bullhorns, no thread from the last;  back:  the threads again
@@ -28,9 +36,12 @@
  *     the article, a button per top-level section;  a button lands its section under the stuck band and is marked;
  *     the bullhorn's count, and its clicks landing on each waiting thread in turn;  ⌘ / Ctrl K listing them, an id
  *     landing on its thread, words going to the site's search;  the router's swap:  the next page's toolbar
+ *   - a page in TABS (Brand's element pages, the swap's):  the toolbar the shown tab's sections, and another tab's
+ *     once it's shown
  *   - no page errors
- * - and on a GUIDE (`guides/python-target.html`), served with `--bundle` as its `spell-ui.js` when given:  the docs
- *   runtime still draws bullhorns, and a thread has the comments' look (`spell-comments.css`, through `spell-doc.css`)
+ * - and, for Epic UI, on a GUIDE (`guides/python-target.html`), served with `--bundle` as its `spell-ui.js` when given:
+ *   the docs runtime still draws bullhorns, and a thread has the comments' look (`spell-comments.css`, through
+ *   `spell-doc.css`)
  * - screenshots (outDir, default a temporary folder):  `<width>-<step>.png`
  * - exits 1 on any miss
  * - re-runs itself under `tsx` (the page server is TypeScript)
@@ -63,12 +74,32 @@ const { GuideInbox } = await import("../tool/GuideInbox.ts")
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)
-const element = flag("--page", "epic-item")
+
+/**
+ * The sets it checks, by `--set`:  each one's folder (Epic UI's the engine's own;  the others from the spell-app
+ * checkout, `--checkout`), its first page and the page the router's swap goes to, and what else its layout loads.
+ * - `pack`:  its component pack's folder in the checkout, served at its own path (Brand's layout loads it from there)
+ * - `stub`:  a script its layout loads that no server here has, answered empty
+ */
+const SETS = {
+  epics: { dir: join(ROOT, "src", "docs"), page: "epic-item", swap: "epic-page" },
+  app: { dir: "packages/app/docs", page: "AppRoot", swap: "Chooser", stub: "/element/spell.pack.js" },
+  brand: { dir: "packages/brand/docs", page: "index", swap: "brand-color", pack: "packages/brand/components/__pack" }
+}
+const setName = flag("--set", "epics")
+const set = SETS[setName]
+if (!set) {
+  console.error(`check-comments-epic-ui:  --set is ${Object.keys(SETS).join(", ")}, not "${setName}"`)
+  process.exit(2)
+}
+const checkout = resolve(flag("--checkout", join(ROOT, ".spell-app")))
+const element = flag("--page", set.page)
+const swapTo = flag("--swap", set.swap)
 const bundle = flag("--bundle", undefined)
 const commentsScript = flag("--comments", undefined)
 const keep = args.includes("--keep")
 /** The flags that take a value:  the word after one isn't the out folder. */
-const VALUED = ["--page", "--docs", "--bundle", "--comments"]
+const VALUED = ["--page", "--swap", "--set", "--checkout", "--docs", "--bundle", "--comments"]
 const out =
   args.find((arg, at) => !arg.startsWith("--") && !VALUED.includes(args[at - 1])) ??
   mkdtempSync(join(tmpdir(), "check-comments-epic-ui-"))
@@ -81,26 +112,41 @@ if (!existsSync(join(SETS_BUNDLE, "site.js"))) {
   process.exit(2)
 }
 
-const SHOTS = join(HERE, "shots", "epic-ui")
+const SHOTS = join(HERE, "shots", setName === "epics" ? "epic-ui" : `${setName}-ui`)
 const docs = flag("--docs", undefined) ? resolve(flag("--docs")) : join(SHOTS, "docs")
 if (!flag("--docs", undefined)) {
   rmSync(SHOTS, { recursive: true, force: true })
-  cpSync(join(ROOT, "src", "docs"), docs, { recursive: true, filter: (from) => !/\.inbox\.json5?$/.test(from) })
+  cpSync(resolve(checkout, set.dir), docs, { recursive: true, filter: (from) => !/\.inbox\.json5?$/.test(from) })
 }
-const pageUrl = (name) => `${served.base}/components/epics/${name}.html`
+/** The set's address, as spell-app's page server serves it:  `/components/app`. */
+const PREFIX = `/components/${setName}`
+const pagePath = (name) => `${PREFIX}/${name}.html`
+const pageUrl = (name) => `${served.base}${pagePath(name)}`
 const inbox = (name) => GuideInbox.fileFor(join(docs, `${name}.html`))
 if (existsSync(inbox(element))) {
   console.error(`check-comments-epic-ui:  ${inbox(element)} exists:  it would be mixed in;  move it first`)
   process.exit(2)
 }
 
-// the server mounts Epic UI itself (epic `epic-eject` I21):  told to serve the scratch copy, so no real inbox is written
-const served = await DemoServer.start({ content: join(SHOTS, "content"), epicUi: docs })
+// the server mounts Epic UI itself (epic `epic-eject` I21):  told to serve the scratch copy, so no real inbox is written;
+// another set:  its scratch copy mounted at its address, as spell-app's page server does (`componentSetPath()`)
+const served = await DemoServer.start(
+  setName === "epics"
+    ? { content: join(SHOTS, "content"), epicUi: docs }
+    : {
+        content: join(SHOTS, "content"),
+        mounts: [
+          { prefix: `${PREFIX}/_assets/`, dir: SETS_BUNDLE },
+          { prefix: `${PREFIX}/`, dir: docs },
+          ...(set.pack ? [{ prefix: `/${set.pack}/`, dir: join(checkout, set.pack) }] : [])
+        ]
+      }
+)
 const problems = []
 const browser = await chromium.launch()
 
 for (const width of [1200, 390]) await checkWidth(width)
-await checkGuide()
+if (setName === "epics") await checkGuide()
 
 await browser.close()
 await served.stop()
@@ -119,11 +165,21 @@ async function newPage(width) {
   const page = await browser.newPage({ viewport: { width, height: width > 600 ? 900 : 844 } })
   page.errors = []
   page.on("pageerror", (error) => page.errors.push(String(error)))
-  page.on("console", (message) => message.type() === "error" && page.errors.push(message.text()))
+  // the stubbed pack (`set.stub`) registers none:  its root says so, which isn't this check's to fail on
+  const stubbed = set.stub?.split("/").at(-1)
+  page.on(
+    "console",
+    (message) =>
+      message.type() === "error" &&
+      !(stubbed && message.text().includes(stubbed)) &&
+      page.errors.push(message.text())
+  )
   if (commentsScript) {
     const code = readFileSync(resolve(commentsScript))
     await page.route("**/spell-comments.js", (route) => route.fulfill({ body: code, contentType: "text/javascript" }))
   }
+  if (set.stub)
+    await page.route(`**${set.stub}`, (route) => route.fulfill({ body: "", contentType: "text/javascript" }))
   return page
 }
 
@@ -254,14 +310,14 @@ async function checkWidth(width) {
 
   // the router's swap:  the next page's bullhorns, none of this page's threads;  back, they're there again
   // a link in the page, as the article's own are:  the router takes the click
-  await page.evaluate(() => {
+  await page.evaluate((swapTo) => {
     const link = document.createElement("a")
-    link.href = "epic-page.html"
-    link.textContent = "epic-page"
-    document.querySelector("main .site-article").append(link)
+    link.href = `${swapTo}.html`
+    link.textContent = swapTo
+    ;(document.querySelector("main .site-article") ?? document.querySelector("main .site-body")).append(link)
     link.click()
-  })
-  await page.waitForFunction(() => location.pathname.endsWith("/epic-page.html"), null, { timeout: 10_000 })
+  }, swapTo)
+  await page.waitForFunction((swapTo) => location.pathname.endsWith(`/${swapTo}.html`), swapTo, { timeout: 10_000 })
   await page.waitForTimeout(2500)
   const swapped = await page.evaluate(() => ({
     page: document.querySelectorAll(".site-masthead > .spell-comment-mark.at-page").length,
@@ -425,35 +481,66 @@ async function checkToolbar(page, name, held) {
   await page.keyboard.press("Escape")
 
   // the router's swap:  the next page's own toolbar, no bullhorn (nothing waits there)
-  await page.evaluate(() => {
+  await page.evaluate((swapTo) => {
     const link = document.createElement("a")
-    link.href = "epic-page.html"
-    document.querySelector("main .site-article").append(link)
+    link.href = `${swapTo}.html`
+    ;(document.querySelector("main .site-article") ?? document.querySelector("main .site-body")).append(link)
     link.click()
-  })
-  await page.waitForFunction(() => location.pathname.endsWith("/epic-page.html"), null, { timeout: 10_000 })
+  }, swapTo)
+  await page.waitForFunction((swapTo) => location.pathname.endsWith(`/${swapTo}.html`), swapTo, { timeout: 10_000 })
   await page.waitForTimeout(2500)
-  const next = await page.evaluate(() => {
-    const article = document.querySelector("main .site-article")
-    const sections = [...article.querySelectorAll(":scope > ui-section[id]")].map((each) => each.id)
-    const items = [...document.querySelectorAll(".spell-toolbar > [data-rail]")].map((each) => each.dataset.rail)
-    const bullhorn = document.querySelector(".spell-toolbar > .spell-toolbar-waiting")
-    return {
-      same: items.join() === sections.join(),
-      items: items.length,
-      bands: document.querySelectorAll(".spell-toolbar").length,
-      bullhorn: !!bullhorn && !bullhorn.hidden
-    }
-  })
+  const next = await page.evaluate(shownToolbar)
   check(
     `${name}:  the router's swap:  the next page's toolbar, no bullhorn`,
     next.same && next.items > 0 && next.bands === 1 && !next.bullhorn,
     JSON.stringify(next)
   )
   await page.screenshot({ path: join(out, `${name}-swapped.png`) })
+
+  // a page in TABS (Brand's element pages):  the toolbar follows the tab shown, its sections only
+  if (!next.tabbed) return
+  await page.evaluate(() => scrollTo(0, 0))
+  await page.locator("ui-tabs.site-tabs").getByRole("tab", { name: "Usage" }).click()
+  await page.waitForTimeout(1200)
+  const usage = await page.evaluate(shownToolbar)
+  check(
+    `${name}:  another tab:  the toolbar its sections only, first in its pane`,
+    usage.same && usage.items > 0 && usage.bands === 1 && usage.inPane && usage.pane === "usage",
+    JSON.stringify(usage)
+  )
+  await page.screenshot({ path: join(out, `${name}-tab.png`) })
 }
 
-/** Clear every comment on Epic UI page `name` through the route, as the trash does. */
+/**
+ * What the toolbar shows against the page shown:  the page's top-level sections (its article's;  a page in tabs, the
+ * shown pane's), the items, how many bands, the bullhorn;  run in the page.
+ */
+function shownToolbar() {
+  const article = document.querySelector("main .site-article")
+  const tabs = document.querySelector("main ui-tabs")
+  const pane = tabs && [...tabs.querySelectorAll(":scope > ui-tab")].find((tab) => tab.matches(":state(selected)"))
+  const top = [...document.querySelectorAll("main ui-section[id]")].filter(
+    (section) => !section.parentElement.closest("ui-section, ui-docs-example, template")
+  )
+  const sections = (
+    article
+      ? [...article.querySelectorAll(":scope > ui-section[id]")]
+      : top.filter((section) => !pane || pane.contains(section))
+  ).map((each) => each.id)
+  const items = [...document.querySelectorAll(".spell-toolbar > [data-rail]")].map((each) => each.dataset.rail)
+  const bullhorn = document.querySelector(".spell-toolbar > .spell-toolbar-waiting")
+  return {
+    same: items.join() === sections.join(),
+    items: items.length,
+    bands: document.querySelectorAll(".spell-toolbar").length,
+    bullhorn: !!bullhorn && !bullhorn.hidden,
+    tabbed: !article && !!pane,
+    pane: pane?.getAttribute("value"),
+    inPane: !!pane && pane.firstElementChild?.matches("ui-sticky.spell-site-toolbar")
+  }
+}
+
+/** Clear every comment on the set's page `name` through the route, as the trash does. */
 async function clear(name) {
   const page = await newPage(1200)
   await page.goto(pageUrl(name))
@@ -466,7 +553,7 @@ async function clear(name) {
           headers: { "content-type": "application/json", "x-server-token": window.SPELL_SERVER.token },
           body: JSON.stringify({ page: path, action: "clear", id })
         }),
-      { id, path: `/components/epics/${name}.html` }
+      { id, path: pagePath(name) }
     )
   check(`cleared the comments on ${name}`, !GuideInbox.read(inbox(name)).commentList.all.length)
   await page.close()

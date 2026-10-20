@@ -11,6 +11,8 @@ import { Window } from "../window.mjs"
 import { EpicConfig } from "../config/EpicConfig.ts"
 import { ENGINE_ROUTES, EPIC_UI } from "../server/server.types.ts"
 
+import { ComponentSetFolders } from "./ComponentSetFolders.ts"
+
 /** `src/tools`:  the docs scripts, `_assets`, the goals tooling. */
 export const TOOLS = dirname(fileURLToPath(import.meta.url))
 
@@ -57,6 +59,13 @@ export const TEMPLATES = join(PACKAGE, "templates")
  * are `components/epics/...`, as spell-app's page server serves them (`EPIC_UI`, `pagePath()`).
  */
 export const EPIC_UI_DOCS = join(PACKAGE, EPIC_UI.dir)
+
+/**
+ * Every COMPONENT SET's pages, named by their address:  `components/app/...` for `packages/app/docs/...`
+ * (`ComponentSetFolders`:  spell-app's `COMPONENT_SETS`);  Epic UI's the engine's `EPIC_UI_DOCS`, the others the
+ * checkout's (`ROOT`).
+ */
+const SETS = new ComponentSetFolders({ root: ROOT, epicUi: EPIC_UI_DOCS })
 
 /**
  * The repo's OWN templates, when it has any:  `repoTemplates` in its `.epic/config.json5`, a folder from the
@@ -142,8 +151,9 @@ export function pageFile(page, cwd = process.env.INIT_CWD ?? process.cwd()) {
  *   checkout's link into it (`<checkout>/guides/x.html`)
  * - the engine's templates:  `templates/...`, wherever spell-epic is
  *   (`TEMPLATES`:  `<spell-epic>/templates/durable.html` => `templates/durable.html`)
- * - Epic UI's pages:  as served, `components/epics/...` (`EPIC_UI_DOCS`:  `<spell-epic>/src/docs/epic-item.html` =>
- *   `components/epics/epic-item.html`)
+ * - a component set's pages:  as served, `components/<set>/...` (`SETS`), never from their folder
+ *   - Epic UI's:  `<spell-epic>/src/docs/epic-item.html` => `components/epics/epic-item.html` (`EPIC_UI_DOCS`)
+ *   - App UI's, Brand's, Spell UI's:  `<checkout>/packages/app/docs/Chooser.html` => `components/app/Chooser.html`
  * - anything else:  from the checkout's root (`packages/brand/x.html`), which the page server serves at `/` too;
  *   a file outside it keeps its `../` path
  * - `/`-separated
@@ -154,8 +164,8 @@ export function pagePath(file) {
   const path = resolve(file)
   const inTemplates = insideOf(TEMPLATES, path) ?? insideOf(TEMPLATES, realOf(path))
   if (inTemplates !== undefined) return ["templates", ...(inTemplates ? inTemplates.split(sep) : [])].join("/")
-  const inEpicUi = insideOf(EPIC_UI_DOCS, path) ?? insideOf(realOf(EPIC_UI_DOCS), realOf(path))
-  if (inEpicUi !== undefined) return [EPIC_UI.path, ...(inEpicUi ? inEpicUi.split(sep) : [])].join("/")
+  const inSet = SETS.pageFor(path) ?? SETS.pageFor(realOf(path), realOf)
+  if (inSet !== undefined) return inSet
   const content = insideContent(path)
   return (content ?? relative(ROOT, path)).split(sep).join("/")
 }
@@ -190,15 +200,16 @@ function realOf(path) {
 /**
  * The file page path `path` names (`pagePath()` turned round):
  * - `templates/...`:  in the engine's `TEMPLATES`
- * - `components/epics/...`:  in Epic UI's folder, `EPIC_UI_DOCS`
+ * - `components/<set>/...`:  in that component set's folder (`SETS`):  Epic UI's `EPIC_UI_DOCS`, the others the
+ *   checkout's
  * - in the content folder, when it's there or its top folder is one of the content folder's (`epics/new/...`)
  * - anything else from the checkout's root (`packages/brand/...`)
  */
 export function pageAt(path) {
   const [top, ...rest] = path.split(/[\\/]/)
   if (top === "templates") return join(TEMPLATES, ...rest)
-  const epicUi = `${EPIC_UI.path}/`
-  if (path.startsWith(epicUi)) return join(EPIC_UI_DOCS, path.slice(epicUi.length))
+  const inSet = SETS.fileFor(path)
+  if (inSet) return inSet
   const content = resolve(CONTENT, path)
   return existsSync(content) || contentTop(top) ? content : resolve(ROOT, path)
 }

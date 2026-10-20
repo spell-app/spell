@@ -445,6 +445,7 @@ Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`)
     - From a worktree:  a `--root` folder shaped like spell-app's, its `spell-epic` the worktree.
 - Check a page:  `node tools/check-spell.js docs/<tag>.html`, which loads it from the page server at its address.
 - Comments (epic `epic-engine` P2, T3):  Owen comments on these pages as on a guide.
+  - So he does on App UI's and Brand's, spell-app's sets, which load the same script (see "Comments" below).
   - The bullhorns, the pane, the threads and Send, all of "Comments" below.
   - Each page loads the comments by themselves, after the site's bundle, in its `<head>`:
     `<script defer src="/_epic/assets/spell-comments.js">` (the template has it too).
@@ -1727,7 +1728,11 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - their inbox beside each, in the set's tracked `docs/` folder, git-ignored there
     - Epic UI's draw them since epic `epic-engine` P2 (T3):  `spell-comments.js`, the comments alone, beside the
       site's Spell UI (see "Epic UI, the docs set").  Before, the route took their comments, but no page could make one.
-    - App UI's and the brand's (spell-app's) don't load it yet.
+    - App UI's and Brand's (spell-app's) too, since epic `epic-engine`'s sets work:  the same line in every page's
+      head, and the epics pack in their layout (`<ui-components source="/_epic/pack/epics.pack.js">`), whose
+      elements draw the threads and the pane.  Spell UI's own pages don't load it.
+    - a page in TABS (a components page's Examples, Usage, API, Theming:  Brand's element pages):  the toolbar lists
+      the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
   - NOT:
     - an epic page's `parts/`
     - details pages (questions, or comment boxes alone:  their `<epic-send>`;  epic `epic-engine` r6), choice pages
@@ -1753,8 +1758,10 @@ Each kind of page has ONE name, written everywhere a person reads it.
     So Owen's reply on a thread is new work, as a new comment is:  `list` shows it under the comment.
   - `answer` puts Claude's answer on the thread:  Owen's turn.  `--commit`:  the Done line shows it.
   - `list <epic>`:  the comments on the pages that epic owns, and those taken into it.
-  - Epic UI's pages too (epic `epic-engine` P2):  by their served path, `components/epics/epic-item.html#M1`,
-    their inboxes found in the engine's `src/docs/` (`PageInboxes.inboxFiles()`, `pages.js` `EPIC_UI_DOCS`).
+  - every component set's pages too:  by their served path, `components/epics/epic-item.html#M1`,
+    `components/app/Chooser.html#M1`;  their inboxes found in the sets' folders (`PageInboxes.inboxFiles()`, `pages.js`
+    `pagePath()` / `pageAt()`, both through `ComponentSetFolders`:  spell-app's `COMPONENT_SETS`, Epic UI's the
+    engine's `src/docs/`, App UI's and Brand's the checkout's `packages/<set>/docs/`).
   - `working` and `answer` stamp the heartbeat of the session listening to the page's epic, if any.
   - `gather` takes every waiting comment (and page note still `new`) into ONE epic, the standing `feedback`
     (`guide-changes` before epic `epic-engine` T9).
@@ -2019,13 +2026,15 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
       on a guide and an epic page (epic `epic-workflow` P23)
     - their comments stubbed in the browser, every POST aborted:  no inbox read or written, nobody woken
     - Run it after touching the comments' runtime, the toolbar or the jump dialog.
-  - `node src/demo/check-comments-epic-ui.mjs [--page <element>] [--docs <folder>] [--bundle <spell-ui.js>] [--keep]
-    [outDir]`, from the root:
+  - `node src/demo/check-comments-epic-ui.mjs [--set epics | app | brand] [--checkout <spell-app>] [--page <name>]
+    [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--keep] [outDir]`, from the root:
+    - `--set app` / `brand`:  App UI's or Brand's pages, from `--checkout`'s `packages/<set>/docs/` (default
+      `.spell-app`;  a spell-app worktree's, to check its pages before they merge);  a tabbed page's toolbar too
     - comments on Epic UI's pages (epic `epic-engine` P2):  the bullhorns, a page comment and a text one, their
       threads, Send, the router's swap and back, at 1200 and 390px;  and a guide's still drawn by the docs bundle
     - their toolbar (epic `epic-engine` T11):  a button per section landing it under the band, the bullhorn's count
       and its jumps, Cmd / Ctrl + K on a comment's id and on words (the site's search), the router's swap
-    - on a scratch copy of `src/docs/` unless `--docs`;  nobody woken
+    - on a scratch copy of the set's folder unless `--docs`;  nobody woken
     - Run it after touching the comments' code or look, or Epic UI's layout.
   - `node src/demo/check-test-run.mjs [--doc <name>] [outDir]`, from the root (epic `epic-engine` P4):
     - a test run on a scratch copy of an epic page, its To test section replaced by scratch tests (the new shape and

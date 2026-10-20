@@ -12,7 +12,7 @@ import { expect, test } from "vite-plus/test"
 import { COMPONENT_SETS } from "$/server/page/page.types"
 
 import { EPIC_UI } from "../../src/server/server.types.ts"
-import { EPIC_UI_DOCS, pageAndId, pageAt, pagePath } from "../../src/tools/pages.js"
+import { EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath } from "../../src/tools/pages.js"
 
 /** `src/tools/pages.js`, run in a child for another checkout (`EPIC_CHECKOUT` is read as it loads). */
 const PAGES_JS = resolve(dirname(fileURLToPath(import.meta.url)), "../../src/tools/pages.js")
@@ -36,6 +36,20 @@ test("Epic UI's pages are the engine's `src/docs/`, named `components/epics/...`
   expect(EPIC_UI_DOCS).toBe(resolve(dirname(fileURLToPath(import.meta.url)), "../../src/docs"))
   expect(pagePath(join(EPIC_UI_DOCS, "epic-item.html"))).toBe("components/epics/epic-item.html")
   expect(pageAt("components/epics/epic-item.html")).toBe(join(EPIC_UI_DOCS, "epic-item.html"))
+})
+
+// epic `epic-engine`:  every component set's pages are named by their address, App UI's and Brand's too (spell-app's,
+// in the checkout), as the epic server mounts them (`componentSetMounts()`)
+test("every component set's pages are `components/<set>/...`:  App UI's and Brand's from the checkout's folders", () => {
+  for (const set of COMPONENT_SETS.filter((each) => each.name !== "Epic UI")) {
+    const file = join(ROOT, set.dir, "x.html")
+    expect(pagePath(file)).toBe(`${set.prefix.slice(1)}/x.html`)
+    expect(pageAt(`${set.prefix.slice(1)}/x.html`)).toBe(file)
+  }
+  expect(pagePath(join(ROOT, "packages/app/docs/Chooser.inbox.json5"))).toBe("components/app/Chooser.inbox.json5")
+  expect(pageAt("components/brand/index.html")).toBe(join(ROOT, "packages/brand/docs/index.html"))
+  // their code isn't a set's
+  expect(pagePath(join(ROOT, "packages/app/src/x.ts"))).toBe("packages/app/src/x.ts")
 })
 
 // epic `epic-eject` T11:  every template is the engine's, spell-epic's own `templates/`, whichever checkout the tools

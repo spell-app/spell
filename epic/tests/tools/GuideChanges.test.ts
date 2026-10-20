@@ -152,6 +152,33 @@ describe("GuideChanges.gather()", () => {
     expect(GuideInbox.read(inbox).comments[id]).toMatchObject({ status: "taken", taken: { epic: "gc" } })
   })
 
+  // epic `epic-engine`:  every component set's pages take comments, App UI's and Brand's (spell-app's) in their
+  // folders in the checkout;  no epic owns one, so they're gathered too, each by its served path
+  test("App UI's and Brand's comments:  found in the checkout's sets, named `components/<set>/...`, gathered", async () => {
+    const pages = {
+      "components/app/Chooser.html": "packages/app/docs",
+      "components/brand/brand-color.html": "packages/brand/docs"
+    }
+    const ids: Record<string, string> = {}
+    for (const [page, dir] of Object.entries(pages)) {
+      const file = join(root, dir, page.split("/").at(-1)!)
+      mkdirSync(join(root, dir), { recursive: true })
+      writeFileSync(file, GUIDE.replace(/<spell-notes[\s\S]*<\/spell-notes>/, ""))
+      const inbox = GuideInbox.fileFor(file)
+      ids[page] = GuideInbox.update(inbox, (comments) =>
+        comments.add({ anchor: "sizes", kind: "section", label: "2. Sizes", excerpt: "2. Sizes" }, `On ${page}`)
+      )
+      expect(changes.inboxFiles()).toContain(inbox)
+      expect(changes.pageOf(inbox)).toBe(page)
+      expect(changes.fileOf(page)).toBe(file)
+    }
+    expect(changes.inboxes.unowned()).toEqual(expect.arrayContaining(Object.keys(pages)))
+    expect(await changes.gather()).toMatchObject(
+      Object.keys(pages).map((page) => ({ page, as: "phase", comments: [ids[page]] }))
+    )
+    expect(epicText()).toMatch(/href="\.\.\/\.\.\/components\/app\/Chooser\.html#sizes"/)
+  })
+
   // epic `epic-workflow` P13:  a page an epic owns sends its comments to that epic, never into feedback
   test("a page another epic owns is left out;  named, it's gathered all the same", async () => {
     mkdirSync(join(root, "epics", "py"), { recursive: true })

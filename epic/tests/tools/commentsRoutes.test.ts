@@ -60,6 +60,10 @@ const PAGES: Record<string, string> = {
   // Epic UI's page of `<epic-send>`, showing one live:  not a details page, so it takes comments
   "spell-epic/src/docs/epic-send.html": PAGE.replace("<p>Body.</p>", "<p>Body.</p><epic-send></epic-send>"),
   "spell-epic/src/docs/__parts/layout.html": PAGE,
+  // spell-app's own sets, App UI and Brand (epic `epic-engine`:  their pages load the comments too)
+  "packages/app/docs/Chooser.html": PAGE,
+  "packages/app/docs/__parts/layout.html": PAGE,
+  "packages/brand/docs/brand-color.html": PAGE,
   // epic py's guide:  a page epic py owns (`SeeAlso.ownerOf()`, epic `epic-workflow` P13)
   "guides/py.html": PAGE,
   "epics/py/py.plan.html": `<epic-page epic="py" updated="2026-10-13"><a slot="durable" href="../../guides/py.html">Py</a></epic-page>`,
@@ -403,6 +407,27 @@ test("a component set's page, at its address:  its inbox beside it in the set's 
   expect((await post({ page: "/components/epics/missing.html", action: "add", ...ON_TABLE, text: "x" })).status).toBe(
     404
   )
+})
+
+// epic `epic-engine`:  App UI's and Brand's pages load the comments as Epic UI's do;  no epic owns them, so their
+// Send names the standing `feedback`
+test("App UI's and Brand's pages, at their addresses:  their inboxes in the sets' folders, their Send feedback's", async () => {
+  for (const [page, file] of [
+    ["/components/app/Chooser.html", "packages/app/docs/Chooser.html"],
+    ["/components/brand/brand-color.html", "packages/brand/docs/brand-color.html"]
+  ]) {
+    const { status, answer } = await post({ page, action: "add", anchor: "page", kind: "page", text: `On ${page}` })
+    expect(status).toBe(200)
+    expect(answer.send).toMatchObject({ epic: "feedback", owned: false, unsent: [answer.id] })
+    expect(inboxOf(file)).toMatchObject({ comments: { [answer.id]: { text: `On ${page}`, status: "new" } } })
+    const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${page}`)).text)
+    expect(read).toMatchObject({ takesComments: true, comments: [{ id: answer.id }], send: { epic: "feedback" } })
+    rmSync(join(root, file.replace(/\.html$/, ".inbox.json5")))
+  }
+  const layout = JSON.parse(
+    (await ask(port, "GET", "/api/docs/comments?page=/components/app/__parts/layout.html")).text
+  )
+  expect(layout.takesComments).toBe(false)
 })
 
 // epic `epic-engine` r6:  the runtime drew the comments' Send over a details page's own, "nobody is listening"

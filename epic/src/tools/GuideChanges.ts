@@ -40,8 +40,9 @@ const PROMPT =
  *     the page's Send (`plan-doc inbox <epic> wait`), or wait for its next `/epic review`;  a page the caller names
  *     is gathered all the same
  *   - its page notes still `new` (`<spell-note status="new">`, written before P11:  `notesOnDisk.ts`)
- *   - Epic UI's pages too (the engine's `src/docs/`, `EPIC_UI`;  epic `epic-engine` P2):  no epic owns one, so their
- *     comments come here;  each by its served path, `components/epics/<page>` (`pageOf()`)
+ *   - the component sets' pages too (`PageInboxes`):  no epic owns one, so their comments come here;  each by its
+ *     served path, `components/epics/<page>`, `components/app/<page>` (`pageOf()`)
+ *     - Epic UI's since epic `epic-engine` P2;  App UI's and Brand's since they load the comments (`epic-engine`)
  * - ONE PHASE PER PAGE:  the comments its goal, each linked back to the page and its block, quoted;
  *   a page with a phase still open (to do or under way) gets an update in it instead (`addPhaseUpdate()`):
  *   an `<epic-update>` block at the end of its description, `Update: N comments more from Owen`
@@ -67,11 +68,6 @@ export class GuideChanges {
     this.content = EpicConfig.contentOf(root)
     this.epic = epicNamed(epic)
     this.inboxes = new PageInboxes({ root, epicUi })
-  }
-
-  /** Epic UI's folder:  the engine's `src/docs/`, or another (a test's). */
-  get epicUi(): string {
-    return this.inboxes.epicUi
   }
 
   /** The page path of inbox file `inbox`'s page (`PageInboxes.pageOf()`). */

@@ -1,0 +1,59 @@
+import { isAbsolute, join, relative, sep } from "node:path"
+
+// Import directly:  the page server's barrel would load the whole server into every `epic` call
+import { COMPONENT_SETS } from "@spell-app/server/src/page/page.types.ts"
+
+import { EPIC_UI } from "../server/server.types.ts"
+
+/****************
+ * ### `ComponentSetFolders`
+ * Where each COMPONENT SET's pages are on disk, and the PAGE PATH the tools name each one by:  its address, as the
+ * page servers serve it (`components/app/Chooser.html`), never its folder (`packages/app/docs/Chooser.html`).
+ * - The sets:  spell-app's `COMPONENT_SETS`, read through `.spell-app`, as the epic server's `componentSetMounts()`
+ *   reads them:  Spell UI, Epic UI, App UI, Brand.
+ *   - each in its folder in checkout `root` (`packages/app/docs/`)
+ *   - except Epic UI:  the engine's own `src/docs/` (`epicUi`), wherever spell-epic is
+ * - Their pages take comments, in inbox files beside them (`commentsRoutes.ts`);
+ *   `PageInboxes` finds them, and `pages.js` names them (`pagePath()`, `pageAt()`).
+ * - Reads no files:  a set whose folder isn't there is listed all the same.
+ ****************/
+export class ComponentSetFolders {
+  /** each set's page-path prefix (`components/app`) and folder, in `COMPONENT_SETS`' order */
+  readonly folders: readonly ComponentSetFolder[]
+
+  constructor({ root, epicUi }: { root: string; epicUi: string }) {
+    this.folders = COMPONENT_SETS.map((set) => {
+      const path = set.prefix.slice(1)
+      return { name: set.name, path, dir: path === EPIC_UI.path ? epicUi : join(root, set.dir) }
+    })
+  }
+
+  /**
+   * The page path of `file`, a page (or folder, or inbox file) in a set's folder:  `components/app/Chooser.html`;
+   * `undefined` outside every set's.
+   * - `real`:  a set's folder with its links followed, for a `file` named with them followed (`pages.js` `realOf()`)
+   */
+  pageFor(file: string, real: (dir: string) => string = (dir) => dir): string | undefined {
+    for (const { path, dir } of this.folders) {
+      const inside = relative(real(dir), file)
+      if (inside.startsWith("..") || isAbsolute(inside)) continue
+      return [path, ...(inside ? inside.split(sep) : [])].join("/")
+    }
+  }
+
+  /** The file page path `page` names in a set's folder (`pageFor()` turned round);  `undefined`:  not a set's. */
+  fileFor(page: string): string | undefined {
+    const folder = this.folders.find(({ path }) => page === path || page.startsWith(`${path}/`))
+    return folder && join(folder.dir, page.slice(folder.path.length + 1))
+  }
+}
+
+/** One component set's pages:  `{ name: "App UI", path: "components/app", dir: "<checkout>/packages/app/docs" }`. */
+export type ComponentSetFolder = {
+  /** what prose calls it, `App UI` */
+  name: string
+  /** its pages' page paths start with it:  its address, without the leading `/` */
+  path: string
+  /** its pages' folder, absolute */
+  dir: string
+}

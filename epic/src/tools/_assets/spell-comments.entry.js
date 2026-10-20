@@ -1,7 +1,9 @@
 /**
  * Entry of `spell-comments.js`:  the docs pages' TOOLBAR and COMMENTS, for the pages that load Spell UI's site bundle
  * instead of the docs bundle (epic `epic-engine` P2, T3;  the toolbar since T11).
- * - Epic UI's pages (`src/docs/`, served at `/components/epics/`):  each loads it in its `<head>`, after the site's:
+ * - Epic UI's pages (`src/docs/`, served at `/components/epics/`), and App UI's and Brand's (spell-app's
+ *   `packages/<set>/docs/`, at `/components/app/`, `/components/brand/`):  each loads it in its `<head>`, after the
+ *   site's (their layouts load the epics pack, whose elements draw the threads and the pane):
  *
  *     <script defer src="/_epic/assets/spell-comments.js"></script>
  *
@@ -88,15 +90,45 @@ async function wire() {
  * The page's TOOLBAR (see the header):  a `<ui-sticky class="site-sticky-bar">` first in the page's article, holding
  * the toolbar's menu (`toolbarMenu()`, titled), a button per top-level `<ui-section>` (`titledItems()`:  its number and
  * its title, `1` `Example`);  none without sections.
+ * - a page in TABS (a components page's Examples, Usage, API, Theming:  Brand's element pages):  the SHOWN pane's
+ *   sections, its bar first in that pane;  drawn again for the next pane as the tabs switch (`ui-show`), the
+ *   comments' bullhorn kept (`toolbarMenu()` keeps what was added to the row);  a pane without sections, none
+ *   - before:  one bar in the first pane, a button for every pane's sections, the hidden ones' too
  * - the section being read marked (`markCurrent()`):  the last whose top has reached the line the site sticks titles
  *   at (`--site-sections-top`, which counts the bar)
  * - a click lands as the site lands any `#id` link (`SiteSections`:  unfolded, below the stuck titles)
  * - the site measured again once it's drawn (a `resize`):  its titles stick below the bar, its links land below it
- * - SIDE EFFECT:  the bar in `main` (`data-spell-added`:  the comments step around it);  a scroll and a resize
- *   listener, until `signal`
+ * - SIDE EFFECT:  the bar in `main` (`data-spell-added`:  the comments step around it);  a scroll, a resize and a
+ *   `ui-show` listener, until `signal`
  */
 function wireToolbar(main, { signal }) {
   const sections = topSections(main)
+  const tabs = sections[0]?.parentElement?.closest("ui-tab")?.closest("ui-tabs")
+  if (!tabs) return drawToolbar(sections, { signal })
+  // the toolbar drawn for the pane shown now:  aborted for the next
+  let pane = null
+  const drawPane = () => {
+    pane?.abort()
+    pane = new AbortController()
+    signal.addEventListener("abort", () => pane.abort(), { once: true, signal: pane.signal })
+    const shown = [...tabs.querySelectorAll(":scope > ui-tab")].find(isShownPane)
+    drawToolbar(
+      sections.filter((section) => section.parentElement.closest("ui-tab") === shown),
+      { signal: pane.signal }
+    )
+  }
+  tabs.addEventListener("ui-show", (event) => event.target.parentElement === tabs && requestAnimationFrame(drawPane), {
+    signal
+  })
+  drawPane()
+}
+
+/**
+ * Draw the toolbar over `sections`, first in their parent (the page's article, or a tab's pane);  none, none.
+ * - `signal`:  takes it down again (the bar, its listeners);  what the comments added to its row is kept for the next
+ *   (`toolbarMenu()`)
+ */
+function drawToolbar(sections, { signal }) {
   if (!sections.length) return
   const groups = sections.map((element) => ({
     element,
@@ -111,6 +143,7 @@ function wireToolbar(main, { signal }) {
     titledItems(groups, () => []),
     { titled: true }
   )
+  for (const old of document.querySelectorAll(`.${PAGE_BAR_CLASS}.spell-site-toolbar`)) old.remove()
   const bar = el("ui-sticky", { class: `${PAGE_BAR_CLASS} spell-site-toolbar`, "data-spell-added": true }, toolbar)
   const article = sections[0].parentElement
   article.prepend(bar)
@@ -126,12 +159,22 @@ function wireToolbar(main, { signal }) {
     scheduled = true
     requestAnimationFrame(() => {
       scheduled = false
-      if (!signal.aborted) markCurrent(toolbar, currentSection(main, sections)?.id ?? sections[0].id)
+      if (!signal.aborted)
+        markCurrent(toolbar, currentSection(document.querySelector(PAGE_MAIN), sections)?.id ?? sections[0].id)
     })
   }
   addEventListener("scroll", follow, { passive: true, signal })
   addEventListener("resize", follow, { passive: true, signal })
   follow()
+}
+
+/** Is `<ui-tab>` `tab` the pane its `<ui-tabs>` shows (its `:state(selected)`)?  No `:state()`:  unless hidden. */
+function isShownPane(tab) {
+  try {
+    return tab.matches(":state(selected)")
+  } catch {
+    return !tab.hidden
+  }
 }
 
 /** The page's top-level `<ui-section>`s:  its article's own, else every one not inside another (or an example). */

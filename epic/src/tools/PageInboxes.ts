@@ -8,6 +8,8 @@ import { SeeAlso } from "$/epics/tool/SeeAlso"
 
 import { EPIC_UI } from "../server/server.types"
 
+import { ComponentSetFolders } from "./ComponentSetFolders"
+
 /** The folders, from the content folder, whose pages take comments (`commentsRoutes.ts`). */
 const COMMENT_FOLDERS = ["guides", "pages", "epics"]
 
@@ -25,8 +27,10 @@ const INBOX_FILE = /\.inbox\.json5?$/
  * The docs pages' INBOX FILES (`<page>.inbox.json5` beside each page that has comments, `GuideInbox`):  where they
  * are, and which page each is for (epic `epic-engine` T9, lifted out of `GuideChanges`).
  * - the content folder's `guides/`, `pages/` and `epics/` (an epic's own pages;  never an epic page's review inbox)
- * - Epic UI's pages too (the engine's `src/docs/`, `EPIC_UI`;  epic `epic-engine` P2):  each by its served path,
- *   `components/epics/<page>` (`pageOf()`)
+ * - every COMPONENT SET's pages too (`ComponentSetFolders`):  each by its served path, `components/app/<page>`
+ *   (`pageOf()`)
+ *   - App UI's and Brand's in the checkout (`packages/app/docs/` ...);  Epic UI's in the engine's `src/docs/`
+ *     (`EPIC_UI`;  epic `epic-engine` P2)
  * - `unowned()`:  the pages no epic owns, the standing `feedback` epic's (`SeeAlso.epicFor()`):  how `epic inbox
  *   feedback wait` hears their Send
  * - Reads files only, never writes.  Node only:  imported by path, as `SeeAlso` is.
@@ -36,38 +40,40 @@ export class PageInboxes {
   readonly root: string
   /** its repo's content folder (`EpicConfig.contentOf()`):  its `guides/`, `pages/`, `epics/` */
   readonly content: string
-  /** Epic UI's folder:  the engine's `src/docs/`, or another (a test's) */
-  readonly epicUi: string
+  /** the component sets' folders:  Epic UI's the engine's `src/docs/` (or a test's), the others the checkout's */
+  readonly sets: ComponentSetFolders
 
   constructor({ root, epicUi = EPIC_UI_DOCS }: { root: string; epicUi?: string }) {
     this.root = root
     this.content = EpicConfig.contentOf(root)
-    this.epicUi = epicUi
+    this.sets = new ComponentSetFolders({ root, epicUi })
   }
 
   /**
-   * The page path of inbox file `inbox`'s page:  from the content folder (`guides/x.html`), or Epic UI's as served
-   * (`components/epics/epic-item.html`).
+   * The page path of inbox file `inbox`'s page:  from the content folder (`guides/x.html`), or a component set's as
+   * served (`components/epics/epic-item.html`, `components/app/Chooser.html`).
    */
   pageOf(inbox: string): string {
-    const inEpicUi = relative(this.epicUi, inbox)
-    const path = inEpicUi.startsWith("..") ? relative(this.content, inbox) : `${EPIC_UI.path}/${inEpicUi}`
-    return path.split(sep).join("/").replace(INBOX_FILE, ".html")
+    const path = this.sets.pageFor(inbox) ?? relative(this.content, inbox).split(sep).join("/")
+    return path.replace(INBOX_FILE, ".html")
   }
 
   /** Page path `page`'s file (`pageOf()` turned round). */
   fileOf(page: string): string {
-    const epicUi = `${EPIC_UI.path}/`
-    return page.startsWith(epicUi) ? join(this.epicUi, page.slice(epicUi.length)) : join(this.content, page)
+    return this.sets.fileFor(page) ?? join(this.content, page)
   }
 
   /**
    * Every docs page's inbox file (`<page>.inbox.json5` beside a `<page>.html`, never an epic page's), sorted:  the
-   * content folder's, then Epic UI's.
+   * content folder's, then each component set's (`COMPONENT_SETS`' order).
    * - by its `.json5` name, also when only its old `.json` is there (`GuideInbox.read()` reads either)
    */
   inboxFiles(): string[] {
-    return [...COMMENT_FOLDERS.map((folder) => join(this.content, folder)), this.epicUi].flatMap((top) => {
+    const tops = [
+      ...COMMENT_FOLDERS.map((folder) => join(this.content, folder)),
+      ...this.sets.folders.map((set) => set.dir)
+    ]
+    return tops.flatMap((top) => {
       let names: string[]
       try {
         names = readdirSync(top, { recursive: true, encoding: "utf8" })

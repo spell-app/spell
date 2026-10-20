@@ -3,6 +3,8 @@ import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import type { SRV } from "$/server"
+
 import { EpicConfig } from "../config/EpicConfig"
 import { EpicServer } from "../server/EpicServer"
 import { repoPrefixFor } from "../server/server.types"
@@ -85,12 +87,18 @@ export class DemoServer {
   static async start({
     content,
     port = 47_600 + Math.floor(Math.random() * 300),
-    epicUi
+    epicUi,
+    mounts = []
   }: {
     content: string
     port?: number
     /** the folder to serve at `/components/epics/`:  a check's scratch copy of `src/docs/` (`EpicServer`'s `epicUi`) */
     epicUi?: string
+    /**
+     * more folders served, before the rest:  a check's scratch copy of another component set at its address
+     * (`/components/app/`), its site bundle and its pack (`check-comments-epic-ui.mjs --set app`)
+     */
+    mounts?: SRV.Mount[]
   }) {
     const scratch = mkdtempSync(join(tmpdir(), "epic-demo-"))
     const windows = join(scratch, "windows")
@@ -135,6 +143,7 @@ export class DemoServer {
       repos: [{ name: "demo", checkout: ENGINE, content: folder, prefix: repoPrefixFor("demo"), isDefault: true }],
       epicUi
     })
+    for (const mount of mounts) made.web.files.mount(mount)
     for (const [name, dir] of sharedFolders()) made.web.files.mount({ prefix: `/${name}/`, dir })
     const server = await made.start({ port, pidFile: false })
     // the copies a check just wrote:  macOS reports them to the new watcher late, and live reload would reload a page
