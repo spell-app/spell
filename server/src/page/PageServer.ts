@@ -207,7 +207,8 @@ export class PageServer {
    * The page server of the checkout at `root`, started in the background if it isn't running.
    * - returns its info, `base` URL, and whether it was `launched` just now
    * - runs `page/cli.ts serve` under `tsx`, whatever the caller's folder,
-   *   with this package's `tsconfig.json` for the aliases (`TSX_TSCONFIG_PATH`)
+   *   with this package's `tsconfig.json` for the aliases (`TSX_TSCONFIG_PATH`), and the run-time alias hook
+   *   (`ALIASES`):  the route modules it loads (spell-app's, spell-epic's) import their own repos' `$/` aliases
    * - its output goes to `<root>/.spell-server.log`
    * - what `spell dev server ensure`, the goals tools and the openers call
    */
@@ -215,7 +216,19 @@ export class PageServer {
     // its code:  this package's, and its route modules' folders;  a server older than them restarts (I5 of `skillz`)
     const routes = (pageServerSettings(root).routes ?? []).map((path) => dirname(join(root, path)))
     return new SRV.PidFile(root).ensure({
-      command: [process.execPath, "--import", "tsx", CLI, "serve", "--root", resolve(root), "--port", String(port)],
+      command: [
+        process.execPath,
+        "--import",
+        "tsx",
+        "--import",
+        ALIASES,
+        CLI,
+        "serve",
+        "--root",
+        resolve(root),
+        "--port",
+        String(port)
+      ],
       env: { TSX_TSCONFIG_PATH: TSCONFIG },
       sources: [SOURCE, ...new Set(routes)]
     })
@@ -401,6 +414,12 @@ const SOURCE = fileURLToPath(new URL("..", import.meta.url))
 
 /** This package's `tsconfig.json`:  the alias table a background server needs. */
 const TSCONFIG = fileURLToPath(new URL("../../tsconfig.json", import.meta.url))
+
+/**
+ * The run-time alias hook (`@spell-app/toolchain/aliases`, epic `repo-split` I12), loaded after `tsx` in the
+ * background server:  each file's `$/` imports by its OWN repo's alias table.
+ */
+const ALIASES = import.meta.resolve("@spell-app/toolchain/aliases")
 
 /** Where worktrees are served, once a route module says where they are (`serveWorktrees()`). */
 const WORKTREES_PREFIX = "/worktrees/"

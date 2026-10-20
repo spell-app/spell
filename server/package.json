@@ -37,6 +37,10 @@
     "./test/serve": {
       "types": "./dist-types/test/serve.d.ts",
       "default": "./test/serve.ts"
+    },
+    "./test/checkouts": {
+      "types": "./dist-types/test/checkouts.d.ts",
+      "default": "./test/checkouts.ts"
     }
   },
   "scripts": {
@@ -54,10 +58,10 @@
     "test:watch": "vp test"
   },
   "dependencies": {
+    "@spell-app/toolchain": "workspace:*",
     "parse5": "^7.3.0"
   },
   "devDependencies": {
-    "@spell-app/toolchain": "workspace:*",
     "@types/node": "^22.20.4",
     "@typescript/typescript6": "^6.0.2",
     "json5": "^2.1.1",
