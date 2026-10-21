@@ -64,7 +64,9 @@
  *   - The resumed session goes back into its worktree by itself (Claude records `worktree-state` in the transcript),
  *     but ONLY one that entered with `EnterWorktree`, never one started in the worktree's folder
  *     (epic `epic-eject` I3).
- *     So every skill enters that way, and the session-start guard (`hooks/worktree-guard.mjs`) catches the rest.
+ *     The new tab starts in the worktree's window, whose first folder is the worktree, so it's there anyway;  the
+ *     session-start guard (`hooks/worktree-guard.mjs`) records a session started there, and sends one reopened
+ *     elsewhere back.
  *   - Why wait for the turn to end:
  *     until then the old process is still writing the transcript, and the new tab would load it half-written.
  *   - The repo's `Stop` hook (`.claude/hooks/handoff.mjs`) starts `resume`, detached,
@@ -520,11 +522,17 @@ export class Window {
    *     - each file once, one repo in Source Control
    *     - its Claude panel lists every session through the worktree's linked session folder (`linkSessionFolders`)
    *     - a new tab's session starts IN the worktree:
-   *       the session-start guard (`hooks/worktree-guard.mjs`) has it `EnterWorktree` its own folder,
-   *       so a reopen finds its way back (I3)
+   *       the session-start guard (`hooks/worktree-guard.mjs`) records it there, so a reopen finds its way back (I3)
+   *   - a multi-repo top's epic worktree (`~/www/spell.worktrees/<name>`, `windows.worktreeOnly` off):  `⎇ <name>`
+   *     first, then the main top checkout, then the content folder (epic `epic-engine` P12)
+   *     - the worktree first, so a new tab's session starts in it, never asked to `EnterWorktree` (which Claude Code
+   *       asks Owen about outside `.claude/worktrees/`:  r11);  the Claude panel still lists every session, through
+   *       the worktree's linked session folder (`linkSessionFolders`)
+   *     - the main top came first before P12 (J83):  a window written then keeps that order (`init` never reorders
+   *       an open window's folders:  a new first folder restarts its extensions, the Claude panel's sessions with them)
    *   - the old layout, a worktree nested in the checkout:
-   *     the main root first (for the Claude panel), then `⎇ <name>`, then the content folder
-   *     - the main root's files hidden (`filesExclude({ worktree: true })`):  the worktree's folder has the same ones
+   *     the main root first (for the Claude panel), then `⎇ <name>`, then the content folder;  entering it asks nothing
+   *   - either way, the main root's files hidden (`filesExclude({ worktree: true })`):  the worktree has the same ones
    * - its look (epic `windows-and-review` P5, Q1):  `color`, a look's name (`LOOKS`);  else `from`'s,
    *   the window file of the window it's opened from (its theme and colours, a staying session's tint left out);
    *   else `pkg`'s theme, the title bar tinted the worktree's own colour (`tint()`)
@@ -544,12 +552,13 @@ export class Window {
         settings["workbench.colorCustomizations"] = source.settings["workbench.colorCustomizations"]
     } else settings["workbench.colorCustomizations"] = tint(name)
     const ongoing = WORKTREE_WINDOWS
+    const worktree = { path: relative(ongoing, CONFIG.worktreeFolder(name)), name: `⎇ ${name}` }
+    const repo = only ? [] : [{ path: relative(ongoing, MAIN_ROOT), name: CONFIG.windows.repoName }]
+    // a worktree outside the main checkout FIRST, so a new tab's session starts in it, and nothing has to
+    // EnterWorktree (epic `epic-engine` P12, r11:  Claude Code asks before entering one outside `.claude/worktrees/`)
+    const first = CONFIG.isOutside(CONFIG.worktreeFolder(name))
     return {
-      folders: [
-        ...(only ? [] : [{ path: relative(ongoing, MAIN_ROOT), name: CONFIG.windows.repoName }]),
-        { path: relative(ongoing, CONFIG.worktreeFolder(name)), name: `⎇ ${name}` },
-        ...Window.sharedFolder(ongoing)
-      ],
+      folders: [...(first ? [worktree, ...repo] : [...repo, worktree]), ...Window.sharedFolder(ongoing)],
       settings,
       spell: { package: pkg }
     }
@@ -698,10 +707,9 @@ export class Window {
    *     - its look:  `color`, else `pkg`'s window's theme, the title bar tinted `name`'s own colour;
    *       never the look of the window it's launched from, another epic's
    * - several of the epic's sessions running, or its one session in a terminal:  nothing done, `action` says why
-   * - a new session starts in the window's first folder:
-   *   - the main root (the old layout):  `/epic <name>` enters the worktree with `EnterWorktree`
-   *   - or the worktree itself (a worktree-only window):  the session-start guard has it `EnterWorktree`
-   *     its own folder first, so a reopen comes back there (epic `epic-eject` I3)
+   * - a new session starts in the window's first folder, the worktree (`worktreeWorkspace()`):  the session-start
+   *   guard records it there, so a reopen comes back (epic `epic-eject` I3), with no `EnterWorktree` (epic `epic-engine`
+   *   P12);  in a window written before P12 it starts in the main root, and `/epic <name>` enters the worktree
    */
   static async launch(name, pkg, { color = null, prompt = null } = {}) {
     const file = Window.worktreeFile(name)

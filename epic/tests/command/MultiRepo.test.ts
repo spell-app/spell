@@ -64,9 +64,10 @@ const GIT_ENV = {
   GIT_CONFIG_VALUE_0: "false"
 }
 const SAVED = { ...process.env }
-Object.assign(process.env, GIT_ENV, { CLAUDE_CONFIG_DIR: CLAUDE })
+// the session-start guard's records (epic `epic-engine` P12) in a temp home, never ~/.spell-epic
+Object.assign(process.env, GIT_ENV, { CLAUDE_CONFIG_DIR: CLAUDE, SPELL_EPIC_HOME: join(TEMP, "home") })
 afterAll(() => {
-  for (const key of [...Object.keys(GIT_ENV), "CLAUDE_CONFIG_DIR"])
+  for (const key of [...Object.keys(GIT_ENV), "CLAUDE_CONFIG_DIR", "SPELL_EPIC_HOME"])
     if (SAVED[key] === undefined) delete process.env[key]
     else process.env[key] = SAVED[key]
   rmSync(TEMP, { recursive: true, force: true })
@@ -299,14 +300,15 @@ describe("an epic across two child repos and the kit:  merge-main, merge, remove
 })
 
 describe("the session guard and the window, from a child repo", () => {
-  test("a session started in a child's folder of an epic worktree:  told to enter the TOP's worktree", () => {
+  test("a session started in a child's folder of an epic worktree:  the TOP's worktree recorded, nothing said", () => {
     const made = hook("create", { name: "guard", cwd: TOP })
     expect(made.status, made.stderr).toBe(0)
-    const said = WorktreeGuard.check({ cwd: join(made.stdout, "spell-ui"), source: "startup" })
-    expect(said?.hookSpecificOutput.additionalContext).toContain(`EnterWorktree with path "${made.stdout}"`)
+    const said = WorktreeGuard.check({ cwd: join(made.stdout, "spell-ui"), source: "startup", session_id: "g1" })
+    expect(said).toBeUndefined()
+    expect(WorktreeGuard.recordOf("g1")).toMatchObject({ worktreePath: made.stdout, worktreeName: "guard" })
   })
 
-  test("an epic's window:  the main TOP checkout first (its files hidden), then the epic's worktree, then the content", () => {
+  test("an epic's window:  the epic's worktree first, then the main TOP checkout (its files hidden), then the content", () => {
     const code =
       "const { Window } = await import(process.env.WINDOW_SCRIPT);" +
       'console.log(JSON.stringify({ guard: Window.worktreeWorkspace("spell", "guard"), repo: Window.packageFolders() }))'
@@ -320,8 +322,8 @@ describe("the session guard and the window, from a child repo", () => {
     expect(
       guard.folders.map(({ path, name }: { path: string; name: string }) => [resolve(ongoing, path), name])
     ).toEqual([
-      [TOP, "spell"],
       [join(WORKTREES, "guard"), "⎇ guard"],
+      [TOP, "spell"],
       [CONTENT, "spell.epics"]
     ])
     expect(guard.settings["files.exclude"]["*"]).toEqual({ when: ".spell-main" })
