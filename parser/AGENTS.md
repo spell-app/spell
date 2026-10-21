@@ -31,11 +31,11 @@ Each folder links to its own `AGENTS.md`:  read it before working there.
 
 | Folder | Entry | Alias | Namespace | What it is |
 | --- | --- | --- | --- | --- |
-| [parser](parser/AGENTS.md) | `spell-lang/parser` | `$/parser` | `P` | the generic rule-based parser;  Rulex is an opt-in side-effect import, `$/parser/rulex` |
+| [parser](parser/AGENTS.md) | `spell-lang/parser` | `$/parser` | `P` | the generic rule-based parser;  Rulex is an opt-in side-effect import, `$/parser/rulex` (`spell-lang/parser/rulex` from another repo) |
 | [markdown](markdown/AGENTS.md) | `spell-lang/markdown` | `$/markdown` | `MD` | GitHub-flavoured markdown on the parser, drawing `ui-*` markup |
 | [core](core/AGENTS.md) | `spell-lang/core` | `$/core` | `SC` | the runtime compiled spell runs on |
 | [py](py/AGENTS.md) | `spell-lang/py` | `$/py` | `PY` | Python's writers (`ts/`) and `spell_core` (`core/`, a uv project) |
-| [spell](spell/AGENTS.md) | `spell-lang/spell` | `$/spell` | `SP` | the spell LANGUAGE on the parser, `PARSING.md` and `readme.md` |
+| [spell](spell/AGENTS.md) | `spell-lang/spell` | `$/spell` | `SP` | the spell LANGUAGE on the parser, and `PARSING.md`;  its page for people is [README-spell.md](README-spell.md) |
 
 ## Tests
 
