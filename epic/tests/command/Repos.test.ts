@@ -1,8 +1,10 @@
 /**
  * Tests of `epic repo` (`Repos`) and of `epic hub`'s checks before it starts anything (`Hub`), in a temp home folder.
- * - no server is started here (the server itself:  `EpicServer.test.ts`)
+ * - no server is started here (the server itself:  `EpicServer.test.ts`);  a port taken:  a plain web server's
  */
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { createServer } from "node:http"
+import type { AddressInfo } from "node:net"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
@@ -83,5 +85,22 @@ describe("epic hub, before it starts anything", () => {
   test("status with no server:  'not running', exit 1", async () => {
     expect(await new Hub({ home: join(top, "home4") }).run(["status"])).toBe(1)
     expect(printed.join("")).toBe("not running\n")
+  })
+  // epic `epic-engine` I69:  it took any free port instead, and every restart moved open pages to a dead address
+  test("its port taken by another program:  refused on one line, saying so, nothing started elsewhere", async () => {
+    const home = join(top, "home5")
+    await new Repos({ list: new RepoList({ home }) }).run(["add", repo("five")])
+    const other = createServer((_request, reply) => reply.writeHead(404).end())
+    await new Promise<void>((done) => other.listen(0, "127.0.0.1", done))
+    const { port } = other.address() as AddressInfo
+    try {
+      const refused = new Hub({ home }).run(["ensure", "--port", String(port)])
+      await expect(refused).rejects.toThrow(EpicCommandError)
+      await expect(refused).rejects.toThrow(`epic server:  port ${port} is taken, by another program`)
+      expect(existsSync(join(home, "server.json"))).toBe(false)
+    } finally {
+      other.closeAllConnections()
+      await new Promise((done) => other.close(done))
+    }
   })
 })

@@ -1,11 +1,14 @@
 /**
  * Tests of the machine's epic server (`EpicServer`):  two scratch repos, this checkout as the engine, a temp home.
  * - started on a free port with no route modules and no pid file, and stopped after
+ * - its port (`claimPort()`):  FAKE servers, processes of their own on free ports (`fakeServer()`)
  */
+import { spawn, type ChildProcess } from "node:child_process"
+import { once } from "node:events"
 import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
-import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell-kit/server"
 import { componentSets, type ComponentSetSetting } from "spell-kit/server/page"
@@ -254,6 +257,116 @@ describe("EpicServer, no repo registered", () => {
     } finally {
       await server.stop()
       rmSync(home, { recursive: true, force: true })
+    }
+  })
+})
+
+/**
+ * A FAKE epic server, its own process:  answers `/api/server` with `info`, its own pid and port filled in, on `port`
+ * (default a free one);  `SIGTERM` ends it and frees its port, as a real one's stop does.
+ * - never the real server, never 4848
+ */
+async function fakeServer(info: Record<string, unknown>, port = 0): Promise<{ pid: number; port: number }> {
+  const script =
+    `const info = JSON.parse(process.argv[1]);  const server = require("node:http").createServer((_, reply) => ` +
+    `reply.setHeader("Content-Type", "application/json").end(JSON.stringify({ ...info, pid: process.pid, ` +
+    `port: server.address().port })));  server.listen(${port}, "127.0.0.1", () => console.log(server.address().port))`
+  const child = spawn(process.execPath, ["-e", script, JSON.stringify(info)], { stdio: ["ignore", "pipe", "inherit"] })
+  fakes.push(child)
+  const [line] = (await once(child.stdout!, "data")) as [Buffer]
+  return { pid: child.pid!, port: Number(String(line).trim()) }
+}
+
+/** Every fake started, ended after the tests. */
+const fakes: ChildProcess[] = []
+
+/** Whether process `pid` is still running. */
+function alive(pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// epic `epic-engine` I69:  two `ensure()`s at once started two;  the pid file named the one on a random port, and every
+// restart after replaced only it, on yet another port, while the first kept 4848
+describe("EpicServer.claimPort():  ONE server, on ONE port", () => {
+  let home: string
+  let pidFile: SRV.PidFile
+  beforeEach(() => {
+    home = realpathSync(mkdtempSync(join(tmpdir(), "epic-server-port-")))
+    pidFile = new SRV.PidFile(home, "server.json")
+  })
+  afterEach(() => rmSync(home, { recursive: true, force: true }))
+  afterAll(() => {
+    for (const fake of fakes) fake.kill()
+  })
+
+  /** This home's epic server's answer, started now. */
+  const ours = () => ({ root: home, started: new Date().toISOString(), epicServer: true, repos: [] })
+
+  /** Name the fake `server` in the pid file, as its own start would have. */
+  const name = (server: { pid: number; port: number }) => pidFile.write({ ...ours(), ...server } as never)
+
+  test("an epic server of this home on the port, the pid file naming another:  adopted, the other stopped", async () => {
+    const onPort = await fakeServer(ours())
+    const named = await fakeServer(ours())
+    name(named)
+    await EpicServer.claimPort(pidFile, onPort.port)
+    expect(pidFile.read()).toMatchObject({ pid: onPort.pid, port: onPort.port, root: home })
+    expect(alive(named.pid)).toBe(false)
+    expect(alive(onPort.pid)).toBe(true)
+    // and again:  it's the one named now, kept
+    await EpicServer.claimPort(pidFile, onPort.port)
+    expect(pidFile.read()?.pid).toBe(onPort.pid)
+    expect(alive(onPort.pid)).toBe(true)
+  })
+
+  test("the pid file's server on ANOTHER port, the port free:  stopped, so a fresh one starts on the port", async () => {
+    const named = await fakeServer(ours())
+    name(named)
+    await EpicServer.claimPort(pidFile, await SRV.freePort())
+    expect(alive(named.pid)).toBe(false)
+  })
+
+  test("the pid file's server on the port, older than the repo list:  stopped, its port free again", async () => {
+    const named = await fakeServer({ ...ours(), started: new Date(Date.now() - 60_000).toISOString() })
+    name(named)
+    writeFileSync(new RepoList({ home }).file, "[]\n")
+    await EpicServer.claimPort(pidFile, named.port)
+    expect(alive(named.pid)).toBe(false)
+    expect(await SRV.isFree(named.port)).toBe(true)
+  })
+
+  test("the port taken by ANOTHER home's epic server:  refused, saying whose, and left alone", async () => {
+    const theirs = await fakeServer({ ...ours(), root: "/elsewhere" })
+    await expect(EpicServer.claimPort(pidFile, theirs.port)).rejects.toThrow(
+      `port ${theirs.port} is taken, by the epic server of /elsewhere (pid ${theirs.pid})`
+    )
+    expect(alive(theirs.pid)).toBe(true)
+  })
+
+  test("the port taken by something that isn't an epic server:  refused", async () => {
+    const other = await fakeServer({ root: home })
+    await expect(EpicServer.claimPort(pidFile, other.port)).rejects.toThrow(/is taken, by another program/)
+    expect(alive(other.pid)).toBe(true)
+  })
+
+  test("`start()` on a taken port:  with a pid file, refused, writing none;  without one, another port", async () => {
+    const taken = await fakeServer({ root: "/elsewhere" })
+    const machine = new EpicServer({ home, engine: ENGINE, repos: [] })
+    await expect(machine.start({ port: taken.port, routes: false, bundles: false })).rejects.toThrow(
+      `epic server:  port ${taken.port} is taken`
+    )
+    expect(existsSync(pidFile.file)).toBe(false)
+    const demo = new EpicServer({ home, engine: ENGINE, repos: [] })
+    try {
+      await demo.start({ port: taken.port, routes: false, pidFile: false, bundles: false })
+      expect(demo.info.port).not.toBe(taken.port)
+    } finally {
+      await demo.stop()
     }
   })
 })

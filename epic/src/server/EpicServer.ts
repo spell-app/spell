@@ -75,7 +75,8 @@ import {
  * - The site header's tabs:  the default repo's settings' (`"siteTabs"`), told every page as its own page server tells
  *   them (`SPELL_SERVER.siteTabs`;  epic `repo-split` I4)
  * - Its pid file and log are in spell-epic's home folder (`~/.spell-epic/server.json`, `server.log`).
- * - Its port:  `DEFAULT_EPIC_PORT` (4848), not spell-app's 4747.
+ * - Its port:  `DEFAULT_EPIC_PORT` (4848), not spell-app's 4747;  only ever that one (`claimPort()`, epic `epic-engine`
+ *   I69)
  * - Run it with `epic hub` (`Hub`), never by hand.
  ****************/
 export class EpicServer {
@@ -196,7 +197,10 @@ export class EpicServer {
 
   /**
    * Load the route modules, start watching, listen, write the pid file, then run route modules' `onListening`s.
-   * - `port`:  wanted (default `DEFAULT_EPIC_PORT`);  taken:  any free one
+   * - `port`:  wanted (default `DEFAULT_EPIC_PORT`)
+   *   - taken, with a pid file:  throws, stopped again, never on another port (epic `epic-engine` I69):  the machine's
+   *     server keeps ONE address, and a second one started beside it (two `ensure()`s at once) exits, writing nothing
+   *   - taken, without one (a demo check's own):  any free one
    * - `routes`:  load the route modules (default `true`;  tests turn it off)
    * - `pidFile`:  write `server.json` (default `true`)
    * - `bundles`:  build the default repo's stale bundles in the background (default `true`;  tests turn it off:
@@ -211,7 +215,14 @@ export class EpicServer {
     this.watch()
     if (bundles) await this.buildBundles()
     if (routes && this.defaultRepo) await this.loadRoutes()
-    const { port: actual } = await this.web.listen({ port })
+    let actual: number
+    try {
+      ;({ port: actual } = await this.web.listen({ port, fallback: !pidFile }))
+    } catch (error) {
+      await this.stop()
+      if ((error as NodeJS.ErrnoException).code !== "EADDRINUSE") throw error
+      throw new Error(`epic server:  port ${port} is taken, so this one doesn't start (\`epic hub ensure\` says by what)`)
+    }
     this.info.port = actual
     if (pidFile) {
       mkdirSync(this.home, { recursive: true })
@@ -235,6 +246,7 @@ export class EpicServer {
    * The epic server of home folder `home`:  its info, `base` URL, and whether it was `launched`.
    * - started in the background if it isn't running
    * - restarted when it started before its code or the repo list last changed
+   * - always on `port`:  `claimPort()` first
    * - runs `bin/epic hub serve` (spell-epic's `tsx` loader is in it), output to `<home>/server.log`
    * - what `epic hub ensure`, `epic hub url` and the openers call
    */
@@ -242,16 +254,45 @@ export class EpicServer {
     const folder = resolve(home)
     mkdirSync(folder, { recursive: true })
     const pidFile = new SRV.PidFile(folder, PID_FILE)
-    const running = await pidFile.status()
-    const list = new RepoList({ home: folder }).file
-    // a repo added or removed since it started:  a fresh one serves the new list
-    if (running && existsSync(list) && statSync(list).mtimeMs > Date.parse(running.started)) await pidFile.stop()
+    await EpicServer.claimPort(pidFile, port)
     return pidFile.ensure({
       command: [process.execPath, EPIC_BIN, "hub", "serve", "--port", String(port)],
       env: { [HOME_ENV]: folder },
       log: join(folder, LOG_FILE),
       sources: SOURCES
     })
+  }
+
+  /**
+   * Make `port` the home's epic server's, as `ensure()` begins (epic `epic-engine` I69):  ONE server, on ONE port.
+   * - an epic server of THIS home on `port` (it answers `/api/server` so) that the pid file doesn't name:  ADOPTED,
+   *   the pid file names it, the one it named is stopped
+   *   - how one went unnamed:  two `ensure()`s at once each started one;  the first took `port`, the second took a
+   *     free one and wrote the pid file last, and from then on each restart replaced only the second, on yet another
+   *     port, while the first kept `port`
+   * - the pid file's server on ANOTHER port, or older than the repo list (a repo added or removed since):  stopped,
+   *   so a fresh one starts on `port`, serving the new list
+   * - `port` held by anything else (another home's epic server, another program):  throws, saying so, rather than
+   *   start one elsewhere;  never stops what isn't provably this home's
+   * - `pidFile`:  the home's (`<home>/server.json`)
+   */
+  static async claimPort(pidFile: SRV.PidFile, port: number): Promise<void> {
+    let running = await pidFile.status()
+    const onPort = await epicServerOn(port)
+    if (onPort && onPort.root === pidFile.root && onPort.pid !== running?.pid) {
+      await pidFile.stop()
+      pidFile.write(onPort)
+      running = await pidFile.status()
+    }
+    const list = new RepoList({ home: pidFile.root }).file
+    const listNewer = running && existsSync(list) && statSync(list).mtimeMs > Date.parse(running.started)
+    if (running && (running.port !== port || listNewer)) {
+      await pidFile.stop()
+      running = undefined
+    }
+    if (running || (await SRV.isFree(port))) return
+    const holder = onPort ? `the epic server of ${onPort.root} (pid ${onPort.pid})` : "another program"
+    throw new SRV.HttpError(409, `port ${port} is taken, by ${holder}:  stop it, or give another (--port)`)
   }
 
   ////////////////
@@ -501,6 +542,20 @@ export class EpicServer {
 /** `html`, its cdnjs highlight.js tag pointing at the engine's copy:  pages load offline (`HIGHLIGHT_JS`). */
 export function localHighlight(html: string): string {
   return html.replaceAll(HIGHLIGHT_JS.cdn, HIGHLIGHT_JS.local)
+}
+
+/**
+ * The epic server on `port`, as it answers `/api/server` (`EpicServerInfo`), any home's;  `undefined`:  nothing
+ * there, or something that isn't an epic server.  NEVER throws.
+ */
+async function epicServerOn(port: number): Promise<EpicServerInfo | undefined> {
+  try {
+    const reply = await fetch(`http://127.0.0.1:${port}${SRV.SERVER_API}`, { signal: AbortSignal.timeout(1000) })
+    const info = reply.ok ? ((await reply.json()) as Partial<EpicServerInfo>) : undefined
+    return info?.epicServer === true ? (info as EpicServerInfo) : undefined
+  } catch {
+    return undefined
+  }
 }
 
 /** spell-epic's checkout:  `src/server/` is two folders down. */
