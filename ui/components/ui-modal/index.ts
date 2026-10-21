@@ -6,7 +6,7 @@
  *   - registers `ModalDialogs` as `UI.modals`' provider once the runtime has loaded,
  *     so `UI.modals.confirm()` / `alert()` / `prompt()` work
  * - Also exports `DialogComponent`, the base `<ui-flyout>` (`$/ui/components/ui-flyout`) builds on.
- * - Also the library's `@spell-app/ui/ui-modal` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-modal` entry (its size is in `notes/report.md`).
  */
 
 import { E, UI } from "$/ui/core"

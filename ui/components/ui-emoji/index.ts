@@ -1,7 +1,7 @@
 /**
  * The emoji family:  defines `<ui-emoji>` and exports its component, `UIEmoji`.
  * - SIDE EFFECT:  importing it defines the tag.
- * - Also the library's `@spell-app/ui/ui-emoji` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-emoji` entry (its size is in `notes/report.md`).
  * - It exports `EmojiData` too, for apps that pick the page's name set
  *   (`EmojiData.use("fomantic")`;  for a subtree, `<ui-root emoji="fomantic">`),
  *   register their own names or preload a name (`EmojiData.get("smile")`).

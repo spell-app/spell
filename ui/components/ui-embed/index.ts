@@ -2,7 +2,7 @@
  * The embed family:  defines `<ui-embed>` and exports its component, `UIEmbed`, its DOM element, `DOMEmbedElement`,
  * and `EmbedSources`, which builds the frame's URL.
  * - SIDE EFFECT:  importing it defines the tag.
- * - Also the library's `@spell-app/ui/ui-embed` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-embed` entry (its size is in `notes/report.md`).
  */
 
 import { DOMEmbedElement, UIEmbed } from "./UIEmbed"

@@ -1,4 +1,4 @@
-# `@spell-app/ui` docs site -- the build
+# `spell-ui` docs site -- the build
 
 The site bundle every Spell UI docs page loads, and its entry.
 - The PAGES are in [the docs folder](../docs/README.md):  Spell UI's component set, served at `/components/ui/`.

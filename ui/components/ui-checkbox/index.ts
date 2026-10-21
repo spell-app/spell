@@ -1,7 +1,7 @@
 /**
  * The checkbox family:  defines `<ui-checkbox>` and `<ui-radio>`, and exports their components
  * and their DOM element class, `DOMCheckElement`.
- * - Also the `checkbox` lib entry (`@spell-app/ui/ui-checkbox`), measured in `notes/report.md`.
+ * - Also the `checkbox` lib entry (`spell-ui/ui-checkbox`), measured in `notes/report.md`.
  * - SIDE EFFECT:  importing it defines the tags.
  */
 

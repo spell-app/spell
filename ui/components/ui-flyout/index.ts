@@ -6,7 +6,7 @@
  *     the content parts and `<ui-button>` too:  a flyout is Fomantic's side modal
  * - NOTE: `UIFlyout` imports the modal's FILES, never its barrel,
  *   so a server render (`$/ui/static`) can load `UIFlyout` without `customElements`;  the barrel is imported here.
- * - Also the library's `@spell-app/ui/ui-flyout` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-flyout` entry (its size is in `notes/report.md`).
  */
 
 import { UIFlyout } from "./UIFlyout"

@@ -1,9 +1,9 @@
 /****************
  * ### `Warnings`
- * The ONE way `@spell-app/ui` warns the page's developer in the console:  one prefix, one message format.
+ * The ONE way `spell-ui` warns the page's developer in the console:  one prefix, one message format.
  * - `ui`'s substitute for WWOD §19's `Logger`, which would add bytes (and colours no browser but Chrome draws) to
  *   every component bundle (epic `wwod-spell-ui`, Q5).
- * - Message format, WWOD §19 › "Message format":  `[@spell-app/ui] <source>:  <what happened>`, then the data as
+ * - Message format, WWOD §19 › "Message format":  `[spell-ui] <source>:  <what happened>`, then the data as
  *   separate arguments, so the console shows them as objects.  `source` names who warns:  a tag (`<ui-root>`), a
  *   runtime service (`UI.icons`), a method (`Converters.enumValue()`).
  * - Plain DOM-free JS:  no Solid, no runtime;  lives in `$/ui/util`, so `core` and every lazy chunk can use it.
@@ -39,5 +39,5 @@ export class Warnings {
   }
 }
 
-/** What every warning starts with, so `@spell-app/ui`'s are greppable in a busy console. */
-const PREFIX = "[@spell-app/ui]"
+/** What every warning starts with, so `spell-ui`'s are greppable in a busy console. */
+const PREFIX = "[spell-ui]"

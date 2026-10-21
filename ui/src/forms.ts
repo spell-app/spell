@@ -1,5 +1,5 @@
 /**
- * `forms` lib entry (`@spell-app/ui/forms`):  what only form controls with a VALUE need,
+ * `forms` lib entry (`spell-ui/forms`):  what only form controls with a VALUE need,
  * split from `core` so a page without one never loads it.
  * - `FormComponent` (form value, validity, reset) on a `DOMFormControl` (the form-control API)
  * - `Validator` (Fomantic's rules)

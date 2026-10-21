@@ -19,7 +19,7 @@ import { ClassBuilder } from "./ClassBuilder"
  *     and the runtime's `UI.vocabulary` and `UI.i18n`
  *   - `styles`, `focus`:  the runtime's `UI.styles`, `UI.focus`
  *   - `motion`:  Fomantic's animations (`UIT.Animations`), run by `UI.transitions`;  `--ui-motion`
- *   - `warn`:  `Warnings.warn()`, `[@spell-app/ui] ...`
+ *   - `warn`:  `Warnings.warn()`, `[spell-ui] ...`
  * - SIDE EFFECT:  installs them;  listed in `package.json`'s `sideEffects`.
  * - Imported for that by `core.ts`, AND by `$/ui`'s barrel (`index.ts`) and the root's (`ui-root/index.ts`):
  *   - `core.ts` alone isn't enough in a bundle, since it's only re-exports:

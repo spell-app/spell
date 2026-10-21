@@ -2,7 +2,7 @@
  * The shape family:  defines `<ui-shape>` and `<ui-side>`, and exports their components, `UIShape` and `UISide`,
  * and the shape's DOM element, `DOMShapeElement`.
  * - SIDE EFFECT:  importing it defines the tags.
- * - Also the library's `@spell-app/ui/ui-shape` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-shape` entry (its size is in `notes/report.md`).
  */
 
 import { DOMShapeElement, UIShape } from "./UIShape"

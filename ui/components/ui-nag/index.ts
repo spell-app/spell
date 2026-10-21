@@ -2,7 +2,7 @@
  * The nag family:  defines `<ui-nag>` and exports its component, `UINag`, its DOM element, `DOMNagElement`,
  * and `DismissalStore`, where a nag remembers it was dismissed.
  * - SIDE EFFECT:  importing it defines the tag.
- * - Also the library's `@spell-app/ui/ui-nag` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-nag` entry (its size is in `notes/report.md`).
  */
 
 import { DOMNagElement, UINag } from "./UINag"

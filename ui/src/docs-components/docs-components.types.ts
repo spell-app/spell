@@ -20,7 +20,7 @@ import type { JSX } from "@solidjs/web"
 
 /**
  * The `<ui-*>` tags a docs element may render in its JSX, each as loose attributes.
- * - Why:  `@spell-app/ui`'s components build their shadow markup from native elements,
+ * - Why:  `spell-ui`'s components build their shadow markup from native elements,
  *   so `ui` declares no JSX types for its own tags;  the docs elements are the first to COMPOSE widgets.
  * - Named tags, NOT `` [tag: `ui-${string}`] ``:  `app`'s `solid.types.ts` declares that index signature,
  *   and two identical index signatures in one program are an error (TS2374) the moment `app` compiles a file of ours.

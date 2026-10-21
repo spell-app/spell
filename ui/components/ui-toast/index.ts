@@ -4,7 +4,7 @@
  *   - defines `<ui-toast>`, and `<ui-button>` / `<ui-buttons>` too
  *     (through `$/ui/components/ui-button`:  `UI.toast()` builds its actions from them)
  *   - registers `ToastStack` as `UI.toasts`' provider once the runtime has loaded, so `UI.toast({…})` works
- * - Also the library's `@spell-app/ui/ui-toast` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-toast` entry (its size is in `notes/report.md`).
  */
 
 import { E, UI } from "$/ui/core"

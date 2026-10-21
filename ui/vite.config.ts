@@ -160,7 +160,7 @@ export function baseConfig() {
 }
 
 /**
- * Library build of `@spell-app/ui`, and the dev server (`yarn dev`:  `tools/demo/`).
+ * Library build of `spell-ui`, and the dev server (`yarn dev`:  `tools/demo/`).
  * - ESM only:  every consumer we target (bundlers, `<script type="module">`, frameworks) speaks it.
  * - `solid-js` and `@solidjs/web` are external (`SOLID_EXTERNAL`);
  *   the `UIRuntime` and icon packs are separate files (`emitIconPacks()`).
@@ -266,8 +266,8 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  * - `?inline` CSS imports (`styles/index.ts`) become `declare const x: string`:  only `vite/client` types them.
  * - Why not `bundleTypes`:  it rolls each entry up on its own, so a class like `UIComponent` is copied into every entry
  *   that reaches it, and a class with private members is a DIFFERENT type in each copy.
- *   Per-file declarations keep one `UIComponent` for `@spell-app/ui/core` and `@spell-app/ui/ui-button` alike.
- * - `util` and `spell-element` are not published on their own, so their declarations ship inside `@spell-app/ui`
+ *   Per-file declarations keep one `UIComponent` for `spell-ui/core` and `spell-ui/ui-button` alike.
+ * - `util` and `spell-element` are not published on their own, so their declarations ship inside `spell-ui`
  *   (`util`'s GENERIC ones only).
  *   NOT `util/src/spell/` or `util`'s barrel (which flattens it in):
  *   `exclude` lists them, and `src/util/index.ts` imports file by file.
@@ -374,7 +374,7 @@ function rewriteDeclaration(filePath: string, content: string) {
 }
 
 /**
- * The folders besides `src/` whose declarations ship inside `@spell-app/ui`, each into a `dist/` folder of its own
+ * The folders besides `src/` whose declarations ship inside `spell-ui`, each into a `dist/` folder of its own
  * (`rewriteDeclaration()`):  ui's `components/`, and the packages outside this one.
  * - `alias`:  how `src/` imports them (`$/util`), or what an npm name becomes (`spell-kit/util` => `$/util`)
  * - `src`:  their source folder

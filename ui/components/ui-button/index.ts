@@ -1,6 +1,6 @@
 /**
  * The button family:  defines `<ui-button>`, `<ui-buttons>` and `<ui-or>`, and exports their components.
- * - Also the `button` lib entry (`@spell-app/ui/ui-button`), measured in `notes/report.md`.
+ * - Also the `button` lib entry (`spell-ui/ui-button`), measured in `notes/report.md`.
  * - SIDE EFFECT:  importing it defines the tags.
  */
 

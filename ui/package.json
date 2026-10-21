@@ -1,5 +1,5 @@
 {
-  "name": "@spell-app/ui",
+  "name": "spell-ui",
   "version": "0.0.1",
   "description": "Fomantic UI's vocabulary as modern-CSS web components, on Solid 2",
   "license": "MIT",

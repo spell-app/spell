@@ -242,7 +242,7 @@ export class PropertyEditorPages {
 
 /** What `compile()` takes. */
 export type CompileOptions = {
-  /** What the module imports for Spell UI's property editor;  default `@spell-app/ui/ui-property-editor`. */
+  /** What the module imports for Spell UI's property editor;  default `spell-ui/ui-property-editor`. */
   uiModule?: string
 }
 
@@ -299,7 +299,7 @@ const KIND_TYPES: Record<string, readonly V.ValueType[]> = {
 }
 
 /** What a compiled page imports for Spell UI's property editor, by default. */
-const UI_MODULE = "@spell-app/ui/ui-property-editor"
+const UI_MODULE = "spell-ui/ui-property-editor"
 
 /** A page's editor's attributes a compiled page leaves out:  the schema is inlined, and nothing is loaded. */
 const NOT_COMPILED = new Set(["schema", "source", "select"])

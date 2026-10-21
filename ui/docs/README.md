@@ -1,4 +1,4 @@
-# `@spell-app/ui` docs site
+# `spell-ui` docs site
 
 Plain, hand-authored `.html` pages in [fomantic-ui.com](https://fomantic-ui.com)'s docs style, built ONLY from
 `<ui-*>` widgets:

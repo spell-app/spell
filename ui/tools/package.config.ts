@@ -17,7 +17,7 @@ const ROOT = fileURLToPath(new URL("../", import.meta.url))
 const EXTRA_ENTRIES = { api: ENTRIES.api!, styles: ENTRIES.styles! }
 
 /**
- * How the tooling reads `@spell-app/ui`:  entries, externals, peer set, buckets.
+ * How the tooling reads `spell-ui`:  entries, externals, peer set, buckets.
  * - Two shared entries:  `core` (every family) and `forms` (families with a form VALUE:  dropdown, input, checkbox, form).
  * - `groups` (`bucket()`):
  *   - `solid-js`, `@solidjs/*` => `library`
@@ -37,7 +37,7 @@ const EXTRA_ENTRIES = { api: ENTRIES.api!, styles: ENTRIES.styles! }
  *   - any other `src/` module (incl. `\0` virtual helpers) => `core`
  */
 export const PACKAGE: PackageConfig = {
-  name: "@spell-app/ui",
+  name: "spell-ui",
   root: ROOT,
   entries: Object.fromEntries(COMPONENTS.map((name) => [name, `components/${name}/index.ts`])),
   shared: [
@@ -53,15 +53,15 @@ export const PACKAGE: PackageConfig = {
 
 /**
  * Import map entries for `dist/` (the vendored Solid ones come from `vendor/importmap.json`).
- * - `@spell-app/ui` ~== every family (`dist/index.js`);  `@spell-app/ui/ui-<family>` one family;
- *   `@spell-app/ui/core`, `@spell-app/ui/forms`;  `@spell-app/ui/api` the `E` / `V` namespaces.
+ * - `spell-ui` ~== every family (`dist/index.js`);  `spell-ui/ui-<family>` one family;
+ *   `spell-ui/core`, `spell-ui/forms`;  `spell-ui/api` the `E` / `V` namespaces.
  */
 export const DIST_IMPORTS: ImportMap["imports"] = {
-  "@spell-app/ui": "/dist/index.js",
-  "@spell-app/ui/core": "/dist/core.js",
-  "@spell-app/ui/forms": "/dist/forms.js",
-  "@spell-app/ui/api": "/dist/api.js",
-  ...Object.fromEntries(COMPONENTS.map((name) => [`@spell-app/ui/${name}`, `/dist/${name}.js`]))
+  "spell-ui": "/dist/index.js",
+  "spell-ui/core": "/dist/core.js",
+  "spell-ui/forms": "/dist/forms.js",
+  "spell-ui/api": "/dist/api.js",
+  ...Object.fromEntries(COMPONENTS.map((name) => [`spell-ui/${name}`, `/dist/${name}.js`]))
 }
 
 /** Bucket of one module id (`PACKAGE.groups`). */

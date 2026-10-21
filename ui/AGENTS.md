@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file guides AI coding agents (Claude Code, Codex, and others)
-working with code in this package, `@spell-app/ui`.
+working with code in this package, `spell-ui`.
 
 **READ [the repo root's AGENTS.md](../AGENTS.md) and [WWOD](agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -16,21 +16,21 @@ READ [the custom elements guide](../spell.epics/guides/custom-elements/custom-el
 ## This repo:  `spell-ui`
 
 - `github.com/spell-app/spell-ui`, private;  cut from spell-app with its history (epic `repo-split` P8).
-- It holds `@spell-app/ui` itself, at the repo's root:  the `ui-*` elements (`components/`), the runtime (`src/`), its docs pages (`docs/`) and site, its tools.
+- It holds `spell-ui` itself, at the repo's root:  the `ui-*` elements (`components/`), the runtime (`src/`), its docs pages (`docs/`) and site, its tools.
 - It may use:  the kit:  its `element/` (its elements are written on it), util's generic files and the toolchain;
   its `server/` and `assembler/` for its site tools and tests only.
   - Every arrow points DOWN:  no repo below this one may import it.
 - It lives inside the kit `spell-kit`, at `~/www/spell/spell-ui/`:  the kit holds the ONE install for every repo
   (no `yarn.lock` here), and [its AGENTS.md](../AGENTS.md) has the rules across repos.
 - `$/` aliases are for inside this repo ([tsconfig.base.json](tsconfig.base.json));  another repo's package is imported
-  by its npm name (`spell-kit/...`, `@spell-app/...`), an entry of its `package.json` `exports`.
+  by its npm name (`spell-kit/...`), an entry of its `package.json` `exports`.
 - `agents/` (WWOD and the three logs):  a link to the kit's `agents/` (git-ignored here), made by `yarn clone`.
 - Its design notes are in the content repo since epic `repo-split` P9 (Q34):
   [guides/ui/notes/](../spell.epics/guides/ui/notes/).
 
 ## Overview
 
-- `@spell-app/ui` is Fomantic UI reborn as `ui-*` custom elements, on a modern CSS foundation:
+- `spell-ui` is Fomantic UI reborn as `ui-*` custom elements, on a modern CSS foundation:
   - Fomantic's vocabulary (`ui small primary basic icon button`)
   - shadow DOM, `@layer`s, OKLCH tokens
   - accessibility built in
@@ -131,7 +131,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     - Still imported as `$/ui/components/...`:
       that alias is longer than `$/ui/*`, so it wins (the root's [tsconfig.base.json](tsconfig.base.json)).
     - The published shape is unchanged (`declarations()` in [vite.config.ts](vite.config.ts)):
-      - `@spell-app/ui/ui-button`
+      - `spell-ui/ui-button`
       - `dist/components/ui-<name>/`
   - Every FILE in it is named for its COMPONENT, as any class file is named for its class (`UIButton.css`).
   - Its files are listed below ("A family's files").
@@ -170,13 +170,13 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     and the element core through `$/ui/core`.
     - A mark a static initializer reads comes from `./static.types.ssr` directly
       (WWOD §4 › "Circular imports";  `barrel.ssr.test.ts`).
-- [`core`](src/core.ts) and [`forms`](src/forms.ts):  the two SHARED lib entries (`@spell-app/ui/core`, `@spell-app/ui/forms`).
+- [`core`](src/core.ts) and [`forms`](src/forms.ts):  the two SHARED lib entries (`spell-ui/core`, `spell-ui/forms`).
   - `core`:  the element core, and the foundation JS every family needs.
   - `forms`:  what only form controls with a VALUE need (`FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`).
   - Component files import shared code ONLY through these (see "Solid authoring").
-- [`src/styles/`](src/styles/):  its own lib entry, `@spell-app/ui/styles`.
+- [`src/styles/`](src/styles/):  its own lib entry, `spell-ui/styles`.
   - `layers.css`, tokens, colours, sizes, reset, typography, animations, utilities, `native.css`, `themes/`
-- [The package's entry](src/index.ts):  `@spell-app/ui`.
+- [The package's entry](src/index.ts):  `spell-ui`.
   - Registers every family (side effect) and re-exports them,
     plus `UIT`, the runtime, styles and icons.
   - The namespaces `E` / `F` / `V` come from `core` / `forms` / the `api` entry.
@@ -265,7 +265,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - So `LoadableComponent` keeps its `as DOMLoadableElement` casts.
 - `index.ts`:  the family barrel.
   - Calls `define()` for every tag (SIDE EFFECT), and re-exports the classes.
-  - Also the family's lib entry (`@spell-app/ui/ui-button`), and its hot-reload boundary.
+  - Also the family's lib entry (`spell-ui/ui-button`), and its hot-reload boundary.
 - `UI<Name>.css`:  the port of Fomantic's `.less` + `.variables`.
   - A second sheet keeps its suffix (`UIDimmer.page.css`), or names its own tag's component (`UIBrandCheck.css`).
 - `UI<Name>.en.ts`:  the tag's VOCABULARY, named for its language.
@@ -950,7 +950,7 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     `this.on()` for one added later, or under a condition.
   - Inside a component, `onClick={...}` for native events.
     - No `on:` namespace.
-    - Rich data as `prop:options` ([the Solid 2 rules](../spell.epics/guides/solid/solid-2.md), "DOM and `@spell-app/ui` elements").
+    - Rich data as `prop:options` ([the Solid 2 rules](../spell.epics/guides/solid/solid-2.md), "DOM and `spell-ui` elements").
   - A THIRD-PARTY Solid app listening for `ui-*` events uses a `ref` callback + `addEventListener`
     ([the Solid host app](tools/frameworks/solid/app.tsx)).
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".
@@ -1077,7 +1077,7 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - A pack's events keep their own names (`spell-open`).
     - Only Spell UI's `ui-*` ones take a translated tag's prefix
       (`Vocabulary`;  [the translation doc](../spell.epics/guides/ui/notes/translation.md)).
-  - `registerPack()`:  exported from `$/ui` (`@spell-app/ui`) and the family's barrel.
+  - `registerPack()`:  exported from `$/ui` (`spell-ui`) and the family's barrel.
     - The docs bundle puts it on `window.SpellUI`.
     - So does the site's bundle ([SitePacks.ts](site/_src/SitePacks.ts)).
   - A `define()` still running (it loads its families first):
@@ -1092,7 +1092,7 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
     - and a console ERROR naming the `source` (`Warnings.error()`)
     - The root still gets ready.
 - Modules a pack shares with the page are `SpellUI.packModules`:
-  the specifier its build leaves external, by its `$/` name (`packModuleKey()`:  an import of `@spell-app/ui/core`
+  the specifier its build leaves external, by its `$/` name (`packModuleKey()`:  an import of `spell-ui/core`
   is `$/ui/core`) => the page's module.
   - `solid-js`, `@solidjs/web`, `$/spell-element`, `$/ui/core`, `$/ui/forms`
   - `$/spell-element`, what a pack's elements are written on, is Spell UI's core module:  it carries all of it.
@@ -1171,7 +1171,7 @@ As WWOD §4, with `$/ui` / `$/ui/*` as our alias, plus these deliberate EXCEPTIO
   - peers after a blank line (`./generatedFiles.ts`)
 - Another repo imports Spell UI by its npm name (epic `repo-split` P6;  the root's `AGENTS.md`, "Aliases"):
   `package.json`'s `exports`, every entry a SOURCE file.
-  - The published entries, from source:  `@spell-app/ui`, `/core`, `/forms`, `/api`, `/styles`, every family's
+  - The published entries, from source:  `spell-ui`, `/core`, `/forms`, `/api`, `/styles`, every family's
     `/ui-<name>` (`./components/ui-<name>/index.ts`), `/icons/*`.
   - And what other repos' code, tools and tests import:  `/property`, `/runtime`, `/icons`,
     `/test/MemberClashes`, the site and static tools (`/tools/SiteDataBuilder`, `/tools/StaticRenderer` ...),
@@ -1308,7 +1308,7 @@ Instead:
 - Every console warning goes through `Warnings` (`$/ui/util`):
   - `Warnings.warn(source, message, ...data)`:  for what the page's author must fix
   - `Warnings.devWarn(...)`:  advice, in development builds only
-  - ONE format:  `[@spell-app/ui] <source>:  <what happened>`, then the data.
+  - ONE format:  `[spell-ui] <source>:  <what happened>`, then the data.
   - NEVER a bare `console.warn`.
 - The two `console.error`s:
   - `UIComponent`'s, when an element's render throws (WWOD §19 › "`console.*` is reserved for")

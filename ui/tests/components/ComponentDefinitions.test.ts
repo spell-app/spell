@@ -4,7 +4,7 @@ import * as library from "$/ui"
 import { ComponentDefinitions } from "$/ui/components/ComponentDefinitions"
 import { ValueSets } from "$/ui/vocabulary"
 
-/** Tag of every element class `@spell-app/ui` exports (each carries its vocabulary). */
+/** Tag of every element class `spell-ui` exports (each carries its vocabulary). */
 const EXPORTED_TAGS = Object.values(library)
   // classes only:  `UI` is a proxy that throws on any key before the runtime loads
   .filter((value) => typeof value === "function")

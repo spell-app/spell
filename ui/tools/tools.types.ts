@@ -22,7 +22,7 @@ import type { PerfResult } from "../test-helpers/PerfRun.ts"
  * - Paths are absolute, or relative to `root`.
  */
 export type PackageConfig = {
-  /** display name in reports, e.g. `@spell-app/ui` */
+  /** display name in reports, e.g. `spell-ui` */
   name: string
   /** repo root, absolute */
   root: string

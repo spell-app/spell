@@ -652,8 +652,8 @@
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
-                  import { UI } from "@spell-app/ui/core"
-                  import "@spell-app/ui/ui-modal" // registers the helpers
+                  import { UI } from "spell-ui/core"
+                  import "spell-ui/ui-modal" // registers the helpers
 
                   await UI.load()
                   const ok = await UI.modals.confirm({ title: "Delete draft?", message: "The draft will be gone for good." })

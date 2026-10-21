@@ -4,7 +4,7 @@
  * - SIDE EFFECT:  importing it defines the tags.
  *   Its components import the form and section families first:  the editor is a form and draws a section,
  *   a group is a section, a property is a field.
- * - Also the library's `@spell-app/ui/ui-property-editor` entry.
+ * - Also the library's `spell-ui/ui-property-editor` entry.
  */
 
 import { DOMPropertyElement, UIProperty } from "./UIProperty"

@@ -1,5 +1,5 @@
 /**
- * `core` lib entry (`@spell-app/ui/core`):  the element core PLUS the foundation it builds on, as ONE module.
+ * `core` lib entry (`spell-ui/core`):  the element core PLUS the foundation it builds on, as ONE module.
  * - Every component file imports shared code from here (`$/ui/core`), never from the pieces,
  *   so Rolldown puts all of it in `dist/core.js`,
  *   and each family entry holds only its own classes, sheet, vocabulary and fallback.

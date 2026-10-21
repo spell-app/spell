@@ -188,7 +188,7 @@ export type PerfResult = {
 
 /** `perf-results.json`:  one run, labelled with where it ran. */
 export type PerfRecord = {
-  /** package measured, e.g. `@spell-app/ui` */
+  /** package measured, e.g. `spell-ui` */
   package: string
   /** e.g. `vitest browser mode` */
   where: string

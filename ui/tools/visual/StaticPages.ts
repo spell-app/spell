@@ -86,7 +86,7 @@ export class StaticPages {
       [/<script\b[^>]*><\/script>\s*/, ""],
       [/<main id="example"><\/main>/, `<main id="example">${body}</main>`],
       [/<\/head>/, `  <link rel="stylesheet" href="${VisualSettings.STATIC_PAGES}ui.css" />\n  </head>`],
-      [/<title>[^<]*<\/title>/, "<title>@spell-app/ui: static visual fixture</title>"]
+      [/<title>[^<]*<\/title>/, "<title>spell-ui: static visual fixture</title>"]
     ]
     let html = fixture
     for (const [pattern, replacement] of replacements) {

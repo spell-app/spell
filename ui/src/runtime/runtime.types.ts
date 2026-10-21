@@ -18,13 +18,13 @@ import type { UIRuntime } from "./UIRuntime"
 
 /**
  * Key the ONE runtime instance lives under on `globalThis`.
- * - `Symbol.for()` so two copies of `@spell-app/ui` on one page (duplicate bundles, micro-frontends)
+ * - `Symbol.for()` so two copies of `spell-ui` on one page (duplicate bundles, micro-frontends)
  *   find each other's runtime rather than fighting over shortcuts, overlays and scroll lock.
  */
 export const RUNTIME_KEY = Symbol.for("@spell-app/ui:runtime")
 
 /**
- * Version of this runtime build:  `@spell-app/ui`'s `package.json` `version`, inlined by the bundler.
+ * Version of this runtime build:  `spell-ui`'s `package.json` `version`, inlined by the bundler.
  * - Compared when a second bundle finds an existing runtime, so mismatches warn in dev.
  * - Read from `package.json` rather than a `define` (`__PACKAGE_VERSION__` is SPELL's version in `app`'s build):
  *   every bundle that compiles `ui`'s source -- the lib, vitest, the site, `docs`, `brand`, `app` -- gets the right

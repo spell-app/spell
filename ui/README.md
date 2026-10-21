@@ -1,6 +1,6 @@
 # `$/ui` -- Fomantic UI's vocabulary as web components, on Solid 2
 
-`@spell-app/ui`:  Fomantic UI reborn as `ui-*` custom elements, on a modern CSS foundation.
+`spell-ui`:  Fomantic UI reborn as `ui-*` custom elements, on a modern CSS foundation.
 
 - Shadow DOM, `@layer`s, OKLCH tokens, anchor positioning, `<dialog>` / popover, accessibility built in.
 - Usable from any framework, or plain HTML.
@@ -46,7 +46,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 - One home for constants several families share:  `UIT` ([the shared types](components/components.types.ts)).
   - Key names are `UIT.Key`.
 - One way to warn:  `E.Warnings.warn()` / `devWarn()`.
-  - It prints `[@spell-app/ui] <source>:  ...`.
+  - It prints `[spell-ui] <source>:  ...`.
 - One runtime per page:  `UI`.
   - `UI.keyboard`, `UI.overlays`, `UI.focus`, `UI.transitions`, `UI.ids`
   - `UI.toasts`, `UI.modals`, `UI.icons`, `UI.sources`, `UI.themes` ...
@@ -64,10 +64,10 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 
 | Path | What |
 | --- | --- |
-| `src/index.ts` | `@spell-app/ui`:  registers every family (SIDE EFFECT) and re-exports them, plus `UIT`, the runtime, styles and icons |
-| `src/core.ts` | `@spell-app/ui/core`, the `E` namespace:  the element core and the foundation every family needs, in ONE chunk |
-| `src/forms.ts` | `@spell-app/ui/forms`, the `F` namespace:  what only form controls need (`FormComponent`, `Validator`, `MenuOptions` ...) |
-| `src/api.ts` | `@spell-app/ui/api`:  `E`, `F`, and the vocabulary layer as `V` |
+| `src/index.ts` | `spell-ui`:  registers every family (SIDE EFFECT) and re-exports them, plus `UIT`, the runtime, styles and icons |
+| `src/core.ts` | `spell-ui/core`, the `E` namespace:  the element core and the foundation every family needs, in ONE chunk |
+| `src/forms.ts` | `spell-ui/forms`, the `F` namespace:  what only form controls need (`FormComponent`, `Validator`, `MenuOptions` ...) |
+| `src/api.ts` | `spell-ui/api`:  `E`, `F`, and the vocabulary layer as `V` |
 | `src/elements/` | Spell UI's own half of the element core:  `ClassBuilder`, `NativeFallback`, `LoadableComponent`, `PartComponent`, `SpellUISettings` ... |
 | *(none -- the kit's [`element/`](../element/AGENTS.md), `$/spell-element`)* | the element bases, out of `src/elements/` since epic `people-and-orgs` P17:  `UIComponent`, `DOMElement`, `Reactive`, `Cell`, `PartContext` ... |
 | `components/` | one folder per component FAMILY (`ui-button/`):  element classes, vocabularies, sheet, fallback, tests, examples;  `components.types.ts` (`UIT`), `ComponentDefinitions.ts` (every tag's vocabulary, rolled up) |

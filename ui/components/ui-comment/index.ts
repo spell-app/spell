@@ -3,7 +3,7 @@
  * and exports their components, `UIComments` and `UIComment`.
  * - SIDE EFFECT:  importing it defines the tags, and the generic content parts through the parts barrel,
  *   so a page never has to import what its comments hold.
- * - Also the library's `@spell-app/ui/ui-comment` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-comment` entry (its size is in `notes/report.md`).
  */
 
 import { UIComment } from "./UIComment"

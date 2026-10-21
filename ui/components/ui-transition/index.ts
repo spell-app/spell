@@ -4,7 +4,7 @@
  * - SIDE EFFECT:  importing it defines the tag.
  * - NOTE: the keyframes are `animations.css`, part of the foundation every page and shadow root already has:
  *   `UI.transitions` animates any element with them, no `<ui-transition>` needed.
- * - Also the library's `@spell-app/ui/ui-transition` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-transition` entry (its size is in `notes/report.md`).
  */
 
 import { DOMTransitionElement, UITransition } from "./UITransition"

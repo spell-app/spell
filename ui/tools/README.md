@@ -1,6 +1,6 @@
 # `tools/` -- package tooling
 
-Node-side tooling for `@spell-app/ui`, plus the pages it drives:
+Node-side tooling for `spell-ui`, plus the pages it drives:
 measurement, vendoring, smoke, report, HMR, the docs site and the design export.
 - Run through `packages/ui`'s yarn scripts.
 - Results land in `results/` here (git-ignored).
@@ -80,7 +80,7 @@ yarn report
     - the visual tests' `fixture.ts` and `StaticFixture.ts`
   - Browser-side helpers they serve are transpiled on the fly by `StaticServer`, and may import types only.
     - [`PerfRun`](../test-helpers/PerfRun.ts), [the Spanish dictionary](../test-helpers/dictionary.es.ts)
-- **Pages:**  a smoke page imports `@spell-app/ui...` and the peers by specifier,
+- **Pages:**  a smoke page imports `spell-ui...` and the peers by specifier,
   and publishes `window.smokeResult = { ok, label, checks }`.
   - `kind: "compat"` is reported as COMPATIBILITY.
   - A page module that imports a peer binding itself must be listed in `PeerVendor`'s `usedBy` (in `cli.ts`).

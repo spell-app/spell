@@ -3,7 +3,7 @@
  * - SIDE EFFECT:  importing it defines the tag.
  * - NOTE: the behaviour itself is the runtime's (`UI.observeVisibility()`, `UI.visibility.lazyImage()`),
  *   usable without this element.
- * - Also the library's `@spell-app/ui/ui-visibility` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-visibility` entry (its size is in `notes/report.md`).
  */
 
 import { UIVisibility } from "./UIVisibility"

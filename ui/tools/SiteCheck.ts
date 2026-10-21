@@ -786,7 +786,7 @@ function allDefined() {
 /**
  * Elements of ours across the light DOM and every open shadow root:
  * totals per tag, the undefined (`ui-*` / `spell-*`), the defined `ui-*` with no shadow root.
- * - every `@spell-app/ui` element renders into an open shadow root (the docs' `check-spell.js` rule):
+ * - every `spell-ui` element renders into an open shadow root (the docs' `check-spell.js` rule):
  *   no light-DOM exceptions
  */
 function inspectElements() {

@@ -22,7 +22,7 @@ it("filters 1000 options in under a frame per keystroke (PerfRun)", async () => 
   const host = await ElementFixture.render(`<ui-dropdown search selection placeholder="Search"></ui-dropdown>`)
   const result = await PerfRun.run(host as Parameters<typeof PerfRun.run>[0], SOLID_SETTLE)
   await PerfRun.save(
-    { package: "@spell-app/ui", where: "vitest browser mode", build: "dev (Vite dev server)", result },
+    { package: "spell-ui", where: "vitest browser mode", build: "dev (Vite dev server)", result },
     commands.writeFile,
     "tools/results/perf-results.json"
   )

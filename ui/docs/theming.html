@@ -669,7 +669,7 @@
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
-                  import { UI } from "@spell-app/ui/core"
+                  import { UI } from "spell-ui/core"
 
                   const { themes } = await UI.load() // `UI.themes` is there once the runtime has loaded
                   themes.names // ["amazon", "basic", "bookish" ...]:  the Fomantic themes, A-Z
@@ -816,7 +816,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   \* Generated from `styles.en.ts` by `yarn gen:styles`, committed, so consumers need no build step.
-                  `@spell-app/ui/styles` exports each sheet as text, plus `foundationCSS` (for the document AND every shadow root)
+                  `spell-ui/styles` exports each sheet as text, plus `foundationCSS` (for the document AND every shadow root)
                   and `pageCSS` (foundation + typography + native, for the document only).
                 </script>
               </ui-markdown>

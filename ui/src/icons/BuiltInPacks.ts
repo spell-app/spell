@@ -2,11 +2,11 @@ import { BuiltInIconPacks, ICON_PACK_INDEX, type BuiltInIconPack } from "./icons
 
 /****************
  * ### `BuiltInPacks`
- * Where the packs `@spell-app/ui` ships live:  `icon-packs/<id>/pack.js`, next to the module that holds THIS class.
+ * Where the packs `spell-ui` ships live:  `icon-packs/<id>/pack.js`, next to the module that holds THIS class.
  * - Dev / tests:  this file is `src/icons/BuiltInPacks.ts`, so `src/icons/icon-packs/<id>/`.
  * - Library build:  bundled into `dist/core.js`, so `dist/icon-packs/<id>/` -- where `emitIconPacks()`
  *   (`vite.config.ts`) copies them.  The docs site:  `site/_assets/icon-packs/<id>/` (a symlink, `yarn site:bundle`).
- * - A consumer that bundles `@spell-app/ui` moves this code away from `node_modules/@spell-app/ui/dist/icon-packs/`:
+ * - A consumer that bundles `spell-ui` moves this code away from `node_modules/spell-ui/dist/icon-packs/`:
  *   copy that folder next to the app's chunks, or point a pack elsewhere with `base` (`notes/icons.md`, "Shipping
  *   icons").
  * - STATIC and instance-free on purpose:  the packs sit in one place per page.  No DOM:  the CLI's icon search

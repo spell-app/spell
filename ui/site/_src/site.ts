@@ -13,7 +13,7 @@
  *      `globalThis.SpellUI`, so a page's component packs (`<ui-components source="x.pack.js">`) share its Solid and
  *      Spell UI:  every set's layout loads the epics pack, for the comments' threads and pane, and Epic UI's, App UI's
  *      and the brand's their own for their live examples
- *   2. the page CSS:  `@spell-app/ui`'s foundation (`ui.css`:  layers, tokens, reset, typography, native markup) +
+ *   2. the page CSS:  `spell-ui`'s foundation (`ui.css`:  layers, tokens, reset, typography, native markup) +
  *      the site's layout glue (`./site.css`) -- extracted to `_assets/site.css`, which the page links
  *   3. `SiteData`, `BuiltInPacks`:  pointed at `__data/components.json5` and `_assets/icon-packs/` from THIS file's
  *      URL, so a page at any depth finds them;  `DocsFamilies.add()`:  `<ui-root>` may load the `<ui-docs-*>`

@@ -3,7 +3,7 @@
  * - SIDE EFFECT:  importing it defines the tag, and the content parts (`$/ui/components/ui-parts`):
  *   an accordion's children are `<ui-title>` + `<ui-content>` pairs.
  *   An accordion owns the accordions nested in it.
- * - Also the library's `@spell-app/ui/ui-accordion` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-accordion` entry (its size is in `notes/report.md`).
  */
 
 import { UIAccordion } from "./UIAccordion"

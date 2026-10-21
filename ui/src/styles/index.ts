@@ -1,6 +1,6 @@
 /**
  * Barrel for `$/ui/styles` -- the CSS foundation as TEXT, plus the style vocabulary it's generated from.
- * - Its own lib entry (`@spell-app/ui/styles`), PURE DATA:  no code, so `styles.js` needs none of Rolldown's helpers.
+ * - Its own lib entry (`spell-ui/styles`), PURE DATA:  no code, so `styles.js` needs none of Rolldown's helpers.
  *   Code here once split them into a `rolldown-runtime-<hash>.js` every page fetched, as `styles.js` never loads
  *   `core.js` (epic `wwod-spell-ui`, I13);  `yarn measure` builds this entry too, so its checks catch a relapse.
  * - Imports nothing of `ui`'s outside its own folder;  the runtime (`UIRuntime`) imports the sheets from here.

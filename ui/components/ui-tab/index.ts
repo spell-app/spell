@@ -4,7 +4,7 @@
  * - SIDE EFFECT:  importing it defines the tags.
  * - NOTE: `<ui-tabs>` adopts `UIMenu.css` for its tab list, and `<ui-tab>` `UISegment.css`, as sheets only:
  *   no `<ui-menu>` or `<ui-segment>` is defined here.
- * - Also the library's `@spell-app/ui/ui-tab` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-tab` entry (its size is in `notes/report.md`).
  */
 
 import { UITab } from "./UITab"

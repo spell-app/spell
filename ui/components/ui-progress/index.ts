@@ -1,7 +1,7 @@
 /**
  * The progress family:  defines `<ui-progress>` and exports its component, `UIProgress`.
  * - SIDE EFFECT:  importing it defines the tag.
- * - Also the library's `@spell-app/ui/ui-progress` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-progress` entry (its size is in `notes/report.md`).
  * - It exports `ProgressValues` (the arithmetic) too, so an app can compute the same numbers.
  */
 

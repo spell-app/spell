@@ -17,7 +17,7 @@ import { Terminal } from "spell-kit/element/tools/Terminal"
  *   - `/dist/`, `/vendor/` -- the library build and the vendored peers (`yarn vendor`)
  *   - `/tools/` -- host pages (`frameworks/*.html`), the compiled Solid host app, the extra pages
  *   - `/test-helpers/` -- `PerfRun.ts` and the translation dictionary, transpiled on the fly
- * - Every page gets ONE import map (`importMap`):  the vendored peers, `@spell-app/ui/...` => `/dist/...`;  the Solid
+ * - Every page gets ONE import map (`importMap`):  the vendored peers, `spell-ui/...` => `/dist/...`;  the Solid
  *   host app resolves `solid-js` / `@solidjs/web` through it too, so it shares one copy with the components.
  * - Pages:  the four hosts (`vanilla`, `react`, `vue`, `solid`), the perf page when a `perfAdapter` is given, then
  *   `pages`.  Each page publishes `window.smokeResult` (`PageResult`).
@@ -156,14 +156,14 @@ export class SmokeRunner {
 
 /** Constructor options of `SmokeRunner`. */
 export type SmokeRunnerOptions = {
-  /** display name, e.g. `@spell-app/ui` */
+  /** display name, e.g. `spell-ui` */
   name: string
   /** repo root, absolute */
   root: string
   /** where `smoke-results.json` goes, relative to `root` */
   results: string
   /**
-   * Import map entries:  the vendored peers (`vendor/importmap.json`) and `@spell-app/ui`, `@spell-app/ui/ui-<family>` =>
+   * Import map entries:  the vendored peers (`vendor/importmap.json`) and `spell-ui`, `spell-ui/ui-<family>` =>
    * `/dist/...`.
    */
   importMap: ImportMap

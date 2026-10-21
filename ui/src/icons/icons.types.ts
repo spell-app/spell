@@ -55,14 +55,14 @@ export type IconPackEntry = {
 ////////////////
 
 /**
- * Packs `@spell-app/ui` ships, served from `icon-packs/<id>/` next to the chunk that holds `BuiltInPacks`.
+ * Packs `spell-ui` ships, served from `icon-packs/<id>/` next to the chunk that holds `BuiltInPacks`.
  * - `fa7-free`:  Font Awesome 7 Free solid + regular (`… outline`), plus a few extras;  the DEFAULT pack
  * - `fa7-brands`:  every Font Awesome 7 Free brand icon
  * - `fomantic`:  Fomantic-UI's icon names, pointing at the two FA folders
  */
 export const BuiltInIconPacks = ["fa7-free", "fa7-brands", "fomantic"] as const
 
-/** Id of a pack `@spell-app/ui` ships (`BuiltInIconPacks`). */
+/** Id of a pack `spell-ui` ships (`BuiltInIconPacks`). */
 export type BuiltInIconPack = (typeof BuiltInIconPacks)[number]
 
 /** Pack the runtime adds by itself, unless a page replaces it (`only`). */

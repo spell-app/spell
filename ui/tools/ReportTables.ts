@@ -432,7 +432,7 @@ const CHECK_LABELS: Record<keyof MeasureChecks, string> = {
 const VERSIONED = /^solid-js$|^@solidjs\//
 
 /** What each extra entry (`MeasureResults.extra`) holds, for the tier table. */
-const EXTRA: Record<string, string> = { api: "`E` / `V` namespaces, `@spell-app/ui/api`" }
+const EXTRA: Record<string, string> = { api: "`E` / `V` namespaces, `spell-ui/api`" }
 
 /** LOC groups listed file by file (`loc-files`). */
 const LOC_FILE_GROUPS = ["element core", "components"]

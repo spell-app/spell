@@ -6,7 +6,7 @@ import * as forms from "$/ui/forms"
 import * as vocabulary from "$/ui/vocabulary"
 
 /**
- * `@spell-app/ui/api`:  `E` / `F` MUST be the very namespaces component files import from `$/ui/core` / `$/ui/forms`,
+ * `spell-ui/api`:  `E` / `F` MUST be the very namespaces component files import from `$/ui/core` / `$/ui/forms`,
  * and `V` the whole `$/ui/vocabulary` surface, although it goes through `vocabulary.api.ts` (see `api.ts`);  all three
  * survive the circular barrels (`AGENTS.md`:  `barrel.test.ts`).
  */

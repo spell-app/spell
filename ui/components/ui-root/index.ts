@@ -10,7 +10,7 @@
  *   the static server render (`$/ui/static`) loads `UIRoot` from its own file, and defining an element throws in node.
  * - `RootCatalogEntry` is exported for component packs:  `spell dev pack build` writes a catalog of them.
  * - `RootVocabulary`, for a subclass's vocabulary (`<spell-app>`'s).
- * - Also the library's `@spell-app/ui/ui-root` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-root` entry (its size is in `notes/report.md`).
  */
 
 // Spell UI's settings for `$/spell-element` (a side effect), here too:  every page has a root, and `core`'s import of

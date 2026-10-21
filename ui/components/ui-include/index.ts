@@ -3,7 +3,7 @@
  * and its DOM element class, `DOMIncludeElement`.
  * - SIDE EFFECT:  importing it defines the tag, and `<ui-loader>` and `<ui-message>` (its loading and error looks).
  *   `UIInclude` imports `<ui-root>`'s family, whose `RootLoader` loads the families the included markup uses.
- * - Also the library's `@spell-app/ui/ui-include` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell-ui/ui-include` entry (its size is in `notes/report.md`).
  */
 
 import { DOMIncludeElement, UIInclude } from "./UIInclude"

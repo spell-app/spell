@@ -47,7 +47,7 @@ export class Modals {
   /** `Modals.provider`;  throws until the `ui-modal` family has registered one. */
   private get registeredProvider(): ModalProvider {
     if (!Modals.provider) {
-      throw new Error("UI.modals:  ui-modal not registered;  import its family (`@spell-app/ui/ui-modal`) first")
+      throw new Error("UI.modals:  ui-modal not registered;  import its family (`spell-ui/ui-modal`) first")
     }
     return Modals.provider
   }

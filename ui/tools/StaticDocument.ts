@@ -31,12 +31,12 @@ export class StaticDocument {
   /**
    * A `<script>` (its `src` or its text) or `<link rel="modulepreload">` (`href`) that loads the elements:  a static
    * page MUST NOT (an upgrade would take the flattened markup for slotted content, plan caveat C4).
-   * - `@spell-app/ui...` and `$/ui...` imports;  `ui`'s own `src/` / `dist/`;  a family's folder (`ui-button/`)
+   * - `spell-ui...` and `$/ui...` imports;  `ui`'s own `src/` / `dist/`;  a family's folder (`ui-button/`)
    * - the docs' classic bundle, `spell-ui.js` (and `spell-ui-*.js`), which also holds the docs page runtime
    * - NOT import maps:  other modules may still need them, and they load nothing themselves.
    */
   static readonly ELEMENT_SCRIPT =
-    /@spell-app\/ui\b|\$\/ui\b|\/ui\/(?:src|dist)\/|\/components\/ui-[\w-]+\/|\bspell-ui(?:[\w.-]*)\.js\b/
+    /(?<![\w-])spell-ui(?![\w.-])|\$\/ui\b|\/ui\/(?:src|dist)\/|\/components\/ui-[\w-]+\/|\bspell-ui(?:[\w.-]*)\.js\b/
 
   /** `StaticCatalog`'s classes are defined:  static, as defining is once per process. */
   private static isDefined = false

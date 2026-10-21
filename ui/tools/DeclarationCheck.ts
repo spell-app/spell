@@ -96,5 +96,5 @@ export class DeclarationCheck {
   }
 }
 
-/** The kit's folders whose declarations ship inside `@spell-app/ui`'s `dist/` (`declarations()`):  never named by a `.d.ts`. */
+/** The kit's folders whose declarations ship inside `spell-ui`'s `dist/` (`declarations()`):  never named by a `.d.ts`. */
 const UNPUBLISHED = /^spell-kit\/(util|element)(\/|$)/
