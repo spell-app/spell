@@ -8,7 +8,8 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
 
 - **Feature-cohesive folders beat layer-cohesive:**
   - A feature gets its own folder -- a package, or a folder under a package's `src/` -- with its own barrel, its
-    tests beside the files they test, and a `README.md` where a reader needs one (every package has one, WWOD §6).
+    tests beside the files they test, and, for a major folder, its page `README-<folder>.md` at the repo's root,
+    never a README inside it (WWOD §6).
   - Why:  a change to one feature stays in one folder, rather than touching a `models/`, a `controllers/` and a
     `views/`.
 
@@ -44,7 +45,7 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
   - `<folder>.types.ts` -- its types and everything that goes with them (below, "`<folder>.types.ts`").
   - one file per class, named for the class -- the logic, DOM entry points included.
   - one pure-helpers file if the folder has any, capability-named.
-  - `index.ts` (the barrel), and a `README.md` where a reader needs one.
+  - `index.ts` (the barrel);  no README:  a major folder's page is `README-<folder>.md` at the repo's root (WWOD §6).
   - sub-folders for what isn't code:  fixtures, assets ...
   - Callers reach all of it through the package's namespace (`P.X`, WWOD §4).
   - e.g. `packages/server/src/page/`:  `page.types.ts`, `PageServer.ts`, `PageEditor.ts`, `RunningEpics.ts`,

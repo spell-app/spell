@@ -535,14 +535,19 @@ Their long before / afters are in `agents/wwod/writing.md`.
 - **`oxlint-disable` carries a `-- reason`:**
   - `` // oxlint-disable-next-line import/default -- `?worker` is Vite's, typed by `vite/client`, which oxlint
     can't see `` (`packages/app/src/ui/monaco/monaco.ts`).
-- **A `README.md` per package**, REQUIRED;  one per folder only where a folder needs it.  Structure:
-  - H1 `` `$/name` -- tagline ``
-  - a grammar fenced block, for a folder that parses something (URLs, paths ...)
-  - "The DRY rule (one of each)", with "If you find yourself writing a second copy of any
-    of these, stop and reuse."
-  - files table (unaligned `| --- |`), env-var table
-  - numbered "Adding a new X" recipe, "Deferred" section
+- **A front page per repo, `README.md`, and a `README-<folder>.md` beside it per major folder**, REQUIRED;
+  NO README inside a folder.  Structure:
+  - the front page:  what the repo is, a picture, its folders, setup, things to try, a link to every page beside it
+  - a `README-<folder>.md` goes deep on one folder or topic, and holds what an in-folder README used to:
+    - "The DRY rule (one of each)", with "If you find yourself writing a second copy of any
+      of these, stop and reuse."
+    - files table (unaligned `| --- |`), env-var table
+    - a grammar fenced block, for a folder that parses something (URLs, paths ...)
+    - numbered "Adding a new X" recipe, "Deferred" section
+  - every page ends with "See also";  `yarn readme:check`, at the kit's root, checks the links, captions and names
   - in-flight design notes go in an epic page (`epics/`), not beside the README
+  - NOT:  a `README.md` in each package folder -- they were folded into the repos' pages and deleted (epic
+    `readme` Q5).
 - **User-facing strings stay inline**, where they're used;  only `ui` localizes (its vocabularies, `UIButton.en.ts`).
   - NOT:  a `MSG.ts` object of every user-facing string per package -- one more file to keep in step, for no
     localization.

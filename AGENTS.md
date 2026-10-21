@@ -95,6 +95,8 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
 - spell-lang and spell-app run their checks the same way, `spell-folders <check>` (a bin of the kit's, beside
   `spell-types` and `spell-pack`):  [the toolchain's AGENTS.md](toolchain/AGENTS.md).
 - The kit's other scripts:  `yarn server` (the page server's command line), `yarn favicon` (server's icons).
+- The READMEs (every repo's `README.md` and `README-*.md`):  `yarn readme:check` checks them;  `yarn mermaid:pretty`
+  styles their Mermaid pictures ([README-toolchain.md](README-toolchain.md)).
 
 ## Which repo holds what
 
