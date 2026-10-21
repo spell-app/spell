@@ -1,9 +1,9 @@
 import { spawn } from "node:child_process"
 import { constants } from "node:os"
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { tsxImports } from "../tools/packageDir"
+import { packageDir, tsxImports } from "../tools/packageDir"
 
 import { EXIT, type ToolSpec } from "./command.types"
 import { planDocArgs } from "./epicArgs"
@@ -20,14 +20,16 @@ import { Sessions } from "./Sessions"
  *   - So a worktree 50 commits behind main runs main's tools, through main's `epic` on the `PATH`.
  *   - Its DATA stays the caller's:  the nearest checkout from the current folder (`Git.nearestCheckout()`),
  *     handed to the tool as `EPIC_CHECKOUT` (the docs tools' `pages.js` and the window script read it as their root).
- *   - The one exception:  a tool that SERVES its checkout (the page server),
- *     whose code is that checkout's (`code: "caller"`).
+ *   - The exceptions:  the tools that SERVE their checkout, whose code is that checkout's:
+ *     - `serve`, the checkout's own script (`code: "caller"`)
+ *     - the page server, the `@spell-app/server` its install resolves (`package`)
  * - All `static`:  no state;  `codeRoot` is the one seam, a test's fake checkout of tools.
  ****************/
 export class EpicTools {
   /**
    * Run tool `name` with `args` verbatim and this terminal attached;  resolves to its exit code.
-   * - the script:  `codeRoot`'s copy (default this code's checkout), unless the tool's `code` is `caller`
+   * - the script:  `codeRoot`'s copy (default this code's checkout), unless the tool's `code` is `caller` or it's in a
+   *   `package` (`codeOf()`)
    * - the data:  the caller's checkout (`EPIC_CHECKOUT`)
    *   - a tool with a `cwd` runs in that folder of it
    *   - else (a repo without the epic tools, one `epic init` set up) in that folder of the code's checkout
@@ -40,8 +42,12 @@ export class EpicTools {
   static run(name: EpicToolName, args: string[], options: EpicToolOptions = {}): Promise<number> {
     const { env = {}, codeRoot = Git.CODE_ROOT, cwd = process.cwd() } = options
     const spec: ToolSpec = EpicTools.TOOLS[name]
-    const data = Git.nearestCheckout(spec.tool, cwd)
-    const code = spec.code === "caller" ? data : codeRoot
+    const data = Git.nearestCheckout(spec.package ? CHECKOUT_MARKER : spec.tool, cwd)
+    const code = EpicTools.codeOf(spec, data, codeRoot)
+    if (!code) {
+      process.stderr.write(`epic:  ${data} doesn't install ${spec.package}, so has no ${name} to run\n`)
+      return Promise.resolve(EXIT.ERRORS)
+    }
     const toolCwd = spec.cwd && (existsSync(join(data, spec.cwd)) ? join(data, spec.cwd) : join(code, spec.cwd))
     return EpicTools.runChild(process.execPath, [...EpicTools.toolArgs(spec, code), ...args], {
       cwd: toolCwd || cwd,
@@ -52,6 +58,17 @@ export class EpicTools {
         ...env
       }
     })
+  }
+
+  /**
+   * The folder `spec`'s `tool` and `tsx` are relative to, for a call from checkout `data`:
+   * - a tool in a `package`:  that package's folder, as `data`'s install resolves it;  `undefined`:  not installed
+   * - `code: "caller"`:  `data`
+   * - else `codeRoot`, the running `epic`'s checkout
+   */
+  static codeOf(spec: ToolSpec, data: string, codeRoot = Git.CODE_ROOT): string | undefined {
+    if (spec.package) return packageDir(spec.package, data)
+    return spec.code === "caller" ? data : codeRoot
   }
 
   /**
@@ -147,8 +164,8 @@ export class EpicTools {
    * - `notes`, `comments`:  page notes and comments on docs pages, in the caller's folder (`--file` is from there)
    * - `window`:  the VS Code windows (`src/window.mjs`);
    *   plain `node`, so it runs in a worktree before its `yarn install`
-   * - `server`:  the caller's checkout's page server (`packages/server`'s `cli.ts`)
-   * - `serve`:  every web server, `epic server start --all` (root `scripts/serve.mjs`)
+   * - `server`:  the caller's checkout's page server (`@spell-app/server`'s `src/page/cli.ts`, spell-server's)
+   * - `serve`:  every web server, `epic server start --all` (the caller's root `scripts/serve.mjs`, spell-app's)
    * - `pages <verb>`:  the docs pages' tools, `epic pages index` ...
    *   (`spell dev docs <verb>` in spell-app;  `runPages()`)
    *   - at the caller's checkout's root (spell-app's `yarn workspace` ran them in `packages/epics` before epic
@@ -163,7 +180,7 @@ export class EpicTools {
     notes: { tool: "src/tools/notes.ts", tsx: "tsconfig.json" },
     comments: { tool: "src/tools/comments.ts", tsx: "tsconfig.json" },
     window: { tool: "src/window.mjs" },
-    server: { tool: "packages/server/src/page/cli.ts", tsx: "packages/server/tsconfig.json", code: "caller" },
+    server: { package: "@spell-app/server", tool: "src/page/cli.ts", tsx: "tsconfig.json" },
     serve: { tool: "scripts/serve.mjs", code: "caller" },
     "pages update": { tool: "src/tools/update.js", cwd: "." },
     "pages index": { tool: "src/tools/index.js", cwd: "." },
@@ -176,12 +193,17 @@ export class EpicTools {
   } satisfies Record<string, ToolSpec>
 
   /**
-   * Whether the caller's checkout has a page server of its own (`TOOLS.server`, spell-app's `packages/server`).
-   * - a repo `epic init` set up has none, and `epic server` is the machine's epic server there (`epic hub`)
+   * Whether the caller's checkout has a page server of its own (`TOOLS.server`), as `pages.js`' `ensurePageServer()`
+   * finds one:  its `package.json` has `"pageServer"` settings (spell-app's), and its install resolves
+   * `@spell-app/server`.
+   * - a repo `epic init` set up has none, nor has spell-epic:  `epic server` is the machine's epic server there
+   *   (`epic hub`)
    */
   static hasPageServer(cwd = process.cwd()): boolean {
-    const { tool } = EpicTools.TOOLS.server
-    return existsSync(join(Git.nearestCheckout(tool, cwd), tool))
+    const spec: ToolSpec = EpicTools.TOOLS.server
+    const data = Git.nearestCheckout(CHECKOUT_MARKER, cwd)
+    const code = EpicTools.codeOf(spec, data)
+    return hasPageServerSettings(data) && !!code && existsSync(join(code, spec.tool))
   }
 
   /**
@@ -236,6 +258,18 @@ const PASSED_SIGNALS: NodeJS.Signals[] = ["SIGTERM", "SIGHUP"]
  * - a worktree cut before P7 of `epic-components` has it too:  its docs are the shared ones either way
  */
 const PLAN_DOC_MARKER = "packages/epics/tools/plan-doc.js"
+
+/** What marks the caller's checkout for a tool in a package:  the nearest repo's root (a worktree's `.git` is a file). */
+const CHECKOUT_MARKER = ".git"
+
+/** Whether checkout `root`'s `package.json` has `"pageServer"` settings (a page server's routes, sets, bundles ...). */
+function hasPageServerSettings(root: string): boolean {
+  try {
+    return (JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { pageServer?: unknown }).pageServer !== undefined
+  } catch {
+    return false
+  }
+}
 
 /** Resolves once everything written to stdout and stderr so far is out:  an empty write's callback comes after. */
 function flushed(): Promise<void> {

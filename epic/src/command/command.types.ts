@@ -613,6 +613,8 @@ export type PastedImage = {
  *     and print paths relative to it
  * - `code`:  whose copy of the script runs
  *   - `own` (default):  the one beside the running `epic`, so every checkout runs ONE copy of the epic code
- *   - `caller`:  the caller's checkout's, for a tool that serves that checkout (the page server)
+ *   - `caller`:  the caller's checkout's, for a tool that serves that checkout (`serve`)
+ * - `package`:  the package the script is in, as the caller's checkout's install resolves it (`packageDir()`):
+ *   `tool` and `tsx` are relative to its folder, and `code` is moot (the page server, `@spell-app/server`)
  */
-export type ToolSpec = { tool: string; tsx?: string; cwd?: string; code?: "own" | "caller" }
+export type ToolSpec = { tool: string; tsx?: string; cwd?: string; code?: "own" | "caller"; package?: string }

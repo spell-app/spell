@@ -10,12 +10,15 @@ import { EpicTools } from "$/epics/command/EpicTools"
  * - CODE:  the running `epic`'s, its tools fake scripts that report what they got
  * - DATA:  the caller's, where the command runs from, with the same files
  * - ONE copy of the code (epic `epic-eject` P5):  every epic tool must be CODE's script, working on DATA.
+ * - DATA installs a fake `@spell-app/server` (`SERVER`), whose `src/page/cli.ts` is the page server
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "epic-tools-")))
 const CODE = join(TEMP, "code")
 const DATA = join(TEMP, "data")
 /** A folder inside the caller's checkout, to run from. */
 const INSIDE = join(DATA, "packages", "app")
+/** The `@spell-app/server` DATA's install resolves. */
+const SERVER = join(DATA, "node_modules", "@spell-app", "server")
 /** Where each run's report goes. */
 const REPORT = join(TEMP, "report.json")
 afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
@@ -38,8 +41,14 @@ for (const [root, owner] of [
     writeFileSync(join(root, tool), SCRIPT(owner))
   }
   writeFileSync(join(root, "tsconfig.json"), "{}")
-  writeFileSync(join(root, "packages/server/tsconfig.json"), "{}")
 }
+mkdirSync(join(DATA, ".git"))
+writeFileSync(join(DATA, "package.json"), JSON.stringify({ name: "data", pageServer: {} }))
+mkdirSync(join(SERVER, "src", "page"), { recursive: true })
+writeFileSync(join(SERVER, "package.json"), JSON.stringify({ name: "@spell-app/server", exports: { ".": "./src/index.ts" } }))
+writeFileSync(join(SERVER, "src", "index.ts"), "")
+writeFileSync(join(SERVER, "src", "page", "cli.ts"), SCRIPT("server"))
+writeFileSync(join(SERVER, "tsconfig.json"), "{}")
 mkdirSync(INSIDE, { recursive: true })
 
 /** Run tool `name` from `INSIDE` with CODE as the code:  its exit code, and what the fake tool reported. */
@@ -75,11 +84,29 @@ describe("EpicTools.run()", () => {
     }
   })
 
-  test("server, serve:  the CALLER's copy, the page server serving its own checkout", async () => {
+  test("server:  the @spell-app/server the CALLER's install resolves, with its own config", async () => {
     const server = await run("server", ["status"])
-    expect(server).toMatchObject({ status: 3, owner: "data", args: ["status"] })
-    expect(server.tsconfig).toBe(join(DATA, "packages/server/tsconfig.json"))
+    expect(server).toMatchObject({ status: 3, owner: "server", args: ["status"], checkout: DATA })
+    expect(server.tsconfig).toBe(join(SERVER, "tsconfig.json"))
+  })
+
+  test("serve:  the CALLER's own script", async () => {
     expect(await run("serve", [])).toMatchObject({ owner: "data" })
+  })
+})
+
+describe("EpicTools.hasPageServer()", () => {
+  test("a checkout with page server settings that installs @spell-app/server", () => {
+    expect(EpicTools.hasPageServer(INSIDE)).toBe(true)
+  })
+
+  test("not without the settings (spell-epic, a repo epic init set up), nor without the package", () => {
+    const bare = join(TEMP, "bare")
+    mkdirSync(join(bare, ".git"), { recursive: true })
+    writeFileSync(join(bare, "package.json"), JSON.stringify({ name: "bare" }))
+    expect(EpicTools.hasPageServer(bare)).toBe(false)
+    writeFileSync(join(bare, "package.json"), JSON.stringify({ name: "bare", pageServer: {} }))
+    expect(EpicTools.hasPageServer(bare)).toBe(false)
   })
 })
 
