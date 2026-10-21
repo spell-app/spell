@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "@spell-app/ui/core"
+import { E } from "spell-ui/core"
 
 import { epicHiddenNoteVocabulary } from "./EpicHiddenNote.en"
 import { SHOW_ALL } from "./EpicStateFilter.types"

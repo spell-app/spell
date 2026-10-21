@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import type { E } from "@spell-app/ui/core"
+import type { E } from "spell-ui/core"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ReviewClient, type Inbox } from "$/epics/review"
 
-import "@spell-app/ui/ui-button"
-import "@spell-app/ui/ui-icon"
-import "@spell-app/ui/ui-section"
+import "spell-ui/ui-button"
+import "spell-ui/ui-icon"
+import "spell-ui/ui-section"
 import "$/epics/components/epic-item"
 import "$/epics/components/epic-choices"
 import "$/epics/components/epic-section"

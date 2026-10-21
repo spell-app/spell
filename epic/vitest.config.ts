@@ -4,17 +4,17 @@ import { defineConfig, type TestProjectConfiguration, type UserConfig } from "vi
 import { playwright } from "vite-plus/test/browser-playwright"
 
 /**
- * Spell UI's own config, from the `@spell-app/ui` workspace (spell-ui, a child repo of the top `spell` install, epic
+ * Spell UI's own config, from the `spell-ui` workspace (spell-ui, a child repo of the top `spell` install, epic
  * `epic-engine` P10), by its package entry (`./vite.config.ts`).
  * - HACK: its specifier in a constant, so `tsc` doesn't follow it:  type-checked here, `ui`'s config meets ITS repo's
  *   view of vite's types beside spell-epic's, and comparing the two runs out of stack ("Excessive stack depth
  *   comparing types 'Plugin<any>'").  spell-ui checks that file itself.
  */
-const UI_CONFIG = "@spell-app/ui/vite.config.ts"
+const UI_CONFIG = "spell-ui/vite.config.ts"
 const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConfig }
 
 /**
- * vitest config for `@spell-app/epics`, a component pack (`spell-pack`):  two projects, over `tests/`.
+ * vitest config for `spell-epic`, a component pack (`spell-pack`):  two projects, over `tests/`.
  * - `node` -- everything but the elements:  the epic code's tests, `pack.test.ts` among them (`spell-pack check`:
  *   `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
  * - `browser` -- `components/**`:  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
@@ -28,8 +28,8 @@ const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConf
 /** The tests live in tests/, at the same paths as the code in src/. */
 const TESTS = resolve(import.meta.dirname, "tests")
 
-/** Spell UI's test setup (`@spell-app/ui/test/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
-const UI_SETUP = fileURLToPath(import.meta.resolve("@spell-app/ui/test/setup.ts"))
+/** Spell UI's test setup (`spell-ui/test/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
+const UI_SETUP = fileURLToPath(import.meta.resolve("spell-ui/test/setup.ts"))
 
 export function epicsProjects({
   prefix = "",

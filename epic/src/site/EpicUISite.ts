@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url"
 import { parseHTML } from "linkedom"
 
 import { readJSON5File } from "spell-kit/util/node/json5"
-import { SiteSearchBuilder } from "@spell-app/ui/tools/SiteSearchBuilder"
+import { SiteSearchBuilder } from "spell-ui/tools/SiteSearchBuilder"
 import type {
   SiteAttribute,
   SiteDataFile,
@@ -14,7 +14,7 @@ import type {
   SiteSearchFile,
   SiteSearchPage,
   SiteTag
-} from "@spell-app/ui/docs-components/docs-components.types"
+} from "spell-ui/docs-components/docs-components.types"
 import { Definitions } from "$/epics/definitions"
 import type { EpicTag, EpicVocabulary } from "$/epics/definitions"
 

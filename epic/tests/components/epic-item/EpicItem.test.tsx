@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { E, UI } from "@spell-app/ui/core"
+import { E, UI } from "spell-ui/core"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 

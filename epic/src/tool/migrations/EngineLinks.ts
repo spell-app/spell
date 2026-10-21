@@ -166,7 +166,7 @@ const MOVES: readonly (readonly [string, string | null])[] = [
   // spell-app 0840a018b (people-and-orgs P16):  "docs and epics are one package":  the docs package's tools (63
   // renames) went into packages/epics/tools, so on to spell-epic's src/tools
   ["packages/docs/tools/", "spell-epic/src/tools/"],
-  // the package itself, its package.json, tsconfig.json, vitest.config.ts:  spell-epic's root, `@spell-app/epics`
+  // the package itself, its package.json, tsconfig.json, vitest.config.ts:  spell-epic's root, `spell-epic`
   ["packages/epics/", "spell-epic/"],
   ["tests/epics/src/", "spell-epic/tests/"],
   ["tests/epics/", "spell-epic/tests/"],

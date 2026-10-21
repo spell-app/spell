@@ -17,7 +17,7 @@
  *   swap), served as spell-app's page server serves them, at `/components/<set>/`, by a page server of its OWN
  *   (`DemoServer`:  this checkout's `EpicServer` on a free port, no pid file, nobody woken), with Spell UI's site
  *   bundle laid over them (the checkout's settings' set's `assets`:  spell-ui's `site/_assets/`, built by spell-app's
- *   page server or `yarn site:bundle` in spell-ui;  else Spell UI's, the `@spell-app/ui` workspace's)
+ *   page server or `yarn site:bundle` in spell-ui;  else Spell UI's, the `spell-ui` workspace's)
  *   - Epic UI's:  the epic server's own (`epicUiMounts()`)
  *   - App UI's layout loads the app's element pack, `/element/spell.pack.js`, which no server here builds:  stubbed,
  *     empty, and its root's error about it let through (its live examples don't draw;  not what this checks)
@@ -122,12 +122,12 @@ mkdirSync(out, { recursive: true })
 
 /**
  * Spell UI's site bundle, as spell-app's page server lays it over a set's folder:  the checkout's settings' set's
- * `assets` (`componentSets()`), every set's since epic `epic-engine`;  else Spell UI's own, the `@spell-app/ui`
+ * `assets` (`componentSets()`), every set's since epic `epic-engine`;  else Spell UI's own, the `spell-ui`
  * workspace's `site/_assets/`.
  */
 const BUNDLE = named?.assets
   ? join(checkout, named.assets)
-  : join(packageDir("@spell-app/ui") ?? "@spell-app/ui (not installed)", "site", "_assets")
+  : join(packageDir("spell-ui") ?? "spell-ui (not installed)", "site", "_assets")
 if (!existsSync(join(BUNDLE, "site.js"))) {
   console.error(`check-comments-epic-ui:  no ${BUNDLE}/site.js:  start spell-app's page server once to build it`)
   process.exit(2)

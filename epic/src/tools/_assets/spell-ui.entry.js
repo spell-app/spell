@@ -2,7 +2,7 @@
  * Entry of `spell-ui.js`, the ONE classic script a `.html` doc loads -- `file://` blocks ES modules.
  * - Built by `node src/tools/bundle-spell-ui.js`, from spell-epic's root (part of `spell dev docs update`);  edit THIS,
  *   never the bundle.
- * - `@spell-app/ui` ~== UI's built `dist/index.js`:  every family, each `define()`s its tags as it's imported.
+ * - `spell-ui` ~== UI's built `dist/index.js`:  every family, each `define()`s its tags as it's imported.
  *   Solid comes from UI's `node_modules`, so there's exactly one copy.
  * - Order matters -- imports run top to bottom:
  *   - `spell-ui:icons` FIRST:  a module the bundler writes, registering the icons our widgets and pages draw
@@ -37,22 +37,22 @@
 
 import "spell-ui:icons"
 import "spell-ui:emoji"
-import { UI } from "@spell-app/ui"
+import { UI } from "spell-ui"
 import * as solidH from "@solidjs/h"
 import * as solidWeb from "@solidjs/web"
 import * as solid from "solid-js"
-import * as uiCore from "@spell-app/ui/core"
-import * as uiForms from "@spell-app/ui/forms"
-import * as uiRoot from "@spell-app/ui/ui-root"
-import * as uiCode from "@spell-app/ui/ui-code"
-import * as uiMarkdown from "@spell-app/ui/ui-markdown"
+import * as uiCore from "spell-ui/core"
+import * as uiForms from "spell-ui/forms"
+import * as uiRoot from "spell-ui/ui-root"
+import * as uiCode from "spell-ui/ui-code"
+import * as uiMarkdown from "spell-ui/ui-markdown"
 import "spell-ui:lazy"
 import "./spell-ui-sources.js"
 import "./spell-doc-runtime.js"
 import { defineSite } from "spell-kit/server/site"
 
 export { UI }
-export { registerPack } from "@spell-app/ui"
+export { registerPack } from "spell-ui"
 
 /**
  * What a component pack imports, by the specifier its build leaves external => the page's copy of that module.

@@ -6,8 +6,8 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import type { ThreadComment } from "$/epics/comments"
 import type { DOMThreadElement } from "$/epics/components/epic-thread"
 
-import "@spell-app/ui/ui-button"
-import "@spell-app/ui/ui-icon"
+import "spell-ui/ui-button"
+import "spell-ui/ui-icon"
 import "$/epics/components/epic-thread"
 
 /** `element`'s shadow part `name`. */

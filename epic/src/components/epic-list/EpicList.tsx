@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "@spell-app/ui/core"
+import { E } from "spell-ui/core"
 
 import { EPIC_GROUPS, byTitle, type EpicGroupName } from "$/epics/list/EpicCards"
 import { StateFilter } from "$/epics/components/epic-section/StateFilter"

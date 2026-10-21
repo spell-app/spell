@@ -459,7 +459,7 @@ function foldState({ id, kind }) {
  * element definitions and rendering, the rail vs the top-level sections, code blocks, icons.
  * - the packs' elements:  `ui-*` (Spell UI) and `epic-*` (the `epics` pack)
  *   - `PACK_TAG`, written out here, as this runs in the page
- * - "rendered" means has a shadow root:  every @spell-app/ui element renders into one, and so does every pack's.
+ * - "rendered" means has a shadow root:  every spell-ui element renders into one, and so does every pack's.
  * - icons:  `<ui-icon>` plus any `ui-*` with an `icon` attribute, looked for an `<svg>` anywhere in its shadow tree.
  */
 function inspectPage(nav) {

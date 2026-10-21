@@ -13,7 +13,7 @@ parking and waking sessions, and the `epic` command that drives them.
 
 ## What's in it
 
-ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` J14):  the code in `src/`, its tests in
+ONE package, `spell-epic`, laid out as a plain JS repo (epic `epic-eject` J14):  the code in `src/`, its tests in
 `tests/` at the same paths, the plugin's parts at the root.
 
 | Folder | What |
@@ -377,7 +377,7 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 The epic pages are drawn with Spell UI, and the tools run on spell's page server and page assembler.
 spell-epic is a child repo of the kit `spell-kit`, and a WORKSPACE of its one install (epic `epic-engine` P10), not
 an npm user:
-- Its dependencies `@spell-app/ui` and `spell-kit` (the kit's server, assembler, util, element and toolchain) are
+- Its dependencies `spell-ui` and `spell-kit` (the kit's server, assembler, util, element and toolchain) are
   `workspace:*` (in [the root `package.json`](package.json)):  spell-ui and the kit around it (the kit's `repos.json5`
   lists the repos, and what spell-epic needs).
   - No resolutions or Solid pins here:  the kit's `package.json` holds them;  the tool versions' catalog is in
@@ -391,7 +391,7 @@ an npm user:
       `spell-kit/toolchain/aliases`, the run-time hook that runs their source with their own `$/` names (`bin/epic`,
       the `tsx` scripts)
   - A file of theirs is imported by its npm name, an entry its `package.json` `exports` names
-    (`@spell-app/ui/core`, `spell-kit/server/checkout`, `spell-kit/assembler/DataFile`), never by its path
+    (`spell-ui/core`, `spell-kit/server/checkout`, `spell-kit/assembler/DataFile`), never by its path
     (WWOD §4 › "Package names across repos").
     - `tsc` reads the entry's `types`, its BUILT declarations (`dist-types/`, git-ignored there);  Vite, Vitest, `tsx`
       and node its `default`, the source.

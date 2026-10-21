@@ -5,7 +5,7 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ReviewClient } from "$/epics/review"
 
-import "@spell-app/ui/ui-icon"
+import "spell-ui/ui-icon"
 import "$/epics/components/epic-new-item"
 
 // the form and its saves, inside a page:  `EpicReview.test.tsx` (a Todos section) and `EpicPage.test.tsx` (the `+`)

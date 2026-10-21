@@ -186,7 +186,7 @@ const BUILT_AFTER = [
   "<p>Checked:  the type check now understands Spell UI pages.</p>",
   "<ul>",
   "  <li>It reads JSX the way app and ui do.</li>",
-  "  <li>It adds app's types for <code>&lt;ui-*&gt;</code> tags, because <code>@spell-app/ui</code> doesn't ship any.</li>",
+  "  <li>It adds app's types for <code>&lt;ui-*&gt;</code> tags, because <code>spell-ui</code> doesn't ship any.</li>",
   "</ul>"
 ]
 
@@ -224,7 +224,7 @@ describe("path-in-prose", () => {
 
   test("NOT a name:  a folder, a package, an alias, a file alone, a route, a URL, a date, a command naming a file", () => {
     const text = [
-      "In `packages/docs/`, `@spell-app/ui`, `$/epics/tool/PlanParts`, `fuss.ts`, `/api/review/inbox`,",
+      "In `packages/docs/`, `spell-ui`, `$/epics/tool/PlanParts`, `fuss.ts`, `/api/review/inbox`,",
       "https://example.com/a/b/c.html, 10/9/26, read/write/check, `yarn tsx tools/doc-links.js page`."
     ].join("\n")
     expect(found("a.md", text).filter(([, kind]) => kind === "path-in-prose")).toEqual([])

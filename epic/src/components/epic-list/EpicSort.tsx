@@ -1,7 +1,7 @@
 import { For } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "@spell-app/ui/core"
+import { E } from "spell-ui/core"
 
 import { epicSortVocabulary } from "./EpicSort.en"
 import { SORT_KEY, save, savedSort, type EpicSortName, type SortDetail } from "./EpicList.types"

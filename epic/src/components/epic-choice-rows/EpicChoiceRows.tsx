@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "@spell-app/ui/core"
+import { E } from "spell-ui/core"
 
 import { ChoicesForm } from "$/epics/answers"
 

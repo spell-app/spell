@@ -329,7 +329,7 @@ export class EpicServer {
    *   their first set's, from its main checkout;  built as the server starts (`buildBundles()`)
    *   - read from the settings, never named here:  Spell UI's site bundle since epic `epic-engine` (every set's, packs
    *     and all;  spell-app's settings name spell-ui's `site/_assets`)
-   *   - a default repo naming no sets (or none registered):  Spell UI's own, `site/_assets/` in the `@spell-app/ui`
+   *   - a default repo naming no sets (or none registered):  Spell UI's own, `site/_assets/` in the `spell-ui`
    *     workspace (`packageDir()`, epic `epic-engine` P10);  not built there:  no bundle, the pages unstyled
    * - the longer prefix wins (`SRV.StaticHandler`), so `_assets/` is the bundle's, never the docs folder's
    */
@@ -338,14 +338,14 @@ export class EpicServer {
     const checkout = this.defaultRepo?.checkout
     const sets = checkout ? componentSets(pageServerSettings(checkout)) : []
     const assets = (sets.find((set) => set.prefix === `/${EPIC_UI.path}`) ?? sets[0])?.assets
-    const ui = packageDir("@spell-app/ui")
+    const ui = packageDir("spell-ui")
     const dir = checkout && assets ? join(checkout, assets) : ui && join(ui, SPELL_UI_ASSETS)
     return [...(dir ? [{ prefix: `${prefix}${SET_ASSETS}/`, dir }] : []), { prefix, dir: this.epicUiDir }]
   }
 
   /**
    * Build the default repo's bundles whose sources changed since their last build, in the background, with that
-   * checkout's OWN build:  its `@spell-app/page-server`'s `BundleBuild` (`spell dev bundles build --stale`, with its
+   * checkout's OWN build:  its `spell-app/page-server`'s `BundleBuild` (`spell dev bundles build --stale`, with its
    * own CLI;  epic `epic-engine` P8, r8), loaded from the checkout, never a dependency of spell-epic's (spell-app is
    * above spell-epic:  it RUNS spell-epic, epic `epic-engine` P10).
    * - the bundles:  that checkout's settings' `"bundles"`, Spell UI's site bundle among them, which every component
@@ -543,9 +543,9 @@ export const SOURCES = [
 ]
 
 /** The package holding the default repo's own bundle build (`BundleBuild`):  spell-app's, from its checkout. */
-const PAGE_SERVER = "@spell-app/page-server"
+const PAGE_SERVER = "spell-app/page-server"
 
-/** Spell UI's site bundle, in its package (`@spell-app/ui`):  Epic UI's when the default repo's settings name none. */
+/** Spell UI's site bundle, in its package (`spell-ui`):  Epic UI's when the default repo's settings name none. */
 const SPELL_UI_ASSETS = "site/_assets"
 
 /** A component set's site bundle, under its address:  `/components/epics/_assets/site.js`. */
@@ -563,7 +563,7 @@ const WRITABLE = ["epics", "guides", "pages", "brand", "sagas"]
  */
 const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/
 
-/** What the epic server uses of a checkout's `BundleBuild` (`@spell-app/page-server`'s, loaded at run time). */
+/** What the epic server uses of a checkout's `BundleBuild` (`spell-app/page-server`'s, loaded at run time). */
 type BundleBuilder = { readonly wait: Handler; start(): unknown; stop(): void }
 
 /** `BundleBuild` itself:  `new BundleBuild({ root })`. */

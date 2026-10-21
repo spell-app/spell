@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "@spell-app/ui/core"
+import { E } from "spell-ui/core"
 
 import { Fold } from "$/epics/components/epic-item/Fold"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)

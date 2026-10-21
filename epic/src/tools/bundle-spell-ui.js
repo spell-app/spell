@@ -1,5 +1,5 @@
 /**
- * Builds @spell-app/ui from its CURRENT working tree (spell-ui, the workspace Node's resolver finds:  `UI_DIR`),
+ * Builds spell-ui from its CURRENT working tree (spell-ui, the workspace Node's resolver finds:  `UI_DIR`),
  * then bundles `_assets/spell-ui.entry.js` into `_assets/spell-ui.js`:  ONE minified classic script (IIFE),
  * because docs open from `file://`, where browsers refuse ES modules.
  *
@@ -65,15 +65,13 @@ import { packageDir } from "./packageDir.ts"
 /** `src`, the folder of the docs tools (`tools/`). */
 const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 /**
- * Spell UI, the `@spell-app/ui` package:  spell-ui, where Node's resolver finds it from here (a workspace of the top
+ * Spell UI, the `spell-ui` package:  spell-ui, where Node's resolver finds it from here (a workspace of the top
  * `spell` install, epic `epic-engine` P10;  `packageDir()`), unless `SPELL_UI_DIR` says otherwise;  by its REAL path.
- * - esbuild resolves UI's own imports (`dist/` chunk to chunk) to real paths:  had the entry's `@spell-app/ui/*` gone
+ * - esbuild resolves UI's own imports (`dist/` chunk to chunk) to real paths:  had the entry's `spell-ui/*` gone
  *   through a link, the bundle held TWO of UI's modules (`core.js` ...), so two of `spell-element`'s
  *   `ShadowEvents`, and a `<ui-button>`'s page `onClick` ran twice (epic `epic-engine` I18:  Do Now called itself off)
  */
-const UI_DIR = realPath(
-  resolve(process.env.SPELL_UI_DIR ?? packageDir("@spell-app/ui") ?? "@spell-app/ui (not installed)")
-)
+const UI_DIR = realPath(resolve(process.env.SPELL_UI_DIR ?? packageDir("spell-ui") ?? "spell-ui (not installed)"))
 /** spell-element, the `spell-kit/element` package, by its real path:  its source must never be bundled. */
 const ELEMENT_DIR = packageDir("spell-kit/element")
 const ASSETS = join(DOCS, "tools/_assets")
@@ -290,9 +288,9 @@ report(await bundleComments(), COMMENTS_OUT)
  */
 function buildUI() {
   if (!existsSync(join(UI_DIR, "package.json"))) fail(`no UI checkout at ${UI_DIR} (set SPELL_UI_DIR)`)
-  if (run("yarn", ["build"], "build @spell-app/ui (tsc + vite)", { allowFailure: true })) return
+  if (run("yarn", ["build"], "build spell-ui (tsc + vite)", { allowFailure: true })) return
   console.warn("!! UI's tsc failed:  building with `vite build` alone (the bundle may carry type errors)")
-  run("yarn", ["vite", "build"], "build @spell-app/ui (vite only)")
+  run("yarn", ["vite", "build"], "build spell-ui (vite only)")
 }
 
 /**
@@ -373,7 +371,7 @@ async function bundleComments() {
 
 /**
  * esbuild plugin wiring the entry to UI:
- * - `@spell-app/ui` ~== `dist/index.js`, `@spell-app/ui/<entry>` ~== `dist/<entry>.js`
+ * - `spell-ui` ~== `dist/index.js`, `spell-ui/<entry>` ~== `dist/<entry>.js`
  *   (mirrors UI's `package.json` `exports`)
  * - Solid imports resolve from UI's root (`SOLID`), whoever imports them
  * - `spell-ui:icons`:  the generated icon registrations (`iconsModule()`)
@@ -400,7 +398,7 @@ function spellUiResolver() {
         if (loaded.path === "lazy-chunk") return { contents: "export {}", loader: "js" }
         return { contents: "", loader: "js" }
       })
-      pluginBuild.onResolve({ filter: /^@spell-app\/ui(\/.*)?$/ }, ({ path }) => ({ path: uiDistPath(path) }))
+      pluginBuild.onResolve({ filter: /^spell-ui(\/.*)?$/ }, ({ path }) => ({ path: uiDistPath(path) }))
       pluginBuild.onResolve({ filter: SOLID }, async ({ path, kind, pluginData }) => {
         if (pluginData?.fromUiRoot) return undefined
         const resolved = await pluginBuild.resolve(path, { kind, resolveDir: UI_DIR, pluginData: { fromUiRoot: true } })
@@ -418,16 +416,16 @@ function spellUiResolver() {
   }
 }
 
-/** File in UI's `dist/` for an `@spell-app/ui[/...]` specifier. */
+/** File in UI's `dist/` for a `spell-ui[/...]` specifier. */
 function uiDistPath(specifier) {
-  const sub = specifier.slice("@spell-app/ui".length).replace(/^\//, "")
+  const sub = specifier.slice("spell-ui".length).replace(/^\//, "")
   if (!sub) return join(UI_DIR, "dist/index.js")
   return join(UI_DIR, "dist", `${sub}.js`)
 }
 
 /**
  * Source of `spell-ui:icons`:  each of `ICONS`' SVG text, `UI.icons.register()`ed under each of its names.
- * - Imports `UI` from `@spell-app/ui/core` -- the same module `index.js` uses --
+ * - Imports `UI` from `spell-ui/core` -- the same module `index.js` uses --
  *   so this runs BEFORE any family defines (and so upgrades) its elements.
  * - Registers in the FIRST `UI.load()` callback:
  *   every element `await`s that same promise before drawing an icon, so the names are in place first.
@@ -440,7 +438,7 @@ function iconsModule() {
     return [names, readFileSync(path, "utf8")]
   })
   return [
-    `import { UI } from "@spell-app/ui/core"`,
+    `import { UI } from "spell-ui/core"`,
     `const ICONS = ${JSON.stringify(icons)}`,
     `UI.load().then((ui) => {`,
     `  ui.icons.reset()`,
@@ -479,7 +477,7 @@ function baseUrlSource() {
  */
 function emojiModule() {
   return [
-    `import { EmojiData } from "@spell-app/ui/ui-emoji"`,
+    `import { EmojiData } from "spell-ui/ui-emoji"`,
     baseUrlSource(),
     `const base = bundleUrl("emoji/")`,
     `const waiting = new Map()`,
@@ -644,8 +642,8 @@ async function writeLazyScripts() {
  */
 function lazyModule() {
   return [
-    `import { CodeHighlighter } from "@spell-app/ui/ui-code"`,
-    `import { MarkdownRenderer } from "@spell-app/ui/ui-markdown"`,
+    `import { CodeHighlighter } from "spell-ui/ui-code"`,
+    `import { MarkdownRenderer } from "spell-ui/ui-markdown"`,
     baseUrlSource(),
     `const base = bundleUrl("lazy/")`,
     `const loading = new Map()`,

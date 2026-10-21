@@ -4,7 +4,7 @@ import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 // the page's own Spell UI, which draws the code:  the docs bundle defines it on a real page
-import "@spell-app/ui/ui-code"
+import "spell-ui/ui-code"
 import "$/epics/components/epic-code"
 
 /** `element`'s shadow part `name`. */

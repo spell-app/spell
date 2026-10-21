@@ -2,7 +2,7 @@
   // spell-epic's import-alias table, as every child repo has its own (epic `repo-split` P8):  `$/epics` is this repo
   // itself, one package (epic `epic-eject` J14):  its `src/`, the elements included (`$/epics/components` is
   // `src/components/`).  The root `tsconfig.json` extends this, and so does the extension's (`vscode/tsconfig.json`).
-  // - A package of ANOTHER repo is imported by its npm name (`@spell-app/ui/core`, `spell-kit/server/page`), an entry
+  // - A package of ANOTHER repo is imported by its npm name (`spell-ui/core`, `spell-kit/server/page`), an entry
   //   its `package.json` `exports` names (WWOD §4, "Package names across repos"):  a workspace of the top `spell`
   //   install (epic `epic-engine` P10).  `tsc` reads its BUILT declarations (the entry's `types`, `dist-types/`, which
   //   `yarn ts` builds first:  `spell-types --below`);  Vite, Vitest, `tsx` and node read its source.

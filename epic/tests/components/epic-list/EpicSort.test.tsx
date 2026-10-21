@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "@spell-app/ui/ui-icon"
-import "@spell-app/ui/ui-button"
+import "spell-ui/ui-icon"
+import "spell-ui/ui-button"
 import "$/epics/components/epic-list"
 
 import { SORT_KEY } from "$/epics/components/epic-list/EpicList.types"

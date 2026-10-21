@@ -16,11 +16,11 @@
  * - Unlike a pack:
  *   - no `<ui-root>` catalog, no `registerPack()`:  the entry defines its tags itself, as the script runs
  *   - it may import Spell UI's DOC-ONLY families (`$/ui/docs-components/<family>`, e.g. `<ui-docs-inspector>`),
- *     bundled from this checkout's source;  any other `$/ui/...` module, Solid or `@spell-app/...` import fails
+ *     bundled from this checkout's source;  any other `$/ui/...` module, Solid or `spell-ui/...` import fails
  * - Why not in `spell-ui.js`:  that bundle is built from `ui`'s `dist/`, which has no docs families;
  *   and only the page that needs these pays for them.
  * - The entry lives in SHARED content, which has no `node_modules`:
- *   `$/ui/docs-components/...` resolves to Spell UI's `src/` by alias (the `@spell-app/ui` workspace Node's resolver finds
+ *   `$/ui/docs-components/...` resolves to Spell UI's `src/` by alias (the `spell-ui` workspace Node's resolver finds
  *   from here, spell-ui), so the script is built from the checkout that runs this.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
@@ -33,8 +33,8 @@ import { parseArgs } from "./pages.js"
 /** `src`, the folder of the docs tools (`tools/`). */
 const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 
-/** Spell UI (`@spell-app/ui`, spell-ui):  its Vite config (`baseConfig()`) and the docs families' source. */
-const UI_DIR = packageDir("@spell-app/ui") ?? join(DOCS, "@spell-app/ui (not installed)")
+/** Spell UI (`spell-ui`, spell-ui):  its Vite config (`baseConfig()`) and the docs families' source. */
+const UI_DIR = packageDir("spell-ui") ?? join(DOCS, "spell-ui (not installed)")
 
 /**
  * The modules a script SHARES with the page instead of bundling:
@@ -42,14 +42,14 @@ const UI_DIR = packageDir("@spell-app/ui") ?? join(DOCS, "@spell-app/ui (not ins
  * - The same list as the pack build's `PACK_MODULES` (`packages/cli/src/dev/packBuild.ts`):  keep them in step.
  *   Not imported from there:  `packBuild.ts` reaches `$/util`'s barrel, which this package's `tsc` can't check.
  */
-const PACK_MODULES = ["solid-js", "@solidjs/web", "spell-kit/element", "@spell-app/ui/core", "@spell-app/ui/forms"]
+const PACK_MODULES = ["solid-js", "@solidjs/web", "spell-kit/element", "spell-ui/core", "spell-ui/forms"]
 
 /** Imports bundled from `ui`'s source:  the doc-only families and what they import of `ui` beyond the core. */
 const UI_SOURCE = /^\$\/ui\/(docs-components|components\/components\.types)(\/|$)/
 
-/** Imports the page must share, never bundled:  Spell UI, Solid, our other packages (as `packBuild.ts`). */
+/** Imports the page must share, never bundled:  Spell UI, Solid, our other repos' packages (as `packBuild.ts`). */
 const SHARED_IMPORT =
-  /^\$\/(ui|spell-element)(\/|$)|^solid-js(\/|$)|^@solidjs\/|^@spell-app\/|^spell-kit\/element(\/|$)/
+  /^\$\/(ui|spell-element)(\/|$)|^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell-kit\/element(\/|$)/
 
 const { positional } = parseArgs(process.argv.slice(2))
 const entry = positional[0] ? resolve(positional[0]) : ""

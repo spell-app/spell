@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI } from "@spell-app/ui/core"
+import { E, UI } from "spell-ui/core"
 
 import { PlanDates } from "$/epics/dates"
 import { readEpicDate } from "$/epics/list/EpicCards"

@@ -8,13 +8,13 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
   [WWOD](../agents/wwod/WWOD.md).
   - No `agents/` link at the root (epic `epic-eject` I23):  Claude Code reads a plugin's root `agents/` as agent types.
 - spell-epic is a child repo of the kit `spell-kit`, and a workspace of its ONE install (`yarn install` in the kit;
-  epic `epic-engine` P10):  the other repos' packages (`@spell-app/ui`, `spell-kit/server` ...) are `workspace:*`
+  epic `epic-engine` P10):  the other repos' packages (`spell-ui`, `spell-kit/server` ...) are `workspace:*`
   dependencies, imported by their package names (WWOD §4), never by a path into a sibling repo.
   - `tsc` reads their built declarations (`dist-types/`):  `yarn ts` builds them first (`spell-types --below`).
   - A tool finding one on disk asks Node's resolver ([packageDir.ts](src/tools/packageDir.ts)).
   - Their source runs here with their own `$/` names through `spell-kit/toolchain/aliases` (`bin/epic`, the
     `tsx` scripts).
-- spell-epic is ONE package, `@spell-app/epics` (epic `epic-eject` J14), laid out as a plain JS repo:
+- spell-epic is ONE package, `spell-epic` (epic `epic-eject` J14), laid out as a plain JS repo:
   - `src/`:  the code (`$/epics`), the elements and the docs tools included;  its rules:  [src/AGENTS.md](src/AGENTS.md)
   - `tests/`:  its tests, at the same paths as the code (`tests/command/X.test.ts` for `src/command/X.ts`)
   - `scripts/`:  dev-only scripts;  `vscode/`:  the extension, its own yarn project

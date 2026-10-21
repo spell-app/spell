@@ -1,6 +1,6 @@
 /*
  * Page behaviour for the `.html` docs.
- * Bundled into `spell-ui.js` (a classic IIFE, beside @spell-app/ui) by `scripts/bundle-spell-ui.js`;
+ * Bundled into `spell-ui.js` (a classic IIFE, beside spell-ui) by `scripts/bundle-spell-ui.js`;
  * side effects only.  The page's markup is hand-authored;  this only DRIVES it.
  * - Two page markups, read into ONE outline (`outlineOf()`) that everything below works from:
  *   - SECTIONS (every page but the saga pages):
@@ -99,7 +99,7 @@ import {
   wireJumpKey
 } from "./spell-doc-toolbar.js"
 import { EpicAddress, PageTargets } from "$/epics/links"
-import { ComponentPacks } from "@spell-app/ui/ui-components"
+import { ComponentPacks } from "spell-ui/ui-components"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
 const TAGS = [

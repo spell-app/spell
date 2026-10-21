@@ -1,7 +1,7 @@
 /* GENERATED -- do not edit:  `spell dev pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  1cb2a3a7da6f077c
+// sources:  0625411558fa999d
 
-import type { RootCatalogEntry } from "@spell-app/ui"
+import type { RootCatalogEntry } from "spell-ui"
 
 /** Every tag of the `epics` pack => what `<ui-root>` needs before its family loads. */
 export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {

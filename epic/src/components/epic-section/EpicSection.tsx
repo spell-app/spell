@@ -1,7 +1,7 @@
 import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "@spell-app/ui/core"
+import { E } from "spell-ui/core"
 
 import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "$/epics/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)

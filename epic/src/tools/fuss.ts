@@ -307,7 +307,7 @@ function pathWhy(paths: string[], format: Format): string {
  * - a file in a folder (`tools/fuss.ts`), or a file and its line (`fuss.ts:12`)
  * - 3 or more parts from a top folder of the checkout or a package (`packages/epics/tools`)
  * - NOT:
- *   - a folder alone (`packages/`, `packages/epics/`), a package (`@spell-app/ui`), an alias (`$/epics/tool`)
+ *   - a folder alone (`packages/`, `packages/epics/`), a package (`spell-ui`), an alias (`$/epics/tool`)
  *   - a URL, a route (`/api/review`), a date (`10/9/26`), a file alone (`fuss.ts`), or words like "read/write/check"
  */
 function isFilePath(token: string): boolean {

@@ -41,7 +41,7 @@ export class PathTooltips {
 
   /**
    * Is `text` a path to a file:  a file in a folder (`tools/fuss.ts`), or a file and its line (`fuss.ts:12`)?
-   * - never a folder, a URL, a route (`/api/...`), an alias (`$/epics`) or a package (`@spell-app/ui`)
+   * - never a folder, a URL, a route (`/api/...`), an alias (`$/epics`) or a package (`spell-ui`)
    */
   static isFilePath(text: string): boolean {
     const path = text.trim()

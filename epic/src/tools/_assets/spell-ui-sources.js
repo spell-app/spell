@@ -9,7 +9,7 @@
  *   for 409 (the file changed since it was loaded:  reload, then save again), `save` otherwise.
  */
 
-import { UI } from "@spell-app/ui/core"
+import { UI } from "spell-ui/core"
 
 if (window.SPELL_SERVER) {
   void UI.load().then((ui) => {

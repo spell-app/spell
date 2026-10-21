@@ -9,8 +9,8 @@ import { pathToFileURL } from "node:url"
  * workspace of the top `spell` install, wherever that put it (epic `epic-engine` P10).
  *
  * ```js
- * packageDir("@spell-app/ui")                       // => "/Users/owen/www/spell/spell-ui"
- * packageDir("@spell-app/page-server", checkout)    // => "<checkout>/page-server", from that checkout's install
+ * packageDir("spell-ui")                       // => "/Users/owen/www/spell/spell-ui"
+ * packageDir("spell-app/page-server", checkout)    // => "<checkout>/page-server", from that checkout's install
  * ```
  *
  * - Never a sibling named by hand (`../spell-ui`, `.spell-app/packages/ui`):  spell-epic's other repos are packages,

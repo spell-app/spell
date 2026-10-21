@@ -1,5 +1,5 @@
 {
-  "name": "@spell-app/epics",
+  "name": "spell-epic",
   "version": "0.1.0",
   "private": true,
   "description": "spell-epic:  the epic tooling -- epic pages and their <epic-*> component pack, the epic command, worktrees and windows, the review loop, and every docs page's tooling -- as a Claude Code plugin, loaded in place",
@@ -40,12 +40,12 @@
     "vscode:package": "cd vscode && yarn package"
   },
   "dependencies": {
-    "@spell-app/ui": "workspace:*",
     "chalk": "^5.6.0",
     "commander": "^14",
     "json5": "^2.1.1",
     "linkedom": "^0.18.13",
     "spell-kit": "workspace:*",
+    "spell-ui": "workspace:*",
     "tsx": "4.20.3"
   },
   "devDependencies": {
