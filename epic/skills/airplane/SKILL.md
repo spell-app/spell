@@ -36,7 +36,7 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
    - `offline pages`:  `--fix` points every page's highlight.js at the repo's copy.
      Anything else remote it names:  fix the page by hand, or tell Owen which pages will look plain.
    - `extension`, too old:  spell-epic's VS Code extension, rebuilt and installed
-     as [its README](${CLAUDE_PLUGIN_ROOT}/vscode/README.md) says.
+     as [its README](${CLAUDE_PLUGIN_ROOT}/README-vscode.md) says.
      - From spell-epic's main checkout, never a branch behind it:  it installs into VS Code.
      - Then ask Owen to reload the window (Developer:  Reload Window).
    - `waiting`:  marks already in the inboxes from before:  say which epics;  they'll be gathered at landing too
