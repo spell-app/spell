@@ -79,7 +79,25 @@ export const packModules = Object.freeze({
   "$/ui/components/ui-markdown": uiMarkdown
 })
 
+/**
+ * The site header's tabs on a doc whose server names none (`defineSite({ tabs })`):  a doc opened from disk
+ * (`file://`), a server without `"siteTabs"` in its settings.
+ * - served by spell-app's page server or the epic server:  the checkout's `"pageServer"` `"siteTabs"` instead, which
+ *   name the other parts of the site too (Spell/UI, the app ...);  the header names none itself (epic `repo-split` I4)
+ * - the docs' own areas, the list pages `epic pages index` writes (`index.js` `LISTS`), and the engine's own
+ *   component set, in the header's order (Owen, 2026-10-11, epic `epic-workflow` J40)
+ *   - Epic/UI:  greyed out from disk, as every tab only a server has
+ */
+const DOCS_TABS = [
+  { name: "Guides", path: "guides/index.html", areas: ["guides"] },
+  { name: "Sagas", path: "sagas/index.html", areas: ["sagas", "goals"] },
+  { name: "Epics", path: "epics/index.html", areas: ["epics"] },
+  { name: "Epic/UI", path: "/components/epics/", serverOnly: true, sets: ["epics"], paths: ["/spell-epic/src/docs/"] },
+  { name: "Brand", path: "brand/index.html", areas: ["brand"], sets: ["brand"] },
+  { name: "Templates", path: "templates/index.html", areas: ["templates"] }
+]
+
 void UI.load()
   .then((ui) => ui.themes.apply("spell-brand"))
   .catch((error) => console.error("spell-ui:  the spell-brand theme", error))
-defineSite()
+defineSite({ tabs: DOCS_TABS })

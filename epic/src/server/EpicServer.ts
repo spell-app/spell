@@ -10,6 +10,7 @@ import {
   type PageConfig,
   type RouteModule
 } from "@spell-app/server/page"
+import type { SiteTab } from "@spell-app/server/site/site.types"
 
 import type { ContentRouteContext } from "$/epics/list/runningRoutes"
 
@@ -77,6 +78,8 @@ import {
  *   `"app"` declares it (`RepoApp`):  redirected to while it answers;  else started (its own command, detached, from
  *   its main checkout) behind a "Starting ..." page that goes there once it does;  none declared:  a page saying so.
  *   spell-app's is the editor its page server starts (spaces' `appRoutes.ts`).
+ * - The site header's tabs:  the default repo's settings' (`"siteTabs"`), told every page as its own page server tells
+ *   them (`SPELL_SERVER.siteTabs`;  epic `repo-split` I4)
  * - Its pid file and log are in spell-epic's home folder (`~/.spell-epic/server.json`, `server.log`).
  * - Its port:  `DEFAULT_EPIC_PORT` (4848), not spell-app's 4747.
  * - Run it with `epic hub` (`Hub`), never by hand.
@@ -121,6 +124,12 @@ export class EpicServer {
   /** every component set's folders, at their addresses:  Epic UI's, then the repos' others */
   private readonly setMounts: SRV.Mount[]
 
+  /**
+   * the site header's tabs every page is told (`SPELL_SERVER.siteTabs`):  the default repo's settings' `"siteTabs"`,
+   * as its own page server tells them;  none:  `undefined`, and pages show their bundle's (`defineSite({ tabs })`)
+   */
+  private readonly siteTabs?: readonly SiteTab[]
+
   /** the default repo's bundles' build, once `start()` has begun it (`buildBundles()`) */
   private bundles?: BundleBuilder
 
@@ -145,6 +154,7 @@ export class EpicServer {
     this.repos = repos ?? new RepoList({ home: this.home }).repos()
     this.defaultRepo = this.repos.find((repo) => repo.isDefault) ?? this.repos[0]
     this.setMounts = [...this.epicUiMounts(), ...this.componentSetMounts()]
+    this.siteTabs = this.defaultRepo && pageServerSettings(this.defaultRepo.checkout).siteTabs
     this.pidFile = new SRV.PidFile(this.home, PID_FILE)
     this.info = {
       pid: process.pid,
@@ -379,6 +389,8 @@ export class EpicServer {
    * - `root`:  that repo's main checkout
    * - `engine`:  spell-epic's checkout
    * - `edit`, `etag`:  the page editor, for the default repo's pages
+   * - `siteTabs`:  the site header's tabs, the default repo's settings' (`siteTabs`), every page's alike:
+   *   the header keeps no repo's prefix (`/r/<repo>/`) on its links
    * - and what route modules add (`addPageConfig()`)
    */
   pageConfig(served: ServedFile): Record<string, unknown> {
@@ -402,6 +414,7 @@ export class EpicServer {
       engine: this.engine,
       ...(repo?.isDefault && { edit: PageEditor.PREFIX }),
       etag: SRV.StaticHandler.etagOf(statSync(served.file)),
+      ...(this.siteTabs && { siteTabs: this.siteTabs }),
       ...Object.assign({}, ...this.pageConfigs.map((add) => add(served)))
     }
   }

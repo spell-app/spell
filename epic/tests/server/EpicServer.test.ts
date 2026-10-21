@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "@spell-app/server"
 import { componentSets, type ComponentSetSetting } from "@spell-app/server/page"
+import type { SiteTab } from "@spell-app/server/site/site.types"
 import { ask } from "@spell-app/server/test/serve"
 
 import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "$/epics/server/EpicServer"
@@ -48,13 +49,19 @@ const SETS: Record<string, ComponentSetSetting> = {
   brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
 }
 
+/** The site header's tabs a scratch repo's settings name (`"siteTabs"`), as spell-app's do. */
+const SITE_TABS: SiteTab[] = [
+  { name: "Guides", path: "guides/index.html", areas: ["guides"] },
+  { name: "Spell/UI", path: "/components/ui/", serverOnly: true, sets: ["ui"] }
+]
+
 /**
- * Give the scratch repo at `checkout` component sets:  its settings naming them (`SETS`), and each set's home page and
+ * Give the scratch repo at `checkout` component sets and the header's tabs (`SITE_TABS`):  its settings naming them (`SETS`), and each set's home page and
  * its site bundle's `site.js`, saying which folder it is;  Epic UI's folder too, which the engine's stands in for.
  */
 function withComponentSets(checkout: string): void {
   const name = checkout.split("/").at(-1)
-  put(checkout, "package.json", JSON.stringify({ pageServer: { componentSets: SETS } }))
+  put(checkout, "package.json", JSON.stringify({ pageServer: { componentSets: SETS, siteTabs: SITE_TABS } }))
   for (const set of Object.values(SETS)) {
     put(checkout, `${set.dir}/index.html`, `${name} ${set.name} home`)
     put(checkout, `${set.assets}/site.js`, `// ${name} ${set.assets}`)
@@ -194,11 +201,15 @@ describe("EpicServer", () => {
       root: join(top, "one"),
       engine: ENGINE,
       edit: "/api/pages",
-      token: "t0ken"
+      token: "t0ken",
+      // the site header's tabs:  the default repo's settings' (epic `repo-split` I4)
+      siteTabs: SITE_TABS
     })
     const other = config((await ask(port, "GET", "/r/two/epics/seo/seo.plan.html")).text)
     expect(other).toMatchObject({ file: "/r/two/epics/seo/seo.plan.html", repo: "two", base: "/r/two/" })
     expect(other.edit).toBeUndefined()
+    // every page alike:  the header's links keep no repo's prefix
+    expect(other.siteTabs).toEqual(SITE_TABS)
   })
 
   test("highlight.js from the engine, not cdnjs:  pages load offline", async () => {

@@ -3,7 +3,7 @@
  * from every page's `<title>` and description (claude-design P5).
  * Usage (from spell-epic's root):  node src/tools/index.js
  * - The home, `pages/index.html`:  a routing page, one card per area in the top bar's order
- *   (`areaCards()`;  the site header's `PROPERTIES`), each with its count,
+ *   (`areaCards()`;  the site header's tabs, the checkout's `"pageServer"` `"siteTabs"`), each with its count,
  *   written between `<!-- areas:start -->` and `<!-- areas:end -->`
  *   - a missing one is made from `homeSkeleton()` first (a repo `epic init` set up)
  *   - only the areas this checkout HAS (`areaCards()`):  a repo with no Spell UI, app or brand gets no card for them

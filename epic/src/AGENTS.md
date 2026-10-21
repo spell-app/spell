@@ -799,6 +799,8 @@ In `tools/`:
   - Everything that sticks or lands starts below it:
     `siteHeaderHeight()` in `spell-doc-runtime.js`, and its header's "Landing".
   - The element itself is `@spell-app/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
+  - Its tabs:  the checkout's `"pageServer"` `"siteTabs"` on a served page;  from disk, the docs bundle's own
+    (`DOCS_TABS` in `spell-ui.entry.js`:  the docs' areas and Epic/UI), epic `repo-split` I4.
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
 - Pages MUST still open straight from disk (`file://`):  no ES modules, hence the one classic bundle.
   - But the openers (`docs open`, `epic open`) show them from this checkout's PAGE SERVER
