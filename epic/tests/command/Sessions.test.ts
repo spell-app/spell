@@ -4,6 +4,7 @@ import { join } from "path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { Sessions } from "$/epics/command/Sessions"
+import { EpicConfig } from "$/epics/config/EpicConfig"
 
 /** A fake `~/.claude`, and a folder that is NOT a git checkout to list sessions from. */
 const HOME = mkdtempSync(join(tmpdir(), "claude-home-"))
@@ -91,6 +92,35 @@ describe("named()", () => {
     ).toEqual(["aaaa1111", "bbbb2222"])
     expect(new Sessions({ home: HOME }).named("nope")).toEqual([])
   })
+
+  // epic `epic-engine` I67:  `epic worktree status` took 50 seconds, resolving real paths for every line of every
+  // transcript, and parsing every line of transcripts that couldn't match
+  const busy = Array.from({ length: 200 }, (_, at) => ({ type: "user", cwd: "/elsewhere/busy", uuid: `u${at}` }))
+  for (const id of ["busy-1", "busy-2", "busy-3"]) transcript("-busy", id, busy)
+  test("each distinct folder resolved once;  a transcript that can't match, never parsed", () => {
+    const ask = vi.spyOn(EpicConfig.prototype, "worktreeNameOf")
+    const parse = vi.spyOn(Sessions, "parseJSONLine")
+    try {
+      expect(new Sessions({ home: HOME }).named("seo")).toHaveLength(2)
+      // 600 lines name /elsewhere/busy;  a handful of folders in all
+      expect(ask.mock.calls.length).toBeLessThan(10)
+      // only the two that match:  their 4 lines with a `cwd` or a title
+      expect(parse.mock.calls.length).toBeLessThan(10)
+    } finally {
+      ask.mockRestore()
+      parse.mockRestore()
+    }
+  })
+  transcript("-odd", "odd-1", [{ type: "user", cwd: `${REPO}/.claude/worktrees/odd"one\\x/src` }])
+  transcript("-odd", "odd-2", [{ type: "custom-title", customTitle: '✅ odd"one\\x' }])
+  test("a folder or title with escapes in its JSON still found", () => {
+    expect(
+      new Sessions({ home: HOME })
+        .named('odd"one\\x')
+        .map((it) => it.id)
+        .sort()
+    ).toEqual(["odd-1", "odd-2"])
+  })
 })
 
 describe("promptText()", () => {
@@ -156,7 +186,9 @@ describe("title <title>:  titled only when the tab shows it", () => {
     }
   })
   test("alone:  the title, and what its tab may show", async () => {
-    expect((await title("t-resumed")).said).toBe('*🚧 editor  (its tab may show "Claude in Chrome browser automation")\n')
+    expect((await title("t-resumed")).said).toBe(
+      '*🚧 editor  (its tab may show "Claude in Chrome browser automation")\n'
+    )
     expect((await title("t-custom")).said).toBe("*🚧 editor\n")
   })
   test("--force (Continue after a handoff, a resume):  queued whatever the tab seems to show", async () => {

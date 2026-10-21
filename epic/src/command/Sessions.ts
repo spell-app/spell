@@ -495,13 +495,22 @@ export class Sessions {
   named(name: string): NamedSession[] {
     // a `cwd` in worktree `name`:  the worktrees folder from the repo's `.epic/config.json5`
     const config = EpicConfig.of(Git.mainRoot())
+    // each distinct `cwd` asked ONCE (epic `epic-engine` I67):  the transcripts' many thousand lines name a few
+    // hundred folders, and each ask resolves real paths on disk
+    const worktrees = new Map<string, string | undefined>()
+    const worktreeOf = (cwd: string) => {
+      if (!worktrees.has(cwd)) worktrees.set(cwd, config.worktreeNameOf(cwd))
+      return worktrees.get(cwd)
+    }
     const found: NamedSession[] = []
     for (const path of this.transcripts()) {
       let title: string | null = null
       let cwd: string | null = null
       let last = ""
       let inWorktree = false
-      for (const line of readFileSync(path, "utf8").split("\n")) {
+      const text = readFileSync(path, "utf8")
+      if (!Sessions.mayBeNamed(text, name, worktreeOf)) continue
+      for (const line of text.split("\n")) {
         // cheap pre-check:  most lines are neither
         if (!line.includes('"custom-title"') && !line.includes('"cwd"')) continue
         const entry = Sessions.parseJSONLine(line)
@@ -509,7 +518,7 @@ export class Sessions {
         if (typeof entry.cwd === "string" && entry.cwd) {
           cwd = entry.cwd
           last = (entry.timestamp as string) ?? last
-          inWorktree ||= config.worktreeNameOf(cwd) === name
+          inWorktree ||= worktreeOf(cwd) === name
         }
       }
       // titled `<name>`, with or without its icon (`🚧 <name>`, `✅ <name>`:  `bareTitle()`)
@@ -517,6 +526,23 @@ export class Sessions {
       if (titled || inWorktree) found.push({ id: basename(path, ".jsonl"), title: title ?? "-", last, cwd })
     }
     return found.sort((a, b) => b.last.localeCompare(a.last) || b.id.localeCompare(a.id))
+  }
+
+  /**
+   * Whether transcript `text` MAY be titled `name` or have worked in its worktree (`worktreeOf()`), from every
+   * `"customTitle"` and `"cwd"` in it, unparsed (epic `epic-engine` I67)
+   * - `false`:  `named()` skips it without parsing a line;  most transcripts, and parsing them all took seconds
+   * - every string either key holds, anywhere in it:  so never `false` for one `named()` would find
+   */
+  static mayBeNamed(text: string, name: string, worktreeOf: (cwd: string) => string | undefined): boolean {
+    const seen = new Set<string>()
+    for (const [, key, raw] of text.matchAll(/"(customTitle|cwd)"\s*:\s*"((?:[^"\\]|\\.)*)"/g)) {
+      if (seen.has(`${key}:${raw}`)) continue
+      seen.add(`${key}:${raw}`)
+      const value = decoded(raw!)
+      if (key === "cwd" ? worktreeOf(value) === name : bareTitle(value) === name) return true
+    }
+    return false
   }
 
   /** Every transcript file, of every project:  each once, a linked worktree's folder skipped (`SessionFolders.listed()`). */
@@ -800,6 +826,16 @@ function readJSON(path: string): Record<string, unknown> {
     return Sessions.parseJSONLine(readFileSync(path, "utf8"))
   } catch {
     return {}
+  }
+}
+
+/** JSON string body `raw` (between its quotes), its escapes undone;  as written when it doesn't parse. */
+function decoded(raw: string): string {
+  if (!raw.includes("\\")) return raw
+  try {
+    return JSON.parse(`"${raw}"`) as string
+  } catch {
+    return raw
   }
 }
 
