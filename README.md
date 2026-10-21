@@ -28,6 +28,10 @@ yarn clone            # every child repo in repos.json5, then ONE install for al
   ```
 
 - `yarn clone` clones over SSH, and over HTTPS (GitHub's login, `gh auth setup-git`) when SSH is refused.
+- Its flags (CI's):  `--branch <name>` clones each repo at that branch when it has one, else its default branch;
+  `--https` skips SSH;  `--shallow` takes only the last commit;  `--no-install` clones only.
+- Every `yarn install` links each child repo's `agents` to the kit's (`postinstall`), so a checkout made without
+  `yarn clone` (an epic's worktree, CI) has them too.
 - Again after `repos.json5` gains a repo:  it clones only what's missing.
 
 ## Day to day
@@ -75,6 +79,7 @@ The rest of what's tracked:
 | `yarn.lock`, `.yarnrc.yml`, `.yarn/releases/` | the one lockfile, the one catalog of tool versions (`vite-plus` and its tools), the yarn release |
 | `repos.json5` | the child repos, lowest first:  name, git URL, which repos each needs |
 | `tools/repos.ts` | what `clone`, `pull`, `status`, `repos`, the checks over every repo and the `postinstall` run |
+| `.github/workflows/checks.yml` | the kit's CI;  each child repo has its own ([AGENTS.md](AGENTS.md), "CI") |
 | `agents/` | WWOD, the house style (`agents/wwod/`), and links to the three logs in the content repo |
 | `AGENTS.md`, `CLAUDE.md` | the rules for the kit and across repos |
 | `.epic/config.json5` | the epic settings, for a session working here |

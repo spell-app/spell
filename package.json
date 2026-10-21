@@ -213,7 +213,7 @@
     "kit:review": "yarn kit:ts && yarn kit:lint:fix && yarn kit:format && yarn kit:test && echo '== REVIEW PASSED\n===========\n'",
     "server": "tsx --tsconfig server/tsconfig.json server/src/page/cli.ts",
     "favicon": "tsx --tsconfig server/tsconfig.json server/scripts/favicon.ts",
-    "postinstall": "node tools/repos.ts link-kit",
+    "postinstall": "node tools/repos.ts links",
     "/////// THE CHILD REPOS (tools/repos.ts, repos.json5)": "",
     "clone": "node tools/repos.ts clone",
     "pull": "node tools/repos.ts pull",

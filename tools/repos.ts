@@ -8,11 +8,15 @@
  * ```sh
  * yarn clone [repo ...]     # clone what's missing (the named repos and everything they need;  none named:  all),
  *                           # then ONE `yarn install` over every repo
+ *   --branch <name>         #   each at that branch when it has one, else its default branch (CI's)
+ *   --https --shallow       #   over HTTPS only;  only the last commit (CI's)
+ *   --no-install            #   clone only
  * yarn pull                 # `git pull --ff-only` in every child repo there
  * yarn status               # each child repo's branch and changes;  a clean one in one line
  * yarn repos                # the list:  which are cloned, and what each needs
- * node tools/repos.ts link-kit    # `node_modules/spell-kit`, a link to the kit:  what `yarn install` runs after
- *                                 # (`postinstall`)
+ * node tools/repos.ts links       # `node_modules/spell-kit`, a link to the kit, and each child repo's `agents`
+ *                                 # link:  what `yarn install` runs after (`postinstall`)
+ * node tools/repos.ts link-kit    # the first of those alone
  * yarn ts | test | lint | review    # the kit's own (`kit:<script>`), then that script in every child repo there,
  *                                   # lowest first
  * ```
@@ -84,8 +88,83 @@ function httpsOf(url: string): string {
   return ssh ? `https://${ssh[1]}/${ssh[2]}` : url
 }
 
-/** `yarn clone [repo ...]`:  clone what's missing, then one install over every repo. */
-function clone(names: string[]): number {
+/**
+ * An HTTPS URL signed in with `SPELL_REPOS_TOKEN`, when the environment has it (CI's secret, epic `repo-split` J74);
+ * any other URL, or no token, as it is.
+ * - The repos are public, so CI clones with no token:  the secret is only for a repo made private later.
+ */
+function signedIn(url: string): string {
+  const token = process.env.SPELL_REPOS_TOKEN
+  return token && url.startsWith("https://") ? url.replace("https://", `https://x-access-token:${token}@`) : url
+}
+
+/** How `yarn clone` clones:  its flags. */
+type CloneOptions = {
+  /**
+   * `--branch <name>`:  each repo at that branch when it has one, else at its default branch (`main`).
+   * - CI's:  the branch under test, so a change across repos is checked together.
+   */
+  branch?: string
+  /** `--https`:  over HTTPS only, never trying SSH first (CI has no SSH key) */
+  https: boolean
+  /** `--shallow`:  only each repo's last commit (CI's:  no history needed) */
+  shallow: boolean
+  /** `--no-install`:  clone only, no `yarn install` after */
+  install: boolean
+}
+
+/** `yarn clone`'s command line:  the repos named, and the flags. */
+function cloneArgs(args: string[]): { names: string[]; options: CloneOptions } {
+  const names: string[] = []
+  const options: CloneOptions = { https: false, shallow: false, install: true }
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]!
+    if (arg === "--branch") options.branch = args[++i]
+    else if (arg === "--https") options.https = true
+    else if (arg === "--shallow") options.shallow = true
+    else if (arg === "--no-install") options.install = false
+    else if (arg.startsWith("--")) throw new Error(`yarn clone:  no flag ${arg}`)
+    else names.push(arg)
+  }
+  if (options.branch === "") throw new Error("yarn clone:  --branch needs a branch name")
+  return { names, options }
+}
+
+/**
+ * Where to clone `repo` from, and its branches:  the first of its URLs that answers `git ls-remote`.
+ * - SSH first, then HTTPS (GitHub's login, `gh auth setup-git`):  `--https`, HTTPS alone.
+ * - Asks nothing:  no password prompt, no SSH host-key question (a hung CI job otherwise).
+ */
+function remoteOf(repo: Repo, https: boolean): { url: string; branches: string[] } | undefined {
+  const urls = https ? [httpsOf(repo.url)] : [...new Set([repo.url, httpsOf(repo.url)])]
+  const env = {
+    ...process.env,
+    GIT_TERMINAL_PROMPT: "0",
+    GIT_SSH_COMMAND: process.env.GIT_SSH_COMMAND ?? "ssh -o BatchMode=yes"
+  }
+  for (const url of urls) {
+    const done = spawnSync("git", ["ls-remote", "--heads", signedIn(url)], { encoding: "utf8", env })
+    if (done.status === 0)
+      return { url, branches: done.stdout.split("\n").flatMap((line) => /\trefs\/heads\/(.+)$/.exec(line)?.[1] ?? []) }
+  }
+  return undefined
+}
+
+/**
+ * `yarn clone [repo ...] [--branch <name>] [--https] [--shallow] [--no-install]`:  clone what's missing, then one
+ * install over every repo.
+ * - CI (each repo's `.github/workflows/checks.yml`, epic `repo-split` P12):  the repo under test is checked out
+ *   already;  `yarn clone <it> --branch <its branch> --https --shallow` clones the repos it needs.
+ */
+function clone(args: string[]): number {
+  let parsed: ReturnType<typeof cloneArgs>
+  try {
+    parsed = cloneArgs(args)
+  } catch (error) {
+    console.error((error as Error).message)
+    return 2
+  }
+  const { names, options } = parsed
   const wanted = names.length ? closure(names) : repos()
   const missing = wanted.filter((repo) => !isCloned(repo.name))
   for (const repo of missing) {
@@ -93,13 +172,23 @@ function clone(names: string[]): number {
       console.error(`${repo.name}:  the folder is there, but it isn't a git checkout:  move it away, then clone again`)
       return 1
     }
-    console.log(`== cloning ${repo.name}  (${repo.url})`)
-    // SSH refused (no key for it here):  the same repo over HTTPS, with GitHub's login (`gh auth setup-git`)
-    if (run("git", ["clone", repo.url, repo.name]) !== 0 && run("git", ["clone", httpsOf(repo.url), repo.name]) !== 0)
+    const remote = remoteOf(repo, options.https)
+    if (!remote) {
+      console.error(
+        `${repo.name}:  can't reach ${options.https ? httpsOf(repo.url) : `${repo.url} or ${httpsOf(repo.url)}`}`
+      )
       return 1
+    }
+    const branch = options.branch && remote.branches.includes(options.branch) ? options.branch : undefined
+    console.log(`== cloning ${repo.name}  (${remote.url}, ${branch ? `branch ${branch}` : "its default branch"})`)
+    const flags = [...(branch ? ["--branch", branch] : []), ...(options.shallow ? ["--depth", "1"] : [])]
+    if (run("git", ["clone", ...flags, signedIn(remote.url), repo.name]) !== 0) return 1
+    // the token stays out of the clone's settings
+    if (signedIn(remote.url) !== remote.url) git(join(TOP, repo.name), "remote", "set-url", "origin", remote.url)
   }
   if (!missing.length) console.log(`every repo asked for is cloned:  ${wanted.map((repo) => repo.name).join(", ")}`)
   for (const repo of wanted) linkAgents(repo.name)
+  if (!options.install) return 0
   console.log("== yarn install:  one install over every repo")
   return run("yarn", ["install"])
 }
@@ -133,7 +222,19 @@ function isLink(path: string): boolean {
 }
 
 /**
- * `postinstall`:  `node_modules/spell-kit`, a link to the kit itself (epic `repo-split` P9).
+ * `postinstall`:  the links every install needs (epic `repo-split` P12):  the kit's own (`linkKit()`), and each cloned
+ * child repo's `agents` (`linkAgents()`).
+ * - So a checkout made without `yarn clone` gets its `agents` links too:  an epic's worktree (the worktree hook runs
+ *   one `yarn install`), CI.
+ */
+function links(): number {
+  linkKit()
+  for (const repo of repos().filter((each) => isCloned(each.name))) linkAgents(repo.name)
+  return 0
+}
+
+/**
+ * `node_modules/spell-kit`, a link to the kit itself (epic `repo-split` P9).
  * - The kit is a package, `spell-kit`, AND the install's root workspace, and yarn's node-modules linker links the root
  *   workspace nowhere:  without this, no child repo could import `spell-kit/util` ... (yarn's own self-references,
  *   `nmSelfReferences`, leave the root out too).
@@ -173,7 +274,10 @@ function status(): number {
     const branch = git(dir, "rev-parse", "--abbrev-ref", "HEAD") ?? "?"
     const counts = git(dir, "rev-list", "--left-right", "--count", "@{upstream}...HEAD")
     const [behind = "0", ahead = "0"] = counts?.split(/\s+/) ?? []
-    const away = counts === undefined ? "  (no upstream)" : `${+ahead ? `  ahead ${ahead}` : ""}${+behind ? `  behind ${behind}` : ""}`
+    const away =
+      counts === undefined
+        ? "  (no upstream)"
+        : `${+ahead ? `  ahead ${ahead}` : ""}${+behind ? `  behind ${behind}` : ""}`
     const changes = git(dir, "status", "--short") ?? ""
     console.log(`${repo.name.padEnd(14)} ${branch}${away}${changes ? "" : "  clean"}`)
     const lines = changes ? changes.split("\n") : []
@@ -237,13 +341,17 @@ function main([command, ...args]: string[]): number {
       return status()
     case "list":
       return list()
+    case "links":
+      return links()
     case "link-kit":
       return linkKit()
     case "run":
       if (args.length === 1) return runEverywhere(args[0]!)
       break
   }
-  console.error("usage:  node tools/repos.ts clone [repo ...] | pull | status | list | link-kit | run <script>")
+  console.error(
+    "usage:  node tools/repos.ts clone [repo ...] [--branch <name>] [--https] [--shallow] [--no-install] | pull | status | list | links | link-kit | run <script>"
+  )
   return 2
 }
 

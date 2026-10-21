@@ -12,7 +12,8 @@
   "repos": "repos.json5",
 
   // The shared content repo:  epics, guides, sagas, pages, brand, and the three logs (the kit's `agents/` links them).
-  // - In this repo, git-ignored (epic `repo-split` J5):  a link to `~/www/spell-app/spell-app.epics` until the move.
+  // - In this repo, git-ignored (epic `repo-split` J5):  `~/www/spell/spell.epics`, a folder of its own in the main
+  //   checkout, a link to it in an epic's worktree.
   "contentFolder": "spell.epics",
 
   // The branch worktrees start from and merge into:  every child repo's is `main` too.
@@ -26,6 +27,10 @@
   "installCommand": "yarn install",
   // The worktree hook runs it BEFORE the window opens, within "installTimeout" seconds (600 left out).
   "installOnCreate": true,
+  // The yarn projects of their OWN in an epic's worktree, outside the one install (epic `epic-engine` I65):
+  // the two VS Code extensions.  The hook runs "installCommand" in each, after the one above;  one that fails is a
+  // warning.
+  "extraInstalls": ["spell-epic/vscode", "spell-app/vscode"],
 
   // The VS Code windows (`epic window`).
   "windows": {

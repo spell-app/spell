@@ -1,0 +1,39 @@
+# The kit's checks on a push to `main`, a pull request, or by hand (Actions tab => "checks" => "Run workflow"):
+# `yarn kit:ts`, `kit:lint` and `kit:test`, over its five folders (util, toolchain, server, assembler, element;  epic
+# `repo-split` P12).
+# - The kit alone:  no child repo is cloned.
+#   Each child repo's own workflow checks it on the kit (its `.github/workflows/checks.yml`).
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # the lockfile lists every child repo, and none is cloned here:  yarn must be free to drop them
+  YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: yarn
+      - run: yarn install
+
+      # util's and element's browser tests run in a real chromium
+      - run: yarn playwright install --with-deps chromium
+
+      - run: yarn kit:ts
+      - run: yarn kit:lint
+      - run: yarn kit:test

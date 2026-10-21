@@ -172,7 +172,23 @@ The kit is always there, so no `needs` names it.
   - a lower repo's never read a higher one's:  a fixture of its own, or the test moves up
   - a test that needs a higher repo only to check against it (spell-lang's TypeScript check of compiled spell,
     against the editor's types) skips itself when that repo isn't installed
-- `yarn test` here runs the kit's, then every repo's;  each repo's CI (epic `repo-split` P9) its own.
+- `yarn test` here runs the kit's, then every repo's;  each repo's CI its own (epic `repo-split` P12).
+
+## CI
+
+- Every repo has one GitHub Actions workflow, `.github/workflows/checks.yml`:  on a push to `main`, a pull request,
+  or by hand.
+- The kit's runs `kit:ts`, `kit:lint` and `kit:test`, with no child repo cloned.
+- A child repo's checks it in the layout it's worked on:
+  - the kit at the root, at the branch under test when the kit has one, else at `main`
+  - the repo itself inside it, at its folder name:  the commit under test
+  - the repos it needs (`repos.json5`), by `yarn clone <repo> --branch <branch> --https --shallow`:  each at the branch
+    under test when it has one, else its default branch
+  - then its `yarn ts`, `yarn lint` and `yarn test`
+- So a change across repos is checked together when every repo's branch has the same name.
+- The repos are public:  no token.  The secret `SPELL_REPOS_TOKEN`, if it's set, signs the clones in (J74).
+- The five child workflows are the same but for the repo's name, uv (spell-lang's and spell-app's Python) and
+  spell-epic's extension install:  change them together.
 
 ## WWOD and the logs
 
@@ -186,7 +202,8 @@ The kit is always there, so no `needs` names it.
     Claude's Edit refuses to write through a link to a file.
 - Every child repo has an `agents` link at its root (git-ignored there), to the kit's `../agents`:
   so its instructions name `agents/wwod/WWOD.md`, `agents/PAPERCUTS.md` ...
-  - `yarn clone` makes them.
+  - Every `yarn install` here makes them (the `postinstall`, `tools/repos.ts links`;  epic `repo-split` P12), and
+    `yarn clone`:  so an epic's worktree and CI have them too.
   - Except spell-epic's:  a root `agents/` there makes Claude Code load WWOD and the logs as plugin agents
     (epic `epic-engine`'s move check).
 - Edit every other content file at its real path too, `spell.epics/...`.
@@ -196,5 +213,5 @@ The kit is always there, so no `needs` names it.
 - An epic's worktree in this layout:  a worktree of the kit at `~/www/spell.worktrees/<epic>/`, with the child repos
   inside it, each a worktree of its own repo on the epic's branch, and one install.
   - A branch cut before the split works in its one repo's worktree, as before
-    (spell-app's in `~/www/spell-app/spell-app.worktrees/`).
+    (spell-app's from before the move in `~/www/spell-app/spell-app.worktrees/`, the old checkout's).
 - The epic settings for a session working HERE:  [.epic/config.json5](.epic/config.json5).
