@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
 import { nextFrame } from "$/ui/util"
-import { Fixture } from "$/ui/test/Fixture"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 import { Visibility } from "$/ui/runtime/Visibility"
 import type { VisibilityCalculations, VisibilityCallbacks } from "$/ui/runtime/runtime.types"
 

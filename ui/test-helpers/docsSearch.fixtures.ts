@@ -3,7 +3,7 @@ import type { SiteDataFile, SiteSearchFile, SiteTag } from "$/ui/docs-components
 /**
  * `<ui-docs-search>`'s test data, shared by its element test and `SearchIndex.test.ts` / `PageOutline.test.ts`:  the
  * site's data file, its search file, and the page shown.
- * - Test-only:  in `test/`, so the library's build (`src/`) never ships it.
+ * - Test-only:  in `test-helpers/`, so the library's build (`src/`) never ships it.
  */
 
 /** The test data:  Button (+ Or), Divider, Modal, Label;  each with a few attributes. */

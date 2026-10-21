@@ -627,7 +627,7 @@ Edit a component in `yarn dev`, and every live instance updates in place.
 
 ### Method
 
-`test/PerfRun.ts`:  a `search selection` dropdown, with 1000 options set through the `options` property.
+`test-helpers/PerfRun.ts`:  a `search selection` dropdown, with 1000 options set through the `options` property.
 - Opened by a click on the search input.
 - Then `"united sta"` is typed one character per keystroke:  rows narrow 1000 => 30.
 - Per step, timed from just before the event:
@@ -659,7 +659,7 @@ Edit a component in `yarn dev`, and every live instance updates in place.
 
 ### Method
 
-`SmokeRunner`:  `yarn build`, then ONE static server (no Vite dev server) serves `dist/`, `vendor/`, `tools/` and `test/`.
+`SmokeRunner`:  `yarn build`, then ONE static server (no Vite dev server) serves `dist/`, `vendor/`, `tools/` and `test-helpers/`.
 - It injects one `<script type="importmap">` into every page:
   - `solid-js`, `@solidjs/web`, `@spell-app/solid-element` => `/vendor/...`
   - `@spell-app/ui` => `/dist/index.js`
@@ -741,17 +741,17 @@ _Not measured yet:  run `yarn smoke`._
 - **axe** passes on every element-markup example (`components/ui-<name>/examples/elements/`, 39 files),
   and on every form control's native fallback.
   - `color-contrast` included:  text inside a `.ui.disabled` element is exempt
-    (as WCAG exempts inactive components;  `test/A11y.ts`).
+    (as WCAG exempts inactive components;  `test-helpers/A11y.ts`).
   - `heading-order` is off for two pages of heading demos.
 
 ## SSR / Declarative Shadow DOM
 
 **DIY, no hydration.**  The fork has no server render yet.
-- The server half:  `test/ssr.ssr.test.tsx` (node project) renders the REAL `UIButton` component
+- The server half:  `test-helpers/ssr.ssr.test.tsx` (node project) renders the REAL `UIButton` component
   under `@solidjs/web`'s server `renderToString`, against a stub DOM element.
   - It wraps it in `<template shadowrootmode="open" shadowrootdelegatesfocus>`,
     with the foundation CSS + `UIButton.css` inlined.
-- The browser half:  `test/dsd.test.ts` parses it with `setHTMLUnsafe`, and paints a styled button before any script.
+- The browser half:  `test-helpers/dsd.test.ts` parses it with `setHTMLUnsafe`, and paints a styled button before any script.
   - Then it defines the element:  the fork ADOPTS the declarative root, and empties it before its first render.
 
 - The client render replaces the server markup.
@@ -766,7 +766,7 @@ _Not measured yet:  run `yarn smoke`._
   - A throw stays local:  in the constructor, in render, in a memo during an update, or in an effect.
     The element stops rendering, a sibling keeps updating, and new elements still render.
   - Without it (`errorBoundary: false`), the same throw logs `[REACTIVITY_HALTED]` and the sibling freezes
-    (tested, `test/isolation.test.tsx`).
+    (tested, `test-helpers/isolation.test.tsx`).
 - **Hook:**  `UIComponent.define()` passes the fork's `onError` and `fallback`.
   - `onError`:
     - ONE `console.error`, naming the tag
@@ -779,15 +779,15 @@ _Not measured yet:  run `yarn smoke`._
   - the button loses `ui-toggle`, the glyph and the spinner
   - the dropdown becomes a native `<select>`:
     form value, validity, `element.value` and `ui-change` keep working
-- **Tests:**  `test/fallback.cases.ts`, run by `test/fallback.test.tsx` through a `FallbackAdapter`.
+- **Tests:**  `test-helpers/fallback.cases.ts`, run by `test-helpers/fallback.test.tsx` through a `FallbackAdapter`.
   - `ElementFixture.breakRender()` makes a RENDERED element's next update throw.
   - All 8 pass, axe included.
 
 ## Translation
 
 - `UIButton.define("ie-boton", es)` and `UIDropdown.define("ie-desplegable", es)`,
-  with a 20-line dictionary (`test/dictionary.es.ts`).
-  - Run by `test/translate.test.tsx`, `tools/demo/translate.html` (dev) and `tools/smoke/translate.html` (from `dist/`).
+  with a 20-line dictionary (`test-helpers/dictionary.es.ts`).
+  - Run by `test-helpers/translate.test.tsx`, `tools/demo/translate.html` (dev) and `tools/smoke/translate.html` (from `dist/`).
 - A second `ElementDefinition` for the same component class, from the localized vocabulary.
   - Localized attribute AND property names (`primario`, `"primario" in el`), under the SAME canonical keys.
   - Classes stay canonical;  events are localized (`ie-cambio`).
@@ -799,7 +799,7 @@ _Not measured yet:  run `yarn smoke`._
   - `browser`:  chromium;  `SPELL_UI_TEST_ALL=1` adds firefox and webkit
   - `ssr`:  node
   - Component tests live beside their component (`UI<Name>.test.tsx`);
-    cross-family ones in `test/` (fallback, isolation, translate, SSR, DSD).
+    cross-family ones in `test-helpers/` (fallback, isolation, translate, SSR, DSD).
   - The class-grammar CSS tests (`UI<Name>.css.test.ts`) stay:
     they test the sheets on static markup, which the element tests don't cover.
 - **Synchronization:**  `DOMElement.ready` + `flush()` (`ElementFixture.render()` / `settle()` / `tick()`).

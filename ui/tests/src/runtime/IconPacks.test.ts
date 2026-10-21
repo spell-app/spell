@@ -4,7 +4,7 @@ import { BuiltInPacks } from "$/ui/icons"
 import { IconPacks } from "$/ui/runtime/IconPacks"
 
 /** The stroke-style (Lucide-like) fixture pack:  `bell`, `sun` (aliases `light`, `day`), 24 x 24. */
-const STROKE = new URL("/test/fixtures/stroke-pack/pack.js", location.href).href
+const STROKE = new URL("/test-helpers/fixtures/stroke-pack/pack.js", location.href).href
 
 ////////////////
 // ## Names

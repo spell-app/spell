@@ -5,11 +5,11 @@
  * - At the BOTTOM of the tools' import graph:  `import type` only, so every tool (and `packages/cli`, through
  *   `$/ui/tools/tools.types`) imports it without loading another.
  * - Every `tools/results/*-results.json` has one of these shapes;  `ReportTables` reads them.
- * - The perf shapes (`PerfRecord` ...) live beside the benchmark, in `test/PerfRun.ts` (it runs in the browser).
+ * - The perf shapes (`PerfRecord` ...) live beside the benchmark, in `test-helpers/PerfRun.ts` (it runs in the browser).
  */
 
 import type { SiteDataFile } from "../src/docs-components/docs-components.types.ts"
-import type { PerfResult } from "../test/PerfRun.ts"
+import type { PerfResult } from "../test-helpers/PerfRun.ts"
 
 ////////////////
 // ## Package config

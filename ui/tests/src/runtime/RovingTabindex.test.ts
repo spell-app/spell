@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
-import { Fixture } from "$/ui/test/Fixture"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 import { RovingTabindex } from "$/ui/runtime/RovingTabindex"
 
 /** Dispatch a `keydown` from `target`. */

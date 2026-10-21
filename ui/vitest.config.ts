@@ -17,11 +17,11 @@ const BROWSERS = environment.isAllBrowsers ? (["chromium", "firefox", "webkit"] 
  * - Absolute:  a relative `dir` is read from wherever the run starts (the repo root's run too).
  * - The globs below are relative to it.
  * - `root` stays this package, so these still mean this package's files:
- *   `/src/...` and `/components/...` globs, `/test/fixtures/...` URLs, `setupFiles`.
+ *   `/src/...` and `/components/...` globs, `/test-helpers/fixtures/...` URLs, `setupFiles`.
  */
 const TESTS = resolve(import.meta.dirname, "./tests")
 
-/** The folders of tests, as the code's:  `src/`, the families' `components/`, and the cross-family `test/`. */
+/** The folders of tests, as the code's:  `src/`, the families' `components/`, and the cross-family `test-helpers/`. */
 const TEST_FOLDERS = "{src,components,test}"
 
 /** Server-render tests:  `*.ssr.test.ts(x)`, anywhere. */
@@ -41,7 +41,7 @@ const TOOL_TESTS = ["tools/**/*.test.ts"]
  *   - the plugin picks its posture (client, or the server build of `@solidjs/web`)
  *     from `test.environment` of the config it's created in
  *   - it never sees a project's `environment` through `extends: true`
- * - NOTE: `ssr` runs FIRST:  it writes `.cache/ssr-button.html`, which `test/dsd.test.ts` imports.
+ * - NOTE: `ssr` runs FIRST:  it writes `.cache/ssr-button.html`, which `tests/test-helpers/dsd.test.ts` imports.
  *   - `yarn test` here runs the projects one after the other.
  *   - In the root's single run, `sequence.groupOrder` does it:
  *     vitest runs project groups in ascending order, and a group finishes before the next starts.
@@ -73,7 +73,7 @@ export function uiProjects({ prefix = "", root }: { prefix?: string; root?: stri
         dir: TESTS,
         include: [`${TEST_FOLDERS}/**/*.test.{ts,tsx}`],
         exclude: [...configDefaults.exclude, ...SSR_TESTS],
-        setupFiles: ["./test/setup.ts"],
+        setupFiles: ["./test-helpers/setup.ts"],
         // a guard:  an element bug that halts rendering must fail its test, not hang the run
         testTimeout: 10_000,
         // Test files of one browser run in parallel iframes of ONE page, which has ONE focus:

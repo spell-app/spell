@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import { UI } from "$/ui/core"
 import type { PropertySchema } from "$/ui/vocabulary"
 
@@ -246,7 +246,7 @@ describe("<ui-property-editor> section and Save", () => {
 ////////////////
 
 describe("<ui-property-editor source>", () => {
-  const PAGE = "/test/fixtures/sources/property-editor/Theme.editor.html"
+  const PAGE = "/test-helpers/fixtures/sources/property-editor/Theme.editor.html"
 
   it("takes its layout from the page:  its groups and properties, and the page's attributes it doesn't have", async () => {
     const host = await ElementFixture.render<Editor>(`<ui-property-editor source="${PAGE}"></ui-property-editor>`)

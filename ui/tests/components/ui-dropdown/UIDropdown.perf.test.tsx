@@ -2,8 +2,8 @@ import { expect, inject, it } from "vite-plus/test"
 import { commands } from "vite-plus/test/browser"
 import { flush } from "solid-js"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { PerfRun } from "$/ui/test/PerfRun"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { PerfRun } from "$/ui/test-helpers/PerfRun"
 
 import "$/ui/components/ui-dropdown"
 
@@ -11,7 +11,7 @@ import "$/ui/components/ui-dropdown"
 const SOLID_SETTLE = { settle: () => flush() }
 
 /**
- * The dropdown benchmark (`test/PerfRun.ts`):  1000 options, `"united sta"` typed one character per keystroke;
+ * The dropdown benchmark (`test-helpers/PerfRun.ts`):  1000 options, `"united sta"` typed one character per keystroke;
  * each keystroke must stay under a frame (16 ms), event => DOM updated.
  * - The 16 ms budget is skipped on CI (`inject("ci")`):  a shared runner measured 16.75 ms.
  *   The rows are still checked.

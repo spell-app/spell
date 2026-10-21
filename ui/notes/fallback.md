@@ -40,7 +40,7 @@ Considered and left out:
 
 Every other family has none.
 - When it breaks, it shows a bare `<slot>` (`UIComponent.renderFallback()`), so its children still show.
-- Tested by the case "a family without a fallback ..." in [the fallback cases](../test/fallback.cases.ts).
+- Tested by the case "a family without a fallback ..." in [the fallback cases](../test-helpers/fallback.cases.ts).
 
 ## API
 

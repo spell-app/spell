@@ -6,8 +6,8 @@ import type { ComponentVocabulary } from "$/ui/vocabulary"
 import { E } from "$/ui/core"
 import { UIButton } from "$/ui/components/ui-button"
 import { UIDropdown } from "$/ui/components/ui-dropdown"
-import { es } from "$/ui/test/dictionary.es"
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { es } from "$/ui/test-helpers/dictionary.es"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 
 UIButton.define("ie-boton", es)
 UIDropdown.define("ie-desplegable", es)

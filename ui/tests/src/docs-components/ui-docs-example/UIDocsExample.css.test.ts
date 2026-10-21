@@ -2,7 +2,7 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "$/ui/styles"
 
-import { Sheets } from "$/ui/test/Sheets"
+import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import exampleCSS from "$/ui/docs-components/ui-docs-example/UIDocsExample.css?inline"
 import exampleRaw from "$/ui/docs-components/ui-docs-example/UIDocsExample.css?raw"

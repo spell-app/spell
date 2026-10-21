@@ -3,7 +3,7 @@
 import { expect, test, type Page, type TestInfo } from "@playwright/test"
 import { mkdirSync, writeFileSync } from "node:fs"
 
-import type { VisualState } from "../../test/test.types.ts"
+import type { VisualState } from "../../test-helpers/test.types.ts"
 import { environment } from "../environment.ts"
 import type {
   ParityKind,

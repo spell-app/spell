@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { expectAccessible } from "$/ui/test/A11y"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
 import type { DOMFieldElement } from "$/ui/components/ui-form/UIField"
 
 import "$/ui"

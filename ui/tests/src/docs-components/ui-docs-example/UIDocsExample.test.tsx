@@ -1,7 +1,7 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { expectAccessible } from "$/ui/test/A11y"
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import type { DOMElement } from "@spell-app/spell-element"
 
 import { ExampleSource } from "$/ui/docs-components/ui-docs-example/ExampleSource"

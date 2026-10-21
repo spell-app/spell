@@ -10,7 +10,7 @@ import { VisualSettings } from "./VisualSettings.ts"
  * which starts the dev server (and, for `--os linux`, the Docker browser server) and sets `VisualVariables`, read
  * back here as `environment.visual` (`tools/environment.ts`).
  * - One project per browser;  the CLI picks them with `--project`.
- * - Baselines:  `test/visual/baselines/<os>/<browser>/ui-<family>/<file>.png` (`snapshotPathTemplate`), where
+ * - Baselines:  `test-helpers/visual/baselines/<os>/<browser>/ui-<family>/<file>.png` (`snapshotPathTemplate`), where
  *   `<os>` is `linux` or `local-<platform>` (`VisualSettings.osFolder()`).
  * - Results (diffs, the HTML report):  `tools/results/visual/<os>/`, git-ignored.
  * - `linux`:  `connectOptions` points every project at the browser server in Docker;  `exposeNetwork:

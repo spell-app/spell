@@ -239,7 +239,7 @@
 - `src/icons/`:  FA7 Free path data as JSON chunks (+ a short Fomantic alias list).
 - `site/`:  the docs site (plain HTML pages on `ui-*` widgets since 2026-10;  Astro before).
 - `notes/` (`docs/` until epic `people-and-orgs` P18):  `spike-lit-vs-solid.md`, `grammar.md`, `theming.md`, `translation.md`.
-- `test/`:  shared test utils.
+- `test-helpers/`:  shared test utils.
 
 ### CSS system
 - Layers:
@@ -536,7 +536,7 @@ Each row is one unit of work:  CSS port + element(s) + a11y + tests + docs page.
 - oxlint + oxfmt with Owen's config;  `yarn review` = tsc + lint:fix + format + test.
 - Tests:
   - Vitest 5 browser mode + `@vitest/browser-playwright` (chromium default;  webkit / firefox in `test:all`)
-  - axe-core, via `test/A11y.ts`
+  - axe-core, via `test-helpers/A11y.ts`
   - `toMatchScreenshot` for visual
 - `@custom-elements-manifest/analyzer` → `custom-elements.json` → VS Code custom data, JetBrains web-types,
   JSX types (`@wc-toolkit/jsx-types`), docs API tables.

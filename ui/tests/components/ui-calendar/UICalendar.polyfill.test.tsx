@@ -3,7 +3,7 @@ import { userEvent } from "vite-plus/test/browser"
 
 import { UI } from "$/ui/runtime"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import type { DOMElement } from "@spell-app/spell-element"
 
 import { Browser } from "$/ui/runtime/Browser"

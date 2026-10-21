@@ -4,7 +4,7 @@ import { AnimationNames } from "$/ui/runtime"
 import { breakpoints, colorsCSS, foundationCSS, pageCSS, sizes, utilitiesCSS } from "$/ui/styles"
 import { StyleGenerator } from "$/ui/styles/StyleGenerator"
 
-import { Fixture } from "$/ui/test/Fixture"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 
 import layersRaw from "$/ui/styles/layers.css?raw"
 import tokensRaw from "$/ui/styles/tokens.css?raw"

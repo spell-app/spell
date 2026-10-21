@@ -4,7 +4,7 @@
  * (`ComponentVocabulary.skeleton`, skeleton text parsed by `SkeletonText` into a `SkeletonSpec`;  a vocabulary
  * without one writes no `skeleton` key).
  * - Run after adding or moving a tag, or changing a skeleton.  `components/ui-root/UIRoot.catalog.test.ts` and
- *   `test/vocabularies.test.ts` fail while the file is stale.
+ *   `test-helpers/vocabularies.test.ts` fail while the file is stale.
  * - Why generated, not `ComponentDefinitions`:  that roll-up imports every vocabulary (~325 kB of source);  a lib
  *   entry importing it would split each vocabulary into a chunk shared with its family.  The catalog is a few kB.
  * - Reads the vocabularies with `tools/RootCatalog.ts` (`spell dev pack build` shares it, for a component pack's

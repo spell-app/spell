@@ -4,9 +4,9 @@ import { page, userEvent } from "vite-plus/test/browser"
 import { UI } from "$/ui/runtime"
 import type { TableColumn, TableRow, TableSortDetail } from "$/ui/components/components.types"
 import type { DOMElement } from "@spell-app/spell-element"
-import { expectAccessible } from "$/ui/test/A11y"
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { Viewport } from "$/ui/test/Viewport"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { Viewport } from "$/ui/test-helpers/Viewport"
 
 import "$/ui/components/ui-table"
 

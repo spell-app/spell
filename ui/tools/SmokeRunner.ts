@@ -16,7 +16,7 @@ import { Terminal } from "./Terminal.ts"
  * - ONE static server (`StaticServer`), no Vite dev server, mounting repo folders at their own names:
  *   - `/dist/`, `/vendor/` -- the library build and the vendored peers (`yarn vendor`)
  *   - `/tools/` -- host pages (`frameworks/*.html`), the compiled Solid host app, the extra pages
- *   - `/test/` -- `PerfRun.ts` and the translation dictionary, transpiled on the fly
+ *   - `/test-helpers/` -- `PerfRun.ts` and the translation dictionary, transpiled on the fly
  * - Every page gets ONE import map (`importMap`):  the vendored peers, `@spell-app/ui/...` => `/dist/...`;  the Solid
  *   host app resolves `solid-js` / `@solidjs/web` through it too, so it shares one copy with the components.
  * - Pages:  the four hosts (`vanilla`, `react`, `vue`, `solid`), the perf page when a `perfAdapter` is given, then
@@ -197,7 +197,7 @@ const HOSTS = ["vanilla", "react", "vue", "solid"] as const
 const CDN_HOSTS = ["esm.sh", "unpkg.com"]
 
 /** Repo folders the server mounts, each at `/<folder>/`. */
-const MOUNTS = ["dist", "vendor", "tools", "test"]
+const MOUNTS = ["dist", "vendor", "tools", "test-helpers"]
 
 /** How long a page may take to publish `window.smokeResult`:  the CDN frameworks load over the network. */
 const PAGE_TIMEOUT_MS = 45_000

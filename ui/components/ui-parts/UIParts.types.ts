@@ -1,6 +1,6 @@
 /**
  * The `ui-parts` family's shared lists:  every part's noun and vocabulary, in one order.
- * - Read by the family's tests, and by `test/StubOwner.tsx` (stand-in owners for tests and the demo).
+ * - Read by the family's tests, and by `test-helpers/StubOwner.tsx` (stand-in owners for tests and the demo).
  * - Runtime-light:  no element code, so any file may import it.
  * - The ONE types file that value-imports vocabularies (`packages/ui/AGENTS.md` "Overview"):
  *   `PartVocabularies` IS the list of them, and no vocabulary of this family imports this file back,

@@ -7,7 +7,7 @@
  */
 
 import { UIButton } from "$/ui/components/ui-button"
-import { es } from "$/ui/test/dictionary.es"
+import { es } from "$/ui/test-helpers/dictionary.es"
 
 import "$/ui/components/ui-dropdown"
 import "$/ui/components/ui-segment"

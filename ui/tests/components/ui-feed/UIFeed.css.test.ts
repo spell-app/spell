@@ -2,8 +2,8 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsCSS, foundationCSS } from "$/ui/styles"
 
-import { Fixture } from "$/ui/test/Fixture"
-import { Sheets } from "$/ui/test/Sheets"
+import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import { eventVocabulary } from "$/ui/components/ui-feed/UIFeedEvent.en"
 import { feedVocabulary } from "$/ui/components/ui-feed/UIFeed.en"

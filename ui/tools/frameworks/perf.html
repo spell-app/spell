@@ -17,7 +17,7 @@
     <script type="module">
       import "@spell-app/ui"
       import { adapter } from "@spell/ui-tools/perf-adapter"
-      import { PerfRun } from "/test/PerfRun.ts"
+      import { PerfRun } from "/test-helpers/PerfRun.ts"
 
       await customElements.whenDefined("ui-dropdown")
       const host = document.querySelector("#perf")

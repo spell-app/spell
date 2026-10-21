@@ -178,13 +178,13 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - [`UIButton`](components/ui-button/UIButton.tsx)'s test is
     [`UIButton.test.tsx`](./tests/components/ui-button/UIButton.test.tsx), at the same path under `tests/ui/`.
   - The cross-family tests are in [`tests/ui/test/`](./tests/test/), the tools' in [`tests/ui/tools/`](./tests/tools/).
-  - Their helpers stay here, in `test/` (`$/ui/test/*`), for now.
+  - Their helpers stay here, in `test-helpers/` (`$/ui/test-helpers/*`), for now.
   - [Spell UI's Vitest config](vitest.config.ts) finds them there (`dir`).
     - `root` stays this package, so these still mean this package's files:
-      a test's `/src/...` or `/components/...` glob, or a `/test/fixtures/...` URL.
+      a test's `/src/...` or `/components/...` glob, or a `/test-helpers/fixtures/...` URL.
   - Every test runs in a REAL browser (Vitest browser mode + Playwright, chromium by default),
     except `*.ssr.test.tsx` (node).
-- [`test/`](test/):  shared test utils.
+- [`test-helpers/`](test-helpers/):  shared test utils.
   - `Fixture.render(html)` (`Fixture.ts`);  `A11y.check(el)` / `expectAccessible(el)` (`A11y.ts`)
   - `ElementFixture`:  render, wait for `ready`, `flush()`;  `breakRender()`
   - `StubOwner`:  stand-in owners (card, feed ...)
@@ -399,7 +399,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `ssr` first:  it writes `ssr-button.html` in `.cache/`, which [the DSD test](./tests/test/dsd.test.ts) reads.
 - `yarn test:all`:  chromium + firefox + webkit (`yarn test:browsers` once first).
 - `yarn test:visual`:  screenshot tests of every element example, light + dark,
-  against [the baselines](test/visual/baselines/) (Playwright's `toHaveScreenshot`).
+  against [the baselines](test-helpers/visual/baselines/) (Playwright's `toHaveScreenshot`).
   - Its flags:
 
     ```sh
@@ -1082,7 +1082,7 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - A new specifier goes there AND in the pack build's externals (`PACK_MODULES`, [packModules.ts](tools/packModules.ts)).
   - So a pack's elements extend the page's own `UIComponent` / `DOMElement`.
 - Tests:  [the component packs test](./tests/components/ui-components/ComponentPacks.test.ts).
-  - On [the classic fixtures](test/fixtures/component-packs/), served by Vitest's dev server.
+  - On [the classic fixtures](test-helpers/fixtures/component-packs/), served by Vitest's dev server.
 
 ## Decorators
 
@@ -1115,7 +1115,7 @@ As WWOD §8, plus our self-namespaces:  one per lib entry, since each entry is i
 ## Imports
 
 As WWOD §4, with `$/ui` / `$/ui/*` as our alias, plus these deliberate EXCEPTIONS.
-(`$/ui/components/*`, the families, and `$/ui/test/*`, the test helpers, are longer than `$/ui/*`, so they win.)
+(`$/ui/components/*`, the families, and `$/ui/test-helpers/*`, the test helpers, are longer than `$/ui/*`, so they win.)
 
 - Component files import shared code from `$/ui/core` / `$/ui/forms` only, as `E` / `F` / `UI` / `UIT`
   ("Solid authoring").

@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
 import { UI } from "$/ui/runtime"
-import { expectAccessible } from "$/ui/test/A11y"
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 
 import { MarkdownRenderer } from "$/ui/components/ui-markdown/MarkdownRenderer"
 import type { DOMMarkdownElement } from "$/ui/components/ui-markdown/UIMarkdown"

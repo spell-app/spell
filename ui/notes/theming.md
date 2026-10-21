@@ -717,7 +717,7 @@ The references:
    - images, a font it needs to look right
 7. Test:  append a `describe("<name>.css")` to [the themes test](../tests/src/styles/themes/themes.test.ts).
    - `ThemeHarness.use(name)`, then at least one COMPUTED style per touched component, INSIDE its shadow root.
-   - `ThemeHarness.inner(html, selector)`, in [the theme harness](../test/ThemeHarness.ts).
+   - `ThemeHarness.inner(html, selector)`, in [the theme harness](../test-helpers/ThemeHarness.ts).
    - `UI.themes`' own tests ([the Themes test](../tests/src/runtime/Themes.test.ts))
      already check that the sheet is wholly `@layer ui.theme`.
 8. Look:  screenshot the touched components with the theme applied, light and dark,

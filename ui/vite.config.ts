@@ -143,7 +143,7 @@ export const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
 /**
  * Config shared by the library build / dev server (below), `vitest.config.ts` and the docs site:
  * plugins, aliases, dedupe, Lightning CSS.
- * - Aliases (`$/ui`, `$/ui/test`, `$/util` ...) come from the repo root's `tsconfig.base.json`, through
+ * - Aliases (`$/ui`, `$/ui/test-helpers`, `$/util` ...) come from the repo root's `tsconfig.base.json`, through
  *   `resolve.tsconfigPaths`.  A FUNCTION, so every caller gets its own plugin instances.
  * - `standardDecorators()` MUST come first:  both it and the Solid plugin are `enforce: "pre"`, and the Solid
  *   compiler must see decorator-free code.
@@ -299,7 +299,7 @@ export function declarations(): PluginOptions {
   return {
     include: ["src", "components", fromHere(UTIL_SRC), fromHere(ELEMENT_SRC)],
     exclude: [
-      // visual-test hooks:  they import `test/test.types.ts`, whose `vitest` augmentations this program can't resolve
+      // visual-test hooks:  they import `test-helpers/test.types.ts`, whose `vitest` augmentations this program can't resolve
       "components/**/*.visual.ts",
       `${fromHere(UTIL_SRC)}/spell/**`,
       `${fromHere(UTIL_SRC)}/index.ts`,

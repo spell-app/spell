@@ -1,8 +1,8 @@
 import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { UI } from "$/ui/runtime"
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { ThemeHarness } from "$/ui/test/ThemeHarness"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ThemeHarness } from "$/ui/test-helpers/ThemeHarness"
 
 import "$/ui/components/ui-button"
 import "$/ui/components/ui-checkbox"
@@ -17,7 +17,7 @@ import "$/ui/components/ui-progress"
 
 /*
  * Every theme sheet's cases, one `describe("<name>.css")` each (theme agents APPEND theirs;  don't rewrite).
- * - Helpers:  `ThemeHarness` (`$/ui/test/ThemeHarness`).  `UI.themes`' own tests:  `src/runtime/Themes.test.ts`.
+ * - Helpers:  `ThemeHarness` (`$/ui/test-helpers/ThemeHarness`).  `UI.themes`' own tests:  `src/runtime/Themes.test.ts`.
  * - Import the families a case renders at the top (`import "$/ui/components/ui-<name>"`).
  */
 

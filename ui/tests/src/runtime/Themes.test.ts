@@ -1,7 +1,7 @@
 import { describe, expect, onTestFinished, test } from "vite-plus/test"
 
 import { UI } from "$/ui/runtime"
-import { ThemeHarness } from "$/ui/test/ThemeHarness"
+import { ThemeHarness } from "$/ui/test-helpers/ThemeHarness"
 
 import "$/ui/components/ui-button"
 

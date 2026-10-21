@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { EMPTY_FORM_ENTRIES, EMPTY_FORM_HTML, STATIC_FORM_ENTRIES, STATIC_FORM_HTML } from "$/ui/test/staticForm.cases"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import {
+  EMPTY_FORM_ENTRIES,
+  EMPTY_FORM_HTML,
+  STATIC_FORM_ENTRIES,
+  STATIC_FORM_HTML
+} from "$/ui/test-helpers/staticForm.cases"
 
 import "$/ui/components/ui-button"
 import "$/ui/components/ui-calendar"

@@ -4,10 +4,10 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 import type { SectionToggleDetail } from "$/ui/components/components.types"
 import { UI } from "$/ui/runtime"
 import { nextFrame } from "$/ui/util"
-import { expectAccessible } from "$/ui/test/A11y"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { Fixture } from "$/ui/test/Fixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 import type { DOMElement } from "@spell-app/spell-element"
 
 import "$/ui/components/ui-section"
@@ -692,7 +692,7 @@ describe("<ui-sections>", () => {
 
 describe("<ui-section source>", () => {
   /** Fixture bodies the test server serves. */
-  const DIR = "/test/fixtures/sources/bodies"
+  const DIR = "/test-helpers/fixtures/sources/bodies"
 
   /** A section DOM element with its source API. */
   type SourceSection = SectionElement & { load(): Promise<void>; reload(): Promise<void> }

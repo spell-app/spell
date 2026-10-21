@@ -17,7 +17,7 @@ export class VisualSettings {
   /** repo root, with a trailing slash */
   static readonly ROOT = fileURLToPath(new URL("../../", import.meta.url))
   /** baselines, in git:  `<os>/<browser>/ui-<family>/<file>.png` */
-  static readonly BASELINES = `${VisualSettings.ROOT}test/visual/baselines`
+  static readonly BASELINES = `${VisualSettings.ROOT}test-helpers/visual/baselines`
   /** diffs, HTML reports, the parity report (git-ignored) */
   static readonly RESULTS = `${VisualSettings.ROOT}tools/results/visual`
   /** the fixture page, served by the Vite dev server */

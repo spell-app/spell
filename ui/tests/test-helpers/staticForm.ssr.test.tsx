@@ -16,7 +16,12 @@ import { UIRating } from "$/ui/components/ui-rating/UIRating"
 import { UISearch } from "$/ui/components/ui-search/UISearch"
 import { UISelect } from "$/ui/components/ui-select/UISelect"
 import { UISlider } from "$/ui/components/ui-slider/UISlider"
-import { EMPTY_FORM_ENTRIES, EMPTY_FORM_HTML, STATIC_FORM_ENTRIES, STATIC_FORM_HTML } from "$/ui/test/staticForm.cases"
+import {
+  EMPTY_FORM_ENTRIES,
+  EMPTY_FORM_HTML,
+  STATIC_FORM_ENTRIES,
+  STATIC_FORM_HTML
+} from "$/ui/test-helpers/staticForm.cases"
 
 /**
  * A static form's round trip (seo plan, P4):  `STATIC_FORM_HTML` rendered by `StaticRender.page()`, then the entry

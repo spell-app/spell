@@ -1,8 +1,8 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
 import { UI, type SourceSaver } from "$/ui/runtime"
-import { expectAccessible } from "$/ui/test/A11y"
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 
 import { UIInclude } from "$/ui/components/ui-include/UIInclude"
 import type { DOMIncludeElement } from "$/ui/components/ui-include/UIInclude"
@@ -17,7 +17,7 @@ const EXAMPLES = import.meta.glob<string>("/components/ui-include/examples/eleme
 })
 
 /** Fixture files the test server serves. */
-const DIR = "/test/fixtures/sources"
+const DIR = "/test-helpers/fixtures/sources"
 
 beforeAll(async () => {
   await UI.load()

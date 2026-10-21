@@ -12,7 +12,7 @@ const VOCABULARIES = import.meta.glob<string>("/components/*/*.en.ts", {
 /** The foundation sheets, whose `--ui-*` names are never component tokens. */
 const FOUNDATION = import.meta.glob<string>("/src/styles/*.css", { query: "?raw", import: "default", eager: true })
 
-/** The real tags and foundation:  what `test/componentTokens.test.ts` checks every sheet with. */
+/** The real tags and foundation:  what `test-helpers/componentTokens.test.ts` checks every sheet with. */
 const TOKENS = new ComponentTokens({ vocabularies: VOCABULARIES, foundation: Object.values(FOUNDATION) })
 
 ////////////////

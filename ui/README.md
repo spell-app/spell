@@ -76,7 +76,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | `src/util/` | `$/ui/util`:  `$/util`'s generic files and spell-element's timing helpers (`afterSolidUpdate()`, `after()` ...), re-exported, plus `Warnings` |
 | `src/static/` | `$/ui/static` (`SSR`, node only):  the static server render, `ui-*` markup to plain HTML |
 | *(none -- the app's [`<spell-code>`](../spell-app/app/components/spell-code/))* | spell's highlighter, which Spell UI shipped pre-compiled until epic `repo-split` P2 |
-| `test/` | shared test helpers (`Fixture`, `ElementFixture`, `A11y` ...);  the tests themselves are in the repo's [`tests/ui/`](./tests/), at the same paths as the code |
+| `test-helpers/` | shared test helpers (`Fixture`, `ElementFixture`, `A11y` ...);  the tests themselves are in the repo's [`tests/ui/`](./tests/), at the same paths as the code |
 | `tools/` | node tooling (classes):  measure, vendor, smoke, report, site data and checks, design export, visual tests;  see [`tools/README.md`](tools/README.md) |
 | `scripts/` | one file per yarn script, named for it (`site:data` -> `site-data.ts`), plus the helpers they share |
 | `docs/` | the docs site's PAGES, a component set (served at `/components/ui/`):  `*.html`, `__parts/`, `__data/` (the site data, `yarn site:data`) |

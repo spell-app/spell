@@ -12,7 +12,7 @@ import type { ComponentVocabulary } from "@spell-app/spell-element/vocabulary.ty
  * - A vocabulary file is named for its component and its LANGUAGE:  `UIButton.en.ts`, a translation
  *   `UIButton.es.ts`.  `languageOf()` is the one rule for that name;  `yarn measure`'s buckets use it too.
  * - Imports each FILE (`import()`), never a family's `index.ts`:  nothing is defined, no Solid or CSS loads.
- *   Vocabularies are pure data for this reason (`AGENTS.md` "Overview";  `test/vocabularies.test.ts`).
+ *   Vocabularies are pure data for this reason (`AGENTS.md` "Overview";  `test-helpers/vocabularies.test.ts`).
  * - A vocabulary is any export with a `tag` and an `attributes` array.
  * - Static:  a read of files, no state.
  ****************/

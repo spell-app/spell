@@ -2,8 +2,8 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "$/ui/styles"
 
-import { Fixture } from "$/ui/test/Fixture"
-import { Sheets } from "$/ui/test/Sheets"
+import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import { emojiVocabulary } from "$/ui/components/ui-emoji/UIEmoji.en"
 

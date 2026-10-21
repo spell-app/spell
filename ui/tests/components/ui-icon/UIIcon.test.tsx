@@ -1,8 +1,8 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { expectAccessible } from "$/ui/test/A11y"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import type { DOMElement } from "@spell-app/spell-element"
 
 import "$/ui/components/ui-icon"
@@ -206,7 +206,7 @@ describe("<ui-icons>", () => {
 
 describe("<ui-icon> in a <ui-root icons>", () => {
   /** The stroke-style (Lucide-like) fixture pack:  `bell`, `sun`;  its id is `stroke`. */
-  const STROKE = new URL("/test/fixtures/stroke-pack/pack.js", location.href).href
+  const STROKE = new URL("/test-helpers/fixtures/stroke-pack/pack.js", location.href).href
 
   /** `<div>` holding `html`, every element ready. */
   async function page(html: string) {

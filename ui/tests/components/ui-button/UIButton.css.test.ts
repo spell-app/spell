@@ -4,7 +4,7 @@ import { ClassBuilder } from "$/ui/elements"
 import { colorsCSS, foundationCSS } from "$/ui/styles"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 
-import { Fixture } from "$/ui/test/Fixture"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 
 import { buttonsVocabulary } from "$/ui/components/ui-button/UIButtons.en"
 import { buttonVocabulary } from "$/ui/components/ui-button/UIButton.en"

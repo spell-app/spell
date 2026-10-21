@@ -2,8 +2,8 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsCSS, foundationCSS } from "$/ui/styles"
 
-import { Fixture } from "$/ui/test/Fixture"
-import { Sheets } from "$/ui/test/Sheets"
+import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import { breadcrumbSectionVocabulary } from "$/ui/components/ui-breadcrumb/UIBreadcrumbSection.en"
 import { breadcrumbVocabulary } from "$/ui/components/ui-breadcrumb/UIBreadcrumb.en"

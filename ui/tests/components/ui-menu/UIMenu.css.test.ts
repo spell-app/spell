@@ -4,8 +4,8 @@ import { page } from "vite-plus/test/browser"
 import { colorsCSS, foundationCSS } from "$/ui/styles"
 import { itemVocabulary } from "$/ui/components/ui-item"
 
-import { Fixture } from "$/ui/test/Fixture"
-import { Sheets } from "$/ui/test/Sheets"
+import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import { menuVocabulary } from "$/ui/components/ui-menu/UIMenu.en"
 

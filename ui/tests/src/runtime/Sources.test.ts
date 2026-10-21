@@ -5,7 +5,7 @@ import { SourceError } from "$/ui/runtime"
 import { Sources } from "$/ui/runtime/Sources"
 
 /** A fixture file the test server serves. */
-const HELLO = "/test/fixtures/sources/hello.txt"
+const HELLO = "/test-helpers/fixtures/sources/hello.txt"
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -62,11 +62,11 @@ describe("Sources.load()", () => {
 
   it("rejects a missing file with `load` and its status, and doesn't cache the failure", async () => {
     const sources = new Sources()
-    const failure = await sources.load("/test/fixtures/sources/missing.txt").catch((error: unknown) => error)
+    const failure = await sources.load("/test-helpers/fixtures/sources/missing.txt").catch((error: unknown) => error)
     expect(failure).toBeInstanceOf(SourceError)
     expect(failure).toMatchObject({ kind: "load", status: 404 })
     const fetchSpy = vi.spyOn(globalThis, "fetch")
-    await sources.load("/test/fixtures/sources/missing.txt").catch(() => undefined)
+    await sources.load("/test-helpers/fixtures/sources/missing.txt").catch(() => undefined)
     expect(fetchSpy).toHaveBeenCalledTimes(1)
   })
 

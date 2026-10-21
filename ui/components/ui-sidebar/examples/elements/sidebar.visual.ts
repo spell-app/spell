@@ -1,5 +1,5 @@
-import { VisualOpen } from "$/ui/test/VisualOpen"
-import type { VisualHooks } from "$/ui/test/test.types"
+import { VisualOpen } from "$/ui/test-helpers/VisualOpen"
+import type { VisualHooks } from "$/ui/test-helpers/test.types"
 
 /**
  * Open states of `sidebar.html` for `yarn test:visual`:  the sidebars shown inside their pushables.

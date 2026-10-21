@@ -3,7 +3,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-import type { PerfRecord, PerfResult, PerfStep } from "../test/PerfRun.ts"
+import type { PerfRecord, PerfResult, PerfStep } from "../test-helpers/PerfRun.ts"
 import {
   kB,
   ScenarioNames,

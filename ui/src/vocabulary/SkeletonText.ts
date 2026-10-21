@@ -18,7 +18,7 @@ import type { SkeletonPart, SkeletonSpec } from "@spell-app/spell-element/vocabu
  *   `{ height: "2em" }`;  `18 wide: square image, header, 3 line paragraph` ~== a width over parts
  * - No `none`:  a tag with no skeleton of its own leaves the key OUT.  Epic `wwod-spell-ui`, J26.
  * - ONE parser, run in node, never in a page:  `tools/RootCatalog.ts` parses the vocabularies into `<ui-root>`'s
- *   catalog (`yarn gen:root`) and into a component pack's (`spell dev pack build`), and `test/vocabularies.test.ts`
+ *   catalog (`yarn gen:root`) and into a component pack's (`spell dev pack build`), and `test-helpers/vocabularies.test.ts`
  *   parses every vocabulary, so a typo fails a test, not a page.
  * - Pure data, at the bottom of `$/ui/vocabulary` (types only).  NOT in the folder's barrel:  `core` re-exports that
  *   barrel, and no page parses skeleton text, so it'd cost every page bytes for nothing.  Reached by path.

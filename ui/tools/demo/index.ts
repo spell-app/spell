@@ -11,7 +11,7 @@
  */
 
 import { UI } from "$/ui/runtime"
-import { StubOwner } from "$/ui/test/StubOwner"
+import { StubOwner } from "$/ui/test-helpers/StubOwner"
 
 import { FamilySheets } from "./FamilySheets.ts"
 

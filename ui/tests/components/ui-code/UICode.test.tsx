@@ -1,8 +1,8 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
 import { UI } from "$/ui/runtime"
-import { expectAccessible } from "$/ui/test/A11y"
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 
 import type { DOMCodeElement } from "$/ui/components/ui-code/UICode"
 
@@ -119,7 +119,7 @@ describe("<ui-code> behaviour", () => {
   })
 
   it("loads a `source` file", async () => {
-    const host = await code(`<ui-code source="/test/fixtures/sources/hello.txt" language="text"></ui-code>`)
+    const host = await code(`<ui-code source="/test-helpers/fixtures/sources/hello.txt" language="text"></ui-code>`)
     expect(linesOf(host)).toEqual(["Hello, source!"])
   })
 

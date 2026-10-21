@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test/Keys"
+import { Keys } from "$/ui/test-helpers/Keys"
 
 import { UI } from "$/ui/runtime"
 import type { ToastActionDetail, ToastCloseDetail, ToastShowDetail } from "$/ui/components/components.types"
-import { expectAccessible } from "$/ui/test/A11y"
-import { Fixture } from "$/ui/test/Fixture"
-import { Viewport } from "$/ui/test/Viewport"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Viewport } from "$/ui/test-helpers/Viewport"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import type { DOMElement } from "@spell-app/spell-element"
 
 import "$/ui/components/ui-toast"

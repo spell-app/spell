@@ -2,9 +2,9 @@ import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeAll, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { UI } from "$/ui/runtime"
-import { expectAccessible } from "$/ui/test/A11y"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import type { DOMElement } from "@spell-app/spell-element"
 import type { AccordionToggleDetail } from "$/ui/components/components.types"
 
@@ -421,7 +421,7 @@ describe("<ui-accordion> look", () => {
 
 describe("<ui-accordion> source", () => {
   /** Fixture bodies the test server serves. */
-  const DIR = "/test/fixtures/sources/bodies"
+  const DIR = "/test-helpers/fixtures/sources/bodies"
 
   /** An accordion DOM element with its source API. */
   type SourceAccordion = DOMElement & { open: string | undefined; load(): Promise<void>; reload(): Promise<void> }

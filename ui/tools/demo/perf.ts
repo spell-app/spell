@@ -1,5 +1,5 @@
 /**
- * The dropdown benchmark (`test/PerfRun.ts`) on the dev server:  1000 options, `"united sta"` typed one character
+ * The dropdown benchmark (`test-helpers/PerfRun.ts`) on the dev server:  1000 options, `"united sta"` typed one character
  * per keystroke, update / + layout / + frame per step.
  * - Dev build of Solid (Vite serves the `development` export condition);  `yarn smoke` runs the same benchmark
  *   against `dist/` + the vendored production Solid.
@@ -9,7 +9,7 @@
 import { flush } from "solid-js"
 
 import type { E } from "$/ui/core"
-import { PerfRun } from "$/ui/test/PerfRun"
+import { PerfRun } from "$/ui/test-helpers/PerfRun"
 
 import "$/ui/components/ui-dropdown"
 

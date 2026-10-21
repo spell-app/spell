@@ -3,10 +3,10 @@ import { userEvent } from "vite-plus/test/browser"
 
 import { UI } from "$/ui/runtime"
 import type { ShapeChangeDetail } from "$/ui/components/components.types"
-import { expectAccessible } from "$/ui/test/A11y"
-import { Fixture } from "$/ui/test/Fixture"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import type { DOMElement } from "@spell-app/spell-element"
 import type { DOMShapeElement } from "$/ui/components/ui-shape"
 

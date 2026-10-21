@@ -4,7 +4,7 @@
  */
 
 import { UIButton, UIDropdown } from "$/ui/index"
-import { es } from "$/ui/test/dictionary.es"
+import { es } from "$/ui/test-helpers/dictionary.es"
 
 UIButton.define("ie-boton", es)
 UIDropdown.define("ie-desplegable", es)

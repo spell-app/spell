@@ -89,7 +89,7 @@ A change that alters rendering updates its baselines IN THE SAME CHANGE:
 3. When every difference is intended, run the same command with `--update`.
 4. Run it once more without `--update`:  it must pass.
 5. Commit the changed PNGs with the change.
-   - `git diff --stat test/visual/baselines` shows which ones moved.
+   - `git diff --stat test-helpers/visual/baselines` shows which ones moved.
 
 - `--update` rewrites only the baselines that differ beyond the tolerances, plus missing ones.
 - A FULL `--update` run (no `--grep`) also deletes the baselines no example makes any more:
@@ -105,7 +105,7 @@ A change that alters rendering updates its baselines IN THE SAME CHANGE:
 In plain git (`.gitattributes` marks them `binary`):
 
 ```
-test/visual/baselines/
+test-helpers/visual/baselines/
   <os>/                    linux | local-<platform>, e.g. local-darwin
     <browser>/             chromium | firefox | webkit
       ui-<family>/
@@ -157,8 +157,8 @@ modal, flyout, popup, dropdown menu, calendar popup, sidebar, dimmer, toast.
 
 ```ts
 // components/ui-modal/examples/elements/types.visual.ts
-import { VisualOpen } from "$/ui/test/VisualOpen"
-import type { VisualHooks } from "$/ui/test/test.types"
+import { VisualOpen } from "$/ui/test-helpers/VisualOpen"
+import type { VisualHooks } from "$/ui/test-helpers/test.types"
 
 /**
  * Open states of `types.html` for `yarn test:visual`:  each modal shown.
@@ -185,7 +185,7 @@ export default {
 - `mask`:  selectors (Playwright CSS, piercing shadow roots) painted over in every capture of the example.
   - Prefer fixing the source (frozen time, disabled animation) over a mask.
 - The node side IMPORTS the hook file for its state names, so:
-  - no value imports besides `$/ui/test/VisualOpen`
+  - no value imports besides `$/ui/test-helpers/VisualOpen`
   - runtime code is imported INSIDE `open()`:  `const { UI } = await import("$/ui/runtime")` (see the toast hooks)
 - State names are kebab case:  they become part of the file name.
 

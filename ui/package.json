@@ -127,20 +127,20 @@
     },
     "./styles/ui.css": "./src/styles/ui.css",
     "./test/A11y": {
-      "types": "./dist-types/test/A11y.d.ts",
-      "default": "./test/A11y.ts"
+      "types": "./dist-types/test-helpers/A11y.d.ts",
+      "default": "./test-helpers/A11y.ts"
     },
     "./test/ElementFixture": {
-      "types": "./dist-types/test/ElementFixture.d.ts",
-      "default": "./test/ElementFixture.ts"
+      "types": "./dist-types/test-helpers/ElementFixture.d.ts",
+      "default": "./test-helpers/ElementFixture.ts"
     },
     "./test/MemberClashes": {
-      "types": "./dist-types/test/MemberClashes.d.ts",
-      "default": "./test/MemberClashes.ts"
+      "types": "./dist-types/test-helpers/MemberClashes.d.ts",
+      "default": "./test-helpers/MemberClashes.ts"
     },
     "./test/setup.ts": {
-      "types": "./dist-types/test/setup.d.ts",
-      "default": "./test/setup.ts"
+      "types": "./dist-types/test-helpers/setup.d.ts",
+      "default": "./test-helpers/setup.ts"
     },
     "./tools/ComponentPack": {
       "types": "./dist-types/tools/ComponentPack.d.ts",

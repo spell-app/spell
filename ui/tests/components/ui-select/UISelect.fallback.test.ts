@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { Fixture } from "$/ui/test/Fixture"
-import { expectAccessible } from "$/ui/test/A11y"
-import { FallbackStub, type StubHost } from "$/ui/test/FallbackStub"
+import { Fixture } from "$/ui/test-helpers/Fixture"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { FallbackStub, type StubHost } from "$/ui/test-helpers/FallbackStub"
 import type { SelectChangeDetail } from "$/ui/components/components.types"
 
 import { SelectFallback } from "$/ui/components/ui-select/UISelect.fallback"

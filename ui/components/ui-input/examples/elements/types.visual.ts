@@ -1,4 +1,4 @@
-import type { VisualHooks } from "$/ui/test/test.types"
+import type { VisualHooks } from "$/ui/test-helpers/test.types"
 
 /**
  * `types.html` for `yarn test:visual`.

@@ -21,4 +21,4 @@ docs/__data/html-custom-data.json                             linguist-generated
 components/ui-emoji/data/**                                   linguist-generated -diff
 
 # Visual regression baselines (`yarn test:visual`):  images, never diffed or merged as text
-test/visual/baselines/**/*.png binary
+test-helpers/visual/baselines/**/*.png binary

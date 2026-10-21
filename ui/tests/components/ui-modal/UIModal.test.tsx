@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test/Keys"
+import { Keys } from "$/ui/test-helpers/Keys"
 
 import { UI } from "$/ui/runtime"
 import { PartOwnerTokens, type ModalCloseDetail } from "$/ui/components/components.types"
-import { A11y, expectAccessible } from "$/ui/test/A11y"
-import { Fixture } from "$/ui/test/Fixture"
+import { A11y, expectAccessible } from "$/ui/test-helpers/A11y"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import type { DOMElement } from "@spell-app/spell-element"
 
 import "$/ui/components/ui-modal"

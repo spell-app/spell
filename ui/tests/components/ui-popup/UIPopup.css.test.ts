@@ -1,13 +1,13 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test/Keys"
+import { Keys } from "$/ui/test-helpers/Keys"
 
 import { colorsCSS, foundationCSS, nativeCSS } from "$/ui/styles"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { Fixture } from "$/ui/test/Fixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 import type { DOMElement } from "@spell-app/spell-element"
-import { Sheets } from "$/ui/test/Sheets"
+import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import "$/ui/components/ui-button"
 

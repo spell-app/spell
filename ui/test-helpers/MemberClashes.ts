@@ -2,7 +2,7 @@ import type { DOMElement, UIComponentClass } from "@spell-app/spell-element"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 import { E } from "$/ui/core"
 import { F } from "$/ui/forms"
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 
 /****************
  * ### `MemberClashes`

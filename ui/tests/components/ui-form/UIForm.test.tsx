@@ -10,10 +10,10 @@ import type {
   FormValues
 } from "$/ui/components/components.types"
 import { E } from "$/ui/core"
-import { expectAccessible } from "$/ui/test/A11y"
+import { expectAccessible } from "$/ui/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test/ElementFixture"
-import { Viewport } from "$/ui/test/Viewport"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { Viewport } from "$/ui/test-helpers/Viewport"
 
 import "$/ui/components/ui-form"
 import "$/ui/components/ui-input"

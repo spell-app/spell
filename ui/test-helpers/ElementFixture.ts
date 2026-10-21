@@ -1,6 +1,6 @@
 import { flush } from "solid-js"
 
-import { Fixture } from "$/ui/test/Fixture"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 import type { DOMElement } from "@spell-app/spell-element"
 
 /**

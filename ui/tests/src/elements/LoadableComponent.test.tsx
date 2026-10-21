@@ -4,7 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { UI, type SourceSaver } from "$/ui/runtime"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 import * as UIT from "$/ui/components/components.types"
-import { ElementFixture } from "$/ui/test/ElementFixture"
+import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import { type UIComponentClass, UIComponent } from "@spell-app/spell-element"
 import { LoadableComponent, type DOMLoadableElement } from "$/ui/elements"
 
@@ -31,8 +31,8 @@ const X_SOURCE = {
 } as const satisfies ComponentVocabulary
 
 /** Fixture files the test server serves. */
-const HELLO = "/test/fixtures/sources/hello.txt"
-const OTHER = "/test/fixtures/sources/other.txt"
+const HELLO = "/test-helpers/fixtures/sources/hello.txt"
+const OTHER = "/test-helpers/fixtures/sources/other.txt"
 
 /**
  * How long a `load="visible"` element gets to NOT fetch while off screen:  a REAL wait, on purpose.
@@ -146,12 +146,14 @@ describe("<ui-test-source source>", () => {
   })
 
   it("shows an error for a missing file;  a cancelled `ui-error` shows none", async () => {
-    const host = await renderLoaded(`<ui-test-source source="/test/fixtures/sources/missing.txt"></ui-test-source>`)
+    const host = await renderLoaded(
+      `<ui-test-source source="/test-helpers/fixtures/sources/missing.txt"></ui-test-source>`
+    )
     expect(host.shadowRoot!.querySelector("[part~=error]")!.textContent).toMatch(/Couldn't load/)
     const cancel = (event: Event) => event.preventDefault()
     document.addEventListener("ui-error", cancel)
     const quiet = await renderLoaded(
-      `<ui-test-source source="/test/fixtures/sources/missing-too.txt"></ui-test-source>`
+      `<ui-test-source source="/test-helpers/fixtures/sources/missing-too.txt"></ui-test-source>`
     )
     document.removeEventListener("ui-error", cancel)
     expect(quiet.matches(":state(error)")).toBe(true)

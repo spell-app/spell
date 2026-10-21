@@ -4,7 +4,7 @@
  *   classes and `VisualMarkups`, so the fixture page (`Fixture.ts`, in the browser) can import it too.
  */
 
-import type { VisualHooks } from "../../test/test.types.ts"
+import type { VisualHooks } from "../../test-helpers/test.types.ts"
 import type { VisualSettings } from "./VisualSettings.ts"
 
 export type { VisualOs } from "../environment.ts"

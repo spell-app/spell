@@ -25,7 +25,7 @@ measurement, vendoring, smoke, report, HMR, the docs site and the design export.
 | `PeerVendor.ts` | one ES module per peer specifier + `importmap.json` in `vendor/`, deduped (ONE Solid), tree-shaken to the bindings `dist/` and the pages import |
 | `DeclarationCheck.ts` | `yarn smoke` runs it after `vite build`:  every `exports` `types` path exists, and no `dist/**.d.ts` import is an alias (`$/util`, `$/ui`) or leaves `dist/` |
 | `HostApp.ts` | compiles the Solid 2 host app (`frameworks/solid/app.tsx`) with Solid external |
-| `SmokeRunner.ts` + `StaticServer.ts` | (`StaticServer` is a thin wrapper over `SRV.WebServer`) serves `dist/`, `vendor/`, `tools/`, `test/` from ONE static server, injects the import map, drives each page in headless chromium |
+| `SmokeRunner.ts` + `StaticServer.ts` | (`StaticServer` is a thin wrapper over `SRV.WebServer`) serves `dist/`, `vendor/`, `tools/`, `test-helpers/` from ONE static server, injects the import map, drives each page in headless chromium |
 | `LocCount.ts` | lines / code lines per file, by group |
 | `ReportTables.ts` | rewrites the `generated:<name>` tables of `notes/report.md` |
 | `peers.ts` | the peer specifiers `dist/` imports |
@@ -77,7 +77,7 @@ yarn report
     - the demo's `*.ts` (`demo/`)
     - the visual tests' `fixture.ts` and `StaticFixture.ts`
   - Browser-side helpers they serve are transpiled on the fly by `StaticServer`, and may import types only.
-    - [`PerfRun`](../test/PerfRun.ts), [the Spanish dictionary](../test/dictionary.es.ts)
+    - [`PerfRun`](../test-helpers/PerfRun.ts), [the Spanish dictionary](../test-helpers/dictionary.es.ts)
 - **Pages:**  a smoke page imports `@spell-app/ui...` and the peers by specifier,
   and publishes `window.smokeResult = { ok, label, checks }`.
   - `kind: "compat"` is reported as COMPATIBILITY.

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
 import * as core from "$/ui/core"
-import { Fixture } from "$/ui/test/Fixture"
+import { Fixture } from "$/ui/test-helpers/Fixture"
 import type { DOMElement } from "@spell-app/spell-element"
 
 import { ComponentPacks, registerPack } from "$/ui/components/ui-components"
@@ -13,14 +13,14 @@ import "$/ui/components/ui-root"
 // ## Fixtures
 ////////////////
 
-/** The test pack:  `<x-card>` (ready when the test says) and `<x-note>`, a classic script (`test/fixtures/`). */
-const X_PACK = "/test/fixtures/component-packs/x.pack.js"
+/** The test pack:  `<x-card>` (ready when the test says) and `<x-note>`, a classic script (`test-helpers/fixtures/`). */
+const X_PACK = "/test-helpers/fixtures/component-packs/x.pack.js"
 
 /** A pack whose `define()` loads its families first:  `<later-card>`, defined a while after the script ran. */
-const LATER_PACK = "/test/fixtures/component-packs/later.pack.js"
+const LATER_PACK = "/test-helpers/fixtures/component-packs/later.pack.js"
 
 /** A pack script that runs but registers nothing. */
-const SILENT_PACK = "/test/fixtures/component-packs/silent.pack.js"
+const SILENT_PACK = "/test-helpers/fixtures/component-packs/silent.pack.js"
 
 /** A pack script that can't load:  nothing listens on port 1. */
 const MISSING_PACK = "http://127.0.0.1:1/missing.pack.js"

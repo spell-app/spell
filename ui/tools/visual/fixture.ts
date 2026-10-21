@@ -14,8 +14,8 @@
  */
 
 import { UI } from "$/ui/runtime"
-import { StubOwner } from "$/ui/test/StubOwner"
-import type { VisualHooks } from "$/ui/test/test.types"
+import { StubOwner } from "$/ui/test-helpers/StubOwner"
+import type { VisualHooks } from "$/ui/test-helpers/test.types"
 
 import { FamilySheets } from "../demo/FamilySheets.ts"
 import { VisualMarkups, type VisualMarkup } from "./visual.types.ts"

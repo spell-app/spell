@@ -112,7 +112,7 @@ export class ComponentTokens {
       notes.push(
         `declares another family's token ${declaration.name} (line ${declaration.line}):  convert by hand -- ` +
           "the alias `--_ui-x: var(--ui-x, <default>)` for a look token its readers take through the alias, a " +
-          "private switch for an internal one, or an EXCEPTION in `test/componentTokens.test.ts` when it " +
+          "private switch for an internal one, or an EXCEPTION in `test-helpers/componentTokens.test.ts` when it " +
           "deliberately themes a nested component"
       )
     }
