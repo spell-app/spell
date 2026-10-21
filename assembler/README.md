@@ -33,11 +33,11 @@ for (const bundle of AS.Bundle.all(root)) if (bundle.isStale) bundle.build()
 - The command line:
 
   ```sh
-  spell dev bundles build [<name>...] [--stale]
-  spell dev bundles check [<name>...]
+  spell bundle [<name>...] [--stale]
+  spell bundle check [<name>...]
   ```
 
-- The page server runs `spell dev bundles build --stale` when it starts.
+- The page server runs `spell bundle --stale` when it starts.
   - A request for a bundle's file waits while it runs.
   - That's [BundleBuild.ts](../spell-app/page-server/src/BundleBuild.ts), in the page-server package.
 

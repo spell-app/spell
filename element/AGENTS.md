@@ -79,7 +79,7 @@ then [ui's AGENTS.md](../spell-ui/AGENTS.md), "Solid authoring":  how an element
     and Vite+ configs.
 - [`bin/spell-pack.mjs`](bin/spell-pack.mjs), the kit's bin:  `spell-pack build | check [<folder>]`, a component
   pack's build or its check, from any repo (`ComponentPack`).
-  - spell-epic's and the brand's `yarn pack:build` / `pack:check` run it;  spell-app's `spell dev pack` calls
+  - spell-epic's and the brand's `yarn pack:build` / `pack:check` run it;  spell-app's `spell pack` calls
     `ComponentPack` itself.
   - Spell UI's `spell-ui-pack` until epic `repo-split` P10, which ran files Spell UI's package doesn't ship (C10).
 - Four of those files began as `@solidjs/element` and `component-register`,

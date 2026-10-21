@@ -20,6 +20,10 @@
       "$/server/*": ["./server/src/*"],
       "$/server/test/*": ["./server/test/*"],
 
+      // ## `cli`:  the `spell` command's base (`spell-kit/cli` from another repo)
+      "$/cli": ["./cli/src/index.ts"],
+      "$/cli/*": ["./cli/src/*"],
+
       // ## `assembler`
       "$/assembler": ["./assembler/src/index.ts"],
       "$/assembler/*": ["./assembler/src/*"],

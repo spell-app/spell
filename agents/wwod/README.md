@@ -38,7 +38,7 @@ The house style for AI coding agents working in Spell's repos (Claude Code, Code
 2. A rule we chose AGAINST:  a `NOT:` line under the winning rule, with the why, so nobody re-proposes it.
 3. Cite real code by repo path.
 4. New section:  number it after the last (renumbering is fine;  fix the citations).
-5. Then `spell dev wwod check`:  every `WWOD §N › "title"` citation and repo path, here and in every `AGENTS.md`,
+5. Then `spell wwod check`:  every `WWOD §N › "title"` citation and repo path, here and in every `AGENTS.md`,
    `CLAUDE.md` and skill;  exits 1 on a broken one.  A retitled rule breaks its citations.
 
 ## History

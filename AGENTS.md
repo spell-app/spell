@@ -12,7 +12,8 @@ and across the child repos inside it.
 ## The kit
 
 - The bottom of every repo, and always there.  It holds:
-  - five folders of code every repo stands on:  `util/`, `toolchain/`, `server/`, `assembler/`, `element/` (below)
+  - six folders of code every repo stands on:  `util/`, `toolchain/`, `server/`, `assembler/`, `element/`, `cli/`
+    (below)
   - the house style, WWOD, in [agents/wwod/](agents/wwod/) (below, "WWOD and the logs")
   - the glue:  the ONE install for every repo, the list of repos, the commands over them
     ([README.md](README.md) lists the files)
@@ -20,20 +21,21 @@ and across the child repos inside it.
   - spell-util:  `util/`, `toolchain/`
   - spell-server:  `server/`, `assembler/`
   - spell-element:  `element/`
+  - and `cli/`, the `spell` command's base, from spell-app's CLI (epic `repo-split` P13)
 - ONE npm package, `spell-kit` (Q35;  unscoped, Q36):  its root [package.json](package.json), one version.
-  - Its `exports` name every entry the five folders offer, each under its folder's name:
-    `spell-kit/util/class`, `spell-kit/server/page`, `spell-kit/element`, `spell-kit/toolchain/lint` ...
+  - Its `exports` name every entry the six folders offer, each under its folder's name:
+    `spell-kit/util/class`, `spell-kit/server/page`, `spell-kit/element`, `spell-kit/toolchain/lint`, `spell-kit/cli` ...
   - The folders have NO `package.json` of their own:  their dependencies are the root's.
   - Each folder is still its own TypeScript program, with its own `tsconfig.json`, `vite.config.ts` and
     `vitest.config.ts`:
     - browser-safe:  `util`, `element` (no node types)
-    - node:  `assembler` (no DOM);  `server` (node, plus the live-reload client and the site header it serves to
+    - node:  `assembler` (no DOM);  `cli` (the `spell` command);  `server` (node, plus the live-reload client and the site header it serves to
       pages, so its settings keep the DOM)
   - `yarn install` runs a `postinstall` that links `node_modules/spell-kit` to the kit:
     yarn links the root package nowhere by itself.
 - Every child repo is its own git repo, cloned inside the kit and git-ignored here.
   - Run git in the child repo you mean:  `git -C spell-ui status`.
-  - Here, git sees the kit's own:  its five folders, `tests/`, `agents/`, the glue.
+  - Here, git sees the kit's own:  its six folders, `tests/`, `agents/`, the glue.
 - `yarn install` runs HERE, never in a child repo:  the child repos have no `yarn.lock`.
   - A child repo's `.yarnrc.yml` is a copy of this one's, without `yarnPath`:  the yarn release is here.
   - One copy of each package version (`nmHoistingLimits: none`), above all Solid:  pinned by `resolutions`.
@@ -52,6 +54,7 @@ Each folder links to its own `AGENTS.md`:  read it before working there.
 | [toolchain](toolchain/AGENTS.md) | `spell-kit/toolchain/...` | | | what every repo's configs share:  the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, `spell-folders`, the run-time alias hook |
 | [server](server/AGENTS.md) | `spell-kit/server` | `$/server` | `SRV` | serving pages locally:  static folders, an Express-shaped router, live reload, ports, openers, a file lock, the generic page server, the site header |
 | [assembler](assembler/AGENTS.md) | `spell-kit/assembler` | `$/assembler` | `AS` | assembling pages:  link targets (`Linker`), `formatHTML()`, bundles built on demand (`Bundle`), `DataFile`, `contentFolder` |
+| [cli](cli/AGENTS.md) | `spell-kit/cli` | `$/cli` | `CLI` | the `spell` command's base:  arguments, help, every repo's commands and hooks;  the kit's own commands (server, bundle, commands, wwod, pony) |
 | [element](element/AGENTS.md) | `spell-kit/element` | `$/spell-element` | `E` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's);  the test helpers every set's tests use (`spell-kit/test-helpers/...`);  the element tools (`spell-kit/element/tools/...`:  the pack build, the root catalog, the elements' Vite settings) and their bin, `spell-pack` |
 
 - Inside a folder, its own files by its `$/` alias;  ANOTHER folder of the kit by its entry (`spell-kit/util/string`,
@@ -68,6 +71,9 @@ Each folder links to its own `AGENTS.md`:  read it before working there.
   - `server` is a leaf:  node built-ins only (its background page server loads the toolchain's alias hook by name).
   - `assembler` uses util's json5 and the toolchain's format settings.
   - `element` uses util's generic files, one by one.
+  - `cli` uses server, assembler and util's json5;  nothing in the kit imports `cli`.
+    - It names no child repo in its code:  each one hands it its commands, by its `package.json`
+      (`"spell": { "commands", "hooks" }`).
   - Nothing in the kit imports a child repo:  every arrow points down.
 
 ## Commands
@@ -94,7 +100,12 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
 - One folder's check, or a few:  `node toolchain/bin/spell-folders.ts test server element`.
 - spell-lang and spell-app run their checks the same way, `spell-folders <check>` (a bin of the kit's, beside
   `spell-types` and `spell-pack`):  [the toolchain's AGENTS.md](toolchain/AGENTS.md).
-- The kit's other scripts:  `yarn server` (the page server's command line), `yarn favicon` (server's icons).
+- The kit's other scripts:  `yarn server` (`spell server`:  the page server), `yarn favicon` (server's icons),
+  `yarn cli:install` (puts `spell` on your `PATH`).
+- The `spell` command:  the kit's `cli/` (its [AGENTS.md](cli/AGENTS.md)).
+  - Every installed repo adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
+    `spell help` lists them, grouped by repo.
+  - A word two repos both want goes under each one's short name (`spell lang check`, `spell app check`).
 
 ## Which repo holds what
 
@@ -103,7 +114,7 @@ The kit is always there, so no `needs` names it.
 
 | Repo | Packages | Needs |
 | --- | --- | --- |
-| spell-kit (this one) | `util`, `toolchain`, `server`, `assembler`, `element`:  ONE package, `spell-kit` | nothing:  the bottom |
+| spell-kit (this one) | `util`, `toolchain`, `server`, `assembler`, `element`, `cli`:  ONE package, `spell-kit` | nothing:  the bottom |
 | [spell-lang](spell-lang/AGENTS.md) | `parser`, `markdown`, `core`, `py`, `spell`:  ONE package, `spell-lang` | the kit |
 | [spell-ui](spell-ui/AGENTS.md) | the repo IS `spell-ui` | the kit |
 | [spell-brand](spell-brand/AGENTS.md) | the repo IS `spell-brand` | spell-ui, the kit |
@@ -137,7 +148,7 @@ The kit is always there, so no `needs` names it.
     - Each `exports` entry has a `types` condition, `./dist-types/...d.ts`, built by the toolchain's `spell-types`
       (git-ignored), every `$/` in them rewritten as a relative path.
     - The kit's are built folder by folder into ONE `dist-types/` at its root (`dist-types/util/src/index.d.ts` ...):
-      its `package.json` lists the folders in `"spellTypes"` (util, server, assembler, element).
+      its `package.json` lists the folders in `"spellTypes"` (util, server, assembler, element, cli).
       The toolchain has no aliases, so others read its source.
     - spell-lang's the same way (epic `repo-split` P11):  its five folders, into `spell-lang/dist-types/`
       (`dist-types/parser/src/index.d.ts` ...).

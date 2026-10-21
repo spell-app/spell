@@ -3,7 +3,7 @@
  * Shapes shared by the kit's element tools (`element/tools/`) and the repos that call them:  the component packs'
  * reports and their error.
  * - At the BOTTOM of the tools' import graph:  types and one error class, nothing else, so every tool (and spell-app's
- *   `spell dev pack`, through `spell-kit/element/tools/tools.types`) imports it without loading another.
+ *   `spell pack`, through `spell-kit/element/tools/tools.types`) imports it without loading another.
  * - Spell UI's own tools keep their shapes in its `tools/tools.types.ts`.
  ****************/
 
@@ -27,7 +27,7 @@ export type ComponentPackStale = { file: string; reason: string }
 /**
  * Thrown by `ComponentPack` when a pack can't be read or built:  a folder that isn't a pack, a tag without the pack's
  * prefix, an import the page can't share, or a docs data builder that failed.
- * - `spell-pack` prints its message and exits 1;  `spell dev pack` turns it into its own error.
+ * - `spell-pack` prints its message and exits 1;  `spell pack` turns it into its own error.
  */
 export class ComponentPackError extends Error {}
 ComponentPackError.prototype.name = "ComponentPackError"

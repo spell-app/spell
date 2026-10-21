@@ -170,6 +170,6 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   ```
 
   - A child process by URL:  `--import`, `import.meta.resolve("spell-kit/toolchain/aliases")`.
-  - Who loads it:  spell-app's CLI (`cli/bin/spell.mjs`) and every child it starts, the kit's background page server
+  - Who loads it:  the kit's `spell` (`cli/bin/spell.mjs`) and every child it starts, the kit's background page server
     (`PageServer.ensure()`, in `server/`), the kit's `spell-pack` (`element/bin/`),
     and the `tsx` package scripts of every repo.

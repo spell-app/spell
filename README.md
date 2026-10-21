@@ -2,7 +2,7 @@
 
 The kit:  the layer every Spell repo stands on, the house style, and the ONE install over the child repos
 (epic `repo-split` P7, P9).
-- Five folders of code:  util, toolchain, server, assembler and element, published as ONE package, `spell-kit`
+- Six folders of code:  util, toolchain, server, assembler, element and cli, published as ONE package, `spell-kit`
   (`spell-kit/util`, `spell-kit/server/page` ...).
 - The house style every repo shares, WWOD, in `agents/wwod/`.
 - The glue:  the install, the list of child repos, and the commands over them.
@@ -37,7 +37,7 @@ yarn clone            # every child repo in repos.json5, then ONE install for al
 ## Day to day
 
 ```sh
-yarn kit:review       # the kit's own finishing pass:  ts, lint, format, tests of its five folders
+yarn kit:review       # the kit's own finishing pass:  ts, lint, format, tests of its six folders
 yarn pull             # git pull --ff-only in every child repo
 yarn status           # each child repo's branch and changes;  a clean one in one line
 yarn repos            # the list:  which are cloned, and what each needs
@@ -65,9 +65,11 @@ The kit's code, one folder each, its tests in `tests/<folder>/`:
 | [toolchain/](toolchain/) | `spell-kit/toolchain/...` | the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, `spell-folders` (what the `kit:` checks, spell-lang's and spell-app's run, folder by folder), the run-time alias hook |
 | [server/](server/) | `spell-kit/server` | serving pages locally:  static folders, an Express-shaped router, live reload, ports, openers, a file lock, the generic page server, the site header |
 | [assembler/](assembler/) | `spell-kit/assembler` | assembling pages:  link targets (`Linker`), `formatHTML()`, bundles built on demand (`Bundle`), `DataFile`, `contentFolder` |
+| [cli/](cli/) | `spell-kit/cli` | the `spell` command:  its base (arguments, help, every installed repo's commands and hooks, by each one's `package.json`) and the kit's own commands (`spell server`, `bundle`, `commands`, `wwod`, `pony`);  `yarn cli:install` puts it on your `PATH` |
 | [element/](element/) | `spell-kit/element` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's);  `SkeletonText`;  the test helpers every set's tests use (`spell-kit/test-helpers/ElementFixture` ...);  the element tools (`spell-kit/element/tools/...`:  the component pack build, the root catalog, the elements' Vite settings, the HMR plugin ...) and their bin, `spell-pack build \| check` |
 
-- They were three repos, spell-util, spell-server and spell-element, merged in with their history (P9).
+- They were three repos, spell-util, spell-server and spell-element, merged in with their history (P9);
+  `cli/` came from spell-app's CLI (P13).
 
 The rest of what's tracked:
 

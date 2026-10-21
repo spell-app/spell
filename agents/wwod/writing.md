@@ -245,7 +245,7 @@ In Markdown, which has no tooltips, the name is a link:
 
 ## The tools
 
-- `spell dev docs fuss <paths...>` (or `--branch`):  the checker.
+- `epic pages fuss <paths...>` (or `--branch`):  the checker.
   It lists the misses a tool can find, by file and line:
   lines ending in a new phrase's first words, bullets of 3+ sentences, words like "the fork",
   file paths in a page's prose, sentences of 3+ code spans.

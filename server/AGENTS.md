@@ -84,7 +84,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `ensure` restarts a server that started before its code last changed.
       So after a merge, the next opener gets the new routes.
       - its code:  the `sources` folders, by `newestChange()`
-      - Nothing restarts it by itself:  the next `spell dev server ensure` (an opener, `/airplane`),
+      - Nothing restarts it by itself:  the next `spell server start` (an opener, `/airplane`),
         or the side bar's "Restart Page Server".  Its open pages then reload (`hello`).
     - `stop` waits for the old PROCESS to end (`SIGTERM`, then `SIGKILL` after 10s), not just for it to stop answering.
       - Why:  it stops answering before it lets go of its port.
@@ -114,7 +114,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It went to spell-server when the repos split (P8), and into the kit with it (P9);  page-server went to spell-app.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
   - `$/server/page/...` -- the page server (one per checkout):
-    - its CLI, `spell dev server`
+    - its CLI, `spell server`
     - page edits:  `PageEditor`, `/api/pages`
     - its info:  `/api/server`
     - Its settings:  the `"pageServer"` block of the root `package.json`.
@@ -172,7 +172,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - Live reload watches it whole, reporting each change at `/<path>` and under every worktree's address.
         - A page from it is told its path there (`SPELL_SERVER.file`, `/epics/x/x.plan.html`).
         - `/api/files` and `/api/pages` write in it:  the `"writable"` names are its folders.
-        - `/api/server` reports it (`contentFolder`);  `spell dev server url <file>` gives a file of it its path there
+        - `/api/server` reports it (`contentFolder`);  `spell server url <file>` gives a file of it its path there
           (`contentPathOf()`).
       - The shared pages' bridges (the engine's old folders, `/ui/` answering "not found"):  page-server's route
         module ([page-server's AGENTS.md](../spell-app/page-server/AGENTS.md)).

@@ -13,7 +13,7 @@ import { AS } from "$/assembler"
  *   - its entry is missing, or newer than its build
  *   - its sources' hash isn't the one its last build recorded (`AS.BUNDLE_RECORD`, in its output folder)
  * - `build()`:  runs its build command, then records the hash
- * - The page server runs `spell dev bundles build --stale` when it starts, so a page always loads a current build.
+ * - The page server runs `spell bundle --stale` when it starts, so a page always loads a current build.
  * - WHICH bundles:  the ones whose output folders the checkout's root `package.json` names,
  *   in `"pageServer": { "bundles": [...] }`, the list the page server reads too (`Bundle.specs()`)
  * - Knows no checkout's LAYOUT:  each bundle by its PACKAGE (`AS.BUNDLES`), found through the checkout's

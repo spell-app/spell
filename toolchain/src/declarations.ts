@@ -124,7 +124,7 @@ export class Declarations {
    * - Paths relative to `dist-types/`, where it's written.
    */
   tsconfig(): object {
-    const paths: Record<string, string[]> = {}
+    const paths: Record<string, string[]> = { ...this.selfPaths() }
     for (const alias of this.aliases) {
       const target = this.owns(alias.target) ? alias.target : declarationOf(alias.target, alias.package)
       paths[alias.pattern] = [relativeTo(this.out, target)]
@@ -145,6 +145,31 @@ export class Declarations {
         paths
       }
     }
+  }
+
+  /**
+   * A package of several folders (the kit):  its OTHER folders' entries, by the package's own name
+   * (`spell-kit/server`), pointed at their declarations, as `paths` (relative to `dist-types/`).
+   * - Why:  for an import of its own package's name, `tsc` maps a `types` path inside the output folder back to the
+   *   SOURCE.  A folder reading another's source through it (the kit's `cli` reads `spell-kit/server`) gets that
+   *   folder's `$/` imports as declarations too, and fails writing over its own inputs (TS5055).
+   * - None for the folder built, nor for a package of one folder.
+   */
+  selfPaths(): Record<string, string[]> {
+    if (!this.stem) return {}
+    const { name, exports = {} } = readJson5<{ name: string; exports?: Record<string, unknown> }>(
+      join(this.root, "package.json")
+    )
+    const own = join(this.out, relative(this.root, this.dir))
+    const paths: Record<string, string[]> = {}
+    for (const [entry, value] of Object.entries(exports)) {
+      const types = (value as { types?: string } | undefined)?.types
+      if (typeof types !== "string" || !entry.startsWith("./")) continue
+      const target = join(this.root, types)
+      if (!isInside(target, this.out) || isInside(target, own)) continue
+      paths[`${name}/${entry.slice(2)}`] = [relativeTo(this.out, target)]
+    }
+    return paths
   }
 
   /** Every `$/` specifier in `dist-types/` rewritten as a relative path;  the files it changed. */

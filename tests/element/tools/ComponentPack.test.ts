@@ -10,7 +10,7 @@ import { ComponentPackError } from "$/spell-element/tools/tools.types"
  * The kit's pack tooling (Spell UI's from epic `repo-split` P5, the kit's from P10):  what a pack is, and what its build
  * is made from.
  * - Each test writes a tiny pack of its own into a throwaway folder;  nothing here builds (no Vite):
- *   the CLI's `packBuild.test.ts` builds a scaffolded pack through `spell dev pack build`, and the brand's and
+ *   the CLI's `packBuild.test.ts` builds a scaffolded pack through `spell pack build`, and the brand's and
  *   spell-epic's own `pack.test.ts` check theirs.
  */
 const ROOT = realpathSync(mkdtempSync(join(tmpdir(), "component-pack-")))

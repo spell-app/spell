@@ -16,19 +16,25 @@
     "./server/**",
     "./assembler/**",
     "./element/tools/**",
-    "./tools/**"
+    "./tools/**",
+    "./cli/**"
   ],
   "bin": {
+    "spell": "./cli/bin/spell.mjs",
     "spell-folders": "./toolchain/bin/spell-folders.ts",
     "spell-pack": "./element/bin/spell-pack.mjs",
     "spell-types": "./toolchain/bin/spell-types.ts"
+  },
+  "spell": {
+    "commands": "./cli/commands.ts"
   },
   "spellTypes": [
     "util",
     "server",
     "assembler",
     "element",
-    "element/tools"
+    "element/tools",
+    "cli"
   ],
   "spellFolders": [
     {
@@ -62,6 +68,16 @@
       "name": "element/tools",
       "lint": [
         "."
+      ],
+      "node": true
+    },
+    {
+      "name": "cli",
+      "lint": [
+        "src",
+        "bin",
+        "scripts",
+        "commands.ts"
       ],
       "node": true
     }
@@ -200,6 +216,10 @@
       "types": "./dist-types/element/test-helpers/*.d.ts",
       "default": "./element/test-helpers/*.ts"
     },
+    "./cli": {
+      "types": "./dist-types/cli/src/index.d.ts",
+      "default": "./cli/src/index.ts"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -211,7 +231,10 @@
     "kit:format": "node toolchain/bin/spell-folders.ts format",
     "kit:format:check": "node toolchain/bin/spell-folders.ts format:check",
     "kit:review": "yarn kit:ts && yarn kit:lint:fix && yarn kit:format && yarn kit:test && echo '== REVIEW PASSED\n===========\n'",
-    "server": "tsx --tsconfig server/tsconfig.json server/src/page/cli.ts",
+    "/////// THE spell COMMAND (cli/)": "",
+    "spell": "node cli/bin/spell.mjs",
+    "cli:install": "node cli/scripts/install-cli.mjs",
+    "server": "node cli/bin/spell.mjs server",
     "favicon": "tsx --tsconfig server/tsconfig.json server/scripts/favicon.ts",
     "postinstall": "node tools/repos.ts links",
     "/////// THE CHILD REPOS (tools/repos.ts, repos.json5)": "",
@@ -228,6 +251,7 @@
   "dependencies": {
     "@solidjs/vite-plugin": "3.0.0-next.47",
     "chalk": "^5.6.0",
+    "commander": "^14",
     "esbuild": "^0.28.2",
     "global": "^4.3.2",
     "json5": "^2.2.3",

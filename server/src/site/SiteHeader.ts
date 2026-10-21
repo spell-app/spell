@@ -197,7 +197,7 @@ export class SiteHeader extends HTMLElement {
         const own = tab.ownTab ? ` target="spell-${escape(tab.name.toLowerCase())}" data-spell-open="browser"` : ""
         return href
           ? `<a class="tab" href="${escape(href)}"${current}${own}>${escape(tab.name)}</a>`
-          : `<span class="tab off" title="only when served:  spell dev server ensure">${escape(tab.name)}</span>`
+          : `<span class="tab off" title="only when served:  spell server start">${escape(tab.name)}</span>`
       })
       .join("")
     const checkout = this.info?.worktree ?? this.info?.branch

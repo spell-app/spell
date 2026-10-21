@@ -32,7 +32,7 @@ import { json5Edited } from "spell-kit/util/node/json5"
  * - Writes are atomic (a temp file renamed over it), and take no lock:  a caller that shares the file holds its own
  *   (`SRV.FileLock`, on the `.json5` name), as `ReviewInbox.update()` does.
  * - The assembler's since epic `epic-eject` I5 (it was `$/epics/data/DataFile`):  spell-app's CLI reads the commands
- *   page's data with it (`spell dev commands`, `spell dev pack new`), and spell-epic's tooling imports it from here.
+ *   page's data with it (`spell commands`, `spell pack create`), and spell-epic's tooling imports it from here.
  * - Node only (`node:fs`):  NOT in the `$/assembler` barrel, imported by path (`$/assembler/DataFile`).
  * - Its position:  imports only node's own modules, `json5`, and the JSON5 editor beside it by its relative path, so
  *   plain `node` loads it;  NEVER an alias, an `enum` or a parameter property.

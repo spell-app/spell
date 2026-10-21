@@ -1,11 +1,15 @@
 /**
- * `spell dev server <command>`:  the page server of this checkout.
- * - `serve [--port N]` -- run it in the foreground, until `Ctrl-C`
- * - `start` / `ensure` -- start it in the background if it isn't running;
+ * `spell server <command>` (the kit's `spell`, which runs this) and `yarn server <command>`:  the page server of this
+ * checkout.
+ * - `local [--port N]` -- run it in the foreground, until `Ctrl-C`
+ *   - `serve`:  the same, hidden:  what a background server runs (`PageServer.ensure()`), which `prune` finds by it
+ * - `start` -- start it in the background if it isn't running;
  *   prints JSON `{ base, port, pid, root, launched }`
+ *   - `start all`:  every web server of the checkout, the kit's `spell server start all` (not this file's)
+ *   - `ensure`:  the same, hidden:  the old name, which spell-epic's `epic server ensure` still hands on
  * - `stop` -- stop it
  * - `status` -- JSON, or exit 1 when not running
- * - `url <file>` -- `ensure`, then print the URL that serves `file`
+ * - `url <file>` -- `start`, then print the URL that serves `file`
  *   - a worktree's file:  on the MAIN checkout's server (`/worktrees/<w>/...`),
  *     when that one runs and serves worktrees (`SRV.mainServerUrl()`)
  *   - a file of the shared content folder:  its path there (`/epics/...`), on the main checkout's server if it runs,
@@ -36,6 +40,7 @@ async function main(args: string[]): Promise<void> {
   const pidFile = new SRV.PidFile(root)
 
   switch (command) {
+    case "local":
     case "serve": {
       const server = await new PageServer({ root }).start({ port })
       console.log(`page server:  ${server.web.url}/  (root ${root})`)
@@ -43,6 +48,7 @@ async function main(args: string[]): Promise<void> {
       return
     }
     case "start":
+    // hidden:  the old name, which spell-epic's `epic server ensure` still hands on (its verbs' renames wait)
     case "ensure":
       return print(await PageServer.ensure(root, port))
     case "stop":
@@ -58,7 +64,7 @@ async function main(args: string[]): Promise<void> {
     }
     case "url": {
       const file = rest.find((arg) => !arg.startsWith("--") && arg !== flag(rest, "--root"))
-      if (!file) throw new Error("usage:  spell dev server url <file>")
+      if (!file) throw new Error("usage:  spell server url <file>")
       const absolute = resolve(process.env.INIT_CWD ?? process.cwd(), file)
       // a worktree's file:  the MAIN checkout's server, when it serves worktrees, so every link is on one port
       const main = await SRV.mainServerUrl(absolute, root)
@@ -74,7 +80,7 @@ async function main(args: string[]): Promise<void> {
     }
     default:
       console.log(
-        `usage:  spell dev server serve|start|ensure|stop|status|url <file>|prune [--dry-run]  [--root <dir>] [--port <n>] [--spaces <dir>]`
+        `usage:  spell server local|start|stop|status|url <file>|prune [--dry-run]  [--root <dir>] [--port <n>] [--spaces <dir>]`
       )
   }
 }

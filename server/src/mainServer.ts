@@ -2,7 +2,7 @@
  * A worktree's files, and the shared content folder's, on the MAIN checkout's page server, so every link points to
  * one port.
  * - The main page server serves each worktree under `/worktrees/<w>/` (`$/server/page` `PageServer`).
- * - Used by `spell dev server url` and the VS Code doc preview;  either falls back to the worktree's own server.
+ * - Used by `spell server url` and the VS Code doc preview;  either falls back to the worktree's own server.
  * - Shared content is served from the main checkout itself:  `/epics/...`, not `/worktrees/<w>/epics/...`.
  *   - shared content:  `epics/`, `guides/` ...:  ONE shared repo, the same in every checkout
  *     - a file in it by its own path, as spell-epic hands them out (`.../spell-app.epics/epics/x/x.plan.html`):

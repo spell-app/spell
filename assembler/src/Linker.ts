@@ -176,7 +176,7 @@ export class Linker {
    * The tab name for `dest`, an absolute path or URL:  re-clicks reuse that tab.
    * - URLs:  `ext-<slug>`
    * - an epic page:  its `<name>`, since the page sets `window.name` to it,
-   *   and `spell dev plan-doc open <name>` reuses it
+   *   and `epic open <name>` reuses it
    * - anything else:  `src-<slug of the repo-relative path>`
    * - at most 80 characters after the prefix
    */

@@ -117,7 +117,7 @@ const SPELL_UI_SOURCES = [
  * How each bundle built on demand is built.
  * - WHICH are built:  the ones whose `output` folders the checkout's root `package.json` names
  *   (`"pageServer": { "bundles": [...] }`, `Bundle.specs()`), the list the page server reads too
- * - the page server builds the stale ones when it starts (`spell dev bundles build --stale`)
+ * - the page server builds the stale ones when it starts (`spell bundle --stale`)
  * - `sources`:  generous, so a change never leaves one stale unnoticed
  *   - `Bundle.sourceFiles()` skips tests, snapshots, dot files and the icon packs
  * - their `output` folders are in their own repos' `.gitignore`

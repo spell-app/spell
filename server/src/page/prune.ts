@@ -2,11 +2,11 @@ import { spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
 
 /**
- * `spell dev server prune`:  find the web servers left running by checkouts that are gone, and stop them.
+ * `spell server prune`:  find the web servers left running by checkouts that are gone, and stop them.
  * - Why:  removing a worktree leaves its page server (and the editor's vite server, its child) running,
  *   and nothing else ever stops them:  their `.spell-server.json` went with the folder.
  * - So they're found by PROCESS, not by pid file:
- *   - `ps` lists the page servers (`.../packages/server/src/page/cli.ts serve`)
+ *   - `ps` lists the page servers (`.../server/src/page/cli.ts serve`, the kit's;  `.../packages/server/...` before epic `repo-split` P9)
  *     and the vite dev servers (`.../node_modules/vite.../ dev`)
  *   - `lsof` gives each one's working folder, and the port it listens on
  * - A server is an orphan when its checkout AND its working folder are both gone:
@@ -14,7 +14,7 @@ import { existsSync } from "node:fs"
  */
 
 /** What runs a page server:  its entry point, run with `serve`. */
-const PAGE_SERVER = /\/packages\/server\/src\/page\/cli\.ts\s+serve\b/
+const PAGE_SERVER = /\/(?:packages\/)?server\/src\/page\/cli\.ts\s+serve\b/
 
 /** What runs a vite dev server, through Vite+ or vite itself. */
 const VITE_SERVER =

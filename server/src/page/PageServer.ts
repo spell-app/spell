@@ -61,8 +61,8 @@ import {
  * - The server knows nothing of what the sets, routes, scripts and tabs are:  they come from the settings
  *   (epic `repo-split` P4).
  * - port:  `DEFAULT_PORT` (4747) if free, else any
- *   - the real one goes in `<root>/.spell-server.json`, where `spell dev server ensure` and the openers find it
- * - Run it with `spell dev server` (`page/cli.ts`), never by hand.
+ *   - the real one goes in `<root>/.spell-server.json`, where `spell server start` and the openers find it
+ * - Run it with `spell server` (`page/cli.ts`), never by hand.
  */
 export class PageServer {
   /** the checkout served */
@@ -217,7 +217,7 @@ export class PageServer {
    *   with this package's `tsconfig.json` for the aliases (`TSX_TSCONFIG_PATH`), and the run-time alias hook
    *   (`ALIASES`):  the route modules it loads (spell-app's, spell-epic's) import their own repos' `$/` aliases
    * - its output goes to `<root>/.spell-server.log`
-   * - what `spell dev server ensure`, the goals tools and the openers call
+   * - what `spell server start`, the goals tools and the openers call
    */
   static ensure(root: string, port = DEFAULT_PORT) {
     // its code:  this package's, and its route modules' folders;  a server older than them restarts (I5 of `skillz`)
@@ -413,7 +413,7 @@ export function urlPathOf(root: string, dir: string): string {
   return `/${inside}${inside ? "/" : ""}`
 }
 
-/** `page/cli.ts`:  `spell dev server`. */
+/** `page/cli.ts`:  `spell server`. */
 const CLI = fileURLToPath(new URL("./cli.ts", import.meta.url))
 
 /** This package's `src/`:  the code a page server runs. */

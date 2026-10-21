@@ -167,7 +167,7 @@ export const rootLintIgnore = [
   "spell/thoughts",
   "spell/static",
   "spell/vscode-extension/out",
-  // every component pack's generated folder (`spell dev pack build`)
+  // every component pack's generated folder (`spell pack build`)
   "**/components/__pack"
 ]
 
@@ -283,7 +283,7 @@ export function rootLint() {
 /**
  * A package's `lint` block:  `lintBase`, plus `reactLint` when `react`.
  * - `ignorePatterns`:  the package's own, relative to its folder;  NOT inherited from the root's.
- *   - Plus every component pack's generated folder, `components/__pack/` (`spell dev pack build`), always.
+ *   - Plus every component pack's generated folder, `components/__pack/` (`spell pack build`), always.
  * - `name`:  its name in `PATTERN_FOLDERS` (`ui`, `brand`, `app`), for the `spell-ui/*` rules there.
  * - `ignorePatterns` always gets `dist-types` too (`spell-types`'s declarations).
  */
@@ -301,7 +301,7 @@ export function packageLint({
   } satisfies OxlintConfig
 }
 
-/** A component pack's generated folder in its package (`spell dev pack build`):  never linted. */
+/** A component pack's generated folder in its package (`spell pack build`):  never linted. */
 const PACK_FOLDER = "components/__pack"
 
 /** A package's built declarations (`spell-types`, epic `repo-split` I12):  never linted. */
@@ -386,7 +386,7 @@ export const fmtConfig = {
     "*/*results.json",
     "**/tools/frameworks/solid/dist/**",
     "**/tools/results/**",
-    // every component pack's generated folder (`spell dev pack build`):  `**/` first, so a package's own
+    // every component pack's generated folder (`spell pack build`):  `**/` first, so a package's own
     // `vp fmt components` skips it too
     "**/components/__pack/**"
   ]

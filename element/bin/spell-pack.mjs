@@ -4,7 +4,7 @@
  * (`element/tools/ComponentPack.ts`), from any folder of any repo of the kit.
  * - `<folder>`:  the pack's package, the folder of its `package.json`;  default the current folder.
  * - spell-epic and the brand build their packs with it (their `yarn pack:build` / `pack:check`);
- *   spell-app's `spell dev pack build` calls the same tool.
+ *   spell-app's `spell pack build` calls the same tool.
  * - Spell UI's `spell-ui-pack` until epic `repo-split` P10:  Spell UI's published bin ran files its package doesn't ship
  *   (C10);  the kit ships its source.
  * - Runs the tool's source through `tsx`, no build step, with the PACK's own `tsconfig.json` when it has one

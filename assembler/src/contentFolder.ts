@@ -21,7 +21,7 @@ import JSON5 from "json5"
  * - `undefined`:  no config file, or no `contentFolder` in it;  callers then look in the checkout (an old link)
  * - NEVER throws:  a config file it can't read names none
  * - Its position:  imports only node's own modules and `json5`, so plain `node` loads it by path;
- *   NOT in the `$/assembler` barrel (`$/assembler/contentFolder`), so the CLI's lean `spell dev` loads no linkedom
+ *   NOT in the `$/assembler` barrel (`$/assembler/contentFolder`), so the kit's `spell` loads no linkedom for a command that needs only this
  */
 export function contentFolderOf(root: string): string | undefined {
   const given = process.env.SPELL_SHARED_DIR

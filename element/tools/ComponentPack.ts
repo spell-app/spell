@@ -33,9 +33,9 @@ import {
  * - then its set's docs data, `docs/__data/` (`buildSiteData()`)
  * - A pack is a package whose `package.json` has `"spellPack": { "prefix" }` (`read()`).
  * - Run by `spell-pack build | check` (the kit's `element/bin/spell-pack.mjs`), from any repo of the kit:
- *   spell-epic and the brand build theirs with it.  spell-app's `spell dev pack` calls it too.
+ *   spell-epic and the brand build theirs with it.  spell-app's `spell pack` calls it too.
  * - Node built-ins, `RootCatalog` and (only while building) Vite.
- * - Its generated files still name `spell dev pack build <pack>`, the command that made them first:
+ * - Its generated files still name `spell pack build <pack>`, the command that made them first:
  *   the packs come out byte for byte as before this tool moved to Spell UI (epic `repo-split` P5), then to the kit
  *   (P10:  it was Spell UI's published `spell-ui-pack`, which ran files Spell UI doesn't ship, C10).
  ****************/

@@ -34,7 +34,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `brand`:  the brand pages
     - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
     - `build()`:  runs its package's script, then records the hash in its output folder (`.bundle.json`).
-    - Its command line:  `spell dev bundles build [<name>...] [--stale]` / `check`.
+    - Its command line:  `spell bundle [<name>...] [--stale]` / `check`.
     - The page server runs `build --stale` when it starts:  `BundleBuild`, in the page-server package (`$/page-server`).
     - Why (Owen, 2026-10-07):  their chunk names carry content hashes,
       so every Spell UI change deleted and re-added most of their files, in every diff and merge.
@@ -63,7 +63,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     checkout's root.
     - The `Linker` lays it under the checkout (`content`), and the CLI reads the commands page's data and the WWOD
       check's shared citers from it.
-    - Opt-in by path, like `DataFile`:  the CLI's lean `spell dev` loads no linkedom.
+    - Opt-in by path, like `DataFile`:  the kit's `spell` loads no linkedom for a command that needs only this.
 - It knows the checkout's LAYOUT as folder names, never as imports:  `Linker` takes the checkout's root.
   - The folder names:
     - `packages/*/src`, and `packages/*/components` (a component set's elements)
