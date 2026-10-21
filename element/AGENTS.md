@@ -74,8 +74,9 @@ then [ui's AGENTS.md](../spell-ui/AGENTS.md), "Solid authoring":  how an element
   - [DevServer](tools/DevServer.ts):  a package's Vite dev server, started from node
   - [Terminal](tools/Terminal.ts):  where tools print;  [NodePackage](tools/NodePackage.ts):  finds an installed package
   - Their tests:  the kit's [tests/element/tools/](../tests/element/tools/).
-  - The kit checks them as their own folder (its [`tools/kit.ts`](../tools/kit.ts)), with their own
-    [tsconfig.json](tools/tsconfig.json) (node) and Vite+ configs.
+  - The kit checks them as their own folder (`element/tools` in its `"spellFolders"`, run by `spell-folders`:
+    [the toolchain's AGENTS.md](../toolchain/AGENTS.md)), with their own [tsconfig.json](tools/tsconfig.json) (node)
+    and Vite+ configs.
 - [`bin/spell-pack.mjs`](bin/spell-pack.mjs), the kit's bin:  `spell-pack build | check [<folder>]`, a component
   pack's build or its check, from any repo (`ComponentPack`).
   - spell-epic's and the brand's `yarn pack:build` / `pack:check` run it;  spell-app's `spell dev pack` calls

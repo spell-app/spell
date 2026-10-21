@@ -7,10 +7,10 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 import { AS } from "$/assembler"
 
 /**
- * A top repo as `spell` is (epic `repo-split` P8):  its install (`yarn.lock`, `node_modules/@spell-app/*`) over the
+ * A top repo as `spell` is (epic `repo-split` P8):  its install (`yarn.lock`, `node_modules/spell-ui` ...) over the
  * repos beside the checkout, `spell-app/`, which these tests link pages in.
- * - Spell UI's repo, `spell-ui/`, and spell-server's `server` package:  what pages name, as `packages/ui/...` (the old
- *   monorepo's spelling) or `spell-ui/...`.
+ * - Spell UI's repo, `spell-ui/`, and a kit's `server/` folder (`spell-kit`, here in `spell-server/`):  what pages name,
+ *   as `packages/ui/...`, `packages/server/...` (the old monorepo's spelling) or `spell-ui/...`.
  * - Made here:  a test never reads another repo's real files.
  */
 const TOP = realpathSync(mkdtempSync(join(tmpdir(), "linker-top-")))
@@ -27,7 +27,7 @@ for (const file of [
   "spell-ui/AGENTS.md",
   "spell-ui/README.md",
   "spell-ui/tools/SiteCheck.ts",
-  "spell-server/server/package.json",
+  "spell-server/package.json",
   "spell-server/server/src/page/PageServer.ts",
   "spell-app/tsconfig.base.json",
   "spell-app/pages/index.html",
@@ -35,9 +35,9 @@ for (const file of [
   "spell-app/guides/spell-docs/spell-docs.md"
 ])
   put(file)
-mkdirSync(join(TOP, "node_modules", "@spell-app"), { recursive: true })
-symlinkSync(join(TOP, "spell-ui"), join(TOP, "node_modules", "@spell-app", "ui"))
-symlinkSync(join(TOP, "spell-server", "server"), join(TOP, "node_modules", "@spell-app", "server"))
+mkdirSync(join(TOP, "node_modules"), { recursive: true })
+symlinkSync(join(TOP, "spell-ui"), join(TOP, "node_modules", "spell-ui"))
+symlinkSync(join(TOP, "spell-server"), join(TOP, "node_modules", "spell-kit"))
 afterAll(() => rmSync(TOP, { recursive: true, force: true }))
 
 /** The checkout these tests link pages in:  spell-app, in the top repo. */

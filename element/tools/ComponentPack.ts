@@ -300,7 +300,7 @@ export class ComponentPack {
     return `/* GENERATED -- do not edit:  \`spell dev pack build ${this.name}\`, from every vocabulary, \`<Name>.en.ts\` */
 // sources:  ${hash}
 
-import type { RootCatalogEntry } from "@spell-app/ui"
+import type { RootCatalogEntry } from "spell-ui"
 
 /** Every tag of the \`${this.name}\` pack => what \`<ui-root>\` needs before its family loads. */
 export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
@@ -486,9 +486,12 @@ export const PACK_FOLDER = `${COMPONENTS_FOLDER}/__pack`
 /** `spell-pack`'s usage line. */
 const USAGE = "usage:  spell-pack build | check [<folder>]   (the pack's package;  default the current folder)"
 
-/** Imports the page must share, never bundled:  spell-element (`spell-kit/element`), Spell UI, Solid, our other packages. */
+/**
+ * Imports the page must share, never bundled:  spell-element (`spell-kit/element`), Spell UI, Solid, our other repos'
+ * packages (`spell-lang`, `spell-app` ..., epic `repo-split` P11).
+ */
 const SHARED_IMPORT =
-  /^\$\/(ui|spell-element)(\/|$)|^solid-js(\/|$)|^@solidjs\/|^@spell-app\/|^spell-kit\/element(\/|$)/
+  /^\$\/(ui|spell-element)(\/|$)|^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell-kit\/element(\/|$)/
 
 /** Version of what `build()` writes:  bump it when the generated files change shape, so every pack goes stale. */
 const PACK_FORMAT = "spell-pack 1"

@@ -42,7 +42,7 @@ export type BundleSpec = {
   /** what it is, for people */
   title: string
   /**
-   * the package it's built in, by its npm name, e.g. `@spell-app/brand`:  found through the checkout's `node_modules`,
+   * the package it's built in, by its npm name, e.g. `spell-brand`:  found through the checkout's `node_modules`,
    * wherever its repo is (epic `repo-split` P8:  Spell UI's and the brand's are repos beside spell-app's)
    */
   package: string
@@ -56,7 +56,7 @@ export type BundleSpec = {
   entry: string
   /**
    * files and folders the build reads:  a change to one makes the bundle stale
-   * - a package's, by its npm name and a path in it:  `@spell-app/ui/src`
+   * - a package's, by its npm name and a path in it:  `spell-ui/src`
    * - anything else, from the install's root (the folder holding `yarn.lock`):  `yarn.lock`
    */
   sources: string[]
@@ -105,10 +105,10 @@ export const BUNDLE_RECORD = ".bundle.json"
  * - the lock file
  */
 const SPELL_UI_SOURCES = [
-  "@spell-app/ui/src",
-  "@spell-app/ui/components",
+  "spell-ui/src",
+  "spell-ui/components",
   "spell-kit/element/src",
-  "@spell-app/ui/vite.config.ts",
+  "spell-ui/vite.config.ts",
   "spell-kit/server/src/site",
   "yarn.lock"
 ]
@@ -127,32 +127,32 @@ export const BUNDLES: BundleSpec[] = [
   {
     name: "ui-site",
     title: "Spell UI's docs site bundle",
-    package: "@spell-app/ui",
+    package: "spell-ui",
     cwd: ".",
     run: ["yarn", "site:bundle"],
     output: "site/_assets",
     entry: "site.js",
     sources: [
       ...SPELL_UI_SOURCES,
-      "@spell-app/ui/site/_src",
-      "@spell-app/ui/vite.site.config.ts",
-      "@spell-app/ui/scripts/site-bundle.ts"
+      "spell-ui/site/_src",
+      "spell-ui/vite.site.config.ts",
+      "spell-ui/scripts/site-bundle.ts"
     ]
   },
   {
     name: "brand",
     title: "brand pages' bundle",
-    package: "@spell-app/brand",
+    package: "spell-brand",
     cwd: ".",
     run: ["yarn", "build"],
     output: "_assets/ui",
     entry: "brand-ui.js",
     sources: [
       ...SPELL_UI_SOURCES,
-      "@spell-app/brand/src",
-      "@spell-app/brand/components",
-      "@spell-app/brand/vite.config.ts",
-      "@spell-app/brand/scripts/build.ts"
+      "spell-brand/src",
+      "spell-brand/components",
+      "spell-brand/vite.config.ts",
+      "spell-brand/scripts/build.ts"
     ]
   }
 ]

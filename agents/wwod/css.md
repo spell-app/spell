@@ -1,12 +1,12 @@
 # WWOD spoke -- CSS
 
-Styling the app's components and pages, on top of `@spell-app/ui`.  Read with `agents/wwod/WWOD.md`
+Styling the app's components and pages, on top of `spell-ui`.  Read with `agents/wwod/WWOD.md`
 (the hub).
-From:  original WWOD §19 ("CSS"), rewritten for plain `.css` and `@spell-app/ui`'s tokens (no Tailwind).
+From:  original WWOD §19 ("CSS"), rewritten for plain `.css` and `spell-ui`'s tokens (no Tailwind).
 
-- `@spell-app/ui`'s own sheets (layers, tokens, units, `::part()` names, utility grammar, global sheets):
+- `spell-ui`'s own sheets (layers, tokens, units, `::part()` names, utility grammar, global sheets):
   `packages/ui/AGENTS.md` "CSS" and `packages/ui/notes/theming.md`.
-- Class attributes in JSX:  WWOD §17 and `guides/solid/solid-2.md` "DOM and `@spell-app/ui` elements".
+- Class attributes in JSX:  WWOD §17 and `guides/solid/solid-2.md` "DOM and `spell-ui` elements".
 
 ## 18. CSS
 

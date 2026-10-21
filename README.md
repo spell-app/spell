@@ -47,7 +47,7 @@ yarn review           # the kit's finishing pass, then every repo's
 - The kit's checks one at a time:  `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`,
   `kit:format:check`.
 - In a child repo, its own scripts:  `cd spell-ui && yarn test`.
-  In a package of a repo with several:  `cd spell-lang/core && yarn test`.
+  One folder of a repo with several (spell-lang, spell-app):  `cd spell-lang && yarn spell-folders test core`.
 - A change across two repos is two commits, one in each, and two pull requests, the lower repo's first.
   No publish, no version bump:  every repo uses the others' source, through this one install.
 
@@ -58,7 +58,7 @@ The kit's code, one folder each, its tests in `tests/<folder>/`:
 | Folder | Entry | What it is |
 | --- | --- | --- |
 | [util/](util/) | `spell-kit/util` | the helpers every package shares:  small generic ones (`@proto` ...), spell's own in `src/spell/`, the reactive engine, and `node/json5` (node only) |
-| [toolchain/](toolchain/) | `spell-kit/toolchain/...` | the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, the run-time alias hook |
+| [toolchain/](toolchain/) | `spell-kit/toolchain/...` | the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, `spell-folders` (what the `kit:` checks, spell-lang's and spell-app's run, folder by folder), the run-time alias hook |
 | [server/](server/) | `spell-kit/server` | serving pages locally:  static folders, an Express-shaped router, live reload, ports, openers, a file lock, the generic page server, the site header |
 | [assembler/](assembler/) | `spell-kit/assembler` | assembling pages:  link targets (`Linker`), `formatHTML()`, bundles built on demand (`Bundle`), `DataFile`, `contentFolder` |
 | [element/](element/) | `spell-kit/element` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's);  `SkeletonText`;  the test helpers every set's tests use (`spell-kit/test-helpers/ElementFixture` ...);  the element tools (`spell-kit/element/tools/...`:  the component pack build, the root catalog, the elements' Vite settings, the HMR plugin ...) and their bin, `spell-pack build \| check` |
@@ -69,12 +69,11 @@ The rest of what's tracked:
 
 | File | What it is |
 | --- | --- |
-| `package.json` | the ONE package `spell-kit` and its `exports`;  `"workspaces": ["spell-*"]`:  every child repo, each naming its own packages (yarn's nested workspaces);  the `resolutions` (one Solid);  the scripts above |
+| `package.json` | the ONE package `spell-kit` and its `exports`;  `"workspaces": ["spell-*"]`:  every child repo, each ONE package named after it (epic `repo-split` P11);  `"spellTypes"` and `"spellFolders"`, its folders;  the `resolutions` (one Solid);  the scripts above |
 | `tsconfig.base.json` | the kit's `$/` alias table (`$/util`, `$/server` ...), for inside the kit |
 | `vite.config.ts` | the kit's lint and format settings, what `vp check` and the editor read |
 | `yarn.lock`, `.yarnrc.yml`, `.yarn/releases/` | the one lockfile, the one catalog of tool versions (`vite-plus` and its tools), the yarn release |
 | `repos.json5` | the child repos, lowest first:  name, git URL, which repos each needs |
-| `tools/kit.ts` | what the `kit:` checks run, folder by folder;  Node 24 runs it as is |
 | `tools/repos.ts` | what `clone`, `pull`, `status`, `repos`, the checks over every repo and the `postinstall` run |
 | `agents/` | WWOD, the house style (`agents/wwod/`), and links to the three logs in the content repo |
 | `AGENTS.md`, `CLAUDE.md` | the rules for the kit and across repos |
@@ -84,11 +83,11 @@ The folders git ignores:
 
 | Folder | What it is |
 | --- | --- |
-| `spell-lang/` | the parser, markdown, core, py and spell:  the language, its runtime and its writers |
+| `spell-lang/` | the parser, markdown, core, py and spell, ONE package `spell-lang`:  the language, its runtime and its writers |
 | `spell-ui/` | Spell UI, the `ui-*` elements, and its docs site |
 | `spell-brand/` | Spell's brand:  Claude Design's pages, the `<brand-*>` pack |
 | `spell-epic/` | the epic engine, a Claude Code plugin |
-| `spell-app/` | the editor and its servers:  app, spaces, lsp, cli, vscode, page-server |
+| `spell-app/` | the editor and its servers, ONE package `spell-app`:  app, spaces, lsp, cli, page-server;  and vscode |
 | `spell.epics/` | the content repo:  epics, guides, sagas, pages, brand pages, window files, the logs;  its own git repo, local only |
 | `spell.spaces/` | your own projects:  a plain folder |
 | `dist-types/` | the kit's built declarations, for the repos above it (`spell-types`) |

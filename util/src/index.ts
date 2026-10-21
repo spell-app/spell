@@ -1,7 +1,7 @@
 /**
  * Barrel for `$/util` (`spell-kit/util`) -- helpers shared by `ui`, `spell` and `cli`, in two layers.
  * - GENERIC (the files beside this one):  `@proto`, class, name-case string and shadow-aware DOM helpers.  No runtime
- *   dependencies, safe anywhere, including `*.types.ts` files and SSR / node tooling.  `@spell-app/ui` is published and
+ *   dependencies, safe anywhere, including `*.types.ts` files and SSR / node tooling.  `spell-ui` is published and
  *   bundles what it imports from here.
  * - REACTIVE (`./reactive`):  the reactive engine every reactive class shares -- spell cells, the records, the schema,
  *   `@prop` / `@state` / `@derived`.  Generic too:  no lodash, no Solid.

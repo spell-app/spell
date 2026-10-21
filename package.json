@@ -19,6 +19,7 @@
     "./tools/**"
   ],
   "bin": {
+    "spell-folders": "./toolchain/bin/spell-folders.ts",
     "spell-pack": "./element/bin/spell-pack.mjs",
     "spell-types": "./toolchain/bin/spell-types.ts"
   },
@@ -28,6 +29,42 @@
     "assembler",
     "element",
     "element/tools"
+  ],
+  "spellFolders": [
+    {
+      "name": "toolchain"
+    },
+    {
+      "name": "util",
+      "node": true
+    },
+    {
+      "name": "server",
+      "lint": [
+        "src",
+        "test",
+        "scripts"
+      ],
+      "node": true
+    },
+    {
+      "name": "assembler",
+      "node": true
+    },
+    {
+      "name": "element",
+      "lint": [
+        "src",
+        "test-helpers"
+      ]
+    },
+    {
+      "name": "element/tools",
+      "lint": [
+        "."
+      ],
+      "node": true
+    }
   ],
   "exports": {
     "./util": {
@@ -166,13 +203,13 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "/////// THE KIT'S OWN CHECKS (tools/kit.ts):  util, toolchain, server, assembler, element": "",
-    "kit:ts": "node tools/kit.ts ts",
-    "kit:test": "node tools/kit.ts test",
-    "kit:lint": "node tools/kit.ts lint",
-    "kit:lint:fix": "node tools/kit.ts lint:fix",
-    "kit:format": "node tools/kit.ts format",
-    "kit:format:check": "node tools/kit.ts format:check",
+    "/////// THE KIT'S OWN CHECKS (spell-folders, its \"spellFolders\"):  util, toolchain, server, assembler, element": "",
+    "kit:ts": "node toolchain/bin/spell-folders.ts ts",
+    "kit:test": "node toolchain/bin/spell-folders.ts test",
+    "kit:lint": "node toolchain/bin/spell-folders.ts lint",
+    "kit:lint:fix": "node toolchain/bin/spell-folders.ts lint:fix",
+    "kit:format": "node toolchain/bin/spell-folders.ts format",
+    "kit:format:check": "node toolchain/bin/spell-folders.ts format:check",
     "kit:review": "yarn kit:ts && yarn kit:lint:fix && yarn kit:format && yarn kit:test && echo '== REVIEW PASSED\n===========\n'",
     "server": "tsx --tsconfig server/tsconfig.json server/src/page/cli.ts",
     "favicon": "tsx --tsconfig server/tsconfig.json server/scripts/favicon.ts",

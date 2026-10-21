@@ -25,8 +25,9 @@ import { aliasesOf, isInside, readJson5, repoOf, resolveAlias, type Alias } from
  * spell-types --clean    # this package's `dist-types/` deleted first:  a full build
  * ```
  *
- * - A package of several FOLDERS, each its own TypeScript program (the kit, `spell-kit`:  epic `repo-split` P9):
- *   its `package.json` lists them in `"spellTypes"`, in build order (`["util", "server", "assembler", "element"]`).
+ * - A package of several FOLDERS, each its own TypeScript program (the kit, `spell-kit`:  epic `repo-split` P9;
+ *   `spell-lang`:  P11):  its `package.json` lists them in `"spellTypes"`, in build order (`["util", "server",
+ *   "assembler", "element"]`).
  *   - Each is built on its own `tsconfig.json`, so each keeps its own `lib` and `types` (server and assembler node
  *     only, util and element browser-safe), into the package's ONE `dist-types/`, mirroring the package:
  *     `util/src/index.ts` => `dist-types/util/src/index.d.ts`.
@@ -45,12 +46,12 @@ import { aliasesOf, isInside, readJson5, repoOf, resolveAlias, type Alias } from
  *   1. `tsc` on the package's own `tsconfig.json`, emitting declarations only (and their maps, so "Go to Definition"
  *      lands in the source), incrementally:  nothing changed, nothing to do.
  *      - Its program reads its repo-mates' DECLARATIONS, not their source (the repo's alias table, re-pointed):
- *        a package's output holds only its own files.  So a repo builds its packages in dependency order
- *        (`yarn workspaces foreach -t`).
+ *        a package's output holds only its own files.  So a package builds its folders in dependency order (its
+ *        `"spellTypes"`).
  *   2. Every `$/` specifier in the output is rewritten to a relative path:  to the package's own declarations, or to
  *      a repo-mate's (`../../../parser/dist-types/src/index`).
  *   - It IS the package's type check:  a package's `yarn ts` runs it in place of a bare `tsc`.
- * - `--below`:  the packages of OTHER repos that this repo's packages depend on (`@spell-app/*` in their
+ * - `--below`:  the packages of OTHER repos that this repo's packages depend on (`spell-kit`, `spell-ui` ... in their
  *   `package.json`s, and theirs, and so on), lowest first, each built as above.  A repo's `yarn ts` runs it first, so
  *   what it reads is never stale;  up-to-date ones take a second or two each.
  * - Node runs this file as is (types stripped, `bin/spell-types.ts`):  node's modules and `json5` only, no alias, no
@@ -174,7 +175,7 @@ export class Declarations {
   /**
    * The packages of the repos BELOW `dir`'s repo that `dir`'s repo's packages use, lowest first:  what
    * `spell-types --below` builds.
-   * - Found by the `workspace:` dependencies in each `package.json` (`spell-kit`, `@spell-app/ui` ...), through
+   * - Found by the `workspace:` dependencies in each `package.json` (`spell-kit`, `spell-ui` ...), through
    *   `node_modules`.
    * - A package of several folders (the kit's `"spellTypes"`) is each of them, in its order.
    * - Only the ones with a `tsconfig.json`, that have aliases to rewrite:  one with none (the kit's `toolchain/`, not in
@@ -247,8 +248,8 @@ function filesIn(dir: string, keep: (name: string) => boolean): string[] {
 }
 
 /**
- * The packages of the repo at `repo`:  its root's `workspaces`, or the repo itself (a flat repo, or the kit, whose
- * `workspaces` are the child repos inside it, not its own packages).
+ * The packages of the repo at `repo`:  its root's `workspaces`, or the repo itself (one package, as every repo is since
+ * epic `repo-split` P11;  or the kit, whose `workspaces` are the child repos inside it, not its own packages).
  */
 function packagesOf(repo: string): string[] {
   const { workspaces, spellTypes } = readJson5<Manifest>(join(repo, "package.json"))

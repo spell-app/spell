@@ -33,7 +33,8 @@ import { contentFolderOf } from "./contentFolder"
  *   install (`yarn.lock`, `top`), each package is in a repo of its own there.
  *   - `spell-ui/tools/SiteCheck.ts` resolves from `top`, and links as `../../../spell-ui/tools/SiteCheck.ts`.
  *   - `packages/<name>/...` (the old monorepo's spelling, in every page written before P8) is package
- *     `@spell-app/<name>`'s folder, found through `top`'s `node_modules`:  `packages/ui/tools` is spell-ui's `tools/`.
+ *     package `<name>`'s folder, found through `top`'s `node_modules` (`spellPackagesIn()`):  `packages/ui/tools` is
+ *     spell-ui's `tools/`, `packages/parser/src` spell-lang's `parser/src`.
  *   - A file anywhere under `top` counts as inside the repo (`check()`);  its target is its path from `top`.
  *   - With no `yarn.lock` above the checkout, `top` is the checkout itself:  the monorepo layout, as before.
  * - SERVED folders (`served`, epic `epic-workflow` P10):  a folder the page server serves at another address.
@@ -61,10 +62,10 @@ export class Linker {
    */
   readonly top: string
 
-  /** each `@spell-app/*` package's folder by its short name (`ui` => `<top>/spell-ui`), through `top`'s `node_modules` */
+  /** each of our packages' folders by its old short name (`ui` => `<top>/spell-ui`), through `top`'s `node_modules` */
   readonly packageDirs: ReadonlyMap<string, string>
 
-  /** Spell UI's folder:  `@spell-app/ui`'s, else `packages/ui` */
+  /** Spell UI's folder:  `spell-ui`'s, else `packages/ui` */
   readonly ui: string
 
   /** the home page's folder, `pages/`:  what `resolve()` resolves against when no page folder is given */
@@ -126,7 +127,7 @@ export class Linker {
       ["solidjs/solid", "https://github.com/solidjs/solid/tree/next"],
       ["solidjs/solid-docs", "https://github.com/solidjs/solid-docs/tree/v2-rebuild"],
       ["documentation/solid-2.0/", "https://github.com/solidjs/solid/tree/next/documentation/solid-2.0"],
-      ["@spell-app/ui", join(this.ui, "README.md")]
+      ["spell-ui", join(this.ui, "README.md")]
     ])
   }
 
@@ -307,7 +308,7 @@ export class Linker {
   /**
    * Where bare file names (`withSolid.ts`) are looked up:
    * - every package's `src/`, and its `components/` (a component set's elements:  `UIButton.tsx`)
-   *   - the old monorepo's `packages/*`, and every `@spell-app/*` package in `top`'s install
+   *   - the old monorepo's `packages/*`, and every one of our packages in `top`'s install (`spellPackagesIn()`)
    *   - none in a repo without either:  a plain one, spell-epic's own (epic `epic-engine` I14)
    * - a plain repo's own `src/`, when it has one (spell-epic's:  `PlanDocFiles.ts`)
    * - the repo's `tests/`, where every package's tests live (`List.test.ts`)
@@ -600,31 +601,51 @@ function installRoot(root: string): string {
 }
 
 /**
- * Each `@spell-app/*` package installed in `top`'s `node_modules`, its real folder by its short name;  and the kit's
- * folders (`spell-kit`, epic `repo-split` P9), each by its old package's short name:  `server` => `<kit>/server`,
- * `spell-element` => `<kit>/element`.
+ * Each of our packages installed in `top`'s `node_modules`, its real folder by its old short name (the monorepo's
+ * `packages/<name>/`, in old pages):
+ * - a one-package repo (`ONE_PACKAGE_REPOS`) by its old name:  `ui` => `<top>/spell-ui`
+ * - a package of several folders (`FOLDERS_OF`, epic `repo-split` P9 and P11:  the kit, spell-lang, spell-app), each
+ *   folder by its old package's name:  `server` => `<kit>/server`, `spell-element` => `<kit>/element`,
+ *   `parser` => `<spell-lang>/parser`
  */
 function spellPackagesIn(top: string): Map<string, string> {
-  const scope = join(top, "node_modules", "@spell-app")
   const found = new Map<string, string>()
-  for (const name of isDir(scope) ? readdirSync(scope) : []) {
-    const dir = join(scope, name)
-    if (existsSync(join(dir, "package.json"))) found.set(name, realpathSync(dir))
+  const installed = (name: string): string | undefined => {
+    const dir = join(top, "node_modules", name)
+    return existsSync(join(dir, "package.json")) ? realpathSync(dir) : undefined
   }
-  const kit = join(top, "node_modules", "spell-kit")
-  if (existsSync(join(kit, "package.json"))) {
-    const root = realpathSync(kit)
-    for (const [name, folder] of Object.entries(KIT_FOLDERS))
-      if (isDir(join(root, folder))) found.set(name, join(root, folder))
+  for (const [name, short] of Object.entries(ONE_PACKAGE_REPOS)) {
+    const dir = installed(name)
+    if (dir) found.set(short, dir)
+  }
+  for (const [name, folders] of Object.entries(FOLDERS_OF)) {
+    const root = installed(name)
+    if (!root) continue
+    for (const [short, folder] of Object.entries(folders))
+      if (isDir(join(root, folder))) found.set(short, join(root, folder))
   }
   return found
 }
 
-/** The kit's folders, by the short name of the package each was before the kit (`packages/<name>/` in old pages). */
-const KIT_FOLDERS: Readonly<Record<string, string>> = {
-  util: "util",
-  toolchain: "toolchain",
-  server: "server",
-  assembler: "assembler",
-  "spell-element": "element"
+/** The repos that are ONE package of no folders of its own, by npm name:  the short name of the package each was. */
+const ONE_PACKAGE_REPOS: Readonly<Record<string, string>> = {
+  "spell-ui": "ui",
+  "spell-brand": "brand",
+  "spell-epic": "epics"
+}
+
+/**
+ * The packages of several folders, by npm name:  each folder by the short name of the package it was
+ * (`packages/<name>/` in old pages).
+ */
+const FOLDERS_OF: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  "spell-kit": {
+    util: "util",
+    toolchain: "toolchain",
+    server: "server",
+    assembler: "assembler",
+    "spell-element": "element"
+  },
+  "spell-lang": { parser: "parser", markdown: "markdown", core: "core", py: "py", spell: "spell" },
+  "spell-app": { app: "app", spaces: "spaces", lsp: "lsp", cli: "cli", "page-server": "page-server" }
 }

@@ -49,7 +49,7 @@ From:  original WWOD §21 "Logging".
   - `group()` opens a `console.group()` at `INFO`;  ALWAYS pair it with `groupEnd()`, which isn't level-gated.
 - **`console.*` is reserved for:**
   - `console.error` in a best-effort `catch` where no logger exists
-  - developer warnings a library MUST always show, whatever the level, e.g. `@spell-app/ui`'s one `console.error`
+  - developer warnings a library MUST always show, whatever the level, e.g. `spell-ui`'s one `console.error`
     naming the tag when an element's render throws (`packages/ui/test/fallback.cases.ts`)
   - NOT for inspecting objects while debugging:  expose them with `setDebugGlobal()` (below)
   - SEE:  `packages/cli/AGENTS.md` -- in the CLI `console.*` is SILENCED;  output goes to `process.stdout` / `stderr`

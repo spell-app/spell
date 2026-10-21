@@ -120,7 +120,7 @@ describe("Bundle", () => {
 /** An install holding Spell UI's and the brand's packages, each its own repo beside the checkout, `spell-app/`. */
 function top(): string {
   const dir = mkdtempSync(join(tmpdir(), "assembler-bundles-"))
-  install(dir, { "@spell-app/ui": "spell-ui", "@spell-app/brand": "spell-brand" })
+  install(dir, { "spell-ui": "spell-ui", "spell-brand": "spell-brand" })
   mkdirSync(join(dir, "spell-app"))
   return dir
 }

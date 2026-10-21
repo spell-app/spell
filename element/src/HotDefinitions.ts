@@ -34,7 +34,7 @@ import { E } from "$/spell-element"
  * - Imports the package through `$/spell-element`, as a component file does:  it's loaded into component barrels,
  *   and NOTHING in the package imports it (it's not in the `$/spell-element` barrel).
  * - STATIC and instance-free on purpose:  ONE record of definitions per page, as `customElements` is.
- * - Began as `@spell-app/solid-element`'s hot reload, merged into its one user (epic `spell-element`, Q11).
+ * - Began as the old `solid-element` package's hot reload, merged into its one user (epic `spell-element`, Q11).
  ****************/
 export class HotDefinitions {
   /** Wrap `UIComponent.define`, and hook into every DOM element made;  idempotent. */

@@ -193,7 +193,7 @@ function list(): number {
 }
 
 /**
- * `yarn ts | test | lint | review`:  the kit's own (`kit:<script>`, `tools/kit.ts`), then that script in every child
+ * `yarn ts | test | lint | review`:  the kit's own (`kit:<script>`, the toolchain's `spell-folders`), then that script in every child
  * repo there, lowest first, each in its own folder.
  * - Lowest first:  a repo's `ts` builds its declarations (epic `repo-split` I12), which the repos above it read;  the
  *   kit's are the lowest of all.

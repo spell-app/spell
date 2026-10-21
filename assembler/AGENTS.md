@@ -67,6 +67,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - It knows the checkout's LAYOUT as folder names, never as imports:  `Linker` takes the checkout's root.
   - The folder names:
     - `packages/*/src`, and `packages/*/components` (a component set's elements)
+      - Under the kit, an old `packages/<name>/` is found through `node_modules`:  spell-ui, spell-brand, spell-epic,
+        and the folders of spell-kit, spell-lang and spell-app (`packages/parser/src` is spell-lang's `parser/src`;
+        epic `repo-split` P11).
     - `tests/`, where every package's tests live
     - the shared areas:
       - `pages/`

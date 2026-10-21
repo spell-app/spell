@@ -101,7 +101,7 @@ BEFORE
 ```ts
 /****************
  * ### `UIHost`
- * Base class of every element's HOST -- the `BaseElement` option `@spell-app/solid-element` extends.
+ * Base class of every element's HOST -- the `BaseElement` option `solid-element` extends.
  * - The fork owns the platform plumbing:  shadow root (`shadowRootInit`, `delegatesFocus`), `ElementInternals`
  *   (`internals: true`), prop accessors, the upgrade step, lifecycle.  This class keeps what is OURS:  the
  *   `ready` promise, custom states, the controller link and the disabled-click guard.
@@ -157,7 +157,7 @@ BEFORE
 /****************
  * ### `UIElement`
  * Base CONTROLLER of every component:  one instance per element, created by the render function the fork
- * (`@spell-app/solid-element`) calls, holding the component's signals, memos and handlers as fields and methods.
+ * (`solid-element`) calls, holding the component's signals, memos and handlers as fields and methods.
  * - Why a class around a render function:  the library's unit is a function `(props, { element }) => JSX`;
  *   a class keeps the repo's conventions (`@proto static` defaults, methods over loose helpers, one exported
  *   class per file) and gives `this.attrs` / `this.emit()` / `this.classes()` to every component.
@@ -196,7 +196,7 @@ BEFORE
 ```text
 Built: buildTsx(), packages/spell/src/node/buildTsx.ts:40
 
-Checked: tsc --noEmit with jsx: "preserve", jsxImportSource: "solid-js", types: ["@spell-app/app/jsx"],
+Checked: tsc --noEmit with jsx: "preserve", jsxImportSource: "solid-js", types: ["spell-app/app/jsx"],
 paths from tsconfig.base.json resolved against the repo root (cwd is a temp dir), experimentalDecorators: false.
 ```
 
@@ -208,7 +208,7 @@ AFTER
 <p>Checked:  the type check now understands Spell UI pages.</p>
 <ul>
   <li>It reads JSX the way app and ui do.</li>
-  <li>It adds app's types for <code>&lt;ui-*&gt;</code> tags, because <code>@spell-app/ui</code> doesn't ship any.</li>
+  <li>It adds app's types for <code>&lt;ui-*&gt;</code> tags, because <code>spell-ui</code> doesn't ship any.</li>
   <li>It finds <code>solid-js</code> and the other packages in the repo, even though it runs from a temporary folder.</li>
   <li>Decorators are checked as standard decorators, not the old experimental kind.</li>
 </ul>

@@ -150,7 +150,7 @@ export class Bundle {
   }
 
   /**
-   * Its source files, sorted, by name:  a package's by its npm name and its path in it (`@spell-app/ui/src/core.ts`,
+   * Its source files, sorted, by name:  a package's by its npm name and its path in it (`spell-ui/src/core.ts`,
    * `spell-kit/element/src/index.ts`),
    * anything else by its path from the install's root (`yarn.lock`);  `/`-separated.
    * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs)
@@ -164,8 +164,9 @@ export class Bundle {
   private sources(): Array<[name: string, file: string]> {
     const found: Array<[string, string]> = []
     for (const source of this.spec.sources) {
-      // a package by its npm name:  scoped (`@spell-app/ui/src`), or unscoped when one's installed by that name
-      // (`spell-kit/element/src`, epic `repo-split` P9);  else a path from the install's root (`yarn.lock`)
+      // a package by its npm name:  scoped (`@scope/name/src`), or unscoped when one's installed by that name
+      // (`spell-ui/src`, `spell-kit/element/src`, epic `repo-split` P9 / P11);  else a path from the install's root
+      // (`yarn.lock`)
       const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
       const folder = named && packageFolder(named[1]!, this.root)
       if (named?.[1]!.startsWith("@") && !folder) continue

@@ -1,6 +1,6 @@
 # util
 
-The kit's `util/`, `spell-kit/util`:  small generic helpers shared by `@spell-app/ui`, `spell` and the CLI.
+The kit's `util/`, `spell-kit/util`:  small generic helpers shared by `spell-ui`, `spell` and the CLI.
 Part of the kit's one package, `spell-kit`, private for now.
 
 ```ts
@@ -21,7 +21,7 @@ import { proto, kebabCase, closestAcrossShadow } from "$/util"
 - `$/util/reactive` -- the shared reactive engine:  spell cells, `getProp` / `setProp`, `getState` / `setState`,
   `@prop` / `@state` / `@derived`, `bridgeSolid()`.  Generic, no lodash or Solid;  see `AGENTS.md`
 
-Not published on its own:  `@spell-app/ui` bundles what it uses.
+Not published on its own:  `spell-ui` bundles what it uses.
 It imports no other package, and has no runtime dependencies.
 
 The kit's `yarn kit:review`, at its root, runs `tsc`, oxlint, oxfmt and the tests (in a real browser), this folder's

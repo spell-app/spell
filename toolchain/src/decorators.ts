@@ -8,7 +8,7 @@ import type { Plugin } from "vite"
  * - Only touches files which actually contain a decorator;  everything else stays on vite's normal path.
  * - esbuild rather than SWC / babel:  `tsx` already runs the server through esbuild, so client, server
  *   and tests all lower decorators identically.  One small, fast dependency, so `@proto` behaves
- *   identically across `spell/parser`, `@spell-app/ui`, and runners built with this plugin.
+ *   identically across `spell/parser`, `spell-ui`, and runners built with this plugin.
  * - `keepNames` MUST stay on:  rule classes register under their class name (see `packages/spell/src/parser/build.test.ts`),
  *   and custom element classes keep their class names (`UIButton`), which the custom-elements manifest and
  *   dev-time warnings read -- the build keeps them too.
@@ -16,9 +16,9 @@ import type { Plugin } from "vite"
  * - esbuild's transform has no "import helpers" option:  every file gets its own copy of the decorator runtime
  *   (`__decorateElement`, `__runInitializers` ... ~2.6 kB minified).  So the copy is swapped for an import of ONE
  *   shared module, `HELPERS_MODULE` (made from `HELPERS_PROBE`'s output), when every helper the file declares is
- *   that module's, word for word;  else the file keeps its own (`@spell-app/ui`'s core had 12 copies, epic
+ *   that module's, word for word;  else the file keeps its own (`spell-ui`'s core had 12 copies, epic
  *   `wwod-spell-ui` I26).  The swap keeps the line count, so esbuild's source map still lines up.
- * - MUST be used by BOTH `vite.config.ts` and `vitest.config.ts` in every package (`@spell-app/ui`'s site bundle,
+ * - MUST be used by BOTH `vite.config.ts` and `vitest.config.ts` in every package (`spell-ui`'s site bundle,
  *   `vite.site.config.ts`, gets it through `baseConfig()`).
  * - TODO: delete this file when oxc lowers standard decorators.
  */

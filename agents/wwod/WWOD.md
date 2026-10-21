@@ -54,8 +54,8 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 - **Inspect objects through a debug global, not `console.log`** -- SEE:  WWOD §19 › "Debug globals through
   `setDebugGlobal()`".
 - **Finishing pass for fast-drafted code:**
-  - Run `yarn review` in every package you touched (or at the root);  what it runs:  SEE:  root `AGENTS.md`
-    "Toolchain:  Vite+".
+  - Run `yarn review` at the root of every repo you touched (or the kit's, over all);  what it runs:
+    SEE:  root `AGENTS.md` "Toolchain:  Vite+".
   - Then sweep for classic drift bugs:
     - operator precedence in template ternaries (`` `${a}` + b ? … ``)
     - inverted comparisons in guard clauses
@@ -196,8 +196,8 @@ Examples use `parser`'s alias and namespace (`$/parser`, `P`);  each package's `
 
 - **Package names across repos** (epic `repo-split` P6):
   - Inside ONE future repo, a package's alias, `$/name`:  spell imports `$/parser` (both are spell-lang's).
-  - From ANOTHER repo, its npm name:  `@spell-app/ui/core`, an entry its `package.json` `exports` names.
-    - A Spell UI family by its published entry:  `@spell-app/ui/ui-code`.
+  - From ANOTHER repo, its npm name:  `spell-ui/core`, an entry its `package.json` `exports` names.
+    - A Spell UI family by its published entry:  `spell-ui/ui-code`.
   - Lint fails a `$/` alias into another repo (`spell/no-cross-repo-alias`;  the repos are `REPO_OF` in the
     toolchain's `lint.imports.ts`).
   - A string that only NAMES a module (a `packModules` key) keeps its `$/` name.
@@ -213,7 +213,7 @@ Examples use `parser`'s alias and namespace (`$/parser`, `P`);  each package's `
     lint fails it (`spell/no-cross-package-import`, the toolchain's `lint.imports.ts`).
     - A package and its tests count as one:  `tests/ui/` may reach `packages/ui/`.
     - Where no alias reaches, the package's npm name:  an entry its `package.json` `exports` names
-      (`spell-kit/server/checkout`, `@spell-app/ui/vite.config.ts`).
+      (`spell-kit/server/checkout`, `spell-ui/vite.config.ts`).
       - E.g. a file Vite loads as a config:  Vite reads it with no alias table.
   - EXCEPTION:  when subclassing, import the extended class directly from its file, to avoid circular imports --
     SEE:  WWOD §4 › "Circular imports".
@@ -266,7 +266,7 @@ Examples use `parser`'s alias and namespace (`$/parser`, `P`);  each package's `
   - node_modules
   - (blank line)
   - `$/util` and other general utilities, general-to-specific
-  - other sub-system barrels (`@spell-app/...` sits where its `$/` name would)
+  - other sub-system barrels (another repo's package, `spell-ui/...`, `spell-lang/...`, sits where its `$/` name would)
   - own barrel
   - direct peer files, base classes first
   - (blank line)
@@ -359,7 +359,7 @@ Their long before / afters are in `agents/wwod/writing.md`.
     ```text
     BEFORE
     Base CONTROLLER of every component:  one instance per element, created by the render function the fork
-    (`@spell-app/solid-element`) calls, holding the component's signals, memos and handlers as fields and methods.
+    (`solid-element`) calls, holding the component's signals, memos and handlers as fields and methods.
 
     AFTER
     The base class of every Spell UI component.
@@ -416,13 +416,13 @@ Their long before / afters are in `agents/wwod/writing.md`.
     ```text
     BEFORE
     Built: buildTsx(), packages/spell/src/node/buildTsx.ts:40.  Checked: tsc with jsx preserve,
-    jsxImportSource solid-js, types ["@spell-app/app/jsx"], paths from tsconfig.base.json, experimentalDecorators off.
+    jsxImportSource solid-js, types ["spell-app/app/jsx"], paths from tsconfig.base.json, experimentalDecorators off.
 
     AFTER
     Built: buildTsx()      <- its path is the tooltip
     Checked: the type check now understands Spell UI pages.
     - It reads JSX the way app and ui do.
-    - It adds app's types for <ui-*> tags, because @spell-app/ui doesn't ship any.
+    - It adds app's types for <ui-*> tags, because spell-ui doesn't ship any.
     - It finds solid-js and the other packages in the repo, even though it runs from a temporary folder.
     - Decorators are checked as standard decorators, not the old experimental kind.
     ```

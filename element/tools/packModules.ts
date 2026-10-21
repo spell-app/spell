@@ -10,12 +10,12 @@
 
 /**
  * The modules a pack SHARES with the page instead of bundling:  the import specifiers its build leaves external, by
- * their `packModules` key (`packModuleKey()`:  `@spell-app/ui/core` is `$/ui/core`).
+ * their `packModules` key (`packModuleKey()`:  `spell-ui/core` is `$/ui/core`).
  * - Each is read from `globalThis.SpellUI.packModules[<specifier>]`:  spell-epic's docs bundle's
  *   (`spell-ui.entry.js`), and the component sets' site build's (`site/_src/SitePacks.ts`).
  * - `$/spell-element`:  what the pack's elements are written on (`E.UIComponent` ...).
  *   The page's is Spell UI's core module, which carries all of it, so a page has one (`packModules`).
- * - Any other `$/ui...`, `$/spell-element/...`, Solid or `@spell-app/...` import fails the build:
+ * - Any other `$/ui...`, `$/spell-element/...`, Solid or `spell-ui/...` import fails the build:
  *   a second copy of spell-element, Spell UI's core or Solid on a page breaks them.
  * - Another one:  add it here AND to both `packModules`, AND to the guides' copy
  *   (spell-epic's `src/tools/bundle-experiment.ts`, which builds a guide's live elements the same way).
@@ -24,19 +24,26 @@ export const PACK_MODULES = ["solid-js", "@solidjs/web", "$/spell-element", "$/u
 
 /**
  * The `packModules` key of the module an import names:  its `$/` name, the key every page has always offered.
- * - Since epic `repo-split` P6 another repo's code imports Spell UI and spell-element by their npm names:
- *   `@spell-app/ui/core` => `$/ui/core`, `spell-kit/element` => `$/spell-element`.
- * - A family's published entry, `@spell-app/ui/ui-code`, is its folder's:  `$/ui/components/ui-code`.
- * - So the keys a page's bundle offers (spell-epic's docs bundle, `SitePacks.ts`) stay as they were:
+ * - Since epic `repo-split` P6 another repo's code imports Spell UI and spell-element by their npm names, and since
+ *   P11 each repo is one package named after it (Q36):  `spell-ui/core` => `$/ui/core`, `spell-kit/element` =>
+ *   `$/spell-element`.
+ * - A family's published entry, `spell-ui/ui-code`, is its folder's:  `$/ui/components/ui-code`.
+ * - So the keys a page's bundle offers (spell-epic's docs bundle, `SitePacks.ts`) stay as they were (J72):
  *   the run-time names didn't change, only how a repo's source spells the import.
- * - The kit's folders since epic `repo-split` P9 (one package, `spell-kit`):  `spell-kit/element` => `$/spell-element`
- *   (its key since before the kit, J72), `spell-kit/util/...` => `$/util/...`.
+ * - The kit's folders (one package, `spell-kit`, P9):  `spell-kit/element` => `$/spell-element` (its key since before
+ *   the kit), `spell-kit/util/...` => `$/util/...`.
+ * - spell-lang's and spell-app's folders (one package each, P11):  `spell-lang/spell` => `$/spell`.
+ * - The other one-package repos:  `spell-brand` => `$/brand`, `spell-epic` => `$/epics`.
  * - Any other specifier comes back as it is.
  */
 export function packModuleKey(specifier: string): string {
-  const family = /^@spell-app\/ui\/(ui-[a-z-]+)$/.exec(specifier)
+  const family = /^spell-ui\/(ui-[a-z-]+)$/.exec(specifier)
   if (family) return `$/ui/components/${family[1]}`
   const kit = /^spell-kit\/([^/]+)(.*)$/.exec(specifier)
   if (kit) return `$/${kit[1] === "element" ? "spell-element" : kit[1]}${kit[2]}`
-  return specifier.replace(/^@spell-app\//, "$/")
+  const folder = /^spell-(?:lang|app)\/(.+)$/.exec(specifier)
+  if (folder) return `$/${folder[1]}`
+  const flat = /^spell-(ui|brand|epic)((?:\/.*)?)$/.exec(specifier)
+  if (flat) return `$/${flat[1] === "epic" ? "epics" : flat[1]}${flat[2]}`
+  return specifier
 }

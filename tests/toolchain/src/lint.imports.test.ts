@@ -25,7 +25,7 @@ describe("spell/no-cross-package-import", () => {
       // its own package, by `../`, and other packages by alias or npm name
       at("spell-ui/src/runtime/Focus.ts", `import { E } from "../elements/index.ts"`),
       at("spell-app/spaces/src/server/node/environment.ts", `import { checkoutOf } from "spell-kit/server"`),
-      at("spell-app/app/vite.config.ts", `import env from "@spell-app/spaces/server/node/environment"`),
+      at("spell-app/app/vite.config.ts", `import env from "spell-app/spaces/server/node/environment"`),
       // a package and its tests are ONE package:  a flat repo's `tests/`, a multi-package repo's `tests/<name>/`
       at("spell-ui/tests/tools/LintPatterns.test.ts", `import { Tool } from "../../tools/Tool.ts"`),
       at("tests/toolchain/src/a.test.ts", `import { x } from "../../../toolchain/src/lint.ts"`),
@@ -78,7 +78,7 @@ describe("spell/no-cross-repo-alias", () => {
       at("spell-app/app/src/a.ts", `import { LSP } from "$/lsp"`),
       at("spell-ui/tests/components/a.test.ts", `import { ElementFixture } from "$/ui/test/ElementFixture"`),
       // another repo's, by its npm name
-      at("spell-app/app/src/a.ts", `import { E } from "@spell-app/ui/core"`),
+      at("spell-app/app/src/a.ts", `import { E } from "spell-ui/core"`),
       at("spell-ui/src/a.ts", `declare module "spell-kit/element/vocabulary.types" {}`),
       // inside the kit:  one repo
       at("element/src/a.ts", `import { proto } from "$/util/decorators"`),
@@ -90,23 +90,19 @@ describe("spell/no-cross-repo-alias", () => {
       at("nowhere/src/a.ts", `import { x } from "$/ui"`)
     ],
     invalid: [
-      crosses("spell-app/app/src/a.ts", `import { E } from "$/ui/core"`, "@spell-app/ui/core"),
+      crosses("spell-app/app/src/a.ts", `import { E } from "$/ui/core"`, "spell-ui/core"),
       crosses("spell-ui/src/a.ts", `export * from "$/spell-element"`, "spell-kit/element"),
-      crosses(
-        "spell-brand/tests/components/a.test.ts",
-        `import { A11y } from "$/ui/test/A11y"`,
-        "@spell-app/ui/test/A11y"
-      ),
+      crosses("spell-brand/tests/components/a.test.ts", `import { A11y } from "$/ui/test/A11y"`, "spell-ui/test/A11y"),
       crosses(
         "spell-lang/parser/src/a.ts",
         `const m = await import("$/util/spell/Logger")`,
         "spell-kit/util/spell/Logger"
       ),
-      crosses("spell-app/app/src/a.ts", `type T = import("$/spell").SP`, "@spell-app/spell"),
-      crosses("spell-app/tests/app/src/a.test.ts", `vi.mock("$/spell")`, "@spell-app/spell"),
+      crosses("spell-app/app/src/a.ts", `type T = import("$/spell").SP`, "spell-lang/spell"),
+      crosses("spell-app/tests/app/src/a.test.ts", `vi.mock("$/spell")`, "spell-lang/spell"),
       crosses("spell-ui/src/a.ts", `declare module "$/spell-element/vocabulary.types" {}`, "spell-kit/element"),
       crosses("spell-epic/src/a.ts", `import { SRV } from "$/server"`, "spell-kit/server"),
-      crosses("server/src/a.ts", `import { UI } from "$/ui/core"`, "@spell-app/ui/core")
+      crosses("server/src/a.ts", `import { UI } from "$/ui/core"`, "spell-ui/core")
     ]
   })
 })
@@ -135,7 +131,7 @@ describe("packageOf():  a file's package, by where it is in the kit", () => {
       name: "spell-element",
       folder: "tests/element"
     })
-    expect(packageOf(join(TOP, "tools/kit.ts"))).toBeUndefined()
+    expect(packageOf(join(TOP, "tools/repos.ts"))).toBeUndefined()
     expect(packageOf(join(TOP, "tests/vitest.shared.ts"))).toBeUndefined()
   })
 })

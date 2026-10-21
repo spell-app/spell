@@ -8,7 +8,7 @@ From:  original WWOD §18 ("Svelte / UI"), rewritten for Solid 2 (D9).
 - A rule here that leans on a mechanic cites `solid-2.md`.  The few mechanics this house style is built on
   (reading once with `untrack`, `onCleanup`, `<Loading>`, `<Show keyed>`, `useContext`, `ClassBuilder`) are stated
   here, with the rule that uses them (Owen, epic `wwod`).
-- `@spell-app/ui`'s own elements (component classes, `render()`):  `packages/ui/AGENTS.md` "Solid authoring".
+- `spell-ui`'s own elements (component classes, `render()`):  `packages/ui/AGENTS.md` "Solid authoring".
 - Styling:  WWOD §18 (`css.md`).
 
 ## 17. Solid components
@@ -18,7 +18,7 @@ From:  original WWOD §18 ("Svelte / UI"), rewritten for Solid 2 (D9).
     `<InputEditor>`, whose error path is `<FallbackEditor>` (`packages/app/src/solid/InputEditor.tsx`)
   - pieces several app components share live in `$/app/solid`:  `chrome.tsx`'s `<PanelMenu>` / `<Submenu>` /
     `<DropdownLabel>`;  `<TreeRow>`, shared by `<TypeExplorer>` and `<ThingExplorer>`
-  - generic beyond the app (no spell, no `editor`) => a `ui-*` element in `@spell-app/ui`, written as
+  - generic beyond the app (no spell, no `editor`) => a `ui-*` element in `spell-ui`, written as
     `packages/ui/AGENTS.md` says;  when:  WWOD §8 › "Promotion path".  NEVER without an intensive design review
     first:  `ui` is a library others build on
   - hosts stay thin adapters (WWOD §8 › "Hosts are thin adapters"):  the VS Code runner (`VSCodeRunner.tsx`) and
@@ -125,7 +125,7 @@ function update(changed: TypeExplorerState) {
 - **Events:  `onClick`, or `on()` for `ui-*`:**
   - native events:  `onClick` / `onInput` ...;  `ui-*` events:  `ref={on<Detail>("ui-change", handler)}`, with
     our `on()` (`$/app/solid`, `on.ts`), not Solid 1's removed `on()` -- never a hand-rolled listener ref.  Why:
-    `solid-2.md` "DOM and `@spell-app/ui` elements"
+    `solid-2.md` "DOM and `spell-ui` elements"
   - a handler that does more than one call is a named `function` at the bottom (`choose()` in `FileDropdown.tsx`)
   - NOT:  `use:` directives (`use:activate`) -- gone in Solid 2;  a ref directive factory (`on()`) instead
   - TODO:  review the event semantics we landed on (`ui-*` event names, `detail` shapes, `on()`)
@@ -136,11 +136,11 @@ function update(changed: TypeExplorerState) {
   - optional parts:  `showX` props, defaulted at the read (`showToolbar`, `showLabel`, `showActions`)
 
 - **Class attributes:**
-  - array / object form (`solid-2.md` "DOM and `@spell-app/ui` elements"), in a fixed order:  the component's
+  - array / object form (`solid-2.md` "DOM and `spell-ui` elements"), in a fixed order:  the component's
     root class, then a caller's `props.class` or variants, then the state object:
     `class={["ScopeTreeNode", props.node.kind, { selected: isSelected() }]}`, `class={["TreeRow", props.class]}`
   - state keys lowercase (WWOD §18)
-  - the ONE built class string:  `@spell-app/ui`'s shadow markup, whose Fomantic class grammar needs a fixed word
+  - the ONE built class string:  `spell-ui`'s shadow markup, whose Fomantic class grammar needs a fixed word
     order (`[class*="four wide"]`).  `ClassBuilder` builds it from the vocabulary (`class={this.classes()}`) --
     never by hand, never in app code
 

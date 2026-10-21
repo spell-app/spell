@@ -40,7 +40,7 @@ const VI_CALLS = new Set(["mock", "doMock", "unmock", "doUnmock", "importActual"
  * - A path into a repo root's own files (`../../vite.config.ts`) is fine:  they're nobody's package.
  * - Its fix, in its message:  the package's alias inside its repo (`$/parser`, from `spell`);  its npm name from
  *   another repo (`no-cross-repo-alias`), and in a file Vite loads as a config, which has no alias table
- *   (`spell-kit/server/checkout`, `@spell-app/ui/vite.config.ts`):  an entry its `package.json` `exports` names.
+ *   (`spell-kit/server/checkout`, `spell-ui/vite.config.ts`):  an entry its `package.json` `exports` names.
  */
 const noCrossPackageImport = defineRule({
   meta: {
@@ -78,7 +78,7 @@ const noCrossPackageImport = defineRule({
 /**
  * Each package's repo, by package name:  where `$/<name>` is an alias (epic `repo-split` P8).
  * - Inside ONE repo, a package names another by its alias (`$/parser`, from `spell`);  from ANOTHER repo, by its npm
- *   name (`@spell-app/ui/core`, from the app;  `spell-kit/element`, from Spell UI).
+ *   name (`spell-ui/core`, from the app;  `spell-kit/element`, from Spell UI).
  * - A package missing here is in no known repo:  the rule leaves its imports alone.
  * - The flat repos (one package each) are `FLAT_REPOS`;  the kit's folders, `KIT_FOLDERS`.
  */
@@ -115,6 +115,8 @@ export const FLAT_REPOS: Readonly<Record<string, string>> = {
  * The kit's own folders, at its root (epic `repo-split` P9):  each folder's package name, its `$/` alias
  * (`element/` is `$/spell-element`, the name every page's packs share it by, J72).
  * - One npm package, `spell-kit`:  another repo imports a folder as `spell-kit/<folder>` (`npmNameOf()`).
+ * - spell-lang and spell-app are one package each too (epic `repo-split` P11, Q36):  their folders are named after
+ *   their package (`$/parser` is `spell-lang/parser`), so they need no table of their own.
  */
 export const KIT_FOLDERS: Readonly<Record<string, string>> = {
   util: "util",
@@ -124,16 +126,24 @@ export const KIT_FOLDERS: Readonly<Record<string, string>> = {
   element: "spell-element"
 }
 
-/** A package's npm name, by its name (its alias's):  `spell-kit/element` for `spell-element`, `@spell-app/ui` for `ui`. */
+/**
+ * A package's npm name, by its name (its alias's), as another repo imports it (epic `repo-split` P11, Q36:  one
+ * package per repo, named after the repo):
+ * - a flat repo's (`FLAT_REPOS`), the repo's:  `spell-ui` for `ui`
+ * - a kit folder's, `spell-kit/<folder>`:  `spell-kit/element` for `spell-element`
+ * - any other, a folder of its repo's one package:  `spell-lang/parser` for `parser`, `spell-app/spaces` for `spaces`
+ */
 export function npmNameOf(name: string): string {
+  const flat = Object.entries(FLAT_REPOS).find(([, each]) => each === name)?.[0]
+  if (flat) return flat
   const folder = Object.entries(KIT_FOLDERS).find(([, each]) => each === name)?.[0]
-  return folder ? `spell-kit/${folder}` : `@spell-app/${name}`
+  return folder ? `spell-kit/${folder}` : `${REPO_OF[name] ?? "spell-app"}/${name}`
 }
 
 /**
  * A `$/` alias naming a package of ANOTHER repo (`REPO_OF`):  `import { E } from "$/spell-element"`, from Spell UI.
  * - Its fix, in its message:  the package's npm name, `spell-kit/element`, an entry its `package.json`
- *   `exports` names (a family's barrel is its published entry:  `@spell-app/ui/ui-code`).
+ *   `exports` names (a family's barrel is its published entry:  `spell-ui/ui-code`).
  * - Looks at every module path a file names, as `no-cross-package-import` does.
  * - NOT a string that only NAMES a module:  a page's `SpellUI.packModules` keys (`"$/ui/core"`) stay `$/` names.
  */

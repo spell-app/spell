@@ -97,7 +97,7 @@ export const lintBase = {
     //   package's (`packageLint()`) get it with the rest of `lintBase`, and it's on in tests too (`testLint` leaves it).
     // - It skips the repo root's own files itself:  they're in no package.
     "spell/no-cross-package-import": "error",
-    // A `$/` alias naming a package of ANOTHER repo:  `@spell-app/ui/core`, never `$/ui/core`, from the app
+    // A `$/` alias naming a package of ANOTHER repo:  `spell-ui/core`, never `$/ui/core`, from the app
     // (WWOD §4;  epic `repo-split` P6).  Here too, for the same reasons.
     "spell/no-cross-repo-alias": "error"
   }
