@@ -234,7 +234,7 @@ All in the FIRST turn, in this order, then the turn ends.
 5. `epic open <name> --review`, AFTER the handoff.
    - It shows in the right side bar's Review tab (the checkbox icon) of the window the session moves to,
      once it has:  one tab, reloaded on every later `open`.
-   - Needs spell-epic's VS Code extension ([its README](${CLAUDE_PLUGIN_ROOT}/vscode/README.md)).
+   - Needs spell-epic's VS Code extension ([its README](${CLAUDE_PLUGIN_ROOT}/README-vscode.md)).
    - MUST print "... shows in ... once this session moves there".
      Why:  only a PENDING move defers it;  before the handoff, it shows in THIS window's side bar, the one being left.
 6. Isolate "Start", step 6:  END THE TURN.
