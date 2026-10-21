@@ -127,7 +127,7 @@ export class DesignExport {
       "",
       "**Spell** is a programming language for non-programmers whose source code is grammatical human language:  AI " +
         "writes the spell, a person reads and edits it, and Spell compiles it into an app that runs in a browser.  This " +
-        "system is its interface kit, **Spell UI**:  Fomantic UI reborn as `<ui-*>` custom elements (built on Solid 2), " +
+        "system is its interface kit, **Spell UI**:  beautiful, themeable, accessible `<ui-*>` components that load themselves on demand (built on Solid 2), " +
         "in Spell's brand.  Brand brief:  *friendly without being kitschy, and sophisticated.*",
       "",
       ...CONSUMING,
