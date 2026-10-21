@@ -1,0 +1,16 @@
+{
+  // spell-__pack__'s import-alias table:  `$/__pack__` (its shared code, `src/`) and `$/__pack__/components` (its
+  // elements), for inside this repo only;  another repo's package by its npm name (`spell-ui/core`).
+  // - It extends the TypeScript settings every repo shares, the kit's toolchain's.
+  // - MUST stay the only `paths` in the repo:  a `tsconfig.json` that sets its own REPLACES this table.
+  // - `$/__pack__/components` is longer than `$/__pack__/*`, so it wins:  the elements live outside `src/`.
+  "extends": "spell-kit/toolchain/tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "$/__pack__": ["./src/index.ts"],
+      "$/__pack__/*": ["./src/*"],
+      "$/__pack__/components": ["./components/index.ts"],
+      "$/__pack__/components/*": ["./components/*"]
+    }
+  }
+}

@@ -35,7 +35,7 @@ let tokens: DesignTokensFile
 beforeAll(() => {
   const exporter = new DesignExport({
     data: DATA,
-    // the brand's folder is the caller's to give (epic `repo-split` P5):  `spell dev design build` gives spell-brand's
+    // the brand's folder is the caller's to give (epic `repo-split` P5):  `spell design build` gives spell-brand's
     brand: BRAND,
     git: { branch: "main", sha: "abc1234", user: "Test" },
     now: new Date(0)

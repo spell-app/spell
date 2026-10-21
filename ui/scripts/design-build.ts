@@ -1,11 +1,11 @@
 /**
- * `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (also `spell dev design build`):  write
+ * `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (also `spell design build`):  write
  * the claude.ai Design System's files for Spell UI into `<dir>/project/` (default `packages/ui/build/design-system/`,
  * git-ignored), from the vocabularies (`docs/__data/components.json5`), the element examples and the Spell theme
  * (see `tools/DesignExport.ts`).
  * - `--brand`:  the brand's package folder, whose `<brand-*>` cards join the system (a "Brand" group);
  *   `--brand-book`:  Claude Design's brand book, whose content rules join the README.
- *   Spell UI never names either itself (epic `repo-split` P5):  `spell dev design build` passes spell-app's.
+ *   Spell UI never names either itself (epic `repo-split` P5):  `spell design build` passes the kit's spell-brand.
  * - Every path is relative to the folder `yarn` ran from (`environment.invocationDir`).
  * - Reads `components.json5` as committed:  run `yarn site:data` first after changing a vocabulary.
  * - Leaves `project/components/bundle.js` / `bundle.css` alone:  the design bundle's build (epic `claude-design`, P8).

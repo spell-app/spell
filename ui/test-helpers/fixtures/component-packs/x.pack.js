@@ -1,6 +1,6 @@
 /**
  * A test component pack (`components/ui-components/ComponentPacks.test.ts`):  a CLASSIC script, as
- * `spell dev pack build` writes one, taking what it shares with the page from `SpellUI.packModules`.
+ * `spell pack build` writes one, taking what it shares with the page from `SpellUI.packModules`.
  * - `<x-card>`:  a `DOMElement` (the page's own class), ready only once the test says (`__xPack.cards`, `markReady()`),
  *   with a skeleton in the catalog.
  * - `<x-note>`:  a plain element, ready at once, no skeleton.

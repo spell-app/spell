@@ -27,8 +27,11 @@ const TEST_FOLDERS = "{src,components,test-helpers}"
 /** Server-render tests:  `*.ssr.test.ts(x)`, anywhere. */
 const SSR_TESTS = [`${TEST_FOLDERS}/**/*.ssr.test.{ts,tsx}`]
 
-/** Node tooling tests (the pack builder) under `tools/`, run with the `ssr` project, in node. */
-const TOOL_TESTS = ["tools/**/*.test.ts"]
+/**
+ * Node tooling tests, run with the `ssr` project, in node:  the tools' (`tools/`), and Spell UI's `spell` commands'
+ * (`cli/`:  `spell icon`, `spell ssr`, `spell pack`, `spell design`).
+ */
+const TOOL_TESTS = ["tools/**/*.test.ts", "cli/**/*.test.ts"]
 
 /**
  * Two projects:
@@ -36,7 +39,7 @@ const TOOL_TESTS = ["tools/**/*.test.ts"]
  *   - Custom elements, shadow DOM, `adoptedStyleSheets`, anchor positioning and axe all need one,
  *     and jsdom fakes too much of it.
  * - `ssr` -- `*.ssr.test.tsx` in node, under `@solidjs/web`'s server build (`renderToString`).
- *   - Also the node tooling's own tests (`TOOL_TESTS`).
+ *   - Also the node tooling's own tests, and the `spell` commands' (`TOOL_TESTS`).
  * - Each project gets its OWN Solid plugin instance (`baseConfig()`):
  *   - the plugin picks its posture (client, or the server build of `@solidjs/web`)
  *     from `test.environment` of the config it's created in

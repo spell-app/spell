@@ -16,7 +16,7 @@ tools/frameworks/solid/dist
 # `/park`'s note on where parked work stopped:  never committed
 PARKED-*.md
 *.code-workspace
-# the docs site's bundle, built by the page server when it starts, if stale (`spell dev bundles build --stale`):
+# the docs site's bundle, built by the page server when it starts, if stale (`spell bundle --stale`):
 # never committed, its chunk names carry content hashes
 /site/_assets/
 # the docs pages' waiting comments (`<page>.inbox.json5` beside a page, and its lock):  per machine

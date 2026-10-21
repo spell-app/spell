@@ -2,5 +2,7 @@
   // ui's tests:  ui's own settings (packages/ui/tsconfig.json), over this folder
   "extends": "../tsconfig.json",
   // and ui's own folders, as its tsconfig includes them:  the JSX tags and Vitest types they declare reach the tests
-  "include": [".", "../src", "../components", "../test-helpers", "../tools", "../site/_src"]
+  "include": [".", "../src", "../components", "../test-helpers", "../tools", "../site/_src"],
+  // the `spell` commands' tests:  node, with the commands' own settings (`cli/tsconfig.json`)
+  "exclude": ["cli"]
 }

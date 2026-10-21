@@ -16,7 +16,7 @@ export type RootVocabulary = typeof rootVocabulary
 
 /**
  * What `<ui-root>` knows about a tag before its family loads (`UIRoot.catalog.ts`, generated);  a component pack's
- * catalog has the same shape (`ComponentPack.catalog`, built by `spell dev pack build`).
+ * catalog has the same shape (`ComponentPack.catalog`, built by `spell pack build`).
  */
 export type RootCatalogEntry = {
   /**

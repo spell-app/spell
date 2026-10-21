@@ -22,7 +22,7 @@ import {
 /****************
  * ### `DesignExport`
  * The claude.ai Design System's files, from what Spell UI already knows about itself (epic `claude-design`, P7):
- * `yarn design:build` (`spell dev design build`) writes them to `<out>/project/`, laid out as the format says.
+ * `yarn design:build` (`spell design build`) writes them to `<out>/project/`, laid out as the format says.
  * - `README.md` -- the brand book:  how to consume the elements (plain markup, one script), the brand's content and
  *   visual rules in `ui` terms, and an index of components by group
  * - `tokens.json` -- the `spell-brand` theme's tokens, light and dark (`DesignTokens`)

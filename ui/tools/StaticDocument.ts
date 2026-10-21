@@ -1,5 +1,5 @@
 /**
- * Whole pages turned static, for `spell static` (`packages/cli`):  every `ui-*` element of a `StaticCatalog` family
+ * Whole pages turned static, for `spell ssr` (Spell UI's `cli/`):  every `ui-*` element of a `StaticCatalog` family
  * rendered to light DOM (`StaticRender.page()`), the scripts that load the elements removed, and the stylesheet that
  * styles what's left, linked or inline.
  * - Loaded through Vite's SSR (`StaticRenderer`, `server.ssrLoadModule(StaticRenderer.DOCUMENT)`), NEVER by node

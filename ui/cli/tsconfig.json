@@ -1,0 +1,12 @@
+{
+  // Spell UI's `spell` commands (`cli/`):  node, with the browser's types too, since they reach Spell UI's own source
+  // (its icons, its static render's types), as `scripts/` does
+  "extends": ["../tsconfig.node.json", "../tsconfig.base.json"],
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web"
+  },
+  "include": ["src", "commands.ts"]
+}

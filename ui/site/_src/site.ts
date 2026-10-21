@@ -1,7 +1,7 @@
 /**
  * Entry of the Spell UI site's bundle, `site/_assets/site.js` (+ `site.css`):  the ONE script every page loads.
  * - Built by `yarn site:bundle` (`scripts/site-bundle.ts`, config `vite.site.config.ts`) into `site/_assets/`, NOT
- *   committed:  the page server builds it when it starts, if stale (`spell dev bundles`).  Edit THIS (and the
+ *   committed:  the page server builds it when it starts, if stale (`spell bundle`).  Edit THIS (and the
  *   library source), never `_assets/`.
  * - A page loads it as (paths relative to the page:  every page sits in its set's one folder):
  *     <link rel="stylesheet" href="_assets/site.css">

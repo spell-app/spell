@@ -13,7 +13,7 @@
  * - A watch rebuild doesn't clear `_assets/`, so a chunk whose hash changed leaves its old file behind:  harmless,
  *   since `_assets/` isn't committed;  the page server's next start rebuilds it clean (its `site.js` is newer than
  *   the last recorded build, `$/assembler` `Bundle`).
- * - `Ctrl-C` stops the watch;  the page server keeps running (`spell dev server stop`).
+ * - `Ctrl-C` stops the watch;  the page server keeps running (`spell server stop`).
  */
 import { execFileSync } from "node:child_process"
 import path from "node:path"
@@ -44,11 +44,11 @@ function report(event: Rolldown.RolldownWatcherEvent): void {
 
 /**
  * spell-app's page server origin, e.g. `http://127.0.0.1:54769` (`SPELL_APP`'s:  it serves this site).
- * - SIDE EFFECT:  `spell dev server ensure` starts it in the background if it isn't running
+ * - SIDE EFFECT:  `spell server start` starts it in the background if it isn't running
  * - it prints `{ base, port, ... }` as JSON, maybe after other lines:  parsed from the first `{`
  */
 function ensurePageServer(): string {
-  const text = execFileSync(process.execPath, [SPELL_CLI, "dev", "server", "ensure"], {
+  const text = execFileSync(process.execPath, [SPELL_CLI, "server", "start"], {
     cwd: SPELL_APP,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],

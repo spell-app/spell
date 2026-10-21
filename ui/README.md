@@ -81,6 +81,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | *(none -- the app's [`<spell-code>`](../spell-app/app/components/spell-code/))* | spell's highlighter, which Spell UI shipped pre-compiled until epic `repo-split` P2 |
 | `test-helpers/` | Spell UI's own test helpers (`Sheets`, `ThemeHarness`, `MemberClashes` ...;  the generic ones, `Fixture`, `ElementFixture`, `A11y`, `Viewport`, are the kit's, `spell-kit/test-helpers/...`);  the tests themselves are in the repo's [`tests/ui/`](./tests/), at the same paths as the code |
 | `tools/` | node tooling (classes):  measure, vendor, smoke, report, site data and checks, design export, visual tests;  see [`tools/README.md`](tools/README.md) |
+| `cli/` | Spell UI's `spell` commands (`spell icon`, `ssr`, `pack`, `design`):  their list, `commands.ts`, and their code;  see [`cli/README.md`](cli/README.md) |
 | `scripts/` | one file per yarn script, named for it (`site:data` -> `site-data.ts`), plus the helpers they share |
 | `docs/` | the docs site's PAGES, a component set (served at `/components/ui/`):  `*.html`, `__parts/`, `__data/` (the site data, `yarn site:data`) |
 | `site/` | the docs site's BUILD:  bundle (`_assets/`, git-ignored) and its entry (`_src/`) |

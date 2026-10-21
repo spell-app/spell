@@ -38,16 +38,16 @@ More:
 
 ## Viewing
 
-From the repo root:
+From the kit's root:
 
 ```sh
-spell dev server start --all                                  # starts the page server (and the editor);  prints its URL
-spell dev server url "$PWD/packages/ui/docs/index.html"      # the URL of one page (starts the server if needed)
+spell server start all                                       # starts the page server (and the editor);  prints its URL
+spell server url "$PWD/spell-ui/docs/index.html"             # the URL of one page (starts the server if needed)
 ```
 
 - Pages are `<base>/components/ui/`, `<base>/components/ui/ui-button.html` ...
 - The page server reloads an open page when it, its parts, its data or the bundle changes.
-- `spell dev server stop` stops it.
+- `spell server stop` stops it.
 
 ## Layout
 

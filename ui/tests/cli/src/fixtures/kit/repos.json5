@@ -1,0 +1,4 @@
+// A kit's list of child repos:  what makes a folder a kit for `CLI.findCheckout(CLI.KIT_MARKER)`.
+{
+  "repos": []
+}

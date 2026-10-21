@@ -216,6 +216,10 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     the HMR plugin, the elements' Vite settings.
   - Environment variables (ours are `SPELL_UI_*`, WWOD §11) are read ONLY in
     [`environment`](tools/environment.ts):  by `tools/`, `scripts/` and the configs alike.
+- [`cli/`](cli/AGENTS.md):  Spell UI's `spell` commands, which the kit's `spell` loads (epic `repo-split` P13, Q42):
+  - `spell icon`, `spell ssr`, `spell pack create | add | build | check`, `spell design ...`
+  - its list:  [cli/commands.ts](cli/commands.ts), named by `package.json`'s `"spell": { "commands" }`;
+    their code in `cli/src/` (`$/ui/cli/...`), their tests in [`tests/cli/`](./tests/cli/)
 - The docs site, modelled on Fomantic's docs:  "The docs site", below.
 - Design notes, and the generated `report.md`:  in the content repo (Q34, above),
   [guides/ui/notes/](../spell.epics/guides/ui/notes/).
@@ -294,7 +298,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
       an optional property left out (epic `wwod-spell-ui` J26).
     - A component pack's vocabularies write it the same way.
     - [The root catalog](../element/tools/RootCatalog.ts), the kit's, parses it into the catalog:
-      `yarn gen:root`, or `spell dev pack build` for a pack.
+      `yarn gen:root`, or `spell pack build` for a pack.
     - [The vocabularies test](./tests/test-helpers/vocabularies.test.ts) parses every one,
       and fails on a typo or a stale catalog.
 - `UI<Name>.types.ts`:  the folder's loose constants, types and shared vocabulary pieces,
@@ -368,7 +372,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
       ```
 
     - The page server builds it when it starts, if stale, and a page waits for that.
-      - `spell dev bundles build --stale`;  `$/assembler`'s `Bundle`
+      - `spell bundle --stale`;  `$/assembler`'s `Bundle`
       - `.bundle.json` records the sources' hash
     - NEVER edit.
   - `site/_src/`:  the bundle's entry (`site.ts`:  what's in it and why), and the site's layout-glue CSS (`site.css`).
@@ -458,7 +462,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `yarn site:bundle`:  `site/_assets/`, sizes printed
   - Rerun it after changing a vocabulary, a family sheet, an example, or any source the site shows.
   - Then commit `docs/`:  `site/_assets/` is git-ignored.
-    - `spell dev bundles build ui-site` records its sources' hash, so the page server doesn't build it again.
+    - `spell bundle ui-site` records its sources' hash, so the page server doesn't build it again.
 - `yarn site:dev` ([its script](scripts/site-dev.ts)):  `yarn site:bundle`, then live editing.
   - The page server (started if needed) serves `/components/ui/`,
     while a Vite WATCH build rebuilds `site/_assets/` on every `src/` / `components/` / `site/_src/` edit,
@@ -482,11 +486,11 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   nests every page's flat level 2 / 3 headers and headed examples into `<ui-section>`s.
   - It writes (or fixes) their ids, `<tab>-<section>-<example>`;  idempotent.
   - `site:index`, `site:kitchen` and `site:new` run it on what they write.
-- `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (`spell dev design build`):
+- `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (`spell design build`):
   the claude.ai design system's files (epic `claude-design`).
   - [Its script](scripts/design-build.ts), on [the design export](tools/DesignExport.ts).
   - `--brand`:  the brand's package folder, its `<brand-*>` cards;  `--brand-book`:  Claude Design's brand book.
-    - Spell UI never names either (epic `repo-split` P5):  `spell dev design build` passes spell-app's.
+    - Spell UI's code never names either (epic `repo-split` P5):  `spell design build` passes the kit's spell-brand.
     - Without them:  no Brand cards and no content rules, and the README's "Not synced" says so.
   - Written to `<dir>/project/`;  by default `build/design-system/` (git-ignored).
   - Made from the site's components data, the element examples and the Spell theme.
@@ -1049,10 +1053,11 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
     (Spell UI's from epic `repo-split` P5 to P10):
     - `spell-pack build | check [<folder>]`, the kit's bin ([its script](../element/bin/spell-pack.mjs)),
       run from the pack's own repo:  spell-epic's and the brand's `yarn pack:build` / `pack:check`
-    - spell-app's `spell dev pack build <pack>` finds the pack by name, and calls the same tool
+    - Spell UI's `spell pack build <pack>` ([its cli/](cli/AGENTS.md)) finds the pack by name, and calls the same tool
     - It runs the tool's source through `tsx`, with the PACK's `tsconfig.json`:
       the pack's vocabularies import `$/<pack>/...` as its own build resolves them.
-    - Its generated files still name `spell dev pack build <pack>`:  the packs stayed byte for byte the same.
+    - Its generated files still name `spell dev pack build <pack>`, the command's name before epic `repo-split` P13:
+      the packs stayed byte for byte the same.
   - As it runs, it calls `SpellUI.registerPack({ name, prefix, catalog, define })`.
   - `catalog` has `ROOT_CATALOG`'s shape (`RootCatalogEntry`:  a folder and a parsed skeleton).
     - Read from the pack's `<Name>.en.ts` vocabularies by [the root catalog](../element/tools/RootCatalog.ts),
@@ -1073,7 +1078,7 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - A `define()` may return a promise, when it imports its families first.
     - The load resolves once that settles, so the root waits for the tags.
     - `packages/app`'s `spell.pack.js` (`<spell-app>`, `<spell-editor>`) imports two ES modules that way.
-      It's built by Vite, not `spell dev pack build` ([app's AGENTS.md](../spell-app/app/AGENTS.md), `components/`).
+      It's built by Vite, not `spell pack build` ([app's AGENTS.md](../spell-app/app/AGENTS.md), `components/`).
   - A pack's events keep their own names (`spell-open`).
     - Only Spell UI's `ui-*` ones take a translated tag's prefix
       (`Vocabulary`;  [the translation doc](../spell.epics/guides/ui/notes/translation.md)).

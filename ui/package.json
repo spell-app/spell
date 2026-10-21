@@ -442,9 +442,9 @@
     "clean": "rm -rf ./.cache ./build ./dist ./coverage ./test-results ./vendor ./tools/frameworks/solid/dist",
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && spell-types --below && spell-types && tsc -p tsconfig.node.json && tsc -p ./tests && echo '<< TSC PASSED\n'",
-    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src components test-helpers scripts tools && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\n'",
-    "lint:fix": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT --fix' && vp lint --fix src components test-helpers scripts tools && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\n'",
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && spell-types --below && spell-types && tsc -p tsconfig.node.json && tsc -p cli && tsc -p ./tests && tsc -p ./tests/cli && echo '<< TSC PASSED\n'",
+    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src components test-helpers scripts tools cli && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\n'",
+    "lint:fix": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT --fix' && vp lint --fix src components test-helpers scripts tools cli && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\n'",
     "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt . && cd ./tests && vp fmt . && echo '<< OXFMT PASSED\n'",
     "format:check": "vp fmt --check . && cd ./tests && vp fmt --check .",
     "/////// TESTING": "",
@@ -528,5 +528,8 @@
     "node": ">=24.11"
   },
   "packageManager": "yarn@4.18.0",
-  "customElements": "./docs/__data/custom-elements.json"
+  "customElements": "./docs/__data/custom-elements.json",
+  "spell": {
+    "commands": "./cli/commands.ts"
+  }
 }

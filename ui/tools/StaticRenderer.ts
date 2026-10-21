@@ -6,7 +6,7 @@ import { createServer, type InlineConfig, type ViteDevServer } from "vite"
 /****************
  * ### `StaticRenderer`
  * The SSR-only Vite server the static server render (`$/ui/static`) runs on, from node:  shared by the visual tests'
- * `--static` pages (`visual/StaticPages.ts`) and `spell static` (`packages/cli`, `src/runner/renderStatic.ts`).
+ * `--static` pages (`visual/StaticPages.ts`) and `spell ssr` (Spell UI's `cli/`, `src/runner/renderStatic.ts`).
  * - Why Vite at all:  the components' JSX must compile `generate: "ssr"` and `@solidjs/web` resolve to its server
  *   build, which `tsx` / esbuild can't do.  Load render modules with `server.ssrLoadModule()`, e.g.
  *   `StaticRenderer.DOCUMENT` (`StaticDocument`).

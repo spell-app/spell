@@ -1,0 +1,5 @@
+{
+  // the `spell` commands' tests:  the commands' own settings (cli/tsconfig.json), over this folder
+  "extends": "../../cli/tsconfig.json",
+  "include": ["."]
+}

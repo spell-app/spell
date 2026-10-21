@@ -9,8 +9,8 @@ import { BuiltInIconPacks, ICON_PACK_INDEX, type BuiltInIconPack } from "./icons
  * - A consumer that bundles `spell-ui` moves this code away from `node_modules/spell-ui/dist/icon-packs/`:
  *   copy that folder next to the app's chunks, or point a pack elsewhere with `base` (`notes/icons.md`, "Shipping
  *   icons").
- * - STATIC and instance-free on purpose:  the packs sit in one place per page.  No DOM:  the CLI's icon search
- *   (`packages/cli`) uses it too.
+ * - STATIC and instance-free on purpose:  the packs sit in one place per page.  No DOM:  `spell icon`'s search
+ *   (Spell UI's `cli/`) uses it too.
  ****************/
 export class BuiltInPacks {
   /**

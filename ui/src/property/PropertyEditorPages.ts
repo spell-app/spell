@@ -30,7 +30,7 @@ import { PropertySchemas } from "./PropertySchemas"
  *   - dropped properties taken away
  *   - new ones added to an "Other" group
  *   - a control that no longer fits back to its type's own
- * - DOM only, no Solid and no runtime:  a browser's DOM, or linkedom's under node (`spell check`).
+ * - DOM only, no Solid and no runtime:  a browser's DOM, or linkedom's under node (`spell lint`).
  * - STATIC and instance-free:  it keeps nothing between calls.
  ****************/
 export class PropertyEditorPages {

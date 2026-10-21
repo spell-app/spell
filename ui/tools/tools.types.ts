@@ -4,8 +4,8 @@
  * (`IconPackError` ...).
  * - The component packs' shapes (their reports, `ComponentPackError`) are the kit's, beside its pack tooling:
  *   `spell-kit/element/tools/tools.types` (epic `repo-split` P10).
- * - At the BOTTOM of the tools' import graph:  `import type` only, so every tool (and `packages/cli`, through
- *   `$/ui/tools/tools.types`) imports it without loading another.
+ * - At the BOTTOM of the tools' import graph:  `import type` only, so every tool (and Spell UI's `spell` commands, `cli/`,
+ *   through `$/ui/tools/tools.types`) imports it without loading another.
  * - Every `tools/results/*-results.json` has one of these shapes;  `ReportTables` reads them.
  * - The perf shapes (`PerfRecord` ...) live beside the benchmark, in `test-helpers/PerfRun.ts` (it runs in the browser).
  */
@@ -447,7 +447,7 @@ export type IconPackErrorCause = {
 }
 
 ////////////////
-// ## Static pages (`StaticDocument`, `spell static`)
+// ## Static pages (`StaticDocument`, `spell ssr`)
 ////////////////
 
 /** How `StaticDocument.render()` treats one page's stylesheet. */
@@ -492,7 +492,7 @@ export type StaticDocumentResult = {
 
 /**
  * What `server.ssrLoadModule(StaticRenderer.DOCUMENT)` resolves to:  `StaticDocument`'s API.
- * - Why a type of its own:  `packages/cli` can't type-check `StaticDocument.ts` itself,
+ * - Why a type of its own:  Spell UI's `cli/` can't type-check `StaticDocument.ts` itself,
  *   which reaches every family's Solid JSX.
  */
 export type StaticDocumentModule = {
@@ -530,7 +530,7 @@ export type StaticStylesheetResult = {
 
 /**
  * What a shared stylesheet covers, so a later run that renders only SOME of its pages still builds one that styles
- * them all (`spell static` keeps it in the sheet's first line).
+ * them all (`spell ssr` keeps it in the sheet's first line).
  */
 export type StaticCoverage = {
   /** every tag the sheet styles, e.g. `ui-card` */

@@ -272,4 +272,4 @@ const kind = facts.own ? `own page of ${facts.tag}` : facts.tag ? `component ${f
 Terminal.out(
   `wrote ${path.relative(process.cwd(), file)}  (${kind}${facts.own && !facts.theming ? ", no Theming tab" : ""})`
 )
-Terminal.out(`  view:  spell dev server url ${file}   (from the repo root);  check:  yarn site:check ${facts.file}`)
+Terminal.out(`  view:  spell server url ${file}   (from the repo root);  check:  yarn site:check ${facts.file}`)

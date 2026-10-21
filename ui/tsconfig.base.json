@@ -10,14 +10,17 @@
   "extends": "spell-kit/toolchain/tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      // ## `ui`:  barrel, files, elements, test helpers and node tools;  its `<ui-*>` families live in `components/`, outside
-      // `src/`:  `$/ui/components/*`, `$/ui/test-helpers/*` and `$/ui/tools/*` are longer than `$/ui/*`, so they win.  No
-      // `$/ui/components` barrel:  `$/ui` is the one that registers every family
+      // ## `ui`:  barrel, files, elements, test helpers, node tools and its `spell` commands;  its `<ui-*>` families live
+      // in `components/`, outside `src/`:  `$/ui/components/*`, `$/ui/test-helpers/*`, `$/ui/tools/*` and `$/ui/cli/*`
+      // are longer than `$/ui/*`, so they win.  No `$/ui/components` barrel:  `$/ui` is the one that registers every
+      // family
       "$/ui": ["./src/index.ts"],
       "$/ui/*": ["./src/*"],
       "$/ui/components/*": ["./components/*"],
       "$/ui/test-helpers/*": ["./test-helpers/*"],
-      "$/ui/tools/*": ["./tools/*"]
+      "$/ui/tools/*": ["./tools/*"],
+      // its `spell` commands' code (`cli/src/`);  the list itself is `cli/commands.ts`
+      "$/ui/cli/*": ["./cli/src/*"]
     }
   }
 }

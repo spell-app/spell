@@ -151,7 +151,7 @@ export class SiteCheck {
 
   /**
    * Find the page server, then check every page in one browser.
-   * - SIDE EFFECT:  `spell dev server ensure` starts the server if it isn't running;  writes screenshots to `out`;
+   * - SIDE EFFECT:  `spell server start` starts the server if it isn't running;  writes screenshots to `out`;
    *   prints each page's result to stderr
    * - throws `SiteCheckError` when there's no page server serving the site
    */
@@ -174,14 +174,14 @@ export class SiteCheck {
 
   /**
    * The page server's origin, once it serves the site bundle.
-   * - `spell dev server ensure` prints `{ base, port, ... }` as JSON, maybe after other lines:
+   * - `spell server start` prints `{ base, port, ... }` as JSON, maybe after other lines:
    *   parsed from the first `{`
    * - throws `SiteCheckError` when there's no server, or it doesn't serve `/components/ui/_assets/site.js`
    */
   async ensureServer(): Promise<string> {
     let base: string
     try {
-      const text = execFileSync(process.execPath, [SPELL, "dev", "server", "ensure"], {
+      const text = execFileSync(process.execPath, [SPELL, "server", "start"], {
         cwd: REPO,
         encoding: "utf8",
         stdio: ["ignore", "pipe", "pipe"],
@@ -190,7 +190,7 @@ export class SiteCheck {
       base = (JSON.parse(text.slice(text.indexOf("{"))) as { base: string }).base.replace(/\/$/, "")
     } catch (error) {
       throw new SiteCheckError(
-        `SiteCheck.ensureServer():  can't start or find the page server (\`spell dev server ensure\` in ${REPO}):  ` +
+        `SiteCheck.ensureServer():  can't start or find the page server (\`spell server start\` in ${REPO}):  ` +
           `${error};  start it by hand and read its output`
       )
     }
@@ -679,7 +679,7 @@ const SITE = join(PACKAGE, SITE_PAGES)
 /** Where the page server serves Spell UI's docs (the page server's `componentSets` setting). */
 const SITE_ADDRESS = "/components/ui"
 
-/** Where `spell dev server ensure` runs, and that checkout's own CLI:  spell-app's (`spellApp.ts`). */
+/** Where `spell server start` runs (spell-app's checkout), and the kit's `spell` that runs it (`spellApp.ts`). */
 const REPO = SPELL_APP
 const SPELL = SPELL_CLI
 
@@ -762,7 +762,7 @@ const CLICK_MS = 3000
 /** One screenshot (a full page can be tall). */
 const SCREENSHOT_MS = 30000
 
-/** `spell dev server ensure`, which may start the server. */
+/** `spell server start`, which may start the server. */
 const SERVER_START_MS = 60000
 
 /** Fetching the site bundle from the server, to see it's served. */

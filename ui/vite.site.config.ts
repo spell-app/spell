@@ -6,7 +6,7 @@ import { baseConfig } from "./vite.config.ts"
 /** `packages/ui/`. */
 const ROOT = fileURLToPath(new URL("./", import.meta.url))
 
-/** Where the bundle goes:  `site/_assets/`, git-ignored, built by the page server when stale (`spell dev bundles`). */
+/** Where the bundle goes:  `site/_assets/`, git-ignored, built by the page server when stale (`spell bundle`). */
 export const SITE_ASSETS = `${ROOT}site/_assets`
 
 /** The entry:  `site/_src/site.ts`. */
