@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `@spell-app/ui`.  Format:  [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);  versions
+All notable changes to `spell-ui`.  Format:  [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);  versions
 follow [Semantic Versioning](https://semver.org/) once 1.0 ships (before that, a minor version may break).
 
 ## Unreleased

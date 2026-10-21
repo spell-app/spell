@@ -4,7 +4,7 @@
     {
       "path": "index.html",
       "title": "Spell UI",
-      "summary": "Fomantic UI reborn as ui-* custom elements on a modern CSS foundation, usable from any framework or plain HTML.",
+      "summary": "Beautiful, themeable, accessible components that load themselves on demand, for use in plain HTML or any framework.",
       "sections": [
         {"id":"design","title":"Design Beautiful Pages Quickly"},
         {"id":"concise-html","title":"Concise HTML"},
@@ -227,7 +227,7 @@
     {
       "path": "components.html",
       "title": "Components",
-      "summary": "Fomantic's vocabulary as ui-* custom elements, by topic.",
+      "summary": "Every Spell UI component family, by topic.",
       "sections": [
         {"id":"basic","title":"Basic"},
         {"id":"layout","title":"Layout"},

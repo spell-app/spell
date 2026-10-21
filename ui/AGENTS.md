@@ -30,7 +30,8 @@ READ [the custom elements guide](../spell.epics/guides/custom-elements/custom-el
 
 ## Overview
 
-- `spell-ui` is Fomantic UI reborn as `ui-*` custom elements, on a modern CSS foundation:
+- `spell-ui`:  beautiful, themeable, accessible components that load themselves on demand, for use in plain HTML or
+  any framework;  `ui-*` custom elements, on a modern CSS foundation:
   - Fomantic's vocabulary (`ui small primary basic icon button`)
   - shadow DOM, `@layer`s, OKLCH tokens
   - accessibility built in
@@ -206,7 +207,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - `VisualOpen` + `test.types.ts`:  the visual tests' hooks
   - `visual/baselines/`:  the screenshots (`yarn test:visual`)
   - `fixtures/`:  files the tests load (component packs, sources, an icon pack)
-- [`tools/`](tools/):  package tooling, node scripts run by `tsx` (see [the tools README](tools/README.md)).
+- [`tools/`](tools/):  package tooling, node scripts run by `tsx` (see [README-site.md](README-site.md), "The tools").
   - bundle measurement, peer vendoring, import-map smoke pages (framework hosts), LOC, report tables
   - the HMR end-to-end test
   - `tools/demo/`:  the `yarn dev` site;  `tools/visual/`:  the visual tests
@@ -346,7 +347,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
 - In two halves, one constant each in [the tools' types](tools/tools.types.ts).
 - `SITE_PAGES`, the PAGES:  [`docs/`](docs/index.html), tracked here.
   - So a page changes in the same commit as its element.
-  - How pages are made:  [its README](docs/README.md).
+  - How pages are made:  [README-site.md](README-site.md), "Writing a page".
   - ONE flat folder:
     - the pages:  `*.html`, an element's named for its tag (`ui-button.html`)
     - the component index:  `components.html`
@@ -359,7 +360,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - `../../` is the checkout's root
     - `../epics/epic-item.html` is another set's page
   - The `site:*` scripts that WRITE pages (`site:new`, `site:index`, `site:kitchen`, `site:sections`) write here.
-- `SITE_BUILD`, the BUILD:  `site/`, tracked per branch ([the site README](site/README.md):  its files).
+- `SITE_BUILD`, the BUILD:  `site/`, tracked per branch ([README-site.md](README-site.md):  its files).
   - `site/_assets/`:  GENERATED, NOT committed.
     - Git-ignored since 2026-10-07:  its hashed chunk names churned every diff and merge.
     - The site bundle (`yarn site:bundle`):  `site.js` + `site.css`, which every page loads.
@@ -451,7 +452,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
 
   - `--sanitize` strips unsafe attributes first.
   - Files that still fail refuse the pack, unless skipped or allowed.
-- `yarn vendor`, `yarn measure`, `yarn smoke`, `yarn report`, `yarn test:hmr`:  see [the tools README](tools/README.md).
+- `yarn vendor`, `yarn measure`, `yarn smoke`, `yarn report`, `yarn test:hmr`:  see [README-site.md](README-site.md), "The tools".
   - `yarn report` rewrites the tables of [the report](../spell.epics/guides/ui/notes/report.md).
     Run it twice:  no diff.
 - `yarn site:build` ~== these four, in turn:

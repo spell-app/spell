@@ -29,7 +29,7 @@
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-app/issues/new?title=Getting%20started%3A%20%20"
+              href="https://github.com/spell-app/spell-ui/issues/new?title=Getting%20started%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -53,7 +53,7 @@
           <ui-markdown>
             <script type="text/markdown">
               How to put Spell UI on a page, and the three rules every component follows so it works in any
-              framework. Something unclear or broken? [Open an issue](https://github.com/spell-app/spell-app/issues/new).
+              framework. Something unclear or broken? [Open an issue](https://github.com/spell-app/spell-ui/issues/new).
             </script>
           </ui-markdown>
 
@@ -99,10 +99,10 @@
           <ui-section id="installation" label="Installation" sticky collapsible dividing>
             <ui-message state="info" header="Not published yet">
               <code>spell-ui</code> isn't on npm yet:  the steps below apply once it is. Until then, build it in
-              the spell-app monorepo, where it lives:
+              the kit, the checkout every Spell repo is cloned into:
               <ul>
-                <li><code>yarn</code> in the monorepo</li>
-                <li>then <code>yarn build</code> in the ui package (<code>packages/ui</code>), which writes its dist folder</li>
+                <li><code>yarn clone spell-ui</code> in the kit, which installs it</li>
+                <li>then <code>yarn build</code> in <code>spell-ui/</code>, which writes its dist folder</li>
               </ul>
             </ui-message>
             <ui-markdown>
@@ -248,7 +248,7 @@
               <script type="text/markdown">
                 Once published, `yarn up spell-ui` (or `npm update spell-ui`) is all there is: no
                 installer to rerun, no build to redo. Theme sheets and your token overrides are plain CSS, so they
-                survive an update untouched. [`CHANGELOG.md`](https://github.com/spell-app/spell-app/blob/main/packages/ui/CHANGELOG.md)
+                survive an update untouched. [`CHANGELOG.md`](https://github.com/spell-app/spell-ui/blob/main/CHANGELOG.md)
                 lists what changed.
               </script>
             </ui-markdown>

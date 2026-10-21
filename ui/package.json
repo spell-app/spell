@@ -1,7 +1,7 @@
 {
   "name": "spell-ui",
   "version": "0.0.1",
-  "description": "Fomantic UI's vocabulary as modern-CSS web components, on Solid 2",
+  "description": "Beautiful, themeable, accessible components that load themselves on demand, for use in plain HTML or any framework",
   "license": "MIT",
   "repository": "https://github.com/spell-app/spell-ui",
   "files": [
@@ -474,6 +474,7 @@
     "site:new": "tsc -p scripts && tsx --import spell-kit/toolchain/aliases scripts/site-new.ts",
     "site:sections": "tsx --import spell-kit/toolchain/aliases scripts/site-sections.ts",
     "site:check": "tsx --import spell-kit/toolchain/aliases scripts/site-check.ts",
+    "readme:components": "tsx --import spell-kit/toolchain/aliases scripts/readme-components.ts",
     "/////// GENERATED": "",
     "gen:styles": "tsc -p scripts && tsx --import spell-kit/toolchain/aliases scripts/gen-styles.ts",
     "gen:icons": "tsc -p scripts && tsx --import spell-kit/toolchain/aliases scripts/gen-icons.ts",
