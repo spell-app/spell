@@ -138,16 +138,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - it gathers the answer, sends it (`POST /api/docs/details/answer`, through a `ServerLink`),
         reads it back on load, and says where it stands for `<epic-send>`
       - and its DRAFT (P18):  what's typed and not sent
-        - kept by id at once (`typed`), in `localStorage` at once, and on the page server 2s later
-          (`POST /api/docs/details/draft`)
+        - kept by id at once (`typed`), in `localStorage` at once, and on the page server as he types, half a second
+          later (`POST /api/docs/details/draft`);  a failed save tries again every 3s (epic `epic-engine` P15)
         - put back on load over the answer, and into a part that joins later (an agent's rewrite, patched in place)
         - text whose id leaves the page is KEPT (`kept`):  drawn by the notes box, and sent with the rest
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
     - `ChoicesForm`, one per choice page:
       - the rows (`<epic-choice-row>`) register
-      - the draft every 5s and as the page goes away, "Do it" (`/api/docs/choices/*`), and bringing both back,
-        for `<epic-choices-bar>`
+      - the draft:  in `localStorage` at once, on the page server as he types and as the page goes away, a failed save
+        tried again every 3s (epic `epic-engine` P15);  "Do it" (`/api/docs/choices/*`);  bringing both back;
+        Copy my answers (`copyText()`);  for `<epic-choices-bar>`
     - the answers' shapes are copies of the docs tools' routes':
       [detailsRoutes.ts](tools/detailsRoutes.ts), [choicesRoutes.ts](tools/choicesRoutes.ts)
     - The elements:
@@ -1416,8 +1417,10 @@ Each kind of page has ONE name, written everywhere a person reads it.
 - What he typed and hasn't sent is a DRAFT (epic `epic-workflow` P18).
   - Why:  agents rewrote a page under him twice, and everything he hadn't sent was lost (request r4).
   - `<slug>.draft.json5` beside the page, through the same route module (`POST /api/docs/details/draft`)
-    - saved 2s after he stops typing, and as the page goes away
+    - saved as he types (half a second after each change, one save at a time), and as the page goes away
     - a copy in the browser's `localStorage` too, written at once, for when the page server can't take it
+    - a save that fails says so in red, on its own line under Send, and tries again every 3s until one goes through
+      (epic `epic-engine` P15):  a page server back on its address takes it, its new token too, with no keystroke
   - It wakes nobody:  `epic ask wait` watches the answer only.  Send deletes it.
   - The page's `AnswerForm` (`$/epics/answers`) keeps it, by question / option / section id, with each id's title
     (`labels`).
@@ -1479,7 +1482,14 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - It still takes comments:  only a page with `<slug>.rows.json5` beside it doesn't.
 - The page server's route module, [choicesRoutes.ts](tools/choicesRoutes.ts), at `/api/docs/choices/...`
   (each save through `SRV.FileOperations.save()`):
-  - the draft:  `<slug>.draft.json5`, saved 5s after typing stops, never wakes anyone
+  - the draft:  `<slug>.draft.json5`, never wakes anyone
+    - saved as Owen types (half a second after each change), and as the page goes away
+    - a copy in the browser's `localStorage` too, written at once;  on load the newest of the two (or the answer)
+      comes back
+    - a save that fails says so in red on the bar, and tries again every 3s until one goes through (epic `epic-engine`
+      P15, r14:  a page server gone lost 76 boxes Owen typed)
+    - Copy my answers, on the bar:  what's typed, as the draft's JSON, onto the clipboard, for a page whose server is
+      gone for good (a reload there brings back nothing);  saved as the draft file, the page shows it again
   - the answer:  `<slug>.answer.json5`, which `epic choices wait` exits with
 
 ## Comments

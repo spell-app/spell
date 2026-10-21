@@ -8,7 +8,8 @@
  * - `GET /api/docs/choices/draft?page=<path>` -- what was typed so far, `{ draft: ChoicesDraft | null }`:
  *   the page restores it on load
  * - `POST /api/docs/choices/draft` `{ page, values, feedback }` -- save it to `<slug>.draft.json5` beside the page
- *   - every 5s while Owen types, and as the page goes away
+ *   - as Owen types (half a second after each change), and as the page goes away;  a failed save tries again every
+ *     3s (`ChoicesForm`, epic `epic-engine` P15)
  *   - wakes NOBODY:  `epic choices wait` watches the answer only
  * - `GET /api/docs/choices/answer?page=<path>` -- the answer sent, `{ answer: ChoicesAnswer | null }`
  * - `POST /api/docs/choices/answer` `{ page, values, feedback }` -- "Do it":

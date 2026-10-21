@@ -25,6 +25,7 @@ import {
 
 import { shownReadingTime } from "$/epics/tools/ReadingTime.js"
 
+import { Clipboard } from "./Clipboard"
 import { epicPageVocabulary } from "./EpicPage.en"
 import {
   ACTIVE,
@@ -1253,7 +1254,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    */
   @E.untracked
   private async copyAndSay(text: string): Promise<boolean> {
-    if (!(await EpicPage.copyText(text))) return false
+    if (!(await Clipboard.copy(text))) return false
     if (customElements.get("ui-toast")) {
       UI.toast({
         id: COPIED_TOAST_ID,
@@ -1313,30 +1314,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       else if (node.nodeType === Node.ELEMENT_NODE) text += EpicPage.textOf(node as Element)
     }
     return text
-  }
-
-  /**
-   * Put `value` on the clipboard;  true when it got there.
-   * - the async Clipboard API first
-   * - where it's refused (a webview without the permission):  the old `execCommand("copy")` from a hidden textarea,
-   *   as the old page runtime's `copyText()`
-   * - NEVER throws
-   */
-  private static async copyText(value: string): Promise<boolean> {
-    try {
-      await navigator.clipboard.writeText(value)
-      return true
-    } catch {
-      const area = document.createElement("textarea")
-      area.value = value
-      area.setAttribute("readonly", "")
-      area.style.cssText = "position: fixed; opacity: 0; pointer-events: none"
-      document.body.append(area)
-      area.select()
-      const copied = document.execCommand("copy")
-      area.remove()
-      return copied
-    }
   }
 
   /** Is the git toggle on for this page, as last left?  `false` without storage. */

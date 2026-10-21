@@ -3,6 +3,7 @@ import { ServerLink, sentence, type ServerLinkOptions } from "$/epics/review"
 
 import { AnswerDraft } from "./AnswerDraft"
 import {
+  ANSWER_RETRY_MS,
   DETAILS_API,
   DETAILS_DRAFT_API,
   DETAILS_LISTEN_POLL_MS,
@@ -53,8 +54,10 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *   and says so (`notice`):  the next `ask wait` or `ask answer` reads it.
  * - Keeps a DRAFT of what's typed and not sent (P18:  agents rewrote a page under Owen, and lost what he typed):
  *   - every change Owen makes (`edited()`) goes into `typed`, the page as he left it, at once;  a copy goes into
- *     the browser's storage at once, and to the page server a moment later (`DETAILS_SAVE_MS`,
- *     `POST /api/docs/details/draft`, `<slug>.draft.json5`), and as the page goes away (`watch()`)
+ *     the browser's storage at once, and to the page server as he types (`DETAILS_SAVE_MS`, half a second;
+ *     `POST /api/docs/details/draft`, `<slug>.draft.json5`), one save at a time, and as the page goes away (`watch()`)
+ *   - a save that fails says so in red, and tries again every `ANSWER_RETRY_MS` (3s) until one goes through:  a page
+ *     server back on its address takes it, with its new token (`ServerLink`;  epic `epic-engine` P15, r14)
  *   - the draft wakes nobody:  only Send does;  Send deletes it
  *   - on load, the newest draft newer than the answer (the server's, else the browser's) goes back into the parts,
  *     by id, over the answer sent (`AnswerDraft.over()`):  "Changes not sent"
@@ -131,6 +134,12 @@ export class AnswerForm {
   /** The draft's save waiting for typing to stop. */
   private saveTimer: ReturnType<typeof setTimeout> | undefined
 
+  /** The next try after the draft's save failed (`ANSWER_RETRY_MS`). */
+  private retryTimer: ReturnType<typeof setTimeout> | undefined
+
+  /** The draft's saves queued, one at a time:  a later save never lands before an earlier one. */
+  private saving: Promise<void> = Promise.resolve()
+
   /** `settle()` waiting for the parts of a rewrite to join. */
   private settleTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -153,13 +162,22 @@ export class AnswerForm {
 
   /** The page's form, made on the first call (browser only). */
   static forPage(): AnswerForm {
-    AnswerForm.current ??= new AnswerForm({ ...ServerLink.pageOptions(), storage: storageOf(window) })
+    AnswerForm.current ??= new AnswerForm({ ...ServerLink.pageOptions(), storage: AnswerForm.storageOf(window) })
     return AnswerForm.current
   }
 
   /** Make `form` the page's from now on (`undefined`:  the next `forPage()` makes one):  tests. */
   static adopt(form: AnswerForm | undefined) {
     AnswerForm.current = form
+  }
+
+  /** `window`'s localStorage, or `null` where reading it throws (blocked site data):  a choice page's too. */
+  static storageOf(window: Window): Storage | null {
+    try {
+      return window.localStorage
+    } catch {
+      return null
+    }
   }
 
   ////////////////
@@ -498,13 +516,20 @@ export class AnswerForm {
   }
 
   /**
-   * Save the draft to the page server now, if anything changed since the last save.
+   * Save the draft to the page server now, if anything changed since the last save;  after any save on its way.
    * - `keepalive`:  the page is going away;  the request outlives it
-   * - NEVER throws:  a failure shows in `draftText` (the browser's copy still has it), and the next change tries
-   *   again
+   * - NEVER throws:  a failure shows in `draftText`, in red (the browser's copy still has it), and it tries again in
+   *   `ANSWER_RETRY_MS`
    */
-  async saveDraft({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
+  saveDraft({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
     if (this.saveTimer) clearTimeout(this.saveTimer)
+    this.saving = this.saving.then(() => this.saveNow(keepalive))
+    return this.saving
+  }
+
+  /** `saveDraft()`'s work, one at a time. */
+  private async saveNow(keepalive: boolean): Promise<void> {
+    if (this.retryTimer) clearTimeout(this.retryTimer)
     if (!this.isUnsaved || !this.typed || !this.keepsDrafts) return
     if (!this.options.server?.token || this.options.protocol === "file:")
       return this.setDraftText("draft kept in this browser only:  this page isn't on the page server", true)
@@ -512,7 +537,8 @@ export class AnswerForm {
     // the server stamps it `saved`
     const { page, answers, comments, notes, labels, kept } = this.draftNow()
     this.writeLocal()
-    this.setDraftText("saving draft…")
+    // a failure stays in view while it tries again
+    if (!this.isDraftError) this.setDraftText("saving draft…")
     this.changed()
     try {
       const body = { page, answers, comments, notes, labels, kept: kept ?? [] }
@@ -520,8 +546,12 @@ export class AnswerForm {
       // sent meanwhile:  the send said where things stand
       if (this.typed) this.setDraftText(`draft saved ${clockOf(reply.draft.saved)}`)
     } catch (failure) {
+      // sent meanwhile:  nothing left to save
+      if (!this.typed) return this.changed()
       this.isUnsaved = true
-      this.setDraftText(`draft kept in this browser only:  ${(failure as Error).message}`, true)
+      const why = (failure as Error).message.replace(/[.!]$/, "")
+      this.setDraftText(`draft kept in this browser only:  ${why};  trying again every ${ANSWER_RETRY_MS / 1000}s`, true)
+      this.retryTimer = setTimeout(() => void this.saveDraft(), ANSWER_RETRY_MS)
     }
     this.changed()
   }
@@ -547,6 +577,7 @@ export class AnswerForm {
       window.removeEventListener("pagehide", leaving)
       window.document.removeEventListener("visibilitychange", hidden)
       if (this.saveTimer) clearTimeout(this.saveTimer)
+      if (this.retryTimer) clearTimeout(this.retryTimer)
       if (this.settleTimer) clearTimeout(this.settleTimer)
     }
   }
@@ -579,6 +610,7 @@ export class AnswerForm {
   /** Sent:  the draft is done with;  nothing to save, and the browser's copy goes. */
   private draftDone() {
     if (this.saveTimer) clearTimeout(this.saveTimer)
+    if (this.retryTimer) clearTimeout(this.retryTimer)
     this.isUnsaved = false
     this.typed = undefined
     this.setDraftText("")
@@ -589,7 +621,7 @@ export class AnswerForm {
     }
   }
 
-  /** The draft's save status;  `isError`:  in orange, a warning (`templates/epics/plan-doc.md`, "Colours"). */
+  /** The draft's save status;  `isError`:  in red, as a choice page's failed save (P15:  "says so loudly"). */
   private setDraftText(text: string, isError = false) {
     this.draftText = text
     this.isDraftError = isError
@@ -669,15 +701,6 @@ function sorted<T>(record: Record<string, T>): Record<string, T> {
 /** `iso`'s local time of day, `14:04`. */
 function clockOf(iso: string): string {
   return PlanDates.clock(new Date(iso))
-}
-
-/** `window`'s localStorage, or `null` where reading it throws (blocked site data). */
-function storageOf(window: Window): Storage | null {
-  try {
-    return window.localStorage
-  } catch {
-    return null
-  }
 }
 
 /**
