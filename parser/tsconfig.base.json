@@ -28,7 +28,11 @@
 
       // ## `spell`
       "$/spell": ["./spell/src/index.ts"],
-      "$/spell/*": ["./spell/src/*"]
+      "$/spell/*": ["./spell/src/*"],
+
+      // ## `cli`:  the language's `spell` commands' types (`cli/commands.ts` is their list)
+      "$/cli": ["./cli/src/index.ts"],
+      "$/cli/*": ["./cli/src/*"]
     }
   }
 }

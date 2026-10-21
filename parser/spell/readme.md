@@ -58,11 +58,11 @@ The repo has a language server for spell (`packages/lsp`), and a VS Code extensi
 **Install it in your VS Code:**
 
 - `yarn` in the repo, if you haven't already:  the extension runs the repo's own language server.
-- `spell dev vscode` (at the repo root) builds the extension and installs it in VS Code.
+- `spell app vscode` (at the repo root) builds the extension and installs it in VS Code.
   It's the two steps below.
-  - `spell dev vscode build` builds `spell-language.vsix`, beside the extension's code:
+  - `spell app vscode build` builds `spell-language.vsix`, beside the extension's code:
     it installs the extension's packages, bundles it, and packages it.
-  - `spell dev vscode install` installs that file with `code --install-extension`.
+  - `spell app vscode install` installs that file with `code --install-extension`.
     - Or in VS Code:  Extensions view => `...` menu => `Install from VSIX...`.
     - No `code` command?  In VS Code:  `Shell Command: Install 'code' command in PATH`.
 - Reload VS Code, and open a `.spell` file.

@@ -6,12 +6,16 @@
   "license": "MIT",
   "repository": "https://github.com/spell-app/spell-lang",
   "type": "module",
+  "spell": {
+    "commands": "./cli/commands.ts"
+  },
   "spellTypes": [
     "parser",
     "markdown",
     "core",
     "py",
-    "spell"
+    "spell",
+    "cli"
   ],
   "spellFolders": [
     {
@@ -45,6 +49,14 @@
       "lint": [
         "."
       ]
+    },
+    {
+      "name": "cli",
+      "lint": [
+        "src",
+        "commands.ts"
+      ],
+      "node": true
     }
   ],
   "exports": {
@@ -115,6 +127,10 @@
     "./spell/test": {
       "types": "./dist-types/spell/src/test/index.d.ts",
       "default": "./spell/src/test/index.ts"
+    },
+    "./cli": {
+      "types": "./dist-types/cli/src/index.d.ts",
+      "default": "./cli/src/index.ts"
     },
     "./package.json": "./package.json"
   },
