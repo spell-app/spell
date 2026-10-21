@@ -67,6 +67,16 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     await expectAccessible(table)
   })
 
+  test("a purpose's `` `code` `` draws as code, as a note's does", async () => {
+    const root = await ElementFixture.render(section().replace('purpose="dark"', 'purpose="runs the `epic` command"'))
+    await ElementFixture.settle()
+    const [, command] = rows(root) as [Element, Element]
+    const purpose = part(command, "purpose")!
+    expect(purpose.querySelector("code")!.textContent).toBe("epic")
+    expect(purpose.textContent).toContain("runs the epic command")
+    expect(purpose.textContent).not.toContain("`")
+  })
+
   test("counts its section:  renames and rows that stay, then what Owen changed;  a changed box orange, with its reset", async () => {
     const root = await ElementFixture.render(section())
     await ElementFixture.settle()
