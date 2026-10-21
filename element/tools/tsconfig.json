@@ -1,0 +1,14 @@
+{
+  // The element tools (epic `repo-split` P10):  node code, its own TypeScript program (the elements' `element/src/` is
+  // browser-safe, with no node types), so it's its own folder of the declarations build (`"spellTypes"`).
+  // - It reads `element/src/` by its npm name (`spell-kit/element/SkeletonText`), so by its declarations.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": ["."],
+  // its configs:  `tsconfig.node.json`
+  "exclude": ["node_modules", "vite.config.ts", "vitest.config.ts"]
+}

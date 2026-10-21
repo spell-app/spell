@@ -1,0 +1,10 @@
+{
+  // the element tools' configs, type-checked by `yarn kit:ts` (the declarations build leaves them out)
+  "extends": "spell-kit/toolchain/tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts", "vitest.config.ts"]
+}

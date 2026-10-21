@@ -9,14 +9,14 @@ import {
   type DOMElement,
   type UIComponentClass
 } from "$/spell-element"
-import { ElementFixture } from "$/spell-element/test/ElementFixture"
+import { ElementFixture } from "$/spell-element/test-helpers/ElementFixture"
 
 /**
  * `ShadowEvents`:  Solid's event delegation inside each element's shadow root leaves nothing behind on the event.
  * - Page listeners see the platform's retargeted event:  `target` === the host, `composedPath()[0]` the inner node.
  * - Solid handlers OUTSIDE the element (an app's `<x-el onClick>`, an enclosing element's) still run, once.
- * - Tried on tiny test elements;  Spell UI's `tests/ui/test/events.test.tsx` does the same for real `ui-*` elements,
- *   with typing and focus, and a Solid app elsewhere on the page.
+ * - Tried on tiny test elements;  Spell UI's `spell-ui/tests/test-helpers/events.test.tsx` does the same for real
+ *   `ui-*` elements, with typing and focus, and a Solid app elsewhere on the page.
  */
 
 /** What a listener saw:  `target`, `currentTarget`, `composedPath()[0]`, as `name()`s. */

@@ -9,7 +9,7 @@ import {
   type DOMElement,
   type UIComponentClass
 } from "$/spell-element"
-import { ElementFixture } from "$/spell-element/test/ElementFixture"
+import { ElementFixture } from "$/spell-element/test-helpers/ElementFixture"
 
 /**
  * `UIComponent`:  each element draws in a Solid root of its OWN.

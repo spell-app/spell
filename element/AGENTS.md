@@ -48,14 +48,39 @@ then [ui's AGENTS.md](../spell-ui/AGENTS.md), "Solid authoring":  how an element
   - [PartContext](src/PartContext.ts) and [OwnerContext](src/OwnerContext.ts):
     the generic content parts, and the element they belong to
   - [ShadowEvents](src/ShadowEvents.ts):  Solid's events kept from leaking out of shadow roots
-  - [HotDefinitions](src/HotDefinitions.ts):  hot reload of Spell UI's elements in `yarn dev` (dev-only)
+  - [HotDefinitions](src/HotDefinitions.ts):  hot reload of a set's elements in `yarn dev` (dev-only)
   - [timing](src/timing.ts):  when to run something
     - `afterSolidUpdate()`, `beforeNextPaint()`
     - `soon()`, `after()`, `every()`
+  - [SkeletonText](src/SkeletonText.ts):  a vocabulary's skeleton, written as one line of text, parsed in node
+    - NOT in the barrel:  reached by path, `spell-kit/element/SkeletonText`
+    - Spell UI's (`src/vocabulary/`) until epic `repo-split` P10
   - [SpellSolid](src/SpellSolid.ts):  the settings a set's runtime hands it as it loads (below)
   - the types:
     - [elements.types.ts](src/elements.types.ts):  `ElementSetup`, `AttributeValues`, the settings
     - [vocabulary.types.ts](src/vocabulary.types.ts):  `ComponentVocabulary`, `Dictionary`:  every set's schema
+- What's in [`tools/`](tools/), node only, imported as `spell-kit/element/tools/<Name>`
+  (`$/spell-element/tools/<Name>` inside the kit):  the tools every set's builds and scripts share.
+  - Spell UI's own `tools/` until epic `repo-split` P10.
+  - [ComponentPack](tools/ComponentPack.ts):  a component pack's build, and whether it's current
+    - its shapes and its error:  [tools.types.ts](tools/tools.types.ts)
+  - [packModules](tools/packModules.ts):  the modules a pack shares with the page (`PACK_MODULES`, `packModuleKey()`)
+  - [RootCatalog](tools/RootCatalog.ts):  what `<ui-root>` needs of each tag, read from the vocabularies;
+    [VocabularyFiles](tools/VocabularyFiles.ts):  every vocabulary file of a folder of families
+  - [elementConfig](tools/elementConfig.ts):  the Vite settings every set's elements are compiled with
+    - `elementBaseConfig()`:  Spell UI's `baseConfig()` starts from it, and so does the pack build
+    - `CSS_TARGETS`, `SOLID_DEDUPE`
+  - [HotElements](tools/HotElements.ts):  the Vite plugin for hot reloading a set's elements in `yarn dev`
+  - [DevServer](tools/DevServer.ts):  a package's Vite dev server, started from node
+  - [Terminal](tools/Terminal.ts):  where tools print;  [NodePackage](tools/NodePackage.ts):  finds an installed package
+  - Their tests:  the kit's [tests/element/tools/](../tests/element/tools/).
+  - The kit checks them as their own folder (its [`tools/kit.ts`](../tools/kit.ts)), with their own
+    [tsconfig.json](tools/tsconfig.json) (node) and Vite+ configs.
+- [`bin/spell-pack.mjs`](bin/spell-pack.mjs), the kit's bin:  `spell-pack build | check [<folder>]`, a component
+  pack's build or its check, from any repo (`ComponentPack`).
+  - spell-epic's and the brand's `yarn pack:build` / `pack:check` run it;  spell-app's `spell dev pack` calls
+    `ComponentPack` itself.
+  - Spell UI's `spell-ui-pack` until epic `repo-split` P10, which ran files Spell UI's package doesn't ship (C10).
 - Four of those files began as `@solidjs/element` and `component-register`,
   folded in and fixed (epic `spell-element`, 2026-10-09):
   - `UIComponent`, `DOMElement`, `ShadowEvents`, `HotDefinitions`
@@ -67,10 +92,18 @@ then [ui's AGENTS.md](../spell-ui/AGENTS.md), "Solid authoring":  how an element
     on the folder's own plugins ([its Vitest config](vitest.config.ts)):  the decorator pre-pass, then Solid's.
   - With NO Spell UI on the page (epic `repo-split` P3):  its tsconfig and Vitest config name none,
     nor do the kit's dependencies.
-    - Their setup file, [TestSettings](test/TestSettings.ts), installs stand-in settings:
+    - Their setup file, [TestSettings](test-helpers/TestSettings.ts), installs stand-in settings:
       English names, the shared attributes, no styles, every animation over at once.
-    - Their helpers are the folder's own, in [`test/`](test/) (`$/spell-element/test/...`):
-      `Fixture`, `ElementFixture`, with the same API as Spell UI's.
+    - Their helpers are the folder's own, in [`test-helpers/`](test-helpers/) (`$/spell-element/test-helpers/...`).
+- The TEST HELPERS every set's tests use, in [`test-helpers/`](test-helpers/) (epic `repo-split` P10, Q39):
+  `spell-kit/test-helpers/<Name>` from another repo, `$/spell-element/test-helpers/<Name>` inside the kit.
+  - [`Fixture`](test-helpers/Fixture.ts):  render HTML into the live document, removed when the test ends
+  - [`ElementFixture`](test-helpers/ElementFixture.ts):  render, wait for every element's `ready`, `flush()`;
+    `breakRender()`, a forced render failure
+  - [`A11y`](test-helpers/A11y.ts):  axe on a live element (`expectAccessible()`), and WCAG contrast
+  - [`Viewport`](test-helpers/Viewport.ts):  resize the test iframe for one test
+  - They know only the DOM, Solid, `DOMElement` and `UIComponent`:  a helper that needs Spell UI stays in Spell UI's
+    `test-helpers/` (`MemberClashes`, `ThemeHarness`, `Sheets` ...).
     - What needs Spell UI's real runtime is tested in Spell UI's tests:
       `<ui-root>`'s `appContext`, Spell UI's settings and translations, its core carrying every name,
       no vocabulary attribute named like a base's member (`$/ui/test/MemberClashes`, run by each set over its own).
@@ -82,7 +115,7 @@ then [ui's AGENTS.md](../spell-ui/AGENTS.md), "Solid authoring":  how an element
 
 As WWOD §4, plus:
 
-- It imports ONLY Solid, and `$/util`'s generic files, one by one, never the `$/util` barrel:
+- `src/` imports ONLY Solid, and `$/util`'s generic files, one by one, never the `$/util` barrel:
   - `$/util/class`, `decorators`, `dom`, `string`, `util.types`
   - NEVER Spell UI, or any other package:  every set's elements are written on it, Spell UI's included.
   - The barrel re-exports those `$/util` files,
@@ -105,7 +138,9 @@ As WWOD §4, plus:
     - where a set adds its names (below)
     - for node code that mustn't load the element layer (the vocabularies, the epics' definitions)
   - `$/spell-element/timing`:  `$/ui/util` re-exports it
-  - `$/spell-element/HotDefinitions`:  Spell UI's HMR plugin injects it by its file path
+  - `$/spell-element/SkeletonText` (`spell-kit/element/SkeletonText`):  node code that parses skeletons
+  - `$/spell-element/HotDefinitions`:  the HMR plugin, [HotElements](tools/HotElements.ts), injects it by its file path
+- `tools/` and `bin/` are node only, and may import node built-ins, Vite and `tsx` too:  never a page.
 
 ## Settings
 
@@ -145,7 +180,7 @@ As WWOD §4, plus:
     - the docs bundle, the site bundles
     - the app's `spell-solid.js`
   - A component pack leaves `$/spell-element` external, as it leaves Solid and `$/ui/core`.
-    - The list:  `PACK_MODULES`, in [Spell UI's pack modules](../spell-ui/tools/packModules.ts).
+    - The list:  `PACK_MODULES`, in [the pack modules](tools/packModules.ts).
     - It reads it from the page:
       `SpellUI.packModules["$/spell-element"]` is Spell UI's core module, which carries all of it.
   - The app's element bundles likewise take it from `spell-solid-shared.js`

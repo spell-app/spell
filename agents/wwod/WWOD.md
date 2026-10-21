@@ -203,8 +203,8 @@ Examples use `parser`'s alias and namespace (`$/parser`, `P`);  each package's `
   - A string that only NAMES a module (a `packModules` key) keeps its `$/` name.
 - **Package aliases, never `../`:**
   - ALWAYS import starting from a package alias, NEVER start import from `../`.  Every package's alias is `$/name`
-    (`$/parser`, `$/core`, `$/ui` ...), `$` meaning `packages/`.  `ui` is no exception:  its test helpers are
-    `$/ui/test/...`.  The one table is `tsconfig.base.json`, for inside a repo.
+    (`$/parser`, `$/core`, `$/ui` ...), `$` meaning `packages/`.  `ui` is no exception:  its own test helpers are
+    `$/ui/test-helpers/...`.  The one table is `tsconfig.base.json`, for inside a repo.
   - INSIDE a package, `$/name` is its barrel and `$/name/deep/path` any file in its `src/`, e.g. `$/app/ui`.
   - From ANOTHER package, import the BARREL only (`$/parser`, never `$/parser/rules/Rule`), except the entry points
     (opt-in side-effect imports, test helpers, node-only files ...) listed in `tsconfig.base.json`'s header comment.

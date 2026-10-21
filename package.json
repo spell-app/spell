@@ -11,19 +11,23 @@
   "type": "module",
   "sideEffects": [
     "./element/src/HotDefinitions.ts",
+    "./element/test-helpers/Fixture.ts",
     "./toolchain/**",
     "./server/**",
     "./assembler/**",
+    "./element/tools/**",
     "./tools/**"
   ],
   "bin": {
+    "spell-pack": "./element/bin/spell-pack.mjs",
     "spell-types": "./toolchain/bin/spell-types.ts"
   },
   "spellTypes": [
     "util",
     "server",
     "assembler",
-    "element"
+    "element",
+    "element/tools"
   ],
   "exports": {
     "./util": {
@@ -139,6 +143,10 @@
       "types": "./dist-types/element/src/HotDefinitions.d.ts",
       "default": "./element/src/HotDefinitions.ts"
     },
+    "./element/SkeletonText": {
+      "types": "./dist-types/element/src/SkeletonText.d.ts",
+      "default": "./element/src/SkeletonText.ts"
+    },
     "./element/timing": {
       "types": "./dist-types/element/src/timing.d.ts",
       "default": "./element/src/timing.ts"
@@ -146,6 +154,14 @@
     "./element/vocabulary.types": {
       "types": "./dist-types/element/src/vocabulary.types.d.ts",
       "default": "./element/src/vocabulary.types.ts"
+    },
+    "./element/tools/*": {
+      "types": "./dist-types/element/tools/*.d.ts",
+      "default": "./element/tools/*.ts"
+    },
+    "./test-helpers/*": {
+      "types": "./dist-types/element/test-helpers/*.d.ts",
+      "default": "./element/test-helpers/*.ts"
     },
     "./package.json": "./package.json"
   },
@@ -173,40 +189,46 @@
     "review": "node tools/repos.ts run review"
   },
   "dependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.47",
     "chalk": "^5.6.0",
     "esbuild": "^0.28.2",
     "global": "^4.3.2",
     "json5": "^2.2.3",
     "json5-writer": "^0.2.0",
+    "lightningcss": "^1.33.0",
     "linkedom": "^0.18.13",
     "lodash": "^4.17.21",
     "node-storage-shim": "^2.0.1",
     "parse5": "^7.3.0",
     "pluralize": "^8.0.0",
     "query-string": "^6.12.1",
+    "tsx": "4.20.3",
     "vite-plus": "catalog:"
   },
   "devDependencies": {
-    "@solidjs/vite-plugin": "3.0.0-next.47",
     "@solidjs/web": "2.0.0-rc.13",
     "@types/lodash": "^4.17.17",
     "@types/node": "^22.20.4",
     "@types/pluralize": "^0.0.33",
     "@typescript/typescript6": "^6.0.2",
     "@vitest/browser-playwright": "catalog:",
+    "axe-core": "^4.13.0",
     "playwright": "1.63.0",
     "solid-js": "2.0.0-rc.13",
-    "tsx": "4.20.3",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
     "@solidjs/web": "2.0.0-rc.13",
+    "axe-core": "^4.13.0",
     "solid-js": "2.0.0-rc.13"
   },
   "peerDependenciesMeta": {
     "@solidjs/web": {
+      "optional": true
+    },
+    "axe-core": {
       "optional": true
     },
     "solid-js": {

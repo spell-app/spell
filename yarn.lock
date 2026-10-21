@@ -1808,6 +1808,8 @@ __metadata:
     "@solidjs/web": "npm:2.0.0-rc.13"
     "@spell-app/ui": "workspace:*"
     "@types/node": "npm:^22.20.4"
+    esbuild: "npm:^0.28.2"
+    playwright: "npm:1.63.0"
     solid-js: "npm:2.0.0-rc.13"
     spell-kit: "workspace:*"
     tsx: "npm:^4.23.15"
@@ -2061,8 +2063,6 @@ __metadata:
   peerDependencies:
     "@solidjs/web": 2.0.0-rc.13
     solid-js: 2.0.0-rc.13
-  bin:
-    spell-ui-pack: ./bin/spell-ui-pack.mjs
   languageName: unknown
   linkType: soft
 
@@ -6978,11 +6978,13 @@ __metadata:
     "@types/pluralize": "npm:^0.0.33"
     "@typescript/typescript6": "npm:^6.0.2"
     "@vitest/browser-playwright": "catalog:"
+    axe-core: "npm:^4.13.0"
     chalk: "npm:^5.6.0"
     esbuild: "npm:^0.28.2"
     global: "npm:^4.3.2"
     json5: "npm:^2.2.3"
     json5-writer: "npm:^0.2.0"
+    lightningcss: "npm:^1.33.0"
     linkedom: "npm:^0.18.13"
     lodash: "npm:^4.17.21"
     node-storage-shim: "npm:^2.0.1"
@@ -6998,13 +7000,17 @@ __metadata:
     vitest: "catalog:"
   peerDependencies:
     "@solidjs/web": 2.0.0-rc.13
+    axe-core: ^4.13.0
     solid-js: 2.0.0-rc.13
   peerDependenciesMeta:
     "@solidjs/web":
       optional: true
+    axe-core:
+      optional: true
     solid-js:
       optional: true
   bin:
+    spell-pack: ./element/bin/spell-pack.mjs
     spell-types: ./toolchain/bin/spell-types.ts
   languageName: unknown
   linkType: soft

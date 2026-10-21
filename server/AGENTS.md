@@ -149,6 +149,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The list:  the settings' `"engineRoutes"`, each a route and its folder (epic `repo-split` P4).
       - Today spell-app's:  `/_epic/assets/`, `/_epic/pack/` and `/templates/`, from spell-epic through the checkout's
         `spell-epic` link:  where spell-epic's one server per machine serves the engine too, and the pages load it from.
+      - And `/_brand/assets/`, spell-brand's `assets/` (the logo, fonts and reference images, epic `repo-split` P10).
       - A checkout without the link answers "not found" there, and loads no epic route module.
       - Live reload reports a change in one at its route.
     - Route modules add to every page's `window.SPELL_SERVER`:  `addPageConfig()`.

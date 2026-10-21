@@ -3,7 +3,7 @@ import { render, type JSX } from "@solidjs/web"
 import { describe, expect, it } from "vite-plus/test"
 
 import { E, type ComponentVocabulary, type Dictionary, type DOMElement, type UIComponentClass } from "$/spell-element"
-import { ElementFixture } from "$/spell-element/test/ElementFixture"
+import { ElementFixture } from "$/spell-element/test-helpers/ElementFixture"
 
 /**
  * The reactive members (`Reactive`):  `@state` and `@derived` on any class, then the component side --

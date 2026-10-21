@@ -29,8 +29,9 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
   - `<module>.test.ts(x)` next to `<module>.ts(x)`:  `Router.ts` => `Router.test.ts`.  Cross-cutting tests in the
     package's `test/`.
   - The test is renamed with its module (below, "Tests follow the logic").
-  - Shared helpers come from the package's test entry point:  `$/parser/test`, `$/spell/test`, `$/ui/test/...`,
-    `$/server/test/...` (WWOD §4).
+  - Shared helpers come from the package's test entry point:  `$/parser/test`, `$/spell/test`, `$/ui/test-helpers/...`,
+    `$/server/test/...` (WWOD §4);  every set's element helpers are the kit's, `spell-kit/test-helpers/...`
+    (`ElementFixture`, `A11y` ...).
 - **Hand-rolled fakes over mock libraries:**
   - Hooks objects of `vi.fn()`:  `const hooks = { onChange: vi.fn() }`.
   - `vi.mock()` only to cut a module seam, e.g. `vi.mock("./loadRuntime", ...)`

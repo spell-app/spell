@@ -8,7 +8,7 @@ import { E } from "$/spell-element"
  * keeping the element objects, their attributes and their property values.
  * - Dev-only;  NEVER in a build.
  * - Loaded into every component barrel, before its `define()` calls run,
- *   by Spell UI's Vite plugin (`packages/ui/tools/HotElements.ts`).
+ *   by the kit's Vite plugin (`element/tools/HotElements.ts`), which Spell UI's `vite.config.ts` adds.
  * - SIDE EFFECT:
  *   `install()` wraps `UIComponent.define`, and hooks into every DOM element made (`DOMElement.hotReloadHooks`).
  * - Why:  `define()` is idempotent per tag, so a barrel re-run by HMR would return the OLD element class.

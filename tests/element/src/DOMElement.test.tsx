@@ -13,8 +13,8 @@ import {
   type DOMElementClass,
   type ElementSetup
 } from "$/spell-element"
-import { ElementFixture } from "$/spell-element/test/ElementFixture"
-import { Fixture } from "$/spell-element/test/Fixture"
+import { ElementFixture } from "$/spell-element/test-helpers/ElementFixture"
+import { Fixture } from "$/spell-element/test-helpers/Fixture"
 
 /**
  * The DOM element (`DOMElement`):  attributes and properties, the upgrade step, lifecycle, shadow root,
@@ -286,7 +286,8 @@ describe("DOMElement property values", () => {
     const { define } = testTag("translated", [attribute("label", "string")])
     const tag = `x-dom-traducido-${tagCount}`
     const Class = define(tag, { lang: "es", attributes: { label: "etiqueta" } })
-    // then the shared attributes;  their Spanish names are Spell UI's (`tests/ui/test/translate.test.tsx`)
+    // then the shared attributes;  their Spanish names are Spell UI's
+    // (`spell-ui/tests/test-helpers/translate.test.tsx`)
     expect(Class.observedAttributes[0]).toBe("etiqueta")
     expect(Class.observedAttributes).not.toContain("label")
     const host = await renderTag(tag, `etiqueta="A"`)

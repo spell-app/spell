@@ -61,7 +61,7 @@ The kit's code, one folder each, its tests in `tests/<folder>/`:
 | [toolchain/](toolchain/) | `spell-kit/toolchain/...` | the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, the run-time alias hook |
 | [server/](server/) | `spell-kit/server` | serving pages locally:  static folders, an Express-shaped router, live reload, ports, openers, a file lock, the generic page server, the site header |
 | [assembler/](assembler/) | `spell-kit/assembler` | assembling pages:  link targets (`Linker`), `formatHTML()`, bundles built on demand (`Bundle`), `DataFile`, `contentFolder` |
-| [element/](element/) | `spell-kit/element` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's) |
+| [element/](element/) | `spell-kit/element` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's);  `SkeletonText`;  the test helpers every set's tests use (`spell-kit/test-helpers/ElementFixture` ...);  the element tools (`spell-kit/element/tools/...`:  the component pack build, the root catalog, the elements' Vite settings, the HMR plugin ...) and their bin, `spell-pack build \| check` |
 
 - They were three repos, spell-util, spell-server and spell-element, merged in with their history (P9).
 

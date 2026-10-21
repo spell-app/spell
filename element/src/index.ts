@@ -14,7 +14,7 @@
  *   a component file reads them through `E` too (`@E.proto`)
  * - It imports only `$/util`'s generic files and Solid:  NEVER Spell UI, or any other package.
  * - NOTE: `HotDefinitions` is left out:  dev-only, and a SIDE EFFECT on import (it wraps `UIComponent.define`);
- *   Spell UI's HMR plugin loads it into each component barrel (`packages/ui/tools/HotElements.ts`).
+ *   the HMR plugin loads it into each component barrel (the kit's `element/tools/HotElements.ts`).
  * - NOTE: `ShadowEvents` (Solid's events kept from leaking out of shadow roots) is left out too:
  *   only `UIComponent` uses it, directly.
  * - NOTE: the files import this barrel back, as `E`:  a cycle, on purpose (WWOD §4 › "ONE namespace per sub-system").

@@ -296,7 +296,7 @@ export type ComponentVocabulary = {
    *   or a tag with nothing to show (`ui-popup`).
    * - Text, not a `SkeletonSpec`:  one form for Spell UI's vocabularies and a component pack's.
    *   - `yarn gen:root` (and `spell dev pack build`) parse it into a catalog.
-   *   - Spell UI's vocabularies test (`tests/ui/test/vocabularies.test.ts`) parses every one.
+   *   - Spell UI's vocabularies test (`spell-ui/tests/test-helpers/vocabularies.test.ts`) parses every one.
    * - NEVER translated:  drawing data, like `states`.
    */
   skeleton?: string

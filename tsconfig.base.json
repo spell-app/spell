@@ -25,11 +25,13 @@
       "$/assembler/*": ["./assembler/src/*"],
 
       // ## `element`:  still `$/spell-element`, the name every page's packs share it by (`packModuleKey()`, epic
-      // `repo-split` J72);  `$/spell-element/test/*` (its own tests' helpers) is longer than `$/spell-element/*`, so it
-      // wins
+      // `repo-split` J72);  `$/spell-element/test-helpers/*` (the test helpers, `spell-kit/test-helpers/...` from
+      // another repo) and `$/spell-element/tools/*` (the element tools, `spell-kit/element/tools/...`) are longer than
+      // `$/spell-element/*`, so they win
       "$/spell-element": ["./element/src/index.ts"],
       "$/spell-element/*": ["./element/src/*"],
-      "$/spell-element/test/*": ["./element/test/*"]
+      "$/spell-element/test-helpers/*": ["./element/test-helpers/*"],
+      "$/spell-element/tools/*": ["./element/tools/*"]
     }
   }
 }

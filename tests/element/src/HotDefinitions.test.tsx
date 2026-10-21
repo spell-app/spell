@@ -14,7 +14,7 @@ import {
   type UIComponentClass
 } from "$/spell-element"
 import { HotDefinitions } from "$/spell-element/HotDefinitions"
-import { ElementFixture } from "$/spell-element/test/ElementFixture"
+import { ElementFixture } from "$/spell-element/test-helpers/ElementFixture"
 
 /**
  * Hot reload of elements (`HotDefinitions`):

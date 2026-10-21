@@ -52,7 +52,7 @@ Each folder links to its own `AGENTS.md`:  read it before working there.
 | [toolchain](toolchain/AGENTS.md) | `spell-kit/toolchain/...` | | | what every repo's configs share:  the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, the run-time alias hook |
 | [server](server/AGENTS.md) | `spell-kit/server` | `$/server` | `SRV` | serving pages locally:  static folders, an Express-shaped router, live reload, ports, openers, a file lock, the generic page server, the site header |
 | [assembler](assembler/AGENTS.md) | `spell-kit/assembler` | `$/assembler` | `AS` | assembling pages:  link targets (`Linker`), `formatHTML()`, bundles built on demand (`Bundle`), `DataFile`, `contentFolder` |
-| [element](element/AGENTS.md) | `spell-kit/element` | `$/spell-element` | `E` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's) |
+| [element](element/AGENTS.md) | `spell-kit/element` | `$/spell-element` | `E` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's);  the test helpers every set's tests use (`spell-kit/test-helpers/...`);  the element tools (`spell-kit/element/tools/...`:  the pack build, the root catalog, the elements' Vite settings) and their bin, `spell-pack` |
 
 - Inside a folder, its own files by its `$/` alias;  ANOTHER folder of the kit by its entry (`spell-kit/util/string`,
   from `element/`), as before they were one package:  other repos' builds read those files' source, and a `$/` in them
@@ -104,7 +104,7 @@ The kit is always there, so no `needs` names it.
 | [spell-lang](spell-lang/AGENTS.md) | `parser`, `markdown`, `core`, `py`, `spell` | the kit |
 | [spell-ui](spell-ui/AGENTS.md) | the repo IS `@spell-app/ui` | the kit |
 | [spell-brand](spell-brand/AGENTS.md) | the repo IS `@spell-app/brand` | spell-ui, the kit |
-| [spell-epic](spell-epic/AGENTS.md) | the repo IS `@spell-app/epics` | spell-brand, spell-ui, the kit |
+| [spell-epic](spell-epic/AGENTS.md) | the repo IS `@spell-app/epics` | spell-ui, the kit |
 | [spell-app](spell-app/AGENTS.md) | `app`, `spaces`, `lsp`, `cli`, `page-server` (and `vscode`, its own yarn project) | spell-lang, spell-brand, spell-ui, the kit;  RUNS spell-epic by its page server's settings |
 
 - Three kinds of repo:
@@ -158,7 +158,9 @@ The kit is always there, so no `needs` names it.
   (`tests/server/src/...` tests `server/src/...`), with their snapshots and test data.
   - Each folder's Vitest finds them (its config's `dir`);
     a `tsconfig.json` in each tests folder gives them the folder's own settings and the aliases.
-  - Their helpers stay in the folders:  `server/test/`, `element/test/`.
+  - Their helpers stay in the folders:  `server/test/`, `element/test-helpers/`.
+    - `element/test-helpers/` are every set's (`spell-kit/test-helpers/ElementFixture` ...:  epic `repo-split` P10,
+      Q39):  [element's AGENTS.md](element/AGENTS.md), "Tests".
 - Tests only reach DOWN:
   - a higher repo's tests may use a lower repo's helpers (spell-app's and spell-brand's run Spell UI's setup,
     `@spell-app/ui/test/setup.ts`) and its test data (spell-app's spaces reads spell-lang's frozen test projects)

@@ -16,8 +16,8 @@ const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
  *     and the Solid compiler must see decorator-free code
  *   - then Solid's
  *   - aliases from the repo root's `tsconfig.base.json` (`resolve.tsconfigPaths`), and ONE Solid (`dedupe`)
- * - The tests draw their elements on the package's own stand-in settings (`test/TestSettings.ts`), installed before
- *   every test file, and use its own helpers (`$/spell-element/test/...`).
+ * - The tests draw their elements on the package's own stand-in settings (`test-helpers/TestSettings.ts`), installed before
+ *   every test file, and use its own helpers (`$/spell-element/test-helpers/...`).
  *   - What needs Spell UI's real runtime is tested in Spell UI's own tests.
  * - The repo root's `vitest.config.ts` picks this up as project `spell-element`.
  */
@@ -36,7 +36,7 @@ export default defineConfig({
     dir: resolve(import.meta.dirname, "../tests/element"),
     include: ["src/**/*.test.{ts,tsx}"],
     // the stand-in settings, installed before every test file
-    setupFiles: [resolve(import.meta.dirname, "test/TestSettings.ts")],
+    setupFiles: [resolve(import.meta.dirname, "test-helpers/TestSettings.ts")],
     // a guard:  an element bug that halts rendering must fail its test, not hang the run
     testTimeout: 10_000,
     browser: {

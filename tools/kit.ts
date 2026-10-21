@@ -39,7 +39,9 @@ const FOLDERS: Folder[] = [
   { name: "util", lint: ["src"], node: true },
   { name: "server", lint: ["src", "test", "scripts"], node: true },
   { name: "assembler", lint: ["src"], node: true },
-  { name: "element", lint: ["src", "test"] }
+  { name: "element", lint: ["src", "test-helpers"] },
+  // the element tools (epic `repo-split` P10):  node code, its own folder of checks beside the browser-safe element
+  { name: "element/tools", lint: ["."], node: true }
 ]
 
 /** The `vp lint` flags of a check (`lint`):  every warning fails it. */

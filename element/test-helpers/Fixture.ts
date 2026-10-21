@@ -2,9 +2,10 @@ import { afterEach, onTestFinished } from "vite-plus/test"
 
 /**
  * Render HTML into the live document for a test, and remove it again afterwards.
- * - Real document, not a detached fragment:  custom elements only upgrade and run `connectedCallback` once connected.
- * - Cleanup is registered per render with `onTestFinished()`, so a test never sees a previous test's DOM.
- * - Spell UI has its own, with the same API.
+ * - Real document, not a detached fragment:  custom elements only upgrade, run `connectedCallback`,
+ *   and get styles / layout once connected.
+ * - Cleanup is registered per render with `onTestFinished()`, so a test never sees a previous test's DOM
+ *   and callers never write their own `afterEach`.
  */
 export class Fixture {
   /**
@@ -24,7 +25,11 @@ export class Fixture {
     return element as T
   }
 
-  /** Remove every fixture container still in the document:  a backstop, after each test. */
+  /**
+   * Remove every fixture container still in the document.
+   * - Backstop for a fixture rendered outside a test (e.g. at describe time), where
+   *   `onTestFinished()` isn't available -- call from `afterEach` / `afterAll` there.
+   */
   static cleanup() {
     for (const container of document.querySelectorAll("[data-fixture]")) container.remove()
   }

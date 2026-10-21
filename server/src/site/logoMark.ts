@@ -1,9 +1,9 @@
 /**
  * Spell's hat mark, the site header's brand (`SiteHeader`):  an inline SVG in `currentColor`.
- * - from `brand/spell-design-system/assets/logo/logo-mark.svg` (its `readme.md`, "logo-mark"),
- *   its c2pa `<metadata>` dropped
+ * - from Spell's logo mark, `logo-mark.svg` (spell-brand's `assets/logo/`, epic `repo-split` P10;  the content repo's
+ *   `brand/spell-design-system/assets/logo/` before), its c2pa `<metadata>` dropped
  * - copied, not imported:  `server` imports no package, and the header is browser code with no asset loader
- * - re-copy when the mark changes, then `yarn favicon` (in `packages/server`):  the favicon is made from it
+ * - re-copy when the mark changes, then `yarn favicon` (in the kit):  the favicon is made from it
  */
 
 /** The mark's SVG, sized by its container (`height` in CSS). */

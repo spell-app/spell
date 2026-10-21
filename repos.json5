@@ -15,11 +15,7 @@
     { "name": "spell-lang", "url": "git@github.com:spell-app/spell-lang.git", "needs": [] },
     { "name": "spell-ui", "url": "git@github.com:spell-app/spell-ui.git", "needs": [] },
     { "name": "spell-brand", "url": "git@github.com:spell-app/spell-brand.git", "needs": ["spell-ui"] },
-    {
-      "name": "spell-epic",
-      "url": "git@github.com:spell-app/spell-epic.git",
-      "needs": ["spell-brand", "spell-ui"]
-    },
+    { "name": "spell-epic", "url": "git@github.com:spell-app/spell-epic.git", "needs": ["spell-ui"] },
     {
       "name": "spell-app",
       "url": "git@github.com:spell-app/spell-app.git",
