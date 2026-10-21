@@ -12,7 +12,7 @@ import {
   type EpicAttributeSpec,
   type EpicTag
 } from "$/epics/definitions"
-import { SkeletonText } from "@spell-app/ui/vocabulary/SkeletonText"
+import { SkeletonText } from "spell-kit/element/SkeletonText"
 
 /** The pack's family folders. */
 const COMPONENTS = fileURLToPath(new URL("../../src/components/", import.meta.url))

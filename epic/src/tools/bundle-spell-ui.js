@@ -48,37 +48,15 @@
  * - A classic script (IIFE) with NO Spell UI and no Solid in it, and no global of its own:  it runs beside the page's
  *   Spell UI, never with a second one (`checkNoSpellUI()`)
  *
- * The DESIGN target (epic `claude-design`, P8):  a claude.ai Design System's `components/bundle.js`.
- *
- *   node tools/bundle-spell-ui.js --design [--out <dir>] [--skip-ui-build]     (yarn design:bundle)
- *
- * - Entry `_assets/spell-ui.design.entry.js`, written to `<dir>/bundle.js`.
- *   - `--out` is relative to the working folder.
- *   - Default `DESIGN_OUT`:  `project/components/` in what `spell dev design build` writes
- *     (UI's `build/design-system/`, ignored by git), which that command leaves in place.
- * - Same esbuild config and resolver as the docs bundle (`bundle()`), but:
- *   - the engines are INLINED, not lazy (Claude Design refuses a relative `<script src>`):
- *     their `dist/` chunks aren't stubbed, so esbuild inlines them like every other string-literal `import()`
- *   - no `_assets/lazy/` or `_assets/emoji/` is written,
- *     and emoji chunks stay empty stand-ins (emoji names draw nothing)
- *   - `spell-ui:icons` registers EVERY Font Awesome Free icon (`designIconsModule()`)
- * - Readers INLINE the file, so `escapeForInlining()` rewrites each `<!--` / `</script` as `\x3C...`.
- *   The build FAILS if one survives, if any `import()` / `import.meta` does, or if it's over `DESIGN_MAX_BYTES`.
- * - No `bundle.css`:  every element adopts its own sheets and the theme its page sheet;
- *   page typography is UI's opt-in `class="ui-typography"` on `<body>`.
- * - The brand's `<brand-*>` elements too (P11;  `<ui-brand-*>` before epic `people-and-orgs` P18):
- *   `@spell-app/brand/design` is the brand's own build of them, spell-brand's `dist/brand-design.js`.
- *   - Built by `vite.design.config.ts`, run first unless `--skip-ui-build`
- *     (Solid JSX needs the Solid compiler, which esbuild isn't).
- *   - Its `$/ui/core` / `$/ui/forms` imports resolve to UI's `dist/`, the modules UI's own elements use,
- *     so there's one `UIComponent` and one `ValueSets`.
+ * NOT the claude.ai design bundle (Claude Design's `components/bundle.js`, with the brand's elements):  spell-brand's
+ * `yarn design:bundle` since epic `repo-split` P10 (Q32), whose resolver and checks are a copy of these.
  */
 
 import { build } from "esbuild"
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
-import { fileURLToPath, pathToFileURL } from "node:url"
+import { fileURLToPath } from "node:url"
 import { Script } from "node:vm"
 import { gzipSync } from "node:zlib"
 
@@ -98,25 +76,12 @@ const UI_DIR = realPath(
 )
 /** spell-element, the `spell-kit/element` package, by its real path:  its source must never be bundled. */
 const ELEMENT_DIR = packageDir("spell-kit/element")
-/**
- * The brand, the `@spell-app/brand` package (spell-brand), where Node's resolver finds it:  its elements join the
- * design bundle (P11).  Only the design target reads it (`brandDir()`).
- */
-const BRAND_DIR = packageDir("@spell-app/brand")
-/** The brand's build of its elements for the design bundle (`vite.design.config.ts` there). */
-const BRAND_DESIGN = join(BRAND_DIR ?? "@spell-app/brand (not installed)", "dist/brand-design.js")
 const ASSETS = join(DOCS, "tools/_assets")
 
 const args = process.argv.slice(2)
-/** Building the design bundle (`--design`), not the docs one. */
-const DESIGN = args.includes("--design")
-/** Where the design bundle goes by default:  in the design-system folder `spell dev design build` writes. */
-const DESIGN_OUT = join(UI_DIR, "build/design-system/project/components")
-/** Claude Design's cap on a design system's `bundle.js` (6 MB, counted in decimal to be safe). */
-const DESIGN_MAX_BYTES = 6_000_000
 
-const ENTRY = join(ASSETS, DESIGN ? "spell-ui.design.entry.js" : "spell-ui.entry.js")
-const OUTFILE = DESIGN ? join(resolve(argValue("--out") ?? DESIGN_OUT), "bundle.js") : join(ASSETS, "spell-ui.js")
+const ENTRY = join(ASSETS, "spell-ui.entry.js")
+const OUTFILE = join(ASSETS, "spell-ui.js")
 /** Building ONLY the comments' own script (`--comments`). */
 const COMMENTS_ONLY = args.includes("--comments")
 /** The comments' own script:  its entry, and the classic script it's built into. */
@@ -127,13 +92,6 @@ const PAGE_RUNTIME = join(ASSETS, "spell-doc-runtime.js")
 
 /** UI's Font Awesome pack, where `ICONS`' files are read from. */
 const ICON_PACK = join(UI_DIR, "src/icons/icon-packs/fa7-free")
-
-/**
- * Packs the design bundle inlines WHOLE, in order:  the first to give a name keeps it (`designIconsModule()`).
- * - `fa7-free`:  solid + regular (`… outline`) + its few brand extras, UI's default pack
- * - `fa7-brands`:  every brand;  only fills names `fa7-free` doesn't give, so a name means what it means on any page
- */
-const DESIGN_PACKS = ["fa7-free", "fa7-brands"].map((id) => join(UI_DIR, "src/icons/icon-packs", id))
 
 /**
  * Icons bundled into the script, as `<style>/<file name>` => the names to register it under.
@@ -314,18 +272,13 @@ const LAZY = [
 ]
 
 if (!COMMENTS_ONLY) {
-  if (!args.includes("--skip-ui-build")) {
-    buildUI()
-    if (DESIGN) buildBrand()
-  }
-  if (!DESIGN) {
-    writeEmojiChunks()
-    await writeLazyScripts()
-  }
+  if (!args.includes("--skip-ui-build")) buildUI()
+  writeEmojiChunks()
+  await writeLazyScripts()
   const warnings = await bundle()
   report(warnings)
 }
-if (!DESIGN) report(await bundleComments(), COMMENTS_OUT)
+report(await bundleComments(), COMMENTS_OUT)
 
 ////////////////
 // ## UI build
@@ -340,15 +293,6 @@ function buildUI() {
   if (run("yarn", ["build"], "build @spell-app/ui (tsc + vite)", { allowFailure: true })) return
   console.warn("!! UI's tsc failed:  building with `vite build` alone (the bundle may carry type errors)")
   run("yarn", ["vite", "build"], "build @spell-app/ui (vite only)")
-}
-
-/** Builds the brand's elements for the design bundle, `BRAND_DESIGN`, from its working tree (P11). */
-function buildBrand() {
-  if (!BRAND_DIR)
-    fail("no @spell-app/brand installed:  the design bundle needs spell-brand (`yarn install` at the top)")
-  run("yarn", ["vp", "build", "--config", "vite.design.config.ts"], "build the brand elements (@spell-app/brand)", {
-    cwd: BRAND_DIR
-  })
 }
 
 /**
@@ -371,7 +315,6 @@ function run(command, commandArgs, label, { allowFailure = false, cwd = UI_DIR }
 
 /**
  * Bundles the entry into `OUTFILE`, then checks the output is safe for a classic script on `file://`.
- * - Design target:  also escaped for inlining, and checked for that and for size (`checkDesignBundle()`).
  * - Returns esbuild's warnings, as text.
  */
 async function bundle() {
@@ -399,9 +342,7 @@ async function bundle() {
   checkOneSolid(result.metafile)
   checkEachFileOnce(result.metafile)
   checkNoElementSource(result.metafile)
-  if (DESIGN) escapeForInlining()
   checkClassicScript()
-  if (DESIGN) checkDesignBundle()
   return result.warnings.map((warning) => `${warning.location?.file ?? ""}: ${warning.text}`)
 }
 
@@ -437,8 +378,6 @@ async function bundleComments() {
  * - Solid imports resolve from UI's root (`SOLID`), whoever imports them
  * - `spell-ui:icons`:  the generated icon registrations (`iconsModule()`)
  * - the page runtime:  an empty module until its file exists
- * - design target:
- *   `@spell-app/brand/design` ~== `BRAND_DESIGN`, and the `$/ui/<entry>` it imports ~== UI's `dist/<entry>.js`
  */
 function spellUiResolver() {
   return {
@@ -447,17 +386,14 @@ function spellUiResolver() {
       pluginBuild.onResolve({ filter: /^spell-ui:icons$/ }, () => ({ path: "icons", namespace: "spell-ui" }))
       pluginBuild.onResolve({ filter: /^spell-ui:emoji$/ }, () => ({ path: "emoji", namespace: "spell-ui" }))
       pluginBuild.onResolve({ filter: /^spell-ui:lazy$/ }, () => ({ path: "lazy", namespace: "spell-ui" }))
-      // the engines' `dist/` chunks:  never inlined (`spell-ui:lazy` loads them as scripts);  an empty stand-in.
-      // The design bundle inlines them instead:  it can't load a script of its own.
-      for (const { chunk } of DESIGN ? [] : LAZY) {
+      // the engines' `dist/` chunks:  never inlined (`spell-ui:lazy` loads them as scripts);  an empty stand-in
+      for (const { chunk } of LAZY) {
         pluginBuild.onResolve({ filter: chunk }, () => ({ path: "lazy-chunk", namespace: "spell-ui" }))
       }
       // UI's emoji data chunks:  never inlined (`EmojiData.chunkLoader` loads them as scripts);  an empty stand-in
       pluginBuild.onResolve({ filter: EMOJI_CHUNK }, () => ({ path: "emoji-chunk", namespace: "spell-ui" }))
-      pluginBuild.onLoad({ filter: /.*/, namespace: "spell-ui" }, async (loaded) => {
-        if (loaded.path === "icons") {
-          return { contents: DESIGN ? await designIconsModule() : iconsModule(), resolveDir: ASSETS, loader: "js" }
-        }
+      pluginBuild.onLoad({ filter: /.*/, namespace: "spell-ui" }, (loaded) => {
+        if (loaded.path === "icons") return { contents: iconsModule(), resolveDir: ASSETS, loader: "js" }
         if (loaded.path === "emoji") return { contents: emojiModule(), resolveDir: ASSETS, loader: "js" }
         if (loaded.path === "emoji-chunk") return { contents: "export default {}", loader: "js" }
         if (loaded.path === "lazy") return { contents: lazyModule(), resolveDir: ASSETS, loader: "js" }
@@ -465,17 +401,6 @@ function spellUiResolver() {
         return { contents: "", loader: "js" }
       })
       pluginBuild.onResolve({ filter: /^@spell-app\/ui(\/.*)?$/ }, ({ path }) => ({ path: uiDistPath(path) }))
-      pluginBuild.onResolve({ filter: /^@spell-app\/brand\/design$/ }, () => {
-        if (!existsSync(BRAND_DESIGN)) fail(`${relative(DOCS, BRAND_DESIGN)} is missing:  run without --skip-ui-build`)
-        return { path: BRAND_DESIGN }
-      })
-      // `$/spell-element`, what the brand's elements are written on:  Spell UI's `dist/core.js`, which carries it
-      pluginBuild.onResolve({ filter: /^\$\/spell-element$/ }, () => ({ path: uiDistPath("@spell-app/ui/core") }))
-      pluginBuild.onResolve({ filter: /^\$\/ui(\/.*)?$/ }, ({ path }) => {
-        const file = uiDistPath(`@spell-app/ui${path.slice("@spell-app/ui".length)}`)
-        if (!existsSync(file)) fail(`${path} (a brand element's import) has no ${relative(DOCS, file)}`)
-        return { path: file }
-      })
       pluginBuild.onResolve({ filter: SOLID }, async ({ path, kind, pluginData }) => {
         if (pluginData?.fromUiRoot) return undefined
         const resolved = await pluginBuild.resolve(path, { kind, resolveDir: UI_DIR, pluginData: { fromUiRoot: true } })
@@ -520,60 +445,6 @@ function iconsModule() {
     `UI.load().then((ui) => {`,
     `  ui.icons.reset()`,
     `  for (const [names, svg] of ICONS) for (const name of names) ui.icons.register(name, svg)`,
-    `})`
-  ].join("\n")
-}
-
-/**
- * Source of `spell-ui:icons` for the DESIGN bundle:
- * every icon of `DESIGN_PACKS`, so any Font Awesome Free name draws, with no pack to load.
- * - Names as UI's packs give them (`IconName.claim()` on each index:  file name, `… outline`, FA's aliases);
- *   across packs the FIRST to give a name keeps it;
- *   then `ICONS`' names on top, so widgets' own names (`close`, `search`) mean what they mean in the docs bundle.
- * - The SVGs travel as ONE string, an `<svg>` holding each icon's `<svg>` in order,
- *   parsed once (one `DOMParser` call, not ~2,200).
- *   - `NAMES[i]` are the names of its `i`th child.
- *   - Each is `register()`ed under each name in the first `UI.load()` callback, after `reset()`, like `iconsModule()`.
- * - Each file's licence comment is stripped (they're all one text, and `<!--` can't be in the bundle anyway):
- *   the text goes ONCE into a `/*!` legal comment, which esbuild keeps at the end.
- * - Their `xmlns` too:  the outer `<svg>` gives it.
- * - NOTE:  `register()`ed icons answer plain names only:  `fa7-free:bell` (a `prefix:` name) draws nothing here.
- */
-async function designIconsModule() {
-  const { IconName } = await import(pathToFileURL(join(UI_DIR, "src/icons/IconName.ts")).href)
-  /** normalized name -> SVG file */
-  const files = new Map()
-  for (const folder of DESIGN_PACKS) {
-    const index = (await import(pathToFileURL(join(folder, "pack.js")).href)).default
-    const claimed = IconName.claim(Object.entries(index.icons).map(([key, entry]) => [key, entry.alias]))
-    for (const [name, key] of claimed) if (!files.has(name)) files.set(name, join(folder, `${key}.svg`))
-  }
-  for (const [file, names] of Object.entries(ICONS)) {
-    for (const name of names) files.set(IconName.normalize(name), join(ICON_PACK, `${file}.svg`))
-  }
-  /** SVG file -> its names, in first-claimed order */
-  const namesOf = new Map()
-  for (const [name, file] of files) namesOf.set(file, [...(namesOf.get(file) ?? []), name])
-  const licenses = new Set()
-  const svgs = [...namesOf.keys()].map((file) => {
-    if (!existsSync(file)) fail(`no icon ${relative(DOCS, file)}`)
-    const svg = readFileSync(file, "utf8")
-      .trim()
-      .replace(/<!--!?\s*([\s\S]*?)\s*-->/g, (_comment, text) => (licenses.add(text), ""))
-      .replace(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"/, "<svg")
-    if (!svg.startsWith("<svg") || svg.includes("<!--")) fail(`${relative(DOCS, file)}:  not one plain <svg>`)
-    return svg
-  })
-  console.log(`-- icons:  ${svgs.length} SVGs, ${files.size} names`)
-  return [
-    ...[...licenses].map((text) => `/*! ${text.replaceAll("*/", "* /")} */`),
-    `import { UI } from "@spell-app/ui/core"`,
-    `const SHEET = ${JSON.stringify(`<svg xmlns="http://www.w3.org/2000/svg">${svgs.join("")}</svg>`)}`,
-    `const NAMES = ${JSON.stringify([...namesOf.values()])}`,
-    `UI.load().then((ui) => {`,
-    `  ui.icons.reset()`,
-    `  const icons = new DOMParser().parseFromString(SHEET, "image/svg+xml").documentElement.children`,
-    `  NAMES.forEach((names, at) => { for (const name of names) ui.icons.register(name, icons[at]) })`,
     `})`
   ].join("\n")
 }
@@ -671,8 +542,7 @@ function checkOneSolid(metafile) {
 
 /**
  * Fails if spell-element's SOURCE made it into the bundle:  a second copy beside the one Spell UI's `dist/core.js`
- * carries, so two `UIComponent`s and two `ShadowEvents` (the brand's `$/spell-element` import, unless the resolver
- * sends it to `dist/core.js`;  epic `epic-engine` P9).
+ * carries, so two `UIComponent`s and two `ShadowEvents` (epic `epic-engine` P9).
  */
 function checkNoElementSource(metafile) {
   const sources = Object.keys(metafile.inputs).filter((input) => isInside(realPath(resolve(input)), ELEMENT_DIR))
@@ -727,40 +597,6 @@ function checkClassicScript(file = OUTFILE) {
   }
   if (/(?<![.\w$])import\((?![^)]*\)\s*\{)/.test(code)) problems.push("a runtime import()")
   if (problems.length) fail(`${relative(DOCS, file)} still has ${problems.join(", ")}`)
-}
-
-/**
- * Rewrites every `<!--` and `</script` in the design bundle as `\x3C!--` / `\x3C/script` (caveat C5):
- * readers INLINE a design system's `bundle.js` into a `<script>`, where either would end it or change how it parses.
- * - Same meaning wherever minified code has them:
- *   in a string, a template or a regex `\x3C` IS `<`;  in a comment it's just text.
- * - An odd run of backslashes before the `<` already escaped it (`\<`):  one is dropped.
- * - SIDE EFFECT:  rewrites `OUTFILE`;  `checkDesignBundle()` then proves none survive and it still parses.
- */
-function escapeForInlining() {
-  let count = 0
-  const code = readFileSync(OUTFILE, "utf8").replace(/(\\*)<(?=!--|\/script)/gi, (_match, slashes) => {
-    count++
-    return `${slashes.length % 2 ? slashes.slice(1) : slashes}\\x3C`
-  })
-  writeFileSync(OUTFILE, code)
-  console.log(`-- escaped ${count} <!-- / </script for inlining`)
-}
-
-/**
- * Fails unless the design bundle is fit for a claude.ai design system:
- * no `<!--` or `</script` left, still a script that parses, at most `DESIGN_MAX_BYTES`.
- */
-function checkDesignBundle() {
-  const code = readFileSync(OUTFILE, "utf8")
-  if (/<!--|<\/script/i.test(code)) fail(`${OUTFILE} still has a <!-- or </script`)
-  try {
-    new Script(code, { filename: OUTFILE })
-  } catch (error) {
-    fail(`${OUTFILE} no longer parses after escaping:  ${error}`)
-  }
-  const bytes = Buffer.byteLength(code)
-  if (bytes > DESIGN_MAX_BYTES) fail(`${OUTFILE} is ${bytes} bytes:  over Claude Design's ${DESIGN_MAX_BYTES}`)
 }
 
 ////////////////
@@ -837,19 +673,8 @@ function lazyModule() {
 function report(warnings, file = OUTFILE) {
   const code = readFileSync(file)
   const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`
-  // relative inside the checkout, else (an `--out` elsewhere) absolute
-  const shown = relative(resolve(DOCS, ".."), file).startsWith("..") ? file : relative(DOCS, file)
-  console.log(`-- ${shown}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`)
+  console.log(`-- ${relative(DOCS, file)}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`)
   for (const warning of warnings) console.warn(`!! ${warning}`)
-}
-
-/** Value after flag `name` (`--out <dir>`), or `undefined`;  exits if the flag has none. */
-function argValue(name) {
-  const at = args.indexOf(name)
-  if (at < 0) return undefined
-  const value = args[at + 1]
-  if (!value || value.startsWith("--")) fail(`${name} needs a value`)
-  return value
 }
 
 /** Prints `message` and exits with an error. */

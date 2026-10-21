@@ -6,16 +6,16 @@ import { expect, test } from "vite-plus/test"
 import { packageDir } from "$/epics/tools/packageDir"
 
 /**
- * Spell UI's pack tooling, `spell-ui-pack` (`yarn pack:check`;  epic `repo-split` P5), from the `@spell-app/ui`
- * workspace (spell-ui), where Node's resolver finds it.
+ * The kit's pack tooling, `spell-pack` (`yarn pack:check`;  Spell UI's `spell-ui-pack` until epic `repo-split` P10),
+ * from the kit's `element/`, where Node's resolver finds it.
  */
-const SPELL_UI_PACK = join(packageDir("@spell-app/ui")!, "bin/spell-ui-pack.mjs")
+const SPELL_PACK = join(packageDir("spell-kit/element")!, "bin/spell-pack.mjs")
 
 /** spell-epic's root:  the package, whose `package.json` names the pack (`"spellPack"`, its `src/`). */
 const PACKAGE = fileURLToPath(new URL("../", import.meta.url))
 
 test("`src/components/__pack/` is CURRENT:  built from the vocabularies and sources as they are -- `yarn pack:build` if not", () => {
-  const check = spawnSync(process.execPath, [SPELL_UI_PACK, "check"], {
+  const check = spawnSync(process.execPath, [SPELL_PACK, "check"], {
     cwd: PACKAGE,
     encoding: "utf8"
   })

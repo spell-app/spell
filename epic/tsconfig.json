@@ -14,8 +14,7 @@
     "types": ["vite/client", "node", "spell-kit/toolchain/types"]
   },
   "include": ["src", "scripts", "vite.config.ts", "vitest.config.ts"],
-  // - `src/components/__pack/` is generated (`spell-ui-pack build`, `yarn pack:build`):  not ours to check
+  // - `src/components/__pack/` is generated (`spell-pack build`, `yarn pack:build`):  not ours to check
   // - `src/tools/_assets/`:  the docs pages' browser code (`spell-ui.entry.js` pulls in UI source), bundled, not checked
-  // - `src/tools/vendor/`:  minified third-party code (Claude Design's runtime, for `check-design-bundle.js`)
-  "exclude": ["src/components/__pack", "node_modules", "src/tools/_assets", "src/tools/vendor"]
+  "exclude": ["src/components/__pack", "node_modules", "src/tools/_assets"]
 }

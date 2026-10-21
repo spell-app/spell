@@ -22,9 +22,10 @@ The page must load Spell UI's docs bundle FIRST ([spell-ui.js](tools/_assets/spe
 
 If you find yourself writing a second copy of any of these, stop and reuse.
 
-- the pack's build, catalog and staleness check:  Spell UI's, `spell-ui-pack`
-  ([ComponentPack.ts](../ui/tools/ComponentPack.ts))
-- reading a vocabulary's tag and skeleton:  Spell UI's `RootCatalog` ([RootCatalog.ts](../ui/tools/RootCatalog.ts))
+- the pack's build, catalog and staleness check:  the kit's, `spell-pack`
+  ([ComponentPack.ts](../../element/tools/ComponentPack.ts))
+- reading a vocabulary's tag and skeleton:  the kit's `RootCatalog`
+  ([RootCatalog.ts](../../element/tools/RootCatalog.ts))
 - the element authoring API:  `spell-kit/element`, and Spell UI's `@spell-app/ui/core`
 
 ## Files
@@ -41,7 +42,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | `src/links/` | `$/epics/links`:  short addresses (`SAGA:/<saga>/<epic>#<id>`) and `<epic-link>`'s attributes as a page and an id (`EpicAddress`), and what a page holds to land on (`PageTargets`);  pure, for the elements, the docs runtime and the tool (epic `epic-workflow` P15) |
 | `src/convert/` | the converter (`epic convert`):  an epic page in the old markup => `<epic-*>` markup, with a proof that no id, link or word was lost;  every live doc was converted at P12, and it stays for a doc restored from an old backup |
 | `src/tool/` | the `epic` tool (`epic <verb>`;  `spell dev plan-doc`, its old spelling), node only, not in the pack;  `PLAN-DOC.md`, the rules for a doc's data;  `templates/plan.html`, a new doc |
-| `tests/epics/src/pack.test.ts` (repo root) | runs `spell-ui-pack check`:  `components/__pack/` and `docs/__data/` are current |
+| `tests/epics/src/pack.test.ts` (repo root) | runs `spell-pack check`:  `components/__pack/` and `docs/__data/` are current |
 | `components/__pack/` | GENERATED, committed:  `epics.catalog.ts`, `epics.entry.ts`, `epics.pack.js` |
 | `docs/` | Epic UI, the elements' docs pages, served at `/components/epics/`:  `index.html`, `<tag>.html`, `__parts/`, `__data/` ([AGENTS.md](AGENTS.md), "Epic UI, the docs set") |
 | `src/site/` | `EpicUISite`:  `docs/__data/`'s generated files (`yarn site:data`) |

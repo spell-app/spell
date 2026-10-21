@@ -14,12 +14,12 @@ const UI_CONFIG = "@spell-app/ui/vite.config.ts"
 const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConfig }
 
 /**
- * vitest config for `@spell-app/epics`, a component pack (`spell-ui-pack`):  two projects, over `tests/`.
- * - `node` -- everything but the elements:  the epic code's tests, `pack.test.ts` among them (`spell-ui-pack check`:
+ * vitest config for `@spell-app/epics`, a component pack (`spell-pack`):  two projects, over `tests/`.
+ * - `node` -- everything but the elements:  the epic code's tests, `pack.test.ts` among them (`spell-pack check`:
  *   `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
  * - `browser` -- `components/**`:  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
  *   chromium), as Spell UI's are.  `baseConfig()`:  Spell UI's plugins (decorators BEFORE Solid), Solid dedupe,
- *   Lightning CSS;  Spell UI's test helpers come from `@spell-app/ui/test/...`
+ *   Lightning CSS;  the test helpers come from the kit (`spell-kit/test-helpers/...`)
  * - NOT here:  the window script's and the extension's tests (`tests/window.test.mjs`, `tests/vscode/`), plain
  *   `node --test` (`yarn test:scripts`)
  * - `prefix` / `root`:  for a config that lists these beside others (`epics:node` / `epics:browser`), `root` set to

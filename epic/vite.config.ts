@@ -7,15 +7,14 @@ import { fmtConfig, packageLint, patternLintIn } from "spell-kit/toolchain/lint"
  * extension read), from the shared toolchain package, `spell-kit/toolchain/lint` (spell-util's, a workspace of the top
  * `spell` install, epic `epic-engine` P10):  the copy of its `vite.lint.ts` that was here is gone.
  * - ONE block for the whole repo:  spell-epic is one package (epic `epic-eject` J14), so the root is the package.
- * - The pack's BUILD is Spell UI's, the same for every pack:
- *   `spell-ui-pack build` (`@spell-app/ui`'s `tools/ComponentPack.ts`, in spell-ui), on Spell UI's `baseConfig()`.
+ * - The pack's BUILD is the kit's, the same for every pack:
+ *   `spell-pack build` (`spell-kit/element/tools/ComponentPack`), on the kit's `elementBaseConfig()`.
  * - Tests:  `vitest.config.ts` beside this.
  * - Not ours to lint or format:
  *   - `src/components/__pack/`:  generated
  *   - in the docs tools' `_assets/`:  the bundles `spell dev docs update` writes (`spell-ui.js`, `spell-comments.js`,
  *     `lazy/`, `emoji/`),
  *     and the vendored highlight.js
- *   - `src/tools/vendor/`:  Claude Design's runtime
  *   - the extension's build (`vscode/out`)
  */
 /**
@@ -55,8 +54,7 @@ export default defineConfig({
         "src/tools/_assets/spell-comments.js",
         "src/tools/_assets/lazy",
         "src/tools/_assets/emoji",
-        "src/tools/_assets/highlight.min.js",
-        "src/tools/vendor"
+        "src/tools/_assets/highlight.min.js"
       ]
     }),
     overrides: [

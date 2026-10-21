@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
-import { expectAccessible } from "@spell-app/ui/test/A11y"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 // the page's own Spell UI, which draws the code:  the docs bundle defines it on a real page
 import "@spell-app/ui/ui-code"

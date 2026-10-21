@@ -36,9 +36,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       paint):  `customElements.whenDefined()` to wait for it.
 
 - Made by `spell dev pack new epics --prefix epic-`.
-  - Its build and check are Spell UI's own pack tooling, `spell-ui-pack`
-    ([ComponentPack.ts](../../spell-ui/tools/ComponentPack.ts), epic `repo-split` P5), which the CLI's `spell dev pack` calls
-    too:  every pack builds and checks the same way.
+  - Its build and check are the kit's pack tooling, `spell-pack`
+    ([ComponentPack.ts](../../element/tools/ComponentPack.ts);  Spell UI's `spell-ui-pack` from epic `repo-split` P5
+    to P10), which the CLI's `spell dev pack` calls too:  every pack builds and checks the same way.
 - `components/<tag>/` (`$/epics/components`) -- one folder per element family.
   - Written exactly like a Spell UI family:
     [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Overview" and "Solid authoring".
@@ -92,7 +92,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The docs runtime puts a block's bullhorn there (see "Comments").
     - NOT the cards with a heading band (a reply, a status card, a note ...):  nothing needs it there yet.
 - `src/` (`$/epics`, `EP`) -- code the elements and the node tools share.
-  - Its test, [pack.test.ts](../tests/pack.test.ts), runs `spell-ui-pack check` (`yarn pack:check`).
+  - Its test, [pack.test.ts](../tests/pack.test.ts), runs `spell-pack check` (`yarn pack:check`).
   - `definitions/` -- the ONE description of every element:
     - `Definitions.all`:  each vocabulary as data, plus `children` (the content model)
     - Node-safe:  imports vocabulary files, never a family's barrel.
@@ -337,7 +337,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `ProseRewrite` turns them into elements,
         for the tool's way in (`IncomingHtml`) and the converter's second pass alike.
 - `components/__pack/` -- GENERATED, committed.  NEVER edit.
-  - Built by `spell-ui-pack build` (`yarn pack:build`).
+  - Built by `spell-pack build` (`yarn pack:build`).
   - `pack/` until P18 of `people-and-orgs`:  every pack is built inside its families' folder, `__` marking it as no family.
   - `epics.catalog.ts` -- tag => family folder + skeleton, read from the vocabularies.
     Its second line records the hash of the sources it was built from.
@@ -358,7 +358,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## Rules
 
 - Change an element -- its vocabulary above all, or any file under `components/` or `src/` -- then:
-  1. `yarn pack:build` (`spell-ui-pack build`)
+  1. `yarn pack:build` (`spell-pack build`)
   2. in the same change, commit the pack, `components/__pack/`, and the docs data the build writes too, `docs/__data/`
   - `yarn pack:check` exits 1 while either is stale, and the pack's test (`pack.test.ts`) runs it:
     so `yarn test` and `yarn review` fail until you build.
@@ -370,7 +370,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The build fails on any other Spell UI, `spell-kit/element` or Solid import, which the page couldn't share:
     a deeper `@spell-app/ui/...` or `spell-kit/element/...`, say.
   - Another shared module:
-    add it to Spell UI's `packModules` AND to `PACK_MODULES`, in [ComponentPack.ts](../../spell-ui/tools/ComponentPack.ts).
+    add it to Spell UI's `packModules` AND to `PACK_MODULES`, in the kit's
+    [packModules.ts](../../element/tools/packModules.ts).
 - Every tag starts `epic-`:  `<ui-root>` knows the pack's tags by that prefix.
 - Every sheet NAME starts `epic-` too:  `elementSetup = { styleSheets: { "epic-item": itemCSS } }`.
   - Spell UI keeps ONE sheet per name for the whole page, and the first class to register a name wins.
@@ -400,10 +401,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Commands
 
-- `yarn pack:build` ~== `spell-ui-pack build` ~== `spell dev pack build epics`
+- `yarn pack:build` ~== `spell-pack build` ~== `spell dev pack build epics`
   - the catalog, the entry and the script, into `components/__pack/`
   - then Epic UI's data, `docs/__data/` (`yarn site:data`)
-- `yarn pack:check` ~== `spell-ui-pack check` ~== `spell dev pack check epics` -- exits 1 while either is stale
+- `yarn pack:check` ~== `spell-pack check` ~== `spell dev pack check epics` -- exits 1 while either is stale
 - `yarn site:data [--check]` -- Epic UI's data ([EpicUISite.ts](site/EpicUISite.ts), [its script](../scripts/site-data.ts))
   - rerun after changing an element or a page's sections, and commit `docs/__data/`
 - `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium)
@@ -414,7 +415,6 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   ```text
   yarn docs:update | docs:index | docs:new | docs:open | docs:link   ~==  spell dev docs update | index | new | open | link
   yarn plan-doc,  yarn details
-  yarn design:bundle,  yarn design:check
   ```
 
 ## Epic UI, the docs set
@@ -731,8 +731,6 @@ In `tools/`:
   - `spell-ui.entry.js` -> `spell-ui.js`:  the ONE classic script a page loads.
     - Solid + @spell-app/ui + the runtime
     - GENERATED by [bundle-spell-ui.js](tools/bundle-spell-ui.js).  NEVER edit `spell-ui.js`.
-  - `spell-ui.design.entry.js`:  the same, for Claude Design's `bundle.js`.
-    - built by `bundle-spell-ui.js --design`
   - `emoji/`:  UI's emoji name chunks, as classic scripts, `<set>/<letter>.js`.
     - The bundle loads one lazily, on first use of a name.
     - both sets:  `cldr`, `fomantic`
@@ -1921,22 +1919,11 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - `--skip-ui-build` reuses `../ui/dist`;  `--no-check` skips the browser.
 - [bundle-spell-ui.js](tools/bundle-spell-ui.js):  builds UI (`yarn build`), and bundles `spell-ui.js`, in `_assets/`.
   - then `spell-comments.js` beside it (Epic UI's pages' comments);  `--comments`:  only that one, no UI build
-  - `--design [--out <dir>]` (`yarn design:bundle`, epic `claude-design` P8):
-    the claude.ai design system's bundle instead, `bundle.js` in its `components/`.
-    - from `spell-ui.design.entry.js`, in `_assets/`
-    - no page runtime, site header or saver
-    - the engines and every Font Awesome Free icon inlined
-    - `<!--` / `</script` escaped
-    - fails over 6 MB
-    - default out:  `project/components/`, in Spell UI's `build/design-system/`
+  - NOT the claude.ai design system's bundle (`bundle.js` in its `components/`), nor its check:  spell-brand's
+    `yarn design:bundle` / `design:check` since epic `repo-split` P10 (Q32), run by `spell dev design bundle | check`.
 - `yarn tsx tools/bundle-experiment.ts <entry.ts> [<out.js>]`:  a guide's live elements, as one classic script.
   - See "Experiments".
   - default out:  `<name>.bundle.js`, beside `<name>.entry.ts`
-- [check-design-bundle.js](tools/check-design-bundle.js) `[bundle.js] [outDir]` (`yarn design:check`), with Playwright:
-  - the design bundle, inlined into an `about:srcdoc` frame:  icons, code colours, markdown, no errors
-  - then a board under Claude Design's own runtime, whose `<ui-button onClick>` must count
-    - the runtime:  [dc-runtime.js](tools/vendor/claude-design/dc-runtime.js), copied from claude.ai
-  - Run it after touching the design target.
 - [design.js](tools/design.js) (`spell dev design pull | changed | pushed | state`):
   the local half of the `/design` skill.
   - a Claude Design board, as a page

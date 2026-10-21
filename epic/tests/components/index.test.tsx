@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { E, UI } from "@spell-app/ui/core"
-import { ElementFixture } from "@spell-app/ui/test/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 import "@spell-app/ui/ui-item"
 import * as Components from "$/epics/components"

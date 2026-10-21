@@ -396,12 +396,13 @@ an npm user:
     - `tsc` reads the entry's `types`, its BUILT declarations (`dist-types/`, git-ignored there);  Vite, Vitest, `tsx`
       and node its `default`, the source.
   - The alias table, `tsconfig.base.json`, holds spell-epic's own `$/epics` only.
-  - A tool that needs one's FOLDER (Spell UI's site bundle, its icon packs, the brand's design build) asks Node's
+  - A tool that needs one's FOLDER (Spell UI's site bundle, its icon packs) asks Node's
     resolver, [`packageDir()`](src/tools/packageDir.ts), never a path to a sibling by hand.
 
-- The component pack's build and check are Spell UI's own pack tooling, `spell-ui-pack` (`@spell-app/ui`'s bin;
-  `tools/ComponentPack.ts` there;  epic `repo-split` P5), which spell-app's CLI (`spell dev pack`) calls too.
-  - `yarn pack:build` / `pack:check` run `spell-ui-pack build` / `check` in the root.
+- The component pack's build and check are the kit's pack tooling, `spell-pack` (`spell-kit`'s bin;
+  `element/tools/ComponentPack.ts` there), which spell-app's CLI (`spell dev pack`) calls too.
+  - Spell UI's `spell-ui-pack` from epic `repo-split` P5 to P10.
+  - `yarn pack:build` / `pack:check` run `spell-pack build` / `check` in the root.
   - It finds the pack from the root `package.json`'s `"spellPack": { "name": "epics", "prefix": "epic-", "dir": "src" }`:
     a pack that is a whole checkout (J14).
 - At release:  publish those packages to npm, and depend on them there.
