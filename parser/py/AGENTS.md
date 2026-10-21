@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this package, `@spell-app/py`.
+when working with code in this folder, `py/` of the `spell-lang` package (`spell-lang/py`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -15,7 +15,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - NOT here:  `spell_quart`, Python's web server, which serves a program as a web app on Quart.
     It's in the spaces package, [its Python side](../../spell-app/spaces/src/server/py/pyproject.toml)
     ([spaces' AGENTS.md](../../spell-app/spaces/AGENTS.md);  epic `people-and-orgs` P14).
-- ONE yarn workspace, `@spell-app/py`.
+- A folder of the `spell-lang` package, its entry `spell-lang/py`:  no `package.json` of its own
+  (epic `repo-split` P11).
   - Its TypeScript is in `ts/`, not the usual source folder:
     [the alias table](../tsconfig.base.json) points `$/py` there.
   - `core/` is a uv project of its own, beside it:  yarn doesn't look in it.
@@ -27,14 +28,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `P.forEachNode()`
     - `P.jsShapes` (`unwrapped()`, `isCoreCall()` ...)
 - `spell` imports it, for its targets (`SP.TARGETS`).
-- `yarn review` here covers both:
+- The repo's checks (`spell-folders`, this folder's `"python": "core"` in its `"spellFolders"`) cover both:
   - `ts/`:  tsc, oxlint / oxfmt and vitest
   - then `core/`:  ruff and pytest
 - Tests live in the repo's `tests/py/`, at the same paths as the code they test:
   - TypeScript, found by vitest (our `vitest.config.ts` points there):
     - [PyWriter.ts](ts/PyWriter.ts) => [PyWriter.test.ts](../tests/py/ts/PyWriter.test.ts)
   - `core/tests/` => `tests/py/core/tests/`
-    - Its pytest finds them by its `testpaths`;  the yarn scripts hand ruff their folder too.
+    - Its pytest finds them by its `testpaths`;  the repo's checks hand ruff their folder too.
 
 ## The writers (`ts/`)
 
@@ -78,18 +79,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - What spell compiled to Python imports, for what Python has no word of its own for.
   - Compiled code imports `core`, and the classes it extends:  `from spell_core import core, Thing, List, App, prop, h`.
   - That `core` has the JavaScript core's methods, snake_cased, e.g. `random_item_of()`.
-  - Each module is the twin of one in `@spell-app/core`,
+  - Each module is the twin of one in `spell-lang/core`,
     e.g. `positions.py` of [positions.ts](../core/src/positions.ts).
   - `core` stands in for the running program's own core (`using_core()`):  one per web visitor.
   - Standard library only (decision Q33):  any standard module is fine;  a package from outside it, ask Owen first.
 - A uv project, [pyproject.toml](core/pyproject.toml) with its `uv.lock`:  Python 3.12 or later.
   - Tests are pytest's, in the repo's `tests/py/core/tests/`;  lint and format, ruff.
-  - The yarn scripts here run them:
+  - The repo's checks run them, from its root (`spell-folders`):
 
     ```sh
-    uv run --directory core pytest -q                                     # yarn test
-    uv run --directory core ruff check . ../../../tests/py/core/tests    # yarn lint, and --fix in yarn lint:fix
-    uv run --directory core ruff format . ../../../tests/py/core/tests   # yarn format
+    uv run --directory py/core pytest -q                                  # yarn test
+    uv run --directory py/core ruff check . ../../tests/py/core/tests    # yarn lint, and --fix in yarn lint:fix
+    uv run --directory py/core ruff format . ../../tests/py/core/tests   # yarn format
     ```
 
 - It runs a compiled program with `python -m spell_core.run <program> --seed n`.

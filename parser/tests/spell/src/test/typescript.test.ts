@@ -40,7 +40,7 @@ beforeAll(() => {
   result = typecheck({ ...files, "Cards.sample.tsx": solidSample(), "Mistakes.tsx": MISTAKES }, { projects })
 }, 60_000)
 
-describe.skipIf(!APP_DIR)("fixture projects as TypeScript, checked by tsc (needs spell-app's @spell-app/app)", () => {
+describe.skipIf(!APP_DIR)("fixture projects as TypeScript, checked by tsc (needs spell-app's spell-app/app)", () => {
   test("core's own files check clean", () => {
     expect(result.other).toEqual([])
   })

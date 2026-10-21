@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this package, `@spell-app/spell`.
+when working with code in this folder, `spell/` of the `spell-lang` package (`spell-lang/spell`).
 - Code imports it as `$/spell`;  its namespace is `SP`.
 
 **READ the repo root's `AGENTS.md` and [WWOD](../agents/wwod/WWOD.md) FIRST:**
@@ -12,11 +12,11 @@ when working with code in this package, `@spell-app/spell`.
 
 ## Overview
 
-- This package is the spell LANGUAGE, on the generic parser.
+- This folder is the spell LANGUAGE, on the generic parser.
   Its `src/` (namespace `SP`) holds:
   - spell's rules
   - `SpellParser`, `SpellProject` and friends
-- The pieces around it are packages of their own, beside this one:
+- The pieces around it are folders of their own, beside this one or in another repo:
   - [parser](../parser/AGENTS.md), `$/parser` (`P`):  the generic rule-based parser.
     [PARSING.md](PARSING.md), here, maps its pipeline.
   - [core](../core/AGENTS.md), `$/core` (`SC`):  the runtime compiled spell runs on.
@@ -27,17 +27,17 @@ when working with code in this package, `@spell-app/spell`.
     Its own yarn project, NOT a workspace.
   - [app](../../spell-app/app/AGENTS.md), `$/app`:  the web app.
     - Also the runner, and the `<spell-app>` / `<spell-editor>` elements.
-    - `yarn start` is run THERE.
+    - `yarn start` is run THERE, at spell-app's root (epic `repo-split` P11).
   - [spaces](../../spell-app/spaces/AGENTS.md), `$/spaces`:  where projects live, and the editor's server.
     - Spell's project groups (`@spell/examples`, `owen@spell` ...), their lists, and a project's file edits.
     - The built-in projects and the test projects, and reading and writing projects on disk.
-    - This package NEVER imports it (see "Projects live in spaces" below).
+    - This folder NEVER imports it (see "Projects live in spaces" below).
   - [cli](../../spell-app/cli/AGENTS.md):  the `spell` command line.
-    It runs this package's SOURCE (and the others') through `tsx`.
+    It runs this folder's SOURCE (and the others') through `tsx`.
 - `src/rules/`:  spell's rule modules (see "Parser rules" below).
 - Tests live in the repo's `tests/spell/`, at the same paths as the code they test:
   [SpellProject.ts](src/SpellProject.ts) => [SpellProject.test.ts](../tests/spell/src/SpellProject.test.ts).
-  - `yarn test` here runs them (`vitest.config.ts` points there).
+  - `yarn vp test` here runs them (`vitest.config.ts` points there);  `yarn test` runs the whole repo's.
   - Their helpers stay here, in `src/test/` (`$/spell/test`).
   - The projects they read are spaces' test projects, `tests/spaces/@spell/test/`
     (see "Projects live in spaces" below).
@@ -54,7 +54,7 @@ when working with code in this package, `@spell-app/spell`.
     - `pyright`:  pyright on the Python target
   - And the spell syntax table (see "Parser rules"):
     - `spellSyntax`
-    - `writeSpellSyntax`, the script behind `yarn gen:syntax`
+    - `writeSpellSyntax`, the script behind `yarn spell:gen:syntax`
   - Projects on disk are NOT here:  they're spaces' (`$/spaces/server/node/...`).
   - The barrel NEVER exports it.
   - Other packages may import these files by name:  one of the deep-import exceptions
@@ -100,7 +100,7 @@ when working with code in this package, `@spell-app/spell`.
     `spell compile --target <name>` picks one for a single run.
   - The writers are `$/parser`'s:  "Compile" in [PARSING.md](PARSING.md).
 - `src/test/` (`$/spell/test`):  the test helpers, e.g. the fixture helpers below.
-- Projects live in spaces, not here:  this package reads and compiles them, but holds none.
+- Projects live in spaces, not here:  this folder reads and compiles them, but holds none.
   - Spell's project groups (`@spell/examples` ...) are spaces' `SPACES.PROJECT_GROUPS`.
     - Spell's registry, `SP.SpellSetup`, starts EMPTY:  loading spaces' groups registers them there.
     - So every program that reads a spell path loads them first, through `$/spaces`,
@@ -135,7 +135,7 @@ when working with code in this package, `@spell-app/spell`.
     - The Python ones only for the fixtures in `PYTHON_FIXTURES`:  every fixture but `todos-form-based`, so far.
       The Python writer can't write its method's named arguments yet.
     - Add a fixture by copying a project in.
-    - After a deliberate change, `yarn test:fixtures:bless`, and read the diff.
+    - After a deliberate change, `yarn spell:test:fixtures:bless`, and read the diff.
 - [readme.md](readme.md) is the project's front page.
   Docs live in the shared root folders, their tooling in [spell-epic's tools](../../spell-epic/src/tools/) (see "Creating docs").
 - [The barrel](src/index.ts) is loaded in browsers AND the editor's server, in spaces (WWOD §8 › "Barrels").
@@ -159,7 +159,7 @@ when working with code in this package, `@spell-app/spell`.
 
 - Docs for people (design notes, research, references), for every package, live in the shared root folders:
   `guides/` mostly (root `AGENTS.md`, "Shared content").
-  - Their tooling is [spell-epic's tools](../../spell-epic/src/tools/), in `@spell-app/epics`, its own repo.
+  - Their tooling is [spell-epic's tools](../../spell-epic/src/tools/), in `spell-epic`, its own repo.
 - How to write one:  [spell-epic's AGENTS.md](../../spell-epic/src/AGENTS.md), "Writing a page".
 
 ## Parser rules
@@ -205,7 +205,7 @@ when working with code in this package, `@spell-app/spell`.
     - its aliases
     - its docstring's first sentence
     - What [the spell syntax guide](../../spell.epics/guides/spell-syntax/spell-syntax.html) draws.
-    - Generated:  `yarn gen:syntax`, after adding, renaming or changing a rule, its class docstring or its tests.
+    - Generated:  `yarn spell:gen:syntax`, after adding, renaming or changing a rule, its class docstring or its tests.
       [spellSyntax.test.ts](../tests/spell/src/node/spellSyntax.test.ts) fails until you do.
     - So a class docstring's first sentence says what the rule is FOR, in plain words:  it's the guide's Purpose.
   - ONE `syntax` per registration.
@@ -334,14 +334,14 @@ when working with code in this package, `@spell-app/spell`.
   - `input` is parsed ONCE, then written by both:  a change to either writer fails the rule's own tests.
   - A rule alone has no project around it, only its test's scope.
     So its `js` and `ts` show what the writers do without one, e.g. a type they can't know.
-  - `yarn test:rules:bless` writes each test's `js` and `ts` into the source.
+  - `yarn spell:test:rules:bless` writes each test's `js` and `ts` into the source.
     - It sets `BLESS_RULE_TESTS=1`, then runs `vp fmt`.
     - Read the diff after:  it's the review.
     - It finds each test by its `input` and old `js`;  one it can't place fails the run, saying why.
   - Test setup shared by a rule's registrations:  `setup<RuleClass>()`, returning `{ compileAs, beforeEach }`.
     - It's spread into each block:  `{ ...setupAssignmentStatement(), tests: [...] }`.
   - Tests need no type annotations there.
-  - `yarn test:rules` runs every rule module's tests, and `ruleNames.test.ts`.
+  - `yarn spell:test:rules` runs every rule module's tests, and `ruleNames.test.ts`.
 - Type arguments:  `Rule<Props, Groups, MatchData>`, all defaulted.
   - So the bare classes work:  `P.Rule`, `P.Sequence`, `P.Match`.
   - Rule base classes fix `Props`.
@@ -384,7 +384,7 @@ when working with code in this package, `@spell-app/spell`.
 - A built-in type's members (`the length of the name`) are DATA in `SP.BUILT_IN_TYPE_TABLE`, NOT rules.
   - The table:  [builtinTypes.ts](src/builtinTypes.ts).
   - Add one there, with the real `core` method or javascript property its `readAs` names.
-  - Then `yarn scopes --builtins`, in `../../spell-app/lsp`.
+  - Then `yarn lsp:scopes --builtins`, in spell-app.
   - See "Built-in types" in `PARSING.md`.
 - A `parse()` which understood a statement but mustn't take it REFUSES it, NOT returns `undefined`.
   - `return SpellStatement.refuse(match, "why")`:  the line's error then says why.

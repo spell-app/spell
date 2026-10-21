@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this package, `@spell-app/markdown`.
+when working with code in this folder, `markdown/` of the `spell-lang` package (`spell-lang/markdown`).
 
 **READ the repo root's `AGENTS.md` and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 - the root's:  the repo's layout
@@ -16,7 +16,7 @@ when working with code in this package, `@spell-app/markdown`.
   - The plan:  [its epic page](../../spell.epics/epics/markdown/markdown.plan.html).
 - It depends only on `$/parser` and `$/util`.
   - NEVER import `$/spell`, or anything above it.
-  - `ui` NEVER imports this package, nor ships it prebuilt:  Spell UI's `<ui-markdown>` draws with marked.
+  - `ui` NEVER imports this folder, nor ships it prebuilt:  Spell UI's `<ui-markdown>` draws with marked.
     The app's `<spell-markdown>` draws with it, from source ([MDEngine](../../spell-app/app/components/spell-markdown/MDEngine.ts)).
 - [MarkdownTokenizer.ts](src/MarkdownTokenizer.ts):  how text becomes tokens.
   - words:  letters / digits
@@ -26,7 +26,7 @@ when working with code in this package, `@spell-app/markdown`.
   - What rulex can't say is hand-written:  block nesting, emphasis pairing, "any token but a backtick".
 - The tests live in the repo's `tests/markdown/`, at the same paths as the code.
 - `src/spec/`:  the GFM spec examples, and their test.
-  - `gfm-spec.json`:  the examples, from cmark-gfm's `spec.txt`, by `yarn spec:update <spec.txt>`
+  - `gfm-spec.json`:  the examples, from cmark-gfm's `spec.txt`, by `yarn markdown:spec:update <spec.txt>`
   - [spec.test.ts](../tests/markdown/src/spec/spec.test.ts) renders each with the PLAIN-HTML tags, and pins the pass count per section in a snapshot.
     - A regression fails it.
     - A gain updates it:  `vitest -u`, after reading the diff.

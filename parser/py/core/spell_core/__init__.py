@@ -1,6 +1,6 @@
 """spell_core:  what Python compiled from spell imports, to do what Python has no word of its own for.
 
-- The Python twin of the JavaScript core, `@spell-app/core`, in `packages/py/core/`:  `$/py`'s Python.
+- The Python twin of the JavaScript core, `spell-lang/core`, in `packages/py/core/`:  `$/py`'s Python.
 - Compiled code imports the one `core`, and the classes it extends:
   `from spell_core import core, Thing, List, App, prop, h`.
 - And, for spell code counting from 1, what turns its positions into indexes as it runs (`positions.py`):

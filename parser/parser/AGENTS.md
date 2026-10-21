@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this package, `@spell-app/parser`.
+when working with code in this folder, `parser/` of the `spell-lang` package (`spell-lang/parser`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -56,7 +56,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - e.g. `class CardElement extends SpellElement<Card>`, its base imported from `@spell/elements`
         - Written by `elementClassFor()`.
   - `P.LibraryWriter`:  a project's classes alone, as a TypeScript LIBRARY other code imports (epic `people-and-orgs`)
-    - The `ts/lib` target:  `P.TSWriter`, minus the program's top-level steps, its core `@spell-app/core/model`.
+    - The `ts/lib` target:  `P.TSWriter`, minus the program's top-level steps, its core `spell-lang/core/model`.
     - One file, `<Project>.lib.ts`, its own types:  no `.d.ts` beside it.
     - `P.isDeclaration()` says what's kept:  classes, what's added to them, comments.
       Python's page writer keeps the same.
@@ -72,7 +72,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The app shows compiled JavaScript in Monaco.
     - Solid's compiler builds the TypeScript target's JSX later (`$/spell/node/buildTsx`).
 - "Parser rules" (how to write a rule class + its `syntax` + `tests`) is in [spell's AGENTS.md](../spell/AGENTS.md).
-  - The rules there are spell's, on this package's `Rule`.
+  - The rules there are spell's, on this folder's `Rule`.
   - See also the top docstring in [Rule.ts](src/rules/Rule.ts).
 - `keepNames`:  every prod build MUST keep its class names (`output.keepNames`),
   because a rule's name is worked out from its class name.

@@ -9,7 +9,7 @@ import { packageVersion } from "spell-kit/toolchain/packageVersion"
 const SOLID = [/^solid-js/, /^@solidjs\//]
 
 /**
- * Vitest config for `@spell-app/core`.
+ * Vitest config for `spell-lang/core`.
  * - Aliases (`$/util` ...) come from the repo root's `tsconfig.base.json`, through `resolve.tsconfigPaths`.
  * - `standardDecorators()` lowers standard decorators:  vite 8's own transform (oxc) doesn't.
  * - Solid's CLIENT build (`browser`, `development`), as programs draw in a page:  node would pick its server build,

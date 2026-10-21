@@ -1,6 +1,6 @@
 /**
  * The core's method list:  what every core must have, so another target's core can check itself against it.
- * - Written to `core.declarations.json5`, at the package's root, by `yarn gen:declarations`
+ * - Written to `core.declarations.json5`, at `core/`'s root, by `yarn core:gen:declarations`
  *   (`writeCoreDeclarations.ts`).
  *   - `coreDeclarations.test.ts` fails when that file and the core differ.
  *   - Python's core reads it in a test, to find what it hasn't ported yet

@@ -153,7 +153,7 @@ A compact map of the parse pipeline, so agents don't have to work it out again.
   - `ts`:  what `P.TSWriter` writes, left out where it's the same
   - The Python writers are tested by their own tests, and by the fixtures' snapshots ("Testing a whole project").
   - [`unitTestModuleRules()`](../parser/src/test/unitTestModuleRules.ts) runs them.
-  - `yarn test:rules:bless` writes each test's `js` and `ts` into the source.
+  - `yarn spell:test:rules:bless` writes each test's `js` and `ts` into the source.
   - `Parser.testRules()`, which the speed test times, checks `js` only.
 
 ## Expressions
@@ -439,11 +439,11 @@ A compact map of the parse pipeline, so agents don't have to work it out again.
   - completion offers them with their docs
   - the Type Explorer lists the table's types and members, and its rules' syntax from the live grammar
   - `core`'s [`core.scopes.js`](../core/src/core.scopes.js) is the same, for pages with no parser.
-    - It's GENERATED from the table:  `yarn scopes --builtins` in `packages/lsp`.
+    - It's GENERATED from the table:  `yarn lsp:scopes --builtins` in spell-app.
     - A test fails until you do.
 - Adding a member:  ONE table entry, plus the `core` method or javascript property its `readAs` names.
   - [builtinTypes.test.ts](../tests/spell/src/builtinTypes.test.ts) reads each one off a sample value, so it must be real.
-  - Then `yarn scopes --builtins`.
+  - Then `yarn lsp:scopes --builtins`, in spell-app.
 - Adding a TYPE:  its name in `P.BUILT_IN_TYPES` first, then its entry.
 
 ## Membership:  `a card belongs to one pile`
@@ -1430,7 +1430,7 @@ A kind that says so is saved in a file of its own.
     - `ts/lib`, by `P.LibraryWriter` (epic `people-and-orgs` P3):
       a LIBRARY, the project's classes alone, for other code to import
       - one TypeScript file, `<Project>.lib.ts`, its own types, checked by `tsc`
-      - no drawing, none of its top-level steps, the core with no Solid (`@spell-app/core/model`)
+      - no drawing, none of its top-level steps, the core with no Solid (`spell-lang/core/model`)
   - Each writes a file of its own, e.g. `Solitaire.spell.py`:  see each target's `suffix`.
   - A project lists the others it wants in its project file, e.g. `"targets": ["ts/solid", "py"]`.
   - What every program's writer shares is `P.ProgramWriter`, which the javascript and Python writers extend.
@@ -1522,7 +1522,7 @@ A kind that says so is saved in a file of its own.
 
 ## Language server
 
-- [lsp's source](../../spell-app/lsp/src/) (`LSP`) runs as `yarn start:lsp`.
+- [lsp's source](../../spell-app/lsp/src/) (`LSP`) runs as `yarn lsp:start`, in spell-app.
   - Or from the VS Code extension, in `packages/vscode/`.
   - The extension spawns the repo's own `tsx` on [the server's entry](../../spell-app/lsp/src/server.ts).
   - `stdioGuard.ts` sends `console.*` to stderr first:  stdout is the protocol.

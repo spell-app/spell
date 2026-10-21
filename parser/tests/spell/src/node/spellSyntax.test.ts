@@ -4,16 +4,16 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { SPELL_SYNTAX_FILE, purposeOf, spellSyntax, withoutComments } from "$/spell/node/spellSyntax"
 
-/** Where `yarn gen:syntax` writes the spell syntax table. */
+/** Where `yarn spell:gen:syntax` writes the spell syntax table. */
 const SYNTAX_FILE = resolve(import.meta.dirname, "../../../../spell", SPELL_SYNTAX_FILE)
 
 describe("the spell syntax table, spellSyntax.json", () => {
   const data = spellSyntax()
   const rows = data.modules.flatMap((module) => module.rules)
 
-  test("is up to date with the rules:  if not, run `yarn gen:syntax` in spell/", () => {
+  test("is up to date with the rules:  if not, run `yarn spell:gen:syntax` in spell-lang", () => {
     const written = JSON.parse(readFileSync(SYNTAX_FILE, "utf8")) as unknown
-    expect(written, "spellSyntax.json is out of date:  run `yarn gen:syntax` in spell/").toEqual(data)
+    expect(written, "spellSyntax.json is out of date:  run `yarn spell:gen:syntax` in spell-lang").toEqual(data)
   })
 
   test("lists each rule class once, every rule name under one", () => {

@@ -20,18 +20,24 @@ export const CODE_FOLDERS = (() => {
 })()
 
 /**
- * The editor app's folder (`@spell-app/app`, spell-app's), when it's installed beside spell-lang;  else `undefined`.
+ * The editor app's folder (`spell-app/app`, spell-app's), when it's installed beside spell-lang;  else `undefined`.
  * - The `ts/solid` target's check reads its types (`typecheck()`):  compiled spell's elements ARE the app's.
  * - A higher repo's:  spell-lang alone (`yarn clone spell-lang`) has none, and the checks that need it skip
  *   (epic `repo-split` C11).
  */
-export const APP_DIR: string | undefined = installedPackage("@spell-app/app")
+export const APP_DIR: string | undefined = installedPackage("spell-app", "app")
 
-/** The real folder of installed package `name` (found up from spell's own folder, in `node_modules`);  else `undefined`. */
-function installedPackage(name: string): string | undefined {
+/**
+ * The real folder of installed package `name` (found up from spell's own folder, in `node_modules`), or of its folder
+ * `sub` (`spell-app`'s `app/`, epic `repo-split` P11:  one package, its folders its sub-paths);  else `undefined`.
+ */
+function installedPackage(name: string, sub = ""): string | undefined {
   for (let folder = CODE_FOLDERS.srcDir; ; folder = dirname(folder)) {
     const candidate = join(folder, "node_modules", name)
-    if (existsSync(join(candidate, "package.json"))) return realpathSync(candidate)
+    if (existsSync(join(candidate, "package.json"))) {
+      const found = join(realpathSync(candidate), sub)
+      return existsSync(found) ? found : undefined
+    }
     if (dirname(folder) === folder) return undefined
   }
 }
@@ -45,7 +51,7 @@ function installedPackage(name: string): string | undefined {
  *   - `<ui-*>` tags are typed as `app` types them (`UI_JSX_TYPES`).
  * - Standard decorators (`@prop`, `@drawn`), never `experimentalDecorators`.
  * - A drawable type's element class (epic `drawable-thing` P10), `class CardElement extends SpellElement<Card>`:
- *   - checked against app's `SpellElement` and Spell UI's declarations (`@spell-app/ui`'s, epic `repo-split` I12)
+ *   - checked against app's `SpellElement` and Spell UI's declarations (`spell-ui`'s, epic `repo-split` I12)
  *   - as `@spell/elements` is app's `spellElements.ts`
  *   - With the 2023 javascript library, which Spell UI's own files use (`toReversed()`, `findLast()`).
  * - `files`:  each file's name, e.g. `Solitaire.tsx`, and its code.
@@ -113,7 +119,7 @@ function nodeModulesDir(): string {
 
 /**
  * `<ui-*>` tags' JSX types:  `app`'s, which types each `ui-*` tag loosely (HTML attributes, plus anything else).
- * - `@spell-app/ui` ships no JSX types:  this is where the app's Solid code gets them,
+ * - `spell-ui` ships no JSX types:  this is where the app's Solid code gets them,
  *   so compiled spell's `<ui-button>` checks the same way.
  * - A declaration file only:  nothing of `app`'s runs here.
  */
@@ -129,15 +135,15 @@ const SPELL_ELEMENTS_SOURCE = "src/runner/spellElements.ts"
  * A `tsconfig.json` checking `names`, with `@spell/core` pointing at `core`'s source.
  * - `core`'s settings, plus Solid's JSX and `<ui-*>`'s JSX types -- see `typecheck()`.
  * - `@spell/elements` pointing at app's source (`APP_DIR`).
- * - ONE core:  the app's own imports of `@spell-app/core` go to the same source.
- * - The other repos' packages (`spell-kit/util`, `@spell-app/ui` ...) by their declarations, through the
+ * - ONE core:  the app's own imports of `spell-lang/core` go to the same source.
+ * - The other repos' packages (`spell-kit/util`, `spell-ui` ...) by their declarations, through the
  *   folder's `node_modules` link (epic `repo-split` I12):  their own `$/` aliases are theirs, not core's.
  */
 function tsconfig(names: string[], projects: Record<string, string>) {
   const { coreDir } = CODE_FOLDERS
   const app = APP_DIR
   if (!app)
-    throw new Error("typecheck():  no @spell-app/app installed beside spell-lang:  it checks against the app's types")
+    throw new Error("typecheck():  no spell-app/app installed beside spell-lang:  it checks against the app's types")
   const nodeModules = nodeModulesDir()
   const imported = Object.fromEntries(Object.entries(projects).map(([id, path]) => [`@spell/project/${id}`, [path]]))
   return {
@@ -145,7 +151,7 @@ function tsconfig(names: string[], projects: Record<string, string>) {
     compilerOptions: {
       paths: {
         "@spell/core": [`${coreDir}/index.ts`],
-        "@spell-app/core": [`${coreDir}/index.ts`],
+        "spell-lang/core": [`${coreDir}/index.ts`],
         "$/core": [`${coreDir}/index.ts`],
         "$/core/*": [`${coreDir}/*`],
         "@spell/elements": [resolve(app, SPELL_ELEMENTS_SOURCE)],

@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this package, `@spell-app/core`.
+when working with code in this folder, `core/` of the `spell-lang` package (`spell-lang/core`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -17,7 +17,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its Python twin is `spell_core`, what spell compiled to Python imports ("The Python core", below).
 - [core.scopes.js](src/core.scopes.js) is GENERATED:  the built-in types' docs, for pages with no parser.
   - Built from spell's table of built-in types, `BUILT_IN_TYPE_TABLE` ([builtinTypes.ts](../spell/src/builtinTypes.ts)).
-  - By `yarn scopes --builtins`, in `../../spell-app/lsp`.
+  - By `yarn lsp:scopes --builtins`, in spell-app.
   - NEVER edit it by hand:  edit the table, run that.
 - [core.declarations.json5](core.declarations.json5) is GENERATED too:
   the core's method list, what another target's core must have (Python's `spell_core`, say).
@@ -26,7 +26,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - They're what [the core reference page](../../spell.epics/guides/targets/core-reference.html) shows
       (epic `python-target` P29).
     - A name with no docstring fails `coreDeclarations.test.ts`.
-  - Written by `yarn gen:declarations` ([writeCoreDeclarations.ts](src/writeCoreDeclarations.ts)).
+  - Written by `yarn core:gen:declarations` ([writeCoreDeclarations.ts](src/writeCoreDeclarations.ts)).
   - [coreDeclarations.test.ts](../tests/core/src/coreDeclarations.test.ts) fails until you run it,
     after adding, renaming or removing anything on `core`.
   - Python's [test_core_declarations.py](../tests/py/core/tests/test_core_declarations.py) checks `spell_core` against it:
@@ -98,7 +98,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The core with no drawing, so no Solid, and no running program's list of things.
     - References by name are in it all the same, searching what `searchThings()` was given (P9).
   - What a compiled LIBRARY imports, e.g. `people.lib.ts` (the `ts/lib` target).
-    - By the package's name, `@spell-app/core/model`:  the one export in its `package.json`.
+    - By its entry in spell-lang's `package.json` `exports`, `spell-lang/core/model`.
   - So the server and the app may value-import it, through a library:
     its things are plain data, belonging to no program, so a copy of its own is fine.
   - Code it loads NEVER imports the barrel, and asks `programThings()` for the running program's things,
@@ -228,7 +228,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## The Python core
 
-- Its Python twin, `spell_core`, is in the py package ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).
+- Its Python twin, `spell_core`, is in the py folder ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).
   - The four files both cores read stay in the JavaScript core:
     its method list here, the three expected files with its tests (`tests/core/`):
     - [core.declarations.json5](core.declarations.json5)

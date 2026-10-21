@@ -1,14 +1,19 @@
-import { readFileSync } from "fs"
-import { resolve } from "path"
+import { existsSync, readFileSync } from "fs"
+import { dirname, join } from "path"
 import { fileURLToPath } from "url"
 
 /**
  * Our `package.json` version -- the app's, NOT the spell language's (`SP.SPELL_VERSION`).
+ * - The nearest `package.json` up from this file:  spell-lang's one (epic `repo-split` P11:  `spell/` is a folder of
+ *   the `spell-lang` package, with no `package.json` of its own).
  * - NODE ONLY:  reads the file.  NEVER import from browser code -- it gets `__PACKAGE_VERSION__` from vite.
  */
 export function readPackageVersion(): string {
-  const packageJson = resolve(fileURLToPath(import.meta.url), "..", "..", "..", "package.json")
-  return (JSON.parse(readFileSync(packageJson, "utf8")) as { version: string }).version
+  for (let at = dirname(fileURLToPath(import.meta.url)); ; at = dirname(at)) {
+    const packageJson = join(at, "package.json")
+    if (existsSync(packageJson)) return (JSON.parse(readFileSync(packageJson, "utf8")) as { version: string }).version
+    if (dirname(at) === at) throw new Error("readPackageVersion:  no package.json above spell's src/node/")
+  }
 }
 
 /**

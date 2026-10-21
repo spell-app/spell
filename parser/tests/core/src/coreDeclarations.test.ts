@@ -5,13 +5,13 @@ import { describe, test, expect } from "vite-plus/test"
 import { core } from "$/core"
 import { coreDeclarations, docsIn, paramNamesOf, unlistedCoreNames } from "$/core/coreDeclarations"
 
-/** Where `yarn gen:declarations` writes the core's method list. */
+/** Where `yarn core:gen:declarations` writes the core's method list. */
 const DECLARATIONS_FILE = resolve(import.meta.dirname, "../../../core/core.declarations.json5")
 
 describe("the core's method list, core.declarations.json5", () => {
-  test("is up to date with the core:  if not, run `yarn gen:declarations` in core/", () => {
+  test("is up to date with the core:  if not, run `yarn core:gen:declarations` in spell-lang", () => {
     const written = JSON.parse(readFileSync(DECLARATIONS_FILE, "utf8")) as unknown
-    expect(written, "core.declarations.json5 is out of date:  run `yarn gen:declarations` in core/").toEqual(
+    expect(written, "core.declarations.json5 is out of date:  run `yarn core:gen:declarations` in spell-lang").toEqual(
       coreDeclarations()
     )
   })

@@ -1,7 +1,7 @@
 """spell_core against the core's method list, `core.declarations.json5`:  nothing the JavaScript core has
 is missed.
 
-- The list is written from the JavaScript core by `yarn gen:declarations` (in `core/`), beside `py/`.
+- The list is written from the JavaScript core by `yarn core:gen:declarations` (spell-lang's), beside `py/`.
 - Each name, snake_cased, must be on `core` (`getItemAt` is `core.get_item_at()`),
   or in `not_ported_yet.json5` (`NOT_PORTED_YET`), with why.
 - A class compiled code imports keeps its name, on the package:  `spell_core.Thing`.

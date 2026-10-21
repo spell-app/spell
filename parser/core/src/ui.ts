@@ -130,7 +130,7 @@ export const uiMethods = defineCoreModule({
 Object.assign(core, uiMethods)
 
 /**
- * What core uses of the page's Spell UI runtime (`UI`, `@spell-app/ui`):  typed here, as core never imports `ui`.
+ * What core uses of the page's Spell UI runtime (`UI`, `spell-ui`):  typed here, as core never imports `ui`.
  * - Its `modals` work once the `ui-modal` family is defined:  a runner's page defines every family.
  */
 type PageUI = {

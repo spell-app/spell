@@ -10,7 +10,7 @@ import { TSWriter } from "./TSWriter"
  *   - A library lives with its project, e.g. `packages/spaces/@spell/...`, which none includes.
  *   - node, vite and `tsx` all read a package's exports, wherever the importing file is.
  */
-export const LIBRARY_CORE_MODULE = "@spell-app/core/model"
+export const LIBRARY_CORE_MODULE = "spell-lang/core/model"
 
 /****************
  * ### `LibraryWriter`
@@ -22,7 +22,7 @@ export const LIBRARY_CORE_MODULE = "@spell-app/core/model"
  *   - its top-level functions, as they are
  *   - the program's top-level STEPS left out:  headings, tests, `print`, the things it makes
  *     - So importing it runs nothing but the class declarations.
- *   - its core imported from `@spell-app/core/model` (`LIBRARY_CORE_MODULE`), and only what it uses:
+ *   - its core imported from `spell-lang/core/model` (`LIBRARY_CORE_MODULE`), and only what it uses:
  *     no Solid, and a thing it makes registers in no program's list
  * - One file, its own types, with no `.d.ts` beside it (Owen's pick, the layout page's Q5).
  *   - The repo's code imports it as it imports any TypeScript (vite, `tsx`, `tsc`).
@@ -54,7 +54,7 @@ export class LibraryWriter extends TSWriter {
     }
   }
 
-  /** As `TSWriter`'s, its core import from `@spell-app/core/model`, naming only what the code uses. */
+  /** As `TSWriter`'s, its core import from `spell-lang/core/model`, naming only what the code uses. */
   module(code: string): string {
     return libraryImports(super.module(code))
   }
@@ -105,7 +105,7 @@ export function isDeclaration(statement: P.ASTNode): boolean {
   return declarationKinds().some((kind) => statement instanceof kind)
 }
 
-/** `code`'s `@spell/core` import as a library's:  from `@spell-app/core/model`, naming only what the rest of `code` uses. */
+/** `code`'s `@spell/core` import as a library's:  from `spell-lang/core/model`, naming only what the rest of `code` uses. */
 function libraryImports(code: string): string {
   return code.replace(P.jsShapes.CORE_IMPORT, (_line, imported: string) => {
     const body = code.replace(P.jsShapes.CORE_IMPORT, "")

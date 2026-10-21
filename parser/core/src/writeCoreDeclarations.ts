@@ -1,5 +1,5 @@
 /**
- * `yarn gen:declarations`:  write the core's method list, `core.declarations.json5`, at the package's root.
+ * `yarn core:gen:declarations`:  write the core's method list, `core.declarations.json5`, at `core/`'s root.
  * - Run it after adding, renaming or removing anything on `core`:  `coreDeclarations.test.ts` fails until you do.
  * - What's in it, and what's left out:  `coreDeclarations()`.
  * - NODE ONLY, and NOT in the barrel:  it writes the file the moment it's imported.

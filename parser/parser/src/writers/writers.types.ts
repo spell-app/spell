@@ -5,7 +5,7 @@
 
 /**
  * One box of a spell tree diagram:  what `P.TreeWriter` writes for each AST node.
- * - The same shape `@spell-app/ui`'s `<ui-tree-diagram>` draws (its `TreeDiagramNode`):
+ * - The same shape `spell-ui`'s `<ui-tree-diagram>` draws (its `TreeDiagramNode`):
  *   plain data, as JSON, so the parser and `ui` never import each other.
  */
 export type TreeNode = {

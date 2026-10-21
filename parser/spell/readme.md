@@ -25,15 +25,15 @@ Experimental [Deepwiki Documentation](https://deepwiki.com/spell-app/spell-app)
 
 - Install Node 24.11+ and enable Corepack (`corepack enable`), which supplies the repo's yarn.
 - Clone the `spell` monorepo, and run `yarn` at its root.
-- Start the app (port 3000) and the api server (port 3001):  `yarn start`, in `packages/app`.
+- Start the app (port 3000) and the api server (port 3001):  `yarn start`, in spell-app.
   - `yarn stop` (there too) stops them.
 - Open http://localhost:3000 in your web browser.
 - Check out the [Solitaire Example](http://localhost:3000/run/@spell/examples/solitaire/Card.spell).
 - Click the `Edit Example` button to see the code.
 - To run tests:
-  - every package:  `yarn test`, at the monorepo root
-  - this one:  `yarn test --project spell`, or `yarn test` inside any package
-  - vitest's UI:  `yarn test:ui`, here
+  - every repo's:  `yarn test`, at the kit's root
+  - this folder's:  `yarn spell-folders test spell`, at spell-lang's root, or `yarn vp test run` here
+  - vitest's UI:  `yarn spell:test:ui`, at spell-lang's root
 - NOTE: Docker support was removed on 2026-09-30:  out of date, and broken by the monorepo move.
   - To bring it back, start from `git show 02476e71:packages/spell/Dockerfile.dev` and its siblings.
 
@@ -72,8 +72,8 @@ Notes:
 - The extension runs the parser straight from this repo, so parser changes need no rebuild.
   - Just `Developer: Restart Extension Host`, or reload the window.
   - Rebuild and reinstall only when `packages/vscode/` itself changes.
-- The extension's version is pinned to the parser's:  the `version` in both packages' `package.json`.
-  - The packages:  `packages/vscode` and `packages/spell`.
+- The extension's version is pinned to the parser's:  the `version` in both `package.json`s.
+  - They're spell-app's `vscode/` and spell-lang's root, the package `spell-lang` (one version, epic `repo-split` P11).
   - The build fails if they differ, so bump them together.
 - The build records where this repo is.
   - Move the repo, and either rebuild, or set `spell.parserRoot` to its new folder.
@@ -100,7 +100,7 @@ Notes:
       - with its properties as they change, and its actions:  ▶ does one
   - Its code is `dist-runner/`, in `packages/app`, built from [the app's runner](../../spell-app/app/src/runner/).
     - Building the extension builds it.
-    - After changing the runner alone:  `yarn build:runner` (in `packages/app`), and close / reopen the panel.
+    - After changing the runner alone:  `yarn build:runner` (in spell-app), and close / reopen the panel.
 - Spell indents with tabs:  the extension sets `.spell` files to tabs, and formatting always uses them.
 - Settings:
   - `spell.compileOnSave` writes the project's `<Project>.spell.js` on save.
@@ -122,7 +122,7 @@ Notes:
 <spell-app src="apps/Calculator.spell.js" toolbar width="50%"></spell-app>
 ```
 
-- To build it:  `yarn build:element`, in `packages/app`.
+- To build it:  `yarn build:element`, in spell-app.
   - It's built into `dist-element/`:  copy that folder anywhere.
   - The dev server serves it at `/element/`, with a demo at `http://localhost:3001/demo/spell-app.html`.
 - Attributes:
@@ -135,11 +135,11 @@ Notes:
 - `el.restart()` runs it again.
 - A `spell-open` event says a Type Explorer link was clicked.
 - Its Type Explorer reads the project's scope pack, `<Project>.scopes.js`.
-  - In `packages/lsp`, `yarn scopes` writes it:
+  - In spell-app, `yarn lsp:scopes` writes it:
 
     ```sh
-    yarn scopes [--compile] <projectId...>
-    yarn scopes --compile @spell/examples/solitaire   # e.g.
+    yarn lsp:scopes [--compile] <projectId...>
+    yarn lsp:scopes --compile @spell/examples/solitaire   # e.g.
     ```
 
   - So do `spell compile` and the VS Code extension, on each clean compile.
@@ -181,7 +181,7 @@ Notes:
   - `width` / `height`
   - `assets`
 - `el.compile()` and `el.save()` do what Cmd+Enter and Cmd+S do.
-- To build it:  `yarn build:element`, in `packages/app`.
+- To build it:  `yarn build:element`, in spell-app.
   - It's built beside `<spell-app>`, into `dist-element/`.
   - Its demo is at `http://localhost:3001/demo/spell-editor.html`, whose edits save to the examples.
   - Monaco (~4 MB) loads only once there's a project to show:
@@ -191,7 +191,7 @@ Notes:
 
 ## To see server logs
 
-- `yarn start` (in `packages/app`) prints both servers' logs in its terminal.
+- `yarn start` (in spell-app) prints both servers' logs in its terminal.
 
 ## To test
 

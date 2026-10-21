@@ -1,5 +1,5 @@
 /**
- * `yarn gen:syntax`:  write the spell syntax table, `spellSyntax.json`, at the package's root.
+ * `yarn spell:gen:syntax`:  write the spell syntax table, `spellSyntax.json`, at `spell/`'s root.
  * - Run it after adding, renaming or changing a rule, its docstring or its tests:
  *   `spellSyntax.test.ts` fails until you do.
  * - What's in it:  `spellSyntax()`.  Who reads it:  the spell syntax guide, `guides/spell-syntax/spell-syntax.html`.

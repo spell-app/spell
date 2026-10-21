@@ -1,5 +1,5 @@
 /**
- * `@spell-app/py` (`$/py`, `PY`):  everything spell has for Python (epic `python-target` P21).
+ * `spell-lang/py` (`$/py`, `PY`):  everything spell has for Python (epic `python-target` P21).
  * - Here, in `ts/`:  the TypeScript that writes Python, and Python's page and app.
  *   - `PY.PyWriter`:  the `py` target's writer, `<Project>.spell.py`, on asyncio
  *   - `PY.PyBaseWriter`:  what it builds on, all but waiting
