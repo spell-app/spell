@@ -66,9 +66,10 @@ export class ServerLink {
           frame.remove()
         }
       }
-      const timer = setTimeout(() => finish(() => {
+      const notLoaded = (): string => {
         throw new Error("the page didn't load")
-      }), timeout)
+      }
+      const timer = setTimeout(() => finish(notLoaded), timeout)
       frame.addEventListener("load", () => {
         // the empty document a frame starts with:  the page is still to come
         if (frame.contentDocument?.URL === "about:blank") return
