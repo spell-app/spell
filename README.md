@@ -11,7 +11,7 @@ The top repo:  the ONE install over Spell's child repos, the list of them, and t
 ## Setting up
 
 ```sh
-git clone git@github.com:spell-app/spell.git ~/www/spell
+git clone git@github.com:spell-app/spell-hub.git ~/www/spell
 cd ~/www/spell
 yarn install          # quick:  no child repos yet, so nothing to link
 yarn clone            # every child repo in repos.json5, then ONE install for all of them

@@ -3,7 +3,7 @@
   "private": true,
   "description": "The top repo:  the ONE install over Spell's child repos (spell-util, spell-server, spell-element, spell-lang, spell-ui, spell-brand, spell-epic, spell-app), the list of them, and the commands over them",
   "license": "MIT",
-  "repository": "https://github.com/spell-app/spell",
+  "repository": "https://github.com/spell-app/spell-hub",
   "workspaces": [
     "spell-*"
   ],
