@@ -338,7 +338,7 @@ test("a THREAD:  `reply` (saved as typed), `resolve` (that's good / skip it), `r
   await post({ page, action: "clear", id })
 })
 
-test("WORKING:  `spell dev comments working` -- the GET carries it (the thread's thinking stub);  `answer` clears it", async () => {
+test("WORKING:  `epic comments working` -- the GET carries it (the thread's thinking stub);  `answer` clears it", async () => {
   const page = "/epics/big/notes.html"
   const file = join(root, "epics/big/notes.html")
   const { id } = (await post({ page, action: "add", ...ON_TABLE, text: "Why?" })).answer

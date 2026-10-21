@@ -1,5 +1,5 @@
 /**
- * `spell dev docs link <page> [--hash <id>] [--text "..."] [--review] [--show]`:  the markdown link Claude gives Owen for a
+ * `epic pages link <page> [--hash <id>] [--text "..."] [--review] [--show]`:  the markdown link Claude gives Owen for a
  * page:  a SIDE BAR link, then a browser one, `🌐` after a `•` (Owen, 2026-10-11).
  *
  *     [Details Pages](http://127.0.0.1:4747/api/docs/show?path=...&window=123) • [🌐](http://127.0.0.1:4747/...)
@@ -33,7 +33,7 @@ const addressed = positional[0] && EpicAddress.isAddress(positional[0]) ? addres
 const file = addressed?.file ?? (positional[0] ? pageFile(positional[0]) : "")
 if (!positional[0] || !file.endsWith(".html") || !existsSync(file)) {
   console.error(
-    'usage:  spell dev docs link <page.html | SAGA:/<saga>[/<epic>][#<id>]> [--hash <id>] [--text "..."] [--review] [--show]'
+    'usage:  epic pages link <page.html | SAGA:/<saga>[/<epic>][#<id>]> [--hash <id>] [--text "..."] [--review] [--show]'
   )
   process.exit(1)
 }
@@ -76,7 +76,7 @@ export async function markdownLink(
     return `[${title}](${url.origin}/api/docs/show?${query}) • [🌐](${url.origin}/api/docs/show?${browser})`
   }
   console.error(
-    "no page server here can show pages in the side bar yet (restart it:  spell dev server stop && spell dev server ensure)"
+    "no page server here can show pages in the side bar yet (restart it:  spell server stop && spell server start)"
   )
   return `[${title}](${pages[0] ?? `file://${file}`}${anchor})`
 }

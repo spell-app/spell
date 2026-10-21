@@ -41,7 +41,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | `src/answers/` | `$/epics/answers`:  the pages Owen answers on (epic `epic-workflow` P12) -- a details page's answer (`AnswerForm`:  gathered from its `<epic-ask>`s and `<epic-text-box>`es, sent, read back) and a choice page's boxes (`ChoicesForm`:  the draft, "Do it") |
 | `src/links/` | `$/epics/links`:  short addresses (`SAGA:/<saga>/<epic>#<id>`) and `<epic-link>`'s attributes as a page and an id (`EpicAddress`), and what a page holds to land on (`PageTargets`);  pure, for the elements, the docs runtime and the tool (epic `epic-workflow` P15) |
 | `src/convert/` | the converter (`epic convert`):  an epic page in the old markup => `<epic-*>` markup, with a proof that no id, link or word was lost;  every live doc was converted at P12, and it stays for a doc restored from an old backup |
-| `src/tool/` | the `epic` tool (`epic <verb>`;  `spell dev plan-doc`, its old spelling), node only, not in the pack;  `PLAN-DOC.md`, the rules for a doc's data;  `templates/plan.html`, a new doc |
+| `src/tool/` | the `epic` tool (`epic <verb>`;  `epic plan-doc`, the tool in its own order), node only, not in the pack;  `PLAN-DOC.md`, the rules for a doc's data;  `templates/plan.html`, a new doc |
 | `tests/epics/src/pack.test.ts` (repo root) | runs `spell-pack check`:  `components/__pack/` and `docs/__data/` are current |
 | `components/__pack/` | GENERATED, committed:  `epics.catalog.ts`, `epics.entry.ts`, `epics.pack.js` |
 | `docs/` | Epic UI, the elements' docs pages, served at `/components/epics/`:  `index.html`, `<tag>.html`, `__parts/`, `__data/` ([AGENTS.md](AGENTS.md), "Epic UI, the docs set") |
@@ -51,7 +51,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 
 ## Adding a new element
 
-1. `spell dev pack element epics epic-<name>`:
+1. `spell pack add epics epic-<name>`:
    - writes the family's folder, `components/epic-<name>/`
    - adds it to [the barrel](components/index.ts)
    - rebuilds `components/__pack/`

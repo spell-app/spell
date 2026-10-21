@@ -9,7 +9,7 @@ parking and waking sessions, and the `epic` command that drives them.
 - ONE copy per machine, which every repo and every window runs.
   - An edit here is live at once for the `epic` command and the hooks.
   - A skill's new text reaches a running session after `/reload-plugins`.
-- spell-app is its first user:  it keeps `spell dev` aliases that hand the epic verbs on to `epic`.
+- spell-app is its first user.
 
 ## What's in it
 
@@ -104,7 +104,7 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | `app.path` | `"/editor/"` | the repo's APP (epic `epic-engine` I49):  its address on the epic server, the top bar's App tab (`/editor/`, and `/r/<repo>/editor/`) |
 | `app.url` | `""` | where the app answers (`"http://localhost:3000/"`);  `""` with no `urlFile`:  no app, and the tab says so |
 | `app.urlFile` | `""` | OR a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout:  wins while it's there (spell-app's `".spell-server.editor.json"`) |
-| `app.start` | `""` | the shell command that starts it, run in the background from the main checkout when it doesn't answer (spell-app's `"node packages/cli/bin/spell.mjs dev server ensure"`:  its page server, which starts the editor);  `""`:  the tab says it isn't up |
+| `app.start` | `""` | the shell command that starts it, run in the background from the main checkout when it doesn't answer (spell-app's `"node ../cli/bin/spell.mjs server start"`, the kit's `spell`:  its page server, which starts the editor);  `""`:  the tab says it isn't up |
 
 A repo's generated files are its own list, in each checkout:  `.epic/generators.json5`.
 - `epic worktree merge-main` rebuilds them instead of merging them.
@@ -153,7 +153,7 @@ For the morning after epic `epic-eject`'s night:  that night nothing was install
    - Then the main checkout's `spell-epic` link, `yarn install`, and a restart of its page server:
 
      ```sh
-     cd ~/www/spell-app/spell-app && epic shared link && yarn install && spell dev server stop && spell dev server ensure
+     cd ~/www/spell-app/spell-app && epic shared link && yarn install && spell server stop && spell server start
      ```
 
    - Again if `main` already has it:  the branch took two more commits spell-epic needs (T26), the page server's
@@ -320,8 +320,8 @@ What the content folder holds:
 Not the folders that are spell-app's own:  `brand/`, `ui/`, `goals/`, `agents/`.
 And no `templates/`:  the templates are spell-epic's.
 
-The verbs a skill names that spell-app spells `spell dev ...`:
-- `epic pages index | update | new | open | link | fuss | offline` (`spell dev docs ...`)
+The verbs a skill names that need the repo's own tools:
+- `epic pages index | update | new | open | link | fuss | offline`
 - `epic server ...`:  in a repo without its own page server, the epic server (`epic hub`), same verbs
 - `epic window open <name> --no-open`:  writes the worktree's window file without opening VS Code
 
@@ -401,7 +401,7 @@ an npm user:
     resolver, [`packageDir()`](src/tools/packageDir.ts), never a path to a sibling by hand.
 
 - The component pack's build and check are the kit's pack tooling, `spell-pack` (`spell-kit`'s bin;
-  `element/tools/ComponentPack.ts` there), which spell-app's CLI (`spell dev pack`) calls too.
+  `element/tools/ComponentPack.ts` there), which spell-app's CLI (`spell pack`) calls too.
   - Spell UI's `spell-ui-pack` from epic `repo-split` P5 to P10.
   - `yarn pack:build` / `pack:check` run `spell-pack build` / `check` in the root.
   - It finds the pack from the root `package.json`'s `"spellPack": { "name": "epics", "prefix": "epic-", "dir": "src" }`:

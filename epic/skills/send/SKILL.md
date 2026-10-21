@@ -18,7 +18,7 @@ and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-
 - By itself (no `/send`):  Owen asks for a change to DEV TOOLING, how he works, not what this session builds.
   - Dev tooling:  the epic page and its comments, marks and buttons;  the Review tab;  details pages;
     every skill and hook;  windows, worktrees, the page server;
-    `epic`, and the repo's own dev commands (spell-app's `spell dev`).
+    `epic`, and the repo's own dev commands (the kit's `spell`).
   - Not:  this session's OWN epic's content.
     "Fix P4's file list in the plan doc" in `🚧 python` is python's job;
     "the plan doc's comment box covers the text" is tooling.

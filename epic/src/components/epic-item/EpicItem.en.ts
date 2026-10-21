@@ -4,7 +4,7 @@
  *   - the review controls' parts and button names (`REVIEW_*`):
  *     it draws `<epic-review>`, and its id chip's tooltip names the chosen button
  *   - the `actions` slot every title row shares (`ACTIONS_*`)
- * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"

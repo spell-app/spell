@@ -5,7 +5,7 @@
  *   `main`'s sections once, at start, so the families must be in the page before it runs.  This script fetches,
  *   draws, then adds `spell-ui.js` (same folder), whatever happened.
  * - The data:  `<page>.json5` (`body[data-commands]` overrides), fetched, so the page needs the PAGE SERVER
- *   (`spell dev docs open <page>`);  from `file://` it shows a notice where the tables go.
+ *   (`epic pages open <page>`);  from `file://` it shows a notice where the tables go.
  *   - JSON5's JSON-compatible part, comments and trailing commas allowed (`parseData()`;  epic `epic-workflow` P21);
  *     its old name, `<page>.json`, fetched when there's no `.json5` yet
  * - JSON:  `{ families: [{ id, title, icon?, intro?, rows: [Row] }] }` (a family `id` shares the page's id space:  never
@@ -17,7 +17,7 @@
  *   - `runs` -- the tool doing the work (`src/window.mjs`, `status.py`, `prose`);  `target`, `notes` -- text
  *   - in `target`, a roadmap id in parens, `(R3)`, links to `#r3`:  the page's roadmap rows carry those ids
  *   - text fields:  `` `code` `` becomes `<code>`;  everything else is plain text, never markup
- * - `sources` (top level, optional):  what `spell dev commands` counts:  `userSkills` (in `~/.claude/skills`),
+ * - `sources` (top level, optional):  what `spell commands` counts:  `userSkills` (in `~/.claude/skills`),
  *   `ignore` (commands that need no row);  ignored here
  * - Built from elements (`el()`), never from markup in strings (epic `epic-engine` P3):  Spell UI's own, as a page
  *   writes them (`<ui-section>`, `<ui-table>` round a real `<table>`, `<ui-statistic>`, `<ui-message>`), in the
@@ -75,7 +75,7 @@
       location.pathname.replace(/[^/]*$/, (name) => name.replace(/\.html?$/, ".json5"))
     if (location.protocol === "file:") {
       notice(
-        `This page draws its tables from ${file.split("/").pop()}:  open it through the page server, e.g. \`spell dev docs open ${pagePath()}\`.`
+        `This page draws its tables from ${file.split("/").pop()}:  open it through the page server, e.g. \`epic pages open ${pagePath()}\`.`
       )
       return undefined
     }

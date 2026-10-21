@@ -739,7 +739,7 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code>spell dev plan-doc new &lt;name&gt; [--title ...] [--prompt ...] [--future]</code>: copies the
+                <code>epic new &lt;epic&gt; [--title ...] [--prompt ...] [--future]</code>: copies the
                 tool's template (<a
                   href="../../spell-epic/src/tool/templates/plan.html"
                   target="src-spell-epic-src-tool-templates-plan-html"
@@ -757,16 +757,16 @@
                 Every command that edits the doc stamps <code>updated</code> and refreshes <code>recent-since</code>.
               </li>
               <li>
-                <code>spell dev plan-doc bedtime &lt;name&gt; start "P3-P6"</code> sets <code>bedtime</code>;
+                <code>epic bedtime &lt;epic&gt; start "P3-P6"</code> sets <code>bedtime</code>;
                 <code>bedtime &lt;name&gt; done</code> removes it.
               </li>
               <li>
-                <code>spell dev plan-doc commit</code> and
-                <code>spell dev plan-doc commits &lt;name&gt; --backfill</code> list commits, linked through
+                <code>epic commit</code> and
+                <code>epic commits &lt;epic&gt; --backfill</code> list commits, linked through
                 <code>repo</code>.
               </li>
               <li>
-                <code>spell dev plan-doc convert</code> wrote it for every doc made before the switch (from the old
+                <code>epic convert</code> wrote it for every doc made before the switch (from the old
                 <code>ui-*</code> markup).
               </li>
               <li><code>reviewing</code> is never written: the page sets it on itself while it's being reviewed.</li>

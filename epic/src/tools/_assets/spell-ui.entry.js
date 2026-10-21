@@ -1,6 +1,6 @@
 /**
  * Entry of `spell-ui.js`, the ONE classic script a `.html` doc loads -- `file://` blocks ES modules.
- * - Built by `node src/tools/bundle-spell-ui.js`, from spell-epic's root (part of `spell dev docs update`);  edit THIS,
+ * - Built by `node src/tools/bundle-spell-ui.js`, from spell-epic's root (part of `epic pages update`);  edit THIS,
  *   never the bundle.
  * - `spell-ui` ~== UI's built `dist/index.js`:  every family, each `define()`s its tags as it's imported.
  *   Solid comes from UI's `node_modules`, so there's exactly one copy.
@@ -19,7 +19,7 @@
  * - Exports become `window.SpellUI` (`UI`), for the page runtime's checks and for poking in DevTools.
  * - Component packs (epic `epic-components`):  `<ui-components source="x.pack.js">` in a `<ui-root>` loads a pack's
  *   classic script, which calls `SpellUI.registerPack(pack)` and imports the modules it shares with the page from
- *   `SpellUI.packModules` (`spell dev pack build` maps each of their specifiers there), so a pack never brings a
+ *   `SpellUI.packModules` (`spell pack build` maps each of their specifiers there), so a pack never brings a
  *   second Solid or Spell UI.
  *   - `packModules` is the EXACT specifier a pack's build leaves external => that module's namespace.  Add one here
  *     AND to the pack build's externals, together.

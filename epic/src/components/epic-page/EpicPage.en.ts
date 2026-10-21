@@ -1,7 +1,7 @@
 /**
  * Every name `<epic-page>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
  * - Pure data:  `import type` only (its toolbar's chips are `<epic-state-filter>`'s, with their texts).
- * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"

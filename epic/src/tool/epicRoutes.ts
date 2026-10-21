@@ -23,7 +23,7 @@
  * - stored in ONE shared file, `epics/favorites.json5` (`$/epics/list/EpicCards` `FAVORITES_FILE`), a list:
  *   every checkout reads the same one, and the shared repo commits it after the turn
  * - each card goes in its group by it as the page server serves the Epics page (`$/epics/list/RunningEpics`);
- *   `spell dev docs index` writes the stars and groups it says into the page
+ *   `epic pages index` writes the stars and groups it says into the page
  * - no Claude needed:  it works on a plane
  *
  * Each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`).

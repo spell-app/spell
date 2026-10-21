@@ -262,12 +262,12 @@
             <ul>
               <li>
                 <code
-                  >spell dev plan-doc commit &lt;name&gt; &lt;sha&gt; --phase N | --item &lt;id&gt;
+                  >epic commit &lt;epic&gt;#&lt;id&gt; &lt;sha&gt;
                   "&lt;sentence&gt;"</code
                 >: lists one, replacing the entry already there for that sha.
               </li>
               <li>
-                <code>spell dev plan-doc commits &lt;name&gt; --backfill</code>: every phase and item commit in the
+                <code>epic commits &lt;epic&gt; --backfill</code>: every phase and item commit in the
                 doc's git history not listed yet, read from subjects (<code>P3: Name -- summary</code>,
                 <code>Fix I3: ...</code>).
               </li>

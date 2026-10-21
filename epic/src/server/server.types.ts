@@ -80,7 +80,7 @@ export const EPIC_UI = { name: "Epic UI", path: "components/epics", dir: "src/do
  *   pay first) held the page's own scripts up behind it, and the page showed raw markup for tens of seconds
  * - `local`:  the same file (11.9.0), at the engine's assets route
  * - who swaps the one for the other:  the epic server as it serves a page (`EpicServer`'s `localHighlight()`),
- *   `epic airplane` / `spell dev docs offline --fix` in the files (`offline.ts`);  spell-app's page server has its own
+ *   `epic airplane` / `epic pages offline --fix` in the files (`offline.ts`);  spell-app's page server has its own
  *   swap (its `page-server` package)
  * - the engine's own since epic `epic-engine` P8 (r8):  it was spell-app's `HIGHLIGHT_JS` in `$/server/page`
  */

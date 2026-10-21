@@ -108,7 +108,7 @@ const ENGINE_EPIC = `node ${JSON.stringify(join(ENGINE_ROOT, "bin", "epic"))}`
 const OLD_EPIC = "packages/cli/bin/epic.mjs"
 
 /**
- * The same old checkout's `spell` CLI, for `spell dev server`:
+ * The same old checkout's `spell` CLI, for its `spell dev server`:
  * a checkout from before `epic server` (epic `epic-eject` P5) has no such verb.
  */
 const OLD_SPELL = "node packages/cli/bin/spell.mjs"
@@ -399,7 +399,7 @@ export class DocView implements vscode.WebviewViewProvider {
    * - runs `epic server stop`, then `epic server ensure`, in a LOGIN shell (`$SHELL -lc`):
    *   a GUI VS Code's own `PATH` may have no `node`
    *   - a checkout from before `epic server` (epic `epic-eject` P5):
-   *     `spell dev server stop` / `ensure` instead, when its own `epic` refuses the verb
+   *     `spell dev server stop` / `ensure` instead (its own `OLD_SPELL`), when its own `epic` refuses the verb
    * - with spell-epic's `epic`, the one this extension was built from (`ENGINE_EPIC`), never the `epic` on `PATH`,
    *   run in that checkout's root:  the page server is per checkout, and `epic` acts on the checkout it's run in
    *   - a checkout cut before the switch (epic `epic-eject` I5) runs its own copy instead (`OLD_EPIC`)
@@ -474,7 +474,7 @@ export class DocView implements vscode.WebviewViewProvider {
   async remembered(): Promise<string | undefined> {
     const url = DocView.memory?.get<string>(`${this.id}.page`)
     if (!url) return undefined
-    // a page server restarting (`spell dev server ensure` after a merge) is back in a few seconds:
+    // a page server restarting (`spell server start` after a merge) is back in a few seconds:
     // wait for it rather than forget the page
     // (Owen, 2026-10-10:  "reloading either of those tabs forgets what page was shown")
     for (let tries = 0; tries < REMEMBER_TRIES; tries++) {

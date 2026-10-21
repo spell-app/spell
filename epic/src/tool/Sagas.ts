@@ -233,7 +233,7 @@ export type GuideSaga = {
 /** The guides' shared folder, from the content folder. */
 const GUIDES = "guides"
 
-/** The Guides list page (`spell dev docs index` writes it):  not a guide. */
+/** The Guides list page (`epic pages index` writes it):  not a guide. */
 const GUIDES_LIST = "guides/index.html"
 
 /** Folders that hold no pages (the docs tools' `SKIP_DIRS`). */

@@ -8,7 +8,7 @@
  *   `<ui-counter>`) loads the script right after `spell-ui.js`;  the elements it defines extend the page's own
  *   Spell UI, so they work like any `<ui-*>` there.
  * - `<out.js>`:  default, the entry's name with `.bundle.js` for `.entry.ts`, beside it.
- * - Built as a component pack's script is (`spell dev pack build`, `packages/cli/src/dev/packBuild.ts`):
+ * - Built as a component pack's script is (`spell pack build`, `packages/cli/src/dev/packBuild.ts`):
  *   - Vite, on Spell UI's `baseConfig()`:  decorators BEFORE Solid, Solid's JSX, Lightning CSS
  *   - one minified IIFE, banner first, saying how it was built
  *   - every `PACK_MODULES` specifier (`solid-js`, `@solidjs/web`, `$/spell-element`, `$/ui/core`, `$/ui/forms`) left

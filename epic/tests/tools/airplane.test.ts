@@ -6,7 +6,7 @@ import { afterAll, describe, expect, it } from "vite-plus/test"
 import { preFlight } from "../../src/tools/airplane.ts"
 import { HIGHLIGHT } from "../../src/tools/offline.ts"
 
-describe("spell dev airplane check:  preFlight()", () => {
+describe("epic airplane check:  preFlight()", () => {
   const root = mkdtempSync(join(tmpdir(), "airplane-check-"))
   const page = join(root, "guides", "page.html")
   mkdirSync(join(root, "guides"))

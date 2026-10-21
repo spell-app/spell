@@ -33,7 +33,7 @@ import { Worktrees } from "./Worktrees"
  *   - `window`, `server` and the docs tools' groups (`ask`, `choices`, `comments`, `notes`, `agents`, `airplane`):
  *     scripts passed through, their arguments verbatim (`EpicTools.run()`)
  *   - `hub`, `repo`:  the machine's one epic server and the repos it serves (`Hub`, `Repos`;  epic `epic-eject` P7)
- *   - `pages`:  the docs pages' tools (`spell dev docs` in spell-app;  epic `epic-eject` P9), passed through
+ *   - `pages`:  the docs pages' tools (spell-app's `spell dev docs` until epic `repo-split` P13;  epic `epic-eject` P9), passed through
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
  *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Help and mistakes:
@@ -44,15 +44,14 @@ import { Worktrees } from "./Worktrees"
  * - ONE copy of the code:  every verb runs THIS checkout's code, whichever checkout calls it.
  *   - the data is the caller's (`Git.nearestCheckout()`)
  *   - `epic --version` says which code runs
- * - The old spellings still run here:
- *   - `spell dev plan-doc <verb> <name> ...`, `spell dev worktree ...`, `spell dev details ...`
- *     (the CLI's `devProgram.ts`)
- *   - `spell epic <verb>`
+ * - The tool's own order still runs here, hidden:  `epic plan-doc <verb> <name> ...`
+ *   - spell-app's old spellings that handed on to it (`spell dev plan-doc`, `spell dev worktree`, `spell dev details`,
+ *     `spell epic <verb>` ...) went with `spell dev` (epic `repo-split` P13)
  * - Lean:  it loads no spell, and the `epic` tool only when a page verb runs,
  *   so `epic` starts in a fraction of a second.
  *   - its entry is the CLI's `epicMain.ts`
  *   - NEVER imports the CLI package (`$/cli`)
- * - NOTE: `spell dev commands` reads the `epic.command(...)` calls in this file's TEXT:
+ * - NOTE: `spell commands` reads the `epic.command(...)` calls in this file's TEXT:
  *   keep the receiver named `epic`
  ****************/
 export class EpicProgram {
@@ -372,10 +371,10 @@ export class EpicProgram {
     ).usage("[<kind>] [<epic>... | --all] [--file <page>] [--step <name>] [--dry-run] [--notify] [--list]")
 
     // the `epic` tool in ITS OWN order (`summary seo`, `add seo judgement "Title"`), hidden:  what spell-app's old
-    // spelling, `spell dev plan-doc ...`, hands on to (epic `epic-eject` I5)
+    // spelling, `spell dev plan-doc ...`, handed on to (epic `epic-eject` I5), until `spell dev` went (`repo-split` P13)
     epic
       .command("plan-doc", { hidden: true })
-      .description("the epic tool in its own order, for spell-app's `spell dev plan-doc ...`")
+      .description("the epic tool in its own order:  epic plan-doc summary seo")
       .argument("[args...]")
       .allowUnknownOption()
       .helpOption(false)
@@ -478,10 +477,7 @@ export class EpicProgram {
         !EpicTools.hasPageServer()
           ? new Hub().run(args)
           : args[0] === "start" && args.includes("--all")
-            ? EpicTools.run(
-                "serve",
-                args.slice(1).filter((arg) => arg !== "--all")
-              )
+            ? EpicTools.run("serve", ["server", "start", "all", ...args.slice(1).filter((arg) => arg !== "--all")])
             : EpicTools.run("server", args)
     )
     this.group(
@@ -584,7 +580,7 @@ export class EpicProgram {
    * - `sample`:  a whole command line, for its help's "Example:"
    *   (a verb with its own help text has its examples there)
    * - its arguments are taken raw (`rawArgs()`):  `--goal` / `--details` ... are the tool's, not commander's
-   * - `epic.command("<name>")` stays at each call:  `spell dev commands` finds the verbs by that text
+   * - `epic.command("<name>")` stays at each call:  `spell commands` finds the verbs by that text
    */
   private page(verb: Command, description: string, sample?: string): Command {
     const name = verb.name()
@@ -603,7 +599,7 @@ export class EpicProgram {
    * - no verb (`epic agents`, `epic comments --json`):  the tool's default, or its usage
    * - a verb after a flag the tool takes (`epic agents --epic seo list`) is the tool's to read:
    *   commander can't tell a flag's value from a verb
-   * - `epic.command("<name>")` stays at each call:  `spell dev commands` finds the verbs by that text
+   * - `epic.command("<name>")` stays at each call:  `spell commands` finds the verbs by that text
    */
   private group(command: Command, description: string, run: (args: string[]) => Promise<number>): Command {
     const name = command.name() as GroupName

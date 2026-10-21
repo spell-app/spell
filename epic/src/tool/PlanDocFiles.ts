@@ -436,7 +436,7 @@ export class PlanDocFiles {
   /**
    * Rewrite the docs index:  a plan's status badge follows its phases.
    * - by running the docs index's script, `src/tools/index.js`, as a child `node`,
-   *   as `spell dev docs index` runs it
+   *   as `epic pages index` runs it
    * - shared content (a content folder of its own, `content`):  ONE `pages/index.html` for every checkout, not
    *   tracked by spell-app, so a worktree rewrites it too:  nothing to conflict on merge
    * - a checkout holding its own pages (its own tracked home) in a worktree:

@@ -1,5 +1,5 @@
 /**
- * `spell dev docs open [page] [--vs | --review]`:  show a page in Chrome, reusing its tab (`pages.js` `openInChrome()`).
+ * `epic pages open [page] [--vs | --review]`:  show a page in Chrome, reusing its tab (`pages.js` `openInChrome()`).
  * - `<page>` from the checkout's root, an area, or absolute (`pages.js` `pageFile()`), e.g. `guides/solid/solid-2.html`
  *   or just `solid/solid-2.html`;  default:  the home page, `pages/index.html`
  *   - `.html` and a folder's own page may be left off:  `solid/solid-2` ~== `guides/solid/solid-2.html`,
@@ -12,7 +12,7 @@
  *   test run, epic `epic-engine` P4)
  * - `<page>` may be a SHORT ADDRESS (epic `epic-workflow` P15):  `SAGA:/drawable-spell` (the saga page),
  *   `SAGA:/drawable-spell/python-target#T1` (the epic page, landing on T1)
- *   - read by `$/epics/links`, imported only then:  `spell dev docs open` runs this under `tsx`, while `epic open`
+ *   - read by `$/epics/links`, imported only then:  `epic pages open` runs this under `tsx`, while `epic open`
  *     runs it with plain `node` and a file
  */
 import { existsSync, statSync } from "node:fs"

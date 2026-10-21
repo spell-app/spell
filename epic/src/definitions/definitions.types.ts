@@ -29,7 +29,7 @@ export type CamelCase<S extends string> = S extends `${infer Head}-${infer Tail}
  * - Write it as `export const epicItemVocabulary = { ... } as const satisfies EpicVocabulary`:  the element class
  *   reads it as any Spell UI family does (`E.UIComponent<typeof epicItemVocabulary>`), and `Definitions.all` lists it
  *   for the node tools.
- * - Pure data:  `import type` only (node imports it:  `spell dev pack build`, the tests, the tool).
+ * - Pure data:  `import type` only (node imports it:  `spell pack build`, the tests, the tool).
  */
 export type EpicVocabulary = Omit<ComponentVocabulary, "attributes"> & {
   attributes: readonly EpicAttributeSpec[]

@@ -21,8 +21,8 @@ import { Sessions } from "./Sessions"
  *   - Its DATA stays the caller's:  the nearest checkout from the current folder (`Git.nearestCheckout()`),
  *     handed to the tool as `EPIC_CHECKOUT` (the docs tools' `pages.js` and the window script read it as their root).
  *   - The exceptions:  the tools that SERVE their checkout, whose code is that checkout's:
- *     - `serve`, the checkout's own script (`code: "caller"`)
  *     - the page server, the `spell-kit/server` its install resolves (`package`)
+ *     - `serve`, every web server:  the kit's `spell` its install resolves (`spell-kit/cli`)
  * - All `static`:  no state;  `codeRoot` is the one seam, a test's fake checkout of tools.
  ****************/
 export class EpicTools {
@@ -85,7 +85,7 @@ export class EpicTools {
    *   a foreground server (`server serve`) gets to stop cleanly, and we exit with its code
    * - `SIGTERM` / `SIGHUP` sent to us alone are passed on
    * - killed by a signal:  `128 +` its number, as a shell reports it;  failed to start:  `EXIT.ERRORS`, saying why
-   * - static:  any command;  the `spell dev` pass-throughs run theirs with it too
+   * - static:  any command
    */
   static runChild(
     command: string,
@@ -165,9 +165,10 @@ export class EpicTools {
    * - `window`:  the VS Code windows (`src/window.mjs`);
    *   plain `node`, so it runs in a worktree before its `yarn install`
    * - `server`:  the caller's checkout's page server (`spell-kit/server`'s `src/page/cli.ts`, the kit's)
-   * - `serve`:  every web server, `epic server start --all` (the caller's root `scripts/serve.mjs`, spell-app's)
+   * - `serve`:  every web server, `epic server start --all`:  the kit's `spell` its install resolves, which
+   *   `EpicProgram` runs as `spell server start all` (spell-app's own `scripts/serve.mjs` until epic `repo-split` P13)
    * - `pages <verb>`:  the docs pages' tools, `epic pages index` ...
-   *   (`spell dev docs <verb>` in spell-app;  `runPages()`)
+   *   (`runPages()`;  spell-app's `spell dev docs <verb>` until epic `repo-split` P13)
    *   - at the caller's checkout's root (spell-app's `yarn workspace` ran them in `packages/epics` before epic
    *     `epic-eject`'s switch-over), or the caller's folder for those that take paths from there
    * - static:  the one table
@@ -181,7 +182,7 @@ export class EpicTools {
     comments: { tool: "src/tools/comments.ts", tsx: "tsconfig.json" },
     window: { tool: "src/window.mjs" },
     server: { package: "spell-kit/server", tool: "src/page/cli.ts", tsx: "tsconfig.json" },
-    serve: { tool: "scripts/serve.mjs", code: "caller" },
+    serve: { package: "spell-kit/cli", tool: "bin/spell.mjs" },
     "pages update": { tool: "src/tools/update.js", cwd: "." },
     "pages index": { tool: "src/tools/index.js", cwd: "." },
     "pages new": { tool: "src/tools/new-page.js", cwd: "." },

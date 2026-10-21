@@ -431,7 +431,7 @@
             <ul>
               <li>
                 Nothing any more:
-                <code>spell dev plan-doc updated &lt;name&gt; &lt;N&gt; "&lt;html&gt;"</code> writes an
+                <code>epic updated &lt;epic&gt;#P&lt;N&gt; "&lt;html&gt;"</code> writes an
                 <a href="epic-update.html" target="src-packages-epics-docs-epic-update-html"
                   ><code>&lt;epic-update&gt;</code></a
                 >
@@ -443,11 +443,11 @@
                 in the Phases section (<code>of</code>) go.
               </li>
               <li>
-                <code>spell dev plan-doc add-phase ... --before N</code>: renumbers the phases that move, in both
+                <code>epic add-phase ... --before N</code>: renumbers the phases that move, in both
                 attributes (<code>phase</code>, <code>of</code>).
               </li>
               <li>
-                <code>spell dev plan-doc convert</code>: from an old phase's Updated field, one per dated line, then
+                <code>epic convert</code>: from an old phase's Updated field, one per dated line, then
                 migrated to <code>&lt;epic-update&gt;</code> as it writes its files.
               </li>
             </ul>

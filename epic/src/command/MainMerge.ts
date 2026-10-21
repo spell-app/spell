@@ -40,7 +40,7 @@ const SNAPSHOT_UPDATE = (tests: string[]) => ["yarn", "vp", "test", "run", ...te
  * - Generated output one side no longer commits:
  *   a file `main` changed, or in conflict, that the merged `.gitignore` ignores and one side's tree lacks,
  *   leaves the index and stays on disk (`untracked`).
- *   - e.g. the bundles the page server builds since 2026-10-07 (`spell dev bundles`)
+ *   - e.g. the bundles the page server builds since 2026-10-07 (`spell bundle`)
  * - Snapshots are regenerated with `vp test run --update`, then each entry is compared to both sides:
  *   one NEITHER side had is new behaviour nobody reviewed, so it's reported (`review`), never hidden.
  * - Any OTHER file in conflict stops it mid-merge:
@@ -226,7 +226,7 @@ export class MainMerge {
    *   a branch that adds a generated file lists it, and its own merge knows it
    * - no file:  none, so only snapshots are regenerated
    * - Why a file:  the epic code is every repo's, and the generators are one repo's own
-   *   (spell-app's bundles, its packs ...);  `spell dev pack new` adds a pack's line
+   *   (spell-app's bundles, its packs ...);  `spell pack create` adds a pack's line
    * - throws `SyntaxError` on a file that won't read, `TypeError` on an entry of the wrong shape:  each names the file
    */
   static generatorsOf(root: string): Generator[] {

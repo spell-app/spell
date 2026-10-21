@@ -460,7 +460,7 @@
             <ul>
               <li>
                 A plan change:
-                <code>spell dev plan-doc updated &lt;name&gt; &lt;N&gt; "&lt;html&gt;" [--summary "..."]</code>, at the
+                <code>epic updated &lt;epic&gt;#P&lt;N&gt; "&lt;html&gt;" [--summary "..."]</code>, at the
                 end of phase N's description (<code>PlanDoc.addPhaseUpdate()</code>). The phase's
                 <code>changes</code> counts them, for the folded title's pen.
               </li>
@@ -470,7 +470,7 @@
                 active, once per item (<code>PlanDoc.markUpdate()</code>).
               </li>
               <li>
-                <code>spell dev plan-doc phase &lt;name&gt; &lt;N&gt; done</code> removes phase N's bare labels and its
+                <code>epic phase &lt;epic&gt;#P&lt;N&gt; done</code> removes phase N's bare labels and its
                 prose updates; its plan changes stay.
               </li>
               <li><code>add-phase ... --before N</code> renumbers <code>phase</code> with the phases.</li>

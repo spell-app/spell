@@ -13,7 +13,7 @@ import { AS } from "spell-kit/assembler"
  * - `EpicParts` beside this splits and assembles a doc on them;  so does the converter (`$/epics/convert`), whose
  *   first pass also assembles a doc in the old markup (`OldParts`)
  * - a part is told from a page by its FOLDER, `parts/`:  every page walker skips it (`pages.js` `findPages()`:  the
- *   `docs index`, `docs update`;  `relocate.js`;  `spell static`), so a part is never taken for a page (Q12)
+ *   `docs index`, `docs update`;  `relocate.js`;  `spell ssr`), so a part is never taken for a page (Q12)
  * - `.html` only:  the `.htm` of a doc split before Q12 is read no more (epic `epic-components` P15:  every doc was
  *   converted, and its parts written `.html`, at P12)
  * - STATIC:  every helper works on paths, URLs or the element it's given, never a document of its own

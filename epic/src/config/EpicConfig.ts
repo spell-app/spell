@@ -733,7 +733,7 @@ export type EpicSettings = {
  *   `url` while it's there (spell-app's `.spell-server.editor.json`, spaces' `EditorServer`;  as its page server's
  *   `/editor` reads it, `appRoutes.ts`)
  * - `start`:  the shell command that starts it, run DETACHED from the main checkout when it doesn't answer
- *   (`node packages/cli/bin/spell.mjs dev server ensure`);  `""`:  nothing to run, the tab says it isn't up
+ *   (`node ../cli/bin/spell.mjs server start`, the kit's `spell`);  `""`:  nothing to run, the tab says it isn't up
  * - neither `url` nor `urlFile`:  no app (the default)
  */
 export type EpicApp = { path: string; url: string; urlFile: string; start: string }

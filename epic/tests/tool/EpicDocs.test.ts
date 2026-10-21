@@ -1,5 +1,5 @@
 /**
- * Tests of `EpicDocs` (`spell dev plan-doc docs | decisions`):  its pure rules, then a scratch checkout with git,
+ * Tests of `EpicDocs` (`epic docs | decisions`):  its pure rules, then a scratch checkout with git,
  * a shared content repo its config names (no links), and two epics' pages.
  */
 import { spawnSync } from "node:child_process"

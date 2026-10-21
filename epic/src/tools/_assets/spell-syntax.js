@@ -118,7 +118,7 @@
     if (!path) throw new Error("the page's `<body>` has no `data-choices-rows`")
     if (location.protocol === "file:") {
       notice(
-        "This page draws its rules from the checkout serving it, and saves what you type, through the page server:  open it with `spell dev docs open guides/spell-syntax/spell-syntax.html`."
+        "This page draws its rules from the checkout serving it, and saves what you type, through the page server:  open it with `epic pages open guides/spell-syntax/spell-syntax.html`."
       )
       return undefined
     }
@@ -659,7 +659,7 @@
   /** POST `body` to `url` with the page server's token;  the answer, or throws saying what to do. */
   async function postJSON(url, body, { keepalive = false } = {}) {
     if (!server?.token)
-      throw new Error("this page isn't on the page server:  open it with `spell dev docs open <page>`")
+      throw new Error("this page isn't on the page server:  open it with `epic pages open <page>`")
     const response = await fetch(url, {
       method: "POST",
       keepalive,
@@ -672,7 +672,7 @@
       throw new Error("the page server restarted since this page loaded:  reload the page (your boxes come back)")
     // no route at all:  a server started before it existed
     if (response.status === 404 && !answer.error)
-      throw new Error("page server too old, restart it (`spell dev server stop`, then `spell dev server ensure`)")
+      throw new Error("page server too old, restart it (`spell server stop`, then `spell server start`)")
     throw new Error(answer.error ?? `${response.status} ${response.statusText}`)
   }
 

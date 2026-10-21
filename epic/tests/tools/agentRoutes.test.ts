@@ -27,7 +27,7 @@ const PAGES = {
 
 const PLAN_URL = `/${PAGES.plan}`
 
-/** the scratch epic's list, as `spell dev agents` would write it */
+/** the scratch epic's list, as `epic agents` would write it */
 let list: AgentList
 
 beforeAll(async () => {
@@ -76,7 +76,7 @@ test("GET:  no agents, no file:  an empty list", async () => {
   expect(await get()).toEqual({ status: 200, body: { agents: [] } })
 })
 
-test("GET:  the epic's list, as `spell dev agents` wrote it", async () => {
+test("GET:  the epic's list, as `epic agents` wrote it", async () => {
   list.add("aaa", "docstrings in string.ts")
   const { status, body } = await get()
   expect(status).toBe(200)

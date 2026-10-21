@@ -86,7 +86,7 @@
             <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" changes="1">
               <epic-field name="symptom">26 docs in today's markup, in several generations of it.</epic-field>
               <epic-field name="changes"
-                ><code>spell dev plan-doc convert</code> rewrites a doc into <code>epic-*</code> markup, and proves
+                ><code>epic convert</code> rewrites a doc into <code>epic-*</code> markup, and proves
                 nothing was lost: the same ids, the same link targets, the same text.</epic-field
               >
               <epic-field name="goal"
@@ -108,7 +108,7 @@
                     <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" changes="1">
                       <epic-field name="symptom">26 docs in today's markup, in several generations of it.</epic-field>
                       <epic-field name="changes"
-                        ><code>spell dev plan-doc convert</code> rewrites a doc into <code>epic-*</code> markup, and proves nothing was lost:
+                        ><code>epic convert</code> rewrites a doc into <code>epic-*</code> markup, and proves nothing was lost:
                         the same ids, the same link targets, the same text.</epic-field
                       >
                       <epic-field name="goal"
@@ -720,36 +720,36 @@
             <ul>
               <li>
                 <code
-                  >spell dev plan-doc add-phase &lt;name&gt; "Short Name" --symptom ... --changes ... [--goal ...]
+                  >epic add-phase &lt;epic&gt; "Short Name" --symptom ... --changes ... [--goal ...]
                   [--files ...] [--verify ...] [--estimate 1-2h] [--before N]</code
                 >: a new phase, <code>todo</code>; a field not given reads <code>TBD</code>.
                 <code>--before N</code> inserts it as PN and renumbers the rest.
               </li>
-              <li><code>spell dev plan-doc phase-body &lt;name&gt; &lt;N&gt; --symptom ...</code>: sets its fields.</li>
+              <li><code>epic update &lt;epic&gt;#P&lt;N&gt; --symptom ...</code>: sets its fields.</li>
               <li>
-                <code>spell dev plan-doc phase &lt;name&gt; &lt;N&gt; todo|active|done [--done ...]</code>: its
+                <code>epic phase &lt;epic&gt;#P&lt;N&gt; todo|active|done [--done ...]</code>: its
                 <code>status</code>, and its Done field.
               </li>
               <li>
-                <code>spell dev plan-doc estimate &lt;name&gt; &lt;N&gt; "1-2h"</code>: its <code>estimate</code> (the
+                <code>epic update &lt;epic&gt;#P&lt;N&gt; --estimate "1-2h"</code>: its <code>estimate</code> (the
                 Overview's total follows).
               </li>
               <li>
-                <code>spell dev plan-doc updated &lt;name&gt; &lt;N&gt; "..." [--summary "..."]</code>: an
+                <code>epic updated &lt;epic&gt;#P&lt;N&gt; "..." [--summary "..."]</code>: an
                 <code>&lt;epic-update at summary&gt;</code> block at the end of its description. The
                 <code>changes</code> count is rewritten by the tool on every edit.
               </li>
               <li>
-                <code>spell dev plan-doc rename &lt;name&gt; P6 "New title" [--html]</code>: its <code>title</code> (or
+                <code>epic update &lt;epic&gt;#P6 --title "New title" [--html]</code>: its <code>title</code> (or
                 its title slot, with <code>--html</code>); links that say the old title, and items queued for it,
                 follow.
               </li>
               <li>
-                <code>spell dev plan-doc commit &lt;name&gt; &lt;sha&gt; --phase N</code>,
-                <code>spell dev plan-doc commits --backfill</code>: its commits, and <code>commits</code>.
+                <code>epic commit &lt;epic&gt;#P&lt;N&gt; &lt;sha&gt;</code>,
+                <code>epic commits --backfill</code>: its commits, and <code>commits</code>.
               </li>
               <li>Its To review field: rewritten by the tool on every edit.</li>
-              <li><code>spell dev plan-doc split</code>: <code>source</code> and <code>part-ids</code>.</li>
+              <li><code>epic split</code>: <code>source</code> and <code>part-ids</code>.</li>
             </ul>
           </ui-section>
           <footer class="site-page-footer">

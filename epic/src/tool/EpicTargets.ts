@@ -14,7 +14,7 @@ import { ServedFolders } from "./ServedFolders"
  * What a link to a saga, an epic, a phase or an item finds in ONE checkout (epic `epic-workflow` P15):  the page, the
  * id on it, its title, and what's broken.
  * - Used by the page server (`GET /api/epics/target` and `/saga/...`, `linkRoutes.ts`), the link check (`epic check`,
- *   `doc-links.js --check`:  `problemsIn()`) and the openers (`spell dev docs open | link SAGA:/...`).
+ *   `doc-links.js --check`:  `problemsIn()`) and the openers (`epic pages open | link SAGA:/...`).
  * - Broken:  a saga not in `sagas/sagas.json5`, a page that isn't there, an id not on its page, and an epic under a
  *   saga it doesn't name (its `<epic-page saga>`).  The last still LINKS:  only the check minds.
  * - Reads pages from disk with linkedom;  each kept while its file is unchanged (by mtime), so a page server asking

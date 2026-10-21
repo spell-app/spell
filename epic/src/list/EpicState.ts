@@ -12,7 +12,7 @@
  * - the Epics page's cards, `<epic-card>` (`$/epics/components`, epic `epic-engine` P3), in the browser;  and their
  *   groups, which `docs index` (`src/tools/index.js`, plain `node`:  it imports this FILE by path) counts on the home
  * - `<epic-page>`'s header mark (`$/epics/components`), in the browser
- * - the session titles' icons (`spell dev session icons`, `packages/cli`)
+ * - the session titles' icons (`epic session icons`, `packages/cli`)
  *
  * Its position:  browser code with NO imports at all, so plain `node` loads it (types stripped),
  * and the epics pack bundles it.

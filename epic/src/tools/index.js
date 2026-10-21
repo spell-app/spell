@@ -1,5 +1,5 @@
 /**
- * `epic pages index` (`spell dev docs index`):  write the home page's area cards and each area's list page,
+ * `epic pages index`:  write the home page's area cards and each area's list page,
  * from every page's `<title>` and description (claude-design P5).
  * Usage (from spell-epic's root):  node src/tools/index.js
  * - The home, `pages/index.html`:  a routing page, one card per area in the top bar's order
@@ -151,7 +151,7 @@ saga sets</a>, read only (epic <code>epic-goals</code> rebuilds them).</li>\n`
 const BRAND_NOTES = `<ui-section id="files" header="Files" sticky collapsible dividing collapsed>
 <ui-icon slot="icon" name="folder"></ui-icon>
 <ul>
-<li><code>brand/design-system.json</code>:  the design system's push record (<code>spell dev design pushed</code>).</li>
+<li><code>brand/design-system.json</code>:  the design system's push record (<code>spell design pushed</code>).</li>
 <li><code>brand/README.md</code>:  what this folder holds.</li>
 </ul>
 </ui-section>`

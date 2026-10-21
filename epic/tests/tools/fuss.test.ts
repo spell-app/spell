@@ -1,5 +1,5 @@
 /**
- * Tests of `spell dev docs fuss` (`fuss.ts`):
+ * Tests of `epic pages fuss` (`fuss.ts`):
  * each kind of miss found at its line, what it skips, and the files it walks.
  * - Owen's own before / after (epic `skillz`, P7's goal) are the fixtures.
  */
@@ -282,7 +282,7 @@ describe("what it skips", () => {
     const docs = [
       "An example:",
       "",
-      "    spell dev docs fuss a:  b c",
+      "    epic pages fuss a:  b c",
       "    more. Lines. Here.",
       "",
       "```ts",

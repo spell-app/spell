@@ -19,7 +19,7 @@
  *   - 2:  `--max` seconds passed (default 3600);  polls every `--every` (default 2)
  * - `told <name>`:  its redirects were passed on;  the page shows them "told"
  * - `--epic <name>`, any verb:  that epic's list, e.g. from the main checkout;  default:  the worktree's epic, if any
- * - Which checkout:  the one this file is in, which `spell dev` picks from the current folder (`runTool()`)
+ * - Which checkout:  the one this file is in, which `epic` picks from the current folder (`EpicTools.run()`)
  */
 import { setTimeout as sleep } from "node:timers/promises"
 

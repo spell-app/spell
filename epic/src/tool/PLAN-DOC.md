@@ -811,7 +811,7 @@ Pointing at a saga, an epic, a phase or an item, the same way everywhere (epic `
 - Who reads them:
   - the docs runtime:  `<a href="SAGA:/...">` becomes the page and its `#id`
   - the page server:  a typed `/saga/<saga>[/<epic>]` redirects to the page, the `#id` kept
-  - the openers:  `spell dev docs open SAGA:/...`, `spell dev docs link SAGA:/...`
+  - the openers:  `epic pages open SAGA:/...`, `epic pages link SAGA:/...`
   - the check:  below
 - The code:  `$/epics/links` (`EpicAddress`, `PageTargets`:  pure, browser and node), `EpicTargets` here (what's on
   disk).

@@ -9,7 +9,7 @@
  *   - `review-sample.html` (default)
  *   - or `--doc <name>`, a copy of `epics/<name>/`
  *     (its skeleton and parts:  a doc in `<epic-page>` markup;  never its inbox or details)
- *   - or of `--from <folder>` (a converted copy:  `spell dev plan-doc convert <name> --out <folder>`)
+ *   - or of `--from <folder>` (a converted copy:  `epic convert <name> --out <folder>`)
  *   - copied to `src/demo/shots/epics/<name>/<name>.plan.html` (git-ignored), as deep as a real one, so its links
  *     lead where a real page's do:  the review routes take epic pages only (`epics/<name>/<name>.plan.html`),
  *     its inbox file lands beside it, and the tool finds it there (`PlanDocFiles({ root, content }`, both `src/demo/shots`:  never the real content folder)

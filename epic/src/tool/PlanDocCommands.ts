@@ -27,14 +27,14 @@ import { TestCommands } from "./TestCommands"
 
 /****************
  * ### `PlanDocCommands`
- * `spell dev plan-doc <command> <name> ...`:
+ * `epic plan-doc <command> <name> ...` (the `epic` tool in its own order;  `epic <verb> <epic>#<id>` turns into it):
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `$/epics/definitions`
  * - Commands:  `new`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `close`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `overnight`, `prompt`, `summary`, `docs`, `decisions`,
  *   `check`, `open`, `migrate`, `convert`, `split`, `join`, `inbox`, `details`, `status`, `original`
- *   (`spell dev plan-doc` with no command lists them:  `USAGE`).
+ *   (`epic plan-doc` with no command lists them:  `USAGE`).
  * - `docs`, `decisions` (`EpicDocs`, for `/docs-check`):
  *   the docs an epic wrote besides its epic page, and what its epic page settled
  * - the `<epic-*>` markup only:  every command refuses a doc still in the old markup before it writes anything
@@ -50,7 +50,7 @@ import { TestCommands } from "./TestCommands"
  * - `details`:  writes an agent's details or reply into one item
  * - an item's text is never dropped:  a rewrite moves it into the item's folded Original Discussion
  *   - `original` puts text recovered from git there
- * - the docs, their files and git:  `PlanDocFiles`, for ONE checkout (the caller's:  `spell dev plan-doc` finds it)
+ * - the docs, their files and git:  `PlanDocFiles`, for ONE checkout (the caller's:  `epic` finds it)
  * - the doc itself:  `PlanDoc`, pure
  * - output goes straight to `process.stdout` / `stderr`,
  *   never `console.*`, which the `spell` CLI silences (`packages/cli/src/consoleGuard.ts`)
@@ -938,7 +938,7 @@ export type OpenOptions = { hash?: string; query?: string }
 type CreateFlags = { title?: string; prompt?: string; promptFile?: string; future?: boolean; saga?: string | true }
 
 /** Usage, printed with no command or a bad one. */
-export const USAGE = `usage:  spell dev plan-doc <command> <name> ...    (doc:  epics/<name>/<name>.plan.html)
+export const USAGE = `usage:  epic plan-doc <command> <name> ...    (doc:  epics/<name>/<name>.plan.html)
   The old spelling of the epic command:  \`epic --help\` lists today's names (\`epic close seo#J3\` ...).
   A phase <N> is its number (3, P3) or its name ("Epic Migrate", epic-migrate, p-epic-migrate:  its stable id).
   new <name> [--title "Title"] [--prompt "text" | --prompt-file path] [--future] [--saga <id>]

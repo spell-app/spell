@@ -63,7 +63,7 @@ export class RunningEpics {
   /** the watchers `watch()` started, one per worktrees folder there is, closed by `close()` */
   private watchers: FSWatcher[] = []
 
-  /** the Epics list page, `epics/index.html`, whose marker becomes the list (`spell dev docs index` writes it) */
+  /** the Epics list page, `epics/index.html`, whose marker becomes the list (`epic pages index` writes it) */
   readonly index: string
 
   /**

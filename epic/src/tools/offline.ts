@@ -1,8 +1,8 @@
 /**
- * `spell dev docs offline [paths...] [--fix] [--json]`:  lists what docs pages LOAD from the internet,
+ * `epic pages offline [paths...] [--fix] [--json]`:  lists what docs pages LOAD from the internet,
  * by file and line, so they still work with no network (epic `airplane` P1:  Owen reads and marks docs on a plane).
  *
- *     spell dev docs offline
+ *     epic pages offline
  *     guides/solid/solid-2.html:893  script  https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js
  *     1 remote load in 1 of 412 pages
  *
@@ -102,7 +102,7 @@ export type RemoteLoad = { file: string; line: number; kind: string; url: string
  */
 export const HIGHLIGHT = { cdn: HIGHLIGHT_JS.cdn, local: HIGHLIGHT_JS.local.slice(1) } as const
 
-/** The folders `spell dev docs offline` checks by default, from the content folder (`EpicConfig.contentOf()`). */
+/** The folders `epic pages offline` checks by default, from the content folder (`EpicConfig.contentOf()`). */
 export const DOCS_FOLDERS = ["epics", "guides", "pages", "templates", "goals"]
 
 /** Files it reads. */
@@ -150,7 +150,7 @@ function checkoutOf(start: string): string | undefined {
 // ## The command
 ////////////////
 
-/** Run `spell dev docs offline` with `args`:  fixes (`--fix`), prints the loads left, and returns the exit code. */
+/** Run `epic pages offline` with `args`:  fixes (`--fix`), prints the loads left, and returns the exit code. */
 export function run(args: string[], { cwd = process.cwd() } = {}): number {
   const flags = new Set(args.filter((arg) => arg.startsWith("--")))
   const unknown = [...flags].find((flag) => !FLAGS.includes(flag))
@@ -189,7 +189,7 @@ export function run(args: string[], { cwd = process.cwd() } = {}): number {
     return loads.length ? 1 : 0
   } catch (error) {
     if (!(error instanceof OfflineError)) throw error
-    console.error(`spell dev docs offline:  ${error.message}`)
+    console.error(`epic pages offline:  ${error.message}`)
     return 2
   }
 }

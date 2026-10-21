@@ -3,7 +3,7 @@
  * - Pure data:  `import type`, plus two types files' data:
  *   - the fold pieces (`FOLD_*`), from `epic-section`'s;  the `actions` slot (`ACTIONS_*`), from the folds'
  *   - the review controls' parts (`REVIEW_PARTS`), from `epic-review`'s:  a phase takes review notes (epic `airplane` P2)
- * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"
@@ -168,7 +168,7 @@ export const epicPhaseVocabulary = {
       max: 1,
       description:
         "Requests:  what Owen sent this phase from other sessions (epic `epic-workflow`), one labelled block each:  " +
-        "his words, the sender, his screenshots (`spell epic file`)."
+        "his words, the sender, his screenshots (`epic file`)."
     },
     {
       tag: "epic-reply",

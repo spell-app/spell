@@ -108,7 +108,7 @@ export class MigrateCommands {
   ): Promise<number> {
     if (notify && !this.sessionsOf)
       throw new PlanDocError(
-        "--notify needs the running sessions, which only the `epic` command (or `spell dev plan-doc`) can see"
+        "--notify needs the running sessions, which only the `epic` command can see"
       )
     const only = step ? [step] : undefined
     const counts = new Map<string, number>()

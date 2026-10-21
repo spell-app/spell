@@ -146,7 +146,7 @@
                 <p><b>P1.</b></p>
                 <p>
                   The <code>/_server/favicon.*</code> routes and <code>/favicon.ico</code> are on every
-                  <code>SRV.WebServer</code> (page server, <code>spell serve</code>, the app's API server, VS Code's doc
+                  <code>SRV.WebServer</code> (page server, <code>spell app serve</code>, the app's API server, VS Code's doc
                   preview, <code>ui</code>'s <code>StaticServer</code>), not only live ones; the icon LINKS are injected
                   only where live reload is (pages served by the page server). <code>/favicon.ico</code> answers with
                   the 32px PNG (no redirect: one request), and sits AFTER the static folders, so a folder with its own

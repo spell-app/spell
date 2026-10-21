@@ -35,10 +35,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - So our tools just create the `<epic-*>` element;  it upgrades once the pack has loaded (async, after the first
       paint):  `customElements.whenDefined()` to wait for it.
 
-- Made by `spell dev pack new epics --prefix epic-`.
+- Made by `spell pack create epics --prefix epic-`.
   - Its build and check are the kit's pack tooling, `spell-pack`
     ([ComponentPack.ts](../../element/tools/ComponentPack.ts);  Spell UI's `spell-ui-pack` from epic `repo-split` P5
-    to P10), which the CLI's `spell dev pack` calls too:  every pack builds and checks the same way.
+    to P10), which the CLI's `spell pack` calls too:  every pack builds and checks the same way.
 - `components/<tag>/` (`$/epics/components`) -- one folder per element family.
   - Written exactly like a Spell UI family:
     [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Overview" and "Solid authoring".
@@ -51,7 +51,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `tests/components/<tag>/`
     - `index.ts`:  defines its tags (SIDE EFFECT)
   - No native fallback:  only form controls have one.
-  - A new one:  `spell dev pack element epics <tag>`, the tag starting `epic-`.
+  - A new one:  `spell pack add epics <tag>`, the tag starting `epic-`.
   - Every component is a family, as in Spell UI (P10 of epic `spell-element`).
     - No exported function components.
     - The lint rules hold them to it (`yarn lint`).
@@ -176,7 +176,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - written by `yarn site:data` ([its script](../scripts/site-data.ts));  `EpicUISite.test.ts` fails while stale
   - `list/` -- [the Epics list](../../epics/index.html), out of the page server since P16 of `people-and-orgs`:
     - `EpicState`:  an epic's state, the ONE rule every list and page draws it by
-    - `EpicCards`:  the list's markup, written alike by `spell dev docs index` and the page server:
+    - `EpicCards`:  the list's markup, written alike by `epic pages index` and the page server:
       ONE `<epic-list>` of `<epic-card>`s (epic `epic-engine` P3), which draw, group, sort and filter themselves
       (the `epic-list` family, in `components/`)
       - each card carries its saga (`saga`, `saga-title`, `saga-purpose`;  epic `epic-workflow` P15)
@@ -265,7 +265,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the `epic` on the `PATH` is the main checkout's
       - the caller's checkout:  `Git.nearestCheckout()`
       - the tools get it as `EPIC_CHECKOUT`, which [pages.js](tools/pages.js) and the window script take as their root
-    - the CLI package keeps only the entry ([epicMain.ts](../cli/src/epicMain.ts)) and the `spell dev` aliases
+    - its entry is [epicMain.ts](command/epicMain.ts), run by [bin/epic](../bin/epic)
       - this folder NEVER imports `$/cli`, and loads no spell
     - node only, NOT in the `$/epics` barrel:  imported by path, `$/epics/command/EpicProgram`
     - its tests:  `tests/command/`
@@ -328,7 +328,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the page, the id, its title, what's broken (no saga, no page, no id, an epic under a saga it doesn't name)
       - read by:
         - the link check (`epic check`, the docs tools' `doc-links.js --check`:  `problemsIn()`)
-        - the openers (`spell dev docs link SAGA:/...`)
+        - the openers (`epic pages link SAGA:/...`)
         - the page server:  [linkRoutes.ts](tool/linkRoutes.ts)
           - `GET /api/epics/target`:  `<epic-link>`'s title and short form
           - the typed `/saga/<saga>[/<epic>]`
@@ -401,10 +401,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Commands
 
-- `yarn pack:build` ~== `spell-pack build` ~== `spell dev pack build epics`
+- `yarn pack:build` ~== `spell-pack build` ~== `spell pack build epics`
   - the catalog, the entry and the script, into `components/__pack/`
   - then Epic UI's data, `docs/__data/` (`yarn site:data`)
-- `yarn pack:check` ~== `spell-pack check` ~== `spell dev pack check epics` -- exits 1 while either is stale
+- `yarn pack:check` ~== `spell-pack check` ~== `spell pack check epics` -- exits 1 while either is stale
 - `yarn site:data [--check]` -- Epic UI's data ([EpicUISite.ts](site/EpicUISite.ts), [its script](../scripts/site-data.ts))
   - rerun after changing an element or a page's sections, and commit `docs/__data/`
 - `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium)
@@ -413,7 +413,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - the docs tools' own (see "Scripts"):
 
   ```text
-  yarn docs:update | docs:index | docs:new | docs:open | docs:link   ~==  spell dev docs update | index | new | open | link
+  yarn docs:update | docs:index | docs:new | docs:open | docs:link   ~==  epic pages update | index | new | open | link
   yarn plan-doc,  yarn details
   ```
 
@@ -564,16 +564,16 @@ The shared folders:
       packages/app/docs/     served at  /components/app/
       ```
 
-    - NEVER run `spell dev docs index` from a branch whose sets' addresses `main` doesn't serve yet:
+    - NEVER run `epic pages index` from a branch whose sets' addresses `main` doesn't serve yet:
       it writes the shared home, which `main`'s page server shows too.
-  - `spell dev docs index` writes the cards, between the `areas:start` / `areas:end` markers.
+  - `epic pages index` writes the cards, between the `areas:start` / `areas:end` markers.
     Edit only outside the markers.
   - NOT `index:start` / `index:end`:  on those, an older checkout's `index.js` would stop on the shared home,
     instead of writing its three lists back into it.
 - Each area's LIST PAGE, its top-bar tab's home:
   `index.html` in `epics/`, `guides/`, `sagas/`, `templates/` and `brand/`.
   - A card per page (epics open first).
-  - `spell dev docs index` writes them, between the `index:start` / `index:end` markers.
+  - `epic pages index` writes them, between the `index:start` / `index:end` markers.
   - A missing one is made from [`skeleton()`](tools/index.js).
   - The Epics page (epic `airplane` P8, Owen 2026-10-10) sorts its cards into five GROUPS.
     - ELEMENTS since epic `epic-engine` P3 (the `epic-list` family, Epic UI's "The Epics page"):
@@ -618,7 +618,7 @@ The shared folders:
         - the epic page's `updated`
         - its last log line (the `log.html` part)
         - its branch's last commit (one `git for-each-ref`)
-      - A running epic's card keeps the date `spell dev docs index` wrote when it's later than its doc's.
+      - A running epic's card keeps the date `epic pages index` wrote when it's later than its doc's.
     - SAGAS (epic `epic-workflow` P15):  each card names its saga, a small label
       (the saga's title, its purpose the tooltip).
       - Above the groups, a row of SAGA CHIPS, one per saga with epics, in Owen's order (`<epic-list sagas>`),
@@ -664,7 +664,7 @@ The shared folders:
     the page loads them when opened (see "Epic pages").
     - `.htm` before Q12 of `epic-components`:  read no more.
     - Every page walker skips `parts/` folders, so a part is never taken for a page.
-      - `findPages()`, `relocate.js`, `spell static`
+      - `findPages()`, `relocate.js`, `spell ssr`
 - `pages/details/`:  DETAILS PAGES, each `<slug>.html`.
   - A question Claude explains, and Owen answers on the page (`/details`, see "Details pages").
   - Scratch:  ignored by the shared repo's git, swept after 14 days.
@@ -786,7 +786,7 @@ In `tools/`:
 - Start from a template:
 
   ```sh
-  spell dev docs new durable|cheatsheet|commands <topic>/<topic>.html --title "Title"
+  epic pages new durable|cheatsheet|commands <topic>/<topic>.html --title "Title"
   ```
 
   - It copies it into `guides/` (and for `commands`, its data as `<topic>.json5`).
@@ -802,7 +802,7 @@ In `tools/`:
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
 - Pages MUST still open straight from disk (`file://`):  no ES modules, hence the one classic bundle.
   - But the openers (`docs open`, `epic open`) show them from this checkout's PAGE SERVER
-    (`spell dev server`, see [server's AGENTS.md](../server/AGENTS.md)).
+    (`spell server`, see [server's AGENTS.md](../server/AGENTS.md)).
     - It adds live reload, edit mode, and the server-only properties (Spell UI, Editor).
   - The exceptions fetch their JSON, so they draw their tables only from the page server:
     a `commands` page, the core reference page and the spell syntax guide.
@@ -1102,7 +1102,7 @@ In `tools/`:
       - `goals-live.js`' own buttons have `title`s since epic `epic-engine` P3.
     - `basic` for quiet tools (sidebars, toolbars);  `primary` for the one main action in a dialog.
   - An icon a page uses must be in `ICONS`, in [bundle-spell-ui.js](tools/bundle-spell-ui.js)
-    (then `spell dev docs update`):  any other name draws nothing.
+    (then `epic pages update`):  any other name draws nothing.
 - Code:
   - ALWAYS folded and colored:
 
@@ -1152,8 +1152,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | components page | one element:  its examples, attributes and look | a component set's `docs/`:  `packages/ui/docs/`, `packages/epics/docs/`, `packages/app/docs/`, `packages/brand/docs/` | [spell-ui-docs.html](../templates/spell-ui-docs.html) |
 | components guide | a component set's pages that aren't one element:  home, getting started, theming, icons | beside its components pages | [component-set-docs.html](../templates/component-set-docs.html) |
 | brand page | Claude Design's brand pages, and their Spell UI copies | `brand/` | none:  Claude Design's exports |
-| home page | the docs' front page:  a card per area | `pages/index.html` | none:  `spell dev docs index` writes its cards |
-| list page | a card per page of one area:  each top-bar tab's own page | `<area>/index.html` | none:  `spell dev docs index` writes it |
+| home page | the docs' front page:  a card per area | `pages/index.html` | none:  `epic pages index` writes its cards |
+| list page | a card per page of one area:  each top-bar tab's own page | `<area>/index.html` | none:  `epic pages index` writes it |
 | changelog | what the repo shipped, newest first | `guides/changelog.html` | none:  its header comment has an entry's markup |
 | template | the starting point for one kind of page | `templates/` | -- |
 
@@ -1210,7 +1210,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - The saga pages keep the old `section.s2` markup
     until they migrate ([the code-debt log](../../agents/CODE-DEBT.md)).
 - A new KIND of doc gets a template here.
-  `spell dev docs index` gives it a card on the Templates list page.
+  `epic pages index` gives it a card on the Templates list page.
 
 ## Epic pages
 
@@ -1237,7 +1237,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - The tool reads either shape whole, and writes it back split:  each file once, atomically, only when changed.
     - `split <name>` / `split --done` / `join <name>`
   - A reader of the skeleton alone sees every section, phase status and item line.
-    - e.g. `spell dev docs index`, the main server's epic cards, `ReviewInbox.itemIds()`
+    - e.g. `epic pages index`, the main server's epic cards, `ReviewInbox.itemIds()`
     - Anything needing bodies reads the doc through the tool (`PlanDocFiles` `read()`).
   - A split doc needs the page server (`<body data-spell-needs-server>`):  bodies don't load from `file://`.
 - What the docs tools (`tools/`) add for epic pages, as for every page:
@@ -1914,26 +1914,26 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
 
 ## Scripts
 
-- `spell dev docs update` ([update.js](tools/update.js)):  rebuilds the bundle from the LATEST UI.
+- `epic pages update` ([update.js](tools/update.js)):  rebuilds the bundle from the LATEST UI.
   - Then `docs index`, then `doc-links.js --check` and `check-spell.js` on every page.
   - `--skip-ui-build` reuses `../ui/dist`;  `--no-check` skips the browser.
 - [bundle-spell-ui.js](tools/bundle-spell-ui.js):  builds UI (`yarn build`), and bundles `spell-ui.js`, in `_assets/`.
   - then `spell-comments.js` beside it (Epic UI's pages' comments);  `--comments`:  only that one, no UI build
   - NOT the claude.ai design system's bundle (`bundle.js` in its `components/`), nor its check:  spell-brand's
-    `yarn design:bundle` / `design:check` since epic `repo-split` P10 (Q32), run by `spell dev design bundle | check`.
+    `yarn design:bundle` / `design:check` since epic `repo-split` P10 (Q32), run by `spell design bundle | check`.
 - `yarn tsx tools/bundle-experiment.ts <entry.ts> [<out.js>]`:  a guide's live elements, as one classic script.
   - See "Experiments".
   - default out:  `<name>.bundle.js`, beside `<name>.entry.ts`
-- [design.js](tools/design.js) (`spell dev design pull | changed | pushed | state`):
+- [design.js](tools/design.js) (`spell design pull | changed | pushed | state`):
   the local half of the `/design` skill.
   - a Claude Design board, as a page
   - the push record:  `design-system.json` in `brand/`, shared
-- `spell dev docs index` ([index.js](tools/index.js)) rewrites:
+- `epic pages index` ([index.js](tools/index.js)) rewrites:
   - the docs' home page's area cards
   - each area's list page:  `index.html` in `epics/`, `guides/`, `sagas/`, `templates/`, `brand/`
   - it reads the sagas through `Sagas` ([Sagas.ts](tool/Sagas.ts), by path)
-- `spell dev docs new` ([new-page.js](tools/new-page.js)):  a page from a template, at any depth.
-- `spell dev docs open [page] [--vs | --review]` ([open.js](tools/open.js)):  shows a page, by default the index.
+- `epic pages new` ([new-page.js](tools/new-page.js)):  a page from a template, at any depth.
+- `epic pages open [page] [--vs | --review]` ([open.js](tools/open.js)):  shows a page, by default the index.
   - `page` may be a short address:  `SAGA:/drawable-spell`, `SAGA:/drawable-spell/python-target#T1` (landing on T1)
   - in Chrome, reusing its tab
   - `--vs`:  in VS Code's doc preview, the right side bar's "Spell Docs" tab (`/spell-docs`)
@@ -1973,13 +1973,13 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     - It goes into the entry's `redirects`, untold.
     - Until a session's background `wait` takes it, sends it to the agent, and marks it `told`.
   - The verbs, and an example:  the header of [agents.ts](tools/agents.ts).
-- `spell dev docs link <page> [--hash <id>] [--text "..."] [--review] [--show]` ([link.ts](tools/link.ts)):
+- `epic pages link <page> [--hash <id>] [--text "..."] [--review] [--show]` ([link.ts](tools/link.ts)):
   the markdown links Claude gives for a page.
   - side bar first (`--review`:  its "Review" tab), then `• 🌐`, the browser link (Owen, 2026-10-11)
   - `<page>` may be a short address (`SAGA:/drawable-spell/python-target#T1`):  its `--hash`, and its text the short
     form and the item's title (`python-target T1 · ...`)
   - both through [showRoutes.ts](tools/showRoutes.ts) (`GET /api/docs/show`)
-- `spell dev docs fuss <paths...> | --branch [--json]` ([fuss.ts](tools/fuss.ts)):
+- `epic pages fuss <paths...> | --branch [--json]` ([fuss.ts](tools/fuss.ts)):
   the writing checker under `/fussbudget` (epic `skillz`, P7).
   - It lists the misses of WWOD §6 a tool can find, by file and line.
   - kinds:

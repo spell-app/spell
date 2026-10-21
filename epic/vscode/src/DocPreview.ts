@@ -15,7 +15,7 @@
  *      when it runs and the file is in a registered repo's content (`RepoList.urlPathFor()`):
  *      every repo's pages on one port, from any window
  *   2. the MAIN checkout's page server, for a worktree's file, when it serves worktrees (`SRV.mainServerUrl()`)
- *   3. the file's checkout's page server (`spell dev server`, a `.spell-server.json` at its root)
+ *   3. the file's checkout's page server (`spell server`, a `.spell-server.json` at its root)
  *   4. else a server of our own, in-process, on `127.0.0.1`, one per root, for as long as the extension runs:
  *      the same `$/server` `WebServer`, with live reload and the engine's routes, but no route modules
  *   - NEVER starts a page server itself:  a GUI VS Code may have no `node` / `yarn` on its PATH.

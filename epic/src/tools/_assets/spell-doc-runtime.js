@@ -713,7 +713,7 @@ function tableBoxes(root) {
  *   - a section or heading WITHOUT unfolding the target itself:  the address follows the section being read
  *     (`followScroll()`), so a reload (or VS Code restarting) lands on it, folded or not, as the reader left it
  *   - a plan item (`<epic-item>`) OPENS:  the address never follows items, so an item's `#q16` is a link someone
- *     followed (`spell dev docs link --hash q16 --show`), and a folded item shows nothing of what it pointed at
+ *     followed (`epic pages link --hash q16 --show`), and a folded item shows nothing of what it pointed at
  * - else nowhere:  the top
  * - then the address starts following the scroll;  after a `#hash`, only once the jump has landed:
  *   a target in a body not loaded yet (a split epic page's part) lands a moment later, and following before that saw

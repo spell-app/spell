@@ -117,7 +117,7 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       expect(stderr).toContain("takes an epic, not unified-server#J3")
     })
 
-    // epic `epic-eject` I5:  what spell-app's `spell dev plan-doc ...` hands on to
+    // epic `epic-eject` I5:  the tool in its own order, `epic plan-doc ...` (spell-app's old `spell dev plan-doc` handed on to it)
     test("plan-doc:  the epic tool in its own order, hidden", () => {
       expect(epic(["--help"]).stdout).not.toMatch(/^ {2}plan-doc /m)
       const { status, stdout } = epic(["plan-doc", "summary", "unified-server"])
@@ -130,7 +130,7 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       expect(status).toBe(0)
     })
 
-    // epic `epic-eject` P5:  the verbs that were `spell dev window | worktree | park | session | stock | shared`
+    // epic `epic-eject` P5:  the verbs that were `epic window | worktree | park | session | stock | shared`
     test("worktree, session, park, shared, window, server:  their own headings, and their verbs' help", () => {
       const { stdout } = epic(["--help"])
       for (const heading of ["Worktrees, sessions and parked work:", "Shared content:", "Windows and the page server:"])

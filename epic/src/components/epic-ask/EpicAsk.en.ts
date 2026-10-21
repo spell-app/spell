@@ -1,7 +1,7 @@
 /**
  * Every name `<epic-ask>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
  * - Pure data:  `import type` only.
- * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"

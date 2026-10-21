@@ -619,28 +619,28 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code>spell dev plan-doc new</code>: the template's Overview, with a placeholder summary and one
+                <code>epic new</code>: the template's Overview, with a placeholder summary and one
                 sub-section, <code>o1</code> "Structure".
               </li>
               <li>
-                <code>spell dev plan-doc new --prompt "..."</code> and
-                <code>spell dev plan-doc prompt &lt;name&gt; "..."</code>: its <code>&lt;epic-prompt&gt;</code>.
+                <code>epic new --prompt "..."</code> and
+                <code>epic prompt &lt;epic&gt; "..."</code>: its <code>&lt;epic-prompt&gt;</code>.
               </li>
               <li>
                 <code>estimate</code>: rewritten by every command that changes a phase (<code
-                  >spell dev plan-doc add-phase</code
-                >, <code>spell dev plan-doc estimate</code> ...): every phase's estimate added up, and what's left.
+                  >epic add-phase</code
+                >, <code>epic update --estimate</code> ...): every phase's estimate added up, and what's left.
                 Absent before the first estimated phase.
               </li>
               <li>
                 The summary and the sub-sections' prose: written by hand, by the Claude session planning the epic.
               </li>
               <li>
-                <code>spell dev plan-doc status &lt;name&gt; o3 ...</code>: Claude's status cards on a sub-section; a
+                <code>epic status &lt;epic&gt;#o3 ...</code>: Claude's status cards on a sub-section; a
                 review's Make Todo makes a todo linking it.
               </li>
               <li>
-                <code>spell dev plan-doc convert</code>: the old Overview, its slotted summary and prompt turned into
+                <code>epic convert</code>: the old Overview, its slotted summary and prompt turned into
                 <code>&lt;epic-summary&gt;</code> and <code>&lt;epic-prompt&gt;</code> by its second pass.
               </li>
             </ul>

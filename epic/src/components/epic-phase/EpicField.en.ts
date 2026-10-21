@@ -1,7 +1,7 @@
 /**
  * Every name `<epic-field>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
  * - Pure data:  `import type` only.
- * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"
@@ -27,7 +27,7 @@ export const epicFieldVocabulary = {
       values: ["symptom", "changes", "requests", "goal", "done", "files", "verify", "to-review"],
       description:
         "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` " +
-        "(a bullet per outcome), `requests` (what Owen sent it from other sessions:  `spell epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's " +
+        "(a bullet per outcome), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's " +
         "toggles), `to-review` (the script's)."
     },
     {

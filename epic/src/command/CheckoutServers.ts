@@ -5,7 +5,7 @@ import { join, resolve, sep } from "node:path"
 // By the server's package entry (its `exports`, epic `repo-split` P6):  the hooks load this file with plain `node`
 // (types stripped), and find the server package in `node_modules` (spell-app's, linked in:  `portal:`), as
 // `EpicConfig` does.  Its finder of the web
-// servers on this machine, by process:  what `spell dev server prune` / `epic server prune` run.
+// servers on this machine, by process:  what `spell server prune` / `epic server prune` run.
 import { orphanServers, serverProcesses } from "spell-kit/server/page/prune"
 import type { OrphanServer, ServerProcess } from "spell-kit/server/page/prune"
 
@@ -16,7 +16,7 @@ import { HOME_ENV, HOME_FOLDER } from "../server/server.types.ts"
  * The web servers a CHECKOUT runs (its page server, the editor's vite ...), stopped as the checkout goes
  * (epic `epic-engine` I53).
  * - Why:  removing a worktree left its servers running, and nothing ever stopped them:  on 2026-10-19,
- *   `spell dev server prune` found 128 of them, left by 44 removed checkouts.
+ *   `spell server prune` found 128 of them, left by 44 removed checkouts.
  * - Found the way `epic server prune` finds them:  spell-app's `prune.ts` (`serverProcesses()`, `orphanServers()`),
  *   BY PROCESS (`ps`, `lsof`), never by pid file:  a checkout's `.spell-server.json` goes with its folder.
  *   - a server's checkout:  its `--root`, else the folder above its script's `packages/` or `node_modules/`

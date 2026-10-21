@@ -804,28 +804,28 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code>spell dev plan-doc new</code>: the template's sections, each kind once, in order, with its fixed
+                <code>epic new</code>: the template's sections, each kind once, in order, with its fixed
                 id; and one Overview sub-section, <code>o1</code>.
               </li>
               <li>
-                Its children, by kind: <code>spell dev plan-doc add-phase</code> (phases),
-                <code>spell dev plan-doc add</code> and <code>spell dev plan-doc decide</code> (items),
-                <code>spell dev plan-doc log</code> and every command that logs (the log).
+                Its children, by kind: <code>epic add-phase</code> (phases),
+                <code>epic add</code> and <code>epic decide</code> (items),
+                <code>epic log</code> and every command that logs (the log).
               </li>
               <li>
                 An older doc's Plan changes copies (<code>slot="changes"</code>): removed by the tool on its next write,
                 which puts each phase's changes in that phase instead.
               </li>
               <li>
-                <code>spell dev plan-doc status &lt;name&gt; o3 underway | done</code>: Claude's status cards on an
+                <code>epic status &lt;epic&gt;#o3 underway | done</code>: Claude's status cards on an
                 Overview sub-section.
               </li>
               <li>
-                <code>spell dev plan-doc split</code> / <code>spell dev plan-doc join</code>: move a body into a part
+                <code>epic split</code> / <code>epic join</code>: move a body into a part
                 file (<code>source</code>, <code>part-ids</code>) and back.
               </li>
               <li>
-                <code>spell dev plan-doc overnight &lt;name&gt; remove</code>: removes an older doc's Overnight report
+                <code>epic overnight &lt;epic&gt; remove</code>: removes an older doc's Overnight report
                 once read.
               </li>
               <li>An Overview sub-section's prose: by hand, by the Claude session planning the epic.</li>

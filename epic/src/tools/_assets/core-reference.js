@@ -36,7 +36,7 @@
  *   the source link a `<ui-button>`), in the page's light DOM, so the runtime's contents, sticky titles, table widths
  *   and comment anchors take them as hand-written ones
  * - From `file://` it shows a notice where the tables go:
- *   the page needs the PAGE SERVER (`spell dev docs open <page>`).
+ *   the page needs the PAGE SERVER (`epic pages open <page>`).
  * - Classic script, no imports:  same rule as every docs asset.
  */
 ;(function () {
@@ -72,7 +72,7 @@
     const { coreDeclarations, notPorted } = document.body.dataset
     if (location.protocol === "file:") {
       notice(
-        `This page draws the core's method list from the checkout serving it:  open it through the page server, e.g. \`spell dev docs open ${pagePath()}\`.`
+        `This page draws the core's method list from the checkout serving it:  open it through the page server, e.g. \`epic pages open ${pagePath()}\`.`
       )
       return undefined
     }

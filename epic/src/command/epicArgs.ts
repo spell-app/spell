@@ -1,7 +1,7 @@
 import { EpicCommandError } from "./command.types"
 
 /**
- * How an `epic <verb> ...` command line becomes the `epic` tool's (`spell dev plan-doc <verb> <name> ...`):
+ * How an `epic <verb> ...` command line becomes the `epic` tool's (`epic plan-doc <verb> <name> ...`, its own order):
  * a thin translation, so the tool itself (`$/epics/tool/PlanDocCommands`) keeps its arguments.
  * - Owen's scheme (Command Review Page, 2026-10-12):  `epic <verb> <epic>#<id>` for anything inside an epic page
  *   - `seo`:  the page
@@ -15,7 +15,7 @@ import { EpicCommandError } from "./command.types"
  * - The tool's own order, with no `#` (`epic close seo J3`), is REFUSED,
  *   the message spelling it right (`epic close seo#J3`).
  *   - Why:  run silently, it taught agents the old shape (epic `epic-workflow` P19).
- *   - `spell dev plan-doc close seo J3` still runs it:  that's the tool's own command line, not this.
+ *   - `epic plan-doc close seo J3` still runs it:  that's the tool's own command line, not this.
  * - Pure:  no files, no output.
  * - Throws `EpicCommandError` (a usage error, exit 2) for a target the verb can't take.
  * - Lean:  imports only the folder's types, so `epic` starts fast.
@@ -66,7 +66,7 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
       return [["bedtime", ...rest]]
     }
     case "open":
-      // the Spell Docs tab, unless `--review` (Owen, 2026-10-12);  `spell dev plan-doc open` keeps the Review tab
+      // the Spell Docs tab, unless `--review` (Owen, 2026-10-12);  `epic plan-doc open` keeps the Review tab
       refused(verb, target)
       return [["open", ...args.filter((arg) => arg !== "--review"), ...(args.includes("--review") ? [] : ["--docs"])]]
     case "update":

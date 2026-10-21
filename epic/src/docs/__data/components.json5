@@ -622,7 +622,7 @@
         },
         {
           "key": "file",
-          "text": "The epics show when the page is served:  spell dev docs open this page.",
+          "text": "The epics show when the page is served:  epic pages open this page.",
           "description": "Opened from disk:  only the page server knows the epics."
         },
         {
@@ -1434,7 +1434,7 @@
             "verify",
             "to-review"
           ],
-          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `requests` (what Owen sent it from other sessions:  `spell epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `to-review` (the script's)."
+          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `to-review` (the script's)."
         },
         {
           "name": "label",

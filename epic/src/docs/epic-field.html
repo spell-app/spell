@@ -464,22 +464,22 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code>spell dev plan-doc add-phase</code>: Symptom, Changes, then Goal, Files, Verify (without
+                <code>epic add-phase</code>: Symptom, Changes, then Goal, Files, Verify (without
                 <code>--symptom</code> / <code>--changes</code>: Goal, Files, Verify); a field not given reads
                 <code>TBD</code>.
               </li>
               <li>
-                <code>spell dev plan-doc phase-body &lt;name&gt; &lt;N&gt; --goal ...</code>: sets a field, in its
+                <code>epic update &lt;epic&gt;#P&lt;N&gt; --goal ...</code>: sets a field, in its
                 place; <code>""</code> removes it.
               </li>
-              <li><code>spell dev plan-doc phase &lt;name&gt; &lt;N&gt; done --done "..."</code>: the Done field.</li>
+              <li><code>epic phase &lt;epic&gt;#P&lt;N&gt; done --done "..."</code>: the Done field.</li>
               <li>
                 To review: written by the tool on every edit, LAST in the phase: the items added while it was active,
                 still open and not reviewed.
               </li>
               <li>
                 Labelled blocks: by hand, in an item's text (<code>add --details</code>, <code>details --file</code>);
-                <code>spell dev plan-doc convert</code>'s second pass turned
+                <code>epic convert</code>'s second pass turned
                 <code>&lt;p&gt;&lt;b&gt;Where:&lt;/b&gt; ...</code> into them.
               </li>
             </ul>

@@ -278,7 +278,7 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code>spell dev plan-doc details &lt;name&gt; &lt;id&gt; --file &lt;html&gt;</code>: a rewrite of the
+                <code>epic details &lt;epic&gt;#&lt;id&gt; --file &lt;html&gt;</code>: a rewrite of the
                 item's text moves the old text here, as a new version.
               </li>
               <li>
@@ -287,7 +287,7 @@
               </li>
               <li>
                 <code
-                  >spell dev plan-doc original &lt;name&gt; &lt;id&gt; --file &lt;html&gt; [--as-of "YYYY-MM-DD
+                  >epic restore &lt;epic&gt;#&lt;id&gt; --file &lt;html&gt; [--as-of "YYYY-MM-DD
                   HH:MM"]</code
                 >: text recovered from git (old markup welcome).
               </li>
@@ -296,7 +296,7 @@
                 says the same as one already there.
               </li>
               <li>
-                The converter (<code>spell dev plan-doc convert</code>) turned the old markup's Original Discussion into
+                The converter (<code>epic convert</code>) turned the old markup's Original Discussion into
                 it (<code>CardConverter</code>).
               </li>
             </ul>

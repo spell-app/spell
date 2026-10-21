@@ -54,7 +54,7 @@ import { Formats, type EpicAttributeSpec, type EpicTag, type EpicVocabulary } fr
  * - Imports each `<Name>.en.ts` straight from its family folder:  PURE DATA, never the family's barrel,
  *   so loading this defines no element and touches no DOM -- node-safe (the tool, the converter, the tests).
  * - STATIC:  one registry, nothing per instance.
- * - A new tag:  `spell dev pack element epics <tag>` (or a sub-tag's files by hand), then its line in `all`.
+ * - A new tag:  `spell pack add epics <tag>` (or a sub-tag's files by hand), then its line in `all`.
  *   `Definitions.test.ts` fails on a vocabulary file it doesn't list.
  ****************/
 export class Definitions {

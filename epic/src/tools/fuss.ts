@@ -1,9 +1,9 @@
 /**
- * `spell dev docs fuss <paths...> | --branch [--json]`:  lists the writing misses a tool can find,
+ * `epic pages fuss <paths...> | --branch [--json]`:  lists the writing misses a tool can find,
  * by file and line (WWOD §6, epic `skillz` P7).
  * The `/fussbudget` skill starts from its list;  every epic's Doc Review runs it last.
  *
- *     spell dev docs fuss packages/server/src
+ *     epic pages fuss packages/server/src
  *     packages/server/src/Router.ts:12  phrase-split  the route's handler, if any;  else the
  *     1 miss in 1 of 40 files:  1 phrase-split
  *
@@ -143,7 +143,7 @@ FussError.prototype.name = "FussError"
 // ## The command
 ////////////////
 
-/** Run `spell dev docs fuss` with `args`:  prints the misses, and returns the exit code. */
+/** Run `epic pages fuss` with `args`:  prints the misses, and returns the exit code. */
 export function run(args: string[], { cwd = process.cwd() } = {}): number {
   const paths = args.filter((arg) => !arg.startsWith("--"))
   const flags = new Set(args.filter((arg) => arg.startsWith("--")))
@@ -174,7 +174,7 @@ const FLAGS = ["--branch", "--json"]
 /** Say how to call it, after `problem` if any;  returns the usage error's exit code, 2. */
 function usage(problem?: string): number {
   if (problem) console.error(problem)
-  console.error("usage:  spell dev docs fuss <paths...> | --branch [--json]")
+  console.error("usage:  epic pages fuss <paths...> | --branch [--json]")
   return 2
 }
 
@@ -929,7 +929,7 @@ function unique(list: string[]): string[] {
   return [...new Set(list)]
 }
 
-// run as a script (`spell dev docs fuss`), not when a test imports it;  last, so every `const` above is set
+// run as a script (`epic pages fuss`), not when a test imports it;  last, so every `const` above is set
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   process.exitCode = run(process.argv.slice(2))
 }

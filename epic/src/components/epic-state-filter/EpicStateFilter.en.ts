@@ -1,7 +1,7 @@
 /**
  * Every name `<epic-state-filter>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
  * - Pure data:  `import type`, plus the state filter's texts (`FILTER_TEXTS`), from `epic-section`'s types file.
- * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"

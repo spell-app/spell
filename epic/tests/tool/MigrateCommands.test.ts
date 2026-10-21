@@ -1,5 +1,5 @@
 /**
- * Tests of `spell dev plan-doc migrate` (`MigrateCommands`, `PlanDocFiles.migrate()`) on a scratch checkout:
+ * Tests of `epic migrate` (`MigrateCommands`, `PlanDocFiles.migrate()`) on a scratch checkout:
  * - the runner:  steps in order, `--step`, `--dry-run` writes nothing, the lock, the per-page report,
  *   a second run up to date
  * - page kinds

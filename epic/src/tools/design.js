@@ -1,5 +1,5 @@
 /**
- * `spell dev design pull | changed | pushed | state` (epic `claude-design`, P9):
+ * `spell design pull | changed | pushed | state` (epic `claude-design`, P9):
  * the local half of Spell's claude.ai design system.
  * Claude's `/design` skill (`.claude/skills/design/`) does the claude.ai half with its Artifact tool.
  * - `pull <board.dc.html> <page.html> [--title "..."] [--from <design link>]`:
@@ -8,7 +8,7 @@
  *   - the one-file bundle and the site header added for the page's depth
  *   - prints what it couldn't carry
  * - `changed [--json]`:  which files of the built system differ from what was last pushed, and which were removed
- *   - the built system, from `spell dev design build` + `yarn design:bundle`:
+ *   - the built system, from `spell design build` + `yarn design:bundle`:
  *     `packages/ui/build/design-system/project/`
  * - `pushed [--url <system link>]`:  record the built files as pushed (after the skill's publish)
  * - `state [--json]`:  the record:  the system's link, when it was pushed, how many files
@@ -25,7 +25,7 @@ import { parseHTML } from "linkedom"
 import { ENGINE_ROUTES } from "../server/server.types.ts"
 import { CONTENT, ROOT, pageFile, pagePath } from "./pages.js"
 
-/** The built design system:  `spell dev design build` writes it, `yarn design:bundle` adds the bundle. */
+/** The built design system:  `spell design build` writes it, `yarn design:bundle` adds the bundle. */
 export const BUILT = join(ROOT, "packages/ui/build/design-system")
 
 /**
@@ -37,7 +37,7 @@ const EVENT_ATTRIBUTE = /^on[a-z]+$/i
 /** A hole:  `{{ path }}`, a dotted lookup into the artboard's `renderVals()`. */
 const HOLE = /\{\{\s*([\w.$]+)\s*\}\}/g
 
-/** Run `spell dev design <verb> ...`;  the exit code. */
+/** Run `spell design <verb> ...`;  the exit code. */
 async function main(argv) {
   const [verb, ...rest] = argv
   const { positional, flags } = parseArgs(rest)
@@ -280,7 +280,7 @@ function parseArgs(argv) {
 
 /** Print how to call a verb;  exit code 1. */
 function usage(text) {
-  console.error(`usage:  spell dev design ${text}`)
+  console.error(`usage:  spell design ${text}`)
   return 1
 }
 

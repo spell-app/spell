@@ -436,9 +436,9 @@ function hasPageServer(root) {
 const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
 
 /**
- * This checkout's page server (`spell dev server`), started in the background if it isn't running.
+ * This checkout's page server (`spell server`), started in the background if it isn't running.
  * - returns `{ base, port }`, or `undefined` if it can't start (the caller falls back to `file://`)
- * - runs the server package's `src/page/cli.ts ensure` under `tsx` with the run-time alias hook (`ALIASES`):  the
+ * - runs the server package's `src/page/cli.ts start` under `tsx` with the run-time alias hook (`ALIASES`):  the
  *   `spell-kit/server` this checkout's install resolves (the kit's, `packageDir()`, epic `epic-engine` P10)
  * - a checkout whose settings name no page server (no `"pageServer"` in its `package.json`:  a repo `epic init` set
  *   up, spell-epic itself), or that resolves no server package:  the machine's epic server instead
@@ -451,7 +451,7 @@ export function ensurePageServer() {
   const server = hasPageServer(ROOT) && packageDir("spell-kit/server", ROOT)
   const cli = server && join(server, "src/page/cli.ts")
   if (!cli || !existsSync(cli)) return ensureEpicServer()
-  const run = spawnSync(process.execPath, ["--import", "tsx", "--import", ALIASES, cli, "ensure", "--root", ROOT], {
+  const run = spawnSync(process.execPath, ["--import", "tsx", "--import", ALIASES, cli, "start", "--root", ROOT], {
     cwd: ROOT,
     encoding: "utf8",
     env: { ...process.env, TSX_TSCONFIG_PATH: join(server, "tsconfig.json") }
@@ -543,7 +543,7 @@ export function serverUrl(base, file) {
  * Show `file` rendered in VS Code's doc preview.
  * - for `epic open <name>`, `epic phase`, `/spell-docs`
  * - starts this checkout's page server first (`ensurePageServer()`), so the page live-reloads
- * - the spell extension (`spell dev vscode`) finds the server by its pid file,
+ * - the spell extension (`spell app vscode`) finds the server by its pid file,
  *   and shows the page in a tab of the right side bar (or Simple Browser, `spell.docPreview.location`)
  *   - the page already in that tab isn't reloaded:  it updates itself
  * - first asks THIS session's window, through the extension's window bridge (the repo root's `src/window.mjs`);
@@ -555,7 +555,7 @@ export function serverUrl(base, file) {
  *   - an extension from before it ignores it:  the page shows as usual
  * - `view`:  which side bar tab;  each keeps its own page
  *   - `"docs"`:  "Spell Docs", the default
- *   - `"review"`:  "Review" (`/epic review`, `spell dev docs open <page> --review`)
+ *   - `"review"`:  "Review" (`/epic review`, `epic pages open <page> --review`)
  * - the session is moving to a worktree's window (`/isolate`, `/epic`:  a pending handoff):
  *   shown THERE once it has moved, not in the window it's leaving
  * - no bridge (extension not reloaded, or not run from a VS Code window), or it failed:  the `vscode://` URI
@@ -584,12 +584,12 @@ export async function openInVSCode(file, { hash, query, view = "docs" } = {}) {
 }
 
 /**
- * Show `file` in Chrome, in ONE tab per page, IN THE BACKGROUND:  `spell dev docs open <page>`;  `openInVSCode()`'s fallback.
+ * Show `file` in Chrome, in ONE tab per page, IN THE BACKGROUND:  `epic pages open <page>`;  `openInVSCode()`'s fallback.
  * - from this checkout's page server (live reload), started if need be;  `file://` if it can't start
  * - The tab is keyed by the page's path (`/epics/<name>/<name>.plan.html`:  `pagePath()`), not its full URL.
  *   - so the same page from another checkout (a worktree) reuses it:  re-pointed if the URL differs, else reloaded
  *   - the page names its tab the same way (`spell-doc-runtime.js` `window.name`;  links use that `target`)
- * - `hash`:  an id on the page to land on (`spell dev docs open SAGA:/saga/epic#T1`);  `query`:  the page's query
+ * - `hash`:  an id on the page to land on (`epic pages open SAGA:/saga/epic#T1`);  `query`:  the page's query
  * - Never brings Chrome or its window forward:  the tab is made active in ITS window only.
  *   - a new tab goes in the front window
  *   - `openUrlInChrome()` with `front` does bring it forward, for a link Owen clicked

@@ -4,7 +4,7 @@
  *   - the fold pieces (`FOLD_*`), from its types file;  the `actions` slot (`ACTIONS_*`), from the folds'
  *   - the parts of the `<epic-review>`s an Overview sub-section draws (Q14)
  *   - the new-item texts of Todos and Questions
- * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  * - `kind`'s values are `overview-part`, `SectionIds`' keys, then `report`:  `Definitions.test.ts` checks they agree.
  */
 

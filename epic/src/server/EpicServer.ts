@@ -345,7 +345,7 @@ export class EpicServer {
 
   /**
    * Build the default repo's bundles whose sources changed since their last build, in the background, with that
-   * checkout's OWN build:  its `spell-app/page-server`'s `BundleBuild` (`spell dev bundles build --stale`, with its
+   * checkout's OWN build:  its `spell-app/page-server`'s `BundleBuild` (`spell bundle --stale`, with its
    * own CLI;  epic `epic-engine` P8, r8), loaded from the checkout, never a dependency of spell-epic's (spell-app is
    * above spell-epic:  it RUNS spell-epic, epic `epic-engine` P10).
    * - the bundles:  that checkout's settings' `"bundles"`, Spell UI's site bundle among them, which every component

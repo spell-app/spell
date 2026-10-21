@@ -129,8 +129,7 @@ const USAGE = `usage:  epic ask new <slug> [--title "..."] [--epic <name>] [--de
         epic ask answer <page>
         epic ask draft <page>
         epic ask list [<epic>]
-        epic ask sweep [--days 14]
-(the old spelling, spell dev details, runs the same)`
+        epic ask sweep [--days 14]`
 
 ////////////////
 // ## Pages

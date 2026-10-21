@@ -1,5 +1,5 @@
 /**
- * `spell dev docs update`:  rebuild the spell-ui bundle from the LATEST UI, then check every `**\/<name>.html`
+ * `epic pages update`:  rebuild the spell-ui bundle from the LATEST UI, then check every `**\/<name>.html`
  * page in a real browser.  Pages are hand-authored:  nothing here writes them.
  * Usage (from spell-epic's root):  node src/tools/update.js [--skip-ui-build] [--no-check]
  * - `--skip-ui-build`:  reuse `../ui/dist` instead of rebuilding UI (the bundle is still rebuilt)
@@ -27,7 +27,7 @@ const check = !args.includes("--no-check")
 const unknown = args.filter((arg) => arg !== "--skip-ui-build" && arg !== "--no-check")
 if (unknown.length) {
   console.error(
-    `unknown argument(s):  ${unknown.join(" ")}\nusage:  spell dev docs update [--skip-ui-build] [--no-check]`
+    `unknown argument(s):  ${unknown.join(" ")}\nusage:  epic pages update [--skip-ui-build] [--no-check]`
   )
   process.exit(2)
 }

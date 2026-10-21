@@ -33,7 +33,7 @@ describe("Offline.loadsIn()", () => {
   })
 })
 
-describe("spell dev docs offline", () => {
+describe("epic pages offline", () => {
   const root = mkdtempSync(join(tmpdir(), "docs-offline-"))
   const page = join(root, "guides", "topic", "topic.html")
   mkdirSync(join(root, ".git"))

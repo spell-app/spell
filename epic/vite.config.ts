@@ -12,7 +12,7 @@ import { fmtConfig, packageLint, patternLintIn } from "spell-kit/toolchain/lint"
  * - Tests:  `vitest.config.ts` beside this.
  * - Not ours to lint or format:
  *   - `src/components/__pack/`:  generated
- *   - in the docs tools' `_assets/`:  the bundles `spell dev docs update` writes (`spell-ui.js`, `spell-comments.js`,
+ *   - in the docs tools' `_assets/`:  the bundles `epic pages update` writes (`spell-ui.js`, `spell-comments.js`,
  *     `lazy/`, `emoji/`),
  *     and the vendored highlight.js
  *   - the extension's build (`vscode/out`)

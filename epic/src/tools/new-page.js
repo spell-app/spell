@@ -1,5 +1,5 @@
 /**
- * `spell dev docs new <template> <page> [--title "Title"] [--description "One sentence."]`:  start a page from a template.
+ * `epic pages new <template> <page> [--title "Title"] [--description "One sentence."]`:  start a page from a template.
  * - `<template>`:  `durable`, `cheatsheet` or `commands` (or a path under `templates/`);  epic pages come from
  *   `epic new`
  *   - found by `templateFile()`:  the repo's own templates first (`repoTemplates`), then the engine's, spell-epic's

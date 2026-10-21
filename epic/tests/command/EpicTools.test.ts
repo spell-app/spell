@@ -10,7 +10,8 @@ import { EpicTools } from "$/epics/command/EpicTools"
  * - CODE:  the running `epic`'s, its tools fake scripts that report what they got
  * - DATA:  the caller's, where the command runs from, with the same files
  * - ONE copy of the code (epic `epic-eject` P5):  every epic tool must be CODE's script, working on DATA.
- * - DATA installs a fake kit, `spell-kit`, whose `server/src/page/cli.ts` is the page server (`SERVER`)
+ * - DATA installs a fake kit, `spell-kit`, whose `server/src/page/cli.ts` is the page server (`SERVER`), and whose
+ *   `cli/bin/spell.mjs` is the `spell` command (`serve`'s:  `spell server start all`)
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "epic-tools-")))
 const CODE = join(TEMP, "code")
@@ -48,8 +49,12 @@ writeFileSync(join(DATA, "package.json"), JSON.stringify({ name: "data", pageSer
 mkdirSync(join(SERVER, "src", "page"), { recursive: true })
 writeFileSync(
   join(KIT, "package.json"),
-  JSON.stringify({ name: "spell-kit", exports: { "./server": "./server/src/index.ts" } })
+  JSON.stringify({ name: "spell-kit", exports: { "./server": "./server/src/index.ts", "./cli": "./cli/src/index.ts" } })
 )
+mkdirSync(join(KIT, "cli", "src"), { recursive: true })
+mkdirSync(join(KIT, "cli", "bin"), { recursive: true })
+writeFileSync(join(KIT, "cli", "src", "index.ts"), "")
+writeFileSync(join(KIT, "cli", "bin", "spell.mjs"), SCRIPT("kit"))
 writeFileSync(join(SERVER, "src", "index.ts"), "")
 writeFileSync(join(SERVER, "src", "page", "cli.ts"), SCRIPT("server"))
 writeFileSync(join(SERVER, "tsconfig.json"), "{}")
@@ -94,8 +99,8 @@ describe("EpicTools.run()", () => {
     expect(server.tsconfig).toBe(join(SERVER, "tsconfig.json"))
   })
 
-  test("serve:  the CALLER's own script", async () => {
-    expect(await run("serve", [])).toMatchObject({ owner: "data" })
+  test("serve:  the kit's spell, which the CALLER's install resolves", async () => {
+    expect(await run("serve", ["server", "start", "all"])).toMatchObject({ owner: "kit", args: ["server", "start", "all"] })
   })
 })
 

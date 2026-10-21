@@ -13,7 +13,7 @@ import { APP_API, type AppStatus, type Repo } from "./server.types"
  * A repo's APP on the epic server (epic `epic-engine` I49):  what the top bar's App tab opens, `/editor/`.
  * - Declared by the repo:  its `.epic/config.json5`'s `"app"` (`EpicApp`):  where it answers, and what starts it.
  *   - spell-app's:  the editor, recorded in `.spell-server.editor.json` once its page server has started it
- *     (spaces' `EditorServer`), started by `spell dev server ensure`
+ *     (spaces' `EditorServer`), started by `spell server start`
  * - The tab's click (`route()`), at `<path>` for the default repo and `/r/<repo><path>` for each:
  *   - the app answers:  a redirect to it
  *   - it doesn't:  its `start` command, run DETACHED from the repo's main checkout (it outlives the epic server),
@@ -231,6 +231,6 @@ function escape(text: string): string {
 /**
  * The epic server's own settings, never passed on to an app it starts:  its checkout (`EPIC_CHECKOUT`, which
  * spell-app's page server's epic routes would read), its home, its `tsx` config, and yarn's starting folder
- * (`INIT_CWD`, which `spell dev server` takes as the checkout).
+ * (`INIT_CWD`, which `spell server` takes as the checkout).
  */
 const NOT_PASSED = ["EPIC_CHECKOUT", "SPELL_EPIC_HOME", "TSX_TSCONFIG_PATH", "INIT_CWD"]

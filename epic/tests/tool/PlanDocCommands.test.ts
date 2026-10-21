@@ -1,5 +1,5 @@
 /**
- * Tests of `PlanDocCommands` (`spell dev plan-doc ...`) on a scratch checkout:  the command line itself, its flags,
+ * Tests of `PlanDocCommands` (`epic plan-doc ...`, the tool's own order) on a scratch checkout:  the command line itself, its flags,
  * output and log lines, on a doc written as a real one is (linked, formatted, split).
  */
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"

@@ -2,7 +2,7 @@
  * Every name `<epic-overview>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
  * - Pure data:  `import type`, plus the fold pieces (`FOLD_*`) from `epic-section`'s types file, the `actions`
  *   slot (`ACTIONS_*`) from the folds', and the review controls' parts (`REVIEW_PARTS`), data too.
- * - Change it, then `spell dev pack build epics`:  the pack's catalog is read from here.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "$/epics/definitions"

@@ -433,7 +433,7 @@ nothing flickers. The tool's `EpicParts` does it; the markup (`source`, `part-id
   | the log, `#log`                | `parts/log.html` | its events                                                                  |
 
 - How a part is told from a page: by its folder. Every page walker skips `parts/` folders (spell-epic's `src/tools/
-pages.js` `findPages()`, `relocate.js`, `spell static`): the docs' home page, `docs update` and link repairs never take
+pages.js` `findPages()`, `relocate.js`, `spell ssr`): the docs' home page, `docs update` and link repairs never take
   a part for a page.
 - A part file: a one-line comment saying whose body it is, then the body's markup. Its relative URLs are relative to
   `parts/`: one `../` more than the skeleton's (`../../../guides/x.html`, not `../../guides/x.html`).
