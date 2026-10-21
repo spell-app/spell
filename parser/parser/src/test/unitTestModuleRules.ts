@@ -15,7 +15,7 @@ import { describe, test, expect } from "vite-plus/test"
 import groupBy from "lodash/groupBy"
 import isEqual from "lodash/isEqual"
 
-import { showWhitespace } from "@spell-app/util"
+import { showWhitespace } from "spell-kit/util"
 
 import { P } from "$/parser"
 // Import type only:  loaded only when blessing, as it reads and writes files

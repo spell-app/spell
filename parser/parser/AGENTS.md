@@ -93,7 +93,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 As WWOD §12, plus:
 
-- `vitest.config.ts` uses the toolchain's decorator pre-pass (`@spell-app/toolchain/decorators`).
+- `vitest.config.ts` uses the toolchain's decorator pre-pass (`spell-kit/toolchain/decorators`).
 
 ## Types / Exports
 

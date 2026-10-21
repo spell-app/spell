@@ -1,4 +1,4 @@
-import { kebabCase, typeCase, proto } from "@spell-app/util"
+import { kebabCase, typeCase, proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { SP } from "$/spell"
 // Import directly to avoid circular import

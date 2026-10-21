@@ -1,4 +1,4 @@
-import { NONE } from "@spell-app/util"
+import { NONE } from "spell-kit/util"
 import { P } from "$/parser"
 import { expressions } from "./expressions.parser"
 

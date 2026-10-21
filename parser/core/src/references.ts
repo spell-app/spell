@@ -25,7 +25,7 @@
  *   - The model has no drawing, so no `elementIdFor()`:  it says so if it's called there.
  */
 
-import { untrackCells } from "@spell-app/util"
+import { untrackCells } from "spell-kit/util"
 
 import { programThings, core } from "./core"
 import { defineCoreModule } from "./core.types"

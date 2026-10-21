@@ -130,7 +130,7 @@ const SPELL_ELEMENTS_SOURCE = "src/runner/spellElements.ts"
  * - `core`'s settings, plus Solid's JSX and `<ui-*>`'s JSX types -- see `typecheck()`.
  * - `@spell/elements` pointing at app's source (`APP_DIR`).
  * - ONE core:  the app's own imports of `@spell-app/core` go to the same source.
- * - The other repos' packages (`@spell-app/util`, `@spell-app/ui` ...) by their declarations, through the
+ * - The other repos' packages (`spell-kit/util`, `@spell-app/ui` ...) by their declarations, through the
  *   folder's `node_modules` link (epic `repo-split` I12):  their own `$/` aliases are theirs, not core's.
  */
 function tsconfig(names: string[], projects: Record<string, string>) {
@@ -156,8 +156,8 @@ function tsconfig(names: string[], projects: Record<string, string>) {
       jsxImportSource: "@solidjs/web",
       // the repo's global types (`Prettify` ...), through the folder's `node_modules` link;  `vite/client`:  `core`
       // uses none of it (the toolchain's types bring it all the same)
-      types: ["node", "@spell-app/toolchain/types"],
-      // `node_modules` too:  a scoped package's types (`@spell-app/toolchain/types`) are looked up only there
+      types: ["node", "spell-kit/toolchain/types"],
+      // `node_modules` too:  a scoped package's types (`spell-kit/toolchain/types`) are looked up only there
       typeRoots: [`${nodeModules}/@types`, nodeModules],
       noUnusedLocals: false
     },

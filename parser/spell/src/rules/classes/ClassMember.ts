@@ -1,4 +1,4 @@
-import { proto } from "@spell-app/util"
+import { proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { Priority, declaredPrefix } from "$/spell/rules/rules.types"
 import { getKnownType } from "$/spell/rules/types"

@@ -2,7 +2,7 @@
  * Shared by the `properties` rule files:  the words a member's name stops at,
  * and how the `its_*` rules read `it`.
  */
-import { NONE } from "@spell-app/util"
+import { NONE } from "spell-kit/util"
 import { P } from "$/parser"
 
 /**

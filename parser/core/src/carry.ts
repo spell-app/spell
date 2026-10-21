@@ -17,7 +17,7 @@
  *   - Either way the program starts afresh too.
  * - Part of `core`:  imported by `$/core`'s barrel for its side effect.
  */
-import { getProps, schemaOf, setProp, type PropInfo } from "@spell-app/util"
+import { getProps, schemaOf, setProp, type PropInfo } from "spell-kit/util"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"

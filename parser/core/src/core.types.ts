@@ -15,7 +15,7 @@ import type { jsonMethods } from "./json"
 import type { carryMethods } from "./carry"
 import type { classesMethods } from "./classes"
 import type { deprecatedMethods } from "./deprecated"
-import type { PropRule } from "@spell-app/util"
+import type { PropRule } from "spell-kit/util"
 
 // ## Importing core
 

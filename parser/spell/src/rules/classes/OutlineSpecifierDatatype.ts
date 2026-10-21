@@ -1,4 +1,4 @@
-import { proto } from "@spell-app/util"
+import { proto } from "spell-kit/util"
 import { classes } from "./classes.parser"
 import { TypeSpecifierDatatype } from "./TypeSpecifierDatatype"
 

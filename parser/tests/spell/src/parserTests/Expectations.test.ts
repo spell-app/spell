@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { proto } from "@spell-app/util"
+import { proto } from "spell-kit/util"
 import { P, Parser, Tokenizer, WhitespacePolicy } from "$/parser"
 import { SP } from "$/spell"
 import { loadFixtureProject, parseSpellProject } from "$/spell/test"

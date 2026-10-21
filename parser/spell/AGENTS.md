@@ -20,7 +20,7 @@ when working with code in this package, `@spell-app/spell`.
   - [parser](../parser/AGENTS.md), `$/parser` (`P`):  the generic rule-based parser.
     [PARSING.md](PARSING.md), here, maps its pipeline.
   - [core](../core/AGENTS.md), `$/core` (`SC`):  the runtime compiled spell runs on.
-  - [util](../../spell-util/util/AGENTS.md), `$/util`:  utilities.
+  - [util](../../util/AGENTS.md), `spell-kit/util`:  utilities (the kit's `util/`).
   - [lsp](../../spell-app/lsp/AGENTS.md), `$/lsp` (`LSP`):  spell's language server.
     See "Language server" in [PARSING.md](PARSING.md).
   - `../../spell-app/vscode`:  the VS Code extension that runs it.
@@ -420,7 +420,7 @@ when working with code in this package, `@spell-app/spell`.
 
 As WWOD §12, plus:
 
-- The toolchain's decorator pre-pass (`@spell-app/toolchain/decorators`) is used by `vitest.config.ts` here.
+- The toolchain's decorator pre-pass (`spell-kit/toolchain/decorators`) is used by `vitest.config.ts` here.
 
 ## Imports
 

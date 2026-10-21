@@ -1,4 +1,4 @@
-import { proto } from "@spell-app/util"
+import { proto } from "spell-kit/util"
 import { P } from "$/parser"
 // Import directly to avoid circular import
 import { PostfixOperatorSuffix, Precedence } from "$/spell/rules/expressions"

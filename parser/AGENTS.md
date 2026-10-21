@@ -6,13 +6,13 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in th
 
 - `github.com/spell-app/spell-lang`, private;  cut from spell-app with its history (epic `repo-split` P8).
 - It holds `parser` (the rule-based parser, and Rulex), `markdown` (GitHub markdown on the parser), `core` (the runtime compiled spell runs on), `py` (Python's writers, and `spell_core`, a uv project) and `spell` (the language).
-- It may use:  spell-util:  util's helpers (by package name, `@spell-app/util`) and the toolchain.
+- It may use:  the kit:  util's helpers (by package name, `spell-kit/util`) and the toolchain.
   - Every arrow points DOWN:  no repo below this one may import it.
-- It lives inside the top repo `spell`, at `~/www/spell/spell-lang/`:  the top holds the ONE install for every repo
+- It lives inside the kit `spell-kit`, at `~/www/spell/spell-lang/`:  the kit holds the ONE install for every repo
   (no `yarn.lock` here), and [its AGENTS.md](../AGENTS.md) has the rules across repos.
 - `$/` aliases are for inside this repo ([tsconfig.base.json](tsconfig.base.json));  another repo's package is imported
-  by its npm name (`@spell-app/...`), an entry of its `package.json` `exports`.
-- `agents/` (WWOD and the three logs):  a link to spell-util's main checkout, made by the top repo's setup (not yet).
+  by its npm name (`spell-kit/...`, `@spell-app/...`), an entry of its `package.json` `exports`.
+- `agents/` (WWOD and the three logs):  a link to the kit's `agents/` (git-ignored here), made by `yarn clone`.
 
 ## Packages
 

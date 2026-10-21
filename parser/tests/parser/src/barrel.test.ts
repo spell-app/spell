@@ -13,7 +13,7 @@
 //  order no longer matters -- `export * as P from "./"` may sit anywhere in the file.
 //
 import { describe, expect, test, vi } from "vite-plus/test"
-import { proto } from "@spell-app/util"
+import { proto } from "spell-kit/util"
 
 /** Values the barrel MUST expose -- a representative slice, not the whole surface. */
 const VALUES = [

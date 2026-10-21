@@ -1,4 +1,4 @@
-import { NONE, proto } from "@spell-app/util"
+import { NONE, proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { identifierBlacklist } from "$/spell/rules/identifier-blacklist"
 

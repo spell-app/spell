@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node", "@spell-app/toolchain/types"],
+    "types": ["node", "spell-kit/toolchain/types"],
     "allowJs": true,
     "target": "ES2020",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],

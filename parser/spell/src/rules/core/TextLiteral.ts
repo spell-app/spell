@@ -1,4 +1,4 @@
-import { assert, proto } from "@spell-app/util"
+import { assert, proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { core } from "./core.parser"
 

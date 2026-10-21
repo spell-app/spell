@@ -1,4 +1,4 @@
-import { proto } from "@spell-app/util"
+import { proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { Priority } from "$/spell/rules/rules.types"
 import { SpellExpression } from "$/spell/rules/expressions"

@@ -1,4 +1,4 @@
-import { pluralize } from "@spell-app/util"
+import { pluralize } from "spell-kit/util"
 import { P } from "$/parser"
 import { types } from "./types.parser"
 import { SpellType } from "./SpellType"

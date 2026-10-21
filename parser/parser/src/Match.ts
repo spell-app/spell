@@ -1,7 +1,7 @@
 import { isNode } from "browser-or-node"
 import omit from "lodash/omit"
 
-import { Assertable } from "@spell-app/util"
+import { Assertable } from "spell-kit/util"
 import { P } from "$/parser"
 
 /**

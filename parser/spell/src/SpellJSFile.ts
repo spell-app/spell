@@ -1,4 +1,4 @@
-import { TextFile } from "@spell-app/util"
+import { TextFile } from "spell-kit/util"
 import { SP } from "$/spell"
 
 /**

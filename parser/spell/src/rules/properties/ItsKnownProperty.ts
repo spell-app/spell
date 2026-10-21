@@ -1,4 +1,4 @@
-import { NONE, proto } from "@spell-app/util"
+import { NONE, proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { Priority, declaredPrefix } from "$/spell/rules/rules.types"
 import { MemberReadExpression } from "./MemberReadExpression"

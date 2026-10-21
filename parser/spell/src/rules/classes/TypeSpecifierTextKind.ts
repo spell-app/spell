@@ -1,4 +1,4 @@
-import { proto, type PropRule } from "@spell-app/util"
+import { proto, type PropRule } from "spell-kit/util"
 import { P } from "$/parser"
 import { Priority } from "$/spell/rules/rules.types"
 import { classes } from "./classes.parser"

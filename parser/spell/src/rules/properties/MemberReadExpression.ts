@@ -1,4 +1,4 @@
-import { upperFirst } from "@spell-app/util"
+import { upperFirst } from "spell-kit/util"
 import { P } from "$/parser"
 import { SP } from "$/spell"
 import { SpellExpression } from "$/spell/rules/expressions"

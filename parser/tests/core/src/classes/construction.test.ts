@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { thing } from "@spell-app/util"
+import { thing } from "spell-kit/util"
 import { Thing, List } from "$/core"
 
 /**

@@ -1,4 +1,4 @@
-import { instanceCase, proto } from "@spell-app/util"
+import { instanceCase, proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { SP } from "$/spell"
 import { Priority } from "$/spell/rules/rules.types"

@@ -1,4 +1,4 @@
-import { type Plurality } from "@spell-app/util"
+import { type Plurality } from "spell-kit/util"
 import { P } from "$/parser"
 import { SpellIdentifier } from "./SpellIdentifier"
 import { variables } from "./variables.parser"

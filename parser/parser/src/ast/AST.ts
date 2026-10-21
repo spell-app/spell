@@ -5,7 +5,7 @@
  * - NEVER write output here.
  */
 
-import { Assertable, OPTIONAL } from "@spell-app/util"
+import { Assertable, OPTIONAL } from "spell-kit/util"
 import { P } from "$/parser"
 
 ////////////////

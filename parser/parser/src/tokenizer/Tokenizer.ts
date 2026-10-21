@@ -1,4 +1,4 @@
-import { Logger } from "@spell-app/util/spell/Logger"
+import { Logger } from "spell-kit/util/spell/Logger"
 import { P } from "$/parser"
 
 /**

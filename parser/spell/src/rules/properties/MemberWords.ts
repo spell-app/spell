@@ -1,4 +1,4 @@
-import { proto } from "@spell-app/util"
+import { proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { MEMBER_LEADING_WORDS, MEMBER_STOP_WORDS } from "./properties.shared"
 import { properties } from "./properties.parser"

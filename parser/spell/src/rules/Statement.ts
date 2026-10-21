@@ -1,4 +1,4 @@
-import { NONE, proto } from "@spell-app/util"
+import { NONE, proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { SP } from "$/spell"
 // Import directly to avoid circular import -- rules are constructed while the `SP` barrel is still loading.

@@ -23,10 +23,9 @@
   },
   "dependencies": {
     "@spell-app/parser": "workspace:*",
-    "@spell-app/util": "workspace:*"
+    "spell-kit": "workspace:*"
   },
   "devDependencies": {
-    "@spell-app/toolchain": "workspace:*",
     "@types/node": "^22.20.4",
     "typescript": "^7.0.2",
     "vite": "catalog:",

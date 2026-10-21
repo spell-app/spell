@@ -61,20 +61,19 @@
     "test:rules": "vp test run src/rules",
     "test:rules:bless": "BLESS_RULE_TESTS=1 vp test run src/rules; vp fmt src/rules",
     "/////// GENERATED FILES": "",
-    "gen:syntax": "node --import tsx --import @spell-app/toolchain/aliases src/node/writeSpellSyntax.ts && vp fmt spellSyntax.json"
+    "gen:syntax": "node --import tsx --import spell-kit/toolchain/aliases src/node/writeSpellSyntax.ts && vp fmt spellSyntax.json"
   },
   "dependencies": {
     "@spell-app/core": "workspace:*",
     "@spell-app/parser": "workspace:*",
     "@spell-app/py": "workspace:*",
-    "@spell-app/util": "workspace:*",
     "browser-or-node": "^3.0.0",
     "json5": "^2.1.1",
-    "semver": "^7.8.5"
+    "semver": "^7.8.5",
+    "spell-kit": "workspace:*"
   },
   "devDependencies": {
     "@solidjs/compiler": "2.0.0-rc.13",
-    "@spell-app/toolchain": "workspace:*",
     "@types/node": "^22",
     "@types/semver": "^7.8.0",
     "@vitest/coverage-v8": "catalog:",

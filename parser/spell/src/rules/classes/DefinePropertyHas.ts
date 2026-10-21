@@ -1,4 +1,4 @@
-import { pluralize, proto, upperFirst, type PropRule } from "@spell-app/util"
+import { pluralize, proto, upperFirst, type PropRule } from "spell-kit/util"
 import { P } from "$/parser"
 import { SP } from "$/spell"
 import { Priority } from "$/spell/rules/rules.types"

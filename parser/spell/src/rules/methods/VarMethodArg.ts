@@ -1,4 +1,4 @@
-import { proto } from "@spell-app/util"
+import { proto } from "spell-kit/util"
 import { P } from "$/parser"
 import { SP } from "$/spell"
 import { SpellIdentifier } from "$/spell/rules/variables"

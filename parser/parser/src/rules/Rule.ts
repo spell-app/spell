@@ -1,8 +1,8 @@
 //  # Parser Rules
 //
 
-import { proto } from "@spell-app/util"
-import { Derivative } from "@spell-app/util/spell/Derivative"
+import { proto } from "spell-kit/util"
+import { Derivative } from "spell-kit/util/spell/Derivative"
 import { P } from "$/parser"
 
 /**

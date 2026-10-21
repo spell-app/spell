@@ -1,4 +1,4 @@
-import { snakeCase } from "@spell-app/util"
+import { snakeCase } from "spell-kit/util"
 import { P } from "$/parser"
 
 import { BlockScope } from "./BlockScope"

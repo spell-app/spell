@@ -20,7 +20,7 @@
     "review": "yarn workspaces foreach -W --exclude spell-lang -v run review"
   },
   "devDependencies": {
-    "@spell-app/toolchain": "workspace:*",
+    "spell-kit": "workspace:*",
     "vite-plus": "catalog:"
   },
   "engines": {

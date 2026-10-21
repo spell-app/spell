@@ -1,4 +1,4 @@
-import type { PropRule } from "@spell-app/util"
+import type { PropRule } from "spell-kit/util"
 import { P } from "$/parser"
 import { classes } from "./classes.parser"
 // Import directly to avoid circular import
