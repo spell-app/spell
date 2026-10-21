@@ -80,6 +80,12 @@
         "commands.ts"
       ],
       "node": true
+    },
+    {
+      "name": "tools",
+      "lint": [
+        "."
+      ]
     }
   ],
   "exports": {
@@ -223,7 +229,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "/////// THE KIT'S OWN CHECKS (spell-folders, its \"spellFolders\"):  util, toolchain, server, assembler, element": "",
+    "/////// THE KIT'S OWN CHECKS (spell-folders, its \"spellFolders\"):  util, toolchain, server, assembler, element, cli, tools": "",
     "kit:ts": "node toolchain/bin/spell-folders.ts ts",
     "kit:test": "node toolchain/bin/spell-folders.ts test",
     "kit:lint": "node toolchain/bin/spell-folders.ts lint",
@@ -242,6 +248,9 @@
     "pull": "node tools/repos.ts pull",
     "status": "node tools/repos.ts status",
     "repos": "node tools/repos.ts list",
+    "/////// THE READMES (tools/readme-check.ts, tools/mermaid-pretty.ts):  the root pages of every repo": "",
+    "readme:check": "node tools/readme-check.ts",
+    "mermaid:pretty": "node tools/mermaid-pretty.ts",
     "/////// CHECKS OVER EVERY REPO, lowest first": "",
     "ts": "node tools/repos.ts run ts",
     "test": "node tools/repos.ts run test",

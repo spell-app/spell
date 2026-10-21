@@ -13,7 +13,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It reads the command line, prints help, and finds every installed repo's commands.
   - Each repo adds its own commands;  the kit adds a few of its own.
   - It was spell-app's `cli/` until epic `repo-split` P13 (decisions Q33, Q42).
-  - [The README](README.md) says how it works, and how to add a command.
+  - [README-cli.md](../README-cli.md), "How a command is built", says how it works, and how to add a command.
 - What's in it:
   - [bin/spell.mjs](bin/spell.mjs) -- starts it:  `tsx`, then the run-time alias hook, then [main.ts](src/main.ts)
   - [main.ts](src/main.ts) -- the process entry:  every repo's commands, then the command line.

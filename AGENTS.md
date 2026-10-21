@@ -102,10 +102,13 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   `spell-types` and `spell-pack`):  [the toolchain's AGENTS.md](toolchain/AGENTS.md).
 - The kit's other scripts:  `yarn server` (`spell server`:  the page server), `yarn favicon` (server's icons),
   `yarn cli:install` (puts `spell` on your `PATH`).
-- The `spell` command:  the kit's `cli/` (its [AGENTS.md](cli/AGENTS.md)).
+- The `spell` command:  the kit's `cli/` (its [AGENTS.md](cli/AGENTS.md));
+  every command, every repo's:  [README-cli.md](README-cli.md).
   - Every installed repo adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
     `spell help` lists them, grouped by repo.
   - A word two repos both want goes under each one's short name (`spell lang check`, `spell app check`).
+- The READMEs (every repo's `README.md` and `README-*.md`):  `yarn readme:check` checks them;  `yarn mermaid:pretty`
+  styles their Mermaid pictures ([README-toolchain.md](README-toolchain.md)).
 
 ## Which repo holds what
 
