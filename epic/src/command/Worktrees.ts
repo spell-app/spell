@@ -48,7 +48,8 @@ import { tsxImports } from "../tools/packageDir"
  *   - `path <name>`:  worktree `<name>`'s folder, absolute (epic `epic-eject` P8)
  *     - an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):  that repo's, said on stderr
  *     - where it is (the old place included), else where a new one goes (`EpicConfig.worktreeFolder()`)
- *     - what the skills give `EnterWorktree`
+ *     - for a person or a tool:  the skills enter a worktree by its NAME, never this path (Claude Code asks before
+ *       entering a path outside `.claude/worktrees/`;  epic `epic-engine` P16)
  *   - `remove <name | path> [--force] [--branches]`:  remove a worktree, its servers stopped FIRST (`remove()`, epic
  *     `epic-engine` I53);  `--branches`:  and its branch in each repo, when merged (`git branch -d`)
  *   - `repos [<name>] [--json]`:  each repo's checkout in epic `<name>`'s worktree (default:  the one this runs in),

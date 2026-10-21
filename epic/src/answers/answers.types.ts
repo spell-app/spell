@@ -34,10 +34,10 @@ export const DETAILS_LISTENING_API = "/api/docs/details/listening"
 export const DETAILS_LISTEN_POLL_MS = 30_000
 
 /**
- * How long after the last change a details page saves its draft, in ms:  "a moment after he stops typing"
- * (P18;  a choice page waits 5s, `CHOICES_SAVE_MS`).  The browser's own copy is written at once.
+ * How long after the last change a details page saves its draft, in ms:  as Owen types (epic `epic-engine` P15,
+ * r14:  "save into an inbox as I type";  2s before).  The browser's own copy is written at once.
  */
-export const DETAILS_SAVE_MS = 2000
+export const DETAILS_SAVE_MS = 500
 
 /**
  * How long after a question or box leaves the page (an agent's rewrite, patched in place) the page looks for what
@@ -47,6 +47,13 @@ export const DETAILS_SETTLE_MS = 250
 
 /** The browser's copy of a details page's draft (`localStorage`):  this, then the page's path. */
 export const DRAFT_KEY_PREFIX = "spell-details-draft:"
+
+/**
+ * How long after a draft's save FAILED an answer page tries again, in ms, until one goes through (epic `epic-engine`
+ * P15):  a page server that's back takes it with no keystroke and no reload, its new token too (`ServerLink`).
+ * - Why:  a failed save used to wait for the next keystroke, and with every box filled none came (r14).
+ */
+export const ANSWER_RETRY_MS = 3000
 
 /** The key of the page's notes, among the ids a page's parts hold (`PartLabels`). */
 export const NOTES_KEY = "notes"
@@ -60,8 +67,14 @@ export const DETAILS_PAGE = /\/details\/[^/]+\.html$/
 /** A choice page's routes (`choicesRoutes.ts`):  `<api>/draft` and `<api>/answer`, `POST` and `GET ?page=`. */
 export const CHOICES_API = "/api/docs/choices"
 
-/** How long after the last change a choice page saves its draft, in ms (Owen:  "5 sec debounce is fine"). */
-export const CHOICES_SAVE_MS = 5000
+/**
+ * How long after the last change a choice page saves its draft, in ms:  as Owen types (epic `epic-engine` P15, r14:
+ * "save into an inbox as I type";  5s before).  The browser's own copy is written at once.
+ */
+export const CHOICES_SAVE_MS = 500
+
+/** The browser's copy of a choice page's draft (`localStorage`, P15):  this, then the page's path. */
+export const CHOICES_KEY_PREFIX = "spell-choices-draft:"
 
 /**
  * A page the choices routes save for:  in a `details/` folder (`choicesRoutes.ts` `choicesPage()`).
@@ -199,8 +212,10 @@ export type ChoiceRowPart = {
   readonly recommended: string | undefined
   /** what its box holds now, as typed */
   readonly value: string
-  /** the box differs from the recommendation (trimmed) */
+  /** the box differs from the recommendation (trimmed);  a `blank` row:  holds something other than today's text */
   readonly isChanged: boolean
+  /** its table types into blank boxes (`<epic-choice-rows blank>`, epic `epic-engine` P13):  no recommendation */
+  readonly blank?: boolean
   /**
    * its table's key when Owen can put its rows in order (`<epic-choice-rows reorder>`):  its section's id;
    * `undefined` for a table that keeps its order
@@ -222,8 +237,11 @@ export type ChoicesValues = { values: Record<string, string>; feedback: string; 
 /** Each reorderable table's row ids, in the order Owen left them, by its section's id. */
 export type ChoicesOrder = Record<string, string[]>
 
-/** A choice page's draft (`<slug>.draft.json5`):  its values, and when it was saved. */
-export type ChoicesDraft = ChoicesValues & { saved: string }
+/**
+ * A choice page's draft (`<slug>.draft.json5`):  its values, and when it was saved.
+ * - the browser's copy (`CHOICES_KEY_PREFIX`) and Copy my answers have this shape too, with the page's path (`page`)
+ */
+export type ChoicesDraft = ChoicesValues & { saved: string; page?: string }
 
 /** A choice page's answer (`<slug>.answer.json5`):  its values, when, and how often sent. */
 export type ChoicesAnswer = ChoicesValues & { answered: string; changes?: number }

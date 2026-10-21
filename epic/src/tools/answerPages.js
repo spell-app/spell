@@ -177,7 +177,13 @@ export function choiceSections(document, data) {
     const table = make(
       document,
       ROWS,
-      { stacked: data.stacked === true, "no-file": !hasFile, reorder: section.reorder === true },
+      {
+        stacked: data.stacked === true,
+        "no-file": !hasFile,
+        reorder: section.reorder === true,
+        blank: data.blank === true,
+        ...(data.blank === true && typeof data.noun === "string" && { noun: data.noun })
+      },
       rows.map((row) => choiceRow(document, row))
     )
     const rule = section.description

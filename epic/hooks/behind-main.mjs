@@ -6,7 +6,8 @@
  * - Why:  a worktree runs its OWN copy of the repo's code and pages, as old as its branch.
  *   Nothing told anyone, and windows sat 54-154 commits behind:  new features showed up half-done there.
  * - stdin `{ cwd, hook_event_name, tool_input, ... }`.
- *   The folder checked:  `tool_input.path` (an `EnterWorktree` into an existing worktree), else `cwd`.
+ *   The folder checked:  `tool_input.path` (an `EnterWorktree` by path), else `cwd` (by name, the skills' way since
+ *   epic `epic-engine` P16).
  * - Only in a repo that uses epics (it has `.epic/config.json5`):  the plugin's hooks run in every repo.
  * - On `main`, outside git, or not behind:  nothing.
  * - Behind:  a line for Owen (`systemMessage`), and one for Claude (`additionalContext`):

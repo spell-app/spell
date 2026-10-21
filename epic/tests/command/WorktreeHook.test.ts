@@ -166,7 +166,7 @@ describe("worktree hook", () => {
     const failed = hook("create", { name: "broken", cwd: MAIN })
     expect(failed.status).toBe(1)
     expect(failed.stdout).toBe("")
-    expect(failed.stderr).toMatch(/`exit 3` failed in .*broken:  exit 3\..*EnterWorktree with path/)
+    expect(failed.stderr).toMatch(/`exit 3` failed in .*broken:  exit 3\..*EnterWorktree with name "broken"/)
     expect(existsSync(join(BESIDE, "broken", ".git"))).toBe(true)
 
     config({ installOnCreate: true, installCommand: "sleep 5", installTimeout: 1 })

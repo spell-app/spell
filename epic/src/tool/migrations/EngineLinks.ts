@@ -153,7 +153,7 @@ const MOVES: readonly (readonly [string, string | null])[] = [
   // `git diff -M ea6e884 HEAD` renames every one by these prefixes but the three docs files, which went into src/
   ["packages/epics/AGENTS.md", "spell-epic/src/AGENTS.md"],
   ["packages/epics/CLAUDE.md", "spell-epic/src/CLAUDE.md"],
-  ["packages/epics/README.md", "spell-epic/src/README.md"],
+  ["packages/epics/README.md", "spell-epic/README-pages.md"],
   // the plan-doc checks' screenshots:  git-ignored there (`/src/demo/shots/`), never in a checkout but the one that ran
   ["packages/epics/demo/shots/", null],
   ["packages/epics/demo/", "spell-epic/src/demo/"],

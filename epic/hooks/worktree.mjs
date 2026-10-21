@@ -91,7 +91,7 @@
  */
 import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
-import { dirname, isAbsolute, join, relative, resolve } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
 import { CheckoutServers } from "../src/command/CheckoutServers.ts"
 import { EpicRepo } from "../src/config/EpicRepo.ts"
@@ -291,7 +291,7 @@ class Worktree {
     if (!why) return
     throw new Error(
       `\`${command}\` failed in ${path}:  ${why}.  The worktree is made:  run \`${command}\` there by hand, ` +
-        `then EnterWorktree with path "${path}"`
+        `then EnterWorktree with name "${basename(path)}" (never its path:  Claude Code would ask)`
     )
   }
 

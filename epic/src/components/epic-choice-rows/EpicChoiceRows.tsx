@@ -18,6 +18,8 @@ import rowsCSS from "./EpicChoiceRows.css?inline"
  * - Draws the column heads, then its rows (`<epic-choice-row>`s, its children) on the same columns:  a grid, each
  *   row a subgrid of it.
  *   - `no-file`:  no File column;  `stacked`:  Current and Recommended in one column, Syntax
+ *   - `blank` (epic `epic-engine` P13):  today's text with an empty box under it, first, then Purpose;  its badge
+ *     `42 commands · 3 changed` (`noun`, default `rows`)
  *   - Under 720px the grid keeps that width, and scrolls inside its own box, never the page.
  * - Counts its rows on its `<ui-section>`'s title (`badge`):  `3 to change · 1 stay`, then `· 1 changed` once Owen
  *   changed some.  Follows the page's `ChoicesForm`, where its rows register.
@@ -65,12 +67,20 @@ export class EpicChoiceRows extends E.UIComponent<typeof epicChoiceRowsVocabular
   get badgeText(): string {
     void this.version
     const rows = this.rows
+    const changed = rows.filter((row) => ((row as E.DOMElement).component as EpicChoiceRow | undefined)?.isChanged)
+    if (this.blank) {
+      const noun = this.noun || this.translationForKey("rowsNoun")
+      return this.translationForKey("countBlank", {
+        rows: String(rows.length),
+        noun,
+        changed: String(changed.length)
+      })
+    }
     const renames = rows.filter((row) => row.getAttribute("recommended") !== row.getAttribute("current")).length
     let count = this.reorder
       ? this.translationForKey("countOrdered", { rows: String(rows.length) })
       : this.translationForKey("count", { renames: String(renames), stay: String(rows.length - renames) })
     if (this.reorder && this.isMoved) count = this.translationForKey("countMoved", { count })
-    const changed = rows.filter((row) => ((row as E.DOMElement).component as EpicChoiceRow | undefined)?.isChanged)
     return changed.length ? this.translationForKey("countChanged", { count, changed: String(changed.length) }) : count
   }
 
@@ -117,7 +127,10 @@ export class EpicChoiceRows extends E.UIComponent<typeof epicChoiceRowsVocabular
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
         <div
-          class={[TABLE, { [NO_FILE]: !!this.noFile, [STACKED]: !!this.stacked, [REORDER]: !!this.reorder }]}
+          class={[
+            TABLE,
+            { [NO_FILE]: !!this.noFile, [STACKED]: !!this.stacked, [REORDER]: !!this.reorder, [BLANK]: !!this.blank }
+          ]}
           part={this.partForName("table")}
           role="table"
         >
@@ -128,10 +141,20 @@ export class EpicChoiceRows extends E.UIComponent<typeof epicChoiceRowsVocabular
             <Show when={!this.noFile}>
               <span role="columnheader">{this.translationForKey("file")}</span>
             </Show>
-            <span role="columnheader">{this.translationForKey("purpose")}</span>
-            <Show when={!this.stacked} fallback={<span role="columnheader">{this.translationForKey("syntax")}</span>}>
-              <span role="columnheader">{this.translationForKey("current")}</span>
-              <span role="columnheader">{this.translationForKey("recommended")}</span>
+            <Show
+              when={!this.blank}
+              fallback={
+                <>
+                  <span role="columnheader">{this.translationForKey("blankHead")}</span>
+                  <span role="columnheader">{this.translationForKey("purpose")}</span>
+                </>
+              }
+            >
+              <span role="columnheader">{this.translationForKey("purpose")}</span>
+              <Show when={!this.stacked} fallback={<span role="columnheader">{this.translationForKey("syntax")}</span>}>
+                <span role="columnheader">{this.translationForKey("current")}</span>
+                <span role="columnheader">{this.translationForKey("recommended")}</span>
+              </Show>
             </Show>
           </div>
           <slot />
@@ -149,4 +172,5 @@ const TABLE = "table"
 const NO_FILE = "no-file"
 const STACKED = "stacked"
 const REORDER = "reorder"
+const BLANK = "blank"
 const HEAD = "head"

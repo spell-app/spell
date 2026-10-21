@@ -15,6 +15,9 @@ import {
  * - writes:  `post()`, with the server's write token (`x-server-token`, `SRV.Guard`);  a 403 on the token (the page
  *   server restarted since the page loaded) takes the server's new token from the page as it's served now, and
  *   tries once more, so nothing typed is refused for a restart
+ *   - "as it's served now":  loaded in a hidden frame with no scripts (`readInFrame()`), as a page is served to the
+ *     browser;  a script's `fetch()` of it gets the file as is, without the token (epic `epic-engine` P15:  until
+ *     then, no refresh ever worked in a browser, and every write after a restart was refused)
  * - reads stay the clients' own:  a GET needs no token
  * - keeping fresh:  `watch()`, the poll, the page becoming visible, and the page server's word that a file changed
  * - Node-safe at import, and without `watch()` / `pageOptions()`:  no `window` / `document` touched;  `fetch` comes
@@ -35,8 +38,46 @@ export class ServerLink {
       page: location.pathname,
       server: (window as { SPELL_SERVER?: ServerInfo }).SPELL_SERVER,
       protocol: location.protocol,
-      fetch: window.fetch.bind(window)
+      fetch: window.fetch.bind(window),
+      readServed: (page) => ServerLink.readInFrame(window.document, page)
     }
+  }
+
+  /**
+   * Page `page` as the page server serves it to the browser now (its `window.SPELL_SERVER` injected):  loaded in a
+   * hidden frame in `document`, its scripts off, then read and dropped.
+   * - its own address (`?spell-token=<now>`):  a browser won't frame a page inside itself
+   * - throws when it doesn't load in `timeout` ms, or loads as an error page (no server):  not readable
+   */
+  static readInFrame(document: Document, page: string, timeout = FRAME_TIMEOUT_MS): Promise<string> {
+    return new Promise((done, fail) => {
+      const frame = document.createElement("iframe")
+      // same origin, so it can be read;  no `allow-scripts`, so nothing on it runs
+      frame.setAttribute("sandbox", "allow-same-origin")
+      frame.setAttribute("aria-hidden", "true")
+      frame.hidden = true
+      const finish = (read: () => string) => {
+        clearTimeout(timer)
+        try {
+          done(read())
+        } catch (failure) {
+          fail(failure as Error)
+        } finally {
+          frame.remove()
+        }
+      }
+      const notLoaded = (): string => {
+        throw new Error("the page didn't load")
+      }
+      const timer = setTimeout(() => finish(notLoaded), timeout)
+      frame.addEventListener("load", () => {
+        // the empty document a frame starts with:  the page is still to come
+        if (frame.contentDocument?.URL === "about:blank") return
+        finish(() => frame.contentDocument!.documentElement.outerHTML)
+      })
+      frame.src = `${page}${page.includes("?") ? "&" : "?"}spell-token=${Date.now()}`
+      document.body.append(frame)
+    })
   }
 
   /**
@@ -122,11 +163,15 @@ export class ServerLink {
   /**
    * Take the page server's CURRENT write token from the page as it serves it now (its `window.SPELL_SERVER`):  a
    * restarted server has a new one.  True when it changed.
+   * - the page:  `readServed()` (a frame, in the browser), else `fetch()`ed
    * - NEVER throws
    */
   private async refreshToken(): Promise<boolean> {
     try {
-      const html = await (await this.options.fetch(this.options.page, { cache: "no-store" })).text()
+      const { page, readServed } = this.options
+      const html = readServed
+        ? await readServed(page)
+        : await (await this.options.fetch(page, { cache: "no-store" })).text()
       const fresh = (JSON.parse(SERVER_INFO.exec(html)?.[1] ?? "null") as ServerInfo | null)?.token
       if (!fresh || !this.info || fresh === this.info.token) return false
       this.info.token = fresh
@@ -136,3 +181,6 @@ export class ServerLink {
     }
   }
 }
+
+/** How long `readInFrame()` waits for the page to load, in ms. */
+const FRAME_TIMEOUT_MS = 10_000

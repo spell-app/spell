@@ -68,6 +68,33 @@ describe("<epic-choices-bar>", () => {
     await expectAccessible(bar)
   })
 
+  test("a save that failed says so in red, bold;  Copy my answers puts what's typed on the clipboard (P15)", async () => {
+    const route = vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
+      if (!init?.method) return Response.json(url.includes("/draft") ? { draft: null } : { answer: null })
+      return Response.json({ error: "disk full" }, { status: 500 })
+    })
+    const { form } = adoptForm(route)
+    const root = await ElementFixture.render(PAGE)
+    const bar = root.querySelector("epic-choices-bar")!
+    const box = root.querySelector("epic-choice-row")!.shadowRoot!.querySelector("textarea")!
+    box.value = "mine"
+    box.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await form.save()
+    await ElementFixture.settle()
+    const failed = bar.shadowRoot!.querySelector<HTMLElement>(".failed")!
+    expect(failed.textContent).toBe("Can't save:  disk full.  Kept in this browser;  trying again every 3s.")
+    expect(getComputedStyle(failed).fontWeight).toBe("600")
+    const copied = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
+    part(bar, "copy")!.click()
+    await vi.waitFor(() => expect(part(bar, "copy")!.textContent?.trim()).toBe("Copied"))
+    expect(JSON.parse(copied.mock.calls[0]![0])).toMatchObject({
+      page: "/pages/details/names.html",
+      values: { r1: "mine" },
+      feedback: ""
+    })
+    copied.mockRestore()
+  })
+
   test("Do it:  sends the changed boxes and the feedback;  says what went", async () => {
     const { fetch } = adoptForm()
     const root = await ElementFixture.render(PAGE)

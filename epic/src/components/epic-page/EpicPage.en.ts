@@ -126,6 +126,12 @@ export const epicPageVocabulary = {
   parts: [
     { name: "base", description: "The page." },
     {
+      name: "reading",
+      description:
+        "After the epic's name:  how long what's SHOWN takes to read, `12 min read`, recounted as blocks open and close " +
+        "(epic `epic-engine` J91).  None narrow."
+    },
+    {
       name: "crumbs",
       description:
         "In the h1, before the epic's name:  `Docs / Epics /`, the docs' eyebrow.  None narrow, nor while the doc " +
@@ -243,6 +249,17 @@ export const epicPageVocabulary = {
     },
 
     { key: "copyHeading", text: "Copy {command}", description: "The h1's name:  its tooltip." },
+    { key: "reading", text: "{minutes} min read", description: "The reading chip after the epic's name." },
+    {
+      key: "readingTip",
+      text: "{words} words shown:  folded sections count once opened",
+      description: "The reading chip's tooltip."
+    },
+    {
+      key: "readingCodeTip",
+      text: "{words} words shown, {code} of them code:  folded sections count once opened",
+      description: "The reading chip's tooltip, with code shown."
+    },
     {
       key: "copiedText",
       text: "Copied {text}",

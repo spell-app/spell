@@ -186,10 +186,15 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
   - An epic page or guide already there still asks.
 - "2. Session" as "Staying in this window", with no question and no `window stay`:
   the window is already `⎇ <name>`, tinted.
-  - `EnterWorktree` with `path`:  the folder `epic worktree path <name>` prints.
-    - Also in a worktree-only window, whose new tab already starts IN the worktree.
-      - The session-start guard says so.
-      - Entering records the worktree, so a reopen from any window comes back to it (epic `epic-eject` I3).
+  - `EnterWorktree` with `name: "<name>"` ONLY when `pwd` isn't in the worktree already.
+    - An epic's window starts its new tabs IN the worktree (its first folder):  then never enter.
+    - ALWAYS by `name`, NEVER by `path` (epic `epic-engine` P16):  the worktree hook finds the existing one by its
+      name, and Claude Code lets the call through.
+      - With a `path` outside `.claude/worktrees/` it asks Owen every time, whatever the permission rules say;  a
+        symlink doesn't help (it resolves links).
+      - Owen:  "this EnterWorktree thing is intolerable -- it's halting processes and wasting my time."
+    - The session-start guard records a session that starts in the worktree, so a reopen from another window still
+      comes back to it (epic `epic-eject` I3).
   - Then steps 2, 3 and 5, then "3. Plan".
 
 ## 2. Session:  stub doc, then move
@@ -234,7 +239,7 @@ All in the FIRST turn, in this order, then the turn ends.
 5. `epic open <name> --review`, AFTER the handoff.
    - It shows in the right side bar's Review tab (the checkbox icon) of the window the session moves to,
      once it has:  one tab, reloaded on every later `open`.
-   - Needs spell-epic's VS Code extension ([its README](${CLAUDE_PLUGIN_ROOT}/vscode/README.md)).
+   - Needs spell-epic's VS Code extension ([its README](${CLAUDE_PLUGIN_ROOT}/README-vscode.md)).
    - MUST print "... shows in ... once this session moves there".
      Why:  only a PENDING move defers it;  before the handoff, it shows in THIS window's side bar, the one being left.
 6. Isolate "Start", step 6:  END THE TURN.
@@ -432,13 +437,12 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        1. `main` moved (`git log --oneline HEAD..main` not empty):  `epic worktree merge-main`.
           - A multi-repo top (`epic config repos` prints names;  [the isolate skill](../isolate/SKILL.md), "A
             multi-repo top"):  `epic worktree repos` says which repos are behind;  `merge-main` merges every one.
-       2. `ExitWorktree` with `action: "keep"`:  a worktree session can't move `main`.
-       3. `epic merge <name>`, in the main checkout:  checks it's on `main` and clean, then fast-forwards.
-          - A multi-repo top:  in the main TOP checkout;  only the repos whose `<name>` branch has commits move.
+       2. `epic merge <name>`, from the worktree:  it works on the MAIN checkout, checks it's on `main` and clean,
+          then fast-forwards.
+          - Never `ExitWorktree` and back for it:  entering asks Owen every time (epic `epic-engine` P12, r11).
+          - A multi-repo top:  every repo's main checkout;  only the repos whose `<name>` branch has commits move.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
-       4. `EnterWorktree` with `path`, the folder `epic worktree path <name>` prints.
-          Back, the window and session unchanged.
-       5. The changelog, if the repo keeps one:
+       3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/isolate done`:  the worktree, the window and the session stay, for the next request.
      - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
@@ -818,7 +822,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - and `<name>` has an epic page (`epics/<name>/`), and is the `<name>` typed, if one was.
    - Then that's the epic, and nothing is asked:
      no "Which epic?" modal (step 1), no new-window-or-stay modal (step 3).
-     - Step 3 is `EnterWorktree` with `path` (if not in it yet), then `epic window stay <name>`.
+     - Step 3 is `EnterWorktree` with `name: "<name>"` (if not in it yet), then `epic window stay <name>`.
    - One line says so:  "this window is `⎇ <name>`:  resuming it".
 1. Which epic:
    - `<name>` given:  that one.
@@ -842,7 +846,8 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
      "/epic resume <name>"`.
    - `main`:  no worktree;  work in the main checkout, this window.
    - a worktree (`.claude/worktrees/<name>`, or beside the repo):  as [the unpark skill](../unpark/SKILL.md), step 3.
-     - That's `stay-check --epic`, a new window or stay, and `EnterWorktree` with `path`.
+     - That's `stay-check --epic`, a new window or stay, and `EnterWorktree` with `name: "<name>"` (never `path`:
+       "Launched").
      - A `PARKED-<name>.md` there:  it was parked.
        `/unpark`'s steps instead, and stop here.
    - The worktree is gone but branch `<name>` isn't:
@@ -1015,7 +1020,7 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
 - It reaches this session one of three ways:
   - a message from the sender:  "New request r3 for epic `<epic>` ...":  the same steps
   - a NEW session in the epic's window, `/epic request <epic> r3` typed in, when the epic's session wasn't running
-    - first `EnterWorktree` with `path`, as "Launched" does:  the folder `epic worktree path <epic>` prints
+    - first `EnterWorktree` with `name: "<epic>"`, as "Launched" does, only when `pwd` isn't in it already
   - the sender IS this epic's session:  it follows these steps itself
 - The prompt hook titled the session `🚧 <epic>`, so later requests reach it.
   - It refuses `/epic request` in a session titled for another epic.

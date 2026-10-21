@@ -101,13 +101,39 @@ describe("<epic-send>", () => {
     await form.saveDraft()
     await ElementFixture.settle()
     expect(part(send, "draft")!.textContent).toMatch(/^draft saved \d\d:\d\d$/)
-    expect([part(send, "draft")!.hasAttribute("data-error"), fetch.mock.calls.at(-1)![0]]).toEqual([
+    expect([part(send, "draft")!.classList.contains("draft-failed"), fetch.mock.calls.at(-1)![0]]).toEqual([
       false,
       "/api/docs/details/draft"
     ])
     part(send, "send")!.click()
     await vi.waitFor(() => expect(part(send, "send")!.dataset.fill).toBe("sent"))
     expect(part(send, "draft")).toBeNull()
+  })
+
+  test("a draft's save that failed:  on its own line under the rest, red and bold (P15)", async () => {
+    const route = vi.fn(async (_url: string, init?: RequestInit): Promise<Response> => {
+      if (!init?.method) return Response.json({ answer: null, draft: null })
+      return Response.json({ error: "disk full" }, { status: 500 })
+    })
+    const { form } = adoptForm(route)
+    const root = await ElementFixture.render(
+      `<div><epic-send></epic-send><epic-text-box type="notes"></epic-text-box></div>`
+    )
+    const [send, notes] = Array.from(root.children) as [Element, Element]
+    const field = notes.shadowRoot!.querySelector("textarea")!
+    field.value = "half a thought"
+    field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await form.saveDraft()
+    await ElementFixture.settle()
+    const line = part(send, "draft")!
+    expect([line.localName, line.getAttribute("role"), line.textContent]).toEqual([
+      "p",
+      "alert",
+      "draft kept in this browser only:  disk full;  trying again every 3s"
+    ])
+    expect(getComputedStyle(line).fontWeight).toBe("600")
+    // not in the line beside Send, where the side bar's width would cut it short
+    expect(line.parentElement).toBe(part(send, "base"))
   })
 
   test("an empty page never sent:  Send says what to do first, under it", async () => {

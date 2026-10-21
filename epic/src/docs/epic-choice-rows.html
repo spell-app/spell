@@ -121,6 +121,29 @@
                   current="(new)"
                   recommended="Dev Tooling · dev-tooling"
                 ></epic-choice-row> </epic-choice-rows></ui-section
+            ><ui-section id="1-blank" header="With blank" sticky collapsible dividing collapsed>
+              <p>
+                <code>blank</code> (epic <code>epic-engine</code> P13): boxes Owen types into, not recommendations.
+                Today's text comes first with an empty box under it, and blank means no change. A click on today's text
+                copies it into the box. The badge counts the rows and the changes (<code>noun</code> names them).
+              </p>
+              <epic-choice-rows no-file blank noun="commands">
+                <epic-choice-row
+                  name="help"
+                  file="cli/src/main.ts"
+                  line="228"
+                  purpose="Shows the help for spell, or for one command (spell help compile)."
+                  current="spell help [command]"
+                  recommended=""
+                ></epic-choice-row>
+                <epic-choice-row
+                  name="pony"
+                  file="cli/src/main.ts"
+                  line="240"
+                  purpose="Draws the pony. It imports nothing, so it proves spell runs with nothing else installed."
+                  current="spell pony"
+                  recommended=""
+                ></epic-choice-row> </epic-choice-rows></ui-section
           ></ui-section>
           <ui-section id="2-markup" header="2. Markup" sticky collapsible dividing collapsed
             ><ui-icon slot="icon" name="code"></ui-icon
@@ -208,6 +231,22 @@
                     </td>
                     <td></td>
                   </tr>
+                  <tr>
+                    <td><code>blank</code></td>
+                    <td>present or absent</td>
+                    <td>
+                      Boxes Owen types into, not recommendations (<code>blank: true</code>; epic
+                      <code>epic-engine</code> P13): one first column, today's text with an EMPTY box under it, then
+                      Purpose. Blank means no change; a click on today's text copies it into the box.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>noun</code></td>
+                    <td>a word</td>
+                    <td>What <code>blank</code>'s count calls its rows: <code>commands</code> reads "42 commands · 3 changed".</td>
+                    <td><code>rows</code></td>
+                  </tr>
                 </tbody></table
             ></ui-table>
             <ui-section id="epic-choice-rows-slots" header="Slots" sticky collapsible dividing collapsed
@@ -276,6 +315,11 @@
                 <code>reorder</code> (epic <code>epic-workflow</code> P15): an Order column first, as narrow as a place
                 and two buttons. The badge counts the rows (<code>9 in order</code>), then <code>· moved</code>. The
                 order Owen left comes back on load (<code>ChoicesForm</code>'s <code>restoredOrder</code>).
+              </li>
+              <li>
+                <code>blank</code> (epic <code>epic-engine</code> P13, Owen's layout A): today's text and its box in one
+                column, first, then Purpose. No <code>stays</code> tag; the round button clears the box. The badge reads
+                <code>42 commands · 3 changed</code>.
               </li>
             </ul></ui-section
           >

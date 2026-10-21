@@ -19,7 +19,14 @@ const NESTED = fakeWorktree(MAIN, join(MAIN, ".claude", "worktrees", "old"))
 const PLAIN = fakeMainCheckout(join(TEMP, "plain"))
 mkdirSync(join(MAIN, ".epic"))
 writeFileSync(join(MAIN, ".epic", "config.json5"), '{ "worktreesFolder": "../repo.worktrees" }')
-afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
+// the guard's own records (rule 2) in a temp home, never ~/.spell-epic
+const HOME = process.env.SPELL_EPIC_HOME
+process.env.SPELL_EPIC_HOME = join(TEMP, "home")
+afterAll(() => {
+  if (HOME === undefined) delete process.env.SPELL_EPIC_HOME
+  else process.env.SPELL_EPIC_HOME = HOME
+  rmSync(TEMP, { recursive: true, force: true })
+})
 
 /** A transcript whose lines are `entries`, as JSON lines;  returns its path. */
 function transcript(name: string, entries: object[]): string {
@@ -42,7 +49,7 @@ const entered = transcript("entered", [{ type: "user", cwd: MAIN }, note(BESIDE)
 describe("WorktreeGuard", () => {
   test("LOST:  reopened outside the worktree its last note names:  told to EnterWorktree back, Owen told too", () => {
     const output = WorktreeGuard.check({ cwd: MAIN, transcript_path: entered, source: "resume" })
-    expect(output?.hookSpecificOutput.additionalContext).toMatch(`run EnterWorktree with path "${BESIDE}"`)
+    expect(output?.hookSpecificOutput.additionalContext).toMatch(`run EnterWorktree with name "seo"`)
     expect(output?.systemMessage).toMatch(/⎇ seo:  this session was reopened outside its worktree/)
   })
 
@@ -58,15 +65,32 @@ describe("WorktreeGuard", () => {
     expect(WorktreeGuard.check({ cwd: MAIN, transcript_path: entered, source: "compact" })).toBeUndefined()
   })
 
-  test("NOT RECORDED:  started in a worktree beside the repo with no note:  told to EnterWorktree where it is", () => {
+  test("NOT RECORDED:  started in a worktree beside the repo with no note:  recorded quietly, never told to enter", () => {
     const fresh = transcript("fresh", [{ type: "user", cwd: BESIDE }])
-    const output = WorktreeGuard.check({ cwd: BESIDE, transcript_path: fresh, source: "startup" })
-    expect(output?.hookSpecificOutput.additionalContext).toMatch(`run EnterWorktree with path "${BESIDE}"`)
-    expect(output?.hookSpecificOutput.additionalContext).toMatch(/without EnterWorktree/)
+    expect(WorktreeGuard.check({ cwd: BESIDE, transcript_path: fresh, source: "startup", session_id: "new-1" })).toBe(
+      undefined
+    )
+    expect(WorktreeGuard.recordOf("new-1")).toMatchObject({ worktreePath: BESIDE, worktreeName: "seo" })
     // no transcript yet (a brand-new session):  the same
-    expect(WorktreeGuard.check({ cwd: BESIDE, source: "startup" })).toBeDefined()
+    expect(WorktreeGuard.check({ cwd: BESIDE, source: "startup", session_id: "new-2" })).toBeUndefined()
+    expect(WorktreeGuard.recordOf("new-2")).toMatchObject({ worktreePath: BESIDE })
     // a nested worktree:  the Claude panel hands its session its folder itself
-    expect(WorktreeGuard.check({ cwd: NESTED, source: "startup" })).toBeUndefined()
+    expect(WorktreeGuard.check({ cwd: NESTED, source: "startup", session_id: "new-3" })).toBeUndefined()
+    expect(WorktreeGuard.recordOf("new-3")).toBeUndefined()
+  })
+
+  test("LOST by the guard's record:  reopened outside it, no note of Claude Code's:  told to EnterWorktree back", () => {
+    WorktreeGuard.record("rec-1", { worktreePath: BESIDE, worktreeName: "seo" })
+    const plain = transcript("plain", [{ type: "user", cwd: BESIDE }])
+    const output = WorktreeGuard.check({ cwd: MAIN, transcript_path: plain, source: "resume", session_id: "rec-1" })
+    expect(output?.hookSpecificOutput.additionalContext).toMatch(`run EnterWorktree with name "seo"`)
+    // Claude Code's note wins:  a session that LEFT on purpose stays out, record or not
+    const left = transcript("left-rec", [note(BESIDE), note(null)])
+    expect(WorktreeGuard.check({ cwd: MAIN, transcript_path: left, source: "resume", session_id: "rec-1" })).toBe(
+      undefined
+    )
+    // an id can't name another folder
+    expect(WorktreeGuard.recordFile("../x")).toBe(join(TEMP, "home", "session-worktrees", "___x.json"))
   })
 
   test("only in a repo that uses epics (`.epic/config.json5`)", () => {

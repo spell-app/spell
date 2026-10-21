@@ -98,6 +98,7 @@ import {
   toolbarMenu,
   wireJumpKey
 } from "./spell-doc-toolbar.js"
+import { readingTime } from "../ReadingTime.js"
 import { EpicAddress, PageTargets } from "$/epics/links"
 import { ComponentPacks } from "spell-ui/ui-components"
 
@@ -169,6 +170,9 @@ const EPIC_WAIT_MS = 5000
  * what `loadEpicsPack()` loads on a page that names none.
  */
 const EPICS_PACK = "/_epic/pack/epics.pack.js"
+
+/** The docs head's h1, its title (`oneLineHead()`):  an epic page has none, `<epic-page>` draws its own. */
+const PAGE_TITLE = ":scope > ui-sticky.spell-h1 > .spell-page-head > h1"
 
 /** Space between the stuck titles and an element a link lands on inside an epic page, px (`EpicFold`'s `LAND_GAP`). */
 const EPIC_LAND_GAP = 8
@@ -242,6 +246,7 @@ async function start() {
   }
   const outline = outlineOf(main)
   oneLineHead(main)
+  wireReadingTime(main)
   const counts = countItems(outline)
   // the saga pages (HEADINGS) get no filter, but their id chips are coloured by state too
   if (outline.sections) wireItemFilters(main)
@@ -309,7 +314,7 @@ function loadEpicsPack() {
  * - a page with no breadcrumb:  the title alone, in the same type
  */
 function oneLineHead(main) {
-  const h1 = main.querySelector(":scope > ui-sticky.spell-h1 > .spell-page-head > h1")
+  const h1 = main.querySelector(PAGE_TITLE)
   if (!h1) return
   document.body.classList.add("spell-one-line-head")
   const crumbs = main.querySelector(":scope > ui-breadcrumb.spell-crumbs")
@@ -329,6 +334,40 @@ function oneLineHead(main) {
 }
 
 /**
+ * The READING TIME chip, right after the page's title (epic `epic-engine` P14, Q5):  `SOLID 2 · 48 min read`,
+ * a quiet `<ui-label>` (`spell-doc.css`, "The reading time chip").
+ * - its tooltip:  the exact count, "8,749 words, 2,281 of them code" (`readingTime()`, `ReadingTime.js`)
+ * - every page with the docs head:  guides, the index pages, details and choice pages
+ * - NOT an epic or saga page:  `<epic-page>` draws its own head, and its own chip, counting only what's SHOWN
+ *   (`shownReadingTime()`;  J91, Owen:  "Count what's shown"):  its items' bodies wait in part files until opened
+ * - recounted on every `spell-doc:updated`:  an edit saved, a section's body loaded
+ */
+function wireReadingTime(main) {
+  drawReadingTime(main)
+  addEventListener("spell-doc:updated", () => drawReadingTime(main))
+}
+
+/**
+ * Draw the reading time chip at the end of the page's h1, or update the one there.
+ * - `data-spell-added`:  a live update steps around it, and `readingTime()` skips it
+ */
+function drawReadingTime(main) {
+  const h1 = main.querySelector(PAGE_TITLE)
+  if (!h1) return
+  const { words, code, minutes } = readingTime(main)
+  let chip = h1.querySelector(":scope > ui-label.spell-reading-time")
+  if (!chip) {
+    chip = el("ui-label", { class: "spell-reading-time", size: "tiny", basic: true, "data-spell-added": true })
+    h1.append(chip)
+  }
+  const counted = code
+    ? `${words.toLocaleString()} words, ${code.toLocaleString()} of them code`
+    : `${words.toLocaleString()} words`
+  if (chip.textContent !== `${minutes} min read`) chip.textContent = `${minutes} min read`
+  if (chip.title !== counted) chip.title = counted
+}
+
+/**
  * The wide layout, every page's (`spell-doc.css`, "Layout";  epic `epic-engine` P2):  every table sits in the reading
  * column, as prose does, with an EXPAND button over its top right corner that runs it the page's full width
  * (Owen, 2026-10-13:  "make tables fit in the column by default, but have an expand button ... Remember that setting
@@ -340,6 +379,10 @@ function oneLineHead(main) {
  * - Expanded:  CSS can't know how far in a table starts (a list's indent, an item's inset), so this measures it,
  *   moving the table out to the page's gutter with the page's width, less the gutter on both sides.
  *   Again whenever its parent changes size (a section or item opening, the window resizing).
+ * - Never past a box that CLIPS it (`roomFor()`):  an ancestor between it and `main` that hides its overflow (an
+ *   epic element's reply card, `div.reply`) would cut the widened table off on both sides (epic `epic-engine` r10:
+ *   "the expand table button made the table unusable").  With less than `MIN_WIDE_GAIN` to gain on its width in the
+ *   column, the button hides.
  * - Inside a `<ui-table>`, the host is what moves.
  * - Remembered in this browser, per page, by the table's key (`tableKey()`):  `spell-table-wide:<path>`.
  * - Tables a part's body or a live update adds later get theirs too.
@@ -349,6 +392,7 @@ function wireTableWidths(main) {
   if (!document.body.classList.contains("spell-doc-page")) return
   const storeKey = `spell-table-wide:${location.pathname}`
   const toggles = new Map()
+  const narrow = new WeakMap()
   const sizes = new ResizeObserver((entries) => {
     for (const entry of entries) for (const box of boxesIn(entry.target)) place(box)
   })
@@ -359,8 +403,12 @@ function wireTableWidths(main) {
     const toggle = toggles.get(box)
     const parent = box.parentElement
     if (!toggle || !parent || !box.isConnected) return
-    const wide = isWide(box)
     const row = toggle.closest(".spell-block-actions")
+    // its width in the column, measured while not widened:  the column is often the table's own `max-width`, not
+    // its parent's
+    if (!box.style.width && box.getClientRects().length) narrow.set(box, box.getBoundingClientRect().width)
+    toggle.hidden = roomWidth(box, main) <= (narrow.get(box) ?? 0) + MIN_WIDE_GAIN
+    const wide = isWide(box) && !toggle.hidden
     toggle.toggleAttribute("active", wide)
     toggle.title = wide ? "Back into the column" : "Expand to the page's width"
     toggle.setAttribute("aria-label", toggle.title)
@@ -373,14 +421,13 @@ function wireTableWidths(main) {
       return alignBlockActions(row)
     }
     if (!parent.getClientRects().length) return
-    const page = main.getBoundingClientRect()
-    const gutter = parseFloat(getComputedStyle(main).getPropertyValue("--spell-gutter")) || 16
+    const room = roomFor(box, main)
     const style = getComputedStyle(parent)
     const contentLeft =
       parent.getBoundingClientRect().left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft)
-    const start = `${page.left + gutter - contentLeft}px`
+    const start = `${room.left - contentLeft}px`
     box.style.maxWidth = "none"
-    box.style.width = `${page.width - 2 * gutter}px`
+    box.style.width = `${room.right - room.left}px`
     box.style.marginInlineStart = start
     row.style.width = box.style.width
     row.style.marginInlineStart = start
@@ -694,6 +741,40 @@ function tableKey(box, main) {
   const holder = box.parentElement.closest("[id]")
   const root = holder && main.contains(holder) ? holder : main
   return `${root === main ? "page" : root.id}#table-${tableBoxes(root).indexOf(box) + 1}`
+}
+
+/**
+ * How far a widened table `box` may run, as window x's `{ left, right }`:  `main`'s width less its gutter
+ * (`--spell-gutter`) on both sides, cut to every ancestor between them that clips its overflow (`overflow-x` not
+ * `visible`), at that ancestor's inner edges.
+ * - up through slots and shadow roots:  a table in an `<epic-*>` element's light DOM is laid out in its shadow root's
+ *   boxes
+ */
+function roomFor(box, main) {
+  const page = main.getBoundingClientRect()
+  const gutter = parseFloat(getComputedStyle(main).getPropertyValue("--spell-gutter")) || 16
+  const room = { left: page.left + gutter, right: page.right - gutter }
+  for (let el = layoutParent(box); el && el !== main; el = layoutParent(el)) {
+    if (getComputedStyle(el).overflowX === "visible") continue
+    const left = el.getBoundingClientRect().left + el.clientLeft
+    room.left = Math.max(room.left, left)
+    room.right = Math.min(room.right, left + el.clientWidth)
+  }
+  return room
+}
+
+/** How wide `roomFor()` lets `box` run. */
+function roomWidth(box, main) {
+  const room = roomFor(box, main)
+  return room.right - room.left
+}
+
+/** The least a widened table must gain on its column (px) for the expand button to show. */
+const MIN_WIDE_GAIN = 24
+
+/** The box `el` is laid out in:  its slot when it's slotted, else its parent, else its shadow root's host. */
+function layoutParent(el) {
+  return el.assignedSlot ?? el.parentElement ?? el.getRootNode().host ?? null
 }
 
 /**

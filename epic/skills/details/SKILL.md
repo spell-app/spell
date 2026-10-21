@@ -197,7 +197,7 @@ Any page you name to Owen (a details page, an epic page, any docs page):
     `epic server stop`, then `epic server ensure`, in the checkout whose server it is.
 - "The page server restarted since this page loaded":  Owen reloads the page, then sends again.
 - `show` couldn't reach VS Code:  spell-epic's VS Code extension is missing or old.
-  - Install it as [its README](${CLAUDE_PLUGIN_ROOT}/vscode/README.md) says, then reload the window.
+  - Install it as [its README](${CLAUDE_PLUGIN_ROOT}/README-vscode.md) says, then reload the window.
   Meanwhile the page's URL (`epic server url <ABSOLUTE path>`) works in any browser.
 
 ## Commands (`epic ask ...`, from anywhere in the repo)

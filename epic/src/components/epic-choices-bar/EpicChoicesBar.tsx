@@ -4,6 +4,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E } from "spell-ui/core"
 
 import { ChoicesForm } from "$/epics/answers"
+import { Clipboard } from "$/epics/components/epic-page/Clipboard"
 import type { DOMTextBoxElement } from "$/epics/components/epic-text-box/EpicTextBox"
 // the feedback box:  its barrel first, so it's defined wherever the bar is
 import "$/epics/components/epic-text-box"
@@ -19,8 +20,10 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  * window's bottom while the rows scroll above it;  ivory, as the page's toolbar at the top (Owen, 2026-10-13).
  * - Draws the page's `ChoicesForm`:
  *   - the feedback box (it grows with its text), then "Do it", whose tooltip counts the changed boxes
- *   - under them:  Expand all, and the save status only when a save FAILED (Owen, 2026-10-13:  "Lose the `0 boxes
- *     saved` bit")
+ *   - under them:  the save status only when a save FAILED (Owen, 2026-10-13:  "Lose the `0 boxes saved` bit"), in
+ *     red, bold;  then Copy my answers and Expand all
+ *     - Copy my answers (epic `epic-engine` P15):  what's typed, as the draft's JSON, onto the clipboard
+ *       (`ChoicesForm.copyText()`):  a page whose server is gone can't save, and a reload brings back nothing
  *   - then why "Do it" failed, or what it sent ("Sent to Claude at 14:04 ...";  orange once changed since)
  * - SIDE EFFECT:  as it connects, the form brings back what was typed and sent before (`ChoicesForm.restore()`),
  *   and saves what's typed as the page goes away (`ChoicesForm.watch()`).
@@ -51,6 +54,12 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   /** The feedback brought back from the draft (or the answer):  it goes into the box, once. */
   @E.state accessor restoredFeedback = ""
 
+  /** Copy my answers' last click:  `copied` for a moment, `failed` until the next;  `""` before. */
+  @E.state accessor copyState: "" | "copied" | "failed" = ""
+
+  /** Copy my answers' "Copied" going back to the button's own words. */
+  private copyTimer?: E.CancelablePromise<unknown>
+
   /** While connected:  follow the form, save as the page goes away, and bring back what was typed;  the undo. */
   @E.whileConnected
   protected followForm() {
@@ -63,6 +72,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
     return () => {
       unsubscribe()
       unwatch()
+      this.copyTimer?.cancel()
     }
   }
 
@@ -101,8 +111,22 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
         </div>
         <div class={META} part={this.partForName("meta")}>
           <Show when={this.saveError}>
-            <span class={FAILED}>{this.saveError}</span>
+            <span class={FAILED} role="alert">
+              {this.saveError}
+            </span>
           </Show>
+          <ui-button
+            class={COPY}
+            part={this.partForName("copy")}
+            size="mini"
+            basic=""
+            circular=""
+            icon={this.copyState === "copied" ? "check" : "copy"}
+            title={this.translationForKey(this.copyState === "failed" ? "copyFailed" : "copyTip")}
+            onClick={this.onCopy}
+          >
+            {this.translationForKey(this.copyState === "copied" ? "copied" : "copyAnswers")}
+          </ui-button>
           <ui-button
             class={EXPAND}
             part={this.partForName("expand")}
@@ -178,6 +202,16 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
     void this.form?.send()
   }
 
+  /** Copy my answers:  what's typed onto the clipboard;  the button says "Copied" for a moment. */
+  private readonly onCopy = async () => {
+    const form = this.form
+    if (!form) return
+    const isCopied = await Clipboard.copy(form.copyText())
+    this.copyTimer?.cancel()
+    this.copyState = isCopied ? "copied" : "failed"
+    if (isCopied) this.copyTimer = E.after(COPIED_SECONDS, () => (this.copyState = ""))
+  }
+
   /** Expand all, or Collapse all. */
   private readonly onExpand = () => {
     this.isAllOpen = ChoicesForm.expandAll(document)
@@ -194,6 +228,10 @@ const FEEDBACK = "feedback"
 const SEND = "send"
 const META = "meta"
 const FAILED = "failed"
+const COPY = "copy"
 const EXPAND = "expand"
 const ERROR = "error"
 const SENT = "sent"
+
+/** How long Copy my answers says "Copied", in seconds. */
+const COPIED_SECONDS = 2

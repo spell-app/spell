@@ -130,8 +130,8 @@
                       <td><code>draft</code></td>
                       <td>
                         The draft's save (P18), muted: <code>draft saved 14:04</code>,
-                        <code>draft from 14:04 put back</code>; orange when the page server can't take it (the browser
-                        still keeps it).
+                        <code>draft from 14:04 put back</code>; when the page server can't take it, on its own line
+                        under the rest, red and bold (P15: the browser still keeps it, and it tries again every 3s).
                       </td>
                     </tr>
                     <tr>
@@ -206,8 +206,8 @@
               </li>
               <li>
                 The draft's save beside the line, muted (<code>draft not saved yet</code>, <code>saving draft…</code>,
-                <code>draft saved 14:04</code>, <code>draft from 14:04 put back</code>); ORANGE, a warning, when the
-                page server can't take it (<code>draft kept in this browser only: ...</code>). Gone once sent.
+                <code>draft saved 14:04</code>, <code>draft from 14:04 put back</code>). Saved to the page server as
+                Owen types, half a second after each change, and kept in the browser at once. Gone once sent.
               </li>
               <li>
                 After Send, who hears it, muted (epic <code>epic-engine</code> r6): <code>repo-split is listening</code>
@@ -218,6 +218,12 @@
               <li>
                 Send works with nobody waiting too: the answer is saved beside the page, and an orange line says so,
                 <code>Saved: nobody is waiting yet; Claude reads it when it next looks.</code>
+              </li>
+              <li>
+                A draft's save that failed, on its own line under them in red, bold, so the side bar's width never cuts
+                it short (epic <code>epic-engine</code> P15):
+                <code>draft kept in this browser only: ...; trying again every 3s</code>. It does try again, by
+                itself: once the page server answers (a restart's new token too), it saves with no keystroke.
               </li>
               <li>Why it couldn't send, in red, under them.</li>
             </ul></ui-section

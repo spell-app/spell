@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -403,9 +403,10 @@ export class Requests {
   /**
    * A STANDING epic's phase, onto `main` at once (epic `epic-workflow`, Q8):  `epic merge <epic>`.
    * - `main`:  the repo's base branch, `baseBranch` in `.epic/config.json5` (`EpicConfig`)
-   * - Run in the MAIN checkout, by the epic's session after `ExitWorktree` (`keep`);
-   *   it goes back with `EnterWorktree`.
-   *   A worktree session can't move `main` itself:  its git runs in its own worktree only.
+   * - Run from ANYWHERE in the repo, the epic's own worktree included:  git runs in the MAIN checkout
+   *   (`Git.mainRoot()`), where `main` is checked out.
+   *   - Before epic `epic-engine` P12 it refused outside the main checkout, so the epic's session left its worktree
+   *     (`ExitWorktree`) and came back (`EnterWorktree`):  Claude Code asked Owen to enter every time (r11).
    * - Fast-forward only, after the checks `/isolate done` makes (its "Finish", step 7):
    *   - this is the main checkout, on `main`, with nothing uncommitted (another session may work there)
    *   - branch `<epic>` holds all of `main`:  else `main` moved, and the branch merges it first
@@ -416,10 +417,6 @@ export class Requests {
    */
   static merge(epic: string, cwd = process.cwd()): string[] {
     const main = Git.mainRoot(cwd)
-    const top = Git.run(["rev-parse", "--show-toplevel"], cwd).out
-    if (!top || realpathSync(top) !== realpathSync(main)) {
-      throw new EpicCommandError(`merge:  run it in the main checkout (${main}):  ExitWorktree (keep) first`)
-    }
     const base = new EpicConfig(main).baseBranch
     const branch = Git.run(["branch", "--show-current"], main).out
     if (branch !== base) throw new EpicCommandError(`merge:  the main checkout is on '${branch}', not ${base}`)
@@ -445,7 +442,7 @@ export class Requests {
   /**
    * `merge()` for every repo of a MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10):  `{ repo, base, commits }`
    * each, in `repoCheckouts()` order, the top first;  a single repo:  `merge()`'s alone, no `repo`.
-   * - run in the main checkout of the top (or of a child repo):  each repo's own main checkout is merged into
+   * - run anywhere in the top or a child repo, their worktrees included:  each repo's own main checkout is merged into
    * - ONLY the repos whose branch `<epic>` has commits beyond their base branch:  a repo the epic never touched, or
    *   with no branch `<epic>`, is skipped
    * - EVERY repo checked before any moves (on its base branch, clean, the branch holding all of it):  one failing
@@ -455,9 +452,6 @@ export class Requests {
     const main = Git.mainRoot(cwd)
     const top = new EpicConfig(main).top
     if (!top) return [{ base: new EpicConfig(main).baseBranch, commits: Requests.merge(epic, cwd) }]
-    const toplevel = Git.run(["rev-parse", "--show-toplevel"], cwd).out
-    if (!toplevel || realpathSync(toplevel) !== realpathSync(main))
-      throw new EpicCommandError(`merge:  run it in the main checkout (${top.main}):  ExitWorktree (keep) first`)
     const repos = top.repoCheckouts(epic).flatMap(({ repo, main: checkout }) => {
       const base = new EpicConfig(checkout).baseBranch
       if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], checkout).ok) return []

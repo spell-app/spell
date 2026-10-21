@@ -23,6 +23,9 @@ import {
   TEST_START
 } from "$/epics/components/epic-test-run/EpicTestRun.types"
 
+import { shownReadingTime } from "$/epics/tools/ReadingTime.js"
+
+import { Clipboard } from "./Clipboard"
 import { epicPageVocabulary } from "./EpicPage.en"
 import {
   ACTIVE,
@@ -239,6 +242,16 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /** The review line, just copied:  it flashes and says so. */
   @E.state accessor isCopied = false
 
+  /**
+   * How long what's SHOWN takes to read (`shownReadingTime()`;  epic `epic-engine` J91, Owen:  "Count what's shown"):
+   * the chip after the epic's name.  Counted again as the page's size changes:  a section, phase or item opening or
+   * closing, a part loading.  `undefined` until first counted.
+   */
+  @E.state accessor reading: { words: number; code: number; minutes: number } | undefined = undefined
+
+  /** A recount is queued for the next paint:  one per batch of size changes. */
+  private isReadingQueued = false
+
   /** Bumped when a section's filter changes (`ui-filter`) or the sections first draw:  the toolbar's chips follow. */
   @E.state accessor filterTick = 0
 
@@ -447,6 +460,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     })
     const resizes = new ResizeObserver(() => this.measure())
     for (const box of [this.header, this.bar]) if (box) resizes.observe(box)
+    // the page's own size:  anything opening or closing changes it, and what's shown with it (the reading chip)
+    const grows = new ResizeObserver(this.queueReading)
+    grows.observe(this.domElement)
     const site = document.querySelector("spell-site-header")
     if (site) resizes.observe(site)
     const listeners = new AbortController()
@@ -460,8 +476,41 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     return () => {
       mutations.disconnect()
       resizes.disconnect()
+      grows.disconnect()
       listeners.abort()
     }
+  }
+
+  /** The reading chip counted again before the next paint, once per batch (`reading`). */
+  private readonly queueReading = () => {
+    if (this.isReadingQueued) return
+    this.isReadingQueued = true
+    E.beforeNextPaint(() => {
+      this.isReadingQueued = false
+      this.reading = shownReadingTime(this.domElement)
+    })
+  }
+
+  /** The reading chip after the epic's name:  `12 min read`, its tooltip what it counted. */
+  private readingChip(): JSX.Element {
+    return (
+      <Show when={this.reading}>
+        {(reading) => (
+          <ui-label
+            class={READING}
+            part={this.partForName("reading")}
+            size="tiny"
+            basic=""
+            title={this.translationForKey(reading().code ? "readingCodeTip" : "readingTip", {
+              words: reading().words.toLocaleString(),
+              code: reading().code.toLocaleString()
+            })}
+          >
+            {this.translationForKey("reading", { minutes: String(reading().minutes) })}
+          </ui-label>
+        )}
+      </Show>
+    )
   }
 
   /** A layout bump queued:  one per batch of mutations. */
@@ -584,6 +633,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             >
               {this.isSaga ? this.saga : this.epic}
             </button>
+            {this.readingChip()}
           </h1>
           <span class={STATUS} part={this.partForName("status")}>
             <Show when={this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
@@ -1204,7 +1254,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    */
   @E.untracked
   private async copyAndSay(text: string): Promise<boolean> {
-    if (!(await EpicPage.copyText(text))) return false
+    if (!(await Clipboard.copy(text))) return false
     if (customElements.get("ui-toast")) {
       UI.toast({
         id: COPIED_TOAST_ID,
@@ -1266,30 +1316,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     return text
   }
 
-  /**
-   * Put `value` on the clipboard;  true when it got there.
-   * - the async Clipboard API first
-   * - where it's refused (a webview without the permission):  the old `execCommand("copy")` from a hidden textarea,
-   *   as the old page runtime's `copyText()`
-   * - NEVER throws
-   */
-  private static async copyText(value: string): Promise<boolean> {
-    try {
-      await navigator.clipboard.writeText(value)
-      return true
-    } catch {
-      const area = document.createElement("textarea")
-      area.value = value
-      area.setAttribute("readonly", "")
-      area.style.cssText = "position: fixed; opacity: 0; pointer-events: none"
-      document.body.append(area)
-      area.select()
-      const copied = document.execCommand("copy")
-      area.remove()
-      return copied
-    }
-  }
-
   /** Is the git toggle on for this page, as last left?  `false` without storage. */
   private static savedCommits(): boolean {
     try {
@@ -1317,3 +1343,6 @@ const SECTIONS = "epic-section"
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */
 const AIRPLANE_LAND = "/airplane land"
+
+/** The reading chip after the epic's name (`readingChip()`). */
+const READING = "reading"

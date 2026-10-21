@@ -21,7 +21,8 @@ export const epicSendVocabulary = {
     "A details page's Send, in its sticky header (epic `epic-workflow` P12):  where the answer stands (`Not " +
     "sent`, `Changes not sent`, `Sent 10/8/26 14:34 · 5 of 17 decided`), then a round blue Send.  It sends the " +
     "whole page, partial answers too, as often as Owen likes:  the page never locks.  Beside them, the draft's " +
-    "save (P18):  what's typed and not sent is kept beside the page, and comes back when it reloads.  After the " +
+    "save (P18):  what's typed and not sent is kept in the browser at once and beside the page as Owen types, and " +
+    "comes back when it reloads;  a save that fails says so in red under them, and tries again every 3s.  After the " +
     "button, who hears it (epic `epic-engine` r6):  `repo-split is listening` while a session's `epic ask wait` " +
     "waits for the answer, else `nobody is waiting yet`;  Send works either way, and with nobody waiting says the " +
     "answer is saved for Claude's next look.  Once a page.",
@@ -34,8 +35,9 @@ export const epicSendVocabulary = {
     {
       name: "draft",
       description:
-        "The draft's save (P18), muted:  `draft saved 14:04`, `draft from 14:04 put back`;  orange when the page " +
-        "server can't take it (the browser still keeps it)."
+        "The draft's save (P18), muted:  `draft saved 14:04`, `draft from 14:04 put back`;  when the page server " +
+        "can't take it, on its own line under the rest, red and bold (P15:  the browser still keeps it, and it " +
+        "tries again every 3s)."
     },
     {
       name: "send",

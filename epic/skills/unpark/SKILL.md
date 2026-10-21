@@ -53,14 +53,14 @@ Then AskUserQuestion:
     - The option it recommends first, with "(Recommended)"
       ([the isolate skill](../isolate/SKILL.md), "Start", step 2b).
   - "Open new window":
-    1. not yet in the worktree:  `EnterWorktree`
-       - its `path`:  the folder `epic worktree path <name>` prints
+    1. not yet in the worktree:  `EnterWorktree` with `name: "<name>"`
+       - never its `path`:  outside `.claude/worktrees/`, Claude Code asks Owen every time (epic `epic-engine` P16)
     2. both from the worktree's root, as [the isolate skill](../isolate/SKILL.md)'s "Start", steps 4-5:
        - `epic window open <name>` (`--pkg <pkg>` when this isn't a package window)
        - then `epic window handoff <name>`
        - The session moves there when this turn ends.
   - "Stay in this window":  step 1, then `epic window stay <name>` (the window titled `⎇ <name>`, tinted).
-- Same:  `EnterWorktree` if not in it yet, and go on.
+- Same:  `EnterWorktree` with `name: "<name>"` if not in it yet, and go on.
 
 ## 4. Resume
 

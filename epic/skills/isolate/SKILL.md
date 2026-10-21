@@ -103,13 +103,14 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      - With others, they share its doc preview and Source Control.
      - [window.mjs](${CLAUDE_PLUGIN_ROOT}/src/window.mjs), "Staying put"
 3. `EnterWorktree` with `name: "<name>"`.
-   - Reusing one:  `path` instead, the folder `epic worktree path <name>` prints.
-   - ALWAYS this way, whatever folder the session is in:
-     never start a session inside a worktree's folder to work there.
-     - Only a session that ENTERED with `EnterWorktree` comes back to its worktree
-       when it's reopened from another window.
-     - One started there comes back in that window's folder, often `main` (epic `epic-eject` I3).
-   - The session-start guard says so when it isn't ([worktree-guard.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree-guard.mjs)).
+   - Reusing one:  the same, by `name`:  the worktree hook finds it.  NEVER `path` (epic `epic-engine` P16):  Claude
+     Code asks Owen before entering a path outside `.claude/worktrees/`, every time.
+   - Already in it (`pwd` is in that folder:  a new tab of the worktree's window):  NOT again.
+     - Entering again would be a no-op at best (epic `epic-engine` P12, r11:  "You keep asking for permission to
+       EnterWorktree, it has to stop").
+     - The session-start guard records a session started in a worktree
+       ([worktree-guard.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree-guard.mjs)), and tells one reopened outside it to
+       enter:  only then does it ask, once (epic `epic-eject` I3).
      - It isn't:  a reopened session outside its worktree, or a new tab inside one.
      - Do what it says first.
    - The repo's `WorktreeCreate` hook ([worktree.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree.mjs))
@@ -214,9 +215,8 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
 - The steps:  [the epic skill](../epic/SKILL.md), "5. Each phase", step 4 ("A STANDING epic").
 - In short:
   1. `merge-main`, if `main` moved
-  2. `ExitWorktree` (keep)
-  3. `epic merge <name>`, in the main checkout
-  4. `EnterWorktree` back, with `path`
+  2. `epic merge <name>`, from the worktree:  it moves the MAIN checkout's `main`
+     - no `ExitWorktree` and back:  entering asks Owen every time (epic `epic-engine` P12)
 - `/isolate done` in a standing epic's session:  say it stands, and ask first ("Stop standing, and finish?").
 
 ## Finish:  `/isolate done`
