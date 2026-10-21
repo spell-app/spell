@@ -107,6 +107,51 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     expect(part(row, "pick")!.querySelector("code")!.textContent).toBe("this.open")
   })
 
+  test("`blank`:  today's text and an EMPTY box first, then Purpose;  blank or today's text is no change;  axe", async () => {
+    const root = await ElementFixture.render(
+      section('blank no-file noun="commands"').replaceAll(/ recommended="[^"]*"/g, ' recommended=""')
+    )
+    await ElementFixture.settle()
+    const table = root.querySelector("epic-choice-rows")!
+    expect(Array.from(part(table, "head")!.children, (head) => head.textContent)).toEqual([
+      "Current, and yours under it",
+      "Purpose"
+    ])
+    const [row, other] = rows(root) as [Element, Element]
+    // the box's column first, under its head
+    const headLeft = part(table, "head")!.children[0]!.getBoundingClientRect().left
+    expect(part(row, "pick")!.getBoundingClientRect().left).toBeCloseTo(headLeft, 0)
+    expect(part(row, "copy")!.textContent).toBe("this.open")
+    expect(part(row, "copy")!.title).toBe("Copy into the box")
+    expect(part<HTMLTextAreaElement>(row, "box")!.value).toBe("")
+    expect(part(other, "purpose")!.textContent).not.toContain("stays")
+    expect(root.getAttribute("badge")).toBe("2 commands · 0 changed")
+    // today's text, copied in:  in the box, the cursor at its end, still no change
+    part(row, "copy")!.click()
+    await ElementFixture.settle()
+    await new Promise((done) => requestAnimationFrame(done))
+    const box = part<HTMLTextAreaElement>(row, "box")!
+    expect([box.value, box.selectionStart]).toEqual(["this.open", "this.open".length])
+    expect(row.matches(":state(changed)")).toBe(false)
+    expect(ChoicesForm.forPage().collect()).toEqual({})
+    // typed over:  a change;  the round button clears it
+    await type(row, "this.isOpen")
+    expect(row.matches(":state(changed)")).toBe(true)
+    expect(root.getAttribute("badge")).toBe("2 commands · 1 changed")
+    expect(ChoicesForm.forPage().collect()).toEqual({ "q1-A-7": "this.isOpen" })
+    expect(part(row, "reset")!.title).toBe("Clear the box")
+    part(row, "reset")!.click()
+    await ElementFixture.settle()
+    expect([box.value, row.matches(":state(changed)")]).toEqual(["", false])
+    await expectAccessible(table)
+  })
+
+  test("`blank` without a `noun`:  its count says rows", async () => {
+    const root = await ElementFixture.render(section("blank"))
+    await ElementFixture.settle()
+    expect(root.getAttribute("badge")).toBe("2 rows · 0 changed")
+  })
+
   test("`reorder`:  an Order column first, each row's place;  move up / down swap rows, keep the focus, and go in the form's order", async () => {
     const root = await ElementFixture.render(
       section("no-file reorder").replace(

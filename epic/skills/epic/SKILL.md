@@ -186,10 +186,13 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
   - An epic page or guide already there still asks.
 - "2. Session" as "Staying in this window", with no question and no `window stay`:
   the window is already `⎇ <name>`, tinted.
-  - `EnterWorktree` with `path`:  the folder `epic worktree path <name>` prints.
-    - Also in a worktree-only window, whose new tab already starts IN the worktree.
-      - The session-start guard says so.
-      - Entering records the worktree, so a reopen from any window comes back to it (epic `epic-eject` I3).
+  - `EnterWorktree` with `path` (the folder `epic worktree path <name>` prints) ONLY when `pwd` isn't in it already.
+    - An epic's window starts its new tabs IN the worktree (its first folder):  then never enter.
+    - Why (epic `epic-engine` P12, r11):  Claude Code asks Owen before entering any worktree outside
+      `.claude/worktrees/`, whatever the permission rules say.
+      Owen:  "You keep asking for permission to EnterWorktree, it has to stop."
+    - The session-start guard records a session that starts in the worktree, so a reopen from another window still
+      comes back to it (epic `epic-eject` I3).
   - Then steps 2, 3 and 5, then "3. Plan".
 
 ## 2. Session:  stub doc, then move
@@ -432,13 +435,12 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        1. `main` moved (`git log --oneline HEAD..main` not empty):  `epic worktree merge-main`.
           - A multi-repo top (`epic config repos` prints names;  [the isolate skill](../isolate/SKILL.md), "A
             multi-repo top"):  `epic worktree repos` says which repos are behind;  `merge-main` merges every one.
-       2. `ExitWorktree` with `action: "keep"`:  a worktree session can't move `main`.
-       3. `epic merge <name>`, in the main checkout:  checks it's on `main` and clean, then fast-forwards.
-          - A multi-repo top:  in the main TOP checkout;  only the repos whose `<name>` branch has commits move.
+       2. `epic merge <name>`, from the worktree:  it works on the MAIN checkout, checks it's on `main` and clean,
+          then fast-forwards.
+          - Never `ExitWorktree` and back for it:  entering asks Owen every time (epic `epic-engine` P12, r11).
+          - A multi-repo top:  every repo's main checkout;  only the repos whose `<name>` branch has commits move.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
-       4. `EnterWorktree` with `path`, the folder `epic worktree path <name>` prints.
-          Back, the window and session unchanged.
-       5. The changelog, if the repo keeps one:
+       3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/isolate done`:  the worktree, the window and the session stay, for the next request.
      - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
@@ -1015,7 +1017,8 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
 - It reaches this session one of three ways:
   - a message from the sender:  "New request r3 for epic `<epic>` ...":  the same steps
   - a NEW session in the epic's window, `/epic request <epic> r3` typed in, when the epic's session wasn't running
-    - first `EnterWorktree` with `path`, as "Launched" does:  the folder `epic worktree path <epic>` prints
+    - first `EnterWorktree` with `path`, as "Launched" does, only when `pwd` isn't in it already:  the folder
+      `epic worktree path <epic>` prints
   - the sender IS this epic's session:  it follows these steps itself
 - The prompt hook titled the session `🚧 <epic>`, so later requests reach it.
   - It refuses `/epic request` in a session titled for another epic.

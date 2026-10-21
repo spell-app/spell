@@ -20,18 +20,15 @@ git("worktree", "add", "-q", WORKTREE, "tooling")
 commit("b.txt", "two", "P1:  the phase", WORKTREE)
 
 describe("mergeEpic()", () => {
-  test("refuses from the worktree:  main moves in the main checkout", () => {
-    expect(() => Requests.merge("tooling", WORKTREE)).toThrow(/run it in the main checkout/)
-  })
-
-  test("refuses with uncommitted changes in the main checkout", () => {
+  test("refuses with uncommitted changes in the main checkout, from the worktree too", () => {
     writeFileSync(join(REPO, "a.txt"), "changed")
     expect(() => Requests.merge("tooling", REPO)).toThrow(/uncommitted changes/)
+    expect(() => Requests.merge("tooling", WORKTREE)).toThrow(/uncommitted changes/)
     git("checkout", "--", "a.txt")
   })
 
-  test("fast-forwards main, returning the commits;  then nothing to merge", () => {
-    expect(Requests.merge("tooling", REPO).map((line) => line.replace(/^\w+ /, ""))).toEqual(["P1:  the phase"])
+  test("fast-forwards main from the epic's own worktree (no ExitWorktree), returning the commits;  then nothing", () => {
+    expect(Requests.merge("tooling", WORKTREE).map((line) => line.replace(/^\w+ /, ""))).toEqual(["P1:  the phase"])
     expect(git("log", "-1", "--format=%s", "main")).toBe("P1:  the phase")
     expect(Requests.merge("tooling", REPO)).toEqual([])
   })

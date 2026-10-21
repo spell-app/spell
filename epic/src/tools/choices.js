@@ -136,9 +136,15 @@ export function createPage(docs, slug, { title, epic, description, data } = {}) 
   example?.replaceWith(...choiceSections(document, checked))
   mkdirSync(folder, { recursive: true })
   writeFileSync(file, serialize(document))
-  const { sections, rows, fileColumn, stacked } = checked
+  const { sections, rows, fileColumn, stacked, blank, noun } = checked
   // the layout flags, kept only when they change the default (the migration redraws a page from them:  `migrate.js`)
-  const kept = { ...(fileColumn === false && { fileColumn }), ...(stacked === true && { stacked }), sections, rows }
+  const kept = {
+    ...(fileColumn === false && { fileColumn }),
+    ...(stacked === true && { stacked }),
+    ...(blank === true && { blank, ...(noun && { noun }) }),
+    sections,
+    rows
+  }
   DataFile.write(rowsFile(file), kept)
   return file
 }
@@ -155,6 +161,10 @@ export function checkData(data) {
     throw new Error(`rows:  fileColumn is true or false:  ${json(data.fileColumn)}`)
   if (data.stacked !== undefined && typeof data.stacked !== "boolean")
     throw new Error(`rows:  stacked is true or false:  ${json(data.stacked)}`)
+  if (data.blank !== undefined && typeof data.blank !== "boolean")
+    throw new Error(`rows:  blank is true or false:  ${json(data.blank)}`)
+  if (data.noun !== undefined && (typeof data.noun !== "string" || !data.noun.trim()))
+    throw new Error(`rows:  noun is a word, e.g. "commands":  ${json(data.noun)}`)
   for (const section of sections) {
     if (!section?.id || !section.title) throw new Error(`rows:  a section needs an id and a title:  ${json(section)}`)
     if (section.reorder !== undefined && typeof section.reorder !== "boolean")
@@ -164,6 +174,8 @@ export function checkData(data) {
   if (!Array.isArray(data.rows) || !data.rows.length) throw new Error("rows:  no rows")
   const ids = new Set()
   const rows = data.rows.map((row) => {
+    // a `blank` page recommends nothing:  its rows' `recommended` may be left out
+    if (data.blank === true && row && row.recommended === undefined) row = { ...row, recommended: "" }
     for (const key of ["section", "file", "purpose", "current", "recommended"])
       if (typeof row?.[key] !== "string") throw new Error(`rows:  a row needs ${key}:  ${json(row)}`)
     if (!Number.isInteger(row.line) || row.line < 1) throw new Error(`rows:  a row needs a line:  ${json(row)}`)
@@ -248,12 +260,14 @@ export function readRows(page) {
 /**
  * `answer` to `page` as plain text, for Claude:  the page and when, the CHANGED rows by section
  * (`file:line  current -> recommended  =>  typed`), how many stayed as recommended (accepted), then the feedback.
+ * - a `blank` page (epic `epic-engine` P13) recommends nothing:  `file:line  current  =>  typed`, and the rest
+ *   "left as they are"
  */
 export function formatAnswer(page, answer) {
   const { document } = parseHTML(readFileSync(page, "utf8"))
   const title = document.querySelector("h1")?.textContent?.trim() ?? basename(page)
   if (!DataFile.exists(rowsFile(page))) return formatDeclared(page, title, answer)
-  const { sections, rows } = readRows(page)
+  const { sections, rows, blank } = readRows(page)
   const values = answer.values ?? {}
   const lines = [`Choices on "${title}" (${shown(page)}), sent ${answer.answered}:`]
   if (answer.changes) lines[0] += `  (sent ${answer.changes + 1}×)`
@@ -266,7 +280,8 @@ export function formatAnswer(page, answer) {
     lines.push(`    ${section.title}`)
     for (const row of mine) {
       const typed = values[row.id].trim() || "(blank)"
-      lines.push(`      ${row.file}:${row.line}  ${row.current} -> ${row.recommended}  =>  ${typed}`)
+      const was = blank ? row.current : `${row.current} -> ${row.recommended}`
+      lines.push(`      ${row.file}:${row.line}  ${was}  =>  ${typed}`)
     }
   }
   if (!changed.length) lines.push("    (none)")
@@ -276,7 +291,9 @@ export function formatAnswer(page, answer) {
   const accepted = rows.filter((row) => !(row.id in values))
   const renames = accepted.filter((row) => row.recommended !== row.current).length
   lines.push(
-    `  Unchanged (accepted as recommended):  ${accepted.length} -- ${renames} to rename, ${accepted.length - renames} to stay`
+    blank
+      ? `  Unchanged (left as they are):  ${accepted.length}`
+      : `  Unchanged (accepted as recommended):  ${accepted.length} -- ${renames} to rename, ${accepted.length - renames} to stay`
   )
   lines.push(answer.feedback ? `  Feedback:\n${indent(answer.feedback, "    ")}` : "  Feedback:  (none)")
   return lines.join("\n")
@@ -362,6 +379,10 @@ async function waitAndPrint(file, flags) {
  *   `answer` / `wait` print for Claude.  Default:  shown
  * - `stacked`:  `true` puts Current and Recommended in one Syntax column, today's text over the box (Owen, 2026-10-11,
  *   the epic command's review page).  Default:  two columns
+ * - `blank`:  `true` makes it a page Owen TYPES into, not one of recommendations (epic `epic-engine` P13, r12):
+ *   today's text with an empty box under it, first, then Purpose;  blank means no change, and a click on today's
+ *   text copies it into the box.  Its rows' `recommended` may be left out.  Default:  recommendations
+ *   - `noun`:  what its count calls the rows, `commands` ("42 commands · 3 changed");  default `rows`
  * - `where`:  `{ epic, justNow, decides }`, the "Where we are" box, as a details page's
  * - `sections[]`:  `{ id, title, description?, icon?, reorder? }`, in page order;  `description`:  one line saying
  *   which question it answers and the recommended rule;  `` `code` `` in it is shown as code

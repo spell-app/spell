@@ -1,10 +1,12 @@
-import { existsSync, readFileSync } from "node:fs"
-import { basename } from "node:path"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { homedir } from "node:os"
+import { basename, join } from "node:path"
 
 // By relative path, `.ts` and all:  the `SessionStart` hook loads this file with plain `node` (types stripped)
 import { EpicConfig } from "../config/EpicConfig.ts"
 import { EpicRepo } from "../config/EpicRepo.ts"
 import { RealPath } from "../config/RealPath.ts"
+import { HOME_ENV, HOME_FOLDER } from "../server/server.types.ts"
 
 /****************
  * ### `WorktreeGuard`
@@ -23,10 +25,15 @@ import { RealPath } from "../config/RealPath.ts"
  *    but the session's folder is outside it.
  *    Claude is told to `EnterWorktree` back into it before anything else.
  *    - a session that LEFT on purpose (`ExitWorktree`) has a last note of `null`:  nothing said
+ *    - no note at all:  the guard's OWN record of the session's worktree (rule 2) stands in for one
  * 2. NOT RECORDED:  the session's folder is in a worktree BESIDE the repo
  *    (`../spell-app.worktrees/<name>`, a worktree-only window's new tab), and no worktree note names it.
- *    Claude is told to `EnterWorktree` the folder it's already in,
- *    so Claude Code records it, and a reopen from any window comes back there.
+ *    The guard RECORDS it itself (`record()`), and says nothing:  a reopen outside it is rule 1's.
+ *    - Before epic `epic-engine` P12, Claude was told to `EnterWorktree` the folder it was already in, so Claude
+ *      Code would record it.  But Claude Code ASKS before entering any worktree outside `.claude/worktrees/`,
+ *      whatever the permission rules say (r11, Owen:  "You keep asking for permission to EnterWorktree, it has to
+ *      stop"):  every new tab of a worktree window asked.
+ *    - So only a session really outside its worktree (rule 1) is asked to enter, and Owen is asked once then.
  *    - a worktree nested in the checkout doesn't need it:  the panel hands such a session its folder itself
  * 0. STRAY, first:  the session's folder, or the worktree its last note names, is a worktree of THIS repo named for
  *    an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):  `spell-app.worktrees/epic-engine`.
@@ -53,7 +60,9 @@ export class WorktreeGuard {
     const config = own.top ?? own
     if (!existsSync(config.file)) return undefined
     const here = RealPath.of(cwd)
-    const note = WorktreeGuard.lastNote(transcript)
+    // Claude Code's own note first;  none at all (never entered, never left):  the guard's record (rule 2)
+    const last = WorktreeGuard.lastNote(transcript)
+    const note = last === undefined ? WorktreeGuard.recordOf(input.session_id) : last
     const recorded = note?.worktreePath ? RealPath.of(note.worktreePath) : undefined
     const stray = WorktreeGuard.stray(config, here) ?? (recorded ? WorktreeGuard.stray(config, recorded) : undefined)
     if (stray) return stray
@@ -71,14 +80,44 @@ export class WorktreeGuard {
     const folder = name && config.worktreeFolder(name)
     if (!name || !folder || !config.isOutside(folder) || (recorded && RealPath.isIn(recorded, RealPath.of(folder))))
       return undefined
-    const path = RealPath.of(folder)
-    return WorktreeGuard.output(
-      `⎇ ${name}:  Claude enters its worktree properly first, so a reopen from another window comes back here.`,
-      `This session started inside worktree ${name}'s folder (${path}) without EnterWorktree, so Claude Code ` +
-        `hasn't recorded the worktree:  reopened from another window, the session would work in that window's ` +
-        `folder instead (epic-eject I3).  Before anything else, run EnterWorktree with path "${path}" (the folder ` +
-        `you're already in).  If it refuses, say so in one line and carry on.`
-    )
+    // NOT RECORDED (rule 2):  the guard records it, quietly;  no EnterWorktree, which would ask Owen
+    WorktreeGuard.record(input.session_id, { worktreePath: RealPath.of(folder), worktreeName: name })
+    return undefined
+  }
+
+  /**
+   * Record that session `id` works in worktree `note` (rule 2), in spell-epic's home folder:
+   * `~/.spell-epic/session-worktrees/<id>.json`, the fields of Claude Code's own note.
+   * - no id:  nothing;  a write that fails:  nothing either (the hook never fails a session)
+   */
+  static record(id: string | undefined, note: WorktreeNote): void {
+    if (!id) return
+    try {
+      mkdirSync(WorktreeGuard.recordsFolder(), { recursive: true })
+      writeFileSync(WorktreeGuard.recordFile(id), `${JSON.stringify({ ...note, at: new Date().toISOString() })}\n`)
+    } catch {
+      // no record:  a reopen elsewhere works in that window's folder, as before the guard
+    }
+  }
+
+  /** Session `id`'s worktree as the guard recorded it (`record()`);  `undefined` when there's none. */
+  static recordOf(id: string | undefined): WorktreeNote | undefined {
+    if (!id || !existsSync(WorktreeGuard.recordFile(id))) return undefined
+    try {
+      return JSON.parse(readFileSync(WorktreeGuard.recordFile(id), "utf8")) as WorktreeNote
+    } catch {
+      return undefined
+    }
+  }
+
+  /** Where the guard's records go:  `$SPELL_EPIC_HOME`, else `~/.spell-epic`, then `session-worktrees/`. */
+  static recordsFolder(): string {
+    return join(process.env[HOME_ENV] || join(homedir(), HOME_FOLDER), "session-worktrees")
+  }
+
+  /** Session `id`'s record file;  the id's own characters only, so it can't name another folder. */
+  static recordFile(id: string): string {
+    return join(WorktreeGuard.recordsFolder(), `${id.replace(/[^\w-]/g, "_")}.json`)
   }
 
   /**

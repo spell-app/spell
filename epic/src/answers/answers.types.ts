@@ -199,8 +199,10 @@ export type ChoiceRowPart = {
   readonly recommended: string | undefined
   /** what its box holds now, as typed */
   readonly value: string
-  /** the box differs from the recommendation (trimmed) */
+  /** the box differs from the recommendation (trimmed);  a `blank` row:  holds something other than today's text */
   readonly isChanged: boolean
+  /** its table types into blank boxes (`<epic-choice-rows blank>`, epic `epic-engine` P13):  no recommendation */
+  readonly blank?: boolean
   /**
    * its table's key when Owen can put its rows in order (`<epic-choice-rows reorder>`):  its section's id;
    * `undefined` for a table that keeps its order

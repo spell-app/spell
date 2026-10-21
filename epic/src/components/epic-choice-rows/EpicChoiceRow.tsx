@@ -23,6 +23,11 @@ import rowsCSS from "./EpicChoiceRows.css?inline"
  *   - Current:  today's text, as code
  *   - Recommended:  the box, pre-filled with Claude's call;  one line of text that wraps and grows (Enter adds no
  *     line, a pasted line break goes);  changed, it's orange, with a round button putting the recommendation back
+ * - `blank` (epic `epic-engine` P13, r12;  Owen picked layout A on its example page):  no recommendation.  ONE first
+ *   cell, today's text with an EMPTY box under it, then Purpose.
+ *   - Blank means no change:  it's changed once its box holds anything but today's text.
+ *   - A click on today's text copies it into the box, the cursor at its end, so Owen edits from it.
+ *   - No `stays` tag;  the round button clears the box.
  * - Registered with the page's `ChoicesForm` while connected:  its box is saved in the draft, and sent with
  *   "Do it" when it differs from the recommendation.
  ****************/
@@ -37,9 +42,9 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   /** What Owen typed (or a draft brought back);  `undefined` until then:  the recommendation. */
   @E.state accessor typed: string | undefined = undefined
 
-  /** What its box holds now. */
+  /** What its box holds now:  with `blank`, empty until Owen types. */
   get value(): string {
-    return this.typed ?? this.recommended ?? ""
+    return this.typed ?? (this.layout.blank ? "" : (this.recommended ?? ""))
   }
 
   /** Its id:  its box's key. */
@@ -47,16 +52,23 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     return this.name ?? ""
   }
 
-  /** Its box differs from the recommendation (trimmed). */
+  /** Its box differs from the recommendation (trimmed);  with `blank`, holds something other than today's text. */
   @E.cssState("changed")
   get isChanged(): boolean {
-    return this.value.trim() !== (this.recommended ?? "")
+    const value = this.value.trim()
+    if (this.layout.blank) return value !== "" && value !== (this.current ?? "")
+    return value !== (this.recommended ?? "")
   }
 
-  /** Claude would keep it as it is. */
+  /** Claude would keep it as it is;  never with `blank`, which recommends nothing. */
   @E.cssState("stays")
   get isKept(): boolean {
-    return this.recommended === this.current
+    return !this.layout.blank && this.recommended === this.current
+  }
+
+  /** Its table types into blank boxes (`<epic-choice-rows blank>`):  for the page's form (`ChoiceRowPart`). */
+  get blank(): boolean {
+    return this.layout.blank
   }
 
   /** Its table's layout:  no File column, Current and Recommended stacked, rows in order.  Read again as it connects. */
@@ -134,18 +146,37 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
       <div class={[this.rootClass, ROW_BOX]} part={this.partForName("base")}>
         <Show when={this.layout.reorder}>{this.orderCell()}</Show>
         <Show when={!this.layout.noFile}>{this.fileCell()}</Show>
-        <div class={[CELL, PURPOSE]} part={this.partForName("purpose")} role="cell">
-          {this.purpose}
-          <Show when={this.isKept}>
-            {" "}
-            <ui-label class={STAYS} size="mini" basic="">
-              {this.translationForKey("stays")}
-            </ui-label>
-          </Show>
-          <Show when={this.note}>
-            <div class={NOTE}>{this.withCode(this.note ?? "")}</div>
-          </Show>
-        </div>
+        <Show when={this.layout.blank} fallback={this.recommendedCells()}>
+          {this.blankCell()}
+          {this.purposeCell()}
+        </Show>
+      </div>
+    )
+  }
+
+  /** The Purpose cell:  the purpose, `stays` when Claude would keep it, the note under it. */
+  private purposeCell(): JSX.Element {
+    return (
+      <div class={[CELL, PURPOSE]} part={this.partForName("purpose")} role="cell">
+        {this.purpose}
+        <Show when={this.isKept}>
+          {" "}
+          <ui-label class={STAYS} size="mini" basic="">
+            {this.translationForKey("stays")}
+          </ui-label>
+        </Show>
+        <Show when={this.note}>
+          <div class={NOTE}>{this.withCode(this.note ?? "")}</div>
+        </Show>
+      </div>
+    )
+  }
+
+  /** Purpose, Current and Recommended (`stacked`:  Current over the box, one cell). */
+  private recommendedCells(): JSX.Element {
+    return (
+      <>
+        {this.purposeCell()}
         <Show when={!this.layout.stacked}>
           <div class={[CELL, CURRENT]} part={this.partForName("current")} role="cell">
             <code>{this.current}</code>
@@ -155,33 +186,62 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
           <Show when={this.layout.stacked}>
             <code class={WAS}>{this.current}</code>
           </Show>
-          <div class={FIELD}>
-            <textarea
-              ref={(element) => (this.box = element)}
-              class={BOX}
-              part={this.partForName("box")}
-              rows="1"
-              spellcheck={false}
-              autocomplete="off"
-              aria-label={this.translationForKey("boxLabel", { current: this.current ?? "" })}
-              value={this.value}
-              onInput={this.onInput}
-              onKeyDown={this.onKeyDown}
-            />
-            <Show when={this.isChanged}>
-              <button
-                type="button"
-                class={RESET}
-                part={this.partForName("reset")}
-                aria-label={this.translationForKey("reset")}
-                title={this.translationForKey("resetTip", { recommended: this.recommended ?? "" })}
-                onClick={this.onReset}
-              >
-                <ui-icon name="clock rotate left" />
-              </button>
-            </Show>
-          </div>
+          {this.field(this.translationForKey("boxLabel", { current: this.current ?? "" }))}
         </div>
+      </>
+    )
+  }
+
+  /** With `blank`:  today's text, a button copying it into the box, then the box. */
+  private blankCell(): JSX.Element {
+    return (
+      <div class={[CELL, PICK]} part={this.partForName("pick")} role="cell">
+        <button
+          type="button"
+          class={COPY}
+          part={this.partForName("copy")}
+          title={this.translationForKey("copyTip")}
+          onClick={this.onCopy}
+        >
+          <code>{this.current}</code>
+        </button>
+        {this.field(this.translationForKey("blankLabel", { current: this.current ?? "" }))}
+      </div>
+    )
+  }
+
+  /** The box, and the round button beside it:  back to the recommendation once it differs;  with `blank`, clear it. */
+  private field(label: string): JSX.Element {
+    return (
+      <div class={FIELD}>
+        <textarea
+          ref={(element) => (this.box = element)}
+          class={BOX}
+          part={this.partForName("box")}
+          rows="1"
+          spellcheck={false}
+          autocomplete="off"
+          aria-label={label}
+          value={this.value}
+          onInput={this.onInput}
+          onKeyDown={this.onKeyDown}
+        />
+        <Show when={this.layout.blank ? this.value !== "" : this.isChanged}>
+          <button
+            type="button"
+            class={RESET}
+            part={this.partForName("reset")}
+            aria-label={this.translationForKey(this.layout.blank ? "clear" : "reset")}
+            title={
+              this.layout.blank
+                ? this.translationForKey("clear")
+                : this.translationForKey("resetTip", { recommended: this.recommended ?? "" })
+            }
+            onClick={this.onReset}
+          >
+            <ui-icon name={this.layout.blank ? "xmark" : "clock rotate left"} />
+          </button>
+        </Show>
       </div>
     )
   }
@@ -291,7 +351,18 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     this.form?.changed()
   }
 
-  /** The reset button:  the recommendation back in the box, the cursor in it. */
+  /** With `blank`, today's text clicked:  copied into the box, the cursor at its end;  the form told. */
+  private readonly onCopy = () => {
+    const text = this.current ?? ""
+    this.typed = text
+    this.form?.changed()
+    E.beforeNextPaint(() => {
+      this.box?.focus()
+      this.box?.setSelectionRange(text.length, text.length)
+    })
+  }
+
+  /** The reset button:  the recommendation back in the box (with `blank`, the box cleared), the cursor in it. */
   private readonly onReset = () => {
     this.typed = undefined
     this.form?.changed()
@@ -306,12 +377,13 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   }
 
   /** Its table's layout, from the `<epic-choice-rows>` it's in. */
-  private static layoutOf(element: Element): { noFile: boolean; stacked: boolean; reorder: boolean } {
+  private static layoutOf(element: Element): { noFile: boolean; stacked: boolean; reorder: boolean; blank: boolean } {
     const rows = element.closest(ROWS_TAG)
     return {
       noFile: !!rows?.hasAttribute("no-file"),
       stacked: !!rows?.hasAttribute("stacked"),
-      reorder: !!rows?.hasAttribute("reorder")
+      reorder: !!rows?.hasAttribute("reorder"),
+      blank: !!rows?.hasAttribute("blank")
     }
   }
 }
@@ -336,6 +408,7 @@ const NOTE = "note"
 const CURRENT = "current"
 const PICK = "pick"
 const WAS = "was"
+const COPY = "copy"
 const FIELD = "field"
 const BOX = "box"
 const RESET = "reset"

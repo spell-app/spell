@@ -64,6 +64,7 @@ export const epicChoiceRowVocabulary = {
     },
     { name: "purpose", description: "The Purpose cell:  the purpose, `stays` when it stays, the note." },
     { name: "current", description: "The Current cell:  today's text, as code." },
+    { name: "copy", description: "With `blank`:  today's text over the box, a button that copies it into the box." },
     { name: "pick", description: "The Recommended cell:  the box, and the reset button once it differs." },
     { name: "box", description: "The `<textarea>`:  one line of text, wrapping and growing;  Enter adds no line." },
     { name: "reset", description: "The round button putting the recommendation back." }
@@ -77,6 +78,9 @@ export const epicChoiceRowVocabulary = {
     { key: "boxLabel", text: "Recommended for {current}", description: "The box's name, for a screen reader." },
     { key: "reset", text: "Back to the recommendation", description: "The reset button's name." },
     { key: "resetTip", text: "Back to {recommended}", description: "The reset button's tooltip." },
+    { key: "blankLabel", text: "Yours for {current}:  blank keeps it", description: "With `blank`:  the box's name." },
+    { key: "copyTip", text: "Copy into the box", description: "With `blank`:  today's text's tooltip." },
+    { key: "clear", text: "Clear the box", description: "With `blank`:  the reset button's name and tooltip." },
     { key: "openTip", text: "Open {file}:{line} in VS Code", description: "The file link's tooltip." },
     { key: "up", text: "Move up", description: "The move up button's name and tooltip." },
     { key: "down", text: "Move down", description: "The move down button's name and tooltip." }

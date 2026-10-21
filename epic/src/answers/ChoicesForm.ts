@@ -27,7 +27,8 @@ import {
  * - "Do it" (`send()`):  `POST /api/docs/choices/answer`, which `epic choices wait` exits with;  pressed again after
  *   changes, it sends again.
  * - On load (`restore()`):  the draft (else the answer) comes back into the boxes and the feedback.
- * - Only the boxes that differ from the recommendation are sent, by row id (`values`), with the feedback.
+ * - Only the boxes that differ from the recommendation are sent, by row id (`values`), with the feedback;  a `blank`
+ *   row's box (epic `epic-engine` P13) when it holds something other than today's text.
  * - A table Owen can put in order (`<epic-choice-rows reorder>`, epic `epic-workflow` P15):  its rows' ids in the
  *   order he left them go too (`order`), by its section's id;  on load they come back in `restoredOrder`, which the
  *   table puts its rows in.
@@ -253,7 +254,8 @@ export class ChoicesForm {
     const again = answer.changes ? ` (sent ${answer.changes + 1} times)` : ""
     const at = clockOf(answer.answered)
     if (this.isStale) return `Sent at ${at}${again};  changed since:  press Do it again to send the new ones.`
-    const what = `${changes} changed, ${this.rows.size - changes} as recommended`
+    const left = [...this.rows.values()].every((row) => row.blank) ? "left as they are" : "as recommended"
+    const what = `${changes} changed, ${this.rows.size - changes} ${left}`
     return `Sent to Claude at ${at}${again}:  ${what}.  Change anything and press Do it again to resend.`
   }
 

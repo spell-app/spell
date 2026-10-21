@@ -205,9 +205,9 @@ describe("the session-start guard", () => {
     expect(output?.hookSpecificOutput.additionalContext).toMatch("never EnterWorktree it")
   })
 
-  test("the epic's own worktree:  as before", () => {
+  test("the epic's own worktree:  as before, nothing said (epic `epic-engine` P12:  recorded, never told to enter)", () => {
     const own = join(TEMP, "engine.worktrees", "engine-work")
-    expect(WorktreeGuard.check({ cwd: own, source: "startup" })?.systemMessage).toMatch(/enters its worktree properly/)
+    expect(WorktreeGuard.check({ cwd: own, source: "startup" })).toBeUndefined()
   })
 })
 
