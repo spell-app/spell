@@ -338,8 +338,8 @@ function oneLineHead(main) {
  * a quiet `<ui-label>` (`spell-doc.css`, "The reading time chip").
  * - its tooltip:  the exact count, "8,749 words, 2,281 of them code" (`readingTime()`, `ReadingTime.js`)
  * - every page with the docs head:  guides, the index pages, details and choice pages
- * - NOT an epic or saga page:  `<epic-page>` draws its own head, and its items' bodies wait in part files
- *   until opened, so the count would be a fraction of the page (J91)
+ * - NOT an epic or saga page:  `<epic-page>` draws its own head, and its own chip, counting only what's SHOWN
+ *   (`shownReadingTime()`;  J91, Owen:  "Count what's shown"):  its items' bodies wait in part files until opened
  * - recounted on every `spell-doc:updated`:  an edit saved, a section's body loaded
  */
 function wireReadingTime(main) {

@@ -890,7 +890,8 @@ In `tools/`:
       - a lighter ivory than the toolbar under it
       - a "48 min read" chip after the title, its tooltip the word count (`wireReadingTime()`, epic `epic-engine` P14):
         prose at 230 words a minute, code words counted twice, folded sections included;
-        none at phone width, and none on an epic page, which draws its own head
+        none at phone width;  an epic page's is `<epic-page>`'s own, in its head, counting only what's SHOWN
+        (`shownReadingTime()`, J91:  folded blocks count once opened)
     - While a sub-section's title is stuck under its parent's, the two are one row (`wireStuckTrail()`):
       `2. Files on disk › 2.1 The repo`.
   - The OLD markup is for the saga pages only;  the runtime still drives it.
