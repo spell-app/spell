@@ -18,7 +18,8 @@ const PAGE = "/epics/big/details/names.html"
 /**
  * The page server's choices routes, as `fetch`:  the draft and answer it holds, every POST as `[what, body]`.
  * - `isDown`:  nothing answers (the server stopped, or its address is gone)
- * - `token`:  this run's write token, which a POST must carry;  the page, as served now, tells it
+ * - `token`:  this run's write token, which a POST must carry;  the page as served to the browser tells it
+ *   (`served()`), never a script's `fetch()` of it:  that gets the file as is, as the real server sends it
  */
 class FakeServer {
   draft: Record<string, unknown> | null = null
@@ -31,8 +32,7 @@ class FakeServer {
 
   readonly fetch = vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
     if (this.isDown) throw new TypeError("Failed to fetch")
-    if (url === PAGE)
-      return new Response(`<script>window.SPELL_SERVER = {"token":"${this.token}"}</script>`, { status: 200 })
+    if (url === PAGE) return new Response("<html><head></head></html>", { status: 200 })
     const what = /\/api\/docs\/choices\/(draft|answer)/.exec(url)![1] as "draft" | "answer"
     if (!init?.method) return json({ [what]: this[what] })
     if ((init.headers as Record<string, string>)["x-server-token"] !== this.token)
@@ -43,6 +43,9 @@ class FakeServer {
     else this.answer = { ...body, answered: "2026-10-14T04:02:00.000Z", changes: this.answer ? 1 : 0 }
     return json({ ok: true, [what]: this[what] })
   })
+
+  /** The page as served to the browser now (`readServed`):  its `window.SPELL_SERVER`, with this run's token. */
+  readonly served = vi.fn(async (_page: string) => `<script>window.SPELL_SERVER = {"token":"${this.token}"}</script>`)
 }
 
 /** `body` as a JSON response. */
@@ -97,6 +100,7 @@ function formOn(server: FakeServer, page = PAGE, storage?: FakeStorage) {
     server: { token: "t" },
     protocol: "http:",
     fetch: server.fetch as unknown as typeof fetch,
+    readServed: server.served,
     storage: storage as unknown as Storage
   })
 }
@@ -256,10 +260,11 @@ describe("ChoicesForm", () => {
     ])
     await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
     expect(form.isSaveError).toBe(true)
-    // the server is back, restarted:  a new token, which the page as served now tells
+    // the server is back, restarted:  a new token, which the page as served to the browser now tells
     server.isDown = false
     server.token = "t2"
     await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
+    expect(server.served).toHaveBeenCalledWith(PAGE)
     expect(server.posts).toEqual([["draft", { page: PAGE, values: { a: "open" }, feedback: "" }]])
     expect([form.isSaveError, form.savedText]).toEqual([false, expect.stringMatching(/^saved \d\d:\d\d$/)])
     // saved:  no more tries

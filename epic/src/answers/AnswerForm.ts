@@ -550,7 +550,10 @@ export class AnswerForm {
       if (!this.typed) return this.changed()
       this.isUnsaved = true
       const why = (failure as Error).message.replace(/[.!]$/, "")
-      this.setDraftText(`draft kept in this browser only:  ${why};  trying again every ${ANSWER_RETRY_MS / 1000}s`, true)
+      this.setDraftText(
+        `draft kept in this browser only:  ${why};  trying again every ${ANSWER_RETRY_MS / 1000}s`,
+        true
+      )
       this.retryTimer = setTimeout(() => void this.saveDraft(), ANSWER_RETRY_MS)
     }
     this.changed()

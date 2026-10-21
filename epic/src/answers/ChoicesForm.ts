@@ -234,9 +234,7 @@ export class ChoicesForm {
     if (this.retryTimer) clearTimeout(this.retryTimer)
     if (!this.isUnsaved || !this.keepsDrafts) return
     if (!this.options.server?.token || this.options.protocol === "file:") {
-      this.setSaved("kept in this browser only:  this page isn't on the page server (open it with `epic choices show`)", {
-        isError: true
-      })
+      this.setSaved(OFF_SERVER, { isError: true })
       return this.notify()
     }
     this.isUnsaved = false
@@ -511,6 +509,9 @@ export class ChoicesForm {
     for (const listener of this.listeners) listener()
   }
 }
+
+/** What a failed save says off the page server (from `file://`):  the browser's copy is all there is. */
+const OFF_SERVER = "kept in this browser only:  this page isn't on the page server (open it with `epic choices show`)"
 
 /** `iso`'s local time of day, `14:04`. */
 function clockOf(iso: string): string {

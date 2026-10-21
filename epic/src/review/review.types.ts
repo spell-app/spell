@@ -208,6 +208,13 @@ export type ServerLinkOptions = {
   protocol?: string
   /** `fetch`, bound */
   fetch: typeof fetch
+  /**
+   * the page as the page server serves it to the browser NOW, with its `window.SPELL_SERVER` (`ServerLink`'s token
+   * refresh);  none:  `fetch()`ed (tests)
+   * - why not `fetch()` in a browser:  the server sends a script's `fetch()` the file as is, without it
+   *   (`StaticHandler`, `Sec-Fetch-Dest: empty`)
+   */
+  readServed?: (page: string) => Promise<string>
 }
 
 /** What a `ReviewClient` is made from:  its link's facts, plus the browser's storage and the page's items. */
