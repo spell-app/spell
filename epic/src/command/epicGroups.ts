@@ -263,6 +263,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic worktree remove seo"
     },
     {
+      name: "repos",
+      usage: "[<name>] [--json]",
+      description:
+        "each repo's checkout in epic <name>'s worktree (default:  the one this runs in):  its branch, what's " +
+        "uncommitted, how far it's ahead of and behind its base branch",
+      example: "epic worktree repos"
+    },
+    {
       name: "merge-main",
       usage: "[--continue] [--json]",
       description:
