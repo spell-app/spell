@@ -1,0 +1,70 @@
+{
+  "name": "@spell-app/spell-element",
+  "version": "0.0.0",
+  "private": true,
+  "description": "What makes a custom element on Solid, for every component set:  the DOM element and component bases, the reactive members' decorators, shadow events and hot reloading",
+  "license": "MIT",
+  "repository": "https://github.com/spell-app/spell-element",
+  "type": "module",
+  "sideEffects": [
+    "./src/HotDefinitions.ts"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist-types/src/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./elements.types": {
+      "types": "./dist-types/src/elements.types.d.ts",
+      "default": "./src/elements.types.ts"
+    },
+    "./HotDefinitions": {
+      "types": "./dist-types/src/HotDefinitions.d.ts",
+      "default": "./src/HotDefinitions.ts"
+    },
+    "./timing": {
+      "types": "./dist-types/src/timing.d.ts",
+      "default": "./src/timing.ts"
+    },
+    "./vocabulary.types": {
+      "types": "./dist-types/src/vocabulary.types.d.ts",
+      "default": "./src/vocabulary.types.ts"
+    }
+  },
+  "scripts": {
+    "/////// CORRECTNESS": "",
+    "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && spell-types --below && spell-types && tsc -p ./tests && echo '<< TSC PASSED\n'",
+    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src test && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\n'",
+    "lint:fix": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT --fix' && vp lint --fix src test && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\n'",
+    "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt src test vite.config.ts vitest.config.ts && cd ./tests && vp fmt . && echo '<< OXFMT PASSED\n'",
+    "/////// TESTING": "",
+    "test": "echo '>>>>>>>>>>>\n>> RUNNING TESTS' && vp test run && echo '<< TESTS PASSED\n'",
+    "test:watch": "vp test"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.47",
+    "@solidjs/web": "2.0.0-rc.13",
+    "@spell-app/toolchain": "workspace:*",
+    "@types/node": "^22.20.4",
+    "@vitest/browser-playwright": "catalog:",
+    "esbuild": "^0.28.2",
+    "playwright": "1.63.0",
+    "solid-js": "2.0.0-rc.13",
+    "typescript": "^7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "@solidjs/web": "2.0.0-rc.13",
+    "solid-js": "2.0.0-rc.13"
+  },
+  "engines": {
+    "node": ">=24.11"
+  },
+  "packageManager": "yarn@4.18.0",
+  "dependencies": {
+    "@spell-app/util": "workspace:*"
+  }
+}
