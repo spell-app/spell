@@ -1,7 +1,7 @@
 import { onTestFinished, beforeAll, describe, expect, test } from "vite-plus/test"
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { UIComponent, type DOMElement, type UIComponentClass } from "@spell-app/spell-element"
+import { UIComponent, type DOMElement, type UIComponentClass } from "spell-kit/element"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 import { UI } from "$/ui/runtime"
 import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
@@ -13,7 +13,7 @@ import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
  * - Tried on tiny test elements inside Spell UI's real `<ui-root>`, loaded by each test:
  *   the first test needs the tag still undefined.
  * - How each element draws in a Solid root of its own:
- *   spell-element's tests (`tests/spell-element/src/UIComponent.test.tsx`).
+ *   spell-element's tests (the kit's `tests/element/src/UIComponent.test.tsx`).
  */
 
 ////////////////

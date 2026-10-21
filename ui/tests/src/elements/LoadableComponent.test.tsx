@@ -5,7 +5,7 @@ import { UI, type SourceSaver } from "$/ui/runtime"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 import * as UIT from "$/ui/components/components.types"
 import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
-import { type UIComponentClass, UIComponent } from "@spell-app/spell-element"
+import { type UIComponentClass, UIComponent } from "spell-kit/element"
 import { LoadableComponent, type DOMLoadableElement } from "$/ui/elements"
 
 import "$/ui/components/ui-loader"

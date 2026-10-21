@@ -484,8 +484,9 @@ export const PACK_FOLDER = `${COMPONENTS_FOLDER}/__pack`
 /** `spell-ui-pack`'s usage line. */
 const USAGE = "usage:  spell-ui-pack build | check [<folder>]   (the pack's package;  default the current folder)"
 
-/** Imports the page must share, never bundled:  spell-element, Spell UI, Solid, our other packages. */
-const SHARED_IMPORT = /^\$\/(ui|spell-element)(\/|$)|^solid-js(\/|$)|^@solidjs\/|^@spell-app\//
+/** Imports the page must share, never bundled:  spell-element (`spell-kit/element`), Spell UI, Solid, our other packages. */
+const SHARED_IMPORT =
+  /^\$\/(ui|spell-element)(\/|$)|^solid-js(\/|$)|^@solidjs\/|^@spell-app\/|^spell-kit\/element(\/|$)/
 
 /** Version of what `build()` writes:  bump it when the generated files change shape, so every pack goes stale. */
 const PACK_FORMAT = "spell-pack 1"

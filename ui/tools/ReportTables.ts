@@ -1,7 +1,7 @@
 /// <reference types="node" />
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
-import { join } from "node:path"
+import { join, resolve } from "node:path"
 
 import type { PerfRecord, PerfResult, PerfStep } from "../test-helpers/PerfRun.ts"
 import {
@@ -44,7 +44,7 @@ export class ReportTables {
 
   /** Rewrite every marked table;  returns the names it found. */
   write(): string[] {
-    const path = join(this.root, this.file)
+    const path = resolve(this.root, this.file)
     let text = readFileSync(path, "utf8")
     const found: string[] = []
     for (const name of Object.keys(TABLES) as TableName[]) {
@@ -383,7 +383,8 @@ export class ReportTables {
 export type ReportTablesProps = {
   /** repo root, absolute */
   root: string
-  /** report file, relative to the root;  default `notes/report.md` */
+  /** report file, relative to the root (or absolute:  the content repo's `guides/ui/notes/report.md`, `tools/cli.ts`);
+   * default `notes/report.md` */
   file?: string
   /** folder of the result files, relative to the root;  default `tools/results` */
   results?: string

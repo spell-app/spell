@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SpellSolid, UIComponent } from "@spell-app/spell-element"
+import { SpellSolid, UIComponent } from "spell-kit/element"
 
 import "$/ui/core"
 

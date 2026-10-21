@@ -7,7 +7,7 @@ import { expectAccessible } from "$/ui/test-helpers/A11y"
 import { Fixture } from "$/ui/test-helpers/Fixture"
 
 import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
-import type { DOMElement } from "@spell-app/spell-element"
+import type { DOMElement } from "spell-kit/element"
 import type { DOMShapeElement } from "$/ui/components/ui-shape"
 
 import "$/ui/components/ui-shape"

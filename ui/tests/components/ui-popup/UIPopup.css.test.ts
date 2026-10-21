@@ -6,7 +6,7 @@ import { colorsCSS, foundationCSS, nativeCSS } from "$/ui/styles"
 
 import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import { Fixture } from "$/ui/test-helpers/Fixture"
-import type { DOMElement } from "@spell-app/spell-element"
+import type { DOMElement } from "spell-kit/element"
 import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import "$/ui/components/ui-button"

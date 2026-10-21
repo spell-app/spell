@@ -6,7 +6,7 @@ import type {
   ComponentVocabulary,
   SharedDictionary,
   StateSpec
-} from "@spell-app/spell-element/vocabulary.types"
+} from "spell-kit/element/vocabulary.types"
 
 /****************
  * ### `SharedVocabulary`

@@ -23,14 +23,18 @@ export const PACK_MODULES = ["solid-js", "@solidjs/web", "$/spell-element", "$/u
 /**
  * The `packModules` key of the module an import names:  its `$/` name, the key every page has always offered.
  * - Since epic `repo-split` P6 another repo's code imports Spell UI and spell-element by their npm names:
- *   `@spell-app/ui/core` => `$/ui/core`, `@spell-app/spell-element` => `$/spell-element`.
+ *   `@spell-app/ui/core` => `$/ui/core`, `spell-kit/element` => `$/spell-element`.
  * - A family's published entry, `@spell-app/ui/ui-code`, is its folder's:  `$/ui/components/ui-code`.
  * - So the keys a page's bundle offers (spell-epic's docs bundle, `SitePacks.ts`) stay as they were:
  *   the run-time names didn't change, only how a repo's source spells the import.
+ * - The kit's folders since epic `repo-split` P9 (one package, `spell-kit`):  `spell-kit/element` => `$/spell-element`
+ *   (its key since before the kit, J72), `spell-kit/util/...` => `$/util/...`.
  * - Any other specifier comes back as it is.
  */
 export function packModuleKey(specifier: string): string {
   const family = /^@spell-app\/ui\/(ui-[a-z-]+)$/.exec(specifier)
   if (family) return `$/ui/components/${family[1]}`
+  const kit = /^spell-kit\/([^/]+)(.*)$/.exec(specifier)
+  if (kit) return `$/${kit[1] === "element" ? "spell-element" : kit[1]}${kit[2]}`
   return specifier.replace(/^@spell-app\//, "$/")
 }

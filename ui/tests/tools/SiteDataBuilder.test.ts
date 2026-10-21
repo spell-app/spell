@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { describe, expect, it } from "vite-plus/test"
 
-import { keepingCommentsIn as asWritten, readJSON5File } from "@spell-app/util/node/json5"
+import { keepingCommentsIn as asWritten, readJSON5File } from "spell-kit/util/node/json5"
 import type { SitePagesFile } from "$/ui/docs-components/docs-components.types"
 import { SiteDataBuilder } from "$/ui/tools/SiteDataBuilder"
 import { SITE_PAGES } from "$/ui/tools/tools.types"
@@ -63,10 +63,7 @@ describe("SiteDataBuilder.build()", () => {
     expect(data.components.find((entry) => entry.tag === "ui-button")!.page).toBe(true)
     // every page the data names exists
     for (const entry of data.components.filter((tag) => tag.page))
-      expect(
-        () => readFileSync(join(import.meta.dirname, "../..", SITE_PAGES, entry.href!)),
-        entry.href
-      ).not.toThrow()
+      expect(() => readFileSync(join(import.meta.dirname, "../..", SITE_PAGES, entry.href!)), entry.href).not.toThrow()
   }, 60_000)
 
   it("resolves shared value sets, and reads a family's tokens with types", async () => {

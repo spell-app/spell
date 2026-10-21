@@ -13,7 +13,7 @@ More:
 - No build step to VIEW a page:  pages are static files loading ONE bundle.
   - The page server builds it when it starts, if it's stale (not committed since 2026-10-07).
 - Served at `/components/ui/` by the repo's page server, live-reloading
-  ([`packages/server`](../../spell-server/server/), its `componentSets` setting in the root `package.json`).
+  ([the kit's `server/`](../../server/), its `componentSets` setting in the root `package.json`).
 
 ## A component set
 
@@ -107,7 +107,7 @@ the doc-only `<ui-docs-*>` elements included ([`src/docs-components/`](../src/do
 The layout's root is `<ui-root class="site" stack-with="page" ...>`:
 - stacking examples (`stackable`, `doubling`, steps, form rows, items, token tables) stack by the SCREEN,
   as on fomantic-ui.com, not by the narrower docs column
-- [theming notes](../notes/theming.md), "Stacking"
+- [theming notes](../../spell.epics/guides/ui/notes/theming.md), "Stacking"
 
 The source of a page:  the site header's "open in VS Code" button.
 - Pages left GitHub with the move, so they have no "edit on GitHub" link any more.

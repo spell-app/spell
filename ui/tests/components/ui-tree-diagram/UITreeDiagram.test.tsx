@@ -2,7 +2,7 @@ import { describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 
 import { expectAccessible } from "$/ui/test-helpers/A11y"
 import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
-import type { DOMElement } from "@spell-app/spell-element"
+import type { DOMElement } from "spell-kit/element"
 import { TreeLayout, type TreeDiagramNode } from "$/ui/components/ui-tree-diagram"
 
 import "$/ui/components/ui-tree-diagram"

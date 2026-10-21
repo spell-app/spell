@@ -25,6 +25,6 @@ const ownConfig = join(resolve(args[1] ?? "."), "tsconfig.json")
 register({ tsconfig: existsSync(ownConfig) ? ownConfig : join(UI, "tsconfig.json") })
 // then every `$/` import by its OWN repo's alias table (the toolchain's hook, epic `repo-split` I12):  a pack's catalog
 // imports its vocabularies (`$/<pack>/...`) AND Spell UI's tools import Spell UI's own (`$/ui/...`), two repos' tables
-await import("@spell-app/toolchain/aliases")
+await import("spell-kit/toolchain/aliases")
 const { ComponentPack } = await import(pathToFileURL(join(UI, "tools", "ComponentPack.ts")).href)
 process.exitCode = await ComponentPack.main(args)

@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 
 import { expectAccessible } from "$/ui/test-helpers/A11y"
 import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import { Fixture } from "$/ui/test-helpers/Fixture"
-import type { DOMElement } from "@spell-app/spell-element"
+import type { DOMElement } from "spell-kit/element"
 import { SiteData, type SiteDataFile, type SiteTag } from "$/ui/docs-components"
 
 import { STORAGE_KEYS } from "$/ui/docs-components/ui-docs-nav/UIDocsNav.types"

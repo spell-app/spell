@@ -9,8 +9,8 @@ import { dirname, join, normalize, relative, resolve } from "node:path"
  * - Every `types` path in the PUBLISHED `exports` (and `types`) exists:  `package.json`'s `publishConfig`, which
  *   `yarn pack` writes over the source ones (epic `repo-split` P6);  the top-level fields when it has none.
  * - Every import / export STATEMENT is a bare package name, or a relative path that resolves INSIDE `dist/`:
- *   no `$/util`, `$/ui` ... (build-time aliases a consumer can't resolve), no `@spell-app/util` or
- *   `@spell-app/spell-element` (not published on their own:  their declarations ship in `dist/_util/` and
+ *   no `$/util`, `$/ui` ... (build-time aliases a consumer can't resolve), no `spell-kit/util` or
+ *   `spell-kit/element` (not published on their own:  their declarations ship in `dist/_util/` and
  *   `dist/_spell-element/`), and nothing escaping `dist/`.  Doc comments may mention aliases.
  * - `problems()` is empty when it's fine;  `yarn smoke` runs it after `vite build` and fails otherwise.
  * - Node only, node built-ins only.
@@ -96,5 +96,5 @@ export class DeclarationCheck {
   }
 }
 
-/** Packages whose declarations ship inside `@spell-app/ui`'s `dist/` (`declarations()`):  never named by a `.d.ts`. */
-const UNPUBLISHED = /^@spell-app\/(util|spell-element)(\/|$)/
+/** The kit's folders whose declarations ship inside `@spell-app/ui`'s `dist/` (`declarations()`):  never named by a `.d.ts`. */
+const UNPUBLISHED = /^spell-kit\/(util|element)(\/|$)/

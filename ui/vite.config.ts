@@ -6,8 +6,8 @@ import { createRequire } from "node:module"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { standardDecorators } from "@spell-app/toolchain/decorators"
-import { fmtConfig, packageLint } from "@spell-app/toolchain/lint"
+import { standardDecorators } from "spell-kit/toolchain/decorators"
+import { fmtConfig, packageLint } from "spell-kit/toolchain/lint"
 import { environment } from "./tools/environment.ts"
 import { hotElements } from "./tools/HotElements.ts"
 
@@ -21,8 +21,8 @@ const COMPONENTS_DIR = fileURLToPath(new URL("./components", import.meta.url))
  * The `src/` folders of `util` and `spell-element`, which live in repos of their own (epic `repo-split` P8):
  * found by their npm names, so the declarations build doesn't depend on where those repos sit.
  */
-const UTIL_SRC = path.dirname(createRequire(import.meta.url).resolve("@spell-app/util"))
-const ELEMENT_SRC = path.dirname(createRequire(import.meta.url).resolve("@spell-app/spell-element"))
+const UTIL_SRC = path.dirname(createRequire(import.meta.url).resolve("spell-kit/util"))
+const ELEMENT_SRC = path.dirname(createRequire(import.meta.url).resolve("spell-kit/element"))
 
 /**
  * The declarations program's root:  the folder holding this repo, `UTIL_SRC` and `ELEMENT_SRC`
@@ -192,7 +192,7 @@ export function baseConfig() {
  * - `css.transformer: "lightningcss"` so component CSS gets nesting / `@custom-media` lowering with the same engine
  *   that minifies it.  NOTE: postcss is never used.
  * - `vite-plugin-dts` emits `.d.ts` for consumers, laid out like `exports` says (`declarations()`).
- * - Also `vp lint` / `vp fmt`:  the toolchain's settings (`@spell-app/toolchain/lint`), as Spell UI's OWN package's
+ * - Also `vp lint` / `vp fmt`:  the toolchain's settings (`spell-kit/toolchain/lint`), as Spell UI's OWN package's
  *   (`packageLint({ name: "ui" })`, the `spell-ui/*` rules in its component folders):  spell-ui is a flat repo, so this
  *   is its root block too, the one the editor and `vp check` read (epic `repo-split` I13;  spell-app's root block
  *   covered it before).
@@ -269,7 +269,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  * `vite-plugin-dts` options for the published declarations:
  * `dist/index.d.ts`, `dist/core.d.ts`, `dist/components/ui-<name>/index.d.ts` ... --
  * the paths `package.json` `exports` names.
- * - `src/` imports `@spell-app/util` (`UTIL_SRC`) and `@spell-app/spell-element` (`ELEMENT_SRC`), in other repos.
+ * - `src/` imports `spell-kit/util` (`UTIL_SRC`) and `spell-kit/element` (`ELEMENT_SRC`), in other repos.
  *   - So the program's root is the folder holding all three (`DECLARATIONS_ROOT`;  `compilerOptions.rootDir`, else
  *     TS6059).
  *   - All three `src/` trees are included, with ui's `components/`.
@@ -277,9 +277,9 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   - `dist/spell-ui/src/**` up to `dist/**`
  *   - `dist/spell-ui/components/**` to `dist/components/**` (where it was while the families lived in
  *     `src/components/`)
- *   - `dist/spell-util/util/src/**` to `dist/_util/**` (not `dist/util/`:  that's `src/util/`'s)
- *   - `dist/spell-element/src/**` to `dist/_spell-element/**`
- * - It also rewrites `$/ui` specifiers, and `@spell-app/util` / `@spell-app/spell-element` ones (their npm names, as
+ *   - `dist/util/src/**` (the kit's `util/`) to `dist/_util/**` (not `dist/util/`:  that's `src/util/`'s)
+ *   - `dist/element/src/**` (the kit's `element/`) to `dist/_spell-element/**`
+ * - It also rewrites `$/ui` specifiers, and `spell-kit/util` / `spell-kit/element` ones (their npm names, as
  *   `ui` imports them from another repo since epic `repo-split` P6), to relative ones (a `declare module`
  *   augmentation's too).
  *   - `pathsToAliases: false`:
@@ -292,7 +292,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   (`util`'s GENERIC ones only).
  *   NOT `util/src/spell/` or `util`'s barrel (which flattens it in):
  *   `exclude` lists them, and `src/util/index.ts` imports file by file.
- * - MUST end with NO `$/` alias and no `@spell-app/util` / `@spell-app/spell-element` in `dist/**.d.ts`, and no path
+ * - MUST end with NO `$/` alias and no `spell-kit/util` / `spell-kit/element` in `dist/**.d.ts`, and no path
  *   outside `dist/`;  `yarn smoke` checks.
  */
 export function declarations(): PluginOptions {
@@ -331,18 +331,18 @@ function declarationPaths(): Record<string, string[]> {
     "$/ui/components/*": [`${ui}/components/*`],
     "$/util": [`${util}/index.ts`],
     "$/util/*": [`${util}/*`],
-    "@spell-app/util": [`${util}/index.ts`],
-    "@spell-app/util/*": [`${util}/*`],
+    "spell-kit/util": [`${util}/index.ts`],
+    "spell-kit/util/*": [`${util}/*`],
     "$/spell-element": [`${element}/index.ts`],
     "$/spell-element/*": [`${element}/*`],
-    "@spell-app/spell-element": [`${element}/index.ts`],
-    "@spell-app/spell-element/*": [`${element}/*`]
+    "spell-kit/element": [`${element}/index.ts`],
+    "spell-kit/element/*": [`${element}/*`]
   }
 }
 
 /**
  * `declarations()`'s `beforeWriteFile`:  where a `.d.ts` goes in `dist/`, and its imports made to match.
- * - Returns `false` (skip) for anything outside `ui/src`, `ui/components`, `util/src` and `spell-element/src`.
+ * - Returns `false` (skip) for anything outside `ui/src`, `ui/components`, `util/src` and `element/src` (the kit's).
  * - Only import / export STATEMENTS are rewritten (`from "..."`, `import("...")`, `declare module "..."`):
  *   doc comments may mention aliases.
  * - A specifier is resolved against the SOURCE tree, then expressed in `dist/` terms.
@@ -368,10 +368,13 @@ function rewriteDeclaration(filePath: string, content: string) {
 
   const code = content
     .replace(
-      /(from |import\(|declare module )(["'])(\$\/[^"']+|@spell-app\/(?:util|spell-element)(?:\/[^"']*)?|\.\.?\/[^"']*)\2/g,
+      /(from |import\(|declare module )(["'])(\$\/[^"']+|spell-kit\/(?:util|element)(?:\/[^"']*)?|\.\.?\/[^"']*)\2/g,
       (_, start, quote, written: string) => {
-        // another repo's package by its npm name (epic `repo-split` P6):  its subpaths are its alias's
-        const specifier = written.replace(/^@spell-app\//, "$/")
+        // the kit by its npm name (epic `repo-split` P6, P9):  its subpaths are its alias's (`spell-kit/element` is
+        // `$/spell-element`)
+        const specifier = written
+          .replace(/^spell-kit\/element(?=\/|$)/, "$/spell-element")
+          .replace(/^spell-kit\//, "$/")
         const aliased = OUTSIDE.find(({ alias }) => specifier === alias || specifier.startsWith(`${alias}/`))
         const source = specifier.startsWith(".")
           ? path.resolve(sourceDir, specifier)
@@ -394,7 +397,7 @@ function rewriteDeclaration(filePath: string, content: string) {
 /**
  * The folders besides `src/` whose declarations ship inside `@spell-app/ui`, each into a `dist/` folder of its own
  * (`rewriteDeclaration()`):  ui's `components/`, and the packages outside this one.
- * - `alias`:  how `src/` imports them (`$/util`), or what an npm name becomes (`@spell-app/util` => `$/util`)
+ * - `alias`:  how `src/` imports them (`$/util`), or what an npm name becomes (`spell-kit/util` => `$/util`)
  * - `src`:  their source folder
  * - `written`:  where `vite-plugin-dts` writes their declarations, in `dist/`
  * - `folder`:  where they go instead
@@ -441,15 +444,13 @@ function slashed(file: string): string {
 /**
  * Hot module replacement for the components in `yarn dev` (`tools/HotElements.ts`;
  * `apply: "serve"`, so builds are untouched, and NOT in `vitest.config.ts`).
- * - `HotDefinitions` (`@spell-app/spell-element`'s) is injected by FILE PATH, resolved from its package's `exports`:
+ * - `HotDefinitions` (`spell-kit/element`'s) is injected by FILE PATH, resolved from its package's `exports`:
  *   the sheets' handler import lives in a `.css?inline` module, where `resolve.tsconfigPaths` resolves no alias.
  */
 function hotElementsPlugin(): Plugin {
   // HACK: `HotElements.ts` types its plugin with `vite`'s `Plugin`, this config with `vite-plus`'s:
   // the same version, but a second declaration TypeScript won't unify
-  return hotElements(
-    createRequire(import.meta.url).resolve("@spell-app/spell-element/HotDefinitions")
-  ) as unknown as Plugin
+  return hotElements(createRequire(import.meta.url).resolve("spell-kit/element/HotDefinitions")) as unknown as Plugin
 }
 
 /**

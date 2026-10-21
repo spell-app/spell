@@ -6,7 +6,7 @@ import { Fixture } from "$/ui/test-helpers/Fixture"
 import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
 import { Viewport } from "$/ui/test-helpers/Viewport"
 import { E } from "$/ui/core"
-import { DOMElement } from "@spell-app/spell-element"
+import { DOMElement } from "spell-kit/element"
 
 import { UIRoot, type RootFailure } from "$/ui/components/ui-root"
 
