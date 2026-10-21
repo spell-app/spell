@@ -1,27 +1,30 @@
-# spell
+# spell-kit
 
-The top repo:  the ONE install over Spell's child repos, the list of them, and the commands over them
-(epic `repo-split` P7).
-- It holds nothing anyone imports:  no package, only the glue.
+The kit:  the layer every Spell repo stands on, the house style, and the ONE install over the child repos
+(epic `repo-split` P7, P9).
+- Five folders of code:  util, toolchain, server, assembler and element, published as ONE package, `spell-kit`
+  (`spell-kit/util`, `spell-kit/server/page` ...).
+- The house style every repo shares, WWOD, in `agents/wwod/`.
+- The glue:  the install, the list of child repos, and the commands over them.
 - Each child repo is its own git repo, cloned INSIDE this one and git-ignored here
   (`~/www/spell/spell-ui/` ...).
-  - `git status` here shows only the glue;  each child repo has its own.
+  - `git status` here shows only the kit's own files;  each child repo has its own.
 - Rules for humans and agents:  [AGENTS.md](AGENTS.md).
 
 ## Setting up
 
 ```sh
-git clone git@github.com:spell-app/spell-hub.git ~/www/spell
+git clone git@github.com:spell-app/spell-kit.git ~/www/spell
 cd ~/www/spell
-yarn install          # quick:  no child repos yet, so nothing to link
+yarn install          # the kit's own packages:  no child repos yet
 yarn clone            # every child repo in repos.json5, then ONE install for all of them
 ```
 
-- Or only what you're working on, and what it needs:
+- Or only what you're working on, and what it needs (the kit is always there):
 
   ```sh
-  yarn clone spell-ui   # spell-ui, spell-element, spell-server, spell-util
-  yarn clone spell-lang # spell-lang, spell-util
+  yarn clone spell-ui    # spell-ui alone
+  yarn clone spell-brand # spell-brand, spell-ui
   ```
 
 - `yarn clone` clones over SSH, and over HTTPS (GitHub's login, `gh auth setup-git`) when SSH is refused.
@@ -30,15 +33,19 @@ yarn clone            # every child repo in repos.json5, then ONE install for al
 ## Day to day
 
 ```sh
+yarn kit:review       # the kit's own finishing pass:  ts, lint, format, tests of its five folders
 yarn pull             # git pull --ff-only in every child repo
 yarn status           # each child repo's branch and changes;  a clean one in one line
 yarn repos            # the list:  which are cloned, and what each needs
-yarn ts               # every repo's `yarn ts`, lowest first (each builds the declarations the ones above read)
-yarn test             # every repo's tests
-yarn lint             # every repo's lint
-yarn review           # every repo's finishing pass
+yarn ts               # the kit's, then every repo's `yarn ts`, lowest first:
+                      #   each builds the declarations the ones above read
+yarn test             # the kit's tests, then every repo's
+yarn lint             # the kit's lint, then every repo's
+yarn review           # the kit's finishing pass, then every repo's
 ```
 
+- The kit's checks one at a time:  `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`,
+  `kit:format:check`.
 - In a child repo, its own scripts:  `cd spell-ui && yarn test`.
   In a package of a repo with several:  `cd spell-lang/core && yarn test`.
 - A change across two repos is two commits, one in each, and two pull requests, the lower repo's first.
@@ -46,35 +53,50 @@ yarn review           # every repo's finishing pass
 
 ## What's in it
 
+The kit's code, one folder each, its tests in `tests/<folder>/`:
+
+| Folder | Entry | What it is |
+| --- | --- | --- |
+| [util/](util/) | `spell-kit/util` | the helpers every package shares:  small generic ones (`@proto` ...), spell's own in `src/spell/`, the reactive engine, and `node/json5` (node only) |
+| [toolchain/](toolchain/) | `spell-kit/toolchain/...` | the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, the run-time alias hook |
+| [server/](server/) | `spell-kit/server` | serving pages locally:  static folders, an Express-shaped router, live reload, ports, openers, a file lock, the generic page server, the site header |
+| [assembler/](assembler/) | `spell-kit/assembler` | assembling pages:  link targets (`Linker`), `formatHTML()`, bundles built on demand (`Bundle`), `DataFile`, `contentFolder` |
+| [element/](element/) | `spell-kit/element` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's) |
+
+- They were three repos, spell-util, spell-server and spell-element, merged in with their history (P9).
+
+The rest of what's tracked:
+
 | File | What it is |
 | --- | --- |
-| `package.json` | `"workspaces": ["spell-*"]`:  every child repo, each naming its own packages (yarn's nested workspaces);  the `resolutions` (one Solid);  the scripts above |
+| `package.json` | the ONE package `spell-kit` and its `exports`;  `"workspaces": ["spell-*"]`:  every child repo, each naming its own packages (yarn's nested workspaces);  the `resolutions` (one Solid);  the scripts above |
+| `tsconfig.base.json` | the kit's `$/` alias table (`$/util`, `$/server` ...), for inside the kit |
+| `vite.config.ts` | the kit's lint and format settings, what `vp check` and the editor read |
 | `yarn.lock`, `.yarnrc.yml`, `.yarn/releases/` | the one lockfile, the one catalog of tool versions (`vite-plus` and its tools), the yarn release |
 | `repos.json5` | the child repos, lowest first:  name, git URL, which repos each needs |
-| `tools/repos.ts` | what `clone`, `pull`, `status`, `repos` and the checks run;  Node 24 runs it as is |
-| `AGENTS.md`, `CLAUDE.md` | the rules across repos |
-| `.epic/config.json5` | the epic settings, for a session working here (epic `repo-split` P9) |
+| `tools/kit.ts` | what the `kit:` checks run, folder by folder;  Node 24 runs it as is |
+| `tools/repos.ts` | what `clone`, `pull`, `status`, `repos`, the checks over every repo and the `postinstall` run |
+| `agents/` | WWOD, the house style (`agents/wwod/`), and links to the three logs in the content repo |
+| `AGENTS.md`, `CLAUDE.md` | the rules for the kit and across repos |
+| `.epic/config.json5` | the epic settings, for a session working here |
 
-The folders, all git-ignored:
+The folders git ignores:
 
 | Folder | What it is |
 | --- | --- |
-| `spell-util/` | util (the helpers every package shares) and the toolchain (lint, tsconfig, decorators, types) |
-| `spell-server/` | server (serving pages, the generic page server) and assembler |
-| `spell-element/` | custom elements on Solid, for every component set |
 | `spell-lang/` | the parser, markdown, core, py and spell:  the language, its runtime and its writers |
 | `spell-ui/` | Spell UI, the `ui-*` elements, and its docs site |
 | `spell-brand/` | Spell's brand:  Claude Design's pages, the `<brand-*>` pack |
 | `spell-epic/` | the epic engine, a Claude Code plugin |
 | `spell-app/` | the editor and its servers:  app, spaces, lsp, cli, vscode, page-server |
-| `spell.epics/` | the content repo:  epics, guides, sagas, pages, brand pages, window files;  its own git repo, local only |
+| `spell.epics/` | the content repo:  epics, guides, sagas, pages, brand pages, window files, the logs;  its own git repo, local only |
 | `spell.spaces/` | your own projects:  a plain folder |
+| `dist-types/` | the kit's built declarations, for the repos above it (`spell-types`) |
 | `node_modules/` | the one install |
 
 - The dot in `spell.epics` and `spell.spaces` keeps them out of the `"spell-*"` workspaces:  they're data, not code.
-  - They're links to their old places (`~/www/spell-app/spell-app.epics`, `~/www/spell-app/spell-spaces`) until the
-    move (epic `repo-split` P9) puts the real folders here.
   - `yarn clone` never clones them:  they're yours.  Someone new starts without them.
-- spell-epic is a workspace like the rest since epic `epic-engine` P10 (on its `cutover` branch until the move).
-- Standalone child repos (`git clone spell-ui && yarn install`, no top repo) aren't supported yet:  that's once the
-  packages are on npm.
+  - In a worktree of the kit, they're links to the main checkout's.
+- spell-epic is a workspace like the rest since epic `epic-engine` P10.
+- Standalone child repos (`git clone spell-ui && yarn install`, no kit around them) aren't supported yet:
+  that's once the packages are on npm.

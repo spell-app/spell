@@ -150,7 +150,8 @@ export class Bundle {
   }
 
   /**
-   * Its source files, sorted, by name:  a package's by its npm name and its path in it (`@spell-app/ui/src/core.ts`),
+   * Its source files, sorted, by name:  a package's by its npm name and its path in it (`@spell-app/ui/src/core.ts`,
+   * `spell-kit/element/src/index.ts`),
    * anything else by its path from the install's root (`yarn.lock`);  `/`-separated.
    * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs)
    * - the same names wherever the repos are, so a move makes no bundle stale
@@ -163,11 +164,14 @@ export class Bundle {
   private sources(): Array<[name: string, file: string]> {
     const found: Array<[string, string]> = []
     for (const source of this.spec.sources) {
-      const scoped = /^(@[^/]+\/[^/]+)(?:\/(.*))?$/.exec(source)
-      const base = scoped ? packageFolder(scoped[1]!, this.root) : installRoot(this.root)
-      if (!base) continue
-      const prefix = scoped ? scoped[1]! : ""
-      walk(join(base, scoped ? (scoped[2] ?? "") : source), base, prefix)
+      // a package by its npm name:  scoped (`@spell-app/ui/src`), or unscoped when one's installed by that name
+      // (`spell-kit/element/src`, epic `repo-split` P9);  else a path from the install's root (`yarn.lock`)
+      const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
+      const folder = named && packageFolder(named[1]!, this.root)
+      if (named?.[1]!.startsWith("@") && !folder) continue
+      const base = folder ?? installRoot(this.root)
+      const prefix = folder ? named![1]! : ""
+      walk(join(base, folder ? (named![2] ?? "") : source), base, prefix)
     }
     return found.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
 

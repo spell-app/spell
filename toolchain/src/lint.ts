@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 /**
  * Lint (oxlint) and format (oxfmt) settings every package of every repo shares, as `lint` / `fmt` blocks of
- * `vite.config.ts`:  `@spell-app/toolchain/lint` (spell-app's root `vite.lint.ts` until epic `repo-split` P6).
+ * `vite.config.ts`:  `spell-kit/toolchain/lint` (spell-app's root `vite.lint.ts` until epic `repo-split` P6).
  * - Was `.oxlintrc.json`, `.oxlintrc.react.json` and `.oxfmtrc.json` at the repo root,
  *   before Vite+ (`vp lint`, `vp fmt`, `vp check`) folded them into `vite.config.ts`.
  * - Plain objects, spread by each repo's root `vite.config.ts` and each package's:

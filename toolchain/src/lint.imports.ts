@@ -8,7 +8,9 @@ import { definePlugin, defineRule, type ESTree, type Rule } from "vite-plus/lint
  * (WWOD §4, "Package aliases, never `../`";  epic `repo-split` P3, P6 and I13).
  * - Unlike `spell-ui/*` (`lint.patterns.ts`), which holds component files to Spell UI's patterns,
  *   these hold for EVERY file of a package or its tests:  on in `lintBase` (`lint.ts`).
- * - Laid out as the top repo `spell` holds its child repos (epic `repo-split` P8, Q16):
+ * - Laid out as the kit `spell-kit` holds its child repos (epic `repo-split` P8, Q16, P9):
+ *   - the kit's own folders (`util/`, `server/` ...):  each a package to these rules, its tests `tests/<name>/`
+ *     (one npm package, `spell-kit`, but one TypeScript program per folder)
  *   - a repo of several packages (spell-lang ...):  `<repo>/<name>/`, its tests `<repo>/tests/<name>/`
  *   - a flat repo, ONE package (spell-ui ...):  the repo itself, its tests `<repo>/tests/`
  * - Files at a multi-package repo's root (`vite.config.ts` ...) aren't in a package:  no rule here looks at them.
@@ -18,14 +20,11 @@ import { definePlugin, defineRule, type ESTree, type Rule } from "vite-plus/lint
 // ## Rules
 ////////////////
 
-/** The file that marks the top repo, the folder holding every child repo:  its list of them. */
+/** The file that marks the kit, the top repo holding every child repo:  its list of them. */
 const TOP_MARK = "repos.json5"
 
-/**
- * The top repo when no `repos.json5` is found above a file:  the folder holding spell-util, which this file is in
- * (`spell-util/toolchain/src/`).
- */
-const FALLBACK_TOP = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
+/** The kit when no `repos.json5` is found above a file:  the kit this file is in (`toolchain/src/`). */
+const FALLBACK_TOP = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 
 /** `vi.*` calls that take a module path:  a mock is an import too. */
 const VI_CALLS = new Set(["mock", "doMock", "unmock", "doUnmock", "importActual", "importMock"])
@@ -41,7 +40,7 @@ const VI_CALLS = new Set(["mock", "doMock", "unmock", "doUnmock", "importActual"
  * - A path into a repo root's own files (`../../vite.config.ts`) is fine:  they're nobody's package.
  * - Its fix, in its message:  the package's alias inside its repo (`$/parser`, from `spell`);  its npm name from
  *   another repo (`no-cross-repo-alias`), and in a file Vite loads as a config, which has no alias table
- *   (`@spell-app/server/checkout`, `@spell-app/ui/vite.config.ts`):  an entry its `package.json` `exports` names.
+ *   (`spell-kit/server/checkout`, `@spell-app/ui/vite.config.ts`):  an entry its `package.json` `exports` names.
  */
 const noCrossPackageImport = defineRule({
   meta: {
@@ -51,7 +50,7 @@ const noCrossPackageImport = defineRule({
       climb:
         "`{{path}}` climbs out of `{{from}}` into `{{into}}`:  import it through the package, never `../`:  " +
         "from its own repo, its alias (`$/{{name}}`, or an entry point `tsconfig.base.json` lists);  from another " +
-        "repo, or where no alias reaches (a Vite config), its npm name (`@spell-app/{{name}}/...`, its `exports`)  " +
+        "repo, or where no alias reaches (a Vite config), its npm name (`{{npm}}/...`, its `exports`)  " +
         '(WWOD §4, "Package aliases, never `../`")'
     }
   },
@@ -69,7 +68,7 @@ const noCrossPackageImport = defineRule({
         context.report({
           node,
           messageId: "climb",
-          data: { path, from: from.folder, into: into.folder, name: into.name }
+          data: { path, from: from.folder, into: into.folder, name: into.name, npm: npmNameOf(into.name) }
         })
       }
     })
@@ -79,16 +78,16 @@ const noCrossPackageImport = defineRule({
 /**
  * Each package's repo, by package name:  where `$/<name>` is an alias (epic `repo-split` P8).
  * - Inside ONE repo, a package names another by its alias (`$/parser`, from `spell`);  from ANOTHER repo, by its npm
- *   name (`@spell-app/ui/core`, from the app).
+ *   name (`@spell-app/ui/core`, from the app;  `spell-kit/element`, from Spell UI).
  * - A package missing here is in no known repo:  the rule leaves its imports alone.
- * - The flat repos (one package each) are `FLAT_REPOS`.
+ * - The flat repos (one package each) are `FLAT_REPOS`;  the kit's folders, `KIT_FOLDERS`.
  */
 export const REPO_OF: Readonly<Record<string, string>> = {
-  util: "spell-util",
-  toolchain: "spell-util",
-  server: "spell-server",
-  assembler: "spell-server",
-  "spell-element": "spell-element",
+  util: "spell-kit",
+  toolchain: "spell-kit",
+  server: "spell-kit",
+  assembler: "spell-kit",
+  "spell-element": "spell-kit",
   parser: "spell-lang",
   markdown: "spell-lang",
   core: "spell-lang",
@@ -107,15 +106,33 @@ export const REPO_OF: Readonly<Record<string, string>> = {
 
 /** The repos that ARE one package, by folder:  their package's name (`spell-ui` is `ui`, `$/ui`). */
 export const FLAT_REPOS: Readonly<Record<string, string>> = {
-  "spell-element": "spell-element",
   "spell-ui": "ui",
   "spell-brand": "brand",
   "spell-epic": "epics"
 }
 
 /**
+ * The kit's own folders, at its root (epic `repo-split` P9):  each folder's package name, its `$/` alias
+ * (`element/` is `$/spell-element`, the name every page's packs share it by, J72).
+ * - One npm package, `spell-kit`:  another repo imports a folder as `spell-kit/<folder>` (`npmNameOf()`).
+ */
+export const KIT_FOLDERS: Readonly<Record<string, string>> = {
+  util: "util",
+  toolchain: "toolchain",
+  server: "server",
+  assembler: "assembler",
+  element: "spell-element"
+}
+
+/** A package's npm name, by its name (its alias's):  `spell-kit/element` for `spell-element`, `@spell-app/ui` for `ui`. */
+export function npmNameOf(name: string): string {
+  const folder = Object.entries(KIT_FOLDERS).find(([, each]) => each === name)?.[0]
+  return folder ? `spell-kit/${folder}` : `@spell-app/${name}`
+}
+
+/**
  * A `$/` alias naming a package of ANOTHER repo (`REPO_OF`):  `import { E } from "$/spell-element"`, from Spell UI.
- * - Its fix, in its message:  the package's npm name, `@spell-app/spell-element`, an entry its `package.json`
+ * - Its fix, in its message:  the package's npm name, `spell-kit/element`, an entry its `package.json`
  *   `exports` names (a family's barrel is its published entry:  `@spell-app/ui/ui-code`).
  * - Looks at every module path a file names, as `no-cross-package-import` does.
  * - NOT a string that only NAMES a module:  a page's `SpellUI.packModules` keys (`"$/ui/core"`) stay `$/` names.
@@ -127,7 +144,7 @@ const noCrossRepoAlias = defineRule({
     messages: {
       alias:
         "`{{path}}` is `{{name}}`'s alias, from `{{from}}` ({{fromRepo}}) into {{intoRepo}}:  import it by its npm " +
-        'name, `@spell-app/{{rest}}`, an entry of its `package.json` `exports`  (WWOD §4, "Package names across repos")'
+        'name, `{{npm}}{{rest}}`, an entry of its `package.json` `exports`  (WWOD §4, "Package names across repos")'
     }
   },
   create(context) {
@@ -141,7 +158,15 @@ const noCrossRepoAlias = defineRule({
         context.report({
           node,
           messageId: "alias",
-          data: { path, name, from: from.folder, fromRepo, intoRepo, rest: path.slice(2) }
+          data: {
+            path,
+            name,
+            from: from.folder,
+            fromRepo,
+            intoRepo,
+            npm: npmNameOf(name),
+            rest: path.slice(2 + name.length)
+          }
         })
       }
     })
@@ -182,9 +207,10 @@ function moduleVisitor(check: (node: ESTree.Node, path: string) => void) {
 }
 
 /**
- * The package a path is in, if it's in one:  its name and its folder from the top repo (`spell-lang/core`,
- * `spell-lang/tests/core`, `spell-ui`, `spell-ui/tests`).
- * - Its repo:  the child-repo folder under the top repo (`topOf()`) that it's in.
+ * The package a path is in, if it's in one:  its name and its folder from the kit (`spell-lang/core`,
+ * `spell-lang/tests/core`, `spell-ui`, `spell-ui/tests`, `element`, `tests/element`).
+ * - The kit's own folders (`KIT_FOLDERS`):  `<folder>/...` or `tests/<folder>/...`, at the kit's root.
+ * - Else its repo:  the child-repo folder under the kit (`topOf()`) that it's in.
  * - A flat repo (`FLAT_REPOS`):  every file in it is its package's, its tests' too.
  * - A repo of several packages:  `<repo>/<name>/...` or `<repo>/tests/<name>/...`;  its root's own files are in none.
  */
@@ -192,6 +218,12 @@ export function packageOf(path: string): { name: string; folder: string } | unde
   const parts = relative(topOf(path), path).split(sep)
   const [repo, first, second] = parts
   if (!repo || repo.startsWith("..") || parts.length < 2) return undefined
+  const kit = KIT_FOLDERS[repo]
+  if (kit) return { name: kit, folder: repo }
+  if (repo === "tests") {
+    const tested = KIT_FOLDERS[first!]
+    return tested && parts.length > 2 ? { name: tested, folder: `tests/${first}` } : undefined
+  }
   const flat = FLAT_REPOS[repo]
   if (flat) return { name: flat, folder: first === "tests" ? `${repo}/tests` : repo }
   if (first === "tests") return parts.length > 3 ? { name: second!, folder: `${repo}/tests/${second}` } : undefined

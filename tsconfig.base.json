@@ -1,0 +1,35 @@
+{
+  // The kit's import-alias table (epic `repo-split` P9:  spell-util's, spell-server's and spell-element's tables, one).
+  // Every folder's `tsconfig.json` here extends it;  it extends the TypeScript settings every repo shares, the
+  // toolchain's (`toolchain/tsconfig.base.json`, `spell-kit/toolchain/tsconfig.base.json` from another repo).
+  // - `$/name` is a folder's barrel, `$/name/...` a file in its `src/`:  for INSIDE the kit only.
+  // - Another repo imports the kit by its npm name (`spell-kit/util/class`), an entry its `package.json` `exports`
+  //   names (WWOD §4, "Package names across repos").
+  // - MUST stay the only `paths` in the kit:  a folder that sets its own `paths` REPLACES this table, never adds to it.
+  // - Paths are fixed, never `${configDir}`:  `tsx` can't resolve it.
+  // - The child repos inside the kit (`spell-ui/` ...) have their own tables:  the nearest one up wins.
+  "extends": "./toolchain/tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      // ## `util`
+      "$/util": ["./util/src/index.ts"],
+      "$/util/*": ["./util/src/*"],
+
+      // ## `server`
+      "$/server": ["./server/src/index.ts"],
+      "$/server/*": ["./server/src/*"],
+      "$/server/test/*": ["./server/test/*"],
+
+      // ## `assembler`
+      "$/assembler": ["./assembler/src/index.ts"],
+      "$/assembler/*": ["./assembler/src/*"],
+
+      // ## `element`:  still `$/spell-element`, the name every page's packs share it by (`packModuleKey()`, epic
+      // `repo-split` J72);  `$/spell-element/test/*` (its own tests' helpers) is longer than `$/spell-element/*`, so it
+      // wins
+      "$/spell-element": ["./element/src/index.ts"],
+      "$/spell-element/*": ["./element/src/*"],
+      "$/spell-element/test/*": ["./element/test/*"]
+    }
+  }
+}

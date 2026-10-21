@@ -1776,12 +1776,9 @@ __metadata:
     "@spell-app/lsp": "workspace:*"
     "@spell-app/markdown": "workspace:*"
     "@spell-app/parser": "workspace:*"
-    "@spell-app/server": "workspace:*"
     "@spell-app/spaces": "workspace:*"
     "@spell-app/spell": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
     "@spell-app/ui": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/lodash": "npm:^4.17.17"
     "@types/node": "npm:^22.20.4"
     "@typescript/typescript6": "npm:^6.0.2"
@@ -1794,6 +1791,7 @@ __metadata:
     monaco-editor: "npm:^0.57.0"
     playwright: "npm:1.63.0"
     solid-js: "npm:2.0.0-rc.13"
+    spell-kit: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -1803,34 +1801,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@spell-app/assembler@workspace:*, @spell-app/assembler@workspace:spell-server/assembler":
-  version: 0.0.0-use.local
-  resolution: "@spell-app/assembler@workspace:spell-server/assembler"
-  dependencies:
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
-    "@types/node": "npm:^22.20.4"
-    json5: "npm:^2.1.1"
-    linkedom: "npm:^0.18.13"
-    tsx: "npm:4.20.3"
-    typescript: "npm:^7.0.2"
-    vite: "catalog:"
-    vite-plus: "catalog:"
-  languageName: unknown
-  linkType: soft
-
 "@spell-app/brand@workspace:spell-brand":
   version: 0.0.0-use.local
   resolution: "@spell-app/brand@workspace:spell-brand"
   dependencies:
     "@solidjs/web": "npm:2.0.0-rc.13"
-    "@spell-app/server": "workspace:*"
-    "@spell-app/spell-element": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
     "@spell-app/ui": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/node": "npm:^22.20.4"
     solid-js: "npm:2.0.0-rc.13"
+    spell-kit: "workspace:*"
     tsx: "npm:^4.23.15"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -1843,10 +1822,8 @@ __metadata:
   resolution: "@spell-app/cli@workspace:spell-app/cli"
   dependencies:
     "@inkjs/ui": "npm:^2"
-    "@spell-app/server": "workspace:*"
     "@spell-app/spaces": "workspace:*"
     "@spell-app/spell": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
     "@spell-app/ui": "workspace:*"
     "@types/node": "npm:^22"
     "@types/react": "npm:^18.2.56"
@@ -1856,6 +1833,7 @@ __metadata:
     ink-testing-library: "npm:^4"
     linkedom: "npm:^0.18.13"
     react: "npm:^18.2.0"
+    spell-kit: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -1873,8 +1851,6 @@ __metadata:
   dependencies:
     "@solidjs/h": "npm:2.0.0-rc.13"
     "@solidjs/web": "npm:2.0.0-rc.13"
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/lodash": "npm:^4.17.17"
     "@types/node": "npm:^22.20.4"
     "@typescript/typescript6": "npm:^6.0.2"
@@ -1882,6 +1858,7 @@ __metadata:
     linkedom: "npm:^0.18.13"
     lodash: "npm:^4.17.21"
     solid-js: "npm:2.0.0-rc.13"
+    spell-kit: "workspace:*"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
     vite-plus: "catalog:"
@@ -1894,12 +1871,7 @@ __metadata:
   dependencies:
     "@solidjs/h": "npm:2.0.0-rc.13"
     "@solidjs/web": "npm:2.0.0-rc.13"
-    "@spell-app/assembler": "workspace:*"
-    "@spell-app/server": "workspace:*"
-    "@spell-app/spell-element": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
     "@spell-app/ui": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/node": "npm:^22.20.4"
     "@vitest/browser-playwright": "catalog:"
     axe-core: "npm:^4.13.0"
@@ -1910,6 +1882,7 @@ __metadata:
     linkedom: "npm:^0.18.13"
     playwright: "npm:1.63.0"
     solid-js: "npm:2.0.0-rc.13"
+    spell-kit: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -1929,12 +1902,11 @@ __metadata:
     "@spell-app/parser": "workspace:*"
     "@spell-app/spaces": "workspace:*"
     "@spell-app/spell": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/node": "npm:^22.20.4"
     "@typescript/typescript6": "npm:^6.0.2"
     esbuild: "npm:^0.28.2"
     json5: "npm:^2.1.1"
+    spell-kit: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -1950,12 +1922,11 @@ __metadata:
   resolution: "@spell-app/markdown@workspace:spell-lang/markdown"
   dependencies:
     "@spell-app/parser": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/node": "npm:^22.20.4"
     "@typescript/typescript6": "npm:^6.0.2"
     entities: "npm:^6.0.1"
     esbuild: "npm:^0.28.2"
+    spell-kit: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -1967,9 +1938,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@spell-app/page-server@workspace:spell-app/page-server"
   dependencies:
-    "@spell-app/server": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
     "@types/node": "npm:^22.20.4"
+    spell-kit: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -1981,14 +1951,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@spell-app/parser@workspace:spell-lang/parser"
   dependencies:
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/lodash": "npm:^4.17.17"
     "@types/node": "npm:^22.20.4"
     "@typescript/typescript6": "npm:^6.0.2"
     browser-or-node: "npm:^3.0.0"
     esbuild: "npm:^0.28.2"
     lodash: "npm:^4.17.21"
+    spell-kit: "workspace:*"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
     vite-plus: "catalog:"
@@ -2000,25 +1969,8 @@ __metadata:
   resolution: "@spell-app/py@workspace:spell-lang/py"
   dependencies:
     "@spell-app/parser": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/node": "npm:^22.20.4"
-    typescript: "npm:^7.0.2"
-    vite: "catalog:"
-    vite-plus: "catalog:"
-  languageName: unknown
-  linkType: soft
-
-"@spell-app/server@workspace:*, @spell-app/server@workspace:spell-server/server":
-  version: 0.0.0-use.local
-  resolution: "@spell-app/server@workspace:spell-server/server"
-  dependencies:
-    "@spell-app/toolchain": "workspace:*"
-    "@types/node": "npm:^22.20.4"
-    "@typescript/typescript6": "npm:^6.0.2"
-    json5: "npm:^2.1.1"
-    parse5: "npm:^7.3.0"
-    tsx: "npm:4.20.3"
+    spell-kit: "workspace:*"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
     vite-plus: "catalog:"
@@ -2029,44 +1981,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@spell-app/spaces@workspace:spell-app/spaces"
   dependencies:
-    "@spell-app/assembler": "workspace:*"
-    "@spell-app/server": "workspace:*"
     "@spell-app/spell": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/fs-extra": "npm:^11.0.4"
     "@types/node": "npm:^22.20.4"
     chalk: "npm:^5.6.0"
     fs-extra: "npm:^11.3.0"
     json5: "npm:^2.1.1"
     node-filter-async: "npm:^3.0.0"
+    spell-kit: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
     vite-plus: "catalog:"
-  languageName: unknown
-  linkType: soft
-
-"@spell-app/spell-element@workspace:*, @spell-app/spell-element@workspace:spell-element":
-  version: 0.0.0-use.local
-  resolution: "@spell-app/spell-element@workspace:spell-element"
-  dependencies:
-    "@solidjs/vite-plugin": "npm:3.0.0-next.47"
-    "@solidjs/web": "npm:2.0.0-rc.13"
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
-    "@types/node": "npm:^22.20.4"
-    "@vitest/browser-playwright": "catalog:"
-    esbuild: "npm:^0.28.2"
-    playwright: "npm:1.63.0"
-    solid-js: "npm:2.0.0-rc.13"
-    typescript: "npm:^7.0.2"
-    vite: "catalog:"
-    vite-plus: "catalog:"
-    vitest: "catalog:"
-  peerDependencies:
-    "@solidjs/web": 2.0.0-rc.13
-    solid-js: 2.0.0-rc.13
   languageName: unknown
   linkType: soft
 
@@ -2078,8 +2004,6 @@ __metadata:
     "@spell-app/core": "workspace:*"
     "@spell-app/parser": "workspace:*"
     "@spell-app/py": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/node": "npm:^22"
     "@types/semver": "npm:^7.8.0"
     "@vitest/coverage-v8": "catalog:"
@@ -2090,26 +2014,12 @@ __metadata:
     playwright: "npm:^1.63.0"
     pyright: "npm:1.1.414"
     semver: "npm:^7.8.5"
+    spell-kit: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
     vite-plus: "catalog:"
     vitest: "catalog:"
-  languageName: unknown
-  linkType: soft
-
-"@spell-app/toolchain@workspace:*, @spell-app/toolchain@workspace:spell-util/toolchain":
-  version: 0.0.0-use.local
-  resolution: "@spell-app/toolchain@workspace:spell-util/toolchain"
-  dependencies:
-    "@types/node": "npm:^22.20.4"
-    esbuild: "npm:^0.28.2"
-    json5: "npm:^2.2.3"
-    typescript: "npm:^7.0.2"
-    vite: "catalog:"
-    vite-plus: "catalog:"
-  bin:
-    spell-types: ./bin/spell-types.ts
   languageName: unknown
   linkType: soft
 
@@ -2122,11 +2032,6 @@ __metadata:
     "@solidjs/h": "npm:2.0.0-rc.13"
     "@solidjs/vite-plugin": "npm:3.0.0-next.47"
     "@solidjs/web": "npm:2.0.0-rc.13"
-    "@spell-app/assembler": "workspace:*"
-    "@spell-app/server": "workspace:*"
-    "@spell-app/spell-element": "workspace:*"
-    "@spell-app/toolchain": "workspace:*"
-    "@spell-app/util": "workspace:*"
     "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^22.20.4"
     "@typescript/typescript6": "npm:^6.0.2"
@@ -2145,6 +2050,7 @@ __metadata:
     playwright: "npm:1.63.0"
     postcss: "npm:^8.5.28"
     solid-js: "npm:2.0.0-rc.13"
+    spell-kit: "workspace:*"
     temporal-polyfill: "npm:^1.0.5"
     tsx: "npm:^4.23.15"
     typescript: "npm:^7.0.2"
@@ -2157,33 +2063,6 @@ __metadata:
     solid-js: 2.0.0-rc.13
   bin:
     spell-ui-pack: ./bin/spell-ui-pack.mjs
-  languageName: unknown
-  linkType: soft
-
-"@spell-app/util@workspace:*, @spell-app/util@workspace:spell-util/util":
-  version: 0.0.0-use.local
-  resolution: "@spell-app/util@workspace:spell-util/util"
-  dependencies:
-    "@spell-app/toolchain": "workspace:*"
-    "@types/lodash": "npm:^4.17.17"
-    "@types/node": "npm:^22.20.4"
-    "@types/pluralize": "npm:^0.0.33"
-    "@typescript/typescript6": "npm:^6.0.2"
-    "@vitest/browser-playwright": "catalog:"
-    chalk: "npm:^5.6.0"
-    esbuild: "npm:^0.28.2"
-    global: "npm:^4.3.2"
-    json5: "npm:^2.1.1"
-    json5-writer: "npm:^0.2.0"
-    lodash: "npm:^4.17.21"
-    node-storage-shim: "npm:^2.0.1"
-    playwright: "npm:1.63.0"
-    pluralize: "npm:^8.0.0"
-    query-string: "npm:^6.12.1"
-    typescript: "npm:^7.0.2"
-    vite: "catalog:"
-    vite-plus: "catalog:"
-    vitest: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -7078,13 +6957,55 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "spell-app@workspace:spell-app"
   dependencies:
-    "@spell-app/toolchain": "workspace:*"
     "@vitest/browser-playwright": "catalog:"
     playwright: "npm:1.63.0"
     pyright: "npm:1.1.414"
+    spell-kit: "workspace:*"
     vite: "catalog:"
     vite-plus: "catalog:"
     vitest: "catalog:"
+  languageName: unknown
+  linkType: soft
+
+"spell-kit@workspace:*, spell-kit@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "spell-kit@workspace:."
+  dependencies:
+    "@solidjs/vite-plugin": "npm:3.0.0-next.47"
+    "@solidjs/web": "npm:2.0.0-rc.13"
+    "@types/lodash": "npm:^4.17.17"
+    "@types/node": "npm:^22.20.4"
+    "@types/pluralize": "npm:^0.0.33"
+    "@typescript/typescript6": "npm:^6.0.2"
+    "@vitest/browser-playwright": "catalog:"
+    chalk: "npm:^5.6.0"
+    esbuild: "npm:^0.28.2"
+    global: "npm:^4.3.2"
+    json5: "npm:^2.2.3"
+    json5-writer: "npm:^0.2.0"
+    linkedom: "npm:^0.18.13"
+    lodash: "npm:^4.17.21"
+    node-storage-shim: "npm:^2.0.1"
+    parse5: "npm:^7.3.0"
+    playwright: "npm:1.63.0"
+    pluralize: "npm:^8.0.0"
+    query-string: "npm:^6.12.1"
+    solid-js: "npm:2.0.0-rc.13"
+    tsx: "npm:4.20.3"
+    typescript: "npm:^7.0.2"
+    vite: "catalog:"
+    vite-plus: "catalog:"
+    vitest: "catalog:"
+  peerDependencies:
+    "@solidjs/web": 2.0.0-rc.13
+    solid-js: 2.0.0-rc.13
+  peerDependenciesMeta:
+    "@solidjs/web":
+      optional: true
+    solid-js:
+      optional: true
+  bin:
+    spell-types: ./toolchain/bin/spell-types.ts
   languageName: unknown
   linkType: soft
 
@@ -7092,35 +7013,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "spell-lang@workspace:spell-lang"
   dependencies:
-    "@spell-app/toolchain": "workspace:*"
+    spell-kit: "workspace:*"
     vite-plus: "catalog:"
-  languageName: unknown
-  linkType: soft
-
-"spell-server@workspace:spell-server":
-  version: 0.0.0-use.local
-  resolution: "spell-server@workspace:spell-server"
-  dependencies:
-    "@spell-app/toolchain": "workspace:*"
-    vite-plus: "catalog:"
-  languageName: unknown
-  linkType: soft
-
-"spell-util@workspace:spell-util":
-  version: 0.0.0-use.local
-  resolution: "spell-util@workspace:spell-util"
-  dependencies:
-    "@spell-app/toolchain": "workspace:*"
-    vite-plus: "catalog:"
-  languageName: unknown
-  linkType: soft
-
-"spell@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "spell@workspace:."
-  dependencies:
-    "@types/node": "npm:^22.20.4"
-    json5: "npm:^2.2.3"
   languageName: unknown
   linkType: soft
 

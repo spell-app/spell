@@ -1,4 +1,8 @@
-// The child repos `yarn clone` puts inside the top repo `spell`, each its own git repo (epic `repo-split` P7, Q15-Q17).
+// The child repos `yarn clone` puts inside the kit `spell-kit` (checked out at `~/www/spell`), each its own git repo
+// (epic `repo-split` P7, Q15-Q17).
+// - The kit itself is the bottom of every list, and always there:  every repo uses it (`spell-kit/util`,
+//   `spell-kit/element` ...), so no `needs` names it (epic `repo-split` P9:  spell-util, spell-server and spell-element
+//   are its folders now).
 // - Lowest first:  a repo only ever uses the ones above it in this list ("Every arrow points down").
 // - `needs`:  the repos its CODE uses, directly:  `yarn clone <repo>` clones those too, and theirs, and so on.
 // - `runs`:  repos it runs by its settings, never imports (spell-app's page server runs spell-epic's route modules):
@@ -8,30 +12,18 @@
 // - Read by `tools/repos.ts` (`yarn clone`, `yarn pull`, `yarn status`, and the checks over every repo).
 {
   "repos": [
-    { "name": "spell-util", "url": "git@github.com:spell-app/spell-util.git", "needs": [] },
-    { "name": "spell-server", "url": "git@github.com:spell-app/spell-server.git", "needs": ["spell-util"] },
-    { "name": "spell-element", "url": "git@github.com:spell-app/spell-element.git", "needs": ["spell-util"] },
-    { "name": "spell-lang", "url": "git@github.com:spell-app/spell-lang.git", "needs": ["spell-util"] },
-    {
-      "name": "spell-ui",
-      "url": "git@github.com:spell-app/spell-ui.git",
-      // spell-server for its docs site's tools and its tests only
-      "needs": ["spell-element", "spell-server", "spell-util"]
-    },
-    {
-      "name": "spell-brand",
-      "url": "git@github.com:spell-app/spell-brand.git",
-      "needs": ["spell-ui", "spell-element", "spell-server", "spell-util"]
-    },
+    { "name": "spell-lang", "url": "git@github.com:spell-app/spell-lang.git", "needs": [] },
+    { "name": "spell-ui", "url": "git@github.com:spell-app/spell-ui.git", "needs": [] },
+    { "name": "spell-brand", "url": "git@github.com:spell-app/spell-brand.git", "needs": ["spell-ui"] },
     {
       "name": "spell-epic",
       "url": "git@github.com:spell-app/spell-epic.git",
-      "needs": ["spell-brand", "spell-ui", "spell-server", "spell-element", "spell-util"]
+      "needs": ["spell-brand", "spell-ui"]
     },
     {
       "name": "spell-app",
       "url": "git@github.com:spell-app/spell-app.git",
-      "needs": ["spell-lang", "spell-brand", "spell-ui", "spell-server", "spell-element", "spell-util"],
+      "needs": ["spell-lang", "spell-brand", "spell-ui"],
       "runs": ["spell-epic"]
     }
   ]

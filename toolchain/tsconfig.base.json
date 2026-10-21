@@ -4,7 +4,7 @@
   // by name, and every package's `tsconfig.json` extends that table:  `"extends": "../tsconfig.base.json"`.
   // - NOT the alias table (`paths`):  that's each repo's own, at its root (`$/` inside a repo, WWOD §4).
   // - What differs by package stays in its own:  `target`, `lib`, `types`, `jsx`, `allowJs`.
-  // - The global types (`Prettify`, `Class` ...):  `"types": [..., "@spell-app/toolchain/types"]`, where a package
+  // - The global types (`Prettify`, `Class` ...):  `"types": [..., "spell-kit/toolchain/types"]`, where a package
   //   wants them (`types/index.d.ts` here).
   "compilerOptions": {
     "module": "ESNext",

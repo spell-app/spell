@@ -1,5 +1,5 @@
-// The top repo's epic settings:  where a session working HERE (`~/www/spell`, every window's folder 1 once epic
-// `repo-split` P9 lands) keeps its epic things.
+// The kit's epic settings (the top repo, `spell-kit`, since epic `repo-split` P9):  where a session working HERE
+// (`~/www/spell`, every window's folder 1) keeps its epic things.
 // - Read by spell-epic's `EpicConfig` (spell-epic/src/config/EpicConfig.ts), as every repo's `.epic/config.json5` is:
 //   epic `epic-engine` P10 (spell-epic as a workspace of this install) and epic `repo-split` P9 (the multi-repo
 //   tooling) are what read it here.
@@ -11,7 +11,7 @@
   // mode on (epic `epic-engine` P10):  an epic's worktree is one of `spell` with one of every child repo inside it.
   "repos": "repos.json5",
 
-  // The shared content repo:  epics, guides, sagas, pages, brand, the logs until spell-util's agents/ takes them.
+  // The shared content repo:  epics, guides, sagas, pages, brand, and the three logs (the kit's `agents/` links them).
   // - In this repo, git-ignored (epic `repo-split` J5):  a link to `~/www/spell-app/spell-app.epics` until the move.
   "contentFolder": "spell.epics",
 
@@ -43,8 +43,8 @@
   "linkSessionFolders": true,
 
   // The content folder's folders every checkout links in at its root (`epic shared link`):  none here (epic-engine
-  // P10).  WWOD and the logs:  the `agents` link, git-ignored, to spell-util's main checkout once the move (epic
-  // `repo-split` P9) puts them there.
+  // P10).  WWOD and the logs:  the kit TRACKS `agents/` (epic `repo-split` P9):  `agents/wwod/`, and links for the
+  // three logs into the content repo's `agents/`.
   "sharedFolders": [],
 
   // The epic engine:  the spell-epic child repo, already inside the top repo, so no link (`""`, epic-engine P10).

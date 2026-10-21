@@ -1,10 +1,10 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this package, `@spell-app/server`.
+when working with code in the kit's `server/` (`spell-kit/server`).
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
-the repo's layout, and the house style every package shares.
+**READ the kit's [AGENTS.md](../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
+the kit's layout, and the house style every repo shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
@@ -12,7 +12,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Serving pages locally, for every package:  `$/server` (`SRV`).
   - Before this package, six servers each had their own mime table, path check, port choice and opener.
     Now they share these.
-  - Docs:  [the page server guide](../../spell.epics/guides/server.html):  the library, the page server's flows,
+  - Docs:  [the page server guide](../spell.epics/guides/server.html):  the library, the page server's flows,
     route modules, safety, why.
 - What's in it:
   - [mime.ts](src/mime.ts) -- ONE content-type table, `typeFor()`
@@ -110,8 +110,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - It's GENERIC (epic `repo-split` P4):  its code names nothing of spell-app's or spell-epic's folders.
   - What the page server serves beyond the checkout comes from its settings (below):
     the component sets, the engine routes, the page scripts, the route modules, the site header's tabs.
-  - What only spell-app's page server does is [page-server](../../spell-app/page-server/AGENTS.md)'s route module.
-  - It goes to the bottom repo, spell-server, when the repos split (P8);  page-server goes to spell-app.
+  - What only spell-app's page server does is [page-server](../spell-app/page-server/AGENTS.md)'s route module.
+  - It went to spell-server when the repos split (P8), and into the kit with it (P9);  page-server went to spell-app.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
   - `$/server/page/...` -- the page server (one per checkout):
     - its CLI, `spell dev server`
@@ -137,7 +137,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - It mounts every worktree's files at `/worktrees/<w>/`, once a route module says where they are:
       `serveWorktrees(dir)` (epic `epic-eject` P4).
       - The running epics' route module does, in the main checkout:
-        [runningRoutes.ts](../../spell-epic/src/list/runningRoutes.ts) (spell-epic's), which also answers
+        [runningRoutes.ts](../spell-epic/src/list/runningRoutes.ts) (spell-epic's), which also answers
         `/api/epics/running`.
       - Why:  the worktrees' folder is in the repo's epic settings (`.epic/config.json5`, read by epics' `EpicConfig`),
         and this package imports no other.
@@ -152,7 +152,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - A checkout without the link answers "not found" there, and loads no epic route module.
       - Live reload reports a change in one at its route.
     - Route modules add to every page's `window.SPELL_SERVER`:  `addPageConfig()`.
-      - e.g. epics' airplane mode ([airplaneRoutes.ts](../../spell-epic/src/tools/airplaneRoutes.ts)),
+      - e.g. epics' airplane mode ([airplaneRoutes.ts](../spell-epic/src/tools/airplaneRoutes.ts)),
         whose switch, `AirplaneMode`, moved to epics in `epic-eject` P4.
     - Tests set a route module up by hand with `server.routeContext()`.
     - Every call is under `/api/`, one prefix per package that answers it.
@@ -174,7 +174,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `/api/server` reports it (`contentFolder`);  `spell dev server url <file>` gives a file of it its path there
           (`contentPathOf()`).
       - The shared pages' bridges (the engine's old folders, `/ui/` answering "not found"):  page-server's route
-        module ([page-server's AGENTS.md](../../spell-app/page-server/AGENTS.md)).
+        module ([page-server's AGENTS.md](../spell-app/page-server/AGENTS.md)).
     - And the COMPONENT SETS:  the docs of each set of elements, in Spell UI's page shape, in its package's `docs/`.
       - The list:  the settings' `"componentSets"`, by id, in the top bar's order (`componentSets()`, epic `repo-split`
         P4;  `ComponentSet`, in [page.types.ts](src/page/page.types.ts)).
@@ -195,7 +195,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The bundles it serves are NOT committed:  page-server's route module builds them (`BundleBuild`).
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.
-      - [ProjectBuild](../../spell-app/spaces/src/server/node/routes/ProjectBuild.ts), in spaces' routes,
+      - [ProjectBuild](../spell-app/spaces/src/server/node/routes/ProjectBuild.ts), in spaces' routes,
         runs `spell compile --stale --all @spell/examples @spell/library` as the page server starts.
       - The page server knows nothing of spell projects.
   - `$/server/site/...` -- browser code:
@@ -219,15 +219,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `EpicState`, `EpicCards`
   - `$/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
-  - the usual five (node tests):
+  - the kit's, at its root (node tests):
 
     ```sh
-    yarn review    yarn ts    yarn lint    yarn format    yarn test
+    yarn kit:review    yarn kit:ts    yarn kit:lint    yarn kit:format    yarn kit:test
     ```
 
-  - The tests live in the repo's `tests/server/`, at the same paths as the code.
+  - In this folder, its tests alone:  `yarn vp test run`.
+  - The tests live in the kit's [tests/server/](../tests/server/), at the same paths as the code.
     Their helpers are still here, in `test/`.
-  - `yarn favicon [--hat 0.74]` after the hat mark changes (headless Chromium renders the PNGs)
+  - `yarn favicon [--hat 0.74]`, at the kit's root, after the hat mark changes (headless Chromium renders the PNGs)
 
 ## Express, on purpose
 
@@ -250,6 +251,6 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 As WWOD §8, plus our self-namespace:
 
 - `SRV` ~== `$/server`
-- Another repo imports it by its npm name (epic `repo-split` P6), an entry of its `package.json` `exports`, each a
-  SOURCE file:  `@spell-app/server`, `/page`, `/site`, `/site/site.types`, `/test/serve`;  and three that plain
+- Another repo imports it by its npm name (epic `repo-split` P6), an entry of the kit's `package.json` `exports`, each
+  a SOURCE file:  `spell-kit/server`, `/page`, `/site`, `/site/site.types`, `/test/serve`;  and three that plain
   `node` loads (node built-ins and type imports only, `.ts` and all):  `/checkout`, `/page/settings`, `/page/prune`.

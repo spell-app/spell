@@ -1,26 +1,28 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this package, `@spell-app/spell-element`.
+when working with code in the kit's `element/` (`spell-kit/element`).
 
-**READ the repo root's [AGENTS.md](../AGENTS.md) and [WWOD](agents/wwod/WWOD.md) FIRST:**
-the repo's layout, and the house style every package shares.
+**READ the kit's [AGENTS.md](../AGENTS.md) and [WWOD](../agents/wwod/WWOD.md) FIRST:**
+the kit's layout, and the house style every repo shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 **This is Solid work:  READ [the Solid 2 rules](../spell.epics/guides/solid/solid-2.md) IN FULL FIRST,**
-then [ui's AGENTS.md](../spell-ui/AGENTS.md), "Solid authoring":  how an element is written on this package.
+then [ui's AGENTS.md](../spell-ui/AGENTS.md), "Solid authoring":  how an element is written on this folder's code.
 
-## This repo:  `spell-element`
+## This folder:  the kit's `element/`
 
-- `github.com/spell-app/spell-element`, private;  cut from spell-app with its history (epic `repo-split` P8).
-- It holds `@spell-app/spell-element` itself, at the repo's root:  the component and DOM element bases, the reactive members' decorators, shadow events, hot reloading.
-- It may use:  spell-util:  util's generic files (`@spell-app/util/class` ...) and the toolchain.
-  - Every arrow points DOWN:  no repo below this one may import it.
-- It lives inside the top repo `spell`, at `~/www/spell/spell-element/`:  the top holds the ONE install for every repo
-  (no `yarn.lock` here), and [its AGENTS.md](../AGENTS.md) has the rules across repos.
-- `$/` aliases are for inside this repo ([tsconfig.base.json](tsconfig.base.json));  another repo's package is imported
-  by its npm name (`@spell-app/...`), an entry of its `package.json` `exports`.
-- `agents/` (WWOD and the three logs):  a link to spell-util's main checkout, made by the top repo's setup (not yet).
+- What makes a custom element on Solid:  the component and DOM element bases, the reactive members' decorators,
+  shadow events, hot reloading.
+- Its own repo, spell-element, from epic `repo-split` P8 (cut from spell-app with its history);
+  merged into the kit with that history in P9.
+- Another repo imports it by its npm name, `spell-kit/element`, an entry of the kit's `package.json` `exports`
+  (`spell-kit/element/timing` ...).
+- Inside the kit, its alias is still `$/spell-element`, in the kit's [tsconfig.base.json](../tsconfig.base.json):
+  the name every page's component packs share it by at run time (`packModuleKey()`, epic `repo-split` J72).
+- It may use:  util's generic files (`$/util/class` ...) and the toolchain, both the kit's.
+  - Every arrow points DOWN:  nothing in the kit or below it may import a child repo.
+- Its tests:  in the kit's [tests/element/](../tests/element/) (below, "Overview").
 
 ## Overview
 
@@ -58,20 +60,21 @@ then [ui's AGENTS.md](../spell-ui/AGENTS.md), "Solid authoring":  how an element
   folded in and fixed (epic `spell-element`, 2026-10-09):
   - `UIComponent`, `DOMElement`, `ShadowEvents`, `HotDefinitions`
   - each carries their MIT notice
-- Tests:  in the repo's [`tests/spell-element/`](./tests/), at the same paths as the code.
+- Tests:  in the kit's [`tests/element/`](../tests/element/), at the same paths as the code.
   - [`UIComponent`](src/UIComponent.tsx)'s test is
-    [`UIComponent.test.tsx`](./tests/src/UIComponent.test.tsx), at the same path under `tests/spell-element/`.
+    [`UIComponent.test.tsx`](../tests/element/src/UIComponent.test.tsx), at the same path under `tests/element/`.
   - In a real browser (Vitest browser mode + Playwright, chromium), as Spell UI's are,
-    on the package's own plugins ([its Vitest config](vitest.config.ts)):  the decorator pre-pass, then Solid's.
-  - With NO Spell UI on the page (epic `repo-split` P3):  its tsconfig, Vitest config and dev dependencies name none.
+    on the folder's own plugins ([its Vitest config](vitest.config.ts)):  the decorator pre-pass, then Solid's.
+  - With NO Spell UI on the page (epic `repo-split` P3):  its tsconfig and Vitest config name none,
+    nor do the kit's dependencies.
     - Their setup file, [TestSettings](test/TestSettings.ts), installs stand-in settings:
       English names, the shared attributes, no styles, every animation over at once.
-    - Their helpers are the package's own, in [`test/`](test/) (`$/spell-element/test/...`):
+    - Their helpers are the folder's own, in [`test/`](test/) (`$/spell-element/test/...`):
       `Fixture`, `ElementFixture`, with the same API as Spell UI's.
     - What needs Spell UI's real runtime is tested in Spell UI's tests:
       `<ui-root>`'s `appContext`, Spell UI's settings and translations, its core carrying every name,
       no vocabulary attribute named like a base's member (`$/ui/test/MemberClashes`, run by each set over its own).
-  - [The barrel test](./tests/src/barrel.test.ts) pins what "Imports" says:
+  - [The barrel test](../tests/element/src/barrel.test.ts) pins what "Imports" says:
     - every export live
     - no import but `$/util`'s and Solid's
 
@@ -81,7 +84,7 @@ As WWOD §4, plus:
 
 - It imports ONLY Solid, and `$/util`'s generic files, one by one, never the `$/util` barrel:
   - `$/util/class`, `decorators`, `dom`, `string`, `util.types`
-  - NEVER Spell UI, or any other package:  every set's elements are written on this package, Spell UI's included.
+  - NEVER Spell UI, or any other package:  every set's elements are written on it, Spell UI's included.
   - The barrel re-exports those `$/util` files,
     so a component file reads them through `E` too (`@E.proto`).
 - Its files import each other through `E`, as Spell UI's element core does
@@ -92,12 +95,12 @@ As WWOD §4, plus:
 - Who imports it:
   - Spell UI:  its `$/ui/core` entry re-exports ALL of it, so Spell UI's `E` holds every name this `E` does.
     Spell UI's own component files keep importing `$/ui/core`.
-  - Every pack's element files, `import { E } from "$/spell-element"`:
+  - Every pack's element files, `import { E } from "spell-kit/element"` (another repo's, so by its npm name):
     - `epics`, `brand`, and `app`'s `components/`
     - A file that also uses Spell UI's own pieces takes `E` from `$/ui/core` instead:
       the same names, and Spell UI's on top.
       Those pieces:  `E.IconGlyph`, `E.LoadableBody`, `E.NativeFallback`, `E.Converters` ...
-- Leaves other packages may import by path (the header of the root's [tsconfig.base.json](tsconfig.base.json)):
+- Leaves other packages may import by path (the header of the kit's [tsconfig.base.json](../tsconfig.base.json)):
   - `$/spell-element/elements.types` and `$/spell-element/vocabulary.types`:
     - where a set adds its names (below)
     - for node code that mustn't load the element layer (the vocabularies, the epics' definitions)
@@ -107,7 +110,7 @@ As WWOD §4, plus:
 ## Settings
 
 - The element bases call the page's RUNTIME for what's a set's own:  its words, style sheets, focus and animations.
-  - spell-element can't import that runtime, so the runtime hands them over as it loads.
+  - `element/` can't import that runtime, so the runtime hands them over as it loads.
     - It calls `SpellSolid.install(settings)`.
     - The bases read them as `E.SpellSolid.settings`.
     - Their type:  `SpellSolidSettings`, in [elements.types.ts](src/elements.types.ts).
@@ -125,7 +128,7 @@ As WWOD §4, plus:
     - `UIComponent.define()` returns `undefined`, and defines the tag as they're installed.
     - Still waiting after 5s:  a console warning.
   - Reading `SpellSolid.settings` before any are installed throws, naming what to import.
-- A set adds the NAMES spell-element's types check against by augmenting its interfaces
+- A set adds the NAMES `element/`'s types check against by augmenting its interfaces
   (`declare module "$/spell-element/..."`):
   - `ElementAnimations` (`elementSetup.animation`):  Spell UI adds Fomantic's, in its `components.types.ts`
   - `ValueSetNames` and `TopicNames` (a vocabulary's `values` and `topics`):  Spell UI's `ValueSets`
@@ -133,7 +136,7 @@ As WWOD §4, plus:
 
 ## One copy per page
 
-- Two copies of this package on a page would mean two `UIComponent`s and two registries.
+- Two copies of `element/` on a page would mean two `UIComponent`s and two registries.
   - It fails silently, as two Solids do
     ([the Solid 2 rules](../spell.epics/guides/solid/solid-2.md), "One Solid per page").
 - So no bundle of ours carries its own:
@@ -150,5 +153,6 @@ As WWOD §4, plus:
 
 ## Commands
 
-- As every package's:  `yarn ts`, `yarn lint`, `yarn format`, `yarn test`, `yarn review`.
+- The kit's, at its root:  `yarn kit:ts`, `kit:lint`, `kit:format`, `kit:test`, `kit:review`.
+- In this folder, its tests alone:  `yarn vp test run`.
 - No build of its own:  it's source, bundled by whoever draws with it.

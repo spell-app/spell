@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
@@ -7,7 +7,7 @@
     "jsxImportSource": "@solidjs/web",
     "types": ["vite/client"]
   },
-  // its own source (it imports `$/util`'s generic files and Solid, never another package), and its tests' helpers
+  // its own source (it imports `$/util`'s generic files and Solid, never another folder), and its tests' helpers
   // (`test/`:  in here, too, so Vite resolves their aliases)
   "include": ["src", "test"],
   "exclude": ["node_modules"]

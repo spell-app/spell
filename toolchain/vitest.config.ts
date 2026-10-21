@@ -3,7 +3,7 @@ import { resolve } from "node:path"
 import { defineConfig } from "vite-plus"
 
 /**
- * vitest config for `@spell-app/toolchain`:  every test in node (the lint rules, through oxlint's `RuleTester`).
+ * vitest config for `spell-kit/toolchain`:  every test in node (the lint rules, through oxlint's `RuleTester`).
  * - No aliases, no decorators:  its files import each other relatively.
  */
 export default defineConfig({

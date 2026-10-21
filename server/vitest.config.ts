@@ -3,7 +3,7 @@ import { resolve } from "node:path"
 import { defineConfig } from "vite-plus"
 
 /**
- * vitest config for `@spell-app/server`:  every test in node, since this package IS node (`node:http`, `fs`).
+ * vitest config for `spell-kit/server`:  every test in node, since this package IS node (`node:http`, `fs`).
  * - Aliases (`$/server` ...) come from the repo root's `tsconfig.base.json`, through `resolve.tsconfigPaths`.
  * - No decorators here, so no `standardDecorators()`.
  */

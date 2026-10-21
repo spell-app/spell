@@ -3,13 +3,13 @@ import { resolve } from "node:path"
 import { defineConfig } from "vite-plus"
 import { playwright } from "vite-plus/test/browser-playwright"
 
-import { standardDecorators } from "@spell-app/toolchain/decorators"
+import { standardDecorators } from "spell-kit/toolchain/decorators"
 
 /** Packages that MUST resolve to one copy:  two Solids can't share owners. */
 const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
 
 /**
- * Vitest config for `@spell-app/spell-element`:  its tests run in a REAL browser, with no Spell UI on the page.
+ * Vitest config for `spell-kit/element`:  its tests run in a REAL browser, with no Spell UI on the page.
  * - Vitest browser mode + Playwright, chromium.
  * - Its own plugins:
  *   - the repo root's decorator pre-pass FIRST:  it and the Solid plugin are both `enforce: "pre"`,
@@ -32,8 +32,8 @@ export default defineConfig({
     include: SOLID_DEDUPE
   },
   test: {
-    // the tests live in the repo's tests/ folder, at the same paths as the code
-    dir: resolve(import.meta.dirname, "./tests"),
+    // the tests live in the kit's tests/element/ folder, at the same paths as the code
+    dir: resolve(import.meta.dirname, "../tests/element"),
     include: ["src/**/*.test.{ts,tsx}"],
     // the stand-in settings, installed before every test file
     setupFiles: [resolve(import.meta.dirname, "test/TestSettings.ts")],

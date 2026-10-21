@@ -215,7 +215,7 @@ function sharedContext(): CellsContext {
     if (existing.version !== CONTEXT_VERSION) {
       throw new Error(
         `spell cells:  this page already runs cells context v${existing.version}, this copy needs v${CONTEXT_VERSION} -- ` +
-          `two incompatible builds of @spell-app/util on one page.`
+          `two incompatible builds of spell-kit/util on one page.`
       )
     }
     return existing

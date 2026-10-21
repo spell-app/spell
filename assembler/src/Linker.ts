@@ -599,7 +599,11 @@ function installRoot(root: string): string {
   }
 }
 
-/** Each `@spell-app/*` package installed in `top`'s `node_modules`, its real folder by its short name. */
+/**
+ * Each `@spell-app/*` package installed in `top`'s `node_modules`, its real folder by its short name;  and the kit's
+ * folders (`spell-kit`, epic `repo-split` P9), each by its old package's short name:  `server` => `<kit>/server`,
+ * `spell-element` => `<kit>/element`.
+ */
 function spellPackagesIn(top: string): Map<string, string> {
   const scope = join(top, "node_modules", "@spell-app")
   const found = new Map<string, string>()
@@ -607,5 +611,20 @@ function spellPackagesIn(top: string): Map<string, string> {
     const dir = join(scope, name)
     if (existsSync(join(dir, "package.json"))) found.set(name, realpathSync(dir))
   }
+  const kit = join(top, "node_modules", "spell-kit")
+  if (existsSync(join(kit, "package.json"))) {
+    const root = realpathSync(kit)
+    for (const [name, folder] of Object.entries(KIT_FOLDERS))
+      if (isDir(join(root, folder))) found.set(name, join(root, folder))
+  }
   return found
+}
+
+/** The kit's folders, by the short name of the package each was before the kit (`packages/<name>/` in old pages). */
+const KIT_FOLDERS: Readonly<Record<string, string>> = {
+  util: "util",
+  toolchain: "toolchain",
+  server: "server",
+  assembler: "assembler",
+  "spell-element": "element"
 }

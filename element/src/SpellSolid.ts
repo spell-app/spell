@@ -42,7 +42,7 @@ export class SpellSolid {
     void E.after(WAIT_WARNING_SECONDS, () => {
       if (!SpellSolid.waiting.length) return
       console.warn(
-        `[@spell-app/spell-element] SpellSolid:  ${SpellSolid.waiting.length} element(s) wait to be defined, and no ` +
+        `[spell-kit/element] SpellSolid:  ${SpellSolid.waiting.length} element(s) wait to be defined, and no ` +
           "settings are installed;  load a component set's runtime (Spell UI's `$/ui/core`)"
       )
     })

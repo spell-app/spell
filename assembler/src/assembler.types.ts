@@ -107,9 +107,9 @@ export const BUNDLE_RECORD = ".bundle.json"
 const SPELL_UI_SOURCES = [
   "@spell-app/ui/src",
   "@spell-app/ui/components",
-  "@spell-app/spell-element/src",
+  "spell-kit/element/src",
   "@spell-app/ui/vite.config.ts",
-  "@spell-app/server/src/site",
+  "spell-kit/server/src/site",
   "yarn.lock"
 ]
 

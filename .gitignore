@@ -1,17 +1,22 @@
-# The top repo `spell` tracks only the glue (its package.json, yarn.lock, .yarnrc.yml, repos.json5, tools/, the
-# cross-repo rules):  every child repo is its own git repo, cloned inside it by `yarn clone`, and ignored here.
+# The kit `spell-kit` (checked out at `~/www/spell`) tracks its own folders (util/, toolchain/, server/, assembler/,
+# element/, tests/), the house style (agents/), and the glue (package.json, yarn.lock, .yarnrc.yml, repos.json5, tools/):
+# every child repo is its own git repo, cloned inside it by `yarn clone`, and ignored here.
 /spell-*/
 # the two data folders (epic repo-split J5):  the content repo (its own git repo, local only) and your projects (a plain
-# folder);  links until the move puts the real folders here
+# folder)
 /spell.epics
 /spell.spaces
-# WWOD and the three logs:  a link to spell-util's main checkout (`spell-util/agents/`), as in every child repo
-/agents
 
 node_modules
 .yarn/install-state.gz
 .DS_Store
+.vitest/
 *.log
 *.code-workspace
+# `/park`'s note on where parked work stopped:  never committed
+PARKED-*.md
 # the MAIN checkout's marker:  worktree windows hide its folder's files (spell-epic's window script)
 /.spell-main
+
+# the declarations the kit builds for the repos above it (`spell-types`, epic repo-split I12):  never committed
+dist-types/

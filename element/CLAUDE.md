@@ -1,5 +1,4 @@
-Claude Code loads this repo's cross-model `AGENTS.md` (`spell-element`:  what it holds, what it may use, its packages).
-Opened inside the top repo `spell` (`~/www/spell`), the top's `CLAUDE.md` / `AGENTS.md` come first:  the rules across
-repos.
+Claude Code rules for this folder of the kit come from the cross-model `AGENTS.md` beside this file, on top of the
+kit's `CLAUDE.md` / `AGENTS.md`, at its root.
 
 @AGENTS.md

@@ -1,7 +1,7 @@
-# @spell-app/util
+# util
 
-Small generic helpers shared by `@spell-app/ui`, `spell` and the CLI.
-Private for now:  the npm scope isn't decided.
+The kit's `util/`, `spell-kit/util`:  small generic helpers shared by `@spell-app/ui`, `spell` and the CLI.
+Part of the kit's one package, `spell-kit`, private for now.
 
 ```ts
 import { proto, kebabCase, closestAcrossShadow } from "$/util"
@@ -24,5 +24,6 @@ import { proto, kebabCase, closestAcrossShadow } from "$/util"
 Not published on its own:  `@spell-app/ui` bundles what it uses.
 It imports no other package, and has no runtime dependencies.
 
-`yarn review` runs `tsc`, oxlint, oxfmt and the tests (in a real browser).
+The kit's `yarn kit:review`, at its root, runs `tsc`, oxlint, oxfmt and the tests (in a real browser), this folder's
+among the rest.
 See [AGENTS.md](AGENTS.md).

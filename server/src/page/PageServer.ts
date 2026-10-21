@@ -423,10 +423,10 @@ const SOURCE = fileURLToPath(new URL("..", import.meta.url))
 const TSCONFIG = fileURLToPath(new URL("../../tsconfig.json", import.meta.url))
 
 /**
- * The run-time alias hook (`@spell-app/toolchain/aliases`, epic `repo-split` I12), loaded after `tsx` in the
+ * The run-time alias hook (`spell-kit/toolchain/aliases`, epic `repo-split` I12), loaded after `tsx` in the
  * background server:  each file's `$/` imports by its OWN repo's alias table.
  */
-const ALIASES = import.meta.resolve("@spell-app/toolchain/aliases")
+const ALIASES = import.meta.resolve("spell-kit/toolchain/aliases")
 
 /** Where worktrees are served, once a route module says where they are (`serveWorktrees()`). */
 const WORKTREES_PREFIX = "/worktrees/"

@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs"
-import { resolve } from "node:path"
+import { existsSync, readFileSync } from "node:fs"
+import { dirname, join, resolve } from "node:path"
 
 import type { Plugin } from "vite"
 
@@ -19,8 +19,14 @@ export function packageVersion(packageFolder: string): Plugin {
   }
 }
 
-/** The version in `<packageFolder>/package.json`. */
+/**
+ * The version in the `package.json` of the package `packageFolder` is in:  its own, else the nearest one up (a folder
+ * of the kit, `spell-kit`, has none of its own:  the kit's one version, epic `repo-split` P9).
+ */
 function readPackageVersion(packageFolder: string): string {
-  const packageJson = resolve(packageFolder, "package.json")
-  return (JSON.parse(readFileSync(packageJson, "utf8")) as { version: string }).version
+  for (let at = resolve(packageFolder); ; at = dirname(at)) {
+    const packageJson = join(at, "package.json")
+    if (existsSync(packageJson)) return (JSON.parse(readFileSync(packageJson, "utf8")) as { version: string }).version
+    if (dirname(at) === at) throw new Error(`packageVersion:  no package.json at or above ${packageFolder}`)
+  }
 }

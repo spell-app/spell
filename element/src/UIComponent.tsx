@@ -13,7 +13,7 @@ import {
 import { insert, isServer, type JSX } from "@solidjs/web"
 
 // Import directly to avoid circular import
-import { protoMerged } from "@spell-app/util/decorators"
+import { protoMerged } from "spell-kit/util/decorators"
 import { E } from "$/spell-element"
 // Import directly to avoid circular import
 import { DOMElement, type TagSetup } from "./DOMElement"

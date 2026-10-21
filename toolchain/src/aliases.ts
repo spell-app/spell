@@ -12,11 +12,11 @@ import { aliasesOf, repoOf, resolveAlias, type Alias } from "./aliasTable.ts"
  *
  * ```js
  * register({ tsconfig })                        // tsx, from `tsx/esm/api`
- * await import("@spell-app/toolchain/aliases")  // then this
+ * await import("spell-kit/toolchain/aliases")  // then this
  * ```
  * ```sh
- * tsx --import @spell-app/toolchain/aliases scripts/site-data.ts
- * node --import tsx --import @spell-app/toolchain/aliases src/page/cli.ts serve
+ * tsx --import spell-kit/toolchain/aliases scripts/site-data.ts
+ * node --import tsx --import spell-kit/toolchain/aliases src/page/cli.ts serve
  * ```
  *
  * - Why:  `tsx` reads ONE `tsconfig`, the one it's given (or the current folder's), for every file it runs.  A program

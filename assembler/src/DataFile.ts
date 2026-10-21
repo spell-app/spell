@@ -6,7 +6,7 @@ import JSON5 from "json5"
 // By util's npm name, an entry of its `exports`:  plain `node` loads this file (spell-epic's docs tools,
 // `details.js` ...), and resolves no `$/` alias (epic `repo-split` I3).  The JSON5 editor, util's since `repo-split` P1, the one every
 // JSON5 edit goes through (epic `people-and-orgs` P8)
-import { json5Edited } from "@spell-app/util/node/json5"
+import { json5Edited } from "spell-kit/util/node/json5"
 
 /****************
  * ### `DataFile`

@@ -1,5 +1,5 @@
 /**
- * Barrel for `$/util` (`@spell-app/util`) -- helpers shared by `ui`, `spell` and `cli`, in two layers.
+ * Barrel for `$/util` (`spell-kit/util`) -- helpers shared by `ui`, `spell` and `cli`, in two layers.
  * - GENERIC (the files beside this one):  `@proto`, class, name-case string and shadow-aware DOM helpers.  No runtime
  *   dependencies, safe anywhere, including `*.types.ts` files and SSR / node tooling.  `@spell-app/ui` is published and
  *   bundles what it imports from here.
