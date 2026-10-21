@@ -19,7 +19,7 @@ import rowsCSS from "./EpicChoiceRows.css?inline"
  *   - File:  the file's name and line, a link into VS Code (`vscode://file/...:<line>`);  its folder under it.
  *     In VS Code's side bar the page's frame can't follow `vscode://`, so a click there goes to the view as
  *     `{ spell: "open", kind: "external" }`, which hands it to VS Code (`packages/vscode/src/DocView.ts`).
- *   - Purpose:  the purpose, `stays` when Claude would keep it, the note under it
+ *   - Purpose:  the purpose, `stays` when Claude would keep it, the note under it;  `` `code` `` in either is code
  *   - Current:  today's text, as code
  *   - Recommended:  the box, pre-filled with Claude's call;  one line of text that wraps and grows (Enter adds no
  *     line, a pasted line break goes);  changed, it's orange, with a round button putting the recommendation back
@@ -154,11 +154,11 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     )
   }
 
-  /** The Purpose cell:  the purpose, `stays` when Claude would keep it, the note under it. */
+  /** The Purpose cell:  the purpose, `stays` when Claude would keep it, the note under it;  `` `code` `` as code. */
   private purposeCell(): JSX.Element {
     return (
       <div class={[CELL, PURPOSE]} part={this.partForName("purpose")} role="cell">
-        {this.purpose}
+        {this.withCode(this.purpose ?? "")}
         <Show when={this.isKept}>
           {" "}
           <ui-label class={STAYS} size="mini" basic="">

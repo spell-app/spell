@@ -392,7 +392,8 @@ async function waitAndPrint(file, flags) {
  * - `rows[]`:  `{ id?, section, file, line, purpose, current, recommended, note? }`
  *   - `file`:  repo-relative;  `line`:  1-based, current at the branch's HEAD:  the page links `file:line` into VS Code
  *   - `purpose`:  what it's for, in words a reader new to it follows:  1-3 words for a name, or a short sentence
- *     and when it's used, for a command;  `current`:  as a reader sees it at a use site (`this.isOpen()`);
+ *     and when it's used, for a command;  `` `code` `` as in `description`;
+ *     `current`:  as a reader sees it at a use site (`this.isOpen()`);
  *     `recommended`:  that use site as Claude would write it (equal to `current` for a row that stays)
  *   - `note`:  a short why, shown under the purpose;  `` `code` `` as in `description`
  * - plain JS:  no type, this comment is the spec
