@@ -98,6 +98,7 @@ import {
   toolbarMenu,
   wireJumpKey
 } from "./spell-doc-toolbar.js"
+import { readingTime } from "../ReadingTime.js"
 import { EpicAddress, PageTargets } from "$/epics/links"
 import { ComponentPacks } from "spell-ui/ui-components"
 
@@ -169,6 +170,9 @@ const EPIC_WAIT_MS = 5000
  * what `loadEpicsPack()` loads on a page that names none.
  */
 const EPICS_PACK = "/_epic/pack/epics.pack.js"
+
+/** The docs head's h1, its title (`oneLineHead()`):  an epic page has none, `<epic-page>` draws its own. */
+const PAGE_TITLE = ":scope > ui-sticky.spell-h1 > .spell-page-head > h1"
 
 /** Space between the stuck titles and an element a link lands on inside an epic page, px (`EpicFold`'s `LAND_GAP`). */
 const EPIC_LAND_GAP = 8
@@ -242,6 +246,7 @@ async function start() {
   }
   const outline = outlineOf(main)
   oneLineHead(main)
+  wireReadingTime(main)
   const counts = countItems(outline)
   // the saga pages (HEADINGS) get no filter, but their id chips are coloured by state too
   if (outline.sections) wireItemFilters(main)
@@ -309,7 +314,7 @@ function loadEpicsPack() {
  * - a page with no breadcrumb:  the title alone, in the same type
  */
 function oneLineHead(main) {
-  const h1 = main.querySelector(":scope > ui-sticky.spell-h1 > .spell-page-head > h1")
+  const h1 = main.querySelector(PAGE_TITLE)
   if (!h1) return
   document.body.classList.add("spell-one-line-head")
   const crumbs = main.querySelector(":scope > ui-breadcrumb.spell-crumbs")
@@ -326,6 +331,40 @@ function oneLineHead(main) {
       page.previousSibling.remove()
   }
   h1.prepend(trail)
+}
+
+/**
+ * The READING TIME chip, right after the page's title (epic `epic-engine` P14, Q5):  `SOLID 2 · 48 min read`,
+ * a quiet `<ui-label>` (`spell-doc.css`, "The reading time chip").
+ * - its tooltip:  the exact count, "8,749 words, 2,281 of them code" (`readingTime()`, `ReadingTime.js`)
+ * - every page with the docs head:  guides, the index pages, details and choice pages
+ * - NOT an epic or saga page:  `<epic-page>` draws its own head, and its items' bodies wait in part files
+ *   until opened, so the count would be a fraction of the page (J91)
+ * - recounted on every `spell-doc:updated`:  an edit saved, a section's body loaded
+ */
+function wireReadingTime(main) {
+  drawReadingTime(main)
+  addEventListener("spell-doc:updated", () => drawReadingTime(main))
+}
+
+/**
+ * Draw the reading time chip at the end of the page's h1, or update the one there.
+ * - `data-spell-added`:  a live update steps around it, and `readingTime()` skips it
+ */
+function drawReadingTime(main) {
+  const h1 = main.querySelector(PAGE_TITLE)
+  if (!h1) return
+  const { words, code, minutes } = readingTime(main)
+  let chip = h1.querySelector(":scope > ui-label.spell-reading-time")
+  if (!chip) {
+    chip = el("ui-label", { class: "spell-reading-time", size: "tiny", basic: true, "data-spell-added": true })
+    h1.append(chip)
+  }
+  const counted = code
+    ? `${words.toLocaleString()} words, ${code.toLocaleString()} of them code`
+    : `${words.toLocaleString()} words`
+  if (chip.textContent !== `${minutes} min read`) chip.textContent = `${minutes} min read`
+  if (chip.title !== counted) chip.title = counted
 }
 
 /**

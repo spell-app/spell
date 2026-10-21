@@ -406,6 +406,26 @@ body.spell-one-line-head .spell-page-head > h1 {
     display: none;
   }
 }
+/*
+ * ## The reading time chip (the runtime's `drawReadingTime()`, epic `epic-engine` P14):  `48 min read` right after
+ * the title, a quiet outlined label in the body's type, muted:  not the title's tracked capitals
+ * - none at phone width:  the head's tools row lies over the title's end there, and would cut it off
+ */
+.spell-page-head > h1 > ui-label.spell-reading-time {
+  --ui-label-basic-color: var(--spell-muted);
+  --ui-label-basic-border: var(--spell-rule);
+  --ui-label-basic-background: transparent;
+  flex: none;
+  font-family: var(--spell-sans);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+@media (max-width: 720px) {
+  .spell-page-head > h1 > ui-label.spell-reading-time {
+    display: none;
+  }
+}
 .spell-page-head > h1 {
   flex: 1 1 auto;
   min-width: 0;
