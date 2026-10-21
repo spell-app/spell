@@ -221,7 +221,9 @@ export class EpicServer {
     } catch (error) {
       await this.stop()
       if ((error as NodeJS.ErrnoException).code !== "EADDRINUSE") throw error
-      throw new Error(`epic server:  port ${port} is taken, so this one doesn't start (\`epic hub ensure\` says by what)`)
+      throw new Error(
+        `epic server:  port ${port} is taken, so this one doesn't start (\`epic hub ensure\` says by what)`
+      )
     }
     this.info.port = actual
     if (pidFile) {
