@@ -534,7 +534,7 @@ export const ROUTE_MODULES = [
  * - ALL of spell-epic's code, `src/` (epic `epic-eject` I11):  the route modules import far beyond their own folders
  *   (`config/`, `data/`, `links/`, `review/`, the elements' definitions ...), so watching only theirs and this one
  *   missed a change to the rest
- * - the server package's, `spell-kit/server` (spell-server's), where Node's resolver finds it (`packageDir()`)
+ * - the server package's, `spell-kit/server` (the kit's), where Node's resolver finds it (`packageDir()`)
  *   - not the default repo's page-server package (`buildBundles()`):  spell-app's own, a change there needs a restart
  */
 export const SOURCES = [

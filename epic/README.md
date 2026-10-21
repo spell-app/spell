@@ -91,6 +91,7 @@ Each repo says where it keeps its epic things in ONE file, `.epic/config.json5`,
 | `installCommand` | `"yarn install"` | what makes a new worktree ready to run, from its root;  `""`:  nothing to install |
 | `installOnCreate` | `false` | whether the worktree hook runs `installCommand` before it hands a new worktree over (I2) |
 | `installTimeout` | `600` | the seconds that install may take before the hook fails |
+| `extraInstalls` | `[]` | folders of a new worktree that are yarn projects of their OWN, outside the one install (`["spell-epic/vscode", "spell-app/vscode"]`, the kit's:  the extensions;  epic `epic-engine` I65), each a path from the worktree's root (the top's, in a multi-repo top):  the hook runs `installCommand` in each after the one at the root;  one missing or failing is a warning |
 | `windows.default` | `"spell-app"` | the window file a worktree's window is opened from, by default |
 | `windows.repoName` | `"spell-app"` | the repo root's folder name in every window |
 | `windows.contentName` | `"spell-app-dev"` | the content repo's folder name in every window |

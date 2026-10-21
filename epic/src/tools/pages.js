@@ -439,7 +439,7 @@ const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
  * This checkout's page server (`spell dev server`), started in the background if it isn't running.
  * - returns `{ base, port }`, or `undefined` if it can't start (the caller falls back to `file://`)
  * - runs the server package's `src/page/cli.ts ensure` under `tsx` with the run-time alias hook (`ALIASES`):  the
- *   `spell-kit/server` this checkout's install resolves (spell-server, `packageDir()`, epic `epic-engine` P10)
+ *   `spell-kit/server` this checkout's install resolves (the kit's, `packageDir()`, epic `epic-engine` P10)
  * - a checkout whose settings name no page server (no `"pageServer"` in its `package.json`:  a repo `epic init` set
  *   up, spell-epic itself), or that resolves no server package:  the machine's epic server instead
  *   (`ensureEpicServer()`)

@@ -136,6 +136,31 @@ describe("worktree hook", () => {
     expect(made.stderr).not.toMatch(/worktree hook: {2}in /)
   })
 
+  test("extraInstalls (I65):  the install runs again in each yarn project of its own;  one missing or failing warns", () => {
+    // `tools/vscode`:  its own yarn project, tracked by the repo, outside the one install
+    mkdirSync(join(MAIN, "tools", "vscode"), { recursive: true })
+    writeFileSync(join(MAIN, "tools", "vscode", "package.json"), "{}\n")
+    git(MAIN, "add", "-A")
+    git(MAIN, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "vscode")
+    const mark = join(TEMP, "installed-in-each")
+    config({ installOnCreate: true, installCommand: `pwd >> "${mark}"`, extraInstalls: ["tools/vscode", "gone"] })
+    const made = hook("create", { name: "extras", cwd: MAIN })
+    expect(made.status, made.stderr).toBe(0)
+    expect(readFileSync(mark, "utf8").trim().split("\n")).toEqual([made.stdout, join(made.stdout, "tools", "vscode")])
+    expect(made.stderr).toMatch(/extraInstalls: {2}gone isn't in .*: {2}skipped/)
+
+    // the root's install passes, the folder's fails:  a warning, and the worktree handed over
+    config({
+      installOnCreate: true,
+      installCommand: 'case "$PWD" in */vscode) exit 4;; esac',
+      extraInstalls: ["tools/vscode"]
+    })
+    const warned = hook("create", { name: "extras-failing", cwd: MAIN })
+    expect(warned.status, warned.stderr).toBe(0)
+    expect(warned.stdout).toBe(join(BESIDE, "extras-failing"))
+    expect(warned.stderr).toMatch(/failed in .*extras-failing\/tools\/vscode: {2}exit 4\. {2}Its packages are missing/)
+  })
+
   test("an install that fails, or runs out of time, fails the hook, saying how to carry on;  the worktree stays", () => {
     config({ installOnCreate: true, installCommand: "exit 3" })
     const failed = hook("create", { name: "broken", cwd: MAIN })

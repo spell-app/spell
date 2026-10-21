@@ -9,7 +9,8 @@ import { Git } from "./Git"
 
 /**
  * A Vitest snapshot file:  its test is `<dir>/../<name>` less `.snap`.
- * - Under `tests/<package>/`, where each package's tests live (epic `people-and-orgs` P10);
+ * - Under `tests/<package>/`, where each package's tests live (epic `people-and-orgs` P10;  in every repo since epic
+ *   `repo-split`:  `tests/markdown/` in spell-lang, `tests/util/` in the kit);
  *   or under `packages/`, for a branch from before that move.
  */
 const SNAPSHOTS = ["tests/*/**/__snapshots__/*.snap", "packages/*/**/__snapshots__/*.snap"]
@@ -137,7 +138,7 @@ export class MainMerge {
     const ours = new Set(gitLines(root, ["diff", "--name-only", base, "HEAD"]))
     const touched = [...new Set([...unmerged, ...theirs.filter((file) => !report.untracked.includes(file))])]
     const candidates = touched.filter((file) => unmerged.includes(file) || ours.has(file))
-    const plan = MainMerge.generatorsFor(candidates, generators, snapshotUpdate)
+    const plan = MainMerge.generatorsFor(candidates, generators, snapshotUpdate, root)
     const planned = new Set(plan.flatMap((step) => step.files))
     report.conflicts = unmerged.filter((file) => !planned.has(file))
     if (report.conflicts.length) return { ...report, result: "conflicts" }
@@ -250,29 +251,48 @@ export class MainMerge {
    * The generators `files` need, in run order, each with the files it covers:
    * `generators`' (a checkout's list, `generatorsOf()`), then one snapshot update per package.
    * - a file no generator covers isn't in any step
-   * - static:  pure
+   * - `root`:  the checkout, where each snapshot's package folder is looked for (`packageFolder()`);  left out,
+   *   `packages/<name>`
+   * - static:  pure, but for looking in `root`
    */
   static generatorsFor(
     files: string[],
     generators: Generator[],
-    snapshotUpdate = SNAPSHOT_UPDATE
+    snapshotUpdate = SNAPSHOT_UPDATE,
+    root?: string
   ): { generator: Generator; files: string[] }[] {
     const steps = generators
       .map((generator) => ({ generator, files: files.filter((file) => matchesAny(file, generator.outputs)) }))
       .filter((step) => step.files.length)
-    // By package, run in `packages/<name>` (a snapshot under `tests/<name>/` is that package's):  one run each
+    // By package, run in its folder (a snapshot under `tests/<name>/` is package `<name>`'s):  one run each
     const snapshots = new Map<string, string[]>()
     for (const snap of files.filter(isSnapshot)) {
-      const cwd = `packages/${snap.split("/")[1]}`
+      const cwd = MainMerge.packageFolder(snap.split("/")[1]!, root)
       snapshots.set(cwd, [...(snapshots.get(cwd) ?? []), snap])
     }
     for (const [cwd, snaps] of snapshots) {
-      // each test's path from the package:  `src/x.test.ts`, or `../../tests/<name>/src/x.test.ts`
+      // each test's path from the package:  `src/x.test.ts`, `../../tests/<name>/src/x.test.ts`, `../tests/<name>/...`
       const tests = snaps.map((snap) => relative(cwd, join(dirname(dirname(snap)), basename(snap, ".snap"))))
-      const generator = { name: `${basename(cwd)} snapshots`, outputs: snaps, cwd, run: snapshotUpdate(tests) }
+      const name = `${cwd === "." ? "root" : basename(cwd)} snapshots`
+      const generator = { name, outputs: snaps, cwd, run: snapshotUpdate(tests) }
       steps.push({ generator, files: snaps })
     }
     return steps
+  }
+
+  /**
+   * Package `name`'s folder in checkout `root`, from its root:  where its snapshots are updated (its own
+   * `vitest.config.ts`).
+   * - `packages/<name>`:  a repo laid out as spell-app was, one workspace per folder of `packages/` (and left out
+   *   `root`)
+   * - `<name>`:  a repo that's ONE package, its parts folders at its root (epic `repo-split` P9 and P11:  the kit's
+   *   `util/`, spell-lang's `markdown/`, spell-app's `lsp/`), when there's no `packages/<name>` but a `<name>`
+   * - `.`, the repo's root, when neither is there
+   */
+  static packageFolder(name: string, root?: string): string {
+    const old = `packages/${name}`
+    if (!root || existsSync(join(root, old))) return old
+    return existsSync(join(root, name)) ? name : "."
   }
 
   /**

@@ -1,9 +1,11 @@
 /**
- * A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A), on SCRATCH git repos laid out as `~/www/spell` is:
- * a top repo `spell` (its `.epic/config.json5` naming its child repos through `repos.json5`) with three child repos
+ * A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A), on SCRATCH git repos laid out as `~/www/spell` is
+ * since epic `repo-split` P9:  the kit, `spell-kit`, checked out as `spell` (its own folders `util/`, `toolchain/`
+ * ... tracked;  its `.epic/config.json5` naming its child repos through `repos.json5`), with its FIVE child repos
  * cloned inside it, each its own git repo on `main`.
  * - an epic's worktree:  `spell.worktrees/<epic>/`, a worktree of the top with one of every child inside it, all on
- *   branch `<epic>`, one install at its top (the worktree hook, run as Claude Code runs it)
+ *   branch `<epic>`, one install at its top, then one in each yarn project of its own (`extraInstalls`, the two
+ *   `vscode/` folders;  epic `epic-engine` I65) (the worktree hook, run as Claude Code runs it)
  * - `EpicConfig` from a child:  its top, its worktree, the epic a path inside it is in
  * - `epic worktree merge-main` over every repo, `epic merge` of only the repos with commits, `epic worktree remove`
  * - the session guard and the window file, from a child repo's folder
@@ -43,7 +45,13 @@ const TOP = join(TEMP, "www", "spell")
 const WORKTREES = join(TEMP, "www", "spell.worktrees")
 const CONTENT = join(TEMP, "www", "spell.epics")
 const CLAUDE = join(TEMP, "claude")
-const CHILDREN = ["spell-util", "spell-ui", "spell-app"]
+const CHILDREN = ["spell-lang", "spell-ui", "spell-brand", "spell-epic", "spell-app"]
+
+/** The kit's own folders, tracked by the top (epic `repo-split` P9:  once spell-util, spell-server, spell-element). */
+const KIT = ["util", "toolchain", "server", "assembler", "element"]
+
+/** The yarn projects of their own, outside the one install:  the two extensions. */
+const EXTRAS = ["spell-epic/vscode", "spell-app/vscode"]
 
 /** git's identity and no signing, for every commit here and in the code under test (`MainMerge` commits). */
 const GIT_ENV = {
@@ -65,9 +73,14 @@ afterAll(() => {
 })
 
 ////////
-// The top:  the glue only, its child repos git-ignored;  `installed.txt` is what its install command writes
+// The top, the kit:  its own folders and the glue, its child repos git-ignored;  `installed.txt` is what its install
+// command writes
 mkdirSync(join(TOP, ".epic"), { recursive: true })
 git(TOP, "init", "-q", "-b", "main")
+for (const name of KIT) {
+  mkdirSync(join(TOP, name, "src"), { recursive: true })
+  writeFileSync(join(TOP, name, "src", "index.ts"), `export const ${name} = 1\n`)
+}
 writeFileSync(join(TOP, ".gitignore"), "/spell-*/\n/installed.txt\n/.spell-main\nnode_modules\n")
 writeFileSync(
   join(TOP, "repos.json5"),
@@ -83,6 +96,7 @@ writeFileSync(
     worktreesFolder: "../spell.worktrees",
     installCommand: "echo installed > installed.txt",
     installOnCreate: true,
+    extraInstalls: EXTRAS,
     linkSessionFolders: true,
     sharedFolders: [],
     engineFolder: "",
@@ -97,6 +111,13 @@ for (const name of CHILDREN) {
   git(child, "init", "-q", "-b", "main")
   writeFileSync(join(child, "README.md"), `# ${name}\n`)
   commit(child, `${name}:  first`)
+}
+// the extensions:  a yarn project of its own in each, its install's output git-ignored there
+for (const extra of EXTRAS) {
+  mkdirSync(join(TOP, extra))
+  writeFileSync(join(TOP, extra, "package.json"), "{}\n")
+  writeFileSync(join(TOP, extra, ".gitignore"), "installed.txt\n")
+  commit(join(TOP, dirname(extra)), `${dirname(extra)}:  its extension`)
 }
 // spell-app keeps its own (old) config, as the real one does:  its own worktrees folder, beside it
 mkdirSync(join(TOP, "spell-app", ".epic"))
@@ -149,7 +170,10 @@ describe("the worktree hook, multi-repo", () => {
       expect(existsSync(join(top, name, "installed.txt"))).toBe(false)
     }
     expect(readFileSync(join(top, "installed.txt"), "utf8").trim()).toBe("installed")
-    // the top's git sees none of the child repos
+    // and each extension's own install (I65)
+    for (const extra of EXTRAS) expect(existsSync(join(top, extra, "installed.txt"))).toBe(true)
+    // the top's git sees none of the child repos, and tracks the kit's own folders
+    expect(git(top, "ls-files", "util")).toBe("util/src/index.ts")
     expect(git(top, "status", "--porcelain")).toBe("")
     // every session saved under the main TOP checkout's folder:  the top's worktree's and each child's are links to it
     const mains = realpathSync(SessionFolders.folderOf(TOP, CLAUDE))
@@ -193,40 +217,48 @@ describe("the worktree hook, multi-repo", () => {
   })
 })
 
-describe("an epic across two child repos:  merge-main, merge, remove", () => {
+describe("an epic across two child repos and the kit:  merge-main, merge, remove", () => {
   const epic = join(WORKTREES, "demo")
 
-  test("commits in two children;  `repos` says which are ahead", () => {
-    for (const name of ["spell-ui", "spell-app"]) {
+  test("commits in two children and in the kit's own folders;  `repos` says which are ahead", () => {
+    for (const name of ["spell-lang", "spell-app"]) {
       writeFileSync(join(epic, name, "demo.md"), `${name} demo\n`)
       git(join(epic, name), "add", "-A")
       git(join(epic, name), "commit", "-q", "-m", `demo:  ${name}`)
     }
+    writeFileSync(join(epic, "util", "src", "demo.ts"), "export const demo = 1\n")
+    commit(epic, "demo:  the kit's util")
     const states = new Worktrees({ main: join(TOP, "spell-app") }).repoStates("demo")
     expect(states.map(({ repo, ahead, behind, dirty }) => ({ repo, ahead, behind, dirty: dirty.length }))).toEqual([
-      { repo: "spell", ahead: 0, behind: 0, dirty: 0 },
-      { repo: "spell-util", ahead: 0, behind: 0, dirty: 0 },
-      { repo: "spell-ui", ahead: 1, behind: 0, dirty: 0 },
+      { repo: "spell", ahead: 1, behind: 0, dirty: 0 },
+      { repo: "spell-lang", ahead: 1, behind: 0, dirty: 0 },
+      { repo: "spell-ui", ahead: 0, behind: 0, dirty: 0 },
+      { repo: "spell-brand", ahead: 0, behind: 0, dirty: 0 },
+      { repo: "spell-epic", ahead: 0, behind: 0, dirty: 0 },
       { repo: "spell-app", ahead: 1, behind: 0, dirty: 0 }
     ])
-    expect(new Worktrees({ main: TOP }).nameStatus("demo", []).ahead).toBe(2)
+    expect(new Worktrees({ main: TOP }).nameStatus("demo", []).ahead).toBe(3)
   })
 
   test("merge-main, from a child's folder:  each repo's main into its branch, the top last", () => {
-    // main moves in spell-ui (another file) and in the top
-    writeFileSync(join(TOP, "spell-ui", "other.md"), "other\n")
-    commit(join(TOP, "spell-ui"), "spell-ui:  main moves", true)
-    writeFileSync(join(TOP, "glue.md"), "glue\n")
-    commit(TOP, "the top:  main moves", true)
+    // main moves in spell-lang (another file) and in the kit (another of its folders)
+    writeFileSync(join(TOP, "spell-lang", "other.md"), "other\n")
+    commit(join(TOP, "spell-lang"), "spell-lang:  main moves", true)
+    writeFileSync(join(TOP, "server", "src", "glue.ts"), "export const glue = 1\n")
+    commit(TOP, "the kit:  main moves", true)
     const reports = MainMerge.runAll(join(epic, "spell-app"))
     expect(reports.map(({ repo, result, error }) => ({ repo, result, error }))).toEqual([
-      { repo: "spell-util", result: "up-to-date", error: undefined },
-      { repo: "spell-ui", result: "merged", error: undefined },
+      { repo: "spell-lang", result: "merged", error: undefined },
+      { repo: "spell-ui", result: "up-to-date", error: undefined },
+      { repo: "spell-brand", result: "up-to-date", error: undefined },
+      { repo: "spell-epic", result: "up-to-date", error: undefined },
       { repo: "spell-app", result: "up-to-date", error: undefined },
-      { repo: "spell", result: "fast-forward", error: undefined }
+      { repo: "spell", result: "merged", error: undefined }
     ])
-    expect(existsSync(join(epic, "spell-ui", "other.md"))).toBe(true)
-    expect(existsSync(join(epic, "glue.md"))).toBe(true)
+    expect(existsSync(join(epic, "spell-lang", "other.md"))).toBe(true)
+    expect(existsSync(join(epic, "server", "src", "glue.ts"))).toBe(true)
+    // the extensions' installs untouched:  git-ignored there
+    for (const extra of EXTRAS) expect(existsSync(join(epic, extra, "installed.txt"))).toBe(true)
   })
 
   test("a single repo's merge-main:  its one report, no `repo`", () => {
@@ -237,27 +269,26 @@ describe("an epic across two child repos:  merge-main, merge, remove", () => {
     expect(MainMerge.runAll(lone)).toEqual([expect.not.objectContaining({ repo: expect.anything() })])
   })
 
-  test("`epic merge`:  ONLY the two repos with commits fast-forward;  the others untouched", () => {
+  test("`epic merge`:  ONLY the three repos with commits fast-forward;  the others untouched", () => {
     const before = Object.fromEntries(
-      ["spell-util", "."].map((name) => [name, git(join(TOP, name), "rev-parse", "main")])
+      ["spell-ui", "spell-brand", "spell-epic"].map((name) => [name, git(join(TOP, name), "rev-parse", "main")])
     )
     const merged = Requests.mergeEach("demo", TOP)
     expect(merged.map(({ repo, commits }) => ({ repo, count: commits.length }))).toEqual([
-      { repo: "spell-ui", count: 2 },
+      { repo: "spell", count: 2 },
+      { repo: "spell-lang", count: 2 },
       { repo: "spell-app", count: 1 }
     ])
-    for (const name of ["spell-ui", "spell-app"])
+    for (const name of [".", "spell-lang", "spell-app"])
       expect(git(join(TOP, name), "rev-parse", "main")).toBe(git(join(TOP, name), "rev-parse", "demo"))
-    expect(git(join(TOP, "spell-util"), "rev-parse", "main")).toBe(before["spell-util"])
-    expect(git(TOP, "rev-parse", "main")).toBe(before["."])
+    for (const name of ["spell-ui", "spell-brand", "spell-epic"])
+      expect(git(join(TOP, name), "rev-parse", "main")).toBe(before[name])
   })
 
   test("`epic worktree remove demo --branches`, from a child:  every worktree and branch gone, children first", () => {
     const lines = new Worktrees({ main: join(TOP, "spell-ui") }).remove("demo", { branches: true })
     expect(lines.filter((line) => /removed /.test(line)).map((line) => line.split(":")[0])).toEqual([
-      "spell-app",
-      "spell-ui",
-      "spell-util",
+      ...[...CHILDREN].reverse(),
       "spell"
     ])
     expect(existsSync(epic)).toBe(false)

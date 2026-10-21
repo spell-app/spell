@@ -34,6 +34,7 @@ describe("EpicConfig", () => {
       installCommand: "yarn install",
       installOnCreate: false,
       installTimeout: 600,
+      extraInstalls: "",
       "windows.default": "spell-app",
       "windows.repoName": "spell-app",
       "windows.contentName": "spell-app-dev",
@@ -114,6 +115,15 @@ describe("EpicConfig", () => {
       /"installTimeout" must be a number/
     )
     expect(() => EpicConfig.settingsFrom('{ "installTimeout": "9" }', "x.json5")).toThrow(/must be a number/)
+  })
+
+  test("extraInstalls (epic-engine I65):  the folders that are yarn projects of their own, paths from the root", () => {
+    const settings = EpicConfig.settingsFrom('{ "extraInstalls": ["spell-epic/vscode", "vscode"] }')
+    expect(settings.extraInstalls).toEqual(["spell-epic/vscode", "vscode"])
+    for (const bad of ['["/abs/vscode"]', '["../vscode"]', '["a//b"]', '["./vscode"]', '"vscode"', "[3]"])
+      expect(() => EpicConfig.settingsFrom(`{ "extraInstalls": ${bad} }`, "x.json5")).toThrow(
+        /"extraInstalls" must be a list of folders/
+      )
   })
 
   test("the P9 keys:  no install command (an empty one), and the folders linked in", () => {

@@ -17,6 +17,10 @@
   // What makes a new worktree ready to run, from its root;  run BEFORE its window opens.
   "installCommand": "yarn install",
   "installOnCreate": true,
+  // Its own yarn project, outside the install:  the extension (epic `epic-engine` I65).
+  // - Only for a worktree of this repo alone:  in the kit, an epic's worktree is the top's, and the top's
+  //   "extraInstalls" names it.
+  "extraInstalls": ["vscode"],
 
   // The VS Code windows (`epic window`).
   "windows": {

@@ -4,7 +4,7 @@
  *   still knows whose `epic` command restarts the epic server.  Move the checkout and you must rebuild.
  * - `esbuild` is spell-epic's own, found up the folder tree.
  * - `$/` imports resolve by the IMPORTING file's repo (`repoAliases`, epic `repo-split` I18):  the bundle takes in other
- *   repos' source (spell-server's `Guard.ts` imports `$/server/...`), and this folder's `tsconfig.json` has only
+ *   repos' source (the kit server's `Guard.ts` imports `$/server/...`), and this folder's `tsconfig.json` has only
  *   spell-epic's table.
  */
 import { aliasedFile } from "spell-kit/toolchain/aliases"

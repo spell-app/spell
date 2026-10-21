@@ -55,6 +55,11 @@
  *   3. `installOnCreate` on:  runs `installCommand` in it (`installTimeout` seconds at most),
  *      so nothing opens the worktree without its packages (I2).
  *      A failure FAILS the hook, saying how to carry on:  the worktree stays
+ *   4. then in each of its `extraInstalls` (epic `epic-engine` I65):  the folders that are yarn projects of their own,
+ *      outside the one install (`spell-epic/vscode`, `spell-app/vscode`:  the extensions), so the linting of them
+ *      finds their packages
+ *      - `installCommand` again, in that folder, `installTimeout` seconds at most
+ *      - a failure, or a folder that isn't there, is a WARNING, saying what to run:  the worktree works without it
  * - The hook's own time limit is in `hooks/hooks.json` (900s):  more than any install's.
  *
  * ## A multi-repo top (epic `epic-engine` P10, repo-split's Q9 A)
@@ -65,7 +70,8 @@
  *     `baseBranch`, or its branch `<name>` when there);  stdout is the TOP's worktree
  *     - one that's there already is reused, and a child cloned since is added
  *     - the shared links once (the top's), the session-folder links for the top's worktree and each child's (all to
- *       the main TOP checkout's folder:  every session saved under `~/www/spell`'s), then ONE install, at the top
+ *       the main TOP checkout's folder:  every session saved under `~/www/spell`'s), then ONE install, at the top,
+ *       and one in each of the top's `extraInstalls` (`spell-epic/vscode` ...)
  *   - `remove`:  the worktree_path may be the top's worktree or any child's in it.  Every repo is checked FIRST
  *     (uncommitted changes, commits its base branch lacks):  any one kept keeps them all.  Then the servers stop
  *     (once, for the whole folder), each child's worktree and branch go, then the top's
@@ -160,7 +166,7 @@ class Worktree {
     Worktree.linkShared(path, config)
     if (config.linkSessionFolders) Worktree.linkSessions(path, root)
     // `installCommand: ""`:  a repo with nothing to install
-    if (config.installOnCreate && config.installCommand) Worktree.install(path, config)
+    if (config.installOnCreate && config.installCommand) Worktree.installAll(path, config)
     return path
   }
 
@@ -193,7 +199,7 @@ class Worktree {
     if (!made.length) return path
     Worktree.linkShared(path, top)
     if (top.linkSessionFolders) for (const each of made) Worktree.linkSessions(each, top.main)
-    if (top.installOnCreate && top.installCommand) Worktree.install(path, top)
+    if (top.installOnCreate && top.installCommand) Worktree.installAll(path, top)
     return path
   }
 
@@ -266,32 +272,68 @@ class Worktree {
   }
 
   /**
+   * Install worktree `path`:  `installCommand` at its root (`install()`), then in each of its `extraInstalls`
+   * (`installExtra()`, epic `epic-engine` I65).
+   */
+  static installAll(path, config) {
+    Worktree.install(path, config)
+    for (const folder of config.extraInstalls) Worktree.installExtra(path, folder, config)
+  }
+
+  /**
    * Run the repo's `installCommand` in worktree `path`, in a shell, `installTimeout` seconds at most.
    * - its output goes to stderr (stdout is the worktree's path)
    * - throws, saying how to carry on, when it fails or runs out of time:  the worktree is kept, made and linked
    */
   static install(path, config) {
     const command = config.installCommand
-    console.error(`worktree hook:  ${command} in ${path}`)
-    const run = spawnSync(command, {
-      cwd: path,
-      shell: true,
-      stdio: ["ignore", 2, 2],
-      timeout: config.installTimeout * 1000
-    })
-    const why =
-      run.error?.code === "ETIMEDOUT" || run.signal
-        ? `stopped after ${config.installTimeout}s (installTimeout in .epic/config.json5)`
-        : run.error
-          ? run.error.message
-          : run.status !== 0
-            ? `exit ${run.status}`
-            : ""
+    const why = Worktree.run(command, path, config)
     if (!why) return
     throw new Error(
       `\`${command}\` failed in ${path}:  ${why}.  The worktree is made:  run \`${command}\` there by hand, ` +
         `then EnterWorktree with path "${path}"`
     )
+  }
+
+  /**
+   * Run the repo's `installCommand` in `folder` of worktree `path`, a yarn project of its own (`extraInstalls`).
+   * - a folder that isn't there (a child repo not cloned), or an install that fails:  a warning saying what to run,
+   *   never a failed hook (the worktree works;  only what needs that folder's packages doesn't, its linting)
+   */
+  static installExtra(path, folder, config) {
+    const command = config.installCommand
+    const cwd = join(path, folder)
+    if (!existsSync(join(cwd, "package.json"))) {
+      console.error(`worktree hook:  extraInstalls:  ${folder} isn't in ${path} (no package.json there):  skipped`)
+      return
+    }
+    const why = Worktree.run(command, cwd, config)
+    if (why)
+      console.error(
+        `worktree hook:  \`${command}\` failed in ${cwd}:  ${why}.  Its packages are missing:  run \`${command}\` ` +
+          "there by hand"
+      )
+  }
+
+  /**
+   * Run `command` in folder `cwd`, in a shell, `installTimeout` seconds at most, its output on stderr (stdout is the
+   * worktree's path):  why it failed, or `""`.
+   */
+  static run(command, cwd, config) {
+    console.error(`worktree hook:  ${command} in ${cwd}`)
+    const run = spawnSync(command, {
+      cwd,
+      shell: true,
+      stdio: ["ignore", 2, 2],
+      timeout: config.installTimeout * 1000
+    })
+    return run.error?.code === "ETIMEDOUT" || run.signal
+      ? `stopped after ${config.installTimeout}s (installTimeout in .epic/config.json5)`
+      : run.error
+        ? run.error.message
+        : run.status !== 0
+          ? `exit ${run.status}`
+          : ""
   }
 
   /**

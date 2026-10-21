@@ -196,6 +196,29 @@ describe("generatorsFor()", () => {
       ]
     ])
   })
+
+  test("a repo that's ONE package (spell-lang, the kit):  run in its part's folder at the root, else at the root", () => {
+    // spell-lang's layout:  `markdown/` at its root, its tests in `tests/markdown/`;  no `packages/`
+    const root = join(TEMP, "one-package")
+    mkdirSync(join(root, "markdown"), { recursive: true })
+    const steps = MainMerge.generatorsFor(
+      ["tests/markdown/src/spec/__snapshots__/spec.test.ts.snap", "tests/gone/src/__snapshots__/x.test.ts.snap"],
+      [],
+      undefined,
+      root
+    )
+    expect(steps.map(({ generator }) => [generator.name, generator.cwd, generator.run])).toEqual([
+      [
+        "markdown snapshots",
+        "markdown",
+        ["yarn", "vp", "test", "run", "../tests/markdown/src/spec/spec.test.ts", "--update"]
+      ],
+      ["root snapshots", ".", ["yarn", "vp", "test", "run", "tests/gone/src/x.test.ts", "--update"]]
+    ])
+    // a repo laid out as spell-app was:  `packages/<name>` first
+    mkdirSync(join(root, "packages", "markdown"), { recursive: true })
+    expect(MainMerge.packageFolder("markdown", root)).toBe("packages/markdown")
+  })
 })
 
 describe("snapshotEntries()", () => {

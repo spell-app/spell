@@ -125,6 +125,7 @@ export class RepoInit {
    * - `baseBranch`:  the remote's default branch (`origin/HEAD`), else the main checkout's branch, else `main`
    * - `installCommand`:  what the repo's lock file names (`installCommandOf()`), `""` with none
    * - `installOnCreate`:  on when there is one, so a worktree's window never opens without its packages
+   * - `extraInstalls`:  none (`[]`);  the file says what it's for
    * - `windows`:  named for the repo and its content folder;  `worktreeOnly` on (every worktree is beside the repo)
    * - `linkSessionFolders` on:  each worktree's saved sessions show in every window's Claude panel
    * - `sharedFolders`:  what the epic tooling reads and writes (`INIT_FOLDERS`)
@@ -144,6 +145,7 @@ export class RepoInit {
       installCommand,
       installOnCreate: Boolean(installCommand),
       installTimeout: EpicConfig.DEFAULTS.installTimeout,
+      extraInstalls: [],
       windows: { default: repo, repoName: repo, contentName: `${repo}.epics`, worktreeOnly: true },
       linkSessionFolders: true,
       sharedFolders: [...INIT_FOLDERS],
@@ -191,6 +193,9 @@ export class RepoInit {
   "installOnCreate": ${value("installOnCreate")},
   // the seconds that install may take
   "installTimeout": ${value("installTimeout")},
+  // folders that are yarn projects of their own, outside that install (a \`vscode/\` extension), from a worktree's
+  // root:  installCommand runs in each too
+  "extraInstalls": ${value("extraInstalls")},
   // the VS Code windows:  the window file a worktree's window is opened from, the folder names a window shows,
   // and whether a worktree's window holds only the worktree and the content folder
   "windows": {

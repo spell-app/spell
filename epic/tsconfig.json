@@ -1,5 +1,5 @@
 {
-  // The TypeScript settings every package shares are the toolchain's (`spell-kit/toolchain`, spell-util's, a workspace
+  // The TypeScript settings every package shares are the toolchain's (`spell-kit/toolchain`, the kit's, at the root
   // of the top `spell` install);  the alias table is this repo's own (`./tsconfig.base.json`).  What's ours below.
   "extends": ["spell-kit/toolchain/tsconfig.base.json", "./tsconfig.base.json"],
   "compilerOptions": {

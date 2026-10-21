@@ -21,7 +21,10 @@ When `epic config repos` prints names, the repo is a MULTI-REPO top, or a child 
 repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P10).  Then:
 - The worktree is the TOP's:  `epic worktree path <name>` prints `~/www/spell.worktrees/<name>`, a git worktree of the
   top with a git worktree of EVERY child repo inside it, at the same folder names, ALL on branch `<name>`.
-  - The `WorktreeCreate` hook makes them all, and runs ONE install, at its top.
+  - The `WorktreeCreate` hook makes them all, and runs ONE install, at its top;  then one in each folder that's a yarn
+    project of its own (`epic config extraInstalls`:  the `vscode/` extensions).
+  - The top is the kit, `spell-kit` (its own folders `util/`, `server/` ... at its root):  its changes are commits in
+    the top's worktree, like any child's.
   - Each repo is its own git repo:  run git in the repo's folder (`git -C <name's folder>/spell-ui ...`).
 - `epic worktree repos [<name>]` lists each repo's checkout:  its branch, how far it is ahead of and behind its
   `main`, and what's uncommitted.  `--json` for the numbers.

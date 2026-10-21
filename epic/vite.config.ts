@@ -4,7 +4,7 @@ import { fmtConfig, packageLint, patternLintIn } from "spell-kit/toolchain/lint"
 
 /**
  * spell-epic's Vite+ config:  only the `lint` / `fmt` blocks (what `vp check`, `vp lint`, `vp fmt` and the Oxc editor
- * extension read), from the shared toolchain package, `spell-kit/toolchain/lint` (spell-util's, a workspace of the top
+ * extension read), from the shared toolchain package, `spell-kit/toolchain/lint` (the kit's, at the root of the top
  * `spell` install, epic `epic-engine` P10):  the copy of its `vite.lint.ts` that was here is gone.
  * - ONE block for the whole repo:  spell-epic is one package (epic `epic-eject` J14), so the root is the package.
  * - The pack's BUILD is the kit's, the same for every pack:

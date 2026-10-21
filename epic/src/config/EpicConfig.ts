@@ -62,6 +62,7 @@ export class EpicConfig {
     installCommand: "yarn install",
     installOnCreate: false,
     installTimeout: 600,
+    extraInstalls: [],
     windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
     linkSessionFolders: false,
     sharedFolders: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"],
@@ -210,8 +211,8 @@ export class EpicConfig {
   /**
    * The child repos this repo holds, lowest first, when it's a MULTI-REPO TOP (epic `epic-engine` P10, repo-split's
    * Q9 A):  `repos` in its config;  `[]` for any other repo (a single repo, or a child).
-   * - `repos`:  a list of names (`["spell-util", ...]`), or a file from the main checkout listing them
-   *   (`"repos.json5"`:  `{ "repos": [{ "name": "spell-util", ... }, ...] }`, the top repo `spell`'s own list)
+   * - `repos`:  a list of names (`["spell-lang", ...]`), or a file from the main checkout listing them
+   *   (`"repos.json5"`:  `{ "repos": [{ "name": "spell-lang", ... }, ...] }`, the top repo `spell`'s own list)
    * - a file that won't read:  `[]`, said on stderr
    */
   get repos(): string[] {
@@ -301,6 +302,15 @@ export class EpicConfig {
   /** how long the worktree hook's install may take, in seconds, before it's stopped and the hook fails */
   get installTimeout(): number {
     return this.settings.installTimeout
+  }
+
+  /**
+   * the folders in a new worktree that are yarn projects of their OWN, outside the one install (`vscode/`, epic
+   * `epic-engine` I65):  `extraInstalls`, as written, each from the worktree's root (the top's, in a multi-repo top)
+   * - the worktree hook runs `installCommand` in each, after the one at the root, when `installOnCreate` is on
+   */
+  get extraInstalls(): string[] {
+    return this.settings.extraInstalls
   }
 
   /** the window names:  the default window, and the folder names a window shows */
@@ -549,6 +559,7 @@ export class EpicConfig {
       installCommand: this.installCommand,
       installOnCreate: this.installOnCreate,
       installTimeout: this.installTimeout,
+      extraInstalls: this.extraInstalls.join(","),
       "windows.default": this.windows.default,
       "windows.repoName": this.windows.repoName,
       "windows.contentName": this.windows.contentName,
@@ -597,6 +608,7 @@ export class EpicConfig {
       installCommand: valueOf(given, "installCommand", defaults.installCommand, file, "", { empty: true }),
       installOnCreate: valueOf(given, "installOnCreate", defaults.installOnCreate, file),
       installTimeout: valueOf(given, "installTimeout", defaults.installTimeout, file),
+      extraInstalls: pathsOf(given, "extraInstalls", defaults.extraInstalls, file),
       windows: {
         default: valueOf(window, "default", defaults.windows.default, file, "windows."),
         repoName: valueOf(window, "repoName", defaults.windows.repoName, file, "windows."),
@@ -658,6 +670,11 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  * - `installOnCreate`:  whether the worktree hook runs `installCommand` itself, before it hands a NEW worktree over
  *   (off:  the skills run it, after entering).  On, nothing opens the worktree without its packages (I2)
  * - `installTimeout`:  the seconds the hook's install may take (600)
+ * - `extraInstalls`:  folders of a new worktree that are yarn projects of their own, NOT workspaces of the one install
+ *   (`["spell-epic/vscode", "spell-app/vscode"]`, the extensions;  epic `epic-engine` I65), each a path from the
+ *   worktree's root (the top's, in a multi-repo top);  `[]` (the default):  none
+ *   - the worktree hook runs `installCommand` in each, after the one at the root, `installTimeout` seconds each;  one
+ *     that fails, or isn't there, is a warning:  the worktree works, only what needs that folder's packages doesn't
  * - `windows`:  the VS Code windows (the window script)
  *   - `default`:  the window file a worktree's window is opened from when the session's window isn't a package's
  *     (`spell-app`:  `<windowsFolder>/spell-app.code-workspace`)
@@ -696,6 +713,7 @@ export type EpicSettings = {
   installCommand: string
   installOnCreate: boolean
   installTimeout: number
+  extraInstalls: string[]
   windows: EpicWindows
   linkSessionFolders: boolean
   sharedFolders: string[]
@@ -790,7 +808,26 @@ function foldersOf(given: Record<string, unknown>, key: string, fallback: string
 }
 
 /**
- * `given.repos`:  a file listing the child repos (`"repos.json5"`), or their names (`["spell-util", ...]`);
+ * `given[key]`, a list of folders, each a relative path (`["vscode", "spell-app/vscode"]`);  `fallback` when it's
+ * left out.
+ * - throws `TypeError` naming the file and the key when it isn't a list of `/`-separated plain names (no absolute path,
+ *   no `.`, `..` or empty part)
+ */
+function pathsOf(given: Record<string, unknown>, key: string, fallback: string[], file: string): string[] {
+  const value = given[key]
+  if (value === undefined) return fallback
+  const part = (each: string) => /^[\w.-]+$/.test(each) && each !== "." && each !== ".."
+  const relative = (each: unknown) => typeof each === "string" && each.split("/").every(part)
+  if (!Array.isArray(value) || !value.every(relative))
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "${key}" must be a list of folders from the worktree's root, ["vscode", ...], not ` +
+        JSON.stringify(value)
+    )
+  return value as string[]
+}
+
+/**
+ * `given.repos`:  a file listing the child repos (`"repos.json5"`), or their names (`["spell-lang", ...]`);
  * `fallback` (`""`, none) when it's left out.
  * - throws `TypeError` naming the file for anything else
  */

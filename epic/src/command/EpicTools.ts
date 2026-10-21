@@ -164,7 +164,7 @@ export class EpicTools {
    * - `notes`, `comments`:  page notes and comments on docs pages, in the caller's folder (`--file` is from there)
    * - `window`:  the VS Code windows (`src/window.mjs`);
    *   plain `node`, so it runs in a worktree before its `yarn install`
-   * - `server`:  the caller's checkout's page server (`spell-kit/server`'s `src/page/cli.ts`, spell-server's)
+   * - `server`:  the caller's checkout's page server (`spell-kit/server`'s `src/page/cli.ts`, the kit's)
    * - `serve`:  every web server, `epic server start --all` (the caller's root `scripts/serve.mjs`, spell-app's)
    * - `pages <verb>`:  the docs pages' tools, `epic pages index` ...
    *   (`spell dev docs <verb>` in spell-app;  `runPages()`)
