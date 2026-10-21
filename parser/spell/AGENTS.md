@@ -109,8 +109,8 @@ when working with code in this folder, `spell/` of the `spell-lang` package (`sp
   - Where each group's projects are:
     - [spaces' built-ins](../../spell-app/spaces/@spell/), committed:
       `@spell/examples`, `@spell/library`, `@spell/guides`
-    - `@spell/test`:  the test projects, [tests/spaces/@spell/test/](../../spell-app/tests/spaces/@spell/test/), committed
-    - `owen@spell`:  Owen's own, in spell-spaces beside the main checkout, outside git
+    - `@spell/test`:  the test projects, [tests/spaces/@spell/test/](../tests/spaces/@spell/test/), committed
+    - `owen@spell`:  Owen's own, in spell.spaces beside the main checkout, outside git
   - A project's URLs and folder come from ONE function, [SpellUrls](src/SpellUrls.ts) (`SP.SpellUrls`).
   - See "Projects" in [PARSING.md](PARSING.md).
   - Tests read ONLY the test projects:  frozen projects, never the live examples, which get edited.
@@ -136,7 +136,8 @@ when working with code in this folder, `spell/` of the `spell-lang` package (`sp
       The Python writer can't write its method's named arguments yet.
     - Add a fixture by copying a project in.
     - After a deliberate change, `yarn spell:test:fixtures:bless`, and read the diff.
-- [readme.md](readme.md) is the project's front page.
+- [README-spell.md](../README-spell.md), at the repo's root, is this folder's page for people;
+  [the repo's README](../README.md) is spell-lang's front page.
   Docs live in the shared root folders, their tooling in [spell-epic's tools](../../spell-epic/src/tools/) (see "Creating docs").
 - [The barrel](src/index.ts) is loaded in browsers AND the editor's server, in spaces (WWOD §8 › "Barrels").
   - It imports `$/core`'s TYPES only, never its code.

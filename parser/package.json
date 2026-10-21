@@ -64,6 +64,10 @@
       "types": "./dist-types/parser/src/index.d.ts",
       "default": "./parser/src/index.ts"
     },
+    "./parser/rulex": {
+      "types": "./dist-types/parser/src/rulex/index.d.ts",
+      "default": "./parser/src/rulex/index.ts"
+    },
     "./markdown": {
       "types": "./dist-types/markdown/src/index.d.ts",
       "default": "./markdown/src/index.ts"

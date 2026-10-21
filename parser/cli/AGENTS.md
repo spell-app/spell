@@ -9,7 +9,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
 
-- The language's commands for `spell`, the kit's command line ([the kit's cli/](../../cli/README.md)):
+- The language's commands for `spell`, the kit's command line ([README-cli.md](../../README-cli.md)):
 
   ```
   compile  lint  run  test  watch  format  describe  explain  parse  repl  speedtest
@@ -17,7 +17,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   - `lint` was `spell check`, `speedtest` was `spell speed`;  `spell explore` is gone (Owen's names, epic
     `repo-split` P13).
-  - [The README](README.md) has what each needs to move down here.
+  - [spell-lang's README](../README.md#the-language-commands), "Deferred", has what each needs to move down here.
 - How the kit finds them:  `package.json`'s `"spell": { "commands": "./cli/commands.ts" }`.
   - [commands.ts](commands.ts) adds each command to the `spell` program it's handed (commander):
     its name, arguments, flags and help.

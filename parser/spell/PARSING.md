@@ -1,6 +1,7 @@
 # How parsing works
 
 A compact map of the parse pipeline, so agents don't have to work it out again.
+The overview, for people:  [README-parser](../README-parser.md) and [README-spell](../README-spell.md).
 - MUST be kept up to date when any of these change (see [AGENTS.md](AGENTS.md)):
   - `Parser`, `SpellParser`, scopes
   - how a file becomes blocks, lines and statements:
@@ -1135,13 +1136,13 @@ A kind that says so is saved in a file of its own.
   [project-utils.ts](../../spell-app/spaces/src/server/node/projects/project-utils.ts)):
   - spaces' built-ins, committed:
     - `@spell/examples/...`, `@spell/library/...`
-    - in `packages/spaces/@spell/<group>/<Project>/`
+    - in spell-app's `spaces/@spell/<group>/<Project>/`
   - the test projects, committed and frozen:
     - `@spell/test/...`
     - in `tests/spaces/@spell/test/<Project>/`
-  - Owen's own, in spell-spaces, outside git:
+  - Owen's own, in spell.spaces, outside git:
     - `owen@spell/...`
-    - in `<main checkout>/../spell-spaces/@spell/owen@/<project>/`
+    - in `<main checkout>/../spell.spaces/@spell/owen@/<project>/`
     - One folder for main and every worktree;  `SPELL_SPACES_DIR` sets it.
     - A person's space is inside their org's, so `@` says what each folder is.
   - A `@local/<folder>` group says where itself, with its `serverPath`.
@@ -1153,7 +1154,7 @@ A kind that says so is saved in a file of its own.
       SPELL_BUILTINS_DIR  SPELL_TESTS_DIR  SPELL_SPACES_DIR
       ```
 
-  - A project's folder is its name, e.g. `packages/spaces/@spell/examples/drawable-solitaire/` (decision Q39).
+  - A project's folder is its name, e.g. spell-app's `spaces/@spell/examples/drawable-solitaire/` (decision Q39).
     The editor shows its title, `Drawable Solitaire` (`SpellProject.title`).
   - A group with `devOnly` is listed in the app's UI in dev only.
 - A group's projects are its folder's sub-folders, less spaces' own `__` names.
@@ -1179,11 +1180,12 @@ A kind that says so is saved in a file of its own.
   - Else the index would add them to the project file.
   - The list:  `GENERATED_SUFFIXES`, beside `isManifestFile()`.
 - What spell BUILDS for a project goes in its build folder, not beside its source (epic `people-and-orgs` P11).
-  - That's `build/` at the repo root, never committed, each checkout its own.
+  - That's `build/` at spell-app's root, never committed, each checkout its own.
     It mirrors the project's path:
-    - under `packages/`:  `packages/spaces/@spell/examples/solitaire` => `build/spaces/@spell/examples/solitaire`
-    - under `tests/`:  `tests/spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
-    - in spell-spaces:  `@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
+    - under spell-app:  `spaces/@spell/examples/drawable-solitaire` => `build/spaces/@spell/examples/drawable-solitaire`
+    - spell-lang's frozen test projects:  `tests/spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
+    - in spell.spaces:  `@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
+    - The table, and `SPELL_BUILD_DIR`:  [spaces' AGENTS.md](../../spell-app/spaces/AGENTS.md), "Projects".
   - The files:  its compiled code and its scope pack.
 
     ```text
@@ -1523,7 +1525,7 @@ A kind that says so is saved in a file of its own.
 ## Language server
 
 - [lsp's source](../../spell-app/lsp/src/) (`LSP`) runs as `yarn lsp:start`, in spell-app.
-  - Or from the VS Code extension, in `packages/vscode/`.
+  - Or from the VS Code extension, in spell-app's [vscode/](../../spell-app/vscode/).
   - The extension spawns the repo's own `tsx` on [the server's entry](../../spell-app/lsp/src/server.ts).
   - `stdioGuard.ts` sends `console.*` to stderr first:  stdout is the protocol.
 - It hosts the SAME `SpellProject` / `SpellFile` the app uses, and takes everything from them:
