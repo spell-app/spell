@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { ChoicesForm } from "$/epics/answers/ChoicesForm"
-import { CHOICES_SAVE_MS, type ChoiceRowPart } from "$/epics/answers/answers.types"
+import {
+  ANSWER_RETRY_MS,
+  CHOICES_KEY_PREFIX,
+  CHOICES_SAVE_MS,
+  type ChoiceRowPart,
+  type ChoicesDraft
+} from "$/epics/answers/answers.types"
 
 ////////////////
 // ## Fakes
@@ -9,21 +15,37 @@ import { CHOICES_SAVE_MS, type ChoiceRowPart } from "$/epics/answers/answers.typ
 
 const PAGE = "/epics/big/details/names.html"
 
-/** The page server's choices routes, as `fetch`:  the draft and answer it holds, every POST as `[what, body]`. */
+/**
+ * The page server's choices routes, as `fetch`:  the draft and answer it holds, every POST as `[what, body]`.
+ * - `isDown`:  nothing answers (the server stopped, or its address is gone)
+ * - `token`:  this run's write token, which a POST must carry;  the page as served to the browser tells it
+ *   (`served()`), never a script's `fetch()` of it:  that gets the file as is, as the real server sends it
+ */
 class FakeServer {
   draft: Record<string, unknown> | null = null
   answer: Record<string, unknown> | null = null
   posts: [string, Record<string, unknown>][] = []
+  isDown = false
+  token = "t"
+  /** when each draft was saved:  a minute after the one before */
+  private clock = Date.parse("2026-10-14T04:01:00.000Z")
 
   readonly fetch = vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
+    if (this.isDown) throw new TypeError("Failed to fetch")
+    if (url === PAGE) return new Response("<html><head></head></html>", { status: 200 })
     const what = /\/api\/docs\/choices\/(draft|answer)/.exec(url)![1] as "draft" | "answer"
     if (!init?.method) return json({ [what]: this[what] })
+    if ((init.headers as Record<string, string>)["x-server-token"] !== this.token)
+      return json({ error: "bad token:  reload the page" }, 403)
     const body = JSON.parse(init.body as string) as Record<string, unknown>
     this.posts.push([what, body])
-    if (what === "draft") this.draft = { ...body, saved: "2026-10-14T04:01:00.000Z" }
+    if (what === "draft") this.draft = { ...body, saved: new Date((this.clock += 60_000)).toISOString() }
     else this.answer = { ...body, answered: "2026-10-14T04:02:00.000Z", changes: this.answer ? 1 : 0 }
     return json({ ok: true, [what]: this[what] })
   })
+
+  /** The page as served to the browser now (`readServed`):  its `window.SPELL_SERVER`, with this run's token. */
+  readonly served = vi.fn(async (_page: string) => `<script>window.SPELL_SERVER = {"token":"${this.token}"}</script>`)
 }
 
 /** `body` as a JSON response. */
@@ -57,14 +79,36 @@ class FakeRow implements ChoiceRowPart {
   }
 }
 
-/** A form on `server` for `page`. */
-function formOn(server: FakeServer, page = PAGE) {
+/** The browser's `localStorage`, in a map. */
+class FakeStorage {
+  readonly items = new Map<string, string>()
+  getItem(key: string) {
+    return this.items.get(key) ?? null
+  }
+  setItem(key: string, value: string) {
+    this.items.set(key, value)
+  }
+  removeItem(key: string) {
+    this.items.delete(key)
+  }
+}
+
+/** A form on `server` for `page`, keeping its browser copy in `storage`. */
+function formOn(server: FakeServer, page = PAGE, storage?: FakeStorage) {
   return new ChoicesForm({
     page,
     server: { token: "t" },
     protocol: "http:",
-    fetch: server.fetch as unknown as typeof fetch
+    fetch: server.fetch as unknown as typeof fetch,
+    readServed: server.served,
+    storage: storage as unknown as Storage
   })
+}
+
+/** The browser's copy of `PAGE`'s draft in `storage`. */
+function localOf(storage: FakeStorage): ChoicesDraft | undefined {
+  const text = storage.getItem(`${CHOICES_KEY_PREFIX}${PAGE}`)
+  return text ? (JSON.parse(text) as ChoicesDraft) : undefined
 }
 
 afterEach(() => {
@@ -76,7 +120,7 @@ afterEach(() => {
 ////////////////
 
 describe("ChoicesForm", () => {
-  test("sends only the boxes that differ from the recommendation, and the feedback;  the draft 5s after typing stops", async () => {
+  test("sends only the boxes that differ from the recommendation, and the feedback;  the draft as Owen types", async () => {
     vi.useFakeTimers()
     const server = new FakeServer()
     const form = formOn(server)
@@ -93,6 +137,7 @@ describe("ChoicesForm", () => {
     await vi.advanceTimersByTimeAsync(1)
     expect(server.posts).toEqual([["draft", { page: PAGE, values: { b: "dark" }, feedback: "mostly" }]])
     expect(form.savedText).toMatch(/^saved \d\d:\d\d$/)
+    expect(CHOICES_SAVE_MS).toBeLessThanOrEqual(500)
     // nothing new:  no second save
     await form.save()
     expect(server.posts).toHaveLength(1)
@@ -156,6 +201,109 @@ describe("ChoicesForm", () => {
     server.answer = { ...server.answer, order: { goals: ["b", "a"] } }
     await again.restore()
     expect(again.restoredOrder).toEqual({ goals: ["b", "a"] })
+  })
+
+  test("keeps what's typed in the browser at once;  a reload brings it back, newer than the server's, and saves it", async () => {
+    vi.useFakeTimers()
+    const server = new FakeServer()
+    const storage = new FakeStorage()
+    const form = formOn(server, PAGE, storage)
+    const row = new FakeRow("a", "isOpen")
+    form.add(row)
+    row.typed = "open"
+    form.setFeedback("first")
+    // at once:  before any save
+    expect(localOf(storage)).toMatchObject({ page: PAGE, values: { a: "open" }, feedback: "first" })
+    expect(server.posts).toEqual([])
+    // the server goes away;  Owen types on
+    server.isDown = true
+    row.typed = "opened"
+    form.changed()
+    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
+    expect(form.isSaveError).toBe(true)
+    // a reload:  the browser's copy is newer than anything the server has
+    vi.setSystemTime(Date.parse("2026-10-14T05:00:00.000Z"))
+    form.changed()
+    server.isDown = false
+    const again = formOn(server, PAGE, storage)
+    const back = new FakeRow("a", "isOpen")
+    again.add(back)
+    await again.restore()
+    expect([back.value, again.feedback]).toEqual(["opened", "first"])
+    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
+    expect(server.posts.at(-1)).toEqual(["draft", { page: PAGE, values: { a: "opened" }, feedback: "first" }])
+    // the server's newer draft wins over an older browser copy
+    storage.setItem(
+      `${CHOICES_KEY_PREFIX}${PAGE}`,
+      JSON.stringify({ page: PAGE, saved: "2026-10-14T03:00:00.000Z", values: { a: "stale" }, feedback: "" })
+    )
+    const third = formOn(server, PAGE, storage)
+    const latest = new FakeRow("a", "isOpen")
+    third.add(latest)
+    await third.restore()
+    expect(latest.value).toBe("opened")
+  })
+
+  test("a failed save says so in red, and tries again every 3s by itself;  a restarted server's new token too", async () => {
+    vi.useFakeTimers()
+    const server = new FakeServer()
+    const form = formOn(server, PAGE, new FakeStorage())
+    const row = new FakeRow("a", "isOpen")
+    form.add(row)
+    row.typed = "open"
+    server.isDown = true
+    form.changed()
+    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
+    expect([form.isSaveError, form.savedText]).toEqual([
+      true,
+      "Can't save:  couldn't reach the page server (Failed to fetch).  Kept in this browser;  trying again every 3s."
+    ])
+    await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
+    expect(form.isSaveError).toBe(true)
+    // the server is back, restarted:  a new token, which the page as served to the browser now tells
+    server.isDown = false
+    server.token = "t2"
+    await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
+    expect(server.served).toHaveBeenCalledWith(PAGE)
+    expect(server.posts).toEqual([["draft", { page: PAGE, values: { a: "open" }, feedback: "" }]])
+    expect([form.isSaveError, form.savedText]).toEqual([false, expect.stringMatching(/^saved \d\d:\d\d$/)])
+    // saved:  no more tries
+    await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS * 3)
+    expect(server.posts).toHaveLength(1)
+  })
+
+  test("Do it drops the browser's copy;  the template keeps none", async () => {
+    vi.useFakeTimers()
+    const server = new FakeServer()
+    const storage = new FakeStorage()
+    const form = formOn(server, PAGE, storage)
+    const row = new FakeRow("a", "isOpen")
+    form.add(row)
+    row.typed = "open"
+    form.changed()
+    expect(storage.items.size).toBe(1)
+    await form.send()
+    expect(storage.items.size).toBe(0)
+    const template = formOn(server, "/templates/syntax-choices.html", storage)
+    template.add(new FakeRow("a", "isOpen"))
+    template.changed()
+    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
+    expect([storage.items.size, server.posts.length]).toEqual([0, 1])
+  })
+
+  test("Copy my answers:  what's typed, as the draft's JSON", () => {
+    const form = formOn(new FakeServer())
+    const row = new FakeRow("a", "isOpen")
+    form.add(row)
+    form.add(new FakeRow("b", "isDark"))
+    row.typed = "open"
+    form.feedback = "ok"
+    expect(JSON.parse(form.copyText())).toEqual({
+      page: PAGE,
+      saved: expect.stringMatching(/^\d{4}-\d\d-\d\dT/),
+      values: { a: "open" },
+      feedback: "ok"
+    })
   })
 
   test("a row's file for VS Code:  the served checkout, a worktree's from its page's address;  `#` off the server", () => {

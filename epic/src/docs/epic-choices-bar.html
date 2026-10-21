@@ -46,7 +46,8 @@
         ><article class="site-article">
           <p class="lede">
             A choice page's bar, last on the page and pinned to the window's bottom: the feedback, then "Do it", which
-            sends every changed box and the feedback to Claude. What's typed saves itself as a draft.
+            sends every changed box and the feedback to Claude. What's typed is kept in the browser at once and saves
+            itself to the page server as a draft as Owen types.
           </p>
           <p class="meta">
             For anyone writing a page Owen answers on (a details or choice page), or changing this element.<br />
@@ -126,7 +127,11 @@
                     </tr>
                     <tr>
                       <td><code>meta</code></td>
-                      <td>The line under them: the save status (only when it failed), Expand all.</td>
+                      <td>The line under them: the save status (only when it failed), Copy my answers, Expand all.</td>
+                    </tr>
+                    <tr>
+                      <td><code>copy</code></td>
+                      <td>Copy my answers (<code>&lt;ui-button&gt;</code>): what's typed, as the draft's JSON, onto the clipboard.</td>
                     </tr>
                     <tr>
                       <td><code>expand</code></td>
@@ -178,8 +183,22 @@
                 counting the changed boxes.
               </li>
               <li>
-                Under them: Expand all, and the save status only when a save failed; then what was sent (green, orange
-                once changed since), or why not (red).
+                Under them: the save status only when a save failed (red, bold), then Copy my answers and Expand all at
+                the right; then what was sent (green, orange once changed since), or why not (red).
+              </li>
+            </ul>
+            <p>What's typed is never only in the open page (epic <code>epic-engine</code> P15):</p>
+            <ul>
+              <li>Every change goes into the browser's storage at once, and to the page server half a second later.</li>
+              <li>
+                A save that fails says why in red, "Kept in this browser; trying again every 3s", and does: once the
+                page server answers again (a restart's new token too), it saves with no keystroke and no reload.
+              </li>
+              <li>On load, the newest of the server's draft, the browser's copy and the answer sent comes back.</li>
+              <li>
+                Copy my answers puts what's typed on the clipboard, as the draft's JSON: for a page whose server is gone
+                for good, where even a reload brings back nothing. Saved as <code>&lt;slug&gt;.draft.json5</code> beside
+                the page, the page shows it again.
               </li>
             </ul></ui-section
           >

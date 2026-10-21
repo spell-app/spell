@@ -2,13 +2,15 @@ import { parseHTML } from "linkedom"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { AnswerForm } from "$/epics/answers/AnswerForm"
-import type {
-  AnswerPart,
-  AskState,
-  DetailsDraft,
-  PageAnswer,
-  PartLabels,
-  SentAnswer
+import {
+  ANSWER_RETRY_MS,
+  DETAILS_SAVE_MS,
+  type AnswerPart,
+  type AskState,
+  type DetailsDraft,
+  type PageAnswer,
+  type PartLabels,
+  type SentAnswer
 } from "$/epics/answers/answers.types"
 
 ////////////////
@@ -549,7 +551,7 @@ describe("AnswerForm's draft (P18)", () => {
     expect(server.drafts).toHaveLength(0)
   })
 
-  test("a draft the page server refuses stays in the browser, said in orange;  the next change tries again", async () => {
+  test("a draft the page server refuses stays in the browser, said in red;  it tries again by itself until one goes through", async () => {
     vi.useFakeTimers()
     const server = new FakeServer()
     server.failure = { status: 404, error: "no such route" }
@@ -559,12 +561,52 @@ describe("AnswerForm's draft (P18)", () => {
     form.add(ask)
     ask.picks = ["A"]
     form.edited()
-    await vi.advanceTimersByTimeAsync(2000)
-    expect([form.isDraftError, form.draftText]).toEqual([true, "draft kept in this browser only:  no such route"])
+    await vi.advanceTimersByTimeAsync(DETAILS_SAVE_MS)
+    expect([form.isDraftError, form.draftText]).toEqual([
+      true,
+      "draft kept in this browser only:  no such route;  trying again every 3s"
+    ])
     expect(storage.items.size).toBe(1)
+    // tries again, with no change:  still failing, still said
+    await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
+    expect([server.drafts.length, form.isDraftError]).toEqual([2, true])
+    // the server takes it:  saved, with no keystroke
     server.failure = undefined
+    await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
+    expect([server.drafts.length, form.isDraftError]).toEqual([3, false])
+    expect(form.draftText).toMatch(/^draft saved \d\d:\d\d$/)
+    // nothing more to save:  no more tries
+    await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS * 3)
+    expect(server.drafts).toHaveLength(3)
+  })
+
+  test("saves one at a time:  a change while a save is on its way goes in the next save, never beside it", async () => {
+    vi.useFakeTimers()
+    const server = new FakeServer()
+    let release!: () => void
+    const slow = server.fetch.getMockImplementation()!
+    let inFlight = 0
+    let most = 0
+    server.fetch.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return slow(url, init)
+      most = Math.max(most, ++inFlight)
+      if (server.drafts.length === 0) await new Promise<void>((done) => (release = done))
+      const reply = await slow(url, init)
+      inFlight--
+      return reply
+    })
+    const form = formOn(server)
+    const ask = new FakeAsk(at("a"), "q1")
+    form.add(ask)
+    ask.picks = ["A"]
     form.edited()
-    await vi.advanceTimersByTimeAsync(2000)
-    expect([form.isDraftError, server.drafts.length]).toEqual([false, 2])
+    await vi.advanceTimersByTimeAsync(DETAILS_SAVE_MS)
+    ask.picks = ["B"]
+    form.edited()
+    await vi.advanceTimersByTimeAsync(DETAILS_SAVE_MS)
+    release()
+    await vi.advanceTimersByTimeAsync(DETAILS_SAVE_MS)
+    expect(most).toBe(1)
+    expect(server.drafts.map((draft) => (draft.answers as PageAnswer["answers"]).q1!.picked)).toEqual([["A"], ["B"]])
   })
 })

@@ -18,8 +18,9 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *   - the round Send, blue as every Send is, by the fill rule (`templates/epics/plan-doc.md`, "Colours"):
  *     a grey outline with nothing to send, dashed with changes not sent, an outline once sent;
  *     never solid, since the page can't tell when Claude is done with it
- *   - the draft's save, muted beside them ("draft saved 14:04";  orange when it can't save to the page server:
- *     the browser still keeps it;  epic `epic-workflow` P18)
+ *   - the draft's save, muted beside them ("draft saved 14:04";  epic `epic-workflow` P18)
+ *     - a save that FAILED, on its own line under them, in red, bold (epic `epic-engine` P15):  never cut short by the
+ *       side bar's width;  the browser still keeps the draft, and the form tries again every 3s
  *   - after Send, who hears it (epic `epic-engine` r6):  "repo-split is listening" with a green dot (a session's
  *     `epic ask wait`), or "nobody is waiting yet" (`AnswerForm.listenLine`)
  *   - why the last send failed, under them;  or, sent with nobody waiting, that it's saved for Claude's next look
@@ -120,13 +121,8 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
           <span class={STATE} part={this.partForName("state")} data-color={this.stateLine.color}>
             {this.stateLine.text}
           </span>
-          <Show when={this.draftLine.text}>
-            <span
-              class={DRAFT}
-              part={this.partForName("draft")}
-              data-error={this.draftLine.isError ? "" : undefined}
-              title={this.draftLine.text}
-            >
+          <Show when={this.draftLine.text && !this.draftLine.isError}>
+            <span class={DRAFT} part={this.partForName("draft")} title={this.draftLine.text}>
               {this.draftLine.text}
             </span>
           </Show>
@@ -154,6 +150,11 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
             </span>
           </Show>
         </div>
+        <Show when={this.draftLine.isError}>
+          <p class={[ERROR, DRAFT_FAILED]} part={this.partForName("draft")} role="alert">
+            {this.draftLine.text}
+          </p>
+        </Show>
         <Show when={this.error}>
           <p class={ERROR} part={this.partForName("error")} role="alert">
             {this.error}
@@ -181,6 +182,7 @@ export interface EpicSend extends E.AttributeValues<typeof epicSendVocabulary> {
 const ROW = "row"
 const STATE = "state"
 const DRAFT = "draft"
+const DRAFT_FAILED = "draft-failed"
 const SEND = "send"
 const ERROR = "error"
 const WHO = "who"

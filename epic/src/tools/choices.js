@@ -23,8 +23,8 @@
  *   - `<slug>.rows.json5` -- the rows (`ChoicesData`, below), written by `new`, beside the same rows in the page:
  *     `answer` / `wait` read them, and the route knows a choices page by it (and checks the ids it's sent).
  *     Before epic `epic-workflow` P12 the page fetched it and drew its tables from it
- *   - `<slug>.draft.json5` -- what Owen typed so far, saved by the page every 5s (`choicesRoutes.ts`);  never wakes
- *     anyone
+ *   - `<slug>.draft.json5` -- what Owen typed so far, saved by the page as he types (`choicesRoutes.ts`);  never
+ *     wakes anyone
  *   - `<slug>.answer.json5` -- what "Do it" sent:  `wait` exits with it
  *   - data files (`DataFile`, epic `epic-workflow` P21):  JSON5, read by their old `.json` names too;  `--rows` may be
  *     either

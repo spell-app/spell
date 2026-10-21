@@ -48,12 +48,17 @@
     font-size: 0.8em;
     font-variant-numeric: tabular-nums;
   }
-  .expand {
+  /* Copy my answers and Expand all, together at the right */
+  .copy {
     margin-inline-start: auto;
   }
   .failed,
   .error {
     color: var(--ui-error-text, var(--ui-red, #db2828));
+  }
+  /* a save that failed says so loudly (epic `epic-engine` P15) */
+  .failed {
+    font-weight: 600;
   }
   .error,
   .sent {
