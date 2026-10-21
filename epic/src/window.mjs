@@ -126,7 +126,7 @@
  *   folders and `files.exclude` (a worktree's window:  `files.exclude`);  themes and other settings are Owen's, kept
  * - `move [--dry-run]`:  carry the window files from the old folder, `workspaces/` in the main checkout, to the
  *   windows folder, once (`moveWindowFiles()`);  never deletes the old ones
- * - `which`:  this session's window:  pid, workspace file, folders
+ * - `which`:  this session's window:  pid, workspace file, folders;  a warning when it was opened through a link (I38)
  * - `add <path> [--name <name>]`:  add a folder (a worktree) to the window
  *   - needs a window opened from its `.code-workspace` (else the change would restart its extensions,
  *     Claude panel included)
@@ -639,7 +639,8 @@ export class Window {
     }
     delete workspace.settings["workbench.colorCustomizations"]
     writeFileSync(file, `${JSON.stringify(workspace, null, 2)}\n`)
-    const run = spawnSync("code", [file], { encoding: "utf8", env: codeEnv() })
+    // by its real path:  VS Code resolves the file's relative folders from the path it's opened by, links not followed
+    const run = spawnSync("code", [real(file)], { encoding: "utf8", env: codeEnv() })
     if (run.status !== 0) throw new Error(`\`code ${file}\` failed:  ${run.stderr || run.error?.message}`)
     return { file, colors }
   }
@@ -834,7 +835,7 @@ export class Window {
     const { sessionId, to, from, close, remove, show, prompt } = handoff
     titles = [titles ?? []].flat().filter(Boolean)
     if (!SESSION_ID.test(sessionId ?? "")) throw new Error(`bad session id '${sessionId}'`)
-    if (!Window.windowOf(to)) spawnSync("code", [to], { encoding: "utf8", env: codeEnv() })
+    if (!Window.windowOf(to)) spawnSync("code", [real(to)], { encoding: "utf8", env: codeEnv() })
     const window = await Window.waitFor(to)
     await Window.request("open-session", prompt ? { sessionId, prompt } : { sessionId }, window)
     let shown
@@ -1057,6 +1058,12 @@ export class Window {
       console.log(`pid        ${window.pid}`)
       console.log(`workspace  ${window.workspaceFile ?? "(none:  not opened from a .code-workspace)"}`)
       console.log(`folders    ${window.folders.join("\n           ")}`)
+      const opened = window.workspaceFile
+      if (opened && real(opened) !== resolve(opened)) {
+        console.log(`warning    opened through a link:  its relative folders resolve from there, not from the file`)
+        console.log(`           (the Claude panel then lists another folder's sessions;  epic \`repo-split\` I38)`)
+        console.log(`           reopen ${real(opened)}`)
+      }
       return 0
     }
     if (command === "reload-view") {
