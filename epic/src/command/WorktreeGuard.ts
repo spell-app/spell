@@ -72,8 +72,9 @@ export class WorktreeGuard {
         `⎇ ${name}:  this session was reopened outside its worktree;  Claude moves back in first.`,
         `This session worked in worktree ${name} (${recorded}) when it was last open, but it was reopened in ` +
           `${here}, the folder of the window it was opened from.  Before anything else, run EnterWorktree with ` +
-          `path "${recorded}", unless \`pwd\` already prints that folder, and say so in one line.  Stay where you ` +
-          `are only if Owen says it left that worktree on purpose.`
+          `name "${name}" (never its path, which makes Claude Code ask Owen), unless \`pwd\` already prints ` +
+          `${recorded}, and say so in one line.  Stay where you are only if Owen says it left that worktree on ` +
+          `purpose.`
       )
     }
     const name = config.worktreeNameOf(here)

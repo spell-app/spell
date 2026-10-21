@@ -126,6 +126,13 @@ describe("EpicRepo", () => {
     expect(EpicRepo.mainOfPath(join(TEMP, "nowhere", "gone"))).toBeNull()
   })
 
+  test("mainOfPath():  a LEFTOVER worktree folder, its `.git` file naming a gone gitdir, isn't a checkout (P16)", () => {
+    const leftover = join(TEMP, "app.worktrees", "leftover")
+    mkdirSync(leftover, { recursive: true })
+    writeFileSync(join(leftover, ".git"), `gitdir: ${join(TEMP, "gone", ".git", "worktrees", "leftover")}\n`)
+    expect(EpicRepo.mainOfPath(leftover)).toBe(APP)
+  })
+
   test("refusal():  where it's worked, and the launch", () => {
     const line = EpicRepo.refusal(EpicRepo.of("engine-work", APP)!)
     expect(line).toMatch(`Epic engine-work is worked in engine (${ENGINE}), not this repo (app)`)
@@ -147,7 +154,7 @@ describe("the worktree hook", () => {
     const made = create("engine-work", ENGINE)
     expect(made.status).toBe(0)
     expect(made.stdout).toBe(join(TEMP, "engine.worktrees", "engine-work"))
-    expect(create("engine-work", APP).stderr).toMatch(`EnterWorktree, path "${made.stdout}"`)
+    expect(create("engine-work", APP).stderr).toMatch(`EnterWorktree, name "engine-work"`)
     expect(create("app-work", APP).status).toBe(0)
     expect(create("not-an-epic", APP).status).toBe(0)
     expect(create("someday", APP).status).toBe(0)

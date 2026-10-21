@@ -49,7 +49,7 @@ const entered = transcript("entered", [{ type: "user", cwd: MAIN }, note(BESIDE)
 describe("WorktreeGuard", () => {
   test("LOST:  reopened outside the worktree its last note names:  told to EnterWorktree back, Owen told too", () => {
     const output = WorktreeGuard.check({ cwd: MAIN, transcript_path: entered, source: "resume" })
-    expect(output?.hookSpecificOutput.additionalContext).toMatch(`run EnterWorktree with path "${BESIDE}"`)
+    expect(output?.hookSpecificOutput.additionalContext).toMatch(`run EnterWorktree with name "seo"`)
     expect(output?.systemMessage).toMatch(/⎇ seo:  this session was reopened outside its worktree/)
   })
 
@@ -83,7 +83,7 @@ describe("WorktreeGuard", () => {
     WorktreeGuard.record("rec-1", { worktreePath: BESIDE, worktreeName: "seo" })
     const plain = transcript("plain", [{ type: "user", cwd: BESIDE }])
     const output = WorktreeGuard.check({ cwd: MAIN, transcript_path: plain, source: "resume", session_id: "rec-1" })
-    expect(output?.hookSpecificOutput.additionalContext).toMatch(`run EnterWorktree with path "${BESIDE}"`)
+    expect(output?.hookSpecificOutput.additionalContext).toMatch(`run EnterWorktree with name "seo"`)
     // Claude Code's note wins:  a session that LEFT on purpose stays out, record or not
     const left = transcript("left-rec", [note(BESIDE), note(null)])
     expect(WorktreeGuard.check({ cwd: MAIN, transcript_path: left, source: "resume", session_id: "rec-1" })).toBe(

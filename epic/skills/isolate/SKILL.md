@@ -103,10 +103,11 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      - With others, they share its doc preview and Source Control.
      - [window.mjs](${CLAUDE_PLUGIN_ROOT}/src/window.mjs), "Staying put"
 3. `EnterWorktree` with `name: "<name>"`.
-   - Reusing one:  `path` instead, the folder `epic worktree path <name>` prints.
+   - Reusing one:  the same, by `name`:  the worktree hook finds it.  NEVER `path` (epic `epic-engine` P16):  Claude
+     Code asks Owen before entering a path outside `.claude/worktrees/`, every time.
    - Already in it (`pwd` is in that folder:  a new tab of the worktree's window):  NOT again.
-     - Claude Code asks Owen before entering any worktree outside `.claude/worktrees/`, whatever the permission rules
-       say (epic `epic-engine` P12, r11:  "You keep asking for permission to EnterWorktree, it has to stop").
+     - Entering again would be a no-op at best (epic `epic-engine` P12, r11:  "You keep asking for permission to
+       EnterWorktree, it has to stop").
      - The session-start guard records a session started in a worktree
        ([worktree-guard.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/worktree-guard.mjs)), and tells one reopened outside it to
        enter:  only then does it ask, once (epic `epic-eject` I3).

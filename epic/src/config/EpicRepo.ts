@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { basename, dirname, join, sep } from "node:path"
 
 // By relative path, `.ts` and all:  the hooks load this file with plain `node` (types stripped)
@@ -111,7 +111,7 @@ export class EpicRepo {
     const repo = home.checkout ? `${basename(home.checkout)} (${home.checkout})` : `the repo at ${home.url}`
     const enter =
       home.made && home.worktree
-        ? `;  a session started in ${basename(home.checkout!)} enters it with EnterWorktree, path "${home.worktree}"`
+        ? `;  a session started in ${basename(home.checkout!)} enters it with EnterWorktree, name "${home.name}"`
         : ""
     return (
       `Epic ${home.name} is worked in ${repo}, not this repo (${basename(home.here)}):  ` +
@@ -155,7 +155,7 @@ export class EpicRepo {
    * The MAIN checkout of the repo folder `path` was in, whether or not it's still there;  `null` when it can't tell.
    * - there:  its main checkout (`EpicConfig.mainOf()`)
    * - gone:  `<main>/.claude/worktrees/<w>` -> `<main>`;  `<main>.worktrees/<w>` -> `<main>`
-   * - only a folder that IS a checkout (it has `.git`)
+   * - only a folder that IS a main checkout (its `.git` a folder):  not a leftover worktree folder
    */
   static mainOfPath(path: string): string | null {
     const candidates = [] as string[]
@@ -164,7 +164,9 @@ export class EpicRepo {
     if (nested > 0) candidates.push(path.slice(0, nested))
     const parent = dirname(path)
     if (parent.endsWith(".worktrees")) candidates.push(parent.slice(0, -".worktrees".length))
-    return candidates.find((main) => existsSync(join(main, ".git"))) ?? null
+    // a MAIN checkout's `.git` is a folder:  a leftover worktree folder's `.git` FILE names a gitdir that may be gone
+    // (repo-split's old `spell-app.worktrees/repo-split` after the move, epic `epic-engine` P16)
+    return candidates.find((main) => isFolder(join(main, ".git"))) ?? null
   }
 
   /** Checkout `dir`'s `origin` URL;  `null` for none. */
@@ -227,4 +229,13 @@ function normalUrl(url: string): string {
     .replace(/^([^/:]+):(?!\d)/, "$1/")
     .replace(/\/+$/, "")
     .replace(/\.git$/, "")
+}
+
+/** Whether `path` is a folder (links followed);  false when it's missing. */
+function isFolder(path: string): boolean {
+  try {
+    return statSync(path).isDirectory()
+  } catch {
+    return false
+  }
 }

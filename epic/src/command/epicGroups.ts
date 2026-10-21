@@ -243,7 +243,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<name>",
       description:
         "worktree <name>'s folder, absolute:  where it is (beside the repo, or the old .claude/worktrees), else " +
-        "where a new one goes:  what EnterWorktree's path takes",
+        "where a new one goes (sessions enter it by NAME, never by this path:  Claude Code would ask)",
       example: "epic worktree path seo"
     },
     {

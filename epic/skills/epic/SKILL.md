@@ -186,11 +186,13 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
   - An epic page or guide already there still asks.
 - "2. Session" as "Staying in this window", with no question and no `window stay`:
   the window is already `⎇ <name>`, tinted.
-  - `EnterWorktree` with `path` (the folder `epic worktree path <name>` prints) ONLY when `pwd` isn't in it already.
+  - `EnterWorktree` with `name: "<name>"` ONLY when `pwd` isn't in the worktree already.
     - An epic's window starts its new tabs IN the worktree (its first folder):  then never enter.
-    - Why (epic `epic-engine` P12, r11):  Claude Code asks Owen before entering any worktree outside
-      `.claude/worktrees/`, whatever the permission rules say.
-      Owen:  "You keep asking for permission to EnterWorktree, it has to stop."
+    - ALWAYS by `name`, NEVER by `path` (epic `epic-engine` P16):  the worktree hook finds the existing one by its
+      name, and Claude Code lets the call through.
+      - With a `path` outside `.claude/worktrees/` it asks Owen every time, whatever the permission rules say;  a
+        symlink doesn't help (it resolves links).
+      - Owen:  "this EnterWorktree thing is intolerable -- it's halting processes and wasting my time."
     - The session-start guard records a session that starts in the worktree, so a reopen from another window still
       comes back to it (epic `epic-eject` I3).
   - Then steps 2, 3 and 5, then "3. Plan".
@@ -820,7 +822,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - and `<name>` has an epic page (`epics/<name>/`), and is the `<name>` typed, if one was.
    - Then that's the epic, and nothing is asked:
      no "Which epic?" modal (step 1), no new-window-or-stay modal (step 3).
-     - Step 3 is `EnterWorktree` with `path` (if not in it yet), then `epic window stay <name>`.
+     - Step 3 is `EnterWorktree` with `name: "<name>"` (if not in it yet), then `epic window stay <name>`.
    - One line says so:  "this window is `⎇ <name>`:  resuming it".
 1. Which epic:
    - `<name>` given:  that one.
@@ -844,7 +846,8 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
      "/epic resume <name>"`.
    - `main`:  no worktree;  work in the main checkout, this window.
    - a worktree (`.claude/worktrees/<name>`, or beside the repo):  as [the unpark skill](../unpark/SKILL.md), step 3.
-     - That's `stay-check --epic`, a new window or stay, and `EnterWorktree` with `path`.
+     - That's `stay-check --epic`, a new window or stay, and `EnterWorktree` with `name: "<name>"` (never `path`:
+       "Launched").
      - A `PARKED-<name>.md` there:  it was parked.
        `/unpark`'s steps instead, and stop here.
    - The worktree is gone but branch `<name>` isn't:
@@ -1017,8 +1020,7 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
 - It reaches this session one of three ways:
   - a message from the sender:  "New request r3 for epic `<epic>` ...":  the same steps
   - a NEW session in the epic's window, `/epic request <epic> r3` typed in, when the epic's session wasn't running
-    - first `EnterWorktree` with `path`, as "Launched" does, only when `pwd` isn't in it already:  the folder
-      `epic worktree path <epic>` prints
+    - first `EnterWorktree` with `name: "<epic>"`, as "Launched" does, only when `pwd` isn't in it already
   - the sender IS this epic's session:  it follows these steps itself
 - The prompt hook titled the session `🚧 <epic>`, so later requests reach it.
   - It refuses `/epic request` in a session titled for another epic.
