@@ -5,24 +5,27 @@ import {
   FAVICON_SVG,
   forcedScheme,
   LEGACY_SCHEME_KEYS,
+  litTab,
   LOGO_MARK,
-  PROPERTIES,
   SCHEME_CLASSES,
   SCHEME_KEY,
   SITE_HOME,
-  type SiteProperty,
-  type SiteScheme
+  type SiteScheme,
+  type SiteTab
 } from "$/server/site"
 
 /****************
  * ### `<spell-site-header>`
  * The fixed bar on top of every page of the site, with a tab to switch to each of its parts:
- * docs, epic pages, sagas, the component sets (Epic UI, Spell UI, App UI), the editor.
- * Each part is a PROPERTY (`SiteProperty`, `PROPERTIES`):  a part with its own home page.
+ * e.g. docs, epic pages, sagas, component sets, an app.
+ * - The tabs are DATA (`SiteTab`):  this element names no site's parts (epic `repo-split` I4).
+ *   - served:  the page server's settings' (`"siteTabs"`), on the page as `SPELL_SERVER.siteTabs`
+ *   - else (`file://`, a server whose settings name none):  `fallbackTabs`, what `defineSite()`'s caller passed
+ *   - the lit one:  `litTab()`
  * - In each page and template, right after `<body>`, with `root` = the path from the page to the repo root:
  *   `<spell-site-header root="../.."></spell-site-header>`.
  *   - from `file://`:  its links stay relative
- *   - served by the page server:  they're absolute, and server-only properties (Epic/UI, Spell/UI, App, App/UI) turn on
+ *   - served by the page server:  they're absolute, and server-only tabs (`serverOnly`) turn on
  * - Brand:  the hat mark (`LOGO_MARK`), a link to the home page (`SITE_HOME`), which lights no tab.
  * - Also shows:
  *   - no breadcrumb (Owen, 2026-10-10:  "We don't need the breadcrumb in the spell doc toolbar"):  the lit tab says
@@ -71,6 +74,12 @@ export class SiteHeader extends HTMLElement {
 
   /** event a router dispatches on `document` after swapping the page in place:  re-draw */
   static readonly PAGE_EVENT = "spell-site:page"
+
+  /**
+   * The tabs a page shows when its server names none (`tabs`):  a `file://` page, a server without `"siteTabs"`.
+   * - set by `defineSite({ tabs })`;  none by default:  just the logo and the tools
+   */
+  static fallbackTabs: readonly SiteTab[] = []
 
   /** server info, once known:  injected `SPELL_SERVER`, else `/api/server` */
   private info?: Partial<ServerInfo & ServerConfig>
@@ -136,20 +145,27 @@ export class SiteHeader extends HTMLElement {
   }
 
   /**
-   * The URL of `property`'s home (or the site's, `SITE_HOME`), or `undefined` where it can't be reached
+   * The tabs this page shows, in order:  its server's (`SPELL_SERVER.siteTabs`), else `fallbackTabs`.
+   */
+  get tabs(): readonly SiteTab[] {
+    return serverConfig()?.siteTabs ?? SiteHeader.fallbackTabs
+  }
+
+  /**
+   * The URL of `tab`'s home (or the site's, `SITE_HOME`), or `undefined` where it can't be reached
    * (server-only, from `file://`).
    * - A worktree's page on the main checkout's server (`/worktrees/<w>/...`) keeps that prefix on repo paths,
-   *   so a tab stays in the worktree:  a property only the branch has (Brand, before it merges) is a 404 on `main`.
+   *   so a tab stays in the worktree:  a tab only the branch has (Brand, before it merges) is a 404 on `main`.
    * - A server route (`/components/ui/`, `/editor/`) is the server's own:  never prefixed.
    */
-  href(property: Pick<SiteProperty, "path" | "serverOnly">): string | undefined {
+  href(tab: Pick<SiteTab, "path" | "serverOnly">): string | undefined {
     if (this.served) {
-      if (property.path.startsWith("/")) return property.path
+      if (tab.path.startsWith("/")) return tab.path
       const worktree = /^\/worktrees\/[^/]+\//.exec(location.pathname)?.[0] ?? "/"
-      return `${worktree}${property.path}`
+      return `${worktree}${tab.path}`
     }
-    if (property.serverOnly) return undefined
-    return `${this.root}/${property.path}`
+    if (tab.serverOnly) return undefined
+    return `${this.root}/${tab.path}`
   }
 
   /**
@@ -172,18 +188,18 @@ export class SiteHeader extends HTMLElement {
   render(): void {
     const shadow = this.shadowRoot!
     const path = location.pathname
-    const active = PROPERTIES.find((property) => property.match(path))
-    const tabs = PROPERTIES.map((property) => {
-      const href = this.href(property)
-      const current = property === active ? ` aria-current="page"` : ""
-      // its own tab:  `target` in a browser;  `data-spell-open` tells the side bar's frame (`liveClient.ts`)
-      const own = property.ownTab
-        ? ` target="spell-${escape(property.name.toLowerCase())}" data-spell-open="browser"`
-        : ""
-      return href
-        ? `<a class="tab" href="${escape(href)}"${current}${own}>${escape(property.name)}</a>`
-        : `<span class="tab off" title="only when served:  spell dev server ensure">${escape(property.name)}</span>`
-    }).join("")
+    const active = litTab(this.tabs, path)
+    const links = this.tabs
+      .map((tab) => {
+        const href = this.href(tab)
+        const current = tab === active ? ` aria-current="page"` : ""
+        // its own tab:  `target` in a browser;  `data-spell-open` tells the side bar's frame (`liveClient.ts`)
+        const own = tab.ownTab ? ` target="spell-${escape(tab.name.toLowerCase())}" data-spell-open="browser"` : ""
+        return href
+          ? `<a class="tab" href="${escape(href)}"${current}${own}>${escape(tab.name)}</a>`
+          : `<span class="tab off" title="only when served:  spell dev server ensure">${escape(tab.name)}</span>`
+      })
+      .join("")
     const checkout = this.info?.worktree ?? this.info?.branch
     const badge = checkout
       ? `<span class="badge${this.info?.worktree ? " worktree" : ""}" title="${escape(this.info?.root ?? "")}">⎇ ${escape(checkout)}</span>`
@@ -206,7 +222,7 @@ export class SiteHeader extends HTMLElement {
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
   <a class="brand" href="${escape(this.href({ path: SITE_HOME }) ?? "#")}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
-  <nav aria-label="Site">${tabs}</nav>
+  <nav aria-label="Site">${links}</nav>
   <span class="spacer"></span>
   ${badge}${edit}${vscode}
   ${this.docked ? "" : `<button class="tool" data-action="theme" title="${themeLabel}" aria-label="${themeLabel}">${ICONS[shown]}</button>`}

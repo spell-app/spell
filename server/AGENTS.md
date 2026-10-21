@@ -109,7 +109,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     ui's tools and site, spaces' node server, cli, app, page-server, epics, goals, the VS Code extension.
 - It's GENERIC (epic `repo-split` P4):  its code names nothing of spell-app's or spell-epic's folders.
   - What the page server serves beyond the checkout comes from its settings (below):
-    the component sets, the engine routes, the page scripts, the route modules.
+    the component sets, the engine routes, the page scripts, the route modules, the site header's tabs.
   - What only spell-app's page server does is [page-server](../../spell-app/page-server/AGENTS.md)'s route module.
   - It goes to the bottom repo, spell-server, when the repos split (P8);  page-server goes to spell-app.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
@@ -120,7 +120,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Its settings:  the `"pageServer"` block of the root `package.json`.
       - Read by `pageServerSettings()`, in [settings.ts](src/page/settings.ts);
         `componentSets()` and `engineRoutes()` read their two lists out of them.
-      - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes
+      - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
+        the site header's tabs
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
         node built-ins and type imports only, and `./settings.ts` with its extension.
     - PAGE SCRIPTS (`"pageScripts"`, epic `repo-split` P2):  module scripts it adds to every HTML page it serves,
@@ -199,6 +200,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The page server knows nothing of spell projects.
   - `$/server/site/...` -- browser code:
     - the site header every page shows
+      - its TABS are data (`SiteTab`, epic `repo-split` I4):  it names no site's parts
+        - served:  the settings' `"siteTabs"`, in the header's order, told every page as `SPELL_SERVER.siteTabs`
+        - else (`file://`, settings naming none):  what `defineSite({ tabs })`'s caller gave (`SiteHeader.fallbackTabs`)
+        - each:  its label and home;  `serverOnly`, `ownTab`;  what lights it (`litTab()`):
+          component sets by id (`sets`), path patterns (`paths`), docs area folders (`areas`)
+        - spell-app's:  its root `package.json`;  spell-epic's docs bundle gives the docs' own areas
     - Spell's favicon, `favicon.ts`:
       - GENERATED from the hat mark, by `yarn favicon` ([favicon.ts](scripts/favicon.ts), in `scripts/`)
       - `WebServer` serves it at the root, after the static files (a folder's own icons win):

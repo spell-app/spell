@@ -4,6 +4,7 @@
  * - Plain `node` loads this file by path (spell-epic's tools):  so its re-exports name `./settings.ts` in full.
  */
 import type { SRV, ServedFile, ServerInfo } from "$/server"
+import type { SiteTab } from "$/server/site/site.types"
 
 /**
  * A ROUTE MODULE:  a file that adds routes to the page server, e.g. goals' buttons, the app's `/api`.
@@ -104,6 +105,15 @@ export type PageServerSettings = {
    * - live reload reports a change in one at its route
    */
   engineRoutes?: Record<string, string>
+  /**
+   * the SITE HEADER's tabs, in its order (`SiteTab`);  none by default:  pages show the tabs their bundle gives
+   * (`defineSite({ tabs })`)
+   * - handed to every page it serves, as `SPELL_SERVER.siteTabs`
+   * - e.g. `{ "name": "Epic/UI", "path": "/components/epics/", "serverOnly": true, "sets": ["epics"] }`:
+   *   a component set's tab, lit on its pages (`litTab()`)
+   * - the server knows nothing of what they are:  the header's parts come from here (epic `repo-split` I4)
+   */
+  siteTabs?: SiteTab[]
 }
 
 /** One of the page server's `pageScripts`:  a module script added to the pages it serves. */

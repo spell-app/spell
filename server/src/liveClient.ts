@@ -4,6 +4,8 @@
  *   - the helpers it calls (`forVsCode()`, `liveAction()`, `servedPath()`, `reloadGate()`) are served beside it
  *     (`liveClientScript()`), so tests can call them too
  */
+// types only:  erased, so the served function stays self-contained
+import type { SiteTab } from "$/server/site/site.types"
 
 /**
  * What a served page knows about its server:  `window.SPELL_SERVER`, injected before `</head>`.
@@ -48,6 +50,11 @@ export type ServerConfig = {
    */
   worktreesPath?: string
   edit?: string
+  /**
+   * the site header's tabs, in order:  the page server's settings' `"siteTabs"` (`SiteHeader.tabs`);
+   * none:  the header shows what `defineSite()` was given
+   */
+  siteTabs?: SiteTab[]
   /**
    * airplane mode is on:  Owen works with no Claude, everything waits for `/airplane land` (epics' `AirplaneMode`,
    * told by its route module)

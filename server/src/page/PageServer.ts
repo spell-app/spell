@@ -4,6 +4,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { SRV, type ServedFile, type ServerInfo } from "$/server"
+import type { SiteTab } from "$/server/site/site.types"
 import {
   PageEditor,
   besideFolders,
@@ -48,8 +49,8 @@ import {
  *     epics' running epics, in the main checkout;  the server itself knows no worktree folder
  *   - from several folders at once, the first that has `<w>` serving it:
  *     the worktrees beside the repo, and those left in the old `.claude/worktrees` (epic `epic-eject` J28)
- * - what pages are told (`window.SPELL_SERVER`):  the checkout, its branch, the edit API ... and what route modules
- *   add (`addPageConfig()`), e.g. epics' airplane mode
+ * - what pages are told (`window.SPELL_SERVER`):  the checkout, its branch, the edit API, the site header's tabs
+ *   (the settings' `"siteTabs"`) ... and what route modules add (`addPageConfig()`), e.g. epics' airplane mode
  * - route modules (`RouteModule`) from the root `package.json`'s `"pageServer"` add the rest, e.g. the running epics,
  *   and what only one repo's page server does (spell-app's `$/page-server`:  building its bundles ...)
  * - the page scripts there (`"pageScripts"`) go on every page, before `</body>` (`withPageScripts()`)
@@ -57,7 +58,7 @@ import {
  *   (`engineRoutePath()`, epic `epic-eject` P7), e.g. `/_epic/assets/...`, from the epic engine through a link
  *   - under every worktree's address too (`/worktrees/<w>/templates/...`):  ONE copy, this checkout's
  * - NO redirects for old URLs (epic `people-and-orgs`, Q30):  an old address answers "not found"
- * - The server knows nothing of what the sets, routes and scripts are:  the folders come from the settings
+ * - The server knows nothing of what the sets, routes, scripts and tabs are:  they come from the settings
  *   (epic `repo-split` P4).
  * - port:  `DEFAULT_PORT` (4747) if free, else any
  *   - the real one goes in `<root>/.spell-server.json`, where `spell dev server ensure` and the openers find it
@@ -81,6 +82,9 @@ export class PageServer {
 
   /** the engine routes it serves, from the settings as it starts (`engineRoutes()`) */
   readonly engineRoutes: readonly EngineRoute[]
+
+  /** the site header's tabs every page is told (`SPELL_SERVER.siteTabs`), from the settings as it starts */
+  readonly siteTabs?: readonly SiteTab[]
 
   /** run once listening, from route modules */
   private listenings: (() => unknown)[] = []
@@ -117,8 +121,9 @@ export class PageServer {
       ...checkoutInfo(this.root)
     }
     const settings = this.settings()
-    const { writable, pageScripts = [] } = settings
+    const { writable, pageScripts = [], siteTabs } = settings
     this.pageScripts = pageScripts
+    this.siteTabs = siteTabs
     this.componentSets = componentSets(settings)
     this.engineRoutes = engineRoutes(settings)
     this.web = new SRV.WebServer({
@@ -138,6 +143,8 @@ export class PageServer {
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
+        // the site header's tabs:  what the settings name (`"siteTabs"`)
+        ...(this.siteTabs && { siteTabs: this.siteTabs }),
         // e.g. Owen is offline, no Claude:  pages say "queued for when you land" (epics' airplane mode)
         ...Object.assign({}, ...this.pageConfigs.map((add) => add(served)))
       })

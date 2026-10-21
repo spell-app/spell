@@ -1,131 +1,101 @@
 /**
- * Types of the site header and section editor, plus the list of properties they switch between.
+ * Types of the site header and section editor, and how the header lights its tabs.
  * - Browser code:  no node imports.
+ * - GENERIC (epic `repo-split` I4):  it names no site's parts.
+ *   The tabs are data (`SiteTab`):  the page server's settings, or `defineSite()`'s caller.
  */
 
 /**
- * One PROPERTY of the site:  a part with its own home page, switched between in the site header.
- * - `path`:  home page, relative to the repo root (`pages/index.html`), or server-absolute (`/components/ui/`)
- * - `serverOnly`:  only exists when served by the page server
- *   - `/components/<set>/`:  a component set's `docs/` folder,
- *     with Spell UI's site bundle laid over it (the page server's `componentSets` setting)
- *   - `/editor/`:  the app
+ * One TAB of the site header:  a part of the site with its own home page.
+ * - DATA, never code in this package:  the header knows no site's parts
+ *   - served:  the page server's settings, `"siteTabs"` (`PageServerSettings.siteTabs`),
+ *     handed to every page it serves as `SPELL_SERVER.siteTabs`
+ *   - else (a `file://` page, a server whose settings name none):  what `defineSite()`'s caller passes
+ *     (`SiteHeader.fallbackTabs`)
+ *   - plain JSON, so a setting and a served page can carry it
+ * - `name`:  its label, e.g. `Epic/UI`
+ * - `path`:  its home page, relative to the site's root (`guides/index.html`), or server-absolute (`/components/ui/`)
+ * - `serverOnly`:  its home exists only when served:  greyed out on a `file://` page
  * - `ownTab`:  always opens in its own browser tab (`target`), never in place
- *   - the app is a whole program, too big for VS Code's side bar
+ *   - e.g. an app:  a whole program, too big for VS Code's side bar
  *   - a frame that left the page server can't step back (`liveClient.ts`)
- * - `match`:  whether a page path (`location.pathname`) belongs to this property;  the FIRST match wins
+ * - what lights it (`litTab()`):
+ *   - `sets`:  component sets, by id:  a page at `/components/<id>/` (`componentSet()`)
+ *   - `paths`:  more pages, each a pattern (a `RegExp` source) on the page's path, e.g. `^/editor(/|$)`
+ *   - `areas`:  docs areas, by folder name:  a page under `<area>/` (`docsArea()`)
  */
-export type SiteProperty = {
+export type SiteTab = {
   name: string
   path: string
   serverOnly?: boolean
   ownTab?: boolean
-  match: (path: string) => boolean
+  sets?: string[]
+  paths?: string[]
+  areas?: string[]
 }
 
 /**
- * The home page, relative to the repo root:  a routing page, a card per property (claude-design P5).
+ * The home page, relative to the repo root:  a routing page, a card per tab (claude-design P5).
  * - the header's Spell logo goes there;  no tab is lit on it
+ * - the page server sends `/` there too (`DOCS_HOME`)
  */
 export const SITE_HOME = "pages/index.html"
 
 /**
- * Every property, in header order (Owen, 2026-10-11, epic `epic-workflow` J40):
- * Guides · Sagas · Epics · Epic/UI · Spell/UI · App · App/UI · Brand · Templates.
- * - Sagas was Goals until epic `epic-workflow` P15 (Owen, 2026-10-13:  "saga means roughly epic of epics");
- *   it opens the Sagas list page, and lights on the saga pages and on the parked goal sets (`goals/`) too
- * - Owen's words:  "Docs toolbar:  Guides Goals Epics Epic/UI Spell/UI App App/UI";
- *   asked where Brand and Templates go, "At the end"
- * - the slashed names are the tab labels as he typed them (J41):  "the UI set of Epic", "of Spell", "of the app";
- *   prose keeps "Epic UI", "Spell UI", "App UI"
- * - (before, claude-design Q6, 2026-10-05:  Epics · Guides · Brand · Spell UI · Templates · Goals · App)
- * - the home's cards are in the same order (spell-epic's `src/tools/index.js` `areaCards()`)
- * - each docs area's tab lights on its own pages (`docsArea()`):
- *   - an epic page:  Epics
- *   - a guide:  Guides
- *   - a template (the plan template under `templates/epics/` too):  Templates
- *   - the home and the scratch details pages:  none
- * - each area's list page is its tab's home (`<area>/index.html`)
- * - the component sets light on their address and on their `docs/` folder's long one (`componentSet()`)
- *   - the page server's `componentSets` setting, served at `/components/<set>/` (epic `people-and-orgs` P18)
- *   - the brand's set has no tab of its own:  it lights Brand, beside the Brand tab's own pages
- * - App means the editor, opened in its own browser tab
+ * A component set's address, its id caught:  `/components/<id>/`, after a worktree's `/worktrees/<w>`.
+ * - MUST match the page server's `COMPONENTS_PREFIX` (`$/server/page`'s `settings.ts`, node code:  not imported here)
  */
-export const PROPERTIES: SiteProperty[] = [
-  { name: "Guides", path: "guides/index.html", match: (path) => docsArea(path) === "guides" },
-  {
-    name: "Sagas",
-    path: "sagas/index.html",
-    match: (path) => docsArea(path) === "sagas" || docsArea(path) === "goals"
-  },
-  { name: "Epics", path: "epics/index.html", match: (path) => docsArea(path) === "epics" },
-  { name: "Epic/UI", path: "/components/epics/", serverOnly: true, match: (path) => componentSet(path) === "epics" },
-  // Spell UI's site bundle's own folder too (`packages/ui/site/`)
-  {
-    name: "Spell/UI",
-    path: "/components/ui/",
-    serverOnly: true,
-    match: (path) => componentSet(path) === "ui" || /\/packages\/ui\/site\//.test(path)
-  },
-  { name: "App", path: "/editor/", serverOnly: true, ownTab: true, match: (path) => /^\/editor(\/|$)/.test(path) },
-  { name: "App/UI", path: "/components/app/", serverOnly: true, match: (path) => componentSet(path) === "app" },
-  // Brand:  the shared `brand/` pages, moved from `packages/brand` (claude-design P11);  its home is the Brand index.
-  // And the brand's element set, `/components/brand/`
-  {
-    name: "Brand",
-    path: "brand/index.html",
-    match: (path) => docsArea(path) === "brand" || componentSet(path) === "brand"
-  },
-  { name: "Templates", path: "templates/index.html", match: (path) => docsArea(path) === "templates" }
-]
+const COMPONENT_SET_ADDRESS = /^(?:\/worktrees\/[^/]+)?\/components\/([^/]+)(?:\/|$)/
+
+/** A worktree's prefix on a page's path, up to the worktree's own folder:  `/worktrees/<w>`, `.../.claude/worktrees/<w>`. */
+const WORKTREE_PREFIX = /^.*\/worktrees\/[^/]+(?=\/)/
 
 /**
- * Which component set page path `path` is in (`location.pathname`);  `undefined` for anything else.
- * - by its served address, `/components/<set>/` (a worktree's too, `/worktrees/<w>/components/<set>/`)
- * - or by its folder's long one, `packages/<package>/docs/` (a `file://` page too);  Epic UI's,
- *   `spell-epic/src/docs/` (epic `epic-eject` I5)
- * - the sets:  `ui`, `epics`, `app`, `brand`, as the page server's `componentSets` setting names them
- *   (its prefixes' tails, and their folders:  `docs/` of `packages/ui`, `packages/app` ..., `spell-epic/src/docs/`)
+ * The tab `tabs` light for page path `path` (`location.pathname`:  served, or a `file://` path);  `undefined`:  none.
+ * - FIRST the first tab whose `sets` or `paths` take the page
+ *   - so a component set's page is never a docs area's,
+ *     even in a folder named like one (`x/epics/docs/`)
+ * - else the tab whose `areas` hold the page's docs area (`docsArea()`, over every tab's `areas`)
  */
-export function componentSet(path: string): string | undefined {
-  return (
-    /^(?:\/worktrees\/[^/]+)?\/components\/([^/]+)(?:\/|$)/.exec(path)?.[1] ??
-    /\/packages\/(ui|epics|app|brand)\/docs\//.exec(path)?.[1] ??
-    (/\/spell-epic\/src\/docs\//.test(path) ? "epics" : undefined)
+export function litTab(tabs: readonly SiteTab[], path: string): SiteTab | undefined {
+  const set = componentSet(path)
+  const named = tabs.find(
+    (tab) =>
+      (set !== undefined && tab.sets?.includes(set)) || tab.paths?.some((pattern) => new RegExp(pattern).test(path))
   )
+  if (named) return named
+  const area = docsArea(
+    path,
+    tabs.flatMap((tab) => tab.areas ?? [])
+  )
+  return area === undefined ? undefined : tabs.find((tab) => tab.areas?.includes(area))
 }
 
-/** A docs area:  a root folder of the checkout (each a link into the shared content repo) with a tab of its own. */
-export type DocsArea = "epics" | "guides" | "brand" | "templates" | "sagas" | "goals"
+/**
+ * Which component set page path `path` is in (`location.pathname`), by its served address;  `undefined` for anything
+ * else.
+ * - `/components/<set>/`, a worktree's too (`/worktrees/<w>/components/<set>/`):  the page server's `componentSets`
+ *   setting, each at `/components/<id>/`
+ * - a set's folder on disk (a `file://` page) has no address:  a tab names it in its `paths`
+ */
+export function componentSet(path: string): string | undefined {
+  return COMPONENT_SET_ADDRESS.exec(path)?.[1]
+}
 
 /**
- * Which docs area page path `path` is in (`location.pathname`:  served, or a `file://` path).
- * `undefined` for the home (`pages/`) and anything else.
+ * Which docs area page path `path` is in (`location.pathname`:  served, or a `file://` path), of `areas`, the area
+ * folders' names (`guides`, `epics` ...);  `undefined` for anything else.
+ * - an area is a folder with a tab of its own (`SiteTab.areas`):  the page server's, or the shared content folder's
  * - the area is the FIRST area folder in the path:  `templates/epics/plan.html` is a template, not an epic
  * - a worktree's page, served from the main checkout (`/worktrees/<w>/...`) or opened from disk
  *   (`.claude/worktrees/<w>/...`):  read from inside the worktree,
- *   so a worktree named `goals` isn't the Goals area
- * - older checkouts' paths still land:
- *   `packages/docs/content/<x>` (2026-10-04 .. 10-05) and `packages/docs/<x>` (before)
- *   - `epics/` (or `plans/`):  Epics
- *   - `templates/`:  Templates
- *   - the home and `details/`:  none
- *   - the rest:  Guides
- * - any other package's files (`packages/ui/...`):  none
+ *   so a worktree named `goals` isn't the `goals` area
+ * - a component set's page (`componentSet()`):  none, it has a tab of its own
  */
-export function docsArea(path: string): DocsArea | undefined {
-  const inside = path.replace(/^.*\/worktrees\/[^/]+(?=\/)/, "")
-  const old = /\/packages\/docs\/(?:content\/)?(.*)$/.exec(inside)
-  if (old) {
-    const first = old[1]!.split("/")[0]!
-    if (first === "epics" || first === "plans") return "epics"
-    if (first === "templates") return "templates"
-    if (!first || first === "index.html" || first === "details" || first === "tools") return undefined
-    return "guides"
-  }
-  // a component set's address (`/components/epics/`) or folder:  its own tab (`componentSet()`)
-  if (/\/packages\//.test(inside) || /^\/components\//.test(inside)) return undefined
-  return /\/(epics|guides|brand|templates|sagas|goals)\//.exec(inside)?.[1] as DocsArea | undefined
+export function docsArea(path: string, areas: readonly string[]): string | undefined {
+  if (componentSet(path) !== undefined) return undefined
+  const folders = path.replace(WORKTREE_PREFIX, "").split("/").slice(0, -1)
+  return folders.find((folder) => areas.includes(folder))
 }
 
 /**

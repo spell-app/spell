@@ -1,116 +1,77 @@
 import { describe, expect, it } from "vite-plus/test"
 
 // the leaf, not the barrel:  `SiteHeader` extends `HTMLElement`, which node lacks
-import { PROPERTIES, SCHEME_CLASSES, SITE_HOME, docsArea, forcedScheme } from "$/server/site/site.types"
+import { SCHEME_CLASSES, componentSet, docsArea, forcedScheme, litTab, type SiteTab } from "$/server/site/site.types"
 
-/** The tab the site header lights for page path `path`:  the first property that matches (`SiteHeader.render()`). */
-function litTab(path: string): string | undefined {
-  return PROPERTIES.find((property) => property.match(path))?.name
-}
+/**
+ * Tabs of a made-up site, as a page server's settings would name them (`"siteTabs"`):  the header names none itself.
+ * - spell-app's own, and the pages they light:  its `tests/page-server/src/siteTabs.test.ts`
+ */
+const TABS: SiteTab[] = [
+  { name: "Notes", path: "notes/index.html", areas: ["notes"] },
+  { name: "Logs", path: "logs/index.html", areas: ["logs", "old-logs"] },
+  { name: "Kit", path: "/components/kit/", serverOnly: true, sets: ["kit"], paths: ["/kit/docs/"] },
+  { name: "Tool", path: "/tool/", serverOnly: true, ownTab: true, paths: ["^/tool(/|$)"] },
+  { name: "Shop", path: "shop/index.html", areas: ["shop"], sets: ["shop"] }
+]
 
-describe("the site header's tabs", () => {
-  it("are in Owen's order (epic-workflow J40), each list page its tab's home", () => {
-    expect(PROPERTIES.map((property) => property.name)).toEqual([
-      "Guides",
-      "Sagas",
-      "Epics",
-      "Epic/UI",
-      "Spell/UI",
-      "App",
-      "App/UI",
-      "Brand",
-      "Templates"
-    ])
-    expect(PROPERTIES.map((property) => property.path)).toEqual([
-      "guides/index.html",
-      "sagas/index.html",
-      "epics/index.html",
-      "/components/epics/",
-      "/components/ui/",
-      "/editor/",
-      "/components/app/",
-      "brand/index.html",
-      "templates/index.html"
-    ])
-    expect(SITE_HOME).toBe("pages/index.html")
-  })
-
+describe("litTab():  the tab the site header lights, from its tabs' data", () => {
   it.each([
-    // served by the page server
-    ["/epics/index.html", "Epics"],
-    ["/epics/seo/seo.plan.html", "Epics"],
-    ["/epics/seo/details/q1.html", "Epics"],
-    ["/guides/index.html", "Guides"],
-    ["/guides/solid/solid-2.html", "Guides"],
-    ["/brand/index.html", "Brand"],
-    ["/brand/pony.html", "Brand"],
-    ["/brand/compare.html", "Brand"],
-    ["/brand/spell-design-system/Logo.spell.html", "Brand"],
-    // the component sets:  their address, a worktree's, and their folder's long one (a file:// page too)
-    ["/components/ui/", "Spell/UI"],
-    ["/components/ui/ui-card.html", "Spell/UI"],
-    ["/packages/ui/site/index.html", "Spell/UI"],
-    ["/packages/ui/docs/ui-card.html", "Spell/UI"],
-    ["/worktrees/w/components/ui/ui-card.html", "Spell/UI"],
-    ["/components/epics/", "Epic/UI"],
-    ["/components/epics/epic-item.html", "Epic/UI"],
-    ["/worktrees/w/components/epics/epic-item.html", "Epic/UI"],
-    ["/packages/epics/docs/epic-item.html", "Epic/UI"],
-    // spell-epic's, through the checkout's link (epic `epic-eject` I5)
-    ["/spell-epic/src/docs/epic-item.html", "Epic/UI"],
-    ["/Users/owen/www/spell-app/spell-epic/src/docs/index.html", "Epic/UI"],
-    ["/Users/owen/www/spell-app/spell-app/packages/epics/docs/index.html", "Epic/UI"],
-    ["/components/app/", "App/UI"],
-    ["/components/app/spell-app.html", "App/UI"],
-    ["/worktrees/w/components/app/", "App/UI"],
-    ["/packages/app/docs/index.html", "App/UI"],
-    // the brand's element set lights the Brand tab
-    ["/components/brand/", "Brand"],
-    ["/components/brand/brand-logo.html", "Brand"],
-    ["/packages/brand/docs/brand-logo.html", "Brand"],
-    // the old addresses:  no tab
-    ["/ui/components/ui-card.html", undefined],
-    ["/epic-ui/", undefined],
-    ["/packages/app/components/spell-app/SpellApp.tsx", undefined],
-    // Epic UI's old element pages, until the merge:  guides
-    ["/guides/epic-components/elements/epic-item.html", "Guides"],
-    ["/templates/index.html", "Templates"],
-    // the plan template is a template, not an epic;  the goals templates aren't goals
-    ["/templates/epics/plan.html", "Templates"],
-    ["/templates/goals/set/index.html", "Templates"],
-    // the saga pages, and the parked goal sets under the same tab (epic `epic-workflow` P15)
-    ["/sagas/index.html", "Sagas"],
-    ["/sagas/epics/epics.saga.html", "Sagas"],
-    ["/goals/index.html", "Sagas"],
-    ["/goals/spell/motivation/motivation.html", "Sagas"],
-    ["/editor/", "App"],
-    // the home and the scratch details pages:  no tab
-    ["/pages/index.html", undefined],
-    ["/pages/details/x.html", undefined],
-    // a worktree's pages, from the main checkout's server:  inside the worktree, whatever it's called
-    ["/worktrees/goals/epics/goals/goals.plan.html", "Epics"],
-    ["/worktrees/seo/guides/seo/seo.html", "Guides"],
-    // from disk, in a checkout and in a worktree
-    ["/Users/owen/www/spell-app/spell-app/guides/cli.html", "Guides"],
-    ["/Users/owen/www/spell-app/spell-app/.claude/worktrees/brand/templates/durable.html", "Templates"],
-    ["/Users/owen/www/spell-app/spell-app-dev/brand/pony.html", "Brand"],
-    // older checkouts' paths
-    ["/packages/docs/content/epics/seo/seo.html", "Epics"],
-    ["/packages/docs/content/templates/durable.html", "Templates"],
-    ["/packages/docs/content/solid/solid-2.html", "Guides"],
-    ["/packages/docs/content/index.html", undefined],
-    ["/packages/docs/epics/seo/seo.html", "Epics"],
-    ["/packages/docs/solid/solid-2.html", "Guides"],
-    // other packages' files
-    ["/packages/server/AGENTS.md", undefined],
-    ["/packages/ui/notes/plan.md", undefined]
-  ])("light %s:  %s", (path, tab) => {
-    expect(litTab(path)).toBe(tab)
+    // a docs area:  any of the tab's `areas`
+    ["/notes/index.html", "Notes"],
+    ["/notes/deep/page.html", "Notes"],
+    ["/old-logs/2026/x.html", "Logs"],
+    // the first area folder in the path wins, whatever the tabs' order
+    ["/shop/notes/x.html", "Shop"],
+    ["/notes/shop/x.html", "Notes"],
+    // a component set:  its address, a worktree's;  and a folder its tab names (`paths`)
+    ["/components/kit/", "Kit"],
+    ["/components/kit", "Kit"],
+    ["/components/kit/kit-card.html", "Kit"],
+    ["/worktrees/w/components/kit/kit-card.html", "Kit"],
+    ["/Users/me/repo/kit/docs/kit-card.html", "Kit"],
+    // `sets` and `paths` before any area:  a set's folder inside a folder named like an area
+    ["/notes/kit/docs/kit-card.html", "Kit"],
+    // a set with no tab of its own lights the tab naming it (`sets`), beside that tab's area
+    ["/components/shop/shop-cart.html", "Shop"],
+    ["/shop/index.html", "Shop"],
+    // a path pattern
+    ["/tool/", "Tool"],
+    ["/tool", "Tool"],
+    ["/toolbox/x.html", undefined],
+    // a set no tab names:  none, never an area under it
+    ["/components/other/notes/x.html", undefined],
+    // a worktree's pages:  read inside the worktree, whatever it's called
+    ["/worktrees/notes/logs/x.html", "Logs"],
+    ["/Users/me/repo/.claude/worktrees/notes/shop/x.html", "Shop"],
+    // from disk
+    ["/Users/me/repo/notes/x.html", "Notes"],
+    // no area folder, or a FILE named like one:  none
+    ["/home/index.html", undefined],
+    ["/x/notes", undefined]
+  ])("lights %s:  %s", (path, tab) => {
+    expect(litTab(TABS, path)?.name).toBe(tab)
   })
 
-  it("docsArea():  the first area folder in the path wins", () => {
-    expect(docsArea("/templates/epics/plan.html")).toBe("templates")
-    expect(docsArea("/epics/templates/x.html")).toBe("epics")
+  it("lights nothing with no tabs:  a page whose server and bundle name none", () => {
+    expect(litTab([], "/notes/x.html")).toBeUndefined()
+  })
+})
+
+describe("componentSet() and docsArea()", () => {
+  it("componentSet():  the set at a page's address, `/components/<id>/`, a worktree's too", () => {
+    expect(componentSet("/components/ui/ui-card.html")).toBe("ui")
+    expect(componentSet("/worktrees/w/components/epics/")).toBe("epics")
+    expect(componentSet("/components")).toBeUndefined()
+    expect(componentSet("/x/components/ui/ui-card.html")).toBeUndefined()
+  })
+
+  it("docsArea():  the first of `areas` among the path's folders;  none in a component set", () => {
+    const areas = ["epics", "templates"]
+    expect(docsArea("/templates/epics/plan.html", areas)).toBe("templates")
+    expect(docsArea("/epics/templates/x.html", areas)).toBe("epics")
+    expect(docsArea("/guides/x.html", areas)).toBeUndefined()
+    expect(docsArea("/components/epics/templates/x.html", areas)).toBeUndefined()
   })
 })
 
