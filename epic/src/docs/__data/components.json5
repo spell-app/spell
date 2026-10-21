@@ -1040,7 +1040,7 @@
         "send bar",
         "feedback"
       ],
-      "description": "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  the feedback box, then \"Do it\", which sends every changed box and the feedback to Claude;  under them, Expand all, and the save status when a save failed;  then what was sent, or why not.  What's typed saves itself as a draft 5s after typing stops, and as the page goes away.  Once a page.",
+      "description": "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  the feedback box, then \"Do it\", which sends every changed box and the feedback to Claude;  under them, the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  What's typed is kept in the browser at once and saves itself to the page server as a draft as Owen types, and as the page goes away;  a save that fails tries again every 3s.  Once a page.",
       "noun": "choices bar",
       "attributes": [],
       "slots": [],
@@ -1060,7 +1060,11 @@
         },
         {
           "name": "meta",
-          "description": "The line under them:  the save status (only when it failed), Expand all."
+          "description": "The line under them:  the save status (only when it failed), Copy my answers, Expand all."
+        },
+        {
+          "name": "copy",
+          "description": "Copy my answers (`<ui-button>`):  what's typed, as the draft's JSON, onto the clipboard."
         },
         {
           "name": "expand",
@@ -1091,6 +1095,26 @@
           "key": "sendTip",
           "text": "Send {changed} changed of {rows}, and the feedback, to Claude",
           "description": "The button's tooltip:  the count."
+        },
+        {
+          "key": "copyAnswers",
+          "text": "Copy my answers",
+          "description": "Puts what's typed on the clipboard."
+        },
+        {
+          "key": "copied",
+          "text": "Copied",
+          "description": "Copy my answers, for a moment after a click."
+        },
+        {
+          "key": "copyTip",
+          "text": "Copy every box you changed, and the feedback, as JSON:  for when this page can't save",
+          "description": "Copy my answers' tooltip."
+        },
+        {
+          "key": "copyFailed",
+          "text": "Couldn't copy:  the browser refused the clipboard",
+          "description": "Copy my answers' tooltip after a copy failed."
         },
         {
           "key": "expandAll",
@@ -4444,7 +4468,7 @@
         "send bar",
         "answer"
       ],
-      "description": "A details page's Send, in its sticky header (epic `epic-workflow` P12):  where the answer stands (`Not sent`, `Changes not sent`, `Sent 10/8/26 14:34 · 5 of 17 decided`), then a round blue Send.  It sends the whole page, partial answers too, as often as Owen likes:  the page never locks.  Beside them, the draft's save (P18):  what's typed and not sent is kept beside the page, and comes back when it reloads.  After the button, who hears it (epic `epic-engine` r6):  `repo-split is listening` while a session's `epic ask wait` waits for the answer, else `nobody is waiting yet`;  Send works either way, and with nobody waiting says the answer is saved for Claude's next look.  Once a page.",
+      "description": "A details page's Send, in its sticky header (epic `epic-workflow` P12):  where the answer stands (`Not sent`, `Changes not sent`, `Sent 10/8/26 14:34 · 5 of 17 decided`), then a round blue Send.  It sends the whole page, partial answers too, as often as Owen likes:  the page never locks.  Beside them, the draft's save (P18):  what's typed and not sent is kept in the browser at once and beside the page as Owen types, and comes back when it reloads;  a save that fails says so in red under them, and tries again every 3s.  After the button, who hears it (epic `epic-engine` r6):  `repo-split is listening` while a session's `epic ask wait` waits for the answer, else `nobody is waiting yet`;  Send works either way, and with nobody waiting says the answer is saved for Claude's next look.  Once a page.",
       "noun": "send",
       "attributes": [],
       "slots": [],
@@ -4460,7 +4484,7 @@
         },
         {
           "name": "draft",
-          "description": "The draft's save (P18), muted:  `draft saved 14:04`, `draft from 14:04 put back`;  orange when the page server can't take it (the browser still keeps it)."
+          "description": "The draft's save (P18), muted:  `draft saved 14:04`, `draft from 14:04 put back`;  when the page server can't take it, on its own line under the rest, red and bold (P15:  the browser still keeps it, and it tries again every 3s)."
         },
         {
           "name": "send",
