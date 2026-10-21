@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { Ids } from "$/ui/runtime/Ids"
 
 describe("Ids.next()", () => {

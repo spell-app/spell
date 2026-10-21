@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
 import type { OverlayEntry } from "$/ui/runtime"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { Browser } from "$/ui/runtime/Browser"
 import { Focus } from "$/ui/runtime/Focus"
 import { Keyboard } from "$/ui/runtime/Keyboard"

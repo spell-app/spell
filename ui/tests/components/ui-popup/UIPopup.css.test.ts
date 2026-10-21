@@ -4,8 +4,8 @@ import { Keys } from "$/ui/test-helpers/Keys"
 
 import { colorsCSS, foundationCSS, nativeCSS } from "$/ui/styles"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import type { DOMElement } from "spell-kit/element"
 import { Sheets } from "$/ui/test-helpers/Sheets"
 

@@ -19,7 +19,7 @@ import { gzipSync } from "node:zlib"
 import { build } from "vite"
 
 import { SITE_ASSETS } from "../vite.site.config.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 /** The packs link's name inside `_assets/`:  the one entry a rebuild keeps. */
 const PACKS_NAME = "icon-packs"

@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import type { Bucket, ImportMap, PackageConfig } from "./tools.types.ts"
 import { COMPONENTS, ENTRIES, SHARED_ENTRIES, SOLID_EXTERNAL } from "../vite.config.ts"
-import { VocabularyFiles } from "./VocabularyFiles.ts"
+import { VocabularyFiles } from "spell-kit/element/tools/VocabularyFiles"
 
 /** Repo root, absolute, with a trailing slash. */
 const ROOT = fileURLToPath(new URL("../", import.meta.url))
@@ -23,9 +23,8 @@ const EXTRA_ENTRIES = { api: ENTRIES.api!, styles: ENTRIES.styles! }
  *   - `solid-js`, `@solidjs/*` => `library`
  *   - `forms.ts`, `FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`, `ControlLabels` (+ `LabelWatch`) =>
  *     `shared:forms`
- *   - a family folder => its own classes / sheet / vocabulary / fallback;
- *     `vocabulary/SkeletonText.ts` too, as `ui-root`'s:
- *     its only runtime importer, and NOT in `core` (left out of `$/ui/vocabulary`'s barrel)
+ *   - a family folder => its own classes / sheet / vocabulary / fallback
+ *     (`SkeletonText`, which no page loads, is the kit's since epic `repo-split` P10)
  *   - `api.ts` and the two barrels it namespaces (`E`, `V`) => `extra:api`:  only `api.js` holds them
  *   - `src/styles/` (the foundation sheets as text, the style vocabulary) => `extra:styles`:
  *     only `styles.js` holds them

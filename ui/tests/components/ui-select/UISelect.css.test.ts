@@ -6,7 +6,7 @@ import { UI } from "$/ui/runtime"
 import { colorsCSS, foundationCSS } from "$/ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "$/ui/vocabulary"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import { selectVocabulary } from "$/ui/components/ui-select/UISelect.en"

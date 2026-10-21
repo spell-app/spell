@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vite-plus/test"
 import type { JSX } from "@solidjs/web"
 
-import { expectAccessible } from "$/ui/test-helpers/A11y"
-import { Fixture } from "$/ui/test-helpers/Fixture"
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
-import { Viewport } from "$/ui/test-helpers/Viewport"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { Viewport } from "spell-kit/test-helpers/Viewport"
 import { E } from "$/ui/core"
 import { DOMElement } from "spell-kit/element"
 

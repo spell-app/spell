@@ -38,7 +38,7 @@ import { parseArgs } from "node:util"
 
 import { TocIndex } from "../src/docs-components/ui-docs-toc/TocIndex.ts"
 import { environment } from "../tools/environment.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import { SITE_PAGES } from "../tools/tools.types.ts"
 
 import { type GeneratedOutput, writeOrCheck } from "./generatedFiles.ts"

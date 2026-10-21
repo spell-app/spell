@@ -13,7 +13,7 @@ import { TocIndex } from "../src/docs-components/ui-docs-toc/TocIndex.ts"
 import { SPELL_APP, SPELL_CLI } from "./spellApp.ts"
 import { SITE_PAGES, SiteCheckError } from "./tools.types.ts"
 import { environment } from "./environment.ts"
-import { Terminal } from "./Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 /****************
  * ### `SiteCheck`

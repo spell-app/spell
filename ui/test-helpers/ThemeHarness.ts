@@ -2,7 +2,7 @@ import { onTestFinished } from "vite-plus/test"
 
 import { UI } from "$/ui/runtime"
 
-import { ElementFixture } from "./ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 /**
  * Helpers for theme tests (`src/styles/themes/themes.test.ts`, `src/runtime/Themes.test.ts`).

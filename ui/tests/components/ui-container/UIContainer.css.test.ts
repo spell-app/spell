@@ -3,7 +3,7 @@ import { page } from "vite-plus/test/browser"
 
 import { foundationCSS } from "$/ui/styles"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import { containerVocabulary } from "$/ui/components/ui-container/UIContainer.en"

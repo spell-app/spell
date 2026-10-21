@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { Keyboard } from "$/ui/runtime/Keyboard"
 
 /** Dispatch a bubbling, composed `keydown` from `target`;  returns the event. */

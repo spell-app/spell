@@ -15,7 +15,7 @@ import {
   type SmokePage,
   type SmokeResults
 } from "./tools.types.ts"
-import { Terminal } from "./Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 /****************
  * ### `ReportTables`

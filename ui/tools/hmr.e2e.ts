@@ -30,7 +30,7 @@ import { after, before, describe, it } from "node:test"
 import { fileURLToPath } from "node:url"
 import { chromium, type Browser, type Page } from "playwright"
 
-import { DevServer } from "./DevServer.ts"
+import { DevServer } from "spell-kit/element/tools/DevServer"
 
 void describe("hot module replacement (Vite dev, tools/demo/hmr.html)", () => {
   // set in `before()`:  the suite's body runs while this module loads, before the classes below exist
@@ -213,7 +213,7 @@ class HmrPage {
 
   /** Start the dev server and chromium, load the demo page and wait for its elements. */
   static async open(): Promise<HmrPage> {
-    const server = await DevServer.start({ port: PORT })
+    const server = await DevServer.start({ root: ROOT, port: PORT })
     const browser = await chromium.launch()
     const page = await browser.newPage()
     // tsx compiles this file with esbuild `keepNames`, which wraps named functions in `__name(...)` -- also the

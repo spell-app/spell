@@ -1,7 +1,9 @@
 /**
  * Types shared by the package tooling (`tools/`):  the package config, the measurement / smoke / LOC result
- * shapes, the site's two folders, the static pages' and the design export's shapes, the component packs' reports,
- * and the error classes (`IconPackError`, `ComponentPackError` ...).
+ * shapes, the site's two folders, the static pages' and the design export's shapes, and the error classes
+ * (`IconPackError` ...).
+ * - The component packs' shapes (their reports, `ComponentPackError`) are the kit's, beside its pack tooling:
+ *   `spell-kit/element/tools/tools.types` (epic `repo-split` P10).
  * - At the BOTTOM of the tools' import graph:  `import type` only, so every tool (and `packages/cli`, through
  *   `$/ui/tools/tools.types`) imports it without loading another.
  * - Every `tools/results/*-results.json` has one of these shapes;  `ReportTables` reads them.
@@ -443,31 +445,6 @@ export type IconPackErrorCause = {
   /** each SVG that failed verification;  empty for other failures */
   problems: IconPackProblem[]
 }
-
-////////////////
-// ## Component packs (`ComponentPack`, `spell-ui-pack`)
-////////////////
-
-/**
- * What `ComponentPack.build()` wrote.
- * - `files`:  absolute paths:  the pack's generated files, then its set's docs data folder when it has one
- * - `tags`:  every tag of the pack, sorted;  `hash`:  its sources' (`ComponentPack.hash()`)
- */
-export type ComponentPackBuild = { pack: string; files: string[]; tags: string[]; hash: string }
-
-/** What `ComponentPack.check()` found:  each generated file that isn't current;  none means current. */
-export type ComponentPackCheck = { pack: string; hash: string; stale: ComponentPackStale[] }
-
-/** One stale generated file:  its absolute path, and why, e.g. `built from older sources`. */
-export type ComponentPackStale = { file: string; reason: string }
-
-/**
- * Thrown by `ComponentPack` when a pack can't be read or built:  a folder that isn't a pack, a tag without the pack's
- * prefix, an import the page can't share, or a docs data builder that failed.
- * - `spell-ui-pack` prints its message and exits 1;  `spell dev pack` turns it into its own error.
- */
-export class ComponentPackError extends Error {}
-ComponentPackError.prototype.name = "ComponentPackError"
 
 ////////////////
 // ## Static pages (`StaticDocument`, `spell static`)

@@ -20,7 +20,7 @@ import path from "node:path"
 import { build, type Rolldown } from "vite"
 
 import { SPELL_APP, SPELL_CLI } from "../tools/spellApp.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 /** Spell UI's folder. */
 const UI = path.resolve(import.meta.dirname, "..")

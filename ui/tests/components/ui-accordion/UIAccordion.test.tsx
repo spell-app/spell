@@ -2,9 +2,9 @@ import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeAll, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { UI } from "$/ui/runtime"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 import type { AccordionToggleDetail } from "$/ui/components/components.types"
 

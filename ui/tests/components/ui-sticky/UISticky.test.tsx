@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test
 import { UI } from "$/ui/runtime"
 import { nextFrame } from "$/ui/util"
 import type { StickyDetail } from "$/ui/components/components.types"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
 import "$/ui/components/ui-sticky"

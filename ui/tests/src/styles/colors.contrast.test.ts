@@ -3,7 +3,7 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { hueAliases, hueStates, hues, semanticAliases, semanticColors, type Oklch } from "$/ui/styles"
 import { ColorContrast } from "$/ui/styles/ColorContrast"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 
 import layersRaw from "$/ui/styles/layers.css?raw"
 import tokensRaw from "$/ui/styles/tokens.css?raw"

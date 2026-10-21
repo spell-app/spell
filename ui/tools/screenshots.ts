@@ -12,8 +12,8 @@ import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 import { chromium, type Page } from "playwright"
 
-import { DevServer } from "./DevServer.ts"
-import { Terminal } from "./Terminal.ts"
+import { DevServer } from "spell-kit/element/tools/DevServer"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 /****************
  * ### `DemoScreenshots`
@@ -102,7 +102,7 @@ const MAX_PROBLEMS = 30
 
 const { positionals } = parseArgs({ allowPositionals: true, options: {} })
 const families = (positionals[0] ?? DEFAULT_FAMILIES).split(",").map((family) => family.trim().replace(/^ui-/, ""))
-const server = await DevServer.start({ port: PORT, logLevel: "error" })
+const server = await DevServer.start({ root: ROOT, port: PORT, logLevel: "error" })
 const browser = await chromium.launch()
 try {
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } })

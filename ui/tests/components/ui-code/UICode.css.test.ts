@@ -2,7 +2,7 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "$/ui/styles"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import { codeVocabulary } from "$/ui/components/ui-code/UICode.en"

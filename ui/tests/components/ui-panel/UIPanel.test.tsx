@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vite-plus/test"
 import { UI } from "$/ui/runtime"
 import { ValueSets } from "$/ui/vocabulary"
 import { sectionVocabulary } from "$/ui/components/ui-section/UISection.en"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { UIPanel } from "$/ui/components/ui-panel"
 import { panelVocabulary } from "$/ui/components/ui-panel/UIPanel.en"
 

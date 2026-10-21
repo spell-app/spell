@@ -4,9 +4,9 @@ import { userEvent } from "vite-plus/test/browser"
 import { UI } from "$/ui/runtime"
 import type { DropdownOptions } from "$/ui/components/components.types"
 import { FlagCountry } from "$/ui/components/ui-flag"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
 import "$/ui/components/ui-dropdown"

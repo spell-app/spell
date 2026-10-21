@@ -2,7 +2,7 @@ import { describe, expect, it } from "vite-plus/test"
 
 import type { UIComponent, DOMElement } from "spell-kit/element"
 import { UI } from "$/ui/runtime"
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 // NOTE: order matters:  table registers its `label` text BEFORE breadcrumb does
 import "$/ui/components/ui-table"

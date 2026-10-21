@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { PAGE } from "$/ui/test-helpers/docsSearch.fixtures"
 
 import { PageOutline } from "$/ui/docs-components/ui-docs-search/PageOutline"

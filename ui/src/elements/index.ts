@@ -18,7 +18,7 @@
  *   they import the `$/ui/core` / `$/ui/forms` ENTRIES (`src/core.ts`, `src/forms.ts`),
  *   which split the same files into the two shared chunks of the build.
  * - NOTE: `HotDefinitions` is left out:  dev-only, and a SIDE EFFECT on import (it wraps `UIComponent.define`);
- *   the HMR plugin loads it into each component barrel (`tools/HotElements.ts`).
+ *   the HMR plugin loads it into each component barrel (the kit's `element/tools/HotElements.ts`).
  * - NOTE: `ShadowEvents` (Solid's events kept from leaking out of shadow roots) is left out too:
  *   only `UIComponent` uses it, directly.
  * - NOTE: only `OwnerContext.find()`, `StickyWatch` and the Solid layer touch the DOM, and only when called.

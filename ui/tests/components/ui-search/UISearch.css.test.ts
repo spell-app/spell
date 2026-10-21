@@ -5,7 +5,7 @@ import { ClassBuilder } from "$/ui/elements"
 import { colorsCSS, foundationCSS } from "$/ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "$/ui/vocabulary"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { Sheets } from "$/ui/test-helpers/Sheets"
 
 import { searchVocabulary } from "$/ui/components/ui-search/UISearch.en"

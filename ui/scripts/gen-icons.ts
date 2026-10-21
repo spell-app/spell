@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url"
 import { IconName } from "../src/icons/IconName.ts"
 import { environment } from "../tools/environment.ts"
 import { IconPackBuilder } from "../tools/IconPackBuilder.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import type { IconPackReport } from "../tools/tools.types.ts"
 import { ICON_EXTRAS } from "./iconExtras.ts"
 

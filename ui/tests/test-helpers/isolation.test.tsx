@@ -4,7 +4,7 @@ import { createEffect, resetErrorHalt } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import type { ComponentVocabulary } from "$/ui/vocabulary"
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { UIComponent, type AttributeValues, type UIComponentClass, type DOMElement } from "spell-kit/element"
 
 import "$/ui/components/ui-label"

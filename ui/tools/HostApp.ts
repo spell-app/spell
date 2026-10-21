@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url"
 import solid from "@solidjs/vite-plugin"
 import * as vite from "vite"
 
-import { NodePackage } from "./NodePackage.ts"
-import { Terminal } from "./Terminal.ts"
+import { NodePackage } from "spell-kit/element/tools/NodePackage"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 /****************
  * ### `HostApp`

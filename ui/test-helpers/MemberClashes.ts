@@ -2,14 +2,14 @@ import type { DOMElement, UIComponentClass } from "spell-kit/element"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 import { E } from "$/ui/core"
 import { F } from "$/ui/forms"
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 /****************
  * ### `MemberClashes`
  * The attributes of a set's vocabularies named like a member of `UIComponent` or `FormComponent`:
  * a base's member wins over the attribute's getter, so the attribute would read wrong.
- * - Each set runs it over its own vocabularies, in its own tests:  Spell UI's (`tests/ui/test/vocabularies.test.ts`),
- *   the brand's and the app's.
+ * - Each set runs it over its own vocabularies, in its own tests:
+ *   Spell UI's (`tests/test-helpers/vocabularies.test.ts`), the brand's and the app's.
  * - A browser test helper:  it draws a bare element once, to read `UIComponent`'s instance fields.
  ****************/
 export class MemberClashes {

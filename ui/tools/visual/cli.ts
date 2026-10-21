@@ -11,7 +11,7 @@
 
 import { parseArgs } from "node:util"
 
-import { Terminal } from "../Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import { FlagError, VisualError, type VisualBrowser, type VisualOs } from "./visual.types.ts"
 import { VisualRunner } from "./VisualRunner.ts"
 import { VisualSettings } from "./VisualSettings.ts"

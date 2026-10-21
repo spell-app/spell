@@ -5,8 +5,8 @@ import { existsSync } from "node:fs"
 
 import { SRV } from "spell-kit/server"
 
-import { NodePackage } from "../NodePackage.ts"
-import { Terminal } from "../Terminal.ts"
+import { NodePackage } from "spell-kit/element/tools/NodePackage"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import { VisualError } from "./visual.types.ts"
 import { VisualSettings } from "./VisualSettings.ts"
 

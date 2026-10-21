@@ -4,7 +4,7 @@ import { ClassBuilder } from "$/ui/elements"
 import { colorsCSS, foundationCSS } from "$/ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "$/ui/vocabulary"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 
 import { dropdownVocabulary } from "$/ui/components/ui-dropdown/UIDropdown.en"
 

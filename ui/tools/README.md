@@ -12,13 +12,19 @@ measurement, vendoring, smoke, report, HMR, the docs site and the design export.
   - A folder with its own flags has a `cli.ts`:  [this one's](cli.ts), [the visual tests'](visual/cli.ts).
 - Output goes through `Terminal` (stdout / stderr), never `console.*`.
 - Environment variables go through `environment`.
+- The generic tools are the kit's since epic `repo-split` P10, `spell-kit/element/tools/<Name>`
+  (in the kit's `element/tools/`, its [AGENTS.md](../../element/AGENTS.md)):
+  - `Terminal`, where every tool and script prints;  `NodePackage`, finding an installed dependency
+  - `ComponentPack` and `packModules`, a component pack's build (its bin:  `spell-pack build | check`);
+    `RootCatalog` and `VocabularyFiles`, which `yarn gen:root` and `yarn site:data` read the vocabularies with
+  - `DevServer`, the dev server `test:visual`, `test:hmr` and `screenshots` start;  `HotElements`, the HMR plugin
+  - `elementBaseConfig()`, `CSS_TARGETS`, `SOLID_DEDUPE`:  the Vite settings `../vite.config.ts`'s `baseConfig()`
+    starts from
 
 | File | What |
 |---|---|
 | `cli.ts` | the command line behind `yarn vendor`, `measure`, `smoke` (`declarations`, then `smoke`), `serve`, `report` (`loc`, then `report`), `icons:pack`:  its commands `vendor`, `measure`, `smoke`, `declarations`, `serve`, `loc`, `report`, `icons:pack` |
-| `index.ts` | the barrel:  the measure / vendor / LOC / report / smoke / icon-pack classes and `Terminal`;  NOT the site and design tools, `StaticRenderer` / `StaticDocument`, the pages or the scripts (its header says why) |
-| `Terminal.ts` | `Terminal.out()` / `err()`:  where every tool and script prints (stdout / stderr, the shape of `packages/cli`'s `CliSession`) |
-| `NodePackage.ts` | finds an installed dependency's folder (`NodePackage.need("emojibase-data")`), wherever yarn hoisted it:  NEVER a hard-coded `node_modules` path |
+| `index.ts` | the barrel:  the measure / vendor / LOC / report / smoke / icon-pack classes;  NOT the site and design tools, `StaticRenderer` / `StaticDocument`, the pages or the scripts (its header says why) |
 | `package.config.ts` | `PACKAGE` (`PackageConfig`):  entries, shared entries (`core`, `forms`), externals, peer list, module => bucket;  `DIST_IMPORTS` for import maps |
 | `tools.types.ts` | `PackageConfig`, result shapes (`MeasureResults`, `SmokeResults`, `LocResults`) and `kB()`, `SolidIdentityHook`, the site's two halves (`SITE_PAGES`, `SITE_BUILD`), the static pages' and the design export's shapes, the error classes `IconPackError` and `SiteCheckError` |
 | `BundleMeasure.ts` | in-memory `vite build` with the repo's config, modules bucketed into library / shared entries / own per family / lazy;  the library AS USED (bindings `dist/` imports) and in full;  standalone per-family builds;  structural checks |
@@ -34,18 +40,14 @@ measurement, vendoring, smoke, report, HMR, the docs site and the design export.
 | `SiteSearchBuilder.ts` | `docs/__data/search.json5` (`SiteSearchFile`):  every page's title and sections, read from the page files, for `<ui-docs-search>`;  through `SiteDataBuilder.searchText()` |
 | `FamilyTokens.ts` | one family's public CSS tokens, read from its sheets:  its docs page's token table |
 | `FoundationTokens.ts` | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page's tables, read from the generated sheets |
-| `VocabularyFiles.ts` | every English vocabulary of a folder of families, read from its `UI<Name>.en.ts` files in node:  what `RootCatalog` (`yarn gen:root`, `spell dev pack build`) and `yarn site:data` (`SiteDataBuilder`) read |
 | `ThemeFamilies.ts` | which families each theme sheet (`src/styles/themes/*.css`) touches, read from its CSS at build time (`SiteDataFile.themes`) |
 | `SiteCheck.ts` | `yarn site:check <page...> \| --all [--out <dir>]` (`scripts/site-check.ts` hands it the arguments):  the plain-HTML docs site (the shared `ui/*.html`, `ui/components/ui-<name>.html`) in headless chromium, from the page server's `/ui/` (`spell dev server ensure`):  errors and failed requests, undefined / unrendered `ui-*`, the four component tabs each loaded from its `#hash`, `ui-docs-toc`, phone overflow (with the offending elements), the nav flyout, dark;  screenshots in `tools/results/site-check/`, JSON summary on stdout, exit 1 on any problem |
 | `StaticRenderer.ts` | the SSR-only Vite server (`mode: "test"`, `ssr.noExternal` Solid) the static server render (`$/ui/static`) runs on from node:  `ssrLoadModule()` compiles the components' JSX for the server, which `tsx` can't.  Used by `visual/StaticPages.ts` and `spell static` (`packages/cli`, `src/runner/renderStatic.ts`) |
 | `StaticDocument.ts` | loaded BY that server (never by node):  `render(html, options)` turns a whole page static (every `StaticCatalog` family, the element-loading scripts removed, the stylesheet linked first in `<head>` or inline) and `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell static`'s engine.  Its types (and `StaticDocumentModule`, for callers that can't type-check it) are in `tools.types.ts` |
 | `DesignExport.ts` | `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (`scripts/design-build.ts`, also `spell dev design build`, which passes spell-app's brand):  the claude.ai Design System's files in `<dir>/project/` (default `build/design-system/`, git-ignored) -- brand book README, `tokens.json`, `components/index.d.ts`, a README + `preview.html` per family, the cover, `design-system.json`;  keeps `components/bundle.js` / `bundle.css` (the design bundle's).  `DesignTokens` resolves the `spell-brand` theme's `:root` tokens per scheme (colour maths in `DesignColor`);  `DesignComponents` writes the cards from `docs/__data/components.json5` and the element examples;  `DesignBrand` adds the brand's `<brand-*>` cards (a "Brand" group), reading the GIVEN brand folder's `docs/__data/components.json5` and its docs pages' examples as data:  `ui` imports nothing of `brand`, and names no folder of it |
 | `DesignTokens.ts`, `DesignColor.ts`, `DesignComponents.ts`, `DesignBrand.ts` | `DesignExport`'s parts (above) |
-| `RootCatalog.ts` | what `<ui-root>` needs of each tag before its family loads (folder, skeleton text parsed by `SkeletonText`), read from the `<Name>.en.ts` files (`VocabularyFiles`):  `yarn gen:root` writes `UIRoot.catalog.ts` with it, `ComponentPack` a component pack's catalog |
-| `ComponentPack.ts` | a COMPONENT PACK and its build (epic `repo-split` P5):  `spell-ui-pack build \| check [<folder>]` (`../bin/spell-ui-pack.mjs`, from any repo that links Spell UI in:  spell-epic, the brand;  `spell dev pack build` calls it too):  the catalog (`RootCatalog`), the entry and ONE classic script, built by Vite on `baseConfig()` with `PACK_MODULES` external, into the pack's `components/__pack/`, then its docs data (its `yarn site:data`);  `check()` says what's stale, by the sources' hash |
 | `ElementManifests.ts` | `custom-elements.json` (Custom Elements Manifest 2.1) and `html-custom-data.json` (VS Code `html.customData`, loaded by the repo's `.vscode/settings.json`), written by `yarn site:data` into `site/_data/` from the same data |
 | `environment.ts` | `environment`:  EVERY environment variable `tools/`, `scripts/` and the configs read, parsed once (`SPELL_UI_TEST_ALL`, `SPELL_UI_SOLID_PROD`, `SPELL_UI_FA_PACKAGE_DIR`, `CI`, `INIT_CWD`, and `yarn test:visual`'s `SPELL_UI_VISUAL_*`, `VisualVariables`);  nowhere else reads `process.env` |
-| `DevServer.ts` | the package's Vite dev server started from node (`test:visual`, `test:hmr`, `screenshots`):  preferred port or the next free one, and its REAL `origin` |
 | `hmr.e2e.ts` | `yarn test:hmr`:  dev server + headless chromium + real file edits, 8 scenarios (`node:test`:  run as a plain script) |
 | `screenshots.ts` | `yarn screenshots [families]`:  one PNG per example pair of `demo/index.html`, for a quick look (no baselines;  regression tests are `visual/`) |
 | tests | in the repo's [`tests/ui/tools/`](../tests/tools/):  `DesignExport`, `IconPackBuilder`, `SiteDataBuilder` (fails while `docs/__data/` is stale), `SiteSearchBuilder` ...;  in the `ssr` project |

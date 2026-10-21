@@ -8,7 +8,7 @@ import { writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import { StyleGenerator } from "../src/styles/StyleGenerator.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 import { formatFiles } from "./generatedFiles.ts"
 

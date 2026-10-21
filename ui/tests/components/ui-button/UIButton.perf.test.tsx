@@ -2,7 +2,7 @@ import { expect, it } from "vite-plus/test"
 import { commands } from "vite-plus/test/browser"
 import { flush } from "solid-js"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 import "$/ui/components/ui-button"
 

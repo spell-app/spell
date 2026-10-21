@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 import { ElementSnapshot, type SnapshotRow } from "$/ui/docs-components/ui-docs-inspector/ElementSnapshot"
 

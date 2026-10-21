@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url"
 
 import { keepingCommentsIn } from "spell-kit/util/node/json5"
 
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 ////////////////
 // ## Files

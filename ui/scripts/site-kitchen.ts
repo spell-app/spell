@@ -35,7 +35,7 @@ import { parseArgs } from "node:util"
 import { readJSON5File } from "spell-kit/util/node/json5"
 
 import type { SiteDataFile, SiteFamily, SiteTag } from "../src/docs-components/docs-components.types.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import { SITE_DATA, SITE_PAGES } from "../tools/tools.types.ts"
 
 import { escapeHtml, spliceGenerated, withoutTicks, writeOrCheck } from "./generatedFiles.ts"

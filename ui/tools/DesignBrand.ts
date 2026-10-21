@@ -18,8 +18,8 @@ import type { DesignExample, DesignSource } from "./tools.types.ts"
  *   - `docs/<tag>.html` -- its docs set's pages (served at `/components/brand/`):
  *     the examples are their Examples tab's `<ui-docs-example>`s, titled by the `<ui-section>` around each
  *   - each page's own `<style>`s:  the classes those examples use (`.brand-docs-row`, `.stage` ...)
- * - The elements themselves reach the bundle from the docs tool (`bundle-spell-ui.js --design`),
- *   which may import any package.
+ * - The elements themselves reach the bundle from the brand's own build of it (spell-brand's `yarn design:bundle`,
+ *   epic `repo-split` P10), which may import Spell UI.
  ****************/
 export class DesignBrand {
   /** the brand's package folder, absolute */

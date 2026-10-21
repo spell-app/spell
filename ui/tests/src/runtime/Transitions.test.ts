@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { Transitions } from "$/ui/runtime/Transitions"
 
 /** Stand-in for `animations.css`:  a short `fade` in / out, driven by `data-ui-animation`. */

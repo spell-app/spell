@@ -18,7 +18,7 @@ import { parseArgs } from "node:util"
 
 import { ElementManifests } from "../tools/ElementManifests.ts"
 import { SiteDataBuilder } from "../tools/SiteDataBuilder.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 import { type GeneratedOutput, writeOrCheck } from "./generatedFiles.ts"
 

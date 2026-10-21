@@ -1,10 +1,10 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { expectAccessible } from "$/ui/test-helpers/A11y"
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
-import { Viewport } from "$/ui/test-helpers/Viewport"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { Viewport } from "spell-kit/test-helpers/Viewport"
 import type { DOMElement } from "spell-kit/element"
 
 import "$/ui/components/ui-statistic"

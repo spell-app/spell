@@ -22,7 +22,7 @@ const BROWSERS = environment.isAllBrowsers ? (["chromium", "firefox", "webkit"] 
 const TESTS = resolve(import.meta.dirname, "./tests")
 
 /** The folders of tests, as the code's:  `src/`, the families' `components/`, and the cross-family `test-helpers/`. */
-const TEST_FOLDERS = "{src,components,test}"
+const TEST_FOLDERS = "{src,components,test-helpers}"
 
 /** Server-render tests:  `*.ssr.test.ts(x)`, anywhere. */
 const SSR_TESTS = [`${TEST_FOLDERS}/**/*.ssr.test.{ts,tsx}`]

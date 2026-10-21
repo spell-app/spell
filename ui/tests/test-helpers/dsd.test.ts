@@ -1,7 +1,7 @@
 import { expect, it } from "vite-plus/test"
 import ssrButton from "/.cache/ssr-button.html?raw"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
 /**

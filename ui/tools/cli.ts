@@ -29,6 +29,7 @@ import { join, resolve } from "node:path"
 import { parseArgs } from "node:util"
 
 import { contentFolderOf } from "spell-kit/assembler/contentFolder"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 import {
   BundleMeasure,
@@ -40,7 +41,6 @@ import {
   PeerVendor,
   ReportTables,
   SmokeRunner,
-  Terminal,
   type IconPackUnsafePolicy,
   type ImportMap
 } from "./index.ts"

@@ -33,7 +33,7 @@ import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell-kit/util/node/json5"
 
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import { SITE_DATA, SITE_PAGES } from "../tools/tools.types.ts"
 
 import { STATUS_TEXT, escapeHtml } from "./generatedFiles.ts"

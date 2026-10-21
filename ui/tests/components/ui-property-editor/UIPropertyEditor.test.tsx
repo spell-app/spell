@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { UI } from "$/ui/core"
 import type { PropertySchema } from "$/ui/vocabulary"
 

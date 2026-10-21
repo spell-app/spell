@@ -4,10 +4,10 @@ import { Keys } from "$/ui/test-helpers/Keys"
 
 import { UI } from "$/ui/runtime"
 import { PartOwnerTokens, type ModalCloseDetail } from "$/ui/components/components.types"
-import { A11y, expectAccessible } from "$/ui/test-helpers/A11y"
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { A11y, expectAccessible } from "spell-kit/test-helpers/A11y"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
 import "$/ui/components/ui-modal"

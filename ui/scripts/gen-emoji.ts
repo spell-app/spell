@@ -23,8 +23,8 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { NodePackage } from "../tools/NodePackage.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { NodePackage } from "spell-kit/element/tools/NodePackage"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 
 /****************
  * ### `EmojiGenerator`

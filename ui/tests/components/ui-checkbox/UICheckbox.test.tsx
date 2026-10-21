@@ -5,9 +5,9 @@ import { attribution } from "solid-js/attribution"
 
 import { E } from "$/ui/core"
 import type { DOMFormControl } from "$/ui/elements"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 import { UICheckbox } from "$/ui/components/ui-checkbox"
 

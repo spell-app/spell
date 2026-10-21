@@ -2,10 +2,10 @@ import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 import { Keys } from "$/ui/test-helpers/Keys"
 
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
-import { Viewport } from "$/ui/test-helpers/Viewport"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { Viewport } from "spell-kit/test-helpers/Viewport"
 import type { DOMElement } from "spell-kit/element"
 
 import "$/ui/components/ui-items"

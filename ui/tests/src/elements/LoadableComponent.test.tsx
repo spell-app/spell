@@ -4,7 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { UI, type SourceSaver } from "$/ui/runtime"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 import * as UIT from "$/ui/components/components.types"
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { type UIComponentClass, UIComponent } from "spell-kit/element"
 import { LoadableComponent, type DOMLoadableElement } from "$/ui/elements"
 

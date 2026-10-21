@@ -3,10 +3,10 @@
 import { spawn, type ChildProcess } from "node:child_process"
 import { existsSync, readdirSync, rmSync } from "node:fs"
 
-import { DevServer } from "../DevServer.ts"
+import { DevServer } from "spell-kit/element/tools/DevServer"
 import { VisualVariables } from "../environment.ts"
-import { NodePackage } from "../NodePackage.ts"
-import { Terminal } from "../Terminal.ts"
+import { NodePackage } from "spell-kit/element/tools/NodePackage"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import { VisualError, type VisualBrowser, type VisualOs } from "./visual.types.ts"
 import { DockerBrowserServer } from "./DockerBrowserServer.ts"
 import { ParityReport } from "./ParityReport.ts"
@@ -153,6 +153,7 @@ export class VisualRunner {
    */
   private async startServer(): Promise<string> {
     this.server = await DevServer.start({
+      root: VisualSettings.ROOT,
       port: PORT,
       server: { hmr: false, ws: false, open: false },
       optimizeDeps: { entries: [VisualSettings.FIXTURE.slice(1)] },

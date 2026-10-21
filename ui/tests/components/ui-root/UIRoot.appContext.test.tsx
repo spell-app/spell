@@ -4,7 +4,7 @@ import { Dynamic, type JSX } from "@solidjs/web"
 import { UIComponent, type DOMElement, type UIComponentClass } from "spell-kit/element"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 import { UI } from "$/ui/runtime"
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 /**
  * `UIComponent.appContext`:  what an app hands the elements inside a `<ui-root>`, read by `$/spell-element`'s

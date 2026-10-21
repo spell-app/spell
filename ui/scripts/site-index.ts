@@ -20,7 +20,7 @@ import { readJSON5File } from "spell-kit/util/node/json5"
 
 import type { SiteDataFile, SiteTag } from "../src/docs-components/docs-components.types.ts"
 import { NavIndex } from "../src/docs-components/ui-docs-nav/NavIndex.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import { SITE_DATA, SITE_PAGES } from "../tools/tools.types.ts"
 
 import { STATUS_TEXT, escapeHtml, spliceGenerated, withoutTicks, writeOrCheck } from "./generatedFiles.ts"

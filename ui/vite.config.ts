@@ -1,4 +1,3 @@
-import solid from "@solidjs/vite-plugin"
 import { defineConfig, type Plugin, type UserConfig } from "vite-plus"
 import dts, { type PluginOptions } from "vite-plugin-dts"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
@@ -6,10 +5,10 @@ import { createRequire } from "node:module"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { standardDecorators } from "spell-kit/toolchain/decorators"
+import { elementBaseConfig } from "spell-kit/element/tools/elementConfig"
+import { hotElements } from "spell-kit/element/tools/HotElements"
 import { fmtConfig, packageLint } from "spell-kit/toolchain/lint"
 import { environment } from "./tools/environment.ts"
-import { hotElements } from "./tools/HotElements.ts"
 
 /** Absolute path of `src/`. */
 const SRC = fileURLToPath(new URL("./src", import.meta.url))
@@ -32,15 +31,6 @@ const DECLARATIONS_ROOT = commonFolder([path.resolve("."), UTIL_SRC, ELEMENT_SRC
 
 /** Where `vite-plugin-dts` writes this repo's own files, under `dist/`:  its path from `DECLARATIONS_ROOT`. */
 const UI_WRITTEN = `${slashed(path.relative(DECLARATIONS_ROOT, path.resolve(".")))}/`
-
-/**
- * Browsers the CSS is compiled FOR:  the platform floor the plan commits to (anchor positioning everywhere).
- * - MUST stay modern:  with Vite's default (`baseline-widely-available`) Lightning CSS lowers `light-dark()`
- *   into `--lightningcss-light` variables resolved where a token is DECLARED, which freezes `:root`'s colour
- *   scheme into `.ui-dark` subtrees, and adds hex fallbacks for every `oklch()`.  `styles.test.ts` checks.
- * - Lightning CSS encodes versions as `major << 16 | minor << 8`.
- */
-export const CSS_TARGETS = { chrome: 125 << 16, safari: 26 << 16, firefox: 147 << 16 }
 
 /** Component families, one lib entry each (`components/ui-<name>/index.ts`), so each can be loaded and sized alone. */
 export const COMPONENTS = [
@@ -137,30 +127,25 @@ export const ENTRIES: Record<string, string> = {
  */
 export const SOLID_EXTERNAL = /^solid-js(\/|$)|^@solidjs\//
 
-/** Packages that MUST resolve to one copy:  two Solids can't share owners (`agents/PAPERCUTS.md`). */
-export const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
-
 /**
  * Config shared by the library build / dev server (below), `vitest.config.ts` and the docs site:
  * plugins, aliases, dedupe, Lightning CSS.
- * - Aliases (`$/ui`, `$/ui/test-helpers`, `$/util` ...) come from the repo root's `tsconfig.base.json`, through
- *   `resolve.tsconfigPaths`.  A FUNCTION, so every caller gets its own plugin instances.
- * - `standardDecorators()` MUST come first:  both it and the Solid plugin are `enforce: "pre"`, and the Solid
- *   compiler must see decorator-free code.
+ * - The kit's element build settings (`elementBaseConfig()`, `spell-kit/element/tools/elementConfig`), which every
+ *   component pack's script is built on too (epic `repo-split` P10):  the decorator pre-pass BEFORE Solid's plugin,
+ *   aliases from each file's `tsconfig.json` (`resolve.tsconfigPaths`:  `$/ui`, `$/ui/test-helpers` ...), ONE Solid,
+ *   Lightning CSS on the platform floor (`CSS_TARGETS`).
+ * - A FUNCTION, so every caller gets its own plugin instances.
  * - `SPELL_UI_SOLID_PROD=1` (`environment.isSolidProduction`, `tools/environment.ts`):
  *   Solid's PRODUCTION runtime under `vite dev` (no dev diagnostics, no performance tracks),
  *   for timing `tools/demo/perf.html`.
  * - `optimizeDeps`:  `axe-core`, `temporal-polyfill` (only a Temporal-less page imports it), highlight.js, marked and
- *   DOMPurify (only the lazy `CodeEngine` / `MarkdownEngine` import them) pre-bundled up front, so the first test run doesn't reload mid-run.
+ *   DOMPurify (only the lazy `CodeEngine` / `MarkdownEngine` import them) pre-bundled up front, so the first test run
+ *   doesn't reload mid-run.
  */
 export function baseConfig() {
   const production = environment.isSolidProduction ? { dev: false, performanceTracks: false } : {}
   return {
-    plugins: [standardDecorators(), solid(production)],
-    resolve: {
-      tsconfigPaths: true,
-      dedupe: SOLID_DEDUPE
-    },
+    ...elementBaseConfig({ solid: production }),
     optimizeDeps: {
       include: [
         "axe-core",
@@ -170,13 +155,6 @@ export function baseConfig() {
         "marked",
         "dompurify"
       ]
-    },
-    css: {
-      transformer: "lightningcss",
-      lightningcss: {
-        targets: CSS_TARGETS,
-        drafts: { customMedia: true }
-      }
     }
   } satisfies UserConfig
 }
@@ -211,7 +189,8 @@ export default defineConfig(() => {
       lib: { entry: ENTRIES, formats: ["es"] },
       // the build's CSS MINIFY reads `cssTarget`, not `css.lightningcss.targets`:  left at Vite's default (older
       // Safari) it lowered `light-dark()` into `--lightningcss-light` variables fixed at `:root`, so `.ui-dark` /
-      // `<ui-root theme="dark">` changed nothing in `dist/` (dev and tests were fine).  Same browsers as `CSS_TARGETS`.
+      // `<ui-root theme="dark">` changed nothing in `dist/` (dev and tests were fine).  Same browsers as the kit's
+      // `CSS_TARGETS` (`spell-kit/element/tools/elementConfig`).
       cssTarget: ["chrome125", "safari26", "firefox147"],
       rolldownOptions: {
         external: (id: string) => SOLID_EXTERNAL.test(id),
@@ -442,7 +421,8 @@ function slashed(file: string): string {
 }
 
 /**
- * Hot module replacement for the components in `yarn dev` (`tools/HotElements.ts`;
+ * Hot module replacement for the components in `yarn dev`
+ * (the kit's `HotElements`, `spell-kit/element/tools/HotElements`;
  * `apply: "serve"`, so builds are untouched, and NOT in `vitest.config.ts`).
  * - `HotDefinitions` (`spell-kit/element`'s) is injected by FILE PATH, resolved from its package's `exports`:
  *   the sheets' handler import lives in a `.css?inline` module, where `resolve.tsconfigPaths` resolves no alias.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { Fixture } from "$/ui/test-helpers/Fixture"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { FallbackStub, type StubHost } from "$/ui/test-helpers/FallbackStub"
 
 import { CalendarFallback } from "$/ui/components/ui-calendar/UICalendar.fallback"

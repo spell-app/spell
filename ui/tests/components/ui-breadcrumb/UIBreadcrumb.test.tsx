@@ -2,9 +2,9 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { BreadcrumbDividerTokens } from "$/ui/components/components.types"
 import { UI } from "$/ui/runtime"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 import { BreadcrumbDivider } from "$/ui/components/ui-breadcrumb/BreadcrumbDivider"
 

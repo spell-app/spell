@@ -10,7 +10,7 @@ import type { TokenDeclaration } from "./styles.types"
  *
  * - Pure text in, text out:  no DOM, no Vite, and nothing of `ui`'s but `styles.types` (types only).
  *   So these share it:
- *   - the browser test (`tests/ui/test/componentTokens.test.ts`)
+ *   - the browser test (`tests/test-helpers/componentTokens.test.ts`)
  *   - the codemod (`yarn tokens:alias`, `scripts/tokens-alias.ts`)
  *   - the docs site's token tables, in node (`tools/FamilyTokens.ts`, `tools/FoundationTokens.ts`)
  * - Build / test time only:  left out of the `$/ui/styles` barrel, import the leaf file.

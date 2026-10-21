@@ -22,7 +22,7 @@ import { FamilyTokens } from "./FamilyTokens.ts"
 import { FoundationTokens } from "./FoundationTokens.ts"
 import { SiteSearchBuilder } from "./SiteSearchBuilder.ts"
 import { ThemeFamilies } from "./ThemeFamilies.ts"
-import { VocabularyFiles } from "./VocabularyFiles.ts"
+import { VocabularyFiles } from "spell-kit/element/tools/VocabularyFiles"
 
 /****************
  * ### `SiteDataBuilder`

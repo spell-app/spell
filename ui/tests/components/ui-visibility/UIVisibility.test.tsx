@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it } from "vite-plus/test"
 
 import { UI, type VisibilityCalculations } from "$/ui/runtime"
 import { nextFrame } from "$/ui/util"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 import type { DOMElement } from "spell-kit/element"
 
 import "$/ui/components/ui-visibility"

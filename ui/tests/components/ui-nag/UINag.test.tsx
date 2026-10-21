@@ -4,10 +4,10 @@ import { Keys } from "$/ui/test-helpers/Keys"
 
 import { UI } from "$/ui/runtime"
 import type { NagCloseDetail } from "$/ui/components/components.types"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
-import { Fixture } from "$/ui/test-helpers/Fixture"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { Fixture } from "spell-kit/test-helpers/Fixture"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
 import "$/ui/components/ui-nag"

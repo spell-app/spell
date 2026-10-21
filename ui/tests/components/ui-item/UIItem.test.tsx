@@ -5,9 +5,9 @@ import type { ItemContext, ItemOwner } from "$/ui/components/components.types"
 import { UIComponent, type AttributeValues, type UIComponentClass, type DOMElement } from "spell-kit/element"
 import type { ComponentVocabulary } from "$/ui/vocabulary"
 import { UI } from "$/ui/runtime"
-import { expectAccessible } from "$/ui/test-helpers/A11y"
+import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ElementFixture } from "$/ui/test-helpers/ElementFixture"
+import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
 import "$/ui/components/ui-item"
 import "$/ui/components/ui-parts"

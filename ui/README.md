@@ -56,8 +56,8 @@ If you find yourself writing a second copy of any of these, stop and reuse.
   - `flatParentFor()`, `closestAcrossShadow()`
 - Tooling:
   - ONE reader of environment variables:  [`environment`](tools/environment.ts)
-  - ONE printer:  [`Terminal`](tools/Terminal.ts)
-  - ONE dependency finder:  [`NodePackage`](tools/NodePackage.ts)
+  - ONE printer:  the kit's [`Terminal`](../element/tools/Terminal.ts) (`spell-kit/element/tools/Terminal`)
+  - ONE dependency finder:  the kit's [`NodePackage`](../element/tools/NodePackage.ts)
   - ONE write-or-`--check` for generated files:  [`generatedFiles`](scripts/generatedFiles.ts)
 
 ## Files
@@ -79,7 +79,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | `src/util/` | `$/ui/util`:  the kit's util's generic files and its element's timing helpers (`afterSolidUpdate()`, `after()` ...), re-exported, plus `Warnings` |
 | `src/static/` | `$/ui/static` (`SSR`, node only):  the static server render, `ui-*` markup to plain HTML |
 | *(none -- the app's [`<spell-code>`](../spell-app/app/components/spell-code/))* | spell's highlighter, which Spell UI shipped pre-compiled until epic `repo-split` P2 |
-| `test-helpers/` | shared test helpers (`Fixture`, `ElementFixture`, `A11y` ...);  the tests themselves are in the repo's [`tests/ui/`](./tests/), at the same paths as the code |
+| `test-helpers/` | Spell UI's own test helpers (`Sheets`, `ThemeHarness`, `MemberClashes` ...;  the generic ones, `Fixture`, `ElementFixture`, `A11y`, `Viewport`, are the kit's, `spell-kit/test-helpers/...`);  the tests themselves are in the repo's [`tests/ui/`](./tests/), at the same paths as the code |
 | `tools/` | node tooling (classes):  measure, vendor, smoke, report, site data and checks, design export, visual tests;  see [`tools/README.md`](tools/README.md) |
 | `scripts/` | one file per yarn script, named for it (`site:data` -> `site-data.ts`), plus the helpers they share |
 | `docs/` | the docs site's PAGES, a component set (served at `/components/ui/`):  `*.html`, `__parts/`, `__data/` (the site data, `yarn site:data`) |

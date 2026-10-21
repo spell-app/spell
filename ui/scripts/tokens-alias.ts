@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
 import { ComponentTokens } from "../src/styles/ComponentTokens.ts"
-import { Terminal } from "../tools/Terminal.ts"
+import { Terminal } from "spell-kit/element/tools/Terminal"
 import { SITE_PAGES } from "../tools/tools.types.ts"
 
 import { formatFiles } from "./generatedFiles.ts"
