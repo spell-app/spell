@@ -14,6 +14,8 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  * - `serve [--port <n>]`:  run it in the foreground, until `Ctrl-C`
  * - `start` / `ensure [--port <n>]`:  start it in the background if it isn't running;
  *   JSON `{ base, port, pid, repos, launched ... }`
+ *   - always on that port (default 4848):  never another, so open pages keep their address (epic `epic-engine` I69;
+ *     `EpicServer.claimPort()`)
  * - `stop`:  stop it
  * - `status`:  JSON, exit 1 when it isn't running
  * - `url <file>`:  ensure it runs, then print the URL that serves `<file>` (a page in a registered repo's content)
@@ -72,12 +74,24 @@ export class Hub {
     return `${base}${path}`
   }
 
-  /** The server, started in the background if it isn't running (`EpicServer.ensure()`). */
+  /**
+   * The server, started in the background if it isn't running (`EpicServer.ensure()`), always on `port`.
+   * - `port` taken by something else, or a server that won't start:  `EpicCommandError`, its message on one line,
+   *   which the openers show (`pages.js` `ensureEpicServer()`)
+   */
   async ensure(port = DEFAULT_EPIC_PORT) {
     if (!new RepoList({ home: this.home }).repos().length)
       throw new EpicCommandError("no repos to serve yet:  epic repo add <checkout>")
-    const { EpicServer } = await import("$/epics/server/EpicServer")
-    return EpicServer.ensure(this.home, port)
+    const [{ EpicServer }, { SRV }] = await Promise.all([
+      import("$/epics/server/EpicServer"),
+      import("spell-kit/server")
+    ])
+    try {
+      return await EpicServer.ensure(this.home, port)
+    } catch (error) {
+      if (error instanceof SRV.HttpError) throw new EpicCommandError(`epic server:  ${error.message}`, EXIT.ERRORS)
+      throw error
+    }
   }
 
   /** Serve in the foreground until `Ctrl-C`;  resolves to 0 once stopped. */

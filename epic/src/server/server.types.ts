@@ -28,8 +28,9 @@ export const PID_FILE = "server.json"
 export const LOG_FILE = "server.log"
 
 /**
- * The port it asks for first:  `SPELL_EPIC_PORT`, else 4848.
- * - taken:  any free one (the pid file says which)
+ * Its port:  `SPELL_EPIC_PORT`, else 4848.
+ * - the machine's server keeps it:  taken, it doesn't start, never on another port (epic `epic-engine` I69:
+ *   every restart moved open pages to a dead address);  `EpicServer.claimPort()`
  * - NOT 4747, spell-app's page server's, so the two run side by side
  */
 export const DEFAULT_EPIC_PORT = Number(process.env.SPELL_EPIC_PORT) || 4848
