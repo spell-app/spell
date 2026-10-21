@@ -24,7 +24,7 @@ READ [the custom elements guide](../spell.epics/guides/custom-elements/custom-el
   (no `yarn.lock` here), and [its AGENTS.md](../AGENTS.md) has the rules across repos.
 - `$/` aliases are for inside this repo ([tsconfig.base.json](tsconfig.base.json));  another repo's package is imported
   by its npm name (`spell-kit/...`), an entry of its `package.json` `exports`.
-- `agents/` (WWOD and the three logs):  a link to the kit's `agents/` (git-ignored here), made by `yarn clone`.
+- `agents/` (WWOD and the three logs):  a link to the kit's `agents/` (git-ignored here), made by the kit's every `yarn install` (its `postinstall`).
 - Its design notes are in the content repo since epic `repo-split` P9 (Q34):
   [guides/ui/notes/](../spell.epics/guides/ui/notes/).
 
