@@ -2,15 +2,9 @@ import { existsSync, mkdirSync, statSync } from "node:fs"
 import { join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { SRV, type Handler, type ServedFile } from "@spell-app/server"
-import {
-  componentSets,
-  PageEditor,
-  pageServerSettings,
-  type PageConfig,
-  type RouteModule
-} from "@spell-app/server/page"
-import type { SiteTab } from "@spell-app/server/site/site.types"
+import { SRV, type Handler, type ServedFile } from "spell-kit/server"
+import { componentSets, PageEditor, pageServerSettings, type PageConfig, type RouteModule } from "spell-kit/server/page"
+import type { SiteTab } from "spell-kit/server/site/site.types"
 
 import type { ContentRouteContext } from "$/epics/list/runningRoutes"
 
@@ -540,12 +534,12 @@ export const ROUTE_MODULES = [
  * - ALL of spell-epic's code, `src/` (epic `epic-eject` I11):  the route modules import far beyond their own folders
  *   (`config/`, `data/`, `links/`, `review/`, the elements' definitions ...), so watching only theirs and this one
  *   missed a change to the rest
- * - the server package's, `@spell-app/server` (spell-server's), where Node's resolver finds it (`packageDir()`)
+ * - the server package's, `spell-kit/server` (spell-server's), where Node's resolver finds it (`packageDir()`)
  *   - not the default repo's page-server package (`buildBundles()`):  spell-app's own, a change there needs a restart
  */
 export const SOURCES = [
   join(ENGINE_ROOT, "src"),
-  ...[packageDir("@spell-app/server")].filter((dir) => dir !== undefined).map((dir) => join(dir, "src"))
+  ...[packageDir("spell-kit/server")].filter((dir) => dir !== undefined).map((dir) => join(dir, "src"))
 ]
 
 /** The package holding the default repo's own bundle build (`BundleBuild`):  spell-app's, from its checkout. */

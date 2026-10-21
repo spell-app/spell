@@ -3,8 +3,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { PageServer } from "@spell-app/server/page"
-import { ask } from "@spell-app/server/test/serve"
+import { PageServer } from "spell-kit/server/page"
+import { ask } from "spell-kit/server/test/serve"
 
 import { EPIC_CARDS_END } from "$/epics/list/EpicCards"
 import {

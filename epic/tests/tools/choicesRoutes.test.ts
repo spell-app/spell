@@ -8,8 +8,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 
-import { PageServer } from "@spell-app/server/page"
-import { ask } from "@spell-app/server/test/serve"
+import { PageServer } from "spell-kit/server/page"
+import { ask } from "spell-kit/server/test/serve"
 
 import choicesRoutes, { type ChoicesAnswer, type ChoicesDraft } from "../../src/tools/choicesRoutes"
 

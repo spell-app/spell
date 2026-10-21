@@ -4,15 +4,15 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 
 - spell-epic is the epic tooling, lifted out of spell-app (epic `epic-eject` P6).
   [The README](README.md) says what it is, how it's laid out and how it's installed.
-- The house style is Spell's, WWOD:  **READ it FIRST**, from the shared content folder beside this repo:
-  [WWOD](../spell.epics/agents/wwod/WWOD.md).
+- The house style is Spell's, WWOD:  **READ it FIRST**, from the kit around this repo:
+  [WWOD](../agents/wwod/WWOD.md).
   - No `agents/` link at the root (epic `epic-eject` I23):  Claude Code reads a plugin's root `agents/` as agent types.
-- spell-epic is a child repo of the top `spell` repo, and a workspace of its ONE install (`yarn install` at the top;
-  epic `epic-engine` P10):  the other repos' packages (`@spell-app/ui`, `@spell-app/server` ...) are `workspace:*`
+- spell-epic is a child repo of the kit `spell-kit`, and a workspace of its ONE install (`yarn install` in the kit;
+  epic `epic-engine` P10):  the other repos' packages (`@spell-app/ui`, `spell-kit/server` ...) are `workspace:*`
   dependencies, imported by their package names (WWOD §4), never by a path into a sibling repo.
   - `tsc` reads their built declarations (`dist-types/`):  `yarn ts` builds them first (`spell-types --below`).
   - A tool finding one on disk asks Node's resolver ([packageDir.ts](src/tools/packageDir.ts)).
-  - Their source runs here with their own `$/` names through `@spell-app/toolchain/aliases` (`bin/epic`, the
+  - Their source runs here with their own `$/` names through `spell-kit/toolchain/aliases` (`bin/epic`, the
     `tsx` scripts).
 - spell-epic is ONE package, `@spell-app/epics` (epic `epic-eject` J14), laid out as a plain JS repo:
   - `src/`:  the code (`$/epics`), the elements and the docs tools included;  its rules:  [src/AGENTS.md](src/AGENTS.md)
@@ -35,5 +35,5 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.
-- Checks, from the root:  `yarn ts`, `yarn test`, `yarn lint`, `yarn plugin:validate`;  over every repo:  the top's
+- Checks, from the root:  `yarn ts`, `yarn test`, `yarn lint`, `yarn plugin:validate`;  over every repo:  the kit's
   `yarn ts` / `yarn test` / `yarn lint`.

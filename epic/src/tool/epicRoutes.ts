@@ -58,8 +58,8 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { SRV } from "@spell-app/server"
-import type { RouteModule } from "@spell-app/server/page"
+import { SRV } from "spell-kit/server"
+import type { RouteModule } from "spell-kit/server/page"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { DataFile } from "$/epics/data/DataFile"
 import { FAVORITES_FILE, favoritesIn } from "$/epics/list/EpicCards"

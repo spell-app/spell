@@ -40,7 +40,7 @@ const ROOT = resolve(HERE, "../..")
 if (!process.env.CHECK_JUMP_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", "--import", import.meta.resolve("@spell-app/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", "--import", import.meta.resolve("spell-kit/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,

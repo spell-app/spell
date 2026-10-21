@@ -11,7 +11,7 @@ import { dirname, join } from "node:path"
 import { parseHTML } from "linkedom"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { AS } from "@spell-app/assembler"
+import { AS } from "spell-kit/assembler"
 import type { MigrationContext } from "$/epics/tool/migrations/migrations.types"
 import { Migrations } from "$/epics/tool/migrations/Migrations"
 

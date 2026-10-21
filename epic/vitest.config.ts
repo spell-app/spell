@@ -57,7 +57,7 @@ export function epicsProjects({
         name: `${prefix}browser`,
         dir: TESTS,
         include: ["components/**/*.test.{ts,tsx}"],
-        // Spell UI's core first, as a page has it:  its settings for `@spell-app/spell-element` (spell-ui's
+        // Spell UI's core first, as a page has it:  its settings for `spell-kit/element` (spell-ui's
         // `test/setup.ts`)
         setupFiles: [UI_SETUP],
         testTimeout: 10_000,

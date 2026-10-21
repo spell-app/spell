@@ -16,8 +16,8 @@
  * - 400 for attributes that aren't an address (a bad name, an item AND a phase)
  * - a read:  no token
  */
-import { SRV } from "@spell-app/server"
-import type { RouteModule } from "@spell-app/server/page"
+import { SRV } from "spell-kit/server"
+import type { RouteModule } from "spell-kit/server/page"
 
 import { EpicAddress, TARGET_API } from "$/epics/links"
 

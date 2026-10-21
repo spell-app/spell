@@ -403,7 +403,7 @@ export function formattedAlready(files) {
 /**
  * How to run `doc-links.js` with `args` as a child `node`, for `spawnSync(command, args, { env })`.
  * - under `tsx`, with this package's `tsconfig.json`, from whatever folder it runs in;  and the run-time alias hook
- *   (`ALIASES`), for the `$/` imports inside the packages it uses (`@spell-app/assembler`'s own)
+ *   (`ALIASES`), for the `$/` imports inside the packages it uses (`spell-kit/assembler`'s own)
  * - the one way the tools run it (`tidy()`, `update.js`, goals' check, its own test)
  */
 export function docLinksRun(args) {
@@ -415,12 +415,10 @@ export function docLinksRun(args) {
 }
 
 /**
- * The run-time alias hook (`@spell-app/toolchain/aliases`, epic `repo-split` I12), for a child `node` under `tsx`:
+ * The run-time alias hook (`spell-kit/toolchain/aliases`, epic `repo-split` I12), for a child `node` under `tsx`:
  * every `$/` import resolves through the importing file's own repo's table, so other repos' source runs here.
  */
-export const ALIASES = pathToFileURL(
-  resolvedFile("@spell-app/toolchain/aliases") ?? "@spell-app/toolchain/aliases"
-).href
+export const ALIASES = pathToFileURL(resolvedFile("spell-kit/toolchain/aliases") ?? "spell-kit/toolchain/aliases").href
 
 /** Does checkout `root` run a page server of its own:  `"pageServer"` in its root `package.json` (spell-app's)? */
 function hasPageServer(root) {
@@ -441,7 +439,7 @@ const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
  * This checkout's page server (`spell dev server`), started in the background if it isn't running.
  * - returns `{ base, port }`, or `undefined` if it can't start (the caller falls back to `file://`)
  * - runs the server package's `src/page/cli.ts ensure` under `tsx` with the run-time alias hook (`ALIASES`):  the
- *   `@spell-app/server` this checkout's install resolves (spell-server, `packageDir()`, epic `epic-engine` P10)
+ *   `spell-kit/server` this checkout's install resolves (spell-server, `packageDir()`, epic `epic-engine` P10)
  * - a checkout whose settings name no page server (no `"pageServer"` in its `package.json`:  a repo `epic init` set
  *   up, spell-epic itself), or that resolves no server package:  the machine's epic server instead
  *   (`ensureEpicServer()`)
@@ -450,7 +448,7 @@ const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
  */
 export function ensurePageServer() {
   if (process.env.SPELL_NO_SERVER) return undefined
-  const server = hasPageServer(ROOT) && packageDir("@spell-app/server", ROOT)
+  const server = hasPageServer(ROOT) && packageDir("spell-kit/server", ROOT)
   const cli = server && join(server, "src/page/cli.ts")
   if (!cli || !existsSync(cli)) return ensureEpicServer()
   const run = spawnSync(process.execPath, ["--import", "tsx", "--import", ALIASES, cli, "ensure", "--root", ROOT], {

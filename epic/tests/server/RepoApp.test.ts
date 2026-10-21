@@ -9,7 +9,7 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { ask } from "@spell-app/server/test/serve"
+import { ask } from "spell-kit/server/test/serve"
 
 import { EpicServer } from "$/epics/server/EpicServer"
 import { RepoList } from "$/epics/server/RepoList"

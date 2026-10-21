@@ -7,7 +7,7 @@
  *   repos' source (spell-server's `Guard.ts` imports `$/server/...`), and this folder's `tsconfig.json` has only
  *   spell-epic's table.
  */
-import { aliasedFile } from "@spell-app/toolchain/aliases"
+import { aliasedFile } from "spell-kit/toolchain/aliases"
 import { build } from "esbuild"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -16,7 +16,7 @@ const here = dirname(fileURLToPath(import.meta.url))
 
 /**
  * `$/name/...` through the alias table of the repo the importing file is in (`tsconfig.base.json`), as
- * `@spell-app/toolchain/aliases` does for node;  anything it can't place goes on to esbuild's own resolver.
+ * `spell-kit/toolchain/aliases` does for node;  anything it can't place goes on to esbuild's own resolver.
  * @type {import("esbuild").Plugin}
  */
 const repoAliases = {

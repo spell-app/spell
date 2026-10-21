@@ -5,13 +5,13 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
-import { AS } from "@spell-app/assembler"
+import { AS } from "spell-kit/assembler"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { EpicRepo } from "$/epics/config/EpicRepo"
 import { RealPath } from "$/epics/config/RealPath"
 import { DataFile, type DataFileMove } from "$/epics/data/DataFile"
 import { RepoList } from "$/epics/server/RepoList"
-import { SRV } from "@spell-app/server"
+import { SRV } from "spell-kit/server"
 
 import { planDocIn } from "../tools/pages.js"
 import { PlanDocError, type CommitLogEntry, type PlanDocOptions, type PlanDocParts } from "./planDoc.types"

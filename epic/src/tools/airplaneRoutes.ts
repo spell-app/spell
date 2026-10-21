@@ -8,7 +8,7 @@
  * - Here, not in the server, since epic `epic-eject` P4:
  *   the switch is epics' (`AirplaneMode`), and the server imports no other package.
  */
-import type { RouteModule } from "@spell-app/server/page"
+import type { RouteModule } from "spell-kit/server/page"
 
 import { AirplaneMode } from "./AirplaneMode"
 

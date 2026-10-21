@@ -11,7 +11,7 @@
  *   - then `spell-ui:lazy`, pointing `<ui-code>` / `<ui-markdown>`'s engine loaders at their lazy scripts (before
  *     any element highlights:  that waits for `UI.load()`), and the source elements' saver (`spell-ui-sources.js`)
  *   - then the page runtime, with every tag defined
- *   - then the site header (`@spell-app/server/site`):  `defineSite()` runs once every import has, so `<spell-site-header>`
+ *   - then the site header (`spell-kit/server/site`):  `defineSite()` runs once every import has, so `<spell-site-header>`
  *     upgrades -- and sets `--spell-site-header-height` -- before the runtime first measures its sticky offsets
  *     (the runtime waits for the `ui-*` definitions first)
  * - `$/...` aliases resolve through esbuild's own tsconfig `paths` support:  `tsconfig.json` extends
@@ -49,7 +49,7 @@ import * as uiMarkdown from "@spell-app/ui/ui-markdown"
 import "spell-ui:lazy"
 import "./spell-ui-sources.js"
 import "./spell-doc-runtime.js"
-import { defineSite } from "@spell-app/server/site"
+import { defineSite } from "spell-kit/server/site"
 
 export { UI }
 export { registerPack } from "@spell-app/ui"

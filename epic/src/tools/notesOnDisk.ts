@@ -1,8 +1,8 @@
 import { readFileSync, readdirSync } from "node:fs"
 import { join, relative } from "node:path"
 
-import { AS } from "@spell-app/assembler"
-import { SRV } from "@spell-app/server"
+import { AS } from "spell-kit/assembler"
+import { SRV } from "spell-kit/server"
 
 import { PageNotes } from "./PageNotes.js"
 

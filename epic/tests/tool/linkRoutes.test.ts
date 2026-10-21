@@ -9,8 +9,8 @@ import { dirname, join } from "node:path"
 
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { PageServer } from "@spell-app/server/page"
-import { ask } from "@spell-app/server/test/serve"
+import { PageServer } from "spell-kit/server/page"
+import { ask } from "spell-kit/server/test/serve"
 
 import linkRoutes from "$/epics/tool/linkRoutes"
 

@@ -10,7 +10,7 @@
 
 // NOTE:  spell-element's vocabulary TYPES file, not its barrel or `$/ui/core`:  those load the element layer (JSX,
 // Vite-only imports), which a node tool's type check -- the docs tools, through the epic-page forwarders -- can't compile.
-import type { AttributeSpec, ComponentVocabulary } from "@spell-app/spell-element/vocabulary.types"
+import type { AttributeSpec, ComponentVocabulary } from "spell-kit/element/vocabulary.types"
 
 import type { Definitions } from "./Definitions"
 

@@ -8,7 +8,7 @@
  * - The ELEMENTS (tags, attributes, which children go where) are `$/epics/definitions`':
  *   this file holds only what the tool adds on top --
  *   item kinds as the command line names them, review filters, result shapes.
- * - `Prettify<>` (the toolchain's global types, `@spell-app/toolchain/types`, in `tsconfig.json`'s `"types"`)
+ * - `Prettify<>` (the toolchain's global types, `spell-kit/toolchain/types`, in `tsconfig.json`'s `"types"`)
  *   wraps the combined types.
  */
 

@@ -3,7 +3,7 @@
  * classic script defining `window.SpellUI`.
  * - Built by `node tools/bundle-spell-ui.js --design [--out <dir>]`;  edit THIS, never the bundle.
  * - The docs entry (`spell-ui.entry.js`) minus what only docs pages need:
- *   - no page runtime (`spell-doc-runtime.js`), no site header (`@spell-app/server/site`), no saver (`spell-ui-sources.js`)
+ *   - no page runtime (`spell-doc-runtime.js`), no site header (`spell-kit/server/site`), no saver (`spell-ui-sources.js`)
  *   - no `spell-ui:lazy` / `spell-ui:emoji`:  Claude Design refuses a relative `<script src>` (caveat C6), so the
  *     design build INLINES the code and markdown engines (their `import()`s stay in the bundle, as code), and emoji
  *     names simply never load (their chunks are empty stand-ins, `<ui-emoji name>` draws nothing, nothing throws)

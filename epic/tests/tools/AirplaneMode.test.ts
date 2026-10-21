@@ -3,9 +3,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeEach, describe, expect, it } from "vite-plus/test"
 
-import type { SRV } from "@spell-app/server"
-import { PageServer } from "@spell-app/server/page"
-import { ask } from "@spell-app/server/test/serve"
+import type { SRV } from "spell-kit/server"
+import { PageServer } from "spell-kit/server/page"
+import { ask } from "spell-kit/server/test/serve"
 
 import { AirplaneMode } from "../../src/tools/AirplaneMode"
 import airplaneRoutes from "../../src/tools/airplaneRoutes"

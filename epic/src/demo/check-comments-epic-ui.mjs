@@ -64,7 +64,7 @@ const ROOT = resolve(HERE, "../..")
 if (!process.env.CHECK_EPIC_UI_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", "--import", import.meta.resolve("@spell-app/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", "--import", import.meta.resolve("spell-kit/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,
@@ -79,7 +79,7 @@ const { DemoServer } = await import("./DemoServer.ts")
 const { GuideInbox } = await import("../tool/GuideInbox.ts")
 const { RepoList } = await import("../server/RepoList.ts")
 const { packageDir } = await import("../tools/packageDir.ts")
-const { componentSets, pageServerSettings } = await import("@spell-app/server/page/settings")
+const { componentSets, pageServerSettings } = await import("spell-kit/server/page/settings")
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)

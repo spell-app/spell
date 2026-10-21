@@ -1,7 +1,8 @@
 # `$/epics` -- a component pack of `<epic-*>` elements
 
 Custom elements a page loads ON DEMAND.
-Written exactly like Spell UI's own element families, on `$/spell-element` and Spell UI's `$/ui/core`.
+Written exactly like Spell UI's own element families,
+on the kit's `spell-kit/element` and Spell UI's `@spell-app/ui/core`.
 - `<ui-root>` reads [the pack's script](components/__pack/epics.pack.js) when the page names it.
   - It's a classic script, so it works from `file://` too.
 - It shows each tag's skeleton until it's defined, then defines them all.
@@ -24,7 +25,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 - the pack's build, catalog and staleness check:  Spell UI's, `spell-ui-pack`
   ([ComponentPack.ts](../ui/tools/ComponentPack.ts))
 - reading a vocabulary's tag and skeleton:  Spell UI's `RootCatalog` ([RootCatalog.ts](../ui/tools/RootCatalog.ts))
-- the element authoring API:  `$/spell-element`, and Spell UI's `$/ui/core`
+- the element authoring API:  `spell-kit/element`, and Spell UI's `@spell-app/ui/core`
 
 ## Files
 

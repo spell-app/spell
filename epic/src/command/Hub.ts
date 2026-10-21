@@ -84,7 +84,7 @@ export class Hub {
   private async serve(port: number): Promise<number> {
     const [{ EpicServer }, { SRV }] = await Promise.all([
       import("$/epics/server/EpicServer"),
-      import("@spell-app/server")
+      import("spell-kit/server")
     ])
     const server = await new EpicServer({ home: this.home }).start({ port })
     const repos = server.repos.map((repo) => `${repo.name}${repo.isDefault ? " (at /)" : ""}`).join(", ")
@@ -95,7 +95,7 @@ export class Hub {
 
   /** The server's pid file, `<home>/server.json`. */
   private async pidFile() {
-    const { SRV } = await import("@spell-app/server")
+    const { SRV } = await import("spell-kit/server")
     return new SRV.PidFile(this.home, PID_FILE)
   }
 }

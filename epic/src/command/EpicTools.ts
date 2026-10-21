@@ -22,7 +22,7 @@ import { Sessions } from "./Sessions"
  *     handed to the tool as `EPIC_CHECKOUT` (the docs tools' `pages.js` and the window script read it as their root).
  *   - The exceptions:  the tools that SERVE their checkout, whose code is that checkout's:
  *     - `serve`, the checkout's own script (`code: "caller"`)
- *     - the page server, the `@spell-app/server` its install resolves (`package`)
+ *     - the page server, the `spell-kit/server` its install resolves (`package`)
  * - All `static`:  no state;  `codeRoot` is the one seam, a test's fake checkout of tools.
  ****************/
 export class EpicTools {
@@ -164,7 +164,7 @@ export class EpicTools {
    * - `notes`, `comments`:  page notes and comments on docs pages, in the caller's folder (`--file` is from there)
    * - `window`:  the VS Code windows (`src/window.mjs`);
    *   plain `node`, so it runs in a worktree before its `yarn install`
-   * - `server`:  the caller's checkout's page server (`@spell-app/server`'s `src/page/cli.ts`, spell-server's)
+   * - `server`:  the caller's checkout's page server (`spell-kit/server`'s `src/page/cli.ts`, spell-server's)
    * - `serve`:  every web server, `epic server start --all` (the caller's root `scripts/serve.mjs`, spell-app's)
    * - `pages <verb>`:  the docs pages' tools, `epic pages index` ...
    *   (`spell dev docs <verb>` in spell-app;  `runPages()`)
@@ -180,7 +180,7 @@ export class EpicTools {
     notes: { tool: "src/tools/notes.ts", tsx: "tsconfig.json" },
     comments: { tool: "src/tools/comments.ts", tsx: "tsconfig.json" },
     window: { tool: "src/window.mjs" },
-    server: { package: "@spell-app/server", tool: "src/page/cli.ts", tsx: "tsconfig.json" },
+    server: { package: "spell-kit/server", tool: "src/page/cli.ts", tsx: "tsconfig.json" },
     serve: { tool: "scripts/serve.mjs", code: "caller" },
     "pages update": { tool: "src/tools/update.js", cwd: "." },
     "pages index": { tool: "src/tools/index.js", cwd: "." },
@@ -195,7 +195,7 @@ export class EpicTools {
   /**
    * Whether the caller's checkout has a page server of its own (`TOOLS.server`), as `pages.js`' `ensurePageServer()`
    * finds one:  its `package.json` has `"pageServer"` settings (spell-app's), and its install resolves
-   * `@spell-app/server`.
+   * `spell-kit/server`.
    * - a repo `epic init` set up has none, nor has spell-epic:  `epic server` is the machine's epic server there
    *   (`epic hub`)
    */
@@ -265,7 +265,10 @@ const CHECKOUT_MARKER = ".git"
 /** Whether checkout `root`'s `package.json` has `"pageServer"` settings (a page server's routes, sets, bundles ...). */
 function hasPageServerSettings(root: string): boolean {
   try {
-    return (JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { pageServer?: unknown }).pageServer !== undefined
+    return (
+      (JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { pageServer?: unknown }).pageServer !==
+      undefined
+    )
   } catch {
     return false
   }

@@ -42,19 +42,14 @@ const UI_DIR = packageDir("@spell-app/ui") ?? join(DOCS, "@spell-app/ui (not ins
  * - The same list as the pack build's `PACK_MODULES` (`packages/cli/src/dev/packBuild.ts`):  keep them in step.
  *   Not imported from there:  `packBuild.ts` reaches `$/util`'s barrel, which this package's `tsc` can't check.
  */
-const PACK_MODULES = [
-  "solid-js",
-  "@solidjs/web",
-  "@spell-app/spell-element",
-  "@spell-app/ui/core",
-  "@spell-app/ui/forms"
-]
+const PACK_MODULES = ["solid-js", "@solidjs/web", "spell-kit/element", "@spell-app/ui/core", "@spell-app/ui/forms"]
 
 /** Imports bundled from `ui`'s source:  the doc-only families and what they import of `ui` beyond the core. */
 const UI_SOURCE = /^\$\/ui\/(docs-components|components\/components\.types)(\/|$)/
 
 /** Imports the page must share, never bundled:  Spell UI, Solid, our other packages (as `packBuild.ts`). */
-const SHARED_IMPORT = /^\$\/(ui|spell-element)(\/|$)|^solid-js(\/|$)|^@solidjs\/|^@spell-app\//
+const SHARED_IMPORT =
+  /^\$\/(ui|spell-element)(\/|$)|^solid-js(\/|$)|^@solidjs\/|^@spell-app\/|^spell-kit\/element(\/|$)/
 
 const { positional } = parseArgs(process.argv.slice(2))
 const entry = positional[0] ? resolve(positional[0]) : ""

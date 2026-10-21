@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs"
 import { isAbsolute, join, relative, resolve } from "node:path"
 
-import type { AS } from "@spell-app/assembler"
+import type { AS } from "spell-kit/assembler"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

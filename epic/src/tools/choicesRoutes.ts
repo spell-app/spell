@@ -32,8 +32,8 @@
 import { readFileSync } from "node:fs"
 
 import { DataFile } from "$/epics/data/DataFile"
-import { SRV } from "@spell-app/server"
-import type { RouteModule } from "@spell-app/server/page"
+import { SRV } from "spell-kit/server"
+import type { RouteModule } from "spell-kit/server/page"
 
 import { answerFile, draftFile, isDetailsPage, saveData, servedPage } from "./detailsRoutes"
 

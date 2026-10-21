@@ -1,7 +1,7 @@
 {
-  // The TypeScript settings every package shares are the toolchain's (`@spell-app/toolchain`, spell-util's, a workspace
+  // The TypeScript settings every package shares are the toolchain's (`spell-kit/toolchain`, spell-util's, a workspace
   // of the top `spell` install);  the alias table is this repo's own (`./tsconfig.base.json`).  What's ours below.
-  "extends": ["@spell-app/toolchain/tsconfig.base.json", "./tsconfig.base.json"],
+  "extends": ["spell-kit/toolchain/tsconfig.base.json", "./tsconfig.base.json"],
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
@@ -9,9 +9,9 @@
     "allowJs": true,
     "jsx": "preserve",
     "jsxImportSource": "@solidjs/web",
-    // `@spell-app/toolchain/types`:  the ambient helper types (`Prettify` ...), used bare (WWOD §9);  with Vite's client
+    // `spell-kit/toolchain/types`:  the ambient helper types (`Prettify` ...), used bare (WWOD §9);  with Vite's client
     // types
-    "types": ["vite/client", "node", "@spell-app/toolchain/types"]
+    "types": ["vite/client", "node", "spell-kit/toolchain/types"]
   },
   "include": ["src", "scripts", "vite.config.ts", "vitest.config.ts"],
   // - `src/components/__pack/` is generated (`spell-ui-pack build`, `yarn pack:build`):  not ours to check

@@ -37,8 +37,8 @@
  */
 import { DataFile } from "$/epics/data/DataFile"
 import { AskListeners } from "./AskListeners"
-import { SRV } from "@spell-app/server"
-import type { RouteModule } from "@spell-app/server/page"
+import { SRV } from "spell-kit/server"
+import type { RouteModule } from "spell-kit/server/page"
 
 /** Where the routes live. */
 const API = "/api/docs/details"

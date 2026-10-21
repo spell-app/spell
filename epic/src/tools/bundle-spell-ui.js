@@ -96,8 +96,8 @@ const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const UI_DIR = realPath(
   resolve(process.env.SPELL_UI_DIR ?? packageDir("@spell-app/ui") ?? "@spell-app/ui (not installed)")
 )
-/** spell-element, the `@spell-app/spell-element` package, by its real path:  its source must never be bundled. */
-const ELEMENT_DIR = packageDir("@spell-app/spell-element")
+/** spell-element, the `spell-kit/element` package, by its real path:  its source must never be bundled. */
+const ELEMENT_DIR = packageDir("spell-kit/element")
 /**
  * The brand, the `@spell-app/brand` package (spell-brand), where Node's resolver finds it:  its elements join the
  * design bundle (P11).  Only the design target reads it (`brandDir()`).

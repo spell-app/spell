@@ -5,7 +5,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { AS } from "@spell-app/assembler"
+import { AS } from "spell-kit/assembler"
 
 import { NotesError, PageNotes, htmlOf } from "../../src/tools/PageNotes.js"
 

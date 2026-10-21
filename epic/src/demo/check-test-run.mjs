@@ -65,7 +65,7 @@ const TSCONFIG = join(ROOT, "tsconfig.json")
 if (!process.env.CHECK_TEST_RUN_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", "--import", import.meta.resolve("@spell-app/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", "--import", import.meta.resolve("spell-kit/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,

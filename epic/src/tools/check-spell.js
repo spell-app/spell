@@ -50,7 +50,7 @@ import { chromium } from "playwright"
 
 // By its package entry (epic `repo-split` P6), its types stripped by `node` itself:  this tool runs under plain `node`,
 // so no `$/` alias
-import { componentSets, pageServerSettings } from "@spell-app/server/page/settings"
+import { componentSets, pageServerSettings } from "spell-kit/server/page/settings"
 import { engineFileFor } from "../server/engineLinks.ts"
 import { CONTENT, PACKAGE, ROOT, ensurePageServer, pageFile, pagePath, serverUrl } from "./pages.js"
 

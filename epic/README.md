@@ -33,8 +33,9 @@ ONE package, `@spell-app/epics`, laid out as a plain JS repo (epic `epic-eject` 
 
 Not run yet:  these are the steps (Owen, 2026-10-17:  the install waits for him).
 
-1. `yarn install` at the top `spell` repo, above this one:  ONE install over every child repo, spell-epic a workspace
-   of it (see "The other repos' packages", below).  Never in here alone.
+1. `yarn install` in the kit `spell-kit` (`~/www/spell`), above this one:
+   ONE install over every child repo, spell-epic a workspace of it (see "The other repos' packages", below).
+   Never in here alone.
 2. Add this folder as a marketplace, for the whole machine, and install the plugin from it:
 
    ```sh
@@ -374,23 +375,23 @@ epic hub url ~/www/spell-app/spell-app-dev/epics/seo/seo.plan.html
 ## The other repos' packages
 
 The epic pages are drawn with Spell UI, and the tools run on spell's page server and page assembler.
-spell-epic is a child repo of the top `spell` repo, and a WORKSPACE of its one install (epic `epic-engine` P10), not
+spell-epic is a child repo of the kit `spell-kit`, and a WORKSPACE of its one install (epic `epic-engine` P10), not
 an npm user:
-- Its `@spell-app/{ui,server,assembler,util,spell-element}` dependencies, and the dev dependency
-  `@spell-app/toolchain`, are `workspace:*` (in [the root `package.json`](package.json)):  spell-ui, spell-server,
-  spell-element and spell-util, beside it in the top repo (its `repos.json5` lists them, and what spell-epic needs).
-  - No resolutions or Solid pins here:  the top `package.json` holds them;  the tool versions' catalog is in
+- Its dependencies `@spell-app/ui` and `spell-kit` (the kit's server, assembler, util, element and toolchain) are
+  `workspace:*` (in [the root `package.json`](package.json)):  spell-ui and the kit around it (the kit's `repos.json5`
+  lists the repos, and what spell-epic needs).
+  - No resolutions or Solid pins here:  the kit's `package.json` holds them;  the tool versions' catalog is in
     `.yarnrc.yml`, the same as every child repo's.
-  - `@spell-app/toolchain` (spell-util's) is what every package's configs share:
-    - the lint and format settings, `@spell-app/toolchain/lint` (`vite.config.ts`)
-    - the TypeScript settings, `@spell-app/toolchain/tsconfig.base.json`, which `tsconfig.json` extends beside the
+  - `spell-kit/toolchain` (the kit's `toolchain/`) is what every package's configs share:
+    - the lint and format settings, `spell-kit/toolchain/lint` (`vite.config.ts`)
+    - the TypeScript settings, `spell-kit/toolchain/tsconfig.base.json`, which `tsconfig.json` extends beside the
       alias table
-    - the ambient helper types (`Prettify` ...), `@spell-app/toolchain/types`, in `tsconfig.json`'s `"types"`
+    - the ambient helper types (`Prettify` ...), `spell-kit/toolchain/types`, in `tsconfig.json`'s `"types"`
     - `spell-types`, which builds the lower repos' declarations (`yarn ts` runs `spell-types --below` first), and
-      `@spell-app/toolchain/aliases`, the run-time hook that runs their source with their own `$/` names (`bin/epic`,
+      `spell-kit/toolchain/aliases`, the run-time hook that runs their source with their own `$/` names (`bin/epic`,
       the `tsx` scripts)
   - A file of theirs is imported by its npm name, an entry its `package.json` `exports` names
-    (`@spell-app/ui/core`, `@spell-app/server/checkout`, `@spell-app/assembler/DataFile`), never by its path
+    (`@spell-app/ui/core`, `spell-kit/server/checkout`, `spell-kit/assembler/DataFile`), never by its path
     (WWOD §4 › "Package names across repos").
     - `tsc` reads the entry's `types`, its BUILT declarations (`dist-types/`, git-ignored there);  Vite, Vitest, `tsx`
       and node its `default`, the source.

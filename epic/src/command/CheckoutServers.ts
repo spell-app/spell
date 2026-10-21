@@ -6,8 +6,8 @@ import { join, resolve, sep } from "node:path"
 // (types stripped), and find the server package in `node_modules` (spell-app's, linked in:  `portal:`), as
 // `EpicConfig` does.  Its finder of the web
 // servers on this machine, by process:  what `spell dev server prune` / `epic server prune` run.
-import { orphanServers, serverProcesses } from "@spell-app/server/page/prune"
-import type { OrphanServer, ServerProcess } from "@spell-app/server/page/prune"
+import { orphanServers, serverProcesses } from "spell-kit/server/page/prune"
+import type { OrphanServer, ServerProcess } from "spell-kit/server/page/prune"
 
 import { HOME_ENV, HOME_FOLDER } from "../server/server.types.ts"
 
@@ -33,7 +33,7 @@ import { HOME_ENV, HOME_FOLDER } from "../server/server.types.ts"
  * - NEVER a live checkout's servers:  a server is stopped only when its checkout and its working folder are both
  *   gone, or both in the checkout being removed (`prune.ts`' rule, `orphanServers()`)
  * - `SIGTERM`, then up to `WAIT_MS` for them to exit, so the folder's removal doesn't race their last writes
- * - Its position:  node's own modules, `prune.ts` by the server package's entry (`@spell-app/server/page/prune`)
+ * - Its position:  node's own modules, `prune.ts` by the server package's entry (`spell-kit/server/page/prune`)
  *   and the server's constants by path, so plain `node` loads it.
  *   NEVER an alias, an `enum` or a parameter property.
  * - All `static`:  the only state is the machine's processes and the stamp file.

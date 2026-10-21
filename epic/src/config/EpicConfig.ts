@@ -4,7 +4,7 @@ import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 // By the server's package entry (its `exports`, epic `repo-split` P6):  plain `node` loads this file (the hooks,
 // `src/window.mjs`), and finds the server package in `node_modules` (spell-app's, linked in:  `portal:`).  The
 // server's checkout finder:  the main checkout from any worktree, with no `git` run
-import { checkoutOf } from "@spell-app/server/checkout"
+import { checkoutOf } from "spell-kit/server/checkout"
 
 import { RealPath } from "./RealPath.ts"
 

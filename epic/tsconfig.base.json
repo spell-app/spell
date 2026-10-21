@@ -2,14 +2,14 @@
   // spell-epic's import-alias table, as every child repo has its own (epic `repo-split` P8):  `$/epics` is this repo
   // itself, one package (epic `epic-eject` J14):  its `src/`, the elements included (`$/epics/components` is
   // `src/components/`).  The root `tsconfig.json` extends this, and so does the extension's (`vscode/tsconfig.json`).
-  // - A package of ANOTHER repo is imported by its npm name (`@spell-app/ui/core`, `@spell-app/server/page`), an entry
+  // - A package of ANOTHER repo is imported by its npm name (`@spell-app/ui/core`, `spell-kit/server/page`), an entry
   //   its `package.json` `exports` names (WWOD §4, "Package names across repos"):  a workspace of the top `spell`
   //   install (epic `epic-engine` P10).  `tsc` reads its BUILT declarations (the entry's `types`, `dist-types/`, which
   //   `yarn ts` builds first:  `spell-types --below`);  Vite, Vitest, `tsx` and node read its source.
   // - MUST stay the only `paths` in the repo:  a package that sets its own `paths` REPLACES this table, never adds to it.
   // - `tsc` and `tsx` read it through the root `tsconfig.json`;  vite / vitest through `resolve.tsconfigPaths`, which
   //   finds the tsconfig nearest the IMPORTING file;  other repos' source run here finds its own repo's table through
-  //   `@spell-app/toolchain/aliases` (`bin/epic`).
+  //   `spell-kit/toolchain/aliases` (`bin/epic`).
   // - Paths are fixed, never `${configDir}`:  `tsx` can't resolve it (4.20 throws, 4.23 ignores it).
   "compilerOptions": {
     "paths": {

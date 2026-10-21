@@ -3,4 +3,4 @@
 // keeps importing `$/epics/data/DataFile`, and plain `node` (the docs tools' `details.js` ...) `../data/DataFile.ts`.
 // - By the assembler's package entry (its `exports`, epic `repo-split` P6), through the `portal:` package:  plain
 //   `node` loads it, types stripped
-export { DataFile, type DataFileMove } from "@spell-app/assembler/DataFile"
+export { DataFile, type DataFileMove } from "spell-kit/assembler/DataFile"

@@ -2,7 +2,7 @@
  * Types the epic page MIGRATIONS share (`Migrations`, each step, `MigrateCommands`).
  * - Data only:  nothing here runs.
  */
-import type { AS } from "@spell-app/assembler"
+import type { AS } from "spell-kit/assembler"
 import type { DataFileMove } from "$/epics/data/DataFile"
 
 /**

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 
-import { AS } from "@spell-app/assembler"
+import { AS } from "spell-kit/assembler"
 
 /****************
  * ### `PlanParts`

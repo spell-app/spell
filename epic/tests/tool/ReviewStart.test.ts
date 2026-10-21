@@ -13,7 +13,7 @@ import { afterAll, beforeAll, beforeEach, expect, test } from "vite-plus/test"
 
 import { EpicConfig } from "$/epics/config/EpicConfig"
 import { ReviewStart } from "$/epics/tool/ReviewStart"
-import { fakeMainCheckout, fakeWorktree } from "@spell-app/server/test/checkouts"
+import { fakeMainCheckout, fakeWorktree } from "spell-kit/server/test/checkouts"
 
 let home: string
 let root: string
