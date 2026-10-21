@@ -111,6 +111,29 @@ test("new:  fileColumn false is kept beside the rows, so the page drops its File
   expect(() => checkData({ ...DATA, fileColumn: "no" })).toThrow(/fileColumn is true or false/)
 })
 
+test("new:  blank true and its noun kept beside the rows;  rows need no recommended;  the answer prints current => typed", () => {
+  const rows = DATA.rows.map(({ recommended: _, ...row }) => row)
+  const file = createPage(docs, "blank", {
+    epic: "big",
+    data: { ...DATA, fileColumn: false, blank: true, noun: "commands", rows }
+  })
+  expect(readRows(file)).toMatchObject({ fileColumn: false, blank: true, noun: "commands" })
+  expect(readRows(file).rows.every((row) => row.recommended === "")).toBe(true)
+  expect(readFileSync(file, "utf8")).toContain('<epic-choice-rows no-file blank noun="commands">')
+  const text = formatAnswer(file, {
+    page: "/epics/big/details/blank.html",
+    answered: "2026-10-21T16:00:00.000Z",
+    values: { "q1-A-7": "this.isOpen" }
+  })
+  expect(text).toContain("      packages/ui/src/A.tsx:7  this.open  =>  this.isOpen")
+  expect(text).toContain("  Unchanged (left as they are):  2")
+  // without blank:  no noun kept, and a missing recommended still refused
+  expect("noun" in readRows(createPage(docs, "not-blank", { epic: "big", data: { ...DATA, noun: "x" } }))).toBe(false)
+  expect(() => checkData({ ...DATA, rows })).toThrow(/a row needs recommended/)
+  expect(() => checkData({ ...DATA, blank: "yes" })).toThrow(/blank is true or false/)
+  expect(() => checkData({ ...DATA, blank: true, noun: " " })).toThrow(/noun is a word/)
+})
+
 test("new:  stacked true is kept beside the rows (one Syntax column);  two columns by default", () => {
   const file = createPage(docs, "stacked", { epic: "big", data: { ...DATA, fileColumn: false, stacked: true } })
   expect(readRows(file)).toMatchObject({ fileColumn: false, stacked: true })

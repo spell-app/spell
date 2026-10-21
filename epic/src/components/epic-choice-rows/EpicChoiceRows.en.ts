@@ -21,7 +21,8 @@ export const epicChoiceRowsVocabulary = {
     "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | " +
     "Current | Recommended, then its rows, each an `<epic-choice-row>` whose Recommended box Owen types over.  " +
     "It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, " +
-    "Owen puts the rows in order too (epic `epic-workflow` P15).  Under 720px it scrolls inside its own box.",
+    "Owen puts the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and Owen types " +
+    "only what he'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
   attributes: [
     {
       name: "stacked",
@@ -33,6 +34,19 @@ export const epicChoiceRowsVocabulary = {
       kind: "boolean",
       description:
         "No File column (`fileColumn: false`):  for rows whose place in the code doesn't matter to the reader."
+    },
+    {
+      name: "blank",
+      kind: "boolean",
+      description:
+        "Boxes Owen types into, not recommendations (`blank: true`;  epic `epic-engine` P13, r12):  one first column, " +
+        "today's text with an EMPTY box under it, then Purpose.  Blank means no change;  a click on today's text " +
+        "copies it into the box.  The count says how many rows and how many he changed."
+    },
+    {
+      name: "noun",
+      kind: "string",
+      description: 'What `blank`\'s count calls its rows:  `commands` reads "42 commands · 3 changed".  Default `rows`.'
     },
     {
       name: "reorder",
@@ -57,6 +71,13 @@ export const epicChoiceRowsVocabulary = {
     { key: "recommended", text: "Recommended", description: "The Recommended column's head." },
     { key: "syntax", text: "Syntax:  today, then yours", description: "The one column of `stacked`." },
     { key: "order", text: "Order", description: "The Order column's head, with `reorder`." },
+    { key: "blankHead", text: "Current, and yours under it", description: "The box's column with `blank`." },
+    { key: "rowsNoun", text: "rows", description: "What `blank`'s count calls its rows without a `noun`." },
+    {
+      key: "countBlank",
+      text: "{rows} {noun} · {changed} changed",
+      description: "Its section's badge with `blank`:  how many rows, and how many Owen changed."
+    },
     {
       key: "count",
       text: "{renames} to change · {stay} stay",

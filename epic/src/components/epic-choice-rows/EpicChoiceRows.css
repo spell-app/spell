@@ -6,6 +6,7 @@
  *   - Fixed shares (19 / 22 / 27 / the rest):  long code wraps in its cell instead of pushing Recommended off to the
  *     right.  Under 720px the grid keeps that width and scrolls inside its own box.
  *   - `no-file`:  Purpose, a sentence, takes File's room;  `stacked`:  one Syntax column for Current and the box.
+ *   - `blank`:  that one column FIRST (today's text, the box under it), then Purpose.
  *   - `reorder`:  an Order column first, as narrow as its place and two buttons, before the shares (`--_epic-choice-cols`).
  * - A row whose box Owen changed:  an orange box, an orange edge on the row.
  * - Public tokens (`--epic-choice-rows-*`) are never declared here:  read through private aliases.
@@ -44,6 +45,12 @@
     --_epic-choice-cols: 19fr 30fr 51fr;
   }
   .table.stacked.no-file {
+    --_epic-choice-cols: 45fr 55fr;
+  }
+  .table.blank {
+    --_epic-choice-cols: 19fr 40fr 41fr;
+  }
+  .table.blank.no-file {
     --_epic-choice-cols: 45fr 55fr;
   }
   .table.reorder {
@@ -123,6 +130,23 @@
   .was {
     display: inline-block;
     margin-bottom: 4px;
+  }
+  /* blank:  today's text over the box, a button that copies it in;  dotted under the pointer */
+  .copy {
+    display: block;
+    margin: 0 0 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .copy:is(:hover, :focus-visible) code {
+    text-decoration: underline dotted;
+  }
+  .copy code {
+    pointer-events: none;
   }
 
   /* Order:  the place, then move up and move down, small and grey until pointed at */
