@@ -597,6 +597,11 @@ export type SpellDeclaration = {
   /** `property`'s datatype, e.g. `text`. */
   datatype?: string
   /**
+   * How `property` is read, when not as a property, e.g. `Suit.color({it})` for a value kind's `the color of a suit`.
+   * - See `P.ScopeVariable.readAs`.
+   */
+  readAs?: string
+  /**
    * `property` was declared by its first `set`, as its type never declared it.
    * - See `P.ScopeVariable.autoDeclared`.
    */

@@ -279,14 +279,13 @@ A reader of only a derived value hears of a change on a microtask, and only the 
 `the first card of the deck` is the first card, and `card 2 of the deck` the second, as a person counts.
 JavaScript and Python count from 0, and so does the runtime.
 The compiler bridges the two;  here's Klondike's deal, from the
-[drawable-solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/drawable-solitaire/Solitaire.spell) test project:
+[solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/solitaire/Solitaire.spell) test project:
 
 ```spell
-// deal cards into tableaus
 for row from 1 to 7
-	turn the bottom card of the stock face up
+	turn the last card of its stock face up
 	for column from row to 7
-		add the bottom card of the stock to item column of the tableaus
+		add the last card of its stock to item column of the tableaus
 		pause for 50 msec
 ```
 
@@ -297,9 +296,9 @@ for row from 1 to 7
 
 ```js
 for (const row of core.getRange(1, 7)) {
-  stock.lastItem?.turnFaceUp()
+  this.stock.lastItem?.turnFaceUp()
   for (const column of core.getRange(row, 7)) {
-    tableaus.getItem(position(column))?.append(stock.lastItem)
+    core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
     await core.pauseFor(50, "msec")
   }
 }
@@ -310,9 +309,9 @@ for (const row of core.getRange(1, 7)) {
 
 ```py
 for row in range(1, 8):
-    await stock.last_item.turn_face_up()
+    await self.stock.last_item.turn_face_up()
     for column in core.get_range(row, 7):
-        tableaus[position(column)].append(stock.last_item)
+        core.get_item_at(core.every_thing(Tableau), position(column)).append(self.stock.last_item)
         await core.pause_for(50, "msec")
 ```
 
@@ -322,7 +321,7 @@ for row in range(1, 8):
 
 `column` is known only as the loop runs, so it goes through `position()`, which turns Spell's 2 into the language's 1.
 A position written out is turned as it compiles:
-the board's `draw item 2 of the tableaus` is simply `tableaus.getItem(1)`, and `tableaus[1]` in Python;
+`item 2 of the tableaus` is simply `core.getItemAt(tableaus, 1)`, in Python too;
 `the first` is simply `0`.
 
 | Spell | JavaScript | Python |
@@ -346,7 +345,7 @@ The core itself counts from 0, and has no idea where a project counts from.
 That's on purpose:  counting is the language's business, and the output stays each platform's own.
 So a project can count from 0 instead, with `"listsStartAt": 0` in its project file, and only the compiled numbers
 change:  `card 0 of the deck` is the ace of clubs, and so, still, is `the first card of the deck`
-(the [cards-from-zero](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/cards-from-zero/) test project).
+(the [lists-from-zero](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/lists-from-zero/) test project).
 
 The edge:  only Spell's own lines count from 1.
 JavaScript you write by hand that calls a compiled class gets the platform's indexes:

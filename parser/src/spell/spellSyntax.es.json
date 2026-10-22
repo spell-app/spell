@@ -5862,7 +5862,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodDefinition.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "Base for method-DEFINITION rules built on `method_signature`: `to_do_something`, `create_animation` and `quoted_type_expression`.",
           "syntaxes": [],
           "aliases": []
@@ -6094,7 +6094,7 @@
           "ruleNames": ["quoted_method_signature"],
           "internal": false,
           "file": "src/spell/rules/methods/QuotedMethodSignature.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "Method signature surrounded by quotes.",
           "syntaxes": [],
           "aliases": []

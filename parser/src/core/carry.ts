@@ -17,7 +17,7 @@
  *   - Either way the program starts afresh too.
  * - Part of `core`:  imported by `spell-lang/core`'s barrel for its side effect.
  */
-import { getProps, schemaOf, setProp, type PropInfo } from "spell-kit/util"
+import { getProps, schemaOf, setProp, withoutCreate, type PropInfo } from "spell-kit/util"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -172,7 +172,8 @@ class CarryOver {
         ([key, prop]) => (prop === null || typeof prop !== "object") && keeps(value.constructor, Class, key)
       )
     )
-    const made = new Class(plain)
+    // a copy, not a new one:  its `create()` ran in the last run -- a deck's would deal 52 cards more
+    const made = withoutCreate(() => new Class(plain))
     this.carried.set(value, made)
     this.fill(value, made, "new")
     return made

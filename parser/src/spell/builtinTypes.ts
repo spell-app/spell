@@ -662,7 +662,7 @@ export function parseReadAsTemplate(template: string): SP.ReadAsTemplate | undef
  * - The last is a VALUE kind's property, e.g. `Suit.color({it})` -- never in the table:  see `value_kind`.
  */
 const READ_AS_TEMPLATE =
-  /^(?:\{it\}\.(\w+)|\{it\}\.(\w+)\(\)|core\.(\w+)\(\{it\}\)|(?!core\.)([A-Z]\w*)\.(\w+)\(\{it\}\))$/
+  /^(?:\{it\}\.(\w+)|\{it\}\.(\w+)\(\)|core\.(\w+)\(\{it\}\)|(?!core\.)(\p{Lu}[\p{L}\p{N}_$]*)\.([\p{L}\p{N}_$]+)\(\{it\}\))$/u
 
 ////////////////
 // ## Lookups

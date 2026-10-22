@@ -58,12 +58,17 @@ def run_program(path: str | Path, seed: int | None = None, pauses: bool = True) 
 
     - Unseeded, a different game each run, as JavaScript's core does.
     - Its folder is first on the import path:  a project it imports sits beside it.
+    - Each run imports those projects afresh:  a program may add to an imported class (`Card.play`, Solitaire's
+      `to play a card`), reading its own top level, so two runs in one process -- two visitors' games --
+      mustn't share one (epic `spanish` P11).
     """
     core.pauses = pauses
     core.seed_random(seed if seed is not None else random.SystemRandom().randint(1, 2147483646))
     program = Path(path).resolve()
     if str(program.parent) not in sys.path:
         sys.path.insert(0, str(program.parent))
+    for beside in program.parent.glob("*.py"):
+        sys.modules.pop(beside.stem, None)
     return runpy.run_path(str(program), run_name="__main__")
 
 

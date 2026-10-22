@@ -26,7 +26,7 @@
  * - The twin of Python's `spell_core.state`:  both write the same JSON for the same things.
  *   `stateById.expected.json5`, with the core's tests (`tests/core/`), holds one, read by both.
  */
-import { getProp, ITEMS_KEY, keysOf, setProp, TYPE_KEY } from "spell-kit/util"
+import { getProp, ITEMS_KEY, keysOf, setProp, TYPE_KEY, withoutCreate } from "spell-kit/util"
 
 import { programThings } from "./core"
 // Import directly to avoid circular import
@@ -117,7 +117,8 @@ export class StateMirror {
    * `state` read back:  each thing with an id we hold changed in place, each new one made and kept.
    * - A thing we hold:  its props set to the state's, and any it no longer has unset;
    *   a list's items set to the state's.
-   * - A new one:  made as `core.fromJSON()` makes one, through its setters, then its `create()`.
+   * - A new one:  made as `core.fromJSON()` makes one, through its setters, then its `create()` --
+   *   not with an id, a copy of a thing the program made:  its `create()` ran there (`withoutCreate()`).
    * - `{ "$id": ... }` alone:  the thing with that id.
    * - JSON with no ids (`toJSON()`'s) reads as `core.fromJSON()` reads it:  a new thing each time.
    */
@@ -131,7 +132,9 @@ export class StateMirror {
     const Class = typeof type === "string" ? programThings()?.classNamed(type) : undefined
     if (!Class) return Object.fromEntries(Object.entries(state).map(([key, value]) => [key, this.read(value)]))
     const { [TYPE_KEY]: _type, [ID_KEY]: _id, [ITEMS_KEY]: items, ...named } = state
-    const fields = Object.fromEntries(Object.entries(named).map(([key, value]) => [this.nameOf(key), value]))
+    const fields = Object.fromEntries(
+      Object.entries(named).map(([key, value]) => [setterNamed(Class.prototype, this.nameOf(key)), value])
+    )
     const known = typeof id === "string" ? this.byId.get(id) : undefined
     let made = known instanceof Class ? known : undefined
     let rest = fields
@@ -143,7 +146,10 @@ export class StateMirror {
         if (hasSetter(Class.prototype, key)) settable[key] = this.read(value)
         else rest[key] = value
       }
-      made = new Class(settable) as SpellObject
+      // a program's thing, by its id, is a copy of one it made:  its `create()` mustn't run again --
+      // an app's `create()` that deals the deck into its stock would take the cards out of the piles they're in
+      const make = () => new Class(settable) as SpellObject
+      made = typeof id === "string" ? withoutCreate(make) : make()
     }
     // kept BEFORE its fields are read:  a field may mention it, `{ "$id": ... }`
     if (typeof id === "string") {
@@ -202,6 +208,21 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 }
 
 /** Does `proto`, or one up its chain, have a setter for `key`?  The nearest accessor decides. */
+/**
+ * The name `proto` has a setter by for `key`, if `key` lost its case on the way:  Python's `t1` is our `T1`.
+ * - `key` itself if it has one by that name, or none by any:  a name in another case is only a guess's fallback.
+ */
+function setterNamed(proto: object, key: string): string {
+  if (hasSetter(proto, key)) return key
+  const lower = key.toLowerCase()
+  for (let at: object | null = proto; at; at = Object.getPrototypeOf(at) as object | null) {
+    for (const [name, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(at))) {
+      if (descriptor.set && name.toLowerCase() === lower) return name
+    }
+  }
+  return key
+}
+
 export function hasSetter(proto: object | null, key: string): boolean {
   for (; proto; proto = Object.getPrototypeOf(proto) as object | null) {
     const descriptor = Object.getOwnPropertyDescriptor(proto, key)

@@ -29,6 +29,22 @@ describe("incremental parsing ~== full parse", () => {
     }
   })
 
+  test("an edit above an outline's type body, compiled, then undone:  its members say where they are now (P11)", () => {
+    const contents = [
+      "## A deck",
+      "a card is a thing",
+      'a "deck" is a list of cards where:',
+      '\t- its "jokers" is yes or no'
+    ].join("\n")
+    const files: SpellSourceFile[] = [{ path: "/Deck.spell", contents }]
+    const project = incrementalSpellProject(files)
+    project.update("/Deck.spell", contents.replace("## A deck", "## A deck, edited"))
+    // compiled now:  the body's AST is memoized, its `SPELL: DECLARES` comments with it
+    expect(summarizeIncremental(project)[0]!.compiled).toContain("/Deck.spell:74-")
+    project.update("/Deck.spell", contents)
+    expect(summarizeIncremental(project)).toEqual(summarize(parseSpellProject(files)))
+  })
+
   test("a type declared further down counts -- and an edit adding or removing one re-parses what's above it", () => {
     const typeFiles: SpellSourceFile[] = [
       { path: "/A.spell", contents: "set x to 1\nprint x is a widget" },

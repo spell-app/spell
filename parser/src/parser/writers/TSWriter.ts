@@ -686,7 +686,8 @@ export class TSWriter extends JSWriter {
     const initializer = node.initializer && unwrapped(node.initializer)
     // made when first read, `as a new task-list`:  the class it makes, e.g. `TaskList`
     if (initializer instanceof P.ASTNewInstanceExpression && initializer.type.name !== "List") {
-      return initializer.type.name
+      // by the writer's naming, as the class itself is
+      return this.typeNameOf(initializer.type.name)
     }
     // `as a new list of tasks`:  `List<Task>`
     const itemType = initializer instanceof P.ASTNewInstanceExpression && this.newListItemType(initializer)

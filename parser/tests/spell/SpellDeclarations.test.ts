@@ -133,6 +133,45 @@ describe("SpellDeclarations of a derived property", () => {
   })
 })
 
+/**
+ * A value kind, `- "suits" as one of clubs ...`, and its property, `the "color" of a suit is:`, in another project
+ * (epic `spanish` P11):  the importer's `the color of its suit` calls `Suit.color()`, as the card's own does.
+ */
+describe("SpellDeclarations of a value kind", () => {
+  const library = [
+    {
+      path: "/Card.spell",
+      contents: [
+        'a "card" is a thing where:',
+        '\t- "suits" as one of clubs, diamonds, hearts or spades',
+        '\t- the "color" of a suit is:',
+        "\t\tred if it is diamonds or hearts",
+        "\t\tblack otherwise",
+        '\t- its "suit" is a suit'
+      ].join("\n")
+    }
+  ]
+  const declarations = compiledSpellProject(library).declarations
+
+  test("its property says how it's read, `Suit.color({it})`", () => {
+    const color = declarations.statements.find((it) => it.property === "color" && it.of === "Suit")
+    expect(color?.readAs).toBe("Suit.color({it})")
+  })
+
+  test("loads them again:  the kind keeps its values and list, its property its reading", () => {
+    const imports = SP.SpellDeclarations.importScope(SP.SpellParser.rootScope, [
+      { from: "@spell/library/c", declarations }
+    ])
+    const suit = imports.types.get("Suit", "LOCAL_ONLY")
+    expect(suit?.valueKind).toEqual({
+      values: ["clubs", "diamonds", "hearts", "spades"],
+      listOn: "Card",
+      listName: "Suits"
+    })
+    expect(suit?.variables.get("color", "LOCAL_ONLY")?.readAs).toBe("Suit.color({it})")
+  })
+})
+
 /** A type's short name, `a bank account aka account` (epic `drawable-thing`, P1), in another project. */
 describe("SpellDeclarations, a type's short name", () => {
   test("goes into its declarations, and finds the type in a project that imports it", () => {

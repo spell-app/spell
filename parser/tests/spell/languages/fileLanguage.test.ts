@@ -159,4 +159,15 @@ describe("a project mixing languages", () => {
     expect(SP.SpellDeclarations.speakingFirst(["en"], [])).toEqual(["en"])
     expect(SP.SpellDeclarations.speakingFirst([], [])).toEqual(["en"])
   })
+
+  test("a type used above its declaration still compiles Spanish's `nombre` to `name` (epic `spanish` P11)", () => {
+    const contents = [
+      "juego es una aplicación donde:",
+      '\t- su "reserva" es una nueva pila con nombre = "reserva"',
+      "una carta es una cosa",
+      "una pila es una lista de cartas"
+    ].join("\n")
+    const { code } = compiledSpellProject([{ path: "/Juego.es.spell", contents }])
+    expect(code).toContain('new Pila({ name: "reserva" })')
+  })
 })
