@@ -1,21 +1,23 @@
-import { instanceCase, proto } from "spell-kit/util"
+import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { getKnownType } from "spell-lang/spell/rules/types"
+import { Wording } from "spell-lang/spell/rules/expressions"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { type MethodBody } from "./classes.shared"
 
-/** What a list takes:  `can take a card if: ...`, after its subject. */
-const CAN_TAKE = "can (verb:add|take) (a|an) {item:type} if :? {expression_body}?"
-/** What a list gives up:  `can give up a card if: ...`, after its subject. */
-const CAN_GIVE_UP = "can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?"
-/** What a list never gives up:  `can never let go of a card`, after its subject. */
-const CAN_NEVER_GIVE_UP = "can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}"
-/** What a list never takes:  `can never take a card`, after its subject (epic page `outline-spell`, P26). */
-const CAN_NEVER_TAKE = "can (never:never) (verb:add|take) (a|an) {item:type}"
+/**
+ * What a list takes or gives up, after its subject:  `can take a card if: ...`, `can give up a card if: ...`.
+ * - `take_or_give_up` says which:  see `ListGuard.methodName()`.
+ */
+export const CAN_MOVE = "can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?"
+/**
+ * What a list never takes or gives up, after its subject:  `can never take a card`, `can never let go of a card`
+ * (epic page `outline-spell`, P26).
+ */
+export const CAN_NEVER_MOVE = "can (never:never) {verb:take_or_give_up} (a|an) {item:type}"
 
 /**
  * `list_guard` rule:  what a list type takes, or gives up, when something MOVES (epic page Q23 - Q25):
@@ -36,12 +38,18 @@ export class ListGuard extends SpellStatement<"type|verb|item|body?|never?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 
-  /** The method we define, e.g. `can take a card` of `tableau` -- for editors' symbol lists. */
+  /**
+   * The method we define, e.g. `can take a card` of `tableau` -- for editors' symbol lists.
+   * - Named by the line's own words, from after its subject to the item:  whatever the language.
+   */
   getDeclaration(match: P.MatchFor<this>): P.Declaration {
-    const { type, never, verb, item } = match.groups
+    const { type, verb, item } = match.groups
+    const text = match.inputText
+    // a subject left out (`- can take a card if: ...`) takes no words
+    const from = type.length ? type.next! - match.start! : 0
     return {
       kind: "method",
-      name: `can ${never ? "never " : ""}${verb.raw} a ${item.raw}`,
+      name: text.slice(from, item.end! - match.start!).trim(),
       nameMatch: verb,
       of: `${type.value}`,
       detail: `${ListGuard.methodName(match)}()`
@@ -57,7 +65,7 @@ export class ListGuard extends SpellStatement<"type|verb|item|body?|never?"> {
       thisVar: listType.instanceName,
       mapItTo: "this",
       itDatatype: SP.typeName(listType.name),
-      args: [new P.ScopeVariable({ name: instanceCase(itemType), datatype: itemType })],
+      args: [new P.ScopeVariable({ name: P.instanceCase(itemType), datatype: itemType })],
       declaredBy: match
     })
   }
@@ -66,7 +74,7 @@ export class ListGuard extends SpellStatement<"type|verb|item|body?|never?"> {
     const { type, never, item } = match.groups
     const itemType = SP.typeName(`${item.value}`)
     // its type, e.g. `Card` for `a card`:  a typed target writes it
-    const arg = new P.ASTVariableExpression(match, { name: instanceCase(itemType), datatype: itemType })
+    const arg = new P.ASTVariableExpression(match, { name: P.instanceCase(itemType), datatype: itemType })
     const body = never
       ? new P.ASTReturnStatement(match, { value: new P.ASTBooleanLiteral(match, false) })
       : P.matchAST<MethodBody>(this.getBody(match))
@@ -77,139 +85,8 @@ export class ListGuard extends SpellStatement<"type|verb|item|body?|never?"> {
     })
   }
 
-  /** `canTake` for `add` / `take`, else `canGiveUp` -- the `List` method we override. */
+  /** `canTake` for a verb meaning `take`, e.g. `add`;  else `canGiveUp` -- the `List` method we override. */
   static methodName(match: P.MatchFor<ListGuard>): "canTake" | "canGiveUp" {
-    return ["add", "take"].includes(`${match.groups.verb.value}`) ? "canTake" : "canGiveUp"
-  }
-}
-classes.addRule(ListGuard, {
-  syntax: `(a|an) {type:known_type} ${CAN_TAKE}`,
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse(["a card is a thing", "a pile is a list of cards"].join("\n"), "block")
-      },
-      tests: [
-        [
-          "a pile can take a card if: it is empty",
-          ["Pile.prototype.canTake = function (card) {", "  return this.isEmpty", "}"],
-          [
-            "export interface Pile { canTake(card: Card): boolean }",
-            "Pile.prototype.canTake = function (this: Pile, card: Card) {",
-            "  return this.isEmpty",
-            "}"
-          ]
-        ],
-        {
-          title: "an indented body, `the pile` and `the card`",
-          input: [
-            "a pile can add a card if:",
-            "\tif the pile is empty return yes",
-            "\treturn the card is not the last card of the pile"
-          ],
-          js: [
-            "Pile.prototype.canTake = function (card) {",
-            "  if (this.isEmpty) return true",
-            "  return card !== this.lastItem",
-            "}"
-          ],
-          ts: [
-            "export interface Pile { canTake(card: Card): boolean }",
-            "Pile.prototype.canTake = function (this: Pile, card: Card) {",
-            "  if (this.isEmpty) return true",
-            "  return card !== this.lastItem",
-            "}"
-          ]
-        }
-      ]
-    }
-  ]
-})
-classes.addRule(ListGuard, {
-  syntax: `(a|an) {type:known_type} ${CAN_GIVE_UP}`,
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse(["a card is a thing", "a pile is a list of cards"].join("\n"), "block")
-      },
-      tests: [
-        [
-          "a pile can give up a card if: the card is its last card",
-          ["Pile.prototype.canGiveUp = function (card) {", "  return card === this.lastItem", "}"],
-          [
-            "export interface Pile { canGiveUp(card: Card): boolean }",
-            "Pile.prototype.canGiveUp = function (this: Pile, card: Card) {",
-            "  return card === this.lastItem",
-            "}"
-          ]
-        ],
-        [
-          "a pile can let go of a card if: yes",
-          ["Pile.prototype.canGiveUp = function (card) {", "  return true", "}"],
-          [
-            "export interface Pile { canGiveUp(card: Card): boolean }",
-            "Pile.prototype.canGiveUp = function (this: Pile, card: Card) {",
-            "  return true",
-            "}"
-          ]
-        ]
-      ]
-    }
-  ]
-})
-classes.addRule(ListGuard, {
-  syntax: `(a|an) {type:known_type} ${CAN_NEVER_GIVE_UP}`,
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse(["a card is a thing", "a pile is a list of cards"].join("\n"), "block")
-      },
-      tests: [
-        [
-          "a pile can never let go of a card",
-          ["Pile.prototype.canGiveUp = function (card) {", "  return false", "}"],
-          [
-            "export interface Pile { canGiveUp(card: Card): boolean }",
-            "Pile.prototype.canGiveUp = function (this: Pile, card: Card) {",
-            "  return false",
-            "}"
-          ]
-        ]
-      ]
-    }
-  ]
-})
-classes.addRule(ListGuard, {
-  syntax: `(a|an) {type:known_type} ${CAN_NEVER_TAKE}`,
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse(["a card is a thing", "a pile is a list of cards"].join("\n"), "block")
-      },
-      tests: [
-        [
-          "a pile can never take a card",
-          ["Pile.prototype.canTake = function (card) {", "  return false", "}"],
-          [
-            "export interface Pile { canTake(card: Card): boolean }",
-            "Pile.prototype.canTake = function (this: Pile, card: Card) {",
-            "  return false",
-            "}"
-          ]
-        ]
-      ]
-    }
-  ]
-})
-// in a list type's outline body -- tests in `parserTests/outline.test.ts`:
-// - `- it can take a card if: ...`, `- it can never let go of a card`, `- it can never take a card`
-// - and with the subject left out:  `- can take a card if: ...`
-for (const subject of ["subject_it", "subject_implied"]) {
-  for (const guard of [CAN_TAKE, CAN_GIVE_UP, CAN_NEVER_GIVE_UP, CAN_NEVER_TAKE]) {
-    classes.addRule(ListGuard, { syntax: `{type:${subject}} ${guard}` })
+    return Wording.meaningOf(match.groups.verb) === "take" ? "canTake" : "canGiveUp"
   }
 }

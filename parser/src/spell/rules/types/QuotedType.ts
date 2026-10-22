@@ -1,6 +1,6 @@
 import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { types } from "./types.parser"
+import { SP } from "spell-lang/spell"
 import { SpellType } from "./SpellType"
 
 /**
@@ -8,23 +8,26 @@ import { SpellType } from "./SpellType"
  * -- the outline style's "quotes teach a new word" (epic page `outline-spell`).
  * - e.g. `"card"` in `a "card" is a thing where:`
  * - One word (dashes OK) inside straight quotes, not blacklisted;  a `SpellType` match like `card` would be.
- * - `raw` is the name without its quotes, e.g. `card`.
+ * - Or several, up to `SpellType.MAX_NAME_WORDS`, blacklisted ones too, but not first or last (epic `spanish` P14):
+ *   `a "card in play" is a thing`, `una "carta de juego" es una cosa`.
+ *   - Compiled as `bank account` would be:  `CardInPlay`.
+ * - `raw` is the name without its quotes, e.g. `card`, `card in play`.
  */
 export class QuotedType extends SpellType {
   /** A text token whose inside is one type word. */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
-    return QuotedType.nameOf(tokens[start], this.blacklist) !== undefined
+    return QuotedType.nameOf(tokens[start], SP.Language.of(scope).words.blacklist) !== undefined
   }
 
   parse(scope: P.Scope, tokens: P.Token[]) {
     const [token] = tokens
-    const raw = QuotedType.nameOf(token, this.blacklist)
+    const raw = QuotedType.nameOf(token, SP.Language.of(scope).words.blacklist)
     if (!token || raw === undefined) return undefined
     const match: P.MatchFor<this> = new P.Match({
       rule: this,
       matched: [token],
       raw,
-      value: this.mapValue(raw),
+      value: this.mapValue(raw.replace(/\s+/g, "-")),
       tokens: [token],
       scope
     })
@@ -37,26 +40,19 @@ export class QuotedType extends SpellType {
     return `${match.raw}`
   }
 
-  /** The one word inside `token`'s quotes, if it's a text token holding just that -- else `undefined`. */
+  /**
+   * The name inside `token`'s quotes, its words a space apart, if it's a text token holding just that -- else `undefined`.
+   * - Its first and last word not on `blacklist`:  see class docs.
+   */
   private static nameOf(token: P.Token | undefined, blacklist: P.IdentifierBlacklist | undefined): string | undefined {
     if (!(token instanceof P.TextToken)) return undefined
-    const name = token.innerText
-    if (!QUOTED_TYPE_NAME.test(name) || blacklist?.[name.toLowerCase()]) return undefined
-    return name
+    const words = token.innerText.trim().split(/\s+/)
+    const isBlacklisted = (word: string | undefined) => !!blacklist?.[`${word}`.toLowerCase()]
+    if (words.length > SpellType.MAX_NAME_WORDS || !words.every((word) => QUOTED_TYPE_NAME.test(word))) return undefined
+    if (isBlacklisted(words[0]) || isBlacklisted(words.at(-1))) return undefined
+    return words.join(" ")
   }
 }
-types.addRule(QuotedType, {
-  tests: [
-    {
-      tests: [
-        { title: "a quoted word", input: '"card"', js: "Card" },
-        { title: "dashed", input: '"bank-account"', js: "BankAccount" },
-        { title: "two words", input: '"playing card"', js: undefined },
-        { title: "blacklisted word", input: '"if"', js: undefined }
-      ]
-    }
-  ]
-})
 
-/** What `quoted_type` takes inside its quotes:  one word, dashes OK. */
-const QUOTED_TYPE_NAME = /^[A-Za-z][\w-]*$/
+/** What `quoted_type` takes inside its quotes:  each word, dashes OK. */
+const QUOTED_TYPE_NAME = P.ALPHANUMERIC_WORD_WITH_DASHES

@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { UI } from "./UI.parser"
 
 /**
  * `notify` rule:  notify user about `message` in a non-modal (popup?) interface.
@@ -23,15 +22,3 @@ export class Notify extends SpellStatement<"message|okButton?"> {
     })
   }
 }
-UI.addRule(Notify, {
-  syntax: "notify {message:expression} (with {okButton:text})?", // TODO: "with close" ?
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`notify "Yo!"`, `core.notify("Yo!")`],
-        [`notify "Yo!" with "gotcha"`, `core.notify("Yo!", "gotcha")`]
-      ]
-    }
-  ]
-})

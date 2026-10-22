@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 
 /**
  * `type_specifier_instance` rule:  `as a new thing` / `as a new list of tasks` -- specifies a property's
@@ -26,19 +25,3 @@ export class TypeSpecifierInstance extends P.Sequence<"new_list?|new_thing?"> {
     return (match.groups.new_list ?? match.groups.new_thing)!
   }
 }
-classes.addRule(TypeSpecifierInstance, {
-  syntax: "as ({new_list}|{new_thing})",
-  tests: [
-    {
-      tests: [
-        ["as a new thing", "new Thing()"],
-        ["as a new thing with a=1, b = true", "new Thing({ a: 1, b: true })"],
-        [
-          "as a new list of numbers",
-          'new List({ instanceType: "number" })',
-          'new List<number>({ instanceType: "number" })'
-        ]
-      ]
-    }
-  ]
-})

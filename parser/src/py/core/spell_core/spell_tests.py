@@ -12,6 +12,7 @@ A test prints its result first, as a group heading, then what happened inside it
 - Lines inside a test wait until it ends, so they can print under its heading.
 - Outside a test, each line prints at once.
 - The lines are the JavaScript core's, character for character.
+- Their words are in the program's language (`core.message()`, `messages.py`):  English when it has none.
 """
 
 import math
@@ -29,8 +30,6 @@ if TYPE_CHECKING:
 PASSED = "✅"  # ✅
 FAILED = "❌"  # ❌
 UNDECIDED = "❓"  # ❓
-# What starts the line `echo_test_action()` prints:  ▶️, then the same 2 spaces as the JavaScript core.
-EXECUTING = "▶️ Executing  "
 
 # Stands for "no expected value given":  `None` can't, it's a value someone might expect.
 _NOTHING = object()
@@ -55,6 +54,8 @@ class SpellTestMethods:
 
     # where every line goes:  `Core` sets it
     console: "SpellConsole"
+    # a message in the program's language:  `MessageMethods`, which `Core` adds
+    message: "Callable[..., str]"
     # the test running now, if any
     active_test: ActiveTest | None = None
 
@@ -93,7 +94,7 @@ class SpellTestMethods:
         try:
             yield
         except Exception as error:  # a failing test mustn't stop the program
-            self.console.error(f"Error in test {js_string(message)}:", repr(error))
+            self.console.error(self.message("test-threw", test=js_string(message)), repr(error))
         finally:
             self.end_test()
 
@@ -139,18 +140,17 @@ class SpellTestMethods:
         """
         if other_thing is _NOTHING:
             success = _is_js_truthy(thing)
-            other_source = "truthy"
+            other_source = self.message("expect-truthy")
         else:
             success = deep_equals(thing, other_thing)
             other_source = self.back_tick_quote(other_source)
 
-        thing_source = self.back_tick_quote(thing_source)
-        output: list[object] = [self.test_result_icon(success)]
+        what = self.back_tick_quote(thing_source)
         if success:
-            output += ["As expected", thing_source, "is", other_source]
+            line = self.message("expect-passed", what=what, expected=other_source)
         else:
-            actual = self.back_tick_quote(thing)
-            output += ["Unexpected:", thing_source, "should be", other_source, "but is actually", actual]
+            line = self.message("expect-failed", what=what, expected=other_source, actual=self.back_tick_quote(thing))
+        output: list[object] = [self.test_result_icon(success), line]
 
         test = self.active_test
         if test:
@@ -168,11 +168,11 @@ class SpellTestMethods:
 
     def echo_test_action(self, message: object) -> None:
         """Print `▶️ Executing` and the spell about to run:  each statement of a `to test ...` method does."""
-        output = [EXECUTING, self.back_tick_quote(message)]
+        line = self.message("test-step", step=self.back_tick_quote(message))
         if self.active_test:
-            self.active_test.output.append(output)
+            self.active_test.output.append(line)
         else:
-            self.console.info(*output)
+            self.console.info(line)
 
     @staticmethod
     def test_result_icon(success: bool | None) -> str:

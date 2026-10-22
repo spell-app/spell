@@ -260,13 +260,13 @@ export class Tokenizer {
   // ## Word / Symbol / Text
   ////////////////
 
-  /** Regex matching first character allowed to start a `WordToken` -- ASCII letters only. */
+  /** Regex matching first character allowed to start a `WordToken` -- a letter in any script:  `a`, `ñ`, `É`. */
   get WORD_START() {
-    return /[A-Za-z]/
+    return /\p{L}/u
   }
-  /** Regex matching subsequent `WordToken` characters -- letters, digits, `_` or `-`. */
+  /** Regex matching subsequent `WordToken` characters -- letters, accents, digits, `_` or `-`. */
   get WORD_CHAR() {
-    return /^[\w_-]/
+    return /^[\p{L}\p{M}\d_-]/u
   }
 
   /**
@@ -286,8 +286,10 @@ export class Tokenizer {
     }
     if (wordEnd === start) return undefined
 
-    const value = text.slice(start, wordEnd)
-    return new P.WordToken({ value, raw: value, start })
+    const raw = text.slice(start, wordEnd)
+    // One spelling per word:  `é` typed as one character or as `e` plus an accent is the same word (NFC).
+    // `raw` and `start` stay the text's own, so positions still line up with the source.
+    return new P.WordToken({ value: raw.normalize("NFC"), raw, start })
   }
 
   /**

@@ -5,7 +5,6 @@
  * - `placeholderData()` and `QuotedPropertyFormulaBits`:  what `quoted_property_formula` and the
  *   `QuotedPropertyRule` it makes both work with
  */
-import { pluralize, singularize } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 
 /**
@@ -37,8 +36,8 @@ export function placeholderData(
   values: Array<string | number>,
   kind?: string
 ): QuotedPropertyFormulaBits["ruleData"][number] {
-  const isSingular = singularize(instanceVar) === instanceVar
-  const inflector = isSingular ? singularize : pluralize
+  const isSingular = P.singularize(instanceVar) === instanceVar
+  const inflector = isSingular ? P.singularize : P.pluralize
   const enumeration = values.map((value) =>
     typeof value === "string" ? inflector(value.replace(/^'(.*)'$/, "$1")) : value
   )

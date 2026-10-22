@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 import { TypeSpecifierInstance } from "./TypeSpecifierInstance"
 
 /**
@@ -13,20 +12,13 @@ import { TypeSpecifierInstance } from "./TypeSpecifierInstance"
 export class OutlineSpecifierInstance extends TypeSpecifierInstance {
   @proto static alias = "outline_specifier"
 
-  /** Quick test:  `a new` or `an new` first, as every outline specifier is tried on every body line. */
-  test(_scope: P.Scope, tokens: P.Token[], start = 0) {
-    const article = tokens[start] as P.Token | undefined
-    return !!article?.matchesLiteral(["a", "an"]) && !!tokens[start + 1]?.matchesLiteral("new")
+  /**
+   * Quick test:  `a new` first, as every outline specifier is tried on every body line.
+   * - Asks `new_thing` and `new_list` themselves:  they check their own words, e.g. `a new`, whatever the language.
+   *   Ours alone can't:  our syntax is nothing but those two rules.
+   */
+  test(scope: P.Scope, tokens: P.Token[], start = 0) {
+    const rules = scope.parser?.rules
+    return !!(rules?.new_thing?.test(scope, tokens, start) || rules?.new_list?.test(scope, tokens, start))
   }
 }
-classes.addRule(OutlineSpecifierInstance, {
-  syntax: "({new_list}|{new_thing})",
-  tests: [
-    {
-      tests: [
-        ["a new thing", "new Thing()"],
-        ["a new thing with a=1, b = true", "new Thing({ a: 1, b: true })"]
-      ]
-    }
-  ]
-})

@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 
 /**
  * `type_specifier_yes_or_no` rule:  `as yes or no` / `as either true or false` -- specifies a property's datatype as a
@@ -16,7 +15,3 @@ export class TypeSpecifierYesOrNo extends P.Sequence {
     return new P.ASTTypeExpression(match, { raw: "yes or no", name: "choice" })
   }
 }
-classes.addRule(TypeSpecifierYesOrNo, {
-  syntax: "as either? (yes or no|true or false)",
-  tests: [{ tests: [["as yes or no", "choice"]] }]
-})

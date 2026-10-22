@@ -1,6 +1,4 @@
-import { pluralize } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { types } from "./types.parser"
 import { SpellType } from "./SpellType"
 
 /**
@@ -11,7 +9,10 @@ import { SpellType } from "./SpellType"
 export class PluralType extends SpellType {
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens)
-    if (match && typeof match.raw === "string" && match.raw === pluralize(match.raw)) return match
+    if (!match || typeof match.raw !== "string") return undefined
+    // Anything but a definite singular will do, as `plural_identifier`:  uncountable words (`sheep`) match here too.
+    // NOT `words === P.pluralize(words)`:  Spanish's inflector makes a plural more plural, `cartas` => `cartases`
+    if (P.getPlurality(SpellType.numberWordOf(match)) !== "singular") return match
     return undefined
   }
   getAST(match: P.MatchFor<this>): P.ASTTypeExpression {
@@ -20,20 +21,3 @@ export class PluralType extends SpellType {
     return type
   }
 }
-types.addRule(PluralType, {
-  tests: [
-    {
-      tests: [
-        { title: "plural, lower case", input: "things", js: "Thing" },
-        { title: "plural, upper case", input: "Things", js: "Thing" },
-        { title: "plural, multi-word, lower case", input: "bank-accounts", js: "BankAccount" },
-        { title: "plural, multi-word, mixed case", input: "Bank-accounts", js: "BankAccount" },
-
-        { title: "singular, lower case", input: "thing", js: undefined },
-        { title: "singular, upper case", input: "Thing", js: undefined },
-        { title: "singular, multi-word, lower case", input: "bank-account", js: undefined },
-        { title: "singular, multi-word, mixed case", input: "Bank-account", js: undefined }
-      ]
-    }
-  ]
-})

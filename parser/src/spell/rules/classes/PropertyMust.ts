@@ -4,7 +4,6 @@ import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 // Import directly to avoid circular import
 import { MustRule } from "./MustRule"
 
@@ -46,12 +45,3 @@ export class PropertyMust extends SpellStatement<"type|property|rule"> {
     })
   }
 }
-classes.addRule(PropertyMust, {
-  syntax: "{type:subject_its} {property:member_words} must {rule:must_rule}"
-})
-classes.addRule(PropertyMust, {
-  syntax: "{type:subject_its} {property:quoted_member} must {rule:must_rule}"
-})
-classes.addRule(PropertyMust, {
-  syntax: "{type:subject_implied} {property:body_member_words} must {rule:must_rule}"
-})

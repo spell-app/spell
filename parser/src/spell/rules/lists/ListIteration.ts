@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 import { type MethodBody, type ItemVariableData } from "./lists.shared"
 
 /**
@@ -75,69 +74,3 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
     })
   }
 }
-lists.addRule(ListIteration, {
-  syntax:
-    "for each? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("deck")
-        scope.variables?.add("my-list")
-        scope.variables?.add("messages")
-      },
-      tests: [
-        ["for each card in deck:", "core.map(deck, () => {})"],
-        ["for item, index in my-list:", "core.map(myList, () => {})"],
-        [
-          `for each card in deck: set the direction of the card to "down"`,
-          'core.map(deck, (card) => (card.direction = "down"))'
-        ],
-        [
-          `for each card in deck: set the direction of it to "down"`,
-          'core.map(deck, (card) => (card.direction = "down"))'
-        ],
-        [
-          "for message, index in messages: add message + index to messages",
-          "core.map(messages, withSpellPositions((message, index) => core.append(messages, message + index)))",
-          "core.map(messages, withSpellPositions((message, index: number) => core.append(messages, message + index)))"
-        ],
-        [
-          "for message, index in messages: add it + index to messages",
-          "core.map(messages, withSpellPositions((message, index) => core.append(messages, message + index)))",
-          "core.map(messages, withSpellPositions((message, index: number) => core.append(messages, message + index)))"
-        ],
-        [
-          "for message, index in messages: set its list to messages",
-          "core.map(messages, (message) => (message.list = messages))"
-        ],
-
-        [
-          `for each card in deck:\n\tset the direction of the card to "down"`,
-          'core.map(deck, (card) => (card.direction = "down"))'
-        ],
-        [
-          [`for each card in deck:`, `\tset the direction of it to "down"`],
-          'core.map(deck, (card) => (card.direction = "down"))'
-        ],
-        [
-          [`for each card in deck:`, `\tset the direction of the card to "down"`, `\tset the value of the card to 10`],
-          [`core.map(deck, (card) => {`, `  card.direction = "down"`, `  card.value = 10`, `})`]
-        ],
-        [
-          ["for message and index in messages:", "\tif index is greater than 2 add message to messages"],
-          [
-            "core.map(messages, withSpellPositions((message, index) => {",
-            "  if (index > 2) core.append(messages, message)",
-            "}))"
-          ],
-          [
-            "core.map(messages, withSpellPositions((message, index: number) => {",
-            "  if (index > 2) core.append(messages, message)",
-            "}))"
-          ]
-        ]
-      ]
-    }
-  ]
-})

@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { lists } from "./lists.parser"
 
 /**
  * `bracketed_list` rule:  bracketed list (array) literal, e.g. `[1,2 , true,false ]`.
@@ -23,27 +22,3 @@ export class BracketedList extends P.Sequence<"list?"> {
     return new P.ASTListExpression(match, { items })
   }
 }
-lists.addRule(BracketedList, {
-  syntax: "\\[ [list:{expression} ,]? \\]",
-  tests: [
-    {
-      title: "correctly matches literal lists",
-      tests: [
-        ["[]", "[]"],
-        ["[1]", "[1]"],
-        ["[1,]", "[1]"],
-        ["[1,2,3]", "[1, 2, 3]"],
-        ["[1, 2, 3]", "[1, 2, 3]"],
-        ["[1,2,3,]", "[1, 2, 3]"],
-        [`[yes,no,"a",1]`, `[true, false, "a", 1]`]
-      ]
-    },
-    {
-      title: "doesn't match malformed lists ",
-      tests: [
-        ["", undefined],
-        ["[,1]", undefined]
-      ]
-    }
-  ]
-})

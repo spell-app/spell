@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vite-plus/test"
-import { unitTestModuleRules } from "spell-lang/spell/test"
+import { describeParseErrors, describeWarnings, unitTestModuleRules } from "spell-lang/spell/test"
 import { P } from "spell-lang/parser"
 import { SP, spellParser } from "spell-lang/spell"
 import { Precedence } from "spell-lang/spell/rules/expressions"
@@ -143,5 +143,50 @@ describe("Negatable", () => {
     expect(negatedIn(parser, "tiene", "tiene")).toBe(false)
     expect(negatedIn(parser, "tiene", "tienen")).toBe(false)
     expect(negatedIn(parser, "tiene", "no tiene")).toBe(true)
+  })
+})
+
+/**
+ * Article agreement, English's half (epic `spanish` P8):  `a` before a consonant sound, `an` before a vowel sound.
+ * - A warning under the article, never an error:  the line still parses.
+ * - Spanish's half, gender and number:  `tests/spell/rules/es/expressions/expressions.test.ts`.
+ */
+describe("article agreement", () => {
+  /** The warnings `lines` parse with, in a fresh scope called `scopeName`. */
+  const warningsIn = (lines: string[], scopeName: string) =>
+    describeWarnings(spellParser.getScope(scopeName).parse(lines.join("\n"), "block"))
+
+  test('`a apple` warns "an apple"?, under the article, and still parses', () => {
+    const block = spellParser.getScope("agreement-a-apple").parse("a apple is a thing", "block")
+    expect(describeParseErrors(block)).toEqual([])
+    expect(describeWarnings(block)).toEqual(['1:0 Did you mean "an apple"?'])
+  })
+
+  test('`an card` warns "a card"?, wherever it is', () => {
+    const lines = ["a card is a thing", "the x is a new card", "if the x is an card then print 1"]
+    expect(warningsIn(lines, "agreement-an-card")).toEqual(['3:12 Did you mean "a card"?'])
+  })
+
+  test("no type needed:  `a apple` warns though nothing is called `apple`", () => {
+    const lines = ["a card is a thing", "to peel a apple:", "\tprint 1"]
+    expect(warningsIn(lines, "agreement-no-type")).toEqual(['2:8 Did you mean "an apple"?'])
+  })
+
+  test("by the noun's first sound:  `an hour`, `a unicorn`, `a user`, `a one-of-a-kind thing` agree", () => {
+    const lines = [
+      "an hour is a thing",
+      "a unicorn is a thing",
+      "a user is a thing",
+      "an apple is a thing",
+      "a card is a thing",
+      "an apple has a unicorn as a unicorn",
+      "an apple has an hour as an hour"
+    ]
+    expect(warningsIn(lines, "agreement-sounds")).toEqual([])
+  })
+
+  test("never a variable named `a`, nor an article before a structural word", () => {
+    const lines = ["set a to 1", "if a is 1 then print a", "set an to 2", "print an + a"]
+    expect(warningsIn(lines, "agreement-variable")).toEqual([])
   })
 })

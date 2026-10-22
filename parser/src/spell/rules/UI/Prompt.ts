@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { UI } from "./UI.parser"
 
 /**
  * `prompt` rule:  prompt user to specify a value in response to `message` with `defaultValue`.
@@ -27,18 +26,6 @@ export class Prompt extends SpellStatement<"message|defaultValue?"> {
     })
   }
 }
-UI.addRule(Prompt, {
-  syntax: "prompt {message:expression} (with {defaultValue:expression})?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`prompt "Name for the new baby?"`, `await core.prompt("Name for the new baby?")`],
-        [`prompt "File name:" with "Untitled"`, `await core.prompt("File name:", "Untitled")`]
-      ]
-    }
-  ]
-})
 
 // Chose one or more items from `collection` (of strings???)
 // Returns a promise which `resolve()`s if they "OK" with a value, `reject()`s if they "cancel".

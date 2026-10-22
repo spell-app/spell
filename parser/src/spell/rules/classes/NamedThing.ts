@@ -2,7 +2,6 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { SpellType, getKnownType } from "spell-lang/spell/rules/types"
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { classes } from "./classes.parser"
 import { NewThing } from "./NewThing"
 import { ThingName } from "./ThingName"
 
@@ -71,32 +70,3 @@ export class NamedThing extends SpellExpression<"type|name"> {
     return ast instanceof P.ASTStringLiteral ? ast.value : `${match.value}`
   }
 }
-classes.addRule(NamedThing, {
-  syntax: "{type:known_type} {name:thing_name}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.compile(["a pile is a list of things", "a tableau is a pile"].join("\n"), "block")
-      },
-      tests: [
-        ["tableau T1", 'core.thingNamed(Tableau, "T1")'],
-        ["pile T1", 'core.thingNamed(Pile, "T1")'],
-        { title: "a name in lowercase is quoted", input: "tableau stock", js: undefined }
-      ]
-    }
-  ]
-})
-// a name in quotes:  any text, e.g. a lowercase one
-classes.addRule(NamedThing, {
-  syntax: "{type:known_type} {name:text}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.compile(["a pile is a list of things", "a foundation is a pile"].join("\n"), "block")
-      },
-      tests: [['foundation "clubs"', 'core.thingNamed(Foundation, "clubs")']]
-    }
-  ]
-})

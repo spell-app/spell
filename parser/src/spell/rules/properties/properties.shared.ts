@@ -5,52 +5,6 @@
 import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 
-/**
- * Words which end a run of `member_words`:  spell's structural words, never part of a member's name.
- * - e.g. `of` ends `the short rank of`, `as` ends `a card has short rank as text`,
- *   `is` a test, `and` a list, `where` / `whose` / `with` / `for` / `from` / `in` / `to` a clause.
- * - Anything not a word ends a run too, e.g. `+`, `:`, `,` or a number.
- */
-export const MEMBER_STOP_WORDS = new Set([
-  "of",
-  "the",
-  "a",
-  "an",
-  "is",
-  "isnt",
-  "are",
-  "was",
-  "has",
-  "have",
-  "in",
-  "to",
-  "and",
-  "or",
-  "if",
-  "where",
-  "as",
-  "with",
-  "whose",
-  "for",
-  "from",
-  "then",
-  "else",
-  "otherwise",
-  "not",
-  "into",
-  "on",
-  "by",
-  "at"
-])
-
-/**
- * Stop words which may still START a member's name,
- * e.g. `with jokers` in `a deck has with jokers as yes or no`, `in play`, `on top`.
- * - They END a run anywhere else:  `the jokers with ...` is `jokers`.
- * - Safe:  a name starts only where a rule's syntax expects one, e.g. after `has` or `the`.
- */
-export const MEMBER_LEADING_WORDS = new Set(["with", "for", "from", "in", "on", "by", "at", "into"])
-
 /** What `its_*` rules stash on their matches. */
 export type ItsMatchData = {
   /** `it` in scope when parsed, or `NONE` => means `this`.  Looked up THEN, not in `getAST()` -- see `SpellIdentifier`. */

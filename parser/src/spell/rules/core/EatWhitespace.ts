@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `eat_whitespace` rule:  eats all whitespace at start of tokens
@@ -13,6 +12,3 @@ import { core } from "./core.parser"
 export class EatWhitespace extends P.Repeat {
   @proto static datatype = "text"
 }
-core.addRule(EatWhitespace, {
-  syntax: "{whitespace}*"
-})

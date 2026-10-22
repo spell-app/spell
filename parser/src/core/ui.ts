@@ -79,7 +79,7 @@ export const uiMethods = defineCoreModule({
    */
   async confirm(message: unknown, okText?: string, cancelText?: string): Promise<boolean> {
     const ui = pageUI()
-    if (!ui) return (core.console.info(`${String(message)} (yes)`), true)
+    if (!ui) return (core.console.info(core.message("confirm-default", { question: String(message) })), true)
     return (await ui.load()).modals.confirm({ message: String(message), okText, cancelText })
   },
 

@@ -2,7 +2,6 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `merge_lists` rule:  merge a set of lists together, e.g. `merge the piles` => `core.mergeLists(piles)`.
@@ -26,18 +25,3 @@ export class MergeLists extends SpellExpression<"expression|type?"> {
     })
   }
 }
-lists.addRule(MergeLists, {
-  syntax: "merge lists? {expression:operand} ((as|into) (a|an) new? {type:known_type})?",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("piles")
-      },
-      tests: [
-        ["merge the piles", "core.mergeLists(piles)"],
-        ["merge the piles as a list", "core.mergeLists(piles, List)"]
-      ]
-    }
-  ]
-})

@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
 
 /**
  * `times` rule:  `*` / `times`, e.g. `price * taxRate` -- `Precedence.product`, tightest, alongside `/`.
@@ -15,20 +14,3 @@ export class Times extends InfixOperatorSuffix {
     return "times"
   }
 }
-math.addRule(Times, {
-  syntax: "(operator:*|times) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("price")
-        scope.variables?.add("taxRate")
-      },
-      tests: [
-        ["price*taxRate", "(price * taxRate)"],
-        ["price * taxRate", "(price * taxRate)"],
-        ["price times taxRate", "(price * taxRate)"]
-      ]
-    }
-  ]
-})

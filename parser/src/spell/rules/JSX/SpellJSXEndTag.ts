@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { JSX } from "./JSX.parser"
 
 /**
  * `jsxEndTag` rule:  match a JSX closing tag (`</tag>`),
@@ -18,4 +17,3 @@ export class SpellJSXEndTag extends P.TokenType {
     return new P.ASTJSXEndTag(match, { tagName })
   }
 }
-JSX.addRule(SpellJSXEndTag)

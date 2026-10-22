@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /**
  * `list_shuffle` rule:  shuffle (randomize) list in-place:
@@ -19,20 +18,3 @@ export class ListShuffle extends SpellStatement<"arg?|list"> {
     })
   }
 }
-lists.addRule(ListShuffle, {
-  syntax: "(randomize|shuffle) (the? {arg:plural_identifier} (in|of))? {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("deck")
-        scope.variables?.add("my-list")
-      },
-      tests: [
-        ["shuffle cards of deck", "core.randomize(deck)"],
-        ["shuffle the cards of the deck", "core.randomize(deck)"],
-        ["randomize my-list", "core.randomize(myList)"]
-      ]
-    }
-  ]
-})

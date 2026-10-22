@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
@@ -34,6 +33,3 @@ export class TypedMethodArg extends P.Sequence<"identifier|type", MethodArgData>
     return match
   }
 }
-methods.addRule(TypedMethodArg, {
-  syntax: `{identifier} as (a|an)? {type}`
-})

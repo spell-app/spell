@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
 
 /**
  * `gt_lt` rule:  `<`, `>`, `<=`, `>=` comparison, e.g. `salary > expenses`.
@@ -30,28 +29,3 @@ export class GtLt extends InfixOperatorSuffix<"operator|expression"> {
     })
   }
 }
-math.addRule(GtLt, {
-  syntax: "(operator:(<|>) =?) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("salary")
-        scope.variables?.add("expenses")
-      },
-      tests: [
-        { title: "> with spaces", input: "salary > expenses", js: "(salary > expenses)" },
-        { title: "> without spaces", input: "salary>expenses", js: "(salary > expenses)" },
-
-        { title: "< with spaces", input: "salary < expenses", js: "(salary < expenses)" },
-        { title: "< without spaces", input: "salary<expenses", js: "(salary < expenses)" },
-
-        { title: ">= with spaces", input: "salary >= expenses", js: "(salary >= expenses)" },
-        { title: ">= without spaces", input: "salary>=expenses", js: "(salary >= expenses)" },
-
-        { title: "<= with spaces", input: "salary <= expenses", js: "(salary <= expenses)" },
-        { title: "<= without spaces", input: "salary<=expenses", js: "(salary <= expenses)" }
-      ]
-    }
-  ]
-})

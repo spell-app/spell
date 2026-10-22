@@ -4,7 +4,6 @@ import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * `saved_inline` rule:  `a dated-event is saved inline` --
@@ -41,30 +40,3 @@ export class SavedInline extends SpellStatement<"type"> {
     return new P.ASTPatchedMember(match, { member: savedInline })
   }
 }
-classes.addRule(SavedInline, {
-  syntax: "(a|an) {type:known_type} is saved inline",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse(["a dated-event is a thing", "a card is a drawable thing"].join("\n"), "block")
-      },
-      tests: [
-        ["a dated-event is saved inline", "DatedEvent.savedInline = true"],
-        {
-          title: "a drawable thing too:  saved inside, as every thing is by default",
-          input: "a card is saved inline",
-          js: "Card.savedInline = true"
-        },
-        {
-          title: "not a built-in type:  every project shares it",
-          input: "a thing is saved inline",
-          js: `/* PARSE ERROR: Can't save thing inline:  it's built in, and every project shares it */`
-        }
-      ]
-    }
-  ]
-})
-// in an outline body:  `- it is saved inline` -- tests in `parserTests/outline.test.ts`
-classes.addRule(SavedInline, { syntax: "{type:subject_it} is saved inline" })
-classes.addRule(SavedInline, { syntax: "{type:subject_implied} is saved inline" })

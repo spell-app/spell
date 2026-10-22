@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /**
  * `list_empty` rule:  empty a list in-place, e.g. `empty my-list` => `core.clear(myList)`.
@@ -19,19 +18,3 @@ export class ListEmpty extends SpellStatement<"list"> {
     })
   }
 }
-lists.addRule(ListEmpty, {
-  syntax: "(empty|clear) {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("deck")
-      },
-      tests: [
-        ["empty my-list", "core.clear(myList)"],
-        ["clear the cards of the deck", "core.clear(deck.cards)"]
-      ]
-    }
-  ]
-})

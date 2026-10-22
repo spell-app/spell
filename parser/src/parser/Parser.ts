@@ -22,6 +22,12 @@ export class Parser extends Derivative {
   declare defaultRule: string
   /** Other parsers whose rules we import. */
   declare imports: Parser[] | undefined
+  /**
+   * How our language makes words singular and plural, in play while we parse -- see `P.Inflector`.
+   * - Copied by `clone()`, so every project's parser speaks its language's.
+   * - `undefined` for a parser with no human language, e.g. rulex's:  the fallback's then.
+   */
+  declare inflector: P.Inflector | undefined
 
   static {
     Object.defineProperty(this.prototype, "module", { value: undefined, writable: true })
@@ -108,8 +114,27 @@ export class Parser extends Derivative {
 
     // Parse the rule or throw an exception if rule not found.
     const rule = scope.getRuleOrDie(ruleName)
-    return rule.parse(scope, tokens)
+    return this.inPlay(() => rule.parse(scope, tokens))
   }
+
+  /**
+   * Run `work` with this parser IN PLAY:  `Parser.current`, and our language's inflector (`P.Inflector.using()`).
+   * - So code that meets a word mid-parse, with no scope to ask, reads OUR language's words, e.g. a member's stop words.
+   * - A parse within a parse (another project's) puts its own in play, and gives it back after.
+   */
+  inPlay<T>(work: () => T): T {
+    if (Parser.current === this) return work()
+    const before = Parser.current
+    Parser.current = this
+    try {
+      return P.Inflector.using(this.inflector, work)
+    } finally {
+      Parser.current = before
+    }
+  }
+
+  /** The parser parsing right now, if any -- see `inPlay()`. */
+  static current: Parser | undefined
 
   /**
    * What could come after `input`, a half-typed `ruleName`, e.g. `to` after `set x` -- for editor completion.
@@ -126,7 +151,7 @@ export class Parser extends Derivative {
     const tokens = this.tokenize(input, ruleName) ?? []
     const rule = scope.getRuleOrDie(ruleName)
     return P.Expectations.collect(() => {
-      if (tokens.length) rule.parse(scope, tokens)
+      if (tokens.length) this.inPlay(() => rule.parse(scope, tokens))
       else P.Expectations.current!.expect(rule)
     })
   }
@@ -138,7 +163,7 @@ export class Parser extends Derivative {
    * - NOTE: only for matches parsed OUTSIDE a language's own block parsing, which commits each line itself.
    */
   commit(match: P.Match) {
-    match.rule.mutateScope(match)
+    this.inPlay(() => match.rule.mutateScope(match))
   }
 
   ////////////////
@@ -625,4 +650,6 @@ export type ParserProps = {
   rules?: P.RuleInput[]
   /** Other parsers whose rules to import. */
   imports?: Parser[]
+  /** How our language makes words singular and plural -- see `Parser.inflector`. */
+  inflector?: P.Inflector
 }

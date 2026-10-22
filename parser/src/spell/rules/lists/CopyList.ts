@@ -2,7 +2,6 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `copy_list` rule:  duplicate a list, e.g. `a copy of the piles` => `core.duplicateList(piles)`.
@@ -26,18 +25,3 @@ export class CopyList extends SpellExpression<"expression|type?"> {
     })
   }
 }
-lists.addRule(CopyList, {
-  syntax: "a (copy|duplicate) of list? {expression:operand} (as (a|an) {type:known_type})?",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("piles")
-      },
-      tests: [
-        ["a copy of the piles", "core.duplicateList(piles)"],
-        ["a duplicate of list the piles as a list", "core.duplicateList(piles, List)"]
-      ]
-    }
-  ]
-})

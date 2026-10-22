@@ -2,9 +2,9 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { SP } from "spell-lang/spell"
 
-/** Pieces of `text` coloured `kind`. */
-function coloured(text: string, kind: string): string[] {
-  return SP.SpellHighlighter.spans(text)
+/** Pieces of `text` coloured `kind`, by `parser` (English's by default). */
+function coloured(text: string, kind: string, parser?: SP.SpellParser): string[] {
+  return SP.SpellHighlighter.spans(text, parser)
     .filter((span) => span.kind === kind)
     .map((span) => text.slice(span.start, span.end))
 }
@@ -34,6 +34,17 @@ describe("SpellHighlighter", () => {
     const kinds = new Set(SP.SpellHighlighter.spans(PILE).map((span) => span.kind))
     expect(kinds.has("keyword")).toBe(true)
     expect(coloured(PILE, "keyword")).toEqual(expect.arrayContaining(["return"]))
+  })
+
+  it("colours another language with its own parser:  Spanish's keywords are Spanish's", () => {
+    const PILA = `una pila es una lista de cartas
+
+el valor de una pila es:
+\tsi la pila está vacía devolver 0
+\tdevolver el valor de su última carta
+`
+    expect(coloured(PILA, "keyword", SP.spanish.parser)).toEqual(expect.arrayContaining(["si", "devolver"]))
+    expect(coloured(PILA, "keyword")).not.toContain("devolver")
   })
 
   it("returns spans in order, never overlapping, inside the text", () => {

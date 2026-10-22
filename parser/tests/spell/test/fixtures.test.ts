@@ -11,7 +11,8 @@ import {
   fixtureDraws,
   fixturePath,
   fixtureProjectNames,
-  fixtureWords
+  fixtureWords,
+  fixtureLanguage
 } from "spell-lang/spell/test"
 
 /**
@@ -19,7 +20,7 @@ import {
  * against the snapshots beside it, in `tests/spaces/@spell/test/<Project>/`:
  * - `<Project>.snapshot.js`:  the javascript (`js/solid` target)
  * - `<Project>.snapshot.declarations.json5`:  its declarations
- * - `<Project>.en.snapshot.js`:  its words
+ * - `<Project>.<lang>.snapshot.js`:  its words, in its language (`cards.en.snapshot.js`, `cartas.es.snapshot.js`)
  * - `<Project>.snapshot.tsx`:  the TypeScript (`ts/solid` target)
  * - `<Project>.snapshot.py`:  the Python (the `py` target)
  *   - only for the fixtures in `PYTHON_FIXTURES`
@@ -44,9 +45,11 @@ describe("fixture projects compile to their snapshots", () => {
     })
 
     // its words, by the names its javascript uses -- see `SP.SpellWords`.
-    // `.en.snapshot.js`:  ending as a snapshot does keeps it out of the fixture's files, in the app.
+    // `.<lang>.snapshot.js`:  ending as a snapshot does keeps it out of the fixture's files, in the app.
     test(`${name}'s words`, async () => {
-      await expect(fixtureWords(name)).toMatchFileSnapshot(fixturePath(name, `${name}.en${SP.SNAPSHOT_JS_SUFFIX}`))
+      await expect(fixtureWords(name)).toMatchFileSnapshot(
+        fixturePath(name, `${name}.${fixtureLanguage(name)}${SP.SNAPSHOT_JS_SUFFIX}`)
+      )
     })
 
     // the `ts/solid` target's, `tsc`-checked by `typescript.test.ts`

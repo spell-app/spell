@@ -1,8 +1,9 @@
-import { kebabCase, typeCase, proto } from "spell-kit/util"
+import { kebabCase, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell-lang/spell/rules/Statement"
+import { SubjectRule } from "spell-lang/spell/rules/types"
 import { DynamicMethodRule } from "./DynamicMethodRule"
 import { MethodInfixRule } from "./MethodInfixRule"
 import { MethodPostfixRule } from "./MethodPostfixRule"
@@ -46,27 +47,28 @@ export class MethodDefinition<
    * - The method's NAME drops the type, unless that leaves a little word dangling (epic `output-targets`, Q44).
    *   - Then it keeps the type's name:
    *     `to update the total of (a calculator)` => `update_the_total_of_calculator`, not `update_the_total_of`.
-   *     See `DANGLING_WORDS`.
+   *     See `isDangling()`:  the language's `danglingWords`.
    *   - Nothing dangles with the receiver first:  `to move (a card) to (a pile)` => `move_to_$pile`.
    *   - These are spell's names:  compiled javascript says them in camelCase, `moveToPile()` (`JSWriter.nameOf()`).
    * - SIDE EFFECT: mutates `signature` in place:
    *   - removes the type's arg / method / syntax bits, and replaces the syntax bit with `{thisArg:expression}`
    *   - adds an alias variable when the arg's own name differs from the type name,
    *     e.g. `to show (thing as a card)` aliases `thing` to `this`
-   * - Also promotes to a `test` method when `asTest`, prefixing `test` onto the method name and syntax.
+   * - Also promotes to a `test` method when `asTest`:
+   *   prefixes `test` onto the method name, and the word it was written with (`test`, `probar`) onto its syntax.
    * - In a type's outline body, a signature that names no type is the type's own:  see `takeSubject()`.
    */
   processSignature(groups: P.MatchGroups, signature: MethodSignatureData, scope: P.Scope): MethodSignatureData {
     const initialType = signature.types.find((type) => !type.isSimple)
     const subject = this.inlineInitialType && !initialType ? P.SubjectScope.of(scope)?.subjectType : undefined
     if (subject) {
-      MethodDefinition.takeSubject(signature, subject)
+      MethodDefinition.takeSubject(signature, subject, scope)
     } else if (this.inlineInitialType && initialType) {
       signature.instanceType = initialType.name
       // remove instance bits from args and method signature
       signature.args.splice(initialType.argIndex, 1)
       const wordBefore = signature.methodBits[initialType.methodIndex - 1]
-      if (wordBefore && DANGLING_WORDS.test(wordBefore)) {
+      if (wordBefore && isDangling(wordBefore, scope)) {
         // keep the type's name in its place, as a word:  `of_calculator`, not `of_$calculator`
         signature.methodBits[initialType.methodIndex] = initialType.name.replace(/-/g, "_")
       } else {
@@ -78,9 +80,11 @@ export class MethodDefinition<
         signature.extraVars.push({ name: initialType.varName, output: "this", type: "alias" })
       }
     }
-    if (groups.asTest) {
+    const { asTest } = groups as { asTest?: P.Match }
+    if (asTest) {
+      // its name is spell's own, `test_...`;  its call says the language's word, as written:  `probar ...` in Spanish
       signature.methodBits.unshift("test")
-      signature.syntaxBits.unshift("test")
+      signature.syntaxBits.unshift(`${asTest.raw ?? asTest.value}`.toLowerCase())
     }
     return signature
   }
@@ -89,21 +93,25 @@ export class MethodDefinition<
    * A method in a type's outline body that names no type is the type's own (epic page `outline-spell`, P20, I15).
    * - `- to debug it:` is `to debug a solitaire`:  `it` is where the receiver goes, `debug the solitaire`.
    *   - After a little word, the method's name keeps the type's:  `- to cheat at it:` => `cheat_at_solitaire`.
+   * - `it` is the language's word for the subject, `subject_it`:  see `SubjectRule.reads()`.
    * - With no `it`, `- animation deal the cards:` takes its receiver after `of`:  `deal the cards of the solitaire`.
+   *   - `of` is the language's word, the `receiver_of` word rule's syntax:  `(de|del)` in Spanish.
    *   - One word reads as a verb, so the receiver comes straight after:  `- to reset:` is `reset the solitaire`.
    *   - And inside the type's own methods, the words alone call it on this one:  `deal the cards`.
    *     So its receiver is optional:  `deal the cards (of {thisArg:expression})?`.
    * - SIDE EFFECT: mutates `signature` in place, as `processSignature()` does.
    */
-  static takeSubject(signature: MethodSignatureData, subject: P.TypeScope): void {
+  static takeSubject(signature: MethodSignatureData, subject: P.TypeScope, scope: P.Scope): void {
     // in the words a signature names a type with, `stock-pile`, as `(a stock pile)` gives
     const typeWords = kebabCase(subject.name).replace(/^-/, "")
     signature.instanceType = typeWords
-    const at = signature.syntaxBits.indexOf("it")
-    const methodAt = signature.methodBits.indexOf("it")
+    const isSubjectWord = (bit: string) =>
+      !/^[{(]/.test(bit) && SubjectRule.reads(scope, "subject_it", scope.parser?.tokenize(bit)?.[0])
+    const at = signature.syntaxBits.findIndex(isSubjectWord)
+    const methodAt = signature.methodBits.findIndex(isSubjectWord)
     if (at >= 0 && methodAt >= 0) {
       const wordBefore = signature.methodBits[methodAt - 1]
-      if (wordBefore && DANGLING_WORDS.test(wordBefore)) {
+      if (wordBefore && isDangling(wordBefore, scope)) {
         signature.methodBits[methodAt] = typeWords.replace(/-/g, "_")
       } else {
         signature.methodBits.splice(methodAt, 1)
@@ -114,7 +122,7 @@ export class MethodDefinition<
     // one word reads as a verb, `reset the solitaire`;  more, as a phrase, `deal the cards of the solitaire`
     // -- and left out, the call is on this one:  see `DynamicMethodRule.onThis()`
     if (signature.syntaxBits.length === 1) signature.syntaxBits.push("{thisArg:expression}?")
-    else signature.syntaxBits.push("(of {thisArg:expression})?")
+    else signature.syntaxBits.push(`(${scope.getRuleOrDie("receiver_of").syntax} {thisArg:expression})?`)
   }
 
   /**
@@ -273,7 +281,7 @@ export class MethodDefinition<
     const type = instanceType ? match.scope.types?.get(instanceType) : undefined
     return {
       type,
-      of: type?.name ?? (instanceType && typeCase(instanceType)),
+      of: type?.name ?? (instanceType && P.typeCase(instanceType)),
       params: args.map((arg) => MethodDefinition.paramOf(arg))
     }
   }
@@ -459,7 +467,7 @@ export class MethodDefinition<
         // console.warn("APE:", method)
         output.push(
           new P.ASTPropertyDefinition(match, {
-            type: typeCase(instanceType),
+            type: P.typeCase(instanceType),
             property: methodName,
             get: method
           })
@@ -467,7 +475,7 @@ export class MethodDefinition<
       } else {
         output.push(
           new P.ASTPropertyDefinition(match, {
-            type: typeCase(instanceType),
+            type: P.typeCase(instanceType),
             property: methodName,
             method
           })
@@ -525,18 +533,18 @@ type MethodDefinitionData = {
   scopeMethod?: P.ScopeMethod
 }
 
-/**
- * Little words a method's name may not END a phrase with, where its receiver's type was:
- * `MethodDefinition.processSignature()` keeps the type's name after one (epic `output-targets`, Q44).
- * - `to update the total of (a calculator)` => `update_the_total_of_calculator`
- * - `to set the operator of (a calculator) to (op as text)` => `set_the_operator_of_calculator_to_$op`
- * - Prepositions only:  a verb or noun before the receiver reads fine without it, `turn_face_up`, `move_to_$pile`.
- *   So do a verb's own little words (`up`, `over`, `out`, `off`, `down`):  `to pick up (a card)` => `pick_up`.
- */
-const DANGLING_WORDS =
-  /^(of|to|from|in|into|on|onto|at|by|for|with|without|before|after|about|under|through|between|within|upon|against|toward|towards)$/i
-
 /** Is `scope` a file's (or project's) top level, where a definition is `export`ed? */
 function isTopLevel(scope: P.Scope): boolean {
   return scope instanceof P.FileScope || scope instanceof P.ProjectScope
+}
+
+/**
+ * Is `word` one of the language's little words a method's name keeps its receiver's type after?
+ * - e.g. `of`:  `to update the total of (a calculator)` => `update_the_total_of_calculator`
+ * - `scope`'s language's (`SP.LanguageWords.danglingWords`), NOT the one in play:
+ *   a method read ahead (`callAhead()`) works out its name out of a parse, where English is the fallback in play.
+ *   So Spanish's `para dar la vuelta a una carta` and its call agree on `dar_la_vuelta_a_carta`.
+ */
+function isDangling(word: string, scope: P.Scope): boolean {
+  return SP.Language.of(scope).words.danglingWords.has(word.toLowerCase())
 }

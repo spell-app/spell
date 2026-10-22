@@ -5,7 +5,6 @@ import { Priority } from "spell-lang/spell/rules/rules.types"
 import { getKnownType } from "spell-lang/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { type MethodBody } from "./classes.shared"
 
 /**
@@ -74,31 +73,3 @@ export class UpgradeMethod extends SpellStatement<"type|version|body?"> {
     return `upgradeToVersion${match.groups.version.value}`
   }
 }
-classes.addRule(UpgradeMethod, {
-  syntax: "to upgrade \\( (a|an) {type:known_type} \\) to version {version:number} :? {statement_body}?",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse(["a person is a thing", "a person has a name as text"].join("\n"), "block")
-      },
-      tests: [
-        [
-          'to upgrade (a person) to version 4: set its name to "x"',
-          ["Person.prototype.upgradeToVersion4 = function () {", '  this.name = "x"', "}"],
-          [
-            "export interface Person { upgradeToVersion4(): undefined }",
-            "Person.prototype.upgradeToVersion4 = function (this: Person) {",
-            '  this.name = "x"',
-            "}"
-          ]
-        ],
-        {
-          title: "an upgrade starts at version 2",
-          input: 'to upgrade (a person) to version 1: set its name to "x"',
-          js: "/* PARSE ERROR: An upgrade starts at version 2:  a file with no version is version 1 */"
-        }
-      ]
-    }
-  ]
-})

@@ -84,6 +84,7 @@ export class MemberReadExpression<
    */
   static warnIfUndeclared(match: P.Match, ownerType: P.TypeScope | undefined, property: P.Match): void {
     if (!ownerType || !(ownerType.stub || ownerType.declaredBy)) return
+    // REFACTOR: the message and its `a` / `an` move into the language pack's messages (epic `spanish`)
     const aWord = (words: string) => `${/^[aeiou]/i.test(words) ? "an" : "a"} ${words}`
     const words = property.raw ?? `${property.value}`
     const aType = aWord(ownerType.name.toLowerCase().replace(/_/g, "-"))

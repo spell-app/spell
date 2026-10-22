@@ -78,3 +78,62 @@ export function declaredPrefix(words: P.Match, isDeclared: (words: string) => bo
   }
   return 0
 }
+
+////////////////
+// ## Names with grammar words
+////////////////
+
+/**
+ * The names in `list` and its parents' lists which hold a grammar word, as their words:
+ * lowercase, a space between, e.g. `card in play`, `lado de juego` (epic `spanish` P14).
+ * - `wordsOf`:  a name's words, e.g. `CardInPlay` => `["card", "in", "play"]`.
+ * - `isGrammarWord`:  a word which ends a name, e.g. one on the language's blacklist.
+ *   The FIRST word is never asked:  a name can't start with one, apart from a member's leading words (`in play`).
+ * - So a MENTION of a declared name can read past a word that would otherwise end it:
+ *   `the c is a new card in play`, after `a card in play is a thing`.
+ *   - Only a declared name, whole:  `card in the deck` stays `card`, then `in`.
+ * - `kind` keys the cache:  each list asks with one `isGrammarWord`.
+ * - `LOCAL_ONLY`:  `list`'s own names, not its parents', e.g. a type's own members.
+ * - Cached by each list's items array, which a list swaps rather than changes (`P.ScopeList`):
+ *   cheap enough to ask at every word, and an edit's undo is seen at once.
+ */
+export function namesWithGrammarWords<Item>(
+  list: P.ScopeList<Item, any> | undefined,
+  kind: string,
+  wordsOf: (item: Item) => string[],
+  isGrammarWord: (word: string) => boolean,
+  localOnly?: "LOCAL_ONLY"
+): string[] {
+  const names: string[] = []
+  for (let current = list; current; current = localOnly ? undefined : current.parent) {
+    const items = current.get()
+    const cache = (GRAMMAR_WORD_NAMES[kind] ??= new WeakMap())
+    let found = cache.get(items)
+    if (!found) {
+      found = []
+      for (const item of items) {
+        const words = wordsOf(item).map((word) => word.toLowerCase())
+        if (words.length > 1 && words.slice(1).some(isGrammarWord)) found.push(words.join(" "))
+      }
+      cache.set(items, found)
+    }
+    names.push(...found)
+  }
+  return names
+}
+
+/** `namesWithGrammarWords()`' cache:  by kind, then by a list's items array. */
+const GRAMMAR_WORD_NAMES: Record<string, WeakMap<readonly unknown[], string[]>> = Object.create(null)
+
+/**
+ * How many of `words`, from the first, are the longest of `names` -- 0 if none is, e.g. 3 for `card in play is`.
+ * - `words` lowercase;  `names` as `namesWithGrammarWords()` gives them.
+ */
+export function longestNameIn(words: string[], names: string[]): number {
+  let longest = 0
+  for (const name of names) {
+    const count = name.split(" ").length
+    if (count > longest && count <= words.length && words.slice(0, count).join(" ") === name) longest = count
+  }
+  return longest
+}

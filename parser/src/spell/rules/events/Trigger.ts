@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { events } from "./events.parser"
 
 /**
  * `trigger` rule:  fires a global event, optionally with a `props` object.
@@ -25,26 +24,3 @@ export class Trigger extends SpellStatement<"eventName|props?"> {
     })
   }
 }
-events.addRule(Trigger, {
-  syntax: "(trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        //
-        { input: `trigger card-click`, js: 'trigger("card-click")' },
-        {
-          input: `fire event card-click with card = 1`,
-          js: 'trigger("card-click", { card: 1 })'
-        }
-      ]
-    }
-  ]
-})
-// `fire event card click with card = it`:  an event's name of several words -- see `event_words`
-events.addRule(Trigger, {
-  syntax: "(trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?",
-  tests: [
-    { compileAs: "statement", tests: [["fire event card click with card = 1", 'trigger("card-click", { card: 1 })']] }
-  ]
-})

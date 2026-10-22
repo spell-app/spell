@@ -1,6 +1,5 @@
 import { P } from "spell-lang/parser"
 import { SpellIdentifier } from "spell-lang/spell/rules/variables"
-import { events } from "./events.parser"
 
 /** Most words an event's name may have. */
 const MAX_WORDS = 4
@@ -27,4 +26,3 @@ export class EventWords extends SpellIdentifier {
     return new P.Match({ rule: this, matched: taken, raw: name, value: name, tokens: taken, scope })
   }
 }
-events.addRule(EventWords)

@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
@@ -13,6 +12,7 @@ import type { MethodArgData } from "./methods.shared"
  *   variables.
  * - `method` is `undefined`: prop names don't appear in the generated method name.
  * - `syntax` always contributes an OPTIONAL trailing `(with {props:object_literal_properties})?` --
+ *   its first word the one the definition says, e.g. `(con {props:...})?` in Spanish --
  *   calling without `with ...` is valid, and the generated `props` param defaults to `{}`.
  * - `arg` is a single synthetic `props` argument (defaulting to `{}`); `MethodDefinition.
  *   getPropsAssignment()` destructures `props` back out into the individual prop variables at the top of
@@ -31,7 +31,8 @@ export class WithPropsArg extends P.Sequence<never, MethodArgData> {
     const props = items.map((item) => (item.data as MethodArgData).arg) as P.ASTVariableExpression[]
     match.data.items = items
     match.data.method = undefined // not part of method signature
-    match.data.syntax = "(with {props:object_literal_properties})?"
+    // the call says the word the definition was written with:  `with` in English, `con` in Spanish
+    match.data.syntax = `(${`${match.tokens[0]!.value}`.toLowerCase()} {props:object_literal_properties})?`
     match.data.props = props
     match.data.arg = new P.ASTVariableExpression(match, {
       name: "props",
@@ -41,6 +42,3 @@ export class WithPropsArg extends P.Sequence<never, MethodArgData> {
     return match
   }
 }
-methods.addRule(WithPropsArg, {
-  syntax: "with [{simple_method_arg} (,|and)]"
-})

@@ -1,6 +1,4 @@
 import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 import { TypeSpecifierEnum } from "./TypeSpecifierEnum"
 
 /**
@@ -15,34 +13,9 @@ export class OutlineSpecifierEnum extends TypeSpecifierEnum {
   @proto static alias = "outline_specifier"
 
   /**
-   * Without `either` / `one of`, two or more values joined by `or`, e.g. `up or down` (epic page Q4's comparison):
-   * one value alone, `its "x" is total`, stays a getter.
+   * Without `either` / `one of` (no word before its list), two or more values joined by `or`,
+   * e.g. `up or down` (epic page Q4's comparison):  one value alone, `its "x" is total`, stays a getter.
+   * - See `TypeSpecifierEnum.parse()`.
    */
-  parse(scope: P.Scope, tokens: P.Token[]) {
-    const match = super.parse(scope, tokens)
-    if (!match || /^(either|one)$/i.test(`${tokens[0]?.value}`)) return match
-    const list = (match.groups as { enumeration: P.Match }).enumeration
-    const hasOr = list.tokens.some((token) => `${token.value}`.toLowerCase() === "or")
-    return list.items.length >= 2 && hasOr ? match : undefined
-  }
+  @proto static wordsBeforeBareList = 0
 }
-classes.addRule(OutlineSpecifierEnum, {
-  syntax: "(either|one of) {enumeration:identifier_list}",
-  tests: [
-    {
-      tests: [["one of clubs, diamonds, hearts, spades", '["clubs", "diamonds", "hearts", "spades"]']]
-    }
-  ]
-})
-classes.addRule(OutlineSpecifierEnum, {
-  syntax: "{enumeration:identifier_list}",
-  tests: [
-    {
-      tests: [
-        ["up or down", '["up", "down"]'],
-        ["up", undefined],
-        ["up, down", undefined]
-      ]
-    }
-  ]
-})

@@ -3,8 +3,7 @@ import { P } from "spell-lang/parser"
 import { fillInsAST, parseFillIns } from "spell-lang/spell/rules/core"
 // Import directly to avoid circular import
 import { commitStatement } from "spell-lang/spell/rules/Statement"
-import { JSX } from "./JSX.parser"
-import { SPELL_ATTRIBUTE_NAMES } from "./JSX.shared"
+import { SPELL_ATTRIBUTE_WORDS, webWordFor } from "./JSX.shared"
 import { SpellJSXContent } from "./SpellJSXContent"
 
 /**
@@ -14,7 +13,7 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *   an implicit `event` argument, producing an inline event-handler method rather than an expression.
  * - Falls back to `parse_error` if neither an `expression` nor `on*` `statement` consumes the whole value.
  * - Spell's own attribute words become the web's as the AST is built:
- *   `in="header"` => `slot="header"` (`SPELL_ATTRIBUTE_NAMES`).
+ *   `in="header"` => `slot="header"` (`SPELL_ATTRIBUTE_WORDS`).
  * - NOTE: rule name is `jsxAttribute`, kept distinct from class name `SpellJSXAttribute` (pre-existing convention).
  */
 export class SpellJSXAttribute extends SpellJSXContent {
@@ -32,6 +31,7 @@ export class SpellJSXAttribute extends SpellJSXContent {
     // pull attribute name up to match
     const attributeToken = match.matched[0] as P.JSXAttributeToken
     match.data.attribute = attributeToken.name
+    match.data.webAttribute = webWordFor(scope, SPELL_ATTRIBUTE_WORDS, attributeToken.name)
     // parse `value`:  text, a number, or a `{...}` JSX expression
     const { value } = match
     // text with `[name]` fill-ins, e.g. `source="images/[rank].png"` -- as `text`'s (`parseFillIns()`)
@@ -80,10 +80,10 @@ export class SpellJSXAttribute extends SpellJSXContent {
    * Build `P.ASTJSXAttribute`.
    * - `statement` value becomes an inline `P.ASTMethodDefinition` (with an `event` arg for `on*` names).
    * - Missing `value` (bare attribute, e.g. `<input disabled/>`) becomes `true`.
-   * - Spell's own attribute words as the web's:  `in` => `slot` (`SPELL_ATTRIBUTE_NAMES`).
+   * - Spell's own attribute words as the web's, found by `parse()`:  `in` => `slot` (`SPELL_ATTRIBUTE_WORDS`).
    */
   getAST(match: P.MatchFor<this>) {
-    const { attribute, expression, statement, error, fillIns } = match.data
+    const { attribute, webAttribute, expression, statement, error, fillIns } = match.data
     const { value } = match
     let valueAST: P.ASTExpression | undefined
     if (fillIns) valueAST = fillInsAST(match, fillIns)
@@ -108,10 +108,9 @@ export class SpellJSXAttribute extends SpellJSXContent {
       valueAST = new P.ASTNothingLiteral(match)
     }
     return new P.ASTJSXAttribute(match, {
-      name: SPELL_ATTRIBUTE_NAMES.get(attribute!) ?? attribute!,
+      name: webAttribute ?? attribute!,
       value: valueAST,
       error: error?.AST as P.ASTParseError | undefined
     })
   }
 }
-JSX.addRule(SpellJSXAttribute)

@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * `new_thing` rule:  `a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).
@@ -80,27 +79,6 @@ export class NewThing extends SpellStatement<"type|props?"> {
     return (NAMES_GIVEN.get(type) ?? []).filter((given) => given.name === name).length
   }
 }
-classes.addRule(NewThing, {
-  syntax: "a new {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
-  tests: [
-    {
-      title: "creates normal types",
-      compileAs: "expression",
-      tests: [
-        [`a new thing`, `new Thing()`],
-        [`a new Thing with a = 1, b = yes`, `new Thing({ a: 1, b: true })`]
-      ]
-    },
-    {
-      title: "creates base types",
-      compileAs: "expression",
-      tests: [
-        ["a new Object", "new Object()"],
-        ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"]
-      ]
-    }
-  ]
-})
 
 /** The names each type's things are given in so many words, and the statements giving them -- see `noteNameGiven()`. */
 const NAMES_GIVEN = new WeakMap<P.TypeScope, Array<{ name: string; statement: P.Match }>>()

@@ -1,5 +1,6 @@
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
+import "./messages"
 
 /** State for the currently-running dynamic `test()`. */
 export type ActiveTest = {
@@ -18,7 +19,8 @@ export type ActiveTest = {
 
 /**
  * Return message as to whether a runtime assertion is true or false.
- * - Message is prefixed with a result icon from `core._getTestResultIcon()` (`✅`/`❌`).
+ * - One line, `[icon, message]`:  a result icon from `core._getTestResultIcon()` (`✅`/`❌`),
+ *   then `expect-passed` or `expect-failed` in the program's language (`core.message()`).
  * - With 2 arguments:
  *    - passes if `thing` is truthy
  *    - `thingSource` is spell Expression source for `thing`
@@ -37,19 +39,17 @@ export function expect(thing: unknown, thingSource: string, otherThing?: unknown
   let success: boolean
   if (arguments.length === 2) {
     success = !!thing
-    otherSource = `truthy`
+    otherSource = core.message("expect-truthy")
   } else {
     success = core.equals(thing, otherThing)
     otherSource = core.backTickQuote(otherSource)
   }
 
-  const output: unknown[] = [core._getTestResultIcon(success)]
-  thingSource = core.backTickQuote(thingSource)
-  if (success) {
-    output.push("As expected", thingSource, "is", otherSource)
-  } else {
-    output.push("Unexpected:", thingSource, "should be", otherSource, "but is actually", core.backTickQuote(thing))
-  }
+  const what = core.backTickQuote(thingSource)
+  const message = success
+    ? core.message("expect-passed", { what, expected: otherSource })
+    : core.message("expect-failed", { what, expected: otherSource, actual: core.backTickQuote(thing) })
+  const output: unknown[] = [core._getTestResultIcon(success), message]
 
   const test = core.ACTIVE_TEST
   if (test) {
@@ -117,16 +117,17 @@ export const testMethods = defineCoreModule({
     else core.console.info(message)
   },
   /**
-   * Print `▶️ Executing` plus back-tick-quoted `message`, grouped under current test if one's running.
+   * Print `▶️ Executing` plus back-tick-quoted `message` (`test-step`, in the program's language),
+   * grouped under current test if one's running.
    * - Narrates each statement's source as it executes -- auto-injected before every statement inside
    *   a method defined `to test ...` (see `P.ASTEchoInvocation` usage in `methods/MethodDefinition.ts`).
    */
   echoTestAction(message: unknown): void {
-    const output = ["▶️ Executing  ", core.backTickQuote(message)]
+    const output = core.message("test-step", { step: core.backTickQuote(message) })
     if (core.ACTIVE_TEST) {
       core.ACTIVE_TEST.output.push(output)
     } else {
-      core.console.info(...output)
+      core.console.info(output)
     }
   },
   /**

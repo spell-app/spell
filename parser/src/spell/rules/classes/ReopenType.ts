@@ -1,7 +1,6 @@
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { TypeDeclaration } from "./TypeDeclaration"
 
 /**
@@ -35,6 +34,3 @@ export class ReopenType extends TypeDeclaration<"type|with_nested_statements|bod
     return new P.ASTStatementGroup(match, { statements: [] })
   }
 }
-classes.addRule(ReopenType, {
-  syntax: "(a|an) {type} {with_nested_statements}"
-})

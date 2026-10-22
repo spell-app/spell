@@ -167,12 +167,22 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - A target whose page draws in javascript writes its drawing half too, `Solitaire.elements.spell.js`:
    *   see `elementsFileFor()`.
    */
-  /*@memoize*/
   get wordsFile(): SP.SpellJSFile {
-    return this.derived("wordsFile", () => {
-      const location = this.getFileLocation(`${this.projectName}${SP.WORDS_JS_SUFFIX}`)!
+    const lang = this.language.lang
+    // one per language:  the project file names its language once it has loaded
+    return this.derived(`wordsFile_${lang}`, () => {
+      const location = this.getFileLocation(`${this.projectName}${SP.wordsSuffixFor(lang)}`)!
       return new SP.SpellJSFile(location.path)
     })
+  }
+
+  /**
+   * The language our spell is written in, from our project file (`language`), e.g. Spanish -- English when it names none.
+   * - Its parser reads our files, its words name our words file (`Solitario.es.js`).
+   * - throws a `TypeError` naming the languages spell reads, for one it doesn't
+   */
+  get language(): SP.Language {
+    return SP.Language.for(this.contents?.language)
   }
 
   /**
@@ -282,7 +292,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   wordsFileFor(target: SP.Target): SP.SpellJSFile | undefined {
     if (!target.wordsSuffix) return undefined
-    return new SP.SpellJSFile(this.getFileLocation(`${this.projectName}${target.wordsSuffix}`)!.path)
+    // the suffix names English;  another language's file names its own, e.g. `Solitario.py.es.json5`
+    const suffix = target.wordsSuffix.replace(/\.en\.(?=[^.]+$)/, `.${this.language.lang}.`)
+    return new SP.SpellJSFile(this.getFileLocation(`${this.projectName}${suffix}`)!.path)
   }
 
   /**
@@ -337,7 +349,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Clones `parentScope`'s parser scoped to `this.path`, so rules added within project
    *   (e.g. custom types/macros) don't leak out to `parentScope` or sibling projects.
    */
-  getScope(parentScope: P.Scope = SP.SpellParser.rootScope): P.ProjectScope {
+  getScope(parentScope: P.Scope = this.language.rootScope): P.ProjectScope {
     // Make a parser that depends on the parentScope's parser
     // This way rules added to the project won't leak out.
     const parser = parentScope.parser!.clone({ module: this.path })
@@ -369,7 +381,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                 this.incremental = undefined
                 try {
                   const importScope = await this.loadImportScope(
-                    (parentScope as P.Scope | undefined) ?? SP.SpellParser.rootScope
+                    (parentScope as P.Scope | undefined) ?? this.language.rootScope
                   )
                   this.setState("scope", this.getScope(importScope))
                 } catch (error) {
@@ -432,67 +444,79 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           }),
           new Task({
             name: "Combining output",
-            run: async (allCompiled) => {
-              // each `.spell` file as its AST, so a class gets its members from every file
-              const files = [...this.sourceImportFiles, ...this.activeImports]
-              const parts = files.map((file, index) =>
-                file.AST instanceof P.ASTStatementGroup ? file.AST : (allCompiled as string[])[index]
-              )
-              const { version, exports } = this.contents ?? {}
-              // each target's code, through its writer -- `js/solid`'s first:  it's the one that runs
-              for (const target of this.targets) {
-                if (target.can.draw === false && SpellProject.draws(parts)) {
-                  throw new P.ParserError({
-                    message: `'${this.projectName}' draws a UI, which target '${target.name}' can't.`,
-                    activity: "SpellProject.compile",
-                    params: { target: target.name }
-                  })
-                }
-                const header = this.importHeader(target.writer)
-                const marked = SpellProject.combineCompiled(parts, target.writer, header, this.scope, {
-                  listsStartAt: this.contents?.listsStartAt
-                })
-                // each declaring statement's marker comes out, into our declarations -- see `SP.SpellDeclarations`
-                const { code, declarations } = SP.SpellDeclarations.split(marked, this.scope!, { version, exports })
-                this.outputFileFor(target).contents = code
-                // a target with words of its own, keyed by its names, e.g. Python's `move_to_pile`
-                const wordsFile = this.wordsFileFor(target)
-                if (wordsFile) wordsFile.contents = SP.SpellWords.json(SP.SpellWords.of(declarations, target.writer))
-                // a target whose page draws in javascript, e.g. Python's:
-                // the drawing half, `Solitaire.elements.spell.js`
-                const elementsFile = this.elementsFileFor(target)
-                if (elementsFile && SpellProject.draws(parts)) {
-                  const writer = PY.ElementsWriter.instance
-                  const elements = SpellProject.combineCompiled(parts, writer, this.importHeader(writer), this.scope, {
+            // our language in play:  the writers make words singular and plural by its rules
+            run: async (allCompiled) =>
+              this.scope!.parser!.inPlay(() => {
+                // each `.spell` file as its AST, so a class gets its members from every file
+                const files = [...this.sourceImportFiles, ...this.activeImports]
+                const parts = files.map((file, index) =>
+                  file.AST instanceof P.ASTStatementGroup ? file.AST : (allCompiled as string[])[index]
+                )
+                const { version, exports, language } = this.contents ?? {}
+                // each target's code, through its writer -- `js/solid`'s first:  it's the one that runs
+                for (const target of this.targets) {
+                  if (target.can.draw === false && SpellProject.draws(parts)) {
+                    throw new P.ParserError({
+                      message: `'${this.projectName}' draws a UI, which target '${target.name}' can't.`,
+                      activity: "SpellProject.compile",
+                      params: { target: target.name }
+                    })
+                  }
+                  const header = this.importHeader(target.writer)
+                  const marked = SpellProject.combineCompiled(parts, target.writer, header, this.scope, {
                     listsStartAt: this.contents?.listsStartAt
                   })
-                  elementsFile.contents = SP.SpellDeclarations.split(elements, this.scope!, { version, exports }).code
-                  // and its web app, `Solitaire.app.py`, for a target with one
-                  if (target.appSuffix) {
-                    const name = this.projectName ?? this.projectId
-                    this.appTexts.set(
-                      target.name,
-                      PY.quartApp({
-                        projectName: name,
-                        program: `${name}${target.suffix}`,
-                        elements: `${name}${target.elementsSuffix}`,
-                        // the app stays beside our source, the program goes where the server builds:  see `buildFolder`
-                        outputs: this.contents?.buildFolder ?? "."
-                      })
+                  // each declaring statement's marker comes out, into our declarations -- see `SP.SpellDeclarations`
+                  const { code, declarations } = SP.SpellDeclarations.split(marked, this.scope!, {
+                    version,
+                    exports,
+                    language
+                  })
+                  this.outputFileFor(target).contents = code
+                  // a target with words of its own, keyed by its names, e.g. Python's `move_to_pile`
+                  const wordsFile = this.wordsFileFor(target)
+                  if (wordsFile) wordsFile.contents = SP.SpellWords.json(SP.SpellWords.of(declarations, target.writer))
+                  // a target whose page draws in javascript, e.g. Python's:
+                  // the drawing half, `Solitaire.elements.spell.js`
+                  const elementsFile = this.elementsFileFor(target)
+                  if (elementsFile && SpellProject.draws(parts)) {
+                    const writer = PY.ElementsWriter.instance
+                    const elements = SpellProject.combineCompiled(
+                      parts,
+                      writer,
+                      this.importHeader(writer),
+                      this.scope,
+                      {
+                        listsStartAt: this.contents?.listsStartAt
+                      }
                     )
+                    elementsFile.contents = SP.SpellDeclarations.split(elements, this.scope!, { version, exports }).code
+                    // and its web app, `Solitaire.app.py`, for a target with one
+                    if (target.appSuffix) {
+                      const name = this.projectName ?? this.projectId
+                      this.appTexts.set(
+                        target.name,
+                        PY.quartApp({
+                          projectName: name,
+                          program: `${name}${target.suffix}`,
+                          elements: `${name}${target.elementsSuffix}`,
+                          // the app stays beside our source, the program goes where the server builds:  see `buildFolder`
+                          outputs: this.contents?.buildFolder ?? "."
+                        })
+                      )
+                    }
                   }
+                  if (target.name !== SP.RUNNING_TARGET) continue
+                  this.setState("compiled", code)
+                  this.declarationsFile.contents = JSON.stringify(declarations, null, 2)
+                  // spell's wording of each member, by the names this code uses -- see `SP.SpellWords`
+                  this.wordsFile.contents = SP.SpellWords.script(
+                    SP.SpellWords.of(declarations),
+                    this.projectName ?? this.projectId
+                  )
                 }
-                if (target.name !== SP.RUNNING_TARGET) continue
-                this.setState("compiled", code)
-                this.declarationsFile.contents = JSON.stringify(declarations, null, 2)
-                // spell's wording of each member, by the names this code uses -- see `SP.SpellWords`
-                this.wordsFile.contents = SP.SpellWords.script(
-                  SP.SpellWords.of(declarations),
-                  this.projectName ?? this.projectId
-                )
-              }
-              return this.compiled
-            }
+                return this.compiled
+              })
           }),
           new Task({
             name: "Saving compiled output",

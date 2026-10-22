@@ -163,3 +163,13 @@ export type ExplainOptions = GlobalOptions & {
   in?: string
   json?: boolean
 }
+
+/**
+ * `spell lang packs check|fix` flags (epic `spanish` P7).
+ * - `json`:  `check` prints its report as JSON
+ * - `ai`:  `fix` asks `claude -p` to translate each stub, rather than leaving it in English
+ */
+export type PacksOptions = GlobalOptions & {
+  json?: boolean
+  ai?: boolean
+}

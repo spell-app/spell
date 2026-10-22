@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /**
  * `list_remove_range_ordinal` rule:  remove range of items from list using ordinal words for both ends,
@@ -20,18 +19,6 @@ export class ListRemoveRangeOrdinal extends SpellStatement<"start|end|arg|list">
     })
   }
 }
-lists.addRule(ListRemoveRangeOrdinal, {
-  syntax: "remove {start:ordinal} to {end:ordinal} {arg:plural_identifier} of {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("deck")
-      },
-      tests: [["remove first to third cards of the deck", "core.removeRangeBetween(deck, 0, 3)"]]
-    }
-  ]
-})
 
 // TODO: `remove last card from the deck`
 // TODO: `remove last two cards from the deck`

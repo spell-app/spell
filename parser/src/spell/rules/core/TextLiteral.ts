@@ -1,6 +1,5 @@
 import { assert, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `text` rule:  literal `text` string.
@@ -50,35 +49,6 @@ export class TextLiteral extends P.TokenType<never, { fillIns?: FillInParts }> {
     }
   }
 }
-core.addRule(TextLiteral, {
-  tests: [
-    {
-      title: "correctly matches text",
-      tests: [
-        ['""', '""'],
-        ['"a"', '"a"'],
-        ['"abcd"', '"abcd"'],
-        ['"abc def ghi. jkl"', '"abc def ghi. jkl"'],
-        [`"...Can't touch this"`, `"...Can't touch this"`]
-      ]
-    },
-    {
-      title: "values inside:  [name] fills in;  [[ and \\[ are a real [",
-      beforeEach(scope: P.Scope) {
-        ;(scope as P.BlockScope).variables.add("rank")
-        ;(scope as P.BlockScope).variables.add("suit")
-      },
-      tests: [
-        ['"images/[rank]-of-[suit].png"', "`images/${rank}-of-${suit}.png`"],
-        ['"[rank + 1] cards"', "`${(rank + 1)} cards`"],
-        ['"[[draft]] or \\[draft]"', "`[draft] or [draft]`"],
-        ['"a `tick` and ${x}"', '"a `tick` and ${x}"'],
-        ['"`[rank]` ${x}"', "`\\`${rank}\\` \\${x}`"],
-        ['"[no such thing here]"', undefined]
-      ]
-    }
-  ]
-})
 
 /**
  * Text with fill-ins, split up:  each plain piece (as written, its escapes kept) or a fill-in's parsed match.

@@ -1,6 +1,5 @@
 import { assert, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `whitespace` rule:  any whitespace token -- space, tab, newline, etc., wrapped as-is into a `StringLiteral`.
@@ -15,4 +14,3 @@ export class Whitespace extends P.TokenType {
     return new P.ASTStringLiteral(match, { value: assert.string(value), raw })
   }
 }
-core.addRule(Whitespace)

@@ -1,7 +1,6 @@
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `random_items_expression` rule:  pick a unique set of random items from list, returning an array.
@@ -22,20 +21,3 @@ export class RandomItemsExpression extends SpellExpression<"number|arg|list"> {
     })
   }
 }
-lists.addRule(RandomItemsExpression, {
-  syntax: "{number} random {arg:plural_identifier} (of|from|in) {list:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("deck")
-      },
-      tests: [
-        ["2 random items of my-list", "core.randomItemsOf(myList, 2)"],
-        [`2 random words in "some other words"`, `core.randomItemsOf("some other words", 2)`],
-        ["3 random cards from deck", "core.randomItemsOf(deck, 3)"]
-      ]
-    }
-  ]
-})

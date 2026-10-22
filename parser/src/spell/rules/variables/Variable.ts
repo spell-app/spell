@@ -1,8 +1,7 @@
-import { NONE, type Plurality } from "spell-kit/util"
+import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SpellIdentifier } from "./SpellIdentifier"
-import { VARIABLE_SYNTAX, type IdentifierMatchData } from "./variables.shared"
-import { variables } from "./variables.parser"
+import { type IdentifierMatchData } from "./variables.shared"
 
 /**
  * `variable` rule:  `SpellIdentifier` which may or may not be known, with optional `the` prefix, e.g. `the thing`.
@@ -31,27 +30,13 @@ export class Variable extends P.Sequence<"identifier", VariableMatchData> {
    * Plurality of our identifier -- `the` adds nothing here either.
    * - Same signature as `SpellIdentifier.getPlurality()`, so callers needn't care which they've got.
    */
-  getPlurality(match: P.MatchFor<this>): Plurality {
+  getPlurality(match: P.MatchFor<this>): P.Plurality {
     const { identifier } = match.groups
     // Syntax guarantees this, but the type system can't know which rule `{identifier}` resolves to.
     if (!identifier.is(SpellIdentifier)) throw new TypeError(`Expected an identifier, got '${identifier.raw}'.`)
     return identifier.rule.getPlurality(identifier)
   }
 }
-variables.addRule(Variable, {
-  syntax: VARIABLE_SYNTAX,
-  tests: [
-    {
-      tests: [
-        { title: "single word", input: "thing", js: "thing" },
-        { title: "single word with the", input: "the thing", js: "thing" },
-        { title: "multi-word", input: "bank-account", js: "bankAccount" },
-        { title: "multi-word with the", input: "the bank-account", js: "bankAccount" },
-        { title: "blacklisted word", input: "if", js: undefined }
-      ]
-    }
-  ]
-})
 
 /** What `variable` / `known_variable` stash on their matches. */
 type VariableMatchData = IdentifierMatchData

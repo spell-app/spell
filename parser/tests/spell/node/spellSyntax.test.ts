@@ -2,26 +2,45 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, expect, test } from "vite-plus/test"
 
-import { SPELL_SYNTAX_FILE, purposeOf, spellSyntax, withoutComments } from "spell-lang/spell/node/spellSyntax"
+import { SP } from "spell-lang/spell"
+import {
+  SPELL_SYNTAX_FILE,
+  purposeOf,
+  spellSyntax,
+  spellSyntaxFileFor,
+  withoutComments
+} from "spell-lang/spell/node/spellSyntax"
 
-/** Where `yarn spell:gen:syntax` writes the spell syntax table. */
-const SYNTAX_FILE = resolve(import.meta.dirname, "../../../src/spell", SPELL_SYNTAX_FILE)
+/** Where `yarn spell:gen:syntax` writes the spell syntax tables. */
+const SYNTAX_FOLDER = resolve(import.meta.dirname, "../../../src/spell")
+
+describe("each language's spell syntax table is up to date:  if not, run `yarn spell:gen:syntax` in spell-lang", () => {
+  for (const language of SP.Language.all.values()) {
+    const file = spellSyntaxFileFor(language)
+    test(`${language.name}'s, ${file}`, () => {
+      const written = JSON.parse(readFileSync(resolve(SYNTAX_FOLDER, file), "utf8")) as unknown
+      expect(written, `${file} is out of date:  run \`yarn spell:gen:syntax\` in spell-lang`).toEqual(
+        spellSyntax(language)
+      )
+    })
+  }
+
+  test("English's is spellSyntax.json;  Spanish's, spellSyntax.es.json", () => {
+    expect(spellSyntaxFileFor(SP.english)).toBe(SPELL_SYNTAX_FILE)
+    expect(spellSyntaxFileFor(SP.spanish)).toBe("spellSyntax.es.json")
+  })
+})
 
 describe("the spell syntax table, spellSyntax.json", () => {
   const data = spellSyntax()
   const rows = data.modules.flatMap((module) => module.rules)
-
-  test("is up to date with the rules:  if not, run `yarn spell:gen:syntax` in spell-lang", () => {
-    const written = JSON.parse(readFileSync(SYNTAX_FILE, "utf8")) as unknown
-    expect(written, "spellSyntax.json is out of date:  run `yarn spell:gen:syntax` in spell-lang").toEqual(data)
-  })
 
   test("lists each rule class once, every rule name under one", () => {
     const classes = rows.map((row) => row.className)
     expect(new Set(classes).size).toBe(classes.length)
     const names = rows.flatMap((row) => row.ruleNames)
     expect(new Set(names).size).toBe(names.length)
-    expect(names).toEqual(expect.arrayContaining(["is_gt_lt", "list_add_relative", "is", "can"]))
+    expect(names).toEqual(expect.arrayContaining(["is_gt_lt", "list_add_relative", "is_or_is_not", "can_or_cannot"]))
   })
 
   test("a rule's syntax, its example in each writer, and its aliases", () => {
@@ -31,7 +50,7 @@ describe("the spell syntax table, spellSyntax.json", () => {
       file: "src/spell/rules/math/IsGtLt.ts",
       syntaxes: [
         {
-          syntax: "(operator:is (greater|less) than (or equal to)?) {expression:operand}",
+          syntax: "{operator:is_greater_or_less_than} {expression:operand}",
           example: "salary is greater than expenses",
           outputs: {
             js: { code: "(salary > expenses)" },
@@ -72,7 +91,21 @@ describe("the spell syntax table, spellSyntax.json", () => {
 
   test("a class specialized into several rules is one row, with each rule's syntax", () => {
     const row = rows.find((it) => it.className === "Negatable")
-    expect(row?.ruleNames).toEqual(["is", "can", "will", "has"])
+    expect(row?.ruleNames).toEqual([
+      "is_or_is_not",
+      "is_or_is_not_a",
+      "can_or_cannot",
+      "will_or_will_not",
+      "has_or_has_not",
+      "is_neither",
+      "is_defined_or_not",
+      "exists_or_not",
+      "there_is_or_is_not",
+      "starts_with_or_not",
+      "ends_with_or_not",
+      "has_or_has_no",
+      "exclusive_or_not"
+    ])
     expect(row?.syntaxes[0]).toEqual({ syntax: "(is|(negated:is not|isn't|isnt))" })
   })
 
@@ -130,5 +163,36 @@ describe("purposeOf()", () => {
   test("a lead ending in a colon ends in a period;  none:  blank", () => {
     expect(purposeOf("a class variable, e.g.:\n- `card suits`")).toBe("A class variable, e.g.")
     expect(purposeOf(undefined)).toBe("")
+  })
+})
+
+describe("Spanish's spell syntax table, spellSyntax.es.json", () => {
+  const rows = spellSyntax(SP.spanish).modules.flatMap((module) => module.rules)
+
+  test("a rule's Spanish syntax, its example from its Spanish tests, and what that compiles to", () => {
+    expect(rows.find((row) => row.className === "IsGtLt")).toMatchObject({
+      ruleNames: ["is_gt_lt"],
+      file: "src/spell/rules/math/IsGtLt.ts",
+      syntaxes: [
+        {
+          syntax: "{operator:is_greater_or_less_than} {expression:operand}",
+          example: "salary es mayor que expenses",
+          outputs: { js: { code: "(salary > expenses)" } }
+        }
+      ]
+    })
+  })
+
+  test("a word rule says its Spanish words", () => {
+    const row = rows.find((it) => it.className === "Negatable")
+    expect(row?.syntaxes[0]).toEqual({ syntax: "(es|está|esta|(negated:no es|no está|no esta))" })
+  })
+
+  test("every example compiles, in javascript", () => {
+    const failed = rows
+      .flatMap((row) => row.syntaxes.map((form) => ({ className: row.className, ...form })))
+      .filter(({ outputs }) => outputs && "error" in outputs.js)
+      .map(({ className, example }) => `${className}:  ${example}`)
+    expect(failed).toEqual([])
   })
 })

@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { MemberReadExpression } from "./MemberReadExpression"
-import { properties } from "./properties.parser"
 
 /**
  * `property_expression` rule:  `the {member words} of {thing}` ~== `thing.member`.
@@ -53,68 +52,3 @@ export class PropertyExpression extends MemberReadExpression<"property|expressio
     return property.length === 1 && scope.getRuleOrDie("property").test(scope, property.tokens, 0) !== false
   }
 }
-properties.addRule(PropertyExpression, {
-  syntax: "the {property:member_words} of {expression:operand}",
-  tests: [
-    {
-      title: "resolved:  what the type declares",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.compile(
-          [
-            "a card is a thing",
-            "a card has a suit as one of clubs, diamonds",
-            "the short rank of a card is: 1",
-            "the long-name of a card is: 2",
-            "a deck is a list of cards",
-            "the last card of a deck is: its bottom card",
-            "the card is a new card",
-            "the deck is a new deck"
-          ].join("\n"),
-          "block"
-        )
-      },
-      tests: [
-        ["the short rank of the card", "card.shortRank"],
-        ["the short-rank of the card", "card.shortRank"],
-        ["the long name of the card", "card.longName"],
-        ["the last card of the deck", "deck.lastCard"],
-        ["the short rank of the last card of the deck", "deck.lastCard.shortRank"],
-        ["the suit of the card", "card.suit"],
-        ["the suits of the card", "Card.Suits"]
-      ]
-    },
-    {
-      title: "built in:  as the type's table entry compiles it -- see `SP.BUILT_IN_TYPE_TABLE`",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add({ name: "name", datatype: "text" })
-        scope.variables?.add({ name: "deck", datatype: "list" })
-        scope.variables?.add({ name: "due", datatype: "date" })
-        scope.variables?.add("bar")
-      },
-      tests: [
-        ["the length of the name", "name.length"],
-        ["the length of the deck", "core.itemCountOf(deck)"],
-        ["the year of the due", "due.getFullYear()"],
-        { title: "unknown type:  a loose read, as before", input: "the length of bar", js: "bar.length" }
-      ]
-    },
-    {
-      title: "loose:  one word, nothing need declare",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("bar")
-        scope.variables?.add("baz")
-      },
-      tests: [
-        ["the foo of bar", "bar.foo"],
-        ["the foo of the bar", "bar.foo"],
-        ["the foo of the bar of the baz", "baz.bar.foo"],
-        ["the foo-bar of the baz", "baz.fooBar"],
-        { title: "several undeclared words:  not a property read", input: "the foo bar of the baz", js: undefined },
-        { title: "a blacklisted word:  not a loose read", input: "the short of the baz", js: undefined }
-      ]
-    }
-  ]
-})

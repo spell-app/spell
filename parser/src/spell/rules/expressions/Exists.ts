@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `exists` rule:  `{lhs} exists`/`does not exist` postfix, e.g. `thing exists`.
@@ -11,9 +10,6 @@ import { expressions } from "./expressions.parser"
 export class Exists extends PostfixOperatorSuffix {
   @proto static precedence = Precedence.comparison
 
-  shouldNegateOutput(operator: P.Match): boolean {
-    return operator.value !== "exists"
-  }
   compileASTExpression(match: P.MatchFor<this>, { lhs }: OperatorOperands): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "isDefined",
@@ -21,18 +17,3 @@ export class Exists extends PostfixOperatorSuffix {
     })
   }
 }
-expressions.addRule(Exists, {
-  syntax: "(exists|does not exist)",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-      },
-      tests: [
-        ["thing exists", "thing !== undefined"],
-        ["thing does not exist", "thing === undefined"]
-      ]
-    }
-  ]
-})

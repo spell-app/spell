@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 
 /**
  * `thing_name` rule:  the name of one thing, written bare after its type (epic `drawable-thing` P19).
@@ -13,20 +12,9 @@ import { classes } from "./classes.parser"
  */
 export class ThingName extends P.Pattern {
   @proto static matchGroup = "name"
-  @proto static pattern = /^[A-Z][\w-]*$/
+  @proto static pattern = P.UPPER_INITIAL_WORD_WITH_DASHES
 
   getAST(match: P.MatchFor<this>): P.ASTStringLiteral {
     return new P.ASTStringLiteral(match, { value: `${match.value}`, quote: '"' })
   }
 }
-classes.addRule(ThingName, {
-  tests: [
-    {
-      tests: [
-        ["T1", '"T1"'],
-        ["North-Pile", '"North-Pile"'],
-        { title: "lowercase:  quote it instead", input: "stock", js: undefined }
-      ]
-    }
-  ]
-})

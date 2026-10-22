@@ -1,5 +1,7 @@
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
+import { Wording } from "spell-lang/spell/rules/expressions"
+import { SubjectRule } from "spell-lang/spell/rules/types"
 import { SpellStatement, commitStatement } from "./Statement"
 import { Block, type BlockMatchData } from "./Block"
 import { SpellJSX } from "./JSX"
@@ -44,6 +46,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
   /**
    * SIDE EFFECT: calls `statement.rule.mutateScope()` on the parsed statement (and on any nested block's
    * errors are folded in too), so a locked-in statement can e.g. add variables to `scope` as it's parsed.
+   * - SIDE EFFECT:  then notes a warning on the statement for each article which doesn't agree with its noun,
+   *   e.g. `a apple` -- see `SP.SpellWarnings.noteArticles()`.
    */
   parse(scope: P.Scope, lines: P.Token[]): P.Match | undefined {
     const line = lines[0]
@@ -129,6 +133,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
         const nextItem = lines[1]
         const inlineBody = statement.rule instanceof SpellStatement ? statement.rule.getBody(statement) : undefined
         const committed = commitStatement(statement, nextItem)
+        // once committed:  a type this line declares has its gender -- see `SpellWarnings.noteArticles()`
+        SP.SpellWarnings.noteArticles(statement)
         const nestedBlockMatch = committed.body
         lineBodyMark = committed.bodyMark
         fromBody = committed.fromBody
@@ -180,12 +186,15 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
   /**
    * Is `tokens` an outline body's line, e.g. `it has a deck` or `its "suit" is ...`, NOT in a type's body -- so it
    * didn't parse?  Its error then says where it belongs (epic page `outline-spell`, P6).
-   * - `it` / `its`, then a quoted name or phrase, or `has` / `belongs`.
+   * - `it` / `its` (`subject_it`, `subject_its`), then a quoted name or phrase, or `has` / `belongs`
+   *   (`has_or_belongs`):  each language's own words.
    */
   static isOutlineLineOutsideBody(scope: P.Scope, tokens: P.Token[]): boolean {
     const [subject, next] = tokens
-    if (!/^its?$/i.test(`${subject?.value}`) || P.SubjectScope.of(scope) || scope instanceof P.MethodScope) return false
-    return next instanceof P.TextToken || /^(has|belongs)$/i.test(`${next?.value}`)
+    const isSubject =
+      SubjectRule.reads(scope, "subject_it", subject) || SubjectRule.reads(scope, "subject_its", subject)
+    if (!isSubject || P.SubjectScope.of(scope) || scope instanceof P.MethodScope) return false
+    return next instanceof P.TextToken || Wording.lengthAt(scope, "has_or_belongs", tokens, 1) > 0
   }
 
   /**

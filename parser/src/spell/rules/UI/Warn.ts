@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { UI } from "./UI.parser"
 
 /**
  * `warn` rule:  warning message -- like alert but more dire.
@@ -26,15 +25,3 @@ export class Warn extends SpellStatement<"message|okButton?"> {
     })
   }
 }
-UI.addRule(Warn, {
-  syntax: "warn {message:expression} (with {okButton:text})?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`warn "Yo!"`, `await core.warn("Yo!")`],
-        [`warn "Yo!" with "yep"`, `await core.warn("Yo!", "yep")`]
-      ]
-    }
-  ]
-})

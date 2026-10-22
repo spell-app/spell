@@ -1,7 +1,6 @@
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { classes } from "./classes.parser"
 
 /**
  * `thing_at_place` rule:  one thing, by its type and its place (epic `drawable-thing` P19, Owen's J23).
@@ -28,19 +27,3 @@ export class ThingAtPlace extends SpellExpression<"ordinal|type"> {
     })
   }
 }
-classes.addRule(ThingAtPlace, {
-  syntax: "the {ordinal} {type:known_type}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.compile(["a pile is a list of things", "a tableau is a pile"].join("\n"), "block")
-      },
-      tests: [
-        ["the first tableau", "core.thingAtPlace(Tableau, 1)"],
-        ["the second tableau", "core.thingAtPlace(Tableau, 2)"],
-        ["the last tableau", "core.thingAtPlace(Tableau, -1)"]
-      ]
-    }
-  ]
-})

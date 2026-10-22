@@ -15,6 +15,7 @@ import type { jsonMethods } from "./json"
 import type { carryMethods } from "./carry"
 import type { classesMethods } from "./classes"
 import type { deprecatedMethods } from "./deprecated"
+import type { messageMethods } from "./messages"
 import type { PropRule } from "spell-kit/util"
 
 // ## Importing core
@@ -84,7 +85,47 @@ export type Core = typeof coreMethods &
   typeof jsonMethods &
   typeof carryMethods &
   typeof classesMethods &
+  typeof messageMethods &
   typeof deprecatedMethods
+
+// ## Messages
+
+/**
+ * What the core says to the person running a program, in English:  its built-in words, by key (epic `spanish` P12).
+ * - `core.message(key, values)` fills one in:  each `{name}` is `values.name`.
+ * - A project in another language brings its own, in its words file's `messages`, which the runner hands
+ *   `core.useMessages()`:  each from its language pack (spell's `languages/<lang>/messages.ts`).
+ *   - English writes none:  these are its words.
+ * - ONLY what a person running the program sees.  What a programmer sees stays English:
+ *   assertions, thrown errors, a property's type warnings, `draw() failed` on the console.
+ *
+ * | Key | Where it shows | Placeholders |
+ * | --- | --- | --- |
+ * | `expect-passed` | a test's ✅ line, `expect` | `what`, `expected` |
+ * | `expect-failed` | a test's ❌ line, `expect` | `what`, `expected`, `actual` |
+ * | `expect-truthy` | what `expect x` with no value expects | |
+ * | `test-step` | a `to test ...` method's ▶️ line, each statement | `step` |
+ * | `test-threw` | a test that threw (Python's core:  the javascript core's swallows it) | `test` |
+ * | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
+ * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
+ *
+ * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
+ */
+export const CORE_MESSAGES = {
+  "expect-passed": "As expected {what} is {expected}",
+  "expect-failed": "Unexpected: {what} should be {expected} but is actually {actual}",
+  "expect-truthy": "truthy",
+  "test-step": "▶️ Executing   {step}",
+  "test-threw": "Error in test {test}:",
+  "cant-draw": "⚠ {type} can't draw",
+  "confirm-default": "{question} (yes)"
+}
+
+/** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */
+export type CoreMessageKey = keyof typeof CORE_MESSAGES
+
+/** Every one of the core's messages, in one language:  what a language pack holds (`SP.Language.messages`). */
+export type CoreMessages = Record<CoreMessageKey, string>
 
 // ## Properties
 

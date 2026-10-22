@@ -1,11 +1,11 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
+import { SpellExpression, Wording } from "spell-lang/spell/rules/expressions"
 
 /**
  * `round_number` rule:  `round {expression}`, optionally `off`/`up`/`down`, e.g. `round price up`.
+ * - Which way, by what `operator` means (`rounding`):  `up`, `down`, or none, the nearest.
  * - TODO: precision:  to the nearest tenth ?
  * - `Priority.preferred`, lowest of the `expression` alternatives here.
  */
@@ -14,14 +14,15 @@ export class RoundNumber extends SpellExpression<"expression|operator?"> {
   @proto static datatype = "number"
 
   /**
-   * Maps `off`/`up`/`down` suffix to `round`/`roundUp`/`roundDown`:  each writer says it as its platform does
+   * Maps `operator`'s meaning, none / `up` / `down`, to `round`/`roundUp`/`roundDown`:  each writer says it as its platform does
    * (epic `python-target` P24, Owen on Q29):  `Math.round(price)`, `math.floor(price + 0.5)`.
    */
   getAST(match: P.MatchFor<this>) {
     const { expression, operator } = match.groups
+    const rounding = Wording.meaningOf(operator)
     let methodName = "round"
-    if (operator?.value === "up") methodName = "roundUp"
-    else if (operator?.value === "down") methodName = "roundDown"
+    if (rounding === "up") methodName = "roundUp"
+    else if (rounding === "down") methodName = "roundDown"
     return new P.ASTCoreMethodInvocation(match, {
       datatype: "number",
       methodName,
@@ -29,20 +30,3 @@ export class RoundNumber extends SpellExpression<"expression|operator?"> {
     })
   }
 }
-math.addRule(RoundNumber, {
-  syntax: "round {expression:arithmetic_expression} (operator:off|up|down)?",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("price")
-      },
-      tests: [
-        ["round price", "Math.round(price)"],
-        ["round price off", "Math.round(price)"],
-        ["round price up", "Math.ceil(price)"],
-        ["round price down", "Math.floor(price)"]
-      ]
-    }
-  ]
-})

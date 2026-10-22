@@ -324,6 +324,9 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - `a bank account aka account is a thing`:  ONE type, compiled `Bank_Account`, as `bank-account` would be.
   - Afterwards `bank account(s)` and `account(s)` both name it.
 - A DECLARATION's name is [`type_words`](rules/types/TypeWords.ts):  every word up to a blacklisted one or `aka`.
+  - Or blacklisted words too, when the whole name runs up to `is` or `aka` (epic `spanish` P14):
+    `a card in play is a thing`, `una carta de juego es una cosa`.
+  - In quotes, the same:  `a "card in play" is a thing` ([`quoted_type`](rules/types/QuotedType.ts)).
   - Its rules:  `create_type` and `create_list_type`.
     Their syntax:  `(a|an) {type:type_words} (aka {aka:singular_type})? is ...`
   - Both declare through `TypeDeclaration.declareType()`.
@@ -333,6 +336,9 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - first the LONGEST run of 2 to `MAX_NAME_WORDS` words that names a type in scope, joined with dashes to look up
   - else one word, as ever
   - So only DECLARED names take several words:  `a big card` stays a card, unless someone declared a `big card`.
+  - A declared name holding a grammar word is found whole, before the blacklist ends it:  `a new card in play`.
+    - Its plural is its FIRST word's:  `a list of cards in play`, `cartas de juego`.
+    - `namesWithGrammarWords()` ([rules.types.ts](rules/rules.types.ts)) lists them, cached per scope list.
   - A type has to be declared before a mention of several words can find it:  no stubs for those.
   - Those rules:  `type`, `known_type`, `singular_type` ...
 - Spell's own two-word types are built in (epic `drawable-thing`, P2):
@@ -353,9 +359,13 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 ## Members:  `the short rank of the card`
 
 - A member's NAME is [`member_words`](rules/properties/MemberWords.ts):  1..N words, up to the first structural one.
-  - `MEMBER_STOP_WORDS`:
+  - The language's stop words, `memberStopWords` (`SP.LanguageWords`;  English's in `languages/en/words.ts`):
     `of the a an is has have in to and or if where as with whose for from then else otherwise not ...`
   - It's NOT the identifier blacklist, so `short` is fine.
+  - A member declared with a stop word in its name, in quotes, is read whole, longest first (epic `spanish` P14):
+    `its "side of play" is a number`, then `the side of play of the card`, `su fecha de nacimiento`.
+    - Any type's:  `the X of Y` takes its words before Y's type is known.
+    - Without quotes, a declaration's name still stops at the stop word.
   - Its two spellings:
     - `value`:  its compiled name, `short_rank`
     - `raw`:  its words, `short rank`
@@ -664,6 +674,18 @@ A kind that says so is saved in a file of its own.
       - e.g. `the name of the pile` => `A pile never says it has a name:  declare it, e.g. "a pile has a name as text"`
       - Only on a type the project declares, all of whose super-types are its own or spell's:
         an imported type's importer may give it anything (`MemberReadExpression.warnIfUndeclared()`, `noteIf()`).
+    - an article that doesn't agree with its noun (epic `spanish` P8), the ONE warning no rule notes:
+      - e.g. `a apple` => `Did you mean "an apple"?`;  Spanish's `el carta` => `¿Querías decir "la carta"?`
+      - `BlockLine` notes it on each line's statement, once committed:  `SP.SpellWarnings.noteArticles()`.
+        So a type the line declares already has its gender.
+      - An article is a form of the language's `indefinite_article` / `definite_article` word rule
+        (`Synonyms.matchAt()`, `Synonyms.formOf()`);  its noun the words after it, up to a structural word.
+      - What agrees is the language pack's:  `SP.Language.agreement(article, noun, type)`,
+        each pack's `agreement.ts` (`languages/en/`, `languages/es/`).
+        - English:  `a` / `an` by the noun's first sound;  needs no type.
+        - Spanish:  gender and number, only for a noun naming a type.
+          A type's gender is read off its declaration's article (`TypeDeclaration.genderOf()`, `P.TypeScope.gender`),
+          and kept in its declarations;  the built-in types' are in the Spanish pack.
   - Editors show them as `DiagnosticSeverity.Warning` (`SpellLanguageService.diagnostics()`).
   - `spell compile` lists them after its errors, never counting them:  see "Language server".
 
@@ -1045,7 +1067,7 @@ A kind that says so is saved in a file of its own.
       - e.g. `to make a mess`, `to reset the stock pile`
     - its compiled NAME drops the receiver's type (`turn_over`), unless that leaves a little word dangling (Q44)
       - then it keeps the type's name:  `to update the total of (a calculator)` => `update_the_total_of_calculator`
-      - `MethodDefinition.processSignature()`, `DANGLING_WORDS`
+      - `MethodDefinition.processSignature()`, the language's `danglingWords`
     - in a type's outline body, a signature that names no type takes the body's subject (P20, I15)
       - `- to debug it:` ~== `to debug a solitaire`
         - `it` is where the receiver goes
@@ -1093,7 +1115,9 @@ A kind that says so is saved in a file of its own.
   - `words_identifier`:  2 to 4 plain words, up to a structural one (`to`, `of`, `with` ...);
     the longest run a variable in scope goes by, else the whole run.
   - The same variable as its dashed name:  `start pile` and `start-pile` are both `start_pile`.
-  - A name can't hold a structural word:  `cards-to-move` is written `moving cards`.
+  - A name holding a structural word is declared with dashes, `set way-to-go to 3`,
+    then read either way, `way to go`, longest first (epic `spanish` P14).
+    - Its first word can't be one:  `no more` reads `no`, then `more`.
   - Its quick test looks the words up first:  it's an expression, tried at almost every word.
   - An event's name of several words too, `on card click`, `fire event card click` (`event_words`):
     the same event as `card-click`.

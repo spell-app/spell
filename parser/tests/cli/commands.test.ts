@@ -8,7 +8,7 @@ describe("the language's spell commands (epic repo-split P13)", () => {
   languageCommands(spell)
   const names = spell.commands.map((command) => command.name())
 
-  test("Owen's names:  lint (was check), speedtest (was speed);  no explore", () => {
+  test("Owen's names:  lint (was check), speedtest (was speed);  no explore;  lang for the language's own tools", () => {
     expect(names).toEqual([
       "compile",
       "lint",
@@ -20,8 +20,14 @@ describe("the language's spell commands (epic repo-split P13)", () => {
       "speedtest",
       "parse",
       "repl",
-      "explain"
+      "explain",
+      "lang"
     ])
+  })
+
+  test("the language packs' tools:  spell lang packs check, spell lang packs fix (epic spanish P7)", () => {
+    const packs = spell.commands.find((command) => command.name() === "lang")!.commands[0]!
+    expect([packs.name(), ...packs.commands.map((command) => command.name())]).toEqual(["packs", "check", "fix"])
   })
 
   test("each project command says how to name projects", () => {

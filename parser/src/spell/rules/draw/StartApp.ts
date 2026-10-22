@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { draw } from "./draw.parser"
 
 /**
  * `start_app` rule:  start a scoped `App`/`Drawable`, e.g. `start the game` => `game.start()`
@@ -23,6 +22,3 @@ export class StartApp extends SpellStatement<"app"> {
     })
   }
 }
-draw.addRule(StartApp, {
-  syntax: "start {app:expression}"
-})

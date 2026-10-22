@@ -9,25 +9,36 @@ core.words_of(card)["move_to_pile"]  # "move (a card) to (a pile)"
 - The compiler writes each program's words beside its Python, `<Project>.py.en.json5`, keyed by the Python names --
   the same data as javascript's `<Project>.en.js`, which the Thing Explorer reads.
 - Loading them is up to whoever reflects on the program:  a compiled program never needs them to run.
+- A program in a language other than English has its `messages` there too:  `load_words()` hands them to
+  `use_messages()`, so its tests print in its language (epic spanish, P12).
 """
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 
 class WordMethods:
     """`core.load_words()` and `core.words_of()`."""
 
+    # what the core says, in the words' language:  `MessageMethods`, which `Core` adds
+    use_messages: "Callable[[dict[str, str] | None], None]"
+
     # Each type's members, by Python name, in spell's words:  `{"Card": {"move_to_pile": "move (a card) ..."}}`
     words: dict[str, dict[str, str]]
 
     def load_words(self, path: str | Path) -> None:
-        """Load a program's words file, e.g. `Solitaire.py.en.json5`, beside those already loaded."""
+        """Load a program's words file, e.g. `Solitaire.py.en.json5`, beside those already loaded.
+
+        - Its `messages`, if it has any, become what the core says (`use_messages()`):  e.g. `cartas.py.es.json5`'s.
+        """
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         if not hasattr(self, "words"):
             self.words = {}
         for type_name, members in data.get("types", {}).items():
             self.words.setdefault(type_name, {}).update(members)
+        if data.get("messages"):
+            self.use_messages(data["messages"])
 
     def words_of(self, thing: object) -> dict[str, str]:
         """`thing`'s members in spell's words, its own class's and those it extends, by Python name."""

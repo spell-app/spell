@@ -551,7 +551,8 @@ export const TYPE_WORDS: P.TypeWords = {
  * - Anything else is a user's type, PascalCase and singular:  `cards` => `Card`.
  */
 export function typeName(written: string): P.Datatype {
-  return P.typeName(written, TYPE_WORDS)
+  const { typeWords, words } = SP.Language.active
+  return P.typeName(written, typeWords, words.listOfWord)
 }
 
 ////////////////
@@ -568,7 +569,7 @@ export function typeName(written: string): P.Datatype {
  * - Throws for a type the scope doesn't have, or a template `parseReadAsTemplate()` can't read.
  * - SIDE EFFECT:  changes the shared root's types, once -- `SpellParser.rootScope` calls it as it builds.
  */
-export function loadBuiltInTypes(scope: P.RootScope): void {
+export function loadBuiltInTypes(scope: P.RootScope, words: SP.LanguageWords = SP.Language.default.words): void {
   for (const entry of BUILT_IN_TYPE_TABLE) {
     const type = scope.types.get(entry.name, "LOCAL_ONLY")
     if (!type) throw new TypeError(`Built-in type '${entry.name}' isn't in the root scope:  see P.BUILT_IN_TYPES`)
@@ -579,13 +580,24 @@ export function loadBuiltInTypes(scope: P.RootScope): void {
         type.variables.add({ name: builtInMemberName(words), datatype, docstring })
         continue
       }
+      // the language's own words for it, e.g. Spanish's `largo` for `length`:  each reads the same
+      const local = words.builtInMembers?.[member.words]
+      if (local && member.readAs) {
+        for (const said of local) {
+          const name = builtInMemberName(said)
+          const { datatype, readAs, docstring } = member
+          type.variables.add({ name, ...(said !== name ? { asWritten: said } : {}), datatype, readAs, docstring })
+        }
+        continue
+      }
       if (!member.readAs) continue
       if (!parseReadAsTemplate(member.readAs)) {
         throw new TypeError(`Built-in ${entry.name}'s '${member.words}':  can't read template '${member.readAs}'`)
       }
-      const { words, datatype, readAs, docstring } = member
-      const name = builtInMemberName(words)
-      type.variables.add({ name, ...(words !== name ? { asWritten: words } : {}), datatype, readAs, docstring })
+      const { datatype, readAs, docstring } = member
+      const name = builtInMemberName(member.words)
+      const asWritten = member.words !== name ? { asWritten: member.words } : {}
+      type.variables.add({ name, ...asWritten, datatype, readAs, docstring })
     }
   }
 }
@@ -653,7 +665,11 @@ export function builtInMembersOfRule(ruleName: string): Array<{ type: SP.BuiltIn
  * - See `SpellStatement.refuseBuiltInType()`.
  */
 export function isBuiltInTypeScope(type: P.TypeScope | undefined): boolean {
-  return !!type && SP.SpellParser.rootScope.types.get(type.name, "LOCAL_ONLY") === type
+  if (!type) return false
+  // any language's root:  a Spanish project's built-ins are its own root scope's
+  return [...SP.Language.all.values()].some(
+    (language) => language.rootScope.types.get(type.name, "LOCAL_ONLY") === type
+  )
 }
 
 /**

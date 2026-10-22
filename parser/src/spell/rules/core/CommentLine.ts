@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `comment` rule:  line comment token -- wraps a `CommentToken` into a `LineComment` AST node, e.g. `// foo`.
@@ -19,17 +18,3 @@ export class CommentLine extends P.TokenType {
     return new P.ASTLineComment(match, { commentSymbol, initialWhitespace, value })
   }
 }
-core.addRule(CommentLine, {
-  tests: [
-    {
-      compileAs: "comment",
-      tests: [
-        ["//", "//"],
-        ["// foo", "// foo"],
-        ["-- foo", "//-- foo"],
-        ["## foo", "//## foo"],
-        ["//    foo bar baz", "//    foo bar baz"]
-      ]
-    }
-  ]
-})

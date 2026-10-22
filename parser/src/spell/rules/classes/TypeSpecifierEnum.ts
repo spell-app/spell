@@ -1,15 +1,37 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 
 /**
  * `type_specifier_enum` rule:  specifies a property's allowed values as an enumeration,
  * for use by `define_property_has`.
  * - e.g. `as either red or black`, `as one of clubs, diamonds, hearts, spades`
  * - Compiles (via `getAST()`) to a `P.ASTEnumeration` array literal, e.g. `["red", "black"]`.
+ * - Without `either` / `one of`, only two or more values joined by `or`:  Spanish's `como arriba o abajo`.
+ *   One value alone, `como texto`, is a type (`type_specifier_datatype`) -- see `parse()`.
  */
 export class TypeSpecifierEnum extends P.Sequence<"enumeration"> {
   @proto static alias = "type_specifier"
+  /**
+   * How many words come before the list when it has no `either` / `one of`:  1, its `as` (`como`).
+   * - English always says `either` or `one of`;  Spanish may leave them out, `como arriba o abajo`.
+   */
+  @proto static wordsBeforeBareList = 1
+  declare wordsBeforeBareList: number
+
+  /**
+   * A list with no `either` / `one of` before it (only `wordsBeforeBareList` words) must be two or more values
+   * joined by `or`, e.g. `up or down`:  one value alone, or `texto, que`, isn't an enumeration.
+   * - `or` is the language's own:  the `and_or` word rule's word meaning `or`.
+   */
+  parse(scope: P.Scope, tokens: P.Token[]) {
+    const match = super.parse(scope, tokens)
+    if (!match) return match
+    const list = (match.groups as { enumeration: P.Match }).enumeration
+    if (wordsBefore(match, list) !== this.wordsBeforeBareList) return match
+    if (list.items.length < 2) return undefined
+    return list.tokens.some((token) => Wording.reads(scope, "and_or", `${token.value}`, "or")) ? match : undefined
+  }
 
   getAST(match: P.MatchFor<this>): P.ASTEnumeration {
     // a range spread into its numbers -- see `number_range`
@@ -19,6 +41,11 @@ export class TypeSpecifierEnum extends P.Sequence<"enumeration"> {
       values: enumeration.map(valueOf)
     })
   }
+}
+
+/** How many words of `match` come before its part `list`:  whitespace isn't a word. */
+function wordsBefore(match: P.Match, list: P.Match): number {
+  return match.tokens.filter((token) => !(token instanceof P.WhitespaceToken) && token.start < list.start!).length
 }
 
 /**
@@ -32,14 +59,3 @@ export class TypeSpecifierEnum extends P.Sequence<"enumeration"> {
 function valueOf(literal: P.ASTExpression): string | number {
   return P.spellValueOf(literal.compile() as string | number)
 }
-classes.addRule(TypeSpecifierEnum, {
-  syntax: "as (either|one of) {enumeration:identifier_list}",
-  tests: [
-    {
-      tests: [
-        ["as either red or black", '["red", "black"]'],
-        ["as one of clubs, diamonds, hearts, spades", '["clubs", "diamonds", "hearts", "spades"]']
-      ]
-    }
-  ]
-})

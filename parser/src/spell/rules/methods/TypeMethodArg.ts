@@ -1,7 +1,6 @@
-import { instanceCase, proto } from "spell-kit/util"
+import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
@@ -20,11 +19,11 @@ export class TypeMethodArg extends P.Sequence<"type", MethodArgData> {
     if (!match) return undefined
     const { type } = match.groups
     match.data.type = type
-    // TODO: instanceCase(type.value) ???
+    // TODO: P.instanceCase(type.value) ???
     match.data.method = `$${type.raw}`
     match.data.syntax = "{callArgs:expression}"
     match.data.arg = new P.ASTVariableExpression(match, {
-      name: instanceCase(type.value),
+      name: P.instanceCase(type.value),
       type: "argument",
       // what it holds, e.g. `Card` for `(a card)`
       datatype: SP.typeName(`${type.value}`)
@@ -32,6 +31,3 @@ export class TypeMethodArg extends P.Sequence<"type", MethodArgData> {
     return match
   }
 }
-methods.addRule(TypeMethodArg, {
-  syntax: `(a|an) {type}`
-})

@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 import { getWhereMethod, getWhereScope } from "./lists.shared"
 
 /**
@@ -36,17 +35,3 @@ export class OrdinalWhereExpression extends SpellExpression<"ordinal|arg|list|bo
     return new P.ASTCoreMethodInvocation(match, { methodName: "getItemAt", args: [passing, P.matchAST(ordinal)] })
   }
 }
-lists.addRule(OrdinalWhereExpression, {
-  syntax: "the {ordinal} {arg:singular_identifier} (in|of) {list:expression} where {inline_expression}?",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-      },
-      tests: [
-        ["the first item in my-list where its id > 1", "core.getItemAt(core.filter(myList, (item) => item.id > 1), 0)"]
-      ]
-    }
-  ]
-})

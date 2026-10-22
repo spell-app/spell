@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * `new_list` rule:  `a new list of <type>` -- constructs a `List`, optionally tagged with `instanceType`.
@@ -35,26 +34,3 @@ export class NewList extends SpellStatement<"instanceType?"> {
     })
   }
 }
-classes.addRule(NewList, {
-  syntax: "a new (list|List) of {instanceType:type}?",
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [
-        [`a new list`, `new List()`],
-        [`a new List`, `new List()`],
-        [
-          `a new list of objects`,
-          `new List({ instanceType: "Object" })`,
-          'new List<Object>({ instanceType: "Object" })'
-        ],
-        [
-          `a new list of numbers`,
-          `new List({ instanceType: "number" })`,
-          'new List<number>({ instanceType: "number" })'
-        ],
-        [`a new list of Todos`, `new List({ instanceType: "Todo" })`, 'new List<Todo>({ instanceType: "Todo" })']
-      ]
-    }
-  ]
-})

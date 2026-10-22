@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `is_defined` rule:  `{lhs} is defined`/`undefined`/`not defined` postfix, e.g. `thing is defined`.
@@ -15,9 +14,6 @@ export class IsDefined extends PostfixOperatorSuffix {
   @proto static priority = Priority.preferred
   @proto static precedence = Precedence.comparison
 
-  shouldNegateOutput(operator: P.Match): boolean {
-    return operator.value !== "is defined"
-  }
   compileASTExpression(match: P.MatchFor<this>, { lhs }: OperatorOperands): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "isDefined",
@@ -25,19 +21,3 @@ export class IsDefined extends PostfixOperatorSuffix {
     })
   }
 }
-expressions.addRule(IsDefined, {
-  syntax: "is (defined|undefined|not defined)",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-      },
-      tests: [
-        ["thing is defined", "thing !== undefined"],
-        ["thing is undefined", "thing === undefined"],
-        ["thing is not defined", "thing === undefined"]
-      ]
-    }
-  ]
-})

@@ -349,8 +349,14 @@ export class Match<
     })
   }
 
-  /** Compile the output of the match (a string for language parsers, arbitrary values for e.g. `rulex`). */
+  /**
+   * Compile the output of the match (a string for language parsers, arbitrary values for e.g. `rulex`).
+   * - With its parser in play (`P.Parser.inPlay()`):  its words go singular and plural by its language's rules,
+   *   e.g. Spanish's `dirección` => `Direcciones`, as `P.ProgramWriter.writeMatch()` does.
+   */
   compile(): unknown {
+    const parser = this.scope?.parser
+    if (parser && P.Parser.current !== parser) return parser.inPlay(() => this.compile())
     // Some languages (e.g. Spell) convert to an AST first, then compile().
     if (this.rule.getAST) {
       return this.AST?.compile()

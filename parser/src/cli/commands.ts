@@ -1,10 +1,12 @@
 /**
  * The language's `spell` commands (spell-lang's `package.json`'s `"spell": { "commands" }`, epic `repo-split` Q33):
- * compile, lint, run, test, watch, format, describe, explain, parse, repl, speedtest.
+ * compile, lint, run, test, watch, format, describe, explain, parse, repl, speedtest;
+ * and `spell lang packs check|fix`, for the language packs (epic `spanish` P7).
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which spell-app provides today:  every one
  *   loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
  *   - Without spell-app, each says so and exits 2.
  *   - Moving the work down here, command by command, is epic `repo-split`'s open issue (P13).
+ *   - `spell lang packs` is the exception:  it needs no project, so its work is here, `packsCommand.ts`.
  * - Loads fast:  nothing of spell until a command runs.
  * - NOTE: `spell commands` reads this file's TEXT, for each `spell.command(...)` call:
  *   keep each command's name a literal at its call.
@@ -130,6 +132,30 @@ export default function languageCommands(spell: Command): void {
     .option("--in <project>", "look in this project too, e.g. @spell/test/solitaire")
     .option("--json", "print what was found as JSON")
     .action((word: string, _options, command: Command) => language("explain", [word], command))
+
+  // the language's own tools, under `spell lang`:  their work is here, not behind the hook
+  const lang = spell.command("lang").description("tools for spell itself:  its language packs")
+  const packs = lang
+    .command("packs")
+    .description("is each language pack complete, against English?  check, or fix with stubs to translate")
+
+  packs
+    .command("check")
+    .description("list what a language pack lacks, per rule file -- exits 1 if anything")
+    .argument("[lang]", "one language, e.g. es -- default every pack but English")
+    .option("--json", "print the report as JSON")
+    .action((lang: string | undefined, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./packsCommand")).checkPacks(lang, command.optsWithGlobals()))
+    )
+
+  packs
+    .command("fix")
+    .description("write a stub for each missing registration, English copied and marked TODO:  translate")
+    .argument("[lang]", "one language, e.g. es -- default every pack but English")
+    .option("--ai", "ask claude -p to translate each stub, marked AI draft:  review")
+    .action((lang: string | undefined, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./packsCommand")).fixPacks(lang, command.optsWithGlobals()))
+    )
 }
 
 /**

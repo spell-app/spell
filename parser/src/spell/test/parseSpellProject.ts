@@ -43,7 +43,10 @@ export function parseSpellProject(
 
   const parsedFiles = parsed.map(({ path, contents, scope, match, parseMsec }) => {
     const start = performance.now()
-    const compiled = (P.JSWriter.instance.writeMatch(match) as string | undefined) ?? ""
+    // the project's language in play, as a compile has it:  its words go singular and plural by its rules
+    const compiled = projectScope.parser!.inPlay(
+      () => (P.JSWriter.instance.writeMatch(match) as string | undefined) ?? ""
+    )
     const compileMsec = performance.now() - start
     const errors = describeParseErrors(match)
     return { path, contents, scope, match, compiled, errors, warnings: describeWarnings(match), parseMsec, compileMsec }
@@ -139,8 +142,13 @@ export function fixtureDeclarations(projectName: string): string {
   return JSON.stringify(compileFixture(projectName).declarations, null, 2) + "\n"
 }
 
+/** The human language fixture `projectName` is written in, from its project file:  `en` when it names none. */
+export function fixtureLanguage(projectName: string): string {
+  return readProjectFile(fixturePath(projectName)).language ?? "en"
+}
+
 /**
- * Fixture `projectName`'s words, as its `<Project>.en.js` would hold them:
+ * Fixture `projectName`'s words, as its `<Project>.<lang>.js` would hold them (`cards.en.js`, `cartas.es.js`):
  * from its declarations, by javascript's names -- see `SP.SpellWords`.
  */
 export function fixtureWords(projectName: string): string {
@@ -165,7 +173,7 @@ function compileFixture(
   target: string | P.ProgramWriter = SP.RUNNING_TARGET
 ): { code: string; declarations: SP.SpellDeclarationsData; draws: boolean } {
   const projectDir = fixturePath(projectName)
-  const { version, exports, imports, listsStartAt } = readProjectFile(projectDir)
+  const { version, exports, imports, listsStartAt, language } = readProjectFile(projectDir)
   const parentScope = fixtureImportScope(projectName)
   const { scope, files } = parseSpellProject(loadFixtureProject(projectName), { parentScope })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
@@ -179,8 +187,13 @@ function compileFixture(
   const writer = typeof target === "string" ? SP.targetFor(target).writer : target
   const importLines = SP.SpellProject.importHeaderFor(scope, writer)
   const marked =
-    errors.join("") + SP.SpellProject.combineCompiled(parts, writer, importLines, scope, { listsStartAt }) + "\n"
-  return { ...SP.SpellDeclarations.split(marked, scope, { version, exports }), draws: SP.SpellProject.draws(parts) }
+    errors.join("") +
+    scope.parser!.inPlay(() => SP.SpellProject.combineCompiled(parts, writer, importLines, scope, { listsStartAt })) +
+    "\n"
+  return {
+    ...SP.SpellDeclarations.split(marked, scope, { version, exports, language }),
+    draws: SP.SpellProject.draws(parts)
+  }
 }
 
 /**
@@ -217,7 +230,8 @@ function fixtureImportScope(projectName: string): P.Scope {
     const projectId = SP.SpellProject.projectIdForImport(path)
     return { from: path, projectId, declarations: compileFixture(fixture).declarations, import: picks, module }
   })
-  const root = SP.SpellParser.rootScope
+  // the fixture's language's root:  its project file says which, English if none
+  const root = SP.Language.for(readProjectFile(fixturePath(projectName)).language).rootScope
   return loaded.length ? SP.SpellDeclarations.importScope(root, loaded) : root
 }
 
@@ -247,6 +261,7 @@ function readProjectFile(projectDir: string): {
   exports?: string[]
   imports: Array<{ path: string; active?: boolean; import?: string[] }>
   listsStartAt?: 0 | 1
+  language?: string
 } {
   return JSON5.parse(readFileSync(projectFileFor(projectDir), "utf8"))
 }

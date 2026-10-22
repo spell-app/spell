@@ -371,6 +371,8 @@ The names live here, and each command hands its work to spell-app's `language` h
   or the "which project?" prompt, with the build folder under spell-app's `build/`
 - it asks the editor's language service, so the command line sees what an editor sees
 - without spell-app, each command stops, says to clone it (`yarn clone spell-app`), and exits 2
+- `spell lang packs check` / `fix` are the exception:  they need no project, so their work is here,
+  in [packsCommand.ts](src/cli/packsCommand.ts).
 
 <details>
 <summary>The files in cli/</summary>

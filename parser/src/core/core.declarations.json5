@@ -1535,6 +1535,33 @@
       "description": "Split `path` into an array of steps, e.g. `[\"a\", \"b\", 0, \"c\"]` -- see `splitPath()` in `spell-kit/util`."
     },
     {
+      "kind": "method",
+      "name": "useMessages",
+      "of": "core",
+      "module": "messages",
+      "params": [
+        {
+          "name": "messages"
+        }
+      ],
+      "description": "Speak the program's language:  `messages` from its words file (`words.messages`), by key."
+    },
+    {
+      "kind": "method",
+      "name": "message",
+      "of": "core",
+      "module": "messages",
+      "params": [
+        {
+          "name": "key"
+        },
+        {
+          "name": "values"
+        }
+      ],
+      "description": "Message `key` in the program's language, each `{name}` in it filled with `values.name`: `core.message(\"cant-draw\", { type: \"Card\" })` => `⚠ Card can't draw`."
+    },
+    {
       "property": "ACTIVE_TEST",
       "of": "core",
       "module": "tests",
@@ -1595,7 +1622,7 @@
           "name": "message"
         }
       ],
-      "description": "Print `▶️ Executing` plus back-tick-quoted `message`, grouped under current test if one's running."
+      "description": "Print `▶️ Executing` plus back-tick-quoted `message` (`test-step`, in the program's language), grouped under current test if one's running."
     },
     {
       "kind": "method",

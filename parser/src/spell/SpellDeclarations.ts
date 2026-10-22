@@ -1,7 +1,6 @@
 import JSON5 from "json5"
 import semver from "semver"
 
-import { singularize, typeCase } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 
@@ -36,7 +35,7 @@ export class SpellDeclarations {
   static split(
     compiled: string,
     scope: P.ProjectScope,
-    { version, exports }: { version?: string; exports?: string[] } = {}
+    { version, exports, language }: { version?: string; exports?: string[]; language?: string } = {}
   ): { code: string; declarations: SP.SpellDeclarationsData } {
     const code: string[] = []
     const statements: SP.SpellDeclaration[] = []
@@ -60,6 +59,8 @@ export class SpellDeclarations {
     const declarations = definedOnly({
       version,
       spellVersion: SP.SPELL_VERSION,
+      // English, the default, says nothing:  every English project's declarations stay as they were
+      language: language === "en" ? undefined : language,
       provides: SpellDeclarations.provides(scope, exports),
       statements,
       codeLines
@@ -136,7 +137,10 @@ export class SpellDeclarations {
     const constantOutputs: Record<string, string> = {}
     for (const item of mine) {
       if (item instanceof P.TypeScope) {
-        if (!item.stub) merge({ type: item.name, superType: item.superType, aka: item.aka, itemType: item.itemType })
+        if (!item.stub) {
+          const { name: type, superType, aka, gender, itemType } = item
+          merge({ type, superType, aka, gender, itemType })
+        }
       } else if (item instanceof P.ScopeMethod) {
         merge(SpellDeclarations.methodDeclaration(item))
       } else if (item instanceof P.ScopeVariable) {
@@ -277,8 +281,8 @@ export class SpellDeclarations {
       const declaredAt = SpellDeclarations.declaredAt(projectId, declaration.defined)
       if (declaration.type) {
         const runtimeName = declaration.type === original.type ? undefined : original.type
-        const { type, superType, aka, itemType } = declaration
-        const props = { name: type, superType, aka, itemType, runtimeName, declaredAt }
+        const { type, superType, aka, gender, itemType } = declaration
+        const props = { name: type, superType, aka, gender, itemType, runtimeName, declaredAt }
         SpellDeclarations.loadType(scope, from, names, props)
       }
       SpellDeclarations.loadVariables(scope, names, declaration, declaredAt)
@@ -521,7 +525,7 @@ export class SpellDeclarations {
       if (!P.ALPHANUMERIC_WORD_WITH_DASHES.test(alias)) {
         SpellDeclarations.fail(from, `'${alias}' isn't a type name:  one word, dashes OK`)
       }
-      renames.set(name, typeCase(alias))
+      renames.set(name, P.typeCase(alias))
     }
     // what each type needs -- `names` grows as we go, so dependencies' dependencies come too
     const needs = new Map<string, string[]>()
@@ -530,7 +534,7 @@ export class SpellDeclarations {
       if (property && of && datatype) needs.set(of, [...(needs.get(of) ?? []), datatype])
     }
     for (const name of names) {
-      for (const need of needs.get(name) ?? []) if (need && needs.has(typeCase(need))) names.add(typeCase(need))
+      for (const need of needs.get(name) ?? []) if (need && needs.has(P.typeCase(need))) names.add(P.typeCase(need))
     }
     // a new name MUST be unique among what's loaded
     const loaded = [...names].map((name) => renames.get(name) ?? name)
@@ -550,12 +554,12 @@ export class SpellDeclarations {
     const renamed = { ...declaration }
     for (const key of ["type", "superType", "of", "datatype", "itemType", "returns"] as const) {
       const name = declaration[key]
-      const to = name === undefined ? undefined : renames.get(typeCase(name))
+      const to = name === undefined ? undefined : renames.get(P.typeCase(name))
       if (to) renamed[key] = to
     }
     if (declaration.params) {
       renamed.params = declaration.params.map((param) => {
-        const to = param.datatype === undefined ? undefined : renames.get(typeCase(param.datatype))
+        const to = param.datatype === undefined ? undefined : renames.get(P.typeCase(param.datatype))
         return to ? { ...param, datatype: to } : param
       })
     }
@@ -641,7 +645,7 @@ export class SpellDeclarations {
    */
   private static ownerOf(statement: P.Match): string | undefined {
     const of = statement.rule.getDeclaration(statement)?.of
-    return of ? typeCase(singularize(of)) : undefined
+    return of ? P.typeCase(P.singularize(of)) : undefined
   }
 
   /**
@@ -695,6 +699,7 @@ const PROP_ORDER = [
   "type",
   "superType",
   "aka",
+  "gender",
   "property",
   "asWritten",
   "classVariable",
@@ -775,7 +780,7 @@ function toLiteral(value: unknown): string {
 
 /** `key` bare if it's an identifier, else quoted, e.g. `ruleName` but `"is-a"`. */
 function literalKey(key: string): string {
-  return /^[A-Za-z_$][\w$]*$/.test(key) ? key : toLiteral(key)
+  return /^[\p{L}_$][\p{L}\p{M}\d_$]*$/u.test(key) ? key : toLiteral(key)
 }
 
 /**

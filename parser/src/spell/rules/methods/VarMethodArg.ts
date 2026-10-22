@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { SpellIdentifier } from "spell-lang/spell/rules/variables"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
@@ -33,4 +32,3 @@ export class VarMethodArg extends SpellIdentifier<MethodArgData> {
     return match
   }
 }
-methods.addRule(VarMethodArg)

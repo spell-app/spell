@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
@@ -9,7 +8,7 @@ import type { MethodArgData } from "./methods.shared"
  *   its raw, unmodified text to the rule's rulex `syntax`.
  */
 export class MethodKeyword extends P.Pattern<never, MethodArgData> {
-  @proto static pattern = /^[a-zA-Z][\w-]*$/
+  @proto static pattern = P.ALPHANUMERIC_WORD_WITH_DASHES
   @proto static highlightAs: P.HighlightKind = "function"
 
   /** Convert dashes to underscores so e.g. `at-rest` becomes `at_rest` in the generated method name. */
@@ -27,4 +26,3 @@ export class MethodKeyword extends P.Pattern<never, MethodArgData> {
     return match
   }
 }
-methods.addRule(MethodKeyword)

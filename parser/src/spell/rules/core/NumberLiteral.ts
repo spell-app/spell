@@ -1,6 +1,5 @@
 import { assert, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `number` rule:  `number` as a float or integer token.
@@ -20,33 +19,3 @@ export class NumberLiteral extends P.TokenType {
     return new P.ASTNumericLiteral(match, { value: assert.number(value), raw })
   }
 }
-core.addRule(NumberLiteral, {
-  tests: [
-    {
-      title: "correctly matches numbers",
-      tests: [
-        ["1", 1],
-        ["1000", 1000],
-        ["-1", -1],
-        ["1.1", 1.1],
-        ["000.1", 0.1],
-        [".1", 0.1],
-        ["1.", 1],
-        [".1", 0.1],
-        ["-111.111", -111.111]
-      ]
-    },
-    {
-      title: "doesn't match things that aren't numbers",
-      tests: [
-        ["", undefined],
-        ["-", undefined],
-        [".", undefined]
-      ]
-    },
-    {
-      title: "requires negative sign to touch the number",
-      tests: [["- 1", undefined]]
-    }
-  ]
-})

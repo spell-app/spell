@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
 
 /**
  * `plus` rule:  `plus` / `+`, e.g. `price + tax` -- `Precedence.sum`:  tighter than comparisons, looser than `*` `/`.
@@ -40,20 +39,3 @@ export class Plus extends InfixOperatorSuffix {
     return datatype === "number" || datatype === "integer"
   }
 }
-math.addRule(Plus, {
-  syntax: "(operator:plus|+) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("price")
-        scope.variables?.add("tax")
-      },
-      tests: [
-        ["price + tax", "(price + tax)"],
-        ["price+tax", "(price + tax)"],
-        ["price plus tax", "(price + tax)"]
-      ]
-    }
-  ]
-})

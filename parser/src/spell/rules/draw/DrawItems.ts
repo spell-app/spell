@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { draw } from "./draw.parser"
 
 /**
  * `draw_items` rule:  draw each / all of a collection of items.
@@ -30,36 +29,3 @@ export class DrawItems extends SpellStatement<"variable?|plural_identifier?|expr
     })
   }
 }
-draw.addRule(DrawItems, {
-  syntax: "draw (each {variable}|(the|all)? {plural_identifier}) (of|in) {expression}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("deck")
-      },
-      tests: [
-        {
-          input: "draw each card in the deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
-        },
-        {
-          input: "draw cards of the deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
-        },
-        {
-          input: "draw the cards of the deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
-        },
-        {
-          input: "draw all cards of the deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
-        }
-      ]
-    }
-  ]
-})

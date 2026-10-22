@@ -1,6 +1,5 @@
 import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { expressions } from "./expressions.parser"
 
 /** Hex digits, the most a code point has:  6 (`10FFFF`). */
 const HEX_CODE = /^[0-9a-f]{1,6}$/i
@@ -42,4 +41,3 @@ export class UnicodeCode extends P.Pattern {
     return new P.Match({ rule: this, matched: taken, raw: text, value: code, tokens: taken, scope })
   }
 }
-expressions.addRule(UnicodeCode)

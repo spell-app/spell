@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { SpellExpression } from "./SpellExpression"
-import { expressions } from "./expressions.parser"
 
 /**
  * `unicode_literal` rule:  `unicode 1F0A0` -- the character with that code point, written in hex
@@ -19,17 +18,3 @@ export class UnicodeLiteral extends SpellExpression<"code"> {
     return new P.ASTStringLiteral(match, { value: String.fromCodePoint(match.groups.code.value as number), quote: '"' })
   }
 }
-expressions.addRule(UnicodeLiteral, {
-  syntax: "unicode {code:unicode_code}",
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [
-        ["unicode 1F0A0", '"🂠"'],
-        ["unicode 2665", '"♥"'],
-        ["unicode A0", '" "'],
-        ["unicode 110000", "core.unicode(110000)"]
-      ]
-    }
-  ]
-})
