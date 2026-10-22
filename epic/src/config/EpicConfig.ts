@@ -63,7 +63,13 @@ export class EpicConfig {
     installOnCreate: false,
     installTimeout: 600,
     extraInstalls: [],
-    windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
+    windows: {
+      default: "spell-app",
+      repoName: "spell-app",
+      contentName: "spell-app-dev",
+      worktreeOnly: false,
+      settings: {}
+    },
     linkSessionFolders: false,
     sharedFolders: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"],
     engineFolder: "../spell-epic",
@@ -564,6 +570,7 @@ export class EpicConfig {
       "windows.repoName": this.windows.repoName,
       "windows.contentName": this.windows.contentName,
       "windows.worktreeOnly": this.windows.worktreeOnly,
+      "windows.settings": JSON.stringify(this.windows.settings),
       linkSessionFolders: this.linkSessionFolders,
       sharedFolders: this.sharedFolders.join(","),
       engineFolder: this.engineFolder ?? "",
@@ -597,6 +604,9 @@ export class EpicConfig {
     if (typeof windows !== "object" || windows === null || Array.isArray(windows))
       throw new TypeError(`EpicConfig:  ${file}'s "windows" must be an object, { "default": ..., ... }`)
     const window = windows as Record<string, unknown>
+    const windowSettings = window.settings === undefined ? defaults.windows.settings : window.settings
+    if (typeof windowSettings !== "object" || windowSettings === null || Array.isArray(windowSettings))
+      throw new TypeError(`EpicConfig:  ${file}'s "windows.settings" must be an object of VS Code settings, { ... }`)
     const appGiven = given.app === undefined ? {} : given.app
     if (typeof appGiven !== "object" || appGiven === null || Array.isArray(appGiven))
       throw new TypeError(`EpicConfig:  ${file}'s "app" must be an object, { "url": ..., "start": ... }`)
@@ -613,7 +623,8 @@ export class EpicConfig {
         default: valueOf(window, "default", defaults.windows.default, file, "windows."),
         repoName: valueOf(window, "repoName", defaults.windows.repoName, file, "windows."),
         contentName: valueOf(window, "contentName", defaults.windows.contentName, file, "windows."),
-        worktreeOnly: valueOf(window, "worktreeOnly", defaults.windows.worktreeOnly, file, "windows.")
+        worktreeOnly: valueOf(window, "worktreeOnly", defaults.windows.worktreeOnly, file, "windows."),
+        settings: windowSettings as Record<string, unknown>
       },
       linkSessionFolders: valueOf(given, "linkSessionFolders", defaults.linkSessionFolders, file),
       sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file),
@@ -682,6 +693,11 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   - `contentName`:  the content repo's folder name in every window (`spell-app-dev`)
  *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the content folder (off);
  *     a worktree beside the repo gets that window anyway (`worktreeOnlyWindow()`)
+ *   - `settings`:  VS Code settings every window file gets, the repo's own (`{}`, none:  the default),
+ *     e.g. the kit's TypeScript server
+ *     - for WINDOW-scoped settings:  in a window of several folders, VS Code ignores them in a folder's
+ *       `.vscode/settings.json`, and reads them from the window file only
+ *     - `epic window init` writes them into the window files that exist;  a new one gets them as it's made
  * - `linkSessionFolders`:  whether the worktree hook links each NEW worktree's saved-session folder
  *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (off;
  *   `SessionFolders`, epic `epic-eject` Q4)
@@ -738,8 +754,15 @@ export type EpicSettings = {
  */
 export type EpicApp = { path: string; url: string; urlFile: string; start: string }
 
-/** `EpicSettings.windows`:  the default window, the folder names every window shows, and its layout. */
-export type EpicWindows = { default: string; repoName: string; contentName: string; worktreeOnly: boolean }
+/** `EpicSettings.windows`:  the default window, the folder names every window shows, its layout and settings. */
+export type EpicWindows = {
+  default: string
+  repoName: string
+  contentName: string
+  worktreeOnly: boolean
+  /** VS Code settings every window file gets (`settings` in the file), by name */
+  settings: Record<string, unknown>
+}
 
 /** The text of `file`;  `""` when it isn't there. */
 function readOrEmpty(file: string): string {

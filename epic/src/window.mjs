@@ -28,6 +28,10 @@
  *   - NEVER add one any more:  VS Code writes the folder into the window file, where it outlives the worktree
  * - The whole repo's window file is written when it's missing (`ensureRepoWindow()`, by `open`, `launch` and `init`;
  *   epic `epic-engine` I15):  spell-epic's, in its own git-ignored `workspaces/` (its `windowsFolder`)
+ * - The repo's own settings, in every window file (`windows.settings` in its config;  epic `intellisense` P4):
+ *   the WINDOW-scoped ones a folder's `.vscode/settings.json` can't give in a window of several folders,
+ *   e.g. the kit's TypeScript server, so its TypeScript plugin loads in an epic's window too
+ *   - written as a file is made, and into the ones that exist by `init`
  * - `git.detectWorktrees` on:  Source Control lists every worktree as its own repo, changes and diffs included,
  *   so a session that STAYS in its window when it isolates (below) is still reviewable there.
  *   - every package window lists every worktree;  takes a window reload
@@ -125,7 +129,8 @@
  *
  * ## Commands
  * - `init`:  write the window file of every package that lacks one, and bring the others up to date:
- *   folders and `files.exclude` (a worktree's window:  `files.exclude`);  themes and other settings are Owen's, kept
+ *   folders, `files.exclude` and the repo's own settings (a worktree's window:  `files.exclude` and the repo's
+ *   settings);  themes and other settings are Owen's, kept
  * - `move [--dry-run]`:  carry the window files from the old folder, `workspaces/` in the main checkout, to the
  *   windows folder, once (`moveWindowFiles()`);  never deletes the old ones
  * - `which`:  this session's window:  pid, workspace file, folders;  a warning when it was opened through a link (I38)
@@ -321,7 +326,8 @@ export class Window {
       settings: {
         "workbench.colorTheme": THEMES[pkg] ?? FALLBACK_THEME,
         "git.detectWorktrees": true,
-        "files.exclude": Window.filesExclude()
+        "files.exclude": Window.filesExclude(),
+        ...CONFIG.windows.settings
       }
     }
   }
@@ -375,11 +381,12 @@ export class Window {
 
   /**
    * `init`:  write the missing window files, and bring existing ones up to date;  returns the paths written.
-   * - a package window:  its folders (`packageFolders()`) and `files.exclude`;
-   *   its theme and every other setting are Owen's, kept
+   * - a package window:  its folders (`packageFolders()`), `files.exclude` and the repo's own settings
+   *   (`windows.settings`);  its theme and every other setting are Owen's, kept
    * - the whole repo's window, `windows.default` (`spell-app`), when it isn't a package's:
    *   written when missing (`ensureRepoWindow()`)
-   * - a worktree's window (`<windowsFolder>/ongoing/`):  its `files.exclude`, and the content folder when it lacks it,
+   * - a worktree's window (`<windowsFolder>/ongoing/`):  its `files.exclude` and the repo's own settings,
+   *   and the content folder when it lacks it,
    *   a folder that's gone (an old content folder) dropped (`withContentFolder()`)
    * - an existing file VS Code can't read as JSON (comments) is left alone
    * - NOTE:  a package window that changes folders while open re-reads its workspace;  its Claude panel may reload
@@ -400,7 +407,11 @@ export class Window {
       }
       const refreshed = refresh(file, (workspace) => {
         workspace.folders = Window.packageFolders()
-        workspace.settings = { ...workspace.settings, "files.exclude": Window.filesExclude() }
+        workspace.settings = {
+          ...workspace.settings,
+          "files.exclude": Window.filesExclude(),
+          ...CONFIG.windows.settings
+        }
       })
       if (refreshed) written.push(relative(MAIN_ROOT, file))
     }
@@ -411,7 +422,11 @@ export class Window {
       const old = !CONFIG.worktreeOnlyWindow(name.replace(/\.code-workspace$/, ""))
       const refreshed = refresh(file, (workspace) => {
         workspace.folders = Window.withContentFolder(workspace.folders ?? [], ongoing)
-        workspace.settings = { ...workspace.settings, "files.exclude": Window.filesExclude({ worktree: old }) }
+        workspace.settings = {
+          ...workspace.settings,
+          "files.exclude": Window.filesExclude({ worktree: old }),
+          ...CONFIG.windows.settings
+        }
       })
       if (refreshed) written.push(relative(MAIN_ROOT, file))
     }
@@ -533,6 +548,7 @@ export class Window {
    *   - the old layout, a worktree nested in the checkout:
    *     the main root first (for the Claude panel), then `⎇ <name>`, then the content folder;  entering it asks nothing
    *   - either way, the main root's files hidden (`filesExclude({ worktree: true })`):  the worktree has the same ones
+   * - the repo's own settings (`windows.settings`;  epic `intellisense` P4)
    * - its look (epic `windows-and-review` P5, Q1):  `color`, a look's name (`LOOKS`);  else `from`'s,
    *   the window file of the window it's opened from (its theme and colours, a staying session's tint left out);
    *   else `pkg`'s theme, the title bar tinted the worktree's own colour (`tint()`)
@@ -541,7 +557,8 @@ export class Window {
     const only = CONFIG.worktreeOnlyWindow(name)
     const settings = {
       "workbench.colorTheme": Window.theme(pkg),
-      "files.exclude": Window.filesExclude({ worktree: !only })
+      "files.exclude": Window.filesExclude({ worktree: !only }),
+      ...CONFIG.windows.settings
     }
     if (color) withLook(settings, color)
     else if (from?.settings?.["workbench.colorTheme"]) {
@@ -1229,7 +1246,8 @@ const COMMANDS = [
 /** Usage, printed for a bad command. */
 const USAGE = `usage:  epic window <command>
   init                         write each package's missing <windowsFolder>/<pkg>.code-workspace, and bring
-                               every window file up to date (folders, files.exclude;  theme kept)
+                               every window file up to date (folders, files.exclude, the repo's windows.settings;
+                               theme kept)
   move [--dry-run]             carry the window files from workspaces/ (the main checkout's, before epic-eject
                                P13) to the windows folder, folder paths rewritten;  never deletes the old ones
   which                        this session's VS Code window:  pid, workspace file, folders

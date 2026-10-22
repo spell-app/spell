@@ -49,7 +49,13 @@ describe("epic init", () => {
     expect(config.baseBranch).toBe("trunk")
     expect(config.installCommand).toBe("")
     expect(config.installOnCreate).toBe(false)
-    expect(config.windows).toEqual({ default: "try", repoName: "try", contentName: "try.epics", worktreeOnly: true })
+    expect(config.windows).toEqual({
+      default: "try",
+      repoName: "try",
+      contentName: "try.epics",
+      worktreeOnly: true,
+      settings: {}
+    })
     expect(config.linkSessionFolders).toBe(true)
     expect(config.sharedFolders).toEqual(["epics", "sagas", "guides", "pages"])
     // the window files in the content repo (epic-eject P13)

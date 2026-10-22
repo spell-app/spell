@@ -146,7 +146,7 @@ export class RepoInit {
       installOnCreate: Boolean(installCommand),
       installTimeout: EpicConfig.DEFAULTS.installTimeout,
       extraInstalls: [],
-      windows: { default: repo, repoName: repo, contentName: `${repo}.epics`, worktreeOnly: true },
+      windows: { default: repo, repoName: repo, contentName: `${repo}.epics`, worktreeOnly: true, settings: {} },
       linkSessionFolders: true,
       sharedFolders: [...INIT_FOLDERS],
       engineFolder: "",

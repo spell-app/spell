@@ -490,7 +490,7 @@ Without the extension, the window verbs exit 1, and say so.
 | `epic window reload` | rebuilds the side bar's view from scratch, at the page it shows;  `--review` |
 | `epic window add <path>` | adds a folder to the window (`--name <name>`);  never a worktree's:  a worktree has a window of its own |
 | `epic window remove <path>` | removes that folder again |
-| `epic window init` | writes each missing window file, and brings every window file up to date |
+| `epic window init` | writes each missing window file, and brings every window file up to date:  its folders, `files.exclude`, and the repo's own settings (`windows.settings`) |
 | `epic window move` | carries the window files, once, from the main checkout's old `workspaces/` folder to the windows folder (`windowsFolder`), the old files kept;  `--dry-run` |
 
 Two kinds of server serve the pages:  each checkout's own page server, and ONE epic server for the machine,

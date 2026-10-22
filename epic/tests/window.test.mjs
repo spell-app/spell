@@ -315,7 +315,7 @@ test("worktrees beside the repo (epic-eject P8):  a worktree-only window;  an ol
   assert.equal(exclude[".claude/worktrees"], true)
 })
 
-test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole repo's window first;  `init` puts the content folder back", () => {
+test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole repo's window first;  `init` puts the content folder back, and the repo's own settings in", () => {
   // a repo of its own, as spell-epic's:  its default window named for it, worktrees and the content folder beside it
   const top = mkdtempSync(join(tmpdir(), "window-plain-"))
   const repo = join(top, "repo")
@@ -326,7 +326,14 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
     JSON.stringify({
       worktreesFolder: "../repo.worktrees",
       contentFolder: "../repo.epics",
-      windows: { default: "repo", repoName: "repo", contentName: "repo.epics", worktreeOnly: true }
+      windows: {
+        default: "repo",
+        repoName: "repo",
+        contentName: "repo.epics",
+        worktreeOnly: true,
+        // every window file gets these (epic intellisense P4)
+        settings: { "js/ts.experimental.useTsgo": false }
+      }
     })
   )
   mkdirSync(join(top, "repo.epics"))
@@ -377,6 +384,8 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   ])
   assert.ok(written.includes("../repo.epics/windows/ongoing/old.code-workspace"))
   assert.ok(!written.includes("../repo.epics/windows/repo.code-workspace"))
+  // the repo's own settings (`windows.settings`):  in each new file, and `init` writes them into an old one
+  for (const workspace of [seo, repoWindow, old]) assert.equal(workspace.settings["js/ts.experimental.useTsgo"], false)
 })
 
 test("a repo moved behind a compat link (I59):  `init` drops the content folder that's gone, adds the one found", () => {
