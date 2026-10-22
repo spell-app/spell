@@ -700,7 +700,7 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   - `contentName`:  the content repo's folder name in every window (`spell-app-dev`)
  *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the content folder (off);
  *     a worktree beside the repo gets that window anyway (`worktreeOnlyWindow()`)
- *   - `settings`:  VS Code settings every window file gets, the repo's own, e.g. the kit's TypeScript server
+ *   - `settings`:  VS Code settings every window file gets, the repo's own, e.g. which TypeScript the editor runs
  *     (`{}`, none:  the default)
  *     - for WINDOW-scoped settings:  in a window of several folders,
  *       VS Code ignores them in a folder's `.vscode/settings.json`, and reads them from the window file only

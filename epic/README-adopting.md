@@ -240,7 +240,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
 | `windows.repoName` | the repo's name | the repo root's folder name in every window |
 | `windows.contentName` | `"<repo>.epics"` | the content folder's name in every window |
 | `windows.worktreeOnly` | `true` | whether every worktree's window holds only the worktree and the content folder |
-| `windows.settings` | not written:  `{}` | VS Code settings every window file gets:  the WINDOW settings a folder's `.vscode/settings.json` can't give in a window of several folders (the kit's TypeScript server);  `epic window init` writes them into the files that exist |
+| `windows.settings` | not written:  `{}` | VS Code settings every window file gets:  the WINDOW settings a folder's `.vscode/settings.json` can't give in a window of several folders (which TypeScript the editor runs, say;  none of Spell's repos names any today);  `epic window init` writes them into the files that exist |
 | `windowsFolder` | `"../<repo>.epics/windows"` | where the VS Code window files go;  worktree windows in its `ongoing/` |
 | `linkSessionFolders` | `true` | whether each worktree's saved Claude sessions show in every window's Claude panel |
 | `sharedFolders` | `epics`, `sagas`, `guides`, `pages` | the content folders each checkout links in at its root |

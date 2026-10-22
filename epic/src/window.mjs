@@ -33,7 +33,9 @@
  *   epic `epic-engine` I15):  spell-epic's, in its own git-ignored `workspaces/` (its `windowsFolder`)
  * - The repo's own settings, in every window file (`windows.settings` in its config;  epic `intellisense` P4):
  *   the WINDOW-scoped ones a folder's `.vscode/settings.json` can't give in a window of several folders,
- *   e.g. the kit's TypeScript server, so its TypeScript plugin loads in an epic's window too
+ *   e.g. which TypeScript the editor runs, or a window-wide theme setting
+ *   - no repo names any today (epic `intellisense` P7 moved the kit's TypeScript settings out):
+ *     the feature stays, for the next window setting a repo needs
  *   - written as a file is made, and into the ones that exist by `init`
  * - `git.detectWorktrees` on:  Source Control lists every worktree as its own repo, changes and diffs included,
  *   so a session that STAYS in its window when it isolates (below) is still reviewable there.
