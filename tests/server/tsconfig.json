@@ -1,5 +1,0 @@
-{
-  // server's tests:  server's own settings (server/tsconfig.json), over this folder
-  "extends": "../../server/tsconfig.json",
-  "include": ["."]
-}

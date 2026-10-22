@@ -1,0 +1,33 @@
+{
+  // The kit's NODE code, ONE TypeScript program (epic `repo-split` P14, Q47):  server, the `spell` command (`cli`), the
+  // element tools, the toolchain, util's node-only files;  and what's outside `src/`:  the bins, scripts, glue tools
+  // and configs.
+  // - As `tsconfig.json`, but node's types, and the DOM's too:  the server's site header and live-reload client are
+  //   browser code it serves.
+  // - ALSO the settings `tsx` runs every repo's code under, where the kit starts it (`bin/spell.mjs`, the background
+  //   page server, `spell-pack`):  `tsx` takes ONE tsconfig for every file it runs.
+  //   - `jsx: react-jsx`:  spell-app's terminal screens (Ink, React for terminals)
+  //   - `target: ES2020`:  standard decorators lowered, for spell-lang's source
+  // - The declarations build (`spell-types`) builds it into `dist-types/src/` too, beside the browser program's.
+  "extends": "./src/toolchain/tsconfig.base.json",
+  "compilerOptions": {
+    "customConditions": ["spell-kit-source"],
+    "target": "ES2020",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["node", "spell-kit/toolchain/types"]
+  },
+  "include": [
+    "src/server",
+    "src/cli",
+    "src/element-tools",
+    "src/toolchain",
+    "src/util/node",
+    "bin",
+    "scripts",
+    "tools",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": ["node_modules"]
+}

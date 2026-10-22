@@ -1,6 +1,0 @@
-{
-  // the kit's tools' tests:  the tools' own settings (tools/tsconfig.json), over this folder
-  "extends": "../../tools/tsconfig.json",
-  "include": ["."],
-  "exclude": ["fixtures"]
-}

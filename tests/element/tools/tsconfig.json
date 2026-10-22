@@ -1,5 +1,0 @@
-{
-  // the element tools' tests:  the tools' own settings (element/tools/tsconfig.json, node), over this folder
-  "extends": "../../../element/tools/tsconfig.json",
-  "include": ["."]
-}
