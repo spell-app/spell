@@ -28,11 +28,14 @@ const EXTRA_ENTRIES = { api: ENTRIES.api!, styles: ENTRIES.styles! }
  *   - `api.ts` and the two barrels it namespaces (`E`, `V`) => `extra:api`:  only `api.js` holds them
  *   - `src/styles/` (the foundation sheets as text, the style vocabulary) => `extra:styles`:
  *     only `styles.js` holds them
- *   - lazy tiers:  runtime services + the theme sheets (`styles/themes/`, loaded by `UI.themes`) => `runtime`;
- *     icon name / alias maps => `icons`;  a family's lazily imported data (`components/ui-<family>/data/`, the emoji
- *     chunks) and the Temporal polyfill (`temporal-polyfill`, loaded only where the browser lacks `Temporal`) =>
- *     `data`;  so are the source elements' engines' libraries (highlight.js, marked, DOMPurify), loaded on first use,
- *     and a language's names (`components.es.ts`, each tag's `UI<Name>.es.ts`), loaded by a page in that language
+ *   - lazy tiers:
+ *     - runtime services + the theme sheets (`styles/themes/`, loaded by `UI.themes`) => `runtime`
+ *     - icon name / alias maps => `icons`
+ *     - `data`:
+ *       - a family's lazily imported data (`components/ui-<family>/data/`, the emoji chunks)
+ *       - the Temporal polyfill (`temporal-polyfill`, loaded only where the browser lacks `Temporal`)
+ *       - the source elements' engines' libraries (highlight.js, marked, DOMPurify), loaded on first use
+ *       - a language's names (`components.es.ts`, each tag's `UI<Name>.es.ts`), loaded by a page in that language
  *   - `src/docs-components/` (the doc-only `<ui-docs-*>` families) => `docs`:  never in the lib build, which a check
  *     flags (`docsBundled`);  only the docs site's bundle adds them (`DocsFamilies`)
  *   - any other `src/` module (incl. `\0` virtual helpers) => `core`

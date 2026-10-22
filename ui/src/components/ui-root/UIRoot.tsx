@@ -22,8 +22,8 @@ import rootCSS from "./UIRoot.css?inline"
  * - Loads on demand:  every undefined `ui-*` tag inside (now, and as content is added)
  *   imports its family once (`RootLoader`);  nothing is imported up front.
  * - The page's language:  its own `lang`, else the closest one above it (the document's).
- *   - One Spell UI ships (`es`) loads first, once per page:
- *     then the tags in it load as `ui-*` tags do (`<es-boton>`), and the texts are in it (`RootLoader.useLanguage()`).
+ *   - A language Spell UI ships (`es`) loads first, once per page (`RootLoader.useLanguage()`).
+ *   - Then its tags load their families as `ui-*` tags do (`<es-boton>`), and the texts people read are in it.
  * - Component packs:  each `<ui-components source>` inside loads its pack's script once per page
  *   (`ComponentPacks`), which defines the pack's tags (`epic-*` ...).
  *   - Then the root treats them as its own:

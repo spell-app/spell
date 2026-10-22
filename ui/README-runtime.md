@@ -145,8 +145,8 @@ This is a Spell UI page, written in Spanish:
 
 - The root reads the page's language:  its own `lang`, else the document's.
 - Spanish is one Spell UI ships, so the root loads it first, once per page:  a chunk of its own.
-- Then each Spanish tag loads its family on demand, as a `ui-*` tag does:
-  `<es-boton>` is `<ui-button>`, drawn as `ui small red primary button`.
+- Then each Spanish tag loads its family on demand, as a `ui-*` tag does.
+  `<es-boton>` is Spell UI's button, drawn as `ui small red primary button`.
 - And the texts people read are Spanish too:  a modal's close button says "Cerrar".
 
 From code, the same thing is two calls on the runtime:
@@ -174,6 +174,7 @@ _What [the translation smoke page](src/tools/smoke/translate.html) checks, in he
 - One component, `UIButton.define("es-boton", es)`, for a page that wants only a few.
 
 The page wrote Spanish;  the component's code read English, and didn't change.
+
 That works because the code never writes a name of its own.
 Every name a tag uses is data, in ONE file per tag, its vocabulary, `UI<Name>.en.ts`:
 
@@ -231,7 +232,8 @@ export const buttonEs = {
   - the shared value sets (hues, sizes, positions, devices ...), and every other value (`left` is `izquierda`)
   - the texts every family shares (`close`, `ok`, `noResults` ...)
 - It gathers the tag files into one `Dictionary`, `es`.
-- Names are ASCII (`tamano`, `es-boton`):  values may hold accents (`pequeño`), and are found without them too.
+- Names are ASCII (`tamano`, `es-boton`).
+  Values may hold accents (`pequeño`), and are found without them too.
 
 Localization comes in two halves:
 - NAMES, what authors type:  a dictionary renames tags, attributes, values, events, slots and parts.
@@ -249,10 +251,11 @@ Localization comes in two halves:
 The price is that the names ship.
 `<ui-button>`'s vocabulary is 3.0 kB of its own 11.6 kB gzipped,
 because the element reads its names as it runs, and a dictionary needs them there.
-The Spanish names and texts are a chunk only a Spanish page loads.
 
 **Real today:**  Spanish, every family:  the names, the texts, and `<ui-root lang="es">`.
-It's a first draft, for a native speaker to review.
+- Its names and texts are a chunk only a Spanish page loads.
+- It's a first draft, for a native speaker to review.
+
 **Not yet:**  no other language, and no translated emoji names.
 
 <details>

@@ -298,11 +298,12 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     `UIButton.en.ts`, `UIButtons.en.ts`, `UIOr.en.ts`;  `UIFeedEvent.en.ts` for `<ui-event>`.
   - It holds EVERY name the tag uses:
     tag, attributes (kind + allowed values), values, events, slots, parts, states, text strings.
-  - Translations become `UI<Name>.<lang>.ts` (`UIButton.es.ts`):  a `TagDictionary`, its tag's own names and texts.
+  - Translations become `UI<Name>.<lang>.ts` (`UIButton.es.ts`):
+    a `TagDictionary`, with the names and texts only its tag uses.
     - Spanish:  every tag has one, and a NEW TAG MUST too
       ([the Spanish test](./tests/components/components.es.test.ts) fails without it, or on a name used twice).
-    - Names several tags share, the shared value sets and `words`:  once, in
-      [components.es.ts](src/components/components.es.ts), which gathers the tag files into `es`.
+    - Names several tags share, the shared value sets and `words`:
+      once, in [components.es.ts](src/components/components.es.ts), which gathers the tag files into `es`.
     - Names ASCII (`tamano`);  values and texts keep their accents.
     - A two-letter code before `.ts` means a vocabulary:
       the tools find them by it (`VocabularyFiles.languageOf()`), so no other family file is named so.
