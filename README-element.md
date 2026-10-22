@@ -753,7 +753,9 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
   still waiting after 5 s, a console warning.
 - Reading the settings before any are installed throws, naming what to import.
 - A set adds the names the types check against by augmenting the framework's interfaces:
-  `ElementAnimations`, `ValueSetNames`, `TopicNames`.
+  `ElementAnimations`, `ValueSetValues`, `KindValueSets`, `TopicNames`.
+  - `ValueSetValues` carries each value set's values too,
+    so an attribute of a set reads as them (`this.size`:  the sizes, not any text).
 
 </details>
 

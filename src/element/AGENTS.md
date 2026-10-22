@@ -192,7 +192,9 @@ As WWOD §4, plus:
 - A set adds the NAMES `src/element/`'s types check against by augmenting its interfaces
   (`declare module "spell-kit/element/elements.types"` ...):
   - `ElementAnimations` (`elementSetup.animation`):  Spell UI adds Fomantic's, in its `components.types.ts`
-  - `ValueSetNames` and `TopicNames` (a vocabulary's `values` and `topics`):  Spell UI's `ValueSets`
+  - `ValueSetValues`, `KindValueSets` and `TopicNames` (a vocabulary's `values` and `topics`):  Spell UI's `ValueSets`
+    - `ValueSetValues` holds each set's values, and `KindValueSets` each kind's default set (`size` => `sizes`),
+      so an attribute getter of a set reads as its values (`SpecValue`):  `this.size` is the sizes, not any text
   - Without Spell UI in a program, they hold only `none` / nothing.
 
 ## Defined early
