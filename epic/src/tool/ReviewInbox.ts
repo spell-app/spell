@@ -57,10 +57,12 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *   - `working`:  `{ [id]: { action, since } }`, Claude's agents at work on an item (the page shows a spinner)
  *   - `canceled`:  `{ [id]: { action, at, told } }`, a request Owen called off ("nevermind", `cancelNow()`):
  *     the waiting session stops its agent (`told` once handed over), and a late write into the item is refused
- *   - `listening`:  `{ session, since, seen }` while a Claude session waits on this inbox, else `null`
+ *   - `listening`:  `{ session, since, seen, pid? }` while a Claude session waits on this inbox, else `null`
  *     - `seen`:  its last heartbeat (`epic inbox wait` stamps it every `LISTEN_HEARTBEAT_MS`);
  *       older than `LISTEN_STALE_MS` (an old file without one:  `since` that old), the session is gone:
  *       `liveListener()` is `null`, and the routes answer `listening: null` (`forPage()`)
+ *     - `pid`:  the session's MONITOR's process, when the monitor listens (`InboxMonitor`, epic `epic-engine` P19):
+ *       live while that process runs, heartbeat or not;  gone the moment it ends
  *   - `handedOver`:  the `sent` time a waiting session last took (`takeWork()`), else `null`:
  *     so a second `epic inbox wait` doesn't hand the same send over again
  *   - `comments`:  `{ [m1 ...]: comment }` (shown `M1`;  `cm1` in an older file:  `CommentList.label()`), Owen's comments on the page's blocks and on selected text
@@ -553,11 +555,12 @@ export class ReviewInbox {
   /**
    * Claude session `session` started (or, `null`, stopped) waiting on this inbox.
    * - `seen`:  its first heartbeat (`touchListening()`)
+   * - `pid`:  the session's MONITOR's process (`InboxMonitor`, its poller):  live while it runs, with no heartbeat
    * - the page says "No Claude session is reviewing this doc" while it's `null`, or stale
    *   (`liveListener()`;  decision D6)
    */
-  setListening(session: string | null, at = isoTime()): InboxListener | null {
-    this.listening = session === null ? null : { session, since: at, seen: at }
+  setListening(session: string | null, at = isoTime(), pid?: number): InboxListener | null {
+    this.listening = session === null ? null : { session, since: at, seen: at, ...(pid ? { pid } : {}) }
     // a session took over:  the wake did its job, and the next Send with nobody listening may wake again
     if (session !== null) this.woken = null
     return this.listening
@@ -577,10 +580,12 @@ export class ReviewInbox {
    * The session listening:  `null` when nobody is, or its heartbeat stopped
    * (`seen`, an old file's `since`, older than `LISTEN_STALE_MS` at `now`, in ms).
    * - why:  a session killed without `ignore` leaves `listening` set;  the page must not claim it's there
+   * - a monitor's (`pid` set):  live exactly while the monitor's process runs (`SRV.isProcessAlive()`)
    */
   liveListener(now = Date.now()): InboxListener | null {
     const listening = this.listening
     if (!listening) return null
+    if (listening.pid) return SRV.isProcessAlive(listening.pid) ? listening : null
     const seen = Date.parse(listening.seen ?? listening.since)
     return now - seen > LISTEN_STALE_MS ? null : listening
   }
@@ -962,8 +967,12 @@ export type WorkingEntry = { action: NowAction; since: string }
 /** A request Owen called off;  `told` once a waiting session heard of it. */
 export type InboxCancel = { action: NowAction; at: string; told: boolean }
 
-/** The session waiting on the inbox:  `seen` its last heartbeat (missing in an old file). */
-export type InboxListener = { session: string; since: string; seen?: string }
+/**
+ * The session waiting on the inbox:  `seen` its last heartbeat (missing in an old file).
+ * - `pid`:  the session's monitor's process, when the monitor listens:  live while it runs, with no heartbeat
+ *   (`liveListener()`)
+ */
+export type InboxListener = { session: string; since: string; seen?: string; pid?: number }
 
 /**
  * The page server's wake of the epic (`ReviewInbox.claimWake()`, epic `epic-workflow` P16).
