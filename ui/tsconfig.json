@@ -1,6 +1,6 @@
 {
-  // Spell UI's BROWSER code, ONE TypeScript program (epic `repo-split` P14, Q47):  everything in `src/` but the node
-  // tools and the `spell` commands, and the docs site bundle's entry (`site/_src`).
+  // Spell UI's BROWSER code, ONE TypeScript program (epic `repo-split` P14, Q47):
+  // everything in `src/` but the node tools and the `spell` commands, and the docs site bundle's entry (`site/_src`).
   // - It extends the settings every repo shares, the kit's toolchain's (`spell-kit/toolchain/tsconfig.base.json`).
   // - NO `paths`:  every file is imported by its package name and its path under `src/`
   //   (`spell-ui/components/ui-button/UIButton`), Spell UI's own files too.
@@ -17,8 +17,8 @@
     "jsxImportSource": "@solidjs/web",
     "types": ["vite/client"],
     // the kit's TypeScript plugin, in the editor only (`tsc` runs no plugins):
-    // slot and part names for custom elements in JSX,
-    // from the Custom Elements Manifests of this package and its dependencies (the kit's README-element.md)
+    // slot and part names for custom elements in JSX, from the Custom Elements Manifests
+    // of this package and its dependencies (the kit's README-element.md)
     "plugins": [{ "name": "spell-kit/src/element-tools/ts-plugin/plugin.cjs" }]
   },
   "include": ["src", "site/_src"],

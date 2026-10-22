@@ -15,36 +15,38 @@ import { FamilyFiles } from "./FamilyFiles.ts"
 
 /****************
  * ### `ElementManifests`
- * The editors' element descriptions, from the site data (`docs/__data/components.json5`, every vocabulary):
- * the STANDARD ones, and the JSX types.
+ * What editors read about the elements:  the STANDARD descriptions, and the JSX types.
+ * - Made from the site data (`docs/__data/components.json5`, every vocabulary).
  * - `custom-elements.json`:  a Custom Elements Manifest (schema 2.1),
  *   what web-component tools read (Storybook, linters, IDE plugins, Claude)
  *   - `package.json`'s `customElements` points at it
- * - `html-custom-data.json`:  VS Code's HTML custom data (`html.customData`),
+ * - `html-custom-data.json`:  VS Code's HTML custom data (`html.customData`):
  *   autocomplete and hover docs for every `<ui-*>` tag, attribute and value in any `.html` file
- *   - the repo's `.vscode/settings.json` loads it, and the kit's, and every epic's window
+ *   - the kit's `.vscode/settings.json` loads it, in every window the kit is a folder of (its own, every epic's);
+ *     so does spell-app's
  * - `css-custom-data.json`:  VS Code's CSS custom data (`css.customData`), for any `.css` file:
  *   - every family's custom properties (`--ui-button-radius`), completed as property names, with hover docs
  *   - every part, as `::part(icon)`, and every custom state, as `:state(open)`
- *     - for ANY selector:  VS Code can't tell which tag a selector names, so each one's docs list the tags that have it
+ *     - for ANY selector:  VS Code can't tell which tag a selector names,
+ *       so each one's docs list the tags that have it
  *   - loaded beside the HTML data
- * - `src/jsx.ts` (`spell-ui/jsx`, `jsxTypes()`):  every tag's attributes and events as TypeScript types for Solid's JSX,
- *   so VS Code completes, explains and checks `<ui-*>` tags in a `.tsx` file of any program that imports it
+ * - `src/jsx.ts` (`spell-ui/jsx`, `jsxTypes()`):  every tag's attributes and events, as types for Solid's JSX
+ *   - so VS Code completes, explains and checks `<ui-*>` tags in a `.tsx` file of any program that imports it
  * - Written by `yarn site:data`, and committed:  editors read them with no build.
  *   - The three data files beside `components.json5`;  the JSX types in `src/`, as code imports them.
  *   - `tests/tools/ElementManifests.test.ts` fails while they're stale.
  * - All list COMPONENT tags only, not the doc-only `<ui-docs-*>`.
+ * - Pure data in, text out:  reads only the family barrels' file names (`className()`).
+ * - Another package's elements written the same way (the brand's `<brand-*>`):
+ *   its own `yarn site:data` makes these with its own folders, beside ITS site data
+ *   (spell-brand's `scripts/site-data.ts`).
  * - Why not the `custom-elements-manifest analyze` script (`yarn manifest`):
  *   it reads classes, and our attributes, events and slots live in the vocabulary objects, which it can't see.
- * - Another package's elements written the same way (the brand's `<brand-*>`):
- *   its own `yarn site:data` makes one of these with its own folders, beside ITS site data
- *   (`packages/brand/scripts/site-data.ts`).
- * - Pure data in, text out:  reads only the family barrels' file names (`className()`).
  ****************/
 export class ElementManifests {
   /** site data, as `yarn site:data` builds it */
   readonly data: SiteDataFile
-  /** the package folder (`packages/ui`, `packages/brand`), absolute:  where element class files are looked up */
+  /** the package folder (`spell-ui/`, `spell-brand/`), absolute:  where element class files are looked up */
   readonly packageFolder: string
   /** family folders, relative to `packageFolder`:  `components`, as every set lays them out (Spell UI's, the brand's) */
   readonly componentsPath: string
@@ -65,7 +67,8 @@ export class ElementManifests {
 
   /**
    * The three data files as `yarn site:data` writes them, `[path, text]`, into `dataFolder` (`docs/__data/`).
-   * - `JSON.stringify(..., 2)`:  oxfmt skips a set's `docs/__data/`, so the bytes stay ours and the staleness test can compare.
+   * - `JSON.stringify(..., 2)`:  oxfmt skips a set's `docs/__data/`,
+   *   so the bytes stay ours, and the staleness test can compare them.
    */
   outputs(dataFolder: string): [file: string, text: string][] {
     return [
@@ -236,9 +239,10 @@ export class ElementManifests {
   }
 
   /**
-   * `tag`'s class name, by `FamilyFiles.stem()`'s rule (`ui-breadcrumb-section` => `UIBreadcrumbSection`,
-   * `brand-blob` => `BrandBlob`), checked against its family folder;  else the class the family barrel names ending in
-   * `<Name>` (`ui-event` => `UIFeedEvent`).
+   * `tag`'s class name, by `FamilyFiles.stem()`'s rule:  `ui-breadcrumb-section` => `UIBreadcrumbSection`.
+   * - Any set's prefix:  `brand-blob` => `BrandBlob`.
+   * - Checked against its family folder, for a file of that name.
+   * - Else the class the family barrel names ending in `<Name>`:  `ui-event` => `UIFeedEvent`.
    */
   className(tag: SiteTag): string {
     const name = FamilyFiles.stem(tag.tag)
@@ -301,8 +305,8 @@ export class ElementManifests {
 
   /**
    * The DOM's own maps (`jsxTypes()`), so plain DOM code knows the tags and their events:
-   * - `HTMLElementTagNameMap`:  each tag's element (`jsxElementType()`),
-   *   so `querySelector("ui-button")` gives one whose `addEventListener("ui-toggle", ...)` types `event.detail`
+   * - `HTMLElementTagNameMap`:  each tag's element (`jsxElementType()`)
+   *   - so `querySelector("ui-button")` gives one whose `addEventListener("ui-toggle", ...)` types `event.detail`
    * - `UIEventMap`, every event name a tag sends, as a `CustomEvent<unknown>`,
    *   added to `HTMLElementEventMap` and `DocumentEventMap`:  any element or the document completes the names
    *   - `unknown`:  the same name is any tag's, other sets' too (`<brand-*>`, `<epic-*>`), each with its own `detail`
@@ -680,28 +684,32 @@ const JSX_GLOBAL_TYPE =
 /** The JSX types' header (`jsxTypes()`):  what the file is, and how a program uses it. */
 const JSX_HEADER = [
   "/**",
-  " * Every Spell UI `<ui-*>` tag's attributes and events in JSX (Solid 2's), for completion, hover docs and checks",
-  " * in VS Code;  and each tag's events in plain DOM code.",
+  " * The JSX types of every Spell UI `<ui-*>` tag, in Solid 2's JSX:  its attributes and events.",
+  " * - In VS Code:  completion, hover docs and checks.",
+  " * - And each tag's events in plain DOM code.",
   " * - GENERATED by `yarn site:data` from the vocabularies -- do not edit.",
   " *   `tests/tools/ElementManifests.test.ts` fails while it's stale.",
   " * - A program uses it by importing it once, in any of its files (its `.types.ts`, say):",
   ' *   `import type {} from "spell-ui/jsx"`.',
   " *   - Then every `<ui-*>` tag in that program's JSX is checked.",
   " *   - Not by `tsconfig`'s `types`:  that finds packages, not a package's files.",
-  " * - EXACT:  an attribute the vocabulary doesn't name is an error;",
-  " *   HTML's global attributes (`class`, `id`, `slot`, `style`, `onClick` ...) and `aria-*` stay allowed.",
+  " * - EXACT:  an attribute the vocabulary doesn't name is an error.",
+  " *   - HTML's global attributes (`class`, `id`, `slot`, `style`, `onClick` ...) and `aria-*` stay allowed.",
   " *   - A name with a dash in it (`data-*`, a misspelt `text-alin`) isn't checked:  TypeScript lets any through.",
-  ' * - Values:  a flag is `basic`, `basic={true}` or `basic=""`, and `basic={false}` removes it;',
-  ' *   other attributes take their text, a number as `{5}` or `"5"`.',
+  " * - Values:",
+  ' *   - a flag:  `basic`, `basic={true}` or `basic=""`;  `basic={false}` removes it',
+  ' *   - other attributes take their text, a number as `{5}` or `"5"`',
   " * - Rich data (an object, array or function) goes to a property:  `prop:options={...}`.",
   " *   - Any attribute may be set as its property too, typed the same:  `prop:value={value()}`.",
   " * - Events:  `on-<event>` per event a tag sends, its `event.detail` typed:  `on-ui-change={(event) => ...}`.",
-  " *   - NOTE: typed only, for now:  Solid calls it once epic `solid-17` lands;",
-  " *     until then, listen with `addEventListener()` from a `ref`.",
+  " *   - NOTE: typed only, for now:  Solid calls it once epic `solid-17` lands.",
+  " *     Until then, listen with `addEventListener()` from a `ref`.",
   ' *   - In plain DOM code too:  `querySelector("ui-button")` gives a `<ui-button>` (`HTMLElementTagNameMap`),',
-  ' *     whose `addEventListener("ui-toggle", ...)` types `event.detail`;  so does a JSX `ref`\'s element.',
-  " *   - On any other element or the document, every `ui-*` name completes, its `detail` `unknown` (`UIEventMap`).",
-  " *   - A misspelt `on-ui-chnage` isn't checked (it has a dash):  the kit's TS plugin warns on it.",
+  ' *     whose `addEventListener("ui-toggle", ...)` types `event.detail`.',
+  " *     So does a JSX `ref`'s element.",
+  " *   - On any other element or the document, every `ui-*` name completes (`UIEventMap`):",
+  " *     its `detail` is `unknown`.",
+  " *   - A misspelt `on-ui-chnage` isn't checked (it has a dash):  the kit's TypeScript plugin warns on it.",
   " * - Component tags only, not the docs site's `<ui-docs-*>`.",
   " * - Type-only:  no code, nothing at run time.",
   " */",
@@ -717,8 +725,8 @@ const JSX_HEADER = [
   "export type UIGlobalJSXAttributes<Target extends HTMLElement = HTMLElement> = JSX.HTMLAttributes<Target>",
   "",
   "/**",
-  " * A `<ui-*>` element in the DOM's types:  an `HTMLElement` whose `addEventListener()` knows its own events,",
-  " * `event.detail` typed;  `Events`:  its `<Class>EventMap`.",
+  " * A `<ui-*>` element in the DOM's types:  an `HTMLElement` whose `addEventListener()` knows its own events.",
+  " * - `Events`:  its `<Class>EventMap`, each event's `detail` typed",
   ' * - `querySelector("ui-button")` gives one (`HTMLElementTagNameMap`), and so does a JSX `ref`.',
   " * - Its other members (`value`, `open()` ...) aren't here:  cast to its DOM element class for those.",
   " */",

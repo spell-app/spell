@@ -303,13 +303,13 @@ export type ImportMap = {
 ////////////////
 
 /**
- * Spell UI's docs site's PAGES, from `packages/ui/`:  its `docs/` folder, a component set laid out as every set is
+ * Spell UI's docs site's PAGES, from the repo's root:  its `docs/` folder, a component set laid out as every set is
  * (epic `people-and-orgs` P18;  until then shared content, the checkout's `ui/`, from claude-design P6).
  * - What's in it:
  *   - the pages, `*.html`, flat:  an element's page is its tag, `ui-button.html`
  *   - the component index, `components.html`
  *   - the layout (`__parts/`), the data (`__data/`, `SITE_DATA`)
- *   - the files examples load (`examples/`), Fomantic's images (`images/`), the site's `README.md`
+ *   - the files examples load (`examples/`), Fomantic's images (`images/`)
  * - Tracked with the branch, so a page changes in the same commit as its element.
  * - The page server serves it at `/components/ui/`, with the site bundle (`SITE_BUILD`'s `_assets/`) laid over it,
  *   so a page's `_assets/site.js` resolves (the page server's `componentSets` setting).
@@ -317,7 +317,7 @@ export type ImportMap = {
 export const SITE_PAGES = "docs"
 
 /**
- * Spell UI's docs site's DATA, from `packages/ui/`:  `docs/__data/`.
+ * Spell UI's docs site's DATA, from the repo's root:  `docs/__data/`.
  * - GENERATED, committed (`yarn site:data`):
  *   - `components.json5`, `icons.json5`, `search.json5`
  *   - `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`
@@ -326,7 +326,7 @@ export const SITE_PAGES = "docs"
 export const SITE_DATA = `${SITE_PAGES}/__data`
 
 /**
- * Spell UI's docs site's BUILD, from `packages/ui/`:  `site/`.
+ * Spell UI's docs site's BUILD, from the repo's root:  `site/`.
  * - `_src/`:  the bundle's entry;  `_assets/`:  the bundle (`yarn site:bundle`), never committed
  */
 export const SITE_BUILD = "site"
@@ -680,9 +680,9 @@ export type DesignSource = {
   group: string
   /** its site data, as its `yarn site:data` wrote it */
   data: SiteDataFile
-  /** where its family folders are, relative to `packages/ui` (for `tokens.json`'s `meta`), e.g. `../brand/components` */
+  /** where its family folders are, from Spell UI's folder (for `tokens.json`'s `meta`):  `../spell-brand/components` */
   componentsPath: string
-  /** the files its cards are read from, relative to `packages/ui` (for the same), e.g. `../brand/docs/brand-*.html` */
+  /** the files its cards are read from, from Spell UI's folder (for the same):  `../spell-brand/docs/brand-*.html` */
   docsPaths: string[]
   /** what the README says about the group, under its heading */
   intro: string

@@ -445,7 +445,7 @@ export const SITE_DATA_VERSION = 1
 /** Tag prefix of every doc-only element. */
 export const DOCS_TAG_PREFIX = "ui-docs-"
 
-/** Where the data file sits, relative to the site root (a set's `docs/`:  `packages/ui/docs/`). */
+/** Where the data file sits, relative to the site root (a set's `docs/`:  Spell UI's `docs/`). */
 export const SITE_DATA_PATH = "__data/components.json5"
 
 /** Where the search file sits, relative to the site root:  beside the data file. */
@@ -494,9 +494,9 @@ export const DOCS_SCHEME_SWITCHING = "ui-scheme-switching"
  * `localStorage` keys of the viewer's look (`ThemePreference`).
  * - `scheme`:  ONE key for every doc site:  `light` / `dark`, absent for `system` (follow the OS).
  *   `<spell-site-header>` on the docs, epic pages and saga pages reads and writes it too.
- *   - MUST equal `SCHEME_KEY` in `packages/server/src/site/site.types.ts`:
- *     `ui` can't import it (the server package is a leaf `ui` stays clear of in shipped code);
- *     `UIDocsThemes.test.tsx` pins the two equal
+ *   - MUST equal `SCHEME_KEY` in the kit's server (`spell-kit/server/site/site.types`):
+ *     `ui` can't import it, as its shipped code stays clear of the server.
+ *     `UIDocsThemes.test.tsx` pins the two equal.
  * - `theme`:  a `UI.themes` name (`github`, `classic`), `DOCS_PLAIN_THEME` for our own look,
  *   absent for `DOCS_DEFAULT_THEME`.  Spell UI's site only.
  */
@@ -507,7 +507,7 @@ export const DOCS_LOOK_KEYS = { scheme: "spell-site:scheme", theme: "spell-ui-si
  * read once when `DOCS_LOOK_KEYS.scheme` is absent, copied to it, then removed;  first valid one wins.
  * - `spell-site:theme`:  `<spell-site-header>`'s (docs, epic pages, saga pages)
  * - `spell-ui-site:scheme`:  Spell UI's site (and the Astro site before it)
- * - MUST equal `LEGACY_SCHEME_KEYS` in `packages/server/src/site/site.types.ts`
+ * - MUST equal `LEGACY_SCHEME_KEYS` in the kit's server (`spell-kit/server/site/site.types`)
  */
 export const DOCS_LEGACY_SCHEME_KEYS = ["spell-site:theme", "spell-ui-site:scheme"] as const
 

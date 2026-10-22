@@ -66,8 +66,8 @@ When the bundle is stale, the page server rebuilds it as it starts, and a page t
 - The docs site is served by spell-app's page server, because spell-app's settings name every component set
   (`componentSets`, in [its package.json](https://github.com/spell-app/spell-app/blob/main/package.json):
   [spell-app's README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md)).
-  - So it needs `spell-app` cloned, not only `spell-ui`:  `yarn clone spell-app` brings both
-    ([setup](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero)).
+  - So it needs `spell-app` cloned, not only `spell-ui`:
+    `yarn clone spell-app` brings both ([setup](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero)).
   - `start all` finds spell-app from any folder of the kit;  in `spell-app/`, `yarn serve` runs the same.
 - `start all` brings up the editor too.
   For the page server alone, `spell server start` in `spell-app/`:
@@ -453,7 +453,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [IconPackBuilder.ts](src/tools/IconPackBuilder.ts) | `yarn icons:pack`:  checks a folder of SVGs (no script, no external resources) and writes its `pack.js`, keeping hand edits;  `--sanitize`, `--skip-unsafe`, `--allow-unsafe`;  also run by `gen:icons` |
 | [SiteDataBuilder.ts](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale |
 | [SiteSearchBuilder.ts](src/tools/SiteSearchBuilder.ts) | `search.json5`:  every page's title and sections, read from the page files, for `<ui-docs-search>` |
-| [ElementManifests.ts](src/tools/ElementManifests.ts) | `custom-elements.json` (Custom Elements Manifest 2.1) and `html-custom-data.json` (VS Code's `html.customData`, which spell-app's `.vscode/settings.json` loads), written by `yarn site:data` into `docs/__data/`;  and the JSX types, `src/jsx.ts` (`spell-ui/jsx`) |
+| [ElementManifests.ts](src/tools/ElementManifests.ts) | what editors read about the elements, written by `yarn site:data`:  in `docs/__data/`, `custom-elements.json` (Custom Elements Manifest 2.1), `html-custom-data.json` (VS Code's HTML data) and `css-custom-data.json` (VS Code's CSS data:  custom properties, `::part()` and `:state()` names), which the kit's `.vscode/settings.json` loads in every window the kit is a folder of;  and the JSX types, `src/jsx.ts` (`spell-ui/jsx`) |
 | [FamilyFiles.ts](src/tools/FamilyFiles.ts) | where a family's own files are, by name:  `ui-button` => `UIButton.css`, `UIButton.types.ts` ...;  for the tools that look one up (`FamilyTokens`, `yarn gen:root`) |
 | [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
@@ -541,7 +541,7 @@ this is their code.
 - The kit's `spell` finds them through Spell UI's `package.json`:  `"spell": { "commands": "./src/cli/commands.ts" }`.
 - Each action imports its command's file only when it runs, so `spell help` stays fast.
 - Adding one:  the kit's recipe, "Adding a command" in [README-cli.md](https://github.com/spell-app/spell-kit/blob/main/README-cli.md);
-  the rules for writing one here, [src/cli/AGENTS.md](src/cli/AGENTS.md).
+  the rules for writing one here, [the commands' AGENTS.md](src/cli/AGENTS.md).
 
 <details>
 <summary>The DRY rule (one of each)</summary>

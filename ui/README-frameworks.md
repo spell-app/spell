@@ -57,8 +57,8 @@ The first three are the DOM's own, so a framework that can drive a `<video>` alr
    - `ready` resolves when an element fails, too.
      It then has `:state(errored)` and has sent a cancelable `ui-error`, and the rest of the page carries on.
 
-Define the elements BEFORE the framework renders them:  `import "spell-ui"` for every family,
-or `import "spell-ui/ui-dropdown"` for one.
+Define the elements BEFORE the framework renders them:
+`import "spell-ui"` for every family, or `import "spell-ui/ui-dropdown"` for one.
 As a backstop, a property set before the tag is defined is kept, and applied once it is.
 
 ```mermaid
@@ -229,8 +229,8 @@ function listen(element) {
 ```
 
 - **The catch:**  your app must run the SAME Solid as Spell UI, `solid-js` and `@solidjs/web` 2.0.0-rc.13.
-  Two copies of Solid on one page break silently:  two registries, two owners
-  ([the element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md)).
+  Two copies of Solid on one page break silently:
+  two registries, two owners ([the element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md)).
   - In Vite, that's `resolve.dedupe`:  `["solid-js", "@solidjs/web"]`, as every Spell build sets it.
 - Solid's context stops at the element:  each element draws in a Solid root of its own,
   so your providers don't reach inside.
@@ -296,8 +296,8 @@ For Solid's JSX, import the types once, in any file of your program:
 import type {} from "spell-ui/jsx"
 ```
 
-- Then every `<ui-*>` tag is checked:  a misspelt attribute (`sise="large"`), or a value its set doesn't hold
-  (`size="enormous"`), is an error.
+- Then every `<ui-*>` tag is checked:
+  a misspelt attribute (`sise="large"`), or a value its set doesn't hold (`size="enormous"`), is an error.
 - HTML's global attributes (`class`, `id`, `slot`, `onClick`, `aria-*` ...) stay allowed.
 - A name with a dash in it (`data-*`) is never checked:  TypeScript lets any through.
 - Flags:  `basic`, `basic={true}` or `basic=""`;  `basic={false}` removes it.
@@ -325,8 +325,9 @@ button.addEventListener("ui-toggle", (event) => setActive(event.detail.active))
   - **Typed only, for now:  Solid calls it once Solid's custom event props land (epic `solid-17`).**
     Until then, listen from a `ref`, as above.
   - A misspelt `on-ui-chnage` isn't an error (it has a dash);  the kit's TypeScript plugin warns on it.
-- In plain DOM code:  `querySelector("ui-button")` gives a `<ui-button>` whose `addEventListener()` knows its events,
+- In plain DOM code:  `querySelector("ui-button")` gives a `<ui-button>` that knows its own events,
   and so does a JSX `ref`'s element.
+  - Its `addEventListener()` types each one's `event.detail`.
   - Only its events:  for its other members (`value`, `open()` ...), cast to its class.
 - On any other element, or the document, every `ui-*` name completes, but its `detail` is `unknown`.
   - The same name is many tags' (`ui-change` is 18 of Spell UI's, and other sets' too), each with its own `detail`.
@@ -353,8 +354,8 @@ A page then maps the names onto those folders, exactly as the smoke pages do:
 </script>
 ```
 
-- `spell-ui` is every family, `spell-ui/ui-<family>` one;  `spell-ui/core`, `spell-ui/forms` and `spell-ui/api`
-  are the shared entries.
+- `spell-ui` is every family, `spell-ui/ui-<family>` one.
+  - `spell-ui/core`, `spell-ui/forms` and `spell-ui/api` are the shared entries.
 - `yarn vendor` writes the two Solid lines to `vendor/importmap.json`,
   after compiling the Solid smoke app when it's out of date.
 - `yarn serve` serves `dist/`, `vendor/` and `src/` with the whole map injected into every page,

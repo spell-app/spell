@@ -436,8 +436,8 @@ The page at the top paid for five things once, and then a few kB for each family
 That's 115.7 kB, and none of it is paid twice, however many elements follow.
 After that, each family costs its own code, once:  5.7 kB on average, from Text's 1.2 kB to Form's 16.9 kB.
 The first form control on a page adds the shared `forms` chunk, 6.8 kB.
-The page at the top used three families, with the two chunks they share with others:  21.6 kB,
-so 137.3 kB in all, before its icon.
+The page at the top used three families, with the two chunks they share with others:
+21.6 kB, so 137.3 kB in all, before its icon.
 Import every family at once (`import "spell-ui"`) and it's 421 kB, Solid included.
 
 - The changelog's budget, 8 kB a family, holds for 49 of the 62;  nothing checks it.
