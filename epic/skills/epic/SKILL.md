@@ -481,10 +481,11 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        right after its pruning.
      - Both rewrite in place, uncommitted:
        the branch's diff waits for Owen in Source Control, before the phase's commit.
-  2. Then the epic's guide (below), written from the CLEANED epic page in the README VOICE
-     ([readme.md](${CLAUDE_PLUGIN_ROOT}/voices/readme.md), read whole first:  its "AN EPIC'S GUIDE" shape),
-     plus the repo's own writing rules, which win where they differ (Spell's:  WWOD §6, and the kit's
-     `agents/wwod/writing.md`).
+  2. Then the epic's guide (below), written from the CLEANED epic page in the voice the repo gives guides:
+     `epic voice --for guide` prints its file (spell-epic's readme voice, unless the repo names its own);
+     read it whole first, and its "AN EPIC'S GUIDE" shape.
+     The repo's CODE voice (`epic voice code`:  its house style's writing rules;  Spell's, WWOD §6) still holds
+     where they differ.
   3. Then the READMEs (below):  every README the epic made untrue, rewritten in the same voice.
   4. Last, the checkers:
      - `epic pages fuss --branch`
@@ -503,7 +504,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
   - Finish as [epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md) says, "Finishing a page".
   - Then `epic pages index`.
     The index is shared too:  `epic` keeps the epic's own card current from any checkout.
-- The READMEs:  bring every README the epic made untrue up to date, in the readme voice.
+- The READMEs:  bring every README the epic made untrue up to date, in the voice the repo gives READMEs
+  (`epic voice --for readme`).
   - Which:  in every repo the epic touched (the kit and each child repo it committed to), every `README.md` and
     `README-*.md` that names something the epic added, changed, renamed or removed:
     - the README files its commits changed (`epic docs <name>`, its `wrote` list)

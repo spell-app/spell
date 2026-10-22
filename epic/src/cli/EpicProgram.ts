@@ -504,6 +504,17 @@ export class EpicProgram {
       .action(() => runVerb(() => EpicProgram.config(rawArgs("config"))))
 
     epic
+      .command("voice")
+      .description(
+        "the VOICE a kind of page is written in (readme, code ...):  its file, for a skill to read;  or every voice"
+      )
+      .usage("[<name> | --for <kind>] [--json]")
+      .argument("[args...]")
+      .allowUnknownOption()
+      .addHelpText("after", VOICE_HELP)
+      .action(() => runVerb(() => EpicProgram.voice(rawArgs("voice"))))
+
+    epic
       .command("init")
       .description(
         "set this repo up for epics:  its .epic/config.json5, the content repo beside it, the links and their " +
@@ -657,6 +668,56 @@ export class EpicProgram {
   }
 
   /**
+   * `epic voice [<name> | --for <kind>] [--json]`:  the VOICES this repo writes people-facing pages in (epic `readme`
+   * P13;  `EpicConfig.voiceFile()`).
+   * - `<name>`:  that voice's file, alone on a line, for a skill to read:  `epic voice readme` => `/.../readme.md`
+   * - `--for <kind>`:  the file of the voice that kind of page is written in:  `epic voice --for guide`
+   * - neither:  every voice, its file and the kinds of page written in it;  `--json`:  the same as JSON
+   * - Returns 0.
+   * - Throws `EpicCommandError`:  exit 2 for a voice this repo hasn't got, listing those it has;  1 for a config file
+   *   that won't read.
+   * - static:  needs no tree
+   */
+  static async voice(args: string[]): Promise<number> {
+    const json = args.includes("--json")
+    const forAt = args.indexOf("--for")
+    const kind = forAt === -1 ? undefined : args[forAt + 1]
+    const [named] = args.filter((arg, at) => !arg.startsWith("--") && (forAt === -1 || at !== forAt + 1))
+    let config: EpicConfig
+    try {
+      config = EpicConfig.of(Git.nearestCheckout({ marker: ".git" }))
+    } catch (error) {
+      throw new EpicCommandError((error as Error).message, EXIT.ERRORS)
+    }
+    if (forAt !== -1 && !kind) throw new EpicCommandError("epic voice --for <kind>?  e.g. --for guide", EXIT.USAGE)
+    const name = kind ? config.voiceFor(kind) : named
+    if (name === undefined) {
+      const kinds = Object.entries(config.settings.pageVoices)
+      const all = config.voiceNames.map((each) => ({
+        name: each,
+        file: config.voiceFile(each) ?? "",
+        kinds: kinds.filter(([, voice]) => voice === each).map(([pageKind]) => pageKind)
+      }))
+      const lines = all.map(
+        (each) => `${each.name.padEnd(10)} ${each.file}${each.kinds.length ? `  (${each.kinds.join(", ")})` : ""}`
+      )
+      process.stdout.write(json ? `${JSON.stringify(all, null, 2)}\n` : `${lines.join("\n")}\n`)
+      return EXIT.OK
+    }
+    const file = config.voiceFile(name)
+    if (!file)
+      throw new EpicCommandError(
+        `epic voice ${name}?  no such voice here.  The voices:  ${config.voiceNames.join(", ")}` +
+          (name === "code"
+            ? `.  Name the repo's house style in .epic/config.json5:  "voices": { "code": "<its file>" }`
+            : ""),
+        EXIT.USAGE
+      )
+    process.stdout.write(json ? `${JSON.stringify({ name, file })}\n` : `${file}\n`)
+    return EXIT.OK
+  }
+
+  /**
    * `epic --version`:  the code this `epic` runs, `<short sha> (<branch>) <checkout>`.
    * - static:  this code's checkout, whoever calls
    */
@@ -770,11 +831,28 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
                        names):  an epic's worktree is then <worktreesFolder>/<epic>, a worktree of the top with
                        one of every child repo inside it, all on branch <epic>;  empty:  a single repo
   top                  the multi-repo top's main checkout this repo is (or is a child of);  empty:  none
+  voices.<name>        each voice's file:  the repo's own ("voices"), else spell-epic's voices/<name>.md
+  pageVoices.<kind>    the voice each kind of page is written in ("pageVoices", over the defaults)
 Any worktree reads the main checkout's file;  a key it leaves out takes its default.
 
 Examples:
   epic config contentFolder
   epic config --json`
+
+/** After `epic voice --help`. */
+const VOICE_HELP = `
+A VOICE is how a kind of page is written:  who reads it, what it opens with, what it never does.
+  readme   READMEs, an epic's guide, reference pages:  one engineer to another, with proof
+           (spell-epic's voices/readme.md)
+  code     docstrings, comments, AGENTS.md files, epic pages:  the repo's own house style, which its
+           .epic/config.json5 names ("voices": { "code": "agents/wwod/writing.md" });  spell-epic ships none
+A repo's .epic/config.json5 adds or replaces voices ("voices", a name to a file from its main checkout) and says
+which voice each kind of page takes ("pageVoices":  readme, guide, code, epic-page ...).
+
+Examples:
+  epic voice readme
+  epic voice --for guide
+  epic voice --json`
 
 /** After `epic init --help`. */
 const INIT_HELP = `

@@ -153,7 +153,9 @@ export class RepoInit {
       repoTemplates: "",
       windowsFolder: `../${repo}.epics/windows`,
       app: { ...EpicConfig.DEFAULTS.app },
-      repos: ""
+      repos: "",
+      voices: {},
+      pageVoices: { ...EpicConfig.DEFAULTS.pageVoices }
     }
   }
 

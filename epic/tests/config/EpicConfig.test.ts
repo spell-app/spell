@@ -50,7 +50,13 @@ describe("EpicConfig", () => {
       "app.start": "",
       // a single repo:  no child repos, no multi-repo top (epic-engine P10)
       repos: "",
-      top: ""
+      top: "",
+      // spell-epic's own voices, and the default kinds of page (epic readme P13)
+      "voices.readme": join(EpicConfig.ENGINE_VOICES, "readme.md"),
+      "pageVoices.readme": "readme",
+      "pageVoices.guide": "readme",
+      "pageVoices.code": "code",
+      "pageVoices.epic-page": "code"
     })
     // no app declared
     expect(config.app).toBeUndefined()
@@ -215,6 +221,43 @@ describe("EpicConfig", () => {
       /"windows\.default" must be a string/
     )
     expect(() => EpicConfig.settingsFrom("[]", "x.json5")).toThrow(/must hold an object/)
+  })
+})
+
+// epic `readme` P13:  voices, a name each, the repo's own over spell-epic's
+describe("EpicConfig voices", () => {
+  test("no file:  spell-epic's readme voice, no code voice, and the default kinds of page", () => {
+    const config = new EpicConfig(MAIN)
+    expect(config.voiceFile("readme")).toBe(join(EpicConfig.ENGINE_VOICES, "readme.md"))
+    expect(config.voiceFile("code")).toBeUndefined()
+    expect(config.voiceFor("guide")).toBe("readme")
+    expect(config.voiceFor("epic-page")).toBe("code")
+    expect(config.voiceFor("brand")).toBe("brand")
+    expect(config.voiceNames).toContain("readme")
+    expect(config.values()["voices.readme"]).toBe(join(EpicConfig.ENGINE_VOICES, "readme.md"))
+    expect(config.values()["pageVoices.guide"]).toBe("readme")
+  })
+
+  test("the repo's own:  a voice from its main checkout, one of spell-epic's replaced, a kind sent elsewhere", () => {
+    const main = fakeMainCheckout(join(TOP, "voices"))
+    configFile(
+      main,
+      '{ "voices": { "code": "agents/wwod/writing.md", "readme": "docs/our-readme.md" }, "pageVoices": { "guide": "code" } }'
+    )
+    const config = new EpicConfig(main)
+    expect(config.voiceFile("code")).toBe(join(main, "agents/wwod/writing.md"))
+    expect(config.voiceFile("readme")).toBe(join(main, "docs/our-readme.md"))
+    expect(config.voiceFor("guide")).toBe("code")
+    expect(config.voiceFor("readme")).toBe("readme")
+    expect(config.voiceNames).toEqual(expect.arrayContaining(["code", "readme"]))
+  })
+
+  test("refuses voices that aren't names to files", () => {
+    expect(() => EpicConfig.settingsFrom('{ "voices": ["code"] }', "x.json5")).toThrow(
+      /x\.json5's "voices" must be an object of names to text/
+    )
+    expect(() => EpicConfig.settingsFrom('{ "voices": { "code": "" } }', "x.json5")).toThrow(/"voices"/)
+    expect(() => EpicConfig.settingsFrom('{ "pageVoices": { "a b": "readme" } }', "x.json5")).toThrow(/"pageVoices"/)
   })
 })
 

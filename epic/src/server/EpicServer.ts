@@ -622,4 +622,3 @@ type BundleBuilder = { readonly wait: Handler; start(): unknown; stop(): void }
 
 /** `BundleBuild` itself:  `new BundleBuild({ root })`. */
 type BundleBuilderClass = new (props: { root: string }) => BundleBuilder
-

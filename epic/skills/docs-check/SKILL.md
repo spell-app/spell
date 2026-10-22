@@ -33,10 +33,11 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
     - each item:  its status, its chosen option, its answer;  `--json` adds its whole current text
 - Not a text-rewriting skill (spell-app's `/fussbudget`):  that one fixes how text READS;  this one fixes what it SAYS.
   A sentence it rewrites still reads right:
-  - in a README or a guide, the README VOICE ([readme.md](${CLAUDE_PLUGIN_ROOT}/voices/readme.md)):
+  - in a README or a guide, the voice the repo gives that kind of page (`epic voice --for readme`,
+    `epic voice --for guide`:  spell-epic's readme voice unless the repo names its own):
     real output over adjectives, the edge said, one home per fact
-  - everywhere, the repo's writing rules, from the house style its `AGENTS.md` names, which win where they differ
-    (Spell's:  WWOD §6, and its before / afters in the kit's `agents/wwod/writing.md`)
+  - everywhere, the repo's CODE voice (`epic voice code`:  its house style's writing rules), which wins where they
+    differ (Spell's:  WWOD §6, and its before / afters in the kit's `agents/wwod/writing.md`)
 
 ## Forms
 
