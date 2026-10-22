@@ -77,6 +77,13 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   - [HotElements](../element-tools/HotElements.ts):  the Vite plugin for hot reloading a set's elements in `yarn dev`
   - [DevServer](../element-tools/DevServer.ts):  a package's Vite dev server, started from node
   - [Terminal](../element-tools/Terminal.ts):  where tools print;  [NodePackage](../element-tools/NodePackage.ts):  finds an installed package
+  - [ts-plugin/](../element-tools/ts-plugin/):  the TypeScript plugin, slot, part and dashed-attribute names in JSX
+    (epic `intellisense` P5;  the kit's README-element.md, "The TypeScript plugin")
+    - [ElementsPlugin](../element-tools/ts-plugin/ElementsPlugin.ts):  the language service's completions and warnings
+    - [ElementCatalog](../element-tools/ts-plugin/ElementCatalog.ts):  the tags of the program's packages, from their
+      Custom Elements Manifests
+    - [plugin.cjs](../element-tools/ts-plugin/plugin.cjs):  what tsserver loads, by its path
+      (`spell-kit/src/element-tools/ts-plugin/plugin.cjs`):  CommonJS, the TypeScript through `tsx`
   - Their tests:  the kit's [tests/element-tools/](../../tests/element-tools/).
   - Node code:  the kit's node program checks them ([tsconfig.node.json](../../tsconfig.node.json)), its Vitest
     project `element-tools` runs their tests.

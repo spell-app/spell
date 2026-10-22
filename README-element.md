@@ -606,6 +606,53 @@ These close the gap, for every set, in node:
 - Import them by name:  `spell-kit/element-tools/<Name>`.
 - `spell-pack` is a bin of the kit:  spell-epic's `yarn pack:build` and `pack:check` run it, from its own folder.
 
+## The TypeScript plugin:  slots, parts and dashed attributes in JSX
+
+The JSX types can say which attributes a tag takes, but not what goes INSIDE it.
+A TypeScript plugin adds that in VS Code, in every `.tsx` file of a repo that turns it on:
+
+```tsx
+<ui-panel>
+  <div slot="acions">...</div>      {/* warning:  <ui-panel> has no slot "acions";  its slots:  label, hint ... */}
+</ui-panel>
+<ui-button text-alin="left" />      {/* warning:  <ui-button> has no attribute "text-alin" */}
+```
+
+- `slot="` on a child of a custom element lists the PARENT tag's slots, each with its description;
+  a slot it doesn't have is a warning (a yellow squiggle, not an error).
+- `part="` in a component's own JSX (a file in its family's folder) lists that component's parts;
+  a part it doesn't list is a warning.
+  - Most of Spell UI writes `part={this.partForName("...")}`, which its types already check.
+- A dashed attribute a custom tag doesn't have is a warning, with a "did you mean" when one is close:
+  TypeScript never checks a dashed name in JSX.
+  - Always allowed:  `data-*`, `aria-*`, and `on-<event>` for each event the tag dispatches (`on-ui-change`).
+- Which children a tag takes isn't checked:  no vocabulary says so yet.
+
+Where it learns the tags:  the Custom Elements Manifest of the repo's own package and of each package it depends on,
+named by the package's `"customElements"` field (Spell UI's, from its `yarn site:data`).
+
+- A manifest is re-read as soon as it changes, with no restart.
+- So any set that ships a manifest gets it;  the kit imports none of them.
+
+How it's turned on:
+
+- Each repo's `tsconfig.json` names it:
+  `"plugins": [{ "name": "spell-kit/src/element-tools/ts-plugin/plugin.cjs" }]`
+  (Spell UI, the app, Spell Epic, and the other element sets).
+  - tsserver finds a plugin by its path in the package, not by `exports`, so the name has `src/` in it.
+  - `plugin.cjs` loads the TypeScript source through `tsx`:  nothing to build.
+- `tsc` never runs plugins:  `yarn ts` is the same with or without it.
+- VS Code runs plugins only in the REPO's TypeScript, and only TypeScript 6's editor server loads them
+  (TypeScript 7, what `tsc` runs here, has none).
+  The kit's `.vscode/settings.json` says so, for a window opened on the kit's folder:
+  - `js/ts.tsdk.path`:  `node_modules/@typescript/old/lib`, TypeScript 6
+  - `js/ts.experimental.useTsgo: false`:  the native preview (TypeScript 7 in the editor) loads no plugins
+  - VS Code asks once, "Use Workspace Version":  say yes.
+- A window opened from a `.code-workspace` file (an epic's window) ignores a folder's window settings:
+  put those two in the window file's `settings`, or run "TypeScript:  Select TypeScript Version".
+- Its log lines (the manifests it found, anything that failed) are in "TypeScript:  Open TS Server log",
+  prefixed `spell-elements`.
+
 ## Who's written on it
 
 | Set | What it is | Its elements |
@@ -717,7 +764,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
 | [SpellSolid.ts](src/element/SpellSolid.ts) | the settings the page's runtime installs |
 | [elements.types.ts](src/element/elements.types.ts), [vocabulary.types.ts](src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
-| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types` |
+| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types`;  the TypeScript plugin, `ts-plugin/` (`ElementsPlugin`, `ElementCatalog`, `plugin.cjs`) |
 | [src/test-helpers/](src/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
 | [bin/spell-pack.mjs](bin/spell-pack.mjs) | `spell-pack build \| check` |
 

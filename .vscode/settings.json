@@ -1,0 +1,15 @@
+{
+  // The kit's window settings, for a window opened on the kit's folder itself.
+  // - A window opened from a `.code-workspace` file (an epic's window) reads these window settings from that file
+  //   instead:  VS Code ignores a folder's window settings in a workspace of several folders.
+
+  // TypeScript:  the editor runs the repo's own TypeScript 6 server, so the tsconfigs' plugins load
+  // (the kit's TypeScript plugin:  slot and part names for custom elements in JSX;  README-element.md).
+  // - TypeScript 7 (`node_modules/typescript`, what `tsc` runs) has no editor server that loads plugins,
+  //   so the editor's is TypeScript 6's:  `@typescript/typescript6`, installed as `@typescript/old`.
+  // - `useTsgo: false`:  the native preview (TypeScript 7 in the editor) loads no plugins either.
+  // - VS Code asks once, "Use Workspace Version", before it switches.
+  "js/ts.tsdk.path": "node_modules/@typescript/old/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.experimental.useTsgo": false
+}
