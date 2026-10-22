@@ -173,7 +173,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 
 | Command | What it does |
 | --- | --- |
-| `spell server <verb>` | this checkout's page server:  docs, epic pages, the app's `/api`;  `start all`, every web server of the checkout |
+| `spell server <verb>` | the kit's page server, from any folder of the kit:  docs, epic pages, the app's `/api`;  `start all`, every web server of the kit |
 | `spell bundle [names...]` | builds the bundles the page server serves, which are built on demand and never committed:  Spell UI's docs site, `ui-site` |
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
@@ -182,7 +182,8 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
 `spell server` manages the page server;  `spell app serve` opens the editor on it.
-The page server belongs to a checkout:  run from an epic's worktree, `spell server start` starts the worktree's.
+The page server belongs to a kit, and starts from its root only:
+run from any folder of an epic's worktree, `spell server start` starts that worktree's.
 
 <details>
 <summary>Every verb of server, and every option of bundle, commands, wwod and pony</summary>
@@ -191,7 +192,7 @@ The page server belongs to a checkout:  run from an epic's worktree, `spell serv
 | --- | --- |
 | `spell server local` | runs the page server in the foreground, until `Ctrl-C` |
 | `spell server start` | starts it in the background if it isn't running, and prints where it is (JSON) |
-| `spell server start all` | every web server of the checkout:  the page server, the app's editor, Spell UI's site;  a row for each, and exit 1 if one didn't come up |
+| `spell server start all` | every web server of the kit:  the page server, the app's editor, Spell UI's site;  a row for each, and exit 1 if one didn't come up |
 | `spell server stop` | stops the page server, waiting for its process to end;  its editor stops with it |
 | `spell server stop all` | the page server, then the app's editor too, even one left running |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
@@ -199,13 +200,12 @@ The page server belongs to a checkout:  run from an epic's worktree, `spell serv
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
 
 - The page server's own flags pass through, as typed:
-  `--root <dir>` (another checkout), `--port <n>`, `--spaces <dir>`.
-- `start all` and `stop all` look for page server settings instead:  the nearest checkout up that has them,
-  else `spell-app`'s.
-  The editor gets a row only where those settings run `spell-app`'s routes;
+  `--root <dir>` (another kit's root:  any other folder is an error that names the kit), `--port <n>`,
+  `--spaces <dir>`.
+- `start all` and `stop all` find the kit from the current folder too, and read its merged settings:
+  the editor gets a row only where they run `spell-app`'s routes (it's installed);
   Spell UI's site, only where they name its component set.
-- The kit's `yarn server` runs `spell server` on the kit alone, which has no page server settings of its own;
-  `epic server` runs it for the caller's checkout.
+- The kit's `yarn server` runs the same command line;  `epic server` runs it for the caller's kit.
 - What the page server serves, and how:  [README-server.md](README-server.md).
 
 | Option | What it does |
@@ -221,7 +221,7 @@ The page server belongs to a checkout:  run from an epic's worktree, `spell serv
 | `spell wwod --json` | the report as JSON |
 | `spell pony --gallop` | her legs gallop:  in place in a terminal, else one stride's frames |
 
-- Which bundles there are:  the `"bundles"` in the page server settings of the same checkout.
+- Which bundles there are:  the `"bundles"` in the kit's page server settings, every installed repo's merged.
   The page server builds the stale ones when it starts, and a page waits for them.
 - `spell bundle check` ends with the fix:
   `ui-site:  STALE (built from older sources)`, then `fix:  spell bundle ui-site`.
@@ -580,7 +580,7 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell-app/
 | Command | What it does |
 | --- | --- |
 | `spell app create <name>` | makes a project, `<name>/__project.json5` and a starter `<name>.spell` that prints a hello, in your own space |
-| `spell app serve [project]` | starts the Spell editor and this checkout's page server, and opens the editor on a project, until `Ctrl-C` |
+| `spell app serve [project]` | starts the Spell editor and the kit's page server, and opens the editor on a project, until `Ctrl-C` |
 | `spell app vscode [build \| install]` | builds the VS Code language extension, `spell-language.vsix`, and installs it;  no verb does both |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
 
@@ -612,7 +612,7 @@ spell projects
 
 `app serve`
 - Two servers:
-  - the page server, this checkout's ([README-server.md](README-server.md)), on port 4747, else any free one:
+  - the page server, the kit's ([README-server.md](README-server.md)), on port 4747, else any free one:
     the app's `/api`, which saves files to disk, plus the docs, the epic pages and Spell UI's docs
   - the editor, the Spell app's Vite with hot reload, passing `/api` on to the page server:
     the page server's own child, which it starts once it listens and stops with itself,
