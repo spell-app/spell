@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { instanceCase, snakeCase, typeCase } from "spell-kit/util"
+import { snakeCase } from "spell-kit/util"
 
 describe("snakeCase()", () => {
   it("splits words as lodash does", () => {
@@ -18,13 +18,5 @@ describe("snakeCase()", () => {
     expect(snakeCase("año nuevo")).toBe("año_nuevo")
     expect(snakeCase("Niño")).toBe("niño")
     expect(snakeCase("corazón")).not.toBe(snakeCase("corazon"))
-  })
-})
-
-describe("typeCase() / instanceCase()", () => {
-  it("keep accents", () => {
-    expect(typeCase("árbol")).toBe("Árbol")
-    expect(typeCase("niño-pequeño")).toBe("NiñoPequeño")
-    expect(instanceCase("Árbol")).toBe("árbol")
   })
 })

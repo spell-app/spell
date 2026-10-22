@@ -8,12 +8,13 @@
  */
 
 import { camelCase, kebabCase } from "spell-kit/util/string"
-import { singularize } from "./string"
 
 /**
  * Tag of the element for class `className` in project `project`:
- * the project's name made singular, then the class's, kebab-cased.
- * - e.g. `Solitaire`, `Card` => `solitaire-card`;  `games`, `BankAccount` => `game-bank-account`
+ * the project's name, then the class's, kebab-cased.
+ * - e.g. `Solitaire`, `Card` => `solitaire-card`;  `games`, `BankAccount` => `games-bank-account`
+ * - The project's name as written, never made singular:  a compiled program runs this, and never loads a language's
+ *   inflector (epic `spanish` P3).
  * - The word "drawable" in the project's name is left out, so its tags don't all say it (epic `drawable-thing` P18):
  *   `Drawable Solitaire`, `Tableau` => `solitaire-tableau`, never `drawable-solitaire-tableau`.
  * - Only letters, digits and dashes, starting with a letter:  always a valid custom element name, as it has a dash.
@@ -23,7 +24,7 @@ export function elementTagFor(project: string, className: string): string {
     .split("-")
     .filter((word) => !DRAWABLE_WORD.test(word))
     .join("-")
-  const prefix = singularize(tagWords(projectWords)) || "spell"
+  const prefix = tagWords(projectWords) || "spell"
   return `${prefix}-${tagWords(className)}`
 }
 
