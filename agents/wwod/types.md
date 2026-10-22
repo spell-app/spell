@@ -94,7 +94,7 @@ From:  original WWOD §11, root `AGENTS.md` "Functions", "Types / Exports" (type
 - **Avoid `null`, use `undefined` instead:**
   - Treat absence of value as logically "null".
   - `undefined` values work for e.g. argument or method spread where `null` does not.
-  - "Looked, not found", where `undefined` already means "not looked yet":  `NONE` from `$/util` -- SEE:
+  - "Looked, not found", where `undefined` already means "not looked yet":  `NONE` from `spell-kit/util` -- SEE:
     `packages/spell/AGENTS.md` (`match.data`).
 - **Leave an optional property OUT, never fill it with "nothing":**
   - An optional property that doesn't apply is simply absent:  no `null`, `""`, `false` or `"none"` written to

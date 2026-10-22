@@ -1,6 +1,6 @@
 # The kit's checks on a push to `main`, a pull request, or by hand (Actions tab => "checks" => "Run workflow"):
-# `yarn kit:ts`, `kit:lint` and `kit:test`, over its five folders (util, toolchain, server, assembler, element;  epic
-# `repo-split` P12).
+# `yarn kit:ts`, `kit:lint` and `kit:test`, over its one `src/` (util, toolchain, server, element, its tools and test
+# helpers, cli) and its tests (epic `repo-split` P12, P14).
 # - The kit alone:  no child repo is cloned.
 #   Each child repo's own workflow checks it on the kit (its `.github/workflows/checks.yml`).
 name: checks

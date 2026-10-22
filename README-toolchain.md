@@ -21,18 +21,19 @@ flowchart TB
   review --> lang[spell-lang]
   review --> ui[spell-ui]
   review --> more["spell-brand · spell-epic · spell-app"]
-  kit --> folders["spell-folders:  each folder in turn<br/>ts · lint · format · test"]
-  lang --> folders
+  kit --> checks["ts · lint · format · test<br/>one config each, at the repo's root"]
+  lang --> checks
+  ui --> checks
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef repo fill:#6550CA,stroke:#4A3AA0,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600
   class kit,lang,ui,more repo
 ```
 
-_The kit first, then each repo lowest first;  inside a repo, `spell-folders` runs each check folder by folder._
+_The kit first, then each repo lowest first;  inside a repo, each check runs once over its `src/` and `tests/`._
 
-- Code:  [toolchain/](toolchain/), its tests in [tests/toolchain/](tests/toolchain/).
-- Rules for working on it:  [toolchain's AGENTS.md](toolchain/AGENTS.md).
+- Code:  [src/toolchain/](src/toolchain/), its commands in [bin/](bin/), its tests in [tests/toolchain/](tests/toolchain/).
+- Rules for working on it:  [toolchain's AGENTS.md](src/toolchain/AGENTS.md).
 - Its entries are SOURCE files, imported by name:
   `spell-kit/toolchain/lint`, `spell-kit/toolchain/decorators`, `spell-kit/toolchain/tsconfig.base.json` ...
 - Node runs its two commands as they are (Node 24 strips TypeScript's types), with no build.
@@ -62,7 +63,7 @@ that pins Vite, Vitest, oxlint, oxfmt and tsgolint (oxlint's type-aware half) at
 ## The lint and format rules
 
 Every repo's `vite.config.ts` spreads the same settings into its `lint` and `fmt` blocks,
-from `spell-kit/toolchain/lint` ([lint.ts](toolchain/src/lint.ts)):
+from `spell-kit/toolchain/lint` ([lint.ts](src/toolchain/lint.ts)):
 
 ```ts
 import { defineConfig } from "vite-plus"
@@ -88,8 +89,8 @@ On top of oxlint's rules sit the house's own, as two lint plugins:
 
 | Plugin | Where it's on | What it catches |
 | --- | --- | --- |
-| `spell/*`, the import rules ([lint.imports.ts](toolchain/src/lint.imports.ts)) | everywhere | a `../` path from one package (or its tests) into another package's folder:  import it by its package name instead |
-| `spell-ui/*`, the component rules ([lint.patterns.ts](toolchain/src/lint.patterns.ts)) | every component set's component folders | what a component does BY HAND that a decorator does for it:  a hand-written Solid effect, a `MutationObserver`, a listener on the DOM element, `untrack()`, a raw timer, an exported function component;  each message names the decorator to use |
+| `spell/*`, the import rules ([lint.imports.ts](src/toolchain/lint.imports.ts)) | everywhere | a `../` path from one package (or its tests) into another package's folder:  import it by its package name instead |
+| `spell-ui/*`, the component rules ([lint.patterns.ts](src/toolchain/lint.patterns.ts)) | every component set's component folders | what a component does BY HAND that a decorator does for it:  a hand-written Solid effect, a `MutationObserver`, a listener on the DOM element, `untrack()`, a raw timer, an exported function component;  each message names the decorator to use |
 
 A kept exception says why, on the line above it:
 
@@ -117,7 +118,7 @@ A kept exception says why, on the line above it:
 ## The decorator pre-pass
 
 Spell writes STANDARD (TC39) decorators everywhere:  `@proto`, `@E.state`, `@prop`.
-`standardDecorators()` ([decorators.ts](toolchain/src/decorators.ts)), a Vite plugin, lowers them with esbuild first,
+`standardDecorators()` ([decorators.ts](src/toolchain/decorators.ts)), a Vite plugin, lowers them with esbuild first,
 before Solid's compiler sees the code.
 
 - Why:  nothing runs them natively yet, and Vite's own compiler only lowers the older, experimental kind.
@@ -149,16 +150,24 @@ flowchart LR
 
 _TypeScript reads declarations, everything else reads source:  one `exports` entry carries both._
 
-- Each entry of a package's `exports` names both:
+- A package's `exports` names both, in one wildcard entry (epic `repo-split` P14):
 
   ```json
-  "./element": { "types": "./dist-types/element/src/index.d.ts", "default": "./element/src/index.ts" }
+  "./*": {
+    "spell-kit-source": ["./src/*.ts", "./src/*.tsx", "./src/*/index.ts", "./src/*/index.tsx", "./src/*"],
+    "types": ["./dist-types/src/*.d.ts", "./dist-types/src/*/index.d.ts"],
+    "default": "./src/*"
+  }
   ```
 
-- `dist-types/` is git-ignored;  in a fresh clone, before it's built, TypeScript falls back to the source.
+  - The package's own type check reads its own SOURCE (`spell-kit-source`, its tsconfig's `customConditions`);
+    every other repo's reads `types`.
+- `dist-types/` is git-ignored;  in a fresh clone, before it's built, the repos above get "Cannot find module":
+  their `yarn ts` builds it first.
 - `spell-types` IS a package's type check:  `yarn ts` runs it where a bare `tsc` ran.
-- A package of several folders lists them in `"spellTypes"`, in the order they're built:
-  the kit's are util, server, element, element's tools.
+- A package lists its TypeScript programs in `"spellTypes"`, as their `tsconfig` files, in the order they're built:
+  the kit's are `tsconfig.json` (browser-safe:  util, element, the test helpers) and `tsconfig.node.json` (node:
+  server, cli, the element tools, the toolchain).
 - `spell-types --below` rebuilds the lower repos' declarations first, where they're stale:
   every repo's `yarn ts` runs it, so what it reads is never out of date.
 
@@ -172,30 +181,31 @@ spell-types --clean    # dist-types/ deleted first:  a full build
 ```
 
 - Builds are incremental:  nothing changed, nothing to do (a second or two).
-- The generated settings are a `.tsconfig.json` in the declarations' folder, rewritten each build.
+- The generated settings are a `.<name>.tsconfig.json` in the declarations' folder, rewritten each build.
 - Declaration maps too, so "Go to Definition" lands in the source, not the `.d.ts`.
-- The toolchain itself has none:  other repos read its source.
+- A repo not converted yet (still on `$/` aliases) lists its folders instead, and gets its `$/` rewritten as
+  relative paths, until P14's last step.
 
 </details>
 
 ## `spell-folders`:  a repo of several folders, checked folder by folder
 
-The kit, spell-lang and spell-app each hold several folders:
-each folder is its own TypeScript program (browser or node), with its own Vite and Vitest settings.
-`spell-folders` ([folders.ts](toolchain/src/folders.ts)) runs one check over each folder in turn,
+A repo with its folders at its root, each its own TypeScript program (browser or node) with its own Vite and
+Vitest settings:  spell-app, until it's converted (epic `repo-split` P14).
+`spell-folders` ([folders.ts](src/toolchain/folders.ts)) runs one check over each folder in turn,
 and its tests' in `tests/<folder>/`.
+A repo with one `src/` (the kit, spell-lang ...) needs none:  plain scripts, one Vitest config of projects,
+`vp lint src tests`.
 
 ```sh
 spell-folders test                 # every folder's tests
-spell-folders lint server element  # only those folders
+spell-folders lint app spaces      # only those folders
 ```
 
 - The checks:  `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check`.
 - The folders:  the `"spellFolders"` list in the repo's `package.json`, lowest first.
 - Every folder runs, failed or not;  the summary says which failed, and it exits 1 if any did.
-- How it's run:
-  - in the kit, `node toolchain/bin/spell-folders.ts <check>`:  what `yarn kit:test` runs
-  - in spell-lang and spell-app, `spell-folders <check>`:  what their `yarn test` runs
+- How it's run:  `spell-folders <check>`, what spell-app's `yarn test` runs.
 
 <details>
 <summary>What each check runs, and the <code>"spellFolders"</code> keys</summary>
@@ -223,13 +233,14 @@ spell-folders lint server element  # only those folders
 Tools and scripts run TypeScript as it is, with no build:
 plain `node` for the toolchain's own commands (Node 24 strips types), and `tsx` for everything that needs more
 (decorators, JSX).
-Every import is a package name, and a package's own deep files use its `#/` imports:
-so node's own resolver finds every file in every repo, whichever repo the program started in.
+Every import is a package name and a path under its `src/` (epic `repo-split` P14):
+so `tsx` finds every file in every repo by node's own package resolution, whichever repo the program started in.
+Plain `node` adds no extension:  it writes `.ts`, or uses an entry of its own in the package's `exports`.
 
 <details>
-<summary>Until repo-split P14 lands</summary>
+<summary>Until every repo is converted (repo-split P14)</summary>
 
-- Today, inside a repo, files import each other by short alias names from that repo's alias table
+- A repo not converted yet still imports inside itself by short alias names from its alias table
   (`tsconfig.base.json` at its root).
 - `tsx` reads ONE settings file for every file it runs:
   so a program that runs several repos' source (the command line, the page server) can't resolve another repo's
@@ -243,8 +254,7 @@ so node's own resolver finds every file in every repo, whichever repo the progra
 - The hook resolves each alias by the table of the repo the IMPORTING file lives in.
 - A lint rule, `spell/no-cross-repo-alias`, stops an alias reaching into another repo;
   `spell-types` rewrites the aliases in the declarations it writes.
-- P14 replaces every alias with package names and `#/` imports:
-  the hook, the tables, the rule and the rewrite all go.
+- P14's last step deletes the hook, the tables, the rule and the rewrite.
 
 </details>
 
@@ -269,31 +279,32 @@ on a push to `main`, a pull request, or by hand from the Actions tab.
 
 | Command | Where | What |
 | --- | --- | --- |
-| `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`, `kit:format:check` | the kit's root | one check over every kit folder, through `spell-folders` |
+| `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`, `kit:format:check` | the kit's root | one check over the whole kit:  `spell-types` and the tests' `tsc`;  one Vitest run;  oxlint;  oxfmt |
 | `yarn kit:review` | the kit's root | `kit:ts`, `kit:lint:fix`, `kit:format`, `kit:test`, then "REVIEW PASSED" |
 | `yarn ts`, `test`, `lint`, `review` | the kit's root | the kit's, then every cloned repo's, lowest first |
-| `spell-folders <check> [folder ...]` | a repo of several folders | one check, folder by folder |
+| `spell-folders <check> [folder ...]` | a repo of several folders at its root (spell-app) | one check, folder by folder |
 | `spell-types [--below] [--clean]` | any repo | its declarations, and its type check |
-| `yarn vp test run`, `yarn vp lint src`, `yarn vp fmt` | inside one folder | that folder's tools directly |
+| `yarn vp test run --project <folder>` | the kit's root | one folder's tests |
 
 <details>
 <summary>The shared TypeScript settings, in words</summary>
 
-[tsconfig.base.json](toolchain/tsconfig.base.json), which every repo's settings extend:
+[tsconfig.base.json](src/toolchain/tsconfig.base.json), which every repo's settings extend:
 - modern modules, resolved the way a bundler does;  `.ts` extensions allowed in imports
 - strict, with unused locals reported and no switch fall-through
 - `isolatedModules` and `useDefineForClassFields`:  each file compiles on its own, class fields as the standard says
 - no output of its own (`noEmit`):  `spell-types` and the bundlers write what's written
-- what differs by folder stays in its own settings:  the target, the libraries (DOM or not), JSX, the global types
+- what differs stays in each program's settings:  the target, the libraries (DOM or not), JSX, the global types,
+  and its package's own condition (`customConditions`)
 
 </details>
 
 <details>
 <summary>The global types and the version stamp</summary>
 
-- `spell-kit/toolchain/types` ([index.d.ts](toolchain/types/index.d.ts)), named in a folder's `"types"`:
+- `spell-kit/toolchain/types` ([index.d.ts](src/toolchain/types/index.d.ts)), named in a folder's `"types"`:
   `__PACKAGE_VERSION__`, `Class<T>`, `AbstractClass<T>`, `Prettify<T>`, `SplitString<List>`, and Vite's client types.
-- `packageVersion()` ([packageVersion.ts](toolchain/src/packageVersion.ts)), a Vite plugin, so a build knows its own
+- `packageVersion()` ([packageVersion.ts](src/toolchain/packageVersion.ts)), a Vite plugin, so a build knows its own
   version:  it defines `__PACKAGE_VERSION__` from the nearest `package.json`.
 
 </details>
@@ -303,16 +314,16 @@ on a push to `main`, a pull request, or by hand from the Actions tab.
 
 | File | What |
 | --- | --- |
-| [src/lint.ts](toolchain/src/lint.ts) | the oxlint and oxfmt settings:  `packageLint()`, `rootLint()`, `fmtConfig` |
-| [src/lint.imports.ts](toolchain/src/lint.imports.ts) | the `spell/*` import rules |
-| [src/lint.patterns.ts](toolchain/src/lint.patterns.ts) | the `spell-ui/*` component rules |
-| [src/decorators.ts](toolchain/src/decorators.ts) | `standardDecorators()`, the decorator pre-pass |
-| [src/packageVersion.ts](toolchain/src/packageVersion.ts) | `__PACKAGE_VERSION__` |
-| [src/declarations.ts](toolchain/src/declarations.ts), [bin/spell-types.ts](toolchain/bin/spell-types.ts) | `spell-types` |
-| [src/folders.ts](toolchain/src/folders.ts), [bin/spell-folders.ts](toolchain/bin/spell-folders.ts) | `spell-folders` |
-| [src/aliases.ts](toolchain/src/aliases.ts), [src/aliasTable.ts](toolchain/src/aliasTable.ts) | the run-time alias hook, until P14 |
-| [tsconfig.base.json](toolchain/tsconfig.base.json) | the shared TypeScript settings |
-| [types/index.d.ts](toolchain/types/index.d.ts) | the global types |
+| [lint.ts](src/toolchain/lint.ts) | the oxlint and oxfmt settings:  `packageLint()`, `rootLint()`, `fmtConfig` |
+| [lint.imports.ts](src/toolchain/lint.imports.ts) | the `spell/*` import rules |
+| [lint.patterns.ts](src/toolchain/lint.patterns.ts) | the `spell-ui/*` component rules |
+| [decorators.ts](src/toolchain/decorators.ts) | `standardDecorators()`, the decorator pre-pass |
+| [packageVersion.ts](src/toolchain/packageVersion.ts) | `__PACKAGE_VERSION__` |
+| [declarations.ts](src/toolchain/declarations.ts), [bin/spell-types.ts](bin/spell-types.ts) | `spell-types` |
+| [folders.ts](src/toolchain/folders.ts), [bin/spell-folders.ts](bin/spell-folders.ts) | `spell-folders` |
+| [aliases.ts](src/toolchain/aliases.ts), [aliasTable.ts](src/toolchain/aliasTable.ts) | the run-time alias hook, until every repo is converted (P14) |
+| [tsconfig.base.json](src/toolchain/tsconfig.base.json) | the shared TypeScript settings |
+| [types/index.d.ts](src/toolchain/types/index.d.ts) | the global types |
 
 </details>
 

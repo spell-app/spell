@@ -28,8 +28,8 @@ flowchart LR
 
 _Routes run before files;  the server imports no route module, it loads them by path from settings._
 
-- Code:  [server/](server/), its tests in [tests/server/](tests/server/).
-- Rules for working on it:  [server's AGENTS.md](server/AGENTS.md).
+- Code:  [src/server/](src/server/), its tests in [tests/server/](tests/server/).
+- Rules for working on it:  [server's AGENTS.md](src/server/AGENTS.md).
 
 ## What it serves
 
@@ -215,8 +215,8 @@ export default helloRoutes
 | `siteTabs` | the site header's tabs, in order:  label, home, and what lights each |
 | `engineRoutes` | URL prefixes served from a folder:  `{ "/_epic/pack/": "../spell-epic/src/components/__pack" }` |
 
-- Read by `pageServerSettings()` ([settings.ts](server/src/page/settings.ts)):
-  its types in [page.types.ts](server/src/page/page.types.ts).
+- Read by `pageServerSettings()` ([settings.ts](src/server/page/settings.ts)):
+  its types in [page.types.ts](src/server/page/page.types.ts).
 - Settings that name no sets serve no sets;  a new set is one more entry.
 
 </details>
@@ -322,7 +322,7 @@ for (const bundle of SRV.Bundle.all(root)) if (bundle.isStale) bundle.build()
 - Stale:  never built, its entry missing or rewritten, or its sources' hash changed.
 - `build()` runs the package's script, then records the hash in its output folder (`.bundle.json`).
 - Which bundles exist:  the settings' `bundles` list;  how each is built:  `BUNDLES`.
-- The page server builds the stale ones as it starts (spell-app's [BundleBuild.ts](spell-app/page-server/src/BundleBuild.ts)):
+- The page server builds the stale ones as it starts (spell-app's [BundleBuild.ts](spell-app/src/page-server/BundleBuild.ts)):
   a request for a bundle's file waits while it builds.
 - By hand:  `spell bundle [<name>...] [--stale]`, `spell bundle check [<name>...]`.
 - A new bundle:  a `BUNDLES` entry;  its output folder in the settings' `bundles` list, and in the root `.gitignore`.
@@ -349,18 +349,6 @@ DataFile.write(file, answer)
 - It's the `contentFolder` in the MAIN checkout's epic settings, `.epic/config.json5`.
 - `SPELL_SHARED_DIR` overrides it.
 - It never throws:  a checkout with none simply has none.
-
-<details>
-<summary>Until repo-split P14 lands</summary>
-
-- Today these steps are their own folder of the kit, [assembler/](assembler/), imported as `spell-kit/assembler`:
-  - its namespace is `AS`:  `AS.Linker`, `AS.formatHTML()`, `AS.Bundle`
-  - `DataFile` and `contentFolderOf()` are its entries:
-    `spell-kit/assembler/DataFile` and `spell-kit/assembler/contentFolder`
-- Its tests are in [its tests folder](tests/assembler/);  its rules in [assembler's AGENTS.md](assembler/AGENTS.md).
-- P14 folds it into the server:  one import name, `SRV` for both.
-
-</details>
 
 <details>
 <summary>Adding a step, and what's still to come</summary>
@@ -419,7 +407,7 @@ _The program runs in Python on the server;  the page only draws, from the state 
   then a patch after each of its messages, and at each pause, so a game animates.
 - The game lives in the server's memory:  a restart ends it.
 - Compiling to Python writes the app itself beside the program, `<Project>.app.py`:  its routes, spelled out.
-- Where it lives:  [the Python server's folder](spell-app/spaces/src/server/py/) in spell-app, a uv project.
+- Where it lives:  [the Python server's folder](spell-app/src/spaces/server/py/) in spell-app, a uv project.
   More in [spell-app's README-spaces.md](spell-app/README-spaces.md).
 
 ## Commands
@@ -479,18 +467,18 @@ _The program runs in Python on the server;  the page only draws, from the state 
 
 | File | What |
 | --- | --- |
-| [src/index.ts](server/src/index.ts) | the barrel, `SRV` (node only) |
-| [src/WebServer.ts](server/src/WebServer.ts) | the server, and the request order |
-| [src/StaticHandler.ts](server/src/StaticHandler.ts), [mime.ts](server/src/mime.ts), [safePath.ts](server/src/safePath.ts) | static files, content types, the path check |
-| [src/Router.ts](server/src/Router.ts), [Request.ts](server/src/Request.ts), [Reply.ts](server/src/Reply.ts), [bodies.ts](server/src/bodies.ts), [listener.ts](server/src/listener.ts) | the Express-shaped part |
-| [src/LiveReload.ts](server/src/LiveReload.ts), [liveClient.ts](server/src/liveClient.ts), [webSocket.ts](server/src/webSocket.ts) | live reload |
-| [src/Guard.ts](server/src/Guard.ts), [FileLock.ts](server/src/FileLock.ts), [FileOperations.ts](server/src/FileOperations.ts), [PidFile.ts](server/src/PidFile.ts) | safety, locks, writes, the pid file |
-| [src/ports.ts](server/src/ports.ts), [open.ts](server/src/open.ts), [proxy.ts](server/src/proxy.ts), [checkout.ts](server/src/checkout.ts), [mainServer.ts](server/src/mainServer.ts), [untilInterrupted.ts](server/src/untilInterrupted.ts) | ports, openers, proxies, checkouts |
-| [src/page/](server/src/page/) | the page server:  `PageServer`, `PageEditor`, its settings, its command line, `prune` |
-| [src/site/](server/src/site/) | browser code:  `<spell-site-header>`, `<spell-section-editor>`, the favicon, the logo |
-| [test/](server/test/) | the test helpers |
-| [scripts/favicon.ts](server/scripts/favicon.ts) | `yarn favicon` |
-| [assembler/src/](assembler/src/) | until P14:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `format.ts` (`formatHTML()`);  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`);  `DataFile`;  `contentFolder.ts` (`contentFolderOf()`);  their types in `assembler.types.ts` (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleRecord`, `BUNDLES`);  the barrel `index.ts` |
+| [index.ts](src/server/index.ts) | the barrel, `SRV` (node only) |
+| [WebServer.ts](src/server/WebServer.ts) | the server, and the request order |
+| [StaticHandler.ts](src/server/StaticHandler.ts), [mime.ts](src/server/mime.ts), [safePath.ts](src/server/safePath.ts) | static files, content types, the path check |
+| [Router.ts](src/server/Router.ts), [Request.ts](src/server/Request.ts), [Reply.ts](src/server/Reply.ts), [bodies.ts](src/server/bodies.ts), [listener.ts](src/server/listener.ts) | the Express-shaped part |
+| [LiveReload.ts](src/server/LiveReload.ts), [liveClient.ts](src/server/liveClient.ts), [webSocket.ts](src/server/webSocket.ts) | live reload |
+| [Guard.ts](src/server/Guard.ts), [FileLock.ts](src/server/FileLock.ts), [FileOperations.ts](src/server/FileOperations.ts), [PidFile.ts](src/server/PidFile.ts) | safety, locks, writes, the pid file |
+| [ports.ts](src/server/ports.ts), [open.ts](src/server/open.ts), [proxy.ts](src/server/proxy.ts), [checkout.ts](src/server/checkout.ts), [mainServer.ts](src/server/mainServer.ts), [untilInterrupted.ts](src/server/untilInterrupted.ts) | ports, openers, proxies, checkouts |
+| [page/](src/server/page/) | the page server:  `PageServer`, `PageEditor`, its settings, its command line, `prune` |
+| [site/](src/server/site/) | browser code:  `<spell-site-header>`, `<spell-section-editor>`, the favicon, the logo |
+| [test/](src/server/test/) | the test helpers |
+| [scripts/favicon.ts](scripts/favicon.ts) | `yarn favicon` |
+| [Linker.ts](src/server/Linker.ts), [format.ts](src/server/format.ts), [Bundle.ts](src/server/Bundle.ts), [DataFile.ts](src/server/DataFile.ts), [contentFolder.ts](src/server/contentFolder.ts) | assembling pages (the kit's `assembler/` until P14):  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleRecord`, `BUNDLES`) |
 
 Tests (node), at the same paths under [tests/server/](tests/server/):
 - `Router`, `StaticHandler`, `WebServer`, `LiveReload`, `PidFile`, `FileOperations`

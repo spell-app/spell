@@ -7,7 +7,7 @@ If you know React:  a custom element here is TWO objects.
 
 Every set of elements in Spell is written on this one framework:
 Spell UI's `<ui-*>`, spell-epic's `<epic-*>`, the brand's `<brand-*>`, the app's `<spell-app>` and `<spell-editor>`.
-It's the kit's [element folder](element/), imported as `spell-kit/element`, its namespace `E`.
+It's the kit's [element folder](src/element/), imported as `spell-kit/element`, its namespace `E`.
 
 ![A page loading its elements in eight numbered steps, between the page, its ui-root and the element families](docs/images/element-loading.svg)
 
@@ -34,8 +34,10 @@ sequenceDiagram
 
 </details>
 
-- Code:  [element/](element/), its tests in [tests/element/](tests/element/).
-- Rules for working on it:  [element's AGENTS.md](element/AGENTS.md).
+- Code:  [src/element/](src/element/), its tools in [src/element-tools/](src/element-tools/), its test helpers in
+  [src/test-helpers/](src/test-helpers/);  their tests in [tests/element/](tests/element/) and
+  [tests/element-tools/](tests/element-tools/).
+- Rules for working on it:  [element's AGENTS.md](src/element/AGENTS.md).
 - It's Solid work:  [Solid's docs](https://docs.solidjs.com) cover the reactivity underneath.
 
 ## What it can do
@@ -195,7 +197,9 @@ _A pack is one classic script:  it brings its own elements, and borrows Solid an
 
 - A pack is a package whose `package.json` has `"spellPack"`:
   spell-epic's is `{ "name": "epics", "prefix": "epic-", "dir": "src" }`.
-- Its build (`spell-pack build`) writes three files into `components/__pack/`:
+  - `components`:  its families' folder, when it isn't `components/` in `dir`:
+    the brand's is `"src/components"`, its code all in ONE `src/` and its docs outside it.
+- Its build (`spell-pack build`) writes three files into its families' folder's `__pack/`:
   1. `<pack>.catalog.ts`:  each tag's family folder and skeleton, read from the vocabularies
   2. `<pack>.entry.ts`:  `SpellUI.registerPack({ name, prefix, catalog, define })`
   3. `<pack>.pack.js`:  that entry built as ONE classic script, minified, which works from `file://` too
@@ -354,7 +358,7 @@ The tools every set's builds share (node only), and the test helpers every set's
 | `A11y` | axe on a live element (`expectAccessible()`), and WCAG contrast |
 | `Viewport` | resize the test's frame for one test |
 
-- Tools:  `spell-kit/element/tools/<Name>`.
+- Tools:  `spell-kit/element-tools/<Name>`.
   Helpers:  `spell-kit/test-helpers/<Name>`.
 - The helpers know only the DOM, Solid and this framework;  one that needs Spell UI stays in Spell UI.
 - This folder's own tests run in a real Chromium with NO Spell UI on the page:
@@ -427,22 +431,22 @@ Each message names the decorator to use:  the full table is in [README-toolchain
 
 | File | What |
 | --- | --- |
-| [src/index.ts](element/src/index.ts) | the barrel, `E` |
-| [src/UIComponent.tsx](element/src/UIComponent.tsx) | the component base |
-| [src/DOMElement.ts](element/src/DOMElement.ts) | the DOM element base |
-| [src/ElementDefinition.ts](element/src/ElementDefinition.ts) | a vocabulary turned into a tag's attributes, events and slots |
-| [src/Reactive.ts](element/src/Reactive.ts) | the reactive members' decorators |
-| [src/Cell.ts](element/src/Cell.ts), [SlotContent.ts](element/src/SlotContent.ts) | a reactive cell;  slotted content |
-| [src/PartContext.ts](element/src/PartContext.ts), [OwnerContext.ts](element/src/OwnerContext.ts) | generic content parts, and the element they belong to |
-| [src/ShadowEvents.ts](element/src/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
-| [src/HotDefinitions.ts](element/src/HotDefinitions.ts) | hot reload, in development only (its own entry) |
-| [src/timing.ts](element/src/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()` |
-| [src/SkeletonText.ts](element/src/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
-| [src/SpellSolid.ts](element/src/SpellSolid.ts) | the settings the page's runtime installs |
-| [src/elements.types.ts](element/src/elements.types.ts), [vocabulary.types.ts](element/src/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
-| [tools/](element/tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage` |
-| [test-helpers/](element/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
-| [bin/spell-pack.mjs](element/bin/spell-pack.mjs) | `spell-pack build \| check` |
+| [index.ts](src/element/index.ts) | the barrel, `E` |
+| [UIComponent.tsx](src/element/UIComponent.tsx) | the component base |
+| [DOMElement.ts](src/element/DOMElement.ts) | the DOM element base |
+| [ElementDefinition.ts](src/element/ElementDefinition.ts) | a vocabulary turned into a tag's attributes, events and slots |
+| [Reactive.ts](src/element/Reactive.ts) | the reactive members' decorators |
+| [Cell.ts](src/element/Cell.ts), [SlotContent.ts](src/element/SlotContent.ts) | a reactive cell;  slotted content |
+| [PartContext.ts](src/element/PartContext.ts), [OwnerContext.ts](src/element/OwnerContext.ts) | generic content parts, and the element they belong to |
+| [ShadowEvents.ts](src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
+| [HotDefinitions.ts](src/element/HotDefinitions.ts) | hot reload, in development only (its own entry) |
+| [timing.ts](src/element/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()` |
+| [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
+| [SpellSolid.ts](src/element/SpellSolid.ts) | the settings the page's runtime installs |
+| [elements.types.ts](src/element/elements.types.ts), [vocabulary.types.ts](src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
+| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage` |
+| [src/test-helpers/](src/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
+| [bin/spell-pack.mjs](bin/spell-pack.mjs) | `spell-pack build \| check` |
 
 - Its own entries, besides the barrel:
   `spell-kit/element/elements.types` and `/vocabulary.types` (for node code that mustn't load the framework),
@@ -457,9 +461,9 @@ Each message names the decorator to use:  the full table is in [README-toolchain
 <details>
 <summary>Until repo-split P14 lands</summary>
 
-- Inside the kit, this folder's files are imported by a short alias:
-  the same name the packs share it by at run time;  the pack modules list it by that name too.
-  P14 makes the package name, `spell-kit/element`, the one name everywhere, and every pack is rebuilt once.
+- The kit's own files import it as `spell-kit/element` now, as every other repo does.
+- The packs still share it at run time by its old short name, `$/spell-element`, and the pack modules list it by
+  that name:  a later step of P14 makes the package name the key too, and rebuilds every pack once.
 
 </details>
 

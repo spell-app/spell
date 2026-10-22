@@ -1,0 +1,20 @@
+{
+  // The kit's BROWSER-SAFE code, ONE TypeScript program (epic `repo-split` P14, Q47):  util, element, the test helpers.
+  // - It extends the settings every repo shares, the toolchain's (`spell-kit/toolchain/tsconfig.base.json`).
+  // - NO `paths`:  every file is imported by its package name and its path under `src/` (`spell-kit/util/string`), the
+  //   kit's own files too;  `customConditions` makes TypeScript read the kit's SOURCE for its own name (`exports`,
+  //   `spell-kit-source`), where another repo reads its built declarations (`types`).
+  // - No node types:  util's node-only files (`src/util/node/`) are the node program's, `tsconfig.node.json`.
+  // - The declarations build (`spell-types`, the `package.json`'s `"spellTypes"`) builds it into `dist-types/src/`.
+  "extends": "./src/toolchain/tsconfig.base.json",
+  "compilerOptions": {
+    "customConditions": ["spell-kit-source"],
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "types": ["vite/client", "spell-kit/toolchain/types"]
+  },
+  "include": ["src/util", "src/element", "src/test-helpers"],
+  "exclude": ["node_modules", "src/util/node"]
+}

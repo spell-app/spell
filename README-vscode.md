@@ -91,7 +91,7 @@ spell app vscode        # build its .vsix, then install it into VS Code
 - Its id is `spell-language` (publisher `spell-app`), shown as "Spell", version 0.8.0.
 - Its build runs esbuild, and also spell-app's `yarn build:runner`:  the page Run Project shows.
 - `yarn package` writes `spell-language.vsix`, with `vsce`.
-- The language server is spell-app's [`server.ts`](spell-app/lsp/src/server.ts), run by `tsx`.
+- The language server is spell-app's [`server.ts`](spell-app/src/lsp/server.ts), run by `tsx`.
 - The code that picks the checkout:  [`spellAppRoot.ts`](spell-app/vscode/src/spellAppRoot.ts).
   Run Project's panel:  [`RunnerPanel.ts`](spell-app/vscode/src/RunnerPanel.ts).
 
@@ -205,10 +205,10 @@ The rules that keep windows working:
 | `epic window launch <name>` | a NEW session in a worktree's window |
 | `epic window handoff` / `resume` | moves this session to another window when its turn ends (the `Stop` hook) |
 | `epic window stay <name>` / `stay --end` | a session staying in its window:  titled `⎇ <name>` and tinted, then put back |
-| `epic window stay-check` | recommends a new window or staying, with reasons |
+| `epic window should-stay` | recommends a new window or staying, with reasons |
 | `epic window color [<look>]` | recolours the window |
 | `epic window show` | shows a page beside the session, in the window it's moving to |
-| `epic window reload-view` | reloads a side-bar view |
+| `epic window reload` | reloads a side-bar view |
 | `epic window add` / `remove` | a folder, never a worktree's |
 
 - Where window files live:  `windowsFolder` in the repo's epic settings ([.epic/config.json5](.epic/config.json5)).

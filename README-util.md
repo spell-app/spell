@@ -28,8 +28,8 @@ flowchart TB
 
 _Each layer uses only the ones below it;  Spell UI takes only the generic files, one by one._
 
-- Code:  [util/](util/), its tests in [tests/util/](tests/util/).
-- Rules for working on it:  [util's AGENTS.md](util/AGENTS.md).
+- Code:  [src/util/](src/util/), its tests in [tests/util/](tests/util/).
+- Rules for working on it:  [util's AGENTS.md](src/util/AGENTS.md).
 
 ## Importing it
 
@@ -169,7 +169,7 @@ lodash, chalk, pluralize and query-string, all the kit's own.
 
 ## Node only:  JSON5 with its comments kept
 
-[json5.ts](util/src/node/json5.ts), imported as `spell-kit/util/node/json5`:
+[json5.ts](src/util/node/json5.ts), imported as `spell-kit/util/node/json5`:
 reads a JSON5 file and writes it back with every hand-written comment kept.
 
 - `readJSON5File()`, `json5Edited()`, `keepingComments()`, on json5-writer.
@@ -193,26 +193,16 @@ reads a JSON5 file and writes it back with every hand-written comment kept.
 
 | File | What |
 | --- | --- |
-| [src/index.ts](util/src/index.ts) | the barrel:  the generic files, then the reactive engine, then spell's own |
-| [src/decorators.ts](util/src/decorators.ts) | `@proto`, `@protoMerged`, `@lazy`, `@once`, `forget()`, `@resets()` |
-| [src/class.ts](util/src/class.ts) | `hasOwnProp()`, `getSuperHierarchy()`, `hasDescriptor()` |
-| [src/string.ts](util/src/string.ts) | `kebabCase()`, `camelCase()`, `numberToWord()`, `levenshtein()`, `suggest()` |
-| [src/dom.ts](util/src/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
-| [src/util.types.ts](util/src/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
-| [src/reactive/](util/src/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
-| [src/spell/](util/src/spell/) | spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `prefs`, `AppPrefStore`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `drawable`, `json`, `paths`, `array`, `string`, `constants` |
-| [src/node/json5.ts](util/src/node/json5.ts) | JSON5 written with its comments kept (node only) |
-| [vitest.config.ts](util/vitest.config.ts) | the two test projects, `browser` and `spell` |
-
-</details>
-
-<details>
-<summary>Until repo-split P14 lands</summary>
-
-- Today the kit's own files import this folder by a short alias, from the kit's alias table
-  ([tsconfig.base.json](tsconfig.base.json)).
-- Other repos already use `spell-kit/util`, as above.
-- Once every repo imports by package name, the alias goes and the kit's files use `spell-kit/util` too.
+| [index.ts](src/util/index.ts) | the barrel:  the generic files, then the reactive engine, then spell's own |
+| [decorators.ts](src/util/decorators.ts) | `@proto`, `@protoMerged`, `@lazy`, `@once`, `forget()`, `@resets()` |
+| [class.ts](src/util/class.ts) | `hasOwnProp()`, `getSuperHierarchy()`, `hasDescriptor()` |
+| [string.ts](src/util/string.ts) | `kebabCase()`, `camelCase()`, `numberToWord()`, `levenshtein()`, `suggest()` |
+| [dom.ts](src/util/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
+| [util.types.ts](src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
+| [reactive/](src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
+| [spell/](src/util/spell/) | spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `prefs`, `AppPrefStore`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `drawable`, `json`, `paths`, `array`, `string`, `constants` |
+| [node/json5.ts](src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
+| [vitest.config.ts](vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |
 
 </details>
 

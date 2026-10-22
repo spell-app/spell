@@ -63,7 +63,7 @@ Then, from the kit's folder:
    It links `spell` into the first writable folder on your `PATH`, and prints the link:
 
    ```text
-   Linked ~/.local/bin/spell -> ~/www/spell/cli/bin/spell.mjs
+   Linked ~/.local/bin/spell -> ~/www/spell/bin/spell.mjs
    ```
 
    - The folders it tries, in order:  `~/.local/bin`, npm's global bin, `/usr/local/bin`, `/opt/homebrew/bin`.
@@ -113,7 +113,7 @@ Then, from the kit's folder:
 
    - The tree is how spell read the line;  the last line is the JavaScript it compiles to.
 
-- No install at all:  `node ~/www/spell/cli/bin/spell.mjs --help`, or `yarn spell --help` at the kit's root.
+- No install at all:  `node ~/www/spell/bin/spell.mjs --help`, or `yarn spell --help` at the kit's root.
 - A shell alias or function named `spell` hides the command:  `type -a spell` in a login shell says which runs.
 - `epic` is linked by spell-epic's install ([README-agents.md](README-agents.md), "The epic plugin"):
   in Claude Code it's on every session's `PATH` while the plugin is on.
@@ -377,7 +377,7 @@ These show how spell reads what you wrote:  the parse, the rules, the types.
 
 How it renders
 - Through Spell UI's static server render, in a child process on an SSR-only Vite server
-  ([`StaticRenderer.ts`](spell-ui/tools/StaticRenderer.ts);  its child process, [`renderStatic.ts`](spell-ui/cli/src/runner/renderStatic.ts)).
+  ([`StaticRenderer.ts`](spell-ui/src/tools/StaticRenderer.ts);  its child process, [`renderStatic.ts`](spell-ui/src/cli/runner/renderStatic.ts)).
   - A child, because Spell UI's Solid JSX must compile for the server, which `tsx` can't.
   - Each run starts Vite and compiles every family, so a page takes about 3 seconds;  several pages share one run.
 - It renders the families in Spell UI's static catalog.
@@ -566,13 +566,13 @@ It loads no spell, so it starts in a fraction of a second.
 | Group | Its verbs |
 | --- | --- |
 | Requests from other sessions | `send`, `requests`, `file`, `home`, `merge` |
-| Epic page:  making and reading | `new`, `list`, `summary`, `summaries`, `items`, `docs`, `decisions`, `open`, `check` |
+| Epic page:  making and reading | `create`, `list`, `summary`, `summaries`, `items`, `docs`, `decisions`, `open`, `lint` |
 | Epic page:  phases | `add-phase`, `update`, `updated`, `phase`, `commit`, `commits` |
-| Epic page:  items | `add`, `calm`, `decide`, `choose`, `close`, `reopen`, `cancel`, `details`, `status`, `restore`, `review`, `defer`, `queue`, `unqueue` |
+| Epic page:  items | `add`, `calm`, `decide`, `choose`, `close`, `reopen`, `cancel`, `details`, `summarize`, `restore`, `review`, `defer`, `queue`, `unqueue` |
 | Epic page:  the review inbox | `inbox`, `test` |
-| Log and upkeep | `log`, `prompt`, `bedtime`, `overnight`, `backfill`, `convert`, `split`, `join`, `migrate` |
+| Log and upkeep | `log`, `prompt`, `bedtime`, `backfill`, `convert`, `split`, `join`, `migrate` |
 | Sagas | `saga` |
-| Worktrees, sessions and parked work | `worktree`, `session`, `park`, `stock` |
+| Worktrees, sessions and parked work | `worktree`, `session`, `park`, `status` |
 | Shared content | `shared` |
 | Windows and the page server | `window`, `server`, `hub`, `pages`, `repo` |
 | The repo's settings | `config`, `init` |
@@ -603,7 +603,7 @@ epic worktree merge-main
   The message spells it right, `epic close seo#J3`.
 - A phase is written one way, `seo#P3`;  the other spellings read the same, but nothing prints them.
 - Every verb's help has its usage, what it does and an example:  `epic help <verb>`, or `epic <verb> --help`.
-  A group's verbs too:  `epic ask new --help`.
+  A group's verbs too:  `epic ask create --help`.
   - An unknown verb exits 1, listing the verbs;  a usage error exits 2.
 - `epic --version` says which code runs:  its commit, branch and checkout.
 - Every verb runs on the caller's checkout:  a worktree's, when run in one.
@@ -614,11 +614,11 @@ epic worktree merge-main
   - Another file in conflict stops it mid-merge:  resolve, `git add`, then `--continue`.
   - It lists snapshot entries neither side had, to review;  `--json`.
 - `epic window <verb>`:  VS Code windows per repo and worktree.
-  - Its verbs:  `open`, `close`, `handoff`, `show`, `which`, `stay-check` ...
+  - Its verbs:  `open`, `close`, `handoff`, `show`, `which`, `should-stay` ...
   - It works in a worktree before its `yarn install`.
 - `epic ask <verb>`:  details pages, the `/details` skill's tool.
 - `epic choices <verb>`:  choice pages, a table of names with a recommendation per use site.
-  Its verbs:  `new <slug> --rows <rows.json5>`, `show`, `wait`, `answer`, `list`.
+  Its verbs:  `create <slug> --rows <rows.json5>`, `show`, `wait`, `answer`, `list`.
 - `epic comments <verb>`:  comments left on docs pages.
   Its verbs:  `list [<epic>]`, `gather`, `working <page>#<id> on | off`, `answer <page>#<id> --file <html>`.
 - `epic notes <verb>`:  the older page notes, written into the pages.
@@ -633,8 +633,12 @@ epic worktree merge-main
     exits 0 with an untold redirect note from the epic page, 3 when nothing runs, 2 on timeout.
   - Any verb takes `--epic <name>`;  an entry leaves when its agent finishes, and the file goes when empty.
 - `epic airplane <verb>`:  `status`, `on`, `off`, `check [--fix]`, `inbox`.
-- `epic add-request <epic>#P7 <rN> --from ... --file f`:  `epic file`'s old name, hidden.
-  `spell plan-doc` is gone:  its callers moved.
+- `epic inbox <verb> <epic>`:  the inbox's own verb goes first, `epic inbox wait seo`, `epic inbox done seo#J3`;
+  `epic inbox seo` alone prints it.
+- `epic`'s verbs took Owen's names in repo-split P13:  `new` is `create`, `check` is `lint`, `inbox listen` is
+  `inbox watch`, `stock` is `status`;  an item's status card is `epic update seo#J3 underway` ...
+  The old names are gone, `add-request`, `overnight` and `plan-doc` too:
+  [spell-epic's README-cli.md](spell-epic/README-cli.md), "Old spellings", has the table.
 - spell-app's root scripts reach it too, as `yarn epic`.
   And `yarn ask` is `epic ask`.
 
@@ -642,12 +646,12 @@ epic worktree merge-main
 
 ## The kit's own programs
 
-Three small programs ship in the kit's package, so every repo's `node_modules/.bin` has them.
+Three small programs ship in the kit's package (its `bin/`), so every repo's scripts have them.
 They're what the yarn scripts call;  you rarely type them yourself.
 
 | Program | What it does |
 | --- | --- |
-| `spell-folders <check> [folder...]` | Runs a several-folder repo's checks folder by folder:  `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check`.  What `yarn test` runs in the kit, spell-lang and spell-app. |
+| `spell-folders <check> [folder...]` | Runs a several-folder repo's checks folder by folder:  `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check`.  What spell-app's `yarn test` runs, until it has one `src/` too. |
 | `spell-types [--below] [--clean]` | Builds a package's TypeScript declarations for the repos above it;  `--below` rebuilds the lower repos' stale ones first. |
 | `spell-pack build \| check [<folder>]` | Builds a component pack, or checks it's current;  spell-epic's and spell-brand's `yarn pack:build` use it. |
 
@@ -699,7 +703,7 @@ What every `spell` command does the same way.
 
 ## How a command is built
 
-The base of `spell` is the kit's [`cli/`](cli/) folder:  it reads the command line, prints the help,
+The base of `spell` is the kit's [`cli/`](src/cli/) folder:  it reads the command line, prints the help,
 and finds each repo's commands.
 A repo's commands live in its own `cli/` folder, listed in that repo's commands file.
 
@@ -859,36 +863,36 @@ How `spell` finds the repos:
 2. Pick its repo:  the lowest one whose code it needs.
    - It never imports a repo above its own.
    - Something only a higher repo knows comes through a hook (`needHook()`).
-3. Its work:  a file in that repo's `cli/src/`, `(args, options) => Promise<exitCode>`, throwing `CLI.CliError` for a
+3. Its work:  a file in that repo's `src/cli/`, `(args, options) => Promise<exitCode>`, throwing `CLI.CliError` for a
    mistake.
 4. Its line in the repo's command list:  `spell.command("name")`, its arguments, flags and help, and an action
    that imports the file when it runs, through `CLI.runCommand()`.
-   - A repo with no list yet:  `"spell": { "commands": "./cli/commands.ts" }` in its `package.json`.
+   - A repo with no list yet:  `"spell": { "commands": "./src/cli/commands.ts" }` in its `package.json`.
 5. Its test, then its row on the commands page, and `spell commands check`.
 
 </details>
 
 <details>
-<summary>The kit's cli/ folder, file by file</summary>
+<summary>The kit's src/cli/ folder, file by file</summary>
 
 | Path | What |
 | --- | --- |
-| [cli/bin/spell.mjs](cli/bin/spell.mjs) | the `spell` bin:  `tsx` with this folder's settings, the alias hook, then `main.ts` |
-| [cli/commands.ts](cli/commands.ts) | the kit's own command list (its `package.json`'s `"spell": { "commands" }`) |
-| [cli/scripts/install-cli.mjs](cli/scripts/install-cli.mjs) | `yarn cli:install`:  links `spell` onto your `PATH` |
-| [cli/src/main.ts](cli/src/main.ts) | the process entry:  every repo's commands, then the command line |
-| [cli/src/program.ts](cli/src/program.ts) | `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()` |
-| [cli/src/repos.ts](cli/src/repos.ts) | `spellRepos()`, `commandLists()`, `hook()`, `needHook()` |
-| [cli/src/run.ts](cli/src/run.ts) | `runCommand()`, `rawArgsAfter()`, `out()`, `err()`, `relativePath()` |
-| [cli/src/tools.ts](cli/src/tools.ts) | `runTool()`, `runChild()`, `epicBin()`, `runEpic()` |
-| [cli/src/findCheckout.ts](cli/src/findCheckout.ts) | `findCheckout()`, `KIT_ROOT`, `KIT_MARKER` |
-| [cli/src/cli.types.ts](cli/src/cli.types.ts) | `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`, `ToolSpec` |
-| [cli/src/commands/serverCommand.ts](cli/src/commands/serverCommand.ts) | `spell server`:  the page server's command line, `start all`, `stop` |
-| [cli/src/commands/bundleCommand.ts](cli/src/commands/bundleCommand.ts) | `spell bundle`, `spell bundle check` |
-| [cli/src/commands/commandsCommand.ts](cli/src/commands/commandsCommand.ts) | `spell commands`:  every command against the commands page |
-| [cli/src/commands/wwodCommand.ts](cli/src/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](cli/src/commands/wwod.ts) |
-| [cli/src/commands/ponyCommand.ts](cli/src/commands/ponyCommand.ts) | `spell pony` |
-| [cli/tsconfig.json](cli/tsconfig.json) | the settings `tsx` runs EVERY repo's commands under, and this folder's type check |
+| [bin/spell.mjs](bin/spell.mjs) | the `spell` bin:  `tsx` with the kit's node settings, the alias hook, then `main.ts` |
+| [commands.ts](src/cli/commands.ts) | the kit's own command list (its `package.json`'s `"spell": { "commands" }`) |
+| [scripts/install-cli.mjs](scripts/install-cli.mjs) | `yarn cli:install`:  links `spell` onto your `PATH` |
+| [main.ts](src/cli/main.ts) | the process entry:  every repo's commands, then the command line |
+| [program.ts](src/cli/program.ts) | `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()` |
+| [repos.ts](src/cli/repos.ts) | `spellRepos()`, `commandLists()`, `hook()`, `needHook()` |
+| [run.ts](src/cli/run.ts) | `runCommand()`, `rawArgsAfter()`, `out()`, `err()`, `relativePath()` |
+| [tools.ts](src/cli/tools.ts) | `runTool()`, `runChild()`, `epicBin()`, `runEpic()` |
+| [findCheckout.ts](src/cli/findCheckout.ts) | `findCheckout()`, `KIT_ROOT`, `KIT_MARKER` |
+| [cli.types.ts](src/cli/cli.types.ts) | `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`, `ToolSpec` |
+| [commands/serverCommand.ts](src/cli/commands/serverCommand.ts) | `spell server`:  the page server's command line, `start all`, `stop` |
+| [commands/bundleCommand.ts](src/cli/commands/bundleCommand.ts) | `spell bundle`, `spell bundle check` |
+| [commands/commandsCommand.ts](src/cli/commands/commandsCommand.ts) | `spell commands`:  every command against the commands page |
+| [commands/wwodCommand.ts](src/cli/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](src/cli/commands/wwod.ts) |
+| [commands/ponyCommand.ts](src/cli/commands/ponyCommand.ts) | `spell pony` |
+| [tsconfig.node.json](tsconfig.node.json) | the settings `tsx` runs EVERY repo's commands under, and the kit's node type check |
 
 - Its tests are in [tests/cli/](tests/cli/);  each repo's commands' tests in that repo's `tests/cli/`.
 - The other repos' commands:  spell-lang's `cli/` (the list, and the `language` hook's shape),
@@ -937,8 +941,6 @@ How `spell` finds the repos:
   - Moving it down to spell-lang, command by command:  repo-split's open issue from P13.
 - `serve.ts` has twins in spell-app (`spell run`'s browser page) and Spell UI (`spell icon --open`):
   one home in the kit's `cli/` would do for both.
-- The `epic` command's own renames (`new` to `create`, `check` to `lint` ...) and its move to spell-epic's `cli/`:
-  a second step of P13.
 
 </details>
 

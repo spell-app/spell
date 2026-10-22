@@ -6779,10 +6779,9 @@ __metadata:
     solid-js:
       optional: true
   bin:
-    spell: ./cli/bin/spell.mjs
-    spell-folders: ./toolchain/bin/spell-folders.ts
-    spell-pack: ./element/bin/spell-pack.mjs
-    spell-types: ./toolchain/bin/spell-types.ts
+    spell: ./bin/spell.mjs
+    spell-pack: ./bin/spell-pack.mjs
+    spell-types: ./bin/spell-types.ts
   languageName: unknown
   linkType: soft
 

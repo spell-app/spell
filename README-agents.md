@@ -103,7 +103,7 @@ So each rule is written in exactly one of them.
 | --- | --- |
 | the kit's [AGENTS.md](AGENTS.md) | the kit, and what's across repos:  installs, imports, tests, CI, worktrees |
 | each child repo's, e.g. [spell-ui's](spell-ui/AGENTS.md) | that repo:  its folders, what it may import, its commands and its own conventions |
-| each folder's, e.g. [the kit server's](server/AGENTS.md) | what's local to that folder |
+| each folder's, e.g. [the kit server's](src/server/AGENTS.md) | what's local to that folder |
 
 - A section named like a WWOD rule EXTENDS it, and says so:  "As WWOD §4, plus:".
 - A README says what a thing IS and how to run it;  the rules for working on it stay in its `AGENTS.md`.

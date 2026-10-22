@@ -122,16 +122,9 @@ Every command below runs from the folder it names;  what it prints when it worke
    cd ~/www/spell
    yarn playwright install chromium
    yarn kit:test
-   # ... each folder's Vitest run, then:
-   # ==================== test
-   #
-   # toolchain      passed
-   # util           passed
-   # server         passed
-   # assembler      passed
-   # element        passed
-   # element/tools  passed
-   # tools          passed
+   # ... one Vitest run, a project per folder, then:
+   #  Test Files  55 passed (55)
+   #       Tests  610 passed (610)
    ```
 
 6. See what's cloned.
@@ -177,7 +170,7 @@ yarn clone spell-app     # spell-app, and spell-lang, spell-brand, spell-ui, spe
 <summary>Where everything ends up</summary>
 
 ```text
-~/www/spell/                    the kit (git repo spell-kit):  util/ toolchain/ server/ element/ cli/ tests/ tools/ agents/
+~/www/spell/                    the kit (git repo spell-kit):  src/ tests/ bin/ scripts/ tools/ agents/
 ~/www/spell/spell-lang/         each child repo:  its own git repo, git-ignored by the kit
 ~/www/spell/spell-ui/
 ~/www/spell/spell-brand/
@@ -301,40 +294,37 @@ yarn dev
 
 ## The kit's own folders
 
-The kit is ONE npm package, `spell-kit`, made of five folders of code:
-each is its own TypeScript program, and each has a page.
+The kit is ONE npm package, `spell-kit`, its code under ONE `src/`, a folder for each part:
+each file is imported as `spell-kit/` and its path under `src/` (`spell-kit/util/string`), from the kit and every
+other repo.  Each part has a page.
 
 | Folder | Import name | What it is | Its page |
 | --- | --- | --- | --- |
-| [util/](util/) | `spell-kit/util` | the helpers every repo shares:  standard decorators, class, string and DOM helpers, the reactive engine, spell's own utilities, node-only JSON5 | [README-util.md](README-util.md) |
-| [toolchain/](toolchain/) | `spell-kit/toolchain/...` | what every repo's checks share:  the lint and format rules, the decorator pre-pass, declarations, `spell-folders` | [README-toolchain.md](README-toolchain.md) |
-| [server/](server/) | `spell-kit/server` | the page server:  every page on one port, live reload, editing in place, and the steps a tool runs to write a page | [README-server.md](README-server.md) |
-| [element/](element/) | `spell-kit/element` | the element framework every set of web components is written on;  its build tools and test helpers | [README-element.md](README-element.md) |
-| [cli/](cli/) | `spell-kit/cli` | the `spell` command line's base:  arguments, help, finding each repo's commands;  the kit's own commands (`spell server`, `spell bundle` ...) | [README-cli.md](README-cli.md) |
+| [src/util/](src/util/) | `spell-kit/util` | the helpers every repo shares:  standard decorators, class, string and DOM helpers, the reactive engine, spell's own utilities, node-only JSON5 | [README-util.md](README-util.md) |
+| [src/toolchain/](src/toolchain/) | `spell-kit/toolchain/...` | what every repo's checks share:  the lint and format rules, the decorator pre-pass, declarations, `spell-folders` | [README-toolchain.md](README-toolchain.md) |
+| [src/server/](src/server/) | `spell-kit/server` | the page server:  every page on one port, live reload, editing in place, and the steps a tool runs to write a page | [README-server.md](README-server.md) |
+| [src/element/](src/element/) | `spell-kit/element` | the element framework every set of web components is written on | [README-element.md](README-element.md) |
+| [src/element-tools/](src/element-tools/) | `spell-kit/element-tools/...` | the elements' build tools:  the pack build, the root catalog, their Vite settings | [README-element.md](README-element.md) |
+| [src/test-helpers/](src/test-helpers/) | `spell-kit/test-helpers/...` | the test helpers every set's tests use | [README-element.md](README-element.md) |
+| [src/cli/](src/cli/) | `spell-kit/cli` | the `spell` command line's base:  arguments, help, finding each repo's commands;  the kit's own commands (`spell server`, `spell bundle` ...) | [README-cli.md](README-cli.md) |
 
 And the glue that makes six repos one checkout:
 - the ONE install:  `yarn install` runs here, never in a child repo, and links `node_modules/spell-kit` to the kit
 - the list of child repos, lowest first, with what each needs:  [repos.json5](repos.json5)
 - [the commands over them](tools/repos.ts):  `clone`, `pull`, `status`, `repos`, and the checks over every repo
 
-<details>
-<summary>Until repo-split P14 lands</summary>
-
-- The page-writing steps (links, formatting, bundles built on demand, data files) are their own folder today,
-  [assembler/](assembler/), imported as `spell-kit/assembler`:  [README-server.md](README-server.md) covers them.
-- Inside a repo, files import each other by short alias names from the repo's alias table;
-  other repos already import by package name.
-
-</details>
 
 <details>
 <summary>Every file the kit tracks besides its folders</summary>
 
 | File | What it is |
 | --- | --- |
-| [package.json](package.json) | the ONE package `spell-kit`:  its `exports`;  `"workspaces": ["spell-*"]`, every child repo;  `"spellTypes"` and `"spellFolders"`, its folders;  the `resolutions` (one Solid);  the scripts |
-| [tsconfig.base.json](tsconfig.base.json) | the kit's TypeScript settings, which every folder's extends |
-| [vite.config.ts](vite.config.ts) | the kit's lint and format settings, what `vp check` and the editor read |
+| [package.json](package.json) | the ONE package `spell-kit`:  its `exports`;  `"workspaces": ["spell-*"]`, every child repo;  `"spellTypes"`, its TypeScript programs;  the `resolutions` (one Solid);  the scripts |
+| [tsconfig.json](tsconfig.json), [tsconfig.node.json](tsconfig.node.json) | the kit's two TypeScript programs:  browser-safe code, and node code (the tests':  [tests/tsconfig.json](tests/tsconfig.json)) |
+| [vite.config.ts](vite.config.ts) | the kit's lint and format settings, what `yarn kit:lint`, `vp check` and the editor read |
+| [vitest.config.ts](vitest.config.ts) | the kit's tests:  a project per folder |
+| [bin/](bin/) | the kit's commands:  `spell`, `spell-pack`, `spell-types`, `spell-folders` |
+| [scripts/](scripts/) | `yarn cli:install`, `yarn favicon` |
 | `yarn.lock`, [.yarnrc.yml](.yarnrc.yml), `.yarn/releases/` | the one lockfile;  the one catalog of tool versions;  the yarn release |
 | [repos.json5](repos.json5) | the child repos, lowest first:  name, git URL, which repos each needs |
 | [tools/repos.ts](tools/repos.ts) | what `clone`, `pull`, `status`, `repos`, the checks over every repo and the `postinstall` run |
@@ -386,9 +376,10 @@ yarn review           # the kit's finishing pass, then every repo's
 - The kit's checks one at a time:
   `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`, `kit:format:check`.
 - In a child repo, its own scripts:  `cd spell-ui && yarn test`.
-  One folder of a repo with several (spell-lang, spell-app):  `cd spell-lang && yarn spell-folders test core`.
-- Tests live in `tests/<folder>/`, at the same paths as the code they test:
-  [Router.test.ts](tests/server/src/Router.test.ts) tests the server's [Router.ts](server/src/Router.ts).
+  One folder's tests:  `yarn vp test run --project server`, here or in a converted repo;
+  spell-app's, until it's converted:  `cd spell-app && yarn spell-folders test app`.
+- Tests live in `tests/`, at the same paths as the code they test under `src/`:
+  [Router.test.ts](tests/server/Router.test.ts) tests the server's [Router.ts](src/server/Router.ts).
 - A change across two repos is two commits, one in each, and two pull requests, the lower repo's first.
   No publish, no version bump:  every repo uses the others' source, through this one install.
 - Working across several repos at once ([README-development.md](README-development.md)):
