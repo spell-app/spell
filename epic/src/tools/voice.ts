@@ -93,8 +93,8 @@ export type VoicePage = {
 /** The stamp's tag, anywhere in a page;  its `content` the first group. */
 const STAMP = /<meta\s+name="spell-voice"\s+content="([^"]*)"\s*\/?>/i
 
-/** A page's description meta, which the stamp goes after. */
-const DESCRIPTION = /<meta\s+name="description"[^>]*>/i
+/** A page's description meta, which the stamp goes after:  its attributes quoted, so a `>` in its text isn't its end. */
+const DESCRIPTION = /<meta\s+name="description"(?:\s+[\w-]+="[^"]*")*\s*\/?>/i
 
 /** The exit codes. */
 const EXIT = { OK: 0, USAGE: 2 } as const
