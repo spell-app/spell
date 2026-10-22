@@ -3,10 +3,17 @@ import { describe, expect, test } from "vite-plus/test"
 import { drawableAttributeFor, elementTagFor } from "spell-kit/util/spell/drawable"
 
 describe("a drawable type's element names", () => {
-  test("its tag:  the project's name made singular, without the word drawable, then the class's", () => {
+  test("its tag:  the project's name as written, without the word drawable, then the class's", () => {
     expect(elementTagFor("Solitaire", "Card")).toBe("solitaire-card")
     expect(elementTagFor("Drawable Solitaire", "StockPile")).toBe("solitaire-stock-pile")
-    expect(elementTagFor("test_classes", "Card")).toBe("test-class-card")
+    expect(elementTagFor("test_classes", "Card")).toBe("test-classes-card")
+  })
+
+  test("a Spanish program's:  its own names, without the word dibujable, accents dropped", () => {
+    expect(elementTagFor("cartas", "Carta")).toBe("cartas-carta")
+    expect(elementTagFor("Solitario Dibujable", "PilaDeDescarte")).toBe("solitario-pila-de-descarte")
+    expect(elementTagFor("Canciones", "Canción")).toBe("canciones-cancion")
+    expect(elementTagFor("Diseño", "Año")).toBe("diseno-ano")
   })
 
   test("a property's attribute, by its declared type", () => {

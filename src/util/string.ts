@@ -15,7 +15,7 @@
  * - Already-kebab text passes through unchanged.
  */
 export function kebabCase(text: string) {
-  return (KEBAB_CASE[text] ??= text.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`))
+  return (KEBAB_CASE[text] ??= text.replace(/\p{Lu}/gu, (letter) => `-${letter.toLowerCase()}`))
 }
 /** Memo for `kebabCase()`. */
 const KEBAB_CASE: Record<string, string> = Object.create(null)
@@ -26,7 +26,7 @@ const KEBAB_CASE: Record<string, string> = Object.create(null)
  * - Already-camel text passes through unchanged.
  */
 export function camelCase(text: string) {
-  return (CAMEL_CASE[text] ??= text.replace(/-([a-z0-9])/g, (_, letter: string) => letter.toUpperCase()))
+  return (CAMEL_CASE[text] ??= text.replace(/-([\p{Ll}\d])/gu, (_, letter: string) => letter.toUpperCase()))
 }
 /** Memo for `camelCase()`. */
 const CAMEL_CASE: Record<string, string> = Object.create(null)

@@ -391,15 +391,18 @@ export type NamesOf<Registry> = [keyof Registry] extends [never] ? string : Extr
 export type NameMap = Readonly<Record<string, string>>
 
 /**
- * A translation of the vocabulary, e.g. Spanish, so `<ie-tarjeta color="rojo">` ~== `<ui-card color="red">`.
+ * A translation of the vocabulary, e.g. Spanish, so `<es-tarjeta color="rojo">` ~== `<ui-card color="red">`.
  * - Keys are ALWAYS canonical English names;  values are the localized names.
  * - Anything missing falls back to canonical, so the English identity dictionary is just `{ lang: "en" }`.
  * - Tags and events are keyed by their full canonical name (`ui-card`, `ui-change`)
  *   and map to a localized STEM (`tarjeta`, `cambio`):
- *   `Vocabulary.define(prefix, dictionary)` adds the prefix (`ie-tarjeta`).
+ *   `Vocabulary.define(prefix, dictionary)` adds the prefix (`es-tarjeta`).
  * - Attribute, slot and part names map name to name (`header` => `encabezado`).
- * - NOT here:  states (a CSS contract), CSS classes, text strings (owned by Spell UI's `UI.i18n`).
- * - See Spell UI's `packages/ui/notes/translation.md`.
+ * - NOT here:  states (a CSS contract), CSS classes.
+ * - Its `texts` ride along for the runtime's texts (Spell UI's `UI.i18n`):  the names never read them.
+ * - Spell UI's own Spanish:  each tag's `UI<Name>.es.ts` (a `TagDictionary`), gathered into one by
+ *   `spell-ui/components/components.es`.
+ * - See Spell UI's `notes/translation.md`.
  */
 export type Dictionary = {
   /** BCP 47 language tag, e.g. `es`. */
@@ -416,9 +419,26 @@ export type Dictionary = {
   slots?: NameMap
   /** Canonical part name => localized (added alongside the canonical part). */
   parts?: NameMap
+  /**
+   * Canonical value => localized, for the values an attribute lists of its own (`values: ["left", "right"]`),
+   * on every tag:  `{ left: "izquierda" }`.
+   * - So a word used by many tags is translated once.
+   * - After `components[tag].values` and a shared set's map (`values`), before the canonical value.
+   * - NOT for the shared attributes' values (`animation`):  those keep their names.
+   */
+  words?: NameMap
   /** Per-component overrides and inline enum values, keyed by canonical tag. */
   components?: Readonly<Record<string, ComponentDictionary>>
+  /** Text key => text people read, for every component (`UI.i18n`):  `{ close: "Cerrar" }`. */
+  texts?: NameMap
 }
+
+/**
+ * Defines one component class under `tag`, named by `dictionary`:  its `UIComponent.define(tag, dictionary)`.
+ * - What the runtime gets with each vocabulary as the class is defined (`WordSettings.registerVocabulary()`),
+ *   so it can define the class under the page's languages too (Spell UI's `UI.vocabulary.defineComponents()`).
+ */
+export type ComponentDefiner = (tag: string, dictionary: Dictionary) => unknown
 
 /**
  * One language's names for the attributes every element shares (`SharedVocabulary`),
@@ -446,6 +466,23 @@ export type ComponentDictionary = {
   parts?: NameMap
   /** The tag's other names in this language (replacing the English `aka`), e.g. `["diálogo", "ventana"]`. */
   aka?: readonly string[]
+  /** Text key => text people read, for this component only (`UI.i18n`), e.g. `{ loading: "Cargando…" }`. */
+  texts?: NameMap
+}
+
+/**
+ * One tag's names in one language, in a file of its own beside its vocabulary:  `UIButton.es.ts`.
+ * - What a `Dictionary` holds for the tag:  its name in `tags`, the rest in `components[tag]`.
+ * - Names its tag shares with others (`size`, `color`, `ui-change`) are the language's own file's:
+ *   Spell UI's `components.es.ts`.
+ */
+export type TagDictionary = ComponentDictionary & {
+  /** BCP 47 language tag, e.g. `es`. */
+  lang: string
+  /** The canonical tag it translates, e.g. `ui-button`. */
+  tag: string
+  /** Its localized stem, e.g. `boton`:  the page's prefix goes in front (`es-boton`). */
+  name: string
 }
 
 /**
@@ -456,11 +493,11 @@ export type ComponentDictionary = {
 export type LocalizedVocabulary = {
   /** Language of the dictionary it came from. */
   lang: string
-  /** Prefix it was defined with, e.g. `ie`. */
+  /** Prefix it was defined with, e.g. `es`. */
   prefix: string
   /** The canonical vocabulary. */
   vocabulary: ComponentVocabulary
-  /** Localized tag, e.g. `ie-tarjeta`. */
+  /** Localized tag, e.g. `es-tarjeta`. */
   tag: string
   /** Localized attribute name (and canonical aliases) => spec. */
   attributes: Map<string, AttributeSpec>
@@ -482,7 +519,7 @@ export type LocalizedNames = {
   attributes: Map<string, string>
   /** Canonical attribute name => (canonical value => localized value). */
   values: Map<string, Map<string, string>>
-  /** Canonical event name => localized, prefix included (`ie-cambio`). */
+  /** Canonical event name => localized, prefix included (`es-cambio`). */
   events: Map<string, string>
   /** Canonical slot name => localized. */
   slots: Map<string, string>

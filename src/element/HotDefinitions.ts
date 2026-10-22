@@ -14,7 +14,7 @@ import { E } from "spell-kit/element"
  * - Why:  `define()` is idempotent per tag, so a barrel re-run by HMR would return the OLD element class.
  *   - The wrapper records every tag's class and dictionary.
  *   - When a DIFFERENT class of the SAME name defines a known tag (its module was re-evaluated),
- *     that class takes over EVERY tag the old one had, the translated aliases (`ie-boton`) included.
+ *     that class takes over EVERY tag the old one had, the translated aliases (`es-boton`) included.
  * - The platform can't define a tag twice, so each tag's DOM element class STAYS,
  *   and what it reads is swapped in place (`redefine()`):
  *   its definition, its properties, how it builds its component.
