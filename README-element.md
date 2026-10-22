@@ -269,7 +269,7 @@ this.send("ui-change", { count })
 
 And because every name is in one place, a tag can be translated whole, in two halves:
 - **Names**, what authors type, are renamed by a dictionary:
-  `UIButton.define("ie-boton", es)` makes `<ie-boton primario color="rojo">` a Spell UI button in Spanish.
+  `UIButton.define("es-boton", es)` makes `<es-boton primario color="rojo">` a Spell UI button in Spanish.
   Values arrive in English (`rojo` is `red`), so the component's code doesn't change.
 - **Texts**, what people read, are looked up by Spell UI's runtime, so nothing is ever blank:
   the exact locale (`pt-BR`), then the language (`pt`), then English, then the key itself.
