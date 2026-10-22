@@ -505,7 +505,7 @@ spell bundle check ui-site
 | --- | --- | --- |
 | `ui-site` | `yarn site:bundle` in spell-ui | `spell-ui/site/_assets/` |
 
-Why not commit them:  that folder holds 136 files, 74 of them with a content hash in the name (`UIButton-Cm4_3xKY.js`).
+Why not commit them:  that folder holds 138 files, 76 of them with a content hash in the name (`UIButton-Cm4_3xKY.js`).
 Every Spell UI change deleted and re-added most of them, in every diff and every merge.
 
 ```ts
@@ -611,7 +611,7 @@ A repo that isn't cloned brings nothing, and the server runs with whatever is th
 | the content repo's | the folders pages may save into (`writable`:  `epics`, `guides`, `pages`);  `gone`, the old `/ui` address;  `siteTabs`, the header's tabs |
 | [spell-ui's](https://github.com/spell-app/spell-ui/blob/main/package.json) | its site bundle (`bundles`), and the Spell UI set at `/components/ui/` |
 | [spell-epic's](https://github.com/spell-app/spell-epic/blob/main/package.json) | its ten route modules;  the folders live reload watches;  the Epic UI set at `/components/epics/`;  `/_epic/assets/`, `/_epic/pack/` and `/templates/`;  the local copy of highlight.js |
-| [spell-app's](https://github.com/spell-app/spell-app/blob/main/package.json) | its route module, `appRoutes`;  the `spell-language.js` page script;  the App UI set at `/components/app/` ([what it serves](https://github.com/spell-app/spell-app/blob/main/README-page-server.md)) |
+| [spell-app's](https://github.com/spell-app/spell-app/blob/main/package.json) | its route module, `appRoutes`;  the `spell-language.js` page script;  `/element/`, its element bundles (`engineRoutes`);  the App UI set at `/components/app/` ([what it serves](https://github.com/spell-app/spell-app/blob/main/README-page-server.md)) |
 
 - The content repo isn't public, so its file is named here, not linked.
 - `localCopies` is how pages load offline.

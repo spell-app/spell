@@ -508,7 +508,7 @@ spell-ui
 spell-epic
 - checks:  `ts`, `test` (with `test:scripts` and `test:vscode`), `test:node`, `test:watch`,
   `lint`, `lint:fix`, `format`, `review`
-- `epic`, `pack:build`, `pack:check`, `site:data`, `plugin:validate`, `vscode:check`, `vscode:package`
+- `epic`, `plan-doc` (`epic`, in its own order), `pack:build`, `pack:check`, `site:data`, `plugin:validate`, `vscode:check`, `vscode:package`
 - the docs tools:  `docs:update`, `docs:index`, `docs:new`, `docs:open`, `docs:link`, `details`
 
 spell-app

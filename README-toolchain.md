@@ -86,8 +86,8 @@ yarn vp --version
 
 - Its command is `vp`:  `yarn vp test run`, `yarn vp lint src`, `yarn vp fmt`, `yarn vp dev`.
 - No ESLint and no Prettier anywhere:  oxlint lints, oxfmt formats, and `oxlint-tsgolint` is oxlint's type-aware half.
-  On Spell UI's source, about 65,000 lines, oxlint lints its 492 files with 106 rules, type-aware,
-  in about 0.8 seconds;  oxfmt checks its 985 files in about 0.6 (18 threads, by the tools' own count).
+  On Spell UI's source, about 81,000 lines, oxlint lints its 682 files with 105 rules, type-aware,
+  in about 0.9 seconds;  oxfmt checks its 1,197 files in about 0.6 (18 threads, by the tools' own count).
 - The type checker isn't in the set:  every repo names TypeScript 7, the native compiler (`typescript ^7.0.2`).
 - The versions live in one place, the catalog in the kit's [.yarnrc.yml](.yarnrc.yml);
   every repo's `package.json` says `catalog:` for each of them it uses.

@@ -55,7 +55,7 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](bin/spell.mjs) in this ch
   them in `node_modules/.bin` ([below](#two-more-programs-for-yarn-scripts)).
 - The first run takes a few seconds, while `tsx` compiles every repo's source and caches it.
   After that the base answers in about 0.1 s, and a language command, which loads the parser and Spell's rules,
-  in one to two:  `spell explain print` took 0.9 s here, `spell parse` 1.9 s.
+  in about one:  `spell explain print` and `spell parse` each took 0.9 s here.
 
 ## Naming projects:  a path, an address or a group
 
@@ -363,7 +363,7 @@ the parse, the rules behind a word, the types a project declares.
 
 ```sh
 spell explain print
-# print  print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]
+# print  print {operator:print_kind}? [expressions:{expression} ,]
 # e.g. print "Yo!"
 spell describe @spell/test/solitaire Card color
 # property color of Card
@@ -590,7 +590,7 @@ spell projects
 # @spell/examples  Examples       5 projects
 # @spell/guides    Guides         0 projects
 # @spell/library   Libraries      2 projects
-# @spell/test      Test fixtures  11 projects
+# @spell/test      Test fixtures  12 projects
 ```
 
 <details>
@@ -668,7 +668,7 @@ epic worktree merge-main
   `epic close seo#J3`.
 - Every verb runs on the caller's checkout:  a worktree's, when run in one.
   `epic --version` says which code that is:  its commit, branch and checkout.
-- `epic --help` lists all 62 verbs, in twelve groups;
+- `epic --help` lists all 63 verbs, in twelve groups;
   `epic help <verb>`, or `epic <verb> --help`, shows one's usage, what it does and an example,
   and a group's verbs too (`epic ask create --help`).
 - An unknown verb exits 1, listing the verbs;  a usage error exits 2.

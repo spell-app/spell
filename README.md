@@ -391,8 +391,8 @@ the versions and counts will have moved on by the time you run it.
    yarn playwright install chromium
    yarn kit:test
    # ... one Vitest run, a project per folder of src/, then:
-   #  Test Files  55 passed (55)
-   #       Tests  610 passed (610)
+   #  Test Files  60 passed (60)
+   #       Tests  685 passed (685)
    ```
 
 6. Put `spell` on your `PATH`.
