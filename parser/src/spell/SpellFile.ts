@@ -74,6 +74,16 @@ export class SpellFile extends TextFile {
     return this.location.extension
   }
 
+  /**
+   * The human language we're written in, by our name (epic `spanish` P19):
+   * `Carta.es.spell` is Spanish, `Card.spell` English -- see `SP.Language.forFile()`.
+   * - Our parser, our editor's keywords and the parser's messages to whoever writes us follow it.
+   * - throws a `TypeError` naming the languages spell reads, for one it doesn't, e.g. `Carte.fr.spell`
+   */
+  get language(): SP.Language {
+    return SP.Language.forFile(this.file)
+  }
+
   /** Pointer to our `SpellProject`. */
   /*@memoize*/
   get project(): SP.SpellProject {
@@ -145,17 +155,20 @@ export class SpellFile extends TextFile {
   /**
    * Return a `Scope` for parsing this file.
    * - If `parentScope` has `types` (a real project scope), returns a `P.FileScope` under it, reusing its
-   *   parser.
+   *   parser -- or its twin in our `language`, if that's another (`SpellParser.twinFor()`).
    * - Otherwise falls back to an ad-hoc `P.ProjectScope` cloned from `SpellParser.rootScope`'s parser --
    *   logs a warning, since it means we don't know what project we belong to.
    */
   getScope(parentScope: P.Scope | undefined): P.FileScope | P.ProjectScope {
     // If we were passed a `parentScope` with `types`, set up as a `FileScope` and use same parser.
     if (parentScope && parentScope.types) {
+      const parser = parentScope.parser as SP.SpellParser | undefined
+      const twin = parser?.twinFor?.(this.language)
       return new P.FileScope({
         name: this.file,
         path: this.path,
-        parentScope
+        parentScope,
+        ...(twin && twin !== parser ? { parser: twin } : {})
       })
     }
     // Otherwise set up as an ad-hoc `Project` and clone `SpellParser.rootScope.parser`

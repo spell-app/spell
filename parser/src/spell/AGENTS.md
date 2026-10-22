@@ -136,7 +136,7 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     (spell-app's [fixtures.test.ts](../../../spell-app/tests/spell/test/fixtures.test.ts)):
     - `<Project>.snapshot.js`:  the javascript target
     - `<Project>.snapshot.declarations.json5`:  its declarations
-    - `<Project>.<lang>.snapshot.js`:  its words (`SP.SpellWords`), in its language (`.en`, `.es`)
+    - `<Project>.<lang>.snapshot.js`:  its words (`SP.SpellWords`), one per language its files are in (`.en`, `.es`)
       - Its name ends as a snapshot's does, which keeps it out of the project's files.
     - `<Project>.snapshot.tsx`:  the TypeScript target
     - `<Project>.snapshot.tsc.txt`:  what `tsc` says of it ([typescript.test.ts](../../../spell-app/tests/spell/test/typescript.test.ts))

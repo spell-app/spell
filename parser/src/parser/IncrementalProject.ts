@@ -5,7 +5,9 @@ import { P } from "spell-lang/parser"
  * -- see `P.IncrementalParse`.
  * - Every file shares the project scope's parser, and so its `journal` (`P.ParseJournal`):
  *   what file 1 declares, file 2 can use, and rewinding file 1 takes back file 2 as well.
- * - Each file gets its own `P.FileScope` under `scope`.
+ *   - A file may bring a parser of its own, e.g. one in another human language (spell's `SpellParser.twinFor()`):
+ *     it records in the same journal, and shares the rules the project adds.
+ * - Each file gets its own `P.FileScope` under `scope`, with its own parser if it brought one.
  * - Before any file parses, every type and method the files declare is stubbed,
  *   so a line can name a type, or call a method, declared further down:
  *   `parser.stubDeclaredTypes()`, `parser.stubDeclaredMethods()`.
@@ -18,8 +20,9 @@ export class IncrementalProject {
   /**
    * Our files, in parse order.
    * - `types`:  names of the types it declares, joined -- see `parser.declaredTypes()`, `update()`.
+   * - `parser`:  the one it parses with:  the project scope's, unless it brought its own.
    */
-  declare files: Array<{ path: string; parse: P.IncrementalParse; types: string }>
+  declare files: Array<{ path: string; parse: P.IncrementalParse; types: string; parser: P.Parser }>
   /** Do broken lines keep their last working declarations?  See `IncrementalProjectProps.keepLastGood`. */
   declare keepLastGood: boolean
   /** Journal mark before the types we stub -- rewinding to it takes back the whole project. */
@@ -32,19 +35,24 @@ export class IncrementalProject {
 
   /**
    * Parse `files` in order, from scratch.
-   * - SIDE EFFECT: gives `scope.parser` a fresh `journal`.
+   * - SIDE EFFECT: gives `scope.parser` a fresh `journal`, and each file's own parser the same one.
    */
   constructor({ scope, files, keepLastGood }: IncrementalProjectProps) {
     const parser = scope.parser!
-    parser.journal = new P.ParseJournal()
+    const journal = (parser.journal = new P.ParseJournal())
+    const parsers = files.map((file) => file.parser ?? parser)
+    for (const it of parsers) it.journal = journal
     this.scope = scope
     this.keepLastGood = !!keepLastGood
-    this.startMark = parser.journal.mark()
-    this.stub(files.map((file) => file.text))
-    this.files = files.map(({ path, name = path, text }) => {
-      const fileScope = new P.FileScope({ name, path, parentScope: scope })
-      const types = parser.declaredTypes(text).join()
-      return { path, types, parse: new P.IncrementalParse({ parser, scope: fileScope, text, keepLastGood }) }
+    this.startMark = journal.mark()
+    this.stub(files.map(({ text }, index) => ({ text, parser: parsers[index]! })))
+    this.files = files.map(({ path, name = path, text }, index) => {
+      const fileParser = parsers[index]!
+      const own = fileParser === parser ? {} : { parser: fileParser }
+      const fileScope = new P.FileScope({ name, path, parentScope: scope, ...own })
+      const types = fileParser.declaredTypes(text).join()
+      const parse = new P.IncrementalParse({ parser: fileParser, scope: fileScope, text, keepLastGood })
+      return { path, types, parser: fileParser, parse }
     })
   }
 
@@ -66,7 +74,7 @@ export class IncrementalProject {
 
     try {
       // changed which types or methods it declares:  every line above may read differently
-      const parser = this.scope.parser!
+      const { parser } = this.files[index]!
       const types = parser.declaredTypes(text).join()
       if (this.isBroken || types !== this.files[index]!.types) return this.parseAll(path, text)
       if (parser.changesMethods(this.scope, file.text, text, this.keepLastGood)) return this.parseAll(path, text)
@@ -93,20 +101,22 @@ export class IncrementalProject {
     const parser = this.scope.parser!
     if (parser.journal?.has(this.startMark)) parser.journal.rewindTo(this.startMark)
     const texts = this.files.map((file) => (file.path === path ? text : file.parse.text))
-    this.stub(texts)
+    this.stub(this.files.map((file, index) => ({ text: texts[index]!, parser: file.parser })))
     this.files.forEach((file, index) => {
-      file.types = parser.declaredTypes(texts[index]!).join()
+      file.types = file.parser.declaredTypes(texts[index]!).join()
       file.parse.parseAll(texts[index]!)
     })
     this.isBroken = false
     return this.files.map((file) => file.parse)
   }
 
-  /** Stub what `texts` declare, before any file parses:  their types, then their methods. */
-  private stub(texts: string[]): void {
-    const parser = this.scope.parser!
-    parser.stubDeclaredTypes(this.scope, texts)
-    parser.stubDeclaredMethods(this.scope, texts)
+  /**
+   * Stub what `files` declare, before any file parses:  every one's types, then every one's methods.
+   * - Each file by its own parser:  another language's declares in its own words.
+   */
+  private stub(files: Array<{ text: string; parser: P.Parser }>): void {
+    for (const { text, parser } of files) parser.stubDeclaredTypes(this.scope, [text])
+    for (const { text, parser } of files) parser.stubDeclaredMethods(this.scope, [text])
   }
 }
 
@@ -127,5 +137,10 @@ export type IncrementalProjectProps = {
     name?: string
     /** File contents. */
     text: string
+    /**
+     * Parser it parses with, if not the project scope's, e.g. one reading another human language.
+     * - MUST share the project's own rules:  see spell's `SpellParser.twinFor()`.
+     */
+    parser?: P.Parser
   }>
 }

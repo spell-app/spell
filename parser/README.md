@@ -167,7 +167,7 @@ flowchart LR
 </details>
 
 - **Real today:**  English and Spanish in, four targets out.
-  A project written in Spanish says `language: "es"` in its project file;  English is the default.
+  A file written in Spanish says so in its name, `Carta.es.spell`;  a plain `.spell` is English, and one project may mix them.
   Every project gets JavaScript, `js/solid`;  a project asks for the rest by name:  `ts/solid`, `ts/lib`, `py`.
   Twelve frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
   ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
@@ -507,7 +507,7 @@ The language's own commands are this repo's (above):  the command line finds the
 
 A project can be written in Spanish, and compile to the same targets:
 the second box on the left of the picture above.
-Its project file says `language: "es"`, its files stay `.spell`, and its outline reads the way an English one does:
+Each file's name says its language, `Carta.es.spell`, and its outline reads the way an English one does:
 
 ```spell
 una carta es una cosa
@@ -515,7 +515,7 @@ las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
 el color de una carta es rojo si su palo es o bien diamantes o corazones de lo contrario es negro
 ```
 
-_Three lines of [Carta.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/cartas/Carta.spell),
+_Three lines of [Carta.es.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/cartas/Carta.es.spell),
 from `cartas`, the frozen `cards` project translated line for line._
 
 - It isn't a translation layer, or a second parser:  the same rule classes are registered twice.
@@ -527,7 +527,9 @@ from `cartas`, the frozen `cards` project translated line for line._
   English is the first pack, Spanish the second.
 - Names keep their Spanish, accents and all:  `una carta "es una figura"` compiles to `get esUnaFigura()`.
 - A wrong article is a warning, never an error:  `el carta` asks `¿Querías decir "la carta"?`.
-- The parser's warnings and errors speak the project's language, with examples in it:
+- One project may mix languages:  an English `Card.spell` beside a Spanish `Mazo.es.spell`, each read by its own rules,
+  each using what the other declares by the words it was declared with.
+- The parser's warnings and errors speak the file's language, with examples in it:
   `Di qué contiene "nombres-de-cartas", p. ej. "poner nombres-de-cartas a una nueva lista de texto"`.
 - `spell lang packs check` says what a pack lacks against English, module by module, and runs in the tests too;
   `fix` writes stubs to translate.

@@ -145,5 +145,4 @@ describe("SpellWords", () => {
     expect(SP.SpellWords.isWordsScript(SP.SpellWords.script({ lang: "en", types: {} }, "calculator"))).toBe(true)
     expect(SP.SpellWords.isWordsScript("export const io = 1\n")).toBe(false)
   })
-
 })

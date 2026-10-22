@@ -30,12 +30,14 @@ export class SpellDeclarations {
    * - `declarations`:  its versions, what it `provides`, each marker's statement and where its code starts
    *
    * - `version` / `exports` come from its project file -- see `provides()`.
+   * - `languages`:  the languages its files are written in, in file order, e.g. `["en", "es"]`:
+   *   its declarations say them with the one its program speaks first (`speakingFirst()`), and none for English alone.
    * - A marker MUST start its line, and end one:  as `ASTPreservedComment` writes it, indented in a class body.
    */
   static split(
     compiled: string,
     scope: P.ProjectScope,
-    { version, exports, language }: { version?: string; exports?: string[]; language?: string } = {}
+    { version, exports, languages = [] }: { version?: string; exports?: string[]; languages?: string[] } = {}
   ): { code: string; declarations: SP.SpellDeclarationsData } {
     const code: string[] = []
     const statements: SP.SpellDeclaration[] = []
@@ -56,11 +58,12 @@ export class SpellDeclarations {
       )
       codeLines.push(code.length)
     }
+    const spoken = SpellDeclarations.speakingFirst(languages, statements)
     const declarations = definedOnly({
       version,
       spellVersion: SP.SPELL_VERSION,
-      // English, the default, says nothing:  every English project's declarations stay as they were
-      language: language === "en" ? undefined : language,
+      // English alone, the default, says nothing:  every English project's declarations stay as they were
+      languages: spoken.length === 1 && spoken[0] === SP.SpellWords.LANG ? undefined : spoken,
       provides: SpellDeclarations.provides(scope, exports),
       statements,
       codeLines
@@ -181,6 +184,36 @@ export class SpellDeclarations {
         declaration[key] = value
       }
     }
+  }
+
+  /**
+   * `languages`, a project's files' in file order, with the one its program speaks to the person running it first
+   * (epic `spanish` P19):
+   * - the language of the file declaring its app (a type that is an `App`), from where `statements` say it's defined
+   * - else its first file's, where it starts running
+   * - English for none
+   */
+  static speakingFirst(languages: string[], statements: SP.SpellDeclaration[]): string[] {
+    const superTypes = new Map(statements.filter((it) => it.type).map((it) => [it.type!, it.superType]))
+    const isApp = (type: string | undefined, seen = new Set<string>()): boolean => {
+      if (!type || seen.has(type)) return false
+      if (type === "App") return true
+      return isApp(superTypes.get(type), seen.add(type))
+    }
+    const app = statements.find((it) => it.type && isApp(it.type))
+    const appLang = app?.defined ? (SP.Language.langOfFile(app.defined) ?? SP.SpellWords.LANG) : undefined
+    const spoken = appLang ?? languages[0] ?? SP.SpellWords.LANG
+    return [spoken, ...languages.filter((lang) => lang !== spoken)]
+  }
+
+  /**
+   * Codes of the languages `declarations`' project is written in, the one its program speaks first, e.g. `["es", "en"]`:
+   * one words file each (`SP.SpellWords`).
+   * - English alone when they say none.
+   * - Declarations from before epic `spanish` P19 say ONE, `language`.
+   */
+  static languagesOf(declarations: SP.SpellDeclarationsData): string[] {
+    return declarations.languages ?? [declarations.language ?? SP.SpellWords.LANG]
   }
 
   ////////////////

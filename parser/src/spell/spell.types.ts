@@ -156,12 +156,6 @@ export type ProjectManifestJSON5 = {
   /** Where its lists start counting, from its project file:  `1` (the default) or `0` -- see `P.WriterOptions`. */
   listsStartAt?: 0 | 1
   /**
-   * The human language its spell is written in, from its project file, e.g. `es` -- English (`en`) when missing.
-   * - One language per project (epic `spanish` Q1):  its parser, words file and messages follow it.
-   * - See `SpellProject.language`, `SP.Language`.
-   */
-  language?: string
-  /**
    * Where the server puts what compiling builds, e.g. `Solitaire.spell.py`, inside the checkout's `build/`.
    * - e.g. `spaces/@spell/examples/solitaire`, for a project in spell-app's built-ins (epic `people-and-orgs` J33)
    * - Not there:  beside its source.
@@ -504,8 +498,15 @@ export type SpellDeclarationsData = {
   /** Semver of the compiler which wrote these -- see `SPELL_VERSION`. */
   spellVersion: string
   /**
-   * The human language the project is written in, e.g. `es`;  missing for English, the default.
-   * - So a runner finds its words file (`Solitario.es.js`) before it has any other word of the project.
+   * The human languages the project's files are written in, e.g. `["es", "en"]` -- missing for English alone.
+   * - Each has a words file, e.g. `Solitario.es.js`:  so a runner finds them before it has any other word of the project.
+   * - The first is the one its program speaks to the person running it:  `SpellDeclarations.speakingFirst()`.
+   * - Read through `SpellDeclarations.languagesOf()`.
+   */
+  languages?: string[]
+  /**
+   * DEPRECATED:  the ONE language of declarations from before epic `spanish` P19, e.g. `es` -- read, never written.
+   * - See `languages`.
    */
   language?: string
   /**
