@@ -277,6 +277,8 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - `DOMNagElement`, `DOMCheckElement`:  a few members of script API.
     - Above, because its `elementSetup` reads it while the class is defined.
     - Named `DOM<Name>Element`, as the platform's `HTMLAnchorElement`.
+    - NO instance fields of its own, only `declare`d ones:  `<ui-root>` defines the tag before its family loads
+      (the kit's element `AGENTS.md`, "Defined early";  the catalog test checks every tag).
     - NO one-liner files (Owen:  "try to avoid one-liner files, e.g. BrandColorHost").
     - A big one (dozens of members) may keep its own file, `DOM<Name>Element.ts`;  none does today.
   - It names its component class, `class DOMNagElement extends E.DOMElement<UINag>`:

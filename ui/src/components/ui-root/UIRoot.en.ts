@@ -101,9 +101,10 @@ export const rootVocabulary = {
       name: "pure",
       kind: "boolean",
       description:
-        "Leaves the browser's `setAttribute()` alone.  Without it, a function or object a framework gives a " +
-        "component that hasn't loaded yet (`on-ui-change={f}`, `options={[...]}`) is kept until it loads;  " +
-        "with it, such a value becomes text, as the browser makes it.  Read once, as the page first needs it."
+        "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a " +
+        "framework gives them before they load (`on-ui-change={f}`, `options={[...]}`) either way:  the root " +
+        "defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they " +
+        "get text, as the browser makes it.  Read once, as the page first needs it."
     }
   ],
   events: [

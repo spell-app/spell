@@ -775,11 +775,12 @@ const PROBE_MS = 10000
 ////////////////
 
 /**
- * Whether every `ui-*` / `spell-*` element in the light DOM is defined.
+ * Whether every `ui-*` / `spell-*` element in the light DOM has its family loaded:  defined, and not pending.
  * - any other undefined tag (a third party's) is none of our business:  it would never settle
+ * - the selector is `E.DOMElement.notAttached`, written out:  this runs in the page, which has no `E`
  */
 function allDefined() {
-  return [...document.querySelectorAll(":not(:defined)")].every(
+  return [...document.querySelectorAll(":is(:not(:defined), :state(pending))")].every(
     (el) => !el.localName.startsWith("ui-") && !el.localName.startsWith("spell-")
   )
 }

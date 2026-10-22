@@ -81,7 +81,7 @@ describe("buildPack() / checkPack()", () => {
     expect(script).toContain(":host")
     const catalog = readFileSync(join(PACK, "src", "components", "__pack", "demo.catalog.ts"), "utf8")
     expect(catalog).toContain(`// sources:  ${report.hash}\n`)
-    expect(catalog).toContain(`"demo-card": {"folder":"demo-card","skeleton":{"height":"2em"}}`)
+    expect(catalog).toContain(`"demo-card": {"folder":"demo-card","skeleton":{"height":"2em"},"attributes":[]}`)
     expect(readFileSync(join(PACK, "src", "components", "__pack", "demo.entry.ts"), "utf8")).toContain(
       `import("../demo-card")`
     )

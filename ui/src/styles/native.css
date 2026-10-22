@@ -496,8 +496,9 @@
    * A `<ui-popup>` / `<ui-modal>` whose script hasn't run yet (or never will:  no JS, a static SSR page) is
    * hidden, rather than dumped inline next to its target.  Defined, the element shows itself as a popover /
    * dialog.
+   * - Pending too (`:state(pending)`):  a root defines it before its family loads.
    */
-  :where(ui-popup, ui-modal):not(:defined) {
+  :where(ui-popup, ui-modal):is(:not(:defined), :state(pending)) {
     display: none;
   }
 

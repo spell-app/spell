@@ -1,3 +1,4 @@
+import { E } from "spell-ui/core"
 import { ComponentPacks } from "spell-ui/components/ui-components/ComponentPacks"
 import { ROOT_CATALOG } from "./UIRoot.catalog"
 import type { RootCatalogEntry } from "./UIRoot.types"
@@ -60,12 +61,35 @@ export class RootLoader {
    */
   static undefinedTags(root: ParentNode, alsoLoads?: (tag: string) => boolean): Set<string> {
     const tags = new Set<string>()
-    for (const { localName } of root.querySelectorAll(":not(:defined)")) {
+    // not defined, or defined early and pending:  its family hasn't loaded either way
+    for (const { localName } of root.querySelectorAll(E.DOMElement.notAttached)) {
       if (localName.startsWith(TAG_PREFIX) || ComponentPacks.owns(localName) || alsoLoads?.(localName)) {
         tags.add(localName)
       }
     }
     return tags
+  }
+
+  /**
+   * Define every tag of Spell UI's catalog NOW, before its family loads (`E.DOMElement.defineEarly()`):
+   * pending elements, `:state(pending)`, attached as each family loads.
+   * - So each is one of ours from the start, and keeps a function or object given to it (`on-ui-change={f}`)
+   *   with no page-wide patch (`<ui-root pure>`;  epic `solid-17`, P7).
+   * - What the platform fixes as a tag is defined comes from the catalog:  the attributes it observes
+   *   (its own, the shared ones, `hidden`), and whether it's a form control.
+   * - Skips a tag defined already, one with no `attributes` in the catalog, and a server (no `customElements`).
+   * - SIDE EFFECT:  the root's family calls it once, as it loads.
+   */
+  static defineEarly(): void {
+    if (typeof customElements === "undefined") return
+    const shared = [...E.SharedVocabulary.attributeNames, HIDDEN]
+    for (const [tag, { attributes, formControl }] of Object.entries(ROOT_CATALOG)) {
+      if (!attributes) continue
+      E.DOMElement.defineEarly(tag, {
+        attributes: [...new Set([...attributes, ...shared])],
+        isAFormControl: !!formControl
+      })
+    }
   }
 
   ////////////////
@@ -130,3 +154,6 @@ const BARREL = /([\w-]+)\/index\.ts$/
  * unless a registered pack's prefix starts it (`ComponentPacks.owns()`).
  */
 const TAG_PREFIX = "ui-"
+
+/** The platform's `hidden`, which every tag observes as `visible` turned round (`DOMElement`, "Shown or hidden"). */
+const HIDDEN = "hidden"

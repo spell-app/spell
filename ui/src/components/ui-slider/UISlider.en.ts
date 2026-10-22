@@ -15,6 +15,7 @@ import type { E } from "spell-ui/core"
  ****************/
 export const sliderVocabulary = {
   tag: "ui-slider",
+  formControl: true,
   topics: ["inputs", "forms", "controls", "modules"],
   aka: ["range", "range slider", "volume", "scrubber", "track bar"],
   skeleton: "16 x 1.25",

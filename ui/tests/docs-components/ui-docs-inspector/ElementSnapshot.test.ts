@@ -29,7 +29,8 @@ describe("ElementSnapshot()", () => {
       { name: "active", value: "true" },
       { name: "type", value: '"button"' }
     ])
-    expect(snapshot.states).toEqual(["active"])
+    // `ready`:  every element shows it once it has drawn with its styles (`DOMElement.markReady()`)
+    expect(snapshot.states).toEqual(["active", "ready"])
   })
 
   it("`all`:  every vocabulary property, unset ones too", async () => {

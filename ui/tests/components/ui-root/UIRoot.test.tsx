@@ -41,20 +41,42 @@ async function root(html: string) {
 
 describe("<ui-root> loading on demand", () => {
   it("imports only the families its content uses", async () => {
-    expect(customElements.get("ui-card")).toBeUndefined()
+    expect(E.DOMElement.isAttached("ui-card")).toBe(false)
     const { component, host } = await root(`<ui-root><ui-card><ui-header>Report</ui-header></ui-card></ui-root>`)
     expect(await component.settled).toEqual([])
-    expect(customElements.get("ui-card")).toBeDefined()
-    expect(customElements.get("ui-header")).toBeDefined()
-    expect(customElements.get("ui-table")).toBeUndefined()
+    expect(E.DOMElement.isAttached("ui-card")).toBe(true)
+    expect(E.DOMElement.isAttached("ui-header")).toBe(true)
+    expect(E.DOMElement.isAttached("ui-table")).toBe(false)
     expect(host.matches(":state(ready)")).toBe(true)
+  })
+
+  it("defines its catalog's tags up front:  with `pure`, a pending element keeps a function and an object", async () => {
+    // `<ui-select>`'s family isn't loaded yet:  the root defined the tag early, as it loaded
+    expect(customElements.get("ui-select")).toBeDefined()
+    expect(E.DOMElement.isAttached("ui-select")).toBe(false)
+    const { component, host } = await root(`<ui-root pure></ui-root>`)
+    const select = document.createElement("ui-select") as DOMElement & { options?: unknown }
+    expect(select.matches(":state(pending)")).toBe(true)
+    const heard: unknown[] = []
+    const options = [{ value: "a", text: "Apple" }]
+    // as Solid sets plain props:  `on-ui-change={f}`, `options={options}`
+    select.setAttribute("on-ui-change", ((event: CustomEvent) => heard.push(event.detail)) as unknown as string)
+    select.setAttribute("options", options as unknown as string)
+    host.append(select)
+    await component.settled
+    await select.ready
+    expect(select.matches(":state(pending)")).toBe(false)
+    expect(select.matches(":state(ready)")).toBe(true)
+    expect(select.options).toEqual(options)
+    select.dispatchEvent(new CustomEvent("ui-change", { detail: "picked" }))
+    expect(heard).toEqual(["picked"])
   })
 
   it("loads what is added later, without hiding again", async () => {
     const { component, host, slot } = await root(`<ui-root></ui-root>`)
     await component.settled
     host.insertAdjacentHTML("beforeend", `<ui-segment>Late</ui-segment>`)
-    await customElements.whenDefined("ui-segment")
+    await E.DOMElement.whenAttached("ui-segment")
     expect(slot.style.visibility).toBe("")
     expect(slot.style.display).toBe("")
   })
@@ -119,13 +141,13 @@ describe("a subclass of `UIRoot`, under its own tag (as `<spell-app>`)", () => {
   OwnRoot.define()
 
   it("loads the Spell UI tags it draws in its shadow root, and its own tags, each once", async () => {
-    expect(customElements.get("ui-rating")).toBeUndefined()
+    expect(E.DOMElement.isAttached("ui-rating")).toBe(false)
     const { component, host } = await root(
       `<x-own-root><x-own-thing></x-own-thing><x-own-thing></x-own-thing></x-own-root>`
     )
     expect(await component.settled).toEqual([])
-    expect(customElements.get("ui-rating")).toBeDefined()
-    expect(host.shadowRoot!.querySelector("ui-rating")!.matches(":defined")).toBe(true)
+    expect(E.DOMElement.isAttached("ui-rating")).toBe(true)
+    expect(host.shadowRoot!.querySelector("ui-rating")!.matches(E.DOMElement.notAttached)).toBe(false)
     expect(ownLoads).toEqual(["x-own-thing"])
   })
 
@@ -135,7 +157,7 @@ describe("a subclass of `UIRoot`, under its own tag (as `<spell-app>`)", () => {
     Object.assign(host, { appContext: APP })
     host.innerHTML = `<ui-segment>Inside</ui-segment>`
     await component.settled
-    await customElements.whenDefined("ui-segment")
+    await E.DOMElement.whenAttached("ui-segment")
     expect((host.querySelector("ui-segment") as DOMElement).component!.appContext).toBe(APP)
   })
 })

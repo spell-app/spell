@@ -20,13 +20,19 @@ import { DOMElement } from "spell-kit/element"
  ****************/
 export class DOMLoadableElement<C extends LoadableComponentType = LoadableComponentType> extends DOMElement<C> {
   /** `content` set before the component existed;  the component takes it */
-  private pendingContent?: string
+  declare private pendingContent?: string
 
-  /** the current load's promise and how to settle it */
-  private currentLoad = DOMLoadableElement.deferred()
+  /**
+   * the current load's promise and how to settle it:  made on first use (`currentLoad`)
+   * - NO fields of its own in this class, only `declare`d ones:  an element a root defined before its family
+   *   loaded never runs a field definition
+   *   (`DOMElement`, "Defined early")
+   * - NOT named `load`:  that's the `load` attribute's property
+   */
+  declare private openLoad?: ReturnType<typeof DOMLoadableElement.deferred>
 
-  /** has the current load settled? */
-  private settled = false
+  /** has the current load settled?  `undefined` ~== `false` */
+  declare private settled?: boolean
 
   ////////////////
   // ## Script API
@@ -101,8 +107,13 @@ export class DOMLoadableElement<C extends LoadableComponentType = LoadableCompon
   /** A new load started:  `loaded` becomes a new promise, unless the current one is still waiting. */
   beginLoad() {
     if (!this.settled) return
-    this.currentLoad = DOMLoadableElement.deferred()
+    this.openLoad = DOMLoadableElement.deferred()
     this.settled = false
+  }
+
+  /** The current load:  made on first use. */
+  private get currentLoad() {
+    return (this.openLoad ??= DOMLoadableElement.deferred())
   }
 
   /** The current load is done with `text`. */

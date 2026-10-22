@@ -98,8 +98,8 @@ export class SlottedItems {
   }
 
   /**
-   * Converted value of item attribute `name`:  the (already converted) property once the item has upgraded,
-   * else its attribute, converted here.
+   * Converted value of item attribute `name`:  the (already converted) property once the item has upgraded
+   * (and isn't pending:  defined early, its family not loaded), else its attribute, converted here.
    * - On a server, always the attribute:
    *   linkedom has no `:defined`, and the items' stand-in DOM elements are built after the dropdown's.
    * - Static:  pure, it needs no instance.
@@ -113,7 +113,7 @@ export class SlottedItems {
       return raw ?? undefined
     }
     const attribute = definition.attribute(name)
-    if (!isServer && element.matches(":defined")) {
+    if (!isServer && element.matches(":defined") && !E.DOMElement.isPending(element)) {
       return (element as unknown as Record<string, unknown>)[attribute.property]
     }
     return definition.convert(attribute, element.getAttribute(attribute.attribute))

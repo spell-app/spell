@@ -1,5 +1,6 @@
 import { describe, expect, it, test } from "vite-plus/test"
 
+import { E } from "spell-ui/core"
 import { ComponentDefinitions } from "spell-ui/components/ComponentDefinitions"
 import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
 import { SkeletonText } from "spell-kit/element/SkeletonText"
@@ -42,3 +43,40 @@ describe("ROOT_CATALOG's skeletons", () => {
     expect(SkeletonText.format(SkeletonText.parse(text))).toBe(text)
   })
 })
+
+/**
+ * What a root fixes as it defines a tag before its family loads (`RootLoader.defineEarly()`) must match the family:
+ * whether it's a form control, and every attribute it observes.  A mismatch throws when the family attaches.
+ */
+describe("ROOT_CATALOG's early definitions", () => {
+  // every family of the library, defined:  its own tags' classes say what they observe
+  const families = import("spell-ui")
+
+  test("every tag lists its attributes, and says whether it's a form control as its component does", async () => {
+    await families
+    const shared = new Set([...E.SharedVocabulary.attributeNames, "hidden"])
+    for (const [tag, entry] of Object.entries(ROOT_CATALOG)) {
+      const Class = customElements.get(tag) as E.DOMElementClass | undefined
+      // a doc-only tag:  its family isn't the library's
+      if (!Class || !E.DOMElement.isAttached(tag)) continue
+      const { elementDefinition, isAFormControl } = Class.tagSetup
+      expect(!!entry.formControl, `<${tag}>'s formControl`).toBe(isAFormControl)
+      const listed = new Set([...(entry.attributes ?? []), ...shared])
+      const unlisted = E.DOMElement.observedAttributesFor(elementDefinition).filter((name) => !listed.has(name))
+      expect(unlisted, `<${tag}>'s attributes (run \`yarn gen:root\`)`).toEqual([])
+    }
+  })
+
+  // an element a root made before its family loaded runs no field initializer of its family's DOM element class
+  test("no tag's DOM element class has instance fields of its own:  a fresh element has only DOMElement's", async () => {
+    await families
+    for (const tag of Object.keys(ROOT_CATALOG)) {
+      if (!E.DOMElement.isAttached(tag)) continue
+      const own = Object.keys(document.createElement(tag)).filter((key) => !DOM_ELEMENT_FIELDS.includes(key))
+      expect(own, `<${tag}>'s own fields (make them lazy:  \`declare\` + a getter)`).toEqual([])
+    }
+  })
+})
+
+/** The fields every `DOMElement` has of its own, as it's made. */
+const DOM_ELEMENT_FIELDS = ["internals", "attributeValues", "ready", "connectedState", "component"]

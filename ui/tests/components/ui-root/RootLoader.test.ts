@@ -54,7 +54,7 @@ describe("RootLoader.add()", () => {
 
 describe("RootLoader.entryOf()", () => {
   it("knows a catalog tag;  nothing for a tag no catalog or registered pack lists", () => {
-    expect(RootLoader.entryOf("ui-buttons")).toEqual({ folder: "ui-button" })
+    expect(RootLoader.entryOf("ui-buttons")).toMatchObject({ folder: "ui-button", attributes: expect.any(Array) })
     expect(RootLoader.entryOf("x-unlisted")).toBeUndefined()
     expect(RootLoader.entryOf("toString")).toBeUndefined()
   })

@@ -26,6 +26,14 @@ export type RootCatalogEntry = {
   readonly folder: string
   /** What `display="skeleton"` draws in its place;  none:  hidden until ready (or covered by its owner's). */
   readonly skeleton?: E.SkeletonSpec
+  /**
+   * Its vocabulary's attribute names, aliases too:  what it observes, besides the shared ones,
+   * when the root defines it before its family loads (`DOMElement.defineEarly()`)
+   * - None in a catalog written before them (an older pack's):  that tag isn't defined early.
+   */
+  readonly attributes?: readonly string[]
+  /** It's a form control (its vocabulary's `formControl`):  fixed as the root defines it early */
+  readonly formControl?: true
 }
 
 ////////////////

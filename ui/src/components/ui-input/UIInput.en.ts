@@ -42,6 +42,7 @@ const INPUT_TYPES = [
  ****************/
 export const inputVocabulary = {
   tag: "ui-input",
+  formControl: true,
   topics: ["forms", "inputs", "controls", "text", "basic", "elements"],
   aka: ["text field", "text box", "textbox", "input field", "search box"],
   skeleton: "inline 14 x 2.5",

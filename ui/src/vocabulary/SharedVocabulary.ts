@@ -62,6 +62,14 @@ export class SharedVocabulary {
     return SHARED_DICTIONARIES.get(lang)?.attributes[name as keyof SharedDictionary["attributes"]]
   }
 
+  /**
+   * The shared attributes' names, which every tag observes unless its vocabulary declares its own:
+   * what a root adds to a tag it defines before its family loads (`RootLoader.defineEarly()`).
+   */
+  static get attributeNames(): readonly string[] {
+    return SHARED_ATTRIBUTES.map(({ name }) => name)
+  }
+
   /** Is `name` one of the shared attributes? */
   static isSharedAttribute(name: string): boolean {
     return SHARED_ATTRIBUTES.some((spec) => spec.name === name)
@@ -163,5 +171,11 @@ const SHARED_STATES: readonly StateSpec[] = [
   {
     name: "hiding",
     description: "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
-  }
+  },
+  {
+    name: "pending",
+    description:
+      "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+  },
+  { name: "ready", description: "Ready to go:  drawn with its styles (its `ready` promise has resolved)." }
 ]

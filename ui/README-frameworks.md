@@ -231,8 +231,9 @@ render(
     a patch on the browser's `setAttribute()` holds them,
     and acts only for a dashed tag not defined yet, given a function or object.
   - `<ui-root pure>` turns the patch off.
-    Then a function or object given before the component loads becomes text, as in plain Solid:
-    give such values only to components already loaded.
+    Spell UI's own tags still keep them:  the root defines every tag it knows before its component loads.
+    A tag it doesn't know (another library's), given a function or object before it's defined, gets text, as in
+    plain Solid.
   - Text for an attribute stays an attribute, as ever.
 - Not `onUIChange`:  Solid lowercases a camelCase handler's name, so it would listen for `uichange`.
 - Neither namespace:  Solid 2 has no `on:` (a compile error since rc.17), and `prop:` is no longer needed.
