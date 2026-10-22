@@ -13,6 +13,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   ```
   compile  lint  run  test  watch  format  describe  explain  parse  repl  speedtest
+  lang packs check  lang packs fix
   ```
 
   - `lint` was `spell check`, `speedtest` was `spell speed`;  `spell explore` is gone (Owen's names, epic
@@ -28,6 +29,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Why:  every one finds projects the app's way -- addresses like `@spell/examples/solitaire`, groups, the
     editor's language service.
   - Without spell-app, each says "clone spell-app" and exits 2 (`CLI.needHook()`).
+- `spell lang packs check|fix` (epic `spanish` P7) are the exception:  their work IS here, in
+  [packsCommand.ts](packsCommand.ts), as they need no project, only spell-lang's own rule files.
+  - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
+  - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text;  this file reads,
+    writes, asks `claude -p` (`--ai`) and prints.
 - [index.ts](index.ts) (`spell-lang/cli`, here and from every other repo):  TYPES only, today.
   - [cli.types.ts](cli.types.ts):  `LanguageCommands`, the hook's shape, and each command's flags
     (`CompileOptions`, `LintOptions` ...).
@@ -41,3 +47,4 @@ As WWOD §20, plus:
 - In the repo's [tests/cli/](../../tests/cli/):  the command list's names and help.
 - The commands themselves run end to end in spell-app's tests (its `tests/cli/cli.test.ts`):
   their work is spell-app's.
+- `spell lang packs`' work:  in `tests/spell/languages/packs.test.ts`, beside the `packs.ts` it drives.

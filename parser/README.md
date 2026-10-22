@@ -313,6 +313,8 @@ the kit runs them, from the list in its `package.json`'s `"spell": { "commands" 
 | `spell explain <word>` | the rules a word names or starts, with their syntax and an example |
 | `spell describe [project] [name] [member]` | what a file or project declares, as the editor's Type Explorer shows it |
 | `spell speedtest [module]` | times the parser's rule tests;  `--against HEAD` compares with a commit |
+| `spell lang packs check [lang]` | what a language pack lacks against English, per rule file;  exits 1 if anything |
+| `spell lang packs fix [lang]` | writes a stub to translate for each missing registration;  `--ai` asks `claude` for a draft |
 
 - `spell help <command>` has each one's flags.
 - Their names before repo-split P13:  `lint` was `spell check`, `speedtest` was `spell speed`;
@@ -322,6 +324,7 @@ the kit runs them, from the list in its `package.json`'s `"spell": { "commands" 
     the "which project?" prompt, the build folder under spell-app's `build/`.
   - It asks the editor's language service, so the command line sees what an editor does.
   - Without spell-app, each command says to clone it, and exits 2.
+- `spell lang packs` is the exception:  it needs no project, so its work is here, in `packsCommand.ts`.
 
 <details>
 <summary>The files in cli/</summary>
