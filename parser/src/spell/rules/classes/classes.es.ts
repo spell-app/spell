@@ -1,6 +1,6 @@
 /**
- * The `classes` rules in Spanish:  each rule's syntax and its tests, registered on Spanish's own `classes` parser
- * (epic `spanish`).
+ * The `classes` rules in Spanish (epic `spanish`):
+ * each rule's syntax and its tests, registered on Spanish's own `classes` parser.
  * - The rule CLASSES are their own files, beside this one, shared with every language.
  * - Registered in the same order as `classes.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
@@ -985,6 +985,98 @@ classesEs.addRule(DefinePropertyHas, {
       ]
     },
     {
+      title: "every list has a `name`, built in, which a type may still declare, as text (epic `spanish` P15)",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una carta es una cosa", "una pila es una lista de cartas"].join("\n"), "block")
+      },
+      tests: [
+        {
+          input: ["pila = una nueva pila", "imprimir el nombre de la pila"],
+          js: ["export const pila = new Pila()", "core.console.log(pila.name)"]
+        },
+        {
+          input: ["pila = una nueva pila", 'poner el nombre de la pila a "mazo"'],
+          js: ["export const pila = new Pila()", 'pila.name = "mazo"']
+        },
+        {
+          input: 'pila = una nueva pila con nombre = "mazo"',
+          js: 'export const pila = new Pila({ name: "mazo" })'
+        },
+        {
+          input: ["pila = una nueva pila", "el título de una pila es: su nombre"],
+          js: [
+            "export const pila = new Pila()",
+            'Object.defineProperty(Pila.prototype, "título", {',
+            "  get() {",
+            "    return this.name",
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export const pila = new Pila()",
+            "export interface Pila { readonly título: string }",
+            'Object.defineProperty(Pila.prototype, "título", {',
+            "  get(this: Pila) {",
+            "    return this.name",
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        },
+        {
+          input: "una pila tiene un nombre como texto",
+          js: [
+            "// una pila tiene un nombre como texto",
+            'Pila.declareProp("name", { type: "text" })',
+            'Object.defineProperty(Pila.prototype, "name", {',
+            '  get() { return this.getProp("name") },',
+            '  set(value) { this.setProp("name", value) },',
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Pila { name: string }",
+            "// una pila tiene un nombre como texto",
+            'Pila.declareProp("name", { type: "text" })',
+            'Object.defineProperty(Pila.prototype, "name", {',
+            '  get(this: Pila): string { return this.getProp("name") as string },',
+            '  set(this: Pila, value: string) { this.setProp("name", value) },',
+            "  configurable: true",
+            "})"
+          ]
+        },
+        {
+          input: "una pila tiene un nombre como número",
+          js: '/* PARSE ERROR: Can\'t add "nombre" to Pila as number:  every list has one, built in, as text */'
+        },
+        {
+          title: "a thing has no `name` built in:  any type will do",
+          input: "una carta tiene un nombre como número",
+          js: [
+            "// una carta tiene un nombre como número",
+            'Carta.declareProp("nombre", { type: "number" })',
+            'Object.defineProperty(Carta.prototype, "nombre", {',
+            '  get() { return this.getProp("nombre") },',
+            '  set(value) { this.setProp("nombre", value) },',
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Carta { nombre: number }",
+            "// una carta tiene un nombre como número",
+            'Carta.declareProp("nombre", { type: "number" })',
+            'Object.defineProperty(Carta.prototype, "nombre", {',
+            '  get(this: Carta): number { return this.getProp("nombre") as number },',
+            '  set(this: Carta, value: number) { this.setProp("nombre", value) },',
+            "  configurable: true",
+            "})"
+          ]
+        }
+      ]
+    },
+    {
       title: "a list says what it holds, so saving knows before it holds any",
       compileAs: "block",
       beforeEach(scope: P.Scope) {
@@ -1284,7 +1376,8 @@ classesEs.addRule(ThePropertyOfAThing, {
   syntax: `${THE} {property:quoted_member} ${OF} ${A} {type}`
 })
 
-// NOTE:  no `a_things_property`:  English's `a cards color` has no Spanish:  Spanish says `el color de una carta`
+// NOTE:  no `a_things_property`:  English's `a cards color` has no Spanish,
+// which says `el color de una carta`
 // packs: none AThingsProperty -- Spanish has no "a card's color"
 
 classesEs.addRule(ItsQuotedProperty, {

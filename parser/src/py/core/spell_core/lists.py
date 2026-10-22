@@ -24,7 +24,7 @@ from typing import Any, ClassVar, Self, SupportsIndex, overload
 from spell_core.js_text import is_plain_number, js_string
 from spell_core.kinds import is_same
 from spell_core.positions import zero_index_of
-from spell_core.things import ITEMS_KEY, SpellObject, note_change, program_core, to_json_value
+from spell_core.things import ITEMS_KEY, SpellObject, note_change, program_core, prop, to_json_value
 
 # What a list method calls for each item, e.g. `filter()`'s condition:  `(value, position, list)`.
 # - It may take fewer:  `lambda card: card.rank == "queen"` is called with the card alone.
@@ -83,6 +83,10 @@ class List(SpellObject, MutableSequence[Any]):
     exclusive: ClassVar[bool] = False
     # The class of what it holds, e.g. `Card` for `a deck is a list of cards`:  for a reader, nothing checks it.
     item_type: ClassVar[type | None] = None
+    # What it's called, e.g. `"stock"`:  `None` until given one (epic `spanish` P15).
+    # - Every list has one, built in:  compiled spell's `the name of the pile`, Spanish's `el nombre de la pila`.
+    # - A sub-class may declare it again, as text:  `a pile has a name as text`.
+    name = prop(type="text")
 
     @classmethod
     def owner_of(cls, item: object) -> Self | None:

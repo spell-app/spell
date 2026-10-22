@@ -28,6 +28,8 @@ export class MemberReadExpression<
    *   e.g. `Card.Suits` for `the suits of the card`
    * - for a built-in type's member, what its `readAs` template says,
    *   e.g. `core.itemCountOf(deck)` for `the length of the deck` -- see `builtInMemberAST()`
+   * - for a built-in stored member in another language's words, its `output`,
+   *   e.g. `pila.name` for `el nombre de la pila` -- see `SP.loadBuiltInTypes()`
    */
   getMemberAST(match: P.MatchFor<this>, object: P.ASTExpression, property: P.Match): P.ASTExpression {
     const { member, enumerationOf } = match.data as MemberData
@@ -37,6 +39,10 @@ export class MemberReadExpression<
     }
     if (member instanceof P.ScopeVariable && member.readAs) {
       return MemberReadExpression.builtInMemberAST(match, object, member.readAs)
+    }
+    // a built-in member in another language's words, e.g. Spanish's `el nombre de la pila` => `pila.name`
+    if (member instanceof P.ScopeVariable && member.output) {
+      return new P.ASTPropertyExpression(match, { object, property: member.output })
     }
     // a value kind's property declared further down, e.g. `the color of its suit` in a card above the deck:
     // its type's record knows by now (issue I3 of `outline-spell`) -- the static form, as `property_value_getter`'s

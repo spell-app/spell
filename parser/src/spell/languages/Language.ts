@@ -196,6 +196,7 @@ export type LanguageWords = {
   /**
    * The language's words for the built-in types' members, by their English words:  `{ length: ["largo", "longitud"] }`.
    * - Each reads as its English one does (`SP.BUILT_IN_TYPE_TABLE`'s `readAs`).
+   * - A `stored` member's compiles to its English name, and sets too:  Spanish's `nombre` is `.name`.
    * - None:  the English words.
    */
   builtInMembers?: Record<string, string[]>

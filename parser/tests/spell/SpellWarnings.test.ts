@@ -50,11 +50,11 @@ describe("SpellWarnings", () => {
   describe("a member read its type never declares (epic `output-targets`, Q45)", () => {
     const PILE = ["a card is a thing", "a pile is a list of cards", "the pile is a new pile"]
 
-    test("`the name of the pile`, `its name`:  under the member's word", () => {
-      const text = [...PILE, "print the name of the pile", "the state of a pile is:", "\treturn its name"]
+    test("`the label of the pile`, `its label`:  under the member's word", () => {
+      const text = [...PILE, "print the label of the pile", "the state of a pile is:", "\treturn its label"]
       expect(describeWarnings(parse(text.join("\n"), "warnings-undeclared"))).toEqual([
-        '4:10 A pile never says it has a name:  declare it, e.g. "a pile has a name as text"',
-        '6:12 A pile never says it has a name:  declare it, e.g. "a pile has a name as text"'
+        '4:10 A pile never says it has a label:  declare it, e.g. "a pile has a label as text"',
+        '6:12 A pile never says it has a label:  declare it, e.g. "a pile has a label as text"'
       ])
     })
 
@@ -66,8 +66,8 @@ describe("SpellWarnings", () => {
     })
 
     test("none once a later line declares it:  checked when the warnings are gathered", () => {
-      const declaredLater = [...PILE, "print the name of the pile", "a pile has a name as text"]
-      const setLater = [...PILE, "print the name of the pile", 'set the name of the pile to "stock"']
+      const declaredLater = [...PILE, "print the label of the pile", "a pile has a label as text"]
+      const setLater = [...PILE, "print the label of the pile", 'set the label of the pile to "stock"']
       expect(describeWarnings(parse(declaredLater.join("\n"), "warnings-declared-later"))).toEqual([])
       expect(describeWarnings(parse(setLater.join("\n"), "warnings-set-later"))).toEqual([])
     })
@@ -77,6 +77,8 @@ describe("SpellWarnings", () => {
         ...PILE,
         "to shuffle (a pile): print 1",
         "print the length of the pile",
+        // every list has a `name`, built in (epic `spanish` P15)
+        "print the name of the pile",
         "print the shuffle of the pile",
         "print the name of the stranger",
         "print the length of 'text'"

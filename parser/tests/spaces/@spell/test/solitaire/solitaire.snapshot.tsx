@@ -319,9 +319,6 @@ export class Pile extends List<Card> {
     return state
   }
 
-  // set the name of cards-to-move to the name of the start-pile
-  @prop() accessor name!: string
-
   declare droppable: boolean
 }
 export interface Pile {

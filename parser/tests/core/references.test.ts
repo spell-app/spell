@@ -4,15 +4,8 @@ import { core, Thing, List, Drawable } from "spell-lang/core"
 
 /** Thing references:  `Tableau#T1`, `Pile#T1`, `Tableau#1` (epic `drawable-thing` P18). */
 describe("thing references", () => {
-  /** Piles of cards, as Drawable Solitaire's:  a tableau and a foundation are piles. */
-  class Pile extends List {
-    get name() {
-      return this.getProp("name")
-    }
-    set name(value) {
-      this.setProp("name", value)
-    }
-  }
+  /** Piles of cards, as Drawable Solitaire's:  a tableau and a foundation are piles;  `name` is every list's, built in. */
+  class Pile extends List {}
   class Tableau extends Pile {}
   class Foundation extends Pile {}
   const t1 = new Tableau({ name: "T1" })

@@ -129,20 +129,38 @@ export class SpellStatement<
    *   - Its members are spell's own, in `SP.BUILT_IN_TYPE_TABLE`.
    * - A METHOD of a built-in type is fine:  its record goes in the project's `methods` -- see `MethodDefinition`.
    * - ALSO refused:  a property every thing has built in, e.g. `a person has an id as text`
-   *   (epic `people-and-orgs`, Q9) -- see `SP.isBuiltInStoredMember()`.
+   *   (epic `people-and-orgs`, Q9) -- see `SP.builtInStoredMember()`.
+   *   - Except one a type may declare again (`declarable`), with its own datatype or none (epic `spanish` P15):
+   *     `a pile has a name as text` is fine, `a pile has a name as number` isn't.
+   *   - `datatype`:  what the statement says it holds, if it says.
    * - A lookup:  call it WHILE PARSING, e.g. from `DefinePropertyHas.parse()`.
    */
-  static refuseBuiltInType(match: P.Match, type: P.Match, property: P.Match | undefined): P.Match {
+  static refuseBuiltInType(
+    match: P.Match,
+    type: P.Match,
+    property: P.Match | undefined,
+    datatype?: P.Datatype
+  ): P.Match {
     const words = property ? `"${property.raw}"` : "a property"
     const typeName = SP.typeName(`${type.value}`)
-    if (SP.isBuiltInTypeScope(match.scope.types?.get(`${type.value}`))) {
+    const typeScope = match.scope.types?.get(`${type.value}`)
+    if (SP.isBuiltInTypeScope(typeScope)) {
       return SpellStatement.refuse(
         match,
         `Can't add ${words} to ${typeName}:  it's built in, and every project shares it`
       )
     }
-    if (property && SP.isBuiltInStoredMember(`${property.value}`)) {
+    const builtIn = property ? SP.builtInStoredMember(typeScope, `${property.value}`) : undefined
+    if (!builtIn) return match
+    const { member, on } = builtIn
+    if (!member.declarable) {
       return SpellStatement.refuse(match, `Can't add ${words} to ${typeName}:  every thing has one, built in`)
+    }
+    if (datatype && datatype !== member.datatype) {
+      return SpellStatement.refuse(
+        match,
+        `Can't add ${words} to ${typeName} as ${datatype}:  every ${on} has one, built in, as ${member.datatype}`
+      )
     }
     return match
   }

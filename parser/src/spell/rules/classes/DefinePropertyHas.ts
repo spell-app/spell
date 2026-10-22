@@ -53,7 +53,7 @@ export const RULES = "(,? which must {rule:must_rule})? {nested_statements}?"
  */
 export class DefinePropertyHas extends SpellStatement<
   "type|property|specifier?|rule?|body?",
-  { valueType?: P.TypeScope }
+  { valueType?: P.TypeScope; builtInName?: string }
 > {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
@@ -61,6 +61,8 @@ export class DefinePropertyHas extends SpellStatement<
 
   /**
    * Refused on a built-in type -- see `SpellStatement.refuseBuiltInType()`.
+   * - A built-in member a type may declare again, e.g. a list's `name`, in the language's own words
+   *   (`nombre`):  notes the member's name, `data.builtInName`, which it declares and compiles to.
    * - Notes the type its specifier names, e.g. `Suit` for `its "suit" is a suit`:
    *   if it's a VALUE kind, its setter checks against its list -- see `value_kind`.
    *   - The type's RECORD, read when compiling, as a call reads `data.method.returns`.
@@ -74,7 +76,19 @@ export class DefinePropertyHas extends SpellStatement<
     const valueType = specifier?.datatype ? scope.types?.get(specifier.datatype) : undefined
     if (valueType) match.data.valueType = valueType
     DefinePropertyHas.warnUntyped(match)
-    return SpellStatement.refuseBuiltInType(match, match.groups.type, match.groups.property)
+    const { type, property } = match.groups
+    const refused = SpellStatement.refuseBuiltInType(match, type, property, specifier?.datatype)
+    if (refused !== match) return refused
+    // a built-in member in the language's own words, e.g. Spanish's `una pila tiene un nombre como texto`:
+    // it declares the member, `name`, not a property of its own
+    const builtIn = SP.builtInStoredMember(scope.types?.get(`${type.value}`), `${property.value}`)
+    if (builtIn && builtIn.name !== property.value) match.data.builtInName = builtIn.name
+    return match
+  }
+
+  /** Name of the property `match` declares, as it compiles:  its words', or the built-in member's it names. */
+  static propertyName(match: P.MatchFor<DefinePropertyHas>): string {
+    return match.data.builtInName ?? `${match.groups.property.value}`
   }
 
   /**
@@ -106,9 +120,10 @@ export class DefinePropertyHas extends SpellStatement<
     const typeName = type.value
     const typeScope = P.TypeScope.getOrStub(scope, typeName, match)
     // what its specifier says it holds, e.g. `text`, `choice`, `thing` for `as a new thing`
-    typeScope.declareProperty(`${property.value}`, match, { asWritten: property.raw, datatype: specifier?.datatype })
+    const name = DefinePropertyHas.propertyName(match)
+    typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype })
     const rule = match.groups.rule as P.MatchFor<MustRule> | undefined
-    if (rule) typeScope.addPropertyRules(`${property.value}`, [MustRule.ruleOf(rule)], match)
+    if (rule) typeScope.addPropertyRules(name, [MustRule.ruleOf(rule)], match)
 
     // If there is a specifier as enumerated values, add rules to match it
     if (specifierAST instanceof P.ASTEnumeration) {
@@ -147,8 +162,9 @@ export class DefinePropertyHas extends SpellStatement<
   mutateScopeFromBody(match: P.Match): string | undefined {
     const rules = DefinePropertyHas.rulesOf(match as P.MatchFor<DefinePropertyHas>)
     if (!rules.length) return undefined
-    const { type, property } = (match as P.MatchFor<DefinePropertyHas>).groups
-    P.TypeScope.getOrStub(match.scope, `${type.value}`, match).addPropertyRules(`${property.value}`, rules, match)
+    const { type } = (match as P.MatchFor<DefinePropertyHas>).groups
+    const name = DefinePropertyHas.propertyName(match as P.MatchFor<DefinePropertyHas>)
+    P.TypeScope.getOrStub(match.scope, `${type.value}`, match).addPropertyRules(name, rules, match)
     return JSON.stringify(rules)
   }
 
@@ -247,7 +263,7 @@ export class DefinePropertyHas extends SpellStatement<
     statements.push(
       new P.ASTReactiveProperty(match, {
         type: typeAST,
-        property: `${property.value}`,
+        property: DefinePropertyHas.propertyName(match),
         check: check.properties.length ? check : undefined,
         initializer
       })

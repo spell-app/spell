@@ -359,11 +359,12 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 ## Members:  `the short rank of the card`
 
 - A member's NAME is [`member_words`](rules/properties/MemberWords.ts):  1..N words, up to the first structural one.
-  - The language's stop words, `memberStopWords` (`SP.LanguageWords`;  English's in `languages/en/words.ts`):
+  - The language's stop words, `SP.LanguageWords.memberStopWords` ([English's](languages/en/words.ts)):
     `of the a an is has have in to and or if where as with whose for from then else otherwise not ...`
   - It's NOT the identifier blacklist, so `short` is fine.
-  - A member declared with a stop word in its name, in quotes, is read whole, longest first (epic `spanish` P14):
-    `its "side of play" is a number`, then `the side of play of the card`, `su fecha de nacimiento`.
+  - A member declared with a stop word in its name, in quotes, is read whole, longest first (epic `spanish` P14).
+    - e.g. `its "side of play" is a number`, then `the side of play of the card`
+    - in Spanish:  `su fecha de nacimiento`
     - Any type's:  `the X of Y` takes its words before Y's type is known.
     - Without quotes, a declaration's name still stops at the stop word.
   - Its two spellings:
@@ -428,12 +429,20 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - `the length of the deck` => `core.itemCountOf(deck)`
   - Its datatype is the member's.
   - An unknown type still reads loose:  `x.length`.
-- A `stored` member is a property the runtime class KEEPS, e.g. `id`, on `thing` and `list`.
+- A `stored` member is a property the runtime class KEEPS:
+  `id`, on `thing` and `list`, and a list's `name` (epic `spanish` P15).
   - Loaded into scope with no template, so it reads and sets like a declared property:
     - `the id of the person` => `person.id`
     - a set is allowed, unlike a `readAs` member's:  `set the id of the person to "owen"` => `person.id = "owen"`
+  - In another language's words, its record's `output` is the member's name, so both still compile to it:
+    Spanish's `el nombre de la pila` => `pila.name`, `poner el nombre de la pila a "mazo"` => `pila.name = "mazo"`.
   - No type may declare its own, e.g. `a person has an id as text` is refused.
-    - That's `SpellStatement.refuseBuiltInType()`, through `SP.isBuiltInStoredMember()`.
+    - That's `SpellStatement.refuseBuiltInType()`, through `SP.builtInStoredMember()`:
+      the built-in type a type comes from says what it has, so a card may declare a `name`, a pile not an `id`.
+  - EXCEPT a `declarable` one, with its own datatype or none:  `a pile has a name as text` is fine,
+    `a pile has a name as number` is refused.
+    - Its declaration compiles to the member's name, in any language's words:
+      `una pila tiene un nombre como texto` declares `name`.
   - See "Ids and saving" below.
 - A member with only `rules` (no `readAs`) is DOCS, for what built-in rules already spell.
   - e.g. `shuffle (a list)` => `list_shuffle`
@@ -675,17 +684,20 @@ A kind that says so is saved in a file of its own.
       - Only on a type the project declares, all of whose super-types are its own or spell's:
         an imported type's importer may give it anything (`MemberReadExpression.warnIfUndeclared()`, `noteIf()`).
     - an article that doesn't agree with its noun (epic `spanish` P8), the ONE warning no rule notes:
-      - e.g. `a apple` => `Did you mean "an apple"?`;  Spanish's `el carta` => `¿Querías decir "la carta"?`
-      - `BlockLine` notes it on each line's statement, once committed:  `SP.SpellWarnings.noteArticles()`.
-        So a type the line declares already has its gender.
-      - An article is a form of the language's `indefinite_article` / `definite_article` word rule
-        (`Synonyms.matchAt()`, `Synonyms.formOf()`);  its noun the words after it, up to a structural word.
-      - What agrees is the language pack's:  `SP.Language.agreement(article, noun, type)`,
-        each pack's `agreement.ts` (`languages/en/`, `languages/es/`).
+      - e.g. `a apple` => `Did you mean "an apple"?`
+      - Spanish's:  `el carta` => `¿Querías decir "la carta"?`
+      - `BlockLine` notes it on each line's statement, once committed (`SP.SpellWarnings.noteArticles()`),
+        so a type the line declares already has its gender.
+      - An article is a form of the language's `indefinite_article` / `definite_article` word rule:
+        `Synonyms.matchAt()`, `Synonyms.formOf()`.
+      - Its noun:  the words after it, up to a structural word.
+      - What agrees is the language pack's, `SP.Language.agreement(article, noun, type)`:
+        each pack's own, [English's](languages/en/agreement.ts) and [Spanish's](languages/es/agreement.ts).
         - English:  `a` / `an` by the noun's first sound;  needs no type.
         - Spanish:  gender and number, only for a noun naming a type.
-          A type's gender is read off its declaration's article (`TypeDeclaration.genderOf()`, `P.TypeScope.gender`),
-          and kept in its declarations;  the built-in types' are in the Spanish pack.
+          - A type's gender is read off its declaration's article, and kept in its declarations:
+            `TypeDeclaration.genderOf()`, `P.TypeScope.gender`.
+          - The built-in types' are in the Spanish pack.
   - Editors show them as `DiagnosticSeverity.Warning` (`SpellLanguageService.diagnostics()`).
   - `spell compile` lists them after its errors, never counting them:  see "Language server".
 
@@ -1115,8 +1127,8 @@ A kind that says so is saved in a file of its own.
   - `words_identifier`:  2 to 4 plain words, up to a structural one (`to`, `of`, `with` ...);
     the longest run a variable in scope goes by, else the whole run.
   - The same variable as its dashed name:  `start pile` and `start-pile` are both `start_pile`.
-  - A name holding a structural word is declared with dashes, `set way-to-go to 3`,
-    then read either way, `way to go`, longest first (epic `spanish` P14).
+  - A name holding a structural word (epic `spanish` P14):  declared with dashes, then read either way, longest first.
+    - e.g. `set way-to-go to 3`, then `way to go`
     - Its first word can't be one:  `no more` reads `no`, then `more`.
   - Its quick test looks the words up first:  it's an expression, tried at almost every word.
   - An event's name of several words too, `on card click`, `fire event card click` (`event_words`):
