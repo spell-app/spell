@@ -80,8 +80,8 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   private async restore(form: ChoicesForm) {
     await form.restore()
     this.restoredFeedback = form.feedback
-    // the docs runtime puts back the reader's folds by the frame after `<ui-section>` defines
-    await customElements.whenDefined("ui-section")
+    // the docs runtime puts back the reader's folds by the frame after `<ui-section>`'s family loads
+    await E.DOMElement.whenAttached("ui-section")
     E.beforeNextPaint(() => (this.isAllOpen = ChoicesForm.isAllOpen(document)))
   }
 
@@ -93,7 +93,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             class={FEEDBACK}
             part={this.partForName("feedback")}
             type="feedback"
-            prop:value={this.restoredFeedback}
+            value={this.restoredFeedback}
             onInput={this.onFeedback}
           />
           <ui-button

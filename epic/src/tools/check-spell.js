@@ -217,13 +217,18 @@ async function open(viewport) {
   return page
 }
 
-/** Wait until every pack tag on `page` is defined (or 10s passed), then a second for the runtime. */
+/**
+ * Wait until every pack tag on `page` is defined and not pending (or 10s passed), then a second for the runtime.
+ * - Pending:  a root defines its catalog's tags before their families load (`:state(pending)`, epic `solid-17` P7).
+ */
 async function settle(page) {
   await page
     .waitForFunction(
       (pattern) =>
         [...document.querySelectorAll("*")].every(
-          (el) => !new RegExp(pattern).test(el.localName) || customElements.get(el.localName)
+          (el) =>
+            !new RegExp(pattern).test(el.localName) ||
+            (customElements.get(el.localName) && !el.matches(":state(pending)"))
         ),
       PACK_TAG.source,
       { timeout: 10000 }

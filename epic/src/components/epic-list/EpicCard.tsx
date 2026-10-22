@@ -200,7 +200,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
   /** A red toast saying the server refused;  the console where toasts aren't there. */
   private toast(key: "starFailed" | "unstarFailed", epic: string, error: string) {
     const message = this.translationForKey(key, { epic, error })
-    if (!customElements.get("ui-toast")) return console.error(message)
+    if (!E.DOMElement.isAttached("ui-toast")) return console.error(message)
     UI.toast({ message, type: "error", position: "bottom right", displayTime: 3000, showIcon: true })
   }
 }

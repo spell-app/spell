@@ -25,12 +25,16 @@ import textBoxCSS from "./EpicTextBox.css?inline"
  * - Above the component:  its `elementSetup` reads this class while the component is defined.
  ****************/
 export class DOMTextBoxElement extends E.DOMElement<EpicTextBox> {
-  /** A value set before its component was built:  the component starts with it. */
-  startValue = ""
+  /**
+   * A value set before its component was built:  the component starts with it.
+   * - Declared, never initialized:  an element made before its family loads never runs a field initializer
+   *   (`DOMElement`, "Defined early").
+   */
+  declare startValue?: string
 
   /** What's typed in it. */
   get value(): string {
-    return this.component?.text ?? this.startValue
+    return this.component?.text ?? this.startValue ?? ""
   }
 
   /** Put `value` in it (a sent answer coming back):  no `input` event, as a `<textarea>`'s `value`. */
