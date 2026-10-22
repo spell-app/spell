@@ -1,32 +1,6 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
-import { tmpdir } from "node:os"
-import { join } from "node:path"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { describe, expect, test } from "vite-plus/test"
 
-import { serverLines, serversRoot } from "spell-kit/cli/commands/serverCommand"
-
-describe("serversRoot()", () => {
-  const temp = realpathSync(mkdtempSync(join(tmpdir(), "servers-root-")))
-  afterAll(() => rmSync(temp, { recursive: true, force: true }))
-  // a kit, its spell-app with page server settings, and spell-ui without
-  mkdirSync(join(temp, "spell-app", "app"), { recursive: true })
-  mkdirSync(join(temp, "spell-ui", "src"), { recursive: true })
-  writeFileSync(join(temp, "repos.json5"), "{ repos: [{ name: 'spell-ui' }, { name: 'spell-app' }] }")
-  writeFileSync(join(temp, "package.json"), JSON.stringify({ name: "spell-kit", spell: {} }))
-  writeFileSync(join(temp, "spell-ui", "package.json"), JSON.stringify({ name: "spell-ui", spell: {} }))
-  writeFileSync(
-    join(temp, "spell-app", "package.json"),
-    JSON.stringify({ name: "spell-app", spell: {}, pageServer: {} })
-  )
-
-  test("inside a checkout with page server settings:  that one", () => {
-    expect(serversRoot(join(temp, "spell-app", "app"))).toBe(join(temp, "spell-app"))
-  })
-  test("anywhere else in the kit:  the installed repo that has them", () => {
-    expect(serversRoot(join(temp, "spell-ui", "src"))).toBe(join(temp, "spell-app"))
-    expect(serversRoot(temp)).toBe(join(temp, "spell-app"))
-  })
-})
+import { serverLines } from "spell-kit/cli/commands/serverCommand"
 
 describe("serverLines()", () => {
   test("one aligned line per server:  name, port, URL, what, state", () => {

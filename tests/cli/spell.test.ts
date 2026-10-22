@@ -93,7 +93,8 @@ process.exit(3)
     expect(server(["prune", "--dry-run"])).toMatchObject({ args: ["prune", "--dry-run"] })
   })
 
-  test("inside a kit:  the page server of its repo with page server settings, from any folder (I62)", () => {
+  // the command line finds the kit itself (`pageServerRoot()`, epic `repo-split` P16):  no `--root` added (I62's)
+  test("inside a kit:  its arguments verbatim, from any folder", () => {
     const kit = join(temp, "kit")
     const app = join(kit, "app")
     mkdirSync(join(kit, "src", "server", "page"), { recursive: true })
@@ -111,8 +112,8 @@ process.exit(3)
     writeFileSync(join(app, "package.json"), `{ "name": "app", "spell": {}, "pageServer": {} }`)
     const run = (args: string[], cwd: string) =>
       JSON.parse(spell(["server", ...args], cwd).stdout) as { args: string[] }
-    expect(run(["status"], kit).args).toEqual(["status", "--root", app])
-    expect(run(["start"], join(kit, "lower")).args).toEqual(["start", "--root", app])
+    expect(run(["status"], kit).args).toEqual(["status"])
+    expect(run(["start"], join(kit, "lower")).args).toEqual(["start"])
     expect(run(["status"], app).args).toEqual(["status"])
     expect(run(["status", "--root", "."], kit).args).toEqual(["status", "--root", "."])
   })
