@@ -93,7 +93,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             class={FEEDBACK}
             part={this.partForName("feedback")}
             type="feedback"
-            prop:value={this.restoredFeedback}
+            value={this.restoredFeedback}
             onInput={this.onFeedback}
           />
           <ui-button
