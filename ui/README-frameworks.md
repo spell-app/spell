@@ -324,7 +324,7 @@ button.addEventListener("ui-toggle", (event) => setActive(event.detail.active))
 - In JSX:  `on-` plus the event's name, `on-ui-change`, one per event the tag sends.
   - **Typed only, for now:  Solid calls it once Solid's custom event props land (epic `solid-17`).**
     Until then, listen from a `ref`, as above.
-  - A misspelt `on-ui-chnage` isn't an error (it has a dash);  the kit's TypeScript plugin warns on it.
+  - A misspelt `on-ui-chnage` isn't an error (it has a dash);  the app's VS Code extension warns on it.
 - In plain DOM code:  `querySelector("ui-button")` gives a `<ui-button>` that knows its own events,
   and so does a JSX `ref`'s element.
   - Its `addEventListener()` types each one's `event.detail`.

@@ -22,8 +22,7 @@ import { FamilyFiles } from "./FamilyFiles.ts"
  *   - `package.json`'s `customElements` points at it
  * - `html-custom-data.json`:  VS Code's HTML custom data (`html.customData`):
  *   autocomplete and hover docs for every `<ui-*>` tag, attribute and value in any `.html` file
- *   - the kit's `.vscode/settings.json` loads it, in every window the kit is a folder of (its own, every epic's);
- *     so does spell-app's
+ *   - spell-app's VS Code extension carries a copy, made when it's built:  one in every window
  * - `css-custom-data.json`:  VS Code's CSS custom data (`css.customData`), for any `.css` file:
  *   - every family's custom properties (`--ui-button-radius`), completed as property names, with hover docs
  *   - every part, as `::part(icon)`, and every custom state, as `:state(open)`
@@ -32,7 +31,8 @@ import { FamilyFiles } from "./FamilyFiles.ts"
  *   - loaded beside the HTML data
  * - `src/jsx.ts` (`spell-ui/jsx`, `jsxTypes()`):  every tag's attributes and events, as types for Solid's JSX
  *   - so VS Code completes, explains and checks `<ui-*>` tags in a `.tsx` file of any program that imports it
- * - Written by `yarn site:data`, and committed:  editors read them with no build.
+ * - Written by `yarn site:data`, and committed:  editors read them with no build of Spell UI.
+ *   - The HTML and CSS data show after spell-app's extension is rebuilt (`spell app vscode`):  it copies them.
  *   - The three data files beside `components.json5`;  the JSX types in `src/`, as code imports them.
  *   - `tests/tools/ElementManifests.test.ts` fails while they're stale.
  * - All list COMPONENT tags only, not the doc-only `<ui-docs-*>`.
@@ -709,7 +709,7 @@ const JSX_HEADER = [
   " *     So does a JSX `ref`'s element.",
   " *   - On any other element or the document, every `ui-*` name completes (`UIEventMap`):",
   " *     its `detail` is `unknown`.",
-  " *   - A misspelt `on-ui-chnage` isn't checked (it has a dash):  the kit's TypeScript plugin warns on it.",
+  " *   - A misspelt `on-ui-chnage` isn't checked (it has a dash):  the app's VS Code extension warns on it.",
   " * - Component tags only, not the docs site's `<ui-docs-*>`.",
   " * - Type-only:  no code, nothing at run time.",
   " */",

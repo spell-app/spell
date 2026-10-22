@@ -24,7 +24,7 @@
  *     So does a JSX `ref`'s element.
  *   - On any other element or the document, every `ui-*` name completes (`UIEventMap`):
  *     its `detail` is `unknown`.
- *   - A misspelt `on-ui-chnage` isn't checked (it has a dash):  the kit's TypeScript plugin warns on it.
+ *   - A misspelt `on-ui-chnage` isn't checked (it has a dash):  the app's VS Code extension warns on it.
  * - Component tags only, not the docs site's `<ui-docs-*>`.
  * - Type-only:  no code, nothing at run time.
  */
