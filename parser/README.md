@@ -1,32 +1,6 @@
 # spell-lang:  English you can run
 
-Spell is English you can run.
-Because the source IS English, the person who asked an AI for a program can read what it wrote,
-change it, and learn from it:  the AI is a partner first, then a teacher.
-
-What's built today:
-- English spell compiles to JavaScript, TypeScript and Python, each written as a person would write it.
-- The editor runs a program as you type it ([spell-app](../spell-app/README.md)).
-- The parser underneath knows no language at all, so GitHub markdown runs on it too.
-
-What isn't:
-no AI feature ships in the editor yet, and English is the only language that parses.
-Today an agent writes spell, and you read it.
-
-**Underneath spell is a generic rule-based parser** that's worth a look on its own,
-if you've ever fought a parser generator:
-- A rule is a class with a syntax string, written in [Rulex](README-rulex.md),
-  which reads like a regular expression over words and other rules.
-- Scope lets earlier lines teach later ones:
-  once a program says `a card is a thing`, the word "card" is a type for every line after it.
-- No grammar file, no code generation step:  the rules are the program.
-- A second language, GitHub-flavoured markdown, runs on it and passes all 670 of 670 spec examples
-  ([README-markdown](README-markdown.md)).
-- The parser itself:  [README-parser](README-parser.md).
-
-## FizzBuzz
-
-The whole program, one of the [frozen test projects](tests/spaces/@spell/test/fizzbuzz/FizzBuzz.spell):
+<a id="fizzbuzz"></a>
 
 ```spell
 ## File FizzBuzz.spell
@@ -40,7 +14,11 @@ to play fizzbuzz
 play fizzbuzz
 ```
 
-What it compiles to, from the snapshots the tests check every target against:
+_FizzBuzz, all eight lines of it, from [the frozen test projects](tests/spaces/@spell/test/fizzbuzz/FizzBuzz.spell)._
+
+You've probably written FizzBuzz for an interviewer, in a language with braces.
+This time it's English, and it runs.
+The compiler turns it into JavaScript or into Python, and the two print the same hundred lines:
 
 <table>
 <tr><th>JavaScript</th><th>Python</th></tr>
@@ -48,6 +26,8 @@ What it compiles to, from the snapshots the tests check every target against:
 <td>
 
 ```js
+core.heading("File FizzBuzz.spell")
+/** File FizzBuzz.spell */
 export function playFizzbuzz() {
   core.getRange(1, 100).forEach((number) => {
     if (core.isOfType(number / 15, "integer"))
@@ -67,6 +47,8 @@ playFizzbuzz()
 <td>
 
 ```py
+from __future__ import annotations
+
 def play_fizzbuzz() -> None:
     """File FizzBuzz.spell"""
     for number in range(1, 101):
@@ -87,23 +69,82 @@ play_fizzbuzz()
 </tr>
 </table>
 
-_One program, three languages out:  the TypeScript is the same as the JavaScript here._
+_What `spell compile --stdout` prints, then the same with `--target py`:
+the JavaScript's import line left out, and its long lines folded to fit._
 
-- The JavaScript's long lines are folded here to fit;
-  the [JavaScript snapshot](tests/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js) has them whole.
-- The [Python snapshot](tests/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.py) is checked by pyright, and it finds nothing.
-- `core` is [the runtime](README-core.md) compiled JavaScript runs on;
-  Python needs it only where it has no word of its own, so FizzBuzz needs none.
+Neither column is a translation of the other.
+The compiler reads the English once, into a tree of what it means,
+and each language has a writer of its own, which turns that tree into code the way that language's programmers would.
+- "From 1 to 100" includes the 100, as people mean it, and Python's `range()` stops one short:
+  so it's `range(1, 101)`.
+- JavaScript has no word for a range, or for "is an integer", so it calls Spell's runtime, `core`, for both.
+  Python has words for both, and needs no runtime here at all.
+- The `##` line is a heading.
+  Both keep it as a comment, and the JavaScript tells the runtime too, with `core.heading()`,
+  so the editor's Thing Explorer can group what the program made under it.
+
+Ask a model for FizzBuzz in Python, and you'll get a good one, a little different each time you ask.
+These eight lines give the same JavaScript and the same Python every time, character for character:
+a test holds them to their snapshots, [the JavaScript](tests/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js)
+and [the Python](tests/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.py), and fails the day they differ.
+
+Everything that just happened lives in this repo, `spell-lang`:
+the parser that read those eight lines, the grammar it read them with, the writers that wrote both columns
+(and a third, for TypeScript), and `core`, the runtime the JavaScript calls.
+That's all of Spell the language.
+The editor that runs a program as you type it is [spell-app](../spell-app/README.md)'s,
+and the checkout every repo is cloned into is [the kit](../README.md)'s.
+
+Why English, now that models write the code?
+Because the person who asked can read what came back, find the sentence that's wrong, and change it.
+That's the long view, and the kit's page says how far along it is:  [where it's going](../README.md#where-its-going).
+
+Here to run it?  [Skip to "Try it in two minutes"](#try-it-in-two-minutes).
+
+## Underneath, a parser that knows no language
+
+With ANTLR or yacc, the grammar is a file, a generator turns it into a parser,
+and the grammar is frozen before the first token is read.
+Spell's parser has no grammar file, and generates nothing.
+Its rules are classes, each with a syntax string, registered while the program runs,
+and a Spell program registers more of them as it's read.
+After `a card "is face up" if its direction is up`, the line `the card is face up` is a rule of its own,
+and `the card is not face up` comes with it.
+
+The syntax strings are written in [Rulex](README-rulex.md), which reads like a regular expression over WORDS.
+Here's the rule FizzBuzz's loop matched, from [ListRangeIteration.ts](src/spell/rules/lists/ListRangeIteration.ts):
+
+```text
+for each? {item:singular_identifier} from {start:expression} down? to {end:expression} :? {statement_body}?
+```
+
+- `each?` is optional, and `{start:expression}` is another rule, by name, its match kept as `start`.
+- Rules name rules, so they nest and recurse,
+  and a parse hands back a tree of matches with named parts, not a row of capture groups.
+
+The parser knows no language until it's handed rules.
+Spell's are 241 classes, with 274 syntaxes between them
+([module by module](README-spell.md#the-whole-language-module-by-module)).
+[GitHub's Markdown](README-markdown.md) is a second set of rules on the same parser,
+and it passes all 670 of the 670 examples in its spec.
+
+It's a parser, not a prompt:  the same text gives the same tree, every time.
+**The cost of being exact:**  Spell reads the shapes its rules know and the phrases your program adds,
+not all of English.
+A sentence outside them is an error at its line and column, however plain it is to you
+("is a whole number" is one, [below](#try-it-in-two-minutes)).
+The parser on its own, and how to write a language of your own on it:  [README-parser](README-parser.md).
 
 ## Languages in, targets out
 
-Spell's middle is ONE tree, the spell tree.
-Each human language reads into it, and each target writes out of it:
-so adding a language or a target is one piece of work, not one per pair.
+The tree in the middle is the Spell tree:  what a program means, in no language's words.
+It holds `equals`, not `==`, and `up`, not `"up"`.
+Each human language reads into it, and each target writes out of it,
+so a new language, or a new target, is one piece of work, not one per pair.
 
-![English, and Spanish coming, read into one spell tree;  JavaScript, TypeScript and Python, and WebAssembly coming, written out of it](docs/images/languages-and-targets.svg)
+![English, and Spanish coming, read into one Spell tree;  JavaScript, TypeScript and Python, and WebAssembly coming, written out of it](docs/images/languages-and-targets.svg)
 
-_N languages plus M targets, never N × M._
+_N languages plus M targets, never N × M:  the dashed boxes are coming._
 
 <details>
 <summary>As text</summary>
@@ -111,7 +152,7 @@ _N languages plus M targets, never N × M._
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
-  en[English] --> tree((the spell tree))
+  en[English] --> tree((the Spell tree))
   es[Spanish, coming] -.-> tree
   tree --> js[JavaScript on Solid]
   tree --> ts[TypeScript on Solid, or a library]
@@ -125,303 +166,295 @@ flowchart LR
 
 </details>
 
-- English is the only language that parses today;  Spanish is a hand translation nothing reads yet (below, "Coming").
-- The four targets are built and checked on every frozen test project:  [README-targets](README-targets.md).
+- **Real today:**  English in, four targets out.
+  Every project gets JavaScript, `js/solid`;  a project asks for the rest by name:  `ts/solid`, `ts/lib`, `py`.
+  Eleven frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
+  ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
+- **Not yet:**  a second human language, and WebAssembly (below, "Coming").
+- What each target gives you, and what it costs:
+  [README-targets](README-targets.md#four-targets-and-what-each-one-costs).
 
-## The pipeline
+## The pipeline:  nine steps, the same for every program
 
-A program goes through the same steps whatever language it's in, or targets it's written to.
-Reading:
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
-flowchart LR
-  source[1 · source text] --> tokens[2 · tokens]
-  tokens --> rules[3 · rules, in Rulex]
-  rules --> matching[4 · matching]
-  matching --> matches[5 · matches and scope]
-  matches --> tree((6 · the spell tree))
-  %% the Spell look:  yarn mermaid:pretty
-  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
-  classDef step fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:16px,ry:16px
-  class source,tokens,rules,matching,matches,tree step
-```
-
-_Reading:  text becomes tokens, the rules match them, and each match builds part of the tree._
-
-Writing:
+Whatever language a program is written in, and whichever targets it's written to, it takes the same nine steps.
+Five read it, once;  three write it, once per target;  the Spell tree sits between them.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
-flowchart LR
-  tree((6 · the spell tree)) --> writer[7 · a writer per target]
-  writer --> files[8 · output files]
-  files --> runtime[9 · the runtime]
+flowchart TB
+  subgraph reading["reading"]
+    direction LR
+    source["1 · source text"] --> tokens["2 · tokens"] --> rules["3 · rules, in Rulex"] --> matching["4 · matching"] --> matches["5 · matches and scope"]
+  end
+  tree(("6 · the Spell tree"))
+  subgraph writing["writing, once per target"]
+    direction LR
+    writer["7 · a writer per target"] --> files["8 · output files"] --> runtime["9 · the runtime"]
+  end
+  reading --> tree --> writing
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef step fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:16px,ry:16px
-  class tree,writer,files,runtime step
+  class source,tokens,rules,matching,matches,tree,writer,files,runtime step
 ```
 
-_Writing:  one writer per target turns the same tree into its own language, which runs on its own runtime._
+_A compile reads a program once, then writes it once per target, from the same tree._
 
-1. **Source text:**  `.spell` files in a project, listed by its project file ([README-spell](README-spell.md)).
-2. **Tokens:**  words, numbers, symbols, text in double quotes;
-   indentation makes blocks ([README-parser](README-parser.md#1-tokens)).
-3. **Rules:**  each a class with a syntax string, compiled once when it's registered ([README-rulex](README-rulex.md)).
-4. **Matching:**  every way a line could read is tried;
-   the best match wins ([README-parser](README-parser.md#3-matches)).
-5. **Matches and scope:**  each line records what it declares, so later lines know the new words
-   ([README-parser](README-parser.md#how-earlier-lines-teach-later-ones)).
-6. **The spell tree:**  83 kinds of node, saying what was meant, in no target's words
-   ([README-parser](README-parser.md#4-the-spell-tree)).
-7. **A writer:**  one per target, one method per kind of node ([README-targets](README-targets.md)).
-8. **Output files:**  `<Project>.spell.js`, `.spell.tsx`, `.spell.py`, in a build folder never committed
-   ([README-spell](README-spell.md#the-compiler)).
-9. **The runtime:**  compiled JavaScript imports `@spell/core`, compiled Python `spell_core`
+1. **Source text:**  the `.spell` files of a project, which its project file lists
+   ([the compiler](README-spell.md#the-compiler)).
+2. **Tokens:**  words, numbers, symbols and text in double quotes;  indentation makes blocks
+   ([tokens](README-parser.md#1-tokens)).
+3. **Rules:**  each a class with a syntax string in Rulex, compiled once, when it registers
+   ([README-rulex](README-rulex.md)).
+4. **Matching:**  every way a line could read is tried, and one wins
+   ([how a choice is settled](README-parser.md#how-a-choice-is-settled)).
+5. **Matches and scope:**  each line records what it declares, so later lines know its words
+   ([how earlier lines teach later ones](README-parser.md#how-earlier-lines-teach-later-ones)).
+6. **The Spell tree:**  84 kinds of node, saying what was meant, in no target's words
+   ([the Spell tree](README-parser.md#4-the-spell-tree)).
+7. **A writer per target:**  a class with a method per kind of node
+   ([one tree, a writer per language](README-targets.md#one-tree-a-writer-per-language)).
+8. **Output files:**  `<Project>.spell.js`, `.spell.tsx` and `.spell.py`, in a build folder that's never committed
+   ([the compiler](README-spell.md#the-compiler)).
+9. **The runtime:**  compiled JavaScript imports `@spell/core`, and compiled Python imports `spell_core`
    ([README-core](README-core.md)).
 
-## The pieces
+The detailed map of all nine, for anyone changing the parser:  [PARSING.md](src/spell/PARSING.md).
 
-ONE npm package, `spell-lang`, of six folders:  each is one of its entries.
+## How Spell reads:  sentences or an outline, one meaning
 
-| Folder | Import | What it is | Its page |
-| --- | --- | --- | --- |
-| [parser/](parser/) | `spell-lang/parser` | the generic rule-based parser:  tokens, rules, matches, scope, the spell tree, the writers | [README-parser](README-parser.md) |
-| [parser/src/rulex/](parser/src/rulex/) | `spell-lang/parser/rulex` | Rulex, the syntax rules are written in:  an opt-in import | [README-rulex](README-rulex.md) |
-| [markdown/](markdown/) | `spell-lang/markdown` | GitHub-flavoured markdown on the parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) |
-| [spell/](spell/) | `spell-lang/spell` | the spell language:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) |
-| [core/](core/) | `spell-lang/core` | the runtime compiled JavaScript runs on | [README-core](README-core.md) |
-| [py/](py/) | `spell-lang/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) |
-| [cli/](cli/) | `spell-lang/cli` | the language's `spell` commands:  their names, arguments and help, and the `language` hook's shape | below, [The language commands](#the-language-commands) |
+A Spell program is sentences, as FizzBuzz is, or an outline, as the card on [the kit's front page](../README.md) is:
+a name, then bullets of what's true of it.
+The two compile to the same JavaScript, member for member, and a file may mix them
+([two styles, one meaning](README-spell.md#two-styles-one-meaning)).
 
-- It stands only on [the kit](../README.md):  its shared helpers and its toolchain.
-- How the folders depend on each other:
-  - `markdown` and `py` stand on `parser`;  `core` on nothing here
-  - `spell` stands on `parser` and `py`, and reads only `core`'s types
-  - nothing here imports a repo above it
-- The rules for working in each folder:  its `AGENTS.md` ([the repo's](AGENTS.md) lists them).
+Six ideas carry most of the language, and each reads both ways:
+- **Types and things.**  `a card is a thing` makes a type, a class named `Card`.
+  "Card" is then a word every line of the project knows, even a line above its declaration.
+- **Properties, and values worked out from them.**
+  `cards have a suit as one of clubs, diamonds, hearts or spades` stores a suit, one of four values;
+  `the color of a card is red if its suit is either diamonds or hearts otherwise it is black` works the color out
+  each time it's read, a getter, so there's nothing to keep in step.
+- **Phrases become rules.**  Quoted words are a new phrase, a rule from the next line on (above, "Underneath").
+  A blank in brackets makes a phrase per value:  after `a card "is a (rank)" for its ranks`,
+  `the card is a queen` reads, and so does `the card is not an ace`.
+- **Precedence, as you'd read it.**  `its suit is either diamonds or hearts` asks ONE question:
+  `core.includes(["diamonds", "hearts"], this.suit)`.
+  Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
+  Sums come before comparisons, too:  the tableau's rule in
+  [outline-solitaire](tests/spaces/@spell/test/outline-solitaire/Solitaire.spell),
+  `its value is the value of the card + 1`, is `this.value === card.value + 1`.
+- **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
+  as a person counts.
+  The compiler turns Spell's positions into JavaScript's and Python's own, which count from 0
+  ([positions count from 1](README-core.md#positions-count-from-1)).
+- **Ids and addresses.**  Every thing has an `id`, built in, and saves as readable JSON;
+  `a person is saved in its own file` gives each person a file of their own.
+  Projects and files have addresses too, like `@spell/examples/drawable-solitaire/Card.spell`
+  ([ids, names and addresses](README-spell.md#ids-names-and-addresses)).
 
-### What's NOT here
-
-spell-lang is the language alone.
-The tools around it live in [spell-app](../spell-app/README.md), the repo above it:
-
-| What | Where |
-| --- | --- |
-| the editor and the runner:  `<spell-app>`, `<spell-editor>`, the live loop | spell-app's [app/](../spell-app/app/), [README-app](../spell-app/README-app.md) |
-| the language server, and the VS Code extension that runs it | spell-app's [lsp/](../spell-app/lsp/) and [vscode/](../spell-app/vscode/), [README-lsp](../spell-app/README-lsp.md) |
-| projects on disk, their addresses, the editor's server | spell-app's [spaces/](../spell-app/spaces/), [README-spaces](../spell-app/README-spaces.md) |
-| the example projects people edit | spell-app's [README-examples](../spell-app/README-examples.md) |
-| the `spell` command line's base:  arguments, help, finding commands | the kit's [README-cli](../README-cli.md) |
-
-The language's own commands are this repo's (below):  the command line finds them here.
+Every rule, and what each target writes for it:  [README-spell](README-spell.md).
 
 ## Try it in two minutes
 
-You need the kit and its child repos installed, and `spell` on your `PATH`:
-[README-cli](../README-cli.md#setting-it-up) says how, from zero.
+You need the kit's checkout with its child repos, and `spell` on your `PATH`:
+the kit's [setup from zero](../README.md#setup-from-zero) does both.
+Then work in a folder of your own, outside the checkout.
 
-How spell reads a line:  its match tree, then the JavaScript it compiles to.
+**How Spell reads a line:**
 
 ```sh
 spell parse "print 1 + 2 * 3"
+# statement › print  print 1 + 2 * 3
+#   Keyword  print
+#   expressions: Repeat  1 + 2 * 3
+#     expression  1 + 2 * 3
+#       lhs: operand › number  1
+#       Repeat  + 2 * 3
+#         expression_suffix › plus  + 2
+#           operator › Symbol  +
+#           expression: operand › number  2
+#         expression_suffix › times  * 3
+#           operator › Symbol  *
+#           expression: operand › number  3
+#
+# core.console.log(1 + 2 * 3)
 ```
 
-```text
-statement › print  print 1 + 2 * 3
-  Keyword  print
-  expressions: Repeat  1 + 2 * 3
-    expression  1 + 2 * 3
-      lhs: operand › number  1
-      Repeat  + 2 * 3
-        expression_suffix › plus  + 2
-          operator › Symbol  +
-          expression: operand › number  2
-        expression_suffix › times  * 3
-          operator › Symbol  *
-          expression: operand › number  3
-
-core.console.log(1 + 2 * 3)
-```
-
-What a word means to spell:  the rules it starts, with their syntax and an example.
+That's the match tree, a rule a line, each inside the one that holds it
+([how to read one](README-parser.md#3-matches)).
+Look at `+ 2` and `* 3`:  two suffixes side by side, because precedence is settled only when the tree is built.
+`--tree` prints that tree, where `*` has already claimed the 2:
 
 ```sh
-spell explain print
+spell parse --tree "print 1 + 2 * 3"
+# Print
+#   args: plus
+#     lhs: Number 1
+#     rhs: times
+#       lhs: Number 2
+#       rhs: Number 3
+#
+# core.console.log(1 + 2 * 3)
 ```
 
-```text
-print  print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]
-e.g. print "Yo!"
+**What a word starts:**  `if` starts two rules.
+FizzBuzz uses the first;  the second reads a value backwards, the way people say it.
+
+```sh
+spell explain if
+# if  if {condition:expression} (then|:)? {statement_body}?
+# e.g. if a
+#
+# backwards_if  if {operator:expression} (else|otherwise) {expression}
+# e.g. print 1 if bar else 2
 ```
 
-Run a program.
-Copy FizzBuzz out of the frozen test projects first, so you never edit them:
+**A whole program, two ways.**
+Copy FizzBuzz out of the frozen test projects first:  nobody edits those.
 
 ```sh
 mkdir -p try
 cp -R ~/www/spell/spell-lang/tests/spaces/@spell/test/fizzbuzz try/fizzbuzz
 spell run try/fizzbuzz
+# ✓ Compiling @local/try/fizzbuzz
+# 1
+# 2
+# 3 fizz
+# 4
+# 5 buzz
+# ...
+# 15 fizzbuzz
+# ...
+diff <(spell run try/fizzbuzz 2>/dev/null) <(spell run try/fizzbuzz --target py 2>/dev/null) && echo same
+# same
 ```
 
-```text
-✓ Compiling @local/try/fizzbuzz
-1
-2
-3 fizz
-4
-5 buzz
-...
-15 fizzbuzz
-...
-```
+- `--target py` runs the Python instead, and needs Python 3.12 or later and uv
+  ([the Python half](README-targets.md#the-python-half)).
+- `spell compile try/fizzbuzz --stdout --target py` prints the Python at the top of this page.
+- A project outside every group is named for its folders, `@local/try/fizzbuzz`
+  ([naming projects](../README-cli.md#naming-projects--a-path-an-address-or-a-group)).
+- The copy brings the test's snapshot files with it:  harmless, or delete the `*snapshot*` files.
 
-The same, run as Python (it needs Python 3.12 and uv:  [README-targets](README-targets.md#the-python-half)):
+**Then break it.**
+In `try/fizzbuzz/FizzBuzz.spell`, change the fizzbuzz line's `is an integer` to `is a whole number`:
 
 ```sh
-spell run try/fizzbuzz --target py
+spell lint try/fizzbuzz
+# ✗ @local/try/fizzbuzz  1 error
+# try/fizzbuzz/FizzBuzz.spell:4:31  Don't understand "is a whole number: print the number, "fizzbuzz""
 ```
 
-The output is the same, line for line.
-See the Python itself with `spell compile try/fizzbuzz --stdout --target py`.
-
-- A project outside the known groups is named for its folders:  `@local/try/fizzbuzz`.
-- Copying keeps snapshot files you don't need:  harmless, or delete the `*snapshot*` files.
-- Every command and its options:  [README-cli](../README-cli.md#commands-for-programs).
+To you, the two say the same thing.
+Spell has no rule for "a whole number", so it names the line and column where it stopped understanding, and exits 1.
+It doesn't guess.
+The edge:  `spell run` reports the same error, then runs what it did understand,
+here an `if` with nothing inside it, so not one line prints.
+Lint first.
 
 ## The language commands
 
-The `spell` command line takes its language commands from this repo's [cli/](cli/) folder:
-the kit runs them, from the list in its `package.json`'s `"spell": { "commands" }`.
+You've just used four of them.
+The kit's `spell` takes eleven commands from this repo:
+`compile`, `lint`, `watch` and `format` build a program;  `run` and `test` run it;
+`parse`, `repl`, `explain` and `describe` show what Spell made of it;  and `speedtest` times the parser.
+[commands.ts](src/cli/commands.ts) lists them, and spell-lang's `package.json` names that file,
+`"spell": { "commands" }`.
+What each does, every option, with examples:  [the command line's page](../README-cli.md#spell-lang),
+or `spell help <command>`.
 
-| Command | What it does |
-| --- | --- |
-| `spell compile [projects...]` | compiles each project to JavaScript in its build folder, plus its other targets, declarations and words;  `--target`, `--stdout`, `--stale` |
-| `spell lint [projects...]` | lists every error as `path:line:col  message`, exiting 1 if there are any |
-| `spell watch [projects...]` | recompiles on every save, showing a live list of errors |
-| `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does |
-| `spell run [project]` | compiles a project and runs it under node;  one with a UI opens in your browser;  `--target ts \| py` |
-| `spell test [projects...]` | runs each `to test ...` in a project, reporting ✓ or ✗ |
-| `spell parse "<text>"` | how spell reads a line:  its match tree, then its JavaScript;  `--tree` for the spell tree |
-| `spell repl [project]` | `spell parse` a line at a time:  what a line declares, later lines know |
-| `spell explain <word>` | the rules a word names or starts, with their syntax and an example |
-| `spell describe [project] [name] [member]` | what a file or project declares, as the editor's Type Explorer shows it |
-| `spell speedtest [module]` | times the parser's rule tests;  `--against HEAD` compares with a commit |
-
-- `spell help <command>` has each one's flags.
-- Their names before repo-split P13:  `lint` was `spell check`, `speedtest` was `spell speed`;
-  `spell explore` is gone (`spell describe` prints the same text).
-- Their WORK is spell-app's for now:  each command asks for the `language` hook, which spell-app provides.
-  - It loads projects the app's way:  by address (`@spell/examples/drawable-solitaire`), groups, `@here`,
-    the "which project?" prompt, the build folder under spell-app's `build/`.
-  - It asks the editor's language service, so the command line sees what an editor does.
-  - Without spell-app, each command says to clone it, and exits 2.
+**Their work is spell-app's, for now.**
+The names live here, and each command hands its work to spell-app's `language` hook
+([hooks.ts](../spell-app/src/cli/hooks.ts)), so the command line and the editor can't disagree:
+- it finds projects the app's way:  by address (`@spell/examples/drawable-solitaire`), group, `@here`,
+  or the "which project?" prompt, with the build folder under spell-app's `build/`
+- it asks the editor's language service, so the command line sees what an editor sees
+- without spell-app, each command stops, says to clone it (`yarn clone spell-app`), and exits 2
 
 <details>
 <summary>The files in cli/</summary>
 
 | Path | What |
 | --- | --- |
-| [cli/commands.ts](cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
-| [cli/src/cli.types.ts](cli/src/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
-| [cli/src/index.ts](cli/src/index.ts) | `spell-lang/cli`:  the types, for spell-app |
+| [cli/commands.ts](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
+| [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
+| [cli/index.ts](src/cli/index.ts) | `spell-lang/cli`:  the types, for spell-app |
 
 </details>
 
 <details>
-<summary>Deferred:  moving each command's work down here</summary>
+<summary>🌱 Moving each command's work down into spell-lang</summary>
 
-As the epic page's analysis of every command sorted them (repo-split P13, M1):
-- What every project command needs first:
-  - a loader that reads a project FOLDER by itself, as spell's tests already do (`parseSpellProject()`)
-  - spell-app's hooks for what's the app's:  addresses and groups, the build folder, the editor pages after
-    `compile` and `lint`, opening a UI project in a browser for `run`
+Planned, and not started:  then the commands run with `spell-lang` alone.
+What each one needs:
+- First, for every command that takes a project:
+  - a loader that reads a project FOLDER by itself, as Spell's tests already do (`parseSpellProject()`)
+  - hooks for what stays spell-app's:  addresses and groups, the build folder, the editor pages after
+    `compile` and `lint`, and opening a UI project in a browser for `run`
 - Then, command by command:
   - `parse`, `repl`:  the parser alone;  only a project argument (`--in`) needs the loader
   - `explain`:  the language service, from spell-app's `lsp`
   - `describe`:  the Type Explorer's builder (`ScopeExplorer`), from spell-app's `lsp`
   - `format`:  the language service's formatting;  its frozen-projects check names spell-lang's own `tests/spaces/`
   - `test`, `watch`:  the loader;  `watch`'s compile step as `compile`'s
-  - `speedtest`:  finds spell by its package, not through spaces
+  - `speedtest`:  finds Spell by its package, not through spaces
   - `compile`, `lint`, `run`:  the loader, plus spell-app's hooks above
-- And the progress lists and screens they draw (Ink, today spell-app's `cli/src/ui/`).
+- And the progress lists and screens they draw, which are spell-app's today (Ink, in its `src/cli/ui/`).
 
 </details>
 
-## How spell reads
+## The pieces, and the page for each
 
-A spell program is sentences, or an outline:  a heading, then bullets of what's true of it.
-The two styles compile to the same code, and a file may mix them.
+`spell-lang` is ONE npm package, its code in six folders under [src/](src/).
+A file's import name is the package's name, then its path under `src/`, with no extension:
+`spell-lang/parser` is a folder's barrel, its `index.ts`, and `spell-lang/parser/rules/Rule` is one file.
+The name is the same inside this repo as from every other, so there's no alias table, and no `../` to count.
 
-<table>
-<tr><th>Sentences</th><th>An outline</th></tr>
-<tr>
-<td>
+| Folder | Import name | What it is | Its page, and what's on it |
+| --- | --- | --- | --- |
+| [parser/](src/parser/) | `spell-lang/parser` | the parser that knows no language:  tokens, rules, matches, scope, the Spell tree, the writers | [README-parser](README-parser.md) <ul><li>rules as classes:  what moves if you've used a parser generator</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled;  how earlier lines teach later ones</li><li>parsers for other languages, with a dates language in 23 lines;  testing rules;  what it costs</li></ul> |
+| [parser/rulex/](src/parser/rulex/) | `spell-lang/parser/rulex` | Rulex, the syntax rules are written in:  a rule with a syntax string needs this import | [README-rulex](README-rulex.md) <ul><li>what moves if you know regular expressions</li><li>three real rules from Spell's grammar;  your program writes Rulex too</li><li>what it can't say;  it compiles once, when a rule registers</li><li>the cheat sheet</li></ul> |
+| [markdown/](src/markdown/) | `spell-lang/markdown` | GitHub's Markdown, on the same parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) <ul><li>a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, and slower and bigger than marked;  who draws with it</li><li>the spec as the scoreboard</li></ul> |
+| [spell/](src/spell/) | `spell-lang/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  types, phrases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
+| [core/](src/core/) | `spell-lang/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a type is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>who may import it:  one copy per running app</li></ul> |
+| [py/](src/py/) | `spell-lang/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
+| [cli/](src/cli/) | `spell-lang/cli` | the language's eleven `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](../README-cli.md#spell-lang) |
 
-```spell
-a card is a thing
-cards have a suit as one of clubs, diamonds, hearts or spades
-cards have a direction as either up or down
-the color of a card is red if its suit is either diamonds or hearts otherwise it is black
-a card "is face up" if its direction is up
-a card "is a (suit)" for its suits
-```
+- It stands only on [the kit](../README.md):  its shared helpers, `spell-kit/util`, and its toolchain.
+- Inside, the arrows point one way:
+  - `markdown` and `py` stand on `parser`;  `core` stands on nothing here
+  - `spell` stands on `parser` and `py`, and of `core` it reads only the types file, never the runtime itself
+  - nothing here imports a repo above it
+- [package.json](package.json)'s `exports` maps every name to its file.
+- Outside `src/`, and never imported:  `tests/` (at the same paths as the code), `scripts/`, `docs/`, the configs.
+- The rules for working in each folder are in its `AGENTS.md`, and [the repo's own](AGENTS.md) lists them.
 
-</td>
-<td>
+### What's NOT here
 
-```spell
-a card is a thing where:
-	- it has a suit as one of clubs, diamonds, hearts or spades
-	- its direction is up or down
-	- its "color" is red if its suit is either diamonds or hearts otherwise it is black
-	- it "is face up" if its direction is up
-	- it "is a (suit)"
-```
+`spell-lang` is the language alone.
+The tools people use it in live in [spell-app](../spell-app/README.md), the repo above it,
+and the command line's base is the kit's:
 
-</td>
-</tr>
-</table>
+| What | Where |
+| --- | --- |
+| the editor and the runner:  `<spell-app>`, `<spell-editor>`, the live loop | spell-app's [src/app/](../spell-app/src/app/), [README-app](../spell-app/README-app.md) |
+| the language server, and the VS Code extension that runs it | spell-app's [src/lsp/](../spell-app/src/lsp/) and [vscode/](../spell-app/vscode/), [README-lsp](../spell-app/README-lsp.md) |
+| projects on disk, their addresses and groups, the editor's server | spell-app's [src/spaces/](../spell-app/src/spaces/), [README-spaces](../spell-app/README-spaces.md) |
+| the example projects people open and edit | spell-app's [spaces/@spell/examples/](../spell-app/spaces/@spell/examples/), [README-examples](../spell-app/README-examples.md) |
+| the `spell` command's base:  arguments, help, finding each repo's commands | the kit's [src/cli/](../src/cli/), [README-cli](../README-cli.md#each-repo-brings-its-own-commands) |
 
-_Both versions print the same for `print the color of the card`, `the card is face up` and `the card is a spade`._
-
-- **Types and things:**  `a card is a thing` makes a type, a JavaScript class or a Python one.
-  From then on, `card` is a word every later line knows.
-- **Phrases become rules:**  `a card "is face up" if ...` teaches spell a new phrase.
-  - `the card is face up` and `the card is not face up` both parse after it.
-  - `"is a (suit)"` makes one phrase per suit:  `the card is a spade`, `the card is a heart`.
-- **Properties and derived values:**  `cards have a suit as one of ...` is a stored property, with its choices;
-  `the color of a card is ...` is worked out each time it's read.
-- **Lists count from 1:**  `the first card of the deck`, `card 2 of the deck`, `the position of 30 in the cards`.
-  The compiler turns positions into the target's own:
-  `card 2 of the deck` becomes `deck.getItem(1)` ([README-core](README-core.md#positions-count-from-1)).
-- **Precedence:**  `1 + 2 * 3` is 7, as in school;  `the count is greater than 2 + 1` adds first, then compares.
-  `spell parse --tree "print 1 + 2 * 3"` shows the tree:
-
-  ```text
-  Print
-    args: plus
-      lhs: Number 1
-      rhs: times
-        lhs: Number 2
-        rhs: Number 3
-  ```
-
-- **Ids and addresses:**  every thing has an `id`, built in, and can be saved as readable JSON by it.
-  - `a person is saved in its own file` gives each one its own file;
-    so does the bullet `- it is saved in its own file`.
-  - A project and its files have addresses:  `@spell/examples/drawable-solitaire/Card.spell`.
-
-Every rule and what each target writes for it:  [README-spell](README-spell.md).
+The language's own commands are this repo's (above):  the command line finds them here.
 
 ## 🌱 Coming
 
-### Spell in other human languages
+None of these is here yet.
+Each says where it stands.
 
-The same programs, written in Spanish, then other languages, compiling to the same targets.
-A hand translation of the card example works the words out, though nothing parses it yet:
-[Card.spell-es](../spell-app/spaces/@spell/examples/outline-solitaire/Card.spell-es), beside the Solitaire example.
+### Spell in Spanish, and then other languages
+
+The same programs, written in Spanish, compiling to the same targets:  the dashed box on the left of the picture above.
+A hand translation of the sentence card has worked out the words, though nothing reads it yet:
 
 ```spell
 una carta es una cosa
@@ -429,124 +462,76 @@ las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
 el color de una carta es rojo si su palo es diamantes o corazones de lo contrario es negro
 ```
 
-Where it stands:  the rule classes can already take a second language's syntax strings;  no Spanish rules are written.
+_Three lines of [Card.spell-es](../spell-app/spaces/@spell/examples/outline-solitaire/Card.spell-es), beside the
+outline Solitaire example._
 
-### A WebAssembly target
+Where it stands:  the rule classes can already take a second language's syntax strings, and no Spanish rules are
+written ([how one would start](README-parser.md#-spell-in-another-human-language)).
 
-`spell compile --target wasm`:  the part of spell that computes, without drawing, as WebAssembly, FizzBuzz first.
+### Two more targets, and mixins
 
-Where it stands:  planned, with its first decisions made ([README-targets](README-targets.md)).
+Each is planned, and its page says how far:
+- WebAssembly, the part of Spell that computes, FizzBuzz first ([README-targets](README-targets.md#webassembly))
+- a JavaScript program on node, its page mirrored by id, as Python's web apps already work
+  ([README-targets](README-targets.md#a-program-on-node-mirrored-in-the-page))
+- mixins, "a card is a drawable, sortable thing", and then Spell UI's simpler elements written in Spell
+  ([README-spell](README-spell.md#-coming--mixins-and-spell-ui-written-in-spell))
 
-### Mixins, and Spell UI written in spell
+### The other direction:  any program, read back as Spell
 
-"A card is a drawable, sortable thing":  a type that takes its behaviour from several named sources.
-Then Spell UI's simpler elements written in spell, compiled ahead to the TypeScript Spell UI ships.
-
-Where it stands:  planned, not started.
-
-### A program on a server, mirrored in the page
-
-A JavaScript program running under node, its page kept in step by id:
-the whole state when it opens, then a patch after each change.
-
-Where it stands:  Python programs already work this way ([README-targets](README-targets.md));  JavaScript is next.
-
-### The other direction:  any program, read as spell
-
-An agent reads a program someone already has, in React or Python, and rewrites it as spell,
+An agent reads a program someone already has, in React or in Python, and rewrites it as Spell,
 so the person can read what they have, and change it.
 
 Where it stands:  an idea, not started.
 
 ## Working on it
 
-spell-lang is a child repo of [the kit](../README.md):
-it's cloned inside the kit, and the kit holds the one install for every repo.
-How to set that up, and how the checks, tests and worktrees work across repos:
+`spell-lang` is a child repo of [the kit](../README.md):  cloned inside it, with the one install every repo shares.
+Setting that up, and how the checks, tests and worktrees work across repos:
 [README-development](../README-development.md).
 
-At spell-lang's root, each check runs over the five folders in turn, lowest first:
+At spell-lang's root, each check runs over the whole repo:
 
 ```sh
 cd ~/www/spell/spell-lang
-yarn ts               # the declarations, then each folder's tsc
-yarn test             # each folder's Vitest, and py's pytest
-yarn lint             # each folder's oxlint, and py's ruff;  lint:fix fixes what it can
-yarn format           # each folder's oxfmt, and ruff format;  format:check only checks
+yarn ts               # the declarations (the kit's, then this repo's two programs), then the tests' tsc
+yarn test             # Vitest, a project per folder, then spell_core's pytest
+yarn lint             # oxlint, then ruff on spell_core;  lint:fix fixes what it can
+yarn format           # oxfmt, then ruff format;  format:check only checks
 yarn review           # the finishing pass:  ts, lint:fix, format, test
 ```
 
-- One folder's, or a few:  `yarn spell-folders test parser core`.
-- Tests live in `tests/<folder>/`, at the same paths as the code they test.
+- TypeScript sees two programs:
+  - [tsconfig.json](tsconfig.json):  the browser-safe code, `parser`, `markdown`, `core`, `py`'s writers and `spell`
+  - [tsconfig.node.json](tsconfig.node.json):  what needs node:  the cli, the node tools and test helpers
+    (the `spell` folder's and the parser's), core's declarations writer, the scripts and configs
+- One folder's tests:  `yarn vp test run --project parser`, or `markdown`, `core`, `py`, `spell`, `cli`.
+- Tests live in `tests/<folder>/`, at the same paths as the code under `src/`:
+  `tests/parser/rules/Rule.test.ts` tests `src/parser/rules/Rule.ts`.
 - The frozen test projects, [tests/spaces/@spell/test/](tests/spaces/@spell/test/), pin every target's output:
   [README-spell](README-spell.md#the-frozen-test-projects).
-- The folders' own scripts, prefixed with the folder's name:
+- The folders' own scripts, each named for its folder:
 
   | Script | What it does |
   | --- | --- |
   | `yarn spell:test:rules` | every rule module's tests;  `:bless` writes each test's output into its source |
   | `yarn spell:test:fixtures` | the frozen test projects against their snapshots;  `:bless` rewrites them |
-  | `yarn spell:gen:syntax` | regenerates the spell syntax table, `spellSyntax.json` |
-  | `yarn spell:test:ui`, `spell:test:coverage` | spell's tests in Vitest's UI, or with coverage |
+  | `yarn spell:gen:syntax` | regenerates the syntax table, `spellSyntax.json` |
+  | `yarn spell:test:ui`, `spell:test:coverage` | Spell's tests in Vitest's UI, or with coverage |
   | `yarn core:gen:declarations` | regenerates the core's method list, `core.declarations.json5` |
-  | `yarn markdown:spec:update` | refreshes the GFM spec examples markdown is tested on |
+  | `yarn markdown:spec:update` | refreshes the GFM spec examples Markdown is tested on |
 
 - The rules for working here, for people and agents:  [AGENTS.md](AGENTS.md).
 
 <details>
-<summary>The size of the grammar today</summary>
-
-From the generated [spell syntax table](spell/spellSyntax.json), as of 2026-10-21:
-
-| Counted | Number |
-| --- | --- |
-| rule modules | 20 (19 folders, plus the base rules:  block, line, statement) |
-| rule classes | 241:  224 rules, 17 base classes no syntax names |
-| registered syntaxes | 274 (a rule with several ways to be written is registered once per way) |
-
-- Each syntax comes with an example from its tests, written by the JavaScript, TypeScript and Python writers.
-- `yarn spell:gen:syntax` rewrites it, and a test fails until you do after changing a rule.
-
-</details>
-
-<details>
-<summary>Where spell came from, in three lines</summary>
+<summary>Where Spell came from, in four lines</summary>
 
 - Spell began in 2017 as a "non-programmer programming environment", from a Future of Programming talk:
   a layperson can read a program before they can write one.
-- Its lineage is HyperCard ("programming for the rest of us"), SuperCard, Inform and literate programming;
-  it aims to fix what HyperCard couldn't:  one platform, no network, a closed file format.
-- The 2017 notes are in [spell/thoughts/](spell/thoughts/):  history, not current plans.
-
-</details>
-
-<details>
-<summary>Every target and the files it writes</summary>
-
-| Target | What it is | Files it writes | Checked by |
-| --- | --- | --- | --- |
-| `js/solid` | JavaScript, drawing with Solid;  always compiled, what the editor and `spell run` run | `<Project>.spell.js` | the tests |
-| `ts/solid` | TypeScript on the same runtime:  JSX, decorators, types | `<Project>.spell.tsx` | `tsc` |
-| `py` | Python on `spell_core`, on asyncio | `<Project>.spell.py`;  a program that draws also `<Project>.elements.spell.js` and `<Project>.app.py` | pyright |
-| `ts/lib` | a TypeScript library:  a project's classes alone, for other code to import | `<Project>.lib.ts` | `tsc` |
-
-- Compiled code goes in a build folder, never committed;
-  `.lib.ts`, `.app.py`, declarations and words go beside the source.
-- More:  [README-targets](README-targets.md).
-
-</details>
-
-<details>
-<summary>More in the docs site</summary>
-
-These guides need a checkout with the content folder beside it, and the page server running.
-
-| Guide | Served at |
-| --- | --- |
-| Spell Syntax:  every rule, drawn from the syntax table | `/guides/spell-syntax/spell-syntax.html` |
-| Outline Spell | `/guides/outline-spell.html` |
-| Compile Targets | `/guides/compile-targets/compile-targets.html` |
-| spell Command Line | `/guides/cli.html` |
+- Its lineage is HyperCard ("programming for the rest of us"), SuperCard, Inform and literate programming,
+  and it aims to fix what HyperCard couldn't:  one platform, no network, a closed file format.
+- Its own parser dates from then, too:  the talk's notes found the language too dynamic for YACC, ANTLR or Chevrotain.
+- The 2017 notes are in [docs/spell/thoughts/](docs/spell/thoughts/):  history, not current plans.
 
 </details>
 
@@ -556,10 +541,8 @@ MIT, as spell-lang's [package.json](package.json) says.
 
 ## See also
 
-- The pages beside this one:
-  [README-parser](README-parser.md), [README-rulex](README-rulex.md), [README-markdown](README-markdown.md),
-  [README-spell](README-spell.md), [README-core](README-core.md), [README-targets](README-targets.md)
-- The map of the parse pipeline, in detail:  [PARSING.md](spell/PARSING.md)
-- The editor, spaces and the language server:  [spell-app](../spell-app/README.md)
-- The command line:  [README-cli](../README-cli.md)
-- The kit, and every repo:  [the kit's README](../README.md)
+- [README-parser](README-parser.md):  the parser on its own, if the rules-as-classes part is why you came
+- [README-spell](README-spell.md):  everything a line of Spell can say, and how to add a rule
+- [README-targets](README-targets.md):  what each target writes, and what each one costs
+- [the command line's page](../README-cli.md#spell-lang):  every option of the eleven commands, with examples
+- [the kit's README](../README.md):  setup from zero, the five repos, and every page of every repo
