@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { PlanDates } from "$/epics/dates/PlanDates"
+import { PlanDates } from "spell-epic/dates/PlanDates"
 
 describe("PlanDates.format()", () => {
   test("a day and a time:  month and day WITHOUT leading zeros, a two-digit year, 24-hour `HH:MM`", () => {

@@ -4,10 +4,10 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { ThreadFacts } from "$/epics/comments"
-import { CommentList, CommentsError, type Comment } from "$/epics/tool/CommentList"
-import { GuideInbox } from "$/epics/tool/GuideInbox"
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
+import { ThreadFacts } from "spell-epic/comments"
+import { CommentList, CommentsError, type Comment } from "spell-epic/tool/CommentList"
+import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
 /** A comment's place:  the second field of phase 3. */
 const ON_FIELD = { anchor: "p3#field-2", kind: "field", label: "Notes", excerpt: "A note bubble" }

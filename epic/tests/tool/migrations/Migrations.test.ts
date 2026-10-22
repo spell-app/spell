@@ -2,38 +2,27 @@
  * Tests of the epic page migrations:
  * - the registry (`Migrations`)
  * - the summary an update gets when it has none (`UpdateSummary`)
- * - Each step's own cases are `PlanDoc.migrate()`'s, in `PlanDoc.test.ts`.
+ * - Each step's own cases are its own test's (`EngineLinks.test.ts`).
  */
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { UpdateSummary } from "$/epics/tool/UpdateSummary"
-import { Migrations } from "$/epics/tool/migrations/Migrations"
+import { UpdateSummary } from "spell-epic/tool/UpdateSummary"
+import { Migrations } from "spell-epic/tool/migrations/Migrations"
 
-/** A page holding one phase, with an older plan change in its `changes` slot. */
-function olderDoc(): Document {
+/** A page holding one phase, linking nothing of the engine's. */
+function upToDateDoc(): Document {
   return parseHTML(
     `<html><body><main><epic-page epic="x" title="X" updated="2026-10-05">` +
-      `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="One" status="todo">` +
-      `<epic-field name="goal">g</epic-field>` +
-      `<epic-updated slot="changes" at="2026-10-05 10:00"><p>Moved the log. Then more.</p></epic-updated>` +
-      `</epic-phase></epic-section></epic-page></main></body></html>`
+      `<epic-section id="phases" kind="phases"><epic-phase id="p-one" title="One" status="todo">` +
+      `<epic-field name="goal">g</epic-field></epic-phase></epic-section></epic-page></main></body></html>`
   ).document as unknown as Document
 }
 
 describe("Migrations", () => {
   test("every step by name, in order;  `named()` finds one", () => {
-    expect(Migrations.all.map((step) => step.name)).toEqual([
-      "updates-as-epic-update",
-      "owen-types-to-you-type",
-      "links-agree",
-      "stable-phase-ids",
-      "json5-data-files",
-      "engine-asset-routes",
-      "engine-links",
-      "unstackable-tables"
-    ])
-    expect(Migrations.named("updates-as-epic-update")?.description).toMatch(/<epic-update at summary>/)
+    expect(Migrations.all.map((step) => step.name)).toEqual(["links-agree", "engine-links"])
+    expect(Migrations.named("engine-links")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
   })
 
@@ -42,76 +31,16 @@ describe("Migrations", () => {
       expect(step.kind).toBe("epic")
       expect(step.date).toMatch(/^\d{4}-\d\d-\d\d$/)
     }
-    expect(Migrations.everyEdit.map((step) => step.name)).toEqual(["updates-as-epic-update", "owen-types-to-you-type"])
+    expect(Migrations.everyEdit.map((step) => step.name)).toEqual([])
   })
 
-  test("`run()` names the steps that changed something;  a second run none (idempotent);  `only` picks steps", () => {
+  test("`run()` names the steps that changed something:  none on a page that's up to date;  `only` picks steps", () => {
     const now = new Date(2026, 9, 11, 9, 0)
-    const document = olderDoc()
+    const document = upToDateDoc()
+    const before = document.documentElement.outerHTML
     expect(Migrations.run(document, { now }, [])).toEqual([])
-    expect(document.querySelector("epic-updated")).not.toBeNull()
-    expect(Migrations.run(document, { now })).toEqual(["updates-as-epic-update", "stable-phase-ids"])
-    const update = document.querySelector("#p-one > epic-update")!
-    expect([
-      update.getAttribute("at"),
-      update.getAttribute("summary"),
-      update.previousElementSibling?.localName
-    ]).toEqual(["2026-10-05 10:00", "Moved the log", "epic-field"])
     expect(Migrations.run(document, { now })).toEqual([])
-  })
-})
-
-describe("EngineAssetRoutes", () => {
-  test("an epic page loads the engine from its routes;  on command only (not every edit);  once", () => {
-    const { document } = parseHTML(
-      '<html><head><link rel="stylesheet" href="../../packages/epics/tools/_assets/spell-doc.css" /></head><body>' +
-        '<ui-root><ui-components source="../../packages/epics/components/__pack/epics.pack.js"></ui-components>' +
-        '<epic-page epic="x"></epic-page></ui-root><script src="../../packages/epics/tools/_assets/spell-ui.js"></script>' +
-        "</body></html>"
-    )
-    const doc = document as unknown as Document
-    const notes: string[] = []
-    const now = new Date(2026, 9, 17)
-    expect(Migrations.named("engine-asset-routes")?.everyEdit).toBe(false)
-    expect(Migrations.run(doc, { now, notes }, ["engine-asset-routes"])).toEqual(["engine-asset-routes"])
-    expect(notes).toEqual([
-      "engine-asset-routes:  ../../packages/epics/tools/_assets/spell-doc.css -> /_epic/assets/spell-doc.css",
-      "engine-asset-routes:  ../../packages/epics/tools/_assets/spell-ui.js -> /_epic/assets/spell-ui.js",
-      "engine-asset-routes:  ../../packages/epics/components/__pack/epics.pack.js -> /_epic/pack/epics.pack.js"
-    ])
-    expect(doc.querySelector("ui-components")!.getAttribute("source")).toBe("/_epic/pack/epics.pack.js")
-    expect(Migrations.run(doc, { now }, ["engine-asset-routes"])).toEqual([])
-  })
-})
-
-describe("UnstackableTables", () => {
-  test("every <ui-table> unstackable, its own words after;  one that asks to stack listed;  on command only;  once", () => {
-    const { document } = parseHTML(
-      `<html><body><main><epic-page epic="x" title="X"><epic-item id="t8" title="T">` +
-        `<epic-reply from="Claude" at="2026-10-19 16:40"><ui-table compact celled><table><tr><td>a</td></tr></table>` +
-        `</ui-table></epic-reply></epic-item>` +
-        `<ui-table celled compact striped unstackable><table><tr><td>b</td></tr></table></ui-table>` +
-        `<epic-original><ui-table><table><tr><td>history</td></tr></table></ui-table></epic-original>` +
-        `<ui-table celled stack-by="container"><table><tr><td>a demo</td></tr></table></ui-table>` +
-        `<epic-code title="x.html"><pre>&lt;ui-table&gt;</pre></epic-code>` +
-        `</epic-page></main></body></html>`
-    )
-    const doc = document as unknown as Document
-    const notes: string[] = []
-    const now = new Date(2026, 9, 19)
-    expect(Migrations.named("unstackable-tables")?.everyEdit).toBe(false)
-    expect(Migrations.run(doc, { now, notes }, ["unstackable-tables"])).toEqual(["unstackable-tables"])
-    expect(Array.from(doc.querySelectorAll("ui-table"), (table) => table.outerHTML.split("<table>")[0])).toEqual([
-      '<ui-table compact="" celled="" unstackable="">',
-      '<ui-table celled="" compact="" striped="" unstackable="">',
-      '<ui-table unstackable="">',
-      '<ui-table celled="" stack-by="container">'
-    ])
-    expect(notes).toEqual([
-      "unstackable-tables:  2 <ui-table>s made unstackable",
-      "unstackable-tables:  LEFT:  <ui-table>:  asks to stack (a demo of stacking?)"
-    ])
-    expect(Migrations.run(doc, { now }, ["unstackable-tables"])).toEqual([])
+    expect(document.documentElement.outerHTML).toBe(before)
   })
 })
 
@@ -144,42 +73,5 @@ describe("UpdateSummary", () => {
   test("of nodes:  their text, a space between blocks", () => {
     const { document } = parseHTML("<div><p>First</p><p>block. Second.</p></div>")
     expect(UpdateSummary.of(document.querySelector("div")!.childNodes)).toBe("First block")
-  })
-})
-
-describe("owen-types-to-you-type", () => {
-  const page = (body: string) =>
-    parseHTML(`<html><body><main><epic-page epic="x" title="X">${body}</epic-page></main></body></html>`)
-      .document as unknown as Document
-  const step = Migrations.named("owen-types-to-you-type")!
-  const context = { now: new Date() }
-
-  test('"Owen types" becomes "You type" at a sentence\'s start, "you type" inside one;  twice:  nothing more', () => {
-    const doc = page(
-      `<ul><li>Owen types <code>epic list</code>.</li><li>Then Owen types it again. Owen types more.</li></ul>`
-    )
-    expect(step.run(doc, context)).toBe(true)
-    expect(doc.querySelector("ul")!.textContent).toBe("You type epic list.Then you type it again. You type more.")
-    expect(step.run(doc, context)).toBe(false)
-  })
-
-  test("records stay as written:  his quoted words, code, the log, the kickoff prompt", () => {
-    const doc = page(
-      `<q>Owen types fast</q><code>Owen types</code><epic-event at="x">Owen types it</epic-event>` +
-        `<epic-aside title="Owen's words"><p>Owen types</p></epic-aside><epic-prompt><p>Owen types</p></epic-prompt>`
-    )
-    expect(step.run(doc, context)).toBe(false)
-    expect(doc.querySelector("q")!.textContent).toBe("Owen types fast")
-  })
-
-  test("an item's or phase's title attribute too", () => {
-    const doc = page(
-      `<epic-item id="t1" title="Every box Owen types in grows"></epic-item><epic-phase id="p1" title="Owen types less"></epic-phase>`
-    )
-    expect(step.run(doc, context)).toBe(true)
-    expect([
-      doc.querySelector("epic-item")!.getAttribute("title"),
-      doc.querySelector("epic-phase")!.getAttribute("title")
-    ]).toEqual(["Every box you type in grows", "You type less"])
   })
 })

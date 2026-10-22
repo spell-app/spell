@@ -8,7 +8,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { Fuss, run } from "../../src/tools/fuss"
+import { Fuss, run } from "spell-epic/tools/fuss"
 
 const SCRATCH = realpathSync(mkdtempSync(join(tmpdir(), "fuss-")))
 afterAll(() => rmSync(SCRATCH, { recursive: true, force: true }))
@@ -160,17 +160,17 @@ describe("dense", () => {
 })
 
 describe("jargon", () => {
-  test('`packages/ui` bans "the fork", in any case;  other packages don\'t', () => {
+  test('spell-ui bans "the fork", in any case;  other packages don\'t', () => {
     const source = "/* The fork's instance API */\nexport const api = {}\n"
-    expect(Fuss.check("/repo/packages/ui/src/a.ts", source)).toMatchObject([
+    expect(Fuss.check("/kit/spell-ui/src/a.ts", source)).toMatchObject([
       { line: 1, kind: "jargon", why: 'says "the fork", "fork\'s"' }
     ])
-    expect(found("/repo/packages/server/src/a.ts", source)).toEqual([])
+    expect(found("/kit/src/server/a.ts", source)).toEqual([])
   })
 
   test("never inside a code span;  in HTML pages too", () => {
-    expect(found("/repo/packages/ui/a.md", "Made by `the fork` itself.\n")).toEqual([])
-    expect(found("/repo/packages/ui/a.html", "<p>Made by the fork.</p>\n")).toEqual([[1, "jargon"]])
+    expect(found("/kit/spell-ui/a.md", "Made by `the fork` itself.\n")).toEqual([])
+    expect(found("/kit/spell-ui/a.html", "<p>Made by the fork.</p>\n")).toEqual([[1, "jargon"]])
   })
 })
 
@@ -224,7 +224,7 @@ describe("path-in-prose", () => {
 
   test("NOT a name:  a folder, a package, an alias, a file alone, a route, a URL, a date, a command naming a file", () => {
     const text = [
-      "In `packages/docs/`, `spell-ui`, `$/epics/tool/PlanParts`, `fuss.ts`, `/api/review/inbox`,",
+      "In `packages/docs/`, `spell-ui`, `spell-epic/tool/PlanParts`, `fuss.ts`, `/api/review/inbox`,",
       "https://example.com/a/b/c.html, 10/9/26, read/write/check, `yarn tsx tools/doc-links.js page`."
     ].join("\n")
     expect(found("a.md", text).filter(([, kind]) => kind === "path-in-prose")).toEqual([])

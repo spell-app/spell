@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 
-import { AS } from "spell-kit/assembler"
+import { SRV } from "spell-kit/server"
 
 /****************
  * ### `PlanParts`
@@ -10,14 +10,14 @@ import { AS } from "spell-kit/assembler"
  * `PLAN-DOC.md` beside this, "Parts".
  * - the parts' FILES and URLS:  where a part lives (`partFile()`), reading one (`reader()`), rebasing a body's
  *   relative URLs to `parts/` and back (`rebase()`), formatting and writing (`formatHTML()`, `writeChanged()`)
- * - `EpicParts` beside this splits and assembles a doc on them;  so does the converter (`$/epics/convert`), whose
+ * - `EpicParts` beside this splits and assembles a doc on them;  so does the converter (`spell-epic/convert`), whose
  *   first pass also assembles a doc in the old markup (`OldParts`)
  * - a part is told from a page by its FOLDER, `parts/`:  every page walker skips it (`pages.js` `findPages()`:  the
  *   `docs index`, `docs update`;  `relocate.js`;  `spell ssr`), so a part is never taken for a page (Q12)
  * - `.html` only:  the `.htm` of a doc split before Q12 is read no more (epic `epic-components` P15:  every doc was
  *   converted, and its parts written `.html`, at P12)
  * - STATIC:  every helper works on paths, URLs or the element it's given, never a document of its own
- * - Node only (`node:fs`, oxfmt through `$/assembler`):  NOT in the `$/epics` barrel, imported by path.
+ * - Node only (`node:fs`, oxfmt through `spell-kit/server`):  NOT in the `spell-epic` barrel, imported by path.
  ****************/
 export class PlanParts {
   ////////////////
@@ -67,10 +67,10 @@ export class PlanParts {
 
   /**
    * `html` formatted as `vp fmt` would format the file at `file` (its extension picks the parser), in this
-   * process:  `$/assembler`'s `formatHTML()`.  Throws on a parse error.
+   * process:  `spell-kit/server`'s `formatHTML()`.  Throws on a parse error.
    */
   static formatHTML(file: string, html: string): Promise<string> {
-    return AS.formatHTML(file, html)
+    return SRV.formatHTML(file, html)
   }
 
   /**
@@ -115,7 +115,7 @@ export const PART_FILE = /^([\w-]+)\.html$/
 /** The comment a part file starts with (`EpicParts` writes it):  stripped when assembling. */
 export const PART_COMMENT = /^\s*plan-doc part\b/
 
-/** URL attributes `SourceMarkup` rewrites against a body's `source` (`URL_ATTRIBUTES` in `$/ui` elements). */
+/** URL attributes `SourceMarkup` rewrites against a body's `source` (`URL_ATTRIBUTES` in `spell-ui` elements). */
 const URL_ATTRIBUTES = ["href", "src", "action", "poster", "source"]
 
 /** Is `url` relative to the document it's in (not empty, a hash, absolute, or from the root)? */

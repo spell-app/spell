@@ -36,7 +36,7 @@
  *   - Send:  the header's button idle -> unsent -> sent;  the marks outlined
  * - Claude's side, by the epic tool on the copy (`PlanDocCommands`), the page reloaded after each:
  *   - Do Now without a note on an item:
- *     - `inbox listen`, `inbox wait` takes it:  its button outlined, its icon turning (`data-busy`)
+ *     - `inbox watch`, `inbox wait` takes it:  its button outlined, its icon turning (`data-busy`)
  *     - `status underway`:  a blue Underway card, the item `progress`
  *     - `status done`:  the card green
  *     - `inbox done`:  Do Now CLEARED (`review-as="now"`:  the buttons are Owen's input, the chip carries the result)
@@ -66,7 +66,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "../config/EpicConfig.ts"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
@@ -78,7 +78,7 @@ const TSCONFIG = join(ROOT, "tsconfig.json")
 if (!process.env.CHECK_REVIEW_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", "--import", import.meta.resolve("spell-kit/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,
@@ -90,9 +90,9 @@ if (!process.env.CHECK_REVIEW_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
-const { PlanDocCommands } = await import("../tool/PlanDocCommands.ts")
-const { PlanDocFiles } = await import("../tool/PlanDocFiles.ts")
-const { ReviewInbox } = await import("../tool/ReviewInbox.ts")
+const { PlanDocCommands } = await import("spell-epic/tool/PlanDocCommands.ts")
+const { PlanDocFiles } = await import("spell-epic/tool/PlanDocFiles.ts")
+const { ReviewInbox } = await import("spell-epic/tool/ReviewInbox.ts")
 
 ////////////////
 // ## Settings
@@ -127,7 +127,7 @@ if (existsSync(inboxFile)) {
 }
 copyDoc()
 
-// the tool links a doc's bare file names (`AS.Linker`) through its checkout's `packages/`:  shots/ has none
+// the tool links a doc's bare file names (`SRV.Linker`) through its checkout's `packages/`:  shots/ has none
 mkdirSync(join(SHOTS, "packages"), { recursive: true })
 
 /** The epic tool, on the copy:  what Claude runs, its output kept for the summary. */
@@ -457,7 +457,7 @@ async function run() {
   })
 
   // Claude listens and takes it:  outlined, its icon turning
-  await tool.run(["inbox", docName, "listen", "--session", SESSION])
+  await tool.run(["inbox", docName, "watch", "--session", SESSION])
   await tool.run(["inbox", docName, "wait", "--timeout", "5", "--json"])
   await open(page)
   expect("listening:  the header's tooltips", (await headerState(page)).nobody, false)
@@ -582,7 +582,7 @@ async function run() {
   const woke = said.slice(heard).join("\n")
   expect("inbox wait:  woken by a send with only a comment", code ?? 0, 0)
   expect("inbox wait:  prints the comment", woke.includes(COMMENT) && /1 comment\)/.test(woke), true)
-  await tool.run(["inbox", docName, "unlisten"])
+  await tool.run(["inbox", docName, "ignore"])
 
   await layouts(context)
   summary.inbox = await readInbox(page)

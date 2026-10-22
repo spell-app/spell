@@ -99,7 +99,7 @@ _The session's process runs inside its window's extension host, so its parent pr
 | Operation | What it does |
 | --- | --- |
 | `show-doc` | shows a page in the Epic Docs or Review view, landing on an id, with a query (`test=1` for a test run) |
-| `reload-view` | rebuilds a view from scratch, at the page it shows |
+| `reload` | rebuilds a view from scratch, at the page it shows |
 | `add-folder` | adds a folder to the window:  only to a window opened from a saved window file |
 | `remove-folder` | removes a folder `add-folder` put there;  never the first |
 | `open-session` | opens a Claude session in an editor tab, or a new one, with a prompt TYPED in, never sent:  you press Enter |

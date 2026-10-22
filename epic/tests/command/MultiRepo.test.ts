@@ -27,12 +27,12 @@ import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { MainMerge } from "$/epics/command/MainMerge"
-import { Requests } from "$/epics/command/Requests"
-import { WorktreeGuard } from "$/epics/command/WorktreeGuard"
-import { Worktrees } from "$/epics/command/Worktrees"
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { SessionFolders } from "$/epics/config/SessionFolders"
+import { MainMerge } from "spell-epic/command/MainMerge"
+import { Requests } from "spell-epic/command/Requests"
+import { WorktreeGuard } from "spell-epic/command/WorktreeGuard"
+import { Worktrees } from "spell-epic/command/Worktrees"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { SessionFolders } from "spell-epic/config/SessionFolders"
 
 /** The plugin's worktree hook, and the window script. */
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..")

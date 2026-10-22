@@ -1,9 +1,9 @@
 /**
- * Types of `$/epics/markup`:  reading, writing and checking an epic page's `<epic-*>` markup.
+ * Types of `spell-epic/markup`:  reading, writing and checking an epic page's `<epic-*>` markup.
  * - Bottom of the folder's import graph:  `import type` only.  `markup.types` <- `MarkupCheck` <- `Markup`.
  */
 
-import type { EpicTag } from "$/epics/definitions"
+import type { EpicTag } from "spell-epic/definitions"
 
 ////////////////
 // ## Writing

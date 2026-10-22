@@ -2,17 +2,17 @@
  * Types, tables and the error class of the epic tool:
  * `PlanReader` (reading a doc), `PlanDoc` (editing one in `<epic-*>` markup) and the command line.
  * Rules, ids and what's data:  `PLAN-DOC.md` beside this.
- * - At the BOTTOM of the tool folder's import graph:  `import type` only, apart from `$/epics`' definitions (data),
+ * - At the BOTTOM of the tool folder's import graph:  `import type` only, apart from `spell-epic`'s definitions (data),
  *   so nothing here loads a class module (WWOD §8).
  *   The graph:  `PlanReader` <- `PlanDoc` <- `PlanDocFiles` <- `PlanDocCommands`.
- * - The ELEMENTS (tags, attributes, which children go where) are `$/epics/definitions`':
+ * - The ELEMENTS (tags, attributes, which children go where) are `spell-epic/definitions`':
  *   this file holds only what the tool adds on top --
  *   item kinds as the command line names them, review filters, result shapes.
  * - `Prettify<>` (the toolchain's global types, `spell-kit/toolchain/types`, in `tsconfig.json`'s `"types"`)
  *   wraps the combined types.
  */
 
-import type { ItemSectionKind } from "$/epics/definitions"
+import type { ItemSectionKind } from "spell-epic/definitions"
 
 ////////////////
 // ## Errors
@@ -211,7 +211,7 @@ export type ItemFacts = {
   reviewAs: string | undefined
 }
 
-/** One item (or an Overview sub-section), as `PlanReader.describeItem()` says it for `plan-doc inbox`. */
+/** One item (or an Overview sub-section), as `PlanReader.describeItem()` says it for `epic inbox`. */
 export type ItemDescription = {
   /** its id, upper case:  `C3` */
   id: string
@@ -644,7 +644,7 @@ export type PlanDocParts = {
 /**
  * Text and markup the OLD markup wrote that the `<epic-*>` elements now DRAW, from their attributes or position.
  * Narrowly, by these patterns:
- * - the converter (`$/epics/convert`) drops it
+ * - the converter (`spell-epic/convert`) drops it
  * - the proof leaves it out of the comparison
  * - the tool's way in (`IncomingHtml`, `ProseRewrite`) reads an old option card or reply by them
  *
@@ -704,7 +704,7 @@ export function replyTitleParts(title: Element): { from: string; at: string; re:
  * The hand-written prose blocks older docs (and agents taught by them) wrote, which P14's elements now draw.
  * - their ONE set of rules is `ProseShapes`
  * - shared by the tool's way in (`IncomingHtml`) and the converter's second pass
- *   (`$/epics/convert` `Upgrader`, which re-exports these in `convert.types`)
+ *   (`spell-epic/convert` `Upgrader`, which re-exports these in `convert.types`)
  */
 export const ProseBlocks = {
   code: "ui-accordion.spell-code",

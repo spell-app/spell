@@ -7,9 +7,9 @@ import {
   type EpicData,
   type EpicTag,
   type PageSectionKind
-} from "$/epics/definitions"
-import { Markup, type MarkupContent } from "$/epics/markup"
-import { PhaseIds } from "$/epics/phases"
+} from "spell-epic/definitions"
+import { Markup, type MarkupContent } from "spell-epic/markup"
+import { PhaseIds } from "spell-epic/phases"
 
 import {
   CALM_ID,
@@ -65,7 +65,7 @@ import { SUMMARY_ID } from "./ReviewInbox"
  * ### `PlanDoc`
  * A parsed epic page in `<epic-*>` markup, `epics/<name>/<name>.plan.html`, and the edits `epic` makes
  * to it.  What's data (ids, statuses, review marks, dates):  `PLAN-DOC.md` beside this.
- * - Every edit makes or sets `<epic-*>` elements THROUGH `$/epics` `Markup`:  data in attributes, prose in children,
+ * - Every edit makes or sets `<epic-*>` elements THROUGH `spell-epic` `Markup`:  data in attributes, prose in children,
  *   checked against the definitions.  It never writes layout:  the elements draw their chrome (chips, labels, the
  *   step label, progress, a phase's Plan changes box, the Plan hung? notice ...).
  * - Children go where their parent's content model lists them (`Markup.place()`):  a phase's Symptom before its Goal, an
@@ -512,8 +512,9 @@ export class PlanDoc extends PlanReader {
   /**
    * Bring this doc's markup up to today's, as every edit does (`Migrations.everyEdit`:  the cheap markup steps,
    * idempotent);  returns the steps that changed something.
-   * - the rest (`links-agree`) run only on command:  `epic migrate` (`MigrateCommands`)
-   * - SIDE EFFECT:  logs them, `migrated:  updates-as-epic-update`
+   * - none today (epic `repo-split` Q45 took the old ones);  the rest (`links-agree`) run only on command:
+   *   `epic migrate` (`MigrateCommands`)
+   * - SIDE EFFECT:  logs them, `migrated:  <step>`
    */
   migrate(): string[] {
     const ran = Migrations.run(this.document, { now: this.now }, undefined, Migrations.everyEdit)
@@ -810,7 +811,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Item `id` is urgent (`calm` false) or not (`calm` true):  Owen's click on its id chip, applied (`plan-doc inbox
+   * Item `id` is urgent (`calm` false) or not (`calm` true):  Owen's click on its id chip, applied (`epic inbox
    * apply`);  returns what it did, for the log (`not urgent`), or `undefined` when it already was.
    * - only a judgement call or an issue:  throws for any other item, or an id the doc doesn't have
    */
@@ -1273,6 +1274,50 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * Condense item `id` after a lot of back and forth:  `html`, Claude's condensed text, REPLACES what the item shows,
+   * and everything that was there moves into its Original Discussion, folded (`epic summarize`;  Owen, epic
+   * `repo-split` J141:  "(re-)condense the text/conversations in that section ... It gets to be too much to read").
+   * Returns its title, and how many blocks moved.
+   * - moved, as ONE version (`keepOriginal()`, cards as the prose they said):  its text, every reply (Owen's and
+   *   Claude's), More Details, Choices nobody picked, asides, code
+   * - stays where it is:
+   *   - the question as asked (`<epic-question>`), the answer, Choices with Owen's pick (`chosen`)
+   *     - a picked set inside a moved reply is copied out to the item, so the pick still shows;  the reply keeps it too
+   *   - Claude's status cards and anything else slotted, the Original Discussion itself, commits
+   *   - Owen's marks:  the item's attributes (reviewed, calm, queued ...) are untouched
+   * - `html` as `details` takes it (old shapes become elements:  `IncomingHtml`);  a question gets no new
+   *   `<epic-question>`:  the one asked stays
+   * - stamped (`changed`);  NOT flagged UPDATE:  the item says what it said, shorter
+   * - throws for no text, or an item with nothing to condense (its text is the condensed text already)
+   */
+  condense(id: string, html: string): { title: string; moved: number } {
+    const item = this.item(id)
+    const nodes = this.incoming(html)
+    if (!nodes.some((node) => PlanMarkup.isElement(node) || !PlanMarkup.isBlank(node)))
+      throw new PlanDocError(`${id.toUpperCase()}:  the condensed text is empty`)
+    const moved = Array.from(item.childNodes).filter((node) => !staysOnCondense(node))
+    if (!moved.some((node) => PlanMarkup.isElement(node) || !PlanMarkup.isBlank(node)))
+      throw new PlanDocError(`${id.toUpperCase()}:  nothing to condense`)
+    const picked = moved.flatMap((node) =>
+      PlanMarkup.isElement(node)
+        ? Array.from(node.querySelectorAll("epic-choices[chosen]"), (set) => set.cloneNode(true))
+        : []
+    )
+    for (const node of moved) node.remove()
+    this.keepOriginal(item, moved)
+    for (const node of [...nodes, ...picked]) Markup.place(item, node)
+    this.stamp(item)
+    return { title: PlanItem.titleOf(item), moved: moved.filter((node) => PlanMarkup.isElement(node)).length }
+
+    /** What condensing leaves:  the rewrite's keepers, the question as asked, and Choices Owen picked from. */
+    function staysOnCondense(node: Node): boolean {
+      if (!PlanMarkup.isElement(node)) return false
+      if (node.hasAttribute("slot") || KEPT_ON_REWRITE.includes(node.localName)) return true
+      return node.localName === "epic-question" || (node.localName === "epic-choices" && node.hasAttribute("chosen"))
+    }
+  }
+
+  /**
    * Keep Owen's note -- `mark.note`, a mark Claude took and is clearing (`inbox done | clear`) -- in item `id`, as his
    * own reply:  `<epic-reply from="Owen" at="2026-10-06 10:42" re="revisit soon"><p>note</p></epic-reply>`.
    * - placed before the first reply dated at or after the note (Claude's answer to it), else after the replies
@@ -1423,8 +1468,8 @@ export class PlanDoc extends PlanReader {
     const card = this.underwayCard(host)
     if (!card)
       throw new PlanDocError(
-        `${id.toUpperCase()} has no underway status card:  \`status <name> ${id} underway "<reading>"\` first ` +
-          `(or \`status <name> ${id} noted "<what was recorded>"\` when you only recorded Owen's choice)`
+        `${id.toUpperCase()} has no underway status card:  \`epic update <name>#${id} underway "<reading>"\` first ` +
+          `(or \`epic update <name>#${id} noted "<what was recorded>"\` when you only recorded Owen's choice)`
       )
     Markup.set<"epic-status">(card, { state, doneAt: PlanTime.clockTime(this.now) })
     for (const block of this.statusBlocks(summary ?? "")) {
@@ -1679,18 +1724,6 @@ export class PlanDoc extends PlanReader {
     const was = this.bedtime
     Markup.set(this.page, { bedtime: undefined })
     return was
-  }
-
-  /**
-   * Remove an older doc's `#overnight` section;  was there one?
-   * - `/bedtime` wrote a report section on top of the doc until 2026-10-05 (D5 of `review-review`);
-   *   the converter keeps one it finds, outside `<epic-page>`,
-   *   until Owen has read it and runs `overnight <name> remove`
-   */
-  removeOvernight(): boolean {
-    const section = this.document.getElementById("overnight")
-    section?.remove()
-    return Boolean(section)
   }
 
   ////////////////

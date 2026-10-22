@@ -98,16 +98,16 @@ _Your marks travel through the page server;  answers land IN the items, never on
    The marks turn OUTLINED.
 4. If no session is listening, the page server types `/epic review <name>` into the epic's session,
    or opens a new tab in its window;  you press Enter.
-5. The session listens (`epic inbox <name> listen`), then waits in the background and ends its turn.
+5. The session listens (`epic inbox watch <name>`), then waits in the background and ends its turn.
    Its `wait` returns when marks arrive, waking it with a list of them.
-6. `epic inbox <name> apply` applies the mechanical marks:
+6. `epic inbox apply <name>` applies the mechanical marks:
    approvals, picks, todos, a todo's plane or x, skips, new items, test results.
    Each logs a line;  a pick or a queued todo gets a "Noted" card saying what happens next.
 7. A revisit or a Do Now:  a blue "Underway" card says what the agent took the task to be;
    a background agent writes the answer into the item;  the card turns green, "Done".
    An answer with options turns the item ORANGE:  your pick.
 8. The page updates in place:  the buttons clear, the chips show the result.
-9. The session waits again;  `unlisten` when it leaves.
+9. The session waits again;  `ignore` when it leaves.
    Silent for 90 seconds, and the page says nobody is reviewing.
 
 - Review Now sends every mark AND turns each revisit waiting into a request for now:
@@ -260,7 +260,7 @@ Only the tool writes it, under a lock.
 - `wait` prints each mark with its item's id, kind, status and title, your note, and a pick's option:
 
   ```text
-  now (1):  start a background agent for each;  `epic inbox review-review#<id> done` after
+  now (1):  start a background agent for each;  `epic inbox done review-review#<id>` after
     - I1  issue, open · The phases' progress bar label is cut off at its left end
         Add Details
   sent 2026-10-04T17:32:26.086-04:00 (4 marks):

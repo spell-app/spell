@@ -2,8 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join, relative } from "node:path"
 
 // By file name, `.ts` and all:  plain `node` loads this file by path (the docs index, `src/tools/index.js`)
-import { EpicConfig } from "../config/EpicConfig.ts"
-import { DataFile } from "../data/DataFile.ts"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { DataFile } from "spell-epic/data/DataFile.ts"
 import { PlanDocError } from "./planDoc.types.ts"
 
 /** The sagas' shared folder, from the content folder:  `sagas/sagas.json5` and each saga's own folder. */
@@ -23,7 +23,7 @@ const SAGA_ID = /^[a-z][a-z0-9]*(-[a-z0-9]+)?$/
  * - Its page:  `sagas/<id>/<id>.saga.html` (`pageOf()`).
  * - Which epics serve it:  each epic page's `<epic-page saga="<id>">`;  which guides:  each guide's
  *   `<meta name="spell-saga" content="<id>">`.  Neither is kept here.
- * - Node only (`node:fs`):  NOT in the `$/epics` barrel, imported by path.
+ * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path.
  *   - JSON5, saved keeping any comment added by hand (`DataFile`, epic `epic-workflow` P21);  its old name,
  *     `sagas.json`, is read while there's no `.json5`
  * - Its position:  imports only node's own modules, `./planDoc.types.ts`, `../data/DataFile.ts` and
@@ -92,8 +92,8 @@ export class Sagas {
    */
   add(saga: Saga, { after }: { after?: string } = {}): void {
     const sagas = this.list()
-    if (sagas.some((each) => each.id === saga.id)) throw new SagaError(`saga new:  "${saga.id}" is a saga already`)
-    const at = after === undefined ? sagas.length : this.indexOf(sagas, after, "saga new") + 1
+    if (sagas.some((each) => each.id === saga.id)) throw new SagaError(`saga create:  "${saga.id}" is a saga already`)
+    const at = after === undefined ? sagas.length : this.indexOf(sagas, after, "saga create") + 1
     sagas.splice(at, 0, saga)
     this.save(sagas)
   }

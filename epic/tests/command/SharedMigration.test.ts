@@ -4,8 +4,8 @@ import { tmpdir } from "os"
 import { dirname, join } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Shared } from "$/epics/command/Shared"
-import { SharedMigration } from "$/epics/command/SharedMigration"
+import { Shared } from "spell-epic/command/Shared"
+import { SharedMigration } from "spell-epic/command/SharedMigration"
 
 /**
  * A worktree cut before the cutover, migrated:

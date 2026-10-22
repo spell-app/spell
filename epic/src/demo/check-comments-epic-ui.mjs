@@ -64,7 +64,7 @@ const ROOT = resolve(HERE, "../..")
 if (!process.env.CHECK_EPIC_UI_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", "--import", import.meta.resolve("spell-kit/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,
@@ -76,9 +76,9 @@ if (!process.env.CHECK_EPIC_UI_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
-const { GuideInbox } = await import("../tool/GuideInbox.ts")
-const { RepoList } = await import("../server/RepoList.ts")
-const { packageDir } = await import("../tools/packageDir.ts")
+const { GuideInbox } = await import("spell-epic/tool/GuideInbox.ts")
+const { RepoList } = await import("spell-epic/server/RepoList.ts")
+const { packageDir } = await import("spell-epic/tools/packageDir.ts")
 const { componentSets, pageServerSettings } = await import("spell-kit/server/page/settings")
 
 const args = process.argv.slice(2)
@@ -315,7 +315,7 @@ async function checkWidth(width) {
     const section = document.querySelectorAll("main > .site-body ui-section[id]:not(ui-section ui-section)")[1]
     section?.scrollIntoView({ block: "center" })
     // its title:  `label`, or `header`, its old name (spell-app's epic `property-editor` P10)
-    return { hovered: section?.id, header: section?.getAttribute("label") ?? section?.getAttribute("header") }
+    return { hovered: section?.id, header: section?.getAttribute("label") }
   })
   // its title, drawn in its shadow root (the host itself has no box of its own to aim at)
   await page.locator(`[id="${hovered}"]`).getByText(header, { exact: true }).first().hover().catch(() => {})

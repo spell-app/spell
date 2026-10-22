@@ -3,18 +3,27 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-kit/element"
 
-import { PlanDates } from "$/epics/dates"
+import { PlanDates } from "spell-epic/dates"
 // the card's shape and its dated band are the answer family's:  one card, its fills per element
-import { BODY, BODY_ID, DATE, DATED, EMPTY, HEADER, WHO, WHO_ID } from "$/epics/components/epic-answer/EpicAnswer.types"
+import {
+  BODY,
+  BODY_ID,
+  DATE,
+  DATED,
+  EMPTY,
+  HEADER,
+  WHO,
+  WHO_ID
+} from "spell-epic/components/epic-answer/EpicAnswer.types"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
-import { FOLDS, Fold } from "$/epics/components/epic-item/Fold"
+import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
 
 import { epicStatusVocabulary } from "./EpicStatus.en"
 
-import answerCSS from "$/epics/components/epic-answer/EpicAnswer.css?inline"
-import foldCSS from "$/epics/components/epic-item/Fold.css?inline"
+import answerCSS from "spell-epic/components/epic-answer/EpicAnswer.css?inline"
+import foldCSS from "spell-epic/components/epic-item/Fold.css?inline"
 import statusCSS from "./EpicStatus.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicStatus`

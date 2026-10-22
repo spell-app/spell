@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { keepingCommentsIn } from "spell-kit/util/node/json5"
-import { EpicUISite } from "$/epics/site/EpicUISite"
+import { EpicUISite } from "spell-epic/site/EpicUISite"
 
 const site = new EpicUISite()
 const isCheck = process.argv.includes("--check")

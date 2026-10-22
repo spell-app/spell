@@ -4,7 +4,7 @@ import { dirname, join, resolve } from "node:path"
 import JSON5 from "json5"
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 /**
  * The real `epic` command, end to end:  `bin/epic` run as a separate process, as a user would.
@@ -68,10 +68,10 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
     })
 
     test("<group> <verb> --help:  that verb's own help, not the group's", () => {
-      const { status, stdout } = epic(["ask", "new", "--help"])
+      const { status, stdout } = epic(["ask", "create", "--help"])
       expect(status).toBe(0)
-      expect(stdout).toMatch(/^Usage: epic ask new <slug> /)
-      expect(stdout).toMatch(/\nExample:\n {2}epic ask new pick-layout/)
+      expect(stdout).toMatch(/^Usage: epic ask create <slug> /)
+      expect(stdout).toMatch(/\nExample:\n {2}epic ask create pick-layout/)
       const group = epic(["comments", "--help"])
       expect(group.stdout).toMatch(/^Usage: epic comments <verb> \[arguments\]\n/)
       expect(group.stdout).toMatch(/^ {2}working +Claude is thinking/m)
@@ -85,7 +85,7 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       const grouped = epic(["ask", "bogus"])
       expect(grouped.status).toBe(1)
       expect(grouped.stderr).toContain(
-        "epic ask bogus?  no such verb.  The verbs:\n  new, show, wait, answer, draft, list, sweep"
+        "epic ask bogus?  no such verb.  The verbs:\n  create, show, wait, answer, draft, list, sweep"
       )
     })
 
@@ -95,14 +95,13 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       expect(stderr).toContain("epic close unified-server#J3")
     })
 
-    test("file:  the phase after a #;  add-request, its old name, runs it, hidden", () => {
-      expect(epic(["--help"]).stdout).not.toMatch(/^ {2}add-request /m)
+    test("file:  the phase after a #;  a request it doesn't have:  a usage error", () => {
       const old = epic(["file", "unified-server", "r3", "7"])
       expect(old.status).toBe(2)
       expect(old.stderr).toContain("epic file unified-server#P7 r3")
-      const alias = epic(["add-request", "unified-server#P1", "r999"])
-      expect(alias.status).toBe(2)
-      expect(alias.stderr).toContain("no request 'r999' in epic 'unified-server'")
+      const missing = epic(["file", "unified-server#P1", "r999"])
+      expect(missing.status).toBe(2)
+      expect(missing.stderr).toContain("no request 'r999' in epic 'unified-server'")
     })
 
     test("an epic page's verb runs the `epic` tool", () => {
@@ -117,12 +116,27 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       expect(stderr).toContain("takes an epic, not unified-server#J3")
     })
 
-    // epic `epic-eject` I5:  the tool in its own order, `epic plan-doc ...` (spell-app's old `spell dev plan-doc` handed on to it)
-    test("plan-doc:  the epic tool in its own order, hidden", () => {
-      expect(epic(["--help"]).stdout).not.toMatch(/^ {2}plan-doc /m)
-      const { status, stdout } = epic(["plan-doc", "summary", "unified-server"])
-      expect(status).toBe(0)
-      expect(stdout).toMatch(/^Unified Server\n {2}\[x\] P1 · Library Core/)
+    // epic `repo-split` P13:  Owen's names, and no stand-ins for the old ones
+    test("create, lint, summarize, status, window should-stay | reload:  Owen's names;  the old ones are unknown", () => {
+      expect(epic(["create", "--help"]).stdout).toMatch(/^Usage: epic create <epic> \[--title "Title"\]/)
+      expect(epic(["lint", "--help"]).stdout).toMatch(/^Usage: epic lint <epic> \[--no-browser\] \[--links\]/)
+      expect(epic(["summarize", "--help"]).stdout).toMatch(/^Usage: epic summarize <epic>#J3 --file <condensed.html>/)
+      expect(epic(["status", "--help"]).stdout).toMatch(/^Usage: epic status \[--json\]/)
+      expect(epic(["update", "--help"]).stdout).toMatch(/<epic>#J3 underway \| done \| noted/)
+      expect(epic(["window", "should-stay", "--help"]).stdout).toMatch(/^Usage: epic window should-stay \[--epic\]/)
+      expect(epic(["window", "reload", "--help"]).stdout).toMatch(/^Usage: epic window reload \[--review\]/)
+      for (const old of ["new", "check", "overnight", "add-request", "plan-doc", "stock"]) {
+        const { status, stderr } = epic([old, "unified-server"])
+        expect(status).toBe(1)
+        expect(stderr).toContain(`epic ${old}?  no such verb.`)
+      }
+    })
+
+    test("inbox:  its own verb first;  the old order refused, spelled right", () => {
+      expect(epic(["inbox", "--help"]).stdout).toMatch(/^Usage: epic inbox \[watch \| ignore \| wait \| apply\] <epic>/)
+      const old = epic(["inbox", "unified-server", "wait"])
+      expect(old.status).toBe(2)
+      expect(old.stderr).toContain("epic inbox wait unified-server  (the inbox's verb goes first)")
     })
 
     test("home, and every other verb, answers in the lean program (no hand-over to main.ts since epic-eject P5)", () => {
@@ -135,7 +149,7 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       const { stdout } = epic(["--help"])
       for (const heading of ["Worktrees, sessions and parked work:", "Shared content:", "Windows and the page server:"])
         expect(stdout).toContain(heading)
-      for (const verb of ["worktree", "session", "park", "stock", "shared", "window", "server"])
+      for (const verb of ["worktree", "session", "park", "status", "shared", "window", "server"])
         expect(stdout).toMatch(new RegExp(`^ {2}${verb} `, "m"))
       expect(epic(["worktree", "merge-main", "--help"]).stdout).toMatch(
         /^Usage: epic worktree merge-main \[--continue\]/

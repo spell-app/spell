@@ -1,5 +1,5 @@
-import { Formats, type EpicData, type EpicTag } from "$/epics/definitions"
-import { Markup, type MarkupContent } from "$/epics/markup"
+import { Formats, type EpicData, type EpicTag } from "spell-epic/definitions"
+import { Markup, type MarkupContent } from "spell-epic/markup"
 
 import { Chrome, Drawn, LABELLED_BLOCK, ProseBlocks, ProseCounted, replyTitleParts } from "./planDoc.types"
 
@@ -24,7 +24,7 @@ import { ProseShapes } from "./ProseShapes"
  *   takes that element
  * - a block in another shape stays prose, as it is, and its owner is told (`keep()`)
  * - Two owners:  the epic tool's way in (`IncomingHtml`, through `plain()`:  the elements made through `Markup`,
- *   nothing counted) and the converter's second pass (`$/epics/convert` `Upgrader`, which counts and notes each).
+ *   nothing counted) and the converter's second pass (`spell-epic/convert` `Upgrader`, which counts and notes each).
  *   One class, so both turn every shape the same way (epic `epic-components` T23).
  * - Works on its owner's document:  the prose inside MOVES into the new elements, never re-made.
  ****************/

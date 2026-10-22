@@ -1,11 +1,11 @@
 /**
- * Comments on docs pages and epic pages, on the page server:  a ROUTE MODULE (`$/server/page`'s `RouteModule`),
+ * Comments on docs pages and epic pages, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`),
  * listed in the repo root's `package.json` `"pageServer": { "routes": [...] }` (epic `airplane`, P11).
  * - A COMMENT:  what Owen writes on one block of a page, from the bullhorn beside it, or on text he selected there.
  *   - selected text:  ⌘ I, or the floating bullhorn
  *   - the page's side:  `_assets/spell-doc-runtime.js`, "Comments"
  *   - no Claude needed, so it works on a plane
- *   - its shape and every change to it:  `CommentList` (`$/epics/tool/CommentList`)
+ *   - its shape and every change to it:  `CommentList` (`spell-epic/tool/CommentList`)
  * - Where it's kept (`inboxOf()`):
  *   - a docs page's:  its own inbox file, `<page>.inbox.json5` beside it (`GuideInbox`);
  *     its Send hands them to the session of the epic the page belongs to (below);
@@ -34,7 +34,7 @@
  *     - `unsent`:  the ids of the comments a Send would hand over
  *     - `waiting`:  every comment waiting for Claude, sent or not
  * - `POST /api/docs/comments/send` `{ page }` -- a docs page's SEND (P13):  every comment waiting so far is sent
- *   (`GuideInbox.markSent()`), and the epic's `plan-doc inbox <epic> wait` takes them
+ *   (`GuideInbox.markSent()`), and the epic's `epic inbox wait <epic>` takes them
  *   - nobody listening to the page's epic:  it WAKES that epic, as an epic page's Send does (P16,
  *     `ReviewStart.wakeFor()`);  a page no epic owns wakes `feedback` (epic `epic-engine` T9), once it's made
  *   - answers `{ ok, comments, send, wake }`;  `wake`:  what waking did, else `null`
@@ -78,8 +78,8 @@ import { join } from "node:path"
 
 import { SRV } from "spell-kit/server"
 import { COMPONENTS_PREFIX, type RouteModule } from "spell-kit/server/page"
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { DataFile } from "$/epics/data/DataFile"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { DataFile } from "spell-epic/data/DataFile"
 import {
   CommentList,
   CommentsError,
@@ -87,11 +87,11 @@ import {
   type CommentPlace,
   type IdentifiedComment,
   type Turn
-} from "$/epics/tool/CommentList"
-import { GuideInbox } from "$/epics/tool/GuideInbox"
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
-import { ReviewStart } from "$/epics/tool/ReviewStart"
-import { SeeAlso } from "$/epics/tool/SeeAlso"
+} from "spell-epic/tool/CommentList"
+import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { ReviewStart } from "spell-epic/tool/ReviewStart"
+import { SeeAlso } from "spell-epic/tool/SeeAlso"
 
 import { rowsFile } from "./choicesRoutes"
 

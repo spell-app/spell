@@ -1,15 +1,14 @@
 /**
  * Tests of the epic server's URL helpers:
  * - the engine routes a page's old asset links become (`engineUrlFor()`, `legacyEnginePath()`)
- * - the page rewrite the asset-route migrations run (`rewriteEngineLinks()`)
+ * - the engine's file behind a route (`engineFileFor()`)
  */
 import { join } from "node:path"
 
-import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { engineFileFor, linksEngineByPath, rewriteEngineLinks } from "$/epics/server/engineLinks"
-import { engineUrlFor, legacyEnginePath, PACK_URL, repoPrefixFor } from "$/epics/server/server.types"
+import { engineFileFor } from "spell-epic/server/engineLinks"
+import { engineUrlFor, legacyEnginePath, PACK_URL, repoPrefixFor } from "spell-epic/server/server.types"
 
 describe("engineUrlFor()", () => {
   test("an engine file by a checkout path, from any depth or the root, old folders too:  its route", () => {
@@ -41,27 +40,7 @@ describe("engineUrlFor()", () => {
   })
 })
 
-describe("rewriteEngineLinks()", () => {
-  /** A page as `epic new` wrote one before the routes:  the engine by checkout paths, and a source link. */
-  const OLD =
-    '<html><head><link rel="stylesheet" href="../../packages/epics/tools/_assets/spell-doc.css" /></head><body>' +
-    '<ui-root><ui-components source="../../packages/epics/components/__pack/epics.pack.js"></ui-components>' +
-    '<p><a href="../../packages/epics/tools/_assets/spell-ui.js">the bundle</a></p></ui-root>' +
-    '<script src="../../packages/epics/tools/_assets/spell-ui.js"></script></body></html>'
-
-  test("what the page loads, to the routes;  a link for a reader kept;  a second run changes nothing", () => {
-    const { document } = parseHTML(OLD)
-    expect(linksEngineByPath(OLD)).toBe(true)
-    expect(rewriteEngineLinks(document as unknown as Document)).toEqual([
-      { from: "../../packages/epics/tools/_assets/spell-doc.css", to: "/_epic/assets/spell-doc.css" },
-      { from: "../../packages/epics/tools/_assets/spell-ui.js", to: "/_epic/assets/spell-ui.js" },
-      { from: "../../packages/epics/components/__pack/epics.pack.js", to: "/_epic/pack/epics.pack.js" }
-    ])
-    expect(document.querySelector("a")!.getAttribute("href")).toBe("../../packages/epics/tools/_assets/spell-ui.js")
-    expect(rewriteEngineLinks(document as unknown as Document)).toEqual([])
-    expect(linksEngineByPath('<script src="/_epic/assets/spell-ui.js"></script>')).toBe(false)
-  })
-
+describe("engineFileFor()", () => {
   test("engineFileFor():  a route's file in the engine;  never outside its folder", () => {
     expect(engineFileFor("/_epic/assets/spell-ui.js", "/e")).toBe(join("/e", "src/tools/_assets/spell-ui.js"))
     expect(engineFileFor("/_epic/pack/epics.pack.js", "/e")).toBe(join("/e", "src/components/__pack/epics.pack.js"))

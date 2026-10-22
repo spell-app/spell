@@ -3,13 +3,13 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E } from "spell-kit/element"
 
 // the folded panel, shared with `<epic-aside>`:  its file, not the `epic-aside` barrel (which would define it here)
-import { EpicPanel } from "$/epics/components/epic-aside/EpicPanel"
+import { EpicPanel } from "spell-epic/components/epic-aside/EpicPanel"
 
 import { epicCodeVocabulary } from "./EpicCode.en"
 
-import panelCSS from "$/epics/components/epic-aside/EpicPanel.css?inline"
+import panelCSS from "spell-epic/components/epic-aside/EpicPanel.css?inline"
 import codeCSS from "./EpicCode.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicCode`

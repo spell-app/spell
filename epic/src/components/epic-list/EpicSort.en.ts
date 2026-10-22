@@ -4,7 +4,7 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "$/epics/definitions"
+import type { EpicVocabulary } from "spell-epic/definitions"
 
 /****************
  * ### `<epic-sort>`
@@ -19,7 +19,7 @@ export const epicSortVocabulary = {
   ui: false,
   description:
     "The Epics page's sort buttons (Owen, 2026-10-13:  \"Add buttons to epics header to sort by date or " +
-    "alphabetical\"):  A–Z sorts each group of every `<epic-list>` on the page by title, Date by when each epic " +
+    'alphabetical"):  A–Z sorts each group of every `<epic-list>` on the page by title, Date by when each epic ' +
     "was last worked on, newest first.  The one in use is pressed, and remembered in this browser.  The docs " +
     "runtime puts it in the Epics page's header.",
   attributes: [],

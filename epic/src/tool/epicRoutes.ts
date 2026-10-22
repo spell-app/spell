@@ -1,12 +1,12 @@
 /**
- * The Epics page's writes, on the page server:  a ROUTE MODULE (`$/server/page`'s `RouteModule`).
+ * The Epics page's writes, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`).
  * - listed in the repo root's `package.json`, `"pageServer": { "routes": [...] }`
  *
  * NEW EPIC (epic `airplane` P7):
  * - Owen writes an idea down on the Epics page:  a title and the kickoff prompt.
  *   - its New epic button (`epics/index.html`), the docs runtime's "New epic"
  *   - no Claude needed, so it works on a plane
- * - It becomes a FUTURE epic at once, as `/epic future` makes one (`epic new <name> --future`):
+ * - It becomes a FUTURE epic at once, as `/epic future` makes one (`epic create <name> --future`):
  *   - the stub epic page with the prompt quoted, listed on the Epics list page with its seedling
  *   - its log says it came from the page (`FROM_PAGE`),
  *     which is how `/airplane land` finds the ones to offer (`AirplaneInbox`)
@@ -20,9 +20,9 @@
  * - `POST /api/epics/favorite` `{ name, favorite }` -- stars (`true`) or unstars epic `name`;
  *   answers `{ favorites }`, every starred epic's name, sorted
  *   - 400:  no name, or not an epic's name (lower-kebab-case);  `favorite` not a boolean
- * - stored in ONE shared file, `epics/favorites.json5` (`$/epics/list/EpicCards` `FAVORITES_FILE`), a list:
+ * - stored in ONE shared file, `epics/favorites.json5` (`spell-epic/list/EpicCards` `FAVORITES_FILE`), a list:
  *   every checkout reads the same one, and the shared repo commits it after the turn
- * - each card goes in its group by it as the page server serves the Epics page (`$/epics/list/RunningEpics`);
+ * - each card goes in its group by it as the page server serves the Epics page (`spell-epic/list/RunningEpics`);
  *   `epic pages index` writes the stars and groups it says into the page
  * - no Claude needed:  it works on a plane
  *
@@ -60,13 +60,13 @@ import { join } from "node:path"
 
 import { SRV } from "spell-kit/server"
 import type { RouteModule } from "spell-kit/server/page"
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { DataFile } from "$/epics/data/DataFile"
-import { FAVORITES_FILE, favoritesIn } from "$/epics/list/EpicCards"
-import type { ContentRouteContext } from "$/epics/list/runningRoutes"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { DataFile } from "spell-epic/data/DataFile"
+import { FAVORITES_FILE, favoritesIn } from "spell-epic/list/EpicCards"
+import type { ContentRouteContext } from "spell-epic/list/runningRoutes"
 
 // the route `<epic-cards>` asks:  its family's types file (data only)
-import { SAGA_EPICS_API } from "$/epics/components/epic-cards/EpicCards.types"
+import { SAGA_EPICS_API } from "spell-epic/components/epic-cards/EpicCards.types"
 
 import { EpicTests, TESTS_API } from "./EpicTests"
 import { PlanDocCommands } from "./PlanDocCommands"
@@ -123,7 +123,7 @@ export default epicRoutes
 
 /**
  * Make a future epic called `title` in checkout `root`, `prompt` its kickoff prompt;  resolves to its name.
- * - SIDE EFFECT:  writes `epics/<name>/` and the Epics list page, as `epic new --future` does
+ * - SIDE EFFECT:  writes `epics/<name>/` and the Epics list page, as `epic create --future` does
  * - throws `HttpError(400)` when the title holds nothing to name it by, `500` when the tool fails
  */
 export async function newEpic(root: string, title: string, prompt: string): Promise<string> {
@@ -133,7 +133,7 @@ export async function newEpic(root: string, title: string, prompt: string): Prom
   // the tool prints what it wrote;  here that goes nowhere
   commands.print = () => {}
   for (const argv of [
-    ["new", name, "--future", "--title", title, "--prompt", prompt],
+    ["create", name, "--future", "--title", title, "--prompt", prompt],
     ["log", name, FROM_PAGE]
   ])
     if ((await commands.run(argv)) !== 0) throw new SRV.HttpError(500, `couldn't make epic ${name}`)

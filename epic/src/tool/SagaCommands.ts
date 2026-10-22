@@ -13,11 +13,11 @@ import { SAGAS, Sagas, type Saga } from "./Sagas"
  * through `Sagas`), and which saga each epic serves (`<epic-page saga>`).
  * - `list [--json]`:  the sagas in order, each with its epics and how many guides name it;  then the epics with none
  * - `set <epic> <saga>` / `set <epic> --none`:  the epic page's `saga`, logged;  refuses a saga not in the list
- * - `new <id> "Title" --purpose "..." [--after <id>]`, `move <id> --before | --after <id>`, `title <id> "Title"`
+ * - `create <id> "Title" --purpose "..." [--after <id>]`, `move <id> --before | --after <id>`, `title <id> "Title"`
  * - `rename <old> <new>`:  the id, and EVERYTHING naming it follows:  each epic page's `saga` (logged), each guide's
  *   saga meta, the saga's folder and its files (`<old>.saga.html` ...), and the `SAGA:/<old>` addresses and
  *   `saga="<old>"` attributes in the shared pages
- * - `epic new <epic> --saga <id>` sets it at birth (`PlanDocCommands`);  `summary --json` and `list --json` carry it
+ * - `epic create <epic> --saga <id>` sets it at birth (`PlanDocCommands`);  `summary --json` and `list --json` carry it
  * - every change rewrites the list pages (`PlanDocFiles.reindex()`):  the Sagas page, the Epics page's chips and
  *   labels, the Guides page's sections
  * - output through its owner's `print()` / `warn()`;  a refusal is a `PlanDocError` (a `SagaError`), printed as one
@@ -54,7 +54,7 @@ export class SagaCommands {
         return this.list(Boolean(flags.json))
       case "set":
         return this.set(this.owner.need(rest[0], "an epic"), flags.none ? null : this.owner.need(rest[1], "a saga"))
-      case "new":
+      case "create":
         return this.add(rest, flags)
       case "move":
         this.sagas.move(this.owner.need(rest[0], "a saga"), {
@@ -71,7 +71,7 @@ export class SagaCommands {
         return this.rename(this.owner.need(rest[0], "the saga's id"), this.owner.need(rest[1], "its new id"))
       default:
         throw new PlanDocError(
-          `saga ${verb ?? ""}?  list | set <epic> <saga> | new <id> "Title" --purpose "..." | ` +
+          `saga ${verb ?? ""}?  list | set <epic> <saga> | create <id> "Title" --purpose "..." | ` +
             `move <id> --before|--after <id> | title <id> "Title" | rename <old> <new>  (epic saga --help)`
         )
     }
@@ -128,7 +128,7 @@ export class SagaCommands {
     this.print(`${epic}:  ${what}${changed ? "" : ", already"}`)
   }
 
-  /** `new <id> "Title" --purpose "..." [--after <id>]`:  a saga, added to the list. */
+  /** `create <id> "Title" --purpose "..." [--after <id>]`:  a saga, added to the list. */
   private add([id, title]: string[], flags: Flags): void {
     const saga: Saga = {
       id: this.owner.need(id, "the saga's id (one or two words, e.g. drawable-spell)"),

@@ -45,7 +45,7 @@ guides/x.html#M3    a comment on a docs page, for epic comments (and a page note
   You can type it in chat, and `epic pages open` and `link` take it.
 - `epic --help` lists every verb.
 - A verb's usage and an example:  `epic <verb> --help`, or `epic help <verb>`.
-  A group's verbs too:  `epic ask new --help`.
+  A group's verbs too:  `epic ask create --help`.
 - `epic --version` says which code runs:  its commit, branch and checkout.
 
 ## Requests from other sessions
@@ -65,7 +65,7 @@ What `/send` files, and where it goes.
 
 | Verb | What it does |
 | --- | --- |
-| `epic new <epic>` | makes an epic page from the template;  `--future`:  an idea for later;  `--saga`:  the saga it serves;  `--prompt`:  the kickoff prompt |
+| `epic create <epic>` | makes an epic page from the template;  `--future`:  an idea for later;  `--saga`:  the saga it serves;  `--prompt`:  the kickoff prompt |
 | `epic list` | lists every epic:  in progress, future or done, where it runs, items not reviewed |
 | `epic summary <epic>` | prints an epic's phases, the next one, and its open questions, issues, caveats and todos |
 | `epic summaries` | prints `summary --json` for each page, worktrees' too:  what `/epics` reads |
@@ -73,7 +73,7 @@ What `/send` files, and where it goes.
 | `epic docs <epic>` | lists the docs an epic wrote besides its page, and its changelog entry:  what `/docs-check` reads |
 | `epic decisions <epic>` | prints what a page settled:  phases' Done and Update notes, items' answers |
 | `epic open <epic>` | shows an epic's page in VS Code's side bar:  Epic Docs, or with `--review` the Review tab |
-| `epic check <epic>` | checks ids, `#id` links, phases and parts, then the page's links, then draws it in a headless browser |
+| `epic lint <epic>` | checks ids, `#id` links, phases and parts, then the page's links, then draws it in a headless browser |
 
 ## Phases
 
@@ -98,7 +98,8 @@ What `/send` files, and where it goes.
 | `epic reopen <epic>#I3` | opens a closed or canceled item again |
 | `epic cancel <epic>#T3 ["why"]` | strikes an item made moot by another decision |
 | `epic details <epic>#Q3 --file <html>` | writes an agent's details or reply into an item;  `--append` adds a reply, `--more` a More Details card |
-| `epic status <epic>#J3 underway "..."` | puts the agent's status card on an item:  `underway` (the spinner), `done`, or `noted` |
+| `epic summarize <epic>#J3 --file <html>` | condenses an item after a lot of back and forth:  the file replaces what it shows, and its text and every reply move into its Original Discussion, folded;  your picks and the answer stay |
+| `epic update <epic>#J3 underway "..."` | puts the agent's status card on an item:  `underway` (the spinner), `done`, or `noted`;  a state word, never with `--fields` |
 | `epic restore <epic>#Q3` | puts earlier text, from git, into an item's Original Discussion |
 | `epic review <epic>#J3 ["outcome"]` | marks an item reviewed today;  the outcome goes in the log |
 | `epic defer <epic>#J3` | puts an item off:  dated, still not reviewed |
@@ -119,12 +120,12 @@ The marks you send from a page, and how a review session takes them:
 | Verb | What it does |
 | --- | --- |
 | `epic inbox <epic>` | prints what you sent from the page:  requests, marks, comments |
-| `epic inbox <epic> listen` / `unlisten` | this session is reviewing the page, or has stopped:  the page stops (or starts) saying nobody is |
-| `epic inbox <epic> wait` | waits, in the background, until there's work;  prints it and exits, which wakes the session |
-| `epic inbox <epic> apply` | applies the sent approvals, picks, todos and test answers;  `--all`:  unsent ones too |
-| `epic inbox <epic>#J3 working on \| off` | turns the page's spinner on an item (or a comment) on or off |
-| `epic inbox <epic>#J3 done` | an agent finished the item:  its mark and spinner go |
-| `epic inbox <epic>#J3 clear` | drops an item's marks:  a revisit talked over |
+| `epic inbox watch <epic>` / `ignore` | this session is reviewing the page, or has stopped:  the page stops (or starts) saying nobody is |
+| `epic inbox wait <epic>` | waits, in the background, until there's work;  prints it and exits, which wakes the session |
+| `epic inbox apply <epic>` | applies the sent approvals, picks, todos and test answers;  `--all`:  unsent ones too |
+| `epic inbox working <epic>#J3 on \| off` | turns the page's spinner on an item (or a comment) on or off |
+| `epic inbox done <epic>#J3` | an agent finished the item:  its mark and spinner go |
+| `epic inbox clear <epic>#J3` | drops an item's marks:  a revisit talked over |
 | `epic test <epic>[#V3]` | opens your test run in the Review tab, one test at a time;  `--list`:  the open tests;  `--all`:  every epic's |
 
 ## Log and upkeep
@@ -134,7 +135,6 @@ The marks you send from a page, and how a review session takes them:
 | `epic log <epic> "text"` | adds a timestamped line to the page's log |
 | `epic prompt <epic> "text"` | sets the kickoff prompt quoted in the Overview;  `""` removes it |
 | `epic bedtime <epic> start "P3-P6"` / `done "summary"` | turns bedtime mode on for an overnight run, then off |
-| `epic overnight <epic> remove` | removes an older page's Overnight report section, once read |
 | `epic backfill <epic> \| --all` | marks items reviewed that past sessions show you went through;  a dry run unless `--apply` |
 | `epic convert` | rewrites pages from the old markup into `<epic-*>` markup, into `--out` only |
 | `epic split <epic>` / `join <epic>` | stores a page as a skeleton plus part files, or puts it back in one file;  `split --done`:  every finished epic |
@@ -151,7 +151,7 @@ The marks you send from a page, and how a review session takes them:
 | --- | --- |
 | `epic saga list` | lists the sagas in order, each with its epics and guide count |
 | `epic saga set <epic> <saga>` | sets the saga an epic serves;  `--none`:  no saga |
-| `epic saga new <id> "Title" --purpose "..."` | adds a saga, last or `--after <id>` |
+| `epic saga create <id> "Title" --purpose "..."` | adds a saga, last or `--after <id>` |
 | `epic saga move <id> --before <id>` | moves a saga in the list (or `--after`) |
 | `epic saga title <id> "Title"` | retitles a saga |
 | `epic saga rename <old> <new>` | renames a saga's id;  pages, folders and `SAGA:/` addresses follow |
@@ -179,7 +179,7 @@ The marks you send from a page, and how a review session takes them:
 | `epic park list` | prints, as JSON, every parked worktree's PARKED note |
 | `epic park candidates` | prints what `/wait-for ?` offers:  unfinished worktrees and epics, running sessions |
 | `epic park wait <name>` | waits until `<name>` finishes, then prints its status |
-| `epic stock` | takes stock:  worktrees, branches, sessions, parked work, plans;  in process, hung or parked, dead |
+| `epic status` | takes stock:  worktrees, branches, sessions, parked work, plans;  in process, hung or parked, dead |
 
 - Never a bare `git worktree remove`:  it leaves the worktree's servers running, and nothing else ever stops them.
 - Never a bare `git merge main` either:
@@ -209,11 +209,11 @@ The content folder is a git repo of its own, beside the checkout;  every checkou
 | `epic window launch <name>` | wakes an epic:  its running session, else a NEW session in its window, opening it if needed |
 | `epic window handoff <name>` | moves this session to `<name>`'s window when this turn ends (`resume` is the move itself, run by the hook) |
 | `epic window stay <name>` / `stay --end` | a session staying in this window for a worktree:  titles and tints the window, then puts both back |
-| `epic window stay-check` | recommends staying in this window or moving to a new one, and why |
+| `epic window should-stay` | recommends staying in this window or moving to a new one, and why |
 | `epic window color [<look>]` | gives this window a look;  no look:  lists the twelve |
 | `epic window which` | prints this session's window:  its process, window file and folders |
 | `epic window show <page>` | shows a page in the window's side bar;  `--review`:  the Review tab |
-| `epic window reload-view` | rebuilds a side-bar view from scratch, at the page it shows |
+| `epic window reload` | rebuilds a side-bar view from scratch, at the page it shows |
 | `epic window add` / `remove <folder>` | adds a folder to the window, or removes it again:  never a worktree's |
 | `epic window move` | carries the window files once from an old folder in the main checkout to the windows folder |
 | `epic server <verb>` | this checkout's page server:  `serve`, `start` (`--all`:  every web server), `ensure`, `stop`, `status`, `url <file>`, `prune` |
@@ -221,7 +221,7 @@ The content folder is a git repo of its own, beside the checkout;  every checkou
 | `epic repo <verb>` | the repos the epic server serves:  `add [<checkout>] [--default]`, `list`, `remove`, `default` |
 | `epic pages index` | writes the docs' home page cards and each area's list page (Epics, Guides, Sagas ...) |
 | `epic pages update` | checks the docs pages against their template:  sections, links, the engine's assets |
-| `epic pages new <template> <page>` | makes a page from a template, at the right depth, and lists it on its area's page |
+| `epic pages create <template> <page>` | makes a page from a template, at the right depth, and lists it on its area's page |
 | `epic pages template [<name>]` | prints where a template is:  the repo's own first, then spell-epic's |
 | `epic pages open <page>` | shows a page in the browser, or in VS Code's side bar (`--vs`;  `--review`) |
 | `epic pages link <page>` | prints a page's links for a reply:  the side bar's and the browser's;  `--show` shows it too |
@@ -241,14 +241,14 @@ The content folder is a git repo of its own, beside the checkout;  every checkou
 
 | Verb | What it does |
 | --- | --- |
-| `epic ask new <slug>` | makes a details page from the template, and prints its path;  `--epic`:  in that epic's `details/` |
+| `epic ask create <slug>` | makes a details page from the template, and prints its path;  `--epic`:  in that epic's `details/` |
 | `epic ask show <page>` | shows the page in this session's Review tab;  `--wait`:  then waits |
 | `epic ask wait <page>` | waits, in the background, until you send an answer, then prints it |
 | `epic ask answer <page>` | prints the answer you already sent |
 | `epic ask draft <page>` | prints what you've typed on the page and not sent:  run before rewriting a page you may have open |
 | `epic ask list [<epic>]` | lists every details page, answered or waiting |
 | `epic ask sweep` | deletes scratch details pages older than a given age;  never an epic's |
-| `epic choices new <slug> --rows <file>` | makes a choice page from its rows, and prints its path |
+| `epic choices create <slug> --rows <file>` | makes a choice page from its rows, and prints its path |
 | `epic choices show` / `wait` / `answer` / `list` | as for details pages:  shows it, waits for "Do it", prints the answer, lists them |
 | `epic comments list [<epic>]` | lists the comments left on docs pages still waiting;  `--all`:  answered ones too |
 | `epic comments wait` | waits until a comment starts waiting, then prints it |
@@ -276,11 +276,29 @@ An old script or skill that still uses one:  write the `epic` spelling.
 | `spell dev plan-doc <verb> ...` | `epic <verb> ...` |
 | `spell dev details ...` | `epic ask ...` |
 | `spell dev docs ...` | `epic pages ...` |
-| `spell dev worktree`, `window`, `session`, `park`, `stock`, `shared`, `choices`, `comments`, `notes`, `agents`, `airplane` | `epic` and the same word |
+| `spell dev worktree`, `window`, `session`, `park`, `shared`, `choices`, `comments`, `notes`, `agents`, `airplane` | `epic` and the same word |
 | `spell epic <verb> ...` | `epic <verb> ...` |
 
 - spell-epic's own `yarn epic` runs it, and spell-app's.
-- `epic add-request` is `epic file`'s old name, still accepted.
+
+`epic`'s own verbs took new names in repo-split P13 too.
+The old ones are gone:  `epic` says "no such verb", and lists the verbs.
+
+| Before | Now |
+| --- | --- |
+| `epic new <epic>` | `epic create <epic>` |
+| `epic stock` | `epic status` |
+| `epic status <epic>#J3 underway "..."` / `done` / `noted` | `epic update <epic>#J3 underway "..."` / `done` / `noted` |
+| `epic check <epic>` | `epic lint <epic>` |
+| `epic inbox <epic> listen` / `unlisten` | `epic inbox watch <epic>` / `ignore <epic>` |
+| `epic inbox <epic> wait` / `apply` | `epic inbox wait <epic>` / `apply <epic>`:  the inbox's verb first |
+| `epic inbox <epic>#J3 working on` / `done` / `clear` | `epic inbox working <epic>#J3 on` / `done <epic>#J3` / `clear <epic>#J3` |
+| `epic window stay-check`, `reload-view` | `epic window should-stay`, `reload` |
+| `epic ask new`, `choices new`, `saga new`, `pages new` | `create`, in each |
+| `epic add-request` | `epic file` |
+| `epic overnight <epic> remove`, `epic plan-doc <verb> ...` | gone |
+
+- The inbox's old order is refused with its new spelling:  `epic inbox seo wait` says `epic inbox wait seo`.
 
 <details>
 <summary>The cheat sheet the epic skill hands its agents</summary>
@@ -290,9 +308,9 @@ It's copied here as [the epic skill](skills/epic/SKILL.md) has it ("Cheat sheet"
 with "you" for the reviewer.
 
 ```text
-new <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future]
+create <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future]
                                                     create from the template, update the docs' home page;  --future:  a
-                                                    future epic (9.);  new on a future epic's doc plans it (promoted)
+                                                    future epic (9.);  create on a future epic's doc plans it (promoted)
 add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..] [--verify ..] [--estimate 2h]
           [--before N]                              --before:  inserted as PN;  the to-do phases from N move down
 update <name>#P<N> [--symptom ..] [--changes ..] [--goal ..] [--files ..] [--verify ..]   set ("" removes) fields
@@ -314,14 +332,13 @@ close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, n
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
 log <name> "text"                                   timestamped line in the doc's log
 bedtime <name> start "P3-P6" | done "summary"       bedtime mode on / off:  the run's changes stay green (`/bedtime`)
-overnight <name> remove                             an older doc's Overnight report (before 2026-10-05), once read
 prompt <name> "text" | --file f                     set the prompt quoted in the Overview
 migrate [<kind>] [<name>... | --all] [--file f] [--step s] [--dry-run] [--notify] [--list]
                                                     pages up to today's markup, every step of their kind, oldest
                                                     first, safe to run again;  alone:  every kind, every page;
                                                     --notify:  running epics told (TELL lines), idle ones migrated
 summary <name> [--json]                             phases, next phase, open questions/issues/caveats/todos
-check <name> [--no-browser]                         ids, links, phases, then the browser check
+lint <name> [--no-browser]                          ids, links, phases, then the browser check
 open <name> --review                                show in the side bar's Review tab
 review <name>#<id> ["outcome"]                      mark reviewed today (outcome to the log)
 defer <name>#<id>                                   deferred:  dated, still not reviewed
@@ -356,10 +373,10 @@ backfill <name> | --all [--apply]                   one-off:  mark what past ses
 <details>
 <summary>Where the command's code is</summary>
 
-- The command's code is in [src/command/](src/command/), run by [bin/epic](bin/epic):
-  its groups in [epicGroups.ts](src/command/epicGroups.ts), its verbs in [EpicProgram.ts](src/command/EpicProgram.ts).
-- Its move to a `cli/` folder of spell-epic's, and its verbs' renames, are still to come:
-  the second step of repo-split P13.
+- The command itself is in [src/cli/](src/cli/), run by [bin/epic](bin/epic) (repo-split J114):
+  its verbs in [EpicProgram.ts](src/cli/EpicProgram.ts), its groups' verbs in [epicGroups.ts](src/cli/epicGroups.ts).
+- What the verbs run stays in [src/command/](src/command/) (worktrees, sessions, requests ...)
+  and [src/tool/](src/tool/) (the epic pages).
 - spell-epic adds no commands to `spell`:  the docs tools are `epic pages <verb>` (`spell dev docs` before P13).
 
 </details>

@@ -36,7 +36,7 @@
   }
   /*
    * narrow (VS Code's side bar, a phone):  none, to save room (no breadcrumb there at all:  Owen, 2026-10-10)
-   * (`$/server/site` `SiteHeader.ts`, its narrow breakpoint:  720px;  Owen, 2026-10-10), as the docs' eyebrow hides
+   * (`spell-kit/server/site` `SiteHeader.ts`, its narrow breakpoint:  720px;  Owen, 2026-10-10), as the docs' eyebrow hides
    */
   @media (max-width: 720px) {
     .crumbs {

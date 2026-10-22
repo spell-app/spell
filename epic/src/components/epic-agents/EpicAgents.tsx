@@ -3,15 +3,15 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-kit/element"
 
-import { AgentsClient, ageOf, clockOf, sentence, type RunningAgent } from "$/epics/review"
+import { AgentsClient, ageOf, clockOf, sentence, type RunningAgent } from "spell-epic/review"
 // the fold every `<epic-*>` fold shares:  its file, not `epic-item`'s barrel
-import { Fold } from "$/epics/components/epic-item/Fold"
-import { STACK_PROPERTY } from "$/epics/components/epic-page/EpicPage.types"
+import { Fold } from "spell-epic/components/epic-item/Fold"
+import { STACK_PROPERTY } from "spell-epic/components/epic-page/EpicPage.types"
 
 import { epicAgentsVocabulary } from "./EpicAgents.en"
 
 import agentsCSS from "./EpicAgents.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicAgents`

@@ -112,7 +112,7 @@
  *
  * ## Staying put
  * - Instead of moving, a session may STAY in its window:  same tab, only its folder is the worktree.
- *   Owen picks, each time, in `/isolate`'s, `/epic`'s or `/unpark`'s modal;  `stay-check` recommends one and says why.
+ *   Owen picks, each time, in `/isolate`'s, `/epic`'s or `/unpark`'s modal;  `should-stay` recommends one and says why.
  * - Its changes show in Source Control (`git.detectWorktrees`), not in Explorer.
  * - The window says so at once (`stay <name>`, epic `windows-and-review` P5):
  *   titled `⎇ <name>`, its title bar tinted the worktree's colour;
@@ -160,7 +160,7 @@
  *   tried in order
  * - `color [<look>]`:  give this session's window a look (`LOOKS`);  no look:  list them
  * - `stay <name>` / `stay --end`:  title and tint this session's window for worktree `<name>` it stays in / put back
- * - `stay-check [--epic] [--json]`:  should this session stay in its window when it isolates, or move?
+ * - `should-stay [--epic] [--json]`:  should this session stay in its window when it isolates, or move?
  *   Prints `recommend stay|window`, then a `- <reason>` line each
  * - No window (the extension isn't installed, or the window wasn't reloaded since):  exits 1, saying so.
  */
@@ -170,9 +170,9 @@ import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { EpicConfig } from "./config/EpicConfig.ts"
-import { RealPath } from "./config/RealPath.ts"
-import { SessionFolders } from "./config/SessionFolders.ts"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { RealPath } from "spell-epic/config/RealPath.ts"
+import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
 
 /** The engine, spell-epic:  the folder this script's `scripts/` is in, with the plugin's `hooks/` beside it. */
 const ENGINE = dirname(dirname(fileURLToPath(import.meta.url)))
@@ -918,10 +918,10 @@ export class Window {
   ////////////////
 
   /**
-   * `stay-check`:  the live facts for `stayAdvice()`, and its answer.
+   * `should-stay`:  the live facts for `stayAdvice()`, and its answer.
    * - `epic`:  for `/epic`, whose epic page takes the window's doc preview
    */
-  static stayCheck({ epic = false } = {}) {
+  static shouldStay({ epic = false } = {}) {
     const window = Window.current()
     const processes = window ? processTable() : new Map()
     const sessions = window ? claudeSessions(processes, window.pid) : []
@@ -1042,14 +1042,14 @@ export class Window {
       return 0
     }
     if (command === "move") return Window.moveCommand({ dryRun: flags["dry-run"] === true })
-    const bare = ["which", "stay-check", "reload-view", "color"].includes(command) || (command === "stay" && flags.end)
+    const bare = ["which", "should-stay", "reload", "color"].includes(command) || (command === "stay" && flags.end)
     if (!COMMANDS.includes(command) || (!bare && !target)) {
       console.error(USAGE)
       return 1
     }
     if (command === "color" || command === "stay") return Window.lookCommand(command, target, flags)
-    if (command === "stay-check") {
-      const advice = Window.stayCheck({ epic: Boolean(flags.epic) })
+    if (command === "should-stay") {
+      const advice = Window.shouldStay({ epic: Boolean(flags.epic) })
       if (flags.json) console.log(JSON.stringify(advice, null, 2))
       else console.log([`recommend ${advice.recommend}`, ...advice.reasons.map((reason) => `- ${reason}`)].join("\n"))
       return 0
@@ -1074,7 +1074,8 @@ export class Window {
       }
       return 0
     }
-    if (command === "reload-view") {
+    if (command === "reload") {
+      // the bridge's op keeps its name, `reload-view`:  an installed extension answers to it
       const view = flags.review ? "review" : "docs"
       try {
         const { url } = await Window.request("reload-view", { view }, window)
@@ -1085,7 +1086,9 @@ export class Window {
       } catch (error) {
         console.error(error.message)
         if (/unknown op/.test(error.message))
-          console.error("  (this window's extension predates `reload-view`:  install it again, then reload the window)")
+          console.error(
+            "  (this window's extension predates the view reload:  install it again, then reload the window)"
+          )
         return 1
       }
     }
@@ -1212,13 +1215,13 @@ const COMMANDS = [
   "add",
   "remove",
   "show",
-  "reload-view",
+  "reload",
   "open",
   "launch",
   "close",
   "handoff",
   "resume",
-  "stay-check",
+  "should-stay",
   "color",
   "stay"
 ]
@@ -1236,7 +1239,7 @@ const USAGE = `usage:  epic window <command>
                                show an .html doc in the window's doc preview (right side bar's
                                "Spell Docs" tab;  --review:  its "Review" tab), at id <id>
                                (moving:  in the window this session moves to)
-  reload-view [--review]       rebuild the "Spell Docs" view (--review:  "Review") from scratch, a new
+  reload [--review]            rebuild the "Spell Docs" view (--review:  "Review") from scratch, a new
                                frame at the page it shows:  for a view gone wrong (clicks lost ...)
   open <name> [--pkg <pkg>] [--color <look>] [--no-open]
                                open worktree <name> in a new window (default package:  this window's;
@@ -1256,7 +1259,8 @@ const USAGE = `usage:  epic window <command>
                                --prompt:  typed into the new tab)
   resume <record> [--title <title>]...
                                the move itself (the Stop hook runs it)
-  stay-check [--epic] [--json] stay in this window when isolating, or move?  recommend stay|window, and why`
+  should-stay [--epic] [--json]
+                               stay in this window when isolating, or move?  recommend stay|window, and why`
 
 /**
  * The package worktree window file `file` was opened from:  its `spell.package`.
@@ -1697,7 +1701,7 @@ function launchedLine(name, prompt, { action, file, sessions }) {
  * - `title`:  the title its tab shows, icon and all (`🚧 seo`);  `""` when it has none
  *   - its record's `name`, or its transcript's title when Claude Code made that up for a resumed session
  *     (`SessionFolders.recordTitle()`;  epic `epic-engine` I50, I51)
- * - the same records `RunningEpics.liveSessions()` reads, in `$/epics`
+ * - the same records `RunningEpics.liveSessions()` reads, in `spell-epic`
  */
 function liveSessions() {
   const home = process.env.SPELL_CLAUDE_HOME || join(homedir(), ".claude")
@@ -1721,7 +1725,7 @@ function liveSessions() {
 /**
  * Whether session title `title` names epic `name`:
  * without its icon it IS the name (`🚧 seo`), or holds it as a whole word (`seo review`;  never `seo-pages`).
- * - the same rule as `titleNames()` in `$/epics` (`RunningEpics`), which this plain script can't import
+ * - the same rule as `titleNames()` in `spell-epic` (`RunningEpics`), which this plain script can't import
  */
 export function titledFor(title, name) {
   const bare = title

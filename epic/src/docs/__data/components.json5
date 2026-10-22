@@ -401,7 +401,7 @@
         "favorite",
         "star"
       ],
-      "description": "One epic's card on the Epics page (epic `epic-engine` P3), in an `<epic-list>`:  its state's mark before its linked title, its description, its saga's label and meta line;  a star at its top right that stars or unstars it on the page server, and the day it was last worked on at its bottom right.  Written by `epic pages index` (`$/epics/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` and `favorite` as it serves the page.",
+      "description": "One epic's card on the Epics page (epic `epic-engine` P3), in an `<epic-list>`:  its state's mark before its linked title, its description, its saga's label and meta line;  a star at its top right that stars or unstars it on the page server, and the day it was last worked on at its bottom right.  Written by `epic pages index` (`spell-epic/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` and `favorite` as it serves the page.",
       "noun": "card",
       "attributes": [
         {
@@ -1753,7 +1753,7 @@
         {
           "name": "calm",
           "kind": "boolean",
-          "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  Owen flips it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `plan-doc inbox apply`)."
+          "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  Owen flips it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
         },
         {
           "name": "failed",
@@ -1813,7 +1813,12 @@
           "description": "About to fold:  its line was clicked.  Cancel to stay open."
         },
         {
-          "name": "ui-load",
+          "name": "ui-loading",
+          "detail": "{ source: string }",
+          "description": "Its `source` part is on its way:  the first unfold, or a live reload."
+        },
+        {
+          "name": "ui-loaded",
           "detail": "{ source: string, content: string }",
           "description": "Its `source` part arrived and is in its children (`content` is the file's text)."
         },
@@ -2218,7 +2223,7 @@
         "saga chips",
         "favorites"
       ],
-      "description": "The Epics page's list (epic `epic-engine` P3):  its `<epic-card>`s in five groups -- Favorites, Active, Planning, Urgent, Done -- each under a heading with its count, by title within each or newest first (`<epic-sort>`);  above them a chip per saga, in the sagas' order, then No saga, each with its count:  a click shows only that saga's epics.  It never moves its cards:  it places and hides them from its shadow root.  Written by `epic pages index` (`$/epics/list/EpicCards` `epicListHtml()`).",
+      "description": "The Epics page's list (epic `epic-engine` P3):  its `<epic-card>`s in five groups -- Favorites, Active, Planning, Urgent, Done -- each under a heading with its count, by title within each or newest first (`<epic-sort>`);  above them a chip per saga, in the sagas' order, then No saga, each with its count:  a click shows only that saga's epics.  It never moves its cards:  it places and hides them from its shadow root.  Written by `epic pages index` (`spell-epic/list/EpicCards` `epicListHtml()`).",
       "noun": "list",
       "attributes": [
         {
@@ -2938,7 +2943,12 @@
           "description": "About to fold:  its title was clicked.  Cancel to stay open."
         },
         {
-          "name": "ui-load",
+          "name": "ui-loading",
+          "detail": "{ source: string }",
+          "description": "The `source` part is on its way:  the first unfold, or a live reload (as `<ui-section source>`'s)."
+        },
+        {
+          "name": "ui-loaded",
           "detail": "{ source: string, content: string }",
           "description": "The `source` part arrived and is in its children (as `<ui-section source>`'s)."
         },
@@ -3224,7 +3234,7 @@
         },
         {
           "name": "state",
-          "description": "The step label while the epic has a state, its icon and colour the state's (`$/epics/list/EpicState`):  in progress (blue half circle), errors (red:  every phase done, items need you), paused (grey:  phases left, untouched for days);  why on hover.  None for a future epic or a done one:  FUTURE or DONE says so."
+          "description": "The step label while the epic has a state, its icon and colour the state's (`spell-epic/list/EpicState`):  in progress (blue half circle), errors (red:  every phase done, items need you), paused (grey:  phases left, untouched for days);  why on hover.  None for a future epic or a done one:  FUTURE or DONE says so."
         },
         {
           "name": "review-line",
@@ -3779,7 +3789,12 @@
           "description": "About to fold:  its title was clicked.  Cancel to stay open."
         },
         {
-          "name": "ui-load",
+          "name": "ui-loading",
+          "detail": "{ source: string }",
+          "description": "The `source` part is on its way:  the first unfold, or a live reload (as `<ui-section source>`'s)."
+        },
+        {
+          "name": "ui-loaded",
           "detail": "{ source: string, content: string }",
           "description": "The `source` part arrived and is in its children (as `<ui-section source>`'s)."
         },
@@ -4193,7 +4208,12 @@
           "description": "About to fold:  its title was clicked.  Cancel to stay open."
         },
         {
-          "name": "ui-load",
+          "name": "ui-loading",
+          "detail": "{ source: string }",
+          "description": "The `source` part is on its way:  the first unfold, or a live reload (as `<ui-section source>`'s)."
+        },
+        {
+          "name": "ui-loaded",
           "detail": "{ source: string, content: string }",
           "description": "The `source` part arrived and is in its children (as `<ui-section source>`'s)."
         },

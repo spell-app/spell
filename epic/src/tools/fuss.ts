@@ -3,8 +3,8 @@
  * by file and line (WWOD §6, epic `skillz` P7).
  * The `/fussbudget` skill starts from its list;  every epic's Doc Review runs it last.
  *
- *     epic pages fuss packages/server/src
- *     packages/server/src/Router.ts:12  phrase-split  the route's handler, if any;  else the
+ *     epic pages fuss src/server
+ *     src/server/Router.ts:12  phrase-split  the route's handler, if any;  else the
  *     1 miss in 1 of 40 files:  1 phrase-split
  *
  * - What it flags, by kind:
@@ -12,8 +12,8 @@
  *     the phrase going on to the next line (a phrase starts after `:`, `;`, `.` or `--`);
  *     also a line whose next line is short, when the whole phrase fits there
  *   - `dense`:  a paragraph, or one bullet, of 3 or more sentences:  a plain lead line, then bullets
- *   - `jargon`:  a word its package bans (`Fuss.JARGON`;  `packages/ui` bans "the fork")
- *   - `path-in-prose`:  a file path in the running text of a page or Markdown (`packages/x/y.ts`, `y.ts:12`):
+ *   - `jargon`:  a word its package bans (`Fuss.JARGON`;  spell-ui bans "the fork")
+ *   - `path-in-prose`:  a file path in the running text of a page or Markdown (`src/x/y.ts`, `y.ts:12`):
  *     name the thing, its path its tooltip (`<code title="path">name</code>`;  in Markdown, a link)
  *   - `code-dense`:  a sentence of 3 or more code spans, in a page or Markdown:
  *     say what it means, the exact values in folded code
@@ -38,7 +38,7 @@ import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "n
 import { extname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "../config/EpicConfig.ts"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 
 /**
  * The checker:  finds the misses in a file's text, and the files to check.
@@ -124,14 +124,15 @@ export class Fuss {
   }
 
   /**
-   * The words each package bans from its comments and docs, by folder from the repo's root.
+   * The words each package bans from its comments and docs, by its folder (a repo's, in the kit).
    * - Implementation words a newcomer can't follow:  name the thing by what it is instead.
-   *   In `packages/ui`, never "the fork":  say what the code is ("the element layer", `DOMElement`).
+   *   In spell-ui, never "the fork":  say what the code is ("the element layer", `DOMElement`).
+   * - spell-app's `packages/ui` before epic `repo-split`'s move
    * - Matched whole, in any case;  never inside a code span.
    * - `static`, so a reader finds the table on the class it configures.
    */
   static JARGON: Record<string, string[]> = {
-    "packages/ui": ["the fork", "fork's"]
+    "spell-ui": ["the fork", "fork's"]
   }
 }
 
@@ -282,7 +283,7 @@ const DENSE_FIX = "a plain lead line saying what they add up to, then bullets, o
 
 /**
  * The file paths on one line of a page's or Markdown's prose (`text`, `masked` its `maskLine()`), in order:
- * - a code span that is a whole path (`packages/x/y.ts`);  NOT one holding a command that names a path
+ * - a code span that is a whole path (`src/x/y.ts`);  NOT one holding a command that names a path
  * - a path in the text itself
  * - never a URL, a Markdown link's target, or a tag's attributes (`title`, `href`):  that's where a path goes
  */
@@ -305,9 +306,9 @@ function pathWhy(paths: string[], format: Format): string {
 /**
  * Whether `token` is a file path a reader would open, not a name:
  * - a file in a folder (`tools/fuss.ts`), or a file and its line (`fuss.ts:12`)
- * - 3 or more parts from a top folder of the checkout or a package (`packages/epics/tools`)
+ * - 3 or more parts from a top folder of the checkout or a package (`spell-ui/src/core`)
  * - NOT:
- *   - a folder alone (`packages/`, `packages/epics/`), a package (`spell-ui`), an alias (`$/epics/tool`)
+ *   - a folder alone (`src/`, `src/tools/`), a package (`spell-ui`), an import name (`spell-epic/tool`)
  *   - a URL, a route (`/api/review`), a date (`10/9/26`), a file alone (`fuss.ts`), or words like "read/write/check"
  */
 function isFilePath(token: string): boolean {

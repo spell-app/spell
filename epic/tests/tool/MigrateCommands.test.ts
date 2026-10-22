@@ -25,11 +25,11 @@ import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vit
 
 import { SRV } from "spell-kit/server"
 
-import { MigrateCommands } from "$/epics/tool/MigrateCommands"
-import { PlanDoc } from "$/epics/tool/PlanDoc"
-import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
+import { MigrateCommands } from "spell-epic/tool/MigrateCommands"
+import { PlanDoc } from "spell-epic/tool/PlanDoc"
+import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -61,17 +61,13 @@ const docOf = (name: string) => join(root, "epics", name, `${name}.plan.html`)
 
 /**
  * Write epic `name`:  three phases, split.
- * - `old`:  phase 2 holds a plan change in the shape before 2026-10-11 (`<epic-updated>`),
- *   which `updates-as-epic-update` migrates
+ * - `old`:  a todo links phase 2 by an old number (`P5 · Two`), which `links-agree` fixes
  */
 async function writeEpic(name: string, { old = false }: { old?: boolean } = {}) {
   mkdirSync(join(root, "epics", name), { recursive: true })
   const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"))
   for (const phase of ["One", "Two", "Three"]) plan.addPhase(phase, { goal: `<ul><li>${phase}'s goal</li></ul>` })
-  if (old)
-    plan
-      .phase(2)
-      .insertAdjacentHTML("beforeend", '<epic-updated at="2026-10-01 09:00"><p>Split in two. Why.</p></epic-updated>')
+  if (old) plan.addItem("todo", "see two", { details: '<p><a href="#p-two">P5 · Two</a></p>' })
   await FILES.writeDoc(docOf(name), plan, true)
 }
 
@@ -108,9 +104,10 @@ describe("migrate:  the runner", () => {
     const before = snapshot()
     expect(await commands().run(["migrate", "--all", "--dry-run"])).toBe(0)
     expect(printed).toEqual([
+      "old:  would run links-agree",
+      '  links-agree:  #p-two "P5 · Two" -> #p-two "P2 · Two"',
       "new:  up to date",
-      "old:  would run updates-as-epic-update",
-      "epic pages:  1 of 2 would change (updates-as-epic-update 1)"
+      "epic pages:  1 of 2 would change (links-agree 1)"
     ])
     expect(snapshot()).toEqual(before)
   })
@@ -119,15 +116,15 @@ describe("migrate:  the runner", () => {
     const updated = FILES.read(docOf("old")).page.getAttribute("updated")
     expect(await commands().run(["migrate", "old", "new"])).toBe(0)
     expect(printed).toEqual([
-      "old:  updates-as-epic-update",
+      "old:  links-agree",
+      '  links-agree:  #p-two "P5 · Two" -> #p-two "P2 · Two"',
       "new:  up to date",
-      "epic pages:  1 of 2 changed (updates-as-epic-update 1)"
+      "epic pages:  1 of 2 changed (links-agree 1)"
     ])
     const plan = FILES.read(docOf("old"))
-    expect(plan.document.querySelector("epic-updated")).toBeNull()
-    expect(plan.phase(2).querySelector(":scope > epic-update")!.getAttribute("summary")).toBe("Split in two")
+    expect(plan.item("t1").querySelector("a")!.textContent).toBe("P2 · Two")
     expect(plan.document.querySelector("#log > epic-event:last-of-type")!.textContent).toMatch(
-      /migrated:\s+updates-as-epic-update/
+      /migrated:\s+links-agree/
     )
     expect(plan.page.getAttribute("updated")).toBe(updated)
     const after = snapshot()
@@ -138,7 +135,7 @@ describe("migrate:  the runner", () => {
   })
 
   test("--step runs just that step;  a step that isn't one is refused", async () => {
-    expect(await commands().run(["migrate", "epic", "old", "--step", "owen-types-to-you-type"])).toBe(0)
+    expect(await commands().run(["migrate", "epic", "old", "--step", "engine-links"])).toBe(0)
     expect(printed[0]).toBe("old:  up to date")
     expect(await commands().run(["migrate", "epic", "--step", "nope"])).toBe(1)
     expect(warned.at(-1)).toMatch(/no epic page step "nope"/)
@@ -146,7 +143,11 @@ describe("migrate:  the runner", () => {
 
   test("--file:  one epic page, by its path", async () => {
     expect(await commands().run(["migrate", "--file", docOf("old"), "--dry-run"])).toBe(0)
-    expect(printed).toEqual(["old:  would run updates-as-epic-update", expect.stringMatching(/1 of 1 would change/)])
+    expect(printed).toEqual([
+      "old:  would run links-agree",
+      '  links-agree:  #p-two "P5 · Two" -> #p-two "P2 · Two"',
+      expect.stringMatching(/1 of 1 would change/)
+    ])
   })
 
   test("the page's lock:  it waits for a writer, and migrates the page as the writer left it", async () => {
@@ -184,64 +185,12 @@ describe("migrate:  the runner", () => {
     expect(ReviewInbox.read(inbox).comments.m1!.anchor).toMatch(/^p-three#field-\d$/)
   })
 
-  test("stable-phase-ids:  old ids, their links, part files and inbox entries follow;  a second run:  up to date", async () => {
-    // epic `new` as written before P15:  each phase's id its number, links and the inbox keyed by them
-    const file = docOf("new")
-    const old = FILES.read(file)
-    old.phaseElements.forEach((phase, index) => (phase.id = `p${index + 1}`))
-    old.addItem("todo", "see two", { details: '<p><a href="#p2">P2 · Two</a>, <a href="new.plan.html#p3">P3</a></p>' })
-    await FILES.writeDoc(file, old, true)
-    const parts = join(file, "..", "parts")
-    expect(readdirSync(parts).filter((name) => /^p/.test(name))).toEqual(["p1.html", "p2.html", "p3.html"])
-    const inbox = ReviewInbox.pathFor(file)
-    ReviewInbox.update(inbox, (each) => {
-      each.setMark("p2", { action: "revisit", note: "too big?" })
-      each.setDraft("p3", "revisit", "half typed")
-      each.setNew(undefined, { kind: "todo", title: "later", near: "p2" })
-      each.commentList.add({ anchor: "p2#field-1", kind: "field" }, "hooked up?")
-    })
-
-    expect(await commands().run(["migrate", "new", "--step", "stable-phase-ids"])).toBe(0)
-    expect(printed[0]).toBe("new:  stable-phase-ids")
-    const plan = FILES.read(file)
-    expect(plan.phases.map((phase) => `${phase.n} ${phase.id}`)).toEqual(["1 p-one", "2 p-two", "3 p-three"])
-    expect(Array.from(plan.item("t1").querySelectorAll("a"), (a) => a.getAttribute("href"))).toEqual([
-      "#p-two",
-      "new.plan.html#p-three"
-    ])
-    // each part under its phase's new id, the old ones gone
-    expect(
-      readdirSync(parts)
-        .filter((name) => /^p/.test(name))
-        .sort()
-    ).toEqual(["p-one.html", "p-three.html", "p-two.html"])
-    const after = ReviewInbox.read(inbox)
-    expect(Object.keys(after.marks).sort()).toEqual(["new1", "p-two"])
-    expect(after.marks.new1!.near).toBe("p-two")
-    expect(Object.keys(after.drafts)).toEqual(["p-three"])
-    expect(after.comments.m1!.anchor).toBe("p-two#field-1")
-
-    printed = []
-    expect(await commands().run(["migrate", "new"])).toBe(0)
-    expect(printed[0]).toBe("new:  up to date")
-  })
-
   test("--list:  the epic page's steps, then the other kinds' (the docs tool)", async () => {
     expect(await commands().run(["migrate", "--list"])).toBe(0)
     expect(printed.map((line) => line.split(/\s+/).slice(0, 3).join(" "))).toEqual([
-      "epic 2026-10-11 updates-as-epic-update",
-      "epic 2026-10-11 owen-types-to-you-type",
       "epic 2026-10-11 links-agree",
-      "epic 2026-10-14 stable-phase-ids",
-      "epic 2026-10-14 json5-data-files",
-      "epic 2026-10-17 engine-asset-routes",
       "epic 2026-10-19 engine-links",
-      "epic 2026-10-19 unstackable-tables",
-      expect.stringMatching(/cheatsheet.* 2026-10-02 ui-section$/),
-      expect.stringMatching(/detail,choice.* 2026-10-14 answer-elements$/),
-      expect.stringMatching(/detail,choice 2026-10-17 engine-asset-routes$/),
-      expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
-      "data-files 2026-10-14 json5-data-files"
+      expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/)
     ])
   })
 })
@@ -269,15 +218,17 @@ describe("migrate --notify", () => {
     const before = readFileSync(docOf("busy"), "utf8")
     expect(await commands({ busy: ["🚧 busy"] }).run(["migrate", "--all", "--notify"])).toBe(0)
     expect(printed).toEqual([
-      "busy:  its session is running:  told to run updates-as-epic-update itself",
+      "busy:  its session is running:  told to run links-agree itself",
+      '  links-agree:  #p-two "P5 · Two" -> #p-two "P2 · Two"',
+      "old:  links-agree",
+      '  links-agree:  #p-two "P5 · Two" -> #p-two "P2 · Two"',
       "new:  up to date",
-      "old:  updates-as-epic-update",
-      "epic pages:  2 of 3 changed (updates-as-epic-update 2)",
+      "epic pages:  2 of 3 changed (links-agree 2)",
       expect.stringMatching(/^TELL:/),
-      `  to 🚧 busy:  ${MigrateCommands.message("busy", ["updates-as-epic-update"])}`
+      `  to 🚧 busy:  ${MigrateCommands.message("busy", ["links-agree"])}`
     ])
     expect(readFileSync(docOf("busy"), "utf8")).toBe(before)
-    expect(FILES.read(docOf("old")).document.querySelector("epic-updated")).toBeNull()
+    expect(FILES.read(docOf("old")).item("t1").querySelector("a")!.textContent).toBe("P2 · Two")
   })
 
   test("the message:  one line, what to run, when, and that it may commit it", () => {

@@ -3,16 +3,16 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { ChoicesForm } from "$/epics/answers"
-import { Clipboard } from "$/epics/components/epic-page/Clipboard"
-import type { DOMTextBoxElement } from "$/epics/components/epic-text-box/EpicTextBox"
+import { ChoicesForm } from "spell-epic/answers"
+import { Clipboard } from "spell-epic/components/epic-page/Clipboard"
+import type { DOMTextBoxElement } from "spell-epic/components/epic-text-box/EpicTextBox"
 // the feedback box:  its barrel first, so it's defined wherever the bar is
-import "$/epics/components/epic-text-box"
+import "spell-epic/components/epic-text-box"
 
 import { epicChoicesBarVocabulary } from "./EpicChoicesBar.en"
 
 import barCSS from "./EpicChoicesBar.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicChoicesBar`

@@ -13,7 +13,7 @@
 
 import { commentsOnPage, firstWords } from "./spell-doc-comments.js"
 import { FIELDS, el, nextFrames, titleInside } from "./spell-doc-helpers.js"
-import { ThreadFacts } from "$/epics/comments"
+import { ThreadFacts } from "spell-epic/comments"
 
 ////////////////
 // ## The toolbar

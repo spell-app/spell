@@ -81,7 +81,7 @@ holding its id (Q7).  Its colour says where the item stands."
             >.
           </p>
 
-          <ui-section id="1-example" header="1. Example" sticky collapsible dividing collapsed>
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>Live: the real element, drawn by the epics pack this page loads.</p>
             <ul>
@@ -175,7 +175,7 @@ holding its id (Q7).  Its colour says where the item stands."
             </epic-item>
             <ui-section
               id="epic-item-actions"
-              header="With buttons in its title row"
+              label="With buttons in its title row"
               sticky
               collapsible
               dividing
@@ -219,7 +219,7 @@ holding its id (Q7).  Its colour says where the item stands."
             </ui-section>
           </ui-section>
 
-          <ui-section id="2-markup" header="2. Markup" sticky collapsible dividing collapsed>
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               A caveat with a reply, from the <code>windows-and-review</code> epic. The doc is split, so on disk the
@@ -252,7 +252,7 @@ holding its id (Q7).  Its colour says where the item stands."
             </ui-accordion>
           </ui-section>
 
-          <ui-section id="3-where-it-goes" header="3. Where it goes" sticky collapsible dividing collapsed>
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="layer group"></ui-icon>
             <p><b>Its parents:</b></p>
             <ul>
@@ -363,7 +363,7 @@ holding its id (Q7).  Its colour says where the item stands."
             </ui-table>
           </ui-section>
 
-          <ui-section id="4-attributes" header="4. Attributes" sticky collapsible dividing collapsed>
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
             <ui-table celled compact striped unstackable>
               <table>
@@ -511,7 +511,7 @@ holding its id (Q7).  Its colour says where the item stands."
                       <code>attention</code> (red). For a call that simply follows WWOD (<code
                         >plan-doc add ... --calm</code
                       >); Owen flips it by clicking the id chip while the page is reviewed (the inbox's
-                      <code>urgency</code>, applied by <code>plan-doc inbox apply</code>).
+                      <code>urgency</code>, applied by <code>epic inbox apply</code>).
                     </td>
                     <td></td>
                   </tr>
@@ -551,7 +551,7 @@ holding its id (Q7).  Its colour says where the item stands."
                 </tbody>
               </table>
             </ui-table>
-            <ui-section id="epic-item-slots" header="Slots" sticky collapsible dividing collapsed>
+            <ui-section id="epic-item-slots" label="Slots" sticky collapsible dividing collapsed>
               <p>
                 A slot is a place in the drawing that a child goes to: a child with <code>slot="name"</code> goes to
                 that name's place, every other child to the default one (shown as <i>default</i>).
@@ -593,7 +593,7 @@ holding its id (Q7).  Its colour says where the item stands."
                 </table>
               </ui-table>
             </ui-section>
-            <ui-section id="epic-item-parts" header="Parts" sticky collapsible dividing collapsed>
+            <ui-section id="epic-item-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>
                 A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a
                 stylesheet can reach it: <code>epic-item::part(header)</code>.
@@ -688,7 +688,7 @@ holding its id (Q7).  Its colour says where the item stands."
                 </table>
               </ui-table>
             </ui-section>
-            <ui-section id="epic-item-states" header="States" sticky collapsible dividing collapsed>
+            <ui-section id="epic-item-states" label="States" sticky collapsible dividing collapsed>
               <p>
                 A state is a word the element sets on itself while something is true, for styling:
                 <code>epic-item:state(open)</code>. Never written in the file.
@@ -722,7 +722,7 @@ holding its id (Q7).  Its colour says where the item stands."
                 </table>
               </ui-table>
             </ui-section>
-            <ui-section id="epic-item-events" header="Events" sticky collapsible dividing collapsed>
+            <ui-section id="epic-item-events" label="Events" sticky collapsible dividing collapsed>
               <ui-table celled compact striped unstackable>
                 <table>
                   <thead>
@@ -750,7 +750,7 @@ holding its id (Q7).  Its colour says where the item stands."
                       <td>About to fold: its line was clicked. Cancel to stay open.</td>
                     </tr>
                     <tr>
-                      <td><code>ui-load</code></td>
+                      <td><code>ui-loaded</code></td>
                       <td><code>{ source: string, content: string }</code></td>
                       <td></td>
                       <td>
@@ -778,7 +778,7 @@ holding its id (Q7).  Its colour says where the item stands."
             </ui-section>
           </ui-section>
 
-          <ui-section id="5-how-it-looks" header="5. How it looks" sticky collapsible dividing collapsed>
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="palette"></ui-icon>
             <p>
               The colours mean the same on every doc page: the whole scheme is on
@@ -793,7 +793,7 @@ holding its id (Q7).  Its colour says where the item stands."
                 ><code>plan-doc.md</code></a
               >, "Colours").
             </p>
-            <ui-section id="item-chip" header="The id chip" sticky collapsible dividing collapsed>
+            <ui-section id="item-chip" label="The id chip" sticky collapsible dividing collapsed>
               <p>
                 The chip shows the id in capitals (<code>Q7</code>) and is a link to the item. Its colour is the item's
                 <code>state</code>, solid:
@@ -854,7 +854,7 @@ holding its id (Q7).  Its colour says where the item stands."
                 </li>
               </ul>
             </ui-section>
-            <ui-section id="item-review" header="The review buttons" sticky collapsible dividing collapsed>
+            <ui-section id="item-review" label="The review buttons" sticky collapsible dividing collapsed>
               <p>
                 While an epic page is being reviewed (<code>&lt;epic-page reviewing&gt;</code>, served by the page
                 server), its marks go to the doc's review inbox: the file of Owen's marks that Claude reads
@@ -891,7 +891,7 @@ holding its id (Q7).  Its colour says where the item stands."
                 <code>deferred</code>, or <code>to do</code> (yellow).
               </p>
             </ui-section>
-            <ui-section id="item-folding" header="Folding" sticky collapsible dividing collapsed>
+            <ui-section id="item-folding" label="Folding" sticky collapsible dividing collapsed>
               <ul>
                 <li>
                   An item starts folded: only its line shows. A click on the line unfolds it, and so do a link to it
@@ -909,7 +909,7 @@ holding its id (Q7).  Its colour says where the item stands."
             </ui-section>
           </ui-section>
 
-          <ui-section id="6-written-by" header="6. Written by" sticky collapsible dividing collapsed>
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <p>
               Only the epic tool (<code>epic</code>) writes items, and it rewrites every item's
@@ -952,13 +952,8 @@ holding its id (Q7).  Its colour says where the item stands."
                 <code>part-ids</code>) and back
               </li>
               <li>
-                older docs: the one-time converter (<code>plan-doc convert</code>,
-                <a
-                  href="../../spell-epic/src/convert/"
-                  target="src-spell-epic-src-convert"
-                  title="spell-epic/src/convert/"
-                  ><code>convert/</code></a
-                >) made every item from the old markup
+                older docs: a one-time converter made every item from the old markup (gone since epic
+                <code>repo-split</code>)
               </li>
             </ul>
           </ui-section>

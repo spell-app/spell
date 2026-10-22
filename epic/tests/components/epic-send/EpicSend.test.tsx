@@ -3,10 +3,10 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { AnswerForm } from "$/epics/answers"
+import { AnswerForm } from "spell-epic/answers"
 
-import "$/epics/components/epic-send"
-import "$/epics/components/epic-text-box"
+import "spell-epic/components/epic-send"
+import "spell-epic/components/epic-text-box"
 
 ////////////////
 // ## Fakes
@@ -148,7 +148,7 @@ describe("<epic-send>", () => {
   test("comments only (r6):  a section's comment box alone makes it pending;  Send posts the comments", async () => {
     const { fetch } = adoptForm()
     const root = await ElementFixture.render(
-      `<div><epic-send></epic-send><ui-section id="l-main" header="2.2 The main checkout"><p>x</p>` +
+      `<div><epic-send></epic-send><ui-section id="l-main" label="2.2 The main checkout"><p>x</p>` +
         `<epic-text-box for="l-main"></epic-text-box></ui-section></div>`
     )
     const send = root.querySelector("epic-send")!

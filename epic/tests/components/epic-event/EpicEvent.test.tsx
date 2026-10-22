@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-event"
+import "spell-epic/components/epic-event"
 
 describe("<epic-event>", () => {
   test("its icon, its time to the minute, then its text through its slot;  axe", async () => {

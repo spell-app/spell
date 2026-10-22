@@ -1,13 +1,13 @@
 /**
  * Tests of `PageNotes`:  notes written into a page's source, edited, answered, and carried over a regenerated part.
  * - every edit splices the source:  the bytes around the note stay as they were
- * - `oxfmt` (`AS.formatHTML()`) leaves a formatted page with notes in it formatted
+ * - `oxfmt` (`SRV.formatHTML()`) leaves a formatted page with notes in it formatted
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { AS } from "spell-kit/assembler"
+import { SRV } from "spell-kit/server"
 
-import { NotesError, PageNotes, htmlOf } from "../../src/tools/PageNotes.js"
+import { NotesError, PageNotes, htmlOf } from "spell-epic/tools/PageNotes.js"
 
 /** When the notes are written:  2026-10-10 14:02, local. */
 const NOW = new Date(2026, 9, 10, 14, 2)
@@ -26,13 +26,13 @@ const PAGE = `<!doctype html>
           ><header class="spell-page-head"><h1>Test page</h1></header></ui-sticky
         >
         <p class="lede">What this settles.</p>
-        <ui-section id="model" header="1. The model" sticky collapsible dividing collapsed>
+        <ui-section id="model" label="1. The model" sticky collapsible dividing collapsed>
           <p>Body.</p>
-          <ui-section id="inner" header="Inner" sticky collapsible dividing collapsed>
+          <ui-section id="inner" label="Inner" sticky collapsible dividing collapsed>
             <p>Inner body.</p>
           </ui-section>
         </ui-section>
-        <ui-section id="later" header="2. Later" sticky collapsible dividing collapsed>
+        <ui-section id="later" label="2. Later" sticky collapsible dividing collapsed>
           <p>More.</p>
         </ui-section>
       </main>
@@ -110,7 +110,7 @@ describe("PageNotes.add()", () => {
   test("refuses blank text, a section that isn't there, and a section only a comment names", () => {
     expect(() => new PageNotes(PAGE).add("model", "  \n ", NOW)).toThrow(NotesError)
     expect(() => new PageNotes(PAGE).add("nowhere", "x", NOW)).toThrow(/no section "nowhere"/)
-    const commented = PAGE.replace('<ui-section id="model" header', '<ui-section id="model2" header')
+    const commented = PAGE.replace('<ui-section id="model" label', '<ui-section id="model2" label')
     expect(() => new PageNotes(commented).add("model", "x", NOW)).toThrow(/no section "model"/)
   })
 
@@ -122,9 +122,9 @@ describe("PageNotes.add()", () => {
       return notes.add("later", long, NOW)
     })
     const squash = (text: string) => text.replace(/\s+/g, " ").replace(/> | </g, (match) => match.trim())
-    expect(squash(await AS.formatHTML("page.html", html))).toBe(squash(html))
+    expect(squash(await SRV.formatHTML("page.html", html))).toBe(squash(html))
     const short = edited((notes) => notes.add("model", "short", NOW)).html
-    expect(await AS.formatHTML("page.html", short)).toBe(short)
+    expect(await SRV.formatHTML("page.html", short)).toBe(short)
   })
 })
 
@@ -192,13 +192,13 @@ describe("PageNotes.answer() / setStatus()", () => {
 
 describe("PageNotes.carryOver()", () => {
   /** what `index.js` writes between its markers:  one section, unformatted */
-  const REGION = `<ui-section id="epics" header="Epics" sticky collapsible dividing>
+  const REGION = `<ui-section id="epics" label="Epics" sticky collapsible dividing>
 <ui-cards></ui-cards>
 </ui-section>`
 
   test("puts each group back into its section;  a group whose section went is kept at the end", () => {
     const before = `
-        <ui-section id="epics" header="Epics" sticky collapsible dividing>
+        <ui-section id="epics" label="Epics" sticky collapsible dividing>
           <ui-cards>old</ui-cards>
           <spell-notes for="epics">
             <spell-note id="n1" status="new" at="2026-10-10 14:02">
@@ -206,14 +206,14 @@ describe("PageNotes.carryOver()", () => {
             </spell-note>
           </spell-notes>
         </ui-section>
-        <ui-section id="gone" header="Gone">
+        <ui-section id="gone" label="Gone">
           <spell-notes for="gone">
             <spell-note id="n2" status="new" at="2026-10-10 14:03"><p>Lost?</p></spell-note>
           </spell-notes>
         </ui-section>
 `
     const after = PageNotes.carryOver(before, REGION)
-    expect(after).toBe(`<ui-section id="epics" header="Epics" sticky collapsible dividing>
+    expect(after).toBe(`<ui-section id="epics" label="Epics" sticky collapsible dividing>
 <ui-cards></ui-cards>
   <spell-notes for="epics">
     <spell-note id="n1" status="new" at="2026-10-10 14:02">

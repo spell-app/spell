@@ -3,8 +3,8 @@ import { dirname, join } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { EpicAddress, PageTargets, SAGA_SCHEME, type Landing, type TargetAnswer } from "$/epics/links"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicAddress, PageTargets, SAGA_SCHEME, type Landing, type TargetAnswer } from "spell-epic/links"
 
 import { Sagas } from "./Sagas"
 import { ServedFolders } from "./ServedFolders"
@@ -13,7 +13,7 @@ import { ServedFolders } from "./ServedFolders"
  * ### `EpicTargets`
  * What a link to a saga, an epic, a phase or an item finds in ONE checkout (epic `epic-workflow` P15):  the page, the
  * id on it, its title, and what's broken.
- * - Used by the page server (`GET /api/epics/target` and `/saga/...`, `linkRoutes.ts`), the link check (`epic check`,
+ * - Used by the page server (`GET /api/epics/target` and `/saga/...`, `linkRoutes.ts`), the link check (`epic lint`,
  *   `doc-links.js --check`:  `problemsIn()`) and the openers (`epic pages open | link SAGA:/...`).
  * - Broken:  a saga not in `sagas/sagas.json5`, a page that isn't there, an id not on its page, and an epic under a
  *   saga it doesn't name (its `<epic-page saga>`).  The last still LINKS:  only the check minds.
@@ -48,7 +48,7 @@ export class EpicTargets {
 
   /**
    * What `address` finds, from the page `from` (a page path) whose markup is `html` (default:  read
-   * from disk;  `epic check` passes the whole doc, parts in).
+   * from disk;  `epic lint` passes the whole doc, parts in).
    * - `href`:  a page path, `#id` kept (`epics/seo/seo.plan.html#j3`);  on the page it's in, `<page>#id`
    * - `problem`:  why it's broken, in a few words;  `undefined` when it isn't
    * - NEVER throws:  a page that won't read is a problem
@@ -130,7 +130,7 @@ export class EpicTargets {
   }
 
   /**
-   * `html` with its links to SERVED ROUTES made inert for the file link check (`AS.Linker.check()`):
+   * `html` with its links to SERVED ROUTES made inert for the file link check (`SRV.Linker.check()`):
    * their `href` `#`, which it skips.
    * - a route (`/api/...`) and a test's action link (`a.epic-test-action`, epic `epic-engine` P4) are pages the page
    *   server answers, opened in the side bar or the browser:  no file to find, and no tab of their own

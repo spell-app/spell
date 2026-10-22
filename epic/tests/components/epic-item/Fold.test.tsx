@@ -2,14 +2,14 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import { expandAllUnder, foldAllUnder } from "$/epics/components/epic-item/Fold"
+import { expandAllUnder, foldAllUnder } from "spell-epic/components/epic-item/Fold"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-answer"
-import "$/epics/components/epic-status"
-import "$/epics/components/epic-note"
-import "$/epics/components/epic-update"
-import "$/epics/components/epic-phase"
+import "spell-epic/components/epic-answer"
+import "spell-epic/components/epic-status"
+import "spell-epic/components/epic-note"
+import "spell-epic/components/epic-update"
+import "spell-epic/components/epic-phase"
 
 /**
  * Every card with a heading band folds from it, the chevron first

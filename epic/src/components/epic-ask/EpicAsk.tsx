@@ -10,14 +10,14 @@ import {
   type PageAnswer,
   type PartLabels,
   type SentAnswer
-} from "$/epics/answers"
+} from "spell-epic/answers"
 // the Other box:  its barrel first, so it's defined wherever `<epic-ask>` is
-import "$/epics/components/epic-text-box"
+import "spell-epic/components/epic-text-box"
 
 import { epicAskVocabulary } from "./EpicAsk.en"
 
 import askCSS from "./EpicAsk.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /** An option's attributes this reads:  ticked to start with, hidden under Open. */
 const SELECTED = "selected"
@@ -170,7 +170,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
 
   /** What its options' group is called:  its section's title (`Q1 · Which layout?`), else its chip. */
   get groupLabel(): string {
-    return this.domElement.closest("ui-section[id]")?.getAttribute("header") ?? this.chipLabel
+    return this.domElement.closest("ui-section[id]")?.getAttribute("label") ?? this.chipLabel
   }
 
   /** Every option shown is ticked:  the button says Select none. */
@@ -369,7 +369,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   labelsInto(labels: PartLabels) {
     const key = this.key
     if (!key) return
-    labels[key] = this.domElement.closest("ui-section[id]")?.getAttribute("header") ?? this.chipLabel
+    labels[key] = this.domElement.closest("ui-section[id]")?.getAttribute("label") ?? this.chipLabel
     for (const option of this.options) {
       const letter = letterOf(option)
       labels[`${key}-${letter}`] = `${letter} · ${option.getAttribute("title") ?? letter}`

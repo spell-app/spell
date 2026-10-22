@@ -21,7 +21,7 @@ import {
  *   (`labelFor()`).
  * - Whether the page and the id are THERE is not its business:  the page knows (`PageTargets`), and so does the
  *   epic tool (`EpicTargets`, node only).
- * - Pure:  no DOM, no files.  The elements, the docs runtime and the node tools all import it (`$/epics/links`).
+ * - Pure:  no DOM, no files.  The elements, the docs runtime and the node tools all import it (`spell-epic/links`).
  ****************/
 export class EpicAddress {
   /** the saga's id */

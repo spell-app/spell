@@ -4,13 +4,13 @@ import { fileURLToPath } from "node:url"
 
 import { componentSets, pageServerSettings } from "spell-kit/server/page/settings"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { EPIC_UI } from "$/epics/server/server.types"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EPIC_UI } from "spell-epic/server/server.types"
 
 /****************
  * ### `ServedFolders`
  * The folders a checkout's page server serves at ANOTHER address:  what a linker under that checkout is told
- * (`AS.Linker`'s `served`), so a link to the address checks as the folder it serves.
+ * (`SRV.Linker`'s `served`), so a link to the address checks as the folder it serves.
  *
  * ```ts
  * ServedFolders.under("/Users/owen/www/spell-app/spell-app")
@@ -24,9 +24,9 @@ import { EPIC_UI } from "$/epics/server/server.types"
  *   repo, found as the templates are
  * - the engine's templates, at `templates/` (epic `epic-eject` T11), through the checkout's `spell-epic` link when it
  *   has one to this engine's repo;  nothing when they ARE the checkout's (spell-epic's own)
- * - Who asks:  the docs tools' linker (`doc-links.js`) and the `epic` tool's (`PlanDocFiles.linker`:  `epic check`'s
+ * - Who asks:  the docs tools' linker (`doc-links.js`) and the `epic` tool's (`PlanDocFiles.linker`:  `epic lint`'s
  *   link check, and every write), so both read `../../components/epics/` and `../../templates/` alike
- *   (epic `epic-engine` I27:  `epic check` called them missing)
+ *   (epic `epic-engine` I27:  `epic lint` called them missing)
  * - STATIC:  reads the disk (the link), keeps nothing.
  ****************/
 export class ServedFolders {

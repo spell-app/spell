@@ -3,11 +3,11 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "spell-ui/ui-icon"
-import "spell-ui/ui-button"
-import "$/epics/components/epic-list"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-button"
+import "spell-epic/components/epic-list"
 
-import { SORT_KEY } from "$/epics/components/epic-list/EpicList.types"
+import { SORT_KEY } from "spell-epic/components/epic-list/EpicList.types"
 
 /** Its buttons, as they read, `*` while in use:  `A–Z*`. */
 function buttons(host: Element): string[] {

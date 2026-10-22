@@ -9,10 +9,10 @@
 
 import type { JSX } from "@solidjs/web"
 
-import { readEpicDate, epicGroupFor, type EpicGroupName } from "$/epics/list/EpicCards"
-import { epicStateFor, type EpicFacts } from "$/epics/list/EpicState"
+import { readEpicDate, epicGroupFor, type EpicGroupName } from "spell-epic/list/EpicCards"
+import { epicStateFor, type EpicFacts } from "spell-epic/list/EpicState"
 
-/** The page server's route that stars and unstars an epic (`$/epics/tool/epicRoutes.ts`). */
+/** The page server's route that stars and unstars an epic (`spell-epic/tool/epicRoutes.ts`). */
 export const FAVORITE_API = "/api/epics/favorite"
 
 /**

@@ -4,7 +4,7 @@ import type { DOMElement } from "spell-ui/core"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-aside"
+import "spell-epic/components/epic-aside"
 
 /** `element`'s shadow part `name`. */
 function part(element: Element, name: string): HTMLElement {

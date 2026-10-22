@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs"
 import { isAbsolute, join, relative, resolve } from "node:path"
 
-import type { AS } from "spell-kit/assembler"
+import type { SRV } from "spell-kit/server"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 
@@ -23,7 +23,7 @@ import type { Migration, MigrationContext } from "./migrations.types"
  *   `spell-epic/`;  1,665 links in 35 epic pages led nowhere.  Epic-engine's own 77 were mended by hand (I22).
  * - Each move is EVIDENCE, never a guess (`MOVES`, each with where it's from):  git's renames, in spell-app and
  *   spell-epic, and the commits that say where a file went.
- * - A link changes only when it's DEAD (nothing there, as `epic check` resolves it) and its new place is there:
+ * - A link changes only when it's DEAD (nothing there, as `epic lint` resolves it) and its new place is there:
  *   - its `href`:  from the page, as the I22 linker writes it (`RepoList.linkRootOf()`:  the checkout the page is
  *     served under;  a component set's files at their served address, `components/epics/`);  its `#hash` kept
  *   - its `target`, when the linker made it (`src-...`, or none):  the new file's, so one file keeps one tab
@@ -87,7 +87,7 @@ export class EngineLinks implements Migration {
    * somewhere, or no move knows it;  else `gone`, or its new place `to` (as served) and whether that's `there`.
    * - `content`:  the page's content folder, laid at the checkout's root:  a file there is there too
    */
-  private static fixFor(linker: AS.Linker, at: string, content?: string): LinkFix | undefined {
+  private static fixFor(linker: SRV.Linker, at: string, content?: string): LinkFix | undefined {
     const there = (path: string): boolean =>
       existsSync(EngineLinks.real(linker, path)) ||
       (!!content && existsSync(join(content, relative(linker.root, path))))
@@ -117,9 +117,9 @@ export class EngineLinks implements Migration {
   /**
    * `path`, as served under `linker`'s checkout, as the file it is:  a component set's address folder swapped for
    * the folder it serves (`<root>/components/epics/x` => `<root>/spell-epic/src/docs/x`), the content folder's areas
-   * for the content folder's;  else `path`.  `AS.Linker`'s own swap, which it keeps private.
+   * for the content folder's;  else `path`.  `SRV.Linker`'s own swap, which it keeps private.
    */
-  private static real(linker: AS.Linker, path: string): string {
+  private static real(linker: SRV.Linker, path: string): string {
     for (const [address, dir] of linker.served) {
       if (path === address) return dir
       if (path.startsWith(`${address}/`)) return dir + path.slice(address.length)
@@ -183,12 +183,13 @@ const MOVES: readonly (readonly [string, string | null])[] = [
   ["packages/vscode/src/DocPreview.ts", "spell-epic/vscode/src/DocPreview.ts"],
   ["packages/vscode/src/WindowBridge.ts", "spell-epic/vscode/src/WindowBridge.ts"],
   // spell-app 617465303 (epic-eject P6) removed the CLI's epic bin and entry;  spell-epic's are the same files, moved
+  // (the entry and the groups to spell-epic's `src/cli/` in repo-split P13:  J114)
   ["packages/cli/bin/epic.mjs", "spell-epic/bin/epic"],
-  ["packages/cli/src/epicMain.ts", "spell-epic/src/command/epicMain.ts"],
+  ["packages/cli/src/epicMain.ts", "spell-epic/src/cli/epicMain.ts"],
   // spell-app 6f41ed9c5 (epic-eject P5):  "every group a class in packages/epics/src/command";  git's renames there
   // (and their tests')
   ["packages/cli/src/epic/epicArgs.ts", "spell-epic/src/command/epicArgs.ts"],
-  ["packages/cli/src/epic/epicGroups.ts", "spell-epic/src/command/epicGroups.ts"],
+  ["packages/cli/src/epic/epicGroups.ts", "spell-epic/src/cli/epicGroups.ts"],
   ["packages/cli/src/epic/requests.ts", "spell-epic/src/command/Requests.ts"],
   ["packages/cli/src/dev/mergeMain.ts", "spell-epic/src/command/MainMerge.ts"],
   ["packages/cli/src/dev/parking.ts", "spell-epic/src/command/Parking.ts"],

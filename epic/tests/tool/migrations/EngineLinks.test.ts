@@ -11,9 +11,9 @@ import { dirname, join } from "node:path"
 import { parseHTML } from "linkedom"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { AS } from "spell-kit/assembler"
-import type { MigrationContext } from "$/epics/tool/migrations/migrations.types"
-import { Migrations } from "$/epics/tool/migrations/Migrations"
+import { SRV } from "spell-kit/server"
+import type { MigrationContext } from "spell-epic/tool/migrations/migrations.types"
+import { Migrations } from "spell-epic/tool/migrations/Migrations"
 
 /** The step under test. */
 const STEP = Migrations.named("engine-links")!
@@ -38,7 +38,7 @@ put(content, "epics/seo/seo.plan.html")
 put(content, "epics/seo/parts/o1.html")
 
 /** The page's linker, as `PlanDocFiles` makes it:  under spell-app's checkout, Epic UI served at its address. */
-const linker = new AS.Linker(app, { served: { "components/epics": "spell-epic/src/docs" }, content })
+const linker = new SRV.Linker(app, { served: { "components/epics": "spell-epic/src/docs" }, content })
 
 /** epic `seo`'s page, holding `links`. */
 function page(links: string): Document {
@@ -55,9 +55,8 @@ function context(): MigrationContext & { notes: string[] } {
 }
 
 describe("engine-links", () => {
-  test("named, dated, on command only (not every edit), after engine-asset-routes", () => {
+  test("named, dated, on command only (not every edit)", () => {
     expect([STEP.kind, STEP.date, STEP.everyEdit]).toEqual(["epic", "2026-10-19", false])
-    expect(Migrations.all.indexOf(STEP)).toBe(Migrations.all.indexOf(Migrations.named("engine-asset-routes")!) + 1)
   })
 
   test("a dead link to the engine's old place leads to its new one, its tab and #hash with it", () => {

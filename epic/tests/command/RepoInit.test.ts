@@ -13,9 +13,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Git } from "$/epics/command/Git"
-import { RepoInit } from "$/epics/command/RepoInit"
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { Git } from "spell-epic/command/Git"
+import { RepoInit } from "spell-epic/command/RepoInit"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 /** A throwaway repo `try` on branch `trunk`:  a README, nothing set up for epics yet. */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "repo-init-")))
@@ -100,7 +100,7 @@ describe("epic init", () => {
   test("a repo set up this way is a checkout the epic verbs work on, from any folder in it", () => {
     mkdirSync(join(MAIN, "src"), { recursive: true })
     expect(Git.isEpicCheckout(MAIN)).toBe(true)
-    expect(Git.nearestCheckout("packages/epics/tools/plan-doc.js", join(MAIN, "src"))).toBe(MAIN)
+    expect(Git.nearestCheckout({ from: join(MAIN, "src") })).toBe(MAIN)
     expect(Git.isEpicCheckout(TEMP)).toBe(false)
   })
 })

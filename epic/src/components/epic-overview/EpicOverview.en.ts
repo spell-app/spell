@@ -5,12 +5,12 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "$/epics/definitions"
+import type { EpicVocabulary } from "spell-epic/definitions"
 
 // the review controls it draws, keyed `summary` (epic `epic-engine` I55)
-import { REVIEW_PARTS } from "$/epics/components/epic-review/EpicReview.types"
+import { REVIEW_PARTS } from "spell-epic/components/epic-review/EpicReview.types"
 
-import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "$/epics/components/epic-item/Fold.types"
+import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell-epic/components/epic-item/Fold.types"
 // the fold pieces every folding block shares
 import {
   FOLD_EVENTS,
@@ -18,7 +18,7 @@ import {
   FOLD_PARTS,
   FOLD_STATES,
   FOLD_TEXTS
-} from "$/epics/components/epic-section/EpicSection.types"
+} from "spell-epic/components/epic-section/EpicSection.types"
 
 /****************
  * ### `<epic-overview>`

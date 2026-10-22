@@ -31,12 +31,12 @@ import { RealPath } from "./RealPath.ts"
  *   - Read here by `parse()`, not by `DataFile`, which needs the `json5` package:
  *     the hooks and the window script load this file with plain `node`, before a worktree's `yarn install`.
  *   - So `DataFile.write()` can write it later (`epic init`, epic `epic-eject` P9), keeping Owen's comments.
- * - Who reads it:  the CLI (`epic shared`, `stock`, `worktree` ...), the epic tool and the epics list,
+ * - Who reads it:  the CLI (`epic shared`, `status`, `worktree` ...), the epic tool and the epics list,
  *   the hooks (`.claude/hooks/`), the window script (`src/window.mjs`), the running epics' route module.
  *   `epic config [key]` prints a value, for the skills.
  *   - Packages below epics never read it (the server, spaces):  they find the main checkout through git
  *     (`SRV.checkoutOf()`), or are told by epics' route module (`PageServer.serveWorktrees()`).
- * - Node only (`node:fs`):  NOT in the `$/epics` barrel, imported by path (`$/epics/config/EpicConfig`).
+ * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path (`spell-epic/config/EpicConfig`).
  * - Its position:  imports only node's own modules, the server's `checkout.ts` by its entry and `RealPath` beside it,
  *   so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
  * - A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A):  the top repo's file names its child repos
@@ -733,7 +733,7 @@ export type EpicSettings = {
  *   `url` while it's there (spell-app's `.spell-server.editor.json`, spaces' `EditorServer`;  as its page server's
  *   `/editor` reads it, `appRoutes.ts`)
  * - `start`:  the shell command that starts it, run DETACHED from the main checkout when it doesn't answer
- *   (`node ../cli/bin/spell.mjs server start`, the kit's `spell`);  `""`:  nothing to run, the tab says it isn't up
+ *   (`node ../bin/spell.mjs server start`, the kit's `spell`);  `""`:  nothing to run, the tab says it isn't up
  * - neither `url` nor `urlFile`:  no app (the default)
  */
 export type EpicApp = { path: string; url: string; urlFile: string; start: string }

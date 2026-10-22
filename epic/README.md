@@ -248,9 +248,12 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 ```
 
 <details>
-<summary>Until repo-split P14 lands:  imports</summary>
+<summary>Imports</summary>
 
-- Inside spell-epic, its own files are imported by an alias today;  after repo-split P14, by `spell-epic` and `#/`.
+- Every file is imported by the package name and its path under `src/`, inside spell-epic too:
+  `spell-epic/tool/PlanDoc`, `spell-ui/core`, `spell-kit/server` (epic `repo-split` P14).
+- Plain `node` (the hooks, the docs tools' `.js` scripts) writes the extension:  `spell-epic/config/EpicConfig.ts`.
+- More:  [the repo's AGENTS.md](AGENTS.md), "Imports".
 
 </details>
 
@@ -259,12 +262,12 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 
 | Page | What it's for | Made by |
 | --- | --- | --- |
-| epic page | an epic's live record:  overview, phases, items, log | `/epic <name>` (`epic new`) |
+| epic page | an epic's live record:  overview, phases, items, log | `/epic <name>` (`epic create`) |
 | saga page | a saga's purpose, what's done so far, ideas not done yet, and a card per epic | `epic saga page <id>` |
-| details page | one question explained with a picture, answered on the page | `/details` (`epic ask new`) |
-| choice page | a table of names the agent recommends, typed over, then "Do it" | `epic choices new` |
+| details page | one question explained with a picture, answered on the page | `/details` (`epic ask create`) |
+| choice page | a table of names the agent recommends, typed over, then "Do it" | `epic choices create` |
 | review page | several calls at once:  keep, change, talk over | the details tools, from a template |
-| guide | what an epic built, for a reader coming to it cold:  written at Doc Review | `epic pages new durable guides/<page>.html` |
+| guide | what an epic built, for a reader coming to it cold:  written at Doc Review | `epic pages create durable guides/<page>.html` |
 | home page | the docs' front door, a card per area;  each area's list page (Epics, Sagas, Guides) | `epic pages index` |
 
 - Every kind starts from a template in [templates/](templates/):  `epic pages template <name>` prints one's path.

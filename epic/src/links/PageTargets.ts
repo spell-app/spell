@@ -81,14 +81,12 @@ export class PageTargets {
   }
 
   /**
-   * `element`'s title, as text:  its `slot="title"` child's text, else `title`, else `header` (a `<ui-section>`),
+   * `element`'s title, as text:  its `slot="title"` child's text, else `title`, else `label` (a `<ui-section>`),
    * else `""`;  white space collapsed.
    */
   static titleOf(element: Element): string {
     const slotted = Array.from(element.children).find((child) => child.getAttribute("slot") === "title")?.textContent
-    return (slotted ?? element.getAttribute("title") ?? element.getAttribute("header") ?? "")
-      .replace(/\s+/g, " ")
-      .trim()
+    return (slotted ?? element.getAttribute("title") ?? element.getAttribute("label") ?? "").replace(/\s+/g, " ").trim()
   }
 }
 

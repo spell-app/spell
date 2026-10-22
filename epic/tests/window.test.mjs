@@ -1,6 +1,6 @@
 /**
  * `node --test tests/window.test.mjs`:  how `Window.current()` finds a session's window, `Window.request()`,
- * the worktree windows' moves, and `stay-check`'s advice.
+ * the worktree windows' moves, and `should-stay`'s advice.
  * - Registry entries go in a temp folder (`SPELL_WINDOWS_DIR`), never `~/.spell/windows`.
  * - The "window" is a stand-in:  our own parent pid (an ancestor, like a session's extension host), a `sleep`
  *   child (alive, but not an ancestor), or a pid that has exited.
@@ -57,7 +57,7 @@ const {
   withoutStay,
   withStay,
   worktreeOf
-} = await import("../src/window.mjs")
+} = await import("spell-epic/window.mjs")
 
 /** The temp registry folder:  spell-epic's bridges' (`Window.registry`). */
 const dir = mkdtempSync(join(tmpdir(), "spell-windows-"))
@@ -159,7 +159,7 @@ test("show():  sends `show-doc` to this session's window, with `hash` and `view`
   }
 })
 
-test("reload-view:  sends `reload-view` with the view to this session's window;  needs no target", async () => {
+test("reload:  sends the bridge's `reload-view` with the view to this session's window;  needs no target", async () => {
   const seen = []
   const server = createServer((request, response) => {
     let body = ""
@@ -175,8 +175,8 @@ test("reload-view:  sends `reload-view` with the view to this session's window; 
   const window = { pid: process.ppid, port: server.address().port, token: "t", folders: [], workspaceFile: null }
   writeFileSync(join(dir, `${process.ppid}.json`), JSON.stringify(window))
   try {
-    assert.equal(await Window.main(["reload-view"]), 0)
-    assert.equal(await Window.main(["reload-view", "--review"]), 0)
+    assert.equal(await Window.main(["reload"]), 0)
+    assert.equal(await Window.main(["reload", "--review"]), 0)
     assert.deepEqual(seen, [
       { op: "/reload-view", view: "docs" },
       { op: "/reload-view", view: "review" }

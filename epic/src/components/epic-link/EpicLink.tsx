@@ -3,7 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { EpicAddress, PageTargets, TARGET_API, type Landing, type TargetAnswer } from "$/epics/links"
+import { EpicAddress, PageTargets, TARGET_API, type Landing, type TargetAnswer } from "spell-epic/links"
 
 import { epicLinkVocabulary } from "./EpicLink.en"
 

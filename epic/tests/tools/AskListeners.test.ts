@@ -8,9 +8,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 
-import { DataFile } from "$/epics/data/DataFile"
+import { DataFile } from "spell-epic/data/DataFile"
 
-import { ASK_STALE_MS, AskListeners } from "../../src/tools/AskListeners"
+import { ASK_STALE_MS, AskListeners } from "spell-epic/tools/AskListeners"
 
 let scratch: string
 let page: string

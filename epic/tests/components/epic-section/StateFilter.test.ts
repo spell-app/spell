@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { StateFilter } from "$/epics/components/epic-section/StateFilter"
+import { StateFilter } from "spell-epic/components/epic-section/StateFilter"
 
 /** The states a filter has, in the filter's order. */
 const PRESENT = ["attention", "replied", "open", "recent"]

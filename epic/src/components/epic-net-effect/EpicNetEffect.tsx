@@ -6,7 +6,7 @@ import { E } from "spell-kit/element"
 import { epicNetEffectVocabulary } from "./EpicNetEffect.en"
 
 import netEffectCSS from "./EpicNetEffect.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicNetEffect`

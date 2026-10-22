@@ -15,8 +15,8 @@ import { componentSets, type ComponentSetSetting } from "spell-kit/server/page"
 import type { SiteTab } from "spell-kit/server/site/site.types"
 import { ask } from "spell-kit/server/test/serve"
 
-import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "$/epics/server/EpicServer"
-import { RepoList } from "$/epics/server/RepoList"
+import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "spell-epic/server/EpicServer"
+import { RepoList } from "spell-epic/server/RepoList"
 
 /** This checkout:  the engine served. */
 const ENGINE = resolve(import.meta.dirname, "../..")

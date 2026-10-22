@@ -3,27 +3,27 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI } from "spell-ui/core"
 // The file itself (`list/` has no barrel):  it has no imports, so the pack bundles it as is
-import { URGENT_SELECTOR, epicStateFor, type EpicState } from "$/epics/list/EpicState"
+import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell-epic/list/EpicState"
 
-import { PlanDates } from "$/epics/dates"
-import { PhaseIds } from "$/epics/phases"
-import { NOBODY_LISTENING, SAGA_PREFIX, isAirplane, isImmediate } from "$/epics/review"
+import { PlanDates } from "spell-epic/dates"
+import { PhaseIds } from "spell-epic/phases"
+import { NOBODY_LISTENING, SAGA_PREFIX, isAirplane, isImmediate } from "spell-epic/review"
 // the page's view of the review inbox, as the review controls':  its file, not `epic-review`'s barrel
-import { ReviewState } from "$/epics/components/epic-review/ReviewState"
+import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
-import { Fold, expandAllUnder, foldAllUnder } from "$/epics/components/epic-item/Fold"
-import { StateFilter } from "$/epics/components/epic-section/StateFilter"
-import { STATE_PICK, type StatePickDetail } from "$/epics/components/epic-state-filter/EpicStateFilter.types"
-import { FILTER, FILTER_STATES, type StateFilterEntry } from "$/epics/components/epic-section/EpicSection.types"
+import { Fold, expandAllUnder, foldAllUnder } from "spell-epic/components/epic-item/Fold"
+import { StateFilter } from "spell-epic/components/epic-section/StateFilter"
+import { STATE_PICK, type StatePickDetail } from "spell-epic/components/epic-state-filter/EpicStateFilter.types"
+import { FILTER, FILTER_STATES, type StateFilterEntry } from "spell-epic/components/epic-section/EpicSection.types"
 import {
   ALL_QUERY,
   TEST_ALL,
   TEST_DONE,
   TEST_QUERY,
   TEST_START
-} from "$/epics/components/epic-test-run/EpicTestRun.types"
+} from "spell-epic/components/epic-test-run/EpicTestRun.types"
 
-import { shownReadingTime } from "$/epics/tools/ReadingTime.js"
+import { shownReadingTime } from "spell-epic/tools/ReadingTime.js"
 
 import { Clipboard } from "./Clipboard"
 import { epicPageVocabulary } from "./EpicPage.en"
@@ -73,11 +73,11 @@ import {
   type StepLabel
 } from "./EpicPage.types"
 
-import collapseAllCSS from "$/epics/components/epic-item/CollapseAll.css?inline"
-import chipsCSS from "$/epics/components/epic-section/StateChips.css?inline"
+import collapseAllCSS from "spell-epic/components/epic-item/CollapseAll.css?inline"
+import chipsCSS from "spell-epic/components/epic-section/StateChips.css?inline"
 import pageCSS from "./EpicPage.css?inline"
 import crumbsCSS from "./Crumbs.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicPage`
@@ -106,7 +106,7 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *   - none without phases;  FUTURE (grey:  not started) for a future epic
  *   - read from the `<epic-phase>`s below, so it follows the live update:  a `MutationObserver` bumps `layout`
  * - The epic's state (Owen, 2026-10-10, epic `airplane` P8), by the ONE rule the Epics list uses too
- *   (`$/epics/list/EpicState`):  the step label's icon and colour, why under its tooltip (`part="state"`)
+ *   (`spell-epic/list/EpicState`):  the step label's icon and colour, why under its tooltip (`part="state"`)
  *   - in progress (blue half circle), errors (red !:  every phase done, items need Owen), paused (grey pause:
  *     untouched for days)
  *   - none on a future epic or a done one:  the label is FUTURE or DONE in its own look

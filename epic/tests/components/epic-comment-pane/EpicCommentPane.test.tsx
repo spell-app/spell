@@ -2,9 +2,9 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "spell-ui/ui-button"
-import "spell-ui/ui-icon"
-import "$/epics/components/epic-comment-pane"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-icon"
+import "spell-epic/components/epic-comment-pane"
 
 /** `element`'s shadow part `name`. */
 function part(element: Element, name: string): HTMLElement {

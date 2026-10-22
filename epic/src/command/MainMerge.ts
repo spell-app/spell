@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import { basename, dirname, join, matchesGlob, relative } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, type Generator, type MergeMainReport, type SnapshotReview } from "./command.types"
 import { Git } from "./Git"

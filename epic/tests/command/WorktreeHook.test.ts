@@ -23,7 +23,7 @@ import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { SessionFolders } from "$/epics/config/SessionFolders"
+import { SessionFolders } from "spell-epic/config/SessionFolders"
 
 /** The hook, as the plugin runs it. */
 const HOOK = resolve(dirname(fileURLToPath(import.meta.url)), "../../hooks/worktree.mjs")

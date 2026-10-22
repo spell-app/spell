@@ -3,12 +3,12 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { PhaseIds } from "$/epics/phases"
+import { PhaseIds } from "spell-epic/phases"
 
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
-import { EpicPage } from "$/epics/components/epic-page/EpicPage"
+import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel
-import { Fold, expandAllUnder, foldAllUnder } from "$/epics/components/epic-item/Fold"
+import { Fold, expandAllUnder, foldAllUnder } from "spell-epic/components/epic-item/Fold"
 
 import {
   BODY,
@@ -50,7 +50,7 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   - the fold chevron
  *   - `hidden="until-found"`:  find-in-page and `#links` unfold it
  * - Folding:  `open` (page state, never in a doc:  epic pages open folded), `@controlled`.
- *   - The inner section's own `ui-open` / `ui-close` are CANCELLED and stopped there:
+ *   - The inner section's own `ui-opening` / `ui-closing` are CANCELLED and stopped there:
  *     the DOM element announces its own (cancelable), then `open` changes and the inner section follows.
  *   - Find-in-page (`beforematch`, not cancelable) is adopted.
  * - Collapse-all (epic `airplane` P8):
@@ -66,7 +66,7 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   Its children get `--epic-stack`, the bottom of the stuck titles above them (px from the viewport top),
  *   for their own sticky lines (`<epic-item>`'s).
  * - Source:  `source="parts/p3.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`).
- *   - into the DOM element's LIGHT children, replacing any placeholder;  `ui-load` then
+ *   - into the DOM element's LIGHT children, replacing any placeholder;  `ui-loaded` then
  *   - the inner section stays folded while the part is on its way (`isVeiled`), so it opens on the body
  *   - from `file://` it can't load:  the `Loads from parts/x.html when opened (needs the page server)` note, as today
  * - Links:  the page's `#hash` naming it, an element inside it, or an id in its `part-ids`
@@ -83,7 +83,7 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   (`spell-doc-runtime.js` reads it):  its title as drawn, its icon, a section's count.
  * - SIDE EFFECT:  with `source`, replaces its own light children (a placeholder) with the part;
  *   listens for `hashchange` while connected.
- * - Position in the import graph:  `$/ui/core` and `EpicPage` (for the page's signals) only;
+ * - Position in the import graph:  `spell-ui/core` and `EpicPage` (for the page's signals) only;
  *   subclasses in other families import THIS file directly, never the `epic-section` barrel.
  ****************/
 export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComponent<V> {
@@ -204,15 +204,16 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   }
 
   /**
-   * The inner section's own `ui-open` / `ui-close` (the title clicked, or find-in-page):  this element's instead.
+   * The inner section's own `ui-opening` / `ui-closing` (the title clicked, or find-in-page):  this element's
+   * `ui-open` / `ui-close` instead.
    * - Heard on the shadow root, which the inner section's events reach on their way out.
    * - A nested fold's events bubble through here too (its DOM element is slotted inside),
    *   and so do those of a `<ui-section>` among the light children:
    *   only the inner section's own, the one sender in this shadow root.
    * - Cancelable (a click):  cancelled and stopped, then `toggle()`;  not (find-in-page):  adopted, and stopped.
    */
-  @E.on("ui-open", { target: "renderRoot" })
-  @E.on("ui-close", { target: "renderRoot" })
+  @E.on("ui-opening", { target: "renderRoot" })
+  @E.on("ui-closing", { target: "renderRoot" })
   protected onInnerToggle(event: Event) {
     const detail = (event as CustomEvent<{ section?: Element; originalEvent?: Event }>).detail
     const sender = event.target as Node
@@ -326,7 +327,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
 
   /**
    * The fold:  the inner `<ui-section>` around the subclass's title pieces, the part note and the children.
-   * - `title`:  the header's content (`slot="header"` of the inner section):  in full, wrapping, folded or open
+   * - `title`:  the header's content (`slot="label"` of the inner section):  in full, wrapping, folded or open
    * - `mark`:  after the title, on its first line, never cut (a phase's plan-changed pen)
    * - `icon`:  its icon
    * - `tools`:  what goes at the title's end (`slot="actions"` of the inner section), after the page's own buttons
@@ -355,7 +356,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
             </span>
           </Show>
           {/* in full, wrapped, folded or open (EpicFold.css) */}
-          <span slot="header" class="header">
+          <span slot="label" class="header">
             <span class="words">{pieces.title()}</span>
             {pieces.mark?.()}
           </span>

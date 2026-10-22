@@ -1,9 +1,9 @@
 /**
- * Details pages' answers, on the page server:  a ROUTE MODULE (`$/server/page`'s `RouteModule`), listed in the repo
+ * Details pages' answers, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`), listed in the repo
  * root's `package.json` `"pageServer": { "routes": [...] }`.
  * - A DETAILS PAGE:  a page Claude writes to explain a question (`/details`, `epic ask`).
  *   - shown in VS Code's side bar
- *   - Owen answers ON it, and its `<epic-send>` posts the answer here (`$/epics/answers` `AnswerForm`)
+ *   - Owen answers ON it, and its `<epic-send>` posts the answer here (`spell-epic/answers` `AnswerForm`)
  * - `POST /api/docs/details/answer` `{ page, answers, comments, notes, kept }` --
  *   write `<slug>.answer.json5` beside the page `<slug>.html`
  *   - `page`:  the page's URL path, as it was served
@@ -35,7 +35,7 @@
  * - `epic ask wait` polls for the file itself, and wakes the waiting Claude session when it lands.
  * - every POST needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  */
-import { DataFile } from "$/epics/data/DataFile"
+import { DataFile } from "spell-epic/data/DataFile"
 import { AskListeners } from "./AskListeners"
 import { SRV } from "spell-kit/server"
 import type { RouteModule } from "spell-kit/server/page"

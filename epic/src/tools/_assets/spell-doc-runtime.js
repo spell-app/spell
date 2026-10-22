@@ -4,11 +4,11 @@
  * side effects only.  The page's markup is hand-authored;  this only DRIVES it.
  * - Two page markups, read into ONE outline (`outlineOf()`) that everything below works from:
  *   - SECTIONS (every page but the saga pages):
- *     `<ui-section id header sticky collapsible dividing>` in `main`, nested for sub-sections,
+ *     `<ui-section id label sticky collapsible dividing>` in `main`, nested for sub-sections,
  *     `collapsed` to start folded.
  *     - the element draws the title, the fold button, the rule and the stack of stuck titles
  *     - this runtime sets the top-level `offset`s, remembers folds, writes counts
- *     - an EPIC PAGE is `<epic-page>` markup (the `epics` pack, `$/epics`):
+ *     - an EPIC PAGE is `<epic-page>` markup (the `epics` pack, `spell-epic`):
  *       its folding blocks (`<epic-overview>`, `<epic-section>`, `<epic-phase>`, `EPIC_FOLDS`) are its sections.
  *       They draw and stick themselves, count their items, filter them,
  *       and draw the page header, the review line, the commits and every review control;
@@ -69,7 +69,7 @@
  *   `scrollIntoView()` from code doesn't --
  *   call `jump`'s path (a click on a `#id` link, or set `location.hash`) instead
  * NOTE: panels open and close through the accordion's `open` PROPERTY (panel indexes as text):
- * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-open` / `ui-close` mean the user).
+ * that's `<ui-accordion>`'s controlled state, and writing it announces nothing (`ui-open` / `ui-close` mean the person).
  */
 
 import { wireComments } from "./spell-doc-comments.js"
@@ -98,9 +98,9 @@ import {
   toolbarMenu,
   wireJumpKey
 } from "./spell-doc-toolbar.js"
-import { readingTime } from "../ReadingTime.js"
-import { EpicAddress, PageTargets } from "$/epics/links"
-import { ComponentPacks } from "spell-ui/ui-components"
+import { readingTime } from "spell-epic/tools/ReadingTime.js"
+import { EpicAddress, PageTargets } from "spell-epic/links"
+import { ComponentPacks } from "spell-ui/components/ui-components"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
 const TAGS = [
@@ -133,6 +133,16 @@ const UNFOLD_FRAMES = 2
  */
 const SETTLE_MS = 450
 
+/**
+ * The events a fold sends as the reader opens or closes it, and a source host as its body arrives:
+ * - a `<ui-section>`'s (`ui-opening`, `ui-closing`;  its old names went in epic `repo-split` P14)
+ * - an `<epic-*>` block's and a `<ui-accordion>`'s (`ui-open`, `ui-close`)
+ * - every source host's body:  `ui-loaded` (Spell UI's `LoadableBody`, the `<epic-*>` blocks' too)
+ */
+const OPENING = ["ui-opening", "ui-open"]
+const CLOSING = ["ui-closing", "ui-close"]
+const LOADED = "ui-loaded"
+
 /** How long a closing fold's header is held in place (`holdWhileFolding()`):  its transition (300ms) and a margin. */
 const FOLD_HOLD_MS = 600
 
@@ -146,7 +156,7 @@ const RESTORE_HOLD_MS = 1500
 const READER_INPUT = ["wheel", "touchstart", "keydown", "pointerdown"]
 
 /**
- * An epic page's folding blocks (`$/epics`):  its sections, in the outline, the folds and the landing.
+ * An epic page's folding blocks (`spell-epic`):  its sections, in the outline, the folds and the landing.
  * Each host has `open` (page state) and `contentsEntry` (`EpicFoldHost`).
  */
 const EPIC_FOLDS = "epic-overview, epic-section, epic-phase"
@@ -665,12 +675,7 @@ function wireStuckTrail(main) {
   const childrenOf = (section) =>
     [...section.querySelectorAll("ui-section")].filter((each) => each.parentElement.closest("ui-section") === section)
   const titleOf = (section) =>
-    (
-      section.getAttribute("label") ??
-      section.getAttribute("header") ??
-      section.querySelector(':scope > [slot="label"], :scope > [slot="header"]')?.textContent ??
-      ""
-    )
+    (section.getAttribute("label") ?? section.querySelector(':scope > [slot="label"]')?.textContent ?? "")
       .replace(/\s+/g, " ")
       .trim()
   const update = () => {
@@ -913,7 +918,7 @@ const squashed = new WeakMap()
 
 /**
  * An edit to this page's file updates it IN PLACE, instead of reloading it (epic page `review-review`, D10).
- * - `liveClient()` (`$/server`, `packages/server/src/liveClient.ts`) fetches the new version when the file changes,
+ * - `liveClient()` (`spell-kit/server`, `packages/server/src/liveClient.ts`) fetches the new version when the file changes,
  *   and fires a cancelable `spell-server:change` on `window`, `detail` `{ path, html, etag, reload() }`:
  *   taking it (`preventDefault()`) stops its reload
  * - the patch compares the page's source as it LOADED (fetched once, `SPELL_SERVER.readPage()`, trusted only when
@@ -1014,7 +1019,8 @@ function isInert(script) {
  * Hosts whose body comes from a file, in step with the files and the page:
  * `<ui-section source>`, `<ui-accordion source>`, and an epic page's parts
  * (`epics/<name>/parts/<id>.html`, epic `claude-design` P3, on its `<epic-*>` blocks and items).
- * - a body loads (`ui-load`, the first open or a re-fetch):  the page is re-wired around it (`live.refresh()`):
+ * - a body loads (the first open or a re-fetch):  the page is re-wired around it (`live.refresh()`):
+ *   - `ui-loaded` (`LOADED`), from a Spell UI host or an `<epic-*>` block
  *   the outline (headings inside), contents, counts, item filters, code colors
  * - a body's FILE changed (the page server's `spell-server:file`, `liveClient.ts`):  a host that has loaded it
  *   re-fetches it in place (`reload()`), the reading position kept (`readingAnchor()`);  one that hasn't drops the
@@ -1022,7 +1028,7 @@ function isInert(script) {
  * - `enqueue`:  the live update's queue (`wireLiveUpdate()`):  a re-fetch waits for a patch in flight
  */
 function wireSourceBodies(main, live, enqueue) {
-  main.addEventListener("ui-load", (event) => {
+  main.addEventListener(LOADED, (event) => {
     const host = event.target
     if (host instanceof Element && host.hasAttribute("source") && main.contains(host)) live.refresh([host])
   })
@@ -1048,12 +1054,12 @@ function wireSourceBodies(main, live, enqueue) {
     const anchor = readingAnchor(main)
     const active = host.contains(document.activeElement) ? deepActiveElement() : null
     const caret = active && "selectionStart" in active ? [active.selectionStart, active.selectionEnd] : null
-    // the body goes in on the host's `ui-load`, which can come after `reload()` resolves;
+    // the body goes in on the host's `ui-loaded`, which can come after `reload()` resolves;
     // the runtime's pieces go back on it (`live.refresh()`):  wait for it (2s at most), then for them
     const loaded =
       active &&
       new Promise((done) => {
-        host.addEventListener("ui-load", done, { once: true })
+        host.addEventListener(LOADED, done, { once: true })
         setTimeout(done, 2000)
       })
     await host.reload?.()
@@ -1687,14 +1693,11 @@ function nodeOf(element) {
   return { element, id: element.id, label, glyph: glyph || undefined, children: [] }
 }
 
-/**
- * A `<ui-section>`'s label:  its `label` (`header`, its old name), else the text of its `slot="label"` (`"header"`)
- * child.  Spell UI's pages say `label` since spell-app's epic `property-editor` P10.
- */
+/** A `<ui-section>`'s label:  its `label`, else the text of its `slot="label"` child. */
 function sectionLabel(section) {
-  const label = (section.getAttribute("label") ?? section.getAttribute("header"))?.trim()
+  const label = section.getAttribute("label")?.trim()
   if (label) return label
-  const slotted = section.querySelector(':scope > [slot="label"], :scope > [slot="header"]')
+  const slotted = section.querySelector(':scope > [slot="label"]')
   return slotted ? labelOf(slotted) : ""
 }
 
@@ -1760,13 +1763,13 @@ function slug(label) {
 /**
  * Item statuses that DON'T count as open:  finished (`done`), made moot (`canceled`), and a plan's answered
  * questions (`decided`) -- in "Questions" only the questions waiting on the reader are open.
- * - `$/epics/tool/planDoc.types` `CLOSED` is the same set
+ * - `spell-epic/tool/planDoc.types` `CLOSED` is the same set
  */
 const CLOSED = new Set(["done", "decided", "canceled"])
 
 /**
  * An epic page's block's items that need Owen, when its `contentsEntry` count doesn't say:
- * its own items (`COUNTED` in `$/epics`' `EpicSection.types.ts`) the `epic` tool marked
+ * its own items (`COUNTED` in `spell-epic`'s `EpicSection.types.ts`) the `epic` tool marked
  * - `attention` (red)
  * - or `replied` (orange:  Claude answered with options, Owen's turn to pick;  `EpicItem.types.ts` `NEEDS_OWEN`).
  */
@@ -1869,7 +1872,7 @@ const ITEM_STATES = [
 
 /**
  * A closed item's state, by its status:  decided or done stay `recent` (green) however old;  only `canceled` is `old`
- * (grey:  no longer relevant).  Owen, 2026-10-08;  `$/epics` `PlanReader.itemState()`, the same rule.
+ * (grey:  no longer relevant).  Owen, 2026-10-08;  `spell-epic` `PlanReader.itemState()`, the same rule.
  */
 const CLOSED_STATES = { done: "recent", decided: "recent", canceled: "old" }
 
@@ -2133,7 +2136,7 @@ function buildToolbar(page, outline, counts) {
  * Every section folds, and the reader's folds are remembered per page (`localStorage`, `{ [id]: folded }`).
  * - SECTIONS:  `<ui-section collapsible>` folds itself;
  *   this restores the saved folds (else the markup's `collapsed` stands)
- *   and saves the reader's toggles (`ui-open` / `ui-close`)
+ *   and saves the reader's toggles (`ui-opening` / `ui-closing`;  an `<epic-*>` block's `ui-open` / `ui-close`)
  *   - an EPIC PAGE (`body.plan-doc`):  every section and sub-section not in the saved folds starts FOLDED,
  *     whatever its markup says:  Owen opens what he wants to read (2026-10-03)
  *     - a link to an id inside still lands (`reveal()` unfolds around it)
@@ -2172,9 +2175,8 @@ function wireFolds(main, outline, kept) {
       if (kept && section.id in kept) setCollapsed(section, !kept[section.id])
       else if (section.id in saved) setCollapsed(section, !!saved[section.id])
       else if (startFolded) setCollapsed(section, true)
-    main.addEventListener("ui-open", onToggle, { signal })
-    main.addEventListener("ui-close", onToggle, { signal })
-    main.addEventListener("ui-close", holdWhileFolding, { signal })
+    for (const name of [...OPENING, ...CLOSING]) main.addEventListener(name, onToggle, { signal })
+    for (const name of CLOSING) main.addEventListener(name, holdWhileFolding, { signal })
   }
 
   /**
@@ -2190,7 +2192,7 @@ function wireFolds(main, outline, kept) {
    *   and the browser pulls it back:  the header jumps down.  So the page keeps its height (`min-height`) until the
    *   reader scrolls back far enough for the shorter page to hold him
    * - stops after `FOLD_HOLD_MS`, or at once when the reader scrolls
-   * - ONLY a fold's `ui-close` (a section, an epic block, an accordion):  a `<ui-popup>` sends a cancelable `ui-close`
+   * - ONLY a fold's closing (a section, an epic block, an accordion):  a `<ui-popup>` sends a cancelable `ui-close`
    *   as it hides, and a hidden popup's top is 0, so holding it scrolled the page to the top (epic `epic-engine` r5)
    */
   function holdWhileFolding(event) {
@@ -2244,7 +2246,7 @@ function wireFolds(main, outline, kept) {
 
   /**
    * The reader folded or unfolded a section (accordions' `ui-open` / `ui-close` bubble here too:  not ours).
-   * - a `ui-open` that can't be cancelled is the BROWSER's reveal (find-in-page, a `#hash` load):
+   * - an opening that can't be cancelled is the BROWSER's reveal (find-in-page, a `#hash` load):
    *   not saved, as a link's unfold isn't
    */
   function onToggle(event) {
@@ -2864,7 +2866,7 @@ function hashId() {
 /**
  * The id an address names on this page:  `id`, unless it's an OLD phase id (`p7`, from before stable phase ids, epic
  * `epic-workflow` P15) that no element has:  then the 7th phase's id (`p-epic-migrate`), so old links and bookmarks
- * still land.  As `$/epics` `PhaseIds.landing()`.
+ * still land.  As `spell-epic` `PhaseIds.landing()`.
  */
 function addressedId(id) {
   if (document.getElementById(id)) return id

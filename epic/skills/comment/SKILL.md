@@ -50,7 +50,7 @@ Review any file through PLAN MODE's comment tab.
    with the header and (for non-`.md`) the fence stripped.
    - Check it:  `git diff --stat <path>` shows only what the comments changed.
    - The file is a generated or checked one:  run its check.
-     - an epic page:  `epic check`
+     - an epic page:  `epic lint`
      - the repo's own (a house-style file ...):  the check its docs name
 6. Next file:  step 2.
    - After the last:  one line per file ("`<path>`:  N rounds, M comments applied", or "approved as is").

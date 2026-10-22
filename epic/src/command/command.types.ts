@@ -1,5 +1,5 @@
 /**
- * Types for the `epic` command's verb groups (`$/epics/command/`):
+ * Types for the `epic` command's verb groups (`spell-epic/command/`):
  * Claude Code sessions, worktrees, parked work, taking stock, shared content, requests.
  * - Runtime-light:  types, constants, the folder's one error class, and pure helpers over them.
  * - Its position:  the BOTTOM of the folder's imports, and loaded by plain `node` too (types stripped):
@@ -189,7 +189,7 @@ export const ENTRYPOINT_PLACES: Record<string, string> = {
  * - 🚧 under way:  `/isolate`, `/epic <name>`, `/unpark`, `/epic resume` (the prompt gate, `PromptGate`)
  * - 📅 a future epic written down (`/epic future`)
  * - ✅ merged (`epic session done`)
- * - from its epic's state (`epic session icons`;  `$/epics/list/EpicState`):
+ * - from its epic's state (`epic session icons`;  `spell-epic/list/EpicState`):
  *   - 🚨 errors (every phase done, items need Owen)
  *   - ⏸️ paused (phases left, untouched for days)
  */
@@ -240,7 +240,7 @@ export type NameStatus = {
 }
 
 /**
- * What an epic page's state is read from (`$/epics/list/EpicState` `EpicFacts`) -- `Worktrees.planFacts()`.
+ * What an epic page's state is read from (`spell-epic/list/EpicState` `EpicFacts`) -- `Worktrees.planFacts()`.
  * - `phases`:  each phase's status
  * - `updated`, `future`, `standing`:  the page's
  * - `urgent`:  the ids of the items that need Owen
@@ -307,7 +307,7 @@ export type IdleWorktree = { path: string; branch: string }
 ////////////////
 
 /**
- * Everything open in the repo, grouped -- `Stock.take()`, `epic stock`.
+ * Everything open in the repo, grouped -- `Stock.take()`, `epic status`.
  * - `groups`:  item keys per group, in report order
  */
 export type StockReport = {
@@ -391,29 +391,6 @@ export type StockAction = { id: string; label: string; commands: string[] }
  *   `EpicConfig.worktreesFolders`)
  */
 export type SharedConfig = { main: string; dir: string; worktrees: string[]; links: string[] }
-
-/**
- * What `epic shared rename` did, or would do (`SharedRename.run()`).
- * - `from` / `to`:  the content folder's old and new place, absolute;  a link is left at `from`
- * - `relinked`:  each checkout's link that went through `from`, and the folder it points at now (`to`)
- * - `config`:  the main checkout's `.epic/config.json5`, and the keys written into it
- *   - `contentFolder`, `windows.contentName`
- * - `rewrites`:  the files it rewrote (or would) to name the new folder:  the main checkout's `AGENTS.md`, `CLAUDE.md`
- *   and Claude settings, the repo's memory notes (epic `epic-eject` J30)
- * - `byHand`:  Claude Code's own settings, when they name the old folder:  the lines to edit, never written
- */
-export type RenameReport = {
-  from: string
-  to: string
-  dryRun: boolean
-  relinked: { checkout: string; path: string; to: string }[]
-  config: { file: string; keys: string[] }
-  rewrites: FileRewrite[]
-  byHand: FileRewrite[]
-}
-
-/** A file's lines naming the old content folder:  each line's number (from 1), as it was and as it's rewritten. */
-export type FileRewrite = { file: string; lines: { line: number; before: string; after: string }[] }
 
 /**
  * One link in one checkout:  its `state` (`Shared.linkState()`), and what `Shared.link()` did about it (`action`).

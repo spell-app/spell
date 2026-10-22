@@ -3,9 +3,9 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { AnswerForm } from "$/epics/answers"
+import { AnswerForm } from "spell-epic/answers"
 
-import "$/epics/components/epic-text-box"
+import "spell-epic/components/epic-text-box"
 
 afterEach(() => AnswerForm.adopt(undefined))
 
@@ -82,7 +82,7 @@ describe("<epic-text-box>", () => {
 
   test("its id, for a draft:  the notes, a comment's section under its title", async () => {
     const root = await ElementFixture.render(
-      `<div><ui-section id="context" header="1. Context"><epic-text-box for="context"></epic-text-box></ui-section>` +
+      `<div><ui-section id="context" label="1. Context"><epic-text-box for="context"></epic-text-box></ui-section>` +
         `<epic-text-box type="notes"></epic-text-box><epic-text-box type="other" for="q1"></epic-text-box></div>`
     )
     expect(root.querySelectorAll("epic-text-box")).toHaveLength(3)

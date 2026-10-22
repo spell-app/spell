@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell-kit/element"
 
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
-import { Fold } from "$/epics/components/epic-item/Fold"
+import { Fold } from "spell-epic/components/epic-item/Fold"
 
 /****************
  * ### `EpicPanel`

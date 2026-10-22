@@ -1,11 +1,11 @@
 /**
- * An epic's running agents, on the page server (epic `skillz`, P3):  a ROUTE MODULE (`$/server/page`'s
+ * An epic's running agents, on the page server (epic `skillz`, P3):  a ROUTE MODULE (`spell-kit/server/page`'s
  * `RouteModule`), listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
- * - The epic page shows them in its "Agents running" box (`<epic-page>`, `$/epics`), each with a note box:
+ * - The epic page shows them in its "Agents running" box (`<epic-page>`, `spell-epic`), each with a note box:
  *   Owen's note REDIRECTS that agent.  It waits in the list (`AgentList.ts`) until a Claude session waiting on it
  *   (`epic agents wait`) passes it on, and marks it told.
  * - `page`:  the epic page's URL path, as it was served (`/epics/x/x.plan.html`, or a worktree's
- *   `/worktrees/<w>/...`);  ONLY an epic page:  anything else is a 403 (`$/epics/tool/reviewRoutes.ts` `planDoc()`)
+ *   `/worktrees/<w>/...`);  ONLY an epic page:  anything else is a 403 (`spell-epic/tool/reviewRoutes.ts` `planDoc()`)
  * - `GET /api/epics/agents?page=<path>` -- `{ agents }`:  the epic's list (`[]` when none run);  the page polls it
  * - `POST /api/epics/agents/redirect` `{ page, name, note }` -- Owen's note for agent `name`;
  *   answers `{ agents }`, the list after.  400:  an empty or long note, or no such agent running.
@@ -15,7 +15,7 @@
 import { SRV } from "spell-kit/server"
 import type { RouteModule } from "spell-kit/server/page"
 
-import { planDoc } from "$/epics/tool/reviewRoutes"
+import { planDoc } from "spell-epic/tool/reviewRoutes"
 
 import { AgentList, AgentListError } from "./AgentList"
 

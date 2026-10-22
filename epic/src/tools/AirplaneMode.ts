@@ -11,7 +11,7 @@ import { dirname, join } from "node:path"
  * - The page server tells every page as it serves it (`window.SPELL_SERVER.airplane`),
  *   through this package's route module (`airplaneRoutes.ts`).
  *   The review controls then say "queued for when you land", never "start `/epic review`".
- * - Here since epic `epic-eject` P4 (it was the server's `$/server/page/AirplaneMode`):
+ * - Here since epic `epic-eject` P4 (it was the page server's own `AirplaneMode`):
  *   the switch is the epics' tooling's, and the server imports no other package
  * - Read on every call:  the switch changes while servers run, and tests point it elsewhere
  */

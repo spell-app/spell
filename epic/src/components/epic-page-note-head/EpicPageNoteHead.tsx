@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-kit/element"
 
-import { ThreadFacts } from "$/epics/comments"
+import { ThreadFacts } from "spell-epic/comments"
 
 import { epicPageNoteHeadVocabulary } from "./EpicPageNoteHead.en"
 

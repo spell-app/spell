@@ -1,5 +1,5 @@
 /**
- * Types and constants of `$/epics/links`:  pointing at a saga, an epic, a phase or an item, the same way everywhere
+ * Types and constants of `spell-epic/links`:  pointing at a saga, an epic, a phase or an item, the same way everywhere
  * (epic `epic-workflow` P15, J32).
  * - Pure data and types:  nothing here runs.
  */

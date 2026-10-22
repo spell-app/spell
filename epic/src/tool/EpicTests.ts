@@ -17,7 +17,7 @@ import { Sagas } from "./Sagas"
  * - his screenshots:  `TestShots`
  * - a test's markup, as `epic add <epic>#V --step ...` writes it (`fieldsHTML()`):  Step, Should, Example, If not,
  *   each an `<epic-field label>` (`TEST_FIELDS`);  an older test has only prose, which the run shows as its Step
- * - Node only (`node:fs`):  NOT in the `$/epics` barrel, imported by path.
+ * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path.
  ****************/
 export class EpicTests {
   /** the repo's content folder (`EpicConfig.contentOf()`):  its `epics/`, `sagas/` */

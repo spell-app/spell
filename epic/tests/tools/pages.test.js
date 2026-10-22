@@ -9,8 +9,8 @@ import { fileURLToPath } from "node:url"
 
 import { expect, test } from "vite-plus/test"
 
-import { EPIC_UI } from "../../src/server/server.types.ts"
-import { EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath } from "../../src/tools/pages.js"
+import { EPIC_UI } from "spell-epic/server/server.types.ts"
+import { EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath } from "spell-epic/tools/pages.js"
 
 /** `src/tools/pages.js`, run in a child for another checkout (`EPIC_CHECKOUT` is read as it loads). */
 const PAGES_JS = resolve(dirname(fileURLToPath(import.meta.url)), "../../src/tools/pages.js")

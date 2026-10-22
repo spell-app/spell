@@ -3,7 +3,7 @@
  * - Types only, plus the JSX declaration:  `<epic-section>` and `<epic-page>` draw the tag in their shadow roots.
  */
 
-import type { UIJSXAttributes } from "$/epics/components/epic-page/EpicPage.types"
+import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 /** A chip's click:  the event its owners hear (`@E.on(STATE_PICK)`). */
 export const STATE_PICK = "epic-state-pick"

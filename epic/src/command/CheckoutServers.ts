@@ -9,7 +9,7 @@ import { join, resolve, sep } from "node:path"
 import { orphanServers, serverProcesses } from "spell-kit/server/page/prune"
 import type { OrphanServer, ServerProcess } from "spell-kit/server/page/prune"
 
-import { HOME_ENV, HOME_FOLDER } from "../server/server.types.ts"
+import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types.ts"
 
 /****************
  * ### `CheckoutServers`

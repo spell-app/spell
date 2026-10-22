@@ -123,7 +123,7 @@ export function questionSection(document, question, i) {
   if (question.text) ask.append(make(document, QUESTION, {}, [htmlIn(document, "p", question.text)]))
   const options = (question.options ?? []).map((option, j) => optionElement(document, option, j))
   if (options.length) ask.append(make(document, CHOICES, {}, options))
-  return make(document, "ui-section", { id, header: question.title ?? `Q${i + 1}`, ...SECTION_FLAGS }, [
+  return make(document, "ui-section", { id, label: question.title ?? `Q${i + 1}`, ...SECTION_FLAGS }, [
     make(document, "ui-icon", { slot: "icon", name: "circle question" }),
     ask
   ])
@@ -189,7 +189,7 @@ export function choiceSections(document, data) {
     const rule = section.description
       ? [make(document, "p", { class: "spell-choices-rule" }, withCode(document, section.description))]
       : []
-    return make(document, "ui-section", { id: section.id, header: section.title, ...SECTION_FLAGS, collapsed: true }, [
+    return make(document, "ui-section", { id: section.id, label: section.title, ...SECTION_FLAGS, collapsed: true }, [
       make(document, "ui-icon", { slot: "icon", name: section.icon ?? SECTION_ICON }),
       ...rule,
       table

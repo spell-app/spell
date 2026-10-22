@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-update"
+import "spell-epic/components/epic-update"
 
 describe("<epic-update>", () => {
   test("bare:  an inline orange UPDATE label, its phase in its tooltip", async () => {

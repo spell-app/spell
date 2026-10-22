@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { RealPath } from "$/epics/config/RealPath"
+import { RealPath } from "spell-epic/config/RealPath"
 
 /** A folder moved behind a compat link:  `old/repo -> ../new/repo`, as repo-split's move to `~/www/spell/` leaves it. */
 const TOP = realpathSync(mkdtempSync(join(tmpdir(), "real-path-")))

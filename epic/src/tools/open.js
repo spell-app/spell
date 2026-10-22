@@ -12,7 +12,7 @@
  *   test run, epic `epic-engine` P4)
  * - `<page>` may be a SHORT ADDRESS (epic `epic-workflow` P15):  `SAGA:/drawable-spell` (the saga page),
  *   `SAGA:/drawable-spell/python-target#T1` (the epic page, landing on T1)
- *   - read by `$/epics/links`, imported only then:  `epic pages open` runs this under `tsx`, while `epic open`
+ *   - read by `spell-epic/links`, imported only then:  `epic pages open` runs this under `tsx`, while `epic open`
  *     runs it with plain `node` and a file
  */
 import { existsSync, statSync } from "node:fs"
@@ -40,7 +40,7 @@ function valueOf(flag) {
 
 /** Short address `address` as its page's file (`null` if it isn't there) and the id to land on. */
 async function addressed(address) {
-  const { EpicAddress } = await import("$/epics/links")
+  const { EpicAddress } = await import("spell-epic/links")
   try {
     const target = EpicAddress.parse(address)
     return { file: findPage(target.page), hash: target.id }

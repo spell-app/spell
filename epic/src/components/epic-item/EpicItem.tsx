@@ -3,16 +3,16 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { PlanDates } from "$/epics/dates"
+import { PlanDates } from "spell-epic/dates"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
-import { ReviewState } from "$/epics/components/epic-review/ReviewState"
+import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 import {
   CHOSEN,
   REVIEW_BUTTONS,
   SHOW_NOTE,
   TODO_BUTTONS,
   type ReviewShows
-} from "$/epics/components/epic-review/EpicReview.types"
+} from "spell-epic/components/epic-review/EpicReview.types"
 
 import { epicItemVocabulary } from "./EpicItem.en"
 import { CONTROLS, FOLDING_CARDS, Fold, foldAllUnder } from "./Fold"
@@ -115,7 +115,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - collapse-all (epic `airplane` P8):  open, with cards or panels inside, a double chevron at its line's end
  *     folds them all (`collapseAll()`);  the page's collapse-all folds the item itself too (`collapse()`)
  * - SOURCE:  `source="parts/q7.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`).
- *   - into its LIGHT children, replacing the placeholder;  `ui-load` then
+ *   - into its LIGHT children, replacing the placeholder;  `ui-loaded` then
  *   - from `file://` it can't load:  the `Loads from ... (needs the page server)` note, as today
  * - The DOM element's own `title` would show as a tooltip over everything in it, prose included:
  *   the shadow wrapper's EMPTY `title` stops it there (T8).

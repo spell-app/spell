@@ -3,9 +3,9 @@
  * - Defines the families it draws in its shadow root first:  `<epic-agents>`, `<epic-state-filter>`,
  *   `<epic-test-run>`.
  */
-import "$/epics/components/epic-agents"
-import "$/epics/components/epic-state-filter"
-import "$/epics/components/epic-test-run"
+import "spell-epic/components/epic-agents"
+import "spell-epic/components/epic-state-filter"
+import "spell-epic/components/epic-test-run"
 
 import { EpicPage } from "./EpicPage"
 

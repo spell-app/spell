@@ -1,8 +1,8 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { dirname, join, posix, relative, resolve, sep } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { DataFile } from "$/epics/data/DataFile"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { DataFile } from "spell-epic/data/DataFile"
 
 /**
  * The STANDING epic for every page no epic owns (epic `epic-engine` T9, J7):  guides no epic claims, Epic UI's pages,
@@ -47,8 +47,8 @@ export function epicNamed(name: string): string {
  *
  * - Reads files only, never writes.  The claims of every epic are kept between calls (`CLAIMS`) while no epic page
  *   or part folder changed, and for at most `CLAIMS_MAX_AGE_MS`:  the page server asks on every guide's load.
- * - Node only (`node:fs`):  NOT in the `$/epics` barrel, imported by path:
- *   the page server's routes (`epicRoutes.ts`, docs' `commentsRoutes.ts`), `plan-doc inbox` (`InboxCommands`),
+ * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path:
+ *   the page server's routes (`epicRoutes.ts`, docs' `commentsRoutes.ts`), `epic inbox` (`InboxCommands`),
  *   docs' `GuideChanges`.
  ****************/
 export class SeeAlso {

@@ -63,7 +63,7 @@ export const ENGINE_ROUTES = {
 /**
  * EPIC UI, the elements' docs set (epic `epic-workflow` P10):  the engine's `src/docs/`, served at `/components/epics/`
  * by both page servers, not by an engine route:
- * - spell-app's (its root `package.json`'s `"pageServer"` `"componentSets"`, `componentSets()` in `$/server/page`;
+ * - spell-app's (its root `package.json`'s `"pageServer"` `"componentSets"`, `componentSets()` in `spell-kit/server/page`;
  *   its `dir` `spell-epic/src/docs`)
  * - the epic server, the same way (`EpicServer`'s `epicUiMounts()`, epic `epic-eject` I21)
  * - `name`:  what prose calls it
@@ -83,7 +83,7 @@ export const EPIC_UI = { name: "Epic UI", path: "components/epics", dir: "src/do
  * - who swaps the one for the other:  the epic server as it serves a page (`EpicServer`'s `localHighlight()`),
  *   `epic airplane` / `epic pages offline --fix` in the files (`offline.ts`);  spell-app's page server has its own
  *   swap (its `page-server` package)
- * - the engine's own since epic `epic-engine` P8 (r8):  it was spell-app's `HIGHLIGHT_JS` in `$/server/page`
+ * - the engine's own since epic `epic-engine` P8 (r8):  it was spell-app's `HIGHLIGHT_JS` in `spell-kit/server/page`
  */
 export const HIGHLIGHT_JS = {
   cdn: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js",
@@ -123,8 +123,8 @@ export const LEGACY_ENGINE_PATHS: readonly (readonly [folder: string, route: str
  * - `undefined` for any other link
  * - the link from any depth (`../` any number of times), or from the root (`/packages/...`)
  * - an engine route already:  `undefined` (nothing to change)
- * - what the asset-route migrations write (`EngineAssetRoutes`, `migrate.js`),
- *   and the server's overlay for pages not migrated yet (`legacyEnginePath()`)
+ * - the server's overlay for pages not migrated (`legacyEnginePath()`):  a worktree of spell-app from before epic
+ *   `epic-eject`;  the asset-route migrations that rewrote the rest went in epic `repo-split` (Q45)
  */
 export function engineUrlFor(href: string): string | undefined {
   const path = /^(?:\.\.\/)*\/?(?:\.\/)?(.*)$/.exec(href)?.[1] ?? href

@@ -3,7 +3,7 @@ import { constants } from "node:os"
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { packageDir, tsxImports } from "../tools/packageDir"
+import { packageDir, tsxImports } from "spell-epic/tools/packageDir"
 
 import { EXIT, type ToolSpec } from "./command.types"
 import { planDocArgs } from "./epicArgs"
@@ -34,7 +34,7 @@ export class EpicTools {
    *   - a tool with a `cwd` runs in that folder of it
    *   - else (a repo without the epic tools, one `epic init` set up) in that folder of the code's checkout
    * - a child `node`, under THIS checkout's `tsx` when the tool has a `tsx` config:
-   *   the config's `$/...` imports map into the CODE's checkout
+   *   its `TSX_TSCONFIG_PATH` is the CODE's checkout's config
    * - `env`:  added to this process's
    * - `cwd`:  the caller's folder, default the current one
    * - `codeRoot`:  where the code is, default this checkout (tests give a fake checkout of tools)
@@ -42,7 +42,7 @@ export class EpicTools {
   static run(name: EpicToolName, args: string[], options: EpicToolOptions = {}): Promise<number> {
     const { env = {}, codeRoot = Git.CODE_ROOT, cwd = process.cwd() } = options
     const spec: ToolSpec = EpicTools.TOOLS[name]
-    const data = Git.nearestCheckout(spec.package ? CHECKOUT_MARKER : spec.tool, cwd)
+    const data = Git.nearestCheckout({ marker: spec.package ? CHECKOUT_MARKER : spec.tool, from: cwd })
     const code = EpicTools.codeOf(spec, data, codeRoot)
     if (!code) {
       process.stderr.write(`epic:  ${data} doesn't install ${spec.package}, so has no ${name} to run\n`)
@@ -134,7 +134,7 @@ export class EpicTools {
       },
       { PlanDocFiles: new (props: { root: string }) => unknown }
     ]
-    const files = new PlanDocFiles({ root: Git.nearestCheckout(PLAN_DOC_MARKER) })
+    const files = new PlanDocFiles({ root: Git.nearestCheckout() })
     const exitCode = await new PlanDocCommands({ files, sessionsOf }).run(argv)
     await flushed()
     return exitCode
@@ -164,7 +164,8 @@ export class EpicTools {
    * - `notes`, `comments`:  page notes and comments on docs pages, in the caller's folder (`--file` is from there)
    * - `window`:  the VS Code windows (`src/window.mjs`);
    *   plain `node`, so it runs in a worktree before its `yarn install`
-   * - `server`:  the caller's checkout's page server (`spell-kit/server`'s `src/page/cli.ts`, the kit's)
+   * - `server`:  the caller's checkout's page server (`spell-kit/server`'s command line, the kit's
+   *   `src/server/page/cli.ts`, under the kit's node settings)
    * - `serve`:  every web server, `epic server start --all`:  the kit's `spell` its install resolves, which
    *   `EpicProgram` runs as `spell server start all` (spell-app's own `scripts/serve.mjs` until epic `repo-split` P13)
    * - `pages <verb>`:  the docs pages' tools, `epic pages index` ...
@@ -181,11 +182,11 @@ export class EpicTools {
     notes: { tool: "src/tools/notes.ts", tsx: "tsconfig.json" },
     comments: { tool: "src/tools/comments.ts", tsx: "tsconfig.json" },
     window: { tool: "src/window.mjs" },
-    server: { package: "spell-kit/server", tool: "src/page/cli.ts", tsx: "tsconfig.json" },
-    serve: { package: "spell-kit/cli", tool: "bin/spell.mjs" },
+    server: { package: "spell-kit", tool: "src/server/page/cli.ts", tsx: "tsconfig.node.json" },
+    serve: { package: "spell-kit", tool: "bin/spell.mjs" },
     "pages update": { tool: "src/tools/update.js", cwd: "." },
     "pages index": { tool: "src/tools/index.js", cwd: "." },
-    "pages new": { tool: "src/tools/new-page.js", cwd: "." },
+    "pages create": { tool: "src/tools/new-page.js", cwd: "." },
     "pages template": { tool: "src/tools/template-path.js", cwd: "." },
     "pages open": { tool: "src/tools/open.js", tsx: "tsconfig.json", cwd: "." },
     "pages link": { tool: "src/tools/link.ts", tsx: "tsconfig.json", cwd: "." },
@@ -202,7 +203,7 @@ export class EpicTools {
    */
   static hasPageServer(cwd = process.cwd()): boolean {
     const spec: ToolSpec = EpicTools.TOOLS.server
-    const data = Git.nearestCheckout(CHECKOUT_MARKER, cwd)
+    const data = Git.nearestCheckout({ marker: CHECKOUT_MARKER, from: cwd })
     const code = EpicTools.codeOf(spec, data)
     return hasPageServerSettings(data) && !!code && existsSync(join(code, spec.tool))
   }
@@ -215,14 +216,14 @@ export class EpicTools {
   static runPages([verb, ...args]: string[]): Promise<number> {
     const name = `pages ${verb}` as EpicToolName
     if (!(name in EpicTools.TOOLS)) {
-      process.stderr.write("epic pages:  which verb?  index, update, new, template, open, link, fuss or offline\n")
+      process.stderr.write("epic pages:  which verb?  index, update, create, template, open, link, fuss or offline\n")
       return Promise.resolve(EXIT.USAGE)
     }
     return EpicTools.run(name, args)
   }
 
   /**
-   * This checkout's own `tsx` loader and the run-time alias hook, as `node --import` arguments (`tsxImports()`):  as
+   * This checkout's own `tsx` loader, as `node --import` arguments (`tsxImports()`):  as
    * this code's install resolves them (a workspace of the top `spell` install hoists them there, epic `epic-engine`
    * P10), never `<root>/node_modules/...` by hand.
    * - static:  where every tool's loaders come from
@@ -237,28 +238,22 @@ export type EpicToolName = keyof typeof EpicTools.TOOLS
 export type EpicToolOptions = { env?: NodeJS.ProcessEnv; codeRoot?: string; cwd?: string }
 
 /**
- * The `epic` tool's modules, by alias (`tsx` resolves them at run time).
+ * The `epic` tool's modules, by package name (`tsx` resolves them at run time).
  * - HACK: specifiers in constants, so the CLI package's `tsc` doesn't follow them:
  *   it follows this file from `epicMain.ts`.
  *   - the tool is type-checked here, in spell-epic
  *   - literal specifiers fail the CLI's `tsc` (spell's settings) in two ways (epic `epic-components` I5, 2026-10-07):
- *     - ES2023 (`toSorted()`, `findLast()`) in `Markup` and the converter:  the CLI's `lib` is ES2022
- *     - Solid's JSX:  the definitions import the vocabularies, which reach `$/ui/core` -> `ui`'s `.tsx`
- *   - REFACTOR: once the vocabularies' data lives clear of `$/ui/core` (and the CLI's `lib` is ES2023),
+ *     - ES2023 (`toSorted()`, `findLast()`) in `Markup`:  the CLI's `lib` is ES2022
+ *     - Solid's JSX:  the definitions import the vocabularies, which reach `spell-ui/core` -> `ui`'s `.tsx`
+ *   - REFACTOR: once the vocabularies' data lives clear of `spell-ui/core` (and the CLI's `lib` is ES2023),
  *     import them plainly
  */
-const COMMANDS = "$/epics/tool/PlanDocCommands"
+const COMMANDS = "spell-epic/tool/PlanDocCommands"
 /** `COMMANDS`' twin:  the docs on disk. */
-const FILES = "$/epics/tool/PlanDocFiles"
+const FILES = "spell-epic/tool/PlanDocFiles"
 
 /** Signals `runChild()` passes on to its child:  they come to us alone, not from the terminal. */
 const PASSED_SIGNALS: NodeJS.Signals[] = ["SIGTERM", "SIGHUP"]
-
-/**
- * What marks a checkout the `epic` tool can work on (`Git.nearestCheckout()`):  its docs tools.
- * - a worktree cut before P7 of `epic-components` has it too:  its docs are the shared ones either way
- */
-const PLAN_DOC_MARKER = "packages/epics/tools/plan-doc.js"
 
 /** What marks the caller's checkout for a tool in a package:  the nearest repo's root (a worktree's `.git` is a file). */
 const CHECKOUT_MARKER = ".git"

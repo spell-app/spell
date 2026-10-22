@@ -1,5 +1,5 @@
-import { Definitions, type EpicTag } from "$/epics/definitions"
-import { Markup } from "$/epics/markup"
+import { Definitions, type EpicTag } from "spell-epic/definitions"
+import { Markup } from "spell-epic/markup"
 
 import { PlanMarkup } from "./PlanMarkup"
 import { PART_COMMENT, PART_EXT, PART_SOURCE, PARTS_DIR, PlanParts, type PartReader } from "./PlanParts"
@@ -20,7 +20,7 @@ import { PART_COMMENT, PART_EXT, PART_SOURCE, PARTS_DIR, PlanParts, type PartRea
  *   (`PlanParts.rebase()`), as the page's `source` loader reads them back
  * - an instance works on ONE parsed document, IN PLACE.  Reuses `PlanParts`' statics for files and URLs.
  * - used by every write of the tool (`PlanDocFiles.writeDoc()`) and by the one-time converter, which imports it from
- *   here:  the tool loads `$/epics/convert` only for its `convert` command (I5)
+ *   here:  the tool loads `spell-epic/convert` only for its `convert` command (I5)
  ****************/
 export class EpicParts {
   /** The document it splits or assembles. */

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { parseTarget, phaseOf, phaseRanges, planDocArgs } from "$/epics/command/epicArgs"
+import { parseTarget, phaseOf, phaseRanges, planDocArgs } from "spell-epic/command/epicArgs"
 
 ////////////////
 // ## Owen's rows
@@ -20,8 +20,9 @@ const OWENS_ROWS: [string[], string[][]][] = [
   [["update", "seo#P3", "--estimate", "1-2h"], [["estimate", "seo", "3", "1-2h"]]],
   [["phase", "seo#3", "done", "--done", "<ul></ul>"], [["phase", "seo", "3", "done", "--done", "<ul></ul>"]]],
   [["update", "epic-workflow", "--standing"], [["standing", "epic-workflow", "on"]]],
+  // `epic file seo#P7 r3`, as `Requests` runs it (`add-request`'s row until repo-split P13)
   [
-    ["add-request", "seo#P7", "r3", "--from", "python", "--file", "r3.html"],
+    ["file", "seo#P7", "r3", "--from", "python", "--file", "r3.html"],
     [["request", "seo", "7", "r3", "--from", "python", "--file", "r3.html"]]
   ],
   [["commit", "seo#p3", "abc123", "what it did"], [["commit", "seo", "abc123", "what it did", "--phase", "3"]]],
@@ -44,15 +45,24 @@ const OWENS_ROWS: [string[], string[][]][] = [
     ["details", "seo#J3", "--file", "reply.html", "--append"],
     [["details", "seo", "J3", "--file", "reply.html", "--append"]]
   ],
-  [["status", "seo#J3", "underway", "reading"], [["status", "seo", "J3", "underway", "reading"]]],
+  // Claude's status card is `update`'s (epic `repo-split` J140:  `epic status` takes stock)
+  [["update", "seo#J3", "underway", "reading"], [["status", "seo", "J3", "underway", "reading"]]],
+  [["update", "seo#J3", "done"], [["status", "seo", "J3", "done"]]],
+  [["update", "seo#o3", "noted", "kept"], [["status", "seo", "o3", "noted", "kept"]]],
+  [["update", "seo#P3", "done", "--filed", "B"], [["status", "seo", "P3", "done", "--filed", "B"]]],
+  // epic `repo-split` Q44, J141
+  [["summarize", "seo#J3", "--file", "c.html"], [["summarize", "seo", "J3", "--file", "c.html"]]],
   [["restore", "seo#J3", "--file", "old.html"], [["original", "seo", "J3", "--file", "old.html"]]],
   [["review", "seo#J3", "outcome"], [["review", "seo", "J3", "outcome"]]],
   [["defer", "seo#J3"], [["defer", "seo", "J3"]]],
   [["queue", "seo#J3", "work"], [["queue", "seo", "J3", "work"]]],
   [["unqueue", "seo#J3"], [["unqueue", "seo", "J3"]]],
-  [["inbox", "seo#J3", "working", "on"], [["inbox", "seo", "working", "J3", "on"]]],
-  [["inbox", "seo#J3", "done"], [["inbox", "seo", "done", "J3"]]],
-  [["inbox", "seo#J3", "clear"], [["inbox", "seo", "clear", "J3"]]],
+  // the inbox's own verb first (Owen's names, repo-split P13)
+  [["inbox", "working", "seo#J3", "on"], [["inbox", "seo", "working", "J3", "on"]]],
+  [["inbox", "done", "seo#J3"], [["inbox", "seo", "done", "J3"]]],
+  [["inbox", "clear", "seo#J3"], [["inbox", "seo", "clear", "J3"]]],
+  [["inbox", "watch", "seo", "--session", "abc"], [["inbox", "seo", "watch", "--session", "abc"]]],
+  [["inbox", "ignore", "seo"], [["inbox", "seo", "ignore"]]],
   [["bedtime", "seo", "start", "P3-P6,P9"], [["bedtime", "seo", "start", "P3-P6,P9"]]]
 ]
 
@@ -72,21 +82,19 @@ describe("planDocArgs()", () => {
   test("the tool's old order, with no #, is refused, spelled right", () => {
     const refused = (verb: string, args: string[]) => () => planDocArgs(verb, args)
     expect(refused("close", ["seo", "J3"])).toThrow('close:  epic close seo#J3  (the id goes after a #, not "seo J3")')
-    expect(refused("status", ["seo", "J3", "underway", "x"])).toThrow("epic status seo#J3 ...")
+    expect(refused("update", ["seo", "J3", "underway", "x"])).toThrow('epic update seo#J3 underway "<reading>"')
     expect(refused("phase", ["seo", "3", "done"])).toThrow("epic phase seo#P3 ...")
     expect(refused("updated", ["seo", "Epic Migrate", "<p>x</p>"])).toThrow('epic updated "seo#Epic Migrate" ...')
     expect(refused("add", ["seo", "todo", "T"])).toThrow("epic add seo#T ...")
     expect(refused("commit", ["seo", "abc", "s", "--phase", "3"])).toThrow("epic commit seo#P3 <sha>")
     expect(refused("commit", ["seo", "abc", "s", "--item", "J3"])).toThrow("epic commit seo#J3 <sha>")
-    expect(refused("inbox", ["seo", "working", "J3", "on"])).toThrow("epic inbox seo#J3 working on")
-    expect(refused("inbox", ["seo", "done", "cm3"])).toThrow("epic inbox seo#cm3 done")
     expect(refused("update", ["seo", "P3", "--goal", "g"])).toThrow("epic update seo#P3 --<field> <value> ...")
-    expect(refused("add-request", ["seo", "7", "r3"])).toThrow("epic add-request seo#P7 ...")
+    expect(refused("file", ["seo", "7", "r3"])).toThrow("epic file seo#P7 ...")
   })
 
   test("an item or phase verb given only the epic:  which one, with an example", () => {
     expect(() => planDocArgs("close", ["seo"])).toThrow("close:  which item?  epic close seo#J3")
-    expect(() => planDocArgs("status", ["seo"])).toThrow('which item?  epic status seo#J3 underway "<reading>"')
+    expect(() => planDocArgs("details", ["seo"])).toThrow("which item?  epic details seo#J3 --file <reply.html>")
     expect(() => planDocArgs("phase", ["seo"])).toThrow("which phase?  epic phase seo#P3 todo | active | done")
     expect(() => planDocArgs("add", ["seo"])).toThrow('which kind of item?  epic add seo#J "Title"')
   })
@@ -98,8 +106,13 @@ describe("planDocArgs()", () => {
   })
 
   test("the page's own verbs, and inbox's, take the epic alone", () => {
-    expect(planDocArgs("inbox", ["seo", "wait"])).toEqual([["inbox", "seo", "wait"]])
-    expect(planDocArgs("inbox", ["seo", "apply", "J3"])).toEqual([["inbox", "seo", "apply", "J3"]])
+    expect(planDocArgs("inbox", ["seo"])).toEqual([["inbox", "seo"]])
+    expect(planDocArgs("inbox", ["seo", "--json"])).toEqual([["inbox", "seo", "--json"]])
+    expect(planDocArgs("inbox", ["wait", "seo"])).toEqual([["inbox", "seo", "wait"]])
+    expect(planDocArgs("inbox", ["apply", "seo", "J3"])).toEqual([["inbox", "seo", "apply", "J3"]])
+    expect(planDocArgs("inbox", ["wait", "SAGA:/epics", "--timeout", "60"])).toEqual([
+      ["inbox", "SAGA:/epics", "wait", "--timeout", "60"]
+    ])
     expect(planDocArgs("update", ["seo", "--standing"])).toEqual([["standing", "seo", "on"]])
   })
 
@@ -126,14 +139,27 @@ describe("planDocArgs()", () => {
     ])
   })
 
-  test("inbox:  a comment's id (M3, as the page shows it;  the old cm3 too), and a flag after the inbox's verb", () => {
-    expect(planDocArgs("inbox", ["seo#M3", "done", "--file", "a.html"])).toEqual([
+  test("inbox:  a comment's id (M3, as the page shows it;  the old cm3 too), its flags, and several ids", () => {
+    expect(planDocArgs("inbox", ["done", "seo#M3", "--file", "a.html"])).toEqual([
       ["inbox", "seo", "done", "M3", "--file", "a.html"]
     ])
-    expect(planDocArgs("inbox", ["seo#cm3", "done", "--file", "a.html"])).toEqual([
+    expect(planDocArgs("inbox", ["done", "seo#cm3", "--file", "a.html"])).toEqual([
       ["inbox", "seo", "done", "cm3", "--file", "a.html"]
     ])
-    expect(() => planDocArgs("inbox", ["seo#J3"])).toThrow(/working on \| off, done, clear/)
+    expect(planDocArgs("inbox", ["done", "seo#J3", "J4"])).toEqual([["inbox", "seo", "done", "J3", "J4"]])
+  })
+
+  test("inbox:  the old order, the epic first, refused with its new spelling;  an id where none goes, or none", () => {
+    const refused = (args: string[]) => () => planDocArgs("inbox", args)
+    expect(refused(["seo", "wait"])).toThrow("inbox:  epic inbox wait seo  (the inbox's verb goes first)")
+    expect(refused(["seo#J3", "working", "on"])).toThrow("epic inbox working seo#J3 on  (the inbox's verb goes first)")
+    expect(refused(["seo", "done", "cm3", "--file", "a.html"])).toThrow("epic inbox done seo#cm3 --file a.html")
+    expect(refused(["seo#J3"])).toThrow("inbox seo#J3:  what?  epic inbox working | done | clear seo#J3")
+    expect(refused(["done", "seo", "J3"])).toThrow('epic inbox done seo#J3  (the id goes after a #, not "seo J3")')
+    expect(refused(["working", "seo"])).toThrow("epic inbox working seo#J3 on  (the id goes after a #)")
+    expect(refused(["wait", "seo#J3"])).toThrow("takes an epic, not seo#J3")
+    expect(refused(["wait"])).toThrow("inbox wait:  which epic?  epic inbox wait seo")
+    expect(refused([])).toThrow("inbox:  which epic?")
   })
 
   test("a phase verb refuses an item;  a page verb refuses any #", () => {
@@ -145,8 +171,8 @@ describe("planDocArgs()", () => {
   // epic `epic-workflow` P15
   test("saga:  its own verbs and arguments, passed through as typed", () => {
     expect(planDocArgs("saga", ["set", "seo", "spell-ui"])).toEqual([["saga", "set", "seo", "spell-ui"]])
-    expect(planDocArgs("saga", ["new", "x", "A # title", "--purpose", "p"])).toEqual([
-      ["saga", "new", "x", "A # title", "--purpose", "p"]
+    expect(planDocArgs("saga", ["create", "x", "A # title", "--purpose", "p"])).toEqual([
+      ["saga", "create", "x", "A # title", "--purpose", "p"]
     ])
   })
 
@@ -157,6 +183,17 @@ describe("planDocArgs()", () => {
 })
 
 describe("planDocArgs():  update", () => {
+  // epic `repo-split` J140
+  test("a card:  a state word after the target;  no id, or fields beside it, refused", () => {
+    expect(() => planDocArgs("update", ["seo", "underway", "x"])).toThrow(
+      'which item?  epic update seo#J3 underway "<reading>"'
+    )
+    expect(() => planDocArgs("update", ["seo#J3", "done", "--title", "T"])).toThrow(
+      "update:  a card (done) or fields (--title), not both"
+    )
+    expect(() => planDocArgs("update", ["seo#J3", "finished"])).toThrow(/a card:  underway \| done \| noted/)
+  })
+
   test("a phase:  body fields in one phase-body, then estimate, then rename", () => {
     expect(
       planDocArgs("update", ["seo#P3", "--goal", "g", "--verify", "", "--estimate", "2h", "--title", "New"])

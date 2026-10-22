@@ -3,24 +3,24 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { EpicTools } from "$/epics/command/EpicTools"
+import { EpicTools } from "spell-epic/command/EpicTools"
 
 /**
  * Two fake checkouts:
  * - CODE:  the running `epic`'s, its tools fake scripts that report what they got
  * - DATA:  the caller's, where the command runs from, with the same files
  * - ONE copy of the code (epic `epic-eject` P5):  every epic tool must be CODE's script, working on DATA.
- * - DATA installs a fake kit, `spell-kit`, whose `server/src/page/cli.ts` is the page server (`SERVER`), and whose
- *   `cli/bin/spell.mjs` is the `spell` command (`serve`'s:  `spell server start all`)
+ * - DATA installs a fake kit, `spell-kit`, whose `src/server/page/cli.ts` is the page server (`SERVER`), and whose
+ *   `bin/spell.mjs` is the `spell` command (`serve`'s:  `spell server start all`)
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "epic-tools-")))
 const CODE = join(TEMP, "code")
 const DATA = join(TEMP, "data")
 /** A folder inside the caller's checkout, to run from. */
 const INSIDE = join(DATA, "packages", "app")
-/** The kit DATA's install resolves, and its `server/` folder:  `spell-kit/server`. */
+/** The kit DATA's install resolves, and its `src/server/` folder:  `spell-kit/server`. */
 const KIT = join(DATA, "node_modules", "spell-kit")
-const SERVER = join(KIT, "server")
+const SERVER = join(KIT, "src", "server")
 /** Where each run's report goes. */
 const REPORT = join(TEMP, "report.json")
 afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
@@ -46,18 +46,19 @@ for (const [root, owner] of [
 }
 mkdirSync(join(DATA, ".git"))
 writeFileSync(join(DATA, "package.json"), JSON.stringify({ name: "data", pageServer: {} }))
-mkdirSync(join(SERVER, "src", "page"), { recursive: true })
+mkdirSync(join(SERVER, "page"), { recursive: true })
 writeFileSync(
   join(KIT, "package.json"),
-  JSON.stringify({ name: "spell-kit", exports: { "./server": "./server/src/index.ts", "./cli": "./cli/src/index.ts" } })
+  JSON.stringify({
+    name: "spell-kit",
+    exports: { "./server": "./src/server/index.ts", "./package.json": "./package.json" }
+  })
 )
-mkdirSync(join(KIT, "cli", "src"), { recursive: true })
-mkdirSync(join(KIT, "cli", "bin"), { recursive: true })
-writeFileSync(join(KIT, "cli", "src", "index.ts"), "")
-writeFileSync(join(KIT, "cli", "bin", "spell.mjs"), SCRIPT("kit"))
-writeFileSync(join(SERVER, "src", "index.ts"), "")
-writeFileSync(join(SERVER, "src", "page", "cli.ts"), SCRIPT("server"))
-writeFileSync(join(SERVER, "tsconfig.json"), "{}")
+mkdirSync(join(KIT, "bin"), { recursive: true })
+writeFileSync(join(KIT, "bin", "spell.mjs"), SCRIPT("kit"))
+writeFileSync(join(SERVER, "index.ts"), "")
+writeFileSync(join(SERVER, "page", "cli.ts"), SCRIPT("server"))
+writeFileSync(join(KIT, "tsconfig.node.json"), "{}")
 mkdirSync(INSIDE, { recursive: true })
 
 /** Run tool `name` from `INSIDE` with CODE as the code:  its exit code, and what the fake tool reported. */
@@ -93,14 +94,17 @@ describe("EpicTools.run()", () => {
     }
   })
 
-  test("server:  the spell-kit/server the CALLER's install resolves, with its own config", async () => {
+  test("server:  the spell-kit/server the CALLER's install resolves, with the kit's node config", async () => {
     const server = await run("server", ["status"])
     expect(server).toMatchObject({ status: 3, owner: "server", args: ["status"], checkout: DATA })
-    expect(server.tsconfig).toBe(join(SERVER, "tsconfig.json"))
+    expect(server.tsconfig).toBe(join(KIT, "tsconfig.node.json"))
   })
 
   test("serve:  the kit's spell, which the CALLER's install resolves", async () => {
-    expect(await run("serve", ["server", "start", "all"])).toMatchObject({ owner: "kit", args: ["server", "start", "all"] })
+    expect(await run("serve", ["server", "start", "all"])).toMatchObject({
+      owner: "kit",
+      args: ["server", "start", "all"]
+    })
   })
 })
 
@@ -120,13 +124,11 @@ describe("EpicTools.hasPageServer()", () => {
 })
 
 describe("EpicTools.toolArgs()", () => {
-  test("plain node:  just the script;  tsx:  this checkout's loader and the alias hook first", () => {
+  test("plain node:  just the script;  tsx:  this checkout's loader first", () => {
     expect(EpicTools.toolArgs(EpicTools.TOOLS.window, "/wt")).toEqual(["/wt/src/window.mjs"])
     expect(EpicTools.toolArgs(EpicTools.TOOLS.notes, "/wt")).toEqual([
       "--import",
       expect.stringMatching(/\/tsx\/dist\/loader\.mjs$/),
-      "--import",
-      expect.stringMatching(/\/toolchain\/src\/aliases\.ts$/),
       "/wt/src/tools/notes.ts"
     ])
   })

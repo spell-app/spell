@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-summary"
+import "spell-epic/components/epic-summary"
 
 /** A summary, two sentences. */
 const SUMMARY = `<epic-summary>Plan docs drawn by web components. <code>spell dev plan-doc</code> writes them.</epic-summary>`

@@ -17,7 +17,7 @@
  *   2. the MAIN checkout's page server, for a worktree's file, when it serves worktrees (`SRV.mainServerUrl()`)
  *   3. the file's checkout's page server (`spell server`, a `.spell-server.json` at its root)
  *   4. else a server of our own, in-process, on `127.0.0.1`, one per root, for as long as the extension runs:
- *      the same `$/server` `WebServer`, with live reload and the engine's routes, but no route modules
+ *      the same `spell-kit/server` `WebServer`, with live reload and the engine's routes, but no route modules
  *   - NEVER starts a page server itself:  a GUI VS Code may have no `node` / `yarn` on its PATH.
  *     The scripts that open docs start one first (`epic hub ensure`, `pages.js` `ensurePageServer()`).
  * - Served from the ROOT, not the doc's folder:  docs link to source files all over the repo.
@@ -32,8 +32,8 @@ import * as vscode from "vscode"
 
 import { SRV } from "spell-kit/server"
 
-import { RepoList } from "$/epics/server/RepoList"
-import { ENGINE_ROUTES, PID_FILE } from "$/epics/server/server.types"
+import { RepoList } from "spell-epic/server/RepoList"
+import { ENGINE_ROUTES, PID_FILE } from "spell-epic/server/server.types"
 
 import { DocView, docsIndex, type DocViewName } from "./DocView"
 import { PREVIEW_PATH, isLoopback, stamped } from "./docUrls"

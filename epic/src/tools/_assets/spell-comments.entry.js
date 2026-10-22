@@ -187,14 +187,11 @@ function topSections(main) {
   )
 }
 
-/**
- * A `<ui-section>`'s label:  its `label` (`header`, its old name), else the text of its `slot="label"` (`"header"`)
- * child.  Spell UI's pages say `label` since spell-app's epic `property-editor` P10.
- */
+/** A `<ui-section>`'s label:  its `label`, else the text of its `slot="label"` child. */
 function sectionLabel(section) {
-  const label = (section.getAttribute("label") ?? section.getAttribute("header"))?.trim()
+  const label = section.getAttribute("label")?.trim()
   if (label) return label
-  const slotted = section.querySelector(':scope > [slot="label"], :scope > [slot="header"]')
+  const slotted = section.querySelector(':scope > [slot="label"]')
   return slotted?.textContent.replace(/\s+/g, " ").trim() ?? section.id
 }
 

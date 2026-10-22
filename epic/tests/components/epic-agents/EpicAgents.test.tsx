@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-agents"
+import "spell-epic/components/epic-agents"
 
 // the panel with agents in it, on a page:  `EpicPage.test.tsx`, "<epic-page> Agents running"
 

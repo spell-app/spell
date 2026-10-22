@@ -162,8 +162,8 @@ Then, in a Claude Code session in your repo:  `/epic <name> <what to plan>`.
 | Folder | What's in it |
 | --- | --- |
 | `epics/` | a page per epic, `epics/<name>/<name>.plan.html`, with its parts, review inbox and details pages;  the Epics list, `epics/index.html` |
-| `sagas/` | the sagas' list, `sagas/sagas.json5` (`epic saga new`), a page per saga, the Sagas list |
-| `guides/` | the guides epics write (`epic pages new durable guides/<page>.html`), the Guides list |
+| `sagas/` | the sagas' list, `sagas/sagas.json5` (`epic saga create`), a page per saga, the Sagas list |
+| `guides/` | the guides epics write (`epic pages create durable guides/<page>.html`), the Guides list |
 | `pages/` | the docs' home page, `pages/index.html` (`epic pages index` writes a card per area), and scratch details pages, `pages/details/` |
 
 - No `templates/`:  the templates are spell-epic's ([templates/](templates/)).
