@@ -88,7 +88,7 @@
     "spell:test:fixtures:bless": "vp test run --project spell tests/spell/test/fixtures.test.ts tests/spell/test/typescript.test.ts tests/spell/test/python.test.ts --update=all",
     "spell:test:rules": "vp test run --project spell tests/spell/rules",
     "spell:test:rules:bless": "BLESS_RULE_TESTS=1 vp test run --project spell tests/spell/rules; vp fmt src/spell/rules",
-    "spell:gen:syntax": "tsx src/spell/node/writeSpellSyntax.ts && vp fmt src/spell/spellSyntax.json"
+    "spell:gen:syntax": "tsx src/spell/node/writeSpellSyntax.ts && vp fmt src/spell/spellSyntax*.json"
   },
   "dependencies": {
     "@solidjs/h": "2.0.0-rc.13",

@@ -208,6 +208,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     - its aliases
     - its docstring's first sentence
     - What [the spell syntax guide](../../../spell.epics/guides/spell-syntax/spell-syntax.html) draws.
+    - One per language pack, the same shape:  Spanish's is [spellSyntax.es.json](spellSyntax.es.json),
+      its syntaxes and examples from the `<module>.es.ts` registrations.
     - Generated:  `yarn spell:gen:syntax`, after adding, renaming or changing a rule, its class docstring or its tests.
       [spellSyntax.test.ts](../../tests/spell/node/spellSyntax.test.ts) fails until you do.
     - So a class docstring's first sentence says what the rule is FOR, in plain words:  it's the guide's Purpose.
@@ -330,6 +332,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     - When two rules tie on `priority` and length, the one registered FIRST wins (`Choice.getBestMatch()`).
     - [The rules' own index](rules/index.ts) loads each module's `.en.ts`, then assembles `spellParser`.
     - Another language's `<module>.<lang>.ts` registers the same classes, in the same order.
+    - `spell lang packs check` says what a language's files lack against English;  `fix` writes stubs to translate
+      ([packs.ts](languages/packs.ts), imported by path:  the barrel leaves it out).
   - `index.ts`:  `export * from` each file.
     - `./<module>.parser` first, then `./<module>.shared`, then the rule files.
     - A rule file that imports a peer (its base class) loads it first:

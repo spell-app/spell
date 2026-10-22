@@ -64,8 +64,9 @@ typesEs.addRule(PluralType, {
         { title: "plural, minúsculas", input: "cartas", js: "Carta" },
         { title: "plural, mayúsculas", input: "Cartas", js: "Carta" },
         { title: "plural, con acento que se va", input: "corazones", js: "Corazón" },
-        // TODO(es):  a plural name of several words, `cuentas-bancarias` => `CuentaBancaria`:
-        //   Spanish's inflector makes only the LAST word singular, `CuentasBancaria`
+        // every word of a name goes plural in Spanish, the adjective too:  `cuentas-bancarias`
+        { title: "plural, varias palabras, minúsculas", input: "cuentas-bancarias", js: "CuentaBancaria" },
+        { title: "plural, varias palabras, mezcladas", input: "Cuentas-bancarias", js: "CuentaBancaria" },
 
         { title: "singular, minúsculas", input: "carta", js: undefined },
         { title: "singular, mayúsculas", input: "Carta", js: undefined },
@@ -92,6 +93,7 @@ typesEs.addRule(QuotedType, {
 // The subject words:  Spanish leaves `it` out (`subject_implied`), `- tiene un mazo`;  `its` is `su` / `sus`,
 // `- su "palo" es ...`.
 // `subject_it` is registered with no word, so it matches nothing:  rules naming `{subject_it}` still compile
+// packs: ok -- Spanish leaves `it` out:  no word
 typesEs.addRule(SubjectIt)
 
 typesEs.addRule(SubjectIts, { syntax: "(su|sus)/i" })
@@ -116,9 +118,10 @@ typesEs.addRule(KnownType, {
         { title: "singular, conocido, varias palabras, mayúsculas", input: "Cuenta-Bancaria", js: "CuentaBancaria" },
         { title: "plural, tipo conocido, minúsculas", input: "cartas", js: "Carta" },
         { title: "plural, tipo conocido, mayúsculas", input: "Cartas", js: "Carta" },
-        // TODO(es):  a plural name of several words, `cuentas-bancarias` / `cuentas bancarias` => `CuentaBancaria`:
-        //   Spanish's inflector makes only the LAST word singular, `cuentas-bancaria`, which names no type
+        { title: "plural, conocido, varias palabras, minúsculas", input: "cuentas-bancarias", js: "CuentaBancaria" },
+        { title: "plural, conocido, varias palabras, mezcladas", input: "Cuentas-bancarias", js: "CuentaBancaria" },
         { title: "varias palabras, declarado", input: "cuenta bancaria", js: "CuentaBancaria" },
+        { title: "varias palabras, declarado, plural", input: "cuentas bancarias", js: "CuentaBancaria" },
         { title: "nombre corto", input: "cuenta", js: "CuentaBancaria" },
         { title: "nombre corto, plural", input: "Cuentas", js: "CuentaBancaria" },
         { title: "palabras que nadie declaró", input: "caja fuerte", js: undefined },
@@ -137,8 +140,7 @@ typesEs.addRule(TypeWords, {
         { title: "dos palabras", input: "cuenta bancaria", js: "CuentaBancaria" },
         { title: "con guiones", input: "cuenta-bancaria", js: "CuentaBancaria" },
         { title: "plural", input: "cartas", js: "Carta" },
-        // TODO(es):  a plural name of several words, `cuentas bancarias` => `CuentaBancaria`:
-        //   Spanish's inflector makes only the LAST word singular, `CuentasBancaria`
+        { title: "plural, varias palabras", input: "cuentas bancarias", js: "CuentaBancaria" },
         { title: "hasta una palabra prohibida", input: "cuenta bancaria es", js: "CuentaBancaria" },
         { title: "hasta alias", input: "cuenta bancaria alias cuenta", js: "CuentaBancaria" },
         { title: "una palabra prohibida", input: "es", js: undefined }

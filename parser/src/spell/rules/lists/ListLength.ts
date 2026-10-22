@@ -14,10 +14,21 @@ import { getWhereScope, getWhereMethod } from "./lists.shared"
  *   - Its own syntax, as `cards in the deck where ...` can't be a `list_filter` here:
  *     we've read `cards in` already.
  * - `Priority.mostSpecific` -- preferred over lower-priority expression rules when tokens are ambiguous.
+ * - Rejects the match when `{list}` is KNOWN to be one thing, not a list, e.g. a `Card`:
+ *   Spanish's `el número de palos de card` is then `list_count` of the card's values, `Card.Palos`.
  */
 export class ListLength extends SpellExpression<"arg|list|body?"> {
   @proto static priority = Priority.mostSpecific
   @proto static datatype = "number"
+
+  /** Not a thing known to be no list -- see class docs. */
+  parse(scope: P.Scope, tokens: P.Token[]) {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (!match) return undefined
+    const listType = scope.getType(match.groups.list.datatype)
+    if (listType && !listType.isA("list") && listType.isA("thing")) return undefined
+    return match
+  }
 
   /** Nested scope for a `where` body -- singularized `{arg}` variable, also aliased from `it`. */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {

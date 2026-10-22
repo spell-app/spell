@@ -68,7 +68,7 @@ export class MethodDefinition<
       // remove instance bits from args and method signature
       signature.args.splice(initialType.argIndex, 1)
       const wordBefore = signature.methodBits[initialType.methodIndex - 1]
-      if (wordBefore && isDangling(wordBefore)) {
+      if (wordBefore && isDangling(wordBefore, scope)) {
         // keep the type's name in its place, as a word:  `of_calculator`, not `of_$calculator`
         signature.methodBits[initialType.methodIndex] = initialType.name.replace(/-/g, "_")
       } else {
@@ -111,7 +111,7 @@ export class MethodDefinition<
     const methodAt = signature.methodBits.findIndex(isSubjectWord)
     if (at >= 0 && methodAt >= 0) {
       const wordBefore = signature.methodBits[methodAt - 1]
-      if (wordBefore && isDangling(wordBefore)) {
+      if (wordBefore && isDangling(wordBefore, scope)) {
         signature.methodBits[methodAt] = typeWords.replace(/-/g, "_")
       } else {
         signature.methodBits.splice(methodAt, 1)
@@ -541,8 +541,10 @@ function isTopLevel(scope: P.Scope): boolean {
 /**
  * Is `word` one of the language's little words a method's name keeps its receiver's type after?
  * - e.g. `of`:  `to update the total of (a calculator)` => `update_the_total_of_calculator`
- * - The language in play's (`SP.LanguageWords.danglingWords`).
+ * - `scope`'s language's (`SP.LanguageWords.danglingWords`), NOT the one in play:
+ *   a method read ahead (`callAhead()`) works out its name out of a parse, where English is the fallback in play.
+ *   So Spanish's `para dar la vuelta a una carta` and its call agree on `dar_la_vuelta_a_carta`.
  */
-function isDangling(word: string): boolean {
-  return SP.Language.active.words.danglingWords.has(word.toLowerCase())
+function isDangling(word: string, scope: P.Scope): boolean {
+  return SP.Language.of(scope).words.danglingWords.has(word.toLowerCase())
 }

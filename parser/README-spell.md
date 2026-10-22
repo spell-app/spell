@@ -432,6 +432,7 @@ each says its words and what it reads as in `core` or JavaScript.
 | [node/](src/spell/node/) | node only:  the TypeScript check and build, pyright, the syntax table |
 | [test/](src/spell/test/) | test helpers:  `loadFixtureProject()`, `fixturePath()` |
 | [spellSyntax.json](src/spell/spellSyntax.json) | GENERATED:  every rule, syntax and output |
+| [spellSyntax.es.json](src/spell/spellSyntax.es.json) | GENERATED:  the same, in Spanish's syntax |
 | [PARSING.md](src/spell/PARSING.md) | the detailed map of the parse pipeline |
 | [thoughts/](docs/spell/thoughts/) | the 2017-era notes:  history, not plans |
 

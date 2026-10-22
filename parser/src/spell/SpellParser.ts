@@ -253,7 +253,8 @@ export class SpellParser extends P.Parser {
   stubDeclaredMethods(scope: P.Scope, texts: string[]): void {
     for (const found of texts.flatMap((text) => this.declaredMethods(text))) {
       const match = this.parseFirstLine(scope, found)
-      if (match) (match.rule as CallsAhead).callAhead!(match)
+      // our language in play:  the method's name is worked out by its rules, as when it's parsed
+      if (match) this.inPlay(() => (match.rule as CallsAhead).callAhead!(match))
     }
   }
 

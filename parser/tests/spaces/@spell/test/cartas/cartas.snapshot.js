@@ -119,7 +119,7 @@ export class Carta extends Thing {
   }
 
   /** Darle la vuelta a la carta */
-  async darVuelta() {
+  async darLaVueltaACarta() {
     if (this.dirección == "arriba") this.voltearBocaAbajo()
     else this.voltearBocaArriba()
     await core.pauseFor(50, "msec")
@@ -136,6 +136,10 @@ export class Carta extends Thing {
       () => `${this.rangoCorto} `,
       h("span", { class: "suit" }, () => this.paloCorto)
     )
+  }
+
+  get pila() {
+    return Pila.ownerOf(this)
   }
 }
 
@@ -180,9 +184,85 @@ export function testLaCarta() {
     carta.voltearBocaAbajo()
     core.expect(carta.dirección, `la dirección de la carta`, "abajo", `abajo`)
 
-    core.echoTestAction(`dar vuelta la carta`)
-    carta.darVuelta()
+    core.echoTestAction(`dar la vuelta a la carta`)
+    carta.darLaVueltaACarta()
     core.expect(carta.estáBocaArriba, `la carta está boca arriba`, true, `verdadero`)
   })
 }
 if (!core.isCarryingOver) testLaCarta()
+// -----------
+core.heading("Mazo:   baraja estándar de EE. UU. (por ahora sin comodines)")
+//## Mazo:   baraja estándar de EE. UU. (por ahora sin comodines)
+
+export class Mazo extends List {
+  static instanceType = Carta
+
+  preparar() {
+    if (this.estáPreparado) return
+    Carta.Rangos.forEach((rango) => Carta.Palos.forEach((palo) => {
+      const carta = new Carta({ rango: rango, palo: palo })
+      this.append(carta)
+    }))
+    this.estáPreparado = true
+  }
+
+  mostrar() {
+    const nombresDeCartas = new List()
+    this.forEach((carta) => nombresDeCartas.append(carta.nombreCorto))
+    core.echo(`mazo: ${nombresDeCartas}`)
+  }
+
+  // poner el está-preparado del mazo a sí
+  static { this.declareProp("estáPreparado", { type: "choice" }) }
+  get estáPreparado() { return this.getProp("estáPreparado") }
+  set estáPreparado(value) { this.setProp("estáPreparado", value) }
+}
+
+export function testLaCreaciónDelMazo() {
+  return core.test("test la creación del mazo", function testLaCreaciónDelMazo() {
+    core.echoTestAction(`el mazo es un nuevo mazo`)
+    const mazo = new Mazo()
+    core.echoTestAction(`preparar el mazo`)
+    mazo.preparar()
+    core.expect(mazo.length, `el número de cartas en el mazo`, 52, `52`)
+    core.echoTestAction(`preparar el mazo`)
+    mazo.preparar()
+    core.expect(mazo.length, `el número de cartas en el mazo`, 52, `52`)
+    core.echoTestAction(`poner las reinas a las cartas en el mazo donde el rango de la carta es "reina"`)
+    const reinas = mazo.filter((carta) => carta.rango == "reina")
+    core.expect(reinas.length, `el número de cartas en las reinas`, 4, `4`)
+    core.expect(mazo.lastItem?.nombre, `el nombre de la carta de abajo del mazo`, "rey-de-espadas", `"rey-de-espadas"`)
+    core.expect(mazo.firstItem?.nombreCorto, `el nombre corto de la carta de arriba del mazo`, "A♣️", `"A♣️"`)
+
+    core.echo("el mazo antes de barajar:")
+    core.echoTestAction(`mostrar el mazo`)
+    mazo.mostrar()
+    core.expect(mazo.firstItem?.esElRangoDePalos("as", "tréboles"), `la primera carta del mazo es el as de tréboles`, true, `sí`)
+  })
+}
+if (!core.isCarryingOver) testLaCreaciónDelMazo()
+// -----------
+core.heading("Pila de cartas")
+/** Pila de cartas */
+export class Pila extends List {
+  static instanceType = Carta
+
+  get color() {
+    if (this.isEmpty) return "ninguno"
+    return this.lastItem.color
+  }
+
+  get valor() {
+    if (this.isEmpty) return 0
+    return this.lastItem.valor
+  }
+
+  get estado() {
+    let estado = `${this.nombre || "pila"}:`
+    this.forEach((carta) => (estado = `${estado} ${carta.estado}`))
+    return estado
+  }
+
+  static exclusive = true
+}
+/** una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta */

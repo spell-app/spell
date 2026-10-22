@@ -65,7 +65,7 @@ para voltear una carta boca abajo:
 	pausar 50 mseg
 
 // Darle la vuelta a la carta
-para dar vuelta una carta:
+para dar la vuelta a una carta:
 	si su dirección es arriba: voltear la carta boca abajo
 	de lo contrario: voltear la carta boca arriba
 	pausar 50 mseg
@@ -112,6 +112,6 @@ para probar la carta
 	voltear la carta boca abajo
 	esperar que la dirección de la carta sea abajo
 
-	dar vuelta la carta
+	dar la vuelta a la carta
 	esperar que la carta está boca arriba sea verdadero
 probar la carta

@@ -177,7 +177,8 @@ coreEs.addRule(TextLiteral, {
       },
       tests: [
         ['"imagenes/[rank]-de-[suit].png"', "`imagenes/${rank}-de-${suit}.png`"],
-        // TODO(es):  `'"[rank + 1] cartas"'` => "`${(rank + 1)} cartas`", once `math.es.ts` registers Spanish's `+`
+        ['"[rank + 1] cartas"', "`${(rank + 1)} cartas`"],
+        ['"[rank más 1] cartas"', "`${(rank + 1)} cartas`"],
         ['"[[borrador]] o \\[borrador]"', "`[borrador] o [borrador]`"],
         ['"una `marca` y ${x}"', '"una `marca` y ${x}"'],
         ['"`[rank]` ${x}"', "`\\`${rank}\\` \\${x}`"],

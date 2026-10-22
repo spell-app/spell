@@ -450,11 +450,13 @@ classesEs.addRule(BelongsToOne, {
           input: "una carta pertenece a una hand",
           js: `/* PARSE ERROR: Can't say "una carta pertenece a una hand" yet:  declare "a hand is a list of cartas" above it */`
         },
-        // TODO(es):  `una carta pertenece a una lista` isn't refused:  `SP.isBuiltInTypeScope()` asks English's root scope
         {
           title: "the list type MUST be a list of the project's",
-          input: "una carta pertenece a una carta",
-          js: `/* PARSE ERROR: Can't say "una carta pertenece a una carta":  a carta isn't a list */`
+          input: ["una carta pertenece a una lista", "una carta pertenece a una carta"],
+          js: [
+            `/* PARSE ERROR: Can't say "una carta pertenece a una lista":  every list would hold a carta once */`,
+            `/* PARSE ERROR: Can't say "una carta pertenece a una carta":  a carta isn't a list */`
+          ]
         }
       ]
     }
@@ -494,8 +496,12 @@ classesEs.addRule(SavedInline, {
           title: "a drawable thing too:  saved inside, as every thing is by default",
           input: "una card se guarda dentro",
           js: "Card.savedInline = true"
+        },
+        {
+          title: "not a built-in type:  every project shares it",
+          input: "una cosa se guarda dentro",
+          js: `/* PARSE ERROR: Can't save thing inline:  it's built in, and every project shares it */`
         }
-        // TODO(es):  `una cosa se guarda dentro` isn't refused:  `SP.isBuiltInTypeScope()` asks English's root scope
       ]
     }
   ]
@@ -515,9 +521,12 @@ classesEs.addRule(SavedInFile, {
         scope.parse("una person es una cosa", "block")
       },
       tests: [
-        ["una person se guarda en su propio archivo", "Person.savedInFile = true"]
-        // TODO(es):  `una cosa se guarda en su propio archivo` isn't refused:
-        // `SP.isBuiltInTypeScope()` asks English's root scope
+        ["una person se guarda en su propio archivo", "Person.savedInFile = true"],
+        {
+          title: "not a built-in type:  every project shares it",
+          input: "una cosa se guarda en su propio archivo",
+          js: `/* PARSE ERROR: Can't save thing in its own file:  it's built in, and every project shares it */`
+        }
       ]
     }
   ]
@@ -610,30 +619,27 @@ classesEs.addRule(ListGuard, {
             "}"
           ]
         ],
-        // TODO(es):  `la carta no es la última carta de la pile` compiles to
-        // `this.getItem(position(false == core.thingAtPlace(Carta, -1)))`:  a `lists` rule reads `la ... de la pile`
-        // as a position in the pile, before `no es` compares
-        // {
-        //   title: "an indented body, `la pile` and `la carta`",
-        //   input: [
-        //     "una pile puede agregar una carta si:",
-        //     "\tsi la pile está vacía devolver sí",
-        //     "\tdevolver la carta no es la última carta de la pile"
-        //   ],
-        //   js: [
-        //     "Pile.prototype.canTake = function (carta) {",
-        //     "  if (this.isEmpty) return true",
-        //     "  return carta !== this.lastItem",
-        //     "}"
-        //   ],
-        //   ts: [
-        //     "export interface Pile { canTake(carta: Carta): boolean }",
-        //     "Pile.prototype.canTake = function (this: Pile, carta: Carta) {",
-        //     "  if (this.isEmpty) return true",
-        //     "  return carta !== this.lastItem",
-        //     "}"
-        //   ]
-        // },
+        {
+          title: "an indented body, `la pile` and `la carta`",
+          input: [
+            "una pile puede agregar una carta si:",
+            "\tsi la pile está vacía devolver sí",
+            "\tdevolver la carta no es la última carta de la pile"
+          ],
+          js: [
+            "Pile.prototype.canTake = function (carta) {",
+            "  if (this.isEmpty) return true",
+            "  return carta !== this.lastItem",
+            "}"
+          ],
+          ts: [
+            "export interface Pile { canTake(carta: Carta): boolean }",
+            "Pile.prototype.canTake = function (this: Pile, carta: Carta) {",
+            "  if (this.isEmpty) return true",
+            "  return carta !== this.lastItem",
+            "}"
+          ]
+        },
         [
           "una pile puede agregar una carta si: no",
           ["Pile.prototype.canTake = function (carta) {", "  return false", "}"],
@@ -850,8 +856,8 @@ classesEs.addRule(ClassMember, {
           [
             "una card es una cosa",
             "una card tiene un palo como uno de tréboles, diamantes",
-            "una bank-account es una cosa",
-            "una bank-account tiene un account-type como uno de savings, checking"
+            "una cuenta-bancaria es una cosa",
+            "una cuenta-bancaria tiene un tipo-de-cuenta como uno de ahorro, corriente"
           ].join("\n"),
           "block"
         )
@@ -859,8 +865,8 @@ classesEs.addRule(ClassMember, {
       tests: [
         ["palos de card", "Card.Palos"],
         ["Palos de Card", "Card.Palos"],
-        // TODO(es):  `account-types de bank-account`:  Spanish's inflector makes `account-type`'s class variable
-        // `Accountes_types`, each word plural
+        // Spanish words, which Spanish's inflector makes plural:  `tipo-de-cuenta` => `tipos-de-cuenta`
+        ["tipos-de-cuenta de cuenta-bancaria", "CuentaBancaria.TiposDeCuenta"],
         { title: "not a class variable", input: "rangos de card", js: undefined }
       ]
     }
@@ -916,9 +922,9 @@ classesEs.addRule(DefinePropertyHas, {
         ["imprimir palos de card", "core.console.log(Card.Palos)"],
         ["imprimir el palo de la card está en palos de card", "core.console.log(core.includes(Card.Palos, card.palo))"],
         ["imprimir el palo de la card", "core.console.log(card.palo)"],
-        ["imprimir los palos de la card", "core.console.log(Card.Palos)"]
-        // TODO(es):  `imprimir el número de palos de card` reads as how many `palos` the card holds (`lists`'s count):
-        // Spanish says "the number of card suits" and "the number of suits in a card" the same way
+        ["imprimir los palos de la card", "core.console.log(Card.Palos)"],
+        // a card is one thing, not a list:  so not how many `palos` it holds, but how many it can be
+        ["imprimir el número de palos de card", "core.console.log(core.itemCountOf(Card.Palos))"]
       ]
     },
     {
@@ -928,8 +934,8 @@ classesEs.addRule(DefinePropertyHas, {
           [
             "una card es una cosa",
             "una card tiene un palo como uno de tréboles, diamantes, corazones o espadas",
-            "una bank-account es una cosa",
-            "una bank-account tiene un account-type como uno de savings o checking"
+            "una cuenta-bancaria es una cosa",
+            "una cuenta-bancaria tiene un tipo-de-cuenta como uno de ahorro o corriente"
           ].join("\n"),
           "block"
         )
@@ -939,9 +945,8 @@ classesEs.addRule(DefinePropertyHas, {
         [
           ["obtener una nueva card", "imprimir sus palos"],
           ["const it = new Card()", "core.console.log(Card.Palos)"]
-        ]
-        // TODO(es):  `imprimir account-types de bank-account`:  Spanish's inflector makes `account-type`'s class
-        // variable `Accountes_types`, each word plural
+        ],
+        ["imprimir tipos-de-cuenta de cuenta-bancaria", "core.console.log(CuentaBancaria.TiposDeCuenta)"]
       ]
     },
     {
@@ -1045,26 +1050,25 @@ classesEs.addRule(DefinePropertyHas, {
       compileAs: "block",
       tests: [
         [
-          // TODO(es):  `una dirección` writes `Carta.Direccións`:  the writers pluralize with English's inflector
-          "las cartas tienen un rumbo como o bien up o down",
+          "las cartas tienen una dirección como o bien up o down",
           [
-            "// las cartas tienen un rumbo como o bien up o down",
-            'Carta.Rumbos = ["up", "down"]',
-            'Carta.declareProp("rumbo", { oneOf: Carta.Rumbos })',
-            'Object.defineProperty(Carta.prototype, "rumbo", {',
-            '  get() { return this.getProp("rumbo") },',
-            '  set(value) { this.setProp("rumbo", value) },',
+            "// las cartas tienen una dirección como o bien up o down",
+            'Carta.Direcciones = ["up", "down"]',
+            'Carta.declareProp("dirección", { oneOf: Carta.Direcciones })',
+            'Object.defineProperty(Carta.prototype, "dirección", {',
+            '  get() { return this.getProp("dirección") },',
+            '  set(value) { this.setProp("dirección", value) },',
             "  configurable: true",
             "})"
           ],
           [
-            "// las cartas tienen un rumbo como o bien up o down",
-            'Carta.Rumbos = ["up", "down"]',
-            "export interface Carta { rumbo: (typeof Carta.Rumbos)[number] }",
-            'Carta.declareProp("rumbo", { oneOf: Carta.Rumbos })',
-            'Object.defineProperty(Carta.prototype, "rumbo", {',
-            '  get(this: Carta): (typeof Carta.Rumbos)[number] { return this.getProp("rumbo") as (typeof Carta.Rumbos)[number] },',
-            '  set(this: Carta, value: (typeof Carta.Rumbos)[number]) { this.setProp("rumbo", value) },',
+            "// las cartas tienen una dirección como o bien up o down",
+            'Carta.Direcciones = ["up", "down"]',
+            "export interface Carta { dirección: (typeof Carta.Direcciones)[number] }",
+            'Carta.declareProp("dirección", { oneOf: Carta.Direcciones })',
+            'Object.defineProperty(Carta.prototype, "dirección", {',
+            '  get(this: Carta): (typeof Carta.Direcciones)[number] { return this.getProp("dirección") as (typeof Carta.Direcciones)[number] },',
+            '  set(this: Carta, value: (typeof Carta.Direcciones)[number]) { this.setProp("dirección", value) },',
             "  configurable: true",
             "})"
           ]
@@ -1275,6 +1279,7 @@ classesEs.addRule(ThePropertyOfAThing, {
 })
 
 // NOTE:  no `a_things_property`:  English's `a cards color` has no Spanish:  Spanish says `el color de una carta`
+// packs: none AThingsProperty -- Spanish has no "a card's color"
 
 classesEs.addRule(ItsQuotedProperty, {
   syntax: "{type:subject_its} {property:quoted_member}"

@@ -12,6 +12,7 @@
 import { P } from "spell-lang/parser"
 import { SpellParser } from "spell-lang/spell/SpellParser"
 import { Negatable, Wording } from "spell-lang/spell/rules/expressions"
+import { Priority } from "spell-lang/spell/rules/rules.types"
 
 import { BracketedList } from "./BracketedList"
 import { CanGiveUp } from "./CanGiveUp"
@@ -283,13 +284,12 @@ listsEs.addRule(ListCount, {
       compileAs: "expression",
       beforeEach(scope: P.Scope) {
         scope.compile(
-          ["una card es una cosa", "una card tiene un suit como uno de clubs, diamonds", "poner x a 1"].join("\n")
+          ["una card es una cosa", "una card tiene un palo como uno de tréboles, diamantes", "poner x a 1"].join("\n")
         )
       },
       tests: [
-        // TODO(es):  `el número de los suits de una card` -- Spanish can't name a type's list of values yet
-        //   (English's `card suits`):  `los suits de la card` reads only through a variable, and has no datatype,
-        //   so `list_count` turns it down.  English:  ["the number of card suits", "core.itemCountOf(Card.Suits)"]
+        // a type's list of values, `palos de card`:  `Card.Palos`
+        ["el número de palos de card", "core.itemCountOf(Card.Palos)"],
         ["el número de [1, 2]", "core.itemCountOf([1, 2])"],
         { title: "not a list:  a property read", input: "el number de x", js: "x.number" }
       ]
@@ -428,6 +428,25 @@ listsEs.addRule(OrdinalPositionExpression, {
         ["el primer item de my-list", "core.getItemAt(myList, 0)"],
         ["la décima card de deck", "core.getItemAt(deck, 9)"],
         ["la penúltima word en words", "core.getItemAt(words, -2)"]
+      ]
+    }
+  ]
+})
+
+// ... and with the end after the noun, as Spanish says a pile's ends:  `la carta de arriba del deck`
+// - `Priority.specific`:  it beats the loose property read the same words also are, `deck.arriba.carta`,
+//   which English's word order never meets.
+listsEs.addRule(OrdinalPositionExpression.specialize({ priority: Priority.specific }), {
+  syntax: "(el|la) {arg:singular_identifier} de {ordinal} (en|de|del) {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("deck")
+      },
+      tests: [
+        ["la carta de arriba del deck", "core.getItemAt(deck, 0)"],
+        ["la carta de abajo de deck", "core.getItemAt(deck, -1)"]
       ]
     }
   ]

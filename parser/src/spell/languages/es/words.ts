@@ -102,6 +102,13 @@ export const spanishWords: SP.LanguageWords = {
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
 
+  /**
+   * Words which name `it` as an object:  `imprimir eso`, `obtener su nombre`, then `imprimir eso`.
+   * - Spanish attaches the pronoun to its verb (`imprimirlo`), which spell's words can't split, so `eso` ("that").
+   * - `ello` too, the plain pronoun.
+   */
+  itWords: new Set(["eso", "ello"]),
+
   /** Spanish's words for the built-in types' members:  `el largo de la lista`, `el año de la fecha`. */
   builtInMembers: {
     length: ["largo", "longitud"],

@@ -274,8 +274,9 @@ expressionsEs.addRule(IsA, {
         ["thing es un número", 'typeof thing === "number"'],
         ["thing es un numero", 'typeof thing === "number"'],
         ["thing es un booleano", 'core.isOfType(thing, "choice")'],
-        ["thing es una lista", 'core.isOfType(thing, "List")']
-        // TODO(es): an unknown type is no type, but `thing es una crata` reads `una` as the number 1:  `(thing == 1)`
+        ["thing es una lista", 'core.isOfType(thing, "List")'],
+        // an unknown type is no type:  `es una crata` doesn't parse
+        ["thing es una crata", "thing"]
       ]
     }
   ]
@@ -312,14 +313,16 @@ expressionsEs.addRule(IsIn, {
       },
       tests: [
         ["thing está en theList", "core.includes(theList, thing)"],
-        // TODO(es): `thing es uno de theList` reads `uno de theList` as a property, `theList.uno`:
-        //   `uno` isn't one of Spanish's member stop words, as `una` is
+        ["thing es uno de theList", "core.includes(theList, thing)"],
         ["thing es una de theList", "core.includes(theList, thing)"],
         ["thing no está en theList", "!core.includes(theList, thing)"],
-        // TODO(es): `thing no es una de theList`, and `no es o bien uno de red o green`, read as the item at a
-        //   position of a list, `no es una` its position (`no` the value false):  `core.getItemAt(theList, ...)`
+        // `no es uno` isn't a position in the list (`false == 1`):  a yes / no counts no place
+        ["thing no es uno de theList", "!core.includes(theList, thing)"],
+        ["thing no es una de theList", "!core.includes(theList, thing)"],
         ["thing es o bien red o green", 'core.includes([red, "green"], thing)'],
-        ["thing no es o bien red o green", '!core.includes([red, "green"], thing)']
+        ["thing es o bien uno de red o green", 'core.includes([red, "green"], thing)'],
+        ["thing no es o bien red o green", '!core.includes([red, "green"], thing)'],
+        ["thing no es o bien uno de red o green", '!core.includes([red, "green"], thing)']
       ]
     }
   ]

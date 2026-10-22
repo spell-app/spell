@@ -22,8 +22,19 @@ export const words = {
       estado: "estado",
       voltearBocaArriba: "voltear una carta boca arriba",
       voltearBocaAbajo: "voltear una carta boca abajo",
-      darVuelta: "dar vuelta una carta",
-      dibujar: "dibujar una carta"
+      darLaVueltaACarta: "dar la vuelta a una carta",
+      dibujar: "dibujar una carta",
+      pila: "pila"
+    },
+    Mazo: {
+      preparar: "preparar un mazo",
+      mostrar: "mostrar un mazo",
+      estáPreparado: "está-preparado"
+    },
+    Pila: {
+      color: "color",
+      valor: "valor",
+      estado: "estado"
     }
   }
 }

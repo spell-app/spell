@@ -87,8 +87,11 @@ methodsEs.addRule(ToDoSomething, {
           input: "para empezar el juego",
           js: "export function empezarElJuego() {}"
         },
-        // TODO(es):  "keyword-only signature - `it` is not defined" (`to start the game: print it`):
-        //   Spanish has no word for `it` as an object yet (the glossary leaves it out), so there's nothing to fail on
+        {
+          title: "keyword-only signature - `eso` (it) is not defined",
+          input: "para empezar el juego: imprimir eso",
+          js: ["export function empezarElJuego() {}", '/* PARSE ERROR: Don\'t understand "imprimir eso" */']
+        },
         {
           title: "paren-free type arg in signature:  a known type is a parameter",
           input: "para crear una card",
@@ -96,6 +99,17 @@ methodsEs.addRule(ToDoSomething, {
           ts: [
             "export interface Card { crear(): any /* spell: type unknown */ }",
             "Card.prototype.crear = function (this: Card) {}"
+          ]
+        },
+        {
+          title: "paren-free type arg in signature - `eso` (it)",
+          input: "para crear una card: imprimir eso",
+          js: [`Card.prototype.crear = function () {`, `  return core.console.log(this)`, `}`],
+          ts: [
+            "export interface Card { crear(): any /* spell: type unknown */ }",
+            "Card.prototype.crear = function (this: Card) {",
+            "  return core.console.log(this)",
+            "}"
           ]
         },
         {
@@ -222,8 +236,45 @@ methodsEs.addRule(ToDoSomething, {
             "}"
           ]
         },
-        // TODO(es):  the `it` tests (`print it`, and "implicit `it` gets remapped after `get`"):
-        //   Spanish has no word for `it` as an object yet
+        {
+          title: "typed arg in signature -- `eso` (it)",
+          input: "para mostrar (thing como una card): imprimir eso",
+          js: [`Card.prototype.mostrar = function () {`, `  return core.console.log(this)`, `}`],
+          ts: [
+            "export interface Card { mostrar(): any /* spell: type unknown */ }",
+            "Card.prototype.mostrar = function (this: Card) {",
+            "  return core.console.log(this)",
+            "}"
+          ]
+        },
+        {
+          title: "typed var in signature: implicit `it` (`eso`, `ello`) gets remapped after `obtener`",
+          input: ["para mostrar (thing como una card)", "\timprimir eso", "\tobtener su name", "\timprimir ello"],
+          js: [
+            "Card.prototype.mostrar = function () {",
+            "  core.console.log(this)",
+            "  const it = this.name",
+            "  core.console.log(it)",
+            "}"
+          ],
+          ts: [
+            "export interface Card { mostrar(): any /* spell: type unknown */ }",
+            "Card.prototype.mostrar = function (this: Card) {",
+            "  core.console.log(this)",
+            "  const it = this.name",
+            "  core.console.log(it)",
+            "}"
+          ]
+        },
+        {
+          title: "simple arg in signature - `eso` (it) is not defined",
+          input: "para avisar (message): imprimir eso",
+          js: ["export function avisarMessage(message) {}", '/* PARSE ERROR: Don\'t understand "imprimir eso" */'],
+          ts: [
+            "export function avisarMessage(message: any /* spell: type unknown */) {}",
+            '/* PARSE ERROR: Don\'t understand "imprimir eso" */'
+          ]
+        },
         {
           title: "mixed vars in signature",
           input: "para preguntar (message como texto) y (reply)",

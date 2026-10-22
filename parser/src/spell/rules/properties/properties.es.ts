@@ -128,8 +128,9 @@ propertiesEs.addRule(PropertyExpression, {
         ["el foo del bar", "bar.foo"],
         ["el foo de la bar de la baz", "baz.bar.foo"],
         ["el foo-bar de la baz", "baz.fooBar"],
-        // TODO(es):  "several undeclared words:  not a property read" (`el foo bar de la baz`):  not ours, but an
-        //   expression still reads it in Spanish, `core.getItemAt(baz, position(bar))` -- another module's rule takes it
+        // `qux`, not English's `bar`:  `bar` is a variable here, so `el foo bar de la baz` is the foo AT `bar` in baz,
+        //   as Spanish says `la card n del deck`, `core.getItemAt(baz, position(bar))`
+        { title: "several undeclared words:  not a property read", input: "el foo qux de la baz", js: undefined },
         { title: "a blacklisted word:  not a loose read", input: "el si de la baz", js: undefined }
       ]
     }

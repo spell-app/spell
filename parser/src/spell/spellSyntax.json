@@ -2019,7 +2019,7 @@
           "ruleNames": ["list_length"],
           "internal": false,
           "file": "src/spell/rules/lists/ListLength.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "Return length of a list, e.g. `number of items in my-list` => `core.itemCountOf(myList)`.",
           "syntaxes": [
             {
@@ -2115,7 +2115,7 @@
           "ruleNames": ["position_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/PositionExpression.ts",
-          "line": 12,
+          "line": 18,
           "purpose": "Numeric-position index expression, e.g. `card 1 of the pile`, `card #2 of the pile`.",
           "syntaxes": [
             {

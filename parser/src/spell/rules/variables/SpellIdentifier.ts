@@ -46,8 +46,21 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
   /** Match a word, remembering the scope variable it names as `match.data.scopeVar` -- see class docs. */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (match) match.data.scopeVar = scope.variables?.get(match.value) ?? NONE
+    if (match) match.data.scopeVar = SpellIdentifier.scopeVariableFor(scope, match.value) ?? NONE
     return match
+  }
+
+  /**
+   * The scope variable `name` names, if any.
+   * - A language's word for `it` as an object (Spanish's `eso`, `SP.LanguageWords.itWords`) names the `it` variable,
+   *   unless a variable of that name is in scope.
+   */
+  static scopeVariableFor(scope: P.Scope, name: string): P.ScopeVariable | undefined {
+    const variables = scope.variables
+    if (!variables) return undefined
+    const named = variables.get(name)
+    if (named || !SP.Language.of(scope).words.itWords?.has(name)) return named
+    return variables.get("it")
   }
 
   /** What the variable it named holds, if known -- see `P.ScopeVariable.datatype`. */
@@ -68,8 +81,8 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
     const { scopeVar } = match.data
     const variable = scopeVar === NONE ? undefined : scopeVar
     if (variable?.output === "this") return new P.ASTSelfLiteral(match, { value: "this", raw: match.raw })
-    // Allow variable to override name if it wants to (e.g. "it")
-    const name = variable && variable.output ? variable.output : match.value
+    // Allow variable to override name if it wants to (e.g. "it");  a word for `it` (Spanish's `eso`) writes `it`
+    const name = variable?.output ? variable.output : variable?.name === "it" ? "it" : match.value
     const plurality = this.getPlurality(match) === "plural" ? "plural" : "singular"
     return new P.ASTVariableExpression(match, { raw: match.raw, name, variable, plurality })
   }

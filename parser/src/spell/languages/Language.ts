@@ -139,6 +139,12 @@ export type LanguageWords = {
   /** The word between a list and what it holds:  `of` in `list of cards`, `de` in `lista de cartas`. */
   listOfWord: string
   /**
+   * Words which name `it` as an OBJECT -- the thing a method runs on, or the last `get` -- e.g. Spanish's `eso`.
+   * - None:  `it` itself, as English writes it (`print it`), the `it` variable's own name.
+   * - A variable a person named the same word wins:  this is only a second name for `it`.
+   */
+  itWords?: Set<string>
+  /**
    * The language's words for the built-in types' members, by their English words:  `{ length: ["largo", "longitud"] }`.
    * - Each reads as its English one does (`SP.BUILT_IN_TYPE_TABLE`'s `readAs`).
    * - None:  the English words.

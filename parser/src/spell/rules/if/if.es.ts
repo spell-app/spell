@@ -144,6 +144,7 @@ ifEs.addRule(Else, {
   ]
 })
 
+// packs: ok -- `si no` is `else` AND `if no`:  `else` must come first
 ifEs.addRule(If, {
   syntax: "si {condition:expression} (entonces|:)? {statement_body}?",
   tests: [
