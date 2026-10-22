@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { UI } from "./UI.parser"
 
 /**
  * `css` rule:  parse CSS from a `TextToken` WITHOUT quotes.
@@ -28,17 +27,6 @@ export class CSSStyles extends P.TokenType<never, CSSMatchData> {
     })
   }
 }
-UI.addRule(CSSStyles, {
-  tests: [
-    {
-      title: "correctly matches css",
-      tests: [
-        [`""`, `core.installStyles(undefined, \`""\`)`],
-        [`".Card {\\n\\theight:30px;\\n}\\n"`, `core.installStyles(undefined, \`".Card {\\n\\theight:30px;\\n}\\n"\`)`]
-      ]
-    }
-  ]
-})
 
 /** What `css` rule expects on its matches. */
 type CSSMatchData = {

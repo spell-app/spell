@@ -1,8 +1,7 @@
-import { proto, singularize } from "spell-kit/util"
+import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 import { type MethodBody } from "./lists.shared"
 
 /**
@@ -27,7 +26,7 @@ export class ListRangeIteration extends SpellStatement<"item|start|end|body?"> {
     const { item } = match.groups
     return new P.MethodScope({
       parentScope: match.scope,
-      args: [new P.ScopeVariable({ name: singularize(item.value), declaredBy: item })],
+      args: [new P.ScopeVariable({ name: P.singularize(item.value), declaredBy: item })],
       declaredBy: match
     })
   }
@@ -50,22 +49,3 @@ export class ListRangeIteration extends SpellStatement<"item|start|end|body?"> {
     return expression
   }
 }
-lists.addRule(ListRangeIteration, {
-  syntax: "for each? {item:singular_identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
-  tests: [
-    {
-      compileAs: "block",
-      tests: [
-        ["for each number from 1 to 10:", "core.getRange(1, 10).forEach(() => {})"],
-        [
-          "for each number from 1 to 10: print the number",
-          "core.getRange(1, 10).forEach((number) => core.console.log(number))"
-        ],
-        [
-          "for each number from 1 to 10:\n\tprint the number",
-          "core.getRange(1, 10).forEach((number) => core.console.log(number))"
-        ]
-      ]
-    }
-  ]
-})

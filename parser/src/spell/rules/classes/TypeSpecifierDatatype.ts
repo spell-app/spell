@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { classes } from "./classes.parser"
 
 /**
  * `type_specifier_datatype` rule:  `as a number` / `as an automobile` -- specifies a property's datatype as a primitive
@@ -20,14 +19,3 @@ export class TypeSpecifierDatatype extends P.Sequence<"datatype"> {
     return P.matchAST<P.ASTTypeExpression>(match.groups.datatype)
   }
 }
-classes.addRule(TypeSpecifierDatatype, {
-  syntax: "as (a|an)? {datatype:singular_type}",
-  tests: [
-    {
-      tests: [
-        ["as a number", "number"],
-        ["as an automobile", "Automobile"]
-      ]
-    }
-  ]
-})

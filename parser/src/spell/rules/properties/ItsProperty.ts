@@ -2,7 +2,6 @@ import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { MemberReadExpression } from "./MemberReadExpression"
 import { itsObject, type ItsMatchData } from "./properties.shared"
-import { properties } from "./properties.parser"
 
 /**
  * `its_property` rule:  `its {property}` -- possessive shorthand.
@@ -28,48 +27,3 @@ export class ItsProperty extends MemberReadExpression<"property", ItsMatchData> 
     return new P.ASTPropertyExpression(match, { object: itsObject(match), property })
   }
 }
-properties.addRule(ItsProperty, {
-  syntax: "its {property}",
-  tests: [
-    {
-      title: "tracks `it` when it var defined explicitly",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add({ name: "it", output: "it" })
-      },
-      tests: [
-        ["its foo", "it.foo"],
-        ["the foo of its bar", "it.bar.foo"]
-      ]
-    },
-    {
-      title: "tracks `it` when it var defined via get",
-      compileAs: "block",
-      tests: [
-        [
-          ["get a new thing", "print its foo"],
-          ["const it = new Thing()", "core.console.log(it.foo)"]
-        ]
-      ]
-    },
-    {
-      title: "tracks `it` when it var defined as output `other`",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add({ name: "it", output: "other" })
-      },
-      tests: [
-        ["its foo", "other.foo"],
-        ["the foo of its bar", "other.bar.foo"]
-      ]
-    },
-    {
-      title: "maps to `this` when `it` is not defined",
-      compileAs: "expression",
-      tests: [
-        ["its foo", "this.foo"],
-        ["the foo of its bar", "this.bar.foo"]
-      ]
-    }
-  ]
-})

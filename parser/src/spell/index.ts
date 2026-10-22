@@ -60,3 +60,7 @@ export * from "./SpellWarnings"
 export * from "./hoistClassMembers"
 export * from "./targets"
 export * from "./highlight"
+export * from "./languages/Language"
+
+// The language packs:  English first, the default
+export { english } from "./languages/en"

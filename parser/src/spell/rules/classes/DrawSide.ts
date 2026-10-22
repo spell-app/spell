@@ -4,7 +4,6 @@ import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { type MethodBody } from "./classes.shared"
 
 /**
@@ -39,10 +38,22 @@ export class DrawSide extends SpellStatement<"alias|body?", { side?: string; dra
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match || !P.SubjectScope.of(scope)?.subjectType) return undefined
-    const side = DRAW_SIDE.exec(`${match.groups.alias.value}`.replace(/^["']|["']$/g, ""))?.[1]
+    const side = DrawSide.sideOf(scope, `${match.groups.alias.value}`.replace(/^["']|["']$/g, ""))
     if (!side) return undefined
     match.data.side = snakeCase(side)
     return match
+  }
+
+  /**
+   * The side `phrase` draws, e.g. `front` for `draw its front`;  `undefined` if it isn't one.
+   * - Its first words are the language's own, the `draw_its` word rule;  the rest are the side's name.
+   */
+  private static sideOf(scope: P.Scope, phrase: string): string | undefined {
+    const tokens = scope.parser?.tokenize(phrase)
+    const lead = tokens && scope.parser?.rules.draw_its?.parse(scope, tokens)
+    if (!lead) return undefined
+    const side = tokens.slice(lead.length).join("").trim()
+    return SIDE_NAME.test(side) ? side : undefined
   }
 
   /** SIDE EFFECT:  declares the side on the type;  notes whether it now has both -- see class docs. */
@@ -101,9 +112,6 @@ export class DrawSide extends SpellStatement<"alias|body?", { side?: string; dra
     return new P.ASTStatementGroup(match, { statements })
   }
 }
-classes.addRule(DrawSide, {
-  syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?"
-})
 
-/** What `draw_side` takes in its quotes:  `draw its front`, the side's name captured. */
-const DRAW_SIDE = /^draw its (\p{L}[\p{L}\p{M}\d_-]*(?: \p{L}[\p{L}\p{M}\d_-]*)*)$/iu
+/** A side's name, after `draw its`:  one or more words, e.g. `front`, `back cover`. */
+const SIDE_NAME = /^\p{L}[\p{L}\p{M}\d_-]*(?: \p{L}[\p{L}\p{M}\d_-]*)*$/iu

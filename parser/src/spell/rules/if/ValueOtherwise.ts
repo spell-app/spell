@@ -4,7 +4,6 @@ import { Priority } from "spell-lang/spell/rules/rules.types"
 import { SpellConstant } from "spell-lang/spell/rules/constants"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { _if_ } from "./if.parser"
 import { refuseOutsideMethod } from "./if.shared"
 
 /**
@@ -36,17 +35,3 @@ export class ValueOtherwise extends SpellStatement<"value"> {
     return { value: match.groups.value }
   }
 }
-_if_.addRule(ValueOtherwise, {
-  syntax: "(value:{expression}|{constant}) (otherwise|else)",
-  tests: [
-    {
-      compileAs: "block",
-      tests: [
-        [
-          ["to pick a color:", "\tblack otherwise"],
-          ["export function pickAColor() {", '  return "black"', "}"]
-        ]
-      ]
-    }
-  ]
-})

@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { _async } from "./async.parser"
 
 /**
  * `pause` rule:  delay for a certain amount of time, e.g. `pause for 2 seconds`.
@@ -22,17 +21,3 @@ export class Pause extends SpellStatement<"number|units"> {
     })
   }
 }
-_async.addRule(Pause, {
-  syntax: "pause for {number:expression} (units:second|seconds|sec|millisecond|milliseconds|msec|tick|ticks)",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`pause for 2 seconds"`, 'await core.pauseFor(2, "seconds")'],
-        [`pause for 500 msec"`, 'await core.pauseFor(500, "msec")'],
-        [`pause for 10 ticks"`, 'await core.pauseFor(10, "ticks")'],
-        [`pause for (10 + 10) sec`, 'await core.pauseFor(10 + 10, "sec")']
-      ]
-    }
-  ]
-})

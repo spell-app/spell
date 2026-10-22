@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import type { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 // Import directly to avoid circular import
 import { CreateListType } from "./CreateListType"
 
@@ -12,71 +11,3 @@ import { CreateListType } from "./CreateListType"
 export class CreateDrawableListType extends CreateListType {
   @proto static listType: P.Datatype = "drawable list"
 }
-classes.addRule(CreateDrawableListType, {
-  syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) drawable list of {instanceType:type} {with_nested_statements}?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [
-          "a pile is a drawable list of cards",
-          [
-            "export class Pile extends DrawableList {",
-            "  static instanceType = Card",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}"
-          ],
-          [
-            "export class Pile extends DrawableList<Card> {",
-            "  static instanceType = Card",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}",
-            "",
-            "/**",
-            " * `<test-class-pile>`:  a pile, drawn in its own element, e.g. by `draw the pile`.",
-            " * - The page defines its tag with this class:  `core.useElement()`, below.",
-            " * - Its attributes are its pile's properties;  its methods call its pile's.",
-            " * - What every drawable thing's element does, e.g. drawing its pile, is `SpellElement`'s.",
-            " */",
-            "export class PileElement extends SpellElement<Pile> {",
-            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-class-pile", "pile", [])',
-            "}",
-            "core.useElement(Pile, PileElement)"
-          ]
-        ]
-      ]
-    },
-    {
-      compileAs: "block",
-      tests: [
-        [
-          "a pile is a drawable list of cards with:",
-          [
-            "export class Pile extends DrawableList {",
-            "  static instanceType = Card",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}"
-          ],
-          [
-            "export class Pile extends DrawableList<Card> {",
-            "  static instanceType = Card",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}",
-            "",
-            "/**",
-            " * `<test-class-pile>`:  a pile, drawn in its own element, e.g. by `draw the pile`.",
-            " * - The page defines its tag with this class:  `core.useElement()`, below.",
-            " * - Its attributes are its pile's properties;  its methods call its pile's.",
-            " * - What every drawable thing's element does, e.g. drawing its pile, is `SpellElement`'s.",
-            " */",
-            "export class PileElement extends SpellElement<Pile> {",
-            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-class-pile", "pile", [])',
-            "}",
-            "core.useElement(Pile, PileElement)"
-          ]
-        ]
-      ]
-    }
-  ]
-})

@@ -166,6 +166,9 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
 
 - A rule is a CLASS (behaviour AND what the rule is), plus its `syntax` and `tests`.
   - Those two are passed when registering it:  `parser.addRule(RuleClass, { syntax, tests })`.
+  - A rule's syntax is in ONE human language;  its class is every language's (epic `spanish`).
+    - Each module's English registrations are its `<module>.en.ts`;  another language's, `<module>.<lang>.ts`.
+    - So rule CODE never reads a word it matched (`operator.value === "is not"`):  it asks a WORD RULE (below).
   - Everything else goes ON THE CLASS, as `@proto static` (from `spell-kit/util`).
     - e.g. `alias`, `priority`, `declares`, `highlightAs`, `datatype`, `tokenType`, `pattern` ...
     - e.g. `@proto static alias = "expression"`
@@ -237,15 +240,23 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     - Its `static declarationProps(declared, syntax)` says what goes in the declaration:  tune output there.
   - A class or rule name is NOT a stable identifier (WWOD §3 › "Names aren't identifiers").
     - Here, the explicit property is e.g. `@proto static importableAs = "quoted_property"`.
-  - A word with negated forms is a [`Negatable`](rules/expressions/Negatable.ts) rule.
-    - `{operator:is}` matches `is`, `is not`, `isn't` and `isnt`.
-    - `Negatable.isNegated(operator)` says which.
-    - Plain `is` matches just the word.
-    - So far:  `is`, `can`, `will`, `has`.
-    - A translation registers its own;  the forms in its `negated` group are the negated ones:
+  - WORD RULES hold a language's words for one thing, and what each form means (epic `spanish` P3):
+    - [`Wording`](rules/expressions/Wording.ts):  forms in named groups, the group's name the meaning,
+      e.g. `list_end`, `((start:start|front|top)|(end:end|back|bottom))`;  the rule asks `Wording.meaningOf(match)`.
+    - [`Negatable`](rules/expressions/Negatable.ts), the commonest:  one meaning, `negated`.
+      - `{operator:is_or_is_not}` matches `is`, `is not`, `isn't` and `isnt`;  `Negatable.isNegated(operator)` says which.
+      - Plain `is` matches just the word.
+      - So far:  `is_or_is_not`, `is_or_is_not_a` (`is a`, `are not a` ...), `can_or_cannot`, `will_or_will_not`,
+        `has_or_has_not`, and the verbs' own in their modules.
+      - The old names (`is`, `can`, `will`, `has`) stay as aliases:  declarations compiled before say them.
+    - [`Synonyms`](rules/expressions/Synonyms.ts):  forms that all mean the same, e.g. `is_or_are`, and the articles,
+      `indefinite_article`, `definite_article`.
+    - Code that meets a word OUTSIDE a parse of its rule (a lookahead, a person's quoted phrase) asks
+      `Wording.reads(scope, "is_or_is_not", word)`, never `word === "is"`.
+    - A translation registers its own under the same names:
 
       ```ts
-      addRule(Negatable.specialize({ ruleName: "es" }), { syntax: "(es|(negated:no es))" })
+      expressions.addRule(Negatable.specialize({ ruleName: "is_or_is_not" }), { syntax: "(es|está|(negated:no es|no está))" })
       ```
 
 - A rule which is a statement AND an expression, ending in a whole `{x:expression}` (a method call, `wait for`):
@@ -281,9 +292,10 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     ```text
     rules/<module>/
       <module>.parser.ts    the module's parser
-      <RuleClass>.ts        one rule class each
+      <RuleClass>.ts        one rule class each:  what it does, in every language
+      <module>.en.ts        its English:  every rule's syntax and tests, in tie-break order
       <module>.shared.ts    what several of its rule files share, if anything
-      index.ts              exports every file, in tie-break order
+      index.ts              exports every rule class
 
     tests/spell/rules/<module>/   (from the repo root)
       <module>.test.ts      its tests
@@ -296,11 +308,10 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - `<RuleClass>.ts`:  ONE rule class, the file named for it, e.g. [Trigger.ts](rules/events/Trigger.ts).
     - Top to bottom:
       - imports:  `./<module>.parser`, peer files (a base class), `spell-lang/spell/rules/<other module>` for another's
-      - constants the class or its registration reads:  a `const` isn't hoisted
-        - e.g. `LOWER_INITIAL_WORD`, in [Property.ts](rules/properties/Property.ts)
+      - constants the class reads:  a `const` isn't hoisted
       - docstring + `export class Trigger extends ... {}`, its `@proto static` props FIRST in the body
-      - `<module>.addRule(Trigger, { syntax, tests })`, right after the class, once per syntax
-      - THEN the types and helpers only this rule uses (`type VariableMatchData`, `setupAssignmentStatement()`)
+      - THEN the types and helpers only this rule uses (`type VariableMatchData`);  one its English tests use too is
+        exported, for `<module>.en.ts` (`setupAssignmentStatement()`)
         - Types and function declarations are hoisted, so they can follow what uses them.
     - The class docstring's first line starts with the RULE name,
       so a search for `{list_add_relative}` finds it:
@@ -315,9 +326,11 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
       two rule files read it.
     - Why `.shared`:  rule helpers build AST nodes (`new P.AST...`).
       A `.types.ts` file mustn't import values like those, so it isn't `.types`.
-  - `index.ts`:  `export * from` each file, in TIE-BREAK order.
+  - `<module>.en.ts`:  every `<module>.addRule(RuleClass, { syntax, tests })` of the module, in TIE-BREAK order.
     - When two rules tie on `priority` and length, the one registered FIRST wins (`Choice.getBestMatch()`).
-      Each rule registers as its file loads, so this list IS the registration order:  keep the module's old order.
+    - [The rules' own index](rules/index.ts) loads each module's `.en.ts`, then assembles `spellParser`.
+    - Another language's `<module>.<lang>.ts` registers the same classes, in the same order.
+  - `index.ts`:  `export * from` each file.
     - `./<module>.parser` first, then `./<module>.shared`, then the rule files.
     - A rule file that imports a peer (its base class) loads it first:
       fine as long as the base came first in the old order too.

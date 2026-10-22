@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { tests } from "./tests.parser"
 
 /**
  * `start_test` rule:  `start test {message}` or `start quiet test {message}` -- marks beginning of a named test run.
@@ -19,6 +18,3 @@ export class StartTest extends SpellStatement<"quiet?|message"> {
     })
   }
 }
-tests.addRule(StartTest, {
-  syntax: "start (quiet:quiet)? test {message:text}"
-})

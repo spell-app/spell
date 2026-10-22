@@ -11,6 +11,7 @@
 export * as P from "./"
 
 export * from "./parser.types"
+export * from "./Inflector"
 export * from "./tokenizer"
 export * from "./Match"
 export * from "./Expectations"

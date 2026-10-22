@@ -1,7 +1,6 @@
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `range_count_expression` rule:  alternative form of range expression.
@@ -26,24 +25,6 @@ export class RangeCountExpression extends SpellExpression<"ordinal|number|arg|li
     })
   }
 }
-lists.addRule(RangeCountExpression, {
-  syntax: "{ordinal} {number} {arg:plural_identifier} (of|in|from) {list:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("deck")
-      },
-      tests: [
-        ["top 2 items of my-list", "core.rangeStartingAt(myList, 0, 2)"],
-        [`first 2 words in "some other words"`, 'core.rangeStartingAt("some other words", 0, 2)'],
-        ["last two cards from deck", "core.rangeStartingAt(deck, -2, 2)"],
-        ["penultimate two cards from deck", "core.rangeStartingAt(deck, -3, 2)"]
-      ]
-    }
-  ]
-})
 
 /**
  * Where a range of `count` items said with `ordinal` starts:

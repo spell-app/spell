@@ -1,8 +1,6 @@
-import { getDerived, singularize } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly, NOT through the `spell-lang/core` barrel:  the parser MUST NOT load `core` itself.
 // Each runner runs its own copy:  see `spellRuntime.ts`.
-import { SPELL_BASE_TYPES } from "spell-lang/core/core.types"
 import { SP } from "spell-lang/spell"
 
 // Registers `RulexParser` on `P.Parser.rulexParser` -- MUST load before any rule with a `syntax:` string.
@@ -156,29 +154,17 @@ export class SpellParser extends P.Parser {
   }
 
   /**
-   * `rootScope` for all spellParsers -- contains base rules, types, constants.
-   * - All project scopes point back to this.
-   * - Its types:
-   *   - spell's runtime classes (`SPELL_BASE_TYPES`:  `Object`, `Thing`, `List`, `App`)
-   *   - then every other built-in type's NAME (`P.BUILT_IN_TYPES`:  `text`, `number` ...), each with its super-type,
-   *     so `is a number` names a known type, and `integer` is a `number`
-   * - Their members -- `the length of the name` -- from `SP.BUILT_IN_TYPE_TABLE`, see `loadBuiltInTypes()`.
+   * The language this parser reads, e.g. English -- see `SP.Language`.
+   * - Set by its language pack;  copied by `clone()`, so every project's parser knows its language.
    */
-  /*@memoize*/
+  declare language: SP.Language | undefined
+
+  /**
+   * The default language's root scope:  spell's built-in types and their members -- see `SP.Language.rootScope`.
+   * - Every project scope in English points back to this;  another language's to its own.
+   */
   static get rootScope(): P.RootScope {
-    return getDerived(this, "rootScope", (): P.RootScope => {
-      const scope = new P.RootScope({ name: "spellRoot", parser: SP.spellParser })
-      // spell's built-in types -- `core.BASE_TYPES`
-      SPELL_BASE_TYPES.forEach((type) => scope.types.add(type))
-      for (const [name, superType] of Object.entries(P.BUILT_IN_TYPES)) {
-        const existing = scope.types.get(name, "LOCAL_ONLY")
-        if (!existing) scope.types.add({ name, superType })
-        else if (superType) existing.superType = P.classCase(superType)
-      }
-      // their members, docs and item types -- see `BUILT_IN_TYPE_TABLE`
-      SP.loadBuiltInTypes(scope)
-      return scope
-    })
+    return SP.Language.default.rootScope
   }
 
   /**
@@ -190,7 +176,7 @@ export class SpellParser extends P.Parser {
     return new P.ProjectScope({
       name: moduleName,
       parser,
-      parentScope: SpellParser.rootScope
+      parentScope: this.language?.rootScope ?? SpellParser.rootScope
     })
   }
 
@@ -229,7 +215,7 @@ export class SpellParser extends P.Parser {
           .join("-") ??
         created!
     )
-    const kinds = [...text.matchAll(SpellParser.VALUE_KIND_DECLARATION)].map(([, plural]) => singularize(plural!))
+    const kinds = [...text.matchAll(SpellParser.VALUE_KIND_DECLARATION)].map(([, plural]) => P.singularize(plural!))
     return [...types, ...kinds]
   }
 

@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
 
 /**
  * `divided_by` rule:  `/` / `divided by`, e.g. `price / taxRate` -- `Precedence.product`, same as `*`.
@@ -15,20 +14,3 @@ export class DividedBy extends InfixOperatorSuffix {
     return "divided by"
   }
 }
-math.addRule(DividedBy, {
-  syntax: "(operator:/|divided by) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("price")
-        scope.variables?.add("taxRate")
-      },
-      tests: [
-        ["price/taxRate", "(price / taxRate)"],
-        ["price / taxRate", "(price / taxRate)"],
-        ["price divided by taxRate", "(price / taxRate)"]
-      ]
-    }
-  ]
-})

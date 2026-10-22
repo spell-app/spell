@@ -1,4 +1,4 @@
-import { kebabCase, typeCase, proto } from "spell-kit/util"
+import { kebabCase, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
@@ -46,7 +46,7 @@ export class MethodDefinition<
    * - The method's NAME drops the type, unless that leaves a little word dangling (epic `output-targets`, Q44).
    *   - Then it keeps the type's name:
    *     `to update the total of (a calculator)` => `update_the_total_of_calculator`, not `update_the_total_of`.
-   *     See `DANGLING_WORDS`.
+   *     See `isDangling()`:  the language's `danglingWords`.
    *   - Nothing dangles with the receiver first:  `to move (a card) to (a pile)` => `move_to_$pile`.
    *   - These are spell's names:  compiled javascript says them in camelCase, `moveToPile()` (`JSWriter.nameOf()`).
    * - SIDE EFFECT: mutates `signature` in place:
@@ -66,7 +66,7 @@ export class MethodDefinition<
       // remove instance bits from args and method signature
       signature.args.splice(initialType.argIndex, 1)
       const wordBefore = signature.methodBits[initialType.methodIndex - 1]
-      if (wordBefore && DANGLING_WORDS.test(wordBefore)) {
+      if (wordBefore && isDangling(wordBefore)) {
         // keep the type's name in its place, as a word:  `of_calculator`, not `of_$calculator`
         signature.methodBits[initialType.methodIndex] = initialType.name.replace(/-/g, "_")
       } else {
@@ -103,7 +103,7 @@ export class MethodDefinition<
     const methodAt = signature.methodBits.indexOf("it")
     if (at >= 0 && methodAt >= 0) {
       const wordBefore = signature.methodBits[methodAt - 1]
-      if (wordBefore && DANGLING_WORDS.test(wordBefore)) {
+      if (wordBefore && isDangling(wordBefore)) {
         signature.methodBits[methodAt] = typeWords.replace(/-/g, "_")
       } else {
         signature.methodBits.splice(methodAt, 1)
@@ -273,7 +273,7 @@ export class MethodDefinition<
     const type = instanceType ? match.scope.types?.get(instanceType) : undefined
     return {
       type,
-      of: type?.name ?? (instanceType && typeCase(instanceType)),
+      of: type?.name ?? (instanceType && P.typeCase(instanceType)),
       params: args.map((arg) => MethodDefinition.paramOf(arg))
     }
   }
@@ -459,7 +459,7 @@ export class MethodDefinition<
         // console.warn("APE:", method)
         output.push(
           new P.ASTPropertyDefinition(match, {
-            type: typeCase(instanceType),
+            type: P.typeCase(instanceType),
             property: methodName,
             get: method
           })
@@ -467,7 +467,7 @@ export class MethodDefinition<
       } else {
         output.push(
           new P.ASTPropertyDefinition(match, {
-            type: typeCase(instanceType),
+            type: P.typeCase(instanceType),
             property: methodName,
             method
           })
@@ -525,18 +525,16 @@ type MethodDefinitionData = {
   scopeMethod?: P.ScopeMethod
 }
 
-/**
- * Little words a method's name may not END a phrase with, where its receiver's type was:
- * `MethodDefinition.processSignature()` keeps the type's name after one (epic `output-targets`, Q44).
- * - `to update the total of (a calculator)` => `update_the_total_of_calculator`
- * - `to set the operator of (a calculator) to (op as text)` => `set_the_operator_of_calculator_to_$op`
- * - Prepositions only:  a verb or noun before the receiver reads fine without it, `turn_face_up`, `move_to_$pile`.
- *   So do a verb's own little words (`up`, `over`, `out`, `off`, `down`):  `to pick up (a card)` => `pick_up`.
- */
-const DANGLING_WORDS =
-  /^(of|to|from|in|into|on|onto|at|by|for|with|without|before|after|about|under|through|between|within|upon|against|toward|towards)$/i
-
 /** Is `scope` a file's (or project's) top level, where a definition is `export`ed? */
 function isTopLevel(scope: P.Scope): boolean {
   return scope instanceof P.FileScope || scope instanceof P.ProjectScope
+}
+
+/**
+ * Is `word` one of the language's little words a method's name keeps its receiver's type after?
+ * - e.g. `of`:  `to update the total of (a calculator)` => `update_the_total_of_calculator`
+ * - The language in play's (`SP.LanguageWords.danglingWords`).
+ */
+function isDangling(word: string): boolean {
+  return SP.Language.active.words.danglingWords.has(word.toLowerCase())
 }

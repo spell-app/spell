@@ -2,7 +2,6 @@ import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
 import { itsObject, type ItsMatchData } from "./properties.shared"
-import { properties } from "./properties.parser"
 
 /**
  * `its_ordinal` rule:  `its {ordinal} {arg}` -- possessive-plus-ordinal shorthand, e.g. `its third card`.
@@ -32,43 +31,3 @@ export class ItsOrdinal extends SpellExpression<"ordinal|arg", ItsMatchData & { 
     })
   }
 }
-properties.addRule(ItsOrdinal, {
-  syntax: "its {ordinal} {arg:singular_identifier}",
-  tests: [
-    {
-      title: "tracks `it` when it var defined explicitly",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add({ name: "it", output: "it" })
-      },
-      tests: [
-        ["its third foo", "core.getItemAt(it, 2)"],
-        ["its last card", "core.getItemAt(it, -1)"]
-      ]
-    },
-    {
-      title: "tracks `it` when it var defined via get",
-      compileAs: "block",
-      tests: [
-        [
-          ["get a new thing", "print its last item"],
-          ["const it = new Thing()", "core.console.log(core.getItemAt(it, -1))"],
-          ["const it = new Thing()", "core.console.log(core.getItemAt(it, -1)!)"]
-        ]
-      ]
-    },
-    {
-      title: "tracks `it` when it var defined as output `other`",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add({ name: "it", output: "other" })
-      },
-      tests: [["its third thing", "core.getItemAt(other, 2)"]]
-    },
-    {
-      title: "maps to `this` when `it` is not defined",
-      compileAs: "expression",
-      tests: [["its third thing", "core.getItemAt(this, 2)"]]
-    }
-  ]
-})

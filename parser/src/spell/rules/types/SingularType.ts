@@ -1,6 +1,4 @@
-import { singularize } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { types } from "./types.parser"
 import { SpellType } from "./SpellType"
 
 /**
@@ -10,7 +8,7 @@ import { SpellType } from "./SpellType"
 export class SingularType extends SpellType {
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens)
-    if (match && typeof match.raw === "string" && match.raw === singularize(match.raw)) return match
+    if (match && typeof match.raw === "string" && match.raw === P.singularize(match.raw)) return match
     return undefined
   }
   getAST(match: P.MatchFor<this>): P.ASTTypeExpression {
@@ -19,20 +17,3 @@ export class SingularType extends SpellType {
     return type
   }
 }
-types.addRule(SingularType, {
-  tests: [
-    {
-      tests: [
-        { title: "singular, lower case", input: "thing", js: "Thing" },
-        { title: "singular, upper case", input: "Thing", js: "Thing" },
-        { title: "singular, multi-word, lower case", input: "bank-account", js: "BankAccount" },
-        { title: "singular, multi-word, mixed case", input: "Bank-account", js: "BankAccount" },
-
-        { title: "plural, lower case", input: "things", js: undefined },
-        { title: "plural, upper case", input: "Things", js: undefined },
-        { title: "plural, multi-word, lower case", input: "bank-accounts", js: undefined },
-        { title: "plural, multi-word, mixed case", input: "Bank-accounts", js: undefined }
-      ]
-    }
-  ]
-})

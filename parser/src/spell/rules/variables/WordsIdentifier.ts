@@ -1,7 +1,6 @@
 import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SpellIdentifier } from "./SpellIdentifier"
-import { variables } from "./variables.parser"
 
 /** Most words a name may have:  `cards still to move` would be 4. */
 const MAX_WORDS = 4
@@ -55,15 +54,3 @@ export class WordsIdentifier extends SpellIdentifier {
       .join(" ")
   }
 }
-variables.addRule(WordsIdentifier, {
-  tests: [
-    {
-      tests: [
-        ["start pile", "startPile"],
-        ["anything changed", "anythingChanged"],
-        ["pile", undefined],
-        ["name of", undefined]
-      ]
-    }
-  ]
-})

@@ -2,9 +2,11 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { identifierBlacklist } from "spell-lang/spell/rules/identifier-blacklist"
-import { MEMBER_STOP_WORDS } from "spell-lang/spell/rules/properties/properties.shared"
 import { compiledFixture, fixtureProjectNames } from "spell-lang/spell/test"
+
+/** English's tables, the pack's own:  the analysis edits them in place, and puts each word back. */
+const identifierBlacklist = SP.english.words.blacklist
+const MEMBER_STOP_WORDS = SP.english.words.memberStopWords
 
 /**
  * Which words the identifier blacklist really needs (epic `spanish` P2):

@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
@@ -31,6 +30,3 @@ export class ValuedVarMethodArg extends SpellStatement<"identifier|value", Metho
     return match
   }
 }
-methods.addRule(ValuedVarMethodArg, {
-  syntax: `{identifier} (=|is|of|as|set to) {value:expression}`
-})

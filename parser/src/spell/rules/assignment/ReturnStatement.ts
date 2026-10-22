@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { assignment } from "./assignment.parser"
 
 /**
  * `return_statement` rule:  `(return|exit with?) {expression}? {nested_expression}?` -- return a value.
@@ -23,43 +22,3 @@ export class ReturnStatement extends SpellStatement<"expression?|body?"> {
     return new P.ASTReturnStatement(match, { value: result?.AST as P.ASTExpression | undefined })
   }
 }
-assignment.addRule(ReturnStatement, {
-  syntax: "(return|exit with?) {expression}? {nested_expression}?",
-  tests: [
-    {
-      title: "Simple return with inline expression",
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        ;(scope as P.BlockScope).variables.add("thing")
-      },
-      tests: [
-        ["return", "return"],
-        ["return thing", "return thing"],
-        ["exit", "return"],
-        ["exit with false", "return false"]
-      ]
-    },
-    {
-      title: "Return with nested block expression",
-      compileAs: "block",
-      tests: [
-        // simple expression
-        ["return\n\t1 + 2", "return 1 + 2"],
-        // inline JSX
-        ["return\n\t<div/>", 'return h("div")', "return <div />"],
-        ["return\n\t1 + <div/>", 'return 1 + h("div")', "return 1 + (<div />)"],
-        // multi-line JSX
-        [
-          ["return", "\t<div>", "\t\t<span/>", "\t</div>"],
-          'return h("div", h("span"))',
-          ["return (", "  <div>", "    <span />", "  </div>", ")"]
-        ],
-        // fails for more than one indented line
-        [
-          "return\n\t<div/>\n\t1",
-          ["return", '/* PARSE ERROR: Don\'t understand "<div/>" */', '/* PARSE ERROR: Don\'t understand "1" */']
-        ]
-      ]
-    }
-  ]
-})

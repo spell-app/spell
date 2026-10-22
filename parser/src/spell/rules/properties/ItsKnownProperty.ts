@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority, declaredPrefix } from "spell-lang/spell/rules/rules.types"
 import { MemberReadExpression } from "./MemberReadExpression"
 import { itsObject, type ItsMatchData } from "./properties.shared"
-import { properties } from "./properties.parser"
 
 /**
  * `its_known_property` rule:  `its {member words}`, where the words name a PROPERTY `it`'s type declares:
@@ -37,24 +36,3 @@ export class ItsKnownProperty extends MemberReadExpression<"property", ItsMatchD
     return this.getMemberAST(match, itsObject(match), match.groups.property)
   }
 }
-properties.addRule(ItsKnownProperty, {
-  syntax: "its {property:member_words}",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.compile(["a card is a thing", "the short rank of a card is: 1"].join("\n"), "block")
-      },
-      tests: [
-        [
-          ["get a new card", "print its short rank"],
-          ["const it = new Card()", "core.console.log(it.shortRank)"]
-        ],
-        [
-          ["get a new card", "print its short rank + 1"],
-          ["const it = new Card()", "core.console.log(it.shortRank + 1)"]
-        ]
-      ]
-    }
-  ]
-})

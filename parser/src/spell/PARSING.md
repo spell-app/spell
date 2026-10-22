@@ -353,7 +353,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 ## Members:  `the short rank of the card`
 
 - A member's NAME is [`member_words`](rules/properties/MemberWords.ts):  1..N words, up to the first structural one.
-  - `MEMBER_STOP_WORDS`:
+  - The language's stop words, `memberStopWords` (`SP.LanguageWords`;  English's in `languages/en/words.ts`):
     `of the a an is has have in to and or if where as with whose for from then else otherwise not ...`
   - It's NOT the identifier blacklist, so `short` is fine.
   - Its two spellings:
@@ -1045,7 +1045,7 @@ A kind that says so is saved in a file of its own.
       - e.g. `to make a mess`, `to reset the stock pile`
     - its compiled NAME drops the receiver's type (`turn_over`), unless that leaves a little word dangling (Q44)
       - then it keeps the type's name:  `to update the total of (a calculator)` => `update_the_total_of_calculator`
-      - `MethodDefinition.processSignature()`, `DANGLING_WORDS`
+      - `MethodDefinition.processSignature()`, the language's `danglingWords`
     - in a type's outline body, a signature that names no type takes the body's subject (P20, I15)
       - `- to debug it:` ~== `to debug a solitaire`
         - `it` is where the receiver goes

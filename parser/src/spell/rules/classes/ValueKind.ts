@@ -1,9 +1,8 @@
-import { pluralize, proto, singularize, typeCase, upperFirst } from "spell-kit/util"
+import { proto, upperFirst } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { TypeSpecifierEnum } from "./TypeSpecifierEnum"
 
 /**
@@ -35,7 +34,7 @@ export class ValueKind extends SpellStatement<"values|specifier", ValueKindData>
     const owner = P.SubjectScope.of(scope)?.subjectType
     if (!owner) return undefined
     match.data.owner = owner.name
-    match.data.kind = typeCase(singularize(`${match.groups.values.value}`))
+    match.data.kind = P.typeCase(P.singularize(`${match.groups.values.value}`))
     return match
   }
 
@@ -83,14 +82,9 @@ export class ValueKind extends SpellStatement<"values|specifier", ValueKindData>
 
   /** Name of the class variable holding the list, e.g. `Suits` for `"suits"`. */
   private static listName(match: P.Match): string {
-    return pluralize(upperFirst(`${(match.groups as { values: P.Match }).values.value}`))
+    return P.pluralize(upperFirst(`${(match.groups as { values: P.Match }).values.value}`))
   }
 }
-// quoted only:  unquoted, `{values:member_words}` matches any words at a line's start,
-// e.g. completion offered `as one of ...` after `set y`
-classes.addRule(ValueKind, {
-  syntax: "{values:quoted_member} {specifier:type_specifier}"
-})
 
 /** What `value_kind` stashes on its match, found while parsing. */
 type ValueKindData = {

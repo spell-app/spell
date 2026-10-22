@@ -1,5 +1,4 @@
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 
 /**
  * `rule_suggestion` rule:  what to say when a property's rule is broken, in place of the rule's own words.
@@ -18,14 +17,3 @@ export class RuleSuggestion extends P.Sequence<"prompt"> {
     return P.matchAST<P.ASTStringLiteral>(match.groups.prompt)
   }
 }
-classes.addRule(RuleSuggestion, {
-  syntax: ",? (with suggestion|saying) {prompt:text}",
-  tests: [
-    {
-      tests: [
-        ['with suggestion "Write it like 1.2.3"', '"Write it like 1.2.3"'],
-        [', saying "Too long"', '"Too long"']
-      ]
-    }
-  ]
-})

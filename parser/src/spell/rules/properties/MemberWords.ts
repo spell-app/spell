@@ -1,11 +1,10 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { MEMBER_LEADING_WORDS, MEMBER_STOP_WORDS } from "./properties.shared"
-import { properties } from "./properties.parser"
+import { SP } from "spell-lang/spell"
 
 /**
  * `member_words` rule:  1..N words naming a member, e.g. `short rank`, `short-rank`, `rank`.
- * - Every word up to the first STRUCTURAL one (`MEMBER_STOP_WORDS`),
+ * - Every word up to the first STRUCTURAL one (the language's `memberStopWords`, `SP.LanguageWords`),
  *   e.g. `of` in `the short rank of a card is:`.  No other bound.
  * - NOT the identifier blacklist:  `short` and `long` are fine.  Safe, as:
  *   - a READ takes these words only if the type it reads from declares them (`property_expression`)
@@ -47,28 +46,15 @@ export class MemberWords extends P.Pattern {
   }
 
   /**
-   * Is `token` one of a member's words:  matches `pattern`, and isn't structural?  See `MEMBER_STOP_WORDS`.
-   * - `first`:  the name's first word, which may also be one of `MEMBER_LEADING_WORDS`,
+   * Is `token` one of a member's words:  matches `pattern`, and isn't one of the language's stop words?
+   * - The language in play's (`SP.LanguageWords.memberStopWords`).
+   * - `first`:  the name's first word, which may also be one of its leading words (`memberLeadingWords`),
    *   e.g. `with` in `with jokers`.
    */
   private static isMemberWord(token: P.Token, pattern: RegExp, first = false): boolean {
     if (!(token instanceof P.WordToken) || !token.matchesPattern(pattern)) return false
     const word = `${token.value}`.toLowerCase()
-    return !MEMBER_STOP_WORDS.has(word) || (first && MEMBER_LEADING_WORDS.has(word))
+    const { memberStopWords, memberLeadingWords } = SP.Language.active.words
+    return !memberStopWords.has(word) || (first && memberLeadingWords.has(word))
   }
 }
-properties.addRule(MemberWords, {
-  tests: [
-    {
-      tests: [
-        { title: "one word", input: "rank", js: "rank" },
-        { title: "several words", input: "short rank", js: "shortRank" },
-        { title: "a blacklisted word", input: "short", js: "short" },
-        { title: "dashed", input: "short-rank", js: "shortRank" },
-        { title: "a structural word", input: "of", js: undefined },
-        { title: "a leading preposition", input: "with jokers", js: "withJokers" },
-        { title: "a preposition after the first word ends it", input: "jokers with", js: "jokers" }
-      ]
-    }
-  ]
-})

@@ -1,6 +1,6 @@
-import { NONE, getPlurality, proto, type Plurality } from "spell-kit/util"
+import { NONE, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { identifierBlacklist } from "spell-lang/spell/rules/identifier-blacklist"
+import { SP } from "spell-lang/spell"
 import { type IdentifierMatchData } from "./variables.shared"
 
 /**
@@ -18,9 +18,14 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
   /** Editors colour every identifier as a variable -- `SpellLanguageService` refines to `parameter` for arguments. */
   @proto static highlightAs?: P.HighlightKind = "variable"
 
-  /** Every identifier rule matches the same thing:  alpha-numeric word (dashes / underscores OK), not blacklisted. */
+  /** Every identifier rule matches the same thing:  alpha-numeric word (dashes / underscores OK), not the language's own (`test()`). */
   constructor(props?: Partial<P.PatternProps>) {
-    super({ pattern: P.ALPHANUMERIC_WORD_WITH_DASHES, blacklist: identifierBlacklist, ...props })
+    super({ pattern: P.ALPHANUMERIC_WORD_WITH_DASHES, ...props })
+  }
+
+  /** Matches our `pattern`, and isn't one of the language's own words (its `blacklist`, `SP.LanguageWords`). */
+  test(scope: P.Scope, tokens: P.Token[], start = 0) {
+    return super.test(scope, tokens, start) && !SP.Language.of(scope).words.blacklist[`${tokens[start]!.value}`]
   }
 
   /**
@@ -29,8 +34,8 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
    *   and subclasses which know better override it, e.g. `singular_identifier` always says `"singular"`.
    * - Ask from elsewhere as `if (match.is(SpellIdentifier)) match.rule.getPlurality(match)`.
    */
-  getPlurality(match: P.MatchFor<this>): Plurality {
-    return getPlurality(`${match.raw ?? match.value}`)
+  getPlurality(match: P.MatchFor<this>): P.Plurality {
+    return P.getPlurality(`${match.raw ?? match.value}`)
   }
 
   /** Map value by converting dashes and whitespace to underscores. */

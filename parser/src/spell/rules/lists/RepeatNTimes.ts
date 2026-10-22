@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 import { type MethodBody } from "./lists.shared"
 
 /**
@@ -48,36 +47,3 @@ export class RepeatNTimes extends SpellStatement<"number|body?"> {
     return expression
   }
 }
-lists.addRule(RepeatNTimes, {
-  syntax: "repeat {number:expression} (time|times) :? {statement_body}?",
-  tests: [
-    {
-      compileAs: "block",
-      tests: [
-        {
-          title: "No statements",
-          input: "repeat 1 time:",
-          js: "core.map(core.countTo(1), () => {})"
-        },
-        {
-          title: "Inline statement",
-          input: "repeat 3 times: print the number",
-          js: "core.map(core.countTo(3), (number) => core.console.log(number))"
-        },
-        {
-          title: "Nested block statement",
-          input: ["repeat 3 times:", "\tprint it"],
-          js: "core.map(core.countTo(3), (number) => core.console.log(number))"
-        },
-        {
-          title: "Error if nested block and inline statement",
-          input: ["repeat 3 times: print 1", "\tprint it"],
-          js: [
-            "core.map(core.countTo(3), (number) => core.console.log(number))",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
-          ]
-        }
-      ]
-    }
-  ]
-})

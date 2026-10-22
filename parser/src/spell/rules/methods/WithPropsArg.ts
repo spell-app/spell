@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
@@ -41,6 +40,3 @@ export class WithPropsArg extends P.Sequence<never, MethodArgData> {
     return match
   }
 }
-methods.addRule(WithPropsArg, {
-  syntax: "with [{simple_method_arg} (,|and)]"
-})

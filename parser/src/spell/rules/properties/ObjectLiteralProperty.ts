@@ -1,6 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { properties } from "./properties.parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 
 /**
  * `object_literal_property` rule:  single object-literal property declaration:
@@ -17,30 +17,6 @@ export class ObjectLiteralProperty extends P.Sequence<"property|value"> {
     })
   }
 }
-properties.addRule(ObjectLiteralProperty, {
-  syntax: "(property:{member_words}|{property}) (=|is|of) {value:expression}",
-  tests: [
-    {
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("bar")
-      },
-      tests: [
-        [``, undefined],
-        [`a = 1`, `a: 1`],
-        [`b = yes`, `b: true`],
-        [`c = "quoted"`, `c: "quoted"`],
-        [`b = the foo of the bar`, `b: bar.foo`],
-
-        [`length is 1`, `length: 1`],
-        [`rank of "queen"`, `rank: "queen"`],
-        [`short rank is 1`, "shortRank: 1"],
-
-        // TODO: `{property}` converts to `foo_bar` before we get here
-        [`foo-bar = 1`, "fooBar: 1"]
-      ]
-    }
-  ]
-})
 /**
  * `named_object_literal_property` rule:  `name T1` --
  * a one-word property and a bare name, no `=` (epic `outline-spell` P19).
@@ -55,31 +31,21 @@ export class NamedObjectLiteralProperty extends ObjectLiteralProperty {
     return /^\p{Lu}/u.test(`${tokens[start + 1]?.value ?? ""}`)
   }
 }
-properties.addRule(NamedObjectLiteralProperty, {
-  syntax: "{property} {value:thing_name}",
-  tests: [
-    {
-      tests: [
-        [`name T1`, `name: "T1"`],
-        [`name t1`, undefined]
-      ]
-    }
-  ]
-})
 
 /**
  * `flag_object_literal_property` rule:  `jokers` -- a property's name alone, meaning `jokers = yes`
  * (epic `outline-spell` P26).
  * - e.g. `a new deck with jokers`, `a new deck with jokers and name = "big"`
- * - One word, then the end, a comma or `and`:  a word with more after it is something else.
+ * - One word, then the end, a comma or `and` (`and_or`, meaning `and`):  a word with more after it is something else.
  */
 export class FlagObjectLiteralProperty extends ObjectLiteralProperty {
   @proto static alias = "object_literal_property"
 
   /** Quick test:  one word, then nothing, `,` or `and`. */
-  test(_scope: P.Scope, tokens: P.Token[], start = 0) {
+  test(scope: P.Scope, tokens: P.Token[], start = 0) {
     const next = tokens[start + 1]
-    return !!tokens[start] && (!next || !!next.matchesLiteral([",", "and"]))
+    if (!tokens[start]) return false
+    return !next || next.matchesLiteral(",") || Wording.lengthAt(scope, "and_or", tokens, start + 1, "and") > 0
   }
 
   getAST(match: P.MatchFor<this>) {
@@ -89,7 +55,3 @@ export class FlagObjectLiteralProperty extends ObjectLiteralProperty {
     })
   }
 }
-properties.addRule(FlagObjectLiteralProperty, {
-  syntax: "{property}",
-  tests: [{ tests: [[`jokers`, `jokers: true`]] }]
-})

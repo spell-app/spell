@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { UI } from "./UI.parser"
 
 /**
  * `print` rule:  print an expression (to the console currently).
@@ -31,18 +30,3 @@ export class Print extends SpellStatement<"operator?|expressions"> {
     })
   }
 }
-UI.addRule(Print, {
-  syntax: "print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`print "Yo!"`, `core.console.log("Yo!")`],
-        [`print warning "Yo!"`, `core.console.warn("Yo!")`],
-        [`print error "Yo!"`, `core.console.error("Yo!")`],
-        [`print group "Yo!"`, `core.console.group("Yo!")`],
-        [`print collapsed group "Yo!"`, `core.console.groupCollapsed("Yo!")`]
-      ]
-    }
-  ]
-})

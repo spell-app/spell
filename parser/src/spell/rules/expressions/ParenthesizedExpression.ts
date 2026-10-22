@@ -1,6 +1,5 @@
 import { P } from "spell-lang/parser"
 import { SpellExpression } from "./SpellExpression"
-import { expressions } from "./expressions.parser"
 
 /**
  * `parenthesized_expression` rule:  `(expression)` -- parenthesized sub-expression.
@@ -19,36 +18,3 @@ export class ParenthesizedExpression extends SpellExpression<"expression"> {
     })
   }
 }
-expressions.addRule(ParenthesizedExpression, {
-  syntax: "\\( {expression} \\)",
-  tests: [
-    {
-      title: "correctly matches parenthesized expressions",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-      },
-      tests: [
-        ["(thing)", "(thing)"],
-        ["((thing))", "(thing)"],
-        ["(((thing)))", "(thing)"],
-        ["(1 and yes)", "(1 && true)"]
-      ]
-    },
-    {
-      title: "correctly matches multiple parenthesis",
-      compileAs: "expression",
-      tests: [
-        ["(1) and (yes)", "(1 && true)"],
-        ["((1) and (yes))", "(1 && true)"],
-        ["((1) and ((yes)))", "(1 && true)"]
-      ]
-    },
-    {
-      title: "doesn't match malformed parenthesized expressions",
-      tests: [
-        ["(foo", undefined],
-        ["(foo(bar)baz", undefined]
-      ]
-    }
-  ]
-})

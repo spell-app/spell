@@ -1,6 +1,5 @@
 import { NONE, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { constants } from "./constants.parser"
 import { SpellConstant } from "./SpellConstant"
 
 /**
@@ -19,23 +18,3 @@ export class KnownConstant extends SpellConstant {
     return undefined
   }
 }
-constants.addRule(KnownConstant, {
-  tests: [
-    {
-      compileAs: "known_constant", // TODO: to "expression"
-      beforeEach(scope: P.Scope) {
-        // `Scope.constants` is typed narrowly (`ScopeList<ScopeConstant>`);
-        // the concrete `RootScope` accepts a plain name string or `ScopeConstantProps` too
-        const { constants } = scope as P.RootScope
-        constants.add("red")
-        constants.add({ name: "green", value: "#00FF00" })
-      },
-      tests: [
-        { title: "known constant", input: "red", js: '"red"' },
-        // its value is spell's, so each writer quotes it (epic `python-target` P3)
-        { title: "known constant w/specific value", input: "green", js: '"#00FF00"' },
-        { title: "unknown constant", input: "missing", js: undefined }
-      ]
-    }
-  ]
-})

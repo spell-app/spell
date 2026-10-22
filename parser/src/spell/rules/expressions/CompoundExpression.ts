@@ -4,7 +4,6 @@ import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { SpellExpression } from "./SpellExpression"
 import { Precedence, SuffixLeft } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `expression` rule:  an operand, then each operator suffix binding TIGHTER than `bound`, e.g. `x + 1 is 3`.
@@ -226,39 +225,3 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
     return (suffix.rule as InfixOperatorSuffix).precedence
   }
 }
-expressions.addRule(CompoundExpression, {
-  syntax: "{lhs:operand} {rhsChain:expression_suffix}*",
-  // test multiple infix expressions in a row
-  tests: [
-    {
-      title: "complex math expressions",
-      compileAs: "expression",
-      tests: [
-        ["1 + 2 + 3", "(1 + 2 + 3)"],
-        ["1 + 2 * 3", "(1 + 2 * 3)"],
-        ["(1+1) * (2+2)", "((1 + 1) * (2 + 2))"],
-        ["((1+1) * (2+2))", "((1 + 1) * (2 + 2))"]
-      ]
-    },
-    {
-      title: "complex property/etc expressions",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("card")
-      },
-      tests: [[`the suit of the card is "ace"`, `(card.suit == "ace")`]]
-    },
-    {
-      title: "postfix binds like a comparison:  after arithmetic, before `and`",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("x")
-        scope.variables?.add("y")
-      },
-      tests: [
-        ["x + y is empty", "core.isEmpty(x + y)"],
-        ["x is 1 and y is empty", "(x == 1 && core.isEmpty(y))"]
-      ]
-    }
-  ]
-})

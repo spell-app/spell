@@ -1,6 +1,4 @@
-import { pluralize } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 import { EveryThing } from "./EveryThing"
 
 /**
@@ -12,12 +10,15 @@ import { EveryThing } from "./EveryThing"
  *   - a property or method of the thing a method is about
  */
 export class TheThings extends EveryThing {
-  /** Quick test:  `the`, then a known type's plural -- `the X` starts most lines' expressions. */
+  /**
+   * Quick test:  `the`, then a known type's plural -- `the X` starts most lines' expressions.
+   * - `the` is checked by our syntax's own quick test:  the language's word, whatever it is.
+   */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
     const word = tokens[start + 1]
-    if (!tokens[start]?.matchesLiteral("the") || !word) return false
+    if (!word || super.test(scope, tokens, start) === false) return false
     const words = `${word.value}`
-    return words === pluralize(words) && !!scope.getType(words)
+    return words === P.pluralize(words) && !!scope.getType(words)
   }
 
   /** A known type's plural, which nothing in `scope` is called -- see the class docstring. */
@@ -40,23 +41,3 @@ export class TheThings extends EveryThing {
     return false
   }
 }
-classes.addRule(TheThings, {
-  syntax: "the {type:plural_type}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.compile(["a pile is a list of things", "a tableau is a pile"].join("\n"), "block")
-        scope.variables?.add("cards")
-      },
-      tests: [
-        ["the piles", "core.everyThing(Pile)"],
-        ["the tableaus", "core.everyThing(Tableau)"],
-        ["the tableau", undefined],
-        // a variable keeps its meaning
-        ["the cards", "cards"],
-        ["the gizmos", undefined]
-      ]
-    }
-  ]
-})

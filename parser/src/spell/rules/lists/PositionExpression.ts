@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { ListItemExpression } from "./ListItemExpression"
-import { lists } from "./lists.parser"
 
 /**
  * `position_expression` rule:  numeric-position index expression, e.g. `card 1 of the pile`, `card #2 of the pile`.
@@ -21,21 +20,3 @@ export class PositionExpression extends ListItemExpression<"arg|position|express
     })
   }
 }
-lists.addRule(PositionExpression, {
-  syntax: "{arg:singular_identifier} {position:expression} of {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("deck")
-        scope.variables?.add("n")
-      },
-      tests: [
-        ["item 1 of my-list", "core.getItemAt(myList, 0)"],
-        ["card 10 of deck", "core.getItemAt(deck, 9)"],
-        ["card n of the cards of the deck", "core.getItemAt(deck.cards, position(n))"]
-      ]
-    }
-  ]
-})

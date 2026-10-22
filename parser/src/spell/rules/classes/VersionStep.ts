@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * `version_step` rule:  how a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6):
@@ -55,35 +54,3 @@ export class VersionStep extends SpellStatement<"type|version|from|to?|drops?"> 
     return Number(match.groups.version.value)
   }
 }
-classes.addRule(VersionStep, {
-  syntax: "(a|an) {type:known_type} version {version:number} renames {from:identifier} to {to:identifier}",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse("a person is a thing", "block")
-      },
-      tests: [
-        ["a person version 2 renames name to names", 'Person.v2RenamesName = "names"'],
-        ["a person version 4 renames nick-name to nickname", 'Person.v4RenamesNickName = "nickname"'],
-        {
-          title: "a version step starts at version 2",
-          input: "a person version 1 renames name to names",
-          js: "/* PARSE ERROR: A version step starts at version 2:  a file with no version is version 1 */"
-        }
-      ]
-    }
-  ]
-})
-classes.addRule(VersionStep, {
-  syntax: "(a|an) {type:known_type} version {version:number} (drops:drops) {from:identifier}",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse("a person is a thing", "block")
-      },
-      tests: [["a person version 3 drops nickname", "Person.v3DropsNickname = true"]]
-    }
-  ]
-})

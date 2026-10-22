@@ -1,6 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 import { CreateType } from "./CreateType"
 
 /**
@@ -23,13 +23,21 @@ export class CreateOneOfAKind extends CreateType {
   /**
    * Quick test:  no article first (`a solitaire is an app` is `create_type`'s), and `is a|an <app>` after it.
    * - So an editor doesn't offer `is a ...` after just any words, e.g. `set y`:  only on a line naming an app.
+   * - `is` and the article are the language's own, its `is_or_is_not` and `indefinite_article` word rules.
+   *   Each is read only before a word naming an app:  reading a word rule's word tokenizes it.
    */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
-    if (tokens[start]?.matchesLiteral(["a", "an"])) return false
-    const is = tokens.findIndex((token, index) => index > start && token.matchesLiteral("is"))
-    if (is < 0 || !tokens[is + 1]?.matchesLiteral(["a", "an"])) return false
-    const superType = tokens[is + 2]
-    if (!superType || !scope.getType(`${superType.value}`)?.isA("App")) return false
+    const reads = (ruleName: string, token: P.Token | undefined) =>
+      !!token && Wording.reads(scope, ruleName, `${token.value}`)
+    if (reads("indefinite_article", tokens[start])) return false
+    const app = tokens.findIndex(
+      (token, index) =>
+        index > start + 2 &&
+        !!scope.getType(`${token.value}`)?.isA("App") &&
+        reads("indefinite_article", tokens[index - 1]) &&
+        reads("is_or_is_not", tokens[index - 2])
+    )
+    if (app < 0) return false
     return super.test(scope, tokens, start)
   }
 
@@ -75,15 +83,3 @@ export class CreateOneOfAKind extends CreateType {
       .replace(/[\s-]+/g, "_")
   }
 }
-classes.addRule(CreateOneOfAKind, {
-  syntax: "{type:type_words} is (a|an) {superType:type} {with_nested_statements}?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        ["solitaire is an app", ["export class Solitaire extends App {}", "export const solitaire = new Solitaire()"]],
-        ["solitaire is a thing", undefined]
-      ]
-    }
-  ]
-})

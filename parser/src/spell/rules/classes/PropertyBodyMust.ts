@@ -5,7 +5,6 @@ import { Priority } from "spell-lang/spell/rules/rules.types"
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
 // Through the folder:  read only when called, once the folder has loaded
 import { DefinePropertyHas } from "spell-lang/spell/rules/classes"
-import { classes } from "./classes.parser"
 
 /**
  * `property_body_must` rule:  what a property's value must be, said indented under the property's own line.
@@ -38,6 +37,3 @@ export class PropertyBodyMust extends SpellStatement<"it?|rule"> {
     return owner?.is(DefinePropertyHas) ? owner : undefined
   }
 }
-classes.addRule(PropertyBodyMust, {
-  syntax: "(it:it)? must {rule:must_rule}"
-})

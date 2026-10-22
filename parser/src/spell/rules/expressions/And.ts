@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { Precedence } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `and` rule:  `{lhs} and {rhs}`, e.g. `thing and other`.
@@ -16,21 +15,3 @@ export class And extends InfixOperatorSuffix<"operator|expression"> {
     return "and"
   }
 }
-expressions.addRule(And, {
-  syntax: "(operator:and) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-        scope.variables?.add("other")
-        scope.variables?.add("yet-another")
-      },
-      tests: [
-        ["thing and other", "(thing && other)"],
-        ["thing and other and yet-another", "(thing && other && yetAnother)"],
-        ["thing is 1 and other is 2", "(thing == 1 && other == 2)"]
-      ]
-    }
-  ]
-})

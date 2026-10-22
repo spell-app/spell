@@ -3,6 +3,7 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import -- rules are constructed while the `SP` barrel is still loading.
 import { BODY_KEYWORDS, type StatementBodySpec } from "spell-lang/spell/spell.types"
+import { SubjectIt, SubjectRule } from "spell-lang/spell/rules/types"
 import { Block } from "./Block"
 
 /**
@@ -277,11 +278,11 @@ export class SpellStatement<
     if (!subject.length) return SpellStatement.longFormWithoutSubject(text, typeWords, property)
     const at = subject.start! - match.start!
     const after = text.slice(at + subject.inputText.trimEnd().length).trimStart()
-    if (/^it$/i.test(subject.inputText.trim())) return `${text.slice(0, at)}a ${typeWords} ${after}`
+    if (subject.is(SubjectIt)) return `${text.slice(0, at)}${LONG_FORM.subject(typeWords)} ${after}`
     // `its <property> ...` => `the <property> of a <type> ...`
     const propertyText = property?.inputText.trimEnd()
     if (!propertyText || !after.startsWith(propertyText)) return undefined
-    return `${text.slice(0, at)}the ${propertyText} of a ${typeWords}${after.slice(propertyText.length)}`
+    return `${text.slice(0, at)}${LONG_FORM.property(propertyText, typeWords)}${after.slice(propertyText.length)}`
   }
 
   /**
@@ -292,9 +293,9 @@ export class SpellStatement<
   private static longFormWithoutSubject(text: string, typeWords: string, property: P.Match | undefined): string {
     const propertyText = property?.inputText.trimEnd()
     if (propertyText && text.startsWith(propertyText)) {
-      return `the ${propertyText} of a ${typeWords}${text.slice(propertyText.length)}`
+      return `${LONG_FORM.property(propertyText, typeWords)}${text.slice(propertyText.length)}`
     }
-    return `a ${typeWords} ${text}`
+    return `${LONG_FORM.subject(typeWords)} ${text}`
   }
 
   /**
@@ -303,7 +304,7 @@ export class SpellStatement<
    */
   static subjectWords(match: P.Match): string | undefined {
     const { subject } = SpellStatement.subjectOf(match)
-    if (!subject || !P.SubjectScope.of(match.scope) || !/^(its?)?$/i.test(subject.inputText.trim())) return undefined
+    if (!subject || !P.SubjectScope.of(match.scope) || !subject.is(SubjectRule)) return undefined
     return `${subject.raw}`
   }
 
@@ -390,6 +391,18 @@ export class SpellStatement<
     if (optional || matchGroup) return `(${matchGroup}${rules})${optional}`
     return `${rules}${optional}`
   }
+}
+
+/**
+ * How a long form spells out an outline line's subject (`SpellStatement.getLongForm()`), in English.
+ * - REFACTOR: moves into the language pack (epic `spanish`), so a Spanish line reads as `un naipe tiene ...`.
+ *   Every `getLongForm()` override writes English too, e.g. `belongs_to_one`'s `belongs to one`.
+ */
+const LONG_FORM = {
+  /** The body's `it`, spelled out:  `a card` */
+  subject: (typeWords: string) => `a ${typeWords}`,
+  /** The body's `its <property>`, spelled out:  `the "color" of a card` */
+  property: (property: string, typeWords: string) => `the ${property} of a ${typeWords}`
 }
 
 /**

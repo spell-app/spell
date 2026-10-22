@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /**
  * `list_remove_position` rule:  remove one item from list by numeric position.
@@ -21,15 +20,3 @@ export class ListRemovePosition extends SpellStatement<"arg|number|list"> {
     })
   }
 }
-lists.addRule(ListRemovePosition, {
-  syntax: "remove {arg:singular_identifier} {number:expression} of {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-      },
-      tests: [["remove item 4 of my-list", "core.removeItemAt(myList, 3)"]]
-    }
-  ]
-})

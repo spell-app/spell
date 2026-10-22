@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { WithPropsArg } from "spell-lang/spell/rules/methods"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { events } from "./events.parser"
 
 /**
  * `on` rule:  watches a global event, with an inline statement or nested block as the handler body.
@@ -77,49 +76,3 @@ export class On extends SpellStatement<"eventName|props?|body?"> {
     })
   }
 }
-events.addRule(On, {
-  syntax: "on event? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.types?.add("card")
-      },
-      tests: [
-        //
-        { title: "No statements", input: `on card-click`, js: 'on("card-click")' },
-        {
-          title: "Inline statement",
-          input: `on event card-click: print 1`,
-          js: 'on("card-click", () => core.console.log(1))'
-        },
-        {
-          title: "Nested block",
-          input: [`on event card-click with a card:`, `\tprint the name of the card`],
-          js: ['on("card-click", (event) => {', "  const { card } = event", "  core.console.log(card.name)", "})"],
-          ts: 'on<{ card: Card }>("card-click", ({ card }) => core.console.log(card.name))'
-        },
-        {
-          title: "Show error if nested block and inline statement",
-          input: [`on event card-click with a card: print 1`, `\tprint the name of the card`],
-          js: [
-            'on("card-click", (event) => {',
-            "  const { card } = event",
-            "  core.console.log(card.name)",
-            "})",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
-          ],
-          ts: [
-            'on<{ card: Card }>("card-click", ({ card }) => core.console.log(card.name))',
-            "/* PARSE ERROR: Got both inline statement and nested block */"
-          ]
-        }
-      ]
-    }
-  ]
-})
-// `on card click with a card`:  an event's name of several words, the same event as `card-click` -- see `event_words`
-events.addRule(On, {
-  syntax: "on event? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
-  tests: [{ compileAs: "block", tests: [["on card click", 'on("card-click")']] }]
-})

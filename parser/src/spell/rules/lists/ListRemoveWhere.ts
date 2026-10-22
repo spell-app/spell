@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 import { getWhereScope, getWhereMethod } from "./lists.shared"
 
 /**
@@ -28,29 +27,3 @@ export class ListRemoveWhere extends SpellStatement<"arg|list|body?"> {
     })
   }
 }
-lists.addRule(ListRemoveWhere, {
-  syntax: "remove {arg:plural_identifier} (in|of|from) {list:expression} where {inline_expression}?",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("deck")
-        scope.variables?.add("my-list")
-        scope.constants?.add("clubs")
-      },
-      tests: [
-        ["remove items from my-list where", "core.removeWhere(myList, () => {})"],
-        [`remove items from my-list where item is not "ace"`, 'core.removeWhere(myList, (item) => item != "ace")'],
-        [
-          "remove cards in deck where the suit of the card is clubs",
-          'core.removeWhere(deck, (card) => card.suit == "clubs")'
-        ],
-        [
-          "remove cards in deck where the suit of it is clubs",
-          'core.removeWhere(deck, (card) => card.suit == "clubs")'
-        ],
-        ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit == "clubs")']
-      ]
-    }
-  ]
-})

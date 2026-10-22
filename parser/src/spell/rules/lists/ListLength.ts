@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 import { getWhereScope, getWhereMethod } from "./lists.shared"
 
 /**
@@ -36,38 +35,3 @@ export class ListLength extends SpellExpression<"arg|list|body?"> {
     return new P.ASTCoreMethodInvocation(match, { methodName: "itemCountOf", args: [items] })
   }
 }
-lists.addRule(ListLength, {
-  syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("bar")
-      },
-      tests: [
-        ["number of items in my-list", "core.itemCountOf(myList)"],
-        ["the number of foos in the foo of the bar", "core.itemCountOf(bar.foo)"],
-        ["the number of items in [1,2,3]", "core.itemCountOf([1, 2, 3])"]
-      ]
-    }
-  ]
-})
-lists.addRule(ListLength, {
-  syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} where {inline_expression}?",
-  tests: [
-    {
-      compileAs: "expression",
-      showAll: true,
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-      },
-      tests: [
-        [
-          "the number of items in my-list where its id > 1",
-          "core.itemCountOf(core.filter(myList, (item) => item.id > 1))"
-        ]
-      ]
-    }
-  ]
-})

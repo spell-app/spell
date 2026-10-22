@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `as_a_type` rule:  `as a`/`an {type}`, e.g. `1 as a string`, `1.4 as an integer`
@@ -41,29 +40,3 @@ export class AsAType extends PostfixOperatorSuffix<"type"> {
     }
   }
 }
-expressions.addRule(AsAType, {
-  syntax: "as (a|an) (type:string|number|fraction|integer)",
-  // es: "como (un|una) (type:cadena|numero|fracción|entero)"
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [
-        ["1 as a string", "`${1}`"],
-        [`"hello" as a string`, '`${"hello"}`'],
-        ["1 as a number", "parseFloat(1)"],
-        ["1.3 as a fraction", "parseFloat(1.3)"],
-        ["1.4 as an integer", "parseInt(1.4)"],
-        [`"foo" as a number`, `parseFloat("foo")`]
-      ]
-    }
-  ]
-})
-expressions.addRule(AsAType, {
-  syntax: "as (type:text)",
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [["1 as text", "`${1}`"]]
-    }
-  ]
-})

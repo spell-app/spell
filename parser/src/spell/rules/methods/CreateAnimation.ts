@@ -1,7 +1,5 @@
 import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
 import { MethodDefinition } from "./MethodDefinition"
-import { methods } from "./methods.parser"
 
 /**
  * `create_animation` rule:  defines an animation method:
@@ -21,49 +19,3 @@ export class CreateAnimation extends MethodDefinition<"asAnimation|signature|bod
   // promote the first captured type arg (e.g. `(a card)`) to an instance-method receiver
   @proto static inlineInitialType = true
 }
-methods.addRule(CreateAnimation, {
-  syntax: `(asAnimation:create? animation) {signature:method_signature} :? {statement_body}?`,
-  tests: [
-    {
-      title: "inline method signatures & variables",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.types?.add("card")
-        scope.types?.add("pile")
-        scope.types?.add("deck")
-        scope.constants?.add("up")
-        scope.constants?.add("down")
-      },
-      tests: [
-        {
-          input: "animation deal the cards",
-          js: [
-            "export async function dealTheCards() {",
-            '  if (core.processIsRunning("deal_the_cards")) return',
-            '  core.startProcess("deal_the_cards", "EXCLUSIVE")',
-            "  try {}",
-            "  finally {",
-            '    core.stopProcess("deal_the_cards")',
-            "  }",
-            "}"
-          ]
-        },
-        {
-          input: ["animation deal the cards", "\tpause for 10 seconds"],
-          js: [
-            "export async function dealTheCards() {",
-            '  if (core.processIsRunning("deal_the_cards")) return',
-            '  core.startProcess("deal_the_cards", "EXCLUSIVE")',
-            "  try {",
-            '    await core.pauseFor(10, "seconds")',
-            "  }",
-            "  finally {",
-            '    core.stopProcess("deal_the_cards")',
-            "  }",
-            "}"
-          ]
-        }
-      ]
-    }
-  ]
-})

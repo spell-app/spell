@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 
 /**
  * `the_property_of_a_thing` rule:  `the color of a card` -- one of two `type_property` spellings consumed by
@@ -10,10 +9,3 @@ import { classes } from "./classes.parser"
 export class ThePropertyOfAThing extends P.Sequence<"property|type"> {
   @proto static alias = "type_property"
 }
-classes.addRule(ThePropertyOfAThing, {
-  syntax: "the {property:member_words} of (a|an) {type}"
-})
-// a quoted name, "quotes teach a new word" (epic page J3, option C):  `the "color" of a card is red if ...`
-classes.addRule(ThePropertyOfAThing, {
-  syntax: "the {property:quoted_member} of (a|an) {type}"
-})

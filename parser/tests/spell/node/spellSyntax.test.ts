@@ -21,7 +21,7 @@ describe("the spell syntax table, spellSyntax.json", () => {
     expect(new Set(classes).size).toBe(classes.length)
     const names = rows.flatMap((row) => row.ruleNames)
     expect(new Set(names).size).toBe(names.length)
-    expect(names).toEqual(expect.arrayContaining(["is_gt_lt", "list_add_relative", "is", "can"]))
+    expect(names).toEqual(expect.arrayContaining(["is_gt_lt", "list_add_relative", "is_or_is_not", "can_or_cannot"]))
   })
 
   test("a rule's syntax, its example in each writer, and its aliases", () => {
@@ -31,7 +31,7 @@ describe("the spell syntax table, spellSyntax.json", () => {
       file: "src/spell/rules/math/IsGtLt.ts",
       syntaxes: [
         {
-          syntax: "(operator:is (greater|less) than (or equal to)?) {expression:operand}",
+          syntax: "{operator:is_greater_or_less_than} {expression:operand}",
           example: "salary is greater than expenses",
           outputs: {
             js: { code: "(salary > expenses)" },
@@ -72,7 +72,21 @@ describe("the spell syntax table, spellSyntax.json", () => {
 
   test("a class specialized into several rules is one row, with each rule's syntax", () => {
     const row = rows.find((it) => it.className === "Negatable")
-    expect(row?.ruleNames).toEqual(["is", "can", "will", "has"])
+    expect(row?.ruleNames).toEqual([
+      "is_or_is_not",
+      "is_or_is_not_a",
+      "can_or_cannot",
+      "will_or_will_not",
+      "has_or_has_not",
+      "is_neither",
+      "is_defined_or_not",
+      "exists_or_not",
+      "there_is_or_is_not",
+      "starts_with_or_not",
+      "ends_with_or_not",
+      "has_or_has_no",
+      "exclusive_or_not"
+    ])
     expect(row?.syntaxes[0]).toEqual({ syntax: "(is|(negated:is not|isn't|isnt))" })
   })
 

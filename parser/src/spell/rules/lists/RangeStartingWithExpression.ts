@@ -1,7 +1,6 @@
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `range_starting_with_expression` rule:  range expression starting at some item in list, inclusive:
@@ -29,25 +28,3 @@ export class RangeStartingWithExpression extends SpellExpression<"arg|list|thing
     })
   }
 }
-lists.addRule(RangeStartingWithExpression, {
-  syntax: "{arg:plural_identifier} (in|of) {list:expression} starting with {thing:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("thing")
-      },
-      tests: [
-        [
-          "items in my-list starting with thing",
-          "core.rangeStartingAt(myList, position(spellPosition(positionOf(myList, thing))))"
-        ],
-        [
-          `words in "some words" starting with "some"`,
-          'core.rangeStartingAt("some words", position(spellPosition(positionOf("some words", "some"))))'
-        ]
-      ]
-    }
-  ]
-})

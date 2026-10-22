@@ -1,4 +1,6 @@
-import { CustomError, pluralize, singularize, typeCase } from "spell-kit/util"
+import { CustomError } from "spell-kit/util"
+
+import { pluralize, singularize, typeCase } from "./Inflector"
 import type { P } from "spell-lang/parser"
 
 export type { RulexParser } from "spell-lang/parser/rulex/RulexParser"

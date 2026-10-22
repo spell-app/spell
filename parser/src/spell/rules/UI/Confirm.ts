@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { UI } from "./UI.parser"
 
 /**
  * `confirm` rule:  confirm message -- present a question with two answers.
@@ -27,16 +26,3 @@ export class Confirm extends SpellStatement<"message|okButton?|cancelButton?"> {
     })
   }
 }
-UI.addRule(Confirm, {
-  syntax: "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})?)?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`confirm "Yo!"`, `await core.confirm("Yo!")`],
-        [`confirm "Yo!" with "yep"`, `await core.confirm("Yo!", "yep")`],
-        [`confirm "Yo!" with "yep" and "nope"`, `await core.confirm("Yo!", "yep", "nope")`]
-      ]
-    }
-  ]
-})

@@ -2,7 +2,6 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { classes } from "./classes.parser"
 
 /**
  * `every_thing` rule:  every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).
@@ -24,18 +23,3 @@ export class EveryThing extends SpellExpression<"type"> {
     })
   }
 }
-classes.addRule(EveryThing, {
-  syntax: "every {type:known_type}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.compile(["a pile is a list of things", "a tableau is a pile"].join("\n"), "block")
-      },
-      tests: [
-        ["every pile", "core.everyThing(Pile)"],
-        ["every tableau", "core.everyThing(Tableau)"]
-      ]
-    }
-  ]
-})

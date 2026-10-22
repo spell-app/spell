@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 
 /**
  * `type_specifier_enum` rule:  specifies a property's allowed values as an enumeration,
@@ -32,14 +31,3 @@ export class TypeSpecifierEnum extends P.Sequence<"enumeration"> {
 function valueOf(literal: P.ASTExpression): string | number {
   return P.spellValueOf(literal.compile() as string | number)
 }
-classes.addRule(TypeSpecifierEnum, {
-  syntax: "as (either|one of) {enumeration:identifier_list}",
-  tests: [
-    {
-      tests: [
-        ["as either red or black", '["red", "black"]'],
-        ["as one of clubs, diamonds, hearts, spades", '["clubs", "diamonds", "hearts", "spades"]']
-      ]
-    }
-  ]
-})

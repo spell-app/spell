@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
 
 /**
  * `absolute_value` rule:  `the absolute value of {expression}`.
@@ -21,15 +20,3 @@ export class AbsoluteValue extends SpellExpression<"operator|expression"> {
     })
   }
 }
-math.addRule(AbsoluteValue, {
-  syntax: "(operator:the? absolute value of) {expression:arithmetic_expression}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("difference")
-      },
-      tests: [["the absolute value of the difference", "core.absoluteValue(difference)"]]
-    }
-  ]
-})

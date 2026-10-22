@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { NewThing } from "spell-lang/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { assignment } from "./assignment.parser"
 import { AssignmentStatement } from "./AssignmentStatement"
 
 /**
@@ -39,82 +38,6 @@ export class Get extends SpellStatement<"value", GetMatchData> {
     })
   }
 }
-assignment.addRule(Get, {
-  syntax: "get {value:expression}",
-  tests: [
-    {
-      title: "`it` is not already defined",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        ;(scope as P.BlockScope).variables.add("thing")
-      },
-      tests: [
-        ["get thing", "const it = thing"],
-        ["get the foo of the thing", "const it = thing.foo"]
-      ]
-    },
-    {
-      title: "`it` is already defined",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        const { variables } = scope as P.BlockScope
-        variables.add("it")
-        variables.add("thing")
-      },
-      tests: [
-        ["get thing", "const it2 = thing"],
-        ["get the foo of the thing", "const it2 = thing.foo"]
-      ]
-    },
-    {
-      title: "each `get` declares a new `it`, so a callback which captured an earlier one keeps it",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        ;(scope as P.BlockScope).variables.add("thing")
-      },
-      tests: [
-        {
-          input: ["get thing", "get the foo of the thing", "print it"],
-          js: ["const it = thing", "const it2 = thing.foo", "core.console.log(it2)"]
-        }
-      ]
-    },
-    {
-      title: "numbered `it`s skip names already in use",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        const { variables } = scope as P.BlockScope
-        variables.add("thing")
-        variables.add("it-2")
-      },
-      tests: [
-        {
-          input: ["get thing", "get the foo of the thing"],
-          js: ["const it = thing", "const it3 = thing.foo"]
-        }
-      ]
-    },
-    {
-      title: "`it` gets redefined if defined as an alias",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        const { variables } = scope as P.BlockScope
-        variables.add({ name: "it", output: "this", isAlias: true })
-        variables.add("thing")
-      },
-      tests: [
-        {
-          input: ["print it", "get the thing", "print it"],
-          js: ["core.console.log(this)", "const it = thing", "core.console.log(it)"]
-        },
-        {
-          input: ["print it", "get its name", "print it"],
-          js: ["core.console.log(this)", "const it = this.name", "core.console.log(it)"]
-        }
-      ]
-    }
-  ]
-})
 
 /** What `get` stashes on its match. */
 type GetMatchData = {

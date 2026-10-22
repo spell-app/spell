@@ -1,6 +1,5 @@
 import { P } from "spell-lang/parser"
 import { ListItemExpression } from "./ListItemExpression"
-import { lists } from "./lists.parser"
 
 /**
  * `random_item_expression` rule:  pick a single random item from list, e.g. `a random item of my-list`.
@@ -16,20 +15,3 @@ export class RandomItemExpression extends ListItemExpression<"arg|list"> {
     })
   }
 }
-lists.addRule(RandomItemExpression, {
-  syntax: "a random {arg:singular_identifier} (of|from|in) {list:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("deck")
-      },
-      tests: [
-        ["a random item of my-list", "core.randomItemOf(myList)"],
-        [`a random word in "some words"`, `core.randomItemOf("some words")`],
-        ["a random card from the deck", "core.randomItemOf(deck)"]
-      ]
-    }
-  ]
-})

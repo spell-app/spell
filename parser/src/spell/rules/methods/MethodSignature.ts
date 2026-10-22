@@ -2,7 +2,6 @@ import { P } from "spell-lang/parser"
 import { SpellType } from "spell-lang/spell/rules/types"
 import { BareTypeArg } from "./BareTypeArg"
 import { MethodKeyword } from "./MethodKeyword"
-import { methods } from "./methods.parser"
 import type { MethodArgData, MethodSignatureData } from "./methods.shared"
 
 /**
@@ -103,6 +102,3 @@ export class MethodSignature extends P.Repeat<never, MethodSignatureData> {
     })
   }
 }
-methods.addRule(MethodSignature, {
-  syntax: `({bare_type_arg}|{method_keyword}|\\( {method_arg} \\))+`
-})

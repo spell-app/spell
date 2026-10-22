@@ -1,6 +1,6 @@
 import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { types } from "./types.parser"
+import { SP } from "spell-lang/spell"
 import { SpellType } from "./SpellType"
 
 /**
@@ -13,12 +13,12 @@ import { SpellType } from "./SpellType"
 export class QuotedType extends SpellType {
   /** A text token whose inside is one type word. */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
-    return QuotedType.nameOf(tokens[start], this.blacklist) !== undefined
+    return QuotedType.nameOf(tokens[start], SP.Language.of(scope).words.blacklist) !== undefined
   }
 
   parse(scope: P.Scope, tokens: P.Token[]) {
     const [token] = tokens
-    const raw = QuotedType.nameOf(token, this.blacklist)
+    const raw = QuotedType.nameOf(token, SP.Language.of(scope).words.blacklist)
     if (!token || raw === undefined) return undefined
     const match: P.MatchFor<this> = new P.Match({
       rule: this,
@@ -45,18 +45,6 @@ export class QuotedType extends SpellType {
     return name
   }
 }
-types.addRule(QuotedType, {
-  tests: [
-    {
-      tests: [
-        { title: "a quoted word", input: '"card"', js: "Card" },
-        { title: "dashed", input: '"bank-account"', js: "BankAccount" },
-        { title: "two words", input: '"playing card"', js: undefined },
-        { title: "blacklisted word", input: '"if"', js: undefined }
-      ]
-    }
-  ]
-})
 
 /** What `quoted_type` takes inside its quotes:  one word, dashes OK. */
 const QUOTED_TYPE_NAME = P.ALPHANUMERIC_WORD_WITH_DASHES

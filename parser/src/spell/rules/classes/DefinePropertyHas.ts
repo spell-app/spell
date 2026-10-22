@@ -1,7 +1,8 @@
-import { pluralize, proto, upperFirst, type PropRule } from "spell-kit/util"
+import { proto, upperFirst, type PropRule } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
+import { SubjectIts } from "spell-lang/spell/rules/types"
 // Through the folder, not its own file:  importing its file would load it first,
 // but `outline_specifier_enum` registers AFTER us, and the registration order must not change.
 // Read only when called, once the folder has loaded.
@@ -14,14 +15,13 @@ import {
 } from "spell-lang/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * What may follow a property's declaration:  its RULES -- see `DefinePropertyHas.rulesOf()` (epic `property-editor` P9).
  * - one on its line:  `, which must not be empty`
  * - an indented body of them:  `- it must not be empty`
  */
-const RULES = "(,? which must {rule:must_rule})? {nested_statements}?"
+export const RULES = "(,? which must {rule:must_rule})? {nested_statements}?"
 
 /**
  * `define_property_has` rule:  declares an instance property on `type`,
@@ -112,7 +112,7 @@ export class DefinePropertyHas extends SpellStatement<
 
     // If there is a specifier as enumerated values, add rules to match it
     if (specifierAST instanceof P.ASTEnumeration) {
-      const groupName = pluralize(upperFirst(property.value))
+      const groupName = P.pluralize(upperFirst(property.value))
 
       const { values } = specifierAST
       const varProps: P.ScopeVariableProps & { enumeration: Array<string | number> } = {
@@ -180,12 +180,15 @@ export class DefinePropertyHas extends SpellStatement<
     const typeWords = SpellStatement.subjectWords(match)
     const { type, property, specifier } = match.groups as { type: P.Match; property: P.Match; specifier?: P.Match }
     // `its "rank" is ...`, or `"rank" is ...`:  NOT `it has ...` / `has ...`, which say it as the sentence style does
-    const isItsForm = /^its$/i.test(type.inputText.trim()) || (!type.length && property.start === match.start)
+    const isItsForm = type.is(SubjectIts) || (!type.length && property.start === match.start)
     if (!typeWords || !isItsForm) return super.getLongForm(match)
     const said = specifier?.inputText.trim()
+    // an enumeration with no `either` / `one of`:  no words before its list
+    const isBareList =
+      specifier?.is(OutlineSpecifierEnum) && (specifier.groups.enumeration as P.Match).start === specifier.start
     const as = !said
       ? ""
-      : specifier!.is(OutlineSpecifierEnum) && !/^(either|one of)\b/i.test(said)
+      : isBareList
         ? ` as one of ${said}`
         : specifier!.is(OutlineSpecifierList)
           ? ` as ${said.replace(/^a (?!new\b)/i, "a new ")}`
@@ -204,7 +207,7 @@ export class DefinePropertyHas extends SpellStatement<
     const specifier = match.groups.specifier?.AST
     // Enumerated values as strings/numbers/etc, as a static on the class, e.g. `Card.Suits`
     if (specifier instanceof P.ASTEnumeration) {
-      const name = pluralize(upperFirst(property.value))
+      const name = P.pluralize(upperFirst(property.value))
       statements.push(new P.ASTStaticDefinition(match, { type: typeAST, name, value: specifier }))
       check.addProp("oneOf", new P.ASTPropertyExpression(match, { object: typeAST, property: name }))
     }
@@ -267,301 +270,3 @@ export class DefinePropertyHas extends SpellStatement<
     return new P.ASTStringLiteral(said.match, { value: said.value, quote: "'" })
   }
 }
-classes.addRule(DefinePropertyHas, {
-  syntax: `(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? ${RULES}`,
-  tests: [
-    {
-      compileAs: "block",
-      tests: [
-        [
-          "a player has a name as text",
-          [
-            "// a player has a name as text",
-            'Player.declareProp("name", { type: "text" })',
-            'Object.defineProperty(Player.prototype, "name", {',
-            '  get() { return this.getProp("name") },',
-            '  set(value) { this.setProp("name", value) },',
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "export interface Player { name: string }",
-            "// a player has a name as text",
-            'Player.declareProp("name", { type: "text" })',
-            'Object.defineProperty(Player.prototype, "name", {',
-            '  get(this: Player): string { return this.getProp("name") as string },',
-            '  set(this: Player, value: string) { this.setProp("name", value) },',
-            "  configurable: true",
-            "})"
-          ]
-        ]
-      ]
-    },
-    {
-      title: "declares type's enumeration and property",
-      beforeEach(scope: P.Scope) {
-        scope.compile(
-          [
-            "a card is a thing",
-            "a card has a suit as one of clubs, diamonds, hearts or spades",
-            "card = a new card"
-          ].join("\n"),
-          "block"
-        )
-      },
-      compileAs: "statement",
-      tests: [
-        // every way to reach an enumeration names its class variable --
-        // was CODE-DEBT "Enumerated properties are reachable under inconsistent names"
-        ["print Card suits", "core.console.log(Card.Suits)"],
-        ["print card suits", "core.console.log(Card.Suits)"],
-        ["print the suit of the card is in card suits", "core.console.log(core.includes(Card.Suits, card.suit))"],
-        ["print the suit of the card", "core.console.log(card.suit)"],
-        ["print the suits of the card", "core.console.log(Card.Suits)"],
-        ["print the number of card suits", "core.console.log(core.itemCountOf(Card.Suits))"]
-      ]
-    },
-    {
-      title: "an enumeration through `its`, and on a dashed type",
-      beforeEach(scope: P.Scope) {
-        scope.compile(
-          [
-            "a card is a thing",
-            "a card has a suit as one of clubs, diamonds, hearts or spades",
-            "a bank-account is a thing",
-            "a bank-account has an account-type as one of savings or checking"
-          ].join("\n"),
-          "block"
-        )
-      },
-      compileAs: "block",
-      tests: [
-        [
-          ["get a new card", "print its suits"],
-          ["const it = new Card()", "core.console.log(Card.Suits)"]
-        ],
-        ["print bank-account account-types", "core.console.log(BankAccount.AccountTypes)"]
-      ]
-    },
-    {
-      title: "every thing has an `id`, built in:  no type declares its own (epic `people-and-orgs`, Q9)",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.compile(["a person is a thing", "a club is a list of people"].join("\n"), "block")
-      },
-      tests: [
-        {
-          input: "a person has an id as text",
-          js: '/* PARSE ERROR: Can\'t add "id" to Person:  every thing has one, built in */'
-        },
-        { input: "a club has an id", js: '/* PARSE ERROR: Can\'t add "id" to Club:  every thing has one, built in */' },
-        {
-          input: ["person = a new person", "print the id of the person"],
-          js: ["export const person = new Person()", "core.console.log(person.id)"]
-        },
-        {
-          input: ["person = a new person", 'set the id of the person to "owen"'],
-          js: ["export const person = new Person()", 'person.id = "owen"']
-        },
-        {
-          input: ["club = a new club", "print the id of the club"],
-          js: ["export const club = new Club()", "core.console.log(club.id)"]
-        }
-      ]
-    },
-    {
-      title: "a list says what it holds, so saving knows before it holds any",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.compile("a friend-list is a thing", "block")
-      },
-      tests: [
-        {
-          input: "a friend-list has people as a new list of people",
-          js: [
-            "// a friend-list has people as a new list of people",
-            'FriendList.declareProp("people", { itemType: "Person", init: () => new List({ instanceType: "Person" }) })',
-            'Object.defineProperty(FriendList.prototype, "people", {',
-            '  get() { return this.getProp("people") },',
-            '  set(value) { this.setProp("people", value) },',
-            "  configurable: true",
-            "})"
-          ],
-          ts: [
-            "export interface FriendList { people: List<Person> }",
-            "// a friend-list has people as a new list of people",
-            'FriendList.declareProp("people", { itemType: "Person", init: () => new List<Person>({ instanceType: "Person" }) })',
-            'Object.defineProperty(FriendList.prototype, "people", {',
-            '  get(this: FriendList): List<Person> { return this.getProp("people") as List<Person> },',
-            '  set(this: FriendList, value: List<Person>) { this.setProp("people", value) },',
-            "  configurable: true",
-            "})"
-          ]
-        }
-      ]
-    },
-    {
-      title: "a name of several words, blacklisted ones too -- the article is optional",
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.compile("a card is a thing", "block")
-      },
-      tests: [
-        [
-          "a card has short rank as text",
-          [
-            "// a card has short rank as text",
-            'Card.declareProp("shortRank", { type: "text" })',
-            'Object.defineProperty(Card.prototype, "shortRank", {',
-            '  get() { return this.getProp("shortRank") },',
-            '  set(value) { this.setProp("shortRank", value) },',
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "export interface Card { shortRank: string }",
-            "// a card has short rank as text",
-            'Card.declareProp("shortRank", { type: "text" })',
-            'Object.defineProperty(Card.prototype, "shortRank", {',
-            '  get(this: Card): string { return this.getProp("shortRank") as string },',
-            '  set(this: Card, value: string) { this.setProp("shortRank", value) },',
-            "  configurable: true",
-            "})"
-          ]
-        ]
-      ]
-    }
-  ]
-})
-classes.addRule(DefinePropertyHas, {
-  syntax: `{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? ${RULES}`,
-  tests: [
-    {
-      compileAs: "block",
-      tests: [
-        [
-          "cards have a direction as either up or down",
-          [
-            "// cards have a direction as either up or down",
-            'Card.Directions = ["up", "down"]',
-            'Card.declareProp("direction", { oneOf: Card.Directions })',
-            'Object.defineProperty(Card.prototype, "direction", {',
-            '  get() { return this.getProp("direction") },',
-            '  set(value) { this.setProp("direction", value) },',
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "// cards have a direction as either up or down",
-            'Card.Directions = ["up", "down"]',
-            "export interface Card { direction: (typeof Card.Directions)[number] }",
-            'Card.declareProp("direction", { oneOf: Card.Directions })',
-            'Object.defineProperty(Card.prototype, "direction", {',
-            '  get(this: Card): (typeof Card.Directions)[number] { return this.getProp("direction") as (typeof Card.Directions)[number] },',
-            '  set(this: Card, value: (typeof Card.Directions)[number]) { this.setProp("direction", value) },',
-            "  configurable: true",
-            "})"
-          ]
-        ],
-        [
-          "todos have a title as text",
-          [
-            "// todos have a title as text",
-            'Todo.declareProp("title", { type: "text" })',
-            'Object.defineProperty(Todo.prototype, "title", {',
-            '  get() { return this.getProp("title") },',
-            '  set(value) { this.setProp("title", value) },',
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "export interface Todo { title: string }",
-            "// todos have a title as text",
-            'Todo.declareProp("title", { type: "text" })',
-            'Object.defineProperty(Todo.prototype, "title", {',
-            '  get(this: Todo): string { return this.getProp("title") as string },',
-            '  set(this: Todo, value: string) { this.setProp("title", value) },',
-            "  configurable: true",
-            "})"
-          ]
-        ],
-        [
-          "todos have a property completed as yes or no",
-          [
-            "// todos have a property completed as yes or no",
-            'Todo.declareProp("completed", { type: "choice" })',
-            'Object.defineProperty(Todo.prototype, "completed", {',
-            '  get() { return this.getProp("completed") },',
-            '  set(value) { this.setProp("completed", value) },',
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "export interface Todo { completed: boolean }",
-            "// todos have a property completed as yes or no",
-            'Todo.declareProp("completed", { type: "choice" })',
-            'Object.defineProperty(Todo.prototype, "completed", {',
-            '  get(this: Todo): boolean { return this.getProp("completed") as boolean },',
-            '  set(this: Todo, value: boolean) { this.setProp("completed", value) },',
-            "  configurable: true",
-            "})"
-          ]
-        ],
-        [
-          "todos have a property tags as a new list",
-          [
-            "// todos have a property tags as a new list",
-            'Todo.declareProp("tags", { init: () => new List() })',
-            'Object.defineProperty(Todo.prototype, "tags", {',
-            '  get() { return this.getProp("tags") },',
-            '  set(value) { this.setProp("tags", value) },',
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "export interface Todo { tags: any /* spell: type unknown */ }",
-            "// todos have a property tags as a new list",
-            'Todo.declareProp("tags", { init: () => new List() })',
-            'Object.defineProperty(Todo.prototype, "tags", {',
-            '  get(this: Todo): any /* spell: type unknown */ { return this.getProp("tags") },',
-            '  set(this: Todo, value: any /* spell: type unknown */) { this.setProp("tags", value) },',
-            "  configurable: true",
-            "})"
-          ]
-        ]
-      ]
-    }
-  ]
-})
-// a quoted name in the sentence style (epic page J3, option C) -- tests in `parserTests/outline.test.ts`:
-// `a card has a "suit" as one of ...`, `cards have a "direction" as either up or down`
-classes.addRule(DefinePropertyHas, {
-  syntax: `(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
-})
-classes.addRule(DefinePropertyHas, {
-  syntax: `{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
-})
-// in an outline body -- tests in `parserTests/outline.test.ts`:
-// - `- it has a deck`
-// - `- its "suit" is one of clubs, diamonds, hearts or spades`, `- its "rank" is a number`
-classes.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? ${RULES}`
-})
-classes.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} ${RULES}`
-})
-// ... and with the subject left out (P8):  `- has a deck`, `- "suit" is one of clubs, diamonds, hearts or spades`
-classes.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? ${RULES}`
-})
-classes.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} ${RULES}`
-})
-// ... and a bare name (P9):  `- suit is a suit of its deck`, `- foundations are a list of piles`
-classes.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} ${RULES}`
-})
-// ... and the quotes are optional (epic page Q4):  `- its rank is a number`
-classes.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_its} {property:member_words} is {specifier:outline_specifier} ${RULES}`
-})

@@ -1,32 +1,13 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { lists } from "./lists.parser"
 
 /**
  * `ordinal` rule:  ordinal numbers (`first`, `second`, `last`, etc.), mapped to numeric literals via `VALUE_MAP`.
  * TODO: sixty-fifth, two hundred forty ninth... with custom parser?
  */
 export class Ordinal extends P.Pattern {
+  // Its words and what each means (`pattern`, `VALUE_MAP`) are the language's:  see its `.en.ts` registration
   @proto static matchGroup = "ordinal"
-  @proto static pattern =
-    /^(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|penultimate|final|last|top|bottom)$/
-  @proto static VALUE_MAP = {
-    first: 1,
-    second: 2,
-    third: 3,
-    fourth: 4,
-    fifth: 5,
-    sixth: 6,
-    seventh: 7,
-    eighth: 8,
-    ninth: 9,
-    tenth: 10,
-    penultimate: -2,
-    final: -1,
-    last: -1,
-    top: 1,
-    bottom: -1
-  }
 
   /** An ordinal literal, not a plain number:  "the first card" is the first, whatever the project counts from. */
   getAST(match: P.MatchFor<this>): P.ASTOrdinalLiteral {
@@ -34,28 +15,3 @@ export class Ordinal extends P.Pattern {
     return new P.ASTOrdinalLiteral(match, { value, raw })
   }
 }
-lists.addRule(Ordinal, {
-  tests: [
-    {
-      tests: [
-        ["first", 1],
-        ["second", 2],
-        ["third", 3],
-        ["fourth", 4],
-        ["fifth", 5],
-        ["sixth", 6],
-        ["seventh", 7],
-        ["eighth", 8],
-        ["ninth", 9],
-        ["tenth", 10],
-
-        ["penultimate", -2],
-        ["final", -1],
-        ["last", -1],
-
-        ["top", 1],
-        ["bottom", -1]
-      ]
-    }
-  ]
-})

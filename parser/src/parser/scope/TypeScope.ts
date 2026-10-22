@@ -1,4 +1,4 @@
-import { instanceCase, snakeCase, type PropRule } from "spell-kit/util"
+import { snakeCase, type PropRule } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { BlockScope } from "./BlockScope"
@@ -200,7 +200,7 @@ export class TypeScope extends BlockScope {
    * - Ours from an earlier parse of the same statement:  ours again, as `declareProperty()`.
    */
   declareOwnerMember(itemType: TypeScope, declaredBy: P.Match): void {
-    const name = instanceCase(this.runtimeName ?? this.name)
+    const name = P.instanceCase(this.runtimeName ?? this.name)
     const existing = itemType.variables.get(name, "LOCAL_ONLY")
     if (existing && existing.declaredBy === declaredBy) return
     if (existing?.exclusive && TypeScope.sameStatement(existing.declaredBy, declaredBy)) {
@@ -297,7 +297,7 @@ export class TypeScope extends BlockScope {
    * - e.g. if type name is `Card`, `instanceName` would be `card`.
    */
   get instanceName() {
-    return instanceCase(this.name)
+    return P.instanceCase(this.name)
   }
 
   /** Named `ScopeVariable`s static to this class, keyed by (snake_case-normalized) name; `kind` set to `"static"`. */

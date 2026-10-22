@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import type { MethodSignature } from "./MethodSignature"
-import { methods } from "./methods.parser"
 
 /**
  * `quoted_method_signature` rule:  method signature surrounded by quotes.  A "good idea"???
@@ -39,4 +38,3 @@ export class QuotedMethodSignature extends P.TokenType {
     return signature
   }
 }
-methods.addRule(QuotedMethodSignature)

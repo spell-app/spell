@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { classes } from "./classes.parser"
 import { TypeDeclaration } from "./TypeDeclaration"
 
 /**
@@ -69,70 +68,3 @@ export class CreateListType extends TypeDeclaration<
     })
   }
 }
-classes.addRule(CreateListType, {
-  syntax: "create a type (named|called) {type} as (a|an) list of {instanceType:type}",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [
-          "create a type named hand as a list of cards",
-          ["export class Hand extends List {", "  static instanceType = Card", "}"],
-          ["export class Hand extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    }
-  ]
-})
-// TODO: "{plural_type} are a list of ..."
-classes.addRule(CreateListType, {
-  syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) list of {instanceType:type} {with_nested_statements}?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [
-          "a deck is a list of cards",
-          ["export class Deck extends List {", "  static instanceType = Card", "}"],
-          ["export class Deck extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    },
-    {
-      compileAs: "block",
-      tests: [
-        [
-          "a deck is a list of cards with:",
-          ["export class Deck extends List {", "  static instanceType = Card", "}"],
-          ["export class Deck extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    }
-  ]
-})
-classes.addRule(CreateListType, {
-  syntax: "(a|an) {type:quoted_type} is (a|an) list of {instanceType:type} {with_nested_statements}?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [
-          'a "deck" is a list of cards',
-          ["export class Deck extends List {", "  static instanceType = Card", "}"],
-          ["export class Deck extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    },
-    {
-      compileAs: "block",
-      tests: [
-        [
-          'a "deck" is a list of cards with:',
-          ["export class Deck extends List {", "  static instanceType = Card", "}"],
-          ["export class Deck extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    }
-  ]
-})

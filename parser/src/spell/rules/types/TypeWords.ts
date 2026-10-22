@@ -1,6 +1,6 @@
 import { NONE } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { types } from "./types.parser"
+import { SP } from "spell-lang/spell"
 import { SpellType } from "./SpellType"
 
 /**
@@ -13,9 +13,6 @@ import { SpellType } from "./SpellType"
  * - `value`, `raw` and `data.scopeType` as `type`'s, e.g. `BankAccount` and `bank account`.
  */
 export class TypeWords extends SpellType {
-  /** Words which end a name, though they're fine in one by themselves. */
-  static STOP_WORDS = new Set(["aka"])
-
   /** Every name word from the first token on -- see class docs. */
   parse(scope: P.Scope, tokens: P.Token[]) {
     let count = 0
@@ -37,21 +34,7 @@ export class TypeWords extends SpellType {
 
   /** Can the token at `index` be one of a name's words? */
   private isNameWord(scope: P.Scope, tokens: P.Token[], index: number): boolean {
-    return this.test(scope, tokens, index) && !TypeWords.STOP_WORDS.has(`${tokens[index]!.value}`.toLowerCase())
+    const { typeNameStopWords } = SP.Language.of(scope).words
+    return this.test(scope, tokens, index) && !typeNameStopWords.has(`${tokens[index]!.value}`.toLowerCase())
   }
 }
-types.addRule(TypeWords, {
-  tests: [
-    {
-      tests: [
-        { title: "one word", input: "card", js: "Card" },
-        { title: "two words", input: "bank account", js: "BankAccount" },
-        { title: "dashed", input: "bank-account", js: "BankAccount" },
-        { title: "plural", input: "bank accounts", js: "BankAccount" },
-        { title: "up to a blacklisted word", input: "bank account is", js: "BankAccount" },
-        { title: "up to aka", input: "bank account aka account", js: "BankAccount" },
-        { title: "a blacklisted word", input: "is", js: undefined }
-      ]
-    }
-  ]
-})

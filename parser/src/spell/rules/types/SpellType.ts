@@ -1,7 +1,6 @@
 import { NONE, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { identifierBlacklist } from "spell-lang/spell/rules/identifier-blacklist"
 
 /**
  * Base pattern rule for matching a type name, singular or plural, known or unknown:
@@ -20,14 +19,18 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   /** Most words a type's name may have, e.g. 2 for `bank account`. */
   static MAX_NAME_WORDS = 4
 
-  /** Every type rule matches the same thing: alpha-numeric word (dashes/underscores OK), not blacklisted. */
+  /** Every type rule matches the same thing: alpha-numeric word (dashes/underscores OK), not the language's own (`test()`). */
   constructor(props?: Partial<P.PatternProps>) {
     super({
       pattern: P.ALPHANUMERIC_WORD_WITH_DASHES,
       datatype: "type",
-      blacklist: identifierBlacklist,
       ...props
     })
+  }
+
+  /** Matches our `pattern`, and isn't one of the language's own words (its `blacklist`, `SP.LanguageWords`). */
+  test(scope: P.Scope, tokens: P.Token[], start = 0) {
+    return super.test(scope, tokens, start) && !SP.Language.of(scope).words.blacklist[`${tokens[start]!.value}`]
   }
 
   /**

@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { fillInsAST, parseFillIns } from "spell-lang/spell/rules/core"
 // Import directly to avoid circular import
 import { commitStatement } from "spell-lang/spell/rules/Statement"
-import { JSX } from "./JSX.parser"
 import { SPELL_ATTRIBUTE_NAMES } from "./JSX.shared"
 import { SpellJSXContent } from "./SpellJSXContent"
 
@@ -114,4 +113,3 @@ export class SpellJSXAttribute extends SpellJSXContent {
     })
   }
 }
-JSX.addRule(SpellJSXAttribute)

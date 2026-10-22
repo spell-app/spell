@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
@@ -27,4 +26,3 @@ export class MethodKeyword extends P.Pattern<never, MethodArgData> {
     return match
   }
 }
-methods.addRule(MethodKeyword)

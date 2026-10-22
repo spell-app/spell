@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { Precedence } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `or` rule:  `{lhs} or {rhs}`, e.g. `thing or other`
@@ -16,16 +15,3 @@ export class Or extends InfixOperatorSuffix<"operator|expression"> {
     return "or"
   }
 }
-expressions.addRule(Or, {
-  syntax: "(operator:or) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-        scope.variables?.add("other")
-      },
-      tests: [["thing or other", "(thing || other)"]]
-    }
-  ]
-})

@@ -1,10 +1,9 @@
-import { instanceCase, proto } from "spell-kit/util"
+import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { SpellConstant } from "spell-lang/spell/rules/constants"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { type MethodBody } from "./classes.shared"
 
 /**
@@ -30,11 +29,11 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
    * Quick test:  our words fit, AND an `if` comes after them.
    * - Our body is parsed apart (`{inline_value_if}`), so `Sequence.test()` sees only `{type_property} is`:
    *   without this, every line with `is` in it would be parsed in full, to find its `value_if`.
+   * - So we ask `value_if`'s own quick test, from our third word on:  it finds its `if`, whatever the language.
    */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
     if (super.test(scope, tokens, start) === false) return false
-    for (let index = start + 2; index < tokens.length; index++) if (tokens[index]!.matchesLiteral("if")) return true
-    return false
+    return scope.parser?.rules.value_if?.test(scope, tokens, start + 2) !== false
   }
 
   /** Refused on a built-in type -- see `SpellStatement.refuseBuiltInType()`;  no `value_if` after `is`, not ours. */
@@ -63,7 +62,7 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
     const typeName = SP.typeName(`${match.groups.type_property.groups.type.value}`)
     return new P.MethodScope({
       parentScope: match.scope,
-      thisVar: instanceCase(typeName),
+      thisVar: P.instanceCase(typeName),
       mapItTo: "this",
       itDatatype: typeName,
       declaredBy: match
@@ -79,63 +78,6 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
     })
   }
 }
-classes.addRule(PropertyValueEither, {
-  syntax: "{type_property} is {inline_value_if}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.types?.add("card")
-        scope.constants?.add("diamonds", "hearts", "clubs", "spades")
-      },
-      tests: [
-        // is one of diamonds or hearts => is_one_of_list
-        [
-          "the color of a card is red if its suit is either diamonds or hearts",
-          [
-            'Object.defineProperty(Card.prototype, "color", {',
-            "  get() {",
-            '    if (core.includes(["diamonds", "hearts"], this.suit)) return "red"',
-            "  },",
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "export interface Card { readonly color: any /* spell: type unknown */ }",
-            'Object.defineProperty(Card.prototype, "color", {',
-            "  get(this: Card) {",
-            '    if (core.includes(["diamonds", "hearts"], this.suit)) return "red"',
-            "  },",
-            "  configurable: true",
-            "})"
-          ]
-        ],
-        [
-          "a cards color is black if its suit is either clubs or spades otherwise it is red",
-          [
-            'Object.defineProperty(Card.prototype, "color", {',
-            "  get() {",
-            '    if (core.includes(["clubs", "spades"], this.suit)) return "black"',
-            '    return "red"',
-            "  },",
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "export interface Card { readonly color: string }",
-            'Object.defineProperty(Card.prototype, "color", {',
-            "  get(this: Card) {",
-            '    if (core.includes(["clubs", "spades"], this.suit)) return "black"',
-            '    return "red"',
-            "  },",
-            "  configurable: true",
-            "})"
-          ]
-        ]
-      ]
-    }
-  ]
-})
 
 /**
  * Match groups for `property_value_either`'s `syntax` -- `type_property` nests its own `type`/`property`

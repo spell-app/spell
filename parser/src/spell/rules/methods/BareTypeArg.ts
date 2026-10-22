@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { TypeMethodArg } from "./TypeMethodArg"
-import { methods } from "./methods.parser"
 
 /**
  * `bare_type_arg` rule:  a KNOWN type after `a` / `an`, with no parens, in a method's signature:
@@ -18,6 +17,3 @@ export class BareTypeArg extends TypeMethodArg {
   /** Editors colour its type's word, `card`, as the parameter it names. */
   @proto static highlightAs: P.HighlightKind = "parameter"
 }
-methods.addRule(BareTypeArg, {
-  syntax: `(a|an) {type:known_type}`
-})

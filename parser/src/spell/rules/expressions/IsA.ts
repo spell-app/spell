@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `is_a` rule:  `{lhs} is [not] a`/`an {type}`, e.g. `thing is a Bee`.
@@ -12,7 +11,7 @@ import { expressions } from "./expressions.parser"
  *   - declared earlier in the project
  *   - or mentioned earlier -- a `stub`, e.g. by `a joker has a color ...` above `a joker is a card`.
  *     See `P.TypeScope.getOrStub()`.
- * - `shouldNegateOutput()` handles `is not a`.
+ * - Negated by its word rule's `negated` forms, e.g. `isn't` -- see `Negatable`.
  * - Compiles to `core.isOfType(lhs, 'TypeName')`, the type's name as text (`P.ASTTypeNameLiteral`):
  *   its RUNTIME name, which differs for a type imported renamed -- see `P.ASTTypeExpression.runtimeName`.
  *   - A writer may test it its own way, e.g. javascript's `lhs instanceof TypeName`.
@@ -20,9 +19,6 @@ import { expressions } from "./expressions.parser"
 export class IsA extends InfixOperatorSuffix<"operator|expression"> {
   @proto static precedence = Precedence.comparison
 
-  shouldNegateOutput(operator: P.Match): boolean {
-    return typeof operator.value === "string" && operator.value.includes("not")
-  }
   compileASTExpression(match: P.MatchFor<this>, { lhs, rhs }: OperatorOperands): P.ASTCoreMethodInvocation {
     // a type's class, by the name it has when the code runs -- see `P.ASTTypeExpression.runtimeName`
     const type =
@@ -32,27 +28,3 @@ export class IsA extends InfixOperatorSuffix<"operator|expression"> {
     return new P.ASTCoreMethodInvocation(match, { methodName: "isOfType", args: [lhs!, type] })
   }
 }
-expressions.addRule(IsA, {
-  syntax: "(operator:is not? (a|an)) {expression:known_type}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-        scope.types?.add("Bee")
-        scope.types?.add("Animal")
-      },
-      tests: [
-        ["thing is a Bee", "thing instanceof Bee"],
-        ["thing is an Animal", "thing instanceof Animal"],
-        ["thing is not a Bee", "!(thing instanceof Bee)"],
-        ["thing is not an Animal", "!(thing instanceof Animal)"],
-        ["thing is a number", 'typeof thing === "number"'],
-        ["thing is a boolean", 'core.isOfType(thing, "choice")'],
-        ["thing is a list", 'core.isOfType(thing, "List")'],
-        // an unknown type is no type:  `is a crad` doesn't parse
-        ["thing is a crad", "thing"]
-      ]
-    }
-  ]
-})

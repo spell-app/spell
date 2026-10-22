@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
 
 /**
  * `max` rule:  `the biggest`/`largest` [thing] `of`/`in` {expression}, e.g. `largest of the prices`.
@@ -21,20 +20,3 @@ export class Max extends SpellExpression<"operator|argument?|expression"> {
     })
   }
 }
-math.addRule(Max, {
-  syntax: "(operator:the? (biggest|largest)) {argument:singular_identifier}? (of|in) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("prices")
-        scope.variables?.add("price")
-      },
-      tests: [
-        ["largest of the prices", "core.largestOf(prices)"],
-        ["biggest in prices", "core.largestOf(prices)"],
-        ["the biggest number in prices", "core.largestOf(prices)"]
-      ]
-    }
-  ]
-})

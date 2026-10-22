@@ -5,7 +5,6 @@ import { MemberReadExpression } from "spell-lang/spell/rules/properties"
 import { NewThing } from "spell-lang/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { assignment } from "./assignment.parser"
 
 /**
  * `assignment` rule:  assignment, via any of 4 equivalent surface forms:
@@ -86,6 +85,8 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
       const scope = match.scope as P.BlockScope
       const { variables } = scope
       // `set it to ...` always declares a new `it` -- see `AssignmentStatement.declareIt()`
+      // REFACTOR: `"it"` is the `it` VARIABLE's name, which spell's code shares (`MethodScope`, `Get`, `ItsProperty` ...);
+      //  a language's own word for it (epic `spanish`) maps to that name where `variable` reads it, not here.
       const { datatype } = value
       if (varName === "it") {
         match.data.newIt = AssignmentStatement.declareIt(scope, match, datatype)
@@ -220,93 +221,13 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     return number ? Number(number) : 1
   }
 }
-assignment.addRule(AssignmentStatement, {
-  syntax: "(thing:{expression}|{variable}) = {value:expression}",
-  tests: [
-    {
-      ...setupAssignmentStatement(),
-      tests: [
-        {
-          title: "non-existing var",
-          input: "unknown-var = yes",
-          js: "export const unknownVar = true",
-          ts: "export const unknownVar: boolean = true"
-        },
-        { title: "existing var", input: "thing = yes", js: "thing = true" }
-      ]
-    }
-  ]
-})
-assignment.addRule(AssignmentStatement, {
-  syntax: "let (thing:{expression}|{variable}) = {value:expression}",
-  tests: [
-    {
-      ...setupAssignmentStatement(),
-      tests: [
-        {
-          title: "non-existing var: property set (won't work)",
-          input: `let the name of unknown-var = "bob"`,
-          js: `/* PARSE ERROR: Don't understand "let the name of unknown-var = "bob"" */`
-        },
-        {
-          title: "existing var: property set",
-          input: `let the name of thing = "bob"`,
-          js: `thing.name = "bob"`
-        }
-      ]
-    }
-  ]
-})
-assignment.addRule(AssignmentStatement, {
-  syntax: "set (thing:{expression}|{variable}) to {value:expression}",
-  tests: [
-    {
-      ...setupAssignmentStatement(),
-      tests: [
-        {
-          title: "non-existing var",
-          input: "set unknown-var to yes",
-          js: "export const unknownVar = true",
-          ts: "export const unknownVar: boolean = true"
-        },
-        { title: "existing var", input: "set thing to yes", js: "thing = true" },
-        {
-          title: "alias var reassign works",
-          input: "set it to the name of it",
-          js: "const it = this.name"
-        },
-        {
-          title: "assignment to alias property doesn't redefine alias",
-          input: "set the title of it to the name of it",
-          js: "this.title = this.name"
-        }
-      ]
-    }
-  ]
-})
-assignment.addRule(AssignmentStatement, {
-  syntax: "{thing:variable} is {value:expression}",
-  tests: [
-    {
-      ...setupAssignmentStatement(),
-      tests: [
-        {
-          title: "non-existing var",
-          input: `bob is a new person whose name is "bob"`,
-          js: 'export const bob = new Person({ name: "bob" })'
-        },
-        { title: "existing var", input: "thing is a new person", js: "thing = new Person()" }
-      ]
-    }
-  ]
-})
 
 /**
  * Test setup shared by each `assignment` syntax:
  * spread into a test block, e.g. `{ ...setupAssignmentStatement(), tests: [...] }`.
  * - `beforeEach` adds variable `thing`, alias `it` (=> `this`) and type `Person`.
  */
-function setupAssignmentStatement(): Pick<P.RuleTestBlock, "compileAs" | "beforeEach"> {
+export function setupAssignmentStatement(): Pick<P.RuleTestBlock, "compileAs" | "beforeEach"> {
   return {
     compileAs: "block",
     beforeEach(scope: P.Scope) {

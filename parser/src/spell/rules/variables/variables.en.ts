@@ -1,0 +1,119 @@
+/**
+ * The `variables` rules in English:  each rule's syntax and its tests, registered on the `variables` module's parser.
+ * - The rule CLASSES are their own files, beside this one:  what a rule does, whatever the language.
+ * - Registered in the order the rules were registered before (`index.ts`):  a tie between two rules goes to the first.
+ * - Another language registers the same classes with its own syntax, in `variables.<lang>.ts` (epic `spanish`).
+ */
+import { P } from "spell-lang/parser"
+
+import { variables } from "./variables.parser"
+import { VARIABLE_SYNTAX } from "./variables.shared"
+import { Identifier } from "./Identifier"
+import { KnownVariable } from "./KnownVariable"
+import { KnownWordsVariable } from "./KnownWordsVariable"
+import { PluralIdentifier } from "./PluralIdentifier"
+import { SingularIdentifier } from "./SingularIdentifier"
+import { Variable } from "./Variable"
+import { WordsIdentifier } from "./WordsIdentifier"
+import { WordsVariable } from "./WordsVariable"
+
+variables.addRule(Identifier)
+
+variables.addRule(SingularIdentifier, {
+  tests: [
+    {
+      tests: [
+        { title: "singular, single word", input: "thing", js: "thing" },
+        { title: "singular, multi-word", input: "bank-account", js: "bankAccount" },
+        { title: "uncountable, matches as singular too", input: "sheep", js: "sheep" },
+        { title: "plural, single word", input: "things", js: undefined },
+        { title: "plural, multi-word", input: "bank-accounts", js: undefined }
+      ]
+    }
+  ]
+})
+
+variables.addRule(PluralIdentifier, {
+  tests: [
+    {
+      tests: [
+        { title: "uncountable, matches as plural too", input: "sheep", js: "sheep" },
+        { title: "plural, single word", input: "things", js: "things" },
+        { title: "plural, multi-word", input: "bank-accounts", js: "bankAccounts" },
+        { title: "singular, single word", input: "thing", js: undefined },
+        { title: "singular, multi-word", input: "bank-account", js: undefined }
+      ]
+    }
+  ]
+})
+
+variables.addRule(Variable, {
+  syntax: VARIABLE_SYNTAX,
+  tests: [
+    {
+      tests: [
+        { title: "single word", input: "thing", js: "thing" },
+        { title: "single word with the", input: "the thing", js: "thing" },
+        { title: "multi-word", input: "bank-account", js: "bankAccount" },
+        { title: "multi-word with the", input: "the bank-account", js: "bankAccount" },
+        { title: "blacklisted word", input: "if", js: undefined }
+      ]
+    }
+  ]
+})
+
+variables.addRule(KnownVariable, {
+  syntax: VARIABLE_SYNTAX,
+  tests: [
+    {
+      compileAs: "known_variable", // TODO: "expression"
+      beforeEach(scope: P.Scope) {
+        // `Scope.variables` is typed narrowly (`ScopeList<ScopeVariable>`);
+        // the concrete `BlockScope` accepts a plain name string too -- see report.
+        const { variables } = scope as P.BlockScope
+        variables.add("thing")
+        variables.add("bank-account")
+      },
+      tests: [
+        { title: "single word", input: "thing", js: "thing" },
+        { title: "multi-word", input: "bank-account", js: "bankAccount" },
+        { title: "not defined", input: "nothing", js: undefined }
+      ]
+    }
+  ]
+})
+
+variables.addRule(WordsIdentifier, {
+  tests: [
+    {
+      tests: [
+        ["start pile", "startPile"],
+        ["anything changed", "anythingChanged"],
+        ["pile", undefined],
+        ["name of", undefined]
+      ]
+    }
+  ]
+})
+
+variables.addRule(WordsVariable, {
+  syntax: "the? {identifier:words_identifier}",
+  tests: [{ tests: [["the start pile", "startPile"]] }]
+})
+
+variables.addRule(KnownWordsVariable, {
+  syntax: "the? {identifier:words_identifier}",
+  tests: [
+    {
+      compileAs: "known_words_variable",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("start_pile")
+      },
+      tests: [
+        ["start pile", "startPile"],
+        ["the start pile", "startPile"],
+        ["end pile", undefined]
+      ]
+    }
+  ]
+})

@@ -1,4 +1,4 @@
-import { pluralize, proto, singularize } from "spell-kit/util"
+import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import {
@@ -97,7 +97,7 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
   ): string | number | undefined {
     const values = scope.types?.get(data.kind!)?.valueKind?.values
     if (!values || !arg) return undefined
-    const inflector = data.isSingular ? singularize : pluralize
+    const inflector = data.isSingular ? P.singularize : P.pluralize
     return values.find((value) =>
       typeof value === "number" ? value === arg.value : inflector(value.replace(/^'(.*)'$/, "$1")) === arg.value
     )

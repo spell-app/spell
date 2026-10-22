@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /** `list_append` rule:  append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`. */
 export class ListAppend extends SpellStatement<"thing|list"> {
@@ -16,16 +15,3 @@ export class ListAppend extends SpellStatement<"thing|list"> {
     })
   }
 }
-lists.addRule(ListAppend, {
-  syntax: "append {thing:expression} to {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("thing")
-      },
-      tests: [["append thing to my-list", "core.append(myList, thing)"]]
-    }
-  ]
-})

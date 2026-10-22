@@ -1,7 +1,6 @@
 import JSON5 from "json5"
 import semver from "semver"
 
-import { singularize, typeCase } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 
@@ -521,7 +520,7 @@ export class SpellDeclarations {
       if (!P.ALPHANUMERIC_WORD_WITH_DASHES.test(alias)) {
         SpellDeclarations.fail(from, `'${alias}' isn't a type name:  one word, dashes OK`)
       }
-      renames.set(name, typeCase(alias))
+      renames.set(name, P.typeCase(alias))
     }
     // what each type needs -- `names` grows as we go, so dependencies' dependencies come too
     const needs = new Map<string, string[]>()
@@ -530,7 +529,7 @@ export class SpellDeclarations {
       if (property && of && datatype) needs.set(of, [...(needs.get(of) ?? []), datatype])
     }
     for (const name of names) {
-      for (const need of needs.get(name) ?? []) if (need && needs.has(typeCase(need))) names.add(typeCase(need))
+      for (const need of needs.get(name) ?? []) if (need && needs.has(P.typeCase(need))) names.add(P.typeCase(need))
     }
     // a new name MUST be unique among what's loaded
     const loaded = [...names].map((name) => renames.get(name) ?? name)
@@ -550,12 +549,12 @@ export class SpellDeclarations {
     const renamed = { ...declaration }
     for (const key of ["type", "superType", "of", "datatype", "itemType", "returns"] as const) {
       const name = declaration[key]
-      const to = name === undefined ? undefined : renames.get(typeCase(name))
+      const to = name === undefined ? undefined : renames.get(P.typeCase(name))
       if (to) renamed[key] = to
     }
     if (declaration.params) {
       renamed.params = declaration.params.map((param) => {
-        const to = param.datatype === undefined ? undefined : renames.get(typeCase(param.datatype))
+        const to = param.datatype === undefined ? undefined : renames.get(P.typeCase(param.datatype))
         return to ? { ...param, datatype: to } : param
       })
     }
@@ -641,7 +640,7 @@ export class SpellDeclarations {
    */
   private static ownerOf(statement: P.Match): string | undefined {
     const of = statement.rule.getDeclaration(statement)?.of
-    return of ? typeCase(singularize(of)) : undefined
+    return of ? P.typeCase(P.singularize(of)) : undefined
   }
 
   /**

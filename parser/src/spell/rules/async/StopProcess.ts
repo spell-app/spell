@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { _async } from "./async.parser"
 
 /**
  * `stop_process` rule:  stop a conceptual animation or process.
@@ -20,18 +19,3 @@ export class StopProcess extends SpellStatement<"name"> {
     })
   }
 }
-_async.addRule(StopProcess, {
-  syntax: "(stop|end|finish|cancel) (animation|process) {name:constant}",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`stop animation dealing`, 'core.stopProcess("dealing")'],
-        [`stop process dealing`, 'core.stopProcess("dealing")'],
-        [`end process dealing`, 'core.stopProcess("dealing")'],
-        [`finish process dealing`, 'core.stopProcess("dealing")'],
-        [`cancel process dealing`, 'core.stopProcess("dealing")']
-      ]
-    }
-  ]
-})

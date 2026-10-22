@@ -1,6 +1,4 @@
-import { pluralize } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { types } from "./types.parser"
 import { SpellType } from "./SpellType"
 
 /**
@@ -11,7 +9,7 @@ import { SpellType } from "./SpellType"
 export class PluralType extends SpellType {
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens)
-    if (match && typeof match.raw === "string" && match.raw === pluralize(match.raw)) return match
+    if (match && typeof match.raw === "string" && match.raw === P.pluralize(match.raw)) return match
     return undefined
   }
   getAST(match: P.MatchFor<this>): P.ASTTypeExpression {
@@ -20,20 +18,3 @@ export class PluralType extends SpellType {
     return type
   }
 }
-types.addRule(PluralType, {
-  tests: [
-    {
-      tests: [
-        { title: "plural, lower case", input: "things", js: "Thing" },
-        { title: "plural, upper case", input: "Things", js: "Thing" },
-        { title: "plural, multi-word, lower case", input: "bank-accounts", js: "BankAccount" },
-        { title: "plural, multi-word, mixed case", input: "Bank-accounts", js: "BankAccount" },
-
-        { title: "singular, lower case", input: "thing", js: undefined },
-        { title: "singular, upper case", input: "Thing", js: undefined },
-        { title: "singular, multi-word, lower case", input: "bank-account", js: undefined },
-        { title: "singular, multi-word, mixed case", input: "Bank-account", js: undefined }
-      ]
-    }
-  ]
-})
