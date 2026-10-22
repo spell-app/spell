@@ -271,13 +271,18 @@ And because every name is in one place, a tag can be translated whole, in two ha
 - **Names**, what authors type, are renamed by a dictionary:
   `UIButton.define("es-boton", es)` makes `<es-boton primario color="rojo">` a Spell UI button in Spanish.
   Values arrive in English (`rojo` is `red`), so the component's code doesn't change.
+  - A translated tag's properties are translated too, the camelCase of each Spanish attribute:
+    `<es-tarjeta discontinuo>` is `tarjeta.discontinuo`.
 - **Texts**, what people read, are looked up by Spell UI's runtime, so nothing is ever blank:
   the exact locale (`pt-BR`), then the language (`pt`), then English, then the key itself.
 - What stays English always:
-  CSS classes, `:state()`s, the component's property names, event details, `--ui-*` tokens.
+  CSS classes, `:state()`s, event details, `--ui-*` tokens.
 
-**Real today:**  the mechanism, tested with a Spanish dictionary.
-**Not yet:**  any translation that ships.
+**Real today:**  Spanish, in every Spell UI component.
+- Each has its Spanish beside its English, `UIButton.es.ts` beside `UIButton.en.ts`:  104 in all.
+- `<ui-root lang="es">` names a page Spanish, and its components load as `es-*` tags.
+
+**Not yet:**  a third language.
 How Spell UI reads them:  [README-runtime.md](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md).
 
 ## What every element gets without asking

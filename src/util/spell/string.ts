@@ -22,8 +22,8 @@ type StringMap = Record<string, string>
  * `text` in snake_case, with memoization:  `Short Names`, `shortNames` and `short-names` are all `short_names`.
  * - Lodash's `snakeCase` without its `deburr()`:  an accent is part of the word (`corazón` stays `corazón`),
  *   so a Spanish name never collides with its accent-less spelling (epic `spanish` Q2).
- * - Words split as lodash splits them:  at spaces and punctuation, before a capital, around digits
- *   (`it2` => `it_2`).
+ * - Words split as lodash splits them:
+ *   at spaces and punctuation, before a capital, around digits (`it2` => `it_2`).
  */
 export const snakeCase = (text: string) => getExistingOrTransform(text, SNAKE_CASE, toSnakeCase)
 /** Un-memoized version of `snakeCase()` -- call `snakeCase()` instead unless you need to bypass cache. */

@@ -400,8 +400,8 @@ export type NameMap = Readonly<Record<string, string>>
  * - Attribute, slot and part names map name to name (`header` => `encabezado`).
  * - NOT here:  states (a CSS contract), CSS classes.
  * - Its `texts` ride along for the runtime's texts (Spell UI's `UI.i18n`):  the names never read them.
- * - Spell UI's own Spanish:  each tag's `UI<Name>.es.ts` (a `TagDictionary`), gathered into one by
- *   `spell-ui/components/components.es`.
+ * - Spell UI's own Spanish:  each tag's `UI<Name>.es.ts` (a `TagDictionary`),
+ *   gathered into one by `spell-ui/components/components.es`.
  * - See Spell UI's `notes/translation.md`.
  */
 export type Dictionary = {
@@ -423,7 +423,8 @@ export type Dictionary = {
    * Canonical value => localized, for the values an attribute lists of its own (`values: ["left", "right"]`),
    * on every tag:  `{ left: "izquierda" }`.
    * - So a word used by many tags is translated once.
-   * - After `components[tag].values` and a shared set's map (`values`), before the canonical value.
+   * - Looked up after `components[tag].values` and a shared set's map (`values`),
+   *   before falling back to the canonical value.
    * - NOT for the shared attributes' values (`animation`):  those keep their names.
    */
   words?: NameMap
