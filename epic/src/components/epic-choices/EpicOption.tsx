@@ -2,7 +2,6 @@ import { Show, type Accessor } from "solid-js"
 import { Dynamic, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
-import type { UILabelAttributes } from "spell-ui/jsx"
 
 import { NOBODY_LISTENING, ReviewClient, picks } from "spell-epic/review"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
@@ -344,8 +343,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             part={this.partForName("badge")}
             size="mini"
             basic=""
-            // HACK: `badge-color` is a hue's name, but a vocabulary's `string` attribute reads as any text
-            color={(this.badgeColor ?? "grey") as UILabelAttributes["color"]}
+            color={this.badgeColor ?? "grey"}
           >
             {this.badge}
           </ui-label>

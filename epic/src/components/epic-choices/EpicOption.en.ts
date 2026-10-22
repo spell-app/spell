@@ -50,7 +50,8 @@ export const epicOptionVocabulary = {
     { name: "badge", kind: "string", description: "In an `<epic-ask>`:  a small label after its title (`deferred`)." },
     {
       name: "badge-color",
-      kind: "string",
+      kind: "enum",
+      values: "hues",
       description: "Its badge's colour, a Spell UI hue (`blue`, `orange` ...);  none:  grey."
     },
     {
