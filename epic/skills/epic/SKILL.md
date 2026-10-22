@@ -544,6 +544,13 @@ Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he 
 - A running Do Now clicked again is "nevermind" (`canceled`, 7.3).
 
 This session LISTENS:  it waits on the doc's review inbox, and acts on what arrives.
+- EVERY epic session listens on its own while it's open, `/epic review` or not (epic `epic-engine` P18):
+  - the plugin's monitor (`epic session listen`) holds the inbox for the session whose title, or worktree, names the
+    epic, and keeps its heartbeat:  the page says it's listening
+  - it prints NOTHING until Owen sends;  then ONE line, `📬 <epic>:  Owen sent work ...`, which wakes the session
+  - that line:  take the work with `epic inbox wait <epic> --timeout 5`, then go on at 7.3, as if your own `wait` had
+    finished
+  - a `wait` already running in the session takes the work first:  the monitor then says nothing
 - Mechanical marks:  at once.
 - Add Details and "revisit now":  by background agents.
 - "Revisit soon":  answered one at a time.
@@ -806,6 +813,8 @@ want you to just do it").
 
 When Owen says he's done ("stop reviewing", "that's it"), or the session must stop:
 - stop the waiter (`TaskStop`), then `epic inbox ignore <name>`
+  - a session whose title or worktree names the epic keeps listening anyway, through its monitor (P18):  the next
+    Send still reaches it, as a `📬` line
 - `epic log <name> "Review:  <n> approved, <n> answered, <n> to todos, <n> details added"`
 - reply:  what was decided and done (in words, ids after), and what's still waiting on him;  the link pair
 - the doc's changes:  nothing to commit, from any checkout.

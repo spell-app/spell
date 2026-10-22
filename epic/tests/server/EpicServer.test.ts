@@ -52,6 +52,9 @@ const SETS: Record<string, ComponentSetSetting> = {
   brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
 }
 
+/** The folders a scratch repo's settings serve at their own addresses (`"engineRoutes"`), as spell-app's do. */
+const ENGINE_ROUTES = { "/element/": "app/dist-element" }
+
 /** The site header's tabs a scratch repo's settings name (`"siteTabs"`), as spell-app's do. */
 const SITE_TABS: SiteTab[] = [
   { name: "Guides", path: "guides/index.html", areas: ["guides"] },
@@ -64,7 +67,12 @@ const SITE_TABS: SiteTab[] = [
  */
 function withComponentSets(checkout: string): void {
   const name = checkout.split("/").at(-1)
-  put(checkout, "package.json", JSON.stringify({ pageServer: { componentSets: SETS, siteTabs: SITE_TABS } }))
+  put(
+    checkout,
+    "package.json",
+    JSON.stringify({ pageServer: { componentSets: SETS, siteTabs: SITE_TABS, engineRoutes: ENGINE_ROUTES } })
+  )
+  put(checkout, "app/dist-element/spell.pack.js", `// ${name} pack`)
   for (const set of Object.values(SETS)) {
     put(checkout, `${set.dir}/index.html`, `${name} ${set.name} home`)
     put(checkout, `${set.assets}/site.js`, `// ${name} ${set.assets}`)
@@ -192,6 +200,18 @@ describe("EpicServer", () => {
     expect((await ask(port, "GET", "/r/one/components/epics/")).status).toBe(404)
     // a repo whose settings name no component sets:  nothing, though it has Spell UI's folder
     expect((await ask(port, "GET", "/r/two/components/ui/")).status).toBe(404)
+  })
+
+  // epic-engine I58:  App UI's pages load the app's /element/spell.pack.js, which only spell-app's own page server served
+  test("the folders a repo's settings serve at their own addresses (engineRoutes), at /<route> for the default repo and /r/<repo>/<route>", async () => {
+    for (const base of ["", "/r/one"]) {
+      const pack = await ask(port, "GET", `${base}/element/spell.pack.js`)
+      expect([pack.status, pack.text], `${base}/element/spell.pack.js`).toEqual([200, "// one pack"])
+    }
+    // a repo whose settings name none:  nothing
+    expect((await ask(port, "GET", "/r/two/element/spell.pack.js")).status).toBe(404)
+    // the engine's own routes stay the engine's
+    expect((await ask(port, "GET", "/_epic/pack/epics.pack.js")).status).toBe(200)
   })
 
   test("every page's SPELL_SERVER:  its path under the prefix it was asked by, its repo, base and checkout", async () => {

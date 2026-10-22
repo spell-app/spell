@@ -56,7 +56,9 @@ describe("EpicConfig", () => {
       "pageVoices.readme": "readme",
       "pageVoices.guide": "readme",
       "pageVoices.code": "code",
-      "pageVoices.epic-page": "code"
+      "pageVoices.epic-page": "code",
+      checkoutPatches: "",
+      promptAck: true
     })
     // no app declared
     expect(config.app).toBeUndefined()

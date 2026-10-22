@@ -264,6 +264,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):  by process, never a pid file;  never a
         live checkout's
       - plain `node` loads it by path, `prune.ts` too (the server package's entry `spell-kit/server/page/prune`)
+    - `CheckoutPatches`:  `epic worktree patch [--all]`, the fixes a repo lists in `"checkoutPatches"` given to every
+      checkout at once, the worktrees behind `main` too (epic `epic-engine` P17)
+      - a `copy` patch puts `main`'s file where it isn't tracked yet, git-excluded;  a `run` patch runs once per checkout
+        (remembered in its git folder, `epic-patches.json`)
+      - the session-start hook starts it in the background ([patch-checkout.mjs](../hooks/patch-checkout.mjs)), the
+        worktree hook runs it on a reused branch;  plain `node` loads it by path
+    - `TranscriptIndex`:  what each saved session's transcript names (its titles, its folders), kept between runs in
+      Claude's folder (`spell-epic/transcript-index.json`;  epic `epic-engine` I62)
+      - `Sessions.named()` (`epic session find`, `epic worktree status`) reads only the transcripts that changed since:
+        the transcripts are 1.6GB, and reading them all took 1.7s of a 2s command, more with every session
+      - keyed by each file's size and modified time;  best effort, never throws
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path
@@ -271,6 +282,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       run in this process
     - `PromptGate`:  the epic rules the `UserPromptSubmit` hook checks a prompt against
       - the hook:  [prompt-gate.mjs](../hooks/prompt-gate.mjs)
+    - `PromptAck`:  the "On it:  ..." line that hook shows for a message sent while the session is busy, its summary
+      Haiku's (`claude -p`, hooks off);  every prompt logged to `epic-prompts.log` in the checkout's git folder;
+      `promptAck` in the config turns it off (epic `epic-engine` P18)
       - plain `node` loads it by path, with `command.types.ts`
     - `Git`:  running git, and finding checkouts:  the main one, the caller's, the one this code is in
     - ONE copy of the code:  every verb runs THIS checkout's code, on the caller's checkout's data.
@@ -318,6 +332,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send or Do Now finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
+    - `InboxMonitor`:  `epic session listen`, the plugin's MONITOR (`monitors/monitors.json`), one beside every
+      session (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
+      - the epic:  the session's title, else its worktree;  none, it does nothing
+      - holds the inbox for the session (`setListening()`, its heartbeat) unless another session listens
+      - prints NOTHING while idle (no tokens);  Owen's Send:  one `📬` line, which wakes the session, which takes the
+        work with its own `epic inbox wait`
     - the inboxes, one shape of comment for both (`CommentList`):
       - `ReviewInbox`:  an epic page's marks and comments
       - `GuideInbox`:  a docs page's comments and its Send (epic `epic-workflow` P13)

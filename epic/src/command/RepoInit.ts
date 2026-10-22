@@ -133,6 +133,8 @@ export class RepoInit {
    * - `repoTemplates`:  `""`, none:  the engine's templates are the repo's (spell-epic's `templates/`, epic `epic-eject` T11)
    * - `windowsFolder`:  `../<repo>.epics/windows`, the content folder's `windows/` (epic `epic-eject` P13)
    * - `app`:  none (the default);  the file shows how to declare one, in a comment
+   * - `checkoutPatches`:  none (`[]`);  the file shows one, in a comment
+   * - `promptAck`:  on, the default
    * - static:  needs no instance
    */
   static settingsFor(main: string): EpicSettings {
@@ -155,7 +157,9 @@ export class RepoInit {
       app: { ...EpicConfig.DEFAULTS.app },
       repos: "",
       voices: {},
-      pageVoices: { ...EpicConfig.DEFAULTS.pageVoices }
+      pageVoices: { ...EpicConfig.DEFAULTS.pageVoices },
+      checkoutPatches: [],
+      promptAck: true
     }
   }
 
@@ -222,6 +226,9 @@ export class RepoInit {
   "windowsFolder": ${value("windowsFolder")}
   // and the repo's app, which the docs' App tab opens through the epic server (started there when it isn't up):
   // "app": { "path": "/editor/", "url": "http://localhost:3000/", "start": "npm run dev" }
+  // and fixes every checkout gets at once, the worktrees behind main too (\`epic worktree patch\`):  main's file
+  // copied in where it isn't tracked yet, or a command run once in each checkout:
+  // "checkoutPatches": [{ "id": "vscode-ignore", "date": "2026-10-22", "why": "...", "copy": ".ignore" }]
 }
 `
   }

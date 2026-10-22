@@ -277,6 +277,15 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
         "merge main into this checkout's branch, regenerating the generated files both sides changed;  exit 1 " +
         "on other conflicts:  resolve, git add, then --continue",
       example: "epic worktree merge-main"
+    },
+    {
+      name: "patch",
+      usage: "[--all] [--dry-run] [--json]",
+      description:
+        "give this checkout the fixes its repo lists in .epic/config.json5's checkoutPatches that it doesn't have " +
+        "yet:  a file copied from main and git-excluded, or a command run once;  --all:  main and every worktree;  " +
+        "the session-start hook runs it by itself",
+      example: "epic worktree patch --all --dry-run"
     }
   ],
   session: [
@@ -327,6 +336,12 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<id prefix> [--json]",
       description: "another session's prompts, last reply and the question it's waiting on",
       example: "epic session transcript 055da582"
+    },
+    {
+      name: "listen",
+      usage: "[--once]",
+      description: "keep this session listening to its epic page while it's open:  the plugin's monitor runs it",
+      example: "epic session listen --once"
     }
   ],
   park: [

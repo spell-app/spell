@@ -73,6 +73,8 @@ import {
  *   (`epicUiMounts()`, epic `epic-eject` I21:  it answered 404 here)
  * - The OTHER component sets, as spell-app's page server serves them (`componentSetMounts()`, epic `epic-engine` I48:
  *   the top bar's Spell/UI and App/UI tabs answered 404 here)
+ * - The folders each repo's settings serve at their own addresses (`repoRouteMounts()`, epic `epic-engine` I58:  App
+ *   UI's pages load the app's `/element/spell.pack.js`, which answered 404 here)
  * - The sets' SITE BUNDLE (Spell UI's, spell-ui's `site/_assets`) isn't committed:  it builds the default repo's
  *   bundles itself as it starts, with that checkout's own build (`buildBundles()`, epic `epic-engine` P8), so it never
  *   waits for spell-app's page server
@@ -127,6 +129,9 @@ export class EpicServer {
   /** every component set's folders, at their addresses:  Epic UI's, then the repos' others */
   private readonly setMounts: SRV.Mount[]
 
+  /** the folders each repo's settings serve at their own addresses (`repoRouteMounts()`) */
+  private readonly routeMounts: SRV.Mount[]
+
   /**
    * the site header's tabs every page is told (`SPELL_SERVER.siteTabs`):  the default repo's settings' `"siteTabs"`,
    * as its own page server tells them;  none:  `undefined`, and pages show their bundle's (`defineSite({ tabs })`)
@@ -157,6 +162,7 @@ export class EpicServer {
     this.repos = repos ?? new RepoList({ home: this.home }).repos()
     this.defaultRepo = this.repos.find((repo) => repo.isDefault) ?? this.repos[0]
     this.setMounts = [...this.epicUiMounts(), ...this.componentSetMounts()]
+    this.routeMounts = this.repoRouteMounts()
     this.siteTabs = this.defaultRepo && pageServerSettings(this.defaultRepo.checkout).siteTabs
     this.pidFile = new SRV.PidFile(this.home, PID_FILE)
     this.info = {
@@ -340,7 +346,29 @@ export class EpicServer {
           { prefix: "/", dir: repo.checkout }
         ]
       : []
-    return [...engine, ...this.setMounts, ...repos, ...home]
+    return [...engine, ...this.setMounts, ...this.routeMounts, ...repos, ...home]
+  }
+
+  /**
+   * The folders each repo's settings serve at their own addresses, as spell-app's page server serves them
+   * (`engineRoutes()`, `"engineRoutes"` in the root `package.json`'s `"pageServer"`;  epic `epic-engine` I58):
+   * - e.g. spell-app's `"/element/": "app/dist-element"`, the app's element bundles that App UI's pages load
+   * - the folder is from the repo's main checkout, as the settings give it (`../spell-ui/docs` is beside it)
+   * - `/<route>`:  the default repo's;  `/r/<repo>/<route>`:  each repo's
+   * - after the engine's own routes (`ENGINE_ROUTES`) and the sets:  at one prefix the first folder holding the path
+   *   answers (`SRV.StaticHandler`), so the engine's `/_epic/assets/` is still this engine's, never a repo's copy
+   * - a folder not built yet is no error:  its paths answer 404
+   */
+  private repoRouteMounts(): SRV.Mount[] {
+    return this.repos.flatMap((repo) => {
+      const bases = repo === this.defaultRepo ? ["/", repo.prefix] : [repo.prefix]
+      return Object.entries(pageServerSettings(repo.checkout).engineRoutes ?? {}).flatMap(([route, folder]) =>
+        bases.map((base) => ({
+          prefix: `${base}${route.replace(/^\/+|\/+$/g, "")}/`,
+          dir: resolve(repo.checkout, folder)
+        }))
+      )
+    })
   }
 
   /**

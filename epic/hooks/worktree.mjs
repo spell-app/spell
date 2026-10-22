@@ -60,6 +60,8 @@
  *      finds their packages
  *      - `installCommand` again, in that folder, `installTimeout` seconds at most
  *      - a failure, or a folder that isn't there, is a WARNING, saying what to run:  the worktree works without it
+ * - Each new worktree's checkout patches (`Worktree.patch()`, epic `epic-engine` P17):  on a branch made from `main`
+ *   just now, only remembered as had;  on a branch that was there already, applied, as `epic worktree patch` would
  * - The hook's own time limit is in `hooks/hooks.json` (900s):  more than any install's.
  *
  * ## A multi-repo top (epic `epic-engine` P10, repo-split's Q9 A)
@@ -93,6 +95,7 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
+import { CheckoutPatches } from "spell-epic/command/CheckoutPatches.ts"
 import { CheckoutServers } from "spell-epic/command/CheckoutServers.ts"
 import { EpicRepo } from "spell-epic/config/EpicRepo.ts"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
@@ -158,10 +161,12 @@ class Worktree {
       console.error(`worktree hook:  reusing ${path}`)
       return path
     }
-    const args = Worktree.hasBranch(root, name) ? [path, name] : ["-b", name, path, config.baseBranch]
+    const reused = Worktree.hasBranch(root, name)
+    const args = reused ? [path, name] : ["-b", name, path, config.baseBranch]
     console.error(`worktree hook:  git worktree add ${args.join(" ")}`)
     mkdirSync(dirname(path), { recursive: true })
     Worktree.git(root, "worktree", "add", "--quiet", ...args)
+    Worktree.patch(path, reused)
     Worktree.linkOutside(path, root)
     Worktree.linkShared(path, config)
     if (config.linkSessionFolders) Worktree.linkSessions(path, root)
@@ -188,10 +193,12 @@ class Worktree {
         continue
       }
       const base = new EpicConfig(main).baseBranch
-      const args = Worktree.hasBranch(main, name) ? [worktree, name] : ["-b", name, worktree, base]
+      const reused = Worktree.hasBranch(main, name)
+      const args = reused ? [worktree, name] : ["-b", name, worktree, base]
       console.error(`worktree hook:  ${repo}:  git worktree add ${args.join(" ")}`)
       mkdirSync(dirname(worktree), { recursive: true })
       Worktree.git(main, "worktree", "add", "--quiet", ...args)
+      Worktree.patch(worktree, reused)
       Worktree.linkOutside(worktree, main)
       made.push(worktree)
     }
@@ -201,6 +208,19 @@ class Worktree {
     if (top.linkSessionFolders) for (const each of made) Worktree.linkSessions(each, top.main)
     if (top.installOnCreate && top.installCommand) Worktree.installAll(path, top)
     return path
+  }
+
+  /**
+   * Give new worktree `path` its repo's checkout patches (`CheckoutPatches`, epic `epic-engine` P17).
+   * - `reused`:  on a branch that was there already, maybe behind `main`:  patched as any checkout is
+   * - else made from `main` just now, so it has what they fix:  each only remembered as had, nothing run
+   * - its child repos are patched as each is made (`createAll()`)
+   * - a failure is a warning:  the worktree works, and the next session start patches it
+   */
+  static patch(path, reused) {
+    if (!reused) return CheckoutPatches.markApplied(path)
+    const report = new CheckoutPatches().patch(path)
+    for (const line of CheckoutPatches.lines([report], path)) console.error(`worktree hook:  patch:  ${line}`)
   }
 
   /**
