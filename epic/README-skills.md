@@ -33,8 +33,16 @@ and nine hooks, scripts Claude Code runs by itself when something happens.
 ```sh
 # from the kit's root, ~/www/spell
 echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node spell-epic/hooks/prompt-gate.mjs
-# {"decision":"block","reason":"Plan mode is on, so `/epic` can't make its worktree.  Leave plan mode ..."}
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+{"decision":"block","reason":"Plan mode is on, so `/epic` can't make its worktree.  Leave plan mode ..."}
+```
+
+</details>
 
 - Claude Code hands a hook a JSON object like that on stdin, with more fields (`cwd`, `session_id` ...);
   the hook answers on stdout, or prints nothing to let the prompt through.

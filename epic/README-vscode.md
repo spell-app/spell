@@ -86,10 +86,18 @@ To check it took, ask a Claude Code session in that window to run `epic window w
 
 ```sh
 epic window which
-# pid        41413
-# workspace  (none:  not opened from a .code-workspace)
-# folders    /Users/<you>/www/spell
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+pid        41413
+workspace  (none:  not opened from a .code-workspace)
+folders    /Users/<you>/www/spell
+```
+
+</details>
 
 - `pid` is the window's extension host, the process the extension runs in;  the bridge, below, says why it matters.
 - Before the install, or before the reload, it exits 1:
@@ -415,15 +423,25 @@ The type check is `yarn vscode:check`.
 The tests are seven, of the pure parts, in [tests/vscode/](tests/vscode/), run by plain `node --test`:
 
 ```sh
-cd ~/www/spell/spell-epic
 yarn test:vscode
-# ✔ stamped() and samePage():  a fresh ?t=, ignored with the hash when comparing
-# ...
-# ✔ folderIndex():  a window's folder by any spelling -- one reopened from the recent list after a move (I59)
-# ℹ tests 7
-# ℹ pass 7
-# ℹ fail 0
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+...
+✔ stamped() and samePage():  a fresh ?t=, ignored with the hash when comparing ...
+...
+✔ folderIndex():  a window's folder by any spelling -- one reopened from the recent list after a move (I59) ...
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+...
+```
+
+</details>
 
 - `yarn test` runs them with the rest, and with the bridge's other side's own, [window.test.mjs](tests/window.test.mjs).
 - The views and the bridge's server need a running VS Code, so they have no tests:

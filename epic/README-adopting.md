@@ -3,20 +3,28 @@
 ```sh
 cd ~/www/my-app
 epic init
-# ~/www/my-app/.epic/config.json5:  written
-#   contentFolder:  "../my-app.epics"
-#   baseBranch:  "main"
-#   worktreesFolder:  "../my-app.worktrees"
-#   installCommand:  "npm install"
-#   ... 18 more, one a line
-# ~/www/my-app.epics:  made, a git repo with epics, sagas, guides, pages
-# ~/www/my-app/epics:  linked
-# ~/www/my-app/sagas:  linked
-# ~/www/my-app/guides:  linked
-# ~/www/my-app/pages:  linked
-# ~/www/my-app/.gitignore:  written
-# next:  commit .epic/config.json5 and .gitignore on the base branch, so every new worktree starts with them
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+~/www/my-app/.epic/config.json5:  written
+  contentFolder:  "../my-app.epics"
+  baseBranch:  "main"
+  worktreesFolder:  "../my-app.worktrees"
+  installCommand:  "npm install"
+  ... 18 more, one a line
+~/www/my-app.epics:  made, a git repo with epics, sagas, guides, pages
+~/www/my-app/epics:  linked
+~/www/my-app/sagas:  linked
+~/www/my-app/guides:  linked
+~/www/my-app/pages:  linked
+~/www/my-app/.gitignore:  written
+next:  commit .epic/config.json5 and .gitignore on the base branch, so every new worktree starts with them
+```
+
+</details>
 
 _A repo that had never heard of Spell, set up for epics in one command.
 Real output, trimmed, the home folder shortened to `~`._
@@ -101,8 +109,16 @@ Then check that `epic` answers:
 
 ```sh
 epic --version
-# epic fc8cd13 (main) ~/www/spell/spell-epic
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+epic ... (...) .../spell-epic
+```
+
+</details>
 
 - `--version` names the code that answers:  its commit, its branch and the checkout it's in.
 - `~/.local/bin`, where the link goes, may not be on your `PATH`:  put the link wherever yours looks.

@@ -317,24 +317,33 @@ and drives the worktrees, windows and servers an epic works in.
 
 ```sh
 epic summary spanish
-# Spanish
-#   [x] P1 · Unicode Words  (2-3h)
-#   ...
-#   [ ] P11 · Solitario  (3-4h)
-#   ...
-#   [x] P17 · Parser Warnings in Spanish  (3-4h)
-# estimate:  56h-80h in all, 3h-4h left
-# next:  P11 · Solitario
-# open judgements:
-#   - J1  JSX tag names stay ASCII
-#   ...
-# open caveats:
-#   - C1  Agreement is a warning, never an error
-#   - C2  ser and estar are interchangeable to the parser
-#   ...
 ```
 
-_On Spell's own pages:  the plan for writing Spell in Spanish, with one phase of seventeen left._
+<details>
+<summary>Output</summary>
+
+```text
+Spanish
+  [x] P1 · Unicode Words  (2-3h)
+...
+  [ ] P11 · Solitario  (3-4h)
+...
+  [x] P17 · Parser Warnings in Spanish  (3-4h)
+...
+estimate:  ... in all, ... left
+next:  P11 · Solitario
+open judgements:
+  - J1  JSX tag names stay ASCII
+...
+open caveats:
+  - C1  Agreement is a warning, never an error
+  - C2  ser and estar are interchangeable to the parser
+...
+```
+
+</details>
+
+_On Spell's own pages:  the plan for writing Spell in Spanish, with P11 still to do._
 
 Every verb, by group, and how to name what one acts on:  [README-cli.md](README-cli.md).
 

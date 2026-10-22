@@ -2,25 +2,33 @@
 
 ```sh
 epic summary readme
-# READMEs
-#   [x] P1 · Map and Outlines  (3h)
-#   [x] P2 · Kit Pages  (3-4h)
-#   ...
-#   [x] P8 · Cross-links and Pictures  (2h)
-#   [~] P9 · Post-split Cleanup  (2h)
-#   [x] P10 · Doc Review  (1h)
-#   [x] P11 · Voice Rewrite  (4h)
-#   ...
-# estimate:  35h-41h in all, 2h left
-# open judgements:
-#   - J16  README-lsp says spell lsp starts the server, though it isn't built
-# open issues:
-#   - I3  Only spell-app has a .vscode/extensions.json
-#   ...
 ```
 
+<details>
+<summary>Output</summary>
+
+```text
+READMEs
+  [x] P1 · Map and Outlines  (3h)
+  [x] P2 · Kit Pages  (3-4h)
+...
+  [x] P8 · Cross-links and Pictures  (2h)
+  [~] P9 · Post-split Cleanup  (2h)
+  [x] P10 · Doc Review  (1h)
+  [x] P11 · Voice Rewrite  (4h)
+...
+estimate:  ...h in all, ...h left
+open judgements:
+...
+open issues:
+  - I3  Only spell-app has a .vscode/extensions.json
+...
+```
+
+</details>
+
 The plan for the pages you're reading came back in 0.4 seconds:
-fifteen phases, what's left of them (P9, under way:  `[~]`), and the loose ends.
+sixteen phases, what's left of them (P9, under way:  `[~]`), and the loose ends.
 P11 is the rewrite this page came out of.
 
 `gh issue list` asks a server for rows in a database.
@@ -99,8 +107,16 @@ _The forms `epic --help` lists, as it prints them._
 
   ```sh
   epic close seo J3
-  # close:  epic close seo#J3  (the id goes after a #, not "seo J3")
   ```
+
+  <details>
+  <summary>Output</summary>
+
+  ```text
+  close:  epic close seo#J3  (the id goes after a #, not "seo J3")
+  ```
+
+  </details>
 
 - A SHORT ADDRESS names an item through its saga, `SAGA:/<saga>/<epic>#<id>`:
   you can type it in chat, and `epic pages open` and `epic pages link` take it.
@@ -197,10 +213,19 @@ _One loop, driven by exit codes:  0 means work, 2 means arm it again._
 
   ```sh
   epic stok
-  # epic stok?  no such verb.  The verbs:
-  #   send, requests, file, home, merge, ...
-  # epic <verb> --help says what each does.
   ```
+
+  <details>
+  <summary>Output</summary>
+
+  ```text
+  epic stok?  no such verb.  The verbs:
+    send, requests, file, home, merge, ...
+  ...
+  epic <verb> --help says what each does.
+  ```
+
+  </details>
 
 ## Every verb, by group
 
@@ -350,8 +375,16 @@ The inbox's own verb goes first, then the epic;  the other order is refused, wit
 
 ```sh
 epic inbox seo wait
-# inbox:  epic inbox wait seo  (the inbox's verb goes first)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+inbox:  epic inbox wait seo  (the inbox's verb goes first)
+```
+
+</details>
 
 | Verb | What it does |
 | --- | --- |
