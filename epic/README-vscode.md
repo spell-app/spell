@@ -141,7 +141,6 @@ as VS Code's Simple Browser does, docked in the right side bar beside your code 
 | Epic Docs, `spellEpic.docView` | the Spell hat | any guide or docs page, an epic page too | `epic open <name>`, `epic pages open <page> --vs`, `/spell-docs` (spell-app's skill) |
 
 - Each view holds ONE page, and keeps its own:  the page you're reviewing stays put while the docs move.
-- Some help text still calls Epic Docs "Spell Docs":  it's the same view.
 
 Four things a browser tab wouldn't do:
 - **It doesn't reload under you.**
@@ -429,7 +428,7 @@ yarn test:vscode
 - `yarn test` runs them with the rest, and with the bridge's other side's own, [window.test.mjs](tests/window.test.mjs).
 - The views and the bridge's server need a running VS Code, so they have no tests:
   try a change by hand, in a window reloaded after the install.
-- `vscode/`'s own `yarn check` stops at `Command not found: node_modules/.bin/tsc`:
+- `vscode/`'s own `yarn check` stops at `command not found: node_modules/.bin/tsc`:
   it looks for TypeScript in spell-epic's folder, and the one install keeps it at the kit's root.
 
 ## See also

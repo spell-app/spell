@@ -1996,7 +1996,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
 - `epic pages open [page] [--vs | --review]` ([open.js](tools/open.js)):  shows a page, by default the index.
   - `page` may be a short address:  `SAGA:/drawable-spell`, `SAGA:/drawable-spell/python-target#T1` (landing on T1)
   - in Chrome, reusing its tab
-  - `--vs`:  in VS Code's doc preview, the right side bar's "Spell Docs" tab (`/spell-docs`)
+  - `--vs`:  in VS Code's doc preview, the right side bar's "Epic Docs" tab (`/spell-docs`)
   - `--review`:  its "Review" tab (`/epic review`)
   - Each tab keeps its own page.
     Showing the page a tab already has doesn't reload it:  the page updates itself.

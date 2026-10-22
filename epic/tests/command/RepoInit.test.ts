@@ -134,6 +134,10 @@ describe("RepoInit's statics", () => {
     expect(twice).toMatch(/^dist\/\n\n# shared:start .*\n\/epics\n\/sagas\n# shared:end\n$/)
     expect(RepoInit.withIgnoreBlock(twice, ["/epics", "/sagas"], "../x.epics")).toBe(twice)
   })
+
+  test("the .gitignore block:  nothing to ignore and no block yet adds none (a repo that links nothing in)", () => {
+    expect(RepoInit.withIgnoreBlock("dist/\n", [], "../x.epics")).toBe("dist/\n")
+  })
 })
 
 /** `git <args>` in `cwd`. */

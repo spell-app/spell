@@ -742,7 +742,7 @@ export class PlanDocCommands {
 
   /**
    * `open <name> [--docs]`:  show the doc in VS Code's side bar, reusing it (`openInVSCode()`):
-   * the Review tab (Owen's rule, 2026-10-07), or with `--docs` the Spell Docs tab
+   * the Review tab (Owen's rule, 2026-10-07), or with `--docs` the Epic Docs tab
    * - `epic open seo` passes `--docs`, and `epic open seo --review` doesn't (Owen, 2026-10-12)
    */
   private open(file: string, { docs }: Flags): void {
@@ -752,9 +752,9 @@ export class PlanDocCommands {
 
   /**
    * Show `file` in VS Code's doc preview, in the right side bar's Review tab
-   * (an epic page's place, Owen's rule 2026-10-07), or its Spell Docs tab (`view` `docs`),
+   * (an epic page's place, Owen's rule 2026-10-07), or its Epic Docs tab (`view` `docs`),
    * or Chrome when not run from VS Code.
-   * - It runs `src/tools/open.js --review <file>` (`--vs` for Spell Docs),
+   * - It runs `src/tools/open.js --review <file>` (`--vs` for Epic Docs),
    *   which starts the page server and asks the session's window (`pages.js` `openInVSCode()`).
    * - `hash`:  an id to land on;  `query`:  the page's query, `test=1` (a test run:  `epic test`)
    * - a child `node`, not an import:  `open.js` with this terminal attached, as its command line runs it
@@ -1041,7 +1041,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    only with --links;  then
                                                    check-spell.js
   open <name> [--docs]                             show in VS Code's side bar:  the Review tab, or --docs the
-                                                   Spell Docs tab (epic open seo ~== open seo --docs)
+                                                   Epic Docs tab (epic open seo ~== open seo --docs)
   migrate [<kind>] [<epic>... | --all] [--file <page>] [--step <name>] [--dry-run] [--notify] [--list]
                                                    bring pages up to today's markup:  every step of their kind,
                                                    oldest first, each page under its lock;  safe to run again.

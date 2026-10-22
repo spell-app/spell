@@ -134,7 +134,7 @@
  *     Claude panel included)
  * - `remove <path>`:  remove that folder again;  never the window's first
  * - `show <file> [--hash <id>] [--review]`:  show an `.html` doc in the window's doc preview, at id `<id>`
- *   - the doc preview:  the right side bar's "Spell Docs" tab;  `--review`:  its "Review" tab
+ *   - the doc preview:  the right side bar's "Epic Docs" tab;  `--review`:  its "Review" tab
  *   - while a `handoff` is pending:  in the window this session is moving to, once it has
  * - `open <name> [--pkg <pkg>] [--color <look>]`:  write worktree `<name>`'s window file and open it in a new window
  *   - `<pkg>` (a package, or any `<windowsFolder>/<pkg>.code-workspace`) defaults to this session's window's package,
@@ -869,7 +869,7 @@ export class Window {
   /**
    * Show `file` (an `.html` doc) in this session's window's doc preview, at id `hash` if given;
    * resolves to `{ window }` (the registry entry it showed in) or `{ later }` (the window file it will show in).
-   * - `view`:  the side bar tab, `"docs"` ("Spell Docs", the default) or `"review"` ("Review");
+   * - `view`:  the side bar tab, `"docs"` ("Epic Docs", the default) or `"review"` ("Review");
    *   sent only when given, so an extension from before the tabs still shows the doc
    * - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`);  sent only when given,
    *   and an extension from before it shows the page without it
@@ -1237,9 +1237,9 @@ const USAGE = `usage:  epic window <command>
   remove <path>                remove it again
   show <file> [--hash <id>] [--review]
                                show an .html doc in the window's doc preview (right side bar's
-                               "Spell Docs" tab;  --review:  its "Review" tab), at id <id>
+                               "Epic Docs" tab;  --review:  its "Review" tab), at id <id>
                                (moving:  in the window this session moves to)
-  reload [--review]            rebuild the "Spell Docs" view (--review:  "Review") from scratch, a new
+  reload [--review]            rebuild the "Epic Docs" view (--review:  "Review") from scratch, a new
                                frame at the page it shows:  for a view gone wrong (clicks lost ...)
   open <name> [--pkg <pkg>] [--color <look>] [--no-open]
                                open worktree <name> in a new window (default package:  this window's;

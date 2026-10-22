@@ -52,6 +52,9 @@ describe("EpicConfig", () => {
       repos: "",
       top: "",
       // spell-epic's own voices, and the default kinds of page (epic readme P13)
+      "voices.blog": join(EpicConfig.ENGINE_VOICES, "blog.md"),
+      "voices.brand": join(EpicConfig.ENGINE_VOICES, "brand.md"),
+      "voices.novice": join(EpicConfig.ENGINE_VOICES, "novice.md"),
       "voices.readme": join(EpicConfig.ENGINE_VOICES, "readme.md"),
       "pageVoices.readme": "readme",
       "pageVoices.guide": "readme",

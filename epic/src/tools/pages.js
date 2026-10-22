@@ -544,7 +544,7 @@ export function serverUrl(base, file) {
  * - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
  *   - an extension from before it ignores it:  the page shows as usual
  * - `view`:  which side bar tab;  each keeps its own page
- *   - `"docs"`:  "Spell Docs", the default
+ *   - `"docs"`:  "Epic Docs", the default
  *   - `"review"`:  "Review" (`/epic review`, `epic pages open <page> --review`)
  * - the session is moving to a worktree's window (`/isolate`, `/epic`:  a pending handoff):
  *   shown THERE once it has moved, not in the window it's leaving

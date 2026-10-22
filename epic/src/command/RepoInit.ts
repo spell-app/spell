@@ -237,9 +237,11 @@ export class RepoInit {
    * `.gitignore` text `text` with its shared block (`# shared:start` ... `# shared:end`) listing `ignored`,
    * one pattern a line (`/epics`).
    * - the block is replaced where it is, else added at the end
+   * - nothing to ignore and no block yet (a repo that links nothing in, as the kit):  `text` as it is, no empty block
    * - `content`:  the content folder from the main checkout, for the block's comment
    */
   static withIgnoreBlock(text: string, ignored: string[], content: string): string {
+    if (!ignored.length && !text.includes(BLOCK_START)) return text
     const block = [
       `${BLOCK_START}  (links into ${content}, the content repo, and the VS Code window files:  never tracked;  ` +
         "written by epic init)",

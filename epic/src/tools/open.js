@@ -4,9 +4,9 @@
  *   or just `solid/solid-2.html`;  default:  the home page, `pages/index.html`
  *   - `.html` and a folder's own page may be left off:  `solid/solid-2` ~== `guides/solid/solid-2.html`,
  *     `server` ~== `guides/server.html`
- * - `--vs`:  in VS Code's doc preview instead (the right side bar's "Spell Docs" tab, `openInVSCode()`):
+ * - `--vs`:  in VS Code's doc preview instead (the right side bar's "Epic Docs" tab, `openInVSCode()`):
  *   `/spell-docs`.  Not run from VS Code:  Chrome anyway.
- * - `--review`:  in the side bar's "Review" tab (`/epic review`), keeping the "Spell Docs" tab's page.  Implies
+ * - `--review`:  in the side bar's "Review" tab (`/epic review`), keeping the "Epic Docs" tab's page.  Implies
  *   `--vs`.
  * - `--hash=<id>`:  an id on the page to land on;  `--query=<query>`:  the page's query, `test=1` (`epic test`:  a
  *   test run, epic `epic-engine` P4)

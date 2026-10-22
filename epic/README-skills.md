@@ -19,8 +19,8 @@ The hook read it first, knew that plan mode can't make a worktree, and refused i
 leave plan mode, type `/epic seo`, and the plan starts from what you wrote.
 
 The whole plugin works like that.
-It gives Claude Code seventeen skills, workflows you start by typing a name,
-and eight hooks, scripts Claude Code runs by itself when something happens.
+It gives Claude Code eighteen skills, workflows you start by typing a name,
+and nine hooks, scripts Claude Code runs by itself when something happens.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
   [the hooks' table](#hooks) says which one did it.
@@ -45,7 +45,7 @@ echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node s
 
 </details>
 
-## Seventeen you type, eight that run by themselves
+## Eighteen you type, nine that run by themselves
 
 In most tools, a slash command is a saved prompt:  it pastes some text and hopes.
 A skill here is a procedure.

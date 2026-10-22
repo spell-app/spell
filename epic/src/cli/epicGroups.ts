@@ -440,7 +440,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "show",
       usage: "<file> [--hash <id>] [--review]",
-      description: "show an .html page in the window's side bar:  Spell Docs, or with --review the Review tab",
+      description: "show an .html page in the window's side bar:  Epic Docs, or with --review the Review tab",
       example: "epic window show epics/seo/seo.plan.html --review"
     },
     {
