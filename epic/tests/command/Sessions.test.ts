@@ -1,9 +1,19 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "fs"
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync
+} from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { Sessions } from "$/epics/command/Sessions"
+import { TranscriptIndex } from "$/epics/command/TranscriptIndex"
 import { EpicConfig } from "$/epics/config/EpicConfig"
 
 /** A fake `~/.claude`, and a folder that is NOT a git checkout to list sessions from. */
@@ -109,6 +119,26 @@ describe("named()", () => {
     } finally {
       ask.mockRestore()
       parse.mockRestore()
+    }
+  })
+  // epic `epic-engine` I62:  the second `epic worktree status` read no transcript it had read already
+  test("a transcript is scanned once while it's unchanged;  a rename later is still found", () => {
+    const scan = vi.spyOn(TranscriptIndex, "scan")
+    try {
+      const sessions = new Sessions({ home: HOME })
+      sessions.named("renamed-later")
+      scan.mockClear()
+      expect(sessions.named("renamed-later")).toEqual([])
+      expect(scan).not.toHaveBeenCalled()
+
+      appendFileSync(
+        join(HOME, "projects", "-busy", "busy-1.jsonl"),
+        `\n${JSON.stringify({ type: "custom-title", customTitle: "🚧 renamed-later" })}`
+      )
+      expect(sessions.named("renamed-later").map((it) => it.id)).toEqual(["busy-1"])
+      expect(scan).toHaveBeenCalledTimes(1)
+    } finally {
+      scan.mockRestore()
     }
   })
   transcript("-odd", "odd-1", [{ type: "user", cwd: `${REPO}/.claude/worktrees/odd"one\\x/src` }])

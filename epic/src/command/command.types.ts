@@ -124,6 +124,17 @@ export type NamedSession = {
 }
 
 /**
+ * What a transcript says about who it is and where it worked -- `TranscriptIndex.scan()`.
+ * - `titles`:  every `customTitle` in it (a `/rename`), distinct, escapes undone
+ * - `cwds`:  every `cwd` in it (folders the session worked in), distinct, escapes undone
+ * - the same strings `Sessions.named()` looks for, so a transcript with none of them can't be a match
+ */
+export type TranscriptFacts = {
+  titles: string[]
+  cwds: string[]
+}
+
+/**
  * What another session has been doing -- `Sessions.digest()`.
  * - `prompts`:  what Owen typed, oldest first (`when` is the timestamp's first 16 chars)
  * - `pending`:  an `AskUserQuestion` still waiting, with its options

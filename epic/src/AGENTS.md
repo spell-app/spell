@@ -253,6 +253,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):  by process, never a pid file;  never a
         live checkout's
       - plain `node` loads it by path, `prune.ts` too (the server package's entry `spell-kit/server/page/prune`)
+    - `TranscriptIndex`:  what each saved session's transcript names (its titles, its folders), kept between runs in
+      Claude's folder (`spell-epic/transcript-index.json`;  epic `epic-engine` I62)
+      - `Sessions.named()` (`epic session find`, `epic worktree status`) reads only the transcripts that changed since:
+        the transcripts are 1.6GB, and reading them all took 1.7s of a 2s command, more with every session
+      - keyed by each file's size and modified time;  best effort, never throws
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path

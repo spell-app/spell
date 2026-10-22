@@ -31,10 +31,12 @@ import {
   type RunningSession,
   type SessionSummary,
   type TranscriptDigest,
+  type TranscriptFacts,
   type VerbArgs
 } from "./command.types"
 import { Git } from "./Git"
 import { Stock } from "./Stock"
+import { TranscriptIndex } from "./TranscriptIndex"
 import { Worktrees } from "./Worktrees"
 
 /****************
@@ -46,6 +48,7 @@ import { Worktrees } from "./Worktrees"
  *   - running ones:  its registry, `sessions/<pid>.json`
  *   - saved ones:  their transcripts, `projects/<slug>/<id>.jsonl`
  *   - titles waiting for a session's next prompt:  `session-titles/<id>`
+ *   - what the transcripts name, for `find` (`named()`):  `spell-epic/transcript-index.json` (`TranscriptIndex`)
  * - The verbs (`run()`):
  *   - `list [<words>...] [--all] [--limit N]`:  this repo's saved sessions, newest first, matching every word
  *     - the main checkout, worktrees and package folders together;  this session left out
@@ -491,6 +494,9 @@ export class Sessions {
    * The sessions titled `name` (`/rename`) or that worked in worktree `name`, newest first.
    * - running or not, any project
    * - used by `epic session find`, and by worktree / park status
+   * - a transcript that can't match isn't read:  what each one names comes from the `TranscriptIndex`, which scans a
+   *   transcript again only when it has changed since the last run
+   * - SIDE EFFECT:  saves the index, `<home>/spell-epic/transcript-index.json`
    */
   named(name: string): NamedSession[] {
     // a `cwd` in worktree `name`:  the worktrees folder from the repo's `.epic/config.json5`
@@ -502,15 +508,15 @@ export class Sessions {
       if (!worktrees.has(cwd)) worktrees.set(cwd, config.worktreeNameOf(cwd))
       return worktrees.get(cwd)
     }
+    const index = new TranscriptIndex({ file: join(this.home, TRANSCRIPT_INDEX) })
     const found: NamedSession[] = []
     for (const path of this.transcripts()) {
       let title: string | null = null
       let cwd: string | null = null
       let last = ""
       let inWorktree = false
-      const text = readFileSync(path, "utf8")
-      if (!Sessions.mayBeNamed(text, name, worktreeOf)) continue
-      for (const line of text.split("\n")) {
+      if (!Sessions.mayBeNamed(index.factsOf(path), name, worktreeOf)) continue
+      for (const line of readFileSync(path, "utf8").split("\n")) {
         // cheap pre-check:  most lines are neither
         if (!line.includes('"custom-title"') && !line.includes('"cwd"')) continue
         const entry = Sessions.parseJSONLine(line)
@@ -525,24 +531,18 @@ export class Sessions {
       const titled = title !== null && bareTitle(title) === name
       if (titled || inWorktree) found.push({ id: basename(path, ".jsonl"), title: title ?? "-", last, cwd })
     }
+    index.save()
     return found.sort((a, b) => b.last.localeCompare(a.last) || b.id.localeCompare(a.id))
   }
 
   /**
-   * Whether transcript `text` MAY be titled `name` or have worked in its worktree (`worktreeOf()`), from every
-   * `"customTitle"` and `"cwd"` in it, unparsed (epic `epic-engine` I67)
-   * - `false`:  `named()` skips it without parsing a line;  most transcripts, and parsing them all took seconds
-   * - every string either key holds, anywhere in it:  so never `false` for one `named()` would find
+   * Whether a transcript with `facts` MAY be titled `name` or have worked in its worktree (`worktreeOf()`)
+   * (epic `epic-engine` I67)
+   * - `false`:  `named()` skips it without reading a line;  most transcripts, and parsing them all took seconds
+   * - every title and folder the transcript holds, anywhere in it:  so never `false` for one `named()` would find
    */
-  static mayBeNamed(text: string, name: string, worktreeOf: (cwd: string) => string | undefined): boolean {
-    const seen = new Set<string>()
-    for (const [, key, raw] of text.matchAll(/"(customTitle|cwd)"\s*:\s*"((?:[^"\\]|\\.)*)"/g)) {
-      if (seen.has(`${key}:${raw}`)) continue
-      seen.add(`${key}:${raw}`)
-      const value = decoded(raw!)
-      if (key === "cwd" ? worktreeOf(value) === name : bareTitle(value) === name) return true
-    }
-    return false
+  static mayBeNamed(facts: TranscriptFacts, name: string, worktreeOf: (cwd: string) => string | undefined): boolean {
+    return facts.titles.some((title) => bareTitle(title) === name) || facts.cwds.some((cwd) => worktreeOf(cwd) === name)
   }
 
   /** Every transcript file, of every project:  each once, a linked worktree's folder skipped (`SessionFolders.listed()`). */
@@ -775,6 +775,9 @@ export type SessionsProps = {
   home?: string
 }
 
+/** The `TranscriptIndex`'s file, in Claude Code's folder (`Sessions.home`). */
+const TRANSCRIPT_INDEX = join("spell-epic", "transcript-index.json")
+
 /** The flags of `epic session` that take no value. */
 const SWITCHES = ["all", "json", "dryRun", "force"]
 
@@ -826,16 +829,6 @@ function readJSON(path: string): Record<string, unknown> {
     return Sessions.parseJSONLine(readFileSync(path, "utf8"))
   } catch {
     return {}
-  }
-}
-
-/** JSON string body `raw` (between its quotes), its escapes undone;  as written when it doesn't parse. */
-function decoded(raw: string): string {
-  if (!raw.includes("\\")) return raw
-  try {
-    return JSON.parse(`"${raw}"`) as string
-  } catch {
-    return raw
   }
 }
 
