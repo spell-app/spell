@@ -49,13 +49,13 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
     - An evaluated-and-rejected approach gets a written census of what it would touch.
   - Standing problems:  in their ledger, never left implicit -- `agents/CODE-DEBT.md` (incl. code that doesn't
     follow a WWOD rule yet), `agents/SUSPECTED-BUGS.md`, `agents/PAPERCUTS.md`, each with its own rules in its
-    header.  SEE:  root `AGENTS.md` "Long-term debt".
+    header.  SEE:  the kit's `AGENTS.md` "Long-term debt".
   - NOT:  a `CORRECTED <date>:` annotation on a claim later found wrong -- each file's own rule says how it's fixed.
 - **Inspect objects through a debug global, not `console.log`** -- SEE:  WWOD §19 › "Debug globals through
   `setDebugGlobal()`".
 - **Finishing pass for fast-drafted code:**
   - Run `yarn review` at the root of every repo you touched (or the kit's, over all);  what it runs:
-    SEE:  root `AGENTS.md` "Toolchain:  Vite+".
+    SEE:  the kit's `AGENTS.md` "Toolchain:  Vite+".
   - Then sweep for classic drift bugs:
     - operator precedence in template ternaries (`` `${a}` + b ? … ``)
     - inverted comparisons in guard clauses
@@ -133,7 +133,7 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 - **Formatting is oxfmt's** (through `vp fmt`):  120-char width, 2-space indent, no semicolons, double quotes, no
   trailing commas.
   - never hand-format against it;  `yarn format` settles it
-  - where it's configured:  SEE:  root `AGENTS.md` "Toolchain:  Vite+"
+  - where it's configured:  SEE:  the kit's `AGENTS.md` "Toolchain:  Vite+"
 - **Strict TypeScript.**
   - Private members:  SEE:  WWOD §12 › "TS `private`, never `#private`".
 - **Decorators:**  STANDARD (TC39) only -- WWOD §12 › "Decorators".

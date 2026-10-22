@@ -1,3 +1,5 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { describe, expect, test } from "vite-plus/test"
@@ -98,6 +100,39 @@ describe("ReadmeCheck.checkPage():  brand", () => {
     expect(findingsOf(["Packs:  `fa7-solid`, `fa7-brands`.", "But `spell-brand` is not."], "brand")).toEqual([
       "2 brand"
     ])
+  })
+})
+
+describe("ReadmeCheck.checkLink():  links into another repo", () => {
+  /** a page of the kit (`README.md`) in a temporary kit holding one child repo, `spell-ui`, with one page */
+  function kitWithChild(): string {
+    const root = mkdtempSync(join(tmpdir(), "readme-check-"))
+    mkdirSync(join(root, "spell-ui"))
+    writeFileSync(join(root, "spell-ui", "README-themes.md"), "# Themes\n\n## Dark mode\n")
+    return root
+  }
+  function findings(root: string, line: string): string[] {
+    return new ReadmeCheck(root)
+      .checkPage(join(root, "README.md"), line)
+      .map(({ rule, message }) => `${rule}  ${message}`)
+  }
+
+  test("flags a relative link into another repo, naming the GitHub URL to write", () => {
+    expect(findings(kitWithChild(), "[themes](spell-ui/README-themes.md)")).toEqual([
+      "cross-repo  spell-ui/README-themes.md:  write https://github.com/spell-app/spell-ui/blob/main/README-themes.md"
+    ])
+  })
+
+  test("checks a GitHub URL into one of our repos against its checkout, anchors included", () => {
+    const root = kitWithChild()
+    const url = "https://github.com/spell-app/spell-ui/blob/main/README-themes.md"
+    expect(findings(root, `[themes](${url}#dark-mode)`)).toEqual([])
+    expect(findings(root, `[themes](${url}#light-mode)`).map((each) => each.split("  ")[0])).toEqual(["anchor"])
+    expect(
+      findings(root, `[gone](https://github.com/spell-app/spell-ui/blob/main/README-gone.md)`).map(
+        (each) => each.split("  ")[0]
+      )
+    ).toEqual(["link"])
   })
 })
 

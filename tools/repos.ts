@@ -22,7 +22,7 @@
  * ```
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, mkdirSync, readFileSync, rmSync, symlinkSync } from "node:fs"
+import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, rmSync, symlinkSync } from "node:fs"
 import { join, resolve } from "node:path"
 
 import JSON5 from "json5"
@@ -199,17 +199,25 @@ function clone(args: string[]): number {
  */
 const NO_AGENTS_LINK = new Set(["spell-epic"])
 
+/** Where each child repo's `agents` link points, from the repo's root:  the kit's `agents/`. */
+const KIT_AGENTS = "../agents"
+
 /**
  * Links child repo `name`'s `agents` (git-ignored there) to the kit's `agents/`:  WWOD, tracked in the kit, and the
  * three logs (epic `repo-split` P9), so a repo's instructions find `agents/wwod/WWOD.md`, `agents/PAPERCUTS.md` ...
- * - Leaves anything already there alone.
+ * - Replaces a link pointing anywhere else:  a checkout from before the split links the content repo's old copy,
+ *   `../spell.epics/agents` (epic `repo-split` I64).
+ * - Leaves a real folder or file alone:  never deletes what isn't a link.
  */
 function linkAgents(name: string): void {
   if (NO_AGENTS_LINK.has(name)) return
   const link = join(TOP, name, "agents")
-  if (existsSync(link) || isLink(link)) return
-  symlinkSync("../agents", link)
-  console.log(`${name}/agents -> ../agents  (the kit's WWOD and the logs)`)
+  if (isLink(link)) {
+    if (readlinkSync(link) === KIT_AGENTS) return
+    rmSync(link)
+  } else if (existsSync(link)) return
+  symlinkSync(KIT_AGENTS, link)
+  console.log(`${name}/agents -> ${KIT_AGENTS}  (the kit's WWOD and the logs)`)
 }
 
 /** Is there a symbolic link at `path` (even one pointing nowhere)? */

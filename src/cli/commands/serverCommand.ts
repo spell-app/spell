@@ -19,9 +19,23 @@ const PAGE_SERVER_CLI: CLI.ToolSpec = { tool: "src/server/page/cli.ts", tsx: "ts
 /**
  * Run the page server's own command line (`src/server/page/cli.ts`) with `args` verbatim, in the current folder:
  * its checkout is the one the current folder is in (`--root` says another).  Resolves to its exit code.
+ * - Inside a kit, from a folder whose checkout has no page server settings (the kit's root, the content folder,
+ *   spell-ui ...):  the kit's repo that has them, by an added `--root` (`withServersRoot()`, epic `repo-split` I62)
  */
 export function pageServer(args: string[]): Promise<number> {
-  return CLI.runTool(PAGE_SERVER_CLI, args)
+  return CLI.runTool(PAGE_SERVER_CLI, withServersRoot(args))
+}
+
+/**
+ * `args`, with `--root <checkout>` added when the page server of the current folder's checkout would serve nothing:
+ * - inside a kit, and `serversRoot()` isn't the checkout the folder is in (`findRoot()`):
+ *   from the kit's root, `spell server start` starts spell-app's page server, and `status` finds it
+ * - unchanged when `args` say `--root` already, outside a kit, or in the checkout that has the settings
+ */
+export function withServersRoot(args: string[], from = process.cwd()): string[] {
+  if (args.includes("--root") || !CLI.findCheckout(CLI.KIT_MARKER, from, "")) return args
+  const root = serversRoot(from)
+  return root === (findRoot(from) ?? resolve(from)) ? args : [...args, "--root", root]
 }
 
 ////////////////
@@ -150,7 +164,7 @@ const UI_TIMEOUT_MS = 130_000
 /**
  * `spell server stop [local|all]`:
  * - `local` (default):  the page server of the checkout the current folder is in, as `src/server/page/cli.ts stop`
- *   (its editor stops with it)
+ *   (its editor stops with it);  inside a kit, the one `serversRoot()` names (`pageServer()`)
  * - `all`:  every web server `start all` starts (`serversRoot()`):  the page server, then the editor too, from its
  *   record, when it's still running;  e.g. after the page server died without stopping it (kill -9)
  * - Throws `CliError` for another word.

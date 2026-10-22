@@ -107,7 +107,7 @@ the kit, then the repo and folder it's working in, then the rules for the task a
 | 1 | the kit's [CLAUDE.md](CLAUDE.md) | by Claude Code, as every session starts | seven lines:  two `@` imports, of the next two files |
 | 2 | the kit's [AGENTS.md](AGENTS.md) | through `CLAUDE.md`;  Codex reads it itself | the kit, and what's across repos:  installs, imports, tests, CI, worktrees |
 | 3 | WWOD's hub, [WWOD.md](agents/wwod/WWOD.md) | through `CLAUDE.md` | the seven sections every task needs, and the table of which spoke to read for what |
-| 4 | a child repo's `CLAUDE.md` and `AGENTS.md`, e.g. [spell-ui's](spell-ui/AGENTS.md) | when the session first works in that repo | that repo:  its folders, what it may import, its commands, its own conventions |
+| 4 | a child repo's `CLAUDE.md` and `AGENTS.md`, e.g. [spell-ui's](https://github.com/spell-app/spell-ui/blob/main/AGENTS.md) | when the session first works in that repo | that repo:  its folders, what it may import, its commands, its own conventions |
 | 5 | a folder's `AGENTS.md`, e.g. [the kit server's](src/server/AGENTS.md) | through the `CLAUDE.md` beside it:  two lines, and an `@AGENTS.md` | what's local to that folder |
 | 6 | WWOD's spoke for the task | as the hub's table says, before writing | one topic's rules:  types, classes, CSS, tests ... (below) |
 | 7 | the Solid 2 rules | IN FULL, before any Solid code;  the `solid-2` skill triggers on Solid work | Solid 2 as it is:  it's neither React nor Solid 1, and guessing from either writes wrong code |
@@ -131,9 +131,10 @@ a section named like a WWOD rule EXTENDS it, and says so, "As WWOD §4, plus:".
     one at a plugin's root draws a warning from `claude plugin validate`.
 
 <details>
-<summary>The Claude-only rules in spell-app's CLAUDE.md</summary>
+<summary>The Claude-only rules in the kit's CLAUDE.md</summary>
 
-spell-app's `CLAUDE.md` loads its `AGENTS.md` and WWOD, as the kit's does, then adds what only Claude Code can do:
+[The kit's `CLAUDE.md`](CLAUDE.md) loads its `AGENTS.md` and WWOD, then adds what only Claude Code can do, for every
+repo:
 
 1. Narrate each step in the order it actually happens,
    and bold anything in the change that has drifted from what was last asked for.
@@ -149,8 +150,8 @@ spell-app's `CLAUDE.md` loads its `AGENTS.md` and WWOD, as the kit's does, then 
 6. A reply that closes out the session's work ends with `*You can close this tab*`, when nothing is left for it,
    and asks whether to run `/isolate done` if its worktree is still there.
 
-- The catch:  the kit's own `CLAUDE.md` has none of these,
-  so a session that never opens a file in spell-app never reads them.
+- Every session reads them, in any repo:
+  a child repo's `CLAUDE.md` points up to the kit's, which Claude Code loads from the folder above.
 
 </details>
 
@@ -228,11 +229,11 @@ In the checkout:
 | --- | --- | --- |
 | run `yarn install` at the kit's root | in a child repo:  they have no `yarn.lock` | [the kit's AGENTS.md](AGENTS.md), "The kit" |
 | run git in the repo you mean:  `git -C spell-ui status` | read a child repo's changes off `git status` at the kit's root:  it sees only the kit's own files | the kit's AGENTS.md, "The kit" |
-| enter a worktree with Claude Code's own worktree tool | start a session in the worktree's folder:  only the tool brings the session back there when it's reopened | [spell-epic's README-adopting.md](spell-epic/README-adopting.md) |
+| enter a worktree with Claude Code's own worktree tool | start a session in the worktree's folder:  only the tool brings the session back there when it's reopened | [spell-epic's README-adopting.md](https://github.com/spell-app/spell-epic/blob/main/README-adopting.md) |
 | merge `main` in with `epic worktree merge-main` | a bare `git merge main`:  it line-merges the generated files the command rebuilds from the merged source | [README-development.md](README-development.md#working-across-repos--one-epic-one-branch-name) |
-| remove a worktree with `epic worktree remove <name>` | a bare `git worktree remove`:  it leaves the worktree's servers running | [spell-epic's AGENTS.md](spell-epic/AGENTS.md) |
-| leave the content folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [spell-app's AGENTS.md](spell-app/AGENTS.md), "Shared content" |
-| open a worktree's window with `epic window open` | `code --add`, `--remove` or `-r`:  they can restart the window's extensions, the Claude panel and its session with them | spell-app's AGENTS.md, "Worktrees" |
+| remove a worktree with `epic worktree remove <name>` | a bare `git worktree remove`:  it leaves the worktree's servers running | [spell-epic's AGENTS.md](https://github.com/spell-app/spell-epic/blob/main/AGENTS.md) |
+| leave the content folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [the kit's AGENTS.md](AGENTS.md#shared-content), "Shared content" |
+| open a worktree's window with `epic window open` | `code --add`, `--remove` or `-r`:  they can restart the window's extensions, the Claude panel and its session with them | [the kit's AGENTS.md](AGENTS.md#worktrees), "Worktrees" |
 
 In the code:
 
@@ -302,11 +303,11 @@ _Two subjects from the kit's history:  a phase's, and an item fix's, which names
 
 - **Real today:**  Spell's own repos are built this way, in Claude Code;  the kit's history is phase commits.
 - **Not yet:**  other agents (below, "Coming").
-- How epics work, the words on a page and the review loop:  [spell-epic's README](spell-epic/README.md).
+- How epics work, the words on a page and the review loop:  [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md).
 
 ## The epic plugin
 
-[spell-epic](spell-epic/README.md) is a Claude Code plugin:
+[spell-epic](https://github.com/spell-app/spell-epic/blob/main/README.md) is a Claude Code plugin:
 the epic pages and their review loop, worktrees and VS Code windows, parking and waking sessions,
 and the `epic` command that drives them.
 ONE copy on the machine serves every repo and every window.
@@ -337,7 +338,7 @@ ln -s ~/www/spell/spell-epic/bin/epic ~/.local/bin/epic
 - To try it in ONE session first, with nothing installed:  `claude --plugin-dir ~/www/spell/spell-epic`.
 - For the Review tab and window moves, install its VS Code extension too:
   [README-vscode.md](README-vscode.md#spell-epic--the-pages-beside-your-code).
-- Using it in a repo that isn't Spell:  [spell-epic's README-adopting.md](spell-epic/README-adopting.md).
+- Using it in a repo that isn't Spell:  [spell-epic's README-adopting.md](https://github.com/spell-app/spell-epic/blob/main/README-adopting.md).
 - The cost:  it installs only inside the kit for now, since it runs on the kit and Spell UI from the one install.
 
 <details>
@@ -362,7 +363,7 @@ The kit's [.epic/config.json5](.epic/config.json5), key by key:
 - The keys it leaves out (`installTimeout`, `repoTemplates`, `app`) take their defaults.
 - `epic config [key]` prints what's in force;  `epic init` writes every key, with a comment each.
 - Every key and its default, in spell-epic's README-adopting.md:
-  [The config file](spell-epic/README-adopting.md#the-config-file--one-per-repo-read-from-the-main-checkout).
+  [The config file](https://github.com/spell-app/spell-epic/blob/main/README-adopting.md#the-config-file--one-per-repo-read-from-the-main-checkout).
 
 </details>
 
@@ -373,16 +374,16 @@ A HOOK is a script Claude Code runs on an event:  a session starting, a prompt s
 
 The plugin brings 17 skills in three groups;  spell-app has five of its own.
 
-| The plugin's [`skills/`](spell-epic/skills/) | For |
+| The plugin's [`skills/`](https://github.com/spell-app/spell-epic/tree/main/skills) | For |
 | --- | --- |
 | Planning and review:  `/epic`, `/epics`, `/details`, `/comment`, `/docs-check`, `/send` | an epic's life, from the first prompt to the last review |
 | Worktrees and sessions:  `/isolate`, `/park`, `/unpark`, `/wait-for`, `/worktrees`, `/session`, `/title`, `/wtf` | moving work between worktrees, windows and sessions, and keeping track of it |
 | Background and offline:  `/bg`, `/bedtime`, `/airplane` | work that runs while you're elsewhere:  a named background agent, phases built overnight, pages marked up offline |
 
 - Each one, its arguments, and when to reach for it:
-  [spell-epic's README-skills.md](spell-epic/README-skills.md).
+  [spell-epic's README-skills.md](https://github.com/spell-app/spell-epic/blob/main/README-skills.md).
 
-spell-app's, in its own [`.claude/skills/`](spell-app/.claude/skills/):
+spell-app's, in its own [`.claude/skills/`](https://github.com/spell-app/spell-app/tree/main/.claude/skills):
 
 | Skill | What it does |
 | --- | --- |
@@ -392,7 +393,7 @@ spell-app's, in its own [`.claude/skills/`](spell-app/.claude/skills/):
 | `/spell-docs` | opens the docs in VS Code's Epic Docs tab |
 | `/spell-serve` | starts this checkout's servers, and says which port each is on |
 
-The hooks are the plugin's [`hooks.json`](spell-epic/hooks/hooks.json):
+The hooks are the plugin's [`hooks.json`](https://github.com/spell-app/spell-epic/blob/main/hooks/hooks.json):
 the seven in the first minute, above, and two that run on the way out.
 - `worktree.mjs`, on `WorktreeRemove`, stops the checkout's servers before the worktree goes.
 - `left-worktree.mjs`, on `PostToolUse` after `ExitWorktree`, reminds the reply to end with
@@ -405,7 +406,7 @@ the seven in the first minute, above, and two that run on the way out.
 - The behind-`main` notice exists because windows sat 54 to 154 commits behind, and nobody knew.
   It says so in one line:  `⎇ <branch> is <n> commits behind main:  its code and pages are that old.`
 - Each hook's event and time limit, and the prompt gate's rules:
-  [spell-epic's README-skills.md](spell-epic/README-skills.md#hooks).
+  [spell-epic's README-skills.md](https://github.com/spell-app/spell-epic/blob/main/README-skills.md#hooks).
 - spell-app's own Claude settings hold no hooks.
 
 ## What's Claude-specific
@@ -430,8 +431,8 @@ Where it stands:  planned;  the plugin, skills and hooks are Claude Code's for n
 
 ## See also
 
-- [spell-epic's README](spell-epic/README.md):  epics, the method the agents here plan in
-- [spell-epic's README-skills.md](spell-epic/README-skills.md):  every skill and hook, and when to reach for which
+- [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md):  epics, the method the agents here plan in
+- [spell-epic's README-skills.md](https://github.com/spell-app/spell-epic/blob/main/README-skills.md):  every skill and hook, and when to reach for which
 - [AGENTS.md](AGENTS.md):  the kit's rules, the ones every session loads
 - [README-development.md](README-development.md):  the checks to run before calling it done, and worktrees
 - [README-vscode.md](README-vscode.md):  the Review tab, windows, and the Claude panel

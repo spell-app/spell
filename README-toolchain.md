@@ -23,7 +23,7 @@ That `setTimeout()` is good JavaScript, and ESLint would pass it.
 Here it's a bug waiting for a double-click:
 click Copy twice inside two seconds, and the first timer, which nothing cancels,
 takes "Copied" away before the second click's two seconds are up.
-What ships in [UICode.tsx](spell-ui/src/components/ui-code/UICode.tsx) does what the message says, and passes:
+What ships in [UICode.tsx](https://github.com/spell-app/spell-ui/blob/main/src/components/ui-code/UICode.tsx) does what the message says, and passes:
 
 ```tsx
     this.copiedTimer?.cancel()
@@ -219,7 +219,7 @@ Spell UI's `<ui-form>` keeps one, because its observer must stop when the form l
 In Spell UI that isn't the end of it.
 A test lists every disable comment in its component folders with its reason, fifteen today,
 and a new one fails it until it's added there:  every exception is seen in review
-([LintPatterns.test.ts](spell-ui/tests/tools/LintPatterns.test.ts)).
+([LintPatterns.test.ts](https://github.com/spell-app/spell-ui/blob/main/tests/tools/LintPatterns.test.ts)).
 Not yet elsewhere:  spell-epic's three exceptions get only the report of an unused one, and spell-app has none.
 
 Even this page is linted, by two scripts at the kit's root:
@@ -399,7 +399,7 @@ and a rule changed here reaches every repo's next run.
   (`packageVersion(import.meta.dirname)`).
   - Code reads it as `PACKAGE_VERSION`, from `spell-kit/util`:  `"unknown"` when nothing defined it.
   - Code `tsx` runs gets it from spell-lang's
-    [packageVersion.node.ts](spell-lang/src/spell/node/packageVersion.node.ts) instead.
+    [packageVersion.node.ts](https://github.com/spell-app/spell-lang/blob/main/src/spell/node/packageVersion.node.ts) instead.
 
 </details>
 

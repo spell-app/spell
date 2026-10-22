@@ -17,11 +17,12 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   shadow events, hot reloading.
 - Its own repo, spell-element, from epic `repo-split` P8 (cut from spell-app with its history);
   merged into the kit with that history in P9.
-- Another repo imports it by its npm name, `spell-kit/element`, an entry of the kit's `package.json` `exports`
-  (`spell-kit/element/timing` ...).
+- Another repo imports it by its npm name, `spell-kit/element` (`spell-kit/element/timing` ...),
+  through the wildcard entry of the kit's `exports`.
 - The kit's own files import it by the same name (epic `repo-split` P14).
-  - Its pack-module key is that name too, `spell-kit/element`:  every page's component packs share it by it at run
-    time (`SpellUI.packModules`;  `$/spell-element` until epic `repo-split` P14, Q45).
+  - Its pack-module key is that name too, `spell-kit/element`:
+    every page's component packs share it by that name at run time (`SpellUI.packModules`).
+    - It was `$/spell-element` until epic `repo-split` P14 (Q45).
 - It may use:  util's generic files (`spell-kit/util/class` ...) and the toolchain, both the kit's.
   - Every arrow points DOWN:  nothing in the kit or below it may import a child repo.
 - Its tests:  in the kit's [tests/element/](../../tests/element/) (below, "Overview").
@@ -63,8 +64,8 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - [vocabulary.types.ts](vocabulary.types.ts):  `ComponentVocabulary`, `Dictionary`:  every set's schema
 - What's in [`src/element-tools/`](../element-tools/), node only, imported as `spell-kit/element-tools/<Name>`:
   the tools every set's builds and scripts share.
-  - Spell UI's own `tools/` until epic `repo-split` P10;  `element/tools/` (`spell-kit/element/tools/...`) until P14
-    (J94).
+  - Spell UI's own `tools/` until epic `repo-split` P10;
+    then `element/tools/` (`spell-kit/element/tools/...`) until P14 (J94).
   - [ComponentPack](../element-tools/ComponentPack.ts):  a component pack's build, and whether it's current
     - its shapes and its error:  [tools.types.ts](../element-tools/tools.types.ts)
   - [packModules](../element-tools/packModules.ts):  the modules a pack shares with the page (`PACK_MODULES`)
@@ -79,10 +80,15 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   - Their tests:  the kit's [tests/element-tools/](../../tests/element-tools/).
   - Node code:  the kit's node program checks them ([tsconfig.node.json](../../tsconfig.node.json)), its Vitest
     project `element-tools` runs their tests.
-- [`bin/spell-pack.mjs`](../../bin/spell-pack.mjs), the kit's bin:  `spell-pack build | check [<folder>]`, a component
-  pack's build or its check, from any repo (`ComponentPack`).
-  - spell-epic's and the brand's `yarn pack:build` / `pack:check` run it;  spell-app's `spell pack` calls
-    `ComponentPack` itself.
+- [`spell-pack`](../../bin/spell-pack.mjs), the kit's bin, from any repo:
+  a component pack's build or its check (`ComponentPack`).
+
+  ```sh
+  spell-pack build | check [<folder>]
+  ```
+
+  - spell-epic's and the brand's `yarn pack:build` / `pack:check` run it.
+  - spell-app's `spell pack` calls `ComponentPack` itself.
   - Spell UI's `spell-ui-pack` until epic `repo-split` P10, which ran files Spell UI's package doesn't ship (C10).
 - Four of those files began as `@solidjs/element` and `component-register`,
   folded in and fixed (epic `spell-element`, 2026-10-09):
@@ -92,8 +98,8 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   - [`UIComponent`](UIComponent.tsx)'s test is
     [`UIComponent.test.tsx`](../../tests/element/UIComponent.test.tsx), at the same path under `tests/element/`.
   - In a real browser (Vitest browser mode + Playwright, chromium), as Spell UI's are,
-    on the project's own plugins (project `element` in [the kit's Vitest config](../../vitest.config.ts)):  the
-    decorator pre-pass, then Solid's.
+    on the project's own plugins (project `element` in [the kit's Vitest config](../../vitest.config.ts)):
+    the decorator pre-pass, then Solid's.
   - With NO Spell UI on the page (epic `repo-split` P3):  the kit's tsconfigs and Vitest config name none,
     nor do the kit's dependencies.
     - Their setup file, [TestSettings](../test-helpers/TestSettings.ts), installs stand-in settings:
@@ -145,8 +151,8 @@ As WWOD §4, plus:
   - `spell-kit/element/timing`:  Spell UI's util barrel re-exports it
   - `spell-kit/element/SkeletonText`:  node code that parses skeletons
   - `spell-kit/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path
-- `src/element-tools/` and `bin/spell-pack.mjs` are node only, and may import node built-ins, Vite and `tsx` too:
-  never a page.
+- The element tools and the `spell-pack` bin are node only:
+  they may import node built-ins, Vite and `tsx` too, and never run in a page.
 
 ## Settings
 
