@@ -42,6 +42,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Where a command works:  the checkout the current folder is in, found by a file only it has
   (`findCheckout(marker)`), else the kit `spell` runs from.
   - Why:  `spell` is linked to the MAIN checkout, but in an epic's worktree the files are the worktree's.
+  - `spell server <verb>` inside a kit:  the page server of the repo with page server settings (spell-app's), from
+    any folder of the kit, its root and the content folder too (`serversRoot()`, `withServersRoot()`;
+    epic `repo-split` I62).
 - `spell commands` reads each repo's command list as TEXT ([commandsCommand.ts](commands/commandsCommand.ts)).
   - A command:  `spell.command("name")`.
   - A group:  `const server = spell.command("server")`, then `server.command("start")`.
