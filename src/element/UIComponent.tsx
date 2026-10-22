@@ -48,7 +48,7 @@ import { ShadowEvents } from "./ShadowEvents"
  * - **Vocabulary**:  `UIButton.en.ts` (named for its language) names EVERYTHING the tag uses
  *   (attributes and their values, events, slots, parts, states, texts).
  *   Code never writes those names as strings:  it reads them from the vocabulary,
- *   so a translated tag (`<ie-boton>`) runs the same code.
+ *   so a translated tag (`<es-boton>`) runs the same code.
  *
  * - **State**:  fields that change over time are declared with a decorator, and read and written like a field:
  *   ```ts
@@ -108,7 +108,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * The vocabulary as built for one actual tag, by `define()`:  the names this element really uses.
-   * - Translated names:  a translated tag (`<ie-boton>`) gets its own spelling of each attribute and event.
+   * - Translated names:  a translated tag (`<es-boton>`) gets its own spelling of each attribute and event.
    * - How each attribute's text converts to a value, and how the classes are built.
    * - Its `.vocabulary` is the same object as `vocabulary` above.
    * - Not called `definition`, because `<ui-table>` has an attribute by that name
@@ -1023,7 +1023,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   //
   // These are called on the component CLASS, before any element exists:
   // - `define()`:  what a component's `index.ts` calls (`UIButton.define()`),
-  //   and what an app calls for a translated tag (`UIButton.define("ie-boton", es)`)
+  //   and what an app calls for a translated tag (`UIButton.define("es-boton", es)`)
   // - `register()`:  the records `define()` starts with;  the server render calls it alone
   // - `tagSetupFor()`:  what the tag's DOM element class carries;  hot reload swaps it in (`HotDefinitions`)
   ////////////////
@@ -1036,7 +1036,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * Make this component a custom element, under its vocabulary's tag or a translated one.
-   * - `UIButton.define("ie-boton", es)` registers `<ie-boton primario color="rojo">`:
+   * - `UIButton.define("es-boton", es)` registers `<es-boton primario color="rojo">`:
    *   its translated attribute, property and event names all reach the same component.
    * - Does nothing for a tag already defined;  a tag a root defined EARLY is attached instead (`DOMElement.attach()`).
    * - Returns the element class.
@@ -1122,6 +1122,8 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     //   it registers only with the one the server render installed (`ServerRuntime`)
     const { runtime, words } = E.SpellSolid.settings
     const isRuntimeLoaded = runtime.isLoaded
+    // so the runtime can define this class under the page's languages too (Spell UI's `defineComponents()`)
+    const define: E.ComponentDefiner = (tag, dictionary) => UIComponent.define.call(this, tag, dictionary)
     if (!UIComponent.registry.vocabularies.has(vocabulary) && (isRuntimeLoaded || !isServer)) {
       UIComponent.registry.vocabularies.add(vocabulary)
       if (isRuntimeLoaded) handOver()
@@ -1135,7 +1137,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     /** Hand the vocabulary and its English texts to the runtime. */
     function handOver() {
       // on the server, editing a vocabulary makes a new object for the same tag:  replace the old one
-      words.registerVocabulary(vocabulary, isServer ? "replace" : "register")
+      words.registerVocabulary(vocabulary, isServer ? "replace" : "register", define)
       const texts: Record<string, string> = {}
       for (const { key, text } of vocabulary.texts) texts[key] = text
       words.registerTexts(texts, vocabulary.tag)

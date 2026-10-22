@@ -53,6 +53,22 @@ describe("ReadmeCheck", () => {
     ])
   })
 
+  test("flags an sh block whose output is written as # lines, not commented commands or trailing comments", () => {
+    const lines = [
+      "```sh",
+      'spell parse "print 1"',
+      "# statement › print  print 1",
+      "```",
+      "",
+      "```sh",
+      "# build, then test",
+      "yarn build",
+      "yarn clone spell-ui   # spell-ui alone",
+      "```"
+    ]
+    expect(findingsOf(lines, "output")).toEqual(["1 output"])
+  })
+
   test("lists a folder's README.md and README-*.md as its pages", () => {
     const check = new ReadmeCheck(FIXTURES)
     expect(check.pages().map((page) => page.slice(FIXTURES.length + 1))).toEqual(["README-other.md", "README.md"])

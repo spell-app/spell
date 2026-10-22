@@ -8,7 +8,7 @@
 
 _The end of the kit's [CLAUDE.md](CLAUDE.md):  each `@` pulls a whole file into every Claude Code session._
 
-Start Claude Code in `~/www/spell`, and before you type a word, the agent has read over 800 lines of rules:
+Start Claude Code in `~/www/spell`, and before you type a word, the agent has read over 1,300 lines of rules:
 the kit's [AGENTS.md](AGENTS.md), then the hub of [WWOD](agents/wwod/WWOD.md), the house style every repo shares.
 
 Those rules name their reader.
@@ -86,7 +86,7 @@ Three things around it won't.
 Every rule has a section and a title, so a review names the one a change broke,
 `WWOD §5 › "Throw typed errors;  NEVER return error unions"`, instead of "we don't do that here".
 The agent is told which rule, and goes and reads it.
-The cost:  the rules ride along on every task, over 800 lines of context before even a one-line fix.
+The cost:  the rules ride along on every task, over 1,300 lines of context before even a one-line fix.
 
 **The plan is a page, not a chat.**
 An issue tracker holds what to do, and a pull request what was done;
@@ -104,7 +104,7 @@ the kit, then the repo and folder it's working in, then the rules for the task a
 
 | # | File | When it's read | What it holds |
 | --- | --- | --- | --- |
-| 1 | the kit's [CLAUDE.md](CLAUDE.md) | by Claude Code, as every session starts | seven lines:  two `@` imports, of the next two files |
+| 1 | the kit's [CLAUDE.md](CLAUDE.md) | by Claude Code, as every session starts | two `@` imports, of the next two files, then the Claude-only rules (below) |
 | 2 | the kit's [AGENTS.md](AGENTS.md) | through `CLAUDE.md`;  Codex reads it itself | the kit, and what's across repos:  installs, imports, tests, CI, worktrees |
 | 3 | WWOD's hub, [WWOD.md](agents/wwod/WWOD.md) | through `CLAUDE.md` | the seven sections every task needs, and the table of which spoke to read for what |
 | 4 | a child repo's `CLAUDE.md` and `AGENTS.md`, e.g. [spell-ui's](https://github.com/spell-app/spell-ui/blob/main/AGENTS.md) | when the session first works in that repo | that repo:  its folders, what it may import, its commands, its own conventions |
@@ -122,7 +122,7 @@ Claude Code loads the root's through `CLAUDE.md`, and a folder's when it works t
 So each rule is written in exactly ONE of them, and a deeper file only adds:
 a section named like a WWOD rule EXTENDS it, and says so, "As WWOD §4, plus:".
 
-- They're as long as what they hold:  the kit's runs to about 250 lines, spell-ui's to over 1,300.
+- They're as long as what they hold:  the kit's runs to about 680 lines, spell-ui's to over 1,300.
   A component library has a lot of conventions.
 - Every child repo has an `agents` link at its root, to the kit's [`agents/`](agents/), made by every install:
   so its rules can name `agents/wwod/WWOD.md` from where they are.
@@ -131,9 +131,10 @@ a section named like a WWOD rule EXTENDS it, and says so, "As WWOD §4, plus:".
     one at a plugin's root draws a warning from `claude plugin validate`.
 
 <details>
-<summary>The Claude-only rules in spell-app's CLAUDE.md</summary>
+<summary>The Claude-only rules in the kit's CLAUDE.md</summary>
 
-spell-app's `CLAUDE.md` loads its `AGENTS.md` and WWOD, as the kit's does, then adds what only Claude Code can do:
+[The kit's `CLAUDE.md`](CLAUDE.md) loads its `AGENTS.md` and WWOD, then adds what only Claude Code can do, for every
+repo:
 
 1. Narrate each step in the order it actually happens,
    and bold anything in the change that has drifted from what was last asked for.
@@ -149,8 +150,8 @@ spell-app's `CLAUDE.md` loads its `AGENTS.md` and WWOD, as the kit's does, then 
 6. A reply that closes out the session's work ends with `*You can close this tab*`, when nothing is left for it,
    and asks whether to run `/isolate done` if its worktree is still there.
 
-- The catch:  the kit's own `CLAUDE.md` has none of these,
-  so a session that never opens a file in spell-app never reads them.
+- Every session reads them, in any repo:
+  a child repo's `CLAUDE.md` points up to the kit's, which Claude Code loads from the folder above.
 
 </details>
 
@@ -162,8 +163,16 @@ It's written for coding agents, to follow over their defaults;  people follow it
 Here's one whole rule, from section 6:
 
 ```markdown
-- **User-facing strings stay inline**, where they're used;  only `ui` localizes (its vocabularies, `UIButton.en.ts`).
-  - NOT:  a `MSG.ts` object of every user-facing string per package -- one more file to keep in step, for no
+- **User-facing strings stay inline**, where they're used -- EXCEPT in code that speaks more than one language:
+  - Spell UI:  its vocabularies (`UIButton.en.ts`) and dictionaries (`UIButton.es.ts`)
+  - the editor app (`spell-app/app`):  every text it shows people is a key in `AppTexts.en.ts`,
+    read with `appTexts.text(key, params)`;  each other language is a LAZY `AppTexts.<lang>.ts` beside it,
+    with every key (its type says so)
+  - the language server (`spell-app/lsp`):  its labels are keys in `LspTexts.en.ts`,
+    read in the PROJECT's language (`LSP.LspTexts.of(scope)`)
+  - A sentence that names something takes it as a param (`{type}`, `{theType}`), never glued from pieces:
+    each language words it its own way.
+  - NOT:  a `MSG.ts` of every string in a package that speaks only English -- one more file to keep in step, for no
     localization.
 ```
 
@@ -231,8 +240,8 @@ In the checkout:
 | enter a worktree with Claude Code's own worktree tool | start a session in the worktree's folder:  only the tool brings the session back there when it's reopened | [spell-epic's README-adopting.md](https://github.com/spell-app/spell-epic/blob/main/README-adopting.md) |
 | merge `main` in with `epic worktree merge-main` | a bare `git merge main`:  it line-merges the generated files the command rebuilds from the merged source | [README-development.md](README-development.md#working-across-repos--one-epic-one-branch-name) |
 | remove a worktree with `epic worktree remove <name>` | a bare `git worktree remove`:  it leaves the worktree's servers running | [spell-epic's AGENTS.md](https://github.com/spell-app/spell-epic/blob/main/AGENTS.md) |
-| leave the content folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [spell-app's AGENTS.md](https://github.com/spell-app/spell-app/blob/main/AGENTS.md), "Shared content" |
-| open a worktree's window with `epic window open` | `code --add`, `--remove` or `-r`:  they can restart the window's extensions, the Claude panel and its session with them | spell-app's AGENTS.md, "Worktrees" |
+| leave the content folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [the kit's AGENTS.md](AGENTS.md#shared-content), "Shared content" |
+| open a worktree's window with `epic window open` | `code --add`, `--remove` or `-r`:  they can restart the window's extensions, the Claude panel and its session with them | [the kit's AGENTS.md](AGENTS.md#worktrees), "Worktrees" |
 
 In the code:
 
@@ -311,7 +320,7 @@ the epic pages and their review loop, worktrees and VS Code windows, parking and
 and the `epic` command that drives them.
 ONE copy on the machine serves every repo and every window.
 
-- It adds 17 skills and 8 hooks, and puts `epic` on every session's `PATH`.
+- It adds 18 skills and 8 hooks, and puts `epic` on every session's `PATH`.
 - An edit to it is live at once for `epic` and the hooks;  a skill's new text after `/reload-plugins`.
 - A repo opts in with `.epic/config.json5`:  where its content folder, worktrees and windows are.
   The kit's [.epic/config.json5](.epic/config.json5) turns on MULTI-REPO mode, so an epic's worktree holds every repo.
@@ -358,6 +367,8 @@ The kit's [.epic/config.json5](.epic/config.json5), key by key:
 | `sharedFolders` | `[]` | no content folders linked in at the root:  the kit tracks `agents/` itself |
 | `engineFolder` | `""` | none:  spell-epic is already a child repo |
 | `windowsFolder` | `"spell.epics/windows"` | the VS Code window files, each machine's own |
+| `voices` | `code`:  `"agents/wwod/writing.md"` | the house's own voice for `/voice`, besides spell-epic's:  WWOD's writing rules |
+| `checkoutPatches` | one, `vscode-ignore`:  copies `.ignore` | fixes every checkout gets at once, worktrees behind `main` too:  this one lets VS Code's Open File and search find the child repos' files again |
 
 - The keys it leaves out (`installTimeout`, `repoTemplates`, `app`) take their defaults.
 - `epic config [key]` prints what's in force;  `epic init` writes every key, with a comment each.
@@ -371,11 +382,11 @@ The kit's [.epic/config.json5](.epic/config.json5), key by key:
 A SKILL is a packaged workflow Claude runs when you type its name (`/epic seo`), or when what you ask matches it.
 A HOOK is a script Claude Code runs on an event:  a session starting, a prompt sent, a turn ending.
 
-The plugin brings 17 skills in three groups;  spell-app has five of its own.
+The plugin brings 18 skills in three groups;  spell-app has five of its own.
 
 | The plugin's [`skills/`](https://github.com/spell-app/spell-epic/tree/main/skills) | For |
 | --- | --- |
-| Planning and review:  `/epic`, `/epics`, `/details`, `/comment`, `/docs-check`, `/send` | an epic's life, from the first prompt to the last review |
+| Planning and review:  `/epic`, `/epics`, `/details`, `/comment`, `/docs-check`, `/voice`, `/send` | an epic's life, from the first prompt to the last review |
 | Worktrees and sessions:  `/isolate`, `/park`, `/unpark`, `/wait-for`, `/worktrees`, `/session`, `/title`, `/wtf` | moving work between worktrees, windows and sessions, and keeping track of it |
 | Background and offline:  `/bg`, `/bedtime`, `/airplane` | work that runs while you're elsewhere:  a named background agent, phases built overnight, pages marked up offline |
 

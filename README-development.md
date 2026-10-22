@@ -160,7 +160,7 @@ Spell UI and spell-epic split theirs by where the tests run instead.
 | spell-lang | `parser`, `markdown`, `core`, `py`, `spell`, `cli` |
 | spell-ui | `ssr` (node, Solid's server build), then `browser` |
 | spell-epic | `node`, `browser` |
-| spell-app | `spaces`, `lsp`, `cli`, `page-server`, `app:node`, `app:browser` |
+| spell-app | `spaces`, `lsp`, `cli`, `app:node`, `app:browser` |
 
 </details>
 
@@ -444,7 +444,7 @@ Find the row for what you want to change, then read the page beside it before yo
 | the example projects | spell-app's [`spaces/@spell/examples/`](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples) and `library/`:  [README-examples.md](https://github.com/spell-app/spell-app/blob/main/README-examples.md) |
 | Python web apps | spell-app's [`spell_quart`](https://github.com/spell-app/spell-app/tree/main/src/spaces/server/py) |
 | a `spell` command | its repo's `src/cli/` folder:  [README-cli.md](README-cli.md) |
-| the page server | the kit's [server](src/server/) ([README-server.md](README-server.md));  spell-app's layer in [`src/page-server/`](https://github.com/spell-app/spell-app/tree/main/src/page-server) ([README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md)), its settings in spell-app's root `package.json` (`"pageServer"`) |
+| the page server | the kit's [server](src/server/page/) ([README-server.md](README-server.md));  what a repo adds to it, in that repo's own `package.json` (`"pageServer"`):  spell-app's, [its README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md);  the header's tabs and the writable folders, in the content repo's `page-server.json5` |
 | a Spell UI element | [spell-ui](https://github.com/spell-app/spell-ui/blob/main/README.md) |
 | the element framework under every set | the kit's [element](src/element/):  [README-element.md](README-element.md) |
 | epic pages, review, windows, hooks, skills | [spell-epic](https://github.com/spell-app/spell-epic/blob/main/README.md), with its own checks;  `/reload-plugins` for a skill's new text |
@@ -508,7 +508,7 @@ spell-ui
 spell-epic
 - checks:  `ts`, `test` (with `test:scripts` and `test:vscode`), `test:node`, `test:watch`,
   `lint`, `lint:fix`, `format`, `review`
-- `epic`, `pack:build`, `pack:check`, `site:data`, `plugin:validate`, `vscode:check`, `vscode:package`
+- `epic`, `plan-doc` (`epic`, in its own order), `pack:build`, `pack:check`, `site:data`, `plugin:validate`, `vscode:check`, `vscode:package`
 - the docs tools:  `docs:update`, `docs:index`, `docs:new`, `docs:open`, `docs:link`, `details`
 
 spell-app

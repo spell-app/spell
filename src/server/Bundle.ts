@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync, realpathSync, statSync, writeFil
 import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
 import { SRV } from "spell-kit/server"
+import { pageServerSettings } from "spell-kit/server/page/settings"
 
 /**
  * One bundle of the checkout at `root` that is BUILT on demand, never committed (`SRV.BUNDLES`).
@@ -14,8 +15,9 @@ import { SRV } from "spell-kit/server"
  *   - its sources' hash isn't the one its last build recorded (`SRV.BUNDLE_RECORD`, in its output folder)
  * - `build()`:  runs its build command, then records the hash
  * - The page server runs `spell bundle --stale` when it starts, so a page always loads a current build.
- * - WHICH bundles:  the ones whose output folders the checkout's root `package.json` names,
- *   in `"pageServer": { "bundles": [...] }`, the list the page server reads too (`Bundle.specs()`)
+ * - WHICH bundles:  the ones whose output folders the page server's settings name, `"bundles"`
+ *   (every installed repo's `"pageServer"` part, merged:  `pageServerSettings()`), the list the page server reads too
+ *   (`Bundle.specs()`)
  * - Knows no checkout's LAYOUT:  each bundle by its PACKAGE (`SRV.BUNDLES`), found through the checkout's
  *   `node_modules` wherever its repo is (epic `repo-split` P8);  imports no other package.
  */
@@ -76,23 +78,21 @@ export class Bundle {
   }
 
   /**
-   * The bundles of the checkout at `root`:  for each folder its `package.json` names in
-   * `"pageServer": { "bundles": [...] }`, in that order, the one of `SRV.BUNDLES` that builds into it.
-   * - ONE list, which the page server reads too (page-server's `BundleBuild` waits on those folders)
+   * The bundles of the checkout at `root`:  for each folder the page server's settings name in `"bundles"`
+   * (`pageServerSettings()`:  spell-ui's part names its site's, spell-brand's its pages'), in that order, the one of
+   * `SRV.BUNDLES` that builds into it.
+   * - ONE list, which the page server reads too (its `BundleBuild` waits on those folders)
    * - none without a list, as the page server
    * - throws a `TypeError` for a folder no bundle builds into
    */
   static specs(root: string): SRV.BundleSpec[] {
-    const file = join(root, "package.json")
-    if (!existsSync(file)) return []
-    const settings = JSON.parse(readFileSync(file, "utf8")) as { pageServer?: { bundles?: string[] } }
-    return (settings.pageServer?.bundles ?? []).map((folder) => {
+    return (pageServerSettings(root).bundles ?? []).map((folder) => {
       const wanted = canonical(resolve(root, folder))
       const spec = SRV.BUNDLES.find((each) => {
         const dir = packageFolder(each.package, root)
         return dir !== undefined && canonical(join(dir, each.output)) === wanted
       })
-      if (!spec) throw new TypeError(`Bundle.specs():  no bundle builds into '${folder}' (package.json's "pageServer")`)
+      if (!spec) throw new TypeError(`Bundle.specs():  no bundle builds into '${folder}' (the "pageServer" settings)`)
       return spec
     })
   }

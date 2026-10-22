@@ -49,13 +49,13 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
     - An evaluated-and-rejected approach gets a written census of what it would touch.
   - Standing problems:  in their ledger, never left implicit -- `agents/CODE-DEBT.md` (incl. code that doesn't
     follow a WWOD rule yet), `agents/SUSPECTED-BUGS.md`, `agents/PAPERCUTS.md`, each with its own rules in its
-    header.  SEE:  root `AGENTS.md` "Long-term debt".
+    header.  SEE:  the kit's `AGENTS.md` "Long-term debt".
   - NOT:  a `CORRECTED <date>:` annotation on a claim later found wrong -- each file's own rule says how it's fixed.
 - **Inspect objects through a debug global, not `console.log`** -- SEE:  WWOD §19 › "Debug globals through
   `setDebugGlobal()`".
 - **Finishing pass for fast-drafted code:**
   - Run `yarn review` at the root of every repo you touched (or the kit's, over all);  what it runs:
-    SEE:  root `AGENTS.md` "Toolchain:  Vite+".
+    SEE:  the kit's `AGENTS.md` "Toolchain:  Vite+".
   - Then sweep for classic drift bugs:
     - operator precedence in template ternaries (`` `${a}` + b ? … ``)
     - inverted comparisons in guard clauses
@@ -133,7 +133,7 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 - **Formatting is oxfmt's** (through `vp fmt`):  120-char width, 2-space indent, no semicolons, double quotes, no
   trailing commas.
   - never hand-format against it;  `yarn format` settles it
-  - where it's configured:  SEE:  root `AGENTS.md` "Toolchain:  Vite+"
+  - where it's configured:  SEE:  the kit's `AGENTS.md` "Toolchain:  Vite+"
 - **Strict TypeScript.**
   - Private members:  SEE:  WWOD §12 › "TS `private`, never `#private`".
 - **Decorators:**  STANDARD (TC39) only -- WWOD §12 › "Decorators".
@@ -547,12 +547,30 @@ Their long before / afters are in `agents/wwod/writing.md`.
     - a grammar fenced block, for a folder that parses something (URLs, paths ...)
     - numbered "Adding a new X" recipe, "Deferred" section
   - every page ends with "See also";  `yarn readme:check`, at the kit's root, checks the links, captions and names
+  - a command shown with what it prints is TESTED (epic `readme` P16):  the command in an `sh` block, its output right
+    after it in a `<details><summary>Output</summary>` fold of `text`;  `yarn readme:test` runs it and compares
+    (`...` for what varies).  A command that mustn't run (installs, servers):  a fold titled `What it printed`.
+  - written in the README VOICE, spell-epic's `voices/readme.md` (epic `readme` P12):  proof first, the
+    reader's own tools as the contrast, every claim with its edge, one home per fact.  Spell's additions, which
+    `yarn readme:check` enforces:
+    - "Spell" capitalised in prose, like a name;  lowercase only in code (the command, `.spell`, package names)
+    - an internal repo is never named:  not in text, tables, pictures or a "needs" list
+    - a link into another of Spell's repos is its GitHub URL (`https://github.com/spell-app/<repo>/blob/main/...`)
+    - a card shown as an example is the owner's outline card (the kit's `docs/drafts/card-example/`)
   - in-flight design notes go in an epic page (`epics/`), not beside the README
   - NOT:  a `README.md` in each package folder -- they were folded into the repos' pages and deleted (epic
     `readme` Q5).
-- **User-facing strings stay inline**, where they're used;  only `ui` localizes (its vocabularies, `UIButton.en.ts`).
-  - NOT:  a `MSG.ts` object of every user-facing string per package -- one more file to keep in step, for no
-    localization.
+- **User-facing strings stay inline**, where they're used -- EXCEPT in code that speaks more than one language:
+  - Spell UI:  its vocabularies (`UIButton.en.ts`) and dictionaries (`UIButton.es.ts`)
+  - the editor app (`spell-app/app`):  every text it shows people is a key in `AppTexts.en.ts`,
+    read with `appTexts.text(key, params)`;  each other language is a LAZY `AppTexts.<lang>.ts` beside it,
+    with every key (its type says so)
+  - the language server (`spell-app/lsp`):  its labels are keys in `LspTexts.en.ts`,
+    read in the PROJECT's language (`LSP.LspTexts.of(scope)`)
+  - A sentence that names something takes it as a param (`{type}`, `{theType}`), never glued from pieces:
+    each language words it its own way.
+  - NOT:  a `MSG.ts` of every string in a package that speaks only English -- one more file to keep in step, for no
+    localization.  (Owen, 2026-10-22, epic `spanish` J61.)
 
 ## 7. Anti-patterns (Claude habits to drop)
 
@@ -584,3 +602,5 @@ Each is a rule elsewhere;  this is the quick list.
 - A distinct input type per method (`getElements(spec)` vs `measureAll(elements)`) -- SEE:  WWOD §9 › "ONE input type
   for the whole class, not one per method".
 - Keeping a field, option or export nothing reads -- SEE:  WWOD §2 › "Delete a field, option or export nothing reads".
+- A sentence glued from pieces in code that speaks more than one language (`"Created " + type + " " + name`) --
+  SEE:  WWOD §6 › "User-facing strings stay inline".

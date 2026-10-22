@@ -28,7 +28,7 @@ export class ElementDefinition {
   /** Names under this tag's prefix + dictionary. */
   readonly localized: E.LocalizedVocabulary
 
-  /** Tag this definition registers, e.g. `ui-button` or `ie-boton`. */
+  /** Tag this definition registers, e.g. `ui-button` or `es-boton`. */
   readonly tag: string
 
   /** Class-grammar builder for the canonical vocabulary. */
@@ -105,7 +105,7 @@ export class ElementDefinition {
   }
 
   /**
-   * Attribute resolved from the name authors write (`permitir-adiciones` on `<ie-desplegable>`);
+   * Attribute resolved from the name authors write (`permitir-adiciones` on `<es-desplegable>`);
    * `undefined` for one outside the vocabulary.
    * - The name DOM API `attributeChangedCallback()` hands the DOM element.
    */
@@ -121,7 +121,7 @@ export class ElementDefinition {
     return this.byName.get(name)?.attribute ?? name
   }
 
-  /** Localized event name, e.g. `ui-change` => `ie-cambio`. */
+  /** Localized event name, e.g. `ui-change` => `es-cambio`. */
   event(name: string): string {
     return this.localized.names.events.get(name) ?? name
   }
@@ -244,7 +244,7 @@ export class ElementDefinition {
    * - Booleans:  `""` or removed (NEVER `"true"`);  `"false"` only for off over a `true` default (`visible`).
    * - `keyOrValueAndKey`:  `""` for bare, else the value.
    * - Arrays:  comma-joined (`a,b`);  one holding anything but strings, numbers and booleans as JSON (`[{"a":1}]`).
-   * - Canonical values are written LOCALIZED (`red` => `rojo` on `<ie-boton>`).
+   * - Canonical values are written LOCALIZED (`red` => `rojo` on `<es-boton>`).
    */
   attributeText(attribute: E.ResolvedAttribute, value: unknown): string | null {
     const { spec } = attribute
@@ -289,7 +289,7 @@ const VISIBLE = "visible"
 
 /** Constructor props for `ElementDefinition`. */
 export type ElementDefinitionProps = {
-  /** Tag to register;  default the vocabulary's.  Its prefix (`ie`) also prefixes events. */
+  /** Tag to register;  default the vocabulary's.  Its prefix (`es`) also prefixes events. */
   tag?: string
   /** Translation;  default English identity. */
   dictionary?: E.Dictionary

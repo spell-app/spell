@@ -246,8 +246,9 @@ and runs them right beside the text.
   Each rule is a class with a syntax string, written in [Rulex](https://github.com/spell-app/spell-lang/blob/main/README-rulex.md);
   no grammar file, no generated code.
   [GitHub's Markdown](https://github.com/spell-app/spell-lang/blob/main/README-markdown.md) runs on it too, and passes all 670 of 670 spec examples.
-- Not yet:  any human language but English.
-  🌱 Spanish is next, for the same programs:  the rules can take a second language's words, but none are written yet.
+- Spell reads Spanish too:  a project says `language: "es"`, and its sentences compile to the same targets
+  ([Spell in Spanish](https://github.com/spell-app/spell-lang/blob/main/README.md#a-third-human-language)).
+  🌱 Norwegian and Portuguese are next.
 
 ### A component is a real element on the page
 
@@ -308,8 +309,8 @@ The kit is checked out first, and the other four are cloned inside it.
 
 ![Five Spell repos stacked by what they use:  spell-app on top uses spell-lang and spell-ui and runs spell-epic;  spell-epic uses spell-ui;  spell-lang and spell-ui use the kit, whose folders are util, toolchain, server, element and cli](docs/images/repos.svg)
 
-_The kit is under every repo.  The dashed arrow is spell-app's page server running spell-epic's routes:
-it never imports a line of them._
+_The kit is under every repo.  The dashed arrow:  `yarn clone spell-app` brings spell-epic too, whose route modules
+the kit's page server runs beside the app's;  spell-app never imports a line of them._
 
 Why five, and not one:  each repo is one thing, with its own tests and its own CI, and the arrows stay honest.
 `yarn clone` brings a repo only what it needs, so an import that climbs fails right there.
@@ -342,8 +343,16 @@ the versions and counts will have moved on by the time you run it.
 
    ```sh
    node --version
-   # v24.21.0
    ```
+
+   <details>
+   <summary>Output</summary>
+
+   ```text
+   v24...
+   ```
+
+   </details>
 
 2. Turn on yarn.
    Corepack, which comes with Node, puts a `yarn` command on your `PATH`.
@@ -351,8 +360,9 @@ the versions and counts will have moved on by the time you run it.
 
    ```sh
    corepack enable
-   # (prints nothing)
    ```
+
+   It prints nothing.
 
    - `corepack: command not found`?  Not every Node install includes it:
      `npm install -g corepack`, or skip this step if `yarn --version` already prints a version.
@@ -363,9 +373,17 @@ the versions and counts will have moved on by the time you run it.
    git clone git@github.com:spell-app/spell-kit.git ~/www/spell
    cd ~/www/spell
    yarn install          # the kit's own packages:  no child repos yet
-   # ➤ YN0086: │ Some peer dependencies are incorrectly met by your project; ...
-   # ➤ YN0000: · Done with warnings in 0s 469ms
    ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   ➤ YN0086: │ Some peer dependencies are incorrectly met by your project; ...
+   ➤ YN0000: · Done with warnings in 0s 469ms
+   ```
+
+   </details>
 
    - No SSH key?  Clone `https://github.com/spell-app/spell-kit.git` instead.
    - The peer-dependency warnings (`YN0060`, `YN0002`, `YN0086`) are expected:
@@ -378,11 +396,19 @@ the versions and counts will have moved on by the time you run it.
    ```sh
    cd ~/www/spell
    yarn clone
-   # == cloning spell-lang  (git@github.com:spell-app/spell-lang.git, its default branch)
-   # ...  and the same for each repo, then the links and the one install:
-   # spell-lang/agents -> ../agents  (the kit's WWOD and the logs)
-   # == yarn install:  one install over every repo
    ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   == cloning spell-lang  (git@github.com:spell-app/spell-lang.git, its default branch)
+   ...  and the same for each repo, then the links and the one install:
+   spell-lang/agents -> ../agents  (the kit's WWOD and the logs)
+   == yarn install:  one install over every repo
+   ```
+
+   </details>
 
 5. Install the browser the tests run in, and check the kit works.
 
@@ -390,10 +416,18 @@ the versions and counts will have moved on by the time you run it.
    cd ~/www/spell
    yarn playwright install chromium
    yarn kit:test
-   # ... one Vitest run, a project per folder of src/, then:
-   #  Test Files  55 passed (55)
-   #       Tests  610 passed (610)
    ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   ... one Vitest run, a project per folder of src/, then:
+    Test Files  60 passed (60)
+         Tests  685 passed (685)
+   ```
+
+   </details>
 
 6. Put `spell` on your `PATH`.
    It links into the first folder on your `PATH` that it can write to
@@ -402,8 +436,16 @@ the versions and counts will have moved on by the time you run it.
    ```sh
    cd ~/www/spell
    yarn cli:install
-   # Linked /Users/<you>/.local/bin/spell -> /Users/<you>/www/spell/bin/spell.mjs
    ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   Linked /Users/<you>/.local/bin/spell -> /Users/<you>/www/spell/bin/spell.mjs
+   ```
+
+   </details>
 
    - Had `spell` already, from an older checkout?  Run it again:  the link holds the full path it points at.
 
@@ -471,21 +513,29 @@ most of us never meet our compiler, but this one shows its work.
 
 ```sh
 spell parse "print 1 + 2 * 3"
-# statement › print  print 1 + 2 * 3
-#   Keyword  print
-#   expressions: Repeat  1 + 2 * 3
-#     expression  1 + 2 * 3
-#       lhs: operand › number  1
-#       Repeat  + 2 * 3
-#         expression_suffix › plus  + 2
-#           operator › Symbol  +
-#           expression: operand › number  2
-#         expression_suffix › times  * 3
-#           operator › Symbol  *
-#           expression: operand › number  3
-#
-# core.console.log(1 + 2 * 3)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+statement › print  print 1 + 2 * 3
+  Keyword  print
+  expressions: Repeat  1 + 2 * 3
+    expression  1 + 2 * 3
+      lhs: operand › number  1
+      Repeat  + 2 * 3
+        expression_suffix › plus  + 2
+          operator › Symbol  +
+          expression: operand › number  2
+        expression_suffix › times  * 3
+          operator › Symbol  *
+          expression: operand › number  3
+
+core.console.log(1 + 2 * 3)
+```
+
+</details>
 
 That's its match tree:  each indented line is a rule that matched, inside the one that holds it.
 The last line is the JavaScript it compiles to.
@@ -498,43 +548,57 @@ Run it;  a program with a UI would open in your browser, and `--no-browser` skip
 
 ```sh
 spell run @spell/examples/fizzbuzz --no-browser
-# ✓ Compiling @spell/examples/fizzbuzz
-# 1
-# 2
-# 3 fizz
-# 4
-# 5 buzz
-# ...
-# 15 fizzbuzz
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ Compiling @spell/examples/fizzbuzz
+1
+2
+3 fizz
+4
+5 buzz
+...
+15 fizzbuzz
+...
+```
+
+</details>
 
 **The same program, in Python** ([spell-lang's README-targets.md](https://github.com/spell-app/spell-lang/blob/main/README-targets.md)).
 Not a word-for-word port, but line for line, the way a person would write it:
 "for each number from 1 to 100" comes out as `range(1, 101)`, and each "otherwise if" as an `elif`.
 
-<details>
-<summary><code>spell compile @spell/examples/fizzbuzz --target py --stdout</code>, and what it printed</summary>
-
 ```sh
 spell compile @spell/examples/fizzbuzz --target py --stdout
-# ✓ @spell/examples/fizzbuzz
-# from __future__ import annotations
-#
-# def play_fizzbuzz() -> None:
-#     """File FizzBuzz.spell"""
-#     for number in range(1, 101):
-#         if (number / 15).is_integer():
-#             print(number, "fizzbuzz")
-#         elif (number / 3).is_integer():
-#             print(number, "fizz")
-#         elif (number / 5).is_integer():
-#             print(number, "buzz")
-#         else:
-#             print(number)
-#
-#
-# play_fizzbuzz()
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ @spell/examples/fizzbuzz
+from __future__ import annotations
+
+def play_fizzbuzz() -> None:
+    """File FizzBuzz.spell"""
+    for number in range(1, 101):
+        if (number / 15).is_integer():
+            print(number, "fizzbuzz")
+        elif (number / 3).is_integer():
+            print(number, "fizz")
+        elif (number / 5).is_integer():
+            print(number, "buzz")
+        else:
+            print(number)
+
+
+play_fizzbuzz()
+```
+
+</details>
 
 </details>
 
@@ -543,11 +607,19 @@ It opens a browser (`--headless` only prints the address);  Ctrl-C stops it.
 
 ```sh
 spell app serve @spell/examples/drawable-solitaire --headless
-# ✓ Starting the page server  http://127.0.0.1:4747/
-# ✓ Starting the editor  http://localhost:3000/  (/api on the page server)
-# The spell app is at http://localhost:3000/edit/@spell/examples/drawable-solitaire;  docs, epics, goals and Spell UI at http://127.0.0.1:4747/ -- Ctrl-C to stop
-# http://localhost:3000/edit/@spell/examples/drawable-solitaire
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Starting the page server  http://127.0.0.1:4747/
+✓ Starting the editor  http://localhost:3000/  (/api on the page server)
+The spell app is at http://localhost:3000/edit/@spell/examples/drawable-solitaire;  docs, epics, goals and Spell UI at http://127.0.0.1:4747/ -- Ctrl-C to stop
+http://localhost:3000/edit/@spell/examples/drawable-solitaire
+```
+
+</details>
 
 Two servers come up:  the page server on 4747, with the docs, epics, goals and Spell UI;  and the editor on 3000.
 When the page server is already running, its line ends "(already running)".
@@ -574,16 +646,24 @@ Find that line, and argue with it:  change `diamonds or hearts` to `clubs or spa
 
 ```sh
 spell test @spell/examples/drawable-solitaire
-# ...
-# ✗ test card setup  (22 checks)
-#     ❌ Unexpected: `the color of the card` should be `black` but is actually `red`
-# ✓ test deck creation  (6 checks)
-#
-# 1 passed, 1 failed
 ```
 
+<details>
+<summary>What it printed</summary>
+
+```text
+...
+✗ test card setup  (22 checks)
+    ❌ Unexpected: `the color of the card` should be `black` but is actually `red`
+✓ test deck creation  (6 checks)
+
+1 passed, 1 failed
+```
+
+</details>
+
 - Before your change it says `2 passed`, and `spell test` exits 1 on a failure, so a script can tell.
-- The `# ...` is two warnings about the game's own Solitaire.spell, there either way.
+- The `...` at the top stands for two warnings about the game's own Solitaire.spell, there either way.
 
 </details>
 
@@ -593,11 +673,19 @@ spell test @spell/examples/drawable-solitaire
 ```sh
 cd ~/www/spell/spell-ui
 yarn dev
-#   VITE+ v1.0.0
-#
-#   ➜  Local:   http://localhost:5173/
-#   ➜  Network: use --host to expose
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+  VITE+ v1.0.0
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+```
+
+</details>
 
 - It opens [the demo page](https://github.com/spell-app/spell-ui/blob/main/src/tools/demo/index.html), at `/src/tools/demo/index.html`, in your browser;
   the port may be the next free one.
@@ -720,7 +808,7 @@ The links into a child repo work in a checkout, where it's cloned inside the kit
 | [README.md](README.md) | <ul><li>a card in Spell, and three things that move if you know React</li><li>where Spell is going;  the five repos</li><li>setup from zero;  things to try, from one line to the whole editor</li><li>what the kit holds, the command line, working across two repos, WWOD</li><li>this index of every README</li></ul> |
 | [README-util.md](README-util.md) | <ul><li>the helpers every repo shares, and when lodash is the better answer</li><li>one import name over three layers</li><li>`@proto`, `@lazy`, `@once`, and DOM helpers across shadow roots</li><li>Spell cells, the reactive engine:  a read after a write is always fresh</li><li>a fetch that throws, files that load themselves;  JSON5 for node</li></ul> |
 | [README-toolchain.md](README-toolchain.md) | <ul><li>Vite+:  one dependency pins every tool</li><li>settings imported like code;  the house's own lint rules, and the READMEs' check</li><li>every tool reads source but the type check:  declarations</li><li>standard decorators, lowered first;  thin checks, the same in every repo</li><li>the files, and the settings they hold</li></ul> |
-| [README-server.md](README-server.md) | <ul><li>the page server, by contrast with Vite and Express:  one port, every address</li><li>five flows, a picture each, from a request to editing a section in place</li><li>writing a page:  links, formatting, bundles built on demand, data files</li><li>settings and route modules;  the library underneath;  safety</li><li>`spell server` and `spell bundle`</li></ul> |
+| [README-server.md](README-server.md) | <ul><li>the page server, by contrast with Vite and Express:  one port, every address</li><li>five flows, a picture each, from a request to editing a section in place</li><li>writing a page:  links, formatting, bundles built on demand, data files</li><li>settings each repo declares, merged;  route modules</li><li>one server per kit, from its root;  what serves without spell-app;  the library underneath;  safety</li><li>`spell server` and `spell bundle`</li></ul> |
 | [README-element.md](README-element.md) | <ul><li>custom elements on Solid 2, mapped from React</li><li>what every element gets without asking;  making one, in eight steps</li><li>nothing loads up front:  packs and `<ui-root>`</li><li>styling through the shadow root;  testing in a real browser</li><li>the build tools, who's written on it, and what it costs</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>setting up `spell`;  naming projects by path, address or group</li><li>every command, under the repo that brings it</li><li>`epic`, and two more programs for yarn scripts</li><li>output, exit codes, and what writes files</li><li>how a command is built</li></ul> |
 | [README-development.md](README-development.md) | <ul><li>a change from branch to merged, in eight steps</li><li>workspaces, with three differences;  the checks, and what "done" means</li><li>tests in a second tree;  one name per file</li><li>working across repos with one branch name;  CI by branch name</li><li>where to change what;  the papercuts;  every script</li></ul> |
@@ -751,7 +839,7 @@ The links into a child repo work in a checkout, where it's cloned inside the kit
 | [spell-app/README-examples.md](https://github.com/spell-app/spell-app/blob/main/README-examples.md) | <ul><li>five example apps, simplest first, and the four parts of each</li><li>FizzBuzz:  a loop, and printing</li><li>Todos:  types, phrases, a list and a form</li><li>Solitaire, in outline and drawn</li><li>ideas for your own;  the frozen test projects</li></ul> |
 | [spell-app/README-spaces.md](https://github.com/spell-app/spell-app/blob/main/README-spaces.md) | <ul><li>spaces, where projects and people live</li><li>addresses:  the folder is in the name</li><li>setting up your own</li><li>the models, the servers, and Python's</li><li>people and orgs;  🌱 sign-in and permissions</li></ul> |
 | [spell-app/README-lsp.md](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) | <ul><li>the language server:  the command line and the editor can't disagree</li><li>one service, three places it runs</li><li>the compiler's parse, through one queue</li><li>what it answers, request by request;  scope packs</li><li>where it stops;  🌱 moving to spell-lang, and `spell lsp`</li></ul> |
-| [spell-app/README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md) | <ul><li>what spell-app adds to the kit's page server, and who answers on its port</li><li>its own module:  bundles, and pages that load on a plane</li><li>adding a route;  running it</li><li>where it stops</li><li>its settings, key by key</li></ul> |
+| [spell-app/README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md) | <ul><li>spell-app's part of the kit's page server:  three settings</li><li>what its route module serves:  the editor, its API, `/element/`</li><li>the editor's record;  running it</li></ul> |
 
 ## See also
 

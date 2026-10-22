@@ -2,11 +2,19 @@
 
 ```sh
 spell --version
-# spell-kit 0.0.0
-# spell-lang 0.8.0
-# spell-ui 0.0.1
-# spell-app 0.8.0
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+spell-kit 0.0.0
+spell-lang 0.8.0
+spell-ui 0.0.1
+spell-app 0.8.0
+```
+
+</details>
 
 _Every repo that adds commands to `spell` answers for itself, the kit's first:  four lines, in about 0.1 s._
 
@@ -55,7 +63,7 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](bin/spell.mjs) in this ch
   them in `node_modules/.bin` ([below](#two-more-programs-for-yarn-scripts)).
 - The first run takes a few seconds, while `tsx` compiles every repo's source and caches it.
   After that the base answers in about 0.1 s, and a language command, which loads the parser and Spell's rules,
-  in one to two:  `spell explain print` took 0.9 s here, `spell parse` 1.9 s.
+  in about one:  `spell explain print` and `spell parse` each took 0.9 s here.
 
 ## Naming projects:  a path, an address or a group
 
@@ -76,13 +84,32 @@ In a script, with no terminal to ask on, it lists them and exits 2;  `--all` tak
 
 ```sh
 spell lint @spell/library
-# @spell/library holds several projects -- name one, or pass --all:
-#   @spell/library/cards
-#   @spell/library/people
-spell lint --all @spell/library
-# ✓ @spell/library/cards  2 warnings
-# ✓ @spell/library/people
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+@spell/library holds several projects -- name one, or pass --all:
+  @spell/library/cards
+  @spell/library/people
+```
+
+</details>
+
+```sh
+spell lint --all @spell/library
+```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ @spell/library/cards  2 warnings
+✓ @spell/library/people
+```
+
+</details>
 
 - A group holding one project uses it without asking.
 - `owen@spell` is your own space:  the folder `spell.spaces/@spell/owen@/` beside the repos,
@@ -124,7 +151,7 @@ Each repo hands it a list, named in the repo's `package.json`:
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
   base["spell-kit, the base<br/>server · bundle · commands · wwod · pony · help"]
-  lang["spell-lang<br/>compile · lint · run · test ... eleven in all"] --> base
+  lang["spell-lang<br/>compile · lint · run · test ... thirteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
   app -. "its language hook does their work" .-> lang
@@ -173,7 +200,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 
 | Command | What it does |
 | --- | --- |
-| `spell server <verb>` | this checkout's page server:  docs, epic pages, the app's `/api`;  `start all`, every web server of the checkout |
+| `spell server <verb>` | the kit's page server, from any folder of the kit:  docs, epic pages, the app's `/api`;  `start all`, every web server of the kit |
 | `spell bundle [names...]` | builds the bundles the page server serves, which are built on demand and never committed:  Spell UI's docs site, `ui-site` |
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
@@ -182,7 +209,8 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
 `spell server` manages the page server;  `spell app serve` opens the editor on it.
-The page server belongs to a checkout:  run from an epic's worktree, `spell server start` starts the worktree's.
+The page server belongs to a kit, and starts from its root only:
+run from any folder of an epic's worktree, `spell server start` starts that worktree's.
 
 <details>
 <summary>Every verb of server, and every option of bundle, commands, wwod and pony</summary>
@@ -191,7 +219,7 @@ The page server belongs to a checkout:  run from an epic's worktree, `spell serv
 | --- | --- |
 | `spell server local` | runs the page server in the foreground, until `Ctrl-C` |
 | `spell server start` | starts it in the background if it isn't running, and prints where it is (JSON) |
-| `spell server start all` | every web server of the checkout:  the page server, the app's editor, Spell UI's site;  a row for each, and exit 1 if one didn't come up |
+| `spell server start all` | every web server of the kit:  the page server, the app's editor, Spell UI's site;  a row for each, and exit 1 if one didn't come up |
 | `spell server stop` | stops the page server, waiting for its process to end;  its editor stops with it |
 | `spell server stop all` | the page server, then the app's editor too, even one left running |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
@@ -199,13 +227,12 @@ The page server belongs to a checkout:  run from an epic's worktree, `spell serv
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
 
 - The page server's own flags pass through, as typed:
-  `--root <dir>` (another checkout), `--port <n>`, `--spaces <dir>`.
-- `start all` and `stop all` look for page server settings instead:  the nearest checkout up that has them,
-  else `spell-app`'s.
-  The editor gets a row only where those settings run `spell-app`'s routes;
+  `--root <dir>` (another kit's root:  any other folder is an error that names the kit), `--port <n>`,
+  `--spaces <dir>`.
+- `start all` and `stop all` find the kit from the current folder too, and read its merged settings:
+  the editor gets a row only where they run `spell-app`'s routes (it's installed);
   Spell UI's site, only where they name its component set.
-- The kit's `yarn server` runs `spell server` on the kit alone, which has no page server settings of its own;
-  `epic server` runs it for the caller's checkout.
+- The kit's `yarn server` runs the same command line;  `epic server` runs it for the caller's kit.
 - What the page server serves, and how:  [README-server.md](README-server.md).
 
 | Option | What it does |
@@ -221,7 +248,7 @@ The page server belongs to a checkout:  run from an epic's worktree, `spell serv
 | `spell wwod --json` | the report as JSON |
 | `spell pony --gallop` | her legs gallop:  in place in a terminal, else one stride's frames |
 
-- Which bundles there are:  the `"bundles"` in the page server settings of the same checkout.
+- Which bundles there are:  the `"bundles"` in the kit's page server settings, every installed repo's merged.
   The page server builds the stale ones when it starts, and a page waits for them.
 - `spell bundle check` ends with the fix:
   `ui-site:  STALE (built from older sources)`, then `fix:  spell bundle ui-site`.
@@ -237,9 +264,10 @@ The page server belongs to a checkout:  run from an epic's worktree, `spell serv
 
 ## spell-lang
 
-The language's eleven commands:  build a program, run it, test it, and see what Spell made of what you wrote.
+The language's thirteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
+and check its language packs.
 They're `spell-lang`'s, but their work is `spell-app`'s for now, through its `language` hook
-([above](#each-repo-brings-its-own-commands)).
+([above](#each-repo-brings-its-own-commands));  the language packs' two are the exception, `spell-lang`'s own.
 
 ### Writing and building
 
@@ -305,11 +333,19 @@ No test runner to configure:  a project's tests are its `to test ...` sections, 
 
 ```sh
 spell test @spell/test/solitaire 2>/dev/null
-# ✓ test card setup  (22 checks)
-# ✓ test deck creation  (6 checks)
-#
-# 2 passed
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ test card setup  (22 checks)
+✓ test deck creation  (6 checks)
+
+2 passed
+```
+
+</details>
 
 The compile line and its five warnings went to stderr, and each warning is a fix, written in Spell:
 `Say what "card-names" holds, e.g. "set card-names to a new list of text"`.
@@ -363,17 +399,36 @@ the parse, the rules behind a word, the types a project declares.
 
 ```sh
 spell explain print
-# print  print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]
-# e.g. print "Yo!"
-spell describe @spell/test/solitaire Card color
-# property color of Card
-# spell-lang/tests/spaces/@spell/test/solitaire/Card.spell:12
-#
-# color as derivation of suit
-#
-# Spell
-#   the color of a card is red if its suit is either diamonds or hearts otherwise it is black
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+print  print {operator:print_kind}? [expressions:{expression} ,]
+e.g. print "Yo!"
+```
+
+</details>
+
+```sh
+spell describe @spell/test/solitaire Card color
+```
+
+<details>
+<summary>Output</summary>
+
+```text
+property color of Card
+spell-lang/tests/spaces/@spell/test/solitaire/Card.spell:12
+
+color as derivation of suit
+
+Spell
+  the color of a card is red if its suit is either diamonds or hearts otherwise it is black
+```
+
+</details>
 
 Two more in action, a whole match tree from `spell parse` and FizzBuzz under `spell run`, are on
 [the kit's front page](README.md).
@@ -431,6 +486,47 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 
 </details>
 
+### Checking the language packs
+
+Spell reads programs in more than one language:
+each language pack registers every rule again, with its own words.
+- When a rule is added in English, these two say which packs still need it, and write the stubs to translate.
+- Their work is `spell-lang`'s own, not the hook's:  they read only its rule files.
+
+| Command | What it does |
+| --- | --- |
+| `spell lang packs check [lang]` | lists, per rule file, what a pack lacks against English, and exits 1 if anything;  default:  every pack but English |
+| `spell lang packs fix [lang]` | writes a stub for each missing registration into its `<module>.<lang>.ts`, English copied and marked `// TODO: translate`, then lists them to review |
+
+<details>
+<summary>What they check, and what fix writes</summary>
+
+| Option | What it does |
+| --- | --- |
+| `spell lang packs check --json` | the report as JSON |
+| `spell lang packs fix --ai` | asks `claude -p` to translate each stub, marked `// AI draft:  review` instead;  one it can't keeps the stub |
+
+- `check` reads each rules module's files as text, English's (`<module>.en.ts`) and the pack's, and lists:
+  - `missing`:  a rule English registers that the pack doesn't
+  - `no tests`, `no syntax`:  a registration without them, where English's has them
+  - `out of order`:  a registration in another place than English's, so a tie between two rules may go the other way
+  - `unregistered`:  a rule class a rules folder exports that no `.en.ts` registers
+    (a base class, or a rule built while parsing, doesn't count)
+  - the pack's words:  every word table English has, and a word for every built-in type
+- A difference on purpose is a comment in the pack's file, with the reason:
+  - above the registration:  `// packs: ok -- si no is else AND if no, so else comes first`
+  - for one left out:  `// packs: none AThingsProperty -- no "a card's color" in Spanish`
+- `fix` puts each stub after the registration English has before it, and adds the imports it needs.
+  A module with no file yet gets one, which the language's `parser.ts` must then import.
+- `--ai` asks Claude for one stub at a time, and sends it:
+  - the rule's class docstring, and its English registration
+  - the module's translations so far
+  - the pack's glossary, e.g. Spanish's
+    [GLOSSARY.md](https://github.com/spell-app/spell-lang/blob/main/src/spell/languages/es/GLOSSARY.md)
+- `fix` writes only what's missing:  translate each stub, then run `check` and the module's rule tests.
+
+</details>
+
 ## spell-ui
 
 Spell UI's four:  find an icon, render pages as plain HTML, build component packs and the design system.
@@ -446,12 +542,20 @@ for search engines and readers with no JavaScript.
 
 ```sh
 spell icon bell
-# bell                fa7-free
-# bell                fomantic  also alarm
-# bell concierge      fa7-free  also concierge bell
-# bell concierge      fomantic  also concierge bell
-# ...
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+bell                fa7-free
+bell                fomantic  also alarm
+bell concierge      fa7-free  also concierge bell
+bell concierge      fomantic  also concierge bell
+...
+```
+
+</details>
 
 <details>
 <summary>Every option of icon and ssr, and how the static render works</summary>
@@ -543,18 +647,26 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell-app/
 | Command | What it does |
 | --- | --- |
 | `spell app create <name>` | makes a project, `<name>/__project.json5` and a starter `<name>.spell` that prints a hello, in your own space |
-| `spell app serve [project]` | starts the Spell editor and this checkout's page server, and opens the editor on a project, until `Ctrl-C` |
+| `spell app serve [project]` | starts the Spell editor and the kit's page server, and opens the editor on a project, until `Ctrl-C` |
 | `spell app vscode [build \| install]` | builds the VS Code language extension, `spell-language.vsix`, and installs it;  no verb does both |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
 
 ```sh
 spell projects
-# owen@spell       Projects       1 project
-# @spell/examples  Examples       5 projects
-# @spell/guides    Guides         0 projects
-# @spell/library   Libraries      2 projects
-# @spell/test      Test fixtures  11 projects
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+owen@spell       Projects       ...
+@spell/examples  Examples       5 projects
+@spell/guides    Guides         0 projects
+@spell/library   Libraries      2 projects
+@spell/test      Test fixtures  12 projects
+```
+
+</details>
 
 <details>
 <summary>Every option of app create, app serve and app vscode, and what serve starts and stops</summary>
@@ -575,7 +687,7 @@ spell projects
 
 `app serve`
 - Two servers:
-  - the page server, this checkout's ([README-server.md](README-server.md)), on port 4747, else any free one:
+  - the page server, the kit's ([README-server.md](README-server.md)), on port 4747, else any free one:
     the app's `/api`, which saves files to disk, plus the docs, the epic pages and Spell UI's docs
   - the editor, the Spell app's Vite with hot reload, passing `/api` on to the page server:
     the page server's own child, which it starts once it listens and stops with itself,
@@ -631,7 +743,7 @@ epic worktree merge-main
   `epic close seo#J3`.
 - Every verb runs on the caller's checkout:  a worktree's, when run in one.
   `epic --version` says which code that is:  its commit, branch and checkout.
-- `epic --help` lists all 62 verbs, in twelve groups;
+- `epic --help` lists all 63 verbs, in twelve groups;
   `epic help <verb>`, or `epic <verb> --help`, shows one's usage, what it does and an example,
   and a group's verbs too (`epic ask create --help`).
 - An unknown verb exits 1, listing the verbs;  a usage error exits 2.

@@ -45,7 +45,9 @@ export class ReadmeCheck {
     "deleted-readme": "the path of an in-folder README that was folded into a page and deleted",
     brand: "the word brand in any form, anywhere (code, links, Mermaid too):  spell-brand is internal, so leave it out",
     capital: "a lowercase `spell` in prose:  write Spell;  lowercase is for code, paths and names like `spell-lang`",
-    siblings: "a See also line that opens `Also beside it`:  a See also lists curated links, not every sibling"
+    siblings: "a See also line that opens `Also beside it`:  a See also lists curated links, not every sibling",
+    output:
+      "an sh block ending in `#` lines after its command:  its output, which goes in an Output fold after the block, so `yarn readme:test` runs it"
   } as const
 
   /** the repos whose root pages are checked, from the kit's root (`.` is the kit) */
@@ -93,6 +95,8 @@ export class ReadmeCheck {
             if (!asText && !hasCaption(lines, index + 1))
               add(fence.start, "caption", "this Mermaid block has no caption")
           }
+          if (fence.language === "sh" && endsInOutput(lines.slice(fence.start, index)))
+            add(fence.start, "output", "this block's output is written as # lines:  move it to an Output fold")
           fence = undefined
         } else this.checkWords(line, lineNumber, folds, add)
         return
@@ -368,6 +372,18 @@ const WORDS: Array<{ pattern: RegExp; rule: Rule; message: string }> = [
 /** The names in `folder`;  none when it isn't a folder. */
 function readdir(folder: string): string[] {
   return statSync(folder).isDirectory() ? readdirSync(folder) : []
+}
+
+/**
+ * Does an `sh` block's text (`body`, its lines between the fences) end in output written as `#` lines:  its last line
+ * a `#` line, after a command?
+ * - a block of commented commands (`# build`, then `yarn build`) ends in a command, so it isn't flagged
+ * - a command's trailing comment (`yarn clone spell-ui   # spell-ui alone`) isn't a `#` line
+ */
+function endsInOutput(body: string[]): boolean {
+  const lines = body.map((line) => line.trim()).filter(Boolean)
+  const last = lines.at(-1)
+  return !!last && last.startsWith("#") && lines.some((line) => !line.startsWith("#"))
 }
 
 /** Is the next paragraph after `start` an italic caption (`_..._` or `*...*`), on one line or two? */
