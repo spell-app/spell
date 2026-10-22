@@ -47,7 +47,7 @@ with live elements to click.
   - shadow DOM, `@layer`s, OKLCH tokens
   - accessibility built in
   - usable from any framework or plain HTML
-- Built on **Solid 2**:  `solid-js` / `@solidjs/web` `2.0.0-rc.13`, pinned exactly.
+- Built on **Solid 2**:  `solid-js` / `@solidjs/web` `2.0.0-rc.17`, pinned exactly.
 - The custom-element layer is the kit's [`element/`](../src/element/AGENTS.md):
   `spell-kit/element`, by the same name on a page.
   - EVERY set's elements are written on it
@@ -279,6 +279,8 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - `DOMNagElement`, `DOMCheckElement`:  a few members of script API.
     - Above, because its `elementSetup` reads it while the class is defined.
     - Named `DOM<Name>Element`, as the platform's `HTMLAnchorElement`.
+    - NO instance fields of its own, only `declare`d ones:  `<ui-root>` defines the tag before its family loads
+      (the kit's element `AGENTS.md`, "Defined early";  the catalog test checks every tag).
     - NO one-liner files (Owen:  "try to avoid one-liner files, e.g. BrandColorHost").
     - A big one (dozens of members) may keep its own file, `DOM<Name>Element.ts`;  none does today.
   - It names its component class, `class DOMNagElement extends E.DOMElement<UINag>`:
@@ -996,10 +998,12 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     for the element's whole life, untracked ("Reactive members").
     `this.on()` for one added later, or under a condition.
   - Inside a component, `onClick={...}` for native events.
-    - No `on:` namespace.
-    - Rich data as `prop:options` ([the Solid 2 rules](../spell.epics/guides/solid/solid-2.md), "DOM and `spell-ui` elements").
-  - A THIRD-PARTY Solid app listening for `ui-*` events uses a `ref` callback + `addEventListener`
-    ([the Solid host app](src/tools/frameworks/solid/app.tsx)).
+    - No `on:` namespace, no `prop:` (epic `solid-17`).
+    - A `ui-*` event:  `on-ui-change={f}`, the event's own name after `on-`.
+    - Rich data as a plain prop, `options={[...]}`:  a function or object reaches the element as itself.
+    - Both through the kit's element framework, its `RichAttributes`:
+      Solid sets a prop it doesn't know with `setAttribute()`, which our elements take over.
+  - A THIRD-PARTY Solid app does the same ([the Solid host app](src/tools/frameworks/solid/app.tsx)).
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".
     - `spell-ui/jsx` types both ways in ([README-frameworks.md](README-frameworks.md), "Events"):
       - the `ref`'s element knows its tag's events, `event.detail` too

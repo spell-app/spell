@@ -13,6 +13,7 @@
  *   `FamilySheets`.
  */
 
+import { E } from "spell-ui/core"
 import { UI } from "spell-ui/runtime"
 import { StubOwner } from "spell-ui/test-helpers/StubOwner"
 import type { VisualHooks } from "spell-ui/test-helpers/test.types"
@@ -91,9 +92,9 @@ class VisualPage {
     let last = ""
     for (let round = 0; round < MAX_SETTLE_ROUNDS; round++) {
       await Promise.all(
-        [...document.querySelectorAll(":not(:defined)")]
+        [...document.querySelectorAll(E.DOMElement.notAttached)]
           .filter((element) => element.localName.startsWith("ui-"))
-          .map((element) => VisualPage.within(customElements.whenDefined(element.localName), DEFINE_TIMEOUT))
+          .map((element) => VisualPage.within(E.DOMElement.whenAttached(element.localName), DEFINE_TIMEOUT))
       )
       const elements = VisualPage.deep(document)
       await Promise.all(

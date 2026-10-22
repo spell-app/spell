@@ -26,7 +26,8 @@ import type { UIHeaderAttributes } from "spell-ui/jsx"
  *   The docs tags aren't in that set, so they're named here.
  * - Named tags, NOT `` [tag: `ui-${string}`] ``:  that would loosen every component tag too.
  * - A docs element that renders another docs tag adds it here.
- * - Loose on purpose:  any attribute as a string, `prop:` for rich data;  a misspelt attribute isn't caught.
+ * - Loose on purpose:  any attribute, any value (an object or function becomes the property, `RichAttributes`);
+ *   a misspelt attribute isn't caught.
  */
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
@@ -34,7 +35,7 @@ declare module "@solidjs/web/types/jsx.js" {
   }
 }
 
-/** Attributes of a `<ui-docs-*>` tag in a docs element's JSX:  HTML attributes, plus any attribute or `prop:`. */
+/** Attributes of a `<ui-docs-*>` tag in a docs element's JSX:  HTML attributes, plus any attribute, any value. */
 export type DocsJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
 
 /** Every `<ui-docs-*>` tag the docs elements render in JSX. */

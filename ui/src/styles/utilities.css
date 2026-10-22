@@ -476,11 +476,12 @@
   }
 
   /*
-   * Cloak:  hide undefined custom elements (FOUCE) until they upgrade -- on the element itself, or on a
-   * wrapper while anything inside is undefined.
+   * Cloak:  hide custom elements not loaded yet (FOUCE) until they are -- on the element itself, or on a
+   * wrapper while anything inside isn't:  undefined, or pending (`:state(pending)`, defined by a root before its
+   * family loads).
    * - Capped at 2s by a `step-end` animation, so a component that never loads can't hide content forever.
    */
-  .ui-cloak:is(:not(:defined), :has(:not(:defined))) {
+  .ui-cloak:is(:not(:defined), :state(pending), :has(:not(:defined), :state(pending))) {
     animation: 2s step-end ui-cloak;
   }
   @keyframes ui-cloak {

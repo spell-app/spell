@@ -1,5 +1,5 @@
 // oxlint-disable-next-line spell-ui/no-solid-effect -- a helper class, not a component:  one effect per bound control, in a root of its own
-import { createEffect, createRoot } from "solid-js"
+import { createEffect } from "solid-js"
 
 import { E, UIT } from "spell-ui/core"
 import { FormFields } from "./FormFields"
@@ -86,11 +86,13 @@ export class FormBinding {
 
   /**
    * Bind every named control not bound yet;  let go of those no longer in the form.
-   * - A `ui-*` control whose tag isn't defined yet isn't a control yet:  this runs again once it is.
+   * - A `ui-*` control whose family hasn't loaded isn't a control yet:  this runs again once it has.
    */
   update() {
     this.isBinding = true
-    for (const element of this.domElement.querySelectorAll(":not(:defined)")) this.updateWhenDefined(element.localName)
+    for (const element of this.domElement.querySelectorAll(E.DOMElement.notAttached)) {
+      this.updateWhenAttached(element.localName)
+    }
     const controls = new Set(this.fields.controls())
     for (const [control, binding] of this.bindings) {
       if (controls.has(control)) continue
@@ -106,12 +108,11 @@ export class FormBinding {
     }
   }
 
-  /** `update()` again once `tag` is defined (while still binding). */
-  private updateWhenDefined(tag: string) {
+  /** `update()` again once `tag`'s family has loaded (while still binding). */
+  private updateWhenAttached(tag: string) {
     if (this.awaitedTags.has(tag)) return
     this.awaitedTags.add(tag)
-    void customElements
-      .whenDefined(tag)
+    void E.DOMElement.whenAttached(tag)
       .then(() => {
         this.awaitedTags.delete(tag)
         if (this.isBinding) this.update()
@@ -137,7 +138,7 @@ export class FormBinding {
    * - STATIC:  needs only its arguments.
    */
   private static bind(control: Element, name: string, scope: () => unknown): Binding {
-    return createRoot((dispose) => {
+    return E.Reactive.ownRoot((dispose) => {
       createEffect(
         () => FormBinding.valueIn(scope(), name),
         (value) => {

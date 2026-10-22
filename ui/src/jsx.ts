@@ -3167,6 +3167,10 @@ export interface UICodeAttributes {
   /**
    * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
    */
+  content?: string
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   */
   "prop:content"?: string
   /**
    * `ui-load`:  Content arrived:  fetched from `source`, or read from the element's own content.
@@ -8934,6 +8938,10 @@ export interface UIIncludeAttributes {
   /**
    * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
    */
+  content?: string
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   */
   "prop:content"?: string
   /**
    * `ui-load`:  Content arrived:  fetched from `source`, or read from the element's own content.
@@ -10916,6 +10924,10 @@ export interface UIMarkdownAttributes {
     | "jiggle"
     | "glow"
     | "none"
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   */
+  content?: string
   /**
    * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
    */
@@ -16546,6 +16558,13 @@ export interface UIRootAttributes {
   /** `fixed`, as the DOM element's property. */
   "prop:fixed"?: boolean | ""
   /**
+   * Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-change={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it.
+   * - takes:  flag (present / absent)
+   */
+  pure?: boolean | ""
+  /** `pure`, as the DOM element's property. */
+  "prop:pure"?: boolean | ""
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
@@ -16636,6 +16655,10 @@ export interface UIRootAttributes {
     | "jiggle"
     | "glow"
     | "none"
+  /**
+   * Your app's own value for every component inside (a theme, a store ...):  each reads it as `appContext`.  Set it before or after the components load.
+   */
+  appContext?: unknown
   /**
    * Your app's own value for every component inside (a theme, a store ...):  each reads it as `appContext`.  Set it before or after the components load.
    */

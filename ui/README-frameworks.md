@@ -4,7 +4,7 @@
 PASS /src/tools/frameworks/vanilla.html (vanilla)
 PASS /src/tools/frameworks/react.html (react 19.3.1)
 PASS /src/tools/frameworks/vue.html (vue 3.5.44)
-PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.13 (app) + identity hook)
+PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.17 (app) + identity hook)
 ```
 
 That's `yarn smoke`, on four pages that each hold one `<ui-dropdown>`:
@@ -25,7 +25,7 @@ Find your row, then your section:
 | [plain JavaScript](#plain-javascript--nothing-to-configure) | `dropdown.options = OPTIONS` | `addEventListener("ui-change", fn)` | ✓ [`vanilla.html`](src/tools/frameworks/vanilla.html) |
 | [React 19](#react-19--define-the-tags-before-react-renders) | `options={OPTIONS}` | `onui-change={fn}` | ✓ [`react.html`](src/tools/frameworks/react.html) |
 | [Vue 3](#vue-3--tell-the-compiler-the-tags-arent-vues) | `:options="options"` | `@ui-change="fn"` | ✓ [`vue.html`](src/tools/frameworks/vue.html) |
-| [Solid 2](#solid-2--one-solid-on-the-page-and-listeners-by-ref) | `prop:options={options}` | a `ref` that adds the listener | ✓ [`solid.html`](src/tools/frameworks/solid.html) |
+| [Solid 2](#solid-2--one-solid-on-the-page-and-plain-props) | `options={options}` | `on-ui-change={fn}` | ✓ [`solid.html`](src/tools/frameworks/solid.html) |
 | [Svelte, Angular, Preact](#svelte-angular-and-preact--should-work-standard-contract) | -- | -- | no page yet |
 
 Every page passes the same three fruit, `OPTIONS` from [`check.js`](src/tools/frameworks/check.js):
@@ -190,11 +190,13 @@ app.mount("#root")
 - **One quirk, already handled:**  where Vue can't find a property, it may write the attribute `open="false"`.
   Spell UI reads `"false"` as false, so it does the right thing anyway.
 
-## Solid 2:  one Solid on the page, and listeners by `ref`
+## Solid 2:  one Solid on the page, and plain props
 
 ✓ Checked by [`solid.html`](src/tools/frameworks/solid.html), a compiled Solid 2 app,
-[`app.tsx`](src/tools/frameworks/solid/app.tsx), on Solid 2.0.0-rc.13:  the components' own copy.
-`prop:` passes a property;  the listeners go on through a `ref`, because Solid 2 dropped the `on:` namespace.
+[`app.tsx`](src/tools/frameworks/solid/app.tsx), on Solid 2.0.0-rc.17:  the components' own copy.
+Every prop is a plain one, the same name as in HTML:
+- an event is `on-` and the event's own name, `on-ui-change={fn}`
+- data is the property's name, `options={options}`, and arrives as the array itself, not as text
 
 ```tsx
 import { createSignal } from "solid-js"
@@ -206,37 +208,44 @@ const [open, setOpen] = createSignal(true)
 
 render(
   () => (
-    <ui-root prop:appContext={APP_CONTEXT_VALUE}>
+    <ui-root appContext={APP_CONTEXT_VALUE}>
       <ui-dropdown
         selection
         placeholder="Fruit"
-        prop:options={options}
-        prop:value={value()}
-        prop:open={open()}
-        ref={listen}
+        options={options}
+        value={value()}
+        open={open()}
+        on-ui-change={(event) => setValue(String(event.detail.value))}
+        on-ui-open={() => setOpen(true)}
+        on-ui-close={() => setOpen(false)}
       />
     </ui-root>
   ),
   root
 )
-
-/** `ui-*` listeners:  Solid 2 has no `on:` namespace, so a ref callback adds them once. */
-function listen(element) {
-  element.addEventListener("ui-change", (event) => setValue(String(event.detail.value)))
-  element.addEventListener("ui-open", () => setOpen(true))
-  element.addEventListener("ui-close", () => setOpen(false))
-}
 ```
 
-- **The catch:**  your app must run the SAME Solid as Spell UI, `solid-js` and `@solidjs/web` 2.0.0-rc.13.
+- **How:**  Solid 2 sets a prop it doesn't know with `setAttribute(name, value)`, the value as it is.
+  Spell UI's elements take that over:  a function or object goes to a listener or a property.
+  - An element whose component hasn't loaded yet keeps them until it does:
+    a patch on the browser's `setAttribute()` holds them,
+    and acts only for a dashed tag not defined yet, given a function or object.
+  - `<ui-root pure>` turns the patch off.
+    Spell UI's own tags still keep them:  the root defines every tag it knows before its component loads.
+    A tag it doesn't know (another library's), given a function or object before it's defined, gets text, as in
+    plain Solid.
+  - Text for an attribute stays an attribute, as ever.
+- Not `onUIChange`:  Solid lowercases a camelCase handler's name, so it would listen for `uichange`.
+- Neither namespace:  Solid 2 has no `on:` (a compile error since rc.17), and `prop:` is no longer needed.
+- **The catch:**  your app must run the SAME Solid as Spell UI, `solid-js` and `@solidjs/web` 2.0.0-rc.17.
   Two copies of Solid on one page break silently:
   two registries, two owners ([the element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md)).
   - In Vite, that's `resolve.dedupe`:  `["solid-js", "@solidjs/web"]`, as every Spell build sets it.
 - Solid's context stops at the element:  each element draws in a Solid root of its own,
   so your providers don't reach inside.
-  Hand app data to the root instead, `<ui-root prop:appContext={value}>` as above:
-  how every component inside reads it, and when to set it, is on
-  [the front page's `<ui-root>`](README.md#ui-root-the-top-of-every-page).
+  - Hand app data to the root instead, as an object:  `<ui-root appContext={value}>`, as above.
+  - How every component inside reads it, and when to set it:
+    [the front page's `<ui-root>`](README.md#ui-root-the-top-of-every-page).
 
 <details>
 <summary>How the smoke page proves there's one Solid</summary>
@@ -386,7 +395,7 @@ declarations:  ok
 PASS /src/tools/frameworks/vanilla.html (vanilla)
 PASS /src/tools/frameworks/react.html (react 19.3.1)
 PASS /src/tools/frameworks/vue.html (vue 3.5.44)
-PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.13 (app) + identity hook)
+PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.17 (app) + identity hook)
 PASS /src/tools/frameworks/perf.html (perf (production))
 PASS /src/tools/smoke/compat-solid-1.9.html (solid 1.9.9 (esm.sh) + vendored Solid 2)
 PASS /src/tools/smoke/translate.html (es (<ui-root> in Spanish))
@@ -405,7 +414,7 @@ PASS /src/tools/demo/fallback.html (every form control, working + failed)
   - `perf.html`:  a 1000-option search dropdown, on the production build.
     On the last run, opening it put all 1000 rows on the page in 22 ms of script and DOM work,
     and each keystroke of `united sta` took 5 ms or less of the same.
-  - `compat-solid-1.9.html`:  the Solid 1.9 app, [above](#solid-2--one-solid-on-the-page-and-listeners-by-ref).
+  - `compat-solid-1.9.html`:  the Solid 1.9 app, [above](#solid-2--one-solid-on-the-page-and-plain-props).
   - `translate.html`:  a page in Spanish (`<html lang="es">`).
     Its root loads the Spanish names, then each tag's family as it meets it (`<es-boton>`, `<es-tarjeta>`).
     - Spanish attributes and values, and the dropdown's own event, `es-cambio`

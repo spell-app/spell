@@ -23,6 +23,7 @@ import type { E } from "spell-ui/core"
  ****************/
 export const selectVocabulary = {
   tag: "ui-select",
+  formControl: true,
   topics: ["forms", "inputs", "selection", "controls", "modules"],
   aka: ["select box", "native select", "picker", "option list"],
   skeleton: "inline 12 x 2.5",

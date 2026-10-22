@@ -18,6 +18,7 @@ import type { E } from "spell-ui/core"
  ****************/
 export const calendarVocabulary = {
   tag: "ui-calendar",
+  formControl: true,
   topics: ["date & time", "forms", "inputs", "controls", "modules"],
   aka: ["date picker", "datepicker", "time picker", "datetime", "date range"],
   skeleton: "inline 14 x 2.5",

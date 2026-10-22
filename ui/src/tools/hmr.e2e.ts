@@ -26,6 +26,7 @@
 import assert from "node:assert/strict"
 import { execFileSync } from "node:child_process"
 import { readFileSync, writeFileSync } from "node:fs"
+import { dirname, join } from "node:path"
 import { after, before, describe, it } from "node:test"
 import { fileURLToPath } from "node:url"
 import { chromium, type Browser, type Page } from "playwright"
@@ -471,7 +472,13 @@ const FILES = {
   css: `${ROOT}src/components/ui-button/UIButton.css`,
   vocabulary: `${ROOT}src/components/ui-button/UIButton.en.ts`,
   orVocabulary: `${ROOT}src/components/ui-button/UIOr.en.ts`,
-  shared: `${ROOT}../element/src/UIComponent.tsx`
+  // the kit's, found by package (never a path into another repo):  `spell-kit`'s `src/element/`
+  shared: join(
+    dirname(fileURLToPath(import.meta.resolve("spell-kit/package.json"))),
+    "src",
+    "element",
+    "UIComponent.tsx"
+  )
 } as const
 
 /** Preferred dev server port (the next free one is taken if busy). */

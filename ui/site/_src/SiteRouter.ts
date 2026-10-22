@@ -92,7 +92,8 @@ export class SiteRouter {
     const main = this.main()
     const old = document.querySelector(SITE_TOC)
     if (!main || !old) return
-    const toc = old.matches(":defined") ? document.createElement(TOC_TAG) : old
+    // one whose family loaded is replaced;  one not loaded yet (undefined, or pending) is kept and upgraded later
+    const toc = old.matches(E.DOMElement.notAttached) ? old : document.createElement(TOC_TAG)
     toc.className = old.className
     toc.toggleAttribute("for", false)
     if (main.querySelector(`#${SITE_TABS_ID}`)) toc.setAttribute("for", SITE_TABS_ID)

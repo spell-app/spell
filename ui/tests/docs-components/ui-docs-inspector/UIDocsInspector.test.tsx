@@ -70,7 +70,7 @@ describe("<ui-docs-inspector> rows", () => {
   it("follows a click:  the attribute, the property and the state come in", async () => {
     const { inspector, target } = await render(TOGGLE)
     target!.shadowRoot!.querySelector("button")!.click()
-    await expect.poll(() => groups(inspector).States).toEqual([":state(active)"])
+    await expect.poll(() => groups(inspector).States).toEqual([":state(active)", ":state(ready)"])
     const shown = groups(inspector)
     expect(shown.Attributes).toContain('active = ""')
     expect(shown.Properties).toContain("active = true")

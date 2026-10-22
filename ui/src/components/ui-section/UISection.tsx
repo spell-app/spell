@@ -284,9 +284,6 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
 
   /**
    * The title's inline tokens:  stick offset and nesting depth.
-   * - A getter, not an inline object:
-   *   Solid's server compile (rc.11) drops the `;` between an inline style object's COMPUTED keys
-   *   (`--a:1px--b:2`), and the browser then ignores both.
    */
   private get titleStyle(): Record<string, string> {
     return { [STICK_TOP_PROPERTY]: `${this.stickTop}px`, [DEPTH_PROPERTY]: String(this.depth) }

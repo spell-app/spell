@@ -20,6 +20,7 @@ import { LEADING_ATTRIBUTES, SHARED_ATTRIBUTES, SHARED_EVENTS, SHARED_PARTS } fr
  ****************/
 export const checkboxVocabulary = {
   tag: "ui-checkbox",
+  formControl: true,
   topics: ["forms", "inputs", "controls", "selection", "basic", "modules"],
   aka: ["check box", "toggle", "switch", "tick box"],
   skeleton: "inline 6 x 1.25",

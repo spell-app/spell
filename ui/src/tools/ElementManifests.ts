@@ -362,7 +362,7 @@ export class ElementManifests {
    * - A rich (`json`) property:  its property name, and `prop:<property>`
    *   - Solid 2 sets the plain name as an ATTRIBUTE today, so our JSX writes `prop:`;
    *     the plain name is for once objects, arrays and functions go to the property (epic `solid-17`).
-   * - The properties no vocabulary names (`JSX_SCRIPT_PROPERTIES`), as `prop:<property>` only.
+   * - The properties no vocabulary names (`JSX_SCRIPT_PROPERTIES`):  their plain name, and `prop:<property>`.
    * - An event:  `on-<event>` (`on-ui-change`), its listener, typed by `<name>EventMap` (epic `solid-17`'s shape).
    * - The first of two same names wins.
    */
@@ -396,9 +396,12 @@ export class ElementManifests {
       }
     }
     for (const { property, type, description, isFor } of JSX_SCRIPT_PROPERTIES) {
-      const name = `prop:${property}`
-      if (!isFor(tag) || members.has(name)) continue
-      members.set(name, [...ElementManifests.docstring([description], "  "), `  "${name}"?: ${type}`])
+      if (!isFor(tag)) continue
+      for (const name of [property, `prop:${property}`]) {
+        if (members.has(name)) continue
+        const key = name === property ? name : JSON.stringify(name)
+        members.set(name, [...ElementManifests.docstring([description], "  "), `  ${key}?: ${type}`])
+      }
     }
     for (const event of tag.events) {
       const prop = `on-${event.name}`

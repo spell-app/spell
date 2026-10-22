@@ -16,6 +16,7 @@ import type { ComponentVocabulary } from "spell-ui/vocabulary"
  ****************/
 export const dropdownVocabulary = {
   tag: "ui-dropdown",
+  formControl: true,
   topics: ["forms", "inputs", "selection", "menus", "controls", "basic", "modules"],
   aka: ["select", "combobox", "picker", "autocomplete", "menu button", "multi select"],
   skeleton: "inline 14 x 2.5",

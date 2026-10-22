@@ -22,7 +22,7 @@ import treeDiagramCSS from "./UITreeDiagram.css?inline"
  *
  * - GENERIC:  it draws any tree from plain data (`TreeDiagramNode`).
  *   It was first drawn for spell's parse trees, but `ui` never imports spell or the parser.
- * - The tree:  the `tree` property (`prop:tree` in Solid),
+ * - The tree:  the `tree` property (`tree={tree}` in Solid),
  *   else the JSON of a `<script type="application/json">` child (static pages, `file://` too),
  *   which it follows as it changes.
  *   - The property wins.

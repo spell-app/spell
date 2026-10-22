@@ -15,6 +15,7 @@ import type { E } from "spell-ui/core"
  ****************/
 export const ratingVocabulary = {
   tag: "ui-rating",
+  formControl: true,
   topics: ["inputs", "controls", "forms", "feedback", "modules"],
   aka: ["stars", "star rating", "score", "review stars", "hearts"],
   skeleton: "inline 5.5 x 1.1",

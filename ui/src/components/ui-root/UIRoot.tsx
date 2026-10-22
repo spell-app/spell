@@ -374,9 +374,9 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
   private async settle(): Promise<void> {
     for (let round = 0; round < MAX_ROUNDS; round++) {
       await this.loadUndefined()
-      const pending = this.pendingElements()
-      if (!pending.length) return
-      await Promise.all(pending.map((element) => this.whenReady(element)))
+      const toAwait = this.elementsToAwait()
+      if (!toAwait.length) return
+      await Promise.all(toAwait.map((element) => this.whenReady(element)))
     }
   }
 
@@ -440,10 +440,14 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
     this.skeletons = this.findSkeletons()
   }
 
-  /** Defined `ui-*` elements inside, not awaited yet. */
-  private pendingElements(): E.DOMElement[] {
+  /**
+   * Elements inside whose family has loaded, not awaited yet.
+   * - Not a pending one (defined early, its family failed or not loaded):  it would never get ready.
+   */
+  private elementsToAwait(): E.DOMElement[] {
     return this.elementsInside().filter(
-      (element): element is E.DOMElement => element instanceof E.DOMElement && !this.awaitedElements.has(element)
+      (element): element is E.DOMElement =>
+        element instanceof E.DOMElement && !E.DOMElement.isPending(element) && !this.awaitedElements.has(element)
     )
   }
 

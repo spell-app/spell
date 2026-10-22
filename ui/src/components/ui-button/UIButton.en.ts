@@ -17,6 +17,7 @@ import type { E } from "spell-ui/core"
  ****************/
 export const buttonVocabulary = {
   tag: "ui-button",
+  formControl: true,
   topics: ["buttons", "basic", "controls", "forms", "elements"],
   aka: ["btn", "action", "submit", "link button"],
   skeleton: "inline 6 x 2.5",

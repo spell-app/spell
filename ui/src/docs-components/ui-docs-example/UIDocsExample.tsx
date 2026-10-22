@@ -145,7 +145,7 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
               part={this.partForName("source")}
               language={this.language || DEFAULT_LANGUAGE}
               copy=""
-              prop:content={this.sourceMarkup}
+              content={this.sourceMarkup}
             />
           </ui-segment>
         </Show>

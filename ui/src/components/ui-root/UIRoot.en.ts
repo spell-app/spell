@@ -96,6 +96,15 @@ export const rootVocabulary = {
       description:
         "Fills the viewport and stays there (`position: fixed`):  the page never scrolls, the root does.  A " +
         "full-page app shell.  On iOS the keyboard can cover fields near the bottom."
+    },
+    {
+      name: "pure",
+      kind: "boolean",
+      description:
+        "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a " +
+        "framework gives them before they load (`on-ui-change={f}`, `options={[...]}`) either way:  the root " +
+        "defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they " +
+        "get text, as the browser makes it.  Read once, as the page first needs it."
     }
   ],
   events: [

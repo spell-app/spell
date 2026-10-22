@@ -418,7 +418,7 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
               type={isColor ? COLOR_TYPE : undefined}
               placeholder={isColor ? undefined : row.default}
               aria-label={this.translationForKey("setToken", { token: row.name })}
-              prop:value={this.inputValue(row)}
+              value={this.inputValue(row)}
             />
           </td>
         </Show>

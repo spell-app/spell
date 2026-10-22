@@ -26,13 +26,13 @@ import { HtmlFormatter } from "./HtmlFormatter"
  ****************/
 export class ExampleSource {
   /**
-   * Keep the markup of every `<ui-docs-example>` under `root` that isn't defined yet;  returns how many.
+   * Keep the markup of every `<ui-docs-example>` under `root` whose family hasn't loaded yet;  returns how many.
    * - Call BEFORE any family loads:  the site entry does, at the top.  Later calls only add new examples.
    * - SIDE EFFECT:  fills the page-wide snapshot map.
    */
   static snapshot(root: ParentNode = document): number {
     let count = 0
-    for (const example of root.querySelectorAll(`${EXAMPLE_TAG}:not(:defined)`)) {
+    for (const example of root.querySelectorAll(`${EXAMPLE_TAG}${E.DOMElement.notAttached}`)) {
       if (ExampleSource.snapshots.has(example)) continue
       ExampleSource.snapshots.set(example, example.innerHTML)
       count++
