@@ -41,20 +41,20 @@ from the [FizzBuzz snapshot](tests/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot
 
 | Piece | What it does | Where |
 | --- | --- | --- |
-| the classes | `Thing`, `List`, `App`, `Drawable`, `DrawableList`:  what spell's types extend | [classes/](core/src/classes/) |
-| list helpers | positions, ranges, filtering, adding and removing, shuffling | [collection-core.ts](core/src/collection-core.ts), [collection-other.ts](core/src/collection-other.ts), [positions.ts](core/src/positions.ts) |
-| drawing | Solid's `h()`, `@drawn`, mounting an app;  each thing drawn inside its own error boundary | [drawing.ts](core/src/drawing.ts), [elements.ts](core/src/elements.ts) |
-| events | `trigger()`, `on()`, `off()`, `once()` | [runtime.ts](core/src/runtime.ts), [SpellEvent.ts](core/src/SpellEvent.ts) |
-| JSON | every object's JSON says its class first, `"$type"`;  `core.fromJSON()` reads it back as that class | [json.ts](core/src/json.ts) |
-| carrying over | keeps the game in progress when the program is recompiled | [carry.ts](core/src/carry.ts) |
-| state by id | a program's state for a page that mirrors it:  whole the first time, then patches | [state.ts](core/src/state.ts), [page.ts](core/src/page.ts) |
-| saving by id | things saved as readable JSON entries, by key (`Person#bob`), with versions and upgrades | [saving.ts](core/src/saving.ts), [checking.ts](core/src/checking.ts) |
-| references | one thing named in text:  `Tableau#T1`, `Tableau#1` | [references.ts](core/src/references.ts) |
-| seeded random | `core.seedRandom(n)`:  everything random after it repeats, run after run | [ParkMiller.ts](core/src/ParkMiller.ts) |
-| the console, tests | `print`, `expect`, `to test ...` | [console.ts](core/src/console.ts), [tests.ts](core/src/tests.ts) |
-| the model alone | the core without drawing, for libraries:  `spell-lang/core/model` | [model.ts](core/src/model.ts) |
+| the classes | `Thing`, `List`, `App`, `Drawable`, `DrawableList`:  what spell's types extend | [classes/](src/core/classes/) |
+| list helpers | positions, ranges, filtering, adding and removing, shuffling | [collection-core.ts](src/core/collection-core.ts), [collection-other.ts](src/core/collection-other.ts), [positions.ts](src/core/positions.ts) |
+| drawing | Solid's `h()`, `@drawn`, mounting an app;  each thing drawn inside its own error boundary | [drawing.ts](src/core/drawing.ts), [elements.ts](src/core/elements.ts) |
+| events | `trigger()`, `on()`, `off()`, `once()` | [runtime.ts](src/core/runtime.ts), [SpellEvent.ts](src/core/SpellEvent.ts) |
+| JSON | every object's JSON says its class first, `"$type"`;  `core.fromJSON()` reads it back as that class | [json.ts](src/core/json.ts) |
+| carrying over | keeps the game in progress when the program is recompiled | [carry.ts](src/core/carry.ts) |
+| state by id | a program's state for a page that mirrors it:  whole the first time, then patches | [state.ts](src/core/state.ts), [page.ts](src/core/page.ts) |
+| saving by id | things saved as readable JSON entries, by key (`Person#bob`), with versions and upgrades | [saving.ts](src/core/saving.ts), [checking.ts](src/core/checking.ts) |
+| references | one thing named in text:  `Tableau#T1`, `Tableau#1` | [references.ts](src/core/references.ts) |
+| seeded random | `core.seedRandom(n)`:  everything random after it repeats, run after run | [ParkMiller.ts](src/core/ParkMiller.ts) |
+| the console, tests | `print`, `expect`, `to test ...` | [console.ts](src/core/console.ts), [tests.ts](src/core/tests.ts) |
+| the model alone | the core without drawing, for libraries:  `spell-lang/core/model` | [model.ts](src/core/model.ts) |
 
-- `core` is built up as it loads ([index.ts](core/src/index.ts)):
+- `core` is built up as it loads ([index.ts](src/core/index.ts)):
   each module adds its helpers to the one object.
 - Random numbers come only from the core's own generator, never `Math.random()`,
   so a seeded game deals the same in JavaScript and Python.
@@ -128,9 +128,9 @@ The same `core`, in two languages:  the JavaScript one, and `spell_core` in Pyth
 _Python uses its own words where it has them, `print` and `range`, and `core` only where it doesn't._
 
 How they're kept in step:
-- [core.declarations.json5](core/core.declarations.json5) is the JavaScript core's method list,
+- [core.declarations.json5](src/core/core.declarations.json5) is the JavaScript core's method list,
   read from the running core.
-  `spell_core` must have each name, or list it in [not_ported_yet.json5](py/core/not_ported_yet.json5), with why.
+  `spell_core` must have each name, or list it in [not_ported_yet.json5](src/py/core/not_ported_yet.json5), with why.
 - 36 names aren't ported yet, mostly a browser's own:
   a drawable thing's element, a page's shadow root, carrying things over a recompile.
 - Both cores read the same expected files in their tests:  seeded random, state by id, and saving by id.
@@ -152,8 +152,8 @@ How they're kept in step:
 
 | File | What it is | Rewritten by |
 | --- | --- | --- |
-| [core.declarations.json5](core/core.declarations.json5) | the core's method list:  13 names it provides, 153 statements, each with its module and a description from its docstring | `yarn core:gen:declarations`, at spell-lang's root |
-| [core.scopes.js](core/src/core.scopes.js) | the built-in types' docs, for pages with no parser | `yarn lsp:scopes --builtins`, in spell-app |
+| [core.declarations.json5](src/core/core.declarations.json5) | the core's method list:  13 names it provides, 153 statements, each with its module and a description from its docstring | `yarn core:gen:declarations`, at spell-lang's root |
+| [core.scopes.js](src/core/core.scopes.js) | the built-in types' docs, for pages with no parser | `yarn lsp:scopes --builtins`, in spell-app |
 
 - A test fails until you regenerate the method list after adding, renaming or removing anything on `core`;
   a name with no docstring fails it too.
@@ -167,20 +167,20 @@ How they're kept in step:
 
 | File | What it is |
 | --- | --- |
-| [index.ts](core/src/index.ts) | the entry:  loads every module, which assembles `core` |
-| [core.ts](core/src/core.ts), [core.types.ts](core/src/core.types.ts) | the `core` object, and its types |
-| [classes/](core/src/classes/) | `Thing`, `List`, `App`, `Drawable`, `DrawableList`, ids |
-| [collection-core.ts](core/src/collection-core.ts), [collection-other.ts](core/src/collection-other.ts), [positions.ts](core/src/positions.ts) | list helpers |
-| [string.ts](core/src/string.ts), [paths.ts](core/src/paths.ts) | text helpers, dotted paths |
-| [things.ts](core/src/things.ts) | the running program's things, for the Thing Explorer |
-| [drawing.ts](core/src/drawing.ts), [elements.ts](core/src/elements.ts), [ui.ts](core/src/ui.ts) | drawing, each drawable thing's element, notices and prompts |
-| [runtime.ts](core/src/runtime.ts), [SpellEvent.ts](core/src/SpellEvent.ts) | events, pauses, processes |
-| [json.ts](core/src/json.ts), [carry.ts](core/src/carry.ts), [state.ts](core/src/state.ts), [page.ts](core/src/page.ts) | JSON, carrying over, state by id, a page drawing a program running elsewhere |
-| [saving.ts](core/src/saving.ts), [checking.ts](core/src/checking.ts), [references.ts](core/src/references.ts) | saving and loading by id, checking an entry, naming a thing |
-| [ParkMiller.ts](core/src/ParkMiller.ts) | seeded random |
-| [console.ts](core/src/console.ts), [assert.ts](core/src/assert.ts), [tests.ts](core/src/tests.ts) | the console, assertions, spell's tests |
-| [model.ts](core/src/model.ts) | `spell-lang/core/model`:  the core without drawing |
-| [coreDeclarations.ts](core/src/coreDeclarations.ts), [writeCoreDeclarations.ts](core/src/writeCoreDeclarations.ts) | the method list, and the script that writes it |
+| [index.ts](src/core/index.ts) | the entry:  loads every module, which assembles `core` |
+| [core.ts](src/core/core.ts), [core.types.ts](src/core/core.types.ts) | the `core` object, and its types |
+| [classes/](src/core/classes/) | `Thing`, `List`, `App`, `Drawable`, `DrawableList`, ids |
+| [collection-core.ts](src/core/collection-core.ts), [collection-other.ts](src/core/collection-other.ts), [positions.ts](src/core/positions.ts) | list helpers |
+| [string.ts](src/core/string.ts), [paths.ts](src/core/paths.ts) | text helpers, dotted paths |
+| [things.ts](src/core/things.ts) | the running program's things, for the Thing Explorer |
+| [drawing.ts](src/core/drawing.ts), [elements.ts](src/core/elements.ts), [ui.ts](src/core/ui.ts) | drawing, each drawable thing's element, notices and prompts |
+| [runtime.ts](src/core/runtime.ts), [SpellEvent.ts](src/core/SpellEvent.ts) | events, pauses, processes |
+| [json.ts](src/core/json.ts), [carry.ts](src/core/carry.ts), [state.ts](src/core/state.ts), [page.ts](src/core/page.ts) | JSON, carrying over, state by id, a page drawing a program running elsewhere |
+| [saving.ts](src/core/saving.ts), [checking.ts](src/core/checking.ts), [references.ts](src/core/references.ts) | saving and loading by id, checking an entry, naming a thing |
+| [ParkMiller.ts](src/core/ParkMiller.ts) | seeded random |
+| [console.ts](src/core/console.ts), [assert.ts](src/core/assert.ts), [tests.ts](src/core/tests.ts) | the console, assertions, spell's tests |
+| [model.ts](src/core/model.ts) | `spell-lang/core/model`:  the core without drawing |
+| [coreDeclarations.ts](src/core/coreDeclarations.ts), [writeCoreDeclarations.ts](src/core/writeCoreDeclarations.ts) | the method list, and the script that writes it |
 
 - Its tests:  [tests/core/](tests/core/), at the same paths, with the expected files both cores read.
 
@@ -202,7 +202,7 @@ These guides need a checkout with the content folder beside it, and the page ser
 
 - The pages beside this one:
   [README-targets](README-targets.md), [README-spell](README-spell.md), [README-parser](README-parser.md)
-- The rules for working in this folder:  [core's AGENTS.md](core/AGENTS.md)
+- The rules for working in this folder:  [core's AGENTS.md](src/core/AGENTS.md)
 - spell-lang's front page:  [README](README.md)
 - The kit, and every repo:  [the kit's README](../README.md)
 - Also beside it:  [README-markdown.md](README-markdown.md) · [README-rulex.md](README-rulex.md)

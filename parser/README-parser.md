@@ -25,7 +25,7 @@ flowchart LR
 _Each stage below opens with its own close-up of one line going through it._
 
 It imports only the kit's shared helpers:  no UI framework, no JSX, no DOM.
-The deep map of how spell's lines go through it is [PARSING.md](spell/PARSING.md);
+The deep map of how spell's lines go through it is [PARSING.md](src/spell/PARSING.md);
 this page is the overview.
 
 ## 1. Tokens
@@ -73,7 +73,7 @@ NumberToken    2
 <details>
 <summary>Every kind of token</summary>
 
-From [Tokens.ts](parser/src/tokenizer/Tokens.ts):
+From [Tokens.ts](src/parser/tokenizer/Tokens.ts):
 
 | Token | What it holds |
 | --- | --- |
@@ -86,8 +86,8 @@ From [Tokens.ts](parser/src/tokenizer/Tokens.ts):
 | `LineToken` | one line's tokens, for a language with blocks |
 | `BlockToken` | lines and nested blocks, by indent |
 
-- The tokenizer:  [Tokenizer.ts](parser/src/tokenizer/Tokenizer.ts).
-- Spell's settings:  `SpellParser.tokenizer`, in [SpellParser.ts](spell/src/SpellParser.ts).
+- The tokenizer:  [Tokenizer.ts](src/parser/tokenizer/Tokenizer.ts).
+- Spell's settings:  `SpellParser.tokenizer`, in [SpellParser.ts](src/spell/SpellParser.ts).
   - double-quoted text only
   - indentation matters at the start of a line
   - raw `css` and `markdown` blocks
@@ -138,7 +138,7 @@ Rulex compiles a syntax string into a tree of these;  you can also make them by 
 | `Pattern` | a token whose text matches a regular expression | (in code:  `pattern: /^\d+$/`) |
 | `TokenType` | any token of one class | (in code:  `tokenType: P.NumberToken`) |
 
-The top docstring of [Rule.ts](parser/src/rules/Rule.ts) has every way to make a rule, with examples.
+The top docstring of [Rule.ts](src/parser/rules/Rule.ts) has every way to make a rule, with examples.
 
 ### A real rule:  spell's `trigger`
 
@@ -174,7 +174,7 @@ events.addRule(Trigger, {
 
 - `@proto static` sets a default on the class, inherited by its subclasses.
 - `syntax`, `tests` and the rule's name are NOT inherited:  share a syntax with a constant.
-- The whole file:  [Trigger.ts](spell/src/rules/events/Trigger.ts), one rule class per file.
+- The whole file:  [Trigger.ts](src/spell/rules/events/Trigger.ts), one rule class per file.
 
 ### Registration and ties
 
@@ -227,7 +227,7 @@ dates.addRule(date, { syntax: "({next_weekday}|{offset}|{day_name})" })
 - A rule with no spell tree compiles itself:  `compile(match)`, here returning text.
 - A named literal's match has its word as `value`;  a number token's, its number.
 
-Markdown's heading rule, two syntaxes on one class ([lineRules.ts](markdown/src/blocks/lineRules.ts)):
+Markdown's heading rule, two syntaxes on one class ([lineRules.ts](src/markdown/blocks/lineRules.ts)):
 
 ```ts
 /** A run of 1-6 `#`, then nothing, or a space and anything. */
@@ -272,7 +272,7 @@ What a match holds:
 <details>
 <summary>Every field of a match</summary>
 
-From [Match.ts](parser/src/Match.ts):
+From [Match.ts](src/parser/Match.ts):
 
 | Field | What it is |
 | --- | --- |
@@ -357,15 +357,15 @@ core.console.log(card.isFaceUp)
 ### Re-parsing after an edit
 
 The editor re-parses as you type, so it re-parses only what an edit changed:
-`IncrementalParse` and `IncrementalProject` ([IncrementalParse.ts](parser/src/IncrementalParse.ts)).
+`IncrementalParse` and `IncrementalProject` ([IncrementalParse.ts](src/parser/IncrementalParse.ts)).
 - A line whose declarations changed re-parses what follows it;  one that changed nothing doesn't.
 - Completion asks the same parser what could come next
-  (`expectedAfter()`, in [Expectations.ts](parser/src/Expectations.ts)).
+  (`expectedAfter()`, in [Expectations.ts](src/parser/Expectations.ts)).
 
 ## 4. The spell tree
 
 Each match builds a node of the spell tree (its AST):  what the line MEANT, in no target's words.
-83 kinds of node, in [AST.ts](parser/src/ast/AST.ts).
+83 kinds of node, in [AST.ts](src/parser/ast/AST.ts).
 
 `spell parse --tree "print 1 + 2 * 3"`:
 
@@ -434,13 +434,13 @@ _The same node, two writers:  `if (...) ...` for JavaScript, an indented block f
 
 | Writer | Writes | Where |
 | --- | --- | --- |
-| `Writer` | the base:  one method per node class, found by name | [Writer.ts](parser/src/writers/Writer.ts) |
-| `ProgramWriter` | what every program's writer shares:  reads the whole project first, how names are written, where lists start counting | [ProgramWriter.ts](parser/src/writers/ProgramWriter.ts) |
-| `JSWriter` | JavaScript on Solid, as a person writes it | [JSWriter.ts](parser/src/writers/JSWriter.ts) |
-| `TSWriter` | TypeScript on Solid:  JSX, decorators, the types spell knows | [TSWriter.ts](parser/src/writers/TSWriter.ts) |
-| `LibraryWriter` | a project's classes alone, as a TypeScript library | [LibraryWriter.ts](parser/src/writers/LibraryWriter.ts) |
-| `TreeWriter` | not code:  boxes for a diagram of the tree (`spell parse --tree --html`) | [TreeWriter.ts](parser/src/writers/TreeWriter.ts) |
-| `PyWriter`, `ElementsWriter` | Python, and a Python program's drawing half in JavaScript | spell-lang's [py/ts/](py/ts/) |
+| `Writer` | the base:  one method per node class, found by name | [Writer.ts](src/parser/writers/Writer.ts) |
+| `ProgramWriter` | what every program's writer shares:  reads the whole project first, how names are written, where lists start counting | [ProgramWriter.ts](src/parser/writers/ProgramWriter.ts) |
+| `JSWriter` | JavaScript on Solid, as a person writes it | [JSWriter.ts](src/parser/writers/JSWriter.ts) |
+| `TSWriter` | TypeScript on Solid:  JSX, decorators, the types spell knows | [TSWriter.ts](src/parser/writers/TSWriter.ts) |
+| `LibraryWriter` | a project's classes alone, as a TypeScript library | [LibraryWriter.ts](src/parser/writers/LibraryWriter.ts) |
+| `TreeWriter` | not code:  boxes for a diagram of the tree (`spell parse --tree --html`) | [TreeWriter.ts](src/parser/writers/TreeWriter.ts) |
+| `PyWriter`, `ElementsWriter` | Python, and a Python program's drawing half in JavaScript | spell-lang's [src/py/](src/py/) |
 
 </details>
 
@@ -469,12 +469,12 @@ Markdown is the worked example:  a second language on the same parser, which nev
 A new language takes five pieces.
 
 1. **A tokenizer setting:**  what's a word, what's a symbol, how whitespace and strings work.
-   - Markdown's ([MarkdownTokenizer.ts](markdown/src/MarkdownTokenizer.ts)):
+   - Markdown's ([MarkdownTokenizer.ts](src/markdown/MarkdownTokenizer.ts)):
      words are letters and digits, every other character is a symbol of its own,
      and whitespace rides on the token before it.
    - So Rulex counts work on it:  `#{1,6}` takes one to six `#` symbols.
 2. **Rule modules:**  a parser per module, one rule class per file, an index file whose order is the registration order.
-   - Spell's are folders under [spell/src/rules/](spell/src/rules/);  markdown's line rules are one file.
+   - Spell's are folders under [src/spell/rules/](src/spell/rules/);  markdown's line rules are one file.
 3. **What scope records:**  if a line can teach later lines words, its rule's `mutateScope()` records them.
    - Markdown needs none;  spell's whole design rests on it.
 4. **A tree, or your own data:**  rules may build spell tree nodes (`getAST()`),
@@ -525,7 +525,7 @@ math.addRule(Plus, {
 - A test is `[input, js, ts?]`, or `{ input, js, ts }`.
   Leave out the TypeScript when it's the same as the JavaScript.
 - `compileAs` parses the input as another rule;  `beforeEach` seeds the scope.
-- Each module's test file runs them all, through `unitTestModuleRules()` ([parser/src/test/](parser/src/test/)).
+- Each module's test file runs them all, through `unitTestModuleRules()` ([src/parser/test/](src/parser/test/)).
 - Blessing writes the writers' current output into each test, in its source:
   `yarn spell:test:rules:bless`, then read the diff.
 - `parser.speedTest()` runs every rule test once to warm up, then 20 more times, and reports the average.
@@ -534,13 +534,13 @@ math.addRule(Plus, {
 ### Adding a rule
 
 1. Pick the module it belongs in, and add a file named for its class, `<RuleClass>.ts`,
-   in that module's folder of [spell/src/rules/](spell/src/rules/).
+   in that module's folder of [src/spell/rules/](src/spell/rules/).
 2. Write the class:  its `@proto static` settings first, then `getAST()` (or `compile()`).
 3. Register it right after the class, once per syntax, each with its tests.
 4. Export it from the module's index file, in the place that gives the tie-break order you want.
 5. Run `yarn spell:test:rules`;  bless the outputs once they're right, and read the diff.
 6. Run `yarn spell:gen:syntax`, which regenerates the syntax table:  a test fails until you do.
-7. A change to how parsing WORKS (not one more rule) updates [PARSING.md](spell/PARSING.md) in the same change.
+7. A change to how parsing WORKS (not one more rule) updates [PARSING.md](src/spell/PARSING.md) in the same change.
 
 Spell's own version of this, with its layout:  [README-spell](README-spell.md#adding-a-rule).
 
@@ -563,7 +563,7 @@ These guides need a checkout with the content folder beside it, and the page ser
 - The pages beside this one:
   [README-rulex](README-rulex.md), [README-markdown](README-markdown.md),
   [README-spell](README-spell.md), [README-core](README-core.md), [README-targets](README-targets.md)
-- The detailed map of spell's parse pipeline:  [PARSING.md](spell/PARSING.md)
-- The rules for working in this folder:  [parser's AGENTS.md](parser/AGENTS.md)
+- The detailed map of spell's parse pipeline:  [PARSING.md](src/spell/PARSING.md)
+- The rules for working in this folder:  [parser's AGENTS.md](src/parser/AGENTS.md)
 - spell-lang's front page:  [README](README.md)
 - The kit, and every repo:  [the kit's README](../README.md)

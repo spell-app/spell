@@ -67,7 +67,7 @@ Options:
 
 Three stages, the first in Rulex, the other two in code where rules weren't enough.
 
-1. **Line rules:**  each kind of line is a Rulex rule ([lineRules.ts](markdown/src/blocks/lineRules.ts)):
+1. **Line rules:**  each kind of line is a Rulex rule ([lineRules.ts](src/markdown/blocks/lineRules.ts)):
    thematic breaks, headings, fences, list markers, quotes, table rows.
    A heading, in two syntaxes on one rule:
 
@@ -78,16 +78,16 @@ Three stages, the first in Rulex, the other two in code where rules weren't enou
    lineRules.addRule(atx_heading, { syntax: "#{1,6}{spaces}{any}*" })
    ```
 
-2. **The block scanner** ([BlockScanner.ts](markdown/src/blocks/BlockScanner.ts)):
+2. **The block scanner** ([BlockScanner.ts](src/markdown/blocks/BlockScanner.ts)):
    the stack of open containers (quotes, list items), lazy continuation lines, tables.
    A port of commonmark.js 0.29's.
-3. **The inline parser** ([InlineParser.ts](markdown/src/inlines/InlineParser.ts)):
+3. **The inline parser** ([InlineParser.ts](src/markdown/inlines/InlineParser.ts)):
    emphasis by its delimiter rules, links, entities, raw HTML;  then GitHub's autolinks.
    A port of commonmark.js 0.29's.
 
-Then the renderers ([render/](markdown/src/render/)) write the blocks and inlines as plain HTML or `ui-*` tags.
+Then the renderers ([render/](src/markdown/render/)) write the blocks and inlines as plain HTML or `ui-*` tags.
 
-- Its tokenizer ([MarkdownTokenizer.ts](markdown/src/MarkdownTokenizer.ts)):
+- Its tokenizer ([MarkdownTokenizer.ts](src/markdown/MarkdownTokenizer.ts)):
   words are letters and digits, every other character is a symbol of its own,
   and whitespace rides on the token before it.
   So Rulex can count `#`s, and tell `**bold**` from `** bold **`.
@@ -112,32 +112,32 @@ Measured on 2026-10-04, over the repo's 172 markdown files (1315 kB):
 
 | Who | What for |
 | --- | --- |
-| spell-app's `<spell-markdown>` ([MDEngine.ts](../spell-app/app/components/spell-markdown/MDEngine.ts)) | Spell UI's `<ui-markdown>`, drawn with this engine and `ui-*` tags, plain or editable |
-| the editor's docstrings ([Markdown.tsx](../spell-app/app/src/solid/Markdown.tsx)) | a type's or member's docs, as plain HTML, loaded on first use |
-| the language server ([SpellLanguageService.ts](../spell-app/lsp/src/SpellLanguageService.ts)) | `**bold**`, `*italic*` and code inside a comment, coloured in the editor |
+| spell-app's `<spell-markdown>` ([MDEngine.ts](../spell-app/src/app/components/spell-markdown/MDEngine.ts)) | Spell UI's `<ui-markdown>`, drawn with this engine and `ui-*` tags, plain or editable |
+| the editor's docstrings ([Markdown.tsx](../spell-app/src/app/solid/Markdown.tsx)) | a type's or member's docs, as plain HTML, loaded on first use |
+| the language server ([SpellLanguageService.ts](../spell-app/src/lsp/SpellLanguageService.ts)) | `**bold**`, `*italic*` and code inside a comment, coloured in the editor |
 
 <details>
 <summary>The files</summary>
 
 | File | What it is |
 | --- | --- |
-| [index.ts](markdown/src/index.ts) | the entry:  `MD` |
-| [MarkdownTokenizer.ts](markdown/src/MarkdownTokenizer.ts) | how text becomes tokens |
-| [MarkdownParser.ts](markdown/src/MarkdownParser.ts) | a parser with markdown's tokenizer, and `matchWhole()` for a rule that must take a whole line |
-| [blocks/lineRules.ts](markdown/src/blocks/lineRules.ts) | each kind of line, in Rulex |
-| [blocks/BlockScanner.ts](markdown/src/blocks/BlockScanner.ts) | the container stack, lazy continuation, tables |
-| [inlines/InlineParser.ts](markdown/src/inlines/InlineParser.ts) | emphasis, links, entities, raw HTML |
-| [inlines/autolinkText.ts](markdown/src/inlines/autolinkText.ts), [extractReferences.ts](markdown/src/inlines/extractReferences.ts) | GitHub's autolinks;  link reference definitions |
-| [render/](markdown/src/render/) | blocks and inlines to markup, then HTML or `ui-*` tags |
-| [toHTML.ts](markdown/src/toHTML.ts) | `toHTML()`, `toMarkup()`, `render()` |
-| [spec/gfm-spec.json](markdown/src/spec/gfm-spec.json) | the spec's examples |
+| [index.ts](src/markdown/index.ts) | the entry:  `MD` |
+| [MarkdownTokenizer.ts](src/markdown/MarkdownTokenizer.ts) | how text becomes tokens |
+| [MarkdownParser.ts](src/markdown/MarkdownParser.ts) | a parser with markdown's tokenizer, and `matchWhole()` for a rule that must take a whole line |
+| [blocks/lineRules.ts](src/markdown/blocks/lineRules.ts) | each kind of line, in Rulex |
+| [blocks/BlockScanner.ts](src/markdown/blocks/BlockScanner.ts) | the container stack, lazy continuation, tables |
+| [inlines/InlineParser.ts](src/markdown/inlines/InlineParser.ts) | emphasis, links, entities, raw HTML |
+| [inlines/autolinkText.ts](src/markdown/inlines/autolinkText.ts), [extractReferences.ts](src/markdown/inlines/extractReferences.ts) | GitHub's autolinks;  link reference definitions |
+| [render/](src/markdown/render/) | blocks and inlines to markup, then HTML or `ui-*` tags |
+| [toHTML.ts](src/markdown/toHTML.ts) | `toHTML()`, `toMarkup()`, `render()` |
+| [spec/gfm-spec.json](src/markdown/spec/gfm-spec.json) | the spec's examples |
 
 </details>
 
 <details>
 <summary>The spec test, and refreshing the examples</summary>
 
-- [spec.test.ts](tests/markdown/src/spec/spec.test.ts) renders every example with plain HTML tags,
+- [spec.test.ts](tests/markdown/spec/spec.test.ts) renders every example with plain HTML tags,
   and pins the pass count per section in a snapshot:  670 of 670 today.
   - A regression fails it.
   - A gain updates it:  `vitest -u`, after reading the diff.
@@ -168,7 +168,7 @@ These guides need a checkout with the content folder beside it, and the page ser
 
 - The pages beside this one:
   [README-parser](README-parser.md), [README-rulex](README-rulex.md), [README-spell](README-spell.md)
-- The rules for working in this folder:  [markdown's AGENTS.md](markdown/AGENTS.md)
+- The rules for working in this folder:  [markdown's AGENTS.md](src/markdown/AGENTS.md)
 - spell-lang's front page:  [README](README.md)
 - The kit, and every repo:  [the kit's README](../README.md)
 - Also beside it:  [README-core.md](README-core.md) · [README-targets.md](README-targets.md)

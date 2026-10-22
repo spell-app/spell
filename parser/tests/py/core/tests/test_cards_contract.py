@@ -3,7 +3,7 @@
 - The program below is the Cards fixture (`tests/spaces/@spell/test/cards/`) in the shape the Python writer emits:
   the contract between the writer and spell_core (epic page python-target, P10).
 - Its tests' lines must be the JavaScript run's, character for character:  `cards.javascript.out.txt` beside this
-  file, a frozen copy of spell-app's contract snapshot (its `tests/cli/src/__snapshots__/contract/cards.out.txt`,
+  file, a frozen copy of spell-app's contract snapshot (its `tests/cli/__snapshots__/contract/cards.out.txt`,
   epic `repo-split` C11:  spell-lang's tests never read spell-app's files).  The frozen Cards fixture's run doesn't
   change;  if the JavaScript core's output does, copy the new one here.
 - `pause for 50 msec` is left out:  this program was written in P10, before pauses (P11).

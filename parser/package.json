@@ -6,159 +6,89 @@
   "license": "MIT",
   "repository": "https://github.com/spell-app/spell-lang",
   "type": "module",
-  "spell": {
-    "commands": "./cli/commands.ts"
-  },
-  "spellTypes": [
-    "parser",
-    "markdown",
-    "core",
-    "py",
-    "spell",
-    "cli"
-  ],
-  "spellFolders": [
-    {
-      "name": "parser",
-      "node": true
-    },
-    {
-      "name": "markdown",
-      "node": true
-    },
-    {
-      "name": "core",
-      "node": true
-    },
-    {
-      "name": "py",
-      "lint": [
-        "ts"
-      ],
-      "fmt": [
-        "ts"
-      ],
-      "tests": [
-        "ts"
-      ],
-      "node": true,
-      "python": "core"
-    },
-    {
-      "name": "spell",
-      "lint": [
-        "."
-      ]
-    },
-    {
-      "name": "cli",
-      "lint": [
-        "src",
-        "commands.ts"
-      ],
-      "node": true
-    }
-  ],
   "exports": {
     "./parser": {
-      "types": "./dist-types/parser/src/index.d.ts",
-      "default": "./parser/src/index.ts"
+      "spell-lang-source": "./src/parser/index.ts",
+      "types": "./dist-types/src/parser/index.d.ts",
+      "default": "./src/parser/index.ts"
     },
     "./parser/rulex": {
-      "types": "./dist-types/parser/src/rulex/index.d.ts",
-      "default": "./parser/src/rulex/index.ts"
+      "spell-lang-source": "./src/parser/rulex/index.ts",
+      "types": "./dist-types/src/parser/rulex/index.d.ts",
+      "default": "./src/parser/rulex/index.ts"
     },
     "./markdown": {
-      "types": "./dist-types/markdown/src/index.d.ts",
-      "default": "./markdown/src/index.ts"
+      "spell-lang-source": "./src/markdown/index.ts",
+      "types": "./dist-types/src/markdown/index.d.ts",
+      "default": "./src/markdown/index.ts"
     },
     "./core": {
-      "types": "./dist-types/core/src/index.d.ts",
-      "default": "./core/src/index.ts"
-    },
-    "./core/console": {
-      "types": "./dist-types/core/src/console.d.ts",
-      "default": "./core/src/console.ts"
-    },
-    "./core/core.types": {
-      "types": "./dist-types/core/src/core.types.d.ts",
-      "default": "./core/src/core.types.ts"
-    },
-    "./core/model": {
-      "types": "./dist-types/core/src/model.d.ts",
-      "default": "./core/src/model.ts"
-    },
-    "./core/things": {
-      "types": "./dist-types/core/src/things.d.ts",
-      "default": "./core/src/things.ts"
+      "spell-lang-source": "./src/core/index.ts",
+      "types": "./dist-types/src/core/index.d.ts",
+      "default": "./src/core/index.ts"
     },
     "./py": {
-      "types": "./dist-types/py/ts/index.d.ts",
-      "default": "./py/ts/index.ts"
+      "spell-lang-source": "./src/py/index.ts",
+      "types": "./dist-types/src/py/index.d.ts",
+      "default": "./src/py/index.ts"
     },
     "./spell": {
-      "types": "./dist-types/spell/src/index.d.ts",
-      "default": "./spell/src/index.ts"
-    },
-    "./spell/node/buildTsx": {
-      "types": "./dist-types/spell/src/node/buildTsx.d.ts",
-      "default": "./spell/src/node/buildTsx.ts"
-    },
-    "./spell/node/packageVersion.node": {
-      "types": "./dist-types/spell/src/node/packageVersion.node.d.ts",
-      "default": "./spell/src/node/packageVersion.node.ts"
-    },
-    "./spell/node/projectFile": {
-      "types": "./dist-types/spell/src/node/projectFile.d.ts",
-      "default": "./spell/src/node/projectFile.ts"
-    },
-    "./spell/node/pyright": {
-      "types": "./dist-types/spell/src/node/pyright.d.ts",
-      "default": "./spell/src/node/pyright.ts"
-    },
-    "./spell/node/typecheck": {
-      "types": "./dist-types/spell/src/node/typecheck.d.ts",
-      "default": "./spell/src/node/typecheck.ts"
-    },
-    "./spell/SpellSetup": {
-      "types": "./dist-types/spell/src/SpellSetup.d.ts",
-      "default": "./spell/src/SpellSetup.ts"
-    },
-    "./spell/SpellUrls": {
-      "types": "./dist-types/spell/src/SpellUrls.d.ts",
-      "default": "./spell/src/SpellUrls.ts"
+      "spell-lang-source": "./src/spell/index.ts",
+      "types": "./dist-types/src/spell/index.d.ts",
+      "default": "./src/spell/index.ts"
     },
     "./spell/test": {
-      "types": "./dist-types/spell/src/test/index.d.ts",
-      "default": "./spell/src/test/index.ts"
+      "spell-lang-source": "./src/spell/test/index.ts",
+      "types": "./dist-types/src/spell/test/index.d.ts",
+      "default": "./src/spell/test/index.ts"
     },
     "./cli": {
-      "types": "./dist-types/cli/src/index.d.ts",
-      "default": "./cli/src/index.ts"
+      "spell-lang-source": "./src/cli/index.ts",
+      "types": "./dist-types/src/cli/index.d.ts",
+      "default": "./src/cli/index.ts"
+    },
+    "./*": {
+      "spell-lang-source": [
+        "./src/*.ts",
+        "./src/*.tsx",
+        "./src/*/index.ts",
+        "./src/*/index.tsx",
+        "./src/*"
+      ],
+      "types": [
+        "./dist-types/src/*.d.ts",
+        "./dist-types/src/*/index.d.ts"
+      ],
+      "default": "./src/*"
+    },
+    "./*.ts": {
+      "spell-lang-source": "./src/*.ts",
+      "types": "./dist-types/src/*.d.ts",
+      "default": "./src/*.ts"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "/////// CHECKS (spell-folders:  each folder in turn, \"spellFolders\")": "",
-    "ts": "spell-types --below && spell-folders ts",
-    "test": "spell-folders test",
-    "lint": "spell-folders lint",
-    "lint:fix": "spell-folders lint:fix",
-    "format": "spell-folders format",
-    "format:check": "spell-folders format:check",
+    "/////// CHECKS": "",
+    "ts": "spell-types --below && spell-types && tsc -p tests",
+    "test": "vp test run && uv run --directory src/py/core pytest -q",
+    "lint": "vp lint --report-unused-disable-directives --max-warnings 0 src tests scripts && uv run --directory src/py/core ruff check . ../../../tests/py/core/tests",
+    "lint:fix": "vp lint --fix src tests scripts && uv run --directory src/py/core ruff check --fix . ../../../tests/py/core/tests",
+    "format": "vp fmt && uv run --directory src/py/core ruff format . ../../../tests/py/core/tests",
+    "format:check": "vp fmt --check && uv run --directory src/py/core ruff format --check . ../../../tests/py/core/tests",
     "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
     "/////// markdown": "",
-    "markdown:spec:update": "cd markdown && node scripts/gfm-spec.mjs",
+    "markdown:spec:update": "node scripts/markdown/gfm-spec.mjs",
     "/////// core": "",
-    "core:gen:declarations": "cd core && node --import tsx --import spell-kit/toolchain/aliases src/writeCoreDeclarations.ts && vp fmt core.declarations.json5",
+    "core:gen:declarations": "tsx src/core/writeCoreDeclarations.ts && vp fmt src/core/core.declarations.json5",
     "/////// spell": "",
-    "spell:test:ui": "cd spell && vp test --ui",
-    "spell:test:coverage": "cd spell && vp test run --coverage",
-    "spell:test:fixtures": "cd spell && vp test run src/test/fixtures.test.ts src/test/typescript.test.ts src/test/python.test.ts",
-    "spell:test:fixtures:bless": "cd spell && vp test run src/test/fixtures.test.ts src/test/typescript.test.ts src/test/python.test.ts --update=all",
-    "spell:test:rules": "cd spell && vp test run src/rules",
-    "spell:test:rules:bless": "cd spell && BLESS_RULE_TESTS=1 vp test run src/rules; vp fmt src/rules",
-    "spell:gen:syntax": "cd spell && node --import tsx --import spell-kit/toolchain/aliases src/node/writeSpellSyntax.ts && vp fmt spellSyntax.json"
+    "spell:test:ui": "vp test --ui --project spell",
+    "spell:test:coverage": "vp test run --coverage --project spell",
+    "spell:test:fixtures": "vp test run --project spell tests/spell/test/fixtures.test.ts tests/spell/test/typescript.test.ts tests/spell/test/python.test.ts",
+    "spell:test:fixtures:bless": "vp test run --project spell tests/spell/test/fixtures.test.ts tests/spell/test/typescript.test.ts tests/spell/test/python.test.ts --update=all",
+    "spell:test:rules": "vp test run --project spell tests/spell/rules",
+    "spell:test:rules:bless": "BLESS_RULE_TESTS=1 vp test run --project spell tests/spell/rules; vp fmt src/spell/rules",
+    "spell:gen:syntax": "tsx src/spell/node/writeSpellSyntax.ts && vp fmt src/spell/spellSyntax.json"
   },
   "dependencies": {
     "@solidjs/h": "2.0.0-rc.13",
@@ -193,5 +123,12 @@
   "engines": {
     "node": ">=24.11"
   },
-  "packageManager": "yarn@4.18.0"
+  "packageManager": "yarn@4.18.0",
+  "spell": {
+    "commands": "./src/cli/commands.ts"
+  },
+  "spellTypes": [
+    "tsconfig.json",
+    "tsconfig.node.json"
+  ]
 }

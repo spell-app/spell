@@ -114,7 +114,7 @@ Every example below was run through the real Rulex, with three helper rules:
 
 ## Three real spell rules
 
-**`plus`**, with its tests ([Plus.ts](spell/src/rules/math/Plus.ts)):
+**`plus`**, with its tests ([Plus.ts](src/spell/rules/math/Plus.ts)):
 
 ```ts
 math.addRule(Plus, {
@@ -139,7 +139,7 @@ math.addRule(Plus, {
 - The `+` or the word `plus`, kept as `operator`, then an operand.
 - How tightly it binds against `*` isn't in the syntax:  that's the class's `precedence`.
 
-**`for each`** ([ListIteration.ts](spell/src/rules/lists/ListIteration.ts)):
+**`for each`** ([ListIteration.ts](src/spell/rules/lists/ListIteration.ts)):
 
 ```text
 for each? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?
@@ -153,7 +153,7 @@ for each? {item:singular_identifier} ((and|,) {position:singular_identifier})? (
 - `each` is optional;  so is a second name for the item's position, counted from 1.
 - `{statement_body}` is what follows on the line, or the block indented under it.
 
-**`print`** ([Print.ts](spell/src/rules/UI/Print.ts)):
+**`print`** ([Print.ts](src/spell/rules/UI/Print.ts)):
 
 ```text
 print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]
@@ -200,7 +200,7 @@ What needs memory or counting across a line is written in code instead, on the s
 <summary>Rulex's own grammar, in words</summary>
 
 Rulex can't define itself, so its grammar is built in code from plain parser rules
-([rulex.ts](parser/src/rulex/rulex.ts)).
+([rulex.ts](src/parser/rulex/rulex.ts)).
 A syntax is a sequence of:
 - a keyword (a word) or a symbol, or `\` and any symbol
 - `{name}` or `{group:name}`:  another rule
@@ -219,7 +219,7 @@ a named part is never merged, since a merged rule can't carry one item's name.
 
 Two tokenizers are involved, and only one is the language's:
 - the rules MATCH the language's tokens:  spell's, or markdown's
-- Rulex READS each syntax string with its own, [RulexTokenizer.ts](parser/src/rulex/RulexTokenizer.ts):
+- Rulex READS each syntax string with its own, [RulexTokenizer.ts](src/parser/rulex/RulexTokenizer.ts):
   words, numbers, symbols and whitespace only
 
 So `--`, `//`, `#`, commas, quotes and `<tag>` are ordinary symbols in a syntax,
@@ -230,7 +230,7 @@ whatever they mean in the language being parsed.
 <details>
 <summary>Its tests</summary>
 
-- [rulex.test.ts](tests/parser/src/rulex/rulex.test.ts), with its snapshots:  what each construct compiles to.
+- [rulex.test.ts](tests/parser/rulex/rulex.test.ts), with its snapshots:  what each construct compiles to.
 - Rulex is itself a parser, so its own rules carry inline tests in the same `[input, output]` form as spell's.
 - Every spell rule's tests run through it too:  `yarn spell:test:rules`.
 

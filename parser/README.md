@@ -183,23 +183,28 @@ _Writing:  one writer per target turns the same tree into its own language, whic
 
 ## The pieces
 
-ONE npm package, `spell-lang`, of six folders:  each is one of its entries.
+ONE npm package, `spell-lang`, its code in six folders under [src/](src/).
+A file's import name is the package's name, then its path under `src/`:
+`spell-lang/parser` (a folder's barrel, its `index.ts`), `spell-lang/parser/rules/Rule`, `spell-lang/core/model`.
 
 | Folder | Import | What it is | Its page |
 | --- | --- | --- | --- |
-| [parser/](parser/) | `spell-lang/parser` | the generic rule-based parser:  tokens, rules, matches, scope, the spell tree, the writers | [README-parser](README-parser.md) |
-| [parser/src/rulex/](parser/src/rulex/) | `spell-lang/parser/rulex` | Rulex, the syntax rules are written in:  an opt-in import | [README-rulex](README-rulex.md) |
-| [markdown/](markdown/) | `spell-lang/markdown` | GitHub-flavoured markdown on the parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) |
-| [spell/](spell/) | `spell-lang/spell` | the spell language:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) |
-| [core/](core/) | `spell-lang/core` | the runtime compiled JavaScript runs on | [README-core](README-core.md) |
-| [py/](py/) | `spell-lang/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) |
-| [cli/](cli/) | `spell-lang/cli` | the language's `spell` commands:  their names, arguments and help, and the `language` hook's shape | below, [The language commands](#the-language-commands) |
+| [parser/](src/parser/) | `spell-lang/parser` | the generic rule-based parser:  tokens, rules, matches, scope, the spell tree, the writers | [README-parser](README-parser.md) |
+| [parser/rulex/](src/parser/rulex/) | `spell-lang/parser/rulex` | Rulex, the syntax rules are written in:  an opt-in import | [README-rulex](README-rulex.md) |
+| [markdown/](src/markdown/) | `spell-lang/markdown` | GitHub-flavoured markdown on the parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) |
+| [spell/](src/spell/) | `spell-lang/spell` | the spell language:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) |
+| [core/](src/core/) | `spell-lang/core` | the runtime compiled JavaScript runs on | [README-core](README-core.md) |
+| [py/](src/py/) | `spell-lang/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) |
+| [cli/](src/cli/) | `spell-lang/cli` | the language's `spell` commands:  their names, arguments and help, and the `language` hook's shape | below, [The language commands](#the-language-commands) |
 
 - It stands only on [the kit](../README.md):  its shared helpers and its toolchain.
 - How the folders depend on each other:
   - `markdown` and `py` stand on `parser`;  `core` on nothing here
   - `spell` stands on `parser` and `py`, and reads only `core`'s types
   - nothing here imports a repo above it
+- The same name works everywhere, inside this repo too:  no aliases, no `../`.
+  - [package.json](package.json)'s `exports` maps every name to its file.
+- Outside `src/`, and never imported:  `tests/` (at the same paths as the code), `scripts/`, `docs/`, the configs.
 - The rules for working in each folder:  its `AGENTS.md` ([the repo's](AGENTS.md) lists them).
 
 ### What's NOT here
@@ -210,7 +215,7 @@ The tools around it live in [spell-app](../spell-app/README.md), the repo above 
 | What | Where |
 | --- | --- |
 | the editor and the runner:  `<spell-app>`, `<spell-editor>`, the live loop | spell-app's [app/](../spell-app/app/), [README-app](../spell-app/README-app.md) |
-| the language server, and the VS Code extension that runs it | spell-app's [lsp/](../spell-app/lsp/) and [vscode/](../spell-app/vscode/), [README-lsp](../spell-app/README-lsp.md) |
+| the language server, and the VS Code extension that runs it | spell-app's [src/lsp/](../spell-app/src/lsp/) and [vscode/](../spell-app/vscode/), [README-lsp](../spell-app/README-lsp.md) |
 | projects on disk, their addresses, the editor's server | spell-app's [spaces/](../spell-app/spaces/), [README-spaces](../spell-app/README-spaces.md) |
 | the example projects people edit | spell-app's [README-examples](../spell-app/README-examples.md) |
 | the `spell` command line's base:  arguments, help, finding commands | the kit's [README-cli](../README-cli.md) |
@@ -292,7 +297,7 @@ See the Python itself with `spell compile try/fizzbuzz --stdout --target py`.
 
 ## The language commands
 
-The `spell` command line takes its language commands from this repo's [cli/](cli/) folder:
+The `spell` command line takes its language commands from this repo's [cli/](src/cli/) folder:
 the kit runs them, from the list in its `package.json`'s `"spell": { "commands" }`.
 
 | Command | What it does |
@@ -323,9 +328,9 @@ the kit runs them, from the list in its `package.json`'s `"spell": { "commands" 
 
 | Path | What |
 | --- | --- |
-| [cli/commands.ts](cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
-| [cli/src/cli.types.ts](cli/src/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
-| [cli/src/index.ts](cli/src/index.ts) | `spell-lang/cli`:  the types, for spell-app |
+| [cli/commands.ts](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
+| [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
+| [cli/index.ts](src/cli/index.ts) | `spell-lang/cli`:  the types, for spell-app |
 
 </details>
 
@@ -465,19 +470,22 @@ it's cloned inside the kit, and the kit holds the one install for every repo.
 How to set that up, and how the checks, tests and worktrees work across repos:
 [README-development](../README-development.md).
 
-At spell-lang's root, each check runs over the five folders in turn, lowest first:
+At spell-lang's root, each check runs over the whole repo:
 
 ```sh
 cd ~/www/spell/spell-lang
-yarn ts               # the declarations, then each folder's tsc
-yarn test             # each folder's Vitest, and py's pytest
-yarn lint             # each folder's oxlint, and py's ruff;  lint:fix fixes what it can
-yarn format           # each folder's oxfmt, and ruff format;  format:check only checks
+yarn ts               # the declarations (the kit's, then spell-lang's two programs), then the tests' tsc
+yarn test             # Vitest, a project per folder, then py's pytest
+yarn lint             # oxlint, then py's ruff;  lint:fix fixes what it can
+yarn format           # oxfmt, then ruff format;  format:check only checks
 yarn review           # the finishing pass:  ts, lint:fix, format, test
 ```
 
-- One folder's, or a few:  `yarn spell-folders test parser core`.
-- Tests live in `tests/<folder>/`, at the same paths as the code they test.
+- TypeScript sees two programs:
+  - [tsconfig.json](tsconfig.json):  the browser-safe code, `parser`, `markdown`, `core`, `py`'s writers and `spell`
+  - [tsconfig.node.json](tsconfig.node.json):  what needs node:  the cli, spell's `node/`, the test helpers
+- One folder's tests:  `yarn vp test run --project parser`.
+- Tests live in `tests/<folder>/`, at the same paths as the code they test (`tests/parser/rules/Rule.test.ts`).
 - The frozen test projects, [tests/spaces/@spell/test/](tests/spaces/@spell/test/), pin every target's output:
   [README-spell](README-spell.md#the-frozen-test-projects).
 - The folders' own scripts, prefixed with the folder's name:
@@ -496,7 +504,7 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
 <details>
 <summary>The size of the grammar today</summary>
 
-From the generated [spell syntax table](spell/spellSyntax.json), as of 2026-10-21:
+From the generated [spell syntax table](src/spell/spellSyntax.json), as of 2026-10-21:
 
 | Counted | Number |
 | --- | --- |
@@ -516,7 +524,7 @@ From the generated [spell syntax table](spell/spellSyntax.json), as of 2026-10-2
   a layperson can read a program before they can write one.
 - Its lineage is HyperCard ("programming for the rest of us"), SuperCard, Inform and literate programming;
   it aims to fix what HyperCard couldn't:  one platform, no network, a closed file format.
-- The 2017 notes are in [spell/thoughts/](spell/thoughts/):  history, not current plans.
+- The 2017 notes are in [spell/thoughts/](docs/spell/thoughts/):  history, not current plans.
 
 </details>
 
@@ -559,7 +567,7 @@ MIT, as spell-lang's [package.json](package.json) says.
 - The pages beside this one:
   [README-parser](README-parser.md), [README-rulex](README-rulex.md), [README-markdown](README-markdown.md),
   [README-spell](README-spell.md), [README-core](README-core.md), [README-targets](README-targets.md)
-- The map of the parse pipeline, in detail:  [PARSING.md](spell/PARSING.md)
+- The map of the parse pipeline, in detail:  [PARSING.md](src/spell/PARSING.md)
 - The editor, spaces and the language server:  [spell-app](../spell-app/README.md)
 - The command line:  [README-cli](../README-cli.md)
 - The kit, and every repo:  [the kit's README](../README.md)

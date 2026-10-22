@@ -228,7 +228,7 @@ $ spell test try/cards
 
 ## The twenty modules
 
-Each module is a folder of [spell/src/rules/](spell/src/rules/), one rule class per file.
+Each module is a folder of [src/spell/rules/](src/spell/rules/), one rule class per file.
 Every row's example and output come from that rule's own tests, as the syntax table records them.
 
 | Module | What it reads | Example | JavaScript |
@@ -255,7 +255,7 @@ Every row's example and output come from that rule's own tests, as the syntax ta
 | tests | `expect`, `should be`, `echo` | `its rank should be queen` | `core.expect(it.rank, ...)` |
 
 - Every rule, with every syntax and its output in all three languages:
-  the generated [spell syntax table](spell/spellSyntax.json), drawn by the Spell Syntax guide (below).
+  the generated [spell syntax table](src/spell/spellSyntax.json), drawn by the Spell Syntax guide (below).
 - Its counts:  241 rule classes, 274 registered syntaxes, as of 2026-10-21 ([README](README.md#working-on-it)).
 
 ## The compiler
@@ -271,7 +271,7 @@ A project is a folder with a project file, `__project.json5`, listing its own fi
 ```
 
 - `SpellProject` reads a project's files (`SpellFile`s) and compiles them
-  ([SpellProject.ts](spell/src/SpellProject.ts)).
+  ([SpellProject.ts](src/spell/SpellProject.ts)).
 - Its compile writes:
   - its code, for each target:  `<Project>.spell.js` always, `.spell.tsx`, `.spell.py` when asked
   - its scope pack, `<Project>.scopes.js`:  what the editor's Type Explorer reads
@@ -340,13 +340,13 @@ The snapshots, for a project `<Project>`:
 The general recipe is [README-parser](README-parser.md#adding-a-rule);  spell's layout:
 
 ```text
-spell/src/rules/<module>/
+src/spell/rules/<module>/
   <module>.parser.ts    the module's parser, and nothing else
   <RuleClass>.ts        one rule class each:  the class, then its addRule() calls
   <module>.shared.ts    what several of its rule files share, if anything
   index.ts              exports every file, in tie-break order
 
-tests/spell/src/rules/<module>/
+tests/spell/rules/<module>/
   <module>.test.ts      calls unitTestModuleRules(), or its tests never run
   __snapshots__/        its group specs
 ```
@@ -359,10 +359,10 @@ tests/spell/src/rules/<module>/
 4. `yarn spell:test:rules`, then `yarn spell:test:rules:bless` once the output is right, and read the diff.
 5. `yarn spell:gen:syntax`:  the syntax table's test fails until you do.
 6. A built-in type's member (`the length of the name`) is data, not a rule:
-   add it to the table in [builtinTypes.ts](spell/src/builtinTypes.ts).
-7. A new operator, or a change to how parsing works:  [PARSING.md](spell/PARSING.md) in the same change.
+   add it to the table in [builtinTypes.ts](src/spell/builtinTypes.ts).
+7. A new operator, or a change to how parsing works:  [PARSING.md](src/spell/PARSING.md) in the same change.
 
-The rules for writing rules, in full:  [spell's AGENTS.md](spell/AGENTS.md), "Parser rules".
+The rules for writing rules, in full:  [spell's AGENTS.md](src/spell/AGENTS.md), "Parser rules".
 
 ## What's not here
 
@@ -399,7 +399,7 @@ Where it stands:  planned, not started.
 <details>
 <summary>The built-in types</summary>
 
-A built-in type's members are data in [builtinTypes.ts](spell/src/builtinTypes.ts), not rules:
+A built-in type's members are data in [builtinTypes.ts](src/spell/builtinTypes.ts), not rules:
 each says its words and what it reads as in `core` or JavaScript.
 
 | Type | Some of its members |
@@ -412,7 +412,7 @@ each says its words and what it reads as in `core` or JavaScript.
 | date | `year`, and its other parts |
 
 - After adding one:  `yarn lsp:scopes --builtins`, in spell-app, rewrites the built-in types' docs
-  ([core.scopes.js](core/src/core.scopes.js)), what pages with no parser read.
+  ([core.scopes.js](src/core/core.scopes.js)), what pages with no parser read.
 
 </details>
 
@@ -421,26 +421,26 @@ each says its words and what it reads as in `core` or JavaScript.
 
 | File | What it is |
 | --- | --- |
-| [SpellParser.ts](spell/src/SpellParser.ts) | spell's parser:  its tokenizer settings, the shared root scope |
-| [rules/](spell/src/rules/) | the twenty modules;  `SP.spellParser` from their index |
-| [SpellProject.ts](spell/src/SpellProject.ts), [SpellFile.ts](spell/src/SpellFile.ts) | a project and its files:  reading, compiling, saving |
-| [SpellLocation.ts](spell/src/SpellLocation.ts), [SpellUrls.ts](spell/src/SpellUrls.ts), [SpellSetup.ts](spell/src/SpellSetup.ts) | addresses, their URLs and folders, the registry of groups |
-| [targets.ts](spell/src/targets.ts) | the four targets:  `SP.TARGETS` |
-| [builtinTypes.ts](spell/src/builtinTypes.ts) | the built-in types' members |
-| [SpellDeclarations.ts](spell/src/SpellDeclarations.ts), [SpellWords.ts](spell/src/SpellWords.ts) | what a project declares, and its words |
-| [highlight/](spell/src/highlight/) | `SpellHighlighter`:  colours a snippet with no project |
-| [node/](spell/src/node/) | node only:  the TypeScript check and build, pyright, the syntax table |
-| [test/](spell/src/test/) | test helpers:  `loadFixtureProject()`, `fixturePath()` |
-| [spellSyntax.json](spell/spellSyntax.json) | GENERATED:  every rule, syntax and output |
-| [PARSING.md](spell/PARSING.md) | the detailed map of the parse pipeline |
-| [thoughts/](spell/thoughts/) | the 2017-era notes:  history, not plans |
+| [SpellParser.ts](src/spell/SpellParser.ts) | spell's parser:  its tokenizer settings, the shared root scope |
+| [rules/](src/spell/rules/) | the twenty modules;  `SP.spellParser` from their index |
+| [SpellProject.ts](src/spell/SpellProject.ts), [SpellFile.ts](src/spell/SpellFile.ts) | a project and its files:  reading, compiling, saving |
+| [SpellLocation.ts](src/spell/SpellLocation.ts), [SpellUrls.ts](src/spell/SpellUrls.ts), [SpellSetup.ts](src/spell/SpellSetup.ts) | addresses, their URLs and folders, the registry of groups |
+| [targets.ts](src/spell/targets.ts) | the four targets:  `SP.TARGETS` |
+| [builtinTypes.ts](src/spell/builtinTypes.ts) | the built-in types' members |
+| [SpellDeclarations.ts](src/spell/SpellDeclarations.ts), [SpellWords.ts](src/spell/SpellWords.ts) | what a project declares, and its words |
+| [highlight/](src/spell/highlight/) | `SpellHighlighter`:  colours a snippet with no project |
+| [node/](src/spell/node/) | node only:  the TypeScript check and build, pyright, the syntax table |
+| [test/](src/spell/test/) | test helpers:  `loadFixtureProject()`, `fixturePath()` |
+| [spellSyntax.json](src/spell/spellSyntax.json) | GENERATED:  every rule, syntax and output |
+| [PARSING.md](src/spell/PARSING.md) | the detailed map of the parse pipeline |
+| [thoughts/](docs/spell/thoughts/) | the 2017-era notes:  history, not plans |
 
 </details>
 
 <details>
 <summary>PARSING.md, the deep map</summary>
 
-[PARSING.md](spell/PARSING.md) is the detailed map of how spell's text becomes the spell tree,
+[PARSING.md](src/spell/PARSING.md) is the detailed map of how spell's text becomes the spell tree,
 for anyone working on the parser or the language:
 - tokens, then block, line, statement
 - when scope changes, and how projects share a parser
@@ -462,8 +462,8 @@ The first README called spell
 - Programs are written in syntactically correct English, then translated into equivalent code.
 - At its root is a rule syntax that resembles regular expressions on steroids (now Rulex):
   it lets a language developer express any language's rules, not just spell's.
-- The parser itself is simple ([Parser.ts](parser/src/Parser.ts));  the power is in how the rules are written:
-  the generic ones, [the parser's rules](parser/src/rules/), and spell's own, [its rules](spell/src/rules/).
+- The parser itself is simple ([Parser.ts](src/parser/Parser.ts));  the power is in how the rules are written:
+  the generic ones, [the parser's rules](src/parser/rules/), and spell's own, [its rules](src/spell/rules/).
 - Unlike other rule-based parsers, adding rules is easy:  import them dynamically, even at run time.
 - The parser could be rewritten in other languages, and other compile targets are easy to add:
   both have since happened in part, with the Python target.
@@ -494,6 +494,6 @@ These guides need a checkout with the content folder beside it, and the page ser
 - The pages beside this one:
   [README-parser](README-parser.md), [README-rulex](README-rulex.md),
   [README-core](README-core.md), [README-targets](README-targets.md), [README-markdown](README-markdown.md)
-- The rules for working in this folder:  [spell's AGENTS.md](spell/AGENTS.md)
+- The rules for working in this folder:  [spell's AGENTS.md](src/spell/AGENTS.md)
 - spell-lang's front page:  [README](README.md)
 - The kit, and every repo:  [the kit's README](../README.md)

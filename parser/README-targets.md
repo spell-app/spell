@@ -30,7 +30,7 @@ _Four writers, three runtimes:  JavaScript and TypeScript share the core, a libr
 
 ## One line through every writer
 
-From the generated [spell syntax table](spell/spellSyntax.json), where every rule's first test is written by all three:
+From the generated [spell syntax table](src/spell/spellSyntax.json), where every rule's first test is written by all three:
 
 | Spell | JavaScript and TypeScript | Python |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ A writer is a class with ONE METHOD PER KIND OF NODE in the spell tree, found by
 - Side by side, the same `if` in JavaScript's and Python's writers:
   [README-parser](README-parser.md#5-output-and-bundling).
 
-What every program's writer shares, `ProgramWriter` ([ProgramWriter.ts](parser/src/writers/ProgramWriter.ts)):
+What every program's writer shares, `ProgramWriter` ([ProgramWriter.ts](src/parser/writers/ProgramWriter.ts)):
 - it reads the whole project before writing any of it, so it knows what each value is
 - its naming:  `camelCase` for JavaScript, PEP 8's `snake_case` and `UPPER_CASE` for Python
 - where lists start counting:  from 1, spell's own, or 0 when the project says so
@@ -91,23 +91,23 @@ What every program's writer shares, `ProgramWriter` ([ProgramWriter.ts](parser/s
 
 | Writer | Target | Where |
 | --- | --- | --- |
-| `JSWriter` | `js/solid` | [JSWriter.ts](parser/src/writers/JSWriter.ts) |
-| `TSWriter` | `ts/solid` | [TSWriter.ts](parser/src/writers/TSWriter.ts) |
-| `LibraryWriter` | `ts/lib` | [LibraryWriter.ts](parser/src/writers/LibraryWriter.ts) |
-| `PyWriter` | `py` | [PyWriter.ts](py/ts/PyWriter.ts), on [PyBaseWriter.ts](py/ts/PyBaseWriter.ts) |
-| `ElementsWriter` | `py`'s drawing half, in JavaScript | [ElementsWriter.ts](py/ts/ElementsWriter.ts) |
+| `JSWriter` | `js/solid` | [JSWriter.ts](src/parser/writers/JSWriter.ts) |
+| `TSWriter` | `ts/solid` | [TSWriter.ts](src/parser/writers/TSWriter.ts) |
+| `LibraryWriter` | `ts/lib` | [LibraryWriter.ts](src/parser/writers/LibraryWriter.ts) |
+| `PyWriter` | `py` | [PyWriter.ts](src/py/PyWriter.ts), on [PyBaseWriter.ts](src/py/PyBaseWriter.ts) |
+| `ElementsWriter` | `py`'s drawing half, in JavaScript | [ElementsWriter.ts](src/py/ElementsWriter.ts) |
 
-The list of targets, each a language, its runtime and its writer:  `SP.TARGETS`, in [targets.ts](spell/src/targets.ts).
+The list of targets, each a language, its runtime and its writer:  `SP.TARGETS`, in [targets.ts](src/spell/targets.ts).
 
 ## The Python half
 
-Everything spell has for Python is in [py/](py/), in two halves:
-- [py/ts/](py/ts/), TypeScript, WRITES Python:  `spell-lang/py`, the writers above
-- [py/core/](py/core/) is `spell_core`, what compiled Python imports:
+Everything spell has for Python is in [src/py/](src/py/), in two halves:
+- its TypeScript files WRITE Python:  `spell-lang/py`, the writers above
+- [src/py/core/](src/py/core/) is `spell_core`, what compiled Python imports:
   `from spell_core import core, Thing, List, App, prop, h`
 
 `spell_core`:
-- a uv project:  Python 3.12 or later, the standard library only ([pyproject.toml](py/core/pyproject.toml))
+- a uv project:  Python 3.12 or later, the standard library only ([pyproject.toml](src/py/core/pyproject.toml))
 - each module the twin of one in the JavaScript core, its helpers by Python's names:  `core.random_item_of()`
 - runs a compiled program:  `python -m spell_core.run <program> --seed n`
 - kept in step with the JavaScript core by shared method lists and expected files
@@ -196,7 +196,7 @@ Where it stands:  planned;  Python's half of the idea is built.
 <details>
 <summary>What isn't ported to Python yet</summary>
 
-[not_ported_yet.json5](py/core/not_ported_yet.json5) lists the JavaScript core's names `spell_core` doesn't have,
+[not_ported_yet.json5](src/py/core/not_ported_yet.json5) lists the JavaScript core's names `spell_core` doesn't have,
 grouped by why (36 names):
 
 | Why | Names |
@@ -233,7 +233,7 @@ These guides need a checkout with the content folder beside it, and the page ser
 
 - The pages beside this one:
   [README-core](README-core.md), [README-spell](README-spell.md), [README-parser](README-parser.md)
-- The rules for working on Python:  [py's AGENTS.md](py/AGENTS.md)
+- The rules for working on Python:  [py's AGENTS.md](src/py/AGENTS.md)
 - spell-lang's front page:  [README](README.md)
 - The kit, and every repo:  [the kit's README](../README.md)
 - Also beside it:  [README-markdown.md](README-markdown.md) · [README-rulex.md](README-rulex.md)
