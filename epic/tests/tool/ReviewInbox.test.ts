@@ -367,6 +367,20 @@ describe("ReviewInbox, Claude's side", () => {
     expect(LISTEN_HEARTBEAT_MS * 3).toBe(LISTEN_STALE_MS)
   })
 
+  test("liveListener:  a monitor's (pid) is live while its process runs, heartbeat or not;  gone once it ends", () => {
+    const inbox = new ReviewInbox()
+    expect(inbox.setListening("abc", T1, process.pid)).toEqual({
+      session: "abc",
+      since: T1,
+      seen: T1,
+      pid: process.pid
+    })
+    const seen = Date.parse(T1)
+    expect(inbox.liveListener(seen + 10 * LISTEN_STALE_MS)).toEqual(inbox.listening)
+    inbox.setListening("abc", T1, 999_999)
+    expect(inbox.liveListener(seen)).toBeNull()
+  })
+
   test("forPage:  the whole inbox, listening null once stale;  the inbox itself untouched", () => {
     const inbox = new ReviewInbox()
     inbox.setMark("j1", { action: "approve" }, T1)

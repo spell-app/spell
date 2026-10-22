@@ -7,6 +7,7 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSyn
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
+import { pageServerRoot, settingsParts } from "spell-kit/server/page/settings"
 import { Window, envCheckout } from "spell-epic/window.mjs"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { ENGINE_ROUTES, EPIC_UI } from "spell-epic/server/server.types.ts"
@@ -414,15 +415,6 @@ export function docLinksRun(args) {
   }
 }
 
-/** Does checkout `root` run a page server of its own:  `"pageServer"` in its root `package.json` (spell-app's)? */
-function hasPageServer(root) {
-  try {
-    return JSON.parse(readFileSync(join(root, "package.json"), "utf8")).pageServer !== undefined
-  } catch {
-    return false
-  }
-}
-
 /**
  * Opens a doc in VS Code's doc preview, through spell-epic's extension's URI handler.
  * - `vscode/src/DocPreview.ts`, its id `spell-app.spell-epic` (epic `epic-eject` P7)
@@ -437,18 +429,19 @@ const PAGE_SERVER_CLI = "src/server/page/cli.ts"
  * - returns `{ base, port }`, or `undefined` if it can't start (the caller falls back to `file://`)
  * - runs the kit's page server command line (`PAGE_SERVER_CLI`) `start` under `tsx`, with the kit's node settings:  the
  *   kit this checkout's install resolves (`packageDir()`, epic `epic-engine` P10)
- * - a checkout whose settings name no page server (no `"pageServer"` in its `package.json`:  a repo `epic init` set
- *   up, spell-epic itself), or that resolves no server package:  the machine's epic server instead
- *   (`ensureEpicServer()`)
+ *   - for the page server's root (`pageServerRoot()`):  in a kit, the kit, from any folder of it (epic `repo-split` P16)
+ * - a checkout whose page server settings have no part (`settingsParts()`:  no `"pageServer"` in any installed repo's
+ *   `package.json`, as in a repo `epic init` set up), or that resolves no server package:  the machine's epic server
+ *   instead (`ensureEpicServer()`)
  * - ~1s when it has to start, ~0.3s when it runs
  * - `SPELL_NO_SERVER=1`:  never starts it
  */
 export function ensurePageServer() {
   if (process.env.SPELL_NO_SERVER) return undefined
-  const kit = hasPageServer(ROOT) && packageDir("spell-kit", ROOT)
+  const kit = settingsParts(ROOT).length > 0 && packageDir("spell-kit", ROOT)
   const cli = kit && join(kit, PAGE_SERVER_CLI)
   if (!cli || !existsSync(cli)) return ensureEpicServer()
-  const run = spawnSync(process.execPath, ["--import", "tsx", cli, "start", "--root", ROOT], {
+  const run = spawnSync(process.execPath, ["--import", "tsx", cli, "start", "--root", pageServerRoot(ROOT)], {
     cwd: ROOT,
     encoding: "utf8",
     env: { ...process.env, TSX_TSCONFIG_PATH: join(kit, "tsconfig.node.json") }

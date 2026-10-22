@@ -251,6 +251,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
 | `app.urlFile` | not written | or a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout |
 | `app.start` | not written | the shell command that starts the app, run in the background when it doesn't answer (`"npm run dev"`) |
 | `repos` | not written | a MULTI-REPO checkout's child repos (a list, or a file such as `"repos.json5"`):  an epic's worktree is then a worktree of the top with one of every child repo inside it, all on the epic's branch;  a child finds its top as the folder above it (`epic config top`) |
+| `checkoutPatches` | not written:  a comment shows how | fixes every checkout gets at once, the worktrees behind `main` too (`epic worktree patch`):  each an `id`, a `date`, a `why`, and a `copy` (a file of `main`'s, put where it isn't tracked yet, git-excluded) or a `run` (a command, once per checkout) |
 
 - Files your build generates (bundles, data) can be listed in `.epic/generators.json5`:
   `epic worktree merge-main` reruns them on the merged source, instead of line-merging what they wrote.
@@ -267,10 +268,11 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
 
 The built-in defaults describe an older Spell checkout, the one the tooling grew up in.
 
-`epic init` writes every key but three:  keep them in the file.
-The three it leaves out have neutral defaults:
+`epic init` writes every key but four:  keep them in the file.
+The four it leaves out have neutral defaults:
 - `app`
 - `repos`
+- `checkoutPatches`
 - `windows.settings`
 
 | Key | Default |
@@ -288,6 +290,7 @@ The three it leaves out have neutral defaults:
 | `engineFolder` | `"../spell-epic"` |
 | `repoTemplates`, `windowsFolder`, `repos` | `""`;  `windowsFolder` `""` means the content folder's `windows/` |
 | `app` | `path` `"/editor/"`, the rest `""` |
+| `checkoutPatches` | `[]` |
 
 - NEVER list `agents` in `sharedFolders` in a repo that's also a loaded plugin.
   - Claude Code reads a plugin's root `agents/` as agent types.

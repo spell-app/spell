@@ -28,6 +28,16 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
   - They link each other by relative path (`../isolate/SKILL.md`).
   - They reach the plugin's own files through `${CLAUDE_PLUGIN_ROOT}`.
+- Voices:  how a kind of people-facing page is written, one file each in [the voices folder](voices/)
+  (epic `readme` P12).
+  - `readme` ([readme.md](voices/readme.md)):  READMEs, an epic's guide, reference pages.
+  - `code`:  docstrings, comments, `AGENTS.md` files, epic pages:  each repo's own house style (Spell's:  WWOD §6),
+    so spell-epic ships no file for it.
+  - Configurable (epic `readme` P13):  a repo's `.epic/config.json5` names its own voices (`"voices"`, a name to a
+    file) and which voice each kind of page takes (`"pageVoices"`);  a child repo of a multi-repo top takes the top's.
+    The skills ask by name:  `epic voice <name>`, `epic voice --for <kind>` print the file (`EpicConfig.voiceFile()`).
+  - The skills that write such pages name the voice they use:  the epic skill's "6. Doc Review", `/docs-check`.
+  - A repo's own house style adds its specifics on top, and wins where they disagree.
 - Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it.
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
@@ -58,7 +68,7 @@ As WWOD §4, plus these.
     source.
   - Vite, Vitest, `tsx`:  `default`, the source, adding the extension themselves.
   - Every folder barrel has an explicit key (`"./markup"`, `"./components/epic-page"` ...):  `tsx`, run from another
-    repo through `node_modules` (spell-app's page server loads the route modules), finds a file without its
+    repo through `node_modules` (the kit's page server loads the route modules), finds a file without its
     extension but not a folder's `index`.
   - esbuild (the extension's build, the docs bundle's) finds neither by itself:  the kit's `sourceNames()`
     (`spell-kit/toolchain/sourceNames`) finds our packages' names as their source files.

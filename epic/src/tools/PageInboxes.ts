@@ -29,7 +29,7 @@ const INBOX_FILE = /\.inbox\.json5?$/
  * - the content folder's `guides/`, `pages/` and `epics/` (an epic's own pages;  never an epic page's review inbox)
  * - every COMPONENT SET's pages too (`ComponentSetFolders`):  each by its served path, `components/app/<page>`
  *   (`pageOf()`)
- *   - App UI's and Brand's in the checkout (`packages/app/docs/` ...);  Epic UI's in the engine's `src/docs/`
+ *   - App UI's in the checkout (spell-app's `app/docs/`), Brand's beside it;  Epic UI's in the engine's `src/docs/`
  *     (`EPIC_UI`;  epic `epic-engine` P2)
  * - `unowned()`:  the pages no epic owns, the standing `feedback` epic's (`SeeAlso.epicFor()`):  how `epic inbox
  *   feedback wait` hears their Send

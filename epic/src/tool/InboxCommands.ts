@@ -562,8 +562,10 @@ export class InboxCommands {
  *   (`PageInboxes.unowned()`), Epic UI's pages too, besides its own `details/` pages
  * - the pages are found again every `GUIDES_FOUND_MS`, so a guide linked mid-wait is heard
  * - each page's inbox read without its lock (atomic writes);  only taking a send locks it (`GuideInbox.takeSent()`)
+ * - the session's monitor (`InboxMonitor`) peeks with it too (`hasNewSend`), and never takes;
+ *   its poller watches `files` for a change
  ****************/
-class GuideSends {
+export class GuideSends {
   /** the checkout's root */
   readonly root: string
   /** the epic's name */
@@ -592,6 +594,19 @@ class GuideSends {
       const taken = GuideInbox.update(file, (_comments, inbox) => inbox.takeSent())
       return taken ? [{ page, ...taken }] : []
     })
+  }
+
+  /** Whether one of the epic's pages holds a send not taken yet:  what `take()` would find.  Takes nothing. */
+  get hasNewSend(): boolean {
+    return this.owned().some((page) => Boolean(this.peek(this.inboxOf(page))?.hasNewSend))
+  }
+
+  /**
+   * The inbox files of the epic's pages, existing or not yet:  what the session's monitor watches for a Send
+   * (`InboxMonitor.check()`).
+   */
+  get files(): string[] {
+    return this.owned().map((page) => this.inboxOf(page))
   }
 
   /** The comments waiting on the epic's pages, by page:  when last sent, and which a Send would hand over. */

@@ -438,6 +438,7 @@ Lost track?  `epic status`.
 | `epic worktree remove <name>` | removes a worktree, its page and Vite servers stopped FIRST, and its session-folder link;  not its branch (`git branch -d` after);  `--force`:  git's, for one with changes |
 | `epic worktree repos [<name>]` | each repo's checkout in an epic's worktree (default:  this one):  its branch, what's uncommitted, how far it's ahead of and behind its base |
 | `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  `--continue` after you resolve any other conflict (below);  `--json` |
+| `epic worktree patch [--all]` | gives this checkout (`--all`:  `main` and every worktree) the fixes its repo lists in `.epic/config.json5`'s `checkoutPatches` that it doesn't have yet:  a file copied from `main` and git-excluded, or a command run once;  `--dry-run`, `--json`;  the session-start hook runs it by itself |
 | `epic worktree move <name> \| --idle` | moves a worktree from the old place inside the repo, `.claude/worktrees`, to beside it;  `--idle`:  every one no session works in;  `--dry-run` |
 | `epic session list [<words> ...]` | lists this repo's saved Claude Code sessions, newest first, matching every word;  `--limit <n>`, `--all` |
 | `epic session find <name>` | finds the sessions titled `<name>`, or that worked in worktree `<name>` |
@@ -447,6 +448,7 @@ Lost track?  `epic status`.
 | `epic session icons` | gives every named session the icon its work's state calls for:  📅 future, 🚧 under way, 🚨 every phase done but items need you, ⏸️ untouched for days, ✅ finished;  `--dry-run` |
 | `epic session window [<pid>]` | prints the VS Code window id a process runs in (default:  this session's) |
 | `epic session transcript <id prefix>` | prints another session's prompts, its last reply and the question it's waiting on |
+| `epic session listen [--json] [--monitor <pid>]` | one look at THIS session's epic page:  listens for the session, and prints the line to wake it when you sent work;  the plugin's monitor runs it as the page's inbox changes, its own pid as `--monitor` |
 | `epic park list` | prints, as JSON, every parked worktree's PARKED note:  its state and where it stopped |
 | `epic park candidates` | prints, as JSON, what `/wait-for ?` offers:  unfinished worktrees and epics, running sessions |
 | `epic park wait <name>` | polls until `<name>` finishes, then prints its status;  `--every 60` seconds, for up to `--max 7140` (just under two hours);  exit 2 when time's up, 3 for nothing by that name |
@@ -463,6 +465,14 @@ Lost track?  `epic status`.
     resolve them, `git add` them, then `epic worktree merge-main --continue` finishes the merge.
   - In an epic's worktree of several repos, it merges every repo, the child repos lowest first,
     the top one (the kit, in Spell) last;  a repo that can't merge says FAILED, and the others go on.
+
+- A fix to how a checkout is SET UP (a VS Code file like `.ignore`, a command to run once) reaches every checkout at once
+  through `checkoutPatches`, not when each branch merges `main`
+  ([README-adopting.md](README-adopting.md#the-config-file)).
+  - Add the fix on `main`, list it there, then `epic worktree patch --all`;  new and reopened sessions catch up by
+    themselves.
+  - A copied file is git-excluded, so `git status` stays clean, and the branch's merge of `main` replaces it with
+    the tracked one;  from then on the patch does nothing there.
 
 ### Shared content
 
@@ -536,6 +546,7 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 | `epic pages open [<page>]` | shows a page in Chrome, or in VS Code's side bar (`--vs`;  `--review`:  the Review tab) |
 | `epic pages link <page>` | prints a page's two links for a reply, the side bar's and the browser's;  `--hash <id>`, `--review`;  `--show`:  shows it too |
 | `epic pages fuss <path> ... \| --branch` | checks the writing of pages and comments against the house rules |
+| `epic pages voice [<page> ...] [--voice <name>] [--done <page> ...]` | lists the guides a voice hasn't gone over yet (`/voice` rewrites them), with their word counts;  `--done` stamps one as gone over |
 | `epic pages offline [<page> ...]` | lists what the docs pages load from the internet, for airplane mode |
 
 ### The repo's settings
@@ -547,6 +558,7 @@ Every key of the config file, and what `epic init` writes:  [README-adopting.md]
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic init` | sets a repo up for epics:  its config file, the content folder beside it, the links and their `.gitignore` lines;  `--dry-run` first;  safe to run again |
+| `epic voice [<name> \| --for <kind>]` | prints a VOICE's file, the rules a kind of page is written to:  `epic voice readme`, or the voice a kind of page takes, `epic voice --for guide`;  no argument lists every voice and the kinds that use it.  A repo names its own in `.epic/config.json5` (`"voices"`, `"pageVoices"`);  spell-epic ships `readme` |
 
 ### Pages you answer on, agents, airplane mode
 

@@ -264,6 +264,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):  by process, never a pid file;  never a
         live checkout's
       - plain `node` loads it by path, `prune.ts` too (the server package's entry `spell-kit/server/page/prune`)
+    - `CheckoutPatches`:  `epic worktree patch [--all]`, the fixes a repo lists in `"checkoutPatches"` given to every
+      checkout at once, the worktrees behind `main` too (epic `epic-engine` P17)
+      - a `copy` patch puts `main`'s file where it isn't tracked yet, git-excluded;  a `run` patch runs once per checkout
+        (remembered in its git folder, `epic-patches.json`)
+      - the session-start hook starts it in the background ([patch-checkout.mjs](../hooks/patch-checkout.mjs)), the
+        worktree hook runs it on a reused branch;  plain `node` loads it by path
+    - `TranscriptIndex`:  what each saved session's transcript names (its titles, its folders), kept between runs in
+      Claude's folder (`spell-epic/transcript-index.json`;  epic `epic-engine` I62)
+      - `Sessions.named()` (`epic session find`, `epic worktree status`) reads only the transcripts that changed since:
+        the transcripts are 1.6GB, and reading them all took 1.7s of a 2s command, more with every session
+      - keyed by each file's size and modified time;  best effort, never throws
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path
@@ -271,6 +282,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       run in this process
     - `PromptGate`:  the epic rules the `UserPromptSubmit` hook checks a prompt against
       - the hook:  [prompt-gate.mjs](../hooks/prompt-gate.mjs)
+    - `PromptAck`:  the "On it:  ..." line that hook shows for a message sent while the session is busy, its summary
+      Haiku's (`claude -p`, hooks off);  every prompt logged to `epic-prompts.log` in the checkout's git folder;
+      `promptAck` in the config turns it off (epic `epic-engine` P18)
       - plain `node` loads it by path, with `command.types.ts`
     - `Git`:  running git, and finding checkouts:  the main one, the caller's, the one this code is in
     - ONE copy of the code:  every verb runs THIS checkout's code, on the caller's checkout's data.
@@ -318,6 +332,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send or Do Now finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
+    - `InboxMonitor`:  `epic session listen`, ONE look for the plugin's MONITOR (`monitors/monitors.json`), one beside
+      every session (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
+      - the epic:  the session's title, else its worktree;  none, it does nothing
+      - holds the inbox for the session (`setListening()`, with the monitor's pid:  live while it runs, no heartbeat)
+        unless another listener holds it
+      - says what's waiting, the `📬` line to print, which files to watch, and when to look again
+    - `InboxPoller` (`spell-epic/tool/InboxPoller.mjs`, run by `monitors/listen.mjs`):  the monitor itself (epic
+      `epic-engine` P19)
+      - plain JavaScript, node's own modules only:  bare node, about 45MB a session;  the look, under `tsx`, about
+        150MB, runs for a moment as its own process.  NEVER import TypeScript into it:  node's TypeScript support
+        alone adds about 28MB
+      - looks at start, a few seconds after a watched file changes, and when the last look said to
+      - prints NOTHING while idle (no tokens);  Owen's Send:  the look's `📬` line, once per batch, which wakes the
+        session, which takes the work with its own `epic inbox wait`
     - the inboxes, one shape of comment for both (`CommentList`):
       - `ReviewInbox`:  an epic page's marks and comments
       - `GuideInbox`:  a docs page's comments and its Send (epic `epic-workflow` P13)
@@ -433,7 +461,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 `docs/`:  the pages of the `<epic-*>` elements, a COMPONENT SET (epic `epic-workflow` P10).
 Laid out as every set is since P18 of `people-and-orgs`
 ([spell-app's AGENTS.md](../../spell-app/AGENTS.md), "COMPONENT SETS").
-- Served by the page server, as its checkout's settings name it (the root `package.json`'s `"pageServer"`
+- Served by the kit's page server, as spell-epic's part of its settings names it (its `package.json`'s `"pageServer"`
   `"componentSets"`, `componentSets()` in [settings.ts](../../src/server/page/settings.ts)), and by the epic server:
   - at `/components/epics/`
   - and at `/worktrees/<w>/components/epics/` for a worktree's
@@ -556,7 +584,7 @@ The shared folders:
   - `EpicConfig.contentOf(<checkout>)` ([EpicConfig.ts](config/EpicConfig.ts));  `pages.js` `CONTENT`
   - a page's PATH is from the content folder (`epics/seo/seo.plan.html`:  `pagePath()`), as the page servers serve it
     at `/`;  `pageAt()` turns one back into its file, `inContent()` maps a path through an older checkout's link
-  - spell-app's page server mounts it at `/` when the running epics' route module says where it is
+  - the kit's page server mounts it at `/` when the running epics' route module says where it is
     (`serveContent()`, `runningRoutes.ts`)
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
@@ -566,7 +594,7 @@ The shared folders:
     - Owen's order (2026-10-11, epic `epic-workflow` J40);  the slashed names are the tabs' labels (J41).
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
-    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (the checkout's `"pageServer"` `"componentSets"`, read with
+    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (each repo's `"pageServer"` `"componentSets"`, merged and read with
       `componentSets()` in `spell-kit/server/page`), in Spell UI's page shape.
       Their cards link the sets' addresses:
 
@@ -808,7 +836,7 @@ In `tools/`:
   - Everything that sticks or lands starts below it:
     `siteHeaderHeight()` in `spell-doc-runtime.js`, and its header's "Landing".
   - The element itself is `spell-kit/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
-  - Its tabs:  the checkout's `"pageServer"` `"siteTabs"` on a served page;  from disk, the docs bundle's own
+  - Its tabs:  the content repo's `page-server.json5` `"siteTabs"` on a served page (epic `repo-split` P16);  from disk, the docs bundle's own
     (`DOCS_TABS` in `spell-ui.entry.js`:  the docs' areas and Epic/UI), epic `repo-split` I4.
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
 - Pages MUST still open straight from disk (`file://`):  no ES modules, hence the one classic bundle.
@@ -1179,7 +1207,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 ## Templates
 
 - spell-epic's own, in its [`templates/`](../templates/) (epic `epic-eject` T11, Q8):  every repo's pages start from them.
-  - Served at `/templates/` (and `/r/<repo>/templates/`) by the epic server and spell-app's page server alike.
+  - Served at `/templates/` (and `/r/<repo>/templates/`) by the epic server and the kit's page server alike.
   - `epic pages template <name>` prints one's path;  `epic pages index` writes the Templates list page,
     `templates/index.html`, here.
   - A repo adds its own only if it wants one:  `repoTemplates` (`EpicConfig`), listed beside these, found first.
@@ -1319,6 +1347,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Waiting until answered (`epic inbox done <name>#M3`).
   - `listening.seen`:  the session's heartbeat (`LISTEN_HEARTBEAT_MS`, 30s, from `wait`).
     - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
+  - `listening.pid`:  the session's MONITOR's process, when the monitor holds it (`InboxMonitor`, epic `epic-engine`
+    P19):  live exactly while that process runs, with no heartbeat.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
     - Send, Review Now or Do Now with nobody listening wakes it, inside the request:
       `/epic review <epic>` typed into its session, or a new session in its window (`ReviewStart`).
@@ -1327,7 +1357,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - No wake with several sessions titled for the epic, in airplane mode, or for a Send with nothing new.
 - The page reads and writes through ONE `ReviewClient` ([the review client](review/)).
   - It's on the page server's route module, [reviewRoutes.ts](tool/reviewRoutes.ts), at `/api/epics/review/...`.
-  - The module is listed in the root `package.json`'s `pageServer.routes`.
+  - The module is listed in spell-epic's `package.json`'s `pageServer.routes`:  its part of the kit's page server's
+    settings, which the epic server reads too (`ROUTE_MODULES`).
   - The routes:
     - `GET inbox?page=`
     - `POST mark { page, id, mark | null }`

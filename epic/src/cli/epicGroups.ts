@@ -196,7 +196,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   airplane: [
     {
       name: "status",
-      usage: "[--json]",
+      usage: "[--json] [--monitor <pid>]",
       description: "airplane mode on or off, and since when (the default verb)",
       example: "epic airplane"
     },
@@ -228,7 +228,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   worktree: [
     {
       name: "list",
-      usage: "[--json]",
+      usage: "[--json] [--monitor <pid>]",
       description: "every running session and the worktree, branch and folder it works in;  then idle worktrees",
       example: "epic worktree list"
     },
@@ -277,6 +277,15 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
         "merge main into this checkout's branch, regenerating the generated files both sides changed;  exit 1 " +
         "on other conflicts:  resolve, git add, then --continue",
       example: "epic worktree merge-main"
+    },
+    {
+      name: "patch",
+      usage: "[--all] [--dry-run] [--json]",
+      description:
+        "give this checkout the fixes its repo lists in .epic/config.json5's checkoutPatches that it doesn't have " +
+        "yet:  a file copied from main and git-excluded, or a command run once;  --all:  main and every worktree;  " +
+        "the session-start hook runs it by itself",
+      example: "epic worktree patch --all --dry-run"
     }
   ],
   session: [
@@ -327,6 +336,13 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<id prefix> [--json]",
       description: "another session's prompts, last reply and the question it's waiting on",
       example: "epic session transcript 055da582"
+    },
+    {
+      name: "listen",
+      usage: "[--json] [--monitor <pid>]",
+      description:
+        "one look at this session's epic page for it:  listen, say what's waiting (the plugin's monitor runs it)",
+      example: "epic session listen"
     }
   ],
   park: [
@@ -354,7 +370,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   shared: [
     {
       name: "status",
-      usage: "[--json]",
+      usage: "[--json] [--monitor <pid>]",
       description: "each checkout's links, and the shared repo's uncommitted files and last commit (the default verb)",
       example: "epic shared status"
     },
@@ -569,7 +585,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "list",
-      usage: "[--json]",
+      usage: "[--json] [--monitor <pid>]",
       description: "every registered repo:  its URL prefix, checkout and content folder",
       example: "epic repo list"
     },
@@ -628,6 +644,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<path>... | --branch",
       description: "check the writing of pages and comments against the house rules",
       example: "epic pages fuss --branch"
+    },
+    {
+      name: "voice",
+      usage: "[<page>...] [--voice <name>] [--done <page>...] [--all] [--json]",
+      description:
+        "the guides a voice still has to go over (none named:  every guide), and the voice's file;  " +
+        "--done:  stamp guides as gone over",
+      example: "epic pages voice --done guides/server.html"
     },
     {
       name: "offline",

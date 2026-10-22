@@ -124,6 +124,17 @@ export type NamedSession = {
 }
 
 /**
+ * What a transcript says about who it is and where it worked -- `TranscriptIndex.scan()`.
+ * - `titles`:  every `customTitle` in it (a `/rename`), distinct, escapes undone
+ * - `cwds`:  every `cwd` in it (folders the session worked in), distinct, escapes undone
+ * - the same strings `Sessions.named()` looks for, so a transcript with none of them can't be a match
+ */
+export type TranscriptFacts = {
+  titles: string[]
+  cwds: string[]
+}
+
+/**
  * What another session has been doing -- `Sessions.digest()`.
  * - `prompts`:  what Owen typed, oldest first (`when` is the timestamp's first 16 chars)
  * - `pending`:  an `AskUserQuestion` still waiting, with its options
@@ -464,6 +475,21 @@ export type Generator = { name: string; outputs: string[]; cwd: string; run: str
  * - `file`:  the `.snap`, relative to the checkout;  `keys`:  its `exports[...]` names
  */
 export type SnapshotReview = { file: string; keys: string[] }
+
+/**
+ * What `epic worktree patch` did in one checkout (`CheckoutPatches.patch()`).
+ * - `checkout`:  its folder
+ * - `applied`:  each patch that did something there, and what (`copied .ignore from main`, `ran yarn install`);  with
+ *   `--dry-run`, what it would do
+ * - `failed`:  each patch that failed there, and why;  the others still ran
+ * - `busy`:  another run was patching it, so nothing was done
+ */
+export type PatchReport = {
+  checkout: string
+  applied: { id: string; did: string[] }[]
+  failed: { id: string; error: string }[]
+  busy?: boolean
+}
 
 /**
  * `epic worktree merge-main`'s answer.

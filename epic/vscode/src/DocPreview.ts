@@ -15,7 +15,8 @@
  *      when it runs and the file is in a registered repo's content (`RepoList.urlPathFor()`):
  *      every repo's pages on one port, from any window
  *   2. the MAIN checkout's page server, for a worktree's file, when it serves worktrees (`SRV.mainServerUrl()`)
- *   3. the file's checkout's page server (`spell server`, a `.spell-server.json` at its root)
+ *   3. the file's page server (`spell server`, a `.spell-server.json` at its root):  in a kit, the kit's, for a file of
+ *      any repo in it (`pageServerRoot()`, epic `repo-split` P16);  else its checkout's
  *   4. else a server of our own, in-process, on `127.0.0.1`, one per root, for as long as the extension runs:
  *      the same `spell-kit/server` `WebServer`, with live reload and the engine's routes, but no route modules
  *   - NEVER starts a page server itself:  a GUI VS Code may have no `node` / `yarn` on its PATH.
@@ -32,6 +33,7 @@ import * as vscode from "vscode"
 
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser (~700 KB) lands in this bundle (I58)
 import { mainServerUrl } from "spell-kit/server/mainServer"
+import { pageServerRoot } from "spell-kit/server/page/settings"
 import { PidFile } from "spell-kit/server/PidFile"
 import { WebServer } from "spell-kit/server/WebServer"
 
@@ -110,7 +112,7 @@ export class DocPreview {
     if (hub && path) return `${hub.base}${path}`
     const main = await mainServerUrl(file)
     if (main) return main
-    const root = gitRoot(file)
+    const root = pageServerRoot(dirname(file))
     const inRoot = file.slice(root.length).split(sep).map(encodeURIComponent).join("/")
     const running = await new PidFile(root).status()
     const base = running?.base ?? (await DocPreview.serverFor(root)).url
@@ -168,14 +170,6 @@ function repoPathOf(file: string): string | undefined {
     return new RepoList().urlPathFor(file)
   } catch {
     return undefined
-  }
-}
-
-/** The folder holding `.git` (a folder, or a worktree's file) above `file`;  its own folder if there's none. */
-function gitRoot(file: string): string {
-  for (let folder = dirname(file); ; folder = dirname(folder)) {
-    if (existsSync(resolve(folder, ".git"))) return folder
-    if (dirname(folder) === folder) return dirname(file)
   }
 }
 
