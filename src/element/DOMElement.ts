@@ -104,8 +104,8 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   /**
    * DOM API:  the element was added to a page.
    * - First time (or after `dispose()`):
-   *   - re-apply properties set before the upgrade (a real write, so it reflects),
-   *     and the functions and objects the page-wide patch held for it (`RichAttributes`)
+   *   - re-apply properties set before the upgrade (a real write, so it reflects)
+   *   - re-apply the functions and objects the page-wide patch held for it (`RichAttributes`)
    *   - read the markup's attributes for the family's script API (`<ui-code content="...">`)
    *   - build and render the component
    *   - hand it what the browser reported before it existed
@@ -180,10 +180,12 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   }
 
   /**
-   * DOM API, widened:  a function or object (`on-ui-change={f}`, `tree={tree}`) goes to `RichAttributes`,
-   * a listener or a property;  so does text for the family's script API (`content` on `<ui-code>`).
-   * Other text goes to the attribute, as ever.
-   * - Why:  Solid sets a JSX prop it doesn't know this way, the value as it is (no `prop:` in our JSX).
+   * DOM API, widened:  sets an attribute, or what a function or object given to one stands for.
+   * - A function or object (`on-ui-change={f}`, `tree={tree}`):  a listener or a property (`RichAttributes`)
+   * - Text for the family's script API (`content` on `<ui-code>`):  the property too
+   * - Other text:  the attribute, as ever
+   * - Why:  Solid sets a JSX prop it doesn't know this way, the value as it is,
+   *   so our JSX needs no `prop:`.
    */
   override setAttribute(name: string, value: unknown) {
     const definition = this.tagSetup?.elementDefinition

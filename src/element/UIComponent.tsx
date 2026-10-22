@@ -927,8 +927,8 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   /**
    * Build `Class`'s component for `domElement` and draw it into its shadow root:
    * what the DOM element's first connect does (`TagSetup.mountComponent`).
-   * - In a Solid root of its OWN (`Reactive.ownRoot()`):  it lives until `domElement.dispose()`, whatever happens
-   *   around it.
+   * - In a Solid root of its OWN (`Reactive.ownRoot()`):
+   *   it lives until `domElement.dispose()`, whatever happens around it.
    *   - So a Solid app's context doesn't reach inside (`appContext` does that).
    * - Inside an error boundary (Solid's `<Errored>`), always:  see "Errors and fallback".
    * - Released with the DOM element:  the root is disposed, the shadow root emptied.

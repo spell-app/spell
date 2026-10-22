@@ -80,10 +80,12 @@ export class Reactive {
   ////////////////
 
   /**
-   * Run `fn` in a Solid root of its OWN, which lives until the `dispose` it's handed is called;  returns what `fn` does.
-   * - Safe ANYWHERE, an effect's callback too:  made under `OWN_ROOTS`, an owner that holds nothing and never goes.
-   *   - A plain `createRoot()` there throws since Solid rc.17 (`PRIMITIVE_IN_EFFECT_CALLBACK`), and the browser
-   *     runs an element's `connectedCallback()` there whenever Solid inserts it.
+   * Run `fn` in a Solid root of its OWN, which lives until the `dispose` it's handed is called.
+   * - Returns what `fn` does.
+   * - Safe ANYWHERE, an effect's callback too:
+   *   made under `OWN_ROOTS`, an owner that holds nothing and never goes.
+   *   - A plain `createRoot()` in an effect's callback throws since Solid rc.17 (`PRIMITIVE_IN_EFFECT_CALLBACK`).
+   *   - The browser runs an element's `connectedCallback()` inside one whenever Solid inserts the element.
    * - No context reaches inside:  not the caller's, not an app's.
    */
   static ownRoot<T>(fn: (dispose: () => void) => T): T {
@@ -196,8 +198,7 @@ export class Reactive {
    * - The method runs only when a member's VALUE changed (`===`, member by member):
    *   a memo with `equals` sits between the reads and the effect.
    *   - Why:  Solid 2 runs an effect's apply on EVERY re-run of its compute, equal value or not
-   *     (documented since rc.17),
-   *     and a getter or `@derived` member tracks the sources UNDER it,
+   *     (documented since rc.17), and a getter or `@derived` member tracks the sources UNDER it,
    *     so its effect re-runs whenever any of them moves.
    *   - Skipping inside the apply would be too late:  Solid has run the previous cleanup by then.
    */
