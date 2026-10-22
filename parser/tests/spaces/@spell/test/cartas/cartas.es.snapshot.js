@@ -36,5 +36,14 @@ export const words = {
       valor: "valor",
       estado: "estado"
     }
+  },
+  messages: {
+    "expect-passed": "Como se esperaba, {what} es {expected}",
+    "expect-failed": "Inesperado: {what} debería ser {expected} pero en realidad es {actual}",
+    "expect-truthy": "verdadero",
+    "test-step": "▶️ Ejecutando   {step}",
+    "test-threw": "Error en la prueba {test}:",
+    "cant-draw": "⚠ {type} no se puede dibujar",
+    "confirm-default": "{question} (sí)"
   }
 }

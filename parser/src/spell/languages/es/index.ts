@@ -5,7 +5,9 @@
  */
 import { SP } from "spell-lang/spell"
 
+import { spanishAgreement } from "./agreement"
 import { spanishInflector } from "./inflector"
+import { spanishMessages } from "./messages"
 import { spanishParser } from "./parser"
 import { spanishTypeWords, spanishWords } from "./words"
 
@@ -17,6 +19,8 @@ export const spanish = SP.Language.register(
     parser: spanishParser,
     inflector: spanishInflector,
     typeWords: spanishTypeWords,
-    words: spanishWords
+    words: spanishWords,
+    messages: spanishMessages,
+    articles: spanishAgreement
   })
 )

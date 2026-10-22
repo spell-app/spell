@@ -17,7 +17,8 @@ describe("a project's language", () => {
       parser: SP.spellParser.clone({ module: "xx", inflector: undefined }),
       inflector: new P.Inflector({ lang: "xx", singular: (word) => word, plural: (word) => `${word}s` }),
       typeWords: SP.TYPE_WORDS,
-      words: SP.english.words
+      words: SP.english.words,
+      messages: SP.english.messages
     })
   )
   afterAll(() => SP.Language.all.delete("xx"))

@@ -5,7 +5,7 @@
  * - `core` is ONE object (constructed in `core.ts`), assembled by ACCRETION:
  *   each sibling module here does `Object.assign(core, <module>Methods)`
  *   as a top-level side effect when its file first loads -- see `defineCoreModule()` in `core.types.ts`.
- *   - The modules:  `collection-core`, `collection-other`, `deprecated`, `paths`, `string`, `tests`,
+ *   - The modules:  `collection-core`, `collection-other`, `deprecated`, `paths`, `string`, `messages`, `tests`,
  *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `drawing`, `elements`, `references`,
  *     plus `core` itself.
  * - NOTE: most of those modules are imported here ONLY for that side effect (bare `import "./x"`, no named import):
@@ -25,6 +25,7 @@ import "./deprecated"
 import "./paths"
 import "./string"
 import { SpellEvent, Eventful } from "./SpellEvent"
+import "./messages"
 import "./tests"
 import "./console"
 import { on, off, once, trigger } from "./runtime"

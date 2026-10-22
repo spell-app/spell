@@ -529,6 +529,12 @@ export type SpellWordsData = {
   lang: string
   /** Each type's members' words, by the type's class name, then each member's compiled name. */
   types: Record<string, Record<string, string>>
+  /**
+   * What the core says to the person running the program, in its language, by the core's keys -- `SP.Language.messages`.
+   * - The runner hands them to the core (`core.useMessages()`) before the program runs.
+   * - Only for a language other than English:  English's are the core's own.
+   */
+  messages?: Record<string, string>
 }
 
 /**
@@ -545,6 +551,11 @@ export type SpellDeclaration = {
   superType?: string
   /** `type`'s short name, e.g. `Account` for `a bank account aka account` -- see `P.TypeScope.aka`. */
   aka?: string
+  /**
+   * `type`'s grammatical gender, e.g. `feminine` for `una carta es una cosa` -- see `P.TypeScope.gender`.
+   * - Only when it has one:  English types never do.
+   */
+  gender?: string
   /**
    * What `type` holds, if it's a list type, e.g. `Card` for `a deck is a list of cards`.
    * - See `P.TypeScope.itemType`.

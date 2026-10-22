@@ -5,7 +5,9 @@
  */
 import { SP } from "spell-lang/spell"
 
+import { englishAgreement } from "./agreement"
 import { englishInflector } from "./inflector"
+import { englishMessages } from "./messages"
 import { englishWords } from "./words"
 
 /** English's language pack. */
@@ -16,6 +18,8 @@ export const english = SP.Language.register(
     parser: SP.spellParser,
     inflector: englishInflector,
     typeWords: SP.TYPE_WORDS,
-    words: englishWords
+    words: englishWords,
+    messages: englishMessages,
+    articles: englishAgreement
   })
 )

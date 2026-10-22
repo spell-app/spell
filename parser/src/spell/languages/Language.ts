@@ -1,6 +1,6 @@
 import { P } from "spell-lang/parser"
 
-import { SPELL_BASE_TYPES } from "spell-lang/core/core.types"
+import { SPELL_BASE_TYPES, type CoreMessages } from "spell-lang/core/core.types"
 import { SP } from "spell-lang/spell"
 
 /**
@@ -11,6 +11,7 @@ import { SP } from "spell-lang/spell"
  *   - its inflector:  how its words go singular and plural (`P.Inflector`)
  *   - its words for spell's built-in types, e.g. `text`, `yes or no` (`typeWords`)
  *   - its root scope:  the built-in types and their members, which every project's scope descends from
+ *   - its words for what the core says to the person running a program (`messages`)
  * - A project names its language (epic `spanish` P4);  `Language.for(lang)` finds its pack.
  * - The rule classes are shared:  a pack holds only words.
  */
@@ -27,14 +28,24 @@ export class Language {
   readonly typeWords: P.TypeWords
   /** Its small words the rules read while parsing:  the blacklist, stop words ... -- see `LanguageWords`. */
   readonly words: LanguageWords
+  /**
+   * What the core says to the person running a program, in this language:  a test's lines, a drawing's stand-in ...
+   * - Copied into a project's words file, for the runner to hand the core -- see `SP.SpellWords.of()`.
+   * - English's are the core's own:  see `CORE_MESSAGES`.
+   */
+  readonly messages: CoreMessages
+  /** How its articles agree with their noun, e.g. `an apple`, `la carta` -- see `agreement()`;  none:  never warns. */
+  readonly articles: ArticleAgreement | undefined
 
   constructor(props: LanguageProps) {
+    this.articles = props.articles
     this.lang = props.lang
     this.name = props.name
     this.parser = props.parser
     this.inflector = props.inflector
     this.typeWords = props.typeWords
     this.words = props.words
+    this.messages = props.messages
     this.parser.language = this
     this.parser.inflector ??= this.inflector
   }
@@ -62,6 +73,26 @@ export class Language {
     }))
   }
   private _rootScope: P.RootScope | undefined
+
+  ////////////////
+  // ## Agreement
+  ////////////////
+
+  /**
+   * The article `noun` should have had, if not `article` -- `undefined` when they agree (epic `spanish` P8).
+   * - e.g. English:  `an` for `a` + `apple`;  Spanish:  `la` for `el` + `carta`, `unas` for `un` + `cartas`.
+   * - `article` and `noun` lowercase, as written;  `type` the type `noun` names, if it names one.
+   * - Never for a language with no `articles`.
+   * - Only a warning:  `SP.SpellWarnings.noteArticles()` notes it, and the line parses as it is.
+   */
+  agreement(article: string, noun: string, type: P.TypeScope | undefined): string | undefined {
+    return this.articles?.expected(article, noun, type)
+  }
+
+  /** The gender a type declared with `article` has, e.g. Spanish's `feminine` for `una` -- English's none. */
+  genderOf(article: string | undefined): string | undefined {
+    return article === undefined ? undefined : this.articles?.genderOf?.(article)
+  }
 
   ////////////////
   // ## Every language
@@ -120,6 +151,24 @@ export type LanguageProps = {
   inflector: P.Inflector
   typeWords: P.TypeWords
   words: LanguageWords
+  messages: CoreMessages
+  articles?: ArticleAgreement
+}
+
+/**
+ * How a language's articles agree with their noun -- English's in `languages/en/agreement.ts` (epic `spanish` P8).
+ * - Read through `Language.agreement()` and `Language.genderOf()`.
+ */
+export type ArticleAgreement = {
+  /**
+   * The article `noun` should have had, if not `article`, e.g. `an` for `a apple` -- `undefined` when they agree.
+   * - `type`:  the type `noun` names, if any;  a language whose articles agree in gender needs one.
+   */
+  expected(article: string, noun: string, type: P.TypeScope | undefined): string | undefined
+  /** The gender a type declared with `article` has, e.g. `feminine` for `una carta es una cosa`;  none in English. */
+  genderOf?(article: string): string | undefined
+  /** The warning for a wrong article, worded in the language:  `phrase` is the right one, e.g. `an apple`. */
+  warning(phrase: string): string
 }
 
 /** A language's small words, the tables spell's rules read while parsing -- English's in `languages/en/words.ts`. */

@@ -44,6 +44,7 @@ import { drawingMethods } from "./drawing"
 import { elementsMethods } from "./elements"
 import { referencesMethods } from "./references"
 import { pathMethods } from "./paths"
+import { messageMethods } from "./messages"
 import { testMethods } from "./tests"
 import { consoleMethods } from "./console"
 import { runtimeMethods } from "./runtime"
@@ -67,6 +68,7 @@ const CORE_MODULES: Record<string, object> = {
   elements: elementsMethods,
   references: referencesMethods,
   paths: pathMethods,
+  messages: messageMethods,
   tests: testMethods,
   console: consoleMethods,
   runtime: runtimeMethods,
