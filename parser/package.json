@@ -17,6 +17,11 @@
       "types": "./dist-types/src/parser/rulex/index.d.ts",
       "default": "./src/parser/rulex/index.ts"
     },
+    "./parser/test": {
+      "spell-lang-source": "./src/parser/test/index.ts",
+      "types": "./dist-types/src/parser/test/index.d.ts",
+      "default": "./src/parser/test/index.ts"
+    },
     "./markdown": {
       "spell-lang-source": "./src/markdown/index.ts",
       "types": "./dist-types/src/markdown/index.d.ts",
