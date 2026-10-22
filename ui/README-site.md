@@ -52,11 +52,19 @@ _Three things make the site:  pages written by hand, data a script writes from t
 
 ```sh
 spell server start all
-# Spell servers of ~/www/spell.worktrees/readme:
-#   page server           56343  http://127.0.0.1:56343/                docs, epics, /api                 started
-#   editor                56344  http://localhost:56344/                the spell app (vite)              running
-#   Spell UI's docs site  56343  http://127.0.0.1:56343/components/ui/  static pages, by the page server  running
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+Spell servers of ~/www/spell.worktrees/readme:
+  page server           56343  http://127.0.0.1:56343/                docs, epics, /api                 started
+  editor                56344  http://localhost:56344/                the spell app (vite)              running
+  Spell UI's docs site  56343  http://127.0.0.1:56343/components/ui/  static pages, by the page server  running
+```
+
+</details>
 
 _A run in an epic's worktree of the kit:  the main checkout's server already held port 4747, so this one took free
 ports._
@@ -344,9 +352,17 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 
   ```sh
   spell bundle check ui-site
-  # ui-site:  STALE (built from older sources)
-  # fix:  spell bundle ui-site
   ```
+
+  <details>
+  <summary>What it printed</summary>
+
+  ```text
+  ui-site:  STALE (built from older sources)
+  fix:  spell bundle ui-site
+  ```
+
+  </details>
 
 ### Checking:  a real browser, at desktop, phone width and dark
 

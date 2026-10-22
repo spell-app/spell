@@ -285,11 +285,19 @@ because the element reads its names as it runs, and a dictionary needs them ther
 
 ```sh
 spell icon rocket
-# rocket      fa7-free
-# rocket      fomantic
-# rocketchat  fa7-brands
-# rocketchat  fomantic
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+rocket      fa7-free
+rocket      fomantic
+rocketchat  fa7-brands
+rocketchat  fomantic
+```
+
+</details>
 
 An icon is an SVG file, and a pack is a folder of them, plus `pack.js`:  its id, label, licence,
 and each icon's size and other names.
@@ -330,15 +338,33 @@ The builder runs in `spell-ui`, in a checkout of the kit ([setup from zero](http
 ```sh
 cd ~/www/spell/spell-ui
 yarn icons:pack ../my-site/icons --id my-icons
-# IconPackBuilder.build():  pack "my-icons" has 1 problem(s) in …/my-site/icons;  fix the SVGs, or sanitize,
-#   skip or allow them (`--sanitize`, `--skip-unsafe`, `--allow-unsafe`)
-#   tracker.svg:  onload attribute on <svg>
-
-yarn icons:pack ../my-site/icons --id my-icons --sanitize
-# …/my-site/icons/pack.js:  3 icons
-#   added:  rocket, tracker, wide-arrow
-#   sanitized tracker.svg:  removed onload attribute on <svg>
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+IconPackBuilder.build():  pack "my-icons" has 1 problem(s) in …/my-site/icons;  fix the SVGs, or sanitize,
+  skip or allow them (`--sanitize`, `--skip-unsafe`, `--allow-unsafe`)
+  tracker.svg:  onload attribute on <svg>
+```
+
+</details>
+
+```sh
+yarn icons:pack ../my-site/icons --id my-icons --sanitize
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+…/my-site/icons/pack.js:  3 icons
+  added:  rocket, tracker, wide-arrow
+  sanitized tracker.svg:  removed onload attribute on <svg>
+```
+
+</details>
 
 ```js
 // my-site/icons/pack.js, as written (its two comment lines left out)
@@ -446,13 +472,21 @@ Here's a page, the command, and what came out:
 
 ```sh
 spell ssr pricing.html
-# Rendering 1 page...
-# pricing.static.html
-# pricing.html -> pricing.static.html  1.2 kB
-#   removed scripts:  inline
-# ui.static.css
-# ui.static.css  259.3 kB from 308.2 kB, 1 page this run, 6 tags in all
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+Rendering 1 page...
+pricing.static.html
+pricing.html -> pricing.static.html  1.2 kB
+  removed scripts:  inline
+ui.static.css
+ui.static.css  259.3 kB from 308.2 kB, 1 page this run, 6 tags in all
+```
+
+</details>
 
 ```html
 <article data-ui="card" class="ui card" part="card">
