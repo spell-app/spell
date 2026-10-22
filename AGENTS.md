@@ -269,7 +269,7 @@ The kit is always there, so no `needs` names it.
 - esbuild, used directly (spell-epic's extension and docs bundle, the brand's design bundle), reads `exports` as
   node does:  no extension added, no folder's `index`.  Its builds take the toolchain's `sourceNames()` plugin,
   which finds our names as their source files (epic `repo-split` I50).
-- A file outside its repo that a program needs at run time (spell's `src/`, the frozen test projects) is found by
+- A file outside its repo that a program needs at run time (spell's `src/`, the core's) is found by
   PACKAGE, through `node_modules`, never by a path into that repo.
 - Paths in config and settings that name another repo's folder say so from the repo's root:
   `../spell-ui/site/_assets` in spell-brand's part of the page server's settings.
@@ -304,10 +304,13 @@ The kit is always there, so no `needs` names it.
       [element's AGENTS.md](src/element/AGENTS.md), "Tests".
 - Tests only reach DOWN:
   - a higher repo's tests may use a lower repo's helpers (spell-app's and spell-brand's run Spell UI's setup,
-    `spell-ui/test-helpers/setup.ts`) and its test data (spell-app's spaces reads spell-lang's frozen test projects)
+    `spell-ui/test-helpers/setup.ts`;  spell-app's run spell-lang's `parseSpellProject()`) and its test data
   - a lower repo's never read a higher one's:  a fixture of its own, or the test moves up
-  - a test that needs a higher repo only to check against it (spell-lang's TypeScript check of compiled spell,
-    against the editor's types) skips itself when that repo isn't installed
+    - e.g. Spell's frozen test projects (`@spell/test`) and the tests that compile them whole are spell-app's, beside
+      its other `@spell` groups (epic `spanish` P18);  spell-lang's own tests write their projects inline
+  - a test that needs a higher repo only to check against it skips itself when that repo isn't installed
+    (none today:  spell-lang's TypeScript check of compiled spell, against the editor's types, moved up with the
+    frozen projects)
 - `yarn test` here runs the kit's, then every repo's;  each repo's CI its own (epic `repo-split` P12).
 
 ## CI

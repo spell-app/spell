@@ -317,7 +317,7 @@ They're `spell-lang`'s, but their work is `spell-app`'s for now, through its `la
   - On macOS a save arrives as a `rename` event, so `watch` ignores event types and looks at what's on disk.
   - Piped, it prints a timestamped line per rebuild on stderr, instead of its live screen.
   - `--test` with `--check-only` is refused:  the tests run what's compiled.
-- `format` never writes into the frozen test projects, `spell-lang`'s `tests/spaces/@spell/test/`.
+- `format` never writes into the frozen test projects, `spell-app`'s `spaces/@spell/test/`.
 - What each of them writes, and where:  [below](#output-exit-codes-and-what-writes-files).
 
 </details>
