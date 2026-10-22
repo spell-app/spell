@@ -22,13 +22,21 @@ Each quoted bullet is a new phrase, and from the next line on Spell reads it lik
 ```sh
 spell parse --in ./solitaire 'the card is a new card whose rank is 7 and suit is hearts
 print the card is a face card, the card is not a 7, the color of the card'
-# ... the match tree, and in it:
-#     expression_suffix › is_a_face_card  is a face card
-#     expression_suffix › is_a_$rank  is not a 7
-#
-# export const card = new Card({ rank: 7, suit: "hearts" })
-# core.console.log(card.isAFaceCard, !card.isARank(7), card.color)
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+... the match tree, and in it:
+    expression_suffix › is_a_face_card  is a face card
+    expression_suffix › is_a_$rank  is not a 7
+
+export const card = new Card({ rank: 7, suit: "hearts" })
+core.console.log(card.isAFaceCard, !card.isARank(7), card.color)
+```
+
+</details>
 
 The match tree names the rules that read those two phrases, `is_a_face_card` and `is_a_$rank`.
 Nobody wrote them:  the card's bullets made them, a moment before.
@@ -57,13 +65,21 @@ In any folder outside the checkout, save the card as `try/solitaire/Card.spell`,
 echo '{}' > try/solitaire/__project.json5
 cd try
 spell compile ./solitaire --stdout
-# ✓ @local/try/solitaire
-# import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"
-#
-# export class Card extends Drawable {
-#   static elementTag = core.defineElement(this, "solitaire")
-# ...
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ @local/try/solitaire
+import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"
+
+export class Card extends Drawable {
+  static elementTag = core.defineElement(this, "solitaire")
+...
+```
+
+</details>
 
 - `{}` is a whole project file (below, "The compiler").
 - `--stdout` prints the code and writes nothing;  without it, the code goes to the build folder (below, "The compiler").
@@ -343,14 +359,22 @@ export function testCardSetup() {
 cp -R ~/www/spell/spell-lang/tests/spaces/@spell/test/cards try/
 cd try
 spell test ./cards
-# ✓ Compiling @local/try/cards  2 warnings
-#     cards/Deck.spell:14:20  warning:  Say what "card-names" holds, e.g. "set card-names to a new list of text"
-#     cards/Pile.spell:15:20  warning:  A pile never says it has a name:  declare it, e.g. "a pile has a name as text"
-# ✓ test card setup  (22 checks)
-# ✓ test deck creation  (6 checks)
-#
-# 2 passed
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Compiling @local/try/cards  2 warnings
+    cards/Deck.spell:14:20  warning:  Say what "card-names" holds, e.g. "set card-names to a new list of text"
+    cards/Pile.spell:15:20  warning:  A pile never says it has a name:  declare it, e.g. "a pile has a name as text"
+✓ test card setup  (22 checks)
+✓ test deck creation  (6 checks)
+
+2 passed
+```
+
+</details>
 
 - A warning is something the program should say;  it never stops a line compiling, and never counts as an error.
 

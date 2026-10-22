@@ -250,12 +250,20 @@ The command line reads the same registrations back:
 
 ```sh
 spell explain trigger
-# trigger  (trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?
-# e.g. trigger card-click
-#
-# trigger  (trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?
-# e.g. fire event card click with card = 1
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+trigger  (trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?
+e.g. trigger card-click
+
+trigger  (trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?
+e.g. fire event card click with card = 1
+```
+
+</details>
 
 ### The kinds of rule
 
@@ -294,19 +302,27 @@ A parse hands back a tree you can read, not a yes or a no.
 
 ```sh
 spell parse "fire event card click with card = 1"
-# statement › trigger  fire event card click with card = 1
-#   Keywords  fire event
-#   eventName: event_words  card click
-#   Sequence  with card = 1
-#     Keyword  with
-#     props: object_literal_properties  card = 1
-#       object_literal_property  card = 1
-#         property › member_words  card
-#         Symbol  =
-#         value: operand › number  1
-#
-# trigger("card-click", { card: 1 })
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+statement › trigger  fire event card click with card = 1
+  Keywords  fire event
+  eventName: event_words  card click
+  Sequence  with card = 1
+    Keyword  with
+    props: object_literal_properties  card = 1
+      object_literal_property  card = 1
+        property › member_words  card
+        Symbol  =
+        value: operand › number  1
+
+trigger("card-click", { card: 1 })
+```
+
+</details>
 
 - Each line is a match:  its rule, then the text it took.
   `statement › trigger` is the `trigger` rule, the one the `statement` choice kept.
@@ -350,15 +366,23 @@ so the lines around it still compile:
 
 ```sh
 spell parse $'print 1\nflibber the jabberwock\nprint 2'
-# ...
-#   line  flibber the jabberwock
-#     parse_error  flibber the jabberwock
-# ...
-#
-# core.console.log(1)
-# /* PARSE ERROR: Don't understand "flibber the jabberwock" */
-# core.console.log(2)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+...
+  line  flibber the jabberwock
+    parse_error  flibber the jabberwock
+...
+
+core.console.log(1)
+/* PARSE ERROR: Don't understand "flibber the jabberwock" */
+core.console.log(2)
+```
+
+</details>
 
 ### How a choice is settled
 
@@ -399,26 +423,42 @@ On its own, a line about a card face up means nothing:
 
 ```sh
 spell parse "print the card is face up"
-# Doesn't parse as statement or expression
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+Doesn't parse as statement or expression
+```
+
+</details>
 
 Three lines earlier, it does.
 Here's the whole program in one parse, and the end of what it prints:
 
 ```sh
 spell parse $'a card is a thing\na card has a direction as either up or down\na card "is face up" if its direction is up\nset the card to a new card\nprint the card is face up'
-# ...
-#   /*! SPELL: DECLARES {
-#     syntax: "{operator:is_or_is_not} face up", output: "is_face_up", rule: "method_postfix",
-#     of: "Card", kind: "method", name: '"is face up"', returns: "choice",
-#   } */
-#   get isFaceUp() {
-#     return this.direction == "up"
-#   }
-# }
-# export const card = new Card()
-# core.console.log(card.isFaceUp)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+...
+  /*! SPELL: DECLARES {
+    syntax: "{operator:is_or_is_not} face up", output: "is_face_up", rule: "method_postfix",
+    of: "Card", kind: "method", name: '"is face up"', returns: "choice",
+  } */
+  get isFaceUp() {
+    return this.direction == "up"
+  }
+}
+export const card = new Card()
+core.console.log(card.isFaceUp)
+```
+
+</details>
 
 - The third line's quoted phrase became a rule while it parsed, and the comment above `isFaceUp` shows its syntax,
   written by Spell in Rulex:  `{operator:is_or_is_not} face up`.
@@ -467,15 +507,23 @@ Our line's:
 
 ```sh
 spell parse --tree "fire event card click with card = 1"
-# Core trigger
-#   args: Text "card-click"
-#   args: Object literal  Object
-#     properties: Object literal property
-#       property: Name card
-#       value: Number 1
-#
-# trigger("card-click", { card: 1 })
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+Core trigger
+  args: Text "card-click"
+  args: Object literal  Object
+    properties: Object literal property
+      property: Name card
+      value: Number 1
+
+trigger("card-click", { card: 1 })
+```
+
+</details>
 
 - `card click` is already `"card-click"`:  the rule decided the event's name, so no writer has to.
 - 84 classes of node, from `ASTNode` down, in [AST.ts](src/parser/ast/AST.ts).

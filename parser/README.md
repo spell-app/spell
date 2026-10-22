@@ -265,21 +265,29 @@ Then work in a folder of your own, outside the checkout.
 
 ```sh
 spell parse "print 1 + 2 * 3"
-# statement › print  print 1 + 2 * 3
-#   Keyword  print
-#   expressions: Repeat  1 + 2 * 3
-#     expression  1 + 2 * 3
-#       lhs: operand › number  1
-#       Repeat  + 2 * 3
-#         expression_suffix › plus  + 2
-#           operator › Symbol  +
-#           expression: operand › number  2
-#         expression_suffix › times  * 3
-#           operator › Symbol  *
-#           expression: operand › number  3
-#
-# core.console.log(1 + 2 * 3)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+statement › print  print 1 + 2 * 3
+  Keyword  print
+  expressions: Repeat  1 + 2 * 3
+    expression  1 + 2 * 3
+      lhs: operand › number  1
+      Repeat  + 2 * 3
+        expression_suffix › plus  + 2
+          operator › Symbol  +
+          expression: operand › number  2
+        expression_suffix › times  * 3
+          operator › Symbol  *
+          expression: operand › number  3
+
+core.console.log(1 + 2 * 3)
+```
+
+</details>
 
 That's the match tree, a rule a line, each inside the one that holds it
 ([how to read one](README-parser.md#3-matches)).
@@ -288,27 +296,43 @@ Look at `+ 2` and `* 3`:  two suffixes side by side, because precedence is settl
 
 ```sh
 spell parse --tree "print 1 + 2 * 3"
-# Print
-#   args: plus
-#     lhs: Number 1
-#     rhs: times
-#       lhs: Number 2
-#       rhs: Number 3
-#
-# core.console.log(1 + 2 * 3)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+Print
+  args: plus
+    lhs: Number 1
+    rhs: times
+      lhs: Number 2
+      rhs: Number 3
+
+core.console.log(1 + 2 * 3)
+```
+
+</details>
 
 **What a word starts:**  `if` starts two rules.
 FizzBuzz uses the first;  the second reads a value backwards, the way people say it.
 
 ```sh
 spell explain if
-# if  if {condition:expression} (then|:)? {statement_body}?
-# e.g. if a
-#
-# backwards_if  if {operator:expression} (else|otherwise) {expression}
-# e.g. print 1 if bar else 2
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+if  if {condition:expression} (then|:)? {statement_body}?
+e.g. if a
+
+backwards_if  if {operator:expression} (else|otherwise) {expression}
+e.g. print 1 if bar else 2
+```
+
+</details>
 
 **A whole program, two ways.**
 Copy FizzBuzz out of the frozen test projects first:  nobody edits those.
@@ -317,18 +341,37 @@ Copy FizzBuzz out of the frozen test projects first:  nobody edits those.
 mkdir -p try
 cp -R ~/www/spell/spell-lang/tests/spaces/@spell/test/fizzbuzz try/fizzbuzz
 spell run try/fizzbuzz
-# ✓ Compiling @local/try/fizzbuzz
-# 1
-# 2
-# 3 fizz
-# 4
-# 5 buzz
-# ...
-# 15 fizzbuzz
-# ...
-diff <(spell run try/fizzbuzz 2>/dev/null) <(spell run try/fizzbuzz --target py 2>/dev/null) && echo same
-# same
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Compiling @local/try/fizzbuzz
+1
+2
+3 fizz
+4
+5 buzz
+...
+15 fizzbuzz
+...
+```
+
+</details>
+
+```sh
+diff <(spell run try/fizzbuzz 2>/dev/null) <(spell run try/fizzbuzz --target py 2>/dev/null) && echo same
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+same
+```
+
+</details>
 
 - `--target py` runs the Python instead, and needs Python 3.12 or later and uv
   ([the Python half](README-targets.md#the-python-half)).
@@ -342,9 +385,17 @@ In `try/fizzbuzz/FizzBuzz.spell`, change the fizzbuzz line's `is an integer` to 
 
 ```sh
 spell lint try/fizzbuzz
-# ✗ @local/try/fizzbuzz  1 error
-# try/fizzbuzz/FizzBuzz.spell:4:31  Don't understand "is a whole number: print the number, "fizzbuzz""
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✗ @local/try/fizzbuzz  1 error
+try/fizzbuzz/FizzBuzz.spell:4:31  Don't understand "is a whole number: print the number, "fizzbuzz""
+```
+
+</details>
 
 To you, the two say the same thing.
 Spell has no rule for "a whole number", so it names the line and column where it stopped understanding, and exits 1.

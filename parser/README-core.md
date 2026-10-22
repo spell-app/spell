@@ -10,19 +10,37 @@ print a random item of the suits
 
 ```sh
 spell run try/deal --seed 7
-# ✓ Compiling @local/try/deal
-# clubs
-# spades
-# diamonds
-# clubs
-
-spell run try/deal --seed 7 --target py
-# ✓ Compiling @local/try/deal
-# clubs
-# spades
-# diamonds
-# clubs
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Compiling @local/try/deal
+clubs
+spades
+diamonds
+clubs
+```
+
+</details>
+
+```sh
+spell run try/deal --seed 7 --target py
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Compiling @local/try/deal
+clubs
+spades
+diamonds
+clubs
+```
+
+</details>
 
 _Four random draws, run as JavaScript and then as Python:  the same four suits._
 
@@ -59,8 +77,16 @@ A folder, `try/deal/`, with two files:
 
 ```sh
 spell lint try/deal
-# ✓ @local/try/deal
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ @local/try/deal
+```
+
+</details>
 
 - Without `--seed`, each run draws differently.
 - A seed is a whole number from 1 to 2147483646 (`spell help run`).

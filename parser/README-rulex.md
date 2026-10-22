@@ -16,16 +16,24 @@ Hand it a line, and each part of the syntax shows up in the match:
 
 ```sh
 spell parse 'print warning "low on cards", 3'
-# statement › print  print warning "low on cards", 3
-#   Keyword  print
-#   operator: print_kind › Keyword  warning
-#   expressions: Repeat  "low on cards", 3
-#     expression: operand › text  "low on cards"
-#     Symbol  ,
-#     expression: operand › number  3
-#
-# core.console.warn("low on cards", 3)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+statement › print  print warning "low on cards", 3
+  Keyword  print
+  operator: print_kind › Keyword  warning
+  expressions: Repeat  "low on cards", 3
+    expression: operand › text  "low on cards"
+    Symbol  ,
+    expression: operand › number  3
+
+core.console.warn("low on cards", 3)
+```
+
+</details>
 
 - The optional `{print_kind}` matched `warning`, and kept it as `operator`.
 - The list, `[ ... ]`, took two expressions with a comma between, and kept them as `expressions`.
@@ -165,9 +173,17 @@ Any rule's syntax, with an example, is a command away:
 
 ```sh
 spell explain print
-# print  print {operator:print_kind}? [expressions:{expression} ,]
-# e.g. print "Yo!"
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+print  print {operator:print_kind}? [expressions:{expression} ,]
+e.g. print "Yo!"
+```
+
+</details>
 
 `spell explain for` lists two rules, `for each card in deck` and `for each number from 1 to 10`:
 a word names every rule whose syntax starts with it.
@@ -226,10 +242,18 @@ same `it "is a (rank)"` line, and Spell writes it the same syntax:
 
 ```sh
 spell parse --in @spell/examples/outline-solitaire $'set the card to a new card\nprint the card is a queen'
-# ...
-# export const card = new Card()
-# core.console.log(card.isARank("queen"))
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+...
+export const card = new Card()
+core.console.log(card.isARank("queen"))
+```
+
+</details>
 
 - A project writes its phrases' syntaxes down, so another project can register the same rules from data:
   that example's are in

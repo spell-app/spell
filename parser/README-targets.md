@@ -252,16 +252,24 @@ Compile a program as a library and you see what's left:
 
 ```sh
 spell compile @spell/examples/fizzbuzz --target ts/lib --stdout
-# ✓ @spell/examples/fizzbuzz
-# import { core } from "spell-lang/core/model"
-#
-# /** File FizzBuzz.spell */
-# export function playFizzbuzz() {
-#   core.getRange(1, 100).forEach((number) => {
-#     ...
-#   })
-# }
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ @spell/examples/fizzbuzz
+import { core } from "spell-lang/core/model"
+
+/** File FizzBuzz.spell */
+export function playFizzbuzz() {
+  core.getRange(1, 100).forEach((number) => {
+    ...
+  })
+}
+```
+
+</details>
 
 The JavaScript starts with a heading and ends by calling `playFizzbuzz()`;  the library does neither,
 so importing it plays nothing.
@@ -298,16 +306,24 @@ Here's the Solitaire example's card, testing itself in Python:
 
 ```sh
 spell run @spell/examples/drawable-solitaire --target py --no-browser
-# ✓ Compiling @spell/examples/drawable-solitaire  2 warnings
-# ...
-# ✅ test card setup
-#   ▶️ Executing   `the card is a new card whose rank is queen, suit is spades and direction is up`
-#   ✅ As expected `the rank of the card` is `queen`
-#   ✅ As expected `the suit of the card` is `spades`
-#   ✅ As expected `the name of the card` is `"queen-of-spades"`
-#   ✅ As expected `the color of the card` is `black`
-# ...
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Compiling @spell/examples/drawable-solitaire  2 warnings
+...
+✅ test card setup
+  ▶️ Executing   `the card is a new card whose rank is queen, suit is spades and direction is up`
+  ✅ As expected `the rank of the card` is `queen`
+  ✅ As expected `the suit of the card` is `spades`
+  ✅ As expected `the name of the card` is `"queen-of-spades"`
+  ✅ As expected `the color of the card` is `black`
+...
+```
+
+</details>
 
 Those tests are the card's own, written in English beside it.
 Run it again without `--target py`, and diff what the two print:  all 40 lines are the same.
