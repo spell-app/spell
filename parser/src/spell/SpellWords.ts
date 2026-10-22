@@ -132,11 +132,19 @@ export class SpellWords {
   }
 
   /**
-   * Is `file` a words file of project `projectName`, in any language -- `Solitaire.en.js`, `Solitaire.pt-BR.js`?
+   * Is `file` named as a words file of project `projectName`, in any language -- `Solitaire.en.js`, `Solitaire.pt-BR.js`?
+   * - No `projectName`:  of ANY project, e.g. `calculator.en.js` left in a copy of it named `calc2`.
+   *   - A name alone can't tell that one from a helper, `socket.io.js`:  `isWordsScript()` reads its text.
    * - NEVER one of a project's own files:  the server leaves it out of the manifest, as its compiled output.
    */
-  static isWordsFile(file: string, projectName: string): boolean {
+  static isWordsFile(file: string, projectName?: string): boolean {
+    if (projectName === undefined) return WORDS_FILE.test(file)
     return file.startsWith(`${projectName}.`) && LANGUAGE_JS.test(file.slice(projectName.length + 1))
+  }
+
+  /** Is `text` a words file as `script()` writes it, of any project?  Its first line says so. */
+  static isWordsScript(text: string): boolean {
+    return text.startsWith(`/*! ${WORDS_MARKER} `)
   }
 
   /**
@@ -168,6 +176,9 @@ const WORDS_LITERAL = /export const words = (\{[\s\S]*\})\s*$/
 
 /** End of a words file's name after its project's, e.g. `en.js`, `pt-BR.js`. */
 const LANGUAGE_JS = /^[a-z]{2}(-[A-Za-z]{2,4})?\.js$/
+
+/** Any project's words file's name, e.g. `calculator.en.js`, `Solitario.pt-BR.js`. */
+const WORDS_FILE = /^[^.]+\.[a-z]{2}(-[A-Za-z]{2,4})?\.js$/
 
 /** Spell's `name` as `writer` writes it;  as is if it isn't an identifier, which the writer quotes. */
 function compiledName(writer: SpellWordsWriter, name: string): string {

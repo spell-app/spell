@@ -1198,11 +1198,16 @@ A kind that says so is saved in a file of its own.
     - a project's `<Project>.spell.js`, and a fixture's `<Project>.snapshot.js`
     - its scope pack, `<Project>.scopes.js`
     - its words, `<Project>.en.js`
+      - and ANY project's, whatever its name:  `calculator.en.js`, left in a copy of the project named `calc2`
+      - Known by its name and its first line (`SP.SpellWords.isWordsScript()`), so a helper like `socket.io.js` lists.
+      - Left on disk, never deleted:  compiling writes the new name's.
     - a Python program's page file, `<Project>.elements.spell.js`
     - the same files by their names before epic `people-and-orgs` P11, e.g. `<Project>.compiled.js`:
       an old copy left in a checkout
   - Else the index would add them to the project file.
   - The list:  `GENERATED_SUFFIXES`, beside `isManifestFile()`.
+- A file's kind is the END of its name (`SpellProject.getFileForPath()`):
+  `helpers.min.js` is javascript, and only what ends in none of `.css`, `.js`, `.jsx`, `.editor.html` is parsed as spell.
 - What spell BUILDS for a project goes in its build folder, not beside its source (epic `people-and-orgs` P11).
   - That's `build/` at spell-app's root, never committed, each checkout its own.
     It mirrors the project's path:

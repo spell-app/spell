@@ -134,6 +134,18 @@ describe("SpellWords", () => {
     expect(SP.SpellWords.isWordsFile("helpers.js", "Solitaire")).toBe(false)
   })
 
+  test("with no project named:  ANY project's words file, by its name, then by its first line", () => {
+    expect(SP.SpellWords.isWordsFile("calculator.en.js")).toBe(true)
+    expect(SP.SpellWords.isWordsFile("Solitario.pt-BR.js")).toBe(true)
+    expect(SP.SpellWords.isWordsFile("Solitaire.spell.js")).toBe(false)
+    expect(SP.SpellWords.isWordsFile("Solitaire.en.snapshot.js")).toBe(false)
+    expect(SP.SpellWords.isWordsFile("helpers.js")).toBe(false)
+    // named like one:  only its text tells
+    expect(SP.SpellWords.isWordsFile("socket.io.js")).toBe(true)
+    expect(SP.SpellWords.isWordsScript(SP.SpellWords.script({ lang: "en", types: {} }, "calculator"))).toBe(true)
+    expect(SP.SpellWords.isWordsScript("export const io = 1\n")).toBe(false)
+  })
+
   test("Solitaire's:  every member of its types, by the names its javascript uses", () => {
     const words = SP.SpellWords.read(fixtureWords("solitaire"))!
     expect(Object.keys(words.types)).toEqual([
