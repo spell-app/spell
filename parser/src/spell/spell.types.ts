@@ -119,11 +119,17 @@ export const SCOPES_JS_SUFFIX = ".scopes.js"
 /**
  * End of a project's words file's name, in English, e.g. `Solitaire.en.js`:
  * spell's wording of each member of its types, by the name its compiled code uses.
+ * - Another language's ends in its own code, e.g. `Solitario.es.js`:  `wordsSuffixFor()`.
  * - See `SpellProject.wordsFile`, `SP.SpellWords`.
  * - NEVER one of a project's own files:
  *   the server leaves any language's out of the manifest (`SP.SpellWords.isWordsFile()`).
  */
 export const WORDS_JS_SUFFIX = ".en.js"
+
+/** End of the words file's name for a project written in language `lang`, e.g. `.es.js`. */
+export function wordsSuffixFor(lang = "en"): string {
+  return `.${lang}.js`
+}
 
 /**
  * Start of the ES module specifier for another project's compiled JS, e.g. `@spell/project/@spell/library/cards`.
@@ -149,6 +155,12 @@ export type ProjectManifestJSON5 = {
   targets?: string[]
   /** Where its lists start counting, from its project file:  `1` (the default) or `0` -- see `P.WriterOptions`. */
   listsStartAt?: 0 | 1
+  /**
+   * The human language its spell is written in, from its project file, e.g. `es` -- English (`en`) when missing.
+   * - One language per project (epic `spanish` Q1):  its parser, words file and messages follow it.
+   * - See `SpellProject.language`, `SP.Language`.
+   */
+  language?: string
   /**
    * Where the server puts what compiling builds, e.g. `Solitaire.spell.py`, inside the checkout's `build/`.
    * - e.g. `spaces/@spell/examples/solitaire`, for a project in spell-app's built-ins (epic `people-and-orgs` J33)
@@ -484,6 +496,11 @@ export type SpellDeclarationsData = {
   version?: string
   /** Semver of the compiler which wrote these -- see `SPELL_VERSION`. */
   spellVersion: string
+  /**
+   * The human language the project is written in, e.g. `es`;  missing for English, the default.
+   * - So a runner finds its words file (`Solitario.es.js`) before it has any other word of the project.
+   */
+  language?: string
   /**
    * Names this project offers importers:  its types, then its top-level functions.
    * - Each an `export` of its compiled JS.

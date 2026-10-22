@@ -34,6 +34,7 @@ export class SpellWords {
    * - `writer`:  whose names the compiled code uses -- javascript's by default, as that's what runs.
    */
   static of(declarations: SP.SpellDeclarationsData, writer: SpellWordsWriter = P.JSWriter.instance): SP.SpellWordsData {
+    const lang = declarations.language ?? SpellWords.LANG
     const types: Record<string, Record<string, string>> = {}
     for (const statement of declarations.statements) {
       if (statement.type) types[statement.type] ??= {}
@@ -45,7 +46,7 @@ export class SpellWords {
     for (const [type, members] of Object.entries(types)) {
       if (!Object.keys(members).length) delete types[type]
     }
-    return { lang: SpellWords.LANG, types }
+    return { lang, types }
   }
 
   /**
@@ -137,7 +138,7 @@ export class SpellWords {
     return `${JSON.stringify(words, null, 2)}\n`
   }
 
-  /** Language the compiler writes words in:  English, spell's own. */
+  /** Language a project's words are in when its declarations name none:  English, the default. */
   static LANG = "en"
 }
 

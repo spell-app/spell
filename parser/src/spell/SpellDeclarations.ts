@@ -35,7 +35,7 @@ export class SpellDeclarations {
   static split(
     compiled: string,
     scope: P.ProjectScope,
-    { version, exports }: { version?: string; exports?: string[] } = {}
+    { version, exports, language }: { version?: string; exports?: string[]; language?: string } = {}
   ): { code: string; declarations: SP.SpellDeclarationsData } {
     const code: string[] = []
     const statements: SP.SpellDeclaration[] = []
@@ -59,6 +59,8 @@ export class SpellDeclarations {
     const declarations = definedOnly({
       version,
       spellVersion: SP.SPELL_VERSION,
+      // English, the default, says nothing:  every English project's declarations stay as they were
+      language: language === "en" ? undefined : language,
       provides: SpellDeclarations.provides(scope, exports),
       statements,
       codeLines
