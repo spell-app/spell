@@ -2,6 +2,7 @@ import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
+import type { UILabelAttributes } from "spell-ui/jsx"
 
 import { SHOT_MAX_BYTES, type ReviewClient, type TestResult, type TestsEntry } from "spell-epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel
@@ -288,7 +289,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           part={this.partForName("progress")}
           size="tiny"
           color="green"
-          value={answered()}
+          value={String(answered())}
           total={total() || 1}
           aria-label={this.translationForKey("answered", { count: answered(), total: total() })}
           title={this.translationForKey("answered", { count: answered(), total: total() })}
@@ -990,7 +991,7 @@ type Loadable = Element & { load?(): Promise<void> }
 const PAGE = "epic-page"
 
 /** A test's id chip, in its item's state's colour (plan-doc.md, "Colours"). */
-const STATE_COLORS: Record<string, string> = {
+const STATE_COLORS: Record<string, UILabelAttributes["color"]> = {
   attention: "red",
   replied: "orange",
   progress: "blue",

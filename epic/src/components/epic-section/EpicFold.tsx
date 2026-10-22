@@ -347,7 +347,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
           fold-icon="end"
           collapsed={!this.isOpen || this.isVeiled ? "" : undefined}
           loading={this.body.isBusy ? "" : undefined}
-          offset={String(this.offset)}
+          offset={this.offset}
           badge={pieces.badge?.() || undefined}
         >
           <Show when={pieces.icon}>

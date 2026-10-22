@@ -7,8 +7,6 @@
  *   it has upgraded.
  */
 
-import type { JSX } from "@solidjs/web"
-
 import { readEpicDate, epicGroupFor, type EpicGroupName } from "spell-epic/list/EpicCards"
 import { epicStateFor, type EpicFacts } from "spell-epic/list/EpicState"
 
@@ -191,20 +189,5 @@ export function save(key: string, value: string) {
     localStorage.setItem(key, value)
   } catch {
     // private mode:  the choice lasts the visit
-  }
-}
-
-/** Loose attributes of a Spell UI tag drawn in JSX:  HTML attributes, plus any attribute. */
-type UIJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
-
-declare module "@solidjs/web/types/jsx.js" {
-  namespace JSX {
-    interface IntrinsicElements {
-      // the Spell UI card a `<epic-card>` draws
-      "ui-card": UIJSXAttributes
-      "ui-content": UIJSXAttributes
-      "ui-description": UIJSXAttributes
-      "ui-meta": UIJSXAttributes
-    }
   }
 }

@@ -4,7 +4,7 @@
  * - Data and types only:  nothing here runs.
  */
 import type { TestResult } from "spell-epic/review"
-import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 ////////////////
 // ## The answers
@@ -97,10 +97,8 @@ export type TestFields = {
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      "epic-test-run": UIJSXAttributes
-      "epic-text-box": UIJSXAttributes
-      "ui-progress": UIJSXAttributes
-      "ui-modal": UIJSXAttributes
+      "epic-test-run": EpicJSXAttributes
+      "epic-text-box": EpicJSXAttributes
     }
   }
 }

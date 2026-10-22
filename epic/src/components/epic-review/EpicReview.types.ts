@@ -4,7 +4,7 @@
  * - Data only:  nothing here runs.  The vocabularies of the families that draw `<epic-review>` read it too.
  */
 
-import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 import type { epicReviewVocabulary } from "./EpicReview.en"
 
@@ -446,10 +446,7 @@ export const REVIEW_TEXTS = [
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      "epic-review": UIJSXAttributes
-      "ui-button": UIJSXAttributes
-      "ui-buttons": UIJSXAttributes
-      "ui-icon": UIJSXAttributes
+      "epic-review": EpicJSXAttributes
     }
   }
 }

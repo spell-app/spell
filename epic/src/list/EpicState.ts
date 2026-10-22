@@ -59,11 +59,18 @@ export type EpicFacts = {
 export type EpicState = {
   name: EpicStateName
   words: string
-  color: string
+  color: EpicStateColor
   icon: string
   tip: string
   count: string
 }
+
+/**
+ * The Spell UI hues the states are drawn in (`LOOKS`).
+ * - Named here, not read from Spell UI (`spell-ui/jsx`):  this file has no imports;
+ *   a `<ui-icon color>` checks them all the same.
+ */
+export type EpicStateColor = "blue" | "red" | "grey" | "green"
 
 /** Days without an update (and no session running) after which an epic with phases left is `paused`. */
 export const PAUSED_DAYS = 3
@@ -75,7 +82,7 @@ export const URGENT_STATES = ["attention", "replied"] as const
 export const URGENT_SELECTOR = URGENT_STATES.map((state) => `epic-item[id][state="${state}"]`).join(", ")
 
 /** How each state is drawn:  words, colour, icon. */
-const LOOKS: Record<EpicStateName, { words: string; color: string; icon: string }> = {
+const LOOKS: Record<EpicStateName, { words: string; color: EpicStateColor; icon: string }> = {
   progress: { words: "in progress", color: "blue", icon: "circle half stroke" },
   errors: { words: "errors", color: "red", icon: "circle exclamation" },
   paused: { words: "paused", color: "grey", icon: "circle pause" },

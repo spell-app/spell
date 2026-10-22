@@ -1,12 +1,15 @@
 /**
  * Loose types and constants of the `epic-page` family;
- * and the JSX types of the Spell UI tags every `<epic-*>` element draws in its shadow root.
+ * and the JSX types of the tags every `<epic-*>` element draws in its shadow root.
+ * - Spell UI's `<ui-*>` tags:  its exact types, generated (`spell-ui/jsx`), imported here.
+ * - The pack's own `<epic-*>` tags:  loose (`EpicJSXAttributes`), each family declaring the ones it draws.
  * - Data only:  nothing here runs.
  */
 
 import type { JSX } from "@solidjs/web"
 
 import type { E } from "spell-kit/element"
+import type {} from "spell-ui/jsx"
 
 import type { epicPageVocabulary } from "./EpicPage.en"
 
@@ -195,22 +198,19 @@ export type HeaderMarks = {
 export const PROMPT = 'epic-overview > [slot="prompt"]'
 export const ICON = "icon"
 
-/** Loose attributes of a Spell UI tag drawn in JSX:  HTML attributes, plus any attribute. */
-export type UIJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+/**
+ * Loose attributes of an `<epic-*>` tag drawn in JSX:  HTML attributes, plus any attribute.
+ * - Loose until the pack generates exact types, as Spell UI does (`spell-ui/jsx`).
+ */
+export type EpicJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
 
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      "ui-section": UIJSXAttributes
-      "ui-label": UIJSXAttributes
-      "ui-message": UIJSXAttributes
-      "ui-code": UIJSXAttributes
-      "ui-breadcrumb": UIJSXAttributes
-      "ui-breadcrumb-section": UIJSXAttributes
-      // the pack's own families it draws in its shadow root
-      "epic-new-item": UIJSXAttributes
-      "epic-agents": UIJSXAttributes
-      "epic-test-run": UIJSXAttributes
+      // the pack's own families it draws in its shadow root (Spell UI's:  `spell-ui/jsx`)
+      "epic-new-item": EpicJSXAttributes
+      "epic-agents": EpicJSXAttributes
+      "epic-test-run": EpicJSXAttributes
     }
   }
 }
