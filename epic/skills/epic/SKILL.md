@@ -275,8 +275,9 @@ Staying in this window (step 0):  skip steps 4 and 6.
       - Its goal names the text pass ("6. Doc Review"):
         - the repo's text-rewriting skill, if it has one (spell-app's `/fussbudget`):  the branch's text and the epic
           page, rewritten
-        - the epic's guide, written from the cleaned epic page to the same rules
-        - `epic pages fuss --branch` last:  its misses fixed, or listed for Owen
+        - the epic's guide, written from the cleaned epic page in the readme voice
+        - the READMEs the epic made untrue, in every repo it touched, brought up to date in the same voice
+        - `epic pages fuss --branch` and the repo's README checker last:  their misses fixed, or listed for Owen
    3. Overview:  the total estimate, then numbered sections (structure, code, flows):
       what will become guides
    4. Caveats, issues, todos, decisions (what + why), open questions (the doc's ids:  `Q1` ...)
@@ -430,7 +431,8 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      - Standing:  `<epic-page standing>`, and `epic summary --json`'s `standing` (epic `epic-workflow`).
      - Its own short doc pass comes first, in place of one Doc Review at the end:
        the repo's text-rewriting skill (spell-app's `/fussbudget`) on the files the phase changed,
-       and the guide brought in line, before the commit.
+       and the guide and the READMEs the phase made untrue brought in line, in the readme voice
+       ("6. Doc Review"), before the commit.
      - Then, no asking (the standing epic is the ask):
        1. `main` moved (`git log --oneline HEAD..main` not empty):  `epic worktree merge-main`.
           - A multi-repo top (`epic config repos` prints names;  [the isolate skill](../isolate/SKILL.md), "A
@@ -479,21 +481,41 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
        right after its pruning.
      - Both rewrite in place, uncommitted:
        the branch's diff waits for Owen in Source Control, before the phase's commit.
-  2. Then the epic's guide (below), written from the CLEANED epic page, to the same rules:
-     the repo's writing rules, from its house style (spell-app's:  WWOD §6, and the content folder's
+  2. Then the epic's guide (below), written from the CLEANED epic page in the README VOICE
+     ([readme.md](${CLAUDE_PLUGIN_ROOT}/voices/readme.md), read whole first:  its "AN EPIC'S GUIDE" shape),
+     plus the repo's own writing rules, which win where they differ (Spell's:  WWOD §6, and the kit's
      `agents/wwod/writing.md`).
-  3. Last, the checker, on both:
+  3. Then the READMEs (below):  every README the epic made untrue, rewritten in the same voice.
+  4. Last, the checkers:
      - `epic pages fuss --branch`
      - `epic pages fuss <the epic's guide>`:  it's shared content, not in the branch's diff
-     - Its misses fixed, or listed for Owen in the reply.
+     - the repo's README checker, if it has one (Spell's:  `yarn readme:check` at the kit's root)
+     - Their misses fixed, or listed for Owen in the reply.
 - Turn it into the epic's guide:  `epic pages create durable <page> --title "..."` (fixes asset paths for the depth).
   - One page:  `guides/<name>.html`.
   - Several files (pages, experiments):  `guides/<name>/<name>.html`.
     Shared content too:  committed for you, like the epic page.
-  - From the epic page:  Overview -> the body;  decisions -> a "Why" section;  open caveats -> "Limits".
+  - From the epic page, in the voice's guide shape:
+    - Overview and the phases' Done lists -> the hook, what it is, how to use it, how it works
+    - decisions -> "Why it's built this way", each with the option it beat
+    - open caveats -> "Limits"
+    - phase and item ids -> nowhere in the body;  one folded "History" note at the end, if any
   - Finish as [epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md) says, "Finishing a page".
   - Then `epic pages index`.
     The index is shared too:  `epic` keeps the epic's own card current from any checkout.
+- The READMEs:  bring every README the epic made untrue up to date, in the readme voice.
+  - Which:  in every repo the epic touched (the kit and each child repo it committed to), every `README.md` and
+    `README-*.md` that names something the epic added, changed, renamed or removed:
+    - the README files its commits changed (`epic docs <name>`, its `wrote` list)
+    - and, by grep, every page naming one of its commands, flags, files, folders, settings or elements, old name or new
+  - Each one:  the facts first (what's binding:  the `/docs-check` skill's rules), then the voice:
+    the sections that changed are written as the voice says (hook, model, edges, real output), and a page index or
+    table that lists the changed thing is brought along.
+    A section the epic didn't touch is left as it is.
+  - A README the epic made necessary (a new major folder) gets a new page in the voice, and a row in its repo's index
+    of pages.
+  - Big:  more than 6 pages, or several repos:  fan out as `/docs-check` does ("Fanning out"), one agent per repo.
+  - Tracked files:  the diff joins the phase's commit, in each repo.
 - The epic page stays in `epics/` as the record:  every phase done.
 - Changelog, if the repo keeps one (its `AGENTS.md` says):  write the epic's entry straight into it.
   - The shared changelog is the content folder's `guides/changelog.html`:  `epic docs <name>` looks for the entry there.

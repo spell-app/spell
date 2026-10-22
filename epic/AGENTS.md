@@ -28,6 +28,15 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
   - They link each other by relative path (`../isolate/SKILL.md`).
   - They reach the plugin's own files through `${CLAUDE_PLUGIN_ROOT}`.
+- Voices:  how a kind of people-facing page is written, one file each in [the voices folder](voices/)
+  (epic `readme` P12).
+  - `readme` ([readme.md](voices/readme.md)):  READMEs, an epic's guide, reference pages.
+  - `code`:  docstrings, comments, `AGENTS.md` files, epic pages:  each repo's own house style (Spell's:  WWOD §6),
+    so spell-epic ships no file for it.
+  - 🌱 Epic `readme` P13 makes them configurable:  a repo's settings name each voice's file and each kind of page's
+    voice, and the skills ask for a voice by name.
+  - The skills that write such pages name the voice they use:  the epic skill's "6. Doc Review", `/docs-check`.
+  - A repo's own house style adds its specifics on top, and wins where they disagree.
 - Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it.
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
