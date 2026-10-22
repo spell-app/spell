@@ -1,16 +1,17 @@
 import { defineConfig } from "vite-plus"
 
-import { fmtConfig, rootLint } from "spell-kit/toolchain/lint"
+import { fmtConfig, packageLint } from "spell-kit/toolchain/lint"
+
+/** Not linted or formatted by oxlint / oxfmt:  Python (ruff's) and the frozen test projects (spell's output). */
+const NOT_OURS = ["src/py/core/**", "tests/py/core/**", "tests/spaces/**"]
 
 /**
- * spell-lang's root Vite+ config:  only the `lint` / `fmt` blocks (what `vp check`, `vp lint`, `vp fmt` and the Oxc
- * editor extension read here).
- * - The settings live in the toolchain package (`spell-kit/toolchain/lint`), which every package's `vite.config.ts`
- *   spreads too.
- * - NOTE: `vp check` and the editor (`oxc.disableNestedConfig`) read THIS block only, even in a package.
- * - Tests:  each package's own `vitest.config.ts` (`yarn test` here runs every package's).
+ * spell-lang's Vite+ config:  the `lint` / `fmt` blocks (what `vp lint`, `vp fmt` and the Oxc editor extension read),
+ * from the toolchain's settings (`spell-kit/toolchain/lint`).
+ * - One block for the whole repo, `src/`, `tests/` and `scripts/`.
+ * - Tests:  `vitest.config.ts` beside this.
  */
 export default defineConfig({
-  fmt: fmtConfig,
-  lint: rootLint()
+  fmt: { ...fmtConfig, ignorePatterns: [...fmtConfig.ignorePatterns, ...NOT_OURS] },
+  lint: packageLint({ react: true, ignorePatterns: ["build", "dist", ".cache", "docs", ...NOT_OURS] })
 })

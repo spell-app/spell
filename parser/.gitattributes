@@ -9,9 +9,9 @@
 # Vitest snapshots:  regenerated with `vp test run --update`, then checked against both sides
 **/__snapshots__/*.snap                                        linguist-generated merge=binary
 
-# spell:  the spell syntax table, every rule's example in each writer (`yarn gen:syntax`), drawn by the spell syntax
-# guide
-spell/spellSyntax.json                                        linguist-generated merge=binary
+# spell:  the spell syntax table, every rule's example in each writer (`yarn spell:gen:syntax`), drawn by the spell
+# syntax guide
+src/spell/spellSyntax.json                                    linguist-generated merge=binary
 
-# spell:  the core's method list (`yarn gen:declarations` in core)
-core/core.declarations.json5                                  linguist-generated
+# core:  the core's method list (`yarn core:gen:declarations`)
+src/core/core.declarations.json5                              linguist-generated
