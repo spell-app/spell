@@ -141,10 +141,12 @@
  *     else `spell-app` (the whole repo's window)
  *   - its look:  `--pkg`'s window's when named, else this session's window's
  * - `close <name>`:  close that window, delete the file
- * - `launch <name> [--pkg <pkg>] [--color <look>] [--prompt <text>]`:
+ * - `launch <name> [--pkg <pkg>] [--color <look>] [--prompt <text>] [--move]`:
  *   wake epic `<name>`, `<text>` typed in (default `/epic <name>`).
  *   - this session stays where it is:
  *     `/epic <name>` typed in another epic's session (the `/epic` skill's "From another worktree"), `/send`
+ *   - `--move`:  this session goes there instead, as its turn ends (`handoff`), when nothing of the epic runs:
+ *     a session started only to type `/epic <name>`
  *   - which, by `launchPlan()` (epic `epic-eject` P10):
  *     - one of its sessions is running:  typed into it, in its window
  *     - none, but its window is open:  a NEW session there;  the window's file and look untouched
@@ -707,23 +709,40 @@ export class Window {
    *     - its look:  `color`, else `pkg`'s window's theme, the title bar tinted `name`'s own colour;
    *       never the look of the window it's launched from, another epic's
    * - several of the epic's sessions running, or its one session in a terminal:  nothing done, `action` says why
+   * - `move` (`launch --move`:  a session's id, `$CLAUDE_CODE_SESSION_ID`):  THIS session goes to the epic's window,
+   *   rather than a new one starting there (epic `epic-engine` I72;  Owen, 2026-10-22, on `/epic solid-17` typed in a
+   *   fresh tab of epic-engine's window:  the tab stayed there, beside the new window's session)
+   *   - for a session started only to type `/epic <name>`:  the prompt hook says when (`PromptGate`'s `launchNote()`)
+   *   - its worktree and window file made as above, then `handoff()`:  the `Stop` hook moves it as its turn ends, its
+   *     tab here closed, `prompt` typed in there;  `action` `move`
+   *   - one of the epic's sessions running:  woken as above, and this session stays
    * - a new session starts in the window's first folder, the worktree (`worktreeWorkspace()`):  the session-start
    *   guard records it there, so a reopen comes back (epic `epic-eject` I3), with no `EnterWorktree` (epic `epic-engine`
    *   P12);  in a window written before P12 it starts in the main root, and `/epic <name>` enters the worktree
    */
-  static async launch(name, pkg, { color = null, prompt = null } = {}) {
+  static async launch(name, pkg, { color = null, prompt = null, move = null } = {}) {
     const file = Window.worktreeFile(name)
     const open = Window.windowOf(file)
-    const plan = launchPlan({ windowOpen: Boolean(open), sessions: Window.epicSessions(name, open) })
+    // moving:  this session is the one going there, never one of the epic's to wake
+    const sessions = Window.epicSessions(name, open).filter((session) => !move || session.sessionId !== move)
+    const plan = launchPlan({ windowOpen: Boolean(open), sessions })
     const typed = prompt ? { prompt } : {}
     if (plan.wake) await Window.request("open-session", { sessionId: plan.wake.sessionId, ...typed }, plan.wake.window)
-    if (plan.start && !plan.open) await Window.request("open-session", typed, open)
-    if (!plan.open) return { ...plan, file }
-    // the engine's own hook, the one the plugin runs (`hooks/hooks.json`)
-    const hook = join(ENGINE, "hooks", "worktree.mjs")
-    const input = JSON.stringify({ name, cwd: MAIN_ROOT })
-    const made = spawnSync(process.execPath, [hook, "create"], { input, encoding: "utf8" })
-    if (made.status !== 0) throw new Error(`worktree ${name} not made:  ${made.stderr.trim()}`)
+    if (plan.start && !plan.open && !move) await Window.request("open-session", typed, open)
+    if (!plan.open && !(move && plan.start)) return { ...plan, file }
+    if (plan.open) {
+      // the engine's own hook, the one the plugin runs (`hooks/hooks.json`)
+      const hook = join(ENGINE, "hooks", "worktree.mjs")
+      const input = JSON.stringify({ name, cwd: MAIN_ROOT })
+      const made = spawnSync(process.execPath, [hook, "create"], { input, encoding: "utf8" })
+      if (made.status !== 0) throw new Error(`worktree ${name} not made:  ${made.stderr.trim()}`)
+    }
+    if (move) {
+      // its window file written (colours in it:  nobody waits for the window here), the move left to the `Stop` hook
+      if (plan.open) Window.open(name, pkg, { color, fromCurrent: false, noOpen: true })
+      Window.handoff(name, move, { prompt })
+      return { ...plan, action: "move", file }
+    }
     const { colors } = Window.open(name, pkg, { color, fromCurrent: false })
     const window = await Window.waitFor(file)
     if (colors) await Window.applyColors(file, colors)
@@ -1181,7 +1200,9 @@ export class Window {
         const pkg = flags.pkg ?? DEFAULT_WINDOW
         const color = typeof flags.color === "string" ? flags.color : null
         const prompt = typeof flags.prompt === "string" ? flags.prompt : `/epic ${name}`
-        const launched = await Window.launch(name, pkg, { color, prompt })
+        const move = flags.move ? process.env.CLAUDE_CODE_SESSION_ID : null
+        if (flags.move && !SESSION_ID.test(move ?? "")) throw new Error("--move:  $CLAUDE_CODE_SESSION_ID isn't set")
+        const launched = await Window.launch(name, pkg, { color, prompt, move })
         console.log(launchedLine(name, prompt, launched))
         return ["several", "no-window"].includes(launched.action) ? 1 : 0
       }
@@ -1244,11 +1265,11 @@ const USAGE = `usage:  epic window <command>
   open <name> [--pkg <pkg>] [--color <look>] [--no-open]
                                open worktree <name> in a new window (default package:  this window's;
                                default look:  this window's);  --no-open:  write its window file only
-  launch <name> [--pkg <pkg>] [--color <look>] [--prompt <text>]
+  launch <name> [--pkg <pkg>] [--color <look>] [--prompt <text>] [--move]
                                wake epic <name>, <text> typed in (default:  /epic <name>):  into its
                                running session;  else a NEW session in its open window (look untouched);
                                else make worktree <name> if needed, open its window, a NEW session there;
-                               this session stays put
+                               this session stays put;  --move:  this session goes there instead
   color [<look>]               give this window a look:  Tomorrow Night Blue's, in a hue (no look:  list them)
   stay <name> | --end          a session staying here for worktree <name>:  title the window ⎇ <name>, tint its
                                title bar  /  put both back
@@ -1690,6 +1711,8 @@ function launchedLine(name, prompt, { action, file, sessions }) {
       return `${titles} is running, but not in a VS Code window with the bridge:  type ${prompt} there`
     case "start":
       return `${name}'s window is open:  a new session there, ${prompt} typed in (its look untouched)`
+    case "move":
+      return `this session moves to ${name}'s window when this turn ends, ${prompt} typed in;  its tab here closes`
     default:
       return `opened ${relative(MAIN_ROOT, file)}, a new session there:  ${prompt}`
   }
