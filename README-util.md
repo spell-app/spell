@@ -25,7 +25,7 @@ turn the card face down
 expect the direction of the card to be down
 ```
 
-_Two lines of `test card setup`, in Solitaire's [Card.spell](spell-lang/tests/spaces/@spell/test/solitaire/Card.spell):
+_Two lines of `test card setup`, in Solitaire's [Card.spell](https://github.com/spell-app/spell-lang/blob/main/tests/spaces/@spell/test/solitaire/Card.spell):
 the test passes, all 22 checks._
 
 On signals that hold a write back, the second line would still read `up`, and the language would fail its own test.
@@ -94,10 +94,10 @@ Use the barrel, except for these:
 
 | Import | Why not the barrel | Who imports it so |
 | --- | --- | --- |
-| `spell-kit/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](spell-ui/src/util/index.ts), [the element framework's](src/element/index.ts), the kit's test helpers |
+| `spell-kit/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts), [the element framework's](src/element/index.ts), the kit's test helpers |
 | `spell-kit/util/reactive` | the cells without Spell's layer | util's own `spell/` files:  through the barrel, which re-exports them, it'd be a cycle |
 | `spell-kit/util/spell/Derivative`, `/spell/Logger` | one class, and nothing else | spell-lang's parser:  its `Rule` and its tokenizer |
-| `spell-kit/util/spell/ResponseErrors` | the `ResponseError` family is left out of the barrel on purpose | [spell-app's disk fetch](spell-app/src/spaces/server/node/projects/disk-fetch.ts), to throw a `MissingResourceError` as a 404 would |
+| `spell-kit/util/spell/ResponseErrors` | the `ResponseError` family is left out of the barrel on purpose | [spell-app's disk fetch](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/projects/disk-fetch.ts), to throw a `MissingResourceError` as a 404 would |
 | `spell-kit/util/node/json5` | node only:  never through a barrel, so no browser code pulls it in | the tools that write JSON5 (below) |
 
 ## The generic helpers:  what lodash has no shape for
@@ -131,7 +131,7 @@ new WithProto()        // statement:  the default is on the prototype, there bef
 
 - Nothing is copied per instance:  `Object.keys()` of a `WithProto` is `[]`, of a `WithField`, `["alias"]`.
 - Spell's parser is built on it.
-  The [`print` rule](spell-lang/src/spell/rules/UI/Print.ts) starts `@proto static alias = "statement"`,
+  The [`print` rule](https://github.com/spell-app/spell-lang/blob/main/src/spell/rules/UI/Print.ts) starts `@proto static alias = "statement"`,
   and the five repos' code says `@proto static` over 400 times.
 - The edge:  a `static` field only.
   On an instance field it throws `@proto x: only works on 'static' fields.`
@@ -152,7 +152,7 @@ new WithProto()        // statement:  the default is on the prototype, there bef
 - Kept per object:  each instance its own, a `static` one per class.
 - `forget(object, "name")` drops a kept value;  the next read makes it anew.
 - `@resets("load") static accessor url` drops it on every write:
-  [Spell UI's site data](spell-ui/src/docs-components/SiteData.ts) fetches again when its URL changes.
+  [Spell UI's site data](https://github.com/spell-app/spell-ui/blob/main/src/docs-components/SiteData.ts) fetches again when its URL changes.
 - The edges:
   - not reactive:  a `@lazy` value is made once, whatever it read;  a reactive cached value is `@derived`, below
   - a getter or method that THROWS keeps nothing, and the next call tries again;
@@ -263,7 +263,7 @@ Who hears of a write depends on who's listening, and the two listeners behave in
 
 - `bridgeSolid({ enableExternalSource, flush })`, from `solid-js`, makes every Solid computation
   (a memo, an effect, a JSX expression) re-run when a cell it read changes.
-  - The HOST calls it, with its own Solid:  [the editor's bridge](spell-app/src/app/solid/cellsBridge.ts),
+  - The HOST calls it, with its own Solid:  [the editor's bridge](https://github.com/spell-app/spell-app/blob/main/src/app/solid/cellsBridge.ts),
     the command line's runner.
     Util never imports Solid, so the runtime compiled Spell loads (`spell-runtime.js`) holds none.
   - Once per Solid, however many hosts call it, and before anything that reads cells is drawn.
@@ -279,7 +279,7 @@ Who hears of a write depends on who's listening, and the two listeners behave in
 ### Compiled Spell and hand-written classes meet in one schema
 
 Each class has a schema:  its props' types, defaults and legal values.
-[The card example](spell-lang/tests/spaces/@spell/test/solitaire/solitaire.snapshot.js) compiles to a declaration
+[The card example](https://github.com/spell-app/spell-lang/blob/main/tests/spaces/@spell/test/solitaire/solitaire.snapshot.js) compiles to a declaration
 and an accessor pair;  `@prop` writes the same runtime shape by hand:
 
 ```js
@@ -457,7 +457,7 @@ Where a new helper goes, in order:
 2. Only one package uses it:  leave it in that package.
 3. Generic, dependency-free and worth its bytes on every Spell UI page:  beside the generic files.
    - Spell UI's core bundle carries every generic file, used or not.
-   - Add it to [Spell UI's util barrel](spell-ui/src/util/index.ts) and the element framework's,
+   - Add it to [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts) and the element framework's,
      which import these files one by one.
 4. Part of the engine:  `reactive/`, still with no lodash, no Solid and nothing Spell-specific.
 5. Spell-specific, or it needs lodash, `chalk`, `pluralize` ...:  `spell/`.
@@ -516,7 +516,7 @@ server running (`spell server start`, then the URL it prints):
 
 - [README-element.md](README-element.md):  the element framework, which re-exports the generic helpers
   and has a `@state` and `@derived` of its own
-- [spell-lang's README-core.md](spell-lang/README-core.md):  the runtime compiled Spell runs on,
+- [spell-lang's README-core.md](https://github.com/spell-app/spell-lang/blob/main/README-core.md):  the runtime compiled Spell runs on,
   where the same write-then-read happens in English
 - [README-toolchain.md](README-toolchain.md):  the decorator pre-pass every decorator on this page goes through
 - [README-server.md](README-server.md):  the page server, whose data files are written through the JSON5 helper

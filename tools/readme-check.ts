@@ -31,6 +31,8 @@ export class ReadmeCheck {
   /** what each rule's finding means */
   static readonly RULES = {
     link: "a relative link to a file or folder that isn't there",
+    "cross-repo":
+      "a relative link into another repo:  it works in a checkout, but each repo stands alone on GitHub, so write its GitHub URL",
     anchor: "a link to a heading the page hasn't got (GitHub's slugs)",
     "content-folder": "a link into the content folder, spell.epics:  name the guide by its served path instead",
     caption: "a Mermaid block (or a picture standing in for one) with no italic caption line right after it",
@@ -136,13 +138,43 @@ export class ReadmeCheck {
     return findings.sort((a, b) => a.line - b.line)
   }
 
+  /** The repo (an entry of `REPOS`, `.` for the kit) that holds `path`, absolute. */
+  repoOf(path: string): string {
+    const first = relative(this.root, path).split(/[\\/]/)[0]
+    return ReadmeCheck.REPOS.includes(first) ? first : "."
+  }
+
   /** The findings for a link `target` on the page at `path` (its `text`), found at `line`. */
-  checkLink(path: string, text: string, target: string, line: number, add: Add): void {
+  checkLink(path: string, text: string, target: string, line: number, add: Add, viaGitHub = false): void {
+    // a link into another of our repos is a GitHub URL (each repo stands alone there):  checked against its checkout
+    const ours = OUR_GITHUB.exec(target)
+    if (ours) {
+      const [, repo, rest] = ours
+      const folder = repo === "spell-kit" ? "." : repo
+      if (!ReadmeCheck.REPOS.includes(folder)) return
+      if (!existsSync(join(this.root, folder))) return
+      const [inRepo, anchor] = splitAnchor(rest)
+      return this.checkLink(
+        path,
+        text,
+        relative(dirname(path), join(this.root, folder, inRepo)) + (anchor ? `#${anchor}` : ""),
+        line,
+        add,
+        true
+      )
+    }
     if (/^[a-z][\w+.-]*:/i.test(target) || target.startsWith("//")) return
     const [file, anchor] = splitAnchor(target)
     const resolved = file ? resolve(dirname(path), file) : path
     if (resolved.split(/[\\/]/).some((part) => part === CONTENT_FOLDER)) {
       add(line, "content-folder", `${target} points into the content folder`)
+      return
+    }
+    if (file && !viaGitHub && this.repoOf(resolved) !== this.repoOf(path)) {
+      const repo = this.repoOf(resolved)
+      const name = repo === "." ? "spell-kit" : repo
+      const inRepo = relative(join(this.root, repo), resolved)
+      add(line, "cross-repo", `${target}:  write https://github.com/spell-app/${name}/blob/main/${inRepo}`)
       return
     }
     if (!existsSync(resolved)) {
@@ -268,6 +300,12 @@ const NOT_RUNNING_TEXT = new RegExp(
   ].join("|"),
   "gim"
 )
+
+/**
+ * a link to a file or folder of one of our repos on GitHub's `main`:  `[1]` the repo, `[2]` the path (and anchor)
+ * - a page links ANOTHER repo's file this way, since each repo stands alone on GitHub
+ */
+const OUR_GITHUB = /^https:\/\/github\.com\/spell-app\/([\w.-]+)\/(?:blob|tree|raw)\/main\/(.+)$/
 
 /** an import alias, `$/name`:  the end state has none (repo-split P14) */
 const ALIAS = /\$\/[a-z]/i

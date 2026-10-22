@@ -450,7 +450,7 @@ for (const bundle of SRV.Bundle.all(root)) if (bundle.isStale) bundle.build()
 - Which bundles exist:  the settings' `bundles` list;  how each is built:  `BUNDLES`.
   Each is found by its package, through `node_modules`, wherever its repo is.
 - The page server builds the stale ones as it starts
-  (spell-app's [BundleBuild.ts](spell-app/src/page-server/BundleBuild.ts)):
+  (spell-app's [BundleBuild.ts](https://github.com/spell-app/spell-app/blob/main/src/page-server/BundleBuild.ts)):
   meanwhile, a request for a bundle's file that isn't there yet waits for the build.
 - By hand:  `spell bundle [<name>...] [--stale]`, `spell bundle check [<name>...]`;  `--json` for either.
 - A new bundle:  a `BUNDLES` entry;  its output folder in the settings' `bundles` list, and in its repo's `.gitignore`.
@@ -491,7 +491,7 @@ Adding a new step:
 
 🌱 Coming:
 - The rest of the page server's page-building code moves in beside these steps, so other tools can build on it.
-- One list of the content areas:  spell-epic's docs tools ([pages.js](spell-epic/src/tools/pages.js)) keep their own,
+- One list of the content areas:  spell-epic's docs tools ([pages.js](https://github.com/spell-app/spell-epic/blob/main/src/tools/pages.js)) keep their own,
   for `findPages()`, beside the one `Linker` indexes.
 
 </details>
@@ -503,7 +503,7 @@ This one is an app you configure:  settings name the folders, and route modules 
 
 The kit has no settings of its own.
 A checkout's root `package.json` may have a `"pageServer"` block, and spell-app's has the real one.
-A short excerpt (spell-app's whole block, explained:  [its page server page](spell-app/README-page-server.md)):
+A short excerpt (spell-app's whole block, explained:  [its page server page](https://github.com/spell-app/spell-app/blob/main/README-page-server.md)):
 
 ```json
 "pageServer": {
@@ -649,9 +649,9 @@ _Real answers from spell-app's running server;  the status codes added at the ri
 `spell_quart`, a Quart app (Flask's asyncio twin), in spell-app's spaces.
 It runs ONE program, a game per visitor;  this one serves a whole checkout, and never runs your program at all.
 How it keeps each visitor's game, and what a restart costs it:
-[spell-app's README-spaces.md](spell-app/README-spaces.md#the-python-server), beside
-[its folder](spell-app/src/spaces/server/py/), a uv project.
-What compiling to Python writes beside the program:  [spell-lang's README-targets.md](spell-lang/README-targets.md).
+[spell-app's README-spaces.md](https://github.com/spell-app/spell-app/blob/main/README-spaces.md#the-python-server), beside
+[its folder](https://github.com/spell-app/spell-app/tree/main/src/spaces/server/py), a uv project.
+What compiling to Python writes beside the program:  [spell-lang's README-targets.md](https://github.com/spell-app/spell-lang/blob/main/README-targets.md).
 
 ## Commands:  `spell server` and `spell bundle`
 
@@ -750,9 +750,9 @@ The docs site needs a checkout with the content folder beside it, and this page 
 
 ## See also
 
-- [spell-app's README-page-server.md](spell-app/README-page-server.md):  the settings every day-to-day server runs on,
+- [spell-app's README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md):  the settings every day-to-day server runs on,
   and spell-app's own route module
 - [README-element.md](README-element.md):  the element framework, whose packs and component pages this server serves
-- [spell-epic's README](spell-epic/README.md):  the epic pages, and the route modules that serve them
+- [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md):  the epic pages, and the route modules that serve them
 - [README-cli.md](README-cli.md#the-kit):  `spell server`, `spell bundle` and the kit's other commands
 - [README.md](README.md#setup-from-zero):  setup from zero, if nothing above has run for you yet
