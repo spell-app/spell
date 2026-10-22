@@ -242,6 +242,26 @@ describe("outline style", () => {
     expect(run("back, heart, ace, next, none")).toEqual({ back: "🂠", heart: "♥", ace: "🂡", next: "🂢", none: "" })
   })
 
+  test("`unicode 1F0A0 + n` ADDS to the code point;  `hex 1F0A0` is a number;  a character of text is a whole one", () => {
+    const run = runSpell([
+      "set column to 1",
+      "set ace to unicode 1F0A0 + column",
+      "set queen to unicode 1F0A0 + column + 12",
+      "set start to hex 1F0A0",
+      "set next to unicode (start + 1)",
+      'set second to character 2 of "🂡🂢🂣"',
+      'set last to the last character of "🂡🂢🂣"'
+    ])
+    expect(run("ace, queen, start, next, second, last")).toEqual({
+      ace: "🂡",
+      queen: "🂭",
+      start: 0x1f0a0,
+      next: "🂡",
+      second: "🂢",
+      last: "🂣"
+    })
+  })
+
   test("a call that's all words beats a built-in reading:  `{draw its placeholder}` is the pile's own method", () => {
     const compiled = compile([
       "a card is a thing",

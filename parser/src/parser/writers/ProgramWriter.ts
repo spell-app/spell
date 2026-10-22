@@ -190,6 +190,11 @@ export abstract class ProgramWriter extends Writer {
     return node.value
   }
 
+  /** A number written in hex, e.g. `0x1F0A0`:  the same in javascript, TypeScript and Python. */
+  ASTHexLiteral(node: P.ASTHexLiteral): string {
+    return `0x${node.raw}`
+  }
+
   ////////////////
   // ## Positions:  indexes in the code, from 0, whatever the project counts from (epic `python-target` P23)
   //  - Owen's Q28:  "listsStartAt is a *spell language* thing, emitted code is canonical for platform".

@@ -185,6 +185,13 @@ describe("core.getItemAt()", () => {
   test("returns correct value for a non-empty object", () => {
     expect(core.getItemAt({ a: 1, b: true }, "a")).toEqual(1)
   })
+  test("text:  a whole character, so an emoji is one, not its two UTF-16 halves;  negative from the end", () => {
+    expect(core.getItemAt("🂡🂢x", 0)).toEqual("🂡")
+    expect(core.getItemAt("🂡🂢x", 1)).toEqual("🂢")
+    expect(core.getItemAt("🂡🂢x", -1)).toEqual("x")
+    expect(core.getItemAt("🂡🂢x", -3)).toEqual("🂡")
+    expect(core.getItemAt("🂡", 1)).toEqual(undefined)
+  })
 })
 
 describe("core.setItemAt()", () => {

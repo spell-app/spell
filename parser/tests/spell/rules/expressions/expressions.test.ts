@@ -96,6 +96,7 @@ describe("priority and precedence", () => {
         "times:  Precedence.product",
         "type_specifier_text_kind:  Priority.specific",
         "unicode_literal:  Priority.specific",
+        "unicode_offset:  Priority.mostSpecific",
         "upgrade_method:  Priority.declaration",
         "value_if:  Priority.overridable",
         "value_kind:  Priority.declaration",

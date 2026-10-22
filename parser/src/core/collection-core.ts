@@ -148,12 +148,21 @@ export const collectionCoreMethods = defineCoreModule({
   /**
    * The item at `position` of `collection`.
    * - For array: `position` is an index, from 0;  negative from the end.
+   * - For text: its CHARACTERS, by code point, so an emoji like `"🂡"` is one, not its two UTF-16 halves.
+   *   - The same as Python's `spell_core`, which indexes text by code point.
+   *   - e.g. `character 2 of "🂡🂢"` is `"🂢"`;  `the last character of` it too.
+   *   - NOTE:  `the length of` text still counts UTF-16 units (javascript's `length`).
    * - For object: `position` is its string key.
    * - Compiles from `item 1 of my-list` / `the first item of my-list`, its index worked out -- see `rules/lists/`.
    * - Typed by `collection`:  a `List<Card>`'s is a `Card`, if it has one -- see `CollectionOf`.
    */
   getItemAt<T = unknown>(collection?: CollectionOf<T>, position?: string | number): T | undefined {
     if (!assert.isDefined(collection, "core.getItemAt(collection)")) return undefined
+    if (typeof collection === "string") {
+      const characters = Array.from(collection)
+      const index = zeroIndexOf(position as number, characters.length)
+      return index === undefined ? undefined : (characters[index] as T | undefined)
+    }
     const coll = asCollection(collection)
     if (typeof coll.getItem === "function") return coll.getItem(position as string | number) as T | undefined
     if (core.isArrayLike(collection)) {

@@ -646,6 +646,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "HexLiteral",
+          "ruleNames": ["hex_literal"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/HexLiteral.ts",
+          "line": 13,
+          "purpose": "`hex 1F0A0` -- a number written in hex (epic `spanish` P11).",
+          "syntaxes": [
+            {
+              "syntax": "(hex|hexadecimal) {digits:hex_digits}",
+              "example": "hex 1F0A0",
+              "outputs": {
+                "js": {
+                  "code": "0x1F0A0"
+                },
+                "ts": {
+                  "code": "0x1F0A0"
+                },
+                "py": {
+                  "code": "0x1F0A0"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "UnicodeOffset",
+          "ruleNames": ["unicode_offset"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/UnicodeOffset.ts",
+          "line": 14,
+          "purpose": "`unicode 1F0A0 + n` -- the character `n` code points past one written in hex (epic `spanish` P11).",
+          "syntaxes": [
+            {
+              "syntax": "unicode {code:unicode_code} (más|mas|+) {offset:arithmetic_expression}",
+              "example": "unicode 1F0A0 + 1",
+              "outputs": {
+                "js": {
+                  "code": "core.unicode(0x1F0A0 + 1)"
+                },
+                "ts": {
+                  "code": "core.unicode(0x1F0A0 + 1)"
+                },
+                "py": {
+                  "code": "core.unicode(0x1F0A0 + 1)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "UnicodeLiteral",
           "ruleNames": ["unicode_literal"],
           "internal": false,
@@ -1336,11 +1388,21 @@
           "aliases": []
         },
         {
+          "className": "HexDigits",
+          "ruleNames": ["hex_digits"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/HexDigits.ts",
+          "line": 15,
+          "purpose": "A number written in hex, e.g. `1F0A0`, `ff`, `A0` -- the digits of `hex 1F0A0`.",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
           "className": "UnicodeCode",
           "ruleNames": ["unicode_code"],
           "internal": false,
           "file": "src/spell/rules/expressions/UnicodeCode.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "A code point written in hex, e.g. `1F0A0`, `2665`, `A0` (epic page `outline-spell`, P26).",
           "syntaxes": [],
           "aliases": []
