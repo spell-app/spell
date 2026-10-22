@@ -125,7 +125,7 @@ export class PidFile {
    */
   private async stopUnanswering(): Promise<void> {
     const info = this.read()
-    if (!info || resolve(info.root) !== this.root || !isAlive(info.pid)) return
+    if (!info || resolve(info.root) !== this.root || !isProcessAlive(info.pid)) return
     try {
       await fetch(`http://127.0.0.1:${info.port}/`, { signal: AbortSignal.timeout(1000), redirect: "manual" })
     } catch {
@@ -138,7 +138,7 @@ export class PidFile {
 
 /**
  * End process `pid`, and wait until it's gone:  `SIGTERM`, then `SIGKILL` if it's still there after `wait` ms.
- * - gone means `isAlive()` says so, not that it stopped answering:  its port is free then
+ * - gone means `isProcessAlive()` says so, not that it stopped answering:  its port is free then
  * - NEVER throws (it may end between the checks)
  */
 async function endProcess(pid: number, wait: number): Promise<void> {
@@ -151,17 +151,22 @@ async function endProcess(pid: number, wait: number): Promise<void> {
   }
   signal("SIGTERM")
   const deadline = Date.now() + wait
-  while (isAlive(pid) && Date.now() < deadline) await new Promise((done) => setTimeout(done, 100))
-  if (!isAlive(pid)) return
+  while (isProcessAlive(pid) && Date.now() < deadline) await new Promise((done) => setTimeout(done, 100))
+  if (!isProcessAlive(pid)) return
   signal("SIGKILL")
-  for (let tries = 0; tries < 40 && isAlive(pid); tries++) await new Promise((done) => setTimeout(done, 50))
+  for (let tries = 0; tries < 40 && isProcessAlive(pid); tries++) await new Promise((done) => setTimeout(done, 50))
 }
 
 /** How long `stop()` lets a server end by itself before `SIGKILL`, in ms. */
 const STOP_WAIT_MS = 10_000
 
-/** Whether process `pid` is alive:  signal 0 checks without sending anything;  `EPERM`:  alive, not ours. */
-function isAlive(pid: number): boolean {
+/**
+ * Whether process `pid` is alive:  signal 0 checks without sending anything;  `EPERM`:  alive, not ours.
+ * - also the review inbox's listener check:  a session's monitor listens while its session's process runs
+ *   (spell-epic's `ReviewInbox.liveListener()`)
+ * - NEVER throws
+ */
+export function isProcessAlive(pid: number): boolean {
   try {
     process.kill(pid, 0)
     return true

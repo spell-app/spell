@@ -1,12 +1,12 @@
 import { SRV } from "spell-kit/server"
+import { pageServerRoot } from "spell-kit/server/page/settings"
 import { CLI } from "spell-kit/cli"
-import { serversRoot } from "spell-kit/cli/commands/serverCommand"
 
 /**
  * `spell bundle [names...]` / `spell bundle check [names...]`:  the bundles the page server serves, BUILT on demand
- * instead of committed (the page server's settings, `"pageServer": { "bundles": [...] }`:  `ui-site`, Spell UI's docs
- * site;  `brand`, the brand pages).  The logic:  the server's `Bundle` (`SRV.Bundle`).
- * - Whose:  the checkout whose page server serves them (`serversRoot()`:  spell-app's, from anywhere in the kit).
+ * instead of committed (the page server's settings, `"bundles"`:  `ui-site`, Spell UI's docs site, in spell-ui's
+ * part;  `brand`, the brand pages, in spell-brand's).  The logic:  the server's `Bundle` (`SRV.Bundle`).
+ * - Whose:  the kit's page server's (`pageServerRoot()`), from anywhere in the kit.
  * - `--json`:  the report as JSON;  a build's own output goes to stderr
  * - Throws `CliError` for an unknown name.
  */
@@ -57,7 +57,7 @@ export async function checkBundles(names: string[], options: CLI.BundleOptions =
 }
 
 /** The bundles `names` names (none:  every one);  an unknown name is a `CliError`. */
-function bundlesFor(names: string[], root = serversRoot()): SRV.Bundle[] {
+function bundlesFor(names: string[], root = pageServerRoot(process.cwd())): SRV.Bundle[] {
   try {
     return SRV.Bundle.all(root, names)
   } catch (error) {

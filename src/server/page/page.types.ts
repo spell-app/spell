@@ -1,6 +1,6 @@
 /**
  * Types of the page server:  route modules and what they get, its settings, component sets and engine routes.
- * - MUST stay runtime-light:  `import type` only, and re-exports of `settings.ts` (node built-ins).
+ * - MUST stay runtime-light:  constants, `import type`, and re-exports of `settings.ts` (node built-ins and `json5`).
  * - Plain `node` loads this file by path (spell-epic's tools):  so its re-exports name `./settings.ts` in full.
  */
 import type { SRV, ServedFile, ServerInfo } from "spell-kit/server"
@@ -8,7 +8,8 @@ import type { SiteTab } from "spell-kit/server/site/site.types"
 
 /**
  * A ROUTE MODULE:  a file that adds routes to the page server, e.g. goals' buttons, the app's `/api`.
- * - listed in the repo root's `package.json`, `"pageServer": { "routes": ["spell-epic/src/tools/detailsRoutes.ts"] }`
+ * - listed in its repo's part of the settings, `"pageServer": { "routes": ["src/tools/detailsRoutes.ts"] }` in its
+ *   `package.json`, from its repo's folder (`pageServerSettings()`)
  * - its DEFAULT export is this;  `setup()` runs once, before the server listens
  */
 export type RouteModule = {
@@ -55,12 +56,16 @@ export type RouteContext = {
 /** More fields for a page's `window.SPELL_SERVER`, as it's served (`PageServer.addPageConfig()`). */
 export type PageConfig = (served: ServedFile) => Record<string, unknown>
 
-/** The `"pageServer"` field of the repo root's `package.json`. */
+/**
+ * The page server's settings:  the `"pageServer"` field of a repo's `package.json`, ITS part;
+ * or every installed repo's parts merged, as the server reads them (`pageServerSettings()`, epic `repo-split` P16).
+ * - in a part, every path is relative to its repo's folder;  merged, relative to the checkout served
+ */
 export type PageServerSettings = {
-  /** route modules, paths relative to the repo root */
+  /** route modules, loaded in order */
   routes?: string[]
   /**
-   * folders to live-reload, relative to the root (default:  the docs pages and their bundle, `DEFAULT_WATCH`)
+   * folders to live-reload (default, when no part names any:  the shared content areas, `DEFAULT_WATCH`)
    * - one the checkout doesn't have is skipped
    * - the shared content folders (`epics`, `guides` ...):  the content folder's, which the server watches whole once
    *   a route module serves it (`PageServer.serveContent()`);  named for a checkout that still links them in
@@ -76,7 +81,23 @@ export type PageServerSettings = {
    */
   writable?: string[]
   /**
-   * the bundles' folders, relative to the root:  built on demand, never committed (git-ignored);  none by default
+   * URL prefixes answered "not found", though the shared content folder still holds them (`PageServer`);
+   * none by default
+   * - for what moved OUT of the shared content, which the content repo keeps for older checkouts:
+   *   e.g. `/ui`, Spell UI's old docs, now `/components/ui/` (epic `people-and-orgs`, Q30:  no redirects)
+   * - once no checkout needs the folder, it leaves the content repo, and its entry here
+   */
+  gone?: string[]
+  /**
+   * URLs of files every page may load from a CDN, each with the URL this server serves the same file at:
+   * every page it serves loads the local copy, so pages load offline (`PageServer.withLocalCopies()`);
+   * none by default
+   * - e.g. highlight.js from cdnjs, which older pages carry as a plain, blocking `<script>`:
+   *   a hanging network (plane wifi asking to pay first) held up the page's own scripts behind it (epic `airplane` P1)
+   */
+  localCopies?: Record<string, string>
+  /**
+   * the bundles' folders:  built on demand, never committed (git-ignored);  none by default
    * - the page server builds the stale ones when it starts (`BundleBuild`),
    *   and a request for a file in one waits while that runs
    * - THE list:  `spell-kit/server`'s `Bundle.all()` builds the bundles whose output folders it names
@@ -93,15 +114,16 @@ export type PageServerSettings = {
   /**
    * the COMPONENT SETS it serves, by id, in the top bar's order (`ComponentSet`, `componentSets()`):
    * each at `/components/<id>/`, its pages' folder with its site bundle laid over it at `_assets/`;  none by default
-   * - e.g. `"ui": { "name": "Spell UI", "dir": "../spell-ui/docs", "assets": "../spell-ui/site/_assets" }`:  a folder
-   *   beside the checkout (`../`) is served at `/_beside/...` (`folderUrl()`, epic `repo-split` P8)
+   * - e.g. spell-ui's part:  `"ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets" }`
+   *   - read for a folder other than the kit (spell-app's):  a folder beside it (`../spell-ui/docs`) is served at
+   *     `/_beside/...` (`folderUrl()`, epic `repo-split` P8)
    * - the server knows nothing of what they are:  the folders come from here (epic `repo-split` P4, Q3)
    */
   componentSets?: Record<string, ComponentSetSetting>
   /**
    * ENGINE ROUTES:  URL prefixes served from a folder of the checkout, under every worktree's address too
    * (`EngineRoute`, `engineRoutes()`);  none by default
-   * - e.g. `"/_epic/assets/": "../spell-epic/src/tools/_assets"`:  the epic engine, beside the checkout in the top repo
+   * - e.g. spell-epic's part:  `"/_epic/assets/": "src/tools/_assets"`:  the epic engine's assets
    * - live reload reports a change in one at its route
    */
   engineRoutes?: Record<string, string>
@@ -112,6 +134,10 @@ export type PageServerSettings = {
    * - e.g. `{ "name": "Epic/UI", "path": "/components/epics/", "serverOnly": true, "sets": ["epics"] }`:
    *   a component set's tab, lit on its pages (`litTab()`)
    * - the server knows nothing of what they are:  the header's parts come from here (epic `repo-split` I4)
+   * - the content repo's part (`CONTENT_SETTINGS`):  the tabs describe its areas and the component sets
+   *   (epic `repo-split` P16)
+   *   - a tab whose home is a component set's address, none of whose `sets` is served, is left out (`PageServer`):
+   *     without spell-app, no App/UI tab
    */
   siteTabs?: SiteTab[]
 }
@@ -121,7 +147,7 @@ export type PageScript = {
   /** the script's URL, as a page loads it, e.g. `/element/spell-language.js` */
   src: string
   /**
-   * the file it is, relative to the root, e.g. `packages/app/dist-element/spell-language.js`:
+   * the file it is, e.g. spell-app's `app/dist-element/spell-language.js`:
    * added only while it exists, so a checkout that hasn't built it serves its pages without it (no 404)
    * - none:  always added
    */
@@ -136,10 +162,9 @@ export type PageScript = {
 /**
  * One component set, as the settings name it (`"componentSets"`, under its id).
  * - `name`:  what prose calls it, e.g. `Epic UI`
- * - `dir`:  its pages' folder, relative to the checkout, e.g. `packages/ui/docs`
- *   - Epic UI's is spell-epic's, through the checkout's `spell-epic` link (epic `epic-eject` I5)
- * - `assets`:  the site bundle its pages load as `_assets/`, relative to the checkout
- *   - today Spell UI's site bundle (`../spell-ui/site/_assets`), for every set:  it holds `globalThis.SpellUI`
+ * - `dir`:  its pages' folder, e.g. spell-ui's `docs`
+ * - `assets`:  the site bundle its pages load as `_assets/`
+ *   - today Spell UI's site bundle, for every set (`../spell-ui/site/_assets` in the other repos' parts):  it holds `globalThis.SpellUI`
  *     (`SitePacks`) for the component packs a set's pages load, the epics pack, for the comments, on all of them
  *   - the other sets had a build of their own (its `sets/`), from epic `epic-workflow` P10 until epic
  *     `epic-engine` gave Spell UI's pages the packs too
@@ -186,3 +211,10 @@ export type EngineRoute = readonly [route: string, folder: string]
  * - `./settings.ts` with its extension:  plain `node` loads this file by path (spell-epic's tools)
  */
 export { COMPONENTS_PREFIX } from "./settings.ts"
+
+/**
+ * How long a request for a bundle's file waits for the startup build, in ms (`BundleBuild`),
+ * before it's answered as it stands (a 404, while the file is still missing).
+ * - each build takes a few seconds (2 s for both on an M-series Mac, 2026-10-07);  a cold `tsx` and vite add some
+ */
+export const BUNDLE_WAIT_MS = 120_000

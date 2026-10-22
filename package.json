@@ -176,7 +176,6 @@
     "lodash": "^4.17.21",
     "node-storage-shim": "^2.0.1",
     "parse5": "^7.3.0",
-    "pluralize": "^8.0.0",
     "query-string": "^6.12.1",
     "tsx": "4.20.3",
     "vite-plus": "catalog:"
@@ -185,7 +184,6 @@
     "@solidjs/web": "2.0.0-rc.13",
     "@types/lodash": "^4.17.17",
     "@types/node": "^22.20.4",
-    "@types/pluralize": "^0.0.33",
     "@typescript/typescript6": "^6.0.2",
     "@vitest/browser-playwright": "catalog:",
     "axe-core": "^4.13.0",

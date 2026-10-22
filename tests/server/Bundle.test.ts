@@ -14,6 +14,9 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell-kit/server"
 
+/** The kit:  its tests are in its `tests/`. */
+const KIT = join(import.meta.dirname, "../..")
+
 /** Write `text` at `path` under `root`, making folders. */
 function put(root: string, path: string, text: string): void {
   mkdirSync(dirname(join(root, path)), { recursive: true })
@@ -169,7 +172,6 @@ describe("Bundle.specs()", () => {
     expect(() => SRV.Bundle.specs(odd)).toThrow("Bundle.specs():  no bundle builds into '../spell-nope/_assets'")
   })
 
-  // the ONE list:  spell-app's own (its page-server tests check its real settings name every bundle)
   test("a checkout naming every bundle's folder gets every bundle, each once", () => {
     const every = checkout("every", { pageServer: { bundles: BUNDLES } })
     const outputs = SRV.Bundle.specs(every).map((spec) => spec.name)
@@ -177,3 +179,16 @@ describe("Bundle.specs()", () => {
     expect(new Set(outputs).size).toBe(outputs.length)
   })
 })
+
+// the ONE list, as the kit's settings merge it:  spell-ui's part names its site's bundle, spell-brand's its pages'
+// (spell-app's own test until epic `repo-split` P16);  only where both repos are installed (the kit's CI has neither)
+describe.skipIf(!["spell-ui", "spell-brand"].every((repo) => existsSync(join(KIT, repo, "package.json"))))(
+  "the kit's bundles",
+  () => {
+    test("the installed repos' settings name every bundle, each once", () => {
+      const outputs = SRV.Bundle.specs(KIT).map((spec) => spec.name)
+      expect([...outputs].sort()).toEqual(SRV.BUNDLES.map((spec) => spec.name).sort())
+      expect(new Set(outputs).size).toBe(outputs.length)
+    })
+  }
+)

@@ -37,7 +37,7 @@ export type ClassBuildOptions = {
 /**
  * Which elements own generic content parts.
  * - `Set` of tags -- noun is the tag after its prefix (`ui-card` => `card`)
- * - `Map` of tag => noun -- for translated tags (`ie-tarjeta` => `card`)
+ * - `Map` of tag => noun -- for translated tags (`es-tarjeta` => `card`)
  * - function of the tag (and the element) --
  *   return the noun, `true` (derive it from the tag) or a falsy value (not an owner);
  *   the element lets an owner decide per instance (`ConditionalOwner`)
@@ -544,11 +544,12 @@ export type WordSettings = {
   /** The text for `key` in the page's language, as tag `tag` says it, with `params` filled in. */
   text(key: string, params: Record<string, string | number> | undefined, tag: string): string
   /**
-   * Hand a defined tag's vocabulary to the runtime.
+   * Hand a defined tag's vocabulary to the runtime, with how to define its component under another tag.
    * - `"register"` the first time
    * - `"replace"` for a new version of it (hot reload, a server render)
+   * - `define`:  so the runtime can define it under the page's languages too (Spell UI's `defineComponents()`)
    */
-  registerVocabulary(vocabulary: E.ComponentVocabulary, how: "register" | "replace"): void
+  registerVocabulary(vocabulary: E.ComponentVocabulary, how: "register" | "replace", define?: E.ComponentDefiner): void
   /** Hand the runtime tag `tag`'s English texts, as defaults:  a translation's, or an app's own, win. */
   registerTexts(texts: Record<string, string>, tag: string): void
 }

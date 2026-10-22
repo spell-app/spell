@@ -8,32 +8,42 @@
  */
 
 import { camelCase, kebabCase } from "spell-kit/util/string"
-import { singularize } from "./string"
 
 /**
  * Tag of the element for class `className` in project `project`:
- * the project's name made singular, then the class's, kebab-cased.
- * - e.g. `Solitaire`, `Card` => `solitaire-card`;  `games`, `BankAccount` => `game-bank-account`
+ * the project's name, then the class's, kebab-cased.
+ * - e.g. `Solitaire`, `Card` => `solitaire-card`;  `games`, `BankAccount` => `games-bank-account`
+ * - The project's name as written, never made singular:  a compiled program runs this, and never loads a language's
+ *   inflector (epic `spanish` P3).
  * - The word "drawable" in the project's name is left out, so its tags don't all say it (epic `drawable-thing` P18):
  *   `Drawable Solitaire`, `Tableau` => `solitaire-tableau`, never `drawable-solitaire-tableau`.
+ *   - Spanish's word too (epic `spanish` P9):  `Solitario Dibujable`, `Carta` => `solitario-carta`.
  * - Only letters, digits and dashes, starting with a letter:  always a valid custom element name, as it has a dash.
+ *   - A letter's accent is dropped, as Spell UI's Spanish tags drop it (`<es-boton>`):
+ *     `canciones`, `Canción` => `canciones-cancion`.
  */
 export function elementTagFor(project: string, className: string): string {
   const projectWords = tagWords(project)
     .split("-")
     .filter((word) => !DRAWABLE_WORD.test(word))
     .join("-")
-  const prefix = singularize(tagWords(projectWords)) || "spell"
+  const prefix = tagWords(projectWords) || "spell"
   return `${prefix}-${tagWords(className)}`
 }
 
-/** The word left out of a project's name in its tags:  "drawable", or "drawables". */
-const DRAWABLE_WORD = /^drawables?$/
+/**
+ * The word left out of a project's name in its tags:  "drawable", or "drawables", in each of spell's languages.
+ * - Here, not in a language pack:  a compiled program names its tags as it runs, and never loads one.
+ * - English's, then Spanish's (`dibujable`).
+ */
+const DRAWABLE_WORD = /^(drawables?|dibujables?)$/
 
-/** `name` as a tag's words:  kebab-case, lowercase, only letters, digits and single dashes. */
+/** `name` as a tag's words:  kebab-case, lowercase, only letters, digits and single dashes, accents dropped. */
 function tagWords(name: string): string {
   return kebabCase(name.replace(/_/g, "-"))
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^[^a-z]+|-+$/g, "")
@@ -97,7 +107,7 @@ const ATTRIBUTE_KINDS: Record<string, DrawableAttribute["kind"]> = {
 }
 
 /** A declared type that's a thing's, e.g. `Pile`:  a class's name, where spell's own types are lowercase (`text`). */
-const THING_TYPE = /^[A-Z]/
+const THING_TYPE = /^\p{Lu}/u
 
 /** Attributes the page or Spell UI already means something by:  never a type's. */
 const TAKEN_ATTRIBUTES = new Set([
