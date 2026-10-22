@@ -437,7 +437,7 @@
           "ruleNames": ["words_identifier"],
           "internal": false,
           "file": "src/spell/rules/variables/WordsIdentifier.ts",
-          "line": 16,
+          "line": 21,
           "purpose": "A variable's name of several words, e.g. `start pile` (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -1737,7 +1737,7 @@
           "ruleNames": ["member_words"],
           "internal": false,
           "file": "src/spell/rules/properties/MemberWords.ts",
-          "line": 18,
+          "line": 23,
           "purpose": "1..N words naming a member, e.g. `short rank`, `short-rank`, `rank`.",
           "syntaxes": [
             {
@@ -1787,7 +1787,7 @@
           "ruleNames": ["quoted_member"],
           "internal": false,
           "file": "src/spell/rules/properties/QuotedMember.ts",
-          "line": 12,
+          "line": 15,
           "purpose": "A member's name in quotes, where it's being declared: `its \"suit\" is one of ...` in an outline-style type's body -- the outline style's \"quotes teach a new word\" (epic page `outline-spell`).",
           "syntaxes": [
             {
@@ -5121,7 +5121,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/types/SpellType.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Base pattern rule for matching a type name, singular or plural, known or unknown.",
           "syntaxes": [],
           "aliases": []
@@ -5216,7 +5216,7 @@
           "ruleNames": ["quoted_type"],
           "internal": false,
           "file": "src/spell/rules/types/QuotedType.ts",
-          "line": 13,
+          "line": 16,
           "purpose": "A type's name in quotes, where it's being declared: `a \"card\" is a thing where:` -- the outline style's \"quotes teach a new word\" (epic page `outline-spell`).",
           "syntaxes": [
             {
@@ -5266,7 +5266,7 @@
           "ruleNames": ["type_words"],
           "internal": false,
           "file": "src/spell/rules/types/TypeWords.ts",
-          "line": 15,
+          "line": 20,
           "purpose": "The name a declaration gives a type, one word or several, e.g. `bank account` in `a bank account is a thing`.",
           "syntaxes": [
             {

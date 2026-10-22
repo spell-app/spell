@@ -60,7 +60,13 @@ propertiesEs.addRule(QuotedMember, {
         { title: "several words", input: '"short rank"', js: "shortRank" },
         { title: "dashed", input: '"short-rank"', js: "shortRank" },
         { title: "a leading preposition", input: '"con jokers"', js: "conJokers" },
-        { title: "a structural word", input: '"rank de"', js: undefined }
+        {
+          title: "a structural word inside (epic `spanish` P14)",
+          input: '"fecha de nacimiento"',
+          js: "fechaDeNacimiento"
+        },
+        { title: "a structural word last", input: '"rank de"', js: "rankDe" },
+        { title: "a structural word first", input: '"de juego"', js: undefined }
       ]
     }
   ]

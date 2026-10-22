@@ -1,6 +1,7 @@
 import { NONE, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
+import { longestNameIn, namesWithGrammarWords } from "spell-lang/spell/rules/rules.types"
 
 /**
  * Base pattern rule for matching a type name, singular or plural, known or unknown:
@@ -82,6 +83,10 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     if (!types) return undefined
     let count = 0
     while (count < SpellType.MAX_NAME_WORDS && count < tokens.length && this.test(scope, tokens, count)) count++
+    if (count && count < tokens.length) {
+      const withGrammarWords = this.declaredWithGrammarWords(scope, types, tokens)
+      if (withGrammarWords) return withGrammarWords
+    }
     for (; count > 1; count--) {
       const words = tokens.slice(0, count)
       const scopeType = types.get(this.mapValue(SpellType.joined(words)))
@@ -91,13 +96,59 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   }
 
   /**
+   * A declared name holding a grammar word, from the first token, e.g. `card in play`, `carta de juego` (epic `spanish` P14).
+   * - Only a name declared whole, longest first:  `namesWithGrammarWords()`.
+   * - Its first word passes `test()`;  the others may be on the blacklist.
+   */
+  private declaredWithGrammarWords(
+    scope: P.Scope,
+    types: NonNullable<P.Scope["types"]>,
+    tokens: P.Token[]
+  ): P.MatchFor<this> | undefined {
+    const { blacklist } = SP.Language.of(scope).words
+    const names = namesWithGrammarWords(types, "type", SpellType.wordsOfTypeName, (word) => !!blacklist[word])
+    if (!names.length) return undefined
+    const written = SpellType.lowerWords(tokens, SpellType.MAX_NAME_WORDS)
+    // plural by its first word, as a person writes it:  `cards in play`, `cartas de juego`
+    const singular = written.length ? [P.singularize(written[0]!), ...written.slice(1)] : written
+    const count = longestNameIn(written, names) || longestNameIn(singular, names)
+    if (!count) return undefined
+    const words = tokens.slice(0, count)
+    const scopeType = types.get(this.mapValue(singular.slice(0, count).join("-")))
+    if (!scopeType) return undefined
+    const match = this.typeMatch(scope, words, scopeType, scopeType.name)
+    match.data.numberWord = `${words[0]!.value}`
+    return match
+  }
+
+  /** The words of a type's name, e.g. `CardInPlay` => `["Card", "In", "Play"]`:  split where each word was capitalized. */
+  static wordsOfTypeName(type: P.TypeScope): string[] {
+    return `${type.name}`.split(/(?=\p{Lu})/u)
+  }
+
+  /** The first words of `tokens`, at most `max`, lowercase:  up to the first token which isn't a word. */
+  static lowerWords(tokens: P.Token[], max: number): string[] {
+    const words: string[] = []
+    for (const token of tokens) {
+      if (words.length >= max || !(token instanceof P.WordToken)) break
+      words.push(`${token.value}`.toLowerCase())
+    }
+    return words
+  }
+
+  /**
    * Match of `words` naming `scopeType`.
    * - `value`:  how its words compile, e.g. `BankAccount` for `bank accounts`;
    *   for a short name, the type's own name.
    * - `raw`:  its words as written, e.g. `bank accounts`.
+   * - `written`:  how its words compile, if not as `mapValue()` has them.
    */
-  private typeMatch(scope: P.Scope, words: P.Token[], scopeType: P.TypeScope): P.MatchFor<this> {
-    const written = this.mapValue(SpellType.joined(words))
+  private typeMatch(
+    scope: P.Scope,
+    words: P.Token[],
+    scopeType: P.TypeScope,
+    written = this.mapValue<string>(SpellType.joined(words))
+  ): P.MatchFor<this> {
     const match = new P.Match({
       rule: this,
       matched: words,
@@ -108,6 +159,14 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     }) as P.MatchFor<this>
     match.data.scopeType = scopeType
     return match
+  }
+
+  /**
+   * The word saying whether `match` names one or several, e.g. `cards` for `cards in play`:
+   * its first word, for a name holding a grammar word, else all of it (`bank accounts`).
+   */
+  static numberWordOf(match: P.Match): string {
+    return (match.data as TypeMatchData).numberWord ?? `${match.raw}`
   }
 
   /** `words` as one dashed name, e.g. `bank-accounts`:  how `typeCase()` reads a name of several words. */
@@ -132,6 +191,8 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
 type TypeMatchData = {
   /** Existing `TypeScope` looked up in `scope.types` while parsing, or `NONE` if scope doesn't know it. */
   scopeType?: P.TypeScope | typeof NONE
+  /** The word saying whether it names one or several, when not all of it:  see `SpellType.numberWordOf()`. */
+  numberWord?: string
 }
 
 /**

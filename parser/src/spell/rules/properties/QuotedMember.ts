@@ -8,6 +8,9 @@ import { SP } from "spell-lang/spell"
  *   -- the outline style's "quotes teach a new word" (epic page `outline-spell`).
  * - The words inside are a `member_words` name, every one of them:  `value` and `raw` as `member_words`'s,
  *   e.g. `short_rank` / `short rank`.
+ * - Stop words too, after the first (epic `spanish` P14):  `its "side of play" is a number`, `"what if"`.
+ *   - Later reads find the name whole:  see `member_words`.
+ *   - Not first:  `"is face up"` is a phrase, not a member.
  */
 export class QuotedMember extends P.Rule {
   @proto static highlightAs: P.HighlightKind = "property"
@@ -43,7 +46,7 @@ export class QuotedMember extends P.Rule {
     return `${match.raw}`
   }
 
-  /** The words inside `token`'s quotes, if it's a text token holding only member words -- else `undefined`. */
+  /** The words inside `token`'s quotes, if it's a text token holding only a member's words -- else `undefined`. */
   private static wordsOf(token: P.Token | undefined): string[] | undefined {
     if (!(token instanceof P.TextToken)) return undefined
     const words = token.innerText.trim().split(/\s+/)
@@ -51,7 +54,7 @@ export class QuotedMember extends P.Rule {
     const isMemberWord = (word: string, index: number) => {
       const lower = word.toLowerCase()
       return (
-        QUOTED_MEMBER_WORD.test(word) && (!memberStopWords.has(lower) || (index === 0 && memberLeadingWords.has(lower)))
+        QUOTED_MEMBER_WORD.test(word) && (index > 0 || !memberStopWords.has(lower) || memberLeadingWords.has(lower))
       )
     }
     return words[0] && words.every(isMemberWord) ? words : undefined

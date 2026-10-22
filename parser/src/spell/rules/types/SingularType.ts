@@ -8,7 +8,9 @@ import { SpellType } from "./SpellType"
 export class SingularType extends SpellType {
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens)
-    if (match && typeof match.raw === "string" && match.raw === P.singularize(match.raw)) return match
+    if (!match || typeof match.raw !== "string") return undefined
+    const word = SpellType.numberWordOf(match)
+    if (word === P.singularize(word)) return match
     return undefined
   }
   getAST(match: P.MatchFor<this>): P.ASTTypeExpression {

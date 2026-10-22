@@ -83,7 +83,9 @@ typesEs.addRule(QuotedType, {
       tests: [
         { title: "una palabra entre comillas", input: '"card"', js: "Card" },
         { title: "con guiones", input: '"bank-account"', js: "BankAccount" },
-        { title: "dos palabras", input: '"carta de juego"', js: undefined },
+        { title: "dos palabras", input: '"carta bonita"', js: "CartaBonita" },
+        { title: "una palabra prohibida dentro (épica `spanish` P14)", input: '"carta de juego"', js: "CartaDeJuego" },
+        { title: "una palabra prohibida al final", input: '"carta de"', js: undefined },
         { title: "palabra prohibida", input: '"si"', js: undefined }
       ]
     }
@@ -143,6 +145,17 @@ typesEs.addRule(TypeWords, {
         { title: "plural, varias palabras", input: "cuentas bancarias", js: "CuentaBancaria" },
         { title: "hasta una palabra prohibida", input: "cuenta bancaria es", js: "CuentaBancaria" },
         { title: "hasta alias", input: "cuenta bancaria alias cuenta", js: "CuentaBancaria" },
+        {
+          title: "una palabra prohibida dentro, hasta es (épica `spanish` P14)",
+          input: "carta de juego es",
+          js: "CartaDeJuego"
+        },
+        {
+          title: "palabras prohibidas dentro, hasta alias",
+          input: "cuenta de ahorro alias cuenta",
+          js: "CuentaDeAhorro"
+        },
+        { title: "una palabra prohibida, no hasta es", input: "carta de juego", js: "Carta" },
         { title: "una palabra prohibida", input: "es", js: undefined }
       ]
     }

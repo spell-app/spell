@@ -55,7 +55,9 @@ properties.addRule(QuotedMember, {
         { title: "several words", input: '"short rank"', js: "shortRank" },
         { title: "dashed", input: '"short-rank"', js: "shortRank" },
         { title: "a leading preposition", input: '"with jokers"', js: "withJokers" },
-        { title: "a structural word", input: '"rank of"', js: undefined }
+        { title: "a structural word inside (epic `spanish` P14)", input: '"side of play"', js: "sideOfPlay" },
+        { title: "a structural word last", input: '"what if"', js: "whatIf" },
+        { title: "a structural word first", input: '"of play"', js: undefined }
       ]
     }
   ]

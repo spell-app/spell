@@ -124,6 +124,18 @@ variablesEs.addRule(KnownWordsVariable, {
         ["la pila inicial", "pilaInicial"],
         ["pila final", undefined]
       ]
+    },
+    {
+      title: "un nombre conocido con una palabra prohibida, leído entero (épica `spanish` P14)",
+      compileAs: "known_words_variable",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("carta_de_juego")
+      },
+      tests: [
+        ["carta de juego", "cartaDeJuego"],
+        ["la carta de juego", "cartaDeJuego"],
+        ["carta de mazo", undefined]
+      ]
     }
   ]
 })

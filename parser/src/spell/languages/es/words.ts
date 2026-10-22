@@ -124,12 +124,13 @@ export const spanishWords: SP.LanguageWords = {
      * A line declaring a type, its name captured:  `una carta es una cosa`, `un mazo es una lista de cartas`.
      * - Its groups, in order:
      *   1. a one-word name
-     *   2. a name of several words, before `es un` / `es una` or `alias`
+     *   2. a name of several words, before `es un` / `es una` or `alias`,
+     *      quoted too:  `una "carta de juego" es una cosa`
      *   3. `crear un tipo llamado ...`'s name
      *   4. a one-of-a-kind app's name, `solitario es una aplicación`
      */
     typeDeclaration:
-      /^[ \t]*(?:-[ \t]+)?(?:un[oa]?[ \t]+["']?([\p{L}\p{M}\d_-]+)["']?[ \t]+es\b|un[oa]?[ \t]+((?:(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+[ \t]+){1,3}(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+)[ \t]+(?:es[ \t]+un[oa]?|alias)\b|crear[ \t]+un[ \t]+tipo[ \t]+(?:llamado|nombrado)[ \t]+([\p{L}\p{M}\d_-]+)|(?!(?:un[oa]?|el|la|los|las|su|sus)\b)((?:(?!es\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!es\b)[\p{L}\p{M}\d_-]+)[ \t]+es[ \t]+una[ \t]+aplicaci[oó]n\b)/gimu,
+      /^[ \t]*(?:-[ \t]+)?(?:un[oa]?[ \t]+["']?([\p{L}\p{M}\d_-]+)["']?[ \t]+es\b|un[oa]?[ \t]+["']?((?:(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+[ \t]+){1,3}(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es[ \t]+un[oa]?|alias)\b|crear[ \t]+un[ \t]+tipo[ \t]+(?:llamado|nombrado)[ \t]+([\p{L}\p{M}\d_-]+)|(?!(?:un[oa]?|el|la|los|las|su|sus)\b)((?:(?!es\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!es\b)[\p{L}\p{M}\d_-]+)[ \t]+es[ \t]+una[ \t]+aplicaci[oó]n\b)/gimu,
     /** A line declaring a value kind, its PLURAL name captured:  `- "palos" como uno de ...`. */
     valueKindDeclaration:
       /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+como[ \t]+(?:uno[ \t]+de|o[ \t]+bien)\b/gimu,

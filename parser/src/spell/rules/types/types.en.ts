@@ -74,7 +74,9 @@ types.addRule(QuotedType, {
       tests: [
         { title: "a quoted word", input: '"card"', js: "Card" },
         { title: "dashed", input: '"bank-account"', js: "BankAccount" },
-        { title: "two words", input: '"playing card"', js: undefined },
+        { title: "two words", input: '"playing card"', js: "PlayingCard" },
+        { title: "a blacklisted word inside (epic `spanish` P14)", input: '"card in play"', js: "CardInPlay" },
+        { title: "a blacklisted word last", input: '"card in"', js: undefined },
         { title: "blacklisted word", input: '"if"', js: undefined }
       ]
     }
@@ -131,6 +133,14 @@ types.addRule(TypeWords, {
         { title: "plural", input: "bank accounts", js: "BankAccount" },
         { title: "up to a blacklisted word", input: "bank account is", js: "BankAccount" },
         { title: "up to aka", input: "bank account aka account", js: "BankAccount" },
+        {
+          title: "a blacklisted word inside, up to is (epic `spanish` P14)",
+          input: "card in play is",
+          js: "CardInPlay"
+        },
+        { title: "blacklisted words inside, up to aka", input: "box of the year aka box", js: "BoxOfTheYear" },
+        { title: "a blacklisted word, not up to is", input: "card in play", js: "Card" },
+        { title: "a blacklisted word last", input: "card in is", js: "Card" },
         { title: "a blacklisted word", input: "is", js: undefined }
       ]
     }

@@ -114,6 +114,18 @@ variables.addRule(KnownWordsVariable, {
         ["the start pile", "startPile"],
         ["end pile", undefined]
       ]
+    },
+    {
+      title: "a known name with a blacklisted word, read whole (epic `spanish` P14)",
+      compileAs: "known_words_variable",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("way_to_go")
+      },
+      tests: [
+        ["way to go", "wayToGo"],
+        ["the way to go", "wayToGo"],
+        ["way to stop", undefined]
+      ]
     }
   ]
 })
