@@ -10,8 +10,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## Overview
 
 - Serving pages locally, and assembling them, for every package:  `spell-kit/server` (`SRV`).
-  - Assembling (below, "Assembling pages"):  the kit's `assembler/` until epic `repo-split` P14 (Q43, namespace
-    `AS`), merged in here, its names in `SRV`.
+  - Assembling (below, "Assembling pages"):  merged in here, its names in `SRV`.
+    It was the kit's `assembler/` (namespace `AS`) until epic `repo-split` P14 (Q43).
   - Before this package, six servers each had their own mime table, path check, port choice and opener.
     Now they share these.
   - Docs:  [the page server guide](../../spell.epics/guides/server.html):  the library, the page server's flows,
@@ -47,7 +47,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - every one needs `Guard`'s strong write check (this run's token, same origin)
       - ONLY inside the writable folders, the shared content ones;  anything else:  403
         - the list:  `"writable"`, in the page server's settings (below)
-        - today:  `epics`, `guides`, `pages`, `brand`
+        - today:
+          `epics`, `guides`, `pages`, `brand`
           (not `templates` since epic `epic-eject` T11:  they're spell-epic's, at the engine route `/templates/`)
       - The page editor's writes are held to the same list (`FileOperations.writableFile()`).
       - Those folders are the shared content folder's, once the page server serves it (`FileOperations.content`,
@@ -94,7 +95,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         and pages on the old one found the server down (epic `airplane`, 2026-10-10).
   - [mainServer.ts](mainServer.ts) -- `mainServerUrl()`:  a worktree's file on the MAIN checkout's page server.
     - It asks that server for `/api/epics/running` (`RUNNING_EPICS_API`).
-    - A file of the shared content folder, by its own path (`.../spell-app.epics/epics/...`, as spell-epic hands
+    - A file of the shared content folder, by its own path (`.../spell.epics/epics/...`, as spell-epic hands
       them out):  its path there, `/epics/...` (epic `epic-eject` I20).
       - The content folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
       - Which main checkout, when the caller names none (the doc preview):  the one beside the content repo whose
@@ -113,22 +114,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - It's GENERIC (epic `repo-split` P4):  its code names nothing of spell-app's or spell-epic's folders.
   - What the page server serves beyond the checkout comes from its settings (below):
     the component sets, the engine routes, the page scripts, the route modules, the site header's tabs.
-  - What only spell-app's page server does is [page-server](../../spell-app/page-server/AGENTS.md)'s route module.
+  - What only spell-app's page server does is [page-server](../../spell-app/src/page-server/AGENTS.md)'s route module.
   - It went to spell-server when the repos split (P8), and into the kit with it (P9);  page-server went to spell-app.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
   - `spell-kit/server/page/...` -- the page server (one per checkout):
     - its CLI, `spell server`
     - page edits:  `PageEditor`, `/api/pages`
     - its info:  `/api/server`
-    - Its settings:  the `"pageServer"` block of the root `package.json`.
+    - Its settings:  the `"pageServer"` block of the serving checkout's root `package.json` (spell-app's).
       - Read by `pageServerSettings()`, in [settings.ts](page/settings.ts);
         `componentSets()` and `engineRoutes()` read their two lists out of them.
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
         the site header's tabs
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
         node built-ins and type imports only, and `./settings.ts` with its extension.
-    - PAGE SCRIPTS (`"pageScripts"`, epic `repo-split` P2):  module scripts it adds to every HTML page it serves,
-      before `</body>` (`PageServer.withPageScripts()`).
+    - PAGE SCRIPTS (`"pageScripts"`, epic `repo-split` P2):
+      module scripts it adds to every HTML page it serves, before `</body>` (`PageServer.withPageScripts()`).
       - Each says its URL (`src`), the file it is (`file`, from the root) and the pages it skips (`skip`, URL prefixes).
         - Added only while its file exists:  a checkout that hasn't built it serves its pages without it, no 404.
         - `skip` is matched without a worktree's `/worktrees/<w>` prefix.
@@ -152,7 +153,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The list:  the settings' `"engineRoutes"`, each a route and its folder (epic `repo-split` P4).
       - Today spell-app's:  `/_epic/assets/`, `/_epic/pack/` and `/templates/`, from spell-epic through the checkout's
         `spell-epic` link:  where spell-epic's one server per machine serves the engine too, and the pages load it from.
-      - And `/_brand/assets/`, spell-brand's `assets/` (the logo, fonts and reference images, epic `repo-split` P10).
+      - And spell-brand's:
+        - `/_brand/assets/`:  its `assets/`, the logo, fonts and reference images (epic `repo-split` P10)
+        - `/packages/brand/_assets/` and `/packages/brand/components/__pack/`:  its `_assets/` and its pack,
+          at the paths the Brand tab's pages load them by (`../packages/brand/_assets/...`)
       - A checkout without the link answers "not found" there, and loads no epic route module.
       - Live reload reports a change in one at its route.
     - Route modules add to every page's `window.SPELL_SERVER`:  `addPageConfig()`.
@@ -165,20 +169,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - It serves the repo at `/`.
       - And the SHARED CONTENT folder after it (`serveContent(dir)`, epic `epic-eject` P12):
         epics, guides, pages, sagas, brand ... with no link at the checkout's root.
-        - The checkout first:  a path it has is its own (the brand pages load `../packages/brand/_assets/...`).
+        - The checkout first:  a path it has is its own.
         - Under every worktree's address too (`/worktrees/<w>/...`), after that worktree's own files:
           a catch-all mount (`Mount.skip`).
         - The running epics' route module calls it, in every checkout:
           the folder is the repo's `.epic/config.json5`'s `contentFolder`, which this package can't read.
-          - `RouteContext.serveContent` is optional:  a server that serves the content itself (spell-epic's
-            `EpicServer`) has none.
+          - `RouteContext.serveContent` is optional:
+            a server that serves the content itself (spell-epic's `EpicServer`) has none.
         - Live reload watches it whole, reporting each change at `/<path>` and under every worktree's address.
         - A page from it is told its path there (`SPELL_SERVER.file`, `/epics/x/x.plan.html`).
         - `/api/files` and `/api/pages` write in it:  the `"writable"` names are its folders.
-        - `/api/server` reports it (`contentFolder`);  `spell server url <file>` gives a file of it its path there
-          (`contentPathOf()`).
-      - The shared pages' bridges (the engine's old folders, `/ui/` answering "not found"):  page-server's route
-        module ([page-server's AGENTS.md](../../spell-app/page-server/AGENTS.md)).
+        - `/api/server` reports it (`contentFolder`).
+        - `spell server url <file>` gives a file of it its path there (`contentPathOf()`).
+      - The shared pages' bridges (the engine's old folders, `/ui/` answering "not found"):
+        page-server's route module ([page-server's AGENTS.md](../../spell-app/src/page-server/AGENTS.md)).
     - And the COMPONENT SETS:  the docs of each set of elements, in Spell UI's page shape, in its package's `docs/`.
       - The list:  the settings' `"componentSets"`, by id, in the top bar's order (`componentSets()`, epic `repo-split`
         P4;  `ComponentSet`, in [page.types.ts](page/page.types.ts)).
@@ -199,7 +203,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The bundles it serves are NOT committed:  page-server's route module builds them (`BundleBuild`).
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.
-      - [ProjectBuild](../../spell-app/spaces/src/server/node/routes/ProjectBuild.ts), in spaces' routes,
+      - [ProjectBuild](../../spell-app/src/spaces/server/node/routes/ProjectBuild.ts), in spaces' routes,
         runs `spell compile --stale --all @spell/examples @spell/library` as the page server starts.
       - The page server knows nothing of spell projects.
   - `spell-kit/server/site/...` -- browser code:
@@ -251,7 +255,7 @@ The steps between a page's content and its file on disk, for every tool that wri
 - [`formatHTML()`](format.ts):  formats a page's text in memory, as `vp fmt` would format its file (oxfmt).
   It was the docs tools' `plan-parts.js`'s.
 - `Bundle` -- the bundles only the page server serves, BUILT on demand instead of committed.
-  - WHICH bundles exist:  the output folders the root `package.json` lists (`Bundle.specs()`).
+  - WHICH bundles exist:  the output folders the serving checkout's root `package.json` lists (`Bundle.specs()`).
     The page server reads the same list:
 
     ```json
@@ -270,7 +274,7 @@ The steps between a page's content and its file on disk, for every tool that wri
   - A new bundle:
     - a `BUNDLES` entry
     - its output folder in the root `package.json`'s bundle list (above)
-    - and in the root `.gitignore`
+    - and in the `.gitignore` of the repo that builds it (`/site/_assets/`, in spell-ui's)
 - JSON5 written with its comments kept moved to util, `spell-kit/util/node/json5` (epic `repo-split` P1):
   its users (ui's tools, app, brand, spaces, spell-epic) need util, not the assembler.
   - `DataFile` writes through it.
@@ -288,11 +292,12 @@ The steps between a page's content and its file on disk, for every tool that wri
     - By its own name, like `DataFile`, a command loads no linkedom when it needs only this.
 - It knows the checkout's LAYOUT as folder names, never as imports:  `Linker` takes the checkout's root.
   - The folder names:
-    - `packages/*/src`, and `packages/*/components` (a component set's elements)
-      - Under the kit, an old `packages/<name>/` is found through `node_modules`:  spell-ui, spell-brand, spell-epic,
-        and the folders of spell-kit, spell-lang and spell-app (`packages/parser/src` is spell-lang's `parser/src`,
-        epic `repo-split` P11;  a folder now in its repo's one `src/` drops the old `src/`:  `packages/server/src/x.ts`
-        is the kit's `src/server/x.ts`, P14).
+    - `packages/*/src`, and `packages/*/components` (a component set's elements):
+      the old monorepo's spelling, in every page written before the split
+      - Under the kit, an old `packages/<name>/` is found through `node_modules`:
+        spell-ui, spell-brand, spell-epic, and the folders of spell-kit, spell-lang and spell-app.
+      - A folder now in its repo's one `src/` drops the old `src/` (epic `repo-split` P11, P14):
+        `packages/server/src/x.ts` is the kit's `src/server/x.ts`.
     - `tests/`, where every package's tests live
     - the shared areas:
       - `pages/`
