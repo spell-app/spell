@@ -15,8 +15,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - NOT here:  `spell_quart`, Python's web server, which serves a program as a web app on Quart.
     It's in the spaces package, [its Python side](../../../spell-app/src/spaces/server/py/pyproject.toml)
     ([spaces' AGENTS.md](../../../spell-app/src/spaces/AGENTS.md);  epic `people-and-orgs` P14).
-- A folder of the `spell-lang` package, its entry `spell-lang/py`:  no `package.json` of its own
-  (epic `repo-split` P11).
+- A folder of the `spell-lang` package, its entry `spell-lang/py`:
+  no `package.json` of its own (epic `repo-split` P11).
   - Its TypeScript is the folder's own files (`index.ts`, `PyWriter.ts` ...), as every folder's.
   - `core/` is a uv project of its own, beside them:  yarn, TypeScript, oxlint and oxfmt don't look in it.
 - It imports only `spell-lang/parser` and `spell-kit/util`.
@@ -115,13 +115,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `reference_for()`
     - Not counted:  a plain `List`, a thing made inside a test, a helper's scratch result (made `core.quietly()`).
     - A name falls back to a thing the program keeps at its top level, as javascript's does.
-- A drawable program (P28) draws its own elements (`<solitaire-card>`) on the page:  the page's javascript defines them,
-  so the Python leaves out the `elementTag` line.
+- A drawable program (P28) draws its own elements (`<solitaire-card>`) on the page:
+  the page's javascript defines them, so the Python leaves out the `elementTag` line.
 - `play_page()` (`spell_core.playing`, P30):  a test plays a program the way its page does, by the page's messages.
   - `game.trigger("card-click", card=game.ref(card))`, `game.call("deal_the_cards")`:  each answered by its patch.
   - `game.thing(id)`, `game.named("stock")`:  what the page holds now, by id.
   - After each, the patches so far must add up to the whole state, else `PatchMismatchError`.
-  - The contract's 300 clicks per game play through it ([patches_in_a_game.py](../../tests/py/core/tests/patches_in_a_game.py)).
+  - The contract's 300 clicks per game play through it
+    ([patches_in_a_game.py](../../tests/py/core/tests/patches_in_a_game.py)).
 - Five checks keep it in step with the javascript core ([core's AGENTS.md](../core/AGENTS.md)):
   - the core's method list ([core.declarations.json5](../core/core.declarations.json5)):
     `spell_core` has each name, or lists it, with why, in [not_ported_yet.json5](core/not_ported_yet.json5)

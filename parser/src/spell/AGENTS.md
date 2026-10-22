@@ -28,7 +28,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - [app](../../../spell-app/src/app/AGENTS.md), `spell-app/app`:  the web app.
     - Also the runner, and the `<spell-app>` / `<spell-editor>` elements.
     - `yarn start` is run THERE, at spell-app's root (epic `repo-split` P11).
-  - [spaces](../../../spell-app/src/spaces/AGENTS.md), `spell-app/spaces`:  where projects live, and the editor's server.
+  - [spaces](../../../spell-app/src/spaces/AGENTS.md), `spell-app/spaces`:
+    where projects live, and the editor's server.
     - Spell's project groups (`@spell/examples`, `owen@spell` ...), their lists, and a project's file edits.
     - The built-in projects and the test projects, and reading and writing projects on disk.
     - This folder NEVER imports it (see "Projects live in spaces" below).
@@ -37,7 +38,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
 - `rules/`:  spell's rule modules (see "Parser rules" below).
 - Tests live in the repo's `tests/spell/`, at the same paths as the code they test:
   [SpellProject.ts](SpellProject.ts) => [SpellProject.test.ts](../../tests/spell/SpellProject.test.ts).
-  - `yarn vp test run --project spell` runs them (the repo's `vitest.config.ts`);  `yarn test` runs the whole repo's.
+  - `yarn vp test run --project spell` runs them (the repo's `vitest.config.ts`).
+    `yarn test` runs the whole repo's.
   - Their helpers stay here, in `test/` (`spell-lang/spell/test`).
   - The projects they read are spaces' test projects, `tests/spaces/@spell/test/`
     (see "Projects live in spaces" below).
@@ -64,7 +66,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - It colours a snippet without a project, for `<ui-code language="spell">`.
   - Call it as `SP.SpellHighlighter.spans(text)`.
   - The app's `<spell-code>` colours pages with it, from source, in a lazy chunk
-    ([SpellLanguage](../../../spell-app/src/app/components/spell-code/SpellLanguage.ts)):  nothing to regenerate after a grammar change.
+    ([SpellLanguage](../../../spell-app/src/app/components/spell-code/SpellLanguage.ts)):
+    nothing to regenerate after a grammar change.
 - [targets.ts](targets.ts):  the TARGETS spell compiles to, `SP.TARGETS`.
   Each is a language, the runtime its code runs on, and the writer that writes it:
   - `js/solid`:  ALWAYS compiled, as the editor, the runners and `spell run` run it
@@ -78,10 +81,13 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
       - its web app on Quart, `<Project>.app.py`
         - Each compile rewrites it only while nobody has edited it.
         - `appSuffix`, and `spell-lang/py`'s [quartApp.ts](../py/quartApp.ts)
-  - `ts/lib`:  a LIBRARY, the project's classes alone, for the repo's code to import (epic `people-and-orgs` P3)
-    - `<Project>.lib.ts`, one file with its own types:  no drawing, none of its top-level steps, the core with no Solid
+  - `ts/lib` (epic `people-and-orgs` P3):
+    a LIBRARY, the project's classes alone, for the repo's code to import
+    - `<Project>.lib.ts`, one file with its own types:
+      no drawing, none of its top-level steps, the core with no Solid
     - checked by `tsc`, as `ts/solid` is
-    - committed beside its source, and marked generated in the root's `.gitattributes`:  a merge recompiles `@spell/library`
+    - committed beside its source, and marked generated in spell-app's `.gitattributes`:
+      a merge recompiles `@spell/library`
   - What a target builds goes in the project's build folder, `build/` at the repo root, never committed.
     - That's its compiled code, and the scope pack, `.scopes.js`:
 
@@ -137,7 +143,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     - After a deliberate change, `yarn spell:test:fixtures:bless`, and read the diff.
 - [README-spell.md](../../README-spell.md), at the repo's root, is this folder's page for people;
   [the repo's README](../../README.md) is spell-lang's front page.
-  Docs live in the shared root folders, their tooling in [spell-epic's tools](../../../spell-epic/src/tools/) (see "Creating docs").
+  - Other docs live in the content repo, their tooling in [spell-epic's tools](../../../spell-epic/src/tools/)
+    (see "Creating docs").
 - [The barrel](index.ts) is loaded in browsers AND the editor's server, in spaces (WWOD §8 › "Barrels").
   - It imports `spell-lang/core`'s TYPES only, never its code.
 
@@ -157,8 +164,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
 
 ## Creating docs
 
-- Docs for people (design notes, research, references), for every package, live in the shared root folders:
-  `guides/` mostly (root `AGENTS.md`, "Shared content").
+- Docs for people (design notes, research, references), for every package, live in the content repo, `spell.epics/`:
+  `guides/` mostly.
   - Their tooling is [spell-epic's tools](../../../spell-epic/src/tools/), in `spell-epic`, its own repo.
 - How to write one:  [spell-epic's AGENTS.md](../../../spell-epic/src/AGENTS.md), "Writing a page".
 
@@ -199,8 +206,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
         - the globals:  `Number`, `Boolean`, `Text`, `Comment` ...
         - a parser class:  `Keyword`
     - So the prod build keeps class names:  [parser's AGENTS.md](../parser/AGENTS.md), `keepNames`.
-    - [ruleNames.test.ts](../../tests/spell/rules/ruleNames.test.ts) pins every rule's name, module and registration order:
-      a renamed class that changes a rule's name fails it.
+    - [ruleNames.test.ts](../../tests/spell/rules/ruleNames.test.ts) pins every rule's name, module and
+      registration order:  a renamed class that changes a rule's name fails it.
   - The SPELL SYNTAX TABLE, [spellSyntax.json](spellSyntax.json):  every rule class, by module, with
     - each syntax it's registered with
     - an example of each from its tests, compiled by the javascript, TypeScript and Python writers
@@ -210,7 +217,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     - What [the spell syntax guide](../../../spell.epics/guides/spell-syntax/spell-syntax.html) draws.
     - One per language pack, the same shape:  Spanish's is [spellSyntax.es.json](spellSyntax.es.json),
       its syntaxes and examples from the `<module>.es.ts` registrations.
-    - Generated:  `yarn spell:gen:syntax`, after adding, renaming or changing a rule, its class docstring or its tests.
+    - Generated by `yarn spell:gen:syntax`:
+      run it after adding, renaming or changing a rule, its class docstring or its tests.
       [spellSyntax.test.ts](../../tests/spell/node/spellSyntax.test.ts) fails until you do.
     - So a class docstring's first sentence says what the rule is FOR, in plain words:  it's the guide's Purpose.
   - ONE `syntax` per registration.
@@ -265,15 +273,16 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
       expressions.addRule(Negatable.specialize({ ruleName: "is_or_is_not" }), { syntax: "(es|está|(negated:no es|no está))" })
       ```
 
-- A rule which is a statement AND an expression, ending in a whole `{x:expression}` (a method call, `wait for`):
+- A rule which is a statement AND an expression,
+  ending in a whole `{x:expression}` (a method call, `wait for`):
   - `@proto static operandInExpressions = true` makes that last slot an `operand` when used INSIDE an expression.
   - So:
     - `if double x is 4` => `double(x) == 4`
     - while the statement `notify x + y` keeps `notify(x + y)`
   - `SpellParser.addRule()` registers the statement and an expression twin:
     see "Expressions" in [PARSING.md](PARSING.md).
-- A statement with a BODY (an inline statement, or an indented block under it) says so with a body keyword,
-  at the END of its `syntax`.
+- A statement with a BODY (an inline statement, or an indented block under it)
+  says so with a body keyword, at the END of its `syntax`.
   - e.g. `if {condition:expression} (then|:)? {statement_body}?`
   - `{statement_body}` ~== `({inline_statement}|{nested_statements})`
   - `{expression_body}` ~== `({inline_expression}|{nested_statements})`
@@ -413,7 +422,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
 - A rule built WHILE PARSING goes through `scope.addRule(RuleClass, definition, match)`.
   - Never `parser.addRule()` directly.
   - So the scope records the class + definition pair, and can hand on the rules it created.
-- A `mutateScope()` that adds a scope record passes `declaredBy: match`, so editors can find where it was declared.
+- A `mutateScope()` that adds a scope record passes `declaredBy: match`,
+  so editors can find where it was declared.
   - a record:  a variable, constant, type, rule or `ScopeMethod`
   - for `scope.addRule()`, it's the third argument
 - What a rule's match IS:  `match.datatype`, in spell's words (see `P.Datatype`).
@@ -451,7 +461,8 @@ As WWOD §12, plus:
   - `spell-lang/core`, types only
   - `spell-kit/util`
   - NEVER `spell-app/lsp`, `spell-app/spaces`, `spell-app/app` or `spell-lang/cli`.
-- A rule module imports the generic parser's rule classes from `spell-lang/parser`, and registers on `SpellParser` here.
+- A rule module imports the generic parser's rule classes from `spell-lang/parser`,
+  and registers on `SpellParser` here.
 
 ## Types / Exports
 
@@ -460,7 +471,7 @@ As WWOD §8, plus our self-namespace:
 - `SP` ~== `spell-lang/spell`
 
 The other namespaces live in their own packages:
-- `P`:  `../parser`
-- `SC`:  `../core`
+- `P`:  `spell-lang/parser`
+- `SC`:  `spell-lang/core`
 - `LSP`:  `spell-app/lsp`
 - `UI`:  `spell-app/app`
