@@ -139,7 +139,7 @@
                 its kind's icon and word (guide, details, choices, guide)
               </li>
               <li>
-                no Send or Review Now: they show only while an epic page is being reviewed through the page server
+                no Send: it shows only while an epic page is being reviewed through the page server
               </li>
             </ul>
           </ui-section>
@@ -574,17 +574,17 @@
                     <tr>
                       <td><code>actions</code></td>
                       <td>
-                        While the page is reviewed: Send (the paper plane: grey, blue with unsent marks, outlined once
-                        sent) and Review Now (the wand: blue while there's anything for Claude to work through).
+                        While the page is reviewed: Send and its countdown (<a href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"><code>&lt;epic-send-buttons&gt;</code></a>:
+                        the paper plane grey, blue with unsent marks, outlined once sent;  the wand, countdown mode).
                       </td>
                     </tr>
                     <tr>
                       <td><code>send</code></td>
-                      <td>The Send button: every unsent mark to Claude.</td>
-                    </tr>
-                    <tr>
-                      <td><code>review-now</code></td>
-                      <td>The Review Now button: every mark sent, each revisit asked now.</td>
+                      <td>
+                        Send and its countdown, an <code>&lt;epic-send-buttons&gt;</code>: every unsent mark and comment
+                        to Claude, by itself 2 minutes after Owen stops while countdown mode is on (epic
+                        <code>epic-engine</code> P20; before it, a round Send and a Review Now button).
+                      </td>
                     </tr>
                     <tr>
                       <td><code>git</code></td>
@@ -700,13 +700,18 @@
                 tooltip says why. None for a future epic or a done one: FUTURE and DONE say it.
               </li>
               <li>
-                <b>Send and Review Now</b>, only while the page is reviewed: blue (do it now), by the fill rule.
+                <b>Send and its countdown</b>, only while the page is reviewed: one group, blue (do it now), by the
+                fill rule (<a href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"><code>&lt;epic-send-buttons&gt;</code></a>, epic <code>epic-engine</code> P20).
                 <ul>
                   <li>
-                    Send (paper plane): a grey outline with nothing to send; DASHED blue with marks not sent yet;
+                    The paper plane: a grey outline with nothing to send; DASHED blue with marks not sent yet;
                     OUTLINED blue once sent
                   </li>
-                  <li>Review Now (wand): outlined blue while Claude has anything to work through</li>
+                  <li>
+                    The wand: countdown mode. On (the default), what's unsent goes by itself 2 minutes after Owen
+                    stops typing, clicking and scrolling, a ring draining round the wand; that send asks every revisit
+                    now, as Review Now did. Off, the plane is filled blue until he presses it.
+                  </li>
                 </ul>
               </li>
               <li>
@@ -714,7 +719,7 @@
                 listening, it says so in solid orange (a warning).
               </li>
               <li>
-                <b>Waking the epic</b> (epic <code>epic-workflow</code> P16): Send, Review Now or Do Now pressed with
+                <b>Waking the epic</b> (epic <code>epic-workflow</code> P16): Send (or its countdown) or Do Now with
                 nobody listening makes the page server type <code>/epic review &lt;name&gt;</code> into the epic's
                 running session, or open a new session in its window, for Owen to press Enter there.
                 <ul>

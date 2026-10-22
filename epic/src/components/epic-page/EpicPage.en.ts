@@ -105,7 +105,7 @@ export const epicPageVocabulary = {
       description:
         "PAGE state, never in a doc:  the page is being reviewed -- served by the page server with a token, its " +
         "review inbox answering -- so items and Overview parts show their review controls, and the header Send and " +
-        "Review Now.  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
+        "its countdown.  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
     }
   ],
   events: [],
@@ -140,7 +140,7 @@ export const epicPageVocabulary = {
     {
       name: "header",
       description:
-        "The sticky page header:  the h1, then at its right Send and Review Now (while reviewed), the bedtime label, " +
+        "The sticky page header:  the h1, then at its right Send and its countdown (while reviewed), the bedtime label, " +
         "the step label (the state in it) and the git toggle."
     },
     {
@@ -176,20 +176,16 @@ export const epicPageVocabulary = {
     {
       name: "send",
       description:
-        "In the header while the page is reviewed, the paper plane:  every unsent mark and comment to Claude.  A " +
-        "grey outline with nothing to send, dashed blue with unsent marks or comments, outlined blue once sent."
-    },
-    {
-      name: "review-now",
-      description:
-        "In the header while the page is reviewed, the wand:  every mark sent, each revisit asked now.  Outlined " +
-        "blue while there's anything for Claude to work through, else grey."
+        "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` " +
+        "P20):  the paper plane sends every unsent mark and comment to Claude (a grey outline with nothing to send, " +
+        "dashed blue with some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, " +
+        "what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did."
     },
     { name: "git", description: "The git toggle:  shows or hides every commit (only when the doc has some)." },
     {
       name: "status",
       description:
-        "The header's right side:  Send and Review Now (while reviewed), the bedtime label, the step label, the git " +
+        "The header's right side:  Send and its countdown (while reviewed), the bedtime label, the step label, the git " +
         "toggle."
     },
     {
@@ -332,25 +328,10 @@ export const epicPageVocabulary = {
       text: "Nothing to send:  mark an item (its buttons) or leave a comment (its bullhorn)",
       description: "Send, no marks or comments."
     },
-    { key: "marksOne", text: "1 mark", description: "Send's and Review Now's count:  one mark." },
-    { key: "marksMany", text: "{count} marks", description: "Send's and Review Now's count:  marks." },
-    { key: "commentsOne", text: "1 comment", description: "Send's and Review Now's count:  one comment." },
-    { key: "commentsMany", text: "{count} comments", description: "Send's and Review Now's count:  comments." },
-    {
-      key: "reviewNowOne",
-      text: "Review Now:  Claude works through {what} at once, answers in its item",
-      description: "Review Now, one mark or comment to work through;  `what` counts it."
-    },
-    {
-      key: "reviewNowMany",
-      text: "Review Now:  Claude works through {what} at once, answers in their items",
-      description: "Review Now, marks or comments to work through;  `what` counts them."
-    },
-    {
-      key: "reviewNowIdle",
-      text: "Review Now:  nothing to work through yet",
-      description: "Review Now, nothing to work through."
-    },
+    { key: "marksOne", text: "1 mark", description: "Send's count:  one mark." },
+    { key: "marksMany", text: "{count} marks", description: "Send's count:  marks." },
+    { key: "commentsOne", text: "1 comment", description: "Send's count:  one comment." },
+    { key: "commentsMany", text: "{count} comments", description: "Send's count:  comments." },
     { key: "reviewLine", text: "To review this doc, type", description: "The review line, before the command." },
     {
       key: "nobodyPill",

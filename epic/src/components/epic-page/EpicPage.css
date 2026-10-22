@@ -187,8 +187,8 @@
   /*
    * at the row's far right, in this order (Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle
    * is) (git icon, but bigger)";  then "Move [Send and Review Now] back to the page header, to the left of P11"):
-   * - Send and Review Now (while reviewed), the bedtime label (when set), the step label (the state in it),
-   *   the git toggle
+   * - Send and its countdown (while reviewed;  Send and Review Now until epic `epic-engine` P20),
+   *   the bedtime label (when set), the step label (the state in it), the git toggle
    * - never on a row of their own:  narrow, they stay put, over the h1's end
    *   (Owen, 2026-10-10:  "They should stay in place and overlap the header instead")
    */
@@ -298,55 +298,16 @@
     outline-offset: 1px;
   }
   /*
-   * ## Send and Review Now, the header's first controls (Owen, 2026-10-10:  "Move back to the page header, to the left
-   *    of P11"):  round, as tall as the labels;  grey with nothing to do, blue by the fill rule (Q20) otherwise
+   * ## Send and its countdown, the header's first controls (Owen, 2026-10-10:  "Move back to the page header, to the
+   *    left of P11";  one group since epic `epic-engine` P20):  `<epic-send-buttons>`, as tall as the labels, its rule
+   *    and grey the page's
    */
-  .send,
-  .review-now {
-    --_tint: var(--ui-blue, #2185d0);
-    display: inline-grid;
-    flex: none;
-    place-items: center;
-    box-sizing: border-box;
-    width: var(--epic-control-size);
-    height: var(--epic-control-size);
-    padding: 0;
-    border: 1px solid var(--epic-rule);
-    border-radius: 50%;
-    background: none;
-    color: var(--epic-muted);
-    cursor: pointer;
-  }
-  /* a little more room after them:  the review's actions, then the epic's labels */
-  .review-now {
+  .send {
+    --epic-send-buttons-size: var(--epic-control-size);
+    --epic-send-buttons-rule: var(--epic-rule);
+    --epic-send-buttons-muted: var(--epic-muted);
+    /* a little more room after it:  the review's controls, then the epic's labels */
     margin-inline-end: 6px;
-  }
-  :is(.send, .review-now) .icon {
-    height: auto;
-    color: inherit;
-  }
-  :is(.send, .review-now):hover {
-    color: var(--_tint);
-  }
-  .send[data-state="unsent"] {
-    border: 2px dashed var(--_tint);
-    color: var(--_tint);
-  }
-  .send[data-state="sent"] {
-    border: 2px solid var(--_tint);
-    color: var(--_tint);
-  }
-  .review-now[data-state="ready"] {
-    border: 2px solid var(--_tint);
-    color: var(--_tint);
-  }
-  .review-now[data-state="ready"]:hover {
-    background: var(--_tint);
-    color: var(--ui-blue-on, #fff);
-  }
-  :is(.send, .review-now):focus-visible {
-    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
-    outline-offset: 1px;
   }
 
   /*

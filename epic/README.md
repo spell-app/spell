@@ -241,8 +241,10 @@ the plane, do it in the next phase;  Revisit;  and the x, drop it.
 _A judgement call on a real epic page, its note box open:  the yellow chip says it's open, and calm;
 Approve, Revisit and Make Todo sit together, Do Now's wand apart._
 
-Nothing you press goes anywhere until Send, in the page's header, hands it all over;
-Review Now does the same AND asks for every revisit to be answered now.
+Nothing you press goes anywhere until Send, in the page's header, hands it all over:
+- you press the paper plane, or
+- countdown mode does it 2 minutes after you stop typing, clicking and scrolling, every revisit asked for now too
+  (the wand beside the plane turns it on and off)
 Do Now is the one that doesn't wait:  a background agent writes the answer into the item, with no Send.
 
 Two more things you'll do on a page, and one you can do from any session:
