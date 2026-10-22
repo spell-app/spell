@@ -124,7 +124,7 @@ Each repo hands it a list, named in the repo's `package.json`:
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
   base["spell-kit, the base<br/>server · bundle · commands · wwod · pony · help"]
-  lang["spell-lang<br/>compile · lint · run · test ... eleven in all"] --> base
+  lang["spell-lang<br/>compile · lint · run · test ... thirteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
   app -. "its language hook does their work" .-> lang
@@ -237,9 +237,10 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 
 ## spell-lang
 
-The language's eleven commands:  build a program, run it, test it, and see what Spell made of what you wrote.
+The language's thirteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
+and check its language packs.
 They're `spell-lang`'s, but their work is `spell-app`'s for now, through its `language` hook
-([above](#each-repo-brings-its-own-commands)).
+([above](#each-repo-brings-its-own-commands));  the language packs' two are the exception, `spell-lang`'s own.
 
 ### Writing and building
 
@@ -433,9 +434,10 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 
 ### Checking the language packs
 
-Spell reads programs in more than one language:  each language pack registers every rule again, with its own words.
-When a rule is added in English, these say which packs still need it, and write the stubs to translate.
-Their work is `spell-lang`'s own, not the hook's:  they read only its rule files.
+Spell reads programs in more than one language:
+each language pack registers every rule again, with its own words.
+- When a rule is added in English, these two say which packs still need it, and write the stubs to translate.
+- Their work is `spell-lang`'s own, not the hook's:  they read only its rule files.
 
 | Command | What it does |
 | --- | --- |
@@ -450,7 +452,7 @@ Their work is `spell-lang`'s own, not the hook's:  they read only its rule files
 | `spell lang packs check --json` | the report as JSON |
 | `spell lang packs fix --ai` | asks `claude -p` to translate each stub, marked `// AI draft:  review` instead;  one it can't keeps the stub |
 
-- `check` reads each rules module's `<module>.en.ts` and `<module>.<lang>.ts` as text, and lists:
+- `check` reads each rules module's files as text, English's (`<module>.en.ts`) and the pack's, and lists:
   - `missing`:  a rule English registers that the pack doesn't
   - `no tests`, `no syntax`:  a registration without them, where English's has them
   - `out of order`:  a registration in another place than English's, so a tie between two rules may go the other way
@@ -462,8 +464,11 @@ Their work is `spell-lang`'s own, not the hook's:  they read only its rule files
   - for one left out:  `// packs: none AThingsProperty -- no "a card's color" in Spanish`
 - `fix` puts each stub after the registration English has before it, and adds the imports it needs.
   A module with no file yet gets one, which the language's `parser.ts` must then import.
-- `--ai` sends `claude` the rule's class docstring, its English registration, the module's translations so far,
-  and the pack's glossary (`languages/<lang>/GLOSSARY.md`), one stub at a time.
+- `--ai` asks Claude for one stub at a time, and sends it:
+  - the rule's class docstring, and its English registration
+  - the module's translations so far
+  - the pack's glossary, e.g. Spanish's
+    [GLOSSARY.md](https://github.com/spell-app/spell-lang/blob/main/src/spell/languages/es/GLOSSARY.md)
 - `fix` writes only what's missing:  translate each stub, then run `check` and the module's rule tests.
 
 </details>
