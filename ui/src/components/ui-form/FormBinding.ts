@@ -1,5 +1,5 @@
 // oxlint-disable-next-line spell-ui/no-solid-effect -- a helper class, not a component:  one effect per bound control, in a root of its own
-import { createEffect, createRoot } from "solid-js"
+import { createEffect } from "solid-js"
 
 import { E, UIT } from "spell-ui/core"
 import { FormFields } from "./FormFields"
@@ -137,7 +137,7 @@ export class FormBinding {
    * - STATIC:  needs only its arguments.
    */
   private static bind(control: Element, name: string, scope: () => unknown): Binding {
-    return createRoot((dispose) => {
+    return E.Reactive.ownRoot((dispose) => {
       createEffect(
         () => FormBinding.valueIn(scope(), name),
         (value) => {
