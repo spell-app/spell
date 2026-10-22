@@ -7,8 +7,8 @@
  *   the runtime builds the toolbar and the sticky titles from `main`'s sections once, at start,
  *   so this script fetches, draws, then adds `spell-ui.js` (same folder), whatever happened.
  * - The data:  the JSON `<body data-choices-rows>` names, from the page:
- *   `packages/spell/spellSyntax.json`, written by `yarn gen:syntax` in `packages/spell`
- *   (`src/node/spellSyntax.ts` has its shape, `SpellSyntaxData`).
+ *   `spell-lang/src/spell/spellSyntax.json`, written by `yarn spell:gen:syntax` in spell-lang
+ *   (spell-lang's `src/spell/node/spellSyntax.ts` has its shape, `SpellSyntaxData`).
  *   - Fetched from the checkout SERVING the page, so each branch shows its own rules.
  *   - From `file://` it says so where the tables go:  the page needs the page server.
  * - Built from elements (`el()`), never from markup in strings.

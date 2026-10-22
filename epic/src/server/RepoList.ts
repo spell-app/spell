@@ -1,6 +1,6 @@
-import { mkdirSync } from "node:fs"
+import { existsSync, mkdirSync } from "node:fs"
 import { homedir } from "node:os"
-import { basename, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { RealPath } from "spell-epic/config/RealPath"
@@ -127,6 +127,12 @@ export class RepoList {
   /**
    * The checkout the pages of checkout `root` are LAID UNDER when served:  where their links to code resolve, so the
    * linker's root (`SRV.Linker`;  epic `epic-engine` I22).
+   * - FIRST, a multi-repo top, or a child repo of one, that shares the top's content folder:  the TOP's checkout
+   *   (`root` itself, for the top;  for a child, the folder above it, the epic's worktree of the top for a child's
+   *   worktree, else the top's main)
+   *   - since epic `repo-split` P16 the top's page server serves that content, from the top's root
+   *   - before epic `readme` P14 this fell through to the first registered repo with the content (spell-app), so a
+   *     guide's `../../spell-ui/...` checked as missing, and `../spell-ui/...` as spell-app's
    * - `root` itself:
    *   - when it holds its own pages (`content` is `root`), or its repo is registered (spell-app, a worktree of it)
    *   - when no registered repo has `content` (another machine's list, a test's made-up checkout)
@@ -138,6 +144,8 @@ export class RepoList {
    */
   linkRootOf(root: string, content = EpicConfig.contentOf(root)): string {
     if (resolve(content) === resolve(root)) return root
+    const top = topCheckoutOf(root, content)
+    if (top) return top
     let repos: Repo[]
     try {
       repos = this.repos()
@@ -223,6 +231,26 @@ export class RepoList {
   static resolved(entry: RepoEntry, isDefault: boolean): Repo {
     const content = new EpicConfig(entry.checkout).contentFolder
     return { ...entry, content, prefix: repoPrefixFor(entry.name), isDefault }
+  }
+}
+
+/**
+ * The top's checkout that serves child repo `root`'s pages (`RepoList.linkRootOf()`), when `root` is a child repo of a
+ * multi-repo top whose content folder is `content`;  else `undefined`.
+ * - the folder above `root` when it is a checkout of the top (a child's worktree sits in the top's), else the top's main
+ * - `root` is the top itself:  `root`
+ * - a single repo, another content folder, or a config that won't read:  `undefined`
+ */
+function topCheckoutOf(root: string, content: string): string | undefined {
+  try {
+    const config = EpicConfig.of(root)
+    const top = config.top
+    if (!top || !RealPath.same(EpicConfig.contentOf(top.main), content)) return undefined
+    if (top === config) return root
+    const above = dirname(resolve(root))
+    return existsSync(join(above, EpicConfig.FILE)) ? above : top.main
+  } catch {
+    return undefined
   }
 }
 
