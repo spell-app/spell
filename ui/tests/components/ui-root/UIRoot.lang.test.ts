@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import type { DOMElement } from "spell-kit/element"
-import { UI } from "spell-ui/core"
+import { E, UI } from "spell-ui/core"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { RootLoader, type UIRoot } from "spell-ui/components/ui-root"
 
@@ -14,8 +14,9 @@ describe("<ui-root lang>:  the page's language", () => {
     await host.ready
     expect(await (host.component as UIRoot).settled).toEqual([])
     expect(customElements.get("es-tarjeta")).toBeDefined()
-    expect(customElements.get("ui-card")).toBeDefined()
-    expect(customElements.get("ui-table")).toBeUndefined()
+    // the root defines every catalog tag early (epic `solid-17` P7):  "its family has loaded" is `isAttached()`
+    expect(E.DOMElement.isAttached("ui-card")).toBe(true)
+    expect(E.DOMElement.isAttached("ui-table")).toBe(false)
     const card = host.querySelector<DOMElement>("es-tarjeta")!
     expect(card.matches(":defined")).toBe(true)
     expect((card as DOMElement & { color: string }).color).toBe("red")
