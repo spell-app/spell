@@ -42,6 +42,7 @@ SpellUI.registerPack({
       import("../epic-review"),
       import("../epic-section"),
       import("../epic-send"),
+      import("../epic-send-buttons"),
       import("../epic-state-filter"),
       import("../epic-status"),
       import("../epic-summary"),

@@ -33,34 +33,10 @@
 }
 
 /*
- * ## Send's pill (a docs page's;  where it sits:  `spell-doc.css`'s page head, or the site's masthead below):  a
- * `<ui-button circular basic size="tiny" icon="paper plane">` (`iconButton()`), blue by the fill rule:  the component's
- * grey ring with nothing waiting, a dashed ring while some aren't sent, a solid one once sent
+ * ## Send (a docs page's;  where it sits:  `spell-doc.css`'s page head, or the site's masthead below):  the epics
+ * pack's `<epic-send-buttons>`, which draws the fill rule and the countdown itself (epic `epic-engine` P20);  then who
+ * is listening, small and quiet
  */
-.spell-send-button > * {
-  pointer-events: none;
-}
-.spell-send[data-state="unsent"] > .spell-send-button::part(button) {
-  box-shadow: none;
-  outline: 2px dashed var(--_tint);
-  outline-offset: -2px;
-  color: var(--_tint);
-}
-.spell-send[data-state="sent"] > .spell-send-button::part(button) {
-  box-shadow: inset 0 0 0 2px var(--_tint);
-  color: var(--_tint);
-}
-.spell-send-count {
-  display: inline-block;
-  margin-inline-start: 6px;
-  min-width: 1.4em;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: var(--_tint);
-  color: var(--ui-blue-on, #fff);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
 .spell-send-who {
   color: var(--spell-muted);
   font-weight: 400;

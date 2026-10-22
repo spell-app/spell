@@ -35,6 +35,7 @@ import { epicQuestionVocabulary } from "spell-epic/components/epic-question/Epic
 import { epicReviewVocabulary } from "spell-epic/components/epic-review/EpicReview.en"
 import { epicSectionVocabulary } from "spell-epic/components/epic-section/EpicSection.en"
 import { epicSendVocabulary } from "spell-epic/components/epic-send/EpicSend.en"
+import { epicSendButtonsVocabulary } from "spell-epic/components/epic-send-buttons/EpicSendButtons.en"
 import { epicHiddenNoteVocabulary } from "spell-epic/components/epic-state-filter/EpicHiddenNote.en"
 import { epicStateFilterVocabulary } from "spell-epic/components/epic-state-filter/EpicStateFilter.en"
 import { epicStatusVocabulary } from "spell-epic/components/epic-status/EpicStatus.en"
@@ -93,6 +94,7 @@ export class Definitions {
     "epic-ask": epicAskVocabulary,
     "epic-text-box": epicTextBoxVocabulary,
     "epic-send": epicSendVocabulary,
+    "epic-send-buttons": epicSendButtonsVocabulary,
     "epic-choice-rows": epicChoiceRowsVocabulary,
     "epic-choice-row": epicChoiceRowVocabulary,
     "epic-choices-bar": epicChoicesBarVocabulary,

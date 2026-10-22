@@ -26,8 +26,9 @@
  *   - the fill:  Approve pressed dashed green, again none;  Make Todo the same
  *   - Revisit on an item with details:  it opens, its box focused;  ten lines grow it;
  *     the box's x saves a skip WITH its note, the id chip dashed in its state's colour
- *   - Revisit on an item without details (one added to the copy):  a box under its line;  a draft saved on Tab, back after a reload;
- *     Later:  a revisit soon, shown under the line, and Edit puts it back in the box
+ *   - Revisit on an item without details (one added to the copy):  a box under its line;  typing turns Revisit on at
+ *     once (epic `epic-engine` P20), saved on Tab;  after a reload, a revisit soon shown under the line;  Edit puts it
+ *     back in the box, and Later keeps it
  *   - Do Now WITH a note (an Overview sub-section):  a revisit now, dashed while nobody listens, the tooltip saying so;
  *     clicked again:  called off, the note back in its box
  *   - a pick on a judgement call's REPLY cards
@@ -45,7 +46,7 @@
  *     - the skip:  reviewed, still open, its note kept as Owen's reply
  *     - the pick approves its call (closed, the reply's set `chosen`, a Noted card `Chose C · ...:  recorded ...`),
  *       its pill SOLID
- *   - Review Now:  the revisit waiting asked now
+ *   - the countdown running out (epic `epic-engine` P20, as Review Now did):  the revisit waiting asked now
  *   - a COMMENT only (Owen, 2026-10-10:  "send button at top of page doesn't appear to be hooked up"):
  *     written into the copy's inbox as the bullhorn would (the comments route takes only the shared folders' pages);
  *     Send turns blue, a click sends it (the inbox's `sent` moves, `unsentComments` empties),
@@ -54,7 +55,7 @@
  *   (read back through `GET /api/epics/review/inbox`)
  * - and at 280px and 900px, light and dark, unless:
  *   - no review control runs past the window, and none sits over its line's title
- *   - every button's glyph is centred in it (within 1px);  the page's round buttons too (Send, Review Now, git)
+ *   - every button's glyph is centred in it (within 1px);  the page's round buttons too (Send's plane and wand, git)
  * - screenshots (outDir, default `demo/shots/`):
  *   `review-<width>-<scheme>.png`, `review-marked.png`, `review-done.png`,
  *   `review-picked.png` / `review-picked-dark.png` (the pick applied)
@@ -206,10 +207,11 @@ async function run() {
   page.on("console", (message) => message.type() === "error" && logs.push(`console:  ${message.text()}`))
   await open(page)
 
-  // Send and Review Now:  in the page header from the start, grey with nothing marked (Owen, 2026-10-10)
+  // Send and its countdown:  in the page header from the start, grey with nothing marked (Owen, 2026-10-10);
+  // countdown mode on by default (decision Q6)
   expect("the header's buttons, nothing marked", await headerState(page), {
     send: "idle",
-    now: "idle",
+    countdown: "true",
     nobody: false,
     inHeader: true
   })
@@ -343,33 +345,35 @@ async function run() {
     { fill: "dashed", color: null }
   )
 
-  // an item without details:  a box under its line, a draft saved on Tab, back after a reload, Later, Edit
+  // an item without details:  a box under its line;  typing turns Revisit on at once (epic `epic-engine` P20:  "when I
+  // type in the revisit box, revisit is automatically on"), saved on Tab;  after a reload, the marked note;  Edit, Later
   await press(page, bare, "revisit")
   await page.waitForTimeout(300)
   await page.keyboard.type(NOTE)
   await page.keyboard.press("Tab")
-  await waitInbox(page, (inbox) => inbox.drafts[bare]?.note === NOTE, `${bare}:  the draft saved on Tab`)
+  await waitInbox(
+    page,
+    (inbox) => inbox.marks[bare]?.action === "revisit" && inbox.marks[bare]?.note === NOTE && !inbox.drafts[bare],
+    `${bare}:  typing turned Revisit on, saved on Tab`
+  )
+  expect(`${bare}'s Revisit, turned on by typing:  dashed blue`, await buttonState(page, bare, "revisit"), {
+    fill: "dashed",
+    color: "blue"
+  })
   const floppy = await page.evaluate((id) => rootOf(id).querySelector(".note-saved")?.getAttribute("title") ?? "", bare)
   if (!/^Saved/.test(floppy)) problems.push(`${bare}:  the floppy says "${floppy}", not Saved`)
   await open(page)
   const bubble = await page.evaluate((id) => !!rootOf(id).querySelector(".review-noted"), bare)
-  if (!bubble) problems.push(`${bare}:  no note bubble for its draft after a reload`)
-  await page.evaluate((id) => (document.getElementById(id).open = true), bare)
-  await page.waitForTimeout(600)
-  expect(`${bare}'s box after a reload`, await noteValue(page, bare), NOTE)
-  await page.evaluate((id) => rootOf(id).querySelector("textarea").focus(), bare)
-  await noteButton(page, bare, "soon")
-  await expectMark(page, bare, { action: "revisit", when: "soon", note: NOTE }, "Later")
+  if (!bubble) problems.push(`${bare}:  no note bubble for its revisit after a reload`)
   const saidNote = await page.evaluate((id) => rootOf(id).querySelector(".said")?.textContent ?? "", bare)
   if (!saidNote.includes("revisit soon") || !saidNote.includes(NOTE))
     problems.push(`${bare}:  the said note reads "${saidNote}"`)
-  expect(`${bare}'s Revisit, unsent:  dashed blue`, await buttonState(page, bare, "revisit"), {
-    fill: "dashed",
-    color: "blue"
-  })
   await page.locator(`#${bare} .said-edit`).click()
   await page.waitForTimeout(300)
   expect(`${bare}:  Edit puts the note back`, await noteValue(page, bare), NOTE)
+  await page.evaluate((id) => rootOf(id).querySelector("textarea").focus(), bare)
+  await noteButton(page, bare, "soon")
+  await expectMark(page, bare, { action: "revisit", when: "soon", note: NOTE }, "Later")
   // left in the box, not changed:  the mark stays as it was
   await page.keyboard.press("Escape")
 
@@ -428,16 +432,16 @@ async function run() {
   // the header's Send:  unsent marks, its tooltip saying nobody listens;  a click sends;  the marks outlined
   expect("the header's buttons, marks unsent", await headerState(page), {
     send: "unsent",
-    now: "ready",
+    countdown: "true",
     nobody: true,
     inHeader: true
   })
-  await page.locator("epic-page button.send").click()
+  await page.locator('epic-page epic-send-buttons [part~="send"]').click()
   await waitInbox(page, (inbox) => !!inbox.sent, "Send:  the marks sent")
   await page.waitForTimeout(200)
   expect("the header's buttons, marks sent", await headerState(page), {
     send: "sent",
-    now: "ready",
+    countdown: "true",
     nobody: true,
     inHeader: true
   })
@@ -555,22 +559,28 @@ async function run() {
   await page.locator(`#${question}`).scrollIntoViewIfNeeded()
   await page.screenshot({ path: join(out, "review-done.png") })
 
-  // Review Now:  the revisit waiting (sent, to talk over) asked now
-  await page.locator("epic-page button.review-now").click()
+  // the countdown running out (epic `epic-engine` P20;  its 2 minutes are the element's own test's, on a fake clock):
+  // the revisit waiting (sent, to talk over) asked now, as Review Now did (decision Q7)
+  await page.evaluate(() =>
+    document
+      .querySelector("epic-page")
+      .shadowRoot.querySelector("epic-send-buttons")
+      .dispatchEvent(new CustomEvent("epic-send-asked", { detail: { auto: true }, bubbles: true, composed: true }))
+  )
   await waitInbox(
     page,
     (inbox) => inbox.now.some((each) => each.id === bare),
-    `Review Now:  ${bare}'s revisit asked now`
+    `the countdown's send:  ${bare}'s revisit asked now`
   )
 
-  // a COMMENT only:  Claude takes what Review Now asked first, so only the comment waits for Send
+  // a COMMENT only:  Claude takes what the countdown's send asked first, so only the comment waits for Send
   await tool.run(["inbox", docName, "wait", "--timeout", "5", "--json"])
   // as the bullhorn writes it:  the comments route takes only the shared folders' pages, never this copy
   ReviewInbox.update(inboxFile, (box) => void box.commentList.add({ anchor: question, kind: "item" }, COMMENT))
   await waitHeader(page, (state) => state.send === "unsent", "Send, with only a comment waiting:  blue (unsent)")
   const unsent = await readInbox(page)
   expect("the inbox:  the comment unsent", unsent.unsentComments, ["m1"])
-  await page.locator("epic-page button.send").click()
+  await page.locator('epic-page epic-send-buttons [part~="send"]').click()
   await waitInbox(
     page,
     (inbox) => inbox.sent !== unsent.sent && inbox.unsentComments.length === 0,
@@ -663,11 +673,17 @@ function measure(width) {
         found.push(`${host.id}'s ${button.dataset.action} glyph off centre by ${dx.toFixed(1)}, ${dy.toFixed(1)}`)
     }
   }
-  // the header's round buttons (Send, Review Now, the git toggle):  in the window, centred
+  // the header's round buttons (Send's plane and wand, the git toggle):  in the window, centred
   const head = document.querySelector("epic-page")?.shadowRoot
-  for (const button of head?.querySelectorAll("button.send, button.review-now, button.git") ?? []) {
+  const round = [
+    ...(head?.querySelector("epic-send-buttons")?.shadowRoot?.querySelectorAll("button") ?? []),
+    ...(head?.querySelectorAll("button.git") ?? [])
+  ]
+  for (const button of round) {
     const outer = button.getBoundingClientRect()
-    const icon = button.querySelector("svg")?.getBoundingClientRect()
+    const icon = (
+      button.querySelector("svg:not(.ring)") ?? button.querySelector("ui-icon")?.shadowRoot?.querySelector("svg")
+    )?.getBoundingClientRect()
     if (outer.right > width + 0.5) found.push(`the header's ${button.className} runs past the window`)
     if (!icon) continue
     const dx = Math.abs(outer.left + outer.width / 2 - (icon.left + icon.width / 2))
@@ -872,19 +888,19 @@ function attribute(page, id, name) {
 }
 
 /**
- * The page header's Send and Review Now, as drawn:  their states, whether Send says nobody listens,
- * and whether both sit in the sticky header.
+ * The page header's Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20), as drawn:  Send's state,
+ * the countdown's mode (`aria-pressed`), whether the plane says nobody listens, and whether it sits in the sticky header.
  */
 function headerState(page) {
   return page.evaluate((nobody) => {
-    const root = document.querySelector("epic-page").shadowRoot
-    const send = root.querySelector("button.send")
-    const now = root.querySelector("button.review-now")
+    const group = document.querySelector("epic-page").shadowRoot.querySelector("epic-send-buttons")
+    const plane = group?.shadowRoot?.querySelector('[part~="send"]')
+    const wand = group?.shadowRoot?.querySelector('[part~="countdown"]')
     return {
-      send: send?.dataset.state ?? null,
-      now: now?.dataset.state ?? null,
-      nobody: new RegExp(nobody).test(send?.title ?? ""),
-      inHeader: !!send?.closest("header") && !!now?.closest("header")
+      send: group?.getAttribute("state") ?? null,
+      countdown: wand?.getAttribute("aria-pressed") ?? null,
+      nobody: new RegExp(nobody).test(plane?.title ?? ""),
+      inHeader: !!group?.closest("header")
     }
   }, NOBODY.source)
 }

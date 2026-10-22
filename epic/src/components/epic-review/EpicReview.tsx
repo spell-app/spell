@@ -61,7 +61,9 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - Revisit and Edit take the reader to the note box (`takeToNote()`):
  *   - `epic-show-note`, so the family unfolds
  *   - then the box beside it (the `<epic-review shows="note">` of the same shadow root) takes the focus
- *   - a judgement call's or todo's EMPTY box gets "do it", selected and saved as the draft (Owen, 2026-10-19)
+ *   - a judgement call's or todo's EMPTY box gets "do it", selected, Revisit turning on with it (Owen, 2026-10-19,
+ *     2026-10-22)
+ * - Typing in the note box turns Revisit on, and never closes it (`ReviewClient.saveTyped()`;  epic `epic-engine` P20).
  * - A button that chose an action (a review button, a note box button) sends `epic-chosen`:
  *   `<epic-item>` folds, so Owen moves on to the next (Owen, 2026-10-10).
  * - SIDE EFFECT:  the note box listens for `pagehide` while connected, to save a draft as the page goes.
@@ -334,8 +336,11 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    * - a todo's buttons (`TODO_NOTE_BUTTONS`), in its line's order:
    *   the plane (green), Revisit Later, the x (grey:  drop it)
    * - Do Now is the line's (decision Q20):  it takes the note along
-   * - SAVED as typed:  to the inbox as a draft, `DRAFT_SAVE_MS` after the last key,
-   *   and at once when the box loses focus or the page goes away (`watchPageHide()`)
+   * - SAVED as typed, `DRAFT_SAVE_MS` after the last key, and at once when the box loses focus or the page goes away
+   *   (`watchPageHide()`)
+   *   - as the mark it makes (`ReviewClient.saveTyped()`;  epic `epic-engine` P20):  words typed turn Revisit ON, at
+   *     the first key, so Send and the countdown hand them over;  the box stays open under the cursor
+   *   - a request at work, or an emptied box with no revisit:  a draft, as before
    *   - the floppy says Saved (its tooltip:  when), or turns red with why not
    *   - a localStorage backup too, for a save that fails (`ReviewClient.type()`)
    * - a button makes the note a mark, then empties the box;  Escape leaves it, the draft kept (`leaveNote()`)
@@ -430,13 +435,21 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     }
   }
 
-  /** A key typed:  kept and backed up at once, saved to the inbox once typing stops. */
+  /**
+   * A key typed:  kept and backed up at once, saved to the inbox once typing stops.
+   * - the first words on an item with no note mark yet are saved AT ONCE:  Revisit turns on as he types (P20)
+   */
   @E.untracked
   private onInput() {
-    this.review.client?.type(this.review.id(), this.noteInput!.value)
+    const client = this.review.client
+    const id = this.review.id()
+    const text = this.noteInput!.value
+    client?.type(id, text)
     this.saved = undefined
     this.saveTimer?.cancel()
     this.saveTimer = E.after(DRAFT_SAVE_MS / 1000, () => void this.saveDraft())
+    const made = client?.typedMark(id, text)
+    if (made && made !== "draft" && made.action !== client?.markOf(id)?.action) this.flush()
   }
 
   /** Escape:  leave the box, the draft saved. */
@@ -483,14 +496,14 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     void this.saveDraft({ keepalive })
   }
 
-  /** Save the note as the element's draft;  the floppy says how it went. */
+  /** Save the note as the mark it makes, else as the element's draft (`ReviewClient.saveTyped()`);  the floppy says how. */
   private async saveDraft({ keepalive = false } = {}) {
     this.saveTimer = undefined
     const client = this.review.client
     const note = this.noteInput
     if (!client || !note) return
     const text = note.value
-    const ok = await client.saveDraft(this.review.id(), text, { keepalive })
+    const ok = await client.saveTyped(this.review.id(), text, { keepalive })
     if (note.value !== text) return
     if (!ok) this.saved = { ok: false }
     else this.saved = text.trim() ? { ok: true, at: new Date().toISOString() } : undefined
@@ -566,7 +579,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *    (details just opened may not be drawn yet, a part may still be loading)
    * - Edit (`note`):  the marked note goes back in the box, unless something is typed there already
    * - Revisit on a judgement call or a todo whose box is EMPTY (no draft, no earlier note):  "do it" in it, as if
-   *   Owen had typed it (`DO_IT_NOTE`;  Owen, 2026-10-19), selected and saved as the draft (`fillIn()`)
+   *   Owen had typed it (`DO_IT_NOTE`;  Owen, 2026-10-19), selected, and saved at once:  Revisit turns ON with it
+   *   (`fillIn()`;  Owen, 2026-10-22:  "turn revision on, add 'do it' and focus the text in the field")
    */
   @E.untracked
   private takeToNote(note?: string) {
@@ -597,8 +611,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   }
 
   /**
-   * Only the note box:  `text` in its EMPTY note, as if typed (kept, backed up, saved as the draft at once), and
-   * selected, so the first key typed replaces it.  A note holding words is left alone.
+   * Only the note box:  `text` in its EMPTY note, as if typed (kept, backed up, saved at once:  Revisit turns on with
+   * it), and selected, so the first key typed replaces it.  A note holding words is left alone.
    */
   @E.untracked
   fillIn(text: string) {

@@ -3157,7 +3157,7 @@
         {
           "name": "reviewing",
           "kind": "boolean",
-          "description": "PAGE state, never in a doc:  the page is being reviewed -- served by the page server with a token, its review inbox answering -- so items and Overview parts show their review controls, and the header Send and Review Now.  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
+          "description": "PAGE state, never in a doc:  the page is being reviewed -- served by the page server with a token, its review inbox answering -- so items and Overview parts show their review controls, and the header Send and its countdown.  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
         }
       ],
       "slots": [
@@ -3190,7 +3190,7 @@
         },
         {
           "name": "header",
-          "description": "The sticky page header:  the h1, then at its right Send and Review Now (while reviewed), the bedtime label, the step label (the state in it) and the git toggle."
+          "description": "The sticky page header:  the h1, then at its right Send and its countdown (while reviewed), the bedtime label, the step label (the state in it) and the git toggle."
         },
         {
           "name": "heading",
@@ -3218,11 +3218,7 @@
         },
         {
           "name": "send",
-          "description": "In the header while the page is reviewed, the paper plane:  every unsent mark and comment to Claude.  A grey outline with nothing to send, dashed blue with unsent marks or comments, outlined blue once sent."
-        },
-        {
-          "name": "review-now",
-          "description": "In the header while the page is reviewed, the wand:  every mark sent, each revisit asked now.  Outlined blue while there's anything for Claude to work through, else grey."
+          "description": "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20):  the paper plane sends every unsent mark and comment to Claude (a grey outline with nothing to send, dashed blue with some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did."
         },
         {
           "name": "git",
@@ -3230,7 +3226,7 @@
         },
         {
           "name": "status",
-          "description": "The header's right side:  Send and Review Now (while reviewed), the bedtime label, the step label, the git toggle."
+          "description": "The header's right side:  Send and its countdown (while reviewed), the bedtime label, the step label, the git toggle."
         },
         {
           "name": "state",
@@ -3497,37 +3493,22 @@
         {
           "key": "marksOne",
           "text": "1 mark",
-          "description": "Send's and Review Now's count:  one mark."
+          "description": "Send's count:  one mark."
         },
         {
           "key": "marksMany",
           "text": "{count} marks",
-          "description": "Send's and Review Now's count:  marks."
+          "description": "Send's count:  marks."
         },
         {
           "key": "commentsOne",
           "text": "1 comment",
-          "description": "Send's and Review Now's count:  one comment."
+          "description": "Send's count:  one comment."
         },
         {
           "key": "commentsMany",
           "text": "{count} comments",
-          "description": "Send's and Review Now's count:  comments."
-        },
-        {
-          "key": "reviewNowOne",
-          "text": "Review Now:  Claude works through {what} at once, answers in its item",
-          "description": "Review Now, one mark or comment to work through;  `what` counts it."
-        },
-        {
-          "key": "reviewNowMany",
-          "text": "Review Now:  Claude works through {what} at once, answers in their items",
-          "description": "Review Now, marks or comments to work through;  `what` counts them."
-        },
-        {
-          "key": "reviewNowIdle",
-          "text": "Review Now:  nothing to work through yet",
-          "description": "Review Now, nothing to work through."
+          "description": "Send's count:  comments."
         },
         {
           "key": "reviewLine",
@@ -4488,7 +4469,7 @@
         "send bar",
         "answer"
       ],
-      "description": "A details page's Send, in its sticky header (epic `epic-workflow` P12):  where the answer stands (`Not sent`, `Changes not sent`, `Sent 10/8/26 14:34 · 5 of 17 decided`), then a round blue Send.  It sends the whole page, partial answers too, as often as Owen likes:  the page never locks.  Beside them, the draft's save (P18):  what's typed and not sent is kept in the browser at once and beside the page as Owen types, and comes back when it reloads;  a save that fails says so in red under them, and tries again every 3s.  After the button, who hears it (epic `epic-engine` r6):  `repo-split is listening` while a session's `epic ask wait` waits for the answer, else `nobody is waiting yet`;  Send works either way, and with nobody waiting says the answer is saved for Claude's next look.  Once a page.",
+      "description": "A details page's Send, in its sticky header (epic `epic-workflow` P12):  where the answer stands (`Not sent`, `Changes not sent`, `Sent 10/8/26 14:34 · 5 of 17 decided`), then Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20).  It sends the whole page, partial answers too, as often as Owen likes:  the page never locks;  with countdown mode on, by itself 2 minutes after he stops.  Beside them, the draft's save (P18):  what's typed and not sent is kept in the browser at once and beside the page as Owen types, and comes back when it reloads;  a save that fails says so in red under them, and tries again every 3s.  After the button, who hears it (epic `epic-engine` r6):  `repo-split is listening` while a session's `epic ask wait` waits for the answer, else `nobody is waiting yet`;  Send works either way, and with nobody waiting says the answer is saved for Claude's next look.  Once a page.",
       "noun": "send",
       "attributes": [],
       "slots": [],
@@ -4508,7 +4489,7 @@
         },
         {
           "name": "send",
-          "description": "The round Send (`<ui-button>`), by the fill rule:  a grey outline with nothing to send, dashed blue with changes not sent, a blue outline once sent."
+          "description": "Send and its countdown (`<epic-send-buttons>`), by the fill rule:  a grey outline with nothing to send, dashed blue with changes not sent, a blue outline once sent;  `data-fill` the form's (`rest`, `pending`, `sent`)."
         },
         {
           "name": "who",
@@ -4535,14 +4516,139 @@
       ],
       "texts": [
         {
-          "key": "send",
-          "text": "Send",
-          "description": "The button's name, for a screen reader."
-        },
-        {
           "key": "sendTip",
           "text": "Send what's on the page:  a partial answer is fine, send again any time",
-          "description": "The button's tooltip."
+          "description": "The plane's tooltip and name (`<epic-send-buttons send-tip>`)."
+        }
+      ]
+    },
+    {
+      "tag": "epic-send-buttons",
+      "name": "epic-send-buttons",
+      "folder": "epic-send-buttons",
+      "mainTag": "epic-send-buttons",
+      "main": true,
+      "page": true,
+      "href": "epic-send-buttons.html",
+      "topics": [
+        "answering"
+      ],
+      "aka": [
+        "send",
+        "send button",
+        "countdown",
+        "auto send",
+        "paper plane",
+        "wand"
+      ],
+      "description": "Send and its countdown, ONE group (epic `epic-engine` P20):  the paper plane sends;  the wand turns COUNTDOWN MODE on and off.  With it on and something not sent, a ring round the wand drains for 2 minutes, starting again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by default, and remembered in this browser for every page.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
+      "noun": "send-buttons",
+      "attributes": [
+        {
+          "name": "state",
+          "kind": "enum",
+          "values": [
+            "idle",
+            "unsent",
+            "sent"
+          ],
+          "description": "Where what the owner sends stands, by the fill rule:  `idle` (nothing to send:  a grey outline), `unsent` (something not sent:  dashed blue, the countdown runs), `sent` (a blue outline).  Default:  `idle`."
+        },
+        {
+          "name": "send-tip",
+          "kind": "string",
+          "description": "The paper plane's tooltip and name:  what a press sends (`Send 2 marks, 1 comment to Claude`).  Default:  `Send`."
+        },
+        {
+          "name": "count",
+          "kind": "number",
+          "description": "How many things a press would send, a small badge on the plane;  0 or none:  no badge."
+        },
+        {
+          "name": "busy",
+          "kind": "boolean",
+          "description": "A send on its way:  the plane spins, and a press does nothing."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "epic-send-asked",
+          "detail": "{ auto }",
+          "description": "A send asked for:  the paper plane pressed (`auto` false), or the countdown ran out (`auto` true).  The owner sends;  a countdown's send asks every revisit now, as Review Now did (decision Q7)."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The group:  one pill, the plane's end and the wand's."
+        },
+        {
+          "name": "send",
+          "description": "The paper plane, a `<button>`:  `data-state`, filled blue while it waits for a press."
+        },
+        {
+          "name": "count",
+          "description": "The badge on the plane:  how many things a press sends."
+        },
+        {
+          "name": "countdown",
+          "description": "The wand, a `<button aria-pressed>`:  countdown mode on (blue) or off (grey)."
+        },
+        {
+          "name": "ring",
+          "description": "The countdown's ring round the wand, draining as the 2 minutes run;  only while it runs."
+        }
+      ],
+      "states": [
+        {
+          "name": "countdown",
+          "description": "Countdown mode is on."
+        },
+        {
+          "name": "counting",
+          "description": "The countdown is running:  something waits, and the ring drains."
+        },
+        {
+          "name": "waiting",
+          "description": "Countdown mode is off and something isn't sent:  the plane is filled blue."
+        }
+      ],
+      "texts": [
+        {
+          "key": "group",
+          "text": "Send",
+          "description": "The group's name, for a screen reader."
+        },
+        {
+          "key": "send",
+          "text": "Send",
+          "description": "The plane's tooltip and name, when the owner gives none (`send-tip`)."
+        },
+        {
+          "key": "countdownOn",
+          "text": "Countdown on:  {when}.  Click to send only when you press the plane",
+          "description": "The wand's tooltip, mode on;  `{when}` says when it sends."
+        },
+        {
+          "key": "countdownOff",
+          "text": "Countdown off:  press the plane to send.  Click to send by itself 2 minutes after you stop",
+          "description": "The wand's tooltip, mode off."
+        },
+        {
+          "key": "whenCounting",
+          "text": "sends by itself in {time} unless you keep typing, clicking or scrolling",
+          "description": "When a running countdown sends;  `{time}` like `1:42`."
+        },
+        {
+          "key": "whenIdle",
+          "text": "what you leave unsent goes by itself 2 minutes after you stop",
+          "description": "When it sends, with nothing waiting yet."
+        },
+        {
+          "key": "countdownName",
+          "text": "Countdown",
+          "description": "The wand's name, for a screen reader (its state is `aria-pressed`)."
         }
       ]
     },
@@ -6313,6 +6419,18 @@
       "docs": false,
       "tags": [
         "epic-send"
+      ],
+      "tokens": []
+    },
+    "epic-send-buttons": {
+      "folder": "epic-send-buttons",
+      "mainTag": "epic-send-buttons",
+      "title": "<epic-send-buttons>",
+      "summary": "The <epic-send-buttons> element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-send-buttons"
       ],
       "tokens": []
     },

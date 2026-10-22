@@ -341,7 +341,8 @@ async function checkWidth(width) {
     send?.state === "unsent" && /^(feedback is listening|nobody is listening:  Send wakes feedback)$/.test(send.who),
     JSON.stringify(send)
   )
-  await page.click(".site-masthead > .spell-send > .spell-send-button")
+  // Send's plane, in its `<epic-send-buttons>` (epic `epic-engine` P20)
+  await page.locator('.site-masthead > .spell-send > epic-send-buttons [part~="send"]').click()
   await page.waitForSelector('.site-masthead > .spell-send[data-state="sent"]', { timeout: 5000 }).catch(() => {})
   check(`${name}:  a click on Send sends them`, !!(await page.$('.site-masthead > .spell-send[data-state="sent"]')))
   check(`${name}:  the inbox says they were sent`, !!GuideInbox.read(inbox(element)).sent)

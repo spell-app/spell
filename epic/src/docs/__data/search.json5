@@ -1506,6 +1506,53 @@
       ]
     },
     {
+      "path": "epic-send-buttons.html",
+      "title": "<epic-send-buttons>",
+      "summary": "The <epic-send-buttons> element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off.",
+      "tag": "epic-send-buttons",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-the-countdown",
+          "title": "3. The countdown"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-send-buttons-parts",
+          "title": "Parts",
+          "parent": 3
+        },
+        {
+          "id": "epic-send-buttons-states",
+          "title": "States",
+          "parent": 3
+        },
+        {
+          "id": "epic-send-buttons-events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
       "path": "epic-send.html",
       "title": "<epic-send>",
       "summary": "A details page's Send: where the answer stands, and the round button that sends it.",
