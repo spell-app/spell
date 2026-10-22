@@ -41,3 +41,31 @@ export function refused() {
     </>
   )
 }
+
+/**
+ * Events:  `on-<event>` with its `event.detail` typed, and `addEventListener()` in plain DOM code.
+ * - A misspelt `on-ui-chnage` can't be tested here:  TypeScript never checks a dashed JSX name it doesn't know
+ *   (the kit's TS plugin warns on it instead), so only a known name's listener is checked.
+ */
+export function events() {
+  const button = document.querySelector("ui-button")!
+  button.addEventListener("ui-toggle", (event) => event.detail.active satisfies boolean)
+  // @ts-expect-error:  `ui-toggle`'s detail has no `value`
+  button.addEventListener("ui-toggle", (event) => event.detail.value)
+  // any element or the document:  the name completes, but any set may send it, so its detail is `unknown`
+  document.addEventListener("ui-change", (event) => event.detail satisfies unknown)
+  // @ts-expect-error:  `unknown` until it's narrowed
+  document.body.addEventListener("ui-change", (event) => event.detail.value)
+  return (
+    <>
+      <ui-input on-ui-change={(event) => event.detail.value satisfies string} />
+      <ui-rating on-ui-change={(event) => event.detail.value satisfies number} />
+      <ui-button on-ui-toggle={(event) => event.detail.active} on-ui-chnage={() => {}} />
+      <ui-button ref={(element) => element.addEventListener("ui-toggle", (event) => event.detail.active)} />
+      {/* @ts-expect-error:  `<ui-button>`'s `ui-toggle` has no `value` */}
+      <ui-button on-ui-toggle={(event) => event.detail.value} />
+      {/* @ts-expect-error:  a listener takes the event, not its detail */}
+      <ui-input on-ui-change={(detail: { value: number }) => detail.value} />
+    </>
+  )
+}

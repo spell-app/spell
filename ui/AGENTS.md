@@ -430,7 +430,8 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `search.json5`:  every page's sections
   - Written by `yarn site:data`;  with them, the editors' manifests:
     `custom-elements.json`, `html-custom-data.json`;
-    and, in `src/`, the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell-ui/jsx`).
+    and, in `src/`, the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell-ui/jsx`):
+    its attributes and events, and each tag's element in the DOM's types (`querySelector("ui-button")`).
     - They type-check in Spell UI's main program, so its own JSX (the docs elements') uses them;
       their test, `tests/jsx/`, in the tests' program.
   - Their shapes, `SiteDataFile` / `SiteIconsFile` / `SiteSearchFile`:
@@ -990,6 +991,11 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     - Rich data as `prop:options` ([the Solid 2 rules](../spell.epics/guides/solid/solid-2.md), "DOM and `spell-ui` elements").
   - A THIRD-PARTY Solid app listening for `ui-*` events uses a `ref` callback + `addEventListener`
     ([the Solid host app](src/tools/frameworks/solid/app.tsx)).
+    - `spell-ui/jsx` types them:  the `ref`'s element knows its tag's events, `event.detail` too;
+      and `on-ui-change` per event, typed, which Solid calls once epic `solid-17` lands
+      ([README-frameworks.md](README-frameworks.md), "Events").
+    - So an event's `detail` in its vocabulary is TypeScript:  a Spell UI type it names goes in
+      `JSX_DETAIL_TYPES` ([the element manifests](src/tools/ElementManifests.ts)), else `yarn site:data` throws.
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".
   - Listeners OUTSIDE a component see `event.target === domElement` (`composedPath()[0]` is the inner element),
     and an app's delegated `onClick` on a `ui-*` tag runs once.

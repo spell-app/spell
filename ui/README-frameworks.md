@@ -307,6 +307,29 @@ import type {} from "spell-ui/jsx"
 - It augments `@solidjs/web/types/jsx.js`, not `@solidjs/web`, which only re-exports `JSX`.
 - Other frameworks' JSX (React's, Preact's):  no types yet;  declare the tags in your own program.
 
+### Events:  `event.detail` typed, in JSX and in plain DOM code
+
+Every event a tag sends is typed, its `detail` too, from the same vocabularies:
+
+```tsx
+<ui-input on-ui-change={(event) => setName(event.detail.value)} />
+
+const button = document.querySelector("ui-button")!
+button.addEventListener("ui-toggle", (event) => setActive(event.detail.active))
+```
+
+- In JSX:  `on-` plus the event's name, `on-ui-change`, one per event the tag sends.
+  - **Typed only, for now:  Solid calls it once Solid's custom event props land (epic `solid-17`).**
+    Until then, listen from a `ref`, as above.
+  - A misspelt `on-ui-chnage` isn't an error (it has a dash);  the kit's TypeScript plugin warns on it.
+- In plain DOM code:  `querySelector("ui-button")` gives a `<ui-button>` whose `addEventListener()` knows its events,
+  and so does a JSX `ref`'s element.
+  - Only its events:  for its other members (`value`, `open()` ...), cast to its class.
+- On any other element, or the document, every `ui-*` name completes, but its `detail` is `unknown`.
+  - The same name is many tags' (`ui-change` is 18 of Spell UI's, and other sets' too), each with its own `detail`.
+  - Narrow it yourself, or listen on the tag.
+- Each tag's own events, by name:  `UIInputEventMap` ..., exported by `spell-ui/jsx`.
+
 ## Using it today:  the kit's build and an import map
 
 Spell UI isn't on npm yet, so a framework app uses the build in a checkout of the kit:

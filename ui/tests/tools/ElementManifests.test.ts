@@ -37,6 +37,27 @@ describe("ElementManifests.jsxTypes()", () => {
     expect(text).toContain("  options?: unknown")
     expect(text).toContain('  "prop:options"?: unknown')
   })
+
+  test("types every tag's events:  its own map, `on-<event>`, and the DOM's maps", () => {
+    const text = new ElementManifests({ data: DATA, packageFolder: UI }).jsxTypes()
+    expect(text).toContain("export interface UIButtonEventMap {")
+    expect(text).toContain('  "on-ui-toggle"?: (event: UIButtonEventMap["ui-toggle"]) => void')
+    expect(text).toContain('    "ui-button": UIHTMLElement<UIButtonEventMap>')
+    expect(text).toContain('  "ui-change": CustomEvent<unknown>')
+    expect(text).toContain("reason: UIT.ModalCloseReason")
+  })
+})
+
+describe("ElementManifests.jsxDetailType()", () => {
+  test("qualifies Spell UI's type names, keeps the DOM's, and throws for one it doesn't know", () => {
+    const tag = DATA.components.find((it) => it.tag === "ui-form")!
+    const detail = (text: string) =>
+      ElementManifests.jsxDetailType(tag, { name: "ui-x", detail: text, description: "" })
+    expect(detail("{ value: FieldValue, item: Element, kind: 'Big' }")).toBe(
+      "{ value: E.FieldValue, item: Element, kind: 'Big' }"
+    )
+    expect(() => detail("{ row: TableRow }")).toThrow(/`TableRow`/)
+  })
 })
 
 describe("ElementManifests.customElements()", () => {

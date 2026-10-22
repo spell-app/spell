@@ -232,6 +232,7 @@ export type SiteEvent = {
   readonly detail: string
   /** `preventDefault()` vetoes it */
   readonly cancelable?: boolean
+  /** what it means, in the docs */
   readonly description: string
 }
 

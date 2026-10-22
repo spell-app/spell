@@ -155,7 +155,10 @@ export class SiteSections {
   /** Unfold every section around `target` (and `target`, a section), without the animation;  true if any was. */
   private static unfold(main: HTMLElement, target: Element): boolean {
     let hasUnfolded = false
-    for (let section = target.closest(SECTION_TAG) ?? undefined; section && main.contains(section);) {
+    for (
+      let section: Element | undefined = target.closest(SECTION_TAG) ?? undefined;
+      section && main.contains(section);
+    ) {
       if (section.hasAttribute(COLLAPSED)) {
         if (!hasUnfolded) SiteSections.instantly(main)
         // controlled:  writing it announces nothing, so it isn't saved

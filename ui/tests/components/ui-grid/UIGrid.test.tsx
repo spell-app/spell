@@ -27,7 +27,7 @@ function inBox(width: number, html: string) {
 }
 
 /** Width of each `<ui-column>` root under `box`, as a fraction of its grid root's width. */
-function fractions(box: Element, grid = box.querySelector("ui-grid")!): number[] {
+function fractions(box: Element, grid: Element = box.querySelector("ui-grid")!): number[] {
   const total = rootOf(grid).getBoundingClientRect().width
   return [...grid.querySelectorAll(":scope > ui-column, :scope > ui-row > ui-column")].map(
     (column) => rootOf(column).getBoundingClientRect().width / total

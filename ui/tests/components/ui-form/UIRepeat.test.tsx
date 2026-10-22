@@ -148,7 +148,7 @@ describe("<ui-repeat>", () => {
     const [milk, eggs] = [new Task("Milk"), new Task("Eggs")]
     list.tasks = [milk]
     const { repeat } = await bound(`<ui-repeat name="nothing">${TASK_ROW}</ui-repeat>`, list)
-    const repeating = repeat as Element & { items: unknown }
+    const repeating = repeat as HTMLElement & { items: unknown }
     repeating.items = [eggs, milk]
     await settle()
     expect(titles(repeat)).toEqual(["Eggs", "Milk"])

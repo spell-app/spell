@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import type { SiteAttribute, SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import type { SiteAttribute, SiteDataFile, SiteEvent, SiteTag } from "spell-ui/docs-components/docs-components.types"
 import { SRV } from "spell-kit/server"
 import type { CustomElementsManifest, HtmlCustomData } from "./tools.types.ts"
 
@@ -17,7 +17,7 @@ import { FamilyFiles } from "./FamilyFiles.ts"
  * - `html-custom-data.json`:  VS Code's HTML custom data (`html.customData`),
  *   autocomplete and hover docs for every `<ui-*>` tag, attribute and value in any `.html` file
  *   - the repo's `.vscode/settings.json` loads it
- * - `src/jsx.ts` (`spell-ui/jsx`, `jsxTypes()`):  every tag's attributes as TypeScript types for Solid's JSX,
+ * - `src/jsx.ts` (`spell-ui/jsx`, `jsxTypes()`):  every tag's attributes and events as TypeScript types for Solid's JSX,
  *   so VS Code completes, explains and checks `<ui-*>` tags in a `.tsx` file of any program that imports it
  * - Written by `yarn site:data`, and committed:  editors read them with no build.
  *   - The two manifests beside `components.json5`;  the JSX types in `src/`, as code imports them.
@@ -201,7 +201,9 @@ export class ElementManifests {
    * - Per tag, two interfaces:
    *   - `<Class>Attributes`:  the attributes its vocabulary names, aliases too, and its rich (`json`) properties
    *   - `<Class>JSXAttributes`:  those, plus HTML's global ones (`class`, `id`, `slot`, `onClick`, `aria-*` ...)
+   *   - and `<Class>EventMap`, for a tag that sends events:  each event's `CustomEvent`, its `detail` typed
    * - Then Solid's `JSX.IntrinsicElements` entry per tag, with its hover docs.
+   * - Then the DOM's own maps (`jsxDomMaps()`):  each tag's element, and every event name.
    * - EXACT:  a name the vocabulary doesn't give is an error.
    *   - Except a dashed one (`sise-x`):  TypeScript never checks a JSX attribute name with a dash in it.
    * - throws if two tags would get the same type name
@@ -222,14 +224,51 @@ export class ElementManifests {
         `      "${tag.tag}": ${this.className(tag)}JSXAttributes`
       )
     }
-    lines.push("    }", "  }", "}", "")
+    lines.push("    }", "  }", "}", "", ...this.jsxDomMaps())
     return lines.join("\n")
+  }
+
+  /**
+   * The DOM's own maps (`jsxTypes()`), so plain DOM code knows the tags and their events:
+   * - `HTMLElementTagNameMap`:  each tag's element (`jsxElementType()`),
+   *   so `querySelector("ui-button")` gives one whose `addEventListener("ui-toggle", ...)` types `event.detail`
+   * - `UIEventMap`, every event name a tag sends, as a `CustomEvent<unknown>`,
+   *   added to `HTMLElementEventMap` and `DocumentEventMap`:  any element or the document completes the names
+   *   - `unknown`:  the same name is any tag's, other sets' too (`<brand-*>`, `<epic-*>`), each with its own `detail`
+   */
+  private jsxDomMaps(): string[] {
+    const names = new Set(this.data.components.flatMap((tag) => tag.events.map((event) => event.name)))
+    return [
+      "/**",
+      " * Every event name a `<ui-*>` tag sends, on any element or the document:  `addEventListener()` completes them.",
+      " * - Its `detail` is `unknown` here:  the same name is any tag's, other sets' too, each with its own.",
+      ' *   The tag\'s own element types it:  `querySelector("ui-button")`, or a JSX `ref`.',
+      " */",
+      "export interface UIEventMap {",
+      ...[...names].map((name) => `  "${name}": CustomEvent<unknown>`),
+      "}",
+      "",
+      "declare global {",
+      "  interface HTMLElementTagNameMap {",
+      ...this.data.components.map((tag) => `    "${tag.tag}": ${this.jsxElementType(tag)}`),
+      "  }",
+      "  interface HTMLElementEventMap extends UIEventMap {}",
+      "  interface DocumentEventMap extends UIEventMap {}",
+      "}",
+      ""
+    ]
+  }
+
+  /** `tag`'s element in the DOM's types:  `UIHTMLElement<<Class>EventMap>` when it sends events, else `HTMLElement`. */
+  private jsxElementType(tag: SiteTag): string {
+    return tag.events.length ? `UIHTMLElement<${this.className(tag)}EventMap>` : "HTMLElement"
   }
 
   /** `tag`'s two interfaces (`jsxTypes()`), as lines;  `name`:  its class name. */
   private jsxTagTypes(tag: SiteTag, name: string): string[] {
-    const members = ElementManifests.jsxAttributeMembers(tag)
+    const members = ElementManifests.jsxAttributeMembers(tag, name)
     return [
+      ...ElementManifests.jsxEventTypes(tag, name),
       `/** \`<${tag.tag}>\`'s own attributes, from its vocabulary. */`,
       ...(members.length
         ? [`export interface ${name}Attributes {`, ...members, "}"]
@@ -237,7 +276,7 @@ export class ElementManifests {
       "",
       `/** \`<${tag.tag}>\` in JSX:  its own attributes, and HTML's global ones. */`,
       `export interface ${name}JSXAttributes`,
-      `  extends Omit<UIGlobalJSXAttributes, keyof ${name}Attributes>, ${name}Attributes {}`
+      `  extends Omit<UIGlobalJSXAttributes<${this.jsxElementType(tag)}>, keyof ${name}Attributes>, ${name}Attributes {}`
     ]
   }
 
@@ -249,9 +288,10 @@ export class ElementManifests {
    *   - Solid 2 sets the plain name as an ATTRIBUTE today, so our JSX writes `prop:`;
    *     the plain name is for once objects, arrays and functions go to the property (epic `solid-17`).
    * - The properties no vocabulary names (`JSX_SCRIPT_PROPERTIES`), as `prop:<property>` only.
+   * - An event:  `on-<event>` (`on-ui-change`), its listener, typed by `<name>EventMap` (epic `solid-17`'s shape).
    * - The first of two same names wins.
    */
-  private static jsxAttributeMembers(tag: SiteTag): string[] {
+  private static jsxAttributeMembers(tag: SiteTag, name: string): string[] {
     const members = new Map<string, string[]>()
     for (const attribute of tag.attributes) {
       if (attribute.kind === "json") {
@@ -285,7 +325,58 @@ export class ElementManifests {
       if (!isFor(tag) || members.has(name)) continue
       members.set(name, [...ElementManifests.docstring([description], "  "), `  "${name}"?: ${type}`])
     }
+    for (const event of tag.events) {
+      const prop = `on-${event.name}`
+      if (members.has(prop)) continue
+      members.set(prop, [
+        ...ElementManifests.docstring(ElementManifests.eventDocs(event), "  "),
+        `  "${prop}"?: (event: ${name}EventMap["${event.name}"]) => void`
+      ])
+    }
     return [...members.values()].flat()
+  }
+
+  /**
+   * `<name>EventMap`, `tag`'s events by name, each its `CustomEvent` (`jsxTagTypes()`);  none for a tag that sends none.
+   * - `detail`:  the vocabulary's text, its Spell UI type names qualified (`jsxDetailType()`).
+   */
+  private static jsxEventTypes(tag: SiteTag, name: string): string[] {
+    if (!tag.events.length) return []
+    return [
+      `/** \`<${tag.tag}>\`'s events, from its vocabulary:  each one's \`CustomEvent\`, by name. */`,
+      `export interface ${name}EventMap {`,
+      ...tag.events.flatMap((event) => [
+        ...ElementManifests.docstring(ElementManifests.eventDocs(event), "  "),
+        `  "${event.name}": CustomEvent<${ElementManifests.jsxDetailType(tag, event)}>`
+      ]),
+      "}",
+      ""
+    ]
+  }
+
+  /**
+   * An event's `detail` text as TypeScript, for `src/jsx.ts`:  each Spell UI type it names, qualified by its namespace
+   * (`FieldValue` => `E.FieldValue`, by `JSX_DETAIL_TYPES`).
+   * - The DOM's and TypeScript's own names (`Element`, `Event`, `Record` ...:  `JSX_GLOBAL_TYPE`) stay as they are.
+   * - throws for any other name:  add it to `JSX_DETAIL_TYPES`
+   */
+  static jsxDetailType(tag: SiteTag, event: SiteEvent): string {
+    return event.detail.replace(/(["'])(?:(?!\1).)*\1|\b[A-Z]\w*/g, (word) => {
+      if (/^["']/.test(word) || JSX_GLOBAL_TYPE.test(word)) return word
+      const qualified = JSX_DETAIL_TYPES[word]
+      if (qualified) return qualified
+      throw new Error(
+        `ElementManifests.jsxDetailType():  \`<${tag.tag}>\`'s \`${event.name}\` detail names \`${word}\`;  ` +
+          "add it to `JSX_DETAIL_TYPES`, or write the detail as TypeScript"
+      )
+    })
+  }
+
+  /** An event's docstring lines:  what it means, its `detail`'s shape, and whether `preventDefault()` vetoes it. */
+  static eventDocs(event: SiteEvent): string[] {
+    const lines = [`\`${event.name}\`:  ${event.description}`, `- \`event.detail\`:  \`${event.detail}\``]
+    if (event.cancelable) lines.push("- cancelable:  `preventDefault()` vetoes it")
+    return lines
   }
 
   /**
@@ -493,10 +584,33 @@ const JSX_SCRIPT_PROPERTIES: readonly {
   }
 ]
 
+/**
+ * The Spell UI types an event's `detail` text names (`jsxDetailType()`), each as `src/jsx.ts` reaches it:
+ * through `spell-ui/core`'s `E` (the element core's and runtime's types) or `UIT` (the components' types).
+ */
+const JSX_DETAIL_TYPES: Readonly<Record<string, string>> = {
+  DimmerCloseReason: "UIT.DimmerCloseReason",
+  FieldValue: "E.FieldValue",
+  FormChange: "UIT.FormChange",
+  ModalCloseReason: "UIT.ModalCloseReason",
+  NagCloseReason: "UIT.NagCloseReason",
+  SearchResult: "UIT.SearchResult",
+  ShapeFlip: "UIT.ShapeFlip",
+  SidebarCloseReason: "UIT.SidebarCloseReason",
+  StickyEdge: "UIT.StickyEdge",
+  ToastCloseReason: "UIT.ToastCloseReason",
+  VisibilityCalculations: "E.VisibilityCalculations"
+}
+
+/** The DOM's and TypeScript's own type names, which a `detail` text may name as they are (`jsxDetailType()`). */
+const JSX_GLOBAL_TYPE =
+  /^(?:Element|Event|Node|DocumentFragment|File|Blob|(?:HTML|SVG)\w*Element|\w+Event|Record|Readonly|Partial|Array)$/
+
 /** The JSX types' header (`jsxTypes()`):  what the file is, and how a program uses it. */
 const JSX_HEADER = [
   "/**",
-  " * Every Spell UI `<ui-*>` tag's attributes in JSX (Solid 2's), for completion, hover docs and checks in VS Code.",
+  " * Every Spell UI `<ui-*>` tag's attributes and events in JSX (Solid 2's), for completion, hover docs and checks",
+  " * in VS Code;  and each tag's events in plain DOM code.",
   " * - GENERATED by `yarn site:data` from the vocabularies -- do not edit.",
   " *   `tests/tools/ElementManifests.test.ts` fails while it's stale.",
   " * - A program uses it by importing it once, in any of its files (its `.types.ts`, say):",
@@ -510,14 +624,57 @@ const JSX_HEADER = [
   ' *   other attributes take their text, a number as `{5}` or `"5"`.',
   " * - Rich data (an object, array or function) goes to a property:  `prop:options={...}`.",
   " *   - Any attribute may be set as its property too, typed the same:  `prop:value={value()}`.",
+  " * - Events:  `on-<event>` per event a tag sends, its `event.detail` typed:  `on-ui-change={(event) => ...}`.",
+  " *   - NOTE: typed only, for now:  Solid calls it once epic `solid-17` lands;",
+  " *     until then, listen with `addEventListener()` from a `ref`.",
+  ' *   - In plain DOM code too:  `querySelector("ui-button")` gives a `<ui-button>` (`HTMLElementTagNameMap`),',
+  ' *     whose `addEventListener("ui-toggle", ...)` types `event.detail`;  so does a JSX `ref`\'s element.',
+  " *   - On any other element or the document, every `ui-*` name completes, its `detail` `unknown` (`UIEventMap`).",
+  " *   - A misspelt `on-ui-chnage` isn't checked (it has a dash):  the kit's TS plugin warns on it.",
   " * - Component tags only, not the docs site's `<ui-docs-*>`.",
   " * - Type-only:  no code, nothing at run time.",
   " */",
   "",
   'import type { JSX } from "@solidjs/web"',
   "",
-  "/** HTML's global attributes, which every `<ui-*>` tag takes:  Solid's own, `class`, `id`, `slot`, `ref`, `onClick` ... */",
-  "export type UIGlobalJSXAttributes = JSX.HTMLAttributes<HTMLElement>"
+  'import type { E, UIT } from "spell-ui/core"',
+  "",
+  "/**",
+  " * HTML's global attributes, which every `<ui-*>` tag takes:  Solid's own, `class`, `id`, `slot`, `ref`, `onClick` ...",
+  " * - `Target`:  the tag's element, as `ref` and `event.currentTarget` see it",
+  " */",
+  "export type UIGlobalJSXAttributes<Target extends HTMLElement = HTMLElement> = JSX.HTMLAttributes<Target>",
+  "",
+  "/**",
+  " * A `<ui-*>` element in the DOM's types:  an `HTMLElement` whose `addEventListener()` knows its own events,",
+  " * `event.detail` typed;  `Events`:  its `<Class>EventMap`.",
+  ' * - `querySelector("ui-button")` gives one (`HTMLElementTagNameMap`), and so does a JSX `ref`.',
+  " * - Its other members (`value`, `open()` ...) aren't here:  cast to its DOM element class for those.",
+  " */",
+  "export interface UIHTMLElement<Events> extends HTMLElement {",
+  "  addEventListener<K extends keyof Events>(",
+  "    type: K,",
+  "    listener: (this: this, event: Events[K]) => unknown,",
+  "    options?: boolean | AddEventListenerOptions",
+  "  ): void",
+  "  addEventListener<K extends keyof HTMLElementEventMap>(",
+  "    type: K,",
+  "    listener: (this: this, event: HTMLElementEventMap[K]) => unknown,",
+  "    options?: boolean | AddEventListenerOptions",
+  "  ): void",
+  "  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void",
+  "  removeEventListener<K extends keyof Events>(",
+  "    type: K,",
+  "    listener: (this: this, event: Events[K]) => unknown,",
+  "    options?: boolean | EventListenerOptions",
+  "  ): void",
+  "  removeEventListener<K extends keyof HTMLElementEventMap>(",
+  "    type: K,",
+  "    listener: (this: this, event: HTMLElementEventMap[K]) => unknown,",
+  "    options?: boolean | EventListenerOptions",
+  "  ): void",
+  "  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void",
+  "}"
 ]
 
 /** Spell UI's manifest `readme` line. */
