@@ -175,14 +175,15 @@ export function drawn<This extends object, Draw extends (this: This) => Drawing>
  * - When `draw()` (or a live value in it) throws:
  *   - one line on the program's console
  *   - a cancelable `ui-error` from the app's element (`{ error, thing }`)
- *   - a small stand-in, unless that event was cancelled
+ *   - a small stand-in, unless that event was cancelled:  made once, even as the drawing around it changes
+ *     (`<Errored>` builds its fallback once since Solid rc.15;  `drawing.test.ts` pins it)
  *   - The rest of the drawing keeps working;  the boundary heals when the thing draws again.
  */
 function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
   return createComponent(Errored, {
     fallback: (error: () => unknown) => drawingFailed(thing, error()),
     get children() {
-      return createMemo(() => drawOrStandIn(thing, draw)) as unknown as Drawing
+      return createMemo(() => madeOnce(draw())) as unknown as Drawing
     }
   })
 }
@@ -213,28 +214,11 @@ const ERROR_EVENT = "ui-error"
 const DRAWN = Symbol("drawn")
 
 /**
- * `draw()`, or `thing`'s stand-in if that throws -- `drawInBoundary()`'s, for a `draw()` that fails.
- * - Caught HERE, not by `<Errored>`:
- *   - `<Errored>` makes its fallback again each time the drawing around it changes
- *     (measured, rc.13:  a card added to a pile made a new stand-in for the pile's broken card)
- *   - here, the stand-in is the memo's value, made once
- *   - `<Errored>` still catches what a live value throws later
- * - What `draw()` returns is made here too, inside the try:  see `madeOnce()`.
- */
-function drawOrStandIn(thing: object, draw: () => Drawing): Drawing | null {
-  try {
-    return madeOnce(draw())
-  } catch (error) {
-    return drawingFailed(thing, error)
-  }
-}
-
-/**
  * `drawing` MADE, if it's `h()`'s thunk (a function that makes the element) -- else `drawing` as it is.
  * - Compiled JavaScript's `draw()` returns `h("div", ...)`, a thunk.  Made here, inside the boundary's memo:
  *   - ONCE:  left a thunk, Solid would make the element again each time the boundary re-reads its children, which it
  *     does whenever anything under it changes (a card added to a pile)
- *   - inside the boundary's `try`:  a tag or child that throws while it's made shows the stand-in
+ *   - inside the boundary:  a tag or child that throws while it's made shows the stand-in
  *   - elements INSIDE it need nothing:  `h()` makes them as it makes their parent
  * - A fragment, `<>...</>`, is a list of them (`[h("a"), h("b")]`):  each made once, the same way.
  * - ONLY `h()`'s thunks:  any other function is a live value, which Solid calls itself, again when it changes.
@@ -275,7 +259,7 @@ function drawingFailed(thing: object, error: unknown): Drawing | null {
   const target = core.appElement()
   if (target && !target.dispatchEvent(event)) return null
   const message = error instanceof Error ? error.message : String(error)
-  // made NOW, as `madeOnce()` makes a drawing:  the stand-in is made once, as the memo's value
+  // made NOW, as `madeOnce()` makes a drawing:  the boundary shows the stand-in once, as it is
   const standIn = core.message("cant-draw", { type })
-  return madeOnce(h("span.spell-draw-error", { title: message, role: "alert" }, standIn) as Drawing)
+  return madeOnce(h("span.spell-draw-error", { title: message, role: "alert" }, standIn) as unknown as Drawing)
 }

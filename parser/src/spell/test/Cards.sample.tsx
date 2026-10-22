@@ -106,7 +106,7 @@ export class Game extends App {
   draw() {
     return (
       <div class="Game">
-        <ui-button class="score" prop:value={String(this.score)} onClick={() => this.score++}>
+        <ui-button class="score" value={this.score} onClick={() => this.score++}>
           Score {this.score}
         </ui-button>
         {this.stock.draw()}

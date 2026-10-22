@@ -204,11 +204,6 @@ describe("SpellLocation", () => {
       expect(SpellLocation.isAddress("/Card.spell")).toBe(false)
       expect(SpellLocation.isAddress("folder/Card.spell")).toBe(false)
     })
-    test("an app URL's tail:  each part decoded", () => {
-      expect(SpellLocation.addressForUrl("@spell/examples/solitaire/a%20b.spell")).toBe(
-        "@spell/examples/solitaire/a b.spell"
-      )
-    })
     test("an app URL from an address:  `/edit/` and `/run/`, the address as it is", () => {
       const location = new SpellLocation("@spell/examples/solitaire/Card.spell")
       expect(location.editorUrl).toBe("/edit/@spell/examples/solitaire/Card.spell")

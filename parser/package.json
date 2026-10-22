@@ -96,19 +96,19 @@
     "spell:gen:syntax": "tsx src/spell/node/writeSpellSyntax.ts && vp fmt src/spell/spellSyntax*.json"
   },
   "dependencies": {
-    "@solidjs/h": "2.0.0-rc.13",
-    "@solidjs/web": "2.0.0-rc.13",
+    "@solidjs/h": "2.0.0-rc.17",
+    "@solidjs/web": "2.0.0-rc.17",
     "browser-or-node": "^3.0.0",
     "entities": "^6.0.1",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
     "pluralize": "^8.0.0",
     "semver": "^7.8.5",
-    "solid-js": "2.0.0-rc.13",
+    "solid-js": "2.0.0-rc.17",
     "spell-kit": "workspace:*"
   },
   "devDependencies": {
-    "@solidjs/compiler": "2.0.0-rc.13",
+    "@solidjs/compiler": "2.0.0-rc.17",
     "@types/lodash": "^4.17.17",
     "@types/node": "^22.20.4",
     "@types/pluralize": "^0.0.33",
