@@ -12,10 +12,14 @@
  * - On `main`, outside git, or not behind:  nothing.
  * - Behind:  a line for Owen (`systemMessage`), and one for Claude (`additionalContext`):
  *   offer the merge.
+ * - Then, behind or not:  starts `patch-checkout.mjs` for the checkout, DETACHED (epic `epic-engine` P17), which gives
+ *   it the fixes its repo lists in `"checkoutPatches"` that it lacks (`CheckoutPatches`);  its lines go to
+ *   `epic-patches.log` in the checkout's git folder, and nothing is said:  a patch is meant to go unnoticed.
  * - Always exits 0, within a few seconds:  never blocks a session.
  */
-import { spawnSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
+import { spawn, spawnSync } from "node:child_process"
+import { existsSync, openSync, readFileSync } from "node:fs"
+import { join } from "node:path"
 
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
@@ -24,6 +28,7 @@ try {
   const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
   const config = dir && EpicConfig.of(dir)
   const main = config && existsSync(config.file) && config.baseBranch
+  if (main) patchInBackground(dir)
   const behind = main && behindMain(dir, main)
   if (behind) {
     const { branch, count } = behind
@@ -45,6 +50,23 @@ try {
   // never block a session
 }
 process.exit(0)
+
+/**
+ * Start `patch-checkout.mjs` for `dir`'s checkout, detached, its output appended to `epic-patches.log` in the
+ * checkout's git folder.
+ * - NEVER throws, never waits
+ */
+function patchInBackground(dir) {
+  try {
+    const gitDir = git(dir, "rev-parse", "--path-format=absolute", "--git-dir")
+    if (!gitDir) return
+    const log = openSync(join(gitDir, "epic-patches.log"), "a")
+    const script = join(import.meta.dirname, "patch-checkout.mjs")
+    spawn(process.execPath, [script, dir], { cwd: dir, detached: true, stdio: ["ignore", log, log] }).unref()
+  } catch {
+    // best effort:  the next session start tries again
+  }
+}
 
 /** How far `dir`'s branch is behind branch `main`, when it's another branch and behind at all;  else `undefined`. */
 function behindMain(dir, main) {

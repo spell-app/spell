@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-send-buttons</title>
+    <meta
+      name="description"
+      content="The &lt;epic-send-buttons&gt; element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-send-buttons&gt;">
+      <ui-segment vertical class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-send-buttons&gt;
+            <ui-header>The &lt;epic-send-buttons&gt; element: Send and its countdown, one group. The paper plane sends; the wand turns countdown mode on and off.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-send-buttons&gt;</code> is Send and its countdown, one pill: the paper plane, then the wand.
+          </p>
+          <ul>
+            <li>The plane sends what Owen marked, typed or commented, as every Send did.</li>
+            <li>
+              The wand turns COUNTDOWN MODE on and off. On, what's unsent goes by itself 2 minutes after he stops typing,
+              clicking and scrolling.
+            </li>
+            <li>Off, the plane is filled blue while something waits: he presses it himself.</li>
+            <li>It sends nothing itself: it asks its owner, which sends its own way.</li>
+          </ul>
+          <p class="meta">
+            For anyone changing how a page's answers or marks reach Claude.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P20), in the
+            <a href="../../spell-epic/src/components/epic-send-buttons/" target="src-spell-epic-src-components-epic-send-buttons"><code title="spell-epic/src/components/epic-send-buttons/">epic-send-buttons</code></a> family.<br />
+            Its vocabulary: <a href="../../spell-epic/src/components/epic-send-buttons/EpicSendButtons.en.ts" target="src-spell-epic-src-components-epic-send-buttons-epicsendbuttons-en-ts"><code title="spell-epic/src/components/epic-send-buttons/EpicSendButtons.en.ts">EpicSendButtons.en.ts</code></a><br />
+            Its component: <a href="../../spell-epic/src/components/epic-send-buttons/EpicSendButtons.tsx" target="src-spell-epic-src-components-epic-send-buttons-epicsendbuttons-tsx"><code title="spell-epic/src/components/epic-send-buttons/EpicSendButtons.tsx">EpicSendButtons.tsx</code></a><br />
+            The countdown: <a href="../../spell-epic/src/review/SendCountdown.ts" target="src-spell-epic-src-review-sendcountdown-ts"><code title="spell-epic/src/review/SendCountdown.ts">SendCountdown</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="eye"></ui-icon>
+<p>
+  <epic-send-buttons state="idle" send-tip="Nothing to send"></epic-send-buttons>
+  <epic-send-buttons state="unsent" count="2" send-tip="Send 2 comments"></epic-send-buttons>
+  <epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
+</p>
+            <ui-accordion class="spell-code" styled>
+              <ui-title>The example above · 5 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <p>
+                      <epic-send-buttons state="idle" send-tip="Nothing to send"></epic-send-buttons>
+                      <epic-send-buttons state="unsent" count="2" send-tip="Send 2 comments"></epic-send-buttons>
+                      <epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
+                    </p>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>Nothing to send, something waiting, all of it sent.</li>
+              <li>The middle one's ring drains while you leave this page alone; any key, click or scroll fills it again.</li>
+              <li>Its 2 minutes running out sends nothing here: nobody on this page listens.</li>
+              <li>A click on a wand turns countdown mode off on every page in this browser: click it again to turn it back on.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>Nobody writes it in a doc: three owners draw it, each setting <code>state</code> and sending its own way.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Owner</th><th>A press sends</th><th>The countdown sends</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><a href="epic-page.html" target="src-spell-epic-src-docs-epic-page-html"><code>&lt;epic-page&gt;</code></a>'s header</td><td>every unsent mark and comment</td><td>the same, every revisit asked now, as Review Now did (decision Q7)</td></tr>
+                  <tr><td><a href="epic-send.html" target="src-spell-epic-src-docs-epic-send-html"><code>&lt;epic-send&gt;</code></a> (a details page)</td><td>the whole page's answer</td><td>the same</td></tr>
+                  <tr><td>a docs page's comments (<a href="../../spell-epic/src/tools/_assets/spell-doc-comments.js" target="src-spell-epic-src-tools-assets-spell-doc-comments-js"><code title="spell-epic/src/tools/_assets/spell-doc-comments.js">drawSend()</code></a>)</td><td>every comment not sent, to the page's epic</td><td>the same</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="3-the-countdown" label="3. The countdown" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="clock"></ui-icon>
+            <p>Owen, 2026-10-22: "when it is on, you wait for 2 minutes of inactivity from me (I haven't typed / clicked / scrolled) and when that is reached you submit the answers".</p>
+            <ul>
+              <li>It runs only while countdown mode is on and something waits (<code>state="unsent"</code>).</li>
+              <li>Every key, click, wheel, scroll or input on the page starts it again, in a same-origin frame too.</li>
+              <li>At 2 minutes it asks once (<code>epic-send-asked</code>, <code>auto</code> true), and stops until something waits again.</li>
+              <li>
+                It's the PAGE's, one <code>SendCountdown</code>: a Send drawn again (a docs page's, at every redraw of its
+                comments) finds it where it was, its ring too.
+              </li>
+              <li>The mode is on by default, remembered in this browser for every page (<code>localStorage</code>, <code>epic-send-countdown</code>; decision Q6).</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Attribute</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>state</code></td><td><code>idle</code>, <code>unsent</code> or <code>sent</code>: where what the owner sends stands. Default <code>idle</code>.</td></tr>
+                  <tr><td><code>send-tip</code></td><td>The plane's tooltip and name: what a press sends. Default <code>Send</code>.</td></tr>
+                  <tr><td><code>count</code></td><td>How many things a press sends: a badge on the plane. None at 0.</td></tr>
+                  <tr><td><code>busy</code></td><td>A send on its way: the plane spins, and a press does nothing.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="epic-send-buttons-parts" label="Parts" sticky collapsible dividing collapsed>
+              <p>Pieces of what it draws.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Part</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>base</code></td><td>The pill.</td></tr>
+                  <tr><td><code>send</code></td><td>The paper plane, a <code>&lt;button&gt;</code>.</td></tr>
+                  <tr><td><code>count</code></td><td>The badge on the plane.</td></tr>
+                  <tr><td><code>countdown</code></td><td>The wand, a <code>&lt;button aria-pressed&gt;</code>.</td></tr>
+                  <tr><td><code>ring</code></td><td>The countdown's ring round the wand, only while it runs.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+            <ui-section id="epic-send-buttons-states" label="States" sticky collapsible dividing collapsed>
+              <p>Custom states, for <code>:state()</code>.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>State</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>countdown</code></td><td>Countdown mode is on.</td></tr>
+                  <tr><td><code>counting</code></td><td>The countdown runs: the ring drains.</td></tr>
+                  <tr><td><code>waiting</code></td><td>Countdown mode is off and something isn't sent: the plane is filled blue.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+            <ui-section id="epic-send-buttons-events" label="Events" sticky collapsible dividing collapsed>
+              <p>What it tells its owner.</p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr><th>Event</th><th>Detail</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>epic-send-asked</code></td><td><code>{ auto }</code></td><td>The plane pressed (<code>auto</code> false), or the countdown ran out (<code>auto</code> true).</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>One pill: the plane's round end, a hairline, the wand's round end.</li>
+              <li>The pill's outline by the fill rule: grey with nothing to send, dashed blue with something not sent, blue once sent.</li>
+              <li>The wand blue while countdown mode is on, grey while off; while it counts, a blue ring round it drains.</li>
+              <li>Countdown off with something waiting: the plane filled blue, its icon white.</li>
+              <li>
+                Its tokens: <code>--epic-send-buttons-size</code> (28px), <code>--epic-send-buttons-rule</code>,
+                <code>--epic-send-buttons-muted</code>; an epic page's header sets them to its own.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li>
+                <code>&lt;epic-page&gt;</code>, <code>&lt;epic-send&gt;</code> and the docs runtime's comments. Before epic
+                <code>epic-engine</code> P20, an epic page's header had a round Send and a Review Now button, a details
+                page a round Send, a docs page a Send pill.
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-22 against branch <code>epic-engine</code> (P20).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

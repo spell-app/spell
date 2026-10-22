@@ -13,6 +13,9 @@
  *   - ALWAYS `cwd`, never one the session inherited:  a window could hand its sessions the checkout that opened it
  *     (epic `epic-engine` P9).
  * - Plain `node`:  `PromptGate.ts` loads with its types stripped.
+ * - Then `PromptAck` (epic `epic-engine` P18):  a prompt the gate let through, sent while the session is busy, gets
+ *   an "On it:  <what Owen asked>" line for him (`systemMessage`);  every prompt is logged to `epic-prompts.log` in
+ *   the checkout's git folder.
  * - Never fails a prompt:  any error exits 0, the prompt untouched.
  * - Its tests:  `tests/src/command/PromptGate.test.ts`, which runs this file as the hook too.
  */
@@ -25,7 +28,10 @@ try {
   const { PromptGate } = await import("spell-epic/command/PromptGate.ts")
   const { Window } = await import("spell-epic/window.mjs")
   const output = PromptGate.gate(input, Window.current())
-  if (output) console.log(JSON.stringify(output))
+  // a prompt the gate let through, sent while the session is busy:  "On it:  ..." (epic `epic-engine` P18)
+  const { PromptAck } = await import("spell-epic/command/PromptAck.ts")
+  const ack = new PromptAck().answer(input, { gated: Boolean(output) })
+  if (output ?? ack) console.log(JSON.stringify(output ?? ack))
 } catch (error) {
   console.error(`prompt-gate hook:  ${error.message}`)
 }

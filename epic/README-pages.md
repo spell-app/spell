@@ -56,7 +56,7 @@ where the build stands and where you're needed are one glance up.
    The step pill names the phase under way (`P13`), else the next one to do, DONE, FUTURE or STANDING;
    it turns red when every phase is done but items still need you, and grey when the epic is paused,
    untouched for 3 days.
-   - Beside it:  Send (the paper plane) and Review Now (the wand), while the page is being reviewed,
+   - Beside it:  Send and its countdown (the paper plane and the wand, one pill), while the page is being reviewed,
      and the git toggle, which shows or hides every commit the page lists.
    - The epic's name, at the left, copies `/epic resume <name>` when you click it;
      the chip after it says how long what's open takes to read.
@@ -171,11 +171,16 @@ it explains every card and colour change you'll see on an item.
 The command behind each step, and why a finished `wait` is what wakes a session:
 [README-cli.md](README-cli.md#a-session-wakes-when-its-wait-exits).
 
-- Review Now (the wand) sends every mark AND turns each revisit waiting into a request for now:
-  the session answers them all at once, by background agents.
+- The wand beside Send is COUNTDOWN MODE (epic `epic-engine` P20), on unless you turn it off:
+  - 2 minutes after you stop typing, clicking and scrolling, what's unsent goes by itself;  a ring round the wand
+    drains while it counts
+  - that send also turns each revisit waiting into a request for now, as Review Now did:  the session answers them all
+    at once, by background agents
+  - off, the paper plane is filled blue while something waits, and nothing goes until you press it
+- Typing in an item's note box turns its Revisit on at the first key;  the box stays open while you type.
 - Do Now (the wand on one item) needs no Send:  it goes at once.
   Click its spinner again to call it off ("nevermind");  an answer that arrives after that is refused.
-- A revisit on a judgement call or a todo starts with `do it` already in its note box:
+- A revisit on a judgement call or a todo starts with `do it` already in its note box, Revisit on with it:
   type over it to say something else.
 
 ![One judgement call, J4, unfolded:  a yellow J4 chip and its title;  at the right the Approve, Revisit and Make Todo
@@ -205,7 +210,7 @@ Every mark, and what applying it does:
 <details>
 <summary>How Send wakes a session</summary>
 
-Send, Review Now or Do Now, pressed while NO session listens, makes the page server wake the epic.
+Send (or its countdown) or Do Now, while NO session listens, makes the page server wake the epic.
 
 - Who, first match wins:
   1. the ONE running session titled for the epic, `🚧 <epic>`:  `/epic review <epic>` typed into it
@@ -492,20 +497,20 @@ This one line, from the repo-split page, is a whole judgement call:
 _Trimmed of its change time.  Its body waits in a part file;  the element draws its chip, buttons and fold._
 
 Epic UI is `spell-epic`'s set of these:  one component pack, `epics`, every tag starting `epic-`,
-47 tags in 35 families.
+48 tags in 36 families.
 The frame around them (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell-ui/blob/main/README.md)'s `<ui-*>` elements.
-43 of them have a docs page in the Epic UI set, at `/components/epics/<tag>.html`;
+44 of them have a docs page in the Epic UI set, at `/components/epics/<tag>.html`;
 the other four (`epic-review`, `epic-new-item`, `epic-agents`, `epic-thread-message`)
 are drawn only inside other elements.
 
 | Group | Elements |
 | --- | --- |
-| Page structure | `epic-page` (the header, meta, step pill, Send and Review Now, the toolbar), `epic-overview`, `epic-summary`, `epic-prompt`, `epic-section`, `epic-phase`, `epic-field`, `epic-item` (one element for every kind of item), `epic-event` (a log line), `epic-commit` |
+| Page structure | `epic-page` (the header, meta, step pill, Send and its countdown, the toolbar), `epic-overview`, `epic-summary`, `epic-prompt`, `epic-section`, `epic-phase`, `epic-field`, `epic-item` (one element for every kind of item), `epic-event` (a log line), `epic-commit` |
 | Prose blocks | `epic-question`, `epic-choices` and `epic-option`, `epic-answer`, `epic-net-effect`, `epic-reply`, `epic-more` (More Details), `epic-original` and `epic-version` (Original Discussion), `epic-update`, `epic-note`, `epic-aside`, `epic-code`, `epic-link` |
 | Review | `epic-review` (an item's buttons), `epic-status` (Underway, Done, Noted), `epic-new-item`, `epic-state-filter`, `epic-hidden-note`, `epic-agents` (the running agents), `epic-test-run` |
 | Comments | `epic-comment-pane`, `epic-thread`, `epic-thread-message`, `epic-threads`, `epic-page-note-head` (older page notes) |
 | Lists | `epic-list`, `epic-card` and `epic-sort` (the Epics list), `epic-cards` (a saga's epics) |
-| Answer pages | `epic-ask`, `epic-text-box`, `epic-send`, `epic-choice-rows` and `epic-choice-row`, `epic-choices-bar` |
+| Answer pages | `epic-ask`, `epic-text-box`, `epic-send`, `epic-send-buttons` (Send and its countdown, every page's), `epic-choice-rows` and `epic-choice-row`, `epic-choices-bar` |
 
 - `<epic-link epic="seo" item="J3">` links an item on another page by what it is, never by a path:
   it draws "seo J3", with J3's title as its tooltip.
@@ -562,7 +567,7 @@ _A page loads two scripts:  Spell UI's docs bundle, then the pack, which borrows
 - Spell UI's docs bundle, `/_epic/assets/spell-ui.js`, defines `<ui-root>`, which adds the pack's script.
 - The pack carries none of the shared code:  it takes `solid-js`, `@solidjs/web`, `spell-kit/element`,
   `spell-ui/core` and `spell-ui/forms` from the bundle, by those names, so a page has ONE Solid.
-- Both addresses are the engine's routes, served by the epic server and spell-app's page server alike.
+- Both addresses are the engine's routes, served by the epic server and the kit's page server alike.
 - So a page needs one of those servers to draw at all, and the part files and review controls need it too.
   Opened straight from disk, a page shows exactly what its file holds:  its prose, unstyled.
 

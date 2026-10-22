@@ -52,6 +52,9 @@ const SETS: Record<string, ComponentSetSetting> = {
   brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
 }
 
+/** The folders a scratch repo's settings serve at their own addresses (`"engineRoutes"`), as spell-app's do. */
+const ENGINE_ROUTES = { "/element/": "app/dist-element" }
+
 /** The site header's tabs a scratch repo's settings name (`"siteTabs"`), as spell-app's do. */
 const SITE_TABS: SiteTab[] = [
   { name: "Guides", path: "guides/index.html", areas: ["guides"] },
@@ -64,7 +67,12 @@ const SITE_TABS: SiteTab[] = [
  */
 function withComponentSets(checkout: string): void {
   const name = checkout.split("/").at(-1)
-  put(checkout, "package.json", JSON.stringify({ pageServer: { componentSets: SETS, siteTabs: SITE_TABS } }))
+  put(
+    checkout,
+    "package.json",
+    JSON.stringify({ pageServer: { componentSets: SETS, siteTabs: SITE_TABS, engineRoutes: ENGINE_ROUTES } })
+  )
+  put(checkout, "app/dist-element/spell.pack.js", `// ${name} pack`)
   for (const set of Object.values(SETS)) {
     put(checkout, `${set.dir}/index.html`, `${name} ${set.name} home`)
     put(checkout, `${set.assets}/site.js`, `// ${name} ${set.assets}`)
@@ -194,6 +202,18 @@ describe("EpicServer", () => {
     expect((await ask(port, "GET", "/r/two/components/ui/")).status).toBe(404)
   })
 
+  // epic-engine I58:  App UI's pages load the app's /element/spell.pack.js, which only spell-app's own page server served
+  test("the folders a repo's settings serve at their own addresses (engineRoutes), at /<route> for the default repo and /r/<repo>/<route>", async () => {
+    for (const base of ["", "/r/one"]) {
+      const pack = await ask(port, "GET", `${base}/element/spell.pack.js`)
+      expect([pack.status, pack.text], `${base}/element/spell.pack.js`).toEqual([200, "// one pack"])
+    }
+    // a repo whose settings name none:  nothing
+    expect((await ask(port, "GET", "/r/two/element/spell.pack.js")).status).toBe(404)
+    // the engine's own routes stay the engine's
+    expect((await ask(port, "GET", "/_epic/pack/epics.pack.js")).status).toBe(200)
+  })
+
   test("every page's SPELL_SERVER:  its path under the prefix it was asked by, its repo, base and checkout", async () => {
     const config = (html: string) => JSON.parse(/window\.SPELL_SERVER = (\{.*?\})<\/script>/.exec(html)![1]!)
     const atRoot = config((await ask(port, "GET", "/epics/seo/seo.plan.html")).text)
@@ -230,8 +250,20 @@ describe("EpicServer", () => {
     expect(server.fileFor("/nope.html")).toBeUndefined()
   })
 
-  test("its route modules are spell-epic's own files", () => {
+  test("its route modules are spell-epic's own files:  its part of the page server's settings", () => {
+    expect(ROUTE_MODULES.length).toBeGreaterThan(0)
     for (const path of ROUTE_MODULES) expect(existsSync(join(ENGINE, path)), path).toBe(true)
+  })
+
+  // epic `repo-split` P16:  the kit's page server swaps the CDN's highlight.js by spell-epic's settings, the epic server
+  // by `HIGHLIGHT_JS`:  the same two URLs
+  test("its highlight.js swap is the one its settings give the kit's page server (`localCopies`)", async () => {
+    const { readFileSync } = await import("node:fs")
+    const { HIGHLIGHT_JS } = await import("spell-epic/server/server.types")
+    const json = JSON.parse(readFileSync(join(ENGINE, "package.json"), "utf8")) as {
+      pageServer: { localCopies: Record<string, string> }
+    }
+    expect(json.pageServer.localCopies).toEqual({ [HIGHLIGHT_JS.cdn]: HIGHLIGHT_JS.local })
   })
 
   // epic `epic-eject` I11:  only the route modules' folders counted, so a change elsewhere in `src/` kept the old server

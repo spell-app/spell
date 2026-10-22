@@ -7,7 +7,7 @@ argument-hint: "[topic]"
 # /details
 
 A DETAILS PAGE:  a small page that explains one decision.
-- It shows in the "Review" view:  VS Code's right side bar, beside "Spell Docs", where Owen answers things.
+- It shows in the "Review" view:  VS Code's right side bar, beside "Epic Docs", where Owen answers things.
 - Owen picks on the page, and clicks Send.
 - The page server writes his answer beside the page,
   and a waiter running in the background exits with it, which wakes this session.

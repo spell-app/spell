@@ -19,8 +19,8 @@ The hook read it first, knew that plan mode can't make a worktree, and refused i
 leave plan mode, type `/epic seo`, and the plan starts from what you wrote.
 
 The whole plugin works like that.
-It gives Claude Code seventeen skills, workflows you start by typing a name,
-and eight hooks, scripts Claude Code runs by itself when something happens.
+It gives Claude Code eighteen skills, workflows you start by typing a name,
+and nine hooks, scripts Claude Code runs by itself when something happens.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
   [the hooks' table](#hooks) says which one did it.
@@ -33,8 +33,16 @@ and eight hooks, scripts Claude Code runs by itself when something happens.
 ```sh
 # from the kit's root, ~/www/spell
 echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node spell-epic/hooks/prompt-gate.mjs
-# {"decision":"block","reason":"Plan mode is on, so `/epic` can't make its worktree.  Leave plan mode ..."}
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+{"decision":"block","reason":"Plan mode is on, so `/epic` can't make its worktree.  Leave plan mode ..."}
+```
+
+</details>
 
 - Claude Code hands a hook a JSON object like that on stdin, with more fields (`cwd`, `session_id` ...);
   the hook answers on stdout, or prints nothing to let the prompt through.
@@ -45,7 +53,7 @@ echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node s
 
 </details>
 
-## Seventeen you type, eight that run by themselves
+## Eighteen you type, nine that run by themselves
 
 In most tools, a slash command is a saved prompt:  it pastes some text and hopes.
 A skill here is a procedure.
@@ -87,6 +95,7 @@ The other six here are for the moments in between.
 | a question needs a picture, or more than four options | `/details [topic]` | explains it on a page in the side bar, which you answer on the page itself;  Claude reaches for it by itself when the question modal is too small |
 | you want to mark up a file line by line | `/comment <file> [<file> ...]` | shows each file in the editor tab plan mode opens, one round per file until you approve, then writes it back;  globs too |
 | an epic is about to merge, or you're about to fly | `/docs-check <epic...>` | makes the docs an epic wrote agree with what was chosen and built, then with each other;  fixed in place, uncommitted;  no epic:  it asks which |
+| guides read older than the house's voice | `/voice [<page>...] [--voice <name>]` | background agents rewrite them in the voice (`epic voice`), every fact, id and link kept, and stamp each one done;  no pages:  every guide not done yet |
 | you notice something that belongs to another epic | `/send [<epic>] <text>` | writes your words and screenshots into that epic as a request, and wakes its session;  no epic:  the tooling's |
 
 - `/send` also goes off unasked, when you ask a session to change how you work rather than what it's building:
@@ -94,7 +103,8 @@ The other six here are for the moments in between.
   The request lands in the epic that looks after the tooling (`epic home` names it),
   and this session gets on with its own work.
   - Unsure which you meant, it asks;  in the tooling epic's own session, it never sends.
-- `/docs-check` fixes what an epic's docs SAY;  spell-app's `/fussbudget` fixes how they READ.
+- `/docs-check` fixes what an epic's docs SAY;  `/voice` and spell-app's `/fussbudget` fix how they READ:
+  `/voice` a whole guide at a time, `/fussbudget` line by line.
 - Pressed Send on a page with nobody listening?  You needn't type `/epic review`:
   the page types it into the epic's own session, for you to send ([README-pages.md](README-pages.md)).
 

@@ -14,7 +14,7 @@
  *     `src/demo/shots/header/epics/<name>/` (git-ignored), as deep as a real one, so its links need no change
  * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
  *   serving `src/demo/shots/header/`;  it wakes nobody;  stopped at the end.
- *   Send / Review Now aren't pressed here:  `check-review-epics.mjs` checks those
+ *   Send and its countdown aren't pressed here:  `check-review-epics.mjs` checks those
  * - fails (exit 1) on a page error, a wrong count, a filter that doesn't hide, a missing box, a header control or
  *   chip running past the window, or a glyph off its box's centre by more than 1px;  at 280px and 900px, light and dark
  * - screenshots (outDir, default `src/demo/shots/p10/`):  `<doc>-<width>-<scheme>-top.png` (the header),
@@ -237,9 +237,11 @@ function readFacts(width) {
   const line = root.querySelector(".review-line")
   const epic = page.getAttribute("epic")
   if (!line.textContent.includes(`/epic review ${epic}`)) found.push(`the review line reads "${line.textContent}"`)
-  // every round control of the header, and every chip, in the window and its glyph centred
+  // every round control of the header (Send's plane and wand, epic `epic-engine` P20;  git), and every chip, in the
+  // window and its glyph centred
   const boxes = [
-    ...root.querySelectorAll("button.send, button.review-now, button.git"),
+    ...(root.querySelector("epic-send-buttons")?.shadowRoot?.querySelectorAll("button") ?? []),
+    ...root.querySelectorAll("button.git"),
     ...Array.from(document.querySelectorAll("epic-section"), (section) =>
       Array.from(section.shadowRoot?.querySelectorAll("button.toggle") ?? []).concat(
         Array.from(section.shadowRoot?.querySelector('[part~="filter"] epic-state-filter')?.shadowRoot?.querySelectorAll("button") ?? [])
@@ -250,7 +252,8 @@ function readFacts(width) {
     const outer = box.getBoundingClientRect()
     if (!outer.width) continue
     if (outer.right > width + 0.5) found.push(`${box.className} runs past the window`)
-    const glyph = box.querySelector("svg")?.getBoundingClientRect()
+    const glyph = (box.querySelector("svg:not(.ring)") ?? box.querySelector("ui-icon")?.shadowRoot?.querySelector("svg"))
+      ?.getBoundingClientRect()
     if (!glyph) continue
     const dx = Math.abs(outer.left + outer.width / 2 - (glyph.left + glyph.width / 2))
     const dy = Math.abs(outer.top + outer.height / 2 - (glyph.top + glyph.height / 2))

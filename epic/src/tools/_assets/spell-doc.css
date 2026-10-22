@@ -477,10 +477,9 @@ body.spell-one-line-head .spell-doc-main .spell-page-head > .spell-head-tools {
   }
 }
 /*
- * ## A docs page's SEND (the runtime's `drawSend()`, epic `epic-workflow` P13):  first in the header's tools row;  a
- * pill (the paper plane, "Send", the count of comments not sent), blue by the fill rule (`templates/epics/plan-doc.md`,
- * "Colours"):  grey outline with nothing waiting, dashed while some aren't sent, outlined once sent;  then who is
- * listening, small and quiet
+ * ## A docs page's SEND (the runtime's `drawSend()`, epic `epic-workflow` P13):  first in the header's tools row;
+ * Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20, which draws the fill rule itself), then who
+ * is listening, small and quiet
  */
 .spell-doc-main .spell-head-tools > .spell-send {
   --_tint: var(--ui-blue, #2185d0);

@@ -48,8 +48,11 @@
       <ui-container class="site-body"
         ><article class="site-article">
           <p class="lede">
-            A details page's Send, in its sticky header: where the answer stands, then a round blue Send. It sends the
-            whole page, partial answers too, as often as Owen likes: the page never locks. Beside them, the draft's
+            A details page's Send, in its sticky header: where the answer stands, then Send and its countdown (<a
+              href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"
+              ><code>&lt;epic-send-buttons&gt;</code></a
+            >). It sends the whole page, partial answers too, as often as Owen likes: the page never locks. With
+            countdown mode on, it sends by itself 2 minutes after he stops. Beside them, the draft's
             save: what's typed and not sent is kept beside the page, and comes back when the page reloads or is
             rewritten. After the button, who hears it: <code>repo-split is listening</code> while a session waits for
             the answer, else <code>nobody is waiting yet</code>. Send works either way.
@@ -137,8 +140,9 @@
                     <tr>
                       <td><code>send</code></td>
                       <td>
-                        The round Send (<code>&lt;ui-button&gt;</code>), by the fill rule: a grey outline with nothing
-                        to send, dashed blue with changes not sent, a blue outline once sent.
+                        Send and its countdown (<code>&lt;epic-send-buttons&gt;</code>, epic <code>epic-engine</code>
+                        P20), by the fill rule: a grey outline with nothing to send, dashed blue with changes not sent, a
+                        blue outline once sent.
                       </td>
                     </tr>
                     <tr>

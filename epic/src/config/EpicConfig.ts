@@ -70,8 +70,15 @@ export class EpicConfig {
     repoTemplates: "",
     windowsFolder: "",
     app: { path: "/editor/", url: "", urlFile: "", start: "" },
-    repos: ""
+    repos: "",
+    voices: {},
+    pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
+    checkoutPatches: [],
+    promptAck: true
   }
+
+  /** the voices spell-epic ships, one `<name>.md` each:  its `voices/` folder (epic `readme` P12) */
+  static readonly ENGINE_VOICES = resolve(import.meta.dirname, "../../voices")
 
   /**
    * where the window files were before epic `epic-eject` P13, from the main checkout:  `epic window move` carries
@@ -311,6 +318,22 @@ export class EpicConfig {
    */
   get extraInstalls(): string[] {
     return this.settings.extraInstalls
+  }
+
+  /**
+   * the fixes every checkout gets, on `main` and in every worktree however far behind its branch is
+   * (`CheckoutPatches`, epic `epic-engine` P17):  `checkoutPatches`, from the MAIN checkout's file
+   */
+  get checkoutPatches(): CheckoutPatch[] {
+    return this.settings.checkoutPatches
+  }
+
+  /**
+   * whether the prompt hook shows an "On it:  ..." line for a message sent while the session is busy
+   * (`PromptAck`, epic `epic-engine` P18):  `promptAck`
+   */
+  get promptAck(): boolean {
+    return this.settings.promptAck
   }
 
   /** the window names:  the default window, and the folder names a window shows */
@@ -574,8 +597,55 @@ export class EpicConfig {
       "app.urlFile": this.settings.app.urlFile && resolve(this.main, this.settings.app.urlFile),
       "app.start": this.settings.app.start,
       repos: this.repos.join(","),
-      top: this.top?.main ?? ""
+      top: this.top?.main ?? "",
+      ...Object.fromEntries(this.voiceNames.map((name) => [`voices.${name}`, this.voiceFile(name) ?? ""])),
+      ...Object.fromEntries(
+        Object.entries(this.settings.pageVoices).map(([kind, voice]) => [`pageVoices.${kind}`, voice])
+      ),
+      checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
+      promptAck: this.promptAck
     }
+  }
+
+  ////////////////
+  // ## Voices
+  ////////////////
+
+  /**
+   * The file of VOICE `name` (`readme`, `code` ...):  how a kind of people-facing page is written (epic `readme` P13).
+   * - the repo's own, when its file names one (`"voices": { "code": "agents/wwod/writing.md" }`):  from the main
+   *   checkout, absolute
+   * - else, in a child repo of a MULTI-REPO top, the top's own (Spell's child repos write in the kit's house style)
+   * - else spell-epic's, `voices/<name>.md` (`ENGINE_VOICES`), when it ships one
+   * - else `undefined`:  no such voice here (spell-epic ships no `code`:  it's each repo's house style)
+   */
+  voiceFile(name: string): string | undefined {
+    const own = this.settings.voices[name]
+    if (own) return resolve(this.main, own)
+    const top = this.top
+    const topsOwn = top && top.main !== this.main ? top.settings.voices[name] : undefined
+    if (topsOwn) return resolve(top!.main, topsOwn)
+    const shipped = join(EpicConfig.ENGINE_VOICES, `${name}.md`)
+    return existsSync(shipped) ? shipped : undefined
+  }
+
+  /**
+   * The voice a KIND of page is written in (`guide` => `readme`):  the file's `pageVoices`, over the defaults;
+   * a kind it doesn't name, a voice of that name
+   */
+  voiceFor(kind: string): string {
+    return this.settings.pageVoices[kind] ?? kind
+  }
+
+  /** every voice this repo can use:  its own, its top's, then spell-epic's, by name, sorted */
+  get voiceNames(): string[] {
+    const shipped = existsSync(EpicConfig.ENGINE_VOICES)
+      ? readdirSync(EpicConfig.ENGINE_VOICES)
+          .filter((name) => name.endsWith(".md"))
+          .map((name) => name.slice(0, -3))
+      : []
+    const tops = this.top && this.top.main !== this.main ? Object.keys(this.top.settings.voices) : []
+    return [...new Set([...Object.keys(this.settings.voices), ...tops, ...shipped])].sort()
   }
 
   ////////////////
@@ -621,6 +691,10 @@ export class EpicConfig {
       repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true }),
       windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true }),
       repos: reposOf(given, defaults.repos, file),
+      voices: namesTo(given, "voices", defaults.voices, file),
+      pageVoices: { ...defaults.pageVoices, ...namesTo(given, "pageVoices", {}, file) },
+      checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
+      promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
       app: {
         path: valueOf(app, "path", defaults.app.path, file, "app."),
         url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
@@ -705,6 +779,18 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   - on, an epic's worktree is `<worktreesFolder>/<epic>/`:  a worktree of the top with one of every child repo
  *     inside it, all on branch `<epic>`, one install at its top (`top`, `repoCheckouts()`;  the worktree hook)
  *   - read in the TOP's config;  a child repo finds its top as the folder above its main checkout (`top`)
+ * - `voices`:  the repo's own VOICES (epic `readme` P13), a name each, its file from the main checkout
+ *   (`{ "code": "agents/wwod/writing.md" }`);  `{}` (the default):  only spell-epic's, `voices/<name>.md`
+ *   - a name spell-epic ships too (`readme`) is the repo's own, in place of spell-epic's (`voiceFile()`)
+ * - `pageVoices`:  which voice each KIND of page is written in, over the defaults
+ *   (`readme` and `guide` in `readme`;  `code` and `epic-page` in `code`):  `voiceFor()`
+ * - `checkoutPatches`:  fixes to a checkout's setup that every checkout gets at once, `main` and each worktree,
+ *   however far behind `main` its branch is (`CheckoutPatch`, `CheckoutPatches`;  epic `epic-engine` P17);  `[]`
+ *   (the default):  none
+ *   - e.g. the kit's `.ignore`, which lets VS Code's Open File find the child repos' files
+ *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
+ * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
+ *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
  */
 export type EpicSettings = {
   contentFolder: string
@@ -722,7 +808,25 @@ export type EpicSettings = {
   windowsFolder: string
   app: EpicApp
   repos: string | string[]
+  voices: Record<string, string>
+  pageVoices: Record<string, string>
+  checkoutPatches: CheckoutPatch[]
+  promptAck: boolean
 }
+
+/**
+ * One of `EpicSettings.checkoutPatches`:  a fix to a checkout's setup that reaches every checkout, the worktrees behind
+ * `main` included (`CheckoutPatches`).
+ * - `id`:  its name, unique in the file (`vscode-ignore`):  what a checkout remembers having had
+ * - `date`:  when it was added (`2026-10-22`)
+ * - `why`:  what it fixes, for a person reading the report
+ * - `copy`:  a file, from the repo's root, copied from the MAIN checkout into each checkout that doesn't track it yet
+ *   - git-excluded there, so `git status` stays clean and the branch's merge of `main` replaces it
+ *   - once the checkout tracks it (its branch has merged `main`), the patch does nothing there:  it retires by itself
+ * - `run`:  a shell command run ONCE in each checkout's root (`yarn install`)
+ * - one of `copy` or `run`, or both (the copy first)
+ */
+export type CheckoutPatch = { id: string; date: string; why: string; copy?: string; run?: string }
 
 /**
  * `EpicSettings.app`:  the repo's app (spell-app's:  the editor), as the epic server opens it (`RepoApp`).
@@ -839,6 +943,62 @@ function reposOf(given: Record<string, unknown>, fallback: string | string[], fi
   throw new TypeError(
     `EpicConfig:  ${file}'s "repos" must be a file ("repos.json5") or a list of repo names, not ${JSON.stringify(value)}`
   )
+}
+
+/**
+ * `given[key]`, an object of plain names to non-empty text (`{ "code": "agents/wwod/writing.md" }`);  `fallback` when
+ * it's left out.
+ * - throws `TypeError` naming the file and the key for anything else
+ */
+function namesTo(
+  given: Record<string, unknown>,
+  key: string,
+  fallback: Record<string, string>,
+  file: string
+): Record<string, string> {
+  const value = given[key]
+  if (value === undefined) return fallback
+  const ok =
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.entries(value).every(([name, text]) => /^[\w.-]+$/.test(name) && typeof text === "string" && text.trim())
+  if (!ok)
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "${key}" must be an object of names to text, { "code": "..." }, not ${JSON.stringify(value)}`
+    )
+  return value as Record<string, string>
+}
+
+/**
+ * `given.checkoutPatches`:  a list of `CheckoutPatch`;  `fallback` (`[]`, none) when it's left out.
+ * - throws `TypeError` naming the file for a patch without a plain `id`, `date` or `why`, one with neither `copy` nor
+ *   `run`, a `copy` that isn't a relative path, or two patches with the same `id`
+ */
+function patchesOf(given: Record<string, unknown>, fallback: CheckoutPatch[], file: string): CheckoutPatch[] {
+  const value = given.checkoutPatches
+  if (value === undefined) return fallback
+  const fail = (why: string) => {
+    throw new TypeError(`EpicConfig:  ${file}'s "checkoutPatches" ${why}`)
+  }
+  if (!Array.isArray(value))
+    fail(`must be a list of patches, [{ "id": ..., "copy": ... }], not ${JSON.stringify(value)}`)
+  const ids = new Set<string>()
+  return (value as unknown[]).map((each) => {
+    const patch = (typeof each === "object" && each !== null ? each : {}) as Record<string, unknown>
+    const text = (key: string) => typeof patch[key] === "string" && (patch[key] as string).trim() !== ""
+    if (!text("id") || !/^[\w.-]+$/.test(patch.id as string))
+      fail(`:  each needs an "id" of plain words, not ${JSON.stringify(each)}`)
+    if (ids.has(patch.id as string)) fail(`:  two patches are "${patch.id}"`)
+    ids.add(patch.id as string)
+    if (!text("date") || !text("why")) fail(`:  "${patch.id}" needs a "date" and a "why"`)
+    if (!text("copy") && !text("run")) fail(`:  "${patch.id}" needs a "copy" or a "run"`)
+    const part = (name: string) => /^[\w.-]+$/.test(name) && name !== "." && name !== ".."
+    if (patch.copy !== undefined && !(text("copy") && (patch.copy as string).split("/").every(part)))
+      fail(`:  "${patch.id}"'s "copy" must be a file from the repo's root, not ${JSON.stringify(patch.copy)}`)
+    const { id, date, why, copy, run } = patch as CheckoutPatch
+    return { id, date, why, ...(copy ? { copy } : {}), ...(run ? { run } : {}) }
+  })
 }
 
 /** `text` without what `cut(rest)` says to cut:  how many characters, at each place outside a double-quoted string. */

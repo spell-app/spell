@@ -321,6 +321,49 @@ describe("ReviewClient writes", () => {
     expect([client.typedOf("q1"), client.readBackups()]).toEqual(["", {}])
   })
 
+  // Owen, 2026-10-22 (epic `epic-engine` P20):  "when I type in the revisit box, revisit is automatically on (but
+  // don't auto-close the field from underneath me)"
+  test("saveTyped():  words typed turn Revisit on, the pick kept and the box open;  counted for Send", async () => {
+    const storage = new MapStorage()
+    const { client, server } = await started(new FakeServer(), { storage })
+    await client.choose("q1", "B")
+    client.type("q1", "B, but shorter")
+    expect(client.typedMark("q1", "B, but shorter")).toEqual({
+      action: "revisit",
+      when: "soon",
+      note: "B, but shorter",
+      pick: "B"
+    })
+    expect(await client.saveTyped("q1", "B, but shorter")).toBe(true)
+    expect(server.inbox.marks.q1).toMatchObject({ action: "revisit", when: "soon", note: "B, but shorter", pick: "B" })
+    expect(server.inbox.drafts.q1).toBeUndefined()
+    // still being written in:  the box stays, what's typed with it, and no marked note is drawn over it
+    expect([client.isBoxOpen("q1"), client.typedOf("q1"), client.readBackups()]).toEqual([true, "B, but shorter", {}])
+    expect(client.unsentMarkCount).toBe(1)
+    // emptied:  the revisit goes, the pick stays a pick
+    expect(await client.saveTyped("q1", "  ")).toBe(true)
+    expect(server.inbox.marks.q1).toMatchObject({ action: "pick", pick: "B" })
+    expect(server.inbox.marks.q1?.note).toBeUndefined()
+  })
+
+  test("saveTyped():  an Approve becomes a revisit;  Make Todo and the x keep their kind;  a request at work, a draft", async () => {
+    const { client, server } = await started()
+    await client.save("q1", { action: "approve" })
+    await client.saveTyped("q1", "on second thought")
+    expect(server.inbox.marks.q1).toMatchObject({ action: "revisit", when: "soon", note: "on second thought" })
+    await client.save("j2", { action: "todo", note: "later" })
+    await client.saveTyped("j2", "later, after P3")
+    expect(server.inbox.marks.j2).toMatchObject({ action: "todo", note: "later, after P3" })
+    // an empty box on an item with no revisit is only a draft:  nothing to send
+    await client.saveTyped("o1", "")
+    expect(server.inbox.marks.o1).toBeUndefined()
+    // Do Now at work:  what's typed waits as a draft, the request untouched
+    client.press("o1", "details")
+    await vi.waitFor(() => expect(server.inbox.marks.o1?.action).toBe("details"))
+    await client.saveTyped("o1", "and also")
+    expect([server.inbox.marks.o1?.action, server.inbox.drafts.o1?.note]).toEqual(["details", "and also"])
+  })
+
   test("send() hands every unsent mark over;  with nothing new it says so", async () => {
     const { client, server } = await started()
     const notices: string[] = []

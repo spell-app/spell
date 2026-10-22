@@ -46,6 +46,11 @@ function part(host: Element, name: string): HTMLElement | null {
   return host.shadowRoot!.querySelector<HTMLElement>(`[part~="${name}"]`)
 }
 
+/** `send`'s paper plane:  the `send` part of its `<epic-send-buttons>` (epic `epic-engine` P20). */
+function plane(send: Element): HTMLElement {
+  return part(part(send, "send")!, "send")!
+}
+
 ////////////////
 // ## Tests
 ////////////////
@@ -57,13 +62,15 @@ describe("<epic-send>", () => {
     await ElementFixture.settle()
     expect(part(send, "state")!.textContent).toBe("Not sent")
     expect(part(send, "state")!.dataset.color).toBe("grey")
-    const button = part(send, "send")!
-    expect([button.dataset.fill, button.hasAttribute("color"), button.getAttribute("aria-label")]).toEqual([
+    // Send and its countdown, one group (epic `epic-engine` P20):  grey with nothing to send
+    const group = part(send, "send")!
+    expect([group.localName, group.dataset.fill, group.getAttribute("state")]).toEqual([
+      "epic-send-buttons",
       "rest",
-      false,
-      "Send"
+      "idle"
     ])
-    expect(button.title).toMatch(/partial answer is fine/)
+    expect(plane(send).getAttribute("aria-label")).toMatch(/partial answer is fine/)
+    expect(plane(send).title).toMatch(/partial answer is fine/)
     await expectAccessible(send)
   })
 
@@ -79,7 +86,7 @@ describe("<epic-send>", () => {
     await ElementFixture.settle()
     expect([part(send, "send")!.dataset.fill, part(send, "state")!.textContent]).toEqual(["pending", "Not sent"])
     expect(send.matches(":state(pending)")).toBe(true)
-    part(send, "send")!.click()
+    plane(send).click()
     await vi.waitFor(() => expect(part(send, "send")!.dataset.fill).toBe("sent"))
     // no question on the page:  nothing to count (r6)
     expect(part(send, "state")!.textContent).toMatch(/^Sent \d+\/\d+\/\d+ \d\d:\d\d$/)
@@ -105,7 +112,7 @@ describe("<epic-send>", () => {
       false,
       "/api/docs/details/draft"
     ])
-    part(send, "send")!.click()
+    plane(send).click()
     await vi.waitFor(() => expect(part(send, "send")!.dataset.fill).toBe("sent"))
     expect(part(send, "draft")).toBeNull()
   })
@@ -139,7 +146,8 @@ describe("<epic-send>", () => {
   test("an empty page never sent:  Send says what to do first, under it", async () => {
     adoptForm()
     const send = await ElementFixture.render(`<epic-send></epic-send>`)
-    part(send, "send")!.click()
+    await ElementFixture.settle()
+    plane(send).click()
     await ElementFixture.settle()
     expect(part(send, "error")!.textContent).toMatch(/^Pick an option, or write something/)
     expect(part(send, "error")!.getAttribute("role")).toBe("alert")
@@ -158,7 +166,7 @@ describe("<epic-send>", () => {
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()
     expect([part(send, "send")!.dataset.fill, part(send, "state")!.textContent]).toEqual(["pending", "Not sent"])
-    part(send, "send")!.click()
+    plane(send).click()
     await vi.waitFor(() => expect(part(send, "send")!.dataset.fill).toBe("sent"))
     const posted = JSON.parse(fetch.mock.calls.at(-1)![1]!.body as string) as Record<string, unknown>
     expect(posted.comments).toEqual({ "l-main": "Make the top project just spell" })
@@ -198,7 +206,7 @@ describe("<epic-send>", () => {
     field.value = "Is this worth it?"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()
-    part(send, "send")!.click()
+    plane(send).click()
     await vi.waitFor(() => expect(part(send, "send")!.dataset.fill).toBe("sent"))
     await ElementFixture.settle()
     expect(part(send, "notice")!.textContent).toBe(

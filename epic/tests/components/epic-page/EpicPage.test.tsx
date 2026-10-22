@@ -431,7 +431,7 @@ describe("<epic-page>", () => {
 })
 
 ////////////////
-// ## Send and Review Now (P10)
+// ## Send and its countdown (P10;  one group since epic `epic-engine` P20)
 ////////////////
 
 /** The review routes, as `fetch`, over an inbox kept here:  each reply the whole inbox;  `posts` every POST. */
@@ -481,19 +481,30 @@ async function adoptClient(routes: FakeRoutes, { served = true } = {}) {
   return client
 }
 
-/** `host`'s Send and Review Now buttons, in its header:  `[state, tooltip]` each;  `null` when not drawn. */
+/**
+ * `host`'s Send, in its header (`<epic-send-buttons part="send">`):  `[state, the plane's tooltip]`;  `null` when not
+ * drawn.
+ */
 function headerButtons(host: Element) {
-  const read = (part: string) => {
-    const button = host.shadowRoot!.querySelector<HTMLButtonElement>(`[part~="${part}"]`)
-    return button ? [button.dataset.state, button.title] : null
-  }
-  return { send: read("send"), now: read("review-now") }
+  const group = host.shadowRoot!.querySelector<HTMLElement>('[part~="send"]')
+  const plane = group?.shadowRoot?.querySelector<HTMLButtonElement>('[part~="send"]')
+  return { send: group ? [group.getAttribute("state"), plane?.title] : null }
+}
+
+/** `host`'s Send group, in its header. */
+function sendGroup(host: Element): HTMLElement {
+  return host.shadowRoot!.querySelector<HTMLElement>('[part~="send"]')!
+}
+
+/** `host`'s paper plane, in its Send group. */
+function plane(host: Element): HTMLButtonElement {
+  return sendGroup(host).shadowRoot!.querySelector<HTMLButtonElement>('[part~="send"]')!
 }
 
 /** What the tooltips add while nobody listens. */
 const NOBODY = ".  No Claude session is reviewing this doc:  Send or Do Now wakes one"
 
-describe("<epic-page> Send and Review Now", () => {
+describe("<epic-page> Send and its countdown", () => {
   afterEach(() => {
     ReviewClient.adopt(undefined)
   })
@@ -501,7 +512,7 @@ describe("<epic-page> Send and Review Now", () => {
   test("drawn ONLY while the page is reviewed (served with a token, its inbox answering)", async () => {
     await adoptClient(new FakeRoutes(), { served: false })
     const host = await render(page("", ["todo"]))
-    expect(headerButtons(host)).toEqual({ send: null, now: null })
+    expect(headerButtons(host)).toEqual({ send: null })
     expect(host.shadowRoot!.querySelector('[part~="new-button"]')).toBeNull()
   })
 
@@ -513,20 +524,17 @@ describe("<epic-page> Send and Review Now", () => {
     routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "revisit", when: "soon", note: "hm", at } }
     const client = await adoptClient(routes)
     const host = await render(page("", ["todo"]))
-    await vi.waitFor(() => expect(headerButtons(host).send).not.toBeNull())
+    await vi.waitFor(() => expect(headerButtons(host).send?.[1]).toBeTruthy())
     expect(host.shadowRoot!.querySelector('[part~="send-bar"]')).toBeNull()
     expect(
       Array.from(host.shadowRoot!.querySelector('header [part~="status"]')!.children, (child) =>
         child.localName === "ui-label" ? "step" : child.getAttribute("part")
       )
-    ).toEqual(["send", "review-now", "step"])
-    expect(headerButtons(host)).toEqual({
-      send: ["unsent", `Send 2 marks to Claude${NOBODY}`],
-      now: ["ready", `Review Now:  Claude works through 2 marks at once, answers in their items${NOBODY}`]
-    })
-    const send = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="send"]')!
+    ).toEqual(["send", "step"])
+    expect(headerButtons(host)).toEqual({ send: ["unsent", `Send 2 marks to Claude${NOBODY}`] })
     // the fill rule (Q20):  pressed marks not sent, dashed;  sent, outlined
-    expect(getComputedStyle(send).borderTopStyle).toBe("dashed")
+    const outline = () => getComputedStyle(sendGroup(host).shadowRoot!.querySelector('[part~="base"]')!).borderTopStyle
+    expect(outline()).toBe("dashed")
     const pill = host.shadowRoot!.querySelector<HTMLElement>('[part~="pill"]')!
     expect(pill.textContent!.replace(/\s+/g, " ")).toContain(
       "No Claude session is reviewing: start one with /epic review demo"
@@ -536,16 +544,19 @@ describe("<epic-page> Send and Review Now", () => {
     const line = host.shadowRoot!.querySelector<HTMLElement>('[part~="review-line"]')!
     expect(line.nextElementSibling).toBe(pill)
     expect(line.textContent).not.toContain("No Claude session")
-    send.click()
+    plane(host).click()
     await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["send"]))
     await vi.waitFor(() => expect(headerButtons(host).send?.[0]).toBe("sent"))
-    expect(getComputedStyle(send).borderTopStyle).toBe("solid")
+    await vi.waitFor(() => expect(outline()).toBe("solid"))
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     await client.refresh()
     await ElementFixture.tick()
     expect(headerButtons(host).send).toEqual(["sent", "Sent:  waiting for Claude"])
     expect(host.shadowRoot!.querySelector('[part~="pill"]')).toBeNull()
-    host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="review-now"]')!.click()
+    // the countdown running out sends as Review Now did (decision Q7):  every revisit asked now
+    sendGroup(host).dispatchEvent(
+      new CustomEvent("epic-send-asked", { detail: { auto: true }, bubbles: true, composed: true })
+    )
     await vi.waitFor(() =>
       expect(routes.posts.at(-1)).toEqual(["send", { page: "/epics/demo/demo.plan.html", now: true }])
     )
@@ -561,17 +572,14 @@ describe("<epic-page> Send and Review Now", () => {
     routes.inbox.unsentComments = ["cm1"]
     await adoptClient(routes)
     const host = await render(page("", ["todo"]))
-    await vi.waitFor(() => expect(headerButtons(host).send).not.toBeNull())
-    expect(headerButtons(host)).toEqual({
-      send: ["unsent", "Send 1 comment to Claude"],
-      now: ["ready", "Review Now:  Claude works through 1 comment at once, answers in its item"]
-    })
+    await vi.waitFor(() => expect(headerButtons(host).send?.[1]).toBeTruthy())
+    expect(headerButtons(host)).toEqual({ send: ["unsent", "Send 1 comment to Claude"] })
     routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "todo", at } }
     routes.inbox.unsentComments = ["cm1", "cm2"]
     await ReviewClient.forPage().refresh()
     await ElementFixture.tick()
     expect(headerButtons(host).send).toEqual(["unsent", "Send 2 marks, 2 comments to Claude"])
-    host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="send"]')!.click()
+    plane(host).click()
     await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["send"]))
     await vi.waitFor(() => expect(headerButtons(host).send).toEqual(["sent", "Sent:  waiting for Claude"]))
   })
@@ -629,10 +637,10 @@ describe("<epic-page> Send and Review Now", () => {
     expect(button.title).toBe("New Todo")
     expect(button.closest('[part~="tools"]')).not.toBeNull()
     expect(button.querySelector("ui-icon")!.getAttribute("name")).toBe("comment dots")
-    // nothing waiting:  both there, grey (so they're always in the same place), and no pill
+    // nothing waiting:  there, grey (so it's always in the same place), and no pill
+    await vi.waitFor(() => expect(headerButtons(host).send?.[1]).toBeTruthy())
     expect(headerButtons(host)).toEqual({
-      send: ["idle", "Nothing to send:  mark an item (its buttons) or leave a comment (its bullhorn)"],
-      now: ["idle", "Review Now:  nothing to work through yet"]
+      send: ["idle", "Nothing to send:  mark an item (its buttons) or leave a comment (its bullhorn)"]
     })
     expect(host.shadowRoot!.querySelector('[part~="pill"]')).toBeNull()
     button.click()
