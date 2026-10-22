@@ -287,8 +287,8 @@ The colours start in the grammar inside the `.vsix`;  everything else comes from
 - **The language server:**  errors as you type, hover, completion, go to definition and references, rename,
   an outline.  [Its page](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) lists every feature.
 - **TS, JS, PY:**  the code the file compiles to, beside it and read-only, as above.
-  - The writers `spell compile` uses:  JavaScript is the target the editor runs, TypeScript is `ts/solid`,
-    Python is `py`.
+  - The writers `spell compile` uses:
+    JavaScript is the target the editor runs, TypeScript is `ts/solid`, Python is `py`.
   - Each view's tab ends in its language, `Card.spell.ts`, so all three can be open at once.
   - A file outside any Spell project gets a one-line comment saying so.
 - **▶ Run Project:**  the project, running in a panel beside its code ("Run drawable-solitaire").
@@ -370,13 +370,14 @@ spell-ui adds a single setting;  spell-lang and spell-epic ship none.
 The kit's window and every epic's window are rooted at the kit, so only the kit's apply in them:
 there, your own settings decide what formats on save.
 
-- And in a window of several folders (every epic's), VS Code reads a WINDOW setting from the window file only,
-  never a folder's `.vscode/`:  the TypeScript ones are such.
+- In a window of several folders (every epic's), VS Code reads a WINDOW setting only from the window file,
+  never from a folder's `.vscode/`:  the TypeScript settings are window settings.
   - So `epic window` writes them into every window file too,
-    from `windows.settings` in the kit's epic settings ([.epic/config.json5](.epic/config.json5)).
+    from `windows.settings` in [the kit's epic settings](.epic/config.json5).
   - Keep the two the same.
-- The HTML and CSS data are a folder's own settings, so the kit's apply in every window it's a folder of,
-  each checkout reading its own files.
+- The HTML and CSS data are a folder's own settings:
+  the kit's apply in every window it's a folder of, each checkout reading its own files.
+
 For spell-app's settings and its F5, open spell-app in a window of its own, `code ~/www/spell/spell-app`;
 its Claude panel then lists only the sessions started there.
 
@@ -440,7 +441,7 @@ because the order of a window's folders decides which sessions its Claude panel 
   an epic's goes in `windows/ongoing/`.
   The folder is `windowsFolder`, in the kit's epic settings ([.epic/config.json5](.epic/config.json5)).
 - `epic window init` writes the missing ones, and brings the rest up to date.
-- Each one also gets the kit's window settings, the TypeScript ones (`windows.settings` in the epic settings),
+- Each one also gets the kit's TypeScript window settings (`windows.settings` in the epic settings):
   so the kit's TypeScript plugin loads in an epic's window too.
 
 Here's the window this page was written in, the `readme` epic's, as `epic window` wrote it:

@@ -76,9 +76,10 @@ written on it:  Spell UI's `<ui-*>`, spell-epic's `<epic-*>`, the app's `<spell-
 and the element a Spell program draws each drawable thing in, like `<solitaire-card>`.
 Its build tools and the test helpers every set's tests use sit beside it, on this page too.
 
-- Code:  [src/element/](src/element/), its tools in [src/element-tools/](src/element-tools/), its test helpers in
-  [src/test-helpers/](src/test-helpers/);  their tests in [tests/element/](tests/element/) and
-  [tests/element-tools/](tests/element-tools/).
+- Code:  [src/element/](src/element/)
+  - its tools in [src/element-tools/](src/element-tools/)
+  - its test helpers in [src/test-helpers/](src/test-helpers/)
+  - their tests in [tests/element/](tests/element/) and [tests/element-tools/](tests/element-tools/)
 - Rules for working on it:  [element's AGENTS.md](src/element/AGENTS.md).
 - The reactivity underneath is Solid's:  [Solid's docs](https://docs.solidjs.com).
 
@@ -220,9 +221,9 @@ flowchart LR
 
 _No second render, no diff:  a write goes straight to the node that shows it._
 
-- A member reads fresh right after a write:  once `pick()` sets `this.sort = "date"`,
-  a read of `this.sort` on the very next line gives `"date"`, with no waiting for a flush,
-  and Solid still redraws what read it.
+- A member reads fresh right after a write:
+  once `pick()` sets `this.sort = "date"`, a read of `this.sort` on the very next line gives `"date"`,
+  with no waiting for a flush, and Solid still redraws what read it.
   - A Solid memo would hand back the old value there, so `@E.derived` is a cache of its own, not a memo.
 - 1,000 `<ui-button>`s put in a page at once are all built, rendered and ready in about 80 ms:
   the median of nine runs, after a warm-up, in Spell UI's
@@ -571,8 +572,8 @@ _From [EpicQuestion.test.tsx](https://github.com/spell-app/spell-epic/blob/main/
 `ElementFixture.render()` waits for every element's `ready`, then runs Solid's `flush()`,
 so the test asserts on the drawn element, not after a guessed number of ticks.
 `expectAccessible()` runs axe through the shadow roots, and fails with a list of what to fix.
-The cost is a real browser to run them in:  Playwright's Chromium, installed once in
-[Setup from zero](README.md#setup-from-zero).
+The cost is a real browser to run them in:
+Playwright's Chromium, installed once in [Setup from zero](README.md#setup-from-zero).
 
 | Test helper | What |
 | --- | --- |
@@ -642,19 +643,19 @@ How it's turned on:
   - tsserver finds a plugin by its path in the package, not by `exports`, so the name has `src/` in it.
   - `plugin.cjs` loads the TypeScript source through `tsx`:  nothing to build.
 - `tsc` never runs plugins:  `yarn ts` is the same with or without it.
-- VS Code runs plugins only in the REPO's TypeScript, and only TypeScript 6's editor server loads them
-  (TypeScript 7, what `tsc` runs here, has none).
-  The kit's `.vscode/settings.json` says so, for a window opened on the kit's folder:
+- VS Code runs plugins only in the REPO's TypeScript, and only TypeScript 6's editor server loads them:
+  TypeScript 7, what `tsc` runs here, has none.
+  [The kit's editor settings](.vscode/settings.json) pick TypeScript 6, for a window opened on the kit's folder:
   - `js/ts.tsdk.path`:  `node_modules/@typescript/old/lib`, TypeScript 6
   - `js/ts.experimental.useTsgo: false`:  the native preview (TypeScript 7 in the editor) loads no plugins
   - VS Code asks once, "Use Workspace Version":  say yes.
-- A window opened from a `.code-workspace` file (an epic's window) ignores a folder's window settings,
-  so `epic window` writes the same ones into every window file:
-  `windows.settings` in the kit's epic settings ([.epic/config.json5](.epic/config.json5)).
+- An epic's window, opened from a `.code-workspace` file, ignores a folder's window settings:
+  so `epic window` writes the same ones into every window file,
+  from `windows.settings` in [the kit's epic settings](.epic/config.json5).
   - A window file from before gets them from `epic window init`.
   - Or run "TypeScript:  Select TypeScript Version" in that window.
-- Its log lines (the manifests it found, anything that failed) are in "TypeScript:  Open TS Server log",
-  prefixed `spell-elements`.
+- Its log lines, prefixed `spell-elements`, are in "TypeScript:  Open TS Server log":
+  the manifests it found, and anything that failed.
 
 ## Who's written on it
 

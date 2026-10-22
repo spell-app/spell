@@ -563,8 +563,8 @@ The game deals itself as it opens.
 Find that line, and argue with it:  change `diamonds or hearts` to `clubs or spades`.
 - Two seconds later the clubs and spades on the table turn red, every card still where you left it:
   the game in progress carries over to the new version.  Restart starts afresh.
-- Further down the same file is its test, in English too:  `expect the color of the card to be black`,
-  for the queen of spades.
+- Further down the same file is its test, in English too:
+  `expect the color of the card to be black`, for the queen of spades.
   You've just made it wrong:  save the file (⌘S, or Ctrl-S), and `spell test` says which check broke, and why.
 - The example is a file in spell-app's repo, so put it back when you're done arguing:
   `git -C spell-app restore spaces/@spell/examples`.

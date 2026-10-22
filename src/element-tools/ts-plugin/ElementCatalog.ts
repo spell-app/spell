@@ -10,8 +10,8 @@ import type { CatalogElement, ElementDoc } from "spell-kit/element-tools/tools.t
  * ### `ElementCatalog`
  * Every custom element a TypeScript program can use, read from the Custom Elements Manifests of its packages:
  * the program's own package, and each package it depends on.
- * - A package ships a manifest by naming it in its `package.json`:  `"customElements": "<path>"`
- *   (Spell UI's and Spell Brand's are written by their `yarn site:data`).
+ * - A package ships a manifest by naming it in its `package.json`:
+ *   `"customElements": "<path>"` (Spell UI's and Spell Brand's are written by their `yarn site:data`).
  * - So it works for ANY set that ships one, and imports none of them:  the kit never imports a child repo.
  * - A manifest is re-read when its file changes (its mtime), so a fresh `yarn site:data` shows up
  *   at the next keystroke, with no restart.

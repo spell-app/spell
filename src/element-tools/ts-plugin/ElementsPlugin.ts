@@ -89,7 +89,7 @@ export class ElementsPlugin {
 
   /**
    * TypeScript's completions at `position`, with the slots or parts the plugin knows put first.
-   * - `undefined` stays `undefined` where the cursor isn't in a `slot="..."` or `part="..."` the plugin knows.
+   * - `prior`, unchanged, where the cursor isn't in a `slot="..."` or `part="..."` the plugin knows.
    */
   completionsAt(
     fileName: string,
@@ -184,8 +184,8 @@ export class ElementsPlugin {
 
   /**
    * A warning when `attribute` is a dashed name its custom tag doesn't have, e.g. `text-alin` on `<ui-button>`.
-   * - Allowed besides the tag's attributes:  `data-*`, `aria-*`, and `on-<event>` for each event it dispatches
-   *   (`on-ui-change`).
+   * - Allowed besides the tag's attributes:
+   *   `data-*`, `aria-*`, and `on-<event>` for each event it dispatches (`on-ui-change`).
    * - Namespaced names (`on:click`, `prop:value`) and undashed ones are TypeScript's to check.
    * - A tag the catalog doesn't know, or whose manifest lists no attributes, says nothing:  no warning.
    */
@@ -347,8 +347,8 @@ function wordSpanAt(value: AttributeValue, position: number): ts.TextSpan {
 }
 
 /**
- * The tag of the element `value`'s element is a child of, e.g. `ui-panel`.
- * - Through the JSX that keeps it a child:  `{...}`, `( )`, `a && <b>`, `a ? <b> : <c>`, `<>...</>`
+ * The tag of the parent of the element `value` is on, e.g. `ui-panel`.
+ * - Looks up through the JSX that keeps it a child:  `{...}`, `( )`, `a && <b>`, `a ? <b> : <c>`, `<>...</>`
  * - `undefined` at the top of a render, or inside a component call (`<For>`'s callback).
  */
 function parentTagOf(typescript: typeof ts, value: AttributeValue): string | undefined {

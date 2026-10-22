@@ -1,8 +1,9 @@
 {
   // The kit's window settings, for a window opened on the kit's folder itself.
-  // - A window opened from a `.code-workspace` file (an epic's window) reads the WINDOW settings below from that file
-  //   instead:  VS Code ignores a folder's window settings in a workspace of several folders.
-  //   spell-epic writes them there, from `windows.settings` in the kit's `.epic/config.json5`:  keep the two the same.
+  // - An epic's window, opened from a `.code-workspace` file, reads the WINDOW settings below from that file:
+  //   VS Code ignores a folder's window settings in a workspace of several folders.
+  //   - spell-epic writes them there, from `windows.settings` in the kit's `.epic/config.json5`.
+  //   - Keep the two the same.
   // - The HTML and CSS data apply in every window the kit is a folder of:  they're a folder's own settings.
 
   // TypeScript:  the editor runs the repo's own TypeScript 6 server, so the tsconfigs' plugins load
