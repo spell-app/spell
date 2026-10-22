@@ -35,7 +35,7 @@ import { fileURLToPath } from "node:url"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { DataFile } from "spell-epic/data/DataFile"
 import { SRV } from "spell-kit/server"
-import { PageServer } from "spell-kit/server/page"
+import { PageServer, pageServerRoot } from "spell-kit/server/page"
 
 import { AirplaneInbox } from "./AirplaneInbox.ts"
 import { AirplaneMode } from "./AirplaneMode.ts"
@@ -67,8 +67,10 @@ function checkoutCheck(root: string): FlightCheck {
  * The checkout's page server, running;  `fix`:  `PageServer.ensure()`, which also restarts one older than its code
  * (after the merge that brought this epic in, so pages get airplane mode).
  */
-async function serverCheck(root: string, fix: boolean): Promise<FlightCheck> {
+async function serverCheck(checkout: string, fix: boolean): Promise<FlightCheck> {
   const name = "page server"
+  // the kit's, from any folder of it:  it starts from the kit's root only (epic `repo-split` P16)
+  const root = pageServerRoot(checkout)
   try {
     if (!fix) {
       const running = await new SRV.PidFile(root).status()

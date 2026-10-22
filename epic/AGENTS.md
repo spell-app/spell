@@ -58,7 +58,7 @@ As WWOD §4, plus these.
     source.
   - Vite, Vitest, `tsx`:  `default`, the source, adding the extension themselves.
   - Every folder barrel has an explicit key (`"./markup"`, `"./components/epic-page"` ...):  `tsx`, run from another
-    repo through `node_modules` (spell-app's page server loads the route modules), finds a file without its
+    repo through `node_modules` (the kit's page server loads the route modules), finds a file without its
     extension but not a folder's `index`.
   - esbuild (the extension's build, the docs bundle's) finds neither by itself:  the kit's `sourceNames()`
     (`spell-kit/toolchain/sourceNames`) finds our packages' names as their source files.

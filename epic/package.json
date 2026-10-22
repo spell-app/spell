@@ -323,5 +323,38 @@
     "name": "epics",
     "prefix": "epic-",
     "dir": "src"
+  },
+  "pageServer": {
+    "routes": [
+      "src/tools/detailsRoutes.ts",
+      "src/tools/choicesRoutes.ts",
+      "src/tools/commentsRoutes.ts",
+      "src/tool/reviewRoutes.ts",
+      "src/tool/epicRoutes.ts",
+      "src/tool/linkRoutes.ts",
+      "src/list/runningRoutes.ts",
+      "src/tools/agentRoutes.ts",
+      "src/tools/showRoutes.ts",
+      "src/tools/airplaneRoutes.ts"
+    ],
+    "watch": [
+      "src/tools/_assets",
+      "src/components/__pack"
+    ],
+    "componentSets": {
+      "epics": {
+        "name": "Epic UI",
+        "dir": "src/docs",
+        "assets": "../spell-ui/site/_assets"
+      }
+    },
+    "engineRoutes": {
+      "/_epic/assets/": "src/tools/_assets",
+      "/_epic/pack/": "src/components/__pack",
+      "/templates/": "templates"
+    },
+    "localCopies": {
+      "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js": "/_epic/assets/highlight.min.js"
+    }
   }
 }

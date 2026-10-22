@@ -433,7 +433,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 `docs/`:  the pages of the `<epic-*>` elements, a COMPONENT SET (epic `epic-workflow` P10).
 Laid out as every set is since P18 of `people-and-orgs`
 ([spell-app's AGENTS.md](../../spell-app/AGENTS.md), "COMPONENT SETS").
-- Served by the page server, as its checkout's settings name it (the root `package.json`'s `"pageServer"`
+- Served by the kit's page server, as spell-epic's part of its settings names it (its `package.json`'s `"pageServer"`
   `"componentSets"`, `componentSets()` in [settings.ts](../../src/server/page/settings.ts)), and by the epic server:
   - at `/components/epics/`
   - and at `/worktrees/<w>/components/epics/` for a worktree's
@@ -556,7 +556,7 @@ The shared folders:
   - `EpicConfig.contentOf(<checkout>)` ([EpicConfig.ts](config/EpicConfig.ts));  `pages.js` `CONTENT`
   - a page's PATH is from the content folder (`epics/seo/seo.plan.html`:  `pagePath()`), as the page servers serve it
     at `/`;  `pageAt()` turns one back into its file, `inContent()` maps a path through an older checkout's link
-  - spell-app's page server mounts it at `/` when the running epics' route module says where it is
+  - the kit's page server mounts it at `/` when the running epics' route module says where it is
     (`serveContent()`, `runningRoutes.ts`)
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
@@ -566,7 +566,7 @@ The shared folders:
     - Owen's order (2026-10-11, epic `epic-workflow` J40);  the slashed names are the tabs' labels (J41).
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
-    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (the checkout's `"pageServer"` `"componentSets"`, read with
+    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (each repo's `"pageServer"` `"componentSets"`, merged and read with
       `componentSets()` in `spell-kit/server/page`), in Spell UI's page shape.
       Their cards link the sets' addresses:
 
@@ -808,7 +808,7 @@ In `tools/`:
   - Everything that sticks or lands starts below it:
     `siteHeaderHeight()` in `spell-doc-runtime.js`, and its header's "Landing".
   - The element itself is `spell-kit/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
-  - Its tabs:  the checkout's `"pageServer"` `"siteTabs"` on a served page;  from disk, the docs bundle's own
+  - Its tabs:  the content repo's `page-server.json5` `"siteTabs"` on a served page (epic `repo-split` P16);  from disk, the docs bundle's own
     (`DOCS_TABS` in `spell-ui.entry.js`:  the docs' areas and Epic/UI), epic `repo-split` I4.
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
 - Pages MUST still open straight from disk (`file://`):  no ES modules, hence the one classic bundle.
@@ -1179,7 +1179,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 ## Templates
 
 - spell-epic's own, in its [`templates/`](../templates/) (epic `epic-eject` T11, Q8):  every repo's pages start from them.
-  - Served at `/templates/` (and `/r/<repo>/templates/`) by the epic server and spell-app's page server alike.
+  - Served at `/templates/` (and `/r/<repo>/templates/`) by the epic server and the kit's page server alike.
   - `epic pages template <name>` prints one's path;  `epic pages index` writes the Templates list page,
     `templates/index.html`, here.
   - A repo adds its own only if it wants one:  `repoTemplates` (`EpicConfig`), listed beside these, found first.
@@ -1327,7 +1327,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - No wake with several sessions titled for the epic, in airplane mode, or for a Send with nothing new.
 - The page reads and writes through ONE `ReviewClient` ([the review client](review/)).
   - It's on the page server's route module, [reviewRoutes.ts](tool/reviewRoutes.ts), at `/api/epics/review/...`.
-  - The module is listed in the root `package.json`'s `pageServer.routes`.
+  - The module is listed in spell-epic's `package.json`'s `pageServer.routes`:  its part of the kit's page server's
+    settings, which the epic server reads too (`ROUTE_MODULES`).
   - The routes:
     - `GET inbox?page=`
     - `POST mark { page, id, mark | null }`

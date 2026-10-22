@@ -1,8 +1,9 @@
 import { spawn } from "node:child_process"
 import { constants } from "node:os"
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync } from "node:fs"
 import { join } from "node:path"
 
+import { settingsParts } from "spell-kit/server/page/settings"
 import { packageDir, tsxImports } from "spell-epic/tools/packageDir"
 
 import { EXIT, type ToolSpec } from "./command.types"
@@ -196,16 +197,16 @@ export class EpicTools {
 
   /**
    * Whether the caller's checkout has a page server of its own (`TOOLS.server`), as `pages.js`' `ensurePageServer()`
-   * finds one:  its `package.json` has `"pageServer"` settings (spell-app's), and its install resolves
-   * `spell-kit/server`.
-   * - a repo `epic init` set up has none, nor has spell-epic:  `epic server` is the machine's epic server there
-   *   (`epic hub`)
+   * finds one:  its install resolves `spell-kit/server`, and the page server's settings have a part
+   * (`settingsParts()`:  in a kit, the kit's and every installed repo's `"pageServer"`;  else the checkout's own).
+   * - in a kit:  from any folder of it, the kit's page server (epic `repo-split` P16)
+   * - a repo `epic init` set up has none:  `epic server` is the machine's epic server there (`epic hub`)
    */
   static hasPageServer(cwd = process.cwd()): boolean {
     const spec: ToolSpec = EpicTools.TOOLS.server
     const data = Git.nearestCheckout({ marker: CHECKOUT_MARKER, from: cwd })
     const code = EpicTools.codeOf(spec, data)
-    return hasPageServerSettings(data) && !!code && existsSync(join(code, spec.tool))
+    return settingsParts(data).length > 0 && !!code && existsSync(join(code, spec.tool))
   }
 
   /**
@@ -257,18 +258,6 @@ const PASSED_SIGNALS: NodeJS.Signals[] = ["SIGTERM", "SIGHUP"]
 
 /** What marks the caller's checkout for a tool in a package:  the nearest repo's root (a worktree's `.git` is a file). */
 const CHECKOUT_MARKER = ".git"
-
-/** Whether checkout `root`'s `package.json` has `"pageServer"` settings (a page server's routes, sets, bundles ...). */
-function hasPageServerSettings(root: string): boolean {
-  try {
-    return (
-      (JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { pageServer?: unknown }).pageServer !==
-      undefined
-    )
-  } catch {
-    return false
-  }
-}
 
 /** Resolves once everything written to stdout and stderr so far is out:  an empty write's callback comes after. */
 function flushed(): Promise<void> {
