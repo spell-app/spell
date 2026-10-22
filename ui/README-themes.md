@@ -369,4 +369,4 @@ The second lives in the content folder, which a new checkout doesn't have.
 - [README-components.md](README-components.md):  every family, each with its own tokens on its docs page's Theming tab
 - [README-runtime.md](README-runtime.md):  the sheets under every theme, and the `UI` runtime that applies them
 - [README-migrating.md](README-migrating.md):  coming from Fomantic UI, whose themes and `.overrides` carry over
-- [The kit's element framework](../README-element.md):  how each component's shadow root adopts these sheets
+- [The kit's element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md):  how each component's shadow root adopts these sheets

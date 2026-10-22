@@ -50,7 +50,7 @@ Every colour carries the text colour that reads on it, in light and in dark, so 
 
 Spell UI is 62 families of these `<ui-*>` custom elements, 104 tags in all:
 buttons, forms, dropdowns, cards, menus, modals, tables, a calendar, a tree diagram ...
-It's Spell's component library ([the kit's front page](../README.md) says what Spell is),
+It's Spell's component library ([the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md) says what Spell is),
 and a page needs nothing else of Spell's to use it.
 
 - **Accessible:**  each element draws real, semantic markup into its shadow root,
@@ -200,7 +200,7 @@ the app stylesheet) are on [README-themes.md](README-themes.md#four-recipes).
 ## Thirty seconds, two ways
 
 Both start from the kit, with Spell UI cloned inside it.
-Setting the kit up from zero (Node 24, yarn, the clone) is [the kit's front page](../README.md#setup-from-zero);
+Setting the kit up from zero (Node 24, yarn, the clone) is [the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero);
 then bring Spell UI in:
 
 ```sh
@@ -326,7 +326,7 @@ it loads what's inside on demand, gives it a theme and a size, and decides what 
 | `fixed` | present or not | fills the viewport and stays there:  the page never scrolls, the root does;  on iOS the keyboard can cover fields near the bottom |
 | `stack-with` | `container`, `page` | what stacking layouts inside measure (`stackable`, `doubling` ...):  each element's own width, or the screen's, as in Fomantic;  sets `--ui-stack-with`, and an element's own `stack-with` wins |
 | `assets` | a folder | where the built-in icon packs load from, relative to the page;  by default, beside the library |
-| `disabled`, `visible`, `animation` | | the states every element shares ([the kit's README-element.md](../README-element.md#what-every-element-gets-without-asking)) |
+| `disabled`, `visible`, `animation` | | the states every element shares ([the kit's README-element.md](https://github.com/spell-app/spell-kit/blob/main/README-element.md#what-every-element-gets-without-asking)) |
 
 - Two events:
   - `ui-ready`, once everything's in:  its `detail.failed` lists what didn't load, `[{ tag, reason, error?, source? }]`,
@@ -376,8 +376,8 @@ It borrows the page's, so the page still has one Solid, and the pack's elements 
 - A pack that fails or times out logs an error naming its `source`, and the root still gets ready.
 - A pack's elements are written exactly like a Spell UI family.
   How one is built (`spell pack build`), and what it costs:
-  [the kit's README-element.md](../README-element.md#packs-and-ui-root);
-  the `spell pack` commands that make one:  [the kit's README-cli.md](../README-cli.md#spell-ui).
+  [the kit's README-element.md](https://github.com/spell-app/spell-kit/blob/main/README-element.md#packs-and-ui-root);
+  the `spell pack` commands that make one:  [the kit's README-cli.md](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-ui).
 
 ## The families:  62, in Fomantic UI's groups
 
@@ -477,7 +477,7 @@ each example's plain class markup on the left, the same example as elements on t
 - The rules for working here (how a component is written, imports, the lint guard):  [AGENTS.md](AGENTS.md).
 - The docs site, the tools, their environment variables, and Spell UI's `spell` commands:
   [README-site.md](README-site.md).
-- The framework every family is written on, the kit's:  [README-element.md](../README-element.md).
+- The framework every family is written on, the kit's:  [README-element.md](https://github.com/spell-app/spell-kit/blob/main/README-element.md).
 
 <details>
 <summary>Every yarn script, one line each</summary>
@@ -515,7 +515,7 @@ each example's plain class markup on the left, the same example as elements on t
 | [src/api.ts](src/api.ts) | `spell-ui/api`:  `E`, `F`, and the vocabulary layer as `V` |
 | [src/components/](src/components/) | one folder per component FAMILY (`ui-button/`):  components, vocabularies, sheet, fallback, examples;  `components.types.ts` (`UIT`), `ComponentDefinitions.ts` (every tag's vocabulary, rolled up) |
 | [src/elements/](src/elements/) | Spell UI's half of the element core:  `ClassBuilder`, `NativeFallback`, `LoadableComponent`, `PartComponent`, `SpellUISettings` ... |
-| *(none:  the kit's [src/element/](../src/element/))* | the element bases every set shares:  `UIComponent`, `DOMElement`, the reactive decorators, `Cell`, `PartContext` ... |
+| *(none:  the kit's [src/element/](https://github.com/spell-app/spell-kit/tree/main/src/element))* | the element bases every set shares:  `UIComponent`, `DOMElement`, the reactive decorators, `Cell`, `PartContext` ... |
 | [src/runtime/](src/runtime/) | the `UI` runtime:  one instance per page, its services as classes (`Keyboard`, `Overlays`, `Focus` ...) |
 | [src/vocabulary/](src/vocabulary/) | the naming layer:  value sets, `Vocabulary` (translated names), `Converters` |
 | [src/styles/](src/styles/) | layers, tokens, colours, sizes, reset, typography, utilities, themes;  `tokens.css`, `colors.css`, `sizes.css` are GENERATED (`yarn gen:styles`) |
@@ -534,7 +534,7 @@ each example's plain class markup on the left, the same example as elements on t
 | [tsconfig.json](tsconfig.json), [tsconfig.node.json](tsconfig.node.json) | the browser code's TypeScript settings, and the node code's (`src/tools/`, `src/cli/`, `scripts/`, the configs):  no aliases, every file by its package name |
 | [vite.config.ts](vite.config.ts), [vitest.config.ts](vitest.config.ts), [vite.site.config.ts](vite.site.config.ts) | the library build (its families in `COMPONENTS`), the tests (two projects, `ssr` and `browser`), the docs site's bundle |
 | `results/` | what the tools write (git-ignored) |
-| *(none:  `spell-app`'s [`<spell-code>`](../spell-app/src/app/components/spell-code/))* | code in Spell, coloured by Spell's own parser:  a subclass of `<ui-code>`, in the Spell app |
+| *(none:  `spell-app`'s [`<spell-code>`](https://github.com/spell-app/spell-app/tree/main/src/app/components/spell-code))* | code in Spell, coloured by Spell's own parser:  a subclass of `<ui-code>`, in the Spell app |
 
 </details>
 
@@ -560,8 +560,8 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 - Tooling:
   - ONE reader of environment variables:  [`environment`](src/tools/environment.ts)
     ([every variable it reads](README-site.md#environment-variables))
-  - ONE printer:  the kit's [`Terminal`](../src/element-tools/Terminal.ts) (`spell-kit/element-tools/Terminal`)
-  - ONE dependency finder:  the kit's [`NodePackage`](../src/element-tools/NodePackage.ts)
+  - ONE printer:  the kit's [`Terminal`](https://github.com/spell-app/spell-kit/blob/main/src/element-tools/Terminal.ts) (`spell-kit/element-tools/Terminal`)
+  - ONE dependency finder:  the kit's [`NodePackage`](https://github.com/spell-app/spell-kit/blob/main/src/element-tools/NodePackage.ts)
   - ONE write-or-`--check` for generated files:  [`generatedFiles`](src/tools/generatedFiles.ts)
 
 </details>
@@ -622,12 +622,12 @@ The rest is on the page that owns each one:
 | [README-migrating.md](README-migrating.md) | <ul><li>from Semantic UI, Fomantic UI or Semantic UI React:  your classes moved inside</li><li>a whole card, three ways;  every class word becomes an attribute</li><li>what changes under the words:  your CSS, jQuery calls, a few words</li><li>from Semantic UI React, no wrappers;  moving a page by hand;  🌱 the migration tool</li></ul> |
 | [README-site.md](README-site.md) | <ul><li>the docs site, 84 pages and 1,740 live examples, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser;  🌱 deploying</li><li>the tools, the visual tests and their environment variables;  Spell UI's `spell` commands</li></ul> |
 
-Every other repo's pages:  [the kit's index](../README.md#every-readme).
+Every other repo's pages:  [the kit's index](https://github.com/spell-app/spell-kit/blob/main/README.md#every-readme).
 
 ## See also
 
 - [README-frameworks.md](README-frameworks.md):  next, if your page is a React, Vue or Solid app
 - [README-components.md](README-components.md):  next, to find the family you need by any name you know
 - [README-themes.md](README-themes.md):  next, if the default look isn't yours
-- [The kit's README-element.md](../README-element.md):  the framework under every element, before you write one
+- [The kit's README-element.md](https://github.com/spell-app/spell-kit/blob/main/README-element.md):  the framework under every element, before you write one
 - [AGENTS.md](AGENTS.md):  the rules for working here, before you change a line
