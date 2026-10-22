@@ -18,7 +18,7 @@
  * - `--root <dir>`:  the kit (default:  the kit holding the folder `yarn` ran in, `INIT_CWD`, from any folder of it,
  *   `pageServerRoot()`);  the page server starts from the kit's root ONLY:  any other folder is an error, naming the
  *   kit (`kitRootOf()`, epic `repo-split` P16)
- * - `--spaces <dir>`:  where people's and orgs' spaces are kept (default:  spell-spaces, beside the main checkout):
+ * - `--spaces <dir>`:  where people's and orgs' spaces are kept (default:  spell.spaces, in the kit):
  *   it sets `SPELL_SPACES_DIR`, which spaces' route modules read, and a background server inherits
  *   (epic `people-and-orgs` P8)
  * - Runs under `tsx` with the kit's node settings (`tsconfig.node.json`).

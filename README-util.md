@@ -82,8 +82,8 @@ flowchart TB
 _Each layer uses only the ones below it;  Spell UI takes the generic files one by one,
 so nothing above them lands in its bundles._
 
-Its biggest reader by far is the language:  249 of spell-lang's files import the barrel,
-215 of them in its `spell` folder, against 15 in spell-app's editor, language server, spaces and command line.
+Its biggest reader by far is the language:  242 of spell-lang's files import the barrel,
+207 of them in its `spell` folder, against 14 in spell-app's editor, language server, spaces and command line.
 Spell UI and [the kit's element framework](README-element.md) never touch the barrel at all:
 they take the generic files, and re-export them as their own.
 The code is in [src/util/](src/util/), its tests in [tests/util/](tests/util/),

@@ -247,7 +247,7 @@ and runs them right beside the text.
   no grammar file, no generated code.
   [GitHub's Markdown](https://github.com/spell-app/spell-lang/blob/main/README-markdown.md) runs on it too, and passes all 670 of 670 spec examples.
 - Spell reads Spanish too:  a project says `language: "es"`, and its sentences compile to the same targets
-  ([Spell in Spanish](https://github.com/spell-app/spell-lang/blob/main/README.md#spell-in-spanish)).
+  ([Spell in Spanish](https://github.com/spell-app/spell-lang/blob/main/README.md#a-third-human-language)).
   🌱 Norwegian and Portuguese are next.
 
 ### A component is a real element on the page
@@ -343,8 +343,16 @@ the versions and counts will have moved on by the time you run it.
 
    ```sh
    node --version
-   # v24.21.0
    ```
+
+   <details>
+   <summary>Output</summary>
+
+   ```text
+   v24...
+   ```
+
+   </details>
 
 2. Turn on yarn.
    Corepack, which comes with Node, puts a `yarn` command on your `PATH`.
@@ -352,8 +360,9 @@ the versions and counts will have moved on by the time you run it.
 
    ```sh
    corepack enable
-   # (prints nothing)
    ```
+
+   It prints nothing.
 
    - `corepack: command not found`?  Not every Node install includes it:
      `npm install -g corepack`, or skip this step if `yarn --version` already prints a version.
@@ -364,9 +373,17 @@ the versions and counts will have moved on by the time you run it.
    git clone git@github.com:spell-app/spell-kit.git ~/www/spell
    cd ~/www/spell
    yarn install          # the kit's own packages:  no child repos yet
-   # ➤ YN0086: │ Some peer dependencies are incorrectly met by your project; ...
-   # ➤ YN0000: · Done with warnings in 0s 469ms
    ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   ➤ YN0086: │ Some peer dependencies are incorrectly met by your project; ...
+   ➤ YN0000: · Done with warnings in 0s 469ms
+   ```
+
+   </details>
 
    - No SSH key?  Clone `https://github.com/spell-app/spell-kit.git` instead.
    - The peer-dependency warnings (`YN0060`, `YN0002`, `YN0086`) are expected:
@@ -379,11 +396,19 @@ the versions and counts will have moved on by the time you run it.
    ```sh
    cd ~/www/spell
    yarn clone
-   # == cloning spell-lang  (git@github.com:spell-app/spell-lang.git, its default branch)
-   # ...  and the same for each repo, then the links and the one install:
-   # spell-lang/agents -> ../agents  (the kit's WWOD and the logs)
-   # == yarn install:  one install over every repo
    ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   == cloning spell-lang  (git@github.com:spell-app/spell-lang.git, its default branch)
+   ...  and the same for each repo, then the links and the one install:
+   spell-lang/agents -> ../agents  (the kit's WWOD and the logs)
+   == yarn install:  one install over every repo
+   ```
+
+   </details>
 
 5. Install the browser the tests run in, and check the kit works.
 
@@ -391,10 +416,18 @@ the versions and counts will have moved on by the time you run it.
    cd ~/www/spell
    yarn playwright install chromium
    yarn kit:test
-   # ... one Vitest run, a project per folder of src/, then:
-   #  Test Files  55 passed (55)
-   #       Tests  610 passed (610)
    ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   ... one Vitest run, a project per folder of src/, then:
+    Test Files  60 passed (60)
+         Tests  685 passed (685)
+   ```
+
+   </details>
 
 6. Put `spell` on your `PATH`.
    It links into the first folder on your `PATH` that it can write to
@@ -403,8 +436,16 @@ the versions and counts will have moved on by the time you run it.
    ```sh
    cd ~/www/spell
    yarn cli:install
-   # Linked /Users/<you>/.local/bin/spell -> /Users/<you>/www/spell/bin/spell.mjs
    ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   Linked /Users/<you>/.local/bin/spell -> /Users/<you>/www/spell/bin/spell.mjs
+   ```
+
+   </details>
 
    - Had `spell` already, from an older checkout?  Run it again:  the link holds the full path it points at.
 
@@ -472,21 +513,29 @@ most of us never meet our compiler, but this one shows its work.
 
 ```sh
 spell parse "print 1 + 2 * 3"
-# statement › print  print 1 + 2 * 3
-#   Keyword  print
-#   expressions: Repeat  1 + 2 * 3
-#     expression  1 + 2 * 3
-#       lhs: operand › number  1
-#       Repeat  + 2 * 3
-#         expression_suffix › plus  + 2
-#           operator › Symbol  +
-#           expression: operand › number  2
-#         expression_suffix › times  * 3
-#           operator › Symbol  *
-#           expression: operand › number  3
-#
-# core.console.log(1 + 2 * 3)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+statement › print  print 1 + 2 * 3
+  Keyword  print
+  expressions: Repeat  1 + 2 * 3
+    expression  1 + 2 * 3
+      lhs: operand › number  1
+      Repeat  + 2 * 3
+        expression_suffix › plus  + 2
+          operator › Symbol  +
+          expression: operand › number  2
+        expression_suffix › times  * 3
+          operator › Symbol  *
+          expression: operand › number  3
+
+core.console.log(1 + 2 * 3)
+```
+
+</details>
 
 That's its match tree:  each indented line is a rule that matched, inside the one that holds it.
 The last line is the JavaScript it compiles to.
@@ -499,43 +548,57 @@ Run it;  a program with a UI would open in your browser, and `--no-browser` skip
 
 ```sh
 spell run @spell/examples/fizzbuzz --no-browser
-# ✓ Compiling @spell/examples/fizzbuzz
-# 1
-# 2
-# 3 fizz
-# 4
-# 5 buzz
-# ...
-# 15 fizzbuzz
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ Compiling @spell/examples/fizzbuzz
+1
+2
+3 fizz
+4
+5 buzz
+...
+15 fizzbuzz
+...
+```
+
+</details>
 
 **The same program, in Python** ([spell-lang's README-targets.md](https://github.com/spell-app/spell-lang/blob/main/README-targets.md)).
 Not a word-for-word port, but line for line, the way a person would write it:
 "for each number from 1 to 100" comes out as `range(1, 101)`, and each "otherwise if" as an `elif`.
 
-<details>
-<summary><code>spell compile @spell/examples/fizzbuzz --target py --stdout</code>, and what it printed</summary>
-
 ```sh
 spell compile @spell/examples/fizzbuzz --target py --stdout
-# ✓ @spell/examples/fizzbuzz
-# from __future__ import annotations
-#
-# def play_fizzbuzz() -> None:
-#     """File FizzBuzz.spell"""
-#     for number in range(1, 101):
-#         if (number / 15).is_integer():
-#             print(number, "fizzbuzz")
-#         elif (number / 3).is_integer():
-#             print(number, "fizz")
-#         elif (number / 5).is_integer():
-#             print(number, "buzz")
-#         else:
-#             print(number)
-#
-#
-# play_fizzbuzz()
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ @spell/examples/fizzbuzz
+from __future__ import annotations
+
+def play_fizzbuzz() -> None:
+    """File FizzBuzz.spell"""
+    for number in range(1, 101):
+        if (number / 15).is_integer():
+            print(number, "fizzbuzz")
+        elif (number / 3).is_integer():
+            print(number, "fizz")
+        elif (number / 5).is_integer():
+            print(number, "buzz")
+        else:
+            print(number)
+
+
+play_fizzbuzz()
+```
+
+</details>
 
 </details>
 
@@ -544,11 +607,19 @@ It opens a browser (`--headless` only prints the address);  Ctrl-C stops it.
 
 ```sh
 spell app serve @spell/examples/drawable-solitaire --headless
-# ✓ Starting the page server  http://127.0.0.1:4747/
-# ✓ Starting the editor  http://localhost:3000/  (/api on the page server)
-# The spell app is at http://localhost:3000/edit/@spell/examples/drawable-solitaire;  docs, epics, goals and Spell UI at http://127.0.0.1:4747/ -- Ctrl-C to stop
-# http://localhost:3000/edit/@spell/examples/drawable-solitaire
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Starting the page server  http://127.0.0.1:4747/
+✓ Starting the editor  http://localhost:3000/  (/api on the page server)
+The spell app is at http://localhost:3000/edit/@spell/examples/drawable-solitaire;  docs, epics, goals and Spell UI at http://127.0.0.1:4747/ -- Ctrl-C to stop
+http://localhost:3000/edit/@spell/examples/drawable-solitaire
+```
+
+</details>
 
 Two servers come up:  the page server on 4747, with the docs, epics, goals and Spell UI;  and the editor on 3000.
 When the page server is already running, its line ends "(already running)".
@@ -575,16 +646,24 @@ Find that line, and argue with it:  change `diamonds or hearts` to `clubs or spa
 
 ```sh
 spell test @spell/examples/drawable-solitaire
-# ...
-# ✗ test card setup  (22 checks)
-#     ❌ Unexpected: `the color of the card` should be `black` but is actually `red`
-# ✓ test deck creation  (6 checks)
-#
-# 1 passed, 1 failed
 ```
 
+<details>
+<summary>What it printed</summary>
+
+```text
+...
+✗ test card setup  (22 checks)
+    ❌ Unexpected: `the color of the card` should be `black` but is actually `red`
+✓ test deck creation  (6 checks)
+
+1 passed, 1 failed
+```
+
+</details>
+
 - Before your change it says `2 passed`, and `spell test` exits 1 on a failure, so a script can tell.
-- The `# ...` is two warnings about the game's own Solitaire.spell, there either way.
+- The `...` at the top stands for two warnings about the game's own Solitaire.spell, there either way.
 
 </details>
 
@@ -594,11 +673,19 @@ spell test @spell/examples/drawable-solitaire
 ```sh
 cd ~/www/spell/spell-ui
 yarn dev
-#   VITE+ v1.0.0
-#
-#   ➜  Local:   http://localhost:5173/
-#   ➜  Network: use --host to expose
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+  VITE+ v1.0.0
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+```
+
+</details>
 
 - It opens [the demo page](https://github.com/spell-app/spell-ui/blob/main/src/tools/demo/index.html), at `/src/tools/demo/index.html`, in your browser;
   the port may be the next free one.

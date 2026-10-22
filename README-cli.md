@@ -2,11 +2,19 @@
 
 ```sh
 spell --version
-# spell-kit 0.0.0
-# spell-lang 0.8.0
-# spell-ui 0.0.1
-# spell-app 0.8.0
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+spell-kit 0.0.0
+spell-lang 0.8.0
+spell-ui 0.0.1
+spell-app 0.8.0
+```
+
+</details>
 
 _Every repo that adds commands to `spell` answers for itself, the kit's first:  four lines, in about 0.1 s._
 
@@ -55,7 +63,7 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](bin/spell.mjs) in this ch
   them in `node_modules/.bin` ([below](#two-more-programs-for-yarn-scripts)).
 - The first run takes a few seconds, while `tsx` compiles every repo's source and caches it.
   After that the base answers in about 0.1 s, and a language command, which loads the parser and Spell's rules,
-  in one to two:  `spell explain print` took 0.9 s here, `spell parse` 1.9 s.
+  in about one:  `spell explain print` and `spell parse` each took 0.9 s here.
 
 ## Naming projects:  a path, an address or a group
 
@@ -76,13 +84,32 @@ In a script, with no terminal to ask on, it lists them and exits 2;  `--all` tak
 
 ```sh
 spell lint @spell/library
-# @spell/library holds several projects -- name one, or pass --all:
-#   @spell/library/cards
-#   @spell/library/people
-spell lint --all @spell/library
-# ✓ @spell/library/cards  2 warnings
-# ✓ @spell/library/people
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+@spell/library holds several projects -- name one, or pass --all:
+  @spell/library/cards
+  @spell/library/people
+```
+
+</details>
+
+```sh
+spell lint --all @spell/library
+```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ @spell/library/cards  2 warnings
+✓ @spell/library/people
+```
+
+</details>
 
 - A group holding one project uses it without asking.
 - `owen@spell` is your own space:  the folder `spell.spaces/@spell/owen@/` beside the repos,
@@ -306,11 +333,19 @@ No test runner to configure:  a project's tests are its `to test ...` sections, 
 
 ```sh
 spell test @spell/test/solitaire 2>/dev/null
-# ✓ test card setup  (22 checks)
-# ✓ test deck creation  (6 checks)
-#
-# 2 passed
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ test card setup  (22 checks)
+✓ test deck creation  (6 checks)
+
+2 passed
+```
+
+</details>
 
 The compile line and its five warnings went to stderr, and each warning is a fix, written in Spell:
 `Say what "card-names" holds, e.g. "set card-names to a new list of text"`.
@@ -364,17 +399,36 @@ the parse, the rules behind a word, the types a project declares.
 
 ```sh
 spell explain print
-# print  print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]
-# e.g. print "Yo!"
-spell describe @spell/test/solitaire Card color
-# property color of Card
-# spell-app/spaces/@spell/test/solitaire/Card.spell:12
-#
-# color as derivation of suit
-#
-# Spell
-#   the color of a card is red if its suit is either diamonds or hearts otherwise it is black
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+print  print {operator:print_kind}? [expressions:{expression} ,]
+e.g. print "Yo!"
+```
+
+</details>
+
+```sh
+spell describe @spell/test/solitaire Card color
+```
+
+<details>
+<summary>Output</summary>
+
+```text
+property color of Card
+spell-lang/tests/spaces/@spell/test/solitaire/Card.spell:12
+
+color as derivation of suit
+
+Spell
+  the color of a card is red if its suit is either diamonds or hearts otherwise it is black
+```
+
+</details>
 
 Two more in action, a whole match tree from `spell parse` and FizzBuzz under `spell run`, are on
 [the kit's front page](README.md).
@@ -488,12 +542,20 @@ for search engines and readers with no JavaScript.
 
 ```sh
 spell icon bell
-# bell                fa7-free
-# bell                fomantic  also alarm
-# bell concierge      fa7-free  also concierge bell
-# bell concierge      fomantic  also concierge bell
-# ...
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+bell                fa7-free
+bell                fomantic  also alarm
+bell concierge      fa7-free  also concierge bell
+bell concierge      fomantic  also concierge bell
+...
+```
+
+</details>
 
 <details>
 <summary>Every option of icon and ssr, and how the static render works</summary>
@@ -591,12 +653,20 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell-app/
 
 ```sh
 spell projects
-# owen@spell       Projects       1 project
-# @spell/examples  Examples       5 projects
-# @spell/guides    Guides         0 projects
-# @spell/library   Libraries      2 projects
-# @spell/test      Test fixtures  11 projects
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+owen@spell       Projects       ...
+@spell/examples  Examples       5 projects
+@spell/guides    Guides         0 projects
+@spell/library   Libraries      2 projects
+@spell/test      Test fixtures  12 projects
+```
+
+</details>
 
 <details>
 <summary>Every option of app create, app serve and app vscode, and what serve starts and stops</summary>
@@ -673,7 +743,7 @@ epic worktree merge-main
   `epic close seo#J3`.
 - Every verb runs on the caller's checkout:  a worktree's, when run in one.
   `epic --version` says which code that is:  its commit, branch and checkout.
-- `epic --help` lists all 62 verbs, in twelve groups;
+- `epic --help` lists all 63 verbs, in twelve groups;
   `epic help <verb>`, or `epic <verb> --help`, shows one's usage, what it does and an example,
   and a group's verbs too (`epic ask create --help`).
 - An unknown verb exits 1, listing the verbs;  a usage error exits 2.

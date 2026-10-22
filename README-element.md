@@ -487,10 +487,18 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
 The check, run in spell-epic, when the pack is current:
 
 ```sh
-cd ~/www/spell/spell-epic
+cd spell-epic          # from the kit's root
 yarn pack:check
-# epics:  current
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+epics:  current
+```
+
+</details>
 
 - Stale, it names each file and why (`built from older sources`), prints the fix, `spell-pack build <folder>`,
   and exits 1.
@@ -498,7 +506,7 @@ yarn pack:check
   The hash includes the build's own format, `spell-pack 2` today:
   a change to what the build writes bumps it, and every pack goes stale at once until it's rebuilt.
 - The cost of one script:  a pack arrives whole.
-  spell-epic's is 47 tags in 35 families, about 630 kB minified and 175 kB gzipped,
+  spell-epic's is 48 tags in 36 families, about 640 kB minified and 178 kB gzipped,
   and it defines every one of its tags as it registers, whichever of them the page uses.
 
 ## Styling through the shadow root
@@ -616,7 +624,7 @@ These close the gap, for every set, in node:
 | Set | What it is | Its elements |
 | --- | --- | --- |
 | Spell UI | the host:  the runtime, `<ui-root>`, the styles and icons, `registerPack()` | 62 families, `<ui-accordion>` ... `<ui-visibility>`:  [spell-ui's README](https://github.com/spell-app/spell-ui/blob/main/README.md) |
-| spell-epic | a pack, prefix `epic-`:  every epic page loads it | 35 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md) |
+| spell-epic | a pack, prefix `epic-`:  every epic page loads it | 36 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md) |
 | spell-app | a root subclass, `<spell-app>`, loading its own tags;  `<spell-editor>`;  each drawable thing's element in a Spell program (`<solitaire-card>`) | [spell-app's README](https://github.com/spell-app/spell-app/blob/main/README.md) |
 
 - Spell UI's core re-exports this whole framework, plus its own pieces:

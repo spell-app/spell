@@ -547,6 +547,9 @@ Their long before / afters are in `agents/wwod/writing.md`.
     - a grammar fenced block, for a folder that parses something (URLs, paths ...)
     - numbered "Adding a new X" recipe, "Deferred" section
   - every page ends with "See also";  `yarn readme:check`, at the kit's root, checks the links, captions and names
+  - a command shown with what it prints is TESTED (epic `readme` P16):  the command in an `sh` block, its output right
+    after it in a `<details><summary>Output</summary>` fold of `text`;  `yarn readme:test` runs it and compares
+    (`...` for what varies).  A command that mustn't run (installs, servers):  a fold titled `What it printed`.
   - written in the README VOICE, spell-epic's `voices/readme.md` (epic `readme` P12):  proof first, the
     reader's own tools as the contrast, every claim with its edge, one home per fact.  Spell's additions, which
     `yarn readme:check` enforces:
