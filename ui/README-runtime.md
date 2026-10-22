@@ -1,42 +1,96 @@
-# What's under Spell UI's elements
+# Under Spell UI's elements:  one runtime per page
 
-Every Spell UI element on a page shares ONE runtime, `UI`:
-the keyboard, the overlay stack, focus, styles, themes, icons, words and the rest.
-The first element that connects loads it, as one lazy chunk;  a page with no elements never pays for it.
+```html
+<ui-root>
+  <ui-button primary icon="rocket">Launch</ui-button>
+</ui-root>
+```
 
-- It lives on the page, not in each element:  `globalThis.UI ??= new UIRuntime()`.
-  So two copies of the package on one page (a micro-frontend, a duplicate bundle)
-  still share one keyboard and one overlay stack.
-- An element calls `UI.load()` as it connects;  the runtime's module is imported once, however many ask.
-- This page walks through what it holds, then the vocabularies, icons, styles and the static render.
+One button.
+Once its own code is in, this is everything else the page fetches for it, in the order the button asks:
+
+| When | What arrives | Gzipped |
+| --- | --- | --- |
+| the button connects | the runtime, `UI`:  keyboard, focus, overlays, words, styles, icons and the rest, as one chunk | 16.9 kB |
+| | the CSS foundation, as text:  every sheet the page and the shadow roots adopt | 17.3 kB |
+| it draws its icon | the default pack's index, `fa7-free/pack.js` | about 14 kB |
+| | `rocket.svg` | 0.4 kB |
+| 99 more buttons connect | nothing:  they share the runtime, the sheets and the SVG | 0 |
+
+_The library build's chunks, each minified and gzipped on its own, as a browser fetches them (`yarn measure`);
+the icon files as a server would gzip them, the index 13.9 to 14.2 kB by gzip level._
+
+Every row is the runtime, or something the runtime fetched:  the one set of services every `<ui-*>` element on a
+page shares.
+A page with no elements fetches none of it;  a page with a thousand fetches it once.
+
+- Before any of that, the page fetched Solid, Spell UI's core and the button's own code:
+  the whole page's numbers are on [Spell UI's front page](README.md).
+- And only when the page asks for them:
+  - a theme, one chunk each, from 0.2 kB to 39.4 kB, when `UI.themes.apply()` names it
+  - the Temporal polyfill, 19.7 kB, for a `<ui-calendar>` in a browser that has no Temporal of its own
+
+## One runtime per page, not one per tree
+
+In React, what every component shares (a theme, a toast queue, a focus trap) is a provider you wrap around the tree,
+and each React root gets its own.
+A second copy of the library on the page is a second world.
+Spell UI keeps ONE object per page, the runtime `UI`, and no element is wrapped in anything to reach it.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
-flowchart TB
-  elements["ui-* elements"] -->|"UI.load(), once"| runtime["the UI runtime"]
-  runtime --> people["keyboard, focus, overlays"]
-  runtime --> looks["styles, themes, icons, transitions"]
-  runtime --> words["vocabulary, i18n"]
-  runtime --> content["sources, api, toasts, modals"]
+flowchart LR
+  yours["your bundle's ui-* elements"] -->|"UI.load()"| key["globalThis, under one Symbol.for() key"]
+  theirs["a second bundle's elements"] -->|"UI.load()"| key
+  key --> runtime["ONE UIRuntime"]
+  runtime --> people["people:  keyboard, focus, overlays, ids"]
+  runtime --> looks["looks:  styles, themes, icons, transitions"]
+  runtime --> words["words:  vocabulary, i18n"]
+  runtime --> content["content:  sources, api, toasts, modals"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
 ```
 
-_One runtime per page:  every element talks to the same services._
+_Two bundles of Spell UI, one runtime:  whichever connects an element first creates it, and the other finds it._
 
-## The services
+- It lives on `globalThis`, under a `Symbol.for()` key that every copy of the package spells the same.
+  So a micro-frontend, or a duplicate in your dependency tree, still shares one keyboard, one overlay stack and one
+  scroll lock.
+  In development, two different versions on one page print a warning.
+- Elements reach it through `UI`, which works before the chunk has arrived:
+  - `UI.load()` imports it, once however many elements ask, and resolves with it:  `const { themes } = await UI.load()`
+  - anything else, `UI.keyboard` say, throws until then, and says to `await UI.load()` first:
+    never a quiet `undefined`
+  - a failed import isn't kept, so the next `UI.load()` tries again
+- It builds in node too, for the static render (below):  a service touches the DOM only when it's used.
 
-Each service is a class, and a field of the runtime:  `UI.keyboard`, `UI.themes` ...
+The cost:  the first element on a page renders, but shows only once the runtime and its sheets are in,
+so nothing flashes unstyled.
+That's one more round trip, which `<ui-root>` covers with skeletons;  every element after the first finds the
+runtime already there.
+
+## Eighteen services, one field each
+
+Each service is a class, built when the runtime is, and held as one of its fields.
+Your own code reads them the way the elements do, once the runtime is in:
+
+```js
+import { UI } from "spell-ui/core"
+
+const { themes, i18n } = await UI.load()
+await themes.apply("github") //             Fomantic's GitHub look, on the page and in every shadow root
+i18n.register("es", { close: "Cerrar" }) // every family's "Close", in Spanish
+```
 
 | Service | What it does |
 | --- | --- |
-| `UI.browser` | feature flags and sniffing:  `UI.browser.supports.invokers` ... |
+| `UI.browser` | feature flags and sniffing, detected once:  `UI.browser.supports.invokers` ... |
 | `UI.ids` | unique ids for ARIA wiring |
 | `UI.keyboard` | shortcuts, with scopes |
 | `UI.focus` | focus helpers that cross shadow roots |
 | `UI.overlays` | the top-layer stack:  Escape, outside clicks, scroll lock, focus restore |
-| `UI.styles` | the shared stylesheets every shadow root adopts, and the page's app stylesheet |
-| `UI.themes` | the theme sheets, loaded on demand, and `apply()` |
+| `UI.styles` | the shared sheets every shadow root adopts, and the page's app stylesheet |
+| `UI.themes` | the theme sheets, loaded on demand, and `apply()` ([README-themes.md](README-themes.md)) |
 | `UI.transitions` | runs the animation catalogue (`fade up`, `scale`, `fly down` ...) |
 | `UI.visibility` | scroll-position callbacks and lazy images |
 | `UI.i18n` | the texts people read, and `Intl` formatting |
@@ -50,34 +104,59 @@ Each service is a class, and a field of the runtime:  `UI.keyboard`, `UI.themes`
 | `UI.propertyControls` | what `<ui-property-editor>` draws, by name:  control kinds, choice sources, rules |
 
 <details>
-<summary>The runtime's API, in more depth</summary>
+<summary>The runtime's API, and what UI.sources and UI.api promise</summary>
 
-- `UI.load()`:  imports the runtime once and resolves with it;  `const { themes } = await UI.load()`.
+- `UI.load()`:  imports the runtime once and resolves with it;  `loadUI()` is the same function.
 - `UI.ready`:  resolves once every service is built and the runtime is on `globalThis`.
 - `UI.version`:  this build's version;  a runtime from another bundle may differ.
-- It builds outside a browser too (the static render):  services touch the DOM only when used.
+- `UI.toast(options)` and `UI.observeVisibility(element, options)`:  shortcuts for `UI.toasts.show()` and
+  `UI.visibility.observe()`, the last returning its undo.
 - `UI.sources`:
   - same origin ONLY:  a URL on another origin is refused before any fetch,
     and so is everything on a page opened as a file
   - cached per URL as the in-flight promise, so elements asking for the same file share one fetch;
-    `load(url, { fresh: true })` fetches again
-  - saving:  `save()` hands the text to a `saver` the host page registers;
+    `load(url, { fresh: true })` fetches again, and a caller's `signal` cancels only its own wait
+  - saving:  `save()` hands the text to a `saver` the host page registers (`UI.sources.saver`);
     Spell UI can't know your server, and with none registered it rejects
-- `UI.api`'s URL templates:
-  - `{name}` is required:  a missing value throws, so a half-built URL never goes out
+- `UI.api`:
+  - `{name}` in a URL template is required:  a missing value throws, so a half-built URL never goes out
   - `{/name}` is an optional path segment:  `/users/{/id}` gives `/users/5` or `/users`
+  - a newer request with the same throttle key cancels the older one;  a response that isn't 2xx rejects
 - The source:  [`src/runtime/`](src/runtime/), one file per service;
-  [`UIRuntime.ts`](src/runtime/UIRuntime.ts) holds them.
+  [`UIRuntime.ts`](src/runtime/UIRuntime.ts) holds them, and [`load.ts`](src/runtime/load.ts) is the small eager
+  half every page's core carries.
 
 </details>
 
 ## Vocabularies and localization
 
-Every tag has ONE vocabulary file, `UI<Name>.en.ts`:  every name the tag uses, as data.
-The component's code reads its names through it, never as string literals.
+This is a Spell UI button, written in Spanish:
+
+```html
+<ie-boton color="rojo" basic>Borrar</ie-boton>
+```
+
+```js
+import { UIButton } from "spell-ui"
+import { es } from "spell-ui/test-helpers/dictionary.es"
+
+UIButton.define("ie-boton", es)
+
+const boton = document.querySelector("ie-boton") // drawn as `ui red basic button`
+boton.color = "verde"
+boton.getAttribute("color") // "verde"
+boton.color //                 "green", and it now draws `ui green basic button`
+```
+
+_What [the translation smoke page](src/tools/smoke/translate.html) checks, in headless Chromium, on every
+`yarn smoke`._
+
+The page wrote Spanish;  the component's code read English, and didn't change.
+That works because the code never writes a name of its own.
+Every name a tag uses is data, in ONE file per tag, its vocabulary, `UI<Name>.en.ts`:
 
 ```ts
-// components/ui-button/UIButton.en.ts, shortened
+// src/components/ui-button/UIButton.en.ts, shortened
 export const buttonVocabulary = {
   tag: "ui-button",
   topics: ["buttons", "basic", "controls", "forms", "elements"],
@@ -86,103 +165,182 @@ export const buttonVocabulary = {
   description: "A button indicates a possible action.",
   attributes: [
     { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "primary", kind: "keyOnly", description: "Primary emphasis:  the `primary` brand colour." }
+    { name: "color", kind: "color", description: "Hue;  fills the button (or its ring and text when `basic`)." },
     // ...
-  ]
-}
+  ],
+  events: [
+    { name: "ui-toggle", detail: "{ active: boolean, originalEvent?: Event }" /* ... */ }
+  ],
+  // ... slots, parts, states
+  texts: [{ key: "loading", text: "Loading…", description: "Announced while `loading`." }]
+} as const satisfies E.ComponentVocabulary
 ```
 
-- It holds:
-  - the tag, its attributes (each with a kind and its allowed values)
-  - its events, slots, parts, states and the texts it shows
-  - `topics` and `aka`:  how people search for it
-  - `skeleton`:  what the root draws while it loads
+Two fields aren't about the element at all.
+`topics` and `aka` are how people find it (search the docs for `btn`, and you get `<ui-button>`),
+and `skeleton` is the grey box `<ui-root>` draws in its place while it loads.
+
 - One file feeds everything that needs the names:
-  - the root's catalog of which family defines a tag
-  - the docs site's data, and its API tables
-  - VS Code's autocomplete for `<ui-*>`:
-    a custom-elements manifest and VS Code's HTML data, written by `yarn site:data`
-  - the claude.ai design system's cards
-- Live in a browser's console:  `UIButton.describe()`.
+  - the root's catalog of which family defines a tag (`yarn gen:root`)
+  - the docs site's data and its API tables
+  - VS Code's autocomplete and hover docs for every `<ui-*>` tag, attribute and value:
+    a Custom Elements Manifest and VS Code's HTML custom data, written by `yarn site:data` and committed
+  - the cards of Spell's design system on claude.ai (`spell design build`)
+- From code, `UIButton.describe()` returns the whole of it:  `UIButton.describe().topics`.
+- How the kit's element framework reads a vocabulary:  [README-element.md](../README-element.md).
 
 Localization comes in two halves:
-
 - NAMES, what authors type:  a dictionary renames tags, attributes, values and events.
-  `UIButton.define("ie-boton", es)` registers `<ie-boton primario color="rojo">`;
-  values arrive in English, so the component's code is unchanged.
-- TEXTS, what people read:  `UI.i18n.register("es", { label: "Etiqueta" })`, for every component or one.
-- What stays in English whatever the language:
+  The smoke page's dropdown, `<ie-desplegable>`, sends `ie-cambio` where Spell UI's sends `ui-change`.
+- TEXTS, what people read:  `UI.i18n.register("es", { close: "Cerrar" })`, for every component,
+  or for one with a third argument, its tag.
+- What stays English whatever the language:
   CSS classes, `:state()`s, JavaScript property names, `detail` keys, tokens, utility classes.
 
-Where it stands:
-the mechanism works, tested with a Spanish dictionary on [the translation smoke page](tools/smoke/translate.html).
-But no real translations ship, and the page-wide call that would rename every family at once isn't built yet.
+The price is that the names ship.
+`<ui-button>`'s vocabulary is 3.0 kB of its own 11.6 kB gzipped,
+because the element reads its names as it runs, and a dictionary needs them there.
+
+**Real today:**  the mechanism, tested with the small Spanish dictionary above,
+and on a page of its own in `yarn dev` (`/src/tools/demo/translate.html`).
+**Not yet:**  no translation ships.
+🌱 The one call that would rename every family on a page at once is designed, not built.
 
 <details>
-<summary>How a text is looked up</summary>
+<summary>How a text is looked up, and emoji names</summary>
 
-`UI.i18n` looks a component's text up in this order, and takes the first it finds:
-
+`UI.i18n` looks a text up in this order, and takes the first it finds:
 1. the exact locale (`pt-BR`)
 2. the language (`pt`)
 3. `en`
-4. the English default in the tag's vocabulary (its `texts`)
+4. the English default:  the tag's own `texts`, then Spell UI's shared ones
 5. the key itself, so a missing text shows up rather than going blank
 
-- Numbers and dates format through `Intl`;  Temporal through a polyfill where the browser lacks it.
-- Emoji names come in two sets, `cldr` (the default) and `fomantic`.
-  A root picks one (`<ui-root emoji>`);  translated sets are planned.
+- At each locale, a component's own texts come before the shared ones:
+  so a shared translation covers every family that uses the key, and a scoped one overrides it for one.
+- `UI.i18n.register("en", { close: "Dismiss" })` rewords an English default.
+- The locale is the browser's (`navigator.language`) until you set `UI.i18n.locale`.
+- Numbers and dates format through `Intl`, each formatter built once per locale and options.
+  Temporal is the browser's own, or the polyfill, a chunk only browsers without it fetch.
+- Emoji names come in two sets:  `cldr` (the default) and `fomantic`.
+  - A root picks one, `<ui-root emoji="fomantic">`;  page-wide, `EmojiData.use("fomantic")`.
+  - The names load by first letter:  a page that draws `smile` fetches the s's, 3.6 kB gzipped.
+  - 🌱 Translated sets are planned.
 
 </details>
 
 ## Icons
 
-Icons are SVG files in PACKS, loaded by `UI.icons` and cached.
-`<ui-icon name="home">` draws one;  so does any element with an `icon` attribute.
+```sh
+spell icon rocket
+# rocket      fa7-free
+# rocket      fomantic
+# rocketchat  fa7-brands
+# rocketchat  fomantic
+```
 
-- The built-in packs:
-  - `fa7-free`:  Font Awesome 7 Free, solid and regular:  the default
-  - `fa7-brands`:  Font Awesome's brand logos, opt-in
-  - `fomantic`:  Fomantic UI's icon names (`address book`) over the same files, opt-in
-- Choose packs for a part of the page with `<ui-root icons="fa7-brands, fomantic">`,
-  or for the whole page with `UI.icons.use()`.
-- A pack is a folder of SVG files and a `pack.js` index:  its id, label, licence and each icon's other names.
-- `spell icon <query>` finds an icon by name, alias or keyword;  `--open` shows them as pictures to click and copy.
+An icon is an SVG file, and a pack is a folder of them, plus `pack.js`:  its id, label, licence,
+and each icon's size and other names.
+`<ui-icon name="rocket">` draws one, and so does any element with an `icon` attribute:
+each asks `UI.icons` for a name, and it decides which file to fetch.
+
+| Pack | What it is | In it |
+| --- | --- | --- |
+| `fa7-free` | Font Awesome 7 Free, solid and regular (`bell outline`):  the default | 1,595 SVGs:  1,422 solid, 169 regular, four logos |
+| `fa7-brands` | Font Awesome's logos of companies and products, opt-in | 572 SVGs |
+| `fomantic` | Fomantic UI's icon names (`address book`) over the same files, opt-in | an index, no files of its own |
+
+- One name per icon, words separated by spaces.
+  What you type is normalized the same way, so `address-book`, pasted from Font Awesome's site, works.
+- Packs stack, and the LAST one added wins a name;  `fa7-brands:github` asks one pack.
+- For a part of the page, `<ui-root icons="fa7-brands, fomantic">`, over the outer root's packs;
+  for the whole page, `UI.icons.use()`.
+- `spell icon <query>` finds an icon by name, alias or keyword, and `--open` shows them as pictures to click and copy:
+  every option on [the command line's page](../README-cli.md#spell-ui).
+
+Icons cost nothing until the first one draws, then its pack's index (about 14 kB for `fa7-free`) and one small file
+per icon.
+Each SVG is fetched once per page, and shared by every root and every bundle on it.
+
+Two catches:
+- There's no sanitizing at run time.
+  The pack builder checked the SVGs (below), and adding a pack runs its `pack.js`:
+  trust a pack the way you'd trust a script.
+- The built-in packs load from `icon-packs/` beside the chunk that holds Spell UI's core.
+  Bundle Spell UI into your own app and that folder doesn't follow:
+  copy it next to your chunks, or point `<ui-root assets>` at wherever it is.
 
 ### Using another icon set
 
-What works today:  any folder of SVGs becomes a pack.
+**What works today:**  any folder of SVGs becomes a pack, filled or stroked.
+The builder runs in `spell-ui`, in a checkout of the kit ([setup from zero](../README.md#setup-from-zero)):
 
 ```sh
-cd spell-ui
-yarn icons:pack ../my-site/icons --id my-icons     # checks every SVG (no scripts, nothing external), writes pack.js
+cd ~/www/spell/spell-ui
+yarn icons:pack ../my-site/icons --id my-icons
+# IconPackBuilder.build():  pack "my-icons" has 1 problem(s) in …/my-site/icons;  fix the SVGs, or sanitize,
+#   skip or allow them (`--sanitize`, `--skip-unsafe`, `--allow-unsafe`)
+#   tracker.svg:  onload attribute on <svg>
+
+yarn icons:pack ../my-site/icons --id my-icons --sanitize
+# …/my-site/icons/pack.js:  3 icons
+#   added:  rocket, tracker, wide-arrow
+#   sanitized tracker.svg:  removed onload attribute on <svg>
+```
+
+```js
+// my-site/icons/pack.js, as written (its two comment lines left out)
+export default {
+  "id": "my-icons",
+  "defaults": {"width":24,"height":24},
+  "icons": {
+    "rocket": {},
+    "tracker": {},
+    "wide-arrow": {"width":32}
+  }
+}
 ```
 
 ```html
-<ui-root icons="my-icons/pack.js">
+<ui-root icons="/icons/pack.js">
   <ui-icon name="rocket"></ui-icon>
+  <ui-icon name="my-icons:wide arrow"></ui-icon>
 </ui-root>
 ```
 
-- `--sanitize` strips unsafe attributes first.
-  The files that still fail:  `--skip-unsafe` leaves them out, `--allow-unsafe` keeps them.
-- Re-running keeps the hand edits in `pack.js` (aliases), refreshing only sizes.
+- The builder never touches an SVG unless asked.
+  If any file could run a script or load another resource, it refuses the whole pack and names each file and why.
+  - `--sanitize` strips the unsafe attributes first, rewriting those files.
+  - What still fails:  `--skip-unsafe` leaves it out, `--allow-unsafe` keeps it anyway.
+  - `--label` and `--license` fill in the pack's own lines;  `--force` replaces a `pack.js` that has another id.
+- Run it again after adding files:  it keeps your hand edits to `pack.js` (an `alias` for a second name),
+  and refreshes only the sizes.
+- From code, `UI.icons.use("/icons/pack.js", { prefix, base, only })`:
+  `prefix` adds a short name to ask it by, `base` serves its SVGs from elsewhere (a CDN),
+  and `only: true` drops every pack before it, the default included.
+- A handful of icons and no pack at all:  `UI.icons.register("logo", svgText)`, ahead of every pack.
+- Stroked sets stay stroked:  an SVG whose root sets its own `fill` (`fill="none"`, Lucide's style) keeps it.
+  Tested with a Lucide-style pack in the tests, not with Lucide's own files.
+
+`spell icon` searches only the three built-in packs, though, and no set installs by name yet.
 
 ### 🌱 Coming:  named icon sets
 
 What it will add:
-
 - packs for the popular sets, installed by name:  Material Symbols, Lucide, Heroicons and Phosphor,
-  so `icons="lucide"` works like `fa7-brands` does today
-- an icon browser that searches across every pack
+  so `icons="lucide"` works the way `icons="fa7-brands"` does today
+- an icon browser that searches across every pack, yours included
 - a pack chosen per element, not only per root
 
-Today a set gets in as a folder of SVGs (above).
+None of it is built;  today a set gets in as a folder of SVGs (above).
 
 ## Styles
 
-Spell UI's CSS foundation is a set of sheets in [`src/styles/`](src/styles/), one per concern, each in its layer.
-Every shadow root adopts the same sheet objects (`adoptedStyleSheets`):  made once per page, never copied.
+A web component that carries its CSS in a `<style>` puts a copy into every instance's shadow root.
+Spell UI makes each sheet ONCE per page, as a `CSSStyleSheet`, and every shadow root adopts that same object
+(`adoptedStyleSheets`):  a thousand buttons, one parse of the button's CSS.
+
+The foundation is a set of sheets in [`src/styles/`](src/styles/), one per concern, each in its cascade layer:
 
 | Sheet | What | Layer |
 | --- | --- | --- |
@@ -192,49 +350,165 @@ Every shadow root adopts the same sheet objects (`adoptedStyleSheets`):  made on
 | `colors.css` * | the palette, semantic colours, colour remaps and colour utilities | `ui.tokens`, `ui.utilities` |
 | `sizes.css` * | size ratios, size remaps, font-size and spacing utilities | `ui.tokens`, `ui.utilities` |
 | `animations.css` | the transition catalogue | `ui.utilities` |
-| `utilities.css` | layout, text, theme and visibility utilities | `ui.utilities` |
+| `utilities.css` | layout, text, theme and visibility utilities, for your markup and inside components | `ui.utilities` |
 | `typography.css` | page typography, opt-in with `class="ui-typography"` | `ui.base` |
-| `native.css` | plain HTML slotted into components, CSS-only tooltips | `ui.components` |
+| `native.css` | plain HTML slotted into components, and CSS-only tooltips (`data-tooltip`) | `ui.components` |
 | `themes/*.css` | the themes ([README-themes.md](README-themes.md)) | `ui.theme` |
 | `ui.css` | all of it as one stylesheet, for pages without JavaScript | -- |
 
 - \* Generated from [`styles.en.ts`](src/styles/styles.en.ts) by `yarn gen:styles`, and committed,
   so nobody using Spell UI needs a build step.
-- `spell-ui/styles` exports each sheet as text, plus:
+- `spell-ui/styles` exports each sheet as text, plus the two lists the runtime adopts:
   - `foundationCSS`:  for the page AND every shadow root
-  - `pageCSS`:  for the page only
-- Each family adds its own sheet, in `ui.components.<name>`, with four sub-layers (types, content, variations, states):
-  so a state beats a variation without `!important`.
-- The app stylesheet (`id="ui-app-stylesheet"`) is adopted LAST into every shadow root:
-  [README-themes.md](README-themes.md).
+  - `pageCSS`:  for the page only, which adds typography and the native-markup rules
+- Each family adds its own sheet, in `ui.components.<name>`, split into four sub-layers:
+  the layer order, and why nobody writes `!important`, are on [README-themes.md](README-themes.md).
+
+A page's own CSS still can't reach inside a shadow root.
+It gets in through [four doors](README.md#your-css-stops-at-the-shadow-root--four-doors-let-it-in),
+and the runtime runs the last of them, the app stylesheet (`id="ui-app-stylesheet"`),
+adopting it LAST into every shadow root.
+The other way round, nothing restyles your markup uninvited:  `typography.css` waits for its class,
+and every rule in `reset.css` starts with `:host`, so on the page it matches nothing.
 
 ## The static render
 
-The static render turns a page of `ui-*` elements into plain HTML in node:  no shadow DOM, no JavaScript.
-It's for search engines and for readers without JavaScript;  the page looks the same, and links and forms work.
+Search engines and readers with JavaScript off get the same page, as plain HTML:  no shadow DOM, no script.
+It looks the same, and its links and forms work.
+Here's a page, the command, and what came out:
 
-```sh
-spell ssr docs/getting-started.html         # writes getting-started.static.html, and ui.static.css beside it
+```html
+<ui-root>
+  <ui-card>
+    <ui-header>Team</ui-header>
+    <ui-label color="green">Popular</ui-label>
+    <ui-button primary>Choose</ui-button>
+  </ui-card>
+  <ui-modal id="terms">
+    <ui-header>Terms</ui-header>
+    <p>The usual.</p>
+  </ui-modal>
+  <ui-button commandfor="terms" command="--show">Read the terms</ui-button>
+</ui-root>
 ```
 
+```sh
+spell ssr pricing.html
+# Rendering 1 page...
+# pricing.static.html
+# pricing.html -> pricing.static.html  1.2 kB
+#   removed scripts:  inline
+# ui.static.css
+# ui.static.css  259.3 kB from 308.2 kB, 1 page this run, 6 tags in all
+```
+
+```html
+<article data-ui="card" class="ui card" part="card">
+  <div data-ui="header" data-state="in-card" class="header in-card" part="header">Team</div>
+  <span data-ui="label" class="ui green label" part="label">Popular</span>
+  <button data-ui="button" type="button" class="ui primary button" part="button">Choose</button>
+</article>
+<dialog data-ui="modal" data-state="hidden" id="terms" class="ui modal" part="modal" aria-labelledby="ui-modal-heading-2">
+  <div data-ui="header" data-state="in-modal" id="ui-modal-heading-2" class="header in-modal" part="header">Terms</div>
+  <p>The usual.</p>
+</dialog>
+<button data-ui="button" type="button" class="ui button" part="button" commandfor="terms" command="show-modal">Read the terms</button>
+```
+
+_`pricing.static.html`'s body, inside the root's wrapper, with each element's `data-ui-slotted` mark left out._
+
+The card is an `<article>`, the label a `<span>`, the modal a real `<dialog>`.
+And the modal still opens:  `--show` was Spell UI's command, and the render rewrote it to the browser's own,
+`show-modal`, so in a browser with invoker commands the button opens the dialog with no script at all.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
+flowchart LR
+  page["pricing.html<br/>ui-* elements, and the script that loads them"] --> ssr["spell ssr, in node"]
+  ssr --> html["pricing.static.html<br/>plain HTML, that script removed"]
+  ssr --> css["ui.static.css<br/>one per folder"]
+  html --> server["any server:  Flask, Quart, a static host"]
+  css --> server
+  %% the Spell look:  yarn mermaid:pretty
+  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
+  classDef data fill:#F1E7D4,stroke:#C9B48A,stroke-width:1.5px,color:#1A1C27,rx:2px,ry:2px
+  class page,html,css data
+```
+
+_Rendered once, ahead of time:  what the server sends is files._
+
 - Each element is rendered to light DOM, and the scripts that load elements are removed;  your own scripts stay.
-- ONE minified stylesheet per output folder, `ui.static.css`, linked from every page there, so a browser fetches it
-  once.
-  It holds the families its pages use, and grows as more pages are rendered.
-- `-o <file or folder>`, `--css <file>` (one stylesheet elsewhere), `--inline-css` (each page its own `<style>`),
-  `--no-minify`.
-- Inside, it's the `SSR` namespace in [`src/static/`](src/static/):  node only, never in a browser bundle.
-  `StaticRender.page()` and `fragment()` do the work, on linkedom and Solid's server render.
-- Elements can also render to Declarative Shadow DOM on the server.
+- What the browser can do without scripts is wired up:  invoker commands, a dialog's close buttons, popovers,
+  and ids made unique where a render repeats one.
+- ONE minified stylesheet per output folder, `ui.static.css`, linked from every page there,
+  so a browser fetches it once.
+  It holds the families its pages use, and grows as more pages are rendered:  rendering one page again never drops
+  another's styles.
+- `-o`, `--css`, `--inline-css` and `--no-minify` choose where the output goes:
+  every option, and how the render works inside, on [the command line's page](../README-cli.md#spell-ui).
+
+The cost is the stylesheet, and most of it is the foundation:
+a page with one button gets 143 kB minified (20 kB gzipped), and the six tags above 259 kB (33 kB).
+
+Where it stops:
+- 55 of the 62 [families](README-components.md) render.
+  The other seven stay as they are, and are listed on stderr:
+  `ui-code`, `ui-markdown`, `ui-include`, `ui-panel`, `ui-property-editor`, `ui-tree-diagram`, and `ui-components`,
+  the pack loader.
+- What has no path without JavaScript stays as rendered:  tabs, and popups that open on hover.
+- The page mustn't load the elements as well:  they'd take the flattened markup for slotted content, and show it twice.
+  That's why the render removes the scripts.
+- Declarative Shadow DOM, the other way to render on a server, is a probe, not a feature:
+  a test renders `<ui-button>` into a `<template shadowrootmode>`, and an element given one uses it,
+  but replaces its content as it renders, with no hydration.
+  No command writes a page that way.
+
+<details>
+<summary>The static render from code</summary>
+
+It's the `SSR` namespace, `spell-ui/static`, in [`src/static/`](src/static/):  node only, never in a browser bundle.
+`StaticRender.page()` and `fragment()` do the work:
+
+```ts
+import { SSR } from "spell-ui/static"
+
+SSR.StaticRender.define(...SSR.StaticCatalog.classes) // the 55 families it can render, once per process
+await SSR.StaticRender.prepare(html) //                  what the render reads:  icon packs, each family's own data
+const page = SSR.StaticRender.page(html) //              a whole document;  fragment(html) for body content
+```
+
+- It parses the page with linkedom, builds every component in document order (owners first), then renders each with
+  Solid's server render.
+- It has to run where Spell UI's JSX is compiled for the server, so not under plain node:
+  `spell ssr` runs it from [`ssrCommand.ts`](src/cli/ssrCommand.ts), in a child process, through Vite.
+
+</details>
 
 ### From Python, Flask or Quart
 
-What works today:  a Python server can serve what the static render wrote, as it would any HTML.
+What `spell ssr` writes is files, so a Python server serves them like any others, today.
+Render the pages once, then send `page.static.html` and `ui.static.css`:
 
-- Render the pages once (`spell ssr`).
-  Then serve `page.static.html` and `ui.static.css` from Flask, Quart or any static host.
-- A spell program compiled to Python serves its drawing half (JavaScript and `ui-*` elements) from Quart,
-  and the page loads Spell UI as usual.
+```python
+from flask import Flask, send_from_directory
+
+app = Flask(__name__)
+
+
+@app.get("/pricing")
+def pricing():
+    return send_from_directory("pages", "pricing.static.html")
+
+
+@app.get("/ui.static.css")
+def stylesheet():
+    return send_from_directory("pages", "ui.static.css")
+```
+
+- Run with Flask's own server, both answer 200, `text/html` and `text/css`, and the modal above still opens.
+- Quart, or any static host, serves them the same way.
+- A Spell program compiled to Python runs its logic on Quart, and draws with JavaScript and Spell UI as usual:
+  its compile writes a short Quart app beside it ([spell-lang's README-targets.md](../spell-lang/README-targets.md)).
 
 ### 🌱 Coming:  rendering from a Python app
 
@@ -248,7 +522,10 @@ Today the render runs ahead of time, from the command line.
 The element framework itself (the DOM element and the component behind every tag, the decorators, the lifecycle)
 is the kit's:  [README-element.md](../README-element.md).
 Spell UI adds what its families need on top, in [`src/elements/`](src/elements/),
-and hands the kit's framework its runtime as it loads.
+and hands the framework its runtime, words and styles as its core loads.
+
+<details>
+<summary>The pieces, one line each</summary>
 
 | Piece | What it's for |
 | --- | --- |
@@ -259,14 +536,16 @@ and hands the kit's framework its runtime as it loads.
 | `NativeFallback` | the plain-DOM stand-in a form control shows if its render throws, so it still submits |
 | `ClassBuilder` | attributes to Fomantic's class words:  `<ui-button size="small" primary>` → `ui small primary button` |
 | `Validator`, `MenuOptions` | form rules;  the options of dropdowns, selects and searches |
-| `IconGlyph` | one icon, drawn from the page's packs |
+| `IconGlyph`, `RootSettings` | one icon, drawn from the packs of the root it's in;  what each `<ui-root>` sets for what's inside |
 | `SpellUISettings` | what Spell UI hands the kit's element framework as it loads:  the runtime, the words, the styles |
 
 - Every family imports these through two entries:
   `spell-ui/core` (`E`) and, for form controls, `spell-ui/forms` (`F`).
-- The states every element shares are documented on the kit's `UIComponent`:
+- The states every element shares are the kit's `UIComponent`'s:
   `disabled`, `loading`, `visible` / `hidden`, `animation`.
   Spell UI's elements style them through the reset sheet.
+
+</details>
 
 <details>
 <summary>More in the docs site</summary>
@@ -277,16 +556,15 @@ so they need a checkout with the content folder and the page server running ([RE
 - Spell UI's design notes on the runtime, icons, translation and fallbacks, in `/guides/ui/notes/`:
   `runtime.md`, `icons.md`, `translation.md`, `fallback.md`
 - Custom Elements in Spell:  `/guides/custom-elements/custom-elements.html`
-- The static render, from the epic that built it:  `/guides/seo/`
+- The static render, from the epic that built it:  `/guides/seo/seo.html`
 
 </details>
 
 ## See also
 
-- [README.md](README.md):  Spell UI's front page
-- [README-themes.md](README-themes.md):  tokens, layers, themes
-- [README-components.md](README-components.md):  every family
-- [README-frameworks.md](README-frameworks.md):  using the elements from a framework
-- [README-site.md](README-site.md):  the docs site and the tools
-- [The kit's front page](../README.md), and its [element framework](../README-element.md)
-- Also beside it:  [README-migrating.md](README-migrating.md)
+- [README-themes.md](README-themes.md):  the four ways your CSS gets inside a component, and the themes
+- [README-element.md](../README-element.md):  the kit's element framework, which every family is written on
+- [README-site.md](README-site.md#the-tools--the-librarys-own-checks-beside-the-sites):
+  `yarn measure` and `yarn smoke`, which made this page's numbers and checks
+- [The command line's page](../README-cli.md#spell-ui):  every option of `spell icon` and `spell ssr`
+- [Spell UI's front page](README.md):  `<ui-root>`, how a page loads its families, and what a whole page weighs

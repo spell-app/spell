@@ -1,35 +1,204 @@
 # Spell UI's components
 
-Every component family, by group, one line each:  its tags, what it is, the names other libraries give it,
-and a picture of its first example where a picture says more than the line.
-Each family links to its page on the docs site, where every example is live.
-
-- A FAMILY is one folder of `components/` (`ui-button/`):
-  its main tag (`<ui-button>`) and the tags that go with it (`<ui-buttons>`, `<ui-or>`).
-  - Each family is its own entry, `spell-ui/ui-button`:
-    [`<ui-root>`](README.md#ui-root) loads it the first time one of its tags appears.
-- The groups are Fomantic UI's four, as the docs site's kitchen sink files them, then the generic content parts,
-  then the elements Spell UI added.
-- The pages are plain HTML in [`docs/`](docs/):
-  on GitHub a link shows the page's source;  served ([README-site.md](README-site.md)), it shows the page.
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
-flowchart LR
-  vocab["each tag's vocabulary"] --> data["the site's data"]
-  data --> site["the docs site"]
-  data --> catalogue["this page"]
-  site --> pictures["thumbnails"]
-  pictures --> catalogue
-  %% the Spell look:  yarn mermaid:pretty
-  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
-  classDef data fill:#F1E7D4,stroke:#C9B48A,stroke-width:1.5px,color:#1A1C27,rx:2px,ry:2px
-  class data data
+```html
+<ui-form>
+  <form method="dialog">
+    <ui-field>
+      <label for="form-first-name-1">First Name</label>
+      <ui-input id="form-first-name-1" name="first-name" placeholder="First Name"></ui-input>
+    </ui-field>
+    <ui-field>
+      <label for="form-last-name-2">Last Name</label>
+      <ui-input id="form-last-name-2" name="last-name" placeholder="Last Name"></ui-input>
+    </ui-field>
+    <ui-field>
+      <ui-checkbox name="terms">I agree to the Terms and Conditions</ui-checkbox>
+    </ui-field>
+    <ui-button type="submit">Submit</ui-button>
+  </form>
+</ui-form>
 ```
 
-_This page is generated:  from the same data as the docs site, with pictures taken from the site itself._
+<img src="docs/images/components/ui-form.png" width="489" height="190"
+  alt="What that markup draws:  First Name and Last Name fields, a checkbox for the terms, and a Submit button">
+
+_The first example on Form's docs page, and the picture of it in the catalogue below._
+
+That form is four families, not one:  Form, Input, Checkbox and Button.
+Inside a `<ui-root>`, each loads the first time the page uses one of its tags.
+Besides the loader and placeholders every root carries, the rest of the library is never fetched.
+The form doesn't even import the controls it checks:  it validates whatever it holds, native ones included.
+
+The catalogue below gives every family a line, and the line includes the names other libraries use.
+So search this page for the name you already know.
+"Datepicker" finds Calendar, "snackbar" finds Toast, and "skeleton" finds Placeholder.
+"Drawer" finds two, Flyout and Sidebar, and that one is a real choice ([below](#when-two-families-look-alike)).
+
+## A family is a folder, and a row
+
+A FAMILY is one folder of [`src/components/`](src/components/), and its tags are defined together:
+`ui-button/` holds `<ui-button>`, and the `<ui-buttons>` and `<ui-or>` that go with it.
+Everything else counts in families.
+The root imports one the first time the page uses any of its tags, the catalogue gives it one row,
+and its docs page covers every tag in it.
+
+- The root finds a tag's family in a catalog generated from the vocabularies, never guessed from the name:
+  `<ui-header>` loads `ui-parts`.
+  The whole load, step by step, is on [the front page](README.md#you-write-tags-and-the-root-does-the-importing).
+- With no root, import the family yourself, and importing it defines its tags:
+  its name, today and 🌱 on npm, is in [the front page's other ways to load](README.md#other-ways-to-load).
+- A row works the same from plain HTML or any framework, because each tag is an element:
+  [README-frameworks.md](README-frameworks.md) has the rules and the recipes.
+- A tag the root can't find stays an unknown element, its text unstyled, but it doesn't fail quietly.
+  Misspell one (`<ui-buton>`) and the root fires `ui-error` with the reason `unknown`,
+  and the console says `<ui-buton> didn't load (unknown)`.
+
+The groups are Fomantic UI's four, and they sort by what a piece is, not what it's for:
+a Dropdown and a Modal are both Modules, because both have behaviour.
+Then come the generic content parts, and the families Spell UI added.
+- Looking by purpose instead?
+  The docs site's nav files every tag under each of its topics:  Date & time, Dialogs, Overlays ...
+- A family Spell UI added still files under the Fomantic group its topics name,
+  so the last group isn't all of them:  Include sits in Modules, and Tree diagram in Views.
+- Coming from Semantic UI or Fomantic UI, you know these groups already;
+  [README-migrating.md](README-migrating.md) maps the rest.
+
+What each column holds, and where it stops:
+- **Picture:**  the first example on the family's docs page, shot headless and trimmed.
+  A blank one means that example is only a button that opens something (Modal, Flyout, Toast, Popup ...)
+  or grey placeholder bars (Segment, Grid, Rail ...):  the docs page shows the real thing.
+- **Family:**  a link to its docs page, every example live with its markup a click away.
+  - The page is plain HTML in [`docs/`](docs/), so on GitHub the link shows its source.
+    Served by the page server, from a checkout of the kit, it shows the page
+    ([setup from zero](../README.md#setup-from-zero), then [README-site.md](README-site.md)).
+  - *(In progress)* marks the two not done yet:  Property Editor and Section.
+- **Tags:**  every tag of the family;  one with a docs page of its own is linked (`<ui-textarea>`, `<ui-radio>`).
+- **What it is:**  the main tag's one-line description, from its vocabulary.
+- **Also called:**  the first four names other libraries and everyday speech give the main tag (its `aka`).
+  A vocabulary may hold more (Tree diagram's has nine, "org chart" and "AST" among them),
+  and the docs site's search finds every one.
+
+## When two families look alike
+
+A few families are near-twins:  their one-line descriptions could swap rows, and nobody would notice.
+Here's what actually separates them.
+
+<details>
+<summary>Select, Dropdown or Search:  the browser's own list, a list Spell UI draws, or a query box</summary>
+
+<img src="docs/images/components/ui-select.png" width="236" height="57" alt="A Select:  a closed box reading Pet">
+<img src="docs/images/components/ui-dropdown.png" width="64" height="26" alt="A Dropdown:  the word File, and a caret">
+<img src="docs/images/components/ui-search.png" width="247" height="55"
+  alt="A Search:  a rounded box with a magnifying glass">
+
+_Their first examples:  a Select, a Dropdown made into a File menu, and a Search._
+
+- **Select** is a native `<select>` in the shadow root:
+  keyboard, type-ahead and screen readers get the browser's own behaviour.
+  - Where the browser has the customizable select (`appearance: base-select`), Spell UI styles its picker and rich
+    options;  elsewhere (Safari before 27, Firefox) it's the plain native picker, in the same closed box.
+  - `multiple` makes it a native list box.
+- **Dropdown** draws its own combobox and listbox, for what a native select can't do:
+  - type to filter (`search`), and offer what was typed as a new option (`allow-additions`)
+  - choose several, each shown as a label (`multiple`)
+  - be a menu of actions:  its first example is a File menu
+- **Search** is a text box with results under it, and its value is the text typed, not a choice from a list.
+  - The results come from a `source` property, or from a server through a `url` with `{query}` in it.
+  - `category` groups them.
+- All three are form controls:  give one a `name`, and a `<form>` submits it.
+
+</details>
+
+<details>
+<summary>Modal, Flyout, Sidebar or Dimmer:  mid-page, in from an edge, beside the content, or over one element</summary>
+
+- **Modal** is a `<dialog>` shown with `showModal()`:  in the middle, over everything, the page behind it inert.
+- **Flyout** is the same kind of dialog, sliding in from an edge:
+  `position` picks left (the default), right, top or bottom.
+- **Sidebar** runs along one edge of a `<ui-pushable>`, not the window,
+  and moves or dims the `<ui-pusher>` beside it:  `transition` says how (over it, pushing it, from under it ...).
+  - So it can live inside a segment, which a dialog in the top layer can't.
+  - `persistent` makes it part of the page, an `<aside>`:  nothing dimmed, and focus stays where it was.
+- **Dimmer** covers its parent and centres its content over it:
+  a busy overlay, or a caption on hover (`show-on="hover"`).
+  `page` makes it cover everything, as a modal.
+- Escape and a click outside close the first three, a `persistent` sidebar aside;
+  `closedby` changes that, as it does on a native `<dialog>`.
+
+</details>
+
+<details>
+<summary>Message, Toast, Nag or Popup:  in the flow, for a few seconds, until dismissed, or at one element</summary>
+
+<img src="docs/images/components/ui-message.png" width="489" height="88"
+  alt="A Message:  a tinted box headed Changes in Service">
+<img src="docs/images/components/ui-nag.png" width="489" height="45"
+  alt="A Nag:  a dark bar reading Look, I am a nag!, with a close button">
+
+_A Message and a Nag.  Toast and Popup have no picture:  their first examples are buttons that open one._
+
+- **Message** sits in the page beside what it explains, tinted by `state` (`error`, `success` ...);
+  `dismissible` adds a close button.
+- **Toast** is a short notice that closes itself.
+  - `UI.toast({ ... })`, from script, stacks one at the top right and closes it after 3000 ms.
+  - A `<ui-toast>` written in the page is an ordinary block, where you put it, until its `display-time` runs out
+    (`auto` is reading time, at 120 words a minute).
+  - It never takes focus, and its countdown pauses while the pointer or focus is on it.
+- **Nag** is a bar that stays until it's dismissed, and can remember that it was:
+  `key` names the memory, kept in `localStorage` or a cookie for `expires` days, or in `sessionStorage`.
+- **Popup** is anchored to one element (`for`, else the element just before it),
+  and opens on hover, focus, click or only from script (`open-on`).
+  On hover it stays open while the pointer is over it, so its text can be read and selected.
+
+</details>
+
+<details>
+<summary>Segment, Card, Section, Panel or Accordion:  a box, a playing card, or three ways to fold</summary>
+
+<img src="docs/images/components/ui-section.png" width="489" height="51"
+  alt="A Section:  the title Getting started, over a line of text"><br>
+<img src="docs/images/components/ui-panel.png" width="249" height="142"
+  alt="A Panel:  a tinted box headed Theme, holding a name field and a slider">
+
+_A Section and a Panel, Spell UI's own:  Fomantic has neither._
+
+- **Segment** groups anything in a box:  `raised`, `piled` or `stacked`;  or no box at all, with `basic`,
+  or `vertical` for a band across the page.
+- **Card** is a playing card:  an image on top, then content parts (a header, meta, a description),
+  then an extra footer.  `href` makes the whole card a link.
+- **Section** is a titled block with a real heading, `<h2>` unless it's nested or `level` says otherwise.
+  `collapsible` folds it;  `sticky` keeps its title in view while you scroll through it.  It's still in progress.
+- **Panel** is a Section dressed as an inspector:  a tinted box of fields under a header band, with sub-heads that
+  fold.  It takes every Section attribute.
+- **Accordion** is a stack of title and content pairs on the browser's own `<details>`:
+  one open at a time unless `exclusive="no"`, and find-in-page opens a closed one.
+- Accordion, Section and Panel can each fetch their content from a file the first time it opens (`source`).
+
+</details>
+
+<details>
+<summary>Include, Code, Markdown or Embed:  a file from this site, shown three ways, or a frame from another</summary>
+
+- **Include**, **Code** and **Markdown** show text from inside the element, or from a file on the same site
+  (`source`).
+  - `load` says when to fetch the file:  at once, when the browser is idle, or once it's scrolled into view.
+  - Another site's URL is refused, and so is any page opened from disk (`file://`).
+  - `save()` writes an edit back, once the page has registered somewhere to save it
+    ([README-runtime.md](README-runtime.md)).
+- **Include** puts part of another page into this one (`select`, a CSS selector), in a shadow root of its own;
+  `page-styles` puts it in the light DOM instead, so the page's stylesheets reach it.
+- **Code** colours source by language with highlight.js, and with any language the page registers
+  (`UI.code.register()`).
+- **Markdown** renders GitHub-flavoured markdown, and `editable` gives it Write and Preview tabs.
+  It keeps raw HTML as written:  set `sanitized` for text you didn't write.
+- **Embed** frames another site:  a YouTube or Vimeo video by its id, or any `http(s)` URL,
+  behind a placeholder until someone clicks it.
+
+</details>
 
 ## The catalogue
+
+Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
@@ -158,28 +327,47 @@ Elements with no Fomantic counterpart.
 
 ## How a family is laid out
 
-Every family folder holds the same files, each named for its component.
-A new tag fills them all;  the tests fail on one that's missing a piece.
+Every family folder holds the same files, each named for its component:
+read one family, and you can find your way around all of them.
 
 | File | What it is |
 | --- | --- |
-| `UI<Name>.tsx` | the component:  one class per tag, its state and its `render()` into the shadow root;  a family's own DOM element class, `DOM<Name>Element`, sits above it in the same file |
-| `index.ts` | the family's barrel:  defines every tag (a side effect), re-exports the classes;  also the family's entry, `spell-ui/ui-<name>` |
+| `UI<Name>.tsx` | the component:  one class per tag (`UIButton.tsx`, `UIButtons.tsx`, `UIOr.tsx`), its state and its `render()` into the shadow root;  a family's own DOM element class, `DOM<Name>Element`, sits above it in the same file |
+| `index.ts` | the family's barrel:  defines every tag (a side effect) and re-exports the classes;  also the family's entry, `spell-ui/ui-<name>` (`spell-ui/components/ui-<name>` inside the repos) |
 | `UI<Name>.css` | its sheet, a port of Fomantic's `.less` and `.variables`, in layers |
 | `UI<Name>.en.ts` | the VOCABULARY, one per tag:  every name the tag uses (attributes and their values, events, slots, parts, states, texts), plus `topics`, `aka` and `skeleton` |
 | `UI<Name>.types.ts` | constants and types several of its files share |
-| `UI<Name>.fallback.ts` | the plain-DOM stand-in shown if the render throws:  form controls only |
+| `UI<Name>.fallback.ts` | the plain-DOM stand-in shown if the render throws:  form controls only, nine families today |
 | `examples/*.html` | Fomantic's examples in class grammar (`<div class="ui primary button">`), for the CSS tests and the site |
-| `examples/elements/*.html` | the same examples as `ui-*` markup:  the visual tests, the demo, the docs pages and these thumbnails start here |
-| tests | at the same path under [`tests/components/`](tests/components/):  the component, its sheet, its fallback, its static render, accessibility, speed |
+| `examples/elements/*.html` | the same examples as `ui-*` markup:  what the demo (`yarn dev`), the visual tests, the accessibility checks and the kitchen sink run |
+| tests | at the same path under [`tests/components/`](tests/components/):  the component (axe passes on every element example), its sheet, its fallback, its static render;  speed, for Button and Dropdown |
 
-- A NEW TAG must fill two fields of its vocabulary:
-  - `topics`:  two or more of the site's topics, how a newcomer looks for it
-  - `aka`:  other libraries' and everyday names (`<ui-modal>` is also "dialog", "lightbox")
-  - The component definitions test fails on a tag without them.
-- Then `yarn gen:root` (the root's catalog of which family defines a tag) and `yarn site:data` (the docs site's data):
-  each one's test fails while it's stale.
-- The full recipe, "Adding a new family":  the front page's [Working on it](README.md#working-on-it).
+### Adding a family, step by step
+
+Seven steps, run from `spell-ui/`;  four of them have a test that fails until they're done.
+
+1. Make the folder, `ui-<name>/` in [the components folder](src/components/), laid out like `ui-button/` (above).
+2. Write one vocabulary per tag, `UI<Name>.en.ts`, with the two fields this page reads:
+   - `topics`:  two or more ids from `ValueSets.topics`, how a newcomer looks for it.
+     The Fomantic group among them (`elements`, `collections`, `views`, `modules`) is the group it files under here.
+   - `aka`:  other libraries' and everyday names (`<ui-modal>` is also "dialog" and "lightbox"):
+     the Also called column.
+   - [The component definitions test](tests/components/ComponentDefinitions.test.ts) fails on a tag without them.
+3. Make it a library entry:
+   - `COMPONENTS` in [vite.config.ts](vite.config.ts)
+   - in [package.json](package.json):  its barrel's own key in `exports` (`"./components/ui-<name>"`;
+     [the package exports test](tests/tools/PackageExports.test.ts) fails without it), its short published name in
+     `publishConfig.exports` (`"./ui-<name>"`), and its `dist/` file in `sideEffects`
+   - re-export it from [the package's entry](src/index.ts)
+4. `yarn gen:root`:  the root's catalog of tag → family.
+   [Its test](tests/components/ui-root/UIRoot.catalog.test.ts) fails while it's stale.
+5. `yarn site:data`:  the docs site's data.
+   [Its test](tests/tools/SiteDataBuilder.test.ts) fails while it's stale.
+   - Add the family's facts to [the pages data](docs/__data/pages.json5).
+6. `yarn site:new <tag>`:  its docs page, from the template
+   ([README-site.md](README-site.md#writing-a-page--start-from-the-model-write-it-flat) has today's catch).
+   Then `yarn site:build`, and `yarn site:check <tag>`.
+7. `yarn readme:components`:  its row in the catalogue (below).
 
 <details>
 <summary>How an element is written, in more depth</summary>
@@ -194,44 +382,60 @@ A new tag fills them all;  the tests fail on one that's missing a piece.
 
 ## Written from the data
 
-The tables above are written by a script, never by hand:
-`yarn readme:components` reads the site's data and puts a fresh catalogue between this page's markers.
+Nobody types these tables.
+`yarn readme:components` writes them from the same data the docs site reads, between this page's markers,
+and leaves the rest of the page alone.
 
-- The data:
-  - [`components.json5`](docs/__data/components.json5), written by `yarn site:data` from every vocabulary
-  - the hand-kept [`pages.json5`](docs/__data/pages.json5) beside it:  titles, status
-- Rerun it after `yarn site:data`;  `yarn readme:components --check` fails while this page is stale.
-- The pictures are PNGs in [the components' images folder](docs/images/components/), one per family that has one.
-  - `yarn readme:components --shoot <docs site address> [family ...]` retakes them headless from the docs site:
-    each family page's first example, trimmed.
-    No family named:  every family that has a picture already.
-  - Delete a picture to drop it from the table;  name a family to add one.
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
+flowchart LR
+  vocab["every tag's vocabulary"] -->|yarn site:data| data["the site's data"]
+  facts["the hand-kept page facts"] -->|yarn site:data| data
+  data --> site["the docs site"]
+  data -->|yarn readme:components| catalogue["this page"]
+  site -->|shot headless| pictures["the pictures"]
+  pictures --> catalogue
+  %% the Spell look:  yarn mermaid:pretty
+  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
+  classDef data fill:#F1E7D4,stroke:#C9B48A,stroke-width:1.5px,color:#1A1C27,rx:2px,ry:2px
+  class data data
+```
+
+_The pictures come from the site itself, so a row shows what its docs page draws._
+
+The data is two files:  [`components.json5`](docs/__data/components.json5), which `yarn site:data` writes
+from every vocabulary, and the hand-kept [`pages.json5`](docs/__data/pages.json5) beside it, with titles and status.
+So rerun `yarn readme:components` after `yarn site:data`.
+Nothing runs it for you:  `yarn readme:components --check` fails while this page is stale,
+but no test or CI step calls it, so a new family's row waits for the recipe's last step.
+
+The pictures are PNGs in [the components' images folder](docs/images/components/), one per family that has one.
+- `yarn readme:components --shoot <docs site address> [family ...]` retakes them headless from the docs site:
+  each family page's first example, trimmed.
+  No family named:  every family that has a picture already.
+- Delete a picture to drop it from the table;  name a family to add one.
 
 <details>
 <summary>Taking the pictures:  the command, as run for this page</summary>
 
-The docs site must be served first (the page server, [README-site.md](README-site.md)).
+The docs site must be served first, since the command doesn't start the page server
+([README-site.md](README-site.md), "Viewing it").
 
 ```sh
-cd spell-ui
+cd ~/www/spell/spell-ui
 yarn readme:components --shoot http://localhost:4747/components/ui/
 ```
 
 - One line per family, `thumbnail:  ui-button`;
   a family whose first example draws nothing says why and keeps its old picture.
-- The pictures are light scheme, at the browser's normal size.
-- Families left without one on purpose, those whose first example is only:
-  - a button that opens something (modal, flyout, toast, popup ...)
-  - or grey placeholder bars (segment, grid, rail ...)
+- The pictures are light scheme, at the browser's normal size, in Playwright's Chromium.
 
 </details>
 
 ## See also
 
-- [README.md](README.md):  Spell UI's front page
-- [README-runtime.md](README-runtime.md):  what's under the elements
-- [README-themes.md](README-themes.md):  theming
-- [README-frameworks.md](README-frameworks.md):  using the elements from React, Vue, Svelte, Solid and plain JavaScript
-- [README-migrating.md](README-migrating.md):  coming from Semantic UI or Fomantic UI
-- [README-site.md](README-site.md):  the docs site and the tools
-- [The kit's front page](../README.md)
+- [README.md](README.md):  Spell UI's front page, with `<ui-root>`, how a page loads these families, and installing
+- [README-frameworks.md](README-frameworks.md):  using any of these from React, Vue, Solid or plain JavaScript
+- [README-site.md](README-site.md):  serving the docs site every Family link opens, and the tools that build it
+- [README-runtime.md](README-runtime.md):  the vocabularies behind every row, and the runtime every element shares
+- [README-themes.md](README-themes.md):  restyling a family through its tokens, or every family with a theme
