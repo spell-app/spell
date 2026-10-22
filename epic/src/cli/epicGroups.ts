@@ -645,6 +645,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic pages fuss --branch"
     },
     {
+      name: "voice",
+      usage: "[<page>...] [--voice <name>] [--done <page>...] [--all] [--json]",
+      description:
+        "the guides a voice still has to go over (none named:  every guide), and the voice's file;  " +
+        "--done:  stamp guides as gone over",
+      example: "epic pages voice --done guides/server.html"
+    },
+    {
       name: "offline",
       usage: "[<page>...]",
       description: "what the docs pages load from the internet, for airplane mode",

@@ -532,6 +532,7 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 | `epic pages open [<page>]` | shows a page in Chrome, or in VS Code's side bar (`--vs`;  `--review`:  the Review tab) |
 | `epic pages link <page>` | prints a page's two links for a reply, the side bar's and the browser's;  `--hash <id>`, `--review`;  `--show`:  shows it too |
 | `epic pages fuss <path> ... \| --branch` | checks the writing of pages and comments against the house rules |
+| `epic pages voice [<page> ...] [--voice <name>] [--done <page> ...]` | lists the guides a voice hasn't gone over yet (`/voice` rewrites them), with their word counts;  `--done` stamps one as gone over |
 | `epic pages offline [<page> ...]` | lists what the docs pages load from the internet, for airplane mode |
 
 ### The repo's settings
