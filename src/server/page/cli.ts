@@ -1,6 +1,5 @@
 /**
- * `spell server <command>` (the kit's `spell`, which runs this) and `yarn server <command>`:  the page server of this
- * checkout.
+ * `spell server <command>` (the kit's `spell`, which runs this) and `yarn server <command>`:  the kit's page server.
  * - `local [--port N]` -- run it in the foreground, until `Ctrl-C`
  *   - `serve`:  the same, hidden:  what a background server runs (`PageServer.ensure()`), which `prune` finds by it
  * - `start` -- start it in the background if it isn't running;
@@ -16,24 +15,35 @@
  *     else this checkout's (`SRV.contentPathOf()`)
  * - `prune [--dry-run]` -- stop the page and vite servers whose checkout is gone (`pruneServers()`), on any checkout;
  *   `--dry-run` only says which
- * - `--root <dir>`:  the checkout (default:  the one holding the folder `yarn` ran in, `INIT_CWD`)
+ * - `--root <dir>`:  the kit (default:  the kit holding the folder `yarn` ran in, `INIT_CWD`, from any folder of it,
+ *   `pageServerRoot()`);  the page server starts from the kit's root ONLY:  any other folder is an error, naming the
+ *   kit (`kitRootOf()`, epic `repo-split` P16)
  * - `--spaces <dir>`:  where people's and orgs' spaces are kept (default:  spell-spaces, beside the main checkout):
  *   it sets `SPELL_SPACES_DIR`, which spaces' route modules read, and a background server inherits
  *   (epic `people-and-orgs` P8)
- * - Runs under `tsx` with THIS package's `tsconfig.json`, so `$/...` aliases resolve.
+ * - Runs under `tsx` with the kit's node settings (`tsconfig.node.json`).
  *   A background server is started the same way (`TSX_TSCONFIG_PATH`), whatever folder it's started from.
  */
 import { relative, resolve, sep } from "node:path"
 
 import { SRV } from "spell-kit/server"
-import { DEFAULT_PORT, PageServer, findRoot, pruneReport, pruneServers } from "spell-kit/server/page"
+import { DEFAULT_PORT, PageServer, kitRootOf, pageServerRoot, pruneReport, pruneServers } from "spell-kit/server/page"
 
 await main(process.argv.slice(2))
 
 /** Run `args`. */
 async function main(args: string[]): Promise<void> {
   const [command = "help", ...rest] = args
-  const root = resolve(flag(rest, "--root") ?? findRoot(process.env.INIT_CWD ?? process.cwd()) ?? process.cwd())
+  const given = resolve(flag(rest, "--root") ?? pageServerRoot(process.env.INIT_CWD ?? process.cwd()))
+  // the kit's root ONLY (epic `repo-split` P16):  `prune` works on any checkout's servers
+  let root = given
+  try {
+    if (command !== "prune") root = kitRootOf(given)
+  } catch (error) {
+    console.error((error as Error).message)
+    process.exitCode = 2
+    return
+  }
   const port = Number(flag(rest, "--port") ?? DEFAULT_PORT)
   const spaces = flag(rest, "--spaces")
   if (spaces) process.env.SPELL_SPACES_DIR = resolve(spaces)

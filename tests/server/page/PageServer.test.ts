@@ -670,6 +670,60 @@ describe("PageServer", () => {
   })
 })
 
+// what spell-app's own route module did until epic `repo-split` P16, now the settings':  local copies, what's gone,
+// the tabs of sets it serves
+describe("PageServer's localCopies, gone and siteTabs", () => {
+  const root = mkdtempSync(join(tmpdir(), "page-server-settings-"))
+  const cdn = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
+  let server: PageServer
+  let port: number
+
+  beforeAll(async () => {
+    const tabs = [
+      { name: "Epics", path: "epics/index.html", areas: ["epics"] },
+      { name: "Spell/UI", path: "/components/ui/", sets: ["ui"] },
+      { name: "App/UI", path: "/components/app/", sets: ["app"] },
+      { name: "Brand", path: "brand/index.html", areas: ["brand"], sets: ["brand"] }
+    ]
+    const settings = {
+      componentSets: { ui: { name: "Spell UI", dir: "ui/docs", assets: "ui/site/_assets" } },
+      localCopies: { [cdn]: "/_epic/assets/highlight.min.js" },
+      gone: ["/ui"],
+      siteTabs: tabs
+    }
+    writeFileSync(join(root, "package.json"), JSON.stringify({ pageServer: settings }))
+    mkdirSync(join(root, "docs"), { recursive: true })
+    mkdirSync(join(root, "ui"), { recursive: true })
+    mkdirSync(join(root, "brand"), { recursive: true })
+    writeFileSync(join(root, "docs/offline.html"), `<!doctype html><head></head><script src="${cdn}"></script>\n`)
+    writeFileSync(join(root, "ui/button.html"), "<!doctype html><p>old</p>\n")
+    writeFileSync(join(root, "brand/index.html"), "<!doctype html><p>Brand</p>\n")
+    server = await new PageServer({ root }).start({ port: 0, routes: false, pidFile: false })
+    port = server.info.port
+  })
+
+  afterAll(async () => {
+    await server.stop()
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it("serves each page its CDN files' local copies, so pages load offline (withLocalCopies())", async () => {
+    const answer = await ask(port, "GET", "/docs/offline.html")
+    expect(answer.text).toContain(`<script src="/_epic/assets/highlight.min.js"></script>`)
+    expect(answer.text).not.toContain("cdnjs")
+  })
+
+  it('answers "not found" at what\'s gone, though the folder is there:  no redirect (Q30)', async () => {
+    for (const old of ["/ui/button.html", "/ui/", "/ui"]) expect((await ask(port, "GET", old)).status, old).toBe(404)
+    expect((await ask(port, "GET", "/brand/index.html")).status).toBe(200)
+  })
+
+  it("leaves out a tab whose home is a component set it doesn't serve:  no App/UI without spell-app", () => {
+    // Brand's home is the content repo's:  it stays without its set
+    expect(server.siteTabs?.map((tab) => tab.name)).toEqual(["Epics", "Spell/UI", "Brand"])
+  })
+})
+
 /**
  * Listen to the live-reload websocket (`SRV.LIVE_EVENTS`) on `port`, as a page does.
  * - `next(event, path)`:  resolves with the data of the next `event` about `path` (none:  an event with no path)

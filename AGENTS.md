@@ -217,7 +217,7 @@ The kit is always there, so no `needs` names it.
 | [spell-ui](spell-ui/AGENTS.md) | the repo IS `spell-ui` | the kit |
 | [spell-brand](spell-brand/AGENTS.md) | the repo IS `spell-brand` | spell-ui, the kit |
 | [spell-epic](spell-epic/AGENTS.md) | the repo IS `spell-epic` | spell-ui, the kit |
-| [spell-app](spell-app/AGENTS.md) | `app`, `spaces`, `lsp`, `cli`, `page-server`:  ONE package, `spell-app` (and `vscode`, its own yarn project) | spell-lang, spell-brand, spell-ui, the kit;  RUNS spell-epic by its page server's settings |
+| [spell-app](spell-app/AGENTS.md) | `app`, `spaces`, `lsp`, `cli`:  ONE package, `spell-app` (and `vscode`, its own yarn project) | spell-lang, spell-brand, spell-ui, the kit |
 
 - EVERY repo is ONE npm package, named after the repo and unscoped (epic `repo-split` P11, Q36).
   - Its code is under ONE `src/` (epic `repo-split` P14, Q47), its folders right inside it:
@@ -270,7 +270,25 @@ The kit is always there, so no `needs` names it.
 - A file outside its repo that a program needs at run time (spell's `src/`, the frozen test projects) is found by
   PACKAGE, through `node_modules`, never by a path into that repo.
 - Paths in config and settings that name another repo's folder say so from the repo's root:
-  `../spell-ui/docs` in spell-app's page server settings.
+  `../spell-ui/site/_assets` in spell-brand's part of the page server's settings.
+
+## The page server
+
+- ONE page server, the KIT's, started from the kit's root only (epic `repo-split` P16):
+  `spell server start | status | stop` from any folder of the kit;  any other root is an error naming the kit.
+- Each repo declares ITS OWN part of its settings in its own `package.json`, `"pageServer"`, the way it declares its
+  `"spell": { "commands" }`, every path from its own folder:
+  - spell-ui:  its component set (`docs`) and its site bundle (`site/_assets`)
+  - spell-brand:  its set, its engine routes (`/_brand/assets/` ...), what it watches, its pages' bundle
+  - spell-epic:  its route modules, engine routes (`/_epic/assets/`, `/_epic/pack/`, `/templates/`), what it watches,
+    Epic UI, the local copy of highlight.js (`localCopies`)
+  - spell-app:  the app's route module (`appRoutes`), App UI, the script that colours spell (`pageScripts`)
+- The CONTENT repo's part is a file of its own, `page-server.json5` in the content folder:  the site's tabs, the
+  writable folders, what moved out of it (`gone`).
+- The kit's server merges them, kit first, then the content repo's, then each INSTALLED child repo's, lowest first
+  (`repos.json5`);  it names no child repo.  So it runs with any set of repos:  the kit, spell-ui and spell-epic serve
+  the epic pages.
+- How:  [the server's AGENTS.md](src/server/AGENTS.md), "The page server's settings".
 
 ## Tests
 

@@ -15,6 +15,10 @@ node_modules
 *.code-workspace
 # `/park`'s note on where parked work stopped:  never committed
 PARKED-*.md
+# the page server's records, at its root:  the kit's since epic repo-split P16 (its pid file, the app's editor's);  its
+# logs are `*.log`
+.spell-server.json
+.spell-server.*.json
 # the MAIN checkout's marker:  worktree windows hide its folder's files (spell-epic's window script)
 /.spell-main
 

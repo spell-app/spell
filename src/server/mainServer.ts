@@ -17,6 +17,7 @@ import { dirname, join, relative, resolve, sep } from "node:path"
 
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { checkoutOf } from "./checkout"
+import { kitOf } from "./page/settings"
 import { PidFile } from "./PidFile"
 import { isInside } from "./safePath"
 import { type ServerInfo } from "./server.types"
@@ -72,9 +73,10 @@ export function contentPathOf(file: string, server: Pick<ServerInfo, "contentFol
 
 /**
  * The main checkout whose page server serves the content folder `file` is in;  else `undefined`.
- * - the content folder is a repo of its own, beside the checkouts (`../spell-app.epics`), and names none of them:
- *   so each folder beside it is asked, by its page server's pid file (`.spell-server.json`, written once the route
- *   modules have said what it serves:  `contentFolder`)
+ * - the content folder is a repo of its own, beside the checkouts (`../spell-app.epics`) or inside the kit
+ *   (`spell/spell.epics`), and names none of them:  so the folder holding it (the kit, whose page server serves it
+ *   since epic `repo-split` P16) and each folder beside it are asked, by their page server's pid file
+ *   (`.spell-server.json`, written once the route modules have said what it serves:  `contentFolder`)
  * - a worktree's server serves it too:  that worktree's main checkout, then
  * - real paths compared, so a file through a link to the content folder counts
  * - NEVER throws
@@ -90,9 +92,11 @@ export function contentServerOf(file: string): string | undefined {
   } catch {
     return undefined
   }
-  for (const entry of entries) {
-    if (!entry.isDirectory() || join(beside, entry.name) === content) continue
-    const info = new PidFile(join(beside, entry.name)).read()
+  const folders = entries
+    .filter((entry) => entry.isDirectory() && join(beside, entry.name) !== content)
+    .map((entry) => join(beside, entry.name))
+  for (const folder of [beside, ...folders]) {
+    const info = new PidFile(folder).read()
     if (info?.contentFolder && realOrSelf(info.contentFolder) === content)
       return checkoutOf(info.root)?.main ?? info.root
   }
@@ -140,9 +144,11 @@ function isShared(at: WorktreePath): boolean {
  * - `worktree`:  the worktree's name
  * - `path`:  the path inside the worktree, as segments
  * - found as git finds it (`SRV.checkoutOf()`), wherever the worktree's folder is
+ * - in a kit, the KIT's worktree (`kitOf()`, epic `repo-split` P16):  its page server is the kit's, so a child repo's
+ *   file in it (`<worktree>/spell-app/x`) is that worktree's `spell-app/x`, never the child repo's own worktree's `x`
  */
 export function worktreePath(file: string): WorktreePath | undefined {
-  const checkout = checkoutOf(file)
+  const checkout = checkoutOf(kitOf(dirname(resolve(file))) ?? file)
   if (!checkout?.worktree) return undefined
   const path = relative(checkout.root, resolve(file)).split(sep).filter(Boolean)
   return { main: checkout.main, root: checkout.root, worktree: checkout.worktree, path }
