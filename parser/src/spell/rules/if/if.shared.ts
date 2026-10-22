@@ -1,4 +1,5 @@
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
 
@@ -13,5 +14,5 @@ export function refuseOutsideMethod(match: P.Match): P.Match {
   for (let scope: P.Scope | undefined = match.scope; scope; scope = scope.parentScope) {
     if (scope instanceof P.MethodScope) return match
   }
-  return SpellStatement.refuse(match, `A line of a getter's body:  put it under one, e.g. "the color of a card is:"`)
+  return SpellStatement.refuse(match, SP.Language.of(match.scope).parserMessage("value-line-outside-getter"))
 }

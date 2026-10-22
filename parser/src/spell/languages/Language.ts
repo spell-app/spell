@@ -2,6 +2,7 @@ import { P } from "spell-lang/parser"
 
 import { SPELL_BASE_TYPES, type CoreMessages } from "spell-lang/core/core.types"
 import { SP } from "spell-lang/spell"
+import { PARSER_MESSAGES } from "spell-lang/spell/languages/en/parserMessages"
 
 /**
  * A LANGUAGE PACK:  everything spell needs to read programs written in one human language (epic `spanish`).
@@ -12,6 +13,7 @@ import { SP } from "spell-lang/spell"
  *   - its words for spell's built-in types, e.g. `text`, `yes or no` (`typeWords`)
  *   - its root scope:  the built-in types and their members, which every project's scope descends from
  *   - its words for what the core says to the person running a program (`messages`)
+ *   - its words for what the parser says to the person writing one (`parserMessages`)
  * - A project names its language (epic `spanish` P4);  `Language.for(lang)` finds its pack.
  * - The rule classes are shared:  a pack holds only words.
  */
@@ -34,6 +36,12 @@ export class Language {
    * - English's are the core's own:  see `CORE_MESSAGES`.
    */
   readonly messages: CoreMessages
+  /**
+   * What the parser says to the person WRITING a program, in this language:  warnings, errors, long forms ...
+   * - Read one with `parserMessage()`.
+   * - English's are every key, `PARSER_MESSAGES`;  another language's may lack some, which read English.
+   */
+  readonly parserMessages: Partial<ParserMessages>
   /** How its articles agree with their noun, e.g. `an apple`, `la carta` -- see `agreement()`;  none:  never warns. */
   readonly articles: ArticleAgreement | undefined
 
@@ -46,6 +54,7 @@ export class Language {
     this.typeWords = props.typeWords
     this.words = props.words
     this.messages = props.messages
+    this.parserMessages = props.parserMessages ?? {}
     this.parser.language = this
     this.parser.inflector ??= this.inflector
   }
@@ -73,6 +82,41 @@ export class Language {
     }))
   }
   private _rootScope: P.RootScope | undefined
+
+  ////////////////
+  // ## Messages
+  ////////////////
+
+  /**
+   * Parser message `key` in this language, each `{name}` in it filled from `params` (epic `spanish` P17):
+   * `SP.Language.of(scope).parserMessage("dont-understand", { text: "x y" })` => `Don't understand "x y"`.
+   * - English when this language has no such key -- see `parserMessages`.
+   * - A placeholder with no param stays as written, `{name}`:  so a gap shows, and an example in braces,
+   *   `{the score of the game}`, is left alone.
+   */
+  parserMessage(key: ParserMessageKey, params: Readonly<Record<string, string | number>> = {}): string {
+    const template = this.parserMessages[key] ?? PARSER_MESSAGES[key]
+    return template.replace(PLACEHOLDER, (whole, name: string) => (name in params ? String(params[name]) : whole))
+  }
+
+  /**
+   * How a person writes built-in type `datatype` in this language:  its first word in `typeWords`,
+   * e.g. `texto` for `text` in Spanish;  any other type as it is, e.g. `Card`.
+   */
+  wordFor(datatype: P.Datatype): string {
+    return Object.keys(this.typeWords).find((words) => this.typeWords[words] === datatype) ?? datatype
+  }
+
+  /**
+   * `noun` with the article it takes, for a message's example:  `an apple`, `the card`, `una carta`, `la dirección`.
+   * - `kind`:  `indefinite` (`a`, `un` ...) or `definite` (`the`, `el` ...).
+   * - `type`:  the type `noun` names, if any;  Spanish's gender is the type's.
+   * - A language with no `articles`:  `noun` alone.
+   */
+  withArticle(kind: ArticleKind, noun: string, type?: P.TypeScope): string {
+    const article = P.Inflector.using(this.inflector, () => this.articles?.article(kind, noun, type))
+    return article ? `${article} ${noun}` : noun
+  }
 
   ////////////////
   // ## Agreement
@@ -152,8 +196,22 @@ export type LanguageProps = {
   typeWords: P.TypeWords
   words: LanguageWords
   messages: CoreMessages
+  /** None:  every message in English. */
+  parserMessages?: Partial<ParserMessages>
   articles?: ArticleAgreement
 }
+
+/** One of the parser's messages, e.g. `dont-understand` -- see `PARSER_MESSAGES`, English's. */
+export type ParserMessageKey = keyof typeof PARSER_MESSAGES
+
+/** Every one of the parser's messages, in one language:  what a language pack holds (`Language.parserMessages`). */
+export type ParserMessages = Record<ParserMessageKey, string>
+
+/** A named placeholder in a message, `{type}` -- see `Language.parserMessage()`. */
+const PLACEHOLDER = /\{(\w+)\}/g
+
+/** Which article a noun takes:  `a` or `the`, in English. */
+export type ArticleKind = "indefinite" | "definite"
 
 /**
  * How a language's articles agree with their noun -- English's in `languages/en/agreement.ts` (epic `spanish` P8).
@@ -167,8 +225,12 @@ export type ArticleAgreement = {
   expected(article: string, noun: string, type: P.TypeScope | undefined): string | undefined
   /** The gender a type declared with `article` has, e.g. `feminine` for `una carta es una cosa`;  none in English. */
   genderOf?(article: string): string | undefined
-  /** The warning for a wrong article, worded in the language:  `phrase` is the right one, e.g. `an apple`. */
-  warning(phrase: string): string
+  /**
+   * The article `noun` takes, for a message's example:  `an` for `apple`, `una` for `carta`.
+   * - `type`:  the type `noun` names, if any;  without one, a language with genders guesses by the word.
+   * - The warning for a wrong article is the pack's `did-you-mean` message (`Language.parserMessage()`).
+   */
+  article(kind: ArticleKind, noun: string, type: P.TypeScope | undefined): string
 }
 
 /** A language's small words, the tables spell's rules read while parsing -- English's in `languages/en/words.ts`. */

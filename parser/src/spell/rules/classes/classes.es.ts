@@ -405,7 +405,7 @@ classesEs.addRule(MarkdownDescription, {
         // not in an outline:  says where it goes
         [
           ["<markdown>", "\tHola", "</markdown>"],
-          "/* PARSE ERROR: A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown> */"
+          "/* PARSE ERROR: Un bloque <markdown> va en el esquema de un tipo, como su descripción, o en un dibujo:  devolver <markdown>...</markdown> */"
         ]
       ]
     }
@@ -454,14 +454,14 @@ classesEs.addRule(BelongsToOne, {
         {
           title: "both types MUST be declared above",
           input: "una carta pertenece a una hand",
-          js: `/* PARSE ERROR: Can't say "una carta pertenece a una hand" yet:  declare "a hand is a list of cartas" above it */`
+          js: '/* PARSE ERROR: Todavía no se puede decir "una carta pertenece a una hand":  declara "un hand es una lista de cartas" antes */'
         },
         {
           title: "the list type MUST be a list of the project's",
           input: ["una carta pertenece a una lista", "una carta pertenece a una carta"],
           js: [
-            `/* PARSE ERROR: Can't say "una carta pertenece a una lista":  every list would hold a carta once */`,
-            `/* PARSE ERROR: Can't say "una carta pertenece a una carta":  a carta isn't a list */`
+            '/* PARSE ERROR: No se puede decir "una carta pertenece a una lista":  cada lista tendría una carta una sola vez */',
+            '/* PARSE ERROR: No se puede decir "una carta pertenece a una carta":  una carta no es una lista */'
           ]
         }
       ]
@@ -506,7 +506,7 @@ classesEs.addRule(SavedInline, {
         {
           title: "not a built-in type:  every project shares it",
           input: "una cosa se guarda dentro",
-          js: `/* PARSE ERROR: Can't save thing inline:  it's built in, and every project shares it */`
+          js: "/* PARSE ERROR: No se puede guardar el tipo cosa dentro:  viene incorporado, y todos los proyectos lo comparten */"
         }
       ]
     }
@@ -531,7 +531,7 @@ classesEs.addRule(SavedInFile, {
         {
           title: "not a built-in type:  every project shares it",
           input: "una cosa se guarda en su propio archivo",
-          js: `/* PARSE ERROR: Can't save thing in its own file:  it's built in, and every project shares it */`
+          js: "/* PARSE ERROR: No se puede guardar el tipo cosa en su propio archivo:  viene incorporado, y todos los proyectos lo comparten */"
         }
       ]
     }
@@ -557,7 +557,7 @@ classesEs.addRule(VersionStep, {
         {
           title: "a version step starts at version 2",
           input: "una person versión 1 renombra name a names",
-          js: "/* PARSE ERROR: A version step starts at version 2:  a file with no version is version 1 */"
+          js: "/* PARSE ERROR: Un paso de versión empieza en la versión 2:  un archivo sin versión es la versión 1 */"
         }
       ]
     }
@@ -599,7 +599,7 @@ classesEs.addRule(UpgradeMethod, {
         {
           title: "an upgrade starts at version 2",
           input: 'para actualizar (una person) a la versión 1: poner su name a "x"',
-          js: "/* PARSE ERROR: An upgrade starts at version 2:  a file with no version is version 1 */"
+          js: "/* PARSE ERROR: Una actualización empieza en la versión 2:  un archivo sin versión es la versión 1 */"
         }
       ]
     }
@@ -964,11 +964,11 @@ classesEs.addRule(DefinePropertyHas, {
       tests: [
         {
           input: "una person tiene un id como texto",
-          js: '/* PARSE ERROR: Can\'t add "id" to Person:  every thing has one, built in */'
+          js: '/* PARSE ERROR: No se puede añadir "id" al tipo Person:  cada cosa ya tiene uno, incorporado */'
         },
         {
           input: "un club tiene un id",
-          js: '/* PARSE ERROR: Can\'t add "id" to Club:  every thing has one, built in */'
+          js: '/* PARSE ERROR: No se puede añadir "id" al tipo Club:  cada cosa ya tiene uno, incorporado */'
         },
         {
           input: ["person = una nueva person", "imprimir el id de la person"],
@@ -1049,7 +1049,7 @@ classesEs.addRule(DefinePropertyHas, {
         },
         {
           input: "una pila tiene un nombre como número",
-          js: '/* PARSE ERROR: Can\'t add "nombre" to Pila as number:  every list has one, built in, as text */'
+          js: '/* PARSE ERROR: No se puede añadir "nombre" al tipo Pila como número:  cada lista ya tiene uno, incorporado, como texto */'
         },
         {
           title: "a thing has no `name` built in:  any type will do",
@@ -1525,7 +1525,7 @@ classesEs.addRule(PropertyValueGetter, {
             "  },",
             "  configurable: true",
             "})",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
           ],
           ts: [
             "export interface Card { readonly shortName: any /* spell: type unknown */ }",
@@ -1535,7 +1535,7 @@ classesEs.addRule(PropertyValueGetter, {
             "  },",
             "  configurable: true",
             "})",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
           ]
         }
       ]

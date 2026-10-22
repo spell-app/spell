@@ -44,7 +44,7 @@ assignmentEs.addRule(AssignmentStatement, {
         {
           title: "non-existing var: property set (won't work)",
           input: `sea el name de unknown-var = "bob"`,
-          js: `/* PARSE ERROR: Don't understand "sea el name de unknown-var = "bob"" */`
+          js: '/* PARSE ERROR: No entiendo "sea el name de unknown-var = "bob"" */'
         },
         {
           title: "existing var: property set",
@@ -229,7 +229,7 @@ assignmentEs.addRule(ReturnStatement, {
         // fails for more than one indented line
         [
           "devolver\n\t<div/>\n\t1",
-          ["return", '/* PARSE ERROR: Don\'t understand "<div/>" */', '/* PARSE ERROR: Don\'t understand "1" */']
+          ["return", '/* PARSE ERROR: No entiendo "<div/>" */', '/* PARSE ERROR: No entiendo "1" */']
         ]
       ]
     }

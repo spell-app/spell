@@ -476,10 +476,11 @@ from `cartas`, the frozen `cards` project translated line for line._
   English is the first pack, Spanish the second.
 - Names keep their Spanish, accents and all:  `una carta "es una figura"` compiles to `get esUnaFigura()`.
 - A wrong article is a warning, never an error:  `el carta` asks `¿Querías decir "la carta"?`.
+- The parser's warnings and errors speak the project's language, with examples in it:
+  `Di qué contiene "nombres-de-cartas", p. ej. "poner nombres-de-cartas a una nueva lista de texto"`.
 - `spell lang packs check` says what a pack lacks against English, module by module, and runs in the tests too;
   `fix` writes stubs to translate.
 - **Not yet:**  a translated example beyond `cartas`, and docs that teach Spanish Spell.
-  Most of the parser's warnings still speak English.
 - The whole story, and what Spell UI and the editor do in Spanish:  the docs site's Spell in Spanish guide,
   `/guides/spanish.html`.
 

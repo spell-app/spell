@@ -108,6 +108,7 @@ export class SpellStatement<
    *   can't take the line instead, e.g. `quoted_type_expression` taking `it "is a suit"` as an empty method.
    */
   static refuse(match: P.Match, message: string): P.Match {
+    // NOTE: `message` is in the scope's language:  `SP.Language.of(scope).parserMessage(key, params)`
     const { scope, tokens, rule } = match
     return new P.Match({
       scope,
@@ -141,26 +142,28 @@ export class SpellStatement<
     property: P.Match | undefined,
     datatype?: P.Datatype
   ): P.Match {
-    const words = property ? `"${property.raw}"` : "a property"
-    const typeName = SP.typeName(`${type.value}`)
+    const language = SP.Language.of(match.scope)
+    const words = property ? `"${property.raw}"` : language.parserMessage("a-property")
+    const typeName = language.wordFor(SP.typeName(`${type.value}`))
     const typeScope = match.scope.types?.get(`${type.value}`)
+    const params = { property: words, type: typeName }
     if (SP.isBuiltInTypeScope(typeScope)) {
-      return SpellStatement.refuse(
-        match,
-        `Can't add ${words} to ${typeName}:  it's built in, and every project shares it`
-      )
+      return SpellStatement.refuse(match, language.parserMessage("cant-add-to-built-in-type", params))
     }
     const builtIn = property ? SP.builtInStoredMember(typeScope, `${property.value}`) : undefined
     if (!builtIn) return match
     const { member, on } = builtIn
     if (!member.declarable) {
-      return SpellStatement.refuse(match, `Can't add ${words} to ${typeName}:  every thing has one, built in`)
+      return SpellStatement.refuse(match, language.parserMessage("cant-add-built-in-member", params))
     }
     if (datatype && datatype !== member.datatype) {
-      return SpellStatement.refuse(
-        match,
-        `Can't add ${words} to ${typeName} as ${datatype}:  every ${on} has one, built in, as ${member.datatype}`
-      )
+      const message = language.parserMessage("cant-retype-built-in-member", {
+        ...params,
+        datatype: language.wordFor(datatype),
+        on: language.wordFor(on),
+        builtInType: language.wordFor(`${member.datatype}`)
+      })
+      return SpellStatement.refuse(match, message)
     }
     return match
   }
@@ -176,7 +179,19 @@ export class SpellStatement<
   static refuseUnknownType(match: P.Match, type: P.Match): P.Match {
     const { scopeType } = type.data as { scopeType?: unknown }
     if (scopeType !== NONE) return match
-    return SpellStatement.refuse(match, `There's no type "${type.raw}":  declare it, e.g. "a ${type.raw} is a thing"`)
+    const example = SpellStatement.exampleTypeDeclaration(match.scope, `${type.raw}`)
+    const message = SP.Language.of(match.scope).parserMessage("no-such-type", { type: `${type.raw}`, example })
+    return SpellStatement.refuse(match, message)
+  }
+
+  /**
+   * How a program declares a type called `words`, in `scope`'s language, for an error's example:
+   * `a pile is a thing`, Spanish's `una pila es una cosa`.
+   */
+  static exampleTypeDeclaration(scope: P.Scope, words: string): string {
+    const language = SP.Language.of(scope)
+    const aType = language.withArticle("indefinite", words, scope.getType(SP.typeName(words)))
+    return language.parserMessage("example-type", { type: words, aType })
   }
 
   /**
@@ -287,33 +302,47 @@ export class SpellStatement<
    *     `has a deck`, `"color" is red if ...`
    * - Override where the sentence style says it differently, e.g. `define_property_has`'s `has ... as ...`.
    * - Its FIRST line only:  a body stays as written.
+   * - In the scope's language:  its pack's `long-form-...` messages, e.g. Spanish's `una carta tiene ...`.
    */
   getLongForm(match: P.Match): string | undefined {
     const { subject, property } = SpellStatement.subjectOf(match)
-    const typeWords = SpellStatement.subjectWords(match)
-    if (!subject || !typeWords) return undefined
+    const subjectParams = SpellStatement.longFormParams(match)
+    if (!subject || !subjectParams) return undefined
     const text = SpellStatement.firstLineOf(match)
-    if (!subject.length) return SpellStatement.longFormWithoutSubject(text, typeWords, property)
+    const language = SP.Language.of(match.scope)
+    const spelledOut = language.parserMessage("long-form-subject", subjectParams)
+    // `its <property> ...` => `the <property> of a <type> ...`
+    const propertyOf = (propertyText: string) =>
+      language.parserMessage("long-form-property", {
+        ...subjectParams,
+        property: propertyText,
+        theProperty: language.withArticle("definite", propertyText)
+      })
+    const propertyText = property?.inputText.trimEnd()
+    if (!subject.length) {
+      if (propertyText && text.startsWith(propertyText)) {
+        return `${propertyOf(propertyText)}${text.slice(propertyText.length)}`
+      }
+      return `${spelledOut} ${text}`
+    }
     const at = subject.start! - match.start!
     const after = text.slice(at + subject.inputText.trimEnd().length).trimStart()
-    if (subject.is(SubjectIt)) return `${text.slice(0, at)}${LONG_FORM.subject(typeWords)} ${after}`
-    // `its <property> ...` => `the <property> of a <type> ...`
-    const propertyText = property?.inputText.trimEnd()
+    if (subject.is(SubjectIt)) return `${text.slice(0, at)}${spelledOut} ${after}`
     if (!propertyText || !after.startsWith(propertyText)) return undefined
-    return `${text.slice(0, at)}${LONG_FORM.property(propertyText, typeWords)}${after.slice(propertyText.length)}`
+    return `${text.slice(0, at)}${propertyOf(propertyText)}${after.slice(propertyText.length)}`
   }
 
   /**
-   * `text`, a line which left its subject out, with it put back -- see `getLongForm()`:
-   * - starting with its `property`:  `"color" is red if ...` => `the "color" of a card is red if ...`
-   * - else:  `has a deck` => `a card has a deck`
+   * The params a long form's message names its subject with, if `match`'s subject is its outline body's type --
+   * see `getLongForm()`:
+   * - `type`:  the type's words as written, `card`
+   * - `aType`:  with the article it takes in the scope's language, `a card`, `una carta`
    */
-  private static longFormWithoutSubject(text: string, typeWords: string, property: P.Match | undefined): string {
-    const propertyText = property?.inputText.trimEnd()
-    if (propertyText && text.startsWith(propertyText)) {
-      return `${LONG_FORM.property(propertyText, typeWords)}${text.slice(propertyText.length)}`
-    }
-    return `${LONG_FORM.subject(typeWords)} ${text}`
+  static longFormParams(match: P.Match): { type: string; aType: string } | undefined {
+    const typeWords = SpellStatement.subjectWords(match)
+    if (!typeWords) return undefined
+    const subjectType = P.SubjectScope.of(match.scope)?.subjectType
+    return { type: typeWords, aType: SP.Language.of(match.scope).withArticle("indefinite", typeWords, subjectType) }
   }
 
   /**
@@ -409,18 +438,6 @@ export class SpellStatement<
     if (optional || matchGroup) return `(${matchGroup}${rules})${optional}`
     return `${rules}${optional}`
   }
-}
-
-/**
- * How a long form spells out an outline line's subject (`SpellStatement.getLongForm()`), in English.
- * - REFACTOR: moves into the language pack (epic `spanish`), so a Spanish line reads as `un naipe tiene ...`.
- *   Every `getLongForm()` override writes English too, e.g. `belongs_to_one`'s `belongs to one`.
- */
-const LONG_FORM = {
-  /** The body's `it`, spelled out:  `a card` */
-  subject: (typeWords: string) => `a ${typeWords}`,
-  /** The body's `its <property>`, spelled out:  `the "color" of a card` */
-  property: (property: string, typeWords: string) => `the ${property} of a ${typeWords}`
 }
 
 /**

@@ -209,6 +209,9 @@ export function unitTestModuleRules(parser: P.Parser, moduleName: string, initia
  *   `tests/spell/rules/events/events.test.ts` tests `src/spell/rules/events/`.
  * - The package's root:  the nearest folder above the test holding a `package.json`.
  * - A module in a folder of its own, `rules/events/events.test.ts`:  every source file in that folder.
+ *   - Another language's, `rules/es/events/events.test.ts`:  the same folder, `rules/events/`.
+ *   - Only the test's own language's registrations, `events.es.ts`, never another's:  two languages' tests can
+ *     share an input and its output, e.g. `<div>{unknown expression}</div>`.
  * - Else the file of its name, `rules/Block.test.ts` => `rules/Block.ts`.
  * - Returns what it couldn't bless:  see `P.RuleTestSource.bless()`.
  */
@@ -219,12 +222,21 @@ async function blessSources(testPath: string, blessed: BlessedTest[]): Promise<s
   // the package's root holds `package.json`, `tests/` and `src/`
   let root = dirname(testPath)
   while (!existsSync(join(root, "package.json")) && dirname(root) !== root) root = dirname(root)
-  const folder = join(root, "src", relative(join(root, "tests"), dirname(testPath)))
   const name = basename(testPath, ".test.ts")
+  let folder = join(root, "src", relative(join(root, "tests"), dirname(testPath)))
+  // another language's tests, `rules/es/events/events.test.ts`:  its module's folder, `rules/events/`
+  let lang = "en"
+  if (!existsSync(folder) && /^[a-z]{2}$/.test(basename(dirname(folder)))) {
+    lang = basename(dirname(folder))
+    folder = join(dirname(dirname(folder)), name)
+  }
+  // only this language's registrations:  `events.es.ts`'s tests may share an input and output with `events.en.ts`'s
+  const isOtherLanguage = (path: string) =>
+    /\.([a-z]{2})\.ts$/.exec(path)?.[1] !== undefined && !path.endsWith(`.${lang}.ts`)
   const paths =
     basename(folder) === name
       ? (readdirSync(folder, { recursive: true }) as string[])
-          .filter((path) => path.endsWith(".ts") && !path.endsWith(".test.ts"))
+          .filter((path) => path.endsWith(".ts") && !path.endsWith(".test.ts") && !isOtherLanguage(path))
           .map((path) => join(folder, path))
       : [join(folder, `${name}.ts`)]
   const sources = paths.map((path) => RuleTestSource.load(path))

@@ -82,8 +82,14 @@ ifEs.addRule(ElseIf, {
         {
           title: "Show error if nested block AND inline statement. Prefer block.",
           input: ["si no si x b = 1", "\tc = 2"],
-          js: ["else if (x) { const c = 2 }", "/* PARSE ERROR: Got both inline statement and nested block */"],
-          ts: ["else if (x) { const c: number = 2 }", "/* PARSE ERROR: Got both inline statement and nested block */"]
+          js: [
+            "else if (x) { const c = 2 }",
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
+          ],
+          ts: [
+            "else if (x) { const c: number = 2 }",
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
+          ]
         }
       ]
     }
@@ -136,8 +142,14 @@ ifEs.addRule(Else, {
         {
           title: "Show error if nested block AND inline statement. Prefer block.",
           input: ["si no b = 1", "\tc = 2"],
-          js: ["else { const c = 2 }", "/* PARSE ERROR: Got both inline statement and nested block */"],
-          ts: ["else { const c: number = 2 }", "/* PARSE ERROR: Got both inline statement and nested block */"]
+          js: [
+            "else { const c = 2 }",
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
+          ],
+          ts: [
+            "else { const c: number = 2 }",
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
+          ]
         }
       ]
     }
@@ -217,8 +229,14 @@ ifEs.addRule(If, {
         {
           title: "Show error if nested block AND inline statement. Prefer block.",
           input: ["si x b = 1", "\tc = 2"],
-          js: ["if (x) { const c = 2 }", "/* PARSE ERROR: Got both inline statement and nested block */"],
-          ts: ["if (x) { const c: number = 2 }", "/* PARSE ERROR: Got both inline statement and nested block */"]
+          js: [
+            "if (x) { const c = 2 }",
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
+          ],
+          ts: [
+            "if (x) { const c: number = 2 }",
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
+          ]
         }
       ]
     }
@@ -279,7 +297,7 @@ ifEs.addRule(ValueIf, {
       tests: [
         [
           `red si suit es "hearts"`,
-          '/* PARSE ERROR: A line of a getter\'s body:  put it under one, e.g. "the color of a card is:" */'
+          '/* PARSE ERROR: Una línea del cuerpo de una propiedad calculada:  ponla debajo de una, p. ej. "el color de una carta es:" */'
         ]
       ]
     }

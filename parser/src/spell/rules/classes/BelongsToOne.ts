@@ -33,8 +33,13 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
   @proto static declares: P.DeclaresSpec = { kind: "property", name: "list", of: "type" }
 
   /** `it belongs to a pile` => `a card belongs to one pile` -- see `SpellStatement.getLongForm()`. */
-  getLongForm(match: P.Match): string | undefined {
-    return super.getLongForm(match)?.replace(/ belongs to (a|an) /i, " belongs to one ")
+  getLongForm(match: P.MatchFor<this>): string | undefined {
+    const params = SpellStatement.longFormParams(match)
+    if (!params || super.getLongForm(match) === undefined) return undefined
+    const language = SP.Language.of(match.scope)
+    const list = `${match.groups.list.raw}`
+    const aList = language.withArticle("indefinite", list, BelongsToOne.typeOf(match.groups.list))
+    return language.parserMessage("long-form-belongs-to-one", { ...params, list, aList })
   }
 
   /** Refused unless both types are declared above, and `list` is a list type of the project's -- see class docs. */
@@ -42,22 +47,34 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const { type, list } = match.groups
+    const language = SP.Language.of(scope)
     const sentence = `"${match.inputText.trim()}"`
+    const typeWords = `${type.raw}`
+    const listWords = `${list.raw}`
+    const aType = language.withArticle("indefinite", typeWords, BelongsToOne.typeOf(type))
+    const aList = language.withArticle("indefinite", listWords, BelongsToOne.typeOf(list))
+    const listExample = language.parserMessage("example-list-type", {
+      list: listWords,
+      aList,
+      items: P.pluralize(typeWords)
+    })
     for (const [word, example] of [
-      [type, `a ${type.raw} is a thing`],
-      [list, `a ${list.raw} is a list of ${P.pluralize(`${type.raw}`)}`]
+      [type, SpellStatement.exampleTypeDeclaration(scope, typeWords)],
+      [list, listExample]
     ] as const) {
       const declared = BelongsToOne.typeOf(word)
       if (!declared || declared.stub) {
-        return SpellStatement.refuse(match, `Can't say ${sentence} yet:  declare "${example}" above it`)
+        return SpellStatement.refuse(match, language.parserMessage("belongs-to-undeclared", { sentence, example }))
       }
     }
     const listType = BelongsToOne.typeOf(list)!
     if (SP.isBuiltInTypeScope(listType)) {
-      return SpellStatement.refuse(match, `Can't say ${sentence}:  every list would hold a ${type.raw} once`)
+      const message = language.parserMessage("belongs-to-built-in-list", { sentence, type: typeWords, aType })
+      return SpellStatement.refuse(match, message)
     }
     if (!listType.isA("list")) {
-      return SpellStatement.refuse(match, `Can't say ${sentence}:  a ${list.raw} isn't a list`)
+      const message = language.parserMessage("belongs-to-not-a-list", { sentence, list: listWords, aList })
+      return SpellStatement.refuse(match, message)
     }
     return match
   }

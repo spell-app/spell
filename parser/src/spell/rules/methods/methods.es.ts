@@ -90,7 +90,7 @@ methodsEs.addRule(ToDoSomething, {
         {
           title: "keyword-only signature - `eso` (it) is not defined",
           input: "para empezar el juego: imprimir eso",
-          js: ["export function empezarElJuego() {}", '/* PARSE ERROR: Don\'t understand "imprimir eso" */']
+          js: ["export function empezarElJuego() {}", '/* PARSE ERROR: No entiendo "imprimir eso" */']
         },
         {
           title: "paren-free type arg in signature:  a known type is a parameter",
@@ -269,10 +269,10 @@ methodsEs.addRule(ToDoSomething, {
         {
           title: "simple arg in signature - `eso` (it) is not defined",
           input: "para avisar (message): imprimir eso",
-          js: ["export function avisarMessage(message) {}", '/* PARSE ERROR: Don\'t understand "imprimir eso" */'],
+          js: ["export function avisarMessage(message) {}", '/* PARSE ERROR: No entiendo "imprimir eso" */'],
           ts: [
             "export function avisarMessage(message: any /* spell: type unknown */) {}",
-            '/* PARSE ERROR: Don\'t understand "imprimir eso" */'
+            '/* PARSE ERROR: No entiendo "imprimir eso" */'
           ]
         },
         {
@@ -359,7 +359,7 @@ methodsEs.addRule(ToDoSomething, {
             "  return core.console.log(1)",
             "}",
             "(new Joker()).mostrarEnPile(new Pile())",
-            '/* PARSE ERROR: Don\'t understand "mostrar una nueva card en una nueva card" */'
+            '/* PARSE ERROR: No entiendo "mostrar una nueva card en una nueva card" */'
           ],
           ts: [
             "export class Joker extends Card {}",
@@ -368,7 +368,7 @@ methodsEs.addRule(ToDoSomething, {
             "  return core.console.log(1)",
             "}",
             "(new Joker()).mostrarEnPile(new Pile())",
-            '/* PARSE ERROR: Don\'t understand "mostrar una nueva card en una nueva card" */'
+            '/* PARSE ERROR: No entiendo "mostrar una nueva card en una nueva card" */'
           ]
         },
         {
@@ -450,7 +450,7 @@ methodsEs.addRule(ToDoSomething, {
         {
           title: "signature with no keywords is not matched",
           input: "para (foo)",
-          js: '/* PARSE ERROR: Don\'t understand "para (foo)" */'
+          js: '/* PARSE ERROR: No entiendo "para (foo)" */'
         },
         {
           title: "with arg is optional when calling",
@@ -712,17 +712,17 @@ methodsEs.addRule(QuotedTypeExpression, {
         {
           title: "signature is empty",
           input: `una cosa "" si`,
-          js: `/* PARSE ERROR: Don't understand "una cosa "" si" */`
+          js: '/* PARSE ERROR: No entiendo "una cosa "" si" */'
         },
         {
           title: "signature doesn't start with a keyword",
           input: `una cosa "(thing)" si`,
-          js: `/* PARSE ERROR: Don't understand "una cosa "(thing)" si" */`
+          js: '/* PARSE ERROR: No entiendo "una cosa "(thing)" si" */'
         },
         {
           title: "more than one arg specified",
           input: `una cosa "(thing) pero (thing)" si`,
-          js: `/* PARSE ERROR: Don't understand "una cosa "(thing) pero (thing)" si" */`
+          js: '/* PARSE ERROR: No entiendo "una cosa "(thing) pero (thing)" si" */'
         }
       ]
     },

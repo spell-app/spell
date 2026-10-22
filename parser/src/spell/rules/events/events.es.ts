@@ -79,11 +79,11 @@ eventsEs.addRule(On, {
             "  const { card } = event",
             "  core.console.log(card.name)",
             "})",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
           ],
           ts: [
             'on<{ card: Card }>("card-click", ({ card }) => core.console.log(card.name))',
-            "/* PARSE ERROR: Got both inline statement and nested block */"
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
           ]
         }
       ]

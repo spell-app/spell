@@ -26,8 +26,8 @@ export class VarMethodArg extends SpellIdentifier<MethodArgData> {
     data.syntax = "{callArgs:expression}"
     data.arg = new P.ASTVariableExpression(match, { name: match.value, type: "argument" })
     const words = match.raw ?? `${match.value}`
-    const example = `(${words} as ${SP.SpellWarnings.exampleType(scope, words)})`
-    SP.SpellWarnings.note(match, `Say what "${words}" is, e.g. "${example}"`)
+    const type = SP.SpellWarnings.exampleType(scope, words)
+    SP.SpellWarnings.note(match, SP.Language.of(scope).parserMessage("untyped-parameter", { name: words, type }))
     return match
   }
 }

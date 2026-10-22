@@ -116,7 +116,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
 
       // add anything unparsed at the end as a parse error -- saying why, for an outline line out of its body
       if (unparsed.length && !statement && BlockLine.isOutlineLineOutsideBody(scope, unparsed)) {
-        const error = SP.spellParser.createParseError(scope, unparsed, OUTSIDE_BODY_MESSAGE)
+        const message = SP.Language.of(scope).parserMessage("outline-line-outside")
+        const error = SP.spellParser.createParseError(scope, unparsed, message)
         errors.push(error)
         matched.push(error)
       } else if (unparsed.length) {
@@ -152,7 +153,7 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
           const error = SP.spellParser.createParseError(
             scope,
             [line, nextItem].filter((item): item is P.Token => item !== undefined),
-            "Got both inline statement and nested block"
+            SP.Language.of(scope).parserMessage("inline-and-nested-body")
           )
           errors.push(error)
           matched.push(error)
@@ -265,7 +266,3 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     })
   }
 }
-
-/** What an outline line out of its type's body says -- see `BlockLine.isOutlineLineOutsideBody()`. */
-const OUTSIDE_BODY_MESSAGE =
-  '"it" and "its" mean a type only in its outline, indented under e.g. "a card is a thing where:"'

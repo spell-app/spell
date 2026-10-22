@@ -271,11 +271,11 @@ describe("names with grammar words", () => {
           // una persona tiene una fecha
           get fecha() { return this.getProp("fecha") }
           set fecha(value) { this.setProp("fecha", value) }
-          /* PARSE ERROR: Don't understand "de nacimiento como texto" */
+          /* PARSE ERROR: No entiendo "de nacimiento como texto" */
         }
         export const p = new Persona()
         core.console.log(p.nacimiento.fecha)
-        ERROR 2:28 Don't understand "de nacimiento como texto""
+        ERROR 2:28 No entiendo "de nacimiento como texto""
       `)
     })
   })

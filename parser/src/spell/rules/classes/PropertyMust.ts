@@ -32,8 +32,12 @@ export class PropertyMust extends SpellStatement<"type|property|rule"> {
     const typeScope = P.TypeScope.getOrStub(match.scope, `${type.value}`, match)
     const name = `${property.value}`
     if (typeScope.addPropertyRules(name, [MustRule.ruleOf(rule as P.MatchFor<MustRule>)], match)) return
-    const words = property.raw ?? name
-    SP.SpellWarnings.note(match, `Declare "${words}" above its rule, e.g. "- it has a ${words} as text"`)
+    const words = `${property.raw ?? name}`
+    const aName = SP.Language.of(match.scope).withArticle("indefinite", words)
+    SP.SpellWarnings.note(
+      match,
+      SP.Language.of(match.scope).parserMessage("rule-before-property", { name: words, aName })
+    )
   }
 
   getAST(match: P.MatchFor<this>): P.ASTPropertyRules {

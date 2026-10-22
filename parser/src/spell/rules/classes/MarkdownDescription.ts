@@ -1,5 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { MARKDOWN_TAG, rawTextOf } from "spell-lang/spell/rules/JSX/JSX.shared"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
@@ -38,10 +39,7 @@ export class MarkdownDescription extends P.TokenType<never, MarkdownDescriptionD
     if (!match) return undefined
     const type = scope instanceof P.SubjectScope ? scope.subjectType : undefined
     if (!type) {
-      return SpellStatement.refuse(
-        match,
-        "A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown>"
-      )
+      return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("markdown-outside-outline"))
     }
     match.data.typeName = type.name
     match.data.markdown = rawTextOf(element)

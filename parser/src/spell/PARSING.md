@@ -644,6 +644,13 @@ A kind that says so is saved in a file of its own.
   - `parse_error` matches roll up into `match.data.errors`, on line and block matches.
     See `Block.getParseErrors()`.
   - They compile to `/* PARSE ERROR: ... */`.
+- Every message for the person writing a program is in the program's language (epic `spanish` P17):
+  a warning, a refusal, a parse error, a long form.
+  - A key in the language pack's `parserMessages` ([English's](languages/en/parserMessages.ts),
+    [Spanish's](languages/es/parserMessages.ts)), read with `SP.Language.of(scope).parserMessage(key, params)`.
+  - Its examples are the language's spell:  `poner X a una nueva lista de texto`.
+  - A key a pack lacks reads English;  `spell lang packs check` reports it.
+  - Rule code never writes a sentence of its own:  `noEnglishInRules.test.ts` checks.
 - Refused statements:  a `parse()` which understood a statement, but mustn't take it.
   - It returns `SpellStatement.refuse(match, message)`.
   - NOT `undefined`, which would say only "Don't understand ...".
@@ -691,6 +698,7 @@ A kind that says so is saved in a file of its own.
       - An article is a form of the language's `indefinite_article` / `definite_article` word rule:
         `Synonyms.matchAt()`, `Synonyms.formOf()`.
       - Its noun:  the words after it, up to a structural word.
+      - Its wording is the pack's `did-you-mean` message.
       - What agrees is the language pack's, `SP.Language.agreement(article, noun, type)`:
         each pack's own, [English's](languages/en/agreement.ts) and [Spanish's](languages/es/agreement.ts).
         - English:  `a` / `an` by the noun's first sound;  needs no type.

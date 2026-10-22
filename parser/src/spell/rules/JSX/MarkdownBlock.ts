@@ -51,11 +51,8 @@ export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
       if (typeof part === "string") return part
       const hole = parseFillIn(scope, part.hole)
       if (hole) return hole
-      const error = SP.spellParser.createParseError(
-        scope,
-        [element],
-        `Don't understand "{${part.hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace`
-      )
+      const message = SP.Language.of(scope).parserMessage("markdown-hole", { hole: part.hole })
+      const error = SP.spellParser.createParseError(scope, [element], message)
       errors.push(error)
       return error
     })

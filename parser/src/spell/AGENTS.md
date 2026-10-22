@@ -426,6 +426,9 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
 - A `parse()` which understood a statement but mustn't take it REFUSES it, NOT returns `undefined`.
   - `return SpellStatement.refuse(match, "why")`:  the line's error then says why.
   - e.g. a property declared on a built-in type
+  - "why" is a key in the language pack's `parserMessages`, never a sentence written in the rule:
+    `SP.Language.of(scope).parserMessage("cant-save-built-in-inline", { type })`.
+    The same for a warning (`SP.SpellWarnings.note()`) and a parse error ("Warnings" in `PARSING.md`).
 - A rule built WHILE PARSING goes through `scope.addRule(RuleClass, definition, match)`.
   - Never `parser.addRule()` directly.
   - So the scope records the class + definition pair, and can hand on the rules it created.

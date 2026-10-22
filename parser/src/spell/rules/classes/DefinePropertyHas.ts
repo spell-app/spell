@@ -102,13 +102,15 @@ export class DefinePropertyHas extends SpellStatement<
     const { property, specifier } = match.groups
     const words = property.raw ?? `${property.value}`
     const said = match.inputText.trim()
+    const language = SP.Language.of(match.scope)
     if (!specifier) {
-      const example = `${said} as ${SP.SpellWarnings.exampleType(match.scope, words)}`
-      SP.SpellWarnings.note(match, `Say what "${words}" is, e.g. "${example}"`)
+      const type = SP.SpellWarnings.exampleType(match.scope, words)
+      SP.SpellWarnings.note(match, language.parserMessage("untyped-property", { name: words, line: said, type }))
     } else if (specifier.datatype === "list") {
       const items = SP.SpellWarnings.exampleItemType(match.scope, words)
-      const example = `${said.slice(0, said.length - specifier.inputText.trim().length)}as a new list of ${items}`
-      SP.SpellWarnings.note(match, `Say what "${words}" holds, e.g. "${example}"`)
+      // the line up to its specifier:  `a todos-app has tasks`
+      const line = said.slice(0, said.length - specifier.inputText.trim().length).trimEnd()
+      SP.SpellWarnings.note(match, language.parserMessage("untyped-list-property", { name: words, line, items }))
     }
   }
 
@@ -193,23 +195,26 @@ export class DefinePropertyHas extends SpellStatement<
    * - the same with the subject left out (epic page `outline-spell`, P8):  `"rank" is a number`
    */
   getLongForm(match: P.Match): string | undefined {
-    const typeWords = SpellStatement.subjectWords(match)
+    const params = SpellStatement.longFormParams(match)
     const { type, property, specifier } = match.groups as { type: P.Match; property: P.Match; specifier?: P.Match }
     // `its "rank" is ...`, or `"rank" is ...`:  NOT `it has ...` / `has ...`, which say it as the sentence style does
     const isItsForm = type.is(SubjectIts) || (!type.length && property.start === match.start)
-    if (!typeWords || !isItsForm) return super.getLongForm(match)
+    if (!params || !isItsForm) return super.getLongForm(match)
+    const language = SP.Language.of(match.scope)
+    const propertyWords = `${property.raw}`
+    const has = { ...params, property: propertyWords, aProperty: language.withArticle("indefinite", propertyWords) }
     const said = specifier?.inputText.trim()
+    if (!said) return language.parserMessage("long-form-has", has)
     // an enumeration with no `either` / `one of`:  no words before its list
-    const isBareList =
-      specifier?.is(OutlineSpecifierEnum) && (specifier.groups.enumeration as P.Match).start === specifier.start
-    const as = !said
-      ? ""
-      : isBareList
-        ? ` as one of ${said}`
-        : specifier!.is(OutlineSpecifierList)
-          ? ` as ${said.replace(/^a (?!new\b)/i, "a new ")}`
-          : ` as ${said}`
-    return `a ${typeWords} has a ${property.raw}${as}`
+    if (specifier!.is(OutlineSpecifierEnum) && (specifier.groups.enumeration as P.Match).start === specifier.start) {
+      return language.parserMessage("long-form-has-one-of", { ...has, values: said })
+    }
+    // `a list of people`, which a sentence says `as a new list of people`
+    if (specifier!.is(OutlineSpecifierList)) {
+      const items = `${(specifier.groups.instanceType as P.Match).raw}`
+      return language.parserMessage("long-form-has-list", { ...has, items })
+    }
+    return language.parserMessage("long-form-has-as", { ...has, specifier: said })
   }
 
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {

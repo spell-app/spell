@@ -47,11 +47,30 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     const read = match && MemberReadExpression.memberRead(match.groups.thing)
     const member = read?.member
     if (!match || !read || !(member instanceof P.ScopeVariable) || !(member.readAs || member.exclusive)) return match
-    const type = read.type ? ` of a ${SP.typeName(read.type.name)}` : ""
-    const why = member.exclusive
-      ? `it's the ${member.datatype} holding it -- move it to a ${member.datatype} instead`
-      : "spell works it out"
-    return SpellStatement.refuse(match, `Can't set the ${read.property.raw}${type}:  ${why}`)
+    const language = SP.Language.of(scope)
+    const property = `${read.property.raw}`
+    const theProperty = language.withArticle("definite", property)
+    const what = read.type
+      ? language.parserMessage("the-property-of-a-type", {
+          property,
+          theProperty,
+          type: SP.typeName(read.type.name),
+          aType: SP.SpellWarnings.exampleNoun(scope, read.type)
+        })
+      : language.parserMessage("the-property", { property, theProperty })
+    if (!member.exclusive) return SpellStatement.refuse(match, language.parserMessage("cant-set-worked-out", { what }))
+    const holder = `${member.datatype}`
+    const holderType = scope.getType(holder)
+    const holderWords = language.wordFor(holder)
+    return SpellStatement.refuse(
+      match,
+      language.parserMessage("cant-set-belongs-to", {
+        what,
+        holder,
+        theHolder: language.withArticle("definite", holderWords, holderType),
+        aHolder: language.withArticle("indefinite", holderWords, holderType)
+      })
+    )
   }
 
   /**
@@ -115,8 +134,9 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
    */
   private static warnListOfNothing(match: P.MatchFor<AssignmentStatement>, identifier: P.Match): void {
     const words = identifier.raw ?? `${identifier.value}`
-    const example = `set ${words} to a new list of ${SP.SpellWarnings.exampleItemType(match.scope, words)}`
-    SP.SpellWarnings.note(match, `Say what "${words}" holds, e.g. "${example}"`, match.groups.value)
+    const items = SP.SpellWarnings.exampleItemType(match.scope, words)
+    const message = SP.Language.of(match.scope).parserMessage("untyped-list-variable", { name: words, items })
+    SP.SpellWarnings.note(match, message, match.groups.value)
   }
 
   /**
@@ -153,11 +173,15 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     }
     // what it holds, when `V` doesn't say:  ask for its declaration (epic `output-targets`, Q24)
     if (!datatype) {
-      const words = property.raw ?? name
-      const typeWords = type.name.toLowerCase().replace(/_/g, "-")
-      const has = `${/^[aeiou]/i.test(typeWords) ? "an" : "a"} ${typeWords} has a ${words}`
-      const example = `${has} as ${SP.SpellWarnings.exampleType(match.scope, words)}`
-      SP.SpellWarnings.note(match, `Say what "${words}" is:  declare it, e.g. "${example}"`, thing)
+      const words = `${property.raw ?? name}`
+      const language = SP.Language.of(match.scope)
+      const message = language.parserMessage("untyped-set-property", {
+        name: words,
+        aName: language.withArticle("indefinite", words),
+        aType: SP.SpellWarnings.exampleNoun(match.scope, type),
+        type: SP.SpellWarnings.exampleType(match.scope, words)
+      })
+      SP.SpellWarnings.note(match, message, thing)
     }
   }
 

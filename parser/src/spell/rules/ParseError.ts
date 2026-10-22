@@ -1,4 +1,5 @@
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 
 /**
  * Fallback rule matched (via `scope.parser.parse(tokens, "parse_error", scope)`) over tokens that no other
@@ -23,10 +24,13 @@ export class ParseError extends P.Rule {
     return match.AST?.compile()
   }
 
-  /** Build the `P.ASTParseError` node, using `match.message` if set, else a generic "don't understand" message. */
+  /**
+   * Build the `P.ASTParseError` node, using `match.message` if set,
+   * else a generic "don't understand" message, in the scope's language:  `No entiendo "..."`.
+   */
   getAST(match: P.MatchFor<this>): P.ASTParseError {
     return new P.ASTParseError(match, {
-      value: match.message || `Don't understand "${match.inputText}"`
+      value: match.message || SP.Language.of(match.scope).parserMessage("dont-understand", { text: match.inputText })
     })
   }
 }

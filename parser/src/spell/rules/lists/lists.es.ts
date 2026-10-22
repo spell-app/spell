@@ -907,7 +907,7 @@ listsEs.addRule(RepeatNTimes.specialize({ counterName: "número" }), {
           input: ["repetir 3 veces: imprimir 1", "\timprimir el número"],
           js: [
             "core.map(core.countTo(3), (número) => core.console.log(número))",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
           ]
         }
       ]

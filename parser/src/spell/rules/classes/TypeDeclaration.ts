@@ -58,24 +58,27 @@ export class TypeDeclaration<
    */
   refuseTakenNames(match: P.Match): P.Match {
     const { groups, scope } = TypeDeclaration.named(match)
+    const language = SP.Language.of(scope)
     const name = P.classCase(`${groups.type.value}`)
     const named = scope.types?.get(name)
     if (named && SpellType.isShortName(named, name)) {
-      return SpellStatement.refuse(match, `"${groups.type.raw}" is already the short name of ${wordsOf(named.name)}`)
+      const message = language.parserMessage("already-a-short-name", {
+        name: `${groups.type.raw}`,
+        type: wordsOf(named.name)
+      })
+      return SpellStatement.refuse(match, message)
     }
     const { aka } = groups
     const akaNamed = aka && scope.types?.get(`${aka.value}`)
     if (akaNamed && akaNamed.name !== name) {
-      return SpellStatement.refuse(match, `"${aka.raw}" already names a type:  ${wordsOf(akaNamed.name)}`)
+      const message = language.parserMessage("aka-names-a-type", { aka: `${aka.raw}`, type: wordsOf(akaNamed.name) })
+      return SpellStatement.refuse(match, message)
     }
     if (named && TypeDeclaration.isDeclaredElsewhere(named, match)) {
       // as the line says it, e.g. `an account`
       const words = `${match.tokens[0]!.value} ${`${groups.type.raw}`.replace(/^["']|["']$/g, "")}`.toLowerCase()
-      return SpellStatement.refuse(
-        match,
-        `There's ${words} already, ${TypeDeclaration.whereDeclared(named.declaredBy!, match)}:  ` +
-          `to add to it, write "${words}:"`
-      )
+      const where = TypeDeclaration.whereDeclared(named.declaredBy!, match)
+      return SpellStatement.refuse(match, language.parserMessage("type-declared-twice", { words, where }))
     }
     return match
   }
@@ -154,9 +157,13 @@ export class TypeDeclaration<
 
   /** Where `declaredBy` is, as seen from `match`:  `on line 3`, or `on line 3 of /Card.spell` in another file. */
   private static whereDeclared(declaredBy: P.Match, match: P.Match): string {
-    const line = `on line ${declaredBy.line! + 1}`
+    const language = SP.Language.of(match.scope)
+    const line = declaredBy.line! + 1
     const file = TypeDeclaration.fileOf(declaredBy.scope)
-    return file && file !== TypeDeclaration.fileOf(match.scope) ? `${line} of ${file.path}` : line
+    if (file && file !== TypeDeclaration.fileOf(match.scope)) {
+      return language.parserMessage("on-line-of-file", { line, file: file.path })
+    }
+    return language.parserMessage("on-line", { line })
   }
 
   /** The file `scope` is in, if any. */

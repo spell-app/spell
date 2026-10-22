@@ -90,12 +90,15 @@ export class MemberReadExpression<
    */
   static warnIfUndeclared(match: P.Match, ownerType: P.TypeScope | undefined, property: P.Match): void {
     if (!ownerType || !(ownerType.stub || ownerType.declaredBy)) return
-    // REFACTOR: the message and its `a` / `an` move into the language pack's messages (epic `spanish`)
-    const aWord = (words: string) => `${/^[aeiou]/i.test(words) ? "an" : "a"} ${words}`
-    const words = property.raw ?? `${property.value}`
-    const aType = aWord(ownerType.name.toLowerCase().replace(/_/g, "-"))
-    const declaration = `${aType} has ${aWord(words)} as ${SP.SpellWarnings.exampleType(match.scope, words)}`
-    const message = `${upperFirst(aType)} never says it has ${aWord(words)}:  declare it, e.g. "${declaration}"`
+    const language = SP.Language.of(match.scope)
+    const words = `${property.raw ?? property.value}`
+    const aType = SP.SpellWarnings.exampleNoun(match.scope, ownerType)
+    const message = language.parserMessage("undeclared-member", {
+      AType: upperFirst(aType),
+      aType,
+      aName: language.withArticle("indefinite", words),
+      type: SP.SpellWarnings.exampleType(match.scope, words)
+    })
     const stillHolds = () =>
       MemberReadExpression.knowsAllMembersOf(ownerType) && !ownerType.getMember(`${property.value}`)
     SP.SpellWarnings.noteIf(match, message, stillHolds, property)

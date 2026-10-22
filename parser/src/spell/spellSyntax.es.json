@@ -49,7 +49,7 @@
           "ruleNames": ["parse_error"],
           "internal": false,
           "file": "src/spell/rules/ParseError.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "Fallback rule matched (via `scope.parser.parse(tokens, \"parse_error\", scope)`) over tokens that no other rule could make sense of -- always \"succeeds\" so callers such as `BlockLine`/`Block`/`JSX` can keep an un-parseable chunk of input as an inline error node instead of aborting the whole parse.",
           "syntaxes": [],
           "aliases": []
@@ -3699,7 +3699,7 @@
           "ruleNames": ["css_block"],
           "internal": false,
           "file": "src/spell/rules/classes/CSSBlock.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "A drawable type's own styles, in its outline (epic `drawable-thing`, P4).",
           "syntaxes": [
             {
@@ -3724,7 +3724,7 @@
           "ruleNames": ["markdown_description"],
           "internal": false,
           "file": "src/spell/rules/classes/MarkdownDescription.ts",
-          "line": 28,
+          "line": 29,
           "purpose": "A type's description, as markdown, in its outline (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -3871,7 +3871,7 @@
           "ruleNames": ["version_step"],
           "internal": false,
           "file": "src/spell/rules/classes/VersionStep.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "How a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6).",
           "syntaxes": [
             {
@@ -4376,7 +4376,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 21,
+          "line": 26,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -4417,7 +4417,7 @@
           "ruleNames": ["quoted_property_formula"],
           "internal": false,
           "file": "src/spell/rules/classes/QuotedPropertyFormula.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "`a card \"is a (rank) of (suits)\" for its ranks and its suits`.",
           "syntaxes": [
             {
@@ -5888,7 +5888,7 @@
           "ruleNames": ["quoted_type_expression"],
           "internal": false,
           "file": "src/spell/rules/methods/QuotedTypeExpression.ts",
-          "line": 34,
+          "line": 35,
           "purpose": "Defines an ad-hoc expression on a type from a QUOTED signature, e.g. `a thing \"nerds out\" if`, `a thing \"is a bug\" if`, `a thing \"nerds out with (another as a thing)\" if`.",
           "syntaxes": [
             {

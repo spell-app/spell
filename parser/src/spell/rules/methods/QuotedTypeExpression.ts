@@ -2,6 +2,7 @@ import { isNode } from "browser-or-node"
 
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { Negatable, Wording } from "spell-lang/spell/rules/expressions"
 import { SubjectImplied, SubjectRule } from "spell-lang/spell/rules/types"
 import { Priority } from "spell-lang/spell/rules/rules.types"
@@ -61,11 +62,11 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
       if (QuotedTypeExpression.isPropertySlip(scope, tokens)) {
         const whole = match.clone({ matched: tokens, tokens: [...tokens] })
         const name = (tokens[1] as P.TextToken).innerText
-        return SpellStatement.refuse(whole, `A property starts "its":  write its "${name}" is ...`)
+        return SpellStatement.refuse(whole, SP.Language.of(scope).parserMessage("property-starts-its", { name }))
       }
       if (QuotedTypeExpression.isBodiless(match, tokens)) {
         const phrase = match.groups.signature.inputText.trim()
-        return SpellStatement.refuse(match, `${phrase} has no body:  write ${phrase} always, or ${phrase} if ...`)
+        return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("phrase-without-body", { phrase }))
       }
     }
     return match
