@@ -25,14 +25,16 @@ P11 is the rewrite this page came out of.
 
 `gh issue list` asks a server for rows in a database.
 This asked nobody.
+
 `epic` read one HTML file, the epic page, from a git repo beside the checkout.
 The page IS the record, and `epic` reads and writes it directly:  no database, no API, no server that has to be up.
 
 It's the same page you review in VS Code.
 When Claude runs `epic close readme#J16`, the item closes on your screen, with no reload.
 
-`epic` is the command line under spell-epic's skills:  `/epic`, `/isolate`, `/bg` and the rest run it for Claude,
-and you can type any of it yourself.
+`epic` is the command line under spell-epic's skills.
+They run it for Claude (`/epic`, `/isolate` and the rest), and you can type any of it yourself.
+
 It has 62 verbs, and 108 more inside its groups (`epic window` alone has fifteen);  this page has every one.
 You'll type about six.
 
@@ -76,7 +78,7 @@ which isn't always the code in front of you ([below](#one-copy-of-the-code-your-
 ## An address is a page and an id
 
 A verb takes an ADDRESS:  the epic's name, then `#` and the id of one thing on its page.
-It reads like a link because it nearly is one:  `seo#J3` is item J3 of `epics/seo/seo.plan.html`.
+It reads like a link because it nearly is one:  `seo#J3` is item J3 of the seo epic's page (its path:  the first line below).
 
 ```text
 seo                 the epic's page, epics/seo/seo.plan.html
@@ -91,7 +93,8 @@ guides/x.html#M3    a comment on a docs page, for epic comments (and a page note
 _The forms `epic --help` lists, as it prints them._
 
 - Ids are short so you can say them in chat:  "approve J3" means one thing on one page.
-- A phase also answers to `p3` or a bare `3`, and a new item's kind to its word:  `seo#judgement` is `seo#J`.
+- A phase also answers to `p3` or a bare `3`.
+- A new item's kind answers to its word too:  `seo#judgement` is `seo#J`.
 - The id goes after the `#`, never as a word of its own.
   Write it as a word and `epic` refuses, with the right spelling, and exits 2:
 
@@ -100,13 +103,14 @@ _The forms `epic --help` lists, as it prints them._
   # close:  epic close seo#J3  (the id goes after a #, not "seo J3")
   ```
 
-- A SHORT ADDRESS names an item through its saga, `SAGA:/<saga>/<epic>#<id>`:
-  you can type it in chat, and `epic pages open` and `epic pages link` take it.
+- A SHORT ADDRESS names an item through its saga, `SAGA:/<saga>/<epic>#<id>`.
+  You can type it in chat, and `epic pages open` and `epic pages link` take it.
 
 ## One copy of the code, your checkout's files
 
 There's one `epic` on your machine, the main checkout's, and every window and every repo runs it.
 What it works ON is wherever you are.
+
 Type `epic server start` in an epic's worktree, and main's code starts that worktree's page server;
 type `epic close seo#J3` anywhere, and it closes J3 on the one page every checkout shares.
 
@@ -120,14 +124,14 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
   the code that runs is main's, with its packages already installed.
   That's how `/isolate` can open a new worktree's window and move the session there first,
   and leave any install still to do to its first turn in the new window.
-- In a worktree whose spell-epic code is newer than `main`'s, though, the `epic` on your `PATH` still runs main's.
+- In a worktree whose spell-epic code is newer than main's, though, the `epic` on your `PATH` still runs main's.
   `epic --version` says which code ran;  the worktree's own [bin/epic](bin/epic) runs its own.
 - Every write takes the page's lock, so several background agents can answer items on one page at once.
 
 <details>
 <summary>Where the command's code is</summary>
 
-- [bin/epic](bin/epic):  the entry on your `PATH`;  it runs [src/cli/epicMain.ts](src/cli/epicMain.ts) through `tsx`.
+- [bin/epic](bin/epic):  the entry on your `PATH`;  it runs [epicMain.ts](src/cli/epicMain.ts) through `tsx`.
 - [src/cli/](src/cli/), the command itself:  [EpicProgram.ts](src/cli/EpicProgram.ts) holds every verb, its help
   and its group, and [epicGroups.ts](src/cli/epicGroups.ts) the verbs inside each group.
 - What the verbs run stays beside them:
@@ -135,11 +139,12 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
   - [src/server/](src/server/):  the epic server
   - [src/tool/](src/tool/):  the epic pages and their inbox
   - [src/tools/](src/tools/):  the docs pages, answer pages, comments, agents and airplane mode
-  - [src/window.mjs](src/window.mjs):  the windows
-- It never loads the kit's `spell` program either, and spell-epic adds no commands to `spell`:
-  its tools, the docs tools included (`epic pages <verb>`), are all `epic`'s.
-- `yarn epic` runs it too, in spell-epic's folder and in spell-app's;
-  spell-app adds `yarn ask` (`epic ask`) and `yarn window` (`epic window`).
+  - [window.mjs](src/window.mjs):  the windows
+- It never loads the kit's `spell` program either, and spell-epic adds no commands to it.
+  Its tools are all `epic`'s, the docs tools included (`epic pages <verb>`).
+- `yarn epic` runs it too, in spell-epic's folder and in spell-app's.
+  - spell-app adds `yarn ask` (`epic ask`)
+  - and `yarn window` (`epic window`)
 
 </details>
 
@@ -147,6 +152,7 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
 
 A Claude Code session that has ended its turn sits idle until something wakes it,
 and one thing that does is a command it started in the background finishing.
+
 So a review session runs `epic inbox wait` in the background and ends its turn.
 The `wait` blocks until you send something from the page, prints it and exits:  the exit is the doorbell.
 
@@ -236,7 +242,7 @@ _Find what you want to change:  the label on its arrow names the verbs that chan
 
 Each row is one verb, with the flags you'll reach for;  `epic <verb> --help` has the rest.
 The background agents get the page verbs in one block instead:
-the `/epic` skill pastes its cheat sheet ([skills/epic/SKILL.md](skills/epic/SKILL.md)) into every agent's prompt.
+the `/epic` skill pastes [its cheat sheet](skills/epic/SKILL.md) into every agent's prompt.
 
 ### Requests from other sessions
 
@@ -389,7 +395,9 @@ epic migrate --all --notify        # once it's on main
 
 - `--notify` migrates the idle epics, and prints a `TELL:` line for each running one, to pass to its session.
 - Alone, `migrate` runs every kind on every page.
-  - `<kind>` (`epic`, `guide`, `cheatsheet` ...):  one kind;  `--file <page>`:  one page;  `--step <name>`:  one step
+  - `<kind>`:  one kind (`epic`, `guide`, `cheatsheet` ...)
+  - `--file <page>`:  one page
+  - `--step <name>`:  one step
   - `--list` names the steps
 
 </details>
@@ -397,9 +405,12 @@ epic migrate --all --notify        # once it's on main
 ### Sagas
 
 A saga is an epic of epics:  the larger aim several epics serve.
-Its page, `sagas/<id>/<id>.saga.html`, is addressed `SAGA:/<id>`,
-and every page verb above works on it:  `epic add SAGA:/epics#T "Title"`.
-The sagas' order lives in `sagas/sagas.json5`, and each epic page names its own (`<epic-page saga="<id>">`).
+Its page is addressed `SAGA:/<id>`, and every page verb above works on it.
+
+- e.g. `epic add SAGA:/epics#T "Title"`
+- the page:  `<id>.saga.html`, in the content folder's `sagas/<id>/`
+- the sagas' order:  `sagas/sagas.json5`
+- each epic page names its own saga (`<epic-page saga="<id>">`)
 
 | Verb | What it does |
 | --- | --- |
@@ -415,6 +426,7 @@ The sagas' order lives in `sagas/sagas.json5`, and each epic page names its own 
 
 Each epic works in a worktree, a branch and a VS Code window of its own, so three can run at once without touching.
 These verbs find them, wake them, clean up after them and say where everything stands.
+
 Lost track?  `epic status`.
 
 | Verb | What it does |
@@ -457,6 +469,7 @@ Lost track?  `epic status`.
 The epic pages aren't in your repo.
 They live in the content folder, a git repo of its own beside the checkout, linked into every checkout:
 that's why `main` and each worktree edit ONE page.
+
 You'll rarely type these:  the turn-end hook runs `epic shared commit` after every turn.
 
 | Verb | What it does |
@@ -471,6 +484,7 @@ You'll rarely type these:  the turn-end hook runs `epic shared commit` after eve
 
 An epic's window is titled `⎇ <name>` and wears a look of its own,
 so you can tell three epics' windows apart at a glance.
+
 A session can move itself into a worktree's window, wake an epic's session, or show you a page in the side bar;
 [README-vscode.md](README-vscode.md) is the extension that carries it out.
 Without the extension, the window verbs exit 1, and say so.
@@ -539,6 +553,7 @@ Every key of the config file, and what `epic init` writes:  [README-adopting.md]
 Some questions need a picture, or more than Claude Code's question box holds (four options, four questions).
 So Claude writes a page you answer ON, shows it in your Review tab, and waits in the background for your Send:
 a details page for one question, a choice page for a table of names.
+
 The same group keeps the comments you leave on any docs page, the background agents at work, and airplane mode.
 
 | Verb | What it does |
@@ -570,9 +585,12 @@ The same group keeps the comments you leave on any docs page, the background age
 | `epic airplane inbox [--since <iso>]` | lists everything you left on the pages while flying, by place:  what `/airplane land` works through |
 
 The running agents are a list in a file, kept only while they run and never committed:
-`epics/<epic>/agents.json5`, beside the epic's page, or `.spell-agents.json5` at the checkout's root outside an epic.
-An agent's full name starts with the epic's name, else the worktree's, else `main`:
-`epic agents add aaa` in epic `skillz` makes `skillz-aaa`, and every `agents` verb takes either name.
+- in an epic:  `agents.json5`, beside the epic's page
+- outside one:  `.spell-agents.json5`, at the checkout's root
+
+An agent's full name starts with the epic's name, else the worktree's, else `main`.
+- in epic skillz, `epic agents add aaa` makes `skillz-aaa`
+- every `agents` verb takes either name
 
 ## Where it stops
 

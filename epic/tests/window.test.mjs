@@ -4,9 +4,10 @@
  * - Registry entries go in a temp folder (`SPELL_WINDOWS_DIR`), never `~/.spell/windows`.
  * - The "window" is a stand-in:  our own parent pid (an ancestor, like a session's extension host), a `sleep`
  *   child (alive, but not an ancestor), or a pid that has exited.
- * - The repo the windows are for is a temp one (`EPIC_CHECKOUT`, set before the script loads:  it reads the config
- *   once), with no `.epic/config.json5` settings of its own:  the defaults, spell-app's OLD layout (worktrees nested
- *   in `.claude/worktrees`, the main root in every window).
+ * - The repo the windows are for is a temp one, with no `.epic/config.json5` settings of its own.
+ *   - `EPIC_CHECKOUT`, set before the script loads:  it reads the config once
+ *   - so it has the defaults, spell-app's OLD layout:
+ *     worktrees nested in `.claude/worktrees`, the main root in every window
  *   - Never the checkout the tests run in:  its config moves worktrees beside the repo (spell-epic's since 2ad9973,
  *     spell-app's since epic `epic-eject` T18), and a session's `EPIC_CHECKOUT` picks whichever it's in.
  *   - The layout beside the repo has a test of its own (epic-eject P8), in a child process.
@@ -338,8 +339,8 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   )
   mkdirSync(join(top, "repo.epics"))
   mkdirSync(join(top, "repo.worktrees", "seo"), { recursive: true })
-  // an ongoing window file without the content folder (written while it was missing):  in the windows folder, the
-  // content folder's windows/
+  // an ongoing window file without the content folder (written while it was missing):
+  // in the windows folder, the content folder's windows/
   const ongoing = join(top, "repo.epics", "windows", "ongoing")
   mkdirSync(ongoing, { recursive: true })
   writeFileSync(
@@ -389,8 +390,8 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
 })
 
 test("a repo moved behind a compat link (I59):  `init` drops the content folder that's gone, adds the one found", () => {
-  // spell-epic moved to spell/, its content folder to spell/new.epics, links at the old names;  its config still
-  // names `../repo.epics`, which only the OLD spelling of the checkout finds
+  // spell-epic moved to spell/, its content folder to spell/new.epics, links at the old names;
+  // its config still names `../repo.epics`, which only the OLD spelling of the checkout finds
   const top = realpathSync(mkdtempSync(join(tmpdir(), "window-moved-")))
   const real = join(top, "spell", "repo")
   mkdirSync(join(real, ".git"), { recursive: true })

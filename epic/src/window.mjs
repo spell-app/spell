@@ -3,13 +3,14 @@
  * `epic window <command>`:  the VS Code windows Owen works in, one per package.
  *
  * ## Window files
- * - Where:  the windows folder (`windowsFolder` in the repo's `.epic/config.json5`;  epic `epic-eject` P13), by
- *   default the content folder's `windows/`, `../spell-app.epics/windows`:  each machine's own, git-ignored there.
+ * - Where:  the windows folder, by default the content folder's `windows/`, `../spell-app.epics/windows`:
+ *   each machine's own, git-ignored there.
+ *   - set by `windowsFolder` in the repo's `.epic/config.json5` (epic `epic-eject` P13)
  *   - Before P13 they were in spell-app, `workspaces/`, tracked and marked `skip-worktree`:
  *     `move` carries them over once (`moveWindowFiles()`), each folder path rewritten for the new place.
  *   - Their folder paths are relative to the FILE:  every writer computes them from the windows folder.
- * - `<windowsFolder>/<pkg>.code-workspace`:  open a package's window from it
- *   (`code <windowsFolder>/ui.code-workspace`).
+ * - `<windowsFolder>/<pkg>.code-workspace`:
+ *   open a package's window from it (`code <windowsFolder>/ui.code-workspace`).
  * - Its FIRST folder is the repo root, the whole branch;  then the shared content repo.
  *   - Why the root first:  the Claude Code panel lists only the sessions saved under a window's first folder,
  *     so every window lists every session.
@@ -20,9 +21,11 @@
  *   - generated files, icons and screenshots stay out of Quick Open and Find
  *     through the root's `.vscode/settings.json` (`search.exclude`)
  * - The folders and names come from the repo's `.epic/config.json5` (`EpicConfig`, `CONFIG`):
- *   the content repo (`contentFolder`), the worktrees' folder (`worktreesFolder`), the window files' folder
- *   (`windowsFolder`), the window names (`windows`).
- *   The names in this header are their defaults.
+ *   - the content repo (`contentFolder`)
+ *   - the worktrees' folder (`worktreesFolder`)
+ *   - the window files' folder (`windowsFolder`)
+ *   - the window names (`windows`)
+ *   - The names in this header are their defaults.
  * - A saved workspace can gain and lose folders (a worktree, while a session works in it) without restarting
  *   extensions;  a one-folder window can't, and its Claude panel restarts.
  *   - NEVER add one any more:  VS Code writes the folder into the window file, where it outlives the worktree
@@ -68,9 +71,9 @@
  *   - The resumed session goes back into its worktree by itself (Claude records `worktree-state` in the transcript),
  *     but ONLY one that entered with `EnterWorktree`, never one started in the worktree's folder
  *     (epic `epic-eject` I3).
- *     The new tab starts in the worktree's window, whose first folder is the worktree, so it's there anyway;  the
- *     session-start guard (`hooks/worktree-guard.mjs`) records a session started there, and sends one reopened
- *     elsewhere back.
+ *     The new tab starts in the worktree's window, whose first folder is the worktree, so it's there anyway;
+ *     the session-start guard (`hooks/worktree-guard.mjs`) records a session started there,
+ *     and sends one reopened elsewhere back.
  *   - Why wait for the turn to end:
  *     until then the old process is still writing the transcript, and the new tab would load it half-written.
  *   - The repo's `Stop` hook (`.claude/hooks/handoff.mjs`) starts `resume`, detached,
@@ -82,22 +85,24 @@
  * - Docs shown while the move is pending (`show`, `epic open`) wait for it, then show in the window the
  *   session moved to:  the window it's leaving is about to close its tab.
  * - Its file:  `<windowsFolder>/ongoing/<name>.code-workspace`, beside the package windows' files.
- * - A MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10:  `~/www/spell`, `"repos"` in its config):  the TOP's
- *   config throughout, from any child repo or worktree.  Folder 1 of every window is the main top checkout, its files
- *   hidden in an epic's window;  then `⎇ <name>`, the epic's worktree of the top (each child repo's inside it);  then
- *   the content folder.  `windows.worktreeOnly` in the top's config drops folder 1.
+ * - A MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10:  `~/www/spell`, `"repos"` in its config):
+ *   the TOP's config throughout, from any child repo or worktree.
+ *   - Folder 1 of every window:  the main top checkout, its files hidden in an epic's window.
+ *   - Then `⎇ <name>`, the epic's worktree of the top (each child repo's inside it).
+ *   - Then the content folder.
+ *   - `windows.worktreeOnly` in the top's config drops folder 1.
  * - A worktree BESIDE the repo (`worktreesFolder` outside it, or `windows.worktreeOnly`;  epic `epic-eject` P8):
  *   a worktree-only window, `⎇ <name>` then the content folder.
  *   - no main checkout, no `.spell-main` marker, no hiding
  *   - its Claude panel lists every session through the worktree's linked session folder (`linkSessionFolders`)
  * - The old layout, while worktrees nested in the checkout are left (`.claude/worktrees`):
- * - Folders:  the MAIN repo root first, as in every window, so its Claude panel lists every session;
- *   then the worktree's root, `⎇ <name>`.
- *   No package folder:  Owen (2026-10-03).
+ *   - Folders:  the MAIN repo root first, as in every window, so its Claude panel lists every session;
+ *     then the worktree's root, `⎇ <name>`.
+ *     No package folder:  Owen (2026-10-03).
  *   - the main root's files are hidden (`files.exclude` `*` beside its `.spell-main` marker):
  *     the worktree's folder has the same ones.
  *     The main root stays first for the Claude panel, and keeps its Source Control.
- *   - the package it's for (theme, `handoff --back`'s target) is kept in the file's own `spell.package`
+ * - The package it's for (theme, `handoff --back`'s target) is kept in the file's own `spell.package`.
  * - Its look (epic `windows-and-review` P5):
  *   `open <name> --color <look>` (`/epic <name> -<look>`), else the look of the window it's opened from;
  *   a window file from before (or a window without one):
@@ -129,8 +134,8 @@
  *
  * ## Commands
  * - `init`:  write the window file of every package that lacks one, and bring the others up to date:
- *   folders, `files.exclude` and the repo's own settings (a worktree's window:  `files.exclude` and the repo's
- *   settings);  themes and other settings are Owen's, kept
+ *   folders, `files.exclude` and the repo's own settings
+ *   (a worktree's window:  `files.exclude` and the repo's settings);  themes and other settings are Owen's, kept
  * - `move [--dry-run]`:  carry the window files from the old folder, `workspaces/` in the main checkout, to the
  *   windows folder, once (`moveWindowFiles()`);  never deletes the old ones
  * - `which`:  this session's window:  pid, workspace file, folders;  a warning when it was opened through a link (I38)
@@ -212,16 +217,17 @@ export function envCheckout(env = process.env) {
 }
 
 /**
- * The engine's own per-run settings, never handed to a VS Code window (`codeEnv()`):  the checkout the `epic`
- * command's tools work on, their `tsx` config, and yarn's starting folder.
+ * The engine's own per-run settings, never handed to a VS Code window (`codeEnv()`):
+ * the checkout the `epic` command's tools work on, their `tsx` config, and yarn's starting folder.
  */
 const ENGINE_ENV = ["EPIC_CHECKOUT", "TSX_TSCONFIG_PATH", "INIT_CWD"]
 
 /**
  * The environment for a `code` command:  this process's, without the engine's own settings (`ENGINE_ENV`).
  * - VS Code gives the window `code` opens the command's environment, so every Claude session in that window
- *   inherits it, and with `EPIC_CHECKOUT` its docs tools worked on the checkout that OPENED the window, long after
- *   it was gone (epic `epic-engine` P9)
+ *   inherits it
+ *   - with `EPIC_CHECKOUT`, its docs tools worked on the checkout that OPENED the window,
+ *     long after it was gone (epic `epic-engine` P9)
  */
 export function codeEnv(env = process.env) {
   return Object.fromEntries(Object.entries(env).filter(([key]) => !ENGINE_ENV.includes(key)))
@@ -538,13 +544,15 @@ export class Window {
    *     - its Claude panel lists every session through the worktree's linked session folder (`linkSessionFolders`)
    *     - a new tab's session starts IN the worktree:
    *       the session-start guard (`hooks/worktree-guard.mjs`) records it there, so a reopen finds its way back (I3)
-   *   - a multi-repo top's epic worktree (`~/www/spell.worktrees/<name>`, `windows.worktreeOnly` off):  `⎇ <name>`
-   *     first, then the main top checkout, then the content folder (epic `epic-engine` P12)
-   *     - the worktree first, so a new tab's session starts in it, never asked to `EnterWorktree` (which Claude Code
-   *       asks Owen about outside `.claude/worktrees/`:  r11);  the Claude panel still lists every session, through
-   *       the worktree's linked session folder (`linkSessionFolders`)
-   *     - the main top came first before P12 (J83):  a window written then keeps that order (`init` never reorders
-   *       an open window's folders:  a new first folder restarts its extensions, the Claude panel's sessions with them)
+   *   - a multi-repo top's epic worktree (`~/www/spell.worktrees/<name>`, `windows.worktreeOnly` off):
+   *     `⎇ <name>` first, then the main top checkout, then the content folder (epic `epic-engine` P12)
+   *     - the worktree first, so a new tab's session starts in it, never asked to `EnterWorktree`
+   *       (which Claude Code asks Owen about outside `.claude/worktrees/`:  r11)
+   *     - the Claude panel still lists every session, through the worktree's linked session folder
+   *       (`linkSessionFolders`)
+   *     - the main top came first before P12 (J83):  a window written then keeps that order
+   *       (`init` never reorders an open window's folders:
+   *       a new first folder restarts its extensions, the Claude panel's sessions with them)
    *   - the old layout, a worktree nested in the checkout:
    *     the main root first (for the Claude panel), then `⎇ <name>`, then the content folder;  entering it asks nothing
    *   - either way, the main root's files hidden (`filesExclude({ worktree: true })`):  the worktree has the same ones
@@ -724,9 +732,10 @@ export class Window {
    *     - its look:  `color`, else `pkg`'s window's theme, the title bar tinted `name`'s own colour;
    *       never the look of the window it's launched from, another epic's
    * - several of the epic's sessions running, or its one session in a terminal:  nothing done, `action` says why
-   * - a new session starts in the window's first folder, the worktree (`worktreeWorkspace()`):  the session-start
-   *   guard records it there, so a reopen comes back (epic `epic-eject` I3), with no `EnterWorktree` (epic `epic-engine`
-   *   P12);  in a window written before P12 it starts in the main root, and `/epic <name>` enters the worktree
+   * - a new session starts in the window's first folder, the worktree (`worktreeWorkspace()`):
+   *   the session-start guard records it there, so a reopen comes back (epic `epic-eject` I3),
+   *   with no `EnterWorktree` (epic `epic-engine` P12)
+   *   - in a window written before P12 it starts in the main root, and `/epic <name>` enters the worktree
    */
   static async launch(name, pkg, { color = null, prompt = null } = {}) {
     const file = Window.worktreeFile(name)
@@ -888,8 +897,8 @@ export class Window {
    * resolves to `{ window }` (the registry entry it showed in) or `{ later }` (the window file it will show in).
    * - `view`:  the side bar tab, `"docs"` ("Spell Docs", the default) or `"review"` ("Review");
    *   sent only when given, so an extension from before the tabs still shows the doc
-   * - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`);  sent only when given,
-   *   and an extension from before it shows the page without it
+   * - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`);
+   *   sent only when given, and an extension from before it shows the page without it
    * - a `handoff` pending for `sessionId`:  NOT here, where the session's tab is about to close,
    *   but in the window it moves to, once it has (`resume`)
    *   - the handoff keeps ONE doc, so the last asked for wins, whichever tab

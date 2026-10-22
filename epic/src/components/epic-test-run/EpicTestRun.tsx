@@ -18,10 +18,11 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicTestRun`
- * The component behind `<epic-test-run>`:  a TEST RUN (epic `epic-engine` P4;  Owen, 2026-10-19:  "a workflow
- * which will step me through what to do in each without depending on chat").
- * - Its tests:  the open tests of the `<epic-page>` around it (its shadow host's, or its own ancestor in a doc), in
- *   page order, the deferred ones (an earlier run's Not now) last (`TestRun.openIds()`)
+ * The component behind `<epic-test-run>`:  a TEST RUN (epic `epic-engine` P4).
+ * One card per test, answered one at a time.
+ * - Owen, 2026-10-19:  "a workflow which will step me through what to do in each without depending on chat"
+ * - Its tests:  the open tests of the `<epic-page>` around it (its shadow host's, or its own ancestor in a doc),
+ *   in page order, the deferred ones (an earlier run's Not now) last (`TestRun.openIds()`)
  *   - kept in that order for the visit (`order`):  a test Claude closes meanwhile keeps its place
  * - ONE card at a time, from the item's light DOM (`TestRun.fieldsOf()`, copies:  the doc is never touched):
  *   - its title and id;  a test a run failed before says so, a deferred one since when
@@ -31,24 +32,26 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - The four ANSWERS, one button group:  Passed (green), Failed (red), Skip (grey), Not now (yellow)
  *   - each a review mark, `{ action: "test", result, note?, shot? }`, through the page's one `ReviewClient`
  *   - the fill rule:  grey outline at rest, dashed in its colour once chosen, outlined once sent
- *   - Passed, Skip and Not now move on to the next test;  Failed opens the failure's screenshot area:  pasted (⌘V) or
- *     dropped, saved through `POST shot` and shown as a thumbnail
- * - A COMMENT on every card, under the answers (Owen, 2026-10-19:  "e.g. it did part of what you asked, I want to
- *   explain how"):  an `<epic-text-box>`, kept as he types -- in the test's answer once it has one (its `note`), else
- *   as the inbox's draft for it -- so it survives a reload, goes with whichever answer he picks, before or after
- *   typing, and stays when he changes the answer
+ *   - Passed, Skip and Not now move on to the next test
+ *   - Failed opens the failure's screenshot area:
+ *     a screenshot pasted (⌘V) or dropped, saved through `POST shot` and shown as a thumbnail
+ * - A COMMENT on every card, under the answers:  an `<epic-text-box>`, kept as he types
+ *   - Owen, 2026-10-19:  "e.g. it did part of what you asked, I want to explain how"
+ *   - kept in the test's answer once it has one (its `note`), else as the inbox's draft for it
+ *   - so it survives a reload, goes with whichever answer he picks, before or after typing,
+ *     and stays when he changes the answer
  *   - an answered test shows its answer, and takes another
- * - "4 of 9" and a thin bar of how many are answered;  Back and Next;  the keys P / F / S / N, ← →, Esc to leave
- *   (only drawn by the page:  an example written in a doc takes no keys)
- * - LEAVING SENDS (I52;  Owen, 2026-10-19:  "I pressed 'Done Testing' ... and you later said 'no test results have
- *   come in'"):  Done testing, Esc and the summary's Next epic hand the run's unsent answers to Claude (the page's
- *   Send), and the notice line says so ("3 results sent to Claude");  nothing answered:  it just leaves
+ * - "4 of 9" and a thin bar of how many are answered;  Back and Next
+ * - the keys P / F / S / N, ← →, Esc to leave (only drawn by the page:  an example written in a doc takes no keys)
+ * - LEAVING SENDS (I52):  Done testing, Esc and the summary's Next epic hand the run's unsent answers to Claude
+ *   (the page's Send), and the notice line says so ("3 results sent to Claude");  nothing answered:  it just leaves
+ *   - Owen, 2026-10-19:  "I pressed 'Done Testing' ... and you later said 'no test results have come in'"
  *   - the send fails (the page server gone, `file://`):  the notice says so, and they wait, Send blue
  *   - not per answer:  each send wakes a waiting session (`handedOver`), so a run of 17 would wake it 17 times
- * - Its place is the address's `#v3` (replaced, never pushed):  a reload resumes there;  without one, at the first
- *   test not answered
- * - Past the last, the SUMMARY:  the counts, Send results (the page's Send), and with `all` (`epic test --all`) the
- *   next epic with open tests (`GET /api/epics/tests`)
+ * - Its place is the address's `#v3` (replaced, never pushed):  a reload resumes there;
+ *   without one, at the first test not answered
+ * - Past the last, the SUMMARY:  the counts, Send results (the page's Send),
+ *   and with `all` (`epic test --all`) the next epic with open tests (`GET /api/epics/tests`)
  * - Not reviewed (`file://`, no token):  the answers are disabled, and say why
  * - SIDE EFFECT:  while connected, listens for keys and pastes on the document, and rewrites the address's hash
  ****************/
@@ -148,8 +151,8 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   })
 
   /**
-   * The tests Owen commented on, in the run's order:  each one's id, answer (none yet:  `undefined`) and comment
-   * (its answer's, else its draft).
+   * The tests Owen commented on, in the run's order:
+   * each one's id, answer (none yet:  `undefined`) and comment (its answer's, else its draft).
    */
   readonly commented = createMemo((): { id: string; result?: TestResult; note: string }[] => {
     void this.review.reviewing()
@@ -612,8 +615,8 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
    * An answer pressed (or its key):  marked at once, then saved.
    * - Passed, Skip, Not now:  on to the next test, a moment later (the press shows first)
    * - Failed:  the screenshot's area opens, the comment box focused;  pressed again, it keeps both
-   * - the comment goes with it, whichever it is (typed, saved in an earlier answer, or the draft);  a screenshot only
-   *   with Failed
+   * - the comment goes with it, whichever it is (typed, saved in an earlier answer, or the draft)
+   * - a screenshot only with Failed
    */
   @E.untracked
   private answer(result: TestResult) {
@@ -653,8 +656,9 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
 
   /**
    * The address says where the run is, `#v3` (none on the summary), replaced:  a reload resumes there.
-   * - again each time the docs runtime's scroll-follow writes its own (`spell-doc:place`):  its sections are hidden,
-   *   so it would take the hash off;  then said the same way, so VS Code's view keeps the run's place too
+   * - again each time the docs runtime's scroll-follow writes its own (`spell-doc:place`):
+   *   its sections are hidden, so it would take the hash off
+   *   - then said the same way, so VS Code's view keeps the run's place too
    */
   @E.untracked
   private readonly keepPlace = () => {
@@ -676,8 +680,8 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   }
 
   /**
-   * The summary's Next epic:  the run's unsent answers sent first (`sendAnswers()`), then on;  a send that failed
-   * stays here, the notice saying why.
+   * The summary's Next epic:  the run's unsent answers sent first (`sendAnswers()`), then on.
+   * - a send that failed stays here, the notice saying why
    */
   @E.untracked
   private onNextEpic(event: MouseEvent, href: string) {
@@ -771,8 +775,8 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   ////////////////
 
   /**
-   * The current test's comment as the inbox holds it:  its answer's, else its draft.  Followed (`onSavedComment()`),
-   * so a box drawn before the inbox was read (a reload) fills once it is.
+   * The current test's comment as the inbox holds it:  its answer's, else its draft.
+   * - followed (`onSavedComment()`), so a box drawn before the inbox was read (a reload) fills once it is
    */
   get savedComment(): string {
     void this.review.reviewing()
@@ -949,8 +953,8 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   }
 
   /**
-   * The next epic with open tests after this one, in Owen's saga order (`GET /api/epics/tests`);  this epic not
-   * among them (no tests left):  the first other.
+   * The next epic with open tests after this one, in Owen's saga order (`GET /api/epics/tests`).
+   * - this epic not among them (no tests left):  the first other
    */
   @E.untracked
   private async findNextEpic() {

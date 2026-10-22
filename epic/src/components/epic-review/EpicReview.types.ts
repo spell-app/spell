@@ -31,8 +31,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `item`:  an item's four (`REVIEW_BUTTONS`), the note box's two (`NOTE_BUTTONS`)
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
  * - `part`:  a part of the plan -- an Overview sub-section, a phase, the summary:  no Approve (`PART_BUTTONS`)
- * - `thread`:  a comment thread's, while it's Owen's turn (`<epic-thread>`, epic `epic-engine` P3):  That's good,
- *   Reply, Skip it (`THREAD_BUTTONS`);  no note box, no inbox
+ * - `thread`:  a comment thread's, while it's Owen's turn (`<epic-thread>`, epic `epic-engine` P3):
+ *   That's good, Reply, Skip it (`THREAD_BUTTONS`);  no note box, no inbox
  * - `closed`:  a closed thread's Reopen (`CLOSED_BUTTONS`)
  */
 export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed"] as const
@@ -126,12 +126,12 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
 }
 
 /**
- * A comment THREAD's answer buttons (`buttons="thread"` or `"closed"`;  epic `epic-engine` P3):  the line's group,
- * same look, same colours, but no inbox behind them.
+ * A comment THREAD's answer buttons (`buttons="thread"` or `"closed"`;  epic `epic-engine` P3):
+ * the line's group, same look, same colours, but no inbox behind them.
  * - Owen, 2026-10-10:  "Make top buttons same semantics/look as pills in item header"
  * - a press only says which (`THREAD_ANSWER`):  the comments' code (`spell-doc-comments.js`) acts on it
- * - always a grey outline on the page's ground, each in its colour under the pointer:  the thread closes, or the
- *   cursor goes into its reply box, at once
+ * - always a grey outline on the page's ground, each in its colour under the pointer
+ * - a press acts at once:  the thread closes, or the cursor goes into its reply box
  */
 export type ThreadButtonSpec = {
   /** what Owen answers:  `good` / `skip` close the thread, `reply` goes to its reply box, `reopen` opens it again */
@@ -295,8 +295,8 @@ export const SHOW_NOTE = "epic-show-note"
 export const CHOSEN = "epic-chosen"
 
 /**
- * The event a thread's answer button sends (`buttons="thread"` / `"closed"`):  `{ act }`, which one
- * (`ThreadAct`).  It crosses shadow roots:  the comments' code hears it on the `<epic-thread>` that draws it.
+ * The event a thread's answer button sends (`buttons="thread"` / `"closed"`):  `{ act }`, which one (`ThreadAct`).
+ * - It crosses shadow roots:  the comments' code hears it on the `<epic-thread>` that draws it.
  */
 export const THREAD_ANSWER = "epic-thread-answer"
 

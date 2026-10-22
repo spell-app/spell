@@ -22,8 +22,11 @@ export type AnswerLook = {
 }
 
 /**
- * The four answers, in their order:  Passed green (done), Failed red (needs Owen's words), Skip grey (no longer
- * relevant), Not now yellow (still open).  Their keys are the letters P / F / S / N.
+ * The four answers, in their order, their keys the letters P / F / S / N:
+ * - Passed:  green (done)
+ * - Failed:  red (needs Owen's words)
+ * - Skip:  grey (no longer relevant)
+ * - Not now:  yellow (still open)
  * - Failed's bug, Skip's x:  the x is "skip it" everywhere (the note box's, a comment thread's)
  */
 export const ANSWER_LOOKS: readonly AnswerLook[] = [
@@ -54,8 +57,8 @@ export const ANSWER_LOOKS: readonly AnswerLook[] = [
 ////////////////
 
 /**
- * The page address's query that starts a run:  `?test=1`;  one epic of a run across every epic (`epic test --all`):
- * `?test=1&all=1`, or `?test=all`.
+ * The page address's query that starts a run:  `?test=1`
+ * - one epic of a run across every epic (`epic test --all`):  `?test=1&all=1`, or `?test=all`
  */
 export const TEST_QUERY = "test"
 export const ALL_QUERY = "all"
@@ -77,8 +80,8 @@ export const TESTS_SELECTOR = 'epic-section[kind="tests"] epic-item'
 export const ACTION_LINK = "a.epic-test-action"
 
 /**
- * A test's fields, as the run shows them (`TestRun.fieldsOf()`):  COPIES of the item's light DOM, so the doc is never
- * touched.
+ * A test's fields, as the run shows them (`TestRun.fieldsOf()`):
+ * COPIES of the item's light DOM, so the doc is never touched.
  * - `step`:  its Step field's content, its action links taken out;  an older test's prose
  * - `actions`:  the Step's action links, drawn as buttons
  * - `shots`:  the Example's images, drawn as zoomable thumbnails;  `example`:  the rest of it

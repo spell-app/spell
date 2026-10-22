@@ -42,8 +42,13 @@ export type PhaseLine = {
 
 /** The step label:  its look, its words, where it links. */
 export type StepLabel = {
-  /** `blue` the active phase (outlined:  Claude is on it), `green` DONE (solid), `grey` the next one, or FUTURE;  else the
-   * epic state's colour (`red` errors) */
+  /**
+   * its colour:
+   * - `blue`:  the active phase (outlined:  Claude is on it)
+   * - `green`:  DONE (solid)
+   * - `grey`:  the next one, or FUTURE
+   * - else the epic state's colour (`red` errors)
+   */
   color: "blue" | "green" | "grey" | "red"
   icon: string
   /** what it says:  `P4`, `DONE`, `FUTURE` */
@@ -166,7 +171,11 @@ export const SAGA_KIND = "saga"
  */
 export const OLD_CRUMBS = ":scope > .spell-crumbs"
 
-/** The toast saying something was copied (the heading's name, a meta line's code, the review line):  how long it shows, ms;  its id, so a second copy replaces it. */
+/**
+ * The toast saying something was copied (the heading's name, a meta line's code, the review line).
+ * - `COPIED_TOAST_MS`:  how long it shows, ms
+ * - `COPIED_TOAST_ID`:  its id, so a second copy replaces it
+ */
 export const COPIED_TOAST_MS = 2500
 export const COPIED_TOAST_ID = "epic-copied"
 

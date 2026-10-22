@@ -53,10 +53,13 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - never in an Original Discussion (`<epic-original>`):  history, not a choice
  * - SIDE EFFECT:  the first one connected makes the page's `ReviewClient` (`forPage()`), which reads the inbox
  *
- * - ANSWERING, an option of an `<epic-ask>` (a page Owen answers on, epic `epic-workflow` P12):  a card, drawn
- *   from its question (`ask`), which holds the picks.
- *   - its header:  the fold chevron (when it has pros and cons), then its tick box labelled by `A · title` (a click
- *     on the title ticks it), the thumbs-up, its `badge`;  at the end, the (?) of `more-details` and its state icon
+ * - ANSWERING, an option of an `<epic-ask>` (a page Owen answers on, epic `epic-workflow` P12):
+ *   a card, drawn from its question (`ask`), which holds the picks.
+ *   - its header:
+ *     - the fold chevron (when it has pros and cons)
+ *     - its tick box labelled by `A · title` (a click on the title ticks it)
+ *     - the thumbs-up, its `badge`
+ *     - at the end, the (?) of `more-details` and its state icon
  *   - pick one:  its tick box is a tab stop only when its question says so (`EpicAsk.tabStop`, a roving `tabindex`);
  *     the question moves the pick with the arrow keys
  *   - a comment box under it, always shown (`<epic-text-box>` for `<key>-<letter>`)
