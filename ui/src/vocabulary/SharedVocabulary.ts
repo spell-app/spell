@@ -23,7 +23,7 @@ import type {
  *   - NOTE: no vocabulary declares its own `visible` or `animation` (since P12), and none may:
  *     that element would lose `visible` / `hidden` as one fact.
  * - The platform's own `hidden` and `inert` need nothing here:  every element has them already.
- * - A translated tag names them in its own language (`<ie-boton desactivado>`):
+ * - A translated tag names them in its own language (`<es-boton desactivado>`):
  *   - each language has a small file of them, `SharedVocabulary.<lang>.ts` (`translated()`)
  *   - `Vocabulary.resolve()` reads it for every dictionary of that `lang`
  *   - the dictionary's own names win

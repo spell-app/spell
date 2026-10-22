@@ -1,12 +1,15 @@
 import { proto } from "spell-ui/util"
 import type {
   AttributeSpec,
+  ComponentDefiner,
+  ComponentDictionary,
   ComponentVocabulary,
   Dictionary,
   LocalizedNames,
   LocalizedVocabulary,
   NameMap,
-  NamePair
+  NamePair,
+  TagDictionary
 } from "spell-kit/element/vocabulary.types"
 import { SharedVocabulary } from "./SharedVocabulary"
 import { ValueSets } from "./ValueSets"
@@ -16,11 +19,16 @@ import { ValueSets } from "./ValueSets"
  * Registry of every component's vocabulary, and the resolver that turns canonical names into localized ones.
  * - `register()` collects each `UI<Name>.en.ts` by canonical tag.
  * - `define(prefix, dictionary)` resolves, for every registered component,
- *   the names an author types in that language (`ie-tarjeta`, `color="rojo"`, `ie-cambio`).
- *   - What a translated tag's `ElementDefinition` is built from (`UIButton.define("ie-boton", es)`).
+ *   the names an author types in that language (`es-tarjeta`, `color="rojo"`, `es-cambio`).
+ *   - What a translated tag's `ElementDefinition` is built from (`UIButton.define("es-boton", es)`).
  *   - The English identity dictionary is the default.
  * - `canonicalize()` / `localize()` convert single names both ways, for attribute parsing and rendering.
+ * - `defineComponents({ prefix, dictionary })`:  the page's language, the one call that names every component in it
+ *   (`<es-boton>`), the ones defined already and every one defined after.
+ *   - The runtime's `UI.vocabulary` is the page's registry:  the element layer hands it each component class
+ *     as it's defined (`registerComponent()`), and this defines it under each page language too.
  * - Pure data, NO DOM:  the runtime's `UI.vocabulary` service wraps one of these.
+ *   - It defines components only through their own `define()`, the classes handed to it.
  *   - Imports only `spell-ui/util` and its folder's peers, so node can load it too.
  * - See `notes/translation.md`.
  ****************/
@@ -49,6 +57,12 @@ export class Vocabulary {
 
   /** Dictionary each entry of `localized` was resolved with, so `replace()` can resolve it again. */
   private readonly dictionaries = new Map<string, Dictionary>()
+
+  /** The page's languages (`defineComponents()`), in the order they came. */
+  readonly languages: PageLanguage[] = []
+
+  /** How to define each component handed over (`registerComponent()`) under another tag, by canonical tag. */
+  private readonly components = new Map<string, ComponentDefiner>()
 
   ////////////////
   // ## Registry
@@ -87,6 +101,20 @@ export class Vocabulary {
       const dictionary = this.dictionaries.get(tag) ?? this.dictionary
       this.localized.set(tag, this.resolve(vocabulary, localized.prefix, dictionary))
     }
+    return vocabulary
+  }
+
+  /**
+   * `register()` `vocabulary`, and remember `define`, how to define its component under another tag;
+   * returns the vocabulary.
+   * - What the element layer calls as a component is defined (Spell UI's `SpellUISettings`).
+   * - SIDE EFFECT:  defines the component under every page language now (`defineComponents()`),
+   *   when the language's dictionary names its tag.
+   */
+  registerComponent<V extends ComponentVocabulary>(vocabulary: V, define: ComponentDefiner): V {
+    this.register(vocabulary)
+    this.components.set(vocabulary.tag, define)
+    for (const language of this.languages) this.defineIn(language, vocabulary, define)
     return vocabulary
   }
 
@@ -169,7 +197,8 @@ export class Vocabulary {
         spec.name
       Vocabulary.claim({ map: localized.attributes, name, value: spec, what: `${where} attribute` })
       names.attributes.set(spec.name, name)
-      const values = Vocabulary.resolveValues(spec, vocabulary.tag, dictionary)
+      const isShared = SharedVocabulary.takesShared(vocabulary, spec.name)
+      const values = Vocabulary.resolveValues({ spec, tag: vocabulary.tag, dictionary, isShared })
       if (values) {
         localized.values.set(spec.name, values.forward)
         names.values.set(spec.name, values.inverse)
@@ -200,12 +229,92 @@ export class Vocabulary {
   }
 
   ////////////////
+  // ## The page's languages
+  ////////////////
+
+  /**
+   * Name every component in the page's language:  `defineComponents({ prefix: "es", dictionary: es })`
+   * makes `<es-boton primario color="rojo">` a `<ui-button primary color="red">`.
+   * - Every component the dictionary names a tag for (`dictionary.tags`), and no other:
+   *   one defined already, now;  one defined later (a family loaded on demand), as it's defined.
+   * - Its texts go to the runtime's texts separately (`UI.i18n.registerDictionary()`):  this is names only.
+   * - Calling it again with the same prefix and dictionary does nothing.
+   * - throws a `TypeError` when `prefix` is taken by another dictionary, or two components would share a name
+   */
+  defineComponents(language: PageLanguage): void {
+    const { prefix, dictionary } = language
+    const existing = this.languages.find((each) => each.prefix === prefix)
+    if (existing?.dictionary === dictionary) return
+    if (existing || prefix === this.prefix) {
+      throw new TypeError(
+        `Vocabulary.defineComponents():  the prefix \`${prefix}\` is taken;  give the ${dictionary.lang} dictionary another`
+      )
+    }
+    this.checkTags(language)
+    this.languages.push(language)
+    for (const [tag, define] of this.components) this.defineIn(language, this.vocabularies.get(tag)!, define)
+  }
+
+  /**
+   * The canonical tag a page language's tag stands for:  `es-boton` => `ui-button`.
+   * - From the dictionaries' `tags`, so it answers before the component's family has loaded.
+   * - A canonical tag answers itself;  `undefined` for any other.
+   */
+  canonicalTagFor(tag: string): string | undefined {
+    if (tag.startsWith(`${this.prefix}-`)) return tag
+    for (const { prefix, dictionary } of this.languages) {
+      if (!tag.startsWith(`${prefix}-`)) continue
+      const stem = tag.slice(prefix.length + 1)
+      const canonical = Object.entries(dictionary.tags ?? {}).find(([, name]) => name === stem)?.[0]
+      if (canonical) return canonical
+    }
+    return undefined
+  }
+
+  /**
+   * One language's `Dictionary`, gathered from its parts:  `shared`, its names for every tag
+   * (`components.es.ts`), and `tags`, each tag's own file (`UIButton.es.ts`).
+   * - Static:  pure.
+   * - throws a `TypeError` on a tag file of another language, or two files for one tag
+   */
+  static dictionaryFrom(shared: Dictionary, tags: Iterable<TagDictionary>): Dictionary {
+    const names: Record<string, string> = { ...shared.tags }
+    const components: Record<string, ComponentDictionary> = { ...shared.components }
+    for (const tag of tags) {
+      if (tag.lang !== shared.lang || components[tag.tag]) {
+        throw new TypeError(
+          `Vocabulary.dictionaryFrom():  <${tag.tag}>'s ${tag.lang} names don't belong in the ${shared.lang} ` +
+            "dictionary, or come twice;  one file per tag and language"
+        )
+      }
+      names[tag.tag] = tag.name
+      components[tag.tag] = tag
+    }
+    return { ...shared, tags: names, components }
+  }
+
+  /** Define `vocabulary`'s component under `language`, when its dictionary names the tag. */
+  private defineIn(language: PageLanguage, vocabulary: ComponentVocabulary, define: ComponentDefiner) {
+    const { prefix, dictionary } = language
+    if (!dictionary.tags?.[vocabulary.tag]) return
+    define(this.resolve(vocabulary, prefix, dictionary).tag, dictionary)
+  }
+
+  /** Throw when `language` would give two components one tag:  one of them would be unreachable on the page. */
+  private checkTags({ prefix, dictionary }: PageLanguage) {
+    const tags = new Map<string, string>()
+    for (const [canonical, name] of Object.entries(dictionary.tags ?? {})) {
+      Vocabulary.claim({ map: tags, name: `${prefix}-${name}`, value: canonical, what: `the ${dictionary.lang} tag` })
+    }
+  }
+
+  ////////////////
   // ## Single names
   ////////////////
 
   /**
    * Localized `attribute` (and `value`) on localized `tag` => canonical names.
-   * - `canonicalize("ie-tarjeta", "color", "rojo")` => `{ attribute: "color", value: "red" }`
+   * - `canonicalize("es-tarjeta", "color", "rojo")` => `{ attribute: "color", value: "red" }`
    * - `multiple` values map token by token (`"movil tableta"` => `"mobile tablet"`).
    * - Unknown values pass through unchanged, so the enum converter can warn about them in context.
    * - `undefined` for an unknown tag or attribute.
@@ -220,7 +329,7 @@ export class Vocabulary {
 
   /**
    * Canonical `attribute` (and `value`) => the names an author writes on localized `tag`.
-   * - `localize("ie-tarjeta", "color", "red")` => `{ attribute: "color", value: "rojo" }`
+   * - `localize("es-tarjeta", "color", "red")` => `{ attribute: "color", value: "rojo" }`
    * - Exact inverse of `canonicalize()` for names the dictionary covers.
    * - `undefined` for an unknown tag or attribute.
    */
@@ -254,34 +363,48 @@ export class Vocabulary {
 
   /**
    * Localized value maps for one attribute, or `undefined` if it has no value set.
+   * - Per value:  the tag's own (`components[tag].values`) > the shared set's map > `words` > itself.
+   *   - `words` only for an attribute's own values:  never a shared attribute's (`animation` keeps Fomantic's names).
    * - `keyOrValueAndKey` attributes also take the boolean words (`pointing="yes"`).
+   * - A localized value with accents is also found without them:  `pequeño` and `pequeno` both mean `small`.
    */
-  private static resolveValues(spec: AttributeSpec, tag: string, dictionary: Dictionary) {
+  private static resolveValues({ spec, tag, dictionary, isShared }: ValuesProps) {
     const set = ValueSets.setFor(spec)
     if (!set) return undefined
     const forward = new Map<string, string>()
     const inverse = new Map<string, string>()
     const shared: NameMap | undefined = typeof set === "string" ? dictionary.values?.[set] : undefined
     const own = dictionary.components?.[tag]?.values?.[spec.name]
+    const words = isShared ? undefined : dictionary.words
     add(ValueSets.get(set), shared)
     if (spec.kind === "keyOrValueAndKey") add(ValueSets.get("booleans"), dictionary.values?.booleans)
+    // the unaccented spellings, after every real name:  never in the way of one
+    for (const [name, value] of [...forward]) {
+      const plain = Vocabulary.withoutAccents(name)
+      if (!forward.has(plain)) forward.set(plain, value)
+    }
     return { forward, inverse }
 
-    /** Map each of `values` through `own` > `map` > itself, into both directions. */
+    /** Map each of `values` through `own` > `map` > `words` > itself, into both directions. */
     function add(values: readonly string[], map: NameMap | undefined) {
       for (const value of values) {
         if (inverse.has(value)) continue
-        const name = own?.[value] ?? map?.[value] ?? value
+        const name = own?.[value] ?? map?.[value] ?? words?.[value] ?? value
         Vocabulary.claim({ map: forward, name, value, what: `<${tag} ${spec.name}> value` })
         inverse.set(value, name)
       }
     }
   }
 
+  /** `text` without its accents:  `pequeño` => `pequeno`, `móvil` => `movil`. */
+  private static withoutAccents(text: string): string {
+    return text.normalize("NFD").replace(ACCENTS, "")
+  }
+
   /**
    * Set `map[name] = value`, throwing if `name` is already taken by something else.
    * - Why throw:  a collision means one of two canonical names became unreachable in that language.
-   * - `what` names the kind of name for the error, e.g. `<ie-tarjeta> attribute`.
+   * - `what` names the kind of name for the error, e.g. `<es-tarjeta> attribute`.
    */
   private static claim<T>({ map, name, value, what }: { map: Map<string, T>; name: string; value: T; what: string }) {
     const existing = map.get(name)
@@ -323,7 +446,7 @@ export class Vocabulary {
 
   /**
    * Event `name`'s name under `prefix`, `translated` when the dictionary names it.
-   * - One of Spell UI's own (`ui-change`) takes the prefix:  `ie-change`, or `ie-cambio` translated.
+   * - One of Spell UI's own (`ui-change`) takes the prefix:  `es-change`, or `es-cambio` translated.
    * - Another package's (`spell-open`, of the `<spell-app>` component pack) keeps its name, unless translated:
    *   a tag outside Spell UI names its events as it likes, and the page listens for them by that name.
    */
@@ -332,6 +455,29 @@ export class Vocabulary {
     return name.startsWith(UI_EVENT_PREFIX) ? `${prefix}-${Vocabulary.stem(name)}` : name
   }
 }
+
+/** A page language:  the prefix its tags take (`es`), and the dictionary that names them. */
+export type PageLanguage = {
+  /** Its tags' and events' prefix, e.g. `es`:  `<es-boton>`, `es-cambio`. */
+  readonly prefix: string
+  /** Its names (and texts). */
+  readonly dictionary: Dictionary
+}
+
+/** `Vocabulary.resolveValues()`'s input. */
+type ValuesProps = {
+  /** the attribute */
+  spec: AttributeSpec
+  /** its canonical tag */
+  tag: string
+  /** the dictionary */
+  dictionary: Dictionary
+  /** a shared attribute (`SharedVocabulary`) the tag takes, not one of its own */
+  isShared: boolean
+}
+
+/** Combining marks, once `normalize("NFD")` has split them off their letters. */
+const ACCENTS = /\p{M}/gu
 
 /** What Spell UI's own event names start with (`ui-change`):  they take a translated tag's prefix. */
 const UI_EVENT_PREFIX = "ui-"

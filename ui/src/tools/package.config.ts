@@ -31,7 +31,8 @@ const EXTRA_ENTRIES = { api: ENTRIES.api!, styles: ENTRIES.styles! }
  *   - lazy tiers:  runtime services + the theme sheets (`styles/themes/`, loaded by `UI.themes`) => `runtime`;
  *     icon name / alias maps => `icons`;  a family's lazily imported data (`components/ui-<family>/data/`, the emoji
  *     chunks) and the Temporal polyfill (`temporal-polyfill`, loaded only where the browser lacks `Temporal`) =>
- *     `data`;  so are the source elements' engines' libraries (highlight.js, marked, DOMPurify), loaded on first use
+ *     `data`;  so are the source elements' engines' libraries (highlight.js, marked, DOMPurify), loaded on first use,
+ *     and a language's names (`components.es.ts`, each tag's `UI<Name>.es.ts`), loaded by a page in that language
  *   - `src/docs-components/` (the doc-only `<ui-docs-*>` families) => `docs`:  never in the lib build, which a check
  *     flags (`docsBundled`);  only the docs site's bundle adds them (`DocsFamilies`)
  *   - any other `src/` module (incl. `\0` virtual helpers) => `core`
@@ -86,6 +87,10 @@ function bucket(id: string): Bucket {
   if (/^(api\.ts|elements\/index\.ts|vocabulary\/vocabulary\.api\.ts)$/.test(src)) return "extra:api"
   if (/^components\/[\w-]+\/data\//.test(src)) return "data"
   if (src.startsWith("docs-components/")) return "docs"
+  // a language's names (`components.es.ts`, each tag's `UI<Name>.es.ts`):  a lazy chunk only its pages load
+  if (/^components\/components\.[a-z]{2}\.ts$/.test(src)) return "data"
+  const language = VocabularyFiles.languageOf(src.split("/").pop()!)
+  if (src.startsWith("components/") && language && language !== "en") return "data"
   const component = /^components\/([\w-]+)\/([\w.-]+)$/.exec(src)
   if (component) {
     const [, family, file] = component as unknown as [string, string, string]

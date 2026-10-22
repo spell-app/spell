@@ -1,48 +1,57 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
-    <title>Translated tags -- smoke page</title>
+    <title>Spell UI in Spanish -- smoke page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body>
-    <h1>Translated tags, from <code>dist/</code></h1>
-    <p>
-      <ie-boton primario tamano="grande">Guardar</ie-boton>
-      <ie-boton color="rojo" basic>Borrar</ie-boton>
-      <ie-boton color="azul" tamano="pequeno" disabled="yes">Desactivado</ie-boton>
-    </p>
-    <p>
-      <ie-desplegable seleccion marcador="Elige un color" id="colores">
-        <ui-item value="r">Rojo</ui-item>
-        <ui-item value="v">Verde</ui-item>
-        <ui-item value="a">Azul</ui-item>
-      </ie-desplegable>
-    </p>
-    <p>Último <code>ie-cambio</code>: <output id="value">(ninguno)</output></p>
+    <h1>Spell UI en español, from <code>dist/</code></h1>
+    <ui-root>
+      <p>
+        <es-boton primario tamano="grande">Guardar</es-boton>
+        <es-boton color="rojo" basico>Borrar</es-boton>
+        <es-boton color="azul" tamano="pequeño" desactivado>Desactivado</es-boton>
+      </p>
+      <p>
+        <es-desplegable seleccion marcador="Elige un color" id="colores">
+          <es-elemento value="r">Rojo</es-elemento>
+          <es-elemento value="v">Verde</es-elemento>
+          <es-elemento value="a">Azul</es-elemento>
+        </es-desplegable>
+      </p>
+      <es-tarjeta color="verde">
+        <es-contenido><es-encabezado>Informe</es-encabezado></es-contenido>
+      </es-tarjeta>
+    </ui-root>
+    <p>Último <code>es-cambio</code>: <output id="value">(ninguno)</output></p>
     <pre id="result">checking...</pre>
     <script type="module">
       import { flush } from "solid-js"
-      import { UIButton, UIDropdown } from "spell-ui"
-      import { es } from "/src/test-helpers/dictionary.es.ts"
+      import { UI } from "spell-ui/core"
+      import "spell-ui/ui-root"
 
-      UIButton.define("ie-boton", es)
-      UIDropdown.define("ie-desplegable", es)
-
+      // `<html lang="es">`:  the root loads Spanish, then each `es-*` tag's family, on demand
+      const root = document.querySelector("ui-root")
+      await root.ready
+      const failed = await root.component.settled
       const dropdown = document.querySelector("#colores")
       const output = document.querySelector("#value")
-      dropdown.addEventListener("ie-cambio", (event) => (output.textContent = JSON.stringify(event.detail.value)))
-      const buttons = [...document.querySelectorAll("ie-boton")]
-      await Promise.all([...buttons, dropdown].map((element) => element.ready))
+      dropdown.addEventListener("es-cambio", (event) => (output.textContent = JSON.stringify(event.detail.value)))
+      const buttons = [...document.querySelectorAll("es-boton")]
+      const card = document.querySelector("es-tarjeta")
+      await Promise.all([...buttons, dropdown, card].map((element) => element.ready))
       flush()
       const classes = buttons.map((button) => button.shadowRoot.querySelector("button").className)
-      dropdown.open = true
+      // a Spanish tag's properties are Spanish too:  `abierto`, not `open`
+      dropdown.abierto = true
       flush()
       dropdown.shadowRoot.querySelector("[role=option]:last-of-type").click()
       flush()
       buttons[1].color = "verde"
       flush()
       const checks = {
+        rootLoaded: failed.length === 0,
         largePrimary: classes[0] === "ui large primary button",
         redBasic: classes[1] === "ui red basic button",
         smallBlueDisabled: classes[2] === "ui small blue disabled button",
@@ -50,10 +59,12 @@
         localizedPropertyValue:
           buttons[1].color === "green" &&
           buttons[1].getAttribute("color") === "verde" &&
-          buttons[1].shadowRoot.querySelector("button").className === "ui green basic button"
+          buttons[1].shadowRoot.querySelector("button").className === "ui green basic button",
+        lazyCard: customElements.get("es-tarjeta") !== undefined && card.color === "green",
+        spanishTexts: UI.i18n.t("close") === "Cerrar"
       }
       const ok = Object.values(checks).every(Boolean)
-      window.smokeResult = { ok, label: "es (ie-boton, ie-desplegable)", checks }
+      window.smokeResult = { ok, label: "es (<ui-root> in Spanish)", checks }
       document.querySelector("#result").textContent = `${ok ? "PASS" : "FAIL"} ${JSON.stringify({ classes, checks })}`
     </script>
   </body>

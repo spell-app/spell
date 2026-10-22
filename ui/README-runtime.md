@@ -94,7 +94,7 @@ i18n.register("es", { close: "Cerrar" }) // every family's "Close", in Spanish
 | `UI.transitions` | runs the animation catalogue (`fade up`, `scale`, `fly down` ...) |
 | `UI.visibility` | scroll-position callbacks and lazy images |
 | `UI.i18n` | the texts people read, and `Intl` formatting |
-| `UI.vocabulary` | the names authors type, canonical and translated |
+| `UI.vocabulary` | the names authors type, canonical and translated;  `defineComponents()`, the page's language |
 | `UI.toasts` | toasts from code (`<ui-toast>` provides them) |
 | `UI.modals` | dialogs from code that return a promise (`<ui-modal>` provides them) |
 | `UI.api` | `fetch` with URL templates, throttling and abort, after Fomantic's API behaviour |
@@ -130,26 +130,48 @@ i18n.register("es", { close: "Cerrar" }) // every family's "Close", in Spanish
 
 ## Vocabularies and localization
 
-This is a Spell UI button, written in Spanish:
+This is a Spell UI page, written in Spanish:
 
 ```html
-<ie-boton color="rojo" basic>Borrar</ie-boton>
+<html lang="es">
+  <ui-root>
+    <es-boton primario color="rojo" tamano="pequeño">Borrar</es-boton>
+    <es-tarjeta>
+      <es-contenido><es-encabezado>Informe</es-encabezado></es-contenido>
+    </es-tarjeta>
+  </ui-root>
+</html>
 ```
 
+- The root reads the page's language:  its own `lang`, else the document's.
+- Spanish is one Spell UI ships, so the root loads it first, once per page:  a chunk of its own.
+- Then each Spanish tag loads its family on demand, as a `ui-*` tag does:
+  `<es-boton>` is `<ui-button>`, drawn as `ui small red primary button`.
+- And the texts people read are Spanish too:  a modal's close button says "Cerrar".
+
+From code, the same thing is two calls on the runtime:
+
 ```js
-import { UIButton } from "spell-ui"
-import { es } from "spell-ui/test-helpers/dictionary.es"
+import { UI } from "spell-ui/core"
+import { es } from "spell-ui/components/components.es"
 
-UIButton.define("ie-boton", es)
+const { vocabulary, i18n } = await UI.load()
+vocabulary.defineComponents({ prefix: "es", dictionary: es }) // every component, named in Spanish
+i18n.registerDictionary(es) //                                   and its texts
 
-const boton = document.querySelector("ie-boton") // drawn as `ui red basic button`
+const boton = document.querySelector("es-boton")
 boton.color = "verde"
 boton.getAttribute("color") // "verde"
-boton.color //                 "green", and it now draws `ui green basic button`
+boton.color //                 "green", and it now draws `ui green primary button`
 ```
 
 _What [the translation smoke page](src/tools/smoke/translate.html) checks, in headless Chromium, on every
 `yarn smoke`._
+
+- `defineComponents()` defines every component the dictionary names a tag for:
+  the ones defined already at once, and each one defined later (a family loaded on demand) as it's defined.
+- One tag still names one component:  it throws on a prefix another dictionary has, or two components given one tag.
+- One component, `UIButton.define("es-boton", es)`, for a page that wants only a few.
 
 The page wrote Spanish;  the component's code read English, and didn't change.
 That works because the code never writes a name of its own.
@@ -189,22 +211,49 @@ and `skeleton` is the grey box `<ui-root>` draws in its place while it loads.
 - From code, `UIButton.describe()` returns the whole of it:  `UIButton.describe().topics`.
 - How the kit's element framework reads a vocabulary:  [README-element.md](https://github.com/spell-app/spell-kit/blob/main/README-element.md).
 
+Its Spanish is a file beside it, `UIButton.es.ts`, with what only that tag says:
+
+```ts
+// src/components/ui-button/UIButton.es.ts, shortened
+export const buttonEs = {
+  lang: "es",
+  tag: "ui-button",
+  name: "boton", //                   <es-boton>
+  aka: ["botón", "acción", "enviar", "botón de enlace"],
+  attributes: { "active-text": "texto-activo", "inactive-text": "texto-inactivo" /* ... */ },
+  events: { "ui-toggle": "alternar" }, // es-alternar
+  texts: { loading: "Cargando…" }
+} as const satisfies E.TagDictionary
+```
+
+- What many tags share is translated once, in [components.es.ts](src/components/components.es.ts):
+  - names (`size` is `tamano` everywhere, `ui-change` is `es-cambio`)
+  - the shared value sets (hues, sizes, positions, devices ...), and every other value (`left` is `izquierda`)
+  - the texts every family shares (`close`, `ok`, `noResults` ...)
+- It gathers the tag files into one `Dictionary`, `es`.
+- Names are ASCII (`tamano`, `es-boton`):  values may hold accents (`pequeño`), and are found without them too.
+
 Localization comes in two halves:
-- NAMES, what authors type:  a dictionary renames tags, attributes, values and events.
-  The smoke page's dropdown, `<ie-desplegable>`, sends `ie-cambio` where Spell UI's sends `ui-change`.
-- TEXTS, what people read:  `UI.i18n.register("es", { close: "Cerrar" })`, for every component,
-  or for one with a third argument, its tag.
+- NAMES, what authors type:  a dictionary renames tags, attributes, values, events, slots and parts.
+  The dropdown, `<es-desplegable>`, sends `es-cambio` where Spell UI's sends `ui-change`.
+  - A Spanish tag's properties are Spanish too:  `desplegable.abierto`, not `open`.
+  - A part keeps its English name beside the Spanish one (`part="header encabezado"`):  a stylesheet works in both.
+- TEXTS, what people read:  `UI.i18n.registerDictionary(es)`, or one at a time,
+  `UI.i18n.register("es", { close: "Cerrar" })`, for every component, or for one with a third argument, its tag.
 - What stays English whatever the language:
-  CSS classes, `:state()`s, JavaScript property names, `detail` keys, tokens, utility classes.
+  - CSS classes, `:state()`s, JavaScript property names of the English tags, `detail` keys, tokens, utility classes
+  - the platform's own attributes, and their values:  `href`, `name`, `value`, `min`, `max`, a button's `type` ...
+  - names that are names:  ad units (`leaderboard`), video providers (`youtube`)
+  - the animations' names (`animation="fade up"`)
 
 The price is that the names ship.
 `<ui-button>`'s vocabulary is 3.0 kB of its own 11.6 kB gzipped,
 because the element reads its names as it runs, and a dictionary needs them there.
+The Spanish names and texts are a chunk only a Spanish page loads.
 
-**Real today:**  the mechanism, tested with the small Spanish dictionary above,
-and on a page of its own in `yarn dev` (`/src/tools/demo/translate.html`).
-**Not yet:**  no translation ships.
-🌱 The one call that would rename every family on a page at once is designed, not built.
+**Real today:**  Spanish, every family:  the names, the texts, and `<ui-root lang="es">`.
+It's a first draft, for a native speaker to review.
+**Not yet:**  no other language, and no translated emoji names.
 
 <details>
 <summary>How a text is looked up, and emoji names</summary>

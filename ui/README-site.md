@@ -499,7 +499,7 @@ The generic tools are the kit's, `spell-kit/element-tools/<Name>`, in [its src/e
   - Their TypeScript settings are the node ones, [tsconfig.node.json](tsconfig.node.json),
     with `src/cli/`, `scripts/` and the configs.
   - Browser-side helpers the static server serves are transpiled on the fly, and may import types only
-    ([PerfRun](src/test-helpers/PerfRun.ts), [the Spanish dictionary](src/test-helpers/dictionary.es.ts)).
+    ([PerfRun](src/test-helpers/PerfRun.ts)).
 - Pages:
   a smoke page imports `spell-ui...` and the peers by name, and publishes `window.smokeResult = { ok, label, checks }`.
   - `kind: "compat"` is reported as COMPATIBILITY.

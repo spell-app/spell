@@ -363,7 +363,7 @@ PASS /src/tools/frameworks/vue.html (vue 3.5.44)
 PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.13 (app) + identity hook)
 PASS /src/tools/frameworks/perf.html (perf (production))
 PASS /src/tools/smoke/compat-solid-1.9.html (solid 1.9.9 (esm.sh) + vendored Solid 2)
-PASS /src/tools/smoke/translate.html (es (ie-boton, ie-desplegable))
+PASS /src/tools/smoke/translate.html (es (<ui-root> in Spanish))
 PASS /src/tools/demo/fallback.html (every form control, working + failed)
 ```
 
@@ -380,8 +380,10 @@ PASS /src/tools/demo/fallback.html (every form control, working + failed)
     On the last run, opening it put all 1000 rows on the page in 22 ms of script and DOM work,
     and each keystroke of `united sta` took 5 ms or less of the same.
   - `compat-solid-1.9.html`:  the Solid 1.9 app, [above](#solid-2--one-solid-on-the-page-and-listeners-by-ref).
-  - `translate.html`:  Spanish tags, `<ie-boton>` and `<ie-desplegable>`, with Spanish attributes
-    and their own event, `ie-cambio`.
+  - `translate.html`:  a page in Spanish, `<html lang="es">`:
+    its `<ui-root>` loads the Spanish names, then each tag's family as it meets it (`<es-boton>`, `<es-tarjeta>`).
+    - Spanish attributes and values, and the dropdown's own event, `es-cambio`
+    - the texts in Spanish too:  "Cerrar"
   - `fallback.html`:  every form control, working and deliberately broken;
     each broken one logs one error and shows its plain-HTML fallback, which still submits.
 - A page publishes `window.smokeResult = { ok, label, checks }`;

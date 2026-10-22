@@ -34,6 +34,10 @@ First public version:  Fomantic UI 2.9.4's vocabulary as `ui-*` custom elements 
   the page, an ancestor, the host or `::part()`.
 - **Translation**:  every attribute, value, event, slot, part and text string comes from a vocabulary file, so tag
   sets can be translated (design:  `notes/translation.md`).
+- **Spell UI in Spanish**:  `<ui-root lang="es">` (or `<html lang="es">`) and `<es-boton primario color="rojo">` works,
+  every family loaded on demand, its texts in Spanish too.  A `UI<Name>.es.ts` beside every vocabulary, the shared
+  names in `components.es.ts`;  from code, `UI.vocabulary.defineComponents({ prefix: "es", dictionary: es })` and
+  `UI.i18n.registerDictionary(es)`.  A first draft, for review.
 - **Fallbacks**:  an element whose render throws shows a native fallback, gets `:state(errored)` and dispatches a
   cancelable `ui-error`;  siblings keep working.
 - **Invoker commands**:  `<ui-button commandfor command>` forwards to its inner `<button>`, with a JS fallback for
