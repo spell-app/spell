@@ -1,7 +1,7 @@
 import type { SharedDictionary } from "spell-kit/element/vocabulary.types"
 
 /**
- * Spanish names for the attributes every element shares (`SharedVocabulary`):  `<ie-boton desactivado>`.
+ * Spanish names for the attributes every element shares (`SharedVocabulary`):  `<es-boton desactivado>`.
  * - Every Spanish dictionary gets them, so it needn't name them itself;
  *   one that does (`attributes: { disabled: "inactivo" }`) wins.
  * - The states stay English (`:state(disabled)`):  a CSS contract, never translated.

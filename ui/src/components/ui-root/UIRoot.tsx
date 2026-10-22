@@ -21,6 +21,9 @@ import rootCSS from "./UIRoot.css?inline"
  *
  * - Loads on demand:  every undefined `ui-*` tag inside (now, and as content is added)
  *   imports its family once (`RootLoader`);  nothing is imported up front.
+ * - The page's language:  its own `lang`, else the closest one above it (the document's).
+ *   - One Spell UI ships (`es`) loads first, once per page:
+ *     then the tags in it load as `ui-*` tags do (`<es-boton>`), and the texts are in it (`RootLoader.useLanguage()`).
  * - Component packs:  each `<ui-components source>` inside loads its pack's script once per page
  *   (`ComponentPacks`), which defines the pack's tags (`epic-*` ...).
  *   - Then the root treats them as its own:
@@ -337,6 +340,7 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
   /** Load, wait (or time out), then show the content and say so. */
   @E.untracked
   private async start() {
+    await this.useLanguage()
     if (this.displayMode === DISPLAY.skeleton) this.skeletons = this.findSkeletons()
     const timeout = E.after(RootTimeout.parse(this.timeout) / 1000, () => "timeout" as const)
     const outcome = await Promise.race([this.settle(), timeout])
@@ -345,6 +349,21 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
     this.contentIsReady = true
     this.send("ui-ready" as never, { failed: [...this.failures] })
     this.resolveSettled([...this.failures])
+  }
+
+  /**
+   * Load the page's language, when Spell UI ships it (`RootLoader.useLanguage()`):
+   * the root's `lang`, else the closest one above it.
+   * - One that fails to load is reported, and the root goes on in English.
+   */
+  private async useLanguage() {
+    const lang = this.domElement.closest("[lang]")?.getAttribute("lang")
+    if (!lang || !RootLoader.hasLanguage(lang)) return
+    try {
+      await RootLoader.useLanguage(lang)
+    } catch (error) {
+      E.Warnings.warn("<ui-root>", `the ${lang} names didn't load:`, error)
+    }
   }
 
   /**

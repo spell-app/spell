@@ -16,7 +16,7 @@ import { Terminal } from "spell-kit/element-tools/Terminal"
  * - ONE static server (`StaticServer`), no Vite dev server, mounting repo folders at their own names:
  *   - `/dist/`, `/vendor/` -- the library build and the vendored peers (`yarn vendor`)
  *   - `/src/tools/` -- host pages (`frameworks/*.html`), the compiled Solid host app, the extra pages
- *   - `/src/test-helpers/` -- `PerfRun.ts` and the translation dictionary, transpiled on the fly
+ *   - `/src/test-helpers/` -- `PerfRun.ts`, transpiled on the fly
  * - Every page gets ONE import map (`importMap`):  the vendored peers, `spell-ui/...` => `/dist/...`;  the Solid
  *   host app resolves `solid-js` / `@solidjs/web` through it too, so it shares one copy with the components.
  * - Pages:  the four hosts (`vanilla`, `react`, `vue`, `solid`), the perf page when a `perfAdapter` is given, then

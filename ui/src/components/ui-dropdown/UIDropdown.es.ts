@@ -1,0 +1,34 @@
+import type { E } from "spell-ui/core"
+
+/**
+ * `<ui-dropdown>` in Spanish:  `<es-desplegable>`, its own names and texts (`UIDropdown.en.ts`'s).
+ * - The names it shares with other tags (`size`, `color`, `ui-change` ...) are Spanish's own file's:
+ *   `components.es.ts`, with the values every tag shares.
+ * - Names stay ASCII (no accents):  tags and attributes are typed, and a tag can't hold every letter safely.
+ */
+export const dropdownEs = {
+  lang: "es",
+  tag: "ui-dropdown",
+  name: "desplegable",
+  aka: ["desplegable", "lista desplegable", "selector", "autocompletar", "selección múltiple"],
+  attributes: {
+    search: "busqueda",
+    button: "boton",
+    upward: "hacia-arriba",
+    unlimited: "ilimitado",
+    columnar: "en-columnas",
+    "allow-additions": "permitir-adiciones",
+    "max-selections": "max-selecciones",
+    "no-results-text": "texto-sin-resultados",
+    "addition-text": "texto-adicion"
+  },
+  events: { "ui-add": "agregar" },
+  slots: { trigger: "disparador", header: "encabezado" },
+  parts: { clear: "borrar" },
+  texts: {
+    noResults: "No se encontraron resultados.",
+    addItem: "Añadir {value}",
+    clear: "Borrar",
+    removeValue: "Quitar {value}"
+  }
+} as const satisfies E.TagDictionary
