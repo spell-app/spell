@@ -346,17 +346,16 @@ the versions and counts will have moved on by the time you run it.
    ```
 
 2. Turn on yarn.
-   You never install yarn itself:  corepack hands every `yarn` command to the version the kit pins,
-   4.18.0, committed in the repo under `.yarn/releases/`.
+   Corepack, which comes with Node, puts a `yarn` command on your `PATH`.
+   Any `yarn` will do:  inside the kit it runs the version the kit pins, 4.18.0, committed under `.yarn/releases/`.
 
    ```sh
    corepack enable
    # (prints nothing)
    ```
 
-   - Node 24 ships corepack.
-     If your shell says `corepack: command not found` (later Node versions stopped shipping it),
-     `npm install -g corepack` first.
+   - `corepack: command not found`?  Not every Node install includes it:
+     `npm install -g corepack`, or skip this step if `yarn --version` already prints a version.
 
 3. Clone the kit, and install.
 
