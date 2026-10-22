@@ -91,6 +91,10 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
       }
       if (this.visibleAttribute) this.attributeValues[VISIBLE] = this.isVisibleInMarkup
       this.captureUpgradeValues(definition)
+    } else {
+      // a tag defined early, its family not loaded yet:  pending until `attach()` ("Defined early")
+      EARLY.get(this.constructor as DOMElementClass)?.pending.add(this)
+      if (DOMElement.isPending(this)) this.setState(PENDING, true)
     }
     // capture on the DOM element itself, so a disabled element swallows clicks before page listeners on it run
     this.addEventListener("click", (event) => this.swallowClickWhileDisabled(event), { capture: true })
@@ -113,6 +117,8 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
    * - NEVER writes default values to attributes:  a bare element grows no attributes, as a native one doesn't.
    */
   connectedCallback() {
+    // pending:  nothing to settle or build until its family loads, and `attach()` connects it again
+    if (DOMElement.isPending(this)) return
     this.settleVisible()
     this.restoreUpgradeValues()
     RichAttributes.replay(this, this.tagSetup?.elementDefinition)
@@ -445,8 +451,14 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     else this.internals.states.delete(name)
   }
 
-  /** Resolve `ready`;  called by the component once it has rendered with styles, or by the error path. */
+  /**
+   * Resolve `ready`, and show `:state(ready)`:  called by the component once it has rendered with styles,
+   * or by the error path.
+   * - Not on a tag whose vocabulary has a `ready` state of its own:  `<ui-root>`'s means everything inside is ready.
+   */
   markReady() {
+    const states = this.tagSetup?.elementDefinition.vocabulary.states
+    if (!states?.some(({ name }) => name === READY)) this.setState(READY, true)
     this.connectedState.resolveReady()
   }
 
@@ -554,6 +566,112 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   }
 
   ////////////////
+  // ## Defined early
+  //
+  // A root (`<ui-root>`) defines every tag it knows BEFORE that tag's family loads (epic `solid-17`, P7):
+  // - so each such element is one of ours from the start:  its own `setAttribute()` keeps a function or object
+  //   given to it (`RichAttributes`), with no page-wide patch
+  // - it's PENDING meanwhile:  `:state(pending)`, no component, its values held
+  // - when its family loads, `UIComponent.define()` ATTACHES it instead of defining it (`attach()`):
+  //   the family's DOM element class is spliced in, and every pending element is set up as an upgrade would
+  // - "its family has loaded" is `isAttached()` / `whenAttached()` / `notAttached`, never `:defined`
+  // - NOTE: a family DOM class (`DOMNagElement`) has NO instance fields of its own, only `declare`d ones (lazy getters
+  //   for a default):  an element made before its family loads never runs a field definition.  Spell UI's catalog
+  //   test checks every tag.
+  ////////////////
+
+  /**
+   * Define `tag` now, before its family loads:  a pending element until `attach()` (see "Defined early").
+   * - `early`:  what the platform fixes as the tag is defined, so it must be right before the family exists:
+   *   the attributes it observes, and whether it's a form control (from the root's catalog).
+   * - Nothing when `tag` is defined already;  returns the class otherwise.
+   */
+  static defineEarly(tag: string, early: EarlyTag): DOMElementClass | undefined {
+    if (customElements.get(tag)) return undefined
+    const name = className(tag)
+    const Class = { [name]: class extends DOMElement {} }[name] as unknown as DOMElementClass
+    let resolve = () => {}
+    const attached = new Promise<void>((done) => (resolve = done))
+    EARLY.set(Class, { ...early, tag, pending: new Set(), isAttached: false, attached, resolve })
+    Object.defineProperty(Class, "formAssociated", { value: early.isAFormControl })
+    Object.defineProperty(Class, "observedAttributes", { value: [...early.attributes] })
+    customElements.define(tag, Class)
+    return Class
+  }
+
+  /** Is `Class` a tag defined early whose family hasn't loaded? */
+  static isEarly(Class: CustomElementConstructor | undefined): Class is DOMElementClass {
+    const early = Class && EARLY.get(Class as DOMElementClass)
+    return !!early && !early.isAttached
+  }
+
+  /**
+   * Its family has loaded:  `Class`, defined early, becomes `Base`'s with `tag`'s setup, and every pending element
+   * of it is set up as an upgrade would (its attributes read, properties set early taken, connected again).
+   * - `UIComponent.define()` calls it, for a tag already defined early.
+   * - throws a `TypeError` when the root's catalog no longer matches the family (form control, observed
+   *   attributes):  the platform fixed those when the tag was defined, so its catalog must be regenerated
+   */
+  static attach(Class: DOMElementClass, Base: AnyDOMElementClass, tag: TagSetup) {
+    const early = EARLY.get(Class)!
+    const missing = DOMElement.observedAttributesFor(tag.elementDefinition).filter(
+      (attribute) => !early.attributes.includes(attribute)
+    )
+    if (tag.isAFormControl !== early.isAFormControl || missing.length) {
+      throw new TypeError(
+        `<${early.tag}>:  its root's catalog is stale (${missing.length ? `no ${missing.join(", ")}` : "form control"});  ` +
+          "regenerate it (Spell UI's `yarn gen:root`, a pack's `spell-pack build`)"
+      )
+    }
+    if (Base !== DOMElement) {
+      Object.setPrototypeOf(Class, Base)
+      Object.setPrototypeOf(Class.prototype, Base.prototype)
+    }
+    Class.tagSetup = tag
+    DOMElement.defineProperties(Class)
+    early.isAttached = true
+    for (const element of early.pending) element.attachPending()
+    early.pending.clear()
+    early.resolve()
+  }
+
+  /** Is `element` pending:  its tag defined early, its family not loaded yet? */
+  static isPending(element: Element): boolean {
+    return DOMElement.isEarly(element.constructor as CustomElementConstructor)
+  }
+
+  /** Has `tag`'s family loaded:  defined, and not early only? */
+  static isAttached(tag: string): boolean {
+    const Class = customElements.get(tag)
+    return !!Class && !DOMElement.isEarly(Class)
+  }
+
+  /** Resolves once `tag`'s family has loaded:  `customElements.whenDefined()`, waiting out an early definition. */
+  static async whenAttached(tag: string): Promise<void> {
+    const Class = await customElements.whenDefined(tag)
+    await EARLY.get(Class as DOMElementClass)?.attached
+  }
+
+  /** CSS selector for elements whose family hasn't loaded:  not defined at all, or defined early and pending. */
+  static readonly notAttached = ":is(:not(:defined), :state(pending))"
+
+  /** `attach()`'s step for one pending element:  what its constructor and the upgrade would have done. */
+  private attachPending() {
+    const definition = this.tagSetup.elementDefinition
+    for (const attribute of definition.attributes) {
+      this.attributeValues[attribute.key] = definition.startingValue(attribute)
+    }
+    if (this.visibleAttribute) this.attributeValues[VISIBLE] = this.isVisibleInMarkup
+    this.captureUpgradeValues(definition)
+    for (const name of DOMElement.observedAttributesFor(definition)) {
+      const text = this.getAttribute(name)
+      if (text !== null) this.attributeChangedCallback(name, null, text)
+    }
+    this.setState(PENDING, false)
+    if (this.isConnected) this.connectedCallback()
+  }
+
+  ////////////////
   // ## Hot reload
   ////////////////
 
@@ -578,6 +696,15 @@ const INSTANCE_FIELDS: readonly string[] = ["internals", "attributeValues", "com
 
 /** The shared `visible` attribute's canonical name and key (`SharedVocabulary`). */
 const VISIBLE = "visible"
+
+/** The state of an element defined early whose family hasn't loaded ("Defined early"). */
+const PENDING = "pending"
+
+/** The state of an element ready to go:  rendered with its styles (`markReady()`). */
+const READY = "ready"
+
+/** Each class defined early (`defineEarly()`), and its state until its family loads. */
+const EARLY = new WeakMap<DOMElementClass, EarlyState>()
 
 ////////////////
 // ## Types
@@ -609,6 +736,28 @@ export type TagSetup = {
   visible: E.StartsVisible
   /** build and render the component;  called on the element's first connect (and again after `dispose()`) */
   mountComponent: (domElement: DOMElement) => void
+}
+
+/** What `defineEarly()` needs of a tag before its family loads:  what the platform fixes as it's defined. */
+export type EarlyTag = {
+  /** every attribute it observes:  its vocabulary's, the shared ones, and `hidden` */
+  readonly attributes: readonly string[]
+  /** DOM API `static formAssociated`:  is it a form control? */
+  readonly isAFormControl: boolean
+}
+
+/** A class defined early:  its `EarlyTag`, and its pending elements until `attach()`. */
+type EarlyState = EarlyTag & {
+  /** the tag */
+  readonly tag: string
+  /** its elements made before its family loaded:  set up by `attach()` */
+  readonly pending: Set<DOMElement>
+  /** its family has loaded */
+  isAttached: boolean
+  /** resolves when it does (`whenAttached()`) */
+  readonly attached: Promise<void>
+  /** resolves `attached` */
+  readonly resolve: () => void
 }
 
 /** A change callback (`addPropertyChangedCallback()`):  key, new value, old value, where it came from. */

@@ -289,6 +289,13 @@ export type ComponentVocabulary = {
    */
   aka?: readonly string[]
   /**
+   * Is it a form control (DOM API `formAssociated`):  `true`, else left out.
+   * - Its component class says so too (`elementSetup.isAFormControl`);  this copy is for a root's catalog, which
+   *   defines the tag before its family loads, when the platform fixes it (`DOMElement.defineEarly()`).
+   * - Spell UI's vocabularies test fails when the two disagree.
+   */
+  formControl?: true
+  /**
    * What `<ui-root display="skeleton">` draws in this tag's place while its family loads, as skeleton text
    * (`SkeletonText`):  `"inline 6 x 2.5"`, `"18 wide: square image, header, 3 line paragraph"`.
    * - Left OUT for none of its own:

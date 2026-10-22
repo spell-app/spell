@@ -185,6 +185,23 @@ As WWOD §4, plus:
   - `ValueSetNames` and `TopicNames` (a vocabulary's `values` and `topics`):  Spell UI's `ValueSets`
   - Without Spell UI in a program, they hold only `none` / nothing.
 
+## Defined early
+
+A root (`<ui-root>`) defines every tag of its catalog BEFORE that tag's family loads (epic `solid-17`, P7);
+the family ATTACHES it when it arrives.
+- Why:  so every element is one of ours from the start, and keeps a function or object given to it
+  (`on-ui-change={f}`, `options={[...]}`;  `RichAttributes`) with no page-wide patch.
+- Meanwhile the element is PENDING:  `:state(pending)`, no component, its values held.
+  - `:state(ready)` once it has drawn with its styles (its `ready` promise), on every element.
+- "Its family has loaded" is `DOMElement.isAttached(tag)`, `whenAttached(tag)` and the selector `notAttached`:
+  NEVER `:defined` or `customElements.get()` for a catalog tag.
+- What the platform fixes as a tag is defined comes from the root's catalog:
+  the attributes it observes, and whether it's a form control (a vocabulary's `formControl`).
+  - A stale catalog throws as the family attaches, naming `yarn gen:root`.
+- A family DOM class (`DOMNagElement`) has NO instance fields of its own:  `declare` them, with a lazy getter for a
+  default.  An element made before its family loads never runs a field definition;  Spell UI's catalog test checks.
+  - And a `declare`d name must not be an attribute's property:  the clash check can't see it.
+
 ## One copy per page
 
 - Two copies of `src/element/` on a page would mean two `UIComponent`s and two registries.

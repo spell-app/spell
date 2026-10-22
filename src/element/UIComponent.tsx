@@ -1038,11 +1038,12 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    * Make this component a custom element, under its vocabulary's tag or a translated one.
    * - `UIButton.define("ie-boton", es)` registers `<ie-boton primario color="rojo">`:
    *   its translated attribute, property and event names all reach the same component.
-   * - Does nothing for a tag already defined.
+   * - Does nothing for a tag already defined;  a tag a root defined EARLY is attached instead (`DOMElement.attach()`).
    * - Returns the element class.
    * - Returns `undefined` while the page's runtime hasn't installed its settings yet (`SpellSolid`):
    *   then the tag is defined as they're installed.
    * - throws a `TypeError` on a name in `elementSetup.cssStates` the tag has no attribute or member for (a typo)
+   * - throws a `TypeError` when a tag defined early no longer matches its root's catalog (`DOMElement.attach()`)
    */
   static define(
     this: E.UIComponentClass,
@@ -1055,7 +1056,9 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     }
     const definition = new E.ElementDefinition(this.prototype.vocabulary, { tag, dictionary })
     const existing = customElements.get(definition.tag)
-    if (existing) return existing
+    // defined early by a root, its family loading now:  attach it ("Defined early", `DOMElement`)
+    const isEarly = DOMElement.isEarly(existing)
+    if (existing && !isEarly) return existing
     // record it, make the tag's own DOM element class on `elementSetup.DOMElement`, and define it (DOM API)
     UIComponent.register.call(this, definition)
     // after `register()`, which puts each attribute's getter on the prototype
@@ -1066,10 +1069,12 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
           "which it has no attribute or member for;  fix the name, or give the class that member"
       )
     }
-    const Class = DOMElement.subclassForTag(
-      this.prototype.elementSetup.DOMElement,
-      UIComponent.tagSetupFor(this, definition)
-    )
+    const tagSetup = UIComponent.tagSetupFor(this, definition)
+    if (isEarly) {
+      DOMElement.attach(existing, this.prototype.elementSetup.DOMElement, tagSetup)
+      return existing
+    }
+    const Class = DOMElement.subclassForTag(this.prototype.elementSetup.DOMElement, tagSetup)
     customElements.define(definition.tag, Class)
     return Class
   }

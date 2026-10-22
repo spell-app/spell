@@ -24,9 +24,8 @@ import type { E } from "spell-kit/element"
  *   - the patch looks for it each time it would hold a value,
  *     and puts the browser's own `setAttribute()` back the first time it finds it
  *   - so a `<ui-root pure>` the app draws itself comes too late for what the patch held before it
- *   - With `pure`, a function or object given to a tag not defined yet becomes text, as in plain Solid.
- *   - Defining every tag up front, from `<ui-root>`'s catalog, would fix that (epic `solid-17`, Q5).
- *     Not built:  see the epic's judgement call on it.
+ *   - With `pure`, a tag of `<ui-root>`'s catalog still keeps them:  the root defines it before its family loads
+ *     (`DOMElement`, "Defined early").  Any other tag not defined yet turns them into text, as in plain Solid.
  *
  * - STATIC and instance-free:  what it keeps per element is in three `WeakMap`s.
  * - Imports only util's `string` and its own types:  `DOMElement` imports it, never the other way round.

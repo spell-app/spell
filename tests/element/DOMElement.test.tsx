@@ -84,7 +84,7 @@ function testTag(name: string, attributes: readonly AttributeSpec[], { Component
   }
   const define = (translatedTag?: string, dictionary?: Dictionary) =>
     UIComponent.define.call(Class as never, translatedTag, dictionary) as DOMElementClass
-  return { tag, define }
+  return { tag, define, vocabulary }
 }
 
 /** `testTag()`, defined at once;  returns the tag and its DOM element class. */
@@ -791,5 +791,88 @@ describe("DOMElement under Solid 2", () => {
     expect(host.matches(":state(errored)")).toBe(true)
     expect(message()).toBe("bad")
     error.mockRestore()
+  })
+})
+
+////////////////
+// ## Defined early
+////////////////
+
+/** Define `testTag()`'s tag early, as a root does from its catalog;  returns its `define()` too. */
+function earlyTag(name: string, attributes: readonly AttributeSpec[], options?: TagOptions) {
+  const { tag, define, vocabulary } = testTag(name, attributes, options)
+  const observed = E.DOMElement.observedAttributesFor(new E.ElementDefinition(vocabulary, {}))
+  const isAFormControl = options?.setup?.isAFormControl ?? false
+  E.DOMElement.defineEarly(tag, { attributes: observed, isAFormControl })
+  return { tag, define, observed }
+}
+
+describe("DOMElement defined early", () => {
+  test("pending until its family loads:  then its attributes are read, an early property taken, and it renders", async () => {
+    const { tag, define } = earlyTag("early", [attribute("label", "string"), attribute("items", "json")])
+    const host = container().appendChild(document.createElement(tag)) as Host
+    host.setAttribute("label", "Hello")
+    host.items = [1, 2]
+    expect(customElements.get(tag)).toBeDefined()
+    expect(host.matches(":state(pending)")).toBe(true)
+    expect(host.shadowRoot).toBeNull()
+    expect(E.DOMElement.isAttached(tag)).toBe(false)
+    expect(host.matches(E.DOMElement.notAttached)).toBe(true)
+
+    const attached = E.DOMElement.whenAttached(tag)
+    define()
+    await attached
+    await host.ready
+    expect(host.matches(":state(pending)")).toBe(false)
+    expect(host.matches(":state(ready)")).toBe(true)
+    expect(E.DOMElement.isAttached(tag)).toBe(true)
+    expect(host.matches(E.DOMElement.notAttached)).toBe(false)
+    expect(host.label).toBe("Hello")
+    expect(host.items).toEqual([1, 2])
+    expect(shown(host)).toBe("string:Hello")
+  })
+
+  test("a function and an object given while pending reach the element once it's attached", async () => {
+    const { tag, define } = earlyTag("early-rich", [attribute("items", "json")])
+    const host = container().appendChild(document.createElement(tag)) as Host
+    const heard: unknown[] = []
+    host.setAttribute("on-x-change", ((event: CustomEvent) => heard.push(event.detail)) as unknown as string)
+    host.setAttribute("items", [3] as unknown as string)
+    expect(host.getAttribute("items")).toBeNull()
+    define()
+    await host.ready
+    host.dispatchEvent(new CustomEvent("x-change", { detail: "heard" }))
+    expect(heard).toEqual(["heard"])
+    expect(host.items).toEqual([3])
+  })
+
+  test("its family's own DOM element class joins it:  script API and `instanceof`", async () => {
+    /** A family's DOM element class with a script API. */
+    class Greeter extends E.DOMElement {
+      greet() {
+        return `hi from ${this.localName}`
+      }
+    }
+    const { tag, define } = earlyTag("early-api", [], { setup: { DOMElement: Greeter } })
+    const host = container().appendChild(document.createElement(tag)) as Host
+    expect(host instanceof Greeter).toBe(false)
+    define()
+    await host.ready
+    expect(host instanceof Greeter).toBe(true)
+    expect((host as unknown as Greeter).greet()).toBe(`hi from ${tag}`)
+    // and one made after it loads
+    expect((document.createElement(tag) as unknown as Greeter).greet()).toBe(`hi from ${tag}`)
+  })
+
+  test("a catalog that no longer matches its family throws as the family attaches, naming the fix", () => {
+    const { tag, define } = testTag("early-stale", [attribute("label", "string")])
+    E.DOMElement.defineEarly(tag, { attributes: [], isAFormControl: false })
+    expect(() => define()).toThrow(/catalog is stale \(no label.*gen:root/)
+  })
+
+  test("a tag defined already is left alone", () => {
+    const { tag } = definedTag("early-defined", [])
+    expect(E.DOMElement.defineEarly(tag, { attributes: [], isAFormControl: false })).toBeUndefined()
+    expect(E.DOMElement.isAttached(tag)).toBe(true)
   })
 })
