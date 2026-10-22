@@ -1,17 +1,406 @@
-# `spell-kit/element`:  the element framework
+# `spell-kit/element`:  custom elements on Solid 2
 
-If you know React:  a custom element here is TWO objects.
-- The DOM ELEMENT is what the page talks to:  a real node with attributes, properties and events, like `<video>`.
-- The COMPONENT draws it, on Solid 2:
-  it holds the state, renders JSX once into the element's shadow root, and handles events.
+```tsx
+import type { JSX } from "@solidjs/web"
 
-Every set of elements in Spell is written on this one framework:
-Spell UI's `<ui-*>`, spell-epic's `<epic-*>`, the brand's `<brand-*>`, the app's `<spell-app>` and `<spell-editor>`.
-It's the kit's [element folder](element/), imported as `spell-kit/element`, its namespace `E`.
+import { E } from "spell-kit/element"
+
+import { epicQuestionVocabulary } from "./EpicQuestion.en"
+
+import questionCSS from "./EpicQuestion.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+
+export class EpicQuestion extends E.UIComponent<typeof epicQuestionVocabulary> {
+  @E.proto static vocabulary = epicQuestionVocabulary
+  @E.protoMerged static elementSetup = {
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-question": questionCSS },
+    // `disabled`:  only a look (the sheet dims it), so the text stays findable;  `loading`:  the shared spinner
+    disabled: "its own",
+    loading: "loader"
+  } satisfies Partial<E.ElementSetup>
+
+  render(): JSX.Element {
+    return (
+      <div class={this.rootClass} part={this.partForName("base")}>
+        <div class={LABEL} part={this.partForName("label")}>
+          {this.translationForKey("label")}
+        </div>
+        <slot />
+      </div>
+    )
+  }
+}
+
+/** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
+export interface EpicQuestion extends E.AttributeValues<typeof epicQuestionVocabulary> {}
+
+/** Class of the label. */
+const LABEL = "label"
+```
+
+_All of [EpicQuestion.tsx](spell-epic/src/components/epic-question/EpicQuestion.tsx), from the epic pages,
+with only its class docstring left out._
+
+Put the question inside it, as its own children:
+
+```html
+<epic-question><p>Which browser first?</p><ul><li>Firefox</li><li>Chrome</li></ul></epic-question>
+```
+
+The page shows a small grey QUESTION over the text, and the browser holds this:
+
+```html
+<epic-question>
+  #shadow-root (open)
+    <div class="question" part="base">
+      <div class="label" part="label">Question</div>
+      <slot></slot>
+    </div>
+  <p>Which browser first?</p>
+  <ul><li>Firefox</li><li>Chrome</li></ul>
+</epic-question>
+```
+
+That's a whole element:  a class, one `render()`, and a file of the names it uses.
+No `useState`, no props object, and no second render:
+`render()` ran once, when the element joined the page.
+The question never moved into the shadow root.
+It's still the page's own `<p>`, shown through the `<slot>`, so find-in-page and `#id` links still find it.
+
+It isn't a wrapper around a framework's component, either.
+`<epic-question>` is a real custom element, a node the page holds the way it holds a `<video>`:
+the browser upgrades every one on the page the moment the class is defined, the ones already there included.
+
+This is the kit's element framework, `spell-kit/element` (namespace `E`), and every set of elements in Spell is
+written on it:  Spell UI's `<ui-*>`, spell-epic's `<epic-*>`, the app's `<spell-app>` and `<spell-editor>`,
+and the element a Spell program draws each drawable thing in, like `<solitaire-card>`.
+Its build tools and the test helpers every set's tests use sit beside it, on this page too.
+
+- Code:  [src/element/](src/element/), its tools in [src/element-tools/](src/element-tools/), its test helpers in
+  [src/test-helpers/](src/test-helpers/);  their tests in [tests/element/](tests/element/) and
+  [tests/element-tools/](tests/element-tools/).
+- Rules for working on it:  [element's AGENTS.md](src/element/AGENTS.md).
+- The reactivity underneath is Solid's:  [Solid's docs](https://docs.solidjs.com).
+
+## If you know React, here's the map
+
+Most of React has a counterpart here, in another shape:
+a class instead of a function, and the DOM's own attributes and events instead of props and callbacks.
+
+| In React | Here |
+| --- | --- |
+| a component is a function the framework calls | a class, and one instance of it per element on the page |
+| props | the element's attributes and properties, read on the component as typed getters (`this.step`) |
+| `useState` | `@E.state accessor isOpen = false`:  a field, and a read right after a write sees the new value |
+| `useMemo` | `@E.derived get rows()`, or a plain getter |
+| `useEffect` | `@E.onChange("member")` on a method;  `@E.whileConnected` for setup and cleanup |
+| a callback prop | a DOM event:  `this.send("ui-change", detail)`, cancelable when the vocabulary says so |
+| context | `appContext`, set on the nearest root:  Solid's context can't cross into an element |
+| unmounting when it leaves the page | none:  a removed element keeps its component and state for its next connect;  only `domElement.dispose()` ends them |
+| re-rendering on every change | none:  `render()` runs once, and only the nodes that read a value update |
+| an error boundary you place | one around every element, always |
+| Fast Refresh | hot reload in place:  every live element redraws, attributes kept, its inner state reset |
+| jsdom and Testing Library | a real Chromium, through `ElementFixture` |
+
+### The page holds the element;  the component draws it
+
+Every tag on the page is TWO objects that point at each other.
+`document.querySelector("ui-button")` hands you the DOM element, the one the page and every framework talk to;
+its `.component` is the object that draws it.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
+flowchart LR
+  page["the page, or any framework"] -- "attributes, properties" --> dom["DOM element<br/>&lt;ui-button&gt;"]
+  dom -- "events" --> page
+  dom -- "domElement.component" --> component["component<br/>UIButton"]
+  component -- "component.domElement" --> dom
+  component -- "render(), once" --> shadow["its shadow root"]
+  %% the Spell look:  yarn mermaid:pretty
+  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
+```
+
+_The page talks to the DOM element;  the component draws into its shadow root;  each points at the other._
+
+- The **DOM element**, a `DOMElement`, is the browser's side:  what the page and every framework talk to.
+  - attributes, and a property per attribute that writes back to it
+  - a property the page set before the tag was defined, kept and applied once it is
+  - the element's internals:  custom states, ARIA defaults, a form value
+  - the shadow root, and a `ready` promise that resolves once it has drawn with its styles
+- The **component**, a `UIComponent` subclass such as `UIButton`, is Solid's side.
+  - one per element, built the first time the element joins a page, kept across moves until it's disposed
+  - it holds the state, renders once into a Solid root of its own, and handles the events
+
+Splitting them is what buys the rest:
+- it works from plain HTML and from any framework, with no wrapper;
+  Spell UI checks plain JavaScript, React, Solid and Vue, each on a page run in a headless browser,
+  and Svelte's isn't checked yet ([Spell UI's README-frameworks.md](spell-ui/README-frameworks.md))
+- state survives a move or a re-sort, because the node is the same node
+- each element is its own error boundary:  an uncaught error would otherwise halt Solid for the whole page
+- the page can be rendered as plain HTML, with no script at all
+
+<details>
+<summary>Its life, in five steps</summary>
+
+1. The family's barrel calls `UIButton.define()`:  the tag's own DOM element class is made and registered.
+2. First connect:  the component is built, `render()` runs once, then `onConnect()`.
+3. The content shows once the runtime and the class's style sheets are in, so nothing flashes unstyled.
+4. A move (re-parenting, a sort) keeps the component and its state;  only `dispose()` ends it.
+5. If anything throws:  `:state(errored)`, one console error, a cancelable `ui-error` event,
+   then a form control shows its plain-HTML fallback and any other element its children.
+
+</details>
+
+### It renders once, and a write reaches only what read it
+
+Here's the state half, from spell-epic's sort buttons, `<epic-sort>`:
+two buttons, A–Z and Date, the one in use pressed.
+
+```tsx
+export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
+  // ...
+  /** The sort in use, as remembered. */
+  @E.state accessor sort: EpicSortName = isServer ? "title" : savedSort()
+
+  render(): JSX.Element {
+    return (
+      <ui-buttons class={this.rootClass} part={this.partForName("base")} ...>
+        <For each={SORT_BUTTONS}>
+          {(button) => {
+            const words = () => this.translationForKey(button.words)
+            const inUse = () => this.sort === button.sort
+            return (
+              <ui-button
+                icon={button.icon}
+                active={inUse() ? "" : undefined}
+                ...
+                onClick={() => this.pick(button.sort)}
+              >
+                {words()}
+              </ui-button>
+            )
+          }}
+        </For>
+      </ui-buttons>
+    )
+  }
+
+  /** A sort, clicked:  in use, remembered, and every list told. */
+  @E.untracked
+  private pick(sort: EpicSortName) {
+    this.sort = sort
+    save(SORT_KEY, sort)
+    this.send("epic-sort", { sort } satisfies SortDetail)
+  }
+}
+```
+
+_Shortened from [EpicSort.tsx](spell-epic/src/components/epic-list/EpicSort.tsx):  `...` marks what's left out._
+
+Click Date, and `pick()` writes `this.sort`.
+In React, that `setSort` would run the component again, build both buttons anew, diff them and patch the DOM.
+Here, `render()` doesn't run again, and neither does `<For>`.
+The only code that runs again is the bindings that read `inUse()`,
+so the only DOM that changes is each button's `active` attribute and its spoken name.
+[Its test](spell-epic/tests/components/epic-list/EpicSort.test.tsx) clicks Date and checks exactly that,
+and the `epic-sort` event the page hears.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
+flowchart LR
+  subgraph vdom["a virtual DOM"]
+    v1[state changes] --> v2[render the tree again] --> v3[diff old and new] --> v4[patch the DOM]
+  end
+  subgraph fine["this framework, on Solid"]
+    f1[state changes] --> f2[the one text node or attribute that read it updates]
+  end
+  %% the Spell look:  yarn mermaid:pretty
+  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
+```
+
+_No second render, no diff:  a write goes straight to the node that shows it._
+
+- A member reads fresh right after a write:  once `pick()` sets `this.sort = "date"`,
+  a read of `this.sort` on the very next line gives `"date"`, with no waiting for a flush,
+  and Solid still redraws what read it.
+  - A Solid memo would hand back the old value there, so `@E.derived` is a cache of its own, not a memo.
+- 1,000 `<ui-button>`s put in a page at once are all built, rendered and ready in about 80 ms:
+  the median of nine runs, after a warm-up, in Spell UI's
+  [button benchmark](spell-ui/tests/components/ui-button/UIButton.perf.test.tsx).
+- A write reaches the screen in the next frame.
+  Typing "united sta" into a searching `<ui-dropdown>` of 1,000 options, a letter at a time,
+  each keystroke's update took under 7 ms, about 3 on average, on the last recorded run;
+  [its benchmark](spell-ui/tests/components/ui-dropdown/UIDropdown.perf.test.tsx)
+  fails when the average reaches a frame, 16 ms.
+
+The cost is one rule, Solid 2's:  NEVER change state while Solid is drawing,
+so not in `render()`, a getter, or an effect's first half.
+Change it in handlers, `@E.onChange` methods, or after an `await`.
+
+One React habit doesn't survive the move:
+a value worked out at the top of `render()`, outside its JSX, is worked out ONCE, a snapshot rather than a binding.
+Work it out inside the JSX, or in a getter the JSX reads.
+
+### Every name the tag uses is data
+
+A React component's names are scattered through its code:
+a props interface, class names in the JSX, an event name in each callback.
+Here, every name a tag uses sits in ONE data file named for its language, its _vocabulary_, `<Name>.en.ts`.
+The code never writes a name as a string;  it reads each one from there:
+
+```ts
+this.partForName("count") //              a typo here fails the type check
+this.translationForKey("add", { step }) // "Add 2", in the page's language
+this.send("ui-change", { count })
+```
+
+- What the file holds:  the tag;  its attributes, each with a kind, its allowed values and a description;
+  its events, slots, parts and states;  the texts people read;  the skeleton it shows while loading.
+- An attribute's `kind` says how its text reads and what it draws.
+  `<ui-container>`'s `text` is `keyOnly`, so `<ui-container text>` draws `ui text container`,
+  and `text="no"` a plain `ui container`:
+  [its test](spell-ui/tests/components/ui-container/UIContainer.test.tsx) checks both.
+- `as const satisfies E.ComponentVocabulary` keeps every name a literal type:
+  so a typo, `this.partForName("cuont")`, fails `tsc`.
+- One line gives a component a typed getter per attribute:
+  `export interface UIButton extends E.AttributeValues<typeof buttonVocabulary> {}`.
+- Vocabularies are pure data:  node reads them all to build the catalog, the docs site's data and the packs,
+  without loading a single component.
+
+And because every name is in one place, a tag can be translated whole, in two halves:
+- **Names**, what authors type, are renamed by a dictionary:
+  `UIButton.define("ie-boton", es)` makes `<ie-boton primario color="rojo">` a Spell UI button in Spanish.
+  Values arrive in English (`rojo` is `red`), so the component's code doesn't change.
+- **Texts**, what people read, are looked up by Spell UI's runtime, so nothing is ever blank:
+  the exact locale (`pt-BR`), then the language (`pt`), then English, then the key itself.
+- What stays English always:
+  CSS classes, `:state()`s, the component's property names, event details, `--ui-*` tokens.
+
+**Real today:**  the mechanism, tested with a Spanish dictionary.
+**Not yet:**  any translation that ships.
+How Spell UI reads them:  [README-runtime.md](spell-ui/README-runtime.md).
+
+## What every element gets without asking
+
+Write `<epic-sort loading>`.
+Its code never mentions `loading`, and still a spinner covers it, its buttons stop taking clicks and focus,
+and a screen reader hears that it's busy.
+That's the base class, and it does the same for the rest of what every element would otherwise write again:
+- Shared states, on every tag whether its vocabulary names them or not:
+  - `loading`:  `:state(loading)`, and by default the spinner, the content made inert and `aria-busy`
+  - `disabled`:  `:state(disabled)`, and by default the content made inert and `aria-disabled`;
+    a family whose disabled is only a look says so in its setup, as `<epic-question>` does above
+  - `visible` and the platform's `hidden`, one fact with two names, animated in and out by `animation`;
+    `animation="none"` or a person's reduced-motion setting turns the motion off for everything inside
+  - the platform's own `inert`
+- Custom states (`:state(open)`) and ARIA (`aria-busy`) from a decorator on a member, never set by hand.
+- Hot reload in place, in development (`yarn dev`):
+  an edit to a component swaps it into every live element, which redraws keeping its attributes and properties;
+  an edit to its CSS swaps the sheet with no redraw at all.
+  - What the browser reads only once (the observed attributes, form association, the shadow root's options)
+    reloads the page instead, and so does an edit to code more than one family shares.
+- A static render for pages with no JavaScript:  the same elements as plain HTML, for search engines and readers,
+  by Spell UI's `spell ssr`.
+  Only `@E.aria` members and `@E.onChange(..., { writesDOMElement: true })` methods run there.
+
+## Making one:  the method, in eight steps
+
+A _family_ is one folder, `<prefix>-<name>/`, holding a tag's files, each named for its component.
+The steps below build `<ui-counter>`, the docs site's teaching element:  a number, and a button that adds to it.
+It isn't part of Spell UI, so nothing ships it.
+
+1. The vocabulary, `UICounter.en.ts`:  every name the tag uses, here the guide's file whole, its imports aside.
+   A new tag must fill `topics` and `aka` (how people find it), and may give a skeleton.
+
+   ```ts
+   export const counterVocabulary = {
+     tag: "ui-counter",
+     topics: ["controls", "inputs"],
+     aka: ["counter", "stepper", "tally"],
+     skeleton: "inline 6 x 2.5",
+     noun: "counter",
+     description: "A counter shows a number, and a button that adds to it.",
+     attributes: [
+       {
+         name: "count",
+         kind: "number",
+         description:
+           "The number shown.  Leave it out and the counter keeps its own, from 0;  set it, and the page's value wins."
+       },
+       { name: "step", kind: "number", default: 1, description: "How much one click adds." },
+       { name: "max", kind: "number", description: "The most it counts to;  none:  no limit." },
+       { name: "size", kind: "size", description: "Size, `mini` ... `massive`." }
+     ],
+     events: [
+       {
+         name: "ui-change",
+         detail: "{ count: number, originalEvent: Event }",
+         cancelable: true,
+         description: "The person asked to add:  cancel it (`preventDefault()`) to keep the old count."
+       }
+     ],
+     slots: [{ name: "", description: "A label before the number." }],
+     parts: [
+       { name: "counter", description: 'The whole box (`<div class="ui counter">`).' },
+       { name: "count", description: "The number (`<output>`)." },
+       { name: "button", description: "The add button." }
+     ],
+     states: [{ name: "at-max", description: "The count has reached `max`:  the button is disabled." }],
+     texts: [{ key: "add", text: "Add {step}", description: "Accessible name of the add button." }]
+   } as const satisfies E.ComponentVocabulary
+   ```
+
+2. The component, `UICounter.tsx`:
+   reactive members by decorator, and a `render()` that reads every name through the vocabulary.
+
+   ```tsx
+   export class UICounter extends E.UIComponent<typeof counterVocabulary> {
+     @E.proto static vocabulary = counterVocabulary
+     @E.protoMerged static elementSetup = { styleSheets: { counter: counterCSS } }
+
+     @E.controlled("count") accessor currentCount = 0
+     @E.cssState("at-max") get isAtMax() {
+       return this.max !== undefined && this.currentCount >= this.max
+     }
+
+     @E.untracked add(event: Event) {
+       const next = Math.min(this.currentCount + this.step!, this.max ?? Infinity)
+       this.requestChange("currentCount", next, () => this.send("ui-change", { count: next, originalEvent: event }))
+     }
+
+     render() {
+       return <div class={this.rootClass} part={this.partForName("counter")}>...</div>
+     }
+   }
+   ```
+
+   - `@E.controlled("count")`:  the page's `count` when it set one, else the counter's own, from 0.
+     It's named `currentCount` because `this.count` is taken:
+     the attribute's own getter, the page's value or `undefined`.
+   - `requestChange()` sends the cancelable `ui-change` first:  a page that cancels it keeps the old count.
+
+3. Its sheet, `UICounter.css`, in four sub-layers:  types, content, variations, states.
+   So a state beats a variation with no `!important`.
+   Its public tokens (`--ui-counter-*`) are read through a private alias, never declared.
+4. Optional:  a script API above the component, a fallback (form controls only), a types file.
+5. The family's barrel, `index.ts`:  `UICounter.define()`, and re-export.
+   Every `<ui-counter>` already in the page upgrades at once.
+6. Regenerate the catalog:  Spell UI's `yarn gen:root`, or a pack's `yarn pack:build`.
+   Their tests fail while it's stale.
+7. Tests at the same path under the repo's tests folder, with `ElementFixture` and `expectAccessible()` (below).
+8. Its docs page, in the set's `docs/`, served at `/components/<set>/`.
+
+## Nothing loads up front
+
+A page doesn't import its elements one by one.
+It wraps them in `<ui-root>`, the top of a page or an app, and the root does the importing:
+every `<ui-*>` tag inside it, now or added later, imports its family once, the first time it appears.
+Which family defines a tag comes from a generated catalog, never from guessing at the name:
+`<ui-actions>` lives in the `ui-parts` family.
 
 ![A page loading its elements in eight numbered steps, between the page, its ui-root and the element families](docs/images/element-loading.svg)
 
-_Nothing loads up front;  the root loads what the page uses._
+_The root loads what the page uses, and only when the page uses it._
 
 <details>
 <summary>As text</summary>
@@ -34,147 +423,17 @@ sequenceDiagram
 
 </details>
 
-- Code:  [element/](element/), its tests in [tests/element/](tests/element/).
-- Rules for working on it:  [element's AGENTS.md](element/AGENTS.md).
-- It's Solid work:  [Solid's docs](https://docs.solidjs.com) cover the reactivity underneath.
+### Packs and `<ui-root>`
 
-## What it can do
-
-- Reactive members that read fresh right after a write:  `this.count = 2; this.count` is 2, no waiting for a flush,
-  and Solid still redraws what read it.
-- Attributes and properties from ONE vocabulary file per tag:  every name the tag uses, as data.
-- Custom states (`:state(open)`) and ARIA (`aria-busy`) from a decorator, not by hand.
-- Behaviour every element gets for free:
-  `disabled`, `loading`, `hidden` with its open and close events, `animation`, `readonly`, `inert`.
-- An error boundary per element:  one element that throws shows a fallback, and the page goes on.
-- Hot reload in place, in development:  an edit swaps the component in every live element.
-- A static render for pages with no JavaScript:  the same elements as plain HTML, for search engines and readers.
-
-## What it is not trying to do
-
-- It knows no set of elements:  it never imports Spell UI.
-  Words, styles, focus and animation come in as settings, from the page's runtime (below, "Settings").
-- No runtime services of its own:
-  keyboard, overlays, translations, themes, icons and data sources are Spell UI's runtime.
-- No bundle of its own:  ONE copy per page, carried by Spell UI's core;  packs leave it out.
-- No build of its own:  it's source, bundled by whoever draws with it.
-- No light-DOM rendering:  shadow DOM everywhere, with semantic markup inside.
-- Not a framework binding:  the elements are plain custom elements, usable from plain HTML or any framework.
-- No function components or hand-written Solid effects in a component file:  the lint guard flags them
-  ([README-toolchain.md](README-toolchain.md), "The lint and format rules").
-- Fallbacks only for form controls:  any other element shows its children if it fails.
-
-## The two objects, and why
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
-flowchart LR
-  page["the page, or any framework"] -- "attributes, properties" --> dom["DOM element<br/>&lt;ui-button&gt;"]
-  dom -- "events" --> page
-  dom -- "domElement.component" --> component["component<br/>UIButton"]
-  component -- "component.domElement" --> dom
-  component -- "render(), once" --> shadow["its shadow root"]
-  %% the Spell look:  yarn mermaid:pretty
-  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
-```
-
-_The page talks to the DOM element;  the component draws into its shadow root;  each points at the other._
-
-- The DOM ELEMENT (`DOMElement`, the browser's side):
-  attributes, a property per attribute that reflects back,
-  the element's internals (custom states, ARIA defaults, a form value), the shadow root, the `ready` promise.
-- The COMPONENT (a `UIComponent` subclass, `UIButton`, Solid's side):
-  one per element, built on first connect and kept across moves until it's disposed.
-  It holds the state, renders once into its own Solid root, handles events.
-
-Its life, in five steps:
-1. The family's barrel calls `UIButton.define()`:  the tag's own DOM element class is made and registered.
-2. First connect:  the component is built, `render()` runs once, then `onConnect()`.
-3. The content shows once the runtime and the class's style sheets are in, so nothing flashes unstyled.
-4. A move (re-parenting, a sort) keeps the component and its state;  only `dispose()` ends it.
-5. If anything throws:  `:state(errored)`, one console error, a cancelable `ui-error` event,
-   then a form control shows its plain-HTML fallback and any other element its children.
-
-### Why not one object, as in React?
-
-A React component is a function the framework calls;  the page never holds it.
-An element here is a real node:  the page, or React, or Svelte, or plain HTML, talks to it
-through its attributes, properties and events, for as long as it lives.
-
-So the browser's side and the drawing side are two objects that point at each other, and that's what buys:
-- it works from plain HTML and from every framework, with no wrapper
-- state survives moves and re-parenting, since the node is the same node
-- each element is its own error boundary:  an uncaught error would otherwise halt Solid page-wide
-- the page can be rendered static, with no script at all
-
-### Why it's as fast as a virtual DOM, or faster
-
-The component renders ONCE into its shadow root.
-After that, Solid's fine-grained reactivity updates only the text nodes and attributes that read the changed value:
-there's no tree to rebuild and diff.
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
-flowchart LR
-  subgraph vdom["a virtual DOM"]
-    v1[state changes] --> v2[render the tree again] --> v3[diff old and new] --> v4[patch the DOM]
-  end
-  subgraph fine["this framework, on Solid"]
-    f1[state changes] --> f2[the one text node or attribute that read it updates]
-  end
-  %% the Spell look:  yarn mermaid:pretty
-  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
-```
-
-_No second render, no diff:  a write goes straight to the node that shows it._
-
-- Measured:  1,000 `<ui-button>`s put in a page at once are all built, rendered and ready in about 75 ms
-  (the median of nine runs, Spell UI's button benchmark).
-- A property write reaches the screen in the next frame:  only the nodes that read it change.
-
-## The vocabulary, and the language system
-
-Every name a tag uses lives in ONE data file named for its language, `<Name>.en.ts`:
-the tag, its attributes (each with a kind, its allowed values and a description), events, slots, parts, states,
-the texts people read, and the skeleton it shows while loading.
-Code never writes those names as strings:  it reads them through the vocabulary.
-
-```ts
-this.partForName("count") //              a typo here fails the type check
-this.translationForKey("add", { step }) // "Add 2", in the page's language
-this.send("ui-change", { count })
-```
-
-- `as const satisfies E.ComponentVocabulary` keeps every name a literal type:
-  so a typo, `this.partForName("cuont")`, fails `tsc`.
-- One line gives a component a typed getter per attribute:
-  `export interface UIButton extends E.AttributeValues<typeof buttonVocabulary> {}`.
-- Vocabularies are pure data:  node reads them all to build the catalog, the docs site's data and the packs.
-
-Translation comes in two halves:
-- NAMES, what authors type, are renamed by a dictionary:
-  `<ie-boton primario color="rojo">` is a Spell UI button in Spanish.
-  Values arrive in English (`rojo` is `red`), so the component's code doesn't change.
-- TEXTS, what people read, are looked up by Spell UI's runtime, so nothing is ever blank:
-  the exact locale (`pt-BR`), then the language (`pt`), then English, then the key itself.
-- What stays English always:  CSS classes, `:state()`s, property names, event details, `--ui-*` tokens.
-- Where it stands:  designed and tested with a Spanish dictionary;  no translations ship yet.
-
-## Packs and `<ui-root>`
-
-`<ui-root>` is the top of a page or an app:
-every `<ui-*>` tag inside it, now or added later, imports its family once, on demand.
-Which family defines a tag comes from a generated catalog, never from guessing at the name.
-
-A COMPONENT PACK is another package's elements, any prefix (`epic-`, `brand-`), loaded the same way.
-This is how every epic page loads spell-epic's elements:
+A _component pack_ is another package's elements, under its own prefix, loaded by the root the same way.
+This is how every epic page loads spell-epic's, trimmed:
 
 ```html
-<script src="/_epic/assets/spell-ui.js"></script>
 <ui-root>
   <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
   <epic-page>...</epic-page>
 </ui-root>
+<script src="/_epic/assets/spell-ui.js"></script>
 ```
 
 ```mermaid
@@ -193,46 +452,73 @@ sequenceDiagram
 
 _A pack is one classic script:  it brings its own elements, and borrows Solid and the framework from the page._
 
-- A pack is a package whose `package.json` has `"spellPack"`:
-  spell-epic's is `{ "name": "epics", "prefix": "epic-", "dir": "src" }`.
-- Its build (`spell-pack build`) writes three files into `components/__pack/`:
-  1. `<pack>.catalog.ts`:  each tag's family folder and skeleton, read from the vocabularies
-  2. `<pack>.entry.ts`:  `SpellUI.registerPack({ name, prefix, catalog, define })`
-  3. `<pack>.pack.js`:  that entry built as ONE classic script, minified, which works from `file://` too
-  - then the set's docs data;  `spell-pack check` exits 1 while any of it is stale
+Making a package a pack takes one key in its `package.json`.
+spell-epic's is `"spellPack": { "name": "epics", "prefix": "epic-", "dir": "src" }`:
+- `prefix` is required, and every tag starts with it;  `name` is the folder's name unless it says otherwise.
+- `dir`:  where its `components/` and `docs/` are, and its code, when that isn't the package's root.
+
+`spell-pack build` then reads every vocabulary in the families' folder, and writes three files into its `__pack/`:
+the catalog `<ui-root>` reads (`<pack>.catalog.ts`, each tag's family and skeleton),
+the entry that registers it (`<pack>.entry.ts`, one `SpellUI.registerPack({ name, prefix, catalog, define })`),
+and that entry built as one minified classic script, `<pack>.pack.js`, which works from `file://` too.
+The set's docs data comes after;  `spell-pack check` exits 1 while any of it is stale.
+
 - ONE Solid per page:  two copies of Solid, of this framework or of Spell UI's core on a page break silently
   (two registries, two owners).
-  So a pack leaves the shared modules OUT and takes the page's copies:
+  So a pack leaves the shared modules out, and borrows the page's copies, by their npm names:
 
   ```ts
   PACK_MODULES = ["solid-js", "@solidjs/web", "spell-kit/element", "spell-ui/core", "spell-ui/forms"]
   ```
 
+  - The page offers them under those same names, in `SpellUI.packModules`;
+    the docs site adds the families a pack may extend, by theirs (`spell-ui/components/ui-code`).
+  - Any other Spell UI or Solid import fails the pack's build, rather than ship a second copy.
+
 - A pack's elements extend the page's one `UIComponent`:
   `spell-kit/element` on the page is Spell UI's core, which carries all of this framework.
 - A pack that fails or times out is logged, and the root still gets ready.
 
-## Theming through shared CSS
+The check, run in spell-epic, when the pack is current:
 
-Spell UI owns the CSS foundation, and every set's elements draw with it:  they adopt its sheets through the runtime.
-Page-level theming works into shadow roots because CSS custom properties inherit into them.
+```sh
+cd ~/www/spell/spell-epic
+yarn pack:check
+# epics:  current
+```
 
-- Layers, in order:  `ui.reset`, `ui.tokens`, `ui.base`, `ui.components`, `ui.utilities`, `ui.theme`, `ui.app`.
-  Later layers win, whatever the specificity;  a page's own unlayered CSS beats them all.
-- Each component's sheet has four sub-layers (types, content, variations, states):
-  so a state beats a variation with no `!important`.
-- Tokens are custom properties (`--ui-*`), colours in OKLCH, sizes in `em` from one `--ui-font-size`.
-- Sheets are shared, never copied:  one `CSSStyleSheet` per sheet, adopted by every shadow root that needs it.
-- Themes apply page-wide and into every shadow root:  `UI.themes.apply("github")`.
+- Stale, it names each file and why (`built from older sources`), prints the fix, `spell-pack build <folder>`,
+  and exits 1.
+- Each generated file's banner names the command that remakes it, `spell pack build epics`, and the sources' hash.
+  The hash includes the build's own format, `spell-pack 2` today:
+  a change to what the build writes bumps it, and every pack goes stale at once until it's rebuilt.
+- The cost of one script:  a pack arrives whole.
+  spell-epic's is 47 tags in 35 families, about 630 kB minified and 175 kB gzipped,
+  and it defines every one of its tags as it registers, whichever of them the page uses.
+
+## Styling through the shadow root
+
+Shadow DOM's cost is the first thing a React developer hits:
+a page's own CSS can't reach inside a shadow root, so it can't restyle a component's insides.
+Spell UI owns the CSS every set's elements draw with, and leaves four ways in:
+- Tokens, the `--ui-*` custom properties, which inherit into every shadow root:
+  colours in OKLCH, sizes in `em` from one `--ui-font-size`.
+- `::part()`, for the inner boxes a vocabulary names as its parts:  `ui-button::part(button)`.
+- A theme, applied page-wide and into every shadow root:  `UI.themes.apply("github")`.
   Dark is a colour scheme (`<ui-root theme="dark">`).
-- More:  [Spell UI's README-themes.md](spell-ui/README-themes.md).
+- The app stylesheet, below:  your site's own rules, inside every component.
 
-## Restyling your whole site with the app stylesheet
+The sheets themselves are shared, never copied:
+one `CSSStyleSheet` per sheet, adopted by every shadow root that needs it, in layers.
+- The layers run `ui.reset`, `ui.tokens`, `ui.base`, `ui.components`, `ui.utilities`, `ui.theme`, `ui.app`:
+  later layers win whatever the specificity, and a page's own unlayered CSS beats them all.
+- The rest of theming:  [Spell UI's README-themes.md](spell-ui/README-themes.md).
 
-A page's own CSS can't reach inside a shadow root, so it can't restyle a component's insides.
+### Restyling your whole site with the app stylesheet
 
-The APP STYLESHEET can:  mark ONE `<style>` (or `<link>`) on the page with `id="ui-app-stylesheet"`.
-The runtime mirrors it into every component's shadow root, adopted last, in the `ui.app` layer.
+Mark one `<style>` (or `<link>`) on the page with `id="ui-app-stylesheet"`.
+The runtime mirrors it into every component's shadow root, adopted after all of the component's own sheets;
+its rules go in `ui.app`, the last layer, as below.
 
 ```html
 <style id="ui-app-stylesheet">
@@ -253,6 +539,8 @@ The runtime mirrors it into every component's shadow root, adopted last, in the 
   The selectors are Spell UI's class grammar, the same classes Semantic UI and Fomantic UI used.
 - Tokens on `:root` (`--ui-primary`, `--ui-font-size`) change every element at once.
 - Edits, a late insertion and a `<link>`'s load are all picked up;  `@import`s inside it are inlined.
+- The edge:  there's one per page, found when it's inserted.
+  A `<style>` that gains the id later, through `setAttribute("id", …)`, isn't noticed:  insert it with its id.
 
 | Put it in | When |
 | --- | --- |
@@ -260,107 +548,110 @@ The runtime mirrors it into every component's shadow root, adopted last, in the 
 | a theme file | a whole look you'd switch to and back, page-wide:  [README-themes.md](spell-ui/README-themes.md) |
 | the app stylesheet | this site's own changes to how components are drawn inside |
 
-## The method:  making an element for a thing
+## Testing it:  a real browser, never jsdom
 
-A FAMILY is one folder, `<prefix>-<name>/`, holding a tag's files, each named for its component.
-The eight steps, building a `<ui-counter>`:
+Testing Library renders into jsdom, a stand-in for the DOM.
+An element's test here renders into a real document in a real Chromium, through Vitest's browser mode,
+because a custom element only upgrades, draws and gets its styles once it's connected.
+This is `<epic-question>`'s first test, whole:
 
-1. The vocabulary, `UICounter.en.ts`:  every name the tag uses.
-   A new tag MUST fill `topics` and `aka` (how people find it), and may give a skeleton.
+```tsx
+test("a small `Question` label over its text;  the text is its own light children, through its slot;  axe", async () => {
+  const host = await ElementFixture.render(QUESTION)
+  expect(part(host, "label")!.textContent).toBe("Question")
+  expect(getComputedStyle(part(host, "label")!).textTransform).toBe("uppercase")
+  expect(host.querySelector("p")!.assignedSlot).toBe(part(host, "base")!.querySelector("slot"))
+  await expectAccessible(host)
+})
+```
 
-   ```ts
-   export const counterVocabulary = {
-     tag: "ui-counter",
-     topics: ["controls", "inputs"],
-     aka: ["counter", "stepper"],
-     skeleton: "inline 6 x 2.5",
-     attributes: [
-       { name: "count", kind: "number", description: "the current count" },
-       { name: "step", kind: "number", default: 1 }
-     ],
-     events: [{ name: "ui-change", detail: "{ count: number }", cancelable: true }],
-     parts: [{ name: "count" }, { name: "button" }],
-     states: [{ name: "at-max" }],
-     texts: [{ key: "add", text: "Add {step}" }]
-   } as const satisfies E.ComponentVocabulary
-   ```
+_From [EpicQuestion.test.tsx](spell-epic/tests/components/epic-question/EpicQuestion.test.tsx):
+`QUESTION` is the markup above, `part()` finds a shadow part by name._
 
-2. The component, `UICounter.tsx`:
-   reactive members by decorator, and a `render()` that reads every name through the vocabulary.
-
-   ```tsx
-   export class UICounter extends E.UIComponent<typeof counterVocabulary> {
-     @E.proto static vocabulary = counterVocabulary
-     @E.protoMerged static elementSetup = { styleSheets: { "ui-counter": counterCSS } }
-
-     @E.controlled("count") accessor currentCount = 0
-     @E.cssState("at-max") get isAtMax() {
-       return this.max !== undefined && this.currentCount >= this.max
-     }
-
-     @E.untracked add(event: Event) {
-       const next = Math.min(this.currentCount + this.step!, this.max ?? Infinity)
-       this.requestChange("currentCount", next, () => this.send("ui-change", { count: next, originalEvent: event }))
-     }
-
-     render() {
-       return <div class={this.rootClass} part={this.partForName("count")}>...</div>
-     }
-   }
-   ```
-
-3. Its sheet, `UICounter.css`, in the four sub-layers.
-   Its public tokens (`--ui-counter-*`) are read through a private alias, never declared.
-4. Optional:  a script API above the component, a fallback (form controls only), a types file.
-5. The family's barrel, `index.ts`:  `UICounter.define()`, and re-export.
-   Every `<ui-counter>` already in the page upgrades at once.
-6. Regenerate the catalog:  Spell UI's `yarn gen:root`, or a pack's `yarn pack:build`.
-   Their tests fail while it's stale.
-7. Tests at the same path under the repo's tests folder, with `ElementFixture` and `expectAccessible()`.
-8. Its docs page, in the set's `docs/`, served at `/components/<set>/`.
-
-## The examples
-
-| Set | What it is | Its elements |
-| --- | --- | --- |
-| Spell UI | the HOST:  the runtime, `<ui-root>`, the styles and icons, `registerPack()` | 62 families, `<ui-accordion>` ... `<ui-visibility>`:  [spell-ui's README](spell-ui/README.md) |
-| spell-epic | a PACK, prefix `epic-`:  every epic page loads it | 35 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](spell-epic/README.md) |
-| spell-brand | a second pack, prefix `brand-` | 10 families |
-| spell-app | a ROOT subclass, `<spell-app>`, loading its own tags;  `<spell-editor>` | [spell-app's README](spell-app/README.md) |
-
-- Spell UI's core re-exports this whole framework, plus its own pieces:
-  `E.IconGlyph`, `E.LoadableBody`, `E.NativeFallback`, `E.Converters` ...
-  So a Spell UI family imports `E` from `spell-ui/core`.
-- A pack's element files import `E` from `spell-kit/element`,
-  or from `spell-ui/core` when they use Spell UI's own pieces:  the same names, and Spell UI's on top.
-
-## Tools and test helpers
-
-The tools every set's builds share (node only), and the test helpers every set's tests use.
-
-| Tool | What |
-| --- | --- |
-| `spell-pack build \| check [<folder>]` | a pack's build, or whether it's current:  exits 0 built or current, 1 stale or failed, 2 bad arguments |
-| `ComponentPack` | what `spell-pack` runs;  the command line's `spell pack` too |
-| `RootCatalog`, `VocabularyFiles` | what `<ui-root>` needs of each tag, read from every vocabulary in a folder of families |
-| `elementBaseConfig()` | the Vite settings every set's elements compile with:  the decorator pre-pass BEFORE Solid, Solid's JSX, Lightning CSS |
-| `HotElements` | the Vite plugin for hot reload in `yarn dev` |
-| `DevServer`, `Terminal`, `NodePackage` | a package's Vite dev server from node;  where tools print;  finding an installed package |
+`ElementFixture.render()` waits for every element's `ready`, then runs Solid's `flush()`,
+so the test asserts on the drawn element, not after a guessed number of ticks.
+`expectAccessible()` runs axe through the shadow roots, and fails with a list of what to fix.
+The cost is a real browser to run them in:  Playwright's Chromium, installed once in
+[Setup from zero](README.md#setup-from-zero).
 
 | Test helper | What |
 | --- | --- |
 | `Fixture` | render HTML into the live document, removed when the test ends |
-| `ElementFixture` | render, wait for every element's `ready`, `flush()`;  `breakRender()` forces a failure |
+| `ElementFixture` | the render above, with its wait;  `settle()` and `tick()` for later changes;  `breakRender()` forces a failure |
 | `A11y` | axe on a live element (`expectAccessible()`), and WCAG contrast |
 | `Viewport` | resize the test's frame for one test |
 
-- Tools:  `spell-kit/element/tools/<Name>`.
-  Helpers:  `spell-kit/test-helpers/<Name>`.
+- Import them by name:  `spell-kit/test-helpers/<Name>`, from any repo.
 - The helpers know only the DOM, Solid and this framework;  one that needs Spell UI stays in Spell UI.
-- This folder's own tests run in a real Chromium with NO Spell UI on the page:
+- The framework's own tests run with no Spell UI on the page:
   on stand-in settings (`TestSettings`:  English names, no styles, every animation instant).
   What needs Spell UI's real runtime is tested in Spell UI.
-- Run them with the kit's `yarn kit:test`, or this folder's alone:  `cd element && yarn vp test run`.
+- Run them with the kit's `yarn kit:test`, or these alone, at the kit's root:
+  `yarn vp test run --project element --project element-tools`.
+
+## The build tools
+
+A set's elements are TypeScript with decorators, JSX and CSS files;  a page wants one script and a catalog of tags.
+These close the gap, for every set, in node:
+
+| Tool | What |
+| --- | --- |
+| `spell-pack build \| check [<folder>]` | a pack's build, or whether it's current:  exits 0 built or current, 1 stale or failed, 2 bad arguments |
+| `ComponentPack` | what `spell-pack` runs;  the command line's [`spell pack`](README-cli.md#spell-ui) too |
+| `RootCatalog`, `VocabularyFiles` | what `<ui-root>` needs of each tag, read from every vocabulary in a folder of families |
+| `elementBaseConfig()` | the Vite settings every set's elements compile with:  the decorator pre-pass before Solid, Solid's JSX, Lightning CSS |
+| `HotElements` | the Vite plugin for hot reload in `yarn dev` |
+| `DevServer`, `Terminal`, `NodePackage` | a package's Vite dev server from node;  where tools print;  finding an installed package |
+
+- Import them by name:  `spell-kit/element-tools/<Name>`.
+- `spell-pack` is a bin of the kit:  spell-epic's `yarn pack:build` and `pack:check` run it, from its own folder.
+
+## Who's written on it
+
+| Set | What it is | Its elements |
+| --- | --- | --- |
+| Spell UI | the host:  the runtime, `<ui-root>`, the styles and icons, `registerPack()` | 62 families, `<ui-accordion>` ... `<ui-visibility>`:  [spell-ui's README](spell-ui/README.md) |
+| spell-epic | a pack, prefix `epic-`:  every epic page loads it | 35 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](spell-epic/README.md) |
+| spell-app | a root subclass, `<spell-app>`, loading its own tags;  `<spell-editor>`;  each drawable thing's element in a Spell program (`<solitaire-card>`) | [spell-app's README](spell-app/README.md) |
+
+- Spell UI's core re-exports this whole framework, plus its own pieces:
+  `E.IconGlyph`, `E.LoadableBody`, `E.NativeFallback`, `E.Converters` ...
+  So a Spell UI family imports `E` from `spell-ui/core`.
+- A pack's element files import `E` from `spell-kit/element`, as `<epic-question>` does,
+  or from `spell-ui/core` when they use Spell UI's own pieces, as `<epic-sort>` does:
+  the same names, and Spell UI's on top.
+
+## What it costs, and what it won't do
+
+The trade is plain:  you get real elements that work on any page,
+and you give up some freedom in how you write them.
+
+What it costs a page is small, and paid once:
+the framework and the util helpers it carries come to 45 kB minified, about 15 kB gzipped,
+and 31 kB gzipped with Solid beside them (esbuild, minified, then gzip -9).
+It ships no bundle of its own, though:  it's source, bundled by whoever draws with it,
+so on a page it arrives inside Spell UI's core, and packs leave it out.
+
+What it costs you, writing one:
+- **Solid 2 is a release candidate:**  `solid-js` 2.0.0-rc.13, pinned to one copy across every repo.
+- **A component is a class.**
+  No function components, and no hand-written Solid effects in a component file:
+  the lint guard flags them, and names the decorator to use ([README-toolchain.md](README-toolchain.md)).
+- **A build step,** for the standard decorators, lowered before Solid's compiler reads the JSX
+  (`elementBaseConfig()`).
+- **Shadow DOM everywhere,** with semantic markup inside and never the light DOM:
+  page CSS needs one of the four ways in (above).
+
+What it won't do:
+- **Draw anything by itself.**
+  It knows no set of elements and never imports Spell UI,
+  so its words, styles, focus and animation come in as settings from the page's runtime (below, "Settings").
+  In practice that runtime is Spell UI's, and so are the services:
+  keyboard, overlays, translations, themes, icons and data sources.
+- **Bind to a framework:**  the elements are plain custom elements, used the same from plain HTML or any framework.
+- **Fall back, except in a form:**  only form controls get a plain-HTML fallback;
+  any other element that fails shows its children.
+- 🌱 Not on npm yet:  today it runs from a checkout of the kit, like every Spell repo.
 
 <details>
 <summary>Every reactive decorator, one line each</summary>
@@ -372,17 +663,14 @@ The tools every set's builds share (node only), and the test helpers every set's
 | `@E.derived get rows()` | a cached value that recomputes only when what it read changed (not a Solid memo, which would read stale after a write) |
 | `@E.cssState("open")` | a boolean member shown as `:state(open)` |
 | `@E.aria("busy")` | a member written to the element's ARIA (`ariaBusy`) |
-| `@E.onChange("member")` | a method run when the member changes (`{ writesDOMElement: true }` to run in the static render too) |
+| `@E.onChange("member")` | a method run at the start and whenever the member changes, the function it returns its cleanup (`{ writesDOMElement: true }` to run in the static render too) |
 | `@E.whileConnected` | a method run while the element is in the page, its cleanup when it leaves |
-| `@E.watches` | a method run when the element's light DOM changes |
+| `@E.watches` | a getter or a method that follows the element's light DOM |
 | `@E.on("click")` | a listener on the element |
 | `@E.untracked` | a method that reads without subscribing |
 | `@E.proto static vocabulary` | the class's vocabulary, on its prototype |
 | `@E.protoMerged static elementSetup` | the class's settings, merged down the chain:  `styleSheets`, `Fallback`, `isAFormControl`, `delegatesFocus`, `disabled`, `loading` ... |
 
-- Solid 2's one rule here:  NEVER change state while Solid is drawing,
-  in `render()`, a getter, or an effect's first half.
-  Change it in handlers, `@E.onChange` methods, or after an `await`.
 - The generic decorators (`@proto`, `@lazy` ...) and the reactive engine's:  [README-util.md](README-util.md).
 
 </details>
@@ -402,8 +690,8 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | `motion` | the default animation, reduced motion, running one |
 | `warn()` | where warnings go |
 
-- Spell UI installs its own as its core loads, so every page with elements has Spell UI's runtime.
-- A tag defined before any settings are in WAITS for them (a split bundle may run a family first);
+- Spell UI installs its own as its core loads.
+- A tag defined before any settings are in waits for them (a split bundle may run a family first);
   still waiting after 5 s, a console warning.
 - Reading the settings before any are installed throws, naming what to import.
 - A set adds the names the types check against by augmenting the framework's interfaces:
@@ -412,65 +700,34 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 </details>
 
 <details>
-<summary>The lint guard's rules</summary>
-
-In every set's component folders, the `spell-ui/*` lint rules flag what a component does by hand that a decorator does:
-- a hand-written Solid effect, a `MutationObserver`, a listener on the DOM element
-- `untrack()`, a raw timer, an exported function component
-
-Each message names the decorator to use:  the full table is in [README-toolchain.md](README-toolchain.md).
-
-</details>
-
-<details>
 <summary>The files, one line each</summary>
 
 | File | What |
 | --- | --- |
-| [src/index.ts](element/src/index.ts) | the barrel, `E` |
-| [src/UIComponent.tsx](element/src/UIComponent.tsx) | the component base |
-| [src/DOMElement.ts](element/src/DOMElement.ts) | the DOM element base |
-| [src/ElementDefinition.ts](element/src/ElementDefinition.ts) | a vocabulary turned into a tag's attributes, events and slots |
-| [src/Reactive.ts](element/src/Reactive.ts) | the reactive members' decorators |
-| [src/Cell.ts](element/src/Cell.ts), [SlotContent.ts](element/src/SlotContent.ts) | a reactive cell;  slotted content |
-| [src/PartContext.ts](element/src/PartContext.ts), [OwnerContext.ts](element/src/OwnerContext.ts) | generic content parts, and the element they belong to |
-| [src/ShadowEvents.ts](element/src/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
-| [src/HotDefinitions.ts](element/src/HotDefinitions.ts) | hot reload, in development only (its own entry) |
-| [src/timing.ts](element/src/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()` |
-| [src/SkeletonText.ts](element/src/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
-| [src/SpellSolid.ts](element/src/SpellSolid.ts) | the settings the page's runtime installs |
-| [src/elements.types.ts](element/src/elements.types.ts), [vocabulary.types.ts](element/src/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
-| [tools/](element/tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage` |
-| [test-helpers/](element/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
-| [bin/spell-pack.mjs](element/bin/spell-pack.mjs) | `spell-pack build \| check` |
+| [index.ts](src/element/index.ts) | the barrel, `E` |
+| [UIComponent.tsx](src/element/UIComponent.tsx) | the component base |
+| [DOMElement.ts](src/element/DOMElement.ts) | the DOM element base |
+| [ElementDefinition.ts](src/element/ElementDefinition.ts) | a vocabulary turned into a tag's attributes, events and slots |
+| [Reactive.ts](src/element/Reactive.ts) | the reactive members' decorators |
+| [Cell.ts](src/element/Cell.ts), [SlotContent.ts](src/element/SlotContent.ts) | a reactive cell;  slotted content |
+| [PartContext.ts](src/element/PartContext.ts), [OwnerContext.ts](src/element/OwnerContext.ts) | generic content parts, and the element they belong to |
+| [ShadowEvents.ts](src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
+| [HotDefinitions.ts](src/element/HotDefinitions.ts) | hot reload, in development only (its own entry) |
+| [timing.ts](src/element/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()` |
+| [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
+| [SpellSolid.ts](src/element/SpellSolid.ts) | the settings the page's runtime installs |
+| [elements.types.ts](src/element/elements.types.ts), [vocabulary.types.ts](src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
+| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types` |
+| [src/test-helpers/](src/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
+| [bin/spell-pack.mjs](bin/spell-pack.mjs) | `spell-pack build \| check` |
 
 - Its own entries, besides the barrel:
   `spell-kit/element/elements.types` and `/vocabulary.types` (for node code that mustn't load the framework),
   `/timing`, `/SkeletonText`, `/HotDefinitions`.
 - It may use only Solid and util's generic files, one by one (and the toolchain, for its configs):
   its barrel test pins that, and every export.
-- Four files began as Solid's `@solidjs/element` and `component-register`, folded in and fixed:
-  `UIComponent`, `DOMElement`, `ShadowEvents`, `HotDefinitions`;  each carries their MIT notice.
-
-</details>
-
-<details>
-<summary>Until repo-split P14 lands</summary>
-
-- Inside the kit, this folder's files are imported by a short alias:
-  the same name the packs share it by at run time;  the pack modules list it by that name too.
-  P14 makes the package name, `spell-kit/element`, the one name everywhere, and every pack is rebuilt once.
-
-</details>
-
-<details>
-<summary>Where it came from</summary>
-
-The framework began as the element half of Spell UI's core.
-- It became its own package for every set (epic `people-and-orgs`).
-- Then its own repo, spell-element, when the repos split:
-  cut from the old single repository with its history (epic `repo-split` P8).
-- Then a folder of the kit, history and all (P9).
+- Four files are derived from Solid's `@solidjs/element` and `component-register`, and carry their MIT notice:
+  `UIComponent`, `DOMElement`, `ShadowEvents`, `HotDefinitions`.
 
 </details>
 
@@ -490,10 +747,8 @@ and the page server running ([README-server.md](README-server.md)).
 ## See also
 
 - [spell-ui's README](spell-ui/README.md):  the elements built on this, and the runtime they need
+- [spell-ui's README-runtime.md](spell-ui/README-runtime.md):  the runtime's half of every element, from words to
+  the static render
 - [README-util.md](README-util.md):  the generic helpers and the reactive engine underneath
 - [README-toolchain.md](README-toolchain.md):  the decorator pre-pass and the lint guard
-- [README-server.md](README-server.md):  the page server that serves the packs
-- [README.md](README.md):  the kit, and Spell as a whole
-- Also beside it:
-  [README-agents.md](README-agents.md) · [README-cli.md](README-cli.md) ·
-  [README-development.md](README-development.md) · [README-vscode.md](README-vscode.md)
+- [README.md](README.md):  the kit's front page, and every page of every repo

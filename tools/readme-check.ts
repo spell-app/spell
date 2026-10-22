@@ -21,6 +21,10 @@ import { dirname, join, relative, resolve } from "node:path"
  * The README check over the pages of the kit and its child repos.
  * - Each page is read line by line:  fenced code blocks, `<details>` folds and Mermaid blocks tracked as it goes.
  * - Links are checked against the disk:  the file, and its heading (GitHub's slugs) for a `#anchor`.
+ * - Words are checked too:  the stale and banned names, and the house's rules about Spell's own name:
+ *   - `brand`:  spell-brand is internal, so no page names it, in code spans, links and Mermaid blocks too
+ *   - `capital`:  "Spell" is capitalised in prose;  a lowercase `spell` is for code and names (`spell-lang`)
+ * - A See also lists curated links, not a line of every page beside it (`siblings`).
  * - spell-brand's README is left out:  it stays outside the set of pages (epic `readme`, the map).
  ****************/
 export class ReadmeCheck {
@@ -36,7 +40,10 @@ export class ReadmeCheck {
     word: "a stale or banned name",
     owner: "the owner's name, outside WWOD's expansion and the sample address",
     example: "a deleted example project",
-    "deleted-readme": "the path of an in-folder README that was folded into a page and deleted"
+    "deleted-readme": "the path of an in-folder README that was folded into a page and deleted",
+    brand: "the word brand in any form, anywhere (code, links, Mermaid too):  spell-brand is internal, so leave it out",
+    capital: "a lowercase `spell` in prose:  write Spell;  lowercase is for code, paths and names like `spell-lang`",
+    siblings: "a See also line that opens `Also beside it`:  a See also lists curated links, not every sibling"
   } as const
 
   /** the repos whose root pages are checked, from the kit's root (`.` is the kit) */
@@ -68,7 +75,7 @@ export class ReadmeCheck {
     const lines = text.split("\n")
 
     //////
-    // Line by line:  folds, fences, captions, words
+    // Line by line:  folds, fences, captions, See also, words
     //////
     const folds: Fold[] = []
     let fence: { marker: string; language: string; start: number } | undefined
@@ -106,6 +113,7 @@ export class ReadmeCheck {
       // a drawn picture standing in for a Mermaid block (its source folded under it, "As text") needs a caption too
       if (HERO_IMAGE.test(trimmed) && !hasCaption(lines, index + 1))
         add(lineNumber, "caption", "this picture has no caption")
+      if (SIBLINGS.test(line)) add(lineNumber, "siblings", "a See also lists curated links, not every sibling")
       this.checkWords(line, lineNumber, folds, add)
       if (/<\/details>/i.test(line)) folds.pop()
     })
@@ -115,9 +123,16 @@ export class ReadmeCheck {
     //////
     const prose = proseOf(lines)
     for (const { target, offset } of linksIn(prose)) {
-      const lineNumber = prose.slice(0, offset).split("\n").length
-      this.checkLink(path, text, target, lineNumber, add)
+      this.checkLink(path, text, target, lineAt(prose, offset), add)
     }
+
+    //////
+    // Spell's name, in two views of the page:  "brand" anywhere in its text, a lowercase "spell" only in its prose
+    //////
+    for (const line of linesMatching(text, BRAND))
+      add(line, "brand", "spell-brand is internal:  leave it out of the docs")
+    for (const line of linesMatching(runningTextOf(prose), LOWERCASE_SPELL))
+      add(line, "capital", `write "Spell" in prose;  lowercase only in code`)
     return findings.sort((a, b) => a.line - b.line)
   }
 
@@ -216,6 +231,44 @@ const UNTIL_WORDING = /^Until repo-split (P13 lands|P14 lands|P13 and P14 land)(
 /** a drawn hero picture on a line of its own:  an image in a repo's `docs/images/`, an SVG */
 const HERO_IMAGE = /^!\[[^\]]*\]\([^)]*docs\/images\/[^)]*\.svg\)$/
 
+/** a See also's dump of every page beside it:  a line that opens `Also beside it`, after any list marker */
+const SIBLINGS = /^\s*(?:(?:[-*+]|\d+[.)])\s+)?Also beside it\b/i
+
+/**
+ * the word `brand`, in any form (`brands`, `branded`, `branding`):  spell-brand is internal, so no page names it
+ * - a whole word, but a hyphen or an underscore doesn't join it to its neighbours:  `spell-brand` and `/_brand/` match
+ * - NOT the phrase "brand new" or "brand-new" (its space may be a line break)
+ * - NOT Font Awesome's icon pack `fa7-brands` (the company logos):  a real pack, nothing to do with the repo
+ */
+const BRAND = /(?<![a-z\d])(?<!fa\d+-)(?:brand(?!(?:-|\s+)new(?![a-z\d]))|brands|branded|branding)(?![a-z\d])/gi
+
+/**
+ * a lowercase `spell` standing as a word:  prose writes the name `Spell`
+ * - not an identifier:  a `spell` touching `-`, `_`, `/`, `@` or `#`, after a `.`, or before a `.` and a letter
+ *   (`spell-lang`, `spell_core`, `@spell/core`, `.spell`, `spell.epics`)
+ */
+const LOWERCASE_SPELL = /(?<![\w@#/.-])spell(?![\w@#/-]|\.[A-Za-z])/g
+
+/**
+ * what a reader doesn't take for words, blanked out of a page's prose by `runningTextOf()`
+ * - an HTML comment, which may run over lines, and HTML's own code (`<code>`, `<pre>`)
+ * - an HTML tag with its attributes, and an autolink (`<https://...>`)
+ * - a link or image target, a bare URL, and a reference link's definition and label
+ */
+const NOT_RUNNING_TEXT = new RegExp(
+  [
+    String.raw`<!--[\s\S]*?-->`,
+    String.raw`<(code|pre)\b[^>]*>[\s\S]*?</\1\s*>`,
+    String.raw`</?[A-Za-z][\w:-]*(?:\s+[\w:.@-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>]+))?)*\s*/?>`,
+    String.raw`<[A-Za-z][\w+.-]*:[^\s<>]*>`,
+    String.raw`\]\([^)]*\)`,
+    String.raw`\b(?:(?:https?|ftp|file)://|mailto:|www\.)[^\s<>]+`,
+    String.raw`^ {0,3}\[(?!\^)[^\]]+\]:.*`,
+    String.raw`\]\[[^\]]*\]`
+  ].join("|"),
+  "gim"
+)
+
 /** an import alias, `$/name`:  the end state has none (repo-split P14) */
 const ALIAS = /\$\/[a-z]/i
 
@@ -231,6 +284,31 @@ const WORDS: Array<{ pattern: RegExp; rule: Rule; message: string }> = [
   { pattern: /\bspell-spaces\b/, rule: "word", message: "an old repo name" },
   { pattern: /\.compiled\.js\b/, rule: "word", message: "compiled output is `.output.js`" },
   { pattern: ALIAS, rule: "word", message: "an import alias outside an 'Until repo-split' fold" },
+  // what repo-split P14's last step deletes:  the finished layout has none of them
+  {
+    pattern: /\bUntil repo-split\b/i,
+    rule: "word",
+    message: "repo-split is finished:  describe the finished layout, no 'Until' fold"
+  },
+  {
+    pattern: /\bspell-folders\b|\bspellFolders\b/,
+    rule: "word",
+    message: "deleted with repo-split P14: one tsconfig, one Vitest config of projects"
+  },
+  {
+    pattern: /toolchain\/aliases\b|\balias hook\b|\brun-time alias\b/i,
+    rule: "word",
+    message: "the run-time alias hook is deleted: every import is a package name"
+  },
+  { pattern: /\bno-cross-(?:repo-alias|package-import)\b/, rule: "word", message: "the alias lint rules are deleted" },
+  { pattern: /\bpackModuleKey\b/, rule: "word", message: "gone: a pack's module key is its npm name (spell-ui/core)" },
+  { pattern: /\bspell dev\b/, rule: "word", message: "the command is gone (repo-split P13)" },
+  { pattern: /\bsix (?:git )?repos\b/i, rule: "word", message: "five public repos" },
+  {
+    pattern: /\bepic (?:new|check|stock)\b|\bepic inbox (?:listen|unlisten)\b|\bepic window stay-check\b/,
+    rule: "word",
+    message: "renamed in repo-split P13: epic create / lint / status, inbox watch / ignore, window should-stay"
+  },
   { pattern: /@spell\/examples\/todos(?![-\w])/, rule: "example", message: "deleted:  todos-form-based" },
   {
     pattern: /examples\/solitaire(?![-\w])/,
@@ -283,6 +361,24 @@ function proseOf(lines: string[]): string {
       return line.replace(/(`+)[^`]*?\1/g, (code) => " ".repeat(code.length))
     })
     .join("\n")
+}
+
+/**
+ * `prose` (from `proseOf()`) with what isn't running text blanked as well:  the text a reader takes for words.
+ * - Blanks `NOT_RUNNING_TEXT`, each character to a space and each newline kept:  a line is the same line after.
+ */
+function runningTextOf(prose: string): string {
+  return prose.replace(NOT_RUNNING_TEXT, (part) => part.replace(/[^\n]/g, " "))
+}
+
+/** The line (from 1) that `offset` falls on in `text`. */
+function lineAt(text: string, offset: number): number {
+  return text.slice(0, offset).split("\n").length
+}
+
+/** The lines (from 1) of `text` where `pattern` (global) matches, each once. */
+function linesMatching(text: string, pattern: RegExp): number[] {
+  return [...new Set([...text.matchAll(pattern)].map((match) => lineAt(text, match.index)))]
 }
 
 /** Every link target in `prose`, with its offset:  Markdown links and images, reference definitions, `href` / `src`. */

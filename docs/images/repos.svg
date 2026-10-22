@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-labelledby="title desc">
-  <title id="title">Six repos, one checkout</title>
-  <desc id="desc">The six Spell repos stacked by what they use.  spell-app at the top uses spell-lang, spell-brand and spell-ui, and runs spell-epic.  spell-brand and spell-epic use spell-ui.  spell-lang and spell-ui use the kit, spell-kit, at the bottom, whose folders are util, toolchain, server, element and cli.</desc>
+  <title id="title">Five repos, one checkout</title>
+  <desc id="desc">The five Spell repos stacked by what they use.  spell-app at the top uses spell-lang and spell-ui, and runs spell-epic.  spell-epic uses spell-ui.  spell-lang and spell-ui use the kit, spell-kit, at the bottom, whose folders are util, toolchain, server, element and cli.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>
@@ -22,17 +22,15 @@
   </style>
 
   <rect x="1" y="1" width="798" height="498" rx="16" fill="#FAF9FE" stroke="#E4E0F5" stroke-width="2"/>
-  <text class="title" x="40" y="44">Six repos, one checkout</text>
+  <text class="title" x="40" y="44">Five repos, one checkout</text>
   <text class="sub" x="40" y="66">Every arrow points down:  a repo uses only what's below it.</text>
 
   <!-- edges first, so the boxes sit on top of them -->
   <path class="edge" d="M330,150 C330,226 210,214 210,286" marker-end="url(#arrow)"/>
-  <path class="edge" d="M480,150 L480,186" marker-end="url(#arrow)"/>
   <path class="edge" d="M580,150 L580,286" marker-end="url(#arrow)"/>
-  <path class="runs" d="M620,120 C676,120 690,140 690,186" marker-end="url(#arrow)"/>
-  <text class="label" x="650" y="112">runs</text>
+  <path class="runs" d="M470,150 L470,186" marker-end="url(#arrow)"/>
+  <text class="label" x="482" y="174">runs</text>
   <path class="edge" d="M480,250 C480,272 536,266 540,286" marker-end="url(#arrow)"/>
-  <path class="edge" d="M690,250 C690,272 626,266 622,286" marker-end="url(#arrow)"/>
   <path class="edge" d="M210,350 L210,386" marker-end="url(#arrow)"/>
   <path class="edge" d="M580,350 L580,386" marker-end="url(#arrow)"/>
 
@@ -41,13 +39,10 @@
   <text class="name" x="460" y="116">spell-app</text>
   <text class="what" x="460" y="136">the editor</text>
 
-  <!-- spell-brand, spell-epic -->
+  <!-- spell-epic -->
   <rect class="repo" x="400" y="190" width="160" height="60" rx="12"/>
-  <text class="name" x="480" y="216">spell-brand</text>
-  <text class="what" x="480" y="236">the brand</text>
-  <rect class="repo" x="610" y="190" width="160" height="60" rx="12"/>
-  <text class="name" x="690" y="216">spell-epic</text>
-  <text class="what" x="690" y="236">epics and sagas</text>
+  <text class="name" x="480" y="216">spell-epic</text>
+  <text class="what" x="480" y="236">epics and sagas</text>
 
   <!-- spell-lang, spell-ui -->
   <rect class="repo" x="110" y="290" width="200" height="60" rx="12"/>
