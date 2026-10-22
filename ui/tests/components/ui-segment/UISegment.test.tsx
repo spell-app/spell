@@ -5,15 +5,15 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-segment"
-import "$/ui/components/ui-parts"
-import "$/ui/components/ui-label"
+import "spell-ui/components/ui-segment"
+import "spell-ui/components/ui-parts"
+import "spell-ui/components/ui-label"
 
 /** Examples whose original fragment fails axe `heading-order` too (see `notes/report.md`). */
 const HEADING_DEMOS = ["parts/examples/elements/header.html", "segment/examples/elements/variations.html"]
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-segment/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-segment/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

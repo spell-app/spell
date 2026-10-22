@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { cardVocabulary } from "$/ui/components/ui-card/UICard.en"
-import { cardsVocabulary } from "$/ui/components/ui-card/UICards.en"
+import { cardVocabulary } from "spell-ui/components/ui-card/UICard.en"
+import { cardsVocabulary } from "spell-ui/components/ui-card/UICards.en"
 
-import iconCSS from "$/ui/components/ui-icon/UIIcon.css?inline"
-import partsCSS from "$/ui/components/ui-parts/UIParts.css?inline"
-import cardCSS from "$/ui/components/ui-card/UICard.css?inline"
-import cardRaw from "$/ui/components/ui-card/UICard.css?raw"
+import iconCSS from "spell-ui/components/ui-icon/UIIcon.css?inline"
+import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import cardCSS from "spell-ui/components/ui-card/UICard.css?inline"
+import cardRaw from "spell-ui/components/ui-card/UICard.css?raw"
 
 /**
  * `UICard.css` on its own, before any element exists:  the sheet's source rules, and the computed styles of the
@@ -22,7 +22,7 @@ import cardRaw from "$/ui/components/ui-card/UICard.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-card",
+  base: "/src/components/ui-card",
   query: "?raw",
   import: "default",
   eager: true

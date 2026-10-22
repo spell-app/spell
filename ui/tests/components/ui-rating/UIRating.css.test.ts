@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { ratingVocabulary } from "$/ui/components/ui-rating/UIRating.en"
+import { ratingVocabulary } from "spell-ui/components/ui-rating/UIRating.en"
 
-import ratingCSS from "$/ui/components/ui-rating/UIRating.css?inline"
-import ratingRaw from "$/ui/components/ui-rating/UIRating.css?raw"
+import ratingCSS from "spell-ui/components/ui-rating/UIRating.css?inline"
+import ratingRaw from "spell-ui/components/ui-rating/UIRating.css?raw"
 
 /**
  * `UIRating.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -18,7 +18,7 @@ import ratingRaw from "$/ui/components/ui-rating/UIRating.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-rating",
+  base: "/src/components/ui-rating",
   query: "?raw",
   import: "default",
   eager: true

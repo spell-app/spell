@@ -4,11 +4,11 @@ import { join } from "node:path"
 import { describe, expect, it } from "vite-plus/test"
 
 import { keepingCommentsIn as asWritten, readJSON5File } from "spell-kit/util/node/json5"
-import type { SitePagesFile } from "$/ui/docs-components/docs-components.types"
-import { SiteDataBuilder } from "$/ui/tools/SiteDataBuilder"
-import { SITE_PAGES } from "$/ui/tools/tools.types"
+import type { SitePagesFile } from "spell-ui/docs-components/docs-components.types"
+import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
+import { SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { writeOrCheck } from "../../scripts/generatedFiles.ts"
+import { writeOrCheck } from "spell-ui/tools/generatedFiles"
 
 /**
  * The site's committed data is what `yarn site:data` would write now.

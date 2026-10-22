@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { adVocabulary } from "$/ui/components/ui-ad/UIAd.en"
+import { adVocabulary } from "spell-ui/components/ui-ad/UIAd.en"
 
-import adCSS from "$/ui/components/ui-ad/UIAd.css?inline"
-import adRaw from "$/ui/components/ui-ad/UIAd.css?raw"
+import adCSS from "spell-ui/components/ui-ad/UIAd.css?inline"
+import adRaw from "spell-ui/components/ui-ad/UIAd.css?raw"
 
 /**
  * `UIAd.css` on the class-grammar examples:  the source rules, every unit's box, the test placeholder.
@@ -17,7 +17,7 @@ import adRaw from "$/ui/components/ui-ad/UIAd.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-ad",
+  base: "/src/components/ui-ad",
   query: "?raw",
   import: "default",
   eager: true

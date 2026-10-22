@@ -1,22 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test-helpers/Keys"
+import { Keys } from "spell-ui/test-helpers/Keys"
 
-import { UI } from "$/ui/runtime"
-import type { SidebarCloseDetail } from "$/ui/components/components.types"
+import { UI } from "spell-ui/runtime"
+import type { SidebarCloseDetail } from "spell-ui/components/components.types"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-sidebar"
-import "$/ui/components/ui-menu"
-import "$/ui/components/ui-item"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-sidebar"
+import "spell-ui/components/ui-menu"
+import "spell-ui/components/ui-item"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-sidebar/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-sidebar/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

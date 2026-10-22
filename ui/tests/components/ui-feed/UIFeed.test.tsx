@@ -5,12 +5,12 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-feed"
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-feed"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-feed/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-feed/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

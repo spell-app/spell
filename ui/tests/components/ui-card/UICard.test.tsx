@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test-helpers/Keys"
+import { Keys } from "spell-ui/test-helpers/Keys"
 
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
@@ -8,12 +8,12 @@ import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { Viewport } from "spell-kit/test-helpers/Viewport"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-card"
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-button"
+import "spell-ui/components/ui-card"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-button"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-card/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-card/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -212,7 +212,7 @@ describe("<ui-card> content parts", () => {
   })
 
   it("keeps a header inside a nested segment standalone (a barrier)", async () => {
-    await import("$/ui/components/ui-segment")
+    await import("spell-ui/components/ui-segment")
     const host = await render(`<ui-card><ui-segment><ui-header>Alone</ui-header></ui-segment></ui-card>`)
     await ElementFixture.settle(host)
     expect(host.querySelector("ui-header")!.matches(":state(in-card)")).toBe(false)

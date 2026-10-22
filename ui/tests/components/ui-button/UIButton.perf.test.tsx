@@ -4,7 +4,7 @@ import { flush } from "solid-js"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "$/ui/components/ui-button"
+import "spell-ui/components/ui-button"
 
 /** Buttons per run. */
 const COUNT = 1000
@@ -18,7 +18,7 @@ const RUNS = 9
  * - It times the custom-element layer (upgrade, attributes, component, first render) more than the button itself,
  *   so the numbers from before and after epic `spell-element` folded solid-element into `ui` compare like for like.
  * - One warm-up run (styles registered, chunks loaded), then `RUNS` timed ones;  the median is the number to quote.
- * - SIDE EFFECT:  writes `tools/results/build-perf.json` (browser-mode `console.log` doesn't reach the terminal).
+ * - SIDE EFFECT:  writes `results/build-perf.json` (browser-mode `console.log` doesn't reach the terminal).
  */
 it("builds 1,000 <ui-button>s", async () => {
   const markup = Array.from({ length: COUNT }, (_, index) => `<ui-button primary>Button ${index}</ui-button>`).join("")
@@ -28,7 +28,7 @@ it("builds 1,000 <ui-button>s", async () => {
   const sorted = [...times].sort((a, b) => a - b)
   const median = sorted[Math.floor(RUNS / 2)]!
   await commands.writeFile(
-    "tools/results/build-perf.json",
+    "results/build-perf.json",
     `${JSON.stringify({ count: COUNT, runs: times, median, date: new Date().toISOString().slice(0, 10) }, null, 2)}\n`
   )
   expect(median).toBeGreaterThan(0)

@@ -1,22 +1,22 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
-import { UI } from "$/ui/runtime"
-import { ValueSets } from "$/ui/vocabulary"
-import { sectionVocabulary } from "$/ui/components/ui-section/UISection.en"
+import { UI } from "spell-ui/runtime"
+import { ValueSets } from "spell-ui/vocabulary"
+import { sectionVocabulary } from "spell-ui/components/ui-section/UISection.en"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { UIPanel } from "$/ui/components/ui-panel"
-import { panelVocabulary } from "$/ui/components/ui-panel/UIPanel.en"
+import { UIPanel } from "spell-ui/components/ui-panel"
+import { panelVocabulary } from "spell-ui/components/ui-panel/UIPanel.en"
 
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-input"
-import "$/ui/components/ui-slider"
-import "$/ui/components/ui-checkbox"
-import "$/ui/components/ui-form"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-input"
+import "spell-ui/components/ui-slider"
+import "spell-ui/components/ui-checkbox"
+import "spell-ui/components/ui-form"
 
 /** Element-markup examples, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-panel/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-panel/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

@@ -12,7 +12,7 @@
  *     holding the example WITHOUT its `header`
  *     - the header-less examples right after it (Fomantic's `.another.example`) go in with it
  *   - a header holding markup (`<code>` ...) keeps it as the section's `<span slot="label">`
- *   - a section's title is `label`;  one by its old name, `header` (epic `property-editor` P10), is read the same
+ *   - a section's title is `label`
  *   - ids:  the pane's value, then each level's slug (lowercase kebab of its header, `TocIndex.slug()`)
  *     - a page without tabs starts at the slug (`#general-usage`, `#general-usage-descriptive-attributes`)
  *     - made unique in the page with `-2`, `-3` ...
@@ -36,12 +36,12 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
-import { TocIndex } from "../src/docs-components/ui-docs-toc/TocIndex.ts"
-import { environment } from "../tools/environment.ts"
-import { Terminal } from "spell-kit/element/tools/Terminal"
-import { SITE_PAGES } from "../tools/tools.types.ts"
+import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
+import { environment } from "spell-ui/tools/environment"
+import { Terminal } from "spell-kit/element-tools/Terminal"
+import { SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { type GeneratedOutput, writeOrCheck } from "./generatedFiles.ts"
+import { type GeneratedOutput, writeOrCheck } from "spell-ui/tools/generatedFiles"
 
 /** `packages/ui/`. */
 const UI = path.resolve(import.meta.dirname, "..")
@@ -60,8 +60,8 @@ export class SiteSections {
   /** Attributes every page section gets after `id` and `label`. */
   static readonly FLAGS = ["sticky", "collapsible", "dividing"]
 
-  /** A section's title attribute and slot:  `label`, then its old name, `header` (epic `property-editor` P10). */
-  static readonly SECTION_TITLE = ["label", "header"]
+  /** A section's title attribute and slot:  `label`. */
+  static readonly SECTION_TITLE = ["label"]
 
   /** A generator's marker comment:  `<!-- kitchen:start -->`, `<!-- site:page:end -->`. */
   static readonly MARKER = /^<!--\s*[\w:-]+:(start|end)\s*-->$/
@@ -368,7 +368,7 @@ export class SiteSections {
   /** A header's text (for the slug), its attribute form, and its markup when it holds any. */
   private static headerOf(node: HtmlNode): Header {
     if (node.tag === "ui-docs-example" || node.tag === "ui-section") {
-      // a section's title:  `label`, or its old name;  an example's:  `header`
+      // a section's title:  `label`;  an example's:  `header`
       const names = node.tag === "ui-section" ? SiteSections.SECTION_TITLE : ["header"]
       const raw = names.map((name) => node.rawAttr(name)).find((value) => value !== undefined)
       if (raw !== undefined) return { text: HtmlParser.decode(raw), attribute: raw }
@@ -424,7 +424,7 @@ type Header = {
   text: string
   /** as an attribute value (escaped);  `""` when slotted */
   attribute: string
-  /** markup for `<span slot="header">`, when the header holds tags */
+  /** markup for `<span slot="label">`, when the header holds tags */
   slot?: string
 }
 

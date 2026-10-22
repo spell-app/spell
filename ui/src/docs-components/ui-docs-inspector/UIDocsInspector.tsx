@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "$/ui/core"
+import { E } from "spell-ui/core"
 import { docsInspectorVocabulary } from "./UIDocsInspector.en"
 import { ElementSnapshot, type SnapshotRow } from "./ElementSnapshot"
 

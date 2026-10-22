@@ -1,31 +1,31 @@
 // Import directly to avoid circular import:  everything here sits below the `core` entry, which imports this file
 import { SpellSolid, type SpellSolidSettings } from "spell-kit/element"
-import { Warnings } from "$/ui/util"
-import { Converters, SharedVocabulary, ValueSets, Vocabulary } from "$/ui/vocabulary"
-import { UI } from "$/ui/runtime"
-import { RUNTIME_KEY, type RuntimeGlobal } from "$/ui/runtime/runtime.types"
-import * as UIT from "$/ui/components/components.types"
+import { Warnings } from "spell-ui/util"
+import { Converters, SharedVocabulary, ValueSets, Vocabulary } from "spell-ui/vocabulary"
+import { UI } from "spell-ui/runtime"
+import { RUNTIME_KEY, type RuntimeGlobal } from "spell-ui/runtime/runtime.types"
+import * as UIT from "spell-ui/components/components.types"
 import { ClassBuilder } from "./ClassBuilder"
 
 /****************
  * ### `SpellUISettings`
  * What Spell UI hands spell-element as it loads (`SpellSolid.install()`), which every set's elements draw with:
  * its runtime (`UI`), its vocabulary layer, its style sheets, focus and animations (`E.SpellSolidSettings`).
- * - Installed as `$/ui/core` loads (`core.ts` imports this file), so before any family's `define()`:
- *   a family imports `$/ui/core` first.
+ * - Installed as `spell-ui/core` loads (`core.ts` imports this file), so before any family's `define()`:
+ *   a family imports `spell-ui/core` first.
  * - What each one is in Spell UI:
- *   - `runtime`:  the page's `UI` runtime, lazy (`$/ui/runtime`):  elements show once it has loaded
- *   - `words`:  `$/ui/vocabulary` (`Vocabulary`, `SharedVocabulary`, `Converters`, `ValueSets`), `ClassBuilder`,
+ *   - `runtime`:  the page's `UI` runtime, lazy (`spell-ui/runtime`):  elements show once it has loaded
+ *   - `words`:  `spell-ui/vocabulary` (`Vocabulary`, `SharedVocabulary`, `Converters`, `ValueSets`), `ClassBuilder`,
  *     and the runtime's `UI.vocabulary` and `UI.i18n`
  *   - `styles`, `focus`:  the runtime's `UI.styles`, `UI.focus`
  *   - `motion`:  Fomantic's animations (`UIT.Animations`), run by `UI.transitions`;  `--ui-motion`
  *   - `warn`:  `Warnings.warn()`, `[spell-ui] ...`
  * - SIDE EFFECT:  installs them;  listed in `package.json`'s `sideEffects`.
- * - Imported for that by `core.ts`, AND by `$/ui`'s barrel (`index.ts`) and the root's (`ui-root/index.ts`):
+ * - Imported for that by `core.ts`, AND by `spell-ui`'s barrel (`index.ts`) and the root's (`ui-root/index.ts`):
  *   - `core.ts` alone isn't enough in a bundle, since it's only re-exports:
  *     a bundler that sees nothing of it used drops its side-effect import too.
  *     Spell UI's site and the brand's pages lost it.
- *   - Every page has a root, or loads `$/ui`.
+ *   - Every page has a root, or loads `spell-ui`.
  *   - Not `core.ts` in `sideEffects` instead:  that re-chunks the app's `spell-solid.js`
  *     (its `BuiltInPacks` moves out, away from where `<spell-app>` finds its icons).
  * - A code-split build may run a family's chunk first:

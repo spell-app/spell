@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { revealVocabulary } from "$/ui/components/ui-reveal/UIReveal.en"
+import { revealVocabulary } from "spell-ui/components/ui-reveal/UIReveal.en"
 
-import revealCSS from "$/ui/components/ui-reveal/UIReveal.css?inline"
-import revealRaw from "$/ui/components/ui-reveal/UIReveal.css?raw"
+import revealCSS from "spell-ui/components/ui-reveal/UIReveal.css?inline"
+import revealRaw from "spell-ui/components/ui-reveal/UIReveal.css?raw"
 
 /**
  * `UIReveal.css` on the class-grammar examples:  the source rules, the stacked contents, and what each type does
@@ -18,7 +18,7 @@ import revealRaw from "$/ui/components/ui-reveal/UIReveal.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-reveal",
+  base: "/src/components/ui-reveal",
   query: "?raw",
   import: "default",
   eager: true

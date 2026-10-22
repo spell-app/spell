@@ -1,4 +1,4 @@
-import { SSR } from "$/ui/static"
+import { SSR } from "spell-ui/static"
 // Import directly to avoid circular import:  the constants below the class read them
 import { ROOT, SLOTTED } from "./static.types.ssr"
 
@@ -19,8 +19,8 @@ import { ROOT, SLOTTED } from "./static.types.ssr"
  * - every subject is anchored (`anchor()`):  it may be the root, and only `::slotted()` / `slot` subjects may be
  *   slotted
  * - Anything else (class grammar) is kept as written.
- * - Node only (`$/ui/static`):  strings in, strings out, no DOM, no postcss;  NEVER imported by a component or
- *   `$/ui`.
+ * - Node only (`spell-ui/static`):  strings in, strings out, no DOM, no postcss;  NEVER imported by a component or
+ *   `spell-ui`.
  ****************/
 export class StaticSelectors {
   /**

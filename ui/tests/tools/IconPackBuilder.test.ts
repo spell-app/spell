@@ -4,9 +4,9 @@ import path from "node:path"
 import { pathToFileURL } from "node:url"
 import { afterEach, describe, expect, it } from "vite-plus/test"
 
-import type { IconPackIndex } from "$/ui/icons/icons.types"
-import { IconPackBuilder } from "$/ui/tools/IconPackBuilder"
-import { IconPackError } from "$/ui/tools/tools.types"
+import type { IconPackIndex } from "spell-ui/icons/icons.types"
+import { IconPackBuilder } from "spell-ui/tools/IconPackBuilder"
+import { IconPackError } from "spell-ui/tools/tools.types"
 
 ////////////////
 // ## Fixtures

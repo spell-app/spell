@@ -1,16 +1,16 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import type { DOMFormControl } from "$/ui/elements"
+import type { DOMFormControl } from "spell-ui/elements"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "$/ui/components/ui-slider"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-slider"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-slider/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-slider/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

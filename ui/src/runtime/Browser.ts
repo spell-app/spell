@@ -1,4 +1,4 @@
-import { isBrowser, lazy } from "$/ui/util"
+import { isBrowser, lazy } from "spell-ui/util"
 
 import type { BrowserSupports } from "./runtime.types"
 

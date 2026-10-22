@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { PartNouns, PartVocabularies } from "$/ui/components/ui-parts/UIParts.types"
+import { PartNouns, PartVocabularies } from "spell-ui/components/ui-parts/UIParts.types"
 
-import iconCSS from "$/ui/components/ui-icon/UIIcon.css?inline"
-import partsCSS from "$/ui/components/ui-parts/UIParts.css?inline"
-import partsRaw from "$/ui/components/ui-parts/UIParts.css?raw"
+import iconCSS from "spell-ui/components/ui-icon/UIIcon.css?inline"
+import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import partsRaw from "spell-ui/components/ui-parts/UIParts.css?raw"
 
 /**
  * `UIParts.css` on its own, before any part element exists:  the sheet's source rules, the standalone header,
@@ -20,7 +20,7 @@ import partsRaw from "$/ui/components/ui-parts/UIParts.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-parts",
+  base: "/src/components/ui-parts",
   query: "?raw",
   import: "default",
   eager: true

@@ -1,19 +1,19 @@
 import { beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test-helpers/Keys"
+import { Keys } from "spell-ui/test-helpers/Keys"
 
-import { UI } from "$/ui/runtime"
-import type { EmbedActivateDetail } from "$/ui/components/components.types"
+import { UI } from "spell-ui/runtime"
+import type { EmbedActivateDetail } from "spell-ui/components/components.types"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-embed"
+import "spell-ui/components/ui-embed"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-embed/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-embed/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -26,7 +26,7 @@ type Embed = DOMElement & { active: boolean; parameters: unknown; activate(): bo
  * A SAME-ORIGIN page to frame, so activation tests never reach the network (a file the dev server has anyway).
  * - Third-party URLs are only ever asserted, through a cancelled `ui-activate` or `EmbedSources` directly.
  */
-const LOCAL = new URL("/components/ui-embed/examples/types.html", location.href).href
+const LOCAL = new URL("/src/components/ui-embed/examples/types.html", location.href).href
 
 /** Render one `<ui-embed>`;  returns it with its box. */
 async function embed(html: string) {

@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import type { AttributeSpec, ComponentVocabulary } from "$/ui/vocabulary"
+import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
 import { SkeletonText } from "spell-kit/element/SkeletonText"
-import { ROOT_CATALOG } from "$/ui/components/ui-root/UIRoot.catalog"
-import { MemberClashes } from "$/ui/test-helpers/MemberClashes"
+import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
+import { MemberClashes } from "spell-ui/test-helpers/MemberClashes"
 
 /** Every family's English vocabulary module, by path:  the components' and the doc-only elements'. */
-const MODULES = import.meta.glob<Record<string, unknown>>(["/components/*/*.en.ts", "/src/docs-components/*/*.en.ts"], {
-  eager: true
-})
+const MODULES = import.meta.glob<Record<string, unknown>>(
+  ["/src/components/*/*.en.ts", "/src/docs-components/*/*.en.ts"],
+  {
+    eager: true
+  }
+)
 
 /** Every exported vocabulary (a `tag` and an `attributes` array). */
 const VOCABULARIES = Object.values(MODULES).flatMap((module) => Object.values(module).filter(isVocabulary))
@@ -63,8 +66,8 @@ describe("UI<Name>.en.ts kinds, across families", () => {
 /** Source of every vocabulary and family types file:  pure data, imported in node too (`yarn site:data`, `gen:root`). */
 const DATA_FILES = import.meta.glob<string>(
   [
-    "/components/*/*.en.ts",
-    "/components/*/*.types.ts",
+    "/src/components/*/*.en.ts",
+    "/src/components/*/*.types.ts",
     "/src/docs-components/*/*.en.ts",
     "/src/docs-components/*/*.types.ts"
   ],
@@ -72,9 +75,9 @@ const DATA_FILES = import.meta.glob<string>(
 )
 
 describe("UI<Name>.en.ts / UI<Name>.types.ts imports", () => {
-  // `$/ui/core` by VALUE loads the element layer, which node can't:  `yarn site:data` / `yarn gen:root` import every
+  // `spell-ui/core` by VALUE loads the element layer, which node can't:  `yarn site:data` / `yarn gen:root` import every
   // vocabulary through tsx (no `?inline` css, no JSX)
-  it.each(Object.entries(DATA_FILES))("%s imports `$/ui/core` for types only", (_, source) => {
+  it.each(Object.entries(DATA_FILES))("%s imports `spell-ui/core` for types only", (_, source) => {
     // one statement:  `import { ... } from` (braces may span lines) or `import X from`, not `import type`
     const valueImports = [...source.matchAll(/^import (?!type )(?:\{[^}]*\}|[\w*][^\n{]*?) from "\$\/ui\/core"/gm)]
       .map((match) => match[0])

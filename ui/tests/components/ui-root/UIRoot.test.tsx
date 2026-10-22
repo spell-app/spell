@@ -5,13 +5,13 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { Viewport } from "spell-kit/test-helpers/Viewport"
-import { E } from "$/ui/core"
+import { E } from "spell-ui/core"
 import { DOMElement } from "spell-kit/element"
 
-import { UIRoot, type RootFailure } from "$/ui/components/ui-root"
+import { UIRoot, type RootFailure } from "spell-ui/components/ui-root"
 
 /** Element examples, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-root/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-root/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

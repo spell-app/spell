@@ -1,0 +1,65 @@
+{
+  "name": "spell-__pack__",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A component pack:  <__prefix__*> elements a page loads on demand through <ui-root> (spell pack)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "spell-__pack__-source": "./src/index.ts",
+      "types": "./dist-types/src/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./components": {
+      "spell-__pack__-source": "./src/components/index.ts",
+      "types": "./dist-types/src/components/index.d.ts",
+      "default": "./src/components/index.ts"
+    },
+    "./*": {
+      "spell-__pack__-source": ["./src/*.ts", "./src/*.tsx", "./src/*/index.ts", "./src/*/index.tsx", "./src/*"],
+      "types": ["./dist-types/src/*.d.ts", "./dist-types/src/*/index.d.ts"],
+      "default": "./src/*"
+    },
+    "./*.ts": {
+      "spell-__pack__-source": "./src/*.ts",
+      "types": "./dist-types/src/*.d.ts",
+      "default": "./src/*.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "pack:build": "spell-pack build",
+    "pack:check": "spell-pack check",
+    "/////// CORRECTNESS": "",
+    "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && spell-types --below && spell-types && tsc -p ./tests && echo '<< TSC PASSED\n'",
+    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\n'",
+    "lint:fix": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT --fix' && vp lint --fix src && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\n'",
+    "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt src vite.config.ts vitest.config.ts && cd ./tests && vp fmt . && echo '<< OXFMT PASSED\n'",
+    "/////// TESTING": "",
+    "test": "echo '>>>>>>>>>>>\n>> RUNNING TESTS' && vp test run && echo '<< TESTS PASSED\n'"
+  },
+  "dependencies": {
+    "spell-kit": "workspace:*"
+  },
+  "devDependencies": {
+    "@solidjs/web": "__solid__",
+    "@types/node": "^22.20.4",
+    "solid-js": "__solid__",
+    "spell-ui": "workspace:*",
+    "typescript": "^7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.11"
+  },
+  "packageManager": "yarn@4.18.0",
+  "spellTypes": ["tsconfig.json"],
+  "spellPack": {
+    "name": "__pack__",
+    "prefix": "__prefix__",
+    "components": "src/components"
+  }
+}

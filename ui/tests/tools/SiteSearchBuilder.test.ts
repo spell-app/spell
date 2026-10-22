@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { SiteSearchBuilder } from "$/ui/tools/SiteSearchBuilder"
+import { SiteSearchBuilder } from "spell-ui/tools/SiteSearchBuilder"
 
 /**
  * `SiteSearchBuilder`:  a page's entry in `docs/__data/search.json5`, from its markup.
@@ -19,7 +19,7 @@ describe("SiteSearchBuilder.page()", () => {
           </ui-section>
         </ui-tab>
         <ui-tab value="usage" label="Usage">
-          <ui-section id="usage-slots"><span slot="header">The <code>header</code> slot</span></ui-section>
+          <ui-section id="usage-slots"><span slot="label">The <code>header</code> slot</span></ui-section>
         </ui-tab>
       </ui-tabs>
       <template><ui-section id="templated" label="Never"></ui-section></template>

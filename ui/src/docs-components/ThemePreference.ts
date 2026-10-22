@@ -1,4 +1,4 @@
-import { E, UI } from "$/ui/core"
+import { E, UI } from "spell-ui/core"
 import {
   DOCS_DARK_QUERY,
   DOCS_DEFAULT_THEME,
@@ -41,7 +41,7 @@ import {
  *     so it usually lands with their first render;  page text may flash the default look for a frame.
  * - Several pickers on one page (the right column's, a components page's `for` one)
  *   stay in step through `subscribe()`.
- * - Imports the core entry (`UI`, `$/ui/core`), which the site entry loads anyway;
+ * - Imports the core entry (`UI`, `spell-ui/core`), which the site entry loads anyway;
  *   the runtime chunk (`UI.themes`) loads only to apply a theme.
  * - Static only:  the look is one per page.
  ****************/

@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { calendarVocabulary } from "$/ui/components/ui-calendar/UICalendar.en"
+import { calendarVocabulary } from "spell-ui/components/ui-calendar/UICalendar.en"
 
-import inputCSS from "$/ui/components/ui-input/UIInput.css?inline"
-import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
-import calendarCSS from "$/ui/components/ui-calendar/UICalendar.css?inline"
-import calendarRaw from "$/ui/components/ui-calendar/UICalendar.css?raw"
+import inputCSS from "spell-ui/components/ui-input/UIInput.css?inline"
+import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import calendarCSS from "spell-ui/components/ui-calendar/UICalendar.css?inline"
+import calendarRaw from "spell-ui/components/ui-calendar/UICalendar.css?raw"
 
 /**
  * `UICalendar.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -20,7 +20,7 @@ import calendarRaw from "$/ui/components/ui-calendar/UICalendar.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-calendar",
+  base: "/src/components/ui-calendar",
   query: "?raw",
   import: "default",
   eager: true

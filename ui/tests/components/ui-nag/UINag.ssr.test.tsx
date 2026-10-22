@@ -2,11 +2,11 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "$/ui/static"
-import { UINag } from "$/ui/components/ui-nag/UINag"
+import { StaticRender } from "spell-ui/static"
+import { UINag } from "spell-ui/components/ui-nag/UINag"
 
 /**
- * `<ui-nag>` in the static server render (`$/ui/static`, seo plan P3):
+ * `<ui-nag>` in the static server render (`spell-ui/static`, seo plan P3):
  * always shown -- a server can't read the reader's dismissal (plan C2).
  */
 describe("<ui-nag> static render", () => {

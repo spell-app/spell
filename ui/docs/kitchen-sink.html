@@ -1640,10 +1640,16 @@
                   An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view.
                   <a href="ui-include.html">Include page</a>
                 </p>
-                <ui-include source="examples/release-notes.html">Loading the release notes...</ui-include>
+                <ui-include source="examples/release-notes.html"
+                  >Loading the release notes...</ui-include
+                >
               </ui-docs-example>
               <ui-docs-example description="One part, with the page's styles">
-                <ui-include source="examples/release-notes.html" select="#notes" page-styles></ui-include>
+                <ui-include
+                  source="examples/release-notes.html"
+                  select="#notes"
+                  page-styles
+                ></ui-include>
               </ui-docs-example>
               <ui-docs-example description="Another site">
                 <ui-include source="https://example.com/"></ui-include>

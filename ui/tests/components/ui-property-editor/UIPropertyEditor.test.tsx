@@ -2,10 +2,10 @@ import { describe, expect, it } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { UI } from "$/ui/core"
-import type { PropertySchema } from "$/ui/vocabulary"
+import { UI } from "spell-ui/core"
+import type { PropertySchema } from "spell-ui/vocabulary"
 
-import "$/ui"
+import "spell-ui"
 
 ////////////////
 // ## Helpers
@@ -209,10 +209,10 @@ describe("<ui-property-editor> section and Save", () => {
     const host = await editor(
       `<ui-property name="title"></ui-property>`,
       { title: "Spell" },
-      `header="Theme" collapsible`
+      `label="Theme" collapsible`
     )
     const section = host.shadowRoot!.querySelector("ui-section")!
-    expect(section.getAttribute("header")).toBe("Theme")
+    expect(section.getAttribute("label")).toBe("Theme")
     expect(section.hasAttribute("collapsible")).toBe(true)
     expect(host.shadowRoot!.querySelector("[part~=form]")!.classList.contains("collapsible")).toBe(false)
   })
@@ -246,7 +246,7 @@ describe("<ui-property-editor> section and Save", () => {
 ////////////////
 
 describe("<ui-property-editor source>", () => {
-  const PAGE = "/test-helpers/fixtures/sources/property-editor/Theme.editor.html"
+  const PAGE = "/src/test-helpers/fixtures/sources/property-editor/Theme.editor.html"
 
   it("takes its layout from the page:  its groups and properties, and the page's attributes it doesn't have", async () => {
     const host = await ElementFixture.render<Editor>(`<ui-property-editor source="${PAGE}"></ui-property-editor>`)

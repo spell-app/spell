@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS, tokensCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS, tokensCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { textVocabulary } from "$/ui/components/ui-text/UIText.en"
+import { textVocabulary } from "spell-ui/components/ui-text/UIText.en"
 
-import textCSS from "$/ui/components/ui-text/UIText.css?inline"
-import textRaw from "$/ui/components/ui-text/UIText.css?raw"
+import textCSS from "spell-ui/components/ui-text/UIText.css?inline"
+import textRaw from "spell-ui/components/ui-text/UIText.css?raw"
 
 /**
  * `UIText.css` on its own, before any element exists:
@@ -20,7 +20,7 @@ import textRaw from "$/ui/components/ui-text/UIText.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-text",
+  base: "/src/components/ui-text",
   query: "?raw",
   import: "default",
   eager: true

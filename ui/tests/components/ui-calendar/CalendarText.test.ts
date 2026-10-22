@@ -1,10 +1,10 @@
 import { Temporal } from "temporal-polyfill"
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
-import type { UIT } from "$/ui/core"
-import { UI } from "$/ui/runtime"
-import { CalendarDates } from "$/ui/components/ui-calendar/CalendarDates"
-import { CalendarText } from "$/ui/components/ui-calendar/CalendarText"
+import type { UIT } from "spell-ui/core"
+import { UI } from "spell-ui/runtime"
+import { CalendarDates } from "spell-ui/components/ui-calendar/CalendarDates"
+import { CalendarText } from "spell-ui/components/ui-calendar/CalendarText"
 
 /** 2:30 PM on Wednesday, September 30, 2026. */
 const MOMENT = Temporal.PlainDateTime.from("2026-09-30T14:30")

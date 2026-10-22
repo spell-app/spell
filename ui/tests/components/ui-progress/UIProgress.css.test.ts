@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { progressVocabulary } from "$/ui/components/ui-progress/UIProgress.en"
+import { progressVocabulary } from "spell-ui/components/ui-progress/UIProgress.en"
 
-import progressCSS from "$/ui/components/ui-progress/UIProgress.css?inline"
-import progressRaw from "$/ui/components/ui-progress/UIProgress.css?raw"
+import progressCSS from "spell-ui/components/ui-progress/UIProgress.css?inline"
+import progressRaw from "spell-ui/components/ui-progress/UIProgress.css?raw"
 
 /**
  * `UIProgress.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -18,7 +18,7 @@ import progressRaw from "$/ui/components/ui-progress/UIProgress.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-progress",
+  base: "/src/components/ui-progress",
   query: "?raw",
   import: "default",
   eager: true

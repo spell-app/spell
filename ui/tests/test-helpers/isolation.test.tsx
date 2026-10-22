@@ -3,12 +3,12 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 import { createEffect, resetErrorHalt } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import type { ComponentVocabulary } from "$/ui/vocabulary"
+import type { ComponentVocabulary } from "spell-ui/vocabulary"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { UIComponent, type AttributeValues, type UIComponentClass, type DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-label"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-label"
+import "spell-ui/components/ui-segment"
 
 /** Test-only element that throws on demand:  `boom` in render, `crash` in the constructor, `burst` in an effect. */
 class Bomb extends UIComponent<typeof BOMB> {

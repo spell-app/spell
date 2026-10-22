@@ -1,20 +1,20 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "$/ui/core"
+import { E, UIT } from "spell-ui/core"
 import {
   HeadingLevels,
   type HeadingBounds,
   type SiteDataFile,
   type SiteTag
-} from "$/ui/docs-components/docs-components.types"
-import { SiteData } from "$/ui/docs-components/SiteData"
+} from "spell-ui/docs-components/docs-components.types"
+import { SiteData } from "spell-ui/docs-components/SiteData"
 import { ApiModel } from "./ApiModel"
 import { InlineCode } from "./InlineCode"
 import { type ApiCell, type ApiItem, type ApiMessage, type ApiSection, type DocsApiVocabulary } from "./UIDocsApi.types"
 import { docsApiVocabulary } from "./UIDocsApi.en"
 
-import tableCSS from "$/ui/components/ui-table/UITable.css?inline"
+import tableCSS from "spell-ui/components/ui-table/UITable.css?inline"
 import apiCSS from "./UIDocsApi.css?inline"
 
 /****************

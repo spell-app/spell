@@ -1,5 +1,5 @@
-import { E } from "$/ui/core"
-import { SiteData } from "$/ui/docs-components/SiteData"
+import { E } from "spell-ui/core"
+import { SiteData } from "spell-ui/docs-components/SiteData"
 import { PAGE_MAIN } from "./site.types"
 
 /****************

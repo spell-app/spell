@@ -1,15 +1,15 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { UI } from "$/ui/runtime"
+import { UI } from "spell-ui/runtime"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-flag"
+import "spell-ui/components/ui-flag"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-flag/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-flag/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

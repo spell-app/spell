@@ -1,13 +1,13 @@
 /**
  * The English vocabulary of `<ui-docs-example>`:  every name the tag uses.
  * - Its tag, attributes, events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`$/ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - A DOC-ONLY element (`src/docs-components/`):  filed under the `documentation` topic,
  *   left out of the component list, and loaded by `<ui-root>` like any family.
  * - Class words:  `bare`, `variation` (`ui bare example`);  the open state is `:state(open)`, not a class.
  */
 
-import type { E } from "$/ui/core"
+import type { E } from "spell-ui/core"
 
 /****************
  * ### `docsExampleVocabulary`

@@ -2,8 +2,8 @@ import { createComponent, createRoot, untrack } from "solid-js"
 import { NoHydration, renderToString } from "@solidjs/web"
 import { parseHTML } from "linkedom"
 
-import { E } from "$/ui/core"
-import { SSR } from "$/ui/static"
+import { E } from "spell-ui/core"
+import { SSR } from "spell-ui/static"
 
 /****************
  * ### `StaticRender`
@@ -20,8 +20,8 @@ import { SSR } from "$/ui/static"
  *   6. rewrite the page's own `<style>`s for that (`StaticPageStyles`:  `::part()`, `:state()`, `ui-*` tags)
  * - Families are opt-in (`define()`):  a `ui-*` tag without one stays as it is.
  * - NOTE: the page MUST NOT load the elements too:  an upgrade would take the flattened markup for slotted content.
- * - The TOP of `$/ui/static`'s graph (with `StaticCatalog`):  uses `$/ui/core` and every peer, but no family.
- *   Node only, NEVER imported by a component or `$/ui`.
+ * - The TOP of `spell-ui/static`'s graph (with `StaticCatalog`):  uses `spell-ui/core` and every peer, but no family.
+ *   Node only, NEVER imported by a component or `spell-ui`.
  * - STATIC:  one set of families per process, as `customElements` is one registry per page.
  ****************/
 export class StaticRender {

@@ -4,7 +4,7 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-components"
+import "spell-ui/components/ui-components"
 
 describe("<ui-components>", () => {
   it("draws nothing and takes no space;  holds its `source` as attribute and property", async () => {

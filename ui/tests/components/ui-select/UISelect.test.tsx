@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { UI } from "$/ui/runtime"
-import type { SelectOptions } from "$/ui/components/components.types"
+import { UI } from "spell-ui/runtime"
+import type { SelectOptions } from "spell-ui/components/components.types"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-select"
+import "spell-ui/components/ui-select"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-select/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-select/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -203,7 +203,7 @@ describe("<ui-select> value", () => {
     const late = container.firstElementChild as Select
     late.options = [{ value: "a", text: "Alpha" }]
     late.value = "a"
-    const { UISelect } = await import("$/ui/components/ui-select")
+    const { UISelect } = await import("spell-ui/components/ui-select")
     UISelect.define("ui-late-select")
     document.body.append(container)
     await ElementFixture.settle(container)

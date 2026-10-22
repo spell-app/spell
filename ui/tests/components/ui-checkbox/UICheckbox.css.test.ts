@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { checkboxVocabulary } from "$/ui/components/ui-checkbox/UICheckbox.en"
-import { radioVocabulary } from "$/ui/components/ui-checkbox/UIRadio.en"
+import { checkboxVocabulary } from "spell-ui/components/ui-checkbox/UICheckbox.en"
+import { radioVocabulary } from "spell-ui/components/ui-checkbox/UIRadio.en"
 
-import checkboxCSS from "$/ui/components/ui-checkbox/UICheckbox.css?inline"
-import checkboxRaw from "$/ui/components/ui-checkbox/UICheckbox.css?raw"
+import checkboxCSS from "spell-ui/components/ui-checkbox/UICheckbox.css?inline"
+import checkboxRaw from "spell-ui/components/ui-checkbox/UICheckbox.css?raw"
 
 /**
  * `UICheckbox.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -19,7 +19,7 @@ import checkboxRaw from "$/ui/components/ui-checkbox/UICheckbox.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-checkbox",
+  base: "/src/components/ui-checkbox",
   query: "?raw",
   import: "default",
   eager: true

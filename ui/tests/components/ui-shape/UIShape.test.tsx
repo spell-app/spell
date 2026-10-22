@@ -1,19 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { UI } from "$/ui/runtime"
-import type { ShapeChangeDetail } from "$/ui/components/components.types"
+import { UI } from "spell-ui/runtime"
+import type { ShapeChangeDetail } from "spell-ui/components/components.types"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
-import type { DOMShapeElement } from "$/ui/components/ui-shape"
+import type { DOMShapeElement } from "spell-ui/components/ui-shape"
 
-import "$/ui/components/ui-shape"
+import "spell-ui/components/ui-shape"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-shape/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-shape/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -90,7 +90,7 @@ describe("<ui-shape> classes and markup", () => {
       `<div><ui-late-shape active-index="1"><ui-late-side>One</ui-late-side><ui-late-side>Two</ui-late-side>` +
         `<ui-late-side>Three</ui-late-side></ui-late-shape></div>`
     )
-    const { UIShape, UISide } = await import("$/ui/components/ui-shape")
+    const { UIShape, UISide } = await import("spell-ui/components/ui-shape")
     UIShape.define("ui-late-shape")
     UISide.define("ui-late-side")
     await ElementFixture.settle(wrapper)

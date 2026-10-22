@@ -9,10 +9,10 @@
  * - The SVGs are FA's files BYTE FOR BYTE, licence comment included (FA's IP:  the attribution stays), in FA's own
  *   layout (`<style>/<name>.svg`), so a pack's `base` can point at jsDelivr's copy of the same package.
  * - Downloads (and caches under the OS temp dir, NOT the repo) the pinned package tarball, `FA_VERSION`;
- *   `SPELL_UI_FA_PACKAGE_DIR` points it at an extracted copy instead (`tools/environment.ts`).
+ *   `SPELL_UI_FA_PACKAGE_DIR` points it at an extracted copy instead (`src/tools/environment.ts`).
  * - Reads (never writes) `reference/Fomantic-UI/src/themes/default/elements/icon.variables`, the LESS source of
  *   Fomantic's `@icon-map` family, for Fomantic's names.
- * - Each pack's `pack.js` is written by `IconPackBuilder` (`tools/`), which also verifies every SVG.
+ * - Each pack's `pack.js` is written by `IconPackBuilder` (`src/tools/`), which also verifies every SVG.
  * - Types here are a deliberately minimal, LOCAL re-statement of Font Awesome's metadata shape.
  */
 
@@ -22,11 +22,11 @@ import { tmpdir } from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { IconName } from "../src/icons/IconName.ts"
-import { environment } from "../tools/environment.ts"
-import { IconPackBuilder } from "../tools/IconPackBuilder.ts"
-import { Terminal } from "spell-kit/element/tools/Terminal"
-import type { IconPackReport } from "../tools/tools.types.ts"
+import { IconName } from "spell-ui/icons/IconName"
+import { environment } from "spell-ui/tools/environment"
+import { IconPackBuilder } from "spell-ui/tools/IconPackBuilder"
+import { Terminal } from "spell-kit/element-tools/Terminal"
+import type { IconPackReport } from "spell-ui/tools/tools.types"
 import { ICON_EXTRAS } from "./iconExtras.ts"
 
 /****************

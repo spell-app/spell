@@ -1,23 +1,23 @@
 import { beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { UI } from "$/ui/runtime"
+import { UI } from "spell-ui/runtime"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import { MarkdownRenderer } from "$/ui/components/ui-markdown/MarkdownRenderer"
-import type { DOMMarkdownElement } from "$/ui/components/ui-markdown/UIMarkdown"
+import { MarkdownRenderer } from "spell-ui/components/ui-markdown/MarkdownRenderer"
+import type { DOMMarkdownElement } from "spell-ui/components/ui-markdown/UIMarkdown"
 
-import "$/ui/components/ui-markdown"
+import "spell-ui/components/ui-markdown"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-markdown/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-markdown/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
 })
 
 /** The example README. */
-const README = "/components/ui-markdown/examples/sources/readme.md"
+const README = "/src/components/ui-markdown/examples/sources/readme.md"
 
 beforeAll(async () => {
   await UI.load()
@@ -149,7 +149,9 @@ describe("<ui-markdown> rendering", () => {
     const host = await markdown(`<ui-markdown source="${README}"></ui-markdown>`)
     expect(body(host).querySelector("h1")!.textContent).toBe("Release notes")
     const changelog = body(host).querySelector<HTMLAnchorElement>("a[href$='changelog.md']")!
-    expect(changelog.href).toBe(new URL("/components/ui-markdown/examples/sources/changelog.md", location.href).href)
+    expect(changelog.href).toBe(
+      new URL("/src/components/ui-markdown/examples/sources/changelog.md", location.href).href
+    )
     expect(body(host).querySelector("a[href='#elements']")).not.toBeNull()
   })
 

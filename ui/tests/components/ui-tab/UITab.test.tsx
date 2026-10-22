@@ -1,19 +1,19 @@
 import { userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test-helpers/Keys"
+import { Keys } from "spell-ui/test-helpers/Keys"
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { UI } from "$/ui/runtime"
+import { UI } from "spell-ui/runtime"
 import type { DOMElement } from "spell-kit/element"
-import type { TabChangeDetail, TabShowDetail } from "$/ui/components/components.types"
+import type { TabChangeDetail, TabShowDetail } from "spell-ui/components/components.types"
 
-import "$/ui/components/ui-tab"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-tab"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-tab/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-tab/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

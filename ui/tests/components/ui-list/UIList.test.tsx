@@ -1,19 +1,19 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import type { ListSelectDetail } from "$/ui/components/components.types"
+import type { ListSelectDetail } from "spell-ui/components/components.types"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-list"
-import "$/ui/components/ui-image"
-import "$/ui/components/ui-parts"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-list"
+import "spell-ui/components/ui-image"
+import "spell-ui/components/ui-parts"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-list/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-list/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -230,7 +230,7 @@ describe("<ui-list> items adopt UIList.css and style by owner", () => {
   })
 
   it("keeps a slotted <ui-icon> a table cell beside the content", async () => {
-    await import("$/ui/components/ui-icon")
+    await import("spell-ui/components/ui-icon")
     const { items } = await list(
       "",
       `<ui-item><ui-icon name="users"></ui-icon><ui-content>Fomantic UI</ui-content></ui-item>`

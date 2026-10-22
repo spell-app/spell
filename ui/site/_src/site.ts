@@ -36,13 +36,13 @@
 import "./snapshot"
 import "./SitePacks"
 
-import "$/ui/styles/ui.css"
+import "spell-ui/styles/ui.css"
 import "./site.css"
 
-import { E, UI } from "$/ui/core"
-import { DocsFamilies } from "$/ui/docs-components/DocsFamilies"
-import { SiteData } from "$/ui/docs-components/SiteData"
-import { ThemePreference } from "$/ui/docs-components/ThemePreference"
+import { E, UI } from "spell-ui/core"
+import { DocsFamilies } from "spell-ui/docs-components/DocsFamilies"
+import { SiteData } from "spell-ui/docs-components/SiteData"
+import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
 import { defineSite } from "spell-kit/server/site"
 import { SiteRouter } from "./SiteRouter"
 import { SiteShell } from "./SiteShell"
@@ -82,9 +82,9 @@ void SiteShell.mount(SITE_ROOT).then(async (content) => {
   router?.land(new URL(location.href), { isFirst: true })
   // the theme's sheet in place BEFORE the root shows the page:  no restyle (and reflow) after first paint
   await theme
-  const root = await import("$/ui/components/ui-root")
+  const root = await import("spell-ui/components/ui-root")
   // a pack's script may share the root's module too (`SitePacks`)
   const packModules = (globalThis as { SpellUI?: { packModules?: Record<string, unknown> } }).SpellUI?.packModules
-  if (packModules) packModules["$/ui/components/ui-root"] = root
+  if (packModules) packModules["spell-ui/components/ui-root"] = root
   router?.start()
 })

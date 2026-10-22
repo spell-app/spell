@@ -1,6 +1,6 @@
 // Import directly to avoid circular import
-import { proto } from "$/ui/util"
-import { E } from "$/ui/core"
+import { proto } from "spell-ui/util"
+import { E } from "spell-ui/core"
 
 /****************
  * ### `ClassBuilder`

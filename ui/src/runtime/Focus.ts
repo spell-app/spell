@@ -1,4 +1,4 @@
-import * as UIT from "$/ui/components/components.types"
+import * as UIT from "spell-ui/components/components.types"
 
 import { CssDisplay, type Disposer, type FocusRoot } from "./runtime.types"
 import { RovingTabindex, type RovingTabindexProps } from "./RovingTabindex"

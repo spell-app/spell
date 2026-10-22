@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "$/ui/core"
-import { SiteData } from "$/ui/docs-components/SiteData"
+import { E, UI, UIT } from "spell-ui/core"
+import { SiteData } from "spell-ui/docs-components/SiteData"
 import { docsSearchVocabulary } from "./UIDocsSearch.en"
 import { PageOutline } from "./PageOutline"
 import { SearchData } from "./SearchData"

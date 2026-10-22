@@ -1,8 +1,8 @@
 import { onSettled } from "solid-js"
 import { isServer } from "@solidjs/web"
 
-import { E } from "$/ui/core"
-import type { F } from "$/ui/forms"
+import { E } from "spell-ui/core"
+import type { F } from "spell-ui/forms"
 // Not in the `forms` entry:  `ControlLabels`' own helper
 import { LabelWatch } from "./LabelWatch"
 
@@ -25,11 +25,11 @@ import { LabelWatch } from "./LabelWatch"
  *   - `<label>`s added to / removed from the DOM element's tree, and their `for` changes:  ONE observer per root node
  *     (document or shadow root), shared by every control in it (`LabelWatch`)
  *   - NOTE: `aria-labelledby` targets added later are not watched
- * - Server render (`$/ui/static`):  read ONCE, in the constructor, from the parsed page (`serverLabels()`);
+ * - Server render (`spell-ui/static`):  read ONCE, in the constructor, from the parsed page (`serverLabels()`);
  *   nothing is watched.  Why:  a slider thumb, a rating's radio group, an inline calendar's group can't be named by
  *   a `<label for>` on the static page either.
  * - MUST be created under the element's owner (it creates an `onSettled`).
- * - Part of the `forms` entry:  reaches the core through the `$/ui/core` ENTRY (`E`), never its leaves, and its
+ * - Part of the `forms` entry:  reaches the core through the `spell-ui/core` ENTRY (`E`), never its leaves, and its
  *   `forms` peers through `F` (`forms.ts`);  `LabelWatch` directly, its own helper, in neither entry.  `@E.state` is
  *   safe while this module evaluates:  the core never imports `forms`.
  ****************/
@@ -52,7 +52,7 @@ export class ControlLabels {
   /** The name of `domElement`'s inner control;  call it under the element's owner. */
   constructor(domElement: F.DOMFormControl) {
     this.domElement = domElement
-    // a server render (`$/ui/static`) reads the page once:  nothing changes, nothing is watched
+    // a server render (`spell-ui/static`) reads the page once:  nothing changes, nothing is watched
     if (isServer) {
       this.accessibleName = this.nameFor(this.serverLabels())
       return

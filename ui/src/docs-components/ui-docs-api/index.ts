@@ -12,10 +12,10 @@ import { UIDocsApi } from "./UIDocsApi"
 import { ApiModel } from "./ApiModel"
 import { InlineCode } from "./InlineCode"
 
-import "$/ui/components/ui-parts"
-import "$/ui/components/ui-table"
-import "$/ui/components/ui-label"
-import "$/ui/components/ui-message"
+import "spell-ui/components/ui-parts"
+import "spell-ui/components/ui-table"
+import "spell-ui/components/ui-label"
+import "spell-ui/components/ui-message"
 
 UIDocsApi.define()
 

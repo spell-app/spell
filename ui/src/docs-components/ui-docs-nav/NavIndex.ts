@@ -1,4 +1,4 @@
-import type { SiteDataFile, SiteNav, SiteTag } from "$/ui/docs-components/docs-components.types"
+import type { SiteDataFile, SiteNav, SiteTag } from "spell-ui/docs-components/docs-components.types"
 
 import { INDEX_PAGE, PAGE_EXTENSION, SEARCH_SEPARATOR, type NavRow, type NavTopic } from "./UIDocsNav.types"
 

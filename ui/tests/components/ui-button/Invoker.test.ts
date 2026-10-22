@@ -1,6 +1,6 @@
 import { describe, expect, onTestFinished, test } from "vite-plus/test"
 
-import { Invoker } from "$/ui/components/ui-button/Invoker"
+import { Invoker } from "spell-ui/components/ui-button/Invoker"
 
 describe("Invoker.resolve()", () => {
   test("finds the id in the element's own root:  the document, or the shadow root it lives in", () => {

@@ -5,7 +5,7 @@
  *   A constant only one class reads sits below that class.
  */
 
-import type { SiteTag } from "$/ui/docs-components/docs-components.types"
+import type { SiteTag } from "spell-ui/docs-components/docs-components.types"
 import type { docsApiVocabulary } from "./UIDocsApi.en"
 
 ////////////////

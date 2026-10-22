@@ -1,15 +1,15 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "$/ui/core"
+import { E, UI, UIT } from "spell-ui/core"
 import {
   DOCS_PLAIN_THEME,
   type DocsLook,
   type DocsShownScheme,
   type SiteDataFile
-} from "$/ui/docs-components/docs-components.types"
-import { SiteData } from "$/ui/docs-components/SiteData"
-import { ThemePreference } from "$/ui/docs-components/ThemePreference"
+} from "spell-ui/docs-components/docs-components.types"
+import { SiteData } from "spell-ui/docs-components/SiteData"
+import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
 import { ThemeMenu } from "./ThemeMenu"
 import {
   type DocsThemesChange,

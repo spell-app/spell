@@ -2,32 +2,32 @@ import { beforeAll, describe, expect, it } from "vite-plus/test"
 import { Dynamic, type JSX } from "@solidjs/web"
 
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { PartNouns } from "$/ui/components/ui-parts/UIParts.types"
-import type { ComponentVocabulary } from "$/ui/vocabulary"
+import { PartNouns } from "spell-ui/components/ui-parts/UIParts.types"
+import type { ComponentVocabulary } from "spell-ui/vocabulary"
 
 import { UIComponent, type PartContext, type UIComponentClass, type DOMElement } from "spell-kit/element"
-import { UI } from "$/ui/runtime"
+import { UI } from "spell-ui/runtime"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { StubOwner } from "$/ui/test-helpers/StubOwner"
+import { StubOwner } from "spell-ui/test-helpers/StubOwner"
 
-import "$/ui/components/ui-parts"
-import "$/ui/components/ui-label"
-import "$/ui/components/ui-segment"
-import "$/ui/components/ui-card"
-import "$/ui/components/ui-items"
-import "$/ui/components/ui-feed"
-import "$/ui/components/ui-comment"
-import "$/ui/components/ui-statistic"
-import "$/ui/components/ui-step"
-import "$/ui/components/ui-message"
-import "$/ui/components/ui-list"
-import "$/ui/components/ui-icon"
+import "spell-ui/components/ui-parts"
+import "spell-ui/components/ui-label"
+import "spell-ui/components/ui-segment"
+import "spell-ui/components/ui-card"
+import "spell-ui/components/ui-items"
+import "spell-ui/components/ui-feed"
+import "spell-ui/components/ui-comment"
+import "spell-ui/components/ui-statistic"
+import "spell-ui/components/ui-step"
+import "spell-ui/components/ui-message"
+import "spell-ui/components/ui-list"
+import "spell-ui/components/ui-icon"
 
 /** Examples whose original fragment fails axe `heading-order` too (see `notes/report.md`). */
 const HEADING_DEMOS = ["parts/examples/elements/header.html", "segment/examples/elements/variations.html"]
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-parts/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-parts/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

@@ -1,5 +1,5 @@
 /**
- * Barrel for `$/ui/docs-components` -- the DOC-ONLY elements:
+ * Barrel for `spell-ui/docs-components` -- the DOC-ONLY elements:
  * `<ui-docs-*>` widgets Spell UI's docs site (its pages:  the shared `ui/*.html`) is built from,
  * on top of the real components.
  * - What they are:  element families written EXACTLY like a component family,
@@ -28,12 +28,12 @@
  *   and import their families in its barrel (a root only loads the light DOM's).
  * - `package.json` `sideEffects` lists every `./src/docs-components/<family>/index.ts`:
  *   without it a bundler drops each barrel's `define()` (the family chunk loads, the tag stays undefined, no error).
- * - Imports:  shared code from `$/ui/core` as any family;
- *   docs-only shared code (`SiteData`) from `$/ui/docs-components/<file>`.
+ * - Imports:  shared code from `spell-ui/core` as any family;
+ *   docs-only shared code (`SiteData`) from `spell-ui/docs-components/<file>`.
  * - `ThemePreference`:  the viewer's theme + colour scheme, remembered and re-applied per page
  *   (`<ui-docs-themes>` sets it, the site entry restores it).
  * - NOTE:  this barrel defines NOTHING:  types, `SiteData` and `ThemePreference` only.
- *   Import a family (`$/ui/docs-components/ui-docs-example`) to define its tags.
+ *   Import a family (`spell-ui/docs-components/ui-docs-example`) to define its tags.
  */
 
 export * from "./docs-components.types"

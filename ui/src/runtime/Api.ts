@@ -1,4 +1,4 @@
-import { after } from "$/ui/util"
+import { after } from "spell-ui/util"
 
 import { ApiError, type ApiRequest, type ApiResponseType, type ApiUrlData } from "./runtime.types"
 

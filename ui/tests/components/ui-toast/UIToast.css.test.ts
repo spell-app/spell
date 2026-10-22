@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { toastVocabulary } from "$/ui/components/ui-toast/UIToast.en"
+import { toastVocabulary } from "spell-ui/components/ui-toast/UIToast.en"
 
-import toastCSS from "$/ui/components/ui-toast/UIToast.css?inline"
-import toastRaw from "$/ui/components/ui-toast/UIToast.css?raw"
-import containerCSS from "$/ui/components/ui-toast/UIToast.container.css?inline"
-import containerRaw from "$/ui/components/ui-toast/UIToast.container.css?raw"
+import toastCSS from "spell-ui/components/ui-toast/UIToast.css?inline"
+import toastRaw from "spell-ui/components/ui-toast/UIToast.css?raw"
+import containerCSS from "spell-ui/components/ui-toast/UIToast.container.css?inline"
+import containerRaw from "spell-ui/components/ui-toast/UIToast.container.css?raw"
 
 /**
  * `UIToast.css` (and the page sheet `UIToast.container.css`) on their own, before any element exists:
@@ -21,7 +21,7 @@ import containerRaw from "$/ui/components/ui-toast/UIToast.container.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-toast",
+  base: "/src/components/ui-toast",
   query: "?raw",
   import: "default",
   eager: true

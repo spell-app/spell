@@ -1,5 +1,5 @@
-import { type Prettify } from "$/ui/util"
-import * as UIT from "$/ui/components/components.types"
+import { type Prettify } from "spell-ui/util"
+import * as UIT from "spell-ui/components/components.types"
 
 import type { Disposer, RovingItems, RovingOptions, RovingOrientation } from "./runtime.types"
 

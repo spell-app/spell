@@ -100,72 +100,72 @@ describe("spell-ui/no-function-component", () => {
  */
 const ALLOWED: readonly Allowed[] = [
   {
-    file: "components/ui-dropdown/SlottedItems.ts",
+    file: "src/components/ui-dropdown/SlottedItems.ts",
     rule: "no-solid-effect",
     reason: "a helper class, not a component:  no decorator reaches it"
   },
   {
-    file: "components/ui-dropdown/SlottedItems.ts",
+    file: "src/components/ui-dropdown/SlottedItems.ts",
     rule: "no-mutation-observer",
     reason: "a helper class:  `@E.watches` is for components"
   },
   {
-    file: "components/ui-form/FormBinding.ts",
+    file: "src/components/ui-form/FormBinding.ts",
     rule: "no-solid-effect",
     reason: "a helper class, not a component:  one effect per bound control, in a root of its own"
   },
   {
-    file: "components/ui-form/UIForm.tsx",
+    file: "src/components/ui-form/UIForm.tsx",
     rule: "no-mutation-observer",
     reason: "only while connected:  `@E.watches` lasts the element's whole life"
   },
   {
-    file: "components/ui-form/UIRepeat.tsx",
+    file: "src/components/ui-form/UIRepeat.tsx",
     rule: "no-mutation-observer",
     reason: "only while connected:  `@E.watches` lasts the element's whole life"
   },
   {
-    file: "components/ui-item/UIItem.tsx",
+    file: "src/components/ui-item/UIItem.tsx",
     rule: "no-untrack",
     reason: "half-tracked on purpose (above)"
   },
   {
-    file: "components/ui-menu/UIMenu.tsx",
+    file: "src/components/ui-menu/UIMenu.tsx",
     rule: "no-untrack",
     reason: "half-tracked on purpose (above)"
   },
   {
-    file: "components/ui-root/LoaderMessage.ts",
+    file: "src/components/ui-root/LoaderMessage.ts",
     rule: "no-solid-effect",
     reason: "a static helper drawing plain DOM:  no members to decorate"
   },
   {
-    file: "components/ui-root/PlaceholderSkeleton.ts",
+    file: "src/components/ui-root/PlaceholderSkeleton.ts",
     rule: "no-solid-effect",
     reason: "a static helper drawing plain DOM:  no members to decorate"
   },
   {
-    file: "components/ui-root/UIRoot.tsx",
+    file: "src/components/ui-root/UIRoot.tsx",
     rule: "no-mutation-observer",
     reason: "only while connected:  `@E.watches` lasts the element's whole life"
   },
   {
-    file: "components/ui-table/TableClassMirror.ts",
+    file: "src/components/ui-table/TableClassMirror.ts",
     rule: "no-mutation-observer",
     reason: "a helper class, watching ANOTHER element (the table)"
   },
   {
-    file: "components/ui-table/UITable.tsx",
+    file: "src/components/ui-table/UITable.tsx",
     rule: "no-solid-effect",
     reason: "the class mirror's RENDER effect:  a throw must reach the error boundary"
   },
   {
-    file: "components/ui-table/UITable.tsx",
+    file: "src/components/ui-table/UITable.tsx",
     rule: "no-mutation-observer",
     reason: "watches the managed TABLE, swapped with it"
   },
   {
-    file: "components/ui-visibility/UIVisibility.tsx",
+    file: "src/components/ui-visibility/UIVisibility.tsx",
     rule: "no-mutation-observer",
     reason: "only while `images` is on and the element connected"
   },

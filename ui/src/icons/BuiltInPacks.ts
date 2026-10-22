@@ -10,7 +10,7 @@ import { BuiltInIconPacks, ICON_PACK_INDEX, type BuiltInIconPack } from "./icons
  *   copy that folder next to the app's chunks, or point a pack elsewhere with `base` (`notes/icons.md`, "Shipping
  *   icons").
  * - STATIC and instance-free on purpose:  the packs sit in one place per page.  No DOM:  `spell icon`'s search
- *   (Spell UI's `cli/`) uses it too.
+ *   (Spell UI's `src/cli/`) uses it too.
  ****************/
 export class BuiltInPacks {
   /**

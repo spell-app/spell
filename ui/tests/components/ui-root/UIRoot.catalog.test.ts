@@ -1,7 +1,7 @@
 import { describe, expect, it, test } from "vite-plus/test"
 
-import { ComponentDefinitions } from "$/ui/components/ComponentDefinitions"
-import { ROOT_CATALOG } from "$/ui/components/ui-root/UIRoot.catalog"
+import { ComponentDefinitions } from "spell-ui/components/ComponentDefinitions"
+import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
 import { SkeletonText } from "spell-kit/element/SkeletonText"
 
 /**

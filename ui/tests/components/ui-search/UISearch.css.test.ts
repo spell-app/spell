@@ -1,18 +1,18 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { ClassBuilder } from "$/ui/elements"
-import { colorsCSS, foundationCSS } from "$/ui/styles"
-import type { AttributeSpec, ComponentVocabulary } from "$/ui/vocabulary"
+import { ClassBuilder } from "spell-ui/elements"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { searchVocabulary } from "$/ui/components/ui-search/UISearch.en"
+import { searchVocabulary } from "spell-ui/components/ui-search/UISearch.en"
 
-import inputCSS from "$/ui/components/ui-input/UIInput.css?inline"
-import searchCSS from "$/ui/components/ui-search/UISearch.css?inline"
-import searchRaw from "$/ui/components/ui-search/UISearch.css?raw"
+import inputCSS from "spell-ui/components/ui-input/UIInput.css?inline"
+import searchCSS from "spell-ui/components/ui-search/UISearch.css?inline"
+import searchRaw from "spell-ui/components/ui-search/UISearch.css?raw"
 
 /**
  * `UISearch.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -23,7 +23,7 @@ import searchRaw from "$/ui/components/ui-search/UISearch.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-search",
+  base: "/src/components/ui-search",
   query: "?raw",
   import: "default",
   eager: true

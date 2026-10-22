@@ -1,15 +1,15 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { UI } from "$/ui/runtime"
+import { UI } from "spell-ui/runtime"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import type { DOMCodeElement } from "$/ui/components/ui-code/UICode"
+import type { DOMCodeElement } from "spell-ui/components/ui-code/UICode"
 
-import "$/ui/components/ui-code"
+import "spell-ui/components/ui-code"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-code/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-code/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -119,7 +119,7 @@ describe("<ui-code> behaviour", () => {
   })
 
   it("loads a `source` file", async () => {
-    const host = await code(`<ui-code source="/test-helpers/fixtures/sources/hello.txt" language="text"></ui-code>`)
+    const host = await code(`<ui-code source="/src/test-helpers/fixtures/sources/hello.txt" language="text"></ui-code>`)
     expect(linesOf(host)).toEqual(["Hello, source!"])
   })
 

@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { inputVocabulary } from "$/ui/components/ui-input/UIInput.en"
-import { textareaVocabulary } from "$/ui/components/ui-input/UITextarea.en"
+import { inputVocabulary } from "spell-ui/components/ui-input/UIInput.en"
+import { textareaVocabulary } from "spell-ui/components/ui-input/UITextarea.en"
 
-import buttonCSS from "$/ui/components/ui-button/UIButton.css?inline"
-import labelCSS from "$/ui/components/ui-label/UILabel.css?inline"
-import inputCSS from "$/ui/components/ui-input/UIInput.css?inline"
-import inputRaw from "$/ui/components/ui-input/UIInput.css?raw"
+import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
+import labelCSS from "spell-ui/components/ui-label/UILabel.css?inline"
+import inputCSS from "spell-ui/components/ui-input/UIInput.css?inline"
+import inputRaw from "spell-ui/components/ui-input/UIInput.css?raw"
 
 /**
  * `UIInput.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -22,7 +22,7 @@ import inputRaw from "$/ui/components/ui-input/UIInput.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-input",
+  base: "/src/components/ui-input",
   query: "?raw",
   import: "default",
   eager: true

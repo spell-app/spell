@@ -1,4 +1,4 @@
-import { E } from "$/ui/core"
+import { E } from "spell-ui/core"
 
 /****************
  * ### `SourceMarkup`

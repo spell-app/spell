@@ -1,7 +1,7 @@
-// The runtime sits BELOW `core` (which re-exports its loader):  never the `$/ui/core` entry, or Rolldown splits the
+// The runtime sits BELOW `core` (which re-exports its loader):  never the `spell-ui/core` entry, or Rolldown splits the
 // modules both reach into a chunk of their own (I16)
-import { proto, Warnings } from "$/ui/util"
-import { Vocabulary } from "$/ui/vocabulary"
+import { proto, Warnings } from "spell-ui/util"
+import { Vocabulary } from "spell-ui/vocabulary"
 import {
   animationsCSS,
   colorsCSS,
@@ -12,7 +12,7 @@ import {
   tokensCSS,
   typographyCSS,
   utilitiesCSS
-} from "$/ui/styles"
+} from "spell-ui/styles"
 
 import {
   RUNTIME_KEY,
@@ -48,8 +48,8 @@ import { load } from "./load"
  * The shared `UI` runtime:  ONE instance per page, holding every service as a readonly field.
  * - The root of the runtime's LAZY chunk:  `load.ts` dynamic-imports this module.
  *   - Nothing imports it statically (`import type` only), so components never carry the services.
- *   - It imports `$/ui/core` (already loaded by then),
- *     and `$/ui/styles` (the foundation's text), which lands in this chunk.
+ *   - It imports `spell-ui/core` (already loaded by then),
+ *     and `spell-ui/styles` (the foundation's text), which lands in this chunk.
  * - Why one:  keyboard scopes, the overlay stack, scroll lock and the stylesheet registry only work
  *   if every component on the page talks to the SAME instance.
  *   - Including components from a second copy of the package (duplicate bundles, micro-frontends).
@@ -60,7 +60,7 @@ import { load } from "./load"
  * - Constructs outside a browser too (SSR):  services touch the DOM only when used.
  * - NOTE: it holds the `Vocabulary` registry itself (`UI.vocabulary`),
  *   and registers the foundation stylesheets with `UI.styles` as it's constructed (`registerFoundation()`).
- *   So `$/ui/vocabulary` and `$/ui/styles` stay plain data, which never reach for the runtime.
+ *   So `spell-ui/vocabulary` and `spell-ui/styles` stay plain data, which never reach for the runtime.
  ****************/
 export class UIRuntime {
   /**
@@ -144,8 +144,8 @@ export class UIRuntime {
    * Register the CSS foundation with `styles`, so every shadow root adopts it and the page gets the light-side sheets.
    * - Every sheet goes on the page (`PAGE_SHEETS`);  shadow roots adopt `FOUNDATION_SHEETS` first, and the
    *   utilities after their own sheets (`Styles`' default `setUtilities()`).
-   * - Here rather than in `$/ui/styles`:  the runtime chunk is loaded exactly once per page, which is also how often
-   *   the foundation must be registered;  `$/ui/styles` stays plain data.
+   * - Here rather than in `spell-ui/styles`:  the runtime chunk is loaded exactly once per page, which is also how often
+   *   the foundation must be registered;  `spell-ui/styles` stays plain data.
    */
   private registerFoundation() {
     // `linked`:  `ui.css` carries every one of these, so a page that links it doesn't get them twice
@@ -188,7 +188,7 @@ export class UIRuntime {
 
 /**
  * Sheets every shadow root adopts BEFORE its own, by name, in cascade order:
- * `foundationCSS` (`$/ui/styles`) less the utilities, which `Styles` adopts after a component's sheets.
+ * `foundationCSS` (`spell-ui/styles`) less the utilities, which `Styles` adopts after a component's sheets.
  */
 const FOUNDATION_SHEETS = {
   layers: layersCSS,
@@ -200,7 +200,7 @@ const FOUNDATION_SHEETS = {
 }
 
 /**
- * Every sheet the runtime registers, by name, in `pageCSS` order (`$/ui/styles`):  all go on the page.
+ * Every sheet the runtime registers, by name, in `pageCSS` order (`spell-ui/styles`):  all go on the page.
  * - `typography` and `native` style light-DOM markup only;  shadow roots never adopt them.
  */
 const PAGE_SHEETS = {

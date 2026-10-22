@@ -1,14 +1,14 @@
 /**
  * The English vocabulary of `<ui-docs-search>`:  every name the tag uses.
  * - Its tag, attributes, events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`$/ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - A DOC-ONLY element (`src/docs-components/`):  filed under the `documentation` topic,
  *   left out of the component list, and loaded by `<ui-root>` like any family.
  * - Class words:  `ui [size] finder` on the box;  `size` scales the field and its results (`--ui-scale`).
  *   Not `search`:  a theme sheet restyling Fomantic's `.ui.search` would reach it.
  */
 
-import type { E } from "$/ui/core"
+import type { E } from "spell-ui/core"
 
 /****************
  * ### `docsSearchVocabulary`

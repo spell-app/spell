@@ -1,6 +1,6 @@
-import { E } from "$/ui/core"
-import { SiteData } from "$/ui/docs-components/SiteData"
-import { SITE_SEARCH_PATH, type SiteSearchFile } from "$/ui/docs-components/docs-components.types"
+import { E } from "spell-ui/core"
+import { SiteData } from "spell-ui/docs-components/SiteData"
+import { SITE_SEARCH_PATH, type SiteSearchFile } from "spell-ui/docs-components/docs-components.types"
 
 /****************
  * ### `SearchData`

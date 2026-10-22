@@ -5,10 +5,10 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-divider"
+import "spell-ui/components/ui-divider"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-divider/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-divider/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

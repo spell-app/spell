@@ -2,10 +2,10 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { FallbackStub, type StubHost } from "$/ui/test-helpers/FallbackStub"
-import type { SearchChangeDetail, SearchResult } from "$/ui/components/components.types"
+import { FallbackStub, type StubHost } from "spell-ui/test-helpers/FallbackStub"
+import type { SearchChangeDetail, SearchResult } from "spell-ui/components/components.types"
 
-import { SearchFallback } from "$/ui/components/ui-search/UISearch.fallback"
+import { SearchFallback } from "spell-ui/components/ui-search/UISearch.fallback"
 
 FallbackStub.define(
   "x-fb-search",

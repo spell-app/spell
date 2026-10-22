@@ -325,11 +325,6 @@
           "description": "The `source` file arrived and its body is in place (`content` is the file's text)."
         },
         {
-          "name": "ui-load",
-          "detail": "{ source: string, content: string }",
-          "description": "Old name of `ui-loaded`:  sent just after it, until every page listens for the new."
-        },
-        {
           "name": "ui-error",
           "detail": "{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'render', source: string, error: unknown }",
           "cancelable": true,
@@ -6054,7 +6049,7 @@
           "name": "options",
           "kind": "json",
           "reflect": false,
-          "description": "Options as a PROPERTY:  `MenuOption[]` (`$/ui/elements`);  added after slotted `<ui-item>`s."
+          "description": "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s."
         },
         {
           "name": "visible",
@@ -13737,18 +13732,12 @@
         {
           "name": "label",
           "kind": "string",
-          "aliases": [
-            "header"
-          ],
-          "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).  Old name:  `header`."
+          "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links)."
         },
         {
           "name": "hint",
           "kind": "string",
-          "aliases": [
-            "subhead"
-          ],
-          "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.  Old name:  `subhead`."
+          "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`."
         },
         {
           "name": "level",
@@ -13776,10 +13765,7 @@
         {
           "name": "description",
           "kind": "string",
-          "aliases": [
-            "info"
-          ],
-          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).  Old name:  `info`."
+          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
           "name": "collapsible",
@@ -13789,7 +13775,7 @@
         {
           "name": "collapsed",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-open` / `ui-close` can veto a person's changes.  Find-in-page unfolds a match."
+          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
         },
         {
           "name": "fold-icon",
@@ -14031,18 +14017,6 @@
         {
           "name": "description",
           "description": "Rich tip, instead of the `description` attribute (bold words, line breaks)."
-        },
-        {
-          "name": "header",
-          "description": "Old name of the `label` slot."
-        },
-        {
-          "name": "subhead",
-          "description": "Old name of the `hint` slot."
-        },
-        {
-          "name": "info",
-          "description": "Old name of the `description` slot."
         }
       ],
       "events": [
@@ -14069,18 +14043,6 @@
           "description": "Folded, by any route:  the title, or the page setting `collapsed`."
         },
         {
-          "name": "ui-open",
-          "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
-          "cancelable": true,
-          "description": "Old name of `ui-opening`:  sent just after it, the same way, until every page listens for the new."
-        },
-        {
-          "name": "ui-close",
-          "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
-          "cancelable": true,
-          "description": "Old name of `ui-closing`:  sent just after it, the same way, until every page listens for the new."
-        },
-        {
           "name": "ui-loading",
           "detail": "{ source: string }",
           "description": "The `source` file is on its way:  the section unfolded for the first time, or `reloadBody()`."
@@ -14089,11 +14051,6 @@
           "name": "ui-loaded",
           "detail": "{ source: string, content: string }",
           "description": "The `source` file arrived and its body is in place (`content` is the file's text)."
-        },
-        {
-          "name": "ui-load",
-          "detail": "{ source: string, content: string }",
-          "description": "Old name of `ui-loaded`:  sent just after it, until every page listens for the new."
         },
         {
           "name": "ui-error",
@@ -14179,11 +14136,11 @@
         },
         {
           "name": "in-section",
-          "description": "Old name of `nested`."
+          "description": "Directly in another section (its part's state);  `nested` counts one through a group too."
         },
         {
           "name": "in-sections",
-          "description": "Old name of `in-group`."
+          "description": "Directly in a `<ui-sections>` group (its part's state), as `in-group`."
         },
         {
           "name": "inverted",
@@ -16061,18 +16018,12 @@
         {
           "name": "label",
           "kind": "string",
-          "aliases": [
-            "header"
-          ],
-          "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).  Old name:  `header`."
+          "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links)."
         },
         {
           "name": "hint",
           "kind": "string",
-          "aliases": [
-            "subhead"
-          ],
-          "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.  Old name:  `subhead`."
+          "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`."
         },
         {
           "name": "level",
@@ -16100,10 +16051,7 @@
         {
           "name": "description",
           "kind": "string",
-          "aliases": [
-            "info"
-          ],
-          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).  Old name:  `info`."
+          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
           "name": "collapsible",
@@ -16113,7 +16061,7 @@
         {
           "name": "collapsed",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-open` / `ui-close` can veto a person's changes.  Find-in-page unfolds a match."
+          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
         },
         {
           "name": "fold-icon",
@@ -16318,18 +16266,6 @@
         {
           "name": "description",
           "description": "Rich tip, instead of the `description` attribute (bold words, line breaks)."
-        },
-        {
-          "name": "header",
-          "description": "Old name of the `label` slot."
-        },
-        {
-          "name": "subhead",
-          "description": "Old name of the `hint` slot."
-        },
-        {
-          "name": "info",
-          "description": "Old name of the `description` slot."
         }
       ],
       "events": [
@@ -16412,18 +16348,6 @@
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
           "description": "Folded, by any route:  the title, or the page setting `collapsed`."
-        },
-        {
-          "name": "ui-open",
-          "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
-          "cancelable": true,
-          "description": "Old name of `ui-opening`:  sent just after it, the same way, until every page listens for the new."
-        },
-        {
-          "name": "ui-close",
-          "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
-          "cancelable": true,
-          "description": "Old name of `ui-closing`:  sent just after it, the same way, until every page listens for the new."
         },
         {
           "name": "ui-error",
@@ -16569,11 +16493,11 @@
         },
         {
           "name": "in-section",
-          "description": "Old name of `nested`."
+          "description": "Directly in another section (its part's state);  `nested` counts one through a group too."
         },
         {
           "name": "in-sections",
-          "description": "Old name of `in-group`."
+          "description": "Directly in a `<ui-sections>` group (its part's state), as `in-group`."
         },
         {
           "name": "inverted",
@@ -16722,18 +16646,12 @@
         {
           "name": "label",
           "kind": "string",
-          "aliases": [
-            "header"
-          ],
-          "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).  Old name:  `header`."
+          "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links)."
         },
         {
           "name": "hint",
           "kind": "string",
-          "aliases": [
-            "subhead"
-          ],
-          "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.  Old name:  `subhead`."
+          "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`."
         },
         {
           "name": "level",
@@ -16761,10 +16679,7 @@
         {
           "name": "description",
           "kind": "string",
-          "aliases": [
-            "info"
-          ],
-          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).  Old name:  `info`."
+          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
           "name": "collapsible",
@@ -16774,7 +16689,7 @@
         {
           "name": "collapsed",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-open` / `ui-close` can veto a person's changes.  Find-in-page unfolds a match."
+          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
         },
         {
           "name": "fold-icon",
@@ -17010,18 +16925,6 @@
         {
           "name": "description",
           "description": "Rich tip, instead of the `description` attribute (bold words, line breaks)."
-        },
-        {
-          "name": "header",
-          "description": "Old name of the `label` slot."
-        },
-        {
-          "name": "subhead",
-          "description": "Old name of the `hint` slot."
-        },
-        {
-          "name": "info",
-          "description": "Old name of the `description` slot."
         }
       ],
       "events": [
@@ -17056,18 +16959,6 @@
           "name": "ui-closed",
           "detail": "{ open: boolean, section: Element }",
           "description": "Folded, by any route:  the title, or the page setting `collapsed`."
-        },
-        {
-          "name": "ui-open",
-          "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
-          "cancelable": true,
-          "description": "Old name of `ui-opening`:  sent just after it, the same way, until every page listens for the new."
-        },
-        {
-          "name": "ui-close",
-          "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
-          "cancelable": true,
-          "description": "Old name of `ui-closing`:  sent just after it, the same way, until every page listens for the new."
         },
         {
           "name": "ui-loading",
@@ -17183,11 +17074,11 @@
         },
         {
           "name": "in-section",
-          "description": "Old name of `nested`."
+          "description": "Directly in another section (its part's state);  `nested` counts one through a group too."
         },
         {
           "name": "in-sections",
-          "description": "Old name of `in-group`."
+          "description": "Directly in a `<ui-sections>` group (its part's state), as `in-group`."
         },
         {
           "name": "inverted",
@@ -19473,18 +19364,12 @@
         {
           "name": "label",
           "kind": "string",
-          "aliases": [
-            "header"
-          ],
-          "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).  Old name:  `header`."
+          "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links)."
         },
         {
           "name": "hint",
           "kind": "string",
-          "aliases": [
-            "subhead"
-          ],
-          "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.  Old name:  `subhead`."
+          "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`."
         },
         {
           "name": "level",
@@ -19512,10 +19397,7 @@
         {
           "name": "description",
           "kind": "string",
-          "aliases": [
-            "info"
-          ],
-          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).  Old name:  `info`."
+          "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
           "name": "collapsible",
@@ -19525,7 +19407,7 @@
         {
           "name": "collapsed",
           "kind": "boolean",
-          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-open` / `ui-close` can veto a person's changes.  Find-in-page unfolds a match."
+          "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match."
         },
         {
           "name": "fold-icon",
@@ -19767,18 +19649,6 @@
         {
           "name": "description",
           "description": "Rich tip, instead of the `description` attribute (bold words, line breaks)."
-        },
-        {
-          "name": "header",
-          "description": "Old name of the `label` slot."
-        },
-        {
-          "name": "subhead",
-          "description": "Old name of the `hint` slot."
-        },
-        {
-          "name": "info",
-          "description": "Old name of the `description` slot."
         }
       ],
       "events": [
@@ -19805,18 +19675,6 @@
           "description": "Folded, by any route:  the title, or the page setting `collapsed`."
         },
         {
-          "name": "ui-open",
-          "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
-          "cancelable": true,
-          "description": "Old name of `ui-opening`:  sent just after it, the same way, until every page listens for the new."
-        },
-        {
-          "name": "ui-close",
-          "detail": "{ open: boolean, section: Element, originalEvent?: Event }",
-          "cancelable": true,
-          "description": "Old name of `ui-closing`:  sent just after it, the same way, until every page listens for the new."
-        },
-        {
           "name": "ui-loading",
           "detail": "{ source: string }",
           "description": "The `source` file is on its way:  the section unfolded for the first time, or `reloadBody()`."
@@ -19825,11 +19683,6 @@
           "name": "ui-loaded",
           "detail": "{ source: string, content: string }",
           "description": "The `source` file arrived and its body is in place (`content` is the file's text)."
-        },
-        {
-          "name": "ui-load",
-          "detail": "{ source: string, content: string }",
-          "description": "Old name of `ui-loaded`:  sent just after it, until every page listens for the new."
         },
         {
           "name": "ui-error",
@@ -19915,11 +19768,11 @@
         },
         {
           "name": "in-section",
-          "description": "Old name of `nested`."
+          "description": "Directly in another section (its part's state);  `nested` counts one through a group too."
         },
         {
           "name": "in-sections",
-          "description": "Old name of `in-group`."
+          "description": "Directly in a `<ui-sections>` group (its part's state), as `in-group`."
         },
         {
           "name": "inverted",
@@ -20760,7 +20613,7 @@
           "name": "options",
           "kind": "json",
           "reflect": false,
-          "description": "Options as a PROPERTY:  `MenuOption[]` (`$/ui/elements`);  added after slotted `<ui-item>`s."
+          "description": "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s."
         },
         {
           "name": "loading",

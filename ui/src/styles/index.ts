@@ -1,5 +1,5 @@
 /**
- * Barrel for `$/ui/styles` -- the CSS foundation as TEXT, plus the style vocabulary it's generated from.
+ * Barrel for `spell-ui/styles` -- the CSS foundation as TEXT, plus the style vocabulary it's generated from.
  * - Its own lib entry (`spell-ui/styles`), PURE DATA:  no code, so `styles.js` needs none of Rolldown's helpers.
  *   Code here once split them into a `rolldown-runtime-<hash>.js` every page fetched, as `styles.js` never loads
  *   `core.js` (epic `wwod-spell-ui`, I13);  `yarn measure` builds this entry too, so its checks catch a relapse.
@@ -15,7 +15,7 @@
  *   substituted where a token is DECLARED, which freezes `:root`'s scheme into `.ui-dark` subtrees.
  *   `styles.test.ts` checks for it.
  * - NOTE: `StyleGenerator` is left out -- build-time only (`yarn gen:styles`).  Import its leaf file.
- * - NOTE: `ComponentTokens` is left out too -- test / build time only (`test-helpers/componentTokens.test.ts`,
+ * - NOTE: `ComponentTokens` is left out too -- test / build time only (`tests/test-helpers/componentTokens.test.ts`,
  *   `yarn tokens:alias`, the docs site's token tables).  Import its leaf file.
  * - NOTE: no namespace:  sheet names carry a `CSS` suffix and the vocabulary exports are data.
  * - NOTE: the THEMES (`themes/*.css`) are not here:  the runtime loads them lazily, one chunk per sheet, and applies

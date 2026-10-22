@@ -1,6 +1,6 @@
 /**
- * Shared types for `$/ui/elements`, Spell UI's own half of the element core.
- * - What makes an element at all is `$/spell-element`'s:  `UIComponent`, `DOMElement` and their types.
+ * Shared types for `spell-ui/elements`, Spell UI's own half of the element core.
+ * - What makes an element at all is `spell-kit/element`'s:  `UIComponent`, `DOMElement` and their types.
  * - Here:
  *   - the parts with no Solid:  class building, validation, menu options, shorthand, native fallbacks
  *   - the elements that show a text file, the dropdown's entries, the sticky watch
@@ -12,7 +12,7 @@
  *     and a static initializer that reads one of its constants imports it directly (`LoadableComponent`).
  */
 
-import type { E } from "$/ui/core"
+import type { E } from "spell-ui/core"
 // a constant `SourceEvent` reads as it's made:  spell-element's types file, which loads nothing
 import { ERROR_EVENT } from "spell-kit/element/elements.types"
 
@@ -486,7 +486,7 @@ export type LoadableBodyOwner = {
   select(): string | undefined
   /** where the body goes:  the DOM element (a section), or a panel's `<ui-content>` (an accordion) */
   target(): Element
-  /** dispatch vocabulary event `name` (`ui-load`, `ui-error`);  false when a cancelable one was vetoed */
+  /** dispatch vocabulary event `name` (`ui-loaded`, `ui-error`);  false when a cancelable one was vetoed */
   send(name: string, detail: object): boolean
 }
 
@@ -504,13 +504,14 @@ export const SOURCE_ATTRIBUTE = "source"
 /**
  * Events the source layer dispatches through its owner:  `SourceEvent.load`.
  * - The owner's vocabulary MUST name them:
- *   `UIT.SourceEvents` (`LoadableComponent`), `UIT.SourceBodyEvents` (`LoadableBody`:  `load` and `error` only).
+ *   `UIT.SourceEvents` (`LoadableComponent`), `UIT.SourceBodyEvents` (`LoadableBody`:  `loading`, `loaded` and
+ *   `error` only).
  */
 export const SourceEvent = {
   load: "ui-load",
   /** A section's body is on its way (epic `property-editor` P10):  `LoadableBody` only. */
   loading: "ui-loading",
-  /** A section's body is in place, `ui-load`'s new name:  `LoadableBody` only. */
+  /** A section's body is in place:  `LoadableBody` only (a `LoadableComponent` sends `ui-load`). */
   loaded: "ui-loaded",
   change: "ui-change",
   save: "ui-save",

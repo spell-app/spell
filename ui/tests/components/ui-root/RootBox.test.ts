@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { RootBox } from "$/ui/components/ui-root/RootBox"
+import { RootBox } from "spell-ui/components/ui-root/RootBox"
 
 describe("RootBox.css()", () => {
   test("writes width, height, scale and stack-with, in that order", () => {

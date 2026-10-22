@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { shapeVocabulary } from "$/ui/components/ui-shape/UIShape.en"
+import { shapeVocabulary } from "spell-ui/components/ui-shape/UIShape.en"
 
-import shapeCSS from "$/ui/components/ui-shape/UIShape.css?inline"
-import shapeRaw from "$/ui/components/ui-shape/UIShape.css?raw"
+import shapeCSS from "spell-ui/components/ui-shape/UIShape.css?inline"
+import shapeRaw from "spell-ui/components/ui-shape/UIShape.css?raw"
 
 /**
  * `UIShape.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -17,7 +17,7 @@ import shapeRaw from "$/ui/components/ui-shape/UIShape.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-shape",
+  base: "/src/components/ui-shape",
   query: "?raw",
   import: "default",
   eager: true

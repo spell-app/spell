@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { UI } from "$/ui/runtime"
+import { UI } from "spell-ui/runtime"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { FallbackStub, type StubHost } from "$/ui/test-helpers/FallbackStub"
+import { FallbackStub, type StubHost } from "spell-ui/test-helpers/FallbackStub"
 
-import { ButtonFallback } from "$/ui/components/ui-button/UIButton.fallback"
+import { ButtonFallback } from "spell-ui/components/ui-button/UIButton.fallback"
 
 FallbackStub.define(
   "x-fb-button",

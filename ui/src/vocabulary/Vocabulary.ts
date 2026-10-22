@@ -1,4 +1,4 @@
-import { proto } from "$/ui/util"
+import { proto } from "spell-ui/util"
 import type {
   AttributeSpec,
   ComponentVocabulary,
@@ -21,7 +21,7 @@ import { ValueSets } from "./ValueSets"
  *   - The English identity dictionary is the default.
  * - `canonicalize()` / `localize()` convert single names both ways, for attribute parsing and rendering.
  * - Pure data, NO DOM:  the runtime's `UI.vocabulary` service wraps one of these.
- *   - Imports only `$/ui/util` and its folder's peers, so node can load it too.
+ *   - Imports only `spell-ui/util` and its folder's peers, so node can load it too.
  * - See `notes/translation.md`.
  ****************/
 export class Vocabulary {

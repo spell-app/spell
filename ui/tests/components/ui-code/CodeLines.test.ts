@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { CodeLines } from "$/ui/components/ui-code/CodeLines"
+import { CodeLines } from "spell-ui/components/ui-code/CodeLines"
 
 ////////////////
 // ## CodeLines.split()

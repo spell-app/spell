@@ -1,22 +1,22 @@
 import { beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test-helpers/Keys"
+import { Keys } from "spell-ui/test-helpers/Keys"
 
-import { UI } from "$/ui/runtime"
-import type { PopupOpenDetail } from "$/ui/components/components.types"
+import { UI } from "spell-ui/runtime"
+import type { PopupOpenDetail } from "spell-ui/components/components.types"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-popup"
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-parts"
-import "$/ui/components/ui-grid"
+import "spell-ui/components/ui-popup"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-parts"
+import "spell-ui/components/ui-grid"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-popup/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-popup/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

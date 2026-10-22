@@ -2,15 +2,15 @@ import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { UI } from "$/ui/runtime"
+import { UI } from "spell-ui/runtime"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-modal"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-modal"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-button/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-button/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -360,7 +360,7 @@ describe("<ui-button> behaviour", () => {
     element.innerHTML = "<ui-later>x</ui-later>"
     const later = element.firstElementChild as HTMLElement & { color?: string }
     later.color = "red"
-    const { UIButton } = await import("$/ui/components/ui-button")
+    const { UIButton } = await import("spell-ui/components/ui-button")
     UIButton.define("ui-later")
     document.body.append(element)
     await ElementFixture.settle(element)

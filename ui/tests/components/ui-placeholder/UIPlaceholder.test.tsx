@@ -1,15 +1,15 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { PLACEHOLDER_HOST_STATE } from "$/ui/components/components.types"
+import { PLACEHOLDER_HOST_STATE } from "spell-ui/components/components.types"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-placeholder"
+import "spell-ui/components/ui-placeholder"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-placeholder/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-placeholder/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

@@ -1,17 +1,17 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { ClassBuilder } from "$/ui/elements"
-import { colorsCSS, foundationCSS } from "$/ui/styles"
-import type { ComponentVocabulary } from "$/ui/vocabulary"
+import { ClassBuilder } from "spell-ui/elements"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import type { ComponentVocabulary } from "spell-ui/vocabulary"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 
-import { buttonsVocabulary } from "$/ui/components/ui-button/UIButtons.en"
-import { buttonVocabulary } from "$/ui/components/ui-button/UIButton.en"
-import { orVocabulary } from "$/ui/components/ui-button/UIOr.en"
+import { buttonsVocabulary } from "spell-ui/components/ui-button/UIButtons.en"
+import { buttonVocabulary } from "spell-ui/components/ui-button/UIButton.en"
+import { orVocabulary } from "spell-ui/components/ui-button/UIOr.en"
 
-import buttonCSS from "$/ui/components/ui-button/UIButton.css?inline"
-import buttonRaw from "$/ui/components/ui-button/UIButton.css?raw"
+import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
+import buttonRaw from "spell-ui/components/ui-button/UIButton.css?raw"
 
 /**
  * `UIButton.css` on its own, before any element exists:  the sheet's source rules, and the computed styles of
@@ -22,7 +22,7 @@ import buttonRaw from "$/ui/components/ui-button/UIButton.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-button",
+  base: "/src/components/ui-button",
   query: "?raw",
   import: "default",
   eager: true

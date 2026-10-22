@@ -5,12 +5,12 @@ import { renderToString } from "@solidjs/web"
 import { writeFile, mkdir } from "node:fs/promises"
 import { resolve } from "node:path"
 
-import { foundationCSS } from "$/ui/styles"
-import { buttonVocabulary } from "$/ui/components/ui-button/UIButton.en"
+import { foundationCSS } from "spell-ui/styles"
+import { buttonVocabulary } from "spell-ui/components/ui-button/UIButton.en"
 import { ElementDefinition, type DOMElement } from "spell-kit/element"
-import { UIButton } from "$/ui/components/ui-button/UIButton"
+import { UIButton } from "spell-ui/components/ui-button/UIButton"
 
-import buttonCSS from "$/ui/components/ui-button/UIButton.css?inline"
+import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
 
 /**
  * SSR probe:  can `<ui-button primary>Save</ui-button>` be rendered to a Declarative Shadow DOM string?

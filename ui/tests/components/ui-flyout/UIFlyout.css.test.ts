@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { flyoutVocabulary } from "$/ui/components/ui-flyout/UIFlyout.en"
+import { flyoutVocabulary } from "spell-ui/components/ui-flyout/UIFlyout.en"
 
-import buttonCSS from "$/ui/components/ui-button/UIButton.css?inline"
-import flyoutCSS from "$/ui/components/ui-flyout/UIFlyout.css?inline"
-import flyoutRaw from "$/ui/components/ui-flyout/UIFlyout.css?raw"
+import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
+import flyoutCSS from "spell-ui/components/ui-flyout/UIFlyout.css?inline"
+import flyoutRaw from "spell-ui/components/ui-flyout/UIFlyout.css?raw"
 
 /**
  * `UIFlyout.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -18,7 +18,7 @@ import flyoutRaw from "$/ui/components/ui-flyout/UIFlyout.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-flyout",
+  base: "/src/components/ui-flyout",
   query: "?raw",
   import: "default",
   eager: true

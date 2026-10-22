@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { UIT } from "$/ui/core"
-import { FLAG_ALIASES } from "$/ui/components/ui-flag/UIFlag.types"
-import { flagVocabulary } from "$/ui/components/ui-flag/UIFlag.en"
+import { UIT } from "spell-ui/core"
+import { FLAG_ALIASES } from "spell-ui/components/ui-flag/UIFlag.types"
+import { flagVocabulary } from "spell-ui/components/ui-flag/UIFlag.en"
 
-import flagCSS from "$/ui/components/ui-flag/UIFlag.css?inline"
-import flagRaw from "$/ui/components/ui-flag/UIFlag.css?raw"
+import flagCSS from "spell-ui/components/ui-flag/UIFlag.css?inline"
+import flagRaw from "spell-ui/components/ui-flag/UIFlag.css?raw"
 
 /**
  * `UIFlag.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -21,7 +21,7 @@ import flagRaw from "$/ui/components/ui-flag/UIFlag.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-flag",
+  base: "/src/components/ui-flag",
   query: "?raw",
   import: "default",
   eager: true

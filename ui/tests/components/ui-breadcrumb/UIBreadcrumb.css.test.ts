@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { breadcrumbSectionVocabulary } from "$/ui/components/ui-breadcrumb/UIBreadcrumbSection.en"
-import { breadcrumbVocabulary } from "$/ui/components/ui-breadcrumb/UIBreadcrumb.en"
+import { breadcrumbSectionVocabulary } from "spell-ui/components/ui-breadcrumb/UIBreadcrumbSection.en"
+import { breadcrumbVocabulary } from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.en"
 
-import breadcrumbCSS from "$/ui/components/ui-breadcrumb/UIBreadcrumb.css?inline"
-import breadcrumbRaw from "$/ui/components/ui-breadcrumb/UIBreadcrumb.css?raw"
+import breadcrumbCSS from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.css?inline"
+import breadcrumbRaw from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.css?raw"
 
 /**
  * `UIBreadcrumb.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -20,7 +20,7 @@ import breadcrumbRaw from "$/ui/components/ui-breadcrumb/UIBreadcrumb.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-breadcrumb",
+  base: "/src/components/ui-breadcrumb",
   query: "?raw",
   import: "default",
   eager: true

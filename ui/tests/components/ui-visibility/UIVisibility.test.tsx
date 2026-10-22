@@ -1,18 +1,18 @@
 import { beforeEach, describe, expect, it } from "vite-plus/test"
 
-import { UI, type VisibilityCalculations } from "$/ui/runtime"
-import { nextFrame } from "$/ui/util"
+import { UI, type VisibilityCalculations } from "spell-ui/runtime"
+import { nextFrame } from "spell-ui/util"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-visibility"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-visibility"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-visibility/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-visibility/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -67,7 +67,7 @@ async function observersSettle() {
 
 /**
  * How long, after a frame, the observers get to report a scroll:
- * a REAL wait, on purpose (as in `src/runtime/Visibility.test.ts`).
+ * a REAL wait, on purpose (as in `tests/runtime/Visibility.test.ts`).
  * - `IntersectionObserver` delivers after the browser's next rendering update,
  *   and `Visibility` then coalesces its reports with a `setTimeout`:
  *   fake timers drive neither, and "nothing fired" can't be polled for.

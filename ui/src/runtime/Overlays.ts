@@ -1,6 +1,6 @@
 // Import directly to avoid circular import
-import { proto } from "$/ui/util"
-import * as UIT from "$/ui/components/components.types"
+import { proto } from "spell-ui/util"
+import * as UIT from "spell-ui/components/components.types"
 
 import {
   LAYER_ORDER,

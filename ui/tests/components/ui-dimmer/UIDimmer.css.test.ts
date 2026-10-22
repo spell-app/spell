@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { dimmerVocabulary } from "$/ui/components/ui-dimmer/UIDimmer.en"
+import { dimmerVocabulary } from "spell-ui/components/ui-dimmer/UIDimmer.en"
 
-import buttonCSS from "$/ui/components/ui-button/UIButton.css?inline"
-import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
-import modalCSS from "$/ui/components/ui-modal/UIModal.css?inline"
-import dimmerCSS from "$/ui/components/ui-dimmer/UIDimmer.css?inline"
-import dimmerRaw from "$/ui/components/ui-dimmer/UIDimmer.css?raw"
-import dimmablePageRaw from "$/ui/components/ui-dimmer/UIDimmer.page.css?raw"
+import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
+import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import modalCSS from "spell-ui/components/ui-modal/UIModal.css?inline"
+import dimmerCSS from "spell-ui/components/ui-dimmer/UIDimmer.css?inline"
+import dimmerRaw from "spell-ui/components/ui-dimmer/UIDimmer.css?raw"
+import dimmablePageRaw from "spell-ui/components/ui-dimmer/UIDimmer.page.css?raw"
 
 /**
  * `UIDimmer.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -21,7 +21,7 @@ import dimmablePageRaw from "$/ui/components/ui-dimmer/UIDimmer.page.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-dimmer",
+  base: "/src/components/ui-dimmer",
   query: "?raw",
   import: "default",
   eager: true

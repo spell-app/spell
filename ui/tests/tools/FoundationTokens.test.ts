@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { FoundationTokens } from "$/ui/tools/FoundationTokens"
+import { FoundationTokens } from "spell-ui/tools/FoundationTokens"
 
 describe("FoundationTokens.groups()", () => {
   test("groups every :root token of the generated sheets, none left over, colours typed", () => {

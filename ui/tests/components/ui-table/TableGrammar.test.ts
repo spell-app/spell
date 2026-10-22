@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { TableGrammar } from "$/ui/components/ui-table/TableGrammar"
+import { TableGrammar } from "spell-ui/components/ui-table/TableGrammar"
 
 describe("TableGrammar.scroller()", () => {
   test("phrases the scroller-shaped attributes in the table's grammar, noun `scroller`, no `ui`", () => {

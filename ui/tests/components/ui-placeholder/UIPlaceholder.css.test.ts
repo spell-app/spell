@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { placeholderHeaderVocabulary } from "$/ui/components/ui-placeholder/UIPlaceholderHeader.en"
-import { placeholderImageVocabulary } from "$/ui/components/ui-placeholder/UIPlaceholderImage.en"
-import { placeholderLineVocabulary } from "$/ui/components/ui-placeholder/UIPlaceholderLine.en"
-import { placeholderParagraphVocabulary } from "$/ui/components/ui-placeholder/UIPlaceholderParagraph.en"
-import { placeholderVocabulary } from "$/ui/components/ui-placeholder/UIPlaceholder.en"
+import { placeholderHeaderVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderHeader.en"
+import { placeholderImageVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderImage.en"
+import { placeholderLineVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderLine.en"
+import { placeholderParagraphVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderParagraph.en"
+import { placeholderVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholder.en"
 
-import placeholderCSS from "$/ui/components/ui-placeholder/UIPlaceholder.css?inline"
-import placeholderRaw from "$/ui/components/ui-placeholder/UIPlaceholder.css?raw"
+import placeholderCSS from "spell-ui/components/ui-placeholder/UIPlaceholder.css?inline"
+import placeholderRaw from "spell-ui/components/ui-placeholder/UIPlaceholder.css?raw"
 
 /**
  * `UIPlaceholder.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -23,7 +23,7 @@ import placeholderRaw from "$/ui/components/ui-placeholder/UIPlaceholder.css?raw
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-placeholder",
+  base: "/src/components/ui-placeholder",
   query: "?raw",
   import: "default",
   eager: true

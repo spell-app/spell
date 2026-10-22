@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { FamilyTokens } from "$/ui/tools/FamilyTokens"
+import { FamilyTokens } from "spell-ui/tools/FamilyTokens"
 
 describe("FamilyTokens.typeFor()", () => {
   test.each([
