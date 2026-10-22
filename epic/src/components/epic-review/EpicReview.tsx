@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-kit/element"
 
-import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, NOBODY_LISTENING, clockOf, isImmediate, type InboxMark } from "$/epics/review"
+import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, NOBODY_LISTENING, clockOf, isImmediate, type InboxMark } from "spell-epic/review"
 
 import { epicReviewVocabulary } from "./EpicReview.en"
 import { ReviewState } from "./ReviewState"
@@ -39,7 +39,7 @@ import {
 } from "./EpicReview.types"
 
 import reviewCSS from "./EpicReview.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicReview`

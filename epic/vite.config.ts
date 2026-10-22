@@ -8,7 +8,7 @@ import { fmtConfig, packageLint, patternLintIn } from "spell-kit/toolchain/lint"
  * `spell` install, epic `epic-engine` P10):  the copy of its `vite.lint.ts` that was here is gone.
  * - ONE block for the whole repo:  spell-epic is one package (epic `epic-eject` J14), so the root is the package.
  * - The pack's BUILD is the kit's, the same for every pack:
- *   `spell-pack build` (`spell-kit/element/tools/ComponentPack`), on the kit's `elementBaseConfig()`.
+ *   `spell-pack build` (`spell-kit/element-tools/ComponentPack`), on the kit's `elementBaseConfig()`.
  * - Tests:  `vitest.config.ts` beside this.
  * - Not ours to lint or format:
  *   - `src/components/__pack/`:  generated

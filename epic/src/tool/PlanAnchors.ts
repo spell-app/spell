@@ -1,4 +1,4 @@
-import { anchorOf, blocksIn, excerptOf, kindOf, PAGE_ANCHOR, sectionOf, textOf } from "../tools/BlockAnchors.js"
+import { anchorOf, blocksIn, excerptOf, kindOf, PAGE_ANCHOR, sectionOf, textOf } from "spell-epic/tools/BlockAnchors.js"
 
 /****************
  * ### `PlanAnchors`

@@ -2,8 +2,8 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "spell-ui/ui-icon"
-import "$/epics/components/epic-page-note-head"
+import "spell-ui/components/ui-icon"
+import "spell-epic/components/epic-page-note-head"
 
 /** `element`'s shadow part `name`. */
 function part(element: Element, name: string): HTMLElement {

@@ -22,8 +22,8 @@ import { existsSync, readFileSync, readdirSync, realpathSync, statSync, writeFil
 import { dirname, extname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { HIGHLIGHT_JS } from "$/epics/server/server.types"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { HIGHLIGHT_JS } from "spell-epic/server/server.types"
 
 /**
  * The checker:  finds a page's remote loads, the pages to check, and the highlight.js fix.

@@ -377,7 +377,7 @@ export class CommentList {
   /**
    * Mark comment `id` taken into `epic`'s phase `phase`:  no longer Owen's to change.
    * - `phaseId`, `title`:  the phase's stable id and its title (epic `epic-engine` I16), so its thread's link finds the
-   *   phase after an insert moves its number (`ThreadFacts.takenInto()`, `$/epics/comments`)
+   *   phase after an insert moves its number (`ThreadFacts.takenInto()`, `spell-epic/comments`)
    */
   take(id: string, { epic, phase, phaseId, title }: TakenInto, now = new Date()): void {
     const comment = this.comment(id)
@@ -387,7 +387,7 @@ export class CommentList {
 
   /**
    * Claude is thinking about comment `id` (`on`), or stopped (`!on`):  the page shows a "Claude: thinking…" stub at
-   * the end of its thread meanwhile (`epic comments working`, `epic inbox <name>#M3 working on`).
+   * the end of its thread meanwhile (`epic comments working`, `epic inbox working <name>#M3 on`).
    * - `working`:  since when;  set again, it keeps the first time
    * - `answer()` turns it off
    */

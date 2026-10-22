@@ -7,10 +7,10 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "$/epics/definitions"
+import type { EpicVocabulary } from "spell-epic/definitions"
 
-import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "$/epics/components/epic-item/Fold.types"
-import { REVIEW_NAME_TEXTS, REVIEW_PARTS } from "$/epics/components/epic-review/EpicReview.types"
+import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell-epic/components/epic-item/Fold.types"
+import { REVIEW_NAME_TEXTS, REVIEW_PARTS } from "spell-epic/components/epic-review/EpicReview.types"
 
 /****************
  * ### `<epic-item>`
@@ -117,7 +117,7 @@ export const epicItemVocabulary = {
       description:
         "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  " +
         "For a call that simply follows WWOD (`plan-doc add ... --calm`);  Owen flips it by clicking the id chip " +
-        "while the page is reviewed (the inbox's `urgency`, applied by `plan-doc inbox apply`)."
+        "while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
     },
     {
       name: "failed",
@@ -165,7 +165,12 @@ export const epicItemVocabulary = {
       description: "About to fold:  its line was clicked.  Cancel to stay open."
     },
     {
-      name: "ui-load",
+      name: "ui-loading",
+      detail: "{ source: string }",
+      description: "Its `source` part is on its way:  the first unfold, or a live reload."
+    },
+    {
+      name: "ui-loaded",
       detail: "{ source: string, content: string }",
       description: "Its `source` part arrived and is in its children (`content` is the file's text)."
     },

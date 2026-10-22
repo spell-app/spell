@@ -33,11 +33,11 @@ import { homedir } from "node:os"
 import { join, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
 
-import { AirplaneMode } from "../tools/AirplaneMode"
+import { AirplaneMode } from "spell-epic/tools/AirplaneMode"
 
-import { RunningEpics, sessionsTitledFor, type LiveSession } from "../list/RunningEpics"
+import { RunningEpics, sessionsTitledFor, type LiveSession } from "spell-epic/list/RunningEpics"
 import { ReviewInbox, type InboxWoken, type PageInbox, type WakeClaim, type WokenState } from "./ReviewInbox"
 
 /** The window script beside this code, spell-epic's `src/window.mjs`:  `epic window launch` (`launch()`). */

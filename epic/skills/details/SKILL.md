@@ -52,7 +52,7 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
 
 ## 2. Make the page
 
-1. `epic ask new <slug> --title "<Title>"`:  prints the page's path.
+1. `epic ask create <slug> --title "<Title>"`:  prints the page's path.
    - Many questions of one shape (a list to pick from):  `--from <spec.json>` builds the whole page from data instead.
      - The data:  title, lede, "Where we are", context, questions and their options.
      - Its shape:  `DetailsSpec`, in [details.js](${CLAUDE_PLUGIN_ROOT}/src/tools/details.js).
@@ -79,7 +79,7 @@ Dense, terse pages make him ask "what do you mean?" (2026-10-03), so:
      - each element has its page in Epic UI, `/components/epics/`
 
      ```html
-     <ui-section id="q1" header="Q1 · Which card layout?" sticky collapsible dividing>
+     <ui-section id="q1" label="Q1 · Which card layout?" sticky collapsible dividing>
        <ui-icon slot="icon" name="circle question"></ui-icon>
        <epic-ask>
          <epic-question><p>The question in full, one or two lines.</p></epic-question>

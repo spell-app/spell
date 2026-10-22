@@ -32,8 +32,8 @@ import { homedir } from "node:os"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { DataFile } from "$/epics/data/DataFile"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { DataFile } from "spell-epic/data/DataFile"
 import { SRV } from "spell-kit/server"
 import { PageServer } from "spell-kit/server/page"
 

@@ -5,9 +5,9 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { PlanAnchors } from "$/epics/tool/PlanAnchors"
-import type { AnchorMove, InboxView, MigrationContext } from "$/epics/tool/migrations/migrations.types"
-import { Migrations } from "$/epics/tool/migrations/Migrations"
+import { PlanAnchors } from "spell-epic/tool/PlanAnchors"
+import type { AnchorMove, InboxView, MigrationContext } from "spell-epic/tool/migrations/migrations.types"
+import { Migrations } from "spell-epic/tool/migrations/Migrations"
 
 /** The step under test. */
 const STEP = Migrations.named("links-agree")!

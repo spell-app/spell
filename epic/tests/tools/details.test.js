@@ -21,7 +21,7 @@ import {
   readDraft,
   sweep,
   waitForAnswer
-} from "../../src/tools/details.js"
+} from "spell-epic/tools/details.js"
 
 let docs
 
@@ -81,7 +81,7 @@ test("new --from:  the whole page from a spec", () => {
   expect(html).toContain('<epic-field label="Just now">listed 6 worktrees</epic-field>')
   expect(html).toContain('<epic-field label="Asked by" data-details-by>session <code>w</code>, while taking stock')
   expect(html).not.toContain('id="context"')
-  expect(html).toMatch(/<ui-section id="q1" header="1 · worktree seo" sticky collapsible dividing>/)
+  expect(html).toMatch(/<ui-section id="q1" label="1 · worktree seo" sticky collapsible dividing>/)
   expect(html).toContain("<epic-ask><epic-question><p>Merged into main.</p></epic-question><epic-choices>")
   expect(html).toContain('<epic-option letter="A" title="Remove it" recommended><p>git worktree remove</p>')
   expect(html).toContain('<epic-aside title="Details"><p>more</p></epic-aside>')
@@ -89,7 +89,7 @@ test("new --from:  the whole page from a spec", () => {
   expect(html).not.toContain("First option")
   // nothing built as markup in strings:  a title with HTML in it stays text, in its attribute
   expect(createPageHtml({ questions: [{ title: 'A <b>"bold"</b> one', options: [{ title: "x & y" }] }] })).toContain(
-    'header="A <b>&quot;bold&quot;</b> one"'
+    'label="A <b>&quot;bold&quot;</b> one"'
   )
   rmSync(file)
 })
@@ -174,7 +174,7 @@ test("formats a page with no questions:  its comments and notes, no count of wha
   const page = join(docs, "layout.html")
   writeFileSync(
     page,
-    `<h1>Layout</h1><ui-section id="l-main" header="2.2 The main checkout"><epic-text-box for="l-main"></epic-text-box></ui-section>`
+    `<h1>Layout</h1><ui-section id="l-main" label="2.2 The main checkout"><epic-text-box for="l-main"></epic-text-box></ui-section>`
   )
   const answer = {
     page: "/x",

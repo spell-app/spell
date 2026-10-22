@@ -12,9 +12,9 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { PageServer } from "spell-kit/server/page"
 import { ask } from "spell-kit/server/test/serve"
 
-import { EPIC_CARDS_END } from "$/epics/list/EpicCards"
-import { MARKER, type RunningEpic } from "$/epics/list/RunningEpics"
-import runningRoutes, { RUNNING_API } from "$/epics/list/runningRoutes"
+import { EPIC_CARDS_END } from "spell-epic/list/EpicCards"
+import { MARKER, type RunningEpic } from "spell-epic/list/RunningEpics"
+import runningRoutes, { RUNNING_API } from "spell-epic/list/runningRoutes"
 
 /** The Epics page's list, empty, as `docs index` writes it (`epicListHtml()`). */
 const LIST = `<epic-list class="spell-epics">\n${MARKER}\n${EPIC_CARDS_END}\n</epic-list>`

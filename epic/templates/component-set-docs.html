@@ -23,7 +23,7 @@
     as Spell UI's, Epic UI's, App UI's and Brand's do.
   - The set's side column lists the new page once its data is rebuilt:  `yarn site:data` in the set's package
     (spell-epic, for Epic UI).
-  - Sections:  nested `<ui-section id header sticky collapsible dividing collapsed>`, every one folded to start, as on
+  - Sections:  nested `<ui-section id label sticky collapsible dividing collapsed>`, every one folded to start, as on
     every docs page.  Code:  `<ui-code language>` around a `<script type="text/plain">`, folded in a
     `<ui-accordion class="spell-code" styled>`.
   - Check it:  `node tools/check-spell.js ../../<set folder>/<page>.html` (in `packages/docs`):  it loads a set's page
@@ -78,13 +78,13 @@
           <p class="lede">What it is, in a sentence or two: what it draws, and where it goes.</p>
           <p class="meta">For anyone reading or writing its markup, or changing it.</p>
 
-          <ui-section id="1-example" header="1. Example" sticky collapsible dividing collapsed>
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>Live: the real element, drawn by the set's pack this page loads.</p>
             <!-- the live example's markup -->
           </ui-section>
 
-          <ui-section id="2-markup" header="2. Markup" sticky collapsible dividing collapsed>
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
             <ui-accordion class="spell-code" styled>
               <ui-title>Where it's from · N lines</ui-title>
@@ -98,7 +98,7 @@
             </ui-accordion>
           </ui-section>
 
-          <ui-section id="3-attributes" header="3. Attributes" sticky collapsible dividing collapsed>
+          <ui-section id="3-attributes" label="3. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
             <ui-table celled compact striped unstackable>
               <table>

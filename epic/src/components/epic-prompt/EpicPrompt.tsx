@@ -5,7 +5,7 @@ import { E } from "spell-ui/core"
 import { epicPromptVocabulary } from "./EpicPrompt.en"
 
 import promptCSS from "./EpicPrompt.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicPrompt`

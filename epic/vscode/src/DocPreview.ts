@@ -17,7 +17,7 @@
  *   2. the MAIN checkout's page server, for a worktree's file, when it serves worktrees (`SRV.mainServerUrl()`)
  *   3. the file's checkout's page server (`spell server`, a `.spell-server.json` at its root)
  *   4. else a server of our own, in-process, on `127.0.0.1`, one per root, for as long as the extension runs:
- *      the same `$/server` `WebServer`, with live reload and the engine's routes, but no route modules
+ *      the same `spell-kit/server` `WebServer`, with live reload and the engine's routes, but no route modules
  *   - NEVER starts a page server itself:  a GUI VS Code may have no `node` / `yarn` on its PATH.
  *     The scripts that open docs start one first (`epic hub ensure`, `pages.js` `ensurePageServer()`).
  * - Served from the ROOT, not the doc's folder:  docs link to source files all over the repo.
@@ -30,10 +30,13 @@ import { existsSync } from "fs"
 import { dirname, join, resolve, sep } from "path"
 import * as vscode from "vscode"
 
-import { SRV } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser (~700 KB) lands in this bundle (I58)
+import { mainServerUrl } from "spell-kit/server/mainServer"
+import { PidFile } from "spell-kit/server/PidFile"
+import { WebServer } from "spell-kit/server/WebServer"
 
-import { RepoList } from "$/epics/server/RepoList"
-import { ENGINE_ROUTES, PID_FILE } from "$/epics/server/server.types"
+import { RepoList } from "spell-epic/server/RepoList"
+import { ENGINE_ROUTES, PID_FILE } from "spell-epic/server/server.types"
 
 import { DocView, docsIndex, type DocViewName } from "./DocView"
 import { PREVIEW_PATH, isLoopback, stamped } from "./docUrls"
@@ -44,7 +47,7 @@ import { PREVIEW_PATH, isLoopback, stamped } from "./docUrls"
  ****************/
 export class DocPreview {
   /** Our own server for each git root without a page server, once listening. */
-  static readonly servers = new Map<string, Promise<SRV.WebServer>>()
+  static readonly servers = new Map<string, Promise<WebServer>>()
 
   /**
    * Set up the URI handler -- call once, first thing in `activate()`.
@@ -105,11 +108,11 @@ export class DocPreview {
     const hub = await DocPreview.epicServer()
     const path = hub && repoPathOf(file)
     if (hub && path) return `${hub.base}${path}`
-    const main = await SRV.mainServerUrl(file)
+    const main = await mainServerUrl(file)
     if (main) return main
     const root = gitRoot(file)
     const inRoot = file.slice(root.length).split(sep).map(encodeURIComponent).join("/")
-    const running = await new SRV.PidFile(root).status()
+    const running = await new PidFile(root).status()
     const base = running?.base ?? (await DocPreview.serverFor(root)).url
     return `${base}${inRoot}`
   }
@@ -121,7 +124,7 @@ export class DocPreview {
    */
   static async epicServer(): Promise<{ base: string } | undefined> {
     try {
-      return await new SRV.PidFile(RepoList.homeFolder(), PID_FILE).status()
+      return await new PidFile(RepoList.homeFolder(), PID_FILE).status()
     } catch {
       return undefined
     }
@@ -131,7 +134,7 @@ export class DocPreview {
    * Our own server for `root`, started once:  static files with live reload, on a free port.
    * - watches `DOC_FOLDERS` if there, else the whole root
    */
-  static serverFor(root: string): Promise<SRV.WebServer> {
+  static serverFor(root: string): Promise<WebServer> {
     let server = DocPreview.servers.get(root)
     if (!server) {
       server = start(root)
@@ -184,12 +187,12 @@ declare const ENGINE_ROOT: string
  * - the engine's routes too (`/_epic/assets/`, `/_epic/pack/`), from the spell-epic checkout this extension was built
  *   from:  a migrated page loads its assets there
  */
-async function start(root: string): Promise<SRV.WebServer> {
+async function start(root: string): Promise<WebServer> {
   const engine = Object.values(ENGINE_ROUTES).map((route) => ({
     prefix: route.prefix,
     dir: join(ENGINE_ROOT, route.dir)
   }))
-  const server = new SRV.WebServer({ root, live: true, mounts: [...engine, { prefix: "/", dir: root }] })
+  const server = new WebServer({ root, live: true, mounts: [...engine, { prefix: "/", dir: root }] })
   const watched = DOC_FOLDERS.map((dir) => join(root, dir)).filter((dir) => existsSync(dir))
   for (const dir of watched.length ? watched : [root]) server.live!.watch(dir)
   await server.listen()

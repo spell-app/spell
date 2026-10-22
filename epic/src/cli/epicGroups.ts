@@ -1,6 +1,6 @@
 /**
  * The verbs of `epic`'s groups (`GroupName`), for their help (epic `epic-workflow` P19):
- * - `epic ask new --help` prints that verb's usage, what it does and an example
+ * - `epic ask create --help` prints that verb's usage, what it does and an example
  * - `epic ask --help` lists them
  *
  * - Help only:  each group's tool or class reads its own arguments, passed through verbatim.
@@ -13,12 +13,12 @@
 export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   ask: [
     {
-      name: "new",
+      name: "create",
       usage: '<slug> [--title "..."] [--epic <epic>] [--description "..."] [--from <questions.json5>]',
       description:
         "make a details page from the template, and print its path;  --epic:  in that epic's details/ (else a " +
         "scratch page, swept after 14 days);  --from:  the whole page from a list of questions",
-      example: 'epic ask new pick-layout --epic seo --title "Pick a layout"'
+      example: 'epic ask create pick-layout --epic seo --title "Pick a layout"'
     },
     {
       name: "show",
@@ -63,11 +63,11 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   ],
   choices: [
     {
-      name: "new",
+      name: "create",
       usage: '<slug> --rows <rows.json5> [--title "..."] [--epic <epic>] [--description "..."]',
       description:
         "make a choice page from its rows (a table of names Claude recommends, Owen's call on each), and print its path",
-      example: "epic choices new boolean-names --rows rows.json5 --epic seo"
+      example: "epic choices create boolean-names --rows rows.json5 --epic seo"
     },
     {
       name: "show",
@@ -381,21 +381,6 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<worktree> [--dry-run] [--json]",
       description: "move a worktree cut before the cutover onto the shared content",
       example: "epic shared migrate seo --dry-run"
-    },
-    {
-      name: "rename",
-      usage: "<new> [--dry-run] [--json]",
-      description:
-        "rename the shared content folder (a bare name:  beside it), leave a link at the old name, relink every " +
-        "checkout, write the new place into .epic/config.json5, and rewrite AGENTS.md, CLAUDE.md, the Claude settings " +
-        "and the memory notes that name it (Claude Code's own settings:  listed, to edit by hand)",
-      example: "epic shared rename spell-app.epics --dry-run"
-    },
-    {
-      name: "repair",
-      usage: "[--dry-run] [--json]",
-      description: "move pages a branch left in old places into the shared folders, fix their links, then link",
-      example: "epic shared repair --dry-run"
     }
   ],
 
@@ -443,10 +428,10 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic window show epics/seo/seo.plan.html --review"
     },
     {
-      name: "reload-view",
+      name: "reload",
       usage: "[--review]",
       description: "rebuild the side bar's view from scratch, at the page it shows",
-      example: "epic window reload-view --review"
+      example: "epic window reload --review"
     },
     {
       name: "open",
@@ -481,10 +466,10 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic window resume ~/.spell-epic/windows/handoffs/<id>.json"
     },
     {
-      name: "stay-check",
+      name: "should-stay",
       usage: "[--epic] [--json]",
       description: "stay in this window when isolating, or move?  recommend stay|window, and why",
-      example: "epic window stay-check --epic"
+      example: "epic window should-stay --epic"
     },
     {
       name: "color",
@@ -611,12 +596,12 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic pages update guides/greet.html"
     },
     {
-      name: "new",
+      name: "create",
       usage: '<kind> <page> --title "..." [--dry-run]',
       description:
         "make a page from a template (durable, ...), at the right depth, and list it on its area's page;  " +
         "--dry-run:  say which template and page, write nothing",
-      example: 'epic pages new durable guides/greet.html --title "How greet() works"'
+      example: 'epic pages create durable guides/greet.html --title "How greet() works"'
     },
     {
       name: "template",
@@ -680,12 +665,12 @@ export type GroupName =
 
 /** One verb of a group, for its help:  `epic <group> <name> <usage>`, what it does, a whole command line. */
 export type GroupVerb = {
-  /** the verb:  `new` */
+  /** the verb:  `create` */
   name: string
   /** its arguments:  `<slug> [--epic <epic>]` */
   usage: string
   /** what it does, for Owen */
   description: string
-  /** a whole command line:  `epic ask new pick-layout --epic seo` */
+  /** a whole command line:  `epic ask create pick-layout --epic seo` */
   example: string
 }

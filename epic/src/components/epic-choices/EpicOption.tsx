@@ -3,21 +3,21 @@ import { Dynamic, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { NOBODY_LISTENING, ReviewClient, picks } from "$/epics/review"
+import { NOBODY_LISTENING, ReviewClient, picks } from "spell-epic/review"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
-import { EpicAsk } from "$/epics/components/epic-ask/EpicAsk"
-import { Fold } from "$/epics/components/epic-item/Fold"
-import type { EpicItem } from "$/epics/components/epic-item/EpicItem"
+import { EpicAsk } from "spell-epic/components/epic-ask/EpicAsk"
+import { Fold } from "spell-epic/components/epic-item/Fold"
+import type { EpicItem } from "spell-epic/components/epic-item/EpicItem"
 // an answering option's comment box:  its barrel first, so it's defined wherever the option is
-import "$/epics/components/epic-text-box"
-import { CLOSED_STATUSES } from "$/epics/components/epic-item/EpicItem.types"
+import "spell-epic/components/epic-text-box"
+import { CLOSED_STATUSES } from "spell-epic/components/epic-item/EpicItem.types"
 
 import { epicOptionVocabulary } from "./EpicOption.en"
 import { EpicChoices } from "./EpicChoices"
 import { ITEM_TAG, ORIGINAL_TAG, TOGGLE, type CardSet } from "./EpicChoices.types"
 
 import choicesCSS from "./EpicChoices.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicOption`
@@ -41,7 +41,7 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  *     - picked:  `Chosen · not sent`, the pill and the card's frame DASHED green (an answered panel:  its title green)
  *     - once sent:  `Chosen · sent`, outlined green
  *     - applied (its set's `chosen`):  `Chosen`, the pill SOLID green;
- *       a question answered with it, any other item approved with it (`plan-doc inbox apply`)
+ *       a question answered with it, any other item approved with it (`epic inbox apply`)
  *   - from the pick on, the card says Chosen (Owen, 2026-10-10):  a sent pick Claude took off the inbox
  *     stays `Chosen · sent` until the doc's `chosen` reaches the page (`ReviewClient.takenPickOf()`)
  *   - WHEREVER its cards are (I8):  an item's text, a reply, More Details;

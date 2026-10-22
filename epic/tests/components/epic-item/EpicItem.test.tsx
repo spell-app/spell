@@ -4,7 +4,7 @@ import { E, UI } from "spell-ui/core"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-item"
+import "spell-epic/components/epic-item"
 
 ////////////////
 // ## Helpers
@@ -304,13 +304,13 @@ describe("<epic-item source>", () => {
     vi.restoreAllMocks()
   })
 
-  test("fetches nothing while folded;  the first unfold loads the part into its LIGHT children, then `ui-load`", async () => {
+  test("fetches nothing while folded;  the first unfold loads the part into its LIGHT children, then `ui-loaded`", async () => {
     const fetches = serve(PART, PART_HTML)
     const { host, line } = await item(
       `<epic-item id="q6" title="Parts" status="decided" answered source="${PART}"><p class="placeholder">Wait</p></epic-item>`
     )
     const loads: string[] = []
-    host.addEventListener("ui-load", (event) => loads.push((event as CustomEvent<{ source: string }>).detail.source))
+    host.addEventListener("ui-loaded", (event) => loads.push((event as CustomEvent<{ source: string }>).detail.source))
     await ElementFixture.tick()
     expect(fetches).not.toHaveBeenCalled()
     line.click()

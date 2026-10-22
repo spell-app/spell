@@ -3,8 +3,8 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-question"
-import "$/epics/components/epic-item"
+import "spell-epic/components/epic-question"
+import "spell-epic/components/epic-item"
 
 /** `host`'s shadow part `name`. */
 function part(host: Element, name: string): HTMLElement | null {

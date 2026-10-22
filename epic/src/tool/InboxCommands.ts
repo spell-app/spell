@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { relative, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { PageInboxes } from "../tools/PageInboxes"
+import { PageInboxes } from "spell-epic/tools/PageInboxes"
 
 import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
 
@@ -26,7 +26,8 @@ import { FEEDBACK, SeeAlso, epicNamed } from "./SeeAlso"
 
 /****************
  * ### `InboxCommands`
- * `epic inbox <name> [<what> ...]`:  the review inbox of an epic's doc (`ReviewInbox`),
+ * `epic inbox [<what>] <name>[#<id>] ...` (`inbox <name> [<what> ...]`, the tool's order):  the review inbox of an
+ * epic's doc (`ReviewInbox`),
  * from Claude's side;  `<what>` none prints it.
  * - every inbox write goes through `ReviewInbox.update()` (the inbox's lock);
  *   doc edits through `PlanDocCommands.edit()` (the doc's)
@@ -58,13 +59,13 @@ export class InboxCommands {
     switch (what) {
       case undefined:
         return this.print(name, this.owner.read(file), file, Boolean(flags.json))
-      case "listen": {
+      case "watch": {
         const session = typeof flags.session === "string" ? flags.session : process.env.CLAUDE_CODE_SESSION_ID
-        if (!session) throw new PlanDocError("listen as which session?  --session <id> (no $CLAUDE_CODE_SESSION_ID)")
+        if (!session) throw new PlanDocError("watch as which session?  --session <id> (no $CLAUDE_CODE_SESSION_ID)")
         ReviewInbox.update(path, (box) => box.setListening(session))
         return this.owner.print(`listening:  session ${session}`)
       }
-      case "unlisten":
+      case "ignore":
         ReviewInbox.update(path, (box) => box.setListening(null))
         return this.owner.print("listening:  nobody")
       case "wait":
@@ -84,7 +85,7 @@ export class InboxCommands {
       case "clear":
         return this.finish(file, what, args, flags)
       default:
-        throw new PlanDocError(`inbox what?  listen | unlisten | wait | apply | working | done | clear (not '${what}')`)
+        throw new PlanDocError(`inbox what?  watch | ignore | wait | apply | working | done | clear (not '${what}')`)
     }
   }
 
@@ -152,7 +153,7 @@ export class InboxCommands {
         ? "listening:  nobody (no Claude session is reviewing this doc)"
         : inbox.liveListener()
           ? `listening:  session ${listening.session}, since ${listening.since}`
-          : `listening:  nobody (session ${listening.session} last seen ${listening.seen ?? listening.since}, over ${LISTEN_STALE_MS / 1000}s ago:  gone without \`unlisten\`)`
+          : `listening:  nobody (session ${listening.session} last seen ${listening.seen ?? listening.since}, over ${LISTEN_STALE_MS / 1000}s ago:  gone without \`ignore\`)`
     )
     const unsentCount = unsent.size + unsentUrgency.size + inbox.unsentComments.length
     lines.push(`sent:  ${inbox.sent ?? "never"};  ${unsentCount} unsent`)
@@ -218,7 +219,7 @@ export class InboxCommands {
   ////////////////
 
   /**
-   * `inbox <name> wait`:  poll the inbox every second until there's work (`hasWork`),
+   * `inbox wait <name>`:  poll the inbox every second until there's work (`hasWork`),
    * TAKE it under the lock (`takeWork()`) and print it (`printWork()`).
    * - none by `timeout` seconds (default 3300, 55 minutes):  exit code 2
    * - how a `/epic review` session hears the page:  run in the background, its EXIT wakes the session
@@ -299,12 +300,12 @@ export class InboxCommands {
     if (canceled.length) {
       lines.push(
         `canceled (${canceled.length}):  Owen said "nevermind":  stop each one's background agent (TaskStop), then ` +
-          `\`epic inbox ${name}#<id> done\``
+          `\`epic inbox done ${name}#<id>\``
       )
       for (const each of canceled) lines.push(`  - ${line(each)}  (${each.action})`)
     }
     if (now.length) {
-      lines.push(`now (${now.length}):  start a background agent for each;  \`epic inbox ${name}#<id> done\` after`)
+      lines.push(`now (${now.length}):  start a background agent for each;  \`epic inbox done ${name}#<id>\` after`)
       for (const each of now) {
         lines.push(`  - ${line(each)}`)
         if (each.action === "details") lines.push("      Add Details")
@@ -343,17 +344,17 @@ export class InboxCommands {
       const talk = sent.marks.filter((mark) => mark.action === "revisit")
       if (sent.marks.length || sent.urgency.length)
         lines.push(
-          `next:  \`epic inbox ${name} apply\` (approve, pick, todo, a todo's next phase or drop, skip, new, ` +
+          `next:  \`epic inbox apply ${name}\` (approve, pick, todo, a todo's next phase or drop, skip, new, ` +
             `test results, urgency)`
         )
       if (talk.length)
         lines.push(
-          `then talk over ${talk.map((mark) => mark.id).join(", ")} in the chat;  \`epic inbox ${name}#<id> clear\` after each`
+          `then talk over ${talk.map((mark) => mark.id).join(", ")} in the chat;  \`epic inbox clear ${name}#<id>\` after each`
         )
       if (sent.comments.length)
         lines.push(
-          `then each comment:  \`epic inbox ${name}#<M id> working on\`, answer it in the doc, ` +
-            `then \`epic inbox ${name}#<M id> done --file <answer.html>\``
+          `then each comment:  \`epic inbox working ${name}#<M id> on\`, answer it in the doc, ` +
+            `then \`epic inbox done ${name}#<M id> --file <answer.html>\``
         )
     }
     if (guides.length) {
@@ -396,7 +397,7 @@ export class InboxCommands {
   ////////////////
 
   /**
-   * `inbox <name> apply [ids...]`:  apply the SENT mechanical marks, all or those of `ids`, then clear them;
+   * `inbox apply <name> [ids...]`:  apply the SENT mechanical marks, all or those of `ids`, then clear them;
    * prints a line per item, and what it left.
    * - the marks (`PlanDoc.applyMark()`):
    *   - approve, pick, todo
@@ -556,7 +557,7 @@ export class InboxCommands {
 /****************
  * ### `GuideSends`
  * The pages an epic owns (`SeeAlso.ownedBy()`:  its details pages, the guides its See Also claims), and the comments
- * Owen sent from them (epic `epic-workflow` P13, J27):  how `inbox <name> wait` hears a guide's Send.
+ * Owen sent from them (epic `epic-workflow` P13, J27):  how `inbox wait <name>` hears a guide's Send.
  * - the standing `feedback` epic (epic `epic-engine` T9):  every page no epic owns that holds comments
  *   (`PageInboxes.unowned()`), Epic UI's pages too, besides its own `details/` pages
  * - the pages are found again every `GUIDES_FOUND_MS`, so a guide linked mid-wait is heard

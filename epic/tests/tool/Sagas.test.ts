@@ -7,7 +7,7 @@ import { join } from "node:path"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Sagas } from "$/epics/tool/Sagas"
+import { Sagas } from "spell-epic/tool/Sagas"
 
 const root = mkdtempSync(join(tmpdir(), "sagas-"))
 

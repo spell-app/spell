@@ -56,7 +56,7 @@ so he answers everything in one sitting.
   - then every real question of step 3, each with its options, one `recommended`
 - `--epic <name>`, slug `bedtime-<date>`, so the page stays with the epic page.
 - Make it, show it, and END THE TURN with the page's link pair (`epic pages link <page>`):
-  - `epic ask new <slug> --from <spec.json>`:  the spec in the scratchpad.
+  - `epic ask create <slug> --from <spec.json>`:  the spec in the scratchpad.
     Its shape:  `DetailsSpec`, in [details.js](${CLAUDE_PLUGIN_ROOT}/src/tools/details.js).
   - Then `epic ask show <slug> --wait`, with Bash `run_in_background: true`.
   - Owen's Send wakes the session with the answers as text.
@@ -180,7 +180,7 @@ Everything else stands:
   epic bedtime <name> done "<done / WIP / skipped counts>;  <n> judgement calls;  branch <branch>"
   ```
 
-- `epic check <name>`, then `epic open <name> --review`.
+- `epic lint <name>`, then `epic open <name> --review`.
   - Owen wakes to the doc, the night's calls and issues red.
   - Nothing to commit for the doc (shared content, committed for you).
 - Final reply:  the summary, the judgement calls by phase (in words, ids after), and the problems.

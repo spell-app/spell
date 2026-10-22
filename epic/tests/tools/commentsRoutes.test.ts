@@ -10,12 +10,12 @@ import { afterAll, beforeAll, expect, test, vi } from "vite-plus/test"
 
 import { PageServer } from "spell-kit/server/page"
 import { ask } from "spell-kit/server/test/serve"
-import { CommentList } from "$/epics/tool/CommentList"
-import { GuideInbox } from "$/epics/tool/GuideInbox"
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
+import { CommentList } from "spell-epic/tool/CommentList"
+import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
-import { run } from "../../src/tools/comments"
-import commentsRoutes from "../../src/tools/commentsRoutes"
+import { run } from "spell-epic/tools/comments"
+import commentsRoutes from "spell-epic/tools/commentsRoutes"
 
 let root: string
 let server: PageServer
@@ -27,7 +27,7 @@ const PAGE = `<!doctype html>
   <body>
     <main class="spell-doc-main">
       <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>Page</h1></header></ui-sticky>
-      <ui-section id="model" header="1. The model" sticky collapsible dividing collapsed>
+      <ui-section id="model" label="1. The model" sticky collapsible dividing collapsed>
         <p>Body.</p>
       </ui-section>
     </main>

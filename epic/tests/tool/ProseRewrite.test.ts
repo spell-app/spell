@@ -1,11 +1,11 @@
 /**
  * Tests of `ProseRewrite` as the tool's way in uses it (`plain()`, history left alone):  each old prose shape made
- * its element, by `ProseShapes`' rules.  As the converter's second pass:  `$/epics/convert` `Upgrader.test.ts`.
+ * its element, by `ProseShapes`' rules.  As the converter's second pass:  `spell-epic/convert` `Upgrader.test.ts`.
  */
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { ProseRewrite } from "$/epics/tool/ProseRewrite"
+import { ProseRewrite } from "spell-epic/tool/ProseRewrite"
 
 /** `html` with every old shape rewritten, white space between tags squeezed. */
 function rewritten(html: string): string {

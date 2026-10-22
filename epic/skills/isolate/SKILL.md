@@ -1,6 +1,6 @@
 ---
 name: isolate
-description: Move this session into its own git worktree `<name>` (worktree, branch and session all named `<name>`) and either open it in a new, tinted VS Code window or stay in this one (Owen picks, `stay-check` recommends);  `/isolate done` offers to merge it into `main` and to open a pull request for it, then leaves it.  Use for `/isolate <name>`, `/isolate done`, or when Owen says "isolate as <name>" / "isolate this" about the current session.
+description: Move this session into its own git worktree `<name>` (worktree, branch and session all named `<name>`) and either open it in a new, tinted VS Code window or stay in this one (Owen picks, `should-stay` recommends);  `/isolate done` offers to merge it into `main` and to open a pull request for it, then leaves it.  Use for `/isolate <name>`, `/isolate done`, or when Owen says "isolate as <name>" / "isolate this" about the current session.
 argument-hint: <name> | done
 ---
 
@@ -87,7 +87,7 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
    - a branch `<name>` or `worktree-<name>`
    - Any hit:  AskUserQuestion, options "Reuse `<name>`" and "Different name" (typed in "Other").
 
-2b. Where:  `epic window stay-check` prints `recommend stay|window`, and why.
+2b. Where:  `epic window should-stay` prints `recommend stay|window`, and why.
    - From `/epic`, add `--epic`.
    - AskUserQuestion "Where should `<name>` run?", its reasons in the question,
      the recommended option first, with "(Recommended)":

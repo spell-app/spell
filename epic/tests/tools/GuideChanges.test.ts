@@ -7,12 +7,12 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { ThreadFacts } from "$/epics/comments"
-import { PhaseIds } from "$/epics/phases"
-import { GuideInbox } from "$/epics/tool/GuideInbox"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
+import { ThreadFacts } from "spell-epic/comments"
+import { PhaseIds } from "spell-epic/phases"
+import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
 
-import { GuideChanges } from "../../src/tools/GuideChanges"
+import { GuideChanges } from "spell-epic/tools/GuideChanges"
 
 /** A guide, its `<title>` carrying a site suffix, with a page note not yet answered. */
 const GUIDE = `<!doctype html>
@@ -21,7 +21,7 @@ const GUIDE = `<!doctype html>
   <body>
     <main class="spell-doc-main">
       <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>Memory</h1></header></ui-sticky>
-      <ui-section id="sizes" header="2. Sizes">
+      <ui-section id="sizes" label="2. Sizes">
         <p>Body.</p>
         <spell-notes for="sizes"><spell-note id="n1" status="new" at="2026-10-10 10:00"><p>Still true?</p></spell-note></spell-notes>
       </ui-section>

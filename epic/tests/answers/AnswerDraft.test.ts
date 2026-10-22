@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { AnswerDraft } from "$/epics/answers/AnswerDraft"
-import type { DetailsDraft, SentAnswer, TypedAnswer } from "$/epics/answers/answers.types"
+import { AnswerDraft } from "spell-epic/answers/AnswerDraft"
+import type { DetailsDraft, SentAnswer, TypedAnswer } from "spell-epic/answers/answers.types"
 
 /** Labels of a page with questions `q1` (options A, B) and `q2` (A), section `context`, and its notes. */
 const LABELS = {

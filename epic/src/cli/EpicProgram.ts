@@ -1,34 +1,37 @@
 import chalk from "chalk"
 import { Command } from "commander"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { EpicRepo } from "$/epics/config/EpicRepo"
+import { EXIT, EpicCommandError } from "spell-epic/command/command.types"
+import { EpicTools, type EpicToolName } from "spell-epic/command/EpicTools"
+import { Git } from "spell-epic/command/Git"
+import { Hub } from "spell-epic/command/Hub"
+import { Parking } from "spell-epic/command/Parking"
+import { RepoInit } from "spell-epic/command/RepoInit"
+import { Repos } from "spell-epic/command/Repos"
+import { Requests } from "spell-epic/command/Requests"
+import { Sessions } from "spell-epic/command/Sessions"
+import { Shared } from "spell-epic/command/Shared"
+import { Stock } from "spell-epic/command/Stock"
+import { Worktrees } from "spell-epic/command/Worktrees"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicRepo } from "spell-epic/config/EpicRepo"
 
-import { EXIT, EpicCommandError } from "./command.types"
 import { GROUP_VERBS, type GroupName } from "./epicGroups"
-import { EpicTools, type EpicToolName } from "./EpicTools"
-import { Git } from "./Git"
-import { Hub } from "./Hub"
-import { Parking } from "./Parking"
-import { RepoInit } from "./RepoInit"
-import { Repos } from "./Repos"
-import { Requests } from "./Requests"
-import { Sessions } from "./Sessions"
-import { Shared } from "./Shared"
-import { Stock } from "./Stock"
-import { Worktrees } from "./Worktrees"
 
 /****************
  * ### `EpicProgram`
  * `epic <verb> ...`, the epic tools' own command (epic `epic-workflow` P9):  its commander tree, and `epic --help`.
  * Each verb group registers here, under its own heading, and runs in THIS process.
  *
+ * - spell-epic's command line, in its `cli/` folder (epic `repo-split` J114):
+ *   this tree, its groups' verbs (`epicGroups.ts`) and its entry (`epicMain.ts`)
+ *   - the classes and tools each verb runs stay where they are:  `command/`, `tool/`, `tools/`
  * - The verb groups:
  *   - most verbs edit or read an epic page (`epics/<name>/<name>.plan.html`):
  *     the `epic` tool (`EpicTools.runPlanDoc()`),
  *     after `planDocArgs()` turns Owen's `seo#J3` addressing into the tool's arguments
  *   - `send`, `requests`, `file`, `home`, `merge`:  `Requests`
- *   - `worktree`, `session`, `park`, `shared`, `stock`:  `Worktrees`, `Sessions`, `Parking`, `Shared`, `Stock`
+ *   - `worktree`, `session`, `park`, `shared`, `status`:  `Worktrees`, `Sessions`, `Parking`, `Shared`, `Stock`
  *     (epic `epic-eject` P5:  they were `spell dev worktree` ...)
  *   - `window`, `server` and the docs tools' groups (`ask`, `choices`, `comments`, `notes`, `agents`, `airplane`):
  *     scripts passed through, their arguments verbatim (`EpicTools.run()`)
@@ -37,20 +40,22 @@ import { Worktrees } from "./Worktrees"
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
  *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Help and mistakes:
- *   - each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask new --help`,
+ *   - each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask create --help`,
  *     and an unknown one is refused
  *   - every verb's help has its usage, what it does and an example (`epic close --help`)
  *   - an unknown verb exits 1, listing them;  a usage error exits 2 (`EXIT`)
  * - ONE copy of the code:  every verb runs THIS checkout's code, whichever checkout calls it.
  *   - the data is the caller's (`Git.nearestCheckout()`)
  *   - `epic --version` says which code runs
- * - The tool's own order still runs here, hidden:  `epic plan-doc <verb> <name> ...`
- *   - spell-app's old spellings that handed on to it (`spell dev plan-doc`, `spell dev worktree`, `spell dev details`,
- *     `spell epic <verb>` ...) went with `spell dev` (epic `repo-split` P13)
+ * - Owen's names (epic `repo-split` P13, his command-names page):  `create`, `lint`, `inbox watch | ignore <epic>`,
+ *   `window should-stay`, `window reload`, `ask | choices | saga | pages create`, `summarize`, `status` (taking
+ *   stock, `stock` before);  an item's status card is `update`'s (`epic update seo#J3 underway`, J140)
+ *   - gone with no stand-in:  the tool in its own order (`epic plan-doc ...`), `add-request` (`file`'s old name),
+ *     `overnight`
  * - Lean:  it loads no spell, and the `epic` tool only when a page verb runs,
  *   so `epic` starts in a fraction of a second.
- *   - its entry is the CLI's `epicMain.ts`
- *   - NEVER imports the CLI package (`$/cli`)
+ *   - its entry is `epicMain.ts`, beside this
+ *   - NEVER imports the kit's `spell` program (`spell-kit/cli`)
  * - NOTE: `spell commands` reads the `epic.command(...)` calls in this file's TEXT:
  *   keep the receiver named `epic`
  ****************/
@@ -131,9 +136,6 @@ export class EpicProgram {
       .usage('<epic>#P3 <request id>  |  <epic> <request id> "where it went"')
       .addHelpText("after", FILE_HELP)
 
-    // `file`'s old name (epic `epic-workflow` P19):  `epic add-request seo#P7 r3 --from ... --file r3.html`
-    requests(epic.command("add-request", { hidden: true }))
-
     requests(epic.command("home"))
       .description("the tooling home, the epic dev-tooling requests go to;  with an epic, set it")
       .usage("[<epic>]")
@@ -155,9 +157,9 @@ export class EpicProgram {
     epic.commandsGroup("Epic page:  making and reading:")
 
     this.page(
-      epic.command("new"),
+      epic.command("create"),
       "make an epic page from the template;  --future:  an idea for later, not planned yet;  --saga:  the saga it serves",
-      'epic new seo --title "SEO" --prompt "Make the docs findable"'
+      'epic create seo --title "SEO" --prompt "Make the docs findable"'
     ).usage('<epic> [--title "Title"] [--prompt "text" | --prompt-file <file>] [--future] [--saga <id>]')
     this.page(
       epic.command("list"),
@@ -195,9 +197,9 @@ export class EpicProgram {
       "epic open seo --review"
     ).usage("<epic> [--review]")
     this.page(
-      epic.command("check"),
+      epic.command("lint"),
       "ids, #id links, phases, parts;  its links;  then the browser check",
-      "epic check seo --no-browser"
+      "epic lint seo --no-browser"
     ).usage("<epic> [--no-browser] [--links]")
 
     ////////////////
@@ -213,8 +215,12 @@ export class EpicProgram {
     )
       .usage('<epic> "Short Name" --symptom <html> --changes <html> [--goal ...] [--files ...] [--verify ...]')
       .addHelpText("after", "\n  Also:  [--estimate 2h] [--before N]")
-    this.page(epic.command("update"), "set a phase's or an item's fields, or the page's flags")
-      .usage("<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...")
+    this.page(
+      epic.command("update"),
+      "set a phase's or an item's fields, or the page's flags;  or Claude's status card on an item:  underway " +
+        "(spinner on), done, or noted"
+    )
+      .usage('<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | noted ["<html>"]')
       .addHelpText("after", UPDATE_HELP)
     this.page(
       epic.command("updated"),
@@ -278,10 +284,11 @@ export class EpicProgram {
       "epic details seo#J3 --file reply.html"
     ).usage("<epic>#J3 --file <reply.html> [--append | --more]  |  <epic>#V3 --step <html> --should <html> ...")
     this.page(
-      epic.command("status"),
-      "Claude's status card on an item:  underway (spinner on), done, or noted",
-      'epic status seo#J3 underway "Reading the routes"'
-    ).usage('<epic>#J3 underway "<reading>" | done ["<summary>"] | noted "<what was recorded>"')
+      epic.command("summarize"),
+      "condense an item after a lot of back and forth:  the file replaces what it shows;  its text and every reply " +
+        "move into its Original Discussion, folded;  Owen's picks and the answer stay",
+      "epic summarize seo#J3 --file condensed.html"
+    ).usage("<epic>#J3 --file <condensed.html>")
     this.page(
       epic.command("restore"),
       "put earlier text (from git) into an item's Original Discussion",
@@ -314,7 +321,7 @@ export class EpicProgram {
       epic.command("inbox"),
       "the marks and comments Owen sends from the page, and how a review session takes them"
     )
-      .usage("<epic> [listen | unlisten | wait | apply]  |  <epic>#J3 working on | off  |  <epic>#J3 done | clear")
+      .usage("[watch | ignore | wait | apply] <epic>  |  working <epic>#J3 on | off  |  done | clear <epic>#J3")
       .addHelpText("after", INBOX_HELP)
     this.page(
       epic.command("test"),
@@ -344,20 +351,10 @@ export class EpicProgram {
       'epic bedtime seo start "P3-P6,P9"'
     ).usage('<epic> start "P3-P6,P9" | done "summary"')
     this.page(
-      epic.command("overnight"),
-      "an older page's Overnight report section (before 2026-10-05):  gone, once read",
-      "epic overnight seo remove"
-    ).usage("<epic> remove")
-    this.page(
       epic.command("backfill"),
       "items Owen already went through in past sessions:  a dry run unless --apply",
       "epic backfill seo --apply"
     ).usage("<epic> | --all [--apply]")
-    this.page(
-      epic.command("convert"),
-      "rewrite pages from the old markup into <epic-*> markup, into --out only",
-      "epic convert seo --out /tmp/converted"
-    ).usage("<epic>... | --all [--dry-run] [--out <folder>] [--verbose]")
     this.page(
       epic.command("split"),
       "store a page as a skeleton plus part files;  --done:  every finished epic",
@@ -369,16 +366,6 @@ export class EpicProgram {
       "bring pages up to today's markup, every step of their kind;  safe to run again",
       "epic migrate --all --dry-run"
     ).usage("[<kind>] [<epic>... | --all] [--file <page>] [--step <name>] [--dry-run] [--notify] [--list]")
-
-    // the `epic` tool in ITS OWN order (`summary seo`, `add seo judgement "Title"`), hidden:  what spell-app's old
-    // spelling, `spell dev plan-doc ...`, handed on to (epic `epic-eject` I5), until `spell dev` went (`repo-split` P13)
-    epic
-      .command("plan-doc", { hidden: true })
-      .description("the epic tool in its own order:  epic plan-doc summary seo")
-      .argument("[args...]")
-      .allowUnknownOption()
-      .helpOption(false)
-      .action(() => runVerb(() => EpicTools.planDoc(rawArgs("plan-doc"))))
   }
 
   ////////////////
@@ -392,7 +379,7 @@ export class EpicProgram {
 
     this.page(epic.command("saga"), "the sagas (epics of epics):  their list in order, and the saga each epic serves")
       .usage(
-        'list [--json] | set <epic> <saga> | set <epic> --none | new <id> "Title" --purpose "..." | page <id> | ...'
+        'list [--json] | set <epic> <saga> | set <epic> --none | create <id> "Title" --purpose "..." | page <id> | ...'
       )
       .addHelpText("after", SAGA_HELP)
   }
@@ -401,7 +388,7 @@ export class EpicProgram {
   // ## Worktrees, sessions, parked work, shared content
   ////////////////
 
-  /** `worktree`, `session`, `park`, `stock`, `shared`:  this folder's classes (epic `epic-eject` P5). */
+  /** `worktree`, `session`, `park`, `status`, `shared`:  the `command/` folder's classes (epic `epic-eject` P5). */
   private addWorkVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("Worktrees, sessions and parked work:")
@@ -421,14 +408,15 @@ export class EpicProgram {
       "parked work:  the PARKED notes, what /wait-for could wait on, waiting for a name to finish",
       (args) => new Parking().run(args)
     )
+    // `stock` until Owen's names (epic `repo-split` J140);  an item's status card is `epic update seo#J3 underway`
     epic
-      .command("stock")
+      .command("status")
       .description("take stock:  worktrees, branches, sessions, parked work, plans -- in process, hung or parked, dead")
       .usage("[--json]")
       .argument("[args...]")
       .allowUnknownOption()
-      .addHelpText("after", example("epic stock --json"))
-      .action(() => runVerb(() => new Stock().run(rawArgs("stock"))))
+      .addHelpText("after", example("epic status --json"))
+      .action(() => runVerb(() => new Stock().run(rawArgs("status"))))
 
     epic.commandsGroup("Shared content:")
 
@@ -466,7 +454,7 @@ export class EpicProgram {
 
     this.group(
       epic.command("window"),
-      "VS Code windows per package and worktree:  open, close, handoff, show, stay-check ...",
+      "VS Code windows per package and worktree:  open, close, handoff, show, should-stay ...",
       (args) => EpicTools.run("window", args, EpicProgram.windowOptions(args))
     )
     this.group(
@@ -594,7 +582,7 @@ export class EpicProgram {
 
   /**
    * Make `command` group `name` of `epic`'s, run by `run` with its arguments verbatim.
-   * - a verb of its own for each of `GROUP_VERBS`, so `epic ask new --help` prints that verb's help
+   * - a verb of its own for each of `GROUP_VERBS`, so `epic ask create --help` prints that verb's help
    * - an unknown verb (`epic ask bogus`):  refused, exit 1, listing the group's verbs
    * - no verb (`epic agents`, `epic comments --json`):  the tool's default, or its usage
    * - a verb after a flag the tool takes (`epic agents --epic seo list`) is the tool's to read:
@@ -653,7 +641,7 @@ export class EpicProgram {
     const [key] = args.filter((arg) => !arg.startsWith("--"))
     let values: Record<string, string | boolean | number>
     try {
-      values = EpicConfig.of(Git.nearestCheckout(".git")).values()
+      values = EpicConfig.of(Git.nearestCheckout({ marker: ".git" })).values()
     } catch (error) {
       throw new EpicCommandError((error as Error).message, EXIT.ERRORS)
     }
@@ -756,8 +744,8 @@ Examples:
   epic summary seo
   epic phase seo#P3 done --done "<ul><li>...</li></ul>"
   epic update seo#P3 --goal "<p>...</p>" --estimate 2h
-  epic status seo#J3 underway "Writing the answer"
-  epic inbox seo wait
+  epic update seo#J3 underway "Writing the answer"
+  epic inbox wait seo
 
 epic <verb> --help says more about each;  an id always goes after a #, never as a word of its own.`
 
@@ -823,18 +811,25 @@ An item (seo#J3):
   --calm  /  --loud                                       not urgent (yellow)  /  urgent (red)
 The page (seo):
   --standing [on | off],  --no-standing                   a standing epic:  open for good, never done
+Claude's status card on an item (seo#J3;  an Overview sub-section seo#o3, a phase seo#P3, seo#summary), a state
+word after the target, never with fields:
+  underway "<reading>"                                    a blue card:  what Claude took the task to be;  spinner on
+  done ["<summary>"]                                      WORK was done:  that card green, the summary under it
+  noted "<what>"                                          Claude only RECORDED Owen's choice:  a calm Noted card
 
 Examples:
   epic update seo#P3 --goal "<p>...</p>" --estimate 2h
   epic update seo#J3 --title "Clearer title"
-  epic update epic-workflow --standing`
+  epic update epic-workflow --standing
+  epic update seo#J3 underway "Reading the routes"
+  epic update seo#J3 done "Answered;  one test skipped"`
 
 /** After `epic saga --help`. */
 const SAGA_HELP = `
 The sagas' list, in Owen's order:  sagas/sagas.json5.  An epic names its saga:  <epic-page saga="<id>">.
   epic saga list [--json]                         the sagas in order, each with its epics and guide count
   epic saga set <epic> <saga>                     the saga an epic serves (--none:  no saga);  logged
-  epic saga new <id> "Title" --purpose "..." [--after <id>]
+  epic saga create <id> "Title" --purpose "..." [--after <id>]
                                                   a new saga, last or after <id>;  its id one or two words
   epic saga move <id> --before <id> | --after <id>
                                                   its place in the list
@@ -865,7 +860,7 @@ Examples:
 /** After `epic test --help`. */
 const TEST_HELP = `
 The run shows one open test at a time:  its Step, Should, Example and If not;  Owen answers Passed, Failed (a note
-and a screenshot), Skip or Not now, and Send hands them to the session listening (epic inbox seo apply).
+and a screenshot), Skip or Not now, and Send hands them to the session listening (epic inbox apply seo).
 
 Examples:
   epic test seo                   the run, in the Review tab (the page with ?test=1)
@@ -876,11 +871,13 @@ Examples:
 
 /** After `epic inbox --help`. */
 const INBOX_HELP = `
+The inbox's own verb first, then the epic:  epic inbox wait seo, epic inbox done seo#J3.
+
 Examples:
   epic inbox seo                  what Owen sent from the page:  requests, marks, comments
-  epic inbox seo listen           this session waits on the inbox;  unlisten:  stopped
-  epic inbox seo wait             block until there's work, print it, exit 0 (run it in the background)
-  epic inbox seo apply [ids...]   apply the sent approve / pick / todo marks and test answers;  --all:  sent or not
-  epic inbox seo#J3 working on    the page's spinner on an item (or a comment, seo#M3);  off:  stopped
-  epic inbox seo#J3 done          an agent finished the item:  its mark and spinner go
-  epic inbox seo#J3 clear         drop its marks (a revisit talked over)`
+  epic inbox watch seo            this session waits on the inbox (the page says someone's reviewing);  ignore:  stopped
+  epic inbox wait seo             block until there's work, print it, exit 0 (run it in the background)
+  epic inbox apply seo [ids...]   apply the sent approve / pick / todo marks and test answers;  --all:  sent or not
+  epic inbox working seo#J3 on    the page's spinner on an item (or a comment, seo#M3);  off:  stopped
+  epic inbox done seo#J3          an agent finished the item:  its mark and spinner go
+  epic inbox clear seo#J3         drop its marks (a revisit talked over)`

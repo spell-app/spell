@@ -4,7 +4,7 @@
  * - Data only:  nothing here runs.  The vocabularies of the families that draw `<epic-review>` read it too.
  */
 
-import type { UIJSXAttributes } from "$/epics/components/epic-page/EpicPage.types"
+import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 import type { epicReviewVocabulary } from "./EpicReview.en"
 

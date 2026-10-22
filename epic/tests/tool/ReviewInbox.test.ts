@@ -15,7 +15,7 @@ import {
   ReviewInbox,
   WAKE_COOLDOWN_MS,
   isoTime
-} from "$/epics/tool/ReviewInbox"
+} from "spell-epic/tool/ReviewInbox"
 
 const T1 = "2026-10-04T15:00:00-04:00"
 const T2 = "2026-10-04T15:01:00-04:00"

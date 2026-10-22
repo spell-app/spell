@@ -17,7 +17,7 @@
  * - A comment on SELECTED TEXT keeps the text (`quote`) and where it starts in its block's text (`offset`,
  *   `offsetIn()`), so it's found again, and highlighted, even where the block says it twice (`quoteIn()`)
  * - Plain DOM, no globals:  the docs runtime runs it on the live page (`_assets/spell-doc-runtime.js`,
- *   "Comments"), the tests on linkedom.  The comments themselves:  `CommentList` (`$/epics/tool/CommentList`).
+ *   "Comments"), the tests on linkedom.  The comments themselves:  `CommentList` (`spell-epic/tool/CommentList`).
  */
 
 /**
@@ -146,20 +146,11 @@ export function excerptOf(block) {
 
 /**
  * A section's (or plan part's) title, as a reader sees it (`2. Memory`):
- * its `label` (a `<ui-section>`'s since spell-app's epic `property-editor` P10), `header` (its old name) or `title`,
- * or its `slot="label"` / `slot="header"` / `slot="title"` text.
+ * its `label` (a `<ui-section>`'s) or `title`, or its `slot="label"` / `slot="title"` text.
  */
 export function sectionTitle(section) {
-  const slotted = Array.from(section.children).find((child) =>
-    /^(label|header|title)$/.test(child.getAttribute("slot"))
-  )
-  return squash(
-    section.getAttribute("label") ??
-      section.getAttribute("header") ??
-      section.getAttribute("title") ??
-      slotted?.textContent ??
-      ""
-  )
+  const slotted = Array.from(section.children).find((child) => /^(label|title)$/.test(child.getAttribute("slot")))
+  return squash(section.getAttribute("label") ?? section.getAttribute("title") ?? slotted?.textContent ?? "")
 }
 
 /**

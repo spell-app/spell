@@ -144,7 +144,7 @@
       "ui-section",
       {
         id: each.id,
-        header: prefix + each.title,
+        label: prefix + each.title,
         sticky: "",
         collapsible: "",
         dividing: "",
@@ -301,9 +301,9 @@
       .replace(/^-|-$/g, "")
   }
 
-  /** The leading number of `section`'s header (`2` for "2. Operations"), or "". */
+  /** The leading number of `section`'s label (`2` for "2. Operations"), or "". */
   function sectionNumber(section) {
-    return /^\s*(\d+(?:\.\d+)*)\.?\s/.exec(section?.getAttribute("header") ?? "")?.[1] ?? ""
+    return /^\s*(\d+(?:\.\d+)*)\.?\s/.exec(section?.getAttribute("label") ?? "")?.[1] ?? ""
   }
 
   /** This page's path from the checkout's root (`guides/...`), for the notice's command. */

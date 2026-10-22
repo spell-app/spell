@@ -1,5 +1,5 @@
-import { PlanDates } from "$/epics/dates"
-import { ServerLink, sentence } from "$/epics/review"
+import { PlanDates } from "spell-epic/dates"
+import { ServerLink, sentence } from "spell-epic/review"
 
 import { AnswerForm, type AnswerFormOptions } from "./AnswerForm"
 import {
@@ -44,7 +44,7 @@ import {
  *   table puts its rows in.
  * - Node-safe at import:  no `window` / `document` touched until `forPage()`, `watch()` or `expandAll()`;
  *   `fetch` and the storage come in through `AnswerFormOptions`, so tests stub them.
- * - Position in the import graph:  `$/epics/review` (the link), `$/epics/dates`, its peer types.
+ * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peer types.
  *   NEVER imports Solid or Spell UI.
  ****************/
 export class ChoicesForm {

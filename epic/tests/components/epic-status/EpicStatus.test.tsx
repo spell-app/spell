@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-status"
+import "spell-epic/components/epic-status"
 
 /** `element`'s shadow part `name`. */
 function part(element: Element, name: string): HTMLElement | null {

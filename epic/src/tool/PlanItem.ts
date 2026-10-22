@@ -1,4 +1,4 @@
-import { Markup } from "$/epics/markup"
+import { Markup } from "spell-epic/markup"
 
 import { KINDS, OLD_DECISION, type OptionCard } from "./planDoc.types"
 

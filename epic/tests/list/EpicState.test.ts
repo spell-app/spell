@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { epicStateFor, idleDays, urgentWords } from "$/epics/list/EpicState"
+import { epicStateFor, idleDays, urgentWords } from "spell-epic/list/EpicState"
 
 // epic `airplane` P8 (Owen, 2026-10-10):  in progress, errors, done, paused;  future as before;  no sleeping
 describe("epicStateFor()", () => {

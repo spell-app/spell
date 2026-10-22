@@ -22,7 +22,7 @@ import {
  * - keeping fresh:  `watch()`, the poll, the page becoming visible, and the page server's word that a file changed
  * - Node-safe at import, and without `watch()` / `pageOptions()`:  no `window` / `document` touched;  `fetch` comes
  *   in through `ServerLinkOptions`, so tests stub it
- * - Position in the import graph:  its peer types file only.  NEVER imports Solid, Spell UI or the `$/epics` barrel.
+ * - Position in the import graph:  its peer types file only.  NEVER imports Solid, Spell UI or the `spell-epic` barrel.
  ****************/
 export class ServerLink {
   /** The page server's info, a copy:  its token is replaced when the server restarts (`refreshToken()`). */

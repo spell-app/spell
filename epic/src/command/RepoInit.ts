@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative } from "node:path"
 
-import { EpicConfig, type EpicSettings } from "$/epics/config/EpicConfig"
+import { EpicConfig, type EpicSettings } from "spell-epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 import { Git } from "./Git"

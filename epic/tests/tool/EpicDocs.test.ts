@@ -10,9 +10,9 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EpicDocs } from "$/epics/tool/EpicDocs"
-import { PlanDoc } from "$/epics/tool/PlanDoc"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
+import { EpicDocs } from "spell-epic/tool/EpicDocs"
+import { PlanDoc } from "spell-epic/tool/PlanDoc"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -105,7 +105,7 @@ describe("EpicDocs on a scratch checkout", () => {
     const listed = commit(root, "a subject naming nobody", { "listed.md": "l" })
     commit(root, "z P1:  someone else", { "z.md": "z" })
     // the shared repo's pages, and its turn commits
-    write(shared, "guides/changelog.html", '<ui-section id="x" header="2026-10-01 · X"></ui-section>')
+    write(shared, "guides/changelog.html", '<ui-section id="x" label="2026-10-01 · X"></ui-section>')
     write(shared, "guides/index.html", "epic `x`")
     write(shared, "guides/x/x.html", "durable")
     write(shared, "guides/x/extra.html", "beside it")

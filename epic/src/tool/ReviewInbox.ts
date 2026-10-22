@@ -1,6 +1,6 @@
 import { SRV } from "spell-kit/server"
 
-import { DataFile } from "$/epics/data/DataFile"
+import { DataFile } from "spell-epic/data/DataFile"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
 
@@ -16,7 +16,7 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  * - per machine, NOT committed (`.gitignore`):  pending notes and session state, not the record;
  *   what Claude makes of a mark lands in the epic page itself
  * - writers:  the page server's route module (`reviewRoutes.ts`, the page's clicks)
- *   and `epic inbox ...` (Claude taking the marks:  `listen`, `wait`, `apply`, `done`, `clear`).
+ *   and `epic inbox ...` (Claude taking the marks:  `watch`, `wait`, `apply`, `done`, `clear`).
  *   Both go through `ReviewInbox.update()` / `updateAsync()`:
  *   under the file's lock (`SRV.FileLock`), written atomically (a temp file renamed over it),
  *   so neither clobbers the other and a reader never sees half a file
@@ -31,9 +31,9 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *     - a NEW item Owen asks for from the page (epic `airplane` P2), `{ action: "new", kind, title, note?, near? }`
  *       - under a key of its own, `new1`, `new2` ... (`setNew()`), so several wait at once
  *       - `kind`:  `todo` or `question`;  `near`:  the id of what it's about
- *       - sent with the rest;  `plan-doc inbox apply` makes the item
+ *       - sent with the rest;  `epic inbox apply` makes the item
  *     - a plain pick, `{ action: "pick", pick: "B", choices: 1 }`, on any item kind (I8):
- *       applied by `plan-doc inbox apply`
+ *       applied by `epic inbox apply`
  *       - `choices`:  WHICH of the item's option card sets, by position, 0 the first (`PlanItem.choiceSets()`):
  *         one item may hold several (its text's, a reply's)
  *       - none (an older mark):  the item's own (`PlanItem.choicesOf()`)
@@ -44,13 +44,13 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       - `result`:  `passed`, `failed`, `skip` (no longer applies), `notnow` (can't do it yet):  `TEST_RESULTS`
  *       - `note`:  what Owen says (a failure's);  `shot`:  his screenshot, `tests/v3-20261019-1432.png`,
  *         from the epic page's folder (written by the review routes' `POST shot`)
- *       - sent with the rest;  `plan-doc inbox apply` applies it (`PlanDoc.applyMark()`)
+ *       - sent with the rest;  `epic inbox apply` applies it (`PlanDoc.applyMark()`)
  *   - `drafts`:  `{ [id]: { action, note, at } }`, a note box's text as Owen types it (`setDraft()`),
  *     until the mark that uses it;  never sent or counted
  *   - `urgency`:  `{ [id]: { calm, at } }`, Owen's click on an open judgement call's or issue's id chip
  *     (`setUrgency()`):  `calm` true, not urgent (blue);  false, urgent (red) again.
  *     Beside its mark, never one:
- *     sent with the marks, written into the doc by `plan-doc inbox apply` (`<epic-item calm>`)
+ *     sent with the marks, written into the doc by `epic inbox apply` (`<epic-item calm>`)
  *   - `sent`:  ISO time of the last "send to Claude", else `null`;  marks newer than it are unsent (`unsentMarks`)
  *   - `now`, `[{ id, action, at, note?, pick?, choices? }]`:
  *     immediate requests (Add Details, revisit now) for Claude to take
@@ -58,15 +58,15 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *   - `canceled`:  `{ [id]: { action, at, told } }`, a request Owen called off ("nevermind", `cancelNow()`):
  *     the waiting session stops its agent (`told` once handed over), and a late write into the item is refused
  *   - `listening`:  `{ session, since, seen }` while a Claude session waits on this inbox, else `null`
- *     - `seen`:  its last heartbeat (`plan-doc inbox wait` stamps it every `LISTEN_HEARTBEAT_MS`);
+ *     - `seen`:  its last heartbeat (`epic inbox wait` stamps it every `LISTEN_HEARTBEAT_MS`);
  *       older than `LISTEN_STALE_MS` (an old file without one:  `since` that old), the session is gone:
  *       `liveListener()` is `null`, and the routes answer `listening: null` (`forPage()`)
  *   - `handedOver`:  the `sent` time a waiting session last took (`takeWork()`), else `null`:
- *     so a second `plan-doc inbox wait` doesn't hand the same send over again
+ *     so a second `epic inbox wait` doesn't hand the same send over again
  *   - `comments`:  `{ [m1 ...]: comment }` (shown `M1`;  `cm1` in an older file:  `CommentList.label()`), Owen's comments on the page's blocks and on selected text
  *     (epic `airplane` P11), in the shape a guide's inbox holds them (`CommentList`)
  *     - waiting until Claude answers them like a revisit's note (`/epic review`, `/airplane land`),
- *       then `answered` (`epic inbox <name>#M3 done`)
+ *       then `answered` (`epic inbox done <name>#M3`)
  *     - Send hands them over, as it does marks (Owen, 2026-10-10:  he keeps Send as the way comments reach Claude):
  *       a waiting comment whose last words are newer than `sent` is unsent (`unsentComments`);
  *       a waiting session takes it with the send (`takeWork()`), once, until Owen speaks on its thread again
@@ -76,7 +76,7 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       (`claimWake()`), from the epic page or any page that wakes the same epic
  *     - `state` `waking` while the wake is under way, claimed under the lock:  two Sends at once wake once
  *     - gone once a session listens (`setListening()`), or `WAKE_COOLDOWN_MS` after `at` (`liveWoken()`)
- * - Node only (`node:fs`, `$/server`'s lock):  NOT in the `$/epics` barrel, imported by path.
+ * - Node only (`node:fs`, `spell-kit/server`'s lock):  NOT in the `spell-epic` barrel, imported by path.
  *   Imports no other file of the tool but `CommentList` (its comments).
  * - From the docs tools' `inbox.js` (epic `epic-components`, P7), which now forwards here.
  ****************/
@@ -154,7 +154,7 @@ export class ReviewInbox {
 
   /**
    * Write this inbox to `file`, atomically;  delete the file instead when the inbox is empty (`isEmpty`).
-   * - a temp file (`<file>.tmp`) renamed over it:  readers (the page's poll, `plan-doc inbox`) never see half of it
+   * - a temp file (`<file>.tmp`) renamed over it:  readers (the page's poll, `epic inbox`) never see half of it
    * - a comment added to the file by hand stays (`DataFile.write()`);  its old `.json` goes
    * - call it under the lock (`update()`), or two writers may lose each other's changes
    * - sync, for the command line's `update()`;  the page server's `updateAsync()` writes through `writeAsync()`
@@ -260,7 +260,7 @@ export class ReviewInbox {
    * - `calm` true:  not urgent (blue);  false:  urgent (red);  `null` drops it (clicked back to what the doc says)
    * - not a mark:  an item may hold both (approve it AND say it's not urgent)
    * - sent with the marks, as they are (`sentUrgency`),
-   *   and written into the doc by `plan-doc inbox apply` (`PlanDoc.setCalm()`)
+   *   and written into the doc by `epic inbox apply` (`PlanDoc.setCalm()`)
    * - only an open judgement call or issue is ever red for want of a review (`PlanReader.itemState()`):
    *   only their ids (`CALM_ID`);  an `InboxError` for any other
    * - returns the entry set, or `null`
@@ -343,7 +343,7 @@ export class ReviewInbox {
    *   under key `id`, or (none) the next free key, `new1`, `new2` ...
    * - `entry` `null` removes it
    * - a mark like any other, `{ action: "new", ... }`:  sent with the rest (`unsentMarks`),
-   *   made into an item by `plan-doc inbox apply` (`PlanDoc.applyMark()`), editable or removable until then
+   *   made into an item by `epic inbox apply` (`PlanDoc.applyMark()`), editable or removable until then
    * - the key is chosen here, under the inbox's lock:  two pages adding at once never take the same one
    * - returns the key, or `null` once removed
    * - throws an `InboxError` for a bad entry, a key that isn't a new item's, or a removal without a key
@@ -512,7 +512,7 @@ export class ReviewInbox {
   }
 
   /**
-   * Claude's agent finished items `ids` (`plan-doc inbox done`):  their IMMEDIATE marks go (`clearMarks()`).
+   * Claude's agent finished items `ids` (`epic inbox done`):  their IMMEDIATE marks go (`clearMarks()`).
    * - returns `{ had, kept }`:  the ids whose mark went, and those whose mark stayed
    * - a mark Owen changed meanwhile to one waiting for a send stays, for the next send:
    *   e.g. he asked "revisit now", then chose card B while the agent worked
@@ -565,8 +565,8 @@ export class ReviewInbox {
 
   /**
    * The listening session's heartbeat:  `listening.seen` is `at`.
-   * Nobody listening:  nothing (a heartbeat never starts one:  that's `listen`'s).
-   * - `plan-doc inbox wait` calls it every `LISTEN_HEARTBEAT_MS`;  the session's other inbox commands, each time
+   * Nobody listening:  nothing (a heartbeat never starts one:  that's `watch`'s).
+   * - `epic inbox wait` calls it every `LISTEN_HEARTBEAT_MS`;  the session's other inbox commands, each time
    */
   touchListening(at = isoTime()): InboxListener | null {
     if (this.listening) this.listening.seen = at
@@ -576,7 +576,7 @@ export class ReviewInbox {
   /**
    * The session listening:  `null` when nobody is, or its heartbeat stopped
    * (`seen`, an old file's `since`, older than `LISTEN_STALE_MS` at `now`, in ms).
-   * - why:  a session killed without `unlisten` leaves `listening` set;  the page must not claim it's there
+   * - why:  a session killed without `ignore` leaves `listening` set;  the page must not claim it's there
    */
   liveListener(now = Date.now()): InboxListener | null {
     const listening = this.listening
@@ -613,7 +613,7 @@ export class ReviewInbox {
   }
 
   /**
-   * Is there work for a waiting session (`plan-doc inbox wait`)?
+   * Is there work for a waiting session (`epic inbox wait`)?
    * A queued immediate request, or a send it hasn't taken yet (`hasNewSend`).
    * - cheap, and read without the lock:  `takeWork()` checks again under it
    */
@@ -630,7 +630,7 @@ export class ReviewInbox {
   /**
    * TAKE the work waiting for a session:  `{ now, sent, canceled }`, or `null` when there's none.
    * - `now`:  the queued immediate requests (`takeNow()`)
-   *   - each item marked `working` (the page's spinner) until Claude's agent is done (`plan-doc inbox done`)
+   *   - each item marked `working` (the page's spinner) until Claude's agent is done (`epic inbox done`)
    *   - their marks stay till then
    * - `sent`:  `{ at, marks, urgency, comments }` for a send not handed over yet (`hasNewSend`), else `null`
    *   - every sent mark (`sentMarks`), each `again: true` when an earlier send already handed it over
@@ -1007,7 +1007,7 @@ export type TakenWork = {
 export const INBOX_VERSION = 1
 
 /**
- * What a mark asks of Claude, in the order `plan-doc inbox` prints them.
+ * What a mark asks of Claude, in the order `epic inbox` prints them.
  * - `approve`:  accept the item as it stands (a judgement call, an answer)
  * - `todo`:  file it as a todo
  * - `next`:  a todo's plane (Owen, 2026-10-09):  do it in the next phase,
@@ -1058,11 +1058,11 @@ export const REVISIT_WHEN = ["soon", "now"] as const
 /** One of `REVISIT_WHEN`. */
 export type RevisitWhen = (typeof REVISIT_WHEN)[number]
 
-/** How often a waiting session (`plan-doc inbox wait`) stamps `listening.seen`:  one locked write. */
+/** How often a waiting session (`epic inbox wait`) stamps `listening.seen`:  one locked write. */
 export const LISTEN_HEARTBEAT_MS = 30_000
 
 /**
- * A `listening` whose heartbeat (`seen`) is older than this is a session that died without `unlisten`
+ * A `listening` whose heartbeat (`seen`) is older than this is a session that died without `ignore`
  * (closed tab, crash):  three missed heartbeats.
  */
 export const LISTEN_STALE_MS = 90_000

@@ -2,11 +2,11 @@ import { spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readFileSync } from "node:fs"
 import { basename, dirname, join, relative } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { EpicRepo } from "$/epics/config/EpicRepo"
-import { RealPath } from "$/epics/config/RealPath"
-import { SessionFolders } from "$/epics/config/SessionFolders"
-import { URGENT_STATES } from "$/epics/list/EpicState"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicRepo } from "spell-epic/config/EpicRepo"
+import { RealPath } from "spell-epic/config/RealPath"
+import { SessionFolders } from "spell-epic/config/SessionFolders"
+import { URGENT_STATES } from "spell-epic/list/EpicState"
 
 import {
   EXIT,
@@ -29,7 +29,7 @@ import { Git } from "./Git"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
 import { Shared } from "./Shared"
-import { tsxImports } from "../tools/packageDir"
+import { tsxImports } from "spell-epic/tools/packageDir"
 
 /****************
  * ### `Worktrees`
@@ -39,7 +39,7 @@ import { tsxImports } from "../tools/packageDir"
  *   - `list [--json]`:  every live Claude Code session on this machine,
  *     with the worktree, branch and folder it works in, then this repo's worktrees no session is in
  *     - `<- this` marks the one that ran it
- *     - quick:  the whole report is `epic stock`
+ *     - quick:  the whole report is `epic status`
  *     - was `worktrees.py --sessions`
  *   - `status <name>`:  JSON:  where worktree / branch / plan / session `<name>` stands (`nameStatus()`)
  *     - was `status.py <name>`
@@ -137,7 +137,7 @@ export class Worktrees {
         return EXIT.OK
       }
       case "merge-main": {
-        const checkout = Git.nearestCheckout(".git")
+        const checkout = Git.nearestCheckout({ marker: ".git" })
         const reports = MainMerge.runAll(checkout, flags.continue ? "continue" : "start")
         // one repo:  its report as before;  a multi-repo top:  one per repo, `repo` in each
         const single = reports.length === 1 && !reports[0]!.repo
@@ -550,7 +550,7 @@ export class Worktrees {
   }
 
   /**
-   * What epic page `file`'s state is read from (`$/epics/list/EpicState` `EpicFacts`),
+   * What epic page `file`'s state is read from (`spell-epic/list/EpicState` `EpicFacts`),
    * from its skeleton's markup, with no parsing library (`PlanFacts`).
    * - `phases`:  each `<epic-phase status>`
    * - `updated`, `future`, `standing`:  `<epic-page updated future standing>`
@@ -592,7 +592,7 @@ export class Worktrees {
 
   /**
    * The sessions as a text table, then the worktrees no session is in, then a blank line:
-   * `epic worktree list`, and the top of `epic stock`'s report.
+   * `epic worktree list`, and the top of `epic status`'s report.
    * - the table's columns:  title, agent, id, status, where, worktree, branch, folder
    * - `<- this` marks the one that ran it
    * - static:  pure

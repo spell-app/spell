@@ -1,6 +1,6 @@
 /**
  * Tests of `PlanParts`:  reading a part file, and rebasing a part's URLs.  Splitting and writing:
- * `PlanDocFiles.test.ts` (`EpicParts`);  an old-markup doc's parts:  `$/epics/convert` `OldParts.test.ts`.
+ * `PlanDocFiles.test.ts` (`EpicParts`);  an old-markup doc's parts:  `spell-epic/convert` `OldParts.test.ts`.
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -8,7 +8,7 @@ import { join } from "node:path"
 
 import { describe, expect, test } from "vite-plus/test"
 
-import { PlanParts } from "$/epics/tool/PlanParts"
+import { PlanParts } from "spell-epic/tool/PlanParts"
 
 describe("PlanParts", () => {
   test("reader():  `parts/<id>.html`;  `undefined` for none, or an old `.htm` (read no more since P15)", () => {

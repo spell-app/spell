@@ -1,12 +1,12 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { join, relative } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { DataFile } from "$/epics/data/DataFile"
-import { CommentList, type Comment, type IdentifiedComment } from "$/epics/tool/CommentList"
-import { FROM_PAGE } from "$/epics/tool/epicRoutes"
-import { GuideInbox } from "$/epics/tool/GuideInbox"
-import { SeeAlso } from "$/epics/tool/SeeAlso"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { DataFile } from "spell-epic/data/DataFile"
+import { CommentList, type Comment, type IdentifiedComment } from "spell-epic/tool/CommentList"
+import { FROM_PAGE } from "spell-epic/tool/epicRoutes"
+import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { SeeAlso } from "spell-epic/tool/SeeAlso"
 
 import { answerFile, readAnswer, listPages } from "./details.js"
 import { GuideChanges } from "./GuideChanges"
@@ -32,7 +32,7 @@ const NOTE_FOLDERS = ["pages", "guides", "epics"]
  * - page notes not yet answered (`<spell-note status="new">` in guides and other pages:  `notesOnDisk.ts`)
  * - details pages answered since the flight began (`<slug>.answer.json5`, newer than `since`)
  * - goals thoughts not yet digested (`li.goals-thought[data-status="new"]` in the saga pages)
- * - read only:  taking the work is each place's own command (`plan-doc inbox apply`, `details answer`, `/goals-update`)
+ * - read only:  taking the work is each place's own command (`epic inbox apply`, `details answer`, `/goals-update`)
  ****************/
 export class AirplaneInbox {
   /**

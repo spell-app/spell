@@ -49,9 +49,9 @@ import { pathToFileURL } from "node:url"
 import { chromium } from "playwright"
 
 // By its package entry (epic `repo-split` P6), its types stripped by `node` itself:  this tool runs under plain `node`,
-// so no `$/` alias
+// which finds only an explicit entry or a name with its `.ts`
 import { componentSets, pageServerSettings } from "spell-kit/server/page/settings"
-import { engineFileFor } from "../server/engineLinks.ts"
+import { engineFileFor } from "spell-epic/server/engineLinks.ts"
 import { CONTENT, PACKAGE, ROOT, ensurePageServer, pageFile, pagePath, serverUrl } from "./pages.js"
 
 /**

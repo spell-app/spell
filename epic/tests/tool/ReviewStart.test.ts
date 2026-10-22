@@ -11,8 +11,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, beforeEach, expect, test } from "vite-plus/test"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { ReviewStart } from "$/epics/tool/ReviewStart"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { ReviewStart } from "spell-epic/tool/ReviewStart"
 import { fakeMainCheckout, fakeWorktree } from "spell-kit/server/test/checkouts"
 
 let home: string

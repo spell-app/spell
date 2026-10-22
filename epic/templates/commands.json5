@@ -8,11 +8,11 @@
       "rows": [
         {
           "op": "Start a page from a template",
-          "cli": { "mark": "could", "note": "`epic pages new`" },
+          "cli": { "mark": "could", "note": "`epic pages create`" },
           "skill": { "mark": "no" },
           "yarn": { "mark": "same", "names": ["root docs:new", "docs docs:new"] },
           "runs": "`src/tools/new-page.js`",
-          "target": "`epic pages new`;  yarn `docs:new` calls it"
+          "target": "`epic pages create`;  yarn `docs:new` calls it"
         },
         {
           "op": "Show a page in VS Code",

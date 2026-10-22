@@ -124,7 +124,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - An older, different file there:  rename it `<name>.<time>.md` first.
   - No text, but that file exists:  it IS the kickoff prompt (the hook saved it).
     Say so in one line.
-  - Delete the file only once the epic page holds it (`epic new --prompt-file`).
+  - Delete the file only once the epic page holds it (`epic create --prompt-file`).
 - Look for collisions (from the repo root), every time:
   - `epics/<name>/`, `guides/<name>/`, `guides/<name>.html`
   - the worktree and branch checks of the isolate skill's "Start", step 2
@@ -135,7 +135,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - A FUTURE epic's doc ("9. Future";  `epic list --json` says `status` `future`):
     no modal, it's waiting to be planned.
     - Say so in one line, then go on.
-    - In "2. Session", step 3, `epic new <name>` PROMOTES it where it is:  no `--prompt-file`.
+    - In "2. Session", step 3, `epic create <name>` PROMOTES it where it is:  no `--prompt-file`.
       Its prompt, decided questions and review page are kept;  the meta lines name the branch and worktree.
     - "3. Plan" starts from its kickoff prompt, its decided questions and its review page.
       The page is `epics/<name>/details/analysis.html`;  its answers, from `epic ask answer <name>/analysis`.
@@ -201,7 +201,7 @@ All in the FIRST turn, in this order, then the turn ends.
 - Why:  the move to the worktree's window waits for the turn to end,
   and the stub doc keeps the kickoff prompt safe whatever happens to this session.
 
-0. Where:  isolate's "Start", step 2b, with `stay-check --epic`:  a new window, or stay in this one.
+0. Where:  isolate's "Start", step 2b, with `should-stay --epic`:  a new window, or stay in this one.
 1. Isolate, with this `<name>`:  `EnterWorktree`.
    - Read [the isolate skill](../isolate/SKILL.md), and follow "Start", step 3 (and step 0 mid-session).
    - A skill can't invoke another, so follow its steps here.
@@ -213,7 +213,7 @@ All in the FIRST turn, in this order, then the turn ends.
 3. The STUB doc:
 
    ```sh
-   epic new <name> --title "<Title>" --saga <saga> --prompt-file ~/.spell/prompts/<name>.md   # no file:  no --prompt-file
+   epic create <name> --title "<Title>" --saga <saga> --prompt-file ~/.spell/prompts/<name>.md   # no file:  no --prompt-file
    ```
 
    - Its SAGA (epic `epic-workflow` P15):  `epic saga list --json` gives the sagas, in Owen's order.
@@ -228,8 +228,8 @@ All in the FIRST turn, in this order, then the turn ends.
    - Then delete the prompt file.
    - Reusing a doc:
      - its prompt missing:  `epic prompt <name> --file <file>`
-     - an older doc (before the `<epic-*>` elements):
-       `epic convert <name> --out <folder>` first, then copy it back
+     - an older doc (before the `<epic-*>` elements):  the tool refuses it;  start a new doc instead
+       (the converter went in epic `repo-split`)
      - No phases yet:  a restart after a hang.
        Plan again from its prompt ("3. Plan");  explore only what the doc doesn't say.
 4. Isolate "Start", steps 4-5:  the worktree's own window, then `handoff <name> --prompt continue`.
@@ -263,7 +263,7 @@ Staying in this window (step 0):  skip steps 4 and 6.
      `epic add <name>#Q "title" --details "..."`.
    - Agents:  up to 5, don't ask.
      Unless the user said "watch token budget":  then one question is "How many agents can I use for this?".
-   - `epic check <name>`, then `epic open <name> --review`.
+   - `epic lint <name>`, then `epic open <name> --review`.
    - Why here:  plan mode allows editing ONLY the harness plan file.
 3. `EnterPlanMode`.
    Draft the plan in the harness plan file, in the epic page's shape:
@@ -330,7 +330,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
   - labelled blocks:  in `<epic-field label="Where">`
   - links to items and phases:  `<a href="#d2">D2</a>`
   - NEVER change an existing `id`.
-- `epic check <name>`, then `epic open <name> --review` (new stage:  reload).
+- `epic lint <name>`, then `epic open <name> --review` (new stage:  reload).
 
 ## 5. Each phase
 
@@ -486,7 +486,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      - `epic pages fuss --branch`
      - `epic pages fuss <the epic's guide>`:  it's shared content, not in the branch's diff
      - Its misses fixed, or listed for Owen in the reply.
-- Turn it into the epic's guide:  `epic pages new durable <page> --title "..."` (fixes asset paths for the depth).
+- Turn it into the epic's guide:  `epic pages create durable <page> --title "..."` (fixes asset paths for the depth).
   - One page:  `guides/<name>.html`.
   - Several files (pages, experiments):  `guides/<name>/<name>.html`.
     Shared content too:  committed for you, like the epic page.
@@ -558,15 +558,16 @@ Commands, in the order a review uses them:
 epic list --json                           every epic:  status, checkout, not reviewed / items
 epic items <name> --json                   where reviews stand;  sections, items, states
 epic pages link <ABS doc> --hash <id> --review --show   show the doc in the Review tab, at <id>;  prints its links
-epic inbox <name> listen  /  unlisten      this session is (no longer) reviewing:  the page says so
-epic inbox <name> wait                     Bash run_in_background:  exits with work (or 2:  timeout)
-epic inbox <name> apply [ids]              approve / pick / todo marks into the doc;  prints what's left
-epic inbox <name>#<id> working on|off      the page's spinner on an item
-epic status <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
-epic status <name>#<id> done ["<summary>"]     WORK done:  that card green (Done), the summary under it;  spinner off
-epic status <name>#<id> noted "<what>"         only RECORDED Owen's choice:  an outlined Noted card (what;  what's next)
+epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
+epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
+epic inbox apply <name> [ids]              approve / pick / todo marks into the doc;  prints what's left
+epic inbox working <name>#<id> on|off      the page's spinner on an item
+epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
+epic update <name>#<id> done ["<summary>"]     WORK done:  that card green (Done), the summary under it;  spinner off
+epic update <name>#<id> noted "<what>"         only RECORDED Owen's choice:  an outlined Noted card (what;  what's next)
 epic details <name>#<id> --file f --more | --append   a More Details card (Add Details) / a reply appended
-epic inbox <name>#<id> done  /  clear      an item's request finished  /  marks dropped after a talk
+epic summarize <name>#<id> --file f        condense an item:  f replaces what it shows, the rest folded away (13.)
+epic inbox done <name>#<id>  /  clear      an item's request finished  /  marks dropped after a talk
 epic inbox <name> [--json]                 what's waiting, sent or not
 ```
 
@@ -599,8 +600,8 @@ epic inbox <name> [--json]                 what's waiting, sent or not
    - none:  the first `open` (yellow) one
    - none:  the top
    - `epic pages link <ABS doc> --hash <that id> --review --show`:  the doc opens in the Review tab, at it.
-4. `epic inbox <name> listen`.
-   - Then `epic inbox <name> wait`, with Bash `run_in_background: true`.
+4. `epic inbox watch <name>`.
+   - Then `epic inbox wait <name>`, with Bash `run_in_background: true`.
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
    Do Now (an item's wand) starts at once (click again to call one off);
@@ -637,13 +638,13 @@ want you to just do it").
 
 1b. CANCELED:  Owen said "nevermind" on a running Do Now (epic `windows-and-review` P2).
    - Stop that item's background agent (`TaskStop`).
-   - Then `epic status <name>#<id> done "Called off on the page:  nothing written."`.
-   - And `epic inbox <name>#<id> done`.
+   - Then `epic update <name>#<id> done "Called off on the page:  nothing written."`.
+   - And `epic inbox done <name>#<id>`.
    - An agent that finishes anyway is refused (`epic details` errors:  "Owen called this request off"):
      nothing lands.
 2. NOW requests:  Add Details, revisit now;  after Review Now, every revisit Owen had marked.
    - `wait` already marked them `working`:  the page spins.
-   - Per item, FIRST its status card:  `epic status <name>#<id> underway "<reading>"`.
+   - Per item, FIRST its status card:  `epic update <name>#<id> underway "<reading>"`.
      - What you take the task to be:  one or two sentences, plain words, no file names.
      - Owen sees it at once, blue, under his note (P13 of `epic-components`).
    - THEN a BACKGROUND `Agent` (`run_in_background: true`).
@@ -667,11 +668,11 @@ want you to just do it").
      - `epic details <name>#<id> --append --file <html>`.
      - With a pick ("picks B · ..., asks:  ..."):  answer about THAT option.
        Never decide the question:  he confirms with a plain pick.
-   - Last:  `epic status <name>#<id> done ["<summary>"]`:  the card turns green.
+   - Last:  `epic update <name>#<id> done ["<summary>"]`:  the card turns green.
      - A summary only when there's something worth saying:  a surprise, a choice made, something left undone.
-     - Then `epic inbox <name>#<id> done`.
+     - Then `epic inbox done <name>#<id>`.
    - Up to 5 agents at once (root rules);  more:  the rest after.
-3. SENT marks:  `epic inbox <name> apply`.
+3. SENT marks:  `epic inbox apply <name>`.
    - Approvals, picks and todos land in the doc;  it prints each.
    - TEST RESULTS from Owen's test run (epic `epic-engine` P4):  `wait` prints them under
      "test, Owen's test run", each test with its result (`passed`, `FAILED`, `skip`, `not now`), his COMMENT and his
@@ -700,7 +701,7 @@ want you to just do it").
        His note quoted, the answer with evidence, option cards when he must choose, so he picks ON THE PAGE.
      - Then `status ... done ["<summary>"]`, since you wrote an answer.
        Only noting what he said, no answer needed:  `status ... noted "<what>"`.
-     - Then `inbox <name>#<id> clear`, and `review <name>#<id> "<outcome>"`.
+     - Then `inbox clear <name>#<id>`, and `review <name>#<id> "<outcome>"`.
      - His answer in words names an option ("require the parens", "B"):  `choose <name>#<id> <letter> "<outcome>"`
        as soon as he says it (section 5, step 2), not a `review`.
    - In chat:  one line per item, with its link (`epic pages link ... --hash <id>`), never the answer itself.
@@ -709,7 +710,7 @@ want you to just do it").
      A quick yes / no:  a modal.
    - A call made name by name (he wants each name's context before a rule's renames go in):
      a CHOICE page (the Choice Pages guide, the content folder's `guides/syntax-choices.html`).
-     - `epic choices new <slug> --epic <name> --rows <rows.json5>`.
+     - `epic choices create <slug> --epic <name> --rows <rows.json5>`.
      - Then `show <slug> --wait`, in the background.
    - "picks B · <card>, asks:  <note>" (a pick with a revisit, "B, but ..."):  `apply` leaves it.
      - `status ... underway`, then answer the note about B.
@@ -738,14 +739,14 @@ want you to just do it").
      - `wait` prints them under the send:  "comments, to answer on their threads", with his latest reply.
      - Each goes over once, until he speaks on its thread again.
      - A comment never wakes `wait` by itself, unsent.  Still check `inbox` on every wake:  one may wait unsent.
-   - FIRST, as you start on one:  `epic inbox <name>#M3 working on`.
+   - FIRST, as you start on one:  `epic inbox working <name>#M3 on`.
      - His thread shows "Claude: thinking…" at its end (a turning notch) until your answer lands.
-     - `inbox <name>#M3 done` turns it off.
-     - Dropped without an answer:  `inbox <name>#M3 working off`.
+     - `inbox done <name>#M3` turns it off.
+     - Dropped without an answer:  `inbox working <name>#M3 off`.
      - What he said before it counts as read:  more words of his go after it, as a new reply (waiting again).
    - Answer each like a revisit's note:  INTO the item it's on (`details --append`, his comment quoted).
      On a phase field or Overview prose:  into that phase or part.
-   - Then `epic inbox <name>#M3 done --file <answer.html> [--commit <sha>]`.
+   - Then `epic inbox done <name>#M3 --file <answer.html> [--commit <sha>]`.
      - The answer goes on his thread too (a line or two;  the full one is in the doc):  his turn, the thread opens.
      - `--commit`:  the commit it was built in;  his Done line shows it.
      - No `--file`:  the thread says "Answered in the epic page".
@@ -780,7 +781,7 @@ want you to just do it").
 ### 7.4 Finish
 
 When Owen says he's done ("stop reviewing", "that's it"), or the session must stop:
-- stop the waiter (`TaskStop`), then `epic inbox <name> unlisten`
+- stop the waiter (`TaskStop`), then `epic inbox ignore <name>`
 - `epic log <name> "Review:  <n> approved, <n> answered, <n> to todos, <n> details added"`
 - reply:  what was decided and done (in words, ids after), and what's still waiting on him;  the link pair
 - the doc's changes:  nothing to commit, from any checkout.
@@ -793,8 +794,8 @@ A SAGA PAGE (`sagas/<id>/<id>.saga.html`, epic `epic-workflow` P15) is reviewed 
 
   ```text
   epic items SAGA:/epics --json
-  epic inbox SAGA:/epics listen
-  epic inbox SAGA:/epics wait
+  epic inbox watch SAGA:/epics
+  epic inbox wait SAGA:/epics
   epic add SAGA:/epics#T "..."
   ```
 
@@ -844,7 +845,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
      "/epic resume <name>"`.
    - `main`:  no worktree;  work in the main checkout, this window.
    - a worktree (`.claude/worktrees/<name>`, or beside the repo):  as [the unpark skill](../unpark/SKILL.md), step 3.
-     - That's `stay-check --epic`, a new window or stay, and `EnterWorktree` with `name: "<name>"` (never `path`:
+     - That's `should-stay --epic`, a new window or stay, and `EnterWorktree` with `name: "<name>"` (never `path`:
        "Launched").
      - A `PARKED-<name>.md` there:  it was parked.
        `/unpark`'s steps instead, and stop here.
@@ -889,7 +890,7 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
 2. The stub:
 
    ```sh
-   epic new <name> --future --title "<Title>" --prompt-file ~/.spell/prompts/<name>.md
+   epic create <name> --future --title "<Title>" --prompt-file ~/.spell/prompts/<name>.md
    ```
 
    - Then delete the prompt file.
@@ -905,7 +906,7 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
 4. The REVIEW page:
 
    ```sh
-   epic ask new analysis --epic <name> --title "<Title>:  analysis"
+   epic ask create analysis --epic <name> --title "<Title>:  analysis"
    ```
 
    Written as [the details skill](../details/SKILL.md) says:
@@ -1043,7 +1044,7 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
       - `--before <Doc Review's number>` while Doc Review is still to do;  else last
    4. `epic file <epic>#P<N> r3`:  his words, the context and the screenshots go into phase N's Requests field,
       and the request is marked filed (`P<N>`)
-   5. `epic check <epic>`;  report one line per request:
+   5. `epic lint <epic>`;  report one line per request:
       "r3 joined P6 · Comment Threads", or "r3:  new P8 · Retry Logic"
 4. Its report back:
    - one line per request, with the phase's link pair:  `epic pages link <doc> --hash <phase id> --review`
@@ -1052,6 +1053,27 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
      "Start P<N> · <Name>" first
    - a phase under way:  no modal;  the new work waits its turn.
 - A request that needs no phase (already done, a duplicate):  `epic file <epic> r3 "<why>"`, and say so.
+
+## 13. Summarize:  condense an item after a lot of back and forth
+
+When Owen asks to summarize (condense, boil down) an item -- in chat, or a revisit note ("summarize this") --
+because its text and replies have grown too long to read (Owen, epic `repo-split` J141):
+1. Read the WHOLE item:  `epic items <name> --json` for its id and state, then the item in the page, its part file
+   too:  its text, every reply (his and Claude's), More Details, option cards, the comment thread on it.
+2. Write the condensed text to a scratchpad file, `condensed.html`:
+   - what the item is about NOW, in plain words, a short lead, then bullets
+   - every decision kept, with its literal values:  numbers, names, paths, who decided and when
+   - options still open:  a fresh `<epic-choices>`, so he can still pick on the page
+   - the open questions at the END, as a short list
+   - not the history of how it got here:  that stays in the Original Discussion
+3. `epic summarize <name>#<id> --file condensed.html`.
+   - The file replaces what the item shows.
+   - Its text, every reply, More Details and Choices nobody picked move into its Original Discussion, folded:
+     nothing is lost.
+   - His picks, the answer, status cards, commits and his marks stay.
+4. With a mark on it:  `epic update <name>#<id> done "Condensed:  <what's in it now>"`, then
+   `epic inbox done <name>#<id>`.
+5. Reply with its link pair (`epic pages link <doc> --hash <id> --review`).
 
 ## Migrations:  bringing epic pages up to today's markup
 
@@ -1081,9 +1103,9 @@ Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by 
 ## Cheat sheet (`epic ...`, from anywhere in the repo)
 
 ```
-new <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future]
+create <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future]
                                                     create from the template, update the docs' home page;  --future:  a
-                                                    future epic (9.);  new on a future epic's doc plans it (promoted)
+                                                    future epic (9.);  create on a future epic's doc plans it (promoted)
 add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..] [--verify ..] [--estimate 2h]
           [--before N]                              --before:  inserted as PN;  the to-do phases from N move down
 update <name>#P<N> [--symptom ..] [--changes ..] [--goal ..] [--files ..] [--verify ..]   set ("" removes) fields
@@ -1105,14 +1127,13 @@ close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, n
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
 log <name> "text"                                   timestamped line in the doc's log
 bedtime <name> start "P3-P6" | done "summary"       bedtime mode on / off:  the run's changes stay green (`/bedtime`)
-overnight <name> remove                             an older doc's Overnight report (before 2026-10-05), once read
 prompt <name> "text" | --file f                     set the prompt quoted in the Overview
 migrate [<kind>] [<name>... | --all] [--file f] [--step s] [--dry-run] [--notify] [--list]
                                                     pages up to today's markup, every step of their kind, oldest
                                                     first, safe to run again;  alone:  every kind, every page;
                                                     --notify:  running epics told (TELL lines), idle ones migrated
 summary <name> [--json]                             phases, next phase, open questions/issues/caveats/todos
-check <name> [--no-browser]                         ids, links, phases, then the browser check
+lint <name> [--no-browser]                          ids, links, phases, then the browser check
 open <name> --review                                show in the side bar's Review tab
 review <name>#<id> ["outcome"]                      mark reviewed today (outcome to the log)
 defer <name>#<id>                                   deferred:  dated, still not reviewed

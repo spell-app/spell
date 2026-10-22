@@ -11,8 +11,8 @@ import {
   lastWorked,
   favoritesIn,
   readEpicDate
-} from "$/epics/list/EpicCards"
-import { epicStateFor } from "$/epics/list/EpicState"
+} from "spell-epic/list/EpicCards"
+import { epicStateFor } from "spell-epic/list/EpicState"
 
 /** A day the tests stand on:  2026-10-10, local. */
 const NOW = new Date(2026, 9, 10, 9)

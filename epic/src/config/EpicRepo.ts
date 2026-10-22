@@ -27,7 +27,7 @@ import { RealPath } from "./RealPath.ts"
  *   - `epic list --json`:  `repo`, and `checkout` in that repo
  *
  * How it knows, from the epic page's `<epic-page>` (`epics/<name>/<name>.plan.html` in this repo's content folder):
- * 1. `worktree`, the checkout `epic new` ran in:  its MAIN checkout is the epic's repo (`mainOfPath()`)
+ * 1. `worktree`, the checkout `epic create` ran in:  its MAIN checkout is the epic's repo (`mainOfPath()`)
  *    - a folder gone since:  `<main>/.claude/worktrees/<w>`, or `<main>.worktrees/<w>` beside the repo
  * 2. else `repo`, its GitHub page:  compared with this checkout's `origin` (`sameUrl()`);  the repo's checkout then
  *    is a folder beside this one whose `origin` it is (`checkoutByUrl()`)

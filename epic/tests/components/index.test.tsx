@@ -3,8 +3,8 @@ import { describe, expect, test } from "vite-plus/test"
 import { E, UI } from "spell-ui/core"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "spell-ui/ui-item"
-import * as Components from "$/epics/components"
+import "spell-ui/components/ui-item"
+import * as Components from "spell-epic/components"
 
 ////////////////
 // ## Helpers

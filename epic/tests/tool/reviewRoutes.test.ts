@@ -15,8 +15,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vite-pl
 import { PageServer } from "spell-kit/server/page"
 import { ask } from "spell-kit/server/test/serve"
 
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
-import reviewRoutes from "$/epics/tool/reviewRoutes"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import reviewRoutes from "spell-epic/tool/reviewRoutes"
 
 let root: string
 let server: PageServer
@@ -452,7 +452,7 @@ describe("start, and waking the epic", () => {
     writeFileSync(file, JSON.stringify({ pid: process.pid, port: bridgePort, token: "t", folders }))
   }
 
-  /** the inbox file of the scratch epic page, changed by `change` (as a session's `plan-doc inbox` would) */
+  /** the inbox file of the scratch epic page, changed by `change` (as a session's `epic inbox` would) */
   function inboxOf(change: (inbox: ReviewInbox) => unknown) {
     ReviewInbox.update(inboxFile(PAGES.plan), change)
   }

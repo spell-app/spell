@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { AgentsClient } from "$/epics/review/AgentsClient"
-import { ServerWriteError, ageOf, agentsOf, sentence, type ServerLinkOptions } from "$/epics/review/review.types"
+import { AgentsClient } from "spell-epic/review/AgentsClient"
+import { ServerWriteError, ageOf, agentsOf, sentence, type ServerLinkOptions } from "spell-epic/review/review.types"
 
 ////////////////
 // ## Fakes

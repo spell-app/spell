@@ -1,7 +1,7 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { EpicAddress, PageTargets } from "$/epics/links"
+import { EpicAddress, PageTargets } from "spell-epic/links"
 
 describe("EpicAddress.parse()", () => {
   test("the four forms:  saga page, an item on it, epic page, an item on that", () => {

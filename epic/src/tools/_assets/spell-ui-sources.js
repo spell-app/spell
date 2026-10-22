@@ -1,6 +1,6 @@
 /*
  * Saving for the docs' source elements (`<ui-include>`, `<ui-code>`, `<ui-markdown>`):  `UI.sources.saver`, through
- * the page server's `SPELL_SERVER.saveFile()` (`$/server`'s live client).
+ * the page server's `SPELL_SERVER.saveFile()` (`spell-kit/server`'s live client).
  * Bundled into `spell-ui.js` by `scripts/bundle-spell-ui.js`;  side effects only.
  * - Only on a page the page server served (`window.SPELL_SERVER`):  from `file://` there's no server, so no saver,
  *   and `save()` fails with `no-saver`.

@@ -3,9 +3,9 @@ import { afterEach, describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ChoicesForm } from "$/epics/answers"
+import { ChoicesForm } from "spell-epic/answers"
 
-import "$/epics/components/epic-choice-rows"
+import "spell-epic/components/epic-choice-rows"
 
 ////////////////
 // ## Fixtures
@@ -14,7 +14,7 @@ import "$/epics/components/epic-choice-rows"
 /** A section of two rows:  a rename, and one that stays;  the table's `flags`. */
 function section(flags = "") {
   return (
-    `<ui-section id="q1" header="Q1 · Members"><epic-choice-rows ${flags}>` +
+    `<ui-section id="q1" label="Q1 · Members"><epic-choice-rows ${flags}>` +
     `<epic-choice-row name="q1-A-7" file="packages/ui/src/A.tsx" line="7" purpose="menu open" note="a \`boolean\`" ` +
     `current="this.open" recommended="this.isOpen"></epic-choice-row>` +
     `<epic-choice-row name="q1-A-9" file="packages/ui/src/A.tsx" line="9" purpose="dark" current="UI.isDark" ` +

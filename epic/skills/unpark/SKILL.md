@@ -47,7 +47,7 @@ Then AskUserQuestion:
 
 - This window:  `epic window which`, its `workspace` line.
 - `<name>`'s window file:  `$(epic config windowsFolder)/ongoing/<name>.code-workspace`.
-- Different (or no window file):  `epic window stay-check` first.
+- Different (or no window file):  `epic window should-stay` first.
   - Then AskUserQuestion "This window isn't `<name>`'s.  Open it in a new window?".
     - Its reasons in the question.
     - The option it recommends first, with "(Recommended)"

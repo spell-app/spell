@@ -1,6 +1,6 @@
-import { Markup } from "$/epics/markup"
+import { Markup } from "spell-epic/markup"
 
-import { unstackTables } from "../tools/to-components.js"
+import { unstackTables } from "spell-epic/tools/to-components.js"
 
 import { ProseBlocks } from "./planDoc.types"
 

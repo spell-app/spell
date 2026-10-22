@@ -4,17 +4,17 @@ import type { E } from "spell-ui/core"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ReviewClient, type Inbox } from "$/epics/review"
+import { ReviewClient, type Inbox } from "spell-epic/review"
 
-import "spell-ui/ui-button"
-import "spell-ui/ui-icon"
-import "spell-ui/ui-section"
-import "$/epics/components/epic-item"
-import "$/epics/components/epic-choices"
-import "$/epics/components/epic-section"
-import "$/epics/components/epic-phase"
-import "$/epics/components/epic-summary"
-import "$/epics/components/epic-overview"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-section"
+import "spell-epic/components/epic-item"
+import "spell-epic/components/epic-choices"
+import "spell-epic/components/epic-section"
+import "spell-epic/components/epic-phase"
+import "spell-epic/components/epic-summary"
+import "spell-epic/components/epic-overview"
 
 ////////////////
 // ## Fakes

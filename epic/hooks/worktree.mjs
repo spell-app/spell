@@ -93,10 +93,10 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
-import { CheckoutServers } from "../src/command/CheckoutServers.ts"
-import { EpicRepo } from "../src/config/EpicRepo.ts"
-import { EpicConfig } from "../src/config/EpicConfig.ts"
-import { SessionFolders } from "../src/config/SessionFolders.ts"
+import { CheckoutServers } from "spell-epic/command/CheckoutServers.ts"
+import { EpicRepo } from "spell-epic/config/EpicRepo.ts"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
 
 /** This plugin's `bin/epic`:  `hooks/` is beside `bin/`. */
 const EPIC = join(dirname(import.meta.dirname), "bin", "epic")

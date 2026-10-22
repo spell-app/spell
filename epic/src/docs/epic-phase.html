@@ -80,7 +80,7 @@
             >.
           </p>
 
-          <ui-section id="1-example" header="1. Example" sticky collapsible dividing collapsed>
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="eye"></ui-icon>
 
             <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" changes="1">
@@ -144,7 +144,7 @@
             </ul>
             <ui-section
               id="epic-phase-actions"
-              header="With buttons in its title row"
+              label="With buttons in its title row"
               sticky
               collapsible
               dividing
@@ -198,7 +198,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="2-markup" header="2. Markup" sticky collapsible dividing collapsed>
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               From a real epic page (<a
@@ -240,10 +240,10 @@
             </ul>
           </ui-section>
 
-          <ui-section id="3-where-it-goes" header="3. Where it goes" sticky collapsible dividing collapsed>
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="compass"></ui-icon>
 
-            <ui-section id="epic-phase-parents" header="Its parents" sticky collapsible dividing collapsed>
+            <ui-section id="epic-phase-parents" label="Its parents" sticky collapsible dividing collapsed>
               <ui-table celled compact striped unstackable>
                 <table>
                   <thead>
@@ -270,7 +270,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-phase-children" header="Its children" sticky collapsible dividing collapsed>
+            <ui-section id="epic-phase-children" label="Its children" sticky collapsible dividing collapsed>
               <p>
                 In THIS order, always: the tool puts each child where it belongs, and the check refuses another order.
               </p>
@@ -416,7 +416,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="4-attributes" header="4. Attributes" sticky collapsible dividing collapsed>
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="table columns"></ui-icon>
 
             <ui-table celled compact striped unstackable>
@@ -515,7 +515,7 @@
                 </tbody>
               </table>
             </ui-table>
-            <ui-section id="epic-phase-slots" header="Slots" sticky collapsible dividing collapsed>
+            <ui-section id="epic-phase-slots" label="Slots" sticky collapsible dividing collapsed>
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
               <ui-table celled compact striped unstackable>
                 <table>
@@ -555,7 +555,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-phase-parts" header="Parts" sticky collapsible dividing collapsed>
+            <ui-section id="epic-phase-parts" label="Parts" sticky collapsible dividing collapsed>
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
               <ui-table celled compact striped unstackable>
                 <table>
@@ -608,7 +608,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-phase-states" header="States" sticky collapsible dividing collapsed>
+            <ui-section id="epic-phase-states" label="States" sticky collapsible dividing collapsed>
               <p>Custom states: CSS can match them with <code>epic-phase:state(name)</code>.</p>
               <ui-table celled compact striped unstackable>
                 <table>
@@ -636,7 +636,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-phase-events" header="Events" sticky collapsible dividing collapsed>
+            <ui-section id="epic-phase-events" label="Events" sticky collapsible dividing collapsed>
               <ui-table celled compact striped unstackable>
                 <table>
                   <thead>
@@ -658,7 +658,7 @@
                       <td>About to fold: its title was clicked. Cancel to stay open.</td>
                     </tr>
                     <tr>
-                      <td><code>ui-load</code></td>
+                      <td><code>ui-loaded</code></td>
                       <td></td>
                       <td>
                         The <code>source</code> part arrived and is in its children (as
@@ -676,7 +676,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="5-how-it-looks" header="5. How it looks" sticky collapsible dividing collapsed>
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
@@ -715,7 +715,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="6-written-by" header="6. Written by" sticky collapsible dividing collapsed>
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>

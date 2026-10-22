@@ -13,7 +13,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { SessionFolders } from "$/epics/config/SessionFolders"
+import { SessionFolders } from "spell-epic/config/SessionFolders"
 
 /** A throwaway Claude Code folder:  never the real `~/.claude`. */
 const HOME = realpathSync(mkdtempSync(join(tmpdir(), "session-folders-")))
@@ -125,7 +125,10 @@ describe("SessionFolders", () => {
     const ai = { type: "ai-title", aiTitle: "Claude in Chrome browser automation" }
     const write = (id: string, ...entries: object[]) => {
       mkdirSync(join(home, "projects", "-a"), { recursive: true })
-      writeFileSync(join(home, "projects", "-a", `${id}.jsonl`), entries.map((it) => JSON.stringify(it) + "\n").join(""))
+      writeFileSync(
+        join(home, "projects", "-a", `${id}.jsonl`),
+        entries.map((it) => JSON.stringify(it) + "\n").join("")
+      )
     }
     write("custom-ai", custom, ai)
     write("ai-custom", ai, custom)
@@ -160,9 +163,13 @@ describe("SessionFolders", () => {
     const line = (entry: object) => JSON.stringify(entry) + "\n"
     writeFileSync(
       join(home, "projects", "-a", "moved.jsonl"),
-      line({ type: "custom-title", customTitle: "🚧 editor" }) + line({ type: "ai-title", aiTitle: "Chrome automation" })
+      line({ type: "custom-title", customTitle: "🚧 editor" }) +
+        line({ type: "ai-title", aiTitle: "Chrome automation" })
     )
-    writeFileSync(join(home, "projects", "-a", "untitled.jsonl"), line({ type: "ai-title", aiTitle: "Chrome automation" }))
+    writeFileSync(
+      join(home, "projects", "-a", "untitled.jsonl"),
+      line({ type: "ai-title", aiTitle: "Chrome automation" })
+    )
     const queued = (id: string) => readFileSync(join(home, "session-titles", id), "utf8")
 
     expect(SessionFolders.requeueTitle("moved", home)).toBe("🚧 editor")

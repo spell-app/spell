@@ -167,7 +167,7 @@
       "ui-section",
       {
         id: `module-${slug(module)}`,
-        header: `${prefix}${module}`,
+        label: `${prefix}${module}`,
         badge: badge.join(" · "),
         sticky: "",
         collapsible: "",
@@ -428,8 +428,8 @@
     // a frame after the toolbar comes:  an icon drawn while the bundle is still starting stays blank
     new MutationObserver(() => requestAnimationFrame(add)).observe(head, { childList: true })
     add()
-    document.addEventListener("ui-open", keepFolds)
-    document.addEventListener("ui-close", keepFolds)
+    document.addEventListener("ui-opening", keepFolds)
+    document.addEventListener("ui-closing", keepFolds)
   }
 
   /**
@@ -469,7 +469,7 @@
    * The reader folded or opened one section:  remember every section's fold again, after the runtime saved that one.
    * - why:  the runtime saves the folds it knows of when the page loaded, plus that one;
    *   it doesn't know what Expand all / Collapse all did, and a reload would undo it
-   * - a `ui-open` it can't cancel is the browser's own reveal (find in page):  not the reader's, as for the runtime
+   * - a `ui-opening` it can't cancel is the browser's own reveal (find in page):  not the reader's, as for the runtime
    */
   function keepFolds(event) {
     const section = event.target
@@ -658,8 +658,7 @@
 
   /** POST `body` to `url` with the page server's token;  the answer, or throws saying what to do. */
   async function postJSON(url, body, { keepalive = false } = {}) {
-    if (!server?.token)
-      throw new Error("this page isn't on the page server:  open it with `epic pages open <page>`")
+    if (!server?.token) throw new Error("this page isn't on the page server:  open it with `epic pages open <page>`")
     const response = await fetch(url, {
       method: "POST",
       keepalive,
@@ -763,7 +762,7 @@
         action: "add",
         anchor: table.id,
         kind: "table",
-        label: section?.getAttribute("header") ?? "",
+        label: section?.getAttribute("label") ?? "",
         excerpt: squash(textOf(table)).slice(0, EXCERPT_LENGTH).trim(),
         quote: squash(textOf(text)),
         offset: offsetOf(table, text),
@@ -855,7 +854,7 @@
 
   /** `section`'s number, from its header (`2. The rules` => `2`);  none:  `""`. */
   function sectionNumber(section) {
-    return /^\s*(\d+(?:\.\d+)*)\.?\s/.exec(section?.getAttribute("header") ?? "")?.[1] ?? ""
+    return /^\s*(\d+(?:\.\d+)*)\.?\s/.exec(section?.getAttribute("label") ?? "")?.[1] ?? ""
   }
 
   /** `text` as nodes:  its `` `code` `` spans as `<code>`, the rest as text. */

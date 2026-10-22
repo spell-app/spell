@@ -13,10 +13,10 @@ import {
 import { homedir } from "node:os"
 import { basename, join, relative } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { RealPath } from "$/epics/config/RealPath"
-import { SessionFolders } from "$/epics/config/SessionFolders"
-import { epicStateFor } from "$/epics/list/EpicState"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { RealPath } from "spell-epic/config/RealPath"
+import { SessionFolders } from "spell-epic/config/SessionFolders"
+import { epicStateFor } from "spell-epic/list/EpicState"
 
 import {
   ENTRYPOINT_PLACES,
@@ -287,7 +287,7 @@ export class Sessions {
    * The icon work `name`'s state calls for (`TITLE_ICONS`),
    * from its worktree, branch and epic page (`Worktrees.nameStatus()`).
    * - `null` when `name` isn't work this repo knows
-   * - with an epic page, its epic's state (`$/epics/list/EpicState`;  a session of it running counts as touched):
+   * - with an epic page, its epic's state (`spell-epic/list/EpicState`;  a session of it running counts as touched):
    *   📅 future, 🚧 in progress, 🚨 errors (every phase done, items need Owen), ⏸️ paused (untouched for days)
    * - ✅ finished:  its branch merged into `main`, or every phase of its plan done with nothing left to merge
    * - 🚧 under way:  a worktree, a branch with commits `main` lacks, or a plan done that waits to merge

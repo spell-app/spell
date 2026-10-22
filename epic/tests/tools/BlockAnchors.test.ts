@@ -16,13 +16,13 @@ import {
   quoteIn,
   targetOf,
   textOf
-} from "../../src/tools/BlockAnchors.js"
+} from "spell-epic/tools/BlockAnchors.js"
 
 /** A guide:  a list before any section, a section with two tables, an aside and a code block, a nested section. */
 const PAGE = `<main class="spell-doc-main">
   <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>Page</h1><ul><li>crumb</li></ul></header></ui-sticky>
   <ul><li>before any section</li></ul>
-  <ui-section id="memory" header="2. Memory">
+  <ui-section id="memory" label="2. Memory">
     <p>Text.</p>
     <ui-table><table><tr><td>Name</td><td>Size</td></tr></table></ui-table>
     <ui-table id="sizes"><table><tr><td>Kind</td></tr></table></ui-table>
@@ -30,7 +30,7 @@ const PAGE = `<main class="spell-doc-main">
     <ui-accordion class="spell-aside"><ui-title>Why</ui-title><ui-content><ui-table><table></table></ui-table></ui-content></ui-accordion>
     <ui-accordion class="spell-code"><ui-title>Code</ui-title><ui-content><pre><code>x</code></pre></ui-content></ui-accordion>
     <spell-notes for="memory"><spell-note><ul><li>a note's list</li></ul></spell-note></spell-notes>
-    <ui-section id="deep" header="2.1 Deep"><ui-message>Careful</ui-message></ui-section>
+    <ui-section id="deep" label="2.1 Deep"><ui-message>Careful</ui-message></ui-section>
   </ui-section>
 </main>`
 
@@ -181,11 +181,11 @@ describe("a component set's page (Epic UI's, in Spell UI's page shape)", () => {
     </ui-container></ui-segment>
     <ui-container class="site-body"><article class="site-article">
       <p class="lede">What it is.</p>
-      <ui-section id="1-example" header="1. Example">
+      <ui-section id="1-example" label="1. Example">
         <ul><li>Click a line.</li></ul>
         <epic-item id="q21" title="A question"><p>Body.</p></epic-item>
       </ui-section>
-      <ui-section id="4-attributes" header="4. Attributes">
+      <ui-section id="4-attributes" label="4. Attributes">
         <ui-table><table><tr><td>open</td></tr></table></ui-table>
       </ui-section>
     </article></ui-container>

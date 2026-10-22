@@ -35,7 +35,7 @@
  *   - v5:  N, not now, on to v4;  → past it, the summary:  1 passed, 1 failed, 1 skipped, 1 not now, 1 not answered
  *   - Send results:  the inbox's `sent` moves, the button says so
  *   - a COMMENT on v1 (then Passed) and on v5 before its answer (the inbox's draft, back after the reload, then Not
- *     now):  each in its mark;  the summary lists the tests commented on;  after `epic inbox <copy> apply`, each is
+ *     now):  each in its mark;  the summary lists the tests commented on;  after `epic inbox apply <copy>`, each is
  *     Owen's reply in its test's details
  *   - Esc:  the blocks back, `?test` off the address;  v5's line says "failed → I9" (`failed="i9"`)
  *   - a run across every epic (`?test=1&all=1`):  the summary's "Next:  test-run-next (2 tests)" opens it, in test
@@ -54,7 +54,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "../config/EpicConfig.ts"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
@@ -65,7 +65,7 @@ const TSCONFIG = join(ROOT, "tsconfig.json")
 if (!process.env.CHECK_TEST_RUN_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", "--import", import.meta.resolve("spell-kit/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,
@@ -77,8 +77,8 @@ if (!process.env.CHECK_TEST_RUN_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
-const { PlanDocCommands } = await import("../tool/PlanDocCommands.ts")
-const { PlanDocFiles } = await import("../tool/PlanDocFiles.ts")
+const { PlanDocCommands } = await import("spell-epic/tool/PlanDocCommands.ts")
+const { PlanDocFiles } = await import("spell-epic/tool/PlanDocFiles.ts")
 const JSON5 = (await import("json5")).default
 
 ////////////////
@@ -345,7 +345,7 @@ async function walk() {
 }
 
 /**
- * Claude's side, on the copy:  `epic inbox <copy> apply` (the tool, in this process):  each COMMENT lands on its test
+ * Claude's side, on the copy:  `epic inbox apply <copy>` (the tool, in this process):  each COMMENT lands on its test
  * as Owen's reply (`<epic-reply from="Owen">`), in its details:  the passed one's and the not-now one's.
  */
 async function applied() {

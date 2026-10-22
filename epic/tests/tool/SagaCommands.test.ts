@@ -1,5 +1,5 @@
 /**
- * Tests of `SagaCommands` (`epic saga ...`) and `epic new --saga`, on a scratch checkout (epic `epic-workflow` P15):
+ * Tests of `SagaCommands` (`epic saga ...`) and `epic create --saga`, on a scratch checkout (epic `epic-workflow` P15):
  * the list, an epic's saga set and cleared, a saga refused, the list's order and titles, and a rename every
  * reference follows.
  */
@@ -10,10 +10,10 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { PlanDoc } from "$/epics/tool/PlanDoc"
-import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
-import { Sagas } from "$/epics/tool/Sagas"
+import { PlanDoc } from "spell-epic/tool/PlanDoc"
+import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { Sagas } from "spell-epic/tool/Sagas"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -126,11 +126,20 @@ describe("epic saga list", () => {
   })
 })
 
-describe("epic saga new, move, title", () => {
+describe("epic saga create, move, title", () => {
   test("adds a saga after another, moves it, retitles it", async () => {
-    expect(await commands().run(["saga", "new", "agents", "Agents", "--purpose", "how agents work"])).toBe(0)
+    expect(await commands().run(["saga", "create", "agents", "Agents", "--purpose", "how agents work"])).toBe(0)
     expect(printed.at(-1)).toBe("agents:  Agents, saga 3 of 3")
-    await commands().run(["saga", "new", "tooling", "Dev Tooling", "--purpose", "tools", "--after", "drawable-spell"])
+    await commands().run([
+      "saga",
+      "create",
+      "tooling",
+      "Dev Tooling",
+      "--purpose",
+      "tools",
+      "--after",
+      "drawable-spell"
+    ])
     const sagas = new Sagas(root)
     expect(sagas.ids()).toEqual(["drawable-spell", "tooling", "epics", "agents"])
     await commands().run(["saga", "move", "agents", "--before", "drawable-spell"])
@@ -144,9 +153,9 @@ describe("epic saga new, move, title", () => {
 
   test("refuses a taken or malformed id, no purpose, or a move with neither place", async () => {
     const owner = commands()
-    expect(await owner.run(["saga", "new", "epics", "Again", "--purpose", "x"])).toBe(1)
-    expect(await owner.run(["saga", "new", "Three Words Here", "X", "--purpose", "x"])).toBe(1)
-    expect(await owner.run(["saga", "new", "fresh", "Fresh"])).toBe(1)
+    expect(await owner.run(["saga", "create", "epics", "Again", "--purpose", "x"])).toBe(1)
+    expect(await owner.run(["saga", "create", "Three Words Here", "X", "--purpose", "x"])).toBe(1)
+    expect(await owner.run(["saga", "create", "fresh", "Fresh"])).toBe(1)
     expect(await owner.run(["saga", "move", "epics"])).toBe(1)
     expect(await owner.run(["saga", "title", "nope", "X"])).toBe(1)
     expect(warned).toHaveLength(5)
@@ -190,11 +199,11 @@ describe("epic saga rename", () => {
   })
 })
 
-describe("epic new --saga", () => {
+describe("epic create --saga", () => {
   test("names the saga from the start;  a saga not in the list writes nothing", async () => {
-    expect(await commands().run(["new", "fresh", "--saga", "drawable-spell"])).toBe(0)
+    expect(await commands().run(["create", "fresh", "--saga", "drawable-spell"])).toBe(0)
     expect(FILES.read(FILES.findDoc("fresh")).summary().saga).toBe("drawable-spell")
-    expect(await commands().run(["new", "other", "--saga", "nope"])).toBe(1)
+    expect(await commands().run(["create", "other", "--saga", "nope"])).toBe(1)
     expect(existsSync(join(root, "epics/other"))).toBe(false)
   })
 })

@@ -1,18 +1,18 @@
 /**
  * Where the docs are, how scripts find, tidy and open pages -- shared by `update.js`, `index.js`, `open.js` and
- * the other docs tools (the `epic` tool, `$/epics/tool`, has its own).
+ * the other docs tools (the `epic` tool, `spell-epic/tool`, has its own).
  */
 import { spawnSync } from "node:child_process"
 import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { Window, envCheckout } from "../window.mjs"
-import { EpicConfig } from "../config/EpicConfig.ts"
-import { ENGINE_ROUTES, EPIC_UI } from "../server/server.types.ts"
+import { Window, envCheckout } from "spell-epic/window.mjs"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { ENGINE_ROUTES, EPIC_UI } from "spell-epic/server/server.types.ts"
 
 import { ComponentSetFolders } from "./ComponentSetFolders.ts"
-import { packageDir, resolvedFile } from "./packageDir.ts"
+import { packageDir } from "./packageDir.ts"
 
 /** `src/tools`:  the docs scripts, `_assets`, the goals tooling. */
 export const TOOLS = dirname(fileURLToPath(import.meta.url))
@@ -85,7 +85,7 @@ export const PAGES = join(CONTENT, "pages")
 /** `pages/index.html`:  the home page, a routing page:  a card per area (`index.js`, claude-design P5). */
 export const HOME = join(PAGES, "index.html")
 
-/** `pages/details/`:  scratch details pages (`epic ask new`, no `--epic`). */
+/** `pages/details/`:  scratch details pages (`epic ask create`, no `--epic`). */
 export const DETAILS = join(PAGES, "details")
 
 /**
@@ -231,7 +231,7 @@ function contentTop(top) {
  * - the repo's own templates first (`REPO_TEMPLATES`), then the engine's (`TEMPLATES`):  a repo may make its own
  *   version of one
  * - a bare name is an `.html` page
- * - `epic pages template <name>` prints it, for the skills;  `epic pages new` copies it
+ * - `epic pages template <name>` prints it, for the skills;  `epic pages create` copies it
  */
 export function templateFile(name) {
   const path = name.replace(/^templates\//, "")
@@ -402,23 +402,17 @@ export function formattedAlready(files) {
 
 /**
  * How to run `doc-links.js` with `args` as a child `node`, for `spawnSync(command, args, { env })`.
- * - under `tsx`, with this package's `tsconfig.json`, from whatever folder it runs in;  and the run-time alias hook
- *   (`ALIASES`), for the `$/` imports inside the packages it uses (`spell-kit/assembler`'s own)
+ * - under `tsx`, with this package's `tsconfig.json`, from whatever folder it runs in:  every repo's files by their
+ *   package names (`spell-kit/server`, epic `repo-split` P14)
  * - the one way the tools run it (`tidy()`, `update.js`, goals' check, its own test)
  */
 export function docLinksRun(args) {
   return {
     command: process.execPath,
-    args: ["--import", "tsx", "--import", ALIASES, join(TOOLS, "doc-links.js"), ...args],
+    args: ["--import", "tsx", join(TOOLS, "doc-links.js"), ...args],
     env: { ...process.env, TSX_TSCONFIG_PATH: join(PACKAGE, "tsconfig.json") }
   }
 }
-
-/**
- * The run-time alias hook (`spell-kit/toolchain/aliases`, epic `repo-split` I12), for a child `node` under `tsx`:
- * every `$/` import resolves through the importing file's own repo's table, so other repos' source runs here.
- */
-export const ALIASES = pathToFileURL(resolvedFile("spell-kit/toolchain/aliases") ?? "spell-kit/toolchain/aliases").href
 
 /** Does checkout `root` run a page server of its own:  `"pageServer"` in its root `package.json` (spell-app's)? */
 function hasPageServer(root) {
@@ -435,11 +429,14 @@ function hasPageServer(root) {
  */
 const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
 
+/** The kit's page server command line (`spell-kit/server`'s), from the kit's root:  `ensurePageServer()` runs it. */
+const PAGE_SERVER_CLI = "src/server/page/cli.ts"
+
 /**
  * This checkout's page server (`spell server`), started in the background if it isn't running.
  * - returns `{ base, port }`, or `undefined` if it can't start (the caller falls back to `file://`)
- * - runs the server package's `src/page/cli.ts start` under `tsx` with the run-time alias hook (`ALIASES`):  the
- *   `spell-kit/server` this checkout's install resolves (the kit's, `packageDir()`, epic `epic-engine` P10)
+ * - runs the kit's page server command line (`PAGE_SERVER_CLI`) `start` under `tsx`, with the kit's node settings:  the
+ *   kit this checkout's install resolves (`packageDir()`, epic `epic-engine` P10)
  * - a checkout whose settings name no page server (no `"pageServer"` in its `package.json`:  a repo `epic init` set
  *   up, spell-epic itself), or that resolves no server package:  the machine's epic server instead
  *   (`ensureEpicServer()`)
@@ -448,13 +445,13 @@ const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
  */
 export function ensurePageServer() {
   if (process.env.SPELL_NO_SERVER) return undefined
-  const server = hasPageServer(ROOT) && packageDir("spell-kit/server", ROOT)
-  const cli = server && join(server, "src/page/cli.ts")
+  const kit = hasPageServer(ROOT) && packageDir("spell-kit", ROOT)
+  const cli = kit && join(kit, PAGE_SERVER_CLI)
   if (!cli || !existsSync(cli)) return ensureEpicServer()
-  const run = spawnSync(process.execPath, ["--import", "tsx", "--import", ALIASES, cli, "start", "--root", ROOT], {
+  const run = spawnSync(process.execPath, ["--import", "tsx", cli, "start", "--root", ROOT], {
     cwd: ROOT,
     encoding: "utf8",
-    env: { ...process.env, TSX_TSCONFIG_PATH: join(server, "tsconfig.json") }
+    env: { ...process.env, TSX_TSCONFIG_PATH: join(kit, "tsconfig.node.json") }
   })
   if (run.status !== 0) {
     console.error(`page server didn't start (${(run.stderr ?? String(run.error)).trim().split("\n").at(-1)})`)
@@ -504,7 +501,7 @@ const EPIC_BIN = join(PACKAGE, "bin", "epic")
  *     - another pack's:  `<up>packages/<name>/components/__pack/` (a repo's own)
  *     - from its old folder, `packages/<name>/pack/`, too
  * - drops the template's `TEMPLATE:` how-to comment
- * - `docs:new`, `details new`, and the plan-doc tool's `epic new` (`PlanDocCommands`)
+ * - `docs:new`, `details create`, and the plan-doc tool's `epic create` (`PlanDocCommands`)
  */
 export function atDepth(html, depth) {
   const up = "../".repeat(depth)

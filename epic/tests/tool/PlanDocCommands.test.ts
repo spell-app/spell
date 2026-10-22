@@ -1,5 +1,5 @@
 /**
- * Tests of `PlanDocCommands` (`epic plan-doc ...`, the tool's own order) on a scratch checkout:  the command line itself, its flags,
+ * Tests of `PlanDocCommands` (the `epic` tool in its own order, `epic <verb>`'s) on a scratch checkout:  the command line itself, its flags,
  * output and log lines, on a doc written as a real one is (linked, formatted, split).
  */
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
@@ -9,11 +9,11 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { PhaseIds } from "$/epics/phases"
-import { PlanDoc } from "$/epics/tool/PlanDoc"
-import { PlanDocCommands, movedDown } from "$/epics/tool/PlanDocCommands"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
+import { PhaseIds } from "spell-epic/phases"
+import { PlanDoc } from "spell-epic/tool/PlanDoc"
+import { PlanDocCommands, movedDown } from "spell-epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -192,6 +192,37 @@ describe("PlanDocCommands choose:  an option Owen settled in conversation, on an
     expect(await owner.run(["choose", "x", "i1"])).toBe(1)
     expect(await owner.run(["choose", "x", "i1", "A"])).toBe(1)
     expect(warned.at(-1)).toBe("epic:  I1 has no option cards to choose from")
+    expect(readFileSync(file, "utf8")).toBe(doc)
+  })
+})
+
+// epic `repo-split` J141
+describe("PlanDocCommands summarize:  an item condensed from a file, the rest folded into its history", () => {
+  test("replaces what it shows, keeps the rest in its Original Discussion, logs it, prints what moved", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "issue", "It breaks", "--details", "<p>long</p><p>longer</p>"])
+    writeFileSync(
+      join(root, "reply.html"),
+      '<epic-reply from="Claude" at="2026-10-01 09:20"><p>and more</p></epic-reply>'
+    )
+    await owner.run(["details", "x", "i1", "--append", "--file", join(root, "reply.html")])
+    writeFileSync(join(root, "condensed.html"), "<p>It breaks on Safari.</p>")
+    printed = []
+    expect(await owner.run(["summarize", "x", "i1", "--file", join(root, "condensed.html")])).toBe(0)
+    expect(printed).toEqual(["I1 condensed:  It breaks (3 blocks into its Original Discussion)"])
+    const item = FILES.read(file).item("i1")
+    expect(item.querySelector(":scope > p")!.textContent).toBe("It breaks on Safari.")
+    expect(item.querySelector(":scope > epic-original")!.textContent).toMatch(/long[\s\S]*and more/)
+  })
+
+  test("refuses no --file, or an item with nothing to condense, writing nothing", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "issue", "It breaks"])
+    const doc = readFileSync(file, "utf8")
+    expect(await owner.run(["summarize", "x", "i1"])).toBe(1)
+    writeFileSync(join(root, "condensed.html"), "<p>Fixed.</p>")
+    expect(await owner.run(["summarize", "x", "i1", "--file", join(root, "condensed.html")])).toBe(1)
+    expect(warned.at(-1)).toMatch(/I1:  nothing to condense/)
     expect(readFileSync(file, "utf8")).toBe(doc)
   })
 })

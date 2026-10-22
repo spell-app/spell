@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, statSync } from "node:fs"
 import { basename, join, relative } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { RealPath } from "$/epics/config/RealPath"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { RealPath } from "spell-epic/config/RealPath"
 
 import {
   EXIT,
@@ -19,7 +19,7 @@ import { Worktrees } from "./Worktrees"
 
 /****************
  * ### `Stock`
- * `epic stock [--json]`:  every running session and where it works, then everything open in this repo,
+ * `epic status [--json]` (`epic stock` until epic `repo-split` J140):  every running session and where it works, then everything open in this repo,
  * sorted into "in process", "hung or parked" and "dead, still hanging on",
  * each with what `/worktrees` can do about it.
  * - Read-only.
@@ -59,7 +59,7 @@ export class Stock {
   // ## The verb
   ////////////////
 
-  /** Run `epic stock <args>`;  resolves to the exit code. */
+  /** Run `epic status <args>`;  resolves to the exit code. */
   async run(args: string[]): Promise<number> {
     const { flags } = parseVerbArgs(args, ["json"])
     const report = this.take()

@@ -11,7 +11,7 @@
  *     under its block) and the comment pane (`<epic-comment-pane>`), which every page that takes comments loads
  *     (the docs runtime's `loadEpicsPack()`;  Epic UI's layout);  each upgrades as the pack registers
  *   - Owen's field, in the pane or a thread:  a native `<textarea>` this code owns, so it lives through every redraw
- *   - what a thread shows, and its ids and words:  `ThreadFacts` (`$/epics/comments`), which the elements share
+ *   - what a thread shows, and its ids and words:  `ThreadFacts` (`spell-epic/comments`), which the elements share
  * - Its look:  `spell-comments.css`, beside it (the bullhorns, Send, Owen's field, where a thread sits);  the
  *   elements' own sheets draw the rest.
  */
@@ -29,8 +29,8 @@ import {
   quoteIn,
   sectionOf,
   sectionTitle
-} from "../BlockAnchors.js"
-import { ThreadFacts } from "$/epics/comments"
+} from "spell-epic/tools/BlockAnchors.js"
+import { ThreadFacts } from "spell-epic/comments"
 import {
   addBlockAction,
   addHeadTool,

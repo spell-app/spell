@@ -11,7 +11,7 @@ Owen has lots going at once:  show it all in one screen, sort it, and clean up w
 - It was `/whassup` plus the old global `/worktrees`, merged 2026-10-03.
 
 - The tools, from the repo root or any worktree.  Read-only.
-  - `epic stock [--json]`:  the whole report
+  - `epic status [--json]`:  the whole report
   - `epic worktree list`:  the sessions table alone
   - What it looks at, and how it groups:  [Stock.ts](${CLAUDE_PLUGIN_ROOT}/src/command/Stock.ts).
 - The sessions (`sessions[]`):  every LIVE session on the machine, in this repo or not.
@@ -44,7 +44,7 @@ Owen has lots going at once:  show it all in one screen, sort it, and clean up w
 
 ## 1. Take stock
 
-1. Run `epic stock --json`.
+1. Run `epic status --json`.
    - `/worktrees sessions`:  `epic worktree list` instead.
      Reply with step 2's table and its "worth acting on" lines, and stop.
 2. The sessions, as a markdown table:  drop empty columns;  mark this session "(this one)".
@@ -80,7 +80,7 @@ ONE details page asks about every item instead (Owen, 2026-10-03):
   - then "Leave it"
 - Skip this session's own item, as below.
 - Make it, show it, and END THE TURN with the page's link pair (`epic pages link <page>`):
-  - `epic ask new <slug> --from <spec.json>`:  the spec in the scratchpad.
+  - `epic ask create <slug> --from <spec.json>`:  the spec in the scratchpad.
     Its shape:  `DetailsSpec`, in [details.js](${CLAUDE_PLUGIN_ROOT}/src/tools/details.js).
   - Then `epic ask show <slug> --wait`, with Bash `run_in_background: true`.
   - Owen's Send wakes the session with the answers as text.
@@ -156,7 +156,7 @@ In the order Owen will want to see them:  quick looks (`wtf`, `open`, `answer`) 
 
 ## 5. Where we stand
 
-1. Run `epic stock --json` again.
+1. Run `epic status --json` again.
 2. One line per item whose group changed, or that went away ("**worktree ui-import**:  dead -> gone").
    - Then the three groups again, as in step 1.
    - Commands refused in step 4:  listed last, ready to paste.

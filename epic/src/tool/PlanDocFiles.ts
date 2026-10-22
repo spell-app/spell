@@ -5,15 +5,14 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
-import { AS } from "spell-kit/assembler"
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { EpicRepo } from "$/epics/config/EpicRepo"
-import { RealPath } from "$/epics/config/RealPath"
-import { DataFile, type DataFileMove } from "$/epics/data/DataFile"
-import { RepoList } from "$/epics/server/RepoList"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicRepo } from "spell-epic/config/EpicRepo"
+import { RealPath } from "spell-epic/config/RealPath"
+import { DataFile, type DataFileMove } from "spell-epic/data/DataFile"
+import { RepoList } from "spell-epic/server/RepoList"
 import { SRV } from "spell-kit/server"
 
-import { planDocIn } from "../tools/pages.js"
+import { planDocIn } from "spell-epic/tools/pages.js"
 import { PlanDocError, type CommitLogEntry, type PlanDocOptions, type PlanDocParts } from "./planDoc.types"
 
 import { EpicParts } from "./EpicParts"
@@ -38,8 +37,9 @@ import { ServedFolders } from "./ServedFolders"
  *   `<name>.plan.html` since 2026-10-04, else the old `<name>.html`, which worktrees cut before then still have
  * - the `<epic-*>` markup only (a `PlanDoc`):
  *   - a doc still in the old `ui-*` markup (one restored from an old backup) is REFUSED by every command,
- *     reading or editing, writing nothing:  "convert it first"
+ *     reading or editing, writing nothing
  *   - the tool read such a doc until every doc was converted (epic `epic-components`, P12);  no more since P15
+ *   - the converter itself went in epic `repo-split` (Q45):  such a doc is upgraded from git history by hand
  * - every edit (`edit()`), in order:
  *   - takes the doc's lock:  parallel agents queue instead of clobbering each other
  *   - parses it, and changes it through `PlanDoc`
@@ -50,8 +50,8 @@ import { ServedFolders } from "./ServedFolders"
  *   - reading assembles it into one document;  `writeDoc()` splits it again
  *   - so every command works on either shape
  *   - a part file is written only when its body changed
- * - Node only (`node:fs`, git, `$/server`'s lock, `$/assembler`'s linker and formatter):
- *   NOT in the `$/epics` barrel, imported by path.
+ * - Node only (`node:fs`, git, `spell-kit/server`'s lock, linker and formatter):
+ *   NOT in the `spell-epic` barrel, imported by path.
  * - Knows nothing of the command line (`PlanDocCommands`).
  *   It rebuilds the docs index by running its tool, `tools/index.js`, as the command line does (`reindex()`).
  ****************/
@@ -78,13 +78,13 @@ export class PlanDocFiles {
    */
   readonly template: string
 
-  /** `pages/details/`:  scratch details pages (`epic ask new`), where the item picker's page lives */
+  /** `pages/details/`:  scratch details pages (`epic ask create`), where the item picker's page lives */
   readonly details: string
 
   /**
-   * where the docs tools run (`index.js`, `check-spell.js`, `open.js`):  `packages/epics` of `root`
-   * - else (a repo without the epic tools:  one `epic init` set up, spell-app after epic `epic-eject`'s switch-over)
-   *   the root of THIS code's checkout, spell-epic, the package `docsTools` is in
+   * where the docs tools run (`index.js`, `check-spell.js`, `open.js`):  the root of THIS code's checkout, spell-epic,
+   * the package `docsTools` is in
+   * - spell-app's `packages/epics` before epic `epic-eject`'s switch-over:  no checkout has one since
    */
   readonly docsPackage: string
 
@@ -96,7 +96,7 @@ export class PlanDocFiles {
   readonly docsTools: string
 
   /** link targets for the checkout's pages:  its bare-name index is built once per process */
-  readonly linker: AS.Linker
+  readonly linker: SRV.Linker
 
   /**
    * - `content`:  the content folder, when it isn't the checkout's (`EpicConfig.contentOf()`):  a demo check's scratch
@@ -112,13 +112,12 @@ export class PlanDocFiles {
     this.epics = join(this.content, "epics")
     this.template = template
     this.details = join(this.content, "pages", "details")
-    const own = join(root, "packages/epics")
-    this.docsPackage = existsSync(own) ? own : resolve(DOCS_TOOLS, "..", "..")
+    this.docsPackage = resolve(DOCS_TOOLS, "..", "..")
     this.docsTools = DOCS_TOOLS
     // under the checkout the content is served in, which isn't this one for spell-epic's own epics (I22);  told its
     // served addresses, so `components/epics/` and `templates/` check as the folders they serve (I27)
     const linkRoot = new RepoList().linkRootOf(root, content)
-    this.linker = new AS.Linker(linkRoot, { served: ServedFolders.under(linkRoot) })
+    this.linker = new SRV.Linker(linkRoot, { served: ServedFolders.under(linkRoot) })
   }
 
   /** The environment the docs tools run in:  this process's, with `root` as the checkout they work on. */
@@ -261,11 +260,12 @@ export class PlanDocFiles {
   /**
    * The epic page at `file`, parsed:  a `PlanDoc`.  `options` as its constructor's.
    * - a SPLIT doc comes back WHOLE:  every part read into its host;  `plan.parts` says how it was stored
-   * - throws a `PlanDocError` for a doc in the old markup:  "convert it first"
+   * - throws a `PlanDocError` for a doc in the old markup
    * - SIDE EFFECT:  names each missing part on stderr
    */
   read(file: string, options?: PlanDocOptions): PlanDoc {
-    if (!existsSync(file)) throw new PlanDocError(`no epic page ${relative(this.content, file)}:  \`epic new\` first`)
+    if (!existsSync(file))
+      throw new PlanDocError(`no epic page ${relative(this.content, file)}:  \`epic create\` first`)
     const html = readFileSync(file, "utf8")
     if (!isEpicMarkup(html)) throw this.oldMarkup(file)
     const plan = PlanDoc.parse(html, undefined, options)
@@ -346,7 +346,6 @@ export class PlanDocFiles {
         epic: basename(file).replace(/(\.plan)?\.html$/, ""),
         folder: dirname(file),
         root: this.content,
-        linker: this.linker,
         inbox: inboxView(ReviewInbox.read(inboxFile)),
         notes: [],
         moves: []
@@ -398,7 +397,7 @@ export class PlanDocFiles {
 
   /**
    * Write `plan` to `file`, tidied as a page must be (link targets, oxfmt), each file ONCE and atomically.
-   * - links and formatting happen in memory (`AS.Linker.link()`, `PlanParts.formatHTML()`)
+   * - links and formatting happen in memory (`SRV.Linker.link()`, `PlanParts.formatHTML()`)
    * - `split`:  a skeleton plus part files (`EpicParts.split()`)
    *   - parts first, then the skeleton, so a page that sees the new skeleton finds its new parts
    *   - only files whose text changed are written (`PlanParts.writeChanged()`)
@@ -454,15 +453,11 @@ export class PlanDocFiles {
     if (run.status !== 0) process.stderr.write(`epic:  docs index not updated\n${run.stdout}${run.stderr}`)
   }
 
-  /**
-   * The error every command gives for a doc in the old markup (one restored from an old backup):  how to convert it.
-   * - `convert` writes copies only (`--out`):  the converted doc is copied back by hand
-   */
+  /** The error every command gives for a doc in the old markup (one restored from an old backup). */
   private oldMarkup(file: string): PlanDocError {
-    const name = basename(file).replace(/(\.plan)?\.html$/, "")
     return new PlanDocError(
-      `${relative(this.content, file)} is in the old markup, which the tool no longer reads:  convert it first ` +
-        `(epic convert ${name} --out <folder>, then copy the converted doc back)`
+      `${relative(this.content, file)} is in the old markup (from before epic \`epic-components\`), ` +
+        `which the tool no longer reads`
     )
   }
 

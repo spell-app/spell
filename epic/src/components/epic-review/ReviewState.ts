@@ -14,7 +14,7 @@ import {
   type PickFields,
   type ReviewAction,
   type Running
-} from "$/epics/review"
+} from "spell-epic/review"
 
 import { PAGE_TAG, REVIEWING, type ReviewFill } from "./EpicReview.types"
 

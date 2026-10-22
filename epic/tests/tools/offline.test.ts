@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, it } from "vite-plus/test"
 
-import { HIGHLIGHT, Offline, run } from "../../src/tools/offline.ts"
+import { HIGHLIGHT, Offline, run } from "spell-epic/tools/offline.ts"
 
 describe("Offline.loadsIn()", () => {
   it("finds what a page fetches as it loads:  scripts, media, stylesheets, CSS urls", () => {

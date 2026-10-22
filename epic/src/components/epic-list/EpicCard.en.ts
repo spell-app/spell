@@ -4,7 +4,7 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "$/epics/definitions"
+import type { EpicVocabulary } from "spell-epic/definitions"
 
 /****************
  * ### `<epic-card>`
@@ -21,7 +21,7 @@ export const epicCardVocabulary = {
     "One epic's card on the Epics page (epic `epic-engine` P3), in an `<epic-list>`:  its state's mark before its " +
     "linked title, its description, its saga's label and meta line;  a star at its top right that stars or unstars " +
     "it on the page server, and the day it was last worked on at its bottom right.  Written by `epic pages index` " +
-    "(`$/epics/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` " +
+    "(`spell-epic/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` " +
     "and `favorite` as it serves the page.",
   attributes: [
     {
@@ -123,7 +123,7 @@ export const epicCardVocabulary = {
   ],
   children: [
     { tag: "flow", description: "Its title link, `<a href>`." },
-    { tag: "flow", slot: "description", description: "Its description, `<span slot=\"description\">`." },
-    { tag: "flow", slot: "meta", description: "Its meta line, `<span slot=\"meta\">`." }
+    { tag: "flow", slot: "description", description: 'Its description, `<span slot="description">`.' },
+    { tag: "flow", slot: "meta", description: 'Its meta line, `<span slot="meta">`.' }
   ]
 } as const satisfies EpicVocabulary

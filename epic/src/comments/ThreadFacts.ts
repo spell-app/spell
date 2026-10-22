@@ -1,4 +1,4 @@
-import type { Comment, CommentPlace, CommentReply, TakenInto, Turn } from "$/epics/tool/CommentList"
+import type { Comment, CommentPlace, CommentReply, TakenInto, Turn } from "spell-epic/tool/CommentList"
 
 /****************
  * ### `ThreadFacts`
@@ -11,7 +11,7 @@ import type { Comment, CommentPlace, CommentReply, TakenInto, Turn } from "$/epi
  *   - the epic tool's `CommentList`:  `takenInto()`
  * - STATIC and pure:  no DOM, no Solid, nothing but types imported, so the comments' own script
  *   (`spell-comments.js`, which must hold no Spell UI) and node load it alike.
- * - NOT in the `$/epics` barrel:  the docs runtime imports it alone.
+ * - NOT in the `spell-epic` barrel:  the docs runtime imports it alone.
  ****************/
 export class ThreadFacts {
   /**

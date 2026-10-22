@@ -1,13 +1,13 @@
 import { existsSync, readFileSync } from "node:fs"
 import { dirname, join, posix, relative } from "node:path"
 
-import { PhaseIds } from "$/epics/phases"
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { CommentList, type IdentifiedComment } from "$/epics/tool/CommentList"
-import { GuideInbox } from "$/epics/tool/GuideInbox"
-import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
-import { FEEDBACK, SeeAlso, epicNamed } from "$/epics/tool/SeeAlso"
+import { PhaseIds } from "spell-epic/phases"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { CommentList, type IdentifiedComment } from "spell-epic/tool/CommentList"
+import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { FEEDBACK, SeeAlso, epicNamed } from "spell-epic/tool/SeeAlso"
 
 import { targetOf } from "./BlockAnchors.js"
 import { editNotes, notesIn, type PageNote } from "./notesOnDisk"
@@ -37,7 +37,7 @@ const PROMPT =
  * - what it gathers, per page:
  *   - its inbox's comments still waiting (`GuideInbox`, `<page>.inbox.json5`;  `CommentList` `waiting`), on a page
  *     NO epic owns (`SeeAlso.ownerOf()`, epic `epic-workflow` P13):  an owned page's go to its epic's session with
- *     the page's Send (`plan-doc inbox <epic> wait`), or wait for its next `/epic review`;  a page the caller names
+ *     the page's Send (`epic inbox wait <epic>`), or wait for its next `/epic review`;  a page the caller names
  *     is gathered all the same
  *   - its page notes still `new` (`<spell-note status="new">`, written before P11:  `notesOnDisk.ts`)
  *   - the component sets' pages too (`PageInboxes`):  no epic owns one, so their comments come here;  each by its
@@ -47,7 +47,7 @@ const PROMPT =
  *   a page with a phase still open (to do or under way) gets an update in it instead (`addPhaseUpdate()`):
  *   an `<epic-update>` block at the end of its description, `Update: N comments more from Owen`
  *   - a page's phase is found by the link to it in the phase's Symptom
- * - the epic is made the first time, if it isn't there yet (`epic new feedback --title "Feedback"`, then
+ * - the epic is made the first time, if it isn't there yet (`epic create feedback --title "Feedback"`, then
  *   `epic update feedback --standing on`):  each phase done merges on its own, the epic never done
  * - then each comment is marked taken (`taken:  { epic, phase }`), each note answered with a link to the phase:
  *   the page shows where it went, and Owen can no longer edit it
@@ -170,7 +170,7 @@ export class GuideChanges {
   ////////////////
 
   /**
-   * The epic's epic page;  made the first time, as `epic new feedback --title "Feedback"`, then made standing
+   * The epic's epic page;  made the first time, as `epic create feedback --title "Feedback"`, then made standing
    * (`epic update feedback --standing on`):  its phases merge on their own, and it's never done.
    */
   private async epicDoc(files: PlanDocFiles): Promise<string> {
@@ -180,7 +180,7 @@ export class GuideChanges {
     // the tool prints what it wrote;  here that goes nowhere
     commands.print = () => {}
     const title = this.epic === FEEDBACK ? "Feedback" : this.epic
-    const made = await commands.run(["new", this.epic, "--title", title, "--prompt", PROMPT])
+    const made = await commands.run(["create", this.epic, "--title", title, "--prompt", PROMPT])
     if (made !== 0) throw new Error(`GuideChanges.gather():  couldn't make epic ${this.epic}`)
     if (this.epic === FEEDBACK) await commands.run(["standing", this.epic, "on"])
     return files.docPath(this.epic)

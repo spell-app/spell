@@ -20,7 +20,7 @@ import { ServerLink } from "./ServerLink"
  * - Node-safe at import, and without `watch()`:  no `window` / `document` touched;
  *   `fetch` comes in through `ServerLinkOptions`, so tests stub it
  * - Position in the import graph:  its peers (types, `ServerLink`) only.
- *   NEVER imports Solid, Spell UI or the `$/epics` barrel:  the panel bridges its changes (`subscribe()`)
+ *   NEVER imports Solid, Spell UI or the `spell-epic` barrel:  the panel bridges its changes (`subscribe()`)
  *   into its own signal.
  ****************/
 export class AgentsClient {

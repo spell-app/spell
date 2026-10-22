@@ -7,7 +7,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { TranscriptIndex } from "$/epics/command/TranscriptIndex"
+import { TranscriptIndex } from "spell-epic/command/TranscriptIndex"
 
 const TEMP = mkdtempSync(join(tmpdir(), "transcript-index-"))
 const FILE = join(TEMP, "index", "transcript-index.json")

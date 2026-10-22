@@ -1,9 +1,9 @@
 /**
- * Choice pages' drafts and answers, on the page server:  a ROUTE MODULE (`$/server/page`'s `RouteModule`),
+ * Choice pages' drafts and answers, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`),
  * listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
  * - A SYNTAX-CHOICES PAGE:  a table of names Claude recommends, one row per use site, each pre-filled in a box Owen
  *   types over (`epic choices`, `choices.js`)
- *   - the page's `<epic-choices-bar>` posts here (`$/epics/answers` `ChoicesForm`),
+ *   - the page's `<epic-choices-bar>` posts here (`spell-epic/answers` `ChoicesForm`),
  *     and so does the spell syntax guide's bar (`_assets/spell-syntax.js`)
  * - `GET /api/docs/choices/draft?page=<path>` -- what was typed so far, `{ draft: ChoicesDraft | null }`:
  *   the page restores it on load
@@ -32,7 +32,7 @@
  */
 import { readFileSync } from "node:fs"
 
-import { DataFile } from "$/epics/data/DataFile"
+import { DataFile } from "spell-epic/data/DataFile"
 import { SRV } from "spell-kit/server"
 import type { RouteModule } from "spell-kit/server/page"
 
@@ -75,7 +75,7 @@ export default choicesRoutes
 
 /**
  * The choice page file URL path `page` names, through the server's mounts.  Either:
- * - a details-folder page with its rows beside it, `<slug>.rows.json5` (`epic choices new`)
+ * - a details-folder page with its rows beside it, `<slug>.rows.json5` (`epic choices create`)
  * - or a docs page naming its own rows, on its `<body data-choices-rows="...">` (`declaredRows()`):
  *   e.g. the spell syntax guide, whose rows are generated from the code, and whose boxes are keyed `<row>.<field>`
  * - 400:  not a path;  404:  no such page;  403:  outside a mount, or neither of the above

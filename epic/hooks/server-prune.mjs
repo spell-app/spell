@@ -19,9 +19,9 @@ import { existsSync, readFileSync } from "node:fs"
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   // loaded in here, so code that won't load never fails the hook
-  const { EpicConfig } = await import("../src/config/EpicConfig.ts")
+  const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
   if (input.cwd && existsSync(EpicConfig.of(input.cwd).file)) {
-    const { CheckoutServers } = await import("../src/command/CheckoutServers.ts")
+    const { CheckoutServers } = await import("spell-epic/command/CheckoutServers.ts")
     const { stopped } = CheckoutServers.atSessionStart()
     if (stopped.length) console.error(`server-prune hook:  ${CheckoutServers.said(stopped)}, their checkouts gone`)
   }
