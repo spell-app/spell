@@ -52,26 +52,26 @@ _Three things make the site:  pages written by hand, data a script writes from t
 
 ```sh
 spell server start all
-# Spell servers of ~/www/spell.worktrees/readme/spell-app:
+# Spell servers of ~/www/spell.worktrees/readme:
 #   page server           56343  http://127.0.0.1:56343/                docs, epics, /api                 started
 #   editor                56344  http://localhost:56344/                the spell app (vite)              running
 #   Spell UI's docs site  56343  http://127.0.0.1:56343/components/ui/  static pages, by the page server  running
 ```
 
-_A real run, in an epic's worktree:  the main checkout's server already held port 4747, so this one took free ports._
+_A run in an epic's worktree of the kit:  the main checkout's server already held port 4747, so this one took free
+ports._
 
 The last row is the docs site:  open it, or one page in it, `ui-button.html`.
 When the bundle is stale, the page server rebuilds it as it starts, and a page that asks for it first waits.
 
-- The docs site is served by spell-app's page server, because spell-app's settings name every component set
-  (`componentSets`, in [its package.json](https://github.com/spell-app/spell-app/blob/main/package.json):
-  [spell-app's README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md)).
-  - So it needs `spell-app` cloned, not only `spell-ui`:  `yarn clone spell-app` brings both
+- The docs site is served by the kit's page server, because Spell UI's own part of its settings names the set and
+  its bundle (`"pageServer"`, in [package.json](package.json):
+  [the kit's README-server.md](https://github.com/spell-app/spell-kit/blob/main/README-server.md#settings-and-route-modules--each-repo-brings-its-own)).
+  - So it needs only the kit and `spell-ui`:  `yarn clone spell-ui`
     ([setup](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero)).
-  - `start all` finds spell-app from any folder of the kit;  in `spell-app/`, `yarn serve` runs the same.
-- `start all` brings up the editor too.
-  For the page server alone, `spell server start` in `spell-app/`:
-  from any other folder it serves that folder's own checkout, which has no docs site.
+  - `start all` and `spell server start` both find the kit from any folder of it.
+- `start all` brings up the editor too, where spell-app is cloned.
+  For the page server alone, `spell server start`.
 - An open page reloads when the page, its layout, its data or the bundle changes.
 - `spell server stop all` stops them both.
 - The epic server serves the same pages, at the same path.
@@ -84,10 +84,11 @@ Three catches, all found the hard way:
 - **`spell server url <file>` doesn't know the docs site yet.**
   For a page in `docs/` it prints a plain file's address, with no bundle laid over it.
   Use the docs site's address instead:  `/components/ui/<page>`.
-- **In an epic's worktree, the main checkout's server shows the main checkout's pages.**
-  It answers `/worktrees/<epic>/components/ui/` with main's Spell UI pages and bundle, not the worktree's:
-  spell-app's settings reach Spell UI's folders beside it, and a server mounts those from its own checkout only.
-  To read a worktree's own pages, run `spell server start all` in the worktree, as above.
+- **The main checkout's server never builds a worktree's bundle.**
+  It answers `/worktrees/<epic>/components/ui/` with the worktree's own pages and bundle,
+  but builds only its own bundles as it starts.
+  After a change to the bundle's sources in a worktree, run `spell bundle ui-site` there,
+  or `spell server start all` in the worktree, as above.
 
 ## A page is its head and one `main`
 
@@ -355,7 +356,7 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 
 ### Checking:  a real browser, at desktop, phone width and dark
 
-`yarn site:check <page...>`, or `yarn site:check --all`, loads pages from spell-app's page server (started if needed),
+`yarn site:check <page...>`, or `yarn site:check --all`, loads pages from the kit's page server (started if needed),
 in Playwright's Chromium, and fails on:
 - console errors, page errors, failed requests and responses of 400 or more
 - `ui-*` or `spell-*` elements still undefined once settled, or defined ones with no shadow root
@@ -458,7 +459,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
 | [ThemeFamilies.ts](src/tools/ThemeFamilies.ts) | which families each theme sheet touches, read from its CSS |
-| [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the docs pages in headless Chromium, from spell-app's page server's `/components/ui/` (started with `spell server start`);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
+| [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the docs pages in headless Chromium, from the kit's page server's `/components/ui/` (started with `spell server start`, run in spell-app's folder);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
 | [spellApp.ts](src/tools/spellApp.ts) | the spell-app checkout whose page server `site:dev` and `site:check` start:  `$SPELL_APP_CHECKOUT`, else `../spell-app`;  and the kit's own `spell`, found by package, never the one on the `PATH`.  Only run, never imported:  spell-app is above Spell UI |
 | [StaticRenderer.ts](src/tools/StaticRenderer.ts) | the server-only Vite server the static render runs on from node:  it compiles the components' JSX for the server, which `tsx` can't;  used by the visual tests' static pages, and by `spell ssr` in its child process (`src/cli/runner/renderStatic.ts`) |
 | [StaticDocument.ts](src/tools/StaticDocument.ts) | loaded BY that server, never by node:  `render(html, options)` turns a whole page static, `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell ssr`'s engine |
