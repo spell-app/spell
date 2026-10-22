@@ -253,7 +253,7 @@ and `spell` on your `PATH` ([README-cli.md](README-cli.md#setting-it-up), "Setti
    - No script installs it for you:  install it again after a change you want in every window.
 4. From the Marketplace, Oxc at least (the table below):  `code --install-extension oxc.oxc-vscode`.
 5. Open the kit, `code ~/www/spell`, and any `.spell` file in it:
-   `spell-app/spaces/@spell/examples/drawable-solitaire/Card.spell`, say.
+   `spell-app/spaces/@spell/examples/Solitaire/Solitaire.spell`, say.
    With epics, every window opens from a window file instead ([below](#windows-and-worktrees)).
 
 Neither of Spell's two is on the Marketplace:  like the rest of Spell today, they run from a checkout of the kit.
@@ -291,7 +291,7 @@ The colours start in the grammar inside the `.vsix`;  everything else comes from
     Python is `py`.
   - Each view's tab ends in its language, `Card.spell.ts`, so all three can be open at once.
   - A file outside any Spell project gets a one-line comment saying so.
-- **▶ Run Project:**  the project, running in a panel beside its code ("Run drawable-solitaire").
+- **▶ Run Project:**  the project, running in a panel beside its code ("Run Solitaire").
   - It's the runner Spell's editor uses in the browser,
     so a game in progress survives your change:  only the panel's Restart starts afresh.
   - It compiles when it opens, on Restart, and each time you save one of the project's files.

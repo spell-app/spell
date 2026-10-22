@@ -355,7 +355,18 @@ const WORDS: Array<{ pattern: RegExp; rule: Rule; message: string }> = [
   {
     pattern: /examples\/solitaire(?![-\w])/,
     rule: "example",
-    message: "deleted:  drawable-solitaire or outline-solitaire"
+    message: "deleted:  now Solitaire, with a capital S"
+  },
+  {
+    pattern: /examples\/(?:drawable|outline)-solitaire\b/,
+    rule: "example",
+    message: "deleted (epic spanish P11):  one example now, Solitaire, and its Spanish twin, Solitario"
+  },
+  {
+    pattern:
+      /@spell\/test\/(?:cards|cards-from-zero|card-table|klondike|drawable-solitaire|outline-solitaire)(?![-\w])/,
+    rule: "example",
+    message: "deleted (epic spanish P11):  the test projects import the card library now -- solitaire, lists-from-zero"
   },
   { pattern: /\bsolitaire-import\b/, rule: "example", message: "deleted" },
   {

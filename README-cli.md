@@ -75,7 +75,7 @@ Most of them work on Spell projects, and you name a project the way the editor d
 | `Card.spell`, `./path/to/Project`, `.` | a Spell file, or the project in a folder;  a lone `.spell` file counts as a one-file project |
 | `@here` | the project in the current folder |
 | `@spell/library/cards`, `owen@spell/x` | one project, by its address |
-| `@spell/test/solitaire/Card.spell` | one file in a project:  its name has a dot |
+| `@spell/library/cards/Card.spell` | one file in a project:  its name has a dot |
 | `@spell/library`, `owen@spell`, `@spell` | a group, or every group of a space:  pick from their projects, or pass `--all` |
 | nothing | the project here;  outside one, `spell` asks, completing as you type |
 
@@ -125,7 +125,7 @@ spell lint --all @spell/library
 - Outside a project, in a terminal, `spell` asks, completing as you type, like a shell.
 - `Tab` completes a level at a time:
   - a group, `@spell/examples/`
-  - then a project, `@spell/examples/drawable-solitaire/`
+  - then a project, `@spell/examples/Solitaire/`
   - then "entire project", or one of its files
 - Your last 3 picks come first, kept in `spell-app`'s `.recent-projects.json`:
   git-ignored, so each checkout keeps its own.
@@ -133,7 +133,7 @@ spell lint --all @spell/library
 - Piped, it says to name one, and exits 2:
 
   ```text
-  No spell project here -- name one, e.g. @spell/examples/drawable-solitaire, or `spell projects`
+  No spell project here -- name one, e.g. @spell/examples/Solitaire, or `spell projects`
   ```
 
 </details>
@@ -412,7 +412,7 @@ e.g. print "Yo!"
 </details>
 
 ```sh
-spell describe @spell/test/solitaire Card color
+spell describe @spell/library/cards Card color
 ```
 
 <details>
@@ -420,12 +420,10 @@ spell describe @spell/test/solitaire Card color
 
 ```text
 property color of Card
-spell-lang/tests/spaces/@spell/test/solitaire/Card.spell:12
-
-color as derivation of suit
+spell-app/spaces/@spell/library/cards/Card.spell:25
 
 Spell
-  the color of a card is red if its suit is either diamonds or hearts otherwise it is black
+    - its "color" is the color of its suit
 ```
 
 </details>
@@ -674,7 +672,7 @@ owen@spell       Projects       ...
 | Option | What it does |
 | --- | --- |
 | `spell app create <name> --in <folder>` | makes it in that folder instead of your own space |
-| `spell app serve <project>` | opens the editor on that project, e.g. `@spell/examples/drawable-solitaire`;  default:  the project here, else the chooser |
+| `spell app serve <project>` | opens the editor on that project, e.g. `@spell/examples/Solitaire`;  default:  the project here, else the chooser |
 | `spell app serve --port <n>` | the editor's port, for a page server this starts;  default 3000, else any free one |
 | `spell app serve --headless` | doesn't open a browser:  just prints the address |
 | `spell app vscode build` | makes the `.vsix`, in `spell-app`'s `vscode/` folder:  `yarn install`, `yarn build`, `yarn package` there |
@@ -783,7 +781,7 @@ After an unknown command it adds `(spell help lists the commands)`.
 
 - `compile` writes the compiled JavaScript, `<Project>.spell.js`, into the project's build folder, as the app does.
   - The build folder:  `build/` at `spell-app`'s root, never committed, at the project's own path
-    (`build/spaces/@spell/examples/drawable-solitaire`);  `SPELL_BUILD_DIR` sets another.
+    (`build/spaces/@spell/examples/Solitaire`);  `SPELL_BUILD_DIR` sets another.
   - With no errors, also its scope pack there, `<Project>.scopes.js`, as the language server does:
     what the Type Explorer reads.
   - A library (`ts/lib`) compiled with no errors gets each of its types' JSON Schema there too, for VS Code:

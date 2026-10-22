@@ -18,15 +18,15 @@ Plain node loads Solid's server build instead, and `count()` reads 1 there._
 
 Four lines, and the reason this folder has a reactive engine of its own.
 Spell is imperative:  a line writes, and the next line reads what it wrote.
-Take the Solitaire example's own test of a card, which it made face up a few lines earlier:
+Take the card library's own test of a card, which it made face up a few lines earlier:
 
 ```spell
-turn the card face down
-expect the direction of the card to be down
+turn it face down
+its direction should be down
 ```
 
-_Two lines of `test card setup`, in Solitaire's [Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/solitaire/Card.spell):
-the test passes, all 22 checks._
+_Two lines of `test card setup`, in the card library's [Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/library/cards/Card.spell):
+the test passes, all 30 checks._
 
 On signals that hold a write back, the second line would still read `up`, and the language would fail its own test.
 It stands on Spell cells instead, and so does the editor.

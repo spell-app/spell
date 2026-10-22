@@ -606,7 +606,7 @@ play_fizzbuzz()
 It opens a browser (`--headless` only prints the address);  Ctrl-C stops it.
 
 ```sh
-spell app serve @spell/examples/drawable-solitaire --headless
+spell app serve @spell/examples/Solitaire --headless
 ```
 
 <details>
@@ -615,8 +615,8 @@ spell app serve @spell/examples/drawable-solitaire --headless
 ```text
 ✓ Starting the page server  http://127.0.0.1:4747/
 ✓ Starting the editor  http://localhost:3000/  (/api on the page server)
-The spell app is at http://localhost:3000/edit/@spell/examples/drawable-solitaire;  docs, epics, goals and Spell UI at http://127.0.0.1:4747/ -- Ctrl-C to stop
-http://localhost:3000/edit/@spell/examples/drawable-solitaire
+The spell app is at http://localhost:3000/edit/@spell/examples/Solitaire;  docs, epics, goals and Spell UI at http://127.0.0.1:4747/ -- Ctrl-C to stop
+http://localhost:3000/edit/@spell/examples/Solitaire
 ```
 
 </details>
@@ -624,19 +624,20 @@ http://localhost:3000/edit/@spell/examples/drawable-solitaire
 Two servers come up:  the page server on 4747, with the docs, epics, goals and Spell UI;  and the editor on 3000.
 When the page server is already running, its line ends "(already running)".
 
-![The Spell editor:  Card.spell on the left, Klondike Solitaire running on the right, the compiled JavaScript and the program's output below](docs/images/spell-editor.png)
+![The Spell editor:  the program on the left, Klondike Solitaire running on the right, the compiled JavaScript and the program's output below](docs/images/spell-editor.png)
 
 _The program on the left, the game it's running on the right:  edit the left, and two seconds later the right follows._
 
-This game's [Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/drawable-solitaire/Card.spell) is written in sentences,
-not an outline, and Spell reads both:
-`the color of a card is red if its suit is either diamonds or hearts otherwise it is black`.
+This game's [Solitaire.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell) is written in outlines,
+and its cards come from the card library, which it imports.
+A tableau says what it can take:
+`return its color is not the color of the card and its value is the value of the card + 1`.
 The game deals itself as it opens.
-Find that line, and argue with it:  change `diamonds or hearts` to `clubs or spades`.
-- Two seconds later the clubs and spades on the table turn red, every card still where you left it:
-  the game in progress carries over to the new version.  Restart starts afresh.
-- Further down the same file is its test, in English too:  `expect the color of the card to be black`,
-  for the queen of spades.
+Find that line, and argue with it:  take out the `not`.
+- Two seconds later the game deals again, by the new rule:  an edit to the file that starts the app starts afresh,
+  as Restart does.  Now a red card goes on a red card, and a black one on a black one.
+- Further down the same file is its test, in Spell too:  `the column can take the queen should be yes`,
+  for the queen of hearts on the king of spades.
   You've just made it wrong:  save the file (⌘S, or Ctrl-S), and `spell test` says which check broke, and why.
 - The example is a file in spell-app's repo, so put it back when you're done arguing:
   `git -C spell-app restore spaces/@spell/examples`.
@@ -645,7 +646,7 @@ Find that line, and argue with it:  change `diamonds or hearts` to `clubs or spa
 <summary>What <code>spell test</code> says about your change</summary>
 
 ```sh
-spell test @spell/examples/drawable-solitaire
+spell test @spell/examples/Solitaire
 ```
 
 <details>
@@ -653,17 +654,17 @@ spell test @spell/examples/drawable-solitaire
 
 ```text
 ...
-✗ test card setup  (22 checks)
-    ❌ Unexpected: `the color of the card` should be `black` but is actually `red`
-✓ test deck creation  (6 checks)
+✓ test piles  (8 checks)
+✗ test the moves  (11 checks)
+    ❌ Unexpected: `the column can take the queen` should be `yes` but is actually `false`
 
-1 passed, 1 failed
+5 passed, 1 failed
 ```
 
 </details>
 
-- Before your change it says `2 passed`, and `spell test` exits 1 on a failure, so a script can tell.
-- The `...` at the top stands for two warnings about the game's own Solitaire.spell, there either way.
+- Before your change it says `6 passed`, and `spell test` exits 1 on a failure, so a script can tell.
+- The `...` at the top stands for the card library's own tests, of its card, deck and piles, which pass either way.
 
 </details>
 
