@@ -149,8 +149,13 @@ def deep_equals(thing: object, other: object) -> bool:
     return False
 
 
+# Where an item keeps the list holding it, for each family of exclusive lists, in its own `__dict__`:
+# see `ListFamily`, in `lists.py`.
+OWNERS_KEY = "_owners"
+
+
 def compared_fields(thing: object) -> dict[str, object]:
-    """`thing`'s fields, as `equals()` compares them:  all of them, but a thing's `id`.
+    """`thing`'s fields, as `equals()` compares them:  all of them, but a thing's `id` and the lists holding it.
 
     - A thing keeps its properties in a dict, `_props`:  its `id` is one of them, once it's read or set.
     - Left out, as JavaScript's `equals()` never sees it:
@@ -158,6 +163,8 @@ def compared_fields(thing: object) -> dict[str, object]:
       (epic `people-and-orgs`, I1).
     """
     fields = dict(vars(thing))
+    # where it is isn't what it is:  JavaScript's keeps that in a `WeakMap`, out of `isEqual()`'s sight too
+    fields.pop(OWNERS_KEY, None)
     props = fields.get("_props")
     if isinstance(props, dict) and "id" in props:
         fields["_props"] = {key: value for key, value in props.items() if key != "id"}

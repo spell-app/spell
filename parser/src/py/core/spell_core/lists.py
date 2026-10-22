@@ -22,7 +22,7 @@ from reprlib import recursive_repr
 from typing import Any, ClassVar, Self, SupportsIndex, overload
 
 from spell_core.js_text import is_plain_number, js_string
-from spell_core.kinds import is_same
+from spell_core.kinds import OWNERS_KEY, is_same
 from spell_core.positions import zero_index_of
 from spell_core.things import ITEMS_KEY, SpellObject, note_change, program_core, prop, to_json_value
 
@@ -623,18 +623,15 @@ class List(SpellObject, MutableSequence[Any]):
 class ListFamily:
     """Who holds each item, for ONE family of exclusive lists, e.g. every `Pile`:  see `List`.
 
+    - Each item keeps the list holding it itself, in its `__dict__` (`OWNERS_KEY`), one per family:
+      so a pile lives as long as one of its cards does, as JavaScript's `WeakMap` keeps it, and no longer.
+      - `card.pile` is its pile even when nothing else holds the pile any more (epic `spanish` J97).
+      - A card and its pile, both gone, are collected together:  Python's collector frees the cycle.
+    - REJECTED:  a record of our own, by each item's `id()`:
+      - holding the pile weakly lost a pile nothing else held, `card.pile` then `None`
+      - holding it strongly would keep every pile, and every card in it, for as long as the program runs
     - Each item is found by its identity, so a thing with an `==` of its own is still one item.
-    - Item and list are both held WEAKLY:  this record never keeps either alive.
-      - An item that's gone is forgotten.
-      - NOTE:  a list nothing else holds is gone too, and its items have no owner then,
-        where JavaScript keeps a pile alive while one of its cards is.
-        Holding them strongly would keep every pile, and every card in it, for as long as the program runs.
     """
-
-    def __init__(self) -> None:
-        """A family where nothing holds anything yet."""
-        # each item's list, by the item's `id()`:  weak links to the item, so a gone one is dropped, and to its list
-        self._owners: dict[int, tuple[weakref.ref[object], weakref.ref[List]]] = {}
 
     @staticmethod
     def of(list_class: type[List]) -> "ListFamily | None":
@@ -654,10 +651,10 @@ class ListFamily:
 
     def owner_of(self, item: object) -> List | None:
         """The list holding `item`, if any."""
-        entry = self._owners.get(id(item))
-        if entry is None or entry[0]() is not item:
+        if not is_ownable(item):
             return None
-        return entry[1]()
+        owners: dict[ListFamily, List] | None = vars(item).get(OWNERS_KEY)
+        return owners.get(self) if owners else None
 
     def set_owner(self, item: object, owner: List | None) -> None:
         """SIDE EFFECT:  `owner` holds `item` now;  `None`:  nothing does.
@@ -666,34 +663,23 @@ class ListFamily:
         """
         if not is_ownable(item):
             return
-        key = id(item)
+        owners: dict[ListFamily, List] = vars(item).setdefault(OWNERS_KEY, {})
         if owner is None:
-            self._owners.pop(key, None)
-            return
-        entry = self._owners.get(key)
-        if entry is not None and entry[0]() is item:
-            self._owners[key] = (entry[0], weakref.ref(owner))
-            return
-        self._owners[key] = (weakref.ref(item, lambda link: self._forget(key, link)), weakref.ref(owner))
-
-    def _forget(self, key: int, link: "weakref.ref[object]") -> None:
-        """An item we held is gone:  drop it, unless its `id()` belongs to a newer item already."""
-        entry = self._owners.get(key)
-        if entry is not None and entry[0] is link:
-            del self._owners[key]
+            owners.pop(self, None)
+        else:
+            owners[self] = owner
 
 
-# Each exclusive family's owners, by its root class.
+# Each exclusive family, by its root class.
 _FAMILIES: "weakref.WeakKeyDictionary[type[List], ListFamily]" = weakref.WeakKeyDictionary()
 
 
 def is_ownable(item: object) -> bool:
-    """Can a list own `item`:  a thing, or another object Python can link to weakly?  A number or text can't be."""
-    try:
-        weakref.ref(item)
-    except TypeError:
-        return False
-    return True
+    """Can a list own `item`:  a thing, or another object with fields of its own (a `__dict__`)?
+
+    - A number or text can't be, nor a class.
+    """
+    return isinstance(getattr(item, "__dict__", None), dict)
 
 
 def _index_number(index: object, list_class: type) -> int | float:

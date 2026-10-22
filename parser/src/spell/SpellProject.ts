@@ -348,6 +348,21 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Each project our drawing half imports, by module, with its own drawing half's file, for `target`'s web app:
+   * e.g. `{ "@spell/project/@spell/library/cards": "cards.elements.spell.js" }` -- see `PY.QuartAppSpec.projects`.
+   * - Each must sit beside our program:  `spell compile` writes them there (spell-app's `writeImports()`).
+   * - Only the projects we import ourselves:  one they import in turn isn't listed.
+   */
+  protected importedElementsFor(target: SP.Target): Record<string, string> {
+    const imports = SpellProject.importsOf(this.scope).filter(
+      ({ module, names }) => module.startsWith(SP.SPELL_PROJECT_MODULE) && names.length
+    )
+    return Object.fromEntries(
+      imports.map(({ module }) => [module, `${PY.PyWriter.projectModule(module)}${target.elementsSuffix}`])
+    )
+  }
+
+  /**
    * SIDE EFFECT:  save `target`'s web app, if it has one written, and the one there is unedited (or there's none).
    * - An app someone has edited is theirs:  see `PY.isUneditedApp()`.
    */
@@ -547,7 +562,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                           program: `${name}${target.suffix}`,
                           elements: `${name}${target.elementsSuffix}`,
                           // the app stays beside our source, the program goes where the server builds:  see `buildFolder`
-                          outputs: this.contents?.buildFolder ?? "."
+                          outputs: this.contents?.buildFolder ?? ".",
+                          projects: this.importedElementsFor(target)
                         })
                       )
                     }

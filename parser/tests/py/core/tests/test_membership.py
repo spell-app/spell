@@ -9,9 +9,9 @@
 """
 
 import gc
+import weakref
 
 from spell_core import List, Thing, core
-from spell_core.lists import ListFamily
 
 
 class Card(Thing):
@@ -218,23 +218,35 @@ def test_a_number_or_text_cant_be_owned_the_list_just_holds_it() -> None:
     assert Pile.owner_of(1) is None
 
 
-def test_a_pile_and_its_cards_that_are_gone_are_forgotten() -> None:
-    family = ListFamily.of(Pile)
-    assert family is not None
+def test_a_card_keeps_its_pile_while_its_in_it_even_once_nothing_else_holds_the_pile() -> None:
+    # epic `spanish` J97:  the pile, held only by the card in it, was gone and `card.pile` `None`
+    [card] = cards(1)
+    Pile([card], name="stock")
     gc.collect()
-    before = len(family._owners)
+    assert card.pile is not None
+    assert card.pile.name == "stock"
+    assert list(card.pile) == [card]
+    # moved out, it lets that pile go
+    left = weakref.ref(card.pile)
+    core.append(Pile(), card)
+    gc.collect()
+    assert left() is None
+
+
+def test_a_pile_and_its_cards_that_are_gone_are_collected_together() -> None:
     pile = Pile(cards(3))
-    assert len(family._owners) == before + 3
+    gone = [weakref.ref(pile), *(weakref.ref(card) for card in pile)]
     del pile
     gc.collect()
-    assert len(family._owners) == before
+    assert [link() for link in gone] == [None] * 4
 
 
-def test_a_pile_nothing_else_holds_is_let_go() -> None:
-    [card] = cards(1)
-    Pile([card])
-    gc.collect()
-    assert card.pile is None
+def test_where_a_card_is_isnt_what_it_is() -> None:
+    # `equals()` doesn't compare the piles holding them:  JavaScript's `isEqual()` never sees its `WeakMap`
+    a, b = Card(rank=1), Card(rank=1)
+    Pile([a])
+    Tableau([b])
+    assert core.equals(a, b)
 
 
 ####################
