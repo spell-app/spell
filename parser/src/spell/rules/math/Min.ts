@@ -5,7 +5,7 @@ import { SpellExpression } from "spell-lang/spell/rules/expressions"
 
 /**
  * `min` rule:  `the smallest` [thing] `of`/`in` {expression}, e.g. `smallest of prices`.
- * - `Priority.specific`, same reasoning as `max` above.
+ * - `Priority.specific`, same reasoning as `max`.
  */
 export class Min extends SpellExpression<"operator|argument?|expression"> {
   @proto static priority = Priority.specific

@@ -43,11 +43,8 @@ export class NamedThing extends SpellExpression<"type|name"> {
     const type = getKnownType(match.groups.type)
     const name = NamedThing.nameOf(match.groups.name)
     const typeWords = SP.typeName(type.name).toLowerCase()
-    SP.SpellWarnings.noteIf(
-      match,
-      `More than one ${typeWords} is named "${name}":  this finds the first one made`,
-      () => NewThing.namesGiven(type, name) > 1
-    )
+    const message = SP.Language.of(scope).parserMessage("named-twice", { type: typeWords, name })
+    SP.SpellWarnings.noteIf(match, message, () => NewThing.namesGiven(type, name) > 1)
     return match
   }
 

@@ -109,8 +109,12 @@ export const spanishWords: SP.LanguageWords = {
    */
   itWords: new Set(["eso", "ello"]),
 
-  /** Spanish's words for the built-in types' members:  `el largo de la lista`, `el año de la fecha`. */
+  /**
+   * Spanish's words for the built-in types' members:  `el largo de la lista`, `el año de la fecha`.
+   * - A list's `name` is `nombre`:  `el nombre de la pila` reads and sets `pila.name`.
+   */
   builtInMembers: {
+    name: ["nombre"],
     length: ["largo", "longitud"],
     size: ["tamaño", "tamano"],
     characters: ["caracteres"],

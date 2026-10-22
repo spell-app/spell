@@ -2,6 +2,8 @@
  * Warnings about a spell program:  something it should say, which doesn't stop it parsing or running.
  * - e.g. a property declared with no type, `a calculator has an input`:
  *   "Say what "input" is, e.g. "a calculator has an input as text"".
+ * - Worded in the program's language, by its pack's messages (epic `spanish` P17):
+ *   `SP.Language.of(scope).parserMessage(key, params)`, e.g. Spanish's `Di qué es "entrada" ...`.
  * - Parse errors are the other kind of problem:  a line spell can't read (`SP.Block.getParseErrors()`).
  *   A line with a warning compiles as it is.
  * - Plain matches and their `data`, no scope of its own:
@@ -14,8 +16,9 @@ import { Synonyms } from "spell-lang/spell/rules/expressions"
 
 /**
  * Notes warnings on matches while parsing, and gathers a file's back up.
- * - A rule notes one on its OWN match's `data.warnings` (`note()`), WHILE PARSING:  in `parse()`, or `mutateScope()`
- *   for what it only knows then.  NEVER in `getAST()`, which is pure.
+ * - A rule notes one on its OWN match's `data.warnings` (`note()`), WHILE PARSING:
+ *   in `parse()`, or `mutateScope()` for what it only knows then.
+ *   NEVER in `getAST()`, which is pure.
  * - Shown under their text by editors (`SpellLanguageService.diagnostics()`, as `DiagnosticSeverity.Warning`), and
  *   listed by `spell compile` after its errors, which they never count as.
  * - STATIC and instance-free on purpose:  what it knows is on the matches, which incremental parsing keeps or
@@ -46,7 +49,8 @@ export class SpellWarnings {
   /**
    * Note a warning on `statement` for each article which doesn't agree with its noun (epic `spanish` P8).
    * - e.g. English's `a apple`:  "Did you mean "an apple"?";  Spanish's `el carta`:  "¿Querías decir "la carta"?".
-   * - Under the article.  Worded by the language's pack, which says what agrees:  `SP.Language.agreement()`.
+   * - Under the article.  The language's pack says what agrees (`SP.Language.agreement()`),
+   *   and words it, its `did-you-mean` message.
    * - An article is a form of the language's `indefinite_article` or `definite_article` word rule;
    *   its noun, the words after it, up to a structural word (`of`, `is` ...):
    *   - the most of them, up to 3, which name a type, e.g. `bank account`
@@ -72,7 +76,8 @@ export class SpellWarnings {
           const noun = SpellWarnings.nounAt(scope, tokens, index + article.length, language)
           const expected = noun && language.agreement(form, noun.words.toLowerCase(), noun.type)
           if (!noun || !expected) continue
-          SpellWarnings.note(statement, language.articles!.warning(`${expected} ${noun.words}`), article)
+          const phrase = `${expected} ${noun.words}`
+          SpellWarnings.note(statement, language.parserMessage("did-you-mean", { phrase }), article)
         }
       })
     } catch (error) {
@@ -153,23 +158,35 @@ export class SpellWarnings {
   }
 
   /**
-   * A type to suggest for something called `words`, as a program would write it after `as`:
-   * - `a deck` when `words` names a type `scope` knows, e.g. a property called `deck`
-   * - else `text`, the most common
+   * A type to suggest for something called `words`, as a program would write it after `as`, in `scope`'s language:
+   * - `a deck` when `words` names a type `scope` knows, e.g. a property called `deck`;  Spanish's `un mazo`
+   * - else `text`, the most common;  Spanish's `texto`
    * - Only a guess, for a warning's example:  spell doesn't type anything by its name.
    */
   static exampleType(scope: P.Scope, words: string): string {
-    if (/^text$/i.test(words) || !scope.getType(SP.typeName(words))) return "text"
-    return `${/^[aeiou]/i.test(words) ? "an" : "a"} ${words}`
+    const language = SP.Language.of(scope)
+    const datatype = SP.typeName(words)
+    const type = datatype === "text" ? undefined : scope.getType(datatype)
+    return type ? language.withArticle("indefinite", words, type) : language.parserMessage("example-text")
   }
 
   /**
    * A list's item type to suggest for something called `words`, as written after `a new list of`:
    * - `words` itself, e.g. `tasks`, when it names a type `scope` knows
-   * - else `text`
+   * - else `text`, in `scope`'s language
    */
   static exampleItemType(scope: P.Scope, words: string): string {
-    return scope.getType(SP.typeName(words)) ? words : "text"
+    return scope.getType(SP.typeName(words)) ? words : SP.Language.of(scope).parserMessage("example-text")
+  }
+
+  /**
+   * `type`, as an example writes it, with its article:  `Pile` => `a pile`, Spanish's `Carta` => `una carta`.
+   * - Its name lowercase, any `_` a `-`.
+   * - `kind`:  `indefinite` (default) or `definite`.
+   */
+  static exampleNoun(scope: P.Scope, type: P.TypeScope, kind: SP.ArticleKind = "indefinite"): string {
+    const words = type.name.toLowerCase().replace(/_/g, "-")
+    return SP.Language.of(scope).withArticle(kind, words, type)
   }
 }
 

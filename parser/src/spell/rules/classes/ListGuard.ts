@@ -14,8 +14,8 @@ import { type MethodBody } from "./classes.shared"
  */
 export const CAN_MOVE = "can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?"
 /**
- * What a list never takes or gives up, after its subject:  `can never take a card`, `can never let go of a card`
- * (epic page `outline-spell`, P26).
+ * What a list never takes or gives up, after its subject (epic page `outline-spell`, P26):
+ * `can never take a card`, `can never let go of a card`.
  */
 export const CAN_NEVER_MOVE = "can (never:never) {verb:take_or_give_up} (a|an) {item:type}"
 
@@ -32,7 +32,8 @@ export const CAN_NEVER_MOVE = "can (never:never) {verb:take_or_give_up} (a|an) {
  *   A sub-type inherits it, unless it says its own.
  * - Only a move asks, e.g. `move the card to the tableau` -- see `list_move`.
  *   `add`, `remove` and `clear` never do:  dealing, gathering cards back.
- * - In a list type's outline body, `it` or no subject at all:  `- can take a card if: ...` (epic page `outline-spell`, P8).
+ * - In a list type's outline body, `it` or no subject at all (epic page `outline-spell`, P8):
+ *   `- can take a card if: ...`
  */
 export class ListGuard extends SpellStatement<"type|verb|item|body?|never?"> {
   @proto static priority = Priority.declaration

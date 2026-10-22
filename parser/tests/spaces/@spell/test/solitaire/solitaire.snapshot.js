@@ -311,10 +311,6 @@ export class Pile extends List {
     this.forEach((card) => (state = `${state} ${card.state}`))
     return state
   }
-
-  // set the name of cards-to-move to the name of the start-pile
-  get name() { return this.getProp("name") }
-  set name(value) { this.setProp("name", value) }
 }
 // -----------
 core.heading("Klondike Solitaire Card Game")

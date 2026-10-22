@@ -34,8 +34,15 @@ export class DrawSide extends SpellStatement<"alias|body?", DrawSideMatchData> {
   /** `to "draw its front":` => `the front of a card is:` -- see `SpellStatement.getLongForm()`. */
   getLongForm(match: P.MatchFor<this>): string | undefined {
     const type = P.SubjectScope.of(match.scope)?.subjectType
-    const side = match.data.side
-    return type && side ? `the ${side.replace(/_/g, " ")} of a ${type.instanceName} is:` : undefined
+    const side = match.data.side?.replace(/_/g, " ")
+    if (!type || !side) return undefined
+    const language = SP.Language.of(match.scope)
+    return language.parserMessage("long-form-side", {
+      side,
+      theSide: language.withArticle("definite", side),
+      type: type.instanceName,
+      aType: language.withArticle("indefinite", type.instanceName, type)
+    })
   }
 
   /** Only `"draw its <side>"`, in a type's outline body. */

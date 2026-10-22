@@ -5,9 +5,10 @@ import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressi
 /**
  * `gt_lt` rule:  `<`, `>`, `<=`, `>=` comparison, e.g. `salary > expenses`.
  * - NOTE: output of `operator` will NOT have space between `>=`.
- * - `getAST()` below looks unreachable in practice: `InfixOperatorSuffix.getAST()` deliberately
- *   throws, and `CompoundExpression`'s shunting-yard calls `compileAST()`/`compileASTExpression()`
- *   directly on matched suffix rules, never `getAST()`.
+ * - `getAST()` below looks unreachable in practice:
+ *   - `InfixOperatorSuffix.getAST()` deliberately throws
+ *   - `CompoundExpression`'s shunting-yard calls `compileAST()` / `compileASTExpression()`
+ *     directly on matched suffix rules, never `getAST()`
  *   TODO: confirm this is genuinely dead code, and if so remove it.
  */
 export class GtLt extends InfixOperatorSuffix<"operator|expression"> {

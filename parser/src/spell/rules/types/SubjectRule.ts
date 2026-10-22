@@ -3,8 +3,9 @@ import { P } from "spell-lang/parser"
 import { SpellType } from "./SpellType"
 
 /**
- * `it` in an outline-style type's body:  the type the body is about -- `Card` in `- it has a deck` under
- * `a card is a thing where:`.  See `P.SubjectScope`.
+ * `it` in an outline-style type's body:  the type the body is about,
+ * e.g. `Card` in `- it has a deck` under `a card is a thing where:`.
+ * - SEE:  `P.SubjectScope`.
  * - A `SpellType` match, so a rule takes it where it takes `a card`, e.g. `{type:subject_it} has ...`:
  *   - `value` is the type's name, e.g. `Card`;  `data.scopeType` its `TypeScope`
  *   - `raw` is the type's instance name, e.g. `card`, NOT `it`:  rules read `raw` as the type's words,

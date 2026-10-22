@@ -5,7 +5,7 @@ import { SP } from "spell-lang/spell"
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
 
 /**
- * `create_thing` rule:  `create a thing` -- same as `new_thing` above, worded with `create` instead of `a new`.
+ * `create_thing` rule:  `create a thing` -- same as `new_thing`, worded with `create` instead of `a new`.
  * - This works as an expression OR a statement.
  * - NOTE: we assume that all types take an object of properties????
  * - TODO: in `statement` form, put into `it`???

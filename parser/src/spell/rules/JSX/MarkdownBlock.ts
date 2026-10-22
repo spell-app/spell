@@ -6,7 +6,8 @@ import { Priority } from "spell-lang/spell/rules/rules.types"
 import { MARKDOWN_TAG, rawTextOf } from "./JSX.shared"
 
 /**
- * `markdown_block` rule:  formatted text in a drawing, drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).
+ * `markdown_block` rule:  formatted text in a drawing,
+ * drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).
  *
  * ```spell
  * to draw a rules panel:
@@ -50,11 +51,8 @@ export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
       if (typeof part === "string") return part
       const hole = parseFillIn(scope, part.hole)
       if (hole) return hole
-      const error = SP.spellParser.createParseError(
-        scope,
-        [element],
-        `Don't understand "{${part.hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace`
-      )
+      const message = SP.Language.of(scope).parserMessage("markdown-hole", { hole: part.hole })
+      const error = SP.spellParser.createParseError(scope, [element], message)
       errors.push(error)
       return error
     })

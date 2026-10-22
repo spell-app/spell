@@ -30,6 +30,30 @@ describe("rule code reads no English words", () => {
   })
 })
 
+/**
+ * The other half (epic `spanish` P17):  rule code never WRITES an English sentence for a person either.
+ * - A warning, a refusal or a parse error is a key in the language's `parserMessages`:
+ *   `SP.Language.of(scope).parserMessage(key, params)`.
+ * - What it looks for:  a sentence in quotes, on the line that notes, refuses or makes the error.
+ */
+describe("rule code writes no English messages", () => {
+  test("no rule file notes, refuses or reports a sentence of its own", () => {
+    const found: string[] = []
+    for (const file of ruleFiles(RULES)) {
+      readFileSync(file, "utf8")
+        .split("\n")
+        .forEach((line, index) => {
+          if (/^\s*(\*|\/\/|\/\*)/.test(line) || !MESSAGE_WRITES.test(line)) return
+          found.push(`${relative(RULES, file)}:${index + 1}  ${line.trim()}`)
+        })
+    }
+    expect(found).toEqual([])
+  })
+})
+
+/** A warning, refusal or parse error given a sentence in quotes:  two words or more. */
+const MESSAGE_WRITES = /\b(note|noteIf|refuse|createParseError)\(.*["'`][A-Za-z']+ [a-z]+/
+
 /** spell's rules folder. */
 const RULES = join(import.meta.dirname, "../../../src/spell/rules")
 

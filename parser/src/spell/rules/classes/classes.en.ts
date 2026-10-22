@@ -1008,6 +1008,76 @@ classes.addRule(DefinePropertyHas, {
       ]
     },
     {
+      title: "every list has a `name`, built in, which a type may still declare, as text (epic `spanish` P15)",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a pile is a list of cards"].join("\n"), "block")
+      },
+      tests: [
+        {
+          input: ["pile = a new pile", "print the name of the pile"],
+          js: ["export const pile = new Pile()", "core.console.log(pile.name)"]
+        },
+        {
+          input: ["pile = a new pile", 'set the name of the pile to "stock"'],
+          js: ["export const pile = new Pile()", 'pile.name = "stock"']
+        },
+        {
+          input: 'pile = a new pile with name = "stock"',
+          js: 'export const pile = new Pile({ name: "stock" })'
+        },
+        {
+          input: "a pile has a name as text",
+          js: [
+            "// a pile has a name as text",
+            'Pile.declareProp("name", { type: "text" })',
+            'Object.defineProperty(Pile.prototype, "name", {',
+            '  get() { return this.getProp("name") },',
+            '  set(value) { this.setProp("name", value) },',
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Pile { name: string }",
+            "// a pile has a name as text",
+            'Pile.declareProp("name", { type: "text" })',
+            'Object.defineProperty(Pile.prototype, "name", {',
+            '  get(this: Pile): string { return this.getProp("name") as string },',
+            '  set(this: Pile, value: string) { this.setProp("name", value) },',
+            "  configurable: true",
+            "})"
+          ]
+        },
+        {
+          input: "a pile has a name as number",
+          js: '/* PARSE ERROR: Can\'t add "name" to Pile as number:  every list has one, built in, as text */'
+        },
+        {
+          title: "a thing has no `name` built in:  any type will do",
+          input: "a card has a name as number",
+          js: [
+            "// a card has a name as number",
+            'Card.declareProp("name", { type: "number" })',
+            'Object.defineProperty(Card.prototype, "name", {',
+            '  get() { return this.getProp("name") },',
+            '  set(value) { this.setProp("name", value) },',
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Card { name: number }",
+            "// a card has a name as number",
+            'Card.declareProp("name", { type: "number" })',
+            'Object.defineProperty(Card.prototype, "name", {',
+            '  get(this: Card): number { return this.getProp("name") as number },',
+            '  set(this: Card, value: number) { this.setProp("name", value) },',
+            "  configurable: true",
+            "})"
+          ]
+        }
+      ]
+    },
+    {
       title: "a list says what it holds, so saving knows before it holds any",
       compileAs: "block",
       beforeEach(scope: P.Scope) {

@@ -3,9 +3,11 @@
  * quoted ad-hoc expressions on a type (`a thing "..." if`), and the method-signature / method-arg rules they share.
  * - A definition registers its call-site rule as it parses:  a `DynamicMethodRule`, `MethodPostfixRule` or
  *   `MethodInfixRule`, `specialize()`d -- see `MethodDefinition.getRule()`.
- * - One rule per file, each registering itself on `methods` (`methods.parser.ts`) as it loads.
- * - NOTE: the rule files are listed in TIE-BREAK order:  when two rules match the same words with the same
- *   `priority` and length, the one registered first wins.  Moving a line here can change what parses.
+ * - One rule class per file;  `methods.en.ts` registers them on `methods` (`methods.parser.ts`),
+ *   and each other language's `methods.<lang>.ts` registers the same rules in its own words.
+ * - NOTE: those files register them in TIE-BREAK order:
+ *   when two rules match the same words with the same `priority` and length, the one registered first wins.
+ *   Moving a line there can change what parses.
  */
 export * from "./methods.parser"
 export * from "./methods.shared"

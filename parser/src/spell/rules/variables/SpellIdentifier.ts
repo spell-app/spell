@@ -18,7 +18,10 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
   /** Editors colour every identifier as a variable -- `SpellLanguageService` refines to `parameter` for arguments. */
   @proto static highlightAs?: P.HighlightKind = "variable"
 
-  /** Every identifier rule matches the same thing:  alpha-numeric word (dashes / underscores OK), not the language's own (`test()`). */
+  /**
+   * Every identifier rule matches the same thing:
+   * an alpha-numeric word (dashes / underscores OK), not the language's own (`test()`).
+   */
   constructor(props?: Partial<P.PatternProps>) {
     super({ pattern: P.ALPHANUMERIC_WORD_WITH_DASHES, ...props })
   }

@@ -52,6 +52,11 @@
       description: "What names it among the others of its kind, e.g. `the id of the person`.\n- Every thing and list has one:  nobody declares it, and a type can't declare its own.\n- Made up the first time it's read, e.g. `person-k3x9q2mf`, unless you set it first:\n  `a new person with id = \"owen\"`, or `set the id of the person to \"owen\"`.\n- Saving uses it:  a thing saved in its own file is referred to by it."
     },
     {
+      path: "type:List/property:name",
+      detail: "text",
+      description: "What it's called, e.g. `the name of the pile` -- nothing until it's given one.\n- Give it one when it's made, `a new pile with name = \"stock\"`, or later, `set the name of the pile to \"stock\"`.\n- Every list has one, built in, but a type may still say so:  `a pile has a name as text`.\n- One list by its name:  `tableau T1` is the tableau named `T1`."
+    },
+    {
       path: "type:List/property:length",
       detail: "number",
       description: "How many items it has, e.g. `the length of the deck`.\n- ~== `the size of the deck`, `the number of cards in the deck`."

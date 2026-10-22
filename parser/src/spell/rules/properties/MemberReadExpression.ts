@@ -28,6 +28,8 @@ export class MemberReadExpression<
    *   e.g. `Card.Suits` for `the suits of the card`
    * - for a built-in type's member, what its `readAs` template says,
    *   e.g. `core.itemCountOf(deck)` for `the length of the deck` -- see `builtInMemberAST()`
+   * - for a built-in stored member in another language's words, its `output`,
+   *   e.g. `pila.name` for `el nombre de la pila` -- see `SP.loadBuiltInTypes()`
    */
   getMemberAST(match: P.MatchFor<this>, object: P.ASTExpression, property: P.Match): P.ASTExpression {
     const { member, enumerationOf } = match.data as MemberData
@@ -37,6 +39,10 @@ export class MemberReadExpression<
     }
     if (member instanceof P.ScopeVariable && member.readAs) {
       return MemberReadExpression.builtInMemberAST(match, object, member.readAs)
+    }
+    // a built-in member in another language's words, e.g. Spanish's `el nombre de la pila` => `pila.name`
+    if (member instanceof P.ScopeVariable && member.output) {
+      return new P.ASTPropertyExpression(match, { object, property: member.output })
     }
     // a value kind's property declared further down, e.g. `the color of its suit` in a card above the deck:
     // its type's record knows by now (issue I3 of `outline-spell`) -- the static form, as `property_value_getter`'s
@@ -84,12 +90,15 @@ export class MemberReadExpression<
    */
   static warnIfUndeclared(match: P.Match, ownerType: P.TypeScope | undefined, property: P.Match): void {
     if (!ownerType || !(ownerType.stub || ownerType.declaredBy)) return
-    // REFACTOR: the message and its `a` / `an` move into the language pack's messages (epic `spanish`)
-    const aWord = (words: string) => `${/^[aeiou]/i.test(words) ? "an" : "a"} ${words}`
-    const words = property.raw ?? `${property.value}`
-    const aType = aWord(ownerType.name.toLowerCase().replace(/_/g, "-"))
-    const declaration = `${aType} has ${aWord(words)} as ${SP.SpellWarnings.exampleType(match.scope, words)}`
-    const message = `${upperFirst(aType)} never says it has ${aWord(words)}:  declare it, e.g. "${declaration}"`
+    const language = SP.Language.of(match.scope)
+    const words = `${property.raw ?? property.value}`
+    const aType = SP.SpellWarnings.exampleNoun(match.scope, ownerType)
+    const message = language.parserMessage("undeclared-member", {
+      AType: upperFirst(aType),
+      aType,
+      aName: language.withArticle("indefinite", words),
+      type: SP.SpellWarnings.exampleType(match.scope, words)
+    })
     const stillHolds = () =>
       MemberReadExpression.knowsAllMembersOf(ownerType) && !ownerType.getMember(`${property.value}`)
     SP.SpellWarnings.noteIf(match, message, stillHolds, property)

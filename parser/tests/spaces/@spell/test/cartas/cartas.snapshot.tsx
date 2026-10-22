@@ -262,7 +262,7 @@ export class Pila extends List<Carta> {
   }
 
   @derived get estado() {
-    let estado = `${this.nombre || "pila"}:`
+    let estado = `${this.name || "pila"}:`
     this.forEach((carta) => (estado = `${estado} ${carta.estado}`))
     return estado
   }

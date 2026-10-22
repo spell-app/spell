@@ -167,6 +167,7 @@ flowchart LR
 </details>
 
 - **Real today:**  English and Spanish in, four targets out.
+  A project written in Spanish says `language: "es"` in its project file;  English is the default.
   Every project gets JavaScript, `js/solid`;  a project asks for the rest by name:  `ts/solid`, `ts/lib`, `py`.
   Twelve frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
   ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
@@ -236,13 +237,13 @@ Six ideas carry most of the language, and each reads both ways:
   `the color of a card is red if its suit is either diamonds or hearts otherwise it is black` works the color out
   each time it's read, a getter, so there's nothing to keep in step.
 - **Phrases become rules.**  Quoted words are a new phrase, a rule from the next line on (above, "Underneath").
-  A blank in brackets makes a phrase per value:  after `a card "is a (rank)" for its ranks`,
-  `the card is a queen` reads, and so does `the card is not an ace`.
+  A blank in brackets makes a phrase per value:
+  after `a card "is a (rank)" for its ranks`, `the card is a queen` reads, and so does `the card is not an ace`.
 - **Precedence, as you'd read it.**  `its suit is either diamonds or hearts` asks ONE question:
   `core.includes(["diamonds", "hearts"], this.suit)`.
   Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
-  Sums come before comparisons, too:  the tableau's rule in
-  [outline-solitaire](tests/spaces/@spell/test/outline-solitaire/Solitaire.spell),
+  Sums come before comparisons, too:
+  the tableau's rule in [outline-solitaire](tests/spaces/@spell/test/outline-solitaire/Solitaire.spell),
   `its value is the value of the card + 1`, is `this.value === card.value + 1`.
 - **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
   as a person counts.
@@ -407,13 +408,14 @@ Lint first.
 ## The language commands
 
 You've just used four of them.
-The kit's `spell` takes eleven commands from this repo:
+The kit's `spell` takes thirteen commands from this repo:
 `compile`, `lint`, `watch` and `format` build a program;  `run` and `test` run it;
-`parse`, `repl`, `explain` and `describe` show what Spell made of it;  and `speedtest` times the parser.
+`parse`, `repl`, `explain` and `describe` show what Spell made of it;  `speedtest` times the parser;
+and `lang packs check` and `lang packs fix` check the language packs against English.
 [commands.ts](src/cli/commands.ts) lists them, and spell-lang's `package.json` names that file,
 `"spell": { "commands" }`.
-What each does, every option, with examples:  [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang),
-or `spell help <command>`.
+What each does, every option, with examples:
+[the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang), or `spell help <command>`.
 
 **Their work is spell-app's, for now.**
 The names live here, and each command hands its work to spell-app's `language` hook
@@ -422,8 +424,8 @@ The names live here, and each command hands its work to spell-app's `language` h
   or the "which project?" prompt, with the build folder under spell-app's `build/`
 - it asks the editor's language service, so the command line sees what an editor sees
 - without spell-app, each command stops, says to clone it (`yarn clone spell-app`), and exits 2
-- `spell lang packs check` / `fix` are the exception:  they need no project, so their work is here,
-  in [packsCommand.ts](src/cli/packsCommand.ts).
+- `spell lang packs check` / `fix` are the exception:
+  they need no project, so their work is here, in [packsCommand.ts](src/cli/packsCommand.ts).
 
 <details>
 <summary>The files in cli/</summary>
@@ -432,6 +434,7 @@ The names live here, and each command hands its work to spell-app's `language` h
 | --- | --- |
 | [cli/commands.ts](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
 | [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
+| [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell lang packs check` and `fix`:  what each language pack lacks against English, and stubs for it |
 | [cli/index.ts](src/cli/index.ts) | `spell-lang/cli`:  the types, for spell-app |
 
 </details>
@@ -453,7 +456,8 @@ What each one needs:
   - `test`, `watch`:  the loader;  `watch`'s compile step as `compile`'s
   - `speedtest`:  finds Spell by its package, not through spaces
   - `compile`, `lint`, `run`:  the loader, plus spell-app's hooks above
-- And the progress lists and screens they draw, which are spell-app's today (Ink, in its `src/cli/ui/`).
+- And the progress lists and screens they draw, which are spell-app's today:
+  [its Ink screens](https://github.com/spell-app/spell-app/tree/main/src/cli/ui).
 
 </details>
 
@@ -472,7 +476,7 @@ The name is the same inside this repo as from every other, so there's no alias t
 | [spell/](src/spell/) | `spell-lang/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  types, phrases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
 | [core/](src/core/) | `spell-lang/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a type is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>who may import it:  one copy per running app</li></ul> |
 | [py/](src/py/) | `spell-lang/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
-| [cli/](src/cli/) | `spell-lang/cli` | the language's eleven `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang) |
+| [cli/](src/cli/) | `spell-lang/cli` | the language's thirteen `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang) |
 
 - It stands only on [the kit](https://github.com/spell-app/spell-kit/blob/main/README.md):  its shared helpers, `spell-kit/util`, and its toolchain.
 - Inside, the arrows point one way:
@@ -499,14 +503,11 @@ and the command line's base is the kit's:
 
 The language's own commands are this repo's (above):  the command line finds them here.
 
-## 🌱 Coming
+## Spell in Spanish
 
-None of these is here yet.
-Each says where it stands.
-
-### A third human language
-
-Spanish reads today, and compiles to the same targets:  the same programs, written in Spanish.
+A project can be written in Spanish, and compile to the same targets:
+the second box on the left of the picture above.
+Its project file says `language: "es"`, its files stay `.spell`, and its outline reads the way an English one does:
 
 ```spell
 una carta es una cosa
@@ -514,13 +515,38 @@ las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
 el color de una carta es rojo si su palo es o bien diamantes o corazones de lo contrario es negro
 ```
 
-_Three lines of [Carta.spell](tests/spaces/@spell/test/cartas/Carta.spell), from the frozen `cartas` project,
-the `cards` project in Spanish._
+_Three lines of [Carta.spell](tests/spaces/@spell/test/cartas/Carta.spell),
+from `cartas`, the frozen `cards` project translated line for line._
 
-Where it stands:  the next language is a pack of its own, beside English's and Spanish's in
-[src/spell/languages/](src/spell/languages/), and every rule module registers the same rule classes again in its words;
-`spell lang packs check` then lists what it lacks against English ([how it starts](README-parser.md#spell-in-another-human-language)).
-None is started.
+- It isn't a translation layer, or a second parser:  the same rule classes are registered twice.
+  - Each folder of rules has `<folder>.en.ts`, the rules with their English syntax and tests,
+    and `<folder>.es.ts`, the same rules in the same order, in Spanish.
+  - A rule reads what a WORD RULE matched (an article, `is` or `is not`), never the word itself.
+- A LANGUAGE PACK is everything else a language brings, in [languages/](src/spell/languages/):
+  its word tables, its singulars and plurals, its articles and their agreement, and its messages.
+  English is the first pack, Spanish the second.
+- Names keep their Spanish, accents and all:  `una carta "es una figura"` compiles to `get esUnaFigura()`.
+- A wrong article is a warning, never an error:  `el carta` asks `¿Querías decir "la carta"?`.
+- The parser's warnings and errors speak the project's language, with examples in it:
+  `Di qué contiene "nombres-de-cartas", p. ej. "poner nombres-de-cartas a una nueva lista de texto"`.
+- `spell lang packs check` says what a pack lacks against English, module by module, and runs in the tests too;
+  `fix` writes stubs to translate.
+- **Not yet:**  a translated example beyond `cartas`, and docs that teach Spanish Spell.
+- The whole story, and what Spell UI and the editor do in Spanish:  the docs site's Spell in Spanish guide,
+  `/guides/spanish.html`.
+
+## 🌱 Coming
+
+None of these is here yet.
+Each says where it stands.
+
+### A third human language
+
+Norwegian and Portuguese are next, with help from friends;  neither is started.
+Each is a pack of its own, beside English's and Spanish's in [src/spell/languages/](src/spell/languages/),
+and a third file per folder of rules:  words, not code.
+`spell lang packs check` then lists what it still lacks against English
+([how a language starts](README-parser.md#spell-in-another-human-language)).
 
 ### Two more targets, and mixins
 
@@ -561,7 +587,11 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
     (the `spell` folder's and the parser's), core's declarations writer, the scripts and configs
 - One folder's tests:  `yarn vp test run --project parser`, or `markdown`, `core`, `py`, `spell`, `cli`.
 - Tests live in `tests/<folder>/`, at the same paths as the code under `src/`:
-  `tests/parser/rules/Rule.test.ts` tests `src/parser/rules/Rule.ts`.
+
+  ```text
+  tests/parser/rules/Rule.test.ts    tests    src/parser/rules/Rule.ts
+  ```
+
 - The frozen test projects, [tests/spaces/@spell/test/](tests/spaces/@spell/test/), pin every target's output:
   [README-spell](README-spell.md#the-frozen-test-projects).
 - The folders' own scripts, each named for its folder:
@@ -585,7 +615,7 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
 - Its lineage is HyperCard ("programming for the rest of us"), SuperCard, Inform and literate programming,
   and it aims to fix what HyperCard couldn't:  one platform, no network, a closed file format.
 - Its own parser dates from then, too:  the talk's notes found the language too dynamic for YACC, ANTLR or Chevrotain.
-- The 2017 notes are in [docs/spell/thoughts/](docs/spell/thoughts/):  history, not current plans.
+- [The 2017 notes](docs/spell/thoughts/) are history, not current plans.
 
 </details>
 
@@ -598,5 +628,5 @@ MIT, as spell-lang's [package.json](package.json) says.
 - [README-parser](README-parser.md):  the parser on its own, if the rules-as-classes part is why you came
 - [README-spell](README-spell.md):  everything a line of Spell can say, and how to add a rule
 - [README-targets](README-targets.md):  what each target writes, and what each one costs
-- [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  every option of the eleven commands, with examples
+- [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  every option of the thirteen commands, with examples
 - [the kit's README](https://github.com/spell-app/spell-kit/blob/main/README.md):  setup from zero, the five repos, and every page of every repo

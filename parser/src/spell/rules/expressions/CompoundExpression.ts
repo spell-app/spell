@@ -7,8 +7,8 @@ import { Precedence, SuffixLeft } from "./expressions.shared"
 
 /**
  * `expression` rule:  an operand, then each operator suffix binding TIGHTER than `bound`, e.g. `x + 1 is 3`.
- * - The ONLY rule registered as `expression`:  every other `expression` alias is an `operand`
- *   -- see `SpellParser.getNamesForRule()`.
+ * - The ONLY rule registered as `expression`:
+ *   every other `expression` alias is an `operand` -- see `SpellParser.getNamesForRule()`.
  * - No suffix => the operand's own match, as is,
  *   so `match.is(KnownVariable)` still works on `{thing:expression}`.
  * - Suffixes' rhs is an `operand`, so the chain is flat:
@@ -122,20 +122,20 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
       rhs?: unknown
       lhs?: unknown
     }): P.ASTNode {
-      // Every match pushed onto `opStack` (below) came from an item whose `.rule` was already
-      // confirmed `instanceof InfixOperatorSuffix`; re-assert that invariant here so `compileAST()`
-      // is callable -- the base `Rule` type doesn't know about this language-specific method.
+      // Every match pushed onto `opStack` (below) came from an item whose `.rule` is an `InfixOperatorSuffix`:
+      // assert it again here, so `compileAST()` is callable.
+      // The base `Rule` type doesn't know about this language-specific method.
       if (!(ruleMatch.rule instanceof InfixOperatorSuffix)) {
         throw new TypeError("Expected an InfixOperatorSuffix rule in CompoundExpression's shunting-yard")
       }
-      // NOTE: re-typed to plain (default-parameterized) `InfixOperatorSuffix` -- bare `instanceof`
-      // against a generic class narrows to `InfixOperatorSuffix<any, any>`, which makes
-      // `MatchFor<this>` resolve to an unhelpful distributed type at the `compileAST()` call below.
+      // NOTE: re-typed to plain (default-parameterized) `InfixOperatorSuffix`:
+      // a bare `instanceof` against a generic class narrows to `InfixOperatorSuffix<any, any>`,
+      // which makes `MatchFor<this>` an unhelpful distributed type at the `compileAST()` call below.
       const rule: InfixOperatorSuffix = ruleMatch.rule
       const args = {
         operator,
-        // `compile()` normalizes matches/arrays down to `ASTNode`s dynamically -- not statically
-        // representable as `Expression`, but that's what every operand is in practice here.
+        // `compile()` turns matches and arrays into `ASTNode`s at run time:
+        // the type can't say `Expression`, but every operand here is one in practice.
         rhs: compile(rhs) as P.ASTExpression | undefined,
         lhs: compile(lhs) as P.ASTExpression | undefined
       }
@@ -152,10 +152,8 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
       }
     }
 
-    // Iterate through the rhs expressions, using a variant of the shunting-yard algorithm
-    //  to deal with operator precedence.  Note that we assume:
-    //  - all infix operators are `left-to-right` associative, and
-    //  - all postfix operators are left to right associative.
+    // Go through the rhs expressions, with a variant of the shunting-yard algorithm for operator precedence:
+    // - it assumes every operator, infix and postfix, is left-to-right associative
     // See: https://en.wikipedia.org/wiki/Shunting-yard_algorithm
     // See: https://www.chris-j.co.uk/parsing.php
     const { lhs, rhsChain } = match.groups
@@ -208,8 +206,8 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
   /**
    * What the next suffix follows, if known -- see `SuffixLeft`.
    * - The first suffix:  our operand, `lhs`.
-   * - After `and` / `or`:  the operand after it, e.g. `the game` in `the card is face up and the game is red`.  Every
-   *   suffix which asks (a user's phrase) binds tighter than those, so that operand is its whole left side.
+   * - After `and` / `or`:  the operand after it, e.g. `the game` in `the card is face up and the game is red`.
+   *   Every suffix which asks (a person's phrase) binds tighter than those, so that operand is its whole left side.
    * - After anything else:  unknown, e.g. after `+` the left side is the sum so far.
    */
   private static suffixLeft(lhs: P.Match, previous: P.Match | undefined): P.Match | undefined {

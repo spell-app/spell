@@ -448,9 +448,16 @@ export type BuiltInMember = {
   /**
    * A property the runtime class keeps, read and set as `{it}.name`, e.g. `id`:  `the id of the card` => `card.id`.
    * - Unlike `readAs`, a `set` of it is allowed.
+   * - Another language's words for it compile to the same name, e.g. Spanish's `el nombre de la pila` => `pila.name`.
    * - Pinned to a real property of the runtime class by `builtinTypes.test.ts`.
    */
   stored?: true
+  /**
+   * A `stored` member a type may still declare, with the member's own datatype or none, e.g. a list's `name`:
+   * `a pile has a name as text` is fine, `a pile has a name as number` is refused.
+   * - Without it, no type may declare it, e.g. `id` -- see `SpellStatement.refuseBuiltInType()`.
+   */
+  declarable?: true
   /** Built-in rules which spell it, by name, e.g. `list_shuffle` -- their syntax shows in the Type Explorer. */
   rules?: string[]
   /** Its docs, as markdown. */

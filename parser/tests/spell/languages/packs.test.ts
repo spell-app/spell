@@ -5,6 +5,7 @@ import { packSources } from "spell-lang/cli/packsCommand"
 import {
   checkPack,
   checkPackModule,
+  checkWords,
   fixPackModule,
   TODO_MARKER,
   type PackModuleSource,
@@ -72,6 +73,16 @@ describe("checkPack()", () => {
   test("Spanish's pack is COMPLETE:  every English registration, word table and rule class", () => {
     const report = checkPack(packSources("es"), SP.english, SP.spanish)
     expect(problemsIn(report)).toEqual([])
+  })
+})
+
+describe("checkWords()", () => {
+  test("a parser message the pack lacks is reported, by its key (epic `spanish` P17)", () => {
+    const { "dont-understand": _left, ...messages } = SP.spanish.parserMessages
+    const lacking = { ...SP.spanish, parserMessages: messages } as SP.Language
+    expect(checkWords(SP.english, lacking)).toEqual([
+      { table: "parserMessages", key: "dont-understand", problem: "missing" }
+    ])
   })
 })
 

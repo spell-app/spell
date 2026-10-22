@@ -4,8 +4,9 @@ import { P } from "spell-lang/parser"
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
 
 /**
- * `else` rule:  `(else|otherwise) :?` -- else branch; must be tried after `else_if` (see NOTE there) so this
- * rule's bare `(else|otherwise)` prefix doesn't eat an `else if` statement.
+ * `else` rule:  `(else|otherwise) :?` -- else branch.
+ * - Must be tried after `else_if` (see NOTE there),
+ *   so this rule's bare `(else|otherwise)` prefix doesn't eat an `else if` statement.
  * - Compiles body in a nested `BlockScope` (named `"else"`) via `getNestedScopeForMatch()`.
  * - Compiles to `else { ...statements }`.
  */

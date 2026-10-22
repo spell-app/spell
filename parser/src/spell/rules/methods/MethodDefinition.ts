@@ -11,7 +11,7 @@ import type { MethodSignatureData } from "./methods.shared"
 
 /**
  * Base for method-DEFINITION rules built on `method_signature`:
- * `to_do_something`, `create_animation` and `quoted_type_expression`.  See `to_do_something` below.
+ * `to_do_something`, `create_animation` and `quoted_type_expression`.  See `to_do_something`.
  * - Turns a parsed signature into one of:
  *   - a loose function
  *   - an instance method, when a captured type is promoted via `inlineInitialType`
@@ -240,7 +240,8 @@ export class MethodDefinition<
   }
 
   /**
-   * Record the method `match` defines as a `P.ScopeMethod`, so a call knows what it returns, and editors what it takes:
+   * Record the method `match` defines as a `P.ScopeMethod`,
+   * so a call knows what it returns, and editors what it takes:
    * - its words
    * - its parameters, with their types
    * - its owner

@@ -359,9 +359,6 @@ class Pile(List):
             state = f"{state} {card.state}"
         return state
 
-    # set the name of cards-to-move to the name of the start-pile
-    name = prop()
-
 
 # -----------
 

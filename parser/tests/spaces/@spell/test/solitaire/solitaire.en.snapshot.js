@@ -36,8 +36,7 @@ export const words = {
     Pile: {
       color: "color",
       value: "value",
-      state: "state",
-      name: "name"
+      state: "state"
     },
     Game: {
       score: "score",

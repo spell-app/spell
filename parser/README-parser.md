@@ -135,8 +135,8 @@ NumberToken    1
   - double-quoted text only, so a single quote can sit inside `isn't`
   - indentation matters at the start of a line
   - raw `css` and `markdown` blocks
-- A word starts with a letter in any script, then takes letters, accents, digits, `-` or `_`:
-  so `año` and `está` are one word each, as Spanish needs.
+- Spell's words are the tokenizer's default:  a letter in any script, then letters, accents, digits, `-` or `_`.
+  So `año`, `está` and `corazón` are one word each, as Spanish needs.
 
 <details>
 <summary>Every kind of token, and the settings</summary>
@@ -703,11 +703,11 @@ From [Parser.ts](src/parser/Parser.ts);  each does nothing, or the simplest thin
 
 Spanish is the worked example:  its own syntax strings, registered on Spell's SAME rule classes.
 - That's why `addRule()` takes only a syntax and its tests:  the class is reusable.
-- Each rule module registers its rules once per language:  `<module>.en.ts` for English,
-  `<module>.es.ts` for Spanish, the same classes in the same order.
-- Words with negated forms are word rules, registered word by word.
-  English's `is`, from [expressions.en.ts](src/spell/rules/expressions/expressions.en.ts), then Spanish's, from
-  [expressions.es.ts](src/spell/rules/expressions/expressions.es.ts):
+- Each folder of rules registers its English in `<folder>.en.ts`, and its Spanish in `<folder>.es.ts`,
+  the same rules in the same order.
+- Words with negated forms are WORD RULES, registered word by word.
+  English's `is`, from [expressions.en.ts](src/spell/rules/expressions/expressions.en.ts),
+  and Spanish's, from [expressions.es.ts](src/spell/rules/expressions/expressions.es.ts):
 
   ```ts
   expressions.addRule(Negatable.specialize({ ruleName: "is_or_is_not", alias: "is" }), {
@@ -718,10 +718,25 @@ Spanish is the worked example:  its own syntax strings, registered on Spell's SA
   })
   ```
 
-- A language's other words (its type words, its plurals, its messages) are its language pack,
+  A rule asks which form matched (`Negatable.isNegated()`), never which word.
+- A language's other words (its type words, its plurals, its messages) are its LANGUAGE PACK,
   in [src/spell/languages/](src/spell/languages/), and a project picks its language with `"language": "es"`.
-- `spell lang packs check` compares a pack against English, rule by rule;  for Spanish today it prints
-  `Spanish (es):  complete, 19 modules`.
+  - A type's words are Spell's vocabulary, handed to the parser:  each pack brings its own.
+- A third language is a third file per folder, and a pack.
+  `spell lang packs check` compares each pack against English, module by module, and says what it still lacks:
+
+  ```sh
+  spell lang packs check
+  ```
+
+  <details>
+  <summary>Output</summary>
+
+  ```text
+  Spanish (es):  complete, 19 modules
+  ```
+
+  </details>
 
 ## Testing rules
 

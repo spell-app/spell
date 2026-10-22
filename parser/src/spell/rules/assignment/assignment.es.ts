@@ -1,6 +1,6 @@
 /**
- * The `assignment` rules in Spanish:  each rule's syntax and its tests, registered on Spanish's own `assignment` parser
- * (epic `spanish`).
+ * The `assignment` rules in Spanish (epic `spanish`):
+ * each rule's syntax and its tests, registered on Spanish's own `assignment` parser.
  * - The rule CLASSES are their own files, beside this one, shared with every language.
  * - Registered in the same order as `assignment.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
@@ -44,7 +44,7 @@ assignmentEs.addRule(AssignmentStatement, {
         {
           title: "non-existing var: property set (won't work)",
           input: `sea el name de unknown-var = "bob"`,
-          js: `/* PARSE ERROR: Don't understand "sea el name de unknown-var = "bob"" */`
+          js: '/* PARSE ERROR: No entiendo "sea el name de unknown-var = "bob"" */'
         },
         {
           title: "existing var: property set",
@@ -229,7 +229,7 @@ assignmentEs.addRule(ReturnStatement, {
         // fails for more than one indented line
         [
           "devolver\n\t<div/>\n\t1",
-          ["return", '/* PARSE ERROR: Don\'t understand "<div/>" */', '/* PARSE ERROR: Don\'t understand "1" */']
+          ["return", '/* PARSE ERROR: No entiendo "<div/>" */', '/* PARSE ERROR: No entiendo "1" */']
         ]
       ]
     }

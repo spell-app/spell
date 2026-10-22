@@ -1,12 +1,17 @@
 /**
- * The `expressions` rule module:  Spell boolean/comparison/type-check expression suffixes -- `and`, `or`, `is`,
- * `is a`, `includes`, `is empty`, string-case conversion, type coercion, etc.
- * - Also defines `InfixOperatorSuffix` / `PostfixOperatorSuffix`, the base classes every operator-suffix
- *   rule here extends, and `CompoundExpression`, which runs the shunting-yard algorithm combining them.
- * - One rule per file, each registering itself on `expressions` (`expressions.parser.ts`) as it loads.
- *   The base classes, `SpellExpression` and the two operator suffixes, register nothing themselves.
- * - NOTE: the rule files are listed in TIE-BREAK order:  when two rules match the same words with the same
- *   `priority` and length, the one registered first wins.  Moving a line here can change what parses.
+ * The `expressions` rule module:  Spell's boolean, comparison and type-check expression suffixes.
+ * - e.g. `and`, `or`, `is`, `is a`, `includes`, `is empty`, string-case conversion, type coercion
+ * - Also its base classes:
+ *   - `InfixOperatorSuffix` / `PostfixOperatorSuffix`:  every operator-suffix rule here extends one
+ *   - `CompoundExpression`:  combines them, with the shunting-yard algorithm
+ *   - `SpellExpression`
+ *   - and the WORD RULES:  `Wording`, `Synonyms`, `Negatable`
+ * - One rule class per file;  `expressions.en.ts` registers them on `expressions` (`expressions.parser.ts`),
+ *   and each other language's `expressions.<lang>.ts` registers the same rules in its own words.
+ *   The base classes register nothing themselves.
+ * - NOTE: those files register them in TIE-BREAK order:
+ *   when two rules match the same words with the same `priority` and length, the one registered first wins.
+ *   Moving a line there can change what parses.
  */
 export * from "./expressions.parser"
 export * from "./expressions.shared"

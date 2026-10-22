@@ -12,7 +12,10 @@ export class SpellConstant extends P.Pattern<never, ConstantMatchData> {
   /** Editors colour every constant as an enum member -- they're the values of enumerated properties. */
   @proto static highlightAs?: P.HighlightKind = "enumMember"
 
-  /** Every constant rule matches the same thing:  alpha-numeric word (dashes / underscores OK), not the language's own (`test()`). */
+  /**
+   * Every constant rule matches the same thing:
+   * an alpha-numeric word (dashes / underscores OK), not the language's own (`test()`).
+   */
   constructor(props?: Partial<P.PatternProps>) {
     super({ pattern: P.ALPHANUMERIC_WORD_WITH_DASHES, ...props })
   }

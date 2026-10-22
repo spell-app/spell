@@ -22,8 +22,9 @@ export class Wording extends P.Choice {
 
   /**
    * SIDE EFFECT:  marks the winning match with its meaning, `data.meaning`.
-   * - `Choice` hands back the winning alternative's own match.  Its `name` says which group:  a one-form group
-   *   compiles to a rule of its name, a several-form one stamps its name on its winner's match.
+   * - `Choice` hands back the winning alternative's own match.  Its `name` says which group:
+   *   - a one-form group compiles to a rule of its name
+   *   - a several-form one stamps its name on its winner's match
    * - Read it NOW:  a `{operator:...}` around us renames the match `operator` as we return.
    */
   parse(scope: P.Scope, tokens: P.Token[]) {

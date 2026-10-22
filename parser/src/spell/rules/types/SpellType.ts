@@ -10,7 +10,8 @@ import { longestNameIn, namesWithGrammarWords } from "spell-lang/spell/rules/rul
  *   - only declared names, the longest first:  `a big card` stays a card, unless a `big card` was declared
  * - A type's short name names it too, compiled as the type's own name:
  *   `account` => `BankAccount`, after `a bank account aka account is a thing` -- see `P.TypeScope.aka`.
- * - Sets `match.data.scopeType` to the existing `TypeScope` looked up by `scope.types`, `NONE` if scope doesn't know it.
+ * - Sets `match.data.scopeType` to the existing `TypeScope` looked up by `scope.types`,
+ *   `NONE` if scope doesn't know it.
  * - Other rules read it as `if (match.is(SpellType)) match.data.scopeType`.
  */
 export class SpellType extends P.Pattern<never, TypeMatchData> {
@@ -20,7 +21,10 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   /** Most words a type's name may have, e.g. 2 for `bank account`. */
   static MAX_NAME_WORDS = 4
 
-  /** Every type rule matches the same thing: alpha-numeric word (dashes/underscores OK), not the language's own (`test()`). */
+  /**
+   * Every type rule matches the same thing:
+   * an alpha-numeric word (dashes / underscores OK), not the language's own (`test()`).
+   */
   constructor(props?: Partial<P.PatternProps>) {
     super({
       pattern: P.ALPHANUMERIC_WORD_WITH_DASHES,
@@ -75,7 +79,8 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   }
 
   /**
-   * The LONGEST run of 2 or more words from the first token which names a type in `scope`, if any, e.g. `bank accounts`.
+   * The LONGEST run of 2 or more words from the first token which names a type in `scope`, if any,
+   * e.g. `bank accounts`.
    * - A name someone declared, or a short name:  never just any run of words -- see class docs.
    */
   private parseDeclaredWords(scope: P.Scope, tokens: P.Token[]): P.MatchFor<this> | undefined {
@@ -96,7 +101,8 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   }
 
   /**
-   * A declared name holding a grammar word, from the first token, e.g. `card in play`, `carta de juego` (epic `spanish` P14).
+   * A declared name holding a grammar word, from the first token,
+   * e.g. `card in play`, `carta de juego` (epic `spanish` P14).
    * - Only a name declared whole, longest first:  `namesWithGrammarWords()`.
    * - Its first word passes `test()`;  the others may be on the blacklist.
    */
@@ -121,7 +127,10 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     return match
   }
 
-  /** The words of a type's name, e.g. `CardInPlay` => `["Card", "In", "Play"]`:  split where each word was capitalized. */
+  /**
+   * The words of a type's name, e.g. `CardInPlay` => `["Card", "In", "Play"]`:
+   * split where each word was capitalized.
+   */
   static wordsOfTypeName(type: P.TypeScope): string[] {
     return `${type.name}`.split(/(?=\p{Lu})/u)
   }

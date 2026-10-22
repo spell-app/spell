@@ -1,6 +1,6 @@
 /**
- * The `JSX` rules in Spanish:  each rule's syntax and its tests, registered on Spanish's own `JSX` parser
- * (epic `spanish`).
+ * The `JSX` rules in Spanish (epic `spanish`):
+ * each rule's syntax and its tests, registered on Spanish's own `JSX` parser.
  * - The rule CLASSES are their own files, beside this one, shared with every language.
  * - Registered in the same order as `JSX.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
@@ -102,12 +102,12 @@ JSXEs.addRule(MarkdownBlock, {
           ["<markdown>", "\tHi {foo bar baz}", "</markdown>"],
           [
             'h("ui-markdown",',
-            '  () => `Hi ${null /* PARSE ERROR: Don\'t understand "{foo bar baz}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace */}`',
+            '  () => `Hi ${null /* PARSE ERROR: No entiendo "{foo bar baz}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave */}`',
             ")"
           ],
           [
             "<ui-markdown>",
-            '  {`Hi ${null /* PARSE ERROR: Don\'t understand "{foo bar baz}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace */}`}',
+            '  {`Hi ${null /* PARSE ERROR: No entiendo "{foo bar baz}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave */}`}',
             "</ui-markdown>"
           ]
         ]
@@ -178,8 +178,8 @@ JSXEs.addRule(SpellJSX, {
           `<div rank={unknown expression} value={another unknown expression}/>`,
           [
             'h("div", {',
-            '  rank: undefined /* PARSE ERROR: Don\'t understand "unknown expression" */,',
-            '  value: undefined /* PARSE ERROR: Don\'t understand "another unknown expression" */',
+            '  rank: undefined /* PARSE ERROR: No entiendo "unknown expression" */,',
+            '  value: undefined /* PARSE ERROR: No entiendo "another unknown expression" */',
             "})"
           ],
           "<div />"
@@ -193,7 +193,7 @@ JSXEs.addRule(SpellJSX, {
         // don't match attribute expressions that don't eat the entire text
         [
           "<div foo={verdadero verdadero}/>",
-          'h("div", { foo: undefined /* PARSE ERROR: Don\'t understand "verdadero verdadero" */ })',
+          'h("div", { foo: undefined /* PARSE ERROR: No entiendo "verdadero verdadero" */ })',
           "<div />"
         ],
         // ignore newlines in attribute expression
@@ -318,20 +318,20 @@ JSXEs.addRule(SpellJSX, {
         // fail if we don't eat entire expression
         [
           `<div>{verdadero verdadero}</div>`,
-          'h("div", null /* PARSE ERROR: Don\'t understand "verdadero verdadero" */)',
-          '<div>{null /* PARSE ERROR: Don\'t understand "verdadero verdadero" */}</div>'
+          'h("div", null /* PARSE ERROR: No entiendo "verdadero verdadero" */)',
+          '<div>{null /* PARSE ERROR: No entiendo "verdadero verdadero" */}</div>'
         ],
         // fail on unknown expression
         [
           `<div>{unknown expression}</div>`,
-          'h("div", null /* PARSE ERROR: Don\'t understand "unknown expression" */)',
-          '<div>{null /* PARSE ERROR: Don\'t understand "unknown expression" */}</div>'
+          'h("div", null /* PARSE ERROR: No entiendo "unknown expression" */)',
+          '<div>{null /* PARSE ERROR: No entiendo "unknown expression" */}</div>'
         ],
         // DO NOT parse a inline statement as a JSXExpression
         [
           `<div>{imprimir 1024}</div>`,
-          'h("div", null /* PARSE ERROR: Don\'t understand "imprimir 1024" */)',
-          '<div>{null /* PARSE ERROR: Don\'t understand "imprimir 1024" */}</div>'
+          'h("div", null /* PARSE ERROR: No entiendo "imprimir 1024" */)',
+          '<div>{null /* PARSE ERROR: No entiendo "imprimir 1024" */}</div>'
         ]
       ]
     }
