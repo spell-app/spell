@@ -374,7 +374,8 @@ It's a child repo of the kit:  `yarn clone spell-epic` brings it and Spell UI,
 and the kit's one `yarn install` installs it, never an install in here.
 It stands on the kit (`spell-kit`:  the page server, the element framework, the toolchain) and on Spell UI,
 by their package names.
-Nothing stands on it:  spell-app's page server runs its route modules, by its settings, and imports none of it.
+Nothing stands on it:  it declares its own part of the kit's page server's settings, in its `package.json`
+(its route modules, its folders, Epic UI), and the server runs them by their paths, importing none of it.
 
 Its git history starts on 2026-10-17, when it was lifted out of spell-app:
 the first commit names the spell-app commit the files came from, so anything older is there.

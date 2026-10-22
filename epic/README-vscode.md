@@ -212,7 +212,8 @@ For a page file, the extension takes the first of these that answers:
 1. **the epic server**, spell-epic's one per machine (`epic hub`, on port 4848),
    for a page in a registered repo's content folder:  every repo's pages on one port, from any window
 2. **the main checkout's page server**, for a worktree's page, when it serves worktrees (at `/worktrees/<name>/`)
-3. **the page's own checkout's page server**, when one runs there
+3. **the page's own page server**, when one runs:  in a Spell kit, the kit's, for a page of any repo in it;
+   else its checkout's
 4. **a small server of the extension's own**, inside VS Code, one per checkout, for as long as the window runs
 
 The first three are processes of their own, and the extension never starts one:
@@ -230,7 +231,8 @@ it has live reload and the engine's own files, but none of the `/api/` routes yo
 <summary>How it finds the servers, and what Restart Page Server runs</summary>
 
 - The epic server, by its pid file:  `~/.spell-epic/server.json` (`SPELL_EPIC_HOME` moves the folder).
-- A checkout's page server, by the `.spell-server.json` at its root.
+- A page server, by the `.spell-server.json` at its root:  in a Spell kit, the kit's root, since the page server
+  is the kit's ([the kit's README-server.md](https://github.com/spell-app/spell-kit/blob/main/README-server.md)).
 - The fallback, one per checkout, live-reloads the docs folders (`epics`, `guides`, `pages`, `templates`, `sagas`),
   else the whole checkout.
   The engine's files it serves (`/_epic/assets/`, `/_epic/pack/`, `/templates/`) come from the checkout the extension
