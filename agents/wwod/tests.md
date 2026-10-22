@@ -29,7 +29,8 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
   - `<module>.test.ts(x)` next to `<module>.ts(x)`:  `Router.ts` => `Router.test.ts`.  Cross-cutting tests in the
     package's `test/`.
   - The test is renamed with its module (below, "Tests follow the logic").
-  - Shared helpers come from the package's test entry point:  `spell-lang/parser/test`, `spell-lang/spell/test`, `spell-ui/test-helpers/...`,
+  - Shared helpers come from the package's test entry point:  `spell-lang/parser/test`, `spell-lang/spell/test`,
+    `spell-app/spaces/test` (the frozen test projects), `spell-ui/test-helpers/...`,
     `spell-kit/server/test/...` (WWOD §4);  every set's element helpers are the kit's, `spell-kit/test-helpers/...`
     (`ElementFixture`, `A11y` ...).
 - **Hand-rolled fakes over mock libraries:**

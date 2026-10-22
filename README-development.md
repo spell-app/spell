@@ -209,10 +209,11 @@ Where a test runs is decided by its folder and its name, so a new file needs no 
 
 Tests reach DOWN only, as code does:
 - A higher repo's tests may use a lower repo's helpers and test data:
-  spell-app's tests read spell-lang's frozen test projects.
+  spell-app's tests parse with spell-lang's `parseSpellProject()`.
 - A lower repo's tests never read a higher one's:  they get a fixture of their own, or the test moves up.
-- A test that needs a higher repo only to check against it skips itself when that repo isn't cloned:
-  spell-lang's TypeScript check of compiled Spell, against the editor's types, says "(needs spell-app)".
+  - Spell's frozen test projects, and the tests that compile them whole, moved up to spell-app that way,
+    beside its other `@spell` groups:  its `spaces/@spell/test/` and `tests/spell/`.
+- A test that needs a higher repo only to check against it skips itself when that repo isn't cloned.
 
 ## One name per file, from every repo
 
@@ -239,7 +240,7 @@ and [Spell UI's label](https://github.com/spell-app/spell-ui/blob/main/src/compo
   and its message names the import to write ([README-toolchain.md](README-toolchain.md#the-houses-own-lint-rules)).
 - Every arrow points down:  a repo imports only the kit and the repos it needs, never one above it.
   `yarn clone <repo>` clones exactly those, so a wrong import fails there, not in someone else's checkout.
-- A file another repo needs at run time (Spell's runtime source, the frozen test projects) is found by PACKAGE,
+- A file another repo needs at run time (Spell's runtime source, the Python core) is found by PACKAGE,
   through `node_modules`, never by a path into that repo.
 - Under the hood, the type check reads the repos below through their built declarations, and Vite, Vitest, `tsx` and
   lint read source:  each entry of a package's `exports` names both
@@ -490,8 +491,7 @@ The kit (`~/www/spell`)
 
 spell-lang
 - checks:  `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check`, `review`
-- `spell:test:rules`, `spell:test:rules:bless`, `spell:test:fixtures`, `spell:test:fixtures:bless`, `spell:test:ui`,
-  `spell:test:coverage`
+- `spell:test:rules`, `spell:test:rules:bless`, `spell:test:ui`, `spell:test:coverage`
 - `spell:gen:syntax` (the syntax table), `core:gen:declarations` (the core's method list), `markdown:spec:update`
   (GitHub's Markdown spec)
 
@@ -513,6 +513,7 @@ spell-epic
 
 spell-app
 - checks:  `ts`, `test`, `test:watch`, `lint`, `lint:fix`, `format`, `format:check`, `review`
+- the frozen test projects:  `spell:test:fixtures`, `spell:test:fixtures:bless`
 - the editor:  `start` (an install, a fresh page server, then the editor, printing its URL), `stop`,
   `start:dev` (Vite alone), `start:server` (the API alone, port 3001), `start:server:prod`, `build`, `build:runner`,
   `build:element`, `build:page`, `preview`, `site:data`, `site:pictures`, `examples:readme`, `clean`

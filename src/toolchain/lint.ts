@@ -152,9 +152,8 @@ export const rootLintIgnore = [
   "app/dist-runner",
   "app/dist-element",
   "app/static",
-  // the `@spell` space's projects (and the test projects):  spell source, and what compiling writes beside it
+  // the `@spell` space's projects (the test projects among them):  spell source, and what compiling writes beside it
   "spaces/@spell",
-  "tests/spaces/@spell",
   // its own yarn project, with its own tools
   "vscode",
   // spell-lang's `spell`

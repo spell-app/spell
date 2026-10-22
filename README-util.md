@@ -25,7 +25,7 @@ turn the card face down
 expect the direction of the card to be down
 ```
 
-_Two lines of `test card setup`, in Solitaire's [Card.spell](https://github.com/spell-app/spell-lang/blob/main/tests/spaces/@spell/test/solitaire/Card.spell):
+_Two lines of `test card setup`, in Solitaire's [Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/solitaire/Card.spell):
 the test passes, all 22 checks._
 
 On signals that hold a write back, the second line would still read `up`, and the language would fail its own test.
@@ -279,7 +279,7 @@ Who hears of a write depends on who's listening, and the two listeners behave in
 ### Compiled Spell and hand-written classes meet in one schema
 
 Each class has a schema:  its props' types, defaults and legal values.
-[The card example](https://github.com/spell-app/spell-lang/blob/main/tests/spaces/@spell/test/solitaire/solitaire.snapshot.js) compiles to a declaration
+[The card example](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/solitaire/solitaire.snapshot.js) compiles to a declaration
 and an accessor pair;  `@prop` writes the same runtime shape by hand:
 
 ```js
