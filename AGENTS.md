@@ -127,7 +127,9 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
     `spell help` lists them, grouped by repo.
   - A word two repos both want goes under each one's short name (`spell lang check`, `spell app check`).
 - The READMEs (every repo's `README.md` and `README-*.md`):
-  - `yarn readme:check` checks them
+  - `yarn readme:check` (`spell readme check`) checks them
+  - `yarn readme:test` (`spell readme test [page...]`) runs every example they print with an Output fold, and
+    compares what it prints (epic `readme` P16;  WWOD §6)
   - `yarn mermaid:pretty` styles their Mermaid pictures ([README-toolchain.md](README-toolchain.md))
 - Three ways to make a repo do something:  the `spell` CLI, Claude skills, yarn scripts.
   - Their map, one row per operation:  [the commands page](spell.epics/guides/dev/commands/commands.html).
