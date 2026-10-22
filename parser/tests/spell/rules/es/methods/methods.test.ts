@@ -28,5 +28,19 @@ describe("testing spell module methods, in Spanish", () => {
       expect(code).toContain("this.darLaVueltaACarta()")
       expect(code).not.toContain("darLaVueltaA(")
     })
+
+    // `dar vuelta la carta`:  the shorter way, common in Argentina and Chile
+    test("the shorter `dar vuelta una carta` works too:  `darVuelta`", () => {
+      const code = compiled([
+        "una carta es una cosa",
+        "una pila es una lista de cartas",
+        "para jugar una carta en una pila:",
+        "\tdar vuelta la carta",
+        "para dar vuelta una carta: imprimir 1"
+      ])
+      expect(code).not.toContain("PARSE ERROR")
+      expect(code).toContain("darVuelta() {")
+      expect(code).toContain("this.darVuelta()")
+    })
   })
 })
