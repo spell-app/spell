@@ -96,6 +96,14 @@ export const rootVocabulary = {
       description:
         "Fills the viewport and stays there (`position: fixed`):  the page never scrolls, the root does.  A " +
         "full-page app shell.  On iOS the keyboard can cover fields near the bottom."
+    },
+    {
+      name: "pure",
+      kind: "boolean",
+      description:
+        "Leaves the browser's `setAttribute()` alone.  Without it, a function or object a framework gives a " +
+        "component that hasn't loaded yet (`on-ui-change={f}`, `options={[...]}`) is kept until it loads;  " +
+        "with it, such a value becomes text, as the browser makes it.  Read once, as the page first needs it."
     }
   ],
   events: [

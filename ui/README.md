@@ -273,8 +273,8 @@ python3 -m http.server 8000        # then open http://localhost:8000/hello.html
 {
   "imports": {
     "spell-ui/": "https://cdn.jsdelivr.net/npm/spell-ui/dist/",
-    "solid-js": "https://esm.sh/solid-js@2.0.0-rc.13",
-    "@solidjs/web": "https://esm.sh/@solidjs/web@2.0.0-rc.13?external=solid-js"
+    "solid-js": "https://esm.sh/solid-js@2.0.0-rc.17",
+    "@solidjs/web": "https://esm.sh/@solidjs/web@2.0.0-rc.17?external=solid-js"
   }
 }
 ```
@@ -284,7 +284,7 @@ Spell UI isn't published, so that map answers nothing yet.
 **In a program with a bundler,** 🌱 once Spell UI is on npm:
 
 ```sh
-npm install spell-ui solid-js@2.0.0-rc.13 @solidjs/web@2.0.0-rc.13
+npm install spell-ui solid-js@2.0.0-rc.17 @solidjs/web@2.0.0-rc.17
 ```
 
 ```js
@@ -338,7 +338,7 @@ it loads what's inside on demand, gives it a theme and a size, and decides what 
 - Roots nest:  an inner root inherits the outer one's settings, and changes only what it names.
 - A subclass is a root too:  the Spell app's own `<spell-app>` element is one, loading its own tags the same way.
 - Solid's context can't cross into a custom element, so a root carries your app's data instead:
-  `root.appContext = value` (`<ui-root prop:appContext={value}>` in Solid), read by every component inside.
+  `root.appContext = value` (`<ui-root appContext={value}>` in Solid), read by every component inside.
   Each reads it once, when it's built, so set it before the elements inside first connect.
 
 <details>
@@ -454,7 +454,7 @@ Spell UI assumes a current browser, with no polyfills:
   and the element takes another way (invoker commands, for one).
 
 And one more edge to plan around:  Solid 2 is a release candidate.
-Spell UI pins `solid-js` and `@solidjs/web` at 2.0.0-rc.13 exactly, as peers,
+Spell UI pins `solid-js` and `@solidjs/web` at 2.0.0-rc.17 exactly, as peers,
 so your app and Spell UI share the one copy, and your app runs that release candidate too.
 
 ## Working on it

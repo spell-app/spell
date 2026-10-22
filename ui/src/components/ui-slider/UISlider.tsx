@@ -220,9 +220,6 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
 
   /**
    * The inner box's inline tokens:  the selected range's two ends, as ratios.
-   * - A getter, not an inline object:
-   *   Solid's server compile (rc.11) drops the `;` between an inline style object's COMPUTED keys
-   *   (`--a:1px--b:2`), and the browser then ignores both.
    */
   private get innerStyle(): Record<string, string> {
     return { [FROM]: String(this.ratio(FIRST, { isFill: true })), [TO]: String(this.ratio(SECOND, { isFill: true })) }

@@ -27,7 +27,8 @@ import type { JSX } from "@solidjs/web"
  * - A docs element that renders another tag adds it here.
  *   - `ui-dropdown` too, which the Solid host app of the smoke pages renders (`src/tools/frameworks/solid/app.tsx`):
  *     its programs (the node tools', the tests') hold this file, so it takes the type from here, ONE declaration.
- * - Loose on purpose:  any attribute as a string, `prop:` for rich data;  a misspelt attribute isn't caught.
+ * - Loose on purpose:  any attribute, any value (an object or function becomes the property, `RichAttributes`);
+ *   a misspelt attribute isn't caught.
  */
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
@@ -35,7 +36,7 @@ declare module "@solidjs/web/types/jsx.js" {
   }
 }
 
-/** Attributes of a `<ui-*>` tag in a docs element's JSX:  HTML attributes, plus any attribute or `prop:`. */
+/** Attributes of a `<ui-*>` tag in a docs element's JSX:  HTML attributes, plus any attribute, any value. */
 export type DocsJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
 
 /** Every `<ui-*>` tag the docs elements render in JSX. */

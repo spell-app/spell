@@ -21056,6 +21056,13 @@
           }
         },
         {
+          "name": "pure",
+          "description": {
+            "kind": "markdown",
+            "value": "Leaves the browser's `setAttribute()` alone.  Without it, a function or object a framework gives a component that hasn't loaded yet (`on-ui-change={f}`, `options={[...]}`) is kept until it loads;  with it, such a value becomes text, as the browser makes it.  Read once, as the page first needs it.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "disabled",
           "description": {
             "kind": "markdown",

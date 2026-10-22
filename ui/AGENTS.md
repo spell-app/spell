@@ -47,7 +47,7 @@ with live elements to click.
   - shadow DOM, `@layer`s, OKLCH tokens
   - accessibility built in
   - usable from any framework or plain HTML
-- Built on **Solid 2**:  `solid-js` / `@solidjs/web` `2.0.0-rc.13`, pinned exactly.
+- Built on **Solid 2**:  `solid-js` / `@solidjs/web` `2.0.0-rc.17`, pinned exactly.
 - The custom-element layer is the kit's [`element/`](../src/element/AGENTS.md):
   `spell-kit/element`, by the same name on a page.
   - EVERY set's elements are written on it
@@ -981,10 +981,12 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     for the element's whole life, untracked ("Reactive members").
     `this.on()` for one added later, or under a condition.
   - Inside a component, `onClick={...}` for native events.
-    - No `on:` namespace.
-    - Rich data as `prop:options` ([the Solid 2 rules](../spell.epics/guides/solid/solid-2.md), "DOM and `spell-ui` elements").
-  - A THIRD-PARTY Solid app listening for `ui-*` events uses a `ref` callback + `addEventListener`
-    ([the Solid host app](src/tools/frameworks/solid/app.tsx)).
+    - No `on:` namespace, no `prop:` (epic `solid-17`).
+    - A `ui-*` event:  `on-ui-change={f}`, the event's own name after `on-`.
+    - Rich data as a plain prop, `options={[...]}`:  a function or object reaches the element as itself.
+    - Both through the kit's `RichAttributes` (`spell-kit/element`):
+      Solid sets a prop it doesn't know with `setAttribute()`, which our elements take over.
+  - A THIRD-PARTY Solid app does the same ([the Solid host app](src/tools/frameworks/solid/app.tsx)).
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".
   - Listeners OUTSIDE a component see `event.target === domElement` (`composedPath()[0]` is the inner element),
     and an app's delegated `onClick` on a `ui-*` tag runs once.

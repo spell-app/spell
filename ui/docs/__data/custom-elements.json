@@ -21448,6 +21448,14 @@
               "fieldName": "fixed"
             },
             {
+              "name": "pure",
+              "description": "Leaves the browser's `setAttribute()` alone.  Without it, a function or object a framework gives a component that hasn't loaded yet (`on-ui-change={f}`, `options={[...]}`) is kept until it loads;  with it, such a value becomes text, as the browser makes it.  Read once, as the page first needs it.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "pure"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {

@@ -6,10 +6,14 @@ import type { SolidIdentityHook } from "spell-ui/tools/tools.types"
 /**
  * The Solid 2 host app of `solid.html`, compiled by `HostApp` (`@solidjs/vite-plugin`) with `solid-js` and
  * `@solidjs/web` EXTERNAL:  the page's import map decides which copy runs.
- * - The plain "Solid 2 app consuming custom elements" round trip -- an app signal drives `prop:value` /
- *   `prop:open` (`hostSetsValue`, `hostOpens`), `ui-change` writes the signal (`pickUpdatesHost`), `options` is a
- *   `prop:` binding, the app's own context works (`appContext`), and unmounting releases the runtime's overlay
- *   entry (`unmount`, `overlaysAfterUnmount`).
+ * - The plain "Solid 2 app consuming custom elements" round trip, all plain props:
+ *   - an app signal drives `value` and `open` (`hostSetsValue`, `hostOpens`)
+ *   - `on-ui-change` writes the signal (`pickUpdatesHost`);  `on-ui-open` / `on-ui-close` follow `open`
+ *   - `options` is an array, set as the property;  `appContext` the same, on `<ui-root>`
+ *   - the app's own context works (`appContext`), and unmounting releases the runtime's overlay entry
+ *     (`unmount`, `overlaysAfterUnmount`)
+ *   - a function or object reaches the element as itself, through `spell-kit/element`'s `RichAttributes`:
+ *     no `prop:`, no `ref` listeners (epic `solid-17`)
  * - The page's identity probe (`identity.js`) sets `globalThis.__uiSolidIdentity` (`SolidIdentityHook`), and then:
  *   - `solidIdentity` / `webIdentity` -- the app's `createSignal` / `render` ARE the functions the components' copy
  *     exports (one module instance on the page)
@@ -17,8 +21,7 @@ import type { SolidIdentityHook } from "spell-ui/tools/tools.types"
  *     and `hook.read(el)` sees the app's value inside the component (`UIComponent.appContext`:
  *     a Solid context can't cross the custom-element boundary, epic `spell-element` Q9)
  *   - without the hook these report `n/a`
- * - Solid 2 notes:  no `on:` namespace any more, so `ui-*` listeners go on through a `ref` callback;
- *   signal writes happen only in event handlers (never in an owned scope).
+ * - Solid 2 notes:  no `on:` namespace any more;  signal writes happen only in event handlers (never in an owned scope).
  */
 export function mount(root: HTMLElement, options: readonly Option[]): MountedApp {
   const hook = (globalThis as { __uiSolidIdentity?: SolidIdentityHook }).__uiSolidIdentity
@@ -29,15 +32,17 @@ export function mount(root: HTMLElement, options: readonly Option[]): MountedApp
   render(
     () => (
       <Theme value={THEME}>
-        <ui-root prop:appContext={APP_CONTEXT_VALUE}>
+        <ui-root appContext={APP_CONTEXT_VALUE}>
           <Show when={mounted()}>
             <ui-dropdown
               selection
               placeholder="Fruit"
-              prop:options={options}
-              prop:value={value()}
-              prop:open={open()}
-              ref={listen}
+              options={options}
+              value={value()}
+              open={open()}
+              on-ui-change={(event: CustomEvent<{ value: unknown }>) => setValue(String(event.detail.value))}
+              on-ui-open={() => setOpen(true)}
+              on-ui-close={() => setOpen(false)}
             />
           </Show>
         </ui-root>
@@ -60,13 +65,6 @@ export function mount(root: HTMLElement, options: readonly Option[]): MountedApp
   )
 
   return { label: `solid ${SOLID_VERSION} (app)${hook ? " + identity hook" : ""}`, extra }
-
-  /** `ui-*` listeners:  Solid 2 dropped `on:`, a ref callback adds them once. */
-  function listen(element: HTMLElement) {
-    element.addEventListener("ui-change", (event) => setValue(String((event as CustomEvent).detail.value)))
-    element.addEventListener("ui-open", () => setOpen(true))
-    element.addEventListener("ui-close", () => setOpen(false))
-  }
 
   /** Solid-specific checks, run after the shared round trip. */
   async function extra(): Promise<Record<string, unknown>> {
@@ -97,8 +95,11 @@ const Theme = createContext("light")
 /** Value the app provides for `Theme`. */
 const THEME = "dark"
 
-/** Value the app sets as its `<ui-root>`'s `appContext`. */
-const APP_CONTEXT_VALUE = "from-the-app"
+/**
+ * Value the app sets as its `<ui-root>`'s `appContext`:  an object, as an app's would be (a store, an API).
+ * - An object reaches the element as itself;  a string would stay an attribute (`appContext` has no setter).
+ */
+const APP_CONTEXT_VALUE = { from: "the app" }
 
 /** Reported for identity checks when the page sets no hook. */
 const NO_HOOK = "n/a (no __uiSolidIdentity hook)"
@@ -136,7 +137,7 @@ declare module "@solidjs/web/types/jsx.js" {
     // one declaration per program, and every program this file is in holds that one
     interface IntrinsicElements {
       /** the app's value for the elements inside it (`UIComponent.appContext`) */
-      "ui-root": JSX.HTMLAttributes<HTMLElement> & { "prop:appContext"?: unknown }
+      "ui-root": JSX.HTMLAttributes<HTMLElement> & { appContext?: unknown }
     }
   }
 }

@@ -129,9 +129,6 @@ export class UISticky extends E.UIComponent<StickyVocabulary> {
 
   /**
    * The box's inline tokens:  top and bottom offsets.
-   * - A getter, not an inline object:
-   *   Solid's server compile (rc.11) drops the `;` between an inline style object's COMPUTED keys
-   *   (`--a:1px--b:2`), and the browser then ignores both.
    */
   private get boxStyle(): Record<string, string> {
     return {
