@@ -70,7 +70,8 @@ export class EpicConfig {
     repoTemplates: "",
     windowsFolder: "",
     app: { path: "/editor/", url: "", urlFile: "", start: "" },
-    repos: ""
+    repos: "",
+    checkoutPatches: []
   }
 
   /**
@@ -311,6 +312,14 @@ export class EpicConfig {
    */
   get extraInstalls(): string[] {
     return this.settings.extraInstalls
+  }
+
+  /**
+   * the fixes every checkout gets, on `main` and in every worktree however far behind its branch is
+   * (`CheckoutPatches`, epic `epic-engine` P17):  `checkoutPatches`, from the MAIN checkout's file
+   */
+  get checkoutPatches(): CheckoutPatch[] {
+    return this.settings.checkoutPatches
   }
 
   /** the window names:  the default window, and the folder names a window shows */
@@ -574,7 +583,8 @@ export class EpicConfig {
       "app.urlFile": this.settings.app.urlFile && resolve(this.main, this.settings.app.urlFile),
       "app.start": this.settings.app.start,
       repos: this.repos.join(","),
-      top: this.top?.main ?? ""
+      top: this.top?.main ?? "",
+      checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(",")
     }
   }
 
@@ -621,6 +631,7 @@ export class EpicConfig {
       repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true }),
       windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true }),
       repos: reposOf(given, defaults.repos, file),
+      checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       app: {
         path: valueOf(app, "path", defaults.app.path, file, "app."),
         url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
@@ -705,6 +716,11 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   - on, an epic's worktree is `<worktreesFolder>/<epic>/`:  a worktree of the top with one of every child repo
  *     inside it, all on branch `<epic>`, one install at its top (`top`, `repoCheckouts()`;  the worktree hook)
  *   - read in the TOP's config;  a child repo finds its top as the folder above its main checkout (`top`)
+ * - `checkoutPatches`:  fixes to a checkout's setup that every checkout gets at once, `main` and each worktree,
+ *   however far behind `main` its branch is (`CheckoutPatch`, `CheckoutPatches`;  epic `epic-engine` P17);  `[]`
+ *   (the default):  none
+ *   - e.g. the kit's `.ignore`, which lets VS Code's Open File find the child repos' files
+ *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  */
 export type EpicSettings = {
   contentFolder: string
@@ -722,7 +738,22 @@ export type EpicSettings = {
   windowsFolder: string
   app: EpicApp
   repos: string | string[]
+  checkoutPatches: CheckoutPatch[]
 }
+
+/**
+ * One of `EpicSettings.checkoutPatches`:  a fix to a checkout's setup that reaches every checkout, the worktrees behind
+ * `main` included (`CheckoutPatches`).
+ * - `id`:  its name, unique in the file (`vscode-ignore`):  what a checkout remembers having had
+ * - `date`:  when it was added (`2026-10-22`)
+ * - `why`:  what it fixes, for a person reading the report
+ * - `copy`:  a file, from the repo's root, copied from the MAIN checkout into each checkout that doesn't track it yet
+ *   - git-excluded there, so `git status` stays clean and the branch's merge of `main` replaces it
+ *   - once the checkout tracks it (its branch has merged `main`), the patch does nothing there:  it retires by itself
+ * - `run`:  a shell command run ONCE in each checkout's root (`yarn install`)
+ * - one of `copy` or `run`, or both (the copy first)
+ */
+export type CheckoutPatch = { id: string; date: string; why: string; copy?: string; run?: string }
 
 /**
  * `EpicSettings.app`:  the repo's app (spell-app's:  the editor), as the epic server opens it (`RepoApp`).
@@ -839,6 +870,37 @@ function reposOf(given: Record<string, unknown>, fallback: string | string[], fi
   throw new TypeError(
     `EpicConfig:  ${file}'s "repos" must be a file ("repos.json5") or a list of repo names, not ${JSON.stringify(value)}`
   )
+}
+
+/**
+ * `given.checkoutPatches`:  a list of `CheckoutPatch`;  `fallback` (`[]`, none) when it's left out.
+ * - throws `TypeError` naming the file for a patch without a plain `id`, `date` or `why`, one with neither `copy` nor
+ *   `run`, a `copy` that isn't a relative path, or two patches with the same `id`
+ */
+function patchesOf(given: Record<string, unknown>, fallback: CheckoutPatch[], file: string): CheckoutPatch[] {
+  const value = given.checkoutPatches
+  if (value === undefined) return fallback
+  const fail = (why: string) => {
+    throw new TypeError(`EpicConfig:  ${file}'s "checkoutPatches" ${why}`)
+  }
+  if (!Array.isArray(value))
+    fail(`must be a list of patches, [{ "id": ..., "copy": ... }], not ${JSON.stringify(value)}`)
+  const ids = new Set<string>()
+  return (value as unknown[]).map((each) => {
+    const patch = (typeof each === "object" && each !== null ? each : {}) as Record<string, unknown>
+    const text = (key: string) => typeof patch[key] === "string" && (patch[key] as string).trim() !== ""
+    if (!text("id") || !/^[\w.-]+$/.test(patch.id as string))
+      fail(`:  each needs an "id" of plain words, not ${JSON.stringify(each)}`)
+    if (ids.has(patch.id as string)) fail(`:  two patches are "${patch.id}"`)
+    ids.add(patch.id as string)
+    if (!text("date") || !text("why")) fail(`:  "${patch.id}" needs a "date" and a "why"`)
+    if (!text("copy") && !text("run")) fail(`:  "${patch.id}" needs a "copy" or a "run"`)
+    const part = (name: string) => /^[\w.-]+$/.test(name) && name !== "." && name !== ".."
+    if (patch.copy !== undefined && !(text("copy") && (patch.copy as string).split("/").every(part)))
+      fail(`:  "${patch.id}"'s "copy" must be a file from the repo's root, not ${JSON.stringify(patch.copy)}`)
+    const { id, date, why, copy, run } = patch as CheckoutPatch
+    return { id, date, why, ...(copy ? { copy } : {}), ...(run ? { run } : {}) }
+  })
 }
 
 /** `text` without what `cut(rest)` says to cut:  how many characters, at each place outside a double-quoted string. */

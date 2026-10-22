@@ -395,7 +395,7 @@ export class EpicProgram {
 
     this.group(
       epic.command("worktree"),
-      "git worktrees:  the live sessions and where they work, where a name stands, merging main in",
+      "git worktrees:  the live sessions and where they work, where a name stands, merging main in, patching them",
       (args) => new Worktrees().run(args)
     )
     this.group(
@@ -770,6 +770,8 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
                        names):  an epic's worktree is then <worktreesFolder>/<epic>, a worktree of the top with
                        one of every child repo inside it, all on branch <epic>;  empty:  a single repo
   top                  the multi-repo top's main checkout this repo is (or is a child of);  empty:  none
+  checkoutPatches      the ids of the fixes every checkout gets, comma-separated:  a file copied from main, or
+                       a command run once (epic worktree patch)
 Any worktree reads the main checkout's file;  a key it leaves out takes its default.
 
 Examples:

@@ -264,6 +264,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):  by process, never a pid file;  never a
         live checkout's
       - plain `node` loads it by path, `prune.ts` too (the server package's entry `spell-kit/server/page/prune`)
+    - `CheckoutPatches`:  `epic worktree patch [--all]`, the fixes a repo lists in `"checkoutPatches"` given to every
+      checkout at once, the worktrees behind `main` too (epic `epic-engine` P17)
+      - a `copy` patch puts `main`'s file where it isn't tracked yet, git-excluded;  a `run` patch runs once per checkout
+        (remembered in its git folder, `epic-patches.json`)
+      - the session-start hook starts it in the background ([patch-checkout.mjs](../hooks/patch-checkout.mjs)), the
+        worktree hook runs it on a reused branch;  plain `node` loads it by path
     - `TranscriptIndex`:  what each saved session's transcript names (its titles, its folders), kept between runs in
       Claude's folder (`spell-epic/transcript-index.json`;  epic `epic-engine` I62)
       - `Sessions.named()` (`epic session find`, `epic worktree status`) reads only the transcripts that changed since:

@@ -24,6 +24,7 @@ import {
   type RepoState,
   type RunningSession
 } from "./command.types"
+import { CheckoutPatches } from "./CheckoutPatches"
 import { CheckoutServers } from "./CheckoutServers"
 import { Git } from "./Git"
 import { MainMerge } from "./MainMerge"
@@ -58,6 +59,8 @@ import { tsxImports } from "spell-epic/tools/packageDir"
  *     - regenerates generated files (bundles, snapshots) both sides changed
  *     - exits 1 when other files conflict
  *     - a multi-repo top's epic worktree:  each repo's base branch into its `<name>` branch (`MainMerge.runAll()`)
+ *   - `patch [--all] [--dry-run] [--json]`:  give this checkout (`--all`:  `main` and every worktree) the fixes its
+ *     repo lists in `"checkoutPatches"` that it doesn't have yet (`CheckoutPatches`, epic `epic-engine` P17)
  * - A MULTI-REPO top (`EpicConfig.top`, epic `epic-engine` P10, repo-split's Q9 A):  `main` is the main TOP checkout
  *   (`~/www/spell`), from any child repo, and an epic's worktree is the top's, holding a worktree of every child repo:
  *   `remove` removes them all (children first), `repos` lists them, `status`'s `ahead` counts every repo's commits
@@ -148,8 +151,18 @@ export class Worktrees {
               out(report.repo && !report.error ? `${report.repo}:  ${line}` : line)
         return reports.some((report) => report.result === "conflicts" || report.error) ? EXIT.ERRORS : EXIT.OK
       }
+      case "patch": {
+        const here = Git.nearestCheckout({ marker: ".git" })
+        const checkouts = flags.all ? CheckoutPatches.allCheckouts(here) : CheckoutPatches.checkoutsAt(here)
+        const reports = new CheckoutPatches({ dryRun: Boolean(flags.dryRun) }).patchAll(checkouts)
+        if (flags.json) out(JSON.stringify(reports, null, 2))
+        else for (const line of CheckoutPatches.lines(reports)) out(line)
+        return reports.some((report) => report.failed.length) ? EXIT.ERRORS : EXIT.OK
+      }
       default:
-        throw new EpicCommandError(`unknown verb '${verb}':  list, status, path, move, remove, repos or merge-main`)
+        throw new EpicCommandError(
+          `unknown verb '${verb}':  list, status, path, move, remove, repos, merge-main or patch`
+        )
     }
   }
 
@@ -630,7 +643,7 @@ export type WorktreesProps = {
 }
 
 /** The flags of `epic worktree` that take no value. */
-const SWITCHES = ["json", "continue", "idle", "dryRun", "force", "branches"]
+const SWITCHES = ["json", "continue", "idle", "dryRun", "force", "branches", "all"]
 
 /**
  * `planSummaries()`'s cache:  `{ file:  summary }`, for this process.

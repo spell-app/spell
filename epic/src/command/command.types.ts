@@ -477,6 +477,21 @@ export type Generator = { name: string; outputs: string[]; cwd: string; run: str
 export type SnapshotReview = { file: string; keys: string[] }
 
 /**
+ * What `epic worktree patch` did in one checkout (`CheckoutPatches.patch()`).
+ * - `checkout`:  its folder
+ * - `applied`:  each patch that did something there, and what (`copied .ignore from main`, `ran yarn install`);  with
+ *   `--dry-run`, what it would do
+ * - `failed`:  each patch that failed there, and why;  the others still ran
+ * - `busy`:  another run was patching it, so nothing was done
+ */
+export type PatchReport = {
+  checkout: string
+  applied: { id: string; did: string[] }[]
+  failed: { id: string; error: string }[]
+  busy?: boolean
+}
+
+/**
  * `epic worktree merge-main`'s answer.
  * - `result`:
  *   - `up-to-date`:  `main` is already in the branch

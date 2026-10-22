@@ -426,6 +426,7 @@ Lost track?  `epic status`.
 | `epic worktree remove <name>` | removes a worktree, its page and Vite servers stopped FIRST, and its session-folder link;  not its branch (`git branch -d` after);  `--force`:  git's, for one with changes |
 | `epic worktree repos [<name>]` | each repo's checkout in an epic's worktree (default:  this one):  its branch, what's uncommitted, how far it's ahead of and behind its base |
 | `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  `--continue` after you resolve any other conflict (below);  `--json` |
+| `epic worktree patch [--all]` | gives this checkout (`--all`:  `main` and every worktree) the fixes its repo lists in `.epic/config.json5`'s `checkoutPatches` that it doesn't have yet:  a file copied from `main` and git-excluded, or a command run once;  `--dry-run`, `--json`;  the session-start hook runs it by itself |
 | `epic worktree move <name> \| --idle` | moves a worktree from the old place inside the repo, `.claude/worktrees`, to beside it;  `--idle`:  every one no session works in;  `--dry-run` |
 | `epic session list [<words> ...]` | lists this repo's saved Claude Code sessions, newest first, matching every word;  `--limit <n>`, `--all` |
 | `epic session find <name>` | finds the sessions titled `<name>`, or that worked in worktree `<name>` |
@@ -451,6 +452,14 @@ Lost track?  `epic status`.
     resolve them, `git add` them, then `epic worktree merge-main --continue` finishes the merge.
   - In an epic's worktree of several repos, it merges every repo, the child repos lowest first,
     the top one (the kit, in Spell) last;  a repo that can't merge says FAILED, and the others go on.
+
+- A fix to how a checkout is SET UP (a VS Code file like `.ignore`, a command to run once) reaches every checkout at once
+  through `checkoutPatches`, not when each branch merges `main`
+  ([README-adopting.md](README-adopting.md#the-config-file)).
+  - Add the fix on `main`, list it there, then `epic worktree patch --all`;  new and reopened sessions catch up by
+    themselves.
+  - A copied file is git-excluded, so `git status` stays clean, and the branch's merge of `main` replaces it with
+    the tracked one;  from then on the patch does nothing there.
 
 ### Shared content
 

@@ -50,7 +50,8 @@ describe("EpicConfig", () => {
       "app.start": "",
       // a single repo:  no child repos, no multi-repo top (epic-engine P10)
       repos: "",
-      top: ""
+      top: "",
+      checkoutPatches: ""
     })
     // no app declared
     expect(config.app).toBeUndefined()
