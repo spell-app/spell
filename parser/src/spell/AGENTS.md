@@ -136,7 +136,7 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     (spell-app's [fixtures.test.ts](../../../spell-app/tests/spell/test/fixtures.test.ts)):
     - `<Project>.snapshot.js`:  the javascript target
     - `<Project>.snapshot.declarations.json5`:  its declarations
-    - `<Project>.en.snapshot.js`:  its words (`SP.SpellWords`)
+    - `<Project>.<lang>.snapshot.js`:  its words (`SP.SpellWords`), in its language (`.en`, `.es`)
       - Its name ends as a snapshot's does, which keeps it out of the project's files.
     - `<Project>.snapshot.tsx`:  the TypeScript target
     - `<Project>.snapshot.tsc.txt`:  what `tsc` says of it ([typescript.test.ts](../../../spell-app/tests/spell/test/typescript.test.ts))
@@ -144,7 +144,8 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     - `<Project>.snapshot.pyright.txt`:  what pyright says of the Python ([python.test.ts](../../../spell-app/tests/spell/test/python.test.ts))
     - `<Project>.elements.snapshot.js`:  the Python targets' page file, for a fixture that draws
     - `<Project>.lib.snapshot.ts`:  the library target, for the fixtures in `LIBRARY_FIXTURES`
-    - The Python ones only for the fixtures in `PYTHON_FIXTURES`:  every fixture but `todos-form-based`, so far.
+    - The Python ones only for the fixtures in `PYTHON_FIXTURES`:
+      every fixture but `todos-form-based` and `cartas`, so far.
       The Python writer can't write its method's named arguments yet.
     - Add a fixture by copying a project in.
     - After a deliberate change, `yarn spell:test:fixtures:bless` at spell-app's root, and read the diff.

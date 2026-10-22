@@ -1,31 +1,41 @@
 # Rulex:  regular expressions for words
 
 ```text
-print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]
+print {operator:print_kind}? [expressions:{expression} ,]
 ```
 
-_Spell's `print` statement, all of it, as its rule in [Print.ts](src/spell/rules/UI/Print.ts) declares it._
+_Spell's `print` statement, all of it, as its English registration in [UI.en.ts](src/spell/rules/UI/UI.en.ts)
+declares it, for the rule in [Print.ts](src/spell/rules/UI/Print.ts)._
 
 If you read regular expressions, you can read most of that already.
-`?` is optional, `(a|b)` is a choice, and a name before a colon keeps what a part matched.
+`?` is optional, `[ ... ,]` is a list with commas between, and a name before a colon keeps what a part matched.
 Then it parts company with a regex:  it reads WORDS, not characters, and `{expression}` is another rule, by name.
+So is `{print_kind}`, a choice of five:  `info`, `warning`, `error`, `group` or `collapsed group`.
 
 Hand it a line, and each part of the syntax shows up in the match:
 
 ```sh
 spell parse 'print warning "low on cards", 3'
-# statement › print  print warning "low on cards", 3
-#   Keyword  print
-#   operator › Keyword  warning
-#   expressions: Repeat  "low on cards", 3
-#     expression: operand › text  "low on cards"
-#     Symbol  ,
-#     expression: operand › number  3
-#
-# core.console.warn("low on cards", 3)
 ```
 
-- The optional choice matched `warning`, and kept it as `operator`.
+<details>
+<summary>Output</summary>
+
+```text
+statement › print  print warning "low on cards", 3
+  Keyword  print
+  operator: print_kind › Keyword  warning
+  expressions: Repeat  "low on cards", 3
+    expression: operand › text  "low on cards"
+    Symbol  ,
+    expression: operand › number  3
+
+core.console.warn("low on cards", 3)
+```
+
+</details>
+
+- The optional `{print_kind}` matched `warning`, and kept it as `operator`.
 - The list, `[ ... ]`, took two expressions with a comma between, and kept them as `expressions`.
 - The rule's class read those two names to write the last line, the JavaScript.
 
@@ -38,9 +48,7 @@ and the string becomes a small tree of rule objects the moment the class registe
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart TD
   seq["Sequence"] --> print["Keyword  print"]
-  seq --> operator["Choice, optional:  operator"]
-  operator --> level["Keyword  info, warning or error"]
-  operator --> group["Keywords  collapsed? group"]
+  seq --> operator["Subrule, optional:  print_kind, kept as operator"]
   seq --> list["Repeat:  expressions"]
   list --> item["Subrule  expression"]
   list -. between items .-> comma["Symbol  ,"]
@@ -48,7 +56,7 @@ flowchart TD
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
 ```
 
-_`print`'s syntax, compiled:  eight rule objects, built once when the rule registers._
+_`print`'s syntax, compiled:  six rule objects, built once when the rule registers._
 
 The examples below lean on four helper rules:
 `{pet}` is `dog` or `cat`, `{word}` is any one word, `{words}` a run of them, and `{number}` any number.
@@ -165,9 +173,17 @@ Any rule's syntax, with an example, is a command away:
 
 ```sh
 spell explain print
-# print  print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]
-# e.g. print "Yo!"
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+print  print {operator:print_kind}? [expressions:{expression} ,]
+e.g. print "Yo!"
+```
+
+</details>
 
 `spell explain for` lists two rules, `for each card in deck` and `for each number from 1 to 10`:
 a word names every rule whose syntax starts with it.
@@ -194,13 +210,13 @@ And the syntaxes Spell wrote for them:
 
 | The card says | The syntax Spell registers |
 | --- | --- |
-| `it "is a face card" if ...` | `{operator:is} a face card` |
-| `it "is a (rank)"` | `{operator:is} (a\|an) (expression:ace\|2\|3\|4\|5\|6\|7\|8\|9\|10\|jack\|queen\|king)` |
+| `it "is a face card" if ...` | `{operator:is_or_is_not_a} face card` |
+| `it "is a (rank)"` | `{operator:is_or_is_not_a} (expression:ace\|2\|3\|4\|5\|6\|7\|8\|9\|10\|jack\|queen\|king)` |
 
 - `(rank)` became a choice of the rank's own thirteen values.
-- `a` became `(a|an)`, for "an ace".
-- `{operator:is}` is Spell's `is` rule, `(is|(negated:is not|isn't|isnt))`:  so `is not` and `isn't` come free,
-  and negate.
+- `is a` became `{operator:is_or_is_not_a}`, Spell's word rule for every form of it:
+  `is a`, `is an`, `are a` ..., and negated, `is not a`, `isn't an` ....
+  So "an ace" reads, and `isn't` comes free, and negates.
 
 So from the next line on, these read exactly, and compile to calls on the card
 (each inside a `print`, through `spell parse`):
@@ -226,10 +242,18 @@ same `it "is a (rank)"` line, and Spell writes it the same syntax:
 
 ```sh
 spell parse --in @spell/examples/outline-solitaire $'set the card to a new card\nprint the card is a queen'
-# ...
-# export const card = new Card()
-# core.console.log(card.isARank("queen"))
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+...
+export const card = new Card()
+core.console.log(card.isARank("queen"))
+```
+
+</details>
 
 - A project writes its phrases' syntaxes down, so another project can register the same rules from data:
   that example's are in

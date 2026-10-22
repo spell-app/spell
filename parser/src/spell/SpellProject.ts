@@ -946,26 +946,31 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   // ## Project file access
   ////////////////
 
-  /** Cache of `extension` -> `SpellFile` subclass constructor, lazily built in `getFileForPath()`. */
+  /**
+   * End of a file's name -> the `SpellFile` subclass for it, lazily built in `getFileForPath()`.
+   * - Anything else is spell source, a `SpellFile`.
+   */
   static extensionMap?: Record<string, new (path: string) => SP.AnySpellFile>
-  /** Given `fullPath` to a file, return a `SpellFile` or `SpellCSSFile` etc. */
+  /**
+   * Given `fullPath` to a file, return a `SpellFile` or `SpellCSSFile` etc.
+   * - Its kind is the END of its name, never everything after its first dot (`SpellLocation.extension`):
+   *   `calculator.en.js`, an old name's words file, is javascript, NOT spell to parse;  so is `helpers.min.js`.
+   */
   static getFileForPath(fullPath: string): SP.AnySpellFile {
-    if (!SpellProject.extensionMap) {
-      SpellProject.extensionMap = {
-        ".css": SP.SpellCSSFile,
-        ".js": SP.SpellJSFile,
-        ".jsx": SP.SpellJSFile,
-        // a property editor page:  any text file, never compiled
-        [SP.EDITOR_PAGE_SUFFIX]: SP.SpellJSFile,
-        default: SP.SpellFile
-      }
+    SpellProject.extensionMap ??= {
+      ".css": SP.SpellCSSFile,
+      ".js": SP.SpellJSFile,
+      ".jsx": SP.SpellJSFile,
+      // a property editor page:  any text file, never compiled
+      [SP.EDITOR_PAGE_SUFFIX]: SP.SpellJSFile
     }
     const location = new SP.SpellLocation(fullPath)
     if (!location.isFilePath) {
       throw new TypeError(`SpellProject.getFileForPath('${fullPath}'): path is not a file path.`)
     }
-    const extension = location.extension
-    const Constructor = (extension && SpellProject.extensionMap[extension]) || SpellProject.extensionMap.default
+    const name = location.file ?? ""
+    const suffix = Object.keys(SpellProject.extensionMap).find((suffix) => name.endsWith(suffix))
+    const Constructor = suffix ? SpellProject.extensionMap[suffix] : SP.SpellFile
     return new Constructor(fullPath)
   }
 

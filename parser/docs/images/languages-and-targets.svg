@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-labelledby="title desc">
   <title id="title">Languages in, targets out</title>
-  <desc id="desc">Human languages read into one Spell tree, and each target writes out of it.  In:  English and Spanish today.  Out:  JavaScript on Solid, TypeScript on Solid or as a library, and Python today, WebAssembly coming.</desc>
+  <desc id="desc">Human languages read into one Spell tree, and each target writes out of it.  In:  English and Spanish, today.  Out:  JavaScript on Solid, TypeScript on Solid or as a library, and Python today, WebAssembly coming.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>

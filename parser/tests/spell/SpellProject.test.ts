@@ -4,6 +4,9 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { parseSpellProject } from "spell-lang/spell/test"
 
+// spell's project groups are spaces' (spell-app's):  a test double of them, registered as it loads (epic `repo-split` C11)
+import "./projectGroups.double"
+
 /**
  * `SpellProject` over projects written here, inline.
  * - A whole frozen project's parse (Solitaire's) is spell-app's test, beside the projects:
@@ -32,5 +35,29 @@ describe("a program's own tests", () => {
   test("not one the program already runs at its start:  `test adding`", () => {
     const lines = startLines([{ path: "/A.spell", contents: "to test adding:\n\t1 + 1 should be 2\ntest adding" }])
     expect(lines).toEqual(["if (!core.isCarryingOver) testAdding()"])
+  })
+})
+
+// the bug of 2026-10-22:  a project copied to a folder of another name parsed its old words file as spell
+describe("getFileForPath():  a file's kind is the END of its name", () => {
+  /** The file `name` is, in a project. */
+  function fileNamed(name: string): SP.AnySpellFile {
+    return SP.SpellProject.getFileForPath(`@spell/test/calc2/${name}`)
+  }
+
+  test("spell source is `.spell`", () => {
+    expect(fileNamed("Calculator.spell")).toBeInstanceOf(SP.SpellFile)
+  })
+
+  test("javascript, whatever comes before its `.js`:  an old name's words file, a minified helper", () => {
+    expect(fileNamed("calculator.en.js")).toBeInstanceOf(SP.SpellJSFile)
+    expect(fileNamed("Solitario.pt-BR.js")).toBeInstanceOf(SP.SpellJSFile)
+    expect(fileNamed("helpers.min.js")).toBeInstanceOf(SP.SpellJSFile)
+    expect(fileNamed("helpers.js")).toBeInstanceOf(SP.SpellJSFile)
+  })
+
+  test("CSS, and property editor pages", () => {
+    expect(fileNamed("theme.dark.css")).toBeInstanceOf(SP.SpellCSSFile)
+    expect(fileNamed(`Card${SP.EDITOR_PAGE_SUFFIX}`)).toBeInstanceOf(SP.SpellJSFile)
   })
 })

@@ -123,7 +123,7 @@ for each? {item:singular_identifier} from {start:expression} down? to {end:expre
   and a parse hands back a tree of matches with named parts, not a row of capture groups.
 
 The parser knows no language until it's handed rules.
-Spell's are 241 classes, with 274 syntaxes between them
+Spell's are 244 classes, with 270 syntaxes between them
 ([module by module](README-spell.md#the-whole-language-module-by-module)).
 [GitHub's Markdown](README-markdown.md) is a second set of rules on the same parser,
 and it passes all 670 of the 670 examples in its spec.
@@ -169,7 +169,7 @@ flowchart LR
 - **Real today:**  English and Spanish in, four targets out.
   A project written in Spanish says `language: "es"` in its project file;  English is the default.
   Every project gets JavaScript, `js/solid`;  a project asks for the rest by name:  `ts/solid`, `ts/lib`, `py`.
-  Eleven frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
+  Twelve frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
   ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
 - **Not yet:**  a third human language, and WebAssembly (below, "Coming").
 - What each target gives you, and what it costs:
@@ -266,21 +266,29 @@ Then work in a folder of your own, outside the checkout.
 
 ```sh
 spell parse "print 1 + 2 * 3"
-# statement › print  print 1 + 2 * 3
-#   Keyword  print
-#   expressions: Repeat  1 + 2 * 3
-#     expression  1 + 2 * 3
-#       lhs: operand › number  1
-#       Repeat  + 2 * 3
-#         expression_suffix › plus  + 2
-#           operator › Symbol  +
-#           expression: operand › number  2
-#         expression_suffix › times  * 3
-#           operator › Symbol  *
-#           expression: operand › number  3
-#
-# core.console.log(1 + 2 * 3)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+statement › print  print 1 + 2 * 3
+  Keyword  print
+  expressions: Repeat  1 + 2 * 3
+    expression  1 + 2 * 3
+      lhs: operand › number  1
+      Repeat  + 2 * 3
+        expression_suffix › plus  + 2
+          operator › Symbol  +
+          expression: operand › number  2
+        expression_suffix › times  * 3
+          operator › Symbol  *
+          expression: operand › number  3
+
+core.console.log(1 + 2 * 3)
+```
+
+</details>
 
 That's the match tree, a rule a line, each inside the one that holds it
 ([how to read one](README-parser.md#3-matches)).
@@ -289,27 +297,43 @@ Look at `+ 2` and `* 3`:  two suffixes side by side, because precedence is settl
 
 ```sh
 spell parse --tree "print 1 + 2 * 3"
-# Print
-#   args: plus
-#     lhs: Number 1
-#     rhs: times
-#       lhs: Number 2
-#       rhs: Number 3
-#
-# core.console.log(1 + 2 * 3)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+Print
+  args: plus
+    lhs: Number 1
+    rhs: times
+      lhs: Number 2
+      rhs: Number 3
+
+core.console.log(1 + 2 * 3)
+```
+
+</details>
 
 **What a word starts:**  `if` starts two rules.
 FizzBuzz uses the first;  the second reads a value backwards, the way people say it.
 
 ```sh
 spell explain if
-# if  if {condition:expression} (then|:)? {statement_body}?
-# e.g. if a
-#
-# backwards_if  if {operator:expression} (else|otherwise) {expression}
-# e.g. print 1 if bar else 2
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+if  if {condition:expression} (then|:)? {statement_body}?
+e.g. if a
+
+backwards_if  if {operator:expression} (else|otherwise) {expression}
+e.g. print 1 if bar else 2
+```
+
+</details>
 
 **A whole program, two ways.**
 Copy FizzBuzz out of the frozen test projects first:  nobody edits those.
@@ -318,18 +342,37 @@ Copy FizzBuzz out of the frozen test projects first:  nobody edits those.
 mkdir -p try
 cp -R ~/www/spell/spell-app/spaces/@spell/test/fizzbuzz try/fizzbuzz
 spell run try/fizzbuzz
-# ✓ Compiling @local/try/fizzbuzz
-# 1
-# 2
-# 3 fizz
-# 4
-# 5 buzz
-# ...
-# 15 fizzbuzz
-# ...
-diff <(spell run try/fizzbuzz 2>/dev/null) <(spell run try/fizzbuzz --target py 2>/dev/null) && echo same
-# same
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Compiling @local/try/fizzbuzz
+1
+2
+3 fizz
+4
+5 buzz
+...
+15 fizzbuzz
+...
+```
+
+</details>
+
+```sh
+diff <(spell run try/fizzbuzz 2>/dev/null) <(spell run try/fizzbuzz --target py 2>/dev/null) && echo same
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+same
+```
+
+</details>
 
 - `--target py` runs the Python instead, and needs Python 3.12 or later and uv
   ([the Python half](README-targets.md#the-python-half)).
@@ -343,9 +386,17 @@ In `try/fizzbuzz/FizzBuzz.spell`, change the fizzbuzz line's `is an integer` to 
 
 ```sh
 spell lint try/fizzbuzz
-# ✗ @local/try/fizzbuzz  1 error
-# try/fizzbuzz/FizzBuzz.spell:4:31  Don't understand "is a whole number: print the number, "fizzbuzz""
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✗ @local/try/fizzbuzz  1 error
+try/fizzbuzz/FizzBuzz.spell:4:31  Don't understand "is a whole number: print the number, "fizzbuzz""
+```
+
+</details>
 
 To you, the two say the same thing.
 Spell has no rule for "a whole number", so it names the line and column where it stopped understanding, and exits 1.
@@ -425,7 +476,7 @@ The name is the same inside this repo as from every other, so there's no alias t
 | [spell/](src/spell/) | `spell-lang/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  types, phrases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
 | [core/](src/core/) | `spell-lang/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a type is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>who may import it:  one copy per running app</li></ul> |
 | [py/](src/py/) | `spell-lang/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
-| [cli/](src/cli/) | `spell-lang/cli` | the language's eleven `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang) |
+| [cli/](src/cli/) | `spell-lang/cli` | the language's thirteen `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang) |
 
 - It stands only on [the kit](https://github.com/spell-app/spell-kit/blob/main/README.md):  its shared helpers, `spell-kit/util`, and its toolchain.
 - Inside, the arrows point one way:
@@ -491,8 +542,10 @@ Each says where it stands.
 
 ### A third human language
 
-Norwegian and Portuguese are next, with help from friends.
-Each is a third file per folder of rules, and a pack of its own:  words, not code
+Norwegian and Portuguese are next, with help from friends;  neither is started.
+Each is a pack of its own, beside English's and Spanish's in [src/spell/languages/](src/spell/languages/),
+and a third file per folder of rules:  words, not code.
+`spell lang packs check` then lists what it still lacks against English
 ([how a language starts](README-parser.md#spell-in-another-human-language)).
 
 ### Two more targets, and mixins
