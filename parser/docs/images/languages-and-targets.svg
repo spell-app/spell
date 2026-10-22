@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-labelledby="title desc">
   <title id="title">Languages in, targets out</title>
-  <desc id="desc">Human languages read into one Spell tree, and each target writes out of it.  In:  English today, Spanish coming.  Out:  JavaScript on Solid, TypeScript on Solid or as a library, and Python today, WebAssembly coming.</desc>
+  <desc id="desc">Human languages read into one Spell tree, and each target writes out of it.  In:  English and Spanish, today.  Out:  JavaScript on Solid, TypeScript on Solid or as a library, and Python today, WebAssembly coming.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>
@@ -32,7 +32,7 @@
 
   <!-- edges -->
   <path class="edge" d="M240,174 C290,174 300,222 324,226" marker-end="url(#arrow)"/>
-  <path class="later" d="M240,274 C290,274 300,250 324,246" marker-end="url(#arrow)"/>
+  <path class="edge" d="M240,274 C290,274 300,250 324,246" marker-end="url(#arrow)"/>
   <path class="edge" d="M478,214 C520,180 520,140 556,140" marker-end="url(#arrow)"/>
   <path class="edge" d="M480,228 C520,214 524,200 556,200" marker-end="url(#arrow)"/>
   <path class="edge" d="M480,244 C520,256 524,260 556,260" marker-end="url(#arrow)"/>
@@ -42,9 +42,9 @@
   <rect class="box" x="50" y="146" width="190" height="56" rx="12"/>
   <text class="name" x="145" y="171">English</text>
   <text class="what" x="145" y="190">parses today</text>
-  <rect class="coming" x="50" y="246" width="190" height="56" rx="12"/>
-  <text class="soon" x="145" y="271">Spanish</text>
-  <text class="soonwhat" x="145" y="290">coming</text>
+  <rect class="box" x="50" y="246" width="190" height="56" rx="12"/>
+  <text class="name" x="145" y="271">Spanish</text>
+  <text class="what" x="145" y="290">parses today</text>
 
   <!-- the tree -->
   <circle cx="400" cy="236" r="78" fill="#6550CA" stroke="#4A3AA0" stroke-width="2.5"/>

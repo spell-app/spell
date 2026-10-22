@@ -46,7 +46,8 @@ And the three agree.
 Every frozen test project is compiled to JavaScript, TypeScript and Python, then run headless from the same seed,
 and each must print the same thing, line for line, its drawing included:
 that's [the core contract test](https://github.com/spell-app/spell-app/blob/main/tests/cli/contract.test.ts).
-The edge:  Python runs ten of the eleven, as one is still beyond its writer (below).
+The edge:  Python runs ten of the twelve:  the to-do app is still beyond its writer (below),
+and the Spanish one, `cartas`, has no Python yet.
 
 ## Four targets, and what each one costs
 
@@ -137,9 +138,9 @@ The differences sit in four places:  imports, types, the element, and each langu
 _Every target keeps the line of Spell that made each stored property, as a comment above it._
 
 TypeScript is JavaScript with types, nearly everywhere:
-of the 208 examples in Spell's [syntax table](src/spell/spellSyntax.json) that carry their output,
-TypeScript writes 183 character for character as JavaScript does.
-The other 25 add a type (`List<Card>`, `: boolean`), declare a member added from outside its class,
+of the 207 examples in Spell's [syntax table](src/spell/spellSyntax.json) that carry their output,
+TypeScript writes 184 character for character as JavaScript does.
+The other 23 add a type (`List<Card>`, `: boolean`), declare a member added from outside its class,
 or draw in JSX where JavaScript calls `h()`.
 
 The one class TypeScript writes and JavaScript doesn't is the element.
@@ -180,14 +181,15 @@ More rows, JavaScript beside Python:  [README-core](README-core.md#the-typescrip
   - any other `to draw` re-runs whole, in its error boundary
 - A type Spell doesn't know is written `any /* spell: type unknown */`, never a bare `any`:
   so every gap shows, and can be counted.
-  In the eleven [frozen test projects](README-spell.md#the-frozen-test-projects)' TypeScript, the count is zero.
+  In the twelve [frozen test projects](README-spell.md#the-frozen-test-projects)' TypeScript, the count is zero.
 
 `tsc` checks it against `@spell/core`'s own types, and its report is pinned beside each test project.
-Ten of the eleven check clean;  `cards-from-zero`, whose lists count from 0, has one error,
-the same pile name its lint warns of:
+Ten of the twelve check clean;  `cards-from-zero`, whose lists count from 0, has one error,
+the same pile name its lint warns of, and so does `cartas`, the same project in Spanish:
 
 ```text
 309:25 TS2339 Property 'name' does not exist on type 'Pile'.
+265:26 TS2339 Property 'nombre' does not exist on type 'Pila'.
 ```
 
 The cost:
@@ -336,7 +338,7 @@ The checks:
 The cost, beyond Python and uv:
 - **Its type hints are thinner than TypeScript's:**  where TypeScript says `rank: Rank`, Python says `rank: Any`.
 - 36 of the JavaScript core's names aren't in `spell_core` yet, most of them a browser's own (below).
-- One test project of the eleven, the to-do app, has no Python yet (below).
+- Two test projects of the twelve have no Python yet:  the to-do app (below), and the Spanish `cartas`.
 - A kind of node the Python writer can't write yet stops the compile, naming the kind.
 
 <details>
@@ -388,7 +390,7 @@ What it says when you ask for what isn't there:
 | --- | --- |
 | `spell compile --target wasm` | `There's no target 'wasm':  try js/solid, ts/solid, py, ts/lib.` |
 | a program that draws, as `ts/lib` | `'drawable-solitaire' draws a UI, which target 'ts/lib' can't.` |
-| `spell run --target ts/lib` | `"ts/lib" doesn't run:  it's compiled for other code to import (spell compile)` |
+| `spell run --target ts/lib` | `` "ts/lib" doesn't run:  it's compiled for other code to import (`spell compile`) `` |
 
 Every option of `spell compile` and `spell run`:  [the command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang).
 
@@ -432,6 +434,6 @@ These guides need a checkout with the content folder beside it, and the page ser
 
 - [README-parser](README-parser.md#5-output):  how a writer walks the tree;  the same `if`, two writers
 - [README-core](README-core.md):  the runtime JavaScript and TypeScript import, and how `spell_core` keeps in step
-- [README-spell](README-spell.md#the-frozen-test-projects):  the eleven test projects whose snapshots pin every target
+- [README-spell](README-spell.md#the-frozen-test-projects):  the twelve test projects whose snapshots pin every target
 - [the `py` folder's AGENTS.md](src/py/AGENTS.md):  the rules for working on Python's writers and `spell_core`
 - [The command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  `spell compile`, `spell run` and the rest of the language's commands

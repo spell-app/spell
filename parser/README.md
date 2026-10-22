@@ -123,7 +123,7 @@ for each? {item:singular_identifier} from {start:expression} down? to {end:expre
   and a parse hands back a tree of matches with named parts, not a row of capture groups.
 
 The parser knows no language until it's handed rules.
-Spell's are 241 classes, with 274 syntaxes between them
+Spell's are 244 classes, with 270 syntaxes between them
 ([module by module](README-spell.md#the-whole-language-module-by-module)).
 [GitHub's Markdown](README-markdown.md) is a second set of rules on the same parser,
 and it passes all 670 of the 670 examples in its spec.
@@ -142,9 +142,9 @@ It holds `equals`, not `==`, and `up`, not `"up"`.
 Each human language reads into it, and each target writes out of it,
 so a new language, or a new target, is one piece of work, not one per pair.
 
-![English, and Spanish coming, read into one Spell tree;  JavaScript, TypeScript and Python, and WebAssembly coming, written out of it](docs/images/languages-and-targets.svg)
+![English and Spanish read into one Spell tree;  JavaScript, TypeScript and Python, and WebAssembly coming, written out of it](docs/images/languages-and-targets.svg)
 
-_N languages plus M targets, never N × M:  the dashed boxes are coming._
+_N languages plus M targets, never N × M:  the dashed box is coming._
 
 <details>
 <summary>As text</summary>
@@ -153,7 +153,7 @@ _N languages plus M targets, never N × M:  the dashed boxes are coming._
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
   en[English] --> tree((the Spell tree))
-  es[Spanish, coming] -.-> tree
+  es[Spanish] --> tree
   tree --> js[JavaScript on Solid]
   tree --> ts[TypeScript on Solid, or a library]
   tree --> py[Python]
@@ -161,16 +161,16 @@ flowchart LR
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef coming fill:#F2F7EE,stroke:#7BA05B,stroke-width:1.5px,stroke-dasharray:5 4,color:#3D5A2A,rx:8px,ry:8px
-  class es,wasm coming
+  class wasm coming
 ```
 
 </details>
 
-- **Real today:**  English in, four targets out.
+- **Real today:**  English and Spanish in, four targets out.
   Every project gets JavaScript, `js/solid`;  a project asks for the rest by name:  `ts/solid`, `ts/lib`, `py`.
-  Eleven frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
+  Twelve frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
   ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
-- **Not yet:**  a second human language, and WebAssembly (below, "Coming").
+- **Not yet:**  a third human language, and WebAssembly (below, "Coming").
 - What each target gives you, and what it costs:
   [README-targets](README-targets.md#four-targets-and-what-each-one-costs).
 
@@ -453,22 +453,23 @@ The language's own commands are this repo's (above):  the command line finds the
 None of these is here yet.
 Each says where it stands.
 
-### Spell in Spanish, and then other languages
+### A third human language
 
-The same programs, written in Spanish, compiling to the same targets:  the dashed box on the left of the picture above.
-A hand translation of the sentence card has worked out the words, though nothing reads it yet:
+Spanish reads today, and compiles to the same targets:  the same programs, written in Spanish.
 
 ```spell
 una carta es una cosa
 las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
-el color de una carta es rojo si su palo es diamantes o corazones de lo contrario es negro
+el color de una carta es rojo si su palo es o bien diamantes o corazones de lo contrario es negro
 ```
 
-_Three lines of [Card.spell-es](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/outline-solitaire/Card.spell-es), beside the
-outline Solitaire example._
+_Three lines of [Carta.spell](tests/spaces/@spell/test/cartas/Carta.spell), from the frozen `cartas` project,
+the `cards` project in Spanish._
 
-Where it stands:  the rule classes can already take a second language's syntax strings, and no Spanish rules are
-written ([how one would start](README-parser.md#-spell-in-another-human-language)).
+Where it stands:  the next language is a pack of its own, beside English's and Spanish's in
+[src/spell/languages/](src/spell/languages/), and every rule module registers the same rule classes again in its words;
+`spell lang packs check` then lists what it lacks against English ([how it starts](README-parser.md#spell-in-another-human-language)).
+None is started.
 
 ### Two more targets, and mixins
 

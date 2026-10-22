@@ -38,7 +38,7 @@ expected draws.
 
 [The parser](README-parser.md) reads the English, [a writer](README-targets.md) turns it into code,
 and this is what the code calls:  `spell-lang/core`, one of [spell-lang's](README.md) six folders.
-It's ONE object, `core`, of 141 helpers (`core.getRange(1, 100)`, `core.randomItemOf(deck)`,
+It's ONE object, `core`, of 143 helpers (`core.getRange(1, 100)`, `core.randomItemOf(deck)`,
 `core.move(card, tableau)` ...), and the five classes a program's types extend.
 Every `core.` in compiled JavaScript is a call into it;  compiled Python's go to its twin, `spell_core`.
 
@@ -126,7 +126,7 @@ _FizzBuzz's three kinds of line:  in JavaScript each one calls the core, in Pyth
 
 Both writers keep one rule:  the language's own word where it has one, the core only where it doesn't.
 The cost lands on JavaScript, whose output leans on the core far harder:
-reading it means knowing the core's names, and the Core Reference lists all 141, in both languages
+reading it means knowing the core's names, and the Core Reference lists all 143, in both languages
 (below, "More in the docs site").
 
 ## A type is a class, and the class is the core's
@@ -201,6 +201,7 @@ Each module of the folder adds its helpers to the one object as it loads, so imp
 | the program's things | every thing still alive, in the order made:  what the Thing Explorer lists | [things.ts](src/core/things.ts) |
 | seeded random | `core.seedRandom(n)`:  everything random after it repeats, run after run | [ParkMiller.ts](src/core/ParkMiller.ts) |
 | the console, tests | `print`, `expect`, `to test ...`, and assertions | [console.ts](src/core/console.ts), [assert.ts](src/core/assert.ts), [tests.ts](src/core/tests.ts) |
+| messages | what the core says to the person running a program, in the program's language:  English built in, another language's from the project's words file | [messages.ts](src/core/messages.ts) |
 | the model alone | the core without drawing, for libraries:  `spell-lang/core/model` | [model.ts](src/core/model.ts) |
 | the method list | every name on the core, for another language's core to match;  and the script that writes it | [coreDeclarations.ts](src/core/coreDeclarations.ts), [writeCoreDeclarations.ts](src/core/writeCoreDeclarations.ts) |
 
@@ -352,8 +353,9 @@ These two are held together by files a test reads:
   running core.
   `spell_core` must have each name, or list it in [not_ported_yet.json5](src/py/core/not_ported_yet.json5) with why;
   a test fails otherwise.
-- Both cores read the same three expected files in their tests:  seeded random, state by id, and saving by id.
-- And the core contract test runs every frozen test project in each target, from the same seed,
+- Both cores read the same four expected files in their tests:  seeded random, state by id, saving by id,
+  and the runtime's messages.
+- And the core contract test runs every frozen test project in each target that writes it, from the same seed,
   and holds them to printing the same thing, line for line
   ([how the targets agree](README-targets.md)).
 
@@ -427,8 +429,8 @@ Where `@spell/core` points, by where the program runs:
 At the root of `spell-lang`:
 
 ```sh
-yarn vp test run --project core          # the TypeScript core's tests:  27 files in tests/core/
-uv run --directory src/py/core pytest    # spell_core's:  24 modules in tests/py/core/tests/
+yarn vp test run --project core          # the TypeScript core's tests:  28 files in tests/core/
+uv run --directory src/py/core pytest    # spell_core's:  25 modules in tests/py/core/tests/
 yarn core:gen:declarations               # rewrite the method list, after adding, renaming or removing a name on core
 ```
 
@@ -441,7 +443,7 @@ yarn core:gen:declarations               # rewrite the method list, after adding
 
 | File | What it is | Rewritten by |
 | --- | --- | --- |
-| [core.declarations.json5](src/core/core.declarations.json5) | the core's method list:  13 names it provides, 153 statements, each with its module and a description from its docstring | `yarn core:gen:declarations`, at the root of `spell-lang` |
+| [core.declarations.json5](src/core/core.declarations.json5) | the core's method list:  13 names it provides, 155 statements, each with its module and a description from its docstring | `yarn core:gen:declarations`, at the root of `spell-lang` |
 | [core.scopes.js](src/core/core.scopes.js) | the built-in types' docs, for pages with no parser | `yarn lsp:scopes --builtins`, in `spell-app` |
 
 - A test fails until you regenerate the method list after adding, renaming or removing anything on `core`;
