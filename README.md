@@ -246,7 +246,7 @@ and runs them right beside the text.
   Each rule is a class with a syntax string, written in [Rulex](https://github.com/spell-app/spell-lang/blob/main/README-rulex.md);
   no grammar file, no generated code.
   [GitHub's Markdown](https://github.com/spell-app/spell-lang/blob/main/README-markdown.md) runs on it too, and passes all 670 of 670 spec examples.
-- Spell reads Spanish too:  a project says `language: "es"`, and its sentences compile to the same targets
+- Spell reads Spanish too:  a file says so in its name, `Carta.es.spell`, and its sentences compile to the same targets
   ([Spell in Spanish](https://github.com/spell-app/spell-lang/blob/main/README.md#a-third-human-language)).
   🌱 Norwegian and Portuguese are next.
 
