@@ -334,7 +334,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    * The value an app handed its `ui-*` elements;  `null` when none:
    * the `appContext` property of the nearest root around this element (crossing shadow roots):
    * a `<ui-root>`, or any other root (`elementSetup.root`:  `<spell-app>`).
-   * - `<ui-root prop:appContext={value}>` in a Solid app, `root.appContext = value` anywhere else.
+   * - `<ui-root appContext={value}>` in a Solid app, `root.appContext = value` anywhere else.
    * - Read once, when this object is built.
    * - Why not a Solid context:  each element draws in a Solid root of its own, with no parent,
    *   so a Solid app's providers don't reach inside `ui-*` tags (epic `spell-element`, Q9).

@@ -1,6 +1,8 @@
 /*! Derived from `@solidjs/element` and `component-register`:  MIT licence, (c) Ryan Carniato. */
 import type { E } from "spell-kit/element"
 
+import { RichAttributes } from "./RichAttributes"
+
 /**
  * `HTMLElement`, or a stand-in outside a browser, so modules that define DOM elements can be IMPORTED during SSR
  * (the classes are never constructed there).
@@ -102,7 +104,9 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   /**
    * DOM API:  the element was added to a page.
    * - First time (or after `dispose()`):
-   *   - re-apply properties set before the upgrade (a real write, so it reflects)
+   *   - re-apply properties set before the upgrade (a real write, so it reflects),
+   *     and the functions and objects the page-wide patch held for it (`RichAttributes`)
+   *   - read the markup's attributes for the family's script API (`<ui-code content="...">`)
    *   - build and render the component
    *   - hand it what the browser reported before it existed
    * - Every time:  the component's `onConnect()`.
@@ -111,9 +115,11 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   connectedCallback() {
     this.settleVisible()
     this.restoreUpgradeValues()
+    RichAttributes.replay(this, this.tagSetup?.elementDefinition)
     const { connectedState } = this
     if (!connectedState.isMounted) {
       connectedState.isMounted = true
+      RichAttributes.readScriptApiAttributes(this, DOMElement, this.tagSetup?.elementDefinition)
       // a bare subclass defined without `subclassForTag()` (a test's stand-in) has no component
       this.tagSetup?.mountComponent(this)
       this.handOverEarlyFormState()
@@ -171,6 +177,26 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     if (!attribute || connectedState.upgradeValues?.has(attribute.property)) return
     if (attribute === visibleAttribute) return this.onVisibleAttributeChanged(text)
     this.setValue(attribute, definition.convert(attribute, text), "attribute")
+  }
+
+  /**
+   * DOM API, widened:  a function or object (`on-ui-change={f}`, `tree={tree}`) goes to `RichAttributes`,
+   * a listener or a property;  so does text for the family's script API (`content` on `<ui-code>`).
+   * Other text goes to the attribute, as ever.
+   * - Why:  Solid sets a JSX prop it doesn't know this way, the value as it is (no `prop:` in our JSX).
+   */
+  override setAttribute(name: string, value: unknown) {
+    const definition = this.tagSetup?.elementDefinition
+    if (RichAttributes.isRich(value) || RichAttributes.isScriptApi(this, name, DOMElement, definition)) {
+      return RichAttributes.apply(this, name, value, definition)
+    }
+    super.setAttribute(name, value as string)
+  }
+
+  /** DOM API, widened:  also drops what a rich value of `name` added (its listener, or its property). */
+  override removeAttribute(name: string) {
+    RichAttributes.clear(this, name, this.tagSetup?.elementDefinition)
+    super.removeAttribute(name)
   }
 
   /** Call `callback` on every attribute value change, equal or not, until `dispose()`. */

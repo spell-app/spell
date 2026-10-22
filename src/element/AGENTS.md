@@ -51,6 +51,10 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   - [PartContext](PartContext.ts) and [OwnerContext](OwnerContext.ts):
     the generic content parts, and the element they belong to
   - [ShadowEvents](ShadowEvents.ts):  Solid's events kept from leaking out of shadow roots
+  - [RichAttributes](RichAttributes.ts):  a function or object given to an element's attribute, as Solid hands a
+    plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property (epic `solid-17`)
+    - NOT in the barrel:  `DOMElement` uses it;  its page-wide `setAttribute()` patch goes in as the file loads
+    - `<ui-root pure>` turns the patch off
   - [HotDefinitions](HotDefinitions.ts):  hot reload of a set's elements in `yarn dev` (dev-only)
   - [timing](timing.ts):  when to run something
     - `afterSolidUpdate()`, `beforeNextPaint()`
