@@ -29,6 +29,7 @@
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell-kit/util/node/json5"
@@ -39,14 +40,18 @@ import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 import { STATUS_TEXT, escapeHtml } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
-/** `packages/ui/`. */
+/** Spell UI's repo root. */
 const UI = path.resolve(import.meta.dirname, "..")
 
 /**
- * The template, in spell-epic's `templates/` (epic `epic-eject` T11:  every template is the engine's), through the
- * checkout's `spell-epic` link;  served at `/templates/spell-ui-docs.html`.
+ * The template, in spell-epic's `templates/` (epic `epic-eject` T11:  every template is the engine's), found by
+ * PACKAGE through the kit's install, never by a path into its repo;  served at `/templates/spell-ui-docs.html`.
+ * - Spell UI never imports spell-epic (it's above):  this only reads one of its files.
  */
-const TEMPLATE = path.resolve(UI, "../../spell-epic/templates/spell-ui-docs.html")
+const TEMPLATE = path.join(
+  path.dirname(fileURLToPath(import.meta.resolve("spell-epic/package.json"))),
+  "templates/spell-ui-docs.html"
+)
 
 /** The template's own path prefix to the site's pages (it's served at `/templates/`, beside `/components/`). */
 const TEMPLATE_SITE = /\.\.\/(?:components\/)?ui\//g

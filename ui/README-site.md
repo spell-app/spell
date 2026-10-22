@@ -241,19 +241,13 @@ yarn site:new getting-started --title "Getting started" --summary "One line."  #
 - Title, summary and status come from [the pages data](docs/__data/pages.json5):
   fix a summary THERE, then `yarn site:data`.
 - It starts from `spell-epic`'s template, [spell-ui-docs.html](https://github.com/spell-app/spell-epic/blob/main/templates/spell-ui-docs.html),
-  and refuses to overwrite a page:  `--force` does, and loses what you wrote.
-
-**Not yet:  `yarn site:new` stops before it writes anything.**
-It looks for that template one folder above the kit, where there's none:
+  found through the kit's install, and refuses to overwrite a page:  `--force` does, and loses what you wrote.
 
 ```text
-Error: ENOENT: no such file or directory, open '~/www/spell.worktrees/spell-epic/templates/spell-ui-docs.html'
+$ yarn site:new my-guide --title "My Guide"
+wrote docs/my-guide.html  (page)
+  view:  spell server url .../spell-ui/docs/my-guide.html   (from the repo root);  check:  yarn site:check my-guide.html
 ```
-
-_A real run, in an epic's worktree.  The template is inside the kit, at `spell-epic/templates/`._
-
-Until that's fixed, start from a copy of the model page:
-keep its `<head>` and its masthead, set the title and summary from the pages data, and empty its panes.
 
 ### The Examples pane:  write it flat, and let a script nest it
 
@@ -396,7 +390,7 @@ their results land in `results/`, git-ignored.
 | `yarn measure` | builds the library in memory and measures it:  each family's own code, the shared entries, the lazy chunks;  prints a `CHECK` line for a module it can't place, or shared code outside its own chunk, and still exits 0 |
 | `yarn smoke` | builds, checks the declarations, then loads every framework page in headless Chromium ([README-frameworks.md](README-frameworks.md)) |
 | `yarn report` | lines of code, then the tables of the generated status report |
-| `yarn serve` | the smoke pages and their import map, for a person:  prints the URLs, runs until stopped.  Not the docs site:  that's spell-app's `yarn serve` |
+| `yarn serve` | the smoke pages and their import map, for a person:  prints the URLs, runs until stopped.  Not the docs site:  that's the kit's page server, `spell server start` |
 | `yarn test:hmr` | hot reload end to end:  a dev server, headless Chromium and real edits to source files, 8 scenarios, every file restored after |
 | `yarn test:visual` | screenshot tests of every element example, light and dark, per browser (below) |
 | `yarn screenshots [families]` | one PNG per example pair of the demo page, for a quick look;  no baselines |
@@ -460,7 +454,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
 | [ThemeFamilies.ts](src/tools/ThemeFamilies.ts) | which families each theme sheet touches, read from its CSS |
 | [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the docs pages in headless Chromium, from the kit's page server's `/components/ui/` (started with `spell server start`, run in spell-app's folder);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
-| [spellApp.ts](src/tools/spellApp.ts) | the spell-app checkout whose page server `site:dev` and `site:check` start:  `$SPELL_APP_CHECKOUT`, else `../spell-app`;  and the kit's own `spell`, found by package, never the one on the `PATH`.  Only run, never imported:  spell-app is above Spell UI |
+| [pageServer.ts](src/tools/pageServer.ts) | the kit whose page server `site:dev` and `site:check` start, from its root, and the kit's own `spell`:  both found by package, never the `spell` on the `PATH` |
 | [StaticRenderer.ts](src/tools/StaticRenderer.ts) | the server-only Vite server the static render runs on from node:  it compiles the components' JSX for the server, which `tsx` can't;  used by the visual tests' static pages, and by `spell ssr` in its child process (`src/cli/runner/renderStatic.ts`) |
 | [StaticDocument.ts](src/tools/StaticDocument.ts) | loaded BY that server, never by node:  `render(html, options)` turns a whole page static, `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell ssr`'s engine |
 | [DesignExport.ts](src/tools/DesignExport.ts), `DesignTokens.ts`, `DesignColor.ts`, `DesignComponents.ts` | `yarn design:build`, also `spell design build`:  the claude.ai design system's files in `<dir>/project/`:  `tokens.json`, `components/index.d.ts`, a README and `preview.html` per family, the cover, `design-system.json`;  it leaves the design bundle's `components/bundle.js` and `bundle.css` alone |
@@ -520,7 +514,7 @@ The generic tools are the kit's, `spell-kit/element-tools/<Name>`, in [its src/e
 ### Environment variables
 
 The tools, the scripts and the configs read them in ONE place, [`environment`](src/tools/environment.ts),
-parsed once;  all but `SPELL_APP_CHECKOUT`, which [spellApp.ts](src/tools/spellApp.ts) reads itself.
+parsed once.
 Ours start `SPELL_UI_`;  `CI` and `INIT_CWD` are other tools' names, read as they are.
 
 | Variable | Read as | What |
@@ -531,7 +525,6 @@ Ours start `SPELL_UI_`;  `CI` and `INIT_CWD` are other tools' names, read as the
 | `SPELL_UI_VISUAL_OS`, `_BASE_URL`, `_WS`, `_PARITY`, `_STATIC`, `_WORKERS` | `environment.visual` | `yarn test:visual`'s choices, set by `VisualRunner` for Playwright's workers (`VisualVariables`) |
 | `CI` | `environment.isCI` | set by the CI service:  tests skip their timing budgets |
 | `INIT_CWD` | `environment.invocationDir` | set by yarn:  the folder a relative path argument is resolved against |
-| `SPELL_APP_CHECKOUT` | `SPELL_APP`, in `spellApp.ts` | the `spell-app` checkout whose page server `yarn site:dev` and `yarn site:check` use;  unset, the one beside Spell UI |
 
 ## Spell UI's `spell` commands
 
@@ -541,7 +534,7 @@ this is their code.
 
 - The kit's `spell` finds them through Spell UI's `package.json`:  `"spell": { "commands": "./src/cli/commands.ts" }`.
 - Each action imports its command's file only when it runs, so `spell help` stays fast.
-- Adding one:  the kit's recipe, "Adding a command" in [README-cli.md](https://github.com/spell-app/spell-kit/blob/main/README-cli.md);
+- Adding one:  the kit's recipe, "How a command is built" in [README-cli.md](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#how-a-command-is-built);
   the rules for writing one here, [src/cli/AGENTS.md](src/cli/AGENTS.md).
 
 <details>

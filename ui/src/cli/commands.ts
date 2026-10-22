@@ -68,7 +68,7 @@ const uiCommands: CLI.CommandList = (spell) => {
 
   pack
     .command("add")
-    .description("add one element to a pack:  components/<tag>/, its test, its line in components/index.ts")
+    .description("add one element to a pack:  src/components/<tag>/, its test, its line in src/components/index.ts")
     .argument("<pack>", "the pack, e.g. brand")
     .argument("<tag>", "the element's tag, starting with the pack's prefix, e.g. brand-card")
     .option("--no-build", "write the files, don't build the pack")
@@ -79,7 +79,7 @@ const uiCommands: CLI.CommandList = (spell) => {
 
   pack
     .command("build")
-    .description("build a pack's components/__pack/:  its catalog, its entry, the script a page loads")
+    .description("build a pack's src/components/__pack/:  its catalog, its entry, the script a page loads")
     .argument("<pack>", "the pack, e.g. brand")
     .option("--json", "print the report as JSON")
     .action((name: string, options: PackOptions) =>
@@ -88,7 +88,7 @@ const uiCommands: CLI.CommandList = (spell) => {
 
   pack
     .command("check")
-    .description("say whether a pack's components/__pack/ is current -- exits 1 when one is stale")
+    .description("say whether a pack's src/components/__pack/ is current -- exits 1 when one is stale")
     .argument("[pack]", "the pack, e.g. brand -- none:  every pack in the kit")
     .option("--json", "print the report as JSON")
     .action((name: string | undefined, options: PackOptions) =>
