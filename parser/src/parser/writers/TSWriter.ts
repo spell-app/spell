@@ -937,7 +937,8 @@ export class TSWriter extends JSWriter {
   /**
    * Each drawable type's tag, declared for the program's JSX (epic `drawable-thing` I7):
    * so a tag written by hand, e.g. `<solitaire-pile>`, type-checks.
-   * - Loose, as app types `<ui-*>` tags:  HTML attributes, plus any attribute or `prop:` its element defines.
+   * - Loose:  HTML attributes, plus any attribute or `prop:` its element defines.
+   *   (Spell UI's own `<ui-*>` tags are typed exactly, by `spell-ui/jsx`.)
    */
   private elementTagsDeclaration(): string {
     const tags = [...this.elementTags].map(
