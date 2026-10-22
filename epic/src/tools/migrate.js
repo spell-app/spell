@@ -9,8 +9,12 @@
  * - `STEPS`:  the steps, as steps of their kind:
  *   - `components-not-markup`:  `to-components.js`, a page's bare tables and `<details>` asides in components
  *     (epic `epic-engine` P3);  what it can't call is left, and listed
+ *   - `engine-asset-paths`:  a page still loading the engine's files by their old checkout paths
+ *     (`../packages/epics/tools/_assets/spell-ui.js`) loads them from the epic server's routes (`/_epic/assets/...`);
+ *     the saga pages, the parked goal sets and a brand page had them (epic `repo-split` I63)
  *   - The older steps went once every page had run them (epic `repo-split` Q45):  `ui-section`, `answer-elements`,
- *     `engine-asset-routes`, and the data files' renames (`json5-data-files`).
+ *     `engine-asset-routes` (which `engine-asset-paths` brings back for the pages it missed), and the data files'
+ *     renames (`json5-data-files`).
  *     Their code is in git history, for a page restored from an old backup.
  * - A new step:  an entry in `STEPS`, LAST, in the same commit as the markup change it follows.
  *   It must change nothing on a page it has migrated already, and keep every word.
@@ -27,6 +31,7 @@ import { parseHTML } from "linkedom"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { DataFile } from "spell-epic/data/DataFile.ts"
+import { engineUrlFor } from "spell-epic/server/server.types.ts"
 import { rowsFile } from "./choices.js"
 import { listPages } from "./details.js"
 import { findPages, formattedAlready, pageFile, parseArgs, ROOT, serialize, tidy } from "./pages.js"
@@ -99,8 +104,54 @@ export const STEPS = [
       ]
       return { changed: tables + unstacked + asides > 0, notes }
     }
+  },
+  {
+    name: "engine-asset-paths",
+    date: "2026-10-21",
+    kinds: KINDS.filter((kind) => kind !== "epic"),
+    description:
+      "a page loading the engine's files by an old checkout path (../packages/epics/tools/_assets/) loads them from /_epic/ (the epic server's routes;  repo-split I63)",
+    applies: (html) => ENGINE_PATH_LINK.test(html),
+    run(document) {
+      const changes = rewriteEngineLinks(document)
+      return { changed: changes.length > 0, notes: changes.map(({ from, to }) => `${from} -> ${to}`) }
+    }
   }
 ]
+
+/**
+ * The elements that LOAD an engine file, and the attribute naming it:  a stylesheet (`<link href>`), a script
+ * (`<script src>`), a component pack (`<ui-components source>`).
+ * - never a plain link (`<a href>`) or a `title`:  those name a source file for a reader, not something the page loads
+ */
+const ENGINE_LINKS = [
+  { selector: "link[href]", attribute: "href" },
+  { selector: "script[src]", attribute: "src" },
+  { selector: "ui-components[source]", attribute: "source" }
+]
+
+/** A loading attribute naming an engine file by an old checkout path, from any depth (`engineUrlFor()`'s folders). */
+const ENGINE_PATH_LINK =
+  /\b(?:href|src|source)="(?:\.\.\/)*\/?packages\/(?:epics\/(?:tools\/_assets|components\/__pack|pack)|docs\/(?:tools\/)?_assets)\//
+
+/**
+ * Point `document`'s links to the engine's files (`ENGINE_LINKS`) at the engine routes, IN PLACE:
+ * `../../packages/epics/tools/_assets/spell-ui.js` => `/_epic/assets/spell-ui.js` (`engineUrlFor()`).
+ * - returns each change, `{ from, to }`;  none when every link is a route already (idempotent)
+ */
+export function rewriteEngineLinks(document) {
+  const changes = []
+  for (const { selector, attribute } of ENGINE_LINKS) {
+    for (const element of document.querySelectorAll(selector)) {
+      const from = element.getAttribute(attribute)
+      const to = engineUrlFor(from)
+      if (!to) continue
+      element.setAttribute(attribute, to)
+      changes.push({ from, to })
+    }
+  }
+  return changes
+}
 
 /**
  * Which kind page `file` is (`KINDS`), from where it lives (its page path:  `pathFrom()`, checkout `root`'s) and
@@ -114,10 +165,11 @@ export function pageKind(file, root = ROOT, html = existsSync(file) ? readFileSy
   // before `details/`:  the epic `details` has its page there (epic `epic-engine` P3)
   if (EPIC_PAGE.test(path)) return "epic"
   if (/(^|\/)details\//.test(path)) return DataFile.exists(rowsFile(file)) ? "choice" : "detail"
+  // before `<epic-page>`:  a saga page is one too (`<epic-page kind="saga">`), which `epic migrate` doesn't list
+  if (/\.(goal|saga)\.html$/.test(path)) return "goal"
   if (EPIC_PAGE_TAG.test(html)) return "epic"
-  if (/\.goal\.html$/.test(path)) return "goal"
   if (path === "pages/index.html") return "home"
-  if (/^(epics|guides|templates|brand)\/index\.html$/.test(path)) return "list"
+  if (/^(epics|guides|templates|brand|sagas)\/index\.html$/.test(path)) return "list"
   if (path.startsWith("goals/") || path.startsWith("templates/goals/")) return "goal-set"
   if (path.startsWith("templates/")) return "template"
   if (path.startsWith("brand/")) return "brand"
@@ -143,9 +195,9 @@ export function stepsFor(kind, step) {
 
 /**
  * The pages of checkout `root` that some step is for, as `{ file, kind }`, sorted:
- * - every page of the docs' areas, the Brand list page too
+ * - every page of the docs' areas:  pages, guides, templates, epics, sagas, the parked goal sets, brand
  * - every details and choice page (`details.js` `listPages()`:  `findPages()` skips `details/` folders)
- * - epic pages, goal sets, brand and components pages left out (no step is for them)
+ * - epic pages and components pages left out (no step is for them)
  * - `kind`:  only that kind
  */
 export function pagesFor(root, kind) {
@@ -153,9 +205,9 @@ export function pagesFor(root, kind) {
   const areas = [
     ...["pages", "guides"].map((area) => join(content, area)),
     join(root, "templates"),
-    join(content, "epics")
+    ...["epics", "sagas", "goals", "brand"].map((area) => join(content, area))
   ]
-  const found = [...findPages(areas), join(content, "brand", "index.html"), ...listPages(content)]
+  const found = [...findPages(areas), ...listPages(content)]
   const files = [...new Set(found)].filter((file) => existsSync(file)).sort((one, other) => one.localeCompare(other))
   return files
     .map((file) => ({ file, kind: pageKind(file, root) }))

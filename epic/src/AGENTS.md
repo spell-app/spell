@@ -689,7 +689,8 @@ In `tools/`:
     - `/_epic/assets/<file>`, and the pack from `/_epic/pack/`
     - epic `epic-eject` P7;  `spell-epic/server`, `EpicServer`
     - Before P7, from the checkout's root:  `<up>packages/epics/tools/_assets/`.
-      - The migration step `engine-asset-routes` moved every page over (gone since epic `repo-split` Q45).
+      - The migration step `engine-asset-routes` moved every page over (gone since epic `repo-split` Q45);
+        `engine-asset-paths` (`migrate.js`) moves the saga pages, goal sets and brand page it missed (I63).
     - A page not migrated (a spell-app worktree from before P7) still loads THIS engine's files on the epic server:
       it serves the old paths from the routes (`legacyEnginePath()`).
     - From `file://`, `check-spell.js` answers the routes from the engine's folders (`engineFileFor()`).
@@ -2116,6 +2117,11 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
       - not its business:  a page's own buttons (its script wires them), the markup the TOOLS draw (their own code
         becomes elements), a heading outside `<ui-section>` (where its section ends is a call)
       - on 2026-10-19 it had nothing to do in spell-app's content:  every table was in a `<ui-table>` already
+    - `engine-asset-paths` (epic `repo-split` I63):  a page loading the engine's files by an old checkout path
+      (`<up>packages/epics/tools/_assets/`, the old pack folders) loads them from the engine routes (`/_epic/...`)
+      - only what the page LOADS:  `<link href>`, `<script src>`, `<ui-components source>`;  a plain link is kept
+      - every kind but the epic page's:  the saga pages count as saga pages here (`goal`), since `epic migrate`
+        lists only epics' pages;  the sagas', goal sets' and brand areas are walked too
     - A step's `run(document, { file })` gets the page's path:  for what lies beside it.
     - A step runs on a page only when its `applies()` holds on the page as the steps before left it.
       Notes it returns with nothing changed (what it left, or skipped) are reported all the same.
