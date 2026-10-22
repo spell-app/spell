@@ -2,13 +2,14 @@ import { describe, test, expect } from "vite-plus/test"
 
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { describeWarnings, loadFixtureProject, parseSpellProject } from "spell-lang/spell/test"
+import { describeWarnings, parseSpellProject } from "spell-lang/spell/test"
 
 /**
  * Spell's words for one thing, by its name or its place (epic `drawable-thing` P19):
  * `tableau T1`, `the first tableau` -- and the warning when two things share the name a reference reads.
  * - What each compiles to:  the rules' own tests (`named_thing`, `thing_at_place`).
- * - What they find when the program runs:  the `ThingReferences` fixture, printed by cli's core contract test.
+ * - What they find when the program runs:  the `ThingReferences` fixture, printed by spell-app's core contract test;
+ *   its warnings are spell-app's test too (its `tests/spell/parserTests/references.test.ts`).
  */
 describe("thing references in spell", () => {
   /** Piles, and a tableau that is one. */
@@ -19,12 +20,6 @@ describe("thing references in spell", () => {
     const { files } = parseSpellProject([{ path: "/Main.spell", contents: lines.join("\n") }])
     return files[0]!.warnings
   }
-
-  test("the ThingReferences fixture:  a warning where a reference reads a name two tableaus share, none elsewhere", () => {
-    const { files } = parseSpellProject(loadFixtureProject("thing-references"))
-    expect(files[0]!.errors).toEqual([])
-    expect(files[0]!.warnings).toEqual(['28:18 More than one tableau is named "T1":  this finds the first one made'])
-  })
 
   test("two things named T1, and nothing reads T1:  no warning", () => {
     const named = [...PILES, 'set a to a new tableau with name = "T1"', 'set b to a new tableau with name = "T1"']

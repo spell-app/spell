@@ -52,7 +52,7 @@ import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterPro
  *   `getItemAt(rank, 1)` counts from 1 (the core contract, `contract.test.ts` in `spell-lang/cli`).
  * - Sees the whole project first (`forProject()`, a `P.WriterProject`).
  *   `TSWriter.instance` alone knows nothing of it, e.g. writing one node in a test.
- * - Checked by `tsc` against `@spell/core`'s types:  see `typescript.test.ts` in `spell-lang/spell`.
+ * - Checked by `tsc` against `@spell/core`'s types:  see spell-app's `typescript.test.ts`, on the frozen test projects.
  ****************/
 export class TSWriter extends JSWriter {
   /** The one `ts/solid` starts from:  it knows no project -- see `forProject()`. */

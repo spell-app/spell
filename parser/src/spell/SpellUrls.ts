@@ -29,8 +29,6 @@ export const SpellUrls = {
   INDEX: "/api/projects/index/",
   /** A group's projects:  `GET /api/projects/list/<group's address>`. */
   LIST: "/api/projects/list/",
-  /** The test projects' group:  their folder is under the repo's `tests/`, not spaces' built-ins. */
-  TEST_PLACE: "@spell/test",
   /** The org whose own space is the repo's built-ins, spell-app's `spaces/@spell/`. */
   BUILT_IN_ORG: "spell",
 
@@ -127,8 +125,8 @@ export const SpellUrls = {
 
   /**
    * Which folder holds `place`:  a `base` and the `path` under it, `/`-separated.
-   * - `@spell/test/fizzbuzz` => `{ base: "tests", path: "@spell/test/fizzbuzz" }`:  the repo's `tests/spaces/`
    * - `@spell/examples/solitaire` => `{ base: "builtins", path: "@spell/examples/solitaire" }`:  spell-app's `spaces/`
+   *   - the test projects too:  `@spell/test/fizzbuzz` => `{ base: "builtins", path: "@spell/test/fizzbuzz" }`
    * - `owen@spell/errors` => `{ base: "spaces", path: "@spell/owen@/errors" }`:  spell-spaces, beside the repo
    *   - A person's space is inside their org's, so `@` says what each folder is.
    * - `@three-degrees/bubble-trouble` => `{ base: "spaces", path: "@three-degrees/bubble-trouble" }`
@@ -143,8 +141,7 @@ export const SpellUrls = {
     if (org === "local") return undefined
     if (person) return { base: "spaces", path: [`@${org}`, `${person}@`, ...rest].join("/") }
     if (org !== SpellUrls.BUILT_IN_ORG) return { base: "spaces", path: place }
-    const isTest = place === SpellUrls.TEST_PLACE || place.startsWith(`${SpellUrls.TEST_PLACE}/`)
-    return { base: isTest ? "tests" : "builtins", path: place }
+    return { base: "builtins", path: place }
   },
 
   /** One part of a URL, encoded on its own:  `@` stays as is, so a place reads as its address. */

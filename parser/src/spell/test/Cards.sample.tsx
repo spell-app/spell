@@ -2,7 +2,7 @@
  * Solid TypeScript as the `ts/solid` target writes it (epic `output-targets` P12), written by hand:
  * a sample of Solitaire's `Card`, a pile and a game, trimmed to run alone.
  * - Checks the plumbing around the writer, apart from the writer:
- *   - `typecheck()` (`typescript.test.ts`)
+ *   - `typecheck()` (spell-app's `typescript.test.ts`)
  *   - building it (`buildTsx.test.ts`)
  *   - running it (`cli`'s `runCommand.test.ts`)
  * - Read with `solidSample()` (`spell-lang/spell/test`).

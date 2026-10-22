@@ -8,8 +8,10 @@ import pytest
 from spell_core import core
 from spell_core.playing import PagePlayer, PatchMismatchError, play_page
 
-# Solitaire compiled to Python:  the test fixture's snapshot, which imports nothing but spell_core.
-SOLITAIRE = Path(__file__).parents[4] / "tests" / "spaces" / "@spell" / "test" / "Solitaire" / "Solitaire.snapshot.py"
+# Solitaire compiled to Python, which imports nothing but spell_core:
+# a frozen copy of the `solitaire` test project's snapshot, spell-app's `spaces/@spell/test/solitaire/`
+# (`.txt`, so neither pytest nor ruff reads it as code;  `run_program()` runs it all the same).
+SOLITAIRE = Path(__file__).parent / "solitaire.snapshot.py.txt"
 
 
 @pytest.fixture

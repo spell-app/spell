@@ -82,7 +82,7 @@ describe("SpellUrls", () => {
       base: "builtins",
       path: "@spell/examples/solitaire"
     })
-    expect(SP.SpellUrls.folderFor("@spell/test/fizzbuzz")).toEqual({ base: "tests", path: "@spell/test/fizzbuzz" })
+    expect(SP.SpellUrls.folderFor("@spell/test/fizzbuzz")).toEqual({ base: "builtins", path: "@spell/test/fizzbuzz" })
     expect(SP.SpellUrls.folderFor("owen@spell/errors")).toEqual({ base: "spaces", path: "@spell/owen@/errors" })
     expect(SP.SpellUrls.folderFor("owen@spell")).toEqual({ base: "spaces", path: "@spell/owen@" })
     expect(SP.SpellUrls.folderFor("@three-degrees/bubble-trouble")).toEqual({

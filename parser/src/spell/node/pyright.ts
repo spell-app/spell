@@ -14,7 +14,7 @@ import { CODE_FOLDERS, nodeBinary } from "spell-lang/spell/node/typecheck"
  *   - against `spell_core`'s source (`src/py/core`)
  *   - as Python 3.12
  *   - in pyright's `basic` mode, what VS Code's Python extension checks by default
- * - Used by spell's `python.test.ts`, as `typecheck()` is for TypeScript.
+ * - Used by spell-app's `python.test.ts` (the frozen test projects'), as `typecheck()` is for TypeScript.
  * - NODE-ONLY:  runs the workspace's `pyright` in a child process.
  *   It's an npm package, so checking needs no Python.
  * - Epic `python-target` P13.

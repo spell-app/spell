@@ -59,7 +59,7 @@ function installedPackage(name: string, sub = ""): string | undefined {
  *   - Written to a temp folder, checked together.
  *   - The folder links the repo's `node_modules`, so `solid-js` and `@solidjs/web` resolve from it.
  * - `projects`:  each project they import, `@spell/project/<id>`, as the path of its compiled output.
- * - Used by `spell compile` (on a `ts/solid` target) and spell's `typescript.test.ts`.
+ * - Used by `spell compile` (on a `ts/solid` target) and spell-app's `typescript.test.ts` (the frozen test projects').
  * - NODE-ONLY:  runs the workspace's `tsc` (TypeScript 7) in a child process.
  * - Needs the editor app installed beside spell-lang (`APP_DIR`, spell-app's):  throws without it.
  */

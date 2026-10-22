@@ -372,9 +372,9 @@ have, grouped by why (36 names):
 | what the lookups search:  Python's take it on each call | 1 |
 | not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it | 16 |
 
-And the [todos-form-based](tests/spaces/@spell/test/todos-form-based/) test project has no Python snapshot:
+And the [todos-form-based](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/todos-form-based/) test project has no Python snapshot:
 the Python writer can't write its function's named arguments yet.
-Its Spell, [todo.spell](tests/spaces/@spell/test/todos-form-based/todo.spell):
+Its Spell, [todo.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/todos-form-based/todo.spell):
 
 ```spell
 to create a new task (with title as text, completed as a choice)

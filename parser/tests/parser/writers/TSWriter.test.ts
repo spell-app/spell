@@ -4,7 +4,7 @@ import { P } from "spell-lang/parser"
 
 /**
  * `TSWriter`:  TypeScript on Solid, as a person writes it.
- * - Whole projects, checked by `tsc`:  spell's `src/test/typescript.test.ts`.
+ * - Whole projects, checked by `tsc`:  spell-app's `tests/spell/test/typescript.test.ts`.
  * - Run on both targets:  the core contract, `contract.test.ts` in `spell-lang/cli`.
  */
 
