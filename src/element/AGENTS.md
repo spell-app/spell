@@ -77,15 +77,14 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   - [HotElements](../element-tools/HotElements.ts):  the Vite plugin for hot reloading a set's elements in `yarn dev`
   - [DevServer](../element-tools/DevServer.ts):  a package's Vite dev server, started from node
   - [Terminal](../element-tools/Terminal.ts):  where tools print;  [NodePackage](../element-tools/NodePackage.ts):  finds an installed package
-  - [ts-plugin/](../element-tools/ts-plugin/):
-    the TypeScript plugin, which completes and checks slot, part and dashed-attribute names in JSX
-    (epic `intellisense` P5;  [README-element.md](../../README-element.md), "The TypeScript plugin")
-    - [ElementsPlugin](../element-tools/ts-plugin/ElementsPlugin.ts):  the language service's completions and warnings
-    - [ElementCatalog](../element-tools/ts-plugin/ElementCatalog.ts):
-      the tags of the program's packages, from their Custom Elements Manifests
-    - [plugin.cjs](../element-tools/ts-plugin/plugin.cjs):  what tsserver loads, by its path in the package
-      - CommonJS, loading the TypeScript through `tsx`
-      - a tsconfig names it `spell-kit/src/element-tools/ts-plugin/plugin.cjs`
+  - [jsx-help/](../element-tools/jsx-help/):
+    the elements help, which completes and checks slot, part and dashed-attribute names in JSX
+    (epic `intellisense` P5, P7;  [README-element.md](../../README-element.md), "The elements help")
+    - [JsxElementHelp](../element-tools/jsx-help/JsxElementHelp.ts):
+      the completions and warnings for one file, as plain data;  reads the JSX with TypeScript 6's API
+    - [ElementCatalog](../element-tools/jsx-help/ElementCatalog.ts):
+      the tags of a package and its dependencies, from their Custom Elements Manifests
+    - Who shows them:  spell-app's VS Code extension (its `vscode/src/ElementsHelp.ts`), which bundles both
   - Their tests:  the kit's [tests/element-tools/](../../tests/element-tools/).
   - Node code:  the kit's node program checks them ([tsconfig.node.json](../../tsconfig.node.json)), its Vitest
     project `element-tools` runs their tests.

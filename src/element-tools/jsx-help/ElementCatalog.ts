@@ -8,17 +8,19 @@ import type { CatalogElement, ElementDoc } from "spell-kit/element-tools/tools.t
 
 /****************
  * ### `ElementCatalog`
- * Every custom element a TypeScript program can use, read from the Custom Elements Manifests of its packages:
- * the program's own package, and each package it depends on.
+ * Every custom element a package's JSX can use, read from the Custom Elements Manifests of its packages:
+ * the package itself, and each package it depends on.
  * - A package ships a manifest by naming it in its `package.json`:
  *   `"customElements": "<path>"` (Spell UI's and Spell Brand's are written by their `yarn site:data`).
  * - So it works for ANY set that ships one, and imports none of them:  the kit never imports a child repo.
  * - A manifest is re-read when its file changes (its mtime), so a fresh `yarn site:data` shows up
  *   at the next keystroke, with no restart.
- * - Node built-ins only, plus `NodePackage`:  the TypeScript plugin (`ElementsPlugin`) loads it into tsserver.
+ * - Node built-ins only, plus `NodePackage`:  spell-app's VS Code extension bundles it, for `JsxElementHelp`.
+ * - One catalog per package:  a file's is its package's, at or above it (`packageFolderFor()`),
+ *   so a worktree's files read the worktree's manifests.
  ****************/
 export class ElementCatalog {
-  /** Absolute path of every manifest the packages name, the program's own package first. */
+  /** Absolute path of every manifest the packages name, the package's own first. */
   readonly manifestFiles: string[]
 
   /** Called with a line to log:  a manifest that can't be read. */
@@ -46,16 +48,24 @@ export class ElementCatalog {
    * - NEVER throws:  no `package.json` above `from` means no manifests.
    */
   static manifestFilesFor(from: string): string[] {
-    const packageDir = packageDirAbove(from)
+    const packageDir = ElementCatalog.packageFolderFor(from)
     if (!packageDir) return []
     const ownPackage = readPackage(packageDir)
     const dependencyNames = new Set(DEPENDENCY_FIELDS.flatMap((field) => Object.keys(ownPackage?.[field] ?? {})))
     const dependencyDirs = [...dependencyNames].map((name) => NodePackage.dir(name, packageDir))
     return [packageDir, ...dependencyDirs].flatMap((dir) => {
       const manifest = dir ? readPackage(dir)?.customElements : undefined
-      // its real path:  a linked package (`node_modules/spell-ui`) names its folders as the program's files do
+      // its real path:  a linked package (`node_modules/spell-ui`) names its folders as the files being checked do
       return dir && typeof manifest === "string" ? [join(realpathSync(dir), manifest)] : []
     })
+  }
+
+  /** The nearest folder at or above `from` holding a `package.json`;  `undefined` when there's none. */
+  static packageFolderFor(from: string): string | undefined {
+    for (let folder = resolve(from); ; folder = dirname(folder)) {
+      if (existsSync(join(folder, "package.json"))) return folder
+      if (dirname(folder) === folder) return undefined
+    }
   }
 
   ////////////////
@@ -82,7 +92,10 @@ export class ElementCatalog {
   private readManifest(file: string, mtimeMs: number): CatalogElement[] {
     if (mtimeMs === MISSING) return []
     try {
-      return elementsOf(JSON.parse(readFileSync(file, "utf8")) as Manifest, packageDirAbove(dirname(file)) ?? "")
+      return elementsOf(
+        JSON.parse(readFileSync(file, "utf8")) as Manifest,
+        ElementCatalog.packageFolderFor(dirname(file)) ?? ""
+      )
     } catch (error) {
       this.log(`can't read ${file}:  ${(error as Error).message}`)
       return []
@@ -98,7 +111,7 @@ export class ElementCatalog {
 
 /** How to make an `ElementCatalog`. */
 export type ElementCatalogProps = {
-  /** A folder of the program, e.g. its `tsconfig.json`'s:  the package at or above it, and its dependencies. */
+  /** A folder of the package, e.g. a file's:  the package at or above it, and its dependencies. */
   from: string
   /** The manifests to read instead of finding them from `from`. */
   manifestFiles?: string[]
@@ -110,7 +123,7 @@ export type ElementCatalogProps = {
 // ## Helpers
 ////////////////
 
-/** The `package.json` fields whose packages may ship elements the program uses. */
+/** The `package.json` fields whose packages may ship elements the package uses. */
 const DEPENDENCY_FIELDS = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"] as const
 
 /** The mtime of a file that doesn't exist. */
@@ -169,14 +182,6 @@ function indexOf(elements: CatalogElement[]): ElementIndex {
     byFolder.set(element.folder, [...(byFolder.get(element.folder) ?? []), element])
   }
   return { byTag, byFolder }
-}
-
-/** The nearest folder at or above `from` holding a `package.json`. */
-function packageDirAbove(from: string): string | undefined {
-  for (let folder = resolve(from); ; folder = dirname(folder)) {
-    if (existsSync(join(folder, "package.json"))) return folder
-    if (dirname(folder) === folder) return undefined
-  }
 }
 
 /** The `package.json` in `dir`, or `undefined` when it's missing or isn't JSON. */

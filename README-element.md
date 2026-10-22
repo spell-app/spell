@@ -607,10 +607,10 @@ These close the gap, for every set, in node:
 - Import them by name:  `spell-kit/element-tools/<Name>`.
 - `spell-pack` is a bin of the kit:  spell-epic's `yarn pack:build` and `pack:check` run it, from its own folder.
 
-## The TypeScript plugin:  slots, parts and dashed attributes in JSX
+## The elements help:  slots, parts and dashed attributes in JSX
 
 The JSX types can say which attributes a tag takes, but not what goes INSIDE it.
-A TypeScript plugin adds that in VS Code, in every `.tsx` file of a repo that turns it on:
+The app's VS Code extension adds that, in every `.tsx` and `.jsx` file:
 
 ```tsx
 <ui-panel>
@@ -629,33 +629,27 @@ A TypeScript plugin adds that in VS Code, in every `.tsx` file of a repo that tu
   - Always allowed:  `data-*`, `aria-*`, and `on-<event>` for each event the tag dispatches (`on-ui-change`).
 - Which children a tag takes isn't checked:  no vocabulary says so yet.
 
-Where it learns the tags:  the Custom Elements Manifest of the repo's own package and of each package it depends on,
+Where it learns the tags:  the Custom Elements Manifest of the file's own package and of each package it depends on,
 named by the package's `"customElements"` field (Spell UI's, from its `yarn site:data`).
 
 - A manifest is re-read as soon as it changes, with no restart.
+- Each file reads its OWN checkout's:  in an epic's window, a worktree's file gets the worktree's manifests.
 - So any set that ships a manifest gets it;  the kit imports none of them.
 
-How it's turned on:
+How it works:
 
-- Each repo's `tsconfig.json` names it:
-  `"plugins": [{ "name": "spell-kit/src/element-tools/ts-plugin/plugin.cjs" }]`
-  (Spell UI, the app, Spell Epic, and the other element sets).
-  - tsserver finds a plugin by its path in the package, not by `exports`, so the name has `src/` in it.
-  - `plugin.cjs` loads the TypeScript source through `tsx`:  nothing to build.
-- `tsc` never runs plugins:  `yarn ts` is the same with or without it.
-- VS Code runs plugins only in the REPO's TypeScript, and only TypeScript 6's editor server loads them:
-  TypeScript 7, what `tsc` runs here, has none.
-  [The kit's editor settings](.vscode/settings.json) pick TypeScript 6, for a window opened on the kit's folder:
-  - `js/ts.tsdk.path`:  `node_modules/@typescript/old/lib`, TypeScript 6
-  - `js/ts.experimental.useTsgo: false`:  the native preview (TypeScript 7 in the editor) loads no plugins
-  - VS Code asks once, "Use Workspace Version":  say yes.
-- An epic's window, opened from a `.code-workspace` file, ignores a folder's window settings:
-  so `epic window` writes the same ones into every window file,
-  from `windows.settings` in [the kit's epic settings](.epic/config.json5).
-  - A window file from before gets them from `epic window init`.
-  - Or run "TypeScript:  Select TypeScript Version" in that window.
-- Its log lines, prefixed `spell-elements`, are in "TypeScript:  Open TS Server log":
-  the manifests it found, and anything that failed.
+- The checks are the kit's, in [jsx-help/](src/element-tools/jsx-help/):
+  - [`JsxElementHelp`](src/element-tools/jsx-help/JsxElementHelp.ts) finds the completions and warnings,
+    as plain data for any editor
+  - [`ElementCatalog`](src/element-tools/jsx-help/ElementCatalog.ts) reads the manifests
+- The app's VS Code extension shows them ([`ElementsHelp`](https://github.com/spell-app/spell-app/blob/main/vscode/src/ElementsHelp.ts)):
+  completions as you type `"`, warnings in the Problems list as you edit.
+  - Its log, the manifests it found and anything that failed:  the "Spell Elements" output.
+- The editor's own TypeScript stays TypeScript 7:  nothing to switch, no "Use Workspace Version".
+  - The extension reads the JSX with TypeScript 6's JavaScript API, which it carries inside:
+    TypeScript 7 has none yet.
+- `tsc` and `yarn ts` don't run these checks:  they're the editor's only.
+- A change to the checks shows after the extension is rebuilt and installed (`spell app vscode`), then "Reload Window".
 
 ## Who's written on it
 
@@ -768,7 +762,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
 | [SpellSolid.ts](src/element/SpellSolid.ts) | the settings the page's runtime installs |
 | [elements.types.ts](src/element/elements.types.ts), [vocabulary.types.ts](src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
-| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types`;  the TypeScript plugin, `ts-plugin/` (`ElementsPlugin`, `ElementCatalog`, `plugin.cjs`) |
+| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types`;  the elements help for JSX, `jsx-help/` (`JsxElementHelp`, `ElementCatalog`) |
 | [src/test-helpers/](src/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
 | [bin/spell-pack.mjs](bin/spell-pack.mjs) | `spell-pack build \| check` |
 
