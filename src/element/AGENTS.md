@@ -85,6 +85,8 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - [ElementCatalog](../element-tools/jsx-help/ElementCatalog.ts):
       the tags of a package and its dependencies, from their Custom Elements Manifests
     - Who shows them:  spell-app's VS Code extension (its `vscode/src/ElementsHelp.ts`), which bundles both
+    - [test/jsxFixture](../element-tools/jsx-help/test/jsxFixture.ts):  their tests' package on disk
+      (`writeJsxFixture()`), the kit's and the extension's (`spell-kit/element-tools/jsx-help/test/jsxFixture`)
   - Their tests:  the kit's [tests/element-tools/](../../tests/element-tools/).
   - Node code:  the kit's node program checks them ([tsconfig.node.json](../../tsconfig.node.json)), its Vitest
     project `element-tools` runs their tests.

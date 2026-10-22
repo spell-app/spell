@@ -762,7 +762,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
 | [SpellSolid.ts](src/element/SpellSolid.ts) | the settings the page's runtime installs |
 | [elements.types.ts](src/element/elements.types.ts), [vocabulary.types.ts](src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
-| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types`;  the elements help for JSX, `jsx-help/` (`JsxElementHelp`, `ElementCatalog`) |
+| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types`;  the elements help for JSX, `jsx-help/` (`JsxElementHelp`, `ElementCatalog`, and its tests' fixture package, `test/jsxFixture`) |
 | [src/test-helpers/](src/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
 | [bin/spell-pack.mjs](bin/spell-pack.mjs) | `spell-pack build \| check` |
 

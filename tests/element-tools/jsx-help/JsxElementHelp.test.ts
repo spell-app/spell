@@ -1,87 +1,27 @@
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, utimesSync, writeFileSync } from "node:fs"
-import { tmpdir } from "node:os"
-import { dirname, join } from "node:path"
+import { readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { ElementCatalog } from "spell-kit/element-tools/jsx-help/ElementCatalog"
 import { JsxElementHelp } from "spell-kit/element-tools/jsx-help/JsxElementHelp"
+import {
+  ATTRIBUTES,
+  CARD,
+  CARD_MANIFEST,
+  MODAL_MANIFEST,
+  PAGE,
+  writeJsxFixture
+} from "spell-kit/element-tools/jsx-help/test/jsxFixture"
 import { ELEMENT_HELP_CODES } from "spell-kit/element-tools/tools.types"
 
-/**
- * The JSX help, over a tiny package on disk:  its own Custom Elements Manifest, and a dependency's.
- * - The package `fixture-app` ships `<fx-card>`, whose family is `src/components/fx-card/`;
- *   its dependency `fixture-ui` ships `<fx-modal>`, with slots `header` and `actions`.
- */
-const ROOT = realpathSync(mkdtempSync(join(tmpdir(), "jsx-element-help-")))
+/** The JSX help, over the fixture package (`writeJsxFixture()`):  `<fx-card>` its own, `<fx-modal>` a dependency's. */
+const FIXTURE = writeJsxFixture()
+const ROOT = FIXTURE.root
 afterAll(() => rmSync(ROOT, { recursive: true, force: true }))
 
-const MODAL_MANIFEST = manifest("src/fx-modal.ts", {
-  name: "FxModal",
-  tagName: "fx-modal",
-  slots: [
-    { name: "", description: "Its content." },
-    { name: "header", description: "The title bar." },
-    { name: "actions", description: "Buttons along the bottom." }
-  ],
-  cssParts: [{ name: "dialog" }],
-  attributes: [{ name: "size" }, { name: "closed-by" }],
-  events: [{ name: "fx-close" }]
-})
-
-const CARD_MANIFEST = manifest("src/components/fx-card/index.ts", {
-  name: "FxCard",
-  tagName: "fx-card",
-  slots: [{ name: "" }],
-  cssParts: [
-    { name: "box", description: "The card's box." },
-    { name: "title", description: "Its title line." }
-  ]
-})
-
-const PAGE = `
-export const page = (
-  <fx-modal>
-    <div slot="acions">OK</div>
-    {true && <div slot="header">Title</div>}
-    <fx-card slot="" />
-  </fx-modal>
-)
-export const plain = <div><span slot="anything" /></div>
-`
-
-const ATTRIBUTES = `
-export const attributes = (
-  <fx-modal size="big" closed-bi="any" data-id="1" aria-label="A" on-fx-close={() => {}} on-fx-clos={() => {}} wild-thing>
-    <x-unknown any-dashed="ok" />
-  </fx-modal>
-)
-`
-
-const CARD = `
-export class FxCard {
-  render() {
-    return <div part="box titel">x</div>
-  }
-}
-`
-
-writeFiles({
-  "package.json": {
-    name: "fixture-app",
-    customElements: "custom-elements.json",
-    dependencies: { "fixture-ui": "*" }
-  },
-  "custom-elements.json": CARD_MANIFEST,
-  "node_modules/fixture-ui/package.json": { name: "fixture-ui", customElements: "cem.json" },
-  "node_modules/fixture-ui/cem.json": MODAL_MANIFEST,
-  "src/page.tsx": PAGE,
-  "src/attributes.tsx": ATTRIBUTES,
-  "src/components/fx-card/FxCard.tsx": CARD
-})
-
-const PAGE_FILE = join(ROOT, "src/page.tsx")
-const ATTRIBUTES_FILE = join(ROOT, "src/attributes.tsx")
-const CARD_FILE = join(ROOT, "src/components/fx-card/FxCard.tsx")
+const PAGE_FILE = FIXTURE.pageFile
+const ATTRIBUTES_FILE = FIXTURE.attributesFile
+const CARD_FILE = FIXTURE.cardFile
 const help = new JsxElementHelp({ catalog: new ElementCatalog({ from: join(ROOT, "src") }) })
 
 describe("ElementCatalog", () => {
@@ -204,23 +144,4 @@ function warningsFor(file: string) {
 /** `file` as it is on disk. */
 function fileOf(fileName: string) {
   return { fileName, text: readFileSync(fileName, "utf8") }
-}
-
-/** A Custom Elements Manifest of one module, declaring one element. */
-function manifest(path: string, declaration: object) {
-  return {
-    schemaVersion: "2.1.0",
-    modules: [
-      { kind: "javascript-module", path, declarations: [{ kind: "class", customElement: true, ...declaration }] }
-    ]
-  }
-}
-
-/** Write `files` under `ROOT`:  objects as JSON. */
-function writeFiles(files: Record<string, string | object>) {
-  for (const [path, content] of Object.entries(files)) {
-    const file = join(ROOT, path)
-    mkdirSync(dirname(file), { recursive: true })
-    writeFileSync(file, typeof content === "string" ? content : JSON.stringify(content))
-  }
 }
