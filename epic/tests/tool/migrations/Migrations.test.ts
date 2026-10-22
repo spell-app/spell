@@ -2,7 +2,7 @@
  * Tests of the epic page migrations:
  * - the registry (`Migrations`)
  * - the summary an update gets when it has none (`UpdateSummary`)
- * - Each step's own cases are its own test's (`EngineLinks.test.ts`).
+ * - Each step's own cases are its own test's (`LinksAgree.test.ts`).
  */
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
@@ -21,8 +21,8 @@ function upToDateDoc(): Document {
 
 describe("Migrations", () => {
   test("every step by name, in order;  `named()` finds one", () => {
-    expect(Migrations.all.map((step) => step.name)).toEqual(["links-agree", "engine-links"])
-    expect(Migrations.named("engine-links")?.kind).toBe("epic")
+    expect(Migrations.all.map((step) => step.name)).toEqual(["links-agree"])
+    expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
   })
 

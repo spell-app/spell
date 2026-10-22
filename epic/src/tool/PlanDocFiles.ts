@@ -346,7 +346,6 @@ export class PlanDocFiles {
         epic: basename(file).replace(/(\.plan)?\.html$/, ""),
         folder: dirname(file),
         root: this.content,
-        linker: this.linker,
         inbox: inboxView(ReviewInbox.read(inboxFile)),
         notes: [],
         moves: []

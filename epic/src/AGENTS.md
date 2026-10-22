@@ -1906,7 +1906,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
       linker and `doc-links.js`'s `contentLinker`
     - both told that checkout's SERVED folders (`ServedFolders`, epic `epic-engine` I27):  a link to
       `components/epics/` or `templates/` checks as the folder it serves (`epic lint` called them missing)
-    - links to the engine's old places in spell-app (`packages/epics/...`):  the migration step `engine-links`
+    - links to the engine's old places in spell-app (`packages/epics/...`):  fixed once by the migration step
+      `engine-links`, gone since epic `repo-split` P14
     - `doc-links.js` is its command line.
     - The `epic` tool links through the same code.
   - Run it under `tsx`, never plain `node`:  it imports `spell-kit/server`.

@@ -135,8 +135,8 @@ describe("migrate:  the runner", () => {
   })
 
   test("--step runs just that step;  a step that isn't one is refused", async () => {
-    expect(await commands().run(["migrate", "epic", "old", "--step", "engine-links"])).toBe(0)
-    expect(printed[0]).toBe("old:  up to date")
+    expect(await commands().run(["migrate", "epic", "new", "--step", "links-agree"])).toBe(0)
+    expect(printed[0]).toBe("new:  up to date")
     expect(await commands().run(["migrate", "epic", "--step", "nope"])).toBe(1)
     expect(warned.at(-1)).toMatch(/no epic page step "nope"/)
   })
@@ -189,7 +189,6 @@ describe("migrate:  the runner", () => {
     expect(await commands().run(["migrate", "--list"])).toBe(0)
     expect(printed.map((line) => line.split(/\s+/).slice(0, 3).join(" "))).toEqual([
       "epic 2026-10-11 links-agree",
-      "epic 2026-10-19 engine-links",
       expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/)
     ])
   })

@@ -142,7 +142,7 @@ export class MigrateCommands {
     return refused ? 1 : 0
   }
 
-  /** One page's report line:  `seo:  up to date`, `seo:  links-agree, engine-links` ... */
+  /** One page's report line:  `seo:  up to date`, `seo:  links-agree` ... */
   static pageLine(name: string, steps: string[], { dryRun, running }: { dryRun: boolean; running: boolean }): string {
     if (!steps.length) return `${name}:  up to date`
     if (running) return `${name}:  its session is running:  told to run ${steps.join(", ")} itself`

@@ -726,19 +726,8 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - also run by `update --title` and `add-phase --before`, right after their change (what it says goes to stderr)
     - a phase's number in its words is its place (`PhaseIds.labelOf()`);  a phase's `renamed` line names the phase
       titled with its new name, else the one at that number
-  - `engine-links` (2026-10-19, on command;  epic `epic-engine` I27):  links to files that left spell-app with the
-    engine lead to where they are now (`EngineLinks`)
-    - `../../packages/epics/tools/pages.js` -> `../../spell-epic/src/tools/pages.js`;  tests, skills, hooks, the
-      window script and the CLI's epic files the same way;  Epic UI's pages at their address, `components/epics/`
-    - each move rests on git's renames or the commit that moved the file (`MOVES`, its comments say which)
-    - only a DEAD link changes, and only to a place that's there;  as the I22 linker writes it (from the checkout
-      the page is served under, `RepoList.linkRootOf()`), its `#hash` kept, its linker-made tab name the new file's
-    - a file that's gone (deleted, folded into another file, never tracked):  its words stay, unlinked
-    - a link ONE folder too deep, past the checkout's root (I34):  the same tail from the root when that's there, or
-      where it moved;  never two folders
-    - reports each change once with its count (`... -> ... (7 links)`);  a dead link it can't place:  `left for you`
-    - needs the page's linker (`context.linker`, `PlanDocFiles.linker`):  `epic lint` and every write use it, told
-      the served folders (`ServedFolders`:  `components/<set>/`, `templates/`) as `doc-links.js`'s is
+  - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
+    no epic page linking the engine's old places in spell-app;  its code is in git history
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,
