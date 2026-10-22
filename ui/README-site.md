@@ -325,7 +325,7 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 
 | Script | What it writes |
 | --- | --- |
-| `yarn site:data [--check]` | the site's data, from the vocabularies and the families' sheets:  `components.json5`;  `icons.json5`, the icon browser's search terms;  `search.json5`, every page's sections for the site search (rerun after renaming or moving a section);  the editors' manifests, `custom-elements.json` and `html-custom-data.json`;  and a new family's entry in `pages.json5` |
+| `yarn site:data [--check]` | the site's data, from the vocabularies and the families' sheets:  `components.json5`;  `icons.json5`, the icon browser's search terms;  `search.json5`, every page's sections for the site search (rerun after renaming or moving a section);  the editors' manifests, `custom-elements.json` and `html-custom-data.json`, and the JSX types, `src/jsx.ts`;  and a new family's entry in `pages.json5` |
 | `yarn site:index [--check]` | the component index's cards, [components.html](docs/components.html):  every tag under each of its topics, A-Z |
 | `yarn site:kitchen [--check]` | the kitchen sink's examples, [kitchen-sink.html](docs/kitchen-sink.html), from each family's main example file (`examples/elements/types.html`), three sections a family at most |
 | `yarn site:bundle` | `site/_assets/`, from [the site's entry](site/_src/site.ts) and [its Vite config](vite.site.config.ts);  prints the sizes.  The page server runs it as `spell bundle ui-site` |
@@ -453,7 +453,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [IconPackBuilder.ts](src/tools/IconPackBuilder.ts) | `yarn icons:pack`:  checks a folder of SVGs (no script, no external resources) and writes its `pack.js`, keeping hand edits;  `--sanitize`, `--skip-unsafe`, `--allow-unsafe`;  also run by `gen:icons` |
 | [SiteDataBuilder.ts](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale |
 | [SiteSearchBuilder.ts](src/tools/SiteSearchBuilder.ts) | `search.json5`:  every page's title and sections, read from the page files, for `<ui-docs-search>` |
-| [ElementManifests.ts](src/tools/ElementManifests.ts) | `custom-elements.json` (Custom Elements Manifest 2.1) and `html-custom-data.json` (VS Code's `html.customData`, which spell-app's `.vscode/settings.json` loads), written by `yarn site:data` into `docs/__data/` |
+| [ElementManifests.ts](src/tools/ElementManifests.ts) | `custom-elements.json` (Custom Elements Manifest 2.1) and `html-custom-data.json` (VS Code's `html.customData`, which spell-app's `.vscode/settings.json` loads), written by `yarn site:data` into `docs/__data/`;  and the JSX types, `src/jsx.ts` (`spell-ui/jsx`) |
 | [FamilyFiles.ts](src/tools/FamilyFiles.ts) | where a family's own files are, by name:  `ui-button` => `UIButton.css`, `UIButton.types.ts` ...;  for the tools that look one up (`FamilyTokens`, `yarn gen:root`) |
 | [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |

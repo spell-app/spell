@@ -15,9 +15,14 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
     "jsxImportSource": "@solidjs/web",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    // the kit's TypeScript plugin, in the editor only (`tsc` runs no plugins):
+    // slot and part names for custom elements in JSX,
+    // from the Custom Elements Manifests of this package and its dependencies (the kit's README-element.md)
+    "plugins": [{ "name": "spell-kit/src/element-tools/ts-plugin/plugin.cjs" }]
   },
   "include": ["src", "site/_src"],
   // `site/`:  only `site/_src` (the site bundle's entry);  the rest is pages, data and the built bundle
-  "exclude": ["node_modules", "src/tools", "src/cli"]
+  // `src/jsx.ts`:  the JSX types, a program of their own (`tsconfig.jsx.json`)
+  "exclude": ["node_modules", "src/tools", "src/cli", "src/jsx.ts"]
 }

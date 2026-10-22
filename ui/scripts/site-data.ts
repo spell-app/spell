@@ -3,7 +3,8 @@
  * (the icon browser's search terms), and keep `docs/__data/pages.json5` complete (see `src/tools/SiteDataBuilder.ts`);  and
  * `search.json5` (every page's sections, for `<ui-docs-search>`), read from the pages beside it.
  * - Also, from the same data, the editors' element descriptions (`src/tools/ElementManifests.ts`):
- *   `custom-elements.json` (a Custom Elements Manifest) and `html-custom-data.json` (VS Code's `html.customData`).
+ *   `custom-elements.json` (a Custom Elements Manifest) and `html-custom-data.json` (VS Code's `html.customData`);
+ *   and the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell-ui/jsx`).
  * - All COMMITTED:  the docs pages fetch them as they are,
  *   with no build step.  Rerun after changing a vocabulary, a family's sheet (its tokens), `pages.json5` or a page's
  *   sections;  `tests/tools/SiteDataBuilder.test.ts` fails while stale.
@@ -11,7 +12,7 @@
  * - JSON5 (epic `epic-workflow` P20):  a comment written by hand into one of the `.json5` files stays when it's
  *   rewritten (`writeOrCheck()`, through the kit server's `keepingCommentsIn()`).
  * - Formatting:  `JSON.stringify(..., 2)`;  oxfmt skips every set's `docs/__data/` (`vite.lint.ts`), so the bytes stay
- *   ours.
+ *   ours.  `src/jsx.ts` is formatted as `yarn format` would, in memory, as it's written.
  */
 import path from "node:path"
 import { parseArgs } from "node:util"
@@ -25,12 +26,14 @@ import { type GeneratedOutput, writeOrCheck } from "spell-ui/tools/generatedFile
 const { values } = parseArgs({ options: { check: { type: "boolean", default: false } } })
 const builder = new SiteDataBuilder()
 const { data, pages } = await builder.build()
+const manifests = new ElementManifests({ data, packageFolder: builder.root })
 const outputs: GeneratedOutput[] = [
   [builder.dataFile, SiteDataBuilder.stringify(data)],
   [builder.pagesFile, SiteDataBuilder.stringify(pages)],
   [builder.iconsFile, builder.iconsText()],
   [builder.searchFile, builder.searchText()],
-  ...new ElementManifests({ data, packageFolder: builder.root }).outputs(builder.dataFolder)
+  ...manifests.outputs(builder.dataFolder),
+  await manifests.jsxOutput()
 ]
 
 const stale = writeOrCheck(outputs, { command: "site:data", isCheck: values.check })

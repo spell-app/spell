@@ -20,6 +20,25 @@ describe("ElementManifests.outputs()", () => {
   })
 })
 
+describe("ElementManifests.jsxOutput()", () => {
+  test("is current (else run `yarn site:data`)", async () => {
+    const [file, text] = await new ElementManifests({ data: DATA, packageFolder: UI }).jsxOutput()
+    expect(readFileSync(file, "utf8") === text, file).toBe(true)
+  })
+})
+
+describe("ElementManifests.jsxTypes()", () => {
+  test("types every component tag in Solid's JSX, its rich data by name and as `prop:`", () => {
+    const text = new ElementManifests({ data: DATA, packageFolder: UI }).jsxTypes()
+    for (const tag of DATA.components) expect(text).toContain(`"${tag.tag}": `)
+    expect(text).not.toContain('"ui-docs-')
+    expect(text).toMatch(/export interface UIButtonAttributes \{[^}]*\n {2}basic\?: boolean \| ""\n/)
+    expect(text).toContain("export interface UIButtonJSXAttributes")
+    expect(text).toContain("  options?: unknown")
+    expect(text).toContain('  "prop:options"?: unknown')
+  })
+})
+
 describe("ElementManifests.customElements()", () => {
   test("describes every component tag as a Custom Elements Manifest", () => {
     const manifest = new ElementManifests({ data: DATA, packageFolder: UI }).customElements()
@@ -74,6 +93,19 @@ describe("ElementManifests.typeText()", () => {
     expect(
       ElementManifests.typeText({ name: "attached", kind: "keyOrValueAndKey", values: ["top"], description: "" })
     ).toBe('boolean | "top"')
+  })
+})
+
+describe("ElementManifests.jsxType()", () => {
+  test('takes a number as its text too, a flag as `""` too, and keeps a value set offered beside free text', () => {
+    expect(ElementManifests.jsxType({ name: "basic", kind: "keyOnly", description: "" })).toBe('boolean | ""')
+    expect(
+      ElementManifests.jsxType({ name: "attached", kind: "keyOrValueAndKey", values: ["top"], description: "" })
+    ).toBe('boolean | "" | "top"')
+    expect(ElementManifests.jsxType({ name: "max", kind: "number", description: "" })).toBe("number | `${number}`")
+    expect(ElementManifests.jsxType({ name: "width", kind: "width", values: ["1", "2"], description: "" })).toBe(
+      '"1" | "2" | (string & {})'
+    )
   })
 })
 

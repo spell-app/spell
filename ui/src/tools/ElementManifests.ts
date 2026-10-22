@@ -2,22 +2,27 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import type { SiteAttribute, SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import { SRV } from "spell-kit/server"
 import type { CustomElementsManifest, HtmlCustomData } from "./tools.types.ts"
 
 import { FamilyFiles } from "./FamilyFiles.ts"
 
 /****************
  * ### `ElementManifests`
- * The two STANDARD element descriptions, from the site data (`docs/__data/components.json5`, every vocabulary):
+ * The editors' element descriptions, from the site data (`docs/__data/components.json5`, every vocabulary):
+ * the two STANDARD ones, and the JSX types.
  * - `custom-elements.json`:  a Custom Elements Manifest (schema 2.1),
  *   what web-component tools read (Storybook, linters, IDE plugins, Claude)
  *   - `package.json`'s `customElements` points at it
  * - `html-custom-data.json`:  VS Code's HTML custom data (`html.customData`),
  *   autocomplete and hover docs for every `<ui-*>` tag, attribute and value in any `.html` file
  *   - the repo's `.vscode/settings.json` loads it
- * - Written by `yarn site:data` beside `components.json5`, and committed:  editors read them with no build.
- *   - `tests/tools/DesignExport.test.ts` fails while they're stale.
- * - Both list COMPONENT tags only, not the doc-only `<ui-docs-*>`.
+ * - `src/jsx.ts` (`spell-ui/jsx`, `jsxTypes()`):  every tag's attributes as TypeScript types for Solid's JSX,
+ *   so VS Code completes, explains and checks `<ui-*>` tags in a `.tsx` file of any program that imports it
+ * - Written by `yarn site:data`, and committed:  editors read them with no build.
+ *   - The two manifests beside `components.json5`;  the JSX types in `src/`, as code imports them.
+ *   - `tests/tools/ElementManifests.test.ts` fails while they're stale.
+ * - All list COMPONENT tags only, not the doc-only `<ui-docs-*>`.
  * - Why not the `custom-elements-manifest analyze` script (`yarn manifest`):
  *   it reads classes, and our attributes, events and slots live in the vocabulary objects, which it can't see.
  * - Another package's elements written the same way (the brand's `<brand-*>`):
@@ -178,6 +183,146 @@ export class ElementManifests {
   }
 
   ////////////////
+  // ## JSX types
+  ////////////////
+
+  /**
+   * `src/jsx.ts`, as `yarn site:data` writes it, `[path, text]`:  `jsxTypes()`, formatted as `yarn format` would.
+   * - Committed, and checked byte for byte by the staleness test, so it's written already tidy.
+   * - throws if the text doesn't parse (a generator bug)
+   */
+  async jsxOutput(): Promise<[file: string, text: string]> {
+    const file = join(this.packageFolder, JSX_FILE)
+    return [file, await SRV.formatHTML(file, this.jsxTypes())]
+  }
+
+  /**
+   * The JSX types of every component tag, as TypeScript text:  `spell-ui/jsx`.
+   * - Per tag, two interfaces:
+   *   - `<Class>Attributes`:  the attributes its vocabulary names, aliases too, and its rich (`json`) properties
+   *   - `<Class>JSXAttributes`:  those, plus HTML's global ones (`class`, `id`, `slot`, `onClick`, `aria-*` ...)
+   * - Then Solid's `JSX.IntrinsicElements` entry per tag, with its hover docs.
+   * - EXACT:  a name the vocabulary doesn't give is an error.
+   *   - Except a dashed one (`sise-x`):  TypeScript never checks a JSX attribute name with a dash in it.
+   * - throws if two tags would get the same type name
+   */
+  jsxTypes(): string {
+    const names = new Set<string>()
+    const lines = [...JSX_HEADER, ""]
+    for (const tag of this.data.components) {
+      const name = this.className(tag)
+      if (names.has(name)) throw new Error(`ElementManifests.jsxTypes():  two tags are both \`${name}\`;  rename one`)
+      names.add(name)
+      lines.push(...this.jsxTagTypes(tag, name), "")
+    }
+    lines.push(`declare module "@solidjs/web/types/jsx.js" {`, "  namespace JSX {", "    interface IntrinsicElements {")
+    for (const tag of this.data.components) {
+      lines.push(
+        ...ElementManifests.docstring(ElementManifests.jsxTagDocs(tag), "      "),
+        `      "${tag.tag}": ${this.className(tag)}JSXAttributes`
+      )
+    }
+    lines.push("    }", "  }", "}", "")
+    return lines.join("\n")
+  }
+
+  /** `tag`'s two interfaces (`jsxTypes()`), as lines;  `name`:  its class name. */
+  private jsxTagTypes(tag: SiteTag, name: string): string[] {
+    const members = ElementManifests.jsxAttributeMembers(tag)
+    return [
+      `/** \`<${tag.tag}>\`'s own attributes, from its vocabulary. */`,
+      ...(members.length
+        ? [`export interface ${name}Attributes {`, ...members, "}"]
+        : [`export type ${name}Attributes = {}`]),
+      "",
+      `/** \`<${tag.tag}>\` in JSX:  its own attributes, and HTML's global ones. */`,
+      `export interface ${name}JSXAttributes`,
+      `  extends Omit<UIGlobalJSXAttributes, keyof ${name}Attributes>, ${name}Attributes {}`
+    ]
+  }
+
+  /**
+   * One member per JSX name `tag`'s vocabulary gives, each with its docstring.
+   * - An attribute:  its name and each alias, typed by `jsxType()`.
+   * - A rich (`json`) property:  its property name, and `prop:<property>`
+   *   - Solid 2 sets the plain name as an ATTRIBUTE today, so our JSX writes `prop:`;
+   *     the plain name is for once objects, arrays and functions go to the property (epic `solid-17`).
+   * - The first of two same names wins.
+   */
+  private static jsxAttributeMembers(tag: SiteTag): string[] {
+    const members = new Map<string, string[]>()
+    for (const attribute of tag.attributes) {
+      if (attribute.kind === "json") {
+        const property = attribute.property ?? ElementManifests.camel(attribute.name)
+        const docs = [attribute.description, "- a JS property (rich data):  an object, array or function"]
+        members.set(property, [...ElementManifests.docstring(docs, "  "), `  ${property}?: unknown`])
+        members.set(`prop:${property}`, [
+          ...ElementManifests.docstring(
+            [
+              ...docs,
+              `- goes once Solid 2 sets rich data on a dashed tag's property itself (epic \`solid-17\`):  then write \`${property}\``
+            ],
+            "  "
+          ),
+          `  "prop:${property}"?: unknown`
+        ])
+        continue
+      }
+      for (const name of [attribute.name, ...(attribute.aliases ?? [])]) {
+        if (members.has(name)) continue
+        const key = /^[a-zA-Z_$][\w$]*$/.test(name) ? name : JSON.stringify(name)
+        const docs = ElementManifests.attributeDocs(attribute, name === attribute.name ? undefined : attribute.name)
+        members.set(name, [
+          ...ElementManifests.docstring(docs, "  "),
+          `  ${key}?: ${ElementManifests.jsxType(attribute)}`
+        ])
+      }
+    }
+    return [...members.values()].flat()
+  }
+
+  /**
+   * An attribute's type in JSX:  `typeText()`, as JSX writes it.
+   * - `number`:  a number or its text (`max={5}`, `max="5"`);  Solid sets either as the attribute's text.
+   * - A value set that also takes free text (`width`):  `string & {}`, so the editor still offers the set.
+   * - A flag:  `basic`, `basic={true}` or `basic=""` sets it (the attribute's own text), `basic={false}` removes it.
+   */
+  static jsxType(attribute: SiteAttribute): string {
+    const type = ElementManifests.typeText(attribute)
+    if (type === "number") return "number | `${number}`"
+    if (type.startsWith("boolean")) return type.replace(/^boolean/, 'boolean | ""')
+    return type.endsWith(" | string") ? type.replace(/ \| string$/, " | (string & {})") : type
+  }
+
+  /** A tag's hover docs in JSX, as docstring lines:  what it is, also-known-as, slots and events. */
+  static jsxTagDocs(tag: SiteTag): string[] {
+    const lines = [`\`<${tag.tag}>\`:  ${tag.description ?? ""}`]
+    if (tag.aka.length) lines.push(`- also known as:  ${tag.aka.join(", ")}`)
+    if (tag.slots.length) {
+      lines.push("- slots:")
+      for (const slot of tag.slots)
+        lines.push(`  - ${slot.name ? `\`${slot.name}\`` : "default"}:  ${slot.description}`)
+    }
+    if (tag.events.length) lines.push(`- events:  ${tag.events.map((event) => `\`${event.name}\``).join(", ")}`)
+    return lines
+  }
+
+  /** An attribute's docstring lines;  `aliasOf`:  the canonical name, when this is an alias. */
+  static attributeDocs(attribute: SiteAttribute, aliasOf?: string): string[] {
+    const lines = [aliasOf ? `Alias of \`${aliasOf}\`.  ${attribute.description}` : attribute.description]
+    lines.push(`- takes:  ${ElementManifests.valueWords(attribute)}`)
+    if (attribute.default !== undefined && attribute.default !== null)
+      lines.push(`- default:  \`${attribute.default}\``)
+    return lines
+  }
+
+  /** `lines` as a `/** ... *\/` docstring at `indent`;  a line's own line breaks stay, `*\/` is escaped. */
+  static docstring(lines: string[], indent: string): string[] {
+    const body = lines.flatMap((line) => line.replace(/\*\//g, "*\\/").split("\n"))
+    return [`${indent}/**`, ...body.map((line) => `${indent} *${line ? " " + line : ""}`), `${indent} */`]
+  }
+
+  ////////////////
   // ## Attribute text (shared with `DesignComponents`)
   ////////////////
 
@@ -284,6 +429,35 @@ export type ElementManifestsProps = {
   /** the Custom Elements Manifest's `readme` line;  default Spell UI's */
   readme?: string
 }
+
+/** The JSX types' file (`jsxOutput()`), from the package folder:  imported as `spell-ui/jsx`. */
+const JSX_FILE = "src/jsx.ts"
+
+/** The JSX types' header (`jsxTypes()`):  what the file is, and how a program uses it. */
+const JSX_HEADER = [
+  "/**",
+  " * Every Spell UI `<ui-*>` tag's attributes in JSX (Solid 2's), for completion, hover docs and checks in VS Code.",
+  " * - GENERATED by `yarn site:data` from the vocabularies -- do not edit.",
+  " *   `tests/tools/ElementManifests.test.ts` fails while it's stale.",
+  " * - A program uses it by importing it once, in any of its files (its `.types.ts`, say):",
+  ' *   `import type {} from "spell-ui/jsx"`.',
+  " *   - Then every `<ui-*>` tag in that program's JSX is checked.",
+  " *   - Not by `tsconfig`'s `types`:  that finds packages, not a package's files.",
+  " * - EXACT:  an attribute the vocabulary doesn't name is an error;",
+  " *   HTML's global attributes (`class`, `id`, `slot`, `style`, `onClick` ...) and `aria-*` stay allowed.",
+  " *   - A name with a dash in it (`data-*`, a misspelt `text-alin`) isn't checked:  TypeScript lets any through.",
+  ' * - Values:  a flag is `basic`, `basic={true}` or `basic=""`, and `basic={false}` removes it;',
+  ' *   other attributes take their text, a number as `{5}` or `"5"`.',
+  " * - Rich data (an object, array or function) goes to a property:  `prop:options={...}`.",
+  " * - Component tags only, not the docs site's `<ui-docs-*>`.",
+  " * - Type-only:  no code, nothing at run time.",
+  " */",
+  "",
+  'import type { JSX } from "@solidjs/web"',
+  "",
+  "/** HTML's global attributes, which every `<ui-*>` tag takes:  Solid's own, `class`, `id`, `slot`, `ref`, `onClick` ... */",
+  "export type UIGlobalJSXAttributes = JSX.HTMLAttributes<HTMLElement>"
+]
 
 /** Spell UI's manifest `readme` line. */
 const SPELL_UI_README =

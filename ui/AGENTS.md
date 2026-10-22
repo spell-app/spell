@@ -428,7 +428,10 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `icons.json5`:  the icon browser's search terms
   - `search.json5`:  every page's sections
   - Written by `yarn site:data`;  with them, the editors' manifests:
-    `custom-elements.json`, `html-custom-data.json`.
+    `custom-elements.json`, `html-custom-data.json`;
+    and, in `src/`, the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell-ui/jsx`).
+    - The JSX types type-check in a program of their own ([tsconfig.jsx.json](tsconfig.jsx.json)), as do their test's
+      (`tests/jsx/`):  in Spell UI's main program they'd clash with the docs elements' loose `DocsJSXTags`.
   - Their shapes, `SiteDataFile` / `SiteIconsFile` / `SiteSearchFile`:
     [the docs components' types](src/docs-components/docs-components.types.ts).
   - And `pages.json5`, hand-kept per-family facts it reads:
@@ -522,9 +525,10 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - Written to `<dir>/project/`;  by default `build/design-system/` (git-ignored).
   - Made from the site's components data, the element examples and the Spell theme.
   - Run `yarn site:data` first, after a vocabulary change.
-    - It also writes `custom-elements.json` and `html-custom-data.json`, in `docs/__data/`:
+    - It also writes `custom-elements.json` and `html-custom-data.json`, in `docs/__data/`,
+      and the JSX types, `src/jsx.ts`:
       VS Code's autocomplete for `<ui-*>` ([the element manifests](src/tools/ElementManifests.ts)).
-    - [The design export's test](./tests/tools/DesignExport.test.ts) fails while they're stale.
+    - [The element manifests' test](./tests/tools/ElementManifests.test.ts) fails while they're stale.
 - `yarn site:check <page...> | --all`:
   loads the `docs/` pages from the page server, at `/components/ui/` (Playwright).
   - [Its script](scripts/site-check.ts), on [the site check](src/tools/SiteCheck.ts).
