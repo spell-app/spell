@@ -70,12 +70,13 @@ export class ReadmeTest {
     const found: ReadmeExample[] = []
     let index = 0
     while (index < lines.length) {
-      const opening = /^(`{3,})sh\s*$/.exec(lines[index])
+      // indented too:  an example under a bullet
+      const opening = /^(\s*)(`{3,})sh\s*$/.exec(lines[index])
       if (!opening) {
         index++
         continue
       }
-      const close = findClose(lines, index + 1, opening[1])
+      const close = findClose(lines, index + 1, opening[2])
       if (close === -1) break
       const output = outputAfter(lines, close + 1)
       if (output) {
@@ -83,7 +84,7 @@ export class ReadmeTest {
           page: relative(this.root, path),
           line: index + 1,
           folder: dirname(path),
-          commands: lines.slice(index + 1, close).join("\n"),
+          commands: dedent(lines.slice(index + 1, close), opening[1]),
           expected: output.text
         })
         index = output.end
@@ -228,11 +229,16 @@ function outputAfter(lines: string[], start: number): { text: string; end: numbe
   if (!/^<summary>Output<\/summary>$/i.test(lines[index + 1]?.trim() ?? "")) return undefined
   index += 2
   while (index < lines.length && !lines[index].trim()) index++
-  const opening = /^(`{3,})text\s*$/.exec(lines[index] ?? "")
+  const opening = /^(\s*)(`{3,})text\s*$/.exec(lines[index] ?? "")
   if (!opening) return undefined
-  const close = findClose(lines, index + 1, opening[1])
+  const close = findClose(lines, index + 1, opening[2])
   if (close === -1) return undefined
-  return { text: lines.slice(index + 1, close).join("\n"), end: close + 1 }
+  return { text: dedent(lines.slice(index + 1, close), opening[1]), end: close + 1 }
+}
+
+/** `lines` joined, each without its block's indent (`indent`, the fence's own):  a block under a bullet. */
+function dedent(lines: string[], indent: string): string {
+  return lines.map((line) => (line.startsWith(indent) ? line.slice(indent.length) : line.trimStart())).join("\n")
 }
 
 /** `text`'s lines, each without trailing spaces, and without blank lines at the end. */

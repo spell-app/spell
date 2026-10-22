@@ -57,6 +57,30 @@ describe("ReadmeTest.examples()", () => {
   })
 })
 
+describe("ReadmeTest.examples() under a bullet", () => {
+  test("an indented example counts, its commands and output without the indent", () => {
+    const page = [
+      "- Close one:",
+      "",
+      "  ```sh",
+      "  echo J3",
+      "  ```",
+      "",
+      "  <details>",
+      "  <summary>Output</summary>",
+      "",
+      "  ```text",
+      "  J3",
+      "    indented in the output",
+      "  ```",
+      "",
+      "  </details>"
+    ].join("\n")
+    const [example] = new ReadmeTest(SCRATCH).examples(join(SCRATCH, "README.md"), page)
+    expect(example).toMatchObject({ line: 3, commands: "echo J3", expected: "J3\n  indented in the output" })
+  })
+})
+
 describe("ReadmeTest.matches()", () => {
   test("line by line, trailing spaces and blank lines ignored", () => {
     expect(ReadmeTest.matches("one\ntwo", "one  \ntwo\n\n")).toBe(true)
