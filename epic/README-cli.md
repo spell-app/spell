@@ -436,6 +436,7 @@ Lost track?  `epic status`.
 | `epic session icons` | gives every named session the icon its work's state calls for:  📅 future, 🚧 under way, 🚨 every phase done but items need you, ⏸️ untouched for days, ✅ finished;  `--dry-run` |
 | `epic session window [<pid>]` | prints the VS Code window id a process runs in (default:  this session's) |
 | `epic session transcript <id prefix>` | prints another session's prompts, its last reply and the question it's waiting on |
+| `epic session listen [--once]` | keeps THIS session listening to its epic page while it's open, and prints one line when you send work;  the plugin's monitor runs it beside every session |
 | `epic park list` | prints, as JSON, every parked worktree's PARKED note:  its state and where it stopped |
 | `epic park candidates` | prints, as JSON, what `/wait-for ?` offers:  unfinished worktrees and epics, running sessions |
 | `epic park wait <name>` | polls until `<name>` finishes, then prints its status;  `--every 60` seconds, for up to `--max 7140` (just under two hours);  exit 2 when time's up, 3 for nothing by that name |

@@ -282,6 +282,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       run in this process
     - `PromptGate`:  the epic rules the `UserPromptSubmit` hook checks a prompt against
       - the hook:  [prompt-gate.mjs](../hooks/prompt-gate.mjs)
+    - `PromptAck`:  the "On it:  ..." line that hook shows for a message sent while the session is busy, its summary
+      Haiku's (`claude -p`, hooks off);  every prompt logged to `epic-prompts.log` in the checkout's git folder;
+      `promptAck` in the config turns it off (epic `epic-engine` P18)
       - plain `node` loads it by path, with `command.types.ts`
     - `Git`:  running git, and finding checkouts:  the main one, the caller's, the one this code is in
     - ONE copy of the code:  every verb runs THIS checkout's code, on the caller's checkout's data.
@@ -329,6 +332,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send or Do Now finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
+    - `InboxMonitor`:  `epic session listen`, the plugin's MONITOR (`monitors/monitors.json`), one beside every
+      session (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
+      - the epic:  the session's title, else its worktree;  none, it does nothing
+      - holds the inbox for the session (`setListening()`, its heartbeat) unless another session listens
+      - prints NOTHING while idle (no tokens);  Owen's Send:  one `📬` line, which wakes the session, which takes the
+        work with its own `epic inbox wait`
     - the inboxes, one shape of comment for both (`CommentList`):
       - `ReviewInbox`:  an epic page's marks and comments
       - `GuideInbox`:  a docs page's comments and its Send (epic `epic-workflow` P13)

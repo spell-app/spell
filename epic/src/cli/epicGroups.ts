@@ -336,6 +336,12 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<id prefix> [--json]",
       description: "another session's prompts, last reply and the question it's waiting on",
       example: "epic session transcript 055da582"
+    },
+    {
+      name: "listen",
+      usage: "[--once]",
+      description: "keep this session listening to its epic page while it's open:  the plugin's monitor runs it",
+      example: "epic session listen --once"
     }
   ],
   park: [

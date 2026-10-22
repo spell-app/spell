@@ -71,7 +71,8 @@ export class EpicConfig {
     windowsFolder: "",
     app: { path: "/editor/", url: "", urlFile: "", start: "" },
     repos: "",
-    checkoutPatches: []
+    checkoutPatches: [],
+    promptAck: true
   }
 
   /**
@@ -320,6 +321,14 @@ export class EpicConfig {
    */
   get checkoutPatches(): CheckoutPatch[] {
     return this.settings.checkoutPatches
+  }
+
+  /**
+   * whether the prompt hook shows an "On it:  ..." line for a message sent while the session is busy
+   * (`PromptAck`, epic `epic-engine` P18):  `promptAck`
+   */
+  get promptAck(): boolean {
+    return this.settings.promptAck
   }
 
   /** the window names:  the default window, and the folder names a window shows */
@@ -584,7 +593,8 @@ export class EpicConfig {
       "app.start": this.settings.app.start,
       repos: this.repos.join(","),
       top: this.top?.main ?? "",
-      checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(",")
+      checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
+      promptAck: this.promptAck
     }
   }
 
@@ -632,6 +642,7 @@ export class EpicConfig {
       windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true }),
       repos: reposOf(given, defaults.repos, file),
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
+      promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
       app: {
         path: valueOf(app, "path", defaults.app.path, file, "app."),
         url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
@@ -721,6 +732,8 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   (the default):  none
  *   - e.g. the kit's `.ignore`, which lets VS Code's Open File find the child repos' files
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
+ * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
+ *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
  */
 export type EpicSettings = {
   contentFolder: string
@@ -739,6 +752,7 @@ export type EpicSettings = {
   app: EpicApp
   repos: string | string[]
   checkoutPatches: CheckoutPatch[]
+  promptAck: boolean
 }
 
 /**

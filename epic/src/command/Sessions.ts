@@ -69,6 +69,8 @@ import { Worktrees } from "./Worktrees"
  *     the icon its work's state calls for (`workIcon()`)
  *   - `window [pid]`:  the VS Code window id a process runs in (default this session's)
  *   - `transcript <id prefix>`:  another session's prompts, last reply and waiting question
+ *   - `listen [--once]`:  keep THIS session listening to its epic page while it's open (`InboxMonitor`), run by the
+ *     plugin's monitor;  prints a line only when Owen sent work
  *   - `--json` (`list`, `find`, `transcript`):  the data instead of lines
  * - Node built-ins only, plus the repo's config:  no spell.
  * - Was `session.py` and `transcript.py`.
@@ -110,9 +112,14 @@ export class Sessions {
       }
       case "transcript":
         return this.showTranscript(rest[0], flags)
+      case "listen": {
+        // loaded here:  the epic tool's review inbox, which no other verb needs
+        const { InboxMonitor } = await import("spell-epic/tool/InboxMonitor")
+        return new InboxMonitor({ sessions: this }).run({ once: Boolean(flags.once) })
+      }
       default:
         throw new EpicCommandError(
-          `unknown verb '${verb}':  list, find, open, title, done, icons, window or transcript`
+          `unknown verb '${verb}':  list, find, open, title, done, icons, window, transcript or listen`
         )
     }
   }
@@ -779,7 +786,7 @@ export type SessionsProps = {
 const TRANSCRIPT_INDEX = join("spell-epic", "transcript-index.json")
 
 /** The flags of `epic session` that take no value. */
-const SWITCHES = ["all", "json", "dryRun", "force"]
+const SWITCHES = ["all", "json", "dryRun", "force", "once"]
 
 /** Longest prompt and reply a transcript digest prints, in characters. */
 const PROMPT_LIMIT = 800

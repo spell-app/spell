@@ -51,7 +51,8 @@ describe("EpicConfig", () => {
       // a single repo:  no child repos, no multi-repo top (epic-engine P10)
       repos: "",
       top: "",
-      checkoutPatches: ""
+      checkoutPatches: "",
+      promptAck: true
     })
     // no app declared
     expect(config.app).toBeUndefined()
